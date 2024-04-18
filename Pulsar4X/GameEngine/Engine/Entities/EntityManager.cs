@@ -465,6 +465,15 @@ namespace Pulsar4X.Engine
                     list.Add(_entities[contactId]);
             }
 
+            if(!_factionNeutralContacts.ContainsKey(factionId))
+                SetupDefaultNeutralEntitiesForFaction(factionId);
+
+            foreach(var neutralId in _factionNeutralContacts[factionId])
+            {
+                if(blobStore.ContainsKey(neutralId))
+                    list.Add(_entities[neutralId]);
+            }
+
             return list;
         }
 

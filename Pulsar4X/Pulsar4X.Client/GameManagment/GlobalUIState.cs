@@ -12,6 +12,9 @@ using Pulsar4X.Engine.Damage;
 using Pulsar4X.Datablobs;
 using System.Linq;
 using Pulsar4X.Input;
+using System.Net.Http;
+using Pulsar4X.Messaging;
+using System.Threading.Tasks;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -19,11 +22,13 @@ namespace Pulsar4X.SDL2UI
 
     public delegate void FactionChangedEventHandler(GlobalUIState uIState);
     public delegate void StarSystemChangedEventHandler(GlobalUIState uIState);
+    public delegate void StarSystemAddedEventHandler(GlobalUIState uiState, string systemId);
 
     public class GlobalUIState
     {
         public event FactionChangedEventHandler OnFactionChanged;
         public event StarSystemChangedEventHandler OnStarSystemChanged;
+        public event StarSystemAddedEventHandler OnStarSystemAdded;
 
         public bool debugnewgame = true;
         //internal PulsarGuiWindow distanceRulerWindow { get; set; }
@@ -160,12 +165,35 @@ namespace Pulsar4X.SDL2UI
                 StarSystemStates[guid] = new SystemState(system, factionEntity);
             }
 
+            // Unsubscribe to any previous message listeners
+            MessagePublisher.Instance.Unsubscribe(MessageTypes.StarSystemRevealed, OnSystemRevealed);
+
+            // Subscribe to new listeners with current faction
+            MessagePublisher.Instance.Subscribe(MessageTypes.StarSystemRevealed, OnSystemRevealed, msg => msg.FactionId == Faction.Id);
+
             OnFactionChanged?.Invoke(this);
+        }
+
+        internal async Task OnSystemRevealed(Message message)
+        {
+            await Task.Run(() => {
+                if(message.SystemId != null)
+                {
+                    if(!StarSystemStates.ContainsKey(message.SystemId)){
+                        StarSystemStates[message.SystemId] = new SystemState(Game.Systems.First(s => s.Guid.Equals(message.SystemId)), Faction);
+                    }    
+                    OnStarSystemAdded?.Invoke(this, message.SystemId);
+                }
+            });
         }
 
         internal void SetActiveSystem(string activeSysID, bool refresh = false)
         {
             if(!activeSysID.Equals(SelectedStarSysGuid) || refresh){
+                if(!StarSystemStates.ContainsKey(activeSysID)){
+                    StarSystemStates[activeSysID] = new SystemState(Game.Systems.First(s => s.Guid.Equals(activeSysID)), Faction);
+                }
+
                 SelectedStarSysGuid = activeSysID;
 
                 var SelectedSys = StarSystemStates[activeSysID].StarSystem;

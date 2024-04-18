@@ -4,6 +4,7 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.Events;
 using Pulsar4X.Extensions;
 using Pulsar4X.Interfaces;
+using Pulsar4X.Messaging;
 
 namespace Pulsar4X.Engine;
 
@@ -120,6 +121,55 @@ public class JPSurveyProcessor : IInstanceProcessor
                     surveyLocation.OwningEntity.Manager.HideNeutralEntityFromFaction(Fleet.FactionOwnerID, surveyLocation.OwningEntity.Id);
                 }
             }
+
+            RevealOtherSide(jp, atDateTime);
+        }
+    }
+
+    private void RevealOtherSide(JumpPointDB jumpPointDB, DateTime atDateTime)
+    {
+        if(Fleet.Manager.TryGetGlobalEntityById(jumpPointDB.DestinationId, out var destinationEntity))
+        {
+            var factionInfoDB = Fleet.Manager.Game.Factions[Fleet.FactionOwnerID].GetDataBlob<FactionInfoDB>();
+
+            // Check to see if the system has been discovered yet
+            if(!factionInfoDB.KnownSystems.Contains(destinationEntity.Manager.ManagerGuid))
+            {
+                factionInfoDB.KnownSystems.Add(destinationEntity.Manager.ManagerGuid);
+
+                EventManager.Instance.Publish(
+                    Event.Create(
+                        EventType.NewSystemDiscovered,
+                        atDateTime,
+                        $"New system discovered",
+                        Fleet.FactionOwnerID,
+                        destinationEntity.Manager.ManagerGuid,
+                        destinationEntity.Id));
+
+                MessagePublisher.Instance.Publish(
+                    Message.Create(
+                        MessageTypes.StarSystemRevealed,
+                        destinationEntity.Id,
+                        destinationEntity.Manager.ManagerGuid,
+                        Fleet.FactionOwnerID));
+            }
+
+            // Reveal the JP
+            if(destinationEntity.TryGetDatablob<JumpPointDB>(out var destinationDB))
+            {
+                destinationDB.IsDiscovered.Add(Fleet.FactionOwnerID);
+                destinationEntity.Manager.ShowNeutralEntityToFaction(Fleet.FactionOwnerID, destinationEntity.Id);
+
+                EventManager.Instance.Publish(
+                    Event.Create(
+                        EventType.JumpPointDetected,
+                        atDateTime,
+                        $"Jump Point discovered",
+                        Fleet.FactionOwnerID,
+                        destinationEntity.Manager.ManagerGuid,
+                        destinationEntity.Id));
+            }
+            
         }
     }
 }

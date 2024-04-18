@@ -47,6 +47,7 @@ namespace Pulsar4X.SDL2UI
             grid = new CollisionGrid(gridwid, gridhig, cellSize);
             _state.EntityClickedEvent += _state_EntityClickedEvent;
             _state.OnFactionChanged += SetFaction;
+            _state.OnStarSystemAdded += OnSystemAdded;
         }
 
         internal void SetFaction(GlobalUIState uIState)
@@ -93,6 +94,13 @@ namespace Pulsar4X.SDL2UI
 
                 i++;
             }
+        }
+
+        void OnSystemAdded(GlobalUIState globalUIState, string systemId)
+        {
+            SystemMapRendering map = new SystemMapRendering(_window, _state);
+            map.Initialize(_state.StarSystemStates[systemId].StarSystem);
+            RenderedMaps[systemId] = map;
         }
 
         void _state_EntityClickedEvent(EntityState entityState, MouseButtons mouseButton)
