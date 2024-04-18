@@ -5,6 +5,7 @@ using ImGuiSDL2CS;
 using SDL2;
 using Pulsar4X.Datablobs;
 using System.Data;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -12,7 +13,7 @@ namespace Pulsar4X.SDL2UI
     {
         GlobalUIState _state;
         List<SystemState> SystemStates = new List<SystemState>();
-        Dictionary<string, SystemMapRendering> RenderedMaps = new ();
+        SafeDictionary<string, SystemMapRendering> RenderedMaps = new ();
         Dictionary<string, StarIcon> StarIcons = new ();
         ConcurrentDictionary<string, NameIcon> _nameIcons = new ();
         ImGuiSDL2CSWindow _window;
