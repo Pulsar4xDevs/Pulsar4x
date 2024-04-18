@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
@@ -12,17 +11,12 @@ namespace Pulsar4X.SDL2UI
 {
     public class ShipIcon : Icon
     {
-        ShipInfoDB _shipInfo;
-        ComponentInstancesDB _componentInstances;
-        OrbitDB _orbitDB;
-        NewtonMoveDB _newtonMoveDB;
-        WarpMovingDB _warpMoveDB;
+        OrbitDB? _orbitDB;
+        NewtonMoveDB? _newtonMoveDB;
         float _lop;
-        Entity _entity;
+        Entity? _entity;
         public ShipIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
         {
-            _shipInfo = entity.GetDataBlob<ShipInfoDB>();
-            _componentInstances = entity.GetDataBlob<ComponentInstancesDB>();
             if (entity.HasDataBlob<OrbitDB>())
             {
                 _orbitDB = entity.GetDataBlob<OrbitDB>();
@@ -35,15 +29,11 @@ namespace Pulsar4X.SDL2UI
             {
                 _newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>();
             }
-            else if (entity.HasDataBlob<WarpMovingDB>())
-                _warpMoveDB = entity.GetDataBlob<WarpMovingDB>();
 
             Func<Message, bool> filterById = msg => msg.EntityId == entity.Id;
 
             MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, OnDBAdded, filterById);
             MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, OnDBRemoved, filterById);
-
-
 
             _entity = entity;
             BasicShape();
@@ -52,6 +42,7 @@ namespace Pulsar4X.SDL2UI
 
         public ShipIcon(PositionDB position) : base(position)
         {
+            _entity = position.OwningEntity;
             Front(60, 100, 0, -110);
             Cargo(160, 160, 0, -120);
             Wings(260, 260, 80, 50, 0, 0);
@@ -71,8 +62,6 @@ namespace Pulsar4X.SDL2UI
                     var loan = _orbitDB.LongitudeOfAscendingNode;
                     _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
                 }
-                else if (message.DataBlob is WarpMovingDB)
-                    _warpMoveDB = (WarpMovingDB)message.DataBlob;
                 else if (message.DataBlob is NewtonMoveDB)
                 {
                     _newtonMoveDB = (NewtonMoveDB)message.DataBlob;
@@ -87,8 +76,6 @@ namespace Pulsar4X.SDL2UI
             {
                 if (message.DataBlob is OrbitDB)
                     _orbitDB = null;
-                else if (message.DataBlob is WarpMovingDB)
-                    _warpMoveDB = null;
                 else if (message.DataBlob is NewtonMoveDB)
                 {
                     _newtonMoveDB = null;
@@ -236,28 +223,30 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        void NewtonVectors()
-        {
-            byte r = 100;
-            byte g = 50;
-            byte b = 200;
-            byte a = 255;
-            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
-            var len = 0.00001 * _newtonMoveDB.OwningEntity.GetDataBlob<NewtonThrustAbilityDB>().ThrustInNewtons;
-            var dv = _newtonMoveDB.ManuverDeltaV;
-            var line = Vector3.Normalise(dv) * len ;
-            Vector2[] points = new Vector2[2];
-            points[0]= Vector2.Zero;
-            points[1] = new Vector2(line.X, line.Y);
-            var shape = new Shape() { Color = colour, Points = points };
+        // void NewtonVectors()
+        // {
+        //     byte r = 100;
+        //     byte g = 50;
+        //     byte b = 200;
+        //     byte a = 255;
+        //     SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+        //     var len = 0.00001 * _newtonMoveDB.OwningEntity.GetDataBlob<NewtonThrustAbilityDB>().ThrustInNewtons;
+        //     var dv = _newtonMoveDB.ManuverDeltaV;
+        //     var line = Vector3.Normalise(dv) * len ;
+        //     Vector2[] points = new Vector2[2];
+        //     points[0]= Vector2.Zero;
+        //     points[1] = new Vector2(line.X, line.Y);
+        //     var shape = new Shape() { Color = colour, Points = points };
 
-            Shapes.Add(shape);
-        }
+        //     Shapes.Add(shape);
+        // }
 
 
 
         public override void OnPhysicsUpdate()
         {
+            if(_entity is null) return;
+
             try
             {
                 var headingVector = _entity.GetRelativeState().Velocity;
@@ -300,18 +289,12 @@ namespace Pulsar4X.SDL2UI
 
     public class ProjectileIcon : Icon
     {
-
-        ProjectileInfoDB _shipInfo;
-        OrbitDB _orbitDB;
-        NewtonMoveDB _newtonMoveDB;
-        WarpMovingDB _warpMoveDB;
+        OrbitDB? _orbitDB;
         float _lop;
-        Entity _entity;
+        Entity? _entity;
         private Shape _flame;
         public ProjectileIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
         {
-            _shipInfo = entity.GetDataBlob<ProjectileInfoDB>();
-
             _entity = entity;
             BasicShape();
             NewtonFlame();
@@ -326,11 +309,8 @@ namespace Pulsar4X.SDL2UI
             }
             else if(entity.HasDataBlob<NewtonMoveDB>())
             {
-                _newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>();
                 Shapes.Add(_flame);
             }
-            else if (entity.HasDataBlob<WarpMovingDB>())
-                _warpMoveDB = entity.GetDataBlob<WarpMovingDB>();
 
             Func<Message, bool> filterById = msg => msg.EntityId.Value == entity.Id;
 
@@ -358,13 +338,9 @@ namespace Pulsar4X.SDL2UI
                 }
                 else if (message.DataBlob is NewtonMoveDB)
                 {
-                    _newtonMoveDB = (NewtonMoveDB)message.DataBlob;
-
                     if(!Shapes.Contains(_flame))
                         Shapes.Add(_flame);
                 }
-                else if (message.DataBlob is WarpMovingDB)
-                    _warpMoveDB = (WarpMovingDB)message.DataBlob;
             });
         }
 
@@ -376,12 +352,9 @@ namespace Pulsar4X.SDL2UI
                     _orbitDB = null;
                 if (message.DataBlob is NewtonMoveDB)
                 {
-                    _newtonMoveDB = null;
                     if (Shapes.Contains(_flame))
                         Shapes.Remove(_flame);
                 }
-                else if (message.DataBlob is WarpMovingDB)
-                    _warpMoveDB = null;
             });
         }
 
@@ -423,8 +396,8 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
+            if(_entity is null) return;
 
-            DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
             var headingVector = _entity.GetRelativeState().Velocity;//_orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
             var heading = Math.Atan2(headingVector.Y, headingVector.X);
             Heading = (float)heading;
@@ -462,14 +435,10 @@ namespace Pulsar4X.SDL2UI
 
     public class BeamIcon : Icon
     {
-        BeamInfoDB _beamInfo;
-        Entity _entity;
+        BeamInfoDB? _beamInfo;
         public BeamIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
         {
             _beamInfo = entity.GetDataBlob<BeamInfoDB>();
-
-            _entity = entity;
-
             OnPhysicsUpdate();
         }
 
@@ -479,13 +448,11 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-
-
-
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
+            if(_beamInfo is null) return;
 
             var p0 = camera.ViewCoordinate_m(_beamInfo.Positions[0]);
             var p1 = camera.ViewCoordinate_m(_beamInfo.Positions[1]);
@@ -504,12 +471,6 @@ namespace Pulsar4X.SDL2UI
             };
             s1.Color = clr;
             DrawShapes[0] = s1;
-
-
-
-
         }
-
     }
-
 }
