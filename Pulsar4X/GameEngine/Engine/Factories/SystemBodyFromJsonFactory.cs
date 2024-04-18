@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
@@ -130,6 +131,44 @@ public static class SystemBodyFromJsonFactory
                 gases
             );
             blobsToAdd.Add(atmosphereDB);
+        }
+
+        if(rootJson["minerals"] != null)
+        {
+            MineralsDB? mineralsDb = null;
+            JToken mineralToken = rootJson["minerals"];
+            if(mineralToken.Type == JTokenType.String)
+            {
+                var value = (string?)rootJson["minerals"] ?? "";
+
+                if(value.Equals("random"))
+                {
+                    mineralsDb = MineralDepositFactory.GenerateRandom(game.GalaxyGen.Settings, game.StartingGameData.Minerals.Values.ToList(), system, systemBodyInfoDB, massVolumeDB);
+                }
+            }
+            else if(mineralToken.Type == JTokenType.Array)
+            {
+                var mineralList = new List<(int, double, double)>();
+                var minerals = (JArray?)rootJson["minerals"];
+                foreach(var mineral in minerals)
+                {
+                    var id = (string?)mineral["id"] ?? "";
+                    var abundance = (double?)mineral["abundance"] ?? 0.1;
+                    var accessibility = (double?)mineral["accessibility"] ?? 0.1;
+
+                    if(!game.StartingGameData.Minerals.ContainsKey(id)) continue;
+
+                    var mineralBlueprint = game.StartingGameData.Minerals[id];
+                    mineralList.Add((mineralBlueprint.ID, abundance, accessibility));
+                }
+
+                mineralsDb = MineralDepositFactory.Generate(game, mineralList, systemBodyInfoDB.BodyType);
+            }
+
+            if(mineralsDb != null)
+            {
+                blobsToAdd.Add(mineralsDb);
+            }
         }
 
         if(rootJson["geoSurvey"] != null)

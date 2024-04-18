@@ -338,7 +338,6 @@ namespace Pulsar4X.Engine
                         GalaxyGen.Settings.J2000,
                         new SensorProfileDB(),
                         Path.Combine(folder, bodyFileName.ToString()));
-                    _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), system, body);
                 }
             }
 

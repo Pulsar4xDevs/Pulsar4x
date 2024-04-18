@@ -16,6 +16,9 @@
     "AoP": 318.0634,
     "meanAnomaly": 115.3654
   },
+  "minerals": [
+    { "id": "iron", "abundance": 0.5, "accessibility": 1 }
+  ],
   "geoSurvey": {
     "pointsRequired": 250
   }
