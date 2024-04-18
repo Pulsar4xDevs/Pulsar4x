@@ -46,8 +46,8 @@ namespace Pulsar4X.Engine
 
         private object _lockObj = new object();
 
-        internal List<Entity> _entitiesTaggedForRemoval = new List<Entity>();        
-        
+        internal List<Entity> _entitiesTaggedForRemoval = new List<Entity>();
+
         [JsonProperty]
         public ManagerSubPulse ManagerSubpulses { get; internal set; }
 
@@ -68,7 +68,7 @@ namespace Pulsar4X.Engine
         [PublicAPI]
         public static readonly EntityManager InvalidManager = new EntityManager();
 
-        
+
 
         #region Constructors
         internal EntityManager() { }
@@ -204,7 +204,7 @@ namespace Pulsar4X.Engine
 
         internal void TagEntityForRemoval(Entity entity)
         {
-            //check we've not already tagged this. 
+            //check we've not already tagged this.
             if (!_entitiesTaggedForRemoval.Contains(entity))
             {
                 //do we really need to check this?
@@ -227,7 +227,7 @@ namespace Pulsar4X.Engine
 
         /// <summary>
         /// This should happen at the beginning of a managers time pulse,
-        /// eg entites get removed at the start of the next pulse. 
+        /// eg entites get removed at the start of the next pulse.
         /// </summary>
         internal void RemoveTaggedEntitys()
         {
@@ -241,7 +241,7 @@ namespace Pulsar4X.Engine
                 {
                     value.RemoveContact(entity.Id);
                 }
-                
+
                 //remove each of the datablobs.
                 foreach (var db in entity.GetAllDataBlobs())
                 {
@@ -253,7 +253,7 @@ namespace Pulsar4X.Engine
                         _datablobStores[type].Remove(entity.Id);
                     }
                 }
-                //actualy remove it from the manager here. 
+                //actualy remove it from the manager here.
                 if (!_entities.Remove(entity.Id))
                 {
                     throw new KeyNotFoundException($"Entity with ID {entity.Id} not found in manager.");
@@ -361,7 +361,6 @@ namespace Pulsar4X.Engine
                         dataBlob);
 
                 MessagePublisher.Instance.Publish(message);
-                _entities[entityId].InvokeChangeEvent(message);
             }
         }
 
@@ -382,7 +381,6 @@ namespace Pulsar4X.Engine
                         blob);
 
                 MessagePublisher.Instance.Publish(message);
-                _entities[entityId].InvokeChangeEvent(message);
             }
         }
 
@@ -625,7 +623,7 @@ namespace Pulsar4X.Engine
             SetupDefaultNeutralEntitiesForFaction(factionId);
 
             _factionNeutralContacts[factionId].Add(entityId);
-            
+
             MessagePublisher.Instance.Publish(
                 Message.Create(
                     MessageTypes.EntityRevealed,

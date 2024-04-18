@@ -5,12 +5,9 @@ using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
-using Pulsar4X.Extensions;
 using Pulsar4X.Messaging;
 
 namespace Pulsar4X.Engine;
-
-public delegate void EntityChangeHandler (Message message);
 
 [DebuggerDisplay("{DebuggerDisplay}")]
 public class Entity : IHasDataBlobs, IEquatable<Entity>
@@ -19,8 +16,6 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
 
     [JsonIgnore]
     public EntityManager? Manager { get; internal set; }
-
-    public event EntityChangeHandler ChangeEvent;
 
     [JsonConstructor]
     private Entity(int id)
@@ -36,7 +31,7 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
 
     public static readonly Entity InvalidEntity = new Entity(-1);
 
-    [JsonIgnore] 
+    [JsonIgnore]
     public bool IsValid { get; internal set; } = false;
 
     public T GetDataBlob<T>() where T : BaseDataBlob
@@ -84,11 +79,6 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
     public void RemoveDataBlob<T>() where T : BaseDataBlob
     {
         Manager.RemoveDatablob<T>(Id);
-    }
-
-    public void InvokeChangeEvent(Message message)
-    {
-        ChangeEvent?.Invoke(message);
     }
 
     [JsonIgnore]

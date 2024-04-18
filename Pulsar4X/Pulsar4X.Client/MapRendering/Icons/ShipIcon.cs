@@ -33,11 +33,11 @@ namespace Pulsar4X.SDL2UI
             }
             else if(entity.HasDataBlob<NewtonMoveDB>())
             {
-                _newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>(); 
+                _newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>();
             }
             else if (entity.HasDataBlob<WarpMovingDB>())
                 _warpMoveDB = entity.GetDataBlob<WarpMovingDB>();
-            
+
             Func<Message, bool> filterById = msg => msg.EntityId == entity.Id;
 
             MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, OnDBAdded, filterById);
@@ -61,7 +61,7 @@ namespace Pulsar4X.SDL2UI
 
         async Task OnDBAdded(Message message)
         {
-            await Task.Run(() => 
+            await Task.Run(() =>
             {
                 if (message.DataBlob is OrbitDB)
                 {
@@ -83,7 +83,7 @@ namespace Pulsar4X.SDL2UI
 
         async Task OnDBRemoved(Message message)
         {
-            await Task.Run(() => 
+            await Task.Run(() =>
             {
                 if (message.DataBlob is OrbitDB)
                     _orbitDB = null;
@@ -99,15 +99,15 @@ namespace Pulsar4X.SDL2UI
 
         void BasicShape()
         {
-            //TODO break the vertical up depending on percentage of ship dedicated to each thing. 
-            //Front(6, 10, 0, -11); 
+            //TODO break the vertical up depending on percentage of ship dedicated to each thing.
+            //Front(6, 10, 0, -11);
             //Cargo(16, 16, 0, -12);
             //Wings(26, 26, 8, 5, 0, 0);
             //Reactors(10, 10, 0, 9);
             //Engines(10, 6, 0, 13);
 
-            //For now we're just going to use a simple cheveron to represent ships, make something fancier in the future 
-            //by somone who has some design mojo. 
+            //For now we're just going to use a simple cheveron to represent ships, make something fancier in the future
+            //by somone who has some design mojo.
             byte r = 50;
             byte g = 50;
             byte b = 200;
@@ -123,9 +123,9 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
             Shapes.Add(new Shape() { Points = points, Color = colour });
         }
-        void Front(int width, int height, int offsetX, int offsetY) //crew 
+        void Front(int width, int height, int offsetX, int offsetY) //crew
         {
- 
+
             var points = CreatePrimitiveShapes.CreateArc(offsetX, offsetY, width * 0.5 , height * 0.5, CreatePrimitiveShapes.QuarterCircle, CreatePrimitiveShapes.HalfCircle, 16);
             byte r = 0;
             byte g = 100;
@@ -145,7 +145,7 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
 
             //TODO: change numbers depending on number of cargo containing components.
-            int numberofPodsX = 4;  
+            int numberofPodsX = 4;
             int numberofPodsY = 2;
 
             int podWidth = width / numberofPodsX;
@@ -170,7 +170,7 @@ namespace Pulsar4X.SDL2UI
         }
 
         void Wings(int width, int height, int frontWidth, int backWidth, int offsetX, int offsetY)//FTL & guns
-        { 
+        {
             byte r = 84;
             byte g = 84;
             byte b = 84;
@@ -191,11 +191,11 @@ namespace Pulsar4X.SDL2UI
             Vector2 p10 = new Vector2() { X = offsetX, Y = -(int)(offsetY + height * 0.5) };
             var shape = new Shape() { Color = colour, Points = new Orbital.Vector2[] { p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10 } };
             Shapes.Add(shape);
-                
+
 
         }
         void Reactors(int width, int height, int offsetX, int offsetY)
-        {   
+        {
             byte r = 100;
             byte g = 0;
             byte b = 0;
@@ -250,7 +250,7 @@ namespace Pulsar4X.SDL2UI
             points[0]= Vector2.Zero;
             points[1] = new Vector2(line.X, line.Y);
             var shape = new Shape() { Color = colour, Points = points };
-            
+
             Shapes.Add(shape);
         }
 
@@ -300,7 +300,7 @@ namespace Pulsar4X.SDL2UI
 
     public class ProjectileIcon : Icon
     {
-        
+
         ProjectileInfoDB _shipInfo;
         OrbitDB _orbitDB;
         NewtonMoveDB _newtonMoveDB;
@@ -311,11 +311,11 @@ namespace Pulsar4X.SDL2UI
         public ProjectileIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
         {
             _shipInfo = entity.GetDataBlob<ProjectileInfoDB>();
-            
+
             _entity = entity;
             BasicShape();
             NewtonFlame();
-            
+
             if (entity.HasDataBlob<OrbitDB>())
             {
                 _orbitDB = entity.GetDataBlob<OrbitDB>();
@@ -326,25 +326,27 @@ namespace Pulsar4X.SDL2UI
             }
             else if(entity.HasDataBlob<NewtonMoveDB>())
             {
-                _newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>(); 
+                _newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>();
                 Shapes.Add(_flame);
             }
             else if (entity.HasDataBlob<WarpMovingDB>())
                 _warpMoveDB = entity.GetDataBlob<WarpMovingDB>();
 
-            entity.ChangeEvent += Entity_ChangeEvent;
+            Func<Message, bool> filterById = msg => msg.EntityId.Value == entity.Id;
 
-            
+            MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, DBAdded, filterById);
+            MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, DBRemoved, filterById);
+
             OnPhysicsUpdate();
         }
 
         public ProjectileIcon(Vector3 position_m) : base(position_m)
         {
         }
-        
-        void Entity_ChangeEvent(Message message)
+
+        async Task DBAdded(Message message)
         {
-            if(message.MessageType == MessageTypes.DBAdded)
+            await Task.Run(() =>
             {
                 if (message.DataBlob is OrbitDB)
                 {
@@ -357,14 +359,18 @@ namespace Pulsar4X.SDL2UI
                 else if (message.DataBlob is NewtonMoveDB)
                 {
                     _newtonMoveDB = (NewtonMoveDB)message.DataBlob;
-                    
+
                     if(!Shapes.Contains(_flame))
                         Shapes.Add(_flame);
                 }
                 else if (message.DataBlob is WarpMovingDB)
-                    _warpMoveDB = (WarpMovingDB)message.DataBlob;                    
-            }
-            else if (message.MessageType == MessageTypes.DBRemoved)
+                    _warpMoveDB = (WarpMovingDB)message.DataBlob;
+            });
+        }
+
+        async Task DBRemoved(Message message)
+        {
+            await Task.Run(() =>
             {
                 if (message.DataBlob is OrbitDB)
                     _orbitDB = null;
@@ -376,9 +382,9 @@ namespace Pulsar4X.SDL2UI
                 }
                 else if (message.DataBlob is WarpMovingDB)
                     _warpMoveDB = null;
-            }
+            });
         }
-        
+
         void BasicShape()
         {
             byte r = 150;
@@ -450,10 +456,10 @@ namespace Pulsar4X.SDL2UI
                 DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
             }
         }
-        
+
     }
-    
-    
+
+
     public class BeamIcon : Icon
     {
         BeamInfoDB _beamInfo;
@@ -461,16 +467,16 @@ namespace Pulsar4X.SDL2UI
         public BeamIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
         {
             _beamInfo = entity.GetDataBlob<BeamInfoDB>();
-            
+
             _entity = entity;
-            
+
             OnPhysicsUpdate();
         }
 
         public BeamIcon(Vector3 position_m) : base(position_m)
         {
         }
-        
+
         public override void OnPhysicsUpdate()
         {
 
@@ -480,10 +486,10 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            
+
             var p0 = camera.ViewCoordinate_m(_beamInfo.Positions[0]);
             var p1 = camera.ViewCoordinate_m(_beamInfo.Positions[1]);
-            
+
             DrawShapes = new Shape[1];
             var s1 = new Shape();
             s1.Points = new Vector2[2];
@@ -503,7 +509,7 @@ namespace Pulsar4X.SDL2UI
 
 
         }
-        
+
     }
-    
+
 }
