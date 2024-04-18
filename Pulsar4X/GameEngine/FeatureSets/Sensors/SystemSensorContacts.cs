@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Pulsar4X.DataStructures;
+using Pulsar4X.Messaging;
 
 namespace Pulsar4X.Engine.Sensors
 {
@@ -18,7 +19,7 @@ namespace Pulsar4X.Engine.Sensors
         Dictionary<int, SensorContact> _sensorContactsByEntityId = new ();
 
         [JsonProperty]
-        public XThreadData<EntityChangeData> Changes = new XThreadData<EntityChangeData>();
+        public XThreadData<Message> Changes = new XThreadData<Message>();
 
         [JsonConstructor]
         public SystemSensorContacts() { }
@@ -53,11 +54,7 @@ namespace Pulsar4X.Engine.Sensors
         internal void AddContact(SensorContact sensorContact)
         {
             _sensorContactsByEntityId.Add(sensorContact.ActualEntityId, sensorContact);
-            Changes.Write(new EntityChangeData()
-            {
-                Entity = sensorContact.ActualEntity,
-                ChangeType = EntityChangeData.EntityChangeType.EntityAdded
-            });
+            Changes.Write(Message.Create(MessageTypes.EntityAdded, sensorContact.ActualEntity.Id));
         }
         internal void RemoveContact(int ActualEntityId)
         {
@@ -65,11 +62,7 @@ namespace Pulsar4X.Engine.Sensors
             {
                 var entity = _sensorContactsByEntityId[ActualEntityId].ActualEntity;
                 _sensorContactsByEntityId.Remove(ActualEntityId);
-                Changes.Write(new EntityChangeData()
-                {
-                    Entity = entity,
-                    ChangeType = EntityChangeData.EntityChangeType.EntityRemoved
-                });
+                Changes.Write(Message.Create(MessageTypes.EntityRemoved, ActualEntityId));
             }
         }
         public List<SensorContact> GetAllContacts()

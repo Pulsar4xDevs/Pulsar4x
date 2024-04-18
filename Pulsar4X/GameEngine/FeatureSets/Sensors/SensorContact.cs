@@ -2,6 +2,7 @@ using System;
 using System.Text.Json.Serialization;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
+using Pulsar4X.Messaging;
 
 namespace Pulsar4X.Engine.Sensors
 {
@@ -39,9 +40,9 @@ namespace Pulsar4X.Engine.Sensors
             Name = actualEntity.GetDataBlob<NameDB>().GetName(factionEntity);
         }
 
-        void ActualEntity_ChangeEvent(EntityChangeData change)
+        void ActualEntity_ChangeEvent(Message message)
         {
-            if (change.ChangeType == EntityChangeData.EntityChangeType.EntityRemoved)
+            if (message.MessageType == MessageTypes.EntityRemoved)
             {
                 Position.GetDataFrom = DataFrom.Memory;
             }

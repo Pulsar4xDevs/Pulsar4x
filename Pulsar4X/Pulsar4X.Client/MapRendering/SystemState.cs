@@ -4,6 +4,8 @@ using Pulsar4X.Engine;
 using Pulsar4X.Engine.Sensors;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using Pulsar4X.Messaging;
+using System.Threading.Tasks;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -17,16 +19,19 @@ namespace Pulsar4X.SDL2UI
     /// </summary>
     public class SystemState
     {
+        public delegate void SystemStateEntityEventHandler(SystemState systemState, Entity entity);
+        public delegate void SystemStateEntityIdEventHandler(SystemState systemState, int entityId);
+        public event SystemStateEntityEventHandler OnEntityAdded;
+        public event SystemStateEntityIdEventHandler OnEntityRemoved;
+
         private Entity _faction;
         internal StarSystem StarSystem;
         internal SystemSensorContacts? SystemContacts;
-        ConcurrentQueue<EntityChangeData> _sensorChanges = new ConcurrentQueue<EntityChangeData>();
-        internal List<EntityChangeData> SensorChanges = new List<EntityChangeData>();
+        ConcurrentQueue<Message> _sensorChanges = new ConcurrentQueue<Message>();
+        internal List<Message> SensorChanges = new List<Message>();
         ManagerSubPulse PulseMgr;
-        AEntityChangeListener _changeListener;
         public List<int> EntitysToBin = new ();
-        public List<int> EntitiesAdded = new ();
-        public List<EntityChangeData> SystemChanges = new List<EntityChangeData>();
+        public List<Message> SystemChanges = new List<Message>();
         public Dictionary<int, EntityState> EntityStatesWithNames = new ();
         public Dictionary<int, EntityState> EntityStatesWithPosition = new ();
         public Dictionary<int, EntityState> EntityStatesColonies = new ();
@@ -46,7 +51,11 @@ namespace Pulsar4X.SDL2UI
                     SetupEntity(entity, _faction);
                 }
 
-                _changeListener = new EntityChangeListenerSM(StarSystem);
+                Func<Message, bool> filterById = msg => msg.SystemId.Equals(StarSystem.ManagerGuid);
+
+                MessagePublisher.Instance.Subscribe(MessageTypes.EntityAdded, OnEntityAddedMessage, filterById);
+                MessagePublisher.Instance.Subscribe(MessageTypes.EntityRemoved, OnEntityRemovedMessage, filterById);
+                MessagePublisher.Instance.Subscribe(MessageTypes.EntityRevealed, OnEntityAddedMessage, filterById);
             }
             else
             {
@@ -56,7 +65,11 @@ namespace Pulsar4X.SDL2UI
                     SetupEntity(entityItem, faction);
                 }
 
-                _changeListener = new EntityChangeListener(StarSystem, faction, new List<Type>());//, listnerblobs);
+                Func<Message, bool> filterById = msg => msg.FactionId == _faction.Id && msg.SystemId.Equals(StarSystem.ManagerGuid);
+
+                MessagePublisher.Instance.Subscribe(MessageTypes.EntityAdded, OnEntityAddedMessage, filterById);
+                MessagePublisher.Instance.Subscribe(MessageTypes.EntityRemoved, OnEntityRemovedMessage, filterById);
+                MessagePublisher.Instance.Subscribe(MessageTypes.EntityRevealed, OnEntityAddedMessage, filterById);
 
                 foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
                 {
@@ -98,27 +111,29 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        void HandleUpdates(EntityChangeData change)
+        async Task OnEntityAddedMessage(Message message)
         {
-                switch (change.ChangeType)
+            await Task.Run(() =>
+            {
+                if(message.EntityId == null) return;
+
+                if(StarSystem.TryGetEntityById(message.EntityId.Value, out var entity))
                 {
-                    case EntityChangeData.EntityChangeType.EntityAdded:
-                        EntitiesAdded.Add(change.Entity.Id);
-                        SetupEntity(change.Entity, _faction);
-                        break;
-                    //if an entity moves from one system to another, then this should be triggered,
-                    //currently Entity.ChangeEvent probibly does too, but we might have to tweak this. maybe add another enum?
-                    case EntityChangeData.EntityChangeType.EntityRemoved:
-                        EntitysToBin.Add(change.Entity.Id);
-                        break;
-                    case EntityChangeData.EntityChangeType.EntityVisibleToFaction:
-                        if(change.FactionId != null && change.FactionId == _faction.Id)
-                        {
-                            EntitiesAdded.Add(change.Entity.Id);
-                            SetupEntity(change.Entity, _faction);
-                        }
-                        break;
+                    SetupEntity(entity, _faction);
+                    OnEntityAdded?.Invoke(this, entity);
                 }
+            });
+        }
+
+        async Task OnEntityRemovedMessage(Message message)
+        {
+            await Task.Run(() =>
+            {
+                if(message.EntityId == null) return;
+
+                EntitysToBin.Add(message.EntityId.Value);
+                OnEntityRemoved?.Invoke(this, message.EntityId.Value);
+            });
         }
 
         /// <summary>
@@ -127,18 +142,6 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         public void PreFrameSetup()
         {
-            _changeListener.TagIsProcessing(true);
-            while (_changeListener.TryDequeue(out EntityChangeData change))
-            {
-                SystemChanges.Add(change);
-                HandleUpdates(change);
-            }
-            while (_sensorChanges.TryDequeue(out EntityChangeData change))
-            {
-                SensorChanges.Add(change);
-                HandleUpdates(change);
-            }
-
             foreach (var item in EntityStatesWithPosition.Values)
             {
                 if (item.IsDestroyed) //items get flagged via an event triggered by worker threads.
@@ -160,14 +163,12 @@ namespace Pulsar4X.SDL2UI
                 EntityStatesWithPosition.Remove(itemGuid);
             }
             EntitysToBin = new List<int>();
-            EntitiesAdded = new List<int>();
-            SensorChanges = new List<EntityChangeData>();
-            SystemChanges = new List<EntityChangeData>();
+            SensorChanges = new List<Message>();
+            SystemChanges = new List<Message>();
             foreach (var item in EntityStatesWithPosition.Values)
             {
                 item.PostFrameCleanup();
             }
-            _changeListener.TagIsProcessing(false);
         }
     }
 }

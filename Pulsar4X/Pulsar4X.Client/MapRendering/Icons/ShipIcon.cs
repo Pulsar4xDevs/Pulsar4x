@@ -5,6 +5,8 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
 using Pulsar4X.Orbital;
 using SDL2;
+using Pulsar4X.Messaging;
+using System.Threading.Tasks;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -35,7 +37,11 @@ namespace Pulsar4X.SDL2UI
             }
             else if (entity.HasDataBlob<WarpMovingDB>())
                 _warpMoveDB = entity.GetDataBlob<WarpMovingDB>();
-            entity.ChangeEvent += Entity_ChangeEvent;
+            
+            Func<Message, bool> filterById = msg => msg.EntityId == entity.Id;
+
+            MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, OnDBAdded, filterById);
+            MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, OnDBRemoved, filterById);
 
 
 
@@ -53,40 +59,43 @@ namespace Pulsar4X.SDL2UI
             Engines(100, 60, 0, 130);
         }
 
-        void Entity_ChangeEvent(EntityChangeData change)
+        async Task OnDBAdded(Message message)
         {
-            if(change.ChangeType == EntityChangeData.EntityChangeType.DBAdded)
+            await Task.Run(() => 
             {
-                if (change.Datablob is OrbitDB)
+                if (message.DataBlob is OrbitDB)
                 {
-                    _orbitDB = (OrbitDB)change.Datablob;
+                    _orbitDB = (OrbitDB)message.DataBlob;
                     var i = _orbitDB.Inclination;
                     var aop = _orbitDB.ArgumentOfPeriapsis;
                     var loan = _orbitDB.LongitudeOfAscendingNode;
                     _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
                 }
-                else if (change.Datablob is WarpMovingDB)
-                    _warpMoveDB = (WarpMovingDB)change.Datablob;
-                else if (change.Datablob is NewtonMoveDB)
+                else if (message.DataBlob is WarpMovingDB)
+                    _warpMoveDB = (WarpMovingDB)message.DataBlob;
+                else if (message.DataBlob is NewtonMoveDB)
                 {
-                    _newtonMoveDB = (NewtonMoveDB)change.Datablob;
+                    _newtonMoveDB = (NewtonMoveDB)message.DataBlob;
                     //NewtonVectors();
                 }
-            }
-            else if (change.ChangeType == EntityChangeData.EntityChangeType.DBRemoved)
+            });
+        }
+
+        async Task OnDBRemoved(Message message)
+        {
+            await Task.Run(() => 
             {
-                if (change.Datablob is OrbitDB)
+                if (message.DataBlob is OrbitDB)
                     _orbitDB = null;
-                else if (change.Datablob is WarpMovingDB)
+                else if (message.DataBlob is WarpMovingDB)
                     _warpMoveDB = null;
-                else if (change.Datablob is NewtonMoveDB)
+                else if (message.DataBlob is NewtonMoveDB)
                 {
                     _newtonMoveDB = null;
                     //Shapes.RemoveAt(Shapes.Count-1);
                 }
-            }
+            });
         }
-
 
         void BasicShape()
         {
@@ -325,8 +334,6 @@ namespace Pulsar4X.SDL2UI
 
             entity.ChangeEvent += Entity_ChangeEvent;
 
-
-
             
             OnPhysicsUpdate();
         }
@@ -335,39 +342,39 @@ namespace Pulsar4X.SDL2UI
         {
         }
         
-        void Entity_ChangeEvent(EntityChangeData change)
+        void Entity_ChangeEvent(Message message)
         {
-            if(change.ChangeType == EntityChangeData.EntityChangeType.DBAdded)
+            if(message.MessageType == MessageTypes.DBAdded)
             {
-                if (change.Datablob is OrbitDB)
+                if (message.DataBlob is OrbitDB)
                 {
-                    _orbitDB = (OrbitDB)change.Datablob;
+                    _orbitDB = (OrbitDB)message.DataBlob;
                     var i = _orbitDB.Inclination;
                     var aop = _orbitDB.ArgumentOfPeriapsis;
                     var loan = _orbitDB.LongitudeOfAscendingNode;
                     _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
                 }
-                else if (change.Datablob is NewtonMoveDB)
+                else if (message.DataBlob is NewtonMoveDB)
                 {
-                    _newtonMoveDB = (NewtonMoveDB)change.Datablob;
+                    _newtonMoveDB = (NewtonMoveDB)message.DataBlob;
                     
                     if(!Shapes.Contains(_flame))
                         Shapes.Add(_flame);
                 }
-                else if (change.Datablob is WarpMovingDB)
-                    _warpMoveDB = (WarpMovingDB)change.Datablob;                    
+                else if (message.DataBlob is WarpMovingDB)
+                    _warpMoveDB = (WarpMovingDB)message.DataBlob;                    
             }
-            else if (change.ChangeType == EntityChangeData.EntityChangeType.DBRemoved)
+            else if (message.MessageType == MessageTypes.DBRemoved)
             {
-                if (change.Datablob is OrbitDB)
+                if (message.DataBlob is OrbitDB)
                     _orbitDB = null;
-                if (change.Datablob is NewtonMoveDB)
+                if (message.DataBlob is NewtonMoveDB)
                 {
                     _newtonMoveDB = null;
                     if (Shapes.Contains(_flame))
                         Shapes.Remove(_flame);
                 }
-                else if (change.Datablob is WarpMovingDB)
+                else if (message.DataBlob is WarpMovingDB)
                     _warpMoveDB = null;
             }
         }
@@ -457,17 +464,11 @@ namespace Pulsar4X.SDL2UI
             
             _entity = entity;
             
-            entity.ChangeEvent += Entity_ChangeEvent;
             OnPhysicsUpdate();
         }
 
         public BeamIcon(Vector3 position_m) : base(position_m)
         {
-        }
-        
-        void Entity_ChangeEvent(EntityChangeData change)
-        {
-
         }
         
         public override void OnPhysicsUpdate()

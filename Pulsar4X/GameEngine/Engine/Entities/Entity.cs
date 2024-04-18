@@ -6,10 +6,11 @@ using Newtonsoft.Json;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
+using Pulsar4X.Messaging;
 
 namespace Pulsar4X.Engine;
 
-public delegate void EntityChangeHandler (EntityChangeData change);
+public delegate void EntityChangeHandler (Message message);
 
 [DebuggerDisplay("{DebuggerDisplay}")]
 public class Entity : IHasDataBlobs, IEquatable<Entity>
@@ -85,9 +86,9 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
         Manager.RemoveDatablob<T>(Id);
     }
 
-    public void InvokeChangeEvent(EntityChangeData change)
+    public void InvokeChangeEvent(Message message)
     {
-        ChangeEvent?.Invoke(change);
+        ChangeEvent?.Invoke(message);
     }
 
     [JsonIgnore]

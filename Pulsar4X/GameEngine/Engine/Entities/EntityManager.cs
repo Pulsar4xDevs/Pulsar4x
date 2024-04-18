@@ -9,6 +9,7 @@ using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Extensions;
 using System.Reflection;
 using Pulsar4X.Events;
+using Pulsar4X.Messaging;
 
 namespace Pulsar4X.Engine
 {
@@ -44,19 +45,8 @@ namespace Pulsar4X.Engine
         public DateTime StarSysDateTime => ManagerSubpulses.StarSysDateTime;
 
         private object _lockObj = new object();
-        internal List<AEntityChangeListener> EntityListeners { get; set; } = new ();
-        internal List<Entity> _entitiesTaggedForRemoval = new List<Entity>();
 
-        internal bool HaveAllListnersProcessed()
-        {
-            foreach (var listener in EntityListeners)
-            {
-                if (!listener.HasBeenProcessed())
-                    return false;
-            }
-            return true;
-        }
-        
+        internal List<Entity> _entitiesTaggedForRemoval = new List<Entity>();        
         
         [JsonProperty]
         public ManagerSubPulse ManagerSubpulses { get; internal set; }
@@ -166,7 +156,12 @@ namespace Pulsar4X.Engine
             entity.IsValid = true;
 
             // Update listeners
-            UpdateListeners(EntityChangeData.EntityChangeType.EntityAdded, entity);
+            MessagePublisher.Instance.Publish(
+                Message.Create(
+                    MessageTypes.EntityAdded,
+                    entity.Id,
+                    ManagerGuid
+                ));
         }
 
         public Entity CreateAndAddEntity(ProtoEntity protoEntity)
@@ -221,7 +216,12 @@ namespace Pulsar4X.Engine
                 entity.IsValid = false;
                 ManagerSubpulses.RemoveEntity(entity);
                 _entitiesTaggedForRemoval.Add(entity);
-                UpdateListeners(EntityChangeData.EntityChangeType.EntityRemoved, entity);
+                MessagePublisher.Instance.Publish(
+                    Message.Create(
+                        MessageTypes.EntityRemoved,
+                        entity.Id,
+                        ManagerGuid
+                    ));
             }
         }
 
@@ -352,8 +352,17 @@ namespace Pulsar4X.Engine
             ManagerSubpulses.AddSystemInterupt(dataBlob);
 
             if(updateListeners)
-                UpdateListeners(EntityChangeData.EntityChangeType.DBAdded, _entities[entityId], dataBlob);
+            {
+                var message = Message.Create(
+                        MessageTypes.DBAdded,
+                        entityId,
+                        ManagerGuid,
+                        null,
+                        dataBlob);
 
+                MessagePublisher.Instance.Publish(message);
+                _entities[entityId].InvokeChangeEvent(message);
+            }
         }
 
         public void RemoveDatablob<T>(int entityId) where T : BaseDataBlob
@@ -364,33 +373,20 @@ namespace Pulsar4X.Engine
                 var blob = _datablobStores[type][entityId];
                 blob.OwningEntity = null;
                 _datablobStores[type].Remove(entityId);
-                UpdateListeners(EntityChangeData.EntityChangeType.DBRemoved, _entities[entityId], blob);
+
+                var message = Message.Create(
+                        MessageTypes.DBRemoved,
+                        entityId,
+                        ManagerGuid,
+                        null,
+                        blob);
+
+                MessagePublisher.Instance.Publish(message);
+                _entities[entityId].InvokeChangeEvent(message);
             }
         }
 
         #endregion
-
-        private void UpdateListeners(EntityChangeData.EntityChangeType change, Entity entity, BaseDataBlob? db = null, int? factionId = null)
-        {
-            if (entity is null)
-                throw new Exception();
-
-            var changeData = new EntityChangeData() {
-                Entity = entity,
-                Datablob = db,
-                ChangeType = change,
-                FactionId = factionId
-            };
-            
-            //listners to this work on thier own threads and are not affected by this one.    
-            foreach (var listner in EntityListeners)
-            {
-                listner.AddChange(changeData);
-            }
-
-            //this one works on the active (ie this) thread
-            entity.InvokeChangeEvent(changeData);
-        }
 
         #region Public API Functions
 
@@ -615,7 +611,13 @@ namespace Pulsar4X.Engine
             SetupDefaultNeutralEntitiesForFaction(factionId);
 
             _factionNeutralContacts[factionId].Remove(entityId);
-            UpdateListeners(EntityChangeData.EntityChangeType.EntityHiddenFromFaction, _entities[entityId], null, factionId);
+
+            MessagePublisher.Instance.Publish(
+                Message.Create(
+                    MessageTypes.EntityHidden,
+                    entityId,
+                    ManagerGuid,
+                    factionId));
         }
 
         public void ShowNeutralEntityToFaction(int factionId, int entityId)
@@ -623,7 +625,13 @@ namespace Pulsar4X.Engine
             SetupDefaultNeutralEntitiesForFaction(factionId);
 
             _factionNeutralContacts[factionId].Add(entityId);
-            UpdateListeners(EntityChangeData.EntityChangeType.EntityVisibleToFaction, _entities[entityId], null, factionId);
+            
+            MessagePublisher.Instance.Publish(
+                Message.Create(
+                    MessageTypes.EntityRevealed,
+                    entityId,
+                    ManagerGuid,
+                    factionId));
         }
 
         private void SetupDefaultNeutralEntitiesForFaction(int factionId)
@@ -719,11 +727,6 @@ namespace Pulsar4X.Engine
             }
 
             return true;
-        }
-
-        public void AddListener(AEntityChangeListener listener)
-        {
-            EntityListeners.Add(listener);
         }
 
         #endregion
