@@ -248,8 +248,8 @@ namespace Pulsar4X.Engine
                     var type = db.GetType();
                     if (_datablobStores.ContainsKey(type))
                     {
-                        var blob = _datablobStores[type][entity.Id];
-                        blob.OwningEntity = null;
+                        // var blob = _datablobStores[type][entity.Id];
+                        // blob.OwningEntity = null;
                         _datablobStores[type].Remove(entity.Id);
                     }
                 }
@@ -258,8 +258,8 @@ namespace Pulsar4X.Engine
                 {
                     throw new KeyNotFoundException($"Entity with ID {entity.Id} not found in manager.");
                 }
-                entity.Manager = null;
-                entity.FactionOwnerID = -1;
+                // entity.Manager = null;
+                // entity.FactionOwnerID = -1;
                 Event e = Event.Create(EventType.EntityDestroyed, StarSysDateTime, "Entity Removed From Manager", entity.FactionOwnerID, ManagerGuid, entity.Id);
                 EventManager.Instance.Publish(e);
 
