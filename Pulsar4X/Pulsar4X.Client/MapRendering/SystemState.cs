@@ -51,7 +51,7 @@ namespace Pulsar4X.SDL2UI
                     SetupEntity(entity, _faction);
                 }
 
-                Func<Message, bool> filterById = msg => msg.SystemId.Equals(StarSystem.ManagerGuid);
+                Func<Message, bool> filterById = msg => msg.SystemId != null && msg.SystemId.Equals(StarSystem.ManagerGuid);
 
                 MessagePublisher.Instance.Subscribe(MessageTypes.EntityAdded, OnEntityAddedMessage, filterById);
                 MessagePublisher.Instance.Subscribe(MessageTypes.EntityRemoved, OnEntityRemovedMessage, filterById);
@@ -65,7 +65,7 @@ namespace Pulsar4X.SDL2UI
                     SetupEntity(entityItem, faction);
                 }
 
-                Func<Message, bool> filterById = msg => msg.SystemId.Equals(StarSystem.ManagerGuid);
+                Func<Message, bool> filterById = msg => msg.SystemId != null && msg.SystemId.Equals(StarSystem.ManagerGuid);
 
                 MessagePublisher.Instance.Subscribe(MessageTypes.EntityAdded, OnEntityAddedMessage, filterById);
                 MessagePublisher.Instance.Subscribe(MessageTypes.EntityRemoved, OnEntityRemovedMessage, filterById);
