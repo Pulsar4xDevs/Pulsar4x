@@ -92,7 +92,7 @@ namespace Pulsar4X.DataStructures
             {
                 lock(_lock) return _innerDictionary[key];
             }
-            internal set
+            set
             {
                 lock(_lock)
                 {
