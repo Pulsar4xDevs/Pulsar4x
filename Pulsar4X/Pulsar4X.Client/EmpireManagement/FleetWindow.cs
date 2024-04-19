@@ -190,10 +190,11 @@ namespace Pulsar4X.SDL2UI
                             ImGui.NextColumn();
                             if (selectedFleetFlagship != null && selectedFleetSystem != null && selectedFleetFlagship.TryGetDatablob<PositionDB>(out var positionDB))
                             {
-                                if (ImGui.SmallButton(selectedFleetSystem.GetName(factionID)))
+                                StarSystem? starSystem = (StarSystem?)positionDB.OwningEntity?.Manager;
+                                if (ImGui.SmallButton(starSystem?.NameDB.OwnersName ?? "Unknown"))
                                 {
-                                    if(selectedFleetSystem.Manager != null)
-                                        _uiState.EntityClicked(selectedFleetSystem.Id, selectedFleetSystem.Manager.ManagerGuid, MouseButtons.Primary);
+                                    if(starSystem != null)
+                                        _uiState.SetActiveSystem(starSystem.ManagerGuid);
                                 }
                                 ImGui.NextColumn();
                                 ImGui.Separator();
