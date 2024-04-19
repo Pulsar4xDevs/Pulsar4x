@@ -30,7 +30,7 @@ namespace Pulsar4X.SDL2UI
                 _newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>();
             }
 
-            Func<Message, bool> filterById = msg => msg.EntityId == entity.Id;
+            Func<Message, bool> filterById = msg => msg.EntityId != null && msg.EntityId == entity.Id;
 
             MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, OnDBAdded, filterById);
             MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, OnDBRemoved, filterById);

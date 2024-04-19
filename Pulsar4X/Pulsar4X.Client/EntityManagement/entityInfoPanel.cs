@@ -80,7 +80,7 @@ namespace Pulsar4X.SDL2UI
                         var _parentEntity = _selectedEntity.GetDataBlob<PositionDB>().Parent;
                         bool _hasParentEntity = false;
                         SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
-                        Dictionary<int, EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithNames;
+                        var _NamedEntityStates = _StarSystemState.EntityStatesWithNames;
                         if (_parentEntity != null)
                         {
                             //checks if parent exists in the selected star system and has a name
@@ -153,9 +153,9 @@ namespace Pulsar4X.SDL2UI
 
         public static class ComponentsDisplay
         {
-            
+
             /// <summary>
-            /// returns a 2d array[i][j] where i is the component design, and j is the componentInstance 
+            /// returns a 2d array[i][j] where i is the component design, and j is the componentInstance
             /// </summary>
             /// <param name="selectedEntity"></param>
             /// <returns></returns>
@@ -196,12 +196,12 @@ namespace Pulsar4X.SDL2UI
                         var instance = instancesArray[i][j];
                         string name = instance.Name;
                         float health = 100 * instance.HealthPercent();
-                        
-                        ImGui.Text(name); 
+
+                        ImGui.Text(name);
                         ImGui.NextColumn();
-                        
+
                         ImGui.Text(health + "%%");
-                        
+
                         ImGui.NextColumn();
                         if(instance.IsEnabled)
                             ImGui.Text("On");
@@ -234,14 +234,14 @@ namespace Pulsar4X.SDL2UI
                         flatInstances.Add(instance);
                         foreach (var atb in instance.GetAttributes().Values)
                         {
-                            
+
                         }
 
                         c++;
                     }
                 }
-                
-                
+
+
                 //BorderListOptions.Begin("Components", names.ToArray(), ref _selectedIndex, 256);
                 //left selectable box
                 if (BorderListOptions.Begin("Components", names.ToArray(), ref _selectedIndex, 188))
@@ -250,28 +250,28 @@ namespace Pulsar4X.SDL2UI
                     attrubutes = new List<IComponentDesignAttribute>();
                 }
 
-                
-                
+
+
                 Dictionary<Type, ComponentAbilityState> states = flatInstances[_selectedIndex].GetAllStates();
                 foreach (var state in states.Values)
                 {
                     ImGui.Text(state.Name);
                 }
-                
+
                 foreach (var atb in flatInstances[_selectedIndex].GetAttributes().Values)
                 {
                     attrubutes.Add(atb);
                 }
-                
-                
+
+
 
                 for (int atbi = 0; atbi < attrubutes.Count; atbi++)
                 {
                     var atbName = attrubutes[atbi].AtbName();
                     ImGui.Text(atbName);
-                    
+
                     string[] atbAry = attrubutes[atbi].AtbDescription().Split("\n");
-                    
+
                     //we're assuming the first item is a title of sorts
                     var strline = atbAry[0];
                     ImGui.Text(strline);
@@ -281,40 +281,40 @@ namespace Pulsar4X.SDL2UI
                     for (int strlinei = 1; strlinei < atbAry.Length; strlinei++)
                     {
                         strline = atbAry[strlinei];
-                        
+
                         string[] tabSplit = strline.Split("\t"); //split if there are tabs.
                         var xpos = ImGui.GetCursorPosX();
-                        for (int i = 0; i < tabSplit.Length; i++) 
+                        for (int i = 0; i < tabSplit.Length; i++)
                         {
                             if(i > 0) //after the tab char
                                 ImGui.SetCursorPosX(xpos + _textwidth[i-1] + 12);//allign second row
-                        
+
                             ImGui.Text(tabSplit[i]); //display the text
                             if (_textwidth[i] < ImGui.GetItemRectSize().X) //check the size
                                 _textwidth[i] = ImGui.GetItemRectSize().X; //expand the size for the next frame
                             if (i < tabSplit.Length - 1) //put the next item on the same line if there is another item in the array
                                 ImGui.SameLine(); //at least this bit shouldnt break if there's more than one tab
                         }
-                        
+
                     }
-                    
-                    
+
+
                     //ImGui.Text(attrubutes[i].AtbDescription());
                 }
-                
+
                 ImGui.Unindent(2);
                 float ycount = flatInstances.Count;
                 float yhight = ImGui.GetTextLineHeightWithSpacing() * ycount;
-                
+
                 //float ycount = abilites[_selectedIndex].AbilityDescription().Split("\n").Length -1;
                 //float yhight = ImGui.GetTextLineHeightWithSpacing() * ycount;
                 if(xwid < _textwidth[0] + _textwidth[1] + 12)
                     xwid = _textwidth[0] + _textwidth[1] + 12;
                 ImGui.Columns(2);
                 BorderListOptions.End(new Vector2(xwid,yhight));
-                
+
                 //BorderListOptions.End(new Vector2(184,yhight));
-                
+
             }
 
         }
@@ -374,7 +374,7 @@ namespace Pulsar4X.SDL2UI
                     strline = abilitiesAry[strlinei];
                     string[] tabSplit = strline.Split("\t"); //split if there are tabs.
                     var xpos = ImGui.GetCursorPosX();
-                    for (int i = 0; i < tabSplit.Length; i++) 
+                    for (int i = 0; i < tabSplit.Length; i++)
                     {
                         if(i > 0) //after the tab char
                             ImGui.SetCursorPosX(xpos + _textwidth[i-1] + 12);//allign second row

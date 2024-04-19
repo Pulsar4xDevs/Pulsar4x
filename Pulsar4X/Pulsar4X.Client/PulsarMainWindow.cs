@@ -150,7 +150,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void ImGuiRender()
         {
-            foreach (var systemState in _state.StarSystemStates.Values)
+            foreach (var (_, systemState) in _state.StarSystemStates)
             {
                 systemState.PreFrameSetup();
             }
@@ -163,7 +163,7 @@ namespace Pulsar4X.SDL2UI
             // Render ImGui on top of the rest. this eventualy calls overide void ImGuiLayout();
             base.ImGuiRender();
 
-            foreach (var systemState in _state.StarSystemStates.Values)
+            foreach (var (_, systemState) in _state.StarSystemStates)
             {
                 systemState.PostFrameCleanup();
             }

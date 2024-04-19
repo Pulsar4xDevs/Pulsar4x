@@ -1283,7 +1283,7 @@ namespace Pulsar4X.SDL2UI
 
             if(SystemState == null) return;
 
-            if (SystemState.EntitysToBin.Count > 0)
+            if (SystemState.EntitiesToBin.Count > 0)
             {
                 RefreshFactionEntites();
             }

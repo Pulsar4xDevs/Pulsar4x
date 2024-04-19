@@ -53,7 +53,7 @@ namespace Pulsar4X.DataStructures
             }
         }
 
-        internal Dictionary<TKey, TValue>.KeyCollection Keys
+        public Dictionary<TKey, TValue>.KeyCollection Keys
         {
             get
             {
@@ -61,7 +61,7 @@ namespace Pulsar4X.DataStructures
             }
         }
 
-        internal Dictionary<TKey, TValue>.ValueCollection Values
+        public Dictionary<TKey, TValue>.ValueCollection Values
         {
             get
             {
@@ -102,7 +102,7 @@ namespace Pulsar4X.DataStructures
             }
         }
 
-        internal void Add(TKey key, TValue value)
+        public void Add(TKey key, TValue value)
         {
             lock(_lock)
             {
@@ -112,7 +112,7 @@ namespace Pulsar4X.DataStructures
             }
         }
 
-        internal bool Remove(TKey key)
+        public bool Remove(TKey key)
         {
             lock(_lock)
             {
@@ -130,6 +130,11 @@ namespace Pulsar4X.DataStructures
         public bool ContainsKey(TKey key)
         {
             lock(_lock) return _innerDictionary.ContainsKey(key);
+        }
+
+        public void Clear()
+        {
+            lock(_lock) _innerDictionary.Clear();
         }
 
         public bool TryGetValue(TKey key, [NotNullWhen(true)] out TValue? value)

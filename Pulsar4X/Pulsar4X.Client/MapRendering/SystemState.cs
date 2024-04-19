@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using Pulsar4X.Messaging;
 using System.Threading.Tasks;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -21,8 +22,10 @@ namespace Pulsar4X.SDL2UI
     {
         public delegate void SystemStateEntityEventHandler(SystemState systemState, Entity entity);
         public delegate void SystemStateEntityIdEventHandler(SystemState systemState, int entityId);
+        public delegate void SystemStateEntityUpdateHandler(SystemState systemState, int entityId, Message messages);
         public event SystemStateEntityEventHandler OnEntityAdded;
         public event SystemStateEntityIdEventHandler OnEntityRemoved;
+        public event SystemStateEntityUpdateHandler OnEntityUpdated;
 
         private Entity _faction;
         internal StarSystem StarSystem;
@@ -30,11 +33,14 @@ namespace Pulsar4X.SDL2UI
         ConcurrentQueue<Message> _sensorChanges = new ConcurrentQueue<Message>();
         internal List<Message> SensorChanges = new List<Message>();
         ManagerSubPulse PulseMgr;
-        public List<int> EntitysToBin = new ();
+
+        public SafeList<int> EntitiesToAdd = new ();
+        public SafeDictionary<int, SafeList<Message>> EntitiesToUpdate = new ();
+        public SafeList<int> EntitiesToBin = new ();
         public List<Message> SystemChanges = new List<Message>();
-        public Dictionary<int, EntityState> EntityStatesWithNames = new ();
-        public Dictionary<int, EntityState> EntityStatesWithPosition = new ();
-        public Dictionary<int, EntityState> EntityStatesColonies = new ();
+        public SafeDictionary<int, EntityState> EntityStatesWithNames = new ();
+        public SafeDictionary<int, EntityState> EntityStatesWithPosition = new ();
+        public SafeDictionary<int, EntityState> EntityStatesColonies = new ();
 
         public SystemState(StarSystem system, Entity faction)
         {
@@ -51,11 +57,13 @@ namespace Pulsar4X.SDL2UI
                     SetupEntity(entity, _faction);
                 }
 
-                Func<Message, bool> filterById = msg => msg.SystemId != null && msg.SystemId.Equals(StarSystem.ManagerGuid);
+                Func<Message, bool> filterById = msg => msg.EntityId != null && msg.SystemId != null && msg.SystemId.Equals(StarSystem.ManagerGuid);
 
                 MessagePublisher.Instance.Subscribe(MessageTypes.EntityAdded, OnEntityAddedMessage, filterById);
                 MessagePublisher.Instance.Subscribe(MessageTypes.EntityRemoved, OnEntityRemovedMessage, filterById);
                 MessagePublisher.Instance.Subscribe(MessageTypes.EntityRevealed, OnEntityAddedMessage, filterById);
+                MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, OnEntityUpdatedMessage, filterById);
+                MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, OnEntityUpdatedMessage, filterById);
             }
             else
             {
@@ -65,11 +73,13 @@ namespace Pulsar4X.SDL2UI
                     SetupEntity(entityItem, faction);
                 }
 
-                Func<Message, bool> filterById = msg => msg.SystemId != null && msg.SystemId.Equals(StarSystem.ManagerGuid);
+                Func<Message, bool> filterById = msg => msg.EntityId != null && msg.SystemId != null && msg.SystemId.Equals(StarSystem.ManagerGuid);
 
                 MessagePublisher.Instance.Subscribe(MessageTypes.EntityAdded, OnEntityAddedMessage, filterById);
                 MessagePublisher.Instance.Subscribe(MessageTypes.EntityRemoved, OnEntityRemovedMessage, filterById);
                 MessagePublisher.Instance.Subscribe(MessageTypes.EntityRevealed, OnEntityAddedMessage, filterById);
+                MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, OnEntityUpdatedMessage, filterById);
+                MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, OnEntityUpdatedMessage, filterById);
 
                 foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
                 {
@@ -116,12 +126,7 @@ namespace Pulsar4X.SDL2UI
             await Task.Run(() =>
             {
                 if(message.EntityId == null) return;
-
-                if(StarSystem.TryGetEntityById(message.EntityId.Value, out var entity))
-                {
-                    SetupEntity(entity, _faction);
-                    OnEntityAdded?.Invoke(this, entity);
-                }
+                EntitiesToAdd.Add(message.EntityId.Value);
             });
         }
 
@@ -130,9 +135,20 @@ namespace Pulsar4X.SDL2UI
             await Task.Run(() =>
             {
                 if(message.EntityId == null) return;
+                EntitiesToBin.Add(message.EntityId.Value);
+            });
+        }
 
-                EntitysToBin.Add(message.EntityId.Value);
-                OnEntityRemoved?.Invoke(this, message.EntityId.Value);
+        async Task OnEntityUpdatedMessage(Message message)
+        {
+            await Task.Run(() =>
+            {
+                if(message.EntityId == null) return;
+                if(!EntitiesToUpdate.ContainsKey(message.EntityId.Value))
+                {
+                    EntitiesToUpdate[message.EntityId.Value] = new ();
+                }
+                EntitiesToUpdate[message.EntityId.Value].Add(message);
             });
         }
 
@@ -142,12 +158,30 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         public void PreFrameSetup()
         {
+            foreach(var entityToAdd in EntitiesToAdd)
+            {
+                if(StarSystem.TryGetEntityById(entityToAdd, out var entity))
+                {
+                    SetupEntity(entity, _faction);
+                    OnEntityAdded?.Invoke(this, entity);
+                }
+            }
+
+            foreach(var (entityId, messages) in EntitiesToUpdate)
+            {
+                foreach(var message in messages)
+                {
+                    OnEntityUpdated?.Invoke(this, entityId, message);
+                }
+            }
+            EntitiesToUpdate.Clear();
+
             foreach (var item in EntityStatesWithPosition.Values)
             {
                 if (item.IsDestroyed) //items get flagged via an event triggered by worker threads.
                 {
-                    if(!EntitysToBin.Contains(item.Entity.Id))
-                        EntitysToBin.Add(item.Entity.Id);
+                    if(!EntitiesToBin.Contains(item.Entity.Id))
+                        EntitiesToBin.Add(item.Entity.Id);
                 }
             }
         }
@@ -158,11 +192,12 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         public void PostFrameCleanup()
         {
-            foreach (var itemGuid in EntitysToBin)
+            foreach (var entityToRemove in EntitiesToBin)
             {
-                EntityStatesWithPosition.Remove(itemGuid);
+                EntityStatesWithPosition.Remove(entityToRemove);
+                OnEntityRemoved?.Invoke(this, entityToRemove);
             }
-            EntitysToBin = new List<int>();
+            EntitiesToBin = new SafeList<int>();
             SensorChanges = new List<Message>();
             SystemChanges = new List<Message>();
             foreach (var item in EntityStatesWithPosition.Values)

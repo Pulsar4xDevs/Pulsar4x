@@ -71,6 +71,7 @@ namespace Pulsar4X.SDL2UI
             _sensorMgr = starSys.GetSensorContacts(_faction.Id);
             _sensorChanges = _sensorMgr.Changes.Subscribe();
             _sysState.OnEntityAdded += OnSystemStateEntityAdded;
+            _sysState.OnEntityUpdated += OnSystemStateEntityUpdated;
 
             foreach (var entityItem in _sysState.EntityStatesWithPosition.Values)
             {
@@ -220,7 +221,7 @@ namespace Pulsar4X.SDL2UI
                                     entityState = new EntityState(retrievedEntity) { Name = "Unknown" };
                                 }
                             }
-                                
+
                             OrbitIconBase orbit;
                             if (orbitDB.Eccentricity < 1)
                             {
@@ -357,6 +358,13 @@ namespace Pulsar4X.SDL2UI
                 AddIconable(systemState.EntityStatesWithPosition[entity.Id]);
         }
 
+        private void OnSystemStateEntityUpdated(SystemState systemState, int entityId, Message message)
+        {
+            // Refreseh the icons for the updated entity
+            RemoveIconable(entityId);
+            AddIconable(systemState.EntityStatesWithPosition[entityId]);
+        }
+
         internal void Draw()
         {
 
@@ -369,7 +377,7 @@ namespace Pulsar4X.SDL2UI
                         HandleChanges(item);
                     }
                 }
-                foreach (var item in _sysState.EntitysToBin)
+                foreach (var item in _sysState.EntitiesToBin)
                 {
                     if(_sysState.EntityStatesWithPosition.ContainsKey(item))
                         RemoveIconable(item);

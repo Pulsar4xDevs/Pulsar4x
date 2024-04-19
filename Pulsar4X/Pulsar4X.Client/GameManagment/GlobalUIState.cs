@@ -75,7 +75,7 @@ namespace Pulsar4X.SDL2UI
         internal SystemMapRendering SelectedSysMapRender { get { return GalacticMap.SelectedSysMapRender; } }
         internal DateTime PrimarySystemDateTime;
         internal EntityContextMenu ContextMenu { get; set; }
-        internal Dictionary<string, SystemState> StarSystemStates = new ();
+        internal SafeDictionary<string, SystemState> StarSystemStates = new ();
         internal Camera Camera;
         internal ImGuiSDL2CSWindow ViewPort;
         internal System.Numerics.Vector2 MainWinSize { get {return ViewPort.Size;}}
@@ -159,7 +159,7 @@ namespace Pulsar4X.SDL2UI
 
             Faction = factionEntity;
             FactionInfoDB factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
-            StarSystemStates = new Dictionary<string, SystemState>();
+            StarSystemStates = new SafeDictionary<string, SystemState>();
             foreach (var guid in factionInfo.KnownSystems)
             {
                 var system = Game.Systems.First(s => s.Guid.Equals(guid));
@@ -252,7 +252,7 @@ namespace Pulsar4X.SDL2UI
             if (LoadedWindows.ContainsKey(typeof(DistanceRuler)))
                 LoadedWindows[typeof(DistanceRuler)].MapClicked(worldCoord, button);
 
-            Dictionary<int, EntityState> allEntities = null;
+            SafeDictionary<int, EntityState> allEntities = null;
             if(StarSystemStates.ContainsKey(SelectedStarSysGuid))
                 allEntities = StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames;
 
