@@ -105,7 +105,7 @@ namespace Pulsar4X.Extensions
             }
             else
             {
-                throw new Exception("Entity has no velocity");
+                return(pos, Vector3.Zero);
             }
         }
 
