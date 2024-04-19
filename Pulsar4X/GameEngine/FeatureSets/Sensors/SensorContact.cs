@@ -2,7 +2,6 @@ using System;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Pulsar4X.Datablobs;
-using Pulsar4X.Engine;
 using Pulsar4X.Messaging;
 
 namespace Pulsar4X.Engine.Sensors
@@ -39,7 +38,7 @@ namespace Pulsar4X.Engine.Sensors
                 factionInfoDB.SensorContacts.Add(actualEntity.Id, this);
             Name = actualEntity.GetDataBlob<NameDB>().GetName(factionEntity);
 
-            MessagePublisher.Instance.Subscribe(MessageTypes.EntityRemoved, EntityRemoved, msg => msg.EntityId.Value == actualEntity.Id);
+            MessagePublisher.Instance.Subscribe(MessageTypes.EntityRemoved, EntityRemoved, msg => msg.EntityId != null && msg.EntityId.Value == actualEntity.Id);
         }
 
         async Task EntityRemoved(Message message)
