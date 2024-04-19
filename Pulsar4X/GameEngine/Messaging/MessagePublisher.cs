@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.Messaging;
 
@@ -11,11 +11,7 @@ public class MessagePublisher
     private MessagePublisher() {}
     public static MessagePublisher Instance => instance;
     public delegate Task MessageHandler(Message message);
-
-    public event MessageHandler MessageReceived;
-
-    private ConcurrentDictionary<MessageTypes, ConcurrentQueue<Message>> messageQueue = new ();
-    private static ConcurrentDictionary<MessageTypes, List<(MessageHandler Handler, Func<Message, bool>? Filter)>> subscribers = new ();
+    private static SafeDictionary<MessageTypes, SafeList<(MessageHandler Handler, Func<Message, bool>? Filter)>> subscribers = new ();
 
     public void Subscribe(MessageTypes messageType, MessageHandler handler, Func<Message, bool>? filter = null)
     {
@@ -36,17 +32,6 @@ public class MessagePublisher
     }
 
     public void Publish(Message message)
-    {
-        if(!messageQueue.ContainsKey(message.MessageType))
-        {
-            messageQueue[message.MessageType] = new ConcurrentQueue<Message>();
-        }
-
-        messageQueue[message.MessageType].Enqueue(message);
-        OnMessageReceived(message);
-    }
-
-    private void OnMessageReceived(Message message)
     {
         if(subscribers.ContainsKey(message.MessageType))
         {
