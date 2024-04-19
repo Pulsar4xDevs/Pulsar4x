@@ -76,10 +76,12 @@ namespace Pulsar4X.Engine
                     var to = (string?)pair["to"];
 
                     var fromSystem = game.Systems.First(s => s.Guid.Equals(from));
-                    var fromJP = JPFactory.CreateJumpPoint(starSystemFactory, fromSystem);
+                    var gravityRoot = fromSystem.GetFirstEntityWithDataBlob<StarInfoDB>().GetDataBlob<PositionDB>().Root;
+                    var fromJP = JPFactory.CreateJumpPoint(starSystemFactory, fromSystem, gravityRoot);
 
                     var toSystem = game.Systems.First(s => s.Guid.Equals(to));
-                    var toJP = JPFactory.CreateJumpPoint(starSystemFactory, toSystem);
+                    gravityRoot = toSystem.GetFirstEntityWithDataBlob<StarInfoDB>().GetDataBlob<PositionDB>().Root;
+                    var toJP = JPFactory.CreateJumpPoint(starSystemFactory, toSystem, gravityRoot);
 
                     fromJP.GetDataBlob<JumpPointDB>().DestinationId = toJP.Id;
                     toJP.GetDataBlob<JumpPointDB>().DestinationId = fromJP.Id;
@@ -320,7 +322,7 @@ namespace Pulsar4X.Engine
             ComponentDesignFromJson.Create(targetFaction, opForDataStore, "Data/basemod/componentDesigns/battery-2t.json");
             ComponentDesignFromJson.Create(targetFaction, opForDataStore, "Data/basemod/componentDesigns/reactor-15k.json");
             ComponentDesignFromJson.Create(targetFaction, opForDataStore, "Data/basemod/componentDesigns/merlin.json");
-            
+
             Entity targetDrone0 = ShipFactory.CreateShip(TargetDrone(targetFaction, factionDataStore), targetFaction, earth, (10 * Math.PI / 180), "Target Drone0");
             Entity targetDrone1 = ShipFactory.CreateShip(TargetDrone(targetFaction, factionDataStore), targetFaction, earth, (22.5 * Math.PI / 180), "Target Drone1");
             Entity targetDrone2 = ShipFactory.CreateShip(TargetDrone(targetFaction, factionDataStore), targetFaction, earth, (45 * Math.PI / 180), "Target Drone2");

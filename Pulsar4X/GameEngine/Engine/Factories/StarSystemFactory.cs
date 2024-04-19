@@ -50,7 +50,7 @@ namespace Pulsar4X.Engine
 
             // Generate Jump Points
             JPSurveyFactory.GenerateJPSurveyPoints(newSystem);
-            JPFactory.GenerateJumpPoints(this, newSystem);
+            JPFactory.GenerateJumpPoints(this, newSystem, stars[0].GetDataBlob<PositionDB>().Root);
 
             //add this system to the GameMaster's Known Systems list.
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(newSystem.Guid);

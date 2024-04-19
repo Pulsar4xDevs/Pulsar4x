@@ -7,7 +7,7 @@ namespace Pulsar4X.Engine
 {
     public static class JPFactory
     {
-        public static Entity CreateJumpPoint(StarSystemFactory ssf, StarSystem system)
+        public static Entity CreateJumpPoint(StarSystemFactory ssf, StarSystem system, Entity gravityRoot)
         {
             var primaryStarInfoDB = system.GetFirstEntityWithDataBlob<StarInfoDB>().GetDataBlob<OrbitDB>().Root.GetDataBlob<StarInfoDB>();
 
@@ -30,7 +30,7 @@ namespace Pulsar4X.Engine
             var y_km = Distance.AuToKm(Y);
 
             NameDB jpNameDB = new NameDB("Jump Point");
-            PositionDB jpPositionDB = new PositionDB(x_km * 1000, y_km * 1000, 0, system.Guid);
+            PositionDB jpPositionDB = new PositionDB(x_km * 1000, y_km * 1000, 0, system.Guid, gravityRoot);
             JumpPointDB jpTransitableDB = new JumpPointDB
             {
                 IsStabilized = system.Game.Settings.AllJumpPointsStabilized ?? false
@@ -93,7 +93,7 @@ namespace Pulsar4X.Engine
         /// <summary>
         /// Generates jump points for this system.
         /// </summary>
-        public static void GenerateJumpPoints(StarSystemFactory ssf, StarSystem system)
+        public static void GenerateJumpPoints(StarSystemFactory ssf, StarSystem system, Entity gravityRoot)
         {
             int numJumpPoints = GetNumJPForSystem(system);
 
@@ -101,7 +101,7 @@ namespace Pulsar4X.Engine
             {
                 numJumpPoints--;
 
-                CreateJumpPoint(ssf, system);
+                CreateJumpPoint(ssf, system, gravityRoot);
             }
         }
 
