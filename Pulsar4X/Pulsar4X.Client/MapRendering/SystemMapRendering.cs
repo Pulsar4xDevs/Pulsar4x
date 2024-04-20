@@ -72,6 +72,7 @@ namespace Pulsar4X.SDL2UI
             _sensorChanges = _sensorMgr.Changes.Subscribe();
             _sysState.OnEntityAdded += OnSystemStateEntityAdded;
             _sysState.OnEntityUpdated += OnSystemStateEntityUpdated;
+            _sysState.OnEntityRemoved += OnSystemStateEntityRemoved;
 
             foreach (var entityItem in _sysState.EntityStatesWithPosition.Values)
             {
@@ -361,8 +362,16 @@ namespace Pulsar4X.SDL2UI
         private void OnSystemStateEntityUpdated(SystemState systemState, int entityId, Message message)
         {
             // Refreseh the icons for the updated entity
+            if(systemState.EntityStatesWithPosition.ContainsKey(entityId))
+            {
+                RemoveIconable(entityId);
+                AddIconable(systemState.EntityStatesWithPosition[entityId]);
+            }        
+        }
+
+        private void OnSystemStateEntityRemoved(SystemState systemState, int entityId)
+        {
             RemoveIconable(entityId);
-            AddIconable(systemState.EntityStatesWithPosition[entityId]);
         }
 
         internal void Draw()
@@ -376,11 +385,6 @@ namespace Pulsar4X.SDL2UI
                     {
                         HandleChanges(item);
                     }
-                }
-                foreach (var item in _sysState.EntitiesToBin)
-                {
-                    if(_sysState.EntityStatesWithPosition.ContainsKey(item))
-                        RemoveIconable(item);
                 }
             }
 
