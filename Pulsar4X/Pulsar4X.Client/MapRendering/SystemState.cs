@@ -34,8 +34,8 @@ namespace Pulsar4X.SDL2UI
         internal List<Message> SensorChanges = new List<Message>();
         ManagerSubPulse PulseMgr;
 
-        public SafeList<int> EntitiesToAdd = new ();
-        public SafeDictionary<int, SafeList<Message>> EntitiesToUpdate = new ();
+        public ConcurrentQueue<int> EntitiesToAdd = new ();
+        public ConcurrentQueue<(int, Message)> EntitiesToUpdate = new ();
         public SafeList<int> EntitiesToBin = new ();
         public List<Message> SystemChanges = new List<Message>();
         public SafeDictionary<int, EntityState> EntityStatesWithNames = new ();
@@ -126,7 +126,7 @@ namespace Pulsar4X.SDL2UI
             await Task.Run(() =>
             {
                 if(message.EntityId == null) return;
-                EntitiesToAdd.Add(message.EntityId.Value);
+                EntitiesToAdd.Enqueue(message.EntityId.Value);
             });
         }
 
@@ -135,7 +135,8 @@ namespace Pulsar4X.SDL2UI
             await Task.Run(() =>
             {
                 if(message.EntityId == null) return;
-                EntitiesToBin.Add(message.EntityId.Value);
+                if(!EntitiesToBin.Contains(message.EntityId.Value))
+                    EntitiesToBin.Add(message.EntityId.Value);
             });
         }
 
@@ -144,11 +145,7 @@ namespace Pulsar4X.SDL2UI
             await Task.Run(() =>
             {
                 if(message.EntityId == null) return;
-                if(!EntitiesToUpdate.ContainsKey(message.EntityId.Value))
-                {
-                    EntitiesToUpdate[message.EntityId.Value] = new ();
-                }
-                EntitiesToUpdate[message.EntityId.Value].Add(message);
+                EntitiesToUpdate.Enqueue((message.EntityId.Value, message));
             });
         }
 
@@ -158,7 +155,7 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         public void PreFrameSetup()
         {
-            foreach(var entityToAdd in EntitiesToAdd)
+            while(EntitiesToAdd.TryDequeue(out var entityToAdd))
             {
                 if(StarSystem.TryGetEntityById(entityToAdd, out var entity))
                 {
@@ -167,22 +164,9 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            foreach(var (entityId, messages) in EntitiesToUpdate)
+            while(EntitiesToUpdate.TryDequeue(out var entityToUpdate))
             {
-                foreach(var message in messages)
-                {
-                    OnEntityUpdated?.Invoke(this, entityId, message);
-                }
-            }
-            EntitiesToUpdate.Clear();
-
-            foreach (var item in EntityStatesWithPosition.Values)
-            {
-                if (item.IsDestroyed) //items get flagged via an event triggered by worker threads.
-                {
-                    if(!EntitiesToBin.Contains(item.Entity.Id))
-                        EntitiesToBin.Add(item.Entity.Id);
-                }
+                OnEntityUpdated?.Invoke(this, entityToUpdate.Item1, entityToUpdate.Item2);
             }
         }
 
@@ -192,14 +176,23 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         public void PostFrameCleanup()
         {
+            foreach(var item in EntityStatesWithPosition.Values)
+            {
+                if(item.IsDestroyed)
+                {
+                    if(!EntitiesToBin.Contains(item.Entity.Id))
+                        EntitiesToBin.Add(item.Entity.Id);
+                }
+            }
+
             foreach (var entityToRemove in EntitiesToBin)
             {
                 EntityStatesWithPosition.Remove(entityToRemove);
                 OnEntityRemoved?.Invoke(this, entityToRemove);
             }
-            EntitiesToBin = new SafeList<int>();
-            SensorChanges = new List<Message>();
-            SystemChanges = new List<Message>();
+            EntitiesToBin.Clear();
+            SensorChanges.Clear();
+            SystemChanges.Clear();
             foreach (var item in EntityStatesWithPosition.Values)
             {
                 item.PostFrameCleanup();
