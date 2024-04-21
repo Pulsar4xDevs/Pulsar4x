@@ -11,12 +11,12 @@
     "tectonics": "earth-like"
   },
   "orbit": {
-    "semiMajorAxis": 57.91E6,
+    "semiMajorAxis_km": 57.91E6,
     "eccentricity": 0.205630,
-    "eclipticInclination": 7.005,
-    "LoAN": 48.331,
-    "AoP": 29.124,
-    "meanAnomaly": 174.796
+    "eclipticInclination_d": 7.005,
+    "LoAN_d": 48.331,
+    "AoP_d": 29.124,
+    "meanAnomaly_d": 174.796
   },
   "geoSurvey": {
     "pointsRequired": 1500

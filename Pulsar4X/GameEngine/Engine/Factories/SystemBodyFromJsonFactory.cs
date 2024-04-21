@@ -47,12 +47,38 @@ public static class SystemBodyFromJsonFactory
         blobsToAdd.Add(massVolumeDB);
 
         var orbit = rootJson["orbit"];
-        double semiMajorAxis_AU = Distance.KmToAU((double?)orbit["semiMajorAxis"] ?? 0);
+        
+        //double semiMajorAxis_AU = Distance.KmToAU((double?)orbit["semiMajorAxis_km"] ?? 0);
+
+        double semiMajorAxis_m = (double?)orbit["semiMajorAxis"] * 1000.0 ?? 
+                                 (double?)orbit["semiMajorAxis_m"] ??
+                                 (double?)orbit["semiMajorAxis_km"] * 1000.0 ?? 
+                                 (double?)orbit["semiMajorAxis_au"] * UniversalConstants.Units.MetersPerAu ?? 
+                                 0;
+        
         double eccentricity = (double?)orbit["eccentricity"] ?? 0;
-        double eclipticInclination = (double?)orbit["eclipticInclination"] ?? 0;
-        double loAN = (double?)orbit["LoAN"] ?? 0;
-        double AoP = (double?)orbit["AoP"] ?? 0;
-        double meanAnomaly = (double?)orbit["meanAnomaly"] ?? 0;
+        
+        double eclipticInclination = (double?)orbit["eclipticInclination_r"] ?? 
+                                     (double?)orbit["eclipticInclination_d"] * Math.PI/180 ?? 
+                                     (double?)orbit["eclipticInclination"] * Math.PI/180 ??
+                                     0;
+        
+        
+        
+        double loAN = (double?)orbit["LoAN_r"] ??
+                      (double?)orbit["LoAN_d"] * Math.PI/180 ??
+                      (double?)orbit["LoAN"] * Math.PI/180 ?? 
+                      0;
+        
+        double AoP = (double?)orbit["AoP_r"] ??
+                     (double?)orbit["AoP_d"] * Math.PI/180 ?? 
+                     (double?)orbit["AoP"] * Math.PI/180 ?? 
+                     0;
+        
+        double meanAnomaly = (double?)orbit["meanAnomaly_r"] ??
+                             (double?)orbit["meanAnomaly_d"] * Math.PI/180 ?? 
+                             (double?)orbit["meanAnomaly"] * Math.PI/180 ?? 
+                             0;
 
         OrbitDB orbitDB;
         var parentBody = sun;
@@ -69,11 +95,11 @@ public static class SystemBodyFromJsonFactory
             case BodyType.Comet:
             case BodyType.Asteroid:
             case BodyType.Moon:
-                orbitDB = OrbitDB.FromAsteroidFormat(
+                orbitDB = OrbitDB.FromAsteroidFormat_r(
                     parentBody,
                     parentMassVolumeDB.MassDry,
                     massVolumeDB.MassDry,
-                    semiMajorAxis_AU,
+                    semiMajorAxis_m,
                     eccentricity,
                     eclipticInclination,
                     loAN,
@@ -82,11 +108,11 @@ public static class SystemBodyFromJsonFactory
                     epoch);
                 break;
             default:
-                orbitDB = OrbitDB.FromMajorPlanetFormat(
+                orbitDB = OrbitDB.FromMajorPlanetFormat_r(
                     parentBody,
                     parentMassVolumeDB.MassDry,
                     massVolumeDB.MassDry,
-                    semiMajorAxis_AU,
+                    semiMajorAxis_m,
                     eccentricity,
                     eclipticInclination,
                     loAN,

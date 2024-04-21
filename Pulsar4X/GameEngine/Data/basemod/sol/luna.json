@@ -9,12 +9,12 @@
     "radius": 6378.1
   },
   "orbit": {
-    "semiMajorAxis": 0.3844E6,
+    "semiMajorAxis_km": 384399,
     "eccentricity": 0.0549,
-    "eclipticInclination": 0,
-    "LoAN": 125.08,
-    "AoP": 318.0634,
-    "meanAnomaly": 115.3654
+    "eclipticInclination_d": 5.145,
+    "LoAN_d": 125.08,
+    "AoP_d": 318.0634,
+    "meanAnomaly_d": 115.3654
   },
   "minerals": [
     { "id": "iron", "abundance": 0.5, "accessibility": 1 }

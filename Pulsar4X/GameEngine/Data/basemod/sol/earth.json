@@ -13,12 +13,12 @@
     "lengthOfDay": "1.00:00:00"
   },
   "orbit": {
-    "semiMajorAxis": 149597887,
+    "semiMajorAxis_km": 149597887,
     "eccentricity": 0.01671022,
-    "eclipticInclination": 0,
-    "LoAN": -11.26064,
-    "AoP": 114.20783,
-    "meanAnomaly": 358.617
+    "eclipticInclination_d": 7.155,
+    "LoAN_d": -11.26064,
+    "AoP_d": 102.94719,
+    "meanAnomaly_d": 358.617
   },
   "atmosphere": {
     "pressure": 1,

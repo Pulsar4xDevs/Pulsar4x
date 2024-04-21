@@ -322,6 +322,37 @@ namespace Pulsar4X.Datablobs
             double sma_m = Distance.AuToMt(semiMajorAxis_AU);
             return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, Angle.ToRadians(inclination), Angle.ToRadians(longitudeOfAscendingNode), Angle.ToRadians(argumentOfPeriapsis), Angle.ToRadians(meanAnomaly), epoch);
         }
+        
+        /// <summary>
+        /// Arguments in meters and degrees.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="parentMass"></param>
+        /// <param name="myMass"></param>
+        /// <param name="semiMajorAxis_m"></param>
+        /// <param name="eccentricity"></param>
+        /// <param name="inclination"></param>
+        /// <param name="longitudeOfAscendingNode"></param>
+        /// <param name="longitudeOfPeriapsis"></param>
+        /// <param name="meanLongitude"></param>
+        /// <param name="epoch"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static OrbitDB FromMajorPlanetFormat_r([NotNull] Entity parent, double parentMass, double myMass, double semiMajorAxis_m, double eccentricity, double inclination,
+                                                    double longitudeOfAscendingNode, double longitudeOfPeriapsis, double meanLongitude, DateTime epoch)
+        {
+            if (parent == null)
+            {
+                throw new ArgumentNullException(nameof(parent));
+            }
+
+            // http://en.wikipedia.org/wiki/Longitude_of_the_periapsis
+            double argumentOfPeriapsis = longitudeOfPeriapsis - longitudeOfAscendingNode;
+            // http://en.wikipedia.org/wiki/Mean_longitude
+            double meanAnomaly = meanLongitude - (longitudeOfAscendingNode + argumentOfPeriapsis);
+            
+            return new OrbitDB(parent, parentMass, myMass, semiMajorAxis_m, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
+        }
 
         /// <summary>
         /// Returns an orbit representing the defined parameters.
@@ -347,6 +378,37 @@ namespace Pulsar4X.Datablobs
             double o_aoP = Angle.NormaliseRadiansPositive(Angle.ToRadians(argumentOfPeriapsis));
             double o_M = Angle.NormaliseRadiansPositive(Angle.ToRadians(meanAnomaly));
 			return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, o_i, o_loAN, o_aoP, o_M, epoch);
+        }
+        
+        /// <summary>
+        /// in radians and meters.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="parentMass"></param>
+        /// <param name="myMass"></param>
+        /// <param name="semiMajorAxis_AU"></param>
+        /// <param name="eccentricity"></param>
+        /// <param name="inclination"></param>
+        /// <param name="longitudeOfAscendingNode"></param>
+        /// <param name="argumentOfPeriapsis"></param>
+        /// <param name="meanAnomaly"></param>
+        /// <param name="epoch"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static OrbitDB FromAsteroidFormat_r([NotNull] Entity parent, double parentMass, double myMass, double semiMajorAxis_m, double eccentricity, double inclination,
+                                                 double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
+        {
+            if (parent == null)
+            {
+                throw new ArgumentNullException(nameof(parent));
+            }
+
+            double sma_m = semiMajorAxis_m;
+            double o_i = inclination;
+            double o_loAN = longitudeOfAscendingNode;
+            double o_aoP = argumentOfPeriapsis;
+            double o_M = meanAnomaly;
+            return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, o_i, o_loAN, o_aoP, o_M, epoch);
         }
 
         internal OrbitDB(Entity? parent, double parentMass, double myMass, double semiMajorAxis_m, double eccentricity, double inclination,
