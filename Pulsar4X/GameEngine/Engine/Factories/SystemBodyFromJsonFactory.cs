@@ -63,6 +63,14 @@ public static class SystemBodyFromJsonFactory
                                      (double?)orbit["eclipticInclination"] * Math.PI/180 ??
                                      0;
         
+        //flatten the inclination, we're only using inclination to define prograde vs retrograde orbits.
+        //if we go to 3d orbits this section will need to be removed.
+        //this is currently also flattened in OrbitEllipseBaseClass for drawing.
+        eclipticInclination = Angle.NormaliseRadiansPositive(eclipticInclination);
+        if (eclipticInclination > 0.5 * Math.PI && eclipticInclination < 1.5 * Math.PI)
+            eclipticInclination = Math.PI;
+        else
+            eclipticInclination = 0;
         
         
         double loAN = (double?)orbit["LoAN_r"] ??
