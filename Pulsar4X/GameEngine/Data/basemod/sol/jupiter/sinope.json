@@ -1,0 +1,22 @@
+{
+  "name": "Sinope",
+  "parent": "Jupiter",
+  "colonizeable": true,
+  "info": {
+    "type": "moon",
+    "albedo": 0.042,
+    "mass": 7.5E16,
+    "radius": 17.5
+  },
+  "orbit": {
+    "semiMajorAxis": 23939000,
+    "eccentricity": 0.25,
+    "eclipticInclination": 0,
+    "LoAN": 0,
+    "AoP": 0,
+    "meanAnomaly": 0
+  },
+  "geoSurvey": {
+    "pointsRequired": 500
+  }
+}

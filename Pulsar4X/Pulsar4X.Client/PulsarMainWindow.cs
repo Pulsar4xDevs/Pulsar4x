@@ -37,33 +37,40 @@ namespace Pulsar4X.SDL2UI
             backColor = new Vector3(0 / 255f, 0 / 255f, 28 / 255f);
             OnEvent = MyEventHandler;
 
-            // Read and apply any window preferences
-            string preferencesDirectory = SDL.SDL_GetPrefPath(OrgName, AppName);
-            string preferencesPath = Path.Combine(preferencesDirectory, PreferencesFile);
-            if(!File.Exists(preferencesPath))
+            try
             {
-                File.Create(preferencesPath).Close();
+                // Read and apply any window preferences
+                string preferencesDirectory = SDL.SDL_GetPrefPath(OrgName, AppName);
+                string preferencesPath = Path.Combine(preferencesDirectory, PreferencesFile);
+                if(!File.Exists(preferencesPath))
+                {
+                    File.Create(preferencesPath).Close();
+                }
+
+                IConfiguration preferences = new ConfigurationBuilder().AddIniFile(preferencesPath).Build();
+                IConfigurationSection windowSection = preferences.GetSection("Window Settings");
+                string? xPosition = windowSection["X"];
+                string? yPosition = windowSection["Y"];
+                string? width = windowSection["Width"];
+                string? height = windowSection["Height"];
+                string? maximized = windowSection["Maximized"];
+
+                if(xPosition != null) X = int.Parse(xPosition);
+                if(yPosition != null) Y = int.Parse(yPosition);
+                if(width != null) Width = int.Parse(width);
+                if(height != null) Height = int.Parse(height);
+
+                // if maximized is set to true it will override the other preferences
+                if(maximized != null)
+                {
+                    bool isMaximized = bool.Parse(maximized);
+                    if(isMaximized)
+                        SDL.SDL_MaximizeWindow(_Handle);
+                }
             }
-
-            IConfiguration preferences = new ConfigurationBuilder().AddIniFile(preferencesPath).Build();
-            IConfigurationSection windowSection = preferences.GetSection("Window Settings");
-            string? xPosition = windowSection["X"];
-            string? yPosition = windowSection["Y"];
-            string? width = windowSection["Width"];
-            string? height = windowSection["Height"];
-            string? maximized = windowSection["Maximized"];
-
-            if(xPosition != null) X = int.Parse(xPosition);
-            if(yPosition != null) Y = int.Parse(yPosition);
-            if(width != null) Width = int.Parse(width);
-            if(height != null) Height = int.Parse(height);
-
-            // if maximized is set to true it will override the other preferences
-            if(maximized != null)
+            catch(Exception e)
             {
-                bool isMaximized = bool.Parse(maximized);
-                if(isMaximized)
-                    SDL.SDL_MaximizeWindow(_Handle);
+                // It's just a preferences file, continue on
             }
         }
 
@@ -143,7 +150,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void ImGuiRender()
         {
-            foreach (var systemState in _state.StarSystemStates.Values)
+            foreach (var (_, systemState) in _state.StarSystemStates)
             {
                 systemState.PreFrameSetup();
             }
@@ -156,7 +163,7 @@ namespace Pulsar4X.SDL2UI
             // Render ImGui on top of the rest. this eventualy calls overide void ImGuiLayout();
             base.ImGuiRender();
 
-            foreach (var systemState in _state.StarSystemStates.Values)
+            foreach (var (_, systemState) in _state.StarSystemStates)
             {
                 systemState.PostFrameCleanup();
             }

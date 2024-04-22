@@ -1,7 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
+using Newtonsoft.Json.Linq;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine.Auth;
+using Pulsar4X.Engine.Factories;
 using Pulsar4X.Events;
+using Pulsar4X.Extensions;
 using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Engine
@@ -38,6 +43,211 @@ namespace Pulsar4X.Engine
          *
          *
          */
+
+        public static Entity LoadFromJson(Game game, string filePath)
+        {
+            string fileContents = File.ReadAllText(filePath);
+            var rootDirectory = (string?)Path.GetDirectoryName(filePath) ?? "Data/basemod/";
+            var rootJson = JObject.Parse(fileContents);
+
+            var name = rootJson["name"].ToString();
+            var faction = CreateFaction(game, name);
+            var factionInfoDB = faction.GetDataBlob<FactionInfoDB>();
+            var factionDataStore = factionInfoDB.Data;
+
+            var componentDesignsToLoad = (JArray?)rootJson["componentDesigns"];
+            foreach(var componentDesignToLoad in componentDesignsToLoad)
+            {
+                string path = componentDesignToLoad.ToString();
+                string fullPath = Path.Combine(rootDirectory, path);
+
+                if(Directory.Exists(fullPath))
+                {
+                    var files = Directory.GetFiles(fullPath, "*.json", SearchOption.AllDirectories);
+                    foreach(var file in files)
+                    {
+                        ComponentDesignFromJson.Create(faction, factionDataStore, file);
+                    }
+                }
+                else
+                {
+                    ComponentDesignFromJson.Create(faction, factionDataStore, fullPath);
+                }
+            }
+
+            var ordnanceDesignsToLoad = (JArray?)rootJson["ordnanceDesigns"];
+            foreach(var ordnanceDesignToLoad in ordnanceDesignsToLoad)
+            {
+                string path = ordnanceDesignToLoad.ToString();
+                string fullPath = Path.Combine(rootDirectory, path);
+
+                if(Directory.Exists(fullPath))
+                {
+                    var files = Directory.GetFiles(fullPath, "*.json", SearchOption.AllDirectories);
+                    foreach(var file in files)
+                    {
+                        OrdnanceDesignFromJson.Create(faction, file);
+                    }
+                }
+                else
+                {
+                    OrdnanceDesignFromJson.Create(faction, fullPath);
+                }
+            }
+
+            var shipDesignsToLoad = (JArray?)rootJson["shipDesigns"];
+            foreach(var shipDesignToLoad in shipDesignsToLoad)
+            {
+                string path = shipDesignToLoad.ToString();
+                string fullPath = Path.Combine(rootDirectory, path);
+
+                if(Directory.Exists(fullPath))
+                {
+                    var files = Directory.GetFiles(fullPath, "*.json", SearchOption.AllDirectories);
+                    foreach(var file in files)
+                    {
+                        ShipDesignFromJson.Create(faction, factionDataStore, file);
+                    }
+                }
+                else
+                {
+                    ShipDesignFromJson.Create(faction, factionDataStore, fullPath);
+                }
+            }
+
+            var speciesToLoad = (JArray?)rootJson["species"];
+            foreach(var toLoad in speciesToLoad)
+            {
+                string path = toLoad.ToString();
+                string fullPath = Path.Combine(rootDirectory, path);
+
+                if(Directory.Exists(fullPath))
+                {
+                    var files = Directory.GetFiles(fullPath, "*.json", SearchOption.AllDirectories);
+                    foreach(var file in files)
+                    {
+                        SpeciesFactory.CreateFromJson(faction, game.GlobalManager, file);
+                    }
+                }
+                else
+                {
+                    SpeciesFactory.CreateFromJson(faction, game.GlobalManager, fullPath);
+                }
+            }
+
+            var coloniesToLoad = (JArray?)rootJson["colonies"];
+            if(coloniesToLoad != null)
+            {
+                foreach(var colonyToLoad in coloniesToLoad)
+                {
+                    var systemId = colonyToLoad["systemId"].ToString();
+
+                    var system = game.Systems.Find(s => s.Guid.Equals(systemId));
+                    if(system == null) throw new NullReferenceException("invalid systemId in json");
+                    var location = NameLookup.GetFirstEntityWithName(system, colonyToLoad["location"].ToString());
+
+                    // Mark the colony location as geo surveyed
+                    if(location.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB))
+                    {
+                        geoSurveyableDB.GeoSurveyStatus[faction.Id] = 0;
+                    }
+
+                    var speciesName = colonyToLoad["species"]["name"].ToString();
+                    var species = faction.GetDataBlob<FactionInfoDB>().Species.Find(s => s.GetOwnersName().Equals(speciesName));
+                    if(species == null) throw new NullReferenceException("invalid species name in json");
+                    var population = (long?)colonyToLoad["species"]["population"] ?? 0;
+
+                    var colony = ColonyFactory.CreateColony(faction, species, location, population);
+
+                    var installationsToAdd = (JArray?)colonyToLoad["installations"];
+                    if(installationsToAdd != null)
+                    {
+                        foreach(var install in installationsToAdd)
+                        {
+                            var installId = install["id"].ToString();
+                            var amount = (int?)install["amount"] ?? 1;
+
+                            colony.AddComponent(
+                                factionInfoDB.InternalComponentDesigns[installId],
+                                amount
+                            );
+                        }
+                    }
+
+                    LoadCargo(colony, factionDataStore, (JArray?)colonyToLoad["cargo"]);
+
+                    //TODO: optionally set this from json
+                    Scientist scientistEntity = CommanderFactory.CreateScientist(faction, colony);
+                    colony.GetDataBlob<TeamsHousedDB>().AddTeam(scientistEntity);
+
+                    ReCalcProcessor.ReCalcAbilities(colony);
+                }
+            }
+
+            var fleetsToLoad = (JArray?)rootJson["fleets"];
+            if(fleetsToLoad != null)
+            {
+                foreach(var fleetToLoad in fleetsToLoad)
+                {
+                    var fleetName = (string?)fleetToLoad["name"] ?? NameFactory.GetFleetName(game);
+                    var systemId = fleetToLoad["location"]["systemId"].ToString();
+                    var system = game.Systems.Find(s => s.Guid.Equals(systemId));
+                    if(system == null) throw new NullReferenceException("invalid systemId in json");
+                    var location = NameLookup.GetFirstEntityWithName(system, fleetToLoad["location"]["body"].ToString());
+
+                    var fleet = FleetFactory.Create(system, faction.Id, fleetName);
+                    var fleetDB = fleet.GetDataBlob<FleetDB>();
+                    fleetDB.SetParent(faction);
+
+                    var shipsInFleet = (JArray?)fleetToLoad["ships"];
+                    if(shipsInFleet != null)
+                    {
+                        foreach(var shipToLoad in shipsInFleet)
+                        {
+                            var designId = shipToLoad["designId"].ToString();
+                            var shipName = (string?)shipToLoad["name"] ?? NameFactory.GetShipName(game);
+                            var ship = ShipFactory.CreateShip(factionInfoDB.ShipDesigns[designId], faction, location, shipName);
+                            fleetDB.AddChild(ship);
+
+                            var commanderDB = CommanderFactory.CreateShipCaptain(game);
+                            commanderDB.CommissionedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365.25 * 10);
+                            commanderDB.RankedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365);
+                            var commander = CommanderFactory.Create(system, faction.Id, commanderDB);
+                            ship.GetDataBlob<ShipInfoDB>().CommanderID = commander.Id;
+
+                            if(fleetDB.FlagShipID < 0)
+                                fleetDB.FlagShipID = ship.Id;
+
+                            LoadCargo(ship, factionDataStore, (JArray?)shipToLoad["cargo"]);
+                        }
+                    }
+                }
+            }
+
+            return faction;
+        }
+
+        private static void LoadCargo(Entity target, FactionDataStore factionDataStore, JArray? cargoArray)
+        {
+            if(cargoArray == null) return;
+
+            foreach(var toAdd in cargoArray)
+            {
+                var cargoId = toAdd["id"].ToString();
+                var amount = (int?)toAdd["amount"] ?? 1;
+                var type = (string?)toAdd["type"] ?? "byMass";
+
+                switch(type)
+                {
+                    case "byCount":
+                        CargoTransferProcessor.AddCargoItems(target, factionDataStore.CargoGoods[cargoId], amount);
+                        break;
+                    default:
+                        CargoTransferProcessor.AddRemoveCargoMass(target, factionDataStore.CargoGoods[cargoId], amount);
+                        break;
+                }
+            }
+        }
 
 
         public static Entity CreateFaction(Game game, string factionName)

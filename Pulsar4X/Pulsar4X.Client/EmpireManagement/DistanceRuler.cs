@@ -27,7 +27,7 @@ namespace Pulsar4X.SDL2UI
             //_flags = ImGuiWindowFlags.NoCollapse;
         }
 
-        
+
 
         internal static DistanceRuler GetInstance() {
 
@@ -40,7 +40,7 @@ namespace Pulsar4X.SDL2UI
             {
                 thisItem = (DistanceRuler)_uiState.LoadedWindows[typeof(DistanceRuler)];
             }
-             
+
 
             return thisItem;
 
@@ -71,7 +71,7 @@ namespace Pulsar4X.SDL2UI
                     }
                 }
             }
-           
+
         }
         internal override void Display()
         {
@@ -136,11 +136,6 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnSystemTickChange(DateTime newDate)
         {
-        }
-
-        public override void OnSelectedSystemChange(StarSystem newStarSys)
-        {
-            throw new NotImplementedException();
         }
     }
 }

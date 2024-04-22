@@ -18,6 +18,8 @@ namespace Pulsar4X.SDL2UI
         {
             MoveTo,
             GeoSurvey,
+            JPSurvey,
+            Jump,
         }
 
         private IssueOrderType selectedIssueOrderType = IssueOrderType.MoveTo;
@@ -188,10 +190,11 @@ namespace Pulsar4X.SDL2UI
                             ImGui.NextColumn();
                             if (selectedFleetFlagship != null && selectedFleetSystem != null && selectedFleetFlagship.TryGetDatablob<PositionDB>(out var positionDB))
                             {
-                                if (ImGui.SmallButton(selectedFleetSystem.GetName(factionID)))
+                                StarSystem? starSystem = (StarSystem?)positionDB.OwningEntity?.Manager;
+                                if (ImGui.SmallButton(starSystem?.NameDB.OwnersName ?? "Unknown"))
                                 {
-                                    if(selectedFleetSystem.Manager != null)
-                                        _uiState.EntityClicked(selectedFleetSystem.Id, selectedFleetSystem.Manager.ManagerGuid, MouseButtons.Primary);
+                                    if(starSystem != null)
+                                        _uiState.SetActiveSystem(starSystem.ManagerGuid);
                                 }
                                 ImGui.NextColumn();
                                 ImGui.Separator();
@@ -281,47 +284,19 @@ namespace Pulsar4X.SDL2UI
                         {
                             selectedIssueOrderType = IssueOrderType.GeoSurvey;
                         }
-
-                        ImGui.EndChild();
-                    }
-                    ImGui.SameLine();
-                    if(ImGui.BeginChild("IssueOrders", secondChildSize, true))
-                    {
-                        var bodies = _uiState.SelectedSystem.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_uiState.Faction.Id);
-                        switch(selectedIssueOrderType)
+                        if(SelectedFleet.HasJPSurveyAbililty() && ImGui.Selectable("Jump Point Survey ...", selectedIssueOrderType == IssueOrderType.JPSurvey))
                         {
-                            case IssueOrderType.MoveTo:
-                                foreach(var body in bodies)
-                                {
-                                    var name = body.GetName(_uiState.Faction.Id);
-                                    if(ImGui.Button(name + "###movement-button-" + name))
-                                    {
-                                        var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
-                                        _uiState.Game.OrderHandler.HandleOrder(order);
-                                    }
-                                }
-                                break;
-                            case IssueOrderType.GeoSurvey:
-                                foreach(var body in bodies)
-                                {
-                                    if(!body.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB)) continue;
-                                    if(geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id)) continue;
-
-                                    var name = body.GetName(_uiState.Faction.Id);
-                                    if(ImGui.Button(name + "###geosurvey-button-" + name))
-                                    {
-                                        var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
-                                        _uiState.Game.OrderHandler.HandleOrder(order);
-
-                                        var order2 = GeoSurveyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
-                                        _uiState.Game.OrderHandler.HandleOrder(order2);
-                                    }
-                                }
-                                break;
+                            selectedIssueOrderType = IssueOrderType.JPSurvey;
+                        }
+                        if(ImGui.Selectable("Jump...", selectedIssueOrderType == IssueOrderType.Jump))
+                        {
+                            selectedIssueOrderType = IssueOrderType.Jump;
                         }
 
                         ImGui.EndChild();
                     }
+                    ImGui.SameLine();
+                    IssueOrdersDisplay(secondChildSize);
                     ImGui.EndTabItem();
                 }
 
@@ -536,6 +511,92 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        private void IssueOrdersDisplay(Vector2 size)
+        {
+            if(ImGui.BeginChild("IssueOrders", size, true))
+            {
+                if(SelectedFleet == null || SelectedFleet.Manager == null)
+                {
+                    ImGui.EndChild();
+                    return;
+                }
+
+                var bodies = SelectedFleet.Manager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_uiState.Faction.Id);
+                switch(selectedIssueOrderType)
+                {
+                    case IssueOrderType.MoveTo:
+                        foreach(var body in bodies)
+                        {
+                            var name = body.GetName(_uiState.Faction.Id);
+                            if(ImGui.Button(name + "###movement-button-" + name))
+                            {
+                                var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
+                                _uiState.Game.OrderHandler.HandleOrder(order);
+                            }
+                        }
+                        break;
+                    case IssueOrderType.GeoSurvey:
+                        foreach(var body in bodies)
+                        {
+                            if(!body.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB)) continue;
+                            if(geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id)) continue;
+
+                            var name = body.GetName(_uiState.Faction.Id);
+                            if(ImGui.Button(name + "###geosurvey-button-" + name))
+                            {
+                                var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
+                                _uiState.Game.OrderHandler.HandleOrder(order);
+
+                                var order2 = GeoSurveyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
+                                _uiState.Game.OrderHandler.HandleOrder(order2);
+                            }
+                        }
+                        break;
+                    case IssueOrderType.JPSurvey:
+                        var jumpPointDBs = SelectedFleet.Manager.GetAllDataBlobsOfType<JPSurveyableDB>();
+                        foreach(var jpSurveyableDB in jumpPointDBs)
+                        {
+                            if(jpSurveyableDB.IsSurveyComplete(_uiState.Faction.Id)) continue;
+
+                            var name = jpSurveyableDB.OwningEntity?.GetName(_uiState.Faction.Id);
+                            if(ImGui.Button(name + "###jpsurvey-button-" + name))
+                            {
+                                if(jpSurveyableDB.OwningEntity != null)
+                                {
+                                    var order = MoveFleetTowardsTargetOrder.CreateCommand(SelectedFleet, jpSurveyableDB.OwningEntity);
+                                    _uiState.Game.OrderHandler.HandleOrder(order);
+
+                                    var order2 = JPSurveyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, jpSurveyableDB.OwningEntity);
+                                    _uiState.Game.OrderHandler.HandleOrder(order2);
+                                }
+                            }
+                        }
+                        break;
+                    case IssueOrderType.Jump:
+                        var jumpGates = SelectedFleet.Manager.GetAllDataBlobsOfType<JumpPointDB>();
+                        foreach(var jumpGateDB in jumpGates)
+                        {
+                            if(!jumpGateDB.IsDiscovered.Contains(_uiState.Faction.Id)) continue;
+
+                            var name = jumpGateDB.OwningEntity?.GetName(_uiState.Faction.Id);
+                            if(ImGui.Button(name + "###jump-gate-button-" + name))
+                            {
+                                if(jumpGateDB.OwningEntity != null)
+                                {
+                                    var order = MoveFleetTowardsTargetOrder.CreateCommand(SelectedFleet, jumpGateDB.OwningEntity);
+                                    _uiState.Game.OrderHandler.HandleOrder(order);
+
+                                    JumpOrder.CreateAndExecute(_uiState.Game, _uiState.Faction, SelectedFleet, jumpGateDB);
+                                }
+                            }
+                        }
+                        break;
+                }
+
+                ImGui.EndChild();
+            }
+        }
+
         private void DisplayShips()
         {
             if(SelectedFleet == null) return;
@@ -578,7 +639,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndChild();
             }
 
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 23f);
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY());
             ImGui.SetCursorPosX(xPosition);
             if(ImGui.Button("Select All/None", new Vector2(Styles.LeftColumnWidthLg, 0f)))
             {

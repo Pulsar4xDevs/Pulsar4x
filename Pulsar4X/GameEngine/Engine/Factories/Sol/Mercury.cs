@@ -41,7 +41,7 @@ namespace Pulsar4X.Engine.Sol
             };
 
             Entity planet = Entity.Create();
-            sol.AddEntity(planet, new List<BaseDataBlob> { planetNameDB, sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetOrbitDB, geoSurveyable });
+            sol.AddEntity(planet, new List<BaseDataBlob> { planetNameDB, sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetOrbitDB, geoSurveyable, new ColonizeableDB() });
             SensorTools.PlanetEmmisionSig(sensorProfile, planetBodyDB, planetMVDB);
             return planet;
         }

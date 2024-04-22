@@ -1,0 +1,22 @@
+{
+  "name": "Ceres",
+  "colonizeable": true,
+  "info": {
+    "type": "dwarf-planet",
+    "albedo": 0.09,
+    "axialTilt": 4,
+    "mass": 9.3835E20,
+    "radius": 469.73
+  },
+  "orbit": {
+    "semiMajorAxis": 414E6,
+    "eccentricity": 0.0785,
+    "eclipticInclination": 10.6,
+    "LoAN": 80.3,
+    "AoP": 73.6,
+    "meanAnomaly": 291.4
+  },
+  "geoSurvey": {
+    "pointsRequired": 750
+  }
+}

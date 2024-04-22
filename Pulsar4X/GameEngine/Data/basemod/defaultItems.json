@@ -72,12 +72,12 @@
         "mercassium",
         "vendarite",
         "gallicite",
-        "missle-payload",
-        "missle-srb",
-        "missle-electronics-suite",
+        "missile-payload",
+        "missile-srb",
+        "missile-electronics-suite",
         "ordnance-cargo-hold",
-        "laser-gun",
-        "missle-launcher"
+        "laser-weapon",
+        "missile-launcher"
       ]
     }
   }

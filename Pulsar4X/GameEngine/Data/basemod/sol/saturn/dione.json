@@ -1,0 +1,22 @@
+{
+  "name": "Dione",
+  "parent": "Saturn",
+  "colonizeable": true,
+  "info": {
+    "type": "moon",
+    "albedo": 0.5,
+    "mass": 1.095452E21,
+    "radius": 561.4
+  },
+  "orbit": {
+    "semiMajorAxis": 377396,
+    "eccentricity": 0.0022,
+    "eclipticInclination": 0.019,
+    "LoAN": 0,
+    "AoP": 0,
+    "meanAnomaly": 0
+  },
+  "geoSurvey": {
+    "pointsRequired": 500
+  }
+}

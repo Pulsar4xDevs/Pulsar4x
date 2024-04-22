@@ -1,0 +1,34 @@
+{
+  "name": "Callisto",
+  "parent": "Jupiter",
+  "colonizeable": true,
+  "info": {
+    "type": "moon",
+    "albedo": 0.22,
+    "mass": 1.075938E23,
+    "radius": 2410.3
+  },
+  "orbit": {
+    "semiMajorAxis": 1882700,
+    "eccentricity": 0.0074,
+    "eclipticInclination": 2.017,
+    "LoAN": 0,
+    "AoP": 0,
+    "meanAnomaly": 0
+  },
+  "atmosphere": {
+    "pressure": 7.4E-12,
+    "hydrosphere": false,
+    "hyrdoExtent": 0,
+    "greenhouseFactor": 0,
+    "greenhousePressure": 0,
+    "surfaceTemperature": -139.15,
+    "gases": [
+      { "symbol": "CO2", "percent": 0.1 },
+      { "symbol": "O2", "percent": 0.05 }
+    ]
+  },
+  "geoSurvey": {
+    "pointsRequired": 500
+  }
+}

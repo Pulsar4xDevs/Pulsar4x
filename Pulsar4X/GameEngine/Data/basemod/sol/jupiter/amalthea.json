@@ -1,0 +1,22 @@
+{
+  "name": "Amalthea",
+  "parent": "Jupiter",
+  "colonizeable": true,
+  "info": {
+    "type": "moon",
+    "albedo": 0.09,
+    "mass": 2.08E18,
+    "radius": 83.5
+  },
+  "orbit": {
+    "semiMajorAxis": 181365.84,
+    "eccentricity": 0.00319,
+    "eclipticInclination": 0,
+    "LoAN": 0,
+    "AoP": 0,
+    "meanAnomaly": 0
+  },
+  "geoSurvey": {
+    "pointsRequired": 500
+  }
+}

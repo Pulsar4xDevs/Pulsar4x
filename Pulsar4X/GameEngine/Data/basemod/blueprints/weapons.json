@@ -2,10 +2,10 @@
   {
     "Type": "ComponentTemplate",
     "Payload": {
-      "UniqueID": "laser-gun",
-      "Name": "LaserGun",
+      "UniqueID": "laser-weapon",
+      "Name": "EMaser Weapon",
       "Formulas": {
-        "Description": "Laser Gun",
+        "Description": "ElectroMagnetic Amplifed by Stimulated Emission of Radiation Weapon",
         "Mass": "Ability('Power Input') / 1000 + Ability('Chamber Volume') + Ability('Radiator Volume')",
         "Volume": "Ability('Power Input') / 1000 + Ability('Chamber Volume')",
         "HTK": "[Mass]",
@@ -31,16 +31,6 @@
           "MinFormula": "1000",
           "StepFormula": "10",
           "AttributeFormula": "5000"
-        },
-        {
-          "Name": "Damage",
-          "Units": "J",
-          "DescriptionFormula": "'(Legacy) Energy output of laser pulse'",
-          "GuiHint": "GuiSelectionMaxMin",
-          "MaxFormula": "100",
-          "MinFormula": "1",
-          "StepFormula": "1",
-          "AttributeFormula": "10"
         },
         {
           "Name": "ReloadRate",
@@ -104,13 +94,13 @@
         },
         {
           "Name": "Target Wavelength",
-          "Units": "y",
+          "Units": "nm",
           "DescriptionFormula": "'What the wavelength of the output energy weapon is '",
           "GuiHint": "GuiSelectionMaxMin",
-          "MaxFormula": "1000",
-          "MinFormula": "100",
+          "MaxFormula": "10000",
+          "MinFormula": "1",
           "StepFormula": "1",
-          "AttributeFormula": "500"
+          "AttributeFormula": "10000"
         },
 
         {
@@ -127,7 +117,7 @@
           "Name": "Emissitivity",
           "Units": "%",
           "DescriptionFormula": "'How emissive radiators are (tech)'",
-          "GuiHint": "GuiSelectionMaxMin",
+          "GuiHint": "GuiTextDisplay",
           "MaxFormula": "1",
           "MinFormula": "0",
           "StepFormula": "0.1",
@@ -215,16 +205,17 @@
           "AttributeFormula": " Ability('Operating Temprature') * Ability('Operating Temprature') * Ability('Focal Length') * 0.000000001 * Ability('Target Wavelength') * ( 1 / Ability('Lens Diameter') ) "
         },
         {
-          "Name": "genericWpndbargs",
+          "Name": "genericWpnAtbArgs",
           "DescriptionFormula": "'int magSize, int reloadPerSec, int amountPerShot, int minShotsPerfire",
           "GuiHint": "None",
           "AttributeFormula": "AtbConstrArgs(Ability('Charge Period') * Ability('Power Input'), Ability('Power Input'), Ability('Pulse Energy'), 1)",
           "AttributeType": "Pulsar4X.Atb.GenericWeaponAtb"
         },
         {
-          "Name": "dbargs",
+          "Name": "genericBeamWpnAtbArgs",
+          "DescriptionFormula": "'int range, double wavelength, int wattage",
           "GuiHint": "None",
-          "AttributeFormula": "AtbConstrArgs(Ability('Range'), Ability('Damage'), Ability('ReloadRate'))",
+          "AttributeFormula": "AtbConstrArgs(Ability('Range'), Ability('Target Wavelength'), Ability('Pulse Energy'))",
           "AttributeType": "Pulsar4X.Datablobs.GenericBeamWeaponAtbDB"
         }
       ]
@@ -233,7 +224,7 @@
   {
     "Type": "ComponentTemplate",
     "Payload": {
-      "UniqueID": "missle-launcher",
+      "UniqueID": "missile-launcher",
       "Name": "Missile Launcher",
       "Formulas": {
         "Description": "A tube that houses missiles and launches them",

@@ -1,0 +1,12 @@
+{
+  "id": "default-design-missile-sensors",
+  "name": "Passive Yellow 1MP",
+  "templateId": "missile-electronics-suite",
+  "attributes": [
+    { "key": "Guidance Type", "value": 2 },
+    { "key": "Antenna Size", "value": 10 },
+    { "key": "Ideal Detection Wavelength", "value": 470 },
+    { "key": "Detection Bandwidth", "value": 2 },
+    { "key": "Resolution", "value": 1 }
+  ]
+}

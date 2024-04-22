@@ -1,0 +1,42 @@
+{
+  "name": "Venus",
+  "colonizeable": true,
+  "info": {
+    "gravity": 8.87,
+    "type": "terrestrial",
+    "albedo": 0.76,
+    "axialTilt": 177.36,
+    "mass": 4.8675E24,
+    "radius": 6051.8,
+    "tectonics": "earth-like"
+  },
+  "orbit": {
+    "semiMajorAxis_km": 108.21E6,
+    "eccentricity": 0.006772,
+    "eclipticInclination_d": 3.39458,
+    "LoAN_d": 76.680,
+    "AoP_d": 54.884,
+    "meanAnomaly_d": 50.115
+  },
+  "atmosphere": {
+    "pressure": 92,
+    "hydrosphere": false,
+    "hydroExtent": 0,
+    "greenhouseFactor": 0,
+    "greenhousePressure": 0,
+    "surfaceTemperature": 464,
+    "gases": [
+      { "symbol": "CO2", "percent": 0.965 },
+      { "symbol": "N2", "percent": 0.035 },
+      { "symbol": "SO2", "percent": 0.00015 },
+      { "symbol": "Ar", "percent": 0.00007 },
+      { "symbol": "H2O", "percent": 0.00002 },
+      { "symbol": "CO", "percent": 0.000017 },
+      { "symbol": "He", "percent": 0.000012 },
+      { "symbol": "Ne", "percent": 0.000007 }
+    ]
+  },
+  "geoSurvey": {
+    "pointsRequired": 1500
+  }
+}

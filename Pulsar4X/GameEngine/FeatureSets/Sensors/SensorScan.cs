@@ -30,7 +30,7 @@ namespace Pulsar4X.Engine
                 {
                     var sensorAbl = receiver.GetAbilityState<SensorReceiverAbility>();
                     var sensorAtb = receiver.Design.GetAttribute<SensorReceiverAtbDB>();
-                    var sensorMgr = manager.GetFactionSensorContacts(entity.FactionOwnerID);
+                    var sensorMgr = manager.GetSensorContacts(entity.FactionOwnerID);
                     var detections = SensorTools.GetDetectedEntites(sensorAtb, position.AbsolutePosition, detectableEntitys, atDateTime, faction.Id, true);
 
                     SensorInfoDB sensorInfo;

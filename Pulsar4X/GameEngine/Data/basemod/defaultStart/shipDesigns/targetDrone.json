@@ -1,0 +1,16 @@
+{
+  "id": "default-ship-design-target-drone",
+  "name": "Target Drone",
+  "armor": {
+    "id": "plastic-armor",
+    "thickness": 3
+  },
+  "components": [
+    { "id": "default-design-passive-sensor-s50", "amount": 1 },
+    { "id": "default-design-fuel-tank-1000", "amount": 2 },
+    { "id": "default-design-alcubierre-500", "amount": 4 },
+    { "id": "default-design-battery-2t", "amount": 3 },
+    { "id": "default-design-reactor-15k", "amount": 1 },
+    { "id": "default-design-merlin", "amount": 4 }
+  ]
+}

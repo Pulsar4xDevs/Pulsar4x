@@ -2,7 +2,7 @@
   {
     "Type": "ComponentTemplate",
     "Payload": {
-      "UniqueID": "missle-payload",
+      "UniqueID": "missile-payload",
       "Name": "Missile Payload",
       "Formulas": {
         "Description": "Payload of a missile",
@@ -221,7 +221,7 @@
   {
     "Type": "ComponentTemplate",
     "Payload": {
-      "UniqueID": "missle-srb",
+      "UniqueID": "missile-srb",
       "Name": "Missile SRB",
       "Formulas": {
         "Description": "A Newtonian Thruster",
@@ -292,7 +292,7 @@
   {
     "Type": "ComponentTemplate",
     "Payload": {
-      "UniqueID": "missle-electronics-suite",
+      "UniqueID": "missile-electronics-suite",
       "Name": "Missile Electronics Suite",
       "Formulas": {
         "Description": "Sensor components for missiles",

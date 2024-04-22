@@ -8,6 +8,9 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Extensions;
 using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Engine.Sol;
+using Pulsar4X.Engine.Factories;
+using System.IO;
+using Newtonsoft.Json.Linq;
 
 namespace Pulsar4X.Engine
 {
@@ -47,7 +50,7 @@ namespace Pulsar4X.Engine
 
             // Generate Jump Points
             JPSurveyFactory.GenerateJPSurveyPoints(newSystem);
-            JPFactory.GenerateJumpPoints(this, newSystem);
+            JPFactory.GenerateJumpPoints(this, newSystem, stars[0].GetDataBlob<PositionDB>().Root);
 
             //add this system to the GameMaster's Known Systems list.
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(newSystem.Guid);
@@ -183,10 +186,6 @@ namespace Pulsar4X.Engine
             return sol;
         }
 
-
-
-        #region Create Sol
-
         /// <summary>
         /// Creates our own solar system.
         /// This probibly needs to be Json! (since we're getting atmo stuff)
@@ -197,104 +196,101 @@ namespace Pulsar4X.Engine
             // WIP Function...
             StarSystem sol = new StarSystem();
             sol.Initialize(game, "Sol", -1);
-            Entity sun = _starFactory.CreateStar(sol, UniversalConstants.Units.SolarMassInKG, UniversalConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "Sol");
+            var sun = StarFromJsonFactory.Create(sol, GalaxyGen.Settings, "Data/basemod/bodies/sol.json");
 
             // Planets and their moons
-            Entity mercury = SolEntities.Mercury(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var mercury = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/mercury.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, mercury);
 
-            Entity venus = SolEntities.Venus(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var venus = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/venus.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, venus);
 
-            Entity earth = SolEntities.Earth(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var earth = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/earth.json");
             _systemBodyFactory.HomeworldMineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, earth);
-            #region Earth Moon
-            Entity luna = SolEntities.Luna(game, sol, sun, earth, GalaxyGen.Settings.J2000, new SensorProfileDB());
-            _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, luna);
-            #endregion
 
-            Entity mars = SolEntities.Mars(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var luna = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/luna.json");
+            _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, luna);
+
+            var mars = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/mars.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, mars);
 
-            Entity jupiter = SolEntities.Jupiter(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var jupiter = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/jupiter/jupiter.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, jupiter);
-            #region Jupiter Moons
-            Entity io = SolEntities.Io(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+
+            var io = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/jupiter/01-io.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, io);
 
-            Entity europa = SolEntities.Europa(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var europa = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/jupiter/02-europa.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, europa);
 
-            Entity ganymede = SolEntities.Ganymede(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var ganymede = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/jupiter/03-ganymede.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, ganymede);
 
-            Entity callisto = SolEntities.Callisto(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var callisto = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/jupiter/04-callisto.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, callisto);
 
-            Entity amalthea = SolEntities.Amalthea(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var amalthea = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/jupiter/amalthea.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, amalthea);
 
-            Entity himalia = SolEntities.Himalia(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var himalia = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/jupiter/himalia.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, himalia);
 
-            Entity elara = SolEntities.Elara(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var elara = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/jupiter/elara.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, elara);
 
-            Entity pasiphae = SolEntities.Pasiphae(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var pasiphae = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/jupiter/pasiphae.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, pasiphae);
 
-            Entity sinope = SolEntities.Sinope(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var sinope = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/jupiter/sinope.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, sinope);
 
-            Entity lysithea = SolEntities.Lysithea(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var lysithea = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/jupiter/lysithea.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, lysithea);
-            #endregion
 
-            Entity saturn = SolEntities.Saturn(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var saturn = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/saturn/saturn.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, saturn);
-            #region Saturn Moons
-            Entity mimas = SolEntities.Mimas(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
+
+            var mimas = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/saturn/mimas.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, mimas);
 
-            Entity enceladus = SolEntities.Enceladus(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var enceladus = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/saturn/enceladus.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, enceladus);
 
-            Entity tethys = SolEntities.Tethys(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var tethys = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/saturn/tethys.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, tethys);
 
-            Entity dione = SolEntities.Dione(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var dione = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/saturn/dione.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, dione);
 
-            Entity rhea = SolEntities.Rhea(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var rhea = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/saturn/rhea.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, rhea);
 
-            Entity titan = SolEntities.Titan(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var titan = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/saturn/titan.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, titan);
-            #endregion
 
-            Entity uranus = SolEntities.Uranus(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var uranus = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/uranus.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, uranus);
 
-            Entity neptune = SolEntities.Neptune(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var neptune = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/neptune.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, neptune);
 
-            Entity pluto = SolEntities.Pluto(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var pluto = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/pluto.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, pluto);
 
-            Entity haumea = SolEntities.Haumea(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var haumea = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/haumea.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, haumea);
 
-            Entity makemake = SolEntities.Makemake(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var makemake = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/makemake.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, makemake);
 
-            Entity eris = SolEntities.Eris(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var eris = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/eris.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, eris);
 
-            Entity ceres = SolEntities.Ceres(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var ceres = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/ceres.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, ceres);
 
             // Comets
-            Entity halleysComet = SolEntities.HalleysComet(game, sol, sun, new System.DateTime(1994, 2, 17), new SensorProfileDB());
+            var halleysComet = SystemBodyFromJsonFactory.Create(game, sol, sun, new System.DateTime(1994, 2, 17), new SensorProfileDB(), "Data/basemod/bodies/halleyscomet.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, halleysComet);
 
             // Clean up cached RNG:
@@ -310,7 +306,71 @@ namespace Pulsar4X.Engine
             return sol;
         }
 
-        #endregion
+        public StarSystem LoadSystemFromJson(Game game, string folder)
+        {
+            string fileContents = File.ReadAllText(Path.Combine(folder, "systemInfo.json"));
+            var rootJson = JObject.Parse(fileContents);
+            var id = rootJson["id"].ToString();
+            var systemName = rootJson["name"].ToString();
+            var rngSeed = (int?)rootJson["seed"] ?? -1;
+
+            StarSystem system = new StarSystem();
+            system.Initialize(game, systemName, rngSeed, id);
+
+            var stars = (JArray?)rootJson["stars"];
+            Entity? rootStar = null;
+            foreach(var starFileName in stars)
+            {
+                var star = StarFromJsonFactory.Create(system, GalaxyGen.Settings, Path.Combine(folder, starFileName.ToString()));
+                if(rootStar == null)
+                    rootStar = star;
+            }
+
+            if(rootStar != null)
+            {
+                var bodies = (JArray?)rootJson["bodies"];
+                foreach(var bodyFileName in bodies)
+                {
+                    var body = SystemBodyFromJsonFactory.Create(
+                        game,
+                        system,
+                        rootStar,
+                        GalaxyGen.Settings.J2000,
+                        new SensorProfileDB(),
+                        Path.Combine(folder, bodyFileName.ToString()));
+                }
+            }
+
+            var surveyRings = (JArray?)rootJson["surveyRings"];
+            if(surveyRings != null)
+            {
+                var ringSettings = new Dictionary<double, int>();
+
+                foreach(var ring in surveyRings)
+                {
+                    var radius = (double?)ring["ringRadiusInAU"] ?? 1;
+                    var count = (int?)ring["count"] ?? 1;
+
+                    ringSettings.Add(Distance.AuToMt(radius), count);
+                }
+                JPSurveyFactory.GenerateJPSurveyPoints(system, ringSettings);
+            }
+            else
+            {
+                JPSurveyFactory.GenerateJPSurveyPoints(system);
+            }
+
+            // Go through all the created entities and set them to be neutral
+            foreach(var entity in system.GetAllEntites())
+            {
+                entity.FactionOwnerID = Game.NeutralFactionId;
+            }
+
+            game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.Guid);
+
+            return system;
+        }
+
 
         #region TestSystems
 

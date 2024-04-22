@@ -1,0 +1,46 @@
+{
+  "name": "Opposition Forces",
+  "componentDesigns": [
+    "componentDesigns/"
+  ],
+  "ordnanceDesigns": [
+  ],
+  "shipDesigns": [
+    "shipDesigns/targetDrone.json"
+  ],
+  "species": [
+    "species-humans.json"
+  ],
+  "fleets": [
+    {
+      "name": "Target Drone Fleet",
+      "location": {
+        "systemId": "sol",
+        "body": "Luna"
+      },
+      "ships": [
+        {
+          "designId": "default-ship-design-target-drone",
+          "name": "Target Drone 0",
+          "cargo": [
+            { "id": "rp-1", "amount": 1000 }
+          ]
+        },
+        {
+          "designId": "default-ship-design-target-drone",
+          "name": "Target Drone 1",
+          "cargo": [
+            { "id": "rp-1", "amount": 1000 }
+          ]
+        },
+        {
+          "designId": "default-ship-design-target-drone",
+          "name": "Target Drone 2",
+          "cargo": [
+            { "id": "rp-1", "amount": 1000 }
+          ]
+        }
+      ]
+    }
+  ]
+}

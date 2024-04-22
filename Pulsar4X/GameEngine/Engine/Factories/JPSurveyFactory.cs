@@ -8,21 +8,23 @@ namespace Pulsar4X.Engine
 {
     internal static class JPSurveyFactory
     {
-        internal static void GenerateJPSurveyPoints(StarSystem system)
+        internal static void GenerateJPSurveyPoints(StarSystem system, Dictionary<double, int>? ringSettings = null)
         {
-            // TODO: Make these settings load from GalaxyGen settings.
-            var ringSettings = new Dictionary<double, int>
+            if(ringSettings == null)
             {
-                { Distance.AuToMt(2), 6 }
-            };
+                ringSettings = new Dictionary<double, int>
+                {
+                    { Distance.AuToMt(2), 6 },
+                    { Distance.AuToMt(10), 8 }
+                };
+            }
 
             var surveyPoints = new List<ProtoEntity>();
-            foreach (KeyValuePair<double, int> ringSetting in ringSettings)
+            int numGenerated = 0;
+            foreach (var (distance, numPoints) in ringSettings)
             {
-                double distance = ringSetting.Key;
-                int numPoints = ringSetting.Value;
-
-                surveyPoints.AddRange(GenerateSurveyRing(distance, numPoints));
+                surveyPoints.AddRange(GenerateSurveyRing(distance, numPoints, numGenerated));
+                numGenerated += numPoints;
             }
 
             foreach (ProtoEntity surveyPoint in surveyPoints)
@@ -62,9 +64,12 @@ namespace Pulsar4X.Engine
             var posDB = new PositionDB(x, y, 0, String.Empty);
             var nameDB = new NameDB($"Survey Point #{nameNumber}");
             //for testing purposes
-            var sensorProfileDB = new SensorProfileDB();
+            // var sensorProfileDB = new SensorProfileDB();
+            // sensorProfileDB.EmittedEMSpectra.Add(new Sensors.EMWaveForm(0, 500, 1000), 1E9);
+            // sensorProfileDB.Reflectivity = 0;
+            var visibleByDefaultDB = new VisibleByDefaultDB();
 
-            var protoEntity = new ProtoEntity(new List<BaseDataBlob>() { surveyDB, posDB, nameDB, sensorProfileDB });
+            var protoEntity = new ProtoEntity(new List<BaseDataBlob>() { surveyDB, posDB, nameDB, visibleByDefaultDB });
 
             return protoEntity;
         }

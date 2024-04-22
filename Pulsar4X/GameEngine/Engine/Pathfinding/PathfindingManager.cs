@@ -26,12 +26,12 @@ namespace Pulsar4X.Engine
             var pathfindingGraph = new Graph();
             foreach (StarSystem starSystem in _game.Systems)
             {
-                List<Entity> jumpPoints = starSystem.GetAllEntitiesWithDataBlob<TransitableDB>();
+                List<Entity> jumpPoints = starSystem.GetAllEntitiesWithDataBlob<JumpPointDB>();
 
                 foreach (Entity jumpPoint in jumpPoints)
                 {
-                    var thisTransitableDB = jumpPoint.GetDataBlob<TransitableDB>();
-                    Entity destinationJP = thisTransitableDB.Destination;
+                    var thisTransitableDB = jumpPoint.GetDataBlob<JumpPointDB>();
+                    Entity destinationJP = starSystem.GetGlobalEntityById(thisTransitableDB.DestinationId);
 
                     var node = new JPNode(jumpPoint, destinationJP, new List<EdgeToNeighbor>());
                     pathfindingGraph.AddNode(node);
@@ -55,8 +55,8 @@ namespace Pulsar4X.Engine
 
                 foreach (Entity jumpPoint in jumpPoints)
                 {
-                    var thisTransitableDB = jumpPoint.GetDataBlob<TransitableDB>();
-                    Entity destinationJP = thisTransitableDB.Destination;
+                    var thisTransitableDB = jumpPoint.GetDataBlob<JumpPointDB>();
+                    Entity destinationJP = faction.Manager.GetGlobalEntityById(thisTransitableDB.DestinationId);
 
                     var node = new JPNode(jumpPoint, destinationJP, new List<EdgeToNeighbor>());
                     pathfindingGraph.AddNode(node);

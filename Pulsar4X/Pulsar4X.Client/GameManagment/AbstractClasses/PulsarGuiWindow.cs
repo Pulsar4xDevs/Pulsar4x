@@ -20,7 +20,7 @@ namespace Pulsar4X.SDL2UI
                 IsActive = ActiveVal;
             else
                 IsActive = false;
-            
+
         }
 
         public void ToggleActive()
@@ -42,8 +42,8 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-        /*An example of how the constructor should be for a derived class. 
-         * 
+        /*An example of how the constructor should be for a derived class.
+         *
         private  DerivedClass (GlobalUIState state):base(state)
         {
             any other DerivedClass specific constrctor stuff here.
@@ -71,10 +71,6 @@ namespace Pulsar4X.SDL2UI
         }
 
         public override void OnSystemTickChange(DateTime newDate)
-        {
-        }
-
-        public override void OnSelectedSystemChange(StarSystem newStarSys)
         {
         }
     }

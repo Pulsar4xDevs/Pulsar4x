@@ -283,9 +283,10 @@ namespace Pulsar4X.Engine
             Performance.BeginInterval();
             IsProcessing = true;
 
-            if (!SpinWait.SpinUntil(_entityManager.HaveAllListnersProcessed, TimeSpan.FromMilliseconds(500)))
-                throw new Exception("timeout on listnerProcessing.");
-            
+            // TODO: fix this. it doesn't let time progress in SM mode
+            // if (!SpinWait.SpinUntil(_entityManager.HaveAllListnersProcessed, TimeSpan.FromMilliseconds(500)))
+            //     throw new Exception("timeout on listnerProcessing.");
+
             _entityManager.RemoveTaggedEntitys();
             while (StarSysDateTime < targetDateTime)
             {
@@ -381,7 +382,7 @@ namespace Pulsar4X.Engine
                 }
                 StarSysDateTime = _subStepDateTime; //update the localDateTime and invoke the SystemDateChangedEvent
                 _subStepDateTime = GetNextInterupt(_processToDateTime - _subStepDateTime);
-                //this lets us run through at least once. 
+                //this lets us run through at least once.
                 if(StarSysDateTime == _processToDateTime)
                     break;
             }

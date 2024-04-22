@@ -95,7 +95,7 @@ namespace Pulsar4X.Datablobs
         NameDB(NameDB db, SensorInfoDB sensorInfo)
         {
             _names.Add(-1, db.DefaultName);
-            _names[sensorInfo.Faction.Id] = db.GetName(sensorInfo.Faction.Id);
+            _names[sensorInfo.FactionId] = db.GetName(sensorInfo.FactionId);
         }
     }
 }

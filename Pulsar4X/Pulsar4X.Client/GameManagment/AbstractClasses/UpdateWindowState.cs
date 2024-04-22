@@ -1,7 +1,4 @@
-﻿using Pulsar4X.Engine;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -13,8 +10,6 @@ namespace Pulsar4X.SDL2UI
 
         public abstract void OnGameTickChange(DateTime newDate);
         public abstract void OnSystemTickChange(DateTime newDate);
-
-        public abstract void OnSelectedSystemChange(StarSystem newStarSys);
 
         protected UpdateWindowState()
         {

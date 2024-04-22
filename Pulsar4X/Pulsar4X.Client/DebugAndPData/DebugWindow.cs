@@ -1283,7 +1283,7 @@ namespace Pulsar4X.SDL2UI
 
             if(SystemState == null) return;
 
-            if (SystemState.EntitiesAdded.Count > 0 || SystemState.EntitysToBin.Count > 0)
+            if (SystemState.EntitiesToBin.Count > 0)
             {
                 RefreshFactionEntites();
             }
@@ -1292,11 +1292,6 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnGameTickChange(DateTime newDate)
         {
-        }
-
-        public override void OnSelectedSystemChange(StarSystem newStarSys)
-        {
-            throw new NotImplementedException();
         }
     }
 }

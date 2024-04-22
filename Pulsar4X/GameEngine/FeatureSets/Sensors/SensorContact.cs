@@ -1,7 +1,8 @@
 using System;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using Pulsar4X.Datablobs;
-using Pulsar4X.Engine;
+using Pulsar4X.Messaging;
 
 namespace Pulsar4X.Engine.Sensors
 {
@@ -35,16 +36,14 @@ namespace Pulsar4X.Engine.Sensors
             var factionInfoDB = factionEntity.GetDataBlob<FactionInfoDB>();
             if (!factionInfoDB.SensorContacts.ContainsKey(actualEntity.Id))
                 factionInfoDB.SensorContacts.Add(actualEntity.Id, this);
-            actualEntity.ChangeEvent += ActualEntity_ChangeEvent;
             Name = actualEntity.GetDataBlob<NameDB>().GetName(factionEntity);
+
+            MessagePublisher.Instance.Subscribe(MessageTypes.EntityRemoved, EntityRemoved, msg => msg.EntityId != null && msg.EntityId.Value == actualEntity.Id);
         }
 
-        void ActualEntity_ChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob? db)
+        async Task EntityRemoved(Message message)
         {
-            if (changeType == EntityChangeData.EntityChangeType.EntityRemoved)
-            {
-                Position.GetDataFrom = DataFrom.Memory;
-            }
+            await Task.Run(() => Position.GetDataFrom = DataFrom.Memory);
         }
 
     }

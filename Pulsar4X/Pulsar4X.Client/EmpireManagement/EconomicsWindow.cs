@@ -20,8 +20,7 @@ namespace Pulsar4X.SDL2UI
             {
                 thisitem = new EconomicsWindow()
                 {
-                    // FIXME: this will crash if there are no colonies
-                    SelectedEntity = _uiState.StarSystemStates.First().Value.EntityStatesColonies.First().Value
+                    SelectedEntity = null
                 };
             }
             thisitem = (EconomicsWindow)_uiState.LoadedWindows[typeof(EconomicsWindow)];

@@ -1,0 +1,25 @@
+{
+  "name": "Luna",
+  "parent": "Earth",
+  "colonizeable": true,
+  "info": {
+    "gravity": 1.625,
+    "type": "moon",
+    "mass": 7.34767309E22,
+    "radius": 6378.1
+  },
+  "orbit": {
+    "semiMajorAxis_km": 384399,
+    "eccentricity": 0.0549,
+    "eclipticInclination_d": 5.145,
+    "LoAN_d": 125.08,
+    "AoP_d": 318.0634,
+    "meanAnomaly_d": 115.3654
+  },
+  "minerals": [
+    { "id": "iron", "abundance": 0.5, "accessibility": 1 }
+  ],
+  "geoSurvey": {
+    "pointsRequired": 250
+  }
+}

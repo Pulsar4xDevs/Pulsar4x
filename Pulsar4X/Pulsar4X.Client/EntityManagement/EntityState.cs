@@ -5,6 +5,8 @@ using Pulsar4X.Interfaces;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Engine.Sensors;
+using Pulsar4X.Messaging;
+using System.Threading.Tasks;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -19,8 +21,8 @@ namespace Pulsar4X.SDL2UI
         public OrbitOrderWidget? DebugOrbitOrder;
         public bool IsDestroyed = false; //currently IsDestroyed = true if moved from one system to another, may need to revisit this. 
         public Dictionary<Type, BaseDataBlob> DataBlobs = new Dictionary<Type, BaseDataBlob>();
-        public List<EntityChangeData> Changes = new List<EntityChangeData>();
-        public List<EntityChangeData> _changesNextFrame = new List<EntityChangeData>();
+        public List<Message> Changes = new List<Message>();
+        public List<Message> _changesNextFrame = new List<Message>();
         public CommandReferences? CmdRef;
         internal string? StarSysGuid;
         internal UserOrbitSettings.OrbitBodyType BodyType = UserOrbitSettings.OrbitBodyType.Unknown;
@@ -38,8 +40,7 @@ namespace Pulsar4X.SDL2UI
                 StarSysGuid = starSys.Guid;
             }
 
-            entity.ChangeEvent += On_entityChangeEvent;
-
+            SetupEventListeners();
             SetBodyType();
         }
 
@@ -92,7 +93,7 @@ namespace Pulsar4X.SDL2UI
                 StarSystem starSys = (StarSystem)Entity.Manager;
                 StarSysGuid = starSys.Guid;
             }
-            sensorContact.ActualEntity.ChangeEvent += On_entityChangeEvent;
+            SetupEventListeners();
             SetBodyType();
         }
 
@@ -157,38 +158,53 @@ namespace Pulsar4X.SDL2UI
                 BodyType = UserOrbitSettings.OrbitBodyType.Ship;
         }
 
-        //maybe this should be done in the SystemState?
-        void On_entityChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob? db)
+        private void SetupEventListeners()
         {
+            Func<Message, bool> filterById = msg => msg.EntityId == Entity.Id;
 
-            _changesNextFrame.Add(new EntityChangeData() { ChangeType = changeType, Datablob = db, Entity = Entity });
-            switch (changeType)
+            MessagePublisher.Instance.Subscribe(MessageTypes.EntityRemoved, OnEntityRemoved, filterById);
+            MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, OnDBAdded, filterById);
+            MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, OnDBRemoved, filterById);
+            MessagePublisher.Instance.Subscribe(MessageTypes.EntityHidden, OnEntityRemoved, filterById);
+        }
+
+        async Task OnEntityRemoved(Message message)
+        {
+            await Task.Run(() => 
             {
-                case EntityChangeData.EntityChangeType.DBAdded:
-                    if(db != null)
-                    {
-                        DataBlobs[db.GetType()] = db;
-                    }
-                    break;
-                case EntityChangeData.EntityChangeType.DBRemoved:
-                    if(db != null)
-                    {
-                        DataBlobs.Remove(db.GetType());
-                    }
-                    break;
-                case EntityChangeData.EntityChangeType.EntityRemoved:
-                    DataBlobs.Clear();
-                    IsDestroyed = true;
-                    break;
-                default:
-                    break;
-            }
+                DataBlobs.Clear();
+                IsDestroyed = true;
+            });
+        }
+
+        async Task OnDBAdded(Message message)
+        {
+            await Task.Run(() => 
+            {
+                if(message.DataBlob != null)
+                {
+                    DataBlobs[message.DataBlob.GetType()] = message.DataBlob;
+                    _changesNextFrame.Add(message);
+                }
+            });
+        }
+
+        async Task OnDBRemoved(Message message)
+        {
+            await Task.Run(() => 
+            {
+                if(message.DataBlob != null)
+                {
+                    DataBlobs.Remove(message.DataBlob.GetType());
+                    _changesNextFrame.Add(message);
+                }
+            });
         }
 
         public void PostFrameCleanup()
         {
             Changes = _changesNextFrame;
-            _changesNextFrame = new List<EntityChangeData>();
+            _changesNextFrame = new List<Message>();
         }
     }
 }

@@ -1,0 +1,35 @@
+{
+  "name": "Titan",
+  "parent": "Saturn",
+  "colonizeable": true,
+  "info": {
+    "type": "moon",
+    "albedo": 0.22,
+    "mass": 1.3452E23,
+    "radius": 2574.73
+  },
+  "orbit": {
+    "semiMajorAxis": 1221870,
+    "eccentricity": 0.0288,
+    "eclipticInclination": 0.34854,
+    "LoAN": 0,
+    "AoP": 0,
+    "meanAnomaly": 0
+  },
+  "atmosphere": {
+    "pressure": 1.45,
+    "hydrosphere": false,
+    "hyrdoExtent": 0,
+    "greenhouseFactor": 0,
+    "greenhousePressure": 0,
+    "surfaceTemperature": -179.5,
+    "gases": [
+      { "symbol": "N2", "percent": 0.984 },
+      { "symbol": "CH4", "percent": 0.014 },
+      { "symbol": "H2", "percent": 0.002 }
+    ]
+  },
+  "geoSurvey": {
+    "pointsRequired": 500
+  }
+}

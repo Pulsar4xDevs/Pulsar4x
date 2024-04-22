@@ -1,0 +1,33 @@
+{
+  "name": "Io",
+  "parent": "Jupiter",
+  "colonizeable": true,
+  "info": {
+    "type": "moon",
+    "albedo": 0.63,
+    "mass": 8.931938E22,
+    "radius": 1821.6
+  },
+  "orbit": {
+    "semiMajorAxis": 421700,
+    "eccentricity": 0.0041,
+    "eclipticInclination": 2.213,
+    "LoAN": 0,
+    "AoP": 0,
+    "meanAnomaly": 0
+  },
+  "atmosphere": {
+    "pressure": 1.9738E-08,
+    "hydrosphere": false,
+    "hyrdoExtent": 0,
+    "greenhouseFactor": 0,
+    "greenhousePressure": 0,
+    "surfaceTemperature": -108,
+    "gases": [
+      { "symbol": "SO2", "percent": 0.9 }
+    ]
+  },
+  "geoSurvey": {
+    "pointsRequired": 500
+  }
+}

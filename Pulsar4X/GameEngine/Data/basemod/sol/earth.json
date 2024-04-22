@@ -1,0 +1,43 @@
+{
+  "name": "Earth",
+  "colonizeable": true,
+  "info": {
+    "gravity": 9.8,
+    "type": "terrestrial",
+    "albedo": 0.306,
+    "axialTilt": 23.439,
+    "magneticField": 45,
+    "mass": 5.9726E24,
+    "radius": 6378.1,
+    "tectonics": "earth-like",
+    "lengthOfDay": "1.00:00:00"
+  },
+  "orbit": {
+    "semiMajorAxis_km": 149597887,
+    "eccentricity": 0.01671022,
+    "eclipticInclination_d": 7.155,
+    "LoAN_d": -11.26064,
+    "AoP_d": 102.94719,
+    "meanAnomaly_d": 358.617
+  },
+  "atmosphere": {
+    "pressure": 1,
+    "hydrosphere": true,
+    "hydroExtent": 71,
+    "greenhouseFactor": 1,
+    "greenhousePressure": 1,
+    "surfaceTemperature": 14.76,
+    "gases": [
+      { "symbol": "N2", "percent": 0.7808 },
+      { "symbol": "O2", "percent": 0.2095 },
+      { "symbol": "H2O", "percent": 0.005 },
+      { "symbol": "Ar", "percent": 0.00934 },
+      { "symbol": "CO2", "percent": 0.000415 },
+      { "symbol": "Ne", "percent": 0.0000182 }
+    ]
+  },
+  "minerals": "random",
+  "geoSurvey": {
+    "pointsRequired": 1500
+  }
+}

@@ -47,12 +47,25 @@ namespace Pulsar4X.SDL2UI
                     DisplayHelpers.PrintRow("Atmospheric Dust", bodyInfoDb.AtmosphericDust.ToString("#"), separator: false);
                 }
                 ImGui.Columns(1);
-                entity.GetDataBlob<ColonyInfoDB>().Display(entityState, uiState);
+                if(colonyInfoDb.PlanetEntity.TryGetDatablob<AtmosphereDB>(out var atmosphereDB))
+                {
+                    atmosphereDB.Display(entityState, uiState);
+                }
+                else
+                {
+                    if(ImGui.CollapsingHeader("Atmosphere", ImGuiTreeNodeFlags.DefaultOpen))
+                    {
+                        ImGui.Text("No Atmosphere");
+                    }
+                }
                 ImGui.EndChild();
             }
             ImGui.SameLine();
             if(ImGui.BeginChild("ColonySummary2", secondChildSize, true))
             {
+                entity.GetDataBlob<ColonyInfoDB>().Display(entityState, uiState);
+                ImGui.Columns(1);
+
                 if(ImGui.CollapsingHeader("Installations", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     if(entity.TryGetDatablob<ComponentInstancesDB>(out var componentInstances))
@@ -89,7 +102,9 @@ namespace Pulsar4X.SDL2UI
         public static void DisplayMining(this Entity entity, GlobalUIState uiState)
         {
             var mineralStaticInfo = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMineralsList();
-            var minerals = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>()?.Minerals;
+            var minerals = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.HasDataBlob<MineralsDB>() ?
+                            entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>()?.Minerals :
+                            null;
             var miningRates = entity.HasDataBlob<MiningDB>() ? entity.GetDataBlob<MiningDB>().ActualMiningRate : new ();
             var storage = entity.GetDataBlob<VolumeStorageDB>()?.TypeStores;
 

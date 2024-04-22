@@ -378,10 +378,5 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             OnUpdate();
         }
-
-        public override void OnSelectedSystemChange(StarSystem newStarSys)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

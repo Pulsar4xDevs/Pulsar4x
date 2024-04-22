@@ -1,0 +1,22 @@
+{
+  "name": "Enceladus",
+  "parent": "Saturn",
+  "colonizeable": true,
+  "info": {
+    "type": "moon",
+    "albedo": 0.81,
+    "mass": 1.0822E20,
+    "radius": 252.1
+  },
+  "orbit": {
+    "semiMajorAxis": 237948,
+    "eccentricity": 0.0047,
+    "eclipticInclination": 0.009,
+    "LoAN": 0,
+    "AoP": 0,
+    "meanAnomaly": 0
+  },
+  "geoSurvey": {
+    "pointsRequired": 500
+  }
+}

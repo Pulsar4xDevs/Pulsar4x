@@ -1,9 +1,5 @@
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Pulsar4X.Engine;
 using Pulsar4X.Components;
 using Pulsar4X.Interfaces;
@@ -15,17 +11,17 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Pulsar4X.Datablobs
 {
-    public class GenericBeamWeaponAtbDB : BaseDataBlob, IComponentDesignAttribute, IFireWeaponInstr
+    public class GenericBeamWeaponAtbDB : IComponentDesignAttribute, IFireWeaponInstr
     {
         [JsonProperty]
         public double MaxRange { get; internal set; }
+        
+        [JsonProperty] 
+        public double WaveLength { get; internal set; } = 700;
+        
         [JsonProperty]
-        public int DamageAmount { get; internal set; }
-        [JsonProperty]
-        public int ReloadRate { get; internal set; }
-
-        [JsonProperty] public int Frequncy { get; internal set; } = 700;
-
+        public int Energy { get; internal set; }
+        
         public double LenPerPulseInSeconds = 1;
 
         public double BeamSpeed { get; internal set; } = 299792458; //299792458 is speed of light.
@@ -33,24 +29,25 @@ namespace Pulsar4X.Datablobs
 
         public GenericBeamWeaponAtbDB() { }
 
-        public GenericBeamWeaponAtbDB(double maxRange, double damageAmount, double reloadRate)
+        public GenericBeamWeaponAtbDB(double maxRange, double waveLen, double jules)
         {
             MaxRange = maxRange;
-            DamageAmount = (int)damageAmount;
-            ReloadRate = (int)reloadRate;
+            WaveLength = waveLen;
+            Energy = (int)jules;
         }
 
         public GenericBeamWeaponAtbDB(GenericBeamWeaponAtbDB db)
         {
             MaxRange = db.MaxRange;
-            DamageAmount = db.DamageAmount;
-            ReloadRate = db.ReloadRate;
+            WaveLength = db.WaveLength;
+            Energy = db.Energy;
         }
 
+        /*
         public override object Clone()
         {
             return new GenericBeamWeaponAtbDB(this);
-        }
+        }*/
 
         public bool CanLoadOrdnance(OrdnanceDesign ordnanceDesign)
         {
@@ -79,7 +76,7 @@ namespace Pulsar4X.Datablobs
             //TODO: DELETE! (for testing purposes turning this on so always hitting)
             hitsTarget = true;
 
-            BeamWeaponProcessor.FireBeamWeapon(launchingEntity, tgtEntity, hitsTarget, Frequncy,BeamSpeed, beamLen);
+            BeamWeaponProcessor.FireBeamWeapon(launchingEntity, tgtEntity, hitsTarget, Energy, WaveLength ,BeamSpeed, beamLen);
         }
 
         public float ToHitChance(Entity launchingEntity, Entity tgtEntity)
@@ -108,8 +105,8 @@ namespace Pulsar4X.Datablobs
                 wpnState.WeaponType = "Beam";
                 wpnState.WeaponStats = new (string name, double value, ValueTypeStruct valueType)[3];
                 wpnState.WeaponStats[0] = ("Max Range:", MaxRange, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Distance, ValueTypeStruct.ValueSizes.BaseUnit));
-                wpnState.WeaponStats[1] = ("Damage:", DamageAmount, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Power, ValueTypeStruct.ValueSizes.BaseUnit));
-                wpnState.WeaponStats[2] = ("Rate Of Fire:", ReloadRate, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Number, ValueTypeStruct.ValueSizes.BaseUnit));
+                wpnState.WeaponStats[1] = ("Wavelength:", WaveLength, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Distance, ValueTypeStruct.ValueSizes.BaseUnit));
+                wpnState.WeaponStats[2] = ("Power:", Energy, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Power, ValueTypeStruct.ValueSizes.BaseUnit));
                 componentInstance.SetAbilityState<WeaponState>(wpnState);
             }
         }

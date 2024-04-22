@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
 using ImGuiSDL2CS;
+using Pulsar4X.Components;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Damage;
 using Pulsar4X.DataStructures;
@@ -120,79 +121,64 @@ namespace Pulsar4X.SDL2UI.Combat
         static class Beam
         {
             public static double BeamFreq = 700;
-            public static string[] BeamTypeNames = new string[]
-            {
-                "Gama-Ray",
-                "X-Ray",
-                "UV",
-                "Visible",
-                "Near IR",
-                "IR",
-                "MicroWave",
-                "Radio"
-            };
-            private static int _beamTypeIndex = 5;
-
-            public static int BeamTypeIndex
-            {
-                get
-                {
-                    return _beamTypeIndex;
-                }
-                set
-                {
-                    _beamTypeIndex = value;
-                    SetRange();
-
-                }
-            }
-
             public static double MinFreq; //in meters
             public static double MaxFreq; //in meters
+            
+            public static double BeamEnergy = 1000;
+            public static double MinEnergy = 10; //in meters
+            public static double MaxEnergy = 10000; //in meters
 
-            static void SetRange()
+
+
+        }
+
+
+        
+        static class ExsistingWeapons
+        {
+            private static FactionInfoDB? _factionInfoDB;
+            private static List<ComponentDesign> _allShipComponents;
+            public static int SelectedWeaponIndex = 0;
+            public static List<ComponentDesign> AvailableShipComponents;
+            public static string[] WeaponNames;
+            public static ComponentDesign SelectedWeapon
             {
-                switch (_beamTypeIndex)
+                get { return AvailableShipComponents[SelectedWeaponIndex]; }
+            }
+            public static void Create(Entity faction)
+            {
+                if(_factionInfoDB is null)
                 {
-                    case 0: //gama
-                        MinFreq = 1e-12; //1pm
-                        MaxFreq = 1e-11; //10pm
-                        break;
-                    case 1: //xray
-                        MinFreq = 1e-11; //1pm
-                        MaxFreq = 1e-8; //10pm
-                        break;
-                    case 2://uv
-                        MinFreq = 1e-8; //10pm
-                        MaxFreq = 4e-7; //400nm
-                        break;
-                    case 3://visable
-                        MinFreq = 4e-7; //400nm
-                        MaxFreq = 7e-7; //700nm
-                        break;
-                    case 4://near IR
-                        MinFreq = 7e-7; //700nm
-                        MaxFreq = 1e-5; //10um
-                        break;
-                    case 5:// IR
-                        MinFreq = 1e-5; //10um
-                        MaxFreq = 0.001; //1mm
-                        break;
-                    case 6:// MicroWave
-                        MinFreq = 0.001; //1mm
-                        MaxFreq = 1; //1m
-                        break;
-                    case 7:// Radio
-                        MinFreq = 1; //1m
-                        MaxFreq = 100000; //100000m Extremely low freqency
-                        break;
+                    _factionInfoDB = faction.GetDataBlob<FactionInfoDB>();
+                    RefreshComponentDesigns();
                 }
             }
+            static void RefreshComponentDesigns()
+            {
+                _allShipComponents = _factionInfoDB.ComponentDesigns.Values.ToList();
+                _allShipComponents.Sort((a, b) => a.Name.CompareTo(b.Name));
 
+                var templatesByGroup = _allShipComponents.GroupBy(t => t.ComponentType);
+                var groupNames = templatesByGroup.Select(g => g.Key).ToList();
+                //var sortedTempGroupNames = groupNames.OrderBy(name => name).ToArray();
+                //_sortedComponentNames = new string[sortedTempGroupNames.Length + 1];
+                //_sortedComponentNames[0] = "All";
+                //Array.Copy(sortedTempGroupNames, 0, _sortedComponentNames, 1, sortedTempGroupNames.Length);
+                
+                AvailableShipComponents = _allShipComponents.Where(t => t.ComponentType.Equals("Weapon")).ToList();
+                WeaponNames = new string[AvailableShipComponents.Count];
+                for (int index = 0; index < AvailableShipComponents.Count; index++)
+                {
+                    ComponentDesign component = AvailableShipComponents[index];
+                    WeaponNames[index] = component.Name;
+                }
+            }
         }
 
         private int _beamTypeIndex = 5;
         private double _momentum = 0;
+        DamageFragment _damageFrag;
+        private bool _typeIsBeam = true;
         internal override void Display()
         {
             if (IsActive)
@@ -223,48 +209,48 @@ namespace Pulsar4X.SDL2UI.Combat
 
                         ImGui.Columns(2);
 
-                        if (_profile != null && ImGui.Button("Fire Beam"))
+                        
+                        //type of damage to test
+                        ExsistingWeapons.Create(_selectedEntity.GetFactionOwner);
+                        if (ImGui.Combo("Exsisting Design", ref ExsistingWeapons.SelectedWeaponIndex, ExsistingWeapons.WeaponNames, ExsistingWeapons.AvailableShipComponents.Count))
                         {
-                            var damageFrag = new DamageFragment()
-                            {
-                                Position = _firePos,
-                                Velocity = new Orbital.Vector2(_fireVel.x, _fireVel.y),
-                                Mass = _projMass,
-                                Density = _projDensity,
-                                Length = _projLen,
-                                Momentum = (float)_momentum,
-
-                            };
-                            _damageFrames = DamageTools.DealDamageSim(_profile, damageFrag).damageFrames;
-                            _rawShipImage = _damageFrames.Last();
+                            
+                            //ExsistingWeapons.SelectedWeapon.
                         }
+                        if (_profile != null && ImGui.Button("Beam"))
+                        {
+                            _typeIsBeam = true;
+                        }
+                        if (_profile != null && ImGui.Button("Longrod Projectile"))
+                        {
+                            _typeIsBeam = false;
+                        }
+                        
+                        
+                        
                         ImGui.NextColumn();
 
-                        if(ImGui.Combo("Beam Type", ref _beamTypeIndex, Beam.BeamTypeNames, Beam.BeamTypeNames.Length))
+                        //tweaks to damage type
+                        if (_typeIsBeam)
                         {
-                            Beam.BeamTypeIndex = _beamTypeIndex;
-                        }
+                            if (ImGuiExt.SliderDouble("Energy", ref Beam.BeamEnergy, Beam.MinEnergy, Beam.MaxEnergy))
+                            {
 
-                        if (ImGuiExt.SliderDouble("Freqency", ref Beam.BeamFreq, Beam.MinFreq, Beam.MaxFreq))
+                            }
+
+                            if (ImGuiExt.SliderDouble("Freqency", ref Beam.BeamFreq, Beam.MinFreq, Beam.MaxFreq))
+                            {
+                                _momentum = (float)(UniversalConstants.Science.PlankConstant * Beam.BeamFreq);
+                            }
+                        }
+                        else
                         {
-                            _momentum = (float)(UniversalConstants.Science.PlankConstant * Beam.BeamFreq);
+                            
                         }
-
 
                         ImGui.NextColumn();
-                        if (_profile != null && ImGui.Button("Fire Longrod Projectile"))
-                        {
-                            var damageFrag = new DamageFragment()
-                            {
-                                Position = _firePos,
-                                Velocity = new Orbital.Vector2(_fireVel.x, _fireVel.y),
-                                Mass = _projMass,
-                                Density = _projDensity,
-                                Length = _projLen
-                            };
-                            _damageFrames = DamageTools.DealDamageSim(_profile, damageFrag).damageFrames;
-                            _rawShipImage = _damageFrames.Last();
-                        }
+
+
 
                         ImGui.NextColumn();
 
@@ -274,6 +260,20 @@ namespace Pulsar4X.SDL2UI.Combat
 
 
                         ImGui.Columns(0);
+
+                        if (ImGui.Button("Fire"))
+                        {
+                            _damageFrag = new DamageFragment()
+                            {
+                                Position = _firePos,
+                                Velocity = new Orbital.Vector2(_fireVel.x, _fireVel.y),
+                                Mass = _projMass,
+                                Density = _projDensity,
+                                Length = _projLen
+                            };
+                            _damageFrames = DamageTools.DealDamageSim(_profile, _damageFrag).damageFrames;
+                            _rawShipImage = _damageFrames.Last();
+                        }
 
 
                     }

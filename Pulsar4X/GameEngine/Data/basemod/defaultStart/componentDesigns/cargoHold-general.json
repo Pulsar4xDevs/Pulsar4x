@@ -1,0 +1,8 @@
+{
+  "id": "default-design-cargo-hold",
+  "name": "General Cargo Hold",
+  "templateId": "general-cargo-hold",
+  "attributes": [
+    { "key": "Storage Volume", "value": 1000000 }
+  ]
+}

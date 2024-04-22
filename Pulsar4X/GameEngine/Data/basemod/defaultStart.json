@@ -1,0 +1,13 @@
+{
+  "systems": [
+    "sol/",
+    "alphaCentauri/"
+  ],
+  "jumpPoints": [
+    { "from": "sol", "to": "alpha-centauri" }
+  ],
+  "factions": [
+    "defaultStart/uef.json",
+    "defaultStart/opposition.json"
+  ]
+}

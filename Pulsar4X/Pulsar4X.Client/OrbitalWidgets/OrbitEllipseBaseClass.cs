@@ -95,8 +95,8 @@ namespace Pulsar4X.SDL2UI
             _eccentricity = (float)_orbitDB.Eccentricity;
             _linearEccentricity = (float)(_eccentricity * _orbitDB.SemiMajorAxis); //linear ecentricity
 
-            
-            if (_orbitDB.Inclination > 1/2 * Math.PI && _orbitDB.Inclination < 3/2 * Math.PI * 2) //orbitDB is in degrees.
+            var inclination = Angle.NormaliseRadiansPositive(_orbitDB.Inclination);
+            if (inclination > 0.5 * Math.PI && inclination < 1.5 * Math.PI) 
             {
                 IsRetrogradeOrbit = true;
                 //_loP_Degrees = (float)(_orbitDB.LongitudeOfAscendingNode - _orbitDB.ArgumentOfPeriapsis);

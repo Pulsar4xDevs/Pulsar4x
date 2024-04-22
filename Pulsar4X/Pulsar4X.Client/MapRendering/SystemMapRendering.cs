@@ -4,71 +4,19 @@ using System.Linq;
 using System.Collections.Concurrent;
 using ImGuiSDL2CS;
 using SDL2;
-using System.ComponentModel;
 using Pulsar4X.Orbital;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Messaging;
 
 namespace Pulsar4X.SDL2UI
 {
-    public class UserOrbitSettings
-    {
-        internal enum OrbitBodyType
-        {
-            Star,
-            Planet,
-            Moon,
-            Asteroid,
-            Comet,
-            Colony,
-            Ship,
-            Unknown,
-
-            [Description("Number Of")]
-            NumberOf
-        }
-
-        internal enum OrbitTrajectoryType
-        {
-            Unknown,
-            [Description("An Elliptical Orbit")]
-            Elliptical,
-            Hyperbolic,
-
-            [Description("Newtonian Thrust")]
-            NewtonionThrust,
-
-            [Description("Non-Newtonian Translation")]
-            NonNewtonionTranslation,
-
-            [Description("Number Of")]
-            NumberOf
-        }
-        //the arc thats actualy drawn, ie we don't normaly draw a full 360 degree (6.28rad) orbit, but only
-        //a section of it ie 3/4 of the orbit (4.71rad) and this is player adjustable.
-        public float EllipseSweepRadians = 4.71239f;
-        //we stop showing names when zoomed out further than this number
-        public float ShowNameAtZoom = 100;
-
-        /// <summary>
-        /// Number of segments in a full ellipse. this is basicaly the resolution of the orbits.
-        /// 32 is a good low number, slightly ugly. 180 is a little overkill till you get really big orbits.
-        /// </summary>
-        public byte NumberOfArcSegments = 180;
-
-        public byte Red = 0;
-        public byte Grn = 0;
-        public byte Blu = 255;
-        public byte MaxAlpha = 255;
-        public byte MinAlpha = 0;
-    }
-
     internal class SystemMapRendering : UpdateWindowState
     {
         GlobalUIState _state;
         SystemSensorContacts? _sensorMgr;
-        ConcurrentQueue<EntityChangeData>? _sensorChanges;
+        ConcurrentQueue<Message>? _sensorChanges;
         SystemState? _sysState;
         Camera _camera;
         internal IntPtr windowPtr;
@@ -101,18 +49,18 @@ namespace Pulsar4X.SDL2UI
             {
                 _testIcons.TryAdd(-1, item);
             }
+
+            //_state.OnStarSystemChanged += RespondToSystemChange;
+            //_state.OnFactionChanged += RespondToSystemChange;
         }
 
 
-        internal void SetSystem(StarSystem starSys)
+        internal void Initialize(StarSystem starSys)
         {
-            if (_sysState != null && _faction != null && _sensorChanges != null)
-            {
-                _sysState.StarSystem.GetSensorContacts(_faction.Id).Changes.Unsubscribe(_sensorChanges);
-
-            }
             if (_state.StarSystemStates.ContainsKey(starSys.Guid))
+            {
                 _sysState = _state.StarSystemStates[starSys.Guid];
+            }
             else
             {
                 _sysState = new SystemState(starSys, _state.Faction);
@@ -122,12 +70,36 @@ namespace Pulsar4X.SDL2UI
             _faction = _state.Faction;
             _sensorMgr = starSys.GetSensorContacts(_faction.Id);
             _sensorChanges = _sensorMgr.Changes.Subscribe();
+            _sysState.OnEntityAdded += OnSystemStateEntityAdded;
+            _sysState.OnEntityUpdated += OnSystemStateEntityUpdated;
+            _sysState.OnEntityRemoved += OnSystemStateEntityRemoved;
+
             foreach (var entityItem in _sysState.EntityStatesWithPosition.Values)
             {
                 AddIconable(entityItem);
             }
         }
 
+        public void UpdateSystemState(SystemState systemState)
+        {
+            _testIcons.Clear();
+            _entityIcons.Clear();
+            _orbitRings.Clear();
+            _moveIcons.Clear();
+            _nameIcons.Clear();
+
+            _sysState = systemState;
+            _state.StarSystemStates[_sysState.StarSystem.Guid] = _sysState;
+
+            _faction = _state.Faction;
+            _sensorMgr = systemState.StarSystem.GetSensorContacts(_faction.Id);
+            _sensorChanges = _sensorMgr.Changes.Subscribe();
+
+            foreach (var entityItem in _sysState.EntityStatesWithPosition.Values)
+            {
+                AddIconable(entityItem);
+            }
+        }
 
         void AddIconable(EntityState entityState)
         {
@@ -226,23 +198,31 @@ namespace Pulsar4X.SDL2UI
         void HandleChanges(EntityState entityState)
         {
 
-            foreach (var changeData in entityState.Changes)
+            foreach (var message in entityState.Changes)
             {
-                if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBAdded)
+                if(message.EntityId == null) continue;
+
+                if (message.MessageType == MessageTypes.DBAdded)
                 {
-                    if (changeData.Datablob is OrbitDB)
+                    if (message.DataBlob is OrbitDB)
                     {
-                        OrbitDB orbitDB = (OrbitDB)changeData.Datablob;
+                        OrbitDB orbitDB = (OrbitDB)message.DataBlob;
                         if (orbitDB.Parent == null)
                             continue;
 
 
                         if (!orbitDB.IsStationary)
                         {
-                            if (_sysState != null && _sysState.EntityStatesWithPosition.ContainsKey(changeData.Entity.Id))
-                                entityState = _sysState.EntityStatesWithPosition[changeData.Entity.Id];
+                            if (_sysState != null && _sysState.EntityStatesWithPosition.ContainsKey(message.EntityId.Value))
+                                entityState = _sysState.EntityStatesWithPosition[message.EntityId.Value];
                             else
-                                entityState = new EntityState(changeData.Entity) { Name = "Unknown" };
+                            {
+                                if(_sysState.StarSystem.TryGetEntityById(message.EntityId.Value, out var retrievedEntity))
+                                {
+                                    entityState = new EntityState(retrievedEntity) { Name = "Unknown" };
+                                }
+                            }
+
                             OrbitIconBase orbit;
                             if (orbitDB.Eccentricity < 1)
                             {
@@ -252,29 +232,29 @@ namespace Pulsar4X.SDL2UI
                             {
                                 orbit = new OrbitHyperbolicIcon2(entityState, _state.UserOrbitSettingsMtx);
                             }
-                            _orbitRings[changeData.Entity.Id] = orbit;
+                            _orbitRings[message.EntityId.Value] = orbit;
 
                         }
                     }
-                    if (changeData.Datablob is WarpMovingDB)
+                    if (message.DataBlob is WarpMovingDB && _sysState.StarSystem.TryGetEntityById(message.EntityId.Value, out var entity))
                     {
-                        var widget = new WarpMovingIcon(changeData.Entity);
+                        var widget = new WarpMovingIcon(entity);
                         widget.OnPhysicsUpdate();
                         //Matrix matrix = new Matrix();
                         //matrix.Scale(_camera.ZoomLevel);
                         //widget.OnFrameUpdate(matrix, _camera);
-                        _moveIcons[changeData.Entity.Id] = widget;
+                        _moveIcons[message.EntityId.Value] = widget;
                         //_moveIcons.Add(changeData.Entity.ID, widget);
                     }
 
-                    if (changeData.Datablob is NewtonMoveDB)
+                    if (message.DataBlob is NewtonMoveDB)
                     {
                         if(entityState.Entity.HasDataBlob<NewtonMoveDB>()) //because sometimes it can be added and removed in a single tick.
                         {
                             Icon orb;
                             //orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
                             orb = new NewtonMoveIcon(entityState, _state.UserOrbitSettingsMtx);
-                            _orbitRings.AddOrUpdate(changeData.Entity.Id, orb, ((guid, data) => data = orb));
+                            _orbitRings.AddOrUpdate(message.EntityId.Value, orb, ((guid, data) => data = orb));
                         }
                     }
                     //if (changeData.Datablob is NameDB)
@@ -282,21 +262,21 @@ namespace Pulsar4X.SDL2UI
 
                     //_entityIcons[changeData.Entity.ID] = new EntityIcon(changeData.Entity, _camera);
                 }
-                if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBRemoved)
+                if (message.MessageType == MessageTypes.DBRemoved)
                 {
-                    if (changeData.Datablob is OrbitDB)
+                    if (message.DataBlob is OrbitDB)
                     {
 
-                        _orbitRings.TryRemove(changeData.Entity.Id, out var foo);
+                        _orbitRings.TryRemove(message.EntityId.Value, out var foo);
                     }
-                    if (changeData.Datablob is WarpMovingDB)
+                    if (message.DataBlob is WarpMovingDB)
                     {
-                        _moveIcons.TryRemove(changeData.Entity.Id, out var foo);
+                        _moveIcons.TryRemove(message.EntityId.Value, out var foo);
                     }
 
-                    if (changeData.Datablob is NewtonMoveDB)
+                    if (message.DataBlob is NewtonMoveDB)
                     {
-                        _orbitRings.TryRemove(changeData.Entity.Id, out var foo);
+                        _orbitRings.TryRemove(message.EntityId.Value, out var foo);
                     }
                 }
             }
@@ -373,83 +353,73 @@ namespace Pulsar4X.SDL2UI
 
         }
 
+        private void OnSystemStateEntityAdded(SystemState systemState, Entity entity)
+        {
+            if(systemState.EntityStatesWithPosition.ContainsKey(entity.Id))
+                AddIconable(systemState.EntityStatesWithPosition[entity.Id]);
+        }
 
+        private void OnSystemStateEntityUpdated(SystemState systemState, int entityId, Message message)
+        {
+            // Refreseh the icons for the updated entity
+            if(systemState.EntityStatesWithPosition.ContainsKey(entityId))
+            {
+                RemoveIconable(entityId);
+                AddIconable(systemState.EntityStatesWithPosition[entityId]);
+            }        
+        }
+
+        private void OnSystemStateEntityRemoved(SystemState systemState, int entityId)
+        {
+            RemoveIconable(entityId);
+        }
 
         internal void Draw()
         {
-            if (_camera.ZoomLevel <= 0.1) //todo: base this number off the largest orbit
+
+            if (_sysState != null)
             {
-                //draw galaxy map instead
+                foreach (var item in _sysState.EntityStatesWithPosition.Values)
+                {
+                    if (item.Changes.Count > 0)
+                    {
+                        HandleChanges(item);
+                    }
+                }
             }
-            else
+
+            byte oR, oG, oB, oA;
+            SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
+            SDL.SDL_BlendMode blendMode;
+            SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
+            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+
+            var matrix = _camera.GetZoomMatrix();
+
+            UpdateAndDraw(UIWidgets.Values.ToList(), matrix);
+
+            UpdateAndDraw(_orbitRings.Values.ToList(), matrix);
+
+            UpdateAndDraw(_moveIcons.Values.ToList(), matrix);
+
+            UpdateAndDraw(_entityIcons.Values.ToList(), matrix);
+
+            UpdateAndDraw(SelectedEntityExtras, matrix);
+
+
+            //because _nameIcons are imgui not sdl, we don't draw them here.
+            //we draw them in PulsarMainWindow.ImGuiLayout
+            lock (_nameIcons)
             {
-                if (_sysState != null)
-                {
-                    foreach (var entityGuid in _sysState.EntitiesAdded)
-                    {
-                        if(_sysState.EntityStatesWithPosition.ContainsKey(entityGuid))
-                            AddIconable(_sysState.EntityStatesWithPosition[entityGuid]);
-                    }
-                    foreach (var item in _sysState.EntityStatesWithPosition.Values)
-                    {
-                        if (item.Changes.Count > 0)
-                        {
-                            HandleChanges(item);
-                        }
-                    }
-                    foreach (var item in _sysState.EntitysToBin)
-                    {
-                        if(_sysState.EntityStatesWithPosition.ContainsKey(item))
-                            RemoveIconable(item);
-                    }
-                }
-
-                byte oR, oG, oB, oA;
-                SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
-                SDL.SDL_BlendMode blendMode;
-                SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
-                SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
-
-                var matrix = _camera.GetZoomMatrix();
-
-                /*
-                if (SysMap == null)
-                {
-                    foreach (var icon in _testIcons.Values)
-                    {
-                        icon.ViewScreenPos = matrix.Transform(icon.WorldPosition.X, icon.WorldPosition.Y);
-                        icon.Draw(rendererPtr, _camera);
-                    }
-                }
-                else
-                {
-                */
-                UpdateAndDraw(UIWidgets.Values.ToList(), matrix);
-
-                UpdateAndDraw(_orbitRings.Values.ToList(), matrix);
-
-                UpdateAndDraw(_moveIcons.Values.ToList(), matrix);
-
-                UpdateAndDraw(_entityIcons.Values.ToList(), matrix);
-
-                UpdateAndDraw(SelectedEntityExtras, matrix);
-
-
-                //because _nameIcons are imgui not sdl, we don't draw them here.
-                //we draw them in PulsarMainWindow.ImGuiLayout
-                lock (_nameIcons)
-                {
-                    foreach (var item in _nameIcons.Values)
-                        item.OnFrameUpdate(matrix, _camera);
-                }
-                TextIconsDistribute();
-
-                //ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
-
-                SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
-                SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
-                //}
+                foreach (var item in _nameIcons.Values)
+                    item.OnFrameUpdate(matrix, _camera);
             }
+            TextIconsDistribute();
+
+            //ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
+
+            SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
+            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
         }
 
         public void DrawNameIcons()
@@ -532,11 +502,6 @@ namespace Pulsar4X.SDL2UI
             {
                 icon.OnPhysicsUpdate();
             }
-        }
-
-        public override void OnSelectedSystemChange(StarSystem newStarSys)
-        {
-            SetSystem(newStarSys);
         }
     }
 }

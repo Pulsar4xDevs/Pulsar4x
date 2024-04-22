@@ -1,0 +1,10 @@
+{
+  "id": "default-design-beam-fire-control",
+  "name": "Beam Fire Control",
+  "templateId": "beam-fire-control",
+  "attributes": [
+    { "key": "Range", "value": 100 },
+    { "key": "Tracking Speed", "value": 5000 },
+    { "key": "Size vs Range", "value": 1 }
+  ]
+}

@@ -47,13 +47,9 @@ namespace Pulsar4X.Engine
             if(entity.TryGetDatablob<OrderableDB>(out var orderableDB))
             {
                 int mask = 0;
-                var list = orderableDB.ActionList.ToList();
 
-                int i = 0;
-                while (i < list.Count)
-                {   var j = list.Count;
-                    EntityCommand entityCommand = list[i];
-
+                foreach(var entityCommand in orderableDB.ActionList)
+                {
                     if ((mask & ((int)entityCommand.ActionLanes)) == 0) //bitwise and
                     {
                         if (entityCommand.IsBlocking)
@@ -75,17 +71,9 @@ namespace Pulsar4X.Engine
                             entityCommand.Execute(atDateTime);
                         }
                     }
-
-                    if (entityCommand.IsFinished())
-                    {
-                        if(j != list.Count)
-                            throw new Exception ("List Changed");
-                        if(list[i] != entityCommand)
-                            throw new Exception("How is this possible");
-                        orderableDB.ActionList.RemoveAt(i);
-                    }
-                    i++;
                 }
+
+                orderableDB.ActionList.RemoveAll(e => e.IsFinished());
             }
         }
     }

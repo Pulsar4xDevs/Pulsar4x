@@ -1,0 +1,38 @@
+{
+  "name": "Jupiter",
+  "colonizeable": false,
+  "info": {
+    "type": "gas-giant",
+    "albedo": 0.503,
+    "mass": 1.8982E27,
+    "radius": 71492
+  },
+  "orbit": {
+    "semiMajorAxis": 778.479E6,
+    "eccentricity": 0.0489,
+    "eclipticInclination": 1.303,
+    "LoAN": 100.464,
+    "AoP": 273.867,
+    "meanAnomaly": 20.02
+  },
+  "atmosphere": {
+    "pressure": 1.97384653,
+    "hydrosphere": false,
+    "hyrdoExtent": 0,
+    "greenhouseFactor": 0,
+    "greenhousePressure": 0,
+    "surfaceTemperature": -108,
+    "gases": [
+      { "symbol": "H2", "percent": 0.89 },
+      { "symbol": "He", "percent": 0.1 },
+      { "symbol": "CH4", "percent": 0.003 },
+      { "symbol": "NH3", "percent": 0.00026 },
+      { "symbol": "HD", "percent": 0.000028 },
+      { "symbol": "C2H6", "percent": 0.000006 },
+      { "symbol": "H2O", "percent": 0.000004 }
+    ]
+  },
+  "geoSurvey": {
+    "pointsRequired": 2500
+  }
+}

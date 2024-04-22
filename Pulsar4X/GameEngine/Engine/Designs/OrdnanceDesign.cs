@@ -71,8 +71,11 @@ namespace Pulsar4X.Engine.Designs
         {
         }
 
-        public OrdnanceDesign(FactionInfoDB faction, string name, double fuelAmountKG,  List<(ComponentDesign design, int count)> components)
+        public OrdnanceDesign(FactionInfoDB faction, string name, double fuelAmountKG,  List<(ComponentDesign design, int count)> components, string? id = null, bool startResearched = false)
         {
+            if(id != null)
+                UniqueID = id;
+
             faction.MissileDesigns.Add(UniqueID, this);
             faction.IndustryDesigns[UniqueID] = this;
             Name = name;
@@ -124,6 +127,15 @@ namespace Pulsar4X.Engine.Designs
             IndustryPointCosts = (int)mass;
             MassPerUnit = (int)WetMass;
             VolumePerUnit = vol;
+
+            if(startResearched)
+            {
+                faction.Data.CargoGoods.Add(this);
+            }
+            else
+            {
+                faction.Data.LockedCargoGoods.Add(this);
+            }
         }
 
 

@@ -70,6 +70,7 @@ namespace Pulsar4X.Engine
                         Density = 1000,
                         Momentum = (float)(UniversalConstants.Science.PlankConstant * freq),
                         Length = (float)(beamInfo.Positions[0] - beamInfo.Positions[1]).Length(),
+                        Energy = beamInfo.Energy,
                     };
                     DamageProcessor.OnTakingDamage(beamInfo.TargetEntity, damage);
                     beamInfo.OwningEntity.Destroy();
@@ -94,7 +95,7 @@ namespace Pulsar4X.Engine
             }
         }
         
-        public static void FireBeamWeapon(Entity launchingEntity, Entity targetEntity, bool hitsTarget,double freqency, double beamVelocity, double beamLenInSeconds)
+        public static void FireBeamWeapon(Entity launchingEntity, Entity targetEntity, bool hitsTarget, double energy, double wavelen, double beamVelocity, double beamLenInSeconds)
         {
             var nowTime = launchingEntity.StarSysDateTime;
             var ourState = launchingEntity.GetAbsoluteState();
@@ -110,7 +111,8 @@ namespace Pulsar4X.Engine
             beamInfo.Positions[0] = startPos.AbsolutePosition ;
             beamInfo.Positions[1] = startPos.AbsolutePosition - normVector * beamlenInMeters;
             beamInfo.VelocityVector = absVector;
-            beamInfo.Frequency = freqency;
+            beamInfo.Frequency = wavelen;
+            beamInfo.Energy = energy;
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
             dataBlobs.Add(beamInfo);
             //dataBlobs.Add(new ComponentInstancesDB());

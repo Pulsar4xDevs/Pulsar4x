@@ -1,0 +1,10 @@
+{
+  "id": "default-design-cargo-hold-5t",
+  "name": "Cargo Hold 5t",
+  "templateId": "general-cargo-hold",
+  "attributes": [
+    { "key": "Storage Volume", "value": 5000 },
+    { "key": "Cargo Transfer Rate", "value": 500 },
+    { "key": "Transfer Range", "value": 100 }
+  ]
+}

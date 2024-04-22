@@ -1,0 +1,24 @@
+{
+  "name": "Mercury",
+  "colonizeable": true,
+  "info": {
+    "gravity": 3.7,
+    "type": "terrestrial",
+    "albedo": 0.088,
+    "axialTilt": 2.04,
+    "mass": 3.3022E23,
+    "radius": 2439.7,
+    "tectonics": "earth-like"
+  },
+  "orbit": {
+    "semiMajorAxis_km": 57.91E6,
+    "eccentricity": 0.205630,
+    "eclipticInclination_d": 7.005,
+    "LoAN_d": 48.331,
+    "AoP_d": 29.124,
+    "meanAnomaly_d": 174.796
+  },
+  "geoSurvey": {
+    "pointsRequired": 1500
+  }
+}

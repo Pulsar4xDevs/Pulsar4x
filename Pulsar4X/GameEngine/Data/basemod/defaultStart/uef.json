@@ -1,0 +1,98 @@
+{
+  "name": "UEF",
+  "componentDesigns": [
+    "componentDesigns/"
+  ],
+  "ordnanceDesigns": [
+    "ordnanceDesigns/"
+  ],
+  "shipDesigns": [
+    "shipDesigns/cargoCourier.json",
+    "shipDesigns/cargoship.json",
+    "shipDesigns/gunship.json",
+    "shipDesigns/obennDropship.json",
+    "shipDesigns/starship.json",
+    "shipDesigns/surveyor.json"
+  ],
+  "species": [
+    "species-humans.json"
+  ],
+  "colonies": [
+    {
+      "systemId": "sol",
+      "location": "Earth",
+      "species": {
+        "name": "Human",
+        "population": 8.2E9
+      },
+      "installations": [
+        { "id": "default-design-passive-sensor", "amount": 1 },
+        { "id": "default-design-mine", "amount": 1 },
+        { "id": "default-design-cargo-hold", "amount": 1 },
+        { "id": "default-design-fuel-tank-1000", "amount": 1 },
+        { "id": "default-design-refinery", "amount": 1 },
+        { "id": "default-design-factory", "amount": 1 },
+        { "id": "default-design-shipyard", "amount": 1 },
+        { "id": "default-design-university", "amount": 1 },
+        { "id": "default-design-logistics-office", "amount": 1 },
+        { "id": "default-design-ordnance-rack-2.5t", "amount": 1 }
+      ],
+      "cargo": [
+        { "id": "iron", "amount": 500000 },
+        { "id": "hydrocarbons", "amount": 5000 },
+        { "id": "stainless-steel", "amount": 100000 },
+        { "id": "chromium", "amount": 50000 },
+        { "id": "fissionables", "amount": 50000 },
+        { "id": "copper", "amount": 50000 },
+        { "id": "default-design-merlin", "amount": 5, "type": "byCount" },
+        { "id": "default-ordnance-missile-250", "amount": 100, "type": "byCount" },
+        { "id": "rp-1", "amount": 10000, "type": "byCount" },
+        { "id": "methalox", "amount": 10000, "type": "byCount" },
+        { "id": "hydrolox", "amount": 10000, "type": "byCount" }
+      ]
+    }
+  ],
+  "fleets": [
+    {
+      "name": "Military Fleet",
+      "location": {
+        "systemId": "sol",
+        "body": "Earth"
+      },
+      "ships": [
+        {
+          "designId": "default-ship-design-gunship",
+          "name": "Serial Peacemaker",
+          "cargo": [
+            { "id": "default-ordnance-missile-250", "amount": 20, "type": "byCount" },
+            { "id": "rp-1", "amount": 2000 }
+          ]
+        },
+        {
+          "designId": "default-ship-design-gunship",
+          "name": "Prevailing Stillness",
+          "cargo": [
+            { "id": "default-ordnance-missile-250", "amount": 20, "type": "byCount" },
+            { "id": "rp-1", "amount": 2000 }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Science Fleet",
+      "location": {
+        "systemId": "sol",
+        "body": "Luna"
+      },
+      "ships": [
+        {
+          "designId": "default-ship-design-surveyor",
+          "name": "Surveyor I",
+          "cargo": [
+            { "id": "rp-1", "amount": 2000 }
+          ]
+        }
+      ]
+    }
+  ]
+}

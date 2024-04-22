@@ -45,10 +45,14 @@ namespace Pulsar4X.Engine.Orders
 
             if(targetPositionDB.OwningEntity == null) throw new NullReferenceException("targetPositionDB.OwningEntity cannot be null");
 
-            double targetSMA = OrbitMath.LowOrbitRadius(targetPositionDB.OwningEntity);
+            double targetSMA = 0;
+
+            if(Target.HasDataBlob<MassVolumeDB>())
+                targetSMA = OrbitMath.LowOrbitRadius(targetPositionDB.OwningEntity);
 
             // Get all the ships we need to add the movement command to
             var ships = fleetDB.Children.Where(c => c.HasDataBlob<ShipInfoDB>());
+            Target.TryGetDatablob<OrbitDB>(out var targetOrbitDB);
 
             foreach(var ship in ships)
             {
@@ -57,19 +61,36 @@ namespace Pulsar4X.Engine.Orders
 
                 var shipMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
 
-                (Vector3 position, DateTime _) = WarpMath.GetInterceptPosition
-                (
-                    ship,
-                    targetPositionDB.OwningEntity.GetDataBlob<OrbitDB>(),
-                    EntityCommanding.StarSysDateTime
-                );
+                if(targetOrbitDB == null)
+                {
+                    var cargoLibrary = EntityCommanding.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
+                    (WarpMoveCommand warpCommand, _) = WarpMoveCommand.CreateCommand(
+                        cargoLibrary,
+                        RequestingFactionGuid,
+                        ship,
+                        Target,
+                        Vector3.Zero,
+                        EntityCommanding.StarSysDateTime,
+                        new Vector3(),
+                        shipMass);
+                    _shipCommands.Add(warpCommand);
+                }
+                else
+                {
+                    (Vector3 position, DateTime _) = WarpMath.GetInterceptPosition
+                    (
+                        ship,
+                        targetPositionDB.OwningEntity.GetDataBlob<OrbitDB>(),
+                        EntityCommanding.StarSysDateTime
+                    );
 
-                Vector3 targetPos = Vector3.Normalise(position) * targetSMA;
+                    Vector3 targetPos = Vector3.Normalise(position) * targetSMA;
 
-                // Create the movement order
-                var cargoLibrary = EntityCommanding.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
-                (WarpMoveCommand warpCommand, NewtonThrustCommand? thrustCommand) = WarpMoveCommand.CreateCommand(cargoLibrary, RequestingFactionGuid, ship, Target, targetPos, EntityCommanding.StarSysDateTime, new Vector3() , shipMass);
-                _shipCommands.Add(warpCommand);
+                    // Create the movement order
+                    var cargoLibrary = EntityCommanding.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
+                    (WarpMoveCommand warpCommand, NewtonThrustCommand? thrustCommand) = WarpMoveCommand.CreateCommand(cargoLibrary, RequestingFactionGuid, ship, Target, targetPos, EntityCommanding.StarSysDateTime, new Vector3() , shipMass);
+                    _shipCommands.Add(warpCommand);
+                }
             }
 
             IsRunning = true;

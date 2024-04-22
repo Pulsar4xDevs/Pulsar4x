@@ -1,0 +1,22 @@
+{
+  "name": "Pasiphae",
+  "parent": "Jupiter",
+  "colonizeable": true,
+  "info": {
+    "type": "moon",
+    "albedo": 0.044,
+    "mass": 3E17,
+    "radius": 28.9
+  },
+  "orbit": {
+    "semiMajorAxis": 23624000,
+    "eccentricity": 0.409,
+    "eclipticInclination": 0,
+    "LoAN": 0,
+    "AoP": 0,
+    "meanAnomaly": 0
+  },
+  "geoSurvey": {
+    "pointsRequired": 500
+  }
+}
