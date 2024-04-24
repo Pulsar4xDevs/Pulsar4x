@@ -15,6 +15,7 @@ namespace Pulsar4X.SDL2UI
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBringToFrontOnFocus;
         internal bool IsActive = true;
         GlobalUIState _state;
+        EntityState _entityState;
         NameDB _nameDB;
         internal string NameString;
         public float Width { get; set; }
@@ -35,6 +36,7 @@ namespace Pulsar4X.SDL2UI
         {
             Random rnd = new Random();
             _state = state;
+            _entityState = entityState;
             _entityGuid = entityState.Entity.Id;
             StarSystem starsys = (StarSystem)entityState.Entity.Manager;
             _starSysGuid = starsys.Guid;
@@ -189,6 +191,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     icon._state.EntityClicked(icon._entityGuid, icon._starSysGuid, MouseButtons.Primary);
                 }
+                DisplayContextMenu(camera, icon);
                 ImGui.PopStyleColor(2);
                 return;
             }
@@ -202,6 +205,7 @@ namespace Pulsar4X.SDL2UI
                     icon._state.EntityClicked(icon._entityGuid, icon._starSysGuid, MouseButtons.Primary);
                 }
                 ImGui.PopStyleColor();
+                DisplayContextMenu(camera, icon);
 
                 if(subIcons.Any())
                     ImGui.Separator();
@@ -217,6 +221,7 @@ namespace Pulsar4X.SDL2UI
                             subIcon._state.EntityClicked(subIcon._entityGuid, subIcon._starSysGuid, MouseButtons.Primary);
                         }
                         ImGui.PopStyleColor();
+                        DisplayContextMenu(camera, subIcon);
                     }
                 }
                 else
@@ -234,6 +239,7 @@ namespace Pulsar4X.SDL2UI
                                     subIcon._state.EntityClicked(subIcon._entityGuid, subIcon._starSysGuid, MouseButtons.Primary);
                                 }
                                 ImGui.PopStyleColor();
+                                DisplayContextMenu(camera, subIcon);
                             }
                             ImGui.EndMenu();
                         }
@@ -266,6 +272,18 @@ namespace Pulsar4X.SDL2UI
         private static void EndNameIcon(NameIcon icon)
         {
             ImGui.End();
+        }
+
+        private static void DisplayContextMenu(Camera camera, NameIcon icon)
+        {
+            if(ImGui.BeginPopupContextItem())
+            {
+                if(ImGui.MenuItem("Pin Camera"))
+                {
+                    camera.PinToEntity(icon._entityState.Entity);
+                }
+                ImGui.EndPopup();
+            }
         }
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
