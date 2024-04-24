@@ -4,13 +4,11 @@ using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.Engine;
-using Pulsar4X.Atb;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
 using Pulsar4X.Extensions;
 using Pulsar4X.SDL2UI.Combat;
 using Vector3 = Pulsar4X.Orbital.Vector3;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace Pulsar4X.SDL2UI
@@ -57,7 +55,6 @@ namespace Pulsar4X.SDL2UI
         bool _isRunningFrame = false;
         bool _drawSOI = false;
         bool _drawParentSOI = false;
-        //List<ECSLib.Vector4> positions = new List<ECSLib.Vector4>();
         private bool _showDamageWindow = false;
         private IntPtr _dmgTxtr;
 
@@ -75,11 +72,9 @@ namespace Pulsar4X.SDL2UI
 
         };
 
-
-
         private DebugWindow()
         {
-
+            _uiState.OnStarSystemChanged += RefreshFactionEntites;
         }
         internal static DebugWindow GetInstance()
         {
@@ -89,7 +84,7 @@ namespace Pulsar4X.SDL2UI
             else
             {
                 instance = (DebugWindow)_uiState.LoadedWindows[typeof(DebugWindow)];
-                instance.RefreshFactionEntites();
+                instance.RefreshFactionEntites(_uiState);
                 //if(_uiState.LastClickedEntity?.Entity != null)
                 //    instance.SelectedEntity = _uiState.LastClickedEntity.Entity;
             }
@@ -900,7 +895,7 @@ namespace Pulsar4X.SDL2UI
             return true;
         }
 
-        void RefreshFactionEntites()
+        void RefreshFactionEntites(GlobalUIState uiState)
         {
             _factionOwnedEntites = new List<(string name, Entity entity)>();
             var factionEntites = _uiState.SelectedSystem.GetEntitiesByFaction(_uiState.Faction.Id);
@@ -1282,12 +1277,6 @@ namespace Pulsar4X.SDL2UI
             _dateChangeSinceLastFrame = true;
 
             if(SystemState == null) return;
-
-            if (SystemState.EntitiesToBin.Count > 0)
-            {
-                RefreshFactionEntites();
-            }
-
         }
 
         public override void OnGameTickChange(DateTime newDate)
