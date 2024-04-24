@@ -172,6 +172,11 @@ namespace Pulsar4X.SDL2UI
                 _entityIcons.TryAdd(entityItem.Id, new BeamIcon(entityItem));
             }
 
+            if(entityItem.HasDataBlob<JPSurveyableDB>())
+            {
+                _entityIcons.TryAdd(entityItem.Id, new PointOfInterestIcon(entityItem));
+            }
+
         }
 
         void RemoveIconable(int entityGuid)
