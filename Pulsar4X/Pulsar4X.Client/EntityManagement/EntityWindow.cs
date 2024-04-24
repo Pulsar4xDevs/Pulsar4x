@@ -62,7 +62,7 @@ namespace Pulsar4X.SDL2UI
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(GlobalUIState.NamesForMenus[typeof(PinCameraBlankMenuHelper)]);
             ImGui.PopID();
-
+            /*
             if(Entity.HasDataBlob<VolumeStorageDB>())
             {
                 // Cargo Transfer
@@ -152,6 +152,7 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Open logistics window");
             }
+            */
         }
 
         private void DisplayInfoTab()
