@@ -203,6 +203,7 @@ namespace Pulsar4X.SDL2UI
                                 _uiState.EntityClicked(parent.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                             }
                             ImGui.NextColumn();
+                            ImGui.Separator();
                         }
                         
                     }
@@ -215,6 +216,24 @@ namespace Pulsar4X.SDL2UI
                 if(Entity.TryGetDatablob<StarInfoDB>(out var starInfoDB))
                 {
                     starInfoDB.Display(EntityState, _uiState);
+                }
+
+                if(Entity.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB) && !geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id))
+                {
+                    ImGui.Columns(2);
+                    DisplayHelpers.PrintRow("Geo Surveyable", "Yes");
+                }
+
+                if(Entity.TryGetDatablob<JPSurveyableDB>(out var jPSurveyableDB))
+                {
+                    ImGui.Columns(1);
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
+                    ImGui.Text("Gravitational anomaly!");
+                    ImGui.PopStyleColor();
+                    ImGui.NewLine();
+                    ImGui.TextWrapped("Order a fleet equipped with a gravitational surveyor to survey this location. A successful survey may reveal a Jump Point to another system.");
+                    ImGui.NewLine();
+                    ImGui.TextWrapped("Survey Points Required: " + jPSurveyableDB.PointsRequired);
                 }
 
                 ImGui.Columns(1);
