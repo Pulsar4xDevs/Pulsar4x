@@ -9,11 +9,13 @@ namespace Pulsar4X.SDL2UI
     {
         public static void Display(this StarInfoDB starInfo, EntityState entityState, GlobalUIState uiState)
         {
-            ImGui.Text("Spectral Type: " + starInfo.SpectralType.ToDescription() + starInfo.SpectralSubDivision);
-            ImGui.Text("Luminosity: " + starInfo.Luminosity + " " + starInfo.LuminosityClass.ToString() + " (" + starInfo.LuminosityClass.ToDescription() + ")");
-            ImGui.Text("Class: " + starInfo.Class);
-            ImGui.Text("Age: " + Stringify.Quantity(starInfo.Age));
-            ImGui.Text("Habitable Zone: " + starInfo.MinHabitableRadius_AU.ToString("0.##") + "AU - " + starInfo.MaxHabitableRadius_AU.ToString("0.##") + "AU");
+            ImGui.Columns(2);
+            DisplayHelpers.PrintRow("Spectral Type", starInfo.SpectralType.ToDescription() + starInfo.SpectralSubDivision);
+            DisplayHelpers.PrintRow("Luminosity", starInfo.Luminosity + " " + starInfo.LuminosityClass.ToString() + " (" + starInfo.LuminosityClass.ToDescription() + ")");
+            DisplayHelpers.PrintRow("Class", starInfo.Class);
+            DisplayHelpers.PrintRow("Age", Stringify.Quantity(starInfo.Age));
+            DisplayHelpers.PrintRow("Habitable Zone", starInfo.MinHabitableRadius_AU.ToString("0.##") + "AU - " + starInfo.MaxHabitableRadius_AU.ToString("0.##") + "AU");
+            ImGui.Columns(1);
         }
     }
 }

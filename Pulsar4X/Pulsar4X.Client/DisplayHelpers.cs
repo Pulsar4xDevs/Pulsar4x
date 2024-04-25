@@ -25,24 +25,33 @@ namespace Pulsar4X.SDL2UI
 
         public static void PrintRow(string one, string two, string? tooltipOne = null, string? tooltipTwo = null, bool separator = true)
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-            ImGui.Text(one);
-            ImGui.PopStyleColor();
-            if(!string.IsNullOrEmpty(tooltipOne))
-            {
-                if(ImGui.IsItemHovered()) ImGui.SetTooltip(tooltipOne);
-            }
-            ImGui.NextColumn();
-
-            ImGui.Text(two);
-            if(!string.IsNullOrEmpty(tooltipTwo))
-            {
-                if(ImGui.IsItemHovered()) ImGui.SetTooltip(tooltipTwo);
-            }
-            ImGui.NextColumn();
+            PrintFormattedCell(one, tooltipOne);
+            PrintCell(two, tooltipTwo);
 
             if(separator)
                 ImGui.Separator();
+        }
+
+        public static void PrintFormattedCell(string text, string? tooltip = null)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.Text(text);
+            ImGui.PopStyleColor();
+            if(!string.IsNullOrEmpty(tooltip))
+            {
+                if(ImGui.IsItemHovered()) ImGui.SetTooltip(tooltip);
+            }
+            ImGui.NextColumn();
+        }
+
+        public static void PrintCell(string text, string? tooltip = null)
+        {
+            ImGui.Text(text);
+            if(!string.IsNullOrEmpty(tooltip))
+            {
+                if(ImGui.IsItemHovered()) ImGui.SetTooltip(tooltip);
+            }
+            ImGui.NextColumn();
         }
 
         public static void ShipTooltip(Entity ship, int factionId)

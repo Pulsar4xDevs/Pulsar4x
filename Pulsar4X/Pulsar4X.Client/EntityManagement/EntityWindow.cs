@@ -4,8 +4,6 @@ using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
-using Pulsar4X.ImGuiNetUI;
-using Pulsar4X.ImGuiNetUI.EntityManagement;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -40,13 +38,9 @@ namespace Pulsar4X.SDL2UI
             if (ImGui.Begin(Title + " (" + EntityState.BodyType.ToDescription() + ")###" + Entity.Id, ref IsActive, _flags))
             {
                 DisplayActions();
+                DisplayInfo();
+                DisplayConditional();
 
-                ImGui.BeginTabBar("Tab bar!###Tabs" + Entity.Id);
-
-                DisplayInfoTab();
-                DisplayConditionalTabs();
-
-                ImGui.EndTabBar();
                 ImGui.End();
             }
         }
@@ -155,9 +149,9 @@ namespace Pulsar4X.SDL2UI
             */
         }
 
-        private void DisplayInfoTab()
+        private void DisplayInfo()
         {
-            if(ImGui.BeginTabItem("Info"))
+            if(ImGui.CollapsingHeader("Info", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 if(Entity.HasDataBlob<ShipInfoDB>() && Entity.HasDataBlob<VolumeStorageDB>())
                 {
@@ -173,22 +167,23 @@ namespace Pulsar4X.SDL2UI
                     }
                 }
 
-                if(Entity.HasDataBlob<SystemBodyInfoDB>())
+                ImGui.Columns(2);
+
+                if(Entity.TryGetDatablob<SystemBodyInfoDB>(out var systemBodyInfoDB))
                 {
-                    ImGui.Text("Body Type: " + Entity.GetDataBlob<SystemBodyInfoDB>().BodyType.ToDescription());
+                    DisplayHelpers.PrintRow("Body Type", systemBodyInfoDB.BodyType.ToDescription());
                 }
 
-                if(Entity.HasDataBlob<MassVolumeDB>())
+                if(Entity.TryGetDatablob<MassVolumeDB>(out var massVolumeDB))
                 {
-                    MassVolumeDB mvDb = Entity.GetDataBlob<MassVolumeDB>();
-                    ImGui.Text("Radius: " + Stringify.Distance(mvDb.RadiusInM));
-                    ImGui.Text("Mass: " + Stringify.Mass(mvDb.MassTotal));
+                    DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolumeDB.RadiusInM));
+                    DisplayHelpers.PrintRow("Mass", Stringify.Mass(massVolumeDB.MassTotal));
                     if (ImGui.IsItemHovered())
                     {
-                        ImGui.SetTooltip("Dry: " + Stringify.Mass(mvDb.MassDry));
+                        ImGui.SetTooltip("Dry: " + Stringify.Mass(massVolumeDB.MassDry));
                     }
-                    ImGui.Text("Volume: " + Stringify.Volume(mvDb.Volume_m3));
-                    ImGui.Text("Density: " + mvDb.DensityDry_gcm.ToString("##0.000") + " kg/m^3");
+                    DisplayHelpers.PrintRow("Volume", Stringify.Volume(massVolumeDB.Volume_m3));
+                    DisplayHelpers.PrintRow("Density", massVolumeDB.DensityDry_gcm.ToString("##0.000") + " kg/m^3");
                 }
 
                 if(Entity.TryGetDatablob<PositionDB>(out var positionDB))
@@ -198,40 +193,35 @@ namespace Pulsar4X.SDL2UI
                     {
                         if (Entity.TryGetDatablob<WarpMovingDB>(out var movedb))
                         {
-                            ImGui.Text("Warping " + Stringify.Velocity(movedb.CurrentNonNewtonionVectorMS.Length()));
-
+                            DisplayHelpers.PrintRow("Warping", Stringify.Velocity(movedb.CurrentNonNewtonionVectorMS.Length()));
                         }
                         else
-                            ImGui.Text("Orbiting: ");
-                        ImGui.SameLine();
-                        if(ImGui.SmallButton(parent.GetName(_uiState.Faction.Id)))
                         {
-                            _uiState.EntityClicked(parent.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                            DisplayHelpers.PrintFormattedCell("Orbiting");
+                            if(ImGui.SmallButton(parent.GetName(_uiState.Faction.Id)))
+                            {
+                                _uiState.EntityClicked(parent.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                            }
+                            ImGui.NextColumn();
                         }
+                        
                     }
-                    // if(positionDB.Children.Count > 0)
-                    // {
-                    //     ImGui.Text("Children:");
-                    //     foreach(var child in positionDB.Children.ToArray())
-                    //     {
-                    //         if(ImGui.SmallButton(child.GetName(_uiState.Faction.Id)))
-                    //         {
-                    //             _uiState.EntityClicked(child.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
-                    //         }
-                    //     }
-                    // }
                 }
-
                 if(Entity.HasDataBlob<ColonyInfoDB>())
                 {
                     Entity.GetDataBlob<ColonyInfoDB>().Display(EntityState, _uiState);
                 }
 
-                ImGui.EndTabItem();
+                if(Entity.TryGetDatablob<StarInfoDB>(out var starInfoDB))
+                {
+                    starInfoDB.Display(EntityState, _uiState);
+                }
+
+                ImGui.Columns(1);
             }
         }
 
-        private void DisplayConditionalTabs()
+        private void DisplayConditional()
         {
             if(Entity.Manager == null) return;
 
@@ -239,49 +229,37 @@ namespace Pulsar4X.SDL2UI
 
             foreach(var db in Entity.Manager.GetAllDataBlobsForEntity(Entity.Id))
             {
-                if(isGeoSurveyed && db is AtmosphereDB && ImGui.BeginTabItem("Atmosphere"))
+                if(isGeoSurveyed && db is AtmosphereDB)
                 {
                     ((AtmosphereDB)db).Display(EntityState, _uiState);
-                    ImGui.EndTabItem();
                 }
-                else if(isGeoSurveyed && db is MineralsDB && ImGui.BeginTabItem("Minerals"))
+                else if(isGeoSurveyed && db is MineralsDB && ImGui.CollapsingHeader("Minerals", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     ((MineralsDB)db).Display(EntityState, _uiState);
-                    ImGui.EndTabItem();
                 }
-                else if(db is StarInfoDB && ImGui.BeginTabItem("Star Info"))
-                {
-                    ((StarInfoDB)db).Display(EntityState, _uiState);
-                    ImGui.EndTabItem();
-                }
-                else if(db is ComponentInstancesDB && ImGui.BeginTabItem("Components"))
+                else if(db is ComponentInstancesDB && ImGui.CollapsingHeader("Components", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     ((ComponentInstancesDB)db).Display(EntityState, _uiState);
-                    ImGui.EndTabItem();
                 }
-                else if(db is VolumeStorageDB && ImGui.BeginTabItem("Storage"))
+                else if(db is VolumeStorageDB)
                 {
                     ((VolumeStorageDB)db).Display(EntityState, _uiState);
-                    ImGui.EndTabItem();
                 }
-                else if(db is EnergyGenAbilityDB && ImGui.BeginTabItem("Power"))
-                {
-                    ((EnergyGenAbilityDB)db).Display(EntityState, _uiState);
-                    ImGui.EndTabItem();
-                }
-                else if(db is FleetDB && ImGui.BeginTabItem("Ships"))
-                {
-                    ImGui.EndTabItem();
-                }
+                // else if(db is EnergyGenAbilityDB && ImGui.CollapsingHeader("Power", ImGuiTreeNodeFlags.DefaultOpen))
+                // {
+                //     ((EnergyGenAbilityDB)db).Display(EntityState, _uiState);
+                // }
+                // else if(db is FleetDB && ImGui.CollapsingHeader("Ships", ImGuiTreeNodeFlags.DefaultOpen))
+                // {
+                // }
             }
 
             // Mining tab
             if(Entity.CanShowMiningTab())
             {
-                if(ImGui.BeginTabItem("Mining"))
+                if(ImGui.CollapsingHeader("Mining", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     Entity.DisplayMining(_uiState);
-                    ImGui.EndTabItem();
                 }
             }
         }
