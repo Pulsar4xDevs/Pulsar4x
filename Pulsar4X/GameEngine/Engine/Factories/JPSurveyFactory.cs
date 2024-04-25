@@ -62,7 +62,7 @@ namespace Pulsar4X.Engine
 
             var surveyDB = new JPSurveyableDB(pointsRequired, new SafeDictionary<int, uint>(), 10000000);
             var posDB = new PositionDB(x, y, 0, String.Empty);
-            var nameDB = new NameDB($"Survey Point #{nameNumber}");
+            var nameDB = new NameDB($"Gravitational Anomaly #{nameNumber}");
             //for testing purposes
             // var sensorProfileDB = new SensorProfileDB();
             // sensorProfileDB.EmittedEMSpectra.Add(new Sensors.EMWaveForm(0, 500, 1000), 1E9);
