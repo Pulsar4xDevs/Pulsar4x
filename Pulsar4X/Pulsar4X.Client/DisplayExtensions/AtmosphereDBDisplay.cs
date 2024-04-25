@@ -18,34 +18,15 @@ namespace Pulsar4X.SDL2UI
                 {
                     DisplayHelpers.PrintRow("Hydrosphere", atmosphereDB.HydrosphereExtent.ToString() + "%%");
                 }
-                ImGui.Columns(1);
 
-                if(ImGui.BeginTable("###GasTable" + entityState.Entity.Id, 2))
+                foreach(var (gas, amount) in atmosphereDB.CompositionByPercent)
                 {
-                    ImGui.TableSetupColumn("Type");
-                    ImGui.TableSetupColumn("Percent");
-                    ImGui.TableHeadersRow();
-
-                    foreach(var (gas, amount) in atmosphereDB.CompositionByPercent)
-                    {
-                        var blueprint = uiState.Game.AtmosphericGases[gas];
-                        ImGui.TableNextRow();
-                        ImGui.TableNextColumn();
-                        ImGui.Text(blueprint.Name);
-                        ImGui.TableNextColumn();
-                        if(Math.Round(amount, 4) > 0)
-                        {
-                            ImGui.Text(Stringify.Quantity(Math.Round(amount, 4)) + " %%");
-                        }
-                        else
-                        {
-                            ImGui.Text("trace amounts");
-                        }
-                    }
-
-                    ImGui.EndTable();
+                    var blueprint = uiState.Game.AtmosphericGases[gas];
+                    var amountString = Math.Round(amount, 4) > 0 ? Stringify.Quantity(Math.Round(amount, 4)) + " %%" : "trace amounts";
+                    DisplayHelpers.PrintRow(blueprint.Name, amountString);
                 }
             }
+            ImGui.Columns(1);
         }
     }
 }
