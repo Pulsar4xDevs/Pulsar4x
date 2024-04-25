@@ -23,9 +23,9 @@ namespace Pulsar4X.SDL2UI
         public delegate void SystemStateEntityEventHandler(SystemState systemState, Entity entity);
         public delegate void SystemStateEntityIdEventHandler(SystemState systemState, int entityId);
         public delegate void SystemStateEntityUpdateHandler(SystemState systemState, int entityId, Message messages);
-        public event SystemStateEntityEventHandler OnEntityAdded;
-        public event SystemStateEntityIdEventHandler OnEntityRemoved;
-        public event SystemStateEntityUpdateHandler OnEntityUpdated;
+        public event SystemStateEntityEventHandler? OnEntityAdded;
+        public event SystemStateEntityIdEventHandler? OnEntityRemoved;
+        public event SystemStateEntityUpdateHandler? OnEntityUpdated;
 
         private Entity _faction;
         internal StarSystem StarSystem;

@@ -40,10 +40,11 @@ public class DataViewerWindow : PulsarGuiWindow
 
     internal override void Display()
     {
-        if (IsActive && ImGui.Begin("Mod Data", ref IsActive))
+        if(!IsActive || _modDataStore == null) return;
+
+        if (ImGui.Begin("Mod Data", ref IsActive))
         {
             
-            object? value = null;
             Type objType = _modDataStore.GetType();
             BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
             MemberInfo[] memberInfos = objType.GetMembers(flags);
@@ -106,7 +107,7 @@ public static class ModDataInspector
             ImGui.BeginChild("InnerColomns", chsize);
             ImGui.Columns(2);
 
-            if (typeof(IDictionary).IsAssignableFrom(value.GetType()))
+            if (value != null && typeof(IDictionary).IsAssignableFrom(value.GetType()))
             {
                 var items = (IDictionary?)GetValue(memberInfo, dataObj);
                 if (items != null)
@@ -138,7 +139,7 @@ public static class ModDataInspector
             }
             
             
-            else if (typeof(ICollection).IsAssignableFrom(value.GetType()))
+            else if (value != null && typeof(ICollection).IsAssignableFrom(value.GetType()))
             {
                 var items = (ICollection?)GetValue(memberInfo, dataObj);
                 if (items != null)
@@ -242,8 +243,9 @@ public static class ModDataInspector
         BorderListOptions.End(size);
     }
     
-        static void RecursiveReflection(object obj)
+        static void RecursiveReflection(object? obj)
         {
+            if(obj == null) return;
             object? value = null;
             Type objType = obj.GetType();
             BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;

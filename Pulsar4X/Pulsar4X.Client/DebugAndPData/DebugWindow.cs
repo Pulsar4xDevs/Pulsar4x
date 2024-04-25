@@ -451,10 +451,8 @@ namespace Pulsar4X.SDL2UI
 
 
                         }
-                        if (SelectedEntity.HasDataBlob<NewtonMoveDB>())
+                        if (SelectedEntity.TryGetDatablob<NewtonMoveDB>(out var nmdb) && SelectedEntity.TryGetDatablob<NewtonThrustAbilityDB>(out var ntdb))
                         {
-                            var nmdb = _uiState.LastClickedEntity.Entity.GetDataBlob<NewtonMoveDB>();
-                            var ntdb = _uiState.LastClickedEntity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
                             if (ImGui.CollapsingHeader("NewtonMove: ###NewtHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                             {
                                 ImGui.Text("Manuver Vector: " + nmdb.ManuverDeltaV);
@@ -473,9 +471,8 @@ namespace Pulsar4X.SDL2UI
 
                         }
 
-                        if (SelectedEntity.HasDataBlob<WarpMovingDB>())
+                        if (SelectedEntity.TryGetDatablob<WarpMovingDB>(out var db))
                         {
-                            var db = _uiState.LastClickedEntity.Entity.GetDataBlob<WarpMovingDB>();
                             if (ImGui.CollapsingHeader("Transit: ###TransitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                             {
                                 ImGui.Text("EntryPoint: ");
@@ -551,28 +548,27 @@ namespace Pulsar4X.SDL2UI
 
                         }
 
-                        if (SelectedEntity.HasDataBlob<GenericFiringWeaponsDB>())
+                        if (SelectedEntity.TryGetDatablob<GenericFiringWeaponsDB>(out var genericFiringWeaponsDB))
                         {
-                            var db = SelectedEntity.GetDataBlob<GenericFiringWeaponsDB>();
                             if (ImGui.CollapsingHeader("Firing Weapons"))
                             {
-                                for (int i = 0; i < db.WpnIDs.Length; i++)
+                                for (int i = 0; i < genericFiringWeaponsDB.WpnIDs.Length; i++)
                                 {
-                                    float reloadAmount = db.InternalMagQty[i];
-                                    float reloadMax = db.InternalMagSizes[i];
-                                    float reloadPerShot = db.AmountPerShot[i];
-                                    float minShots = db.MinShotsPerfire[i];
+                                    float reloadAmount = genericFiringWeaponsDB.InternalMagQty[i];
+                                    float reloadMax = genericFiringWeaponsDB.InternalMagSizes[i];
+                                    float reloadPerShot = genericFiringWeaponsDB.AmountPerShot[i];
+                                    float minShots = genericFiringWeaponsDB.MinShotsPerfire[i];
 
                                     float percFull = reloadAmount / reloadMax;
                                     float percToFire = reloadAmount / (minShots * reloadPerShot);
-                                    float percPerSec = db.ReloadAmountsPerSec[i] / reloadMax;
+                                    float percPerSec = genericFiringWeaponsDB.ReloadAmountsPerSec[i] / reloadMax;
                                     System.Numerics.Vector2 pbsize = new System.Numerics.Vector2(200, 5);
 
                                     float maxShots = reloadMax / reloadPerShot;
                                     ImGui.Text("Max shots per burst: " + maxShots);
                                     ImGui.Text("Min shots per burst: " + minShots);
 
-                                    ImGui.Text("Reload Amount Per Sec:" + db.ReloadAmountsPerSec[i]);
+                                    ImGui.Text("Reload Amount Per Sec:" + genericFiringWeaponsDB.ReloadAmountsPerSec[i]);
                                     ImGui.Text("Reload Percent Per Sec:" + percPerSec);
 
                                     ImGui.Text("Reload Progress " + reloadAmount + "/" + reloadMax);
@@ -581,7 +577,7 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.ProgressBar(percToFire, pbsize);
 
 
-                                    var firingShots = db.ShotsFiredThisTick[i];
+                                    var firingShots = genericFiringWeaponsDB.ShotsFiredThisTick[i];
                                     ImGui.Text("Firing " + firingShots + " this tick");
 
                                 }
@@ -591,8 +587,6 @@ namespace Pulsar4X.SDL2UI
                         if (SelectedEntity.HasDataBlob<SensorInfoDB>())
                         {
                             var actualEntity = SelectedEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
-
-
 
                             if (actualEntity.IsValid && actualEntity.HasDataBlob<AsteroidDamageDB>())
                             {

@@ -219,13 +219,12 @@ namespace Pulsar4X.SDL2UI
                         if (!orbitDB.IsStationary)
                         {
                             if (_sysState != null && _sysState.EntityStatesWithPosition.ContainsKey(message.EntityId.Value))
-                                entityState = _sysState.EntityStatesWithPosition[message.EntityId.Value];
-                            else
                             {
-                                if(_sysState.StarSystem.TryGetEntityById(message.EntityId.Value, out var retrievedEntity))
-                                {
-                                    entityState = new EntityState(retrievedEntity) { Name = "Unknown" };
-                                }
+                                entityState = _sysState.EntityStatesWithPosition[message.EntityId.Value];
+                            }
+                            else if(_sysState != null && _sysState.StarSystem.TryGetEntityById(message.EntityId.Value, out var retrievedEntity))
+                            {
+                                entityState = new EntityState(retrievedEntity) { Name = "Unknown" };
                             }
 
                             OrbitIconBase orbit;
@@ -241,7 +240,7 @@ namespace Pulsar4X.SDL2UI
 
                         }
                     }
-                    if (message.DataBlob is WarpMovingDB && _sysState.StarSystem.TryGetEntityById(message.EntityId.Value, out var entity))
+                    if (message.DataBlob is WarpMovingDB && _sysState != null && _sysState.StarSystem.TryGetEntityById(message.EntityId.Value, out var entity))
                     {
                         var widget = new WarpMovingIcon(entity);
                         widget.OnPhysicsUpdate();

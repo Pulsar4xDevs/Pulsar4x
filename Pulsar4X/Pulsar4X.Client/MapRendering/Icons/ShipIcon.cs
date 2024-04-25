@@ -312,7 +312,7 @@ namespace Pulsar4X.SDL2UI
                 Shapes.Add(_flame);
             }
 
-            Func<Message, bool> filterById = msg => msg.EntityId.Value == entity.Id;
+            Func<Message, bool> filterById = msg => msg.EntityId != null && msg.EntityId.Value == entity.Id;
 
             MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, DBAdded, filterById);
             MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, DBRemoved, filterById);

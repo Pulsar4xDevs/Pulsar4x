@@ -19,12 +19,6 @@ namespace Pulsar4X.SDL2UI
         public SysBodyIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
         {
             _positionDB = entity.GetDataBlob<PositionDB>();
-            Setup(entity);
-        }
-
-        void Setup(Entity entity)
-        {
-
             _systemBodyInfoDB = entity.GetDataBlob<SystemBodyInfoDB>();
             _bodyType = _systemBodyInfoDB.BodyType;
             _massVolDB = entity.GetDataBlob<MassVolumeDB>();
@@ -42,11 +36,6 @@ namespace Pulsar4X.SDL2UI
                 default:
                     Unknown();
                     break;
-            }
-
-            if (entity.HasDataBlob<AtmosphereDB>())
-            {
-
             }
         }
 
