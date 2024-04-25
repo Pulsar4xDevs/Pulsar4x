@@ -97,11 +97,11 @@ namespace Pulsar4X.SDL2UI
                         SelectedEntity.Entity.DisplayMining(_uiState);
                         ImGui.EndTabItem();
                     }
-                    if(ImGui.BeginTabItem("Logistics"))
-                    {
-                        SelectedEntity.Entity.DisplayLogistics(SelectedEntity, _uiState);
-                        ImGui.EndTabItem();
-                    }
+                    // if(ImGui.BeginTabItem("Logistics"))
+                    // {
+                    //     SelectedEntity.Entity.DisplayLogistics(SelectedEntity, _uiState);
+                    //     ImGui.EndTabItem();
+                    // }
                     if(SelectedEntity.Entity.HasDataBlob<NavalAcademyDB>() && ImGui.BeginTabItem("Naval Academy"))
                     {
                         SelectedEntity.Entity.DisplayNavalAcademy(SelectedEntity, _uiState);
