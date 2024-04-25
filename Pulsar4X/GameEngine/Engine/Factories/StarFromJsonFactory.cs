@@ -54,7 +54,8 @@ public static class StarFromJsonFactory
         blobsToAdd.Add(starInfoDb);
         blobsToAdd.Add(new PositionDB(Orbital.Vector3.Zero, system.Guid));
         blobsToAdd.Add(new OrbitDB());
-        blobsToAdd.Add(SensorTools.SetStarEmmisionSig(starInfoDb, massVolumeDb));
+        //blobsToAdd.Add(SensorTools.SetStarEmmisionSig(starInfoDb, massVolumeDb));
+        blobsToAdd.Add(new VisibleByDefaultDB());
 
 
         var star = Entity.Create();
