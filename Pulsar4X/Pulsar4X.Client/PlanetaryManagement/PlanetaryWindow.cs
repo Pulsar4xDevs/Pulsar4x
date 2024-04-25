@@ -25,7 +25,7 @@ namespace Pulsar4X.SDL2UI
 
         public PlanetaryWindow(EntityState entity, GlobalUIState state)
         {
-            _state = state;
+            _uiState = state;
             SetName("PlanetaryWindow|" + entity.Entity.Id.ToString());
             if (_mineralDefinitions == null) {
                 _mineralDefinitions = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMineralsList().ToList();

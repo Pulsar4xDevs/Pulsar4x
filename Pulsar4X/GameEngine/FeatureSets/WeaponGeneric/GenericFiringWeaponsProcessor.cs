@@ -14,7 +14,7 @@ public class GenericFiringWeaponsProcessor : IHotloopProcessor
 
     public void ProcessEntity(Entity entity, int deltaSeconds)
     {
-        if(entity.TryGetDatablob(out GenericFiringWeaponsDB db))
+        if(entity.TryGetDatablob<GenericFiringWeaponsDB>(out var db))
             UpdateWeapons(db);
     }
 
@@ -31,17 +31,17 @@ public class GenericFiringWeaponsProcessor : IHotloopProcessor
         //fire weapons that are able.
         for (int i = 0; i < db.WpnIDs.Length; i++)
         {
-            int shots = (int)(db.InternalMagQty[i] / db.AmountPerShot[i]); 
-            if (shots >= db.MinShotsPerfire[i])
+            int shots = (int)(db.InternalMagQty[i] / db.AmountPerShot[i]);
+            if (shots >= db.MinShotsPerfire[i] && db.OwningEntity != null)
             {
                 db.ShotsFiredThisTick[i] = shots;
                 var tgt = db.FireControlStates[i].Target;
                 db.FireInstructions[i].FireWeapon(db.OwningEntity, tgt, shots);
                 db.InternalMagQty[i] -= shots * db.AmountPerShot[i];
                 db.WeaponStates[i].InternalMagCurAmount = db.InternalMagQty[i];
-            }    
+            }
         }
-        
+
         //reload all internal magazines.
         for (int i = 0; i < db.WpnIDs.Length ; i++)
         {
@@ -50,7 +50,7 @@ public class GenericFiringWeaponsProcessor : IHotloopProcessor
             db.InternalMagQty[i] = magQty;
             db.WeaponStates[i].InternalMagCurAmount = magQty;
         }
-        
+
 
     }
 

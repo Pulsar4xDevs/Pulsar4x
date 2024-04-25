@@ -10,9 +10,8 @@ namespace Pulsar4X.SDL2UI
         internal bool CanActive = false;
         internal bool IsActive = false;
         internal string UniqueName = "test";
-        internal static GlobalUIState _state;
 
-        protected EntityState _lookedAtEntity;
+        protected EntityState? _lookedAtEntity;
 
         public void SetActive(bool ActiveVal = true)
         {
@@ -41,12 +40,11 @@ namespace Pulsar4X.SDL2UI
 
         public void StartDisplay()
         {
-            _state.LoadedNonUniqueWindows[this.UniqueName] = this;
+            _uiState.LoadedNonUniqueWindows[this.UniqueName] = this;
         }
 
         protected NonUniquePulsarGuiWindow()
         {
-
         }
 
         internal abstract void Display();

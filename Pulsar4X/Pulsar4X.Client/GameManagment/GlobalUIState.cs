@@ -27,9 +27,9 @@ namespace Pulsar4X.SDL2UI
 
     public class GlobalUIState
     {
-        public event FactionChangedEventHandler OnFactionChanged;
-        public event StarSystemChangedEventHandler OnStarSystemChanged;
-        public event StarSystemAddedEventHandler OnStarSystemAdded;
+        public event FactionChangedEventHandler? OnFactionChanged;
+        public event StarSystemChangedEventHandler? OnStarSystemChanged;
+        public event StarSystemAddedEventHandler? OnStarSystemAdded;
 
         public bool debugnewgame = true;
         //internal PulsarGuiWindow distanceRulerWindow { get; set; }
@@ -72,7 +72,7 @@ namespace Pulsar4X.SDL2UI
         internal DateTime SelectedSystemTime { get { return StarSystemStates[SelectedStarSysGuid].StarSystem.StarSysDateTime; } }
         internal DateTime SelectedSysLastUpdateTime = new ();
         internal string SelectedStarSysGuid { get; private set; }
-        internal SystemMapRendering SelectedSysMapRender { get { return GalacticMap.SelectedSysMapRender; } }
+        internal SystemMapRendering? SelectedSysMapRender { get { return GalacticMap.SelectedSysMapRender; } }
         internal DateTime PrimarySystemDateTime;
         internal EntityContextMenu ContextMenu { get; set; }
         internal SafeDictionary<string, SystemState> StarSystemStates = new ();

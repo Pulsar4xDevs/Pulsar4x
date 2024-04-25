@@ -12,18 +12,21 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         private EntityState _entityState;
         Vector2 _plotSize = new Vector2(512, 64);
         private EnergyGenAbilityDB? _energyGenDB;
-        
-        
+
+
         internal static PowerGen GetInstance()
         {
             PowerGen instance;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(PowerGen)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(PowerGen)) && _uiState.LastClickedEntity != null)
             {
                 instance = new PowerGen(_uiState.LastClickedEntity);
             }
             else
+            {
                 instance = (PowerGen)_uiState.LoadedWindows[typeof(PowerGen)];
-            if(instance._entityState != _uiState.LastClickedEntity)
+            }
+
+            if(_uiState.LastClickedEntity != null && instance._entityState != _uiState.LastClickedEntity)
                 instance.SetEntity(_uiState.LastClickedEntity);
 
             return instance;
@@ -62,7 +65,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         internal override void Display()
         {
-            if(_entityState != _uiState.LastClickedEntity)//If the selected entity has changed
+            if(_uiState.LastClickedEntity != null && _entityState != _uiState.LastClickedEntity)//If the selected entity has changed
                 SetEntity(_uiState.LastClickedEntity);
 
             if(!IsActive || !CanActive || _energyGenDB == null)

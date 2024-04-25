@@ -16,7 +16,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         private OrdersListUI(EntityState entity, GlobalUIState state)
         {
-            _state = state;
+            _uiState = state;
             SetName("OrdersList|" + entity.Entity.Id.ToString());
             _flags = ImGuiWindowFlags.None;
             onEntityChange(entity);
