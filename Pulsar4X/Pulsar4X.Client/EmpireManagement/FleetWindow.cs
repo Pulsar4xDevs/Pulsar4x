@@ -521,33 +521,33 @@ namespace Pulsar4X.SDL2UI
                     return;
                 }
 
-                var bodies = SelectedFleet.Manager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_uiState.Faction.Id);
+                var bodies = _uiState.StarSystemStates[SelectedFleet.Manager.ManagerGuid].GetFilteredEntities(EntityFilter.Friendly | EntityFilter.Neutral, _uiState.Faction.Id, typeof(SystemBodyInfoDB));
                 switch(selectedIssueOrderType)
                 {
                     case IssueOrderType.MoveTo:
-                        foreach(var body in bodies)
+                        foreach(var bodyState in bodies)
                         {
-                            var name = body.GetName(_uiState.Faction.Id);
+                            var name = bodyState.Entity.GetName(_uiState.Faction.Id);
                             if(ImGui.Button(name + "###movement-button-" + name))
                             {
-                                var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
+                                var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, bodyState.Entity);
                                 _uiState.Game.OrderHandler.HandleOrder(order);
                             }
                         }
                         break;
                     case IssueOrderType.GeoSurvey:
-                        foreach(var body in bodies)
+                        foreach(var bodyState in bodies)
                         {
-                            if(!body.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB)) continue;
+                            if(!bodyState.Entity.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB)) continue;
                             if(geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id)) continue;
 
-                            var name = body.GetName(_uiState.Faction.Id);
+                            var name = bodyState.Entity.GetName(_uiState.Faction.Id);
                             if(ImGui.Button(name + "###geosurvey-button-" + name))
                             {
-                                var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
+                                var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, bodyState.Entity);
                                 _uiState.Game.OrderHandler.HandleOrder(order);
 
-                                var order2 = GeoSurveyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
+                                var order2 = GeoSurveyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, bodyState.Entity);
                                 _uiState.Game.OrderHandler.HandleOrder(order2);
                             }
                         }
