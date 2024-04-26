@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using Pulsar4X.Messaging;
 using System.Threading.Tasks;
 using Pulsar4X.DataStructures;
+using System.Linq;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -197,6 +198,28 @@ namespace Pulsar4X.SDL2UI
             {
                 item.PostFrameCleanup();
             }
+        }
+
+        public List<EntityState> GetFilteredEntities(EntityFilter entityFilter, int factionId, Type? datablobFilter = null)
+        {
+            return GetFilteredEntities(entityFilter, factionId, datablobFilter == null ? null : new List<Type>() { datablobFilter });
+        }
+
+        public List<EntityState> GetFilteredEntities(EntityFilter entityFilter, int factionId, List<Type>? datablobFilter = null, FilterLogic filterLogic = FilterLogic.And)
+        {
+            return EntityStatesWithPosition.Values.Where(entityState =>
+                ((entityFilter.HasFlag(EntityFilter.Friendly) && entityState.Entity.FactionOwnerID == factionId) ||
+                (entityFilter.HasFlag(EntityFilter.Neutral) && entityState.Entity.FactionOwnerID == Game.NeutralFactionId) ||
+                (entityFilter.HasFlag(EntityFilter.Hostile) && entityState.Entity.FactionOwnerID != factionId && entityState.Entity.FactionOwnerID != Game.NeutralFactionId)) &&
+                (datablobFilter == null || datablobFilter.Count == 0 || EvaluateDataBlobs(entityState, datablobFilter, filterLogic)))
+                .ToList();
+        }
+
+        private bool EvaluateDataBlobs(EntityState entityState, List<Type> dataTypes, FilterLogic logic)
+        {
+            var results = dataTypes.Select(type => entityState.HasDataBlob(type)).ToList();
+
+            return logic == FilterLogic.And ? results.All(x => x) : results.Any(x => x);
         }
     }
 }

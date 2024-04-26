@@ -7,6 +7,7 @@ using Pulsar4X.Engine.Orders;
 using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Messaging;
 using System.Threading.Tasks;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -19,10 +20,10 @@ namespace Pulsar4X.SDL2UI
         public NameIcon? NameIcon;
         public IKepler? OrbitIcon;
         public OrbitOrderWidget? DebugOrbitOrder;
-        public bool IsDestroyed = false; //currently IsDestroyed = true if moved from one system to another, may need to revisit this. 
-        public Dictionary<Type, BaseDataBlob> DataBlobs = new Dictionary<Type, BaseDataBlob>();
-        public List<Message> Changes = new List<Message>();
-        public List<Message> _changesNextFrame = new List<Message>();
+        public bool IsDestroyed = false; //currently IsDestroyed = true if moved from one system to another, may need to revisit this.
+        public SafeDictionary<Type, BaseDataBlob> DataBlobs = new ();
+        public SafeList<Message> Changes = new ();
+        public SafeList<Message> _changesNextFrame = new ();
         public CommandReferences? CmdRef;
         internal string? StarSysGuid;
         internal UserOrbitSettings.OrbitBodyType BodyType = UserOrbitSettings.OrbitBodyType.Unknown;
@@ -102,7 +103,6 @@ namespace Pulsar4X.SDL2UI
             get
             {
                 return DataBlobs.ContainsKey(typeof(EntityResearchDB)) ;
-
             }
         }
         public bool CanConstruct
@@ -110,7 +110,6 @@ namespace Pulsar4X.SDL2UI
             get
             {
                 return DataBlobs.ContainsKey(typeof(IndustryAbilityDB)) ;
-
             }
         }
 
@@ -170,7 +169,7 @@ namespace Pulsar4X.SDL2UI
 
         async Task OnEntityRemoved(Message message)
         {
-            await Task.Run(() => 
+            await Task.Run(() =>
             {
                 DataBlobs.Clear();
                 IsDestroyed = true;
@@ -179,7 +178,7 @@ namespace Pulsar4X.SDL2UI
 
         async Task OnDBAdded(Message message)
         {
-            await Task.Run(() => 
+            await Task.Run(() =>
             {
                 if(message.DataBlob != null)
                 {
@@ -191,7 +190,7 @@ namespace Pulsar4X.SDL2UI
 
         async Task OnDBRemoved(Message message)
         {
-            await Task.Run(() => 
+            await Task.Run(() =>
             {
                 if(message.DataBlob != null)
                 {
@@ -204,7 +203,12 @@ namespace Pulsar4X.SDL2UI
         public void PostFrameCleanup()
         {
             Changes = _changesNextFrame;
-            _changesNextFrame = new List<Message>();
+            _changesNextFrame.Clear();
+        }
+
+        public bool HasDataBlob(Type? type)
+        {
+            return type == null ? false : DataBlobs.ContainsKey(type);
         }
     }
 }
