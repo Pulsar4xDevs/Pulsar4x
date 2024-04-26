@@ -47,6 +47,11 @@ namespace Pulsar4X.SDL2UI
         private string[] orderConditionDescriptions = OrderRegistry.Conditions.Keys.ToArray();
         private byte[] orderNameBuffer = new byte[32];
 
+        private List<EntityState> moveToList = new ();
+        private List<EntityState> geoSurveyList = new ();
+        private List<EntityState> gravSurveyList = new ();
+        private List<EntityState> jumpPointList = new ();
+
         private FleetWindow()
         {
             FactionChanged(_uiState);
@@ -284,7 +289,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             selectedIssueOrderType = IssueOrderType.GeoSurvey;
                         }
-                        if(SelectedFleet.HasJPSurveyAbililty() && ImGui.Selectable("Jump Point Survey ...", selectedIssueOrderType == IssueOrderType.JPSurvey))
+                        if(SelectedFleet.HasJPSurveyAbililty() && ImGui.Selectable("Grav Survey ...", selectedIssueOrderType == IssueOrderType.JPSurvey))
                         {
                             selectedIssueOrderType = IssueOrderType.JPSurvey;
                         }
@@ -521,13 +526,20 @@ namespace Pulsar4X.SDL2UI
                     return;
                 }
 
-                var bodies = _uiState.StarSystemStates[SelectedFleet.Manager.ManagerGuid].GetFilteredEntities(EntityFilter.Friendly | EntityFilter.Neutral, _uiState.Faction.Id, typeof(SystemBodyInfoDB));
                 switch(selectedIssueOrderType)
                 {
                     case IssueOrderType.MoveTo:
-                        foreach(var bodyState in bodies)
+                        moveToList = _uiState.StarSystemStates[SelectedFleet.Manager.ManagerGuid].GetFilteredEntities(
+                            EntityFilter.Friendly | EntityFilter.Neutral,
+                            _uiState.Faction.Id,
+                            new List<Type>() {
+                                typeof(SystemBodyInfoDB),
+                                typeof(PositionDB)
+                            });
+
+                        foreach(var bodyState in moveToList)
                         {
-                            var name = bodyState.Entity.GetName(_uiState.Faction.Id);
+                            var name = bodyState.Name;
                             if(ImGui.Button(name + "###movement-button-" + name))
                             {
                                 var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, bodyState.Entity);
@@ -536,12 +548,17 @@ namespace Pulsar4X.SDL2UI
                         }
                         break;
                     case IssueOrderType.GeoSurvey:
-                        foreach(var bodyState in bodies)
+                        geoSurveyList = _uiState.StarSystemStates[SelectedFleet.Manager.ManagerGuid].GetFilteredEntities(
+                            EntityFilter.Friendly | EntityFilter.Neutral,
+                            _uiState.Faction.Id,
+                            typeof(GeoSurveyableDB));
+
+                        foreach(var bodyState in geoSurveyList)
                         {
                             if(!bodyState.Entity.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB)) continue;
                             if(geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id)) continue;
 
-                            var name = bodyState.Entity.GetName(_uiState.Faction.Id);
+                            var name = bodyState.Name;
                             if(ImGui.Button(name + "###geosurvey-button-" + name))
                             {
                                 var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, bodyState.Entity);
@@ -553,12 +570,17 @@ namespace Pulsar4X.SDL2UI
                         }
                         break;
                     case IssueOrderType.JPSurvey:
-                        var jumpPointDBs = SelectedFleet.Manager.GetAllDataBlobsOfType<JPSurveyableDB>();
-                        foreach(var jpSurveyableDB in jumpPointDBs)
+                        gravSurveyList = _uiState.StarSystemStates[SelectedFleet.Manager.ManagerGuid].GetFilteredEntities(
+                            EntityFilter.Friendly | EntityFilter.Neutral,
+                            _uiState.Faction.Id,
+                            typeof(JPSurveyableDB));
+
+                        foreach(var jpBody in gravSurveyList)
                         {
+                            if(!jpBody.Entity.TryGetDatablob<JPSurveyableDB>(out var jpSurveyableDB)) continue;
                             if(jpSurveyableDB.IsSurveyComplete(_uiState.Faction.Id)) continue;
 
-                            var name = jpSurveyableDB.OwningEntity?.GetName(_uiState.Faction.Id);
+                            var name = jpBody.Name;
                             if(ImGui.Button(name + "###jpsurvey-button-" + name))
                             {
                                 if(jpSurveyableDB.OwningEntity != null)
@@ -573,12 +595,17 @@ namespace Pulsar4X.SDL2UI
                         }
                         break;
                     case IssueOrderType.Jump:
-                        var jumpGates = SelectedFleet.Manager.GetAllDataBlobsOfType<JumpPointDB>();
-                        foreach(var jumpGateDB in jumpGates)
+                        jumpPointList = _uiState.StarSystemStates[SelectedFleet.Manager.ManagerGuid].GetFilteredEntities(
+                            EntityFilter.Friendly | EntityFilter.Neutral,
+                            _uiState.Faction.Id,
+                            typeof(JumpPointDB));
+
+                        foreach(var jumpGate in jumpPointList)
                         {
+                            if(!jumpGate.Entity.TryGetDatablob<JumpPointDB>(out var jumpGateDB)) continue;
                             if(!jumpGateDB.IsDiscovered.Contains(_uiState.Faction.Id)) continue;
 
-                            var name = jumpGateDB.OwningEntity?.GetName(_uiState.Faction.Id);
+                            var name = jumpGate.Name;
                             if(ImGui.Button(name + "###jump-gate-button-" + name))
                             {
                                 if(jumpGateDB.OwningEntity != null)
