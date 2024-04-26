@@ -630,9 +630,8 @@ namespace Pulsar4X.SDL2UI
         {
             if (ImGui.BeginTabItem("Info"))
             {
-                BorderGroup.Begin("Info", ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 1.0f)));
+                BorderGroup.Begin("Debug Info", ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 1.0f)));
 
-                ImGui.Text(_uiState.PrimarySystemDateTime.ToString());
                 ImGui.Text("GitHash: " + AssemblyInfo.GetGitHash());
 
                 BorderGroup.End();
