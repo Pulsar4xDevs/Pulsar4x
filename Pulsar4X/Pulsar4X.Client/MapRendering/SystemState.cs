@@ -12,12 +12,7 @@ using System.Linq;
 namespace Pulsar4X.SDL2UI
 {
     /// <summary>
-    /// System state.
-    /// *Notes*
-    /// Currently Entity has an Entity.ChangeEvent
-    /// each individual EntityState listens to this and changes the IsDestroyed flag if needed.
-    /// Should that be done here instead? TODO: profile this to see which is faster, if either.
-    ///
+    /// Maintains client side state for a StarSystem
     /// </summary>
     public class SystemState
     {
@@ -33,12 +28,11 @@ namespace Pulsar4X.SDL2UI
         internal SystemSensorContacts? SystemContacts;
         ConcurrentQueue<Message> _sensorChanges = new ConcurrentQueue<Message>();
         internal List<Message> SensorChanges = new List<Message>();
-        ManagerSubPulse PulseMgr;
-
         public ConcurrentQueue<int> EntitiesToAdd = new ();
         public ConcurrentQueue<(int, Message)> EntitiesToUpdate = new ();
         public SafeList<int> EntitiesToBin = new ();
         public List<Message> SystemChanges = new List<Message>();
+        public SafeDictionary<int, EntityState> AllEntities = new ();
         public SafeDictionary<int, EntityState> EntityStatesWithNames = new ();
         public SafeDictionary<int, EntityState> EntityStatesWithPosition = new ();
         public SafeDictionary<int, EntityState> EntityStatesColonies = new ();
@@ -48,7 +42,6 @@ namespace Pulsar4X.SDL2UI
             StarSystem = system;
             SystemContacts = system.GetSensorContacts(faction.Id);
             _sensorChanges = SystemContacts.Changes.Subscribe();
-            PulseMgr = system.ManagerSubpulses;
             _faction = faction;
 
             if(_faction.Id == system.Game.GameMasterFaction.Id)
@@ -102,23 +95,26 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private void SetupEntity(Entity entityItem, Entity faction)
+        private void SetupEntity(Entity entity, Entity faction)
         {
-            var entityState = new EntityState(entityItem);
-            // Add Data to State if Available
-            if (!EntityStatesWithNames.ContainsKey(entityItem.Id) && entityItem.TryGetDatablob<NameDB>(out var nameDB))
+            var entityState = new EntityState(entity);
+
+            if(!AllEntities.ContainsKey(entity.Id))
+                AllEntities.Add(entity.Id, entityState);
+
+            if (!EntityStatesWithNames.ContainsKey(entity.Id) && entity.TryGetDatablob<NameDB>(out var nameDB))
             {
-                entityState.Name = nameDB.GetName(faction);
-                EntityStatesWithNames.Add(entityItem.Id, entityState);
+                entityState.Name = nameDB.GetName(faction); // TODO: doesn't update when if/when the entity is renamed
+                EntityStatesWithNames.Add(entity.Id, entityState);
             }
-            if (!EntityStatesWithPosition.ContainsKey(entityItem.Id) && entityItem.TryGetDatablob<PositionDB>(out var positionDB))
+            if (!EntityStatesWithPosition.ContainsKey(entity.Id) && entity.TryGetDatablob<PositionDB>(out var positionDB))
             {
                 entityState.Position = positionDB;
-                EntityStatesWithPosition.Add(entityItem.Id, entityState);
+                EntityStatesWithPosition.Add(entity.Id, entityState);
             }
-            if (!EntityStatesColonies.ContainsKey(entityItem.Id) && entityItem.HasDataBlob<ColonyInfoDB>())
+            if (!EntityStatesColonies.ContainsKey(entity.Id) && entity.HasDataBlob<ColonyInfoDB>())
             {
-                EntityStatesColonies.Add(entityItem.Id, entityState);
+                EntityStatesColonies.Add(entity.Id, entityState);
             }
         }
 
@@ -150,10 +146,6 @@ namespace Pulsar4X.SDL2UI
             });
         }
 
-        /// <summary>
-        /// Populates the EntitesToBin list and changes.
-        /// Call this before any UI work done.
-        /// </summary>
         public void PreFrameSetup()
         {
             while(EntitiesToAdd.TryDequeue(out var entityToAdd))
@@ -171,13 +163,9 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        /// <summary>
-        /// clears the EntitysToBin list.
-        /// Call this afer all UI work is done. (each ui object needs to handle it's own cleanup using EntitesToBin list as a reference before this is called)
-        /// </summary>
         public void PostFrameCleanup()
         {
-            foreach(var item in EntityStatesWithPosition.Values)
+            foreach(var item in AllEntities.Values)
             {
                 if(item.IsDestroyed)
                 {
@@ -188,7 +176,10 @@ namespace Pulsar4X.SDL2UI
 
             foreach (var entityToRemove in EntitiesToBin)
             {
+                AllEntities.Remove(entityToRemove);
                 EntityStatesWithPosition.Remove(entityToRemove);
+                EntityStatesWithNames.Remove(entityToRemove);
+                EntityStatesColonies.Remove(entityToRemove);
                 OnEntityRemoved?.Invoke(this, entityToRemove);
             }
             EntitiesToBin.Clear();
@@ -207,7 +198,7 @@ namespace Pulsar4X.SDL2UI
 
         public List<EntityState> GetFilteredEntities(EntityFilter entityFilter, int factionId, List<Type>? datablobFilter = null, FilterLogic filterLogic = FilterLogic.And)
         {
-            return EntityStatesWithPosition.Values.Where(entityState =>
+            return AllEntities.Values.Where(entityState =>
                 ((entityFilter.HasFlag(EntityFilter.Friendly) && entityState.Entity.FactionOwnerID == factionId) ||
                 (entityFilter.HasFlag(EntityFilter.Neutral) && entityState.Entity.FactionOwnerID == Game.NeutralFactionId) ||
                 (entityFilter.HasFlag(EntityFilter.Hostile) && entityState.Entity.FactionOwnerID != factionId && entityState.Entity.FactionOwnerID != Game.NeutralFactionId)) &&
