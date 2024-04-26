@@ -171,6 +171,9 @@ namespace Pulsar4X.SDL2UI
 
         public unsafe override void ImGuiLayout()
         {
+            //because the nameIcons are IMGUI not SDL we draw them here.
+            _state.GalacticMap.DrawNameIcons();
+
             if (_state.ShowImgDbg)
             {
                 ImGui.NewLine();
@@ -256,17 +259,14 @@ namespace Pulsar4X.SDL2UI
                 item.Display();
             }
 
-            //because the nameIcons are IMGUI not SDL we draw them here.
-            _state.GalacticMap.DrawNameIcons();
-
-            // var dispsize = ImGui.GetIO().DisplaySize;
-            // var pos = new System.Numerics.Vector2(0, dispsize.Y - ImGui.GetFrameHeightWithSpacing());
-            // ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-            // var flags = ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav;
-            // if (ImGui.Begin("GitHash", flags))
-            // {
-            //     ImGui.Text(AssemblyInfo.GetGitHash());
-            // }
+            var dispsize = ImGui.GetIO().DisplaySize;
+            var pos = new System.Numerics.Vector2(0, dispsize.Y - ImGui.GetFrameHeightWithSpacing());
+            ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
+            var flags = ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav;
+            if (ImGui.Begin("GitHash", flags))
+            {
+                ImGui.Text("Version: " + AssemblyInfo.GetGitHash());
+            }
         }
     }
 }
