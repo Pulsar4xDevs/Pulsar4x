@@ -15,7 +15,14 @@ namespace Pulsar4X.Engine.Orders
 
         public static MoveToNearestGeoSurveyAction CreateCommand(int factionId, Entity commandingEntity)
         {
-            var command = MoveToNearestAction.CreateCommand<MoveToNearestGeoSurveyAction>(factionId, commandingEntity);
+            var command = new MoveToNearestGeoSurveyAction()
+            {
+                _entityCommanding = commandingEntity,
+                UseActionLanes = true,
+                RequestingFactionGuid = factionId,
+                EntityCommandingGuid = commandingEntity.Id,
+                EntityFactionFilter = DataStructures.EntityFilter.Friendly | DataStructures.EntityFilter.Neutral
+            };
             command.Filter = command.GeoSurveyFilter;
             return command;
         }

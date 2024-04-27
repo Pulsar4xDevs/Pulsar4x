@@ -68,6 +68,12 @@ namespace Pulsar4X.Engine
         [PublicAPI]
         public static readonly EntityManager InvalidManager = new EntityManager();
 
+        /// <summary>
+        /// Used to filter the entities that we should consider valid targets
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public delegate bool FilterEntities(Entity entity);
 
 
         #region Constructors
@@ -689,6 +695,44 @@ namespace Pulsar4X.Engine
 
             entity = Entity.InvalidEntity;
             return false;
+        }
+
+        public List<Entity> GetFilteredEntities(EntityFilter entityFilter, int factionId)
+        {
+            return GetFilteredEntities(entityFilter, factionId, null, FilterLogic.And);
+        }
+
+        public List<Entity> GetFilteredEntities(EntityFilter entityFilter, int factionId, FilterEntities filter)
+        {
+            return GetFilteredEntities(entityFilter, factionId, null, FilterLogic.And, filter);
+        }
+
+        public List<Entity> GetFilteredEntities(EntityFilter entityFilter, int factionId, Type? datablobFilter = null)
+        {
+            return GetFilteredEntities(entityFilter, factionId, datablobFilter == null ? null : new List<Type>() { datablobFilter });
+        }
+
+        public List<Entity> GetFilteredEntities(EntityFilter entityFilter, int factionId, List<Type>? datablobFilter = null, FilterLogic filterLogic = FilterLogic.And, FilterEntities? filter = null)
+        {
+            return _entities.Values.Where(entity =>
+                ((entityFilter.HasFlag(EntityFilter.Friendly) && entity.FactionOwnerID == factionId) ||
+                (entityFilter.HasFlag(EntityFilter.Neutral) && entity.FactionOwnerID == Game.NeutralFactionId) ||
+                (entityFilter.HasFlag(EntityFilter.Hostile) && entity.FactionOwnerID != factionId && entity.FactionOwnerID != Game.NeutralFactionId && EvaluateSensorContact(entity, factionId))) &&
+                (datablobFilter == null || datablobFilter.Count == 0 || EvaluateDataBlobs(entity, datablobFilter, filterLogic)) &&
+                (filter == null || filter(entity)))
+                .ToList();
+        }
+
+        private bool EvaluateDataBlobs(Entity entity, List<Type> dataTypes, FilterLogic logic)
+        {
+            var results = dataTypes.Select(type => entity.HasDataBlob(type)).ToList();
+
+            return logic == FilterLogic.And ? results.All(x => x) : results.Any(x => x);
+        }
+
+        private bool EvaluateSensorContact(Entity entity, int factionId)
+        {
+            return _factionSensorContacts.ContainsKey(factionId) && _factionSensorContacts[factionId].SensorContactExists(entity.Id);
         }
 
         private bool AreAllDataBlobDependenciesPresent(Type type, int entityId, HashSet<Type> visitedTypes, int depth)

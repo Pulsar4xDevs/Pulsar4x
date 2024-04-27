@@ -4,6 +4,7 @@ using System.Linq;
 using GameEngine.WarpMove;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Engine.Orders
@@ -20,19 +21,14 @@ namespace Pulsar4X.Engine.Orders
         /// <summary>
         /// Entity commanding is a fleet in this action
         /// </summary>
-        private Entity _entityCommanding;
+        protected Entity _entityCommanding;
         internal override Entity EntityCommanding
         {
             get { return _entityCommanding; }
         }
 
-        /// <summary>
-        /// Used to filter the entities that we should consider valid targets
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <returns></returns>
-        public delegate bool EntityFilter(Entity entity);
-        public EntityFilter Filter { get; protected set; }
+        public EntityManager.FilterEntities Filter { get; protected set; }
+        public EntityFilter EntityFactionFilter { get; protected set; } = EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile;
 
         private List<EntityCommand> _shipCommands = new List<EntityCommand>();
 
@@ -54,8 +50,10 @@ namespace Pulsar4X.Engine.Orders
             if(!flagship.TryGetDatablob<PositionDB>(out var flagshipPositionDB)) return;
 
             // Get all entites based on the filter
-            List<Entity> entities = EntityCommanding.Manager.GetEntitiesAvailableToFaction(RequestingFactionGuid);
-            var filteredEntities = entities.Where(e => Filter(e)).ToList();
+            List<Entity> filteredEntities = EntityCommanding.Manager.GetFilteredEntities(
+                EntityFactionFilter,
+                RequestingFactionGuid,
+                Filter);
 
             Entity? closestValidEntity = null;
             double closestDistance = double.MaxValue;
@@ -92,14 +90,14 @@ namespace Pulsar4X.Engine.Orders
             {
                 if(!ship.HasDataBlob<WarpAbilityDB>()) continue;
                 if(!ship.TryGetDatablob<PositionDB>(out var shipPositionDB)) continue;
-                if(shipPositionDB.Parent == closestEntityPositionDB.Parent) continue;
+                if(shipPositionDB.Parent == closestEntityPositionDB.OwningEntity) continue;
 
                 var shipMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
 
                 (Vector3 position, DateTime _) = WarpMath.GetInterceptPosition
                 (
                     ship,
-                    closestEntityPositionDB.Parent.GetDataBlob<OrbitDB>(),
+                    closestValidEntity.GetDataBlob<OrbitDB>(),
                     EntityCommanding.StarSysDateTime
                 );
 
@@ -107,7 +105,7 @@ namespace Pulsar4X.Engine.Orders
 
                 // Create the movement order
                 var cargoLibrary = EntityCommanding.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
-                (WarpMoveCommand warpCommand, NewtonThrustCommand? thrustCommand) = WarpMoveCommand.CreateCommand(cargoLibrary, RequestingFactionGuid, ship, closestEntityPositionDB.Parent, targetPos, EntityCommanding.StarSysDateTime, new Vector3() , shipMass);
+                (WarpMoveCommand warpCommand, NewtonThrustCommand? thrustCommand) = WarpMoveCommand.CreateCommand(cargoLibrary, RequestingFactionGuid, ship, closestValidEntity, targetPos, EntityCommanding.StarSysDateTime, new Vector3() , shipMass);
                 _shipCommands.Add(warpCommand);
             }
 

@@ -1,4 +1,4 @@
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.DataStructures;
 
 public enum FilterLogic
 {

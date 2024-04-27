@@ -1,6 +1,6 @@
 using System;
 
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.DataStructures;
 
 [Flags]
 public enum EntityFilter
