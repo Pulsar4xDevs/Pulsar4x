@@ -716,11 +716,16 @@ namespace Pulsar4X.Engine
         {
             return _entities.Values.Where(entity =>
                 ((entityFilter.HasFlag(EntityFilter.Friendly) && entity.FactionOwnerID == factionId) ||
-                (entityFilter.HasFlag(EntityFilter.Neutral) && entity.FactionOwnerID == Game.NeutralFactionId) ||
+                (entityFilter.HasFlag(EntityFilter.Neutral) && entity.FactionOwnerID == Game.NeutralFactionId && EvaluateNeutralEntity(entity, factionId)) ||
                 (entityFilter.HasFlag(EntityFilter.Hostile) && entity.FactionOwnerID != factionId && entity.FactionOwnerID != Game.NeutralFactionId && EvaluateSensorContact(entity, factionId))) &&
                 (datablobFilter == null || datablobFilter.Count == 0 || EvaluateDataBlobs(entity, datablobFilter, filterLogic)) &&
                 (filter == null || filter(entity)))
                 .ToList();
+        }
+
+        private bool EvaluateNeutralEntity(Entity entity, int factionId)
+        {
+            return _factionNeutralContacts.ContainsKey(factionId) && _factionNeutralContacts[factionId].Contains(entity.Id);
         }
 
         private bool EvaluateDataBlobs(Entity entity, List<Type> dataTypes, FilterLogic logic)
