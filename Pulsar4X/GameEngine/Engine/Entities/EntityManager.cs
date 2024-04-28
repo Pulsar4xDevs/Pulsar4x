@@ -642,6 +642,8 @@ namespace Pulsar4X.Engine
 
         public List<Entity> GetFilteredEntities(EntityFilter entityFilter, int factionId, List<Type>? datablobFilter = null, FilterLogic filterLogic = FilterLogic.And, FilterEntities? filter = null)
         {
+            if(factionId == Game.GameMasterFaction.Id) return _entities.Values.ToList();
+
             return _entities.Values.Where(entity =>
                 ((entityFilter.HasFlag(EntityFilter.Friendly) && entity.FactionOwnerID == factionId) ||
                 (entityFilter.HasFlag(EntityFilter.Neutral) && entity.FactionOwnerID == Game.NeutralFactionId && EvaluateNeutralEntity(entity, factionId)) ||
