@@ -11,10 +11,16 @@ namespace Pulsar4X.Engine.Orders
             return entity.HasDataBlob<ColonyInfoDB>();
         }
 
+        private static Entity ColonySelector(Entity entity)
+        {
+            return entity.GetDataBlob<PositionDB>().Parent ?? entity;
+        }
+
         public static MoveToNearestColonyAction CreateCommand(int factionId, Entity commandingEntity)
         {
             var command = MoveToNearestAction.CreateCommand<MoveToNearestColonyAction>(factionId, commandingEntity);
             command.Filter = ColonyFilter;
+            command.TargetSelector = ColonySelector;
             return command;
         }
     }
