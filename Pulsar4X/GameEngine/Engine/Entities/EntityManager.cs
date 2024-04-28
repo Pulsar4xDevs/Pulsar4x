@@ -239,23 +239,28 @@ namespace Pulsar4X.Engine
         {
             foreach (var entity in _entitiesTaggedForRemoval)
             {
-                foreach (var storeEntry in _datablobStores)
+                foreach (var (type, dictionary) in _datablobStores)
                 {
-                    storeEntry.Value.Remove(entity.Id);
+                    dictionary.Remove(entity.Id);
                 }
                 foreach (var (key, value) in _factionSensorContacts)
                 {
                     value.RemoveContact(entity.Id);
                 }
 
-                //remove each of the datablobs.
-                foreach (var db in entity.GetAllDataBlobs())
+                if(entity.FactionOwnerID == Game.NeutralFactionId)
                 {
-                    var type = db.GetType();
+                    foreach(var (factionId, factionContactList) in _factionNeutralContacts)
+                    {
+                        factionContactList.Remove(entity.Id);
+                    }
+                }
+
+                //remove each of the datablobs.
+                foreach (var type in GetAllDataBlobTypesForEntity(entity.Id))
+                {
                     if (_datablobStores.ContainsKey(type))
                     {
-                        // var blob = _datablobStores[type][entity.Id];
-                        // blob.OwningEntity = null;
                         _datablobStores[type].Remove(entity.Id);
                     }
                 }
@@ -264,8 +269,7 @@ namespace Pulsar4X.Engine
                 {
                     throw new KeyNotFoundException($"Entity with ID {entity.Id} not found in manager.");
                 }
-                // entity.Manager = null;
-                // entity.FactionOwnerID = -1;
+                
                 Event e = Event.Create(EventType.EntityDestroyed, StarSysDateTime, "Entity Removed From Manager", entity.FactionOwnerID, ManagerGuid, entity.Id);
                 EventManager.Instance.Publish(e);
 
@@ -435,7 +439,6 @@ namespace Pulsar4X.Engine
         /// <para></para>
         /// DO NOT ASSUME THE ORDER OF THE RETURNED LIST!
         /// </summary>
-        /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         [NotNull]
         public List<Entity> GetAllEntitiesWithDataBlob<T>() where T : BaseDataBlob
         {
@@ -446,58 +449,6 @@ namespace Pulsar4X.Engine
             }
 
             return new List<Entity>();
-        }
-
-        public List<Entity> GetAllEntitiesWithDataBlob<T>(int factionId) where T : BaseDataBlob
-        {
-            var type = typeof(T);
-            if(!_datablobStores.TryGetValue(type, out var blobStore))
-            {
-                return new List<Entity>();
-            }
-
-            var list = new List<Entity>();
-            var contacts = _factionSensorContacts[factionId];
-
-            foreach(var contactId in contacts.GetAllContactIds())
-            {
-                if(blobStore.ContainsKey(contactId))
-                    list.Add(_entities[contactId]);
-            }
-
-            if(!_factionNeutralContacts.ContainsKey(factionId))
-                SetupDefaultNeutralEntitiesForFaction(factionId);
-
-            foreach(var neutralId in _factionNeutralContacts[factionId])
-            {
-                if(blobStore.ContainsKey(neutralId))
-                    list.Add(_entities[neutralId]);
-            }
-
-            return list;
-        }
-
-        /// <summary>
-        /// Returns a list of all the entities in this manager that the faction knows about.
-        /// Either through their sensor contacts or because the entities belong to the faction.
-        /// </summary>
-        /// <param name="factionId">The Id of the faction</param>
-        /// <returns>List of entities</returns>
-        public List<Entity> GetEntitiesAvailableToFaction(int factionId)
-        {
-            var list = new List<Entity>();
-
-            // Add all the factions sensor contacts
-            var factionContacts = _factionSensorContacts[factionId];
-            foreach(var contactId in factionContacts.GetAllContactIds())
-            {
-                list.Add(_entities[contactId]);
-            }
-
-            // Add all the entities that belong to the faction
-            list.AddRange(GetEntitiesByFaction(factionId));
-
-            return list;
         }
 
         /// <summary>
@@ -571,16 +522,6 @@ namespace Pulsar4X.Engine
             return false;
         }
 
-        public List<Entity> GetEntitiesByFaction(int factionId)
-        {
-            return _entities.Values.Where(e => e.FactionOwnerID == factionId).ToList();
-        }
-
-        public List<Entity> GetNeutralEntities()
-        {
-            return _entities.Values.Where(e => e.FactionOwnerID == Game.NeutralFactionId).ToList();
-        }
-
         public Entity GetFirstEntityWithDataBlob<T>() where T : BaseDataBlob
         {
             var type = typeof(T);
@@ -595,19 +536,6 @@ namespace Pulsar4X.Engine
             }
 
             return _factionSensorContacts[factionId];
-        }
-
-        /// <summary>
-        /// Return any entities the faction knows about that aren't
-        /// owned by the faction and aren't sensor contacts
-        /// </summary>
-        /// <param name="factionId"></param>
-        /// <returns></returns>
-        public List<int> GetNonOwnedEntititesForFaction(int factionId)
-        {
-            SetupDefaultNeutralEntitiesForFaction(factionId);
-
-            return _factionNeutralContacts[factionId];
         }
 
         public void HideNeutralEntityFromFaction(int factionId, int entityId)
