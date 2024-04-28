@@ -892,7 +892,7 @@ namespace Pulsar4X.SDL2UI
         {
             SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             _factionOwnedEntites = new List<(string name, Entity entity)>();
-            var factionEntites = _uiState.SelectedSystem.GetEntitiesByFaction(_uiState.Faction.Id);
+            var factionEntites = _uiState.SelectedSystem.GetFilteredEntities(DataStructures.EntityFilter.Friendly, _uiState.Faction.Id);
             foreach (var entity in factionEntites.ToArray())
             {
                 string name = entity.Id.ToString();
