@@ -89,7 +89,7 @@ namespace Pulsar4X.SDL2UI
         internal Dictionary<string, int> GLImageDictionary = new ();
         public event EntityClickedEventHandler EntityClickedEvent;
         internal EntityState? LastClickedEntity = null;
-        internal EntityState PrimaryEntity { get; private set; }
+        internal EntityState? PrimaryEntity { get; private set; }
         internal Orbital.Vector3 LastWorldPointClicked_m { get; set; }
         //internal SpaceMasterVM SpaceMasterVM;
         internal bool SMenabled = false;
@@ -199,7 +199,6 @@ namespace Pulsar4X.SDL2UI
 
                 var SelectedSys = StarSystemStates[activeSysID].StarSystem;
                 PrimarySystemDateTime = SelectedSys.ManagerSubpulses.StarSysDateTime;
-                DebugWindow.GetInstance().SystemState = StarSystemStates[activeSysID]; // Fix this, should be handled internally in the window
                 LastClickedEntity = null;
                 PrimaryEntity = null;
 

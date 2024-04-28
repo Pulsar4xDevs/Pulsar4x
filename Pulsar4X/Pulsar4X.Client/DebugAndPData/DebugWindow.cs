@@ -890,6 +890,7 @@ namespace Pulsar4X.SDL2UI
 
         void RefreshFactionEntites(GlobalUIState uiState)
         {
+            SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             _factionOwnedEntites = new List<(string name, Entity entity)>();
             var factionEntites = _uiState.SelectedSystem.GetEntitiesByFaction(_uiState.Faction.Id);
             foreach (var entity in factionEntites.ToArray())
