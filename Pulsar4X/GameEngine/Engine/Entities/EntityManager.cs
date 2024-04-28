@@ -638,7 +638,7 @@ namespace Pulsar4X.Engine
                     factionId));
         }
 
-        private void SetupDefaultNeutralEntitiesForFaction(int factionId)
+        public void SetupDefaultNeutralEntitiesForFaction(int factionId)
         {
             if(!_factionNeutralContacts.ContainsKey(factionId))
             {
@@ -725,7 +725,8 @@ namespace Pulsar4X.Engine
 
         private bool EvaluateNeutralEntity(Entity entity, int factionId)
         {
-            return _factionNeutralContacts.ContainsKey(factionId) && _factionNeutralContacts[factionId].Contains(entity.Id);
+            return (_factionNeutralContacts.ContainsKey(factionId) && _factionNeutralContacts[factionId].Contains(entity.Id)) ||
+                EvaluateSensorContact(entity, factionId);
         }
 
         private bool EvaluateDataBlobs(Entity entity, List<Type> dataTypes, FilterLogic logic)
