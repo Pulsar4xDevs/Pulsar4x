@@ -40,6 +40,7 @@ namespace Pulsar4X.SDL2UI
         public SystemState(StarSystem system, Entity faction)
         {
             StarSystem = system;
+            StarSystem.SetupDefaultNeutralEntitiesForFaction(faction.Id);
             SystemContacts = system.GetSensorContacts(faction.Id);
             _sensorChanges = SystemContacts.Changes.Subscribe();
             _faction = faction;
@@ -61,10 +62,10 @@ namespace Pulsar4X.SDL2UI
             }
             else
             {
-                var factionEntities = StarSystem.GetEntitiesByFaction(faction.Id);
-                foreach (Entity entityItem in factionEntities)
+                var entities = StarSystem.GetFilteredEntities(EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile, faction.Id);
+                foreach(var entity in entities)
                 {
-                    SetupEntity(entityItem, faction);
+                    SetupEntity(entity, faction);
                 }
 
                 Func<Message, bool> filterById = msg => msg.EntityId != null && msg.SystemId != null && msg.SystemId.Equals(StarSystem.ManagerGuid);
@@ -74,24 +75,6 @@ namespace Pulsar4X.SDL2UI
                 MessagePublisher.Instance.Subscribe(MessageTypes.EntityRevealed, OnEntityAddedMessage, filterById);
                 MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, OnEntityUpdatedMessage, filterById);
                 MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, OnEntityUpdatedMessage, filterById);
-
-                foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
-                {
-                    var entityState = new EntityState(sensorContact) { Name = "Unknown" };
-                    if(!EntityStatesWithNames.ContainsKey(sensorContact.ActualEntityId))
-                        EntityStatesWithNames.Add(sensorContact.ActualEntityId, entityState);
-
-                    if(!EntityStatesWithPosition.ContainsKey(sensorContact.ActualEntityId))
-                        EntityStatesWithPosition.Add(sensorContact.ActualEntityId, entityState);
-                }
-
-                foreach(var entityId in StarSystem.GetNonOwnedEntititesForFaction(faction.Id))
-                {
-                    if(StarSystem.TryGetEntityById(entityId, out var entity))
-                    {
-                        SetupEntity(entity, faction);
-                    }
-                }
             }
         }
 
