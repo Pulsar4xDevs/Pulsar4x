@@ -83,9 +83,14 @@ namespace Pulsar4X.SDL2UI
                 return false;
         }
 
-        public void PinToEntity(Entity entity)
+        public void PinToEntity(Entity? entity)
         {
-            if (entity.HasDataBlob<PositionDB>())
+            if(entity == null)
+            {
+                IsPinnedToEntity = false;
+                PinnedEntityGuid = -1;
+            }
+            else if (entity.HasDataBlob<PositionDB>())
             {
                 _entityPosDB = entity.GetDataBlob<PositionDB>();
                 _camWorldPos_m = new Orbital.Vector3(); //zero on it. 

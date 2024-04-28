@@ -203,6 +203,7 @@ namespace Pulsar4X.SDL2UI
                 LastClickedEntity = null;
                 PrimaryEntity = null;
 
+                Camera.PinToEntity(null); // clear the camera pin
                 OnStarSystemChanged?.Invoke(this);
             }
 
