@@ -54,6 +54,22 @@
   ],
   "fleets": [
     {
+      "name": "Freight Fleet",
+      "location": {
+        "systemId": "sol",
+        "body": "Earth"
+      },
+      "ships": [
+        {
+          "designId": "default-ship-design-freighter",
+          "name": "Planet Express Ship",
+          "cargo": [
+            { "id": "rp-1", "amount": 2000 }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Military Fleet",
       "location": {
         "systemId": "sol",
