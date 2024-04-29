@@ -28,10 +28,16 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PushID(entityState.Entity.Id.ToString());
                 if(ImGui.CollapsingHeader(header + "###" + headerId, flags))
                 {
-                    if(ImGui.BeginTable(header + "table", 2, Styles.TableFlags))
+                    ImGui.Columns(2);
+                    DisplayHelpers.PrintRow("Total Volume", Stringify.Volume(storageType.MaxVolume));
+                    DisplayHelpers.PrintRow("Available Volume", Stringify.Volume(freeVolume), null, null, false);
+                    ImGui.Columns(1);
+
+                    if(ImGui.BeginTable(header + "table", 3, Styles.TableFlags))
                     {
                         ImGui.TableSetupColumn("Item");
                         ImGui.TableSetupColumn("Quantity");
+                        ImGui.TableSetupColumn("Volume");
                         ImGui.TableHeadersRow();
 
                         var cargoables = storageType.GetCargoables();
@@ -86,6 +92,8 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.Text("Volume: " + Stringify.Volume(volumeStored) + " (" + Stringify.Volume(cargoType.VolumePerUnit, "#.#####") + " each)");
                                 ImGui.EndTooltip();
                             }
+                            ImGui.TableNextColumn();
+                            ImGui.Text(Stringify.Volume(volumeStored));
                         }
 
                         ImGui.EndTable();
