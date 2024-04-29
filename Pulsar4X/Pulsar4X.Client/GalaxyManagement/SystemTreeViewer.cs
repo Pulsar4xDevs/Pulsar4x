@@ -109,9 +109,9 @@ public class SystemTreeViewer : PulsarGuiWindow
         ImGui.TableNextColumn();
 
         var result = entity.IsOrHasColony();
-        if(result.Item1)
+        if(result.Item1 && _uiState.SelectedSystemState.EntityStatesColonies.ContainsKey(result.Item2))
         {
-            var colony = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid].EntityStatesColonies[result.Item2];
+            var colony = _uiState.SelectedSystemState.EntityStatesColonies[result.Item2];
             if(colony.Entity.FactionOwnerID == _uiState.Faction.Id && ImGui.SmallButton(colony.Entity.GetOwnersName() + "###" + result.Item2))
             {
                 EconomicsWindow.GetInstance().SetActive(true);

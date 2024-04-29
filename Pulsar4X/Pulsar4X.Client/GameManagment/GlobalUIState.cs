@@ -69,6 +69,7 @@ namespace Pulsar4X.SDL2UI
         internal SafeList<UpdateWindowState> UpdateableWindows = new ();
         internal DateTime LastGameUpdateTime = new ();
         internal StarSystem SelectedSystem { get { return StarSystemStates[SelectedStarSysGuid].StarSystem; } }
+        internal SystemState SelectedSystemState => StarSystemStates[SelectedStarSysGuid];
         internal DateTime SelectedSystemTime { get { return StarSystemStates[SelectedStarSysGuid].StarSystem.StarSysDateTime; } }
         internal DateTime SelectedSysLastUpdateTime = new ();
         internal string SelectedStarSysGuid { get; private set; }
