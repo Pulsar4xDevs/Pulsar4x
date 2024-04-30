@@ -510,7 +510,14 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text(name);
                     if(ImGui.IsItemHovered())
                     {
-                        DisplayHelpers.DescriptiveTooltip(AvailableShipComponents[i].Name, AvailableShipComponents[i].TypeName, AvailableShipComponents[i].Description);
+                        void TooltipExtension()
+                        {
+                            ImGui.Text("Mass: " + Stringify.Mass(AvailableShipComponents[i].MassPerUnit));
+                            ImGui.Text("Volume: " + Stringify.Volume(AvailableShipComponents[i].VolumePerUnit));
+                            ImGui.Text("Crew Required: " + AvailableShipComponents[i].CrewReq);
+                        }
+
+                        DisplayHelpers.DescriptiveTooltip(AvailableShipComponents[i].Name, AvailableShipComponents[i].TypeName, AvailableShipComponents[i].Description, TooltipExtension);
                     }
                     ImGui.TableNextColumn();
                     ImGui.Text(design.ComponentType);

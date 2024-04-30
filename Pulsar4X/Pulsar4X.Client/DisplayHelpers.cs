@@ -82,10 +82,10 @@ namespace Pulsar4X.SDL2UI
                 meta = "Commanded by: " + commander.GetName(factionId);
             }
 
-            DescriptiveTooltip(ship.GetName(factionId), shipInfo.Design.Name, description, meta);
+            DescriptiveTooltip(ship.GetName(factionId), shipInfo.Design.Name, description, () => ImGui.Text(meta));
         }
 
-        public static void DescriptiveTooltip(string name, string type, string description, string metaInfo = "", bool hideTypeIfSameAsName = false)
+        public static void DescriptiveTooltip(string name, string type, string description, Action? callback = null, bool hideTypeIfSameAsName = false)
         {
             if(ImGui.IsItemHovered())
             {
@@ -103,9 +103,8 @@ namespace Pulsar4X.SDL2UI
                     ImGui.PopStyleColor();
                 }
                 var showDescription = description.IsNotNullOrEmpty();
-                var showMetaInfo = metaInfo.IsNotNullOrEmpty();
 
-                if(showDescription || showMetaInfo)
+                if(showDescription || callback != null)
                 {
                     ImGui.Separator();
                 }
@@ -115,10 +114,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     ImGui.TextWrapped(description);
                 }
-                if(showMetaInfo)
-                {
-                    ImGui.Text(metaInfo);
-                }
+                callback?.Invoke();
                 ImGui.PopStyleColor();
                 ImGui.EndTooltip();
             }

@@ -279,7 +279,7 @@ namespace Pulsar4X.SDL2UI
                                 _researchableTechs[i].DisplayName(),
                                 _uiState.Game.TechCategories[_researchableTechs[i].Category].Name,
                                 _researchableTechs[i].Description,
-                                metaInfo);
+                                () => ImGui.Text(metaInfo));
                         }
                         ImGui.SetCursorPos(new Vector2(pos.X + 2f, pos.Y));
                         ImGui.Text(_researchableTechs[i].DisplayName());

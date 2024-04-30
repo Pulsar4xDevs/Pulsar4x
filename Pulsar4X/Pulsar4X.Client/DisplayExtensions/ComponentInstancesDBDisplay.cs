@@ -30,7 +30,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.TableNextColumn();
                     ImGui.Text(instance.Name);
                     AddContextMenu(instance, uiState);
-                    DisplayHelpers.DescriptiveTooltip(instance.Name, instance.Design.TypeName, instance.Design.Description, "", true);
+                    DisplayHelpers.DescriptiveTooltip(instance.Name, instance.Design.TypeName, instance.Design.Description, null, true);
                     ImGui.TableNextColumn();
                     ImGui.Text(listPerDesign.Count.ToString());
                     ImGui.TableNextColumn();

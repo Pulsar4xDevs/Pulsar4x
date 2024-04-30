@@ -7,9 +7,11 @@ using Pulsar4X.Engine.Industry;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Extensions;
+using System.Diagnostics;
 
 namespace Pulsar4X.Components
 {
+    [DebuggerDisplay("{DebuggerDisplay}")]
     public class ComponentDesign : ICargoable, IConstructableDesign
     {
         public ConstructableGuiHints GuiHints { get; set; }
@@ -115,5 +117,8 @@ namespace Pulsar4X.Components
             attribute = default(T);
             return false;
         }
+
+        [JsonIgnore]
+        private string DebuggerDisplay => $"({UniqueID}) {Name}";
     }
 }
