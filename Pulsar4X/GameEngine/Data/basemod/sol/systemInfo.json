@@ -38,7 +38,6 @@
     "saturn/titan.json"
   ],
   "surveyRings": [
-    { "ringRadiusInAU": 2, "count": 6 },
-    { "ringRadiusInAU": 10, "count": 14 }
+    { "ringRadiusInAU": 2, "count": 2 }
   ]
 }

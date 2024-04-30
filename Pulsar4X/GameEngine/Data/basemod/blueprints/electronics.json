@@ -121,7 +121,7 @@
     "Type": "ComponentTemplate",
     "Payload": {
       "UniqueID": "beam-fire-control",
-      "Name": "BeamFireControl",
+      "Name": "Laser Weapon Turret",
       "Formulas": {
         "Description": "",
         "Mass": "Ability('Mass')",

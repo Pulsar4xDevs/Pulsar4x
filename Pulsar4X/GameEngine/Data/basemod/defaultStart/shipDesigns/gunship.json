@@ -9,8 +9,6 @@
     { "id": "default-design-passive-sensor-s50", "amount": 1 },
     { "id": "default-design-laser-weapon", "amount": 2 },
     { "id": "default-design-beam-fire-control", "amount": 1 },
-    { "id": "default-design-missile-tube-500", "amount": 1 },
-    { "id": "default-design-ordnance-rack-2.5t", "amount": 2 },
     { "id": "default-design-cargo-hold-1t", "amount": 1 },
     { "id": "default-design-fuel-tank-1000", "amount": 2 },
     { "id": "default-design-alcubierre-500", "amount": 4 },

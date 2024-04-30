@@ -3,6 +3,6 @@
   "name": "Gravitational Surveyor Mk1",
   "templateId": "gravitational-surveyor",
   "attributes": [
-    { "key": "Survey Speed", "value": 1 }
+    { "key": "Survey Speed", "value": 10 }
   ]
 }

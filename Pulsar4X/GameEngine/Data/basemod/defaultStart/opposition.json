@@ -1,7 +1,12 @@
 {
   "name": "Opposition Forces",
   "componentDesigns": [
-    "componentDesigns/"
+    "componentDesigns/passiveScannerS50.json",
+    "componentDesigns/fuelTank-1000.json",
+    "componentDesigns/alcuberiWhite-500.json",
+    "componentDesigns/battery-2t.json",
+    "componentDesigns/reactor-15k.json",
+    "componentDesigns/merlin.json"
   ],
   "ordnanceDesigns": [
   ],

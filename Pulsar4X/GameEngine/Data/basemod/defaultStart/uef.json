@@ -1,10 +1,33 @@
 {
   "name": "UEF",
   "componentDesigns": [
-    "componentDesigns/"
+    "componentDesigns/alcuberiWhite-2k.json",
+    "componentDesigns/alcuberiWhite-500.json",
+    "componentDesigns/battery-2t.json",
+    "componentDesigns/beamFireControl.json",
+    "componentDesigns/cargoHold-1t.json",
+    "componentDesigns/cargoHold-5t.json",
+    "componentDesigns/cargoHold-general.json",
+    "componentDesigns/f1.json",
+    "componentDesigns/factory.json",
+    "componentDesigns/fuelTank-1000.json",
+    "componentDesigns/fuelTank-1500.json",
+    "componentDesigns/fuelTank-3000.json",
+    "componentDesigns/geoSurveyor.json",
+    "componentDesigns/jpSurveyor.json",
+    "componentDesigns/laserWeapon.json",
+    "componentDesigns/merlin.json",
+    "componentDesigns/mine.json",
+    "componentDesigns/passiveScanner.json",
+    "componentDesigns/passiveScannerS50.json",
+    "componentDesigns/raptor.json",
+    "componentDesigns/reactor-15k.json",
+    "componentDesigns/refinery.json",
+    "componentDesigns/rs-25.json",
+    "componentDesigns/shipyard.json",
+    "componentDesigns/university.json"
   ],
   "ordnanceDesigns": [
-    "ordnanceDesigns/"
   ],
   "shipDesigns": [
     "shipDesigns/cargoCourier.json",
@@ -33,9 +56,7 @@
         { "id": "default-design-refinery", "amount": 1 },
         { "id": "default-design-factory", "amount": 1 },
         { "id": "default-design-shipyard", "amount": 1 },
-        { "id": "default-design-university", "amount": 1 },
-        { "id": "default-design-logistics-office", "amount": 1 },
-        { "id": "default-design-ordnance-rack-2.5t", "amount": 1 }
+        { "id": "default-design-university", "amount": 1 }
       ],
       "cargo": [
         { "id": "iron", "amount": 500000 },
@@ -45,7 +66,6 @@
         { "id": "fissionables", "amount": 50000 },
         { "id": "copper", "amount": 50000 },
         { "id": "default-design-merlin", "amount": 5, "type": "byCount" },
-        { "id": "default-ordnance-missile-250", "amount": 100, "type": "byCount" },
         { "id": "rp-1", "amount": 10000, "type": "byCount" },
         { "id": "methalox", "amount": 10000, "type": "byCount" },
         { "id": "hydrolox", "amount": 10000, "type": "byCount" }
@@ -80,7 +100,6 @@
           "designId": "default-ship-design-gunship",
           "name": "Serial Peacemaker",
           "cargo": [
-            { "id": "default-ordnance-missile-250", "amount": 20, "type": "byCount" },
             { "id": "rp-1", "amount": 2000 }
           ]
         },
@@ -88,7 +107,6 @@
           "designId": "default-ship-design-gunship",
           "name": "Prevailing Stillness",
           "cargo": [
-            { "id": "default-ordnance-missile-250", "amount": 20, "type": "byCount" },
             { "id": "rp-1", "amount": 2000 }
           ]
         }
