@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using Pulsar4X.Extensions;
 using Pulsar4X.Datablobs;
+using Pulsar4X.SDL2UI.ModFileEditing;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -74,6 +75,11 @@ namespace Pulsar4X.SDL2UI
                         if (ImGui.Button("Options", buttonSize))
                         {
                             SettingsWindow.GetInstance().ToggleActive();
+                            this.SetActive(false);
+                        }
+                        if (ImGui.Button("Editor", buttonSize))
+                        {
+                            ModFileEditor.GetInstance().ToggleActive();
                             this.SetActive(false);
                         }
                     }
