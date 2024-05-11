@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
@@ -9,17 +10,10 @@ namespace Pulsar4X.SDL2UI.ModFileEditing;
 
 public class ModFileEditor : PulsarGuiWindow
 {
-    private SafeDictionary<string, TechCategoryBlueprint > _techCategoryBlueprint;
-    private int _selectedTechCat = 0;
-    private string[] _techCatNames;
-    private TechCategoryBlueprint[] _techCatBluprints;
     
-    
-    private Dictionary<string, TechBlueprint> _startingTechBlueprints;
-    private int _selectedTech = 0;
-    private string[] _techNames;
-    private TechBlueprint[] _techBlueprints;
-    
+    private TechBlueprintUI _techBlueprintUI;
+    private TechCatBlueprintUI _techCatBlueprintUI;
+    private ComponentBluprintUI _componentBluprintUI;
     private ModFileEditor()
     {
 
@@ -41,32 +35,10 @@ public class ModFileEditor : PulsarGuiWindow
 
     void refresh()
     {
-        _techCategoryBlueprint = _uiState.Game.TechCategories;
-        _techCatNames = new string[_techCategoryBlueprint.Count];
-        _techCatBluprints = new TechCategoryBlueprint[_techCategoryBlueprint.Count];
-        
 
-        
-        int i = 0;
-        foreach (var kvp in _techCategoryBlueprint)
-        {
-            _techCatNames[i] = kvp.Key;
-            _techCatBluprints[i] = kvp.Value;
-            i++;
-        }
-        
-        
-        _startingTechBlueprints = _uiState.Game.StartingGameData.Techs;
-        _techNames = new string[_startingTechBlueprints.Count];
-        _techBlueprints = new TechBlueprint[_startingTechBlueprints.Count];
-
-        i = 0;
-        foreach (var kvp in _startingTechBlueprints)
-        {
-            _techNames[i] = kvp.Key;
-            _techBlueprints[i] = kvp.Value;
-            i++;
-        }
+        _techCatBlueprintUI = new TechCatBlueprintUI(_uiState.Game.TechCategories);
+        _techBlueprintUI = new TechBlueprintUI(_uiState.Game.StartingGameData.Techs);
+        _componentBluprintUI = new ComponentBluprintUI(_uiState.Game.StartingGameData.ComponentTemplates);
     }
 
     
@@ -77,55 +49,12 @@ public class ModFileEditor : PulsarGuiWindow
         {
             if (ImGui.Begin("Debug GUI Window", ref IsActive))
             {
-                BorderListOptions.Begin("Tech Categores", _techCatNames, ref _selectedTechCat, 200);
-                var selectedcat = _techCatBluprints[_selectedTechCat];
-                
-                ImGui.Text("Name: "); 
-                ImGui.SameLine();
-                ImGui.Text(selectedcat.Name);
-                
-                ImGui.Text("Description: "); 
-                ImGui.SameLine();
-                ImGui.Text(selectedcat.Description);
-                
-                BorderListOptions.End(new Vector2(400, 600));
-                
+                _techCatBlueprintUI.Display();
                 ImGui.NewLine();
-
-                BorderListOptions.Begin("Tech Blueprints", _techNames, ref _selectedTech, 200);
-
-                var selectedTechBnt = _techBlueprints[_selectedTech];
+                _techBlueprintUI.Display();
+                ImGui.NewLine();
+                _componentBluprintUI.Display();
                 
-                ImGui.Text("Name: "); 
-                ImGui.SameLine();
-                ImGui.Text(selectedTechBnt.Name);
-                
-                ImGui.Text("Description: "); 
-                ImGui.SameLine();
-                ImGui.Text(selectedTechBnt.Description);
-                
-                ImGui.Text("Category: "); 
-                ImGui.SameLine();
-                ImGui.Text(selectedTechBnt.Category);
-                
-                ImGui.Text("CostFormula: "); 
-                ImGui.SameLine();
-                ImGui.Text(selectedTechBnt.CostFormula);
-                
-                ImGui.Text("DataFormula: "); 
-                ImGui.SameLine();
-                ImGui.Text(selectedTechBnt.DataFormula);
-                
-                ImGui.Text("MaxLevel: "); 
-                ImGui.SameLine();
-                ImGui.Text(selectedTechBnt.MaxLevel.ToString());
-                
-                ImGui.Text("Unlocks: "); 
-                ImGui.SameLine();
-                //ImGui.Text(selected.);
-                
-                BorderListOptions.End(new Vector2(400, 600));
-
             }
 
             ImGui.End();
