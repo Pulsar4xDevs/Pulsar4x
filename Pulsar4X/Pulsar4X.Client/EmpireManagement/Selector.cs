@@ -82,24 +82,32 @@ namespace Pulsar4X.SDL2UI
                             FleetWindow.GetInstance().SetActive(true);
                             FleetWindow.GetInstance().SelectFleet(fleet);
                         }
+
                         if (ImGui.IsItemHovered())
                         {
-                            ImGui.BeginTooltip();
-
-                            if(fleet.TryGetDatablob<OrderableDB>(out var orderableDb)
-                            && orderableDb.ActionList.Count > 0)
+                            void Callback()
                             {
-                                ImGui.Text("Orders:");
-                                for(int i = 0; i < orderableDb.ActionList.Count; i++)
+                                if(fleet.TryGetDatablob<OrderableDB>(out var orderableDb)
+                                && orderableDb.ActionList.Count > 0)
                                 {
-                                    ImGui.Text(orderableDb.ActionList[i].Name);
+                                    ImGui.Text("Orders:");
+                                    for(int i = 0; i < orderableDb.ActionList.Count; i++)
+                                    {
+                                        ImGui.Text(orderableDb.ActionList[i].Name);
+                                    }
+                                }
+                                else
+                                {
+                                    ImGui.Text("No orders");
                                 }
                             }
-                            else
+
+                            var flagshipID = fleet.GetDataBlob<FleetDB>().FlagShipID;
+                            if(fleet.Manager?.TryGetEntityById(flagshipID, out var flagship) ?? false)
                             {
-                                ImGui.Text("No orders");
+                                var positionDB = flagship.GetDataBlob<PositionDB>();
+                                DisplayHelpers.DescriptiveTooltip(display, positionDB.Parent?.GetName(_uiState.Faction.Id) ?? "Unknown", "", Callback);
                             }
-                            ImGui.EndTooltip();
                         }
                     }
                 }
