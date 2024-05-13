@@ -47,11 +47,10 @@ public class ModFileEditor : PulsarGuiWindow
         ModDataStore modDataStore = new ModDataStore();
         modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
         
-        _techCatBlueprintUI = new TechCatBlueprintUI(modDataStore.TechCategories);
-        _techBlueprintUI = new TechBlueprintUI(modDataStore.Techs);
+        _techCatBlueprintUI = new TechCatBlueprintUI(modDataStore);
+        _techBlueprintUI = new TechBlueprintUI(modDataStore);
+        _componentBluprintUI = new ComponentBluprintUI(modDataStore);
         
-        string[] cargoTypes = modDataStore.CargoTypes.Keys.ToArray();
-        _componentBluprintUI = new ComponentBluprintUI(_uiState.Game.StartingGameData.ComponentTemplates, cargoTypes);
     }
 
     

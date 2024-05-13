@@ -1,10 +1,14 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices.JavaScript;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.Blueprints;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
+using Pulsar4X.Modding;
 
 namespace Pulsar4X.SDL2UI.ModFileEditing;
 
@@ -14,16 +18,28 @@ public abstract class BluePrintsUI
     private protected string[] _itemNames;
     private protected Blueprint[] _itemBlueprints;
     private protected bool[] _isActive;
-
+    private protected ModDataStore _modDataStore;
+    private protected string[] _cargoTypes;
+    private protected string[] _techCatTypes;
+    private protected string[] _techTypes;
+    protected BluePrintsUI(ModDataStore modDataStore)
+    {
+        _modDataStore = modDataStore;
+        _cargoTypes = modDataStore.CargoTypes.Keys.ToArray();
+        _techCatTypes = modDataStore.TechCategories.Keys.ToArray();
+        _techTypes = modDataStore.Techs.Keys.ToArray();
+    }
+    
     public abstract void Display();
 }
 
 public class TechCatBlueprintUI : BluePrintsUI
 {
-
     
-    public TechCatBlueprintUI(Dictionary<string, TechCategoryBlueprint> blueprints)
+    public TechCatBlueprintUI(ModDataStore modDataStore) : base(modDataStore)
     {
+        Dictionary<string, TechCategoryBlueprint> blueprints = _modDataStore.TechCategories;
+        
         _itemNames = new string[blueprints.Count];
         _itemBlueprints = new Blueprint[blueprints.Count];
         _isActive = new bool[blueprints.Count];
@@ -35,8 +51,6 @@ public class TechCatBlueprintUI : BluePrintsUI
             _isActive[i] = false;
             i++;
         }
-
-
     }
     
     public override void Display()
@@ -96,8 +110,11 @@ public class TechCatBlueprintUI : BluePrintsUI
 
 public class TechBlueprintUI : BluePrintsUI
 {
-    public TechBlueprintUI(IDictionary<string, TechBlueprint> blueprints)
+    private int _selectedIndex = -1;
+    public TechBlueprintUI(ModDataStore modDataStore) : base(modDataStore)
     {
+        var blueprints = modDataStore.Techs;
+        
         _itemNames = new string[blueprints.Count];
         _itemBlueprints = new Blueprint[blueprints.Count];
         _isActive = new bool[blueprints.Count];
@@ -139,11 +156,11 @@ public class TechBlueprintUI : BluePrintsUI
         var selectedItem = (TechBlueprint)_itemBlueprints[selectedIndex];
         string name = selectedItem.Name;
         string editStr; 
-        if (ImGui.Begin("Tech Category Editor: " + name))
+        if (ImGui.Begin("Tech Editor: " + name))
         {
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0,100);
-            ImGui.SetColumnWidth(1,300);
+            ImGui.SetColumnWidth(1,500);
             ImGui.Text("Name: ");
             ImGui.NextColumn();
 
@@ -167,10 +184,12 @@ public class TechBlueprintUI : BluePrintsUI
             
             ImGui.Text("Category: ");
             ImGui.NextColumn();
-            editStr = selectedItem.Category;
-            if (TextEditWidget.Display("##cat" + selectedItem.Category, ref editStr))
+            
+            _selectedIndex = Array.IndexOf(_techCatTypes, selectedItem.Category);
+            if (SelectFromListWiget.Display("##cat" + selectedItem.Category, _techCatTypes, ref _selectedIndex))
             {
-                selectedItem.Category = editStr;
+                selectedItem.Category = _techCatTypes[_selectedIndex];
+                _selectedIndex = -1;
             }
             ImGui.NextColumn();
             
@@ -207,7 +226,7 @@ public class TechBlueprintUI : BluePrintsUI
             ImGui.Text("Unlocks: ");
             ImGui.NextColumn();
             var editDic = selectedItem.Unlocks;
-            if (DictEditWidget.Display("##ul" + selectedItem.Name, ref editDic))
+            if (DictEditWidget.Display("##ul" + selectedItem.Name, ref editDic, _techTypes))
             {
                 
             }
@@ -221,12 +240,12 @@ public class TechBlueprintUI : BluePrintsUI
 
 public class ComponentBluprintUI : BluePrintsUI
 {
-    private string[] _cargoTypes;
-    public ComponentBluprintUI(Dictionary<string, ComponentTemplateBlueprint> blueprints, string[] cargoTypes )
+    
+    public ComponentBluprintUI(ModDataStore modDataStore) : base(modDataStore)
     {
+        Dictionary<string, ComponentTemplateBlueprint> blueprints = modDataStore.ComponentTemplates;
         _itemNames = new string[blueprints.Count];
         _itemBlueprints = new Blueprint[blueprints.Count];
-        _cargoTypes = cargoTypes;
         _isActive = new bool[blueprints.Count];
         int i = 0;
         foreach (var kvp in blueprints)
@@ -258,6 +277,7 @@ public class ComponentBluprintUI : BluePrintsUI
         }
     }
 
+    private int editIndex = 0;
     public void DisplayEditorWindow(int selectedIndex)
     {
 
@@ -296,9 +316,9 @@ public class ComponentBluprintUI : BluePrintsUI
             ImGui.Text("CargoType: ");
             ImGui.NextColumn();
             editStr = selectedItem.CargoTypeID;
-            if (SelectFromListWiget.Display("##cgt" + selectedItem.CargoTypeID, _cargoTypes, ref editStr))
+            if (SelectFromListWiget.Display("##cgt" + selectedItem.CargoTypeID, _cargoTypes, ref editIndex))
             {
-                selectedItem.Name = editStr;
+                selectedItem.Name = _cargoTypes[editIndex];
             }
 
             ImGui.NextColumn();
