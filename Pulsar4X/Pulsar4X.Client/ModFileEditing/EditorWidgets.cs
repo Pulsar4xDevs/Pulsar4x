@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
 
@@ -83,13 +84,13 @@ public static class DictEditWidget
     private static uint _buffSize = 128;
     private static byte[] _strInputBuffer = new byte[128];
     private static int _techIndex = 0;
-    
+    private static int _addnum = -1;
     public static bool Display(string label, ref Dictionary<int, List<string>> dict, string[] techs)
     {
         ImGui.BeginChild("##dic");
         ImGui.Columns(2);
         bool isChanged = false;
-        int addnum = -1;
+        _addnum = -1;
         foreach (var kvp in dict)
         {
             _editInt = kvp.Key;
@@ -133,14 +134,14 @@ public static class DictEditWidget
             }
             else
             {
-                addnum = dict.Keys.Count;
-                while (dict.ContainsKey(addnum))
-                    addnum++;
+                _addnum = dict.Keys.Count;
+                while (dict.ContainsKey(_addnum))
+                    _addnum++;
                 _editingID = null;
             }
         }
-        if(addnum > -1) //do this here so we don't add in the middle of foreach
-            dict.Add(addnum, new List<string>());
+        if(_addnum > -1) //do this here so we don't add in the middle of foreach
+            dict.Add(_addnum, new List<string>());
         
         ImGui.EndChild();
         return isChanged;
@@ -148,30 +149,31 @@ public static class DictEditWidget
     
     public static bool Display(string label, ref Dictionary<string, string> dict)
     {
-        ImGui.BeginChild("##dic");
+        ImGui.BeginChild("##dic" + label, new Vector2(400,160), true);
         ImGui.Columns(2);
         bool isChanged = false;
+        _addnum = -1;
         foreach (var kvp in dict)
         {
             _editStr = kvp.Key;
-            if (TextEditWidget.Display(label + _editInt, ref _editStr))
+            if (TextEditWidget.Display(label + kvp.Key + "k", ref _editStr))
             {
                 isChanged = true;
                 if(!dict.ContainsKey(_editStr))
                     dict.Add(_editStr,kvp.Value);
             }
             ImGui.NextColumn();
-            //values list
-
+            
+            //values
             _editStr = kvp.Value;
-            if(TextEditWidget.Display(label+kvp.Value, ref _editStr))
+            if(TextEditWidget.Display(label+kvp.Key + "v", ref _editStr))
             {
                 dict[kvp.Key] = _editStr;
             }
-            
             ImGui.NextColumn();
         }
-        
+        ImGui.Columns(0);
+        ImGui.NewLine();
         ImGui.EndChild();
 
         return isChanged;

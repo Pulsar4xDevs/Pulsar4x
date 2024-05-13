@@ -22,12 +22,14 @@ public abstract class BluePrintsUI
     private protected string[] _cargoTypes;
     private protected string[] _techCatTypes;
     private protected string[] _techTypes;
+    private protected string[] _industryTypes;
     protected BluePrintsUI(ModDataStore modDataStore)
     {
         _modDataStore = modDataStore;
         _cargoTypes = modDataStore.CargoTypes.Keys.ToArray();
         _techCatTypes = modDataStore.TechCategories.Keys.ToArray();
         _techTypes = modDataStore.Techs.Keys.ToArray();
+        _industryTypes = modDataStore.IndustryTypes.Keys.ToArray();
     }
     
     public abstract void Display();
@@ -291,68 +293,88 @@ public class ComponentBluprintUI : BluePrintsUI
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 100);
             ImGui.SetColumnWidth(1, 300);
+            
+            
             ImGui.Text("Name: ");
             ImGui.NextColumn();
-
             editStr = selectedItem.Name;
             if (TextEditWidget.Display("##name" + selectedItem.Name, ref editStr))
             {
                 selectedItem.Name = editStr;
             }
-
             ImGui.NextColumn();
 
 
             ImGui.Text("ComponentType: ");
             ImGui.NextColumn();
             editStr = selectedItem.ComponentType;
-            if (TextEditWidget.Display("##ct" + selectedItem.ComponentType, ref editStr))
+            if (TextEditWidget.Display("##cmpt" + selectedItem.ComponentType, ref editStr))
             {
                 selectedItem.Name = editStr;
             }
-
             ImGui.NextColumn();
 
+            
             ImGui.Text("CargoType: ");
             ImGui.NextColumn();
-            editStr = selectedItem.CargoTypeID;
-            if (SelectFromListWiget.Display("##cgt" + selectedItem.CargoTypeID, _cargoTypes, ref editIndex))
+            editIndex = Array.IndexOf(_cargoTypes, selectedItem.CargoTypeID);
+            if (SelectFromListWiget.Display("##cgot" + selectedItem.CargoTypeID, _cargoTypes, ref editIndex))
             {
                 selectedItem.Name = _cargoTypes[editIndex];
             }
-
             ImGui.NextColumn();
 
+            
+            ImGui.Text("Fomula: ");
+            ImGui.NextColumn();
+            var editDicf = selectedItem.Formulas;
+            if (DictEditWidget.Display("##fmula", ref editDicf))
+            {
+                selectedItem.Formulas = editDicf;
+            }
+            ImGui.NextColumn();
+            
+            
             ImGui.Text("ResourceCosts: ");
             ImGui.NextColumn();
             var editDic = selectedItem.ResourceCost;
-            if (DictEditWidget.Display("##cgt", ref editDic))
+            if (DictEditWidget.Display("##resc", ref editDic))
             {
                 selectedItem.ResourceCost = editDic;
             }
-
             ImGui.NextColumn();
-            /*
-            ImGui.Text("ResourceCosts: ");
-            ImGui.SameLine();
-            ImGui.Text(selected.ResourceCost.ToString());
-
+            
+            
             ImGui.Text("IndustryType: ");
-            ImGui.SameLine();
-            ImGui.Text(selected.IndustryTypeID);
+            ImGui.NextColumn();
+            editIndex = Array.IndexOf(_industryTypes, selectedItem.IndustryTypeID);
+            if (SelectFromListWiget.Display("##indt" + selectedItem.IndustryTypeID, _industryTypes, ref editIndex))
+            {
+                selectedItem.IndustryTypeID = _industryTypes[editIndex];
+            }
+            ImGui.NextColumn();
+            
+            
+            ImGui.Text("MountType: ");
+            ImGui.NextColumn();
+            string[] mountTypes = Enum.GetNames(typeof(ComponentMountType));
+            editIndex = Array.IndexOf(_industryTypes, selectedItem.MountType);
+            if (SelectFromListWiget.Display("##mntt" + selectedItem.IndustryTypeID, mountTypes, ref editIndex))
+            {
+
+                if(Enum.TryParse(typeof(ComponentMountType), mountTypes[editIndex], out var mtype))
+                    selectedItem.MountType = (ComponentMountType)mtype;
+            }
+            ImGui.NextColumn();
+            
+            /*
 
             ImGui.Text("Attributes: ");
             ImGui.SameLine();
             ImGui.Text(selected.Attributes.ToString());
 
-            ImGui.Text("Formulas: ");
-            ImGui.SameLine();
-            ImGui.Text(selected.Formulas.ToString());
-
-            ImGui.Text("MountType: ");
-            ImGui.SameLine();
-            ImGui.Text(selected.MountType.ToString());
             */
+            ImGui.End();
         }
     }
 } 
