@@ -4,6 +4,7 @@ using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.Blueprints;
 using Pulsar4X.DataStructures;
+using Pulsar4X.Engine;
 
 namespace Pulsar4X.SDL2UI.ModFileEditing;
 
@@ -21,7 +22,7 @@ public class TechCatBlueprintUI : BluePrintsUI
 {
 
     
-    public TechCatBlueprintUI(SafeDictionary<string, TechCategoryBlueprint> blueprints)
+    public TechCatBlueprintUI(Dictionary<string, TechCategoryBlueprint> blueprints)
     {
         _itemNames = new string[blueprints.Count];
         _itemBlueprints = new Blueprint[blueprints.Count];
@@ -90,49 +91,6 @@ public class TechCatBlueprintUI : BluePrintsUI
 
             ImGui.End();
         }
-    }
-}
-
-public static class TextEditWidget
-{
-    private static uint _buffSize = 128;
-    private static byte[] _strInputBuffer = new byte[128];
-    private static string? _editingID;
-    
-    public static uint BufferSize
-    {
-        get { return _buffSize ;}
-        set
-        {
-            _buffSize = value;
-            _strInputBuffer = new byte[value];
-        }
-    }
-    
-    public static bool Display(string label, ref string text)
-    {
-        bool hasChanged = false;
-        if(label != _editingID)
-        {
-            ImGui.Text(text);
-            if(ImGui.IsItemClicked())
-            {
-                _editingID = label;
-                _strInputBuffer = ImGuiSDL2CSHelper.BytesFromString(text);
-
-            }
-        }
-        else
-        {
-            if (ImGui.InputText(label, _strInputBuffer, _buffSize, ImGuiInputTextFlags.EnterReturnsTrue))
-            {
-                text = ImGuiSDL2CSHelper.StringFromBytes(_strInputBuffer);
-                _editingID = null;
-                hasChanged = true;
-            }
-        }
-
-        return hasChanged;
     }
 }
 
@@ -230,7 +188,7 @@ public class TechBlueprintUI : BluePrintsUI
             ImGui.Text("DataFormula: ");
             ImGui.NextColumn();
             editStr = selectedItem.DataFormula;
-            if (TextEditWidget.Display("##cf" + selectedItem.DataFormula, ref editStr))
+            if (TextEditWidget.Display("##df" + selectedItem.DataFormula, ref editStr))
             {
                 selectedItem.DataFormula = editStr;
             }
@@ -238,17 +196,21 @@ public class TechBlueprintUI : BluePrintsUI
             
             
             ImGui.Text("MaxLevel: ");
-            ImGui.NextColumn();   
-            ImGui.Text("MaxLevel: "); 
-            ImGui.SameLine();
-            ImGui.Text(selectedItem.MaxLevel.ToString());
+            ImGui.NextColumn();
+            int editInt = selectedItem.MaxLevel;
+            if (IntEditWidget.Display("##ml" + selectedItem.MaxLevel.ToString(), ref editInt))
+            {
+                selectedItem.MaxLevel = editInt;
+            }
             ImGui.NextColumn();
             
             ImGui.Text("Unlocks: ");
             ImGui.NextColumn();
-            ImGui.Text("Unlocks: "); 
-            ImGui.SameLine();
-            ImGui.Text(selectedItem.Unlocks.ToString());
+            var editDic = selectedItem.Unlocks;
+            if (DictEditWidget.Display("##ul" + selectedItem.Name, ref editDic))
+            {
+                
+            }
         
 
             ImGui.End();
@@ -259,56 +221,118 @@ public class TechBlueprintUI : BluePrintsUI
 
 public class ComponentBluprintUI : BluePrintsUI
 {
-    public ComponentBluprintUI(Dictionary<string, ComponentTemplateBlueprint> blueprints)
+    private string[] _cargoTypes;
+    public ComponentBluprintUI(Dictionary<string, ComponentTemplateBlueprint> blueprints, string[] cargoTypes )
     {
         _itemNames = new string[blueprints.Count];
         _itemBlueprints = new Blueprint[blueprints.Count];
+        _cargoTypes = cargoTypes;
+        _isActive = new bool[blueprints.Count];
         int i = 0;
         foreach (var kvp in blueprints)
         {
             _itemNames[i] = kvp.Key;
             _itemBlueprints[i] = kvp.Value;
+            _isActive[i] = false;
             i++;
         }
     }
     
     public override void Display()
     {
-        //BorderListOptions.Begin("Tech Blueprints", _itemNames, ref _selecteditem, 200);
+        ImGui.Columns(2);
+        ImGui.SetColumnWidth(0,200);
+        ImGui.SetColumnWidth(1,100);
 
-        var selected = (ComponentTemplateBlueprint)_itemBlueprints[_selecteditem];
-        ImGui.Text("Name: ");
-        ImGui.SameLine();
-        ImGui.Text(selected.Name);
+        int i = 0;
+        foreach (ComponentTemplateBlueprint item in _itemBlueprints)
+        {
+            ImGui.Text(item.Name);
+            ImGui.NextColumn();
+            if(ImGui.Checkbox("Edit##"+_itemNames[i], ref _isActive[i]));
+            {
+            }
+            DisplayEditorWindow(i);
+            ImGui.NextColumn();
+            i++;
+        }
+    }
 
-        ImGui.Text("ComponentType: ");
-        ImGui.SameLine();
-        ImGui.Text(selected.ComponentType);
-        
-        ImGui.Text("CargoType: ");
-        ImGui.SameLine();
-        ImGui.Text(selected.CargoTypeID);
-        
-        ImGui.Text("ResourceCosts: ");
-        ImGui.SameLine();
-        ImGui.Text(selected.ResourceCost.ToString());
-        
-        ImGui.Text("IndustryType: ");
-        ImGui.SameLine();
-        ImGui.Text(selected.IndustryTypeID);
-        
-        ImGui.Text("Attributes: ");
-        ImGui.SameLine();
-        ImGui.Text(selected.Attributes.ToString());
-        
-        ImGui.Text("Formulas: ");
-        ImGui.SameLine();
-        ImGui.Text(selected.Formulas.ToString());
-        
-        ImGui.Text("MountType: ");
-        ImGui.SameLine();
-        ImGui.Text(selected.MountType.ToString());
-        
-        //BorderListOptions.End(new Vector2(400, 600));
+    public void DisplayEditorWindow(int selectedIndex)
+    {
+
+        if (!_isActive[selectedIndex])
+            return;
+        var selectedItem = (ComponentTemplateBlueprint)_itemBlueprints[selectedIndex];
+        string name = selectedItem.Name;
+        string editStr;
+        if (ImGui.Begin("Tech Category Editor: " + name))
+        {
+            ImGui.Columns(2);
+            ImGui.SetColumnWidth(0, 100);
+            ImGui.SetColumnWidth(1, 300);
+            ImGui.Text("Name: ");
+            ImGui.NextColumn();
+
+            editStr = selectedItem.Name;
+            if (TextEditWidget.Display("##name" + selectedItem.Name, ref editStr))
+            {
+                selectedItem.Name = editStr;
+            }
+
+            ImGui.NextColumn();
+
+
+            ImGui.Text("ComponentType: ");
+            ImGui.NextColumn();
+            editStr = selectedItem.ComponentType;
+            if (TextEditWidget.Display("##ct" + selectedItem.ComponentType, ref editStr))
+            {
+                selectedItem.Name = editStr;
+            }
+
+            ImGui.NextColumn();
+
+            ImGui.Text("CargoType: ");
+            ImGui.NextColumn();
+            editStr = selectedItem.CargoTypeID;
+            if (SelectFromListWiget.Display("##cgt" + selectedItem.CargoTypeID, _cargoTypes, ref editStr))
+            {
+                selectedItem.Name = editStr;
+            }
+
+            ImGui.NextColumn();
+
+            ImGui.Text("ResourceCosts: ");
+            ImGui.NextColumn();
+            var editDic = selectedItem.ResourceCost;
+            if (DictEditWidget.Display("##cgt", ref editDic))
+            {
+                selectedItem.ResourceCost = editDic;
+            }
+
+            ImGui.NextColumn();
+            /*
+            ImGui.Text("ResourceCosts: ");
+            ImGui.SameLine();
+            ImGui.Text(selected.ResourceCost.ToString());
+
+            ImGui.Text("IndustryType: ");
+            ImGui.SameLine();
+            ImGui.Text(selected.IndustryTypeID);
+
+            ImGui.Text("Attributes: ");
+            ImGui.SameLine();
+            ImGui.Text(selected.Attributes.ToString());
+
+            ImGui.Text("Formulas: ");
+            ImGui.SameLine();
+            ImGui.Text(selected.Formulas.ToString());
+
+            ImGui.Text("MountType: ");
+            ImGui.SameLine();
+            ImGui.Text(selected.MountType.ToString());
+            */
+        }
     }
 } 
