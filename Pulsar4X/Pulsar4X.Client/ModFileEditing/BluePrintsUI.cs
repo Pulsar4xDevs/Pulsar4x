@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Numerics;
 using System.Runtime.InteropServices.JavaScript;
 using ImGuiNET;
@@ -8,6 +9,7 @@ using ImGuiSDL2CS;
 using Pulsar4X.Blueprints;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
+using Pulsar4X.Interfaces;
 using Pulsar4X.Modding;
 
 namespace Pulsar4X.SDL2UI.ModFileEditing;
@@ -23,6 +25,8 @@ public abstract class BluePrintsUI
     private protected string[] _techCatTypes;
     private protected string[] _techTypes;
     private protected string[] _industryTypes;
+    private protected string[] _units;
+    private protected Blueprint _newEmpty;
     protected BluePrintsUI(ModDataStore modDataStore)
     {
         _modDataStore = modDataStore;
@@ -30,9 +34,60 @@ public abstract class BluePrintsUI
         _techCatTypes = modDataStore.TechCategories.Keys.ToArray();
         _techTypes = modDataStore.Techs.Keys.ToArray();
         _industryTypes = modDataStore.IndustryTypes.Keys.ToArray();
+
+        _units = new string[9];
+        _units[0] = "";
+        _units[1] = "KJ";
+        _units[2] = "KW";
+        _units[3] = "m^2";
+        _units[4] = "nm";
+        _units[5] = "kg";
+        _units[6] = "m";
+        _units[7] = "N";
+        _units[8] = "m/s";
+
     }
     
-    public abstract void Display();
+
+    public void Display(string label)
+    {
+        int i = 0;
+        if(ImGui.TreeNode(label))
+        {
+            ImGui.BeginChild(label);
+            ImGui.Columns(2);
+            ImGui.SetColumnWidth(0,150);
+            ImGui.SetColumnWidth(1,500);
+            foreach (var item in _itemBlueprints)
+            {
+                ImGui.Text(_itemNames[i]);
+                ImGui.NextColumn();
+                if(ImGui.Checkbox("Edit##"+_itemNames[i], ref _isActive[i]));
+                {
+                }
+                DisplayEditorWindow(i);
+                ImGui.NextColumn();
+                i++;
+            }
+            NewItem("+##"+label, _newEmpty);
+            ImGui.EndChild();
+        }
+    }
+
+    public abstract void DisplayEditorWindow(int index);
+
+    public void NewItem(string label, Blueprint newBlueprint)
+    {
+        if (ImGui.Button(label))
+        {
+            Array.Resize(ref _itemBlueprints, _itemBlueprints.Length + 1);
+            _itemBlueprints[^1] = newBlueprint;
+            Array.Resize(ref _itemNames, _itemNames.Length + 1);
+            _itemNames[^1] = "newBluprint";
+            Array.Resize(ref _isActive, _isActive.Length + 1);
+            _isActive[^1] = true;
+        }
+    }
 }
 
 public class TechCatBlueprintUI : BluePrintsUI
@@ -48,36 +103,18 @@ public class TechCatBlueprintUI : BluePrintsUI
         int i = 0;
         foreach (var kvp in blueprints)
         {
-            _itemNames[i] = kvp.Key;
+            _itemNames[i] = kvp.Value.Name;
             _itemBlueprints[i] = kvp.Value;
             _isActive[i] = false;
             i++;
         }
+
+        var newEmpty = new TechCategoryBlueprint();
+        newEmpty.Name = "New Blueprint";
+        _newEmpty = newEmpty;
     }
     
-    public override void Display()
-    {
-        //BorderListOptions.Begin("Tech Blueprints", _itemNames, ref _selecteditem, 200);
-        //ImGui.BeginChild("");
-        ImGui.Columns(2);
-        ImGui.SetColumnWidth(0,200);
-        ImGui.SetColumnWidth(1,100);
-
-        int i = 0;
-        foreach (TechCategoryBlueprint item in _itemBlueprints)
-        {
-            ImGui.Text(item.Name);
-            ImGui.NextColumn();
-            if(ImGui.Checkbox("Edit##"+_itemNames[i], ref _isActive[i]));
-            {
-            }
-            DisplayEditorWindow(i);
-            ImGui.NextColumn();
-            i++;
-        }
-        
-    }
-    private void DisplayEditorWindow(int selectedIndex)
+    public override void DisplayEditorWindow(int selectedIndex)
     {
         if(!_isActive[selectedIndex])
             return;
@@ -87,8 +124,8 @@ public class TechCatBlueprintUI : BluePrintsUI
         if (ImGui.Begin("Tech Category Editor: " + name))
         {
             ImGui.Columns(2);
-            ImGui.SetColumnWidth(0,100);
-            ImGui.SetColumnWidth(1,300);
+            ImGui.SetColumnWidth(0,150);
+            ImGui.SetColumnWidth(1,500);
             ImGui.Text("Name: ");
             ImGui.NextColumn();
             if (TextEditWidget.Display("##name" + selectedItem.Name, ref name))
@@ -103,8 +140,6 @@ public class TechCatBlueprintUI : BluePrintsUI
             {
                 selectedItem.Description = desc;
             }
-
-
             ImGui.End();
         }
     }
@@ -123,18 +158,21 @@ public class TechBlueprintUI : BluePrintsUI
         int i = 0;
         foreach (var kvp in blueprints)
         {
-            _itemNames[i] = kvp.Key;
+            _itemNames[i] = kvp.Value.Name;
             _itemBlueprints[i] = kvp.Value;
             _isActive[i] = false;
             i++;
         }
+        var newEmpty = new TechBlueprint();
+        newEmpty.Name = "New Blueprint";
+        _newEmpty = newEmpty;
     }
-
+/*
     public override void Display()
     {
         ImGui.Columns(2);
-        ImGui.SetColumnWidth(0,200);
-        ImGui.SetColumnWidth(1,100);
+        ImGui.SetColumnWidth(0,150);
+        ImGui.SetColumnWidth(1,500);
 
         int i = 0;
         foreach (TechBlueprint item in _itemBlueprints)
@@ -148,9 +186,12 @@ public class TechBlueprintUI : BluePrintsUI
             ImGui.NextColumn();
             i++;
         }
+        TechBlueprint newBpt = new TechBlueprint();
+        newBpt.Name = "newBluprint";
+        NewItem("+##newtbt", newBpt);
     }
-    
-    public void DisplayEditorWindow(int selectedIndex)
+    */
+    public override void DisplayEditorWindow(int selectedIndex)
     {
         
         if(!_isActive[selectedIndex])
@@ -161,7 +202,7 @@ public class TechBlueprintUI : BluePrintsUI
         if (ImGui.Begin("Tech Editor: " + name))
         {
             ImGui.Columns(2);
-            ImGui.SetColumnWidth(0,100);
+            ImGui.SetColumnWidth(0,150);
             ImGui.SetColumnWidth(1,500);
             ImGui.Text("Name: ");
             ImGui.NextColumn();
@@ -242,7 +283,8 @@ public class TechBlueprintUI : BluePrintsUI
 
 public class ComponentBluprintUI : BluePrintsUI
 {
-    
+    private AttributeBlueprintUI? _attributeBlueprintUI;
+    private List<ComponentTemplateAttributeBlueprint> _selectedAttributes;
     public ComponentBluprintUI(ModDataStore modDataStore) : base(modDataStore)
     {
         Dictionary<string, ComponentTemplateBlueprint> blueprints = modDataStore.ComponentTemplates;
@@ -252,18 +294,21 @@ public class ComponentBluprintUI : BluePrintsUI
         int i = 0;
         foreach (var kvp in blueprints)
         {
-            _itemNames[i] = kvp.Key;
+            _itemNames[i] = kvp.Value.Name;
             _itemBlueprints[i] = kvp.Value;
             _isActive[i] = false;
             i++;
         }
+        var newEmpty = new ComponentTemplateBlueprint();
+        newEmpty.Name = "New Blueprint";
+        _newEmpty = newEmpty;
     }
-    
+ /*   
     public override void Display()
     {
         ImGui.Columns(2);
-        ImGui.SetColumnWidth(0,200);
-        ImGui.SetColumnWidth(1,100);
+        ImGui.SetColumnWidth(0,150);
+        ImGui.SetColumnWidth(1,500);
 
         int i = 0;
         foreach (ComponentTemplateBlueprint item in _itemBlueprints)
@@ -277,22 +322,30 @@ public class ComponentBluprintUI : BluePrintsUI
             ImGui.NextColumn();
             i++;
         }
+        ComponentTemplateBlueprint newBpt = new ComponentTemplateBlueprint();
+        newBpt.Name = "newBluprint";
+        NewItem("+##newcpbt", newBpt);
     }
-
+*/
     private int editIndex = 0;
-    public void DisplayEditorWindow(int selectedIndex)
+    public override void DisplayEditorWindow(int selectedIndex)
     {
 
         if (!_isActive[selectedIndex])
             return;
         var selectedItem = (ComponentTemplateBlueprint)_itemBlueprints[selectedIndex];
+        _selectedAttributes = selectedItem.Attributes;
+        
+        if(_attributeBlueprintUI == null)
+            _attributeBlueprintUI = new AttributeBlueprintUI(_modDataStore, selectedItem);
+            
         string name = selectedItem.Name;
         string editStr;
         if (ImGui.Begin("Tech Category Editor: " + name))
         {
             ImGui.Columns(2);
-            ImGui.SetColumnWidth(0, 100);
-            ImGui.SetColumnWidth(1, 300);
+            ImGui.SetColumnWidth(0, 150);
+            ImGui.SetColumnWidth(1, 500);
             
             
             ImGui.Text("Name: ");
@@ -367,14 +420,132 @@ public class ComponentBluprintUI : BluePrintsUI
             }
             ImGui.NextColumn();
             
-            /*
+            _attributeBlueprintUI.Display();
 
-            ImGui.Text("Attributes: ");
-            ImGui.SameLine();
-            ImGui.Text(selected.Attributes.ToString());
-
-            */
             ImGui.End();
         }
     }
-} 
+}
+
+public class AttributeBlueprintUI : BluePrintsUI
+{
+    private protected string _parentID;
+    private ComponentTemplateAttributeBlueprint[] _blueprints;
+    private string[] _attributeTypeNames;
+    private string[] _attributeFullNames;
+    public AttributeBlueprintUI(ModDataStore modDataStore, ComponentTemplateBlueprint componentBlueprint) : base(modDataStore)
+    {
+        _parentID = componentBlueprint.UniqueID;
+        _blueprints = componentBlueprint.Attributes.ToArray();
+        _itemNames = new string[_blueprints.Length];
+        _isActive = new bool[_blueprints.Length];
+        int i = 0;
+        foreach (var item in _blueprints)
+        {
+            _itemNames[i] = item.Name;
+            _isActive[i] = false;
+            i++;
+        }
+        var type = typeof(IComponentDesignAttribute);
+        var attributeTypes = AppDomain.CurrentDomain.GetAssemblies()
+                             .SelectMany(s => s.GetTypes())
+                             .Where(p => type.IsAssignableFrom(p));
+        _attributeTypeNames = new string[attributeTypes.Count()];
+        _attributeFullNames = new string[attributeTypes.Count()];
+        i = 0;
+        foreach (var item in attributeTypes)
+        {
+            _attributeTypeNames[i] = item.Name;
+            _attributeFullNames[i] = item.FullName;
+            i++;
+        }
+    }
+    
+    public void Display()
+    {
+        ImGui.Columns(2);
+        ImGui.SetColumnWidth(0,150);
+        ImGui.SetColumnWidth(1,400);
+
+        int i = 0;
+        foreach (var item in _blueprints)
+        {
+            ImGui.Text("Attrubutes: ");
+            ImGui.NextColumn();
+            DisplayEditorWindow(i);
+            i++;
+        }
+        ImGui.Columns(0);
+    }
+
+    public override void DisplayEditorWindow(int selectedIndex)
+    {
+
+        var selectedItem = _blueprints[selectedIndex];
+        string name = selectedItem.Name;
+        string editStr;
+        
+            ImGui.NextColumn();
+            ImGui.Text("Name: ");
+            ImGui.NextColumn();
+            editStr = selectedItem.Name;
+            if (TextEditWidget.Display("##name" + selectedItem.Name, ref editStr))
+            {
+                selectedItem.Name = editStr;
+            }
+            ImGui.NextColumn();
+
+            var foo = selectedItem.Units;
+            ImGui.Text("Units: ");
+            ImGui.NextColumn();
+            var editIndex = Array.IndexOf(_units, selectedItem.Units);
+            if (SelectFromListWiget.Display("##indt" + selectedItem.Units, _units, ref editIndex))
+            {
+                selectedItem.Units = _units[editIndex];
+            }
+            ImGui.NextColumn();
+
+            ImGui.Text("MaxFormula: ");
+            ImGui.NextColumn();
+            editStr = selectedItem.MaxFormula;
+            if (TextEditWidget.Display("##maxf" + selectedItem.MaxFormula, ref editStr))
+            {
+                selectedItem.MaxFormula = editStr;
+            }
+            ImGui.NextColumn();
+
+            ImGui.Text("AttributeFormula: ");
+            ImGui.NextColumn();
+            editStr = selectedItem.AttributeFormula;
+            if (TextEditWidget.Display("##atbf", ref editStr))
+            {
+                selectedItem.AttributeFormula = editStr;
+            }
+            ImGui.NextColumn();
+
+            ImGui.Text("DescriptionFormula: ");
+            ImGui.NextColumn();
+            editStr = selectedItem.DescriptionFormula;
+            if (TextEditWidget.Display("##descf", ref editStr))
+            {
+                selectedItem.DescriptionFormula = editStr;
+            }
+            ImGui.NextColumn();
+
+           
+            ImGui.Text("AttributeType: ");
+            ImGui.NextColumn();
+            editIndex = Array.IndexOf(_attributeFullNames, selectedItem.AttributeType);
+            if (SelectFromListWiget.Display("##indt" + selectedItem.AttributeType, _attributeTypeNames, ref editIndex))
+            {
+                selectedItem.AttributeType = _attributeFullNames[editIndex];
+            }
+            ImGui.NextColumn();
+    }
+    public bool Equals(ComponentTemplateBlueprint componentBlueprint)
+    {
+        if (_parentID == componentBlueprint.UniqueID)
+            return true;
+        return false;
+    }
+}

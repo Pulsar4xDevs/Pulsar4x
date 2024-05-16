@@ -24,6 +24,8 @@ public static class TextEditWidget
     public static bool Display(string label, ref string text)
     {
         bool hasChanged = false;
+        if(string.IsNullOrEmpty(text))
+            text = "null";
         if(label != _editingID)
         {
             ImGui.Text(text);

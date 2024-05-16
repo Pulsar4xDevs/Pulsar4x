@@ -17,7 +17,8 @@ public class ModFileEditor : PulsarGuiWindow
     private TechBlueprintUI _techBlueprintUI;
     private TechCatBlueprintUI _techCatBlueprintUI;
     private ComponentBluprintUI _componentBluprintUI;
-    //private CargoTypeBlueprint _cargoTypeBlueprintUI;
+    //private CargoTypeBlueprintUI _cargoTypeBlueprintUI;
+    private AttributeBlueprintUI _attributeBlueprintUI;
 
 
     
@@ -50,7 +51,9 @@ public class ModFileEditor : PulsarGuiWindow
         _techCatBlueprintUI = new TechCatBlueprintUI(modDataStore);
         _techBlueprintUI = new TechBlueprintUI(modDataStore);
         _componentBluprintUI = new ComponentBluprintUI(modDataStore);
-        
+        //_cargoTypeBlueprintUI = new CargoTypeBlueprint(modDataStore);
+        //_attributeBlueprintUI = new AttributeBlueprintUI(modDataStore)
+
     }
 
     
@@ -61,11 +64,13 @@ public class ModFileEditor : PulsarGuiWindow
         {
             if (ImGui.Begin("Debug GUI Window", ref IsActive))
             {
-                _techCatBlueprintUI.Display();
+                _techCatBlueprintUI.Display("Tech Categorys");
                 ImGui.NewLine();
-                _techBlueprintUI.Display();
+                _techBlueprintUI.Display("Techs");
                 ImGui.NewLine();
-                _componentBluprintUI.Display();
+                _componentBluprintUI.Display("Components");
+                ImGui.NewLine();
+                //_cargoTypeBlueprintUI.Display("Cargo Types");
                 
             }
 
