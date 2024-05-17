@@ -58,10 +58,18 @@ public abstract class BluePrintsUI
         int i = 0;
         if(ImGui.TreeNode(label))
         {
+            ImGui.Button("Save");
+            ImGui.SameLine();
+            ImGui.Button("SaveAs");
+            ImGui.SameLine();
+            ImGui.Button("SaveToMemory");
             ImGui.BeginChild(label);
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0,150);
             ImGui.SetColumnWidth(1,500);
+            //ImGui.NextColumn();
+            
+            //ImGui.NextColumn();
             foreach (var item in _itemBlueprints)
             {
                 ImGui.Text(_itemNames[i]);
