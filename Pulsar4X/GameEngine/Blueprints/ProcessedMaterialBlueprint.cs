@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using Pulsar4X.DataStructures;
-using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Blueprints
 {
     public class ProcessedMaterialBlueprint : Blueprint
     {
-        public string Name { get; init; }
+        public string Name { get; set; }
         public Dictionary<string, string> Formulas { get; set;}
         public Dictionary<string, long> ResourceCosts { get; set; }
         public long IndustryPointCosts { get; set; }

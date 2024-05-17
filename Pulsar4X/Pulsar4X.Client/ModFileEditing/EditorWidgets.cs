@@ -77,12 +77,40 @@ public static class IntEditWidget
     }
 }
 
+public static class DoubleEditWidget
+{
+    private static string? _editingID;
+    
+    public static bool Display(string label, ref double num, string format = "")
+    {
+        bool hasChanged = false;
+        if(label != _editingID)
+        {
+            ImGui.Text(num.ToString());
+            if(ImGui.IsItemClicked())
+            {
+                _editingID = label;
+            }
+        }
+        else
+        {
+            if (ImGui.InputDouble(label, ref num, 1, 1, format, ImGuiInputTextFlags.EnterReturnsTrue))
+            {
+                _editingID = null;
+                hasChanged = true;
+            }
+        }
+
+        return hasChanged;
+    }
+}
+
 public static class DictEditWidget
 {
     private static string? _editingID;
     private static int _editInt;
     private static string _editStr;
-
+    private static long _editLong;
     private static uint _buffSize = 128;
     private static byte[] _strInputBuffer = new byte[128];
     private static int _techIndex = 0;
@@ -154,6 +182,8 @@ public static class DictEditWidget
         ImGui.BeginChild("##dic" + label, new Vector2(400,160), true);
         ImGui.Columns(2);
         bool isChanged = false;
+        if (dict is null)
+            dict = new Dictionary<string, string>();
         _addnum = -1;
         foreach (var kvp in dict)
         {
@@ -171,6 +201,46 @@ public static class DictEditWidget
             if(TextEditWidget.Display(label+kvp.Key + "v", ref _editStr))
             {
                 dict[kvp.Key] = _editStr;
+            }
+            ImGui.NextColumn();
+        }
+        ImGui.Columns(0);
+        ImGui.NewLine();
+        ImGui.EndChild();
+
+        return isChanged;
+    }
+    
+    /// <summary>
+    /// Note this casts to an int, not long.
+    /// </summary>
+    /// <param name="label"></param>
+    /// <param name="dict"></param>
+    /// <returns></returns>
+    public static bool Display(string label, ref Dictionary<string, long> dict)
+    {
+        ImGui.BeginChild("##dic" + label, new Vector2(400,160), true);
+        ImGui.Columns(2);
+        bool isChanged = false;
+        if (dict is null)
+            dict = new Dictionary<string, long>();
+        _addnum = -1;
+        foreach (var kvp in dict)
+        {
+            _editStr = kvp.Key;
+            if (TextEditWidget.Display(label + kvp.Key + "k", ref _editStr))
+            {
+                isChanged = true;
+                if(!dict.ContainsKey(_editStr))
+                    dict.Add(_editStr,kvp.Value);
+            }
+            ImGui.NextColumn();
+            
+            //values
+            _editInt = (int)kvp.Value;
+            if(IntEditWidget.Display(label+kvp.Key + "v", ref _editInt))
+            {
+                dict[kvp.Key] = _editInt;
             }
             ImGui.NextColumn();
         }

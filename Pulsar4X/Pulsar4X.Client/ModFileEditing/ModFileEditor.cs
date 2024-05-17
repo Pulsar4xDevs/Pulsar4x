@@ -1,12 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.Blueprints;
-using Pulsar4X.DataStructures;
-using Pulsar4X.Engine;
 using Pulsar4X.Modding;
 
 namespace Pulsar4X.SDL2UI.ModFileEditing;
@@ -19,7 +11,8 @@ public class ModFileEditor : PulsarGuiWindow
     private ComponentBluprintUI _componentBluprintUI;
     //private CargoTypeBlueprintUI _cargoTypeBlueprintUI;
     private AttributeBlueprintUI _attributeBlueprintUI;
-
+    private ArmorBlueprintUI _armorBlueprintUI;
+    private ProcessedMateralsUI _processedMateralsUI;
 
     
     
@@ -52,7 +45,9 @@ public class ModFileEditor : PulsarGuiWindow
         _techBlueprintUI = new TechBlueprintUI(modDataStore);
         _componentBluprintUI = new ComponentBluprintUI(modDataStore);
         //_cargoTypeBlueprintUI = new CargoTypeBlueprint(modDataStore);
-        //_attributeBlueprintUI = new AttributeBlueprintUI(modDataStore)
+
+        _armorBlueprintUI = new ArmorBlueprintUI(modDataStore);
+        _processedMateralsUI = new ProcessedMateralsUI(modDataStore);
 
     }
 
@@ -71,7 +66,10 @@ public class ModFileEditor : PulsarGuiWindow
                 _componentBluprintUI.Display("Components");
                 ImGui.NewLine();
                 //_cargoTypeBlueprintUI.Display("Cargo Types");
-                
+                _armorBlueprintUI.Display("Armor");
+                ImGui.NewLine();
+                _processedMateralsUI.Display("Processed Materials");
+                ImGui.NewLine();
             }
 
             ImGui.End();
