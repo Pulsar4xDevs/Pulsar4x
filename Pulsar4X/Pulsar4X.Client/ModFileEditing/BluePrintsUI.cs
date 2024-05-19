@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Blueprints;
 using Pulsar4X.DataStructures;
@@ -27,6 +28,8 @@ public abstract class BluePrintsUI
     private protected string[] _constrGuiHints;
     private protected string[] _mountTypes;
     private protected string[] _guiHints;
+
+    private protected Vector2 _childSize = new Vector2(640, 200);
     protected BluePrintsUI(ModDataStore modDataStore)
     {
         _modDataStore = modDataStore;
@@ -50,8 +53,11 @@ public abstract class BluePrintsUI
         _constrGuiHints = Enum.GetNames(typeof(ConstructableGuiHints));
         _guiHints = Enum.GetNames(typeof(GuiHint));
 
+        
+        
     }
-    
+
+    public abstract void Refresh();
 
     public void Display(string label)
     {
@@ -63,19 +69,27 @@ public abstract class BluePrintsUI
             ImGui.Button("SaveAs");
             ImGui.SameLine();
             ImGui.Button("SaveToMemory");
-            ImGui.BeginChild(label);
+            
+            ImGui.BeginChild(label,_childSize, true);
+            
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0,150);
             ImGui.SetColumnWidth(1,500);
-            //ImGui.NextColumn();
-            
-            //ImGui.NextColumn();
+
             foreach (var item in _itemBlueprints)
             {
                 ImGui.Text(_itemNames[i]);
                 ImGui.NextColumn();
-                if(ImGui.Checkbox("Edit##"+_itemNames[i], ref _isActive[i]));
+                //if(ImGui.Checkbox("Edit##" + label + item.UniqueID, ref _isActive[i]));
+                if(ImGui.Button("Edit##" + label + item.UniqueID))
                 {
+                    _isActive[i] = !_isActive[i];
+                }
+                ImGui.SameLine();
+                if(ImGui.Button("Delete##" + label + item.UniqueID))
+                {
+                    removeAtIndex(i);
+                    break;
                 }
                 DisplayEditorWindow(i);
                 ImGui.NextColumn();
@@ -83,6 +97,7 @@ public abstract class BluePrintsUI
             }
             NewItem("+##"+label, _newEmpty);
             ImGui.EndChild();
+            ImGui.TreePop();
         }
     }
 
@@ -100,32 +115,53 @@ public abstract class BluePrintsUI
             _isActive[^1] = true;
         }
     }
+
+    void removeAtIndex(int index)
+    {
+        int newlen = _itemBlueprints.Length - 1;
+        Blueprint[] newArray = new Blueprint[newlen];
+        int i = 0;
+        foreach (var item in _itemBlueprints)
+        {
+            if(i == index)
+            {
+                index = -1;
+                continue;
+            }
+            newArray[i] = item;
+            i++;
+        }
+
+        _itemBlueprints = newArray;
+        Refresh();
+    }
 }
 
 public class TechCatBlueprintUI : BluePrintsUI
 {
-    
     public TechCatBlueprintUI(ModDataStore modDataStore) : base(modDataStore)
     {
         Dictionary<string, TechCategoryBlueprint> blueprints = _modDataStore.TechCategories;
-        
-        _itemNames = new string[blueprints.Count];
-        _itemBlueprints = new Blueprint[blueprints.Count];
-        _isActive = new bool[blueprints.Count];
+        _itemBlueprints = blueprints.Values.ToArray();
+        Refresh();
+    }
+
+    public sealed override void Refresh()
+    {
+        _itemNames = new string[_itemBlueprints.Length];
+        _isActive = new bool[_itemBlueprints.Length];
         int i = 0;
-        foreach (var kvp in blueprints)
+        foreach (TechCategoryBlueprint item in _itemBlueprints)
         {
-            _itemNames[i] = kvp.Value.Name;
-            _itemBlueprints[i] = kvp.Value;
+            _itemNames[i] = item.Name;
             _isActive[i] = false;
             i++;
         }
-
         var newEmpty = new TechCategoryBlueprint();
         newEmpty.Name = "New Blueprint";
         _newEmpty = newEmpty;
     }
-    
+
     public override void DisplayEditorWindow(int selectedIndex)
     {
         if(!_isActive[selectedIndex])
@@ -163,15 +199,18 @@ public class TechBlueprintUI : BluePrintsUI
     public TechBlueprintUI(ModDataStore modDataStore) : base(modDataStore)
     {
         var blueprints = modDataStore.Techs;
-        
-        _itemNames = new string[blueprints.Count];
-        _itemBlueprints = new Blueprint[blueprints.Count];
-        _isActive = new bool[blueprints.Count];
+        _itemBlueprints = blueprints.Values.ToArray();
+        Refresh();
+    }
+    
+    public override void Refresh()
+    {
+        _itemNames = new string[_itemBlueprints.Length];
+        _isActive = new bool[_itemBlueprints.Length];
         int i = 0;
-        foreach (var kvp in blueprints)
+        foreach (TechBlueprint item in _itemBlueprints)
         {
-            _itemNames[i] = kvp.Value.Name;
-            _itemBlueprints[i] = kvp.Value;
+            _itemNames[i] = item.Name;
             _isActive[i] = false;
             i++;
         }
@@ -277,14 +316,17 @@ public class ComponentBluprintUI : BluePrintsUI
     public ComponentBluprintUI(ModDataStore modDataStore) : base(modDataStore)
     {
         Dictionary<string, ComponentTemplateBlueprint> blueprints = modDataStore.ComponentTemplates;
-        _itemNames = new string[blueprints.Count];
-        _itemBlueprints = new Blueprint[blueprints.Count];
-        _isActive = new bool[blueprints.Count];
+        _itemBlueprints = blueprints.Values.ToArray();
+        Refresh();
+    }
+    public sealed override void Refresh()
+    {
+        _itemNames = new string[_itemBlueprints.Length];
+        _isActive = new bool[_itemBlueprints.Length];
         int i = 0;
-        foreach (var kvp in blueprints)
+        foreach (ComponentTemplateBlueprint item in _itemBlueprints)
         {
-            _itemNames[i] = kvp.Value.Name;
-            _itemBlueprints[i] = kvp.Value;
+            _itemNames[i] = item.Name;
             _isActive[i] = false;
             i++;
         }
@@ -397,19 +439,21 @@ public class ArmorBlueprintUI : BluePrintsUI
     public ArmorBlueprintUI(ModDataStore modDataStore) : base(modDataStore)
     {
         Dictionary<string, ArmorBlueprint> blueprints = _modDataStore.Armor;
-        
-        _itemNames = new string[blueprints.Count];
-        _itemBlueprints = new Blueprint[blueprints.Count];
-        _isActive = new bool[blueprints.Count];
+        _itemBlueprints = blueprints.Values.ToArray();
+        Refresh();
+    }
+
+    public sealed override void Refresh()
+    {
+        _itemNames = new string[_itemBlueprints.Length];
+        _isActive = new bool[_itemBlueprints.Length];
         int i = 0;
-        foreach (var kvp in blueprints)
+        foreach (ArmorBlueprint item in _itemBlueprints)
         {
-            _itemNames[i] = kvp.Value.UniqueID;
-            _itemBlueprints[i] = kvp.Value;
+            _itemNames[i] = item.UniqueID;
             _isActive[i] = false;
             i++;
         }
-
         var newEmpty = new ArmorBlueprint();
         newEmpty.UniqueID = "New Blueprint";
         _newEmpty = newEmpty;
@@ -470,15 +514,18 @@ public class ProcessedMateralsUI : BluePrintsUI
     public ProcessedMateralsUI(ModDataStore modDataStore) : base(modDataStore)
     {
         var blueprints = modDataStore.ProcessedMaterials;
-        
-        _itemNames = new string[blueprints.Count];
-        _itemBlueprints = new Blueprint[blueprints.Count];
-        _isActive = new bool[blueprints.Count];
+        _itemBlueprints = blueprints.Values.ToArray();
+        Refresh();
+    }
+
+    public sealed override void Refresh()
+    {
+        _itemNames = new string[_itemBlueprints.Length];
+        _isActive = new bool[_itemBlueprints.Length];
         int i = 0;
-        foreach (var kvp in blueprints)
+        foreach (ProcessedMaterialBlueprint item in _itemBlueprints)
         {
-            _itemNames[i] = kvp.Value.Name;
-            _itemBlueprints[i] = kvp.Value;
+            _itemNames[i] = item.Name;
             _isActive[i] = false;
             i++;
         }
@@ -638,10 +685,19 @@ public class AttributeBlueprintUI : BluePrintsUI
         else
             _blueprints = new ComponentTemplateAttributeBlueprint[1];
         
-        _itemNames = new string[_blueprints.Length];
-        _isActive = new bool[_blueprints.Length];
+        Refresh();
+        
+
+    }
+    
+
+
+    public sealed override void Refresh()
+    {
+        _itemNames = new string[_itemBlueprints.Length];
+        _isActive = new bool[_itemBlueprints.Length];
         int i = 0;
-        foreach (var item in _blueprints)
+        foreach (TechCategoryBlueprint item in _itemBlueprints)
         {
             if (item is null)
                 _itemNames[i] = "?";
@@ -650,10 +706,14 @@ public class AttributeBlueprintUI : BluePrintsUI
             _isActive[i] = false;
             i++;
         }
+        var newEmpty = new TechCategoryBlueprint();
+        newEmpty.Name = "New Blueprint";
+        _newEmpty = newEmpty;
+        
         var type = typeof(IComponentDesignAttribute);
         var attributeTypes = AppDomain.CurrentDomain.GetAssemblies()
-                             .SelectMany(s => s.GetTypes())
-                             .Where(p => type.IsAssignableFrom(p));
+                                      .SelectMany(s => s.GetTypes())
+                                      .Where(p => type.IsAssignableFrom(p));
         _attributeTypeNames = new string[attributeTypes.Count()];
         _attributeFullNames = new string[attributeTypes.Count()];
         i = 0;

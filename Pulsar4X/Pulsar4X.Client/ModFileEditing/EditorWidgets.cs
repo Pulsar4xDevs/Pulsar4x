@@ -170,6 +170,25 @@ public static class DictEditWidget
                 _editingID = null;
             }
         }
+
+        if (dict.Count == 0)
+        {
+            if(_editingID != label+"addKey")
+            {
+                if (ImGui.Button("+"))
+                {
+                    _editingID = label+"addKey";
+                }
+            }
+            else
+            {
+                _addnum = dict.Keys.Count;
+                while (dict.ContainsKey(_addnum))
+                    _addnum++;
+                _editingID = null;
+            }
+        }
+        
         if(_addnum > -1) //do this here so we don't add in the middle of foreach
             dict.Add(_addnum, new List<string>());
         
@@ -244,6 +263,13 @@ public static class DictEditWidget
             }
             ImGui.NextColumn();
         }
+
+        if (ImGui.Button("+##addkey" + label))
+        {
+            dict.Add("???", 0);
+        }
+        
+        
         ImGui.Columns(0);
         ImGui.NewLine();
         ImGui.EndChild();
@@ -262,7 +288,7 @@ public static class SelectFromListWiget
     public static bool Display(string label, string[] selectFrom, ref int selected)
     {
         bool hasChanged = false;
-        string displayText = "";
+        string displayText = "null";
         if(selected > -1)   
             displayText = selectFrom[selected];
         if (label != _editingID)
