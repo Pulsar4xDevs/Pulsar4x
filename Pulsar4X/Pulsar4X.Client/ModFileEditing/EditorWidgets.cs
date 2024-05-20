@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
@@ -114,35 +116,44 @@ public static class DictEditWidget
     private static uint _buffSize = 128;
     private static byte[] _strInputBuffer = new byte[128];
     private static int _techIndex = 0;
-    private static int _addnum = -1;
+    private static int _addKey = -1;
+    private static int _addVal = -1;
     public static bool Display(string label, ref Dictionary<int, List<string>> dict, string[] techs)
     {
         ImGui.BeginChild("##dic");
         ImGui.Columns(2);
+        ImGui.SetColumnWidth(0, 64);
         bool isChanged = false;
-        _addnum = -1;
-        foreach (var kvp in dict)
+        _addKey = -1;
+        foreach (var kvp in dict.ToArray())
         {
             _editInt = kvp.Key;
+            int oldVal = kvp.Key;
             if (IntEditWidget.Display(label + _editInt, ref _editInt))
             {
                 isChanged = true;
                 if(!dict.ContainsKey(_editInt))
-                    dict.Add(_editInt,kvp.Value);
+                {
+                    dict.Add(_editInt, kvp.Value);
+                    dict.Remove(oldVal);
+                }
             }
             ImGui.NextColumn();
             //values list
-            foreach (var item in kvp.Value)
+            int valIndex = 0;
+            foreach (var item in kvp.Value.ToArray())
             {
-                _editStr = item;
-                if(TextEditWidget.Display(label+_editInt+item, ref _editStr))
+                _techIndex = Array.IndexOf(techs, item);
+                if(SelectFromListWiget.Display(label+"chValue", techs, ref _techIndex))
                 {
-                        
+                    dict[kvp.Key][valIndex] = techs[_techIndex];
                 }
+                valIndex++;
             }
+            
             if(_editingID != label+"addValue")
             {
-                if (ImGui.Button("+"))
+                if (ImGui.Button("+##addval" + label))
                 {
                     _editingID = label+"addValue";
                 }
@@ -152,26 +163,14 @@ public static class DictEditWidget
                 if (SelectFromListWiget.Display(label+"addValue", techs, ref _techIndex))
                 {
                     dict[kvp.Key].Add(techs[_techIndex]);
+                    _editingID = null;
                 }
             }
             ImGui.NextColumn();
-            if(_editingID != label+"addKey")
-            {
-                if (ImGui.Button("+"))
-                {
-                    _editingID = label+"addKey";
-                }
-            }
-            else
-            {
-                _addnum = dict.Keys.Count;
-                while (dict.ContainsKey(_addnum))
-                    _addnum++;
-                _editingID = null;
-            }
+            ImGui.Separator();
         }
 
-        if (dict.Count == 0)
+        //if (dict.Count == 0)
         {
             if(_editingID != label+"addKey")
             {
@@ -182,15 +181,13 @@ public static class DictEditWidget
             }
             else
             {
-                _addnum = dict.Keys.Count;
-                while (dict.ContainsKey(_addnum))
-                    _addnum++;
+                _addKey = dict.Keys.Count;
+                while (dict.ContainsKey(_addKey))
+                    _addKey++;
+                dict.Add(_addKey, new List<string>());
                 _editingID = null;
             }
         }
-        
-        if(_addnum > -1) //do this here so we don't add in the middle of foreach
-            dict.Add(_addnum, new List<string>());
         
         ImGui.EndChild();
         return isChanged;
@@ -203,7 +200,7 @@ public static class DictEditWidget
         bool isChanged = false;
         if (dict is null)
             dict = new Dictionary<string, string>();
-        _addnum = -1;
+        _addKey = -1;
         foreach (var kvp in dict)
         {
             _editStr = kvp.Key;
@@ -243,7 +240,7 @@ public static class DictEditWidget
         bool isChanged = false;
         if (dict is null)
             dict = new Dictionary<string, long>();
-        _addnum = -1;
+        _addKey = -1;
         foreach (var kvp in dict)
         {
             _editStr = kvp.Key;

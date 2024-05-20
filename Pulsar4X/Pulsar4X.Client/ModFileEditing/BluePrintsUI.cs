@@ -694,10 +694,10 @@ public class AttributeBlueprintUI : BluePrintsUI
 
     public sealed override void Refresh()
     {
-        _itemNames = new string[_itemBlueprints.Length];
-        _isActive = new bool[_itemBlueprints.Length];
+        _itemNames = new string[_blueprints.Length];
+        _isActive = new bool[_blueprints.Length];
         int i = 0;
-        foreach (TechCategoryBlueprint item in _itemBlueprints)
+        foreach (ComponentTemplateAttributeBlueprint item in _blueprints)
         {
             if (item is null)
                 _itemNames[i] = "?";
@@ -706,9 +706,9 @@ public class AttributeBlueprintUI : BluePrintsUI
             _isActive[i] = false;
             i++;
         }
-        var newEmpty = new TechCategoryBlueprint();
-        newEmpty.Name = "New Blueprint";
-        _newEmpty = newEmpty;
+        //var newEmpty = new ComponentTemplateAttributeBlueprint();
+        //newEmpty.Name = "New Blueprint";
+        //_newEmpty = newEmpty;
         
         var type = typeof(IComponentDesignAttribute);
         var attributeTypes = AppDomain.CurrentDomain.GetAssemblies()
