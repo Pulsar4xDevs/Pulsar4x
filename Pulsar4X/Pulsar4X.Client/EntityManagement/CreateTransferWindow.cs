@@ -14,8 +14,8 @@ public class CreateTransferWindow : PulsarGuiWindow
     public Entity? TransferLeft { get; private set; }
     public Entity? TransferRight { get; private set; }
 
-    public Dictionary<ICargoable, int> TransferLeftGoods { get; private set; } = new ();
-    public Dictionary<ICargoable, int> TransferRightGoods { get; private set; } = new ();
+    public Dictionary<ICargoable, (long, long)> TransferLeftGoods { get; private set; } = new ();
+    public Dictionary<ICargoable, (long, long)> TransferRightGoods { get; private set; } = new ();
 
     internal static CreateTransferWindow GetInstance()
     {
@@ -112,11 +112,11 @@ public class CreateTransferWindow : PulsarGuiWindow
                         {
                             if(entity == TransferLeft && !TransferLeftGoods.ContainsKey(cargoables[id]))
                             {
-                                TransferLeftGoods.Add(cargoables[id], 0);
+                                TransferLeftGoods.Add(cargoables[id], (0, value));
                             }
                             else if(entity == TransferRight && !TransferRightGoods.ContainsKey(cargoables[id]))
                             {
-                                TransferRightGoods.Add(cargoables[id], 0);
+                                TransferRightGoods.Add(cargoables[id], (0, value));
                             }
                         }
                         ImGui.SameLine();
@@ -126,29 +126,37 @@ public class CreateTransferWindow : PulsarGuiWindow
 
                         string amount = Stringify.Number(value);
                         var amountSize = ImGui.CalcTextSize(amount);
-                        
+
                         ImGui.SetCursorPosX(contentSize.X - amountSize.X);
                         ImGui.Text(value.ToString());
-                        
+
                     }
                 }
             }
         }
     }
 
-    private void DisplayTradeList(Dictionary<ICargoable, int> list, Entity entity)
+    private void DisplayTradeList(Dictionary<ICargoable, (long, long)> list, Entity entity)
     {
         var contentSize = ImGui.GetContentRegionAvail();
-        foreach(var (cargoable, amount) in list)
+        foreach(var (cargoable, value) in list)
         {
+            var amount = (int)value.Item1;
             ImGui.Text(cargoable.Name);
             ImGui.SameLine();
             byte[] buffer = new byte[16];
 
             ImGui.SetNextItemWidth(96);
             ImGui.SetCursorPosX(contentSize.X - 96);
-            ImGui.InputText("###input" + cargoable.Name, buffer, 16);
+            ImGui.InputInt("###input" + cargoable.Name, ref amount);
             cargoable.ShowTooltip();
+
+            if(amount > value.Item2)
+                amount = (int)value.Item2;
+            if(amount < 0)
+                amount = 0;
+
+            list[cargoable] = ((long)amount, value.Item2);
         }
     }
 
@@ -173,7 +181,7 @@ public class CreateTransferWindow : PulsarGuiWindow
             if(ImGui.Button(potentialTarget.Name))
             {
                 SetRight(potentialTarget.Entity);
-            }   
+            }
         }
     }
 
