@@ -83,6 +83,17 @@ namespace Pulsar4X.SDL2UI
                 {
                     if(entity.TryGetDatablob<VolumeStorageDB>(out var storage))
                     {
+                        var size = ImGui.GetContentRegionMax();
+                        ImGui.PushStyleColor(ImGuiCol.Button, Styles.SelectedColor);
+                        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Styles.SelectedColorHover);
+                        ImGui.PushStyleColor(ImGuiCol.ButtonActive, Styles.SelectedColorActive);
+                        if(ImGui.Button("Initiate Transfer", new Vector2(size.X - 8, 18)))
+                        {
+                            CreateTransferWindow.GetInstance().SetLeft(entity);
+                            CreateTransferWindow.GetInstance().SetActive(true);
+                        }
+                        ImGui.PopStyleColor(3);
+
                         ImGui.Columns(2);
                         DisplayHelpers.PrintRow("Total Mass in Storage", Stringify.Mass(storage.TotalStoredMass));
                         DisplayHelpers.PrintRow("Transfer Rate", storage.TransferRateInKgHr.ToString() + " kg/hr");

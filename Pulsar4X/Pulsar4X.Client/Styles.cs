@@ -15,6 +15,8 @@ namespace Pulsar4X.SDL2UI
         public static Vector4 TerribleColor = new (1.0f, 0.05f, 0.05f, 1.0f);
 
         public static Vector4 SelectedColor = new Vector4(0.75f, 0.25f, 0.25f, 1f);
+        public static Vector4 SelectedColorHover = new Vector4(0.775f, 0.325f, 0.325f, 1f);
+        public static Vector4 SelectedColorActive = new Vector4(0.675f, 0.225f, 0.225f, 1f);
         public static Vector4 InvisibleColor = new Vector4(0, 0, 0, 0f);
 
         public static Vector4 NeutralColor = new (0.65f, 0.65f, 0.65f, 1f);
