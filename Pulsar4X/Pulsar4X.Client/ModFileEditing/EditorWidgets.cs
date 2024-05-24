@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.SDL2UI.ModFileEditing;
 
@@ -113,6 +114,7 @@ public static class DictEditWidget
     private static int _editInt;
     private static string _editStr;
     private static long _editLong;
+    private static double _editDouble;
     private static uint _buffSize = 128;
     private static byte[] _strInputBuffer = new byte[128];
     private static int _techIndex = 0;
@@ -273,6 +275,41 @@ public static class DictEditWidget
 
         return isChanged;
     }
+    
+    public static bool Display(string label, ref Dictionary<BodyType, double> dict)
+    {
+        ImGui.BeginChild("##dic" + label, new Vector2(400,160), true);
+        ImGui.Columns(2);
+        bool isChanged = false;
+        if (dict is null)
+        {
+            dict = new Dictionary<BodyType, double>();
+            foreach (var bodyType in Enum.GetValues(typeof(BodyType)))
+            {
+                dict.Add((BodyType)bodyType, 0);
+            }
+        }
+        _addKey = -1;
+        foreach (var kvp in dict)
+        {
+            _editStr = Enum.GetName(kvp.Key);
+            _editDouble = kvp.Value;
+            
+            ImGui.Text(_editStr);
+            ImGui.NextColumn();
+
+            if(DoubleEditWidget.Display(label+_editStr,ref _editDouble))
+            {
+                dict[kvp.Key] = _editDouble;
+            }
+            ImGui.NextColumn();
+
+        }
+
+        ImGui.EndChild();
+        return isChanged;
+    }
+    
 }
 
 public static class SelectFromListWiget
