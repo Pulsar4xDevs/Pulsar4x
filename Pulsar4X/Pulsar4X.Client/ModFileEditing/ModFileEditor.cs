@@ -13,7 +13,7 @@ public class ModFileEditor : PulsarGuiWindow
     private AttributeBlueprintUI _attributeBlueprintUI;
     private ArmorBlueprintUI _armorBlueprintUI;
     private ProcessedMateralsUI _processedMateralsUI;
-
+    private MineralBlueprintUI _mineralsBlueprintUI;
     
     
     private ModFileEditor()
@@ -48,6 +48,7 @@ public class ModFileEditor : PulsarGuiWindow
 
         _armorBlueprintUI = new ArmorBlueprintUI(modDataStore);
         _processedMateralsUI = new ProcessedMateralsUI(modDataStore);
+        _mineralsBlueprintUI = new MineralBlueprintUI(modDataStore);
 
     }
 
@@ -57,7 +58,7 @@ public class ModFileEditor : PulsarGuiWindow
         
         if (IsActive)
         {
-            if (ImGui.Begin("Debug GUI Window", ref IsActive))
+            if (ImGui.Begin("Editor", ref IsActive))
             {
                 _techCatBlueprintUI.Display("Tech Categorys");
                 ImGui.NewLine();
@@ -69,6 +70,8 @@ public class ModFileEditor : PulsarGuiWindow
                 _armorBlueprintUI.Display("Armor");
                 ImGui.NewLine();
                 _processedMateralsUI.Display("Processed Materials");
+                ImGui.NewLine();
+                _mineralsBlueprintUI.Display("Minerals");
                 ImGui.NewLine();
             }
 
