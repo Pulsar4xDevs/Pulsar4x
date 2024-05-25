@@ -4,6 +4,7 @@ using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
+using Pulsar4X.Engine.Orders;
 using Pulsar4X.Extensions;
 using Pulsar4X.Interfaces;
 
@@ -72,6 +73,23 @@ public class CreateTransferWindow : PulsarGuiWindow
 
                 ImGui.Columns(1);
 
+                if(TransferLeftGoods.Count > 0 || TransferRightGoods.Count > 0)
+                {
+                    ImGui.Separator();
+                    if(ImGui.Button("Create"))
+                    {
+                        if(TransferLeft != null && TransferRight != null && TransferLeftGoods.Count > 0)
+                        {
+                            var itemsToTransfer = new List<(ICargoable, long)>();
+                            foreach(var item in TransferLeftGoods)
+                            {
+                                itemsToTransfer.Add((item.Key, item.Value.Item1));
+                            }
+                            CargoUnloadToOrder.CreateCommand(_uiState.Faction.Id, TransferLeft, TransferRight, itemsToTransfer);
+                        }
+                    }
+                }
+
                 ImGui.EndChild();
             }
             ImGui.SameLine();
@@ -139,15 +157,20 @@ public class CreateTransferWindow : PulsarGuiWindow
     private void DisplayTradeList(Dictionary<ICargoable, (long, long)> list, Entity entity)
     {
         var contentSize = ImGui.GetContentRegionAvail();
+        var currentX = ImGui.GetCursorPosX();
+        var toRemove = new List<ICargoable>();
         foreach(var (cargoable, value) in list)
         {
             var amount = (int)value.Item1;
+            if(ImGui.SmallButton("-###remove" + cargoable.Name))
+            {
+                toRemove.Add(cargoable);
+            }
+            ImGui.SameLine();
             ImGui.Text(cargoable.Name);
             ImGui.SameLine();
-            byte[] buffer = new byte[16];
-
             ImGui.SetNextItemWidth(96);
-            ImGui.SetCursorPosX(contentSize.X - 96);
+            ImGui.SetCursorPosX(currentX + contentSize.X - 96);
             ImGui.InputInt("###input" + cargoable.Name, ref amount);
             cargoable.ShowTooltip();
 
@@ -157,6 +180,11 @@ public class CreateTransferWindow : PulsarGuiWindow
                 amount = 0;
 
             list[cargoable] = ((long)amount, value.Item2);
+        }
+
+        foreach(var item in toRemove)
+        {
+            list.Remove(item);
         }
     }
 
