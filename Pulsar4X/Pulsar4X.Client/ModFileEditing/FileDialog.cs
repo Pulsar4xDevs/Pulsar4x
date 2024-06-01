@@ -22,8 +22,9 @@ public static class FileDialog
     public static SaveOrLoad DialogType = SaveOrLoad.Save;
     
     
-    public static void Display(ref string path, ref bool IsActive)
+    public static bool Display(ref string path, ref string fileName, ref bool IsActive)
     {
+        bool isok = false;
         if (string.IsNullOrEmpty(path))
             _pathString = _curDir;
         else
@@ -32,7 +33,10 @@ public static class FileDialog
         ImGui.Begin("File Dialog", ref IsActive);
         ImGui.Text("Name:"); 
         ImGui.SameLine();
-        ImGui.InputText("##Name", _strInputBuffer, 128);
+        if (ImGui.InputText("##Name", _strInputBuffer, 128))
+        {
+            fileName = ImGuiSDL2CSHelper.StringFromBytes(_strInputBuffer);
+        }
         
         ImGui.Columns(2);
         ImGui.SetColumnWidth(0,128);
@@ -92,15 +96,15 @@ public static class FileDialog
         _i = 0;
         foreach (var dir in dirs)
         {
-            DirectoryInfo fi = new DirectoryInfo(dir);
+            DirectoryInfo di = new DirectoryInfo(dir);
             
             _b = _i == _selectedIndex;
-            if (ImGui.Selectable(fi.Name, _b, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowDoubleClick))
+            if (ImGui.Selectable(di.Name, _b, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowDoubleClick))
             {
                 _selectedIndex = _i;
                 if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
                 {
-                    _pathString = fi.FullName;
+                    _pathString = di.FullName;
                 }
             }
             
@@ -109,10 +113,10 @@ public static class FileDialog
             ImGui.Text("");
             ImGui.TableNextColumn();
             
-            ImGui.Text(fi.Extension);
+            ImGui.Text(di.Extension);
             ImGui.TableNextColumn();
             
-            ImGui.Text(fi.LastWriteTime.ToString());
+            ImGui.Text(di.LastWriteTime.ToString());
             ImGui.TableNextColumn();
             _i++;
         }
@@ -124,10 +128,17 @@ public static class FileDialog
             FileInfo fi = new FileInfo(file);
             
             _b = _i == _selectedIndex;
-            if (ImGui.Selectable(fi.Name, _b, ImGuiSelectableFlags.SpanAllColumns))
+            if (ImGui.Selectable(fi.Name, _b, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowDoubleClick))
             {
                 _selectedIndex = _i;
                 _strInputBuffer = ImGuiSDL2CSHelper.BytesFromString(fi.Name);
+                fileName = fi.Name;
+                
+                if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                {
+                    isok = true;
+                    IsActive = false;
+                }
             }
             _i++;
             ImGui.TableNextColumn();
@@ -141,13 +152,35 @@ public static class FileDialog
             ImGui.Text(fi.LastWriteTime.ToString());
             ImGui.TableNextColumn();
             
-
         }
-        
         ImGui.EndTable();
         
+        ImGui.Columns(1);
+        if (DialogType == SaveOrLoad.Load)
+        {
+            if (ImGui.Button("Load"))
+            {
+                isok = true;
+                IsActive = false;
+            }
+        }
+        else
+        {
+            if (ImGui.Button("Save"))
+            {
+                isok = true;
+                IsActive = false;
+            }
+        }
+        ImGui.SameLine();
+        if (ImGui.Button("Cancel"))
+        {
+            IsActive = false;
+            isok = false;
+        }
         
         ImGui.End();
         path = _pathString;
+        return isok;
     }
 }
