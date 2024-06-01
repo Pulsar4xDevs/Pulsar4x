@@ -32,6 +32,10 @@ public abstract class BluePrintsUI
     private protected string[] _guiHints;
 
     private protected Vector2 _childSize = new Vector2(640, 200);
+
+    private protected bool _showFileDialog = false;
+    private protected string _fileDialogPath = "";
+    
     protected BluePrintsUI(ModDataStore modDataStore)
     {
         _modDataStore = modDataStore;
@@ -61,9 +65,6 @@ public abstract class BluePrintsUI
 
     public abstract void Refresh();
 
-    public abstract void SaveAs(string path);
-        
-    
     public void Display(string label)
     {
         int i = 0;
@@ -73,8 +74,7 @@ public abstract class BluePrintsUI
             ImGui.SameLine();
             if (ImGui.Button("SaveAs"))
             {
-                SaveAs("foo");   
-                //FileDialog.Display();
+                _showFileDialog = true;
             }
             ImGui.SameLine();
             ImGui.Button("SaveToMemory");
@@ -107,6 +107,11 @@ public abstract class BluePrintsUI
             NewItem("+##"+label, _newEmpty);
             ImGui.EndChild();
             ImGui.TreePop();
+        }
+
+        if (_showFileDialog)
+        {
+            FileDialog.Display(ref _fileDialogPath, ref _showFileDialog);
         }
     }
 
@@ -170,23 +175,7 @@ public class TechCatBlueprintUI : BluePrintsUI
         newEmpty.Name = "New Blueprint";
         _newEmpty = newEmpty;
     }
-
-    public override void SaveAs(string path)
-    {
-        
-        path = "Data/basemod";
-        FileDialog.Display(path);
-        /*
-        using (StreamWriter outputFile = new StreamWriter(Path.Combine(path, "tcb.json")))
-        {
-            foreach (TechCategoryBlueprint blueprint in _itemBlueprints)
-            {
-                var json = JsonConvert.SerializeObject(blueprint, Formatting.Indented);
-                outputFile.WriteLine(json);
-            }
-        }
-        */
-    }
+    
     
     public override void DisplayEditorWindow(int selectedIndex)
     {
@@ -243,11 +232,6 @@ public class TechBlueprintUI : BluePrintsUI
         var newEmpty = new TechBlueprint();
         newEmpty.Name = "New Blueprint";
         _newEmpty = newEmpty;
-    }
-
-    public override void SaveAs(string path)
-    {
-        throw new NotImplementedException();
     }
 
     public override void DisplayEditorWindow(int selectedIndex)
@@ -366,10 +350,6 @@ public class ComponentBluprintUI : BluePrintsUI
         _newEmpty = newEmpty;
     }
 
-    public override void SaveAs(string path)
-    {
-        throw new NotImplementedException();
-    }
 
     public override void DisplayEditorWindow(int selectedIndex)
     {
@@ -494,10 +474,6 @@ public class ArmorBlueprintUI : BluePrintsUI
         _newEmpty = newEmpty;
     }
 
-    public override void SaveAs(string path)
-    {
-        throw new NotImplementedException();
-    }
 
     public override void DisplayEditorWindow(int selectedIndex)
     {
@@ -569,10 +545,6 @@ public class ProcessedMateralsUI : BluePrintsUI
         _newEmpty = newEmpty;
     }
 
-    public override void SaveAs(string path)
-    {
-        throw new NotImplementedException();
-    }
 
     public override void DisplayEditorWindow(int selectedIndex)
     {
@@ -733,10 +705,6 @@ public class MineralBlueprintUI : BluePrintsUI
         _newEmpty = newEmpty;
     }
 
-    public override void SaveAs(string path)
-    {
-        throw new NotImplementedException();
-    }
 
     public override void DisplayEditorWindow(int selectedIndex)
     {
@@ -869,10 +837,6 @@ public class AttributeBlueprintUI : BluePrintsUI
         }
     }
 
-    public override void SaveAs(string path)
-    {
-        throw new NotImplementedException();
-    }
 
     public void Display()
     {
