@@ -6,6 +6,13 @@ using ImGuiSDL2CS;
 namespace Pulsar4X.SDL2UI.ModFileEditing;
 
 
+/*TODO:
+ *Conformation Dialog if overwriting.
+ *Ability to filter by file extension
+ *Proper colomn sizing
+ *Filter by colomns
+ */
+
 public static class FileDialog
 {
     public enum SaveOrLoad

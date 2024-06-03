@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Pulsar4X.Blueprints;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Interfaces;
@@ -116,7 +117,7 @@ public abstract class BluePrintsUI
         {
             if (FileDialog.Display(ref _fileDialogPath, ref _fileName, ref _showFileDialog))
             {
-
+                Save();
             }
         }
     }
@@ -186,14 +187,36 @@ public class TechCatBlueprintUI : BluePrintsUI
     {
         using (StreamWriter outputFile = new StreamWriter(Path.Combine(_fileDialogPath, _fileName)))
         {
-            foreach (TechCategoryBlueprint blueprint in _itemBlueprints)
+            
+            var tcb = new Tcb() {};
+            tcb.Payload = new List<TechCategoryBlueprint>();
+            foreach (TechCategoryBlueprint bpt in _itemBlueprints)
             {
-                 var json = JsonConvert.SerializeObject(blueprint, Formatting.Indented);
-                 outputFile.WriteLine(json);
+                tcb.Payload.Add(bpt);
             }
+            var json = JsonConvert.SerializeObject(tcb, Formatting.Indented);
+            outputFile.WriteLine(json);
+            
+
+            /*
+            Dictionary<ModInstruction.DataType, List<TechCategoryBlueprint>> dic = new Dictionary<ModInstruction.DataType, List<TechCategoryBlueprint>>();
+            dic.Add(ModInstruction.DataType.TechCategory, new List<TechCategoryBlueprint>());
+            foreach (TechCategoryBlueprint bpt in _itemBlueprints)
+            {
+                dic[ModInstruction.DataType.TechCategory].Add(bpt);
+            }
+            var json = JsonConvert.SerializeObject(dic, Formatting.Indented);
+            outputFile.WriteLine(json);
+            */
         }
     }
 
+    class Tcb
+    {
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ModInstruction.DataType Type = ModInstruction.DataType.TechCategory;
+        public List<TechCategoryBlueprint> Payload;
+    }
 
     public override void DisplayEditorWindow(int selectedIndex)
     {
