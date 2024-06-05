@@ -108,7 +108,21 @@ namespace Pulsar4X.Modding
 
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            throw new NotImplementedException();
+            if (value == null)
+            {
+                writer.WriteNull();
+                return;
+            }
+
+            ModInstruction modInstruction = (ModInstruction)value;
+
+            JObject jObject = new JObject
+            {
+                { "Type", modInstruction.Type.ToString() },
+                { "Payload", JObject.FromObject(modInstruction.Data) }
+            };
+
+            jObject.WriteTo(writer);
         }
     }
 

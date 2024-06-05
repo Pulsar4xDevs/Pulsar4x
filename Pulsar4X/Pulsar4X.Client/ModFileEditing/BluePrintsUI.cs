@@ -6,6 +6,7 @@ using System.Numerics;
 using ImGuiNET;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using Pulsar4X.Blueprints;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Interfaces;
@@ -187,16 +188,21 @@ public class TechCatBlueprintUI : BluePrintsUI
     {
         using (StreamWriter outputFile = new StreamWriter(Path.Combine(_fileDialogPath, _fileName)))
         {
-            
-            var tcb = new Tcb() {};
-            tcb.Payload = new List<TechCategoryBlueprint>();
+            JArray output = new JArray();
             foreach (TechCategoryBlueprint bpt in _itemBlueprints)
             {
-                tcb.Payload.Add(bpt);
+                ModInstruction modInstruction = new ModInstruction();
+                modInstruction.Type = ModInstruction.DataType.TechCategory;
+                modInstruction.Data = bpt;
+
+                var json = JsonConvert.SerializeObject(
+                    modInstruction,
+                    Formatting.Indented,
+                    new JsonSerializerSettings { Converters = new List<JsonConverter> { new ModInstructionJsonConverter() } });
+                output.Add(json);
             }
-            var json = JsonConvert.SerializeObject(tcb, Formatting.Indented);
-            outputFile.WriteLine(json);
-            
+
+            outputFile.Write(output);
 
             /*
             Dictionary<ModInstruction.DataType, List<TechCategoryBlueprint>> dic = new Dictionary<ModInstruction.DataType, List<TechCategoryBlueprint>>();
