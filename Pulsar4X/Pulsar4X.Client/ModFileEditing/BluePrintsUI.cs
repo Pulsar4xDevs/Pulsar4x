@@ -38,14 +38,16 @@ public abstract class BluePrintsUI
     private protected bool _showFileDialog = false;
     private protected string _fileDialogPath = "";
     private protected string _fileName = "";
+    private protected ModInstruction.DataType _dataType;
     
-    protected BluePrintsUI(ModDataStore modDataStore)
+    protected BluePrintsUI(ModDataStore modDataStore, ModInstruction.DataType dataType)
     {
         _modDataStore = modDataStore;
         _cargoTypes = modDataStore.CargoTypes.Keys.ToArray();
         _techCatTypes = modDataStore.TechCategories.Keys.ToArray();
         _techTypes = modDataStore.Techs.Keys.ToArray();
         _industryTypes = modDataStore.IndustryTypes.Keys.ToArray();
+        _dataType = dataType;
         
         _units = new string[9];
         _units[0] = "";
@@ -61,14 +63,31 @@ public abstract class BluePrintsUI
         _mountTypes = Enum.GetNames(typeof(ComponentMountType));
         _constrGuiHints = Enum.GetNames(typeof(ConstructableGuiHints));
         _guiHints = Enum.GetNames(typeof(GuiHint));
-
-        
-        
     }
 
     public abstract void Refresh();
 
-    protected abstract void Save();
+    private void Save()
+    {
+        using (StreamWriter outputFile = new StreamWriter(Path.Combine(_fileDialogPath, _fileName)))
+        {
+            JArray output = new JArray();
+            foreach (var bpt in _itemBlueprints)
+            {
+                ModInstruction modInstruction = new ModInstruction();
+                modInstruction.Type = _dataType;
+                modInstruction.Data = bpt;
+
+                JObject jObject = new JObject
+                {
+                    { "Type", modInstruction.Type.ToString() },
+                    { "Payload", JObject.FromObject(modInstruction.Data) }
+                };
+                output.Add(jObject);
+            }
+            outputFile.Write(output);
+        };
+    }
     
     public void Display(string label)
     {
@@ -161,7 +180,7 @@ public abstract class BluePrintsUI
 
 public class TechCatBlueprintUI : BluePrintsUI
 {
-    public TechCatBlueprintUI(ModDataStore modDataStore) : base(modDataStore)
+    public TechCatBlueprintUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.TechCategory)
     {
         Dictionary<string, TechCategoryBlueprint> blueprints = _modDataStore.TechCategories;
         _itemBlueprints = blueprints.Values.ToArray();
@@ -183,47 +202,8 @@ public class TechCatBlueprintUI : BluePrintsUI
         newEmpty.Name = "New Blueprint";
         _newEmpty = newEmpty;
     }
-
-    protected override void Save()
-    {
-        using (StreamWriter outputFile = new StreamWriter(Path.Combine(_fileDialogPath, _fileName)))
-        {
-            JArray output = new JArray();
-            foreach (TechCategoryBlueprint bpt in _itemBlueprints)
-            {
-                ModInstruction modInstruction = new ModInstruction();
-                modInstruction.Type = ModInstruction.DataType.TechCategory;
-                modInstruction.Data = bpt;
-
-                var json = JsonConvert.SerializeObject(
-                    modInstruction,
-                    Formatting.Indented,
-                    new JsonSerializerSettings { Converters = new List<JsonConverter> { new ModInstructionJsonConverter() } });
-                output.Add(json);
-            }
-
-            outputFile.Write(output);
-
-            /*
-            Dictionary<ModInstruction.DataType, List<TechCategoryBlueprint>> dic = new Dictionary<ModInstruction.DataType, List<TechCategoryBlueprint>>();
-            dic.Add(ModInstruction.DataType.TechCategory, new List<TechCategoryBlueprint>());
-            foreach (TechCategoryBlueprint bpt in _itemBlueprints)
-            {
-                dic[ModInstruction.DataType.TechCategory].Add(bpt);
-            }
-            var json = JsonConvert.SerializeObject(dic, Formatting.Indented);
-            outputFile.WriteLine(json);
-            */
-        }
-    }
-
-    class Tcb
-    {
-        [JsonConverter(typeof(StringEnumConverter))]
-        public ModInstruction.DataType Type = ModInstruction.DataType.TechCategory;
-        public List<TechCategoryBlueprint> Payload;
-    }
-
+    
+    
     public override void DisplayEditorWindow(int selectedIndex)
     {
         if(!_isActive[selectedIndex])
@@ -258,7 +238,7 @@ public class TechCatBlueprintUI : BluePrintsUI
 public class TechBlueprintUI : BluePrintsUI
 {
     private int _selectedIndex = -1;
-    public TechBlueprintUI(ModDataStore modDataStore) : base(modDataStore)
+    public TechBlueprintUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.Tech)
     {
         var blueprints = modDataStore.Techs;
         _itemBlueprints = blueprints.Values.ToArray();
@@ -280,11 +260,7 @@ public class TechBlueprintUI : BluePrintsUI
         newEmpty.Name = "New Blueprint";
         _newEmpty = newEmpty;
     }
-
-    protected override void Save()
-    {
-        throw new NotImplementedException();
-    }
+    
 
     public override void DisplayEditorWindow(int selectedIndex)
     {
@@ -380,7 +356,7 @@ public class ComponentBluprintUI : BluePrintsUI
 {
     private AttributeBlueprintUI? _attributeBlueprintUI;
     private List<ComponentTemplateAttributeBlueprint> _selectedAttributes;
-    public ComponentBluprintUI(ModDataStore modDataStore) : base(modDataStore)
+    public ComponentBluprintUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.ComponentTemplate)
     {
         Dictionary<string, ComponentTemplateBlueprint> blueprints = modDataStore.ComponentTemplates;
         _itemBlueprints = blueprints.Values.ToArray();
@@ -401,12 +377,7 @@ public class ComponentBluprintUI : BluePrintsUI
         newEmpty.Name = "New Blueprint";
         _newEmpty = newEmpty;
     }
-
-    protected override void Save()
-    {
-        throw new NotImplementedException();
-    }
-
+    
 
     public override void DisplayEditorWindow(int selectedIndex)
     {
@@ -508,7 +479,7 @@ public class ComponentBluprintUI : BluePrintsUI
 
 public class ArmorBlueprintUI : BluePrintsUI
 {
-    public ArmorBlueprintUI(ModDataStore modDataStore) : base(modDataStore)
+    public ArmorBlueprintUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.Armor)
     {
         Dictionary<string, ArmorBlueprint> blueprints = _modDataStore.Armor;
         _itemBlueprints = blueprints.Values.ToArray();
@@ -530,12 +501,7 @@ public class ArmorBlueprintUI : BluePrintsUI
         newEmpty.UniqueID = "New Blueprint";
         _newEmpty = newEmpty;
     }
-
-    protected override void Save()
-    {
-        throw new NotImplementedException();
-    }
-
+    
 
     public override void DisplayEditorWindow(int selectedIndex)
     {
@@ -584,7 +550,7 @@ public class ArmorBlueprintUI : BluePrintsUI
 public class ProcessedMateralsUI : BluePrintsUI
 {
     private int _selectedIndex = -1;
-    public ProcessedMateralsUI(ModDataStore modDataStore) : base(modDataStore)
+    public ProcessedMateralsUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.ProcessedMaterial)
     {
         var blueprints = modDataStore.ProcessedMaterials;
         _itemBlueprints = blueprints.Values.ToArray();
@@ -606,12 +572,7 @@ public class ProcessedMateralsUI : BluePrintsUI
         newEmpty.Name = "New Blueprint";
         _newEmpty = newEmpty;
     }
-
-    protected override void Save()
-    {
-        throw new NotImplementedException();
-    }
-
+    
 
     public override void DisplayEditorWindow(int selectedIndex)
     {
@@ -749,7 +710,7 @@ public class ProcessedMateralsUI : BluePrintsUI
 
 public class MineralBlueprintUI : BluePrintsUI
 {
-    public MineralBlueprintUI(ModDataStore modDataStore) : base(modDataStore)
+    public MineralBlueprintUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.Mineral)
     {
         var blueprints = modDataStore.Minerals;
         _itemBlueprints = blueprints.Values.ToArray();
@@ -770,11 +731,6 @@ public class MineralBlueprintUI : BluePrintsUI
         var newEmpty = new MineralBlueprint();
         newEmpty.Name = "New Blueprint";
         _newEmpty = newEmpty;
-    }
-
-    protected override void Save()
-    {
-        throw new NotImplementedException();
     }
 
 
@@ -861,7 +817,7 @@ public class AttributeBlueprintUI : BluePrintsUI
     private ComponentTemplateAttributeBlueprint[] _blueprints;
     private string[] _attributeTypeNames;
     private string[] _attributeFullNames;
-    public AttributeBlueprintUI(ModDataStore modDataStore, ComponentTemplateBlueprint componentBlueprint) : base(modDataStore)
+    public AttributeBlueprintUI(ModDataStore modDataStore, ComponentTemplateBlueprint componentBlueprint) : base(modDataStore, ModInstruction.DataType.ComponentTemplate )
     {
         _parentID = componentBlueprint.UniqueID;
         if(componentBlueprint.Attributes != null)
@@ -908,12 +864,6 @@ public class AttributeBlueprintUI : BluePrintsUI
             i++;
         }
     }
-
-    protected override void Save()
-    {
-        throw new NotImplementedException();
-    }
-
 
     public void Display()
     {
