@@ -119,7 +119,7 @@ public abstract class BluePrintsUI
                 ImGui.SameLine();
                 if(ImGui.Button("Delete##" + label + item.UniqueID))
                 {
-                    removeAtIndex(i);
+                    RemoveAtIndex(i);
                     break;
                 }
                 DisplayEditorWindow(i);
@@ -155,7 +155,7 @@ public abstract class BluePrintsUI
         }
     }
 
-    void removeAtIndex(int index)
+    void RemoveAtIndex(int index)
     {
         int newlen = _itemBlueprints.Length - 1;
         Blueprint[] newArray = new Blueprint[newlen];

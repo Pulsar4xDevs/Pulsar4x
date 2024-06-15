@@ -5,7 +5,7 @@ namespace Pulsar4X.SDL2UI.ModFileEditing;
 
 public class ModFileEditor : PulsarGuiWindow
 {
-    
+    private ModInfoUI _modInfoUI;
     private TechBlueprintUI _techBlueprintUI;
     private TechCatBlueprintUI _techCatBlueprintUI;
     private ComponentBluprintUI _componentBluprintUI;
@@ -40,7 +40,8 @@ public class ModFileEditor : PulsarGuiWindow
         ModLoader modLoader = new ModLoader();
         ModDataStore modDataStore = new ModDataStore();
         modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
-        
+
+        _modInfoUI = new ModInfoUI(modDataStore);
         _techCatBlueprintUI = new TechCatBlueprintUI(modDataStore);
         _techBlueprintUI = new TechBlueprintUI(modDataStore);
         _componentBluprintUI = new ComponentBluprintUI(modDataStore);
@@ -60,6 +61,8 @@ public class ModFileEditor : PulsarGuiWindow
         {
             if (ImGui.Begin("Editor", ref IsActive))
             {
+                _modInfoUI.Display("Mod Info");
+                ImGui.NewLine();
                 _techCatBlueprintUI.Display("Tech Categorys");
                 ImGui.NewLine();
                 _techBlueprintUI.Display("Techs");
