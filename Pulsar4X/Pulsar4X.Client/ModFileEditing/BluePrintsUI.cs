@@ -133,7 +133,7 @@ public abstract class BluePrintsUI
 
         if (_showFileDialog)
         {
-            if (FileDialog.Display(ref _fileDialogPath, ref _fileName, ref _showFileDialog))
+            if (FileDialog.DisplaySave(ref _fileDialogPath, ref _fileName, ref _showFileDialog))
             {
                 Save();
             }

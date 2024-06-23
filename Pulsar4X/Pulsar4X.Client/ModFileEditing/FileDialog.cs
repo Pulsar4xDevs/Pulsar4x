@@ -26,10 +26,21 @@ public static class FileDialog
     private static int _selectedIndex = -1;
     private static int _i = 0;
     private static bool _b = false;
-    public static SaveOrLoad DialogType = SaveOrLoad.Save;
+    private static SaveOrLoad DialogType = SaveOrLoad.Save;
+
+    public static bool DisplaySave(ref string path, ref string fileName, ref bool IsActive)
+    {
+        DialogType = SaveOrLoad.Save;
+        return Display(ref path, ref fileName, ref IsActive);
+    }
+
+    public static bool DisplayLoad(ref string path, ref string fileName, ref bool IsActive)
+    {
+        DialogType = SaveOrLoad.Load;
+        return Display(ref path, ref fileName, ref IsActive);
+    }
     
-    
-    public static bool Display(ref string path, ref string fileName, ref bool IsActive)
+    private static bool Display(ref string path, ref string fileName, ref bool IsActive)
     {
         bool isok = false;
         if (string.IsNullOrEmpty(path))

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Numerics;
 using ImGuiNET;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Pulsar4X.Modding;
 
@@ -15,9 +16,11 @@ public class ModInfoUI
     
     private protected Vector2 _childSize = new Vector2(640, 200);
     
-    private protected bool _showFileDialog = false;
+    private protected bool _showSaveDialog = false;
+    private protected bool _showLoadDialog = false;
     private protected string _fileDialogPath = "";
     private protected string _fileName = "";
+    private protected int _selectedIndex = -1;
     private protected ModManifest _newEmpty;
     public ModInfoUI(ModDataStore modDataStore)
     {
@@ -45,14 +48,7 @@ public class ModInfoUI
         int i = 0;
         if(ImGui.TreeNode(label))
         {
-            ImGui.Button("Save");
-            ImGui.SameLine();
-            if (ImGui.Button("SaveAs"))
-            {
-                _showFileDialog = true;
-            }
-            ImGui.SameLine();
-            ImGui.Button("SaveToMemory");
+
             
             ImGui.BeginChild(label,_childSize, true);
             
@@ -64,7 +60,17 @@ public class ModInfoUI
             {
                 ImGui.Text(_itemNames[i]);
                 ImGui.NextColumn();
-
+                ImGui.Button("Save");
+                ImGui.SameLine();
+                if (ImGui.Button("SaveAs"))
+                {
+                    _showSaveDialog = true;
+                    _fileName = _itemNames[i] + ".json";
+                    _selectedIndex = i;
+                }
+                ImGui.SameLine();
+                ImGui.Button("SaveToMemory");
+                ImGui.SameLine();
                 if(ImGui.Button("Edit##" + label + item.Namespace))
                 {
                     _isActive[i] = !_isActive[i];
@@ -79,16 +85,29 @@ public class ModInfoUI
                 ImGui.NextColumn();
                 i++;
             }
-            NewItem("+##"+label, _newEmpty);
+            NewItem("+##"+label);
+            ImGui.SameLine();
+            if (ImGui.Button("Load"))
+            {
+                _showLoadDialog = true;
+
+            }
             ImGui.EndChild();
             ImGui.TreePop();
         }
 
-        if (_showFileDialog)
+        if (_showSaveDialog)
         {
-            if (FileDialog.Display(ref _fileDialogPath, ref _fileName, ref _showFileDialog))
+            if (FileDialog.DisplaySave(ref _fileDialogPath, ref _fileName, ref _showSaveDialog))
             {
                 Save();
+            }
+        }
+        if (_showLoadDialog)
+        {
+            if (FileDialog.DisplayLoad(ref _fileDialogPath, ref _fileName, ref _showLoadDialog))
+            {
+                Load(_fileDialogPath, _fileName);
             }
         }
     }
@@ -113,6 +132,8 @@ public class ModInfoUI
             if (TextEditWidget.Display("##name" + name, ref name))
             {
                 selectedItem.ModName = name;
+                _itemNames[selectedIndex] = name;
+
             }
             
             ImGui.NextColumn();
@@ -134,7 +155,7 @@ public class ModInfoUI
             ImGui.NextColumn();
             ImGui.Text("ModDir: ");
             ImGui.NextColumn();
-            if (TextEditWidget.Display("##version" + name, ref modDir))
+            if (TextEditWidget.Display("##modDir" + name, ref modDir))
             {
                 selectedItem.ModDirectory = modDir;
             }
@@ -147,41 +168,50 @@ public class ModInfoUI
                 selectedItem.Namespace = nameSpace;
             }
             
+            ImGui.NextColumn();
+            ImGui.Text("DataFiles: ");
+            ImGui.NextColumn();
+            foreach (var dataFile in selectedItem.DataFiles)
+            {
+                ImGui.Text(dataFile);
+            }
+            //selectedItem.DataFiles
             ImGui.End();
         }
     }
     
     private void Save()
     {
+        var selectedItem = _modManafests[_selectedIndex];
+
+        //var modManifest = JsonConvert.DeserializeObject<ModManifest>(manifestJson);
+
+        var serialisedItem = JsonConvert.SerializeObject(selectedItem, Formatting.Indented);
+        
         using (StreamWriter outputFile = new StreamWriter(Path.Combine(_fileDialogPath, _fileName)))
         {
-            JArray output = new JArray();
-            foreach (var bpt in _modManafests)
-            {
-                
-                /*
-                ModInstruction modInstruction = new ModInstruction();
-                modInstruction.Type = _dataType;
-                modInstruction.Data = bpt;
+            //output.Add(selectedItem);
+            outputFile.Write(serialisedItem);
+        }
+    }
 
-                JObject jObject = new JObject
-                {
-                    { "Type", modInstruction.Type.ToString() },
-                    { "Payload", JObject.FromObject(modInstruction.Data) }
-                };
-                output.Add(jObject);
-                */
-            }
-            //outputFile.Write(output);
-        };
+    private void Load(string path, string filename)
+    {
+        ModLoader modLoader = new ModLoader();
+        ModDataStore modDataStore = new ModDataStore();
+        modLoader.LoadModManifest(Path.Combine(path,filename), modDataStore);
+        var editor = ModFileEditor.GetInstance();
+        editor.Refresh(modDataStore);
     }
     
-    public void NewItem(string label, ModManifest newBlueprint)
+    public void NewItem(string label)
     {
+        ModManifest newManifest = new ModManifest();
+        
         if (ImGui.Button(label))
         {
             Array.Resize(ref _modManafests, _modManafests.Length + 1);
-            _modManafests[^1] = newBlueprint;
+            _modManafests[^1] = newManifest;
             Array.Resize(ref _itemNames, _itemNames.Length + 1);
             _itemNames[^1] = "newBluprint";
             Array.Resize(ref _isActive, _isActive.Length + 1);

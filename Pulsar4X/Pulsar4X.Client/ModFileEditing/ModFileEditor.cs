@@ -26,7 +26,10 @@ public class ModFileEditor : PulsarGuiWindow
         if (!_uiState.LoadedWindows.ContainsKey(typeof(ModFileEditor)))
         {
             instance = new ModFileEditor();
-            instance.refresh();
+            ModLoader modLoader = new ModLoader();
+            ModDataStore modDataStore = new ModDataStore();
+            modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
+            instance.Refresh(modDataStore);
         }
         else
         {
@@ -35,12 +38,8 @@ public class ModFileEditor : PulsarGuiWindow
         return instance;
     }
 
-    void refresh()
+    public void Refresh(ModDataStore modDataStore)
     {
-        ModLoader modLoader = new ModLoader();
-        ModDataStore modDataStore = new ModDataStore();
-        modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
-
         _modInfoUI = new ModInfoUI(modDataStore);
         _techCatBlueprintUI = new TechCatBlueprintUI(modDataStore);
         _techBlueprintUI = new TechBlueprintUI(modDataStore);
@@ -50,7 +49,6 @@ public class ModFileEditor : PulsarGuiWindow
         _armorBlueprintUI = new ArmorBlueprintUI(modDataStore);
         _processedMateralsUI = new ProcessedMateralsUI(modDataStore);
         _mineralsBlueprintUI = new MineralBlueprintUI(modDataStore);
-
     }
 
     
