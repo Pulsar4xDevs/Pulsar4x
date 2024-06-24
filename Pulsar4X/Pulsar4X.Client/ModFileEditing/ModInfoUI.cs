@@ -111,7 +111,8 @@ public class ModInfoUI
             }
         }
     }
-    
+
+    private static bool _showLoadFileDialogDatafiles = false;
     public void DisplayEditorWindow(int selectedIndex)
     {
         if(!_isActive[selectedIndex])
@@ -122,6 +123,8 @@ public class ModInfoUI
         string version = selectedItem.Version;
         string modDir = selectedItem.ModDirectory;
         string nameSpace = selectedItem.Namespace;
+        int removeDatafileIndex = -1;
+        
         if (ImGui.Begin("Tech Category Editor: " + name, ref _isActive[selectedIndex]))
         {
             ImGui.Columns(2);
@@ -171,11 +174,31 @@ public class ModInfoUI
             ImGui.NextColumn();
             ImGui.Text("DataFiles: ");
             ImGui.NextColumn();
+            int datafileIndex = 0;
             foreach (var dataFile in selectedItem.DataFiles)
             {
                 ImGui.Text(dataFile);
+                ImGui.SameLine();
+                if (ImGui.SmallButton("X##datafileRemove" + datafileIndex))
+                {
+                    removeDatafileIndex = datafileIndex;
+                }
+
+                datafileIndex++;
             }
-            //selectedItem.DataFiles
+            if (ImGui.Button("Add Datafile"))
+            {
+                _showLoadFileDialogDatafiles = true;
+            }
+            if (removeDatafileIndex > -1)
+            {
+                selectedItem.DataFiles.RemoveAt(removeDatafileIndex);
+            }
+            
+            if (_showLoadFileDialogDatafiles && (FileDialog.DisplayLoad(ref _fileDialogPath, ref _fileName, ref _showLoadFileDialogDatafiles)))
+            {
+                selectedItem.DataFiles.Add(_fileName);
+            }
             ImGui.End();
         }
     }
