@@ -666,7 +666,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndChild();
             }
 
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY());
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() - Styles.ButtonVerticalOffset);
             ImGui.SetCursorPosX(xPosition);
             if(ImGui.Button("Select All/None", new Vector2(Styles.LeftColumnWidthLg, 0f)))
             {
