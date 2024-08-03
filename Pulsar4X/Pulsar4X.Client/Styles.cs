@@ -30,5 +30,7 @@ namespace Pulsar4X.SDL2UI
 
         public static string IntFormat = "###,###,###,##0";
         public static string DecimalFormat = "###,###,##0.##";
+
+        public static float ButtonVerticalOffset = 23f;
     }
 }
