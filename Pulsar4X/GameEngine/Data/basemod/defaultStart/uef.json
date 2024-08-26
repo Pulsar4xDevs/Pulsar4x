@@ -84,7 +84,7 @@
           "designId": "default-ship-design-freighter",
           "name": "Planet Express Ship",
           "cargo": [
-            { "id": "rp-1", "amount": 2000 }
+            { "id": "rp-1", "amount": 20000000 }
           ]
         }
       ]

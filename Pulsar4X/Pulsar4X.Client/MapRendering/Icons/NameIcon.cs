@@ -278,10 +278,7 @@ namespace Pulsar4X.SDL2UI
         {
             if(ImGui.BeginPopupContextItem())
             {
-                if(ImGui.MenuItem("Pin Camera"))
-                {
-                    camera.PinToEntity(icon._entityState.Entity);
-                }
+                icon.SetUpContextMenu(icon._entityGuid);
                 ImGui.EndPopup();
             }
         }

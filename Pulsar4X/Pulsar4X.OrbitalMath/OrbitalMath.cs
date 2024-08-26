@@ -1504,5 +1504,179 @@ namespace Pulsar4X.Orbital
         }
 
 
+        /// <summary>
+        /// Hohmann transfer manuver, assumes a cicular orbit. 
+        /// </summary>
+        /// <param name="sgp">standard gravitational parameter (m^3 s^-2)</param>
+        /// <param name="aInt">radius of interceptor orbit (meters)</param>
+        /// <param name="trueInt0"> the intial true longitude of the the interceptor (radians)</param>
+        /// <param name="aTgt">radius of target orbit (meters)</param>
+        /// <param name="trueTgt0"> the intial true longitude of the the target (radians)</param>
+        /// <param name="r2">radius from parent</param>
+        /// 
+        /// <returns>a tuple containing two manuvers with a time in seconds delay from the present to the first manouver, and from the first manuver to the second manuver</returns>
+        public static (Vector3 deltaV, double timeInSeconds)[] HohmannOE(double sgp, double aInt, double trueInt0, double aTgt, double trueTgt0)
+        {
+            var phase0 = (trueInt0 % (2 * Math.PI)) - (trueTgt0 % (2 * Math.PI)); //diffrence between intercptor true anomolay and target true anomally at time 0. True anomolys are put in range of 0-2pi by taking remainder of 2pi
+
+            var angVTgt = Math.Sqrt(sgp / Math.Pow(aTgt, 3)); //Angular velocity of interceptor orbit
+            var angVInt = Math.Sqrt(sgp / Math.Pow(aInt, 3)); //Angular veocity of target orbit
+
+            var aTrans = (aInt + aTgt) / 2; //semimajor axis of transfer orbit
+            var tTrans = Math.PI * Math.Sqrt(Math.Pow(aTrans, 3) / sgp); //time of flight for the transfer orbit (time between burn 1 and burn 2)
+
+            var leadAng = angVTgt * tTrans; //lead angle (amount the target moves durring the transfer orbit )
+            var phaseAng = leadAng - Math.PI; //angle between interceptor at time 1 and target at time 2 needs to be -180 degrees (PI radians). Angle between interceptor at t1 and target at t1 is -180 plus the lead angle
+
+
+            var k = 0;
+            var sign = 1;
+            if (aTgt > aInt)//checks if target orbit is larger than interceptor orbit
+            {
+                //Console.WriteLine("Larger target orbit");
+                if ((phaseAng - phase0) < 0)//when target orbit is larger than interceptor orbit, the interceptor trails the target durring the launch window. If (phaseAng - phase0) < 0 that means the interceptor trails the target by too little so its passed the launch window and has to wait for the next launch window. 
+                {
+                    k = 1;  //used to add 2pi to the twait equation later on. Causes craft to wait till next transfer window.
+                    //Console.WriteLine("Missed current transfer window, needed to wait a partial synodic period");
+                }
+            }
+            else
+            {
+                //Console.WriteLine("Smaller target orbit");
+                sign = -1;//Causes deltaV direction to be reversed, declerating into lower orbit rather than accelerating into higher orbit
+                if ((phaseAng - phase0) > 0)//when target orbit is smaller than interceptor orbit, the interceptor leads the target durring the launch window. If (phaseAng - phase0) > 0 that means the interceptor leads the target by too little, so its passed the launch window and has to wait for the next launch window. 
+                {
+                    k = -1;  //used to subtract 2pi to the twait equation later on to make the numerator negative. Causes craft to wait till next transfer window. Negative because the denominator of the equation is negative in this cercumstance (target orbit smaller than interceptor orbit) so need to make the numerator negative as well to get a positive value for the wait time. 
+                    //Console.WriteLine("Missed current transfer window, needed to wait a partial synodic period");
+                }
+            }
+            
+            var tWait = (phaseAng - phase0 + 2 * Math.PI * k) / (angVInt - angVTgt); //time to wait for the orbits to aline so burn 1 can start.
+
+            var deltaVBurn1 = sign * Math.Abs(Math.Sqrt(((2 * sgp) / aInt) - (sgp / aTrans)) - Math.Sqrt(sgp / aInt)); //DeltaV from going from Interceptor's orbit to transfer orbit
+            var deltaVBurn2 = sign * Math.Abs(Math.Sqrt(((2 * sgp) / aTgt) - (sgp / aTrans)) - Math.Sqrt(sgp / aTgt)); //DeltaV from going from Transfer orbit to Target's orbit
+
+            //planet postitions at times 1 and 2
+            var trueInt1 = trueInt0 + angVInt * tWait;
+            var trueInt2 = trueInt1 + angVInt * tTrans;
+            var trueTgt1 = trueTgt0 + angVTgt * tWait;
+            var trueTgt2 = trueTgt1 + angVTgt * tTrans;
+
+            //transfer orbit properties
+            var eTrans = (aTgt - aInt) / (aTgt + aInt); //the appoasis of the transfer orbit is the semimajor axis of the larger orbit, the periapsis is the semimjor axis of the smaller orbi
+            var LoPTrans = trueInt0 + angVInt * tWait; //periapsis of the transfer orbit is the position of the interceptor at the time of the first burn.
+            
+            //var manuvers = new (Vector3 burn1, double timeInSeconds)[2];
+            
+            /*
+            double[,] manuvers = new double[3, 4];
+            manuvers[0, 0] = deltaVBurn1;
+            manuvers[0, 1] = tWait;
+            manuvers[0, 2] = deltaVBurn2;
+            manuvers[0, 3] = tTrans;
+            manuvers[1, 0] = aTrans;
+            manuvers[1, 1] = eTrans;
+            manuvers[1, 2] = LoPTrans;
+            manuvers[1, 3] = 0; //blank
+            manuvers[2, 0] = trueInt1;
+            manuvers[2, 1] = trueInt2;
+            manuvers[2, 2] = trueTgt1;
+            manuvers[2, 3] = trueTgt2;
+            */
+
+            var manuvers = new (Vector3 burn1, double timeInSeconds)[2];
+            manuvers[0] = (new Vector3(0, deltaVBurn1, 0), tWait);
+            manuvers[1] = (new Vector3(0, deltaVBurn2, 0), tTrans);
+            return manuvers;
+        }
+
+
+        /// <summary>
+        /// Phasing manuver, assumes a cicular orbit. 
+        /// </summary>
+        /// <param name="sgp">standard gravitational parameter (m^3 s^-2)</param>
+        /// <param name="lowestOrbit">lowest safe radius from parent</param>
+        /// <param name="trueInt0"> the intial true longitude of the the interceptor (radians)</param>
+        /// <param name="aTgt">radius of target orbit (meters)</param>
+        /// <param name="trueTgt0"> the intial true longitude of the the target (radians)</param>
+        /// <param name="k"> the number of revolutions of the target you'll allow the phasing orbit to take</param>
+        /// 
+        /// 
+        /// <returns>a tuple containing two manuvers with the first manouver happening imdeatly, and a time in seconds delay from the first manuver to the second manuver</returns>
+        public static (Vector3 deltaV, double timeInSeconds)[] Phasing(double sgp, double lowestOrbit, double trueInt0, double aTgt, double trueTgt0, int k)
+        {
+            //Set color of write lines to make error codes distinct
+
+            var phaseAng = trueInt0 - trueTgt0;
+            var angVTgt = Math.Sqrt(sgp / Math.Pow(aTgt, 3));
+            var TPhase = (2 * Math.PI * k + phaseAng) / angVTgt;
+            var aPhase = Math.Pow(sgp * Math.Pow(TPhase / (2 * Math.PI * k), 2), 1 / 3.0);
+
+            //check to see if phasing orbit would intecsect planet.
+            var apsis = (2 * aPhase) - aTgt;
+            //Console.WriteLine("apsis axis of phasing orbit: " + apsis);
+            if (apsis < lowestOrbit)
+            {
+                phaseAng = phaseAng + 2 * Math.PI; //Phasing orbit is lower than target orbit when interceptor is trailing the target (phaseAng < 0). Adding 2 pi to the phaseAng makes it positive, so its instead treated like the target is leading by a large angle, resulting in a larger phasing orbit that does not hit the planet
+                TPhase = (2 * Math.PI * k + phaseAng) / angVTgt; //recalculating with new value of phaseAng
+                aPhase = Math.Pow(sgp * Math.Pow(TPhase / (2 * Math.PI * k), 2), 1 / 3.0); //recalculating with new value of TPhase
+                apsis = 2 * aPhase - aTgt; //recalculating with new value of aPhase
+
+                //Console.BackgroundColor = ConsoleColor.Red;
+                //Console.WriteLine("Phasing orbit intersects planet. Switched to higher phasing orbit.");
+                //Console.ResetColor();
+            }
+
+            //check if phasing orbit is being raised or lowered
+            var LoP = 0.0;
+            var periapsis = 0.0;
+            var apoapsis = 0.0;
+            if (apsis < aTgt)//phasing orbit is lower than target orbit
+            {
+                periapsis = apsis;
+                apoapsis = aTgt;
+                LoP = trueInt0 + Math.PI;//Current position of the interceptor is the phasing orbits apoapsis, periapsis of the orbit is thus interceptor TrueInt + pi
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.WriteLine("Phasing orbit phasing orbit lower than target orbit, LoP = trueInt0 + pi.");
+                Console.ResetColor(); //resets console colors back to normal
+            }
+            else
+            {
+                periapsis = aTgt;
+                apoapsis = apsis;
+                LoP = trueInt0;//Current position of the interceptor is the periapsis
+            }
+
+            var VPhase = Math.Sqrt(((2 * sgp) / aTgt) - (sgp / aPhase)); //Velocity of the phasing orbit when it intesects the interceptor/target orbit
+            var VCircle = Math.Sqrt(sgp / aTgt); //Velocity of the circlar orbit the target is in
+
+            var deltaV1 = VPhase - VCircle;//velocity change going from circular orbit to phasing orbit
+            var deltaV2 = VCircle - VPhase;//velocity change going from phasing orbit back to circular orbit
+
+            //stuf to plot output
+            Console.WriteLine("periapsis axis of phasing orbit: " + periapsis);
+            Console.WriteLine("apoapsis axis of phasing orbit: " + apoapsis);
+            var ePhase = (apoapsis - periapsis) / (apoapsis + periapsis);
+            var trueTgt1 = trueTgt0 + (angVTgt * TPhase);
+
+            /*
+            double[] manuversP = new double[7];
+            manuversP[0] = deltaV1;
+            manuversP[1] = deltaV2;
+            manuversP[2] = TPhase;
+            manuversP[3] = aPhase;
+            manuversP[4] = LoP;
+            manuversP[5] = ePhase;
+            manuversP[6] = trueTgt1;
+            return manuversP;
+            */
+
+            var manuvers = new (Vector3 burn1, double timeInSeconds)[2];
+            manuvers[0] = (new Vector3(0, deltaV1, 0), 0);
+            manuvers[1] = (new Vector3(0, deltaV2, 0), TPhase);
+            return manuvers;
+            
+        }
+
     }
 }
