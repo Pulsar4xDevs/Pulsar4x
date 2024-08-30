@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
     <Authors>Pulsar4XDevs</Authors>
     <Company>Pulsar4X</Company>
     <Product>GameEngine</Product>
     <Version>1.0.0</Version>
     <PackageId>GameEngine</PackageId>
     <Nullable>enable</Nullable>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
