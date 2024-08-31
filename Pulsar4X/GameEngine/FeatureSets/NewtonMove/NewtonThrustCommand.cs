@@ -278,6 +278,7 @@ namespace Pulsar4X.Engine.Orders
             {
                 RequestingFactionGuid = faction,
                 EntityCommandingGuid = orderEntity.Id,
+                _entityCommanding = orderEntity,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 OrbitrelativeDeltaV = new Vector3(manuverVector.X, manuverVector.Y, 0),
                 StartKE = startKE,
