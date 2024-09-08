@@ -604,7 +604,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             if (_currentKE == null)
                 throw new NullReferenceException();
 
-            _manuvers = OrbitalMath.Phasing(_sgp, lowestOrbit, _phaseAngleRadians, _currentKE.Value, 0, _kRevolutions);
+            //_manuvers = OrbitalMath.Phasing(_sgp, lowestOrbit, _phaseAngleRadians, _currentKE.Value, 0, _kRevolutions);
 
             double totalManuverDV = 0;
             foreach (var manuver in _manuvers)

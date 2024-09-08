@@ -69,4 +69,27 @@ public class NewtonSimpleProcessor : IHotloopProcessor
             CargoTransferProcessor.AddRemoveCargoMass(entity, fuelType, fuelBurned);
         }
     }
+
+    public static (Vector3 pos, Vector3 vel) GetRelativeState(Entity entity, DateTime atDateTime)
+    {
+        NewtonSimpleMoveDB db = entity.GetDataBlob<NewtonSimpleMoveDB>();
+        var state = OrbitMath.GetStateVectors(db.CurrentTrajectory, atDateTime);
+        return (state.position, (Vector3)state.velocity);
+    }
+    public static (Vector3 pos, Vector3 vel) GetAbsoluteState(Entity entity, DateTime atDateTime)
+    {
+        NewtonSimpleMoveDB db = entity.GetDataBlob<NewtonSimpleMoveDB>();
+        var posdb = entity.GetDataBlob<PositionDB>();
+
+        var state = OrbitMath.GetStateVectors(db.CurrentTrajectory, atDateTime);
+        var pos = state.position;
+        var vel = (Vector3)state.velocity;
+        
+        if (posdb.Parent != null)
+        {
+            pos += posdb.Parent.GetAbsoluteFuturePosition(atDateTime);
+            vel += posdb.Parent.GetAbsoluteFutureVelocity(atDateTime);
+        }
+        return (pos, vel);
+    }
 }
