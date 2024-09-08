@@ -47,7 +47,7 @@ namespace Pulsar4X.Engine
 
             if(misslPositionDB.Parent == null) throw new NullReferenceException("misslePositionDB.Parent cannot be null");
 
-            var newtmovedb = new NewtonMoveDB(misslPositionDB.Parent, parentVelocity);
+            var newtmovedb = new NewtonSimDB(misslPositionDB.Parent, parentVelocity);
 
             string defaultName = "Missile";
             string factionsName = missileDesign.Name;
@@ -74,7 +74,7 @@ namespace Pulsar4X.Engine
                 newMissile.AddComponent(tuple.design, tuple.count);
             }
 
-            var newtdb = newMissile.GetDataBlob<NewtonThrustAbilityDB>();
+            var newtdb = newMissile.GetDataBlob<NewtonionThrustAbilityDB>();
             //newtdb.DryMass_kg = missileDesign.MassPerUnit;
             newtdb.SetFuel(missileDesign.WetMass - missileDesign.DryMass, missileDesign.WetMass);
 
@@ -119,14 +119,14 @@ namespace Pulsar4X.Engine
                 var manuverDV = manuvers[0].deltaV;
                 //newtmovedb.ActionOnDateTime = atDatetime;
                 //newtmovedb.DeltaVForManuver_FoRO_m = manuverDV;
-                //NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, atDatetime, manuverDV);
-                //NewtonThrustCommand.CreateCommand(newMissile, (manuver))
+                //NewtonSimCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, atDatetime, manuverDV);
+                //NewtonSimCommand.CreateCommand(newMissile, (manuver))
                 //DateTime futureDate = atDatetime + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
                 //Vector3 futureDV = manuvers[1].deltaV;
-                //NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate, futureDV);
+                //NewtonSimCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate, futureDV);
                 //ThrustToTargetCmd.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate + TimeSpan.FromSeconds(1), targetEntity);
                 var cargoLibrary = newMissile.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
-                NewtonThrustCommand.CreateCommands(cargoLibrary, newMissile, manuvers);
+                NewtonSimCommand.CreateCommands(cargoLibrary, newMissile, manuvers);
             }
             CargoTransferProcessor.RemoveCargoItems(launchingEntity, missileDesign, 1);//remove missile from parent.
         }

@@ -548,9 +548,9 @@ namespace Pulsar4X.Datablobs
 
         internal override void OnSetToEntity()
         {
-            if (OwningEntity.HasDataBlob<NewtonMoveDB>())
+            if (OwningEntity.HasDataBlob<NewtonSimDB>())
             {
-                OwningEntity.RemoveDataBlob<NewtonMoveDB>();
+                OwningEntity.RemoveDataBlob<NewtonSimDB>();
             }
             if (OwningEntity.HasDataBlob<NewtonSimpleMoveDB>())
             {
@@ -654,9 +654,9 @@ namespace Pulsar4X.Datablobs
             {
                 OwningEntity.RemoveDataBlob<OrbitDB>();
             }
-            if (OwningEntity.HasDataBlob<NewtonMoveDB>())
+            if (OwningEntity.HasDataBlob<NewtonSimDB>())
             {
-                OwningEntity.RemoveDataBlob<NewtonMoveDB>();
+                OwningEntity.RemoveDataBlob<NewtonSimDB>();
             }
             if (OwningEntity.HasDataBlob<NewtonSimpleMoveDB>())
             {

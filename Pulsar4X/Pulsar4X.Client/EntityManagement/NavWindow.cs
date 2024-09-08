@@ -23,7 +23,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         //OrbitDB _ourOrbit;
         private double _sgp;
         private KeplerElements? _currentKE;
-        private NewtonThrustAbilityDB? _newtonThrust;
+        private NewtonionThrustAbilityDB? _newtonThrust;
         private double _totalMass;
         private double _dryMass;
         private double _cargoMass;
@@ -85,7 +85,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             _orderEntity = orderEntity.Entity;
             _orderEntityName = _orderEntity.GetName(_uiState.Faction.Id);
-            _newtonThrust = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>();
+            _newtonThrust = _orderEntity.GetDataBlob<NewtonionThrustAbilityDB>();
             _totalMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassTotal;
             _dryMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassDry;
             var soiParent = _orderEntity.GetSOIParentEntity();
@@ -148,7 +148,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             else if (_orderEntity.HasDataBlob<OrbitUpdateOftenDB>())
                 _currentKE = _orderEntity.GetDataBlob<OrbitUpdateOftenDB>().GetElements();
             else if (_orderEntity.HasDataBlob<OrbitDB>())
-                _currentKE = _orderEntity.GetDataBlob<NewtonMoveDB>().GetElements();
+                _currentKE = _orderEntity.GetDataBlob<NewtonSimDB>().GetElements();
 
             if (_targetSMA == 0 && _currentKE != null)
                 _targetSMA = (float)_currentKE.Value.SemiMajorAxis;
@@ -577,7 +577,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 double secondsBurn1 = fuelBurned1 / _burnRate;
                 var manuverNodeTime1 = _atDatetime + TimeSpan.FromSeconds(secondsBurn1 * 0.5);
 
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, _manuvers[0].deltaV, secondsBurn1);
+                NewtonSimCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, _manuvers[0].deltaV, secondsBurn1);
 
                 if(_fuelType == null)
                     throw new NullReferenceException();
@@ -587,7 +587,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 double secondsBurn2 = fuelBurned2 / _burnRate;
                 var manuverNodeTime2 = manuverNodeTime1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
 
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, _manuvers[1].deltaV, secondsBurn2);
+                NewtonSimCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, _manuvers[1].deltaV, secondsBurn2);
             }
         }
 
@@ -625,7 +625,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 double secondsBurn1 = fuelBurned1 / _burnRate;
                 var manuverNodeTime1 = _atDatetime + TimeSpan.FromSeconds(secondsBurn1 * 0.5);
 
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, _manuvers[0].deltaV, secondsBurn1);
+                NewtonSimCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, _manuvers[0].deltaV, secondsBurn1);
 
                 if (_fuelType == null)
                     throw new NullReferenceException();
@@ -635,7 +635,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 double secondsBurn2 = fuelBurned2 / _burnRate;
                 var manuverNodeTime2 = manuverNodeTime1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
 
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, _manuvers[1].deltaV, secondsBurn2);
+                NewtonSimCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, _manuvers[1].deltaV, secondsBurn2);
             }
         }
 
@@ -658,8 +658,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitDB>().SemiMajorAxis;
                 if(selectedSib.HasDataBlob<OrbitUpdateOftenDB>())
                     _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-                if(selectedSib.HasDataBlob<NewtonMoveDB>())
-                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonMoveDB >().GetElements().SemiMajorAxis;
+                if(selectedSib.HasDataBlob<NewtonSimDB>())
+                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonSimDB >().GetElements().SemiMajorAxis;
             }
 
             //TODO this should be radius from orbiting body not major axies.  
@@ -698,7 +698,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 double secondsBurn1 = fuelBurned1 / _burnRate;
                 var manuverNodeTime1 = _atDatetime + TimeSpan.FromSeconds(secondsBurn1 * 0.5);
 
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, _manuvers[0].deltaV, secondsBurn1);
+                NewtonSimCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, _manuvers[0].deltaV, secondsBurn1);
 
                 if(_fuelType == null)
                     throw new NullReferenceException();
@@ -708,7 +708,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 double secondsBurn2 = fuelBurned2 / _burnRate;
                 var manuverNodeTime2 = manuverNodeTime1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
 
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, _manuvers[1].deltaV, secondsBurn2);
+                NewtonSimCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, _manuvers[1].deltaV, secondsBurn2);
 
                 var newseq = new ManuverSequence();
                 newseq.SequenceName = "Hohmann Transfer";
@@ -737,8 +737,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitDB>().SemiMajorAxis;
                 if(selectedSib.HasDataBlob<OrbitUpdateOftenDB>())
                     _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-                if(selectedSib.HasDataBlob<NewtonMoveDB>())
-                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonMoveDB >().GetElements().SemiMajorAxis;
+                if(selectedSib.HasDataBlob<NewtonSimDB>())
+                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonSimDB >().GetElements().SemiMajorAxis;
                 
             }
 
@@ -780,7 +780,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                 var startObt = _manuverLines.EditingNodes[0].PriorOrbit;
                 var tgtObt = _manuverLines.EditingNodes[0].TargetOrbit;
-                NewtonSimpeThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, startObt, tgtObt );
+                NewtonSimpleCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, startObt, tgtObt );
 
                 if(_fuelType == null)
                     throw new NullReferenceException();
@@ -792,7 +792,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                 startObt = _manuverLines.EditingNodes[1].PriorOrbit;
                 tgtObt = _manuverLines.EditingNodes[1].TargetOrbit;
-                NewtonSimpeThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, startObt, tgtObt );
+                NewtonSimpleCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, startObt, tgtObt );
 
                 var newseq = new ManuverSequence();
                 newseq.SequenceName = "Hohmann Transfer";
@@ -828,8 +828,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     _targetSMA = (float)TgtOrbitDB.SemiMajorAxis;
                 if(selectedSib.HasDataBlob<OrbitUpdateOftenDB>())
                     _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-                if(selectedSib.HasDataBlob<NewtonMoveDB>())
-                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonMoveDB >().GetElements().SemiMajorAxis;
+                if(selectedSib.HasDataBlob<NewtonSimDB>())
+                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonSimDB >().GetElements().SemiMajorAxis;
                 
                 trueanomTgt = OrbitMath.GetTrueAnomaly(TgtOrbitDB,_atDatetime);
                 trueanomInt = OrbitMath.GetTrueAnomaly(IntOrbitDB,_atDatetime);
@@ -885,7 +885,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                 var startObt = _manuverLines.EditingNodes[0].PriorOrbit;
                 var tgtObt = _manuverLines.EditingNodes[0].TargetOrbit;
-                NewtonSimpeThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, startObt, tgtObt );
+                NewtonSimpleCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, startObt, tgtObt );
 
                 if(_fuelType == null)
                     throw new NullReferenceException();
@@ -897,7 +897,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                 startObt = _manuverLines.EditingNodes[1].PriorOrbit;
                 tgtObt = _manuverLines.EditingNodes[1].TargetOrbit;
-                NewtonSimpeThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, startObt, tgtObt );
+                NewtonSimpleCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, startObt, tgtObt );
 
                 var newseq = new ManuverSequence();
                 newseq.SequenceName = "Hohmann Transfer";
@@ -925,8 +925,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     _targetSMA = (float)_uncleEntites[_selectedUncle].GetDataBlob<OrbitDB>().SemiMajorAxis;
                 if (selectedUnc.HasDataBlob<OrbitUpdateOftenDB>())
                     _targetSMA = (float)_uncleEntites[_selectedUncle].GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-                if (selectedUnc.HasDataBlob<NewtonMoveDB>())
-                    _targetSMA = (float)_uncleEntites[_selectedUncle].GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
+                if (selectedUnc.HasDataBlob<NewtonSimDB>())
+                    _targetSMA = (float)_uncleEntites[_selectedUncle].GetDataBlob<NewtonSimDB>().GetElements().SemiMajorAxis;
             }
 
             //TODO this should be radius from orbiting body not major axies.  
@@ -966,7 +966,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                         var manuverNodeTime = date + TimeSpan.FromSeconds(secondsBurn * 0.5);
                         mass -= fuelBurned;
 
-                        NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime, manuver.deltaV, secondsBurn);
+                        NewtonSimCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime, manuver.deltaV, secondsBurn);
                     }
                 }
             }
@@ -981,8 +981,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitDB>().SemiMajorAxis;
                 if(selectedSib.HasDataBlob<OrbitUpdateOftenDB>())
                     _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-                if(selectedSib.HasDataBlob<NewtonMoveDB>())
-                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonMoveDB >().GetElements().SemiMajorAxis;
+                if(selectedSib.HasDataBlob<NewtonSimDB>())
+                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonSimDB >().GetElements().SemiMajorAxis;
             }
         }
 
@@ -1038,7 +1038,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 double secondsBurn = fuelBurned / _burnRate;
                 //var manuverNodeTime = _atDatetime + TimeSpan.FromSeconds(secondsBurn * 0.5);
 
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverDateTime, manuver.deltaV, secondsBurn);
+                NewtonSimCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverDateTime, manuver.deltaV, secondsBurn);
             }
 
         }

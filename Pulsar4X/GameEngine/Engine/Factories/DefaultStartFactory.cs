@@ -334,13 +334,13 @@ namespace Pulsar4X.Engine
             CargoTransferProcessor.AddRemoveCargoVolume(targetDrone2, rp1, 1000);
 
 
-            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(gunShip0);
-            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship2);
-            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship3);
-            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(gunShip1);
-            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(courier);
-            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(courier2);
-            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(starship);
+            NewtonSimProcessor.UpdateNewtonThrustAbilityDB(gunShip0);
+            NewtonSimProcessor.UpdateNewtonThrustAbilityDB(ship2);
+            NewtonSimProcessor.UpdateNewtonThrustAbilityDB(ship3);
+            NewtonSimProcessor.UpdateNewtonThrustAbilityDB(gunShip1);
+            NewtonSimProcessor.UpdateNewtonThrustAbilityDB(courier);
+            NewtonSimProcessor.UpdateNewtonThrustAbilityDB(courier2);
+            NewtonSimProcessor.UpdateNewtonThrustAbilityDB(starship);
 
             double test_a = 0.5; //AU
             double test_e = 0;
@@ -379,8 +379,8 @@ namespace Pulsar4X.Engine
             // gunShip1.SetDataBlob<OrbitDB>(orbit);
             // var pos2 = gunShip1.GetRelativeFuturePosition(game.TimePulse.GameGlobalDateTime);
 
-            // var nmdb = new NewtonMoveDB(earth, new Vector3(-10000.0, 0, 0));
-            // gunShip1.SetDataBlob<NewtonMoveDB>(nmdb);
+            // var nmdb = new NewtonSimDB(earth, new Vector3(-10000.0, 0, 0));
+            // gunShip1.SetDataBlob<NewtonSimDB>(nmdb);
 
             startingSystem.SetDataBlob(gunShip0.Id, new JumpPointDB());
             startingSystem.SetDataBlob(ship2.Id, new JumpPointDB());

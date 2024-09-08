@@ -581,22 +581,22 @@ namespace Pulsar4X.Tests
             Vector3 absolutePosition = new Vector3(0, Distance.AuToMt(8.52699302490434E-05), 0);
 
 			PositionDB pos1 = new PositionDB(_entityManager.ManagerGuid, parentEntity) { AbsolutePosition = absolutePosition };
-            var newt1 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ ManuverDeltaV = new Vector3(0,1,0)};
+            var newt1 = new NewtonSimDB(parentEntity, new Vector3(-10.0, 0, 0)){ ManuverDeltaV = new Vector3(0,1,0)};
             BaseDataBlob[] objBlobs1 = new BaseDataBlob[4];
             objBlobs1[0] = pos1;
             objBlobs1[1] = new MassVolumeDB() { MassDry = 10000 };
-            objBlobs1[2] = new NewtonThrustAbilityDB(_entityManager.ManagerGuid);
+            objBlobs1[2] = new NewtonionThrustAbilityDB(_entityManager.ManagerGuid);
             objBlobs1[3] = newt1;
             Entity objEntity1 = Entity.Create();
             _entityManager.AddEntity(objEntity1, objBlobs1);
 
 
             PositionDB pos2 = new PositionDB(_entityManager.ManagerGuid, parentEntity) { AbsolutePosition = absolutePosition };
-            var newt2 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ ManuverDeltaV = new Vector3(0,1,0)};
+            var newt2 = new NewtonSimDB(parentEntity, new Vector3(-10.0, 0, 0)){ ManuverDeltaV = new Vector3(0,1,0)};
             BaseDataBlob[] objBlobs2 = new BaseDataBlob[4];
             objBlobs2[0] = pos2;
             objBlobs2[1] = new MassVolumeDB() { MassDry = 10000 };
-            objBlobs2[2] = new NewtonThrustAbilityDB(_entityManager.ManagerGuid);
+            objBlobs2[2] = new NewtonionThrustAbilityDB(_entityManager.ManagerGuid);
             objBlobs2[3] = newt2;
             Entity objEntity2 = Entity.Create();
             _entityManager.AddEntity(objEntity2, objBlobs2);
@@ -604,13 +604,13 @@ namespace Pulsar4X.Tests
             var seconds = 100;
             for (int i = 0; i < seconds; i++)
             {
-                NewtonionMovementProcessor.NewtonMove(newt1, 1);
+                NewtonSimProcessor.NewtonMove(newt1, 1);
 
                 //this is a hacky way to allow us to increment each second,
                 //since the above method looks at the manager datetime and we're not updating that.
                 newt1.LastProcessDateTime -= TimeSpan.FromSeconds(1);
             }
-            NewtonionMovementProcessor.NewtonMove(newt2, seconds);
+            NewtonSimProcessor.NewtonMove(newt2, seconds);
             var distance1 = (pos1.RelativePosition.Length());
             var distance2 = (pos2.RelativePosition.Length());
 

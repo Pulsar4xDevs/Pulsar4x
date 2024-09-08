@@ -114,7 +114,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SetTooltip("Open warp menu");
             }
 
-            if(Entity.HasDataBlob<NewtonThrustAbilityDB>())
+            if(Entity.HasDataBlob<NewtonionThrustAbilityDB>())
             {
                 ImGui.SameLine();
                 bool buttonresult = ImGui.SmallButton(GlobalUIState.NamesForMenus[typeof(ChangeCurrentOrbitWindow)]);
@@ -138,7 +138,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SetTooltip("Open planetary window");
             }
 
-            if(Entity.HasDataBlob<VolumeStorageDB>() && Entity.HasDataBlob<NewtonThrustAbilityDB>())
+            if(Entity.HasDataBlob<VolumeStorageDB>() && Entity.HasDataBlob<NewtonionThrustAbilityDB>())
             {
                 ImGui.SameLine();
                 bool buttonresult = ImGui.SmallButton(GlobalUIState.NamesForMenus[typeof(LogiShipWindow)]);

@@ -71,7 +71,7 @@ public class ManuverNode
     }
     
     internal Entity _orderEntity;
-    private NewtonThrustAbilityDB _newtonThrust;
+    private NewtonionThrustAbilityDB _newtonionThrust;
     private double _totalMass;
     private double _dryMass;
     private double _sgp;
@@ -86,15 +86,15 @@ public class ManuverNode
     {
         NodeTime = nodeTime;
         _orderEntity = orderEntity;
-        _newtonThrust = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>();
+        _newtonionThrust = _orderEntity.GetDataBlob<NewtonionThrustAbilityDB>();
         _totalMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassTotal;
         _dryMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassDry;
         var parentMass = _orderEntity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
         _sgp = GeneralMath.StandardGravitationalParameter(_totalMass + parentMass);
-        var fuelTypeID = _newtonThrust.FuelType;
+        var fuelTypeID = _newtonionThrust.FuelType;
         _fuelType = orderEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(fuelTypeID);
-        _burnRate = _newtonThrust.FuelBurnRate;
-        _exhaustVelocity = _newtonThrust.ExhaustVelocity;
+        _burnRate = _newtonionThrust.FuelBurnRate;
+        _exhaustVelocity = _newtonionThrust.ExhaustVelocity;
         
         PriorOrbit = orderEntity.GetDataBlob<OrbitDB>().GetElements();
         TargetOrbit = PriorOrbit;

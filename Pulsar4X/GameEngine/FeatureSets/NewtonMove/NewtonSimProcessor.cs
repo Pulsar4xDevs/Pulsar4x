@@ -9,9 +9,9 @@ using Pulsar4X.Engine.Industry;
 namespace Pulsar4X.Engine
 {
 
-    public class NewtonionMovementProcessor : IHotloopProcessor
+    public class NewtonSimProcessor : IHotloopProcessor
     {
-        public NewtonionMovementProcessor()
+        public NewtonSimProcessor()
         {
         }
 
@@ -19,7 +19,7 @@ namespace Pulsar4X.Engine
 
         public TimeSpan FirstRunOffset => TimeSpan.FromSeconds(0);
 
-        public Type GetParameterType => typeof(NewtonMoveDB);
+        public Type GetParameterType => typeof(NewtonSimDB);
 
         public void Init(Game game)
         {
@@ -28,13 +28,13 @@ namespace Pulsar4X.Engine
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            NewtonMove(entity.GetDataBlob<NewtonMoveDB>(), deltaSeconds);
+            NewtonMove(entity.GetDataBlob<NewtonSimDB>(), deltaSeconds);
         }
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             //List<Entity> entites = manager.GetAllEntitiesWithDataBlob<NewtonMoveDB>(_nmDBIdx);
-            var nmdb = manager.GetAllDataBlobsOfType<NewtonMoveDB>();
+            var nmdb = manager.GetAllDataBlobsOfType<NewtonSimDB>();
             foreach (var db in nmdb)
             {
                 NewtonMove(db, deltaSeconds);
@@ -52,12 +52,12 @@ namespace Pulsar4X.Engine
         /// </summary>
         /// <param name="entity">Entity.</param>
         /// <param name="deltaSeconds">Delta seconds.</param>
-        public static void NewtonMove(NewtonMoveDB newtonMoveDB, int deltaSeconds)
+        public static void NewtonMove(NewtonSimDB newtonMoveDB, int deltaSeconds)
         {
             var entity = newtonMoveDB.OwningEntity;
             //NewtonMoveDB newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>();
             var factionDataStore = entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data;
-            NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
+            NewtonionThrustAbilityDB newtonionThrust = entity.GetDataBlob<NewtonionThrustAbilityDB>();
             PositionDB positionDB = entity.GetDataBlob<PositionDB>();
             double massTotal_Kg = entity.GetDataBlob<MassVolumeDB>().MassTotal;
             double parentMass_kg = newtonMoveDB.ParentMass;
@@ -88,8 +88,8 @@ namespace Pulsar4X.Engine
 
                 Vector3 totalDVFromGrav = (gravForceVector / massTotal_Kg) * timeStepInSeconds;
 
-                //double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
-                //double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
+                //double maxAccelFromThrust1 = newtonionThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonionThrust.FuelBurnRate));//per second
+                //double maxAccelFromThrust = newtonionThrust.ThrustInNewtons / mass_Kg; //per second
 
 
                 Vector3 manuverDV = newtonMoveDB.ManuverDeltaV; //how much dv needed to complete the manuver.
@@ -99,17 +99,17 @@ namespace Pulsar4X.Engine
 
                 if(manuverDV.Length() > 0)
                 {
-                    double dryMass = massTotal_Kg - newtonThrust.FuelBurnRate * timeStepInSeconds; //how much our ship weighs after a timestep of fuel is used.
+                    double dryMass = massTotal_Kg - newtonionThrust.FuelBurnRate * timeStepInSeconds; //how much our ship weighs after a timestep of fuel is used.
                     //how much dv can we get in this timestep.
-                    double deltaVThisStep = OrbitMath.TsiolkovskyRocketEquation(massTotal_Kg, dryMass, newtonThrust.ExhaustVelocity);
+                    double deltaVThisStep = OrbitMath.TsiolkovskyRocketEquation(massTotal_Kg, dryMass, newtonionThrust.ExhaustVelocity);
                     deltaVThisStep = Math.Min(manuverDV.Length(), deltaVThisStep); //don't use more Dv than what is called for.
-                    deltaVThisStep = Math.Min(newtonThrust.DeltaV, deltaVThisStep); //check we've got the deltaV to spend.
+                    deltaVThisStep = Math.Min(newtonionThrust.DeltaV, deltaVThisStep); //check we've got the deltaV to spend.
 
                     totalDVFromThrust = Vector3.Normalise(manuverDV) * deltaVThisStep;
 
                     //remove the deltaV we're expending from the max (TODO: Remove fuel from cargo, change mass of ship)
-                    var kgOfFuel = newtonThrust.BurnDeltaV(deltaVThisStep, massTotal_Kg);
-                    var ft = newtonThrust.FuelType;
+                    var kgOfFuel = newtonionThrust.BurnDeltaV(deltaVThisStep, massTotal_Kg);
+                    var ft = newtonionThrust.FuelType;
                     ProcessedMaterial fuel = factionDataStore.CargoGoods.GetMaterial(ft);
                     var massRemoved = CargoTransferProcessor.AddRemoveCargoMass(entity, fuel, -kgOfFuel);
 
@@ -159,8 +159,8 @@ namespace Pulsar4X.Engine
                     }
                     else //if (newtonMoveDB.SOIParent.HasDataBlob<NewtonMoveDB>())
                     {   //this will pretty much never happen.
-                        newParent = newtonMoveDB.SOIParent.GetDataBlob<NewtonMoveDB>().SOIParent;
-                        var parentVelocity = newtonMoveDB.SOIParent.GetDataBlob<NewtonMoveDB>().CurrentVector_ms;
+                        newParent = newtonMoveDB.SOIParent.GetDataBlob<NewtonSimDB>().SOIParent;
+                        var parentVelocity = newtonMoveDB.SOIParent.GetDataBlob<NewtonSimDB>().CurrentVector_ms;
                         parentrelativeVector = newtonMoveDB.CurrentVector_ms + parentVelocity;
                     }
                     parentMass_kg = newParent.GetDataBlob<MassVolumeDB>().MassDry;
@@ -234,10 +234,10 @@ namespace Pulsar4X.Engine
         /// <param name="newtonMoveDB"></param>
         /// <param name="atDateTime"></param>
         /// <returns>Positional and Velocity states</returns>
-        public static (Vector3 pos, Vector3 vel)GetRelativeState(Entity entity, NewtonMoveDB newtonMoveDB, DateTime atDateTime)
+        public static (Vector3 pos, Vector3 vel)GetRelativeState(Entity entity, NewtonSimDB newtonMoveDB, DateTime atDateTime)
         {
             PositionDB positionDB = entity.GetDataBlob<PositionDB>();
-            NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
+            NewtonionThrustAbilityDB newtonionThrust = entity.GetDataBlob<NewtonionThrustAbilityDB>();
             DateTime dateTimeNow = entity.StarSysDateTime;
             TimeSpan timeDelta = atDateTime - dateTimeNow;
             double mass_Kg = entity.GetDataBlob<MassVolumeDB>().MassDry;
@@ -261,8 +261,8 @@ namespace Pulsar4X.Engine
 
                 Vector3 acceleratonFromGrav = gravForceVector / mass_Kg;
 
-                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
-                double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
+                double maxAccelFromThrust1 = newtonionThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonionThrust.FuelBurnRate));//per second
+                double maxAccelFromThrust = newtonionThrust.ThrustInNewtons / mass_Kg; //per second
 
                 //ohhh was this wrong before? which frame of reference should we be in here? parent ralitive or prograde ralitive?
                 Vector3 accelerationFromThrust = newtonMoveDB.ManuverDeltaV / maxAccelFromThrust; //per second
@@ -290,10 +290,10 @@ namespace Pulsar4X.Engine
         /// <param name="newtonMoveDB"></param>
         /// <param name="atDateTime"></param>
         /// <returns>Positional and Velocity states</returns>
-        public static (Vector3 pos, Vector3 vel) GetAbsoluteState(Entity entity, NewtonMoveDB newtonMoveDB, DateTime atDateTime)
+        public static (Vector3 pos, Vector3 vel) GetAbsoluteState(Entity entity, NewtonSimDB newtonMoveDB, DateTime atDateTime)
         {
             PositionDB positionDB = entity.GetDataBlob<PositionDB>();
-            NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
+            NewtonionThrustAbilityDB newtonionThrust = entity.GetDataBlob<NewtonionThrustAbilityDB>();
             DateTime dateTimeNow = entity.StarSysDateTime;
             TimeSpan timeDelta = atDateTime - dateTimeNow;
             double mass_Kg = entity.GetDataBlob<MassVolumeDB>().MassDry;
@@ -317,8 +317,8 @@ namespace Pulsar4X.Engine
 
                 Vector3 acceleratonFromGrav = gravForceVector / mass_Kg;
 
-                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
-                double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
+                double maxAccelFromThrust1 = newtonionThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonionThrust.FuelBurnRate));//per second
+                double maxAccelFromThrust = newtonionThrust.ThrustInNewtons / mass_Kg; //per second
                 Vector3 accelerationFromThrust = newtonMoveDB.ManuverDeltaV / maxAccelFromThrust; //per second
 
                 Vector3 accelerationTotal = acceleratonFromGrav + accelerationFromThrust;
@@ -345,7 +345,7 @@ namespace Pulsar4X.Engine
         public static void UpdateNewtonThrustAbilityDB(Entity parentEntity)
         {
             var factionDataStore = parentEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data;
-            var db = parentEntity.GetDataBlob<NewtonThrustAbilityDB>();
+            var db = parentEntity.GetDataBlob<NewtonionThrustAbilityDB>();
             var ft = db.FuelType;
             var ev = db.ExhaustVelocity;
             var totalMass = parentEntity.GetDataBlob<MassVolumeDB>().MassTotal;

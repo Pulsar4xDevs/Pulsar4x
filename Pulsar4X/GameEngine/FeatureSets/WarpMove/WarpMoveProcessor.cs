@@ -248,8 +248,8 @@ namespace Pulsar4X.Engine
             OrbitDB newOrbit = OrbitDB.FromVelocity(targetEntity, entity, insertionVector_m, atDateTime);
             entity.SetDataBlob(newOrbit);
             
-            var burnRate = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
-            var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var burnRate = entity.GetDataBlob<NewtonionThrustAbilityDB>().FuelBurnRate;
+            var exhaustVelocity = entity.GetDataBlob<NewtonionThrustAbilityDB>().ExhaustVelocity;
             var mass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
             
             /*
@@ -259,7 +259,7 @@ namespace Pulsar4X.Engine
                 double secondsBurn = fuelBurned / burnRate;
                 var manuverNodeTime = entity.StarSysDateTime + TimeSpan.FromSeconds(secondsBurn * 0.5);
                 
-                NewtonThrustCommand.CreateCommand(entity.FactionOwnerID, entity, manuverNodeTime, moveDB.ExpendDeltaV, secondsBurn);
+                NewtonSimCommand.CreateCommand(entity.FactionOwnerID, entity, manuverNodeTime, moveDB.ExpendDeltaV, secondsBurn);
             }
             else if (moveDB.AutoCirculariseAfterWarp)
             {
@@ -274,7 +274,7 @@ namespace Pulsar4X.Engine
                 double secondsBurn = fuelBurned / burnRate;
                 var manuverNodeTime = entity.StarSysDateTime + TimeSpan.FromSeconds(secondsBurn * 0.5);
 
-                NewtonThrustCommand.CreateCommand(entity.FactionOwnerID, entity, manuverNodeTime, circularizationBurn, secondsBurn);
+                NewtonSimCommand.CreateCommand(entity.FactionOwnerID, entity, manuverNodeTime, circularizationBurn, secondsBurn);
             }
 */
         }

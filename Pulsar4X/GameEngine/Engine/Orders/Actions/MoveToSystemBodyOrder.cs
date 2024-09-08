@@ -88,7 +88,7 @@ namespace Pulsar4X.Engine.Orders
 
                     // Create the movement order
                     var cargoLibrary = EntityCommanding.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
-                    (WarpMoveCommand warpCommand, NewtonThrustCommand? thrustCommand) = WarpMoveCommand.CreateCommand(cargoLibrary, RequestingFactionGuid, ship, Target, targetPos, EntityCommanding.StarSysDateTime, new Vector3() , shipMass);
+                    (WarpMoveCommand warpCommand, NewtonSimCommand? thrustCommand) = WarpMoveCommand.CreateCommand(cargoLibrary, RequestingFactionGuid, ship, Target, targetPos, EntityCommanding.StarSysDateTime, new Vector3() , shipMass);
                     _shipCommands.Add(warpCommand);
                 }
             }

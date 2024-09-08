@@ -53,8 +53,8 @@ namespace Pulsar4X.Engine.Logistics
                 mySMA = ship.GetDataBlob<OrbitDB>().SemiMajorAxis;
             if (ship.HasDataBlob<OrbitUpdateOftenDB>())
                 mySMA = ship.GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-            if (ship.HasDataBlob<NewtonMoveDB>())
-                mySMA = ship.GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
+            if (ship.HasDataBlob<NewtonSimDB>())
+                mySMA = ship.GetDataBlob<NewtonSimDB>().GetElements().SemiMajorAxis;
 
             double targetSMA = OrbitMath.LowOrbitRadius(targetBody);
 
@@ -113,8 +113,8 @@ namespace Pulsar4X.Engine.Logistics
                 mySMA = ship.GetDataBlob<OrbitDB>().SemiMajorAxis;
             if (ship.HasDataBlob<OrbitUpdateOftenDB>())
                 mySMA = ship.GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-            if (ship.HasDataBlob<NewtonMoveDB>())
-                mySMA = ship.GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
+            if (ship.HasDataBlob<NewtonSimDB>())
+                mySMA = ship.GetDataBlob<NewtonSimDB>().GetElements().SemiMajorAxis;
 
 
             double targetSMA = 0;
@@ -122,8 +122,8 @@ namespace Pulsar4X.Engine.Logistics
                 targetSMA = target.GetDataBlob<OrbitDB>().SemiMajorAxis;
             if (target.HasDataBlob<OrbitUpdateOftenDB>())
                 targetSMA = target.GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-            if (target.HasDataBlob<NewtonMoveDB>())
-                targetSMA = target.GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
+            if (target.HasDataBlob<NewtonSimDB>())
+                targetSMA = target.GetDataBlob<NewtonSimDB>().GetElements().SemiMajorAxis;
 
             Vector3 targetPos = Vector3.Normalise(pos) * targetSMA;
 
@@ -181,8 +181,8 @@ namespace Pulsar4X.Engine.Logistics
                 mySMA = ship.GetDataBlob<OrbitDB>().SemiMajorAxis;
             if (ship.HasDataBlob<OrbitUpdateOftenDB>())
                 mySMA = ship.GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-            if (ship.HasDataBlob<NewtonMoveDB>())
-                mySMA = ship.GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
+            if (ship.HasDataBlob<NewtonSimDB>())
+                mySMA = ship.GetDataBlob<NewtonSimDB>().GetElements().SemiMajorAxis;
 
             double targetRad = OrbitMath.LowOrbitRadius(targetBody);
 
@@ -226,7 +226,7 @@ namespace Pulsar4X.Engine.Logistics
             
             
             
-            double ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            double ve = ship.GetDataBlob<NewtonionThrustAbilityDB>().ExhaustVelocity;
             double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(shipMass, ve, dv);
             tsec += OrbitMath.BurnTime(ship, dv, shipMass);
             dateTime = dateTime + TimeSpan.FromSeconds(tsec);

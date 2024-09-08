@@ -129,9 +129,9 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            if (entityItem.HasDataBlob<NewtonMoveDB>())
+            if (entityItem.HasDataBlob<NewtonSimDB>())
             {
-                var hyp = entityItem.GetDataBlob<NewtonMoveDB>();
+                var hyp = entityItem.GetDataBlob<NewtonSimDB>();
                 Icon orb;
                 //orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
                 //NewtonMoveIcon
@@ -251,9 +251,9 @@ namespace Pulsar4X.SDL2UI
                         //_moveIcons.Add(changeData.Entity.ID, widget);
                     }
 
-                    if (message.DataBlob is NewtonMoveDB)
+                    if (message.DataBlob is NewtonSimDB)
                     {
-                        if(entityState.Entity.HasDataBlob<NewtonMoveDB>()) //because sometimes it can be added and removed in a single tick.
+                        if(entityState.Entity.HasDataBlob<NewtonSimDB>()) //because sometimes it can be added and removed in a single tick.
                         {
                             Icon orb;
                             //orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
@@ -278,7 +278,7 @@ namespace Pulsar4X.SDL2UI
                         _moveIcons.TryRemove(message.EntityId.Value, out var foo);
                     }
 
-                    if (message.DataBlob is NewtonMoveDB)
+                    if (message.DataBlob is NewtonSimDB)
                     {
                         _orbitRings.TryRemove(message.EntityId.Value, out var foo);
                     }

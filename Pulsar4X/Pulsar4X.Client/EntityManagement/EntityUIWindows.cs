@@ -112,11 +112,11 @@ namespace Pulsar4X.SDL2UI
                 return true;
             }
             //if entity can move
-            else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(ChangeCurrentOrbitWindow))
+            else if (_entityState.Entity.HasDataBlob<NewtonionThrustAbilityDB>() && T == typeof(ChangeCurrentOrbitWindow))
             {
                 return true;
             }
-            else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(NavWindow))
+            else if (_entityState.Entity.HasDataBlob<NewtonionThrustAbilityDB>() && T == typeof(NavWindow))
             {
                 return true;
             }
@@ -151,7 +151,7 @@ namespace Pulsar4X.SDL2UI
             }
             else if (
                 _entityState.Entity.HasDataBlob<VolumeStorageDB>() &&
-                _entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() &&
+                _entityState.Entity.HasDataBlob<NewtonionThrustAbilityDB>() &&
                 T == typeof(LogiShipWindow))
             {
                 return true;

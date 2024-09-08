@@ -74,9 +74,9 @@ namespace Pulsar4X.Extensions
                 return (pos, vel);
             }
 
-            if (entity.HasDataBlob<NewtonMoveDB>())
+            if (entity.HasDataBlob<NewtonSimDB>())
             {
-                var move = entity.GetDataBlob<NewtonMoveDB>();
+                var move = entity.GetDataBlob<NewtonSimDB>();
 
                 var vel = move.CurrentVector_ms;
                 return (pos, vel);
@@ -143,9 +143,9 @@ namespace Pulsar4X.Extensions
                 return (pos, vel);
             }
 
-            if (entity.HasDataBlob<NewtonMoveDB>())
+            if (entity.HasDataBlob<NewtonSimDB>())
             {
-                var move = entity.GetDataBlob<NewtonMoveDB>();
+                var move = entity.GetDataBlob<NewtonSimDB>();
                 var vel = move.CurrentVector_ms;
                 return (pos, vel);
             }
@@ -192,9 +192,9 @@ namespace Pulsar4X.Extensions
             {
                 return entity.GetDataBlob<OrbitUpdateOftenDB>().InstantaneousOrbitalVelocityVector_m(atDateTime);
             }
-            else if (entity.HasDataBlob<NewtonMoveDB>())
+            else if (entity.HasDataBlob<NewtonSimDB>())
             {
-                return NewtonionMovementProcessor.GetRelativeState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).vel;
+                return NewtonSimProcessor.GetRelativeState(entity, entity.GetDataBlob<NewtonSimDB>(), atDateTime).vel;
             }
             else if (entity.HasDataBlob<NewtonSimpleMoveDB>())
             {
@@ -227,9 +227,9 @@ namespace Pulsar4X.Extensions
             {
                 return entity.GetDataBlob<OrbitUpdateOftenDB>().AbsoluteOrbitalVector_m(atDateTime);
             }
-            else if (entity.HasDataBlob<NewtonMoveDB>())
+            else if (entity.HasDataBlob<NewtonSimDB>())
             {
-                var vel = NewtonionMovementProcessor.GetRelativeState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).vel;
+                var vel = NewtonSimProcessor.GetRelativeState(entity, entity.GetDataBlob<NewtonSimDB>(), atDateTime).vel;
                 var parentEntity = GetSOIParentEntity(entity);
                 if(parentEntity == null) throw new NullReferenceException("parentEntity cannot be null");
                 //recurse
@@ -268,9 +268,9 @@ namespace Pulsar4X.Extensions
             {
                 return entity.GetDataBlob<OrbitUpdateOftenDB>().GetPosition(atDateTime);
             }
-            else if (entity.HasDataBlob<NewtonMoveDB>())
+            else if (entity.HasDataBlob<NewtonSimDB>())
             {
-                return NewtonionMovementProcessor.GetRelativeState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).pos;
+                return NewtonSimProcessor.GetRelativeState(entity, entity.GetDataBlob<NewtonSimDB>(), atDateTime).pos;
             }
             else if (entity.HasDataBlob<NewtonSimpleMoveDB>())
             {
@@ -303,9 +303,9 @@ namespace Pulsar4X.Extensions
             {
                 return entity.GetDataBlob<OrbitUpdateOftenDB>().GetAbsolutePosition_m(atDateTime);
             }
-            else if (entity.HasDataBlob<NewtonMoveDB>())
+            else if (entity.HasDataBlob<NewtonSimDB>())
             {
-                return NewtonionMovementProcessor.GetAbsoluteState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).pos;
+                return NewtonSimProcessor.GetAbsoluteState(entity, entity.GetDataBlob<NewtonSimDB>(), atDateTime).pos;
             }
             else if (entity.HasDataBlob<NewtonSimpleMoveDB>())
             {

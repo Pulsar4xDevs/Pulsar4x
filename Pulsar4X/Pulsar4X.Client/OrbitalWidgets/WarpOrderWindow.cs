@@ -113,9 +113,9 @@ namespace Pulsar4X.SDL2UI
 
                 }
             }
-            if(OrderingEntityState.Entity.HasDataBlob<NewtonThrustAbilityDB>())
+            if(OrderingEntityState.Entity.HasDataBlob<NewtonionThrustAbilityDB>())
             {
-                var newtDB = OrderingEntityState.Entity.GetDataBlob<NewtonThrustAbilityDB>();
+                var newtDB = OrderingEntityState.Entity.GetDataBlob<NewtonionThrustAbilityDB>();
                 _maxDV = (float)newtDB.DeltaV;
             }
 
@@ -157,7 +157,7 @@ namespace Pulsar4X.SDL2UI
             }
             else
             {
-                var foo =  OrderingEntityState.Entity.GetDataBlob<NewtonMoveDB>();
+                var foo =  OrderingEntityState.Entity.GetDataBlob<NewtonSimDB>();
                 if(foo == null)
                 {
 
@@ -181,9 +181,9 @@ namespace Pulsar4X.SDL2UI
             }
             DepartureCalcs();
 
-            if (OrderingEntityState.Entity.HasDataBlob<NewtonThrustAbilityDB>())
+            if (OrderingEntityState.Entity.HasDataBlob<NewtonionThrustAbilityDB>())
             {
-                var db = OrderingEntityState.Entity.GetDataBlob<NewtonThrustAbilityDB>();
+                var db = OrderingEntityState.Entity.GetDataBlob<NewtonionThrustAbilityDB>();
                 _newtonUI = new NewtonionOrderUI(db, _massOrderingEntity);
             }
 

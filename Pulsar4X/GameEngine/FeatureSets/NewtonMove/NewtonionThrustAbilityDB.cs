@@ -7,7 +7,7 @@ using Pulsar4X.Components;
 
 namespace Pulsar4X.Datablobs
 {
-    public class NewtonThrustAbilityDB : BaseDataBlob, IAbilityDescription
+    public class NewtonionThrustAbilityDB : BaseDataBlob, IAbilityDescription
     {
 
         public double ThrustInNewtons = 0;
@@ -80,16 +80,16 @@ namespace Pulsar4X.Datablobs
         }
 
         [JsonConstructor]
-        private NewtonThrustAbilityDB()
+        private NewtonionThrustAbilityDB()
         {
         }
 
-        public NewtonThrustAbilityDB(string fuelType)
+        public NewtonionThrustAbilityDB(string fuelType)
         {
             FuelType = fuelType;
         }
 
-        public NewtonThrustAbilityDB(NewtonThrustAbilityDB db)
+        public NewtonionThrustAbilityDB(NewtonionThrustAbilityDB db)
         {
             ThrustInNewtons = db.ThrustInNewtons;
             ExhaustVelocity = db.ExhaustVelocity;
@@ -102,7 +102,7 @@ namespace Pulsar4X.Datablobs
 
         public override object Clone()
         {
-            return new NewtonThrustAbilityDB(this);
+            return new NewtonionThrustAbilityDB(this);
         }
 
         public string AbilityName()

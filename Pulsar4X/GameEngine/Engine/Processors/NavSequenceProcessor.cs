@@ -45,7 +45,7 @@ namespace Pulsar4X.Engine
                     var manuverDV = endVector.velocity - startVector.velocity;
                     
                     
-                    NewtonMoveDB newDB = new NewtonMoveDB(manuver.StartSOIParent, currentVel, (Vector3)manuverDV);
+                    NewtonSimDB newDB = new NewtonSimDB(manuver.StartSOIParent, currentVel, (Vector3)manuverDV);
                     entity.SetDataBlob(newDB);
                     db.CurrentActivity = "Maneuvering";
                     break;

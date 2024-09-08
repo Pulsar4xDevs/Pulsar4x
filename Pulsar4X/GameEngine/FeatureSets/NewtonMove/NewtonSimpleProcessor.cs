@@ -42,7 +42,7 @@ public class NewtonSimpleProcessor : IHotloopProcessor
         DateTime dateTimeNow = entity.Manager.StarSysDateTime;
         DateTime dateTimeNext = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds);
         
-        var thrustdb = entity.GetDataBlob<NewtonThrustAbilityDB>();
+        var thrustdb = entity.GetDataBlob<NewtonionThrustAbilityDB>();
         var posdb = entity.GetDataBlob<PositionDB>();
         var massdb = entity.GetDataBlob<MassVolumeDB>();
 
@@ -61,12 +61,18 @@ public class NewtonSimpleProcessor : IHotloopProcessor
         //if ship has enough fuel to make the manuver:
         if (thrustdb.DeltaV > moveDeltaV)
         {
+            //TODO: handle longer "burns" over several turns.
+            
+            //set entity to new orbit.
             OrbitDB newOrbit = OrbitDB.FromKeplerElements(entity, massdb.MassTotal, targetOrbit, dateTimeNow);
             entity.SetDataBlob(newOrbit);
 
             //remove fuel.
             var fuelBurned = thrustdb.BurnDeltaV(moveDeltaV, massdb.MassTotal);
             CargoTransferProcessor.AddRemoveCargoMass(entity, fuelType, fuelBurned);
+            
+            //tag as complete
+            newtonSimplelMoveDB.IsComplete = true;
         }
     }
 

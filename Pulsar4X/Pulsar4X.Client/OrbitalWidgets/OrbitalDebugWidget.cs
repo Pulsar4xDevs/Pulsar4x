@@ -48,7 +48,7 @@ namespace Pulsar4X.SDL2UI
             if(hasParent &&
                (entity.HasDataBlob<OrbitDB>() 
                 || entity.HasDataBlob<OrbitUpdateOftenDB>()) 
-                || entity.HasDataBlob<NewtonMoveDB>())
+                || entity.HasDataBlob<NewtonSimDB>())
                 _debugWidget = new OrbitalDebugWidget(entityState);
             else
             {
@@ -245,9 +245,9 @@ namespace Pulsar4X.SDL2UI
             }
             else
             {
-                if (_entity.HasDataBlob<NewtonMoveDB>())
+                if (_entity.HasDataBlob<NewtonSimDB>())
                 {
-                    _keplerElements = _entity.GetDataBlob<NewtonMoveDB>().GetElements();
+                    _keplerElements = _entity.GetDataBlob<NewtonSimDB>().GetElements();
                 }
             }
 

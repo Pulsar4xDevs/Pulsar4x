@@ -8,7 +8,7 @@ namespace Pulsar4X.Datablobs
     /// <summary>
     /// This gets added to an entity when it's doing a newton thrust manuver.
     /// </summary>
-    public class NewtonMoveDB : BaseDataBlob
+    public class NewtonSimDB : BaseDataBlob
     {
         [JsonProperty]
         internal DateTime LastProcessDateTime = new DateTime();
@@ -64,7 +64,7 @@ namespace Pulsar4X.Datablobs
         }
 
         [JsonConstructor]
-        private NewtonMoveDB() { }
+        private NewtonSimDB() { }
 
         /// <summary>
         ///
@@ -72,7 +72,7 @@ namespace Pulsar4X.Datablobs
         /// <param name="sphereOfInfluenceParent"></param>
         /// <param name="velocity_ms">Parentrelative Velocity</param>
         /// <param name="manuverDeltaV">Parentrelative Manuver</param>
-        public NewtonMoveDB(Entity sphereOfInfluenceParent, Vector3 velocity_ms, Vector3 manuverDeltaV)
+        public NewtonSimDB(Entity sphereOfInfluenceParent, Vector3 velocity_ms, Vector3 manuverDeltaV)
         {
             CurrentVector_ms = velocity_ms;
             SOIParent = sphereOfInfluenceParent;
@@ -87,7 +87,7 @@ namespace Pulsar4X.Datablobs
         /// </summary>
         /// <param name="sphereOfInfluenceParent"></param>
         /// <param name="velocity_ms">Parentrelative Velocity</param>
-        public NewtonMoveDB(Entity sphereOfInfluenceParent, Vector3 velocity_ms)
+        public NewtonSimDB(Entity sphereOfInfluenceParent, Vector3 velocity_ms)
         {
             CurrentVector_ms = velocity_ms;
             SOIParent = sphereOfInfluenceParent;
@@ -96,7 +96,7 @@ namespace Pulsar4X.Datablobs
 
         }
 
-        public NewtonMoveDB(NewtonMoveDB db)
+        public NewtonSimDB(NewtonSimDB db)
         {
             LastProcessDateTime = db.LastProcessDateTime;
             CurrentVector_ms = db.CurrentVector_ms;
@@ -106,7 +106,7 @@ namespace Pulsar4X.Datablobs
         }
         public override object Clone()
         {
-            return new NewtonMoveDB(this);
+            return new NewtonSimDB(this);
         }
 
         internal override void OnSetToEntity()

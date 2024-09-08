@@ -149,8 +149,8 @@ namespace Pulsar4X.SDL2UI
 
                 var numDB = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>().Count;
                 ImGui.Text($"ObitDB Count: {numDB}");
-                numDB = _systemState.StarSystem.GetAllDataBlobsOfType<NewtonMoveDB>().Count;
-                ImGui.Text($"NewtonMoveDB Count: {numDB}");
+                numDB = _systemState.StarSystem.GetAllDataBlobsOfType<NewtonSimDB>().Count;
+                ImGui.Text($"NewtonSimDB Count: {numDB}");
                 numDB = _systemState.StarSystem.GetAllDataBlobsOfType<SensorAbilityDB>().Count;
                 ImGui.Text($"SensorAbilityDB Count: {numDB}");
 

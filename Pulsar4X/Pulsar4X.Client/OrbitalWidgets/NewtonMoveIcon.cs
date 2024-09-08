@@ -18,7 +18,7 @@ namespace Pulsar4X.SDL2UI
     public class NewtonMoveIcon : Icon, IUpdateUserSettings, IKepler
     {
         //protected EntityManager _mgr;
-        NewtonMoveDB? _newtonMoveDB;
+        NewtonSimDB? _newtonMoveDB;
         PositionDB? _parentPosDB;
         PositionDB? _myPosDB;
         double _sgp;
@@ -65,18 +65,18 @@ namespace Pulsar4X.SDL2UI
         {
         }
 
-        public NewtonMoveIcon(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetDataBlob<NewtonMoveDB>().SOIParent.GetDataBlob<PositionDB>())
+        public NewtonMoveIcon(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetDataBlob<NewtonSimDB>().SOIParent.GetDataBlob<PositionDB>())
         {
             entityState.OrbitIcon = this;
             BodyType = entityState.BodyType;
             TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
             //_mgr = entityState.Entity.Manager;
-            _newtonMoveDB = entityState.Entity.GetDataBlob<NewtonMoveDB>();
+            _newtonMoveDB = entityState.Entity.GetDataBlob<NewtonSimDB>();
             _parentPosDB = _newtonMoveDB.SOIParent.GetDataBlob<PositionDB>();
             _positionDB = _parentPosDB;
             _myPosDB = entityState.Entity.GetDataBlob<PositionDB>();
             _userOrbitSettingsMtx = settings;
-            var parentMass = entityState.Entity.GetDataBlob<NewtonMoveDB>().ParentMass;
+            var parentMass = entityState.Entity.GetDataBlob<NewtonSimDB>().ParentMass;
             var myMass = entityState.Entity.GetDataBlob<MassVolumeDB>().MassDry;
             var _sgp1 = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
 
@@ -145,7 +145,7 @@ namespace Pulsar4X.SDL2UI
 
             if (_newtonMoveDB.ManuverDeltaVLen > 0)
             {
-                var len = 0.1 * _newtonMoveDB.OwningEntity.GetDataBlob<NewtonThrustAbilityDB>().ThrustInNewtons;
+                var len = 0.1 * _newtonMoveDB.OwningEntity.GetDataBlob<NewtonionThrustAbilityDB>().ThrustInNewtons;
                 var dv = _newtonMoveDB.ManuverDeltaV;
                 var line = Vector3.Normalise(dv) * len ;
 

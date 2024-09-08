@@ -14,7 +14,7 @@ namespace Pulsar4X.SDL2UI
     {
         protected EntityManager _mgr;
         private KeplerElements _ke;
-        NewtonMoveDB _newtonMoveDB;
+        NewtonSimDB _newtonSimDB;
         private OrbitDB _orbitDB;
         PositionDB _parentPosDB;
         PositionDB _myPosDB;
@@ -63,21 +63,21 @@ namespace Pulsar4X.SDL2UI
             BodyType = entityState.BodyType;
             TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
             _mgr = entityState.Entity.Manager;
-            if (entityState.Entity.TryGetDatablob<NewtonMoveDB>(out _newtonMoveDB))
+            if (entityState.Entity.TryGetDatablob<NewtonSimDB>(out _newtonSimDB))
             {
-                _ke = _newtonMoveDB.GetElements();
-                _soi = _newtonMoveDB.SOIParent.GetSOI_m();
+                _ke = _newtonSimDB.GetElements();
+                _soi = _newtonSimDB.SOIParent.GetSOI_m();
             }
             else if (entityState.Entity.TryGetDatablob(out _orbitDB))
             {
                 _ke = _orbitDB.GetElements();
                 _soi = entityState.Entity.GetSOI_m();
             }
-            _parentPosDB = _newtonMoveDB.SOIParent.GetDataBlob<PositionDB>();
+            _parentPosDB = _newtonSimDB.SOIParent.GetDataBlob<PositionDB>();
             _positionDB = _parentPosDB;
             _myPosDB = entityState.Entity.GetDataBlob<PositionDB>();
             _userOrbitSettingsMtx = settings;
-            var parentMass = entityState.Entity.GetDataBlob<NewtonMoveDB>().ParentMass;
+            var parentMass = entityState.Entity.GetDataBlob<NewtonSimDB>().ParentMass;
             var myMass = entityState.Entity.GetDataBlob<MassVolumeDB>().MassDry;
             //_sgp = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
 
@@ -131,8 +131,8 @@ namespace Pulsar4X.SDL2UI
             CreatePrimitiveShapes.KeplerPoints(_ke, (Vector2)pos, endPos, ref _points);
             
             /*
-            _dv = _newtonMoveDB.ManuverDeltaVLen;
-            Vector3 vel = Distance.MToAU(_newtonMoveDB.CurrentVector_ms);
+            _dv = _newtonSimDB.ManuverDeltaVLen;
+            Vector3 vel = Distance.MToAU(_newtonSimDB.CurrentVector_ms);
             Vector3 pos = Distance.MToAU(_myPosDB.RelativePosition);
             Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
             double e = eccentVector.Length();
@@ -244,7 +244,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 /*
-            if (_dv != _newtonMoveDB.ManuverDeltaVLen)
+            if (_dv != _newtonSimDB.ManuverDeltaVLen)
                 CreatePointArray();
             
             

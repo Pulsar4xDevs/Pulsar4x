@@ -8,7 +8,7 @@ using Pulsar4X.Extensions;
 namespace Pulsar4X.Engine.Orders
 {
 
-    public class NewtonThrustCommand : EntityCommand
+    public class NewtonSimCommand : EntityCommand
     {
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
         public override bool IsBlocking => true;
@@ -31,7 +31,7 @@ namespace Pulsar4X.Engine.Orders
 
         public Vector3 OrbitrelativeDeltaV;
         //private Vector3 _parentRalitiveDeltaV;
-        NewtonMoveDB _db;
+        NewtonSimDB _db;
 
         DateTime _vectorDateTime;
 
@@ -42,7 +42,7 @@ namespace Pulsar4X.Engine.Orders
 
 
 
-            var cmd = new NewtonThrustCommand()
+            var cmd = new NewtonSimCommand()
             {
                 RequestingFactionGuid = faction,
                 EntityCommandingGuid = orderEntity.Id,
@@ -66,10 +66,10 @@ namespace Pulsar4X.Engine.Orders
 
         public static void CreateCommands(CargoDefinitionsLibrary cargoLibrary, Entity ship, (Vector3 dv, double t)[] manuvers)
         {
-            var fuelTypeID = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
+            var fuelTypeID = ship.GetDataBlob<NewtonionThrustAbilityDB>().FuelType;
             var fuelType = cargoLibrary.GetAny(fuelTypeID);
-            var burnRate = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
-            var exhaustVelocity = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var burnRate = ship.GetDataBlob<NewtonionThrustAbilityDB>().FuelBurnRate;
+            var exhaustVelocity = ship.GetDataBlob<NewtonionThrustAbilityDB>().ExhaustVelocity;
             var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             var tnow = ship.StarSysDateTime;
 
@@ -81,7 +81,7 @@ namespace Pulsar4X.Engine.Orders
                 double tburn = fuelBurned / burnRate;
                 mass -= fuelBurned;
 
-                var cmd = new NewtonThrustCommand()
+                var cmd = new NewtonSimCommand()
                 {
                     RequestingFactionGuid = ship.FactionOwnerID,
                     EntityCommandingGuid = ship.Id,
@@ -98,12 +98,12 @@ namespace Pulsar4X.Engine.Orders
             }
         }
 
-        public static NewtonThrustCommand CreateCommand(CargoDefinitionsLibrary cargoLibrary, Entity ship, (Vector3 dv, double t) manuver)
+        public static NewtonSimCommand CreateCommand(CargoDefinitionsLibrary cargoLibrary, Entity ship, (Vector3 dv, double t) manuver)
         {
-            var fuelTypeID = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
+            var fuelTypeID = ship.GetDataBlob<NewtonionThrustAbilityDB>().FuelType;
             var fuelType = cargoLibrary.GetAny(fuelTypeID);
-            var burnRate = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
-            var exhaustVelocity = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var burnRate = ship.GetDataBlob<NewtonionThrustAbilityDB>().FuelBurnRate;
+            var exhaustVelocity = ship.GetDataBlob<NewtonionThrustAbilityDB>().ExhaustVelocity;
             var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             var tnow = ship.StarSysDateTime;
 
@@ -112,7 +112,7 @@ namespace Pulsar4X.Engine.Orders
                 double tburn = fuelBurned / burnRate;
                 mass -= fuelBurned;
 
-                var cmd = new NewtonThrustCommand()
+                var cmd = new NewtonSimCommand()
                 {
                     RequestingFactionGuid = ship.FactionOwnerID,
                     EntityCommandingGuid = ship.Id,
@@ -131,12 +131,12 @@ namespace Pulsar4X.Engine.Orders
 
         }
 
-        public static NewtonThrustCommand CreateCommand(CargoDefinitionsLibrary cargoLibrary, Entity ship, Vector3 dv, DateTime tmanuver)
+        public static NewtonSimCommand CreateCommand(CargoDefinitionsLibrary cargoLibrary, Entity ship, Vector3 dv, DateTime tmanuver)
         {
-            var fuelTypeID = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
+            var fuelTypeID = ship.GetDataBlob<NewtonionThrustAbilityDB>().FuelType;
             var fuelType = cargoLibrary.GetAny(fuelTypeID);
-            var burnRate = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
-            var exhaustVelocity = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var burnRate = ship.GetDataBlob<NewtonionThrustAbilityDB>().FuelBurnRate;
+            var exhaustVelocity = ship.GetDataBlob<NewtonionThrustAbilityDB>().ExhaustVelocity;
             var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             var tnow = ship.StarSysDateTime;
 
@@ -145,7 +145,7 @@ namespace Pulsar4X.Engine.Orders
             double tburn = fuelBurned / burnRate;
             mass -= fuelBurned;
 
-            var cmd = new NewtonThrustCommand()
+            var cmd = new NewtonSimCommand()
             {
                 RequestingFactionGuid = ship.FactionOwnerID,
                 EntityCommandingGuid = ship.Id,
@@ -183,7 +183,7 @@ namespace Pulsar4X.Engine.Orders
 
 
 
-                _db = new NewtonMoveDB(parent, currentVel);
+                _db = new NewtonSimDB(parent, currentVel);
                 _db.ActionOnDateTime = ActionOnDate;
                 _db.ManuverDeltaV = pralitiveDV;
                 _entityCommanding.SetDataBlob(_db);
@@ -225,137 +225,6 @@ namespace Pulsar4X.Engine.Orders
     }
 
 
-    public class NewtonSimpeThrustCommand : EntityCommand
-    {
-        public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
-        public override bool IsBlocking => true;
-        public override string Name { get {return _name;}}
-
-        string _name = "Newtonion Simple thrust";
-
-        public override string Details
-        {
-            get
-            {
-                return _details;
-            }
-        }
-        string _details = "";
-
-        Entity _factionEntity;
-        Entity _entityCommanding;
-        internal override Entity EntityCommanding { get { return _entityCommanding; } }
-        public Vector3 OrbitrelativeDeltaV;
-        public KeplerElements StartKE;
-        public KeplerElements TargetKE;
-
-        NewtonSimpleMoveDB _db;
-
-        DateTime _vectorDateTime;
-
-        public List<(string item, double value)> DebugDetails = new List<(string, double)>();
-
-        public static void CreateCommand(int faction, Entity orderEntity, Vector3 position, Vector3 startvelocity, Vector3 endvelocity, DateTime manuverNodeTime, string name="Newtonion thrust")
-        {
-            var sgp = orderEntity.GetDataBlob<OrbitDB>().GravitationalParameter_m3S2;
-            KeplerElements startKE = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, startvelocity, manuverNodeTime);
-            KeplerElements tgtKE = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, endvelocity, manuverNodeTime);
-            CreateCommand(faction, orderEntity, manuverNodeTime, startKE, tgtKE);
-        }
-
-        public static void CreateCommand(int faction, Entity orderEntity, DateTime manuverNodeTime, KeplerElements startKE, KeplerElements finKE, string name="Newtonion Simple thrust")
-        {
-
-            var startVec = OrbitalMath.GetStateVectors(startKE, manuverNodeTime);
-
-            var tgtVec = OrbitalMath.GetStateVectors(finKE, manuverNodeTime);
-
-
-            var manuverVector = tgtVec.velocity - startVec.velocity;
-            var manuverDV = manuverVector.Length();
-
-            var cmd = new NewtonSimpeThrustCommand()
-            {
-                RequestingFactionGuid = faction,
-                EntityCommandingGuid = orderEntity.Id,
-                _entityCommanding = orderEntity,
-                CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
-                OrbitrelativeDeltaV = new Vector3(manuverVector.X, manuverVector.Y, 0),
-                StartKE = startKE,
-                TargetKE = finKE,
-                _vectorDateTime = manuverNodeTime,
-                ActionOnDate = manuverNodeTime,
-                _name = name,
-
-            };
-
-            // FIXME:
-            //StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
-            cmd.UpdateDetailString();
-        }
-
-        internal override void Execute(DateTime atDateTime)
-        {
-            if (!IsRunning && atDateTime >= ActionOnDate)
-            {
-                var parent = _entityCommanding.GetSOIParentEntity();
-
-                if(parent == null) throw new NullReferenceException("parent cannot be null");
-
-                // var currentVel = _entityCommanding.GetRelativeFutureVelocity(atDateTime);
-
-                // var parentMass = _entityCommanding.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-                // var myMass = _entityCommanding.GetDataBlob<MassVolumeDB>().MassTotal;
-                // var sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
-
-                // var futurePosition = _entityCommanding.GetRelativeFuturePosition(_vectorDateTime);
-                // var futureVector = _entityCommanding.GetRelativeFutureVelocity(_vectorDateTime);
-
-                _db = new NewtonSimpleMoveDB(parent, StartKE, TargetKE, ActionOnDate);
-                _entityCommanding.SetDataBlob(_db);
-
-                UpdateDetailString();
-                IsRunning = true;
-            }
-        }
-
-        public override void UpdateDetailString()
-        {
-
-
-            if(ActionOnDate > _entityCommanding.StarSysDateTime)
-                _details = "Waiting " + (ActionOnDate - _entityCommanding.StarSysDateTime).ToString("d'd 'h'h 'm'm 's's'") + "\n"
-                + "   to expend  " + Stringify.Velocity(OrbitrelativeDeltaV.Length()) + " Δv";
-            else if(IsRunning)
-                _details = "Manuvering ";
-
-
-
-        }
-
-        public override bool IsFinished()
-        {
-            if (IsRunning && _db.IsComplete)
-                return true;
-            else
-                return false;
-        }
-
-        internal override bool IsValidCommand(Game game)
-        {
-            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
-                return true;
-            else
-                return false;
-        }
-
-        public override EntityCommand Clone()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-
     public class ThrustToTargetCmd : EntityCommand
     {
 
@@ -366,7 +235,7 @@ namespace Pulsar4X.Engine.Orders
             get
             {
                 string targetName = _targetEntity.GetDataBlob<NameDB>().GetName(_factionEntity);
-                return "Attempting intercept on + " + targetName + ", with " + Stringify.Velocity(_newtonAbilityDB.DeltaV) + "Δv remaining.";
+                return "Attempting intercept on + " + targetName + ", with " + Stringify.Velocity(_newtonionAbilityDB.DeltaV) + "Δv remaining.";
             }
         }
 
@@ -379,8 +248,8 @@ namespace Pulsar4X.Engine.Orders
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
         private Entity _targetEntity;
-        NewtonMoveDB _newtonMovedb;
-        NewtonThrustAbilityDB _newtonAbilityDB;
+        NewtonSimDB _newtonMovedb;
+        NewtonionThrustAbilityDB _newtonionAbilityDB;
         private double _startDV;
         // private double _startBurnTime;
         private double _fuelBurnRate;
@@ -410,33 +279,33 @@ namespace Pulsar4X.Engine.Orders
             if (!IsRunning)
             {
                 IsRunning = true;
-                _newtonAbilityDB = _entityCommanding.GetDataBlob<NewtonThrustAbilityDB>();
-                _startDV = _newtonAbilityDB.DeltaV;
-                _fuelBurnRate = _newtonAbilityDB.FuelBurnRate;
-                _totalFuel = _newtonAbilityDB.TotalFuel_kg;
+                _newtonionAbilityDB = _entityCommanding.GetDataBlob<NewtonionThrustAbilityDB>();
+                _startDV = _newtonionAbilityDB.DeltaV;
+                _fuelBurnRate = _newtonionAbilityDB.FuelBurnRate;
+                _totalFuel = _newtonionAbilityDB.TotalFuel_kg;
                 var soiParentEntity = _entityCommanding.GetSOIParentEntity();
                 _soiParentMass = soiParentEntity.GetDataBlob<MassVolumeDB>().MassDry;
                 var currentVel = _entityCommanding.GetRelativeFutureVelocity(atDateTime);
-                if (_entityCommanding.HasDataBlob<NewtonMoveDB>())
+                if (_entityCommanding.HasDataBlob<NewtonSimDB>())
                 {
-                    _newtonMovedb = _entityCommanding.GetDataBlob<NewtonMoveDB>();
+                    _newtonMovedb = _entityCommanding.GetDataBlob<NewtonSimDB>();
                 }
                 else
                 {
-                    _newtonMovedb = new NewtonMoveDB(soiParentEntity, currentVel);
+                    _newtonMovedb = new NewtonSimDB(soiParentEntity, currentVel);
                 }
 
                 _entityCommanding.SetDataBlob(_newtonMovedb);
             }
 
             var halfDV = _startDV * 0.5; //lets burn half the dv getting into a good intercept.
-            var dvUsed = _startDV - _newtonAbilityDB.DeltaV;
+            var dvUsed = _startDV - _newtonionAbilityDB.DeltaV;
             var dvToUse = halfDV - dvUsed;
             if(dvToUse > 0)
             {
                 (Vector3 Position, Vector3 Velocity) curOurRalState = _entityCommanding.GetRelativeState();
                 (Vector3 Position, Vector3 Velocity) curTgtRalState = _targetEntity.GetRelativeState();
-                var dvRemaining = _newtonAbilityDB.DeltaV;
+                var dvRemaining = _newtonionAbilityDB.DeltaV;
 
                 var tgtVelocity = _targetEntity.GetAbsoluteFutureVelocity(atDateTime);
                 //calculate the differencecs in velocity vectors.
@@ -446,11 +315,11 @@ namespace Pulsar4X.Engine.Orders
                 //var manuverVector = OrbitMath.GlobalToOrbitVector(leadToTgt, curOurRalState.Position, curOurRalState.Velocity);
 
 
-                var burnRate = _newtonAbilityDB.FuelBurnRate;
+                var burnRate = _newtonionAbilityDB.FuelBurnRate;
                 //var foo = OrbitMath.TsiolkovskyFuelUse(_totalFuel, )
                 var fuelUse = OrbitMath.TsiolkovskyFuelCost(
-                    _newtonAbilityDB.TotalFuel_kg,
-                    _newtonAbilityDB.ExhaustVelocity,
+                    _newtonionAbilityDB.TotalFuel_kg,
+                    _newtonionAbilityDB.ExhaustVelocity,
                     dvToUse//pretty sure this should be dvToUse, but that's giving me a silent crash.
                     );
                 var burnTime = fuelUse / burnRate;
@@ -512,7 +381,7 @@ namespace Pulsar4X.Engine.Orders
 
 
 
-            var myMass = _newtonAbilityDB.DryMass_kg + _newtonAbilityDB.TotalFuel_kg;
+            var myMass = _newtonionAbilityDB.DryMass_kg + _newtonionAbilityDB.TotalFuel_kg;
             var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, _soiParentMass);
 
             var manuverVector = OrbitMath.StateToProgradeVector(
@@ -588,7 +457,7 @@ namespace Pulsar4X.Engine.Orders
             get
             {
                 string targetName = _targetEntity.GetDataBlob<NameDB>().GetName(_factionEntity);
-                return "Attempting intercept on + " + targetName + ", with " + Stringify.Velocity(_newtonAbilityDB.DeltaV) + "Δv remaining.";
+                return "Attempting intercept on + " + targetName + ", with " + Stringify.Velocity(_newtonionAbilityDB.DeltaV) + "Δv remaining.";
             }
         }
 
@@ -601,8 +470,8 @@ namespace Pulsar4X.Engine.Orders
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
         private Entity _targetEntity;
-        NewtonMoveDB _newtonMovedb;
-        NewtonThrustAbilityDB _newtonAbilityDB;
+        NewtonSimDB _newtonMovedb;
+        NewtonionThrustAbilityDB _newtonionAbilityDB;
         private double _startDV;
         // private double _startBurnTime;
         private double _fuelBurnRate;
@@ -630,10 +499,10 @@ namespace Pulsar4X.Engine.Orders
             if (!IsRunning)
             {
                 IsRunning = true;
-                _newtonAbilityDB = _entityCommanding.GetDataBlob<NewtonThrustAbilityDB>();
-                _startDV = _newtonAbilityDB.DeltaV;
-                _fuelBurnRate = _newtonAbilityDB.FuelBurnRate;
-                _totalFuel = _newtonAbilityDB.TotalFuel_kg;
+                _newtonionAbilityDB = _entityCommanding.GetDataBlob<NewtonionThrustAbilityDB>();
+                _startDV = _newtonionAbilityDB.DeltaV;
+                _fuelBurnRate = _newtonionAbilityDB.FuelBurnRate;
+                _totalFuel = _newtonionAbilityDB.TotalFuel_kg;
                 var soiParentEntity = _entityCommanding.GetSOIParentEntity();
                 _soiParentMass = soiParentEntity.GetDataBlob<MassVolumeDB>().MassDry;
                 var currentVel = _entityCommanding.GetRelativeFutureVelocity(atDateTime);
@@ -641,23 +510,23 @@ namespace Pulsar4X.Engine.Orders
                 _entityCommanding.RemoveDataBlob<OrbitDB>();
                 if(_entityCommanding.HasDataBlob<OrbitUpdateOftenDB>())
                 _entityCommanding.RemoveDataBlob<OrbitUpdateOftenDB>();
-                if (_entityCommanding.HasDataBlob<NewtonMoveDB>())
-                    _newtonMovedb = _entityCommanding.GetDataBlob<NewtonMoveDB>();
+                if (_entityCommanding.HasDataBlob<NewtonSimDB>())
+                    _newtonMovedb = _entityCommanding.GetDataBlob<NewtonSimDB>();
                 else
                 {
-                    _newtonMovedb = new NewtonMoveDB(soiParentEntity, currentVel);
+                    _newtonMovedb = new NewtonSimDB(soiParentEntity, currentVel);
                 }
 
                 _entityCommanding.SetDataBlob(_newtonMovedb);
             }
             var halfDV = _startDV * 0.5; //lets burn half the dv getting into a good intercept.
-            var dvUsed = _startDV - _newtonAbilityDB.DeltaV;
+            var dvUsed = _startDV - _newtonionAbilityDB.DeltaV;
             var dvToUse = halfDV - dvUsed;
             if(dvToUse > 0)
             {
                 (Vector3 pos, Vector3 Velocity) curOurRalState = _entityCommanding.GetRelativeState();
                 (Vector3 pos, Vector3 Velocity) curTgtRalState = _targetEntity.GetRelativeState();
-                var dvRemaining = _newtonAbilityDB.DeltaV;
+                var dvRemaining = _newtonionAbilityDB.DeltaV;
 
 
                 var myMass = _entityCommanding.GetDataBlob<MassVolumeDB>().MassTotal;
@@ -719,7 +588,7 @@ namespace Pulsar4X.Engine.Orders
 
             /*
 
-            var myMass = _newtonAbilityDB.DryMass_kg + _newtonAbilityDB.TotalFuel_kg;
+            var myMass = _newtonionAbilityDB.DryMass_kg + _newtonionAbilityDB.TotalFuel_kg;
             var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, _soiParentMass);
 
             var manuverVector = OrbitMath.StateToProgradeVector(

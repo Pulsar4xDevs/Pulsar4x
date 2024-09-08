@@ -386,7 +386,7 @@ namespace Pulsar4X.SDL2UI
                             }
                         }
 
-                        if (SelectedEntity.HasDataBlob<NewtonMoveDB>())
+                        if (SelectedEntity.HasDataBlob<NewtonSimDB>())
                         {
                             if (ImGui.Checkbox("Draw Parent SOI", ref _drawParentSOI))
                             {
@@ -451,7 +451,7 @@ namespace Pulsar4X.SDL2UI
 
 
                         }
-                        if (SelectedEntity.TryGetDatablob<NewtonMoveDB>(out var nmdb) && SelectedEntity.TryGetDatablob<NewtonThrustAbilityDB>(out var ntdb))
+                        if (SelectedEntity.TryGetDatablob<NewtonSimDB>(out var nmdb) && SelectedEntity.TryGetDatablob<NewtonionThrustAbilityDB>(out var ntdb))
                         {
                             if (ImGui.CollapsingHeader("NewtonMove: ###NewtHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                             {
@@ -850,7 +850,7 @@ namespace Pulsar4X.SDL2UI
 
             if(myPos.Parent == null) return false;
             var parent = myPos.Parent;
-            var cnmve = SelectedEntity.GetDataBlob<NewtonMoveDB>();
+            var cnmve = SelectedEntity.GetDataBlob<NewtonSimDB>();
 
             var soiradius = parent.GetSOI_AU();
             var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };

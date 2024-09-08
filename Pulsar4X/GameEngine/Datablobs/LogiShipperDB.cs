@@ -46,7 +46,7 @@ namespace Pulsar4X.Datablobs
             {
                 TradeSpace.Add(kvp.Key, 0);
             }
-            if(!OwningEntity.HasDataBlob<NewtonThrustAbilityDB>())
+            if(!OwningEntity.HasDataBlob<NewtonionThrustAbilityDB>())
                 throw new Exception("Non moving entites can't be shippers");
             if(OwningEntity.HasDataBlob<OrderableDB>())
             {

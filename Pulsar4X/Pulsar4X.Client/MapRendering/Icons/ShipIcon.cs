@@ -12,7 +12,7 @@ namespace Pulsar4X.SDL2UI
     public class ShipIcon : Icon
     {
         OrbitDB? _orbitDB;
-        NewtonMoveDB? _newtonMoveDB;
+        NewtonSimDB? _newtonMoveDB;
         float _lop;
         Entity? _entity;
         public ShipIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
@@ -25,9 +25,9 @@ namespace Pulsar4X.SDL2UI
                 var loan = _orbitDB.LongitudeOfAscendingNode;
                 _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
             }
-            else if(entity.HasDataBlob<NewtonMoveDB>())
+            else if(entity.HasDataBlob<NewtonSimDB>())
             {
-                _newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>();
+                _newtonMoveDB = entity.GetDataBlob<NewtonSimDB>();
             }
 
             Func<Message, bool> filterById = msg => msg.EntityId != null && msg.EntityId == entity.Id;
@@ -62,9 +62,9 @@ namespace Pulsar4X.SDL2UI
                     var loan = _orbitDB.LongitudeOfAscendingNode;
                     _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
                 }
-                else if (message.DataBlob is NewtonMoveDB)
+                else if (message.DataBlob is NewtonSimDB)
                 {
-                    _newtonMoveDB = (NewtonMoveDB)message.DataBlob;
+                    _newtonMoveDB = (NewtonSimDB)message.DataBlob;
                     //NewtonVectors();
                 }
             });
@@ -76,7 +76,7 @@ namespace Pulsar4X.SDL2UI
             {
                 if (message.DataBlob is OrbitDB)
                     _orbitDB = null;
-                else if (message.DataBlob is NewtonMoveDB)
+                else if (message.DataBlob is NewtonSimDB)
                 {
                     _newtonMoveDB = null;
                     //Shapes.RemoveAt(Shapes.Count-1);
@@ -230,7 +230,7 @@ namespace Pulsar4X.SDL2UI
         //     byte b = 200;
         //     byte a = 255;
         //     SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
-        //     var len = 0.00001 * _newtonMoveDB.OwningEntity.GetDataBlob<NewtonThrustAbilityDB>().ThrustInNewtons;
+        //     var len = 0.00001 * _newtonMoveDB.OwningEntity.GetDataBlob<NewtonionThrustAbilityDB>().ThrustInNewtons;
         //     var dv = _newtonMoveDB.ManuverDeltaV;
         //     var line = Vector3.Normalise(dv) * len ;
         //     Vector2[] points = new Vector2[2];
@@ -307,7 +307,7 @@ namespace Pulsar4X.SDL2UI
                 var loan = _orbitDB.LongitudeOfAscendingNode;
                 _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
             }
-            else if(entity.HasDataBlob<NewtonMoveDB>())
+            else if(entity.HasDataBlob<NewtonSimDB>())
             {
                 Shapes.Add(_flame);
             }
@@ -336,7 +336,7 @@ namespace Pulsar4X.SDL2UI
                     var loan = _orbitDB.LongitudeOfAscendingNode;
                     _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
                 }
-                else if (message.DataBlob is NewtonMoveDB)
+                else if (message.DataBlob is NewtonSimDB)
                 {
                     if(!Shapes.Contains(_flame))
                         Shapes.Add(_flame);
@@ -350,7 +350,7 @@ namespace Pulsar4X.SDL2UI
             {
                 if (message.DataBlob is OrbitDB)
                     _orbitDB = null;
-                if (message.DataBlob is NewtonMoveDB)
+                if (message.DataBlob is NewtonSimDB)
                 {
                     if (Shapes.Contains(_flame))
                         Shapes.Remove(_flame);

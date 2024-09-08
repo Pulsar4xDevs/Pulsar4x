@@ -39,16 +39,16 @@ namespace Pulsar4X.Atb
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            NewtonThrustAbilityDB db;
-            if (!parentEntity.HasDataBlob<NewtonThrustAbilityDB>())
+            NewtonionThrustAbilityDB db;
+            if (!parentEntity.HasDataBlob<NewtonionThrustAbilityDB>())
             {
-                db = new NewtonThrustAbilityDB(FuelType);
+                db = new NewtonionThrustAbilityDB(FuelType);
                 parentEntity.SetDataBlob(db);
             }
             else
             {
                 // Set the fuel type equal to the engine fuel type
-                db = parentEntity.GetDataBlob<NewtonThrustAbilityDB>();
+                db = parentEntity.GetDataBlob<NewtonionThrustAbilityDB>();
                 db.FuelType = FuelType;
                 // if(db.FuelType != FuelType)
                 //     throw new Exception("prime entity can only have thrusters which use the same fuel type");

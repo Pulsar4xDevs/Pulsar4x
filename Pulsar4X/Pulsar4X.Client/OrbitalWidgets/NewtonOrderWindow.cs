@@ -78,9 +78,9 @@ namespace Pulsar4X.SDL2UI
             //CurrentState = States.NeedsTarget;
 
 
-            if(OrderingEntity.Entity.HasDataBlob<NewtonThrustAbilityDB>())
+            if(OrderingEntity.Entity.HasDataBlob<NewtonionThrustAbilityDB>())
             {
-                var propDB = OrderingEntity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
+                var propDB = OrderingEntity.Entity.GetDataBlob<NewtonionThrustAbilityDB>();
                 _maxDV = (float)propDB.DeltaV;
             }
         }
@@ -116,7 +116,7 @@ namespace Pulsar4X.SDL2UI
             _originalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
 
 
-            var newtondb = entity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
+            var newtondb = entity.Entity.GetDataBlob<NewtonionThrustAbilityDB>();
             _newtonUI = new NewtonionOrderUI(newtondb, _massOrderingEntity);
 
             IsActive = true;
@@ -164,7 +164,7 @@ namespace Pulsar4X.SDL2UI
         void ActionCmd()
         {
             //FIXME:
-            //NewtonThrustCommand.CreateCommand(OrderingEntity.Entity, (_deltaV_MS, 0));
+            //NewtonSimCommand.CreateCommand(OrderingEntity.Entity, (_deltaV_MS, 0));
             CloseWindow();
         }
 
@@ -227,11 +227,11 @@ namespace Pulsar4X.SDL2UI
         public double DepartureAngle { get; set; }
         public double Eccentricity { get; set; }
 
-        public NewtonionOrderUI(NewtonThrustAbilityDB newtonAbility, double currentMass)
+        public NewtonionOrderUI(NewtonionThrustAbilityDB newtonionAbility, double currentMass)
         {
-            _exhastVelocity = newtonAbility.ExhaustVelocity;
-            _fuelRate = newtonAbility.FuelBurnRate;
-            _maxDV = newtonAbility.DeltaV;
+            _exhastVelocity = newtonionAbility.ExhaustVelocity;
+            _fuelRate = newtonionAbility.FuelBurnRate;
+            _maxDV = newtonionAbility.DeltaV;
             _curmass = currentMass;
         }
 

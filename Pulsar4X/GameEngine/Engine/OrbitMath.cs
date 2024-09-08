@@ -46,7 +46,7 @@ namespace Pulsar4X.Engine
         /// <returns></returns>
         public static double FuelBurned(Entity ship, double dv, double mass)
         {
-            var ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var ve = ship.GetDataBlob<NewtonionThrustAbilityDB>().ExhaustVelocity;
             double fuelBurned = TsiolkovskyFuelUse(mass, ve, dv);
             return fuelBurned;
         }
@@ -58,13 +58,13 @@ namespace Pulsar4X.Engine
         /// <returns></returns>
         public static double GetEmptyWetDV(Entity entity, CargoDefinitionsLibrary cargoLibrary)
         {
-            var fuelTypeID = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
+            var fuelTypeID = entity.GetDataBlob<NewtonionThrustAbilityDB>().FuelType;
             var fuelType = cargoLibrary.GetAny(fuelTypeID);
 
             if(fuelType == null) throw new NullReferenceException("fuelType cannot be null");
 
-            //var burnRate = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
-            var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            //var burnRate = entity.GetDataBlob<NewtonionThrustAbilityDB>().FuelBurnRate;
+            var exhaustVelocity = entity.GetDataBlob<NewtonionThrustAbilityDB>().ExhaustVelocity;
             var massDry = entity.GetDataBlob<MassVolumeDB>().MassDry;
             //var totalMass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
             var parentMass = entity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
@@ -87,13 +87,13 @@ namespace Pulsar4X.Engine
         /// <returns></returns>
         public static double GetWetDV(Entity entity, double cargoMass, CargoDefinitionsLibrary cargoLibrary)
         {
-            var fuelTypeID = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
+            var fuelTypeID = entity.GetDataBlob<NewtonionThrustAbilityDB>().FuelType;
             var fuelType = cargoLibrary.GetAny(fuelTypeID);
 
             if(fuelType == null) throw new NullReferenceException("fuelType cannot be null");
 
-            //var burnRate = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
-            var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            //var burnRate = entity.GetDataBlob<NewtonionThrustAbilityDB>().FuelBurnRate;
+            var exhaustVelocity = entity.GetDataBlob<NewtonionThrustAbilityDB>().ExhaustVelocity;
             var massDry = entity.GetDataBlob<MassVolumeDB>().MassDry;
             //var totalMass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
             var parentMass = entity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
@@ -116,7 +116,7 @@ namespace Pulsar4X.Engine
         /// <returns></returns>
         public static double GetWetDV(Entity entity, double cargoMass, double fuelMass)
         {
-            var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var exhaustVelocity = entity.GetDataBlob<NewtonionThrustAbilityDB>().ExhaustVelocity;
             var massDry = entity.GetDataBlob<MassVolumeDB>().MassDry;
             var parentMass = entity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
 
@@ -135,10 +135,10 @@ namespace Pulsar4X.Engine
         /// <returns></returns>
         public static double GetDV(Entity entity, double cargoMass, CargoDefinitionsLibrary cargoLibrary)
         {
-            var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var exhaustVelocity = entity.GetDataBlob<NewtonionThrustAbilityDB>().ExhaustVelocity;
             var massDry = entity.GetDataBlob<MassVolumeDB>().MassDry;
             var parentMass = entity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-            var fuelTypeID = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
+            var fuelTypeID = entity.GetDataBlob<NewtonionThrustAbilityDB>().FuelType;
             var fuelType = cargoLibrary.GetAny(fuelTypeID);
 
             if(fuelType == null) throw new NullReferenceException("fuelType cannot be null");
@@ -343,8 +343,8 @@ namespace Pulsar4X.Engine
         public static double BurnTime(Entity ship, double dv, double mass)
         {
             //var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
-            var ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
-            var burnRate = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
+            var ve = ship.GetDataBlob<NewtonionThrustAbilityDB>().ExhaustVelocity;
+            var burnRate = ship.GetDataBlob<NewtonionThrustAbilityDB>().FuelBurnRate;
             double fuelBurned = TsiolkovskyFuelUse(mass, ve, dv);
             double tburn = fuelBurned / burnRate;
             return tburn;

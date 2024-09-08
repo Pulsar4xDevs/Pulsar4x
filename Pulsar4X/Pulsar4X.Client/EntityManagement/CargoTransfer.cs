@@ -538,7 +538,7 @@ namespace Pulsar4X.SDL2UI
             OrbitDB leftOrbit;
             //TODO: the logic here has places where it's going to break, needs fixing.
             //I think I'm checking if it's a colony here?
-            //but I'm not checking for NewtonMoveDB or OrbitUpdateOftenDB
+            //but I'm not checking for NewtonSimDB or OrbitUpdateOftenDB
             if (!_selectedEntityLeft.Entity.HasDataBlob<OrbitDB>())
             {
                 dvDif = _selectedEntityRight.Entity.GetDataBlob<OrbitDB>().MeanOrbitalVelocityInm();

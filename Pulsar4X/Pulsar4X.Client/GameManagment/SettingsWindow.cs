@@ -81,7 +81,7 @@ namespace Pulsar4X.SDL2UI
 
                          if(lastClickedEntity.HasDataBlob<OrbitDB>()
                             || lastClickedEntity.HasDataBlob<OrbitUpdateOftenDB>()
-                            || lastClickedEntity.HasDataBlob<NewtonMoveDB>())
+                            || lastClickedEntity.HasDataBlob<NewtonSimDB>())
                         {
                             bool orbitDebugActive = _orbitalDebugWindow.GetActive();
                             if (ImGui.Checkbox("Show Orbit Debug Lines", ref orbitDebugActive))

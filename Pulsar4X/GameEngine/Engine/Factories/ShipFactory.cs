@@ -120,9 +120,9 @@ namespace Pulsar4X.Engine
                 ship.AddComponent(item.design, item.count);
             }
 
-            if (ship.HasDataBlob<NewtonThrustAbilityDB>())
+            if (ship.HasDataBlob<NewtonionThrustAbilityDB>())
             {
-                NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship);
+                NewtonSimProcessor.UpdateNewtonThrustAbilityDB(ship);
             }
 
             return ship;
