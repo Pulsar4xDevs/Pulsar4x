@@ -36,6 +36,15 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetNextWindowBgAlpha(0);
             if(ImGui.Begin("###selector", _flags))
             {
+                var systemViewPreferences = SystemViewPreferences.GetInstance();
+                int viewIndex = systemViewPreferences.GetViewIndex("map");
+
+                if(ImGui.Combo("###view-selector", ref viewIndex, systemViewPreferences.ViewNames, systemViewPreferences.ViewNames.Length))
+                {
+                    systemViewPreferences.SetViewIndex("map", viewIndex);
+                    ImGui.EndCombo();
+                }
+
                 if(ImGui.CollapsingHeader("Systems", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     // FIXME: this can be done once and updated only when KnownSystems changes

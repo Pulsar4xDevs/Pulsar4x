@@ -8,9 +8,14 @@ using SDL2;
 
 namespace Pulsar4X.SDL2UI;
 
+/// <summary>
+/// This class acts as an editor window for the view preferences
+/// but also loads and saves the preferences and holds the
+/// currently selected views for various parts of the game.
+/// </summary>
 public class SystemViewPreferences : PulsarGuiWindow
 {
-    record View
+    internal record View
     {
         public string FileName;
         public string DisplayName;
@@ -40,10 +45,30 @@ public class SystemViewPreferences : PulsarGuiWindow
     };
 
     Dictionary<int, View> Views = new ();
-    int _selectedViewIndex = 0;
-    string[]? _selectedViewNames;
+    int _selectedEditorViewIndex = 0;
+    string[]? _selectedEditorViewNames;
     string ViewsDirectory;
 
+    public string[] ViewNames
+    {
+        get { return _selectedEditorViewNames ?? new string[1] { "Default" }; }
+    }
+
+    Dictionary<string, int> ViewIndexes { get; set; } = new ();
+
+    public int GetViewIndex(string key)
+    {
+        if(!ViewIndexes.ContainsKey(key))
+            ViewIndexes[key] = 0;
+
+        return ViewIndexes[key];
+    }
+
+    public void SetViewIndex(string key, int value)
+    {
+        ViewIndexes[key] = value;
+    }
+    
     internal static SystemViewPreferences GetInstance()
     {
         if (!_uiState.LoadedWindows.ContainsKey(typeof(SystemViewPreferences)))
@@ -56,44 +81,37 @@ public class SystemViewPreferences : PulsarGuiWindow
 
     internal SystemViewPreferences()
     {
-        try
+        // Read and apply any view preferences
+        string baseDirectory = SDL.SDL_GetPrefPath(PulsarMainWindow.OrgName, PulsarMainWindow.AppName);
+        ViewsDirectory = Path.Combine(baseDirectory, "Views");
+
+        if(!Directory.Exists(ViewsDirectory))
         {
-            // Read and apply any window preferences
-            string baseDirectory = SDL.SDL_GetPrefPath(PulsarMainWindow.OrgName, PulsarMainWindow.AppName);
-            ViewsDirectory = Path.Combine(baseDirectory, "Views");
-
-            if(!Directory.Exists(ViewsDirectory))
-            {
-                Directory.CreateDirectory(ViewsDirectory);
-            }
-
-            var files = Directory.EnumerateFiles(ViewsDirectory, "*.ini");
-            if(files.Count() > 0)
-            {
-                foreach(var fileName in files)
-                {
-                    LoadViewIni(fileName);
-                }
-            }
-            else
-            {
-                CreateDefaultIni(ViewsDirectory);
-                LoadViewIni(Path.Combine(ViewsDirectory, DefaultFileName));
-            }
-            
-            _selectedViewNames = new string[Views.Count];
-            foreach((var id, var view) in Views)
-            {
-                _selectedViewNames[id] = view.DisplayName;
-            }
-
-            // Reset the view index
-            _selectedViewIndex = 0;
+            Directory.CreateDirectory(ViewsDirectory);
         }
-        catch(Exception e)
+
+        var files = Directory.EnumerateFiles(ViewsDirectory, "*.ini");
+        if(files.Count() > 0)
         {
-            // It's just a preferences file, continue on
+            foreach(var fileName in files)
+            {
+                LoadViewIni(fileName);
+            }
         }
+        else
+        {
+            CreateDefaultIni(ViewsDirectory);
+            LoadViewIni(Path.Combine(ViewsDirectory, DefaultFileName));
+        }
+        
+        _selectedEditorViewNames = new string[Views.Count];
+        foreach((var id, var view) in Views)
+        {
+            _selectedEditorViewNames[id] = view.DisplayName;
+        }
+
+        // Reset the view index
+        _selectedEditorViewIndex = 0;
     }
 
     private void LoadViewIni(string fileName)
@@ -195,13 +213,13 @@ public class SystemViewPreferences : PulsarGuiWindow
         }
 
         // Set values
-        var view = new View(Path.GetFileName(fileName), name, _selectedViewIndex)
+        var view = new View(Path.GetFileName(fileName), name, _selectedEditorViewIndex)
         {
             FilterCheckmarks = values
         };
-        Views.Add(_selectedViewIndex, view);
+        Views.Add(_selectedEditorViewIndex, view);
 
-        _selectedViewIndex++;
+        _selectedEditorViewIndex++;
     }
 
     private void SaveViewIni(View view)
@@ -252,12 +270,12 @@ public class SystemViewPreferences : PulsarGuiWindow
     {
         if(!IsActive) return;
 
-        if(_selectedViewNames == null)
+        if(_selectedEditorViewNames == null)
                 throw new NullReferenceException();
 
         if(ImGui.Begin("System View Preferences", ref IsActive))
         {
-            if(ImGui.Combo("###view-selector", ref _selectedViewIndex, _selectedViewNames, _selectedViewNames.Length))
+            if(ImGui.Combo("###view-selector", ref _selectedEditorViewIndex, _selectedEditorViewNames, _selectedEditorViewNames.Length))
             {
                 ImGui.EndCombo();
             }
@@ -265,11 +283,11 @@ public class SystemViewPreferences : PulsarGuiWindow
 
             foreach((var bodyType, var displayName) in FilterDisplayOptions)
             {
-                bool isChecked = Views[_selectedViewIndex].FilterCheckmarks[bodyType];
+                bool isChecked = Views[_selectedEditorViewIndex].FilterCheckmarks[bodyType];
                 if(ImGui.Checkbox(displayName, ref isChecked))
                 {
-                    Views[_selectedViewIndex].FilterCheckmarks[bodyType] = isChecked;
-                    SaveViewIni(Views[_selectedViewIndex]);
+                    Views[_selectedEditorViewIndex].FilterCheckmarks[bodyType] = isChecked;
+                    SaveViewIni(Views[_selectedEditorViewIndex]);
                 }
             }
             ImGui.End();
