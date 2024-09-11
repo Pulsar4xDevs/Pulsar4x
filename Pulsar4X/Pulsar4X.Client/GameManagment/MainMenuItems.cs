@@ -82,6 +82,12 @@ namespace Pulsar4X.SDL2UI
                             ModFileEditor.GetInstance().ToggleActive();
                             this.SetActive(false);
                         }
+
+                        if(ImGui.Button("Preferences", buttonSize))
+                        {
+                            SystemViewPreferences.GetInstance().ToggleActive();
+                            this.SetActive(false);
+                        }
                     }
                     ImGui.Button("Resume a Current Game", buttonSize);
                     ImGui.Button("Connect to a Network Game", buttonSize);

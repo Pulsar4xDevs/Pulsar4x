@@ -18,9 +18,9 @@ namespace Pulsar4X.SDL2UI
 
     public class PulsarMainWindow : ImGuiSDL2CSWindow
     {
-        private const string OrgName = "Pulsar4X";
-        private const string AppName = "Pulsar4X";
-        private const string PreferencesFile = "preferences.ini";
+        public const string OrgName = "Pulsar4X";
+        public const string AppName = "Pulsar4X";
+        public const string PreferencesFile = "preferences.ini";
         private readonly GlobalUIState _state;
 
         Vector3 backColor;
