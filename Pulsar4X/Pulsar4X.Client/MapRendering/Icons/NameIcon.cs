@@ -22,13 +22,11 @@ namespace Pulsar4X.SDL2UI
         public float Height{ get; set; }
         public float X { get { return ViewScreenPos.x; }  }
         public float Y { get { return ViewScreenPos.y; } }
-        int _entityGuid;
         string _starSysGuid;
         public Dictionary<int, string> SubNames = new ();
-        public System.Numerics.Vector2 ViewOffset { get; set; } = new System.Numerics.Vector2();
+        public Vector2 ViewOffset { get; set; } = new Vector2();
         public Rectangle ViewDisplayRect = new Rectangle();
-        UserOrbitSettings.OrbitBodyType _bodyType = UserOrbitSettings.OrbitBodyType.Unknown;
-        internal float DrawAtZoom { get { return _state.DrawNameZoomLvl[_bodyType]; } }
+        internal float DrawAtZoom { get { return _state.DrawNameZoomLvl[_entityState.BodyType]; } }
 
         public Vector4 TextDisplayColor { get; private set; } = Styles.StandardText;
 
@@ -37,14 +35,12 @@ namespace Pulsar4X.SDL2UI
             Random rnd = new Random();
             _state = state;
             _entityState = entityState;
-            _entityGuid = entityState.Entity.Id;
-            StarSystem starsys = (StarSystem)entityState.Entity.Manager;
-            _starSysGuid = starsys.Guid;
+            StarSystem? starsys = (StarSystem?)entityState.Entity.Manager;
+            _starSysGuid = starsys.ID;
             _nameDB = entityState.Entity.GetDataBlob<NameDB>();
             NameString = _nameDB.GetName(state.Faction);
             entityState.Name = NameString;
             entityState.NameIcon = this;
-            _bodyType = entityState.BodyType;
             if(entityState.Entity.FactionOwnerID == Game.NeutralFactionId)
             {
                 TextDisplayColor = Styles.NeutralColor;
@@ -58,7 +54,7 @@ namespace Pulsar4X.SDL2UI
 
         public static NameIcon operator +(NameIcon nameIcon, SDL.SDL_Point point)
         {
-            System.Numerics.Vector2 newpoint = new System.Numerics.Vector2()
+            Vector2 newpoint = new Vector2()
             {
                 X = nameIcon.ViewOffset.X + point.x,
                 Y = nameIcon.ViewOffset.Y + point.y
@@ -85,7 +81,8 @@ namespace Pulsar4X.SDL2UI
             //DefaultViewOffset = new SDL.SDL_Point() { x = Width, y = -Height };
             if (camera.ZoomLevel < DrawAtZoom)
                 return;
-            System.Numerics.Vector2 defualtOffset = new System.Numerics.Vector2(4,-(Height / 2));
+
+            Vector2 defualtOffset = new Vector2(4,-(Height / 2));
             ViewOffset = defualtOffset;
             base.OnFrameUpdate(matrix, camera);
 
@@ -159,7 +156,7 @@ namespace Pulsar4X.SDL2UI
 
             foreach(var nameIconGrouping in nameIconGroupings)
             {
-                var orderedGroupedIcons = nameIconGrouping.GroupBy(i => i._bodyType).OrderBy(g => g.Key).ToList();
+                var orderedGroupedIcons = nameIconGrouping.GroupBy(i => i._entityState.BodyType).OrderBy(g => g.Key).ToList();
                 var highestPriorityGroup = orderedGroupedIcons.First().ToList();
                 orderedGroupedIcons.RemoveAt(0);
                 ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Styles.NameIconHighlight);
@@ -187,9 +184,9 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PushStyleColor(ImGuiCol.Button, Styles.InvisibleColor);
                 ImGui.PushStyleColor(ImGuiCol.Text, icon.TextDisplayColor);
 
-                if (ImGui.Button(icon.NameString + "##" + icon._entityGuid.ToString()))
+                if (ImGui.Button(icon.NameString + "##" + icon._entityState.Entity.Id.ToString()))
                 {
-                    icon._state.EntityClicked(icon._entityGuid, icon._starSysGuid, MouseButtons.Primary);
+                    icon._state.EntityClicked(icon._entityState.Entity.Id, icon._starSysGuid, MouseButtons.Primary);
                 }
                 DisplayContextMenu(camera, icon);
                 ImGui.PopStyleColor(2);
@@ -202,7 +199,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.StandardText);
                 if(ImGui.MenuItem("View " + icon.NameString))
                 {
-                    icon._state.EntityClicked(icon._entityGuid, icon._starSysGuid, MouseButtons.Primary);
+                    icon._state.EntityClicked(icon._entityState.Entity.Id, icon._starSysGuid, MouseButtons.Primary);
                 }
                 ImGui.PopStyleColor();
                 DisplayContextMenu(camera, icon);
@@ -218,7 +215,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.PushStyleColor(ImGuiCol.Text, subIcon.TextDisplayColor);
                         if(ImGui.MenuItem(subIcon.NameString))
                         {
-                            subIcon._state.EntityClicked(subIcon._entityGuid, subIcon._starSysGuid, MouseButtons.Primary);
+                            subIcon._state.EntityClicked(subIcon._entityState.Entity.Id, subIcon._starSysGuid, MouseButtons.Primary);
                         }
                         ImGui.PopStyleColor();
                         DisplayContextMenu(camera, subIcon);
@@ -236,7 +233,7 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.PushStyleColor(ImGuiCol.Text, subIcon.TextDisplayColor);
                                 if(ImGui.MenuItem(subIcon.NameString))
                                 {
-                                    subIcon._state.EntityClicked(subIcon._entityGuid, subIcon._starSysGuid, MouseButtons.Primary);
+                                    subIcon._state.EntityClicked(subIcon._entityState.Entity.Id, subIcon._starSysGuid, MouseButtons.Primary);
                                 }
                                 ImGui.PopStyleColor();
                                 DisplayContextMenu(camera, subIcon);
@@ -254,19 +251,24 @@ namespace Pulsar4X.SDL2UI
         private static void BeginNameIcon(NameIcon icon)
         {
             var yOffset = 10;
-            var xOffset = icon._bodyType == UserOrbitSettings.OrbitBodyType.Star ? 14 : icon._bodyType == UserOrbitSettings.OrbitBodyType.Ship ? 4 : 10;
-            System.Numerics.Vector2 pos = new System.Numerics.Vector2(icon.X + xOffset, icon.Y - yOffset);
+            int xOffset = GetXOffset(icon);
+            Vector2 pos = new Vector2(icon.X + xOffset, icon.Y - yOffset);
 
             ImGui.PushStyleColor(ImGuiCol.WindowBg, Styles.InvisibleColor); //make the background transperent.
 
             ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
             ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 2);
 
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(1, 2));
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(1, 2));
             ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
             ImGui.Begin(icon.NameString, ref icon.IsActive, icon._flags | ImGuiWindowFlags.NoDocking);
             ImGui.PopStyleColor(); //have to pop the color change after pushing it.
             ImGui.PopStyleVar(3);
+        }
+
+        private static int GetXOffset(NameIcon icon)
+        {
+            return icon._entityState.BodyType == UserOrbitSettings.OrbitBodyType.Star ? 14 : icon._entityState.BodyType == UserOrbitSettings.OrbitBodyType.Ship ? 4 : 10;
         }
 
         private static void EndNameIcon(NameIcon icon)
@@ -278,7 +280,7 @@ namespace Pulsar4X.SDL2UI
         {
             if(ImGui.BeginPopupContextItem())
             {
-                icon.SetUpContextMenu(icon._entityGuid);
+                icon.SetUpContextMenu(icon._entityState.Entity.Id);
                 ImGui.EndPopup();
             }
         }
@@ -300,8 +302,8 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PushStyleColor(ImGuiCol.WindowBg, Styles.InvisibleColor); //make the background transperent.
                 ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
                 ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 2);
-                ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(1, 2));
-                ImGui.SetNextWindowPos(new System.Numerics.Vector2(X, Y), ImGuiCond.Always);
+                ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(1, 2));
+                ImGui.SetNextWindowPos(new Vector2(X, Y), ImGuiCond.Always);
                 ImGui.Begin(NameString, ref IsActive, _flags);
             }
 
@@ -312,38 +314,38 @@ namespace Pulsar4X.SDL2UI
             // }
 
             ImGui.PushStyleColor(ImGuiCol.Button, Styles.InvisibleColor);
-            if (ImGui.Button(NameString+"##"+_entityGuid.ToString())) //If the name gets clicked, we tell the state.
+            if (ImGui.Button(NameString+"##"+_entityState.Entity.Id.ToString())) //If the name gets clicked, we tell the state.
             {
-                _state.EntityClicked(_entityGuid, _starSysGuid, MouseButtons.Primary);
+                _state.EntityClicked(_entityState.Entity.Id, _starSysGuid, MouseButtons.Primary);
 
             }
 
-            if (ImGui.BeginPopupContextItem("NameContextMenu"+_entityGuid.ToString()+NameString, ImGuiPopupFlags.MouseButtonRight))
+            if (ImGui.BeginPopupContextItem("NameContextMenu"+_entityState.Entity.Id.ToString()+NameString, ImGuiPopupFlags.MouseButtonRight))
             {
-                SetUpContextMenu(_entityGuid);
+                SetUpContextMenu(_entityState.Entity.Id);
                 ImGui.EndPopup();
             }
             //checks the state if the icon of the entity with this nameicon was altClicked, if yes then display the normal context menu
-            if(_state._lastContextMenuOpenedEntityGuid == _entityGuid)
+            if(_state._lastContextMenuOpenedEntityGuid == _entityState.Entity.Id)
             {
                 if(ImGui.BeginPopupContextVoid())
                 {
-                   SetUpContextMenu(_entityGuid);
+                   SetUpContextMenu(_entityState.Entity.Id);
                    ImGui.EndPopup();
                 }
             }
-            if(_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityGuid].Entity.HasDataBlob<JPSurveyableDB>() && _state.StarSystemStates.ContainsKey(_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityGuid].Entity.GetDataBlob<JPSurveyableDB>().SystemToGuid))
+            if(_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityState.Entity.Id].Entity.HasDataBlob<JPSurveyableDB>() && _state.StarSystemStates.ContainsKey(_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityState.Entity.Id].Entity.GetDataBlob<JPSurveyableDB>().SystemToGuid))
             {
-                ImGui.Text("Jumps to: "+_state.StarSystemStates[_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityGuid].Entity.GetDataBlob<JPSurveyableDB>().SystemToGuid].StarSystem.NameDB.DefaultName);
+                ImGui.Text("Jumps to: "+_state.StarSystemStates[_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityState.Entity.Id].Entity.GetDataBlob<JPSurveyableDB>().SystemToGuid].StarSystem.NameDB.DefaultName);
             }
 
             foreach (var name in SubNames)
             {
-                if (ImGui.Button(name.Value+"##"+_entityGuid.ToString()+name.Key.ToString()+name.Value))
+                if (ImGui.Button(name.Value+"##"+_entityState.Entity.Id.ToString()+name.Key.ToString()+name.Value))
                 {
                     _state.EntityClicked(name.Key, _starSysGuid, MouseButtons.Primary);
                 }
-                if (ImGui.BeginPopupContextItem("subNameContextMenu"+name.Key+name.Value+_entityGuid.ToString()+NameString, ImGuiPopupFlags.MouseButtonRight))
+                if (ImGui.BeginPopupContextItem("subNameContextMenu"+name.Key+name.Value+_entityState.Entity.Id.ToString()+NameString, ImGuiPopupFlags.MouseButtonRight))
                 {
                     SetUpContextMenu(name.Key);
 

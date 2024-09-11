@@ -62,7 +62,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(_game.ProcessorManager.RecalcCount, loadedGame.ProcessorManager.RecalcCount);
             Assert.AreEqual(_game.ProcessorManager.InstanceCount, loadedGame.ProcessorManager.InstanceCount);
 
-            Assert.AreEqual(_game.GlobalManager.ManagerGuid, loadedGame.GlobalManager.ManagerGuid, "Global Manager ID");
+            Assert.AreEqual(_game.GlobalManager.ManagerID, loadedGame.GlobalManager.ManagerID, "Global Manager ID");
 
             var previousEntities = _game.GlobalManager.GetAllEntites();
             var currentEntities = loadedGame.GlobalManager.GetAllEntites();
@@ -78,10 +78,10 @@ namespace Pulsar4X.Tests
 
             foreach(var system in _game.Systems)
             {
-                Assert.NotNull(loadedGame.Systems.Where(s => s.Guid.Equals(system.Guid)).First(), "Star System Guid Check");
+                Assert.NotNull(loadedGame.Systems.Where(s => s.ID.Equals(system.ID)).First(), "Star System Guid Check");
 
                 StarSystem saved = system;
-                StarSystem loaded = loadedGame.Systems.Where(s => s.Guid.Equals(system.Guid)).First();
+                StarSystem loaded = loadedGame.Systems.Where(s => s.ID.Equals(system.ID)).First();
 
                 var savedEntities = saved.GetAllEntites();
                 var loadedEntities = loaded.GetAllEntites();

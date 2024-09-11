@@ -194,7 +194,7 @@ namespace Pulsar4X.Engine
             Game game = DestroyedShip.Manager.Game;
             PositionDB pDB = DestroyedShip.GetDataBlob<PositionDB>();
 
-            var mySystem = game.Systems.Where(s => s.Guid.Equals(pDB.SystemGuid)).First();
+            var mySystem = game.Systems.Where(s => s.ID.Equals(pDB.SystemGuid)).First();
 
             if(mySystem == null)
                 throw new NullReferenceException($"Unable to find the system {pDB.SystemGuid}");
@@ -245,7 +245,7 @@ namespace Pulsar4X.Engine
                 //delete the existing asteroid.
                 PositionDB pDB = Asteroid.GetDataBlob<PositionDB>();
 
-                var mySystem = game.Systems.Where(s => s.Guid.Equals(pDB.SystemGuid)).First();
+                var mySystem = game.Systems.Where(s => s.ID.Equals(pDB.SystemGuid)).First();
 
                 if(mySystem == null)
                     throw new NullReferenceException($"Unable to find the system {pDB.SystemGuid}");

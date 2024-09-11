@@ -75,11 +75,11 @@ namespace Pulsar4X.Engine
                     var from = (string?)pair["from"];
                     var to = (string?)pair["to"];
 
-                    var fromSystem = game.Systems.First(s => s.Guid.Equals(from));
+                    var fromSystem = game.Systems.First(s => s.ID.Equals(from));
                     var gravityRoot = fromSystem.GetFirstEntityWithDataBlob<StarInfoDB>().GetDataBlob<PositionDB>().Root;
                     var fromJP = JPFactory.CreateJumpPoint(starSystemFactory, fromSystem, gravityRoot);
 
-                    var toSystem = game.Systems.First(s => s.Guid.Equals(to));
+                    var toSystem = game.Systems.First(s => s.ID.Equals(to));
                     gravityRoot = toSystem.GetFirstEntityWithDataBlob<StarInfoDB>().GetDataBlob<PositionDB>().Root;
                     var toJP = JPFactory.CreateJumpPoint(starSystemFactory, toSystem, gravityRoot);
 
@@ -94,7 +94,7 @@ namespace Pulsar4X.Engine
                 var faction = FactionFactory.LoadFromJson(game, Path.Combine(rootDirectory, factionToLoad.ToString()));
 
                 faction.FactionOwnerID = faction.Id;
-                faction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(startingSystem.Guid);
+                faction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(startingSystem.ID);
 
                 // TODO: allow the json to set this
                 if(playerFaction == null)
@@ -115,7 +115,7 @@ namespace Pulsar4X.Engine
             }
 
             ComponentDesigner.StartResearched = false;
-            return (playerFaction, startingSystem.Guid);
+            return (playerFaction, startingSystem.ID);
         }
 
         public static Entity DefaultHumans(Game game, string name)
@@ -136,7 +136,7 @@ namespace Pulsar4X.Engine
 
             // Set the faction entity to own itself so it can issue orders to itself
             factionEntity.FactionOwnerID = factionEntity.Id;
-            factionInfoDB.KnownSystems.Add(startingSystem.Guid);
+            factionInfoDB.KnownSystems.Add(startingSystem.ID);
             factionEntity.GetDataBlob<NameDB>().SetName(factionEntity.Id, "UEF");
 
             earth.GetDataBlob<GeoSurveyableDB>().GeoSurveyStatus[factionEntity.Id] = 0;

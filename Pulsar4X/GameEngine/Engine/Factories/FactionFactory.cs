@@ -142,7 +142,7 @@ namespace Pulsar4X.Engine
                 {
                     var systemId = colonyToLoad["systemId"].ToString();
 
-                    var system = game.Systems.Find(s => s.Guid.Equals(systemId));
+                    var system = game.Systems.Find(s => s.ID.Equals(systemId));
                     if(system == null) throw new NullReferenceException("invalid systemId in json");
                     var location = NameLookup.GetFirstEntityWithName(system, colonyToLoad["location"].ToString());
 
@@ -191,7 +191,7 @@ namespace Pulsar4X.Engine
                 {
                     var fleetName = (string?)fleetToLoad["name"] ?? NameFactory.GetFleetName(game);
                     var systemId = fleetToLoad["location"]["systemId"].ToString();
-                    var system = game.Systems.Find(s => s.Guid.Equals(systemId));
+                    var system = game.Systems.Find(s => s.ID.Equals(systemId));
                     if(system == null) throw new NullReferenceException("invalid systemId in json");
                     var location = NameLookup.GetFirstEntityWithName(system, fleetToLoad["location"]["body"].ToString());
 

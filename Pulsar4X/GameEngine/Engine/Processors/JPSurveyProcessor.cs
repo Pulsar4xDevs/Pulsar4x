@@ -77,7 +77,7 @@ public class JPSurveyProcessor : IInstanceProcessor
                 atDateTime,
                 $"Survey of {Target.GetName(Fleet.FactionOwnerID)} complete",
                 Fleet.FactionOwnerID,
-                Target.Manager.ManagerGuid,
+                Target.Manager.ManagerID,
                 Target.Id));
     }
 
@@ -108,7 +108,7 @@ public class JPSurveyProcessor : IInstanceProcessor
                     atDateTime,
                     $"Jump Point discovered",
                     Fleet.FactionOwnerID,
-                    jp.OwningEntity.Manager.ManagerGuid,
+                    jp.OwningEntity.Manager.ManagerID,
                     jp.OwningEntity.Id));
 
             // If this was the last jump point, hide the rest of the survey locations
@@ -133,9 +133,9 @@ public class JPSurveyProcessor : IInstanceProcessor
             var factionInfoDB = Fleet.Manager.Game.Factions[Fleet.FactionOwnerID].GetDataBlob<FactionInfoDB>();
 
             // Check to see if the system has been discovered yet
-            if(!factionInfoDB.KnownSystems.Contains(destinationEntity.Manager.ManagerGuid))
+            if(!factionInfoDB.KnownSystems.Contains(destinationEntity.Manager.ManagerID))
             {
-                factionInfoDB.KnownSystems.Add(destinationEntity.Manager.ManagerGuid);
+                factionInfoDB.KnownSystems.Add(destinationEntity.Manager.ManagerID);
 
                 EventManager.Instance.Publish(
                     Event.Create(
@@ -143,14 +143,14 @@ public class JPSurveyProcessor : IInstanceProcessor
                         atDateTime,
                         $"New system discovered",
                         Fleet.FactionOwnerID,
-                        destinationEntity.Manager.ManagerGuid,
+                        destinationEntity.Manager.ManagerID,
                         destinationEntity.Id));
 
                 MessagePublisher.Instance.Publish(
                     Message.Create(
                         MessageTypes.StarSystemRevealed,
                         destinationEntity.Id,
-                        destinationEntity.Manager.ManagerGuid,
+                        destinationEntity.Manager.ManagerID,
                         Fleet.FactionOwnerID));
             }
 
@@ -166,7 +166,7 @@ public class JPSurveyProcessor : IInstanceProcessor
                         atDateTime,
                         $"Jump Point discovered",
                         Fleet.FactionOwnerID,
-                        destinationEntity.Manager.ManagerGuid,
+                        destinationEntity.Manager.ManagerID,
                         destinationEntity.Id));
             }
             

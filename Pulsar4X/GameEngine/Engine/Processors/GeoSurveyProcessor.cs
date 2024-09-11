@@ -40,7 +40,7 @@ public class GeoSurveyProcessor : IInstanceProcessor
                         atDateTime,
                         $"Geo Survey of {Target.GetName(Fleet.FactionOwnerID)} complete",
                         Fleet.FactionOwnerID,
-                        Target.Manager.ManagerGuid,
+                        Target.Manager.ManagerID,
                         Target.Id));
             }
             else

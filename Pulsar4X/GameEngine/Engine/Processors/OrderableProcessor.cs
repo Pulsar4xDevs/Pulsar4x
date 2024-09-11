@@ -64,7 +64,7 @@ namespace Pulsar4X.Engine
                                                         atDateTime,
                                                         "",
                                                         entityCommand.RequestingFactionGuid,
-                                                        entityCommand.EntityCommanding.Manager.ManagerGuid,
+                                                        entityCommand.EntityCommanding.Manager.ManagerID,
                                                         entityCommand.EntityCommandingGuid);
                                 EventManager.Instance.Publish(e);
                             }

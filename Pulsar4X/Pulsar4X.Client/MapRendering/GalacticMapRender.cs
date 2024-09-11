@@ -59,37 +59,37 @@ namespace Pulsar4X.SDL2UI
             float angleIncrease = (float)Math.Max(0.78539816339, 6.28318530718 / _state.StarSystemStates.Count);
             int startR = 200;
             int radInc = 5;
-            foreach (KeyValuePair<string, SystemState> item in _state.StarSystemStates)
+            foreach ((var starSystemId, var systemState) in _state.StarSystemStates)
             {
                 var x = (startR + radInc * i) * Math.Sin(startangle - angleIncrease * i);
                 var y = (startR + radInc * i) * Math.Cos(startangle - angleIncrease * i);
 
-                if(!RenderedMaps.ContainsKey(item.Key))
+                if(!RenderedMaps.ContainsKey(starSystemId))
                 {
                     SystemMapRendering map = new SystemMapRendering(_window, _state);
 
-                    map.Initialize(item.Value.StarSystem);
-                    RenderedMaps[item.Key] = map;
+                    map.Initialize(systemState.StarSystem);
+                    RenderedMaps[starSystemId] = map;
                     map.GalacticMapPosition.X = x;
                     map.GalacticMapPosition.Y = y;
                 }
                 {
-                    RenderedMaps[item.Key].UpdateSystemState(item.Value);
+                    RenderedMaps[starSystemId].UpdateSystemState(systemState);
                 }
 
                 //TODO: handle binary/multiple star systems better.
-                var starEntity = item.Value.StarSystem.GetFirstEntityWithDataBlob<StarInfoDB>();
+                var starEntity = systemState.StarSystem.GetFirstEntityWithDataBlob<StarInfoDB>();
                 var orbitdb = starEntity.GetDataBlob<OrbitDB>();
                 starEntity = orbitdb.Root; //just incase it's a binary system and the entity we got was not the primary
 
-                var starEntityState = item.Value.EntityStatesWithNames.ContainsKey(starEntity.Id) ?
-                    item.Value.EntityStatesWithNames[starEntity.Id] :
+                var starEntityState = systemState.EntityStatesWithNames.ContainsKey(starEntity.Id) ?
+                    systemState.EntityStatesWithNames[starEntity.Id] :
                     new EntityState(starEntity);
 
                 var starIcon = new StarIcon(starEntity);
-                StarIcons[item.Key] = starIcon;
+                StarIcons[starSystemId] = starIcon;
                 var nameIcon = new NameIcon(starEntityState, _state);
-                _nameIcons[item.Key] = nameIcon;
+                _nameIcons[starSystemId] = nameIcon;
                 starIcon.WorldPosition_m = new Orbital.Vector3(x, y, 0);
                 nameIcon.WorldPosition_m = new Orbital.Vector3(x, y, 0);
 

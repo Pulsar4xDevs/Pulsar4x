@@ -54,7 +54,7 @@ public class CreateColonyOrder : EntityCommand
                 atDateTime,
                 $"{colonyName} has been created",
                 RequestingFactionGuid,
-                _entityCommanding.Manager.ManagerGuid,
+                _entityCommanding.Manager.ManagerID,
                 colony.Id));
     }
 

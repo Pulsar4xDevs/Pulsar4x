@@ -31,7 +31,7 @@ namespace Pulsar4X.Engine
             {
                 var realPoint = Entity.Create();
                 system.AddEntity(realPoint, surveyPoint.DataBlobs);
-                realPoint.GetDataBlob<PositionDB>().SystemGuid = system.Guid;
+                realPoint.GetDataBlob<PositionDB>().SystemGuid = system.ID;
             }
         }
 

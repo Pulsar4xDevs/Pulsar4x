@@ -199,7 +199,7 @@ namespace Pulsar4X.SDL2UI
                                 if (ImGui.SmallButton(starSystem?.NameDB.OwnersName ?? "Unknown"))
                                 {
                                     if(starSystem != null)
-                                        _uiState.SetActiveSystem(starSystem.ManagerGuid);
+                                        _uiState.SetActiveSystem(starSystem.ManagerID);
                                 }
                                 ImGui.NextColumn();
                                 ImGui.Separator();
@@ -529,7 +529,7 @@ namespace Pulsar4X.SDL2UI
                 switch(selectedIssueOrderType)
                 {
                     case IssueOrderType.MoveTo:
-                        moveToList = _uiState.StarSystemStates[SelectedFleet.Manager.ManagerGuid].GetFilteredEntities(
+                        moveToList = _uiState.StarSystemStates[SelectedFleet.Manager.ManagerID].GetFilteredEntities(
                             EntityFilter.Friendly | EntityFilter.Neutral,
                             _uiState.Faction.Id,
                             new List<Type>() {
@@ -548,7 +548,7 @@ namespace Pulsar4X.SDL2UI
                         }
                         break;
                     case IssueOrderType.GeoSurvey:
-                        geoSurveyList = _uiState.StarSystemStates[SelectedFleet.Manager.ManagerGuid].GetFilteredEntities(
+                        geoSurveyList = _uiState.StarSystemStates[SelectedFleet.Manager.ManagerID].GetFilteredEntities(
                             EntityFilter.Friendly | EntityFilter.Neutral,
                             _uiState.Faction.Id,
                             typeof(GeoSurveyableDB));
@@ -570,7 +570,7 @@ namespace Pulsar4X.SDL2UI
                         }
                         break;
                     case IssueOrderType.JPSurvey:
-                        gravSurveyList = _uiState.StarSystemStates[SelectedFleet.Manager.ManagerGuid].GetFilteredEntities(
+                        gravSurveyList = _uiState.StarSystemStates[SelectedFleet.Manager.ManagerID].GetFilteredEntities(
                             EntityFilter.Friendly | EntityFilter.Neutral,
                             _uiState.Faction.Id,
                             typeof(JPSurveyableDB));
@@ -595,7 +595,7 @@ namespace Pulsar4X.SDL2UI
                         }
                         break;
                     case IssueOrderType.Jump:
-                        jumpPointList = _uiState.StarSystemStates[SelectedFleet.Manager.ManagerGuid].GetFilteredEntities(
+                        jumpPointList = _uiState.StarSystemStates[SelectedFleet.Manager.ManagerID].GetFilteredEntities(
                             EntityFilter.Friendly | EntityFilter.Neutral,
                             _uiState.Faction.Id,
                             typeof(JumpPointDB));

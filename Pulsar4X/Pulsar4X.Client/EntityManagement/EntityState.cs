@@ -38,7 +38,7 @@ namespace Pulsar4X.SDL2UI
                 }
 
                 StarSystem starSys = (StarSystem)entity.Manager;
-                StarSysGuid = starSys.Guid;
+                StarSysGuid = starSys.ID;
             }
 
             SetupEventListeners();
@@ -92,7 +92,7 @@ namespace Pulsar4X.SDL2UI
             if(Entity.Manager != null)
             {
                 StarSystem starSys = (StarSystem)Entity.Manager;
-                StarSysGuid = starSys.Guid;
+                StarSysGuid = starSys.ID;
             }
             SetupEventListeners();
             SetBodyType();

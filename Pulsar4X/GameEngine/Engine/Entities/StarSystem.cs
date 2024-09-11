@@ -13,11 +13,11 @@ namespace Pulsar4X.Engine
         private Random RNG;
 
         [PublicAPI]
-        public string Guid
+        public string ID
         {
             get
             {
-                return ManagerGuid;
+                return ManagerID;
             }
         }
 
@@ -82,7 +82,7 @@ namespace Pulsar4X.Engine
             RNG = new Random(seed);
 
             if(systemID.IsNotNullOrEmpty())
-                ManagerGuid = systemID;
+                ManagerID = systemID;
 
             game.Systems.Add(this);
         }

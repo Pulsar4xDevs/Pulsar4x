@@ -155,7 +155,7 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
         return other != null
             && this.Id == other.Id
             && this.FactionOwnerID == other.FactionOwnerID
-            && this.Manager.ManagerGuid.Equals(other.Manager.ManagerGuid);
+            && this.Manager.ManagerID.Equals(other.Manager.ManagerID);
     }
 
     [JsonIgnore]

@@ -163,7 +163,7 @@ namespace Pulsar4X.SDL2UI
             StarSystemStates = new SafeDictionary<string, SystemState>();
             foreach (var guid in factionInfo.KnownSystems)
             {
-                var system = Game.Systems.First(s => s.Guid.Equals(guid));
+                var system = Game.Systems.First(s => s.ID.Equals(guid));
                 StarSystemStates[guid] = new SystemState(system, factionEntity);
             }
 
@@ -182,7 +182,7 @@ namespace Pulsar4X.SDL2UI
                 if(message.SystemId != null)
                 {
                     if(!StarSystemStates.ContainsKey(message.SystemId)){
-                        StarSystemStates[message.SystemId] = new SystemState(Game.Systems.First(s => s.Guid.Equals(message.SystemId)), Faction);
+                        StarSystemStates[message.SystemId] = new SystemState(Game.Systems.First(s => s.ID.Equals(message.SystemId)), Faction);
                     }
                     OnStarSystemAdded?.Invoke(this, message.SystemId);
                 }
@@ -193,7 +193,7 @@ namespace Pulsar4X.SDL2UI
         {
             if(!activeSysID.Equals(SelectedStarSysGuid) || refresh){
                 if(!StarSystemStates.ContainsKey(activeSysID)){
-                    StarSystemStates[activeSysID] = new SystemState(Game.Systems.First(s => s.Guid.Equals(activeSysID)), Faction);
+                    StarSystemStates[activeSysID] = new SystemState(Game.Systems.First(s => s.ID.Equals(activeSysID)), Faction);
                 }
 
                 SelectedStarSysGuid = activeSysID;

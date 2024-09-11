@@ -194,7 +194,7 @@ public class CreateTransferWindow : PulsarGuiWindow
         if(TransferLeft == null || TransferLeft.Manager == null) return;
 
         // Setup the target list
-        var systemState = _uiState.StarSystemStates[TransferLeft.Manager.ManagerGuid];
+        var systemState = _uiState.StarSystemStates[TransferLeft.Manager.ManagerID];
         var allFriendlyStorageInSystem = systemState.GetFilteredEntities(DataStructures.EntityFilter.Friendly, _uiState.Faction.Id, typeof(VolumeStorageDB));
 
         ImGui.Text("Select a Transfer Partner");

@@ -112,7 +112,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PlotHistogram("Frame Rate ##FPSHistogram", ref _frameRates[0], _frameRates.Length, _frameRateIndex, _currentFPS.ToString(), 0f, 10000, new System.Numerics.Vector2(248, 60), sizeof(float));
 
                 var data = _systemState.StarSystem.ManagerSubpulses.Performance.GetLatestEntry();
-                ImGui.Text($"StarSystemID: {_systemState.StarSystem.Guid}");
+                ImGui.Text($"StarSystemID: {_systemState.StarSystem.ID}");
                 ImGui.Columns(4);
                 ImGui.SetColumnWidth(0, 160);
                 ImGui.SetColumnWidth(1, 64);
@@ -159,7 +159,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     foreach (var starsys in _uiState.Game.Systems)
                     {
-                        ImGui.Text(((StarSystem)starsys).Guid.ToString());
+                        ImGui.Text(((StarSystem)starsys).ID.ToString());
                         ImGui.Text($"    IsProcecssing: {starsys.ManagerSubpulses.IsProcessing}");
                         ImGui.Text($"    CurrentProcess: {starsys.ManagerSubpulses.CurrentProcess}");
                         ImGui.Text($"    Last Total ProcessTime: {starsys.ManagerSubpulses.Performance.GetLatestEntry().FullIntervalTime}");

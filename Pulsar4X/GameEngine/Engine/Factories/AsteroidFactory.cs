@@ -58,7 +58,7 @@ namespace Pulsar4X.Engine
             OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, targetPos, velocity, collisionDate);
 
             var currentpos = orbit.GetAbsolutePosition_m(starSys.Game.TimePulse.GameGlobalDateTime);
-            var posDB = new PositionDB(currentpos, parent.Manager.ManagerGuid, parent);
+            var posDB = new PositionDB(currentpos, parent.Manager.ManagerID, parent);
 
 
             var planetDBs = new List<BaseDataBlob>
@@ -114,7 +114,7 @@ namespace Pulsar4X.Engine
                 origOrbit.Eccentricity, origOrbit.Inclination, origOrbit.LongitudeOfAscendingNode,
                 origOrbit.ArgumentOfPeriapsis, origOrbit.MeanAnomalyAtEpoch, origOrbit.Epoch);
 
-            var posDB = new PositionDB(position, parent.Manager.ManagerGuid, parent);
+            var posDB = new PositionDB(position, parent.Manager.ManagerID, parent);
 
             var planetDBs = new List<BaseDataBlob>
             {

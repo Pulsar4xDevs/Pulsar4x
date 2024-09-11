@@ -57,14 +57,14 @@ namespace Pulsar4X.SDL2UI
 
         internal void Initialize(StarSystem starSys)
         {
-            if (_state.StarSystemStates.ContainsKey(starSys.Guid))
+            if (_state.StarSystemStates.ContainsKey(starSys.ID))
             {
-                _sysState = _state.StarSystemStates[starSys.Guid];
+                _sysState = _state.StarSystemStates[starSys.ID];
             }
             else
             {
                 _sysState = new SystemState(starSys, _state.Faction);
-                _state.StarSystemStates[_sysState.StarSystem.Guid] = _sysState;
+                _state.StarSystemStates[_sysState.StarSystem.ID] = _sysState;
             }
 
             _faction = _state.Faction;
@@ -89,7 +89,7 @@ namespace Pulsar4X.SDL2UI
             _nameIcons.Clear();
 
             _sysState = systemState;
-            _state.StarSystemStates[_sysState.StarSystem.Guid] = _sysState;
+            _state.StarSystemStates[_sysState.StarSystem.ID] = _sysState;
 
             _faction = _state.Faction;
             _sensorMgr = systemState.StarSystem.GetSensorContacts(_faction.Id);

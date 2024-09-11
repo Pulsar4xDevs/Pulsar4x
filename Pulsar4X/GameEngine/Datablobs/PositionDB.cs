@@ -99,7 +99,7 @@ namespace Pulsar4X.Datablobs
 
         public PositionDB(Vector3 relativePos_m, Entity SOIParent) : base(SOIParent)
         {
-            SystemGuid = SOIParent.Manager.ManagerGuid;
+            SystemGuid = SOIParent.Manager.ManagerID;
             RelativePosition = relativePos_m;
         }
 

@@ -16,7 +16,7 @@ namespace Pulsar4X.Engine
     public class EntityManager
     {
         [JsonProperty]
-        public string ManagerGuid { get; internal set; }
+        public string ManagerID { get; internal set; }
 
         [JsonIgnore]
         public Game Game { get;  internal set; }
@@ -122,14 +122,14 @@ namespace Pulsar4X.Engine
         {
             Game = game;
 
-            if (ManagerGuid.IsNullOrEmpty())
+            if (ManagerID.IsNullOrEmpty())
             {
-                ManagerGuid = Guid.NewGuid().ToString();
+                ManagerID = Guid.NewGuid().ToString();
             }
 
-            if (!game.GlobalManagerDictionary.ContainsKey(ManagerGuid))
+            if (!game.GlobalManagerDictionary.ContainsKey(ManagerID))
             {
-                game.GlobalManagerDictionary.Add(ManagerGuid, this);
+                game.GlobalManagerDictionary.Add(ManagerID, this);
             }
         }
 
@@ -166,7 +166,7 @@ namespace Pulsar4X.Engine
                 Message.Create(
                     MessageTypes.EntityAdded,
                     entity.Id,
-                    ManagerGuid
+                    ManagerID
                 ));
         }
 
@@ -226,7 +226,7 @@ namespace Pulsar4X.Engine
                     Message.Create(
                         MessageTypes.EntityRemoved,
                         entity.Id,
-                        ManagerGuid
+                        ManagerID
                     ));
             }
         }
@@ -270,7 +270,7 @@ namespace Pulsar4X.Engine
                     throw new KeyNotFoundException($"Entity with ID {entity.Id} not found in manager.");
                 }
                 
-                Event e = Event.Create(EventType.EntityDestroyed, StarSysDateTime, "Entity Removed From Manager", entity.FactionOwnerID, ManagerGuid, entity.Id);
+                Event e = Event.Create(EventType.EntityDestroyed, StarSysDateTime, "Entity Removed From Manager", entity.FactionOwnerID, ManagerID, entity.Id);
                 EventManager.Instance.Publish(e);
 
             }
@@ -324,7 +324,7 @@ namespace Pulsar4X.Engine
             Type blobType = typeof(T);
 
             if(!_datablobStores.ContainsKey(blobType) || !_datablobStores[blobType].ContainsKey(entityID))
-                throw new KeyNotFoundException($"BlobType {blobType} not found in Manager: {ManagerGuid}");
+                throw new KeyNotFoundException($"BlobType {blobType} not found in Manager: {ManagerID}");
 
             return (T)_datablobStores[blobType][entityID];
         }
@@ -366,7 +366,7 @@ namespace Pulsar4X.Engine
                 var message = Message.Create(
                         MessageTypes.DBAdded,
                         entityId,
-                        ManagerGuid,
+                        ManagerID,
                         null,
                         dataBlob);
 
@@ -386,7 +386,7 @@ namespace Pulsar4X.Engine
                 var message = Message.Create(
                         MessageTypes.DBRemoved,
                         entityId,
-                        ManagerGuid,
+                        ManagerID,
                         null,
                         blob);
 
@@ -548,7 +548,7 @@ namespace Pulsar4X.Engine
                 Message.Create(
                     MessageTypes.EntityHidden,
                     entityId,
-                    ManagerGuid,
+                    ManagerID,
                     factionId));
         }
 
@@ -562,7 +562,7 @@ namespace Pulsar4X.Engine
                 Message.Create(
                     MessageTypes.EntityRevealed,
                     entityId,
-                    ManagerGuid,
+                    ManagerID,
                     factionId));
         }
 

@@ -41,15 +41,15 @@ namespace Pulsar4X.SDL2UI
                     // FIXME: this can be done once and updated only when KnownSystems changes
                     var knownSystems = _uiState.Faction.GetDataBlob<FactionInfoDB>().KnownSystems;
                     var filteredAndSortedSystems = _uiState.Game.Systems
-                                                        .Where(s => knownSystems.Contains(s.Guid))
+                                                        .Where(s => knownSystems.Contains(s.ID))
                                                         .OrderBy(s => s.NameDB.OwnersName)
                                                         .ToList();
 
                     foreach(var system in filteredAndSortedSystems)
                     {
-                        if(ImGui.Selectable(system.NameDB.OwnersName, _uiState.SelectedStarSysGuid.Equals(system.Guid)))
+                        if(ImGui.Selectable(system.NameDB.OwnersName, _uiState.SelectedStarSysGuid.Equals(system.ID)))
                         {
-                            _uiState.SetActiveSystem(system.Guid);
+                            _uiState.SetActiveSystem(system.ID);
                         }
                     }
                 }

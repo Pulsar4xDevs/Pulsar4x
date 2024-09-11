@@ -134,7 +134,7 @@ public static class SystemBodyFromJsonFactory
 
         var positionDB = new PositionDB(
             orbitDB.GetPosition(game.TimePulse.GameGlobalDateTime),
-            system.Guid,
+            system.ID,
             parentBody);
         blobsToAdd.Add(positionDB);
         blobsToAdd.Add(orbitDB); // orbit needs to be added after position

@@ -351,7 +351,7 @@ namespace Pulsar4X.Tests
             {
                 List<Entity> systemJumpPoints = starSystem.GetAllEntitiesWithDataBlob<JumpPointDB>();
 
-                jumpPointCounts.Add(starSystem.Guid, systemJumpPoints.Count);
+                jumpPointCounts.Add(starSystem.ID, systemJumpPoints.Count);
             }
 
             var statisticalSpread = new Dictionary<int, int>();
