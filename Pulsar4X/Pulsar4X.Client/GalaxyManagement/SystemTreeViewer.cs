@@ -1,7 +1,6 @@
 ﻿using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
-using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
 using Pulsar4X.Extensions;
@@ -10,9 +9,7 @@ using Pulsar4X.Engine.Orders;
 namespace Pulsar4X.SDL2UI;
 public class SystemTreeViewer : PulsarGuiWindow
 {
-    private SystemTreeViewer()
-    {
-    }
+    private const string SystemViewPreferencesKey = "system-viewer";
 
     internal static SystemTreeViewer GetInstance() {
         SystemTreeViewer thisItem;
@@ -37,6 +34,17 @@ public class SystemTreeViewer : PulsarGuiWindow
         {
             if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid))
             {
+                var systemViewPreferences = SystemViewPreferences.GetInstance();
+                int viewIndex = systemViewPreferences.GetViewIndex(SystemViewPreferencesKey);
+
+                ImGui.Text("View Options: ");
+                ImGui.SameLine();
+                if(ImGui.Combo("###system-viewer-filter", ref viewIndex, systemViewPreferences.ViewNames, systemViewPreferences.ViewNames.Length))
+                {
+                    systemViewPreferences.SetViewIndex(SystemViewPreferencesKey, viewIndex);
+                    ImGui.EndCombo();
+                }
+
                 SystemState starSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
                 List<EntityState> stars = starSystemState.EntityStatesWithPosition.Values
                     .Where(e => e.IsStar())
@@ -77,7 +85,8 @@ public class SystemTreeViewer : PulsarGuiWindow
             if(!currentBody.TryGetDatablob<PositionDB>(out var positionDB))
                 return;
 
-            PrintEntity(currentBody, depth);
+            if(SystemViewPreferences.GetInstance().ShouldDisplay(SystemViewPreferencesKey, entityStates[currentBody.Id].BodyType))
+                PrintEntity(currentBody, depth);
 
             var children = positionDB.Children;
             if (children.Count > 0)
