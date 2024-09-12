@@ -42,6 +42,7 @@ namespace Pulsar4X.SDL2UI
                 if(ImGui.Combo("###view-selector", ref viewIndex, systemViewPreferences.ViewNames, systemViewPreferences.ViewNames.Length))
                 {
                     systemViewPreferences.SetViewIndex("map", viewIndex);
+                    _uiState.SelectedMapView = systemViewPreferences.GetViewByIndex(viewIndex);
                     ImGui.EndCombo();
                 }
 

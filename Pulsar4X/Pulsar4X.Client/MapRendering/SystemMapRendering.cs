@@ -432,9 +432,10 @@ namespace Pulsar4X.SDL2UI
             lock (_nameIcons)
             {
                 List<NameIcon> nameIcons = new List<NameIcon>();
-                foreach (var item in _nameIcons.Values)
+                foreach (var icon in _nameIcons.Values)
                 {
-                    nameIcons.Add(item);
+                    if(SystemViewPreferences.GetInstance().ShouldDisplay("map", icon.EntityState.BodyType))
+                        nameIcons.Add(icon);
                     //item.Draw(_uiState.rendererPtr, _uiState.Camera);
                 }
                 NameIcon.DrawAll(_state.rendererPtr, _state.Camera, nameIcons);

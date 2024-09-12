@@ -68,6 +68,16 @@ public class SystemViewPreferences : PulsarGuiWindow
     {
         ViewIndexes[key] = value;
     }
+
+    internal View GetViewByIndex(int index)
+    {
+        return Views[index];
+    }
+
+    internal bool ShouldDisplay(string key, UserOrbitSettings.OrbitBodyType orbitBodyType)
+    {
+        return ViewIndexes.ContainsKey(key) ? Views[ViewIndexes[key]].FilterCheckmarks[orbitBodyType] : true;
+    }
     
     internal static SystemViewPreferences GetInstance()
     {

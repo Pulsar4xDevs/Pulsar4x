@@ -15,7 +15,7 @@ namespace Pulsar4X.SDL2UI
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBringToFrontOnFocus;
         internal bool IsActive = true;
         GlobalUIState _state;
-        EntityState _entityState;
+        public EntityState EntityState { get; private set; }
         NameDB _nameDB;
         internal string NameString;
         public float Width { get; set; }
@@ -26,7 +26,7 @@ namespace Pulsar4X.SDL2UI
         public Dictionary<int, string> SubNames = new ();
         public Vector2 ViewOffset { get; set; } = new Vector2();
         public Rectangle ViewDisplayRect = new Rectangle();
-        internal float DrawAtZoom { get { return _state.DrawNameZoomLvl[_entityState.BodyType]; } }
+        internal float DrawAtZoom { get { return _state.DrawNameZoomLvl[EntityState.BodyType]; } }
 
         public Vector4 TextDisplayColor { get; private set; } = Styles.StandardText;
 
@@ -34,7 +34,7 @@ namespace Pulsar4X.SDL2UI
         {
             Random rnd = new Random();
             _state = state;
-            _entityState = entityState;
+            EntityState = entityState;
             StarSystem? starsys = (StarSystem?)entityState.Entity.Manager;
             _starSysGuid = starsys.ID;
             _nameDB = entityState.Entity.GetDataBlob<NameDB>();
@@ -156,7 +156,7 @@ namespace Pulsar4X.SDL2UI
 
             foreach(var nameIconGrouping in nameIconGroupings)
             {
-                var orderedGroupedIcons = nameIconGrouping.GroupBy(i => i._entityState.BodyType).OrderBy(g => g.Key).ToList();
+                var orderedGroupedIcons = nameIconGrouping.GroupBy(i => i.EntityState.BodyType).OrderBy(g => g.Key).ToList();
                 var highestPriorityGroup = orderedGroupedIcons.First().ToList();
                 orderedGroupedIcons.RemoveAt(0);
                 ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Styles.NameIconHighlight);
@@ -184,9 +184,9 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PushStyleColor(ImGuiCol.Button, Styles.InvisibleColor);
                 ImGui.PushStyleColor(ImGuiCol.Text, icon.TextDisplayColor);
 
-                if (ImGui.Button(icon.NameString + "##" + icon._entityState.Entity.Id.ToString()))
+                if (ImGui.Button(icon.NameString + "##" + icon.EntityState.Entity.Id.ToString()))
                 {
-                    icon._state.EntityClicked(icon._entityState.Entity.Id, icon._starSysGuid, MouseButtons.Primary);
+                    icon._state.EntityClicked(icon.EntityState.Entity.Id, icon._starSysGuid, MouseButtons.Primary);
                 }
                 DisplayContextMenu(camera, icon);
                 ImGui.PopStyleColor(2);
@@ -199,7 +199,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.StandardText);
                 if(ImGui.MenuItem("View " + icon.NameString))
                 {
-                    icon._state.EntityClicked(icon._entityState.Entity.Id, icon._starSysGuid, MouseButtons.Primary);
+                    icon._state.EntityClicked(icon.EntityState.Entity.Id, icon._starSysGuid, MouseButtons.Primary);
                 }
                 ImGui.PopStyleColor();
                 DisplayContextMenu(camera, icon);
@@ -215,7 +215,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.PushStyleColor(ImGuiCol.Text, subIcon.TextDisplayColor);
                         if(ImGui.MenuItem(subIcon.NameString))
                         {
-                            subIcon._state.EntityClicked(subIcon._entityState.Entity.Id, subIcon._starSysGuid, MouseButtons.Primary);
+                            subIcon._state.EntityClicked(subIcon.EntityState.Entity.Id, subIcon._starSysGuid, MouseButtons.Primary);
                         }
                         ImGui.PopStyleColor();
                         DisplayContextMenu(camera, subIcon);
@@ -233,7 +233,7 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.PushStyleColor(ImGuiCol.Text, subIcon.TextDisplayColor);
                                 if(ImGui.MenuItem(subIcon.NameString))
                                 {
-                                    subIcon._state.EntityClicked(subIcon._entityState.Entity.Id, subIcon._starSysGuid, MouseButtons.Primary);
+                                    subIcon._state.EntityClicked(subIcon.EntityState.Entity.Id, subIcon._starSysGuid, MouseButtons.Primary);
                                 }
                                 ImGui.PopStyleColor();
                                 DisplayContextMenu(camera, subIcon);
@@ -268,7 +268,7 @@ namespace Pulsar4X.SDL2UI
 
         private static int GetXOffset(NameIcon icon)
         {
-            return icon._entityState.BodyType == UserOrbitSettings.OrbitBodyType.Star ? 14 : icon._entityState.BodyType == UserOrbitSettings.OrbitBodyType.Ship ? 4 : 10;
+            return icon.EntityState.BodyType == UserOrbitSettings.OrbitBodyType.Star ? 14 : icon.EntityState.BodyType == UserOrbitSettings.OrbitBodyType.Ship ? 4 : 10;
         }
 
         private static void EndNameIcon(NameIcon icon)
@@ -280,7 +280,7 @@ namespace Pulsar4X.SDL2UI
         {
             if(ImGui.BeginPopupContextItem())
             {
-                icon.SetUpContextMenu(icon._entityState.Entity.Id);
+                icon.SetUpContextMenu(icon.EntityState.Entity.Id);
                 ImGui.EndPopup();
             }
         }
@@ -314,38 +314,38 @@ namespace Pulsar4X.SDL2UI
             // }
 
             ImGui.PushStyleColor(ImGuiCol.Button, Styles.InvisibleColor);
-            if (ImGui.Button(NameString+"##"+_entityState.Entity.Id.ToString())) //If the name gets clicked, we tell the state.
+            if (ImGui.Button(NameString+"##"+EntityState.Entity.Id.ToString())) //If the name gets clicked, we tell the state.
             {
-                _state.EntityClicked(_entityState.Entity.Id, _starSysGuid, MouseButtons.Primary);
+                _state.EntityClicked(EntityState.Entity.Id, _starSysGuid, MouseButtons.Primary);
 
             }
 
-            if (ImGui.BeginPopupContextItem("NameContextMenu"+_entityState.Entity.Id.ToString()+NameString, ImGuiPopupFlags.MouseButtonRight))
+            if (ImGui.BeginPopupContextItem("NameContextMenu"+EntityState.Entity.Id.ToString()+NameString, ImGuiPopupFlags.MouseButtonRight))
             {
-                SetUpContextMenu(_entityState.Entity.Id);
+                SetUpContextMenu(EntityState.Entity.Id);
                 ImGui.EndPopup();
             }
             //checks the state if the icon of the entity with this nameicon was altClicked, if yes then display the normal context menu
-            if(_state._lastContextMenuOpenedEntityGuid == _entityState.Entity.Id)
+            if(_state._lastContextMenuOpenedEntityGuid == EntityState.Entity.Id)
             {
                 if(ImGui.BeginPopupContextVoid())
                 {
-                   SetUpContextMenu(_entityState.Entity.Id);
+                   SetUpContextMenu(EntityState.Entity.Id);
                    ImGui.EndPopup();
                 }
             }
-            if(_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityState.Entity.Id].Entity.HasDataBlob<JPSurveyableDB>() && _state.StarSystemStates.ContainsKey(_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityState.Entity.Id].Entity.GetDataBlob<JPSurveyableDB>().SystemToGuid))
+            if(_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[EntityState.Entity.Id].Entity.HasDataBlob<JPSurveyableDB>() && _state.StarSystemStates.ContainsKey(_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[EntityState.Entity.Id].Entity.GetDataBlob<JPSurveyableDB>().SystemToGuid))
             {
-                ImGui.Text("Jumps to: "+_state.StarSystemStates[_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityState.Entity.Id].Entity.GetDataBlob<JPSurveyableDB>().SystemToGuid].StarSystem.NameDB.DefaultName);
+                ImGui.Text("Jumps to: "+_state.StarSystemStates[_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[EntityState.Entity.Id].Entity.GetDataBlob<JPSurveyableDB>().SystemToGuid].StarSystem.NameDB.DefaultName);
             }
 
             foreach (var name in SubNames)
             {
-                if (ImGui.Button(name.Value+"##"+_entityState.Entity.Id.ToString()+name.Key.ToString()+name.Value))
+                if (ImGui.Button(name.Value+"##"+EntityState.Entity.Id.ToString()+name.Key.ToString()+name.Value))
                 {
                     _state.EntityClicked(name.Key, _starSysGuid, MouseButtons.Primary);
                 }
-                if (ImGui.BeginPopupContextItem("subNameContextMenu"+name.Key+name.Value+_entityState.Entity.Id.ToString()+NameString, ImGuiPopupFlags.MouseButtonRight))
+                if (ImGui.BeginPopupContextItem("subNameContextMenu"+name.Key+name.Value+EntityState.Entity.Id.ToString()+NameString, ImGuiPopupFlags.MouseButtonRight))
                 {
                     SetUpContextMenu(name.Key);
 

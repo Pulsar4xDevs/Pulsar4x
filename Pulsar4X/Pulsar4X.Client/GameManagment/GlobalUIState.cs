@@ -16,6 +16,7 @@ using System.Net.Http;
 using Pulsar4X.Messaging;
 using System.Threading.Tasks;
 using Pulsar4X.DataStructures;
+using static Pulsar4X.SDL2UI.SystemViewPreferences;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -97,6 +98,8 @@ namespace Pulsar4X.SDL2UI
         internal Dictionary<int, EntityWindow> EntityWindows { get; private set; } = new();
 
         internal Stack<IHotKeyHandler> HotKeys { get; private set; } = new ();
+
+        internal View? SelectedMapView { get; set; } = null;
 
         internal GlobalUIState(ImGuiSDL2CSWindow viewport)
         {

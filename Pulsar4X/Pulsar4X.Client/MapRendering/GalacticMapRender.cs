@@ -134,14 +134,14 @@ namespace Pulsar4X.SDL2UI
                 lock (_nameIcons)
                 {
                     List<NameIcon> nameIcons = new List<NameIcon>();
-                    foreach (var item in _nameIcons)
+                    foreach ((var id, var icon) in _nameIcons)
                     {
                         //if(_uiState.StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames.ContainsKey(item.Key)){
-                        if(item.Key == _state.SelectedStarSysGuid){
-                            nameIcons.Add(item.Value);
+                        if(id.Equals(_state.SelectedStarSysGuid)
+                            && SystemViewPreferences.GetInstance().ShouldDisplay("map", icon.EntityState.BodyType))
+                        {
+                            nameIcons.Add(icon);
                         }
-
-
 
                         //}
                         //item.Value.Draw(_uiState.rendererPtr, _uiState.Camera);
