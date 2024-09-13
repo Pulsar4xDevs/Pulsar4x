@@ -39,11 +39,7 @@ public class SystemTreeViewer : PulsarGuiWindow
 
                 ImGui.Text("View Options: ");
                 ImGui.SameLine();
-                if(ImGui.Combo("###system-viewer-filter", ref viewIndex, systemViewPreferences.ViewNames, systemViewPreferences.ViewNames.Length))
-                {
-                    systemViewPreferences.SetViewIndex(SystemViewPreferencesKey, viewIndex);
-                    ImGui.EndCombo();
-                }
+                SystemViewPreferences.GetInstance().DisplayCombo(SystemViewPreferencesKey, selectedIndex => {});
 
                 SystemState starSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
                 List<EntityState> stars = starSystemState.EntityStatesWithPosition.Values

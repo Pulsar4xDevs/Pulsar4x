@@ -78,7 +78,7 @@ public class SystemViewPreferences : PulsarGuiWindow
     {
         return ViewIndexes.ContainsKey(key) ? Views[ViewIndexes[key]].FilterCheckmarks[orbitBodyType] : true;
     }
-    
+
     internal static SystemViewPreferences GetInstance()
     {
         if (!_uiState.LoadedWindows.ContainsKey(typeof(SystemViewPreferences)))
@@ -113,7 +113,7 @@ public class SystemViewPreferences : PulsarGuiWindow
             CreateDefaultIni(ViewsDirectory);
             LoadViewIni(Path.Combine(ViewsDirectory, DefaultFileName));
         }
-        
+
         _selectedEditorViewNames = new string[Views.Count];
         foreach((var id, var view) in Views)
         {
@@ -259,7 +259,7 @@ public class SystemViewPreferences : PulsarGuiWindow
     private void CreateDefaultIni(string directory)
     {
         var filePath = Path.Combine(directory, DefaultFileName);
-        
+
         using( var writer = new StreamWriter(filePath))
         {
             writer.WriteLine("[meta]");
@@ -275,7 +275,7 @@ public class SystemViewPreferences : PulsarGuiWindow
             writer.WriteLine("unknown=True");
         }
     }
-    
+
     internal override void Display()
     {
         if(!IsActive) return;
@@ -301,6 +301,30 @@ public class SystemViewPreferences : PulsarGuiWindow
                 }
             }
             ImGui.End();
+        }
+    }
+
+    internal void DisplayCombo(string key, Action<int> onItemSelected)
+    {
+        int viewIndex = GetViewIndex(key);
+        if(ImGui.BeginCombo($"###{key}-view-selector", ViewNames[viewIndex], ImGuiComboFlags.PopupAlignLeft | ImGuiComboFlags.HeightSmall))
+        {
+            for(int i = 0; i < ViewNames.Length; i++)
+            {
+                if(ImGui.Selectable(ViewNames[i], i == viewIndex))
+                {
+                    SetViewIndex(key, i);
+                    onItemSelected?.Invoke(i);
+                }
+            }
+
+            ImGui.Separator();
+
+            if(ImGui.Selectable("Edit..."))
+            {
+                SetActive(true);
+            }
+            ImGui.EndCombo();
         }
     }
 }
