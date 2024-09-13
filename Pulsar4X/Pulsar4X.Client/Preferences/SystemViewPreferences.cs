@@ -322,6 +322,7 @@ public class SystemViewPreferences : PulsarGuiWindow
 
             if(ImGui.Selectable("Edit..."))
             {
+                _selectedEditorViewIndex = viewIndex;
                 SetActive(true);
             }
             ImGui.EndCombo();
