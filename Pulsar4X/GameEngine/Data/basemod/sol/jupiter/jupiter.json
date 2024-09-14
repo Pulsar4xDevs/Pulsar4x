@@ -32,6 +32,7 @@
       { "symbol": "H2O", "percent": 0.000004 }
     ]
   },
+  "minerals": "random",
   "geoSurvey": {
     "pointsRequired": 2500
   }

@@ -37,6 +37,7 @@
       { "symbol": "Xe", "percent": 0.0000001 }
     ]
   },
+  "minerals": "random",
   "geoSurvey": {
     "pointsRequired": 575
   }

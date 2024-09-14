@@ -32,6 +32,7 @@
       { "symbol": "C2H6", "percent": 0.0000015 }
     ]
   },
+  "minerals": "random",
   "geoSurvey": {
     "pointsRequired": 2500
   }

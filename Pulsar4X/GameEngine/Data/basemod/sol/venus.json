@@ -36,6 +36,7 @@
       { "symbol": "Ne", "percent": 0.000007 }
     ]
   },
+  "minerals": "random",
   "geoSurvey": {
     "pointsRequired": 1500
   }

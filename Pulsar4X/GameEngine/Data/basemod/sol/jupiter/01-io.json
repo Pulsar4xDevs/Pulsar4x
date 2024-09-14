@@ -27,6 +27,7 @@
       { "symbol": "SO2", "percent": 0.9 }
     ]
   },
+  "minerals": "random",
   "geoSurvey": {
     "pointsRequired": 500
   }

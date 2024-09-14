@@ -16,6 +16,7 @@
     "AoP": 73.6,
     "meanAnomaly": 291.4
   },
+  "minerals": "random",
   "geoSurvey": {
     "pointsRequired": 750
   }

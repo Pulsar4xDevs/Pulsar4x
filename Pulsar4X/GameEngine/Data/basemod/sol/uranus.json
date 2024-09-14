@@ -31,6 +31,7 @@
       { "symbol": "HD", "percent": 0.00009 }
     ]
   },
+  "minerals": "random",
   "geoSurvey": {
     "pointsRequired": 2500
   }

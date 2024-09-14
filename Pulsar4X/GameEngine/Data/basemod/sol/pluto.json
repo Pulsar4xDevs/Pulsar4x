@@ -30,6 +30,7 @@
       { "symbol": "CO", "percent": 0.0025 }
     ]
   },
+  "minerals": "random",
   "geoSurvey": {
     "pointsRequired": 750
   }
