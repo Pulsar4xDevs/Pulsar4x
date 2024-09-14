@@ -47,7 +47,8 @@ public class SystemViewPreferences : PulsarGuiWindow
     Dictionary<int, View> Views = new ();
     int _selectedEditorViewIndex = 0;
     string[]? _selectedEditorViewNames;
-    string ViewsDirectory;
+    string ViewsDirectory = "";
+    bool _showModal = false;
 
     public string[] ViewNames
     {
@@ -99,6 +100,14 @@ public class SystemViewPreferences : PulsarGuiWindow
         {
             Directory.CreateDirectory(ViewsDirectory);
         }
+
+        LoadAllIni();
+    }
+
+    private void LoadAllIni()
+    {
+        _selectedEditorViewIndex = 0;
+        Views.Clear();
 
         var files = Directory.EnumerateFiles(ViewsDirectory, "*.ini");
         if(files.Count() > 0)
@@ -289,6 +298,42 @@ public class SystemViewPreferences : PulsarGuiWindow
             {
                 ImGui.EndCombo();
             }
+            ImGui.SameLine();
+            if(ImGui.Button("New..."))
+            {
+                _showModal = true;
+            }
+
+            if(_showModal)
+            {
+                TextModal.GetInstance().DisplayModal("New View Preference", returnedString => {
+                    // Create new preference file here
+                    var view = new View(returnedString.Trim().ToLower() + ".ini", returnedString, -1)
+                    {
+                        FilterCheckmarks = new ()
+                        {
+                            { UserOrbitSettings.OrbitBodyType.Asteroid, true },
+                            { UserOrbitSettings.OrbitBodyType.Colony, true },
+                            { UserOrbitSettings.OrbitBodyType.Comet, true },
+                            { UserOrbitSettings.OrbitBodyType.Moon, true },
+                            { UserOrbitSettings.OrbitBodyType.Planet, true },
+                            { UserOrbitSettings.OrbitBodyType.Ship, true },
+                            { UserOrbitSettings.OrbitBodyType.Star, true },
+                            { UserOrbitSettings.OrbitBodyType.Unknown, true }
+                        }
+                    };
+
+                    SaveViewIni(view);
+                    LoadAllIni();
+                    _showModal = false;
+                }, delegate
+                {
+                    // Cancel was clicked
+                    _showModal = false;
+                });
+            }
+
+
             ImGui.Separator();
 
             foreach((var bodyType, var displayName) in FilterDisplayOptions)
