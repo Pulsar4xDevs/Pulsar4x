@@ -179,6 +179,10 @@ public static class SystemBodyFromJsonFactory
                 {
                     mineralsDb = MineralDepositFactory.GenerateRandom(game.GalaxyGen.Settings, game.StartingGameData.Minerals.Values.ToList(), system, systemBodyInfoDB, massVolumeDB);
                 }
+                if(value.Equals("randomHW"))
+                {
+                    mineralsDb = MineralDepositFactory.GenerateRandomHW(game.GalaxyGen.Settings, game.StartingGameData.Minerals.Values.ToList(), system, systemBodyInfoDB, massVolumeDB);
+                }
             }
             else if(mineralToken.Type == JTokenType.Array)
             {
