@@ -12,18 +12,13 @@ public class MineralDepositFactory
 {
     public static MineralsDB? GenerateRandom(SystemGenSettingsBlueprint settings, List<Mineral> minerals, StarSystem system, SystemBodyInfoDB bodyInfoDB, MassVolumeDB massVolumeDB, bool forceGeneration = false)
     {
-        // get the mass ratio for this body to planet:
-        double massRatio = massVolumeDB.MassDry / UniversalConstants.Units.EarthMassInKG;
-        double genChance = massRatio * system.RNGNextDouble();
-        double genChanceThreshold = settings.MineralGenerationChanceByBodyType[bodyInfoDB.BodyType];
+        double baseChance = settings.BaseMineralChance * 10;
+        var typeMass = settings.SystemBodyMassByType[bodyInfoDB.BodyType];
+        var avgMass = (typeMass.Max + typeMass.Min) * .5;
 
-        // now lets see if this body has minerals
-        if (genChance < genChanceThreshold
-            && BodyType.Comet != bodyInfoDB.BodyType  // comets always have minerals.
-            && !forceGeneration)
-        {
-            return null;
-        }
+        double massRatio = massVolumeDB.MassDry / avgMass;//UniversalConstants.Units.EarthMassInKG;
+        double genChance = baseChance * massRatio * system.RNGNextDouble();
+        double genChanceThreshold = settings.MineralGenerationChanceByBodyType[bodyInfoDB.BodyType];
 
         var mineralInfo = new MineralsDB();
 
@@ -35,7 +30,7 @@ public class MineralDepositFactory
 
             // get a genChance:
             double abundance = min.Abundance[bodyInfoDB.BodyType];
-            genChance = massRatio * system.RNGNextDouble() * abundance;
+            genChance = baseChance * massRatio * system.RNGNextDouble() * abundance;
 
             if (genChance >= genChanceThreshold)
             {

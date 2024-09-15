@@ -637,6 +637,7 @@
         "Intact": 2.0,
         "MultipleIntact": 3.0
       },
+      "BaseMineralChance": 5,
       "MineralGenerationChanceByBodyType": {
         "GasGiant": 0.4,
         "IceGiant": 0.33,
