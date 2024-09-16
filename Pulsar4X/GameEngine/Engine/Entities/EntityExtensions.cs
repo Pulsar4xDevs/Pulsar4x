@@ -480,5 +480,15 @@ namespace Pulsar4X.Extensions
 
             return false;
         }
+
+        public static CargoDefinitionsLibrary? GetFactionCargoDefinitions(this Entity entity)
+        {
+            if(entity.GetFactionOwner.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+            {
+                return factionInfoDB.Data.CargoGoods;
+            }
+
+            return null;
+        }
     }
 }
