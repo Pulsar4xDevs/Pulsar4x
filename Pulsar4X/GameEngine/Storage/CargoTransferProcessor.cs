@@ -9,7 +9,7 @@ namespace Pulsar4X.Engine
 {
     public class CargoTransferProcessor : IHotloopProcessor
     {
-
+        public static CargoDefinitionsLibrary CargoDefs;
 
         public TimeSpan RunFrequency
         {
@@ -63,6 +63,7 @@ namespace Pulsar4X.Engine
                 //update the total masses for these entites
                 transferDB.CargoFromDB.OwningEntity.GetDataBlob<MassVolumeDB>().UpdateMassTotal(transferDB.CargoFromDB);
                 transferDB.CargoToDB.OwningEntity.GetDataBlob<MassVolumeDB>().UpdateMassTotal(transferDB.CargoToDB);
+                UpdateFuelAndDeltaV(entity);
 
 
                 if(amountTo != amountFrom)
@@ -102,6 +103,7 @@ namespace Pulsar4X.Engine
             double amountSuccess = cargo.RemoveCargoByUnit(item, amount);
             MassVolumeDB mv = entity.GetDataBlob<MassVolumeDB>();
             mv.UpdateMassTotal(cargo);
+            UpdateFuelAndDeltaV(entity);
             return amountSuccess;
         }
 
@@ -117,6 +119,7 @@ namespace Pulsar4X.Engine
             double amountSuccess = cargo.AddRemoveCargoByMass(item, amountInMass);
             MassVolumeDB mv = entity.GetDataBlob<MassVolumeDB>();
             mv.UpdateMassTotal(cargo);
+            UpdateFuelAndDeltaV(entity);
             return amountSuccess;
         }
 
@@ -132,7 +135,24 @@ namespace Pulsar4X.Engine
             double amountSuccess = cargo.AddRemoveCargoByVolume(item, amountInVolume);
             MassVolumeDB mv = entity.GetDataBlob<MassVolumeDB>();
             mv.UpdateMassTotal(cargo);
+            UpdateFuelAndDeltaV(entity);
             return amountSuccess;
+        }
+
+        internal static void UpdateFuelAndDeltaV(Entity entity)
+        {
+            if(!entity.TryGetDatablob(out NewtonThrustAbilityDB newtdb))
+                return;
+            if (!entity.TryGetDatablob(out MassVolumeDB massdb))
+                return;
+            if(!entity.TryGetDatablob(out VolumeStorageDB storedb))
+                return;
+
+            var cargoLib = entity.GetFactionCargoDefinitions();
+            var fuelTypeID = newtdb.FuelType;
+            var fuelType = cargoLib.GetAny(fuelTypeID);
+            var fuelMass = storedb.GetMassStored(fuelType);
+            newtdb.SetFuel(fuelMass, massdb.MassTotal);
         }
 
         /// <summary>

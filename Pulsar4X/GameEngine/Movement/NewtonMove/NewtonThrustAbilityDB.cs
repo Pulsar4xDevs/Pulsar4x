@@ -71,7 +71,8 @@ namespace Pulsar4X.Datablobs
         /// <summary>
         /// Sets a given amount of fuel, and updates DeltaV.
         /// </summary>
-        /// <param name="fuel"></param>
+        /// <param name="fuel">fuel mass</param>
+        /// <param name="wetMass_kg">total mass of entity</param>
         internal void SetFuel(double fuel, double wetMass_kg)
         {
             TotalFuel_kg = fuel;

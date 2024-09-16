@@ -153,6 +153,34 @@ namespace Pulsar4X.Engine
         }
         
         /// <summary>
+        /// deltaV this ship has right now.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="cargoMass">non volitile cargo</param>
+        /// <returns></returns>
+        public static double GetDV(Entity entity)
+        {
+            var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var massDry = entity.GetDataBlob<MassVolumeDB>().MassDry;
+            var parentMass = entity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
+
+            var cargoLib = entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
+            var fuelTypeID = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
+            var fuelType = cargoLib.GetAny(fuelTypeID);
+
+            if(fuelType == null) throw new NullReferenceException("fuelType cannot be null");
+            var storage = entity.GetDataBlob<VolumeStorageDB>();
+            var totalCargo = storage.TotalStoredMass;
+            var fuelMass = storage.GetMassStored(fuelType);
+            var dryCargo = totalCargo - fuelMass;
+            var massCargoDry = massDry + dryCargo;
+            var massTotal = massCargoDry + fuelMass;
+
+            return TsiolkovskyRocketEquation(massTotal, massCargoDry, exhaustVelocity);
+
+        }
+        
+        /// <summary>
         /// Currently this only calculates the change in velocity from 0 to planet radius +* 0.33333.
         /// TODO: add gravity drag and atmosphere drag, and tech improvements for such.  
         /// </summary>

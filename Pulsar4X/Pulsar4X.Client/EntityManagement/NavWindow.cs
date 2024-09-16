@@ -780,7 +780,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                 var startObt = _manuverLines.EditingNodes[0].PriorOrbit;
                 var tgtObt = _manuverLines.EditingNodes[0].TargetOrbit;
-                NewtonSimpeThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, startObt, tgtObt );
+                NewtonSimpleCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, startObt, tgtObt );
 
                 if(_fuelType == null)
                     throw new NullReferenceException();
@@ -792,7 +792,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                 startObt = _manuverLines.EditingNodes[1].PriorOrbit;
                 tgtObt = _manuverLines.EditingNodes[1].TargetOrbit;
-                NewtonSimpeThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, startObt, tgtObt );
+                NewtonSimpleCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, startObt, tgtObt );
 
                 var newseq = new ManuverSequence();
                 newseq.SequenceName = "Hohmann Transfer";
@@ -885,7 +885,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                 var startObt = _manuverLines.EditingNodes[0].PriorOrbit;
                 var tgtObt = _manuverLines.EditingNodes[0].TargetOrbit;
-                NewtonSimpeThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, startObt, tgtObt );
+                NewtonSimpleCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, startObt, tgtObt );
 
                 if(_fuelType == null)
                     throw new NullReferenceException();
@@ -897,7 +897,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                 startObt = _manuverLines.EditingNodes[1].PriorOrbit;
                 tgtObt = _manuverLines.EditingNodes[1].TargetOrbit;
-                NewtonSimpeThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, startObt, tgtObt );
+                NewtonSimpleCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, startObt, tgtObt );
 
                 var newseq = new ManuverSequence();
                 newseq.SequenceName = "Hohmann Transfer";
