@@ -34,9 +34,10 @@ namespace Pulsar4X.Datablobs
 
         /// <summary>
         /// removes fuel and correct amount of DV.
+        /// ***USE CargoTransferProcessor.AddRemoveCargoMass instead of this!***
         /// </summary>
         /// <param name="fuel">in kg</param>
-        internal void BurnFuel(double fuel, double wetMass_kg)
+        private void BurnFuel(double fuel, double wetMass_kg)
         {
             TotalFuel_kg -= fuel;
             double dryMass = wetMass_kg - fuel;
@@ -46,10 +47,11 @@ namespace Pulsar4X.Datablobs
         /// <summary>
         /// removes deltaV and correct amount of fuel.
         /// does NOT update the ships total mass or remove fuel from VolumeStorageDB
+        /// ***USE CargoTransferProcessor.AddRemoveCargoMass instead of this!***
         /// </summary>
         /// <param name="dv"></param>
         /// <returns>fuel Burned in kg</returns>
-        internal double BurnDeltaV(double dv, double WetMass_kg)
+        private double BurnDeltaV(double dv, double WetMass_kg)
         {
             DeltaV -= dv;
             double fuelBurned = OrbitMath.TsiolkovskyFuelUse(WetMass_kg, ExhaustVelocity, dv);
@@ -59,9 +61,10 @@ namespace Pulsar4X.Datablobs
 
         /// <summary>
         /// Adds fuel, and updates DeltaV.
+        /// ***USE CargoTransferProcessor.AddRemoveCargoMass instead of this!***
         /// </summary>
         /// <param name="fuel"></param>
-        internal void AddFuel(double fuel, double wetMass_kg)
+        private void AddFuel(double fuel, double wetMass_kg)
         {
             TotalFuel_kg += fuel;
             double dryMass = wetMass_kg - fuel;
@@ -70,6 +73,7 @@ namespace Pulsar4X.Datablobs
 
         /// <summary>
         /// Sets a given amount of fuel, and updates DeltaV.
+        /// ***USE CargoTransferProcessor.AddRemoveCargoMass to add or remove fuel***
         /// </summary>
         /// <param name="fuel">fuel mass</param>
         /// <param name="wetMass_kg">total mass of entity</param>

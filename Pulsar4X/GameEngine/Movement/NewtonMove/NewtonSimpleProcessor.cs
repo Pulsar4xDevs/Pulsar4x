@@ -56,8 +56,6 @@ public class NewtonSimpleProcessor : IHotloopProcessor
         var fuelType = cargoLib.GetAny(fuelTypeID);
         var storage = entity.GetDataBlob<VolumeStorageDB>();
         var fuelMass = storage.GetMassStored(fuelType);
-        thrustdb.SetFuel(fuelMass, massdb.MassTotal); 
-        
         
         var currentOrbit = newtonSimplelMoveDB.CurrentTrajectory;
         var targetOrbit = newtonSimplelMoveDB.TargetTrajectory;
@@ -83,8 +81,8 @@ public class NewtonSimpleProcessor : IHotloopProcessor
             OrbitDB newOrbit = OrbitDB.FromKeplerElements(entity, massdb.MassTotal, targetOrbit, dateTimeNow);
             entity.SetDataBlob(newOrbit);
 
-            //remove fuel.
-            var fuelBurned = thrustdb.BurnDeltaV(moveDeltaV, massdb.MassTotal);
+            //remove fuel
+            double fuelBurned = OrbitMath.TsiolkovskyFuelUse(massdb.MassTotal, thrustdb.ExhaustVelocity, moveDeltaV);
             CargoTransferProcessor.AddRemoveCargoMass(entity, fuelType, fuelBurned);
             
             //tag as complete
