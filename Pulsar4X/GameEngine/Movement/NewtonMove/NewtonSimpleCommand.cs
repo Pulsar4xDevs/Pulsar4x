@@ -102,16 +102,11 @@ public class NewtonSimpleCommand : EntityCommand
 
     public override void UpdateDetailString()
     {
-
-
         if(ActionOnDate > _entityCommanding.StarSysDateTime)
             _details = "Waiting " + (ActionOnDate - _entityCommanding.StarSysDateTime).ToString("d'd 'h'h 'm'm 's's'") + "\n"
                        + "   to expend  " + Stringify.Velocity(OrbitrelativeDeltaV.Length()) + " Δv";
         else if(IsRunning)
             _details = "Manuvering ";
-
-
-
     }
 
     public override bool IsFinished()

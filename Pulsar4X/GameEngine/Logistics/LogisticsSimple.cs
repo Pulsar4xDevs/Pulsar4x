@@ -55,6 +55,8 @@ namespace Pulsar4X.Engine.Logistics
                 mySMA = ship.GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
             if (ship.HasDataBlob<NewtonMoveDB>())
                 mySMA = ship.GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
+            if (ship.HasDataBlob<NewtonSimpleMoveDB>())
+                mySMA = ship.GetDataBlob<NewtonSimpleMoveDB>().CurrentTrajectory.SemiMajorAxis;
 
             double targetSMA = OrbitMath.LowOrbitRadius(targetBody);
 
