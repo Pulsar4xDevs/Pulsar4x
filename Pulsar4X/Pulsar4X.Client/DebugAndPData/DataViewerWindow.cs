@@ -458,7 +458,7 @@ public static class ModDataInspector
                     {
                         return ((PropertyInfo)memberInfo).GetValue(forObject);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         return "";
                     }

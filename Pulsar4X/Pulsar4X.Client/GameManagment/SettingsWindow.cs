@@ -210,12 +210,12 @@ namespace Pulsar4X.SDL2UI
 
                                         //TODO: make this a knob/dial? need to create a custom control: https://github.com/ocornut/imgui/issues/942
                                         if (ImGui.SliderAngle("Sweep Angle ##" + i + j, ref _userOrbitSettings.EllipseSweepRadians, 1f, 360f))
-                                            _uiState.SelectedSysMapRender.UpdateUserOrbitSettings();
+                                            _uiState.SelectedSysMapRender?.UpdateUserOrbitSettings();
 
                                         if (ImGui.SliderInt("Number Of Segments ##" + i + j, ref _arcSegments, 1, 255, _userOrbitSettings.NumberOfArcSegments.ToString()))
                                         {
                                             _userOrbitSettings.NumberOfArcSegments = (byte)_arcSegments;
-                                            _uiState.SelectedSysMapRender.UpdateUserOrbitSettings();
+                                            _uiState.SelectedSysMapRender?.UpdateUserOrbitSettings();
                                         }
 
                                         if (ImGui.ColorEdit3("Orbit Ring Colour ##" + i + j, ref _colour))
@@ -227,13 +227,13 @@ namespace Pulsar4X.SDL2UI
                                         if (ImGui.SliderInt("Max Alpha ##" + i + j, ref _maxAlpha, _minAlpha, 255, ""))
                                         {
                                             _userOrbitSettings.MaxAlpha = (byte)_maxAlpha;
-                                            _uiState.SelectedSysMapRender.UpdateUserOrbitSettings();
+                                            _uiState.SelectedSysMapRender?.UpdateUserOrbitSettings();
                                         }
 
                                         if (ImGui.SliderInt("Min Alpha  ##" + i + j, ref _minAlpha, 0, _maxAlpha, ""))
                                         {
                                             _userOrbitSettings.MinAlpha = (byte)_minAlpha;
-                                            _uiState.SelectedSysMapRender.UpdateUserOrbitSettings();
+                                            _uiState.SelectedSysMapRender?.UpdateUserOrbitSettings();
                                         }
                                     }
                                 }

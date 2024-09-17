@@ -263,10 +263,10 @@ namespace Pulsar4X.SDL2UI
                                     var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
                                     cir = new SimpleCircle(SelectedEntity.GetDataBlob<PositionDB>(), soiradius, colour);
 
-                                    _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(cir), cir);
+                                    _uiState.SelectedSysMapRender?.UIWidgets.Add(nameof(cir), cir);
                                 }
                                 else
-                                    _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(cir));
+                                    _uiState.SelectedSysMapRender?.UIWidgets.Remove(nameof(cir));
                             }
 
                             if (ImGui.CollapsingHeader("OrbitDB: ###OrbitDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
@@ -398,8 +398,8 @@ namespace Pulsar4X.SDL2UI
                                 }
                                 else
                                 {
-                                    _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(psoi));
-                                    _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(psoilin));
+                                    _uiState.SelectedSysMapRender?.UIWidgets.Remove(nameof(psoi));
+                                    _uiState.SelectedSysMapRender?.UIWidgets.Remove(nameof(psoilin));
                                 }
                             }
 
@@ -883,8 +883,8 @@ namespace Pulsar4X.SDL2UI
             var y = soiradius * Math.Sin(θ);
             var psoilin = new SimpleLine(parent.GetDataBlob<PositionDB>(), new Orbital.Vector2() { X = x, Y = y }, colour);
 
-            _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(psoi), psoi);
-            _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(psoilin), psoilin);
+            _uiState.SelectedSysMapRender?.UIWidgets.Add(nameof(psoi), psoi);
+            _uiState.SelectedSysMapRender?.UIWidgets.Add(nameof(psoilin), psoilin);
             return true;
         }
 

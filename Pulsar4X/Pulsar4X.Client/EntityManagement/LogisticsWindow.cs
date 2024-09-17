@@ -4,6 +4,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Extensions;
+using System;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -18,7 +19,7 @@ namespace Pulsar4X.SDL2UI
         private SetLogisticsOrder.Changes? _changes;
         private double _changeMass = 1;
 
-        private LogiShipWindow(EntityState entity)
+        private LogiShipWindow(EntityState? entity)
         {
             SetEntity(entity);
         }
@@ -38,8 +39,10 @@ namespace Pulsar4X.SDL2UI
             return instance;
         } 
 
-        public void SetEntity(EntityState entityState)
+        public void SetEntity(EntityState? entityState)
         {
+            if(entityState == null) throw new NullReferenceException("entityState cannot be null");
+
             _entityState = entityState;
             _selectedEntity = _entityState.Entity;
             _changes = new SetLogisticsOrder.Changes();

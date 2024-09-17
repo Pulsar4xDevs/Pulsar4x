@@ -68,7 +68,7 @@ namespace Pulsar4X.SDL2UI
                         SDL.SDL_MaximizeWindow(_Handle);
                 }
             }
-            catch(Exception e)
+            catch(Exception)
             {
                 // It's just a preferences file, continue on
             }

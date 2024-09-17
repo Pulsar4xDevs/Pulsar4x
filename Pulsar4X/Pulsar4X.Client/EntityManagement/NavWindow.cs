@@ -128,7 +128,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
             OnSystemTickChange(orderEntity.Entity.StarSysDateTime);
 
-            _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_manuverLines);
+            _uiState.SelectedSysMapRender?.SelectedEntityExtras.Add(_manuverLines);
 
             var soiParentPosition = _orderEntity.GetSOIParentPositionDB();
             if(soiParentPosition == null)
@@ -439,7 +439,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 _manuverLines.ManipulateNode(0, _progradeDV, _radialDV, tseconds);
             }
 
-            if (!_uiState.SelectedSysMapRender.SelectedEntityExtras.Contains(_manuverLines))
+            if (_uiState.SelectedSysMapRender != null && !_uiState.SelectedSysMapRender.SelectedEntityExtras.Contains(_manuverLines))
                 _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_manuverLines);
 
             if(_orderEntity.Manager == null)
@@ -531,7 +531,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             ImGui.Text(_manuverLines.EditingNodes[0].TargetOrbit.LoAN.ToString());
             ImGui.Text(_manuverLines.EditingNodes[0].TargetOrbit.AoP.ToString());
 
-            if (!_uiState.SelectedSysMapRender.SelectedEntityExtras.Contains(_manuverLines))
+            if (_uiState.SelectedSysMapRender != null && !_uiState.SelectedSysMapRender.SelectedEntityExtras.Contains(_manuverLines))
                 _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_manuverLines);
 
             if(_orderEntity.Manager == null)
@@ -607,11 +607,14 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             // _manuvers = OrbitalMath.Phasing(_sgp, lowestOrbit, _phaseAngleRadians, _currentKE.Value, 0, _kRevolutions);
 
             double totalManuverDV = 0;
-            foreach (var manuver in _manuvers)
+            if(_manuvers != null)
             {
-                ImGui.Text(manuver.deltaV.Length() + "Δv");
-                totalManuverDV += manuver.deltaV.Length();
-                ImGui.Text("Seconds: " + manuver.tSec);
+                foreach (var manuver in _manuvers)
+                {
+                    ImGui.Text(manuver.deltaV.Length() + "Δv");
+                    totalManuverDV += manuver.deltaV.Length();
+                    ImGui.Text("Seconds: " + manuver.tSec);
+                }
             }
 
             ImGui.Text("Total Δv");

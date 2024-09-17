@@ -112,6 +112,8 @@ namespace Pulsar4X.SDL2UI.Combat
 
         void SetDamageEventFrames()
         {
+            if(_profile == null) return;
+            
             _damageFrames = DamageTools.DealDamageSim(_profile, _profile.DamageEvents[_damageEventIndex]).damageFrames;
             _showFrameNum = 0;
             if(_damageFrames != null)

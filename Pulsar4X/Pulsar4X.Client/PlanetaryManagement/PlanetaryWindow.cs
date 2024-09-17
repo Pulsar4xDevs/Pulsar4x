@@ -66,8 +66,10 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
+            if(!IsActive || _lookedAtEntity == null) return;
+
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(400,400),ImGuiCond.Once);
-            if (IsActive == true && ImGui.Begin("Planetary Window: " + _lookedAtEntity.Name, ref IsActive, _flags))
+            if (ImGui.Begin("Planetary Window: " + _lookedAtEntity.Name, ref IsActive, _flags))
             {
                 RenderTabOptions();
 
@@ -97,6 +99,8 @@ namespace Pulsar4X.SDL2UI
                 _selectedSubWindow = PlanetarySubWindows.generalInfo;
             }
 
+            if(_lookedAtEntity == null) return;
+
             if (_lookedAtEntity.Entity.HasDataBlob<InstallationsDB>())
             {
                 ImGui.SameLine();
@@ -125,6 +129,8 @@ namespace Pulsar4X.SDL2UI
             };
 
             List<string[]> rowData = new List<string[]>();
+
+            if(_lookedAtEntity == null) return;
 
             if (_lookedAtEntity.Entity.HasDataBlob<SystemBodyInfoDB>())
             {
@@ -209,7 +215,7 @@ namespace Pulsar4X.SDL2UI
 
         private void RenderInstallations()
         {
-            if (_lookedAtEntity.Entity.HasDataBlob<InstallationsDB>())
+            if (_lookedAtEntity != null && _lookedAtEntity.Entity.HasDataBlob<InstallationsDB>())
             {
                 InstallationsDB tempInstallations = _lookedAtEntity.Entity.GetDataBlob<InstallationsDB>();
             }
@@ -224,7 +230,7 @@ namespace Pulsar4X.SDL2UI
                 new KeyValuePair<string, TextAlign>("Accessibility", TextAlign.Right)
             };
 
-            if (_lookedAtEntity.Entity.HasDataBlob<MineralsDB>())
+            if (_lookedAtEntity != null && _lookedAtEntity.Entity.HasDataBlob<MineralsDB>())
             {
                 var mineRates = new Dictionary<int, long>();
 
