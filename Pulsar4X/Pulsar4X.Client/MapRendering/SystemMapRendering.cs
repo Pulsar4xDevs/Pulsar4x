@@ -139,6 +139,13 @@ namespace Pulsar4X.SDL2UI
                 _orbitRings.TryAdd(entityItem.Id, orb);
             }
 
+            if (entityItem.HasDataBlob<NewtonSimpleMoveDB>())
+            {
+                Icon orb;
+                orb = new NewtonSimpleIcon(entityState, _state.UserOrbitSettingsMtx);
+                _orbitRings.TryAdd(entityItem.Id, orb);
+            }
+
             if (entityItem.HasDataBlob<WarpMovingDB>())
             {
                 var wrp = entityItem.GetDataBlob<WarpMovingDB>();

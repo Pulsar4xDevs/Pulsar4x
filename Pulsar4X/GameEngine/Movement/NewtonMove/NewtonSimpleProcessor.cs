@@ -10,10 +10,9 @@ namespace Pulsar4X.Engine;
 
 public class NewtonSimpleProcessor : IHotloopProcessor
 {
-    public TimeSpan RunFrequency => TimeSpan.FromSeconds(1);
+    public TimeSpan RunFrequency => TimeSpan.FromSeconds(30);
     public TimeSpan FirstRunOffset => TimeSpan.FromSeconds(0);
     public Type GetParameterType => typeof(NewtonSimpleMoveDB);
-    public CargoDefinitionsLibrary _cargolib = new CargoDefinitionsLibrary();
 
     public void Init(Game game)
     {

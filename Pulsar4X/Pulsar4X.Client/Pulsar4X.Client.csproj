@@ -253,9 +253,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="OrbitalWidgets\" />
-  </ItemGroup>
-  <ItemGroup>
     <None Update="Resources\CancelIco.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

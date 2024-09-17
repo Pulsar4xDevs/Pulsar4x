@@ -57,9 +57,10 @@ namespace Pulsar4X.Extensions
         public static (Vector3 pos, Vector3 Velocity) GetRelativeState(this Entity entity)
         {
             var pos = entity.GetDataBlob<PositionDB>().RelativePosition;
+            var datetime = entity.StarSysDateTime;
             if (entity.HasDataBlob<OrbitDB>())
             {
-                var datetime = entity.StarSysDateTime;
+                datetime = entity.StarSysDateTime;
                 var orbit = entity.GetDataBlob<OrbitDB>();
 
                 var vel = orbit.InstantaneousOrbitalVelocityVector_m(datetime);
@@ -67,7 +68,7 @@ namespace Pulsar4X.Extensions
             }
             if (entity.HasDataBlob<OrbitUpdateOftenDB>())
             {
-                var datetime = entity.StarSysDateTime;
+                datetime = entity.StarSysDateTime;
                 var orbit = entity.GetDataBlob<OrbitUpdateOftenDB>();
                 var vel = orbit.InstantaneousOrbitalVelocityVector_m(datetime);
                 return (pos, vel);
@@ -79,6 +80,11 @@ namespace Pulsar4X.Extensions
 
                 var vel = move.CurrentVector_ms;
                 return (pos, vel);
+            }
+
+            if (entity.HasDataBlob<NewtonSimpleMoveDB>())
+            {
+                NewtonSimpleProcessor.GetRelativeState(entity, datetime);
             }
 
             if (entity.HasDataBlob<ColonyInfoDB>())
@@ -143,6 +149,12 @@ namespace Pulsar4X.Extensions
                 var vel = move.CurrentVector_ms;
                 return (pos, vel);
             }
+            
+            if (entity.HasDataBlob<NewtonSimpleMoveDB>())
+            {
+                return  NewtonSimpleProcessor.GetAbsoluteState(entity, entity.StarSysDateTime);
+            }
+            
             if(entity.HasDataBlob<WarpMovingDB>())
             {
                 var vel = entity.GetDataBlob<WarpMovingDB>().CurrentNonNewtonionVectorMS;
@@ -184,6 +196,10 @@ namespace Pulsar4X.Extensions
             {
                 return NewtonionMovementProcessor.GetRelativeState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).vel;
             }
+            else if (entity.HasDataBlob<NewtonSimpleMoveDB>())
+            {
+                return NewtonSimpleProcessor.GetRelativeState(entity, atDateTime).vel;
+            }
             else if (entity.HasDataBlob<WarpMovingDB>())
             {
                 return entity.GetDataBlob<WarpMovingDB>().SavedNewtonionVector;
@@ -219,6 +235,10 @@ namespace Pulsar4X.Extensions
                 //recurse
                 return GetAbsoluteFutureVelocity(parentEntity, atDateTime) + vel;
             }
+            else if (entity.HasDataBlob<NewtonSimpleMoveDB>())
+            {
+                return NewtonSimpleProcessor.GetAbsoluteState(entity, atDateTime).vel;
+            }
             else if (entity.HasDataBlob<WarpMovingDB>())
             {
                 return entity.GetDataBlob<WarpMovingDB>().SavedNewtonionVector;
@@ -252,6 +272,10 @@ namespace Pulsar4X.Extensions
             {
                 return NewtonionMovementProcessor.GetRelativeState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).pos;
             }
+            else if (entity.HasDataBlob<NewtonSimpleMoveDB>())
+            {
+                return NewtonSimpleProcessor.GetRelativeState(entity, atDateTime).pos;
+            }
             else if (entity.HasDataBlob<PositionDB>())
             {
                 return entity.GetDataBlob<PositionDB>().RelativePosition;
@@ -282,6 +306,10 @@ namespace Pulsar4X.Extensions
             else if (entity.HasDataBlob<NewtonMoveDB>())
             {
                 return NewtonionMovementProcessor.GetAbsoluteState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).pos;
+            }
+            else if (entity.HasDataBlob<NewtonSimpleMoveDB>())
+            {
+                return NewtonSimpleProcessor.GetAbsoluteState(entity, atDateTime).pos;
             }
             else if (entity.HasDataBlob<PositionDB>())
             {
@@ -361,7 +389,6 @@ namespace Pulsar4X.Extensions
 
                 return percentStored;
             }
-
             return 0;
         }
 
@@ -480,7 +507,7 @@ namespace Pulsar4X.Extensions
 
             return false;
         }
-
+        
         public static CargoDefinitionsLibrary? GetFactionCargoDefinitions(this Entity entity)
         {
             if(entity.GetFactionOwner.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
