@@ -34,6 +34,7 @@ namespace Pulsar4X.Engine.Orders
             var navCommand = new NavSequenceCommand();
             navCommand._entityCommanding = entity;
             navCommand._manuvers.Add(manuver);
+            navCommand.Execute(entity.StarSysDateTime);
         }
         
         

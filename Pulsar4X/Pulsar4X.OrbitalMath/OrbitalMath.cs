@@ -1591,6 +1591,71 @@ namespace Pulsar4X.Orbital
         }
 
 
+        public static double[,] HohmannOE2(double sgp, double aInt, double trueInt0, double aTgt, double trueTgt0)
+        {
+            var phase0 = (trueInt0 % (2 * Math.PI)) - (trueTgt0 % (2 * Math.PI)); //diffrence between intercptor true anomolay and tager true anomally at time 0.
+
+            var angVTgt = Math.Sqrt(sgp / Math.Pow(aTgt, 3)); //Angular velocity of interceptor orbit
+            var angVInt = Math.Sqrt(sgp / Math.Pow(aInt, 3)); //Angular veocity of target orbit
+
+            var aTrans = (aInt + aTgt) / 2; //semimajor axis of transfer orbit
+            var tTrans = Math.PI * Math.Sqrt(Math.Pow(aTrans, 3) / sgp); //time of flight for the transfer orbit (time between burn 1 and burn 2)
+
+            var leadAng = angVTgt * tTrans; //lead angle (amount the target moves durring the transfer orbit )
+            var phaseAng = leadAng - Math.PI; //angle between interceptor at time 1 and target at time 2 needs to be -180 degrees (PI radians). Angle between interceptor at t1 and target at t1 is -180 plus the lead angle
+
+            Console.WriteLine("phase0: " + phase0);
+            Console.WriteLine("phaseAng: " + phaseAng);
+
+            var k = 0;
+            var sign = 1;
+            if (aTgt > aInt) //checks if target orbit is larger than interceptor orbit
+            {
+                Console.WriteLine("Larger target orbit");
+                if ((phaseAng - phase0) < 0) //when target orbit is larger than interceptor orbit, the interceptor trails the target durring the launch window. If (phaseAng - phase0) < 0 that means the interceptor trails the target by too little so its passed the launch window and has to wait for the next launch window. 
+                {
+                    k = 1; //used to add 2pi to the twait equation later on. Causes craft to wait till next transfer window.
+                    Console.WriteLine("Missed current transfer window, needed to wait a partial synodic period");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Smaller target orbit");
+                sign = -1; //Causes deltaV direction to be reversed, declerating into lower orbit rather than accelerating into higher orbit
+                if ((phaseAng - phase0) > 0) //when target orbit is smaller than interceptor orbit, the interceptor leads the target durring the launch window. If (phaseAng - phase0) > 0 that means the interceptor leads the target by too little, so its passed the launch window and has to wait for the next launch window. 
+                {
+                    k = -1; //used to subtract 2pi to the twait equation later on to make the numerator negative. Causes craft to wait till next transfer window. Negative because the denominator of the equation is negative in this cercumstance (target orbit smaller than interceptor orbit) so need to make the numerator negative as well to get a positive value for the wait time. 
+                    Console.WriteLine("Missed current transfer window, needed to wait a partial synodic period");
+                }
+            }
+
+            var tWait = (phaseAng - phase0 + 2 * Math.PI * k) / (angVInt - angVTgt); //time to wait for the orbits to aline so burn 1 can start.
+
+            var deltaVBurn1 = sign * Math.Abs(Math.Sqrt(((2 * sgp) / aInt) - (sgp / aTrans)) - Math.Sqrt(sgp / aInt)); //DeltaV from going from Interceptor's orbit to transfer orbit
+            var deltaVBurn2 = sign * Math.Abs(Math.Sqrt(((2 * sgp) / aTgt) - (sgp / aTrans)) - Math.Sqrt(sgp / aTgt)); //DeltaV from going from Transfer orbit to Target's orbit
+
+            //planet postitions at times 1 and 2
+            //var trueInt1 = trueInt0 + angVInt * tWait;
+            //var trueInt2 = trueInt1 + angVInt * tTrans;
+            //var trueTgt1 = trueTgt0 + angVTgt * tWait;
+            //var trueTgt2 = trueTgt1 + angVTgt * tTrans;
+
+            //transfer orbit properties
+            var eTrans = (aTgt - aInt) / (aTgt + aInt); //the appoasis of the transfer orbit is the semimajor axis of the larger orbit, the periapsis is the semimjor axis of the smaller orbi
+            var LoPTrans = trueInt0 + angVInt * tWait; //periapsis of the transfer orbit is the position of the interceptor at the time of the first burn.
+
+            //var manuvers = new (Vector3 burn1, double timeInSeconds)[2];
+            double[,] manuvers = new double[3, 4];
+            manuvers[0, 0] = deltaVBurn1;
+            manuvers[0, 1] = tWait;
+            manuvers[0, 2] = deltaVBurn2;
+            manuvers[0, 3] = tTrans;
+            manuvers[1, 0] = aTrans;
+            manuvers[1, 1] = eTrans;
+            manuvers[1, 2] = LoPTrans;
+            return manuvers;
+        }
+
         /// <summary>
         /// Phasing manuver, assumes a cicular orbit. 
         /// </summary>

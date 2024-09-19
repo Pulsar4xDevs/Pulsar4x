@@ -16,6 +16,7 @@ using System.Net.Http;
 using Pulsar4X.Messaging;
 using System.Threading.Tasks;
 using Pulsar4X.DataStructures;
+using Pulsar4X.ImGuiNetUI.ManuverNodes;
 using static Pulsar4X.SDL2UI.SystemViewPreferences;
 
 namespace Pulsar4X.SDL2UI
@@ -324,6 +325,12 @@ namespace Pulsar4X.SDL2UI
             if(LastClickedEntity.DebugOrbitOrder != null)
             {
                 SelectedSysMapRender.SelectedEntityExtras.Add(LastClickedEntity.DebugOrbitOrder);
+            }
+
+            if (LastClickedEntity.Entity.TryGetDatablob(out NavSequenceDB navDB))
+            {
+                ManuverNodesDraw2 nodeDraw = new ManuverNodesDraw2(LastClickedEntity.Entity);
+                SelectedSysMapRender.SelectedEntityExtras.Add(nodeDraw);
             }
 
             if(ActiveWindow == null || ActiveWindow.GetActive() == false || ActiveWindow.ClickedEntityIsPrimary)

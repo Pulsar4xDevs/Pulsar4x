@@ -888,6 +888,36 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
             if (ImGui.Button("Make it so"))
             {
+                var mvr = OrbitalMath.HohmannOE2(_sgp, intSMA, _truelongInt, _targetSMA, _truelongTgt);
+
+                var timeAtFirstManuver = _atDatetime + TimeSpan.FromSeconds(mvr[0, 1]);
+                var timeAtSecondManuver = _atDatetime + TimeSpan.FromSeconds(mvr[0, 3]);
+                KeplerElements transferOrbit = new KeplerElements()
+                {
+                    SemiMajorAxis = mvr[1,0],
+                    Eccentricity = mvr[1,1],
+                    LoAN = mvr[1,2],
+                    AoP = 0,
+                    Inclination = 0,
+                    StandardGravParameter = _sgp
+                           
+                };
+                Manuver navManuver = new Manuver()
+                {
+                    TypeOfManuver = Manuver.ManuverType.NewtonSimple,
+                    StartDateTime = timeAtFirstManuver,
+                    StartSOIParent = soiParent,
+                    StartKepler = (KeplerElements)_currentKE,
+                    EndSOIParent = _siblingEntities[_selectedSibling],
+                    EndKepler = transferOrbit,
+                    EndDateTime = timeAtSecondManuver
+                };
+                NavSequenceCommand.CreateNewCommand(_orderEntity, navManuver);
+                
+                
+                
+                
+                /*
                 double fuelBurned1 = OrbitMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, _manuvers[0].deltaV.Length());
                 double secondsBurn1 = fuelBurned1 / _burnRate;
                 var manuverNodeTime1 = _atDatetime + TimeSpan.FromSeconds(secondsBurn1 * 0.5);
@@ -899,7 +929,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 if(_fuelType == null)
                     throw new NullReferenceException();
 
-                double mass2 = _totalMass - (fuelBurned1 * _fuelType.MassPerUnit); 
+                double mass2 = _totalMass - (fuelBurned1 * _fuelType.MassPerUnit);
                 double fuelBurned2 = OrbitMath.TsiolkovskyFuelUse(mass2, _exhaustVelocity, _manuvers[1].deltaV.Length());
                 double secondsBurn2 = fuelBurned2 / _burnRate;
                 var manuverNodeTime2 = manuverNodeTime1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
@@ -915,6 +945,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 _manuverLines.EditingNodes[1].NodeName = "Circularise";
                 newseq.ManuverNodes.Add(_manuverLines.EditingNodes[1]);
                 _manuverLines.SelectedSequence.ManuverSequences.Add(newseq);
+                */
             }
         }
 
