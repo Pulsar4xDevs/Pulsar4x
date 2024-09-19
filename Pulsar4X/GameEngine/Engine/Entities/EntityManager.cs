@@ -256,20 +256,12 @@ namespace Pulsar4X.Engine
                     }
                 }
 
-                //remove each of the datablobs.
-                foreach (var type in GetAllDataBlobTypesForEntity(entity.Id))
-                {
-                    if (_datablobStores.ContainsKey(type))
-                    {
-                        _datablobStores[type].Remove(entity.Id);
-                    }
-                }
                 //actualy remove it from the manager here.
                 if (!_entities.Remove(entity.Id))
                 {
                     throw new KeyNotFoundException($"Entity with ID {entity.Id} not found in manager.");
                 }
-                
+
                 Event e = Event.Create(EventType.EntityDestroyed, StarSysDateTime, "Entity Removed From Manager", entity.FactionOwnerID, ManagerID, entity.Id);
                 EventManager.Instance.Publish(e);
 
@@ -282,9 +274,9 @@ namespace Pulsar4X.Engine
             var dataBlobs = new List<BaseDataBlob>();
             foreach(var storeEntry in _datablobStores)
             {
-                if(storeEntry.Value.ContainsKey(entityID))
+                if(storeEntry.Value.TryGetValue(entityID, out var value))
                 {
-                    dataBlobs.Add(storeEntry.Value[entityID]);
+                    dataBlobs.Add(value);
                 }
             }
 
@@ -343,6 +335,24 @@ namespace Pulsar4X.Engine
         internal bool HasDataBlob(int entityID, Type type)
         {
             return _datablobStores[type].ContainsKey(entityID);
+        }
+
+        internal bool TryGetDataBlob<T>(int entityID, out T? value) where T : BaseDataBlob
+        {
+            Type blobType = typeof(T);
+            if(_datablobStores.TryGetValue(blobType, out var dataStore))
+            {
+                if(dataStore.TryGetValue(entityID, out var dataBlob))
+                {
+                    value = (T)dataBlob;
+                    return true;
+                }
+                value = null;
+                return false;
+            }
+
+            value = null;
+            return false;
         }
 
         internal void SetDataBlob<T>(int entityId, T dataBlob, bool updateListeners = true) where T : BaseDataBlob
@@ -512,12 +522,10 @@ namespace Pulsar4X.Engine
         [PublicAPI]
         public bool TryGetEntityById(int entityId, out Entity entity)
         {
-            if(_entities.ContainsKey(entityId))
+            if(_entities.TryGetValue(entityId, out entity))
             {
-                entity = _entities[entityId];
                 return true;
             }
-
             entity = Entity.InvalidEntity;
             return false;
         }

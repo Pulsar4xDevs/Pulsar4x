@@ -153,7 +153,7 @@ namespace Pulsar4X.SDL2UI
                 wrpIcn = new WarpMovingIcon(entityItem);
                 _orbitRings.TryAdd(entityItem.Id, wrpIcn);
             }
-            
+
 
             if (entityItem.HasDataBlob<StarInfoDB>())
             {
@@ -175,9 +175,9 @@ namespace Pulsar4X.SDL2UI
                 _entityIcons.TryAdd(entityItem.Id, new ProjectileIcon(entityItem));
             }
 
-            if (entityItem.HasDataBlob<BeamInfoDB>())
+            if (entityItem.TryGetDatablob<BeamInfoDB>(out var beamInfoDB) && entityItem.TryGetDatablob<PositionDB>(out var positionDB))
             {
-                _entityIcons.TryAdd(entityItem.Id, new BeamIcon(entityItem));
+                _entityIcons.TryAdd(entityItem.Id, new BeamIcon(beamInfoDB, positionDB));
             }
 
             if(entityItem.HasDataBlob<JPSurveyableDB>())
@@ -382,7 +382,7 @@ namespace Pulsar4X.SDL2UI
             {
                 RemoveIconable(entityId);
                 AddIconable(systemState.EntityStatesWithPosition[entityId]);
-            }        
+            }
         }
 
         private void OnSystemStateEntityRemoved(SystemState systemState, int entityId)

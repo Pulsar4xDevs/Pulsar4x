@@ -9,6 +9,7 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Engine.Damage;
 using System.Diagnostics.CodeAnalysis;
 using Pulsar4X.Orbital;
+using Pulsar4X.Weapons;
 
 namespace Pulsar4X.Datablobs
 {
@@ -16,13 +17,13 @@ namespace Pulsar4X.Datablobs
     {
         [JsonProperty]
         public double MaxRange { get; internal set; }
-        
-        [JsonProperty] 
+
+        [JsonProperty]
         public double WaveLength { get; internal set; } = 700;
-        
+
         [JsonProperty]
         public int Energy { get; internal set; }
-        
+
         public double LenPerPulseInSeconds = 1;
 
         public double BeamSpeed { get; internal set; } = UniversalConstants.Units.SpeedOfLightInMetresPerSecond; //299792458 is speed of light.

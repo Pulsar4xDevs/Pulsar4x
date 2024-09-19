@@ -139,18 +139,20 @@ namespace Pulsar4X.DataStructures
 
         public bool TryGetValue(TKey key, [NotNullWhen(true)] out TValue? value)
         {
-            if(ContainsKey(key))
+            lock(_lock)
             {
-                value = _innerDictionary[key];
-                if (value is null)
+                if(_innerDictionary.ContainsKey(key))
                 {
-                    throw new InvalidOperationException("Unexpected null value in the dictionary.");
+                    value = _innerDictionary[key];
+                    if (value is null)
+                    {
+                        throw new InvalidOperationException("Unexpected null value in the dictionary.");
+                    }
+                    return true;
                 }
-                return true;
+                value = default(TValue);
+                return false;
             }
-
-            value = default(TValue);
-            return false;
         }
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()

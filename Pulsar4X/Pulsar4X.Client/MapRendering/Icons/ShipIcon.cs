@@ -436,9 +436,9 @@ namespace Pulsar4X.SDL2UI
     public class BeamIcon : Icon
     {
         BeamInfoDB? _beamInfo;
-        public BeamIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
+        public BeamIcon(BeamInfoDB beamInfoDB, PositionDB positionDB) : base(positionDB)
         {
-            _beamInfo = entity.GetDataBlob<BeamInfoDB>();
+            _beamInfo = beamInfoDB;
             OnPhysicsUpdate();
         }
 
