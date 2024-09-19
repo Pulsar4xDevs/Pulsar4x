@@ -34,6 +34,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         double _exhaustVelocity;
         private double _totalDVUsage = 0;
         private (Vector3 deltaV, double tSec)[]? _manuvers;
+        private Manuver[]? _navManuvers;
         float _phaseAngleRadians = 0;
         private DateTime _minDateTime;
         DateTime _atDatetime;
@@ -750,16 +751,20 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             _manuvers = OrbitalMath.Hohmann2(_sgp, mySMA, _targetSMA);
 
             double totalManuverDV = 0;
+            int i = 0;
             foreach (var manuver in _manuvers)
             {
+                var time = manuver.tSec;
                 var dv = manuver.deltaV.Length();
                 totalManuverDV += dv;
                 double fuelBurned = OrbitMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, dv);
-                double secondsBurn = fuelBurned / _burnRate;
+                double burnTime = fuelBurned / _burnRate;
+                ImGui.Text("Burn # " + i);
+                ImGui.Text(time + "time");
                 ImGui.Text(dv + "Δv");
                 ImGui.Text(fuelBurned + " fuel");
-                ImGui.Text(Stringify.Number(secondsBurn, "0.###") + " Second Burn");
-
+                ImGui.Text(Stringify.Number(burnTime, "0.###") + " Seconds of Burn");
+                i++;
             }
 
             if(totalManuverDV > _totalDV)
@@ -851,6 +856,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
             double totalManuverTime = 0;
             double totalManuverDV = 0;
+            int i = 0;
             foreach (var manuver in _manuvers)
             {
                 var time = manuver.tSec;
@@ -858,13 +864,13 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 totalManuverTime += time;
                 totalManuverDV += dv;
                 double fuelBurned = OrbitMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, dv);
-                double secondsBurn = fuelBurned / _burnRate;
-
+                double burnTime = fuelBurned / _burnRate;
+                ImGui.Text("Burn # " + i);
                 ImGui.Text(time + "time");
                 ImGui.Text(dv + "Δv");
                 ImGui.Text(fuelBurned + " fuel");
-                ImGui.Text(Stringify.Number(secondsBurn, "0.###") + " Second Burn");
-
+                ImGui.Text(Stringify.Number(burnTime, "0.###") + " Seconds of Burn");
+                i++;
             }
 
             if(totalManuverDV > _totalDV)

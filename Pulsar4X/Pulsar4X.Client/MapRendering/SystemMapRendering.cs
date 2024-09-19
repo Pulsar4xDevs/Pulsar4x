@@ -153,6 +153,7 @@ namespace Pulsar4X.SDL2UI
                 wrpIcn = new WarpMovingIcon(entityItem);
                 _orbitRings.TryAdd(entityItem.Id, wrpIcn);
             }
+            
 
             if (entityItem.HasDataBlob<StarInfoDB>())
             {
