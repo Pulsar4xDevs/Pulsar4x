@@ -28,6 +28,13 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
         return new Entity(entityId);
     }
 
+    public static Entity Create(int factionId)
+    {
+        var entity = Create();
+        entity.FactionOwnerID = factionId;
+        return entity;
+    }
+
     public static readonly Entity InvalidEntity = new Entity(-1);
 
     [JsonIgnore]
