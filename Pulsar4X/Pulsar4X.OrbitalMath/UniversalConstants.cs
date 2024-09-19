@@ -63,7 +63,7 @@ namespace Pulsar4X.Orbital
             /// <summary>
             /// Speed of Light in Metres per Second
             /// </summary>
-            public const double SpeedOfLightInMetresPerSecond = 299792458;  // see https://en.wikipedia.org/wiki/Speed_of_light
+            public const double SpeedOfLightInMetresPerSecond = 299792458; // see https://en.wikipedia.org/wiki/Speed_of_light
 
             /// <summary>
             /// Plus or Minus 65Km

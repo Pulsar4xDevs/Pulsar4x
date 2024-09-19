@@ -99,28 +99,32 @@ namespace Pulsar4X.Engine
         {
             var nowTime = launchingEntity.StarSysDateTime;
             var ourState = launchingEntity.GetAbsoluteState();
-            var futurePosTime = PredictTgtPositionAndTime(ourState, nowTime, targetEntity, beamVelocity);
+            var targetFuturePosTime = PredictTgtPositionAndTime(ourState, nowTime, targetEntity, beamVelocity);
             
             var ourAbsPos = launchingEntity.GetAbsoluteFuturePosition(nowTime);
-            var normVector = Vector3.Normalise(futurePosTime.pos - ourAbsPos);
+            var normVector = Vector3.Normalise(targetFuturePosTime.pos - ourAbsPos);
             var absVector =  normVector * beamVelocity;
             var startPos = (PositionDB)launchingEntity.GetDataBlob<PositionDB>().Clone();
-            var beamInfo = new BeamInfoDB(launchingEntity.Id, targetEntity, hitsTarget);
-            var beamlenInMeters = beamLenInSeconds * 299792458;
-            beamInfo.Positions = new Vector3[2];
-            beamInfo.Positions[0] = startPos.AbsolutePosition ;
-            beamInfo.Positions[1] = startPos.AbsolutePosition - normVector * beamlenInMeters;
-            beamInfo.VelocityVector = absVector;
-            beamInfo.Frequency = wavelen;
-            beamInfo.Energy = energy;
-            List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
-            dataBlobs.Add(beamInfo);
-            //dataBlobs.Add(new ComponentInstancesDB());
-            dataBlobs.Add(startPos);
-            //dataBlobs.Add(new NameDB("Beam", launchingEntity.FactionOwner, "Beam" ));
+            var beamlenInMeters = beamLenInSeconds * UniversalConstants.Units.SpeedOfLightInMetresPerSecond;
 
-            var newbeam = Entity.Create();
-            newbeam.FactionOwnerID = launchingEntity.FactionOwnerID;
+            // Setup the beam entity
+            var beamInfo = new BeamInfoDB(launchingEntity.Id, targetEntity, hitsTarget)
+            {
+                Positions = [startPos.AbsolutePosition, startPos.AbsolutePosition + normVector * beamlenInMeters],
+                VelocityVector = absVector,
+                Frequency = wavelen,
+                Energy = energy
+            };
+            
+            var dataBlobs = new List<BaseDataBlob>()
+            {
+                beamInfo,
+                startPos
+            };
+
+            var newbeam = Entity.Create(launchingEntity.FactionOwnerID);
+
+            // Add the beam to the game            
             launchingEntity.Manager.AddEntity(newbeam, dataBlobs);
         }
 
@@ -128,8 +132,7 @@ namespace Pulsar4X.Engine
         {
             
             var tgtState = targetEntity.GetAbsoluteState();
-            Vector3 leadToTgt = (ourState.Velocity - tgtState.Velocity);
-            Vector3 vectorToTgt = (ourState.pos -tgtState.pos);
+            Vector3 vectorToTgt = ourState.pos - tgtState.pos;
             var distanceToTgt = vectorToTgt.Length();
             var timeToTarget = distanceToTgt / beamVelocity;
             var futureDate = atTime + TimeSpan.FromSeconds(timeToTarget);

@@ -291,6 +291,10 @@ namespace Pulsar4X.SDL2UI
                         _orbitRings.TryRemove(message.EntityId.Value, out var foo);
                     }
                 }
+                if(message.MessageType == MessageTypes.EntityRemoved && message.EntityId != null)
+                {
+                    RemoveIconable(message.EntityId.Value);
+                }
             }
         }
 
