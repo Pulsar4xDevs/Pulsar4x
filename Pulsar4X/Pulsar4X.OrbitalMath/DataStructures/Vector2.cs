@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Pulsar4X.Orbital
 {
+    [DebuggerDisplay("{DebuggerDisplay}")]
     public struct Vector2
     {
         public double X;
@@ -25,7 +27,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Gets a vector whose 2 elements are equal to one. 
+        /// Gets a vector whose 2 elements are equal to one.
         /// </summary>
         public static Vector2 One
         {
@@ -33,7 +35,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Gets a vector whose 2 elements are equal to zero. 
+        /// Gets a vector whose 2 elements are equal to zero.
         /// </summary>
         public static Vector2 Zero
         {
@@ -42,15 +44,15 @@ namespace Pulsar4X.Orbital
 
         public static Vector2 Random
         {
-            get 
-            { 
+            get
+            {
                 Random r = new Random();
-                return new Vector2(r.NextDouble(), r.NextDouble()); 
+                return new Vector2(r.NextDouble(), r.NextDouble());
             }
         }
 
         /// <summary>
-        /// Adds two vectors together. 
+        /// Adds two vectors together.
         /// </summary>
         public static Vector2 Add(Vector2 left, Vector2 right)
         {
@@ -58,7 +60,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Divides the first vector by the second. 
+        /// Divides the first vector by the second.
         /// </summary>
         public static Vector2 Divide(Vector2 left, Vector2 right)
         {
@@ -66,7 +68,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Divides the specified vector by a specified scalar value. 
+        /// Divides the specified vector by a specified scalar value.
         /// </summary>
         public static Vector2 Divide(Vector2 left, double divisor)
         {
@@ -77,7 +79,7 @@ namespace Pulsar4X.Orbital
         /// <summary>
         /// Returns the magnitude of the vector.
         /// </summary>
-        /// 
+        ///
         public static double Magnitude(Vector2 vector)
         {
             return Math.Sqrt((vector.X * vector.X) + (vector.Y * vector.Y));
@@ -123,7 +125,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Returns a value that indicates whether this instance and another vector are equal. 
+        /// Returns a value that indicates whether this instance and another vector are equal.
         /// </summary>
         public bool Equals(Vector2 other)
         {
@@ -144,7 +146,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Returns the length of this vector object. 
+        /// Returns the length of this vector object.
         /// </summary>
         public double Length()
         {
@@ -152,7 +154,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Returns the length of the vector squared. 
+        /// Returns the length of the vector squared.
         /// </summary>
         public double LengthSquared()
         {
@@ -168,7 +170,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Multiplies two vectors together. 
+        /// Multiplies two vectors together.
         /// </summary>
         public static Vector2 Multiply(Vector2 left, Vector2 right)
         {
@@ -176,7 +178,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Multiplies a vector by a specified scalar. 
+        /// Multiplies a vector by a specified scalar.
         /// </summary>
         public static Vector2 Multiply(Vector2 left, float right)
         {
@@ -184,7 +186,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Negates a specified vector. 
+        /// Negates a specified vector.
         /// </summary>
         public static Vector2 Negate(Vector2 value)
         {
@@ -192,7 +194,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Subtracts the second vector from the first. 
+        /// Subtracts the second vector from the first.
         /// </summary>
         public static Vector2 Subtract(Vector2 left, Vector2 right)
         {
@@ -208,7 +210,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Returns the string representation of the current instance using the specified format string to format individual elements. 
+        /// Returns the string representation of the current instance using the specified format string to format individual elements.
         /// </summary>
         public string ToString(string format)
         {
@@ -216,7 +218,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Returns the string representation of the current instance using the specified format string to format individual elements 
+        /// Returns the string representation of the current instance using the specified format string to format individual elements
         /// and the specified format provider to define culture-specific formatting.
         /// </summary>
         public string ToString(string format, IFormatProvider formatProvider)
@@ -229,7 +231,7 @@ namespace Pulsar4X.Orbital
         #region Operators
 
         /// <summary>
-        /// Adds two vectors together. 
+        /// Adds two vectors together.
         /// </summary>
         public static Vector2 operator +(Vector2 left, Vector2 right)
         {
@@ -237,7 +239,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Divides the first vector by the second. 
+        /// Divides the first vector by the second.
         /// </summary>
         public static Vector2 operator /(Vector2 left, Vector2 right)
         {
@@ -254,7 +256,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Returns a value that indicates whether each pair of elements in two specified vectors is equal. 
+        /// Returns a value that indicates whether each pair of elements in two specified vectors is equal.
         /// </summary>
         public static bool operator ==(Vector2 left, Vector2 right)
         {
@@ -262,7 +264,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Returns a value that indicates whether two specified vectors are not equal. 
+        /// Returns a value that indicates whether two specified vectors are not equal.
         /// </summary>
         public static bool operator !=(Vector2 left, Vector2 right)
         {
@@ -270,7 +272,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Multiples the scalar value by the specified vector. 
+        /// Multiples the scalar value by the specified vector.
         /// </summary>
         public static Vector2 operator *(double left, Vector2 right)
         {
@@ -286,7 +288,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Multiples the specified vector by the specified scalar value. 
+        /// Multiples the specified vector by the specified scalar value.
         /// </summary>
         public static Vector2 operator *(Vector2 left, double right)
         {
@@ -294,7 +296,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Subtracts the second vector from the first. 
+        /// Subtracts the second vector from the first.
         /// </summary>
         public static Vector2 operator -(Vector2 left, Vector2 right)
         {
@@ -302,7 +304,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Negates the specified vector. 
+        /// Negates the specified vector.
         /// </summary>
         public static Vector2 operator -(Vector2 value)
         {
@@ -315,6 +317,14 @@ namespace Pulsar4X.Orbital
         }
 
         #endregion
+
+        private string DebuggerDisplay
+        {
+            get
+            {
+                return $"({X},{Y})";
+            }
+        }
 
     }
 
