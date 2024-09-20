@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Pulsar4X.DataStructures;
 
@@ -31,17 +31,15 @@ public class MessagePublisher
         }
     }
 
-    public void Publish(Message message)
+    public async Task Publish(Message message)
     {
-        if(subscribers.ContainsKey(message.MessageType))
+        if (subscribers.TryGetValue(message.MessageType, out var handlers))
         {
-            foreach(var (handler, filter) in subscribers[message.MessageType])
-            {
-                if(filter?.Invoke(message) ?? true)
-                {
-                    Task.Run(() => handler(message));
-                }
-            }
+            var tasks = handlers
+                .Where(h => h.Filter?.Invoke(message) ?? true)
+                .Select(h => h.Handler(message));
+
+            await Task.WhenAll(tasks);
         }
     }
 }

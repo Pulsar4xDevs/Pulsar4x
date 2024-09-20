@@ -167,37 +167,31 @@ namespace Pulsar4X.SDL2UI
             MessagePublisher.Instance.Subscribe(MessageTypes.EntityHidden, OnEntityRemoved, filterById);
         }
 
-        async Task OnEntityRemoved(Message message)
+        Task OnEntityRemoved(Message message)
         {
-            await Task.Run(() =>
-            {
-                DataBlobs.Clear();
-                IsDestroyed = true;
-            });
+            DataBlobs.Clear();
+            IsDestroyed = true;
+            return Task.CompletedTask;
         }
 
-        async Task OnDBAdded(Message message)
+        Task OnDBAdded(Message message)
         {
-            await Task.Run(() =>
+            if(message.DataBlob != null)
             {
-                if(message.DataBlob != null)
-                {
-                    DataBlobs[message.DataBlob.GetType()] = message.DataBlob;
-                    _changesNextFrame.Add(message);
-                }
-            });
+                DataBlobs[message.DataBlob.GetType()] = message.DataBlob;
+                _changesNextFrame.Add(message);
+            }
+            return Task.CompletedTask;
         }
 
-        async Task OnDBRemoved(Message message)
+        Task OnDBRemoved(Message message)
         {
-            await Task.Run(() =>
+            if(message.DataBlob != null)
             {
-                if(message.DataBlob != null)
-                {
-                    DataBlobs.Remove(message.DataBlob.GetType());
-                    _changesNextFrame.Add(message);
-                }
-            });
+                DataBlobs.Remove(message.DataBlob.GetType());
+                _changesNextFrame.Add(message);
+            }
+            return Task.CompletedTask;
         }
 
         public void PostFrameCleanup()

@@ -137,7 +137,7 @@ namespace Pulsar4X.Engine
 
         #region Entity Management Functions
 
-        public void AddEntity(Entity entity, IEnumerable<BaseDataBlob>? dataBlobs = null)
+        public async void AddEntity(Entity entity, IEnumerable<BaseDataBlob>? dataBlobs = null)
         {
             if (_entities.ContainsKey(entity.Id))
                 throw new ArgumentException($"Entity with ID {entity.Id} already exists");
@@ -162,7 +162,7 @@ namespace Pulsar4X.Engine
             entity.IsValid = true;
 
             // Update listeners
-            MessagePublisher.Instance.Publish(
+            await MessagePublisher.Instance.Publish(
                 Message.Create(
                     MessageTypes.EntityAdded,
                     entity.Id,
@@ -208,7 +208,7 @@ namespace Pulsar4X.Engine
             return _entities.ContainsKey(entityID);
         }
 
-        internal void TagEntityForRemoval(Entity entity)
+        internal async void TagEntityForRemoval(Entity entity)
         {
             //check we've not already tagged this.
             if (!_entitiesTaggedForRemoval.Contains(entity))
@@ -222,7 +222,7 @@ namespace Pulsar4X.Engine
                 entity.IsValid = false;
                 ManagerSubpulses.RemoveEntity(entity);
                 _entitiesTaggedForRemoval.Add(entity);
-                MessagePublisher.Instance.Publish(
+                await MessagePublisher.Instance.Publish(
                     Message.Create(
                         MessageTypes.EntityRemoved,
                         entity.Id,
@@ -262,7 +262,7 @@ namespace Pulsar4X.Engine
                     throw new KeyNotFoundException($"Entity with ID {entity.Id} not found in manager.");
                 }
 
-                Event e = Event.Create(EventType.EntityDestroyed, StarSysDateTime, "Entity Removed From Manager", entity.FactionOwnerID, ManagerID, entity.Id);
+                Event e = Event.Create(EventType.EntityDestroyed, StarSysDateTime, $"Entity #{entity.Id} removed from {ManagerID}", entity.FactionOwnerID, ManagerID, entity.Id);
                 EventManager.Instance.Publish(e);
 
             }
@@ -355,7 +355,7 @@ namespace Pulsar4X.Engine
             return false;
         }
 
-        internal void SetDataBlob<T>(int entityId, T dataBlob, bool updateListeners = true) where T : BaseDataBlob
+        internal async void SetDataBlob<T>(int entityId, T dataBlob, bool updateListeners = true) where T : BaseDataBlob
         {
             if (dataBlob is null)
                 throw new ArgumentNullException(nameof(dataBlob));
@@ -380,11 +380,11 @@ namespace Pulsar4X.Engine
                         null,
                         dataBlob);
 
-                MessagePublisher.Instance.Publish(message);
+                await MessagePublisher.Instance.Publish(message);
             }
         }
 
-        public void RemoveDatablob<T>(int entityId) where T : BaseDataBlob
+        public async void RemoveDatablob<T>(int entityId) where T : BaseDataBlob
         {
             var type = typeof(T);
             if (_datablobStores.ContainsKey(type))
@@ -400,7 +400,7 @@ namespace Pulsar4X.Engine
                         null,
                         blob);
 
-                MessagePublisher.Instance.Publish(message);
+                await MessagePublisher.Instance.Publish(message);
             }
         }
 
@@ -546,13 +546,13 @@ namespace Pulsar4X.Engine
             return _factionSensorContacts[factionId];
         }
 
-        public void HideNeutralEntityFromFaction(int factionId, int entityId)
+        public async void HideNeutralEntityFromFaction(int factionId, int entityId)
         {
             SetupDefaultNeutralEntitiesForFaction(factionId);
 
             _factionNeutralContacts[factionId].Remove(entityId);
 
-            MessagePublisher.Instance.Publish(
+            await MessagePublisher.Instance.Publish(
                 Message.Create(
                     MessageTypes.EntityHidden,
                     entityId,
@@ -560,13 +560,13 @@ namespace Pulsar4X.Engine
                     factionId));
         }
 
-        public void ShowNeutralEntityToFaction(int factionId, int entityId)
+        public async void ShowNeutralEntityToFaction(int factionId, int entityId)
         {
             SetupDefaultNeutralEntitiesForFaction(factionId);
 
             _factionNeutralContacts[factionId].Add(entityId);
 
-            MessagePublisher.Instance.Publish(
+            await MessagePublisher.Instance.Publish(
                 Message.Create(
                     MessageTypes.EntityRevealed,
                     entityId,

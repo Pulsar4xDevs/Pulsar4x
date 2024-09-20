@@ -44,7 +44,7 @@ namespace Pulsar4X.SDL2UI
             SystemContacts = system.GetSensorContacts(faction.Id);
             _sensorChanges = SystemContacts.Changes.Subscribe();
             _faction = faction;
-            
+
             var entities = StarSystem.GetFilteredEntities(EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile, faction.Id);
             foreach(var entity in entities)
             {
@@ -83,32 +83,26 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        async Task OnEntityAddedMessage(Message message)
+        Task OnEntityAddedMessage(Message message)
         {
-            await Task.Run(() =>
-            {
-                if(message.EntityId == null) return;
-                EntitiesToAdd.Enqueue(message.EntityId.Value);
-            });
+            if(message.EntityId == null) return Task.CompletedTask;
+            EntitiesToAdd.Enqueue(message.EntityId.Value);
+            return Task.CompletedTask;
         }
 
-        async Task OnEntityRemovedMessage(Message message)
+        Task OnEntityRemovedMessage(Message message)
         {
-            await Task.Run(() =>
-            {
-                if(message.EntityId == null) return;
-                if(!EntitiesToBin.Contains(message.EntityId.Value))
-                    EntitiesToBin.Add(message.EntityId.Value);
-            });
+            if(message.EntityId == null) return Task.CompletedTask;
+            if(!EntitiesToBin.Contains(message.EntityId.Value))
+                EntitiesToBin.Add(message.EntityId.Value);
+            return Task.CompletedTask;
         }
 
-        async Task OnEntityUpdatedMessage(Message message)
+        Task OnEntityUpdatedMessage(Message message)
         {
-            await Task.Run(() =>
-            {
-                if(message.EntityId == null) return;
-                EntitiesToUpdate.Enqueue((message.EntityId.Value, message));
-            });
+            if(message.EntityId == null) return Task.CompletedTask;
+            EntitiesToUpdate.Enqueue((message.EntityId.Value, message));
+            return Task.CompletedTask;
         }
 
         public void PreFrameSetup()
@@ -130,14 +124,15 @@ namespace Pulsar4X.SDL2UI
 
         public void PostFrameCleanup()
         {
-            foreach(var item in AllEntities.Values)
-            {
-                if(item.IsDestroyed)
-                {
-                    if(!EntitiesToBin.Contains(item.Entity.Id))
-                        EntitiesToBin.Add(item.Entity.Id);
-                }
-            }
+            // TODO: not sure we need this?
+            // foreach(var item in AllEntities.Values)
+            // {
+            //     if(item.IsDestroyed)
+            //     {
+            //         if(!EntitiesToBin.Contains(item.Entity.Id))
+            //             EntitiesToBin.Add(item.Entity.Id);
+            //     }
+            // }
 
             foreach (var entityToRemove in EntitiesToBin)
             {
