@@ -37,6 +37,8 @@ namespace Pulsar4X.SDL2UI
         public SafeDictionary<int, EntityState> EntityStatesWithPosition = new ();
         public SafeDictionary<int, EntityState> EntityStatesColonies = new ();
 
+        public readonly object Lock = new object();
+
         public SystemState(StarSystem system, Entity faction)
         {
             StarSystem = system;
@@ -85,17 +87,24 @@ namespace Pulsar4X.SDL2UI
 
         Task OnEntityAddedMessage(Message message)
         {
-            if(message.EntityId == null) return Task.CompletedTask;
-            EntitiesToAdd.Enqueue(message.EntityId.Value);
-            return Task.CompletedTask;
+            lock(Lock)
+            {
+                if(message.EntityId == null) return Task.CompletedTask;
+                EntitiesToAdd.Enqueue(message.EntityId.Value);
+                return Task.CompletedTask;
+            }
         }
 
         Task OnEntityRemovedMessage(Message message)
         {
-            if(message.EntityId == null) return Task.CompletedTask;
-            if(!EntitiesToBin.Contains(message.EntityId.Value))
-                EntitiesToBin.Add(message.EntityId.Value);
-            return Task.CompletedTask;
+            lock(Lock)
+            {
+                if(message.EntityId == null) return Task.CompletedTask;
+                if(!EntitiesToBin.Contains(message.EntityId.Value))
+                    EntitiesToBin.Add(message.EntityId.Value);
+
+                return Task.CompletedTask;
+            }
         }
 
         Task OnEntityUpdatedMessage(Message message)
@@ -107,13 +116,30 @@ namespace Pulsar4X.SDL2UI
 
         public void PreFrameSetup()
         {
-            while(EntitiesToAdd.TryDequeue(out var entityToAdd))
+            lock(Lock)
             {
-                if(StarSystem.TryGetEntityById(entityToAdd, out var entity))
+                // Deal with additions
+                while(EntitiesToAdd.TryDequeue(out var entityToAdd))
                 {
-                    SetupEntity(entity, _faction);
-                    OnEntityAdded?.Invoke(this, entity);
+                    if(StarSystem.TryGetEntityById(entityToAdd, out var entity))
+                    {
+                        SetupEntity(entity, _faction);
+                        OnEntityAdded?.Invoke(this, entity);
+                    }
                 }
+
+                // Deal with removals
+                foreach (var entityToRemove in EntitiesToBin)
+                {
+                    AllEntities.Remove(entityToRemove);
+                    EntityStatesWithPosition.Remove(entityToRemove);
+                    EntityStatesWithNames.Remove(entityToRemove);
+                    EntityStatesColonies.Remove(entityToRemove);
+                    OnEntityRemoved?.Invoke(this, entityToRemove);
+                }
+                EntitiesToBin.Clear();
+                SensorChanges.Clear();
+                SystemChanges.Clear();
             }
 
             while(EntitiesToUpdate.TryDequeue(out var entityToUpdate))
@@ -134,17 +160,6 @@ namespace Pulsar4X.SDL2UI
             //     }
             // }
 
-            foreach (var entityToRemove in EntitiesToBin)
-            {
-                AllEntities.Remove(entityToRemove);
-                EntityStatesWithPosition.Remove(entityToRemove);
-                EntityStatesWithNames.Remove(entityToRemove);
-                EntityStatesColonies.Remove(entityToRemove);
-                OnEntityRemoved?.Invoke(this, entityToRemove);
-            }
-            EntitiesToBin.Clear();
-            SensorChanges.Clear();
-            SystemChanges.Clear();
             foreach (var item in EntityStatesWithPosition.Values)
             {
                 item.PostFrameCleanup();
