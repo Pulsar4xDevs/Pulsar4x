@@ -9,7 +9,7 @@ namespace Pulsar4X.SDL2UI
     {
         public static void Display(this ColonyInfoDB colony, EntityState entityState, GlobalUIState uiState)
         {
-            ImGui.PushID("###Population " + entityState.Entity.Id);
+            ImGui.PushID("###Population " + entityState.Id);
             ImGui.Columns(1);
             if(ImGui.CollapsingHeader("Population", ImGuiTreeNodeFlags.DefaultOpen))
             {

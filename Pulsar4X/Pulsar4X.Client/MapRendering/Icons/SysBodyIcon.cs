@@ -16,7 +16,7 @@ namespace Pulsar4X.SDL2UI
         float _viewRadius;
         Random _rng;
         float _iconMinSize = 8;
-        public SysBodyIcon(Entity entity, SystemBodyInfoDB systemBodyInfoDB, PositionDB positionDB, MassVolumeDB massVolumeDB) : base(positionDB)
+        public SysBodyIcon(EntityState entity, SystemBodyInfoDB systemBodyInfoDB, PositionDB positionDB, MassVolumeDB massVolumeDB) : base(positionDB)
         {
             _positionDB = positionDB;
             _systemBodyInfoDB = systemBodyInfoDB;

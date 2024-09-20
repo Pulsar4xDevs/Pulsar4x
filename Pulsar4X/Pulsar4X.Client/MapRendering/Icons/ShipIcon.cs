@@ -15,16 +15,17 @@ namespace Pulsar4X.SDL2UI
         NewtonMoveDB? _newtonMoveDB;
         float _lop;
         Entity? _entity;
-        public ShipIcon(Entity entity, ShipInfoDB shipInfoDB, PositionDB positionDB) : base(positionDB)
+        public ShipIcon(EntityState entity, ShipInfoDB shipInfoDB, PositionDB positionDB) : base(positionDB)
         {
-            if (entity.TryGetDatablob<OrbitDB>(out _orbitDB))
+            _entity = entity.Entity;
+            if (entity.TryGetDataBlob<OrbitDB>(out _orbitDB))
             {
                 var i = _orbitDB.Inclination;
                 var aop = _orbitDB.ArgumentOfPeriapsis;
                 var loan = _orbitDB.LongitudeOfAscendingNode;
                 _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
             }
-            else if(entity.TryGetDatablob<NewtonMoveDB>(out _newtonMoveDB))
+            else if(entity.TryGetDataBlob<NewtonMoveDB>(out _newtonMoveDB))
             {
             }
 
@@ -33,14 +34,12 @@ namespace Pulsar4X.SDL2UI
             MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, OnDBAdded, filterById);
             MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, OnDBRemoved, filterById);
 
-            _entity = entity;
             BasicShape();
             OnPhysicsUpdate();
         }
 
         public ShipIcon(PositionDB position) : base(position)
         {
-            _entity = position.OwningEntity;
             Front(60, 100, 0, -110);
             Cargo(160, 160, 0, -120);
             Wings(260, 260, 80, 50, 0, 0);
@@ -247,6 +246,7 @@ namespace Pulsar4X.SDL2UI
 
             try
             {
+                // FIXME: remove call to engine
                 var headingVector = _entity.GetRelativeState().Velocity;
                 var heading = Math.Atan2(headingVector.Y, headingVector.X);
                 Heading = (float)heading;
@@ -289,15 +289,15 @@ namespace Pulsar4X.SDL2UI
     {
         OrbitDB? _orbitDB;
         float _lop;
-        Entity? _entity;
+        EntityState? _entity;
         private Shape _flame;
-        public ProjectileIcon(Entity entity, PositionDB positionDB) : base(positionDB)
+        public ProjectileIcon(EntityState entity, PositionDB positionDB) : base(positionDB)
         {
             _entity = entity;
             BasicShape();
             NewtonFlame();
 
-            if (entity.TryGetDatablob<OrbitDB>(out _orbitDB))
+            if (entity.TryGetDataBlob<OrbitDB>(out _orbitDB))
             {
                 var i = _orbitDB.Inclination;
                 var aop = _orbitDB.ArgumentOfPeriapsis;
@@ -395,9 +395,10 @@ namespace Pulsar4X.SDL2UI
         {
             if(_entity is null) return;
 
-            var headingVector = _entity.GetRelativeState().Velocity;//_orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
-            var heading = Math.Atan2(headingVector.Y, headingVector.X);
-            Heading = (float)heading;
+            // FIXME: remove call to engine
+            // var headingVector = _entity.GetRelativeState().Velocity;//_orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
+            // var heading = Math.Atan2(headingVector.Y, headingVector.X);
+            // Heading = (float)heading;
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)

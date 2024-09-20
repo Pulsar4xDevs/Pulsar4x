@@ -168,7 +168,7 @@ namespace Pulsar4X.SDL2UI
             foreach (var guid in factionInfo.KnownSystems)
             {
                 var system = Game.Systems.First(s => s.ID.Equals(guid));
-                StarSystemStates[guid] = new SystemState(system, factionEntity);
+                StarSystemStates[guid] = new SystemState(system, factionEntity.Id);
             }
 
             // Unsubscribe to any previous message listeners
@@ -186,7 +186,7 @@ namespace Pulsar4X.SDL2UI
                 if(message.SystemId != null)
                 {
                     if(!StarSystemStates.ContainsKey(message.SystemId)){
-                        StarSystemStates[message.SystemId] = new SystemState(Game.Systems.First(s => s.ID.Equals(message.SystemId)), Faction);
+                        StarSystemStates[message.SystemId] = new SystemState(Game.Systems.First(s => s.ID.Equals(message.SystemId)), Faction.Id);
                     }
                     OnStarSystemAdded?.Invoke(this, message.SystemId);
                 }
@@ -197,7 +197,7 @@ namespace Pulsar4X.SDL2UI
         {
             if(!activeSysID.Equals(SelectedStarSysGuid) || refresh){
                 if(!StarSystemStates.ContainsKey(activeSysID)){
-                    StarSystemStates[activeSysID] = new SystemState(Game.Systems.First(s => s.ID.Equals(activeSysID)), Faction);
+                    StarSystemStates[activeSysID] = new SystemState(Game.Systems.First(s => s.ID.Equals(activeSysID)), Faction.Id);
                 }
 
                 SelectedStarSysGuid = activeSysID;
@@ -263,13 +263,13 @@ namespace Pulsar4X.SDL2UI
 
             //gets all entities with a position on the map
             double closestEntityDistInM = double.MaxValue;
-            Entity closestEntity = null;
+            EntityState closestEntity = null;
             //iterates over entities. Compares the next one with the previous closest-to-click one, if next one is closer, set that one as the closest, repeat for all entities.
             if(allEntities != null)
             {
                 foreach(var oneEntityState in allEntities)
                 {
-                    var oneEntity = oneEntityState.Value.Entity;
+                    var oneEntity = oneEntityState.Value;
                     if(oneEntity.HasDataBlob<PositionDB>()){
                         var thisDistanceInM = Math.Sqrt(Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition.X-worldCoord.X, 2) + Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition.Y -worldCoord.Y,2));
                         if(thisDistanceInM <= closestEntityDistInM)
@@ -327,9 +327,9 @@ namespace Pulsar4X.SDL2UI
                 SelectedSysMapRender.SelectedEntityExtras.Add(LastClickedEntity.DebugOrbitOrder);
             }
 
-            if (LastClickedEntity.Entity.TryGetDatablob(out NavSequenceDB navDB))
+            if (LastClickedEntity.TryGetDataBlob(out NavSequenceDB navDB))
             {
-                ManuverNodesDraw2 nodeDraw = new ManuverNodesDraw2(LastClickedEntity.Entity);
+                ManuverNodesDraw2 nodeDraw = new ManuverNodesDraw2(LastClickedEntity);
                 SelectedSysMapRender.SelectedEntityExtras.Add(nodeDraw);
             }
 
@@ -360,7 +360,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void EntityClicked(EntityState entityState, MouseButtons button)
         {
-            EntityClicked(entityState.Entity.Id, entityState.StarSysGuid, button);
+            EntityClicked(entityState.Id, entityState.StarSystemId, button);
         }
     }
 

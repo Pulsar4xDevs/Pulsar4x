@@ -39,10 +39,10 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         public void SetEntity(EntityState entityState)
         {
-            if (entityState.DataBlobs.ContainsKey(typeof(EnergyGenAbilityDB)))//If the entity has power data
+            if (entityState.HasDataBlob(typeof(EnergyGenAbilityDB)))//If the entity has power data
             {
                 _entityState = entityState;//Store it as the entity being show
-                _energyGenDB = (EnergyGenAbilityDB)entityState.DataBlobs[typeof(EnergyGenAbilityDB)];//Store it's power value
+                _energyGenDB = (EnergyGenAbilityDB)entityState.GetDataBlob(typeof(EnergyGenAbilityDB));//Store it's power value
                 CanActive = true;//And note if that it can be displayed
             }
             else

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Datablobs;
@@ -8,28 +7,34 @@ using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Messaging;
 using System.Threading.Tasks;
 using Pulsar4X.DataStructures;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Pulsar4X.SDL2UI
 {
     public class EntityState
     {
         public Entity Entity;
-        public string Name = "Unknown";
+        public int Id { get; private set; }
+        public int FactionId { get; private set; }
+        public string Name { get; set; } = "Unknown";
 
         public IPosition? Position;
         public NameIcon? NameIcon;
         public IKepler? OrbitIcon;
         public OrbitOrderWidget? DebugOrbitOrder;
         public bool IsDestroyed = false; //currently IsDestroyed = true if moved from one system to another, may need to revisit this.
-        public SafeDictionary<Type, BaseDataBlob> DataBlobs = new ();
+        private SafeDictionary<Type, BaseDataBlob> DataBlobs = new ();
         public SafeList<Message> Changes = new ();
         public SafeList<Message> _changesNextFrame = new ();
         public CommandReferences? CmdRef;
-        internal string? StarSysGuid;
+        internal string? StarSystemId;
         internal UserOrbitSettings.OrbitBodyType BodyType = UserOrbitSettings.OrbitBodyType.Unknown;
-        public EntityState(Entity entity)
+        public EntityState(Entity entity, int id, int factionId)
         {
             Entity = entity;
+            Id = id;
+            FactionId = factionId;
+
             if(entity.Manager != null)
             {
                 foreach (var db in entity.Manager.GetAllDataBlobsForEntity(entity.Id))
@@ -38,34 +43,19 @@ namespace Pulsar4X.SDL2UI
                 }
 
                 StarSystem starSys = (StarSystem)entity.Manager;
-                StarSysGuid = starSys.ID;
+                StarSystemId = starSys.ID;
             }
 
             SetupEventListeners();
             SetBodyType();
         }
 
-        public int GetRank()
-        {
-            var parent = this.GetParent();
-            if (this.IsStar())
-            {
-                return 0;
-            }
-            else if(parent == null)
-            {
-                return 0;
-            }
-            else
-            {
-                EntityState _parententityState = new EntityState(parent);
-                return _parententityState.GetRank() + 1;
-            }
-        }
-
         public Entity? GetParent()
         {
-            return Entity.GetDataBlob<PositionDB>().Parent;
+            if(HasDataBlob(typeof(PositionDB)))
+                return ((PositionDB)DataBlobs[typeof(PositionDB)]).Parent;
+
+            return null;
         }
 
         public bool IsPlanetOrMoon()
@@ -85,6 +75,7 @@ namespace Pulsar4X.SDL2UI
 
         public EntityState(SensorContact sensorContact)
         {
+            // TODO: re-implement this
             Entity = sensorContact.ActualEntity;
             Position = sensorContact.Position;
 
@@ -92,7 +83,7 @@ namespace Pulsar4X.SDL2UI
             if(Entity.Manager != null)
             {
                 StarSystem starSys = (StarSystem)Entity.Manager;
-                StarSysGuid = starSys.ID;
+                StarSystemId = starSys.ID;
             }
             SetupEventListeners();
             SetBodyType();
@@ -115,9 +106,9 @@ namespace Pulsar4X.SDL2UI
 
         void SetBodyType()
         {
-            if (Entity.HasDataBlob<SystemBodyInfoDB>())
+            if (HasDataBlob<SystemBodyInfoDB>())
             {
-                switch (Entity.GetDataBlob<SystemBodyInfoDB>().BodyType)
+                switch (GetDataBlob<SystemBodyInfoDB>().BodyType)
                 {
                     case DataStructures.BodyType.Asteroid:
                         {
@@ -149,17 +140,17 @@ namespace Pulsar4X.SDL2UI
                 }
 
             }
-            if (Entity.HasDataBlob<StarInfoDB>())
+            if (HasDataBlob<StarInfoDB>())
                 BodyType = UserOrbitSettings.OrbitBodyType.Star;
-            if (Entity.HasDataBlob<ColonyInfoDB>())
+            if (HasDataBlob<ColonyInfoDB>())
                 BodyType = UserOrbitSettings.OrbitBodyType.Colony;
-            if (Entity.HasDataBlob<ShipInfoDB>())
+            if (HasDataBlob<ShipInfoDB>())
                 BodyType = UserOrbitSettings.OrbitBodyType.Ship;
         }
 
         private void SetupEventListeners()
         {
-            Func<Message, bool> filterById = msg => msg.EntityId == Entity.Id;
+            Func<Message, bool> filterById = msg => msg.EntityId == Id;
 
             MessagePublisher.Instance.Subscribe(MessageTypes.EntityRemoved, OnEntityRemoved, filterById);
             MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, OnDBAdded, filterById);
@@ -203,6 +194,33 @@ namespace Pulsar4X.SDL2UI
         public bool HasDataBlob(Type? type)
         {
             return type == null ? false : DataBlobs.ContainsKey(type);
+        }
+
+        public bool HasDataBlob<T>() where T : BaseDataBlob
+        {
+            return HasDataBlob(typeof(T));
+        }
+
+        public T GetDataBlob<T>() where T : BaseDataBlob
+        {
+            return (T)DataBlobs[typeof(T)];
+        }
+
+        public BaseDataBlob GetDataBlob(Type type)
+        {
+            return DataBlobs[type];
+        }
+
+        public bool TryGetDataBlob<T>([NotNullWhen(true)] out T? value) where T : BaseDataBlob
+        {
+            if(HasDataBlob<T>())
+            {
+                value = GetDataBlob<T>();
+                return true;
+            }
+
+            value = null;
+            return false;
         }
     }
 }

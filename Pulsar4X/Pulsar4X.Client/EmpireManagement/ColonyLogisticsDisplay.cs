@@ -67,7 +67,7 @@ namespace Pulsar4X.SDL2UI
         {
             _entityState = entityState;
             _selectedEntity = _entityState.Entity;
-            if (entityState.DataBlobs.ContainsKey(typeof(OrderableDB)))
+            if (entityState.HasDataBlob(typeof(OrderableDB)))
             {
                 _selectedEntity.TryGetDatablob<LogiBaseDB>(out _logisticsDB);
                 _selectedEntity.TryGetDatablob<VolumeStorageDB>(out _volStorageDB);

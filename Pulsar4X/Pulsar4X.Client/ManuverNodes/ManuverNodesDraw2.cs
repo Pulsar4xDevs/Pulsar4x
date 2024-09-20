@@ -27,9 +27,9 @@ public class ManuverNodesDraw2 : IDrawData
         r = 200, g = 200, b = 200, a = 100,
     };
 
-    public ManuverNodesDraw2(Entity entity)
+    public ManuverNodesDraw2(EntityState entity)
     {
-        if (entity.TryGetDatablob(out NavSequenceDB db))
+        if (entity.TryGetDataBlob(out NavSequenceDB db))
             _db = db;
         Setup();
     }
@@ -113,14 +113,14 @@ public class ManuverNodesDraw2 : IDrawData
     //private int _index = 0;
     public void OnFrameUpdate(Matrix matrix, Camera camera)
     {
-        
+
         var foo = camera.ViewCoordinateV2_m(new Vector2(0,0)); //camera position and zoom
-            
+
         var trns = Matrix.IDTranslate(foo.X, foo.Y);
         var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
         var mtrx =  scAU * matrix * trns; //scale to au, scale for camera zoom, and move to camera position and zoom
 
-        
+
         var spos = camera.ViewCoordinateV2_m(_bodyAbsPos);
         _drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
         int i = 1;
@@ -153,8 +153,8 @@ public class ManuverNodesDraw2 : IDrawData
                 k = i + j;
                 SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[k].x, _drawPoints[k].y, _drawPoints[k + 1].x, _drawPoints[k +1].y);
             }
-            
-            
+
+
         }
     }
 }

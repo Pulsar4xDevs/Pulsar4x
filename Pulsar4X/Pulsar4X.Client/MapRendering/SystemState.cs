@@ -23,7 +23,7 @@ namespace Pulsar4X.SDL2UI
         public event SystemStateEntityIdEventHandler? OnEntityRemoved;
         public event SystemStateEntityUpdateHandler? OnEntityUpdated;
 
-        private Entity _faction;
+        private int _factionId;
         internal StarSystem StarSystem;
         internal SystemSensorContacts? SystemContacts;
         ConcurrentQueue<Message> _sensorChanges = new ConcurrentQueue<Message>();
@@ -39,18 +39,18 @@ namespace Pulsar4X.SDL2UI
 
         public readonly object Lock = new object();
 
-        public SystemState(StarSystem system, Entity faction)
+        public SystemState(StarSystem system, int factionId)
         {
             StarSystem = system;
-            StarSystem.SetupDefaultNeutralEntitiesForFaction(faction.Id);
-            SystemContacts = system.GetSensorContacts(faction.Id);
+            StarSystem.SetupDefaultNeutralEntitiesForFaction(factionId);
+            SystemContacts = system.GetSensorContacts(factionId);
             _sensorChanges = SystemContacts.Changes.Subscribe();
-            _faction = faction;
+            _factionId = factionId;
 
-            var entities = StarSystem.GetFilteredEntities(EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile, faction.Id);
+            var entities = StarSystem.GetFilteredEntities(EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile, factionId);
             foreach(var entity in entities)
             {
-                SetupEntity(entity, faction);
+                SetupEntity(entity, factionId);
             }
 
             Func<Message, bool> filterById = msg => msg.EntityId != null && msg.SystemId != null && msg.SystemId.Equals(StarSystem.ManagerID);
@@ -62,16 +62,16 @@ namespace Pulsar4X.SDL2UI
             MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, OnEntityUpdatedMessage, filterById);
         }
 
-        private void SetupEntity(Entity entity, Entity faction)
+        private void SetupEntity(Entity entity, int factionId)
         {
-            var entityState = new EntityState(entity);
+            var entityState = new EntityState(entity, entity.Id, factionId);
 
             if(!AllEntities.ContainsKey(entity.Id))
                 AllEntities.Add(entity.Id, entityState);
 
             if (!EntityStatesWithNames.ContainsKey(entity.Id) && entity.TryGetDatablob<NameDB>(out var nameDB))
             {
-                entityState.Name = nameDB.GetName(faction); // TODO: doesn't update when if/when the entity is renamed
+                entityState.Name = nameDB.GetName(factionId); // TODO: doesn't update when if/when the entity is renamed
                 EntityStatesWithNames.Add(entity.Id, entityState);
             }
             if (!EntityStatesWithPosition.ContainsKey(entity.Id) && entity.TryGetDatablob<PositionDB>(out var positionDB))
@@ -121,9 +121,10 @@ namespace Pulsar4X.SDL2UI
                 // Deal with additions
                 while(EntitiesToAdd.TryDequeue(out var entityToAdd))
                 {
+                    // FIXME: need to remove the call to the game engine internals
                     if(StarSystem.TryGetEntityById(entityToAdd, out var entity))
                     {
-                        SetupEntity(entity, _faction);
+                        SetupEntity(entity, _factionId);
                         OnEntityAdded?.Invoke(this, entity);
                     }
                 }
@@ -174,9 +175,9 @@ namespace Pulsar4X.SDL2UI
         public List<EntityState> GetFilteredEntities(EntityFilter entityFilter, int factionId, List<Type>? datablobFilter = null, FilterLogic filterLogic = FilterLogic.And)
         {
             return AllEntities.Values.Where(entityState =>
-                ((entityFilter.HasFlag(EntityFilter.Friendly) && entityState.Entity.FactionOwnerID == factionId) ||
-                (entityFilter.HasFlag(EntityFilter.Neutral) && entityState.Entity.FactionOwnerID == Game.NeutralFactionId) ||
-                (entityFilter.HasFlag(EntityFilter.Hostile) && entityState.Entity.FactionOwnerID != factionId && entityState.Entity.FactionOwnerID != Game.NeutralFactionId)) &&
+                ((entityFilter.HasFlag(EntityFilter.Friendly) && entityState.FactionId == factionId) ||
+                (entityFilter.HasFlag(EntityFilter.Neutral) && entityState.FactionId == Game.NeutralFactionId) ||
+                (entityFilter.HasFlag(EntityFilter.Hostile) && entityState.FactionId != factionId && entityState.FactionId != Game.NeutralFactionId)) &&
                 (datablobFilter == null || datablobFilter.Count == 0 || EvaluateDataBlobs(entityState, datablobFilter, filterLogic)))
                 .ToList();
         }

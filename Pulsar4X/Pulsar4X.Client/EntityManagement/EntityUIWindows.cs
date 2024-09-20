@@ -187,9 +187,9 @@ namespace Pulsar4X.SDL2UI
                     if(jumpPointTo != null)
                         _state.SetActiveSystem(jumpPointTo.GetDataBlob<PositionDB>().SystemGuid);
                 }
-                else if (T == typeof(SelectPrimaryBlankMenuHelper) && _entityState.StarSysGuid != null)
+                else if (T == typeof(SelectPrimaryBlankMenuHelper) && _entityState.StarSystemId != null)
                 {
-                    _state.EntitySelectedAsPrimary(_entityState.Entity.Id, _entityState.StarSysGuid);
+                    _state.EntitySelectedAsPrimary(_entityState.Entity.Id, _entityState.StarSystemId);
                 }
                 //if entity can warp
                 else if (T == typeof(WarpOrderWindow))

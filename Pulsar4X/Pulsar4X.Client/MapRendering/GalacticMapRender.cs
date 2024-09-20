@@ -84,7 +84,7 @@ namespace Pulsar4X.SDL2UI
 
                 var starEntityState = systemState.EntityStatesWithNames.ContainsKey(starEntity.Id) ?
                     systemState.EntityStatesWithNames[starEntity.Id] :
-                    new EntityState(starEntity);
+                    new EntityState(starEntity, starEntity.Id, starEntity.FactionOwnerID);
 
                 if(!starEntity.TryGetDatablob<StarInfoDB>(out var starInfoDB))
                 {
@@ -126,7 +126,7 @@ namespace Pulsar4X.SDL2UI
 
         void _state_EntityClickedEvent(EntityState entityState, MouseButtons mouseButton)
         {
-            var sysGuid = entityState.StarSysGuid;
+            var sysGuid = entityState.StarSystemId;
             if(!string.IsNullOrEmpty(sysGuid) && SelectedStarSysGuid != sysGuid && RenderedMaps.ContainsKey(sysGuid))
             {
                 _state.SetActiveSystem(sysGuid);

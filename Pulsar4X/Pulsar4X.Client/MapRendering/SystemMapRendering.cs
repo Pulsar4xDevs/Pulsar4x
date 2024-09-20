@@ -63,7 +63,7 @@ namespace Pulsar4X.SDL2UI
             }
             else
             {
-                _sysState = new SystemState(starSys, _state.Faction);
+                _sysState = new SystemState(starSys, _state.Faction.Id);
                 _state.StarSystemStates[_sysState.StarSystem.ID] = _sysState;
             }
 
@@ -103,16 +103,15 @@ namespace Pulsar4X.SDL2UI
 
         void AddIconable(EntityState entityState)
         {
-            var entityItem = entityState.Entity;
-            entityItem.TryGetDatablob<PositionDB>(out var positionDB);
-            entityItem.TryGetDatablob<MassVolumeDB>(out var massVolumeDB);
+            entityState.TryGetDataBlob<PositionDB>(out var positionDB);
+            entityState.TryGetDataBlob<MassVolumeDB>(out var massVolumeDB);
 
-            if (entityItem.TryGetDatablob<NameDB>(out var nameDB) && positionDB != null)
+            if (entityState.TryGetDataBlob<NameDB>(out var nameDB) && positionDB != null)
             {
-                _nameIcons.TryAdd(entityItem.Id, new NameIcon(entityState, nameDB, positionDB, _state));
+                _nameIcons.TryAdd(entityState.Id, new NameIcon(entityState, nameDB, positionDB, _state));
             }
 
-            if (entityItem.TryGetDatablob<OrbitDB>(out var orbitDB))
+            if (entityState.TryGetDataBlob<OrbitDB>(out var orbitDB))
             {
                 if (!orbitDB.IsStationary)
                 {
@@ -120,64 +119,64 @@ namespace Pulsar4X.SDL2UI
                     if (orbitDB.Eccentricity < 1)
                     {
                         orbit = new OrbitEllipseIcon(entityState, _state.UserOrbitSettingsMtx);
-                        _orbitRings.TryAdd(entityItem.Id, orbit);
+                        _orbitRings.TryAdd(entityState.Id, orbit);
                     }
                     else
                     {
                         orbit = new OrbitHyperbolicIcon2(entityState, _state.UserOrbitSettingsMtx);
-                        _orbitRings.TryAdd(entityItem.Id, orbit);
+                        _orbitRings.TryAdd(entityState.Id, orbit);
                     }
                 }
             }
 
-            if (entityItem.TryGetDatablob<NewtonMoveDB>(out var newtonMoveDB))
+            if (entityState.TryGetDataBlob<NewtonMoveDB>(out var newtonMoveDB))
             {
-                _orbitRings.TryAdd(entityItem.Id, new NewtonMoveIcon(entityState, newtonMoveDB, _state.UserOrbitSettingsMtx));
+                _orbitRings.TryAdd(entityState.Id, new NewtonMoveIcon(entityState, newtonMoveDB, _state.UserOrbitSettingsMtx));
             }
 
-            if (entityItem.TryGetDatablob<NewtonSimpleMoveDB>(out var newtonSimpleMoveDB))
+            if (entityState.TryGetDataBlob<NewtonSimpleMoveDB>(out var newtonSimpleMoveDB))
             {
-                _orbitRings.TryAdd(entityItem.Id, new NewtonSimpleIcon(entityState, newtonSimpleMoveDB, _state.UserOrbitSettingsMtx));
+                _orbitRings.TryAdd(entityState.Id, new NewtonSimpleIcon(entityState, newtonSimpleMoveDB, _state.UserOrbitSettingsMtx));
             }
 
-            if (entityItem.TryGetDatablob<WarpMovingDB>(out var warpMovingDB) && positionDB != null)
+            if (entityState.TryGetDataBlob<WarpMovingDB>(out var warpMovingDB) && positionDB != null)
             {
-                _orbitRings.TryAdd(entityItem.Id, new WarpMovingIcon(warpMovingDB, positionDB));
+                _orbitRings.TryAdd(entityState.Id, new WarpMovingIcon(warpMovingDB, positionDB));
             }
 
 
-            if (entityItem.TryGetDatablob<StarInfoDB>(out var starInfoDB)
+            if (entityState.TryGetDataBlob<StarInfoDB>(out var starInfoDB)
                 && massVolumeDB != null
                 && positionDB != null)
             {
-                _entityIcons.TryAdd(entityItem.Id, new StarIcon(starInfoDB, positionDB, massVolumeDB));
+                _entityIcons.TryAdd(entityState.Id, new StarIcon(starInfoDB, positionDB, massVolumeDB));
             }
 
-            if (entityItem.TryGetDatablob<SystemBodyInfoDB>(out var systemBodyInfoDB)
+            if (entityState.TryGetDataBlob<SystemBodyInfoDB>(out var systemBodyInfoDB)
                 && massVolumeDB != null
                 && positionDB != null)
             {
-                _entityIcons.TryAdd(entityItem.Id, new SysBodyIcon(entityItem, systemBodyInfoDB, positionDB, massVolumeDB));
+                _entityIcons.TryAdd(entityState.Id, new SysBodyIcon(entityState, systemBodyInfoDB, positionDB, massVolumeDB));
             }
 
-            if (entityItem.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) && positionDB != null)
+            if (entityState.TryGetDataBlob<ShipInfoDB>(out var shipInfoDB) && positionDB != null)
             {
-                _entityIcons.TryAdd(entityItem.Id, new ShipIcon(entityItem, shipInfoDB, positionDB));
+                _entityIcons.TryAdd(entityState.Id, new ShipIcon(entityState, shipInfoDB, positionDB));
             }
 
-            if (entityItem.TryGetDatablob<ProjectileInfoDB>(out var projectileInfoDB) && positionDB != null)
+            if (entityState.TryGetDataBlob<ProjectileInfoDB>(out var projectileInfoDB) && positionDB != null)
             {
-                _entityIcons.TryAdd(entityItem.Id, new ProjectileIcon(entityItem, positionDB));
+                _entityIcons.TryAdd(entityState.Id, new ProjectileIcon(entityState, positionDB));
             }
 
-            if (entityItem.TryGetDatablob<BeamInfoDB>(out var beamInfoDB) && positionDB != null)
+            if (entityState.TryGetDataBlob<BeamInfoDB>(out var beamInfoDB) && positionDB != null)
             {
-                _entityIcons.TryAdd(entityItem.Id, new BeamIcon(beamInfoDB, positionDB));
+                _entityIcons.TryAdd(entityState.Id, new BeamIcon(beamInfoDB, positionDB));
             }
 
-            if(entityItem.TryGetDatablob<JPSurveyableDB>(out var jPSurveyableDB) && positionDB != null)
+            if(entityState.TryGetDataBlob<JPSurveyableDB>(out var jPSurveyableDB) && positionDB != null)
             {
-                _entityIcons.TryAdd(entityItem.Id, new PointOfInterestIcon(positionDB));
+                _entityIcons.TryAdd(entityState.Id, new PointOfInterestIcon(positionDB));
             }
 
         }
@@ -225,9 +224,9 @@ namespace Pulsar4X.SDL2UI
                             {
                                 entityState = _sysState.EntityStatesWithPosition[message.EntityId.Value];
                             }
-                            else if(_sysState != null && _sysState.StarSystem.TryGetEntityById(message.EntityId.Value, out var retrievedEntity))
+                            else if(_sysState != null && message.FactionId != null && _sysState.StarSystem.TryGetEntityById(message.EntityId.Value, out var retrievedEntity))
                             {
-                                entityState = new EntityState(retrievedEntity) { Name = "Unknown" };
+                                entityState = new EntityState(retrievedEntity, message.EntityId.Value, message.FactionId.Value);
                             }
 
                             OrbitIconBase orbit;

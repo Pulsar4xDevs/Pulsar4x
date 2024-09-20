@@ -242,13 +242,13 @@ namespace Pulsar4X.Engine.Orders
         public FireModes IsFiring;
         private Game _game;
 
-        public static void CreateCmd(Game game, Entity faction, Entity shipEntity, string fireControlGuid, FireModes isFiring)
+        public static void CreateCmd(Game game, Entity faction, int shipEntityId, string fireControlGuid, FireModes isFiring)
         {
             var cmd = new SetOpenFireControlOrder()
             {
                 RequestingFactionGuid = faction.Id,
-                EntityCommandingGuid = shipEntity.Id,
-                CreatedDate = shipEntity.Manager.ManagerSubpulses.StarSysDateTime,
+                EntityCommandingGuid = shipEntityId,
+                CreatedDate = game.TimePulse.GameGlobalDateTime,
                 FireControlGuid = fireControlGuid,
                 IsFiring = isFiring,
                 _game = game
@@ -345,13 +345,12 @@ namespace Pulsar4X.Engine.Orders
         private OrdnanceDesign _ordnanceAssigned;
 
 
-        public static void CreateCommand(DateTime starSysDate, Entity faction, Entity orderEntity, WeaponState weapon, string ordnanceAssigned)
+        public static void CreateCommand(DateTime starSysDate, Entity faction, int orderEntityId, WeaponState weapon, string ordnanceAssigned)
         {
             var cmd = new SetOrdinanceToWpnOrder()
             {
                 RequestingFactionGuid = faction.Id,
-                EntityCommandingGuid = orderEntity.Id,
-                _entityCommanding = orderEntity,
+                EntityCommandingGuid = orderEntityId,
                 CreatedDate = starSysDate,
                 WeaponGuid = weapon.ID,
                 OrdnanceAssigned = ordnanceAssigned
