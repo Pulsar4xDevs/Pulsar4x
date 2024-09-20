@@ -1,5 +1,4 @@
 using System;
-using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
 using SDL2;
@@ -7,17 +6,10 @@ using SDL2;
 namespace Pulsar4X.SDL2UI;
 public class PointOfInterestIcon : Icon
 {
-    Entity? _entity;
-    public PointOfInterestIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
+    public PointOfInterestIcon(PositionDB positionDB) : base(positionDB)
     {
-        _entity = entity;
         BasicShape();
         OnPhysicsUpdate();
-    }
-
-    public PointOfInterestIcon(PositionDB position) : base(position)
-    {
-        _entity = position.OwningEntity;
     }
 
     void BasicShape()
@@ -28,21 +20,16 @@ public class PointOfInterestIcon : Icon
         byte g = 115;
         byte b = 115;
         byte a = 165;
-        Orbital.Vector2[] points = {
-            new Orbital.Vector2() { X = 0, Y = 5 },
-            new Orbital.Vector2() { X = 5, Y = 0 },
-            new Orbital.Vector2() { X = 0, Y = -5 },
-            new Orbital.Vector2() { X = -5, Y = 0 },
-            new Orbital.Vector2() { X = 0, Y = 5 }
+        Vector2[] points = {
+            new Vector2() { X = 0, Y = 5 },
+            new Vector2() { X = 5, Y = 0 },
+            new Vector2() { X = 0, Y = -5 },
+            new Vector2() { X = -5, Y = 0 },
+            new Vector2() { X = 0, Y = 5 }
         };
 
         SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
         Shapes.Add(new Shape() { Points = points, Color = colour });
-    }
-    
-    public override void OnPhysicsUpdate()
-    {
-        if(_entity is null) return;
     }
 
     public override void OnFrameUpdate(Matrix matrix, Camera camera)

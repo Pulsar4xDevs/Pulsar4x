@@ -86,9 +86,29 @@ namespace Pulsar4X.SDL2UI
                     systemState.EntityStatesWithNames[starEntity.Id] :
                     new EntityState(starEntity);
 
-                var starIcon = new StarIcon(starEntity);
+                if(!starEntity.TryGetDatablob<StarInfoDB>(out var starInfoDB))
+                {
+                    throw new NullReferenceException("Star must have a StarInfoDB");
+                }
+
+                if(!starEntity.TryGetDatablob<PositionDB>(out var starPositionDB))
+                {
+                    throw new NullReferenceException("Star must have a PositionDB");
+                }
+
+                if(!starEntity.TryGetDatablob<MassVolumeDB>(out var starMassVolumeDB))
+                {
+                    throw new NullReferenceException("Star must have a MassVolumeDB");
+                }
+
+                if(!starEntity.TryGetDatablob<NameDB>(out var starNameDB))
+                {
+                    throw new NullReferenceException("Star must have a NameDB");
+                }
+
+                var starIcon = new StarIcon(starInfoDB, starPositionDB, starMassVolumeDB);
                 StarIcons[starSystemId] = starIcon;
-                var nameIcon = new NameIcon(starEntityState, _state);
+                var nameIcon = new NameIcon(starEntityState, starNameDB, starPositionDB, _state);
                 _nameIcons[starSystemId] = nameIcon;
                 starIcon.WorldPosition_m = new Orbital.Vector3(x, y, 0);
                 nameIcon.WorldPosition_m = new Orbital.Vector3(x, y, 0);

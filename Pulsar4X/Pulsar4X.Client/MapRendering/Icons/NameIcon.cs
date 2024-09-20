@@ -30,14 +30,13 @@ namespace Pulsar4X.SDL2UI
 
         public Vector4 TextDisplayColor { get; private set; } = Styles.StandardText;
 
-        public NameIcon(EntityState entityState, GlobalUIState state) : base(entityState.Entity.GetDataBlob<PositionDB>())
+        public NameIcon(EntityState entityState, NameDB nameDB, PositionDB positionDB, GlobalUIState state) : base(positionDB)
         {
-            Random rnd = new Random();
             _state = state;
             EntityState = entityState;
             StarSystem? starsys = (StarSystem?)entityState.Entity.Manager;
             _starSysGuid = starsys.ID;
-            _nameDB = entityState.Entity.GetDataBlob<NameDB>();
+            _nameDB = nameDB;
             NameString = _nameDB.GetName(state.Faction);
             entityState.Name = NameString;
             entityState.NameIcon = this;

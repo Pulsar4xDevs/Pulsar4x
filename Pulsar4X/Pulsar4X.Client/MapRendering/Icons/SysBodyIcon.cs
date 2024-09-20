@@ -16,12 +16,12 @@ namespace Pulsar4X.SDL2UI
         float _viewRadius;
         Random _rng;
         float _iconMinSize = 8;
-        public SysBodyIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
+        public SysBodyIcon(Entity entity, SystemBodyInfoDB systemBodyInfoDB, PositionDB positionDB, MassVolumeDB massVolumeDB) : base(positionDB)
         {
-            _positionDB = entity.GetDataBlob<PositionDB>();
-            _systemBodyInfoDB = entity.GetDataBlob<SystemBodyInfoDB>();
+            _positionDB = positionDB;
+            _systemBodyInfoDB = systemBodyInfoDB;
             _bodyType = _systemBodyInfoDB.BodyType;
-            _massVolDB = entity.GetDataBlob<MassVolumeDB>();
+            _massVolDB = massVolumeDB;
             _bodyRadiusAU = _massVolDB.RadiusInAU;
             _rng = new Random(entity.Id); //use entity guid as a seed for psudoRandomness.
 

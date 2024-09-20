@@ -22,7 +22,7 @@ namespace Pulsar4X.SDL2UI
         PositionDB? _parentPosDB;
         PositionDB? _myPosDB;
         double _sgp;
-        //_taIndex is the point closest to the orbiting object, it's used to 
+        //_taIndex is the point closest to the orbiting object, it's used to
         int _taIndex;
         //_numberOfEllipsePoints is the total number of points around the ellipse, unadjusted for the percentage of the ellipse actualy drawn.
         private int _numberOfEllipsePoints;
@@ -33,14 +33,14 @@ namespace Pulsar4X.SDL2UI
         //Points is the world coordinate points of an ellipse or hyperbola.
         //eccentricity, focal offset, and longitude of the periapsis are calculated when populating this array.
         protected Orbital.Vector2[] _points = new Vector2[0];
-        //_drawpoints is the translated resized screen/pixel location of the above ellipse points. 
+        //_drawpoints is the translated resized screen/pixel location of the above ellipse points.
         //the above Points are adjusted for camera position and zoom levels when populating this array, as these values can change between frames.
-        //[0] is the position of the orbiting object and subsequent positions trail behind the velocity and drawn with decreasing alpha. 
+        //[0] is the position of the orbiting object and subsequent positions trail behind the velocity and drawn with decreasing alpha.
         protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
 
         //for drawing the direction of thrust when newton thrusting (world coordinates)
         private Orbital.Vector2[] _thrustLinePoints = new Vector2[2];
-        //above adjusted for camera position and zoom. 
+        //above adjusted for camera position and zoom.
         protected SDL.SDL_Point[] _drawThrustLinePoints = new SDL.SDL_Point[2];
         //PointD[] _debugPoints;
         SDL.SDL_Point[] _debugDrawPoints = new SDL.SDL_Point[0];
@@ -52,9 +52,9 @@ namespace Pulsar4X.SDL2UI
         protected UserOrbitSettings _userSettings { get { return _userOrbitSettingsMtx[(int)BodyType][(int)TrajectoryType]; } }
 
         //change after user makes adjustments:
-        protected byte _numberOfArcSegments = 255; //how many segments in a complete 360 degree ellipse. this is set in UserOrbitSettings, localy adjusted because the whole point array needs re-creating when it changes. 
+        protected byte _numberOfArcSegments = 255; //how many segments in a complete 360 degree ellipse. this is set in UserOrbitSettings, localy adjusted because the whole point array needs re-creating when it changes.
         protected int _numberOfDrawSegments; //this is now many segments get drawn in the ellipse, ie if the _ellipseSweepAngle or _numberOfArcSegments are less, less will be drawn.
-        protected float _segmentArcSweepRadians; //how large each segment in the drawn portion of the ellipse.  
+        protected float _segmentArcSweepRadians; //how large each segment in the drawn portion of the ellipse.
         protected float _alphaChangeAmount;
 
         private double _dv = 0;
@@ -65,13 +65,13 @@ namespace Pulsar4X.SDL2UI
         {
         }
 
-        public NewtonSimpleIcon(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetSOIParentPositionDB())
+        public NewtonSimpleIcon(EntityState entityState, NewtonSimpleMoveDB newtonSimpleMoveDB, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetSOIParentPositionDB())
         {
             entityState.OrbitIcon = this;
             BodyType = entityState.BodyType;
             TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
             //_mgr = entityState.Entity.Manager;
-            _newtonMoveDB = entityState.Entity.GetDataBlob<NewtonSimpleMoveDB>();
+            _newtonMoveDB = newtonSimpleMoveDB;
             _parentPosDB = _newtonMoveDB.SOIParent.GetDataBlob<PositionDB>();
             _positionDB = _parentPosDB;
             _myPosDB = entityState.Entity.GetDataBlob<PositionDB>();
@@ -88,7 +88,7 @@ namespace Pulsar4X.SDL2UI
         }
         public void UpdateUserSettings()
         {
-            //if this is the case, we need to rebuild the whole set of points. 
+            //if this is the case, we need to rebuild the whole set of points.
             if (_userSettings.NumberOfArcSegments != _numberOfArcSegments)
             {
                 _numberOfArcSegments = _userSettings.NumberOfArcSegments;
@@ -136,13 +136,13 @@ namespace Pulsar4X.SDL2UI
         {
             if (_newtonMoveDB == null || _newtonMoveDB.OwningEntity == null) //There's a threaded race condition here which will cause a null...
                 return;
-            var ke = _newtonMoveDB.CurrentTrajectory; //...cause a null ref exception inside this call. 
+            var ke = _newtonMoveDB.CurrentTrajectory; //...cause a null ref exception inside this call.
             if (ke.Eccentricity != _ke.Eccentricity)
             {
                 _ke = ke;
                 CreatePointArray();
             }
-            
+
             else
             {
                 _thrustLinePoints[1] = Vector2.Zero;
@@ -161,7 +161,7 @@ namespace Pulsar4X.SDL2UI
                 TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
                 CreateHyperbolicPoints();
             }
-            
+
             SetTrueAnomalyIndex();
         }
 
@@ -174,7 +174,7 @@ namespace Pulsar4X.SDL2UI
             Vector3 pos = _myPosDB.RelativePosition;
             //Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
 
-            double e = _ke.Eccentricity; 
+            double e = _ke.Eccentricity;
             double r = pos.Length();
             double v = vel.Length();
             double a = _ke.SemiMajorAxis;    //semiMajor Axis
@@ -197,7 +197,7 @@ namespace Pulsar4X.SDL2UI
             double ang1 = Math.Abs(EllipseMath.TrueAnomalyAtRadus(soi, p1, e1));
 
             //the angle used in the calculation is not from the focal point, but from the center( x=a y=0)
-            //angleToSOIPoint however is from the focal point so we need to translate from that frame of reference to one from the center. 
+            //angleToSOIPoint however is from the focal point so we need to translate from that frame of reference to one from the center.
 
             double y = Math.Abs(Math.Sin(angleToSOIPoint) * soi);
             double x = Math.Abs(Math.Cos(angleToSOIPoint) * soi);
@@ -229,7 +229,7 @@ namespace Pulsar4X.SDL2UI
             }
 
 
-            //now translate and rotate it into place, and mirror. 
+            //now translate and rotate it into place, and mirror.
             var mtxtr = Matrix.IDTranslate(linierEccentricity, 0);
             var mtxrt = Matrix.IDRotate(_lop);
             var mtx = mtxtr * mtxrt;
@@ -284,7 +284,7 @@ namespace Pulsar4X.SDL2UI
             double x = a * ct;
             double y = a * st;
 
-            //we want the focal point of the ellipse to be at the 'center'  
+            //we want the focal point of the ellipse to be at the 'center'
             //linier ecccentricity is the offset ie the distance between focal and center.
             //we have to rotate the offset since we're already rotating the ellipse above.
             double xc = Math.Cos(_lop) * -linierEccentricity;
@@ -357,9 +357,9 @@ namespace Pulsar4X.SDL2UI
             float alpha = _userSettings.MaxAlpha;
             for (int i = 0; i < _drawPoints.Length - 1; i++)
             {
-                SDL.SDL_SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creeping up. 
+                SDL.SDL_SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creeping up.
                 SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i +1].y);
-                alpha -= _alphaChangeAmount; 
+                alpha -= _alphaChangeAmount;
             }
             byte r = 100;
             byte g = 50;

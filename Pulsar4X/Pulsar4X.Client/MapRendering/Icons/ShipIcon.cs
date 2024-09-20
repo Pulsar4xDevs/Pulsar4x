@@ -15,19 +15,17 @@ namespace Pulsar4X.SDL2UI
         NewtonMoveDB? _newtonMoveDB;
         float _lop;
         Entity? _entity;
-        public ShipIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
+        public ShipIcon(Entity entity, ShipInfoDB shipInfoDB, PositionDB positionDB) : base(positionDB)
         {
-            if (entity.HasDataBlob<OrbitDB>())
+            if (entity.TryGetDatablob<OrbitDB>(out _orbitDB))
             {
-                _orbitDB = entity.GetDataBlob<OrbitDB>();
                 var i = _orbitDB.Inclination;
                 var aop = _orbitDB.ArgumentOfPeriapsis;
                 var loan = _orbitDB.LongitudeOfAscendingNode;
                 _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
             }
-            else if(entity.HasDataBlob<NewtonMoveDB>())
+            else if(entity.TryGetDatablob<NewtonMoveDB>(out _newtonMoveDB))
             {
-                _newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>();
             }
 
             Func<Message, bool> filterById = msg => msg.EntityId != null && msg.EntityId == entity.Id;
@@ -293,15 +291,14 @@ namespace Pulsar4X.SDL2UI
         float _lop;
         Entity? _entity;
         private Shape _flame;
-        public ProjectileIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
+        public ProjectileIcon(Entity entity, PositionDB positionDB) : base(positionDB)
         {
             _entity = entity;
             BasicShape();
             NewtonFlame();
 
-            if (entity.HasDataBlob<OrbitDB>())
+            if (entity.TryGetDatablob<OrbitDB>(out _orbitDB))
             {
-                _orbitDB = entity.GetDataBlob<OrbitDB>();
                 var i = _orbitDB.Inclination;
                 var aop = _orbitDB.ArgumentOfPeriapsis;
                 var loan = _orbitDB.LongitudeOfAscendingNode;

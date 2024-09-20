@@ -21,23 +21,13 @@ namespace Pulsar4X.SDL2UI
         public byte Blu = 0;
         byte alpha = 100;
         SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[2];
-        public WarpMovingIcon(Entity entity): base(new Vector3())
+        public WarpMovingIcon(WarpMovingDB warpMovingDB, PositionDB positionDB): base(new Vector3())
         {
-            if (entity.HasDataBlob<WarpMovingDB>())
-            {
-                var db = entity.GetDataBlob<WarpMovingDB>();
-                _translateStartPoint = db.EntryPointAbsolute;
-                _translateEndPoint = db.ExitPointAbsolute;
-                _relativeEndPoint = db.ExitPointrelative;
-                _targetParentPos = db.GetTargetPosDB;
-            }
-            if (entity.HasDataBlob<OrderableDB>())
-            {
-                var orderable = entity.GetDataBlob<OrderableDB>();
-            }
-            _positionDB = entity.GetDataBlob<PositionDB>();
-
-
+            _translateStartPoint = warpMovingDB.EntryPointAbsolute;
+            _translateEndPoint = warpMovingDB.ExitPointAbsolute;
+            _relativeEndPoint = warpMovingDB.ExitPointrelative;
+            _targetParentPos = warpMovingDB.GetTargetPosDB;
+            _positionDB = positionDB;
         }
 
         public override void OnPhysicsUpdate()
@@ -51,13 +41,13 @@ namespace Pulsar4X.SDL2UI
         {
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
             _drawPoints = new SDL.SDL_Point[3];
-            
+
             var spos = camera.ViewCoordinateV2_m(_currentPosition);
             _drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
-            
+
             var epos = camera.ViewCoordinateV2_m(_translateEndPoint);
             _drawPoints[1] = new SDL.SDL_Point(){x = (int)epos.X, y = (int)epos.Y};
-            
+
             var rpos = camera.ViewCoordinateV2_m(_currentRelativeEndPoint);
             _drawPoints[2] = new SDL.SDL_Point(){x = (int)rpos.X, y = (int)rpos.Y};
         }

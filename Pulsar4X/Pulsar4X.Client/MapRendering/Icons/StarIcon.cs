@@ -13,12 +13,10 @@ namespace Pulsar4X.SDL2UI
         SDL.SDL_Color _color;
         float _iconMinSize = 16;
         double _bodyRadiusAU;
-        public StarIcon(Entity entity): base(entity.GetDataBlob<PositionDB>())
+        public StarIcon(StarInfoDB starInfoDB, PositionDB positionDB, MassVolumeDB massVolumeDB): base(positionDB)
         {
-            StarInfoDB starInfo = entity.GetDataBlob<StarInfoDB>();
-            _tempK = starInfo.Temperature + 273.15;
-            var massVol = entity.GetDataBlob<MassVolumeDB>();
-            _bodyRadiusAU = massVol.RadiusInAU;
+            _tempK = starInfoDB.Temperature + 273.15;
+            _bodyRadiusAU = massVolumeDB.RadiusInAU;
 
             double calcTemp = GeneralMath.Clamp(_tempK, 1000, 40000);
             calcTemp = calcTemp / 100;
@@ -53,7 +51,7 @@ namespace Pulsar4X.SDL2UI
             _color.a = 255;
 
 
-            byte spikes = (byte)(starInfo.SpectralType + 4);
+            byte spikes = (byte)(starInfoDB.SpectralType + 4);
             float spikeheight = 100;
             float spikeDepth = 50;
             double arc = (2 * Math.PI) / spikes;
@@ -79,7 +77,7 @@ namespace Pulsar4X.SDL2UI
                  * the idea was make an arc, then rotate it.
                 List<SDL.SDL_Point> points = new List<SDL.SDL_Point>();
                 points.AddRange(CreatePrimitiveShapes.CreateArc(32, 0, 32 - spikeDepth, 32 + spikeDepth, startAngle, arc, 32)); //32 segments is probilby way overkill maybe adjust this by the camera zoom level?
-                //rotate it at i * arc; 
+                //rotate it at i * arc;
                 var a = arc * i;
                 for (int i2 = 0; i2 < points.Count; i2++)
                 {
@@ -91,7 +89,7 @@ namespace Pulsar4X.SDL2UI
                 startAngle += arc;
                 */
             }
-            shapePoints.Add(shapePoints[0]); //ensure the last point is the same as the first, so it joins up. 
+            shapePoints.Add(shapePoints[0]); //ensure the last point is the same as the first, so it joins up.
             List<Shape> shapes = new List<Shape>();
             shapes.Add(new Shape() { Color = _color, Points = shapePoints.ToArray() });
             Shapes.AddRange(shapes);

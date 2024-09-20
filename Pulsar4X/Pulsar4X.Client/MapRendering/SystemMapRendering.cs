@@ -104,15 +104,16 @@ namespace Pulsar4X.SDL2UI
         void AddIconable(EntityState entityState)
         {
             var entityItem = entityState.Entity;
+            entityItem.TryGetDatablob<PositionDB>(out var positionDB);
+            entityItem.TryGetDatablob<MassVolumeDB>(out var massVolumeDB);
 
-            if (entityItem.HasDataBlob<NameDB>())
+            if (entityItem.TryGetDatablob<NameDB>(out var nameDB) && positionDB != null)
             {
-                _nameIcons.TryAdd(entityItem.Id, new NameIcon(entityState, _state));
+                _nameIcons.TryAdd(entityItem.Id, new NameIcon(entityState, nameDB, positionDB, _state));
             }
 
-            if (entityItem.HasDataBlob<OrbitDB>())
+            if (entityItem.TryGetDatablob<OrbitDB>(out var orbitDB))
             {
-                var orbitDB = entityItem.GetDataBlob<OrbitDB>();
                 if (!orbitDB.IsStationary)
                 {
                     OrbitIconBase orbit;
@@ -129,60 +130,54 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            if (entityItem.HasDataBlob<NewtonMoveDB>())
+            if (entityItem.TryGetDatablob<NewtonMoveDB>(out var newtonMoveDB))
             {
-                var hyp = entityItem.GetDataBlob<NewtonMoveDB>();
-                Icon orb;
-                //orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
-                //NewtonMoveIcon
-                orb = new NewtonMoveIcon(entityState, _state.UserOrbitSettingsMtx);
-                _orbitRings.TryAdd(entityItem.Id, orb);
+                _orbitRings.TryAdd(entityItem.Id, new NewtonMoveIcon(entityState, newtonMoveDB, _state.UserOrbitSettingsMtx));
             }
 
-            if (entityItem.HasDataBlob<NewtonSimpleMoveDB>())
+            if (entityItem.TryGetDatablob<NewtonSimpleMoveDB>(out var newtonSimpleMoveDB))
             {
-                Icon orb;
-                orb = new NewtonSimpleIcon(entityState, _state.UserOrbitSettingsMtx);
-                _orbitRings.TryAdd(entityItem.Id, orb);
+                _orbitRings.TryAdd(entityItem.Id, new NewtonSimpleIcon(entityState, newtonSimpleMoveDB, _state.UserOrbitSettingsMtx));
             }
 
-            if (entityItem.HasDataBlob<WarpMovingDB>())
+            if (entityItem.TryGetDatablob<WarpMovingDB>(out var warpMovingDB) && positionDB != null)
             {
-                var wrp = entityItem.GetDataBlob<WarpMovingDB>();
-                Icon wrpIcn;
-                wrpIcn = new WarpMovingIcon(entityItem);
-                _orbitRings.TryAdd(entityItem.Id, wrpIcn);
+                _orbitRings.TryAdd(entityItem.Id, new WarpMovingIcon(warpMovingDB, positionDB));
             }
 
 
-            if (entityItem.HasDataBlob<StarInfoDB>())
+            if (entityItem.TryGetDatablob<StarInfoDB>(out var starInfoDB)
+                && massVolumeDB != null
+                && positionDB != null)
             {
-                _entityIcons.TryAdd(entityItem.Id, new StarIcon(entityItem));
+                _entityIcons.TryAdd(entityItem.Id, new StarIcon(starInfoDB, positionDB, massVolumeDB));
             }
 
-            if (entityItem.HasDataBlob<SystemBodyInfoDB>())
+            if (entityItem.TryGetDatablob<SystemBodyInfoDB>(out var systemBodyInfoDB)
+                && massVolumeDB != null
+                && positionDB != null)
             {
-                _entityIcons.TryAdd(entityItem.Id, new SysBodyIcon(entityItem));
+                _entityIcons.TryAdd(entityItem.Id, new SysBodyIcon(entityItem, systemBodyInfoDB, positionDB, massVolumeDB));
             }
 
-            if (entityItem.HasDataBlob<ShipInfoDB>())
+            if (entityItem.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) && positionDB != null)
             {
-                _entityIcons.TryAdd(entityItem.Id, new ShipIcon(entityItem));
+                _entityIcons.TryAdd(entityItem.Id, new ShipIcon(entityItem, shipInfoDB, positionDB));
             }
 
-            if (entityItem.HasDataBlob<ProjectileInfoDB>())
+            if (entityItem.TryGetDatablob<ProjectileInfoDB>(out var projectileInfoDB) && positionDB != null)
             {
-                _entityIcons.TryAdd(entityItem.Id, new ProjectileIcon(entityItem));
+                _entityIcons.TryAdd(entityItem.Id, new ProjectileIcon(entityItem, positionDB));
             }
 
-            if (entityItem.TryGetDatablob<BeamInfoDB>(out var beamInfoDB) && entityItem.TryGetDatablob<PositionDB>(out var positionDB))
+            if (entityItem.TryGetDatablob<BeamInfoDB>(out var beamInfoDB) && positionDB != null)
             {
                 _entityIcons.TryAdd(entityItem.Id, new BeamIcon(beamInfoDB, positionDB));
             }
 
-            if(entityItem.HasDataBlob<JPSurveyableDB>())
+            if(entityItem.TryGetDatablob<JPSurveyableDB>(out var jPSurveyableDB) && positionDB != null)
             {
-                _entityIcons.TryAdd(entityItem.Id, new PointOfInterestIcon(entityItem));
+                _entityIcons.TryAdd(entityItem.Id, new PointOfInterestIcon(positionDB));
             }
 
         }
@@ -248,9 +243,12 @@ namespace Pulsar4X.SDL2UI
 
                         }
                     }
-                    if (message.DataBlob is WarpMovingDB && _sysState != null && _sysState.StarSystem.TryGetEntityById(message.EntityId.Value, out var entity))
+                    if (message.DataBlob is WarpMovingDB
+                        && _sysState != null
+                        && _sysState.StarSystem.TryGetEntityById(message.EntityId.Value, out var entity)
+                        && entity.TryGetDatablob<PositionDB>(out var positionDB))
                     {
-                        var widget = new WarpMovingIcon(entity);
+                        var widget = new WarpMovingIcon((WarpMovingDB)message.DataBlob, positionDB);
                         widget.OnPhysicsUpdate();
                         //Matrix matrix = new Matrix();
                         //matrix.Scale(_camera.ZoomLevel);
@@ -261,13 +259,9 @@ namespace Pulsar4X.SDL2UI
 
                     if (message.DataBlob is NewtonMoveDB)
                     {
-                        if(entityState.Entity.HasDataBlob<NewtonMoveDB>()) //because sometimes it can be added and removed in a single tick.
-                        {
-                            Icon orb;
-                            //orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
-                            orb = new NewtonMoveIcon(entityState, _state.UserOrbitSettingsMtx);
-                            _orbitRings.AddOrUpdate(message.EntityId.Value, orb, ((guid, data) => data = orb));
-                        }
+
+                        Icon orb = new NewtonMoveIcon(entityState, (NewtonMoveDB)message.DataBlob, _state.UserOrbitSettingsMtx);
+                        _orbitRings.AddOrUpdate(message.EntityId.Value, orb, ((guid, data) => data = orb));
                     }
                     //if (changeData.Datablob is NameDB)
                     //TextIconList[changeData.Entity.ID] = new TextIcon(changeData.Entity, _camera);
