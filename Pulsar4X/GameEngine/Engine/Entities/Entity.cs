@@ -28,6 +28,13 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
         return new Entity(entityId);
     }
 
+    public static Entity Create(int factionId)
+    {
+        var entity = Create();
+        entity.FactionOwnerID = factionId;
+        return entity;
+    }
+
     public static readonly Entity InvalidEntity = new Entity(-1);
 
     [JsonIgnore]
@@ -55,10 +62,9 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
 
     public bool TryGetDatablob<T>([NotNullWhen(true)] out T? value) where T : BaseDataBlob
     {
-        if(Manager.HasDataBlob<T>(Id))
+        if (Manager.TryGetDataBlob<T>(Id, out value))
         {
-            value = Manager.GetDataBlob<T>(Id);
-            return true;
+            return value != null;
         }
 
         value = null;

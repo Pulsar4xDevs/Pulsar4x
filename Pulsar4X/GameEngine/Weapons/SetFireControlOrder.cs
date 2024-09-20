@@ -281,7 +281,7 @@ namespace Pulsar4X.Engine.Orders
                 else if (IsFiring == FireModes.CeaseFire)
                 {
                     fcState.IsEngaging = false;
-                    GenericFiringWeaponsDB blob = _entityCommanding.GetDataBlob<GenericFiringWeaponsDB>();
+                    _entityCommanding.RemoveDataBlob<GenericFiringWeaponsDB>();
                 }
                 IsRunning = true;
             }
