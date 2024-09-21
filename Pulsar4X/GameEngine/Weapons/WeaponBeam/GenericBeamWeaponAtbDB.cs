@@ -71,14 +71,8 @@ namespace Pulsar4X.Datablobs
         {
 
             var beamLen = Math.Min(1, count * LenPerPulseInSeconds); //our beam can't be longer than the time period.
-            var tohit = ToHitChance(launchingEntity, tgtEntity);
-            var hitsTarget = (launchingEntity.Manager as StarSystem).RNGNexBool(tohit);
-
-
-            //TODO: DELETE! (for testing purposes turning this on so always hitting)
-            hitsTarget = true;
-
-            BeamWeaponProcessor.FireBeamWeapon(launchingEntity, tgtEntity, hitsTarget, Energy, WaveLength ,BeamSpeed, beamLen);
+            
+            BeamWeaponProcessor.FireBeamWeapon(launchingEntity, tgtEntity, true, Energy, WaveLength ,BeamSpeed, beamLen);
         }
 
         public float ToHitChance(Entity launchingEntity, Entity tgtEntity)

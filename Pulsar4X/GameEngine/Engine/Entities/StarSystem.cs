@@ -49,11 +49,11 @@ namespace Pulsar4X.Engine
             return next;
         }
 
-        public bool RNGNexBool(float chance)
+        public bool RNGNextBool(float chance)
         {
             return RNG.NextDouble() < chance;
         }
-        public bool RNGNexBool(double chance)
+        public bool RNGNextBool(double chance)
         {
             return RNG.NextDouble() < chance;
         }

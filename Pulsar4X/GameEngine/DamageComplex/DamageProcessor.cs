@@ -31,25 +31,26 @@ namespace Pulsar4X.Engine
         public static void OnTakingDamage(Entity damageableEntity, DamageFragment damageFragment)
         {
 
-            var db = damageableEntity.GetDataBlob<EntityDamageProfileDB>();
-            if (!damageableEntity.HasDataBlob<EntityDamageProfileDB>())
+            if(!damageableEntity.TryGetDatablob<EntityDamageProfileDB>(out var entityDamageProfileDB))
             {
                 //I think currently most damageable entites should already have this,
                 //need to consider whether an undamaged entity needs this or if we should create it if and when it gets damaged.
 
                 if(damageableEntity.HasDataBlob<ShipInfoDB>())
                 {
-                    db = new EntityDamageProfileDB(damageableEntity.GetDataBlob<ShipInfoDB>().Design);
-                    damageableEntity.SetDataBlob(db);
+                    entityDamageProfileDB = new EntityDamageProfileDB(damageableEntity.GetDataBlob<ShipInfoDB>().Design);
+                    damageableEntity.SetDataBlob(entityDamageProfileDB);
                 }
                 //return;
             }
+
+            if(entityDamageProfileDB == null) return;
             
-            var damages = DamageTools.DealDamageEnergyBeamSim(db, damageFragment);
+            var damages = DamageTools.DealDamageEnergyBeamSim(entityDamageProfileDB, damageFragment);
 
             foreach (var damage in damages.damageToComponents)
             {
-                db.ComponentLookupTable[damage.id].HTKRemaining -= damage.damageAmount;
+                entityDamageProfileDB.ComponentLookupTable[damage.id].HTKRemaining -= damage.damageAmount;
             }
             
 

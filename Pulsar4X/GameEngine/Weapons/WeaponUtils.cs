@@ -19,12 +19,23 @@ public class WeaponUtils
         return distanceToTarget / (targetVelocity - ourVelocity).Length();
     }
 
+    public static double TimeToTarget(Vector3 vectorToTarget, double weaponVelocity)
+    {
+        return vectorToTarget.Length() / weaponVelocity;
+    }
+
     public static (Vector3 pos, double seconds) PredictTargetPositionAndTime((Vector3 pos, Vector3 Velocity) ourState, DateTime atTime, Entity targetEntity, double weaponVelocity)
     {
         var targetState = targetEntity.GetAbsoluteState();
         var vectorToTarget = ourState.pos - targetState.pos;
-        var distanceToTarget = vectorToTarget.Length();
-        var timeToTarget = distanceToTarget / weaponVelocity;
+        var timeToTarget = TimeToTarget(vectorToTarget, weaponVelocity);
+        var futureDate = atTime + TimeSpan.FromSeconds(timeToTarget);
+        var futurePosition = targetEntity.GetAbsoluteFuturePosition(futureDate);
+        return (futurePosition, timeToTarget);
+    }
+
+    public static (Vector3 pos, double seconds) PredictTargetPositionAndTime(double timeToTarget, DateTime atTime, Entity targetEntity)
+    {
         var futureDate = atTime + TimeSpan.FromSeconds(timeToTarget);
         var futurePosition = targetEntity.GetAbsoluteFuturePosition(futureDate);
         return (futurePosition, timeToTarget);

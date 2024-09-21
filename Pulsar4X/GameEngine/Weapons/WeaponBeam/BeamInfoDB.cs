@@ -12,6 +12,7 @@ public class BeamInfoDB : BaseDataBlob
     public Vector3[] Positions;
     public bool HitsTarget;
     public Entity TargetEntity;
+    public Vector3 LaunchPosition;
     private PositionDB _posDB;
     public PositionDB PosDB {
         get
