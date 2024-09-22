@@ -44,6 +44,9 @@ namespace Pulsar4X.Datablobs
         [JsonProperty]
         public Vector3 CurrentNonNewtonionVectorMS { get; internal set; }
 
+        
+        public KeplerElements TargetEndpointOrbit { get; internal set; }
+        
         /// <summary>
         /// Newtonion Vector to burn once warp is complete.
         /// </summary>

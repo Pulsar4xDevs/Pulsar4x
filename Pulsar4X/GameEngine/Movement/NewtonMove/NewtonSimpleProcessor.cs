@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameEngine.Movement;
 using Pulsar4X.Orbital;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Datablobs;
@@ -20,7 +21,10 @@ public class NewtonSimpleProcessor : IHotloopProcessor
 
     public void ProcessEntity(Entity entity, int deltaSeconds)
     {
-        NewtonMove(entity.GetDataBlob<NewtonSimpleMoveDB>(), deltaSeconds);
+        var nmdb = entity.GetDataBlob<NewtonSimpleMoveDB>();
+        NewtonMove(nmdb, deltaSeconds);
+        DateTime todateTime = entity.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+        MoveStateProcessor.ProcessForType(nmdb, todateTime);
     }
 
     public int ProcessManager(EntityManager manager, int deltaSeconds)
@@ -30,6 +34,9 @@ public class NewtonSimpleProcessor : IHotloopProcessor
         {
             NewtonMove(db, deltaSeconds);
         }
+
+        DateTime todateTime = manager.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+        MoveStateProcessor.ProcessForType(nmdb, todateTime);
         return nmdb.Count;
     }
 

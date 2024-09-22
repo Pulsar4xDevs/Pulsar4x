@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameEngine.Movement;
 using GameEngine.WarpMove;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
@@ -36,7 +37,9 @@ namespace Pulsar4X.Engine
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
             DateTime toDate = entity.Manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
-            UpdateOrbit(entity, entity.GetDataBlob<OrbitDB>().Parent.GetDataBlob<PositionDB>(), toDate);
+            var db = entity.GetDataBlob<OrbitDB>();
+            UpdateOrbit(entity, db.Parent.GetDataBlob<PositionDB>(), toDate);
+            MoveStateProcessor.ProcessForType(db, toDate);
         }
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)
@@ -54,6 +57,8 @@ namespace Pulsar4X.Engine
                 PositionDB entityPosition = orbit.OwningEntity.GetDataBlob<PositionDB>();
                 entityPosition.RelativePosition = newPosition;
             }
+
+            MoveStateProcessor.ProcessForType(orbits, toDate);
             return orbits.Count;
         }
 
@@ -195,6 +200,7 @@ namespace Pulsar4X.Engine
             var orbit = entity.GetDataBlob<OrbitUpdateOftenDB>();
             DateTime toDate = entity.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
             UpdateOrbit(orbit, toDate);
+            MoveStateProcessor.ProcessForType(orbit, toDate);
         }
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)
@@ -205,6 +211,7 @@ namespace Pulsar4X.Engine
             {
                 UpdateOrbit(orbit, toDate);
             }
+            MoveStateProcessor.ProcessForType(orbits, toDate);
             return orbits.Count;
         }
 

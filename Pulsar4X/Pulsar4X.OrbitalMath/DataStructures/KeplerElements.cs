@@ -107,6 +107,65 @@ namespace Pulsar4X.Orbital
 
 	}
 
+    public struct KeplerElements2d
+    {
+        /// <summary>
+        /// In meters kg^3
+        /// </summary>
+        /// <remarks>μ</remarks>
+        public double StandardGravParameter;
+        
+        /// <summary>
+        /// SemiMajorAxis in Metres
+        /// Will be negative for Hyperbola!!!
+        /// </summary>
+        /// <remarks>a</remarks>
+        public double SemiMajorAxis;
+        
+        /// <summary>
+        /// Eccentricity
+        /// </summary>
+        /// <remarks>e</remarks>
+        public double Eccentricity;
+        
+        /// <summary>
+        /// Longitude of Periapsis
+        /// </summary>
+        /// <remarks>ϖ</remarks>
+        public double LoP;
+        
+        /// <summary>
+        /// replaces inclination.
+        /// </summary>
+        /// <remarks>i</remarks>
+        public bool IsPrograde;
+        
+        /// <summary>
+        /// Mean Anomaly At Epoch
+        /// </summary>
+        /// <remarks>M0</remarks>
+        public double MeanAnomalyAtEpoch;
+        
+        /// <summary>
+        /// True Anomaly At Epoch
+        /// </summary>
+        /// <remarks>ν or f or θ</remarks>
+        public double TrueAnomalyAtEpoch;
+        
+        /// <summary>
+        /// Eccentric Anomaly for Ellipse
+        /// Hyperbolic Anomaly for Hyperbolic
+        /// </summary>
+        /// <remarks>E0 (ellipse) or F0 (hyperbolic)</remarks>
+        public double AnomalyAtEpoch;
+
+        /// <summary>
+        /// Epoch
+        /// </summary>
+        public DateTime Epoch;
+
+    }
+
     /// <summary>
     /// State Vectors are orbital parent ralitive.
     /// </summary>

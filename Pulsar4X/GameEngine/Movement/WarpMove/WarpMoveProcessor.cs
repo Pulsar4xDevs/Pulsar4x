@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameEngine.Movement;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
@@ -68,45 +69,21 @@ namespace Pulsar4X.Engine
             _gameSettings = game.Settings;
         }
 
-        public static bool StartNonNewtTranslation(Entity entity)
+        
+        
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            var moveDB = entity.GetDataBlob<WarpMovingDB>();
-            var warpDB = entity.GetDataBlob<WarpAbilityDB>();
-            var positionDB = entity.GetDataBlob<PositionDB>();
-            var maxSpeedMS = warpDB.MaxSpeed;
-            var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
-            EnergyGenProcessor.EnergyGen(entity, entity.StarSysDateTime);
-            positionDB.SetParent(positionDB.Root);
-            Vector3 targetPosMt = moveDB.ExitPointAbsolute;
-            Vector3 currentPositionMt = positionDB.AbsolutePosition;
-
-            Vector3 postionDelta = currentPositionMt - targetPosMt;
-            double totalDistance = postionDelta.Length();
-
-            var creationCost = warpDB.BubbleCreationCost;
-            var t = totalDistance / warpDB.MaxSpeed;
-            var tcost = t * warpDB.BubbleSustainCost;
-            double estored = powerDB.EnergyStored[warpDB.EnergyType];
-            bool canStart = false;
-            if (creationCost <= estored)
+            var datablobs = manager.GetAllDataBlobsOfType<WarpMovingDB>();
+            foreach (var db in datablobs)
             {
-
-                var currentVelocityMS = Vector3.Normalise(targetPosMt - currentPositionMt) * maxSpeedMS;
-                warpDB.CurrentVectorMS = currentVelocityMS;
-                moveDB.CurrentNonNewtonionVectorMS = currentVelocityMS;
-                moveDB.LastProcessDateTime = entity.Manager.ManagerSubpulses.StarSysDateTime;
-
-                //estore = (estore.stored - creationCost, estore.maxStore);
-                powerDB.AddDemand(creationCost, entity.StarSysDateTime);
-                powerDB.AddDemand(-creationCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
-                powerDB.AddDemand(warpDB.BubbleSustainCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
-                //powerDB.EnergyStore[warpDB.EnergyType] = estore;
-                moveDB.HasStarted = true;
-                canStart = true;
+                WarpMove(db.OwningEntity, db, deltaSeconds);
             }
-
-            return canStart;
+            DateTime todateTime = manager.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            MoveStateProcessor.ProcessForType(datablobs, todateTime);
+            return datablobs.Count;
         }
+        
+
 
         /// <summary>
         /// Moves an entity while it's in a non newtonion translation state.
@@ -115,17 +92,22 @@ namespace Pulsar4X.Engine
         /// <param name="deltaSeconds">Unused</param>
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
+            var db = entity.GetDataBlob<WarpMovingDB>();
+            WarpMove(entity, db, deltaSeconds);
+            DateTime todateTime = entity.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            MoveStateProcessor.ProcessForType(db, todateTime);
+        }
 
-            var manager = entity.Manager;
-            var moveDB = entity.GetDataBlob<WarpMovingDB>();
+        public void WarpMove(Entity entity, WarpMovingDB moveDB,  int deltaSeconds)
+        {
+
             if (!moveDB.HasStarted & !StartNonNewtTranslation(entity))
                 return;
-
             var warpDB = entity.GetDataBlob<WarpAbilityDB>();
 
             var currentVelocityMS = moveDB.CurrentNonNewtonionVectorMS;
             DateTime dateTimeFrom = moveDB.LastProcessDateTime;
-            DateTime dateTimeNow = manager.ManagerSubpulses.StarSysDateTime;
+            DateTime dateTimeNow = entity.StarSysDateTime;
             DateTime dateTimeFuture = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds);
 
             double deltaT = (dateTimeFuture - dateTimeFrom).TotalSeconds;
@@ -173,9 +155,48 @@ namespace Pulsar4X.Engine
 
 
             moveDB.LastProcessDateTime = dateTimeFuture;
-
         }
+        
+        public static bool StartNonNewtTranslation(Entity entity)
+        {
+            var moveDB = entity.GetDataBlob<WarpMovingDB>();
+            var warpDB = entity.GetDataBlob<WarpAbilityDB>();
+            var positionDB = entity.GetDataBlob<PositionDB>();
+            var maxSpeedMS = warpDB.MaxSpeed;
+            var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
+            EnergyGenProcessor.EnergyGen(entity, entity.StarSysDateTime);
+            positionDB.SetParent(positionDB.Root);
+            Vector3 targetPosMt = moveDB.ExitPointAbsolute;
+            Vector3 currentPositionMt = positionDB.AbsolutePosition;
 
+            Vector3 postionDelta = currentPositionMt - targetPosMt;
+            double totalDistance = postionDelta.Length();
+
+            var creationCost = warpDB.BubbleCreationCost;
+            var t = totalDistance / warpDB.MaxSpeed;
+            var tcost = t * warpDB.BubbleSustainCost;
+            double estored = powerDB.EnergyStored[warpDB.EnergyType];
+            bool canStart = false;
+            if (creationCost <= estored)
+            {
+
+                var currentVelocityMS = Vector3.Normalise(targetPosMt - currentPositionMt) * maxSpeedMS;
+                warpDB.CurrentVectorMS = currentVelocityMS;
+                moveDB.CurrentNonNewtonionVectorMS = currentVelocityMS;
+                moveDB.LastProcessDateTime = entity.Manager.ManagerSubpulses.StarSysDateTime;
+
+                //estore = (estore.stored - creationCost, estore.maxStore);
+                powerDB.AddDemand(creationCost, entity.StarSysDateTime);
+                powerDB.AddDemand(-creationCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
+                powerDB.AddDemand(warpDB.BubbleSustainCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
+                //powerDB.EnergyStore[warpDB.EnergyType] = estore;
+                moveDB.HasStarted = true;
+                canStart = true;
+            }
+
+            return canStart;
+        }
+        
         /// <summary>
         /// Sets a circular orbit without newtonion movement or fuel use.
         /// </summary>
@@ -279,16 +300,7 @@ namespace Pulsar4X.Engine
 */
         }
 
-        public int ProcessManager(EntityManager manager, int deltaSeconds)
-        {
-            List<Entity> entitysWithTranslateMove = manager.GetAllEntitiesWithDataBlob<WarpMovingDB>();
-            foreach (var entity in entitysWithTranslateMove)
-            {
-                ProcessEntity(entity, deltaSeconds);
-            }
 
-            return entitysWithTranslateMove.Count;
-        }
     }
 
 

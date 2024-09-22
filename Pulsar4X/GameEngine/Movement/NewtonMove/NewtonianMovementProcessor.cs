@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameEngine.Movement;
 using Pulsar4X.Orbital;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Datablobs;
@@ -28,7 +29,10 @@ namespace Pulsar4X.Engine
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            NewtonMove(entity.GetDataBlob<NewtonMoveDB>(), deltaSeconds);
+            var nmdb = entity.GetDataBlob<NewtonMoveDB>();
+            NewtonMove(nmdb, deltaSeconds);
+            DateTime todateTime = entity.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            MoveStateProcessor.ProcessForType(nmdb, todateTime);
         }
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)
@@ -39,6 +43,8 @@ namespace Pulsar4X.Engine
             {
                 NewtonMove(db, deltaSeconds);
             }
+            DateTime todateTime = manager.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            MoveStateProcessor.ProcessForType(nmdb, todateTime);
 
             return nmdb.Count;
         }
