@@ -1,6 +1,8 @@
 using System;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
+using Pulsar4X.Engine.Damage;
+using Pulsar4X.Engine.Orders;
 using Pulsar4X.Interfaces;
 
 namespace GameEngine.WeaponFireControl;
@@ -42,6 +44,11 @@ public class GenericFiringWeaponsProcessor : IHotloopProcessor
                     db.InternalMagQty[i] -= shots * db.AmountPerShot[i];
                     db.WeaponStates[i].InternalMagCurAmount = db.InternalMagQty[i];
                 }
+                else
+                {
+                    // If we encounter an invalid target check to see if any valid targets exist
+                    ValidateTargetExists(db, db.FireControlStates);
+                }
             }
         }
 
@@ -53,8 +60,28 @@ public class GenericFiringWeaponsProcessor : IHotloopProcessor
             db.InternalMagQty[i] = magQty;
             db.WeaponStates[i].InternalMagCurAmount = magQty;
         }
+    }
 
-
+    /// <summary>
+    /// Check if each of the FireControlAbilityStates have a valid target,
+    /// if not issue the cease firing command for that fire control.
+    /// </summary>
+    ///<param name="genericFiringWeaponsDB"></param>
+    /// <param name="fireControlAbilityStates"></param>
+    private void ValidateTargetExists(GenericFiringWeaponsDB genericFiringWeaponsDB, FireControlAbilityState[] fireControlAbilityStates)
+    {
+        for(int i  = 0; i < fireControlAbilityStates.Length; i++)
+        {
+            if(!fireControlAbilityStates[i].Target.IsValid)
+            {
+                SetOpenFireControlOrder.CreateCmd(
+                    genericFiringWeaponsDB.OwningEntity.Manager.Game,
+                    genericFiringWeaponsDB.OwningEntity.FactionOwnerID,
+                    genericFiringWeaponsDB.OwningEntity.Id,
+                    fireControlAbilityStates[i].ID,
+                    SetOpenFireControlOrder.FireModes.CeaseFire);
+            }
+        }
     }
 
     public TimeSpan RunFrequency { get; } = TimeSpan.FromSeconds(1);

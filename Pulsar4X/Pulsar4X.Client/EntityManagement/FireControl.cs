@@ -453,7 +453,7 @@ namespace Pulsar4X.ImGuiNetUI
         private void OpenFire(string fcID, SetOpenFireControlOrder.FireModes mode)
         {
             if(_orderEntityState != null)
-                SetOpenFireControlOrder.CreateCmd(_uiState.Game, _uiState.Faction, _orderEntityState.Id, fcID, mode);
+                SetOpenFireControlOrder.CreateCmd(_uiState.Game, _uiState.Faction.Id, _orderEntityState.Id, fcID, mode);
         }
     }
 }

@@ -242,11 +242,11 @@ namespace Pulsar4X.Engine.Orders
         public FireModes IsFiring;
         private Game _game;
 
-        public static void CreateCmd(Game game, Entity faction, int shipEntityId, string fireControlGuid, FireModes isFiring)
+        public static void CreateCmd(Game game, int factionId, int shipEntityId, string fireControlGuid, FireModes isFiring)
         {
             var cmd = new SetOpenFireControlOrder()
             {
-                RequestingFactionGuid = faction.Id,
+                RequestingFactionGuid = factionId,
                 EntityCommandingGuid = shipEntityId,
                 CreatedDate = game.TimePulse.GameGlobalDateTime,
                 FireControlGuid = fireControlGuid,
