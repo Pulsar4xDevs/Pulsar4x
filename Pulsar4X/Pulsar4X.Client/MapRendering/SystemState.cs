@@ -50,7 +50,7 @@ namespace Pulsar4X.SDL2UI
             var entities = StarSystem.GetFilteredEntities(EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile, factionId);
             foreach(var entity in entities)
             {
-                SetupEntity(entity, factionId);
+                SetupEntity(entity, entity.FactionOwnerID);
             }
 
             Func<Message, bool> filterById = msg => msg.EntityId != null && msg.SystemId != null && msg.SystemId.Equals(StarSystem.ManagerID);
@@ -124,7 +124,7 @@ namespace Pulsar4X.SDL2UI
                     // FIXME: need to remove the call to the game engine internals
                     if(StarSystem.TryGetEntityById(entityToAdd, out var entity))
                     {
-                        SetupEntity(entity, _factionId);
+                        SetupEntity(entity, entity.FactionOwnerID);
                         OnEntityAdded?.Invoke(this, entity);
                     }
                 }
