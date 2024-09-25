@@ -133,6 +133,23 @@ public class BeamWeaponProcessor : IHotloopProcessor
                         }));
             }
         }
+        else
+        {
+            // Target was missed
+            EventManager.Instance.Publish(
+                Event.Create(
+                    EventType.TargetMissed,
+                    nowTime,
+                    $"Missed target",
+                    beamInfo.OwningEntity.FactionOwnerID,
+                    beamInfo.OwningEntity.Manager.ManagerID,
+                    beamInfo.TargetEntity.Id,
+                    new List<int>()
+                    {
+                        beamInfo.OwningEntity.FactionOwnerID,
+                        beamInfo.TargetEntity.FactionOwnerID
+                    }));
+        }
 
         // FIXME: beam should continue on and dissipate on a miss
         beamInfo.OwningEntity.Destroy();
