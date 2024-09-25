@@ -6,6 +6,13 @@ namespace Pulsar4X.Damage;
 
 public class SimpleDamage
 {
+    /// <summary>
+    /// Deals damage to the specified entity
+    /// </summary>
+    /// <param name="entityToDamage">The entity to damage</param>
+    /// <param name="damageMin">Inclusive minimum</param>
+    /// <param name="damageMax">Exclusive maximum</param>
+    /// <returns>Returns true if the entity was destroyed.</returns>
     public static bool OnTakingDamage(Entity entityToDamage, int damageMin, int damageMax)
     {
         if(entityToDamage.TryGetDatablob<ComponentInstancesDB>(out var componentInstancesDB)

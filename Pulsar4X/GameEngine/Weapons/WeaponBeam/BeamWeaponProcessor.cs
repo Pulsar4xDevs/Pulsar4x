@@ -4,9 +4,9 @@ using Pulsar4X.Orbital;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
-using Pulsar4X.Engine.Damage;
 using Pulsar4X.Engine;
 using Pulsar4X.Damage;
+using Pulsar4X.Events;
 
 namespace Pulsar4X.Weapons;
 
@@ -99,7 +99,19 @@ public class BeamWeaponProcessor : IHotloopProcessor
             if(SimpleDamage.OnTakingDamage(beamInfo.TargetEntity, 100, 500))
             {
                 // Target was destroyed
-
+                EventManager.Instance.Publish(
+                    Event.Create(
+                        EventType.TargetDestroyed,
+                        nowTime,
+                        "Target has been destroyed",
+                        beamInfo.OwningEntity.FactionOwnerID,
+                        beamInfo.OwningEntity.Manager.ManagerID,
+                        beamInfo.TargetEntity.Id,
+                        new List<int>()
+                        {
+                            beamInfo.OwningEntity.FactionOwnerID,
+                            beamInfo.TargetEntity.FactionOwnerID
+                        }));
             }
         }
 
