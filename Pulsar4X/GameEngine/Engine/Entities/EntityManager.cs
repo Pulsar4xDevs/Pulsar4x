@@ -262,11 +262,8 @@ namespace Pulsar4X.Engine
                     throw new KeyNotFoundException($"Entity with ID {entity.Id} not found in manager.");
                 }
 
-                Event e = Event.Create(EventType.EntityDestroyed, StarSysDateTime, $"Entity #{entity.Id} removed from {ManagerID}", entity.FactionOwnerID, ManagerID, entity.Id);
-                EventManager.Instance.Publish(e);
-
             }
-            _entitiesTaggedForRemoval = new List<Entity>();
+            _entitiesTaggedForRemoval.Clear();
         }
 
         public List<BaseDataBlob> GetAllDataBlobsForEntity(int entityID)
