@@ -42,7 +42,7 @@ public class BeamWeaponProcessor : IHotloopProcessor
     {
         if(!beamInfo.TargetEntity.IsValid)
         {
-            // FIXME: beam should probalby continue on for a bit and dissipate instead of abrupting removing itself from the game
+            // FIXME: beam should probably continue on for a bit and dissipate instead of abrupting removing itself from the game
             beamInfo.OwningEntity.Destroy();
             return;
         }
@@ -96,7 +96,9 @@ public class BeamWeaponProcessor : IHotloopProcessor
             // };
             // DamageProcessor.OnTakingDamage(beamInfo.TargetEntity, damage);
 
-            if(SimpleDamage.OnTakingDamage(beamInfo.TargetEntity, 100, 500))
+            var damageResult = SimpleDamage.OnTakingDamage(beamInfo.TargetEntity, 100, 500);
+
+            if(damageResult.Destroyed)
             {
                 // Target was destroyed
                 EventManager.Instance.Publish(
@@ -104,6 +106,23 @@ public class BeamWeaponProcessor : IHotloopProcessor
                         EventType.TargetDestroyed,
                         nowTime,
                         "Target has been destroyed",
+                        beamInfo.OwningEntity.FactionOwnerID,
+                        beamInfo.OwningEntity.Manager.ManagerID,
+                        beamInfo.TargetEntity.Id,
+                        new List<int>()
+                        {
+                            beamInfo.OwningEntity.FactionOwnerID,
+                            beamInfo.TargetEntity.FactionOwnerID
+                        }));
+            }
+            else if(damageResult.Damage > 0)
+            {
+                // Target took damage
+                EventManager.Instance.Publish(
+                    Event.Create(
+                        EventType.TargetHit,
+                        nowTime,
+                        $"Target hit for {damageResult.Damage} damage",
                         beamInfo.OwningEntity.FactionOwnerID,
                         beamInfo.OwningEntity.Manager.ManagerID,
                         beamInfo.TargetEntity.Id,

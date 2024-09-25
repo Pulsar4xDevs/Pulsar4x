@@ -6,6 +6,12 @@ namespace Pulsar4X.Damage;
 
 public class SimpleDamage
 {
+    public struct DamageResult
+    {
+        public int Damage;
+        public bool Destroyed;
+    }
+
     /// <summary>
     /// Deals damage to the specified entity
     /// </summary>
@@ -13,7 +19,7 @@ public class SimpleDamage
     /// <param name="damageMin">Inclusive minimum</param>
     /// <param name="damageMax">Exclusive maximum</param>
     /// <returns>Returns true if the entity was destroyed.</returns>
-    public static bool OnTakingDamage(Entity entityToDamage, int damageMin, int damageMax)
+    public static DamageResult OnTakingDamage(Entity entityToDamage, int damageMin, int damageMax)
     {
         if(entityToDamage.TryGetDatablob<ComponentInstancesDB>(out var componentInstancesDB)
             && componentInstancesDB.AllComponents.Count > 0)
@@ -34,10 +40,24 @@ public class SimpleDamage
             if(componentInstancesDB.AllComponents.Count <= 0)
             {
                 entityToDamage.Destroy();
-                return true;
+                return new DamageResult()
+                {
+                    Damage = damage,
+                    Destroyed = true
+                };
             }
+
+            return new DamageResult()
+            {
+                Damage = damage,
+                Destroyed = false
+            };
         }
 
-        return false;
+        return new DamageResult()
+        {
+            Damage = 0,
+            Destroyed = false
+        };
     }
 }
