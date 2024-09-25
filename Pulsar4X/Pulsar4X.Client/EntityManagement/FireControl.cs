@@ -21,8 +21,6 @@ namespace Pulsar4X.ImGuiNetUI
     public class FireControl : PulsarGuiWindow
     {
         private EntityState? _orderEntityState;
-        SensorContact[] _allSensorContacts = new SensorContact[0];
-        EntityState[] _ownEntites = new EntityState[0];
         private bool _showOwnAsTarget;
 
         //private int _dragDropIndex;
@@ -100,15 +98,13 @@ namespace Pulsar4X.ImGuiNetUI
             int fcindex = 0;
             foreach(FireControlAbilityState fc in _fcStates)
             {
-
-
                 var startPoint = ImGui.GetCursorPos();
                 BorderGroup.Begin(fc.Name + "##" + fcindex++);
                 //ImGui.BeginChild("fcddarea"+i) ;//("##fcddarea"+i, new Vector2(_fcSizes[i].X -2, _fcSizes[i].Y - 2), false);
 
-                ImGui.Text(fc.TargetName);
-                if (fc.Target != null)
+                if (fc.Target != null && fc.Target.IsValid)
                 {
+                    ImGui.Text(fc.TargetName);
                     if (fc.IsEngaging)
                     {
                         if (ImGui.Button("Cease Fire"))
@@ -131,18 +127,11 @@ namespace Pulsar4X.ImGuiNetUI
 
                 if (ImGui.BeginDragDropTarget())
                 {
-                    var acceptPayload = ImGui.AcceptDragDropPayload("AssignSensorAsTarget");
+                    var acceptPayload = ImGui.AcceptDragDropPayload("AssignAsTarget");
                     bool isDroppingSensorTarget = false;
                     unsafe
                     {
                         isDroppingSensorTarget = acceptPayload.NativePtr != null;
-                    }
-
-                    acceptPayload = ImGui.AcceptDragDropPayload("AssignOwnAsTarget");
-                    bool isDroppingOwnTarget = false;
-                    unsafe
-                    {
-                        isDroppingOwnTarget = acceptPayload.NativePtr != null;
                     }
 
                     acceptPayload = ImGui.AcceptDragDropPayload("AssignWeapon");
@@ -153,8 +142,6 @@ namespace Pulsar4X.ImGuiNetUI
                     }
 
                     if (isDroppingSensorTarget)
-                        SetTarget(fc, _dragDropId);
-                    if (isDroppingOwnTarget)
                         SetTarget(fc, _dragDropId);
                     if (isDroppingWeapon && !string.IsNullOrEmpty(_dragDropGuid))
                         SetWeapon(_wpnDict[_dragDropGuid], fc);
@@ -292,49 +279,49 @@ namespace Pulsar4X.ImGuiNetUI
 
         void DisplayTargetColumn()
         {
+            if(_orderEntityState == null || _orderEntityState.StarSystemId == null) return;
+            var systemState = _uiState.StarSystemStates[_orderEntityState.StarSystemId];
+
             BorderGroup.Begin("Set Target:");
             ImGui.Checkbox("Show Own", ref _showOwnAsTarget);
 
-            for (int i = 0; i < _allSensorContacts.Length; i++)
-            {
-                var contact = _allSensorContacts[i];
-                ImGui.Selectable(contact.Name);
-                if (ImGui.BeginDragDropSource())
-                {
-                    ImGui.Text(contact.Name);
-                    unsafe
-                    {
-                        int* tesnum = &i;
-                        ImGui.SetDragDropPayload("AssignSensorAsTarget", new IntPtr(tesnum), sizeof(int));
-                        _dragDropId = contact.ActualEntityId;
-                    }
+            var filteredEnemies = systemState.GetFilteredEntities(DataStructures.EntityFilter.Hostile, _orderEntityState.FactionId, typeof(PositionDB));
 
-                    ImGui.EndDragDropSource();
-                }
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+            foreach(var entityState in filteredEnemies)
+            {
+                DisplayTarget(entityState);
             }
+            ImGui.PopStyleColor();
 
             if (_showOwnAsTarget)
             {
-                for (int i = 0; i < _ownEntites.Length; i++)
+                var filteredFriendly = systemState.GetFilteredEntities(DataStructures.EntityFilter.Friendly, _orderEntityState.FactionId, typeof(PositionDB));
+                foreach(var entityState in filteredFriendly)
                 {
-                    var contact = _ownEntites[i];
-                    ImGui.Selectable(contact.Name);
-                    if (ImGui.BeginDragDropSource())
-                    {
-                        ImGui.Text(contact.Name);
-                        unsafe
-                        {
-                            int* tesnum = &i;
-                            ImGui.SetDragDropPayload("AssignOwnAsTarget", new IntPtr(tesnum), sizeof(int));
-                            _dragDropId = contact.Id;
-                        }
-
-                        ImGui.EndDragDropSource();
-                    }
+                    DisplayTarget(entityState);
                 }
             }
 
             BorderGroup.End();
+        }
+
+        private void DisplayTarget(EntityState entityState)
+        {
+            int i = entityState.Id;
+            ImGui.Selectable(entityState.Name);
+            if (ImGui.BeginDragDropSource())
+            {
+                ImGui.Text(entityState.Name);
+                unsafe
+                {
+                    int* tesnum = &i;
+                    ImGui.SetDragDropPayload("AssignAsTarget", new IntPtr(tesnum), sizeof(int));
+                    _dragDropId = entityState.Id;
+                }
+
+                ImGui.EndDragDropSource();
+            }
         }
 
         void HardRefresh(EntityState orderEntity)
@@ -369,15 +356,6 @@ namespace Pulsar4X.ImGuiNetUI
             {
                 //_activeWeapons = new GenericFiringWeaponsDB(new ComponentInstance[0]);
             }
-
-            var sysstate = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
-            var contacts = sysstate.SystemContacts;
-            _allSensorContacts = new SensorContact[0];
-            if (contacts != null)
-            {
-                _allSensorContacts = contacts.GetAllContacts().ToArray();
-            }
-            _ownEntites = sysstate.EntityStatesWithPosition.Values.ToArray();
         }
 
         public override void OnSystemTickChange(DateTime newdate)
