@@ -36,9 +36,9 @@ namespace Pulsar4X.Engine
                 //I think currently most damageable entites should already have this,
                 //need to consider whether an undamaged entity needs this or if we should create it if and when it gets damaged.
 
-                if(damageableEntity.HasDataBlob<ShipInfoDB>())
+                if(damageableEntity.TryGetDatablob<ShipInfoDB>(out var shipInfoDB))
                 {
-                    entityDamageProfileDB = new EntityDamageProfileDB(damageableEntity.GetDataBlob<ShipInfoDB>().Design);
+                    entityDamageProfileDB = new EntityDamageProfileDB(shipInfoDB.Design);
                     damageableEntity.SetDataBlob(entityDamageProfileDB);
                 }
                 //return;
@@ -52,7 +52,11 @@ namespace Pulsar4X.Engine
             {
                 entityDamageProfileDB.ComponentLookupTable[damage.id].HTKRemaining -= damage.damageAmount;
             }
-            
+
+            if(damageableEntity.TryGetDatablob<ComponentInstancesDB>(out var damagedComponentInstancesDB))
+            {
+                
+            }
 
             /*
             if (damageableEntity.HasDataBlob<AsteroidDamageDB>())

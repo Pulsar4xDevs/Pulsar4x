@@ -242,19 +242,12 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-            if(_entity is null) return;
+            if(_entity is null || !_entity.IsValid) return;
 
-            try
-            {
-                // FIXME: remove call to engine
-                var headingVector = _entity.GetRelativeState().Velocity;
-                var heading = Math.Atan2(headingVector.Y, headingVector.X);
-                Heading = (float)heading;
-            }
-            catch(Exception)
-            {
-                // I don't think we need to do anything here
-            }
+            // FIXME: remove call to engine
+            var headingVector = _entity.GetRelativeState().Velocity;
+            var heading = Math.Atan2(headingVector.Y, headingVector.X);
+            Heading = (float)heading;
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)

@@ -41,6 +41,17 @@ public class WeaponUtils
         return (futurePosition, timeToTarget);
     }
 
+    public static double ToHitChance(Vector3 launchPosition, Vector3 targetPosition, double projectileSpeed, double baseHitChance)
+    {
+        double range = launchPosition.GetDistanceTo_m(targetPosition);
+
+        //var ttt = BeamWeapnProcessor.TimeToTarget(range, launchingEntity.))
+        //tempory timetotarget
+        double ttt = range / projectileSpeed; //this should be the closing speed (ie the velocity of the two, the beam speed and the range)
+        double missChance = ttt * ( 1 - baseHitChance);
+        return Math.Max(0, 1 - missChance); // avoid negative hit chances
+    }
+
     Vector3 LeadVector(
         double dvToUse,
         double burnTime,

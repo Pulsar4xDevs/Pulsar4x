@@ -6,6 +6,7 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
 using Pulsar4X.Engine.Damage;
 using Pulsar4X.Engine;
+using Pulsar4X.Damage;
 
 namespace Pulsar4X.Weapons;
 
@@ -15,7 +16,8 @@ public class BeamWeaponProcessor : IHotloopProcessor
 
     public void ProcessEntity(Entity entity, int deltaSeconds)
     {
-        UpdateBeam(entity.GetDataBlob<BeamInfoDB>(), deltaSeconds);
+        if(entity.IsValid)
+            UpdateBeam(entity.GetDataBlob<BeamInfoDB>(), deltaSeconds);
     }
 
     public int ProcessManager(EntityManager manager, int deltaSeconds)
@@ -23,7 +25,8 @@ public class BeamWeaponProcessor : IHotloopProcessor
         var dbs = manager.GetAllDataBlobsOfType<BeamInfoDB>();
         foreach (BeamInfoDB db in dbs)
         {
-            UpdateBeam(db, deltaSeconds);
+            if(db.OwningEntity.IsValid)
+                UpdateBeam(db, deltaSeconds);
         }
 
         return dbs.Count;
@@ -37,6 +40,13 @@ public class BeamWeaponProcessor : IHotloopProcessor
 
     public static void UpdateBeam(BeamInfoDB beamInfo, int seconds)
     {
+        if(!beamInfo.TargetEntity.IsValid)
+        {
+            // FIXME: beam should probalby continue on for a bit and dissipate instead of abrupting removing itself from the game
+            beamInfo.OwningEntity.Destroy();
+            return;
+        }
+
         //adjust the vector to ensure the visuals line up with the target
 
         var state = (beamInfo.PosDB.AbsolutePosition, beamInfo.VelocityVector);
@@ -64,43 +74,38 @@ public class BeamWeaponProcessor : IHotloopProcessor
     private static void OnPotentialHit(BeamInfoDB beamInfo, (Vector3 AbsolutePosition, Vector3 VelocityVector) state, DateTime nowTime, (Vector3 pos, double seconds) futurePosTime)
     {
         // FIXME: fix the base 95% chance to hit
-        var tohit = ToHitChance(beamInfo.LaunchPosition, futurePosTime.pos, beamInfo.VelocityVector.Length(), 0.95);
+        var tohit = WeaponUtils.ToHitChance(beamInfo.LaunchPosition, futurePosTime.pos, beamInfo.VelocityVector.Length(), 0.95);
         var hitsTarget = (beamInfo.OwningEntity.Manager as StarSystem).RNGNextBool(tohit);
 
         if(hitsTarget)
         {
-            var posRelativeToTarget = futurePosTime.pos - state.AbsolutePosition;
-            var shipFutureVel = beamInfo.TargetEntity.GetAbsoluteFutureVelocity(nowTime + TimeSpan.FromSeconds(futurePosTime.seconds));
-            var relativeVelocity = shipFutureVel - beamInfo.VelocityVector;
-            var freq = beamInfo.Frequency;
+            // var posRelativeToTarget = futurePosTime.pos - state.AbsolutePosition;
+            // var shipFutureVel = beamInfo.TargetEntity.GetAbsoluteFutureVelocity(nowTime + TimeSpan.FromSeconds(futurePosTime.seconds));
+            // var relativeVelocity = shipFutureVel - beamInfo.VelocityVector;
+            // var freq = beamInfo.Frequency;
 
-            DamageFragment damage = new DamageFragment()
+            // DamageFragment damage = new DamageFragment()
+            // {
+            //     Velocity = new Vector2(relativeVelocity.X, relativeVelocity.Y),
+            //     Position = ((int)posRelativeToTarget.X, (int)posRelativeToTarget.Y),
+            //     Mass = 0.000001f,
+            //     Density = 1000,
+            //     Momentum = (float)(UniversalConstants.Science.PlankConstant * freq),
+            //     Length = (float)(beamInfo.Positions[0] - beamInfo.Positions[1]).Length(),
+            //     Energy = beamInfo.Energy,
+            // };
+            // DamageProcessor.OnTakingDamage(beamInfo.TargetEntity, damage);
+
+            if(SimpleDamage.OnTakingDamage(beamInfo.TargetEntity, 100, 500))
             {
-                Velocity = new Vector2(relativeVelocity.X, relativeVelocity.Y),
-                Position = ((int)posRelativeToTarget.X, (int)posRelativeToTarget.Y),
-                Mass = 0.000001f,
-                Density = 1000,
-                Momentum = (float)(UniversalConstants.Science.PlankConstant * freq),
-                Length = (float)(beamInfo.Positions[0] - beamInfo.Positions[1]).Length(),
-                Energy = beamInfo.Energy,
-            };
-            DamageProcessor.OnTakingDamage(beamInfo.TargetEntity, damage);
+                // Target was destroyed
+
+            }
         }
 
         // FIXME: beam should continue on and dissipate on a miss
         beamInfo.OwningEntity.Destroy();
-    }
-
-    private static double ToHitChance(Vector3 launchPosition, Vector3 targetPosition, double beamSpeed, double baseHitChance)
-    {
-        double range = launchPosition.GetDistanceTo_m(targetPosition);
-
-        //var ttt = BeamWeapnProcessor.TimeToTarget(range, launchingEntity.))
-        //tempory timetotarget
-        double ttt = range / beamSpeed; //this should be the closing speed (ie the velocity of the two, the beam speed and the range)
-        double missChance = ttt * ( 1 - baseHitChance);
-        return Math.Max(0, 1 - missChance); // avoid negative hit chances
-    }
+    }    
 
     private static void UpdatePhysics(BeamInfoDB beamInfo, int seconds)
     {

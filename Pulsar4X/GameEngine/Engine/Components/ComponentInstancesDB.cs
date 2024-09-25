@@ -152,21 +152,24 @@ namespace Pulsar4X.Datablobs
         {
 
             var design = instance.Design;
-            AllDesigns.Remove(design.UniqueID);
             AllComponents.Remove(instance.UniqueID);
             ComponentsByDesign[design.UniqueID].Remove(instance);
 
             foreach (var atbkvp in design.AttributesByType)
             {
                 _designsByAtbType[atbkvp.Key].Remove(design);
-                if (_designsByAtbType[atbkvp.Key].Count == 0)
-                {
-                    _designsByAtbType.Remove(atbkvp.Key);
-                }
+                // if (_designsByAtbType[atbkvp.Key].Count == 0)
+                // {
+                //     _designsByAtbType.Remove(atbkvp.Key);
+                // }
             }
             DesignsAndComponentCount[design] -= 1;
             if (DesignsAndComponentCount[design] == 0)
+            {
                 DesignsAndComponentCount.Remove(design);
+                AllDesigns.Remove(design.UniqueID);
+            }
+                
 
             foreach (var atbkvp in instance.Design.AttributesByType)
             {
