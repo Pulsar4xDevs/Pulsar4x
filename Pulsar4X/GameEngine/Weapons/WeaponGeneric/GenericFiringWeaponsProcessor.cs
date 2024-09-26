@@ -80,6 +80,7 @@ public class GenericFiringWeaponsProcessor : IHotloopProcessor
                     genericFiringWeaponsDB.OwningEntity.Id,
                     fireControlAbilityStates[i].ID,
                     SetOpenFireControlOrder.FireModes.CeaseFire);
+                return; // We only need to send the CeaseFire command once
             }
         }
     }

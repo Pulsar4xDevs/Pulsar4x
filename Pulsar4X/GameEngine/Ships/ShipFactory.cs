@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine.Designs;
+using Pulsar4X.DataStructures;
+using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.Engine
 {
@@ -126,6 +128,52 @@ namespace Pulsar4X.Engine
             }
 
             return ship;
+        }
+
+        public static void DestroyShip(Entity shipToDestroy)
+        {
+            // Steps:
+            // - Remove the ship from fleet (if any)
+            // - Remove the ship as the fleet flagship (if set)
+            // - Kill any officers on board
+            // - Create wreckage
+            // - Remove the ship entity from the game
+            
+            var game = shipToDestroy.Manager.Game;
+            var faction = game.Factions[shipToDestroy.FactionOwnerID];
+            
+            // Remove the ship from its fleet
+            if(faction.TryGetDatablob<FleetDB>(out var fleetDB))
+            {
+                // Recursively try to get the fleet the ship belongs to
+                var belongsToFleet = fleetDB.TryGetChild<FleetDB>(shipToDestroy);
+
+                // If we found it send out the order to unassign the ship
+                if(belongsToFleet != null && belongsToFleet.OwningEntity != null)
+                {
+                    // The unassign ship command removes the ship from the fleet
+                    // and checks if it is the flagship and removes that also
+                    var command = FleetOrder.UnassignShip(
+                        shipToDestroy.FactionOwnerID,
+                        belongsToFleet.OwningEntity,
+                        shipToDestroy);
+                    
+                    game.OrderHandler.HandleOrder(command);
+                }
+            }
+
+            // Kill any officers on board
+            // (currently just the commander)
+            // TODO: check for additional people on board (passengers, officers, scientists etc)
+            if(shipToDestroy.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) 
+                && shipToDestroy.Manager.TryGetEntityById(shipInfoDB.CommanderID, out var commanderEntity))
+            {
+                CommanderFactory.DestroyCommander(commanderEntity);
+            }
+
+
+            // Remove the ship entity from the game
+            shipToDestroy.Destroy();
         }
     }
 }

@@ -38,6 +38,9 @@ namespace Pulsar4X.ImGuiNetUI
         private bool _showOnlyCargoOrdnance = true;
         private GenericFiringWeaponsDB _activeWeapons;
 
+        private List<EntityState> _filteredEnemies = new ();
+        private List<EntityState> _filteredFriends = new ();
+
         private FireControl()
         {
             _flags = ImGuiWindowFlags.None;
@@ -51,7 +54,7 @@ namespace Pulsar4X.ImGuiNetUI
             if (!_uiState.LoadedWindows.ContainsKey(typeof(FireControl)))
             {
                 thisitem = new FireControl();
-                thisitem.HardRefresh(orderEntity);
+                thisitem.SetEntityState(orderEntity);
                 thisitem.OnSystemTickChange(_uiState.SelectedSystemTime);
             }
             else
@@ -59,7 +62,7 @@ namespace Pulsar4X.ImGuiNetUI
                 thisitem = (FireControl)_uiState.LoadedWindows[typeof(FireControl)];
                 if (thisitem._orderEntityState != orderEntity)
                 {
-                    thisitem.HardRefresh(orderEntity);
+                    thisitem.SetEntityState(orderEntity);
                     thisitem.OnSystemTickChange(_uiState.SelectedSystemTime);
                 }
             }
@@ -115,6 +118,12 @@ namespace Pulsar4X.ImGuiNetUI
                         if (ImGui.Button("Open Fire"))
                             OpenFire(fc.ComponentInstance.UniqueID, SetOpenFireControlOrder.FireModes.OpenFire);
                     }
+                }
+                else
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+                    ImGui.Text("No target selected");
+                    ImGui.PopStyleColor();
                 }
 
                 foreach (var wpn in fc.ChildrenStates)
@@ -280,15 +289,12 @@ namespace Pulsar4X.ImGuiNetUI
         void DisplayTargetColumn()
         {
             if(_orderEntityState == null || _orderEntityState.StarSystemId == null) return;
-            var systemState = _uiState.StarSystemStates[_orderEntityState.StarSystemId];
 
             BorderGroup.Begin("Set Target:");
             ImGui.Checkbox("Show Own", ref _showOwnAsTarget);
 
-            var filteredEnemies = systemState.GetFilteredEntities(DataStructures.EntityFilter.Hostile, _orderEntityState.FactionId, typeof(PositionDB));
-
             ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
-            foreach(var entityState in filteredEnemies)
+            foreach(var entityState in _filteredEnemies)
             {
                 DisplayTarget(entityState);
             }
@@ -296,8 +302,7 @@ namespace Pulsar4X.ImGuiNetUI
 
             if (_showOwnAsTarget)
             {
-                var filteredFriendly = systemState.GetFilteredEntities(DataStructures.EntityFilter.Friendly, _orderEntityState.FactionId, typeof(PositionDB));
-                foreach(var entityState in filteredFriendly)
+                foreach(var entityState in _filteredFriends)
                 {
                     DisplayTarget(entityState);
                 }
@@ -324,10 +329,23 @@ namespace Pulsar4X.ImGuiNetUI
             }
         }
 
-        void HardRefresh(EntityState orderEntity)
+        void SetEntityState(EntityState orderEntity)
         {
+            // Remove old event listeners
+            // Need to re-bind them incase the system has changed
+            if(_orderEntityState != null)
+            {
+                _uiState.StarSystemStates[_orderEntityState.StarSystemId].OnEntityAdded -= SystemEntityAdded;
+                _uiState.StarSystemStates[_orderEntityState.StarSystemId].OnEntityRemoved -= SystemEntityRemoved;
+            }
+
+            if(orderEntity.StarSystemId == null) return;
 
             _orderEntityState = orderEntity;
+
+            _uiState.StarSystemStates[_orderEntityState.StarSystemId].OnEntityAdded += SystemEntityAdded;
+            _uiState.StarSystemStates[_orderEntityState.StarSystemId].OnEntityRemoved += SystemEntityRemoved;
+
             var instancesDB = orderEntity.GetDataBlob<ComponentInstancesDB>();
             if (orderEntity.HasDataBlob(typeof(FireControlAbilityDB)))
             {
@@ -356,6 +374,27 @@ namespace Pulsar4X.ImGuiNetUI
             {
                 //_activeWeapons = new GenericFiringWeaponsDB(new ComponentInstance[0]);
             }
+
+            RefreshTargetLists();
+        }
+
+        private void SystemEntityRemoved(SystemState systemState, int entityId)
+        {
+            RefreshTargetLists();
+        }
+
+        private void SystemEntityAdded(SystemState systemState, Entity entity)
+        {
+            RefreshTargetLists();
+        }
+
+        private void RefreshTargetLists()
+        {
+            if(_orderEntityState == null || _orderEntityState.StarSystemId == null) return;
+
+            var systemState = _uiState.StarSystemStates[_orderEntityState.StarSystemId];
+            _filteredEnemies = systemState.GetFilteredEntities(DataStructures.EntityFilter.Hostile, _orderEntityState.FactionId, typeof(PositionDB));
+            _filteredFriends = systemState.GetFilteredEntities(DataStructures.EntityFilter.Friendly, _orderEntityState.FactionId, typeof(PositionDB));
         }
 
         public override void OnSystemTickChange(DateTime newdate)

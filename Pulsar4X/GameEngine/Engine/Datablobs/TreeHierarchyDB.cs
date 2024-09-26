@@ -155,6 +155,26 @@ namespace Pulsar4X.Datablobs
             return !entity.IsValid ? null : (TreeHierarchyDB)entity.GetDataBlob(this.GetType());
         }
 
+        public TreeHierarchyDB? TryGetChild<T>(Entity entity) where T : TreeHierarchyDB
+        {
+            if(Children.Contains(entity))
+                return this;
+
+            else
+            {
+                foreach(var child in Children)
+                {
+                    if(child.TryGetDatablob<T>(out var fleetDB))
+                    {
+                        var childDB = fleetDB.TryGetChild<T>(entity);
+                        if(childDB != null) return childDB;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         /*
         [TestFixture]
         [Description("TreeHierarchyDB Tests")]

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
+using Pulsar4X.Events;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Engine
 {
@@ -70,6 +72,29 @@ namespace Pulsar4X.Engine
             factionTech.AllScientists.Add((sci, location));
 
             return sci;
+        }
+
+        public static void DestroyCommander(Entity commanderToDestroy)
+        {
+            var game = commanderToDestroy.Manager.Game;
+            var faction = game.Factions[commanderToDestroy.FactionOwnerID];
+
+            if(faction.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+            {
+                factionInfoDB.Commanders.Remove(commanderToDestroy.Id);
+            }
+
+            EventManager.Instance.Publish(
+                Event.Create(
+                    EventType.CrewLosses,
+                    commanderToDestroy.Manager.StarSysDateTime,
+                    $"{commanderToDestroy.GetOwnersName()} has been killed",
+                    commanderToDestroy.FactionOwnerID,
+                    commanderToDestroy.Manager.ManagerID,
+                    commanderToDestroy.Id
+                ));
+
+            commanderToDestroy.Destroy();
         }
     }
 }

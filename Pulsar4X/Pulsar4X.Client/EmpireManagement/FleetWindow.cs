@@ -104,9 +104,14 @@ namespace Pulsar4X.SDL2UI
             else
             {
                 selectedFleetDB.OwningEntity?.Manager?.TryGetEntityById(selectedFleetDB.FlagShipID, out selectedFleetFlagship);
-                if(selectedFleetFlagship != null && selectedFleetFlagship.TryGetDatablob<PositionDB>(out var positionDB))
+                if(selectedFleetFlagship != null && selectedFleetFlagship.IsValid && selectedFleetFlagship.TryGetDatablob<PositionDB>(out var positionDB))
                 {
                     selectedFleetSystem = positionDB?.Root;
+                }
+                else
+                {
+                    // If the above condition failed the selectedFleetFlagship needs to be set to null
+                    selectedFleetFlagship = null;
                 }
                 selectedFleetInheritOrders = selectedFleetDB.InheritOrders;
             }

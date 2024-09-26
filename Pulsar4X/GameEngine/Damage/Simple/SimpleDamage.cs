@@ -39,7 +39,15 @@ public class SimpleDamage
             // Check if the entity should be removed
             if(componentInstancesDB.AllComponents.Count <= 0)
             {
-                entityToDamage.Destroy();
+                if(entityToDamage.HasDataBlob<ShipInfoDB>())
+                {
+                    ShipFactory.DestroyShip(entityToDamage);
+                }
+                else
+                {
+                    entityToDamage.Destroy();
+                }
+                
                 return new DamageResult()
                 {
                     Damage = damage,
