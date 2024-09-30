@@ -6,7 +6,7 @@ using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Engine
 {
-    [DebuggerDisplay("{NameDB.DefaultName} - {Guid.ToString()}")]
+    [DebuggerDisplay("{NameDB.DefaultName} - {ID.ToString()}")]
     [JsonObject(MemberSerialization.OptIn)]
     public class StarSystem : EntityManager
     {
