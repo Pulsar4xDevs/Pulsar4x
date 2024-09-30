@@ -161,7 +161,7 @@ namespace Pulsar4X.SDL2UI
             //     }
             // }
 
-            foreach (var item in EntityStatesWithPosition.Values)
+            foreach (var item in AllEntities.Values)
             {
                 item.PostFrameCleanup();
             }

@@ -42,7 +42,8 @@ public class MoveStateProcessor : IInstanceProcessor
     {
         foreach (var orbitDB in orbits)
         {
-            ProcessForType(orbitDB, atDateTime);
+            if(orbitDB.OwningEntity is not null)
+                ProcessForType(orbitDB, atDateTime);
         }
     }
     
@@ -66,7 +67,8 @@ public class MoveStateProcessor : IInstanceProcessor
     {
         foreach (var orbitDB in orbits)
         {
-            ProcessForType(orbitDB, atDateTime);
+            if(orbitDB.OwningEntity is not null)
+                ProcessForType(orbitDB, atDateTime);
         }
     }
     
@@ -133,7 +135,8 @@ public class MoveStateProcessor : IInstanceProcessor
     {
         foreach (var movedb in moves)
         {
-            ProcessForType(movedb, atDateTime);
+            if(movedb.OwningEntity is not null)
+                ProcessForType(movedb, atDateTime);
         }
     }
     
@@ -157,7 +160,9 @@ public class MoveStateProcessor : IInstanceProcessor
     {
         foreach (var warpdb in warps)
         {
-            ProcessForType(warpdb, atDateTime);
+            
+            if(warpdb.OwningEntity is not null)
+                ProcessForType(warpdb, atDateTime);
         }
     }
     
@@ -182,7 +187,17 @@ public class MoveStateProcessor : IInstanceProcessor
     public Type GetParameterType => typeof(MoveStateDB);
     internal override void ProcessEntity(Entity entity, DateTime atDateTime)
     {
-        throw new NotImplementedException();
+        
+        if(entity.TryGetDatablob(out OrbitDB odb))
+            ProcessForType(odb, atDateTime);
+        else if(entity.TryGetDatablob(out OrbitUpdateOftenDB oudb))
+            ProcessForType(oudb, atDateTime);
+        else if(entity.TryGetDatablob(out NewtonMoveDB mdb))
+            ProcessForType(mdb, atDateTime);
+        else if(entity.TryGetDatablob(out NewtonSimpleMoveDB nmdb))
+            ProcessForType(nmdb, atDateTime);
+        else if(entity.TryGetDatablob(out NewtonSimpleMoveDB warpdb))
+            ProcessForType(warpdb, atDateTime);
     }
 }
     
