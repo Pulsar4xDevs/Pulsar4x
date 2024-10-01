@@ -22,6 +22,11 @@ namespace Pulsar4X.Datablobs
         {
         }
 
+        /// <summary>
+        /// When this is called the entity may already be invalid
+        /// </summary>
+        internal virtual void OnRemovedFromEntity() { }
+
         // FIXME: changed this to not return null but this seems bad
         public virtual object Clone() { return new object(); }
 

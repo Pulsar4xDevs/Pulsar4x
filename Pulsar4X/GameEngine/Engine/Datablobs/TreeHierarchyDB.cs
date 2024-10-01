@@ -175,6 +175,21 @@ namespace Pulsar4X.Datablobs
             return null;
         }
 
+        internal override void OnRemovedFromEntity()
+        {
+            if(Parent != null)
+                ParentDB.RemoveChild(OwningEntity);
+
+            Parent = null;
+            foreach(var child in Children)
+            {
+                if(child.IsValid)
+                    child.SetParent(null);
+            }
+
+            Children.Clear();
+        }
+
         /*
         [TestFixture]
         [Description("TreeHierarchyDB Tests")]

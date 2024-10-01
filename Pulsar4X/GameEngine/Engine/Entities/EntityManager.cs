@@ -241,6 +241,9 @@ namespace Pulsar4X.Engine
             {
                 foreach (var (type, dictionary) in _datablobStores)
                 {
+                    if(dictionary.ContainsKey(entity.Id))
+                        dictionary[entity.Id].OnRemovedFromEntity();
+
                     dictionary.Remove(entity.Id);
                 }
                 foreach (var (key, value) in _factionSensorContacts)
@@ -387,6 +390,7 @@ namespace Pulsar4X.Engine
             if (_datablobStores.ContainsKey(type))
             {
                 var blob = _datablobStores[type][entityId];
+                blob.OnRemovedFromEntity();
                 blob.OwningEntity = null;
                 _datablobStores[type].Remove(entityId);
 
