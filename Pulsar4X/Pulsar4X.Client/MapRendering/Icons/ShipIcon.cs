@@ -445,8 +445,8 @@ namespace Pulsar4X.SDL2UI
         {
             if(_beamInfo is null) return;
 
-            var p0 = camera.ViewCoordinate_m(_beamInfo.Positions[0]);
-            var p1 = camera.ViewCoordinate_m(_beamInfo.Positions[1]);
+            var p0 = camera.ViewCoordinate_m(_beamInfo.Positions.Item1);
+            var p1 = camera.ViewCoordinate_m(_beamInfo.Positions.Item2);
 
             DrawShapes = new Shape[1];
             var s1 = new Shape();

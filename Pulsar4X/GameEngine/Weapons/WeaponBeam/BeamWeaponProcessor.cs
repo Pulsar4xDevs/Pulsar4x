@@ -47,28 +47,40 @@ public class BeamWeaponProcessor : IHotloopProcessor
             return;
         }
 
-        //adjust the vector to ensure the visuals line up with the target
-
+        var nowTime = beamInfo.OwningEntity.StarSysDateTime;
         var state = (beamInfo.PosDB.AbsolutePosition, beamInfo.VelocityVector);
-        var targetState = beamInfo.TargetEntity.GetAbsoluteState();
-        var vectorToTarget = state.AbsolutePosition - targetState.pos;
-        var timeToTarget = WeaponUtils.TimeToTarget(vectorToTarget, beamInfo.VelocityVector.Length());
+        (Vector3 pos, double seconds) futurePosTime;
 
-        // we don't really need this, visuals are close enough for most things
-        // beamInfo.VelocityVector = absVector;
+        switch(beamInfo.BeamState)
+        {
+            case BeamInfoDB.BeamStates.Fired:
+                var targetState = beamInfo.TargetEntity.GetAbsoluteState();
+                var vectorToTarget = state.AbsolutePosition - targetState.pos;
+                var timeToTarget = WeaponUtils.TimeToTarget(vectorToTarget, beamInfo.VelocityVector.Length());
 
-        // TODO: we should update the physics and check for a collision?
-        // If the beam hits this update
-        if (timeToTarget <= seconds)
-        {
-            var nowTime = beamInfo.OwningEntity.StarSysDateTime;
-            var futurePosTime = WeaponUtils.PredictTargetPositionAndTime(timeToTarget, nowTime, beamInfo.TargetEntity);
-            OnPotentialHit(beamInfo, state, nowTime, futurePosTime);
-        }
-        else
-        {
-            UpdatePhysics(beamInfo, seconds);
-        }
+                // we don't really need this, visuals are close enough for most things
+                // beamInfo.VelocityVector = absVector;
+
+                // TODO: we should update the physics and check for a collision?
+                // If the beam hits this update
+                if (timeToTarget <= seconds)
+                {
+                    beamInfo.BeamState = BeamInfoDB.BeamStates.AtTarget;
+                    
+                    futurePosTime = WeaponUtils.PredictTargetPositionAndTime(timeToTarget, nowTime, beamInfo.TargetEntity);
+                    beamInfo.Positions.Item1 = beamInfo.Positions.Item2;
+                    beamInfo.Positions.Item2 = futurePosTime.pos;
+                }
+                else
+                {
+                    UpdatePhysics(beamInfo, seconds);
+                }
+                break;
+            case BeamInfoDB.BeamStates.AtTarget:
+                    futurePosTime = WeaponUtils.PredictTargetPositionAndTime(0.0, nowTime, beamInfo.TargetEntity);
+                    OnPotentialHit(beamInfo, state, nowTime, futurePosTime);
+                break;
+        }        
     }
 
     private static void OnPotentialHit(BeamInfoDB beamInfo, (Vector3 AbsolutePosition, Vector3 VelocityVector) state, DateTime nowTime, (Vector3 pos, double seconds) futurePosTime)
@@ -158,10 +170,8 @@ public class BeamWeaponProcessor : IHotloopProcessor
     private static void UpdatePhysics(BeamInfoDB beamInfo, int seconds)
     {
         beamInfo.PosDB.AbsolutePosition += beamInfo.VelocityVector * seconds;
-        for (int j = 0; j < beamInfo.Positions.Length; j++)
-        {
-            beamInfo.Positions[j] += beamInfo.VelocityVector * seconds;
-        }
+        beamInfo.Positions.Item1 = beamInfo.Positions.Item2;
+        beamInfo.Positions.Item2 = beamInfo.PosDB.AbsolutePosition;
     }
 
     public static void FireBeamWeapon(Entity launchingEntity, Entity targetEntity, bool hitsTarget, double energy, double wavelen, double beamVelocity, double beamLenInSeconds)
@@ -179,7 +189,7 @@ public class BeamWeaponProcessor : IHotloopProcessor
         // Setup the beam entity
         var beamInfo = new BeamInfoDB(launchingEntity.Id, targetEntity, hitsTarget)
         {
-            Positions = [startPos.AbsolutePosition, startPos.AbsolutePosition + normVector * beamlenInMeters],
+            Positions = (startPos.AbsolutePosition, startPos.AbsolutePosition),
             LaunchPosition = startPos.AbsolutePosition,
             VelocityVector = absVector,
             Frequency = wavelen,
