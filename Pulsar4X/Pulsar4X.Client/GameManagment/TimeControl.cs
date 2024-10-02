@@ -102,7 +102,7 @@ namespace Pulsar4X.SDL2UI
             if (_expanded)//When the submenu is expanded allow the user to adjust time frequency
             {
                 ImGui.PushItemWidth(100);
-                ImGui.Text("   " + currenttime.ToShortTimeString());
+                ImGui.Text("   " + currenttime.ToLongTimeString());
                 ImGui.SameLine();
                 if (ImGui.SliderFloat("##freqSldr", ref _freqTimeSpanValue, 0.1f, 1, _freqTimeSpanValue.ToString(), ImGuiSliderFlags.None))
                 {
