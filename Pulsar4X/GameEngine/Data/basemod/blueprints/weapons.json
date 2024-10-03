@@ -85,7 +85,7 @@
         {
           "Name": "Duty Cycle",
           "Units": "%",
-          "DescriptionFormula": "'What percentage of the lasers charge perioid is spent firing '",
+          "DescriptionFormula": "'What percentage of the lasers charge period is spent firing '",
           "GuiHint": "GuiSelectionMaxMin",
           "MaxFormula": "1",
           "MinFormula": "0",
@@ -206,9 +206,9 @@
         },
         {
           "Name": "genericWpnAtbArgs",
-          "DescriptionFormula": "'int magSize, int reloadPerSec, int amountPerShot, int minShotsPerfire",
+          "DescriptionFormula": "'int magSize, int reloadPerSec, int amountPerShot, int minShotsPerfire\nAtbConstrArgs(Ability('Charge Period') * Ability('Power Input'), Ability('Power Input'), Ability('Pulse Energy'), 1)",
           "GuiHint": "None",
-          "AttributeFormula": "AtbConstrArgs(Ability('Charge Period') * Ability('Power Input'), Ability('Power Input'), Ability('Pulse Energy'), 1)",
+          "AttributeFormula": "AtbConstrArgs(2, 1, 2, 2)",
           "AttributeType": "Pulsar4X.Atb.GenericWeaponAtb"
         },
         {
