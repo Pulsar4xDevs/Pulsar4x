@@ -120,6 +120,8 @@ namespace Pulsar4X.Datablobs
         [JsonProperty]
         internal double _myMass;
 
+        internal Vector2 _position;
+
         #region Construction Interface
 
 

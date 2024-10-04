@@ -54,8 +54,9 @@ namespace Pulsar4X.Engine
             foreach (var orbit in orbits)
             {
                 Vector3 newPosition = OrbitMath.GetPosition(orbit, toDate);
-                PositionDB entityPosition = orbit.OwningEntity.GetDataBlob<PositionDB>();
-                entityPosition.RelativePosition = newPosition;
+                //PositionDB entityPosition = orbit.OwningEntity.GetDataBlob<PositionDB>();
+                //entityPosition.RelativePosition = newPosition;
+                orbit._position = (Vector2)newPosition;
             }
 
             MoveStateProcessor.ProcessForType(orbits, toDate);
