@@ -65,11 +65,21 @@ public class BeamWeaponProcessor : IHotloopProcessor
                 // If the beam hits this update
                 if (timeToTarget <= seconds)
                 {
-                    beamInfo.BeamState = BeamInfoDB.BeamStates.AtTarget;
-                    
                     futurePosTime = WeaponUtils.PredictTargetPositionAndTime(timeToTarget, nowTime, beamInfo.TargetEntity);
-                    beamInfo.Positions.Item1 = beamInfo.Positions.Item2;
-                    beamInfo.Positions.Item2 = futurePosTime.pos;
+                    beamInfo.HitsTarget = CalculateHit(beamInfo, futurePosTime);
+
+                    if(beamInfo.HitsTarget)
+                    {
+                        beamInfo.BeamState = BeamInfoDB.BeamStates.AtTarget;
+                        beamInfo.Positions.Item1 = beamInfo.Positions.Item2;
+                        beamInfo.Positions.Item2 = futurePosTime.pos;
+                    }
+                    else
+                    {
+                        OnMiss(beamInfo, nowTime);
+                        beamInfo.BeamState = BeamInfoDB.BeamStates.MissedTarget;
+                        UpdatePhysics(beamInfo, seconds);
+                    }
                 }
                 else
                 {
@@ -78,81 +88,75 @@ public class BeamWeaponProcessor : IHotloopProcessor
                 break;
             case BeamInfoDB.BeamStates.AtTarget:
                     futurePosTime = WeaponUtils.PredictTargetPositionAndTime(0.0, nowTime, beamInfo.TargetEntity);
-                    OnPotentialHit(beamInfo, state, nowTime, futurePosTime);
+                    OnHit(beamInfo, state, nowTime, futurePosTime);
                 break;
-        }        
+            case BeamInfoDB.BeamStates.MissedTarget:
+                UpdatePhysics(beamInfo, seconds);
+
+                beamInfo.Energy = Math.Max(0, beamInfo.Energy - beamInfo.StartingEnergy * 0.1);
+
+                if(beamInfo.Energy == 0)
+                {
+                    // Remove the beam when out of energy
+                    beamInfo.OwningEntity.Destroy();
+                }
+                break;
+        }
     }
 
-    private static void OnPotentialHit(BeamInfoDB beamInfo, (Vector3 AbsolutePosition, Vector3 VelocityVector) state, DateTime nowTime, (Vector3 pos, double seconds) futurePosTime)
+    private static bool CalculateHit(BeamInfoDB beamInfo, (Vector3 pos, double seconds) futurePosTime)
     {
         // FIXME: fix the base 95% chance to hit
         var tohit = WeaponUtils.ToHitChance(beamInfo.LaunchPosition, futurePosTime.pos, beamInfo.VelocityVector.Length(), 0.95);
-        var hitsTarget = (beamInfo.OwningEntity.Manager as StarSystem).RNGNextBool(tohit);
+        return (beamInfo.OwningEntity.Manager as StarSystem).RNGNextBool(tohit);
+    }
 
-        if(hitsTarget)
+    private static void OnHit(BeamInfoDB beamInfo, (Vector3 AbsolutePosition, Vector3 VelocityVector) state, DateTime nowTime, (Vector3 pos, double seconds) futurePosTime)
+    {
+        // var posRelativeToTarget = futurePosTime.pos - state.AbsolutePosition;
+        // var shipFutureVel = beamInfo.TargetEntity.GetAbsoluteFutureVelocity(nowTime + TimeSpan.FromSeconds(futurePosTime.seconds));
+        // var relativeVelocity = shipFutureVel - beamInfo.VelocityVector;
+        // var freq = beamInfo.Frequency;
+
+        // DamageFragment damage = new DamageFragment()
+        // {
+        //     Velocity = new Vector2(relativeVelocity.X, relativeVelocity.Y),
+        //     Position = ((int)posRelativeToTarget.X, (int)posRelativeToTarget.Y),
+        //     Mass = 0.000001f,
+        //     Density = 1000,
+        //     Momentum = (float)(UniversalConstants.Science.PlankConstant * freq),
+        //     Length = (float)(beamInfo.Positions[0] - beamInfo.Positions[1]).Length(),
+        //     Energy = beamInfo.Energy,
+        // };
+        // DamageProcessor.OnTakingDamage(beamInfo.TargetEntity, damage);
+
+        var damageResult = SimpleDamage.OnTakingDamage(beamInfo.TargetEntity, 100, 500);
+
+        if(damageResult.Destroyed)
         {
-            // var posRelativeToTarget = futurePosTime.pos - state.AbsolutePosition;
-            // var shipFutureVel = beamInfo.TargetEntity.GetAbsoluteFutureVelocity(nowTime + TimeSpan.FromSeconds(futurePosTime.seconds));
-            // var relativeVelocity = shipFutureVel - beamInfo.VelocityVector;
-            // var freq = beamInfo.Frequency;
-
-            // DamageFragment damage = new DamageFragment()
-            // {
-            //     Velocity = new Vector2(relativeVelocity.X, relativeVelocity.Y),
-            //     Position = ((int)posRelativeToTarget.X, (int)posRelativeToTarget.Y),
-            //     Mass = 0.000001f,
-            //     Density = 1000,
-            //     Momentum = (float)(UniversalConstants.Science.PlankConstant * freq),
-            //     Length = (float)(beamInfo.Positions[0] - beamInfo.Positions[1]).Length(),
-            //     Energy = beamInfo.Energy,
-            // };
-            // DamageProcessor.OnTakingDamage(beamInfo.TargetEntity, damage);
-
-            var damageResult = SimpleDamage.OnTakingDamage(beamInfo.TargetEntity, 100, 500);
-
-            if(damageResult.Destroyed)
-            {
-                // Target was destroyed
-                EventManager.Instance.Publish(
-                    Event.Create(
-                        EventType.TargetDestroyed,
-                        nowTime,
-                        "Target has been destroyed",
-                        beamInfo.OwningEntity.FactionOwnerID,
-                        beamInfo.OwningEntity.Manager.ManagerID,
-                        beamInfo.TargetEntity.Id,
-                        new List<int>()
-                        {
-                            beamInfo.OwningEntity.FactionOwnerID,
-                            beamInfo.TargetEntity.FactionOwnerID
-                        }));
-            }
-            else if(damageResult.Damage > 0)
-            {
-                // Target took damage
-                EventManager.Instance.Publish(
-                    Event.Create(
-                        EventType.TargetHit,
-                        nowTime,
-                        $"Target hit for {damageResult.Damage} damage",
-                        beamInfo.OwningEntity.FactionOwnerID,
-                        beamInfo.OwningEntity.Manager.ManagerID,
-                        beamInfo.TargetEntity.Id,
-                        new List<int>()
-                        {
-                            beamInfo.OwningEntity.FactionOwnerID,
-                            beamInfo.TargetEntity.FactionOwnerID
-                        }));
-            }
-        }
-        else
-        {
-            // Target was missed
+            // Target was destroyed
             EventManager.Instance.Publish(
                 Event.Create(
-                    EventType.TargetMissed,
+                    EventType.TargetDestroyed,
                     nowTime,
-                    $"Missed target",
+                    "Target has been destroyed",
+                    beamInfo.OwningEntity.FactionOwnerID,
+                    beamInfo.OwningEntity.Manager.ManagerID,
+                    beamInfo.TargetEntity.Id,
+                    new List<int>()
+                    {
+                        beamInfo.OwningEntity.FactionOwnerID,
+                        beamInfo.TargetEntity.FactionOwnerID
+                    }));
+        }
+        else if(damageResult.Damage > 0)
+        {
+            // Target took damage
+            EventManager.Instance.Publish(
+                Event.Create(
+                    EventType.TargetHit,
+                    nowTime,
+                    $"Target hit for {damageResult.Damage} damage",
                     beamInfo.OwningEntity.FactionOwnerID,
                     beamInfo.OwningEntity.Manager.ManagerID,
                     beamInfo.TargetEntity.Id,
@@ -163,9 +167,26 @@ public class BeamWeaponProcessor : IHotloopProcessor
                     }));
         }
 
-        // FIXME: beam should continue on and dissipate on a miss
+        // Remove the beam from the game
         beamInfo.OwningEntity.Destroy();
-    }    
+    }
+
+    private static void OnMiss(BeamInfoDB beamInfoDB, DateTime nowTime)
+    {
+        EventManager.Instance.Publish(
+            Event.Create(
+                EventType.TargetMissed,
+                nowTime,
+                $"Missed target",
+                beamInfoDB.OwningEntity.FactionOwnerID,
+                beamInfoDB.OwningEntity.Manager.ManagerID,
+                beamInfoDB.TargetEntity.Id,
+                new List<int>()
+                {
+                    beamInfoDB.OwningEntity.FactionOwnerID,
+                    beamInfoDB.TargetEntity.FactionOwnerID
+                }));
+    }
 
     private static void UpdatePhysics(BeamInfoDB beamInfo, int seconds)
     {
@@ -187,13 +208,12 @@ public class BeamWeaponProcessor : IHotloopProcessor
         var beamlenInMeters = beamLenInSeconds * UniversalConstants.Units.SpeedOfLightInMetresPerSecond;
 
         // Setup the beam entity
-        var beamInfo = new BeamInfoDB(launchingEntity.Id, targetEntity, hitsTarget)
+        var beamInfo = new BeamInfoDB(launchingEntity.Id, targetEntity, hitsTarget, energy)
         {
             Positions = (startPos.AbsolutePosition, startPos.AbsolutePosition),
             LaunchPosition = startPos.AbsolutePosition,
             VelocityVector = absVector,
-            Frequency = wavelen,
-            Energy = energy
+            Frequency = wavelen
         };
 
         var dataBlobs = new List<BaseDataBlob>()

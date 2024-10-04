@@ -16,6 +16,7 @@ public class BeamInfoDB : BaseDataBlob
     public BeamStates BeamState;
     public double Frequency;
     public double Energy;
+    public double StartingEnergy;
     public int FiredBy;
     public Vector3 VelocityVector;
     public (Vector3, Vector3) Positions;
@@ -31,12 +32,14 @@ public class BeamInfoDB : BaseDataBlob
             return _posDB;
         }}
 
-    public BeamInfoDB(int launchedBy, Entity targetEntity, bool hitsTarget)
+    public BeamInfoDB(int launchedBy, Entity targetEntity, bool hitsTarget, double energy)
     {
         FiredBy = launchedBy;
         TargetEntity = targetEntity;
         HitsTarget = hitsTarget;
         BeamState = BeamStates.Fired;
+        Energy = energy;
+        StartingEnergy = Energy;
     }
 
     public override object Clone()
