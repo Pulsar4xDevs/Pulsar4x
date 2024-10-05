@@ -314,7 +314,7 @@ namespace Pulsar4X.Engine.Orders
                 Vector3 leadToTgt = (curTgtRalState.Velocity - curOurRalState.Velocity);
 
                 //convert the lead to an orbit relative (prograde Y) vector.
-                //var manuverVector = OrbitMath.GlobalToOrbitVector(leadToTgt, curOurRalState.Position, curOurRalState.Velocity);
+                //var manuverVector = OrbitMath.GlobalToOrbitVector(leadToTgt, curOurRalState.RelativePosition, curOurRalState.Velocity);
 
 
                 var burnRate = _newtonAbilityDB.FuelBurnRate;
@@ -378,7 +378,7 @@ namespace Pulsar4X.Engine.Orders
             /*
             Vector3 manuverVector = OrbitMath.GlobalToOrbitVector(
                 deltaVVector,
-                ourState.Position,
+                ourState.RelativePosition,
                 ourState.Velocity);
 
 
@@ -389,7 +389,7 @@ namespace Pulsar4X.Engine.Orders
             var manuverVector = OrbitMath.StateToProgradeVector(
                 sgp,
                 deltaVVector,
-                ourState.Position,
+                ourState.RelativePosition,
                 ourState.Velocity);
              */
 
@@ -596,7 +596,7 @@ namespace Pulsar4X.Engine.Orders
             var manuverVector = OrbitMath.StateToProgradeVector(
                 sgp,
                 deltaVVector,
-                ourState.Position,
+                ourState.RelativePosition,
                 ourState.Velocity);
             */
             //So now I'm thrusting in the direction of the target's future position,

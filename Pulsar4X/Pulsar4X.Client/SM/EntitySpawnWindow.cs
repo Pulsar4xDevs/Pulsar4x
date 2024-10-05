@@ -118,7 +118,7 @@
 //                     if (!_uiState.SelectedSysMapRender.UIWidgets.ContainsKey(nameof(EntitySpawnGraphic)))
 //                     {
 //                         var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
-//                         _icon = new EntitySpawnGraphic(parentPos + _sv.Position);
+//                         _icon = new EntitySpawnGraphic(parentPos + _sv.RelativePosition);
 //                         _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(EntitySpawnGraphic), _icon);
 //                     }
 //                     if (!_uiState.SelectedSysMapRender.UIWidgets.ContainsKey("soiIcon"))
@@ -330,7 +330,7 @@
 //             if (OrbitEditWidget.Display(ref _ke, ref _sv, _parentSOI, OrbitEditWidget.WidgetStyle.Newtonion))
 //             {
 //                 var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
-//                 _icon.WorldPosition_m = parentPos + _sv.Position;
+//                 _icon.WorldPosition_m = parentPos + _sv.RelativePosition;
 //                 if(_keIcon != null)
 //                     _keIcon.ForceUpdate(_ke, _sv);
 //             }
@@ -427,7 +427,7 @@
 //                 _sgp = GeneralMath.StandardGravitationalParameter(_objMass + _parentMass);
 //                 _ke.StandardGravParameter = _sgp;
 //                 var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
-//                 _icon.WorldPosition_m = parentPos + _sv.Position;
+//                 _icon.WorldPosition_m = parentPos + _sv.RelativePosition;
 //                 _parentSOI = _parentObect.GetSOI_m();
 //                 if (_keIcon != null)
 //                 {
@@ -553,18 +553,18 @@
 //         {
 //             //_ke = ke;
 //             Style = style;
-//             _pos.X = sv.Position.X;
-//             _pos.Y = sv.Position.Y;
+//             _pos.X = sv.RelativePosition.X;
+//             _pos.Y = sv.RelativePosition.Y;
 //             _vel.X = sv.Velocity.X;
 //             _vel.Y = sv.Velocity.Y;
 //             bool changed = false;
 //             double maxRadius = Math.Min(double.MaxValue, soi);
-//             if(VectorWidget2d.Display("Position Vector", ref _pos, 0, maxRadius))
+//             if(VectorWidget2d.Display("RelativePosition Vector", ref _pos, 0, maxRadius))
 //             {
-//                 sv.Position = new Vector3(_pos.X, _pos.Y, 0);
+//                 sv.RelativePosition = new Vector3(_pos.X, _pos.Y, 0);
 //                 ke = OrbitalMath.KeplerFromPositionAndVelocity(
 //                     ke.StandardGravParameter, 
-//                     sv.Position,
+//                     sv.RelativePosition,
 //                     sv.Velocity, 
 //                     ke.Epoch);
 //                 changed = true;
@@ -602,7 +602,7 @@
 //                 sv.Velocity = new Vector3(_vel.X, _vel.Y, 0);
 //                 ke = OrbitalMath.KeplerFromPositionAndVelocity(
 //                     ke.StandardGravParameter, 
-//                     sv.Position, 
+//                     sv.RelativePosition, 
 //                     sv.Velocity, 
 //                     ke.Epoch);
 //                 return true;

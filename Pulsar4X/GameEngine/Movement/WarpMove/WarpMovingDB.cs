@@ -44,7 +44,8 @@ namespace Pulsar4X.Datablobs
         [JsonProperty]
         public Vector3 CurrentNonNewtonionVectorMS { get; internal set; }
 
-        
+        internal Vector2 _position;
+        internal Entity _parentEnitity;
         public KeplerElements TargetEndpointOrbit { get; internal set; }
         
         /// <summary>
@@ -56,7 +57,8 @@ namespace Pulsar4X.Datablobs
         /// <summary>
         /// when true, will attempt a newton circularization burn after warp, if ExpendDelaV is 0
         /// </summary>
-        [JsonProperty] internal bool AutoCirculariseAfterWarp { get; set; } = true;
+        [JsonProperty] 
+        internal bool AutoCirculariseAfterWarp { get; set; } = true;
         
         [JsonProperty]
         internal bool IsAtTarget { get; set; }

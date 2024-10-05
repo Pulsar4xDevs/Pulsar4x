@@ -92,7 +92,7 @@ namespace Pulsar4X.Engine
         }
 
 
-        #region Orbit Position Calculations
+        #region Orbit RelativePosition Calculations
 
         /// <summary>
         /// Gets the orbital vector, will be either Absolute or relative depending on static bool UserelativeVelocity
@@ -218,10 +218,8 @@ namespace Pulsar4X.Engine
 
         public static void UpdateOrbit(OrbitUpdateOftenDB entityOrbitDB, DateTime toDate)
         {
-            PositionDB entityPosition = entityOrbitDB.OwningEntity.GetDataBlob<PositionDB>();
-
             Vector3 newPosition = entityOrbitDB.GetPosition(toDate);
-            entityPosition.RelativePosition = newPosition;
+            entityOrbitDB._position = (Vector2)newPosition;
             
         }
     }

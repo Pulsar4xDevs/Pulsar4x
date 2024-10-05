@@ -111,20 +111,20 @@ namespace Pulsar4X.Engine
             DateTime dateTimeFuture = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds);
 
             double deltaT = (dateTimeFuture - dateTimeFrom).TotalSeconds;
-            var positionDB = entity.GetDataBlob<PositionDB>();
+            //var positionDB = entity.GetDataBlob<PositionDB>();
 
-            Vector3 currentPositionMt = positionDB.AbsolutePosition;
+            //Vector3 currentPositionMt = positionDB.AbsolutePosition;
 
             Vector3 targetPosMt = moveDB.ExitPointAbsolute;
 
 
-            var deltaVecToTargetMt = currentPositionMt - targetPosMt;
+            var deltaVecToTargetMt = moveDB._position - (Vector2)targetPosMt;
 
-            var newPositionMt = currentPositionMt + currentVelocityMS * deltaT;
+            var newPositionMt = moveDB._position + (Vector2)currentVelocityMS * deltaT;
 
             var distanceToTargetMt = deltaVecToTargetMt.Length();
 
-            var positionDelta = currentPositionMt - newPositionMt;
+            var positionDelta = moveDB._position - newPositionMt;
 
             double distanceToMove = positionDelta.Length();
 
@@ -132,15 +132,15 @@ namespace Pulsar4X.Engine
             if (distanceToTargetMt <= distanceToMove) // moving would overtake target, just go directly to target
             {
                 var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
-                positionDB.SetParent(moveDB.TargetEntity);
-                positionDB.RelativePosition = moveDB.ExitPointrelative;
+                moveDB._parentEnitity = moveDB.TargetEntity;
+                moveDB._position = (Vector2)moveDB.ExitPointrelative;
                 entity.RemoveDataBlob<WarpMovingDB>();
                 
 
                 if(_gameSettings.StrictNewtonion)
-                    SetOrbitHereFullNewt(entity, positionDB, moveDB, dateTimeFuture);
+                    SetOrbitHereFullNewt(entity, moveDB, dateTimeFuture);
                 else
-                    SetOrbitHereNoNewt(entity, positionDB, moveDB, dateTimeFuture);
+                    SetOrbitHereNoNewt(entity, moveDB, dateTimeFuture);
 
                 powerDB.AddDemand(warpDB.BubbleCollapseCost, entity.StarSysDateTime);
                 powerDB.AddDemand( - warpDB.BubbleSustainCost, entity.StarSysDateTime);
@@ -150,7 +150,7 @@ namespace Pulsar4X.Engine
             }
             else
             {
-                positionDB.AbsolutePosition = newPositionMt;
+                moveDB._position = newPositionMt;
             }
 
 
@@ -166,6 +166,7 @@ namespace Pulsar4X.Engine
             var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
             EnergyGenProcessor.EnergyGen(entity, entity.StarSysDateTime);
             positionDB.SetParent(positionDB.Root);
+            moveDB._position = (Vector2)positionDB.AbsolutePosition;
             Vector3 targetPosMt = moveDB.ExitPointAbsolute;
             Vector3 currentPositionMt = positionDB.AbsolutePosition;
 
@@ -205,15 +206,17 @@ namespace Pulsar4X.Engine
         /// <param name="moveDB"></param>
         /// <param name="atDateTime"></param>
         /// <exception cref="NullReferenceException"></exception>
-        void SetOrbitHereNoNewt(Entity entity, PositionDB positionDB, WarpMovingDB moveDB, DateTime atDateTime)
+        void SetOrbitHereNoNewt(Entity entity, WarpMovingDB moveDB, DateTime atDateTime)
         {
             if(moveDB.TargetEntity == null) throw new NullReferenceException("moveDB.TargetEntity cannot be null");
 
+            MoveStateDB moveStatedb = entity.GetDataBlob<MoveStateDB>();
+            
             double targetSOI = moveDB.TargetEntity.GetSOI_m();
 
             Entity? targetEntity;
 
-            if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo_m(positionDB) > targetSOI)
+            if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo_m(moveStatedb) > targetSOI)
             {
                 targetEntity = moveDB.TargetEntity.GetDataBlob<OrbitDB>().Parent; //TODO: it's concevable we could be in another SOI not the parent (ie we could be in a target's moon's SOI)
             }
@@ -227,12 +230,14 @@ namespace Pulsar4X.Engine
             //just chuck it in a circular orbit.
             OrbitDB newOrbit = OrbitDB.FromPosition(targetEntity, entity, atDateTime);
             entity.SetDataBlob(newOrbit);
-            positionDB.SetParent(targetEntity);
+            moveStatedb.SetParent(targetEntity);
             moveDB.IsAtTarget = true;
 
         }
-        
-        
+
+        void SetOrbitHereSimpleNewt(Entity entity)
+        {
+        }
 
         /// <summary>
         /// Sets an orbit using full newtonion movement and fuel use. 
@@ -242,16 +247,16 @@ namespace Pulsar4X.Engine
         /// <param name="moveDB"></param>
         /// <param name="atDateTime"></param>
         /// <exception cref="NullReferenceException"></exception>
-        void SetOrbitHereFullNewt(Entity entity, PositionDB positionDB, WarpMovingDB moveDB, DateTime atDateTime)
+        void SetOrbitHereFullNewt(Entity entity, WarpMovingDB moveDB, DateTime atDateTime)
         {
             if(moveDB.TargetEntity == null) throw new NullReferenceException("moveDB.TargetEntity cannot be null");
             //propulsionDB.CurrentVectorMS = new Vector3(0, 0, 0);
-
+            var moveStatedb = entity.GetDataBlob<MoveStateDB>();
             double targetSOI = moveDB.TargetEntity.GetSOI_m();
 
             Entity? targetEntity;
 
-            if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo_m(positionDB) > targetSOI)
+            if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo_m(moveStatedb) > targetSOI)
             {
                 targetEntity = moveDB.TargetEntity.GetDataBlob<OrbitDB>().Parent; //TODO: it's concevable we could be in another SOI not the parent (ie we could be in a target's moon's SOI)
             }
@@ -263,7 +268,7 @@ namespace Pulsar4X.Engine
             if(targetEntity == null) throw new NullReferenceException("targetEntity cannot be null");
             OrbitDB targetPlanetsOrbit = targetEntity.GetDataBlob<OrbitDB>();
             Vector3 insertionVector_m = OrbitProcessor.GetOrbitalInsertionVector(moveDB.SavedNewtonionVector, targetPlanetsOrbit, atDateTime);
-            positionDB.SetParent(targetEntity);
+            moveStatedb.SetParent(targetEntity);
             moveDB.IsAtTarget = true;
             
             OrbitDB newOrbit = OrbitDB.FromVelocity(targetEntity, entity, insertionVector_m, atDateTime);

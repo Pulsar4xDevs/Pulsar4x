@@ -9,7 +9,7 @@ using Pulsar4X.Orbital;
 namespace GameEngine.Movement;
 
 
-public class MoveStateDB : BaseDataBlob
+public class MoveStateDB : TreeHierarchyDB, IPosition
 {
     public enum MoveTypes
     {
@@ -23,12 +23,53 @@ public class MoveStateDB : BaseDataBlob
     
     public KeplerElements GetKeplerElements { get; internal set; }
     
-    public Vector2 Position { get; internal set; }
+    public Vector3 RelativePosition { get; internal set; }
+
+    public Vector2 RelativePosition2
+    {
+        get { return (Vector2)RelativePosition; }
+        set { RelativePosition = (Vector3)value; }
+    }
+    public Vector3 AbsolutePosition
+    {
+        get
+        {
+            if ( Parent == null || !Parent.IsValid ) //migth be better than crashing if parent is suddenly not valid. should be handled before this though.
+                return RelativePosition;
+            else if (Parent == OwningEntity)
+                throw new Exception("Infinite loop triggered");
+            else
+            {
+                MoveStateDB? parentpos = (MoveStateDB?)ParentDB;
+                if(parentpos == this)
+                    throw new Exception("Infinite loop triggered");
+                return parentpos.AbsolutePosition + RelativePosition;
+            }
+        }
+        internal set
+        {
+            if (Parent == null)
+                RelativePosition = value;
+            else
+            {
+                MoveStateDB? parentpos = (MoveStateDB?)ParentDB;
+                RelativePosition = value - parentpos.AbsolutePosition;
+            }
+        } 
+    }
+
+    public Vector2 AbsolutePosition2     {
+        get { return (Vector2)AbsolutePosition; }
+        set { AbsolutePosition = (Vector3)value; }
+    }
     
     public Vector2 Velocity { get; internal set; }
-
-    public Entity SOIParent { get; internal set; }
+    
     public double SGP { get; internal set; }
+
+    public MoveStateDB(Entity? parent) : base(parent)
+    {
+    }
 }
 
 public class MoveStateProcessor : IInstanceProcessor
@@ -51,15 +92,15 @@ public class MoveStateProcessor : IInstanceProcessor
     {
         if(!orbitDB.OwningEntity.TryGetDatablob(out MoveStateDB stateDB))
         {
-            stateDB = new MoveStateDB();
+            stateDB = new MoveStateDB(orbitDB.Parent);
             orbitDB.OwningEntity.SetDataBlob(stateDB);
         }
         
         stateDB.MoveType = MoveStateDB.MoveTypes.Orbit;
-        stateDB.SOIParent = orbitDB.Parent;
+        stateDB.SetParent(orbitDB.Parent);
         stateDB.SGP = orbitDB.GravitationalParameter_m3S2;
         stateDB.GetKeplerElements = orbitDB.GetElements();
-        stateDB.Position = orbitDB._position; //(Vector2)orbitDB.OwningEntity.GetDataBlob<PositionDB>().RelativePosition;
+        stateDB.RelativePosition2 = orbitDB._position; //(Vector2)orbitDB.OwningEntity.GetDataBlob<PositionDB>().RelativePosition;
         orbitDB.OwningEntity.GetDataBlob<PositionDB>().RelativePosition = (Vector3)orbitDB._position;
         stateDB.Velocity = (Vector2)orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
     }
@@ -77,15 +118,16 @@ public class MoveStateProcessor : IInstanceProcessor
     {
         if(!orbitDB.OwningEntity.TryGetDatablob(out MoveStateDB stateDB))
         {
-            stateDB = new MoveStateDB();
+            stateDB = new MoveStateDB(orbitDB.Parent);
             orbitDB.OwningEntity.SetDataBlob(stateDB);
         }
         
         stateDB.MoveType = MoveStateDB.MoveTypes.Orbit;
-        stateDB.SOIParent = orbitDB.Parent;
+        stateDB.SetParent(orbitDB.Parent);
         stateDB.SGP = orbitDB.GravitationalParameter_m3S2;
         stateDB.GetKeplerElements = orbitDB.GetElements();
-        stateDB.Position = (Vector2)orbitDB.OwningEntity.GetDataBlob<PositionDB>().RelativePosition;
+        stateDB.RelativePosition2 = orbitDB._position;
+        orbitDB.OwningEntity.GetDataBlob<PositionDB>().RelativePosition = (Vector3)orbitDB._position;
         stateDB.Velocity = (Vector2)orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
     }
 
@@ -95,18 +137,18 @@ public class MoveStateProcessor : IInstanceProcessor
         {
             if(!movedb.OwningEntity.TryGetDatablob(out MoveStateDB stateDB))
             {
-                stateDB = new MoveStateDB();
+                stateDB = new MoveStateDB(movedb.SOIParent);
                 movedb.OwningEntity.SetDataBlob(stateDB);
             }
             
             stateDB.MoveType = MoveStateDB.MoveTypes.NewtonSimple;
-            stateDB.SOIParent = movedb.SOIParent;
+            stateDB.SetParent(movedb.SOIParent);
             var myMass = movedb.OwningEntity.GetDataBlob<MassVolumeDB>().MassTotal;
             var pMass = movedb.SOIParent.GetDataBlob<MassVolumeDB>().MassTotal;
             stateDB.SGP = GeneralMath.StandardGravitationalParameter(myMass + pMass);
             var state = OrbitMath.GetStateVectors(movedb.CurrentTrajectory, atDateTime);
-            stateDB.Position = (Vector2)state.position;
-            stateDB.Velocity = (Vector2)state.velocity;
+            stateDB.RelativePosition = state.position;
+            stateDB.Velocity = state.velocity;
             var ke = OrbitMath.KeplerFromPositionAndVelocity(stateDB.SGP, state.position, (Vector3)state.velocity, atDateTime);
             stateDB.GetKeplerElements = ke;
         }
@@ -115,18 +157,18 @@ public class MoveStateProcessor : IInstanceProcessor
     {
         if(!movedb.OwningEntity.TryGetDatablob(out MoveStateDB stateDB))
         {
-            stateDB = new MoveStateDB();
+            stateDB = new MoveStateDB(movedb.SOIParent);
             movedb.OwningEntity.SetDataBlob(stateDB);
         }
         
         stateDB.MoveType = MoveStateDB.MoveTypes.NewtonSimple;
-        stateDB.SOIParent = movedb.SOIParent;
+        stateDB.SetParent(movedb.SOIParent);
         var myMass = movedb.OwningEntity.GetDataBlob<MassVolumeDB>().MassTotal;
         var pMass = movedb.SOIParent.GetDataBlob<MassVolumeDB>().MassTotal;
         stateDB.SGP = GeneralMath.StandardGravitationalParameter(myMass + pMass);
         var state = OrbitMath.GetStateVectors(movedb.CurrentTrajectory, atDateTime);
-        stateDB.Position = (Vector2)state.position;
-        stateDB.Velocity = (Vector2)state.velocity;
+        stateDB.RelativePosition = state.position;
+        stateDB.Velocity = state.velocity;
         var ke = OrbitMath.KeplerFromPositionAndVelocity(stateDB.SGP, state.position, (Vector3)state.velocity, atDateTime);
         stateDB.GetKeplerElements = ke;
     }
@@ -145,15 +187,16 @@ public class MoveStateProcessor : IInstanceProcessor
     {
         if(!movedb.OwningEntity.TryGetDatablob(out MoveStateDB stateDB))
         {
-            stateDB = new MoveStateDB();
+            stateDB = new MoveStateDB(movedb.SOIParent);
             movedb.OwningEntity.SetDataBlob(stateDB);
         }
         
         stateDB.MoveType = MoveStateDB.MoveTypes.NewtonSimple;
-        stateDB.SOIParent = movedb.SOIParent;
+        stateDB.SetParent(movedb.SOIParent);
         stateDB.GetKeplerElements = movedb.GetElements();
         stateDB.SGP = stateDB.GetKeplerElements.StandardGravParameter;
-        stateDB.Position = (Vector2)movedb.OwningEntity.GetDataBlob<PositionDB>().RelativePosition;
+        //newtonmove processor still updates positon in the processor.
+        //stateDB.RelativePosition = (Vector2)movedb.OwningEntity.GetDataBlob<PositionDB>().RelativePosition;
         stateDB.Velocity = (Vector2)movedb.CurrentVector_ms;
     }
 
@@ -169,20 +212,21 @@ public class MoveStateProcessor : IInstanceProcessor
     
     public static void ProcessForType(WarpMovingDB warpdb, DateTime atDateTime)
     {
+        
         if(!warpdb.OwningEntity.TryGetDatablob(out MoveStateDB stateDB))
         {
-            stateDB = new MoveStateDB();
+            stateDB = new MoveStateDB(warpdb._parentEnitity);
             warpdb.OwningEntity.SetDataBlob(stateDB);
         }
         
         stateDB.MoveType = MoveStateDB.MoveTypes.Warp;
-        var pos = warpdb.OwningEntity.GetDataBlob<PositionDB>();
-        stateDB.SOIParent = pos.Parent;
+        
+        stateDB.SetParent(warpdb._parentEnitity);
         stateDB.GetKeplerElements = warpdb.TargetEndpointOrbit;
         stateDB.SGP = stateDB.GetKeplerElements.StandardGravParameter;
-        stateDB.Position = (Vector2)pos.RelativePosition;
+        stateDB.RelativePosition2 = warpdb._position;
         stateDB.Velocity = (Vector2)warpdb.CurrentNonNewtonionVectorMS;
-        
+        stateDB.OwningEntity.GetDataBlob<PositionDB>().RelativePosition = (Vector3)warpdb._position;
     }
 
     public Type GetParameterType => typeof(MoveStateDB);

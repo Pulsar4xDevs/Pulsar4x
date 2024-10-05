@@ -206,7 +206,7 @@ namespace Pulsar4X.Engine
         #endregion
 
 
-        #region Position And Velocity
+        #region RelativePosition And Velocity
         
         
         public static Vector3 GetPosition(OrbitDB orbit, DateTime atDateTime)

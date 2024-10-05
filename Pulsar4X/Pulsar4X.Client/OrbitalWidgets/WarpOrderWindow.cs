@@ -498,7 +498,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text("Y: " + Stringify.Distance(_insertionOrbitalVelocity_m.Y)+ "/s");
                         ImGui.Text("Z: " + Stringify.Distance(_insertionOrbitalVelocity_m.Z)+ "/s");
 
-                        ImGui.Text("Insertion Position: ");
+                        ImGui.Text("Insertion RelativePosition: ");
                         ImGui.Text("X: " + Stringify.Distance(_targetInsertionPoint_m.X));
                         ImGui.Text("Y: " + Stringify.Distance(_targetInsertionPoint_m.Y));
                         ImGui.Text("Z: " + Stringify.Distance(_targetInsertionPoint_m.Z));

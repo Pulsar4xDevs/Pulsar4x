@@ -36,8 +36,8 @@ namespace Pulsar4X.SDL2UI
         /// This is maybe a naive possibly slow way of drawing a filled circle. maybe revisit this if it turns out to be slow.
         /// </summary>
         /// <param name="renderer">Renderer.</param>
-        /// <param name="posX">Position x.</param>
-        /// <param name="posY">Position y.</param>
+        /// <param name="posX">RelativePosition x.</param>
+        /// <param name="posY">RelativePosition y.</param>
         /// <param name="radius">Radius.</param>
         public static void DrawFilledCircle(IntPtr renderer, int posX, int posY, int radius)
         { 
@@ -372,8 +372,8 @@ namespace Pulsar4X.SDL2UI
         /// Creates the arc.
         /// </summary>
         /// <returns>The arc.</returns>
-        /// <param name="posX">Position x.</param>
-        /// <param name="posY">Position y.</param>
+        /// <param name="posX">RelativePosition x.</param>
+        /// <param name="posY">RelativePosition y.</param>
         /// <param name="xRadius">X width.</param>
         /// <param name="yRadius">Y width.</param>
         /// <param name="startAngleRadians">Start angle in radians.</param>

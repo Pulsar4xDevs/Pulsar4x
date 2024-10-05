@@ -99,7 +99,7 @@ namespace Pulsar4X.Engine
 
                 StarInfoDB starData = GenerateStarInfo(starMVDB, starType, randomSelection);
 
-                // Initialize Position as 0,0,0. It will be updated when the star's orbit is calculated.
+                // Initialize RelativePosition as 0,0,0. It will be updated when the star's orbit is calculated.
                 PositionDB positionData = new PositionDB(Vector3.Zero, system.ID);
 
                 var baseDataBlobs = new List<BaseDataBlob> {starMVDB, starData, positionData};

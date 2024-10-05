@@ -440,38 +440,38 @@ namespace Pulsar4X.Tests
                 //testing differences between different position functions
                 Assert.Multiple(() =>
                 {
-                    string message = i + " Position Length compare: \n" +
+                    string message = i + " RelativePosition Length compare: \n" +
                                      "Expected: " + o_pos.Length() + "\n" +
                                      "But was:  " + pos1.Length();
                     Assert.AreEqual(o_pos.Length(), pos1.Length(), epsilonLen, message);
-                    message = i + "Position X compare: \n" +
+                    message = i + "RelativePosition X compare: \n" +
                              "Expected: " + o_pos.X + "\n" +
                              "But was:  " + pos1.X;
                     Assert.AreEqual(o_pos.X, pos1.X, epsilonLen, message);
-                    message = i + "Position Y compare: \n" +
+                    message = i + "RelativePosition Y compare: \n" +
                                "Expected: " + o_pos.Y + "\n" +
                                "But was:  " + pos1.Y;
                     Assert.AreEqual(o_pos.Y, pos1.Y, epsilonLen, message);
-                    message = i + "Position Z compare: \n" +
+                    message = i + "RelativePosition Z compare: \n" +
                               "Expected: " + o_pos.Z + "\n" +
                               "But was:  " + pos1.Z;
                     Assert.AreEqual(o_pos.Z, pos1.Z, epsilonLen, message);
                 });
                 Assert.Multiple(() =>
                 {
-                    string message = i + " Position Length compare: \n" +
+                    string message = i + " RelativePosition Length compare: \n" +
                                      "Expected: " + o_pos.Length() + "\n" +
                                      "But was:  " + pos2.Length();
                     Assert.AreEqual(o_pos.Length(), pos2.Length(), epsilonLen, message);
-                    message = i + "Position X compare: \n" +
+                    message = i + "RelativePosition X compare: \n" +
                               "Expected: " + o_pos.X + "\n" +
                               "But was:  " + pos2.X;
                     Assert.AreEqual(o_pos.X, pos2.X, epsilonLen, message);
-                    message = i + "Position Y compare: \n" +
+                    message = i + "RelativePosition Y compare: \n" +
                                "Expected: " + o_pos.Y + "\n" +
                                "But was:  " + pos2.Y;
                     Assert.AreEqual(o_pos.Y, pos2.Y, epsilonLen, message);
-                    message = i + "Position Z compare: \n" +
+                    message = i + "RelativePosition Z compare: \n" +
                               "Expected: " + o_pos.Z + "\n" +
                               "But was:  " + pos2.Z;
                     Assert.AreEqual(o_pos.Z, pos2.Z, epsilonLen, message);

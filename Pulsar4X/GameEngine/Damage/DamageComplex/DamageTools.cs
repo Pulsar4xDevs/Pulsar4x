@@ -184,7 +184,7 @@ namespace Pulsar4X.Engine.Damage
             var hh = phight * 0.5;
             var len = Math.Sqrt((pwidth * pwidth) + (phight * phight));
 
-            //damage.Position ralitive to our targets center, but we need to translate for calculating 0,0 at top left
+            //damage.RelativePosition ralitive to our targets center, but we need to translate for calculating 0,0 at top left
             Vector2 start = new Vector2(damage.Position.x - hw, damage.Position.y - hh);
             var end = new Vector2((pwidth * 0.5)-1, (phight * 0.5)-1); //center of our target
             var tl = new Vector2(0, 0);
@@ -330,7 +330,7 @@ namespace Pulsar4X.Engine.Damage
             var hh = phight * 0.5;
             var len = Math.Sqrt((pwidth * pwidth) + (phight * phight));
 
-            //damage.Position ralitive to our targets center, but we need to translate for calculating 0,0 at top left
+            //damage.RelativePosition ralitive to our targets center, but we need to translate for calculating 0,0 at top left
             Vector2 start = new Vector2(damage.Position.x - hw, damage.Position.y - hh);
             var end = new Vector2((pwidth * 0.5)-1, (phight * 0.5)-1); //center of our target
             var tl = new Vector2(0, 0);

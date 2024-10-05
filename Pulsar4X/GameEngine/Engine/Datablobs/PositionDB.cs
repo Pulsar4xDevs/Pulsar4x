@@ -16,7 +16,7 @@ namespace Pulsar4X.Datablobs
         public string SystemGuid;
 
         /// <summary>
-        /// The Position as a Vec3, in m.
+        /// The RelativePosition as a Vec3, in m.
         /// </summary>
         public Vector3 AbsolutePosition
         {
@@ -139,7 +139,7 @@ namespace Pulsar4X.Datablobs
 
             /* Operator not supported as it can lead to unintended consequences,
              * especially when trying to do "posA += posB;"
-             * Instead of posA += posB, do "posA.Position += posB.Position;"
+             * Instead of posA += posB, do "posA.RelativePosition += posB.RelativePosition;"
              *
              * Datablobs are stored in an entity manager, and contain important metadata.
              * posA += posB evaluates to posA = posA + posB;

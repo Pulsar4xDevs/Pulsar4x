@@ -720,7 +720,7 @@ namespace Pulsar4X.SDL2UI
                     new SDL.SDL_Color(){a = 0} };
             _bodyPosItem = new ElementItem()
             {
-                NameString = "Object Position (P) - from PosDB",
+                NameString = "Object RelativePosition (P) - from PosDB",
                 Colour = objPntColour,
                 HighlightColour = objPntHColour,
                 //DataItem = ,
@@ -753,7 +753,7 @@ namespace Pulsar4X.SDL2UI
             var posA_m = _entity.GetAbsolutePosition();
             _bodyPosFromState = new ElementItem()
             {
-                NameString = "Object Position (P) - from State",
+                NameString = "Object RelativePosition (P) - from State",
                 Colour = objPntColour,
                 HighlightColour = objPntHColour,
                 //DataItem = ,

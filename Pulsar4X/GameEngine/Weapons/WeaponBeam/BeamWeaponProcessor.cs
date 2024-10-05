@@ -121,7 +121,7 @@ public class BeamWeaponProcessor : IHotloopProcessor
         // DamageFragment damage = new DamageFragment()
         // {
         //     Velocity = new Vector2(relativeVelocity.X, relativeVelocity.Y),
-        //     Position = ((int)posRelativeToTarget.X, (int)posRelativeToTarget.Y),
+        //     RelativePosition = ((int)posRelativeToTarget.X, (int)posRelativeToTarget.Y),
         //     Mass = 0.000001f,
         //     Density = 1000,
         //     Momentum = (float)(UniversalConstants.Science.PlankConstant * freq),
