@@ -173,7 +173,6 @@ public class MoveStateProcessor : IInstanceProcessor
         stateDB.GetKeplerElements = ke;
     }
     
-    
     public static void ProcessForType(List<NewtonMoveDB> moves, DateTime atDateTime)
     {
         foreach (var movedb in moves)
@@ -244,6 +243,56 @@ public class MoveStateProcessor : IInstanceProcessor
         else if(entity.TryGetDatablob(out NewtonSimpleMoveDB warpdb))
             ProcessForType(warpdb, atDateTime);
     }
+
+
+    public static Vector2 GetFuturePosition(Entity entity, DateTime atDateTime)
+    {
+        MoveStateDB moveState = entity.GetDataBlob<MoveStateDB>();
+        Vector2 pos = new Vector2();
+        switch (moveState.MoveType)
+        {
+            case MoveStateDB.MoveTypes.Orbit:
+            {
+                var orbitdb = entity.GetDataBlob<OrbitDB>();
+                pos = (Vector2)OrbitMath.GetPosition(orbitdb, OrbitMath.GetTrueAnomaly(orbitdb, atDateTime));
+            }
+                break;
+            case MoveStateDB.MoveTypes.NewtonSimple:
+            {
+                pos = (Vector2)NewtonSimpleProcessor.GetRelativeState(entity, atDateTime).pos;
+            }
+                break;
+
+            case MoveStateDB.MoveTypes.NewtonComplex:
+            {
+                var db = entity.GetDataBlob<NewtonMoveDB>();
+                pos = (Vector2)NewtonionMovementProcessor.GetRelativeState(entity, db, atDateTime).pos;
+            }
+                break;
+            case MoveStateDB.MoveTypes.Warp:
+            {
+                var db = entity.GetDataBlob<WarpMovingDB>();
+                if (atDateTime < db.PredictedExitTime)
+                {
+                    var t = (atDateTime - db.LastProcessDateTime).TotalSeconds;
+                    pos = db._position + (Vector2)(db.CurrentNonNewtonionVectorMS * t);
+                }
+                else
+                {
+                    var endOrbit = db.TargetEndpointOrbit;
+                    pos = (Vector2)OrbitMath.GetPosition(endOrbit, atDateTime);
+                }
+            }
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        return pos;
+
+    }
+
+    
 }
     
     
