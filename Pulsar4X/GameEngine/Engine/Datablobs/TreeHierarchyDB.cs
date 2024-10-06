@@ -152,7 +152,10 @@ namespace Pulsar4X.Datablobs
 
         private TreeHierarchyDB? GetSameTypeDB(Entity entity)
         {
-            return !entity.IsValid ? null : (TreeHierarchyDB)entity.GetDataBlob(this.GetType());
+            // FIXME: this has/get combo can crash on race conditions
+            return !entity.IsValid && entity.HasDataBlob(this.GetType()) ?
+                null : 
+                (TreeHierarchyDB)entity.GetDataBlob(this.GetType());
         }
 
         public TreeHierarchyDB? TryGetChild<T>(Entity entity) where T : TreeHierarchyDB
@@ -183,8 +186,10 @@ namespace Pulsar4X.Datablobs
             Parent = null;
             foreach(var child in Children)
             {
-                if(child.IsValid)
-                    child.SetParent(null);
+                if(child.IsValid && child.TryGetDataBlob(this.GetType(), out var childDB))
+                {
+                    ((TreeHierarchyDB)childDB).SetParent(null);
+                }
             }
 
             Children.Clear();

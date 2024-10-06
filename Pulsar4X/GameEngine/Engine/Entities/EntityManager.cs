@@ -8,7 +8,6 @@ using Pulsar4X.Engine.Auth;
 using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Extensions;
 using System.Reflection;
-using Pulsar4X.Events;
 using Pulsar4X.Messaging;
 
 namespace Pulsar4X.Engine
@@ -337,20 +336,31 @@ namespace Pulsar4X.Engine
             return _datablobStores[type].ContainsKey(entityID);
         }
 
-        internal bool TryGetDataBlob<T>(int entityID, out T? value) where T : BaseDataBlob
+        internal bool TryGetDataBlob(int entityID, Type blobType, out object? value)
         {
-            Type blobType = typeof(T);
             if(_datablobStores.TryGetValue(blobType, out var dataStore))
             {
                 if(dataStore.TryGetValue(entityID, out var dataBlob))
                 {
-                    value = (T)dataBlob;
+                    value = dataBlob;
                     return true;
                 }
                 value = null;
                 return false;
             }
 
+            value = null;
+            return false;
+        }
+
+        internal bool TryGetDataBlob<T>(int entityID, out T? value) where T : BaseDataBlob
+        {
+            Type blobType = typeof(T);
+            if (TryGetDataBlob(entityID, blobType, out object? objValue))
+            {
+                value = objValue as T;
+                return value != null;
+            }
             value = null;
             return false;
         }

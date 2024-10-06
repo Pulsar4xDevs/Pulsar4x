@@ -5,8 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
-using Pulsar4X.DataStructures;
-using Pulsar4X.Orbital;
 
 namespace Pulsar4X.Engine;
 
@@ -14,9 +12,6 @@ namespace Pulsar4X.Engine;
 public class Entity : IHasDataBlobs, IEquatable<Entity>
 {
     public int Id { get; private set; }
-    public Vector3 RelativePosition { get; set; }
-    public Entity? Parent { get; private set; }
-    public SafeList<Entity> Children { get; private set; } = new ();
 
     [JsonIgnore]
     public EntityManager? Manager { get; internal set; }
@@ -63,6 +58,17 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
     public bool HasDataBlob(Type type)
     {
         return Manager.HasDataBlob(Id, type);
+    }
+
+    public bool TryGetDataBlob(Type type, [NotNullWhen(true)]out object? value)
+    {
+        if(Manager.TryGetDataBlob(Id, type, out value))
+        {
+            return value != null;
+        }
+
+        value = null;
+        return false;
     }
 
     public bool TryGetDatablob<T>([NotNullWhen(true)] out T? value) where T : BaseDataBlob
@@ -167,56 +173,6 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
             && this.Id == other.Id
             && this.FactionOwnerID == other.FactionOwnerID
             && this.Manager.ManagerID.Equals(other.Manager.ManagerID);
-    }
-
-    public Vector3 GetAbsolutePosition()
-    {
-        if(Parent == null)
-            return RelativePosition;
-
-        return Parent.GetAbsolutePosition() + RelativePosition;
-    }
-
-    public void AddChild(Entity child)
-    {
-        if(child.Parent != null)
-            child.Parent.RemoveChild(child);
-
-        child.Parent = this;
-        Children.Add(child);
-    }
-
-    public void RemoveChild(Entity child)
-    {
-        if(Children.Remove(child))
-            child.Parent = null;
-    }
-
-    public void SetParent(Entity? parent)
-    {
-        if(Parent == parent)
-            return;
-
-        Vector3 oldAbsolutePosition = GetAbsolutePosition();
-
-        if(Parent != null)
-            Parent.RemoveChild(this);
-
-        if(parent != null)
-        {
-            parent.AddChild(this);
-            RelativePosition = oldAbsolutePosition - parent.GetAbsolutePosition();
-        }
-        else
-        {
-            Parent = null;
-            RelativePosition = oldAbsolutePosition;
-        }
-    }
-
-    public void RemoveParent()
-    {
-        SetParent(null);
     }
 
     [JsonIgnore]
