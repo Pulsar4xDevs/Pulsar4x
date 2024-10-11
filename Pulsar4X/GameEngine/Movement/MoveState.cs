@@ -244,6 +244,43 @@ public class MoveStateProcessor : IInstanceProcessor
             ProcessForType(warpdb, atDateTime);
     }
 
+    /// <summary>
+    /// This allows easy single entity move processing regardless of move type.
+    /// this should only be used in rare cases where you need to update a position ouside of the normal move tick.
+    /// this WILL update the position, to get the position without updating, use GetFuturePosition() instead.
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <param name="toDateTime"></param>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    internal static void ProcessEntityMove(Entity entity, DateTime toDateTime)
+    {
+        var movestate = entity.GetDataBlob<MoveStateDB>();
+        switch (movestate.MoveType)
+        {
+            case MoveStateDB.MoveTypes.Orbit:
+            {
+                OrbitProcessor.ProcessEntity(entity, toDateTime);
+                break;
+            }
+            case MoveStateDB.MoveTypes.NewtonSimple:
+            {
+                NewtonSimpleProcessor.ProcessEntity(entity, toDateTime);
+                break;
+            }
+            case MoveStateDB.MoveTypes.NewtonComplex:
+            {
+                NewtonionMovementProcessor.ProcessEntity(entity, toDateTime);
+                break;
+            }
+            case MoveStateDB.MoveTypes.Warp:
+            {
+                WarpMoveProcessor.ProcessEntity(entity, toDateTime);
+                break;
+            }
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
 
     public static Vector2 GetFuturePosition(Entity entity, DateTime atDateTime)
     {
@@ -287,12 +324,8 @@ public class MoveStateProcessor : IInstanceProcessor
             default:
                 throw new ArgumentOutOfRangeException();
         }
-
         return pos;
-
     }
-
-    
 }
     
     

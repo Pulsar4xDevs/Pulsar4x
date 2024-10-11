@@ -30,21 +30,30 @@ namespace Pulsar4X.Engine
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
             var nmdb = entity.GetDataBlob<NewtonMoveDB>();
-            NewtonMove(nmdb, deltaSeconds);
-            DateTime todateTime = entity.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
-            MoveStateProcessor.ProcessForType(nmdb, todateTime);
+            DateTime toDateTime = entity.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            NewtonMove(nmdb, toDateTime);
+            MoveStateProcessor.ProcessForType(nmdb, toDateTime);
+        }
+
+        public static void ProcessEntity(Entity entity, DateTime toDateTime)
+        {
+            var nmdb = entity.GetDataBlob<NewtonMoveDB>();
+            NewtonMove(nmdb, toDateTime);
+            MoveStateProcessor.ProcessForType(nmdb, toDateTime);
         }
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             //List<Entity> entites = manager.GetAllEntitiesWithDataBlob<NewtonMoveDB>(_nmDBIdx);
             var nmdb = manager.GetAllDataBlobsOfType<NewtonMoveDB>();
+            
+            DateTime toDateTime = manager.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
             foreach (var db in nmdb)
             {
-                NewtonMove(db, deltaSeconds);
+                NewtonMove(db, toDateTime);
             }
-            DateTime todateTime = manager.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
-            MoveStateProcessor.ProcessForType(nmdb, todateTime);
+            
+            MoveStateProcessor.ProcessForType(nmdb, toDateTime);
 
             return nmdb.Count;
         }
@@ -58,7 +67,7 @@ namespace Pulsar4X.Engine
         /// </summary>
         /// <param name="entity">Entity.</param>
         /// <param name="deltaSeconds">Delta seconds.</param>
-        public static void NewtonMove(NewtonMoveDB newtonMoveDB, int deltaSeconds)
+        public static void NewtonMove(NewtonMoveDB newtonMoveDB, DateTime toDateTime)
         {
             var entity = newtonMoveDB.OwningEntity;
             //NewtonMoveDB newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>();
@@ -71,8 +80,8 @@ namespace Pulsar4X.Engine
             var manager = entity.Manager;
             DateTime dateTimeFrom = newtonMoveDB.LastProcessDateTime;
             DateTime dateTimeNow = manager.ManagerSubpulses.StarSysDateTime;
-            DateTime dateTimeFuture = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds);
-            double deltaT = (dateTimeFuture - dateTimeFrom).TotalSeconds;
+            //DateTime toDateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds);
+            double deltaT = (toDateTime - dateTimeFrom).TotalSeconds;
 
             double sgp = GeneralMath.StandardGravitationalParameter(massTotal_Kg + parentMass_kg);
 
@@ -164,7 +173,7 @@ namespace Pulsar4X.Engine
                     Vector3 posrelativeToNewParent = moveStateDB.AbsolutePosition - newParent.GetDataBlob<PositionDB>().AbsolutePosition;
 
 
-                    var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
+                    var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaT - secondsToItterate);
                     //double sgp = GMath.StandardGravitationalParameter(parentMass_kg + mass_Kg);
 
 
@@ -179,7 +188,7 @@ namespace Pulsar4X.Engine
 
                 if (newtonMoveDB.ManuverDeltaV.Length() <= 0) //if we've completed the manuver.
                 {
-                    var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
+                    var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaT - secondsToItterate);
                     //double sgp = GMath.StandardGravitationalParameter(parentMass_kg + mass_Kg);
 
                     //something funky with the below. though it may be just float differences, not sure.
@@ -220,7 +229,7 @@ namespace Pulsar4X.Engine
 
                 secondsToItterate -= timeStepInSeconds;
             }
-            newtonMoveDB.LastProcessDateTime = dateTimeFuture;
+            newtonMoveDB.LastProcessDateTime = toDateTime;
         }
 
         /// <summary>

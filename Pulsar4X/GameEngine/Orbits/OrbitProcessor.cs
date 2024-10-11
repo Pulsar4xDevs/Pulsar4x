@@ -37,9 +37,14 @@ namespace Pulsar4X.Engine
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
             DateTime toDate = entity.Manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            ProcessEntity(entity, toDate);
+        }
+
+        public static void ProcessEntity(Entity entity, DateTime toDateTime)
+        {
             var db = entity.GetDataBlob<OrbitDB>();
-            UpdateOrbit(entity, db.Parent.GetDataBlob<PositionDB>(), toDate);
-            MoveStateProcessor.ProcessForType(db, toDate);
+            UpdateOrbit(entity, db.Parent.GetDataBlob<PositionDB>(), toDateTime);
+            MoveStateProcessor.ProcessForType(db, toDateTime);
         }
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)

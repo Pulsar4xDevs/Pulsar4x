@@ -22,35 +22,34 @@ public class NewtonSimpleProcessor : IHotloopProcessor
     public void ProcessEntity(Entity entity, int deltaSeconds)
     {
         var nmdb = entity.GetDataBlob<NewtonSimpleMoveDB>();
-        NewtonMove(nmdb, deltaSeconds);
         DateTime todateTime = entity.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+        NewtonMove(nmdb, todateTime);
         MoveStateProcessor.ProcessForType(nmdb, todateTime);
+    }
+
+    public static void ProcessEntity(Entity entity, DateTime toDateTime)
+    {
+        var db = entity.GetDataBlob<NewtonSimpleMoveDB>();
+        NewtonMove(db, toDateTime);
+        MoveStateProcessor.ProcessForType(db, toDateTime);
     }
 
     public int ProcessManager(EntityManager manager, int deltaSeconds)
     {
         var nmdb = manager.GetAllDataBlobsOfType<NewtonSimpleMoveDB>();
+        DateTime toDate = manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
         foreach (var db in nmdb)
         {
-            NewtonMove(db, deltaSeconds);
+            NewtonMove(db, toDate);
         }
-
-        DateTime todateTime = manager.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
-        MoveStateProcessor.ProcessForType(nmdb, todateTime);
+        MoveStateProcessor.ProcessForType(nmdb, toDate);
         return nmdb.Count;
     }
 
 
-    public void NewtonMove(NewtonSimpleMoveDB newtonSimplelMoveDB, int deltaSeconds)
+    public static void NewtonMove(NewtonSimpleMoveDB newtonSimplelMoveDB, DateTime toDateTime)
     {
-        
-        
-        
-        
         Entity entity = newtonSimplelMoveDB.OwningEntity;
-        DateTime dateTimeNow = entity.Manager.StarSysDateTime;
-        DateTime dateTimeNext = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds);
-        
         var thrustdb = entity.GetDataBlob<NewtonThrustAbilityDB>();
         var posdb = entity.GetDataBlob<PositionDB>();
         var massdb = entity.GetDataBlob<MassVolumeDB>();
@@ -69,14 +68,11 @@ public class NewtonSimpleProcessor : IHotloopProcessor
         var thrust = thrustdb.ThrustInNewtons;
         var fuelRate = thrustdb.FuelBurnRate;
         
-        var currentState = OrbitalMath.GetStateVectors(currentOrbit, dateTimeNow);
-        var targetState = OrbitalMath.GetStateVectors(targetOrbit, dateTimeNow);
+        var currentState = OrbitalMath.GetStateVectors(currentOrbit, toDateTime);
+        var targetState = OrbitalMath.GetStateVectors(targetOrbit, toDateTime);
 
         var moveVector = targetState.velocity - currentState.velocity;
         var moveDeltaV = moveVector.Length();
-
-        
-        
         
         //if ship has enough fuel to make the manuver:
         if (thrustdb.DeltaV > moveDeltaV)
@@ -84,7 +80,7 @@ public class NewtonSimpleProcessor : IHotloopProcessor
             //TODO: handle longer "burns" over several turns.
             
             //set entity to new orbit.
-            OrbitDB newOrbit = OrbitDB.FromKeplerElements(entity, massdb.MassTotal, targetOrbit, dateTimeNow);
+            OrbitDB newOrbit = OrbitDB.FromKeplerElements(entity, massdb.MassTotal, targetOrbit, toDateTime);
             entity.SetDataBlob(newOrbit);
 
             //remove fuel

@@ -74,11 +74,11 @@ namespace Pulsar4X.Engine
         public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             var datablobs = manager.GetAllDataBlobsOfType<WarpMovingDB>();
+            DateTime todateTime = manager.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
             foreach (var db in datablobs)
             {
-                WarpMove(db.OwningEntity, db, deltaSeconds);
+                WarpMove(db.OwningEntity, db, todateTime);
             }
-            DateTime todateTime = manager.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
             MoveStateProcessor.ProcessForType(datablobs, todateTime);
             return datablobs.Count;
         }
@@ -93,12 +93,19 @@ namespace Pulsar4X.Engine
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
             var db = entity.GetDataBlob<WarpMovingDB>();
-            WarpMove(entity, db, deltaSeconds);
-            DateTime todateTime = entity.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
-            MoveStateProcessor.ProcessForType(db, todateTime);
+            DateTime toDateTime = entity.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            WarpMove(entity, db, toDateTime);
+            MoveStateProcessor.ProcessForType(db, toDateTime);
         }
 
-        public void WarpMove(Entity entity, WarpMovingDB moveDB,  int deltaSeconds)
+        public static void ProcessEntity(Entity entity, DateTime toDateTime)
+        {
+            var db = entity.GetDataBlob<WarpMovingDB>();
+            WarpMove(entity, db, toDateTime);
+            MoveStateProcessor.ProcessForType(db, toDateTime);
+        }
+        
+        public static void WarpMove(Entity entity, WarpMovingDB moveDB,  DateTime toDateTime)
         {
 
             if (!moveDB.HasStarted & !StartNonNewtTranslation(entity))
@@ -107,17 +114,11 @@ namespace Pulsar4X.Engine
 
             var currentVelocityMS = moveDB.CurrentNonNewtonionVectorMS;
             DateTime dateTimeFrom = moveDB.LastProcessDateTime;
-            DateTime dateTimeNow = entity.StarSysDateTime;
-            DateTime dateTimeFuture = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds);
-
-            double deltaT = (dateTimeFuture - dateTimeFrom).TotalSeconds;
-            //var positionDB = entity.GetDataBlob<PositionDB>();
-
-            //Vector3 currentPositionMt = positionDB.AbsolutePosition;
-
+            
+            double deltaT = (toDateTime - dateTimeFrom).TotalSeconds;
+            
             Vector3 targetPosMt = moveDB.ExitPointAbsolute;
-
-
+            
             var deltaVecToTargetMt = moveDB._position - (Vector2)targetPosMt;
 
             var newPositionMt = moveDB._position + (Vector2)currentVelocityMS * deltaT;
@@ -138,9 +139,9 @@ namespace Pulsar4X.Engine
                 
 
                 if(_gameSettings.StrictNewtonion)
-                    SetOrbitHereFullNewt(entity, moveDB, dateTimeFuture);
+                    SetOrbitHereFullNewt(entity, moveDB, toDateTime);
                 else
-                    SetOrbitHereNoNewt(entity, moveDB, dateTimeFuture);
+                    SetOrbitHereNoNewt(entity, moveDB, toDateTime);
 
                 powerDB.AddDemand(warpDB.BubbleCollapseCost, entity.StarSysDateTime);
                 powerDB.AddDemand( - warpDB.BubbleSustainCost, entity.StarSysDateTime);
@@ -154,7 +155,7 @@ namespace Pulsar4X.Engine
             }
 
 
-            moveDB.LastProcessDateTime = dateTimeFuture;
+            moveDB.LastProcessDateTime = toDateTime;
         }
         
         public static bool StartNonNewtTranslation(Entity entity)
@@ -206,7 +207,7 @@ namespace Pulsar4X.Engine
         /// <param name="moveDB"></param>
         /// <param name="atDateTime"></param>
         /// <exception cref="NullReferenceException"></exception>
-        void SetOrbitHereNoNewt(Entity entity, WarpMovingDB moveDB, DateTime atDateTime)
+        static void SetOrbitHereNoNewt(Entity entity, WarpMovingDB moveDB, DateTime atDateTime)
         {
             if(moveDB.TargetEntity == null) throw new NullReferenceException("moveDB.TargetEntity cannot be null");
 
@@ -235,7 +236,7 @@ namespace Pulsar4X.Engine
 
         }
 
-        void SetOrbitHereSimpleNewt(Entity entity)
+        static void SetOrbitHereSimpleNewt(Entity entity)
         {
         }
 
@@ -247,7 +248,7 @@ namespace Pulsar4X.Engine
         /// <param name="moveDB"></param>
         /// <param name="atDateTime"></param>
         /// <exception cref="NullReferenceException"></exception>
-        void SetOrbitHereFullNewt(Entity entity, WarpMovingDB moveDB, DateTime atDateTime)
+        static void SetOrbitHereFullNewt(Entity entity, WarpMovingDB moveDB, DateTime atDateTime)
         {
             if(moveDB.TargetEntity == null) throw new NullReferenceException("moveDB.TargetEntity cannot be null");
             //propulsionDB.CurrentVectorMS = new Vector3(0, 0, 0);
