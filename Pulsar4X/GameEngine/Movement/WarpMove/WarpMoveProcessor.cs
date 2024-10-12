@@ -210,7 +210,7 @@ namespace Pulsar4X.Engine
         {
             if(moveDB.TargetEntity == null) throw new NullReferenceException("moveDB.TargetEntity cannot be null");
 
-            MoveStateDB moveStatedb = entity.GetDataBlob<MoveStateDB>();
+            PositionDB moveStatedb = entity.GetDataBlob<PositionDB>();
             
             double targetSOI = moveDB.TargetEntity.GetSOI_m();
 
@@ -251,7 +251,7 @@ namespace Pulsar4X.Engine
         {
             if(moveDB.TargetEntity == null) throw new NullReferenceException("moveDB.TargetEntity cannot be null");
             //propulsionDB.CurrentVectorMS = new Vector3(0, 0, 0);
-            var moveStatedb = entity.GetDataBlob<MoveStateDB>();
+            var moveStatedb = entity.GetDataBlob<PositionDB>();
             double targetSOI = moveDB.TargetEntity.GetSOI_m();
 
             Entity? targetEntity;

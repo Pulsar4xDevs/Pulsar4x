@@ -72,7 +72,7 @@ namespace Pulsar4X.Engine
             //NewtonMoveDB newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>();
             var factionDataStore = entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data;
             NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
-            MoveStateDB moveStateDB = entity.GetDataBlob<MoveStateDB>();
+            PositionDB positionDB = entity.GetDataBlob<PositionDB>();
             double massTotal_Kg = entity.GetDataBlob<MassVolumeDB>().MassTotal;
             double parentMass_kg = newtonMoveDB.ParentMass;
 
@@ -91,12 +91,12 @@ namespace Pulsar4X.Engine
                 //double timeStep = Math.Max(secondsToItterate / speed_kms, 1);
                 //timeStep = Math.Min(timeStep, secondsToItterate);
                 double timeStepInSeconds = 1;//because the above seems unstable and looses energy.
-                double distanceToParent_m = moveStateDB.GetDistanceTo_m(newtonMoveDB.SOIParent.GetDataBlob<MoveStateDB>());
+                double distanceToParent_m = positionDB.GetDistanceTo_m(newtonMoveDB.SOIParent.GetDataBlob<PositionDB>());
 
                 distanceToParent_m = Math.Max(distanceToParent_m, 0.1); //don't let the distance be 0 (once collision is in this will likely never happen anyway)
 
                 double gravForce = UniversalConstants.Science.GravitationalConstant * (massTotal_Kg * parentMass_kg / Math.Pow(distanceToParent_m, 2));
-                Vector3 gravForceVector = gravForce * -Vector3.Normalise(moveStateDB.RelativePosition);
+                Vector3 gravForceVector = gravForce * -Vector3.Normalise(positionDB.RelativePosition);
 
                 Vector3 totalDVFromGrav = (gravForceVector / massTotal_Kg) * timeStepInSeconds;
 
@@ -142,12 +142,12 @@ namespace Pulsar4X.Engine
                 newtonMoveDB.CurrentVector_ms = newVelocity;
                 Vector3 deltaPos = (newtonMoveDB.CurrentVector_ms + newVelocity) / 2 * timeStepInSeconds;
 
-                moveStateDB.RelativePosition += deltaPos;
+                positionDB.RelativePosition += deltaPos;
 
                 double sOIRadius = newtonMoveDB.SOIParent.GetSOI_m();
                 var kE = newtonMoveDB.GetElements();
 
-                if (moveStateDB.RelativePosition.Length() >= sOIRadius)
+                if (positionDB.RelativePosition.Length() >= sOIRadius)
                 {
                     Entity? newParent;
                     Vector3 parentrelativeVector;
@@ -169,7 +169,7 @@ namespace Pulsar4X.Engine
                     }
                     parentMass_kg = newParent.GetDataBlob<MassVolumeDB>().MassDry;
 
-                    Vector3 posrelativeToNewParent = moveStateDB.AbsolutePosition - newParent.GetDataBlob<PositionDB>().AbsolutePosition;
+                    Vector3 posrelativeToNewParent = positionDB.AbsolutePosition - newParent.GetDataBlob<PositionDB>().AbsolutePosition;
 
 
                     var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaT - secondsToItterate);
@@ -177,7 +177,7 @@ namespace Pulsar4X.Engine
 
 
                     kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, posrelativeToNewParent, parentrelativeVector, dateTime);
-                    moveStateDB.SetParent(newParent);
+                    positionDB.SetParent(newParent);
                     newtonMoveDB.ParentMass = parentMass_kg;
                     newtonMoveDB.SOIParent = newParent;
                     newtonMoveDB.CurrentVector_ms = parentrelativeVector;
@@ -198,7 +198,7 @@ namespace Pulsar4X.Engine
                         throw new Exception("Old Elements Exception - eccentricity has changed and newtonMoveDB.UpdateKeplerElements() has not been called");
 #endif
                     */
-                    var parentEntity = moveStateDB.Parent;
+                    var parentEntity = positionDB.Parent;
                     if(parentEntity == null) throw new NullReferenceException("parentEntity cannot be null");
 
                     if (kE.Eccentricity < 1) //if we're going to end up in a regular orbit around our new parent
@@ -207,18 +207,18 @@ namespace Pulsar4X.Engine
                         {
                             var newOrbit = OrbitDB.FromKeplerElements(parentEntity, massTotal_Kg, kE, dateTime);
                             var fastOrbit = new OrbitUpdateOftenDB(newOrbit);
-                            moveStateDB.SetParent(parentEntity);
+                            positionDB.SetParent(parentEntity);
                             entity.SetDataBlob(fastOrbit);
                             var newPos = fastOrbit.GetPosition(dateTime);
-                            moveStateDB.RelativePosition = newPos;
+                            positionDB.RelativePosition = newPos;
                         }
                         else
                         {
                             var newOrbit = OrbitDB.FromKeplerElements(parentEntity, massTotal_Kg, kE, dateTime);
-                            moveStateDB.SetParent(parentEntity);
+                            positionDB.SetParent(parentEntity);
                             entity.SetDataBlob(newOrbit);
                             var newPos = newOrbit.GetPosition(dateTime);
-                            moveStateDB.RelativePosition = newPos;
+                            positionDB.RelativePosition = newPos;
                         }
 
                     }
@@ -240,14 +240,14 @@ namespace Pulsar4X.Engine
         /// <returns>Positional and Velocity states</returns>
         public static (Vector3 pos, Vector3 vel)GetRelativeState(Entity entity, NewtonMoveDB newtonMoveDB, DateTime atDateTime)
         {
-            MoveStateDB moveStateDB = entity.GetDataBlob<MoveStateDB>();
+            PositionDB positionDB = entity.GetDataBlob<PositionDB>();
             NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
             DateTime dateTimeNow = entity.StarSysDateTime;
             TimeSpan timeDelta = atDateTime - dateTimeNow;
             double mass_Kg = entity.GetDataBlob<MassVolumeDB>().MassDry;
             double parentMass_kg = newtonMoveDB.ParentMass;
 
-            Vector3 newrelative = moveStateDB.RelativePosition;
+            Vector3 newrelative = positionDB.RelativePosition;
             Vector3 velocity = newtonMoveDB.CurrentVector_ms;
 
             double secondsToItterate = timeDelta.TotalSeconds;
@@ -256,12 +256,12 @@ namespace Pulsar4X.Engine
                 //double timeStep = Math.Max(secondsToItterate / speed_kms, 1);
                 //timeStep = Math.Min(timeStep, secondsToItterate);
                 double timeStep = 1;//because the above seems unstable and looses energy.
-                double distanceToParent_m = moveStateDB.GetDistanceTo_m(newtonMoveDB.SOIParent.GetDataBlob<PositionDB>());
+                double distanceToParent_m = positionDB.GetDistanceTo_m(newtonMoveDB.SOIParent.GetDataBlob<PositionDB>());
 
                 distanceToParent_m = Math.Max(distanceToParent_m, 0.1); //don't let the distance be 0 (once collision is in this will likely never happen anyway)
 
                 double gravForce = UniversalConstants.Science.GravitationalConstant * (mass_Kg * parentMass_kg / Math.Pow(distanceToParent_m, 2));
-                Vector3 gravForceVector = gravForce * -Vector3.Normalise(moveStateDB.RelativePosition);
+                Vector3 gravForceVector = gravForce * -Vector3.Normalise(positionDB.RelativePosition);
 
                 Vector3 acceleratonFromGrav = gravForceVector / mass_Kg;
 
@@ -296,14 +296,14 @@ namespace Pulsar4X.Engine
         /// <returns>Positional and Velocity states</returns>
         public static (Vector3 pos, Vector3 vel) GetAbsoluteState(Entity entity, NewtonMoveDB newtonMoveDB, DateTime atDateTime)
         {
-            MoveStateDB moveStateDB = entity.GetDataBlob<MoveStateDB>();
+            PositionDB positionDB = entity.GetDataBlob<PositionDB>();
             NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
             DateTime dateTimeNow = entity.StarSysDateTime;
             TimeSpan timeDelta = atDateTime - dateTimeNow;
             double mass_Kg = entity.GetDataBlob<MassVolumeDB>().MassDry;
             double parentMass_kg = newtonMoveDB.ParentMass;
 
-            Vector3 newAbsolute = moveStateDB.AbsolutePosition;
+            Vector3 newAbsolute = positionDB.AbsolutePosition;
             Vector3 velocity = newtonMoveDB.CurrentVector_ms;
 
             double secondsToItterate = timeDelta.TotalSeconds;
@@ -312,12 +312,12 @@ namespace Pulsar4X.Engine
                 //double timeStep = Math.Max(secondsToItterate / speed_kms, 1);
                 //timeStep = Math.Min(timeStep, secondsToItterate);
                 double timeStep = 1;//because the above seems unstable and looses energy.
-                double distanceToParent_m = moveStateDB.GetDistanceTo_m(newtonMoveDB.SOIParent.GetDataBlob<MoveStateDB>());
+                double distanceToParent_m = positionDB.GetDistanceTo_m(newtonMoveDB.SOIParent.GetDataBlob<PositionDB>());
 
                 distanceToParent_m = Math.Max(distanceToParent_m, 0.1); //don't let the distance be 0 (once collision is in this will likely never happen anyway)
 
                 double gravForce = UniversalConstants.Science.GravitationalConstant * (mass_Kg * parentMass_kg / Math.Pow(distanceToParent_m, 2));
-                Vector3 gravForceVector = gravForce * -Vector3.Normalise(moveStateDB.RelativePosition);
+                Vector3 gravForceVector = gravForce * -Vector3.Normalise(positionDB.RelativePosition);
 
                 Vector3 acceleratonFromGrav = gravForceVector / mass_Kg;
 

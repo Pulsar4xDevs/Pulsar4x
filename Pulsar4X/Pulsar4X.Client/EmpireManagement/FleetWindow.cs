@@ -216,7 +216,7 @@ namespace Pulsar4X.SDL2UI
                                 if (ImGui.SmallButton(positionDB.Parent?.GetName(factionID) ?? "Unknown"))
                                 {
                                     if(positionDB.Parent != null)
-                                        _uiState.EntityClicked(positionDB.Parent.Id, positionDB.SystemGuid, MouseButtons.Primary);
+                                        _uiState.EntityClicked(positionDB.Parent.Id, starSystem.ManagerID, MouseButtons.Primary);
                                 }
                             }
                             else

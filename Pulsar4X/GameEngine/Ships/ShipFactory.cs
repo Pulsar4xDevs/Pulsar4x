@@ -92,7 +92,7 @@ namespace Pulsar4X.Engine
             dataBlobs.Add(shipinfo);
             var mvdb = MassVolumeDB.NewFromMassAndVolume(shipDesign.MassPerUnit, shipDesign.VolumePerUnit);
             dataBlobs.Add(mvdb);
-            PositionDB posdb = new PositionDB(position, starsys.ManagerID, parent);
+            PositionDB posdb = new PositionDB(position, parent);
             dataBlobs.Add(posdb);
             EntityDamageProfileDB damagedb = (EntityDamageProfileDB)shipDesign.DamageProfileDB.Clone();
             dataBlobs.Add(damagedb);

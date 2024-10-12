@@ -9,7 +9,7 @@ using Pulsar4X.Orbital;
 namespace Pulsar4X.Datablobs;
 
 
-public class MoveStateDB : TreeHierarchyDB, IPosition
+public class PositionDB : TreeHierarchyDB, IPosition
 {
     public enum MoveTypes
     {
@@ -40,7 +40,7 @@ public class MoveStateDB : TreeHierarchyDB, IPosition
                 throw new Exception("Infinite loop triggered");
             else
             {
-                MoveStateDB? parentpos = (MoveStateDB?)ParentDB;
+                PositionDB? parentpos = (PositionDB?)ParentDB;
                 if(parentpos == this)
                     throw new Exception("Infinite loop triggered");
                 return parentpos.AbsolutePosition + RelativePosition;
@@ -52,7 +52,7 @@ public class MoveStateDB : TreeHierarchyDB, IPosition
                 RelativePosition = value;
             else
             {
-                MoveStateDB? parentpos = (MoveStateDB?)ParentDB;
+                PositionDB? parentpos = (PositionDB?)ParentDB;
                 RelativePosition = value - parentpos.AbsolutePosition;
             }
         } 
@@ -67,9 +67,79 @@ public class MoveStateDB : TreeHierarchyDB, IPosition
     
     public double SGP { get; internal set; }
 
-    public MoveStateDB(Entity? parent) : base(parent)
-    {
-    }
+
+        /// <summary>
+        /// Initialized
+        /// .
+        /// </summary>
+        /// <param name="x">X value.</param>
+        /// <param name="y">Y value.</param>
+        /// <param name="z">Z value.</param>
+        public PositionDB(double x, double y, double z, Entity? parent = null) : base(parent)
+        {
+            AbsolutePosition = new Vector3(x, y, z);
+            SetParent(parent);
+            //SystemGuid = systemGuid;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="relativePos_m"></param>
+        /// <param name="systemGuid"></param>
+        /// <param name="parent"></param>
+        public PositionDB(Vector3 relativePos, Entity? parent = null) : base(parent)
+        {
+            SetParent(parent); 
+            RelativePosition = relativePos;
+   
+        }
+
+        public PositionDB(Entity? parent = null) : base(parent)
+        {
+            Vector3? parentPos = (ParentDB as PositionDB)?.AbsolutePosition;
+            AbsolutePosition = parentPos ?? Vector3.Zero;
+        }
+
+        public PositionDB(PositionDB positionDB)
+            : base(positionDB.Parent)
+        {
+            RelativePosition = positionDB.RelativePosition;
+
+        }
+
+        public override object Clone()
+        {
+            return new PositionDB(this);
+        }
+
+        //[UsedImplicitly]
+
+        /// <summary>
+        /// changes the positions relative to
+        /// Can be null.
+        /// </summary>
+        /// <param name="newParent"></param>
+        internal override void SetParent(Entity? newParent)
+        {
+            if (newParent != null && !newParent.HasDataBlob<PositionDB>())
+                throw new Exception("newParent must have a PositionDB");
+            var oldParent = ParentDB;
+            
+            
+            Vector3 currentAbsolute = this.AbsolutePosition;
+            Vector3 newRelative;
+            if (newParent == null)
+            {
+                newRelative = currentAbsolute;
+            }
+            else
+            {
+                newRelative = currentAbsolute - newParent.GetDataBlob<PositionDB>().AbsolutePosition;
+            }
+            base.SetParent(newParent);
+            RelativePosition = newRelative;
+        }
 }
 
 public class MoveStateProcessor : IInstanceProcessor
@@ -90,13 +160,13 @@ public class MoveStateProcessor : IInstanceProcessor
     
     public static void ProcessForType(OrbitDB orbitDB, DateTime atDateTime)
     {
-        if(!orbitDB.OwningEntity.TryGetDatablob(out MoveStateDB stateDB))
+        if(!orbitDB.OwningEntity.TryGetDatablob(out PositionDB stateDB))
         {
-            stateDB = new MoveStateDB(orbitDB.Parent);
+            stateDB = new PositionDB(orbitDB.Parent);
             orbitDB.OwningEntity.SetDataBlob(stateDB);
         }
         
-        stateDB.MoveType = MoveStateDB.MoveTypes.Orbit;
+        stateDB.MoveType = PositionDB.MoveTypes.Orbit;
         stateDB.SetParent(orbitDB.Parent);
         stateDB.SGP = orbitDB.GravitationalParameter_m3S2;
         stateDB.GetKeplerElements = orbitDB.GetElements();
@@ -116,13 +186,13 @@ public class MoveStateProcessor : IInstanceProcessor
     
     public static void ProcessForType(OrbitUpdateOftenDB orbitDB, DateTime atDateTime)
     {
-        if(!orbitDB.OwningEntity.TryGetDatablob(out MoveStateDB stateDB))
+        if(!orbitDB.OwningEntity.TryGetDatablob(out PositionDB stateDB))
         {
-            stateDB = new MoveStateDB(orbitDB.Parent);
+            stateDB = new PositionDB(orbitDB.Parent);
             orbitDB.OwningEntity.SetDataBlob(stateDB);
         }
         
-        stateDB.MoveType = MoveStateDB.MoveTypes.Orbit;
+        stateDB.MoveType = PositionDB.MoveTypes.Orbit;
         stateDB.SetParent(orbitDB.Parent);
         stateDB.SGP = orbitDB.GravitationalParameter_m3S2;
         stateDB.GetKeplerElements = orbitDB.GetElements();
@@ -135,13 +205,13 @@ public class MoveStateProcessor : IInstanceProcessor
     {
         foreach (var movedb in moves)
         {
-            if(!movedb.OwningEntity.TryGetDatablob(out MoveStateDB stateDB))
+            if(!movedb.OwningEntity.TryGetDatablob(out PositionDB stateDB))
             {
-                stateDB = new MoveStateDB(movedb.SOIParent);
+                stateDB = new PositionDB(movedb.SOIParent);
                 movedb.OwningEntity.SetDataBlob(stateDB);
             }
             
-            stateDB.MoveType = MoveStateDB.MoveTypes.NewtonSimple;
+            stateDB.MoveType = PositionDB.MoveTypes.NewtonSimple;
             stateDB.SetParent(movedb.SOIParent);
             var myMass = movedb.OwningEntity.GetDataBlob<MassVolumeDB>().MassTotal;
             var pMass = movedb.SOIParent.GetDataBlob<MassVolumeDB>().MassTotal;
@@ -155,13 +225,13 @@ public class MoveStateProcessor : IInstanceProcessor
     }
     public static void ProcessForType(NewtonSimpleMoveDB movedb, DateTime atDateTime)
     {
-        if(!movedb.OwningEntity.TryGetDatablob(out MoveStateDB stateDB))
+        if(!movedb.OwningEntity.TryGetDatablob(out PositionDB stateDB))
         {
-            stateDB = new MoveStateDB(movedb.SOIParent);
+            stateDB = new PositionDB(movedb.SOIParent);
             movedb.OwningEntity.SetDataBlob(stateDB);
         }
         
-        stateDB.MoveType = MoveStateDB.MoveTypes.NewtonSimple;
+        stateDB.MoveType = PositionDB.MoveTypes.NewtonSimple;
         stateDB.SetParent(movedb.SOIParent);
         var myMass = movedb.OwningEntity.GetDataBlob<MassVolumeDB>().MassTotal;
         var pMass = movedb.SOIParent.GetDataBlob<MassVolumeDB>().MassTotal;
@@ -184,13 +254,13 @@ public class MoveStateProcessor : IInstanceProcessor
     
     public static void ProcessForType(NewtonMoveDB movedb, DateTime atDateTime)
     {
-        if(!movedb.OwningEntity.TryGetDatablob(out MoveStateDB stateDB))
+        if(!movedb.OwningEntity.TryGetDatablob(out PositionDB stateDB))
         {
-            stateDB = new MoveStateDB(movedb.SOIParent);
+            stateDB = new PositionDB(movedb.SOIParent);
             movedb.OwningEntity.SetDataBlob(stateDB);
         }
         
-        stateDB.MoveType = MoveStateDB.MoveTypes.NewtonSimple;
+        stateDB.MoveType = PositionDB.MoveTypes.NewtonSimple;
         stateDB.SetParent(movedb.SOIParent);
         stateDB.GetKeplerElements = movedb.GetElements();
         stateDB.SGP = stateDB.GetKeplerElements.StandardGravParameter;
@@ -212,13 +282,13 @@ public class MoveStateProcessor : IInstanceProcessor
     public static void ProcessForType(WarpMovingDB warpdb, DateTime atDateTime)
     {
         
-        if(!warpdb.OwningEntity.TryGetDatablob(out MoveStateDB stateDB))
+        if(!warpdb.OwningEntity.TryGetDatablob(out PositionDB stateDB))
         {
-            stateDB = new MoveStateDB(warpdb._parentEnitity);
+            stateDB = new PositionDB(warpdb._parentEnitity);
             warpdb.OwningEntity.SetDataBlob(stateDB);
         }
         
-        stateDB.MoveType = MoveStateDB.MoveTypes.Warp;
+        stateDB.MoveType = PositionDB.MoveTypes.Warp;
         
         stateDB.SetParent(warpdb._parentEnitity);
         stateDB.GetKeplerElements = warpdb.TargetEndpointOrbit;
@@ -228,7 +298,7 @@ public class MoveStateProcessor : IInstanceProcessor
         stateDB.OwningEntity.GetDataBlob<PositionDB>().RelativePosition = (Vector3)warpdb._position;
     }
 
-    public Type GetParameterType => typeof(MoveStateDB);
+    public Type GetParameterType => typeof(PositionDB);
     internal override void ProcessEntity(Entity entity, DateTime atDateTime)
     {
         
@@ -254,25 +324,25 @@ public class MoveStateProcessor : IInstanceProcessor
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     internal static void ProcessEntityMove(Entity entity, DateTime toDateTime)
     {
-        var movestate = entity.GetDataBlob<MoveStateDB>();
+        var movestate = entity.GetDataBlob<PositionDB>();
         switch (movestate.MoveType)
         {
-            case MoveStateDB.MoveTypes.Orbit:
+            case PositionDB.MoveTypes.Orbit:
             {
                 OrbitProcessor.ProcessEntity(entity, toDateTime);
                 break;
             }
-            case MoveStateDB.MoveTypes.NewtonSimple:
+            case PositionDB.MoveTypes.NewtonSimple:
             {
                 NewtonSimpleProcessor.ProcessEntity(entity, toDateTime);
                 break;
             }
-            case MoveStateDB.MoveTypes.NewtonComplex:
+            case PositionDB.MoveTypes.NewtonComplex:
             {
                 NewtonionMovementProcessor.ProcessEntity(entity, toDateTime);
                 break;
             }
-            case MoveStateDB.MoveTypes.Warp:
+            case PositionDB.MoveTypes.Warp:
             {
                 WarpMoveProcessor.ProcessEntity(entity, toDateTime);
                 break;
@@ -284,29 +354,29 @@ public class MoveStateProcessor : IInstanceProcessor
 
     public static Vector2 GetFuturePosition(Entity entity, DateTime atDateTime)
     {
-        MoveStateDB moveState = entity.GetDataBlob<MoveStateDB>();
+        PositionDB position = entity.GetDataBlob<PositionDB>();
         Vector2 pos = new Vector2();
-        switch (moveState.MoveType)
+        switch (position.MoveType)
         {
-            case MoveStateDB.MoveTypes.Orbit:
+            case PositionDB.MoveTypes.Orbit:
             {
                 var orbitdb = entity.GetDataBlob<OrbitDB>();
                 pos = (Vector2)OrbitMath.GetPosition(orbitdb, OrbitMath.GetTrueAnomaly(orbitdb, atDateTime));
             }
                 break;
-            case MoveStateDB.MoveTypes.NewtonSimple:
+            case PositionDB.MoveTypes.NewtonSimple:
             {
                 pos = (Vector2)NewtonSimpleProcessor.GetRelativeState(entity, atDateTime).pos;
             }
                 break;
 
-            case MoveStateDB.MoveTypes.NewtonComplex:
+            case PositionDB.MoveTypes.NewtonComplex:
             {
                 var db = entity.GetDataBlob<NewtonMoveDB>();
                 pos = (Vector2)NewtonionMovementProcessor.GetRelativeState(entity, db, atDateTime).pos;
             }
                 break;
-            case MoveStateDB.MoveTypes.Warp:
+            case PositionDB.MoveTypes.Warp:
             {
                 var db = entity.GetDataBlob<WarpMovingDB>();
                 if (atDateTime < db.PredictedExitTime)

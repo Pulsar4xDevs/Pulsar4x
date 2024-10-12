@@ -118,7 +118,7 @@ namespace Pulsar4X.Engine.Auth
                     var factionInfoDB = faction.GetDataBlob<FactionInfoDB>();
                     foreach (var knownSystem in factionInfoDB.KnownSystems)
                     {
-                        if (knownSystem == entityPositionDB.SystemGuid)
+                        if (knownSystem == entity.Manager.ManagerID)
                         {
                             if (!dataBlobTypes.Contains(typeof(JumpPointDB)))
                             {

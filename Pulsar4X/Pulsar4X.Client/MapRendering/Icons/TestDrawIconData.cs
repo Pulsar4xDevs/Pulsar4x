@@ -34,7 +34,7 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_Color lcolor = new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 255 };
             shapes.Add( new Shape() { Points = lpoints1, Color = lcolor });
             shapes.Add( new Shape() { Points = lpoints2, Color = lcolor });
-            PositionDB lpos = new PositionDB(Vector3.Zero, Guid.NewGuid().ToString());
+            PositionDB lpos = new PositionDB(Vector3.Zero);
 
             icons.Add(new Icon(lpos) { Shapes = shapes });
 
@@ -43,7 +43,7 @@ namespace Pulsar4X.SDL2UI
                 Vector2[] points = CreatePrimitiveShapes.CreateArc(50 + 50 * i, 400, 100, 100, 0, 4.71, 160);
                 SDL.SDL_Color color = new SDL.SDL_Color() { r = (byte)(i * 60), g = 100, b = 100, a = 255 };
                 Shape shape = new Shape() { Points = points, Color = color };
-                PositionDB pos1 = new PositionDB(Vector3.Zero, Guid.NewGuid().ToString());
+                PositionDB pos1 = new PositionDB(Vector3.Zero);
 
                 icons.Add(new Icon(pos1) { Shapes = new List<Shape> { shape } });
             }
@@ -56,7 +56,7 @@ namespace Pulsar4X.SDL2UI
             icons.Add(new Icon(pos2) { Shapes = shapes2 });
 */
 
-            PositionDB pos3 = new PositionDB(Vector3.UnitX*100, Guid.NewGuid().ToString());
+            PositionDB pos3 = new PositionDB(Vector3.UnitX*100);
             icons.Add(new ShipIcon(pos3));
 
         }

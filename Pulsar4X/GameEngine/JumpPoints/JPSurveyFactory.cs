@@ -31,7 +31,6 @@ namespace Pulsar4X.Engine
             {
                 var realPoint = Entity.Create();
                 system.AddEntity(realPoint, surveyPoint.DataBlobs);
-                realPoint.GetDataBlob<PositionDB>().SystemGuid = system.ID;
             }
         }
 
@@ -61,7 +60,7 @@ namespace Pulsar4X.Engine
             const int pointsRequired = 400;
 
             var surveyDB = new JPSurveyableDB(pointsRequired, new SafeDictionary<int, uint>(), 10000000);
-            var posDB = new PositionDB(x, y, 0, String.Empty);
+            var posDB = new PositionDB(x, y, 0);
             var nameDB = new NameDB($"Gravitational Anomaly #{nameNumber}");
             //for testing purposes
             // var sensorProfileDB = new SensorProfileDB();

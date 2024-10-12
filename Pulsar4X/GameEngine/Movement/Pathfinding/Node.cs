@@ -119,10 +119,10 @@ namespace Pulsar4X.Engine
                 return false;
             }
 
-            var jp1System = jp1PositionDB.SystemGuid;
-            var jp2System = jp2PositionDB.SystemGuid;
-            var otherJP1System = otherJP1PositionDB.SystemGuid;
-            var otherJP2System = otherJP2PositionDB.SystemGuid;
+            var jp1System = jp1PositionDB.OwningEntity.Manager.ManagerID;
+            var jp2System = jp2PositionDB.OwningEntity.Manager.ManagerID;
+            var otherJP1System = otherJP1PositionDB.OwningEntity.Manager.ManagerID;
+            var otherJP2System = otherJP2PositionDB.OwningEntity.Manager.ManagerID;
 
             if (jp1System.IsNotNullOrEmpty())
             {

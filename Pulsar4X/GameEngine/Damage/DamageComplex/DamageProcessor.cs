@@ -196,17 +196,9 @@ namespace Pulsar4X.Engine
 
 
             //Destroy the ship.
-            Game game = DestroyedShip.Manager.Game;
-            PositionDB pDB = DestroyedShip.GetDataBlob<PositionDB>();
 
-            var mySystem = game.Systems.Where(s => s.ID.Equals(pDB.SystemGuid)).First();
+            DestroyedShip.Manager.TagEntityForRemoval(DestroyedShip);
 
-            if(mySystem == null)
-                throw new NullReferenceException($"Unable to find the system {pDB.SystemGuid}");
-
-            //Does anything else need to be done to delete a ship?
-
-            mySystem.TagEntityForRemoval(DestroyedShip);
         }
 
         /// <summary>
@@ -250,12 +242,7 @@ namespace Pulsar4X.Engine
                 //delete the existing asteroid.
                 PositionDB pDB = Asteroid.GetDataBlob<PositionDB>();
 
-                var mySystem = game.Systems.Where(s => s.ID.Equals(pDB.SystemGuid)).First();
-
-                if(mySystem == null)
-                    throw new NullReferenceException($"Unable to find the system {pDB.SystemGuid}");
-
-                mySystem.TagEntityForRemoval(Asteroid);
+                Asteroid.Manager.TagEntityForRemoval(Asteroid);
             }
         }
     }

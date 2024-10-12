@@ -4,9 +4,10 @@ using Pulsar4X.Orbital;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
-
+/*
 namespace Pulsar4X.Datablobs
 {
+    
 
     //TODO: get rid of AU, why are we using AU.
     public class PositionDB : TreeHierarchyDB, IPosition
@@ -150,7 +151,7 @@ namespace Pulsar4X.Datablobs
              * Ask a senior developer for further clarification if required.
              *
              * Explicitly thrown to prevent new developers from adding this.
-            */
+            
         }
 
         public override object Clone()
@@ -158,4 +159,6 @@ namespace Pulsar4X.Datablobs
             return new PositionDB(this);
         }
     }
+    
 }
+*/

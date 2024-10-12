@@ -26,7 +26,7 @@ namespace Pulsar4X.Engine
             blobs.Add(new OrderableDB());
             blobs.Add(new MassVolumeDB());
             blobs.Add(new VolumeStorageDB());
-            blobs.Add(new PositionDB(pos, planetEntity));
+            blobs.Add(new PositionDB(pos));
             blobs.Add(new TeamsHousedDB());
             blobs.Add(new ComponentInstancesDB()); //installations get added to the componentInstancesDB
 

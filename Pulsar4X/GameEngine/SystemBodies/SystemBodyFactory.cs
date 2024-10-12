@@ -26,7 +26,7 @@ namespace Pulsar4X.Engine
         /// </summary>
         public static ProtoEntity CreateBaseBody()
         {
-            var position = new PositionDB(Vector3.Zero, String.Empty);
+            var position = new PositionDB(Vector3.Zero);
             var massVolume = new MassVolumeDB();
             var planetInfo = new SystemBodyInfoDB();
             var minerals = new MineralsDB();
@@ -216,7 +216,6 @@ namespace Pulsar4X.Engine
 
                 var comet = system.CreateAndAddEntity(newCometProto);
                 var pos = comet.GetDataBlob<PositionDB>();
-                pos.SystemGuid = system.ID;
                 pos.SetParent(comet.GetDataBlob<OrbitDB>().Parent);
             }
 
@@ -383,7 +382,6 @@ namespace Pulsar4X.Engine
             Entity body = system.CreateAndAddEntity(newBody);
 
             var positionDB = body.GetDataBlob<PositionDB>();
-            positionDB.SystemGuid = system.ID;
             positionDB.SetParent(body.GetDataBlob<OrbitDB>().Parent);
             positionDB.AbsolutePosition = body.GetDataBlob<OrbitDB>().GetPosition(parent.StarSysDateTime);
 
@@ -564,7 +562,6 @@ namespace Pulsar4X.Engine
 
             // Finalize Orbit
             var positionDB = body.GetDataBlob<PositionDB>();
-            positionDB.SystemGuid = system.ID;
             positionDB.SetParent(body.GetDataBlob<OrbitDB>().Parent);
             positionDB.AbsolutePosition = body.GetDataBlob<OrbitDB>().GetPosition(currentDateTime);
 
@@ -651,7 +648,6 @@ namespace Pulsar4X.Engine
             {
                 var realMoon = system.CreateAndAddEntity(moon);
                 var pos = realMoon.GetDataBlob<PositionDB>();
-                pos.SystemGuid = system.ID;
                 pos.SetParent(realMoon.GetDataBlob<OrbitDB>().Parent);
             }
         }
@@ -666,7 +662,6 @@ namespace Pulsar4X.Engine
             {
                 ProtoEntity newProtoBody = CreateBaseBody();
                 Entity newBody = system.CreateAndAddEntity(newProtoBody);
-                newBody.GetDataBlob<PositionDB>().SystemGuid = system.ID;
                 SystemBodyInfoDB newBodyDB = newBody.GetDataBlob<SystemBodyInfoDB>();
 
                 if (system.RNGNextDouble() > (1.0 / _galaxyGen.Settings.NumberOfAsteroidsPerDwarfPlanet))

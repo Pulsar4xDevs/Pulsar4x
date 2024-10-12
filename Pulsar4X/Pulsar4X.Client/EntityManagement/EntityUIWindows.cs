@@ -185,7 +185,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     var jumpPointTo = _entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo;
                     if(jumpPointTo != null)
-                        _state.SetActiveSystem(jumpPointTo.GetDataBlob<PositionDB>().SystemGuid);
+                        _state.SetActiveSystem(jumpPointTo.Manager.ManagerID);
                 }
                 else if (T == typeof(SelectPrimaryBlankMenuHelper) && _entityState.StarSystemId != null)
                 {

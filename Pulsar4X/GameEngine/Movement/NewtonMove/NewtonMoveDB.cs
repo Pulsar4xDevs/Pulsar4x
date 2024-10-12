@@ -61,7 +61,7 @@ namespace Pulsar4X.Datablobs
         {
             double myMass = OwningEntity.GetDataBlob<MassVolumeDB>().MassTotal;
             var sgp = GeneralMath.StandardGravitationalParameter(myMass + ParentMass);
-            var pos = OwningEntity.GetDataBlob<MoveStateDB>().RelativePosition;
+            var pos = OwningEntity.GetDataBlob<PositionDB>().RelativePosition;
             var dateTime = OwningEntity.StarSysDateTime;
             _ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, CurrentVector_ms, dateTime);
         }
@@ -130,7 +130,7 @@ namespace Pulsar4X.Datablobs
                 UpdateKeplerElements();
             }
 
-            _position = OwningEntity.GetDataBlob<MoveStateDB>().RelativePosition2;
+            _position = OwningEntity.GetDataBlob<PositionDB>().RelativePosition2;
         }
 
         public KeplerElements GetElements()
