@@ -6,7 +6,7 @@ using Pulsar4X.Extensions;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Orbital;
 
-namespace GameEngine.Movement;
+namespace Pulsar4X.Datablobs;
 
 
 public class MoveStateDB : TreeHierarchyDB, IPosition
