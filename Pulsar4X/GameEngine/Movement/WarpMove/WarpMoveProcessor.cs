@@ -106,55 +106,55 @@ namespace Pulsar4X.Engine
         
         public static void WarpMove(Entity entity, WarpMovingDB moveDB,  DateTime toDateTime)
         {
-
-            if (!moveDB.HasStarted & !StartNonNewtTranslation(entity))
-                return;
-            var warpDB = entity.GetDataBlob<WarpAbilityDB>();
-
-            var currentVelocityMS = moveDB.CurrentNonNewtonionVectorMS;
-            DateTime dateTimeFrom = moveDB.LastProcessDateTime;
-            
-            double deltaT = (toDateTime - dateTimeFrom).TotalSeconds;
-            
-            Vector3 targetPosMt = moveDB.ExitPointAbsolute;
-            
-            var deltaVecToTargetMt = moveDB._position - (Vector2)targetPosMt;
-
-            var newPositionMt = moveDB._position + (Vector2)currentVelocityMS * deltaT;
-
-            var distanceToTargetMt = deltaVecToTargetMt.Length();
-
-            var positionDelta = moveDB._position - newPositionMt;
-
-            double distanceToMove = positionDelta.Length();
-
-
-            if (distanceToTargetMt <= distanceToMove) // moving would overtake target, just go directly to target
+            if (moveDB.HasStarted || StartNonNewtTranslation(entity))
             {
-                var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
-                moveDB._parentEnitity = moveDB.TargetEntity;
-                moveDB._position = (Vector2)moveDB.ExitPointrelative;
-                entity.RemoveDataBlob<WarpMovingDB>();
-                
+                var warpDB = entity.GetDataBlob<WarpAbilityDB>();
 
-                if(_gameSettings.StrictNewtonion)
-                    SetOrbitHereFullNewt(entity, moveDB, toDateTime);
+                var currentVelocityMS = moveDB.CurrentNonNewtonionVectorMS;
+                DateTime dateTimeFrom = moveDB.LastProcessDateTime;
+
+                double deltaT = (toDateTime - dateTimeFrom).TotalSeconds;
+
+                Vector3 targetPosMt = moveDB.ExitPointAbsolute;
+
+                var deltaVecToTargetMt = moveDB._position - (Vector2)targetPosMt;
+
+                var newPositionMt = moveDB._position + (Vector2)currentVelocityMS * deltaT;
+
+                var distanceToTargetMt = deltaVecToTargetMt.Length();
+
+                var positionDelta = moveDB._position - newPositionMt;
+
+                double distanceToMove = positionDelta.Length();
+
+
+                if (distanceToTargetMt <= distanceToMove) // moving would overtake target, just go directly to target
+                {
+                    var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
+                    moveDB._parentEnitity = moveDB.TargetEntity;
+                    moveDB._position = (Vector2)moveDB.ExitPointrelative;
+                    entity.RemoveDataBlob<WarpMovingDB>();
+
+
+                    if (_gameSettings.StrictNewtonion)
+                        SetOrbitHereFullNewt(entity, moveDB, toDateTime);
+                    else
+                        SetOrbitHereNoNewt(entity, moveDB, toDateTime);
+
+                    powerDB.AddDemand(warpDB.BubbleCollapseCost, entity.StarSysDateTime);
+                    powerDB.AddDemand(-warpDB.BubbleSustainCost, entity.StarSysDateTime);
+                    powerDB.AddDemand(-warpDB.BubbleCollapseCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
+
+
+                }
                 else
-                    SetOrbitHereNoNewt(entity, moveDB, toDateTime);
-
-                powerDB.AddDemand(warpDB.BubbleCollapseCost, entity.StarSysDateTime);
-                powerDB.AddDemand( - warpDB.BubbleSustainCost, entity.StarSysDateTime);
-                powerDB.AddDemand(-warpDB.BubbleCollapseCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
+                {
+                    moveDB._position = newPositionMt;
+                }
 
 
+                moveDB.LastProcessDateTime = toDateTime;
             }
-            else
-            {
-                moveDB._position = newPositionMt;
-            }
-
-
-            moveDB.LastProcessDateTime = toDateTime;
         }
         
         public static bool StartNonNewtTranslation(Entity entity)
