@@ -176,7 +176,7 @@ namespace Pulsar4X.Engine.Orders
                 var myMass = _entityCommanding.GetDataBlob<MassVolumeDB>().MassTotal;
                 var sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
 
-                var futurePosition = _entityCommanding.GetRelativeFuturePosition(_vectorDateTime);
+                var futurePosition = (Vector3)MoveStateProcessor.GetRelativeFuturePosition(_entityCommanding, _vectorDateTime);
                 var futureVector = _entityCommanding.GetRelativeFutureVelocity(_vectorDateTime);
                 var pralitiveDV = OrbitalMath.ProgradeToStateVector(sgp, OrbitrelativeDeltaV, futurePosition, futureVector);
 
@@ -362,7 +362,7 @@ namespace Pulsar4X.Engine.Orders
                     timespanToIntercept = TimeSpan.FromSeconds(newttt);
                 }
                 DateTime futureDate = atDateTime + timespanToIntercept;
-                var futurePosition = _targetEntity.GetRelativeFuturePosition(futureDate);
+                var futurePosition = (Vector3)MoveStateProcessor.GetRelativeFuturePosition(_targetEntity, futureDate);
 
                 tgtBearing = futurePosition - ourState.Position;
                 distanceToTgt = (tgtBearing).Length();
@@ -575,7 +575,7 @@ namespace Pulsar4X.Engine.Orders
                     timespanToIntercept = TimeSpan.FromSeconds(timeToIntecept);
                 }
                 DateTime futureDate = atDateTime + timespanToIntercept;
-                var futurePosition = _targetEntity.GetRelativeFuturePosition(futureDate);
+                var futurePosition = (Vector3)MoveStateProcessor.GetRelativeFuturePosition(_targetEntity, futureDate);
 
                 tgtBearing = futurePosition - ourState.Position;
                 distanceToTgt = (tgtBearing).Length();

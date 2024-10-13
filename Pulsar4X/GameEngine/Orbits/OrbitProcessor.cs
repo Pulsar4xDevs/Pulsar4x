@@ -171,10 +171,10 @@ namespace Pulsar4X.Engine
             var vel = entity.GetAbsoluteState().Velocity;
             
             entity.GetDataBlob<PositionDB>().SetParent(newParent);
-            var rpos = entity.GetRalitivePosition();
+            var rpos = MoveStateProcessor.GetRelativeFuturePosition(entity, atDateTime);
             var myMass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
             var gpMass = newParent.GetDataBlob<MassVolumeDB>().MassTotal;
-            var neworbit = OrbitDB.FromVector(newParent, myMass, gpMass, rpos, vel, atDateTime);
+            var neworbit = OrbitDB.FromVector(newParent, myMass, gpMass, (Vector3)rpos, vel, atDateTime);
             entity.SetDataBlob(neworbit);
             var soievent = Event.Create(EventType.SOIChanged, atDateTime, "SOI changed", entity.FactionOwnerID, entity.Manager.ManagerID);
             EventManager.Instance.Publish(soievent);

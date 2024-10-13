@@ -223,6 +223,23 @@ namespace Pulsar4X.Engine
             return OrbitalMath.GetPosition(orbit.SemiMajorAxis, orbit.Eccentricity, orbit.LongitudeOfAscendingNode, orbit.ArgumentOfPeriapsis, orbit.Inclination, trueAnomaly);
         }
 
+        public static Vector3 GetAbsolutePosition(OrbitDB orbit, DateTime atDateTime)
+        {
+            var ta = GetTrueAnomaly(orbit, atDateTime);
+            if (orbit.Parent == null)//if we're the parent sun
+                return OrbitMath.GetPosition(orbit, ta);
+            //else if we're a child
+            Vector3 rootPos = GetAbsolutePosition(orbit, atDateTime);
+            
+            if (orbit.IsStationary)
+            {
+                return rootPos;
+            }
+            
+            return rootPos + orbit.GetPosition(ta);
+
+        }
+
 
         public static (Vector3 pos, Vector3 Velocity) GetStateVectors(OrbitDB orbitDB, DateTime atTime)
         {

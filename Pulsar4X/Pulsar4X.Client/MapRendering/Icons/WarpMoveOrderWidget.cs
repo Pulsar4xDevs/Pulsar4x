@@ -111,7 +111,7 @@ namespace Pulsar4X.SDL2UI
             if (_transitLeaveDateTime < _currentDateTime)
                 _transitLeaveDateTime = _currentDateTime;
 
-            _transitLeavePositionrelative_m = _movingEntity.GetRelativeFuturePosition(_transitLeaveDateTime);
+            _transitLeavePositionrelative_m = (Vector3)MoveStateProcessor.GetRelativeFuturePosition(_movingEntity, _transitLeaveDateTime);
         }
 
         public void OnFrameUpdate(Matrix matrix, Camera camera)

@@ -169,7 +169,7 @@ namespace Pulsar4X.Extensions
         public static (Vector3 pos, Vector3 Velocity) GetRelativeFutureState(this Entity entity, DateTime atDateTime)
         {
             var fvel = GetRelativeFutureVelocity(entity, atDateTime);
-            var fpos = GetRelativeFuturePosition(entity, atDateTime);
+            var fpos = (Vector3)MoveStateProcessor.GetRelativeFuturePosition(entity, atDateTime);
 
             return (fpos, fvel);
         }
@@ -248,79 +248,7 @@ namespace Pulsar4X.Extensions
                 throw new Exception("Entity has no velocity");
             }
         }
-
-
-
-        /// <summary>
-        /// Gets a future position for this entity, regarless of wheter it's orbit or newtonion trajectory
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="atDateTime"></param>
-        /// <returns>In Meters</returns>
-        /// <exception cref="Exception"> if entity doesn't have one of the correct datablobs</exception>
-        public static Vector3 GetRelativeFuturePosition(this Entity entity, DateTime atDateTime)
-        {
-            if (entity.HasDataBlob<OrbitDB>())
-            {
-                return entity.GetDataBlob<OrbitDB>().GetPosition(atDateTime);
-            }
-            else if (entity.HasDataBlob<OrbitUpdateOftenDB>())
-            {
-                return entity.GetDataBlob<OrbitUpdateOftenDB>().GetPosition(atDateTime);
-            }
-            else if (entity.HasDataBlob<NewtonMoveDB>())
-            {
-                return NewtonionMovementProcessor.GetRelativeState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).pos;
-            }
-            else if (entity.HasDataBlob<NewtonSimpleMoveDB>())
-            {
-                return NewtonSimpleProcessor.GetRelativeState(entity, atDateTime).pos;
-            }
-            else if (entity.HasDataBlob<PositionDB>())
-            {
-                return entity.GetDataBlob<PositionDB>().RelativePosition;
-            }
-            else
-            {
-                throw new Exception("Entity is positionless");
-            }
-        }
-
-        /// <summary>
-        /// Gets a future position for this entity, regarless of wheter it's orbit or newtonion trajectory
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="atDateTime"></param>
-        /// <returns>In Meters</returns>
-        /// <exception cref="Exception"> if entity doesn't have one of the correct datablobs</exception>
-        public static Vector3 GetAbsoluteFuturePosition(this Entity entity, DateTime atDateTime)
-        {
-            if (entity.HasDataBlob<OrbitDB>())
-            {
-                return entity.GetDataBlob<OrbitDB>().GetAbsolutePosition_m(atDateTime);
-            }
-            else if (entity.HasDataBlob<OrbitUpdateOftenDB>())
-            {
-                return entity.GetDataBlob<OrbitUpdateOftenDB>().GetAbsolutePosition_m(atDateTime);
-            }
-            else if (entity.HasDataBlob<NewtonMoveDB>())
-            {
-                return NewtonionMovementProcessor.GetAbsoluteState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).pos;
-            }
-            else if (entity.HasDataBlob<NewtonSimpleMoveDB>())
-            {
-                return NewtonSimpleProcessor.GetAbsoluteState(entity, atDateTime).pos;
-            }
-            else if (entity.HasDataBlob<PositionDB>())
-            {
-                return entity.GetDataBlob<PositionDB>().AbsolutePosition;
-            }
-            else
-            {
-                throw new Exception("Entity is positionless");
-            }
-        }
-
+        
         /// <summary>
         /// For more efficent, get and store a reference to PositionDB.
         /// </summary>
@@ -330,17 +258,7 @@ namespace Pulsar4X.Extensions
         {
             return entity.GetDataBlob<PositionDB>().AbsolutePosition;
         }
-
-        /// <summary>
-        /// For more efficent, get and store a reference to PositionDB.
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <returns></returns>
-        public static Vector3 GetRalitivePosition(this Entity entity)
-        {
-            return entity.GetDataBlob<PositionDB>().RelativePosition;
-        }
-
+        
         public static double GetSOI_m(this Entity entity)
         {
             var orbitDB = entity.GetDataBlob<OrbitDB>();

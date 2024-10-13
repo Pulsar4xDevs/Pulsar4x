@@ -334,7 +334,7 @@ namespace Pulsar4X.Engine
             //if we're orbiting something, then the parents position from the sun is going tobe the average distance from the sun
             //this kinda breaks in multi star systems...
             if(heirarchyDepth > 0)
-                bandRadius = parent.GetAbsoluteFuturePosition(parentstar.StarSysDateTime).Length();
+                bandRadius = MoveStateProcessor.GetAbsoluteFuturePosition(parent, system.StarSysDateTime).Length();
 
             var zones = HabitibleZones(settings, starInfo);
             MinMaxStruct zone;

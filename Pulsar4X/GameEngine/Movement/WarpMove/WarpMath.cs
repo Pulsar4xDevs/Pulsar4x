@@ -57,7 +57,7 @@ public static class WarpMath
     /// <param name="atDateTime">Datetime of transit start</param>
     public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition(Entity mover, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
     {
-        Vector3 moverPos = mover.GetAbsoluteFuturePosition(atDateTime);
+        var moverPos = (Vector3)MoveStateProcessor.GetAbsoluteFuturePosition(mover, atDateTime);
         double spd_m = mover.GetDataBlob<WarpAbilityDB>().MaxSpeed;
         return WarpMath.GetInterceptPosition_m(moverPos, spd_m, targetOrbit, atDateTime, offsetPosition);
     }
