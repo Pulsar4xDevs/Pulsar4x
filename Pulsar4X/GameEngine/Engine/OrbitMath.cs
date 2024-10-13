@@ -229,7 +229,7 @@ namespace Pulsar4X.Engine
             if (orbit.Parent == null)//if we're the parent sun
                 return OrbitMath.GetPosition(orbit, ta);
             //else if we're a child
-            Vector3 rootPos = GetAbsolutePosition(orbit, atDateTime);
+            Vector3 rootPos = GetAbsolutePosition((OrbitDB)orbit.ParentDB, atDateTime);
             
             if (orbit.IsStationary)
             {

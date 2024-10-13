@@ -444,7 +444,9 @@ public class MoveStateProcessor : IInstanceProcessor
                 else
                 {
                     var endOrbit = db.TargetEndpointOrbit;
-                    pos = (Vector2)OrbitMath.GetPosition(endOrbit, atDateTime);
+                    var rpos = (Vector2)OrbitalMath.GetPosition(endOrbit, atDateTime);
+                    var ppos = GetAbsoluteFuturePosition(db.TargetEntity, atDateTime);
+                    pos = ppos + rpos;
                 }
             }
                 break;
