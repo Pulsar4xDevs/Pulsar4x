@@ -85,7 +85,7 @@ namespace Pulsar4X.Tests
             Assert.AreSame(_game.GlobalManager, testEntity.Manager);
 
             // Create entity with existing datablobs:
-            var dataBlobs = new List<BaseDataBlob> {new OrbitDB(), new ColonyInfoDB(_pop1, Entity.InvalidEntity), new PositionDB(0,0,0,""), new NameDB("TE-CE-1")};
+            var dataBlobs = new List<BaseDataBlob> {new OrbitDB(), new ColonyInfoDB(_pop1, Entity.InvalidEntity), new PositionDB(0,0,0), new NameDB("TE-CE-1")};
             testEntity = Entity.Create();
             _game.GlobalManager.AddEntity(testEntity, dataBlobs);
             Assert.IsTrue(testEntity.IsValid);
@@ -334,16 +334,16 @@ namespace Pulsar4X.Tests
             _game.GlobalManager.AddEntity(testEntity);
             testEntity.SetDataBlob(new OrbitDB());
             testEntity.SetDataBlob(new ColonyInfoDB(_pop1, Entity.InvalidEntity));
-            testEntity.SetDataBlob(new PositionDB(0, 0, 0, ""));
+            testEntity.SetDataBlob(new PositionDB(0, 0, 0));
             testEntity.SetDataBlob(new NameDB("TE-1"));
 
             // Create an entity with a DataBlobList.
-            var dataBlobs = new List<BaseDataBlob> { new OrbitDB(), new PositionDB(0,0,0,""), new NameDB("TE-2") };
+            var dataBlobs = new List<BaseDataBlob> { new OrbitDB(), new PositionDB(0,0,0), new NameDB("TE-2") };
             var entity = Entity.Create();
             _game.GlobalManager.AddEntity(entity, dataBlobs);
 
             // Create one more, just for kicks.
-            dataBlobs = new List<BaseDataBlob> { new OrbitDB(), new ColonyInfoDB(_pop2, Entity.InvalidEntity), new PositionDB(0, 0, 0, ""), new NameDB("TE-3") };
+            dataBlobs = new List<BaseDataBlob> { new OrbitDB(), new ColonyInfoDB(_pop2, Entity.InvalidEntity), new PositionDB(0, 0, 0), new NameDB("TE-3") };
             entity = Entity.Create();
             _game.GlobalManager.AddEntity(entity, dataBlobs);
 

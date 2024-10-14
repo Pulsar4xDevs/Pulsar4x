@@ -20,7 +20,7 @@ namespace Pulsar4X.Tests
         {
             double parentMass = 1.989e30;
             BaseDataBlob[] parentblobs = new BaseDataBlob[4];
-            parentblobs[0] = new PositionDB(mgr.ManagerID) { AbsolutePosition = Vector3.Zero };
+            parentblobs[0] = new PositionDB() { AbsolutePosition = Vector3.Zero };
             parentblobs[1] = MassVolumeDB.NewFromMassAndRadius_m(parentMass, 696342000.0 );
             parentblobs[2] = new OrbitDB();
             parentblobs[3] = new NameDB();
@@ -33,7 +33,7 @@ namespace Pulsar4X.Tests
         {
             double parentMass = 5.97237e24;
             BaseDataBlob[] parentblobs = new BaseDataBlob[4];
-            parentblobs[0] = new PositionDB(mgr.ManagerID) { AbsolutePosition = Vector3.Zero };
+            parentblobs[0] = new PositionDB() { AbsolutePosition = Vector3.Zero };
             parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
             parentblobs[3] = new NameDB();
