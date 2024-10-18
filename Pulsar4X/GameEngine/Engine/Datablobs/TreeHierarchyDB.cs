@@ -46,7 +46,18 @@ namespace Pulsar4X.Datablobs
         [CanBeNull]
         [PublicAPI]
         [JsonProperty]
-        public Entity? Parent { get; private set; }
+        public Entity? Parent
+        {
+            get { return _parent; }
+            private set
+            {
+                if(this.OwningEntity != null && value == this.OwningEntity)
+                    throw new ArgumentException("Cannot set the parent entity equal to self");
+
+                _parent = value;
+            }
+        }
+        private Entity? _parent = null;
 
         /// <summary>
         /// Same type DataBlob of my parent node.
@@ -154,7 +165,7 @@ namespace Pulsar4X.Datablobs
         {
             // FIXME: this has/get combo can crash on race conditions
             return !entity.IsValid && entity.HasDataBlob(this.GetType()) ?
-                null : 
+                null :
                 (TreeHierarchyDB)entity.GetDataBlob(this.GetType());
         }
 
