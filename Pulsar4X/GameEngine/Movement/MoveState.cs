@@ -11,8 +11,13 @@ namespace Pulsar4X.Datablobs;
 
 public class PositionDB : TreeHierarchyDB, IPosition
 {
+    /// <summary>
+    /// Most objects should have a movetype. none should be used in rare occasions eg anomalies/jump points.
+    /// ships at None type objects should remain warping with a speed of zero, but be using warp resources.
+    /// </summary>
     public enum MoveTypes
     {
+        None,
         Orbit,
         NewtonSimple,
         NewtonComplex,
@@ -327,6 +332,10 @@ public class MoveStateProcessor : IInstanceProcessor
         var movestate = entity.GetDataBlob<PositionDB>();
         switch (movestate.MoveType)
         {
+            case PositionDB.MoveTypes.None:
+            {
+                break;
+            }
             case PositionDB.MoveTypes.Orbit:
             {
                 OrbitProcessor.ProcessEntity(entity, toDateTime);
@@ -358,6 +367,11 @@ public class MoveStateProcessor : IInstanceProcessor
         Vector2 pos = new Vector2(0,0);
         switch (position.MoveType)
         {
+            case PositionDB.MoveTypes.None:
+            {
+                pos = position.RelativePosition2;
+                break;
+            }
             case PositionDB.MoveTypes.Orbit:
             {
                 if(entity.TryGetDatablob<OrbitDB>(out var orbitDB))
@@ -409,6 +423,11 @@ public class MoveStateProcessor : IInstanceProcessor
         Vector2 pos = new Vector2(0,0);
         switch (position.MoveType)
         {
+            case PositionDB.MoveTypes.None:
+            {
+                pos = position.AbsolutePosition2;
+                break;
+            }
             case PositionDB.MoveTypes.Orbit:
             {
                 if(entity.TryGetDatablob<OrbitDB>(out var orbitDB))

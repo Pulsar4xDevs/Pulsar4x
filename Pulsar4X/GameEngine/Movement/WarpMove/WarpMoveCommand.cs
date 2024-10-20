@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using GameEngine.WarpMove;
 using Newtonsoft.Json;
 using Pulsar4X.Orbital;
@@ -50,6 +52,11 @@ namespace Pulsar4X.Engine.Orders
         public Vector3 TargetOffsetPosition_m { get; set; }
         public DateTime TransitStartDateTime;
         public Vector3 ExpendDeltaV;
+        /// <summary>
+        /// the orbit we want to be in at the target.
+        /// </summary>
+        public KeplerElements OrbitAtDestination;
+        public PositionDB.MoveTypes MoveTypeAtDestination;
 
         /// <summary>
         /// Creates the transit cmd.
@@ -95,7 +102,49 @@ namespace Pulsar4X.Engine.Orders
 
             return (cmd, null);
         }
+        public static WarpMoveCommand  CreateCommand(Entity orderEntity, Entity targetEntity, DateTime transitStartDatetime)
+        {
+            var sgp = GeneralMath.StandardGravitationalParameter(targetEntity.GetDataBlob<MassVolumeDB>().MassTotal + orderEntity.GetDataBlob<MassVolumeDB>().MassTotal);
+            (Vector3, DateTime) datetimeArrive;
+            var pos = MoveStateProcessor.GetAbsoluteFuturePosition(orderEntity, transitStartDatetime);
+            var speed = orderEntity.GetDataBlob<WarpAbilityDB>().MaxSpeed;
+            var targetOffsetPos_m = new Vector3(0, 0, 0);
+            if (targetEntity.TryGetDatablob<OrbitDB>(out var odb))
+            {
+                targetOffsetPos_m.X = OrbitMath.LowOrbitRadius(targetEntity);
+                datetimeArrive = WarpMath.GetInterceptPosition(orderEntity, odb, transitStartDatetime, targetOffsetPos_m);
+            }
+            else
+            {
+                var dposAbs = MoveStateProcessor.GetAbsoluteFuturePosition(targetEntity, transitStartDatetime);
+                var distance = (dposAbs - pos).Length();
+                datetimeArrive = ((Vector3)dposAbs, transitStartDatetime + TimeSpan.FromSeconds(distance / speed));
+            }
 
+            var cmd = new WarpMoveCommand()
+            {
+                RequestingFactionGuid = orderEntity.FactionOwnerID,
+                EntityCommandingGuid = orderEntity.Id,
+                CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
+                TargetEntityGuid = targetEntity.Id,
+                TargetOffsetPosition_m = targetOffsetPos_m,
+                TransitStartDateTime = transitStartDatetime,
+            };
+            if (targetEntity.GetDataBlob<PositionDB>().MoveType == PositionDB.MoveTypes.None)
+            {
+                cmd.MoveTypeAtDestination = PositionDB.MoveTypes.None;
+            }
+            else
+            {
+                cmd.MoveTypeAtDestination = PositionDB.MoveTypes.Orbit;
+                cmd.OrbitAtDestination = OrbitMath.FromPosition(targetOffsetPos_m, sgp, datetimeArrive.Item2);;
+            }
+
+            orderEntity.Manager.Game.OrderHandler.HandleOrder(cmd);
+
+
+            return cmd;
+        }
         internal override bool IsValidCommand(Game game)
         {
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
@@ -148,6 +197,77 @@ namespace Pulsar4X.Engine.Orders
         public override EntityCommand Clone()
         {
             throw new NotImplementedException();
+        }
+    }
+    
+    public class WarpFleetTowardsTargetOrder : EntityCommand
+    {
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
+
+        public override bool IsBlocking => true;
+
+        public override string Name => "Move Fleet Towards Target";
+
+        public override string Details => "";
+
+        private Entity _entityCommanding;
+
+        internal override Entity EntityCommanding => _entityCommanding;
+
+        public Entity Target { get; set; }
+
+        List<EntityCommand> _shipCommands = new List<EntityCommand>();
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool IsFinished()
+        {
+            if(!IsRunning) return false;
+
+            foreach(var command in _shipCommands)
+            {
+                if(!command.IsFinished())
+                    return false;
+            }
+            return true;
+        }
+
+        internal override void Execute(DateTime atDateTime)
+        {
+            if(IsRunning) return;
+            if(!_entityCommanding.TryGetDatablob<FleetDB>(out var fleetDB)) return;
+            // Get all the ships we need to add the movement command to
+            var ships = fleetDB.Children.Where(c => c.HasDataBlob<ShipInfoDB>());
+
+            
+            foreach(var ship in ships)
+            {
+                var shipCommand = WarpMoveCommand.CreateCommand(ship, Target, atDateTime);
+
+                _shipCommands.Add(shipCommand);
+            }
+            IsRunning = true;
+        }
+
+        public static WarpFleetTowardsTargetOrder CreateCommand(Entity entity, Entity target)
+        {
+            var order = new WarpFleetTowardsTargetOrder()
+            {
+                RequestingFactionGuid = entity.FactionOwnerID,
+                EntityCommandingGuid = entity.Id,
+                _entityCommanding = entity,
+                Target = target,
+            };
+
+            return order;
+        }
+
+        internal override bool IsValidCommand(Game game)
+        {
+            return true;
         }
     }
 }

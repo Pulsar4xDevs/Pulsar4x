@@ -31,6 +31,7 @@ namespace Pulsar4X.Engine
 
             NameDB jpNameDB = new NameDB("Jump Point");
             PositionDB jpPositionDB = new PositionDB(x_km * 1000, y_km * 1000, 0, gravityRoot);
+            jpPositionDB.MoveType = PositionDB.MoveTypes.None;
             JumpPointDB jpTransitableDB = new JumpPointDB
             {
                 IsStabilized = system.Game.Settings.AllJumpPointsStabilized ?? false
