@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.Damage;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.Client.Interface.Widgets;
@@ -49,6 +50,10 @@ namespace Pulsar4X.SDL2UI.Combat
         private RawBmp _rawShipImage;
         private IntPtr _shipImgPtr;
 
+        DamageMap _damageMap;
+        IntPtr[] _damageMapPtr = new IntPtr[4];
+        DamageMap _projectileDamageMap;
+        IntPtr _projectileDMapPtr;
 
 
         private DamageViewerWindow()
@@ -89,14 +94,16 @@ namespace Pulsar4X.SDL2UI.Combat
 
         private void Init(Entity damageableEntity)
         {
-            
-            if(damageableEntity.TryGetDatablob<EntityDamageProfileDB>(out var  db))
+
+            if (damageableEntity.TryGetDatablob<EntityDamageProfileDB>(out var db))
             {
                 _selectedEntity = damageableEntity;
                 _profile = damageableEntity.GetDataBlob<EntityDamageProfileDB>();
                 _rawShipImage = _profile.DamageProfile;
                 _shipImgPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _rawShipImage);
 
+                _damageMap = new DamageMap(_profile);
+                _damageMapPtr = SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, 255);
                 if (_profile.DamageEvents.Count > 0)
                 {
                     _damageEventIndex = _profile.DamageEvents.Count - 1;
@@ -113,11 +120,11 @@ namespace Pulsar4X.SDL2UI.Combat
 
         void SetDamageEventFrames()
         {
-            if(_profile == null) return;
+            if (_profile == null) return;
 
             _damageFrames = DamageTools.DealDamageSim(_profile, _profile.DamageEvents[_damageEventIndex]).damageFrames;
             _showFrameNum = 0;
-            if(_damageFrames != null)
+            if (_damageFrames != null)
                 _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
         }
 
@@ -144,18 +151,21 @@ namespace Pulsar4X.SDL2UI.Combat
             public static int SelectedWeaponIndex = 0;
             public static List<ComponentDesign> AvailableShipComponents;
             public static string[] WeaponNames;
+
             public static ComponentDesign SelectedWeapon
             {
                 get { return AvailableShipComponents[SelectedWeaponIndex]; }
             }
+
             public static void Create(Entity faction)
             {
-                if(_factionInfoDB is null)
+                if (_factionInfoDB is null)
                 {
                     _factionInfoDB = faction.GetDataBlob<FactionInfoDB>();
                     RefreshComponentDesigns();
                 }
             }
+
             static void RefreshComponentDesigns()
             {
                 _allShipComponents = _factionInfoDB.ComponentDesigns.Values.ToList();
@@ -182,149 +192,292 @@ namespace Pulsar4X.SDL2UI.Combat
         private double _momentum = 0;
         DamageFragment _damageFrag;
         private bool _typeIsBeam = true;
+        private int _dmProjectileSpeed = 5000;
+        private int _dmProjectileSliderTop = 0;
+        private int _dmProjectileSliderBot = 0;
+        private int _dmProjectileSliderLhs = 0;
+        private int _dmProjectileSliderRhs = 0;
+        private float _dmSizeScaler = 4.0f;
+        private Vector2 _dmProjStart = new Vector2(0, 0);
+        private Vector2 _dmProjEnd = new Vector2(0, 0);
+        private Vector2 _dmProjVelVec = new Vector2(0, 0);
+        private System.Numerics.Vector2 _ImageStart = new System.Numerics.Vector2(0, 0);
+        private bool _showCompIDMap = true;
+        private bool _showVMap = false;
+        private bool _showPresMap = true;
+        private bool _showPMap = true;
+        
         internal override void Display()
         {
             if (IsActive)
             {
                 if (Window.Begin("DamageViewer Testing"))
                 {
-
-                    if (_shipImgPtr != IntPtr.Zero)
+                    
+                    if (_shipImgPtr != IntPtr.Zero && ImGui.CollapsingHeader("Old Damage View"))
                     {
                         int w = _rawShipImage.Width; // / 4;
                         int h = _rawShipImage.Height; // / 4;
                         ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(w, h));
 
                     }
+
+                    if (_damageMapPtr[0] != IntPtr.Zero&& ImGui.CollapsingHeader("New Damage Map"))
+                    {
+                        int w = (int)(_damageMap.Width * _dmSizeScaler);
+                        int h = (int)(_damageMap.Height * _dmSizeScaler);
+                        var vsliderSize = new System.Numerics.Vector2(18, h);
+                        //var hsliderSize = new System.Numerics.Vector2(18, w);
+                        //ImGuiSliderFlags.
+                        ImGui.SetNextItemWidth(w);
+                        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + vsliderSize.X + 8);
+                        if (ImGui.SliderInt("###top", ref _dmProjectileSliderTop, 0, w))
+                        {
+                            if (_dmProjectileSliderLhs > h * 0.5)
+                                _dmProjectileSliderLhs = h;
+                            else
+                                _dmProjectileSliderLhs = 0;
+                        }
+
+                        if (ImGui.VSliderInt("###lhs", vsliderSize, ref _dmProjectileSliderLhs, h, 0))
+                        {
+                            if(_dmProjectileSliderTop > w * 0.5)
+                                _dmProjectileSliderTop = w;
+                            else
+                                _dmProjectileSliderTop = 0;
+                        }
+                        ImGui.SameLine();
+                        _ImageStart = ImGui.GetCursorScreenPos();
+                        var cpos = ImGui.GetCursorPos();
+                        if(_showCompIDMap)
+                        {
+                            ImGui.SetCursorPos(cpos);
+                            ImGui.Image(_damageMapPtr[0], new System.Numerics.Vector2(w, h));
+                        }
+                        if(_showPresMap)
+                        {
+                            ImGui.SetCursorPos(cpos);
+                            ImGui.Image(_damageMapPtr[1], new System.Numerics.Vector2(w, h));
+                        }
+                        if(_showVMap)
+                        {
+                            ImGui.SetCursorPos(cpos);
+                            ImGui.Image(_damageMapPtr[2], new System.Numerics.Vector2(w, h));
+                        }
+                        if(_showPMap)
+                        {
+                            ImGui.SetCursorPos(cpos);
+                            ImGui.Image(_damageMapPtr[3], new System.Numerics.Vector2(w, h));
+                        }
+                        
+                        
+                        
+                        
+                        
+                        ImGui.SameLine();
+                        if (ImGui.VSliderInt("###rhs", vsliderSize, ref _dmProjectileSliderRhs, h, 0))
+                        {
+                            if(_dmProjectileSliderBot > w * 0.5)
+                                _dmProjectileSliderBot = w;
+                            else
+                                _dmProjectileSliderBot = 0;
+                        }
+                        ImGui.SetNextItemWidth(w);
+                        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + vsliderSize.X + 8);
+                        if (ImGui.SliderInt("###bot", ref _dmProjectileSliderBot, 0, w))
+                        {
+                            if (_dmProjectileSliderRhs > h * 0.5)
+                                _dmProjectileSliderRhs = h;
+                            else
+                                _dmProjectileSliderRhs = 0;
+                        }
+                        
+                        ImGui.Checkbox("comIDMap", ref _showCompIDMap);
+                        ImGui.SameLine();
+                        ImGui.Checkbox("PresMap", ref _showPresMap);
+                        ImGui.SameLine();                        
+                        ImGui.Checkbox("Vmap", ref _showVMap);
+                        ImGui.SameLine();                
+                        ImGui.Checkbox("Pmap", ref _showPMap);
+                        
+                    }
+
+
+
+                    if (_shipImgPtr != IntPtr.Zero)
+                    {
+                        if (ImGui.CollapsingHeader("Fire a Weapon to check damage result"))
+                        {
+                            var drawList = ImGui.GetWindowDrawList();
+                            System.Numerics.Vector2 offsetStart = new System.Numerics.Vector2(_dmProjectileSliderTop, _dmProjectileSliderLhs);
+                            System.Numerics.Vector2 offsetEnd = new System.Numerics.Vector2(_dmProjectileSliderBot, _dmProjectileSliderRhs);
+                            System.Numerics.Vector2 lineStart = _ImageStart + offsetStart; // Adjust these offsets as needed
+                            System.Numerics.Vector2 lineEnd = _ImageStart + offsetEnd;  // Adjust these offsets as needed
+                            var color = ImGui.GetColorU32(0xFFFFFFFF);
+                            // Draw the line relative to the image position
+                            drawList.AddLine(lineStart, lineEnd, color, 1f);
+                            /*
+                            ImGui.InputInt("PositionX", ref _firePos.x);
+                            ImGui.InputInt("PositionY", ref _firePos.y);
+
+                            ImGui.InputFloat("VelocityX", ref _fireVel.x);
+                            ImGui.InputFloat("VelocityY", ref _fireVel.y);
+
+
+                            ImGui.Columns(2);
+
+
+                            //type of damage to test
+                            ExsistingWeapons.Create(_selectedEntity.GetFactionOwner);
+                            if (ImGui.Combo("Exsisting Design", ref ExsistingWeapons.SelectedWeaponIndex, ExsistingWeapons.WeaponNames, ExsistingWeapons.AvailableShipComponents.Count))
+                            {
+
+                                //ExsistingWeapons.SelectedWeapon.
+                            }
+
+                            if (_profile != null && ImGui.Button("Beam"))
+                            {
+                                _typeIsBeam = true;
+                            }
+
+                            if (_profile != null && ImGui.Button("Longrod Projectile"))
+                            {
+                                _typeIsBeam = false;
+                            }
+
+
+
+                            ImGui.NextColumn();
+
+                            //tweaks to damage type
+                            if (_typeIsBeam)
+                            {
+                                if (ImGuiExt.SliderDouble("Energy", ref Beam.BeamEnergy, Beam.MinEnergy, Beam.MaxEnergy))
+                                {
+
+                                }
+
+                                if (ImGuiExt.SliderDouble("Freqency", ref Beam.BeamFreq, Beam.MinFreq, Beam.MaxFreq))
+                                {
+                                    _momentum = (float)(UniversalConstants.Science.PlankConstant * Beam.BeamFreq);
+                                }
+                            }
+                            else
+                            {
+
+                            }
+
+                            ImGui.NextColumn();
+
+
+
+                            ImGui.NextColumn();
+
+                            ImGui.InputFloat("Mass", ref _projMass);
+                            ImGui.InputFloat("Density", ref _projDensity);
+                            ImGui.InputFloat("Length", ref _projLen);
+
+                        
+                            ImGui.Columns(0);*/
+
+                            if (ImGui.SliderInt("Speed", ref _dmProjectileSpeed, 100, 100000))
+                            {
+                                
+                            }
+
+
+                            
+                            if (ImGui.Button("Fire"))
+                            {
+                                SetDMVectors();
+                                if (_projectileDamageMap.PMap != null)
+                                {
+                                    _damageMap.MergeAndResize(_projectileDamageMap);
+                                    _damageMapPtr = SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, 255);
+                                }
+                                
+                                
+                                /*
+                                _damageFrag = new DamageFragment()
+                                {
+                                    Position = _firePos,
+                                    Velocity = new Orbital.Vector2(_fireVel.x, _fireVel.y),
+                                    Mass = _projMass,
+                                    Density = _projDensity,
+                                    Length = _projLen
+                                };
+                                _damageFrames = DamageTools.DealDamageSim(_profile, _damageFrag).damageFrames;
+                                _rawShipImage = _damageFrames.Last();*/
+                            }
+                            
+                            if (ImGui.Button("RunSimLoop"))
+                            {
+                                PhysicsSim.PhysicsLoop(_damageMap);
+                                _damageMapPtr = SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, 255);
+                            }
+
+
+                        }
+                    }
+
+                    if (_profile != null && _profile.DamageEvents.Count > 0)
+                    {
+                        if (ImGui.SliderInt("Damage Events", ref _damageEventIndex, 1, _profile.DamageEvents.Count - 1))
+                        {
+                            SetDamageEventFrames();
+                        }
+                    }
+
+                    if (_profile != null && _profile.DamageEvents.Count > 0 && _damageFrames == null)
+                    {
+                        _damageEventIndex = 0;
+                        SetDamageEventFrames();
+
+                    }
+
+                    if (_damageFrames != null && _damageFrames.Count > 0)
+                    {
+                        if (ImGui.Button("PrevFrame"))
+                        {
+                            _showFrameNum--;
+                            if (_showFrameNum < 0)
+                                _showFrameNum = _damageFrames.Count - 1;
+                            _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
+                        }
+
+                        ImGui.SameLine();
+                        if (ImGui.Button("NextFrame"))
+                        {
+                            _showFrameNum++;
+                            if (_showFrameNum > _damageFrames.Count - 1)
+                                _showFrameNum = 0;
+                            _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
+                        }
+
+                        ImGui.Text(_showFrameNum + 1 + " of " + _damageFrames.Count);
+                        int h = _damageFrames[_showFrameNum].Height;
+                        int w = _damageFrames[_showFrameNum].Width;
+                        ImGui.Image(_showDmgFrametx, new System.Numerics.Vector2(w, h));
+                    }
+
                     Window.End();
                 }
-
-                if (_shipImgPtr != IntPtr.Zero)
-                {
-                    if (ImGui.CollapsingHeader("Fire a Weapon to check damage result"))
-                    {
-                        ImGui.InputInt("PositionX", ref _firePos.x);
-                        ImGui.InputInt("PositionY", ref _firePos.y);
-
-                        ImGui.InputFloat("VelocityX", ref _fireVel.x);
-                        ImGui.InputFloat("VelocityY", ref _fireVel.y);
-
-
-                        ImGui.Columns(2);
-
-
-                        //type of damage to test
-                        ExsistingWeapons.Create(_selectedEntity.GetFactionOwner);
-                        if (ImGui.Combo("Exsisting Design", ref ExsistingWeapons.SelectedWeaponIndex, ExsistingWeapons.WeaponNames, ExsistingWeapons.AvailableShipComponents.Count))
-                        {
-
-                            //ExsistingWeapons.SelectedWeapon.
-                        }
-                        if (_profile != null && ImGui.Button("Beam"))
-                        {
-                            _typeIsBeam = true;
-                        }
-                        if (_profile != null && ImGui.Button("Longrod Projectile"))
-                        {
-                            _typeIsBeam = false;
-                        }
-
-
-
-                        ImGui.NextColumn();
-
-                        //tweaks to damage type
-                        if (_typeIsBeam)
-                        {
-                            if (ImGuiExt.SliderDouble("Energy", ref Beam.BeamEnergy, Beam.MinEnergy, Beam.MaxEnergy))
-                            {
-
-                            }
-
-                            if (ImGuiExt.SliderDouble("Freqency", ref Beam.BeamFreq, Beam.MinFreq, Beam.MaxFreq))
-                            {
-                                _momentum = (float)(UniversalConstants.Science.PlankConstant * Beam.BeamFreq);
-                            }
-                        }
-                        else
-                        {
-
-                        }
-
-                        ImGui.NextColumn();
-
-
-
-                        ImGui.NextColumn();
-
-                        ImGui.InputFloat("Mass", ref _projMass);
-                        ImGui.InputFloat("Density", ref _projDensity);
-                        ImGui.InputFloat("Length", ref _projLen);
-
-
-                        ImGui.Columns(0);
-
-                        if (ImGui.Button("Fire"))
-                        {
-                            _damageFrag = new DamageFragment()
-                            {
-                                Position = _firePos,
-                                Velocity = new Orbital.Vector2(_fireVel.x, _fireVel.y),
-                                Mass = _projMass,
-                                Density = _projDensity,
-                                Length = _projLen
-                            };
-                            _damageFrames = DamageTools.DealDamageSim(_profile, _damageFrag).damageFrames;
-                            _rawShipImage = _damageFrames.Last();
-                        }
-
-
-                    }
-                }
-
-                if(_profile != null && _profile.DamageEvents.Count > 0)
-                {
-                    if (ImGui.SliderInt("Damage Events", ref _damageEventIndex, 1, _profile.DamageEvents.Count - 1))
-                    {
-                        SetDamageEventFrames();
-                    }
-                }
-
-                if(_profile != null && _profile.DamageEvents.Count > 0 && _damageFrames == null)
-                {
-                    _damageEventIndex = 0;
-                    SetDamageEventFrames();
-
-                }
-
-                if (_damageFrames != null && _damageFrames.Count > 0)
-                {
-                    if (ImGui.Button("PrevFrame"))
-                    {
-                        _showFrameNum--;
-                        if (_showFrameNum < 0)
-                            _showFrameNum = _damageFrames.Count -1;
-                        _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
-                    }
-                    ImGui.SameLine();
-                    if (ImGui.Button("NextFrame"))
-                    {
-                        _showFrameNum++;
-                        if (_showFrameNum > _damageFrames.Count -1)
-                            _showFrameNum = 0;
-                        _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
-                    }
-                    ImGui.Text(_showFrameNum +1  + " of " + _damageFrames.Count);
-                    int h = _damageFrames[_showFrameNum].Height;
-                    int w = _damageFrames[_showFrameNum].Width;
-                    ImGui.Image(_showDmgFrametx, new System.Numerics.Vector2(w, h));
-                }
-
-
             }
-
-            
         }
 
+        void SetDMVectors()
+        {
+            Vector2 size = new  Vector2(1,1);
+            _dmProjStart = new Vector2(_dmProjectileSliderTop, _dmProjectileSliderLhs) / _dmSizeScaler;
+            _dmProjStart -= size;
+            _dmProjEnd = new Vector2(_dmProjectileSliderBot, _dmProjectileSliderRhs) / _dmSizeScaler;
+            Vector2 velocity = Vector2.Normalise(_dmProjEnd - _dmProjStart) * _dmProjectileSpeed;
+            PhysicsSim.DamageMaterial dmMat = new PhysicsSim.DamageMaterial()
+            {
+                
+            };
+            _projectileDamageMap = new DamageMap((int)_dmProjStart.X, (int)_dmProjStart.Y,velocity, (int)size.X, (int)size.Y, dmMat );
+            //_projectileDMapPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageMap.compIDMap, _damageMap.Width, _damageMap.Height);
         }
     }
+}
