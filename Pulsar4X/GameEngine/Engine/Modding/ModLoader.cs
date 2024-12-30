@@ -96,6 +96,9 @@ namespace Pulsar4X.Modding
                 case ModInstruction.DataType.DamageResistance:
                     ApplyModGeneric<DamageResistBlueprint>(baseData.DamageResists, mod, modNamespace);
                     break;
+                case ModInstruction.DataType.PartMat:
+                    ApplyModGeneric<ParticleMaterialBlueprint>(baseData.ParticleMaterials, mod, modNamespace);
+                    break;
                 case ModInstruction.DataType.Species:
                     ApplyModGeneric<SpeciesBlueprint>(baseData.Species, mod, modNamespace);
                     break;

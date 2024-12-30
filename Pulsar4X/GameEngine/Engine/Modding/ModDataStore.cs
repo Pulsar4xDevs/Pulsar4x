@@ -21,8 +21,11 @@ namespace Pulsar4X.Modding
         public Dictionary<string, ThemeBlueprint> Themes { get; set; } = new ();
         public Dictionary<string, DefaultItemsBlueprint> DefaultItems { get; set; } = new ();
 
+        //TODO remove this for new ParticleMaterial
         public Dictionary<string, DamageResistBlueprint> DamageResists { get; set; } = new();
 
+        public Dictionary<string, ParticleMaterialBlueprint> ParticleMaterials { get; set; } = new ();
+        
         public Dictionary<string, SpeciesBlueprint> Species { get; set; } = new ();
     }
 }

@@ -17,5 +17,7 @@ namespace Pulsar4X.Blueprints
         public string CargoTypeID { get; set; }
         public long MassPerUnit { get; set; }
         public double VolumePerUnit { get; set; }
+        
+        public string PartMatID { get; set; }
     }
 }

@@ -6,6 +6,7 @@
     "DefaultEnabled": true,
     "DataFiles": [
         "blueprints/armor.json",
+        "blueprints/particleMaterials.json",
         "blueprints/atmosphereGases.json",
         "blueprints/cargoTypes.json",
         "blueprints/electronics.json",
@@ -24,6 +25,7 @@
         "blueprints/techs.json",
         "blueprints/weapons.json",
         "blueprints/damageResistance.json",
-        "blueprints/species.json"
+        "blueprints/species.json",
+        
     ]
 }

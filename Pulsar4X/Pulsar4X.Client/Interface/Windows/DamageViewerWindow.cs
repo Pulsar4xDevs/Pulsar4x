@@ -472,10 +472,15 @@ namespace Pulsar4X.SDL2UI.Combat
             _dmProjStart -= size;
             _dmProjEnd = new Vector2(_dmProjectileSliderBot, _dmProjectileSliderRhs) / _dmSizeScaler;
             Vector2 velocity = Vector2.Normalise(_dmProjEnd - _dmProjStart) * _dmProjectileSpeed;
-            PhysicsSim.DamageMaterial dmMat = new PhysicsSim.DamageMaterial()
+            ParticleMaterial dmMat = new ParticleMaterial()
             {
-                
+                ThermalCapacity = 900,
+                ThermalConductivity = 237,
+                MeltingZeroPoint = 933.47f, 
+                TriplePoint = ( 0.00001f, 933.47f), 
+                CriticalPoint = (1150, 7500) 
             };
+
             _projectileDamageMap = new DamageMap((int)_dmProjStart.X, (int)_dmProjStart.Y,velocity, (int)size.X, (int)size.Y, dmMat );
             //_projectileDMapPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageMap.compIDMap, _damageMap.Width, _damageMap.Height);
         }

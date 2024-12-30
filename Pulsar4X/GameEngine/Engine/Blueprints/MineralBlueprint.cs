@@ -11,5 +11,7 @@ namespace Pulsar4X.Blueprints
         public long MassPerUnit { get; set; }
         public double VolumePerUnit { get; set; }
         public Dictionary<BodyType, double> Abundance { get; set; }
+        
+        public string PartMatID { get; set; }
     }
 }

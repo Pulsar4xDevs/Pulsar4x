@@ -24,6 +24,7 @@ namespace Pulsar4X.Modding
             TechCategory,
             Theme,
             DamageResistance,
+            PartMat,
             Species,
         }
         public enum OperationType { Default, Remove }

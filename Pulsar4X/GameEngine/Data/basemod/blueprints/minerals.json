@@ -48,6 +48,7 @@
       "Name": "Aluminium",
       "Description": "A naturally-occurring mineral in large deposits.",
       "CargoTypeID": "general-storage",
+      "PartMatID": "aluminum",
       "MassPerUnit": 1.0,
       "VolumePerUnit": 0.0003703703,
       "Abundance": {
@@ -258,6 +259,7 @@
       "Name": "Water",
       "Description": "Essential for life, found in various forms across celestial bodies.",
       "CargoTypeID": "general-storage",
+      "UniqueID": "water",
       "MassPerUnit": 1.0,
       "VolumePerUnit": 0.001,
       "Abundance": {

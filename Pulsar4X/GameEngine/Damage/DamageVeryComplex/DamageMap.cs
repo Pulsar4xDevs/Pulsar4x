@@ -6,7 +6,11 @@ using System.Linq;
 using Pulsar4X.Components;
 using Pulsar4X.Damage;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
+using Pulsar4X.Industry;
+using Pulsar4X.Modding;
 using Pulsar4X.Orbital;
 
 namespace GameEngine.Damage;
@@ -33,7 +37,7 @@ public class DamageMap
         VMap = new Vector2[Width * Height];
         PresMap = new float[Width * Height];
     }
-    public DamageMap(int posX, int posY , Vector2 velocity, int width, int height, IDamageMaterial material)
+    public DamageMap(int posX, int posY , Vector2 velocity, int width, int height, ParticleMaterial material)
     {
         X = posX;
         Y = posY;
@@ -67,7 +71,8 @@ public class DamageMap
         List<(string typeID, float len, float height, int count)> partSizes = SetSize(shipProfile, Scale);
         Dictionary<string, List<ComponentInstance>> componentInstances = shipProfile.OwningEntity.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign;
         ReadOnlyDictionary<string, ComponentDesign> lib = shipProfile.OwningEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().ComponentDesigns;
-        
+        Random rng = shipProfile.OwningEntity.Manager.RNG;
+        var modData = shipProfile.OwningEntity.Manager.Game.StartingGameData;
         int currentX = _pixBuf; // Start at half of the buffer for the left side
         int partSizesIndex = 0;
         foreach (var partSize in partSizes)
@@ -76,6 +81,10 @@ public class DamageMap
             List<ComponentInstance> instanceIDs = componentInstances[typeID];
             int centerY = Height / 2; // Center Y, Height already includes buffer
             centerY += (int)(Math.Round(partSize.height) * partSize.count * 0.5);
+            ComponentDesign componentDesign = lib[typeID];
+            var mats = ParticleHelpers.GetMaterialsList(modData, componentDesign);
+            int numparticles = (int)(Math.Round(partSize.height) * Math.Round(partSize.len));
+            
             
             for (int i = 0; i < partSize.count; i++)
             {
@@ -92,9 +101,8 @@ public class DamageMap
                     for (int x = 0; x < partSize.len; x++)
                     {
                         int index = GetIndex(currentX + x, actualY + y);
-                        
-                        ComponentDesign componentDesign = lib[typeID];
-                        IDamageMaterial mat = PhysicsSim.GetMaterial(componentDesign, x, y);
+
+                        var mat = ParticleHelpers.GetRandomMat(mats, rng);
                         Vector2 pos = new Vector2(currentX + x, actualY + y);
                         Vector2 vel = Vector2.Zero;
                         Particle p = new Particle(mat, pos, vel);
@@ -311,27 +319,8 @@ public static class PhysicsSim
                 throw new IndexOutOfRangeException();
         }
     }
+    
 
-    public struct DamageMaterial : IDamageMaterial
-    {
-        public float SpecificHeatCapacity => 4200;
-
-        public float Density => 1;
-
-        public float MeltingZeroPoint => -60; //kelvn
-
-        public (float bar, float kelvin) TripplePoint => (0.0061f, 273.16f);
-
-        public (float bar, float kelvin) CriticalPoint => (220.6f, 647.096f);
-    }
-
-    public static IDamageMaterial GetMaterial(ComponentDesign componentDesign, int x, int y)
-    {
-        var resources = componentDesign.ResourceCosts;
-        DamageMaterial material = new();
-        return material;
-
-    }
 
 
     public static void PhysicsLoop(DamageMap damageMap)
@@ -445,8 +434,8 @@ public static class PhysicsSim
         double heatB = energyToHeat * (m2 / totalMass);
 
         // Convert energy to temperature increase
-        particleA.Temperature += (float)(heatA / (m1 * particleA.MatType.SpecificHeatCapacity));
-        particleB.Temperature += (float)(heatB / (m2 * particleB.MatType.SpecificHeatCapacity));
+        particleA.Temperature += (float)(heatA / (m1 * particleA.MatType.ThermalCapacity));
+        particleB.Temperature += (float)(heatB / (m2 * particleB.MatType.ThermalCapacity));
 
         // Check for phase transitions
         int indexA = map.GetIndex(particleA);
@@ -494,7 +483,7 @@ public static class PhysicsSim
     {
         var zeroPoint = particle.MatType.MeltingZeroPoint;
         var criticalPoint = particle.MatType.CriticalPoint;
-        var tripplePoint = particle.MatType.TripplePoint;
+        var tripplePoint = particle.MatType.TriplePoint;
         
 
         if (temperature > criticalPoint.kelvin && pressure > criticalPoint.bar)
