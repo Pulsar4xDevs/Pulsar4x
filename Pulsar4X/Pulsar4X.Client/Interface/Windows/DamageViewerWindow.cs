@@ -412,7 +412,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             
                             if (ImGui.Button("RunSimLoop"))
                             {
-                                PhysicsSim.PhysicsLoop(_damageMap);
+                                DamagePhysicsSim.PhysicsLoop(_damageMap);
                                 _damageMapPtr = SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, 255);
                             }
 

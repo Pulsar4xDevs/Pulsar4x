@@ -15,7 +15,7 @@ namespace GameEngine.Damage;
 public struct ParticleMaterial
 {
     public uint PartMatID;
-    float Density { get; } //as a solid
+    public float Density { get; } //as a solid
     public float ThermalCapacity;
     public float ThermalConductivity;
     public float MeltingZeroPoint;
@@ -32,8 +32,6 @@ public struct ParticleMaterial
         CriticalPoint = materialBP.CriticalPoint;
         Density = (float)(minOrMat.MassPerUnit / minOrMat.VolumePerUnit);
     }
-
-    
 }
 
 public struct PhasePoint
@@ -67,13 +65,14 @@ public class Particle
     public float Mass;
     public DamageMap _pMap;
     
-    public Particle(ParticleMaterial matType, Vector2 position, Vector2 velocity = default)
+    public Particle(ParticleMaterial matType, Vector2 position, Vector2 velocity, int scale)
     {
         MatType = matType;
         Position = position;
         Velocity = velocity;
         Temperature = 293.15f; // Room temperature in Kelvin
         Life = 100; // Arbitrary starting life
+        Mass = matType.Density * 1 / scale;
     }
 }
 
@@ -133,8 +132,6 @@ public static class ParticleHelpers
             }
             
         }
-        
         return partMats;
-
     }
 }
