@@ -48,7 +48,7 @@
       "Name": "Aluminium",
       "Description": "A naturally-occurring mineral in large deposits.",
       "CargoTypeID": "general-storage",
-      "PartMatID": "aluminum",
+      "PartMatUniqueID": "aluminum",
       "MassPerUnit": 1.0,
       "VolumePerUnit": 0.0003703703,
       "Abundance": {

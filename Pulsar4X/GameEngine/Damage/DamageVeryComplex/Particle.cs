@@ -19,8 +19,8 @@ public struct ParticleMaterial
     public float ThermalCapacity;
     public float ThermalConductivity;
     public float MeltingZeroPoint;
-    public (float bar, float kelvin) TriplePoint;
-    public (float bar, float kelvin) CriticalPoint;
+    public PhasePoint TriplePoint;
+    public PhasePoint CriticalPoint;
 
     public ParticleMaterial(ParticleMaterialBlueprint materialBP, ICargoable minOrMat)
     {
@@ -36,6 +36,17 @@ public struct ParticleMaterial
     
 }
 
+public struct PhasePoint
+{
+    public float Bar;
+    public float Kelvin;
+
+    public PhasePoint(float bar, float kelvin)
+    {
+        Bar = bar;
+        Kelvin = kelvin;
+    }
+}
 
 public enum PhaseState
 {
@@ -106,18 +117,18 @@ public static class ParticleHelpers
             if (modData.Minerals.ContainsKey(resource.Key))
             {
                 var item = modData.Minerals[resource.Key];
-                if (item.PartMatID.IsNotNullOrEmpty() && partMatBPs.ContainsKey(item.PartMatID))
+                if (item.PartMatUniqueID.IsNotNullOrEmpty() && partMatBPs.ContainsKey(item.PartMatUniqueID))
                 {
-                    var partMat = new ParticleMaterial(partMatBPs[item.PartMatID], item);
+                    var partMat = new ParticleMaterial(partMatBPs[item.PartMatUniqueID], item);
                     partMats[index] = (partMat, (int)resource.Value);
                 }
             }
             if (modData.ProcessedMaterials.ContainsKey(resource.Key))
             {
                 var item = modData.ProcessedMaterials[resource.Key];
-                if (item.PartMatID.IsNotNullOrEmpty() && partMatBPs.ContainsKey(item.PartMatID))
+                if (item.PartMatUniqueID.IsNotNullOrEmpty() && partMatBPs.ContainsKey(item.PartMatUniqueID))
                 {
-                    var partMat = new ParticleMaterial(partMatBPs[item.PartMatID], item);
+                    var partMat = new ParticleMaterial(partMatBPs[item.PartMatUniqueID], item);
                     partMats[index] = (partMat, (int)resource.Value);
                 }
             }

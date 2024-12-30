@@ -18,6 +18,6 @@ namespace Pulsar4X.Blueprints
         public long MassPerUnit { get; set; }
         public double VolumePerUnit { get; set; }
         
-        public string PartMatID { get; set; }
+        public string PartMatUniqueID { get; set; }
     }
 }

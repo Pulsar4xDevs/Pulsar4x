@@ -486,27 +486,27 @@ public static class PhysicsSim
         var tripplePoint = particle.MatType.TriplePoint;
         
 
-        if (temperature > criticalPoint.kelvin && pressure > criticalPoint.bar)
+        if (temperature > criticalPoint.Kelvin && pressure > criticalPoint.Bar)
             return PhaseState.Gas; // Since we've decided not to include supercritical fluid
 
         if (temperature < zeroPoint && pressure == 0)
             return PhaseState.Solid;
 
-        if (temperature < tripplePoint.kelvin && pressure < tripplePoint.bar)
+        if (temperature < tripplePoint.Kelvin && pressure < tripplePoint.Bar)
             return PhaseState.Solid;
 
-        if (temperature > tripplePoint.kelvin && pressure < tripplePoint.bar)
+        if (temperature > tripplePoint.Kelvin && pressure < tripplePoint.Bar)
             return PhaseState.Gas;
 
         // Between melting and boiling (or at the triple point)
-        if ((temperature >= zeroPoint && temperature <= tripplePoint.kelvin) ||
-            (temperature >= tripplePoint.bar && pressure >= tripplePoint.bar && pressure < criticalPoint.bar))
+        if ((temperature >= zeroPoint && temperature <= tripplePoint.Kelvin) ||
+            (temperature >= tripplePoint.Bar && pressure >= tripplePoint.Bar && pressure < criticalPoint.Bar))
         {
-            return pressure >= tripplePoint.bar ? PhaseState.Liquid : PhaseState.Solid;
+            return pressure >= tripplePoint.Bar ? PhaseState.Liquid : PhaseState.Solid;
         }
 
         // Above boiling but below critical point
-        if (temperature > tripplePoint.kelvin && pressure >= tripplePoint.bar && pressure < criticalPoint.bar)
+        if (temperature > tripplePoint.Kelvin && pressure >= tripplePoint.Bar && pressure < criticalPoint.Bar)
             return PhaseState.Liquid;
 
         // Gas if above boiling point at any pressure not covered by the above conditions

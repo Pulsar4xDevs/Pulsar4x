@@ -477,8 +477,8 @@ namespace Pulsar4X.SDL2UI.Combat
                 ThermalCapacity = 900,
                 ThermalConductivity = 237,
                 MeltingZeroPoint = 933.47f, 
-                TriplePoint = ( 0.00001f, 933.47f), 
-                CriticalPoint = (1150, 7500) 
+                TriplePoint = new PhasePoint( 0.00001f, 933.47f), 
+                CriticalPoint = new PhasePoint(1150, 7500) 
             };
 
             _projectileDamageMap = new DamageMap((int)_dmProjStart.X, (int)_dmProjStart.Y,velocity, (int)size.X, (int)size.Y, dmMat );

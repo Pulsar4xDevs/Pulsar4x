@@ -1,3 +1,5 @@
+using GameEngine.Damage;
+
 namespace Pulsar4X.Blueprints;
 
 public class ParticleMaterialBlueprint : Blueprint
@@ -6,6 +8,6 @@ public class ParticleMaterialBlueprint : Blueprint
     public float ThermalCapacity;
     public float ThermalConductivity;
     public float MeltingZeroPoint;
-    public (float bar, float kelvin) TriplePoint;
-    public (float bar, float kelvin) CriticalPoint;
+    public PhasePoint TriplePoint;
+    public PhasePoint CriticalPoint;
 }
