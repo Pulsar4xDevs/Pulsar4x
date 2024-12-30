@@ -103,6 +103,9 @@ namespace Pulsar4X.Modding
                 case ModInstruction.DataType.DamageResistance:
                     instruction.Data = jObject["Payload"].ToObject<DamageResistBlueprint>();
                     break;
+                case ModInstruction.DataType.PartMat:
+                    instruction.Data = jObject["Payload"].ToObject<ParticleMaterialBlueprint>();
+                    break;
                 case ModInstruction.DataType.Species:
                     instruction.Data = jObject["Payload"].ToObject<SpeciesBlueprint>();
                     break;

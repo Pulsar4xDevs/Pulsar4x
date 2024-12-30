@@ -111,7 +111,6 @@ public static class ParticleHelpers
         
         var resources = componentDesign.ResourceCosts;
         List<(ParticleMaterial partMat, int amount)> partMats = new();
-        int index = 0;
         foreach (var resource in resources)
         {
             if (modData.Minerals.ContainsKey(resource.Key))
@@ -120,7 +119,7 @@ public static class ParticleHelpers
                 if (item.PartMatUniqueID.IsNotNullOrEmpty() && partMatBPs.ContainsKey(item.PartMatUniqueID))
                 {
                     var partMat = new ParticleMaterial(partMatBPs[item.PartMatUniqueID], item);
-                    partMats[index] = (partMat, (int)resource.Value);
+                    partMats.Add((partMat, (int)resource.Value));
                 }
             }
             if (modData.ProcessedMaterials.ContainsKey(resource.Key))
@@ -129,7 +128,7 @@ public static class ParticleHelpers
                 if (item.PartMatUniqueID.IsNotNullOrEmpty() && partMatBPs.ContainsKey(item.PartMatUniqueID))
                 {
                     var partMat = new ParticleMaterial(partMatBPs[item.PartMatUniqueID], item);
-                    partMats[index] = (partMat, (int)resource.Value);
+                    partMats.Add((partMat, (int)resource.Value));
                 }
             }
             
