@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using GameEngine.Damage;
 using ImGuiNET;
 using ImGuiSDL2CS;
@@ -51,7 +52,7 @@ namespace Pulsar4X.SDL2UI.Combat
         private IntPtr _shipImgPtr;
 
         DamageMap _damageMap;
-        IntPtr[] _damageMapPtr = new IntPtr[4];
+        IntPtr[] _damageMapPtr = new IntPtr[5];
         DamageMap _projectileDamageMap;
         IntPtr _projectileDMapPtr;
 
@@ -202,11 +203,12 @@ namespace Pulsar4X.SDL2UI.Combat
         private Vector2 _dmProjEnd = new Vector2(0, 0);
         private Vector2 _dmProjVelVec = new Vector2(0, 0);
         private System.Numerics.Vector2 _ImageStart = new System.Numerics.Vector2(0, 0);
-        private bool _showCompIDMap = true;
+        private bool _showCompIDMap = false;
         private bool _showVMap = false;
-        private bool _showPresMap = true;
-        private bool _showPMap = true;
-        
+        private bool _showPresMap = false;
+        private bool _showPMap = false;
+        private bool _showTemp = true;
+        private bool _runSimLoop = false;
         internal override void Display()
         {
             if (IsActive)
@@ -269,6 +271,11 @@ namespace Pulsar4X.SDL2UI.Combat
                             ImGui.SetCursorPos(cpos);
                             ImGui.Image(_damageMapPtr[3], new System.Numerics.Vector2(w, h));
                         }
+                        if(_showTemp)
+                        {
+                            ImGui.SetCursorPos(cpos);
+                            ImGui.Image(_damageMapPtr[4], new System.Numerics.Vector2(w, h));
+                        }
                         
                         
                         
@@ -299,7 +306,8 @@ namespace Pulsar4X.SDL2UI.Combat
                         ImGui.Checkbox("Vmap", ref _showVMap);
                         ImGui.SameLine();                
                         ImGui.Checkbox("Pmap", ref _showPMap);
-                        
+                        ImGui.SameLine();                
+                        ImGui.Checkbox("TempMap", ref _showTemp);
                     }
 
 
@@ -412,11 +420,21 @@ namespace Pulsar4X.SDL2UI.Combat
                             
                             if (ImGui.Button("RunSimLoop"))
                             {
+                                _runSimLoop =! _runSimLoop;
+                            }
+                            if (ImGui.Button("StepSim"))
+                            {
+                                _runSimLoop = false;
                                 DamagePhysicsSim.PhysicsLoop(_damageMap);
                                 _damageMapPtr = SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, 255);
                             }
 
-
+                            if (_runSimLoop)
+                            {
+                                DamagePhysicsSim.PhysicsLoop(_damageMap);
+                                _damageMapPtr = SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, 255);
+                            }
+                            ImGui.Text(Stringify.Energy(_damageMap.TotalEnergy));
                         }
                     }
 
@@ -467,7 +485,7 @@ namespace Pulsar4X.SDL2UI.Combat
 
         void SetDMVectors()
         {
-            Vector2 size = new  Vector2(1,1);
+            Vector2 size = new  Vector2(3,3);
             _dmProjStart = new Vector2(_dmProjectileSliderTop, _dmProjectileSliderLhs) / _dmSizeScaler;
             _dmProjStart -= size;
             _dmProjEnd = new Vector2(_dmProjectileSliderBot, _dmProjectileSliderRhs) / _dmSizeScaler;
@@ -478,7 +496,9 @@ namespace Pulsar4X.SDL2UI.Combat
                 ThermalConductivity = 237,
                 MeltingZeroPoint = 933.47f, 
                 TriplePoint = new PhasePoint( 0.00001f, 933.47f), 
-                CriticalPoint = new PhasePoint(1150, 7500) 
+                CriticalPoint = new PhasePoint(1150, 7500),
+                Density = 7874
+                
             };
 
             _projectileDamageMap = new DamageMap((int)_dmProjStart.X, (int)_dmProjStart.Y,velocity, (int)size.X, (int)size.Y, dmMat );

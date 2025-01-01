@@ -15,7 +15,11 @@ namespace GameEngine.Damage;
 public struct ParticleMaterial
 {
     public uint PartMatID;
-    public float Density { get; } //as a solid
+    public float Density; //as a solid
+    //Gpa
+    public float Elasticity = 0.9f;
+    //Mpa
+    public float TensileStrength = 110;
     public float ThermalCapacity;
     public float ThermalConductivity;
     public float MeltingZeroPoint;
@@ -60,11 +64,25 @@ public class Particle
     public PhaseState StateOfPhase = PhaseState.Solid;
     public Vector2 Position;
     public Vector2 Velocity;
-    public float Temperature;
     public int Life;
     public float Mass;
     public DamageMap _pMap;
-    
+    public float Temperature
+    {
+        get => _temperature;
+        set
+        {
+            if(float.IsNaN(value))
+                throw new Exception("tempIsNaN");
+            if(float.IsInfinity(value))
+                throw new Exception("tempIsInfinit");
+            if(value < 0)
+                throw new Exception("tempIsNegative");
+            _temperature = value;
+        }
+    }
+    private float _temperature;
+
     public Particle(ParticleMaterial matType, Vector2 position, Vector2 velocity, int scale)
     {
         MatType = matType;
@@ -73,6 +91,8 @@ public class Particle
         Temperature = 293.15f; // Room temperature in Kelvin
         Life = 100; // Arbitrary starting life
         Mass = matType.Density * 1 / scale;
+        if(Mass <= 0)
+            throw new Exception("mass canot be zero or negative");
     }
 }
 

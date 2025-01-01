@@ -17,6 +17,7 @@ namespace GameEngine.Damage;
 
 public class DamageMap
 {
+    public double TotalEnergy = 0;
     public double FastestSpeed = 0;
     public const int PhysicsScale = 1000;
     public int Scale = 100;//pixels per meter
@@ -175,6 +176,11 @@ public class DamageMap
     {
         return (int)(Math.Round(particle.Position.Y) * Width + Math.Round(particle.Position.X));
     }
+
+    public (int x, int y) GetPosition(int index)
+    {
+        return (index % Width, index / Width);
+    }
     
     public static T GetItem<T>(object[] ary, int aryWid, int x, int y)
     {
@@ -299,10 +305,45 @@ public static class DamageMapHelpers
             if(part == null)
                 continue;
             var index = map.GetIndex(part);
+            var pos = map.GetPosition(index);
+            var partPos = (Math.Round( part.Position.X), Math.Round(part.Position.Y));
+            
             if(index > map.PMap.Length - 1)
-                throw new IndexOutOfRangeException();
+            {
+                throw new IndexOutOfRangeException(pos.ToString());
+            }
             if(index < 0)
-                throw new IndexOutOfRangeException();
+            {
+                throw new IndexOutOfRangeException(pos.ToString());
+            }
+            var isSame = map.PMap[index] == part; 
+            if (!isSame)
+                throw new Exception("out of position");
         }
+    }
+    
+    public static List<Particle> GetNeighboringParticles(DamageMap map, Vector2 position, float radius)
+    {
+        List<Particle> neighbors = new List<Particle>();
+        int minX = Math.Max(0, (int)(position.X - radius));
+        int maxX = Math.Min(map.Width - 1, (int)(position.X + radius));
+        int minY = Math.Max(0, (int)(position.Y - radius));
+        int maxY = Math.Min(map.Height - 1, (int)(position.Y + radius));
+
+        for (int x = minX; x <= maxX; x++)
+        {
+            for (int y = minY; y <= maxY; y++)
+            {
+                int index = y * map.Width + x; // Assuming row-major order
+                if (index >= 0 && index < map.PMap.Length && map.PMap[index] != null) 
+                {
+                    if (Vector2.Distance(position, map.PMap[index].Position) <= radius)
+                    {
+                        neighbors.Add(map.PMap[index]);
+                    }
+                }
+            }
+        }
+        return neighbors;
     }
 }
