@@ -86,7 +86,7 @@ public class NewGameMenu : PulsarGuiWindow
     {
         if(!IsActive) return;
 
-        if (Window.Begin("New Game Setup", ref IsActive, _flags | ImGuiWindowFlags.NoScrollbar))
+        if (Window.Begin("New Game Setup", _flags | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse))
         {
             _contentRegion = ImGui.GetContentRegionAvail();
             // Get window dimensions
@@ -162,6 +162,9 @@ public class NewGameMenu : PulsarGuiWindow
         ImGui.EndChild();
         ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
+        CancelButton();
+        ImGui.SameLine();
+
         // Right-align the button by calculating its position
         float buttonX = _windowSize.X - _buttonWidth - ImGui.GetStyle().WindowPadding.X;
         ImGui.SetCursorPosX(buttonX);
@@ -219,6 +222,10 @@ public class NewGameMenu : PulsarGuiWindow
 
         ImGui.EndChild();
         ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+
+        CancelButton();
+        ImGui.SameLine();
+
         if (ImGui.Button("Back", new Vector2(_buttonWidth, 0)))
         {
             _currentPage = Page.SelectMods;
@@ -320,6 +327,9 @@ public class NewGameMenu : PulsarGuiWindow
 
         ImGui.EndChild();
         ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+
+        CancelButton();
+        ImGui.SameLine();
 
         if (ImGui.Button("Back", new Vector2(_buttonWidth, 0)))
         {
@@ -465,7 +475,14 @@ public class NewGameMenu : PulsarGuiWindow
         {
             _selectedBodyId = "";
         }
+    }
 
-
+    private void CancelButton()
+    {
+        if(ImGui.Button("Cancel", new Vector2(_buttonWidth, 0)))
+        {
+            IsActive = false;
+            MainMenuItems.GetInstance().SetActive(true);
+        }
     }
 }

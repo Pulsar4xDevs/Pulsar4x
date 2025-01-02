@@ -1,17 +1,8 @@
 ﻿using System;
 using ImGuiNET;
-using System.Numerics;
-using Pulsar4X.Engine;
-using Vector2 = System.Numerics.Vector2;
-using Newtonsoft.Json;
 using System.IO;
-using System.Linq;
 using Pulsar4X.Client.Interface.Menus;
-using Pulsar4X.Extensions;
-using Pulsar4X.Datablobs;
 using Pulsar4X.SDL2UI.ModFileEditing;
-using Pulsar4X.Factions;
-using SDL2;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -36,7 +27,7 @@ namespace Pulsar4X.SDL2UI
         {
             if (IsActive)
             {
-                System.Numerics.Vector2 size = new System.Numerics.Vector2(400, 300);
+                System.Numerics.Vector2 size = new System.Numerics.Vector2(412, 300);
                 System.Numerics.Vector2 pos = new System.Numerics.Vector2(_uiState.MainWinSize.X / 2 - size.X / 2, _uiState.MainWinSize.Y / 2 - size.Y / 2);
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
