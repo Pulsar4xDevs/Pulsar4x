@@ -1,37 +1,54 @@
-﻿using Pulsar4X.Engine;
+﻿using ImGuiSDL2CS;
 using Pulsar4X.Extensions;
 using SDL2;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Runtime.InteropServices;
 
 namespace Pulsar4X.SDL2UI
 {
     public static class ImageLoadingExtensions
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="_uiState">Global UI State Instance</param>
         /// <param name="imgName">Name you wish to refer to the image as</param>
         /// <param name="differentFilename">Different name of .bmp file in Resources</param>
         /// <returns></returns>
-        public static IntPtr ImgByName(this GlobalUIState _uiState, string imgName, string differentFilename = "")
+        public static IntPtr ImgByName(this GlobalUIState _uiState, string imgName, string differentFilename = "", string extension = ".bmp")
         {
             if (!_uiState.SDLImageDictionary.ContainsKey(imgName))
             {
                 // Load the image
                 var filename = differentFilename.IsNotNullOrEmpty() ? differentFilename : imgName;
-                var path = Path.Combine("Resources", filename + ".bmp");
+                var path = Path.Combine("Resources", filename + extension);
 
-                IntPtr sdlSurface = SDL.SDL_LoadBMP(path);
+                IntPtr sdlSurface = SDL2.SDL_image.IMG_Load(path);
+                if (sdlSurface == IntPtr.Zero)
+                {
+                    Console.WriteLine($"Failed to load BMP: {SDL.SDL_GetError()}");
+                    return IntPtr.Zero;
+                }
+
                 IntPtr sdltexture = SDL.SDL_CreateTextureFromSurface(_uiState.rendererPtr, sdlSurface);
+                if (sdltexture == IntPtr.Zero)
+                {
+                    Console.WriteLine($"Failed to create texture: {SDL.SDL_GetError()}");
+                    SDL.SDL_FreeSurface(sdlSurface);
+                    return IntPtr.Zero;
+                }
 
-                // Add to collection of loaded images
+                SDL.SDL_FreeSurface(sdlSurface);
+
+                // Try to bind the texture to OpenGL and check for errors
+                if (SDL.SDL_GL_BindTexture(sdltexture, out float _, out float _) != 0)
+                {
+                    Console.WriteLine($"Failed to bind texture to GL: {SDL.SDL_GetError()}");
+                }
+
                 _uiState.SDLImageDictionary.Add(imgName, sdltexture);
             }
-
             return _uiState.SDLImageDictionary[imgName];
         }
 
@@ -166,6 +183,11 @@ namespace Pulsar4X.SDL2UI
         {
             //LoadImg("Tree", Path.Combine(rf, "TreeIco.bmp"));
             return _uiState.ImgByName("Tree", "TreeIco");
+        }
+
+        public static IntPtr Img_MainMenuLogo(this GlobalUIState _uiState)
+        {
+            return _uiState.ImgByName("pulsar4x-menu", "pulsar4x-menu", ".png");
         }
         #endregion
     }

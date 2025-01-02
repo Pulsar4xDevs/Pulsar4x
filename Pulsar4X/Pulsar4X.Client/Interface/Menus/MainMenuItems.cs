@@ -11,6 +11,7 @@ using Pulsar4X.Extensions;
 using Pulsar4X.Datablobs;
 using Pulsar4X.SDL2UI.ModFileEditing;
 using Pulsar4X.Factions;
+using SDL2;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -18,7 +19,7 @@ namespace Pulsar4X.SDL2UI
     {
 
         bool _saveGame = false;
-        System.Numerics.Vector2 buttonSize = new System.Numerics.Vector2(184, 24);
+        System.Numerics.Vector2 _buttonSize = new System.Numerics.Vector2(400, 24);
         new ImGuiWindowFlags _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar;
         private MainMenuItems(){}
         internal static MainMenuItems GetInstance()
@@ -35,15 +36,16 @@ namespace Pulsar4X.SDL2UI
         {
             if (IsActive)
             {
-                System.Numerics.Vector2 size = new System.Numerics.Vector2(200, 100);
+                System.Numerics.Vector2 size = new System.Numerics.Vector2(400, 300);
                 System.Numerics.Vector2 pos = new System.Numerics.Vector2(_uiState.MainWinSize.X / 2 - size.X / 2, _uiState.MainWinSize.Y / 2 - size.Y / 2);
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
                 ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(10, 10));
                 if (ImGui.Begin("Pulsar4X Main Menu", ref IsActive, _flags))
                 {
+                    ImGui.Image(_uiState.Img_MainMenuLogo(), new System.Numerics.Vector2(400, 200));
 
-                    if (ImGui.Button("Start a New Game", buttonSize) || _uiState.debugnewgame)
+                    if (ImGui.Button("Start a New Game", _buttonSize) || _uiState.debugnewgame)
                     {
                         //_uiState.NewGameOptions.IsActive = true;
                         var newgameoptions = NewGameMenu.GetInstance();
@@ -52,7 +54,7 @@ namespace Pulsar4X.SDL2UI
                     }
                     if (_uiState.IsGameLoaded)
                     {
-                        if (ImGui.Button("Save Game...", buttonSize))
+                        if (ImGui.Button("Save Game...", _buttonSize))
                         {
                             _saveGame = !_saveGame;
 
@@ -62,24 +64,24 @@ namespace Pulsar4X.SDL2UI
                             SetActive(false);
                         }
 
-                        if (ImGui.Button("Options", buttonSize))
+                        if (ImGui.Button("Options", _buttonSize))
                         {
                             SettingsWindow.GetInstance().ToggleActive();
                             this.SetActive(false);
                         }
-                        if (ImGui.Button("Editor", buttonSize))
+                        if (ImGui.Button("Editor", _buttonSize))
                         {
                             ModFileEditor.GetInstance().ToggleActive();
                             this.SetActive(false);
                         }
 
-                        if(ImGui.Button("Preferences", buttonSize))
+                        if(ImGui.Button("Preferences", _buttonSize))
                         {
                             SystemViewPreferences.GetInstance().ToggleActive();
                             this.SetActive(false);
                         }
 
-                        if (ImGui.Button("SM Mode", buttonSize))
+                        if (ImGui.Button("SM Mode", _buttonSize))
                         {
                             var pannel = SMWindow.GetInstance();
                             _uiState.ActiveWindow = pannel;
@@ -92,14 +94,14 @@ namespace Pulsar4X.SDL2UI
                     var disabled = !DoAnySavesExist();
                     if(disabled)
                         ImGui.BeginDisabled();
-                    if (ImGui.Button("Resume a Current Game", buttonSize))
+                    if (ImGui.Button("Resume a Current Game", _buttonSize))
                     {
                         LoadGame.GetInstance().LoadLatest();
                         SetActive(false);
                     }
                     if(disabled)
                         ImGui.EndDisabled();
-                    if (ImGui.Button("Load Game...", buttonSize))
+                    if (ImGui.Button("Load Game...", _buttonSize))
                     {
                         LoadGame.GetInstance().ToggleActive();
                         SetActive(false);
@@ -107,7 +109,7 @@ namespace Pulsar4X.SDL2UI
                     //ImGui.Button("Connect to a Network Game", buttonSize);
                 }
 
-                if(ImGui.Button("Exit to Desktop", buttonSize))
+                if(ImGui.Button("Exit to Desktop", _buttonSize))
                 {
                     _uiState.ViewPort.IsAlive = false;
                 }
