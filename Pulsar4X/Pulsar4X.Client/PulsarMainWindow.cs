@@ -111,6 +111,8 @@ namespace Pulsar4X.SDL2UI
             if (!ImGuiSDL2CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed))
                 return false;
 
+            if(!_state.IsGameLoaded) return false;
+
             if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 1 & !ImGui.GetIO().WantCaptureMouse)
             {
                 _state.OnFocusMoved();
