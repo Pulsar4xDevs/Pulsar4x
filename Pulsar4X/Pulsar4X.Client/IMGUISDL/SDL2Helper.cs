@@ -90,7 +90,7 @@ public static class SDL2Helper
 
     public static IntPtr[] CreateSDLTextures(IntPtr renderPtr, DamageMap damageMap, byte alpha)
     {
-        IntPtr[] textures = new IntPtr[5]; // One for each map (IDMap, PresMap, VMap, PMap)
+        IntPtr[] textures = new IntPtr[6]; // One for each map (IDMap, PresMap, VMap, PMap)
 
         int width = damageMap.Width;
         int height = damageMap.Height;
@@ -100,6 +100,7 @@ public static class SDL2Helper
         textures[2] = CreateTextureForVMap(renderPtr, damageMap, width, height, alpha);
         textures[3] = CreateTextureForPMap(renderPtr, damageMap, width, height, alpha);
         textures[4] = CreateTextureForTemp(renderPtr, damageMap, width, height, alpha);
+        textures[5] = CreateTextureForPhaseState(renderPtr, damageMap, width, height, alpha);
         return textures;
     }
 
@@ -172,16 +173,25 @@ public static class SDL2Helper
         int pitch;
         SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
 
+        double maxVelocity = 0;
+        foreach (var part in damageMap.PMap)
+        {
+            if(part != null && part.Velocity.Length() > maxVelocity)
+                maxVelocity = part.Velocity.Length();
+        }
+        
         unsafe
         {
             uint* pixelPtr = (uint*)pixels.ToPointer();
-            double maxVelocity = damageMap.VMap.Max(v => v.Length());
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    int index = y * width + x;
-                    byte greenValue = (byte)((damageMap.VMap[index].Length() * 255.0) / maxVelocity);
+                    int index = damageMap.GetIndex(x, y);
+                    var part = damageMap.PMap[index];
+                    byte greenValue = 0;
+                    if(part != null)
+                        greenValue = (byte)((damageMap.PMap[index].Velocity.Length() * 255.0) / maxVelocity);
                     *pixelPtr = (uint)((alpha << 24) | (greenValue << 8));
                     pixelPtr++;
                 }
@@ -201,7 +211,7 @@ public static class SDL2Helper
         IntPtr pixels;
         int pitch;
         SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
-
+        int phaseStateCount = Enum.GetValues(typeof(PhaseState)).Length;
         unsafe
         {
             uint* pixelPtr = (uint*)pixels.ToPointer();
@@ -218,7 +228,7 @@ public static class SDL2Helper
                         byte lifeRed = (byte)(particle.Life * 2.55f); // Life is 0-100, so *2.55 for 0-255
 
                         // Blue for StateOfPhase, using full range 0 to 255
-                        int phaseStateCount = Enum.GetValues(typeof(PhaseState)).Length;
+                        
                         byte phaseBlue = (byte)((int)particle.StateOfPhase * 255 / (phaseStateCount - 1)); // Spread over 0-255
 
                         // Green for Temperature, assuming max temp is known or we normalize to 100
@@ -229,6 +239,43 @@ public static class SDL2Helper
                         //color = 0xFFFFFFFF;
 
                     }
+                    *pixelPtr = color;
+                    pixelPtr++;
+                }
+                pixelPtr += (pitch / 4) - width; // Adjust for pitch
+            }
+        }
+
+        SDL.SDL_UnlockTexture(texture);
+        return texture;
+    }
+    
+    internal static IntPtr CreateTextureForPhaseState(IntPtr renderPtr, DamageMap damageMap, int width, int height, byte alpha)
+    {
+        var texture = SDL.SDL_CreateTexture(renderPtr, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, width, height);
+
+        IntPtr pixels;
+        int pitch;
+        uint color = 0;
+        SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
+        int phaseStateCount = Enum.GetValues(typeof(PhaseState)).Length;
+        unsafe
+        {
+            uint* pixelPtr = (uint*)pixels.ToPointer();
+            
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int index = y * width + x;
+                    Particle particle = damageMap.PMap[index];
+                    if (particle != null)
+                    {
+                        var phaseState = particle.StateOfPhase;
+                        byte byteState = (byte)phaseState;
+                        color = ColourFromValue(byteState, phaseStateCount, 0);
+                    }
+                    else color = 0;
                     *pixelPtr = color;
                     pixelPtr++;
                 }
@@ -365,6 +412,16 @@ public static class SDL2Helper
         b = HueToRGB(v2, v1, b - 1f / 3f);
 
         return (r, g, b);
+    }
+
+    public static uint ColourFromValue(int value, int max, int min)
+    {
+        float normalisedVale = (float)(value - min)/(max - min);
+        byte r = (byte)(normalisedVale * 255);
+        byte g = (byte)(normalisedVale * 255);
+        byte b = (byte)(normalisedVale * 255);
+        byte a = 255;
+        return (uint)((a << 24) | (r << 16) | (g << 8) | b);
     }
 
     public static (float, float, float) AdjustLightness(float r, float g, float b, float lightness)

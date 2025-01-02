@@ -17,7 +17,7 @@ public struct ParticleMaterial
     public uint PartMatID;
     public float Density; //as a solid
     //Gpa
-    public float Elasticity = 0.9f;
+    public float Elasticity = 0.5f;
     //Mpa
     public float TensileStrength = 110;
     public float ThermalCapacity;
@@ -25,7 +25,6 @@ public struct ParticleMaterial
     public float MeltingZeroPoint;
     public PhasePoint TriplePoint;
     public PhasePoint CriticalPoint;
-
     public ParticleMaterial(ParticleMaterialBlueprint materialBP, ICargoable minOrMat)
     {
         PartMatID = materialBP.PartMatID;
@@ -60,13 +59,17 @@ public enum PhaseState
 
 public class Particle
 {
+    public static int NextID = 0;
+    public int ID = NextID++;
     public ParticleMaterial MatType;
     public PhaseState StateOfPhase = PhaseState.Solid;
+    public int mapIndex;
     public Vector2 Position;
     public Vector2 Velocity;
     public int Life;
     public float Mass;
     public DamageMap _pMap;
+    public bool IsDeleted = false;
     public float Temperature
     {
         get => _temperature;

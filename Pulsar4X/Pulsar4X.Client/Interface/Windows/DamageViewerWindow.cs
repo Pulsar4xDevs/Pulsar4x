@@ -208,6 +208,7 @@ namespace Pulsar4X.SDL2UI.Combat
         private bool _showPresMap = false;
         private bool _showPMap = false;
         private bool _showTemp = true;
+        private bool _showPState = false;
         private bool _runSimLoop = false;
         internal override void Display()
         {
@@ -276,6 +277,11 @@ namespace Pulsar4X.SDL2UI.Combat
                             ImGui.SetCursorPos(cpos);
                             ImGui.Image(_damageMapPtr[4], new System.Numerics.Vector2(w, h));
                         }
+                        if(_showPState)
+                        {
+                            ImGui.SetCursorPos(cpos);
+                            ImGui.Image(_damageMapPtr[5], new System.Numerics.Vector2(w, h));
+                        }
                         
                         
                         
@@ -308,6 +314,8 @@ namespace Pulsar4X.SDL2UI.Combat
                         ImGui.Checkbox("Pmap", ref _showPMap);
                         ImGui.SameLine();                
                         ImGui.Checkbox("TempMap", ref _showTemp);
+                        ImGui.SameLine();                
+                        ImGui.Checkbox("PhaseStateMap", ref _showPState);
                     }
 
 

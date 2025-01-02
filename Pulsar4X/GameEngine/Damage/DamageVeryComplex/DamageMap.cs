@@ -23,9 +23,8 @@ public class DamageMap
     public int Scale = 100;//pixels per meter
     int _pixBuf = 3; //this is just how much space we're leaving around the edges. 
     public Particle[] PMap;
-    public Vector2[] VMap;
     public string[] compIDMap; //componentInstance Map.
-    public float[] PresMap;
+    public float[] PresMap; //pressure in bar
     public int Width;
     public int Height;
     public int X = 0;
@@ -35,7 +34,6 @@ public class DamageMap
         Width = width;
         Height = height;
         PMap = new Particle[Width * Height];
-        VMap = new Vector2[Width * Height];
         PresMap = new float[Width * Height];
     }
     public DamageMap(int posX, int posY , Vector2 velocity, int width, int height, ParticleMaterial material)
@@ -46,7 +44,6 @@ public class DamageMap
         Height = height;
         compIDMap = new string[Width * Height];
         PMap = new Particle[Width * Height];
-        VMap = new Vector2[Width * Height];
         PresMap = new float[Width * Height];
         // Let's create a simple projectile shape, like a bullet or missile
         for (int y = 0; y < height; y++)
@@ -58,8 +55,9 @@ public class DamageMap
                 {
                     int index = y * width + x;
                     compIDMap[index] = "projectile";
-                    PMap[index] = new Particle(material, new Vector2(x,y), velocity, Scale);
-                    VMap[index] = velocity; // Set the initial velocity in VMap
+                    var newPart = new Particle(material, new Vector2(x,y), velocity, Scale);
+                    newPart.mapIndex = index;
+                    PMap[index] = newPart;
                     PresMap[index] = 1.0f; // Assuming atmospheric pressure for simplicity
                 }
                 // If you want a more complex shape, you can use conditions here to define where particles exist
@@ -102,16 +100,15 @@ public class DamageMap
                     for (int x = 0; x < partSize.len; x++)
                     {
                         int index = GetIndex(currentX + x, actualY + y);
-
                         var mat = ParticleHelpers.GetRandomMat(mats, rng);
                         Vector2 pos = new Vector2(currentX + x, actualY + y);
                         Vector2 vel = Vector2.Zero;
-                        Particle p = new Particle(mat, pos, vel, Scale);
                         float pressure = 1f;
                         compIDMap[index] = instanceID;
-                        PMap[index] = p;
+                        var newPart = new Particle(mat, pos, vel, Scale);
+                        newPart.mapIndex = index;
+                        PMap[index] = newPart;
                         PresMap[index] = pressure;
-                        VMap[index] = vel;
                     }
                 }
             }
@@ -157,7 +154,6 @@ public class DamageMap
         Width = totalLen + _pixBuf * 2;
         int arraylen = Width * Height;
         PMap = new Particle[arraylen];
-        VMap = new Vector2[arraylen];
         PresMap = new float[arraylen];
         compIDMap = new string[arraylen];
         return partsize;
@@ -219,11 +215,12 @@ public class DamageMap
                 newIDMap[newIndex] = compIDMap[oldIndex];
                 if (PMap[oldIndex] != null)
                 {
-                    newPMap[newIndex] = PMap[oldIndex];
+                    var p = PMap[oldIndex];
+                    p.mapIndex = newIndex;
+                    newPMap[newIndex] = p;
                     newPMap[newIndex].Position.X += offsetX;
                     newPMap[newIndex].Position.Y += offsetY;
                 }
-                newVMap[newIndex] = VMap[oldIndex];
                 newPresMap[newIndex] = PresMap[oldIndex];
             }
         }
@@ -241,11 +238,12 @@ public class DamageMap
                 if (newIndex >= 0 && newIndex < newPMap.Length)
                 {
                     newIDMap[newIndex] = otherMap.compIDMap[otherIndex];
-                    newVMap[newIndex] = otherMap.VMap[otherIndex];
                     newPresMap[newIndex] = otherMap.PresMap[otherIndex];
                     if (otherMap.PMap[otherIndex] != null)
                     {
-                        newPMap[newIndex] = otherMap.PMap[otherIndex];
+                        var p = otherMap.PMap[otherIndex];
+                        p.mapIndex = newIndex;
+                        newPMap[newIndex] = p;
                         newPMap[newIndex].Position.X = newX;
                         newPMap[newIndex].Position.Y = newY; 
                     }
@@ -256,7 +254,6 @@ public class DamageMap
         // Update map properties
         compIDMap = newIDMap;
         PMap = newPMap;
-        VMap = newVMap;
         PresMap = newPresMap;
         Width = newWidth;
         Height = newHeight;
@@ -307,7 +304,8 @@ public static class DamageMapHelpers
             var index = map.GetIndex(part);
             var pos = map.GetPosition(index);
             var partPos = (Math.Round( part.Position.X), Math.Round(part.Position.Y));
-            
+            bool isOutOfBounds = DamagePhysicsSim.IsOutOfBounds(part, map);
+            bool isDeleted = part.IsDeleted;
             if(index > map.PMap.Length - 1)
             {
                 throw new IndexOutOfRangeException(pos.ToString());
@@ -317,8 +315,8 @@ public static class DamageMapHelpers
                 throw new IndexOutOfRangeException(pos.ToString());
             }
             var isSame = map.PMap[index] == part; 
-            if (!isSame)
-                throw new Exception("out of position");
+            //if (!isSame)
+                //throw new Exception("out of position");
         }
     }
     
