@@ -111,7 +111,18 @@ namespace Pulsar4X.SDL2UI
             if (!ImGuiSDL2CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed))
                 return false;
 
-            if(!_state.IsGameLoaded) return false;
+            if(!_state.IsGameLoaded)
+            {
+                var compare = 0;
+#if DEBUG
+                // Debug builds have the git hash displayed in the bottom left corner
+                compare = 1;
+#endif
+                // Open the main menu if no other windows are open
+                if(ImGui.GetIO().MetricsRenderWindows == compare)
+                    MainMenuItems.GetInstance().SetActive(true);
+                return false;
+            }
 
             if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 1 & !ImGui.GetIO().WantCaptureMouse)
             {

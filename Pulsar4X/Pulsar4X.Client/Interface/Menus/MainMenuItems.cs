@@ -36,7 +36,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     ImGui.Image(_uiState.Img_MainMenuLogo(), new System.Numerics.Vector2(400, 200));
 
-                    if (ImGui.Button("Start a New Game", _buttonSize) || _uiState.debugnewgame)
+                    if (ImGui.Button("New Game...", _buttonSize) || _uiState.debugnewgame)
                     {
                         //_uiState.NewGameOptions.IsActive = true;
                         var newgameoptions = NewGameMenu.GetInstance();
@@ -85,7 +85,7 @@ namespace Pulsar4X.SDL2UI
                     var disabled = !DoAnySavesExist();
                     if(disabled)
                         ImGui.BeginDisabled();
-                    if (ImGui.Button("Resume a Current Game", _buttonSize))
+                    if (ImGui.Button("Resume Last Save", _buttonSize))
                     {
                         LoadGame.GetInstance().LoadLatest();
                         SetActive(false);
