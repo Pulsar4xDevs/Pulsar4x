@@ -189,6 +189,11 @@ namespace Pulsar4X.SDL2UI
         {
             return _uiState.ImgByName("pulsar4x-menu", "pulsar4x-menu", ".png");
         }
+
+        public static IntPtr Img_Discord(this GlobalUIState _uiState)
+        {
+            return _uiState.ImgByName("discord", "discord-mark-white", ".png");
+        }
         #endregion
     }
 }

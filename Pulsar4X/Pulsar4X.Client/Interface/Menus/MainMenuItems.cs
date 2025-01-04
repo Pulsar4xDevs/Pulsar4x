@@ -3,6 +3,9 @@ using ImGuiNET;
 using System.IO;
 using Pulsar4X.Client.Interface.Menus;
 using Pulsar4X.SDL2UI.ModFileEditing;
+using System.Numerics;
+using Pulsar4X.Client.Interface.Widgets;
+using System.Diagnostics;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -98,6 +101,24 @@ namespace Pulsar4X.SDL2UI
                         SetActive(false);
                     }
                     //ImGui.Button("Connect to a Network Game", buttonSize);
+                }
+
+                if(ImageButton.Render(_uiState.Img_Discord(), "Discord", new Vector2(16, 12), _buttonSize))
+                {
+                    try
+                    {
+                        ProcessStartInfo psi = new ProcessStartInfo
+                        {
+                            FileName = "https://discord.gg/3uwCQSn",
+                            UseShellExecute = true
+                        };
+                        Process.Start(psi);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Handle any errors
+                        Console.WriteLine($"Error opening URL: {ex.Message}");
+                    }
                 }
 
                 if(ImGui.Button("Exit to Desktop", _buttonSize))
