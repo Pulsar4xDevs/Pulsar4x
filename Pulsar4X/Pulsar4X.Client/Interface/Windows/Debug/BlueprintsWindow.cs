@@ -59,6 +59,7 @@ public class BlueprintsWindow : PulsarGuiWindow
 
                 DisplayBlueprintCategory("Armor", _uiState.Game.StartingGameData.Armor.Keys.ToList());
                 DisplayBlueprintCategory("Cargo Types", _uiState.Game.StartingGameData.CargoTypes.Keys.ToList());
+                DisplayBlueprintCategory("Colonies", _uiState.Game.StartingGameData.Colonies.Keys.ToList());
                 DisplayBlueprintCategory("Component Templates", _uiState.Game.StartingGameData.ComponentTemplates.Keys.ToList());
                 DisplayBlueprintCategory("Gas", _uiState.Game.StartingGameData.AtmosphericGas.Keys.ToList());
                 DisplayBlueprintCategory("Industry Types", _uiState.Game.StartingGameData.IndustryTypes.Keys.ToList());
@@ -86,6 +87,8 @@ public class BlueprintsWindow : PulsarGuiWindow
                     DisplayArmorBlueprint((ArmorBlueprint)_selectedBlueprint);
                 else if(_selectedBlueprint is CargoTypeBlueprint)
                     DisplayCargoTypeBlueprint((CargoTypeBlueprint)_selectedBlueprint);
+                else if(_selectedBlueprint is ColonyBlueprint)
+                    DisplayColonyBlueprint((ColonyBlueprint)_selectedBlueprint);
                 else if(_selectedBlueprint is ComponentTemplateBlueprint)
                     DisplayComponentTemplateBlueprint((ComponentTemplateBlueprint)_selectedBlueprint);
                 else if(_selectedBlueprint is DefaultItemsBlueprint)
@@ -120,6 +123,8 @@ public class BlueprintsWindow : PulsarGuiWindow
             return _uiState.Game.StartingGameData.Armor[key];
         if(_uiState.Game.StartingGameData.CargoTypes.ContainsKey(key))
             return _uiState.Game.StartingGameData.CargoTypes[key];
+        if(_uiState.Game.StartingGameData.Colonies.ContainsKey(key))
+            return _uiState.Game.StartingGameData.Colonies[key];
         if(_uiState.Game.StartingGameData.ComponentTemplates.ContainsKey(key))
             return _uiState.Game.StartingGameData.ComponentTemplates[key];
         if(_uiState.Game.StartingGameData.AtmosphericGas.ContainsKey(key))
@@ -152,6 +157,18 @@ public class BlueprintsWindow : PulsarGuiWindow
             ImGui.Text(value);
     }
 
+    private void DisplayStartingItemBlueprint(ColonyBlueprint.StartingItemBlueprint startingItemBlueprint)
+    {
+        ImGui.Text(startingItemBlueprint.Id);
+        ImGui.SameLine();
+        ImGui.Text(startingItemBlueprint.Amount.ToString());
+        ImGui.SameLine();
+        if(string.IsNullOrEmpty(startingItemBlueprint.Type))
+            ImGui.Text("null");
+        else
+            ImGui.Text(startingItemBlueprint.Type);
+    }
+
     private void DisplayArmorBlueprint(ArmorBlueprint armorBlueprint)
     {
         DisplayKeyValue("Resource ID", armorBlueprint.ResourceID);
@@ -162,6 +179,108 @@ public class BlueprintsWindow : PulsarGuiWindow
     {
         DisplayKeyValue("Name", cargoTypeBlueprint.Name);
         DisplayKeyValue("Description", cargoTypeBlueprint.Description);
+    }
+
+    private void DisplayColonyBlueprint(ColonyBlueprint colonyBlueprint)
+    {
+        DisplayKeyValue("Name", colonyBlueprint.Name);
+        DisplayKeyValue("Starting Population", colonyBlueprint.StartingPopulation.ToString());
+
+        // Component Designs
+        if(colonyBlueprint?.ComponentDesigns?.Count > 0
+            && ImGui.CollapsingHeader("Component Designs"))
+        {
+            foreach(var value in colonyBlueprint.ComponentDesigns)
+            {
+                ImGui.Text(value);
+            }
+        }
+
+        // Ordnance Designs
+        if(colonyBlueprint?.OrdnanceDesigns?.Count > 0
+            && ImGui.CollapsingHeader("Ordnance Designs"))
+        {
+            foreach(var value in colonyBlueprint.OrdnanceDesigns)
+            {
+                ImGui.Text(value);
+            }
+        }
+
+        // Ship Designs
+        if(colonyBlueprint?.ShipDesigns?.Count > 0
+            && ImGui.CollapsingHeader("Ship Designs"))
+        {
+            foreach(var value in colonyBlueprint.ShipDesigns)
+            {
+                ImGui.Text(value);
+            }
+        }
+
+        // Starting Items
+        if(colonyBlueprint?.StartingItems?.Count > 0
+            && ImGui.CollapsingHeader("Starting Items"))
+        {
+            foreach(var value in colonyBlueprint.StartingItems)
+            {
+                ImGui.Text(value);
+            }
+        }
+
+        // Installations
+        if(colonyBlueprint?.Installations?.Count > 0
+            && ImGui.CollapsingHeader("Installations"))
+        {
+            foreach(var item in colonyBlueprint.Installations)
+            {
+                DisplayStartingItemBlueprint(item);
+            }
+        }
+
+        // Cargo
+        if(colonyBlueprint?.Cargo?.Count > 0
+            && ImGui.CollapsingHeader("Cargo"))
+        {
+            foreach(var item in colonyBlueprint.Cargo)
+            {
+                DisplayStartingItemBlueprint(item);
+            }
+        }
+
+        // Fleets
+        if(colonyBlueprint?.Fleets?.Count > 0
+            && ImGui.CollapsingHeader("Fleets"))
+        {
+            foreach(var fleet in colonyBlueprint.Fleets)
+            {
+                ImGui.Text(fleet.Name);
+
+                if(fleet.Ships == null) continue;
+
+                ImGui.Indent();
+                if(ImGui.CollapsingHeader("Ships###" + fleet.Name))
+                {
+                    foreach(var ship in fleet.Ships)
+                    {
+                        ImGui.Text(ship.DesignId);
+                        ImGui.Text(ship.Name);
+
+                        if(ship.Cargo == null) continue;
+
+                        ImGui.Indent();
+                        if(ImGui.CollapsingHeader("Cargo###" + ship.Name))
+                        {
+                            foreach(var item in ship.Cargo)
+                            {
+                                DisplayStartingItemBlueprint(item);
+                            }
+                        }
+
+                        ImGui.Unindent();
+                    }
+                }
+                ImGui.Unindent();
+            }
+        }
     }
 
     private void DisplayComponentTemplateBlueprint(ComponentTemplateBlueprint componentTemplateBlueprint)
