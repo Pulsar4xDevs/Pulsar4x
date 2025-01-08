@@ -3,6 +3,7 @@ using System;
 using ImGuiNET;
 using System.IO;
 using System.Numerics;
+using Pulsar4X.Client.Interface.Themes;
 
 namespace ImGuiSDL2CS
 {
@@ -14,6 +15,8 @@ namespace ImGuiSDL2CS
         protected readonly bool[] g_MousePressed = { false, false, false };
         protected float g_MouseWheel = 0.0f;
         protected IntPtr g_FontTexture = IntPtr.Zero;
+
+        protected ITheme Theme { get; set; }
 
         public Vector2 Position
         {
@@ -54,6 +57,10 @@ namespace ImGuiSDL2CS
             OnEvent = ImGuiOnEvent;
             OnLoop = ImGuiOnLoop;
             SDL.SDL_SetHint("SDL_RENDER_LINE_METHOD", "2"); //https://github.com/libsdl-org/SDL/blob/1fc7f681187f80ccd6b9625214b47db665cd9aaf/include/SDL_hints.h#L1304-L1315
+
+            // Apply ImGui theme
+            // TODO: allow player to select/change this
+            ApplyTheme(new FuturisticTheme());
         }
 
         public override void Run()
@@ -64,6 +71,12 @@ namespace ImGuiSDL2CS
             Create();
 
             base.Run();
+        }
+
+        public void ApplyTheme(ITheme theme)
+        {
+            Theme = theme;
+            Theme.Apply();
         }
 
         public bool ImGuiOnEvent(SDL2Window window, SDL.SDL_Event e)
