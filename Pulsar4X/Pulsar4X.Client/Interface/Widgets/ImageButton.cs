@@ -28,7 +28,7 @@ public static class ImageButton
         }
     }
 
-    public static bool Render(IntPtr textureId, string label, Vector2 imageSize, Vector2 buttonSize)
+    public static bool Begin(IntPtr textureId, string label, Vector2 imageSize, Vector2 buttonSize)
     {
         bool clicked = false;
         var currentColors = ButtonColors.FromCurrentStyle();
@@ -69,6 +69,7 @@ public static class ImageButton
                 bgColor,
                 style.FrameRounding);
 
+            // Draw border if thickness > 0
             if (style.FrameBorderSize > 0)
             {
                 drawList.AddRect(
