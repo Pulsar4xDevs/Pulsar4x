@@ -91,8 +91,6 @@ public class BlueprintsWindow : PulsarGuiWindow
                     DisplayColonyBlueprint((ColonyBlueprint)_selectedBlueprint);
                 else if(_selectedBlueprint is ComponentTemplateBlueprint)
                     DisplayComponentTemplateBlueprint((ComponentTemplateBlueprint)_selectedBlueprint);
-                else if(_selectedBlueprint is DefaultItemsBlueprint)
-                    DisplayDefaultItemsBlueprint((DefaultItemsBlueprint)_selectedBlueprint);
                 else if(_selectedBlueprint is GasBlueprint)
                     DisplayGasBlueprint((GasBlueprint)_selectedBlueprint);
                 else if(_selectedBlueprint is IndustryTypeBlueprint)
@@ -342,18 +340,6 @@ public class BlueprintsWindow : PulsarGuiWindow
             foreach(var kvp in componentTemplatePropertyBlueprint.DataDict)
             {
                 DisplayKeyValue(kvp.Key, kvp.Value);
-            }
-        }
-    }
-
-    private void DisplayDefaultItemsBlueprint(DefaultItemsBlueprint defaultItemsBlueprint)
-    {
-        if(defaultItemsBlueprint.Items.Count > 0
-            && ImGui.CollapsingHeader("Items"))
-        {
-            foreach(var item in defaultItemsBlueprint.Items)
-            {
-                ImGui.Text(item);
             }
         }
     }
