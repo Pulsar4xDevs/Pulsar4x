@@ -103,7 +103,7 @@ namespace Pulsar4X.SDL2UI
                     //ImGui.Button("Connect to a Network Game", buttonSize);
                 }
 
-                if(ImageButton.Render(_uiState.Img_Discord(), "Discord", new Vector2(16, 12), _buttonSize))
+                if(ImageButton.Begin(_uiState.Img_Discord(), "Discord", new Vector2(16, 12), _buttonSize))
                 {
                     try
                     {

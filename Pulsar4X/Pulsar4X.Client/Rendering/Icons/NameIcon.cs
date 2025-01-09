@@ -161,7 +161,7 @@ namespace Pulsar4X.SDL2UI
                 var orderedGroupedIcons = nameIconGrouping.GroupBy(i => i.EntityState.BodyType).OrderBy(g => g.Key).ToList();
                 var highestPriorityGroup = orderedGroupedIcons.First().ToList();
                 orderedGroupedIcons.RemoveAt(0);
-                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Styles.NameIconHighlight);
+
                 for(int i = 0; i < highestPriorityGroup.Count; i++)
                 {
                     if(i == 0)
@@ -172,7 +172,6 @@ namespace Pulsar4X.SDL2UI
                     if(i == highestPriorityGroup.Count - 1)
                         EndNameIcon(highestPriorityGroup[i]);
                 }
-                ImGui.PopStyleColor();
             }
         }
 
@@ -183,6 +182,7 @@ namespace Pulsar4X.SDL2UI
 
             if(!subIcons.Any())
             {
+                ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 0f);
                 ImGui.PushStyleColor(ImGuiCol.Button, Styles.InvisibleColor);
                 ImGui.PushStyleColor(ImGuiCol.Text, icon.TextDisplayColor);
 
@@ -192,6 +192,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 DisplayContextMenu(camera, icon);
                 ImGui.PopStyleColor(2);
+                ImGui.PopStyleVar();
                 return;
             }
 

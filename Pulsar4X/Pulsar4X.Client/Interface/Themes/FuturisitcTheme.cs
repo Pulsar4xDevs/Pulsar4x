@@ -45,10 +45,10 @@ public class FuturisticTheme : ITheme
         // Sliders and scrollbars
         colors[(int)ImGuiCol.SliderGrab] = new Vector4(0.24f, 0.46f, 0.98f, 0.78f);    // Bright blue
         colors[(int)ImGuiCol.SliderGrabActive] = new Vector4(0.41f, 0.59f, 1.00f, 0.80f);
-        colors[(int)ImGuiCol.ScrollbarBg] = new Vector4(0.02f, 0.02f, 0.02f, 0.53f);
-        colors[(int)ImGuiCol.ScrollbarGrab] = new Vector4(0.31f, 0.31f, 0.31f, 1.00f);
-        colors[(int)ImGuiCol.ScrollbarGrabHovered] = new Vector4(0.41f, 0.41f, 0.41f, 1.00f);
-        colors[(int)ImGuiCol.ScrollbarGrabActive] = new Vector4(0.51f, 0.51f, 0.51f, 1.00f);
+        colors[(int)ImGuiCol.ScrollbarBg] = new Vector4(0.02f, 0.02f, 0.2f, 0.53f);
+        colors[(int)ImGuiCol.ScrollbarGrab] = new Vector4(0.31f, 0.31f, 0.91f, 0.25f);
+        colors[(int)ImGuiCol.ScrollbarGrabHovered] = new Vector4(0.41f, 0.41f, 0.91f, 0.25f);
+        colors[(int)ImGuiCol.ScrollbarGrabActive] = new Vector4(0.51f, 0.51f, 0.91f, 0.25f);
 
         // Table headers
         colors[(int)ImGuiCol.TableHeaderBg] = new Vector4(0.19f, 0.19f, 0.20f, 1.00f);
@@ -64,7 +64,7 @@ public class FuturisticTheme : ITheme
         style.TouchExtraPadding = new Vector2(0, 0);
 
         style.IndentSpacing = 21.0f;
-        style.ScrollbarSize = 12.0f;
+        style.ScrollbarSize = 10.0f;
         style.GrabMinSize = 9.0f;
 
         style.WindowBorderSize = 1.0f;
@@ -73,12 +73,12 @@ public class FuturisticTheme : ITheme
         style.FrameBorderSize = 1.0f;
         style.TabBorderSize = 1.0f;
 
-        style.WindowRounding = 4.0f;
-        style.ChildRounding = 4.0f;
-        style.FrameRounding = 4.0f;
-        style.PopupRounding = 4.0f;
-        style.ScrollbarRounding = 4.0f;
-        style.GrabRounding = 4.0f;
-        style.TabRounding = 4.0f;
+        style.WindowRounding = 0.0f;
+        style.ChildRounding = 0.0f;
+        style.FrameRounding = 0.0f;
+        style.PopupRounding = 0.0f;
+        style.ScrollbarRounding = 0.0f;
+        style.GrabRounding = 0.0f;
+        style.TabRounding = 0.0f;
     }
 }
