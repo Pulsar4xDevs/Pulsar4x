@@ -184,27 +184,23 @@ namespace Pulsar4X.SDL2UI
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 0f);
                 ImGui.PushStyleColor(ImGuiCol.Button, Styles.InvisibleColor);
-                ImGui.PushStyleColor(ImGuiCol.Text, icon.TextDisplayColor);
 
                 if (ImGui.Button(icon.NameString + "##" + icon.EntityState.Entity.Id.ToString()))
                 {
                     icon._state.EntityClicked(icon.EntityState.Entity.Id, icon._starSysGuid, MouseButtons.Primary);
                 }
                 DisplayContextMenu(camera, icon);
-                ImGui.PopStyleColor(2);
+                ImGui.PopStyleColor(1);
                 ImGui.PopStyleVar();
                 return;
             }
 
-            ImGui.PushStyleColor(ImGuiCol.Text, icon.TextDisplayColor);
             if(ImGui.BeginMenu(icon.NameString))
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.StandardText);
                 if(ImGui.MenuItem("View " + icon.NameString))
                 {
                     icon._state.EntityClicked(icon.EntityState.Entity.Id, icon._starSysGuid, MouseButtons.Primary);
                 }
-                ImGui.PopStyleColor();
                 DisplayContextMenu(camera, icon);
 
                 if(subIcons.Any())
@@ -215,12 +211,10 @@ namespace Pulsar4X.SDL2UI
                 {
                     foreach(var subIcon in subIcons[0])
                     {
-                        ImGui.PushStyleColor(ImGuiCol.Text, subIcon.TextDisplayColor);
                         if(ImGui.MenuItem(subIcon.NameString))
                         {
                             subIcon._state.EntityClicked(subIcon.EntityState.Entity.Id, subIcon._starSysGuid, MouseButtons.Primary);
                         }
-                        ImGui.PopStyleColor();
                         DisplayContextMenu(camera, subIcon);
                     }
                 }
@@ -228,27 +222,22 @@ namespace Pulsar4X.SDL2UI
                 {
                     foreach(var group in subIcons)
                     {
-                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.StandardText);
                         if(ImGui.BeginMenu(group.Key.ToString()))
                         {
                             foreach(var subIcon in group)
                             {
-                                ImGui.PushStyleColor(ImGuiCol.Text, subIcon.TextDisplayColor);
                                 if(ImGui.MenuItem(subIcon.NameString))
                                 {
                                     subIcon._state.EntityClicked(subIcon.EntityState.Entity.Id, subIcon._starSysGuid, MouseButtons.Primary);
                                 }
-                                ImGui.PopStyleColor();
                                 DisplayContextMenu(camera, subIcon);
                             }
                             ImGui.EndMenu();
                         }
-                        ImGui.PopStyleColor();
                     }
                 }
                 ImGui.EndMenu();
             }
-            ImGui.PopStyleColor();
         }
 
         private static void BeginNameIcon(NameIcon icon)
