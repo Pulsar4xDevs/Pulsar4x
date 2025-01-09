@@ -16,6 +16,7 @@ using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using Pulsar4X.Client.Interface;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -242,19 +243,7 @@ namespace Pulsar4X.SDL2UI
                 if(Entity.TryGetDatablob<JPSurveyableDB>(out var jPSurveyableDB))
                 {
                     ImGui.Columns(1);
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
-                    ImGui.Text("Gravitational anomaly!");
-                    ImGui.PopStyleColor();
-                    ImGui.NewLine();
-                    ImGui.TextWrapped("Order a fleet equipped with a gravitational surveyor to survey this location. A successful survey may reveal a Jump Point to another system.");
-                    ImGui.NewLine();
-
-                    var factionID = _uiState.Faction.Id;
-                    var remainingPoints = jPSurveyableDB.PointsRequired;
-                    if( jPSurveyableDB.SurveyPointsRemaining.ContainsKey(factionID))
-                        remainingPoints = jPSurveyableDB.SurveyPointsRemaining[factionID];
-
-                    ImGui.TextWrapped("Survey Points Required: " + remainingPoints + "/" + jPSurveyableDB.PointsRequired);
+                    Displays.GravitationalAnomlay(_uiState, jPSurveyableDB);
                 }
 
                 ImGui.Columns(1);
@@ -299,8 +288,8 @@ namespace Pulsar4X.SDL2UI
                                 }
                                 ImGui.TableNextColumn();
                                 ImGui.Text(actions[i].Details);
-                                
-                                
+
+
                             }
 
                             ImGui.EndTable();

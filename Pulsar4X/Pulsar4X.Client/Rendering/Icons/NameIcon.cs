@@ -9,6 +9,10 @@ using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.JumpPoints;
 using Pulsar4X.Names;
 using Pulsar4X.Movement;
+using Pulsar4X.Client.Interface;
+using Pulsar4X.Ships;
+using Pulsar4X.Galaxy;
+using Pulsar4X.Factions;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -189,6 +193,10 @@ namespace Pulsar4X.SDL2UI
                 {
                     icon._state.EntityClicked(icon.EntityState.Entity.Id, icon._starSysGuid, MouseButtons.Primary);
                 }
+                if(ImGui.IsItemHovered())
+                {
+                    DisplayTooltip(camera, icon);
+                }
                 DisplayContextMenu(camera, icon);
                 ImGui.PopStyleColor(1);
                 ImGui.PopStyleVar();
@@ -275,6 +283,27 @@ namespace Pulsar4X.SDL2UI
                 icon.SetUpContextMenu(icon.EntityState.Entity.Id);
                 ImGui.EndPopup();
             }
+        }
+
+        private static void DisplayTooltip(Camera camera, NameIcon icon)
+        {
+            var name = icon.NameString;
+            var type = icon.EntityState.BodyType.ToString();
+            Action? callback = null;
+
+            // Don't display the unknown body type
+            if(type.Equals("Unknown")) type = "";
+
+            // Setup the callback for the tooltip
+            if(icon.EntityState.HasDataBlob<JPSurveyableDB>())
+                callback = () => Displays.GravitationalAnomlay(icon._state, icon.EntityState.GetDataBlob<JPSurveyableDB>());
+            else if(icon.EntityState.HasDataBlob<ShipInfoDB>()
+                && icon.EntityState.HasDataBlob<MassVolumeDB>()
+                && icon.EntityState.HasDataBlob<PositionDB>())
+                callback = () => Displays.Ship(icon._state, icon.EntityState.GetDataBlob<ShipInfoDB>(), icon.EntityState.GetDataBlob<MassVolumeDB>(), icon.EntityState.GetDataBlob<PositionDB>(), icon._state.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods);
+
+            // Display the tooltip
+            DisplayHelpers.DescriptiveTooltip(name, type, "", callback, hideDescriptionColor: true);
         }
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
