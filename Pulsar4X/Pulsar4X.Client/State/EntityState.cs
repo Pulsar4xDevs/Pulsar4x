@@ -66,7 +66,7 @@ namespace Pulsar4X.SDL2UI
 
         public bool IsPlanetOrMoon()
         {
-            return this.BodyType == UserOrbitSettings.OrbitBodyType.Planet || this.BodyType == UserOrbitSettings.OrbitBodyType.Moon;
+            return this.BodyType == UserOrbitSettings.OrbitBodyType.Planet || this.BodyType == UserOrbitSettings.OrbitBodyType.DwarfPlanet || this.BodyType == UserOrbitSettings.OrbitBodyType.Moon;
         }
 
         public bool IsSmallBody()
@@ -117,30 +117,33 @@ namespace Pulsar4X.SDL2UI
                 switch (GetDataBlob<SystemBodyInfoDB>().BodyType)
                 {
                     case DataStructures.BodyType.Asteroid:
-                        {
+                    {
                             BodyType = UserOrbitSettings.OrbitBodyType.Asteroid;
                             break;
-                        }
+                    }
                     case DataStructures.BodyType.Comet:
-                        {
+                    {
                             BodyType = UserOrbitSettings.OrbitBodyType.Comet;
                             break;
-                        }
+                    }
                     case DataStructures.BodyType.DwarfPlanet:
+                    {
+                        BodyType = UserOrbitSettings.OrbitBodyType.DwarfPlanet;
+                        break;
+                    }
                     case DataStructures.BodyType.GasDwarf:
                     case DataStructures.BodyType.GasGiant:
                     case DataStructures.BodyType.IceGiant:
                     case DataStructures.BodyType.Terrestrial:
-                        {
+                    {
                             BodyType = UserOrbitSettings.OrbitBodyType.Planet;
                             break;
-                        }
-
+                    }
                     case DataStructures.BodyType.Moon:
-                        {
+                    {
                             BodyType = UserOrbitSettings.OrbitBodyType.Moon;
                             break;
-                        }
+                    }
                     default:
                         break;
                 }
