@@ -65,6 +65,9 @@ public class BlueprintsWindow : PulsarGuiWindow
                 DisplayBlueprintCategory("Industry Types", _uiState.Game.StartingGameData.IndustryTypes.Keys.ToList());
                 DisplayBlueprintCategory("Minerals", _uiState.Game.StartingGameData.Minerals.Keys.ToList());
                 DisplayBlueprintCategory("Processed Materials", _uiState.Game.StartingGameData.ProcessedMaterials.Keys.ToList());
+                DisplayBlueprintCategory("Stars", _uiState.Game.StartingGameData.Stars.Keys.ToList());
+                DisplayBlueprintCategory("Systems", _uiState.Game.StartingGameData.Systems.Keys.ToList());
+                DisplayBlueprintCategory("System Bodies", _uiState.Game.StartingGameData.SystemBodies.Keys.ToList());
                 DisplayBlueprintCategory("System Gen Settings", _uiState.Game.StartingGameData.SystemGenSettings.Keys.ToList());
                 DisplayBlueprintCategory("Techs", _uiState.Game.StartingGameData.Techs.Keys.ToList());
                 DisplayBlueprintCategory("Tech Categories", _uiState.Game.StartingGameData.TechCategories.Keys.ToList());
@@ -99,6 +102,12 @@ public class BlueprintsWindow : PulsarGuiWindow
                     DisplayMineralBlueprint((MineralBlueprint)_selectedBlueprint);
                 else if(_selectedBlueprint is ProcessedMaterialBlueprint)
                     DisplayProcessedMaterialBlueprint((ProcessedMaterialBlueprint)_selectedBlueprint);
+                else if(_selectedBlueprint is StarBlueprint)
+                    DisplayStarBlueprint((StarBlueprint)_selectedBlueprint);
+                else if(_selectedBlueprint is SystemBlueprint)
+                    DisplaySystemBlueprint((SystemBlueprint)_selectedBlueprint);
+                else if(_selectedBlueprint is SystemBodyBlueprint)
+                    DisplaySystemBodyBlueprint((SystemBodyBlueprint)_selectedBlueprint);
                 else if(_selectedBlueprint is SystemGenSettingsBlueprint)
                     DisplaySystemGenSettingsBlueprint((SystemGenSettingsBlueprint)_selectedBlueprint);
                 else if(_selectedBlueprint is TechBlueprint)
@@ -133,6 +142,12 @@ public class BlueprintsWindow : PulsarGuiWindow
             return _uiState.Game.StartingGameData.Minerals[key];
         if(_uiState.Game.StartingGameData.ProcessedMaterials.ContainsKey(key))
             return _uiState.Game.StartingGameData.ProcessedMaterials[key];
+        if(_uiState.Game.StartingGameData.Stars.ContainsKey(key))
+            return _uiState.Game.StartingGameData.Stars[key];
+        if(_uiState.Game.StartingGameData.Systems.ContainsKey(key))
+            return _uiState.Game.StartingGameData.Systems[key];
+        if(_uiState.Game.StartingGameData.SystemBodies.ContainsKey(key))
+            return _uiState.Game.StartingGameData.SystemBodies[key];
         if(_uiState.Game.StartingGameData.SystemGenSettings.ContainsKey(key))
             return _uiState.Game.StartingGameData.SystemGenSettings[key];
         if(_uiState.Game.StartingGameData.Techs.ContainsKey(key))
@@ -410,6 +425,138 @@ public class BlueprintsWindow : PulsarGuiWindow
             foreach(var kvp in processedMaterialBlueprint.ResourceCosts)
             {
                 DisplayKeyValue(kvp.Key, kvp.Value.ToString());
+            }
+        }
+    }
+
+    private void DisplayStarBlueprint(StarBlueprint starBlueprint)
+    {
+        DisplayKeyValue("Name", starBlueprint.Name);
+        if(ImGui.CollapsingHeader("Info"))
+        {
+            DisplayKeyValue("Mass", starBlueprint.Info.Mass.ToString());
+            DisplayKeyValue("Radius", starBlueprint.Info.Radius.ToString());
+            DisplayKeyValue("Age", starBlueprint.Info.Age.ToString());
+            DisplayKeyValue("Class", starBlueprint.Info.Class);
+            DisplayKeyValue("Temperature", starBlueprint.Info.Temperature.ToString());
+            DisplayKeyValue("Luminosity", starBlueprint.Info.Luminosity.ToString());
+            DisplayKeyValue("LuminosityClass", starBlueprint.Info.LuminosityClass);
+            DisplayKeyValue("SpectralType", starBlueprint.Info.SpectralType);
+        }
+    }
+
+    private void DisplaySystemBlueprint(SystemBlueprint systemBlueprint)
+    {
+        DisplayKeyValue("Name", systemBlueprint.Name);
+        DisplayKeyValue("Seed", systemBlueprint.Seed.ToString());
+
+        if(ImGui.CollapsingHeader("Stars"))
+        {
+            foreach(var star in systemBlueprint.Stars)
+            {
+                ImGui.Text(star);
+            }
+        }
+
+        if(ImGui.CollapsingHeader("Bodies"))
+        {
+            foreach(var body in systemBlueprint.Bodies)
+            {
+                ImGui.Text(body);
+            }
+        }
+
+        if(ImGui.CollapsingHeader("Survey Rings"))
+        {
+            foreach(var ring in systemBlueprint.SurveyRings)
+            {
+                DisplayKeyValue("RingRadiusInAU", ring.RingRadiusInAU.ToString());
+                ImGui.SameLine();
+                DisplayKeyValue("Count", ring.Count.ToString());
+            }
+        }
+    }
+
+    private void DisplaySystemBodyBlueprint(SystemBodyBlueprint systemBodyBlueprint)
+    {
+        DisplayKeyValue("Name", systemBodyBlueprint.Name);
+        DisplayKeyValue("CanStartHere", systemBodyBlueprint.CanStartHere.ToString());
+        DisplayKeyValue("Parent", systemBodyBlueprint.Parent);
+        DisplayKeyValue("Colonizable", systemBodyBlueprint.Colonizable.ToString());
+        DisplayKeyValue("GeoSurveyPointsRequired", systemBodyBlueprint.GeoSurveyPointsRequired.ToString());
+        DisplayKeyValue("GenerateMinerals", systemBodyBlueprint.GenerateMinerals);
+
+        if(ImGui.CollapsingHeader("Info"))
+        {
+            DisplayKeyValue("Gravity", systemBodyBlueprint.Info.Gravity.ToString());
+            DisplayKeyValue("Type", systemBodyBlueprint.Info.Type);
+            DisplayKeyValue("Tectonics", systemBodyBlueprint.Info.Tectonics);
+            DisplayKeyValue("Albedo", systemBodyBlueprint.Info.Albedo.ToString());
+            DisplayKeyValue("AxialTilt", systemBodyBlueprint.Info.AxialTilt.ToString());
+            DisplayKeyValue("MagneticField", systemBodyBlueprint.Info.MagneticField.ToString());
+            DisplayKeyValue("BaseTemperature", systemBodyBlueprint.Info.BaseTemperature.ToString());
+            DisplayKeyValue("RadiationLevel", systemBodyBlueprint.Info.RadiationLevel.ToString());
+            DisplayKeyValue("AtmosphericDust", systemBodyBlueprint.Info.AtmosphericDust.ToString());
+            DisplayKeyValue("LengthOfDay", systemBodyBlueprint.Info.LengthOfDay.ToString());
+            DisplayKeyValue("Mass", systemBodyBlueprint.Info.Mass.ToString());
+            DisplayKeyValue("Radius", systemBodyBlueprint.Info.Radius.ToString());
+        }
+
+        if(ImGui.CollapsingHeader("Orbit"))
+        {
+            DisplayKeyValue("SemiMajorAxis", systemBodyBlueprint.Orbit.SemiMajorAxis.ToString());
+            DisplayKeyValue("SemiMajorAxis_m", systemBodyBlueprint.Orbit.SemiMajorAxis_m.ToString());
+            DisplayKeyValue("SemiMajorAxis_km", systemBodyBlueprint.Orbit.SemiMajorAxis_km.ToString());
+            DisplayKeyValue("SemiMajorAxis_au", systemBodyBlueprint.Orbit.SemiMajorAxis_au.ToString());
+            DisplayKeyValue("Eccentricity", systemBodyBlueprint.Orbit.Eccentricity.ToString());
+            DisplayKeyValue("EclipticInclination", systemBodyBlueprint.Orbit.EclipticInclination.ToString());
+            DisplayKeyValue("EclipticInclination_r", systemBodyBlueprint.Orbit.EclipticInclination_r.ToString());
+            DisplayKeyValue("EclipticInclination_d", systemBodyBlueprint.Orbit.EclipticInclination_d.ToString());
+            DisplayKeyValue("LoAN", systemBodyBlueprint.Orbit.LoAN.ToString());
+            DisplayKeyValue("LoAN_r", systemBodyBlueprint.Orbit.LoAN_r.ToString());
+            DisplayKeyValue("LoAN_d", systemBodyBlueprint.Orbit.LoAN_d.ToString());
+            DisplayKeyValue("AoP", systemBodyBlueprint.Orbit.AoP.ToString());
+            DisplayKeyValue("AoP_r", systemBodyBlueprint.Orbit.AoP_r.ToString());
+            DisplayKeyValue("AoP_d", systemBodyBlueprint.Orbit.AoP_d.ToString());
+            DisplayKeyValue("MeanAnomaly", systemBodyBlueprint.Orbit.MeanAnomaly.ToString());
+            DisplayKeyValue("MeanAnomaly_r", systemBodyBlueprint.Orbit.MeanAnomaly_r.ToString());
+            DisplayKeyValue("MeanAnomaly_d", systemBodyBlueprint.Orbit.MeanAnomaly_d.ToString());
+        }
+
+        if(systemBodyBlueprint.Atmosphere.HasValue && ImGui.CollapsingHeader("Atmosphere"))
+        {
+            var atmosphere = systemBodyBlueprint.Atmosphere.Value;
+
+            DisplayKeyValue("Pressure", atmosphere.Pressure.ToString());
+            DisplayKeyValue("Hydrosphere", atmosphere.Hydrosphere.ToString());
+            DisplayKeyValue("HydroExtent", atmosphere.HydroExtent.ToString());
+            DisplayKeyValue("GreenhouseFactor", atmosphere.GreenhouseFactor.ToString());
+            DisplayKeyValue("GreenhousePressure", atmosphere.GreenhousePressure.ToString());
+            DisplayKeyValue("SurfaceTemperature", atmosphere.SurfaceTemperature.ToString());
+
+            if(atmosphere.Gases != null)
+            {
+                ImGui.Indent();
+                if(ImGui.CollapsingHeader("Gases"))
+                {
+                    foreach(var gas in atmosphere.Gases)
+                    {
+                        DisplayKeyValue("Symbol", gas.Symbol);
+                        ImGui.SameLine();
+                        DisplayKeyValue("Percent", gas.Percent.ToString());
+                    }
+                }
+                ImGui.Unindent();
+            }
+        }
+
+        if(systemBodyBlueprint.Minerals != null && ImGui.CollapsingHeader("Minerals"))
+        {
+            foreach(var mineral in systemBodyBlueprint.Minerals)
+            {
+                DisplayKeyValue("Id", mineral.Id); ImGui.SameLine();
+                DisplayKeyValue("Abundance", mineral.Abundance.ToString()); ImGui.SameLine();
+                DisplayKeyValue("Accessibility", mineral.Accessibility.ToString());
             }
         }
     }
