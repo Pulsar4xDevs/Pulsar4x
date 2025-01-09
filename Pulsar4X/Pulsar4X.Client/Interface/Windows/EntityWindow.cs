@@ -174,9 +174,7 @@ namespace Pulsar4X.SDL2UI
                     if (Entity.TryGetDatablob<NewtonThrustAbilityDB>(out var newtDB))
                         fuelStr += Stringify.Velocity(newtDB.DeltaV) + " Δv";
                     var size = ImGui.GetContentRegionAvail();
-                    ImGui.PushStyleColor(ImGuiCol.PlotHistogram, Styles.SelectedColor);
                     ImGui.ProgressBar((float)fuelPercent, new Vector2(size.X, 24), fuelStr);
-                    ImGui.PopStyleColor();
                     if (ImGui.IsItemHovered())
                     {
                         ImGui.SetTooltip(fuelType?.Name ?? "Unknown");

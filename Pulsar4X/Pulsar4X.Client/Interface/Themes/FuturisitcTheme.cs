@@ -55,6 +55,9 @@ public class FuturisticTheme : ITheme
         colors[(int)ImGuiCol.TableBorderStrong] = new Vector4(0.31f, 0.31f, 0.35f, 1.00f);
         colors[(int)ImGuiCol.TableBorderLight] = new Vector4(0.23f, 0.23f, 0.25f, 1.00f);
 
+        // Plot lines
+        colors[(int)ImGuiCol.PlotHistogram] = new Vector4(0.15f, 0.28f, 0.47f, 0.80f);
+
         // Style
         style.WindowPadding = new Vector2(8, 8);
         style.FramePadding = new Vector2(5, 3);
