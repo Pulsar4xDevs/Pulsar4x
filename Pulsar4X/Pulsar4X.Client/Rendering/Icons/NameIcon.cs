@@ -301,6 +301,10 @@ namespace Pulsar4X.SDL2UI
                 && icon.EntityState.HasDataBlob<MassVolumeDB>()
                 && icon.EntityState.HasDataBlob<PositionDB>())
                 callback = () => Displays.Ship(icon._state, icon.EntityState.GetDataBlob<ShipInfoDB>(), icon.EntityState.GetDataBlob<MassVolumeDB>(), icon.EntityState.GetDataBlob<PositionDB>(), icon._state.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods);
+            else if(icon.EntityState.HasDataBlob<SystemBodyInfoDB>()
+                && icon.EntityState.HasDataBlob<MassVolumeDB>()
+                && icon.EntityState.HasDataBlob<PositionDB>())
+                callback = () => Displays.SystemBody(icon._state, icon.EntityState.GetDataBlob<SystemBodyInfoDB>(), icon.EntityState.GetDataBlob<MassVolumeDB>(), icon.EntityState.GetDataBlob<PositionDB>());
 
             // Display the tooltip
             DisplayHelpers.DescriptiveTooltip(name, type, "", callback, hideDescriptionColor: true);
