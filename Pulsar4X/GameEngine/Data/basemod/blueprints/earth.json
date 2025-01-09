@@ -205,14 +205,14 @@
               "DesignId": "default-ship-design-gunship",
               "Name": "Serial Peacemaker",
               "Cargo": [
-                { "Id": "ntp", "Amount": 2000 }
+                { "Id": "ntp", "Amount": 20000000, "Type": "byVolume" }
               ]
             },
             {
               "DesignId": "default-ship-design-gunship",
               "Name": "Prevailing Stillness",
               "Cargo": [
-                { "Id": "ntp", "Amount": 2000 }
+                { "Id": "ntp", "Amount": 20000000, "Type": "byVolume" }
               ]
             }
           ]
@@ -224,7 +224,7 @@
               "DesignId": "default-ship-design-surveyor",
               "Name": "Surveyor I",
               "Cargo": [
-                { "Id": "rp-1", "Amount": 2000 }
+                { "Id": "rp-1", "Amount": 20000000, "Type": "byVolume" }
               ]
             }
           ]
