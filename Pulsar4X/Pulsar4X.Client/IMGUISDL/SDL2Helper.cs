@@ -43,11 +43,11 @@ public static class SDL2Helper
     }
 
 
-    public static IntPtr CreateSDLTexture(IntPtr rendererPtr, RawBmp rawImg, bool clean = false)
+    public static void CreateSDLTexture(IntPtr rendererPtr, RawBmp rawImg, ref IntPtr texturePtr)
     {
 
 
-        IntPtr texture;
+        //IntPtr texture;
         int h = rawImg.Height;
         int w = rawImg.Width;
         int d = rawImg.Depth * 8;
@@ -67,47 +67,43 @@ public static class SDL2Helper
         uint amask = 0x000000ff;
 
 
-        SDL.SDL_DestroyTexture(rendererPtr);
+        SDL.SDL_DestroyTexture(texturePtr);
         IntPtr sdlSurface = SDL.SDL_CreateRGBSurfaceFrom(pxls, w, h, d, s, rmask, gmask, bmask, amask);
-        texture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
+        texturePtr = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
         SDL.SDL_FreeSurface(sdlSurface);
-
-
-        // int a;
-        // uint f;
-        // int qw;
-        // int qh;
-        // int q = SDL.SDL_QueryTexture(texture, out f, out a, out qw, out qh);
-        // if (q != 0)
-        // {
-        //     ImGui.Text("QueryResult: " + q);
-        //     ImGui.Text(SDL.SDL_GetError());
-        // }
-        // ImGui.Text("a: " + a +" f: " + f +" w: "+ qw +" h: "+ qh);
-
-        return texture;
+        
     }
 
-    public static IntPtr[] CreateSDLTextures(IntPtr renderPtr, DamageMap damageMap, byte alpha)
+    public static void CreateSDLTextures(IntPtr renderPtr, DamageMap damageMap, ref IntPtr[] textures)
     {
-        IntPtr[] textures = new IntPtr[6]; // One for each map (IDMap, PresMap, VMap, PMap)
-
         int width = damageMap.Width;
         int height = damageMap.Height;
+        CreateTextureForIDMap(renderPtr, damageMap, ref textures[0], width, height);
+        CreateTextureForPresMap(renderPtr, damageMap, ref textures[1], width, height);
+        CreateTextureForVMap(renderPtr, damageMap, ref textures[2], width, height);
+        CreateTextureForPMap(renderPtr, damageMap, ref textures[3], width, height);
+        CreateTextureForTemp(renderPtr, damageMap, ref textures[4], width, height);
+        CreateTextureForPhaseState(renderPtr, damageMap, ref textures[5], width, height);
+        CreateTextureForPhotonMap(renderPtr, damageMap, ref textures[6], width, height);
 
-        textures[0] = CreateTextureForIDMap(renderPtr, damageMap, width, height, alpha);
-        textures[1] = CreateTextureForPresMap(renderPtr, damageMap, width, height, alpha);
-        textures[2] = CreateTextureForVMap(renderPtr, damageMap, width, height, alpha);
-        textures[3] = CreateTextureForPMap(renderPtr, damageMap, width, height, alpha);
-        textures[4] = CreateTextureForTemp(renderPtr, damageMap, width, height, alpha);
-        textures[5] = CreateTextureForPhaseState(renderPtr, damageMap, width, height, alpha);
-        return textures;
     }
 
-    internal static IntPtr CreateTextureForIDMap(IntPtr renderPtr, DamageMap damageMap, int width, int height, byte alpha)
+    internal static void CheckTexture(IntPtr renderPtr, ref IntPtr texture, int width, int height)
     {
-        var texture = SDL.SDL_CreateTexture(renderPtr, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, width, height);
-
+        if(texture == IntPtr.Zero)
+            texture = SDL.SDL_CreateTexture(renderPtr, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, width, height);
+        SDL.SDL_QueryTexture(texture, out _, out _, out var txWidth, out var txHeight);
+        if (width != txWidth || height != txHeight)
+        {
+            SDL.SDL_DestroyTexture(texture);
+            texture = SDL.SDL_CreateTexture(renderPtr, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, width, height);
+        }
+    }
+    
+    internal static void CreateTextureForIDMap(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    {
+        byte alpha = 255;
+        CheckTexture(renderPtr, ref texture, width, height);
         IntPtr pixels;
         int pitch;
         SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
@@ -130,15 +126,13 @@ public static class SDL2Helper
                 pixelPtr += (pitch / 4) - width;
             }
         }
-
         SDL.SDL_UnlockTexture(texture);
-        return texture;
     }
 
-    internal static IntPtr CreateTextureForPresMap(IntPtr renderPtr, DamageMap damageMap, int width, int height, byte alpha)
+    internal static IntPtr CreateTextureForPresMap(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
-        var texture = SDL.SDL_CreateTexture(renderPtr, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, width, height);
-
+        byte alpha = 255;
+        CheckTexture(renderPtr, ref texture, width, height);
         IntPtr pixels;
         int pitch;
         SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
@@ -156,7 +150,6 @@ public static class SDL2Helper
                     *pixelPtr = (uint)((alpha << 24) | blueValue);
                     pixelPtr++;
                 }
-
                 pixelPtr += (pitch / 4) - width;
             }
         }
@@ -165,10 +158,10 @@ public static class SDL2Helper
         return texture;
     }
 
-    internal static IntPtr CreateTextureForVMap(IntPtr renderPtr, DamageMap damageMap, int width, int height, byte alpha)
+    internal static void CreateTextureForVMap(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
-        var texture = SDL.SDL_CreateTexture(renderPtr, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, width, height);
-
+        byte alpha = 255;
+        CheckTexture(renderPtr, ref texture, width, height);
         IntPtr pixels;
         int pitch;
         SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
@@ -201,16 +194,16 @@ public static class SDL2Helper
         }
 
         SDL.SDL_UnlockTexture(texture);
-        return texture;
     }
 
-    internal static IntPtr CreateTextureForPMap(IntPtr renderPtr, DamageMap damageMap, int width, int height, byte alpha)
+    internal static void CreateTextureForPMap(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
-        var texture = SDL.SDL_CreateTexture(renderPtr, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, width, height);
-
+        byte alpha = 255;
+        CheckTexture(renderPtr, ref texture, width, height);
         IntPtr pixels;
         int pitch;
         SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
+        
         int phaseStateCount = Enum.GetValues(typeof(PhaseState)).Length;
         unsafe
         {
@@ -220,19 +213,19 @@ public static class SDL2Helper
                 for (int x = 0; x < width; x++)
                 {
                     int index = y * width + x;
-                    Particle particle = damageMap.PMap[index];
+                    PhysicalParticle physicalParticle = damageMap.PMap[index];
                     uint color = 0;
-                    if (particle != null)
+                    if (physicalParticle != null)
                     {
                         // Red for Life (Health) 0 to 255
-                        byte lifeRed = (byte)(particle.Life * 2.55f); // Life is 0-100, so *2.55 for 0-255
+                        byte lifeRed = (byte)(physicalParticle.Life * 2.55f); // Life is 0-100, so *2.55 for 0-255
 
                         // Blue for StateOfPhase, using full range 0 to 255
                         
-                        byte phaseBlue = (byte)((int)particle.StateOfPhase * 255 / (phaseStateCount - 1)); // Spread over 0-255
+                        byte phaseBlue = (byte)((int)physicalParticle.StateOfPhase * 255 / (phaseStateCount - 1)); // Spread over 0-255
 
                         // Green for Temperature, assuming max temp is known or we normalize to 100
-                        byte tempGreen = (byte)(Math.Min(particle.Temperature, 100) * 2.55f); // Normalize to 0-100 then to 0-255
+                        byte tempGreen = (byte)(Math.Min(physicalParticle.Temperature, 100) * 2.55f); // Normalize to 0-100 then to 0-255
 
                         // Combine all channels
                         color = (uint)((alpha << 24) | (lifeRed << 16) | (tempGreen << 8) | phaseBlue);
@@ -245,19 +238,17 @@ public static class SDL2Helper
                 pixelPtr += (pitch / 4) - width; // Adjust for pitch
             }
         }
-
         SDL.SDL_UnlockTexture(texture);
-        return texture;
     }
     
-    internal static IntPtr CreateTextureForPhaseState(IntPtr renderPtr, DamageMap damageMap, int width, int height, byte alpha)
+    internal static void CreateTextureForPhaseState(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
-        var texture = SDL.SDL_CreateTexture(renderPtr, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, width, height);
-
+        byte alpha = 255;
+        CheckTexture(renderPtr, ref texture, width, height);
         IntPtr pixels;
         int pitch;
-        uint color = 0;
         SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
+        uint color = 0;
         int phaseStateCount = Enum.GetValues(typeof(PhaseState)).Length;
         unsafe
         {
@@ -267,11 +258,11 @@ public static class SDL2Helper
             {
                 for (int x = 0; x < width; x++)
                 {
-                    int index = y * width + x;
-                    Particle particle = damageMap.PMap[index];
-                    if (particle != null)
+                    int index = damageMap.GetIndex(x,y);
+                    PhysicalParticle physicalParticle = damageMap.PMap[index];
+                    if (physicalParticle != null)
                     {
-                        var phaseState = particle.StateOfPhase;
+                        var phaseState = physicalParticle.StateOfPhase;
                         byte byteState = (byte)phaseState;
                         color = ColourFromValue(byteState, phaseStateCount, 0);
                     }
@@ -284,16 +275,17 @@ public static class SDL2Helper
         }
 
         SDL.SDL_UnlockTexture(texture);
-        return texture;
+       
     }
     
-    internal static IntPtr CreateTextureForTemp(IntPtr renderPtr, DamageMap damageMap, int width, int height, byte alpha)
+    internal static void CreateTextureForTemp(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
-        var texture = SDL.SDL_CreateTexture(renderPtr, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, width, height);
-
+        byte alpha = 255;
+        CheckTexture(renderPtr, ref texture, width, height);
         IntPtr pixels;
         int pitch;
         SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
+        
         float temperatureInKelvin = 0;
         float thermalCapacity = 0;
         float thermalConductivity = 0;
@@ -320,14 +312,14 @@ public static class SDL2Helper
                 for (int x = 0; x < width; x++)
                 {
                     int index = y * width + x;
-                    Particle particle = damageMap.PMap[index];
+                    PhysicalParticle physicalParticle = damageMap.PMap[index];
 
                     uint color = 0;
-                    if (particle != null)
+                    if (physicalParticle != null)
                     {
-                         temperatureInKelvin = particle.Temperature;
-                         thermalCapacity = particle.MatType.ThermalCapacity;
-                         thermalConductivity = particle.MatType.ThermalConductivity;
+                         temperatureInKelvin = physicalParticle.Temperature;
+                         thermalCapacity = physicalParticle.MatType.ThermalCapacity;
+                         thermalConductivity = physicalParticle.MatType.ThermalConductivity;
 
 
                         // Normalize temperature
@@ -389,9 +381,72 @@ public static class SDL2Helper
         }
 
         SDL.SDL_UnlockTexture(texture);
-        return texture;
+
     }
-    
+    internal static void CreateTextureForPhotonMap(IntPtr renderPtr, DamageMap damageMap,ref IntPtr texture, int width, int height)
+    {
+        if(damageMap.PhMap == null)
+        {
+            if (texture != IntPtr.Zero)
+            {
+                SDL.SDL_DestroyTexture(texture);
+                texture = IntPtr.Zero;
+            }
+            return;
+        }
+        
+        byte alpha = 255;
+        CheckTexture(renderPtr, ref texture, width, height);
+        IntPtr pixels;
+        int pitch;
+        SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
+
+
+        var minFreq = (int)damageMap.PhMap
+                                    .Where(p => p != null)
+                                    .Select(p => p.WaveLength)
+                                    .DefaultIfEmpty(0) // Fallback value 
+                                    .Min();
+        var maxFreq = (int)damageMap.PhMap
+                                    .Where(p => p != null)
+                                    .Select(p => p.WaveLength)
+                                    .DefaultIfEmpty(10000) // Fallback value 
+                                    .Max();
+        var maxPow = (int)damageMap.PhMap
+                                   .Where(p => p != null)
+                                   .Select(p => p.WaveLength)
+                                   .DefaultIfEmpty(10000) // Fallback value 
+                                   .Max();
+        minFreq = (int)(minFreq * 0.5);
+        maxFreq = (int)(maxFreq * 1.5);
+        uint  color = 0;
+        
+        unsafe
+        {
+            uint* pixelPtr = (uint*)pixels.ToPointer();
+            
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int index = damageMap.GetIndex(x, y);
+                    var photon = damageMap.PhMap[index];
+                    if(photon != null)
+                    {
+                        var power = photon.Power;
+                        var wavelen = (int)photon.WaveLength;
+                        color = ColourFromValue2(wavelen, maxFreq, minFreq, power, 25, maxPow);
+                    }
+                    else color = 0;
+                    *pixelPtr = color;
+                    pixelPtr++;
+                }
+                pixelPtr += (pitch / 4) - width;
+            }
+        }
+
+        SDL.SDL_UnlockTexture(texture);
+    }
     public static (float, float, float) AdjustSaturation(float r, float g, float b, float saturation)
     {
         float max = Math.Max(r, Math.Max(g, b));
@@ -413,16 +468,7 @@ public static class SDL2Helper
 
         return (r, g, b);
     }
-
-    public static uint ColourFromValue(int value, int max, int min)
-    {
-        float normalisedVale = (float)(value - min)/(max - min);
-        byte r = (byte)(normalisedVale * 255);
-        byte g = (byte)(normalisedVale * 255);
-        byte b = (byte)(normalisedVale * 255);
-        byte a = 255;
-        return (uint)((a << 24) | (r << 16) | (g << 8) | b);
-    }
+    
 
     public static (float, float, float) AdjustLightness(float r, float g, float b, float lightness)
     {
@@ -438,6 +484,68 @@ public static class SDL2Helper
         if (2 * vH < 1) return v2;
         if (3 * vH < 2) return v1 + (v2 - v1) * ((2f / 3f) - vH) * 6;
         return v1;
+    }
+    
+    public static uint ColourFromValue(
+        float value, int max, int min, 
+        float alphaValue = 255, int alphaMin = 0, int alphaMax = 255
+    )
+    {
+        // Normalize RGB based on the value range [min, max]
+        float normalizedValue = (float)(value - min) / (max - min);
+
+        // Scale RGB
+        byte r = (byte)(normalizedValue * 255);
+        byte g = (byte)(normalizedValue * 255);
+        byte b = (byte)(normalizedValue * 255);
+
+        // Handle Alpha, either fixed or normalized based on separate alpha range
+        float normalizedAlpha = (float)(alphaValue - alphaMin) / (alphaMax - alphaMin);
+        byte a = (byte)(normalizedAlpha * 255);
+        return (uint)((a << 24) | (r << 16) | (g << 8) | b);
+    }
+    public static uint ColourFromValue2(
+        float value, int max, int min, 
+        float alphaValue = 255, int alphaMin = 0, int alphaMax = 255
+    )
+    {
+        // Normalize the value range [min, max]
+        float normalizedValue = (float)(value - min) / (max - min);
+        normalizedValue = Math.Clamp(normalizedValue, 0.0f, 1.0f); // Ensure it's within [0, 1] for safety
+
+        // Map normalizedValue to a hue-based RGB color
+        float r = 0, g = 0, b = 0;
+        if (normalizedValue < 0.25f) // Blue → Cyan
+        {
+            r = 0;
+            g = normalizedValue * 4;      // Scale up
+            b = 1;
+        }
+        else if (normalizedValue < 0.5f) // Cyan → Green
+        {
+            r = 0;
+            g = 1;
+            b = 1 - (normalizedValue - 0.25f) * 4;
+        }
+        else if (normalizedValue < 0.75f) // Green → Yellow
+        {
+            r = (normalizedValue - 0.5f) * 4;
+            g = 1;
+            b = 0;
+        }
+        else // Yellow → Red
+        {
+            r = 1;
+            g = 1 - (normalizedValue - 0.75f) * 4;
+            b = 0;
+        }
+
+        // Handle Alpha, normalized based on alphaMin and alphaMax
+        float normalizedAlpha = (float)(alphaValue - alphaMin) / (alphaMax - alphaMin);
+        byte a = (byte)(Math.Clamp(normalizedAlpha, 0.0f, 1.0f) * 255);
+
+        // Convert to ARGB uint for SDL2
+        return (uint)((a << 24) | ((byte)(r * 255) << 16) | ((byte)(g * 255) << 8) | (byte)(b * 255));
     }
 }
 

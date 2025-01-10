@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Pulsar4X.Orbital;
+using System.Numerics;
 
 namespace GameEngine.Damage;
 
@@ -12,7 +12,7 @@ public static class PressureMath
         float pressureFactor = 0;
         for (int index = 0; index < damageMap.PMap.Length; index++)
         {
-            Particle? particle = damageMap.PMap[index];
+            PhysicalParticle? particle = damageMap.PMap[index];
             if (particle != null)
             {
                 localDensity = CalculateLocalDensity(damageMap, particle.Position);
@@ -27,7 +27,7 @@ public static class PressureMath
     {
         float density = 0;
         float radius = 1.0f; // Define a radius for local density calculation
-        List<Particle> neighbors = DamageMapHelpers.GetNeighboringParticles(damageMap, position, radius);
+        List<PhysicalParticle> neighbors = DamageMapHelpers.GetNeighboringParticles(damageMap, position, radius);
     
         foreach (var neighbor in neighbors)
         {
@@ -36,16 +36,16 @@ public static class PressureMath
         }
         return density / (MathF.PI * radius * radius); // Normalize by area for density
     }
-    private static float CalculatePressureFactor(Particle particle, float currentPressure)
+    private static float CalculatePressureFactor(PhysicalParticle physicalParticle, float currentPressure)
     {
-        float temperatureFactor = particle.Temperature / particle.MatType.MeltingZeroPoint; // Using melting point as a reference
-        if (currentPressure > particle.MatType.TriplePoint.Bar)
+        float temperatureFactor = physicalParticle.Temperature / physicalParticle.MatType.MeltingZeroPoint; // Using melting point as a reference
+        if (currentPressure > physicalParticle.MatType.TriplePoint.Bar)
         {
             // Here you could interpolate between triple and critical point for a more accurate model
-            temperatureFactor = (particle.Temperature - particle.MatType.TriplePoint.Kelvin) / 
-                                (particle.MatType.CriticalPoint.Kelvin - particle.MatType.TriplePoint.Kelvin);
+            temperatureFactor = (physicalParticle.Temperature - physicalParticle.MatType.TriplePoint.Kelvin) / 
+                                (physicalParticle.MatType.CriticalPoint.Kelvin - physicalParticle.MatType.TriplePoint.Kelvin);
         }
-        else if (currentPressure < particle.MatType.TriplePoint.Bar)
+        else if (currentPressure < physicalParticle.MatType.TriplePoint.Bar)
         {
             // Below triple point, pressure might not affect phase transition as much
             temperatureFactor = Math.Max(0, temperatureFactor);

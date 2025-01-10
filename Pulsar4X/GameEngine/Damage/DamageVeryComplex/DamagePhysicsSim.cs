@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Numerics;
 using System.Linq;
-using Pulsar4X.Components;
-using Pulsar4X.Orbital;
+
 
 namespace GameEngine.Damage;
 
@@ -19,49 +18,79 @@ public static class DamagePhysicsSim
             if( part.Velocity.Length() > mag)
                 mag = part.Velocity.Length();
         }
+        if(map.PhMap != null)
+        {
+            foreach (var part in map.PhMap)
+            {
+                if (part == null)
+                    continue;
+                if (part.Velocity.Length() > mag)
+                    mag = part.Velocity.Length();
+            }
+        }
         return mag;
     }
     
     public static void PhysicsLoop(DamageMap damageMap)
     {
         damageMap.TotalEnergy = CalculateTotalEnergy(damageMap);
-        DamageMapHelpers.FindBadData(damageMap);    
         damageMap.FastestSpeed = FindFastestParticle(damageMap);
         float timeStep = (float)(damageMap.Scale / damageMap.FastestSpeed);
-        List<Particle> movingParticles = new(); //we could be more memory efficent and performant if we used an array buffer here for these.
-        List<(Particle, Particle)> collisions = new();
+        timeStep = Math.Min(timeStep, 1.0f);
+        List<IDamageParticle> movingParticles = new(); //we could be more memory efficent and performant if we used an array buffer here for these.
+        List<(IDamageParticle, PhysicalParticle)> collisions = new();
+        List<PhotonParticle> spawnerParticles = new(); // Spawner particles
         // Collect all non-null and moving particles into a list
         for (int index = 0; index < damageMap.PMap.Length; index++)
         {
-            Particle? particle = damageMap.PMap[index];
+            PhysicalParticle? particle = damageMap.PMap[index];
             if (particle != null && particle.Velocity.Length() > 0)
             {
                 movingParticles.Add((particle));
             }
+            PhotonParticle? phParticle = damageMap.PhMap[index];
+            if (phParticle != null)
+            {
+                if (phParticle.IsSpawner)
+                {
+                    // Add spawners to the new list
+                    spawnerParticles.Add(phParticle);
+                }
+                else if (phParticle.Velocity.Length() > 0) 
+                {
+                    // Add moving photons to the movingParticles list
+                    movingParticles.Add(phParticle);
+                }
+            }
         }
-        DamageMapHelpers.FindBadData(damageMap);
+        
+        PhotonMath.HandleSpawners(spawnerParticles, damageMap, ref movingParticles, timeStep);
+
         // Update positions of all moving particles
         foreach (var particle in movingParticles)
         {
             UpdateParticlePosition(particle, damageMap.Scale, timeStep);
         }
-        HandleOutOfBounds(damageMap, movingParticles);
-        DamageMapHelpers.FindBadData(damageMap);    
+        HandleOutOfBounds(damageMap, ref movingParticles);
+
         // Detect collisions for all particles
         foreach (var particle in movingParticles)
         {
             KineticMath.DetectCollision(particle, damageMap, collisions);
         }
-        DamageMapHelpers.FindBadData(damageMap);   
+   
         // Here you would typically resolve collisions after detection
         foreach (var partPair in collisions)
         {
-            KineticMath.ResolveCollision(partPair.Item1, partPair.Item2, damageMap);
+            if(partPair.Item1 is PhysicalParticle && partPair.Item2 is PhysicalParticle)
+                KineticMath.ResolveCollision((PhysicalParticle)partPair.Item1, partPair.Item2, damageMap);
+            else if(partPair.Item1 is PhotonParticle)
+                PhotonMath.ResolveCollision((PhotonParticle)partPair.Item1, (PhysicalParticle)partPair.Item2, damageMap);
         }
          
-        List<Particle> flatList = collisions.SelectMany(t => new[] { t.Item1, t.Item2 }).ToList();
-        HandleOutOfBounds(damageMap, flatList);
-        DamageMapHelpers.FindBadData(damageMap);    
+        List<IDamageParticle> flatList = collisions.SelectMany(t => new[] { t.Item1, t.Item2 }).ToList();
+        HandleOutOfBounds(damageMap, ref flatList);
+  
         var mergedList = movingParticles.Union(flatList).ToList();
         foreach (var particle in mergedList)
         {
@@ -75,12 +104,12 @@ public static class DamagePhysicsSim
         DamageMapHelpers.FindBadData(damageMap);    
     }
 
-    public static void HandleOutOfBounds(DamageMap damageMap, List<Particle> particlesToCheck)
+    public static void HandleOutOfBounds(DamageMap damageMap, ref List<IDamageParticle> particlesToCheck)
     {
         for (int index = 0; index < particlesToCheck.Count; index++)
         {
             var particle = particlesToCheck[index];
-            if (IsOutOfBounds(particle, damageMap))
+            if (IsOutOfBounds(particle, damageMap) && particle is PhysicalParticle)
             {
                 //todo check if move to sister map
                 particlesToCheck.RemoveAt(index);
@@ -102,17 +131,40 @@ public static class DamagePhysicsSim
                     index--;
                 }
             }
+            else if (IsOutOfBounds(particle, damageMap) && particle is PhotonParticle)
+            {
+                //todo check if move to sister map
+                particlesToCheck.RemoveAt(index);
+                if (damageMap.PhMap[particle.mapIndex] == particle)
+                {
+                    damageMap.PhMap[particle.mapIndex] = null;
+                    particle.IsDeleted = true;
+                    index--;
+                }
+                else
+                {
+                    var pindex = Array.IndexOf(damageMap.PhMap, particle);
+                    while (pindex != -1)
+                    {
+                        damageMap.PhMap[pindex] = null;
+                        pindex = Array.IndexOf(damageMap.PhMap, particle);
+                    }
+                    particle.IsDeleted = true;
+                    index--;
+                }
+            }
+            
         }
     }
 
 
-    public static void UpdateParticlePosition(Particle particle, int scale, float timeStep)
+    public static void UpdateParticlePosition(IDamageParticle particle, int scale, float timeStep)
     {
         Vector2 movement = particle.Velocity * timeStep;
         particle.Position += movement / scale;
     }
 
-    public static bool IsOutOfBounds(Particle particle, DamageMap damageMap)
+    public static bool IsOutOfBounds(IDamageParticle particle, DamageMap damageMap)
     {
         int x = (int)Math.Round(particle.Position.X);
         int y = (int)Math.Round(particle.Position.Y);
@@ -122,18 +174,21 @@ public static class DamagePhysicsSim
     }
     
     // Helper method to update particle in map after position change
-    private static void UpdateParticleInMap(Particle particle, DamageMap map)
+    private static void UpdateParticleInMap(IDamageParticle particle, DamageMap map)
     {
         int newX = (int)Math.Round(particle.Position.X);
         int newY = (int)Math.Round(particle.Position.Y);
-        int newIndex = newY * map.Width + newX;
+        int newIndex = map.GetIndex(newX, newY); 
         int oldIndex = particle.mapIndex;
         if (newIndex != oldIndex && newIndex >= 0 && newIndex < map.PMap.Length)
         {
             if(map.PMap[newIndex] == null)
             {
                 map.PMap[oldIndex] = null;
-                map.PMap[newIndex] = particle;
+                if(particle is PhysicalParticle)
+                    map.PMap[newIndex] = (PhysicalParticle)particle;
+                else if(particle is PhotonParticle)
+                    map.PhMap[newIndex] = (PhotonParticle)particle;
             }
         }
     }
@@ -144,7 +199,7 @@ public static class DamagePhysicsSim
 
         for (int index = 0; index < damageMap.PMap.Length; index++)
         {
-            Particle? particle = damageMap.PMap[index];
+            PhysicalParticle? particle = damageMap.PMap[index];
             if (particle != null)
             {
                 // Kinetic Energy: 0.5 * mass * velocity^2
@@ -155,6 +210,14 @@ public static class DamagePhysicsSim
                 double thermalEnergy = particle.Mass * particle.MatType.ThermalCapacity * particle.Temperature;
 
                 totalEnergy += kineticEnergy + thermalEnergy;
+            }
+        }
+        for (int index = 0; index < damageMap.PhMap.Length; index++)
+        {
+            PhotonParticle? particle = damageMap.PhMap[index];
+            if (particle != null)
+            {
+                totalEnergy += particle.Power * 10e6;
             }
         }
 

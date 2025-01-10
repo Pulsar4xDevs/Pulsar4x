@@ -14,7 +14,19 @@
       "CriticalPoint": {
         "Bar": 220.6,
         "Kelvin": 647.096
-      }
+      },
+      "PhotonReflectivity": {
+        "WavelengthMin_nm": 400,
+        "WavelengthAverage_nm": 500,
+        "WavelengthMax_nm": 600
+      },
+      "PhotonReflectivityPeak": 0.07,
+      "PhotonTransparency": {
+        "WavelengthMin_nm": 400,
+        "WavelengthAverage_nm": 650,
+        "WavelengthMax_nm": 1100
+      },
+      "PhotonTransparencyPeak": 0.92
     }
   },
   {
@@ -32,7 +44,19 @@
       "CriticalPoint": {
         "Bar": 37.9,
         "Kelvin": 132.65
-      }
+      },
+      "PhotonReflectivity": {
+        "WavelengthMin_nm": 700,
+        "WavelengthAverage_nm": 1000,
+        "WavelengthMax_nm": 1100
+      },
+      "PhotonReflectivityPeak": 0.00005,
+      "PhotonTransparency": {
+        "WavelengthMin_nm": 300,
+        "WavelengthAverage_nm": 550,
+        "WavelengthMax_nm": 2400
+      },
+      "PhotonTransparencyPeak": 0.9999
     }
   },
   {
@@ -50,7 +74,19 @@
       "CriticalPoint": {
         "Bar": 1150,
         "Kelvin": 7500
-      }
+      },
+      "PhotonReflectivity": {
+        "WavelengthMin_nm": 200,
+        "WavelengthAverage_nm": 250,
+        "WavelengthMax_nm": 300
+      },
+      "PhotonReflectivityPeak": 0.93,
+      "PhotonTransparency": {
+        "WavelengthMin_nm": 400,
+        "WavelengthAverage_nm": 800,
+        "WavelengthMax_nm": 1600
+      },
+      "PhotonTransparencyPeak": 0.05
     }
   },
   {
@@ -68,7 +104,19 @@
       "CriticalPoint": {
         "Bar": 30000,
         "Kelvin": 20000
-      }
+      },
+      "PhotonReflectivity": {
+        "WavelengthMin_nm": 300,
+        "WavelengthAverage_nm": 550,
+        "WavelengthMax_nm": 750
+      },
+      "PhotonReflectivityPeak": 0.85,
+      "PhotonTransparency": {
+        "WavelengthMin_nm": 800,
+        "WavelengthAverage_nm": 1500,
+        "WavelengthMax_nm": 2000
+      },
+      "PhotonTransparencyPeak": 0.01
     }
   },
   {
@@ -86,7 +134,19 @@
       "CriticalPoint": {
         "Bar": 100000,
         "Kelvin": 50000
-      }
+      },
+      "PhotonReflectivity": {
+        "WavelengthMin_nm": 400,
+        "WavelengthAverage_nm": 600,
+        "WavelengthMax_nm": 700
+      },
+      "PhotonReflectivityPeak": 0.15,
+      "PhotonTransparency": {
+        "WavelengthMin_nm": 800,
+        "WavelengthAverage_nm": 1200,
+        "WavelengthMax_nm": 3000
+      },
+      "PhotonTransparencyPeak": 0.001
     }
   },
   {
@@ -104,7 +164,19 @@
       "CriticalPoint": {
         "Bar": 100,
         "Kelvin": 800
-      }
+      },
+      "PhotonReflectivity": {
+        "WavelengthMin_nm": 400,
+        "WavelengthAverage_nm": 550,
+        "WavelengthMax_nm": 700
+      },
+      "PhotonReflectivityPeak": 0.4,
+      "PhotonTransparency": {
+        "WavelengthMin_nm": 800,
+        "WavelengthAverage_nm": 1300,
+        "WavelengthMax_nm": 2500
+      },
+      "PhotonTransparencyPeak": 0.2
     }
   }
 ]

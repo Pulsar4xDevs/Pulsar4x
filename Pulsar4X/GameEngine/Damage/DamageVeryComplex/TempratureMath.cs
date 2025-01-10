@@ -1,41 +1,56 @@
 using System;
 using System.Collections.Generic;
-using Pulsar4X.Orbital;
+using System.Numerics;
+using Pulsar4X.Engine;
 
 namespace GameEngine.Damage;
 
 public static class TempratureMath
 {
-    private static void TransferHeat(Particle from, Particle to, float deltaTime)
+    private static void TransferHeat(PhysicalParticle a, PhysicalParticle b, float deltaTime)
     {
-        float deltaTemp = from.Temperature - to.Temperature;
-        if (deltaTemp > 0)
+        PhysicalParticle from;
+        PhysicalParticle to;
+        if (a.Temperature == b.Temperature)
+            return;
+        if(a.Temperature > b.Temperature)
         {
-            double distance = Vector2.Distance(from.Position, to.Position);
-        
-            // Calculate average thermal conductivity
-            float avgConductivity = (from.MatType.ThermalConductivity + to.MatType.ThermalConductivity) / 2;
-
-            // Calculate the total energy available for transfer (in J)
-            double totalEnergyToTransfer = deltaTemp * from.Mass * from.MatType.ThermalCapacity;
-
-            // Time constant for exponential decay of heat transfer rate
-            float timeConstant = (float)(distance * from.Mass * from.MatType.ThermalCapacity / avgConductivity); // Approximate time for energy to transfer
-
-            // Calculate energy transfer with decay over time
-            double energyTransfer = totalEnergyToTransfer * (1 - Math.Exp(-deltaTime / timeConstant));
-
-            // Cap energy transfer to what's physically available
-            energyTransfer = Math.Min(energyTransfer, totalEnergyToTransfer);
-
-            // Convert energy transfer back to temperature change for both particles
-            float tempChangeFrom = (float)(energyTransfer / (from.Mass * from.MatType.ThermalCapacity));
-            float tempChangeTo = (float)(energyTransfer / (to.Mass * to.MatType.ThermalCapacity));
-
-            // Apply temperature changes
-            from.Temperature -= tempChangeFrom;
-            to.Temperature += tempChangeTo;
+            from = a;
+            to = b;
         }
+        else
+        {
+            from = b;
+            to = a;
+        }
+        
+        float deltaTemp = from.Temperature - to.Temperature;
+
+        double distance = Vector2.Distance(from.Position, to.Position);
+    
+        // Calculate average thermal conductivity
+        float avgConductivity = (from.MatType.ThermalConductivity + to.MatType.ThermalConductivity) / 2;
+
+        // Calculate the total energy available for transfer (in J)
+        double totalEnergyToTransfer = deltaTemp * from.Mass * from.MatType.ThermalCapacity;
+
+        // Time constant for exponential decay of heat transfer rate
+        float timeConstant = (float)(distance * from.Mass * from.MatType.ThermalCapacity / avgConductivity); // Approximate time for energy to transfer
+
+        // Calculate energy transfer with decay over time
+        double energyTransfer = totalEnergyToTransfer * (1 - Math.Exp(-deltaTime / timeConstant));
+
+        // Cap energy transfer to what's physically available
+        energyTransfer = Math.Min(energyTransfer, totalEnergyToTransfer);
+
+        // Convert energy transfer back to temperature change for both particles
+        float tempChangeFrom = (float)(energyTransfer / (from.Mass * from.MatType.ThermalCapacity));
+        float tempChangeTo = (float)(energyTransfer / (to.Mass * to.MatType.ThermalCapacity));
+
+        // Apply temperature changes
+        from.Temperature -= tempChangeFrom;
+        to.Temperature += tempChangeTo;
+        
     }
     
     public static void TransferHeat(DamageMap damageMap, float timeStep )
@@ -45,10 +60,10 @@ public static class TempratureMath
         heatTransferRadius = 1;
         for (int index = 0; index < damageMap.PMap.Length; index++)
         {
-            Particle? particle = damageMap.PMap[index];
+            PhysicalParticle? particle = damageMap.PMap[index];
             if (particle != null)
             {
-                List<Particle> neighbors = DamageMapHelpers.GetNeighboringParticles(damageMap, particle.Position, heatTransferRadius);
+                List<PhysicalParticle> neighbors = DamageMapHelpers.GetNeighboringParticles(damageMap, particle.Position, heatTransferRadius);
 
                 foreach (var neighbor in neighbors)
                 {
@@ -59,7 +74,7 @@ public static class TempratureMath
 
         for (int index = 0; index < damageMap.PMap.Length; index++)
         {
-            Particle? particle = damageMap.PMap[index];
+            PhysicalParticle? particle = damageMap.PMap[index];
             var pressure = damageMap.PresMap[index];
             if(particle != null && pressure != null)
                 particle.StateOfPhase = GetPhaseState(particle, pressure);
@@ -69,16 +84,16 @@ public static class TempratureMath
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="particle"></param>
+    /// <param name="physicalParticle"></param>
     /// <param name="pressure"></param>
     /// <param name="temperature"></param>
     /// <returns></returns>
-    public static PhaseState GetPhaseState(Particle particle, float pressure)
+    public static PhaseState GetPhaseState(PhysicalParticle physicalParticle, float pressure)
     {
-        var zeroPoint = particle.MatType.MeltingZeroPoint;
-        var criticalPoint = particle.MatType.CriticalPoint;
-        var tripplePoint = particle.MatType.TriplePoint;
-        var temperature = particle.Temperature;
+        var zeroPoint = physicalParticle.MatType.MeltingZeroPoint;
+        var criticalPoint = physicalParticle.MatType.CriticalPoint;
+        var tripplePoint = physicalParticle.MatType.TriplePoint;
+        var temperature = physicalParticle.Temperature;
 
         var state = PhaseState.Solid;
         if (temperature > zeroPoint)
@@ -113,14 +128,12 @@ public static class TempratureMath
         return state;
     }
     
-    public static void PostCollisionTempratureChange(Particle particleA, Particle particleB, double initialkE, DamageMap map)
+    public static void PostCollisionTempratureChange(PhysicalParticle physicalParticleA, PhysicalParticle physicalParticleB, double initialkE, DamageMap map)
     {
-        var m1 = particleA.Mass;
-        var m2 = particleB.Mass;
-        var vA = particleA.Velocity;
-        var vB = particleB.Velocity;
+        var m1 = physicalParticleA.Mass;
+        var m2 = physicalParticleB.Mass;
         
-        double finalKineticEnergy = 0.5f * m1 * vA.LengthSquared() + 0.5f * m2 * vB.LengthSquared();
+        double finalKineticEnergy = KineticMath.CalcKineticEnergy(physicalParticleA) + KineticMath.CalcKineticEnergy(physicalParticleB);
         double energyToHeat = initialkE - finalKineticEnergy; // Ensure non-negative
         var totalMass = m1 + m2;
         // Distribute heat based on mass (more massive objects absorb more heat)
@@ -128,12 +141,80 @@ public static class TempratureMath
         double heatB = energyToHeat * (m2 / totalMass);
 
         // Convert energy to temperature increase
-        float tempIncreaseA = (float)(heatA / (m1 * particleA.MatType.ThermalCapacity));
-        float tempIncreaseB = (float)(heatB / (m2 * particleB.MatType.ThermalCapacity));
+        float tempIncreaseA = (float)(heatA / (m1 * physicalParticleA.MatType.ThermalCapacity));
+        float tempIncreaseB = (float)(heatB / (m2 * physicalParticleB.MatType.ThermalCapacity));
 
         // Ensure temperature increases are non-negative
-        particleA.Temperature += tempIncreaseA; // Minimum temperature to avoid 0 in logs or divisions
-        particleB.Temperature += tempIncreaseB;
+        physicalParticleA.Temperature += tempIncreaseA; // Minimum temperature to avoid 0 in logs or divisions
+        physicalParticleB.Temperature += tempIncreaseB; 
     }
+    /*
+    public static void HandleBoilOff(DamageMap damageMap)
+    {
+        List<(Particle, Particle)> newParticles = new List<(Particle, Particle)>();
 
+        for (int index = 0; index < damageMap.PMap.Length; index++)
+        {
+            Particle? particle = damageMap.PMap[index];
+            if (particle != null && particle.StateOfPhase == PhaseState.Liquid)
+            {
+                if (IsBoiling(particle, damageMap.PresMap[index]))
+                {
+                    float boilOffAmount = CalculateBoilOffAmount(particle, damageMap.PresMap[index]);
+                    if (boilOffAmount > 0)
+                    {
+                        Particle steamParticle = CreateSteamParticle(particle, boilOffAmount);
+                        newParticles.Add((particle, steamParticle));
+                    }
+                }
+            }
+        }
+
+        // Apply changes after calculating for all particles
+        foreach (var (originalParticle, steamParticle) in newParticles)
+        {
+            originalParticle.Mass -= steamParticle.Mass;
+            if (originalParticle.Mass <= 0)
+            {
+                damageMap.PMap[damageMap.GetIndex(originalParticle)] = null;
+            }
+            else
+            {
+                originalParticle.StateOfPhase = GetPhaseState(originalParticle, damageMap.PresMap[damageMap.GetIndex(originalParticle)], originalParticle.Temperature);
+            }
+            AddParticleToMap(damageMap, steamParticle);
+        }
+
+        // Update pressure after boil-off
+        UpdatePressureMap(damageMap);
+    }
+*/
+    private static bool IsBoiling(PhysicalParticle physicalParticle, float pressure)
+    {
+        // Check if we're above the boiling curve for this pressure
+        if (pressure < physicalParticle.MatType.CriticalPoint.Bar && pressure > physicalParticle.MatType.TriplePoint.Bar)
+        {
+            // Linear interpolation between triple and critical point for boiling temperature
+            float boilingTemperature = physicalParticle.MatType.TriplePoint.Kelvin + 
+                ((pressure - physicalParticle.MatType.TriplePoint.Bar) / 
+                (physicalParticle.MatType.CriticalPoint.Bar - physicalParticle.MatType.TriplePoint.Bar)) * 
+                (physicalParticle.MatType.CriticalPoint.Kelvin - physicalParticle.MatType.TriplePoint.Kelvin);
+            return physicalParticle.Temperature >= boilingTemperature;
+        }
+        // If pressure is at or above critical point, we might consider it a supercritical fluid, not boiling
+        return false;
+    }
+/*
+    private static float CalculateBoilOffAmount(Particle particle, float pressure)
+    {
+        float excessTemperature = particle.Temperature - IsBoiling(particle, pressure) ? 
+                                  (particle.MatType.TriplePoint.Kelvin + 
+                                   ((pressure - particle.MatType.TriplePoint.Bar) / 
+                                    (particle.MatType.CriticalPoint.Bar - particle.MatType.TriplePoint.Bar)) * 
+                                   (particle.MatType.CriticalPoint.Kelvin - particle.MatType.TriplePoint.Kelvin)) 
+                                  : 0;
+        float boilOffRate = excessTemperature * particle.Mass / pressure; // Simplified model
+        return Math.Min(particle.Mass, boilOffRate);
+    }
+*/
 }

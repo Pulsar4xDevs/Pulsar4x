@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
 using GameEngine.Damage;
 using ImGuiNET;
 using ImGuiSDL2CS;
@@ -12,6 +11,7 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Orbital;
 using Pulsar4X.Factions;
 using Pulsar4X.Damage;
+using Pulsar4X.Weapons;
 
 
 namespace Pulsar4X.SDL2UI.Combat
@@ -27,10 +27,7 @@ namespace Pulsar4X.SDL2UI.Combat
         float _newmatKinetic = 1f;
         private float _newmatDensity = 5000;
         int _newmatAmount = 50;
-
-
-        private (int x, int y) _firePos = (0, 0);
-        private (float x, float y) _fireVel = (0, 300000f);
+        
 
         private float _projLen = 0.25f;
         private float _projMass = 0.25f;
@@ -52,7 +49,7 @@ namespace Pulsar4X.SDL2UI.Combat
         private IntPtr _shipImgPtr;
 
         DamageMap _damageMap;
-        IntPtr[] _damageMapPtr = new IntPtr[5];
+        IntPtr[] _damageMapPtr = new IntPtr[7];
         DamageMap _projectileDamageMap;
         IntPtr _projectileDMapPtr;
 
@@ -101,10 +98,10 @@ namespace Pulsar4X.SDL2UI.Combat
                 _selectedEntity = damageableEntity;
                 _profile = damageableEntity.GetDataBlob<EntityDamageProfileDB>();
                 _rawShipImage = _profile.DamageProfile;
-                _shipImgPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _rawShipImage);
+                SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _rawShipImage, ref  _shipImgPtr);
 
                 _damageMap = new DamageMap(_profile);
-                _damageMapPtr = SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, 255);
+                SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, ref _damageMapPtr);
                 if (_profile.DamageEvents.Count > 0)
                 {
                     _damageEventIndex = _profile.DamageEvents.Count - 1;
@@ -126,25 +123,10 @@ namespace Pulsar4X.SDL2UI.Combat
             _damageFrames = DamageTools.DealDamageSim(_profile, _profile.DamageEvents[_damageEventIndex]).damageFrames;
             _showFrameNum = 0;
             if (_damageFrames != null)
-                _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
+                SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum], ref _showDmgFrametx);
         }
-
-        static class Beam
-        {
-            public static double BeamFreq = 700;
-            public static double MinFreq; //in meters
-            public static double MaxFreq; //in meters
-
-            public static double BeamEnergy = 1000;
-            public static double MinEnergy = 10; //in meters
-            public static double MaxEnergy = 10000; //in meters
-
-
-
-        }
-
-
-
+        
+        
         static class ExsistingWeapons
         {
             private static FactionInfoDB? _factionInfoDB;
@@ -189,7 +171,7 @@ namespace Pulsar4X.SDL2UI.Combat
             }
         }
 
-        private int _beamTypeIndex = 5;
+        //private int _beamTypeIndex = 5;
         private double _momentum = 0;
         DamageFragment _damageFrag;
         private bool _typeIsBeam = true;
@@ -199,9 +181,7 @@ namespace Pulsar4X.SDL2UI.Combat
         private int _dmProjectileSliderLhs = 0;
         private int _dmProjectileSliderRhs = 0;
         private float _dmSizeScaler = 4.0f;
-        private Vector2 _dmProjStart = new Vector2(0, 0);
-        private Vector2 _dmProjEnd = new Vector2(0, 0);
-        private Vector2 _dmProjVelVec = new Vector2(0, 0);
+
         private System.Numerics.Vector2 _ImageStart = new System.Numerics.Vector2(0, 0);
         private bool _showCompIDMap = false;
         private bool _showVMap = false;
@@ -209,14 +189,20 @@ namespace Pulsar4X.SDL2UI.Combat
         private bool _showPMap = false;
         private bool _showTemp = true;
         private bool _showPState = false;
+        private bool _showPhMap = true;
         private bool _runSimLoop = false;
+        private int _projectileTypes;
+        private int _beamRange = 10000;
+        private float _beamlifetime = 30;
+        private int _beamEnergy = 10000;
+        private int _beamFreq = 700;
         internal override void Display()
         {
             if (IsActive)
             {
                 if (Window.Begin("DamageViewer Testing"))
                 {
-                    
+
                     if (_shipImgPtr != IntPtr.Zero && ImGui.CollapsingHeader("Old Damage View"))
                     {
                         int w = _rawShipImage.Width; // / 4;
@@ -282,8 +268,11 @@ namespace Pulsar4X.SDL2UI.Combat
                             ImGui.SetCursorPos(cpos);
                             ImGui.Image(_damageMapPtr[5], new System.Numerics.Vector2(w, h));
                         }
-                        
-                        
+                        if(_showPhMap && _damageMapPtr[6] != IntPtr.Zero)
+                        {
+                            ImGui.SetCursorPos(cpos);
+                            ImGui.Image(_damageMapPtr[6], new System.Numerics.Vector2(w, h));
+                        }
                         
                         
                         
@@ -316,6 +305,8 @@ namespace Pulsar4X.SDL2UI.Combat
                         ImGui.Checkbox("TempMap", ref _showTemp);
                         ImGui.SameLine();                
                         ImGui.Checkbox("PhaseStateMap", ref _showPState);
+                        ImGui.SameLine();                
+                        ImGui.Checkbox("PhotonMap", ref _showPhMap);
                     }
 
 
@@ -332,86 +323,76 @@ namespace Pulsar4X.SDL2UI.Combat
                             var color = ImGui.GetColorU32(0xFFFFFFFF);
                             // Draw the line relative to the image position
                             drawList.AddLine(lineStart, lineEnd, color, 1f);
-                            /*
-                            ImGui.InputInt("PositionX", ref _firePos.x);
-                            ImGui.InputInt("PositionY", ref _firePos.y);
-
-                            ImGui.InputFloat("VelocityX", ref _fireVel.x);
-                            ImGui.InputFloat("VelocityY", ref _fireVel.y);
-
-
+                            
+                            
                             ImGui.Columns(2);
 
 
                             //type of damage to test
+                            /*
                             ExsistingWeapons.Create(_selectedEntity.GetFactionOwner);
                             if (ImGui.Combo("Exsisting Design", ref ExsistingWeapons.SelectedWeaponIndex, ExsistingWeapons.WeaponNames, ExsistingWeapons.AvailableShipComponents.Count))
                             {
 
                                 //ExsistingWeapons.SelectedWeapon.
-                            }
+                            }*/
 
-                            if (_profile != null && ImGui.Button("Beam"))
+                            if (_profile != null && ImGui.RadioButton("Particle", ref _projectileTypes, 0))
                             {
-                                _typeIsBeam = true;
+
                             }
 
-                            if (_profile != null && ImGui.Button("Longrod Projectile"))
+                            if (_profile != null && ImGui.RadioButton("laser", ref _projectileTypes, 1))
                             {
-                                _typeIsBeam = false;
-                            }
 
+                            }
 
 
                             ImGui.NextColumn();
 
                             //tweaks to damage type
-                            if (_typeIsBeam)
+                            if (_projectileTypes == 0)
                             {
-                                if (ImGuiExt.SliderDouble("Energy", ref Beam.BeamEnergy, Beam.MinEnergy, Beam.MaxEnergy))
+                                //ImGui.InputFloat("Mass", ref _projMass);
+                                //ImGui.InputFloat("Density", ref _projDensity);
+                                //ImGui.InputFloat("Length", ref _projLen);
+                                if (ImGui.SliderInt("Speed", ref _dmProjectileSpeed, 100, 100000))
                                 {
-
+                                
                                 }
 
-                                if (ImGuiExt.SliderDouble("Freqency", ref Beam.BeamFreq, Beam.MinFreq, Beam.MaxFreq))
-                                {
-                                    _momentum = (float)(UniversalConstants.Science.PlankConstant * Beam.BeamFreq);
-                                }
                             }
                             else
                             {
+                                if (ImGui.SliderInt("Energy", ref _beamEnergy, 1000, 100000))
+                                {
 
+                                }
+                                if (ImGui.SliderInt("Freqency", ref _beamFreq, 500, 10000))
+                                {
+                                    //_momentum = (float)(UniversalConstants.Science.PlankConstant * Beam.BeamFreq);
+                                }
+                                if(ImGui.SliderInt("Range Km", ref _beamRange, 1, 100000))
+                                {}
+                                if(ImGui.SliderFloat("Length in seconds", ref _beamlifetime, 1, 60))
+                                {}
                             }
+                            
+                            ImGui.Columns(0);
 
-                            ImGui.NextColumn();
 
-
-
-                            ImGui.NextColumn();
-
-                            ImGui.InputFloat("Mass", ref _projMass);
-                            ImGui.InputFloat("Density", ref _projDensity);
-                            ImGui.InputFloat("Length", ref _projLen);
-
-                        
-                            ImGui.Columns(0);*/
-
-                            if (ImGui.SliderInt("Speed", ref _dmProjectileSpeed, 100, 100000))
-                            {
-                                
-                            }
 
 
                             
                             if (ImGui.Button("Fire"))
                             {
                                 SetDMVectors();
-                                if (_projectileDamageMap.PMap != null)
-                                {
-                                    _damageMap.MergeAndResize(_projectileDamageMap);
-                                    _damageMapPtr = SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, 255);
-                                }
+
+                                _damageMap.MergeAndResize(_projectileDamageMap);
+                                SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, ref _damageMapPtr);
                                 
+                                
+
                                 
                                 /*
                                 _damageFrag = new DamageFragment()
@@ -434,13 +415,13 @@ namespace Pulsar4X.SDL2UI.Combat
                             {
                                 _runSimLoop = false;
                                 DamagePhysicsSim.PhysicsLoop(_damageMap);
-                                _damageMapPtr = SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, 255);
+                                SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, ref _damageMapPtr);
                             }
 
                             if (_runSimLoop)
                             {
                                 DamagePhysicsSim.PhysicsLoop(_damageMap);
-                                _damageMapPtr = SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, 255);
+                                SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, ref _damageMapPtr);
                             }
                             ImGui.Text(Stringify.Energy(_damageMap.TotalEnergy));
                         }
@@ -468,7 +449,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             _showFrameNum--;
                             if (_showFrameNum < 0)
                                 _showFrameNum = _damageFrames.Count - 1;
-                            _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
+                            SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum], ref _showDmgFrametx);
                         }
 
                         ImGui.SameLine();
@@ -477,7 +458,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             _showFrameNum++;
                             if (_showFrameNum > _damageFrames.Count - 1)
                                 _showFrameNum = 0;
-                            _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
+                            SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum], ref _showDmgFrametx);
                         }
 
                         ImGui.Text(_showFrameNum + 1 + " of " + _damageFrames.Count);
@@ -493,23 +474,43 @@ namespace Pulsar4X.SDL2UI.Combat
 
         void SetDMVectors()
         {
-            Vector2 size = new  Vector2(3,3);
-            _dmProjStart = new Vector2(_dmProjectileSliderTop, _dmProjectileSliderLhs) / _dmSizeScaler;
-            _dmProjStart -= size;
-            _dmProjEnd = new Vector2(_dmProjectileSliderBot, _dmProjectileSliderRhs) / _dmSizeScaler;
-            Vector2 velocity = Vector2.Normalise(_dmProjEnd - _dmProjStart) * _dmProjectileSpeed;
-            ParticleMaterial dmMat = new ParticleMaterial()
+            System.Numerics.Vector2 size = new (3,3);
+            System.Numerics.Vector2 dmProjStart = new(_dmProjectileSliderTop, _dmProjectileSliderLhs);
+            dmProjStart /= _dmSizeScaler;
+            dmProjStart -= size;
+            System.Numerics.Vector2 _dmProjEnd = new(_dmProjectileSliderBot, _dmProjectileSliderRhs);
+            _dmProjEnd /= _dmSizeScaler;
+            System.Numerics.Vector2 velocity = System.Numerics.Vector2.Normalize(_dmProjEnd - dmProjStart);
+            if(_projectileTypes == 0)
             {
-                ThermalCapacity = 900,
-                ThermalConductivity = 237,
-                MeltingZeroPoint = 933.47f, 
-                TriplePoint = new PhasePoint( 0.00001f, 933.47f), 
-                CriticalPoint = new PhasePoint(1150, 7500),
-                Density = 7874
-                
-            };
-
-            _projectileDamageMap = new DamageMap((int)_dmProjStart.X, (int)_dmProjStart.Y,velocity, (int)size.X, (int)size.Y, dmMat );
+                velocity *= _dmProjectileSpeed;
+                ParticleMaterial dmMat = new ParticleMaterial()
+                {
+                    ThermalCapacity = 900,
+                    ThermalConductivity = 237,
+                    MeltingZeroPoint = 933.47f,
+                    TriplePoint = new PhasePoint(0.00001f, 933.47f),
+                    CriticalPoint = new PhasePoint(1150, 7500),
+                    Density = 7874
+                };
+                _projectileDamageMap = new DamageMap((int)dmProjStart.X, (int)dmProjStart.Y, velocity, (int)size.X, (int)size.Y, dmMat);
+            }
+            else if (_projectileTypes == 1)
+            {
+                velocity *= 2.998e+8f; //speed of light
+                Vector3 vel3 = new Vector3(velocity.X, velocity.Y, 0);
+                Vector3 lPos = vel3 * _beamRange;
+                BeamInfoDB bidb = new BeamInfoDB(000, _profile.OwningEntity, true, 300)
+                {
+                    VelocityVector = vel3,
+                    LaunchPosition = lPos,
+                    Energy = _beamEnergy,
+                    Frequency = _beamFreq,
+                };
+                _projectileDamageMap = new DamageMap((int)dmProjStart.X, (int)dmProjStart.Y, bidb, _beamlifetime);
+            }
+            
+            
             //_projectileDMapPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageMap.compIDMap, _damageMap.Width, _damageMap.Height);
         }
     }

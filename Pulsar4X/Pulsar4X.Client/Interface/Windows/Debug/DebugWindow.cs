@@ -122,7 +122,7 @@ namespace Pulsar4X.SDL2UI
             if (SelectedEntity.HasDataBlob<EntityDamageProfileDB>())
             {
                 var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
-                _dmgTxtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, dmgdb.DamageProfile);
+                SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, dmgdb.DamageProfile, ref _dmgTxtr);
             }
             else if(SelectedEntity.HasDataBlob<SensorInfoDB>())
             {
@@ -131,7 +131,7 @@ namespace Pulsar4X.SDL2UI
                 if (actualEntity.IsValid && actualEntity.HasDataBlob<EntityDamageProfileDB>())
                 {
                     var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
-                    _dmgTxtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, dmgdb.DamageProfile);
+                    SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, dmgdb.DamageProfile, ref _dmgTxtr);
                 }
             }
             else

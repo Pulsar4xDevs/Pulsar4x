@@ -1,17 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel.Design;
-using System.Linq;
+using System.Numerics;
 using Pulsar4X.Components;
 using Pulsar4X.Damage;
 using Pulsar4X.Datablobs;
-using Pulsar4X.Engine;
-using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
-using Pulsar4X.Industry;
-using Pulsar4X.Modding;
-using Pulsar4X.Orbital;
+using Pulsar4X.Helpers;
+
+//using Pulsar4X.Orbital;
+using Pulsar4X.Weapons;
 
 namespace GameEngine.Damage;
 
@@ -22,7 +20,8 @@ public class DamageMap
     public const int PhysicsScale = 1000;
     public int Scale = 100;//pixels per meter
     int _pixBuf = 3; //this is just how much space we're leaving around the edges. 
-    public Particle[] PMap;
+    public PhysicalParticle[] PMap;
+    public PhotonParticle[] PhMap;
     public string[] compIDMap; //componentInstance Map.
     public float[] PresMap; //pressure in bar
     public int Width;
@@ -33,8 +32,9 @@ public class DamageMap
     {
         Width = width;
         Height = height;
-        PMap = new Particle[Width * Height];
+        PMap = new PhysicalParticle[Width * Height];
         PresMap = new float[Width * Height];
+        PhMap = new PhotonParticle[Width * Height];
     }
     public DamageMap(int posX, int posY , Vector2 velocity, int width, int height, ParticleMaterial material)
     {
@@ -43,7 +43,7 @@ public class DamageMap
         Width = width;
         Height = height;
         compIDMap = new string[Width * Height];
-        PMap = new Particle[Width * Height];
+        PMap = new PhysicalParticle[Width * Height];
         PresMap = new float[Width * Height];
         // Let's create a simple projectile shape, like a bullet or missile
         for (int y = 0; y < height; y++)
@@ -55,12 +55,62 @@ public class DamageMap
                 {
                     int index = y * width + x;
                     compIDMap[index] = "projectile";
-                    var newPart = new Particle(material, new Vector2(x,y), velocity, Scale);
+                    var newPart = new PhysicalParticle(material, new Vector2(x,y), velocity, Scale);
                     newPart.mapIndex = index;
                     PMap[index] = newPart;
                     PresMap[index] = 1.0f; // Assuming atmospheric pressure for simplicity
                 }
                 // If you want a more complex shape, you can use conditions here to define where particles exist
+            }
+        }
+    }
+
+    public DamageMap(int posX, int posY, BeamInfoDB beamInfo, float lifetime)
+    {
+        X = posX;
+        Y = posY;
+        //var range = (beamInfo.LaunchPosition - beamInfo.Positions.Item1).Length();
+        
+        
+        Width = 10; // Example width, set as needed
+        Height = 10; // Example height, set as needed
+        PhMap = new PhotonParticle[Width * Height];
+        compIDMap = new string[Width * Height];
+        PMap = new PhysicalParticle[Width * Height];
+        PresMap = new float[Width * Height];
+        int length = 5; //todo change this to dispersion from range.
+        // Launch position is transformed into this smaller map's local coordinate space
+        Vector2 localOrigin = new Vector2(Width / 2, Height / 2); // Start particles from the map center
+
+        // Perpendicular vector for particle alignment relative to the laser direction
+        Vector2 velocity = beamInfo.VelocityVector.ToNumericsVector2();
+        Vector2 perpendicularVector = new Vector2(-velocity.Y, velocity.X);
+        perpendicularVector = Vector2.Normalize(perpendicularVector);
+        // Seed particles in the smaller map
+
+        for (int i = -length / 2; i <= length / 2; i++)
+        {
+            Vector2 relativePosition = perpendicularVector * i;   // Step particles along the perpendicular
+            Vector2 particlePosition = localOrigin + relativePosition; // Centered in local map space
+
+            int mapX = (int)Math.Round(particlePosition.X);
+            int mapY = (int)Math.Round(particlePosition.Y);
+
+            if (mapX >= 0 && mapX < Width && mapY >= 0 && mapY < Height) // Bounds check for small map
+            {
+                int index = GetIndex(mapX, mapY);
+                compIDMap[index] = "photon";
+                PhMap[index] = new PhotonParticle
+                {
+                    Position = particlePosition,
+                    Velocity = beamInfo.VelocityVector.ToNumericsVector2(),
+                    WaveLength = (float)beamInfo.Frequency,
+                    Power = (float)beamInfo.Energy,
+                    IsSpawner = true,
+                    SpawnerLifetime = lifetime,
+                    mapIndex = index
+                };
+                
             }
         }
     }
@@ -105,7 +155,7 @@ public class DamageMap
                         Vector2 vel = Vector2.Zero;
                         float pressure = 1f;
                         compIDMap[index] = instanceID;
-                        var newPart = new Particle(mat, pos, vel, Scale);
+                        var newPart = new PhysicalParticle(mat, pos, vel, Scale);
                         newPart.mapIndex = index;
                         PMap[index] = newPart;
                         PresMap[index] = pressure;
@@ -153,7 +203,7 @@ public class DamageMap
         Height = totalHeight + _pixBuf * 2; //create a bit larger canvas size for the armor.
         Width = totalLen + _pixBuf * 2;
         int arraylen = Width * Height;
-        PMap = new Particle[arraylen];
+        PMap = new PhysicalParticle[arraylen];
         PresMap = new float[arraylen];
         compIDMap = new string[arraylen];
         return partsize;
@@ -168,7 +218,7 @@ public class DamageMap
         return (int)(Math.Round(point.Y) * Width + Math.Round(point.X));
     }
 
-    public int GetIndex(Particle particle)
+    public int GetIndex(IDamageParticle particle)
     {
         return (int)(Math.Round(particle.Position.Y) * Width + Math.Round(particle.Position.X));
     }
@@ -197,8 +247,8 @@ public class DamageMap
 
         // Create new arrays for storing merged data
         string[] newIDMap = new string[newWidth * newHeight];
-        Particle[] newPMap = new Particle[newWidth * newHeight];
-        Vector2[] newVMap = new Vector2[newWidth * newHeight];
+        PhysicalParticle[] newPMap = new PhysicalParticle[newWidth * newHeight];
+        PhotonParticle[] newPhMap = new PhotonParticle[newWidth * newHeight];
         float[] newPresMap = new float[newWidth * newHeight];
 
         // Offset for placing particles from this map
@@ -218,8 +268,21 @@ public class DamageMap
                     var p = PMap[oldIndex];
                     p.mapIndex = newIndex;
                     newPMap[newIndex] = p;
-                    newPMap[newIndex].Position.X += offsetX;
-                    newPMap[newIndex].Position.Y += offsetY;
+                    var tempPosition = newPMap[newIndex].Position;
+                    tempPosition.X += offsetX;
+                    tempPosition.Y += offsetY;
+                    newPMap[newIndex].Position = tempPosition;
+                }
+
+                if (PhMap != null && PhMap[oldIndex] != null)
+                {
+                    var ph = PhMap[oldIndex];
+                    ph.mapIndex = newIndex;
+                    newPhMap[newIndex] = ph;
+                    var tempPosition = newPhMap[newIndex].Position;
+                    tempPosition.X += offsetX;
+                    tempPosition.Y += offsetY;
+                    newPhMap[newIndex].Position = tempPosition;
                 }
                 newPresMap[newIndex] = PresMap[oldIndex];
             }
@@ -244,8 +307,15 @@ public class DamageMap
                         var p = otherMap.PMap[otherIndex];
                         p.mapIndex = newIndex;
                         newPMap[newIndex] = p;
-                        newPMap[newIndex].Position.X = newX;
-                        newPMap[newIndex].Position.Y = newY; 
+                        newPMap[newIndex].Position = new(newX, newY);
+                    }
+
+                    if (otherMap.PhMap!= null && otherMap.PhMap[otherIndex] != null)
+                    {
+                        var ph = otherMap.PhMap[otherIndex];
+                        ph.mapIndex = newIndex;
+                        newPhMap[newIndex] = ph;
+                        newPhMap[newIndex].Position = new(newX, newY);
                     }
                 }
             }
@@ -254,6 +324,7 @@ public class DamageMap
         // Update map properties
         compIDMap = newIDMap;
         PMap = newPMap;
+        PhMap = newPhMap;
         PresMap = newPresMap;
         Width = newWidth;
         Height = newHeight;
@@ -320,9 +391,9 @@ public static class DamageMapHelpers
         }
     }
     
-    public static List<Particle> GetNeighboringParticles(DamageMap map, Vector2 position, float radius)
+    public static List<PhysicalParticle> GetNeighboringParticles(DamageMap map, Vector2 position, float radius)
     {
-        List<Particle> neighbors = new List<Particle>();
+        List<PhysicalParticle> neighbors = new List<PhysicalParticle>();
         int minX = Math.Max(0, (int)(position.X - radius));
         int maxX = Math.Min(map.Width - 1, (int)(position.X + radius));
         int minY = Math.Max(0, (int)(position.Y - radius));

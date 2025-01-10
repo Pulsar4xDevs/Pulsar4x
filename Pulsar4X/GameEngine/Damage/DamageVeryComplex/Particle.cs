@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Linq;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Components;
 using Pulsar4X.Extensions;
-using Pulsar4X.Industry;
 using Pulsar4X.Modding;
-using Pulsar4X.Orbital;
+using Pulsar4X.Sensors;
 using Pulsar4X.Storage;
 
 namespace GameEngine.Damage;
@@ -16,7 +16,7 @@ public struct ParticleMaterial
 {
     public uint PartMatID;
     public float Density; //as a solid
-    //Gpa
+    //0-1, this is kinetic elasticity not material elasticity
     public float Elasticity = 0.5f;
     //Mpa
     public float TensileStrength = 110;
@@ -25,6 +25,12 @@ public struct ParticleMaterial
     public float MeltingZeroPoint;
     public PhasePoint TriplePoint;
     public PhasePoint CriticalPoint;
+    public EMWaveForm PhotonReflectivity;
+    public float PhotonReflectivityPeak;
+    public EMWaveForm PhotonTransparency;
+    public float PhotonTransperencyPeak;
+
+    
     public ParticleMaterial(ParticleMaterialBlueprint materialBP, ICargoable minOrMat)
     {
         PartMatID = materialBP.PartMatID;
@@ -34,7 +40,12 @@ public struct ParticleMaterial
         TriplePoint = materialBP.TriplePoint;
         CriticalPoint = materialBP.CriticalPoint;
         Density = (float)(minOrMat.MassPerUnit / minOrMat.VolumePerUnit);
+        PhotonReflectivity = materialBP.PhotonReflectivity;
+        PhotonReflectivityPeak = materialBP.PhotonReflectivityPeak;
+        PhotonTransparency = materialBP.PhotonTransparency;
+        PhotonTransperencyPeak = materialBP.PhotonTransparencyPeak;
     }
+    
 }
 
 public struct PhasePoint
@@ -57,19 +68,70 @@ public enum PhaseState
     Plasma
 }
 
-public class Particle
+public interface IDamageParticle
 {
+    public int mapIndex { get; set; }
+    public Vector2 Position{ get; set; }
+    public Vector2 Velocity { get; set; }
+    public bool IsDeleted  { get; set; } 
+
+}
+
+public class PhotonParticle : IDamageParticle
+{
+    public int mapIndex{ get; set; }
+    public Vector2 Position{ get; set; }
+    public Vector2 Velocity{ get; set; }
+    public float WaveLength;
+    public float Power;
+    public bool IsSpawner = false;
+    public double SpawnerLifetime = 30.0;
+    public bool IsDeleted { get; set; } = false;
+
+    public static PhotonParticle SpawnNew(PhotonParticle spawner)
+    {
+        if (!spawner.IsSpawner || spawner.IsDeleted)
+            throw new Exception("Spawner is not valid");
+        Vector2 pos = spawner.Position + Vector2.Normalize(spawner.Velocity);
+        return new PhotonParticle()
+        {
+            Position = pos,
+            Velocity = spawner.Velocity,
+            WaveLength = spawner.WaveLength,
+            Power = spawner.Power,
+            IsSpawner = false,
+            IsDeleted = false
+        };
+    }
+    public static PhotonParticle CloneWithNewVelocityAndPower(PhotonParticle orig, Vector2 velocity, float power)
+    {
+        return new PhotonParticle()
+        {
+            Position = orig.Position,
+            Velocity = velocity,
+            WaveLength = orig.WaveLength,
+            Power = power,
+            IsSpawner = orig.IsSpawner,
+            IsDeleted = orig.IsDeleted
+        };
+    }
+
+}
+
+public class PhysicalParticle : IDamageParticle
+{
+    public int mapIndex{ get; set; }
+    public Vector2 Position{ get; set; }
+    public Vector2 Velocity{ get; set; }
     public static int NextID = 0;
     public int ID = NextID++;
+    
     public ParticleMaterial MatType;
     public PhaseState StateOfPhase = PhaseState.Solid;
-    public int mapIndex;
-    public Vector2 Position;
-    public Vector2 Velocity;
-    public int Life;
+    public byte Life;
     public float Mass;
     public DamageMap _pMap;
-    public bool IsDeleted = false;
+    public bool IsDeleted  { get; set; } = false;
     public float Temperature
     {
         get => _temperature;
@@ -86,7 +148,7 @@ public class Particle
     }
     private float _temperature;
 
-    public Particle(ParticleMaterial matType, Vector2 position, Vector2 velocity, int scale)
+    public PhysicalParticle(ParticleMaterial matType, Vector2 position, Vector2 velocity, int scale)
     {
         MatType = matType;
         Position = position;
