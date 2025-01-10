@@ -38,15 +38,15 @@ namespace Pulsar4X.SDL2UI
         {
             if (IsActive && Window.Begin("Small bodies:", ref IsActive, _flags))
             {
-                if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid))
+                if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId))
                 {
-                    foreach (var smallBody in _uiState.StarSystemStates[_uiState.SelectedStarSysGuid].EntityStatesWithNames)
+                    foreach (var smallBody in _uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesWithNames)
                     {
                         if (smallBody.Value.IsSmallBody())
                         {
                             if (ImGui.SmallButton(smallBody.Value.Name))
                             {
-                                _uiState.EntityClicked(smallBody.Value.Entity.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                                _uiState.EntityClicked(smallBody.Value.Entity.Id, _uiState.SelectedStarSystemId, MouseButtons.Primary);
                             }
                         }
                     }

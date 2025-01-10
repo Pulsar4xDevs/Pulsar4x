@@ -61,7 +61,7 @@ namespace Pulsar4X.SDL2UI
             {
                 instance = (PerformanceWindow)_uiState.LoadedWindows[typeof(PerformanceWindow)];
             }
-            instance._systemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+            instance._systemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
             return instance;
         }
 

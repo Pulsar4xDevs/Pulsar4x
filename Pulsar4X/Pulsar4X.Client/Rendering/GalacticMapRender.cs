@@ -20,7 +20,7 @@ namespace Pulsar4X.SDL2UI
         ConcurrentDictionary<string, NameIcon> _nameIcons = new ();
         ImGuiSDL2CSWindow _window;
         internal string? CapitolSysMap { get; set; }
-        internal string SelectedStarSysGuid { get { return _state.SelectedStarSysGuid; } }
+        internal string SelectedStarSysGuid { get { return _state.SelectedStarSystemId; } }
         internal SystemMapRendering? SelectedSysMapRender
         {
             get
@@ -145,7 +145,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     var sysid = kvp.Key;
                     var sysmap = kvp.Value;
-                    if(sysid == _state.SelectedStarSysGuid){
+                    if(sysid == _state.SelectedStarSystemId){
                         sysmap.DrawNameIcons();
                     }
 
@@ -159,7 +159,7 @@ namespace Pulsar4X.SDL2UI
                     foreach ((var id, var icon) in _nameIcons)
                     {
                         //if(_uiState.StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames.ContainsKey(item.Key)){
-                        if(id.Equals(_state.SelectedStarSysGuid)
+                        if(id.Equals(_state.SelectedStarSystemId)
                             && SystemViewPreferences.GetInstance().ShouldDisplay("map", icon.EntityState.BodyType))
                         {
                             nameIcons.Add(icon);
@@ -212,7 +212,7 @@ namespace Pulsar4X.SDL2UI
                     foreach (var name in _nameIcons.Values)
                         name.OnFrameUpdate(matrix, _camera);
                 }
-                if(item.Key == _state.SelectedStarSysGuid){
+                if(item.Key == _state.SelectedStarSystemId){
                      item.Value.Draw(_renderPtr, _camera);
                 }
 

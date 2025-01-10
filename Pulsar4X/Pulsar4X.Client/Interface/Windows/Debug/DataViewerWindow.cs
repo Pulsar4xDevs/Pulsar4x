@@ -30,7 +30,7 @@ public class DataViewerWindow : PulsarGuiWindow
             instance = (DataViewerWindow)_uiState.LoadedWindows[typeof(DataViewerWindow)];
         }
 
-        instance._systemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+        instance._systemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
         return instance;
     }
 

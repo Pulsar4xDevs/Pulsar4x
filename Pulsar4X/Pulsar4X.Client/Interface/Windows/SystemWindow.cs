@@ -37,7 +37,7 @@ public class SystemWindow : PulsarGuiWindow
 
         if (Window.Begin("System Viewer", ref IsActive, _flags))
         {
-            if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid))
+            if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId))
             {
                 var systemViewPreferences = SystemViewPreferences.GetInstance();
                 int viewIndex = systemViewPreferences.GetViewIndex(SystemViewPreferencesKey);
@@ -46,7 +46,7 @@ public class SystemWindow : PulsarGuiWindow
                 ImGui.SameLine();
                 SystemViewPreferences.GetInstance().DisplayCombo(SystemViewPreferencesKey, selectedIndex => {});
 
-                SystemState starSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+                SystemState starSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
                 List<EntityState> stars = starSystemState.EntityStatesWithPosition.Values
                     .Where(e => e.IsStar())
                     .OrderBy(x => x.Position?.AbsolutePosition ?? Orbital.Vector3.Zero)
@@ -80,7 +80,7 @@ public class SystemWindow : PulsarGuiWindow
 
     void TreeGen(Entity currentBody, Entity selectedBody, int depth = 0)
     {
-        SystemState starSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+        SystemState starSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
         var entityStates = starSystemState.EntityStatesWithPosition;
 
         if (entityStates.ContainsKey(currentBody.Id) && (currentBody.HasDataBlob<StarInfoDB>() || currentBody.HasDataBlob<SystemBodyInfoDB>()))

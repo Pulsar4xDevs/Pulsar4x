@@ -155,7 +155,7 @@ namespace Pulsar4X.SDL2UI
                 DisplayShips();
                 ImGui.SetCursorPosY(ysize * 0.5f);
                 DisplayOrders();
-                
+
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(27f);
 
@@ -249,12 +249,12 @@ namespace Pulsar4X.SDL2UI
                             DisplayHelpers.PrintRow("Ships", SelectedFleet.GetDataBlob<FleetDB>().GetChildren().Where(x => !x.HasDataBlob<FleetDB>()).Count().ToString());
                         }
                         ImGui.Columns(1);
-                        
-                        
 
-                        
-                        
-                        
+
+
+
+
+
                         ImGui.EndChild();
                     }
                     ImGui.SameLine();
@@ -653,7 +653,7 @@ namespace Pulsar4X.SDL2UI
         {
             var xPosition = ImGui.GetCursorPosX();
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            
+
             if (ImGui.BeginChild("Fleet Orders", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y), true))
             {
                 var orderableDB = SelectedFleet.GetDataBlob<OrderableDB>();
@@ -693,7 +693,7 @@ namespace Pulsar4X.SDL2UI
             }
             ImGui.SetCursorPosX(xPosition);
         }
-        
+
         private void DisplayShips()
         {
             if(SelectedFleet == null) return;
@@ -733,8 +733,8 @@ namespace Pulsar4X.SDL2UI
                     ImGui.EndListBox();
                 }
                 ImGui.PopStyleColor();
-                
-                
+
+
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - Styles.ButtonVerticalOffset);
                 if(ImGui.Button("Select All/None", new Vector2(Styles.LeftColumnWidthLg, 0f)))
                 {
@@ -744,7 +744,7 @@ namespace Pulsar4X.SDL2UI
                         selectedShips[ship] = selectAll;
                     }
                 }
-                
+
                 ImGui.EndChild();
             }
             ImGui.SetCursorPosX(xPosition);
@@ -900,7 +900,7 @@ namespace Pulsar4X.SDL2UI
             {
                 if(ImGui.MenuItem("View Ship"))
                 {
-                    _uiState.EntityClicked(ship.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                    _uiState.EntityClicked(ship.Id, _uiState.SelectedStarSystemId, MouseButtons.Primary);
                 }
                 if(!isUnattached)
                 {

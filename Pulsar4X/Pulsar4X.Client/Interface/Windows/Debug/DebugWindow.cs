@@ -101,7 +101,7 @@ namespace Pulsar4X.SDL2UI
             }
             //if(_uiState.LastClickedEntity?.Entity != null && instance.SelectedEntity != _uiState.LastClickedEntity.Entity)
             //    instance.SelectedEntity = _uiState.LastClickedEntity.Entity;
-            instance.SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+            instance.SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
             return instance;
         }
 
@@ -774,7 +774,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NewLine();
                 }
 
-                ImGui.Text("Selected Star System: " + _uiState.SelectedStarSysGuid);
+                ImGui.Text("Selected Star System: " + _uiState.SelectedStarSystemId);
                 ImGui.Text("Number Of Entites: " + _uiState.SelectedSystem.EntityCount);
                 if (ImGui.CollapsingHeader("Log"))
                 {
@@ -932,7 +932,7 @@ namespace Pulsar4X.SDL2UI
 
         void RefreshFactionEntites(GlobalUIState uiState)
         {
-            SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+            SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
             _factionOwnedEntites = new List<(string name, Entity entity)>();
             var factionEntites = _uiState.SelectedSystem.GetFilteredEntities(DataStructures.EntityFilter.Friendly, _uiState.Faction.Id);
             foreach (var entity in factionEntites.ToArray())

@@ -214,7 +214,7 @@ namespace Pulsar4X.SDL2UI
                             DisplayHelpers.PrintFormattedCell("Orbiting");
                             if(ImGui.SmallButton(parent.GetName(_uiState.Faction.Id)))
                             {
-                                _uiState.EntityClicked(parent.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                                _uiState.EntityClicked(parent.Id, _uiState.SelectedStarSystemId, MouseButtons.Primary);
                             }
                             ImGui.NextColumn();
                             ImGui.Separator();

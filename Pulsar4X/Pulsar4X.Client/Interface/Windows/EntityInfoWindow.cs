@@ -46,7 +46,7 @@ namespace Pulsar4X.SDL2UI
             if (Window.Begin("Currently selected", _flags))
             {
 
-                if (_uiState.LastClickedEntity != null && _uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid)){
+                if (_uiState.LastClickedEntity != null && _uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId)){
 
                     EntityState _SelectedEntityState = _uiState.LastClickedEntity;
                     if(_selectedEntity == null || _selectedEntity != _SelectedEntityState.Entity)
@@ -82,7 +82,7 @@ namespace Pulsar4X.SDL2UI
 
                         var _parentEntity = _selectedEntity.GetDataBlob<PositionDB>().Parent;
                         bool _hasParentEntity = false;
-                        SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+                        SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
                         var _NamedEntityStates = _StarSystemState.EntityStatesWithNames;
                         if (_parentEntity != null)
                         {
@@ -95,7 +95,7 @@ namespace Pulsar4X.SDL2UI
                                 if(ImGui.SmallButton(tempEntityState.Name))
                                 {
                                     //if(ImGui.SmallButton(parentEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction.ID))){
-                                    _uiState.EntityClicked(_parentEntity.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                                    _uiState.EntityClicked(_parentEntity.Id, _uiState.SelectedStarSystemId, MouseButtons.Primary);
                                     //}
                                 }
                             }
@@ -118,7 +118,7 @@ namespace Pulsar4X.SDL2UI
                                 {
                                     hasChildrenEntities = true;
                                     if(ImGui.SmallButton(tempEntityState.Name)){
-                                        _uiState.EntityClicked(childEntity.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                                        _uiState.EntityClicked(childEntity.Id, _uiState.SelectedStarSystemId, MouseButtons.Primary);
                                     }
                                 }
 
