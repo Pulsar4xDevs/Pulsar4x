@@ -8,6 +8,7 @@
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
       "VolumePerUnit": 0.000125,
+      "PartMatUniqueID": "stainless-steel",
       "ResourceCosts": {
         "iron": 88,
         "chromium": 11,
@@ -115,6 +116,7 @@
       "Name": "Plastic",
       "Description": "Rendered from Hydrocarbons",
       "CargoTypeID": "general-storage",
+      "PartMatUniqueID": "delrin",
       "MassPerUnit": 1,
       "VolumePerUnit": 0.0010638298,
       "ResourceCosts": {
@@ -190,6 +192,7 @@
       "Name": "Space-Crete",
       "Description": "A composite material for extraterrestrial construction, utilizing local regolith and minerals.",
       "CargoTypeID": "general-storage",
+      "PartMatUniqueID": "concrete",
       "MassPerUnit": 2.4,
       "VolumePerUnit": 0.000417,
       "ResourceCosts": {

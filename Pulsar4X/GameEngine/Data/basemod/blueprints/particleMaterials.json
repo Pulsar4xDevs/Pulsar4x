@@ -1,0 +1,182 @@
+[
+  {
+    "Type": "PartMat",
+    "Payload": {
+      "UniqueID": "water",
+      "PartMatID": 0,
+      "ThermalCapacity": 4200,
+      "ThermalConductivity": 0.6089,
+      "MeltingZeroPoint": -60,      
+      "TriplePoint": {
+        "Bar": 0.0061,
+        "Kelvin":273.16
+      },
+      "CriticalPoint": {
+        "Bar": 220.6,
+        "Kelvin": 647.096
+      },
+      "PhotonReflectivity": {
+        "WavelengthMin_nm": 400,
+        "WavelengthAverage_nm": 500,
+        "WavelengthMax_nm": 600
+      },
+      "PhotonReflectivityPeak": 0.07,
+      "PhotonTransparency": {
+        "WavelengthMin_nm": 400,
+        "WavelengthAverage_nm": 650,
+        "WavelengthMax_nm": 1100
+      },
+      "PhotonTransparencyPeak": 0.92
+    }
+  },
+  {
+    "Type": "PartMat",
+    "Payload": {
+      "UniqueID": "air",
+      "PartMatID": 1,
+      "ThermalCapacity": 1005,
+      "ThermalConductivity": 0.0262,
+      "MeltingZeroPoint": 59.75,
+      "TriplePoint": {
+        "Bar": 0.055,
+        "Kelvin":59.75
+      },
+      "CriticalPoint": {
+        "Bar": 37.9,
+        "Kelvin": 132.65
+      },
+      "PhotonReflectivity": {
+        "WavelengthMin_nm": 700,
+        "WavelengthAverage_nm": 1000,
+        "WavelengthMax_nm": 1100
+      },
+      "PhotonReflectivityPeak": 0.00005,
+      "PhotonTransparency": {
+        "WavelengthMin_nm": 300,
+        "WavelengthAverage_nm": 550,
+        "WavelengthMax_nm": 2400
+      },
+      "PhotonTransparencyPeak": 0.9999
+    }
+  },
+  {
+    "Type": "PartMat",
+    "Payload": {
+      "UniqueID": "aluminum",
+      "PartMatID": 2,
+      "ThermalCapacity": 900,
+      "ThermalConductivity": 237,
+      "MeltingZeroPoint": 933.47,
+      "TriplePoint": {
+        "Bar": 0.00001,
+        "Kelvin": 933.47
+      },
+      "CriticalPoint": {
+        "Bar": 1150,
+        "Kelvin": 7500
+      },
+      "PhotonReflectivity": {
+        "WavelengthMin_nm": 200,
+        "WavelengthAverage_nm": 250,
+        "WavelengthMax_nm": 300
+      },
+      "PhotonReflectivityPeak": 0.93,
+      "PhotonTransparency": {
+        "WavelengthMin_nm": 400,
+        "WavelengthAverage_nm": 800,
+        "WavelengthMax_nm": 1600
+      },
+      "PhotonTransparencyPeak": 0.05
+    }
+  },
+  {
+    "Type": "PartMat",
+    "Payload": {
+      "UniqueID": "stainless-steel",
+      "PartMatID": 3,
+      "ThermalCapacity": 500,
+      "ThermalConductivity": 16.3,
+      "MeltingZeroPoint": 1673,       
+      "TriplePoint": {
+        "Bar": 0.00001,
+        "Kelvin": 1673
+      },
+      "CriticalPoint": {
+        "Bar": 30000,
+        "Kelvin": 20000
+      },
+      "PhotonReflectivity": {
+        "WavelengthMin_nm": 300,
+        "WavelengthAverage_nm": 550,
+        "WavelengthMax_nm": 750
+      },
+      "PhotonReflectivityPeak": 0.85,
+      "PhotonTransparency": {
+        "WavelengthMin_nm": 800,
+        "WavelengthAverage_nm": 1500,
+        "WavelengthMax_nm": 2000
+      },
+      "PhotonTransparencyPeak": 0.01
+    }
+  },
+  {
+    "Type": "PartMat",
+    "Payload": {
+      "UniqueID": "concrete",
+      "PartMatID": 4,
+      "ThermalCapacity": 880,
+      "ThermalConductivity": 0.8,
+      "MeltingZeroPoint": 1873,
+      "TriplePoint": {
+        "Bar": 0.00001,
+        "Kelvin": 1873
+      },
+      "CriticalPoint": {
+        "Bar": 100000,
+        "Kelvin": 50000
+      },
+      "PhotonReflectivity": {
+        "WavelengthMin_nm": 400,
+        "WavelengthAverage_nm": 600,
+        "WavelengthMax_nm": 700
+      },
+      "PhotonReflectivityPeak": 0.15,
+      "PhotonTransparency": {
+        "WavelengthMin_nm": 800,
+        "WavelengthAverage_nm": 1200,
+        "WavelengthMax_nm": 3000
+      },
+      "PhotonTransparencyPeak": 0.001
+    }
+  },
+  {
+    "Type": "PartMat",
+    "Payload": {
+      "UniqueID": "delrin",
+      "PartMatID": 5,
+      "ThermalCapacity": 1500,
+      "ThermalConductivity": 0.23,
+      "SublimationPoint": 600,
+      "TriplePoint": {
+        "Bar": 0.001,
+        "Kelvin": 480
+      },
+      "CriticalPoint": {
+        "Bar": 100,
+        "Kelvin": 800
+      },
+      "PhotonReflectivity": {
+        "WavelengthMin_nm": 400,
+        "WavelengthAverage_nm": 550,
+        "WavelengthMax_nm": 700
+      },
+      "PhotonReflectivityPeak": 0.4,
+      "PhotonTransparency": {
+        "WavelengthMin_nm": 800,
+        "WavelengthAverage_nm": 1300,
+        "WavelengthMax_nm": 2500
+      },
+      "PhotonTransparencyPeak": 0.2
+    }
+  }
+]

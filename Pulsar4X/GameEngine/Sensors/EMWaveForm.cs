@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace Pulsar4X.Sensors
 {
     /// <summary>
@@ -21,14 +23,17 @@ namespace Pulsar4X.Sensors
         /// <summary>
         /// The wavelength average of this emmission in nm
         /// </summary>
+        [JsonProperty]
         public readonly double WavelengthAverage_nm;
         /// <summary>
         /// The min wavelength this will no longer emit at in nm
         /// </summary>
+        [JsonProperty]
         public readonly double WavelengthMin_nm;
         /// <summary>
         /// The max wavelength this will no longer emit at in nm
         /// </summary>
+        [JsonProperty]
         public readonly double WavelengthMax_nm;
 
 

@@ -161,6 +161,11 @@ namespace Pulsar4X.Orbital
             return (X * X) + (Y * Y);
         }
 
+        public static double Distance(Vector2 v1, Vector2 v2)
+        {
+            return (v1 - v2).Length();
+        }
+
         /// <summary>
         /// Multiplies a scalar value by a specified vector.
         /// </summary>
