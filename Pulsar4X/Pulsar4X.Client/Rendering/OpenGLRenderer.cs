@@ -15,10 +15,11 @@ public class OpenGLRenderer : IRenderer
     {
         _windowHandle = windowHandle;
 
-        // Set the OpenGL context attributes
-        //SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-        //SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 0);
-        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK, (int)SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_CORE);
+        // After SDL initialization but before context creation
+        int major, minor;
+        SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, out major);
+        SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, out minor);
+        Console.WriteLine($"Using OpenGL version: {major}.{minor}");
 
         // Create the OpenGL context
         _glContext = SDL.SDL_GL_CreateContext(_windowHandle);
@@ -28,7 +29,16 @@ public class OpenGLRenderer : IRenderer
         }
 
         // Make the OpenGL context current
-        SDL.SDL_GL_MakeCurrent(_windowHandle, _glContext);
+        int makeCurrentResult = SDL.SDL_GL_MakeCurrent(_windowHandle, _glContext);
+        if (makeCurrentResult < 0)
+        {
+            Console.WriteLine($"Make current failed: {SDL.SDL_GetError()}");
+            return;
+        }
+
+        // After context creation
+        string version = GL.GetString(GL.Enum.GL_VERSION);
+        Console.WriteLine($"OpenGL Version: {version}");
     }
 
     public void BeginFrame()
