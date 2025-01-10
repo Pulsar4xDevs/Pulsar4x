@@ -116,31 +116,12 @@ namespace ImGuiSDL2CS
             // Build texture atlas
             io.Fonts.GetTexDataAsAlpha8(out byte* pixels, out int width, out int height);
 
-            GL.GetIntegerv(GL.Enum.GL_TEXTURE_BINDING_2D, out int lastTexture);
+            g_FontTexture = new IntPtr(Renderer.CreateDefaultFontTexture(width, height, (IntPtr)pixels));
 
-            // Create OpenGL texture
-            GL.GenTextures(1, out int fontTextureID);
-            GL.BindTexture(GL.Enum.GL_TEXTURE_2D, fontTextureID);
-            GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MIN_FILTER, (int) GL.Enum.GL_LINEAR);
-            GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MAG_FILTER, (int) GL.Enum.GL_LINEAR);
-            GL.PixelStorei(GL.Enum.GL_UNPACK_ROW_LENGTH, 0);
-            GL.TexImage2D(
-                GL.Enum.GL_TEXTURE_2D,
-                0,
-                (int) GL.Enum.GL_ALPHA,
-                width,
-                height,
-                0,
-                GL.Enum.GL_ALPHA,
-                GL.Enum.GL_UNSIGNED_BYTE,
-                new IntPtr(pixels)
-            );
-            g_FontTexture = new IntPtr(fontTextureID);
             // Store the texture identifier in the ImFontAtlas substructure.
             io.Fonts.SetTexID(g_FontTexture);
             ImGuiSDL2CSHelper.FontTextureID = g_FontTexture;
             io.Fonts.ClearTexData(); // Clears CPU side texture data.
-            GL.BindTexture(GL.Enum.GL_TEXTURE_2D, lastTexture);
         }
 
         protected override void Dispose(bool disposing)

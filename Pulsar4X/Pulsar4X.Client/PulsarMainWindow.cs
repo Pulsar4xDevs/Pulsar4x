@@ -198,8 +198,8 @@ namespace Pulsar4X.SDL2UI
                 systemState.PreFrameSetup();
             }
 
-            GL.ClearColor(backColor.X, backColor.Y, backColor.Z, 1f);
-            GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
+            Renderer.Clear(backColor.X, backColor.Y, backColor.Z, 1f);
+            Renderer.BeginFrame();
 
             _state.GalacticMap.Draw();
 
