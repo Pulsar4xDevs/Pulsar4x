@@ -98,7 +98,8 @@ namespace ImGuiSDL2CS
 
             ImGuiLayout();
 
-            ImGuiSDL2CSHelper.Render(Size);
+            ImGui.Render();
+            Renderer.RenderImGui(ImGui.GetDrawData(), (int) Size.X, (int) Size.Y);
         }
 
         public virtual void ImGuiLayout()
