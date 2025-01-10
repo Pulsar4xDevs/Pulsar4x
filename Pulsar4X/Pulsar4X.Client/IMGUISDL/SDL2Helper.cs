@@ -14,35 +14,6 @@ namespace ImGuiSDL2CS;
 
 public static class SDL2Helper
 {
-    private static bool _Initialized = false;
-    public static bool Initialized => _Initialized;
-
-    public static void Init()
-    {
-        if (_Initialized)
-            return;
-        _Initialized = true;
-
-        SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
-
-        SetGLAttributes();
-    }
-
-    public static void SetGLAttributes(int doubleBuffer = 1,
-                                       int depthSize = 24,
-                                       int stencilSize = 8
-        //int majorVersion = 2,
-        //int minorVersion = 2
-    )
-    {
-        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DOUBLEBUFFER, doubleBuffer);
-        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DEPTH_SIZE, depthSize);
-        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_STENCIL_SIZE, stencilSize);
-        //SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, majorVersion);
-        //SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, minorVersion);
-    }
-
-
     public static void CreateSDLTexture(IntPtr rendererPtr, RawBmp rawImg, ref IntPtr texturePtr)
     {
 
@@ -71,7 +42,7 @@ public static class SDL2Helper
         IntPtr sdlSurface = SDL.SDL_CreateRGBSurfaceFrom(pxls, w, h, d, s, rmask, gmask, bmask, amask);
         texturePtr = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
         SDL.SDL_FreeSurface(sdlSurface);
-        
+
     }
 
     public static void CreateSDLTextures(IntPtr renderPtr, DamageMap damageMap, ref IntPtr[] textures)
@@ -99,7 +70,7 @@ public static class SDL2Helper
             texture = SDL.SDL_CreateTexture(renderPtr, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, width, height);
         }
     }
-    
+
     internal static void CreateTextureForIDMap(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
         byte alpha = 255;
@@ -172,7 +143,7 @@ public static class SDL2Helper
             if(part != null && part.Velocity.Length() > maxVelocity)
                 maxVelocity = part.Velocity.Length();
         }
-        
+
         unsafe
         {
             uint* pixelPtr = (uint*)pixels.ToPointer();
@@ -203,7 +174,7 @@ public static class SDL2Helper
         IntPtr pixels;
         int pitch;
         SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
-        
+
         int phaseStateCount = Enum.GetValues(typeof(PhaseState)).Length;
         unsafe
         {
@@ -221,7 +192,7 @@ public static class SDL2Helper
                         byte lifeRed = (byte)(physicalParticle.Life * 2.55f); // Life is 0-100, so *2.55 for 0-255
 
                         // Blue for StateOfPhase, using full range 0 to 255
-                        
+
                         byte phaseBlue = (byte)((int)physicalParticle.StateOfPhase * 255 / (phaseStateCount - 1)); // Spread over 0-255
 
                         // Green for Temperature, assuming max temp is known or we normalize to 100
@@ -240,7 +211,7 @@ public static class SDL2Helper
         }
         SDL.SDL_UnlockTexture(texture);
     }
-    
+
     internal static void CreateTextureForPhaseState(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
         byte alpha = 255;
@@ -253,7 +224,7 @@ public static class SDL2Helper
         unsafe
         {
             uint* pixelPtr = (uint*)pixels.ToPointer();
-            
+
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -275,9 +246,9 @@ public static class SDL2Helper
         }
 
         SDL.SDL_UnlockTexture(texture);
-       
+
     }
-    
+
     internal static void CreateTextureForTemp(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
         byte alpha = 255;
@@ -285,7 +256,7 @@ public static class SDL2Helper
         IntPtr pixels;
         int pitch;
         SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
-        
+
         float temperatureInKelvin = 0;
         float thermalCapacity = 0;
         float thermalConductivity = 0;
@@ -301,8 +272,8 @@ public static class SDL2Helper
                 if(particle.Temperature > maxTemp)
                     maxTemp = particle.Temperature;
             }
-                
-            
+
+
         }
         unsafe
         {
@@ -394,7 +365,7 @@ public static class SDL2Helper
             }
             return;
         }
-        
+
         byte alpha = 255;
         CheckTexture(renderPtr, ref texture, width, height);
         IntPtr pixels;
@@ -405,26 +376,26 @@ public static class SDL2Helper
         var minFreq = (int)damageMap.PhMap
                                     .Where(p => p != null)
                                     .Select(p => p.WaveLength)
-                                    .DefaultIfEmpty(0) // Fallback value 
+                                    .DefaultIfEmpty(0) // Fallback value
                                     .Min();
         var maxFreq = (int)damageMap.PhMap
                                     .Where(p => p != null)
                                     .Select(p => p.WaveLength)
-                                    .DefaultIfEmpty(10000) // Fallback value 
+                                    .DefaultIfEmpty(10000) // Fallback value
                                     .Max();
         var maxPow = (int)damageMap.PhMap
                                    .Where(p => p != null)
                                    .Select(p => p.WaveLength)
-                                   .DefaultIfEmpty(10000) // Fallback value 
+                                   .DefaultIfEmpty(10000) // Fallback value
                                    .Max();
         minFreq = (int)(minFreq * 0.5);
         maxFreq = (int)(maxFreq * 1.5);
         uint  color = 0;
-        
+
         unsafe
         {
             uint* pixelPtr = (uint*)pixels.ToPointer();
-            
+
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -452,7 +423,7 @@ public static class SDL2Helper
         float max = Math.Max(r, Math.Max(g, b));
         float min = Math.Min(r, Math.Min(g, b));
         float l = (max + min) / 2f;
-    
+
         if (max == min)
             return (r, g, b); // No saturation for grayscale colors
 
@@ -468,7 +439,7 @@ public static class SDL2Helper
 
         return (r, g, b);
     }
-    
+
 
     public static (float, float, float) AdjustLightness(float r, float g, float b, float lightness)
     {
@@ -485,9 +456,9 @@ public static class SDL2Helper
         if (3 * vH < 2) return v1 + (v2 - v1) * ((2f / 3f) - vH) * 6;
         return v1;
     }
-    
+
     public static uint ColourFromValue(
-        float value, int max, int min, 
+        float value, int max, int min,
         float alphaValue = 255, int alphaMin = 0, int alphaMax = 255
     )
     {
@@ -505,7 +476,7 @@ public static class SDL2Helper
         return (uint)((a << 24) | (r << 16) | (g << 8) | b);
     }
     public static uint ColourFromValue2(
-        float value, int max, int min, 
+        float value, int max, int min,
         float alphaValue = 255, int alphaMin = 0, int alphaMax = 255
     )
     {

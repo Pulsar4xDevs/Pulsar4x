@@ -14,7 +14,7 @@ namespace ImGuiSDL2CS
         protected double g_Time = 0.0f;
         protected readonly bool[] g_MousePressed = { false, false, false };
         protected float g_MouseWheel = 0.0f;
-        protected IntPtr g_FontTexture = IntPtr.Zero;
+        protected IntPtr _fontTexture = IntPtr.Zero;
 
         protected ITheme Theme { get; set; }
 
@@ -48,7 +48,7 @@ namespace ImGuiSDL2CS
             string title = "ImGui.NET-SDL2-CS Window",
             int x = SDL.SDL_WINDOWPOS_CENTERED, int y = SDL.SDL_WINDOWPOS_CENTERED,
             int width = 800, int height = 600,
-            SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN
+            SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN
         ) : base(title, x, y, width, height, flags)
         {
             _IsSuperClass = GetType() == typeof(ImGuiSDL2CSWindow);
@@ -117,11 +117,10 @@ namespace ImGuiSDL2CS
             // Build texture atlas
             io.Fonts.GetTexDataAsAlpha8(out byte* pixels, out int width, out int height);
 
-            g_FontTexture = new IntPtr(Renderer.CreateDefaultFontTexture(width, height, (IntPtr)pixels));
+            _fontTexture = new IntPtr(Renderer.CreateDefaultFontTexture(width, height, (IntPtr)pixels));
 
             // Store the texture identifier in the ImFontAtlas substructure.
-            io.Fonts.SetTexID(g_FontTexture);
-            ImGuiSDL2CSHelper.FontTextureID = g_FontTexture;
+            io.Fonts.SetTexID(_fontTexture);
             io.Fonts.ClearTexData(); // Clears CPU side texture data.
         }
 
@@ -135,12 +134,12 @@ namespace ImGuiSDL2CS
 
             // Free unmanaged resources (unmanaged objects) and override a finalizer below.
             // Set large fields to null.
-            if (g_FontTexture != IntPtr.Zero) {
+            if (_fontTexture != IntPtr.Zero) {
                 // Texture gets deleted with the context.
                 // GL.DeleteTexture(g_FontTexture);
-                if ( io.Fonts.TexID == g_FontTexture)
+                if ( io.Fonts.TexID == _fontTexture)
                     io.Fonts.TexID = IntPtr.Zero;
-                g_FontTexture = IntPtr.Zero;
+                _fontTexture = IntPtr.Zero;
             }
 
             base.Dispose(disposing);

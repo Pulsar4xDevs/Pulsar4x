@@ -12,7 +12,6 @@ namespace ImGuiSDL2CS
     {
         private static bool _Initialized = false;
         public static bool Initialized => _Initialized;
-        public static IntPtr FontTextureID;
         public static void Init()
         {
             if (_Initialized)

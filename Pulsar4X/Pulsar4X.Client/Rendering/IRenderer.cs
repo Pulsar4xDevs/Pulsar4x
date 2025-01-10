@@ -13,6 +13,7 @@ public enum RendererType
 
 public interface IRenderer : IDisposable
 {
+    void SetAttributes();
     void Initialize(IntPtr windowHandle);
     void BeginFrame();
     void EndFrame();

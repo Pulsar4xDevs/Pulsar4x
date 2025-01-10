@@ -91,7 +91,7 @@ namespace ImGuiSDL2CS
             string title = defaultTitle,
             int x = SDL.SDL_WINDOWPOS_CENTERED, int y = SDL.SDL_WINDOWPOS_CENTERED,
             int width = 800, int height = 600,
-            SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN
+            SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN
         )
         {
             Init(title, x, y, width, height, flags);
@@ -101,18 +101,22 @@ namespace ImGuiSDL2CS
             string title = defaultTitle,
             int x = SDL.SDL_WINDOWPOS_CENTERED, int y = SDL.SDL_WINDOWPOS_CENTERED,
             int width = 800, int height = 600,
-            SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN
+            SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN
         )
         {
-            SDL2Helper.Init();
+            SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
 
             if (_Handle != IntPtr.Zero)
                 throw new InvalidOperationException("SDL2Window already initialized, Dispose() first before reusing!");
 
+            if ((flags & SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL) == SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL) {
+                Renderer = RendererFactory.CreateRenderer(RendererType.OpenGL);
+                Renderer.SetAttributes();
+            }
+
             _Handle = SDL.SDL_CreateWindow(title, x, y, width, height, flags);
 
             if ((flags & SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL) == SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL) {
-                Renderer = RendererFactory.CreateRenderer(RendererType.OpenGL);
                 Renderer.Initialize(_Handle);
             }
         }
@@ -126,13 +130,11 @@ namespace ImGuiSDL2CS
         {
             Show();
             IsAlive = true;
-            do {
-                while(IsAlive)
-                {
-                    PollEvents();
-                    OnLoop?.Invoke(this);
-                }
-            } while (IsAlive);
+            while(IsAlive)
+            {
+                PollEvents();
+                OnLoop?.Invoke(this);
+            }
         }
 
         public virtual void PollEvents()

@@ -11,15 +11,16 @@ public class OpenGLRenderer : IRenderer
     private IntPtr _glContext;
     private IntPtr _windowHandle;
 
+    public void SetAttributes()
+    {
+        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DOUBLEBUFFER, 1);
+        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DEPTH_SIZE, 24);
+        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_STENCIL_SIZE, 8);
+    }
+
     public void Initialize(IntPtr windowHandle)
     {
         _windowHandle = windowHandle;
-
-        // After SDL initialization but before context creation
-        int major, minor;
-        SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, out major);
-        SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, out minor);
-        Console.WriteLine($"Using OpenGL version: {major}.{minor}");
 
         // Create the OpenGL context
         _glContext = SDL.SDL_GL_CreateContext(_windowHandle);
@@ -32,8 +33,7 @@ public class OpenGLRenderer : IRenderer
         int makeCurrentResult = SDL.SDL_GL_MakeCurrent(_windowHandle, _glContext);
         if (makeCurrentResult < 0)
         {
-            Console.WriteLine($"Make current failed: {SDL.SDL_GetError()}");
-            return;
+            throw new Exception($"GL_MakeCurrent failed: {SDL.SDL_GetError()}");
         }
 
         // After context creation
