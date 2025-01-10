@@ -140,6 +140,32 @@ namespace Pulsar4X.SDL2UI
             MainMenuItems.GetInstance().SetActive();
 
             SelectedStarSystemId = "";
+
+            // Need to pre load all textures
+            this.Img_Cancel();
+            this.Img_Cargo();
+            this.Img_DesComponent();
+            this.Img_DesignOrdnance();
+            this.Img_DesignShip();
+            this.Img_Discord();
+            this.Img_Down();
+            this.Img_Firecon();
+            this.Img_GalaxyMap();
+            this.Img_Industry();
+            this.Img_Logo();
+            this.Img_MainMenuLogo();
+            this.Img_OneStep();
+            this.Img_Pause();
+            this.Img_Pin();
+            this.Img_Play();
+            this.Img_Power();
+            this.Img_Rename();
+            this.Img_Repeat();
+            this.Img_Research();
+            this.Img_Ruler();
+            this.Img_Select();
+            this.Img_Tree();
+            this.Img_Up();
         }
 
         private void DeactivateAllClosableWindows()

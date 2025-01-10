@@ -24,30 +24,50 @@ namespace Pulsar4X.SDL2UI
                 var filename = differentFilename.IsNotNullOrEmpty() ? differentFilename : imgName;
                 var path = Path.Combine("Resources", filename + extension);
 
+                // Check if file exists
+                if (!File.Exists(path))
+                {
+                    Console.WriteLine($"File not found: {path}");
+                    return IntPtr.Zero;
+                }
+#if DEBUG
+                Console.WriteLine($"Loading image: {path}");
+#endif
                 IntPtr sdlSurface = SDL2.SDL_image.IMG_Load(path);
+
                 if (sdlSurface == IntPtr.Zero)
                 {
-                    Console.WriteLine($"Failed to load BMP: {SDL.SDL_GetError()}");
+                    Console.WriteLine($"Failed to load BMP: {SDL_image.IMG_GetError()}");
                     return IntPtr.Zero;
                 }
 
-                IntPtr sdltexture = SDL.SDL_CreateTextureFromSurface(_uiState.SDLRendererPtr, sdlSurface);
-                if (sdltexture == IntPtr.Zero)
+#if DEBUG
+                // Debug surface info
+                var surface = Marshal.PtrToStructure<SDL.SDL_Surface>(sdlSurface);
+                var format = Marshal.PtrToStructure<SDL.SDL_PixelFormat>(surface.format);
+
+                Console.WriteLine($"Successfully loaded: {imgName}");
+                Console.WriteLine($"Format: {extension}");
+                Console.WriteLine($"Surface pointer: {sdlSurface:X}");
+                Console.WriteLine($"Pixel pointer: {surface.pixels:X}");
+                Console.WriteLine($"Dimensions: {surface.w}x{surface.h}");
+                Console.WriteLine($"BPP: {format.BitsPerPixel}");
+                Console.WriteLine($"BytesPerPixel: {format.BytesPerPixel}");
+                Console.WriteLine($"Pitch: {surface.pitch}");
+                Console.WriteLine(new string('-', 50));
+#endif
+                try
                 {
-                    Console.WriteLine($"Failed to create texture: {SDL.SDL_GetError()}");
+                    // Create the texture
+                    uint textureId = _uiState.ViewPort.Renderer.LoadTexture(sdlSurface, imgName);
+                    _uiState.SDLImageDictionary.Add(imgName, (IntPtr)textureId);
+                    return (IntPtr)textureId;
+                }
+                finally
+                {
+                    // Free the surface after the texture is created
                     SDL.SDL_FreeSurface(sdlSurface);
-                    return IntPtr.Zero;
                 }
-
-                SDL.SDL_FreeSurface(sdlSurface);
-
-                // Try to bind the texture to OpenGL and check for errors
-                if (SDL.SDL_GL_BindTexture(sdltexture, out float _, out float _) != 0)
-                {
-                    Console.WriteLine($"Failed to bind texture to GL: {SDL.SDL_GetError()}");
-                }
-
-                _uiState.SDLImageDictionary.Add(imgName, sdltexture);
             }
             return _uiState.SDLImageDictionary[imgName];
         }

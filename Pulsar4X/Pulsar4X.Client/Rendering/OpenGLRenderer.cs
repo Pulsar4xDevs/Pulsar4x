@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using SDL2;
@@ -10,6 +13,8 @@ public class OpenGLRenderer : IRenderer
 {
     private IntPtr _glContext;
     private IntPtr _windowHandle;
+
+    private Dictionary<string, uint> _textures = new ();
 
     public void SetAttributes()
     {
@@ -56,10 +61,126 @@ public class OpenGLRenderer : IRenderer
         GL.ClearColor(r, g, b, a);
     }
 
-    public int CreateDefaultFontTexture(int width, int height, IntPtr pixels)
+    public IntPtr Get()
+    {
+        return _glContext;
+    }
+
+    public uint LoadTexture(IntPtr surfacePtr, string name)
+    {
+        // Convert the SDL_Surface pointer to a managed structure
+        var surface = Marshal.PtrToStructure<SDL.SDL_Surface>(surfacePtr);
+        var format = Marshal.PtrToStructure<SDL.SDL_PixelFormat>(surface.format);
+
+        // Check if pixels exist
+        if (surface.pixels == IntPtr.Zero)
+        {
+            throw new Exception("Surface contains no pixel data");
+        }
+
+        // Check dimensions
+        if (surface.w <= 0 || surface.h <= 0)
+        {
+            throw new Exception($"Invalid texture dimensions: {surface.w}x{surface.h}");
+        }
+
+        // Generate texture ID
+        uint textureId;
+        GL.GenTextures(1, out textureId);
+
+        // Check if texture generation failed
+        if (textureId == 0)
+        {
+            throw new Exception("Failed to generate texture ID");
+        }
+
+        CheckGLError("LoadTexture (GenTextures)");
+
+        GL.BindTexture(GL.Enum.GL_TEXTURE_2D, textureId);
+        CheckGLError("LoadTexture (BindTexture)");
+
+        // Set texture parameters
+        GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MIN_FILTER, (int)GL.Enum.GL_LINEAR);
+        GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MAG_FILTER, (int)GL.Enum.GL_LINEAR);
+        GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_WRAP_S, (int)GL.Enum.GL_CLAMP_TO_EDGE);
+        GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_WRAP_T, (int)GL.Enum.GL_CLAMP_TO_EDGE);
+
+        uint glFormat;
+        switch (format.BitsPerPixel)
+        {
+            case 32:
+                glFormat = (uint)GL.Enum.GL_RGBA;
+                break;
+            case 24:
+                glFormat = (uint)GL.Enum.GL_RGB;
+                break;
+            default:
+                throw new Exception($"Unsupported bits per pixel: {format.BitsPerPixel}");
+        }
+
+        // Upload texture data to GPU
+        try
+        {
+            GL.TexImage2D(
+                GL.Enum.GL_TEXTURE_2D,
+                0,
+                (int)glFormat,
+                surface.w,
+                surface.h,
+                0,
+                (GL.Enum)glFormat,
+                GL.Enum.GL_UNSIGNED_BYTE,
+                surface.pixels
+            );
+        }
+        catch (Exception e)
+        {
+            // Clean up on failure
+            GL.DeleteTextures(1, ref textureId);
+            throw new Exception($"Failed to create texture {name}: {e.Message}", e);
+        }
+
+        // Generate mipmaps (optional, not implemented yet)
+        //GL.GenerateMipmap(GL.Enum.GL_TEXTURE_2D);
+
+        // Check for errors
+        CheckGLError("LoadTexture (TexImage2D)");
+
+        // Keep track of the loaded textures, if name is already used replace the texture
+        if(_textures.ContainsKey(name))
+        {
+            DeleteTexture(name);
+        }
+        _textures.Add(name, textureId);
+
+        return textureId;
+    }
+
+    public void DeleteTexture(string name)
+    {
+        if(_textures.TryGetValue(name, out uint textureId))
+        {
+            GL.DeleteTextures(1, ref textureId);
+            _textures.Remove(name);
+        }
+    }
+
+    public void DeleteTexture(uint textureId)
+    {
+        GL.DeleteTextures(1, ref textureId);
+
+        // Remove all entries where the value is equal to the texture ID
+        var toRemove = _textures.Where(x => x.Value == textureId).ToList();
+        foreach(var kvp in toRemove)
+        {
+            _textures.Remove(kvp.Key);
+        }
+    }
+
+    public uint CreateDefaultFontTexture(int width, int height, IntPtr pixels)
     {
         // Create OpenGL texture
-        GL.GenTextures(1, out int fontTextureID);
+        GL.GenTextures(1, out uint fontTextureID);
         GL.BindTexture(GL.Enum.GL_TEXTURE_2D, fontTextureID);
         GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MIN_FILTER, (int) GL.Enum.GL_LINEAR);
         GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MAG_FILTER, (int) GL.Enum.GL_LINEAR);
@@ -150,7 +271,7 @@ public class OpenGLRenderer : IRenderer
                 }
                 else if (io.Fonts.TexID == pcmd.TextureId)
                 {
-                    GL.BindTexture(GL.Enum.GL_TEXTURE_2D, (int)pcmd.TextureId);
+                    GL.BindTexture(GL.Enum.GL_TEXTURE_2D, (uint)pcmd.TextureId);
                     GL.Scissor(
                         (int)pcmd.ClipRect.X,
                         (int)(io.DisplaySize.Y - pcmd.ClipRect.W),
@@ -162,11 +283,9 @@ public class OpenGLRenderer : IRenderer
                 }
                 else
                 {
-                    float w, h;
-                    var txid = pcmd.TextureId;
-                    var sdlid = SDL.SDL_GL_BindTexture(pcmd.TextureId, out w, out h);
+                    GL.BindTexture(GL.Enum.GL_TEXTURE_2D, (uint)pcmd.TextureId);
 
-                    string errstr = SDL.SDL_GetError();
+                    CheckGLError("RenderImGui");
                     GL.Scissor(
                     (int)pcmd.ClipRect.X,
                     (int)(io.DisplaySize.Y - pcmd.ClipRect.W),
@@ -185,7 +304,7 @@ public class OpenGLRenderer : IRenderer
         GL.DisableClientState(GL.Enum.GL_COLOR_ARRAY);
         GL.DisableClientState(GL.Enum.GL_TEXTURE_COORD_ARRAY);
         GL.DisableClientState(GL.Enum.GL_VERTEX_ARRAY);
-        GL.BindTexture(GL.Enum.GL_TEXTURE_2D, lastTexture);
+        GL.BindTexture(GL.Enum.GL_TEXTURE_2D, (uint)lastTexture);
         GL.MatrixMode(GL.Enum.GL_MODELVIEW);
         GL.PopMatrix();
         GL.MatrixMode(GL.Enum.GL_PROJECTION);
@@ -197,10 +316,37 @@ public class OpenGLRenderer : IRenderer
 
     public void Dispose()
     {
+        if(_textures.Count > 0)
+        {
+            foreach(var kvp in _textures)
+            {
+                uint textureId = _textures[kvp.Key];
+                GL.DeleteTextures(1, ref textureId);
+            }
+            _textures.Clear();
+        }
+
         if(_glContext != IntPtr.Zero)
         {
             SDL.SDL_GL_DeleteContext(_glContext);
             _glContext = IntPtr.Zero;
+        }
+    }
+
+    private void CheckGLError(string operation)
+    {
+        uint error = GL.GetError();
+        if (error != 0)
+        {
+            string errorMsg = error switch
+            {
+                0x0500 => "GL_INVALID_ENUM",
+                0x0501 => "GL_INVALID_VALUE",
+                0x0502 => "GL_INVALID_OPERATION",
+                0x0505 => "GL_OUT_OF_MEMORY",
+                _ => $"Unknown error: 0x{error:X4}"
+            };
+            throw new Exception($"OpenGL error during {operation}: {errorMsg}");
         }
     }
 }

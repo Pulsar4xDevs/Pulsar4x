@@ -120,7 +120,8 @@ namespace ImGuiSDL2CS {
             GL_TEXTURE_WRAP_S = 0x2802,
             GL_TEXTURE_WRAP_T = 0x2803,
             GL_REPEAT = 0x2901,
-            GL_UNPACK_ROW_LENGTH = 0x0CF2
+            GL_UNPACK_ROW_LENGTH = 0x0CF2,
+            GL_CLAMP_TO_EDGE = 0x812F,
         }
 
         public delegate IntPtr glGetString(Enum pname);
@@ -184,7 +185,7 @@ namespace ImGuiSDL2CS {
         public delegate void glColorPointer(int size, Enum type, int stride, IntPtr pointer);
         public static glColorPointer ColorPointer = _<glColorPointer>();
 
-        public delegate void glBindTexture(Enum target, int texture);
+        public delegate void glBindTexture(Enum target, uint texture);
         public static glBindTexture BindTexture = _<glBindTexture>();
 
         public delegate void glScissor(int x, int y, int width, int height);
@@ -199,7 +200,7 @@ namespace ImGuiSDL2CS {
         public delegate void glClear(Enum mask);
         public static glClear Clear = _<glClear>();
 
-        public delegate void glGenTextures(int n, out int textures);
+        public delegate void glGenTextures(int n, out uint textures);
         public static glGenTextures GenTextures = _<glGenTextures>();
 
         public delegate void glTexParameteri(Enum target, Enum pname, int param);
@@ -220,6 +221,12 @@ namespace ImGuiSDL2CS {
             IntPtr pixels
         );
         public static glTexImage2D TexImage2D = _<glTexImage2D>();
+
+        public delegate void glDeleteTextures(int n, ref uint textures);
+        public static glDeleteTextures DeleteTextures = _<glDeleteTextures>();
+
+        public delegate uint glGetError();
+        public static glGetError GetError = _<glGetError>();
 
         /*
         public delegate void gl();
