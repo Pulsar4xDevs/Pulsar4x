@@ -12,7 +12,6 @@
         "blueprints/electronics.json",
         "blueprints/energy.json",
         "blueprints/engines.json",
-        "defaultItems.json",
         "defaultTheme.json",
         "blueprints/industryTypes.json",
         "blueprints/installations.json",
