@@ -31,7 +31,7 @@ namespace Pulsar4X.SDL2UI
                     return IntPtr.Zero;
                 }
 
-                IntPtr sdltexture = SDL.SDL_CreateTextureFromSurface(_uiState.rendererPtr, sdlSurface);
+                IntPtr sdltexture = SDL.SDL_CreateTextureFromSurface(_uiState.SDLRendererPtr, sdlSurface);
                 if (sdltexture == IntPtr.Zero)
                 {
                     Console.WriteLine($"Failed to create texture: {SDL.SDL_GetError()}");

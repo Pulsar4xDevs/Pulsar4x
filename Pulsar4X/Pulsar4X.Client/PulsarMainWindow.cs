@@ -220,7 +220,7 @@ namespace Pulsar4X.SDL2UI
             if (_state.ShowImgDbg)
             {
                 ImGui.NewLine();
-                SDL.SDL_GetRendererInfo(_state.rendererPtr, out var renderInfo);
+                SDL.SDL_GetRendererInfo(_state.SDLRendererPtr, out var renderInfo);
                 ImGui.Text("SDL RenderInfo:");
                 ImGui.Text("Name : " + renderInfo.name.ToString());
                 ImGui.Text("Flags: " +renderInfo.flags.ToString());

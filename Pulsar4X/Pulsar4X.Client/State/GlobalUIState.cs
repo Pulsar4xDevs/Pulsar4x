@@ -20,6 +20,7 @@ using Pulsar4X.Factions;
 using Pulsar4X.Damage;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using Pulsar4X.Client.Rendering;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -67,7 +68,7 @@ namespace Pulsar4X.SDL2UI
         internal bool ShowImgDbg;
         internal bool ShowDemoWindow;
         internal bool ShowDamageWindow;
-        internal IntPtr rendererPtr;
+        internal IntPtr SDLRendererPtr { get; private set; }
         internal int _lastContextMenuOpenedEntityGuid = -1;
         internal GalacticMapRender GalacticMap;
         internal SafeList<UpdateWindowState> UpdateableWindows = new ();
@@ -109,9 +110,13 @@ namespace Pulsar4X.SDL2UI
             ViewPort = viewport;
             PulsarGuiWindow._uiState = this;
             var windowPtr = viewport.Handle;
-            SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_DRIVER, "opengl");
-            //var surfacePtr = SDL.SDL_GetWindowSurface(windowPtr);
-            rendererPtr = SDL.SDL_CreateRenderer(windowPtr, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
+
+            // Hint the renderer to use OpenGL if the viewport renderer is OpenGL
+            if(viewport.Renderer is OpenGLRenderer)
+            {
+                SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_DRIVER, "opengl");
+            }
+            SDLRendererPtr = SDL.SDL_CreateRenderer(windowPtr, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
 
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Star, 2f);
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Planet, 32f);
@@ -140,16 +145,6 @@ namespace Pulsar4X.SDL2UI
 
             //DEBUG Code: (can be deleted);
             DamageTools.LoadFromBitMap(Path.Combine("Resources", "ImgTest.bmp"));
-            /*
-            int gltxtrID;
-            GL.GenTextures(1, out gltxtrID);
-            GL.BindTexture(GL.Enum.GL_TEXTURE_2D, gltxtrID);
-            GL.PixelStorei(GL.Enum.GL_UNPACK_ROW_LENGTH, 0);
-            GL.TexImage2D(GL.Enum.GL_TEXTURE_2D, 0, (int)GL.Enum.GL_RGBA, 16, 16, 0, GL.Enum.GL_RGBA, GL.Enum.GL_UNSIGNED_BYTE, playImgPtr);
-
-            GLImageDictionary["PlayImg"] = gltxtrID;
-            GL.Enable(GL.Enum.GL_TEXTURE_2D);
-            */
         }
 
         private void DeactivateAllClosableWindows()

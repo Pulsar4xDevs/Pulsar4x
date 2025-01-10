@@ -168,7 +168,7 @@ namespace Pulsar4X.SDL2UI
                         //}
                         //item.Value.Draw(_uiState.rendererPtr, _uiState.Camera);
                     }
-                    NameIcon.DrawAll(_state.rendererPtr, _state.Camera, nameIcons);
+                    NameIcon.DrawAll(_state.SDLRendererPtr, _state.Camera, nameIcons);
                 }
             }
         }

@@ -122,7 +122,7 @@ namespace Pulsar4X.SDL2UI
             if (SelectedEntity.HasDataBlob<EntityDamageProfileDB>())
             {
                 var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
-                SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, dmgdb.DamageProfile, ref _dmgTxtr);
+                SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, dmgdb.DamageProfile, ref _dmgTxtr);
             }
             else if(SelectedEntity.HasDataBlob<SensorInfoDB>())
             {
@@ -131,7 +131,7 @@ namespace Pulsar4X.SDL2UI
                 if (actualEntity.IsValid && actualEntity.HasDataBlob<EntityDamageProfileDB>())
                 {
                     var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
-                    SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, dmgdb.DamageProfile, ref _dmgTxtr);
+                    SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, dmgdb.DamageProfile, ref _dmgTxtr);
                 }
             }
             else
@@ -287,7 +287,7 @@ namespace Pulsar4X.SDL2UI
                                         totalCountIncEscro += CargoMath.GetUnitsStored(storeDB, icargoable, true);
                                         totalCountLesEscro += CargoMath.GetUnitsStored(storeDB, icargoable, false);
                                     }
-                                    
+
                                 }
                                 ImGui.Text("Total Units Inc Escro: " + Stringify.Quantity(totalCountIncEscro));
                                 ImGui.Text("Total Units less Escro: " + Stringify.Quantity(totalCountLesEscro));
