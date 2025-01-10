@@ -5,6 +5,7 @@ using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Blueprints;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Factions;
 using Pulsar4X.Logistics;
 using Pulsar4X.Storage;
@@ -28,7 +29,7 @@ namespace Pulsar4X.SDL2UI
         private Entity _selectedEntity;
         private LogiBaseDB? _logisticsDB;
         private CargoStorageDB? _volStorageDB;
-        private Dictionary<string, TypeStore>? _stores;
+        private SafeDictionary<string, TypeStore>? _stores;
         private FactionDataStore _staticData;
         private bool isEnabled;
         private ColonyLogisticsDisplay(EntityState entityState)
@@ -85,18 +86,7 @@ namespace Pulsar4X.SDL2UI
             _changes = new Dictionary<ICargoable, (int count, int demandSupplyWeight)>();
             _displayedStoredResources = new Dictionary<string, Dictionary<ICargoable, (int count, int demandSupplyWeight)>>();
             _displayedUnstored = new Dictionary<string, Dictionary<ICargoable, (int count, int demandSupplyWeight)>>();
-            //we do a deep copy clone so as to avoid a thread collision when we loop through.
-            var newDict = new Dictionary<string, TypeStore>();
-
-            ICollection ic = _volStorageDB.TypeStores;
-            lock (ic.SyncRoot)
-            {
-                foreach (var kvp in _volStorageDB.TypeStores)
-                {
-                    newDict.Add(kvp.Key, kvp.Value.Clone());
-                }
-            }
-            _stores = newDict;
+            _stores = _volStorageDB.TypeStores;
             foreach (var kvp in _stores)
             {
                 var stypeID = kvp.Key;
@@ -292,7 +282,7 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.Text(cname);
 
                                 ImGui.TableNextColumn();
-                                ImGui.Text(Stringify.Number(itemsStored, "#,###"));
+                                ImGui.Text(Stringify.Quantity(itemsStored, "#,###"));
 
                                 ImGui.TableNextColumn();
                                 if (!hasCapacityForMore)
@@ -389,7 +379,7 @@ namespace Pulsar4X.SDL2UI
                         var volumePerItem = ctype.VolumePerUnit;
                         ImGui.Text(cname);
                         ImGui.NextColumn();
-                        ImGui.Text(Stringify.Number(itemsStored, "#,###"));
+                        ImGui.Text(Stringify.Quantity(itemsStored, "#,###"));
                         ImGui.NextColumn();
                         if(ImGui.SmallButton("+##"+ctype.ID))
                         {
@@ -421,12 +411,12 @@ namespace Pulsar4X.SDL2UI
                             {
                                 total += _changes[ctype].count;
                             }
-                            ImGui.Text(Stringify.Number(total));
+                            ImGui.Text(Stringify.Quantity(total));
                         }
                         else if(_changes.ContainsKey(ctype))
                         {
                             double total = _changes[ctype].count;
-                            ImGui.Text(Stringify.Number(total));
+                            ImGui.Text(Stringify.Quantity(total));
                         }
 
                         ImGui.NextColumn();
@@ -453,7 +443,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     ImGui.Text(item.Key.Name);
                     ImGui.NextColumn();
-                    ImGui.Text(Stringify.Number(item.Value.count));
+                    ImGui.Text(Stringify.Quantity(item.Value.count));
                     ImGui.NextColumn();
                 }
                 ImGui.Columns(1);

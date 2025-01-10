@@ -37,11 +37,10 @@ namespace Pulsar4X.Fleets
             get { return _entityCommanding; }
         }
 
-        private bool isFinished = false;
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
-            return isFinished;
+            return _isFinished;
         }
 
         private FleetOrder(int factionGuid, Entity entity)
@@ -232,7 +231,7 @@ namespace Pulsar4X.Fleets
                     break;
             }
 
-            isFinished = true;
+            _isFinished = true;
         }
 
         internal override bool IsValidCommand(Game game)

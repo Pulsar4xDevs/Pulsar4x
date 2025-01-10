@@ -6,17 +6,26 @@ namespace Pulsar4X.Components
 
     public abstract class ComponentAbilityState
     {
-        public string Name { get; internal set; }
 
-        public string ID { get; private set; }
+        public string Name
+        {
+            get { return ComponentInstance.Design.Name; }
+        }
 
+        public string ID
+        {
+            get { return ComponentInstance.UniqueID; }
+        }
+
+        [JsonProperty]
         public ComponentInstance ComponentInstance { get; private set; }
 
+        [JsonConstructor]
+        protected ComponentAbilityState(){}
+        
         public ComponentAbilityState(ComponentInstance componentInstance)
         {
             ComponentInstance = componentInstance;
-            Name = componentInstance.Design.Name;
-            ID = componentInstance.UniqueID;
         }
     }
 }

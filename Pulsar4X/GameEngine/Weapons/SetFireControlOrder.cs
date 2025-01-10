@@ -62,11 +62,13 @@ namespace Pulsar4X.Weapons
             }
         }
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
             if (IsRunning)
-                return true;
-            return false;
+                _isFinished = true;
+            else 
+                _isFinished = false;
+            return _isFinished;
         }
 
         internal override bool IsValidCommand(Game game)
@@ -161,11 +163,13 @@ namespace Pulsar4X.Weapons
 
         }
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
             if (IsRunning)
-                return true;
-            return false;
+                _isFinished = true;
+            else 
+                _isFinished = false;
+            return _isFinished;
             //if target is dead? or not seen for x amount of time?
         }
 
@@ -288,11 +292,13 @@ namespace Pulsar4X.Weapons
             }
         }
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
             if (IsRunning)
-                return true;
-            return false;
+                _isFinished = true;
+            else 
+                _isFinished = false;
+            return _isFinished;
         }
 
         internal override bool IsValidCommand(Game game)
@@ -371,11 +377,13 @@ namespace Pulsar4X.Weapons
             }
         }
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
             if (IsRunning)
-                return true;
-            return false;
+                _isFinished = true;
+            else 
+                _isFinished = false;
+            return _isFinished;
         }
 
         internal override bool IsValidCommand(Game game)

@@ -9,8 +9,10 @@ namespace Pulsar4X.Sensors
     {
         [JsonProperty]
         public Dictionary<int, SensorReturnValues> CurrentContacts = new ();
+        [JsonProperty]
         public Dictionary<int, SensorReturnValues> OldContacts = new ();
-
+        [JsonConstructor]
+        private SensorReceiverAbility(){}
         public SensorReceiverAbility(ComponentInstance componentInstance) : base(componentInstance)
         {
         }

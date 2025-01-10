@@ -22,6 +22,17 @@ namespace Pulsar4X.Weapons
             LaunchForce = launchForce;
         }
 
+        public string WeaponType => "Missile Launcher";
+
+        public void SetWeaponState(WeaponState state)
+        {
+            state.WeaponType = WeaponType;
+            state.WeaponStats = new (string name, double value, ValueTypeStruct valueType)[3];
+            state.WeaponStats[0] = ("Max Size:", LauncherSize, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Distance, ValueTypeStruct.ValueSizes.Milli));
+            state.WeaponStats[1] = ("Launch Force:", LaunchForce, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Force, ValueTypeStruct.ValueSizes.BaseUnit));
+            state.WeaponStats[2] = ("Rate Of Fire:", ReloadRate, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Number, ValueTypeStruct.ValueSizes.BaseUnit));
+        }
+
         public bool CanLoadOrdnance(OrdnanceDesign ordnanceDesign)
         {
             //need to check ordnance type, size etc.
@@ -61,11 +72,7 @@ namespace Pulsar4X.Weapons
             if (!componentInstance.HasAblity<WeaponState>())
             {
                 var wpnState = new WeaponState(componentInstance, this);
-                wpnState.WeaponType = "Missile Launcher";
-                wpnState.WeaponStats = new (string name, double value, ValueTypeStruct valueType)[3];
-                wpnState.WeaponStats[0] = ("Max Size:", LauncherSize, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Distance, ValueTypeStruct.ValueSizes.Milli));
-                wpnState.WeaponStats[1] = ("Launch Force:", LaunchForce, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Force, ValueTypeStruct.ValueSizes.BaseUnit));
-                wpnState.WeaponStats[2] = ("Rate Of Fire:", ReloadRate, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Number, ValueTypeStruct.ValueSizes.BaseUnit));
+                SetWeaponState(wpnState);
                 componentInstance.SetAbilityState<WeaponState>(wpnState);
             }
             /*

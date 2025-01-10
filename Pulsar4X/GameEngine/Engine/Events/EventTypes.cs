@@ -64,6 +64,7 @@ namespace Pulsar4X.Events
 
         PopulationBombarded,
         POWRescued, // Friendly POW's returned to population
+        PopulationChanged,
 
         // Political Status Events
         PopulationSurrendered,

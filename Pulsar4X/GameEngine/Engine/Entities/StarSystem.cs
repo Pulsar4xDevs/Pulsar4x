@@ -11,7 +11,7 @@ namespace Pulsar4X.Engine
     [JsonObject(MemberSerialization.OptIn)]
     public class StarSystem : EntityManager
     {
-        private Random RNG;
+
 
         [PublicAPI]
         public string ID
@@ -32,56 +32,22 @@ namespace Pulsar4X.Engine
         //[PublicAPI]
         //public EntityManager SystemManager { get { return this; } }
 
-        [PublicAPI]
-        [JsonProperty]
-        public int Seed { get;  set; }
 
-        [PublicAPI]
-        public int RNGNext(int min, int max)
-        {
-            var next = RNG.Next(min, max);
-            return next;
-        }
 
-        [PublicAPI]
-        public double RNGNextDouble()
-        {
-            var next = RNG.NextDouble();
-            return next;
-        }
 
-        public bool RNGNextBool(float chance)
-        {
-            return RNG.NextDouble() < chance;
-        }
-        public bool RNGNextBool(double chance)
-        {
-            return RNG.NextDouble() < chance;
-        }
 
+ 
         [JsonConstructor]
         public StarSystem()
         {
         }
 
-        public void Initialize(Game game, string name, int seed = -1, string systemID = "")
+        public void Initialize(Game game, string name, int seed = -1, bool postLoad = false, string systemID = "")
         {
-            base.Initialize(game);
+            base.Initialize(game, seed, postLoad);
 
             NameDB = new NameDB(name);
-
-            if(seed == -1)
-            {
-                var random = new Random();
-                Seed = random.Next(int.MaxValue - 1);
-            }
-            else
-            {
-                Seed = seed;
-            }
-
-            RNG = new Random(seed);
-
+            
             if(systemID.IsNotNullOrEmpty())
                 ManagerID = systemID;
 

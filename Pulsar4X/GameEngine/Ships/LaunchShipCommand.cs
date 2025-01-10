@@ -87,12 +87,13 @@ public class LaunchShipCommand : EntityCommand
         }
     }
 
-    public override bool IsFinished()
+    internal override bool IsFinished()
     {
         if (_hasLaunched)
-            return true;
+            _isFinished = true;
         else
-            return false;
+            _isFinished = false;
+        return _isFinished;
     }
 
     internal override bool IsValidCommand(Game game)

@@ -4,6 +4,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
 using System;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Factions;
 using Pulsar4X.Logistics;
 using Pulsar4X.Storage;
@@ -81,7 +82,7 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(264, 325), ImGuiCond.Once);
 
-            if (ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Logisitcs Ship"), ref IsActive, _flags))
+            if (Window.Begin("Logisitcs Ship", ref IsActive, _flags))
             {
                 if(!_selectedEntity.HasDataBlob<LogiShipperDB>())
                 {
@@ -166,6 +167,8 @@ namespace Pulsar4X.SDL2UI
                     }
                     ImGui.Columns(1);
                 }
+
+                Window.End();
             }
         }
     }

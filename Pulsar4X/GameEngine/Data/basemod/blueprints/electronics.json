@@ -6,9 +6,9 @@
       "Name": "Passive Sensor",
       "Formulas": {
         "Description": "Detects emissions and reflections from other objects",
-        "Mass": "Ability('Mass')",
-        "Volume": "Ability('Mass')",
-        "HTK": "Max(1, Ability('Mass') / 100)",
+        "Mass": "PropertyValue('Mass')",
+        "Volume": "PropertyValue('Mass')",
+        "HTK": "Max(1, PropertyValue('Mass') / 100)",
         "CrewReq": "[Mass]",
         "ResearchCost": "[Mass] * 2",
         "CreditCost": "[Mass]",
@@ -24,7 +24,7 @@
       "MountType": "PlanetInstallation, ShipComponent, ShipCargo, Fighter",
       "IndustryTypeID": "component-construction",
       "CargoTypeID": "general-storage",
-      "Attributes": [
+      "Properties": [
         {
           "Name": "Antenna Size",
           "Units": "m^2",
@@ -33,13 +33,13 @@
           "MaxFormula": "2500",
           "MinFormula": "1",
           "StepFormula": "1",
-          "AttributeFormula": "1.25"
+          "PropertyFormula": "1.25"
         },
         {
           "Name": "Effective Size",
           "Units": "m^2",
           "GuiHint": "None",
-          "AttributeFormula": "Ability('Antenna Size') * TechData('tech-antenna-efficiency')"
+          "PropertyFormula": "PropertyValue('Antenna Size') * TechData('tech-antenna-efficiency')"
         },
         {
           "Name": "Ideal Detection Wavelength",
@@ -49,7 +49,7 @@
           "MaxFormula": "1e12",
           "MinFormula": "0.01",
           "StepFormula": "1",
-          "AttributeFormula": "600"
+          "PropertyFormula": "600"
         },
         {
           "Name": "Detection Bandwidth",
@@ -59,26 +59,26 @@
           "MaxFormula": "TechData('tech-antenna-bandwidth')",
           "MinFormula": "1",
           "StepFormula": "1",
-          "AttributeFormula": "250"
+          "PropertyFormula": "250"
         },
         {
           "Name": "Efficiency",
           "GuiHint": "GuiTextDisplay",
-          "AttributeFormula": "1 / (Ability('Detection Bandwidth') / TechData('tech-antenna-bandwidth') )"
+          "PropertyFormula": "1 / (PropertyValue('Detection Bandwidth') / TechData('tech-antenna-bandwidth') )"
         },
         {
           "Name": "Sensitivity at Ideal Wavelength",
           "Units": "W",
           "DescriptionFormula": "'Smallest signal this can detect at the ideal wavelength, lower is better.",
           "GuiHint": "GuiTextDisplay",
-          "AttributeFormula": "TechData('tech-antenna-sensitivity') / (Ability('Effective Size') * Ability('Effective Size') * Ability('Efficiency'))"
+          "PropertyFormula": "TechData('tech-antenna-sensitivity') / (PropertyValue('Effective Size') * PropertyValue('Effective Size') * PropertyValue('Efficiency'))"
         },
         {
           "Name": "Sensitivity at Worst Wavelength",
           "Units": "W",
           "DescriptionFormula": "'Smallest signal this can detect at the worst wavelength, lower is better.'",
           "GuiHint": "GuiTextDisplay",
-          "AttributeFormula": "TechData('tech-antenna-sensitivity') / (Ability('Effective Size') * Ability('Effective Size') * Ability('Efficiency') * 0.1)"
+          "PropertyFormula": "TechData('tech-antenna-sensitivity') / (PropertyValue('Effective Size') * PropertyValue('Effective Size') * PropertyValue('Efficiency') * 0.1)"
         },
         {
           "Name": "Resolution",
@@ -88,7 +88,7 @@
           "MaxFormula": "1000",
           "MinFormula": "0.1",
           "StepFormula": "1",
-          "AttributeFormula": "1"
+          "PropertyFormula": "1"
         },
         {
           "Name": "Scan Time",
@@ -98,21 +98,21 @@
           "MaxFormula": "86400",
           "MinFormula": "1",
           "StepFormula": "1",
-          "AttributeFormula": "3600"
+          "PropertyFormula": "3600"
         },
         {
           "Name": "Mass",
           "Units": "kg",
           "DescriptionFormula": "'Mass Calculation'",
           "GuiHint": "None",
-          "AttributeFormula": "90 + 10 * Ability('Antenna Size') * Ability('Antenna Size')"
+          "PropertyFormula": "90 + 10 * PropertyValue('Antenna Size') * PropertyValue('Antenna Size')"
         },
         {
           "Name": "DatablobArguments",
           "DescriptionFormula": "'(double peakWaveLength, double bandwidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)'",
           "GuiHint": "None",
-          "AttributeFormula": "AtbConstrArgs(Ability('Ideal Detection Wavelength'), Ability('Detection Bandwidth'), Ability('Sensitivity at Ideal Wavelength'), Ability('Sensitivity at Worst Wavelength'), Ability('Resolution'), Ability('Scan Time'))",
-          "AttributeType": "Pulsar4X.Sensors.SensorReceiverAtbDB"
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Ideal Detection Wavelength'), PropertyValue('Detection Bandwidth'), PropertyValue('Sensitivity at Ideal Wavelength'), PropertyValue('Sensitivity at Worst Wavelength'), PropertyValue('Resolution'), PropertyValue('Scan Time'))",
+          "AttributeType": "Pulsar4X.Sensors.SensorReceiverAtb"
         }
       ]
     }
@@ -124,7 +124,7 @@
       "Name": "Laser Weapon Turret",
       "Formulas": {
         "Description": "",
-        "Mass": "Ability('Mass')",
+        "Mass": "PropertyValue('Mass')",
         "Volume": "[Mass]",
         "HTK": "[Mass]",
         "CrewReq": "[Mass]",
@@ -142,61 +142,61 @@
       "MountType": "ShipComponent, ShipCargo",
       "CargoTypeID": "general-storage",
       "IndustryTypeID": "component-construction",
-      "Attributes": [
+      "Properties": [
         {
           "Name": "Range",
           "Units": "kkm",
           "DescriptionFormula": "'in kkm'",
           "GuiHint": "GuiSelectionMaxMin",
-          "GuidDictionary": {},
+          "DataDict": {},
           "MaxFormula": "175",
           "MinFormula": "10",
           "StepFormula": "5",
-          "AttributeFormula": "20"
+          "PropertyFormula": "20"
         },
         {
           "Name": "Tracking Speed",
           "Units": "km/s",
           "DescriptionFormula": "'in km/s'",
           "GuiHint": "GuiSelectionMaxMin",
-          "GuidDictionary": {},
+          "DataDict": {},
           "MaxFormula": "25000",
           "MinFormula": "1250",
           "StepFormula": "250",
-          "AttributeFormula": "5000"
+          "PropertyFormula": "5000"
         },
         {
           "Name": "Size vs Range",
           "Units": "SVR",
           "GuiHint": "GuiSelectionMaxMin",
-          "GuidDictionary": {},
+          "DataDict": {},
           "MaxFormula": "4",
           "MinFormula": "0.25",
           "StepFormula": "0.25",
-          "AttributeFormula": "1"
+          "PropertyFormula": "1"
         },
         {
           "Name": "Size vs TrackingSpeed",
           "Units": "SVTS",
           "GuiHint": "GuiSelectionMaxMin",
-          "GuidDictionary": {},
+          "DataDict": {},
           "MaxFormula": "4",
           "MinFormula": "0.25",
           "StepFormula": "0.25",
-          "AttributeFormula": "1"
+          "PropertyFormula": "1"
         },
         {
           "Name": "Mass",
           "Units": "kg",
           "GuiHint": "None",
-          "GuidDictionary": {},
-          "AttributeFormula": "(Ability('Range') + Ability('Tracking Speed') / 100) * Ability('Size vs Range') *  Ability('Size vs TrackingSpeed')"
+          "DataDict": {},
+          "PropertyFormula": "(PropertyValue('Range') + PropertyValue('Tracking Speed') / 100) * PropertyValue('Size vs Range') *  PropertyValue('Size vs TrackingSpeed')"
         },
         {
           "Name": "DBargs",
           "GuiHint": "None",
-          "GuidDictionary": {},
-          "AttributeFormula": "AtbConstrArgs(Ability('Range'), Ability('Tracking Speed'))",
+          "DataDict": {},
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Range'), PropertyValue('Tracking Speed'))",
           "AttributeType": "Pulsar4X.Weapons.BeamFireControlAtbDB"
         }
       ]
@@ -209,11 +209,11 @@
       "Name": "Geological Surveyor",
       "Formulas": {
         "Description": "Surveys the geological conditions of a system body.",
-        "Mass": "Ability('Mass')",
+        "Mass": "PropertyValue('Mass')",
         "Volume": "Max(1, [Mass] * 0.1)",
         "HTK": "[Mass]",
-        "CrewReq": "Pow(Ability('Survey Speed') * 2, 3)",
-        "ResearchCost": "Pow(Ability('Survey Speed'), 2)",
+        "CrewReq": "Pow(PropertyValue('Survey Speed') * 2, 3)",
+        "ResearchCost": "Pow(PropertyValue('Survey Speed'), 2)",
         "CreditCost": "[Mass]",
         "BuildPointCost": "[Mass]"
       },
@@ -227,30 +227,30 @@
       "MountType": "ShipComponent, ShipCargo",
       "CargoTypeID": "general-storage",
       "IndustryTypeID": "component-construction",
-      "Attributes":[
+      "Properties":[
         {
           "Name": "Survey Speed",
           "Units": "survey per hour",
           "DescriptionFormula": "'Each point in speed provides one survey point per hour'",
           "GuiHint": "GuiSelectionMaxMinInt",
-          "GuidDictionary": {},
+          "DataDict": {},
           "MaxFormula": "10",
           "MinFormula": "1",
           "StepFormula": "1",
-          "AttributeFormula": "1"
+          "PropertyFormula": "1"
         },
         {
           "Name": "Mass",
           "Units": "kg",
           "DescriptionFormula": "'Mass Calculation'",
           "GuiHint": "None",
-          "AttributeFormula": "Pow(10 * Ability('Survey Speed'), 2)"
+          "PropertyFormula": "Pow(10 * PropertyValue('Survey Speed'), 2)"
         },
         {
           "Name": "DBargs",
           "GuiHint": "None",
-          "GuidDictionary": {},
-          "AttributeFormula": "AtbConstrArgs(Ability('Survey Speed'))",
+          "DataDict": {},
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Survey Speed'))",
           "AttributeType": "Pulsar4X.GeoSurveys.GeoSurveyAtb"
         }
       ]
@@ -263,11 +263,11 @@
       "Name": "Gravitational Surveyor",
       "Formulas": {
         "Description": "Surveys gravatational anomalies",
-        "Mass": "Ability('Mass')",
+        "Mass": "PropertyValue('Mass')",
         "Volume": "Max(1, [Mass] * 0.1)",
         "HTK": "[Mass]",
-        "CrewReq": "Pow(Ability('Survey Speed') * 2, 3)",
-        "ResearchCost": "Pow(Ability('Survey Speed'), 2)",
+        "CrewReq": "Pow(PropertyValue('Survey Speed') * 2, 3)",
+        "ResearchCost": "Pow(PropertyValue('Survey Speed'), 2)",
         "CreditCost": "[Mass]",
         "BuildPointCost": "[Mass]"
       },
@@ -281,30 +281,30 @@
       "MountType": "ShipComponent, ShipCargo",
       "CargoTypeID": "general-storage",
       "IndustryTypeID": "component-construction",
-      "Attributes":[
+      "Properties":[
         {
           "Name": "Survey Speed",
           "Units": "survey points per day",
           "DescriptionFormula": "'Each point in speed provides one survey point per day'",
           "GuiHint": "GuiSelectionMaxMinInt",
-          "GuidDictionary": {},
+          "DataDict": {},
           "MaxFormula": "10",
           "MinFormula": "1",
           "StepFormula": "1",
-          "AttributeFormula": "1"
+          "PropertyFormula": "1"
         },
         {
           "Name": "Mass",
           "Units": "kg",
           "DescriptionFormula": "'Mass Calculation'",
           "GuiHint": "None",
-          "AttributeFormula": "Pow(10 * Ability('Survey Speed'), 2)"
+          "PropertyFormula": "Pow(10 * PropertyValue('Survey Speed'), 2)"
         },
         {
           "Name": "DBargs",
           "GuiHint": "None",
-          "GuidDictionary": {},
-          "AttributeFormula": "AtbConstrArgs(Ability('Survey Speed'))",
+          "DataDict": {},
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Survey Speed'))",
           "AttributeType": "Pulsar4X.JumpPoints.GravSurveyAtb"
         }
       ]

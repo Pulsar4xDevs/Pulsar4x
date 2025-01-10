@@ -12,6 +12,8 @@ using System.Runtime.CompilerServices;
 using Pulsar4X.Events;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
+using Pulsar4X.Energy;
+using Pulsar4X.Sensors;
 [assembly: InternalsVisibleTo("Pulsar4X.Tests")]
 
 namespace Pulsar4X.Engine
@@ -23,6 +25,15 @@ namespace Pulsar4X.Engine
         /// and should have their FactionOwnerID set equal to NeutralFactionID
         /// </summary>
         public static readonly int NeutralFactionId = -99;
+
+        [JsonProperty]
+        public string Name { get; set; }
+
+        [JsonProperty]
+        public string CreatedOnGitHash { get; set; }
+
+        [JsonProperty]
+        public string LastSaveGitHash { get; set; }
 
         [JsonProperty]
         public MasterTimePulse TimePulse { get; internal set; }
@@ -69,9 +80,6 @@ namespace Pulsar4X.Engine
         public GameSettings Settings { get; internal set; }
 
         [JsonProperty]
-        public Random RNG { get; } = new Random(12345689);
-
-        [JsonProperty]
         public ModDataStore StartingGameData { get; private set; }
 
         [JsonProperty]
@@ -87,17 +95,18 @@ namespace Pulsar4X.Engine
         [JsonProperty]
         internal int NextEntityID => EntityIDGenerator.NextId;
 
-        [JsonProperty]
-        public HaltEventLog HaltEventLog { get; set; }
-
         private static int EntityIDCounter = 0;
 
         internal event EventHandler PostLoad;
+
+        internal Random RNG => GlobalManager.RNG;
 
         public Game() { }
 
         public Game(NewGameSettings settings, ModDataStore modDataStore)
         {
+            Name = settings.GameName;
+
             ApplyModData(modDataStore);
             ApplySettings(settings);
 
@@ -109,10 +118,9 @@ namespace Pulsar4X.Engine
             ProcessorManager = new ProcessorManager(this);
             OrderHandler = new StandAloneOrderHandler(this);
             GlobalManager = new EntityManager();
-            GlobalManager.Initialize(this);
+            GlobalManager.Initialize(this, settings.MasterSeed);
             GameMasterFaction = FactionFactory.CreateSpaceMasterFaction(this, SpaceMaster, "SpaceMaster Faction");
-            GalaxyGen = new GalaxyFactory(SystemGenSettings, Settings.MasterSeed);
-            HaltEventLog = HaltEventLog.Create(new List<EventType>(), TimePulse);
+            GalaxyGen = new GalaxyFactory(SystemGenSettings);
         }
 
         public void ApplySettings(NewGameSettings settings)
@@ -152,8 +160,9 @@ namespace Pulsar4X.Engine
         {
             JsonSerializerSettings settings = new JsonSerializerSettings() {
                 Formatting = Formatting.Indented,
-                PreserveReferencesHandling = PreserveReferencesHandling.All,
-                TypeNameHandling = TypeNameHandling.All
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                TypeNameHandling = TypeNameHandling.Objects,
+                ContractResolver = new NonPublicResolver()
             };
 
             return JsonConvert.SerializeObject(game, settings);
@@ -163,8 +172,9 @@ namespace Pulsar4X.Engine
         {
             JsonSerializerSettings settings = new JsonSerializerSettings() {
                 Formatting = Formatting.Indented,
-                PreserveReferencesHandling = PreserveReferencesHandling.All,
-                TypeNameHandling = TypeNameHandling.All
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                TypeNameHandling = TypeNameHandling.Objects,
+                ContractResolver = new NonPublicResolver(),
             };
             var loadedGame = JsonConvert.DeserializeObject<Game>(json, settings);
 
@@ -173,9 +183,10 @@ namespace Pulsar4X.Engine
             loadedGame.OrderHandler = new StandAloneOrderHandler(loadedGame);
             loadedGame.GlobalManager.Initialize(loadedGame);
 
-            foreach(var system in loadedGame.Systems)
+            foreach (var mgr in loadedGame.GlobalManagerDictionary)
             {
-                system.Initialize(loadedGame, true);
+                mgr.Value.Initialize(loadedGame);
+                mgr.Value.ManagerSubpulses.Initialize(mgr.Value, loadedGame.ProcessorManager);
             }
 
             // Hook up the event logs
@@ -197,6 +208,25 @@ namespace Pulsar4X.Engine
             // loadedGame.OrderHandler = JsonConvert.DeserializeObject<StandAloneOrderHandler>(JObject.Parse(json)["OrderHandler"].ToString(), settings);
 
             return loadedGame;
+        }
+
+        public void PostNewGameInitialization()
+        {
+            // There are few DB's that need to run the processor when the game begins
+            foreach(var system in Systems)
+            {
+                var entitiesWithEnergyGen = system.GetAllEntitiesWithDataBlob<EnergyGenAbilityDB>();
+                foreach (var entity in entitiesWithEnergyGen)
+                {
+                    ProcessorManager.GetInstanceProcessor(nameof(EnergyGenProcessor)).ProcessEntity(entity, TimePulse.GameGlobalDateTime);
+                }
+
+                var entitiesWithSensors = system.GetAllEntitiesWithDataBlob<SensorAbilityDB>();
+                foreach (var entity in entitiesWithSensors)
+                {
+                    ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entity, TimePulse.GameGlobalDateTime);
+                }
+            }
         }
     }
 

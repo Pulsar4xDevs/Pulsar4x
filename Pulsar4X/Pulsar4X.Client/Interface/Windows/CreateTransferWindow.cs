@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
@@ -36,7 +37,7 @@ public class CreateTransferWindow : PulsarGuiWindow
     {
         if(!IsActive) return;
 
-        if(ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Create Transfer Order"), ref IsActive))
+        if(Window.Begin("Create Transfer Order", ref IsActive))
         {
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
             var firstChildSize = new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y);
@@ -82,7 +83,7 @@ public class CreateTransferWindow : PulsarGuiWindow
                             var itemsToTransfer = new List<(ICargoable, long)>();
                             foreach(var item in TransferLeftGoods)
                             {
-                                itemsToTransfer.Add((item.Key, item.Value.Item1));
+                                itemsToTransfer.Add((item.Key, -item.Value.Item1));
                             }
                             CargoTransferOrder.CreateCommands(_uiState.Faction.Id, TransferLeft, TransferRight, itemsToTransfer);
                         }
@@ -102,7 +103,7 @@ public class CreateTransferWindow : PulsarGuiWindow
 
                 ImGui.EndChild();
             }
-            ImGui.End();
+            Window.End();
         }
     }
 
@@ -141,7 +142,7 @@ public class CreateTransferWindow : PulsarGuiWindow
                         cargoables[id].ShowTooltip();
                         ImGui.SameLine();
 
-                        string amount = Stringify.Number(value);
+                        string amount = Stringify.Quantity(value);
                         var amountSize = ImGui.CalcTextSize(amount);
 
                         ImGui.SetCursorPosX(contentSize.X - amountSize.X);

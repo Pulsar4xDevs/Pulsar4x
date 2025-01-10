@@ -1,0 +1,43 @@
+[
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "neptune",
+      "Name": "Neptune",
+      "Colonizable": true,
+      "GeoSurveyPointsRequired": 2500,
+      "GenerateMinerals": "random",
+      "Info": {
+        "Gravity": 11.15,
+        "Type": "ice-giant",
+        "Albedo": 0.29,
+        "AxialTilt": 28.32,
+        "Mass": 1.02413E26,
+        "Radius": 24764
+      },
+      "Orbit": {
+        "SemiMajorAxis": 4.5E9,
+        "Eccentricity": 0.008678,
+        "EclipticInclination": 1.77,
+        "LoAN": 131.783,
+        "AoP": 273.187,
+        "MeanAnomaly": 259.883
+      },
+      "Atmosphere": {
+        "Pressure": 986.923267,
+        "Hydrosphere": false,
+        "HyrdoExtent": 0,
+        "GreenhouseFactor": 0,
+        "GreenhousePressure": 0,
+        "SurfaceTemperature": -201,
+        "Gases": [
+          { "Symbol": "H2", "Percent": 0.8 },
+          { "Symbol": "He", "Percent": 0.19 },
+          { "Symbol": "CH4", "Percent": 0.015 },
+          { "Symbol": "HD", "Percent": 0.00019 },
+          { "Symbol": "C2H6", "Percent": 0.0000015 }
+        ]
+      }
+    }
+  }
+]

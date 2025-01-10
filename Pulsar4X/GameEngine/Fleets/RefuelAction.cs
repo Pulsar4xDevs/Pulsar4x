@@ -18,9 +18,9 @@ namespace Pulsar4X.Fleets
             get { return _entityCommanding; }
         }
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
-            return false;
+            return _isFinished;
         }
 
         internal override void Execute(DateTime atDateTime)

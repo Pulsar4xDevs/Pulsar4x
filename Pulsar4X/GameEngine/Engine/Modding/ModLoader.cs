@@ -43,6 +43,7 @@ namespace Pulsar4X.Modding
 
                 foreach (var mod in modInstructions)
                 {
+                    mod.Data.JsonFileName =  modDataFile;
                     ApplyMod(baseData, mod, modManifest.Namespace);
                 }
             }
@@ -64,9 +65,6 @@ namespace Pulsar4X.Modding
                     break;
                 case ModInstruction.DataType.ComponentTemplate:
                     ApplyModGeneric<ComponentTemplateBlueprint>(baseData.ComponentTemplates, mod, modNamespace);
-                    break;
-                case ModInstruction.DataType.DefaultItems:
-                    ApplyModGeneric<DefaultItemsBlueprint>(baseData.DefaultItems, mod, modNamespace);
                     break;
                 case ModInstruction.DataType.Gas:
                     ApplyModGeneric<GasBlueprint>(baseData.AtmosphericGas, mod, modNamespace);
@@ -94,6 +92,27 @@ namespace Pulsar4X.Modding
                     break;
                 case ModInstruction.DataType.DamageResistance:
                     ApplyModGeneric<DamageResistBlueprint>(baseData.DamageResists, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.Species:
+                    ApplyModGeneric<SpeciesBlueprint>(baseData.Species, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.System:
+                    ApplyModGeneric<SystemBlueprint>(baseData.Systems, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.Star:
+                    ApplyModGeneric<StarBlueprint>(baseData.Stars, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.SystemBody:
+                    ApplyModGeneric<SystemBodyBlueprint>(baseData.SystemBodies, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.Colony:
+                    ApplyModGeneric<ColonyBlueprint>(baseData.Colonies, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.ComponentDesign:
+                    ApplyModGeneric<ComponentDesignBlueprint>(baseData.ComponentDesigns, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.ShipDesign:
+                    ApplyModGeneric<ShipDesignBlueprint>(baseData.ShipDesigns, mod, modNamespace);
                     break;
             }
         }

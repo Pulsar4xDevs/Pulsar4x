@@ -6,6 +6,7 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
 using System.Numerics;
 using System.Collections.Generic;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 
@@ -42,7 +43,7 @@ namespace Pulsar4X.SDL2UI
             if(!IsActive) return;
 
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(264, 325), ImGuiCond.Once);
-            if (ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Currently selected"), _flags))
+            if (Window.Begin("Currently selected", _flags))
             {
 
                 if (_uiState.LastClickedEntity != null && _uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid)){
@@ -143,7 +144,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     SmallBodyEntityInfoWindow.GetInstance().SetActive();
                 }
-                ImGui.End();
+                Window.End();
             }
 
 

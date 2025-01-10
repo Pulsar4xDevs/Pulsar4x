@@ -36,7 +36,7 @@
               "Name": "MiningAmount",
               "DescriptionFormula": "''",
               "GuiHint": "None",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries": [
                   {
                     "Key": "5eadda1f-43aa-44be-bdb4-395441a33f14",
@@ -112,7 +112,7 @@
                   }
                 ]
               },
-              "AttributeFormula": "AtbConstrArgs([GuidDict])",
+              "PropertyFormula": "AtbConstrArgs([GuidDict])",
               "AttributeType": "Pulsar4X.ECSLib.MineResourcesAtbDB"
             }
           ]
@@ -125,19 +125,19 @@
           "DescriptionFormula": "'Researches new technologies'",
           "ComponentType":"Facility",
           "ID": "c203b7cf-8b41-4664-8291-d20dfe1119ec",
-          "MassFormula": "Ability('Size') * 100",
-          "VolumeFormula": "Ability('Size') * 0.1",
+          "MassFormula": "PropertyValue('Size') * 100",
+          "VolumeFormula": "PropertyValue('Size') * 0.1",
           "HTKFormula": "[Mass]",
-          "CrewReqFormula": "Ability('Size')",
+          "CrewReqFormula": "PropertyValue('Size')",
           "ResourceCostFormula": {
             "Entries": [
               {
                 "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
-                "Value": "Ability('Size') / 100 * 60"
+                "Value": "PropertyValue('Size') / 100 * 60"
               },
               {
                 "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
-                "Value": "Ability('Size') / 100 * 60"
+                "Value": "PropertyValue('Size') / 100 * 60"
               }
             ]
           },
@@ -155,13 +155,13 @@
               "MaxFormula": "50000",
               "MinFormula": "500",
               "StepFormula": "100",
-              "AttributeFormula": "1000"
+              "PropertyFormula": "1000"
             },
             {
               "Name": "Research Points",
               "DescriptionFormula": "'Research points produced per update'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Ability('Size') * 0.01"
+              "PropertyFormula": "PropertyValue('Size') * 0.01"
             },
             {
               "Name": "Bonus",
@@ -170,14 +170,14 @@
               "MaxFormula": "18",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AttributeFormula": "0"
+              "PropertyFormula": "0"
             },
 
             {
               "Name": "RP Amount Per EconTick",
               "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('Research Points'))",
+              "PropertyFormula": "AtbConstrArgs(PropertyValue('Research Points'))",
               "AttributeType": "Pulsar4X.ECSLib.ResearchPointsAtbDB"
             }
           ]
@@ -190,7 +190,7 @@
           "DescriptionFormula": "'An installation designed to refine base minerals into materials'",
           "ComponentType":"Facility",
           "ID": "90592586-0bd6-4885-8526-7181e08556b5",
-          "MassFormula": "Ability('Size')",
+          "MassFormula": "PropertyValue('Size')",
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "[Mass] * 0.1",
@@ -220,28 +220,28 @@
               "MaxFormula": "10000",
               "MinFormula": "100",
               "StepFormula": "50",
-              "AttributeFormula": "5000"
+              "PropertyFormula": "5000"
             },
             {
               "Name": "Refinery Points",
               "DescriptionFormula": "'Refines at a rate of'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Ability('Size') * 0.1"
+              "PropertyFormula": "PropertyValue('Size') * 0.1"
             },
             {
               "Name": "RefineAbilitys",
               "DescriptionFormula": "''",
               "GuiHint": "None",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries":
                 [
                   {
                     "Key": "265B36EE-BAED-4F92-9AEC-BC8A7EA0DF1F",
-                    "Value": "Ability('Refinery Points')"
+                    "Value": "PropertyValue('Refinery Points')"
                   }
                 ]
               },
-              "AttributeFormula": "AtbConstrArgs([GuidDict])",
+              "PropertyFormula": "AtbConstrArgs([GuidDict])",
               "AttributeType": "Pulsar4X.ECSLib.Industry.IndustryAtb"
             }
           ]
@@ -254,7 +254,7 @@
           "DescriptionFormula": "'Constructs Facilities, Fighters Ammo and Components'",
           "ComponentType":"Facility",
           "ID": "07817639-e0c6-43cd-b3dc-24ed15efb4ba",
-          "MassFormula": "Ability('Size')",
+          "MassFormula": "PropertyValue('Size')",
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "[Mass] * 0.1",
@@ -284,48 +284,48 @@
               "MaxFormula": "10000",
               "MinFormula": "100",
               "StepFormula": "50",
-              "AttributeFormula": "5000"
+              "PropertyFormula": "5000"
             },
             {
               "Name": "Component Construction Points",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "[Mass] * 0.1"
+              "PropertyFormula": "[Mass] * 0.1"
             },            {
               "Name": "Installation Construction Points",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "[Mass] * 0.1"
+              "PropertyFormula": "[Mass] * 0.1"
             },
             {
               "Name": "Fighter Construction Points",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "0"
+              "PropertyFormula": "0"
             },
             {
               "Name": "Ordnance Construction Points",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "[Mass] * 0.1"
+              "PropertyFormula": "[Mass] * 0.1"
             },
             {
               "Name": "Construction Points",
               "GuiHint": "None",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries":
                 [
                   {
                     "Key": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
-                    "Value": "Ability('Component Construction Points')"
+                    "Value": "PropertyValue('Component Construction Points')"
                   },
                   {
                     "Key": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
-                    "Value": "Ability('Installation Construction Points')"
+                    "Value": "PropertyValue('Installation Construction Points')"
                   },
                   {
                     "Key": "5ADBF620-3740-4FD7-98BE-E8670D58945F",
-                    "Value": "Ability('Ordnance Construction Points')"
+                    "Value": "PropertyValue('Ordnance Construction Points')"
                   }
                 ]
               },
-              "AttributeFormula": "AtbConstrArgs([GuidDict])",
+              "PropertyFormula": "AtbConstrArgs([GuidDict])",
               "AttributeType": "Pulsar4X.ECSLib.Industry.IndustryAtb"
             }
           ]
@@ -365,37 +365,37 @@
               "Name": "Component Construction Points",
 
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "1000"
+              "PropertyFormula": "1000"
             },
             {
               "Name": "Ship Assembly Points",
 
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "1000"
+              "PropertyFormula": "1000"
             },
             {
               "Name": "Slip Size",
               "DescriptionFormula": "'Maximum volume of ship size this slip can work on'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "10000"
+              "PropertyFormula": "10000"
             },
             {
               "Name": "db",
               "GuiHint": "None",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries":
                 [
                   {
                     "Key": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
-                    "Value": "Ability('Component Construction Points')"
+                    "Value": "PropertyValue('Component Construction Points')"
                   },
                   {
                     "Key": "91823C5B-A71A-4364-A62C-489F0183EFB5",
-                    "Value": "Ability('Ship Assembly Points')"
+                    "Value": "PropertyValue('Ship Assembly Points')"
                   }
                 ]
               },
-              "AttributeFormula": "AtbConstrArgs([GuidDict], Ability('Slip Size'))",
+              "PropertyFormula": "AtbConstrArgs([GuidDict], PropertyValue('Slip Size'))",
               "AttributeType": "Pulsar4X.ECSLib.Industry.IndustryAtb"
             }
           ]
@@ -431,18 +431,18 @@
               "Name": "Support Colonists",
               "DescriptionFormula": "'Keeps colonists alive on hostile worlds'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "500"
+              "PropertyFormula": "500"
             },
             {
               "Name": "Storage Amount",
               "DescriptionFormula": "'The amount of space that is dedicated to storage space. '",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "500"
+              "PropertyFormula": "500"
             },
             {
               "Name": "DBargs",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability('Storage Amount'))",
+              "PropertyFormula": "AtbConstrArgs(GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), PropertyValue('Storage Amount'))",
               "AttributeType": "Pulsar4X.ECSLib.VolumeStorageAtb"
             }
           ]
@@ -482,30 +482,30 @@
               "Name": "Cargo Transfer Rate",
               "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries": []
               },
               "MaxFormula": "1000000",
               "MinFormula": "100",
               "StepFormula": "100",
-              "AttributeFormula": "50000"
+              "PropertyFormula": "50000"
             },
             {
               "Name": "Transfer Range",
               "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries": []
               },
               "MaxFormula": "1000000",
               "MinFormula": "100",
               "StepFormula": "100",
-              "AttributeFormula": "50000"
+              "PropertyFormula": "50000"
             },
             {
               "Name": "db",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('Cargo Transfer Rate'), Ability('Transfer Range'))",
+              "PropertyFormula": "AtbConstrArgs(PropertyValue('Cargo Transfer Rate'), PropertyValue('Transfer Range'))",
               "AttributeType": "Pulsar4X.ECSLib.StorageTransferRateAtbDB"
             }
           ]
@@ -545,18 +545,18 @@
               "Name": "Logistic Capacity",
               "DescriptionFormula": "'How many different items this office can handle'",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries": []
               },
               "MaxFormula": "100",
               "MinFormula": "5",
               "StepFormula": "5",
-              "AttributeFormula": "5"
+              "PropertyFormula": "5"
             },
             {
               "Name": "db",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('Logistic Capacity'))",
+              "PropertyFormula": "AtbConstrArgs(PropertyValue('Logistic Capacity'))",
               "AttributeType": "Pulsar4X.ECSLib.LogiBaseAtb"
             }
           ]
@@ -569,10 +569,10 @@
           "DescriptionFormula": "'Stores General Cargo'",
           "ComponentType":"Cargo Hold",
           "ID": "B8239721-B60E-4C11-8E45-5F64F6BA5FA5",
-          "MassFormula": "Ability(0)",
+          "MassFormula": "PropertyValue(0)",
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
-          "CrewReqFormula": "Ability(1) * 0.1",
+          "CrewReqFormula": "PropertyValue(1) * 0.1",
           "ResourceCostFormula": {
             "Entries": [
               {
@@ -596,57 +596,57 @@
               "Name": "Warehouse Size",
               "DescriptionFormula": "''",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries": []
               },
               "MaxFormula": "1000000",
               "MinFormula": "100",
               "StepFormula": "100",
-              "AttributeFormula": "50000"
+              "PropertyFormula": "50000"
             },
             {
               "Name": "Size Efficency",
               "DescriptionFormula": "'The amount of tonnage taken up by racking, office space etc.'",
               "GuiHint": "GuiTextDisplay",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries": []
               },
-              "AttributeFormula": "Ability('Warehouse Size') * 0.01"
+              "PropertyFormula": "PropertyValue('Warehouse Size') * 0.01"
             },
             {
               "Name": "Cargo Transfer Rate",
               "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries": []
               },
               "MaxFormula": "1000000",
               "MinFormula": "100",
               "StepFormula": "100",
-              "AttributeFormula": "50000"
+              "PropertyFormula": "50000"
             },
             {
               "Name": "Transfer Range",
               "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries": []
               },
               "MaxFormula": "1000000",
               "MinFormula": "100",
               "StepFormula": "100",
-              "AttributeFormula": "50000"
+              "PropertyFormula": "50000"
             },
             {
               "Name": "DBargsStor",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability('Warehouse Size'))",
+              "PropertyFormula": "AtbConstrArgs(GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), PropertyValue('Warehouse Size'))",
               "AttributeType": "Pulsar4X.ECSLib.VolumeStorageAtb"
             },
             {
               "Name": "DBArgsXfer",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('Cargo Transfer Rate'), Ability('Transfer Range'))",
+              "PropertyFormula": "AtbConstrArgs(PropertyValue('Cargo Transfer Rate'), PropertyValue('Transfer Range'))",
               "AttributeType": "Pulsar4X.ECSLib.StorageTransferRateAtbDB"
             }
           ]
@@ -659,10 +659,10 @@
           "DescriptionFormula": "'Stores Fuel'",
           "ComponentType":"Fuel Storage",
           "ID": "e7ac4187-58e4-458b-9aea-c3e07fc993cb",
-          "MassFormula": "Ability(0)",
+          "MassFormula": "PropertyValue(0)",
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
-          "CrewReqFormula": "Ability(1)",
+          "CrewReqFormula": "PropertyValue(1)",
           "ResourceCostFormula": {
             "Entries": [
               {
@@ -689,26 +689,26 @@
               "MaxFormula": "1000000",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AttributeFormula": "2500"
+              "PropertyFormula": "2500"
             },
             {
               "Name": "Tank Volume",
               "Units": "m^3",
               "DescriptionFormula": "'The volume of this tank.'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "(4 / 3) * Pi * Pow(Ability('Tank Radius'), 3)"
+              "PropertyFormula": "(4 / 3) * Pi * Pow(PropertyValue('Tank Radius'), 3)"
             },
             {
               "Name": "Dry Weight",
               "Units": "kg",
               "DescriptionFormula": "'The weight of the empty tank'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "(4 * Pi * Ability('Tank Radius') * Ability('Tank Radius')) * 23.5 "
+              "PropertyFormula": "(4 * Pi * PropertyValue('Tank Radius') * PropertyValue('Tank Radius')) * 23.5 "
             },
             {
               "Name": "DBargs",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'), Ability('Tank Volume'))",
+              "PropertyFormula": "AtbConstrArgs(GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'), PropertyValue('Tank Volume'))",
               "AttributeType": "Pulsar4X.ECSLib.VolumeStorageAtb"
             }
           ]
@@ -721,8 +721,8 @@
           "DescriptionFormula": "'Stores Fuel'",
           "ComponentType":"Fuel Storage",
           "ID": "3528600E-3A1C-488C-BAE6-60251D1156AB",
-          "MassFormula": "Ability('Dry Weight')",
-          "VolumeFormula": "Ability('Tank Volume')",
+          "MassFormula": "PropertyValue('Dry Weight')",
+          "VolumeFormula": "PropertyValue('Tank Volume')",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "0",
           "ResourceCostFormula": {
@@ -747,26 +747,26 @@
               "MaxFormula": "1000000",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AttributeFormula": "2500"
+              "PropertyFormula": "2500"
             },
             {
               "Name": "Tank Radius",
               "DescriptionFormula": "'The radius of this tank.'",
               "Units": "m",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Pow(3 * (Ability('Tank Volume') / (4 * Pi) ), 1/3)"
+              "PropertyFormula": "Pow(3 * (PropertyValue('Tank Volume') / (4 * Pi) ), 1/3)"
             },
             {
               "Name": "Dry Weight",
               "DescriptionFormula": "'The weight of the empty tank'",
               "Units": "kg",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "(1.333 * Pi * ( Pow(Ability('Tank Radius'),3) - Pow( Ability('Tank Radius') - 0.004, 3)  ) * 8000)"
+              "PropertyFormula": "(1.333 * Pi * ( Pow(PropertyValue('Tank Radius'),3) - Pow( PropertyValue('Tank Radius') - 0.004, 3)  ) * 8000)"
             },
             {
               "Name": "DBargs",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'), Ability('Tank Volume'))",
+              "PropertyFormula": "AtbConstrArgs(GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'), PropertyValue('Tank Volume'))",
               "AttributeType": "Pulsar4X.ECSLib.VolumeStorageAtb"
             }
           ]
@@ -779,10 +779,10 @@
           "DescriptionFormula": "'A generic does everything space facility'",
           "ComponentType":"Facility",
           "ID": "B2E9B32A-C760-4E30-9819-77871C920B9B",
-          "MassFormula": "Ability(0)",
+          "MassFormula": "PropertyValue(0)",
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
-          "CrewReqFormula": "Ability(1) * 0.1",
+          "CrewReqFormula": "PropertyValue(1) * 0.1",
           "ResourceCostFormula": {
             "Entries": [
               {
@@ -806,66 +806,66 @@
               "Name": "Warehouse Size",
               "DescriptionFormula": "''",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries": []
               },
               "MaxFormula": "1000000",
               "MinFormula": "100",
               "StepFormula": "100",
-              "AttributeFormula": "50000"
+              "PropertyFormula": "50000"
             },
             {
               "Name": "Size Efficency",
               "DescriptionFormula": "'The amount of tonnage taken up by racking, office space etc.'",
               "GuiHint": "GuiTextDisplay",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries": []
               },
-              "AttributeFormula": "Ability(0) * 0.01"
+              "PropertyFormula": "PropertyValue(0) * 0.01"
             },
             {
               "Name": "Cargo Transfer Rate",
               "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries": []
               },
               "MaxFormula": "1000000",
               "MinFormula": "100",
               "StepFormula": "100",
-              "AttributeFormula": "50000"
+              "PropertyFormula": "50000"
             },
             {
               "Name": "Transfer Range",
               "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries": []
               },
               "MaxFormula": "1000000",
               "MinFormula": "100",
               "StepFormula": "100",
-              "AttributeFormula": "50000"
+              "PropertyFormula": "50000"
             },
             {
               "Name": "Total Cargo Stored",
               "DescriptionFormula": "'The volume of cargo this can store.'",
               "GuiHint": "GuiTextDisplay",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries": []
               },
-              "AttributeFormula": "Ability(0) - Ability(1) - Ability(2)"
+              "PropertyFormula": "PropertyValue(0) - PropertyValue(1) - PropertyValue(2)"
             },
             {
               "Name": "DBargsTransfer",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('Cargo Transfer Rate'), Ability('Transfer Range'))",
+              "PropertyFormula": "AtbConstrArgs(PropertyValue('Cargo Transfer Rate'), PropertyValue('Transfer Range'))",
               "AttributeType": "Pulsar4X.ECSLib.StorageTransferRateAtbDB"
             },
             {
               "Name": "DBargsStorage",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability('Total Cargo Stored'))",
+              "PropertyFormula": "AtbConstrArgs(GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), PropertyValue('Total Cargo Stored'))",
               "AttributeType": "Pulsar4X.ECSLib.VolumeStorageAtb"
             }
           ]
@@ -878,10 +878,10 @@
           "DescriptionFormula": "Graduates Naval officers",
           "ComponentType": "Facility",
           "ID": "89a944e8-bb95-49dd-b8e1-84e5be84791c",
-          "MassFormula": "Ability('Class Size') * 100",
+          "MassFormula": "PropertyValue('Class Size') * 100",
           "VolumeFormula": "[Mass] * 0.1",
           "HTKFormula": "[Mass]",
-          "CrewReqFormula": "Ability('Class Size') * 0.25",
+          "CrewReqFormula": "PropertyValue('Class Size') * 0.25",
           "ResourceCostFormula": {
             "Entries": [
               {
@@ -894,7 +894,7 @@
               }
             ]
           },
-          "ResearchCostFormula": "Ability('Class Size') * 0.5",
+          "ResearchCostFormula": "PropertyValue('Class Size') * 0.5",
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Mass]",
           "MountType": "PlanetInstallation",
@@ -908,7 +908,7 @@
               "MaxFormula": "2500",
               "MinFormula": "10",
               "StepFormula": "10",
-              "AttributeFormula": "1000"
+              "PropertyFormula": "1000"
             },
             {
               "Name": "Class Length",
@@ -917,12 +917,12 @@
               "MaxFormula": "48",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AttributeFormula": "24"
+              "PropertyFormula": "24"
             },
             {
               "Name": "DBargs",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('Class Size'), Ability('Class Length'))",
+              "PropertyFormula": "AtbConstrArgs(PropertyValue('Class Size'), PropertyValue('Class Length'))",
               "AttributeType": "Pulsar4X.ECSLib.NavalAcademyAtbDB"
             }
           ]

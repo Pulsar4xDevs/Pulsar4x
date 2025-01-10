@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -35,7 +36,7 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            if (IsActive && ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Small bodies:"), ref IsActive, _flags))
+            if (IsActive && Window.Begin("Small bodies:", ref IsActive, _flags))
             {
                 if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid))
                 {
@@ -50,6 +51,7 @@ namespace Pulsar4X.SDL2UI
                         }
                     }
                 }
+                Window.End();
             }
 
         }

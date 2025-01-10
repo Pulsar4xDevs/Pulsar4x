@@ -24,7 +24,6 @@ public class JumpOrder : EntityCommand
     public JumpPointDB JumpGate { get; private set; }
 
     internal override Entity EntityCommanding { get { return _entityCommanding; } }
-    bool _isFinished = false;
     string NewName;
 
     public static void CreateAndExecute(Game game, Entity faction, Entity fleetEntity, JumpPointDB jumpGate)
@@ -68,7 +67,7 @@ public class JumpOrder : EntityCommand
         _isFinished = true;
     }
 
-    public override bool IsFinished()
+    internal override bool IsFinished()
     {
         return _isFinished;
     }

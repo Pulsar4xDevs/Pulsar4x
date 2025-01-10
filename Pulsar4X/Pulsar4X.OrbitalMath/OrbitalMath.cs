@@ -40,7 +40,8 @@ namespace Pulsar4X.Orbital
             double p; //p is where the ellipse or hypobola crosses a line from the focal point 90 degrees from the sma
 
 			// If we run into negative eccentricity we have big problems
-			Debug.Assert(eccentricity >= 0, "Negative eccentricity, this is physically impossible");
+			if(eccentricity < 0)
+                throw new Exception("Negative eccentricity, this is physically impossible");
             
             //note that a hyperbolic orbit will have a negitive semiMajorAxis
             semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);

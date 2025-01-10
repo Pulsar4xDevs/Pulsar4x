@@ -1,5 +1,6 @@
 ﻿using System;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using Vector3 = Pulsar4X.Orbital.Vector3;
@@ -140,10 +141,14 @@ namespace Pulsar4X.SDL2UI
                 return new WarpOrderWindow(entity, SMMode);
             }
             var instance = (WarpOrderWindow)_uiState.LoadedWindows[typeof(WarpOrderWindow)];
+            if (instance.OrderingEntityState != entity)
+            {
+                return new WarpOrderWindow(entity);
+            }
+            
             instance.OrderingEntityState = entity;
             instance.CurrentState = States.NeedsTarget;
             instance._departureDateTime = _uiState.PrimarySystemDateTime;
-
             instance.EntitySelected();
             return instance;
         }
@@ -329,7 +334,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowPos(pos, ImGuiCond.FirstUseEver);
 
-            if (ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle(_displayText), ref IsActive, _flags))
+            if (Window.Begin(_displayText, ref IsActive, _flags))
             {
                 //put calcs that needs refreshing each frame in here. (ie calculations from mouse cursor position)
                 if (_endpointTargetOrbitWidget != null)
@@ -411,8 +416,8 @@ namespace Pulsar4X.SDL2UI
 
                     ImGui.Text("Eccentricity: ");
                     //ImGui.SameLine();
-                    ImGui.Text("Initial: "+Stringify.Number(_endpointInitialOrbit.Eccentricity));
-                    ImGui.Text("Target: "+Stringify.Number(_endpointTargetOrbit.Eccentricity));
+                    ImGui.Text("Initial: "+Stringify.Quantity(_endpointInitialOrbit.Eccentricity));
+                    ImGui.Text("Target: "+Stringify.Quantity(_endpointTargetOrbit.Eccentricity));
 
 
                     ImGui.Text("Apoapsis: ");
@@ -489,7 +494,7 @@ namespace Pulsar4X.SDL2UI
                     }
                 }
 
-                ImGui.End();
+                Window.End();
             }
 
         }
@@ -563,6 +568,8 @@ namespace Pulsar4X.SDL2UI
 
         internal override void EntityClicked(EntityState entity, MouseButtons button)
         {
+            if (entity == OrderingEntityState)
+                return;
             ImGuiIOPtr io = ImGui.GetIO();
 
             if (button == MouseButtons.Primary && !io.KeyShift )

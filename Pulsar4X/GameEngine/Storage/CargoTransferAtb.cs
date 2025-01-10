@@ -32,13 +32,13 @@ public class CargoTransferAtb : IComponentDesignAttribute
             var newdb = new CargoStorageDB();
             parentEntity.SetDataBlob(newdb);
         }
-        var cargoLibrary = parentEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
-        StorageSpaceProcessor.RecalcVolumeCapacityAndRates(parentEntity, cargoLibrary);
+        
+        StorageSpaceProcessor.RecalcVolumeCapacityAndRates(parentEntity);
     }
 
     public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
-
+        StorageSpaceProcessor.RecalcVolumeCapacityAndRates(parentEntity);
     }
 
     public string AtbName()

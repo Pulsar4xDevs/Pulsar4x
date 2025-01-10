@@ -62,13 +62,14 @@ namespace Pulsar4X.Movement
 
         [JsonProperty]
         public Vector3 ExitPointrelative { get; internal set; }
+        [JsonProperty]
         public KeplerElements EndpointTargetOrbit { get; private set; }
 
         [JsonProperty]
         internal Entity? TargetEntity;
 
 
-        [JsonIgnore] //don't store datablobs, we catch this on deserialization.
+        [JsonProperty] 
         internal PositionDB TargetPositionDB;
         public PositionDB GetTargetPosDB
         {
@@ -149,16 +150,7 @@ namespace Pulsar4X.Movement
         [OnDeserialized]
         private void Deserialized(StreamingContext context)
         {
-
-            if (TargetEntity != null)
-            {
-
-                var game = (Game?)context.Context;
-                game.PostLoad += (sender, args) =>
-                {
-                    TargetPositionDB = TargetEntity.GetDataBlob<PositionDB>();
-                };
-            }
+            
         }
 
         public override object Clone()

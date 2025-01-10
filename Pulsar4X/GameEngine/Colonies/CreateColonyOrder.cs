@@ -41,9 +41,10 @@ public class CreateColonyOrder : EntityCommand
         throw new NotImplementedException();
     }
 
-    public override bool IsFinished()
+    internal override bool IsFinished()
     {
-        return TargetSystemBody.IsOrHasColony().Item1;
+        _isFinished = TargetSystemBody.IsOrHasColony().Item1;
+        return _isFinished;
     }
 
     internal override void Execute(DateTime atDateTime)

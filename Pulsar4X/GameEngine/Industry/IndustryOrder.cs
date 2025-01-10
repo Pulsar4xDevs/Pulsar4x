@@ -172,13 +172,17 @@ namespace Pulsar4X.Industry
             return false;
         }
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
             if (_job.Auto == false && _job.NumberCompleted == _job.NumberOrdered)
             {
-                return true;
+                _isFinished = true;
             }
-            return false;
+            else
+            {
+                _isFinished = false;
+            }
+            return _isFinished;
         }
 
         public override EntityCommand Clone()

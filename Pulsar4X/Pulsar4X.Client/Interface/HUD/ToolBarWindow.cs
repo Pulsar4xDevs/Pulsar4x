@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
 
 namespace Pulsar4X.SDL2UI
@@ -186,7 +187,7 @@ namespace Pulsar4X.SDL2UI
 
         void DisplayButtons(string name, List<ToolBarOption> DisplayToolButtons)
         {
-            if (ImGui.Begin(name, _flags))
+            if (Window.Begin(name, _flags))
             {
                 ImGuiCol buttonidx = ImGuiCol.Button;
 
@@ -222,7 +223,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 ImGui.PushStyleColor(buttonidx, UnClickedColour);
 
-                ImGui.End();
+                Window.End();
             }
         }
     }

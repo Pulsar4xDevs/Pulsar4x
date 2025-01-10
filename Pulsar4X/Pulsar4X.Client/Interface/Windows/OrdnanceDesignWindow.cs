@@ -6,6 +6,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Components;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Blueprints;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Factions;
 using Pulsar4X.Sensors;
 using Pulsar4X.Weapons;
@@ -104,7 +105,7 @@ namespace Pulsar4X.SDL2UI
                     {
                         _payloadTypes.Add(cdes);
                     }
-                    if (cdes.AttributesByType.ContainsKey(typeof(SensorReceiverAtbDB)))
+                    if (cdes.AttributesByType.ContainsKey(typeof(SensorReceiverAtb)))
                     {
                         _eleccPackTypes.Add(cdes);
                     }
@@ -132,7 +133,7 @@ namespace Pulsar4X.SDL2UI
             List<ComponentTemplateBlueprint> engineTemplates = new List<ComponentTemplateBlueprint>();
             foreach (var designable in allDesignables)
             {
-                foreach (var atbSD in designable.Attributes)
+                foreach (var atbSD in designable.Properties)
                 {
                     if( atbSD.AttributeType == typeof(NewtonionThrustAtb).ToString())
                     {
@@ -160,7 +161,7 @@ namespace Pulsar4X.SDL2UI
                 || _factionTech == null)
                 return;
 
-            if (ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Ordnance Design")))
+            if (Window.Begin("Ordnance Design"))
             {
                 ImGui.Combo("Current Designs", ref _payloadSelectedIndex, _currentDesignNames, _currentDesignNames.Length);
 
@@ -242,6 +243,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.InputText("Design Name", _designName, (uint)_designName.Length);
                 NewDesignButton();
 
+                Window.End();
             }
         }
 

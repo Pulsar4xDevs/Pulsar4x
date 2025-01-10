@@ -644,7 +644,27 @@ namespace Pulsar4X.SDL2UI
             return arrowPoints;
         }
 
-
+        public static Vector2[] BezierPoints(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, float dt)
+        {
+            List<Vector2> _linePoints = new List<Vector2>();
+            for (float t = 0.0f; t < 1.0; t += dt)
+            {
+                var x = BezCalc(t, p0.X, p1.X, p2.X, p3.X);
+                var y = BezCalc(t, p0.Y, p1.Y, p2.Y, p3.Y);
+                
+                _linePoints.Add(new Vector2() {X = x, Y = y});
+            }
+            _linePoints.Add(p3);
+            return _linePoints.ToArray();
+        }
+        private static double BezCalc(double t, double a0, double a1, double a2, double a3)
+        {
+            double foo = a0 * Math.Pow((1 - t), 3); 
+            foo += a1 * 3 * t * Math.Pow((1 - t), 2); 
+            foo += a2 * 3 * Math.Pow(t, 2) * (1 - t); 
+            foo += a3 * Math.Pow(t, 3);
+            return foo;
+        }
 
     }
 

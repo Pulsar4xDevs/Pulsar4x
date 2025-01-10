@@ -13,7 +13,7 @@ namespace Pulsar4X.Sensors
     public static class SensorTools
     {
 
-        public static SensorReturnValues[] GetDetectedEntites(SensorReceiverAtbDB sensorAtb, Vector3 position, List<Entity> detectableEntities, DateTime atDate, int factionOwnerId,  bool filterSameFaction = true)
+        public static SensorReturnValues[] GetDetectedEntites(SensorReceiverAtb sensorAtb, Vector3 position, List<Entity> detectableEntities, DateTime atDate, int factionOwnerId,  bool filterSameFaction = true)
         {
             SensorReturnValues[] detectionValues = new SensorReturnValues[detectableEntities.Count];
             for (int i = 0; i < detectableEntities.Count; i++)
@@ -47,7 +47,7 @@ namespace Pulsar4X.Sensors
         }
 
         /*
-        internal static void DetectEntites(SystemSensorContacts sensorMgr, FactionInfoDB factionInfo, PositionDB receverPos, SensorReceiverAtbDB receverDB, Entity detectableEntity, DateTime atDate)
+        internal static void DetectEntites(SystemSensorContacts sensorMgr, FactionInfoDB factionInfo, PositionDB receverPos, SensorReceiverAtb receverDB, Entity detectableEntity, DateTime atDate)
         {
             Entity receverFaction = sensorMgr.FactionId;
             //Entity receverFaction;// = receverDB.OwningEntity.GetDataBlob<OwnedDB>().OwnedByFaction;
@@ -105,7 +105,7 @@ namespace Pulsar4X.Sensors
         }
         */
 
-        public static SensorReturnValues DetectonQuality(SensorReceiverAtbDB recever, Dictionary<EMWaveForm, double> signalAtPosition)
+        public static SensorReturnValues DetectonQuality(SensorReceiverAtb recever, Dictionary<EMWaveForm, double> signalAtPosition)
         {
             /*
              * Thoughts (spitballing):

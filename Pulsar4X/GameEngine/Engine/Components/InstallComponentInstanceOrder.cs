@@ -15,7 +15,7 @@ namespace Pulsar4X.Engine.Orders
 
         internal override Entity EntityCommanding { get; }
         public ComponentInstance ComponentInstance { get; private set; }
-        private bool hasExecuted = false;
+
 
         internal InstallComponentInstanceOrder(Entity entity, ComponentInstance componentInstance)
         {
@@ -41,15 +41,15 @@ namespace Pulsar4X.Engine.Orders
             throw new NotImplementedException();
         }
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
-            return hasExecuted;
+            return _isFinished;
         }
 
         internal override void Execute(DateTime atDateTime)
         {
             EntityCommanding.AddComponent(ComponentInstance);
-            hasExecuted = true;
+            _isFinished = true;
         }
 
         internal override bool IsValidCommand(Game game)

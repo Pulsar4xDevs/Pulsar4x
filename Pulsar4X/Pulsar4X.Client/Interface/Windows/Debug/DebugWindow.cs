@@ -10,6 +10,7 @@ using Pulsar4X.Extensions;
 using Pulsar4X.SDL2UI.Combat;
 using Vector3 = Pulsar4X.Orbital.Vector3;
 using System.Linq;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Energy;
 using Pulsar4X.Factions;
 using Pulsar4X.Damage;
@@ -156,7 +157,7 @@ namespace Pulsar4X.SDL2UI
         internal override void Display()
         {
             _isRunningFrame = true;
-            if(IsActive && ImGui.Begin("debug", ref IsActive))
+            if(IsActive && Window.Begin("Debug Window", ref IsActive))
             {
                 if(ImGui.BeginTabBar("DebugTabs"))
                 {
@@ -168,7 +169,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.EndTabBar();
                 }
 
-                ImGui.End();
+                Window.End();
             }
 
             _isRunningFrame = false;
@@ -288,10 +289,10 @@ namespace Pulsar4X.SDL2UI
                                     }
                                     
                                 }
-                                ImGui.Text("Total Units Inc Escro: " + Stringify.Number(totalCountIncEscro));
-                                ImGui.Text("Total Units less Escro: " + Stringify.Number(totalCountLesEscro));
-                                ImGui.Text("Total Mass Inc Escro: " + Stringify.Number(totalMassIncEscro));
-                                ImGui.Text("Total Mass less Escro: " + Stringify.Number(totalMassIncEscro));
+                                ImGui.Text("Total Units Inc Escro: " + Stringify.Quantity(totalCountIncEscro));
+                                ImGui.Text("Total Units less Escro: " + Stringify.Quantity(totalCountLesEscro));
+                                ImGui.Text("Total Mass Inc Escro: " + Stringify.Quantity(totalMassIncEscro));
+                                ImGui.Text("Total Mass less Escro: " + Stringify.Quantity(totalMassIncEscro));
                                 ImGui.Unindent();
                             }
                         }
@@ -877,7 +878,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
                     ImGui.Text("System");
                     ImGui.NextColumn();
-                    ImGui.Text(type.processorType.Name);
+                    ImGui.Text(type.Name);
                     ImGui.NextColumn();
                 }
                 ImGui.EndTabItem();

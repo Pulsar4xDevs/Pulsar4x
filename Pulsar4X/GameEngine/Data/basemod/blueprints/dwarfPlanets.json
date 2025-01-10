@@ -1,0 +1,139 @@
+[
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "dwarf-ceres",
+      "Name": "Ceres",
+      "Colonizable": true,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 750,
+      "Info": {
+        "Type": "dwarf-planet",
+        "Albedo": 0.09,
+        "AxialTilt": 4,
+        "Mass": 9.3835E20,
+        "Radius": 469.73
+      },
+      "Orbit": {
+        "SemiMajorAxis": 414E6,
+        "Eccentricity": 0.0785,
+        "EclipticInclination": 10.6,
+        "LoAN": 80.3,
+        "AoP": 73.6,
+        "MeanAnomaly": 291.4
+      }
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "dwarf-eris",
+      "Name": "Eris",
+      "Colonizable": true,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 750,
+      "Info": {
+        "Type": "dwarf-planet",
+        "Albedo": 0.96,
+        "Mass": 1.66E22,
+        "Radius": 1163
+      },
+      "Orbit": {
+        "SemiMajorAxis": 10.152E9,
+        "Eccentricity": 0.43607,
+        "EclipticInclination": 44.04,
+        "LoAN": 35.951,
+        "AoP": 151.639,
+        "MeanAnomaly": 205.989
+      }
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "dwarf-haumea",
+      "Name": "Haumea",
+      "Colonizable": true,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 750,
+      "Info": {
+        "Type": "dwarf-planet",
+        "Albedo": 0.33,
+        "AxialTilt": 126,
+        "Mass": 4.006E21,
+        "Radius": 798
+      },
+      "Orbit": {
+        "SemiMajorAxis": 6.4501E9,
+        "Eccentricity": 0.19642,
+        "EclipticInclination": 28.2137,
+        "LoAN": 122.167,
+        "AoP": 239.041,
+        "MeanAnomaly": 218.205
+      }
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "dwarf-makemake",
+      "Name": "Makemake",
+      "Colonizable": true,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 750,
+      "Info": {
+        "Type": "dwarf-planet",
+        "Albedo": 0.74,
+        "Mass": 3.1E21,
+        "Rradius": 739
+      },
+      "Orbit": {
+        "SemiMajorAxis": 6.7962E9,
+        "Eccentricity": 0.16126,
+        "EclipticInclination": 28.9835,
+        "LoAN": 79.62,
+        "AoP": 294.834,
+        "MeanAnomaly": 165.514
+      }
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "dwarf-pluto",
+      "Name": "Pluto",
+      "Colonizable": true,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 750,
+      "Info": {
+        "Gravity": 0.62,
+        "Type": "dwarf-planet",
+        "Albedo": 0.49,
+        "AxialTilt": 122.53,
+        "Mass": 1.303E22,
+        "Radius": 1188.3
+      },
+      "Orbit": {
+        "SemiMajorAxis": 5.90638E9,
+        "Eccentricity": 0.2488,
+        "EclipticInclination": 17.16,
+        "LoAN": 110.299,
+        "AoP": 113.834,
+        "MeanAnomaly": 14.53
+      },
+      "Atmosphere": {
+        "Pressure": 0.00000987,
+        "Hydrosphere": false,
+        "HyrdoExtent": 0,
+        "GreenhouseFactor": 0,
+        "GreenhousePressure": 0,
+        "SurfaceTemperature": -229,
+        "Gases": [
+          { "Symbol": "N2", "Percent": 0.99 },
+          { "Symbol": "CH4", "Percent": 0.005 },
+          { "Symbol": "CO", "Percent": 0.0025 }
+        ]
+      }
+    }
+  }
+]

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Galaxy;
@@ -24,11 +25,11 @@ public class PositionDB : TreeHierarchyDB, IPosition
         NewtonComplex,
         Warp,
     }
-
+    [JsonProperty]
     public MoveTypes MoveType { get; internal set; }
 
     public KeplerElements GetKeplerElements { get; internal set; }
-
+    
     public Vector3 RelativePosition { get; internal set; }
 
     public Vector2 RelativePosition2
@@ -68,11 +69,13 @@ public class PositionDB : TreeHierarchyDB, IPosition
         get { return (Vector2)AbsolutePosition; }
         set { AbsolutePosition = (Vector3)value; }
     }
-
+    [JsonProperty]
     public Vector2 Velocity { get; internal set; }
-
+    [JsonProperty]
     public double SGP { get; internal set; }
 
+    [JsonConstructor]
+    private PositionDB(): base(null) {}
 
     /// <summary>
     /// Initialized

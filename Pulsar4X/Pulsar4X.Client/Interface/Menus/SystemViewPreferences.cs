@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using ImGuiNET;
 using Microsoft.Extensions.Configuration;
+using Pulsar4X.Client.Interface.Widgets;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI;
@@ -39,6 +40,7 @@ public class SystemViewPreferences : PulsarGuiWindow
         { UserOrbitSettings.OrbitBodyType.Comet, "Comets" },
         { UserOrbitSettings.OrbitBodyType.Moon, "Moons" },
         { UserOrbitSettings.OrbitBodyType.Planet, "Planets" },
+        { UserOrbitSettings.OrbitBodyType.DwarfPlanet, "Dwarf Planets" },
         { UserOrbitSettings.OrbitBodyType.Ship, "Ships" },
         { UserOrbitSettings.OrbitBodyType.Star, "Stars" },
         { UserOrbitSettings.OrbitBodyType.Unknown, "Unknown Objects" }
@@ -145,6 +147,7 @@ public class SystemViewPreferences : PulsarGuiWindow
         string? comets = viewsSection["comets"];
         string? moons = viewsSection["moons"];
         string? planets = viewsSection["planets"];
+        string? dwarfplanets = viewsSection["dwarfplanets"];
         string? ships = viewsSection["ships"];
         string? stars = viewsSection["stars"];
         string? unknown = viewsSection["unknown"];
@@ -168,7 +171,7 @@ public class SystemViewPreferences : PulsarGuiWindow
         }
         else
         {
-            values.Add(UserOrbitSettings.OrbitBodyType.Colony, false);  // Default value
+            values.Add(UserOrbitSettings.OrbitBodyType.Colony, true);  // Default value
         }
 
         // Comets
@@ -178,7 +181,7 @@ public class SystemViewPreferences : PulsarGuiWindow
         }
         else
         {
-            values.Add(UserOrbitSettings.OrbitBodyType.Comet, false);  // Default value
+            values.Add(UserOrbitSettings.OrbitBodyType.Comet, true);  // Default value
         }
 
         // Moons
@@ -188,7 +191,7 @@ public class SystemViewPreferences : PulsarGuiWindow
         }
         else
         {
-            values.Add(UserOrbitSettings.OrbitBodyType.Moon, false);  // Default value
+            values.Add(UserOrbitSettings.OrbitBodyType.Moon, true);  // Default value
         }
 
         // Planets
@@ -198,7 +201,17 @@ public class SystemViewPreferences : PulsarGuiWindow
         }
         else
         {
-            values.Add(UserOrbitSettings.OrbitBodyType.Planet, false);  // Default value
+            values.Add(UserOrbitSettings.OrbitBodyType.Planet, true);  // Default value
+        }
+
+        // Dwarf Planets
+        if (dwarfplanets != null && bool.TryParse(dwarfplanets, out bool dwarfPlanetsValue))
+        {
+            values.Add(UserOrbitSettings.OrbitBodyType.DwarfPlanet, dwarfPlanetsValue);
+        }
+        else
+        {
+            values.Add(UserOrbitSettings.OrbitBodyType.DwarfPlanet, true);  // Default value
         }
 
         // Ships
@@ -208,7 +221,7 @@ public class SystemViewPreferences : PulsarGuiWindow
         }
         else
         {
-            values.Add(UserOrbitSettings.OrbitBodyType.Ship, false);  // Default value
+            values.Add(UserOrbitSettings.OrbitBodyType.Ship, true);  // Default value
         }
 
         // Stars
@@ -218,7 +231,7 @@ public class SystemViewPreferences : PulsarGuiWindow
         }
         else
         {
-            values.Add(UserOrbitSettings.OrbitBodyType.Star, false);  // Default value
+            values.Add(UserOrbitSettings.OrbitBodyType.Star, true);  // Default value
         }
 
         // Unknown
@@ -228,7 +241,7 @@ public class SystemViewPreferences : PulsarGuiWindow
         }
         else
         {
-            values.Add(UserOrbitSettings.OrbitBodyType.Unknown, false);  // Default value
+            values.Add(UserOrbitSettings.OrbitBodyType.Unknown, true);  // Default value
         }
 
         // Set values
@@ -259,6 +272,7 @@ public class SystemViewPreferences : PulsarGuiWindow
             writer.WriteLine($"comets={view.FilterCheckmarks[UserOrbitSettings.OrbitBodyType.Comet]}");
             writer.WriteLine($"moons={view.FilterCheckmarks[UserOrbitSettings.OrbitBodyType.Moon]}");
             writer.WriteLine($"planets={view.FilterCheckmarks[UserOrbitSettings.OrbitBodyType.Planet]}");
+            writer.WriteLine($"dwarfplanets={view.FilterCheckmarks[UserOrbitSettings.OrbitBodyType.DwarfPlanet]}");
             writer.WriteLine($"ships={view.FilterCheckmarks[UserOrbitSettings.OrbitBodyType.Ship]}");
             writer.WriteLine($"stars={view.FilterCheckmarks[UserOrbitSettings.OrbitBodyType.Star]}");
             writer.WriteLine($"unknown={view.FilterCheckmarks[UserOrbitSettings.OrbitBodyType.Unknown]}");
@@ -279,6 +293,7 @@ public class SystemViewPreferences : PulsarGuiWindow
             writer.WriteLine("comets=True");
             writer.WriteLine("moons=True");
             writer.WriteLine("planets=True");
+            writer.WriteLine("dwarfplanets=True");
             writer.WriteLine("ships=True");
             writer.WriteLine("stars=True");
             writer.WriteLine("unknown=True");
@@ -292,7 +307,7 @@ public class SystemViewPreferences : PulsarGuiWindow
         if(_selectedEditorViewNames == null)
                 throw new NullReferenceException();
 
-        if(ImGui.Begin("System View Preferences", ref IsActive))
+        if(Window.Begin("System View Preferences", ref IsActive))
         {
             if(ImGui.Combo("###view-selector", ref _selectedEditorViewIndex, _selectedEditorViewNames, _selectedEditorViewNames.Length))
             {
@@ -317,6 +332,7 @@ public class SystemViewPreferences : PulsarGuiWindow
                             { UserOrbitSettings.OrbitBodyType.Comet, true },
                             { UserOrbitSettings.OrbitBodyType.Moon, true },
                             { UserOrbitSettings.OrbitBodyType.Planet, true },
+                            { UserOrbitSettings.OrbitBodyType.DwarfPlanet, true },
                             { UserOrbitSettings.OrbitBodyType.Ship, true },
                             { UserOrbitSettings.OrbitBodyType.Star, true },
                             { UserOrbitSettings.OrbitBodyType.Unknown, true }
@@ -345,7 +361,7 @@ public class SystemViewPreferences : PulsarGuiWindow
                     SaveViewIni(Views[_selectedEditorViewIndex]);
                 }
             }
-            ImGui.End();
+            Window.End();
         }
     }
 

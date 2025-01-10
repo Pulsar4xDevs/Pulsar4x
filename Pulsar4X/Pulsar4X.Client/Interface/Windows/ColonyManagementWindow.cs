@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using Pulsar4X.Colonies;
 using Pulsar4X.People;
@@ -37,7 +38,7 @@ namespace Pulsar4X.SDL2UI
         {
             if(!IsActive) return;
 
-            if(ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Manage Colonies"), ref IsActive))
+            if(Window.Begin("Manage Colonies", ref IsActive))
             {
                 Vector2 windowContentSize = ImGui.GetContentRegionAvail();
                 if(ImGui.BeginChild("Colonies", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y), true))
@@ -74,7 +75,11 @@ namespace Pulsar4X.SDL2UI
                     ImGui.EndChild();
                 }
 
-                if(SelectedEntity == null) return;
+                if (SelectedEntity == null)
+                {
+                    Window.End();
+                    return;
+                }
 
                 ImGui.SameLine();
 
@@ -111,7 +116,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.EndChild();
                 }
 
-                ImGui.End();
+                Window.End();
             }
         }
     }

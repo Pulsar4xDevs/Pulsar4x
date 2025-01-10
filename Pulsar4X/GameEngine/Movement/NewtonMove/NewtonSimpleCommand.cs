@@ -111,12 +111,13 @@ public class NewtonSimpleCommand : EntityCommand
             _details = "Manuvering ";
     }
 
-    public override bool IsFinished()
+    internal override bool IsFinished()
     {
         if (IsRunning && _db.IsComplete)
-            return true;
+            _isFinished = true;
         else
-            return false;
+            _isFinished = false;
+        return _isFinished;
     }
 
     internal override bool IsValidCommand(Game game)

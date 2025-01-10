@@ -214,7 +214,7 @@ namespace Pulsar4X.Tests
 
             var storedCookies = cookiePile.GetUnitsStored(cookies, true);
             var storedCookieMass = cookiePile.GetMassStored(cookies, true);
-            var storedCookieVolume = cookiePile.GetVolumeStored(cookies);
+            var storedCookieVolume = cookiePile.GetVolumeStored(cookies, true);
 
 
             Assert.AreEqual( 99, added);
@@ -225,7 +225,7 @@ namespace Pulsar4X.Tests
             var addMore = cookiePile.AddCargoByUnit(cookies, 100);
             var storedCookies2 = cookiePile.GetUnitsStored(cookies, true);
             var storedCookieMass2 = cookiePile.GetMassStored(cookies, true);
-            var storedCookieVolume2 = cookiePile.GetVolumeStored(cookies);
+            var storedCookieVolume2 = cookiePile.GetVolumeStored(cookies, true);
             Assert.AreEqual(1, addMore);
             Assert.AreEqual( 100, storedCookies2);
             Assert.AreEqual(100, storedCookieMass2);

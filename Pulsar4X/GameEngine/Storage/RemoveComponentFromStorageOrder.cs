@@ -45,9 +45,9 @@ namespace Pulsar4X.Storage
             throw new NotImplementedException();
         }
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
-            return hasExecuted;
+            return _isFinished =hasExecuted;
         }
 
         internal override void Execute(DateTime atDateTime)

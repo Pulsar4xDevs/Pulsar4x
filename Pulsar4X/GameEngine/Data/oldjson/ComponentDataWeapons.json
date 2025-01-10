@@ -9,8 +9,8 @@
           "DescriptionFormula": "'Laser Gun'",
           "ComponentType": "Weapon",
           "ID": "8923f0e1-1143-4926-a0c8-66b6c7969425",
-          "MassFormula": "Ability('Power Input') / 1000 + Ability('Chamber Volume') + Ability('Radiator Volume')",
-          "VolumeFormula": "Ability('Power Input') / 1000 + Ability('Chamber Volume')",
+          "MassFormula": "PropertyValue('Power Input') / 1000 + PropertyValue('Chamber Volume') + PropertyValue('Radiator Volume')",
+          "VolumeFormula": "PropertyValue('Power Input') / 1000 + PropertyValue('Chamber Volume')",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "[Mass]",
           "ResourceCostFormula": {
@@ -36,7 +36,7 @@
               "MaxFormula": "10000",
               "MinFormula": "1000",
               "StepFormula": "10",
-              "AttributeFormula": "5000"
+              "PropertyFormula": "5000"
             },
             {
               "Name": "Damage",
@@ -46,7 +46,7 @@
               "MaxFormula": "100",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AttributeFormula": "10"
+              "PropertyFormula": "10"
             },
             {
               "Name": "ReloadRate",
@@ -56,17 +56,17 @@
               "MaxFormula": "100",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AttributeFormula": "10"
+              "PropertyFormula": "10"
             },
             {
               "Name": "Power Input",
               "Units": "W",
               "DescriptionFormula": "'How much power the laser consumes'",
               "GuiHint": "GuiSelectionMaxMin",
-              "MaxFormula": "(Ability('Chamber Volume') * Ability('Target Wavelength') / Ability('Conversion Efficency'))",
+              "MaxFormula": "(PropertyValue('Chamber Volume') * PropertyValue('Target Wavelength') / PropertyValue('Conversion Efficency'))",
               "MinFormula": "1",
               "StepFormula": "10",
-              "AttributeFormula": "100000"
+              "PropertyFormula": "100000"
             },
             {
               "Name": "Chamber Volume",
@@ -76,7 +76,7 @@
               "MaxFormula": "10000",
               "MinFormula": "1",
               "StepFormula": "10",
-              "AttributeFormula": "5000"
+              "PropertyFormula": "5000"
             },
             {
               "Name": "Lens Diameter",
@@ -86,7 +86,7 @@
               "MaxFormula": "10000",
               "MinFormula": "1",
               "StepFormula": "10",
-              "AttributeFormula": "5000"
+              "PropertyFormula": "5000"
             },
             {
               "Name": "Charge Period",
@@ -96,7 +96,7 @@
               "MaxFormula": "100",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AttributeFormula": "10"
+              "PropertyFormula": "10"
             },
             {
               "Name": "Duty Cycle",
@@ -106,7 +106,7 @@
               "MaxFormula": "1",
               "MinFormula": "0",
               "StepFormula": "0.1",
-              "AttributeFormula": "0.1"
+              "PropertyFormula": "0.1"
             },
             {
               "Name": "Target Wavelength",
@@ -116,7 +116,7 @@
               "MaxFormula": "1000",
               "MinFormula": "100",
               "StepFormula": "1",
-              "AttributeFormula": "500"
+              "PropertyFormula": "500"
             },
 
             {
@@ -127,7 +127,7 @@
               "MaxFormula": "100000000",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AttributeFormula": "1000000"
+              "PropertyFormula": "1000000"
             },
             {
               "Name": "Emissitivity",
@@ -137,7 +137,7 @@
               "MaxFormula": "1",
               "MinFormula": "0",
               "StepFormula": "0.1",
-              "AttributeFormula": "0.5"
+              "PropertyFormula": "0.5"
             },
 
             {
@@ -145,93 +145,93 @@
               "Units": "L",
               "DescriptionFormula": "'Volume of the chamber'",
               "GuiHint": "GuiSelectionMaxMin",
-              "MaxFormula": "Ability('Chamber Volume')",
+              "MaxFormula": "PropertyValue('Chamber Volume')",
               "MinFormula": "1",
               "StepFormula": "10",
-              "AttributeFormula": "5000"
+              "PropertyFormula": "5000"
             },
 			{
               "Name": "Radiator Thickness",
               "Units": "m",
               "DescriptionFormula": "'How thick radiators are (debug)'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Pow(Ability('Radiator Volume'), 1/4)"
+              "PropertyFormula": "Pow(PropertyValue('Radiator Volume'), 1/4)"
             },
             {
               "Name": "Radiator area",
               "Units": "m^2",
               "DescriptionFormula": "'How much area radiators have (debug)'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Ability('Radiator Volume') / Ability('Radiator Thickness')"
+              "PropertyFormula": "PropertyValue('Radiator Volume') / PropertyValue('Radiator Thickness')"
             },
             {
               "Name": "Operating Temprature",
               "Units": "K",
               "DescriptionFormula": "'What temp the laser operates at'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Pow( Ability('Thermal Output') / (Ability('Emissitivity') * Ability('Radiator area') * 0.00000005670374419), 1/4 )"
+              "PropertyFormula": "Pow( PropertyValue('Thermal Output') / (PropertyValue('Emissitivity') * PropertyValue('Radiator area') * 0.00000005670374419), 1/4 )"
             },
             {
               "Name": "Input Light",
               "Units": "W",
               "DescriptionFormula": "'Energy out put of a laser pulse'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Ability('Conversion Efficency') * Ability('Power Input')"
+              "PropertyFormula": "PropertyValue('Conversion Efficency') * PropertyValue('Power Input')"
             },
             {
               "Name": "Chamber Absorption",
               "Units": "%",
               "DescriptionFormula": "'What percentage of stored light in the chamber is lost as heat (tech)'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "(Ability('Input Light') / (Ability('Chamber Volume') * Ability('Target Wavelength')))"
+              "PropertyFormula": "(PropertyValue('Input Light') / (PropertyValue('Chamber Volume') * PropertyValue('Target Wavelength')))"
             },
             {
               "Name": "Conversion Efficency",
               "Units": "%",
               "DescriptionFormula": "'What percentage of input energy gets converted into light (tech)'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Sqrt( Ability('Target Wavelength') / 1000 )"
+              "PropertyFormula": "Sqrt( PropertyValue('Target Wavelength') / 1000 )"
             },
             {
               "Name": "Lense Emission",
               "Units": "%",
               "DescriptionFormula": "'What percentage of stored light is fired (tech)'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Sqrt( Ability('Duty Cycle') )"
+              "PropertyFormula": "Sqrt( PropertyValue('Duty Cycle') )"
             },
             {
               "Name": "Pulse Energy",
               "Units": "J",
               "DescriptionFormula": "'Energy output of a laser pulse'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Ability('Lense Emission') * (Ability('Input Light') - Ability('Input Light') * Exp(Ability('Chamber Absorption') * -1 * Ability('Charge Period'))) / Ability('Chamber Absorption')"
+              "PropertyFormula": "PropertyValue('Lense Emission') * (PropertyValue('Input Light') - PropertyValue('Input Light') * Exp(PropertyValue('Chamber Absorption') * -1 * PropertyValue('Charge Period'))) / PropertyValue('Chamber Absorption')"
             },
             {
               "Name": "Thermal Output",
               "Units": "W",
               "DescriptionFormula": "'Waste Thermal heat output by laser'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "(Ability('Power Input') * Ability('Charge Period') - Ability('Pulse Energy')) / Ability('Charge Period')"
+              "PropertyFormula": "(PropertyValue('Power Input') * PropertyValue('Charge Period') - PropertyValue('Pulse Energy')) / PropertyValue('Charge Period')"
             },
             {
               "Name": "Beam waist",
               "Units": "M",
               "DescriptionFormula": "'Width of beam at focal length (debug)'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": " Ability('Operating Temprature') * Ability('Operating Temprature') * Ability('Focal Length') * 0.000000001 * Ability('Target Wavelength') * ( 1 / Ability('Lens Diameter') ) "
+              "PropertyFormula": " PropertyValue('Operating Temprature') * PropertyValue('Operating Temprature') * PropertyValue('Focal Length') * 0.000000001 * PropertyValue('Target Wavelength') * ( 1 / PropertyValue('Lens Diameter') ) "
             },
             {
               "Name": "genericWpndbargs",
               "DescriptionFormula": "'int magSize, int reloadPerSec, int amountPerShot, int minShotsPerfire",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('Charge Period') * Ability('Power Input'), Ability('Power Input'), Ability('Pulse Energy'), 1)",
+              "PropertyFormula": "AtbConstrArgs(PropertyValue('Charge Period') * PropertyValue('Power Input'), PropertyValue('Power Input'), PropertyValue('Pulse Energy'), 1)",
               "AttributeType": "Pulsar4X.ECSLib.GenericWeaponAtb"
             },
             {
               "Name": "dbargs",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('Range'), Ability('Damage'), Ability('ReloadRate'))",
-              "AttributeType": "Pulsar4X.ECSLib.GenericBeamWeaponAtbDB"
+              "PropertyFormula": "AtbConstrArgs(PropertyValue('Range'), PropertyValue('Damage'), PropertyValue('ReloadRate'))",
+              "AttributeType": "Pulsar4X.ECSLib.GenericBeamWeaponAtb"
             }
           ]
         }
@@ -243,8 +243,8 @@
           "DescriptionFormula": "'A Projectile thrower that uses electrical energy to propel a conductive projectile'",
           "ComponentType": "Weapon",
           "ID": "fe9bf895-ac4d-4696-b121-d195c720d17b",
-          "MassFormula": "(Ability('Calibre') * 1.01) * (Ability('Calibre') * 1.01) * (Ability('Rail Length') + Ability('Auto Reloader Mass'))",
-          "VolumeFormula": "(Ability('Calibre') * 1.01) * (Ability('Calibre') * 1.01) * (Ability('Rail Length') + Ability('Auto Reloader Mass'))",
+          "MassFormula": "(PropertyValue('Calibre') * 1.01) * (PropertyValue('Calibre') * 1.01) * (PropertyValue('Rail Length') + PropertyValue('Auto Reloader Mass'))",
+          "VolumeFormula": "(PropertyValue('Calibre') * 1.01) * (PropertyValue('Calibre') * 1.01) * (PropertyValue('Rail Length') + PropertyValue('Auto Reloader Mass'))",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "1",
           "ResourceCostFormula": {
@@ -270,7 +270,7 @@
               "MaxFormula": "250",
               "MinFormula": "10",
               "StepFormula": "1",
-              "AttributeFormula": "25"
+              "PropertyFormula": "25"
             },
             {
               "Name": "Rail Length",
@@ -280,7 +280,7 @@
               "MaxFormula": "100",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AttributeFormula": "1"
+              "PropertyFormula": "1"
             },
             {
               "Name": "Auto Reloader Mass",
@@ -290,38 +290,38 @@
               "MaxFormula": "100",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AttributeFormula": "10"
+              "PropertyFormula": "10"
             },
             {
               "Name": "Power Use",
               "Units": "MJ",
               "DescriptionFormula": "'In MegaJules.'",
               "GuiHint": "None",
-              "AttributeFormula": "TechData('7c23fd4d-6577-4fbe-b15e-77345558c804') * Ability('Calibre') * Ability('Rail Length')"
+              "PropertyFormula": "TechData('7c23fd4d-6577-4fbe-b15e-77345558c804') * PropertyValue('Calibre') * PropertyValue('Rail Length')"
             },
             {
               "Name": "Power Efficency",
               "Units": "unknown",
               "GuiHint": "None",
-              "AttributeFormula": "45 + TechData('1167a255-b004-4a68-91af-1192169b5a37')"
+              "PropertyFormula": "45 + TechData('1167a255-b004-4a68-91af-1192169b5a37')"
             },
             {
               "Name": "ROF",
               "Units": "Rounds/unknown",
               "GuiHint": "None",
-              "AttributeFormula": "Ability('Auto Reloader Mass') / Ability('Calibre')"
+              "PropertyFormula": "PropertyValue('Auto Reloader Mass') / PropertyValue('Calibre')"
             },
             {
               "Name": "genericWpndbargs",
               "DescriptionFormula": "'int magSize, int reloadPerSec, int amountPerShot, int minShotsPerfire, WpnTypes type",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('ROF'), 1, 1)",
+              "PropertyFormula": "AtbConstrArgs(PropertyValue('ROF'), 1, 1)",
               "AttributeType": "Pulsar4X.ECSLib.GenericWeaponAtb"
             },
             {
               "Name": "dbargs",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('Calibre'), Ability('Rail Length'), Ability('Power Use'), Ability('Power Efficiency'), Ability('ROF'))",
+              "PropertyFormula": "AtbConstrArgs(PropertyValue('Calibre'), PropertyValue('Rail Length'), PropertyValue('Power Use'), PropertyValue('Power Efficiency'), PropertyValue('ROF'))",
               "AttributeType": "Pulsar4X.ECSLib.ComponentFeatureSets.RailGun.RailGunAtb"
             }
           ]
@@ -334,7 +334,7 @@
           "DescriptionFormula": "'A tube that houses missiles and launches them'",
           "ComponentType": "Weapon",
           "ID": "978DFA9E-411E-4B4F-A618-85D642927503",
-          "MassFormula": "Ability('Max Mass') * 1.5 ",
+          "MassFormula": "PropertyValue('Max Mass') * 1.5 ",
           "VolumeFormula": "[Mass] * 0.5",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "1",
@@ -361,7 +361,7 @@
               "MaxFormula": "2500",
               "MinFormula": "10",
               "StepFormula": "1",
-              "AttributeFormula": "250"
+              "PropertyFormula": "250"
             },
             {
               "Name": "Max Length",
@@ -371,7 +371,7 @@
               "MaxFormula": "100",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AttributeFormula": "1"
+              "PropertyFormula": "1"
             },
             {
               "Name": "Max Mass",
@@ -381,7 +381,7 @@
               "MaxFormula": "100000",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AttributeFormula": "500"
+              "PropertyFormula": "500"
             },
             {
               "Name": "Auto Reloader Mass",
@@ -391,44 +391,44 @@
               "MaxFormula": "100",
               "MinFormula": "0",
               "StepFormula": "1",
-              "AttributeFormula": "60"
+              "PropertyFormula": "60"
             },
             {
               "Name": "Power Use",
               "Units": "MJ",
               "DescriptionFormula": "'In MegaJules.'",
               "GuiHint": "None",
-              "AttributeFormula": "TechData('7c23fd4d-6577-4fbe-b15e-77345558c804') * Ability('Max Calibre') * Ability('Max Length')"
+              "PropertyFormula": "TechData('7c23fd4d-6577-4fbe-b15e-77345558c804') * PropertyValue('Max Calibre') * PropertyValue('Max Length')"
             },
             {
               "Name": "Power Efficency",
               "Units": "unknown",
               "GuiHint": "None",
-              "AttributeFormula": "45 + TechData('1167a255-b004-4a68-91af-1192169b5a37')"
+              "PropertyFormula": "45 + TechData('1167a255-b004-4a68-91af-1192169b5a37')"
             },
             {
               "Name": "Launch Force",
               "Units": "Newtons",
               "GuiHint": "None",
-              "AttributeFormula": "Ability('Power Use')"
+              "PropertyFormula": "PropertyValue('Power Use')"
             },
             {
               "Name": "ROF",
               "Units": "Rounds/second",
               "GuiHint": "None",
-              "AttributeFormula": "Ability('Auto Reloader Mass') / Ability('Max Mass')"
+              "PropertyFormula": "PropertyValue('Auto Reloader Mass') / PropertyValue('Max Mass')"
             },
             {
               "Name": "genericWpndbargs",
               "DescriptionFormula": "'int magSize, int reloadPerSec, int amountPerShot, int minShotsPerfire, WpnTypes type",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(120, 1, 120, 1)",
+              "PropertyFormula": "AtbConstrArgs(120, 1, 120, 1)",
               "AttributeType": "Pulsar4X.ECSLib.GenericWeaponAtb"
             },
             {
               "Name": "dbargs",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('Max Mass'), Ability('ROF'), Ability('Launch Force'))",
+              "PropertyFormula": "AtbConstrArgs(PropertyValue('Max Mass'), PropertyValue('ROF'), PropertyValue('Launch Force'))",
               "AttributeType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.MissileLauncherAtb"
             }
 

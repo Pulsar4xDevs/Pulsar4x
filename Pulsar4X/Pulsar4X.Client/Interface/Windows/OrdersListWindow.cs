@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
@@ -60,7 +61,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             var orders = _orderableDB.ActionList;
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(550, 325), ImGuiCond.Once);
-            if (IsActive == true && ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Orders: " + _orderEntity.GetOwnersName()), ref IsActive, _flags))
+            if (IsActive == true && Window.Begin("Orders: " + _orderEntity.GetOwnersName(), ref IsActive, _flags))
             {
                 ImGui.Columns(6);
                 ImGui.SetColumnWidth(0, 124);
@@ -138,6 +139,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 }
 
                 ImGui.Columns(1);
+                Window.End();
             }
 
         }

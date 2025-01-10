@@ -162,9 +162,9 @@ public class SetLogisticsOrder : EntityCommand
         }
     }
 
-    public override bool IsFinished()
+    internal override bool IsFinished()
     {
-        return true;
+        return _isFinished = true;
     }
 
     public override EntityCommand Clone()

@@ -9,4 +9,10 @@
     <PackageReference Include="NUnit" Version="3.13.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\..\..\..\home\se5a\.nuget\packages\newtonsoft.json\13.0.3\lib\net6.0\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

@@ -150,7 +150,7 @@ namespace Pulsar4X.Galaxy
 
         void UpdateDatablob(SystemBodyInfoDB originalDB, SensorInfoDB sensorInfo)
         {
-            Random rng = new Random(); //TODO: rand should be deterministic.
+            Random rng = originalDB.OwningEntity.Manager.RNG;
             float accuracy = sensorInfo.HighestDetectionQuality.SignalQuality;
 
             if (sensorInfo.HighestDetectionQuality.SignalQuality > 0.20)

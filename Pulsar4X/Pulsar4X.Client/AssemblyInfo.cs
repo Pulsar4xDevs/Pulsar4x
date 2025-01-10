@@ -39,7 +39,7 @@ public static class AssemblyInfo
                     if (parts.Length > 1)
                     {
                         // Git the hash
-                        return parts[1].Substring(0, 7);
+                        _githash = parts[1].Substring(0, 7);
                     }
                 }
             }

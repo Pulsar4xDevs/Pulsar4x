@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using Vector2 = Pulsar4X.Orbital.Vector2;
@@ -130,7 +131,7 @@ namespace Pulsar4X.SDL2UI
             if(!IsActive)
                 return;
 
-            if (ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle(_displayText), ref IsActive, _flags))
+            if (Window.Begin(_displayText, ref IsActive, _flags))
             {
                 //put calcs that needs refreshing each frame in here. (ie calculations from mouse cursor position)
                 if (_orbitWidget == null && _orderEntityOrbit != null && _orderEntityOrbit.Parent != null)
@@ -147,6 +148,7 @@ namespace Pulsar4X.SDL2UI
                     ActionCmd();
 
                 //ImGui.SetTooltip(_tooltipText);
+                Window.End();
             }
         }
 

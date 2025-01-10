@@ -8,6 +8,7 @@ public class UserOrbitSettings
     {
         Star,
         Planet,
+        DwarfPlanet,
         Moon,
         Asteroid,
         Comet,

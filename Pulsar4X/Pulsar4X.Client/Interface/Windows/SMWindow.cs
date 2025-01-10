@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Names;
@@ -93,7 +94,7 @@ namespace Pulsar4X.SDL2UI
         {
             //selectedEntityData
             ImGui.SetNextWindowSizeConstraints(new System.Numerics.Vector2(32, 32), new System.Numerics.Vector2(720, 720));
-            if (_uiState.SMenabled && ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("SM"), ref IsActive, _flags))
+            if (_uiState.SMenabled && Window.Begin("SM", ref IsActive, _flags))
             {
                 if(_currentSystem != _uiState.SelectedSystem)
                     HardRefresh();
@@ -145,8 +146,9 @@ namespace Pulsar4X.SDL2UI
 
                 }
                 */
+                Window.End();
             }
-            ImGui.End();
+            
         }
 
         internal override void EntityClicked(EntityState entity, MouseButtons button)

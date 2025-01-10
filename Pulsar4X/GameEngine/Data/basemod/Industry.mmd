@@ -1,0 +1,58 @@
+flowchart LR
+    subgraph Raw Materials
+        A1[Hydrocarbons]
+        A2[Iron]
+        A3[Aluminium]
+        A4[Copper]
+        A5[Titanium]
+        A6[Lithium]
+        A7[Chromium]
+        A8[Fissionables]
+        A9[Silicon]
+        A10[Graphite]
+        A11[Tungsten]
+        A12[Nickel]
+        A13[Water]
+    end
+    
+    subgraph Farming
+        E1[Food]
+    end
+    
+    subgraph Production
+        B1[Electronics]
+        B2[Consumer Goods]
+    end
+    
+    subgraph Refining
+        C1[Stainless Steel]
+        C2[RP-1]
+        C3[Methalox]
+        C4[Hydrolox]
+        C5[Hydronuke]
+        C6[Plastic]
+        C7[Fissile Fuels]
+    end
+    
+    subgraph Consumption
+        D1[Civilian Use]
+    end
+    
+    A1 --> C1
+    A2 --> C1
+    A7 --> C1
+    A1 --> C2
+    A1 --> C3
+    A1 --> C4
+    A1 --> C5
+    A8 --> C5
+    A1 --> C6
+    A8 --> C7
+    A4 --> B1
+    A3 --> B1
+    C6 --> B1
+    A9 --> B1
+    B1 --> B2
+    B2 --> D1
+    A13 --> D1
+    E1 --> D1

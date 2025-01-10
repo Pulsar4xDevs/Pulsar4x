@@ -126,7 +126,7 @@ namespace Pulsar4X.Galaxy
 
         void Update(StarInfoDB db, SensorInfoDB sensorInfo)
         {
-            Random rng = new Random();
+            Random rng = db.OwningEntity.Manager.RNG;
             float accuracy = sensorInfo.HighestDetectionQuality.SignalQuality;
 
             Age = SensorTools.RndSigmoid(db.Age, accuracy, rng);

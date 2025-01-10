@@ -1,4 +1,5 @@
-﻿using SDL2;
+﻿using Pulsar4X.Client.Rendering;
+using SDL2;
 using System;
 
 namespace ImGuiSDL2CS
@@ -10,8 +11,7 @@ namespace ImGuiSDL2CS
         protected IntPtr _Handle;
         public IntPtr Handle => _Handle;
 
-        protected IntPtr _GLContext;
-        public IntPtr GLContext => _GLContext;
+        public IRenderer Renderer { get; set; }
 
         /// <summary>
         /// Window title
@@ -112,15 +112,15 @@ namespace ImGuiSDL2CS
             _Handle = SDL.SDL_CreateWindow(title, x, y, width, height, flags);
 
             if ((flags & SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL) == SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL) {
-                _GLContext = SDL.SDL_GL_CreateContext(_Handle);
-                SDL.SDL_GL_MakeCurrent(_Handle, _GLContext);
+                Renderer = RendererFactory.CreateRenderer(RendererType.OpenGL);
+                Renderer.Initialize(_Handle);
             }
         }
 
         public bool IsVisible => (Flags & SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN) == 0;
         public void Show() => SDL.SDL_ShowWindow(_Handle);
         public void Hide() => SDL.SDL_HideWindow(_Handle);
-        public virtual void Swap() => SDL.SDL_GL_SwapWindow(_Handle);
+        public virtual void Swap() => Renderer.EndFrame();
 
         public virtual void Run()
         {
@@ -170,6 +170,7 @@ namespace ImGuiSDL2CS
 
         public void Dispose()
         {
+            Renderer.Dispose();
             Dispose(true);
             GC.SuppressFinalize(this);
         }

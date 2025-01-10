@@ -74,14 +74,69 @@ namespace Pulsar4X.Engine
         /// <param name="entity"></param>
         /// <returns></returns>
         public delegate bool FilterEntities(Entity entity);
+        
+        #region PsudoRNG
 
+        [JsonProperty] private int _rngSeed = -1;
+
+        public Random RNG;
+
+        internal int RNGNext()
+        {
+            return RNG.Next();
+        }
+        internal int RNGNext(int maxValue)
+        {
+            return RNG.Next(maxValue);
+        }
+        
+        internal int RNGNext(int min, int max)
+        {
+            var next = RNG.Next(min, max);
+            return next;
+        }
+
+        internal double RNGNextDouble()
+        {
+            var next = RNG.NextDouble();
+            return next;
+        }
+        internal bool RNGNextBool(float chance)
+        {
+            return RNG.NextDouble() < chance;
+        }
+        internal bool RNGNextBool(double chance)
+        {
+            return RNG.NextDouble() < chance;
+        }
+        #endregion
 
         #region Constructors
         internal EntityManager() { }
 
-        internal void Initialize(Game game, bool postLoad = false)
+        internal void Initialize(Game game, int seed = -1, bool postLoad = false)
         {
             SelfInitialize(game);
+            //init PRNG
+            if (!postLoad)
+            {
+                if (seed == -1)
+                {
+                    _rngSeed = game.GlobalManager.RNGNext();
+                }
+                else
+                {
+                    _rngSeed = seed;
+                }
+            }
+            else
+            {
+                if (_rngSeed == 0)
+                    throw new Exception("postload but seed is not set");
+            }
+
+            RNG = new Random(seed);
+            
             SetEntities();
             InitializeManagerSubPulse(game, postLoad);
 
@@ -334,7 +389,7 @@ namespace Pulsar4X.Engine
 
         internal bool HasDataBlob(int entityID, Type type)
         {
-            return _datablobStores[type].ContainsKey(entityID);
+            return _datablobStores.ContainsKey(type) && _datablobStores[type].ContainsKey(entityID);
         }
 
         internal bool TryGetDataBlob(int entityID, Type blobType, out object? value)

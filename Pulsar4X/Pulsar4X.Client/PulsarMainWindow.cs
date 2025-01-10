@@ -6,6 +6,8 @@ using ImGuiNET;
 using ImGuiSDL2CS;
 using SDL2;
 using Microsoft.Extensions.Configuration;
+using Pulsar4X.Client.Interface.Widgets;
+using Pulsar4X.Client.State;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -18,9 +20,14 @@ namespace Pulsar4X.SDL2UI
 
     public class PulsarMainWindow : ImGuiSDL2CSWindow
     {
+#if DEBUG
+        private ImGuiWindowFlags _gitHashFlags = ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav;
+#endif
         public const string OrgName = "Pulsar4X";
         public const string AppName = "Pulsar4X";
         public const string PreferencesFile = "preferences.ini";
+        public const string SavesPath = "Saves";
+        public const string ModsPath = "Mods";
         private readonly GlobalUIState _state;
 
         Vector3 backColor;
@@ -39,9 +46,32 @@ namespace Pulsar4X.SDL2UI
 
             try
             {
+                string appDataDirectory = SDL.SDL_GetPrefPath(OrgName, AppName);
+
+                // Check for Saves directory and create it if it doesn't exist
+                string savesDirectory = Path.Combine(appDataDirectory, SavesPath);
+                if (!Directory.Exists(savesDirectory))
+                {
+                    Directory.CreateDirectory(savesDirectory);
+                }
+
+                // Check for Mods directory and create it if it doesn't exist
+                string modsDirectory = Path.Combine(appDataDirectory, ModsPath);
+                if(!Directory.Exists(modsDirectory))
+                {
+                    Directory.CreateDirectory(modsDirectory);
+                }
+
+                // Make sure the base game mod is copied over to the mod directory
+                string sourceData = "Data";
+                DeleteThenCopyToDirectory(sourceData, modsDirectory);
+
+                // Load the available mods
+                ModsState.RefreshModListFromModsDirectory();
+
+
                 // Read and apply any window preferences
-                string preferencesDirectory = SDL.SDL_GetPrefPath(OrgName, AppName);
-                string preferencesPath = Path.Combine(preferencesDirectory, PreferencesFile);
+                string preferencesPath = Path.Combine(appDataDirectory, PreferencesFile);
                 if(!File.Exists(preferencesPath))
                 {
                     File.Create(preferencesPath).Close();
@@ -80,6 +110,19 @@ namespace Pulsar4X.SDL2UI
 
             if (!ImGuiSDL2CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed))
                 return false;
+
+            if(!_state.IsGameLoaded)
+            {
+                var compare = 0;
+#if DEBUG
+                // Debug builds have the git hash displayed in the bottom left corner
+                compare = 1;
+#endif
+                // Open the main menu if no other windows are open
+                if(ImGui.GetIO().MetricsRenderWindows == compare)
+                    MainMenuItems.GetInstance().SetActive(true);
+                return false;
+            }
 
             if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 1 & !ImGui.GetIO().WantCaptureMouse)
             {
@@ -155,8 +198,8 @@ namespace Pulsar4X.SDL2UI
                 systemState.PreFrameSetup();
             }
 
-            GL.ClearColor(backColor.X, backColor.Y, backColor.Z, 1f);
-            GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
+            Renderer.Clear(backColor.X, backColor.Y, backColor.Z, 1f);
+            Renderer.BeginFrame();
 
             _state.GalacticMap.Draw();
 
@@ -259,13 +302,48 @@ namespace Pulsar4X.SDL2UI
                 item.Display();
             }
 
+#if DEBUG
             var dispsize = ImGui.GetIO().DisplaySize;
             var pos = new System.Numerics.Vector2(0, dispsize.Y - ImGui.GetFrameHeightWithSpacing());
             ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-            var flags = ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav;
-            if (ImGui.Begin("GitHash", flags))
+            if (Window.Begin("GitHash", _gitHashFlags))
             {
                 ImGui.Text("Version: " + AssemblyInfo.GetGitHash());
+                Window.End();
+            }
+#endif
+        }
+
+        public static string GetAppDataPath()
+        {
+            return SDL.SDL_GetPrefPath(OrgName, AppName);
+        }
+
+        public static void DeleteThenCopyToDirectory(string sourceDir, string destinationDir)
+        {
+            // Check if destination exists, if so delete it and all its contents
+            if (Directory.Exists(destinationDir))
+            {
+                Directory.Delete(destinationDir, recursive: true);
+            }
+
+            // Create the destination directory fresh
+            Directory.CreateDirectory(destinationDir);
+
+            // Get all files and copy them
+            foreach (string filePath in Directory.GetFiles(sourceDir))
+            {
+                string fileName = Path.GetFileName(filePath);
+                string destFile = Path.Combine(destinationDir, fileName);
+                File.Copy(filePath, destFile, true);
+            }
+
+            // Recursively copy all subdirectories
+            foreach (string subDir in Directory.GetDirectories(sourceDir))
+            {
+                string subDirName = Path.GetFileName(subDir);
+                string destSubDir = Path.Combine(destinationDir, subDirName);
+                DeleteThenCopyToDirectory(subDir, destSubDir);
             }
         }
     }

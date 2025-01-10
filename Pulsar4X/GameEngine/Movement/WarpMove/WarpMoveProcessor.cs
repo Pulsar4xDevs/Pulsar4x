@@ -156,7 +156,10 @@ namespace Pulsar4X.Movement
             var maxSpeedMS = warpDB.MaxSpeed;
             var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
             EnergyGenProcessor.EnergyGen(entity, entity.StarSysDateTime);
-            positionDB.SetParent(positionDB.Root);
+            
+            // Check to make sure we don't set the position parent to itself
+            if(positionDB.Parent != positionDB.Root)
+                positionDB.SetParent(positionDB.Root);
 
             Vector3 currentPositionMt = positionDB.AbsolutePosition;
 

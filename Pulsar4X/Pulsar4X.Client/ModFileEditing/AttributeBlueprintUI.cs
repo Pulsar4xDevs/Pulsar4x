@@ -10,16 +10,16 @@ namespace Pulsar4X.SDL2UI.ModFileEditing;
 public class AttributeBlueprintUI : BluePrintsUI
 {
     private protected string _parentID;
-    private ComponentTemplateAttributeBlueprint[] _blueprints;
+    private ComponentTemplatePropertyBlueprint[] _blueprints;
     private string[] _attributeTypeNames;
     private string[] _attributeFullNames;
     public AttributeBlueprintUI(ModDataStore modDataStore, ComponentTemplateBlueprint componentBlueprint) : base(modDataStore, ModInstruction.DataType.ComponentTemplate )
     {
         _parentID = componentBlueprint.UniqueID;
-        if(componentBlueprint.Attributes != null)
-            _blueprints = componentBlueprint.Attributes.ToArray();
+        if(componentBlueprint.Properties != null)
+            _blueprints = componentBlueprint.Properties.ToArray();
         else
-            _blueprints = new ComponentTemplateAttributeBlueprint[1];
+            _blueprints = new ComponentTemplatePropertyBlueprint[1];
         
         Refresh();
         
@@ -33,7 +33,7 @@ public class AttributeBlueprintUI : BluePrintsUI
         _itemNames = new string[_blueprints.Length];
         _isActive = new bool[_blueprints.Length];
         int i = 0;
-        foreach (ComponentTemplateAttributeBlueprint item in _blueprints)
+        foreach (ComponentTemplatePropertyBlueprint item in _blueprints)
         {
             if (item is null)
                 _itemNames[i] = "?";
@@ -84,7 +84,7 @@ public class AttributeBlueprintUI : BluePrintsUI
         var selectedItem = _blueprints[selectedIndex];
         if (selectedItem is null)
         {
-            selectedItem = new ComponentTemplateAttributeBlueprint();
+            selectedItem = new ComponentTemplatePropertyBlueprint();
             selectedItem.Name = "newAttribute";
         }
         
@@ -121,10 +121,10 @@ public class AttributeBlueprintUI : BluePrintsUI
 
         ImGui.Text("AttributeFormula: ");
         ImGui.NextColumn();
-        editStr = selectedItem.AttributeFormula;
+        editStr = selectedItem.PropertyFormula;
         if (TextEditWidget.Display("##atbf", ref editStr))
         {
-            selectedItem.AttributeFormula = editStr;
+            selectedItem.PropertyFormula = editStr;
         }
         ImGui.NextColumn();
 

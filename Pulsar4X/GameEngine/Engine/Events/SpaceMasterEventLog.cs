@@ -29,6 +29,16 @@ public class SpaceMasterEventLog : IEventLog
         EventManager.Instance.Unsubscribe(allEvents, OnEvent);
     }
 
+    public void ToggleHaltsOn(EventType eventType)
+    {
+        // Do nothing, the SM log shouldn't ever halt the game
+    }
+
+    public bool HaltsOn(EventType eventType)
+    {
+        return false;
+    }
+
     private void OnEvent(Event e)
     {
         _events.Add(e);

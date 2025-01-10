@@ -1,0 +1,48 @@
+[
+    {
+      "Type": "SystemBody",
+      "Payload": {
+        "UniqueID": "mars",
+        "Name": "Mars",
+        "Colonizable": true,
+        "GeoSurveyPointsRequired": 575,
+        "GenerateMinerals": "random",
+        "Info": {
+          "Gravity": 3.72076,
+          "Type": "terrestrial",
+          "Albedo": 0.25,
+          "Mass": 0.64174E24,
+          "Radius": 3396.2,
+          "Tectonics": "earth-like"
+        },
+        "Orbit": {
+          "SemiMajorAxis_km": 227939366,
+          "Eccentricity": 0.0934,
+          "EclipticInclination_d": 1.85,
+          "LoAN_d": 49.57854,
+          "AoP_d": 286.5,
+          "MeanAnomaly_d": 19.412
+        },
+        "Atmosphere": {
+          "Pressure": 0.87,
+          "Hydrosphere": false,
+          "HyrdoExtent": 0,
+          "GreenhouseFactor": 0,
+          "GreenhousePressure": 0,
+          "SurfaceTemperature": -63,
+          "Gases": [
+            { "Symbol": "CO2", "Percent": 0.9597 },
+            { "Symbol": "Ar", "Percent": 0.0193 },
+            { "Symbol": "N2", "Percent": 0.0189 },
+            { "Symbol": "O2", "Percent": 0.00146 },
+            { "Symbol": "CO", "Percent": 0.000557 },
+            { "Symbol": "H2O", "Percent": 0.00021 },
+            { "Symbol": "NO", "Percent": 0.0001 },
+            { "Symbol": "Ne", "Percent": 0.0000025 },
+            { "Symbol": "Kr", "Percent": 0.0000003 },
+            { "Symbol": "Xe", "Percent": 0.0000001 }
+          ]
+        }
+      }
+    }
+  ]

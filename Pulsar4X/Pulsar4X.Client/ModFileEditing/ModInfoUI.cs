@@ -4,6 +4,7 @@ using System.Numerics;
 using ImGuiNET;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Modding;
 
 namespace Pulsar4X.SDL2UI.ModFileEditing;

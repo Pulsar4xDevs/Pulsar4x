@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Reflection;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Orbits;
@@ -78,7 +79,7 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            if(IsActive && _systemState != null && ImGui.Begin("Perf Display"))
+            if(IsActive && _systemState != null && Window.Begin("Performance Display"))
             {
                 SetFrameRateArray();
                 ImGui.Text("Global Tick: "); ImGui.SameLine();
@@ -290,6 +291,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     RecordToFile();
                 }
+                Window.End();
             }
         }
 

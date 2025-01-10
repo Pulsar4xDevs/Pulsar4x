@@ -43,7 +43,7 @@ namespace Pulsar4X.Galaxy
             var planetInfo = new SystemBodyInfoDB();
             var name = new NameDB("Ellie");
             var AsteroidDmg = new AsteroidDamageDB{ FractureChance = new PercentValue(0.75f) };
-            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.DensityDry_gcm, massVolume.RadiusInM, 50);
+            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.DensityDry_gcm, massVolume.RadiusInM, 50, starSys.RNG);
             var sensorPfil = new SensorProfileDB();
 
             planetInfo.SupportsPopulations = false;
@@ -80,7 +80,7 @@ namespace Pulsar4X.Galaxy
             return newELE;
         }
 
-        public static Entity CreateAsteroid4(Vector3 position, OrbitDB origOrbit, DateTime atDateTime, double asteroidMass = -1.0)
+        public static Entity CreateAsteroid4(Vector3 position, OrbitDB origOrbit, DateTime atDateTime, Random rng, double asteroidMass = -1.0 )
         {
             //todo rand these a bit.
             double radius = 500;
@@ -99,7 +99,7 @@ namespace Pulsar4X.Galaxy
             var planetInfo = new SystemBodyInfoDB();
             var name = new NameDB("Ellie");
             var AsteroidDmg = new AsteroidDamageDB{ FractureChance = new PercentValue(0.75f) };
-            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.DensityDry_gcm, massVolume.RadiusInM, 50);
+            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.DensityDry_gcm, massVolume.RadiusInM, 50, rng);
             var sensorPfil = new SensorProfileDB();
 
             planetInfo.SupportsPopulations = false;

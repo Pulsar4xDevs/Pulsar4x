@@ -27,7 +27,7 @@ namespace Pulsar4X.Factions
         [JsonProperty]
         public List<string> KnownSystems { get; internal set; } = new ();
 
-
+        [JsonProperty]
         public ReadOnlyDictionary<string, List<Entity>> KnownJumpPoints => new (InternalKnownJumpPoints);
         [JsonProperty]
         internal Dictionary<string, List<Entity>> InternalKnownJumpPoints = new ();
@@ -63,22 +63,25 @@ namespace Pulsar4X.Factions
         /// this shoudl only be designs we can construct.
         /// Does Include Refined Materials.
         /// </summary>
+        [JsonProperty]
         public Dictionary<string, IConstructableDesign> IndustryDesigns = new ();
 
 
 
-        [JsonProperty]
+        
         /// <summary>
         /// stores sensor contacts for the entire faction, when a contact is created it gets added here.
         /// </summary>
+        [JsonProperty]
         internal Dictionary<int, SensorContact> SensorContacts = new ();
-
+        [JsonProperty]
         public Dictionary<EventType, bool> HaltsOnEvent { get; } = new ();
 
         [JsonProperty]
         private Dictionary<Entity, uint> FactionAccessRoles { get; set; } = new ();
         internal ReadOnlyDictionary<Entity, AccessRole> AccessRoles => new (FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
 
+        [JsonProperty]
         public IEventLog EventLog { get; internal set; }
 
         public FactionInfoDB()

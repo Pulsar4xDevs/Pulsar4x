@@ -24,6 +24,6 @@ namespace Pulsar4X.Blueprints
         public ComponentMountType MountType { get; set; }
         public string IndustryTypeID { get; set;}
         public string CargoTypeID { get; set;}
-        public List<ComponentTemplateAttributeBlueprint> Attributes { get; set; }
+        public List<ComponentTemplatePropertyBlueprint> Properties { get; set; }
     }
 }

@@ -27,7 +27,7 @@ namespace Pulsar4X.Engine
         public SortedDictionary<DateTime, Dictionary<string, List<Entity>>> InstanceProcessorsQueue { get; set; } = new ();
 
         [JsonProperty]
-        public SafeDictionary<(Type processorType, Type dbType), DateTime?> HotLoopProcessorsNextRun { get; private set;} = new ();
+        public SafeDictionary<Type , DateTime?> HotLoopProcessorsNextRun { get; private set;} = new ();
 
         //public readonly ConcurrentDictionary<Type, TimeSpan> ProcessTime = new ConcurrentDictionary<Type, TimeSpan>();
         public bool IsProcessing = false;
@@ -150,7 +150,7 @@ namespace Pulsar4X.Engine
             {
                 //the date time here is going to be inconsistant when a game is saved then loaded, vs running without a save/load. needs fixing.
                 //also we may want to run many of these before the first turn, and still have this offset.
-                AddSystemInterupt(StarSysDateTime + item.Value.FirstRunOffset, item.Value);
+                AddSystemInterupt(StarSysDateTime + item.Value.FirstRunOffset, item.Key);
             }
         }
 
@@ -173,32 +173,31 @@ namespace Pulsar4X.Engine
             if (!InstanceProcessorsQueue[nextDateTime][actionProcessor].Contains(entity))
                 InstanceProcessorsQueue[nextDateTime][actionProcessor].Add(entity);
         }
-
-
+        
         /// <summary>
         /// this type of interupt will attempt to run the action processor on all entities within the system
         /// </summary>
         /// <param name="nextDateTime"></param>
         /// <param name="action"></param>
-        internal void AddSystemInterupt(DateTime nextDateTime, IHotloopProcessor actionProcessor)
+        internal void AddSystemInterupt(DateTime nextDateTime, Type dbType)
         {
-            if(nextDateTime < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
-
-            Type processorType = actionProcessor.GetType();
-            Type dbType = actionProcessor.GetParameterType;
-
-            if(!HotLoopProcessorsNextRun.ContainsKey((processorType, dbType)))
+            if(!dbType.IsSubclassOf(typeof(BaseDataBlob)))
             {
-                HotLoopProcessorsNextRun.Add((processorType, dbType), nextDateTime);
+                throw new Exception("Trying to add non datablob type");
+            }
+            if(!HotLoopProcessorsNextRun.ContainsKey((dbType)))
+            {
+                HotLoopProcessorsNextRun.Add((dbType), nextDateTime);
             }
             else
             {
                 // We only want to set the next run time if it is currently null
                 // if it isn't null then it will already be queued to run!
-                if(HotLoopProcessorsNextRun[(processorType, dbType)] == null)
-                    HotLoopProcessorsNextRun[(processorType, dbType)] = nextDateTime;
+                if(HotLoopProcessorsNextRun[(dbType)] == null)
+                    HotLoopProcessorsNextRun[(dbType)] = nextDateTime;
             }
         }
+        
 
         internal void AddSystemInterupt(BaseDataBlob db)
         {
@@ -222,11 +221,13 @@ namespace Pulsar4X.Engine
             DateTime nextDT = _processToDateTime + next;
 
             if(nextDT < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
+            
+            Type dbType = db.GetType();
+            AddSystemInterupt(nextDT, dbType);
 
-            AddSystemInterupt(nextDT, proc);
         }
 
-    /// <summary>
+        /// <summary>
         /// removes all references of an entity from the dictionary
         /// </summary>
         /// <param name="entity"></param>
@@ -349,15 +350,16 @@ namespace Pulsar4X.Engine
                     if (runAt == null || runAt > _subStepDateTime)
                         continue;
 
-                    Performance.Start(type.processorType.Name);
+                    Performance.Start(type.Name);
                     CurrentProcess = type.ToString();
-                    int count = _processManager.HotloopProcessors[type.dbType].ProcessManager(_entityManager, deltaSeconds);
-                    Performance.Stop(type.processorType.Name);
+                    var proc = _game.ProcessorManager.HotloopProcessors[type];
+                    int count = proc.ProcessManager(_entityManager, deltaSeconds);
+                    Performance.Stop(type.Name);
 
                     if (count == 0)
                         HotLoopProcessorsNextRun[type] = null;
                     else
-                        HotLoopProcessorsNextRun[type] = _subStepDateTime + _processManager.HotloopProcessors[type.dbType].RunFrequency; //sets the next interupt for this hotloop process
+                        HotLoopProcessorsNextRun[type] = _subStepDateTime + _processManager.HotloopProcessors[type].RunFrequency; //sets the next interupt for this hotloop process
                 }
 
                 if (InstanceProcessorsQueue.ContainsKey(_subStepDateTime))

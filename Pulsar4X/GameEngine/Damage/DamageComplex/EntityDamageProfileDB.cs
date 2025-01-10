@@ -98,9 +98,8 @@ namespace Pulsar4X.Damage
             DamageProfile = ComponentPlacement.CreateShipBmp(this);
         }
 
-        public static EntityDamageProfileDB AsteroidDamageProfile(double volume, double density, double avgRadius, int irregularity)
+        public static EntityDamageProfileDB AsteroidDamageProfile(double volume, double density, double avgRadius, int irregularity, Random rng)
         {
-            Random rnd = new Random(1);
             var pfl = new EntityDamageProfileDB();
             int segments = 8;
             double avgAngle = Math.PI  / segments;
@@ -116,10 +115,10 @@ namespace Pulsar4X.Damage
 
             for (int i = 0; i < segments + 1; i++)
             {
-                int jitterxL = rnd.Next(0, irregularity);
-                int jitteryL = rnd.Next(-irregularity, irregularity);
-                int jitterxR = rnd.Next(0, irregularity);
-                int jitteryR = rnd.Next(-irregularity, irregularity);
+                int jitterxL = rng.Next(0, irregularity);
+                int jitteryL = rng.Next(-irregularity, irregularity);
+                int jitterxR = rng.Next(0, irregularity);
+                int jitteryR = rng.Next(-irregularity, irregularity);
 
                 double x = avgRadius * Math.Sin(angle);
                 double y = avgRadius * Math.Cos(angle);

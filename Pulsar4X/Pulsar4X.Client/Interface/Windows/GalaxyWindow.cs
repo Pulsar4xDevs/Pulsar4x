@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -31,7 +32,7 @@ namespace Pulsar4X.SDL2UI
         {
 
             //ImGui.SetNextWindowSize();
-            if (IsActive && ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Galaxy Browser"), ref IsActive, _flags))
+            if (IsActive && Window.Begin("Galaxy Browser", ref IsActive, _flags))
             {
 
                 uint iterations = 0;
@@ -45,7 +46,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.PopID();
                     iterations++;
                 }
-                ImGui.End();
+                Window.End();
             }
         }
     }

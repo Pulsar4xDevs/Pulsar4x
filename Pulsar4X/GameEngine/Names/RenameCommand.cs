@@ -17,7 +17,6 @@ namespace Pulsar4X.Names
         Entity _factionEntity;
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
-        bool _isFinished = false;
         string NewName;
 
         public static void CreateRenameCommand(Game game, Entity faction, Entity orderEntity, string newName)
@@ -41,7 +40,7 @@ namespace Pulsar4X.Names
             _isFinished = true;
         }
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
             return _isFinished;
         }

@@ -38,8 +38,19 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
 
     public static readonly Entity InvalidEntity = new Entity(-1);
 
-    [JsonIgnore]
-    public bool IsValid { get; internal set; } = false;
+    [JsonProperty]
+    public bool IsValid { get; internal set; }
+    /* Maybe we should do the below, but I'm unsure if IsValid is being checked elswhere for a tag if it's set for removal
+    public bool IsValid
+    {
+        get
+        {
+            if (Manager == null)
+                return false;
+            else
+                return Manager.IsValidEntity(this);
+        }
+    }*/
 
     public T GetDataBlob<T>() where T : BaseDataBlob
     {

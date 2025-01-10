@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.Orbital", "Pulsar4
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameEngine", "GameEngine\GameEngine.csproj", "{73F73928-ECB3-416D-BC66-E348251BB6D3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,6 +88,22 @@ Global
 		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Release|Windows_x64.Build.0 = Release|Any CPU
 		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Release|Windows_x86.ActiveCfg = Release|Any CPU
 		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Release|Windows_x86.Build.0 = Release|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Debug|Linux_x64.ActiveCfg = Debug|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Debug|Linux_x64.Build.0 = Debug|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Debug|Windows_x64.ActiveCfg = Debug|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Debug|Windows_x64.Build.0 = Debug|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Debug|Windows_x86.ActiveCfg = Debug|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Debug|Windows_x86.Build.0 = Debug|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Release|Linux_x64.ActiveCfg = Release|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Release|Linux_x64.Build.0 = Release|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Release|Windows_x64.ActiveCfg = Release|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Release|Windows_x64.Build.0 = Release|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Release|Windows_x86.ActiveCfg = Release|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Release|Windows_x86.Build.0 = Release|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

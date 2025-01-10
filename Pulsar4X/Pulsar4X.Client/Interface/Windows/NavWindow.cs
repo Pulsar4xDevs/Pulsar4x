@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Orbital;
@@ -242,7 +243,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             if (!IsActive || soiParentPosition == null)
                 return;
             ImGui.SetNextWindowSize(new Vector2(600f, 400f), ImGuiCond.FirstUseEver);
-            if (ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Nav Control: " + _orderEntityName), ref IsActive, _flags))
+            if (Window.Begin("Nav Control: " + _orderEntityName, ref IsActive, _flags))
             {
                 ImGui.Columns(2);
                 ManuverTree(_manuverLines.RootSequence);
@@ -370,6 +371,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 ImGui.Text(fuelName + " Fuel: " + Stringify.Mass(_fuelMass));
                 var thrust = _newtonThrust?.ThrustInNewtons ?? 0;
                 ImGui.Text("Total Thrust: " + Stringify.Thrust(thrust));
+                Window.End();
             }
         }
 
@@ -682,7 +684,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 double secondsBurn = fuelBurned / _burnRate;
                 ImGui.Text(dv + "Δv");
                 ImGui.Text(fuelBurned + " fuel");
-                ImGui.Text(Stringify.Number(secondsBurn, "0.###") + " Second Burn");
+                ImGui.Text(Stringify.Quantity(secondsBurn, "0.###") + " Second Burn");
 
             }
 
@@ -766,7 +768,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 ImGui.Text(time + "time");
                 ImGui.Text(dv + "Δv");
                 ImGui.Text(fuelBurned + " fuel");
-                ImGui.Text(Stringify.Number(burnTime, "0.###") + " Seconds of Burn");
+                ImGui.Text(Stringify.Quantity(burnTime, "0.###") + " Seconds of Burn");
                 i++;
             }
 
@@ -872,7 +874,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 ImGui.Text(time + "time");
                 ImGui.Text(dv + "Δv");
                 ImGui.Text(fuelBurned + " fuel");
-                ImGui.Text(Stringify.Number(burnTime, "0.###") + " Seconds of Burn");
+                ImGui.Text(Stringify.Quantity(burnTime, "0.###") + " Seconds of Burn");
                 i++;
             }
 
@@ -987,7 +989,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     double secondsBurn = fuelBurned / _burnRate;
                     ImGui.Text(dv + "Δv");
                     ImGui.Text(fuelBurned + " fuel");
-                    ImGui.Text(Stringify.Number(secondsBurn, "0.###") + " Second Burn");
+                    ImGui.Text(Stringify.Quantity(secondsBurn, "0.###") + " Second Burn");
 
                 }
 

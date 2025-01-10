@@ -1,5 +1,6 @@
 ﻿using System;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using SDL2;
 
@@ -75,7 +76,7 @@ namespace Pulsar4X.SDL2UI
         }
         internal override void Display()
         {
-            if(IsActive == true && ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Map Scale"), ref IsActive, _flags))//Lets the user close the ruler
+            if(IsActive == true && Window.Begin("Map Scale", ref IsActive, _flags))//Lets the user close the ruler
             {
                 //displays the size in meters of the current screen area account for zoom and window dimensions
                 var windowCornerInWorldCoordinate = _uiState.Camera.WorldCoordinate_m((int)_uiState.MainWinSize.X, (int)_uiState.MainWinSize.Y);
@@ -121,7 +122,7 @@ namespace Pulsar4X.SDL2UI
                     }
                 }
 
-                ImGui.End();
+                Window.End();
             }
             else
             {

@@ -7,6 +7,7 @@ using ImGuiSDL2CS;
 using Pulsar4X.Engine;
 using Pulsar4X.Components;
 using Pulsar4X.Blueprints;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Extensions;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Energy;
@@ -15,6 +16,8 @@ using Pulsar4X.Damage;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 using Pulsar4X.Movement;
+using Pulsar4X.Names;
+using SDL2;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -49,21 +52,36 @@ namespace Pulsar4X.SDL2UI
         private int rawimagewidth;
         private int rawimageheight;
 
+        
+
+        
+        //energy
+        private double _estor;
+        private double _egen;
+
+        //mass
         private double _massDry;
         private double _massWet;
-        private double _ttwr;
-        private double _dv;
-        private double _wspd;
+        private double _grossTonnage;
+        //warp
         private double _wcc;
         private double _wsc;
         private double _wec;
+        private double _wspd;
+        //newt
         private double _tn;
-        private double _estor;
-        private double _egen;
+        private double _ttwr;
+        private double _dv;
+        //fuel
         private double _fuelStoreMass;
         private double _fuelStoreVolume;
-        private double _grossTonnage;
         private ICargoable? _fuelType;
+        //cargo
+        private double _cvol = 0;
+        private double _trnge = 0;
+        private double _trate = 0;
+        
+        
         bool displayimage = true;
         private EntityDamageProfileDB? _profile;
         private bool existingdesignsstatus = true;
@@ -181,7 +199,7 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            if (IsActive && ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Ship Design"), ref IsActive, _flags))
+            if (IsActive && Window.Begin("Ship Design", ref IsActive, _flags))
             {
                 if(_existingShipDesignNames.Count != _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.Count)
                 {
@@ -225,6 +243,7 @@ namespace Pulsar4X.SDL2UI
                     DisplayStats();
                     ImGui.EndChild();
                 }
+                Window.End();
             }
         }
 
@@ -333,7 +352,7 @@ namespace Pulsar4X.SDL2UI
 
             if(ImGui.Button("Create New Design", new Vector2(204f, 0f)))
             {
-                string originalName = "auto-gen names pls", name = originalName;
+                string originalName = NameFactory.GetShipName(_uiState.Game), name = originalName;
                 int counter = 1;
                 while(_factionInfoDB.ShipDesigns.Values.Any(d => d.Name.Equals(name)))
                 {
@@ -392,7 +411,6 @@ namespace Pulsar4X.SDL2UI
                 {
                     _armor = _armorSelection[_armorIndex];
                     DesignChanged = true;
-                    ImGui.EndCombo();
                 }
 
                 ImGui.TableNextColumn();
@@ -450,7 +468,7 @@ namespace Pulsar4X.SDL2UI
                     if (hovered)
                     {
                         selectedItem = i;
-                        DisplayHelpers.DescriptiveTooltip(SelectedComponents[i].design.Name, SelectedComponents[i].design.TypeName, SelectedComponents[i].design.Description);
+                        DisplayHelpers.DescriptiveTooltip(SelectedComponents[i].design.Name, SelectedComponents[i].design.TemplateName, SelectedComponents[i].design.Description);
                     }
 
                     ImGui.TableNextColumn();
@@ -553,7 +571,7 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Text("Crew Required: " + AvailableShipComponents[i].CrewReq);
                         }
 
-                        DisplayHelpers.DescriptiveTooltip(AvailableShipComponents[i].Name, AvailableShipComponents[i].TypeName, AvailableShipComponents[i].Description, TooltipExtension);
+                        DisplayHelpers.DescriptiveTooltip(AvailableShipComponents[i].Name, AvailableShipComponents[i].TemplateName, AvailableShipComponents[i].Description, TooltipExtension);
                     }
                     ImGui.TableNextColumn();
                     ImGui.Text(design.ComponentType);
@@ -623,7 +641,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.Mass(_fuelStoreMass));
                 ImGui.SameLine();
-                ImGui.Text(Stringify.Volume(_fuelStoreVolume));
+                ImGui.Text(Stringify.VolumeLtr(_fuelStoreVolume));
 
                 ImGui.TableNextColumn();
                 ImGui.Text("Delta V");
@@ -660,6 +678,33 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.Energy(_estor));
 
+                if (_cvol > 0)
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.Text("Cargo Storage");
+                    ImGui.TableNextColumn();
+                    ImGui.Text(Stringify.VolumeLtr(_cvol));
+                    
+                    
+                    ImGui.TableNextColumn();
+                    ImGui.Text("Cargo Transfer Rate");
+                    ImGui.TableNextColumn();
+                    if(_trate == 0)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.MediocreColor);
+                    ImGui.Text(Stringify.Mass(_trate));
+                    if(_trate == 0)
+                        ImGui.PopStyleColor();
+                    ImGui.TableNextColumn();
+                    ImGui.Text("Cargo Transfer Range");
+                    ImGui.TableNextColumn();
+                    if(_trnge == 0)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.MediocreColor);
+                    ImGui.Text(Stringify.Velocity(_trnge));
+                    if(_trnge == 0)
+                        ImGui.PopStyleColor();
+                    
+                }
+
                 ImGui.EndTable();
             }
 
@@ -684,6 +729,11 @@ namespace Pulsar4X.SDL2UI
                 if(ImGui.IsItemHovered())
                     ImGui.SetTooltip("You will not be able to construct ships with an invalid design.");
                 ImGui.PopStyleColor();
+            }
+
+            foreach (var warning in Warnings())
+            {
+                ImGui.Text(warning);
             }
 
             ImGui.NewLine();
@@ -763,6 +813,7 @@ namespace Pulsar4X.SDL2UI
                     estor += atb.MaxStore * component.count;
                 }
 
+                /*
                 if (component.design.HasAttribute<CargoStorageAtb>())
                 {
                     var atb = component.design.GetAttribute<CargoStorageAtb>();
@@ -772,9 +823,21 @@ namespace Pulsar4X.SDL2UI
                         cstore.Add(typeid, amount);
                     else
                         cstore[typeid] += amount;
-
                 }
+
+                if (component.design.HasAttribute<CargoTransferAtb>())
+                {
+                    var atb = component.design.GetAttribute<CargoTransferAtb>();
+                    //atb.TransferRange_ms
+                    
+                }*/
             }
+
+            cstore = StorageSpaceProcessor.CalculatedMaxStorage(_workingDesign);
+            var cargoTransfer = StorageSpaceProcessor.CalcRateAndRange(_workingDesign);
+
+            
+            
 
             _armorMass = ShipDesign.GetArmorMass(_profile, _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods);
             mass += (long)Math.Round(_armorMass);
@@ -791,6 +854,11 @@ namespace Pulsar4X.SDL2UI
             _wspd = WarpMath.MaxSpeedCalc(wp, mass);
             _egen = egen;
             _estor = estor;
+            _trate = cargoTransfer.rate;
+            if(double.IsNaN(cargoTransfer.range))
+                _trnge = 0;
+            else
+                _trnge = cargoTransfer.range;
             //double fuelMass = 0;
             if (thrusterFuel.IsNotNullOrEmpty())
             {
@@ -802,6 +870,13 @@ namespace Pulsar4X.SDL2UI
                     _fuelStoreMass = _fuelStoreVolume * fuelDensity;
 
                 }
+            }
+
+            _cvol = 0;
+            foreach (var store in cstore)
+            {
+                if (_fuelType == null || store.Key != _fuelType.CargoTypeID)
+                    _cvol += store.Value;
             }
 
             _massWet = _massDry + _fuelStoreMass;
@@ -860,6 +935,25 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(rawimagewidth * scale, rawimageheight * scale));
             }
+        }
+        
+        private List<string> Warnings()
+        {
+            List<string> warnings = new List<string>();
+            if (_cvol > 0 && _trate == 0 || _trnge == 0)
+            {
+                warnings.Add("This ship has cargo space but no way to transfer cargo by itself");
+            }
+            if (_wspd == 0)
+            {
+                warnings.Add("This ship has no warp ability");
+            }
+
+            if (_ttwr == 0)
+            {
+                warnings.Add("This ship has no newtonion thrust");
+            }
+            return warnings;
         }
     }
 }

@@ -8,7 +8,7 @@
           "Name": "TestWeight",
           "ComponentType": "Misc",
           "ID": "57614ddb-0756-44cf-857b-8a6578493792",
-          "MassFormula": "Ability('Mass')",
+          "MassFormula": "PropertyValue('Mass')",
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "[Mass]",
@@ -32,13 +32,13 @@
               "Units": "kg",
               "DescriptionFormula": "'The mass of the weight'",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
+              "DataDict": {
                 "Entries": []
               },
               "MaxFormula": "10000",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AttributeFormula": "150"
+              "PropertyFormula": "150"
             }
           ]
         }

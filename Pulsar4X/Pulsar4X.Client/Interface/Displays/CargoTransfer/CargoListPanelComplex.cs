@@ -5,9 +5,13 @@ using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Blueprints;
+using Pulsar4X.Colonies;
+using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
+using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.SDL2UI;
@@ -17,7 +21,7 @@ public class CargoListPanelComplex
     FactionDataStore _staticData;
     EntityState _entityState;
     CargoStorageDB _volStorageDB;
-    Dictionary<string, TypeStore> _stores = new ();
+    SafeDictionary<string, TypeStore> _stores = new ();
     Dictionary<ICargoable, long> _cargoToMove = new ();
     Dictionary<ICargoable, long> _cargoToMoveUI = new ();
     Dictionary<ICargoable, long> _cargoToMoveOrders = new ();
@@ -43,20 +47,9 @@ public class CargoListPanelComplex
 
     public void Update()
     {
-        //we do a deep copy clone so as to avoid a thread collision when we loop through.
-        //TODO #THREADSAFE this should be on the engine side.
-        var newDict = new Dictionary<string, TypeStore>();
-        ICollection ic = _volStorageDB.TypeStores;
-        lock (ic.SyncRoot)
-        {
-            foreach (var kvp in _volStorageDB.TypeStores)
-            {
-                newDict.Add(kvp.Key, kvp.Value.Clone());
-            }
-        }
-        _stores = newDict;
 
-
+        _stores = _volStorageDB.TypeStores;
+        
 
         if (_entityState.Entity.TryGetDatablob<CargoTransferDB>(out var db))
         {
@@ -136,6 +129,35 @@ public class CargoListPanelComplex
 
     }
 
+    internal bool CanInstall(ICargoable cargoItem)
+    {
+        if (_entityState.Entity.HasDataBlob<ColonyInfoDB>())
+        {
+            if (cargoItem is ComponentDesign)
+            {
+                var componentDesign = (ComponentDesign)cargoItem;
+                if ((componentDesign.ComponentMountType & ComponentMountType.PlanetInstallation) == ComponentMountType.PlanetInstallation)
+                {
+                    return true;
+                }
+            }
+            
+        }
+        if (_entityState.Entity.HasDataBlob<ShipInfoDB>())
+        {
+            if (cargoItem is ComponentDesign)
+            {
+                var componentDesign = (ComponentDesign)cargoItem;
+                if ((componentDesign.ComponentMountType & ComponentMountType.ShipComponent) == ComponentMountType.ShipComponent)
+                {
+                    return true;
+                }
+            }
+            
+        }
+        return false;
+    }
+
     internal void AddUICargoIn(ICargoable cargoItem, long itemCount)
     {
         if(!_cargoToMoveUI.ContainsKey(cargoItem))
@@ -203,7 +225,7 @@ public class CargoListPanelComplex
             ImGui.PushID(_entityState.Entity.Id.ToString()); //this helps the ui diferentiate between the left and right side
             //and the three ### below forces it to ignore everything before the ### wrt being an ID and the stuff after the ### is an id.
             //this stops the header closing whenever we change the headertext (ie in this case, change the volume)
-            string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free" + "###" + stype.UniqueID;
+            string headerText = stype.Name + " " + Stringify.VolumeLtr(freeVolume) + " / " + Stringify.VolumeLtr(maxVolume) + " free" + "###" + stype.UniqueID;
             if(ImGui.CollapsingHeader(headerText, ImGuiTreeNodeFlags.CollapsingHeader ))
             {
 
@@ -239,7 +261,7 @@ public class CargoListPanelComplex
                         unitsStored = storeInUnits[cargoItem.ID];
 
                     var volumePerItem = cargoItem.VolumePerUnit;
-                    var volumeStored = _volStorageDB.GetVolumeStored(cargoItem);
+                    var volumeStored = _volStorageDB.GetVolumeStored(cargoItem, true);
                     var massStored = _volStorageDB.GetMassStored(cargoItem, true);
 
                     bool isSelected = selectedCargo == cargoItem;
@@ -250,13 +272,13 @@ public class CargoListPanelComplex
                     }
 
                     ImGui.NextColumn();
-                    ImGui.Text(Stringify.Number(unitsStored, "0"));
+                    ImGui.Text(Stringify.Quantity(unitsStored, "0.#######"));
 
 
                     if (_cargoToMove.ContainsKey(cargoItem))
                     {
                         var unitsMoving = _cargoToMove[cargoItem];
-                        string text = Stringify.Number(unitsMoving, "0");
+                        string text = Stringify.Quantity(unitsMoving, "0");
                         ImGui.SameLine();
 
                         float blue = 0f;
@@ -285,7 +307,7 @@ public class CargoListPanelComplex
                     ImGui.NextColumn();
                     ImGui.Text(Stringify.Mass(massStored));
                     ImGui.NextColumn();
-                    ImGui.Text(Stringify.Volume(volumeStored));
+                    ImGui.Text(Stringify.VolumeLtr(volumeStored));
                     ImGui.NextColumn();
                 }
 

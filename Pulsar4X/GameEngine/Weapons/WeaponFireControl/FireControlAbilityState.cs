@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
 using Pulsar4X.Names;
@@ -10,7 +11,9 @@ namespace Pulsar4X.Weapons
     /// </summary>
     public class FireControlAbilityState : ComponentTreeHeirarchyAbilityState
     {
+        [JsonProperty]
         public Entity Target { get; private set; }
+        [JsonProperty]
         private NameDB? _TargetNameDB;
 
         internal void SetTarget(Entity target)
@@ -40,7 +43,8 @@ namespace Pulsar4X.Weapons
 
         public bool IsEngaging { get; internal set; } = false;
 
-
+        [JsonConstructor]
+        private FireControlAbilityState(){}
         public FireControlAbilityState(ComponentInstance componentInstance) : base(componentInstance)
         {
             _factionOwner = componentInstance.ParentInstances.OwningEntity.FactionOwnerID;

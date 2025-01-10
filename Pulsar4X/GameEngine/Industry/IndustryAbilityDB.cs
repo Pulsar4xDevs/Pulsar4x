@@ -17,6 +17,7 @@ namespace Pulsar4X.Industry
             public List<IndustryJob> Jobs = new ();
         }
 
+        [JsonProperty]
         public Dictionary<string, ProductionLine> ProductionLines { get; } = new ();
 
         [JsonConstructor]

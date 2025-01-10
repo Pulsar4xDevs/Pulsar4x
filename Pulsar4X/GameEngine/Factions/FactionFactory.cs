@@ -249,6 +249,9 @@ namespace Pulsar4X.Factions
 
                 switch(type)
                 {
+                    case "byVolume":
+                        CargoTransferProcessor.AddRemoveCargoVolume(target, factionDataStore.CargoGoods[cargoId], amount);
+                        break;
                     case "byCount":
                         CargoTransferProcessor.AddCargoItems(target, factionDataStore.CargoGoods[cargoId], amount);
                         break;
@@ -286,21 +289,53 @@ namespace Pulsar4X.Factions
             factionInfo.EventLog.Subscribe();
 
             // Need to unlock the starting data in the game
-            foreach(var id in game.StartingGameData.DefaultItems["player-starting-items"].Items)
-            {
-                factionInfo.Data.Unlock(id);
+            // foreach(var id in game.StartingGameData.DefaultItems["player-starting-items"].Items)
+            // {
+            //     factionInfo.Data.Unlock(id);
 
-                // Research any tech that is listed
-                if(factionInfo.Data.Techs.ContainsKey(id))
-                {
-                    factionInfo.Data.IncrementTechLevel(id);
-                }
+            //     // Research any tech that is listed
+            //     if(factionInfo.Data.Techs.ContainsKey(id))
+            //     {
+            //         factionInfo.Data.IncrementTechLevel(id);
+            //     }
 
-                if(factionInfo.Data.CargoGoods.IsMaterial(id))
-                {
-                    factionInfo.IndustryDesigns[id] = (IConstructableDesign)factionInfo.Data.CargoGoods[id];
-                }
-            }
+            //     if(factionInfo.Data.CargoGoods.IsMaterial(id))
+            //     {
+            //         factionInfo.IndustryDesigns[id] = (IConstructableDesign)factionInfo.Data.CargoGoods[id];
+            //     }
+            // }
+
+            // Add this faction to the SM's access list.
+            game.SpaceMaster.SetAccess(factionEntity.Id, AccessRole.SM);
+            name.SetName(factionEntity.Id, factionName);
+            game.Factions.Add(factionEntity.Id, factionEntity);
+            return factionEntity;
+        }
+
+        public static Entity CreateBasicFaction(Game game, string factionName)
+        {
+            var name = new NameDB(factionName);
+
+            //var facinfo = new FactionInfoDB(new List<Entity>(), new List<Guid>(), );
+            var factionInfo = new FactionInfoDB();
+            factionInfo.Data = new FactionDataStore(game.StartingGameData);
+
+            var factionTechDB = new FactionTechDB();
+
+            var blobs = new List<BaseDataBlob> {
+                name,
+                factionInfo,
+                new FactionAbilitiesDB(),
+                factionTechDB,
+                new FactionOwnerDB(),
+                new FleetDB(),
+                new OrderableDB(),
+            };
+            var factionEntity = Entity.Create();
+            game.GlobalManager.AddEntity(factionEntity, blobs);
+
+            factionInfo.EventLog = FactionEventLog.Create(factionEntity.Id, game.TimePulse);
+            factionInfo.EventLog.Subscribe();
 
             // Add this faction to the SM's access list.
             game.SpaceMaster.SetAccess(factionEntity.Id, AccessRole.SM);

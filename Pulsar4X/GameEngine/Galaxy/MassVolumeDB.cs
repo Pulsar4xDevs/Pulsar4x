@@ -19,6 +19,7 @@ namespace Pulsar4X.Galaxy
         /// <summary>
         /// Mass in Kg of this entity including all cargo and fuel
         /// </summary>
+        [JsonProperty]
         public double MassTotal {get; private set;}
 
         /// <summary>
@@ -152,6 +153,7 @@ namespace Pulsar4X.Galaxy
 
         /// <summary>
         /// Note that this does not update the density. density is dry.
+        /// This function is here so we can keep MassTotal private setter.
         /// </summary>
         /// <param name="cargo">optional CargoStorageDB, saves time looking it up</param>
         public void UpdateMassTotal(CargoStorageDB cargo)
@@ -161,6 +163,7 @@ namespace Pulsar4X.Galaxy
 
         /// <summary>
         /// Note that this does not update the density. density is dry.
+        /// This function is here so we can keep MassTotal private setter.
         /// </summary>
         public void UpdateMassTotal()
         {

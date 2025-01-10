@@ -26,6 +26,18 @@
   {
     "Type": "Tech",
     "Payload": {
+      "UniqueID": "tech-battery-capacity",
+      "Name": "Advanced Battery Technology",
+      "Description": "Utilizes advanced materials and manufacturing techniques to exponentially increase battery energy density, reaching a threefold increase at its peak.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 10,
+      "DataFormula": "1 + ([Level] / 5.0)",
+      "CostFormula": "(1 + [Level]) * 200" 
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
       "UniqueID": "tech-conductors",
       "Name": "Conductors",
       "Description": "",
@@ -406,6 +418,7 @@
       "Unlocks": {
         "1": [
           "tech-mining-production",
+          "tech-battery-capacity",
           "tech-capacitors",
           "tech-conductors",
           "tech-alcubierre-miniaturization",

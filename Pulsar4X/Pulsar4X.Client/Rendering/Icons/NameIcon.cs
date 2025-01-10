@@ -5,9 +5,14 @@ using ImGuiNET;
 using Pulsar4X.Engine;
 using SDL2;
 using System.Numerics;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.JumpPoints;
 using Pulsar4X.Names;
 using Pulsar4X.Movement;
+using Pulsar4X.Client.Interface;
+using Pulsar4X.Ships;
+using Pulsar4X.Galaxy;
+using Pulsar4X.Factions;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -160,7 +165,7 @@ namespace Pulsar4X.SDL2UI
                 var orderedGroupedIcons = nameIconGrouping.GroupBy(i => i.EntityState.BodyType).OrderBy(g => g.Key).ToList();
                 var highestPriorityGroup = orderedGroupedIcons.First().ToList();
                 orderedGroupedIcons.RemoveAt(0);
-                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Styles.NameIconHighlight);
+
                 for(int i = 0; i < highestPriorityGroup.Count; i++)
                 {
                     if(i == 0)
@@ -171,7 +176,6 @@ namespace Pulsar4X.SDL2UI
                     if(i == highestPriorityGroup.Count - 1)
                         EndNameIcon(highestPriorityGroup[i]);
                 }
-                ImGui.PopStyleColor();
             }
         }
 
@@ -182,27 +186,29 @@ namespace Pulsar4X.SDL2UI
 
             if(!subIcons.Any())
             {
+                ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 0f);
                 ImGui.PushStyleColor(ImGuiCol.Button, Styles.InvisibleColor);
-                ImGui.PushStyleColor(ImGuiCol.Text, icon.TextDisplayColor);
 
                 if (ImGui.Button(icon.NameString + "##" + icon.EntityState.Entity.Id.ToString()))
                 {
                     icon._state.EntityClicked(icon.EntityState.Entity.Id, icon._starSysGuid, MouseButtons.Primary);
                 }
+                if(ImGui.IsItemHovered())
+                {
+                    DisplayTooltip(camera, icon);
+                }
                 DisplayContextMenu(camera, icon);
-                ImGui.PopStyleColor(2);
+                ImGui.PopStyleColor(1);
+                ImGui.PopStyleVar();
                 return;
             }
 
-            ImGui.PushStyleColor(ImGuiCol.Text, icon.TextDisplayColor);
             if(ImGui.BeginMenu(icon.NameString))
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.StandardText);
                 if(ImGui.MenuItem("View " + icon.NameString))
                 {
                     icon._state.EntityClicked(icon.EntityState.Entity.Id, icon._starSysGuid, MouseButtons.Primary);
                 }
-                ImGui.PopStyleColor();
                 DisplayContextMenu(camera, icon);
 
                 if(subIcons.Any())
@@ -213,12 +219,10 @@ namespace Pulsar4X.SDL2UI
                 {
                     foreach(var subIcon in subIcons[0])
                     {
-                        ImGui.PushStyleColor(ImGuiCol.Text, subIcon.TextDisplayColor);
                         if(ImGui.MenuItem(subIcon.NameString))
                         {
                             subIcon._state.EntityClicked(subIcon.EntityState.Entity.Id, subIcon._starSysGuid, MouseButtons.Primary);
                         }
-                        ImGui.PopStyleColor();
                         DisplayContextMenu(camera, subIcon);
                     }
                 }
@@ -226,27 +230,22 @@ namespace Pulsar4X.SDL2UI
                 {
                     foreach(var group in subIcons)
                     {
-                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.StandardText);
                         if(ImGui.BeginMenu(group.Key.ToString()))
                         {
                             foreach(var subIcon in group)
                             {
-                                ImGui.PushStyleColor(ImGuiCol.Text, subIcon.TextDisplayColor);
                                 if(ImGui.MenuItem(subIcon.NameString))
                                 {
                                     subIcon._state.EntityClicked(subIcon.EntityState.Entity.Id, subIcon._starSysGuid, MouseButtons.Primary);
                                 }
-                                ImGui.PopStyleColor();
                                 DisplayContextMenu(camera, subIcon);
                             }
                             ImGui.EndMenu();
                         }
-                        ImGui.PopStyleColor();
                     }
                 }
                 ImGui.EndMenu();
             }
-            ImGui.PopStyleColor();
         }
 
         private static void BeginNameIcon(NameIcon icon)
@@ -262,7 +261,7 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(1, 2));
             ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-            ImGui.Begin(icon.NameString, ref icon.IsActive, icon._flags | ImGuiWindowFlags.NoDocking);
+            Window.Begin(icon.NameString, ref icon.IsActive, icon._flags | ImGuiWindowFlags.NoDocking);
             ImGui.PopStyleColor(); //have to pop the color change after pushing it.
             ImGui.PopStyleVar(3);
         }
@@ -274,7 +273,7 @@ namespace Pulsar4X.SDL2UI
 
         private static void EndNameIcon(NameIcon icon)
         {
-            ImGui.End();
+            Window.End();
         }
 
         private static void DisplayContextMenu(Camera camera, NameIcon icon)
@@ -284,6 +283,31 @@ namespace Pulsar4X.SDL2UI
                 icon.SetUpContextMenu(icon.EntityState.Entity.Id);
                 ImGui.EndPopup();
             }
+        }
+
+        private static void DisplayTooltip(Camera camera, NameIcon icon)
+        {
+            var name = icon.NameString;
+            var type = icon.EntityState.BodyType.ToString();
+            Action? callback = null;
+
+            // Don't display the unknown body type
+            if(type.Equals("Unknown")) type = "";
+
+            // Setup the callback for the tooltip
+            if(icon.EntityState.HasDataBlob<JPSurveyableDB>())
+                callback = () => Displays.GravitationalAnomlay(icon._state, icon.EntityState.GetDataBlob<JPSurveyableDB>());
+            else if(icon.EntityState.HasDataBlob<ShipInfoDB>()
+                && icon.EntityState.HasDataBlob<MassVolumeDB>()
+                && icon.EntityState.HasDataBlob<PositionDB>())
+                callback = () => Displays.Ship(icon._state, icon.EntityState.GetDataBlob<ShipInfoDB>(), icon.EntityState.GetDataBlob<MassVolumeDB>(), icon.EntityState.GetDataBlob<PositionDB>(), icon._state.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods);
+            else if(icon.EntityState.HasDataBlob<SystemBodyInfoDB>()
+                && icon.EntityState.HasDataBlob<MassVolumeDB>()
+                && icon.EntityState.HasDataBlob<PositionDB>())
+                callback = () => Displays.SystemBody(icon._state, icon.EntityState.GetDataBlob<SystemBodyInfoDB>(), icon.EntityState.GetDataBlob<MassVolumeDB>(), icon.EntityState.GetDataBlob<PositionDB>());
+
+            // Display the tooltip
+            DisplayHelpers.DescriptiveTooltip(name, type, "", callback, hideDescriptionColor: true);
         }
 
         public override void Draw(IntPtr rendererPtr, Camera camera)

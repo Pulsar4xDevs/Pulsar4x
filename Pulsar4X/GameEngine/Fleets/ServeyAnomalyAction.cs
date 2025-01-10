@@ -21,9 +21,9 @@ public class ServeyAnomalyAction : EntityCommand
         throw new NotImplementedException();
     }
 
-    public override bool IsFinished()
+    internal override bool IsFinished()
     {
-        throw new NotImplementedException();
+        return _isFinished;
     }
 
     public override EntityCommand Clone()

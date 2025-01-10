@@ -2,6 +2,7 @@
 using Pulsar4X.Engine;
 using System.Collections.Generic;
 using System.Linq;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Extensions;
 using Pulsar4X.Colonies;
 using Pulsar4X.Factions;
@@ -34,7 +35,7 @@ public class SystemWindow : PulsarGuiWindow
     {
         if(!IsActive) return;
 
-        if (ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("System Viewer"), ref IsActive, _flags))
+        if (Window.Begin("System Viewer", ref IsActive, _flags))
         {
             if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid))
             {
@@ -72,6 +73,8 @@ public class SystemWindow : PulsarGuiWindow
                     ImGui.EndTable();
                 }
             }
+
+            Window.End();
         }
     }
 
@@ -179,7 +182,7 @@ public class SystemWindow : PulsarGuiWindow
             if(entity.TryGetDatablob<AtmosphereDB>(out var atmosphereDB))
             {
                 ImGui.TableNextColumn();
-                ImGui.Text(Stringify.Number(atmosphereDB.Pressure));
+                ImGui.Text(Stringify.Quantity(atmosphereDB.Pressure));
                 ImGui.TableNextColumn();
                 if(atmosphereDB.Composition.ContainsKey("oxygen"))
                 {

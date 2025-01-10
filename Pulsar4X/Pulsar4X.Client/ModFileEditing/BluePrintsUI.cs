@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Pulsar4X.Blueprints;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Modding;
 

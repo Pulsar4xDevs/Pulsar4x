@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using Pulsar4X.Interfaces;
@@ -72,7 +73,7 @@ namespace Pulsar4X.SDL2UI
 
             if(_debugWidget == null) return;
 
-            if(IsActive && ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Orbit Lines")))
+            if(IsActive && Window.Begin("Orbit Lines"))
             {
                 ImGui.Text($"Parent: {_debugWidget.parentname}");
                 ImGui.Text($"ParentPos: {_debugWidget.parentPos}");
@@ -117,7 +118,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text(item.DataString);
                 }
 
-                ImGui.End();
+                Window.End();
 
                 if (!_uiState.SelectedSysMapRender.SelectedEntityExtras.Contains(_debugWidget))
                     _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_debugWidget);

@@ -1,15 +1,11 @@
 ﻿using System;
 using ImGuiNET;
-using System.Numerics;
-using Pulsar4X.Engine;
-using Vector2 = System.Numerics.Vector2;
-using Newtonsoft.Json;
 using System.IO;
-using System.Linq;
-using Pulsar4X.Extensions;
-using Pulsar4X.Datablobs;
+using Pulsar4X.Client.Interface.Menus;
 using Pulsar4X.SDL2UI.ModFileEditing;
-using Pulsar4X.Factions;
+using System.Numerics;
+using Pulsar4X.Client.Interface.Widgets;
+using System.Diagnostics;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -17,7 +13,7 @@ namespace Pulsar4X.SDL2UI
     {
 
         bool _saveGame = false;
-        System.Numerics.Vector2 buttonSize = new System.Numerics.Vector2(184, 24);
+        System.Numerics.Vector2 _buttonSize = new System.Numerics.Vector2(400, 24);
         new ImGuiWindowFlags _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar;
         private MainMenuItems(){}
         internal static MainMenuItems GetInstance()
@@ -34,15 +30,16 @@ namespace Pulsar4X.SDL2UI
         {
             if (IsActive)
             {
-                System.Numerics.Vector2 size = new System.Numerics.Vector2(200, 100);
+                System.Numerics.Vector2 size = new System.Numerics.Vector2(412, 300);
                 System.Numerics.Vector2 pos = new System.Numerics.Vector2(_uiState.MainWinSize.X / 2 - size.X / 2, _uiState.MainWinSize.Y / 2 - size.Y / 2);
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
                 ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(10, 10));
                 if (ImGui.Begin("Pulsar4X Main Menu", ref IsActive, _flags))
                 {
+                    ImGui.Image(_uiState.Img_MainMenuLogo(), new System.Numerics.Vector2(400, 200));
 
-                    if (ImGui.Button("Start a New Game", buttonSize) || _uiState.debugnewgame)
+                    if (ImGui.Button("New Game...", _buttonSize) || _uiState.debugnewgame)
                     {
                         //_uiState.NewGameOptions.IsActive = true;
                         var newgameoptions = NewGameMenu.GetInstance();
@@ -51,59 +48,80 @@ namespace Pulsar4X.SDL2UI
                     }
                     if (_uiState.IsGameLoaded)
                     {
-                        if (ImGui.Button("Save Current Game", buttonSize))
+                        if (ImGui.Button("Save Game...", _buttonSize))
                         {
                             _saveGame = !_saveGame;
 
-                            string gameJson = Game.Save(_uiState.Game);
-
-                            File.WriteAllText("save.json", gameJson);
-
-                            // FIXME:
-                            //SerializationManager.Export(_uiState.Game, "SaveGame");
+                            // Set the save name equal to the game name by default (player can change it in the dialog)
+                            SaveGame.GetInstance().UpdateSaveName(_uiState.Game.Name);
+                            SaveGame.GetInstance().ToggleActive();
+                            SetActive(false);
                         }
-                        if (ImGui.Button("Load Last Saved Game", buttonSize))
-                        {
-                            string contents = File.ReadAllText("save.json");
-                            var loadedGame = Game.Load(contents);
 
-                            _uiState.Game = loadedGame;
-
-                            var playerFaction = loadedGame.Factions.Where(f => f.Value.GetOwnersName().Equals("UEF")).First();
-                            _uiState.SetFaction(playerFaction.Value, true);
-                            _uiState.SetActiveSystem(playerFaction.Value.GetDataBlob<FactionInfoDB>().KnownSystems[0]);
-                        }
-                        if (ImGui.Button("Options", buttonSize))
+                        if (ImGui.Button("Options", _buttonSize))
                         {
                             SettingsWindow.GetInstance().ToggleActive();
                             this.SetActive(false);
                         }
-                        if (ImGui.Button("Editor", buttonSize))
+                        if (ImGui.Button("Editor", _buttonSize))
                         {
                             ModFileEditor.GetInstance().ToggleActive();
                             this.SetActive(false);
                         }
 
-                        if(ImGui.Button("Preferences", buttonSize))
+                        if(ImGui.Button("Preferences", _buttonSize))
                         {
                             SystemViewPreferences.GetInstance().ToggleActive();
                             this.SetActive(false);
                         }
+
+                        if (ImGui.Button("SM Mode", _buttonSize))
+                        {
+                            var pannel = SMWindow.GetInstance();
+                            _uiState.ActiveWindow = pannel;
+                            pannel.SetActive();
+                            _uiState.ToggleGameMaster();
+                            this.IsActive = false;
+                        }
                     }
-                    ImGui.Button("Resume a Current Game", buttonSize);
-                    ImGui.Button("Connect to a Network Game", buttonSize);
+
+                    var disabled = !DoAnySavesExist();
+                    if(disabled)
+                        ImGui.BeginDisabled();
+                    if (ImGui.Button("Resume Last Save", _buttonSize))
+                    {
+                        LoadGame.GetInstance().LoadLatest();
+                        SetActive(false);
+                    }
+                    if(disabled)
+                        ImGui.EndDisabled();
+                    if (ImGui.Button("Load Game...", _buttonSize))
+                    {
+                        LoadGame.GetInstance().ToggleActive();
+                        SetActive(false);
+                    }
+                    //ImGui.Button("Connect to a Network Game", buttonSize);
                 }
 
-                if (ImGui.Button("SM Mode", buttonSize))
+                if(ImageButton.Begin(_uiState.Img_Discord(), "Discord", new Vector2(16, 12), _buttonSize))
                 {
-                    var pannel = SMWindow.GetInstance();
-                    _uiState.ActiveWindow = pannel;
-                    pannel.SetActive();
-                    _uiState.ToggleGameMaster();
-                    this.IsActive = false;
+                    try
+                    {
+                        ProcessStartInfo psi = new ProcessStartInfo
+                        {
+                            FileName = "https://discord.gg/3uwCQSn",
+                            UseShellExecute = true
+                        };
+                        Process.Start(psi);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Handle any errors
+                        Console.WriteLine($"Error opening URL: {ex.Message}");
+                    }
                 }
 
-                if(ImGui.Button("Exit to Desktop", buttonSize))
+                if(ImGui.Button("Exit to Desktop", _buttonSize))
                 {
                     _uiState.ViewPort.IsAlive = false;
                 }
@@ -119,6 +137,14 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnSystemTickChange(DateTime newDate)
         {
+        }
+
+        private bool DoAnySavesExist()
+        {
+            var path = Path.Combine(PulsarMainWindow.GetAppDataPath(), PulsarMainWindow.SavesPath);
+            var saveFiles = Directory.GetFiles(path, "*.sav");
+
+            return saveFiles.Length > 0;
         }
     }
 }

@@ -23,7 +23,8 @@ namespace Pulsar4X.Components
         internal static bool StartResearched = false;
         public ComponentDesigner(ComponentTemplateBlueprint componentSD, FactionDataStore factionDataStore, FactionTechDB factionTech, string? uniqueId = null)
         {
-            TypeName = componentSD.Name;
+            TemplateName = componentSD.Name;
+            TemplateID = componentSD.UniqueID;
             Name = componentSD.Name;
             if(!string.IsNullOrEmpty( componentSD.ComponentType))
                 _design.ComponentType = componentSD.ComponentType;
@@ -62,15 +63,15 @@ namespace Pulsar4X.Components
                 if(factionDataStore.CargoGoods.GetAny(kvp.Key) != null)
                     resourceCostForulas.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionDataStore, factionTech));
                 else //TODO: log don't crash.
-                    throw new Exception("GUID object {" + kvp.Key + "} not found in resourceCosting for " + this.TypeName + " This object needs to be either a mineral, material or component defined in the Data folder");
+                    throw new Exception("GUID object {" + kvp.Key + "} not found in resourceCosting for " + this.TemplateName + " This object needs to be either a mineral, material or component defined in the Data folder");
             }
 
             ResourceCostFormulas = resourceCostForulas;
 
-            foreach (var attrbSD in componentSD.Attributes)
+            foreach (var attrbSD in componentSD.Properties)
             {
-                ComponentDesignAttribute designAttribute = new ComponentDesignAttribute(this, attrbSD, factionDataStore, factionTech);
-                ComponentDesignAttributes.Add(designAttribute.Name, designAttribute);
+                ComponentDesignProperty designProperty = new ComponentDesignProperty(this, attrbSD, factionDataStore, factionTech);
+                ComponentDesignProperties.Add(designProperty.Name, designProperty);
             }
 
             EvalAll();
@@ -80,7 +81,7 @@ namespace Pulsar4X.Components
         public void SetAttributes()
         {
             EvalAll();
-            foreach (var designAttribute in ComponentDesignAttributes.Values)
+            foreach (var designAttribute in ComponentDesignProperties.Values)
             {
                 if (designAttribute.AttributeType != null && designAttribute.IsEnabled)
                 {
@@ -148,6 +149,50 @@ namespace Pulsar4X.Components
 
             SetAttributes();
 
+            foreach (var designAttribute in ComponentDesignProperties.Values)
+            {
+                var type = designAttribute.AttributeType;
+                var hint = designAttribute.GuiHint;
+                switch (hint)
+                {
+                    case GuiHint.GuiSelectionMaxMin:
+                    {
+                        _design.TemplatePropertyValues.Add((designAttribute.Name, typeof(double), designAttribute.Value));
+                        break;
+                    }
+                    case GuiHint.GuiSelectionMaxMinInt:
+                    {
+                        _design.TemplatePropertyValues.Add((designAttribute.Name, typeof(int), designAttribute.Value));
+                        break;
+                    }
+                    case GuiHint.GuiFuelTypeSelection:
+                    {
+                        _design.TemplatePropertyValues.Add((designAttribute.Name, typeof(string), designAttribute.ValueString));
+                        break;
+                    }
+                    case GuiHint.GuiTextDisplay:
+                    {
+                        //ignore it, it's not player settable.
+                        break;
+                    }
+                    case GuiHint.None:
+                    {
+                        //ignore it, it's not player settable.
+                        break;
+                    }
+                    case 0:
+                    {
+                        //ignore it, it's not player settable.
+                        break;
+                    }
+                    default:
+                    {
+                        _design.TemplatePropertyValues.Add((designAttribute.Name, typeof(string), designAttribute.ValueString));
+                        break;
+                    }
+                }
+                
+            }
             if(_design.ResearchCostValue == 0 || StartResearched)
             {
                 tech.Level = tech.MaxLevel;
@@ -177,10 +222,16 @@ namespace Pulsar4X.Components
 
         }
 
-        public string TypeName
+        public string TemplateName
         {
-            get { return _design.TypeName; }
-            set { _design.TypeName = value; }
+            get { return _design.TemplateName; }
+            set { _design.TemplateName = value; }
+        }
+
+        public string TemplateID
+        {
+            get { return _design.TemplateID; }
+            set { _design.TemplateID = value; }
         }
 
         public string Name
@@ -222,7 +273,7 @@ namespace Pulsar4X.Components
         public void SetVolume()
         {
             VolumeFormula.Evaluate();
-            _design.VolumePerUnit = VolumeFormula.LongResult;
+            _design.VolumePerUnit = VolumeFormula.DResult;
             _design.Density = _design.MassPerUnit / _design.VolumePerUnit;
         }
 
@@ -342,7 +393,7 @@ namespace Pulsar4X.Components
             internal set { _design.ComponentType = value; }
         }
 
-        public Dictionary<string, ComponentDesignAttribute> ComponentDesignAttributes = new Dictionary<string, ComponentDesignAttribute>();
+        public Dictionary<string, ComponentDesignProperty> ComponentDesignProperties = new Dictionary<string, ComponentDesignProperty>();
         public Dictionary<Type, IComponentDesignAttribute> Attributes
         {
             get { return _design.AttributesByType; }

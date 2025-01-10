@@ -5,6 +5,7 @@ using Pulsar4X.Extensions;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Colonies;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
@@ -71,7 +72,7 @@ namespace Pulsar4X.SDL2UI
             if(!IsActive || _lookedAtEntity == null) return;
 
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(400,400),ImGuiCond.Once);
-            if (ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Planetary Window: " + _lookedAtEntity.Name), ref IsActive, _flags))
+            if (Window.Begin("Planetary Window: " + _lookedAtEntity.Name, ref IsActive, _flags))
             {
                 RenderTabOptions();
 
@@ -90,7 +91,7 @@ namespace Pulsar4X.SDL2UI
                         break;
                 }
                 ImGui.EndChild();
-                ImGui.End();
+                Window.End();
             }
         }
 

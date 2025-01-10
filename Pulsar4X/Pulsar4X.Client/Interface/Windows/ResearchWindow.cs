@@ -5,6 +5,7 @@ using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using System.Linq;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Factions;
 using Pulsar4X.Names;
 using Pulsar4X.Technology;
@@ -103,7 +104,7 @@ namespace Pulsar4X.SDL2UI
                 || _scienceTeams == null)
                 return;
 
-            if (ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Research and Development"), ref IsActive, _flags))
+            if (Window.Begin("Research and Development", ref IsActive, _flags))
             {
                 Vector2 windowContentSize = ImGui.GetContentRegionAvail();
                 var firstChildSize = new Vector2(windowContentSize.X * 0.75f, windowContentSize.Y);
@@ -140,6 +141,7 @@ namespace Pulsar4X.SDL2UI
                     }
                 }
 
+                Window.End();
             }
         }
 

@@ -1,7 +1,10 @@
 using System;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Extensions;
+using Pulsar4X.Fleets;
+using Pulsar4X.Ships;
 
 namespace Pulsar4X.JumpPoints;
 
@@ -25,7 +28,7 @@ public class JPSurveyOrder : EntityCommand
     {
         get { return _entityCommanding; }
     }
-
+    
     public JPSurveyOrder() { }
     public JPSurveyOrder(Entity commandingEntity, Entity target)
     {
@@ -53,9 +56,9 @@ public class JPSurveyOrder : EntityCommand
         return command;
     }
 
-    public override bool IsFinished()
+    internal override bool IsFinished()
     {
-        return TargetSurveyDB == null ? true : TargetSurveyDB.IsSurveyComplete(EntityCommanding.FactionOwnerID);
+        return _isFinished = TargetSurveyDB.IsSurveyComplete(EntityCommanding.FactionOwnerID);
     }
 
     internal override void Execute(DateTime atDateTime)
@@ -64,14 +67,22 @@ public class JPSurveyOrder : EntityCommand
         {
             IsRunning = true;
             PreviousUpdate = atDateTime;
-            Processor = new JPSurveyProcessor(EntityCommanding, Target);
-        }
-        else
-        {
-            if(PreviousUpdate != null && atDateTime - PreviousUpdate >= TimeSpan.FromDays(1))
+
+            // Get any ships in the fleet that can survey and add the JPSurveyDB to them
+            if (_entityCommanding.TryGetDatablob<FleetDB>(out var fleetDB))
             {
-                Processor?.ProcessEntity(EntityCommanding, atDateTime);
-                PreviousUpdate = atDateTime;
+                foreach (var child in fleetDB.Children)
+                {
+                    if (child.HasJPSurveyAbililty())
+                    {
+                        var order = JPSurveyOrder.CreateCommand(RequestingFactionGuid, child, Target);
+                        child.Manager.Game.OrderHandler.HandleOrder(order);
+                    }
+                }
+            }
+            else if (_entityCommanding.TryGetDatablob<ShipInfoDB>(out var shipInfoDB))
+            {
+                _entityCommanding.SetDataBlob(new JPSurveyDB() { TargetId = Target.Id });
             }
         }
     }

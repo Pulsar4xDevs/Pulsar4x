@@ -70,6 +70,42 @@ namespace Pulsar4X.SDL2UI
             NoTemplateState = NoTemplateState.Created;
         }
 
+        public void SetFromComponent(ComponentDesign component, GlobalUIState state)
+        {
+            
+
+            var factionData = state.Faction.GetDataBlob<FactionInfoDB>().Data;
+            var factionTech = state.Faction.GetDataBlob<FactionTechDB>();
+            Template = factionData.ComponentTemplates[component.TemplateID];
+            _componentDesigner = new ComponentDesigner(Template, factionData, factionTech);
+            
+            NoTemplateState = NoTemplateState.Created;
+            
+            var templateProperties = component.TemplatePropertyValues;
+            //_componentDesigner.Name = component.Name;
+            _nameInputBuffer = ImGuiSDL2CSHelper.BytesFromString(component.Name);
+            foreach (var ptup in templateProperties)
+            {
+                var tprop = _componentDesigner.ComponentDesignProperties[ptup.propName];
+                if (tprop.GuiHint == GuiHint.GuiFuelTypeSelection)
+                {
+                    var cargoTypesToDisplay = GetFuelTypes(tprop, state);
+                    var strfuel = (string)ptup.propValue;
+                    var index = cargoTypesToDisplay.FindIndex(item => item.UniqueID == strfuel);
+                    tprop.SetValueFromString((string)ptup.propValue);
+                    tprop.ListSelection = index;
+                }
+                else if (ptup.propValue is string)
+                {
+                    tprop.SetValueFromString((string)ptup.propValue);
+                }
+                else if (ptup.propValue is Int32 || ptup.propValue is float || ptup.propValue is double )
+                {
+                    tprop.SetValueFromInput((double)ptup.propValue);
+                }
+            }
+        }
+
         internal void Display(GlobalUIState uiState)
         {
             if(Template == null)
@@ -155,7 +191,7 @@ namespace Pulsar4X.SDL2UI
 
             if (_componentDesigner != null) //Make sure comp is selected
             {
-                foreach (ComponentDesignAttribute attribute in _componentDesigner.ComponentDesignAttributes.Values) //For each property of the comp type
+                foreach (ComponentDesignProperty attribute in _componentDesigner.ComponentDesignProperties.Values) //For each property of the comp type
                 {
                     ImGui.PushID(attribute.Name);
 
@@ -163,6 +199,8 @@ namespace Pulsar4X.SDL2UI
                     {
                         switch (attribute.GuiHint) //Either
                         {
+                            case 0:
+                                break;
                             case GuiHint.None:
                                 break;
                             case GuiHint.GuiTechSelectionList: //Let the user pick a type from a list
@@ -263,7 +301,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SameLine();
                     ImGui.Text("Volume");
                     ImGui.TableNextColumn();
-                    ImGui.Text(Stringify.Volume(_componentDesigner.VolumeM3Value));
+                    ImGui.Text(Stringify.VolumeLtr(_componentDesigner.VolumeM3Value));
 
                     if(_componentDesigner.CrewReqValue > 0)
                     {
@@ -275,7 +313,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text(_componentDesigner.CrewReqValue.ToString(Styles.IntFormat));
                     }
 
-                    foreach (ComponentDesignAttribute attribute in _componentDesigner.ComponentDesignAttributes.Values) //For each property of the comp type
+                    foreach (ComponentDesignProperty attribute in _componentDesigner.ComponentDesignProperties.Values) //For each property of the comp type
                     {
                         if(attribute.IsEnabled && attribute.GuiHint == GuiHint.GuiTextDisplay)
                         {
@@ -307,7 +345,7 @@ namespace Pulsar4X.SDL2UI
                                     }
                                     case "m^2":
                                     {
-                                        displayStr = Stringify.Volume(value);
+                                        displayStr = Stringify.VolumeLtr(value);
                                         break;
                                     }
                                     case "nm":
@@ -333,6 +371,9 @@ namespace Pulsar4X.SDL2UI
                                     case "m/s":
                                         displayStr = Stringify.Velocity(value);
                                         break;
+                                    case "s":
+                                        displayStr = TimeSpan.FromSeconds(value).ToString() ;
+                                        break;
                                     default:
                                     {
                                         displayStr = attribute.Value.ToString(Styles.DecimalFormat) + " " + attribute.Unit;
@@ -347,6 +388,8 @@ namespace Pulsar4X.SDL2UI
                             else
                             {
                                 ImGui.Text(attribute.Value.ToString(Styles.IntFormat));
+                                if(ImGui.IsItemHovered())
+                                    ImGui.SetTooltip(attribute.Value.ToString(Styles.DecimalFormat));
                             }
                         }
                         else if(attribute.IsEnabled && attribute.GuiHint == GuiHint.GuiFuelTypeSelection)
@@ -425,10 +468,10 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private void GuiHintText(ComponentDesignAttribute attribute)
+        private void GuiHintText(ComponentDesignProperty property)
         {
-            var value = attribute.Value;
-            var strUnit = attribute.Unit;
+            var value = property.Value;
+            var strUnit = property.Unit;
             var displayStr = "";
             switch (strUnit)
             {
@@ -439,29 +482,29 @@ namespace Pulsar4X.SDL2UI
                 }
                 default:
                 {
-                    displayStr = attribute.Value.ToString() + " " + attribute.Unit;
+                    displayStr = property.Value.ToString() + " " + property.Unit;
                     break;
                 }
 
 
             }
 
-            Title(attribute.Name, displayStr);
+            Title(property.Name, displayStr);
         }
 
-        private void GuiHintMaxMin(ComponentDesignAttribute attribute)
+        private void GuiHintMaxMin(ComponentDesignProperty property)
         {
-            Title(attribute.Name, attribute.Description);
+            Title(property.Name, property.Description);
 
-            attribute.SetMax();
-            attribute.SetMin();
+            property.SetMax();
+            property.SetMin();
             //attribute.SetValue();
-            attribute.SetStep();
+            property.SetStep();
 
-            var max = attribute.MaxValue;
-            var min = attribute.MinValue;
-            double val = attribute.Value;
-            double step = attribute.StepValue;
+            var max = property.MaxValue;
+            var min = property.MinValue;
+            double val = property.Value;
+            double step = property.StepValue;
             double fstep = step * 10;
             IntPtr valPtr;
             IntPtr maxPtr;
@@ -480,54 +523,54 @@ namespace Pulsar4X.SDL2UI
 
             var sizeAvailable = ImGui.GetContentRegionAvail();
             ImGui.SetNextItemWidth(sizeAvailable.X);
-            if (ImGui.SliderScalar("##scaler" + attribute.Name, ImGuiDataType.Double, valPtr, minPtr, maxPtr))
+            if (ImGui.SliderScalar("##scaler" + property.Name, ImGuiDataType.Double, valPtr, minPtr, maxPtr))
             {
-                attribute.SetValueFromInput(val);
+                property.SetValueFromInput(val);
             }
             ImGui.SetNextItemWidth(sizeAvailable.X);
-            if (ImGui.InputScalar("##input" + attribute.Name, ImGuiDataType.Double, valPtr, stepPtr, fstepPtr))
-                attribute.SetValueFromInput(val);
+            if (ImGui.InputScalar("##input" + property.Name, ImGuiDataType.Double, valPtr, stepPtr, fstepPtr))
+                property.SetValueFromInput(val);
             ImGui.NewLine();
         }
 
-        private void GuiHintMaxMinInt(ComponentDesignAttribute attribute)
+        private void GuiHintMaxMinInt(ComponentDesignProperty property)
         {
-            Title(attribute.Name, attribute.Description);
+            Title(property.Name, property.Description);
 
-            attribute.SetMax();
-            attribute.SetMin();
+            property.SetMax();
+            property.SetMin();
             //attribute.SetValue();
-            attribute.SetStep();
+            property.SetStep();
 
-            var max = attribute.MaxValue;
-            var min = attribute.MinValue;
-            int val = (int)attribute.Value;
-            double step = attribute.StepValue;
+            var max = property.MaxValue;
+            var min = property.MinValue;
+            int val = (int)property.Value;
+            double step = property.StepValue;
             double fstep = step * 10;
 
             var sizeAvailable = ImGui.GetContentRegionAvail();
             ImGui.SetNextItemWidth(sizeAvailable.X);
-            if(ImGui.SliderInt("##scaler" + attribute.Name, ref val, (int)min, (int)max))
+            if(ImGui.SliderInt("##scaler" + property.Name, ref val, (int)min, (int)max))
             {
-                attribute.SetValueFromInput(val);
+                property.SetValueFromInput(val);
             }
 
             ImGui.SetNextItemWidth(sizeAvailable.X);
-            if(ImGui.InputInt("##input" + attribute.Name, ref val, (int)step, (int)fstep))
+            if(ImGui.InputInt("##input" + property.Name, ref val, (int)step, (int)fstep))
             {
-                attribute.SetValueFromInput(val);
+                property.SetValueFromInput(val);
             }
             ImGui.NewLine();
         }
 
-        private void GuiHintTechSelection(ComponentDesignAttribute attribute, GlobalUIState uiState)
+        private void GuiHintTechSelection(ComponentDesignProperty property, GlobalUIState uiState)
         {
-            Title(attribute.Name, attribute.Description);
+            Title(property.Name, property.Description);
 
             int i = 0;
-            _techSDs = new Tech[attribute.GuidDictionary.Count];
-            _techNames = new string[attribute.GuidDictionary.Count];
-            foreach (var kvp in attribute.GuidDictionary)
+            _techSDs = new Tech[property.GuidDictionary.Count];
+            _techNames = new string[property.GuidDictionary.Count];
+            foreach (var kvp in property.GuidDictionary)
             {
                 Tech sd = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.Techs[(string)kvp.Key];
                 _techSDs[i] = sd;
@@ -535,35 +578,35 @@ namespace Pulsar4X.SDL2UI
                 i++;
             }
 
-            ImGui.TextWrapped(attribute.Value.ToString());
+            ImGui.TextWrapped(property.Value.ToString());
 
             if (ImGui.Combo("Select Tech", ref _techSelectedIndex, _techNames, _techNames.Length))
             {
-                attribute.SetValueFromString(_techSDs[_techSelectedIndex].UniqueID);
+                property.SetValueFromString(_techSDs[_techSelectedIndex].UniqueID);
             }
 
             ImGui.NewLine();
         }
 
-        private void GuiHintEnumSelection(ComponentDesignAttribute attribute)
+        private void GuiHintEnumSelection(ComponentDesignProperty property)
         {
-            _listNames = Enum.GetNames(attribute.EnumType);
+            _listNames = Enum.GetNames(property.EnumType);
 
-            Title(attribute.Name, attribute.Description);
+            Title(property.Name, property.Description);
 
-            int listCount = Math.Min((int)attribute.MaxValue, _listNames.Length);
+            int listCount = Math.Min((int)property.MaxValue, _listNames.Length);
             var sizeAvailable = ImGui.GetContentRegionAvail();
             ImGui.SetNextItemWidth(sizeAvailable.X);
-            if (ImGui.Combo("###Select", ref attribute.ListSelection, _listNames, listCount))
+            if (ImGui.Combo("###Select", ref property.ListSelection, _listNames, listCount))
             {
-                int enumVal = (int)Enum.Parse(attribute.EnumType, _listNames[attribute.ListSelection]);
-                attribute.SetValueFromInput(enumVal);
+                int enumVal = (int)Enum.Parse(property.EnumType, _listNames[property.ListSelection]);
+                property.SetValueFromInput(enumVal);
             }
 
             ImGui.NewLine();
         }
 
-        private void GuiHintOrdnanceSelection(ComponentDesignAttribute attribute, GlobalUIState uiState)
+        private void GuiHintOrdnanceSelection(ComponentDesignProperty property, GlobalUIState uiState)
         {
             var dict = uiState.Faction.GetDataBlob<FactionInfoDB>().MissileDesigns;
             _listNames = new string[dict.Count];
@@ -575,85 +618,93 @@ namespace Pulsar4X.SDL2UI
                 ordnances[i] = kvp.Value;
             }
 
-            Title(attribute.Name, attribute.Description);
+            Title(property.Name, property.Description);
 
-            ImGui.TextWrapped(attribute.Value.ToString());
+            ImGui.TextWrapped(property.Value.ToString());
 
             var sizeAvailable = ImGui.GetContentRegionAvail();
             ImGui.SetNextItemWidth(sizeAvailable.X);
-            if (ImGui.Combo("###Select", ref attribute.ListSelection, _listNames, _listNames.Length))
+            if (ImGui.Combo("###Select", ref property.ListSelection, _listNames, _listNames.Length))
             {
-                attribute.SetValueFromString(ordnances[attribute.ListSelection].UniqueID);
+                property.SetValueFromString(ordnances[property.ListSelection].UniqueID);
             }
 
             ImGui.NewLine();
         }
 
-        private void GuiHintFuelTypeSelection(ComponentDesignAttribute attribute, GlobalUIState uiState)
+        private void GuiHintFuelTypeSelection(ComponentDesignProperty property, GlobalUIState uiState)
         {
-            var cargoTypesToDisplay = new Dictionary<int, ICargoable>();
-            var keys = new List<int>();
-            var names = new List<string>();
 
-            foreach(string cargoType in attribute.GuidDictionary.Keys)
+            var cargoTypesToDisplay = GetFuelTypes(property, uiState);
+            var names = new List<string>();
+            foreach (var cargoType in cargoTypesToDisplay)
             {
-                var fuelType = attribute.GuidDictionary[cargoType].StrResult;
+                names.Add(cargoType.Name);
+            }
+            
+            string[] arrayNames = names.ToArray();
+
+            Title(property.Name, property.Description);
+
+            var sizeAvailable = ImGui.GetContentRegionAvail();
+            ImGui.SetNextItemWidth(sizeAvailable.X);
+            if(ImGui.Combo("###cargotypeselection", ref property.ListSelection, arrayNames, arrayNames.Length))
+            {
+                property.SetValueFromString(cargoTypesToDisplay[property.ListSelection].UniqueID);
+            }
+        }
+
+        List<ICargoable> GetFuelTypes(ComponentDesignProperty property, GlobalUIState uiState)
+        {
+            var cargoTypesToDisplay = new List<ICargoable>();
+            
+            foreach(string cargoType in property.GuidDictionary.Keys)
+            {
+                var fuelType = property.GuidDictionary[cargoType].StrResult;
                 string cargoTypeID = cargoType.ToString();
                 var cargos = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAll().Where(c => c.Value.CargoTypeID.Equals(cargoTypeID));
                 foreach(var cargo in cargos)
                 {
                     if(cargo.Value is ProcessedMaterial
-                        && ((ProcessedMaterial)cargo.Value).Formulas != null
-                        && ((ProcessedMaterial)cargo.Value).Formulas.ContainsKey("ExhaustVelocity")
-                        && ((ProcessedMaterial)cargo.Value).Formulas["ExhaustVelocity"].IsNotNullOrEmpty()
-                        && ((ProcessedMaterial)cargo.Value).Formulas.ContainsKey("FuelType")
-                        && ((ProcessedMaterial)cargo.Value).Formulas["FuelType"] == fuelType)
+                       && ((ProcessedMaterial)cargo.Value).Formulas != null
+                       && ((ProcessedMaterial)cargo.Value).Formulas.ContainsKey("ExhaustVelocity")
+                       && ((ProcessedMaterial)cargo.Value).Formulas["ExhaustVelocity"].IsNotNullOrEmpty()
+                       && ((ProcessedMaterial)cargo.Value).Formulas.ContainsKey("FuelType")
+                       && ((ProcessedMaterial)cargo.Value).Formulas["FuelType"] == fuelType)
                     {
-                        cargoTypesToDisplay.Add(cargo.Key, cargo.Value);
-                        keys.Add(cargo.Key);
-                        names.Add(cargo.Value.Name);
+                        cargoTypesToDisplay.Add(cargo.Value);
                     }
                 }
             }
-
-            string[] arrayNames = names.ToArray();
-
-            Title(attribute.Name, attribute.Description);
-
-            var sizeAvailable = ImGui.GetContentRegionAvail();
-            ImGui.SetNextItemWidth(sizeAvailable.X);
-            if(ImGui.Combo("###cargotypeselection", ref attribute.ListSelection, arrayNames, arrayNames.Length))
-            {
-                attribute.SetValueFromString(cargoTypesToDisplay[keys[attribute.ListSelection]].UniqueID);
-            }
+            return cargoTypesToDisplay;
         }
 
-        private void GuiHintTextSelectionFormula(ComponentDesignAttribute attribute)
+        private void GuiHintTextSelectionFormula(ComponentDesignProperty property)
         {
-            _listNames = new string[attribute.GuidDictionary.Count];
+            _listNames = new string[property.GuidDictionary.Count];
 
             int i = 0;
-            foreach (var kvp in attribute.GuidDictionary)
+            foreach (var kvp in property.GuidDictionary)
             {
                 _listNames[i] = (string)kvp.Key;
                 i++;
             }
 
-            Title(attribute.Name, attribute.Description);
+            Title(property.Name, property.Description);
 
-            ImGui.TextWrapped(attribute.Value.ToString());
+            ImGui.TextWrapped(property.Value.ToString());
 
             var sizeAvailable = ImGui.GetContentRegionAvail();
             ImGui.SetNextItemWidth(sizeAvailable.X);
-            if (ImGui.Combo("###Select", ref attribute.ListSelection, _listNames, _listNames.Length))
+            if (ImGui.Combo("###Select", ref property.ListSelection, _listNames, _listNames.Length))
             {
-                var key = _listNames[attribute.ListSelection];
-                var value = attribute.GuidDictionary[key];
-                attribute.SetValueFromDictionaryExpression(_listNames[attribute.ListSelection]);
+                var key = _listNames[property.ListSelection];
+                var value = property.GuidDictionary[key];
+                property.SetValueFromDictionaryExpression(_listNames[property.ListSelection]);
             }
         }
 
-        private void GuiHintTechCategorySelection(ComponentDesignAttribute attribute, GlobalUIState uiState)
+        private void GuiHintTechCategorySelection(ComponentDesignProperty property, GlobalUIState uiState)
         {
             _listNames = new string[uiState.Game.TechCategories.Count];
 
@@ -664,14 +715,14 @@ namespace Pulsar4X.SDL2UI
                 i++;
             }
 
-            Title(attribute.Name, attribute.Description);
+            Title(property.Name, property.Description);
             var sizeAvailable = ImGui.GetContentRegionAvail();
             ImGui.SetNextItemWidth(sizeAvailable.X);
-            if (ImGui.Combo("###Select", ref attribute.ListSelection, _listNames, _listNames.Length))
+            if (ImGui.Combo("###Select", ref property.ListSelection, _listNames, _listNames.Length))
             {
-                var name = _listNames[attribute.ListSelection];
+                var name = _listNames[property.ListSelection];
                 var value = uiState.Game.TechCategories.Where(c => c.Value.Name.Equals(name)).First();
-                attribute.SetValueFromString(value.Key);
+                property.SetValueFromString(value.Key);
             }
         }
 

@@ -88,9 +88,9 @@
   {
     "Type": "ProcessedMaterial",
     "Payload": {
-      "UniqueID": "hydrofiss",
-      "Name": "HydrogenNuke",
-      "Description": "Hydrogen for nuclear engines, includes fissile fuel.",
+      "UniqueID": "ntp",
+      "Name": "Nuclear Thruster Propellant",
+      "Description": "Composite fuel for nuclear thrusters, hydrogen with encapsulated fissile package.",
       "CargoTypeID": "fuel-storage",
       "MassPerUnit": 1,
       "VolumePerUnit": 0.002777778,
@@ -131,17 +131,39 @@
     "Payload": {
       "UniqueID": "fissile-fuels",
       "Name": "Fissile fuels",
-      "Description": "Fuel for reactors",
+      "Description": "Processed fuel for nuclear reactors, enriched for fission.",
       "CargoTypeID": "fuel-storage",
       "MassPerUnit": 1.0,
       "VolumePerUnit": 0.0000531915,
       "ResourceCosts": {
-        "fissionables": 100
+        "fissionables": 100,
+        "hydrocarbons": 10
       },
       "IndustryPointCosts": 10,
       "IndustryTypeID": "refining",
-      "WealthCost": 100,
+      "WealthCost": 1000,
       "OutputAmount": 1
+    }
+  },
+  {
+    "Type": "ProcessedMaterial",
+    "Payload": {
+      "UniqueID": "electronics",
+      "Name": "Electronics",
+      "Description": "Electrical components",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.002,
+      "ResourceCosts": {
+        "copper" : 2,
+        "plastic": 2,
+        "aluminium": 1,
+        "silicon": 1
+      },
+      "IndustryPointCosts": 100,
+      "IndustryTypeID": "refining",
+      "WealthCost": 2,
+      "OutputAmount": 5
     }
   },
   {
@@ -164,19 +186,23 @@
   {
     "Type": "ProcessedMaterial",
     "Payload": {
-      "UniqueID": "sorium-fuel",
-      "Name": "Sorium Fuel",
-      "Description": "Fuel for SpaceShips",
-      "CargoTypeID": "fuel-storage",
-      "MassPerUnit": 1,
-      "VolumePerUnit": 0.001,
+      "UniqueID": "space-crete",
+      "Name": "Space-Crete",
+      "Description": "A composite material for extraterrestrial construction, utilizing local regolith and minerals.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 2.4,
+      "VolumePerUnit": 0.000417,
       "ResourceCosts": {
-        "sorium": 1
+        "regolith": 70, 
+        "silicon": 10, 
+        "aluminium": 10,
+        "iron": 5,
+        "water": 5 
       },
-      "IndustryPointCosts": 10,
+      "IndustryPointCosts": 25,
       "IndustryTypeID": "refining",
       "WealthCost": 0,
-      "OutputAmount": 1
+      "OutputAmount": 100
     }
   }
 ]

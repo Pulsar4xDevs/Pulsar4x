@@ -12,5 +12,6 @@ namespace Pulsar4X.Modding
         public List<string> DataFiles { get; set; } // List of paths to mod data files
         public string PlayerFactionStartingItems { get; set; }
         public string AIFactionStartingItems { get; set; }
+        public bool DefaultEnabled { get; set; } = false;
     }
 }

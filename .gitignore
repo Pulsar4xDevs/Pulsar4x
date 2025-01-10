@@ -4,6 +4,7 @@ Pulsar4X/*/obj
 Pulsar4X/packages/*
 Pulsar4X/Pulsar4X.Client/*.ini
 Pulsar4X/Pulsar4X.Client/Data/*
+Pulsar4X/Benchmarks/BenchmarksDotNet.Artifacts/*
 
 # Doxygen output
 doc/doxygen/html/

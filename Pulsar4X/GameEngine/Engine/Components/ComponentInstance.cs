@@ -14,10 +14,19 @@ namespace Pulsar4X.Components
     {
 
         #region ICargoable
+        [JsonProperty]
         public int ID { get; private set; } = Game.GetEntityID();
-        public string UniqueID { get; }
-        public string Name { get; }
-        public string CargoTypeID { get; }
+        [JsonProperty]
+        public string UniqueID { get; private set; }
+        [JsonProperty]
+        public string Name { get; private set; }
+
+        
+        public string CargoTypeID
+        {
+            get { return Design.CargoTypeID; }
+        }
+
         public long MassPerUnit
         {
             get { return Design.MassPerUnit; }
@@ -39,16 +48,19 @@ namespace Pulsar4X.Components
         /// This is the entity that this component  is mounted on.
         /// </summary>
         /// <value>The parent entity.</value>
-        [JsonProperty]
         public Entity ParentEntity
         {
             get { return _parentEntity; }
-            internal set { _parentEntity = value; ParentInstances = ParentEntity.GetDataBlob<ComponentInstancesDB>(); }
+            internal set
+            {
+                _parentEntity = value; 
+                ParentInstances = ParentEntity.GetDataBlob<ComponentInstancesDB>();
+            }
         }
-
+        [JsonProperty]
         private Entity _parentEntity;
 
-        [JsonIgnore]
+        [JsonProperty]
         public ComponentInstancesDB ParentInstances { get; private set; }
         /// <summary>
         /// This is the design of this component.
@@ -62,10 +74,13 @@ namespace Pulsar4X.Components
         public PercentValue ComponentLoadPercent { get; internal set; }
         [JsonProperty]
         public int HTKRemaining { get; internal set; }
+
+        public int HTKMax   
+        {
+            get { return Design.HTK; }
+        }
+
         [JsonProperty]
-        public int HTKMax { get; private set; }
-
-
         private Dictionary<Type, ComponentAbilityState> _instanceAbilities = new Dictionary<Type, ComponentAbilityState>();
 
         public Dictionary<Type, ComponentAbilityState> GetAllStates()
@@ -132,8 +147,6 @@ namespace Pulsar4X.Components
             Design = design;
             IsEnabled = isEnabled;
             HTKRemaining = design.HTK;
-            HTKMax = design.HTK;
-            CargoTypeID = design.CargoTypeID;
             Name = design.Name;
         }
 
@@ -146,8 +159,6 @@ namespace Pulsar4X.Components
             IsEnabled = instance.IsEnabled;
             ComponentLoadPercent = instance.ComponentLoadPercent;
             HTKRemaining = instance.HTKRemaining;
-            HTKMax = instance.HTKMax;
-            CargoTypeID = instance.CargoTypeID;
             Name = instance.Name;
         }
 

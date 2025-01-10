@@ -161,6 +161,10 @@
       <Link>SDL2.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Libs\sdl2\win-x64\SDL2_image.dll">
+      <Link>SDL2_image.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">
     <None Include="Libs\cimgui\osx-x64\cimgui.dylib">
@@ -251,6 +255,15 @@
     <Content Include="Resources\ImgTest.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\pulsar4x-menu.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\pulsar4x-menu.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\discord-mark-white.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Update="Resources\CancelIco.bmp">
@@ -292,12 +305,14 @@
     <!-- writes the attribute to the customAssemblyInfo file -->
     <WriteCodeFragment Language="C#" OutputFile="$(CustomAssemblyInfoFile)" AssemblyAttributes="@(AssemblyAttributes)" />
   </Target>
-
+  <Target Name="CleanDataDirectory" BeforeTargets="PreBuildEvent">
+    <RemoveDir Directories="$(OutputPath)Data" />
+  </Target>
   <Target Name="CopyJsonData" AfterTargets="Build">
     <ItemGroup>
       <JsonDataFiles Include="..\GameEngine\Data\**\*" />
     </ItemGroup>
-    <Copy SourceFiles="@(JsonDataFiles)" DestinationFolder="$(OutputPath)\Data\%(RecursiveDir)" />
+    <Copy SourceFiles="@(JsonDataFiles)" DestinationFolder="$(OutputPath)Data\%(RecursiveDir)" />
   </Target>
 
 </Project>

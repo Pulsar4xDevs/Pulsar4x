@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using Pulsar4X.SDL2UI;
 using Vector2 = System.Numerics.Vector2;
@@ -72,7 +73,7 @@ namespace Pulsar4X.ImGuiNetUI
             if (!IsActive)
                 return;
             ImGui.SetNextWindowSize(new Vector2(600f, 400f), ImGuiCond.FirstUseEver);
-            if (ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Fire Control"), ref IsActive, _flags))
+            if (Window.Begin("Fire Control", ref IsActive, _flags))
             {
                 ImGui.Columns(2);
                 ImGui.SetColumnWidth(0, 400);
@@ -88,6 +89,7 @@ namespace Pulsar4X.ImGuiNetUI
 
                 DisplayTargetColumn();
 
+                Window.End();
             }
         }
 

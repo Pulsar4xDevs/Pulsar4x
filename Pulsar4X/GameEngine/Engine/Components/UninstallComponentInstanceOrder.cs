@@ -16,7 +16,6 @@ namespace Pulsar4X.Engine.Orders
         internal override Entity EntityCommanding { get; }
         public ComponentInstance ComponentInstance { get; private set; }
         public int Amount { get; private set; }
-        private bool hasExecuted = false;
 
         internal UninstallComponentInstanceOrder(Entity entity, ComponentInstance componentInstance, int amount = 1)
         {
@@ -43,15 +42,15 @@ namespace Pulsar4X.Engine.Orders
             throw new NotImplementedException();
         }
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
-            return hasExecuted;
+            return _isFinished;
         }
 
         internal override void Execute(DateTime atDateTime)
         {
             EntityCommanding.RemoveComponent(ComponentInstance);
-            hasExecuted = true;
+            _isFinished = true;
         }
 
         internal override bool IsValidCommand(Game game)

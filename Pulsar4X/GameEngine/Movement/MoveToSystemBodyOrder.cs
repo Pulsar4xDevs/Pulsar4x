@@ -29,9 +29,9 @@ namespace Pulsar4X.Movement
 
         private List<EntityCommand> _shipCommands = new List<EntityCommand>();
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
-            return ShipsFinishedWarping();
+            return _isFinished = ShipsFinishedWarping();
         }
 
         internal override void Execute(DateTime atDateTime)

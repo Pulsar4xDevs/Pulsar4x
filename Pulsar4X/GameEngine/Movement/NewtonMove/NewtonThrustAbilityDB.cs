@@ -6,16 +6,20 @@ namespace Pulsar4X.Movement
 {
     public class NewtonThrustAbilityDB : BaseDataBlob, IAbilityDescription
     {
-
+        [JsonProperty]
         public double ThrustInNewtons = 0;
         //public double SpecificImpulseASL = 0;
+        [JsonProperty]
         public double ExhaustVelocity = 0;
+        [JsonProperty]
         public string FuelType; //todo: change this to a list and enable multple fuel types.
 
         /// <summary>
         /// in Kg/s
         /// </summary>
+        [JsonProperty]
         public double FuelBurnRate = 0;
+        [JsonProperty]
         public double TotalFuel_kg { get; private set; }
 
         /// <summary>
@@ -27,6 +31,7 @@ namespace Pulsar4X.Movement
         /// <summary>
         /// Amount of DeltaV the ship has availible.
         /// </summary>
+        [JsonProperty]
         public double DeltaV { get; private set; } = 0;
 
         /// <summary>

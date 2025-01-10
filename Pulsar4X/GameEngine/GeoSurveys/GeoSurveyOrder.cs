@@ -53,9 +53,9 @@ public class GeoSurveyOrder : EntityCommand
         return command;
     }
 
-    public override bool IsFinished()
+    internal override bool IsFinished()
     {
-        return TargetGeoSurveyDB == null ? true : TargetGeoSurveyDB.IsSurveyComplete(EntityCommanding.FactionOwnerID);
+        return _isFinished = TargetGeoSurveyDB == null ? true : TargetGeoSurveyDB.IsSurveyComplete(EntityCommanding.FactionOwnerID);
     }
 
     internal override void Execute(DateTime atDateTime)

@@ -206,12 +206,13 @@ namespace Pulsar4X.Movement
                 _details = "Expending " + Stringify.Velocity(_db.ManuverDeltaVLen) + " Δv";
         }
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
             if (IsRunning && _db.ManuverDeltaV.Length() == 0)
-                return true;
+                _isFinished = true;
             else
-                return false;
+                _isFinished = false;
+            return _isFinished;
         }
 
         internal override bool IsValidCommand(Game game)
@@ -426,12 +427,13 @@ namespace Pulsar4X.Movement
             return timeToTarget;
         }
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
             if (IsRunning && _newtonMovedb.ManuverDeltaV.Length() <= 0)
-                return true;
+                _isFinished = true;
             else
-                return false;
+                _isFinished = false;
+            return _isFinished;
         }
 
         internal override bool IsValidCommand(Game game)
@@ -632,12 +634,13 @@ namespace Pulsar4X.Movement
             return timeToTarget;
         }
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
             if (IsRunning && _newtonMovedb.ManuverDeltaV.Length() <= 0)
-                return true;
+                _isFinished = true;
             else
-                return false;
+                _isFinished = false;
+            return _isFinished;
         }
 
         internal override bool IsValidCommand(Game game)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using System.Numerics;
+using Pulsar4X.Client.Interface.Widgets;
 using Vector2 = System.Numerics.Vector2;
 using Pulsar4X.Engine;
 
@@ -62,7 +63,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
 
-            ImGui.Begin("TimeControl", ref IsActive, _flags);
+            Window.Begin("TimeControl", ref IsActive, _flags);
             ImGui.PushItemWidth(100);
 
             ImGui.PushStyleColor(ImGuiCol.Header, col);
@@ -115,11 +116,7 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.Combo("##freqCmbo", ref _freqSpanType, _timespanTypeSelection, _timespanTypeSelection.Length))
                     AdjustFreqency();
             }
-
-
-
-            ImGui.End();
-
+            Window.End();
         }
 
         void AdjustTimeSpan()

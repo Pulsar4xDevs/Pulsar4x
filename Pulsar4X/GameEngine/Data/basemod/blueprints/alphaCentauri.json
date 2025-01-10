@@ -1,0 +1,61 @@
+[
+  {
+    "Type": "System",
+    "Payload": {
+      "UniqueID": "system-alpha-centauri",
+      "Name": "Alpha Centauri",
+      "Stars": [
+        "alpha-centauri-a",
+        "alpha-centauri-b"
+      ],
+      "Bodies": [],
+      "SurveyRings": [
+        { "RingRadiusInAU": 1, "Count": 3 },
+        { "RingRadiusInAU": 8, "Count": 9 },
+        { "RingRadiusInAU": 20, "Count": 17 }
+      ]
+    }
+  },
+  {
+    "Type": "Star",
+    "Payload": {
+      "UniqueID": "alpha-centauri-a",
+      "Name":"Alpha Centauri A",
+      "Info": {
+        "Mass": 2E30,
+        "Radius": 847000,
+        "Age": 4.85E9,
+        "Class": "G",
+        "Temperature": 5790,
+        "Luminosity": 1.5,
+        "LuminosityClass": "V",
+        "SpectralType": "G"
+      }
+    }
+  },
+  {
+    "Type": "Star",
+    "Payload": {
+      "UniqueID": "alpha-centauri-b",
+      "Name":"Alpha Centauri B",
+      "Info": {
+        "Mass": 1.5E30,
+        "Radius": 598000,
+        "Age": 5.3E9,
+        "Class": "K",
+        "Temperature": 5260,
+        "Luminosity": 1.5,
+        "LuminosityClass": "V",
+        "SpectralType": "K"
+      },
+      "Orbit": {
+        "SemiMajorAxis": 149597887,
+        "Eccentricity": 0.51947,
+        "EclipticInclination": 79.243,
+        "LoAN": 205.073,
+        "AoP": 231.519,
+        "MeanAnomaly": 0
+      }
+    }
+  }
+]

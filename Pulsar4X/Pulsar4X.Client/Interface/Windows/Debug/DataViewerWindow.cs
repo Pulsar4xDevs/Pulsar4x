@@ -196,13 +196,13 @@ public static class ModDataInspector
                     {
                         displayStr = value.ToString();
                         Vector2 v = (Vector2)value;
-                        tooltipStr = "Magnitude: " + Stringify.Number(v.Length());
+                        tooltipStr = "Magnitude: " + Stringify.Quantity(v.Length());
                     }
                     else if (value is Vector3)
                     {
                         displayStr = value.ToString();
                         Vector3 v = (Vector3)value;
-                        tooltipStr = "Magnitude: " + Stringify.Number(v.Length());
+                        tooltipStr = "Magnitude: " + Stringify.Quantity(v.Length());
                     }
                     else
                     {
@@ -404,13 +404,13 @@ public static class ModDataInspector
                             {
                                 displayStr = value.ToString();
                                 Vector2 v = (Vector2)value;
-                                tooltipStr = "Magnitude: " + Stringify.Number(v.Length());
+                                tooltipStr = "Magnitude: " + Stringify.Quantity(v.Length());
                             }
                             else if (value is Vector3)
                             {
                                 displayStr = value.ToString();
                                 Vector3 v = (Vector3)value;
-                                tooltipStr = "Magnitude: " + Stringify.Number(v.Length());
+                                tooltipStr = "Magnitude: " + Stringify.Quantity(v.Length());
                             }
                             else
                             {

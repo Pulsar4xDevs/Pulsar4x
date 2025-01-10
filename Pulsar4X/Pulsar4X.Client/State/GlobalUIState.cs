@@ -35,7 +35,7 @@ namespace Pulsar4X.SDL2UI
         public event StarSystemChangedEventHandler? OnStarSystemChanged;
         public event StarSystemAddedEventHandler? OnStarSystemAdded;
 
-        public bool debugnewgame = true;
+        public bool debugnewgame = false;
         //internal PulsarGuiWindow distanceRulerWindow { get; set; }
         internal static readonly Dictionary<Type, string> NamesForMenus = new() {
             {typeof(PinCameraBlankMenuHelper), "Pin camera"},
@@ -115,6 +115,7 @@ namespace Pulsar4X.SDL2UI
 
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Star, 2f);
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Planet, 32f);
+            DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.DwarfPlanet, 64f);
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Moon, 96f);
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Asteroid, 96f);
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Comet, 96f);

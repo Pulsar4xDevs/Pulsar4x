@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
 
@@ -6,11 +7,12 @@ namespace Pulsar4X.Industry
 {
     public class MiningDB : BaseDataBlob, IAbilityDescription
     {
+        [JsonProperty]
         public Dictionary<int, long> BaseMiningRate { get; set; }
+        [JsonProperty]
         public Dictionary<int, long> ActualMiningRate { get; set; }
-
+        [JsonProperty]
         public int NumberOfMines { get; set;} = 0;
-
         public Dictionary<int, MineralDeposit> MineralDeposit => OwningEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>().Minerals;
 
         public MiningDB()

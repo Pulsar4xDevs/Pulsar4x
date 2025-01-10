@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json.Linq;
+using Pulsar4X.Blueprints;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
@@ -12,6 +13,30 @@ namespace Pulsar4X.People
 {
     public static class SpeciesFactory
     {
+        public static Entity CreateFromBlueprint(StarSystem system, SpeciesBlueprint speciesBlueprint)
+        {
+            var species = Entity.Create();
+
+            system.AddEntity(species, new List<BaseDataBlob>() {
+                new NameDB(speciesBlueprint.Name),
+                new SpeciesDB()
+                {
+                    BaseGravity = speciesBlueprint.Gravity.Ideal ?? 0,
+                    MinimumGravityConstraint = speciesBlueprint.Gravity.Minimum ?? 0,
+                    MaximumGravityConstraint = speciesBlueprint.Gravity.Maximum ?? 0,
+                    BasePressure = speciesBlueprint.Pressure.Ideal ?? 0,
+                    MinimumPressureConstraint = speciesBlueprint.Pressure.Minimum ?? 0,
+                    MaximumPressureConstraint = speciesBlueprint.Pressure.Maximum ?? 0,
+                    BaseTemperature = speciesBlueprint.Temperature.Ideal ?? 0,
+                    MinimumTemperatureConstraint = speciesBlueprint.Temperature.Minimum ?? 0,
+                    MaximumTemperatureConstraint = speciesBlueprint.Temperature.Maximum ?? 0,
+                    BreathableGasSymbol = speciesBlueprint.BreathableGasSymbol ?? "O2",
+                }
+            });
+
+            return species;
+        }
+
         public static Entity CreateFromJson(Entity faction, EntityManager system, string filePath)
         {
             string fileContents = File.ReadAllText(filePath);
@@ -26,13 +51,14 @@ namespace Pulsar4X.People
                 {
                     BaseGravity = (double?)rootJson["gravity"]["ideal"] ?? 0,
                     MinimumGravityConstraint = (double?)rootJson["gravity"]["minimum"] ?? 0,
-                    MaximumGravityConstraint = (double?)rootJson["gravity"]["maxiumum"] ?? 0,
+                    MaximumGravityConstraint = (double?)rootJson["gravity"]["maximum"] ?? 0,
                     BasePressure = (double?)rootJson["pressure"]["ideal"] ?? 0,
                     MinimumPressureConstraint = (double?)rootJson["pressure"]["minimum"] ?? 0,
-                    MaximumPressureConstraint = (double?)rootJson["pressure"]["maxiumum"] ?? 0,
+                    MaximumPressureConstraint = (double?)rootJson["pressure"]["maximum"] ?? 0,
                     BaseTemperature = (double?)rootJson["temperature"]["ideal"] ?? 0,
                     MinimumTemperatureConstraint = (double?)rootJson["temperature"]["minimum"] ?? 0,
-                    MaximumTemperatureConstraint = (double?)rootJson["temperature"]["maxiumum"] ?? 0,
+                    MaximumTemperatureConstraint = (double?)rootJson["temperature"]["maximum"] ?? 0,
+                    BreathableGasSymbol = (string?)rootJson["breathableGasSymbol"] ?? "O2",
                 }
             });
 
@@ -94,7 +120,7 @@ namespace Pulsar4X.People
         public static Entity CreateSpeciesForPlanet(Entity faction, EntityManager systemEntityManager, Entity planetEntity)
         {
             NameDB name = new NameDB("somename"); //where should we get the name from? maybe we should pass a string here.
-            SpeciesDB speciesDB = CreateSpeciesDB_FromPlanet(planetEntity);
+            SpeciesDB speciesDB = CreateSpeciesDB_FromPlanet(planetEntity, systemEntityManager.RNG);
             var blobs = new List<BaseDataBlob> {name, speciesDB};
             Entity species = Entity.Create();
             species.FactionOwnerID = faction.Id;
@@ -103,13 +129,8 @@ namespace Pulsar4X.People
             return species;
         }
 
-        private static SpeciesDB CreateSpeciesDB_FromPlanet(Entity planetEntity, int? seed = null)
+        private static SpeciesDB CreateSpeciesDB_FromPlanet(Entity planetEntity, Random rng)
         {
-            Random rnd;
-            if (seed != null)
-                rnd = new Random((int)seed);
-            else
-                rnd = new Random();
 
             MassVolumeDB masvolinfo = planetEntity.GetDataBlob<MassVolumeDB>();
             SystemBodyInfoDB sysbodyinfo = planetEntity.GetDataBlob<SystemBodyInfoDB>();

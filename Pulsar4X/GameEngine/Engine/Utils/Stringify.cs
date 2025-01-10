@@ -34,54 +34,14 @@ namespace Pulsar4X.Engine
                     str = Thrust(amount * Math.Pow(10, (double)valueType.ValueSize), format);
                     break;
                 case ValueTypeStruct.ValueTypes.Number:
-                    str = Number(amount * Math.Pow(10, (double)valueType.ValueSize), format);
+                    str = Quantity(amount * Math.Pow(10, (double)valueType.ValueSize), format);
                     break;
 
             }
 
             return str;
         }
-        public static string Number(double number,  string format = "0.0##")
-        {
-            string stringCount = "0";
-            double absCnt = Math.Abs(number);
-            double cnt;
-            if (absCnt > 1.0e12)
-            {
-                cnt = number * 1.0e-12;
-                stringCount = cnt.ToString(format) + " T";
-            }
-            else if (absCnt > 1.0e9)
-            {
-                cnt = number * 1.0e-9;
-                stringCount = cnt.ToString(format) + " G";
-            }
-            else if (absCnt > 1.0e6)
-            {
-                cnt = number * 1.0e-6;
-                stringCount = cnt.ToString(format) + " k";
-            }
-            /*
-            else if (absCnt > 1.0e3)
-            {
-                cnt = number * 1.0e-3;
-                stringCount = cnt.ToString(format) + " h";
-            }*/
-            else if (absCnt > 1.0e-3)
-            {
-                stringCount = number.ToString(format);
-            }
-
-
-            else if (absCnt > 1.0e-6)
-            {
-                cnt = number * 1.0e-3;
-                stringCount = cnt.ToString(format) + " m";
-            }
-
-            return stringCount;
-        }
-
+        
         public static string Quantity(double number, string format = "0.###", bool fullSuffix = false)
         {
             string stringCount = "0";
@@ -90,27 +50,36 @@ namespace Pulsar4X.Engine
             if (absCnt > 1.0e15)
             {
                 cnt = number * 1.0e-15;
-                stringCount = cnt.ToString(format) + (fullSuffix ? " quadrillion" : "q");
+                stringCount = cnt.ToString(format) + (fullSuffix ? " quadrillion" : "Q");
             }
             else if (absCnt > 1.0e12)
             {
                 cnt = number * 1.0e-12;
-                stringCount = cnt.ToString(format) + (fullSuffix ? " trillion" : "t");  // Trillion
+                stringCount = cnt.ToString(format) + (fullSuffix ? " trillion" : "T");  // Trillion
             }
             else if (absCnt > 1.0e9)
             {
                 cnt = number * 1.0e-9;
-                stringCount = cnt.ToString(format) + (fullSuffix ? " billion" : "b");  // Billion
+                stringCount = cnt.ToString(format) + (fullSuffix ? " billion" : "B");  // Billion
             }
             else if (absCnt > 1.0e6)
             {
                 cnt = number * 1.0e-6;
-                stringCount = cnt.ToString(format) + (fullSuffix ? " million" : "m");  // Million
+                stringCount = cnt.ToString(format) + (fullSuffix ? " million" : "M");  // Million
             }
             else if (absCnt > 1.0e3)
             {
                 cnt = number * 1.0e-3;
                 stringCount = cnt.ToString(format) + (fullSuffix ? " thousand" : "k");  // Thousand
+            }
+            else if (absCnt > 0)
+            {
+                stringCount = number.ToString(format);
+            }
+            else if (absCnt > 1.0e-6)
+            {
+                cnt = number * 1.0e-3;
+                stringCount = cnt.ToString(format) +(fullSuffix? " milli" : "m");
             }
             else {
                 stringCount = number.ToString(format);
@@ -129,14 +98,14 @@ namespace Pulsar4X.Engine
         public static string Power(double amountInKw, string format = "0.###")
         {
             string stringPower = "0 Kw";
-            if (amountInKw > 100000000)
-            {
-                amountInKw = amountInKw * 0.00000001;
-                stringPower = amountInKw.ToString(format) + " GW";
-            }
-            else if (amountInKw > 100000)
+            if (amountInKw > 1000000)
             {
                 amountInKw = amountInKw * 0.00001;
+                stringPower = amountInKw.ToString(format) + " GW";
+            }
+            else if (amountInKw > 1000)
+            {
+                amountInKw = amountInKw * 0.001;
                 stringPower = amountInKw.ToString(format) + " MW";
             }
             else if (amountInKw < 0.1)
@@ -163,7 +132,7 @@ namespace Pulsar4X.Engine
         /// <returns></returns>
         public static string Energy(double amountInKj, string format = "0.###")
         {
-            string stringPower = "0 Kw";
+            string stringPower = "0 Kj";
             if (amountInKj > 100000000)
             {
                 amountInKj = amountInKj * 0.00000001;
@@ -171,7 +140,7 @@ namespace Pulsar4X.Engine
             }
             else if (amountInKj > 100000)
             {
-                amountInKj = amountInKj * 0.00001;
+                amountInKj = amountInKj * 0.001;
                 stringPower = amountInKj.ToString(format) + " MJ";
             }
             else if (amountInKj < 0.1)
@@ -255,6 +224,47 @@ namespace Pulsar4X.Engine
             }
             else {
                 stringVolume = volume_m.ToString(format) + " m^3";
+            }
+
+            return stringVolume;
+        }
+        
+        public static string VolumeLtr(double volume_m, string format = "0.###", bool fullSuffix = false)
+        {
+            string stringVolume = "0 Ltr";
+            double volLtr = volume_m * 1000;
+            if (volLtr > 1.0e18)
+            {
+                volLtr *= 1.0e-18;
+                stringVolume = volLtr.ToString(format) + (fullSuffix ? " exalitre" : "EL");
+            }
+            else if (volLtr > 1.0e15)
+            {
+                volLtr *= 1.0e-15;
+                stringVolume = volLtr.ToString(format) + (fullSuffix ? " petalitre" : "PL");
+            }
+            else if(volLtr > 1.0e12)
+            {
+                volLtr *= 1.0e-12;
+                stringVolume = volLtr.ToString(format) + (fullSuffix ? " teralitre" : "TL");
+            }
+            else if (volLtr > 1.0e9)
+            {
+                volLtr *= 1.0e-9;
+                stringVolume = volLtr.ToString(format) + (fullSuffix ? " gigalitre" : "ML");
+            }
+            else if (volLtr > 1.0e6)
+            {
+                volLtr *= 1.0e-6;
+                stringVolume = volLtr.ToString(format) + (fullSuffix ? " megalitre" : "ML");
+            }
+            else if (volLtr > 1.0e3)
+            {
+                volLtr *= 1.0e-3;
+                stringVolume = volLtr.ToString(format) + (fullSuffix ? " kilolitre" : "KL");
+            }
+            else {
+                stringVolume = volLtr.ToString(format) + " Ltr";
             }
 
             return stringVolume;

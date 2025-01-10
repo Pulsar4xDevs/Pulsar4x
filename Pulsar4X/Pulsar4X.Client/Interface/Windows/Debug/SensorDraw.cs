@@ -31,7 +31,7 @@ namespace Pulsar4X.SDL2UI
         private SystemState? _selectedStarSysState;
         private StarSystem? _selectedStarSys => _selectedStarSysState?.StarSystem;
 
-        private SensorReceiverAtbDB[]? _selectedReceverAtb;
+        private SensorReceiverAtb[]? _selectedReceverAtb;
         private SensorReceiverAbility[]? _selectedReceverInstanceAbility;
 
 
@@ -345,19 +345,19 @@ namespace Pulsar4X.SDL2UI
             {
                 if(_selectedStarSys == null) return;
 
-                if (_selectedEntity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<SensorReceiverAtbDB>(out var recevers))
+                if (_selectedEntity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<SensorReceiverAtb>(out var recevers))
                 {
                     _receverDat = new WaveDrawData();
                     _receverDat.HasAtn = false;
                     var points = _receverDat.Points = new (System.Numerics.Vector2 p0, System.Numerics.Vector2 p1, System.Numerics.Vector2 p2, System.Numerics.Vector2 p3)[recevers.Count];
                     _receverDat.IsWaveDrawn = new (bool drawSrc, bool drawAtn)[recevers.Count];
 
-                    _selectedReceverAtb = new SensorReceiverAtbDB[recevers.Count];
+                    _selectedReceverAtb = new SensorReceiverAtb[recevers.Count];
                     _selectedReceverInstanceAbility = new SensorReceiverAbility[recevers.Count];
                     int i = 0;
                     foreach (var recever in recevers)
                     {
-                        _selectedReceverAtb[i] = recever.Design.GetAttribute<SensorReceiverAtbDB>();
+                        _selectedReceverAtb[i] = recever.Design.GetAttribute<SensorReceiverAtb>();
                         _selectedReceverInstanceAbility[i] = recever.GetAbilityState<SensorReceiverAbility>();
 
                         float low = (float)_selectedReceverAtb[i].RecevingWaveformCapabilty.WavelengthMin_nm;

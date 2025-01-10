@@ -60,6 +60,7 @@ namespace Pulsar4X.SDL2UI
             MessagePublisher.Instance.Subscribe(MessageTypes.EntityAdded, OnEntityAddedMessage, filterById);
             MessagePublisher.Instance.Subscribe(MessageTypes.EntityRemoved, OnEntityRemovedMessage, filterById);
             MessagePublisher.Instance.Subscribe(MessageTypes.EntityRevealed, OnEntityAddedMessage, filterById);
+            MessagePublisher.Instance.Subscribe(MessageTypes.EntityHidden, OnEntityRemovedMessage, filterById);
             MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, OnEntityUpdatedMessage, filterById);
             MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, OnEntityUpdatedMessage, filterById);
         }

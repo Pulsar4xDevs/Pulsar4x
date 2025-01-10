@@ -10,10 +10,14 @@ namespace Pulsar4X.Components
 {
     public abstract class ComponentTreeHeirarchyAbilityState : ComponentAbilityState
     {
+        [JsonProperty]
         public ComponentTreeHeirarchyAbilityState ParentState { get; private set; }
+        [JsonProperty]
         public List<ComponentTreeHeirarchyAbilityState> ChildrenStates { get; private set; } = new List<ComponentTreeHeirarchyAbilityState>();
 
 
+        [JsonConstructor]
+        protected ComponentTreeHeirarchyAbilityState(){}
 
         public ComponentTreeHeirarchyAbilityState(ComponentInstance componentInstance) : base(componentInstance)
         {

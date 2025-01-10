@@ -15,9 +15,11 @@ namespace Pulsar4X.Industry
 
         [JsonProperty]
         private double MaxProductionVolume;
-
+        [JsonProperty]
         private IndustryAbilityDB.ProductionLine _productionLine;
 
+        [JsonConstructor]
+        private IndustryAtb(){}
         public IndustryAtb(Dictionary<string, double> industryRates)
         {
             MaxProductionVolume = double.PositiveInfinity;

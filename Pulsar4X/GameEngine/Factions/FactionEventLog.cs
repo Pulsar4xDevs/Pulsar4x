@@ -13,6 +13,9 @@ public class FactionEventLog : IEventLog
     [JsonProperty]
     private int _factionId;
     private MasterTimePulse _masterTimePulse;
+    
+    [JsonProperty]
+    private SafeList<EventType> _haltsOn = new();
     private FactionEventLog() { }
 
     public static FactionEventLog Create(int factionId, MasterTimePulse masterTimePulse)
@@ -44,8 +47,27 @@ public class FactionEventLog : IEventLog
             return;
         }
 
+        if (_haltsOn.Contains(e.EventType))
+        {
+            _masterTimePulse.PauseTime();
+        }
+
         _events.Add(e);
     }
+
+    public void ToggleHaltsOn(EventType eventType)
+    {
+        if (_haltsOn.Contains(eventType))
+        {
+            _haltsOn.Remove(eventType);
+        }
+        else
+        {
+            _haltsOn.Add(eventType);    
+        }
+    }
+
+    public bool HaltsOn(EventType eventType) => _haltsOn.Contains(eventType);
 
     public SafeList<Event> GetEvents() => _events;
 }

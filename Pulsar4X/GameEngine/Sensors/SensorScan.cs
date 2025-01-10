@@ -24,14 +24,14 @@ namespace Pulsar4X.Sensors
             if (position == null) //then it's probilby a colony
                 position = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<PositionDB>();
 
-            if( entity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<SensorReceiverAtbDB>(out var receivers))
+            if( entity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<SensorReceiverAtb>(out var receivers))
             {
                 var detectableEntitys = manager.GetAllEntitiesWithDataBlob<SensorProfileDB>();
 
                 foreach (var receiver in receivers)
                 {
                     var sensorAbl = receiver.GetAbilityState<SensorReceiverAbility>();
-                    var sensorAtb = receiver.Design.GetAttribute<SensorReceiverAtbDB>();
+                    var sensorAtb = receiver.Design.GetAttribute<SensorReceiverAtb>();
                     var sensorMgr = manager.GetSensorContacts(entity.FactionOwnerID);
                     var detections = SensorTools.GetDetectedEntites(sensorAtb, position.AbsolutePosition, detectableEntitys, atDateTime, faction.Id, true);
 

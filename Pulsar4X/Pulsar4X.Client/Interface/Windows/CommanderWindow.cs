@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
-using Pulsar4X.Datablobs;
 using Pulsar4X.ImGuiNetUI;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
@@ -36,7 +34,7 @@ namespace Pulsar4X.SDL2UI
         {
             if(!IsActive) return;
 
-            if(ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Commanders"), ref IsActive, _flags))
+            if(Window.Begin("Commanders", ref IsActive, _flags))
             {
                 if(ImGui.BeginTable("CommanderTable", 3, Styles.TableFlags))
                 {
@@ -75,6 +73,7 @@ namespace Pulsar4X.SDL2UI
 
                     ImGui.EndTable();
                 }
+                Window.End();
             }
         }
     }

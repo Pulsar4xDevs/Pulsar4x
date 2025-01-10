@@ -1,5 +1,6 @@
 using System.Linq;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
@@ -74,7 +75,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 _orderableDB = null;
             }
 
-            if (IsActive && ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Order Creation"), ref IsActive, _flags))
+            if (IsActive && Window.Begin("Order Creation", ref IsActive, _flags))
             {
                 RenderTabOptions();
                 if (_orderableDB != null && _orderEntity != null)
@@ -98,7 +99,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                         break;
                 }
                 ImGui.EndChild();
-                ImGui.End();
+                Window.End();
             }
         }
 

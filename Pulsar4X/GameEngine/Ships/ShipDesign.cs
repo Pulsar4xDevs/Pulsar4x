@@ -172,6 +172,49 @@ namespace Pulsar4X.Ships
             return armorMass;
         }
 
+        /// <summary>
+        /// Note: this itterates through the design list, so it's not particuarly efficent for per frame use.
+        /// </summary>
+        /// <param name="components">out list of components that have the given attribute</param>
+        /// <typeparam name="T">attribute type</typeparam>
+        /// <returns>true if design has componenst with this attribute</returns>
+        public bool TryGetComponentsByAttribute<T>(out List<(ComponentDesign design, int count)> components)
+            where T : IComponentDesignAttribute
+        {
+            bool hasComponents = false;
+             components = new ();
+            foreach (var component in Components)
+            {
+                if (component.design.HasAttribute<T>())
+                {
+                    hasComponents = true;
+                    components.Add(component);
+                }
+            }
+            return hasComponents;
+        }
+
+        /// <summary>
+        /// Returns a dictionary of component designs by attribute type.
+        /// Note that there will be doubleups of components where a component has multiple attributes.
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<Type, List<(ComponentDesign design, int count)>> GetComponentsByAttribute()
+        {
+            Dictionary<Type, List<(ComponentDesign design, int count)>> dict = new();
+            foreach (var component in Components)
+            {
+                foreach (var kvp in component.design.AttributesByType)
+                {
+                    if (!dict.ContainsKey(kvp.Key))
+                        dict.Add(kvp.Key, new List<(ComponentDesign design, int count)>());
+                    dict[kvp.Key].Add(component);
+                }
+            }
+            return dict;
+        }
+
+        
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue(nameof(UniqueID), UniqueID);

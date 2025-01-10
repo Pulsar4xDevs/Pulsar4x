@@ -16,10 +16,10 @@ namespace Pulsar4X.Datablobs
     /// </summary>
     public class ComponentInstancesDB : BaseDataBlob
     {
-
-
         [JsonProperty]
-        //internal readonly List<ComponentInstanceData> AllComponents = new List<ComponentInstanceData>();
+        internal readonly Dictionary<string, ComponentInstance> AllComponents = new ();
+        
+        //the below are JsonIgnore, we re-populate these collections useing the [OnDeserialised] Deserialized function, from AllComponents collection.
         [JsonIgnore]
         internal readonly Dictionary<string, ComponentDesign> AllDesigns = new ();
         [JsonIgnore]
@@ -28,10 +28,9 @@ namespace Pulsar4X.Datablobs
         Dictionary<Type, List<ComponentDesign>> _designsByAtbType = new ();
         [JsonIgnore]
         public Dictionary<string, List<ComponentInstance>> ComponentsByDesign = new ();
-
+        [JsonIgnore]
         public Dictionary<Type, List<ComponentInstance>> ComponentsByAttribute = new ();
 
-        internal readonly Dictionary<string, ComponentInstance> AllComponents = new ();
 
         /* Maybe flat arrays would be better? need to test see the mem size difference and speed difference.
         private Guid[] _instanceIDArray = new Guid[0];
@@ -111,7 +110,8 @@ namespace Pulsar4X.Datablobs
 
         internal void AddComponentInstance(ComponentInstance instance)
         {
-            AllComponents.Add(instance.UniqueID, instance);
+            if(!AllComponents.ContainsKey(instance.UniqueID))//we do this check because we're using All components to re-populate after loading.
+                AllComponents.Add(instance.UniqueID, instance);
 
             var design = instance.Design;
             AllDesigns[design.UniqueID] = design;
@@ -238,16 +238,10 @@ namespace Pulsar4X.Datablobs
         [OnDeserialized]
         private void Deserialized(StreamingContext context)
         {
-            // FIXME:
-            // var game = (Game)context.Context;
-            // game.PostLoad += (sender, args) =>
-            // {
-            //     foreach (var item in AllComponents)
-            //     {
-            //         AddComponentInstance(item.Value);
-            //     }
-            // };
-
+            foreach (var item in AllComponents)
+            {
+                AddComponentInstance(item.Value);
+            }
         }
     }
 }

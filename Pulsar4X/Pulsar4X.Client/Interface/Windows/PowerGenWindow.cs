@@ -1,5 +1,6 @@
 using System;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.SDL2UI;
 using Vector2 = System.Numerics.Vector2;
 using Pulsar4X.Energy;
@@ -71,7 +72,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 return;
 
             //If the player has activated the menu and there is a body that can be displayed show the menu
-            if (ImGui.Begin(WindowTitleHelper.GetDebugWindowTitle("Power Display " + _entityState.Name), ref IsActive, _flags))
+            if (Window.Begin("Power Display " + _entityState.Name, ref IsActive, _flags))
             {
                 ImGui.Text("Current Load: ");
                 ImGui.SameLine();
@@ -139,7 +140,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     posYD = nextYD;
                     posYS = nextYS;
                 }
-                ImGui.End();
+                Window.End();
             }
 
         }

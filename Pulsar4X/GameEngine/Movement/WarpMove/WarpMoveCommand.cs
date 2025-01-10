@@ -270,11 +270,13 @@ namespace Pulsar4X.Movement
             }
         }
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
             if(_warpingDB != null)
-                return _warpingDB.IsAtTarget;
-            return false;
+                _isFinished = _warpingDB.IsAtTarget;
+            else
+                _isFinished = false;
+            return _isFinished;
         }
 
         public override EntityCommand Clone()
@@ -306,16 +308,20 @@ namespace Pulsar4X.Movement
             throw new NotImplementedException();
         }
 
-        public override bool IsFinished()
+        internal override bool IsFinished()
         {
-            if(!IsRunning) return false;
-
-            foreach(var command in _shipCommands)
+            if(!IsRunning) 
+                _isFinished = false;
+            else
             {
-                if(!command.IsFinished())
-                    return false;
+                foreach (var command in _shipCommands)
+                {
+                    if (!command.IsFinished())
+                        return _isFinished = false;
+                }
+                _isFinished = true;
             }
-            return true;
+            return _isFinished;
         }
 
         internal override void Execute(DateTime atDateTime)

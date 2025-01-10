@@ -11,7 +11,7 @@ namespace Pulsar4X.SDL2UI.ModFileEditing;
 public class ComponentBluprintUI : BluePrintsUI
 {
     private AttributeBlueprintUI? _attributeBlueprintUI;
-    private List<ComponentTemplateAttributeBlueprint> _selectedAttributes;
+    private List<ComponentTemplatePropertyBlueprint> _selectedAttributes;
     public ComponentBluprintUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.ComponentTemplate)
     {
         Dictionary<string, ComponentTemplateBlueprint> blueprints = modDataStore.ComponentTemplates;
@@ -41,7 +41,7 @@ public class ComponentBluprintUI : BluePrintsUI
         if (!_isActive[selectedIndex])
             return;
         var selectedItem = (ComponentTemplateBlueprint)_itemBlueprints[selectedIndex];
-        _selectedAttributes = selectedItem.Attributes;
+        _selectedAttributes = selectedItem.Properties;
         
         if(_attributeBlueprintUI == null)
             _attributeBlueprintUI = new AttributeBlueprintUI(_modDataStore, selectedItem);

@@ -45,7 +45,7 @@ namespace Pulsar4X.Weapons
         //                FireControlInstances.Add(fc);
         //            }
         //        }
-        //        if (instancesDB.TryGetComponentsByAttribute<GenericBeamWeaponAtbDB>(out var weaponInstances))
+        //        if (instancesDB.TryGetComponentsByAttribute<GenericBeamWeaponAtb>(out var weaponInstances))
         //        {
         //            foreach (var gun in weaponInstances)
         //            {

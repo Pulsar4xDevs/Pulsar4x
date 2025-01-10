@@ -11,7 +11,6 @@ namespace Pulsar4X.Datablobs
         /// <summary>
         /// This is the Entity which Owns/Conatains/IsParentOf this datablob
         /// </summary>
-        [NotNull]
         public virtual Entity? OwningEntity { get; internal set; } = Entity.InvalidEntity;
 
         /// <summary>
