@@ -1,5 +1,6 @@
 using System;
 using ImGuiNET;
+using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.Client.Rendering;
 
@@ -24,6 +25,8 @@ public interface IRenderer : IDisposable
     void DeleteTexture(uint textureId);
 
     IntPtr Get();
+
+    void RenderLine(Shape[] shapes, Camera camera);
 
     uint CreateDefaultFontTexture(int width, int height, IntPtr pixels);
     void RenderImGui(ImDrawDataPtr drawData, int displayWidth, int displayHeight);

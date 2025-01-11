@@ -1,15 +1,52 @@
 ﻿using SDL2;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using ImGuiNET;
-using System.IO;
 using System.Runtime.InteropServices;
 
-namespace ImGuiSDL2CS {
+namespace ImGuiSDL2CS
+{
     // Even smaller than MiniTK, only offering the bare minimum required for ImGuiSDL2CS.
     public unsafe static class GL {
+
+        public static void LoadFunctions()
+        {
+            // Print OpenGL version
+            string version = GetString(Enum.GL_VERSION);
+            Console.WriteLine($"OpenGL Version: {version}");
+
+            // Explicitly load modern functions we need
+            CreateShader = _<glCreateShader>();
+            ShaderSource = _<glShaderSource>();
+            CompileShader = _<glCompileShader>();
+            GetShaderiv = _<glGetShaderiv>();
+            GetShaderInfoLog = _<glGetShaderInfoLog>();
+            CreateProgram = _<glCreateProgram>();
+            AttachShader = _<glAttachShader>();
+            LinkProgram = _<glLinkProgram>();
+            UseProgram = _<glUseProgram>();
+            GetUniformLocation = _<glGetUniformLocation>();
+            DeleteShader = _<glDeleteShader>();
+            Uniform4f = _<glUniform4f>();
+            GenBuffers = _<glGenBuffers>();
+            BindBuffer = _<glBindBuffer>();
+            BufferData = _<glBufferData>();
+            VertexAttribPointer = _<glVertexAttribPointer>();
+            EnableVertexAttribArray = _<glEnableVertexAttribArray>();
+            DrawArrays = _<glDrawArrays>();
+            DeleteBuffers = _<glDeleteBuffers>();
+            DisableVertexAttribArray = _<glDisableVertexAttribArray>();
+            GetProgramiv = _<glGetProgramiv>();
+            GetActiveUniform = _<glGetActiveUniform>();
+            ValidateProgram = _<glValidateProgram>();
+            GetProgramInfoLog = _<glGetProgramInfoLog>();
+
+            // Print any errors
+            uint error = GetError();
+            if (error != 0)
+            {
+                Console.WriteLine($"GL error during function loading: 0x{error:X}");
+            }
+        }
 
         private static T _<T>() where T : class {
             string name = typeof(T).Name;
@@ -17,8 +54,19 @@ namespace ImGuiSDL2CS {
             if (indexOfSplit != -1)
                 name = name.Substring(0, indexOfSplit);
             IntPtr ptr = SDL.SDL_GL_GetProcAddress(name);
+
+            // If that fails, try with ARB prefix
             if (ptr == IntPtr.Zero)
+            {
+                string arbName = "ARB" + name;
+                Console.WriteLine($"Trying ARB variant: {arbName}");
+                ptr = SDL.SDL_GL_GetProcAddress(arbName);
+            }
+            if (ptr == IntPtr.Zero)
+            {
+                Console.WriteLine($"Failed to load GL function: {name}");
                 return null;
+            }
             return Marshal.GetDelegateForFunctionPointer(ptr, typeof(T)) as T;
         }
 
@@ -122,6 +170,16 @@ namespace ImGuiSDL2CS {
             GL_REPEAT = 0x2901,
             GL_UNPACK_ROW_LENGTH = 0x0CF2,
             GL_CLAMP_TO_EDGE = 0x812F,
+            GL_VERTEX_SHADER = 0x8B31,
+            GL_FRAGMENT_SHADER = 0x8B30,
+            GL_ARRAY_BUFFER = 0x8892,
+            GL_STATIC_DRAW = 0x88E4,
+            GL_COMPILE_STATUS = 0x8B81,
+            GL_CURRENT_PROGRAM = 0x8B8D,
+            GL_ACTIVE_UNIFORMS = 0x8B86,
+            GL_LINK_STATUS = 0x8B82,
+            GL_NUM_EXTENSIONS = 0x821D,
+            GL_VALIDATE_STATUS = 0x8B83,
         }
 
         public delegate IntPtr glGetString(Enum pname);
@@ -228,6 +286,70 @@ namespace ImGuiSDL2CS {
         public delegate uint glGetError();
         public static glGetError GetError = _<glGetError>();
 
+        public delegate uint glCreateShader(uint type);
+        public static glCreateShader CreateShader = _<glCreateShader>();
+        public delegate void glShaderSource(uint shader, int count, string[] source, int[] length);
+        public static glShaderSource ShaderSource = _<glShaderSource>();
+        public delegate void glCompileShader(uint shader);
+        public static glCompileShader CompileShader = _<glCompileShader>();
+        public delegate uint glCreateProgram();
+        public static glCreateProgram CreateProgram = _<glCreateProgram>();
+        public delegate void glAttachShader(uint program, uint shader);
+        public static glAttachShader AttachShader = _<glAttachShader>();
+        public delegate void glLinkProgram(uint program);
+        public static glLinkProgram LinkProgram = _<glLinkProgram>();
+        public delegate int glGetUniformLocation(uint program, string name);
+        public static glGetUniformLocation GetUniformLocation = _<glGetUniformLocation>();
+        public delegate void glUniformMatrix4fv(int location, int count, bool transpose, float[] value);
+        public static glUniformMatrix4fv UniformMatrix4fv = _<glUniformMatrix4fv>();
+        public delegate void glDeleteShader(uint shader);
+        public static glDeleteShader DeleteShader = _<glDeleteShader>();
+        public delegate void glColor4f(float red, float green, float blue, float alpha);
+        public static glColor4f Color4f = _<glColor4f>();
+        public delegate void glUniform4f(int location, float v0, float v1, float v2, float v3);
+        public static glUniform4f Uniform4f = _<glUniform4f>();
+        public delegate void glGenBuffers(int n, out uint buffers);
+        public static glGenBuffers GenBuffers = _<glGenBuffers>();
+
+        public delegate void glBindBuffer(uint target, uint buffer);
+        public static glBindBuffer BindBuffer = _<glBindBuffer>();
+        public delegate void glBufferData(uint target, int size, float[] data, uint usage);
+        public static glBufferData BufferData = _<glBufferData>();
+        public delegate void glVertexAttribPointer(uint index, int size, uint type, bool normalized, int stride, IntPtr pointer);
+        public static glVertexAttribPointer VertexAttribPointer = _<glVertexAttribPointer>();
+        public delegate void glEnableVertexAttribArray(uint index);
+        public static glEnableVertexAttribArray EnableVertexAttribArray = _<glEnableVertexAttribArray>();
+        public delegate void glDrawArrays(uint mode, int first, int count);
+        public static glDrawArrays DrawArrays = _<glDrawArrays>();
+        public delegate void glDeleteBuffers(int n, ref uint buffers);
+        public static glDeleteBuffers DeleteBuffers = _<glDeleteBuffers>();
+        public delegate void glDeleteProgram(uint program);
+        public static glDeleteProgram DeleteProgram = _<glDeleteProgram>();
+        public delegate void glGetShaderiv(uint shader, Enum pname, out int param);
+        public static glGetShaderiv GetShaderiv = _<glGetShaderiv>();
+        public delegate void glGetShaderInfoLog(uint shader, int bufSize, out int length, StringBuilder infoLog);
+        public static glGetShaderInfoLog GetShaderInfoLog = _<glGetShaderInfoLog>();
+        public delegate void glColor4ub(byte red, byte green, byte blue, byte alpha);
+        public static glColor4ub Color4ub = _<glColor4ub>();
+        public delegate void glBegin(uint mode);
+        public static glBegin Begin = _<glBegin>();
+        public delegate void glVertex2d(double x, double y);
+        public static glVertex2d Vertex2d = _<glVertex2d>();
+        public delegate void glEnd();
+        public static glEnd End = _<glEnd>();
+        public delegate void glDisableVertexAttribArray(uint index);
+        public static glDisableVertexAttribArray DisableVertexAttribArray = _<glDisableVertexAttribArray>();
+        public delegate void glGetActiveUniform(uint program, uint index, int bufSize, out int length, out int size, out uint type, StringBuilder name);
+        public static glGetActiveUniform GetActiveUniform = _<glGetActiveUniform>();
+        public delegate void glGetProgramiv(uint program, Enum pname, out int param);
+        public static glGetProgramiv GetProgramiv = _<glGetProgramiv>();
+        public delegate IntPtr glGetStringi(Enum name, uint index);
+        public static glGetStringi GetStringi = _<glGetStringi>();
+        public delegate void glValidateProgram(uint program);
+        public static glValidateProgram ValidateProgram = _<glValidateProgram>();
+
+        public delegate void glGetProgramInfoLog(uint program, int maxLength, out int length, StringBuilder infoLog);
+        public static glGetProgramInfoLog GetProgramInfoLog = _<glGetProgramInfoLog>();
         /*
         public delegate void gl();
         public static gl  = _<gl>();

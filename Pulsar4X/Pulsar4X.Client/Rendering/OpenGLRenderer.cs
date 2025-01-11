@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using ImGuiNET;
 using ImGuiSDL2CS;
+using Pulsar4X.SDL2UI;
 using SDL2;
 
 namespace Pulsar4X.Client.Rendering;
@@ -13,18 +14,40 @@ public class OpenGLRenderer : IRenderer
 {
     private IntPtr _glContext;
     private IntPtr _windowHandle;
+    private LineRenderer _lineRenderer;
 
     private Dictionary<string, uint> _textures = new ();
 
     public void SetAttributes()
     {
+        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_RED_SIZE, 8);
+        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_GREEN_SIZE, 8);
+        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_BLUE_SIZE, 8);
+        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_ALPHA_SIZE, 8);
         SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DOUBLEBUFFER, 1);
         SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DEPTH_SIZE, 24);
         SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_STENCIL_SIZE, 8);
+        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 6);
+        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK, (int)SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_CORE);
     }
 
     public void Initialize(IntPtr windowHandle)
     {
+        // Print all OpenGL extensions
+        GL.GetIntegerv(GL.Enum.GL_NUM_EXTENSIONS, out var numExtensions);
+        Console.WriteLine($"Number of OpenGL extensions: {numExtensions}");
+        Console.WriteLine("Looking for shader-related extensions:");
+        for (int i = 0; i < numExtensions; i++)
+        {
+            IntPtr extPtr = GL.GetStringi(GL.Enum.GL_EXTENSIONS, (uint)i);
+            string? ext = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(extPtr);
+            if (ext != null && (ext.Contains("shader") || ext.Contains("SHADER")))
+            {
+                Console.WriteLine($"Found extension: {ext}");
+            }
+        }
+
         _windowHandle = windowHandle;
 
         // Create the OpenGL context
@@ -44,6 +67,11 @@ public class OpenGLRenderer : IRenderer
         // After context creation
         string version = GL.GetString(GL.Enum.GL_VERSION);
         Console.WriteLine($"OpenGL Version: {version}");
+
+        // Load OpenGL functions
+        GL.LoadFunctions();
+
+        _lineRenderer = new LineRenderer();
     }
 
     public void BeginFrame()
@@ -285,7 +313,7 @@ public class OpenGLRenderer : IRenderer
                 {
                     GL.BindTexture(GL.Enum.GL_TEXTURE_2D, (uint)pcmd.TextureId);
 
-                    CheckGLError("RenderImGui");
+                    //CheckGLError("RenderImGui");
                     GL.Scissor(
                     (int)pcmd.ClipRect.X,
                     (int)(io.DisplaySize.Y - pcmd.ClipRect.W),
@@ -312,6 +340,11 @@ public class OpenGLRenderer : IRenderer
         GL.PopAttrib();
         GL.Viewport(lastViewport.X, lastViewport.Y, lastViewport.Z, lastViewport.W);
         GL.Scissor(lastScissorBox.X, lastScissorBox.Y, lastScissorBox.Z, lastScissorBox.W);
+    }
+
+    public void RenderLine(Shape[] shapes, Camera camera)
+    {
+        _lineRenderer.Draw(shapes, camera);
     }
 
     public void Dispose()
