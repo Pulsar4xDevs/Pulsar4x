@@ -27,8 +27,10 @@ public class OpenGLRenderer : IRenderer
         SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DOUBLEBUFFER, 1);
         SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DEPTH_SIZE, 24);
         SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_STENCIL_SIZE, 8);
+#if WINDOWS
         SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 4);
         SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 6);
+#endif
         SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK, (int)SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_CORE);
     }
 
@@ -344,7 +346,17 @@ public class OpenGLRenderer : IRenderer
 
     public void RenderLine(Shape[] shapes, Camera camera)
     {
+        // Save the current OpenGL context state
+        IntPtr previousContext = SDL.SDL_GL_GetCurrentContext();
+
+        // Make the OpenGL context current
+        SDL.SDL_GL_MakeCurrent(_windowHandle, _glContext);
+
+        // Render the lines
         _lineRenderer.Draw(shapes, camera);
+
+        // Restore the previous context
+        SDL.SDL_GL_MakeCurrent(_windowHandle, previousContext);
     }
 
     public void Dispose()

@@ -476,7 +476,7 @@ namespace Pulsar4X.SDL2UI
                         new Vector2() { X = 100, Y = 100 },
                         new Vector2() { X = 0, Y = 0 }
                     },
-                    Color = new SDL.SDL_Color() { r = 255, g = 0, b = 0, a = 255 }
+                    Color = new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 255 }
                 }
             };
             _uiState.ViewPort.Renderer.RenderLine(shapes, _uiState.Camera);
@@ -487,11 +487,11 @@ namespace Pulsar4X.SDL2UI
                 {
                     Points = new Vector2[3]
                     {
-                        new Vector2() { X = 200, Y = 200 },
-                        new Vector2() { X = 300, Y = 300 },
-                        new Vector2() { X = 200, Y = 200 }
+                        new Vector2() { X = 0, Y = 0 },
+                        new Vector2() { X = 150, Y = 100 },
+                        new Vector2() { X = 0, Y = 0 }
                     },
-                    Color = new SDL.SDL_Color() { r = 255, g = 255, b = 0, a = 255 }
+                    Color = new SDL.SDL_Color() { r = 255, g = 255, b = 128, a = 255 }
                 }
             };
             _uiState.ViewPort.Renderer.RenderLine(shapes, _uiState.Camera);

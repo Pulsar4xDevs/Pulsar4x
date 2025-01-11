@@ -39,6 +39,9 @@ namespace ImGuiSDL2CS
             GetActiveUniform = _<glGetActiveUniform>();
             ValidateProgram = _<glValidateProgram>();
             GetProgramInfoLog = _<glGetProgramInfoLog>();
+            UniformMatrix4fv = _<glUniformMatrix4fv>();
+            ColorMask = _<glColorMask>();
+            GetFloatv = _<glGetFloatv>();
 
             // Print any errors
             uint error = GetError();
@@ -180,6 +183,10 @@ namespace ImGuiSDL2CS
             GL_LINK_STATUS = 0x8B82,
             GL_NUM_EXTENSIONS = 0x821D,
             GL_VALIDATE_STATUS = 0x8B83,
+            GL_COLOR_WRITEMASK = 0x0C23,
+            GL_CURRENT_COLOR = 0x0B00,
+            GL_COLOR_MATERIAL = 0x0B57,
+            GL_ACTIVE_ATTRIBUTES = 0x8B89,
         }
 
         public delegate IntPtr glGetString(Enum pname);
@@ -350,6 +357,11 @@ namespace ImGuiSDL2CS
 
         public delegate void glGetProgramInfoLog(uint program, int maxLength, out int length, StringBuilder infoLog);
         public static glGetProgramInfoLog GetProgramInfoLog = _<glGetProgramInfoLog>();
+        public delegate void glColorMask(bool red, bool green, bool blue, bool alpha);
+        public static glColorMask ColorMask = _<glColorMask>();
+
+        public delegate void glGetFloatv(Enum pname, out float param);
+        public static glGetFloatv GetFloatv = _<glGetFloatv>();
         /*
         public delegate void gl();
         public static gl  = _<gl>();
