@@ -12,6 +12,7 @@ using Pulsar4X.Orbital;
 using Pulsar4X.Factions;
 using Pulsar4X.Damage;
 using Pulsar4X.Weapons;
+using Pulsar4X.Extensions;
 
 
 namespace Pulsar4X.SDL2UI.Combat
@@ -27,7 +28,7 @@ namespace Pulsar4X.SDL2UI.Combat
         float _newmatKinetic = 1f;
         private float _newmatDensity = 5000;
         int _newmatAmount = 50;
-        
+
 
         private float _projLen = 0.25f;
         private float _projMass = 0.25f;
@@ -43,7 +44,6 @@ namespace Pulsar4X.SDL2UI.Combat
         private List<RawBmp>? _damageFrames = null;
         private int _showFrameNum = 0;
         private IntPtr _showDmgFrametx;
-
         private EntityDamageProfileDB? _profile;
         private RawBmp _rawShipImage;
         private IntPtr _shipImgPtr;
@@ -98,7 +98,7 @@ namespace Pulsar4X.SDL2UI.Combat
                 _selectedEntity = damageableEntity;
                 _profile = damageableEntity.GetDataBlob<EntityDamageProfileDB>();
                 _rawShipImage = _profile.DamageProfile;
-                SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, _rawShipImage, ref  _shipImgPtr);
+                _uiState.ViewPort.Renderer.CreateTexture(_rawShipImage, ref _shipImgPtr);
 
                 _damageMap = new DamageMap(_profile);
                 SDL2Helper.CreateSDLTextures(_uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
@@ -108,9 +108,9 @@ namespace Pulsar4X.SDL2UI.Combat
                 _dmProjectileSliderLhs = (int)(_dmHeight * 0.75);
                 _dmProjectileSliderTop = 0;
                 _dmProjectileSliderRhs = (int)(_dmHeight * 0.25);
-                
-                
-                
+
+
+
                 if (_profile.DamageEvents.Count > 0)
                 {
                     _damageEventIndex = _profile.DamageEvents.Count - 1;
@@ -132,7 +132,7 @@ namespace Pulsar4X.SDL2UI.Combat
             _damageFrames = DamageTools.DealDamageSim(_profile, _profile.DamageEvents[_damageEventIndex]).damageFrames;
             _showFrameNum = 0;
             if (_damageFrames != null)
-                SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, _damageFrames[_showFrameNum], ref _showDmgFrametx);
+                _uiState.ViewPort.Renderer.CreateTexture(_damageFrames[_showFrameNum], ref _showDmgFrametx);
         }
 
 
@@ -221,8 +221,8 @@ namespace Pulsar4X.SDL2UI.Combat
                         ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(w, h));
 
                     }
-                    
-                    
+
+
                     if (_damageMapPtr[0] != IntPtr.Zero&& ImGui.CollapsingHeader("New Damage Map"))
                     {
                         var vsliderSize = new System.Numerics.Vector2(18, _dmHeight);
@@ -283,9 +283,9 @@ namespace Pulsar4X.SDL2UI.Combat
                             ImGui.SetCursorPos(cpos);
                             ImGui.Image(_damageMapPtr[6], new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
-                        
-                        
-                        
+
+
+
                         ImGui.SameLine();
                         if (ImGui.VSliderInt("###rhs", vsliderSize, ref _dmProjectileSliderRhs, _dmHeight, 0))
                         {
@@ -303,19 +303,19 @@ namespace Pulsar4X.SDL2UI.Combat
                             else
                                 _dmProjectileSliderRhs = 0;
                         }
-                        
+
                         ImGui.Checkbox("comIDMap", ref _showCompIDMap);
                         ImGui.SameLine();
                         ImGui.Checkbox("PresMap", ref _showPresMap);
-                        ImGui.SameLine();                        
+                        ImGui.SameLine();
                         ImGui.Checkbox("Vmap", ref _showVMap);
-                        ImGui.SameLine();                
+                        ImGui.SameLine();
                         ImGui.Checkbox("Pmap", ref _showPMap);
-                        ImGui.SameLine();                
+                        ImGui.SameLine();
                         ImGui.Checkbox("TempMap", ref _showTemp);
-                        ImGui.SameLine();                
+                        ImGui.SameLine();
                         ImGui.Checkbox("PhaseStateMap", ref _showPState);
-                        ImGui.SameLine();                
+                        ImGui.SameLine();
                         ImGui.Checkbox("PhotonMap", ref _showPhMap);
                     }
 
@@ -333,8 +333,8 @@ namespace Pulsar4X.SDL2UI.Combat
                             var color = ImGui.GetColorU32(0xFFFFFFFF);
                             // Draw the line relative to the image position
                             drawList.AddLine(lineStart, lineEnd, color, 1f);
-                            
-                            
+
+
                             ImGui.Columns(2);
 
 
@@ -368,7 +368,7 @@ namespace Pulsar4X.SDL2UI.Combat
                                 //ImGui.InputFloat("Length", ref _projLen);
                                 if (ImGui.SliderInt("Speed", ref _dmProjectileSpeed, 100, 100000))
                                 {
-                                
+
                                 }
 
                             }
@@ -387,13 +387,13 @@ namespace Pulsar4X.SDL2UI.Combat
                                 if(ImGui.SliderFloat("Length in seconds", ref _beamlifetime, 1, 60))
                                 {}
                             }
-                            
+
                             ImGui.Columns(0);
 
 
 
 
-                            
+
                             if (ImGui.Button("Fire"))
                             {
                                 SetDMVectors();
@@ -403,7 +403,7 @@ namespace Pulsar4X.SDL2UI.Combat
 
 
 
-                                
+
                                 /*
                                 _damageFrag = new DamageFragment()
                                 {
@@ -416,7 +416,7 @@ namespace Pulsar4X.SDL2UI.Combat
                                 _damageFrames = DamageTools.DealDamageSim(_profile, _damageFrag).damageFrames;
                                 _rawShipImage = _damageFrames.Last();*/
                             }
-                            
+
                             if (ImGui.Button("RunSimLoop"))
                             {
                                 _runSimLoop =! _runSimLoop;
@@ -459,7 +459,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             _showFrameNum--;
                             if (_showFrameNum < 0)
                                 _showFrameNum = _damageFrames.Count - 1;
-                            SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, _damageFrames[_showFrameNum], ref _showDmgFrametx);
+                            _uiState.ViewPort.Renderer.CreateTexture(_damageFrames[_showFrameNum], ref _showDmgFrametx);
                         }
 
                         ImGui.SameLine();
@@ -468,7 +468,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             _showFrameNum++;
                             if (_showFrameNum > _damageFrames.Count - 1)
                                 _showFrameNum = 0;
-                            SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, _damageFrames[_showFrameNum], ref _showDmgFrametx);
+                            _uiState.ViewPort.Renderer.CreateTexture(_damageFrames[_showFrameNum], ref _showDmgFrametx);
                         }
 
                         ImGui.Text(_showFrameNum + 1 + " of " + _damageFrames.Count);
@@ -519,8 +519,8 @@ namespace Pulsar4X.SDL2UI.Combat
                 };
                 _projectileDamageMap = new DamageMap((int)dmProjStart.X, (int)dmProjStart.Y, bidb, _beamlifetime);
             }
-            
-            
+
+
             //_projectileDMapPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageMap.compIDMap, _damageMap.Width, _damageMap.Height);
         }
     }

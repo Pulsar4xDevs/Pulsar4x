@@ -18,7 +18,7 @@ public class OpenGLRenderer : IRenderer
     private LineRenderer _lineRenderer;
     private IntPtr _previousContext = IntPtr.Zero;
 
-    private Dictionary<string, uint> _textures = new ();
+    private List<uint> _textures = new ();
 
     public void SetAttributes()
     {
@@ -98,7 +98,7 @@ public class OpenGLRenderer : IRenderer
         return _glContext;
     }
 
-    public void CreateTexture(RawBmp rawBmp, ref IntPtr texturePtr, string name)
+    public void CreateTexture(RawBmp rawBmp, ref IntPtr texturePtr)
     {
         IntPtr pixels;
         unsafe
@@ -125,11 +125,11 @@ public class OpenGLRenderer : IRenderer
                                 0x000000ff);
 
 
-        texturePtr = (IntPtr)LoadTexture(sdlSurface, name);
+        texturePtr = (IntPtr)LoadTexture(sdlSurface);
         SDL.SDL_FreeSurface(sdlSurface);
     }
 
-    public uint LoadTexture(IntPtr surfacePtr, string name)
+    public uint LoadTexture(IntPtr surfacePtr)
     {
         // Convert the SDL_Surface pointer to a managed structure
         var surface = Marshal.PtrToStructure<SDL.SDL_Surface>(surfacePtr);
@@ -200,7 +200,7 @@ public class OpenGLRenderer : IRenderer
         {
             // Clean up on failure
             GL.DeleteTextures(1, ref textureId);
-            throw new Exception($"Failed to create texture {name}: {e.Message}", e);
+            throw new Exception($"Failed to create texture: {e.Message}", e);
         }
 
         // Generate mipmaps (optional, not implemented yet)
@@ -210,22 +210,12 @@ public class OpenGLRenderer : IRenderer
         CheckGLError("LoadTexture (TexImage2D)");
 
         // Keep track of the loaded textures, if name is already used replace the texture
-        if(_textures.ContainsKey(name))
+        if(!_textures.Contains(textureId))
         {
-            DeleteTexture(name);
+            _textures.Add(textureId);
         }
-        _textures.Add(name, textureId);
 
         return textureId;
-    }
-
-    public void DeleteTexture(string name)
-    {
-        if(_textures.TryGetValue(name, out uint textureId))
-        {
-            GL.DeleteTextures(1, ref textureId);
-            _textures.Remove(name);
-        }
     }
 
     public void DeleteTexture(uint textureId)
@@ -234,12 +224,8 @@ public class OpenGLRenderer : IRenderer
 
         GL.DeleteTextures(1, ref textureId);
 
-        // Remove all entries where the value is equal to the texture ID
-        var toRemove = _textures.Where(x => x.Value == textureId).ToList();
-        foreach(var kvp in toRemove)
-        {
-            _textures.Remove(kvp.Key);
-        }
+        // Remove textureId
+        _textures.Remove(textureId);
     }
 
     public uint CreateDefaultFontTexture(int width, int height, IntPtr pixels)
@@ -398,9 +384,9 @@ public class OpenGLRenderer : IRenderer
     {
         if(_textures.Count > 0)
         {
-            foreach(var kvp in _textures)
+            foreach(var texture in _textures)
             {
-                uint textureId = _textures[kvp.Key];
+                uint textureId = texture;
                 GL.DeleteTextures(1, ref textureId);
             }
             _textures.Clear();
