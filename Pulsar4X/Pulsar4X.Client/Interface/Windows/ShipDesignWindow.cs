@@ -594,7 +594,7 @@ namespace Pulsar4X.SDL2UI
             if(_profile == null)
                 throw new NullReferenceException();
 
-            _uiState.ViewPort.Renderer.CreateTexture(_profile.DamageProfile, ref _shipImgPtr);
+            _uiState.ViewPort.Renderer.CreateTexture(_profile.DamageProfile, ref _shipImgPtr, Client.Rendering.PixelFormat.ARGB8888);
             rawimagewidth = _profile.DamageProfile.Width;
             rawimageheight = _profile.DamageProfile.Height;
             _imagecreated = true;

@@ -98,7 +98,7 @@ namespace Pulsar4X.SDL2UI.Combat
                 _selectedEntity = damageableEntity;
                 _profile = damageableEntity.GetDataBlob<EntityDamageProfileDB>();
                 _rawShipImage = _profile.DamageProfile;
-                _uiState.ViewPort.Renderer.CreateTexture(_rawShipImage, ref _shipImgPtr);
+                _uiState.ViewPort.Renderer.CreateTexture(_rawShipImage, ref _shipImgPtr, Client.Rendering.PixelFormat.ARGB8888);
 
                 _damageMap = new DamageMap(_profile);
                 SDL2Helper.CreateSDLTextures(_uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
@@ -132,7 +132,7 @@ namespace Pulsar4X.SDL2UI.Combat
             _damageFrames = DamageTools.DealDamageSim(_profile, _profile.DamageEvents[_damageEventIndex]).damageFrames;
             _showFrameNum = 0;
             if (_damageFrames != null)
-                _uiState.ViewPort.Renderer.CreateTexture(_damageFrames[_showFrameNum], ref _showDmgFrametx);
+                _uiState.ViewPort.Renderer.CreateTexture(_damageFrames[_showFrameNum], ref _showDmgFrametx, Client.Rendering.PixelFormat.ARGB8888);
         }
 
 
@@ -459,7 +459,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             _showFrameNum--;
                             if (_showFrameNum < 0)
                                 _showFrameNum = _damageFrames.Count - 1;
-                            _uiState.ViewPort.Renderer.CreateTexture(_damageFrames[_showFrameNum], ref _showDmgFrametx);
+                            _uiState.ViewPort.Renderer.CreateTexture(_damageFrames[_showFrameNum], ref _showDmgFrametx, Client.Rendering.PixelFormat.ARGB8888);
                         }
 
                         ImGui.SameLine();
@@ -468,7 +468,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             _showFrameNum++;
                             if (_showFrameNum > _damageFrames.Count - 1)
                                 _showFrameNum = 0;
-                            _uiState.ViewPort.Renderer.CreateTexture(_damageFrames[_showFrameNum], ref _showDmgFrametx);
+                            _uiState.ViewPort.Renderer.CreateTexture(_damageFrames[_showFrameNum], ref _showDmgFrametx, Client.Rendering.PixelFormat.ARGB8888);
                         }
 
                         ImGui.Text(_showFrameNum + 1 + " of " + _damageFrames.Count);

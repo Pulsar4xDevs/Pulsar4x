@@ -21,7 +21,7 @@ public interface IRenderer : IDisposable
     void EndFrame();
     void Clear(float r, float g, float b, float a);
 
-    void CreateTexture(RawBmp rawBmp, ref IntPtr texturePtr);
+    void CreateTexture(RawBmp rawBmp, ref IntPtr texturePtr, PixelFormat pixelFormat = PixelFormat.RGBA8888);
     uint LoadTexture(IntPtr surfacePtr);
     void DeleteTexture(uint textureId);
 

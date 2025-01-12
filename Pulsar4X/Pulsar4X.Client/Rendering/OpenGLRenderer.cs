@@ -98,7 +98,7 @@ public class OpenGLRenderer : IRenderer
         return _glContext;
     }
 
-    public void CreateTexture(RawBmp rawBmp, ref IntPtr texturePtr)
+    public void CreateTexture(RawBmp rawBmp, ref IntPtr texturePtr, PixelFormat pixelFormat = PixelFormat.RGBA8888)
     {
         IntPtr pixels;
         unsafe
@@ -112,6 +112,26 @@ public class OpenGLRenderer : IRenderer
         // Delete any existing texture
         DeleteTexture((uint)texturePtr);
 
+        // Create the masks based on the requested pixel format
+        uint rmask, gmask, bmask, amask;
+
+        switch(pixelFormat)
+        {
+            case PixelFormat.ARGB8888:
+                amask = 0xff000000;
+                rmask = 0x00ff0000;
+                gmask = 0x0000ff00;
+                bmask = 0x000000ff;
+                break;
+            case PixelFormat.RGBA8888:
+            default:
+                rmask = 0xff000000;
+                gmask = 0x00ff0000;
+                bmask = 0x0000ff00;
+                amask = 0x000000ff;
+                break;
+        }
+
         // Create the surface
         IntPtr sdlSurface = SDL.SDL_CreateRGBSurfaceFrom(
                                 pixels,
@@ -119,11 +139,10 @@ public class OpenGLRenderer : IRenderer
                                 rawBmp.Height,
                                 rawBmp.Depth * 8,
                                 rawBmp.Stride,
-                                0xff000000,
-                                0x00ff0000,
-                                0x0000ff00,
-                                0x000000ff);
-
+                                rmask,
+                                gmask,
+                                bmask,
+                                amask);
 
         texturePtr = (IntPtr)LoadTexture(sdlSurface);
         SDL.SDL_FreeSurface(sdlSurface);
