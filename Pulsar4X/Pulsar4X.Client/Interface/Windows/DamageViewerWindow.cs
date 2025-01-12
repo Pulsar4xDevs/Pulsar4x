@@ -102,6 +102,15 @@ namespace Pulsar4X.SDL2UI.Combat
 
                 _damageMap = new DamageMap(_profile);
                 SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, ref _damageMapPtr);
+                _dmWidth = (int)(_damageMap.Width * _dmSizeScaler);
+                _dmHeight = (int)(_damageMap.Height * _dmSizeScaler);
+                _dmProjectileSliderBot = _dmWidth;
+                _dmProjectileSliderLhs = (int)(_dmHeight * 0.75);
+                _dmProjectileSliderTop = 0;
+                _dmProjectileSliderRhs = (int)(_dmHeight * 0.25);
+                
+                
+                
                 if (_profile.DamageEvents.Count > 0)
                 {
                     _damageEventIndex = _profile.DamageEvents.Count - 1;
@@ -181,8 +190,10 @@ namespace Pulsar4X.SDL2UI.Combat
         private int _dmProjectileSliderLhs = 0;
         private int _dmProjectileSliderRhs = 0;
         private float _dmSizeScaler = 4.0f;
+        private int _dmWidth;
+        private int _dmHeight;
 
-        private System.Numerics.Vector2 _ImageStart = new System.Numerics.Vector2(0, 0);
+        private System.Numerics.Vector2 _ImageStart = new(0, 0);
         private bool _showCompIDMap = false;
         private bool _showVMap = false;
         private bool _showPresMap = false;
@@ -203,6 +214,7 @@ namespace Pulsar4X.SDL2UI.Combat
                 if (Window.Begin("DamageViewer Testing"))
                 {
 
+                    /*
                     if (_shipImgPtr != IntPtr.Zero && ImGui.CollapsingHeader("Old Damage View"))
                     {
                         int w = _rawShipImage.Width; // / 4;
@@ -210,28 +222,27 @@ namespace Pulsar4X.SDL2UI.Combat
                         ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(w, h));
 
                     }
-
+                    */
+                    
                     if (_damageMapPtr[0] != IntPtr.Zero&& ImGui.CollapsingHeader("New Damage Map"))
                     {
-                        int w = (int)(_damageMap.Width * _dmSizeScaler);
-                        int h = (int)(_damageMap.Height * _dmSizeScaler);
-                        var vsliderSize = new System.Numerics.Vector2(18, h);
+                        var vsliderSize = new System.Numerics.Vector2(18, _dmHeight);
                         //var hsliderSize = new System.Numerics.Vector2(18, w);
                         //ImGuiSliderFlags.
-                        ImGui.SetNextItemWidth(w);
+                        ImGui.SetNextItemWidth(_dmWidth);
                         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + vsliderSize.X + 8);
-                        if (ImGui.SliderInt("###top", ref _dmProjectileSliderTop, 0, w))
+                        if (ImGui.SliderInt("###top", ref _dmProjectileSliderTop, 0, _dmWidth))
                         {
-                            if (_dmProjectileSliderLhs > h * 0.5)
-                                _dmProjectileSliderLhs = h;
+                            if (_dmProjectileSliderLhs > _dmHeight * 0.5)
+                                _dmProjectileSliderLhs = _dmHeight;
                             else
                                 _dmProjectileSliderLhs = 0;
                         }
 
-                        if (ImGui.VSliderInt("###lhs", vsliderSize, ref _dmProjectileSliderLhs, h, 0))
+                        if (ImGui.VSliderInt("###lhs", vsliderSize, ref _dmProjectileSliderLhs, _dmHeight, 0))
                         {
-                            if(_dmProjectileSliderTop > w * 0.5)
-                                _dmProjectileSliderTop = w;
+                            if(_dmProjectileSliderTop > _dmWidth * 0.5)
+                                _dmProjectileSliderTop = _dmWidth;
                             else
                                 _dmProjectileSliderTop = 0;
                         }
@@ -241,55 +252,55 @@ namespace Pulsar4X.SDL2UI.Combat
                         if(_showCompIDMap)
                         {
                             ImGui.SetCursorPos(cpos);
-                            ImGui.Image(_damageMapPtr[0], new System.Numerics.Vector2(w, h));
+                            ImGui.Image(_damageMapPtr[0], new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
                         if(_showPresMap)
                         {
                             ImGui.SetCursorPos(cpos);
-                            ImGui.Image(_damageMapPtr[1], new System.Numerics.Vector2(w, h));
+                            ImGui.Image(_damageMapPtr[1], new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
                         if(_showVMap)
                         {
                             ImGui.SetCursorPos(cpos);
-                            ImGui.Image(_damageMapPtr[2], new System.Numerics.Vector2(w, h));
+                            ImGui.Image(_damageMapPtr[2], new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
                         if(_showPMap)
                         {
                             ImGui.SetCursorPos(cpos);
-                            ImGui.Image(_damageMapPtr[3], new System.Numerics.Vector2(w, h));
+                            ImGui.Image(_damageMapPtr[3], new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
                         if(_showTemp)
                         {
                             ImGui.SetCursorPos(cpos);
-                            ImGui.Image(_damageMapPtr[4], new System.Numerics.Vector2(w, h));
+                            ImGui.Image(_damageMapPtr[4], new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
                         if(_showPState)
                         {
                             ImGui.SetCursorPos(cpos);
-                            ImGui.Image(_damageMapPtr[5], new System.Numerics.Vector2(w, h));
+                            ImGui.Image(_damageMapPtr[5], new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
                         if(_showPhMap && _damageMapPtr[6] != IntPtr.Zero)
                         {
                             ImGui.SetCursorPos(cpos);
-                            ImGui.Image(_damageMapPtr[6], new System.Numerics.Vector2(w, h));
+                            ImGui.Image(_damageMapPtr[6], new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
                         
                         
                         
                         ImGui.SameLine();
-                        if (ImGui.VSliderInt("###rhs", vsliderSize, ref _dmProjectileSliderRhs, h, 0))
+                        if (ImGui.VSliderInt("###rhs", vsliderSize, ref _dmProjectileSliderRhs, _dmHeight, 0))
                         {
-                            if(_dmProjectileSliderBot > w * 0.5)
-                                _dmProjectileSliderBot = w;
+                            if(_dmProjectileSliderBot > _dmWidth * 0.5)
+                                _dmProjectileSliderBot = _dmWidth;
                             else
                                 _dmProjectileSliderBot = 0;
                         }
-                        ImGui.SetNextItemWidth(w);
+                        ImGui.SetNextItemWidth(_dmWidth);
                         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + vsliderSize.X + 8);
-                        if (ImGui.SliderInt("###bot", ref _dmProjectileSliderBot, 0, w))
+                        if (ImGui.SliderInt("###bot", ref _dmProjectileSliderBot, 0, _dmWidth))
                         {
-                            if (_dmProjectileSliderRhs > h * 0.5)
-                                _dmProjectileSliderRhs = h;
+                            if (_dmProjectileSliderRhs > _dmHeight * 0.5)
+                                _dmProjectileSliderRhs = _dmHeight;
                             else
                                 _dmProjectileSliderRhs = 0;
                         }

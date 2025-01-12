@@ -15,14 +15,17 @@ namespace GameEngine.Damage;
 
 public class DamageMap
 {
+    public Dictionary<string, int> componentIDLookup = new();
+    private int _nextComponentID = 0;
+
     public double TotalEnergy = 0;
     public double FastestSpeed = 0;
-    public const int PhysicsScale = 1000;
-    public int Scale = 100;//pixels per meter
+    public const int PhysicsScale = 1000;//currently not used
+    public int Scale = 100;//particles per meter
     int _pixBuf = 3; //this is just how much space we're leaving around the edges. 
     public PhysicalParticle[] PMap;
     public PhotonParticle[] PhMap;
-    public string[] compIDMap; //componentInstance Map.
+    public int[] compIDMap; //componentInstance Map.
     public float[] PresMap; //pressure in bar
     public int Width;
     public int Height;
@@ -42,7 +45,7 @@ public class DamageMap
         Y = posY;
         Width = width;
         Height = height;
-        compIDMap = new string[Width * Height];
+        compIDMap = new int[Width * Height];
         PMap = new PhysicalParticle[Width * Height];
         PresMap = new float[Width * Height];
         // Let's create a simple projectile shape, like a bullet or missile
@@ -54,8 +57,8 @@ public class DamageMap
                 if (x == width / 2 && y == height / 2) // Center point for a single particle projectile
                 {
                     int index = y * width + x;
-                    compIDMap[index] = "projectile";
-                    var newPart = new PhysicalParticle(material, new Vector2(x,y), velocity, Scale);
+                    compIDMap[index] = _nextComponentID;
+                    var newPart = new PhysicalParticle(_nextComponentID, material, new Vector2(x,y), velocity, Scale);
                     newPart.mapIndex = index;
                     PMap[index] = newPart;
                     PresMap[index] = 1.0f; // Assuming atmospheric pressure for simplicity
@@ -63,8 +66,24 @@ public class DamageMap
                 // If you want a more complex shape, you can use conditions here to define where particles exist
             }
         }
+        componentIDLookup.Add("projectile"+_nextComponentID, _nextComponentID);
+        _nextComponentID++;
     }
 
+    public int GenerateNewCompID(string strID)
+    {
+        componentIDLookup.Add(strID+_nextComponentID, _nextComponentID);
+        _nextComponentID++;
+        return _nextComponentID - 1;
+    }
+
+    /// <summary>
+    /// laser creation
+    /// </summary>
+    /// <param name="posX"></param>
+    /// <param name="posY"></param>
+    /// <param name="beamInfo"></param>
+    /// <param name="lifetime"></param>
     public DamageMap(int posX, int posY, BeamInfoDB beamInfo, float lifetime)
     {
         X = posX;
@@ -75,7 +94,7 @@ public class DamageMap
         Width = 10; // Example width, set as needed
         Height = 10; // Example height, set as needed
         PhMap = new PhotonParticle[Width * Height];
-        compIDMap = new string[Width * Height];
+        compIDMap = new int[Width * Height];
         PMap = new PhysicalParticle[Width * Height];
         PresMap = new float[Width * Height];
         int length = 5; //todo change this to dispersion from range.
@@ -99,20 +118,14 @@ public class DamageMap
             if (mapX >= 0 && mapX < Width && mapY >= 0 && mapY < Height) // Bounds check for small map
             {
                 int index = GetIndex(mapX, mapY);
-                compIDMap[index] = "photon";
-                PhMap[index] = new PhotonParticle
-                {
-                    Position = particlePosition,
-                    Velocity = beamInfo.VelocityVector.ToNumericsVector2(),
-                    WaveLength = (float)beamInfo.Frequency,
-                    Power = (float)beamInfo.Energy,
-                    IsSpawner = true,
-                    SpawnerLifetime = lifetime,
-                    mapIndex = index
-                };
-                
+                var newPhoton = new PhotonParticle(_nextComponentID, beamInfo, particlePosition, lifetime);
+                newPhoton.mapIndex = index;
+                PhMap[index] = newPhoton;
+                compIDMap[index] = _nextComponentID;
             }
         }
+        componentIDLookup.Add("photon"+_nextComponentID, _nextComponentID);
+        _nextComponentID++;
     }
     
     public DamageMap(EntityDamageProfileDB shipProfile)
@@ -154,14 +167,17 @@ public class DamageMap
                         Vector2 pos = new Vector2(currentX + x, actualY + y);
                         Vector2 vel = Vector2.Zero;
                         float pressure = 1f;
-                        compIDMap[index] = instanceID;
-                        var newPart = new PhysicalParticle(mat, pos, vel, Scale);
+                        compIDMap[index] = _nextComponentID;
+                        var newPart = new PhysicalParticle(_nextComponentID, mat, pos, vel, Scale);
                         newPart.mapIndex = index;
                         PMap[index] = newPart;
                         PresMap[index] = pressure;
                     }
                 }
+                componentIDLookup.Add(instanceID, _nextComponentID);
+                _nextComponentID++;
             }
+
             // Increment currentX by the length of the part for the next placement
             currentX += (int)Math.Ceiling(partSize.len);
             // Check if we've gone beyond the width of the map, if so, throw
@@ -205,7 +221,7 @@ public class DamageMap
         int arraylen = Width * Height;
         PMap = new PhysicalParticle[arraylen];
         PresMap = new float[arraylen];
-        compIDMap = new string[arraylen];
+        compIDMap = new int[arraylen];
         return partsize;
     }
 
@@ -227,6 +243,23 @@ public class DamageMap
     {
         return (index % Width, index / Width);
     }
+
+    public PhysicalParticle[] GetImediateParticles(IDamageParticle particle)
+    {
+        var array = new PhysicalParticle[9];
+        var ctr = GetIndex(particle);
+        array[0] = PMap[ctr - Width -1];
+        array[1] = PMap[ctr - Width];
+        array[2] = PMap[ctr - Width + 1];
+        array[3] = PMap[ctr - 1];
+        array[4] = PMap[ctr];
+        array[5] = PMap[ctr + 1];
+        array[6] = PMap[ctr + Width - 1];
+        array[7] = PMap[ctr + Width];
+        array[8] = PMap[ctr + Width + 1];
+        return array;
+        
+    }
     
     public static T GetItem<T>(object[] ary, int aryWid, int x, int y)
     {
@@ -246,7 +279,7 @@ public class DamageMap
         int newHeight = Height + Math.Abs(expandY) * otherMap.Height;
 
         // Create new arrays for storing merged data
-        string[] newIDMap = new string[newWidth * newHeight];
+        int[] newIDMap = new int[newWidth * newHeight];
         PhysicalParticle[] newPMap = new PhysicalParticle[newWidth * newHeight];
         PhotonParticle[] newPhMap = new PhotonParticle[newWidth * newHeight];
         float[] newPresMap = new float[newWidth * newHeight];
@@ -415,4 +448,6 @@ public static class DamageMapHelpers
         }
         return neighbors;
     }
+    
+    
 }

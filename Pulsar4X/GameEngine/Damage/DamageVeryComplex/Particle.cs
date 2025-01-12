@@ -5,9 +5,11 @@ using System.Linq;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Components;
 using Pulsar4X.Extensions;
+using Pulsar4X.Helpers;
 using Pulsar4X.Modding;
 using Pulsar4X.Sensors;
 using Pulsar4X.Storage;
+using Pulsar4X.Weapons;
 
 namespace GameEngine.Damage;
 
@@ -70,6 +72,7 @@ public enum PhaseState
 
 public interface IDamageParticle
 {
+    public int compID { get; set; }
     public int mapIndex { get; set; }
     public Vector2 Position{ get; set; }
     public Vector2 Velocity { get; set; }
@@ -79,6 +82,7 @@ public interface IDamageParticle
 
 public class PhotonParticle : IDamageParticle
 {
+    public int compID { get; set; }
     public int mapIndex{ get; set; }
     public Vector2 Position{ get; set; }
     public Vector2 Velocity{ get; set; }
@@ -88,6 +92,18 @@ public class PhotonParticle : IDamageParticle
     public double SpawnerLifetime = 30.0;
     public bool IsDeleted { get; set; } = false;
 
+    private PhotonParticle(){}
+    
+    public  PhotonParticle(int id, BeamInfoDB beamInfo, Vector2 particlePosition, float lifetime)
+    {
+        compID = id;
+        Position = particlePosition;
+        Velocity = beamInfo.VelocityVector.ToNumericsVector2();
+        WaveLength = (float)beamInfo.Frequency;
+        Power = (float)beamInfo.Energy;
+        IsSpawner = true;
+        SpawnerLifetime = lifetime;
+    }
     public static PhotonParticle SpawnNew(PhotonParticle spawner)
     {
         if (!spawner.IsSpawner || spawner.IsDeleted)
@@ -95,6 +111,7 @@ public class PhotonParticle : IDamageParticle
         Vector2 pos = spawner.Position + Vector2.Normalize(spawner.Velocity);
         return new PhotonParticle()
         {
+            compID = spawner.compID,
             Position = pos,
             Velocity = spawner.Velocity,
             WaveLength = spawner.WaveLength,
@@ -107,6 +124,7 @@ public class PhotonParticle : IDamageParticle
     {
         return new PhotonParticle()
         {
+            compID = orig.compID,
             Position = orig.Position,
             Velocity = velocity,
             WaveLength = orig.WaveLength,
@@ -120,6 +138,7 @@ public class PhotonParticle : IDamageParticle
 
 public class PhysicalParticle : IDamageParticle
 {
+    public int compID { get; set; }
     public int mapIndex{ get; set; }
     public Vector2 Position{ get; set; }
     public Vector2 Velocity{ get; set; }
@@ -148,8 +167,9 @@ public class PhysicalParticle : IDamageParticle
     }
     private float _temperature;
 
-    public PhysicalParticle(ParticleMaterial matType, Vector2 position, Vector2 velocity, int scale)
+    public PhysicalParticle(int id, ParticleMaterial matType, Vector2 position, Vector2 velocity, int scale)
     {
+        compID = id;
         MatType = matType;
         Position = position;
         Velocity = velocity;

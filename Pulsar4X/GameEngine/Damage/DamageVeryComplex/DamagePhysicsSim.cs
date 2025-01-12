@@ -97,6 +97,12 @@ public static class DamagePhysicsSim
             UpdateParticleInMap(particle, damageMap);
         }
         
+        foreach (var particle in movingParticles)
+        {
+            if(particle is PhysicalParticle)
+                KineticMath.ReAssessDetachmentWithNeighbors(damageMap, (PhysicalParticle)particle, 0.1f);
+        }
+        
         PressureMath.UpdatePressureMap(damageMap);
         
         TempratureMath.TransferHeat(damageMap, timeStep);

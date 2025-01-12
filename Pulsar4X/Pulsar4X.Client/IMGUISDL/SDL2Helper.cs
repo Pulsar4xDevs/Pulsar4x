@@ -88,7 +88,7 @@ public static class SDL2Helper
                 for (int x = 0; x < width; x++)
                 {
                     int index = damageMap.GetIndex(x, y);
-                    string id = damageMap.compIDMap[index];
+                    int id = damageMap.compIDMap[index];
                     byte redValue = id != null ? (byte)(255 * uniqueInstances.IndexOf(id) / (float)uniqueInstances.Count) : (byte)0;
                     *pixelPtr = (uint)((alpha << 24) | (redValue << 16) | 0);
                     pixelPtr++;
