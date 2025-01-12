@@ -68,6 +68,7 @@ namespace Pulsar4X.SDL2UI
         bool _drawParentSOI = false;
         private bool _showDamageWindow = false;
         private IntPtr _dmgTxtr;
+        private string _dmgTextureName = "DebugWindowDamageTexture";
 
         List<(string name, Entity entity)> _factionOwnedEntites = new List<(string name, Entity entity)>();
         List<(string name, Entity entity, string faction)> _allEntites = new List<(string name, Entity entity, string faction)>();
@@ -122,7 +123,7 @@ namespace Pulsar4X.SDL2UI
             if (SelectedEntity.HasDataBlob<EntityDamageProfileDB>())
             {
                 var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
-                SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, dmgdb.DamageProfile, ref _dmgTxtr);
+                _uiState.ViewPort.Renderer.CreateTexture(dmgdb.DamageProfile, ref _dmgTxtr, _dmgTextureName);
             }
             else if(SelectedEntity.HasDataBlob<SensorInfoDB>())
             {
@@ -131,7 +132,7 @@ namespace Pulsar4X.SDL2UI
                 if (actualEntity.IsValid && actualEntity.HasDataBlob<EntityDamageProfileDB>())
                 {
                     var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
-                    SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, dmgdb.DamageProfile, ref _dmgTxtr);
+                    _uiState.ViewPort.Renderer.CreateTexture(dmgdb.DamageProfile, ref _dmgTxtr, _dmgTextureName);
                 }
             }
             else
