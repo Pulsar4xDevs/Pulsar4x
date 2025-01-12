@@ -98,10 +98,10 @@ namespace Pulsar4X.SDL2UI.Combat
                 _selectedEntity = damageableEntity;
                 _profile = damageableEntity.GetDataBlob<EntityDamageProfileDB>();
                 _rawShipImage = _profile.DamageProfile;
-                SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _rawShipImage, ref  _shipImgPtr);
+                SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, _rawShipImage, ref  _shipImgPtr);
 
                 _damageMap = new DamageMap(_profile);
-                SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, ref _damageMapPtr);
+                SDL2Helper.CreateSDLTextures(_uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
                 _dmWidth = (int)(_damageMap.Width * _dmSizeScaler);
                 _dmHeight = (int)(_damageMap.Height * _dmSizeScaler);
                 _dmProjectileSliderBot = _dmWidth;
@@ -132,10 +132,10 @@ namespace Pulsar4X.SDL2UI.Combat
             _damageFrames = DamageTools.DealDamageSim(_profile, _profile.DamageEvents[_damageEventIndex]).damageFrames;
             _showFrameNum = 0;
             if (_damageFrames != null)
-                SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum], ref _showDmgFrametx);
+                SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, _damageFrames[_showFrameNum], ref _showDmgFrametx);
         }
-        
-        
+
+
         static class ExsistingWeapons
         {
             private static FactionInfoDB? _factionInfoDB;
@@ -214,7 +214,6 @@ namespace Pulsar4X.SDL2UI.Combat
                 if (Window.Begin("DamageViewer Testing"))
                 {
 
-                    /*
                     if (_shipImgPtr != IntPtr.Zero && ImGui.CollapsingHeader("Old Damage View"))
                     {
                         int w = _rawShipImage.Width; // / 4;
@@ -400,9 +399,9 @@ namespace Pulsar4X.SDL2UI.Combat
                                 SetDMVectors();
 
                                 _damageMap.MergeAndResize(_projectileDamageMap);
-                                SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, ref _damageMapPtr);
-                                
-                                
+                                SDL2Helper.CreateSDLTextures(_uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
+
+
 
                                 
                                 /*
@@ -426,13 +425,13 @@ namespace Pulsar4X.SDL2UI.Combat
                             {
                                 _runSimLoop = false;
                                 DamagePhysicsSim.PhysicsLoop(_damageMap);
-                                SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, ref _damageMapPtr);
+                                SDL2Helper.CreateSDLTextures(_uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
                             }
 
                             if (_runSimLoop)
                             {
                                 DamagePhysicsSim.PhysicsLoop(_damageMap);
-                                SDL2Helper.CreateSDLTextures(_uiState.rendererPtr, _damageMap, ref _damageMapPtr);
+                                SDL2Helper.CreateSDLTextures(_uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
                             }
                             ImGui.Text(Stringify.Energy(_damageMap.TotalEnergy));
                         }
@@ -460,7 +459,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             _showFrameNum--;
                             if (_showFrameNum < 0)
                                 _showFrameNum = _damageFrames.Count - 1;
-                            SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum], ref _showDmgFrametx);
+                            SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, _damageFrames[_showFrameNum], ref _showDmgFrametx);
                         }
 
                         ImGui.SameLine();
@@ -469,7 +468,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             _showFrameNum++;
                             if (_showFrameNum > _damageFrames.Count - 1)
                                 _showFrameNum = 0;
-                            SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum], ref _showDmgFrametx);
+                            SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, _damageFrames[_showFrameNum], ref _showDmgFrametx);
                         }
 
                         ImGui.Text(_showFrameNum + 1 + " of " + _damageFrames.Count);

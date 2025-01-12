@@ -445,7 +445,7 @@ namespace Pulsar4X.SDL2UI
                         nameIcons.Add(icon);
                     //item.Draw(_uiState.rendererPtr, _uiState.Camera);
                 }
-                NameIcon.DrawAll(_state.rendererPtr, _state.Camera, nameIcons);
+                NameIcon.DrawAll(_state.SDLRendererPtr, _state.Camera, nameIcons);
             }
 
         }
@@ -455,7 +455,46 @@ namespace Pulsar4X.SDL2UI
             foreach (var item in icons)
                 item.OnFrameUpdate(matrix, _camera);
             foreach (var item in icons)
-                item.Draw(rendererPtr, _camera);
+            {
+                // if(item is Icon)
+                // {
+                //     _uiState.ViewPort.Renderer.RenderLine(((Icon)item).GetDrawData(), _uiState.Camera);
+                // }
+                // else
+                // {
+                    item.Draw(rendererPtr, _camera);
+                //}
+            }
+
+            Shape[] shapes = new Shape[1]
+            {
+                new Shape()
+                {
+                    Points = new Vector2[3]
+                    {
+                        new Vector2() { X = 0, Y = 0 },
+                        new Vector2() { X = 100, Y = 100 },
+                        new Vector2() { X = 0, Y = 0 }
+                    },
+                    Color = new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 255 }
+                }
+            };
+            _uiState.ViewPort.Renderer.RenderLine(shapes, _uiState.Camera);
+
+            shapes = new Shape[1]
+            {
+                new Shape()
+                {
+                    Points = new Vector2[3]
+                    {
+                        new Vector2() { X = 0, Y = 0 },
+                        new Vector2() { X = 150, Y = 100 },
+                        new Vector2() { X = 0, Y = 0 }
+                    },
+                    Color = new SDL.SDL_Color() { r = 255, g = 255, b = 128, a = 255 }
+                }
+            };
+            _uiState.ViewPort.Renderer.RenderLine(shapes, _uiState.Camera);
         }
 
         void UpdateAndDraw(IList<IDrawData> icons, Matrix matrix)

@@ -16,7 +16,7 @@ namespace Pulsar4X.SDL2UI
             _state = state;
             //_uiState.OpenWindows.Add(this);
             //IsActive = true;
-            _entityState = state.StarSystemStates[state.SelectedStarSysGuid].EntityStatesWithNames[entityGuid];
+            _entityState = state.StarSystemStates[state.SelectedStarSystemId].EntityStatesWithNames[entityGuid];
 
         }
 

@@ -104,7 +104,18 @@ namespace ImGuiSDL2CS
             SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN
         )
         {
+            // init SDL
             SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
+
+            // init SDL_image
+            var sdlImageFlags = SDL_image.IMG_InitFlags.IMG_INIT_PNG | SDL_image.IMG_InitFlags.IMG_INIT_JPG;
+            var result = SDL_image.IMG_Init(sdlImageFlags);
+
+            if ((result & (int)sdlImageFlags) != (int)sdlImageFlags)
+            {
+                // Some format failed to initialize
+                throw new Exception($"SDL2_image failed to initialize: {SDL.SDL_GetError()}");
+            }
 
             if (_Handle != IntPtr.Zero)
                 throw new InvalidOperationException("SDL2Window already initialized, Dispose() first before reusing!");
@@ -158,6 +169,9 @@ namespace ImGuiSDL2CS
 
             // Free unmanaged resources (unmanaged objects) and override a finalizer below.
             // Set large fields to null.
+            Renderer.Dispose();
+
+            SDL_image.IMG_Quit();
 
             if (_Handle != IntPtr.Zero) {
                 SDL.SDL_DestroyWindow(_Handle);

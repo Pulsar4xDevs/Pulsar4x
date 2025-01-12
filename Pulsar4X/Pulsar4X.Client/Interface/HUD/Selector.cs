@@ -56,7 +56,7 @@ namespace Pulsar4X.SDL2UI
 
                     foreach(var system in filteredAndSortedSystems)
                     {
-                        if(ImGui.Selectable(system.NameDB.OwnersName, _uiState.SelectedStarSysGuid.Equals(system.ID)))
+                        if(ImGui.Selectable(system.NameDB.OwnersName, _uiState.SelectedStarSystemId.Equals(system.ID)))
                         {
                             _uiState.SetActiveSystem(system.ID);
                         }
@@ -70,10 +70,10 @@ namespace Pulsar4X.SDL2UI
                         bool visible = ColonyManagementWindow.GetInstance().GetActive() && ColonyManagementWindow.GetInstance().SelectedEntity?.Entity.Id == colony.Id;
                         if(ImGui.Selectable(colony.GetName(_uiState.Faction.Id), visible))
                         {
-                            if(_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid) && _uiState.StarSystemStates[_uiState.SelectedStarSysGuid].EntityStatesColonies.ContainsKey(colony.Id))
+                            if(_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId) && _uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies.ContainsKey(colony.Id))
                             {
                                 ColonyManagementWindow.GetInstance().SetActive(true);
-                                ColonyManagementWindow.GetInstance().SelectEntity(_uiState.StarSystemStates[_uiState.SelectedStarSysGuid].EntityStatesColonies[colony.Id]);
+                                ColonyManagementWindow.GetInstance().SelectEntity(_uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies[colony.Id]);
                             }
                         }
                     }
@@ -87,7 +87,7 @@ namespace Pulsar4X.SDL2UI
                         // Check if the entity is actually a ship
                         if (fleet.HasDataBlob<ShipInfoDB>())
                             continue;
-                        
+
                         bool visible = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleet?.Id == fleet.Id;
                         string display = fleet.GetName(_uiState.Faction.Id);
                         if(ImGui.Selectable(display, visible))

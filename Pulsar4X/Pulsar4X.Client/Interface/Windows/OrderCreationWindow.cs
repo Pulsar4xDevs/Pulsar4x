@@ -56,7 +56,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         internal override void Display()
         {
-            if (_uiState.LastClickedEntity != null && _uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid))
+            if (_uiState.LastClickedEntity != null && _uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId))
             {
                 EntityState _SelectedEntityState = _uiState.LastClickedEntity;
                 if (_orderEntity == null || _orderEntity != _SelectedEntityState.Entity)
@@ -110,9 +110,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             if (ImGui.TreeNode("Target"))
             {
                 //var moveCandidates = _uiState.Faction
-                if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid))
+                if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId))
                 {
-                    SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+                    SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
                     var _NamedEntityStatesByBodyType = _StarSystemState.EntityStatesWithPosition.Values.GroupBy(x => x.BodyType).ToDictionary(k => k.Key, v => v.Select(x => x).ToList());
 
                     foreach (OrbitBodyType orbitBodyType in _NamedEntityStatesByBodyType.Keys.OrderBy(x => (int)x))

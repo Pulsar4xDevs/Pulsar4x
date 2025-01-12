@@ -52,9 +52,9 @@ namespace Pulsar4X.SDL2UI
         private int rawimagewidth;
         private int rawimageheight;
 
-        
 
-        
+
+
         //energy
         private double _estor;
         private double _egen;
@@ -80,8 +80,8 @@ namespace Pulsar4X.SDL2UI
         private double _cvol = 0;
         private double _trnge = 0;
         private double _trate = 0;
-        
-        
+
+
         bool displayimage = true;
         private EntityDamageProfileDB? _profile;
         private bool existingdesignsstatus = true;
@@ -594,7 +594,7 @@ namespace Pulsar4X.SDL2UI
             if(_profile == null)
                 throw new NullReferenceException();
 
-            SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _profile.DamageProfile, ref _shipImgPtr);
+            SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, _profile.DamageProfile, ref _shipImgPtr);
             rawimagewidth = _profile.DamageProfile.Width;
             rawimageheight = _profile.DamageProfile.Height;
             _imagecreated = true;
@@ -684,8 +684,8 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("Cargo Storage");
                     ImGui.TableNextColumn();
                     ImGui.Text(Stringify.VolumeLtr(_cvol));
-                    
-                    
+
+
                     ImGui.TableNextColumn();
                     ImGui.Text("Cargo Transfer Rate");
                     ImGui.TableNextColumn();
@@ -702,7 +702,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text(Stringify.Velocity(_trnge));
                     if(_trnge == 0)
                         ImGui.PopStyleColor();
-                    
+
                 }
 
                 ImGui.EndTable();
@@ -829,15 +829,15 @@ namespace Pulsar4X.SDL2UI
                 {
                     var atb = component.design.GetAttribute<CargoTransferAtb>();
                     //atb.TransferRange_ms
-                    
+
                 }*/
             }
 
             cstore = StorageSpaceProcessor.CalculatedMaxStorage(_workingDesign);
             var cargoTransfer = StorageSpaceProcessor.CalcRateAndRange(_workingDesign);
 
-            
-            
+
+
 
             _armorMass = ShipDesign.GetArmorMass(_profile, _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods);
             mass += (long)Math.Round(_armorMass);
@@ -936,7 +936,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(rawimagewidth * scale, rawimageheight * scale));
             }
         }
-        
+
         private List<string> Warnings()
         {
             List<string> warnings = new List<string>();

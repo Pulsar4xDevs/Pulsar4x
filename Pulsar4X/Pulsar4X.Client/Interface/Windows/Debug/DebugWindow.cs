@@ -101,7 +101,7 @@ namespace Pulsar4X.SDL2UI
             }
             //if(_uiState.LastClickedEntity?.Entity != null && instance.SelectedEntity != _uiState.LastClickedEntity.Entity)
             //    instance.SelectedEntity = _uiState.LastClickedEntity.Entity;
-            instance.SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+            instance.SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
             return instance;
         }
 
@@ -122,7 +122,7 @@ namespace Pulsar4X.SDL2UI
             if (SelectedEntity.HasDataBlob<EntityDamageProfileDB>())
             {
                 var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
-                SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, dmgdb.DamageProfile, ref _dmgTxtr);
+                SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, dmgdb.DamageProfile, ref _dmgTxtr);
             }
             else if(SelectedEntity.HasDataBlob<SensorInfoDB>())
             {
@@ -131,7 +131,7 @@ namespace Pulsar4X.SDL2UI
                 if (actualEntity.IsValid && actualEntity.HasDataBlob<EntityDamageProfileDB>())
                 {
                     var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
-                    SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, dmgdb.DamageProfile, ref _dmgTxtr);
+                    SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, dmgdb.DamageProfile, ref _dmgTxtr);
                 }
             }
             else
@@ -287,7 +287,7 @@ namespace Pulsar4X.SDL2UI
                                         totalCountIncEscro += CargoMath.GetUnitsStored(storeDB, icargoable, true);
                                         totalCountLesEscro += CargoMath.GetUnitsStored(storeDB, icargoable, false);
                                     }
-                                    
+
                                 }
                                 ImGui.Text("Total Units Inc Escro: " + Stringify.Quantity(totalCountIncEscro));
                                 ImGui.Text("Total Units less Escro: " + Stringify.Quantity(totalCountLesEscro));
@@ -774,7 +774,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NewLine();
                 }
 
-                ImGui.Text("Selected Star System: " + _uiState.SelectedStarSysGuid);
+                ImGui.Text("Selected Star System: " + _uiState.SelectedStarSystemId);
                 ImGui.Text("Number Of Entites: " + _uiState.SelectedSystem.EntityCount);
                 if (ImGui.CollapsingHeader("Log"))
                 {
@@ -932,7 +932,7 @@ namespace Pulsar4X.SDL2UI
 
         void RefreshFactionEntites(GlobalUIState uiState)
         {
-            SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+            SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
             _factionOwnedEntites = new List<(string name, Entity entity)>();
             var factionEntites = _uiState.SelectedSystem.GetFilteredEntities(DataStructures.EntityFilter.Friendly, _uiState.Faction.Id);
             foreach (var entity in factionEntites.ToArray())

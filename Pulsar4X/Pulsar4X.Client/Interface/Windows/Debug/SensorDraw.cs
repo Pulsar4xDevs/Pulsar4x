@@ -75,7 +75,7 @@ namespace Pulsar4X.SDL2UI
                     instance._selectedEntitySate = _uiState.LastClickedEntity;
             }
 
-            instance._selectedStarSysState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+            instance._selectedStarSysState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
             return instance;
         }
 

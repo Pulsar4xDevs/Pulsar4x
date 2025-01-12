@@ -39,7 +39,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
                     if(ImGui.SmallButton(colonyInfoDb.PlanetEntity.GetDefaultName()))
                     {
-                        uiState.EntityClicked(colonyInfoDb.PlanetEntity.Id, uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                        uiState.EntityClicked(colonyInfoDb.PlanetEntity.Id, uiState.SelectedStarSystemId, MouseButtons.Primary);
                     }
                     ImGui.NextColumn();
                     ImGui.Separator();
