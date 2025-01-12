@@ -221,7 +221,7 @@ namespace Pulsar4X.SDL2UI.Combat
                         ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(w, h));
 
                     }
-                    */
+                    
                     
                     if (_damageMapPtr[0] != IntPtr.Zero&& ImGui.CollapsingHeader("New Damage Map"))
                     {
