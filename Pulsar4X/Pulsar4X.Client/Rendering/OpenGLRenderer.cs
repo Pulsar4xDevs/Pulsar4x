@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using ImGuiNET;
 using ImGuiSDL2CS;
+using Pulsar4X.DataStructures;
 using Pulsar4X.SDL2UI;
 using SDL2;
 
@@ -15,6 +16,7 @@ public class OpenGLRenderer : IRenderer
     private IntPtr _glContext;
     private IntPtr _windowHandle;
     private LineRenderer _lineRenderer;
+    private IntPtr _previousContext = IntPtr.Zero;
 
     private Dictionary<string, uint> _textures = new ();
 
@@ -94,6 +96,37 @@ public class OpenGLRenderer : IRenderer
     public IntPtr Get()
     {
         return _glContext;
+    }
+
+    public void CreateTexture(RawBmp rawBmp, ref IntPtr texturePtr, string name)
+    {
+        IntPtr pixels;
+        unsafe
+        {
+            fixed (byte* ptr = rawBmp.ByteArray)
+            {
+                pixels = new IntPtr(ptr);
+            }
+        }
+
+        // Delete any existing texture
+        DeleteTexture((uint)texturePtr);
+
+        // Create the surface
+        IntPtr sdlSurface = SDL.SDL_CreateRGBSurfaceFrom(
+                                pixels,
+                                rawBmp.Width,
+                                rawBmp.Height,
+                                rawBmp.Depth * 8,
+                                rawBmp.Stride,
+                                0xff000000,
+                                0x00ff0000,
+                                0x0000ff00,
+                                0x000000ff);
+
+
+        texturePtr = (IntPtr)LoadTexture(sdlSurface, name);
+        SDL.SDL_FreeSurface(sdlSurface);
     }
 
     public uint LoadTexture(IntPtr surfacePtr, string name)
@@ -197,6 +230,8 @@ public class OpenGLRenderer : IRenderer
 
     public void DeleteTexture(uint textureId)
     {
+        if(textureId == IntPtr.Zero) return;
+
         GL.DeleteTextures(1, ref textureId);
 
         // Remove all entries where the value is equal to the texture ID
@@ -347,7 +382,7 @@ public class OpenGLRenderer : IRenderer
     public void RenderLine(Shape[] shapes, Camera camera)
     {
         // Save the current OpenGL context state
-        IntPtr previousContext = SDL.SDL_GL_GetCurrentContext();
+        _previousContext = SDL.SDL_GL_GetCurrentContext();
 
         // Make the OpenGL context current
         SDL.SDL_GL_MakeCurrent(_windowHandle, _glContext);
@@ -356,7 +391,7 @@ public class OpenGLRenderer : IRenderer
         _lineRenderer.Draw(shapes, camera);
 
         // Restore the previous context
-        SDL.SDL_GL_MakeCurrent(_windowHandle, previousContext);
+        SDL.SDL_GL_MakeCurrent(_windowHandle, _previousContext);
     }
 
     public void Dispose()

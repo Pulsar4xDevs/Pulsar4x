@@ -40,6 +40,7 @@ namespace Pulsar4X.SDL2UI
         List<(ComponentDesign design, int count)> SelectedComponents = new List<(ComponentDesign design, int count)>();
 
         private IntPtr _shipImgPtr;
+        private string _shipTextureName;
 
         //TODO: armor, temporary, maybe density should be an "equvelent" and have a different mass? (damage calcs use density for penetration)
         List<ArmorBlueprint> _armorSelection = new List<ArmorBlueprint>();
@@ -594,7 +595,9 @@ namespace Pulsar4X.SDL2UI
             if(_profile == null)
                 throw new NullReferenceException();
 
-            SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, _profile.DamageProfile, ref _shipImgPtr);
+            _shipTextureName = _profile.OwningEntity.GetOwnersName() + "Texture";
+            _uiState.ViewPort.Renderer.CreateTexture(_profile.DamageProfile, ref _shipImgPtr, _shipTextureName);
+            //SDL2Helper.CreateSDLTexture(_uiState.SDLRendererPtr, _profile.DamageProfile, ref _shipImgPtr);
             rawimagewidth = _profile.DamageProfile.Width;
             rawimageheight = _profile.DamageProfile.Height;
             _imagecreated = true;

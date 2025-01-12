@@ -1,5 +1,6 @@
 using System;
 using ImGuiNET;
+using Pulsar4X.DataStructures;
 using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.Client.Rendering;
@@ -20,6 +21,7 @@ public interface IRenderer : IDisposable
     void EndFrame();
     void Clear(float r, float g, float b, float a);
 
+    void CreateTexture(RawBmp rawBmp, ref IntPtr texturePtr, string name);
     uint LoadTexture(IntPtr surfacePtr, string name);
     void DeleteTexture(string name);
     void DeleteTexture(uint textureId);
