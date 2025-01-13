@@ -52,7 +52,7 @@ public static class SDL2Helper
         int width = damageMap.Width;
         int height = damageMap.Height;
         CreateTextureForIDMap(renderer, damageMap, ref textures[0], width, height);
-        CreateTextureForPresMap(renderPtr, damageMap, ref textures[1], width, height);
+        CreateTextureForPresMap(renderer, damageMap, ref textures[1], width, height);
         CreateTextureForVMap(renderPtr, damageMap, ref textures[2], width, height);
         CreateTextureForPMap(renderPtr, damageMap, ref textures[3], width, height);
         CreateTextureForTemp(renderPtr, damageMap, ref textures[4], width, height);
@@ -117,7 +117,7 @@ public static class SDL2Helper
 
                 // Pack ARGB values into a single uint
                 // Note: OpenGL expects RGBA format, so we need to swap the byte order
-                pixelData[y * width + x] = (uint)((alpha << 24) | (redValue << 16) | 0);
+                pixelData[y * width + x] = (uint)((redValue << 24) | (alpha << 0));
             }
         }
 
@@ -164,7 +164,51 @@ public static class SDL2Helper
         SDL.SDL_UnlockTexture(texture);
     }
 
-    internal static IntPtr CreateTextureForPresMap(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    internal static void CreateTextureForPresMap(IRenderer renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    {
+        byte alpha = 255;
+        float maxPressure = damageMap.PresMap.Max();
+
+        // Check/create texture if needed
+        CheckTexture(renderer, ref texture, width, height);
+
+        // Create a buffer for the pixel data
+        uint[] pixelData = new uint[width * height];
+
+        // Get unique instances for color mapping
+        var uniqueInstances = damageMap.compIDMap.Distinct().Where(id => id != null).ToList();
+
+        // Fill the pixel data
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int index = damageMap.GetIndex(x, y);
+                int id = damageMap.compIDMap[index];
+
+                // Calculate blue value
+                byte blueValue = (byte)(damageMap.PresMap[index] * 255.0f / maxPressure);
+
+                // Pack ARGB values into a single uint
+                pixelData[y * width + x] = (uint)((blueValue << 8) | (alpha << 0));
+            }
+        }
+
+        GCHandle handle = GCHandle.Alloc(pixelData, GCHandleType.Pinned);
+        try
+        {
+            IntPtr pixels = handle.AddrOfPinnedObject();
+
+            // Update the texture
+            renderer.UpdateTexture(ref texture, width, height, pixels);
+        }
+        finally
+        {
+            handle.Free();
+        }
+    }
+
+    internal static void CreateTextureForPresMap(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
         byte alpha = 255;
         CheckTexture(renderPtr, ref texture, width, height);
@@ -190,7 +234,6 @@ public static class SDL2Helper
         }
 
         SDL.SDL_UnlockTexture(texture);
-        return texture;
     }
 
     internal static void CreateTextureForVMap(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
