@@ -148,6 +148,36 @@ public class OpenGLRenderer : IRenderer
         SDL.SDL_FreeSurface(sdlSurface);
     }
 
+    public void CreateTexture(ref IntPtr texture, int width, int height, IntPtr pixels, PixelFormat pixelFormat = PixelFormat.RGBA8888)
+    {
+        // Delete the texture if it already exists
+        DeleteTexture((uint)texture);
+
+        uint textureId;
+        GL.GenTextures(1, out textureId);
+        GL.BindTexture(GL.Enum.GL_TEXTURE_2D, textureId);
+
+        // TODO: allow these to specified in the method parameters
+        GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MIN_FILTER, (int)GL.Enum.GL_LINEAR);
+        GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MAG_FILTER, (int)GL.Enum.GL_LINEAR);
+        GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_WRAP_S, (int)GL.Enum.GL_CLAMP_TO_EDGE);
+        GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_WRAP_T, (int)GL.Enum.GL_CLAMP_TO_EDGE);
+
+        GL.TexImage2D(
+            GL.Enum.GL_TEXTURE_2D,
+            0,
+            (int)GL.Enum.GL_RGBA,
+            width,
+            height,
+            0,
+            GL.Enum.GL_RGBA,
+            GL.Enum.GL_UNSIGNED_BYTE,
+            pixels
+        );
+
+        texture = new IntPtr(textureId);
+    }
+
     public uint LoadTexture(IntPtr surfacePtr)
     {
         // Convert the SDL_Surface pointer to a managed structure
@@ -234,6 +264,34 @@ public class OpenGLRenderer : IRenderer
         }
 
         return textureId;
+    }
+
+    public void UpdateTexture(ref IntPtr texture, int width, int height, IntPtr pixels)
+    {
+        GL.BindTexture(GL.Enum.GL_TEXTURE_2D, (uint)texture);
+
+        GL.TexSubImage2D(
+            GL.Enum.GL_TEXTURE_2D,
+            0,
+            0, 0,
+            width, height,
+            GL.Enum.GL_RGBA,
+            GL.Enum.GL_UNSIGNED_BYTE,
+            pixels
+        );
+    }
+
+    public (int, int) GetTextureDimensions(IntPtr texture)
+    {
+        int txWidth;
+        int txHeight;
+
+        GL.BindTexture(GL.Enum.GL_TEXTURE_2D, (uint)texture);
+
+        GL.GetTexLevelParameteri((uint)GL.Enum.GL_TEXTURE_2D, 0, (uint)GL.GetTextureParameter.TextureWidth, out txWidth);
+        GL.GetTexLevelParameteri((uint)GL.Enum.GL_TEXTURE_2D, 0, (uint)GL.GetTextureParameter.TextureHeight, out txHeight);
+
+        return (txWidth, txHeight);
     }
 
     public void DeleteTexture(uint textureId)

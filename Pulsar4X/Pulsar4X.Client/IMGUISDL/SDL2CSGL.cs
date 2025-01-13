@@ -193,6 +193,21 @@ namespace ImGuiSDL2CS
             GL_ACTIVE_ATTRIBUTES = 0x8B89,
         }
 
+        public enum GetTextureParameter : uint
+        {
+            TextureWidth = 0x1000,                  // GL_TEXTURE_WIDTH
+            TextureHeight = 0x1001,                 // GL_TEXTURE_HEIGHT
+            TextureDepth = 0x8071,                  // GL_TEXTURE_DEPTH
+            TextureInternalFormat = 0x1003,         // GL_TEXTURE_INTERNAL_FORMAT
+            TextureRedSize = 0x805C,                // GL_TEXTURE_RED_SIZE
+            TextureGreenSize = 0x805D,              // GL_TEXTURE_GREEN_SIZE
+            TextureBlueSize = 0x805E,               // GL_TEXTURE_BLUE_SIZE
+            TextureAlphaSize = 0x805F,              // GL_TEXTURE_ALPHA_SIZE
+            TextureDepthSize = 0x884A,              // GL_TEXTURE_DEPTH_SIZE
+            TextureCompressed = 0x86A1,             // GL_TEXTURE_COMPRESSED
+            TextureCompressedImageSize = 0x86A0,    // GL_TEXTURE_COMPRESSED_IMAGE_SIZE
+        }
+
         public delegate IntPtr glGetString(Enum pname);
         private static glGetString _GetString = _<glGetString>();
         public static string GetString(Enum pname)
@@ -366,6 +381,14 @@ namespace ImGuiSDL2CS
 
         public delegate void glGetFloatv(Enum pname, out float param);
         public static glGetFloatv GetFloatv = _<glGetFloatv>();
+
+        public delegate void glGetTexLevelParameteriv(uint target, int level, uint pname, out int param);
+        public static glGetTexLevelParameteriv GetTexLevelParameteri = _<glGetTexLevelParameteriv>();
+        public delegate void glGetTexLevelParameterfv(uint target, int level, uint pname, out float param);
+        public static glGetTexLevelParameterfv GetTexLevelParameterf = _<glGetTexLevelParameterfv>();
+        public delegate void glTexSubImage2D(Enum target, int level, int xoffset, int yoffset, int width, int height, Enum format, Enum type, IntPtr pixels);
+        public static glTexSubImage2D TexSubImage2D = _<glTexSubImage2D>();
+
         /*
         public delegate void gl();
         public static gl  = _<gl>();

@@ -9,6 +9,8 @@ using GameEngine.Damage;
 using ImGuiNET;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Orbital;
+using Pulsar4X.Client.Rendering;
+using Microsoft.VisualBasic;
 
 namespace ImGuiSDL2CS;
 
@@ -45,11 +47,11 @@ public static class SDL2Helper
 
     }
 
-    public static void CreateSDLTextures(IntPtr renderPtr, DamageMap damageMap, ref IntPtr[] textures)
+    public static void CreateSDLTextures(IRenderer renderer, IntPtr renderPtr, DamageMap damageMap, ref IntPtr[] textures)
     {
         int width = damageMap.Width;
         int height = damageMap.Height;
-        CreateTextureForIDMap(renderPtr, damageMap, ref textures[0], width, height);
+        CreateTextureForIDMap(renderer, damageMap, ref textures[0], width, height);
         CreateTextureForPresMap(renderPtr, damageMap, ref textures[1], width, height);
         CreateTextureForVMap(renderPtr, damageMap, ref textures[2], width, height);
         CreateTextureForPMap(renderPtr, damageMap, ref textures[3], width, height);
@@ -68,6 +70,68 @@ public static class SDL2Helper
         {
             SDL.SDL_DestroyTexture(texture);
             texture = SDL.SDL_CreateTexture(renderPtr, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, width, height);
+        }
+    }
+
+    internal static void CheckTexture(IRenderer renderer, ref IntPtr texture, int width, int height)
+    {
+        // If the texture doesn't exist, create it
+        if(texture == IntPtr.Zero)
+        {
+            renderer.CreateTexture(ref texture, width, height, IntPtr.Zero, PixelFormat.ARGB8888);
+        }
+
+        // If the dimensions don't match, recreate the texture
+        (int txWidth, int txHeight) = renderer.GetTextureDimensions(texture);
+        if(width != txWidth || height != txHeight)
+        {
+            renderer.CreateTexture(ref texture, width, height, IntPtr.Zero, PixelFormat.ARGB8888);
+        }
+    }
+
+    internal static void CreateTextureForIDMap(IRenderer renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    {
+        byte alpha = 255;
+
+        // Check/create texture if needed
+        CheckTexture(renderer, ref texture, width, height);
+
+        // Create a buffer for the pixel data
+        uint[] pixelData = new uint[width * height];
+
+        // Get unique instances for color mapping
+        var uniqueInstances = damageMap.compIDMap.Distinct().Where(id => id != null).ToList();
+
+        // Fill the pixel data
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int index = damageMap.GetIndex(x, y);
+                int id = damageMap.compIDMap[index];
+
+                // Calculate red value based on instance index
+                byte redValue = id != null
+                    ? (byte)(255 * uniqueInstances.IndexOf(id) / (float)uniqueInstances.Count)
+                    : (byte)0;
+
+                // Pack ARGB values into a single uint
+                // Note: OpenGL expects RGBA format, so we need to swap the byte order
+                pixelData[y * width + x] = (uint)((alpha << 24) | (redValue << 16) | 0);
+            }
+        }
+
+        GCHandle handle = GCHandle.Alloc(pixelData, GCHandleType.Pinned);
+        try
+        {
+            IntPtr pixels = handle.AddrOfPinnedObject();
+
+            // Update the texture
+            renderer.UpdateTexture(ref texture, width, height, pixels);
+        }
+        finally
+        {
+            handle.Free();
         }
     }
 
