@@ -128,17 +128,16 @@ public static class TempratureMath
         return state;
     }
     
-    public static void PostCollisionTempratureChange(PhysicalParticle physicalParticleA, PhysicalParticle physicalParticleB, double initialkE, DamageMap map)
+    public static void PostCollisionTempratureChange(PhysicalParticle physicalParticleA, PhysicalParticle physicalParticleB, double keDelta, DamageMap map)
     {
         var m1 = physicalParticleA.Mass;
         var m2 = physicalParticleB.Mass;
         
-        double finalKineticEnergy = KineticMath.CalcKineticEnergy(physicalParticleA) + KineticMath.CalcKineticEnergy(physicalParticleB);
-        double energyToHeat = initialkE - finalKineticEnergy; // Ensure non-negative
+
         var totalMass = m1 + m2;
         // Distribute heat based on mass (more massive objects absorb more heat)
-        double heatA = energyToHeat * (m1 / totalMass);
-        double heatB = energyToHeat * (m2 / totalMass);
+        double heatA = keDelta * (m1 / totalMass);
+        double heatB = keDelta * (m2 / totalMass);
 
         // Convert energy to temperature increase
         float tempIncreaseA = (float)(heatA / (m1 * physicalParticleA.MatType.ThermalCapacity));

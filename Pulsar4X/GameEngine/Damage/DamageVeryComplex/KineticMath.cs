@@ -7,6 +7,7 @@ namespace GameEngine.Damage;
 
 public static class KineticMath
 {
+    static int collisionCount = 0;
     public static void DetectCollision(IDamageParticle physicalParticle, DamageMap map, List<(IDamageParticle,PhysicalParticle)> collidedParticles)
     {
         int index = map.GetIndex(physicalParticle);
@@ -24,11 +25,16 @@ public static class KineticMath
     
     public static void ResolveCollision(PhysicalParticle physicalParticleA, PhysicalParticle physicalParticleB, DamageMap map)
     {
-        
+        collisionCount++;
         // Calculate initial properties
         Vector2 vA = physicalParticleA.Velocity;
         Vector2 vB = physicalParticleB.Velocity;
-        Vector2 relativeVelocity = vA - vB;
+        double massA = physicalParticleA.Mass;
+        double massB = physicalParticleB.Mass;
+
+        // Total mass of both particles
+        double totalMass = massA + massB;
+        
         var neighborsA = GetConnectedNeighbors(map, physicalParticleA);
         var neighborsB = GetConnectedNeighbors(map, physicalParticleB);
         
@@ -39,28 +45,48 @@ public static class KineticMath
                 throw new Exception("Collision detected with shared neighbors. Particle A and B are indirectly connected.");
             }
         }
+        var kePartA = CalcKineticEnergy(physicalParticleA);
+        var kePartB = CalcKineticEnergy(physicalParticleB);
+        var keGroupA = CalcKineticEnergy(physicalParticleA, neighborsA);
+        var keGroupB = CalcKineticEnergy(physicalParticleB, neighborsB);
         
-        var keA = CalcKineticEnergy(physicalParticleA, neighborsA);
-        var keB = CalcKineticEnergy(physicalParticleB, neighborsB);
-        
-        
-        Vector2 normal = Vector2.Normalize(physicalParticleB.Position - physicalParticleA.Position);
+        Vector2 collisonNormal = Vector2.Normalize(physicalParticleB.Position - physicalParticleA.Position);
         float baseElasticity = (float)(physicalParticleA.MatType.Elasticity + physicalParticleB.MatType.Elasticity * 0.5);// Assuming 0-1 range
-        float impulseMagnitude = -((1 + baseElasticity) * Vector2.Dot(relativeVelocity, normal)) /
-                                 ((1 / physicalParticleA.Mass) + (1 / physicalParticleB.Mass));
-        // Impulse for A
-        Vector2 impulseA = normal * impulseMagnitude;
-        // Impulse for B (equal and opposite)
-        Vector2 impulseB = -normal * impulseMagnitude;
+        //double relativeVelocityMagnitude = Vector2.Dot(relativeVelocity, collisonNormal);
         
-        DistributeImpulse(physicalParticleA, neighborsA, impulseA, map);
-        DistributeImpulse(physicalParticleB, neighborsB, impulseB, map);
+        double kePostCollision = (kePartA + kePartB) * baseElasticity;
+        double keAF = (massA / totalMass) * kePostCollision;
+        double keBF = (massB / totalMass) * kePostCollision;
+        
+        double keADelta = kePartA - keAF;
+        double keBDelta = kePartB - keBF;
+        double keTotalDelta = keADelta + keBDelta;
+        DistributeKE(physicalParticleA, keADelta, collisonNormal, neighborsA);
+        DistributeKE(physicalParticleB, keBDelta, -collisonNormal, neighborsB);
 
         // this section just for detecting energy gain in the system and throwing an error if so.
+        var kfa = CalcKineticEnergy(physicalParticleA);
+        var kfb = CalcKineticEnergy(physicalParticleB);
         var keFinalA = CalcKineticEnergy(physicalParticleA, neighborsA);
         var keFinalB = CalcKineticEnergy(physicalParticleB, neighborsB);
-        var totalStart = keA + keB;
+        
+        
+        var totalStart = keGroupA + keGroupB;
         var totalEnd = keFinalA + keFinalB;
+        var cstart = kePartA + kePartB;
+        var cend = kfa + kfb;
+        
+        var ctot = cend - cstart;
+        if (ctot == 0)
+        {
+            throw new Exception("no ke loss");
+        }
+
+        if (cstart > cend)
+        {
+            string added = "Added: " + (totalEnd - totalStart);
+            throw new Exception(added);
+        }
         if (totalEnd > totalStart)
         {
             string start = "Start: " + totalStart;
@@ -69,14 +95,84 @@ public static class KineticMath
             throw new Exception(start + "\n" + end + "\n" + added);
         }
         
-        TempratureMath.PostCollisionTempratureChange(physicalParticleA, physicalParticleB, keA+keB, map);
+        TempratureMath.PostCollisionTempratureChange(physicalParticleA, physicalParticleB, keAF+keBF, map);
     }
 
+    public static void DistributeKE(PhysicalParticle ctrParticle, double keDelta, Vector2 collisionNormal, List<PhysicalParticle> neighbors)
+    {
+        float dampingFactor = 0.01f;
+        var totalKEStart = CalcKineticEnergy(ctrParticle, neighbors);
+        
+        // Get tensile connection data for the central particle
+        float totalTensile  = TensileConnectionData(ctrParticle, neighbors);
+        var tensileWeighting = 1.0f / totalTensile;
+        // Calculate the central particle's share of KE
+        double ctrParticleKE = keDelta * tensileWeighting;
+        if (neighbors.Count == 0 || totalTensile <= 0)
+        {
+            ctrParticleKE = keDelta;
+        }
+        var newKeTotal = CalcKineticEnergy(ctrParticle) + keDelta;
+        if(newKeTotal > dampingFactor)
+        {
+            var speedChange = (float)Math.Sqrt(2 * newKeTotal / ctrParticle.Mass) - ctrParticle.Velocity.Length();
+            var normalComponent = Vector2.Dot(ctrParticle.Velocity, collisionNormal) * collisionNormal;
+            var tangentComponent = ctrParticle.Velocity - normalComponent;
+            // Adjust speed along collision normal
+            var newNormalComponent = normalComponent + collisionNormal * speedChange;
+            // Combine normal and tangent components
+            ctrParticle.Velocity += newNormalComponent + tangentComponent;
+        }
+        else
+        {
+            ctrParticle.Velocity = Vector2.Zero;
+        }
+        
+        // Calculate how much KE to distribute to each neighbor
+        double neighborKe = (keDelta - ctrParticleKE) / neighbors.Count;
+
+        foreach (var neighbor in neighbors)
+        {
+            // Calculate new KE for each neighbor
+            var neighborKE = CalcKineticEnergy(neighbor) + neighborKe;
+            if (neighborKE > dampingFactor) // Same padding for neighbors
+            {
+                var neighborSpeedChange = (float)Math.Sqrt(2 * neighborKE / neighbor.Mass) - neighbor.Velocity.Length();
+        
+                // Direction towards collision normal with slight bias away from ctr
+                Vector2 directionToNeighbor = Vector2.Normalize(neighbor.Position - ctrParticle.Position);
+                var direction = Vector2.Normalize(collisionNormal * 0.8f + directionToNeighbor * 0.2f);
+
+                var neighborNormalComponent = Vector2.Dot(neighbor.Velocity, direction) * direction;
+                var neighborTangentComponent = neighbor.Velocity - neighborNormalComponent;
+                var newNeighborNormalComponent = neighborNormalComponent + direction * neighborSpeedChange;
+        
+                neighbor.Velocity += newNeighborNormalComponent + neighborTangentComponent;
+            }
+            else
+            {
+                neighbor.Velocity = Vector2.Zero;
+            }
+    
+            if(float.IsNaN( neighbor.Velocity.Length() ))
+                throw new Exception("is nan");
+        }
+        
+        var totalKEEnd = CalcKineticEnergy(ctrParticle, neighbors);
+        if (totalKEEnd >= totalKEStart + keDelta)
+            throw new Exception("energyAdded");
+
+    }
+    
+    
     public static double CalcKineticEnergy(PhysicalParticle physicalParticle)
     {
         var m = physicalParticle.Mass;
         var v = physicalParticle.Velocity;
-        return (0.5 * m * v.LengthSquared());
+        var foo = (0.5 * m * v.LengthSquared());
+        if(double.IsNaN(foo))
+            throw new Exception("is nan");
+        return foo;
     }
     
     public static double CalcKineticEnergy(PhysicalParticle physicalParticle, List<PhysicalParticle> neighbors)
@@ -168,11 +264,9 @@ public static class KineticMath
 
     
     
-    public static (int connections, float effectiveTensile ) TensileConnectionData(PhysicalParticle physicalParticle, DamageMap map)
+    public static float TensileConnectionData(PhysicalParticle physicalParticle, List<PhysicalParticle> neighbors)
     {
-        List<PhysicalParticle> neighbors = GetConnectedNeighbors(map, physicalParticle);
         float effectiveTensileStrength = 0; 
-        int connections = 0;
         if(physicalParticle.StateOfPhase == PhaseState.Solid)
         {
             effectiveTensileStrength = physicalParticle.MatType.TensileStrength;
@@ -180,11 +274,9 @@ public static class KineticMath
             foreach (var neighbor in neighbors)
             {
                 effectiveTensileStrength += neighbor.MatType.TensileStrength;
-                connections++;
             }
         }
-        effectiveTensileStrength /= (connections + 1);
-        return (connections, effectiveTensileStrength);
+        return effectiveTensileStrength;
     }
 
     public static Vector2 AverageVelocity(List<PhysicalParticle> particles)
@@ -197,74 +289,4 @@ public static class KineticMath
         averageVelocity /= particles.Count;
         return averageVelocity;
     }
-    
-    public static void DistributeImpulse(
-        PhysicalParticle ctrParticle,
-        List<PhysicalParticle> neighbors,
-        Vector2 collisionImpulse, // The primary impulse from the collision
-        DamageMap map
-    )
-    {
-        float basePrimaryRatio = 0.6f; // More impulse to the central particle
-        float baseNeighborRatio = 0.4f; // Remaining impulse to neighbors
-        float velocityThreshold = 0.05f; // Threshold for negligible velocity changes
-
-        // Precompute tensile connection data for the center particle
-        (int connections, float effectiveTensile) tca = TensileConnectionData(ctrParticle, map);
-        if (neighbors.Count == 0 || tca.effectiveTensile <= 0)
-        {
-            ctrParticle.Velocity += collisionImpulse / ctrParticle.Mass; // Full impact to the center
-            return; // Exit early, no neighbors to process
-        }
-        // Scaling factor inversely proportional to tensile strength
-        float changeScaling = 1.0f / tca.effectiveTensile;
-
-        // Calculate primary impulse for the center particle
-        float primaryRatio = basePrimaryRatio * changeScaling;
-        Vector2 centerVelocityChange = collisionImpulse * primaryRatio / ctrParticle.Mass;
-
-        // Apply velocity change to the center particle only if it exceeds the threshold
-        if (centerVelocityChange.Length() < velocityThreshold)
-        {
-            // Set the center particle's velocity to the average of its neighbors
-            var averageNeighborVelocity = AverageVelocity(neighbors);
-            ctrParticle.Velocity = averageNeighborVelocity;
-        }
-        else
-        {
-            // Apply the standard velocity change to the center particle
-            ctrParticle.Velocity += centerVelocityChange;
-        }
-        var normCtrVel = Vector2.Normalize(centerVelocityChange);
-        if(float.IsNaN(ctrParticle.Velocity.Length()))
-            throw new Exception("NaN");
-        // Apply impulses to neighbors
-        foreach (var neighbor in neighbors)
-        {
-            // Neighbor velocity change scaled using the same effective tensile strength logic
-            float neighborRatio = baseNeighborRatio * changeScaling;
-
-            // Calculate impulse direction and scaled impulse
-            Vector2 directionToNeighbor = Vector2.Normalize(neighbor.Position - ctrParticle.Position);
-            var direction = Vector2.Normalize(normCtrVel * 0.8f + directionToNeighbor * 0.2f);
-            if(float.IsNaN(direction.Length()))
-                direction = normCtrVel;
-            Vector2 adjustedImpulse = collisionImpulse * neighborRatio * direction;
-            Vector2 neighborVelocityChange = adjustedImpulse / neighbor.Mass;
-
-            // Skip updating the neighbor's velocity if the change is below the threshold
-            if (neighborVelocityChange.Length() < velocityThreshold)
-            {
-                continue;
-            }
-
-            // Apply the adjusted impulse to the neighbor
-            neighbor.Velocity += neighborVelocityChange;
-            if(float.IsNaN(neighbor.Velocity.Length()))
-                throw new Exception("NaN");
-        }
-    }
-    
-    
-    
 }

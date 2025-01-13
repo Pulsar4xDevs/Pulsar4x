@@ -8,6 +8,7 @@ namespace GameEngine.Damage;
 
 public static class DamagePhysicsSim
 {
+    public static int runCount = 0;
     public static double FindFastestParticle(DamageMap map)
     {
         double mag = 0;
@@ -33,6 +34,7 @@ public static class DamagePhysicsSim
     
     public static void PhysicsLoop(DamageMap damageMap)
     {
+        runCount++;
         damageMap.TotalEnergy = CalculateTotalEnergy(damageMap);
         damageMap.FastestSpeed = FindFastestParticle(damageMap);
         float timeStep = (float)(damageMap.Scale / damageMap.FastestSpeed);
