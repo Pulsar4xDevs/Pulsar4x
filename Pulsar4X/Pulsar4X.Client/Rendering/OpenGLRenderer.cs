@@ -187,58 +187,16 @@ public class OpenGLRenderer : IRenderer
         GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_WRAP_S, (int)GL.Enum.GL_CLAMP_TO_EDGE);
         GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_WRAP_T, (int)GL.Enum.GL_CLAMP_TO_EDGE);
 
-        uint glFormat;
-        uint internalFormat;
+        GL.Enum glFormat = GL.Enum.GL_RGBA;
 
-        if (format.BitsPerPixel == 32)
+        switch(format.BitsPerPixel)
         {
-            // Check the mask layout to determine exact format
-            if (format.Rmask == 0xFF000000 && format.Amask == 0x000000FF)
-            {
-                // RGBA format
-                internalFormat = (uint)GL.Enum.GL_RGBA8;
-                glFormat = (uint)GL.Enum.GL_RGBA;
-            }
-            else if (format.Rmask == 0x000000FF && format.Amask == 0xFF000000)
-            {
-                // BGRA format
-                internalFormat = (uint)GL.Enum.GL_RGBA8;
-                glFormat = (uint)GL.Enum.GL_BGRA;
-            }
-            else if (format.Amask == 0xFF000000 && format.Rmask == 0x00FF0000)
-            {
-                // ARGB format
-                internalFormat = (uint)GL.Enum.GL_RGBA8;
-                glFormat = (uint)GL.Enum.GL_BGRA;
-            }
-            else
-            {
-                throw new Exception($"Unsupported 32-bit pixel format. Rmask: {format.Rmask:X}, Amask: {format.Amask:X}");
-            }
-        }
-        else if (format.BitsPerPixel == 24)
-        {
-            // Check the mask layout for 24-bit formats
-            if (format.Rmask == 0xFF0000)
-            {
-                // RGB format
-                internalFormat = (uint)GL.Enum.GL_RGB8;
-                glFormat = (uint)GL.Enum.GL_RGB;
-            }
-            else if (format.Rmask == 0x0000FF)
-            {
-                // BGR format
-                internalFormat = (uint)GL.Enum.GL_RGB8;
-                glFormat = (uint)GL.Enum.GL_BGR;
-            }
-            else
-            {
-                throw new Exception($"Unsupported 24-bit pixel format. Rmask: {format.Rmask:X}");
-            }
-        }
-        else
-        {
-            throw new Exception($"Unsupported bits per pixel: {format.BitsPerPixel}");
+            case 32:
+                glFormat = GL.Enum.GL_RGBA;
+                break;
+            case 24:
+                glFormat = GL.Enum.GL_RGB;
+                break;
         }
 
         // Upload texture data to GPU
@@ -247,11 +205,11 @@ public class OpenGLRenderer : IRenderer
             GL.TexImage2D(
                 GL.Enum.GL_TEXTURE_2D,
                 0,
-                (int)internalFormat,
+                (int)glFormat,
                 surface.w,
                 surface.h,
                 0,
-                (GL.Enum)glFormat,
+                glFormat,
                 GL.Enum.GL_UNSIGNED_BYTE,
                 surface.pixels
             );
