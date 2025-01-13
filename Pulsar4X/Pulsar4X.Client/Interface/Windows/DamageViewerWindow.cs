@@ -101,7 +101,7 @@ namespace Pulsar4X.SDL2UI.Combat
                 _uiState.ViewPort.Renderer.CreateTexture(_rawShipImage, ref _shipImgPtr, Client.Rendering.PixelFormat.ARGB8888);
 
                 _damageMap = new DamageMap(_profile);
-                SDL2Helper.CreateSDLTextures(_uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
+                SDL2Helper.CreateSDLTextures(_uiState.ViewPort.Renderer, _uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
                 _dmWidth = (int)(_damageMap.Width * _dmSizeScaler);
                 _dmHeight = (int)(_damageMap.Height * _dmSizeScaler);
                 _dmProjectileSliderBot = _dmWidth;
@@ -399,7 +399,7 @@ namespace Pulsar4X.SDL2UI.Combat
                                 SetDMVectors();
 
                                 _damageMap.MergeAndResize(_projectileDamageMap);
-                                SDL2Helper.CreateSDLTextures(_uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
+                                SDL2Helper.CreateSDLTextures(_uiState.ViewPort.Renderer, _uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
 
 
 
@@ -425,13 +425,13 @@ namespace Pulsar4X.SDL2UI.Combat
                             {
                                 _runSimLoop = false;
                                 DamagePhysicsSim.PhysicsLoop(_damageMap);
-                                SDL2Helper.CreateSDLTextures(_uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
+                                SDL2Helper.CreateSDLTextures(_uiState.ViewPort.Renderer, _uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
                             }
 
                             if (_runSimLoop)
                             {
                                 DamagePhysicsSim.PhysicsLoop(_damageMap);
-                                SDL2Helper.CreateSDLTextures(_uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
+                                SDL2Helper.CreateSDLTextures(_uiState.ViewPort.Renderer, _uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
                             }
                             ImGui.Text(Stringify.Energy(_damageMap.TotalEnergy));
                         }
