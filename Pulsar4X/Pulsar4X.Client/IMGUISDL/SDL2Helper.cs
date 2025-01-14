@@ -54,11 +54,11 @@ public static class SDL2Helper
         int height = damageMap.Height;
         CreateTextureForIDMap(renderer, damageMap, ref textures[0], width, height);
         CreateTextureForPresMap(renderer, damageMap, ref textures[1], width, height);
-        CreateTextureForVMap(renderPtr, damageMap, ref textures[2], width, height);
-        CreateTextureForPMap(renderPtr, damageMap, ref textures[3], width, height);
-        CreateTextureForTemp(renderPtr, damageMap, ref textures[4], width, height);
-        CreateTextureForPhaseState(renderPtr, damageMap, ref textures[5], width, height);
-        CreateTextureForPhotonMap(renderPtr, damageMap, ref textures[6], width, height);
+        CreateTextureForVMap(renderer, damageMap, ref textures[2], width, height);
+        CreateTextureForPMap(renderer, damageMap, ref textures[3], width, height);
+        CreateTextureForTemp(renderer, damageMap, ref textures[4], width, height);
+        CreateTextureForPhaseState(renderer, damageMap, ref textures[5], width, height);
+        CreateTextureForPhotonMap(renderer, damageMap, ref textures[6], width, height);
 
     }
 
@@ -79,14 +79,14 @@ public static class SDL2Helper
         // If the texture doesn't exist, create it
         if(texture == IntPtr.Zero)
         {
-            renderer.CreateTexture(ref texture, width, height, IntPtr.Zero, PixelFormat.ARGB8888);
+            renderer.CreateTexture(ref texture, width, height, IntPtr.Zero, PixelFormat.RGBA8888, TextureFilter.Nearest);
         }
 
         // If the dimensions don't match, recreate the texture
         (int txWidth, int txHeight) = renderer.GetTextureDimensions(texture);
         if(width != txWidth || height != txHeight)
         {
-            renderer.CreateTexture(ref texture, width, height, IntPtr.Zero, PixelFormat.ARGB8888);
+            renderer.CreateTexture(ref texture, width, height, IntPtr.Zero, PixelFormat.RGBA8888, TextureFilter.Nearest);
         }
     }
 
@@ -176,16 +176,12 @@ public static class SDL2Helper
         // Create a buffer for the pixel data
         uint[] pixelData = new uint[width * height];
 
-        // Get unique instances for color mapping
-        var uniqueInstances = damageMap.compIDMap.Distinct().Where(id => id != null).ToList();
-
         // Fill the pixel data
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
             {
-                int index = damageMap.GetIndex(x, y);
-                int id = damageMap.compIDMap[index];
+                int index = y * width + x;
 
                 // Calculate blue value
                 byte blueValue = (byte)(damageMap.PresMap[index] * 255.0f / maxPressure);
@@ -237,6 +233,52 @@ public static class SDL2Helper
         SDL.SDL_UnlockTexture(texture);
     }
 
+    internal static void CreateTextureForVMap(IRenderer renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    {
+        byte alpha = 255;
+        double maxVelocity = 0;
+        foreach (var part in damageMap.PMap)
+        {
+            if(part != null && part.Velocity.Length() > maxVelocity)
+                maxVelocity = part.Velocity.Length();
+        }
+
+        // Check/create texture if needed
+        CheckTexture(renderer, ref texture, width, height);
+
+        // Create a buffer for the pixel data
+        uint[] pixelData = new uint[width * height];
+
+        // Fill the pixel data
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int index = damageMap.GetIndex(x, y);
+                var part = damageMap.PMap[index];
+                byte greenValue = 0;
+                if(part != null)
+                    greenValue = (byte)((damageMap.PMap[index].Velocity.Length() * 255.0) / maxVelocity);
+
+                // Pack ARGB values into a single uint
+                pixelData[y * width + x] = (uint)((greenValue << 16) | (alpha << 0));
+            }
+        }
+
+        GCHandle handle = GCHandle.Alloc(pixelData, GCHandleType.Pinned);
+        try
+        {
+            IntPtr pixels = handle.AddrOfPinnedObject();
+
+            // Update the texture
+            renderer.UpdateTexture(ref texture, width, height, pixels);
+        }
+        finally
+        {
+            handle.Free();
+        }
+    }
+
     internal static void CreateTextureForVMap(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
         byte alpha = 255;
@@ -273,6 +315,61 @@ public static class SDL2Helper
         }
 
         SDL.SDL_UnlockTexture(texture);
+    }
+
+    internal static void CreateTextureForPMap(IRenderer renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    {
+        byte alpha = 255;
+        int phaseStateCount = Enum.GetValues(typeof(PhaseState)).Length;
+
+        // Check/create texture if needed
+        CheckTexture(renderer, ref texture, width, height);
+
+        // Create a buffer for the pixel data
+        uint[] pixelData = new uint[width * height];
+
+        // Fill the pixel data
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int index = y * width + x;
+                PhysicalParticle physicalParticle = damageMap.PMap[index];
+                uint color = 0;
+                if (physicalParticle != null)
+                {
+                    // Red for Life (Health) 0 to 255
+                    byte lifeRed = (byte)(physicalParticle.Life * 2.55f); // Life is 0-100, so *2.55 for 0-255
+
+                    // Blue for StateOfPhase, using full range 0 to 255
+
+                    byte phaseBlue = (byte)((int)physicalParticle.StateOfPhase * 255 / (phaseStateCount - 1)); // Spread over 0-255
+
+                    // Green for Temperature, assuming max temp is known or we normalize to 100
+                    byte tempGreen = (byte)(Math.Min(physicalParticle.Temperature, 100) * 2.55f); // Normalize to 0-100 then to 0-255
+
+                    // Combine all channels
+                    color = (uint)((lifeRed << 24) | (tempGreen << 16) | (phaseBlue << 8) | (alpha << 0));
+
+                }
+
+                // Pack ARGB values into a single uint
+                pixelData[index] = color;
+            }
+        }
+
+        GCHandle handle = GCHandle.Alloc(pixelData, GCHandleType.Pinned);
+        try
+        {
+            IntPtr pixels = handle.AddrOfPinnedObject();
+
+            // Update the texture
+            renderer.UpdateTexture(ref texture, width, height, pixels);
+        }
+        finally
+        {
+            handle.Free();
+        }
     }
 
     internal static void CreateTextureForPMap(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
@@ -320,6 +417,51 @@ public static class SDL2Helper
         SDL.SDL_UnlockTexture(texture);
     }
 
+    internal static void CreateTextureForPhaseState(IRenderer renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    {
+        int phaseStateCount = Enum.GetValues(typeof(PhaseState)).Length;
+        uint color = 0;
+
+        // Check/create texture if needed
+        CheckTexture(renderer, ref texture, width, height);
+
+        // Create a buffer for the pixel data
+        uint[] pixelData = new uint[width * height];
+
+        // Fill the pixel data
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int index = damageMap.GetIndex(x,y);
+                PhysicalParticle physicalParticle = damageMap.PMap[index];
+                if (physicalParticle != null)
+                {
+                    var phaseState = physicalParticle.StateOfPhase;
+                    byte byteState = (byte)phaseState;
+                    color = ColourFromValue(byteState, phaseStateCount, 0);
+                }
+                else color = 0;
+
+                // Pack ARGB values into a single uint
+                pixelData[index] = color;
+            }
+        }
+
+        GCHandle handle = GCHandle.Alloc(pixelData, GCHandleType.Pinned);
+        try
+        {
+            IntPtr pixels = handle.AddrOfPinnedObject();
+
+            // Update the texture
+            renderer.UpdateTexture(ref texture, width, height, pixels);
+        }
+        finally
+        {
+            handle.Free();
+        }
+    }
+
     internal static void CreateTextureForPhaseState(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
         byte alpha = 255;
@@ -355,6 +497,117 @@ public static class SDL2Helper
 
         SDL.SDL_UnlockTexture(texture);
 
+    }
+
+    internal static void CreateTextureForTemp(IRenderer renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    {
+        uint color = 0;
+        float temperatureInKelvin = 0;
+        float thermalCapacity = 0;
+        float thermalConductivity = 0;
+        // Define our color spectrum based on Kelvin scale
+        float minTemp = 6000;   // Absolute zero
+        float maxTemp = 6000; // Arbitrary max, adjust based on your data range or visual needs
+        foreach (var particle in damageMap.PMap)
+        {
+            if (particle != null)
+            {
+                if(particle.Temperature < minTemp)
+                    minTemp = particle.Temperature;
+                if(particle.Temperature > maxTemp)
+                    maxTemp = particle.Temperature;
+            }
+        }
+
+        // Check/create texture if needed
+        CheckTexture(renderer, ref texture, width, height);
+
+        // Create a buffer for the pixel data
+        uint[] pixelData = new uint[width * height];
+
+        // Fill the pixel data
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int index = y * width + x;
+                PhysicalParticle physicalParticle = damageMap.PMap[index];
+
+                if (physicalParticle != null)
+                {
+                    temperatureInKelvin = physicalParticle.Temperature;
+                    thermalCapacity = physicalParticle.MatType.ThermalCapacity;
+                    thermalConductivity = physicalParticle.MatType.ThermalConductivity;
+
+                    // Normalize temperature
+                    float tempNormalized = (temperatureInKelvin - minTemp) / (maxTemp - minTemp);
+
+                    // Mapping temperature to RGB
+                    float r, g, b;
+                    if (tempNormalized < 0.2f) // Very Cold - Dark Blue to Blue
+                    {
+                        r = 0;
+                        g = tempNormalized * 5f;
+                        b = 1;
+                    }
+                    else if (tempNormalized < 0.4f) // Cold - Blue to Cyan
+                    {
+                        r = 0;
+                        g = 1;
+                        b = 1 - (tempNormalized - 0.2f) * 5f;
+                    }
+                    else if (tempNormalized < 0.6f) // Cool - Cyan to Green
+                    {
+                        r = (tempNormalized - 0.4f) * 5f;
+                        g = 1;
+                        b = 0;
+                    }
+                    else if (tempNormalized < 0.8f) // Warm - Green to Yellow
+                    {
+                        r = 1;
+                        g = 1 - (tempNormalized - 0.6f) * 5f;
+                        b = 0;
+                    }
+                    else // Hot - Yellow to White
+                    {
+                        float t = (tempNormalized - 0.8f) * 5f;
+                        r = 1;
+                        g = t;
+                        b = t;
+                    }
+
+                    /*
+                    // Adjust color based on thermal properties
+                    float saturation = 1.0f - (thermalConductivity / 100f);
+                    (r, g, b) = AdjustSaturation(r, g, b, saturation);
+
+                    // Use thermal capacity to adjust lightness
+                    float lightness = 0.5f + (thermalCapacity / 200f);
+                    (r, g, b) = AdjustLightness(r, g, b, lightness);
+                    */
+                    // Convert to uint for SDL2 texture (ARGB format)
+                    byte a = 255; // Full opacity
+                    color = (uint)((a << 0) | ((byte)(r * 255) << 24) | ((byte)(g * 255) << 16) | ((byte)(b * 255) << 8));
+
+                }
+
+                // Pack ARGB values into a single uint
+                pixelData[index] = color;
+            }
+        }
+
+        GCHandle handle = GCHandle.Alloc(pixelData, GCHandleType.Pinned);
+        try
+        {
+            IntPtr pixels = handle.AddrOfPinnedObject();
+
+            // Update the texture
+            renderer.UpdateTexture(ref texture, width, height, pixels);
+        }
+        finally
+        {
+            handle.Free();
+        }
     }
 
     internal static void CreateTextureForTemp(IntPtr renderPtr, DamageMap damageMap, ref IntPtr texture, int width, int height)
@@ -462,6 +715,78 @@ public static class SDL2Helper
         SDL.SDL_UnlockTexture(texture);
 
     }
+
+    internal static void CreateTextureForPhotonMap(IRenderer renderer, DamageMap damageMap,ref IntPtr texture, int width, int height)
+    {
+        if(damageMap.PhMap == null)
+        {
+            if (texture != IntPtr.Zero)
+            {
+                renderer.DeleteTexture((uint)texture);
+                texture = IntPtr.Zero;
+            }
+            return;
+        }
+
+        var minFreq = (int)damageMap.PhMap
+                                    .Where(p => p != null)
+                                    .Select(p => p.WaveLength)
+                                    .DefaultIfEmpty(0) // Fallback value
+                                    .Min();
+        var maxFreq = (int)damageMap.PhMap
+                                    .Where(p => p != null)
+                                    .Select(p => p.WaveLength)
+                                    .DefaultIfEmpty(10000) // Fallback value
+                                    .Max();
+        var maxPow = (int)damageMap.PhMap
+                                   .Where(p => p != null)
+                                   .Select(p => p.WaveLength)
+                                   .DefaultIfEmpty(10000) // Fallback value
+                                   .Max();
+        minFreq = (int)(minFreq * 0.5);
+        maxFreq = (int)(maxFreq * 1.5);
+        uint  color = 0;
+
+        // Check/create texture if needed
+        CheckTexture(renderer, ref texture, width, height);
+
+        // Create a buffer for the pixel data
+        uint[] pixelData = new uint[width * height];
+
+        // Fill the pixel data
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int index = damageMap.GetIndex(x, y);
+                var photon = damageMap.PhMap[index];
+                if(photon != null)
+                {
+                    var power = photon.Power;
+                    var wavelen = (int)photon.WaveLength;
+                    color = ColourFromValue2(wavelen, maxFreq, minFreq, power, 25, maxPow);
+                }
+                else color = 0;
+
+                // Pack ARGB values into a single uint
+                pixelData[index] = color;
+            }
+        }
+
+        GCHandle handle = GCHandle.Alloc(pixelData, GCHandleType.Pinned);
+        try
+        {
+            IntPtr pixels = handle.AddrOfPinnedObject();
+
+            // Update the texture
+            renderer.UpdateTexture(ref texture, width, height, pixels);
+        }
+        finally
+        {
+            handle.Free();
+        }
+    }
+
     internal static void CreateTextureForPhotonMap(IntPtr renderPtr, DamageMap damageMap,ref IntPtr texture, int width, int height)
     {
         if(damageMap.PhMap == null)
@@ -581,7 +906,7 @@ public static class SDL2Helper
         // Handle Alpha, either fixed or normalized based on separate alpha range
         float normalizedAlpha = (float)(alphaValue - alphaMin) / (alphaMax - alphaMin);
         byte a = (byte)(normalizedAlpha * 255);
-        return (uint)((a << 24) | (r << 16) | (g << 8) | b);
+        return (uint)((a << 0) | (r << 24) | (g << 16) | (b << 8));
     }
     public static uint ColourFromValue2(
         float value, int max, int min,
@@ -624,7 +949,7 @@ public static class SDL2Helper
         byte a = (byte)(Math.Clamp(normalizedAlpha, 0.0f, 1.0f) * 255);
 
         // Convert to ARGB uint for SDL2
-        return (uint)((a << 24) | ((byte)(r * 255) << 16) | ((byte)(g * 255) << 8) | (byte)(b * 255));
+        return (uint)((a << 0) | ((byte)(r * 255) << 24) | ((byte)(g * 255) << 16) | ((byte)(b * 255) << 8));
     }
 
     enum ColourOrder

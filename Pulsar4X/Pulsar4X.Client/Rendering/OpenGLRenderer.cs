@@ -98,7 +98,7 @@ public class OpenGLRenderer : IRenderer
         return _glContext;
     }
 
-    public void CreateTexture(RawBmp rawBmp, ref IntPtr texturePtr, PixelFormat pixelFormat = PixelFormat.RGBA8888)
+    public void CreateTexture(RawBmp rawBmp, ref IntPtr texturePtr, PixelFormat pixelFormat = PixelFormat.RGBA8888, TextureFilter textureFilter = TextureFilter.Linear)
     {
         IntPtr pixels;
         unsafe
@@ -144,11 +144,11 @@ public class OpenGLRenderer : IRenderer
                                 bmask,
                                 amask);
 
-        texturePtr = (IntPtr)LoadTexture(sdlSurface);
+        texturePtr = (IntPtr)CreateTexture(sdlSurface, textureFilter);
         SDL.SDL_FreeSurface(sdlSurface);
     }
 
-    public void CreateTexture(ref IntPtr texture, int width, int height, IntPtr pixels, PixelFormat pixelFormat = PixelFormat.RGBA8888)
+    public void CreateTexture(ref IntPtr texture, int width, int height, IntPtr pixels, PixelFormat pixelFormat = PixelFormat.RGBA8888, TextureFilter textureFilter = TextureFilter.Linear)
     {
         // Delete the texture if it already exists
         DeleteTexture((uint)texture);
@@ -158,8 +158,7 @@ public class OpenGLRenderer : IRenderer
         GL.BindTexture(GL.Enum.GL_TEXTURE_2D, textureId);
 
         // TODO: allow these to specified in the method parameters
-        GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MIN_FILTER, (int)GL.Enum.GL_LINEAR);
-        GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MAG_FILTER, (int)GL.Enum.GL_LINEAR);
+        SetTextureFilter(textureFilter);
         GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_WRAP_S, (int)GL.Enum.GL_CLAMP_TO_EDGE);
         GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_WRAP_T, (int)GL.Enum.GL_CLAMP_TO_EDGE);
 
@@ -178,7 +177,7 @@ public class OpenGLRenderer : IRenderer
         texture = new IntPtr(textureId);
     }
 
-    public uint LoadTexture(IntPtr surfacePtr)
+    public uint CreateTexture(IntPtr surfacePtr, TextureFilter textureFilter = TextureFilter.Linear)
     {
         // Convert the SDL_Surface pointer to a managed structure
         var surface = Marshal.PtrToStructure<SDL.SDL_Surface>(surfacePtr);
@@ -212,8 +211,7 @@ public class OpenGLRenderer : IRenderer
         CheckGLError("LoadTexture (BindTexture)");
 
         // Set texture parameters
-        GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MIN_FILTER, (int)GL.Enum.GL_LINEAR);
-        GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MAG_FILTER, (int)GL.Enum.GL_LINEAR);
+        SetTextureFilter(textureFilter);
         GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_WRAP_S, (int)GL.Enum.GL_CLAMP_TO_EDGE);
         GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_WRAP_T, (int)GL.Enum.GL_CLAMP_TO_EDGE);
 
@@ -489,6 +487,21 @@ public class OpenGLRenderer : IRenderer
                 _ => $"Unknown error: 0x{error:X4}"
             };
             throw new Exception($"OpenGL error during {operation}: {errorMsg}");
+        }
+    }
+
+    private void SetTextureFilter(TextureFilter textureFilter)
+    {
+        switch(textureFilter)
+        {
+            case TextureFilter.Linear:
+                GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MIN_FILTER, (int)GL.Enum.GL_LINEAR);
+                GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MAG_FILTER, (int)GL.Enum.GL_LINEAR);
+                break;
+            case TextureFilter.Nearest:
+                GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MIN_FILTER, (int)GL.Enum.GL_NEAREST);
+                GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MAG_FILTER, (int)GL.Enum.GL_NEAREST);
+                break;
         }
     }
 }

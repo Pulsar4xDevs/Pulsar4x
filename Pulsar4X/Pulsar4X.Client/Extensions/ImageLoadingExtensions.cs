@@ -59,7 +59,7 @@ namespace Pulsar4X.SDL2UI
                 try
                 {
                     // Create the texture
-                    uint textureId = _uiState.ViewPort.Renderer.LoadTexture(sdlSurface);
+                    uint textureId = _uiState.ViewPort.Renderer.CreateTexture(sdlSurface);
                     _uiState.SDLImageDictionary.Add(imgName, (IntPtr)textureId);
                     return (IntPtr)textureId;
                 }

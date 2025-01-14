@@ -21,9 +21,9 @@ public interface IRenderer : IDisposable
     void EndFrame();
     void Clear(float r, float g, float b, float a);
 
-    void CreateTexture(ref IntPtr texture, int width, int height, IntPtr pixels, PixelFormat pixelFormat = PixelFormat.RGBA8888);
-    void CreateTexture(RawBmp rawBmp, ref IntPtr texturePtr, PixelFormat pixelFormat = PixelFormat.RGBA8888);
-    uint LoadTexture(IntPtr surfacePtr);
+    void CreateTexture(ref IntPtr texture, int width, int height, IntPtr pixels, PixelFormat pixelFormat = PixelFormat.RGBA8888, TextureFilter textureFilter = TextureFilter.Linear);
+    void CreateTexture(RawBmp rawBmp, ref IntPtr texturePtr, PixelFormat pixelFormat = PixelFormat.RGBA8888, TextureFilter textureFilter = TextureFilter.Linear);
+    uint CreateTexture(IntPtr surfacePtr, TextureFilter textureFilter = TextureFilter.Linear);
     void DeleteTexture(uint textureId);
     void UpdateTexture(ref IntPtr texture, int width, int height, IntPtr pixels);
     (int width, int height) GetTextureDimensions(IntPtr texture);
