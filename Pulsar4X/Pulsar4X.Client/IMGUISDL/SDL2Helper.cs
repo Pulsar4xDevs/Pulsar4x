@@ -78,14 +78,14 @@ public static class SDL2Helper
         // If the texture doesn't exist, create it
         if(texture == IntPtr.Zero)
         {
-            renderer.CreateTexture(ref texture, width, height, IntPtr.Zero, PixelFormat.ARGB8888);
+            renderer.CreateTexture(ref texture, width, height, IntPtr.Zero, PixelFormat.ARGB8888, TextureFilter.Nearest);
         }
 
         // If the dimensions don't match, recreate the texture
         (int txWidth, int txHeight) = renderer.GetTextureDimensions(texture);
         if(width != txWidth || height != txHeight)
         {
-            renderer.CreateTexture(ref texture, width, height, IntPtr.Zero, PixelFormat.ARGB8888);
+            renderer.CreateTexture(ref texture, width, height, IntPtr.Zero, PixelFormat.ARGB8888, TextureFilter.Nearest);
         }
     }
 
