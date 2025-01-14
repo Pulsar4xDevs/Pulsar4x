@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using GameEngine.Damage;
 using ImGuiNET;
@@ -624,6 +625,20 @@ public static class SDL2Helper
 
         // Convert to ARGB uint for SDL2
         return (uint)((a << 24) | ((byte)(r * 255) << 16) | ((byte)(g * 255) << 8) | (byte)(b * 255));
+    }
+
+    enum ColourOrder
+    {
+        ARGB,
+        RGBA
+    }
+    static uint ColourFromRGBA(byte r, byte g, byte b, byte a, ColourOrder order = ColourOrder.RGBA)
+    {
+        if(order == ColourOrder.RGBA)
+            return (uint)((r << 24) | (g << 16) | (b << 8) | a);
+        else if(order == ColourOrder.ARGB)
+            return (uint)((a << 24) | (r << 16) | (g << 8) | b);
+        else throw new Exception("Invalid ColourOrder");
     }
 }
 
