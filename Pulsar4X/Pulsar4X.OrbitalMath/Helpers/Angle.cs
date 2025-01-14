@@ -69,6 +69,11 @@ namespace Pulsar4X.Orbital
             return Math.Atan2(vector.Y, vector.X);
         }
 
+        public static double RadiansFromVector2(System.Numerics.Vector2 vector)
+        {
+            return Math.Atan2(vector.Y, vector.X);
+        }
+
         public static Vector2 PositionFromAngle(double radians, double distance = 1)
         {
             double x = distance * Math.Cos(radians);

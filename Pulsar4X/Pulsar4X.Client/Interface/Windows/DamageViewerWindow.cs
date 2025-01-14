@@ -496,6 +496,8 @@ namespace Pulsar4X.SDL2UI.Combat
                 velocity *= _dmProjectileSpeed;
                 ParticleMaterial dmMat = new ParticleMaterial()
                 {
+                    TensileStrength = 110,
+                    Elasticity = 0.5f,
                     ThermalCapacity = 900,
                     ThermalConductivity = 237,
                     MeltingZeroPoint = 933.47f,
