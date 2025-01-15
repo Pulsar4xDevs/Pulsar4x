@@ -57,19 +57,16 @@ public static class SDL2Helper
                 int squareY = y / squareSize;
                 byte valueMax = 255;
                 byte valueMin = 0;
-                
-                
+
+
                 if (squareX == 0 && squareY == 0) // Top left - Red
-                    color = (uint)((valueMax << 24) | (valueMin << 16) | (valueMin << 8) | (valueMax << 0)); // 
-                
+                    color = (uint)((valueMax << 0) | (valueMin << 8) | (valueMin << 16) | (valueMax << 24));
                 else if (squareX == 1 && squareY == 0) // Top right - Green
-                    color = (uint)((valueMax << 24) | (valueMax << 16) | (valueMin << 8) | (valueMin << 0)); // 
-                
+                    color = (uint)((valueMin << 0) | (valueMax << 8) | (valueMin << 16) | (valueMax << 24));
                 else if (squareX == 0 && squareY == 1) // Bottom left - Blue
-                    color = (uint)((valueMax << 24) | (valueMin << 16) | (valueMax << 8) | (valueMin << 0)); // 
-                
+                    color = (uint)((valueMin << 0) | (valueMin << 8) | (valueMax << 16) | (valueMax << 24));
                 else if (squareX == 1 && squareY == 1) // Bottom right - Alpha only (black but full alpha)
-                    color = (uint)((valueMax << 24) | (valueMin << 16) | (valueMin << 8) | (valueMin << 0)); // RGBA: 0, 0, 0, 255
+                    color = (uint)((valueMin << 0) | (valueMin << 8) | (valueMin << 16) | (valueMax << 24));
 
                 pixelData[y * width + x] = color;
             }
@@ -87,6 +84,11 @@ public static class SDL2Helper
         {
             handle.Free();
         }
+    }
+
+    static uint GetColor(byte r, byte g, byte b, byte a)
+    {
+        return (uint)((r << 0) | (g << 8) | (b << 16) | (a << 24));
     }
 
     public static void CreateSDLTextures(IRenderer renderer, IntPtr renderPtr, DamageMap damageMap, ref IntPtr[] textures)
@@ -139,7 +141,7 @@ public static class SDL2Helper
 
                 // Pack ARGB values into a single uint
                 // Note: OpenGL expects RGBA format, so we need to swap the byte order
-                pixelData[y * width + x] = (uint)((redValue << 24) | (alpha << 0));
+                pixelData[y * width + x] = GetColor(redValue, 0, 0, alpha);
             }
         }
         
@@ -176,7 +178,7 @@ public static class SDL2Helper
                 byte blueValue = (byte)(damageMap.PresMap[index] * 255.0f / maxPressure);
 
                 // Pack ARGB values into a single uint
-                pixelData[y * width + x] = (uint)((blueValue << 8) | (alpha << 0));
+                pixelData[y * width + x] = GetColor(0, 0, blueValue, alpha);
             }
         }
 
@@ -221,7 +223,7 @@ public static class SDL2Helper
                     greenValue = (byte)((damageMap.PMap[index].Velocity.Length() * 255.0) / maxVelocity);
 
                 // Pack ARGB values into a single uint
-                pixelData[y * width + x] = (uint)((greenValue << 16) | (alpha << 0));
+                pixelData[y * width + x] = GetColor(0, greenValue, 0, alpha);
             }
         }
 
@@ -269,9 +271,7 @@ public static class SDL2Helper
                     byte tempGreen = (byte)(Math.Min(physicalParticle.Temperature, 100) * 2.55f); // Normalize to 0-100 then to 0-255
 
                     // Combine all channels
-                    //color = (uint)((lifeRed << 24) | (tempGreen << 16) | (phaseBlue << 8) | (alpha << 0));
-                    color = (uint)((alpha << 24) | (lifeRed << 16) | (tempGreen << 8) | (phaseBlue << 0));
-
+                    color = GetColor(lifeRed, tempGreen, phaseBlue, alpha);
                 }
 
                 // Pack ARGB values into a single uint
@@ -421,9 +421,11 @@ public static class SDL2Helper
                     */
                     // Convert to uint for SDL2 texture (ARGB format)
                     byte a = 255; // Full opacity
-                    //color =   (uint)((r << 24) | (g << 16) | (b << 8) | (a << 0));
-                    color = (uint)((a << 0) | (b << 8) | (g << 16) | (r << 24));
-                    //color = (uint)((a << 24) | ((byte)(r * 255) << 16) | ((byte)(g * 255) << 8) | (byte)(b * 255));
+                    color = GetColor(r, g, b, a);
+                }
+                else
+                {
+                    color = 0;
                 }
 
                 // Pack ARGB values into a single uint
@@ -961,29 +963,29 @@ public static class SDL2Helper
         normalizedValue = Math.Clamp(normalizedValue, 0.0f, 1.0f); // Ensure it's within [0, 1] for safety
 
         // Map normalizedValue to a hue-based RGB color
-        float r = 0, g = 0, b = 0;
+        byte r = 0, g = 0, b = 0;
         if (normalizedValue < 0.25f) // Blue → Cyan
         {
             r = 0;
-            g = normalizedValue * 4;      // Scale up
+            g = (byte)(normalizedValue * 4 * 255);      // Scale up
             b = 1;
         }
         else if (normalizedValue < 0.5f) // Cyan → Green
         {
             r = 0;
             g = 1;
-            b = 1 - (normalizedValue - 0.25f) * 4;
+            b = (byte)(1 - (normalizedValue - 0.25f) * 4 * 255);
         }
         else if (normalizedValue < 0.75f) // Green → Yellow
         {
-            r = (normalizedValue - 0.5f) * 4;
+            r = (byte)((normalizedValue - 0.5f) * 4 * 255);
             g = 1;
             b = 0;
         }
         else // Yellow → Red
         {
             r = 1;
-            g = 1 - (normalizedValue - 0.75f) * 4;
+            g = (byte)(1 - (normalizedValue - 0.75f) * 4 * 255);
             b = 0;
         }
 
@@ -992,7 +994,8 @@ public static class SDL2Helper
         byte a = (byte)(Math.Clamp(normalizedAlpha, 0.0f, 1.0f) * 255);
 
         // Convert to RGBA uint
-        return (uint)(((byte)(r * 255) << 24) | ((byte)(g * 255) << 16) | ((byte)(b * 255) << 8) | (a << 0));
+        //return (uint)(((byte)(r * 255) << 24) | ((byte)(g * 255) << 16) | ((byte)(b * 255) << 8) | (a << 0));
+        return GetColor(r, g, b, a);
     }
 
     enum ColourOrder
