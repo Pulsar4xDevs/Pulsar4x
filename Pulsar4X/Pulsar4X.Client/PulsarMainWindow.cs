@@ -247,14 +247,10 @@ namespace Pulsar4X.SDL2UI
                     SDL2Helper.CreateTestTexture(_state.ViewPort.Renderer, ref _colorTesttexture);
                 
                 foreach (var kvp in _state.SDLImageDictionary)
-                {/*
-                    int q = SDL.SDL_QueryTexture(kvp.Value, out uint f, out int a, out int w, out int h);
-                    if (q != 0)
-                    {
-                        ImGui.Text("QueryResult: " + q);
-                        ImGui.Text(SDL.SDL_GetError());
-                    }
-                    ImGui.Image(kvp.Value, new System.Numerics.Vector2(w, h)); */
+                {
+                    (int txWidth, int txHeight) = _state.ViewPort.Renderer.GetTextureDimensions(kvp.Value);
+                    ImGui.Image(kvp.Value, new System.Numerics.Vector2(txWidth, txHeight));
+                    ImGui.Text(kvp.Key);
                 }
             }
 
