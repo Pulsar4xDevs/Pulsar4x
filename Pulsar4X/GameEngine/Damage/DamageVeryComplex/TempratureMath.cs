@@ -7,7 +7,7 @@ namespace GameEngine.Damage;
 
 public static class TempratureMath
 {
-    private static void TransferHeat(PhysicalParticle a, PhysicalParticle b, float deltaTime)
+    private static void TransferHeat(PhysicalParticle a, PhysicalParticle b, float deltaTime, int neighborCount)
     {
         PhysicalParticle from;
         PhysicalParticle to;
@@ -24,7 +24,7 @@ public static class TempratureMath
             to = a;
         }
         
-        float deltaTemp = from.Temperature - to.Temperature;
+        float deltaTemp = (from.Temperature - to.Temperature) / neighborCount;
 
         double distance = Vector2.Distance(from.Position, to.Position);
     
@@ -56,8 +56,8 @@ public static class TempratureMath
     public static void TransferHeat(DamageMap damageMap, float timeStep )
     {
         float baseRadius = 0.1f * damageMap.Scale; // Base radius for 1 meter
-        float heatTransferRadius = baseRadius * MathF.Sqrt(timeStep);
-        heatTransferRadius = 1;
+        //float heatTransferRadius = baseRadius * MathF.Sqrt(timeStep);
+        float heatTransferRadius = 1f;
         for (int index = 0; index < damageMap.PMap.Length; index++)
         {
             PhysicalParticle? particle = damageMap.PMap[index];
@@ -67,7 +67,7 @@ public static class TempratureMath
 
                 foreach (var neighbor in neighbors)
                 {
-                    TransferHeat(particle, neighbor, timeStep);
+                    TransferHeat(particle, neighbor, timeStep, neighbors.Count);
                 }
             }
         }

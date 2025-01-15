@@ -212,6 +212,9 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        private IntPtr _colorTesttexture = IntPtr.Zero;
+        private IntPtr _pixels;
+
         public unsafe override void ImGuiLayout()
         {
             //because the nameIcons are IMGUI not SDL we draw them here.
@@ -237,15 +240,21 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("NumTxtFormats: " +renderInfo.num_texture_formats.ToString());
                 ImGui.NewLine();
 
+                if(_colorTesttexture == IntPtr.Zero)
+                    SDL2Helper.CreateTestTexture(_state.ViewPort.Renderer, ref _colorTesttexture);
+                ImGui.Image(_colorTesttexture, new System.Numerics.Vector2(200, 200));
+                if(ImGui.Button("refresh"))
+                    SDL2Helper.CreateTestTexture(_state.ViewPort.Renderer, ref _colorTesttexture);
+                
                 foreach (var kvp in _state.SDLImageDictionary)
-                {
+                {/*
                     int q = SDL.SDL_QueryTexture(kvp.Value, out uint f, out int a, out int w, out int h);
                     if (q != 0)
                     {
                         ImGui.Text("QueryResult: " + q);
                         ImGui.Text(SDL.SDL_GetError());
                     }
-                    ImGui.Image(kvp.Value, new System.Numerics.Vector2(w, h));
+                    ImGui.Image(kvp.Value, new System.Numerics.Vector2(w, h)); */
                 }
             }
 
