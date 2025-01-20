@@ -47,7 +47,7 @@ namespace Pulsar4X.Damage
 
             foreach (var damage in damages.damageToComponents)
             {
-                entityDamageProfileDB.ComponentLookupTable[damage.id].HTKRemaining -= damage.damageAmount;
+                entityDamageProfileDB.ComponentLookupTable[damage.id].HealthPercent -= damage.damageAmount;
             }
 
             if(damageableEntity.TryGetDatablob<ComponentInstancesDB>(out var damagedComponentInstancesDB))

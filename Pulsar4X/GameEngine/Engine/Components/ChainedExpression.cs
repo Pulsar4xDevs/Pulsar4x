@@ -342,8 +342,8 @@ namespace Pulsar4X.Components
                     break;
 
                 case "HTK":
-                    MakeThisDependant(_designer.HTKFormula);
-                    args.Result = _designer.HTKValue;
+                    MakeThisDependant(_designer.DestructionPercentFormula);
+                    args.Result = _designer.DestructionPercentValue;
                     break;
 
                 case "ResearchCost":

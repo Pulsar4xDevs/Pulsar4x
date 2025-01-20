@@ -26,23 +26,11 @@ namespace Pulsar4X.Extensions
                 var componentCapacity = design.GetAttribute<PopulationSupportAtbDB>().PopulationCapacity;
                 foreach (var component in componentInstances.GetComponentsBySpecificDesign(design.UniqueID).Where(c => c.IsEnabled))
                 {
-                    popSupportValue += (long)(componentCapacity * component.HealthPercent());
+                    popSupportValue += (long)(componentCapacity * component.HealthPercent);
                 }
             }
 
             return popSupportValue;
-        }
-
-        public static int GetTotalHTK(this ComponentInstancesDB componentInstances)
-        {
-            int totalHTK = 0;
-
-            foreach (KeyValuePair<string, List<ComponentInstance>> instance in componentInstances.GetComponentsByDesigns())
-            {
-                instance.Value.ForEach(x => totalHTK += x.HTKRemaining);
-            }
-
-            return totalHTK;
         }
 
         public static long GetTotalDryMass(this ComponentInstancesDB componentInstances)
@@ -88,7 +76,7 @@ namespace Pulsar4X.Extensions
                     //var fuelUsage = (ResourceConsumptionAtbDB)instanceInfo.Design.AttributesByType[typeof(ResourceConsumptionAtbDB)];
                     if (instanceInfo.IsEnabled)
                     {
-                        totalEnginePower += (int)(warpAtb.WarpPower * instanceInfo.HealthPercent());
+                        totalEnginePower += (int)(warpAtb.WarpPower * instanceInfo.HealthPercent);
                         //foreach (var item in fuelUsage.MaxUsage)
                         //{
                         //    totalFuelUsage.SafeValueAdd(item.Key, item.Value);

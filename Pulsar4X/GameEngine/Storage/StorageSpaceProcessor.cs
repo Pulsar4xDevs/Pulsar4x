@@ -45,7 +45,7 @@ namespace Pulsar4X.Storage
                     var design = instance.Design;
                     var atbdata = design.GetAttribute<CargoStorageAtb>();
 
-                    if (instance.HealthPercent() > 0.75)
+                    if (instance.HealthPercent > instance.StopWorkingAtPercent)
                     {
                         if(!calculatedMaxStorage.ContainsKey(atbdata.StoreTypeID))
                             calculatedMaxStorage[atbdata.StoreTypeID] = atbdata.MaxVolume;
@@ -72,7 +72,7 @@ namespace Pulsar4X.Storage
                         continue;
 
                     var atbdata = design.GetAttribute<CargoTransferAtb>();
-                    if (instance.HealthPercent() > 0.75)
+                    if (instance.HealthPercent > instance.StopWorkingAtPercent)
                     {
                         rate += atbdata.TransferRate_kgs;
                         range += atbdata.TransferRange_ms;

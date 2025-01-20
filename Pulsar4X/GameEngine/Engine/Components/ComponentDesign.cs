@@ -38,7 +38,7 @@ namespace Pulsar4X.Components
         
         public string Description;
         //public int Volume_m3 = 1;
-        public int HTK;
+        public float DestructionPercent;
         public int CrewReq;
         public long IndustryPointCosts { get; set; }
         public string IndustryTypeID { get; set; }

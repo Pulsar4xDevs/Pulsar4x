@@ -17,9 +17,9 @@ public class DamageMap
 {
     public TimeSpan RunTime = TimeSpan.Zero;
     private Dictionary<string, ushort> componentIDLookup = new();
-    internal Dictionary<ushort, (string instanceID, float htkpp )> componentIDLookupByIntID = new();
+    //internal Dictionary<ushort, (string instanceID, float htkpp )> componentIDLookupByIntID = new();
     
-    public Dictionary<string, ((int x, int y) Position, (int x, int y) Size, float HTKPerParticle, int totalParticles)> componentData = new();
+    public Dictionary<string, ((int x, int y) Position, (int x, int y) Size, int totalParticles)> componentData = new();
     
     private ushort _nextComponentID = 0;
 
@@ -82,12 +82,12 @@ public class DamageMap
         return (ushort)(_nextComponentID - 1);
     }
 
-    public void AddComponentID(string strID, float htkpp)
+    public void AddComponentID(string strID)//, float htkpp)
     {
         ushort intID = GenerateNewCompID(strID);
         componentIDLookup.Add(strID, intID);
         _nextComponentID++;
-        componentIDLookupByIntID.Add(intID, (strID, htkpp));
+        //componentIDLookupByIntID.Add(intID, (strID, htkpp));
         
     }
 
@@ -169,8 +169,8 @@ public class DamageMap
             {
                 string instanceID = instanceIDs[i].UniqueID; // Get the corresponding instanceID
                 var instance = instanceIDs[i];
-                var htkMax = instance.HTKMax;
-                var htkPerParticle = htkMax / numparticles;
+                //var htkMax = numparticles;//instance.DestructionPercentMax;
+                //var htkPerParticle = htkMax / numparticles;
                 int actualY = stackCenterY + (partHeight * i);
                 //int actualY = centerY - (partHeight * (partSize.count - i) + partHeight / 2);
                 (int x, int y) position = (currentX, actualY);
@@ -198,8 +198,8 @@ public class DamageMap
                     }
                 }
 
-                componentData[instanceID] = (position, size, htkPerParticle, totalParticles);
-                AddComponentID(instanceID, htkPerParticle);
+                componentData[instanceID] = (position, size, totalParticles);
+                AddComponentID(instanceID);//, htkPerParticle);
             }
 
             // Increment currentX by the length of the part for the next placement
@@ -308,7 +308,7 @@ public class DamageMap
         PhysicalParticle[] newPMap = new PhysicalParticle[newWidth * newHeight];
         PhotonParticle[] newPhMap = new PhotonParticle[newWidth * newHeight];
         float[] newPresMap = new float[newWidth * newHeight];
-        var newComponentData = new Dictionary<string, ((int,int) Position, (int,int) Size, float HTKPerParticle, int TotalParticles)>();
+        var newComponentData = new Dictionary<string, ((int,int) Position, (int,int) Size, int TotalParticles)>();
         // Offset for placing particles from this map
         int offsetX = expandX < 0 ? otherMap.Width : 0;
         int offsetY = expandY < 0 ? otherMap.Height : 0;
@@ -316,9 +316,9 @@ public class DamageMap
         foreach (var component in componentData)
         {
             string instanceID = component.Key;
-            var (position, size, htkPerParticle, totalParticles) = component.Value;
+            var (position, size, totalParticles) = component.Value;
             (int,int) newPosition = (position.x + offsetX, position.y + offsetY);
-            newComponentData[instanceID] = (newPosition, size, htkPerParticle, totalParticles);
+            newComponentData[instanceID] = (newPosition, size, totalParticles);
         }
         
         // Copy and offset old data to new arrays
@@ -390,19 +390,19 @@ public class DamageMap
         foreach (var otherComponent in otherMap.componentData)
         {
             string instanceID = otherComponent.Key;
-            var (otherPosition, otherSize, otherHTKPerParticle, otherTotalParticles) = otherComponent.Value;
+            var (otherPosition, otherSize, otherTotalParticles) = otherComponent.Value;
             (int,int) newPosition = (otherPosition.x + otherMap.X + offsetX, otherPosition.y + otherMap.Y + offsetY);
 
             // If this component ID already exists, we'll merge damage or you might decide to handle conflicts differently
             if (newComponentData.ContainsKey(instanceID))
             {
                 // Merge damage - this is a simple approach, might need refinement based on your needs
-                var (currentPosition, currentSize, currentHTKPerParticle, currentTotalParticles) = newComponentData[instanceID];
-                newComponentData[instanceID] = (currentPosition, currentSize, currentHTKPerParticle, currentTotalParticles);
+                var (currentPosition, currentSize, currentTotalParticles) = newComponentData[instanceID];
+                newComponentData[instanceID] = (currentPosition, currentSize, currentTotalParticles);
             }
             else
             {
-                newComponentData[instanceID] = (newPosition, otherSize, otherHTKPerParticle, otherTotalParticles);
+                newComponentData[instanceID] = (newPosition, otherSize, otherTotalParticles);
             }
         }
 

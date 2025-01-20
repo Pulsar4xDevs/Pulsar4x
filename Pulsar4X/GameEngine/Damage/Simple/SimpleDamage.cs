@@ -30,9 +30,9 @@ public class SimpleDamage
             var damagedIndex = mgr.RNGNext(components.Count);
             var damage = mgr.RNGNext(damageMin, damageMax);
 
-            components[damagedIndex].HTKRemaining -= damage;
+            components[damagedIndex].HealthPercent -= damage;
 
-            if(components[damagedIndex].HTKRemaining <= 0)
+            if(components[damagedIndex].HealthPercent <= 0)
             {
                 componentInstancesDB.RemoveComponentInstance(components[damagedIndex]);
             }

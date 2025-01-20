@@ -43,7 +43,7 @@ namespace Pulsar4X.Components
             MassFormula = new ChainedExpression(componentSD.Formulas["Mass"], this, factionDataStore, factionTech);
             VolumeFormula = new ChainedExpression(componentSD.Formulas["Volume"], this, factionDataStore, factionTech);
             CrewFormula = new ChainedExpression(componentSD.Formulas["CrewReq"], this, factionDataStore, factionTech);
-            HTKFormula = new ChainedExpression(componentSD.Formulas["HTK"], this, factionDataStore, factionTech);
+            DestructionPercentFormula = new ChainedExpression(componentSD.Formulas["HTK"], this, factionDataStore, factionTech);
             ResearchCostFormula = new ChainedExpression(componentSD.Formulas["ResearchCost"], this, factionDataStore, factionTech);
             BuildCostFormula = new ChainedExpression(componentSD.Formulas["BuildPointCost"], this, factionDataStore, factionTech);
             CreditCostFormula = new ChainedExpression(componentSD.Formulas["CreditCost"], this, factionDataStore, factionTech);
@@ -278,12 +278,12 @@ namespace Pulsar4X.Components
         }
 
 
-        public int HTKValue { get { return _design.HTK; } }
-        internal ChainedExpression HTKFormula { get; set; }
+        public float DestructionPercentValue { get { return _design.DestructionPercent; } }
+        internal ChainedExpression DestructionPercentFormula { get; set; }
         public void SetHTK()
         {
-            HTKFormula.Evaluate();
-            _design.HTK = HTKFormula.IntResult;
+            DestructionPercentFormula.Evaluate();
+            _design.DestructionPercent = (float)DestructionPercentFormula.DResult;
         }
 
         public int CrewReqValue { get { return _design.CrewReq ; } }

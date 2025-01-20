@@ -105,7 +105,7 @@ namespace Pulsar4X.Industry
 
                 foreach (var instance in instances)
                 {
-                    float healthPercent = instance.HealthPercent();
+                    float healthPercent = instance.HealthPercent;
                     var designInfo = instance.Design.GetAttribute<MineResourcesAtbDB>();
 
                     foreach (var item in designInfo.ResourcesPerEconTick)

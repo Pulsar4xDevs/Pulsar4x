@@ -175,7 +175,7 @@ public static class DamagePhysicsSim
         foreach (var component in map.componentData)
         {
             string instanceID = component.Key;
-            ((int X,int Y) position, (int X,int Y) size, float htkPerParticle, int totalParticles) = component.Value;
+            ((int X,int Y) position, (int X,int Y) size, int totalParticles) = component.Value;
                   
             int undamagedParts = 0;
 
@@ -199,10 +199,11 @@ public static class DamagePhysicsSim
             }
 
             int destroyedParticles = totalParticles - undamagedParts;
+            
             // Calculate new damage based on the number of destroyed or missing particles
-            int totalDamage = (int)(destroyedParticles * htkPerParticle);
+            float percentHealth = (float)undamagedParts / totalParticles; 
             // Update the damage in componentInatance
-            instanceDB.AllComponents[instanceID].HTKRemaining = instanceDB.AllComponents[instanceID].HTKMax - totalDamage;
+            instanceDB.AllComponents[instanceID].HealthPercent = percentHealth;
         }
     }
     

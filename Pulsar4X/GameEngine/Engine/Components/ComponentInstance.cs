@@ -72,12 +72,12 @@ namespace Pulsar4X.Components
         public bool IsEnabled { get; internal set; }
         [JsonProperty]
         public PercentValue ComponentLoadPercent { get; internal set; }
-        [JsonProperty]
-        public int HTKRemaining { get; internal set; }
 
-        public int HTKMax   
+        [JsonProperty] public float HealthPercent { get; internal set; } = 1.0f;
+
+        public float StopWorkingAtPercent   
         {
-            get { return Design.HTK; }
+            get { return Design.DestructionPercent; }
         }
 
         [JsonProperty]
@@ -146,7 +146,6 @@ namespace Pulsar4X.Components
             UniqueID = Guid.NewGuid().ToString();
             Design = design;
             IsEnabled = isEnabled;
-            HTKRemaining = design.HTK;
             Name = design.Name;
         }
 
@@ -158,10 +157,8 @@ namespace Pulsar4X.Components
             Design = instance.Design;
             IsEnabled = instance.IsEnabled;
             ComponentLoadPercent = instance.ComponentLoadPercent;
-            HTKRemaining = instance.HTKRemaining;
             Name = instance.Name;
         }
-
-        public float HealthPercent() => HTKRemaining / HTKMax;
+        
     }
 }

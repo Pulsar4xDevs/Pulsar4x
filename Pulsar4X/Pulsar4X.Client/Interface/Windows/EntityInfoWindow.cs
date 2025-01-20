@@ -198,7 +198,7 @@ namespace Pulsar4X.SDL2UI
                     {
                         var instance = instancesArray[i][j];
                         string name = instance.Name;
-                        float health = 100 * instance.HealthPercent();
+                        float health = 100 * instance.HealthPercent;
 
                         ImGui.Text(name);
                         ImGui.NextColumn();
@@ -232,7 +232,7 @@ namespace Pulsar4X.SDL2UI
                     {
                         var instance = instancesArray[i][j];
                         string name = instance.Name;
-                        float health = 100 * instance.HealthPercent();
+                        float health = 100 * instance.HealthPercent;
                         names.Add(name);
                         flatInstances.Add(instance);
                         foreach (var atb in instance.GetAttributes().Values)
