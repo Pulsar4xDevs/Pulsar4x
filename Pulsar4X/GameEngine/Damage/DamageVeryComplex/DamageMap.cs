@@ -170,7 +170,7 @@ public class DamageMap
                 string instanceID = instanceIDs[i].UniqueID; // Get the corresponding instanceID
                 var instance = instanceIDs[i];
                 var htkMax = instance.HTKMax;
-                var htkPerParticle = numparticles  / htkMax;
+                var htkPerParticle = htkMax / numparticles;
                 int actualY = stackCenterY + (partHeight * i);
                 //int actualY = centerY - (partHeight * (partSize.count - i) + partHeight / 2);
                 (int x, int y) position = (currentX, actualY);
