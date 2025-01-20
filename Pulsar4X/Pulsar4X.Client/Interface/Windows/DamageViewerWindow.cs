@@ -11,6 +11,7 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Orbital;
 using Pulsar4X.Factions;
 using Pulsar4X.Damage;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Weapons;
 using Pulsar4X.Extensions;
 
@@ -52,7 +53,8 @@ namespace Pulsar4X.SDL2UI.Combat
         IntPtr[] _damageMapPtr = new IntPtr[7];
         DamageMap _projectileDamageMap;
         IntPtr _projectileDMapPtr;
-
+        
+        ComponentInstancesDB _componentInstances;
 
         private DamageViewerWindow()
         {
@@ -116,7 +118,7 @@ namespace Pulsar4X.SDL2UI.Combat
                     _damageEventIndex = _profile.DamageEvents.Count - 1;
                     SetDamageEventFrames();
                 }
-
+                _componentInstances = damageableEntity.GetDataBlob<ComponentInstancesDB>();
                 CanActive = true;
             }
             else
@@ -434,6 +436,20 @@ namespace Pulsar4X.SDL2UI.Combat
                                 SDL2Helper.CreateSDLTextures(_uiState.ViewPort.Renderer, _uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
                             }
                             ImGui.Text(Stringify.Energy(_damageMap.TotalEnergy));
+                            ImGui.Text(_damageMap.RunTime.ToString());
+                            
+                            if(ImGui.Button("updateComponetnts"))
+                                DamagePhysicsSim.UpdateComponetHealth(_damageMap, _componentInstances);
+                            foreach (var kvp in _componentInstances.ComponentsByDesign)
+                            {
+                                foreach (var component in kvp.Value)
+                                {
+                                    ImGui.Text(component.Name);
+                                    ImGui.SameLine();
+                                    ImGui.Text(component.HTKRemaining.ToString());
+                                }
+                            }
+                            
                         }
                     }
 

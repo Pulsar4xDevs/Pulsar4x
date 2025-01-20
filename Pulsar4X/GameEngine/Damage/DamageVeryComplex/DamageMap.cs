@@ -15,8 +15,13 @@ namespace GameEngine.Damage;
 
 public class DamageMap
 {
-    public Dictionary<string, int> componentIDLookup = new();
-    private int _nextComponentID = 0;
+    public TimeSpan RunTime = TimeSpan.Zero;
+    private Dictionary<string, ushort> componentIDLookup = new();
+    internal Dictionary<ushort, (string instanceID, float htkpp )> componentIDLookupByIntID = new();
+    
+    public Dictionary<string, ((int x, int y) Position, (int x, int y) Size, float HTKPerParticle, int totalParticles)> componentData = new();
+    
+    private ushort _nextComponentID = 0;
 
     public double TotalEnergy = 0;
     public double FastestSpeed = 0;
@@ -70,11 +75,20 @@ public class DamageMap
         _nextComponentID++;
     }
 
-    public int GenerateNewCompID(string strID)
+    public ushort GenerateNewCompID(string strID)
     {
         componentIDLookup.Add(strID+_nextComponentID, _nextComponentID);
         _nextComponentID++;
-        return _nextComponentID - 1;
+        return (ushort)(_nextComponentID - 1);
+    }
+
+    public void AddComponentID(string strID, float htkpp)
+    {
+        ushort intID = GenerateNewCompID(strID);
+        componentIDLookup.Add(strID, intID);
+        _nextComponentID++;
+        componentIDLookupByIntID.Add(intID, (strID, htkpp));
+        
     }
 
     /// <summary>
@@ -135,32 +149,40 @@ public class DamageMap
         ReadOnlyDictionary<string, ComponentDesign> lib = shipProfile.OwningEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().ComponentDesigns;
         Random rng = shipProfile.OwningEntity.Manager.RNG;
         var modData = shipProfile.OwningEntity.Manager.Game.StartingGameData;
-        int currentX = _pixBuf; // Start at half of the buffer for the left side
+        int currentX = _pixBuf; // Start at the buffer size for the left side
         int partSizesIndex = 0;
+        
         foreach (var partSize in partSizes)
         {
             string typeID = partSize.typeID;
             List<ComponentInstance> instanceIDs = componentInstances[typeID];
-            int centerY = Height / 2; // Center Y, Height already includes buffer
-            centerY += (int)(Math.Round(partSize.height) * partSize.count * 0.5);
+
             ComponentDesign componentDesign = lib[typeID];
             var mats = ParticleHelpers.GetMaterialsList(modData, componentDesign);
-            int numparticles = (int)(Math.Round(partSize.height) * Math.Round(partSize.len));
             
-            
+            int partHeight = (int)Math.Round(partSize.height);
+            int partLength = (int)Math.Round(partSize.len);
+            int numparticles = partHeight * partLength;
+            int centerY = Height / 2; //(int)(Height * 0.5 + partHeight * partSize.count * 0.5);
+            int stackCenterY = centerY - ((partSize.count * partHeight) / 2);
             for (int i = 0; i < partSize.count; i++)
             {
                 string instanceID = instanceIDs[i].UniqueID; // Get the corresponding instanceID
-                int offsetY = -(int)Math.Round(partSize.height) * i;
-                int actualY = centerY + offsetY;
-
-                for (int y = 0; y > -Math.Round(partSize.height); y--)
+                var instance = instanceIDs[i];
+                var htkMax = instance.HTKMax;
+                var htkPerParticle = numparticles  / htkMax;
+                int actualY = stackCenterY + (partHeight * i);
+                //int actualY = centerY - (partHeight * (partSize.count - i) + partHeight / 2);
+                (int x, int y) position = (currentX, actualY);
+                (int x, int y) size = (partLength, partHeight);
+                int totalParticles = 0;
+                for (int y = 0; y < partHeight; y++)
                 {
                     if (actualY + y >= Height)
                         throw new Exception("Outside the height of the array.(more than height)");
                     if(actualY + y < 0)
                         throw new Exception("Outside the height of the array. (less than 0)");
-                    for (int x = 0; x < partSize.len; x++)
+                    for (int x = 0; x < partLength; x++)
                     {
                         int index = GetIndex(currentX + x, actualY + y);
                         var mat = ParticleHelpers.GetRandomMat(mats, rng);
@@ -172,14 +194,16 @@ public class DamageMap
                         newPart.mapIndex = index;
                         PMap[index] = newPart;
                         PresMap[index] = pressure;
+                        totalParticles++;
                     }
                 }
-                componentIDLookup.Add(instanceID, _nextComponentID);
-                _nextComponentID++;
+
+                componentData[instanceID] = (position, size, htkPerParticle, totalParticles);
+                AddComponentID(instanceID, htkPerParticle);
             }
 
             // Increment currentX by the length of the part for the next placement
-            currentX += (int)Math.Ceiling(partSize.len);
+            currentX += partLength;
             // Check if we've gone beyond the width of the map, if so, throw
             if (currentX > Width) // Check against Width 
             {
@@ -277,17 +301,26 @@ public class DamageMap
         // Calculate new dimensions
         int newWidth = Width + Math.Abs(expandX) * otherMap.Width;
         int newHeight = Height + Math.Abs(expandY) * otherMap.Height;
+        
 
         // Create new arrays for storing merged data
         int[] newIDMap = new int[newWidth * newHeight];
         PhysicalParticle[] newPMap = new PhysicalParticle[newWidth * newHeight];
         PhotonParticle[] newPhMap = new PhotonParticle[newWidth * newHeight];
         float[] newPresMap = new float[newWidth * newHeight];
-
+        var newComponentData = new Dictionary<string, ((int,int) Position, (int,int) Size, float HTKPerParticle, int TotalParticles)>();
         // Offset for placing particles from this map
         int offsetX = expandX < 0 ? otherMap.Width : 0;
         int offsetY = expandY < 0 ? otherMap.Height : 0;
 
+        foreach (var component in componentData)
+        {
+            string instanceID = component.Key;
+            var (position, size, htkPerParticle, totalParticles) = component.Value;
+            (int,int) newPosition = (position.x + offsetX, position.y + offsetY);
+            newComponentData[instanceID] = (newPosition, size, htkPerParticle, totalParticles);
+        }
+        
         // Copy and offset old data to new arrays
         for (int y = 0; y < Height; y++)
         {
@@ -353,6 +386,25 @@ public class DamageMap
                 }
             }
         }
+       
+        foreach (var otherComponent in otherMap.componentData)
+        {
+            string instanceID = otherComponent.Key;
+            var (otherPosition, otherSize, otherHTKPerParticle, otherTotalParticles) = otherComponent.Value;
+            (int,int) newPosition = (otherPosition.x + otherMap.X + offsetX, otherPosition.y + otherMap.Y + offsetY);
+
+            // If this component ID already exists, we'll merge damage or you might decide to handle conflicts differently
+            if (newComponentData.ContainsKey(instanceID))
+            {
+                // Merge damage - this is a simple approach, might need refinement based on your needs
+                var (currentPosition, currentSize, currentHTKPerParticle, currentTotalParticles) = newComponentData[instanceID];
+                newComponentData[instanceID] = (currentPosition, currentSize, currentHTKPerParticle, currentTotalParticles);
+            }
+            else
+            {
+                newComponentData[instanceID] = (newPosition, otherSize, otherHTKPerParticle, otherTotalParticles);
+            }
+        }
 
         // Update map properties
         compIDMap = newIDMap;
@@ -361,6 +413,7 @@ public class DamageMap
         PresMap = newPresMap;
         Width = newWidth;
         Height = newHeight;
+        componentData = newComponentData;
     }
 }
 

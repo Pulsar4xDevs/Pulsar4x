@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Linq;
+using Pulsar4X.Datablobs;
 
 
 namespace GameEngine.Damage;
@@ -109,9 +110,12 @@ public static class DamagePhysicsSim
         
         TempratureMath.TransferHeat(damageMap, timeStep);
         
+        damageMap.RunTime += TimeSpan.FromSeconds(timeStep);
+        
         DamageMapHelpers.FindBadData(damageMap);    
     }
-
+    
+    
     public static void HandleOutOfBounds(DamageMap damageMap, ref List<IDamageParticle> particlesToCheck)
     {
         for (int index = 0; index < particlesToCheck.Count; index++)
@@ -164,8 +168,44 @@ public static class DamagePhysicsSim
             
         }
     }
+    
+    
+    public static void UpdateComponetHealth(DamageMap map, ComponentInstancesDB instanceDB)
+    {
+        foreach (var component in map.componentData)
+        {
+            string instanceID = component.Key;
+            ((int X,int Y) position, (int X,int Y) size, float htkPerParticle, int totalParticles) = component.Value;
+                  
+            int undamagedParts = 0;
 
+            // Count how many particles are destroyed or missing
+            for (int y = position.Y; y < position.Y + size.Y; y++)
+            {
+                for (int x = position.X; x < position.X + size.X; x++)
+                {
+                    int index = map.GetIndex(x, y);
+                    var particle = map.PMap[index];
+                    if(particle is null)
+                        continue;
+                    if (particle.compID == map.compIDMap[index])
+                    {
+                        if (!particle.IsComponentPartDestroyed)
+                        {
+                            undamagedParts++;
+                        }
+                    }
+                }
+            }
 
+            int destroyedParticles = totalParticles - undamagedParts;
+            // Calculate new damage based on the number of destroyed or missing particles
+            int totalDamage = (int)(destroyedParticles * htkPerParticle);
+            // Update the damage in componentInatance
+            instanceDB.AllComponents[instanceID].HTKRemaining = instanceDB.AllComponents[instanceID].HTKMax - totalDamage;
+        }
+    }
+    
     public static void UpdateParticlePosition(IDamageParticle particle, int scale, float timeStep)
     {
         Vector2 movement = particle.Velocity * timeStep;

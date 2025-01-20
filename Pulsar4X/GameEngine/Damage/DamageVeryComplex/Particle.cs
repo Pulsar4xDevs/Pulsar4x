@@ -147,7 +147,7 @@ public class PhysicalParticle : IDamageParticle
     
     public ParticleMaterial MatType;
     public PhaseState StateOfPhase = PhaseState.Solid;
-    public byte Life;
+    public bool IsComponentPartDestroyed = false;
     public float Mass;
     public DamageMap _pMap;
     public bool IsDeleted  { get; set; } = false;
@@ -174,7 +174,6 @@ public class PhysicalParticle : IDamageParticle
         Position = position;
         Velocity = velocity;
         Temperature = 293.15f; // Room temperature in Kelvin
-        Life = 100; // Arbitrary starting life
         Mass = matType.Density * 1 / scale;
         if(Mass <= 0)
             throw new Exception("mass canot be zero or negative");

@@ -315,35 +315,42 @@ public static class KineticMath
         int neighborCount = 0;
         //var connectedNeighbors = new List<PhysicalParticle>();
         int ctrIndex = map.GetIndex(centerParticle);
-        for (int i = -map.Width; i <= map.Width; i+=map.Width)
+        if(centerParticle.StateOfPhase == PhaseState.Solid)
         {
-            for (int j = -1; j <= 1; j++)
+            for (int i = -map.Width; i <= map.Width; i += map.Width)
             {
-                int index = ctrIndex + i + j;
-                if (index < 0 || index >= map.PMap.Length)
-                    continue; //check out of bounds
-                if(index == ctrIndex)
-                    continue; //check not the same particle
-                var neighbor = map.PMap[index];
-                if(neighbor == null)
-                    continue; //check not null
-                if(neighbor.StateOfPhase != PhaseState.Solid)
-                    continue; //check solid particle
-                //if material is the same, or the particles are from the same component
-                if ((neighbor.MatType.PartMatID == centerParticle.MatType.PartMatID 
-                     || neighbor.compID == centerParticle.compID))
+                for (int j = -1; j <= 1; j++)
                 {
-                    totalVelocityDifference = Vector2.Distance(centerParticle.Velocity, neighbor.Velocity);
-                    neighborCount++;
-                    //connectedNeighbors.Add(neighbor);
+                    int index = ctrIndex + i + j;
+                    if (index < 0 || index >= map.PMap.Length)
+                        continue; //check out of bounds
+                    if (index == ctrIndex)
+                        continue; //check not the same particle
+                    var neighbor = map.PMap[index];
+                    if (neighbor == null)
+                        continue; //check not null
+                    if (neighbor.StateOfPhase != PhaseState.Solid)
+                        continue; //check solid particle
+                    //if material is the same, or the particles are from the same component
+                    if ((neighbor.MatType.PartMatID == centerParticle.MatType.PartMatID || neighbor.compID == centerParticle.compID))
+                    {
+                        totalVelocityDifference = Vector2.Distance(centerParticle.Velocity, neighbor.Velocity);
+                        neighborCount++;
+                        //connectedNeighbors.Add(neighbor);
+                    }
                 }
             }
+            if (totalVelocityDifference / neighborCount > velocityThreshold)
+                isDetached = true;
         }
-
-        if (totalVelocityDifference / neighborCount > velocityThreshold)
+        else 
             isDetached = true;
+        
         if(isDetached)
+        {
+             centerParticle.IsComponentPartDestroyed = true;
             centerParticle.compID = map.GenerateNewCompID("fragment");
+        }
     }
     
     public static List<PhysicalParticle> GetConnectedNeighbors(DamageMap map, PhysicalParticle centerParticle)

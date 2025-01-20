@@ -261,7 +261,7 @@ public static class SDL2Helper
                 if (physicalParticle != null)
                 {
                     // Red for Life (Health) 0 to 255
-                    byte lifeRed = (byte)(physicalParticle.Life * 2.55f); // Life is 0-100, so *2.55 for 0-255
+                    byte lifeRed = (byte)(physicalParticle.IsComponentPartDestroyed ? 50 : 255); // 
 
                     // Blue for StateOfPhase, using full range 0 to 255
 
@@ -636,7 +636,7 @@ public static class SDL2Helper
                     if (physicalParticle != null)
                     {
                         // Red for Life (Health) 0 to 255
-                        byte lifeRed = (byte)(physicalParticle.Life * 2.55f); // Life is 0-100, so *2.55 for 0-255
+                        byte lifeRed = (byte)(physicalParticle.IsComponentPartDestroyed ? 50 : 255); // 
 
                         // Blue for StateOfPhase, using full range 0 to 255
 
