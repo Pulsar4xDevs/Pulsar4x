@@ -78,7 +78,9 @@ namespace Pulsar4X.Damage
 
 
             if(!File.Exists(file))
-                throw new FileNotFoundException();
+            {
+                throw new FileNotFoundException("Could not find bitmap", file);
+            }
 
             byte[] bmpBytes = File.ReadAllBytes(file);
             (int offset,int size)[] headerDef = new (int,int)[12];
