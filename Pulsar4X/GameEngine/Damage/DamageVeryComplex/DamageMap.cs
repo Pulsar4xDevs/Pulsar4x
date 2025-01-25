@@ -24,12 +24,13 @@ public class DamageMap
     private ushort _nextComponentID = 0;
 
     public double TotalEnergy = 0;
-    public double FastestSpeed = 0;
     public const int PhysicsScale = 1000;//currently not used
     public int Scale = 100;//particles per meter
     int _pixBuf = 3; //this is just how much space we're leaving around the edges. 
     public PhysicalParticle[] PMap;
-    public PhotonParticle[] PhMap;
+    //public PhotonParticle[] PhMap;
+    public List<BeamPoint> BeamStarts = new();
+    public List<BeamPoint> BeamPoints;
     public int[] compIDMap; //componentInstance Map.
     public float[] PresMap; //pressure in bar
     public int Width;
@@ -42,7 +43,6 @@ public class DamageMap
         Height = height;
         PMap = new PhysicalParticle[Width * Height];
         PresMap = new float[Width * Height];
-        PhMap = new PhotonParticle[Width * Height];
     }
     public DamageMap(int posX, int posY , Vector2 velocity, int width, int height, ParticleMaterial material)
     {
@@ -107,7 +107,7 @@ public class DamageMap
         
         Width = 10; // Example width, set as needed
         Height = 10; // Example height, set as needed
-        PhMap = new PhotonParticle[Width * Height];
+
         compIDMap = new int[Width * Height];
         PMap = new PhysicalParticle[Width * Height];
         PresMap = new float[Width * Height];
@@ -131,15 +131,10 @@ public class DamageMap
 
             if (mapX >= 0 && mapX < Width && mapY >= 0 && mapY < Height) // Bounds check for small map
             {
-                int index = GetIndex(mapX, mapY);
-                var newPhoton = new PhotonParticle(_nextComponentID, beamInfo, particlePosition, lifetime);
-                newPhoton.mapIndex = index;
-                PhMap[index] = newPhoton;
-                compIDMap[index] = _nextComponentID;
+                BeamPoint newBP = new BeamPoint(beamInfo, particlePosition, lifetime);
+                BeamStarts.Add(newBP);
             }
         }
-        componentIDLookup.Add("photon"+_nextComponentID, _nextComponentID);
-        _nextComponentID++;
     }
     
     public DamageMap(EntityDamageProfileDB shipProfile)
@@ -306,7 +301,6 @@ public class DamageMap
         // Create new arrays for storing merged data
         int[] newIDMap = new int[newWidth * newHeight];
         PhysicalParticle[] newPMap = new PhysicalParticle[newWidth * newHeight];
-        PhotonParticle[] newPhMap = new PhotonParticle[newWidth * newHeight];
         float[] newPresMap = new float[newWidth * newHeight];
         var newComponentData = new Dictionary<string, ((int,int) Position, (int,int) Size, int TotalParticles)>();
         // Offset for placing particles from this map
@@ -339,17 +333,7 @@ public class DamageMap
                     tempPosition.Y += offsetY;
                     newPMap[newIndex].Position = tempPosition;
                 }
-
-                if (PhMap != null && PhMap[oldIndex] != null)
-                {
-                    var ph = PhMap[oldIndex];
-                    ph.mapIndex = newIndex;
-                    newPhMap[newIndex] = ph;
-                    var tempPosition = newPhMap[newIndex].Position;
-                    tempPosition.X += offsetX;
-                    tempPosition.Y += offsetY;
-                    newPhMap[newIndex].Position = tempPosition;
-                }
+                
                 newPresMap[newIndex] = PresMap[oldIndex];
             }
         }
@@ -375,14 +359,7 @@ public class DamageMap
                         newPMap[newIndex] = p;
                         newPMap[newIndex].Position = new(newX, newY);
                     }
-
-                    if (otherMap.PhMap!= null && otherMap.PhMap[otherIndex] != null)
-                    {
-                        var ph = otherMap.PhMap[otherIndex];
-                        ph.mapIndex = newIndex;
-                        newPhMap[newIndex] = ph;
-                        newPhMap[newIndex].Position = new(newX, newY);
-                    }
+                    
                 }
             }
         }
@@ -409,11 +386,11 @@ public class DamageMap
         // Update map properties
         compIDMap = newIDMap;
         PMap = newPMap;
-        PhMap = newPhMap;
         PresMap = newPresMap;
         Width = newWidth;
         Height = newHeight;
         componentData = newComponentData;
+        BeamStarts = otherMap.BeamStarts;
     }
 }
 

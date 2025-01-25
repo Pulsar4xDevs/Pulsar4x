@@ -449,7 +449,6 @@ namespace Pulsar4X.SDL2UI.Combat
                                     ImGui.Text((component.HealthPercent * 100).ToString());
                                 }
                             }
-                            
                         }
                     }
 

@@ -101,7 +101,7 @@ public static class SDL2Helper
         CreateTextureForPMap(renderer, damageMap, ref textures[3], width, height);
         CreateTextureForTemp(renderer, damageMap, ref textures[4], width, height);
         CreateTextureForPhaseState(renderer, damageMap, ref textures[5], width, height);
-        CreateTextureForPhotonMap(renderer, damageMap, ref textures[6], width, height);
+        CreateTextureForBeamPoints(renderer, damageMap, ref textures[6], width, height);
 
     }
 
@@ -445,11 +445,10 @@ public static class SDL2Helper
             handle.Free();
         }
     }
-
-
-    internal static void CreateTextureForPhotonMap(IRenderer renderer, DamageMap damageMap,ref IntPtr texture, int width, int height)
+    internal static void CreateTextureForBeamPoints(IRenderer renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
-        if(damageMap.PhMap == null)
+        List<BeamPoint> beamPoints = damageMap.BeamPoints;
+        if (beamPoints == null || beamPoints.Count == 0)
         {
             if (texture != IntPtr.Zero)
             {
@@ -459,45 +458,34 @@ public static class SDL2Helper
             return;
         }
 
-        var minFreq = (int)damageMap.PhMap
-                                    .Where(p => p != null)
-                                    .Select(p => p.WaveLength)
-                                    .DefaultIfEmpty(0) // Fallback value
-                                    .Min();
-        var maxFreq = (int)damageMap.PhMap
-                                    .Where(p => p != null)
-                                    .Select(p => p.WaveLength)
-                                    .DefaultIfEmpty(10000) // Fallback value
-                                    .Max();
-        var maxPow = (int)damageMap.PhMap
-                                   .Where(p => p != null)
-                                   .Select(p => p.WaveLength)
-                                   .DefaultIfEmpty(10000) // Fallback value
-                                   .Max();
+        // Find min and max for wavelength and power
+        var minFreq = (int)beamPoints.Min(p => p.Wavelength);
+        var maxFreq = (int)beamPoints.Max(p => p.Wavelength);
+        var maxPow = (int)beamPoints.Max(p => p.Power);
+
+        // Adjust the range for visualization
         minFreq = (int)(minFreq * 0.5);
         maxFreq = (int)(maxFreq * 1.5);
-        uint  color = 0;
-        
+    
+        uint color = 0;
 
         // Create a buffer for the pixel data
         uint[] pixelData = new uint[width * height];
 
-        // Fill the pixel data
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                int index = damageMap.GetIndex(x, y);
-                var photon = damageMap.PhMap[index];
-                if(photon != null)
-                {
-                    var power = photon.Power;
-                    var wavelen = (int)photon.WaveLength;
-                    color = ColourFromValue2(wavelen, maxFreq, minFreq, power, 25, maxPow);
-                }
-                else color = 0;
+        // Initialize pixel data to black (or transparent if your format supports alpha)
+        Array.Clear(pixelData, 0, pixelData.Length);
 
-                // Pack ARGB values into a single uint
+        // Fill the pixel data based on BeamPoints
+        foreach (var point in beamPoints)
+        {
+            int x = (int)point.Position.X;
+            int y = (int)point.Position.Y;
+
+            // Ensure the point is within the texture bounds
+            if (x >= 0 && x < width && y >= 0 && y < height)
+            {
+                int index = y * width + x;
+                color = ColourFromValue2((int)point.Wavelength, maxFreq, minFreq, point.Power, 25, maxPow);
                 pixelData[index] = color;
             }
         }
@@ -514,7 +502,79 @@ public static class SDL2Helper
             handle.Free();
         }
     }
+/*
+    internal static void CreateTextureForPhotonMap(IRenderer renderer, DamageMap damageMap,ref IntPtr texture, int width, int height)
+    {
+        
+           if(damageMap.PhMap == null)
+           {
+               if (texture != IntPtr.Zero)
+               {
+                   renderer.DeleteTexture((uint)texture);
+                   texture = IntPtr.Zero;
+               }
+               return;
+           }
+
+           var minFreq = (int)damageMap.PhMap
+                                       .Where(p => p != null)
+                                       .Select(p => p.WaveLength)
+                                       .DefaultIfEmpty(0) // Fallback value
+                                       .Min();
+           var maxFreq = (int)damageMap.PhMap
+                                       .Where(p => p != null)
+                                       .Select(p => p.WaveLength)
+                                       .DefaultIfEmpty(10000) // Fallback value
+                                       .Max();
+           var maxPow = (int)damageMap.PhMap
+                                      .Where(p => p != null)
+                                      .Select(p => p.WaveLength)
+                                      .DefaultIfEmpty(10000) // Fallback value
+                                      .Max();
+           minFreq = (int)(minFreq * 0.5);
+           maxFreq = (int)(maxFreq * 1.5);
+           uint  color = 0;
+
+
+           // Create a buffer for the pixel data
+           uint[] pixelData = new uint[width * height];
+
+           // Fill the pixel data
+           for (int y = 0; y < height; y++)
+           {
+               for (int x = 0; x < width; x++)
+               {
+                   int index = damageMap.GetIndex(x, y);
+                   var photon = damageMap.PhMap[index];
+                   if(photon != null)
+                   {
+                       var power = photon.Power;
+                       var wavelen = (int)photon.WaveLength;
+                       color = ColourFromValue2(wavelen, maxFreq, minFreq, power, 25, maxPow);
+                   }
+                   else color = 0;
+
+                   // Pack ARGB values into a single uint
+                   pixelData[index] = color;
+               }
+           }
+
+           GCHandle handle = GCHandle.Alloc(pixelData, GCHandleType.Pinned);
+           try
+           {
+               IntPtr pixels = handle.AddrOfPinnedObject();
+               // Update the texture
+               UpdateOrCreate(renderer, ref texture, width, height, pixels);
+           }
+           finally
+           {
+               handle.Free();
+           }
+           
+    }
     
+*/
+
     
     public static void CreateSDLTexture(IntPtr rendererPtr, RawBmp rawImg, ref IntPtr texturePtr)
     {
@@ -832,70 +892,6 @@ public static class SDL2Helper
 
     }
 
-    internal static void CreateTextureForPhotonMap(IntPtr renderPtr, DamageMap damageMap,ref IntPtr texture, int width, int height)
-    {
-        if(damageMap.PhMap == null)
-        {
-            if (texture != IntPtr.Zero)
-            {
-                SDL.SDL_DestroyTexture(texture);
-                texture = IntPtr.Zero;
-            }
-            return;
-        }
-
-        byte alpha = 255;
-        CheckTexture(renderPtr, ref texture, width, height);
-        IntPtr pixels;
-        int pitch;
-        SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
-
-
-        var minFreq = (int)damageMap.PhMap
-                                    .Where(p => p != null)
-                                    .Select(p => p.WaveLength)
-                                    .DefaultIfEmpty(0) // Fallback value
-                                    .Min();
-        var maxFreq = (int)damageMap.PhMap
-                                    .Where(p => p != null)
-                                    .Select(p => p.WaveLength)
-                                    .DefaultIfEmpty(10000) // Fallback value
-                                    .Max();
-        var maxPow = (int)damageMap.PhMap
-                                   .Where(p => p != null)
-                                   .Select(p => p.WaveLength)
-                                   .DefaultIfEmpty(10000) // Fallback value
-                                   .Max();
-        minFreq = (int)(minFreq * 0.5);
-        maxFreq = (int)(maxFreq * 1.5);
-        uint  color = 0;
-
-        unsafe
-        {
-            uint* pixelPtr = (uint*)pixels.ToPointer();
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    int index = damageMap.GetIndex(x, y);
-                    var photon = damageMap.PhMap[index];
-                    if(photon != null)
-                    {
-                        var power = photon.Power;
-                        var wavelen = (int)photon.WaveLength;
-                        color = ColourFromValue2(wavelen, maxFreq, minFreq, power, 25, maxPow);
-                    }
-                    else color = 0;
-                    *pixelPtr = color;
-                    pixelPtr++;
-                }
-                pixelPtr += (pitch / 4) - width;
-            }
-        }
-
-        SDL.SDL_UnlockTexture(texture);
-    }
     public static (float, float, float) AdjustSaturation(float r, float g, float b, float saturation)
     {
         float max = Math.Max(r, Math.Max(g, b));

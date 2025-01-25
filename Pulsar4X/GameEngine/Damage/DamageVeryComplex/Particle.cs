@@ -80,6 +80,7 @@ public interface IDamageParticle
 
 }
 
+/*
 public class PhotonParticle : IDamageParticle
 {
     public int compID { get; set; }
@@ -134,6 +135,69 @@ public class PhotonParticle : IDamageParticle
         };
     }
 
+}
+*/
+
+public class BeamPoint
+{
+    public int BeamID { get; set; }
+    public Vector2 Position { get; set; }
+    
+    public float Wavelength { get; set; }
+    public float Power { get; set; }
+    public float AbsorbPercentage { get; set; } = 1.0f;
+    
+    public Vector2 ReflectDirection { get; set; }
+    public float ReflectPercentage { get; set; } = 0.0f;
+    public int ReflectChildIndex { get; set; } = -1;
+    
+    public Vector2 TransmitDirection { get; set; }
+    public float TransmitPercentage { get; set; } = 0.0f;
+    public int TransmitChildIndex { get; set; } = -1;
+    public float LifeTime { get; set; }
+    public BeamPoint(int beamID, Vector2 position, Vector2 transmitDirection, float wavelength, float power)
+    {
+        BeamID = beamID;
+        Position = position;
+        TransmitDirection = transmitDirection;
+        Wavelength = wavelength;
+        Power = power;
+        AbsorbPercentage = ReflectPercentage = TransmitPercentage = 0;
+        
+    }
+
+    public BeamPoint(BeamInfoDB beamInfo, Vector2 particlePosition, float lifetime)
+    {
+        Position = particlePosition;
+        TransmitDirection = Vector2.Normalize(beamInfo.VelocityVector.ToNumericsVector2());
+        Wavelength = (float)beamInfo.Frequency;
+        Power = (float)beamInfo.Energy;
+        TransmitPercentage = 1.0f;
+        AbsorbPercentage = 0.0f;
+        ReflectPercentage = 0.0f;
+        LifeTime = lifetime;
+    }
+
+    public BeamPoint(BeamPoint parent, Vector2 position, Vector2 direction, float power, PhysicalParticle collisionParticle)
+    {
+        
+        var reflectVector = Vector2.Reflect(direction, collisionParticle.Position - position);
+        BeamID = parent.BeamID;
+        Position = position;
+        TransmitDirection = parent.Position - position;
+        Wavelength = parent.Wavelength;
+
+        Power = power;
+        ReflectDirection = reflectVector;
+        
+        if( power > PhotonMath.minPower)
+        {
+            (float reflected, float transmitted, float absorbed) = PhotonMath.CalculatePhotonInteraction(parent.Wavelength, collisionParticle.MatType);
+            AbsorbPercentage = absorbed;
+            ReflectPercentage = reflected;
+            TransmitPercentage = transmitted;
+        }
+    }
 }
 
 public class PhysicalParticle : IDamageParticle

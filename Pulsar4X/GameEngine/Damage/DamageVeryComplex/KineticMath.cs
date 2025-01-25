@@ -9,18 +9,18 @@ namespace GameEngine.Damage;
 public static class KineticMath
 {
     static int collisionCount = 0;
-    public static void DetectCollision(IDamageParticle physicalParticle, DamageMap map, List<(IDamageParticle,PhysicalParticle)> collidedParticles)
+    public static void DetectCollision(PhysicalParticle movingParticle, DamageMap map, List<(PhysicalParticle,PhysicalParticle)> collidedParticles)
     {
-        int index = map.GetIndex(physicalParticle);
+        int index = map.GetIndex(movingParticle);
         var otherP = map.PMap[index];
         if 
         (
             otherP != null && //check there's actualy something at that position
-            otherP != physicalParticle && //check not the same particle
+            otherP != movingParticle && //check not the same particle
             map.GetIndex(otherP) == index //check that the other particle hasn't moved as well
         )
         {
-            collidedParticles.Add((physicalParticle, otherP)); // Add the particle we've collided with
+            collidedParticles.Add((movingParticle, otherP)); // Add the particle we've collided with
         }
     }
     
@@ -382,6 +382,7 @@ public static class KineticMath
         }
         return connectedNeighbors;
     }
+    
 
     
     
