@@ -170,13 +170,13 @@ public static class DamagePhysicsSim
         }
     }
     
-    public static void UpdateParticlePosition(IDamageParticle particle, int scale, float timeStep)
+    public static void UpdateParticlePosition(PhysicalParticle particle, int scale, float timeStep)
     {
         Vector2 movement = particle.Velocity * timeStep;
         particle.Position += movement / scale;
     }
 
-    public static bool IsOutOfBounds(IDamageParticle particle, DamageMap damageMap)
+    public static bool IsOutOfBounds(PhysicalParticle particle, DamageMap damageMap)
     {
         int x = (int)Math.Round(particle.Position.X);
         int y = (int)Math.Round(particle.Position.Y);
@@ -223,8 +223,4 @@ public static class DamagePhysicsSim
 
         return totalEnergy;
     }
-
-    
-
-
 }

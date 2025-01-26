@@ -253,7 +253,7 @@ public class DamageMap
         return (int)(Math.Round(point.Y) * Width + Math.Round(point.X));
     }
 
-    public int GetIndex(IDamageParticle particle)
+    public int GetIndex(PhysicalParticle particle)
     {
         return (int)(Math.Round(particle.Position.Y) * Width + Math.Round(particle.Position.X));
     }
@@ -263,7 +263,7 @@ public class DamageMap
         return (index % Width, index / Width);
     }
 
-    public PhysicalParticle[] GetImediateParticles(IDamageParticle particle)
+    public PhysicalParticle[] GetImediateParticles(PhysicalParticle particle)
     {
         var array = new PhysicalParticle[9];
         var ctr = GetIndex(particle);
@@ -362,6 +362,13 @@ public class DamageMap
                     
                 }
             }
+        }
+        
+        foreach (var bp in otherMap.BeamStarts)
+        {
+            var x = bp.Position.X + otherMap.X + offsetX;
+            var y = bp.Position.Y + otherMap.Y + offsetY;
+            bp.Position = new Vector2(x,y);
         }
        
         foreach (var otherComponent in otherMap.componentData)

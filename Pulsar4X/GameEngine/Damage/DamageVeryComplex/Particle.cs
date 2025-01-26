@@ -69,7 +69,7 @@ public enum PhaseState
     Gas,
     Plasma
 }
-
+/*
 public interface IDamageParticle
 {
     public int compID { get; set; }
@@ -78,65 +78,7 @@ public interface IDamageParticle
     public Vector2 Velocity { get; set; }
     public bool IsDeleted  { get; set; } 
 
-}
-
-/*
-public class PhotonParticle : IDamageParticle
-{
-    public int compID { get; set; }
-    public int mapIndex{ get; set; }
-    public Vector2 Position{ get; set; }
-    public Vector2 Velocity{ get; set; }
-    public float WaveLength;
-    public float Power;
-    public bool IsSpawner = false;
-    public double SpawnerLifetime = 30.0;
-    public bool IsDeleted { get; set; } = false;
-
-    private PhotonParticle(){}
-    
-    public  PhotonParticle(int id, BeamInfoDB beamInfo, Vector2 particlePosition, float lifetime)
-    {
-        compID = id;
-        Position = particlePosition;
-        Velocity = beamInfo.VelocityVector.ToNumericsVector2();
-        WaveLength = (float)beamInfo.Frequency;
-        Power = (float)beamInfo.Energy;
-        IsSpawner = true;
-        SpawnerLifetime = lifetime;
-    }
-    public static PhotonParticle SpawnNew(PhotonParticle spawner)
-    {
-        if (!spawner.IsSpawner || spawner.IsDeleted)
-            throw new Exception("Spawner is not valid");
-        Vector2 pos = spawner.Position + Vector2.Normalize(spawner.Velocity);
-        return new PhotonParticle()
-        {
-            compID = spawner.compID,
-            Position = pos,
-            Velocity = spawner.Velocity,
-            WaveLength = spawner.WaveLength,
-            Power = spawner.Power,
-            IsSpawner = false,
-            IsDeleted = false
-        };
-    }
-    public static PhotonParticle CloneWithNewVelocityAndPower(PhotonParticle orig, Vector2 velocity, float power)
-    {
-        return new PhotonParticle()
-        {
-            compID = orig.compID,
-            Position = orig.Position,
-            Velocity = velocity,
-            WaveLength = orig.WaveLength,
-            Power = power,
-            IsSpawner = orig.IsSpawner,
-            IsDeleted = orig.IsDeleted
-        };
-    }
-
-}
-*/
+}*/
 
 public class BeamPoint
 {
@@ -200,7 +142,7 @@ public class BeamPoint
     }
 }
 
-public class PhysicalParticle : IDamageParticle
+public class PhysicalParticle
 {
     public int compID { get; set; }
     public int mapIndex{ get; set; }
