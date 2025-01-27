@@ -69,16 +69,6 @@ public enum PhaseState
     Gas,
     Plasma
 }
-/*
-public interface IDamageParticle
-{
-    public int compID { get; set; }
-    public int mapIndex { get; set; }
-    public Vector2 Position{ get; set; }
-    public Vector2 Velocity { get; set; }
-    public bool IsDeleted  { get; set; } 
-
-}*/
 
 public class BeamPoint
 {
