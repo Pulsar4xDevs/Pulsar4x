@@ -102,7 +102,7 @@ namespace Pulsar4X.SDL2UI.Combat
                 _rawShipImage = _profile.DamageProfile;
                 _uiState.ViewPort.Renderer.CreateTexture(_rawShipImage, ref _shipImgPtr, Client.Rendering.PixelFormat.ARGB8888);
 
-                _damageMap = new DamageMap(_profile);
+                _damageMap = new DamageMap(damageableEntity);
                 SDL2Helper.CreateSDLTextures(_uiState.ViewPort.Renderer, _uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
                 _dmWidth = (int)(_damageMap.Width * _dmSizeScaler);
                 _dmHeight = (int)(_damageMap.Height * _dmSizeScaler);
@@ -191,7 +191,7 @@ namespace Pulsar4X.SDL2UI.Combat
         private int _dmProjectileSliderBot = 0;
         private int _dmProjectileSliderLhs = 0;
         private int _dmProjectileSliderRhs = 0;
-        private float _dmSizeScaler = 4.0f;
+        private float _dmSizeScaler = 1.5f;
         private int _dmWidth;
         private int _dmHeight;
 

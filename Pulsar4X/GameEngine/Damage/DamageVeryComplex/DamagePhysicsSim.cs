@@ -65,18 +65,17 @@ public static class DamagePhysicsSim
             KineticMath.ResolveCollision(partPair.Item1, partPair.Item2, damageMap);
         }
 
-        if (damageMap.BeamPoints.Count > 0)
+
+        foreach (var bp in damageMap.BeamPoints)
         {
-            foreach (var bp in damageMap.BeamPoints)
+            if (bp.AbsorbPercentage > 0.0f)
             {
-                if (bp.AbsorbPercentage > 0.0f)
-                {
-                    //var part = damageMap.PMap[damageMap.GetIndex(bp.Position)];
-                    PhotonMath.ApplyTemperatureChanges(damageMap, timeStep);
-                }
+                //var part = damageMap.PMap[damageMap.GetIndex(bp.Position)];
+                PhotonMath.ApplyTemperatureChanges(damageMap, timeStep);
             }
         }
         
+    
          
         List<PhysicalParticle> flatList = collisions.SelectMany(t => new[] { t.Item1, t.Item2 }).ToList();
         HandleOutOfBounds(damageMap, ref flatList);

@@ -5,8 +5,10 @@ using System.Numerics;
 using Pulsar4X.Components;
 using Pulsar4X.Damage;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
 using Pulsar4X.Factions;
 using Pulsar4X.Helpers;
+using Pulsar4X.Ships;
 
 //using Pulsar4X.Orbital;
 using Pulsar4X.Weapons;
@@ -25,12 +27,12 @@ public class DamageMap
 
     public double TotalEnergy = 0;
     public const int PhysicsScale = 1000;//currently not used
-    public int Scale = 100;//particles per meter
+    public int Scale = 1000;//particles per meter
     int _pixBuf = 10; //this is just how much space we're leaving around the edges. 
     private int _armorHeadspace = 2; //space between skin and componenents.
     public PhysicalParticle[] PMap;
     public List<BeamPoint> BeamStarts = new();
-    public List<BeamPoint> BeamPoints;
+    public List<BeamPoint> BeamPoints = new();
     public int[] compIDMap; //componentInstance Map.
     public float[] PresMap; //pressure in bar
     public int Width;
@@ -136,21 +138,26 @@ public class DamageMap
             }
         }
     }
+
     
-    public DamageMap(EntityDamageProfileDB shipProfile)
+    public DamageMap(Entity shipEntity)
     {
-        List<(string typeID, float len, float height, int count)> partSizes = SetSize(shipProfile, Scale);
-        Dictionary<string, List<ComponentInstance>> componentInstances = shipProfile.OwningEntity.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign;
-        ReadOnlyDictionary<string, ComponentDesign> lib = shipProfile.OwningEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().ComponentDesigns;
-        Random rng = shipProfile.OwningEntity.Manager.RNG;
-        var modData = shipProfile.OwningEntity.Manager.Game.StartingGameData;
         
+        Random rng = shipEntity.Manager.RNG;
+        var modData = shipEntity.Manager.Game.StartingGameData;
+        ReadOnlyDictionary<string, ComponentDesign> lib = shipEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().ComponentDesigns;
+        
+        List<(ComponentDesign design, int count)> placementOrder = shipEntity.GetDataBlob<ShipInfoDB>().Design.Components;
+        List<(string typeID, float len, float height, int count)> partSizes = SetSize(placementOrder, Scale);
+        Dictionary<string, List<ComponentInstance>> componentInstances = shipEntity.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign;
+        
+
         int centerY = Height / 2;
         int currentX = _pixBuf; // Start at the buffer size for the left side
         List<(int x, int y)> armorVertex = new();
         armorVertex.Add((currentX , 0));
         currentX += _armorHeadspace;
-        //armorVertex.Add((currentX, (int)(partSizes[0].height / 2) + _armorHeadspace));
+
         int partSizesIndex = 0;
         foreach (var partSize in partSizes)
         {
@@ -189,7 +196,7 @@ public class DamageMap
                         compIDMap[index] = _nextComponentID;
                         var newPart = new PhysicalParticle(_nextComponentID, mat, pos, vel, Scale);
                         newPart.mapIndex = index;
-                        //PMap[index] = newPart;
+                        PMap[index] = newPart;
                         PresMap[index] = pressure;
                         totalParticles++;
                     }
@@ -210,22 +217,6 @@ public class DamageMap
 
             partSizesIndex++;
         }
-
-        /*
-        currentX = _pixBuf;
-        armorVertex.Add((currentX , 0));
-        currentX += _armorHeadspace;
-        armorVertex.Add((currentX, (int)partSizes[0].height / 2));
-        for (int partnum = 0; partnum < partSizes.Count - 1; partnum++)
-        {
-            currentX += (int)Math.Round(partSizes[partnum].len);
-            if (partSizes[partnum].height > partSizes[partnum + 1].height)
-                armorVertex.Add((currentX, (int)partSizes[partnum].height / 2 + _armorHeadspace));
-            else
-                armorVertex.Add((currentX, (int)partSizes[partnum + 1].height / 2 + _armorHeadspace));
-        }
-        armorVertex.Add((currentX ,(int)partSizes[partSizes.Count - 1].height / 2));
-        */
         
         List<int> lineHeight = new List<int>();
 
@@ -241,7 +232,7 @@ public class DamageMap
         }
         lineHeight.Add( (int)Math.Round(partSizes[numparts - 1].height / 2));
         armorVertex.Add((_pixBuf, 0));
-        
+        armorVertex.Add((_pixBuf + _armorHeadspace, lineHeight[0]));
         int currentx = _pixBuf + _armorHeadspace;
         for (int partnum = 0; partnum < numparts; partnum++)
         {
@@ -327,7 +318,7 @@ public class DamageMap
         }
     }
     
-    private List<(string id, float len, float height, int count)> SetSize(EntityDamageProfileDB shipProfile, int scale )
+    private List<(string id, float len, float height, int count)> SetSize(List<(ComponentDesign design, int count)> po, int scale )
     {
         List<(string id, float len, float height, int count)> partsize = new();
         int componentWidthNum = 0;
@@ -336,13 +327,13 @@ public class DamageMap
         int totalHeight = 0;
 
         byte componentInstance = 0;
-        ReadOnlyDictionary<string, ComponentDesign> lib = shipProfile.OwningEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().ComponentDesigns;
-        var po = shipProfile.PlacementOrder;
+
         for (int i = 0; i < po.Count; i++)
         {
-            var typeid = po[i].id;
+            var typeid = po[i].design.UniqueID;
             var count = po[i].count;
-            var compSize= DamageMapHelpers.GetComponentSize(lib, typeid, scale);
+            var compSize= DamageMapHelpers.GetComponentSize(po[i].design, scale);
+            
             var evenHeight = (int)Math.Ceiling(compSize.height);
             if (int.IsOddInteger(evenHeight)) //make heights even to simplify placement. 
                 evenHeight++;
@@ -537,6 +528,14 @@ public static class DamageMapHelpers
     public static double AreaFromVolume(double volm3, int scale)
     {
         return Math.Cbrt(volm3) * scale;
+    }
+    public static (float length, float height) GetComponentSize(ComponentDesign componentDeign, int scale)
+    {
+        var volm3 = componentDeign.VolumePerUnit;
+        var area = AreaFromVolume(volm3, scale);
+        float length = (float)Math.Sqrt(area * componentDeign.AspectRatio);
+        float height = (float)(area / length);
+        return (length, height);
     }
     public static (float length, float height) GetComponentSize(ReadOnlyDictionary<string, ComponentDesign> lib, string typeid, int scale)
     {
