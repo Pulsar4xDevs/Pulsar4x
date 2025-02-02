@@ -145,12 +145,13 @@ public class DamageMap
         
         Random rng = shipEntity.Manager.RNG;
         var modData = shipEntity.Manager.Game.StartingGameData;
-        ReadOnlyDictionary<string, ComponentDesign> lib = shipEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().ComponentDesigns;
-        
-        List<(ComponentDesign design, int count)> placementOrder = shipEntity.GetDataBlob<ShipInfoDB>().Design.Components;
-        List<(string typeID, float len, float height, int count)> partSizes = SetSize(placementOrder, Scale);
+        //ReadOnlyDictionary<string, ComponentDesign> lib = shipEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().ComponentDesigns;
+        var design = shipEntity.GetDataBlob<ShipInfoDB>().Design;
+        var armor = design.Armor;
+        List<(ComponentDesign design, int count)> placementOrder = design.Components;
+        List<(ComponentDesign design, float len, float height, int count)> partSizes = SetSize(placementOrder, Scale);
         Dictionary<string, List<ComponentInstance>> componentInstances = shipEntity.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign;
-        
+       
 
         int centerY = Height / 2;
         int currentX = _pixBuf; // Start at the buffer size for the left side
@@ -161,16 +162,11 @@ public class DamageMap
         int partSizesIndex = 0;
         foreach (var partSize in partSizes)
         {
-            
-            string typeID = partSize.typeID;
-            List<ComponentInstance> instanceIDs = componentInstances[typeID];
-
-            ComponentDesign componentDesign = lib[typeID];
-            var mats = ParticleHelpers.GetMaterialsList(modData, componentDesign);
+            List<ComponentInstance> instanceIDs = componentInstances[partSize.design.UniqueID];
+            var mats = ParticleHelpers.GetMaterialsList(modData, partSize.design);
             
             int partHeight = (int)Math.Round(partSize.height);
             int partLength = (int)Math.Round(partSize.len);
-            
             
             int stackCenterY = centerY - ((partSize.count * partHeight) / 2);
             for (int i = 0; i < partSize.count; i++)
@@ -242,16 +238,17 @@ public class DamageMap
 
         
         //TODO: this is a placeholder!!! need to rework how we're storing armor in the ship construction. 
+        
         ParticleMaterial amMat = new ParticleMaterial()
         {
-            TensileStrength = 110,
-            Elasticity = 0.5f,
-            ThermalCapacity = 900,
-            ThermalConductivity = 237,
-            MeltingZeroPoint = 933.47f,
-            TriplePoint = new PhasePoint(0.00001f, 933.47f),
-            CriticalPoint = new PhasePoint(1150, 7500),
-            Density = 7874
+            TensileStrength = armor.type.TensileStrength,
+            Elasticity = armor.type.Elasticity,
+            ThermalCapacity = armor.type.ThermalCapacity,
+            ThermalConductivity = armor.type.ThermalConductivity,
+            MeltingZeroPoint = armor.type.MeltingZeroPoint,
+            TriplePoint = armor.type.TriplePoint,
+            CriticalPoint = armor.type.CriticalPoint,
+            Density = armor.type.Density
         };
         
         var topcoordStart = armorVertex[0];
@@ -318,9 +315,9 @@ public class DamageMap
         }
     }
     
-    private List<(string id, float len, float height, int count)> SetSize(List<(ComponentDesign design, int count)> po, int scale )
+    private List<(ComponentDesign design, float len, float height, int count)> SetSize(List<(ComponentDesign design, int count)> po, int scale )
     {
-        List<(string id, float len, float height, int count)> partsize = new();
+        List<(ComponentDesign design, float len, float height, int count)> partsize = new();
         int componentWidthNum = 0;
 
         int totalLen = 0;
@@ -330,14 +327,13 @@ public class DamageMap
 
         for (int i = 0; i < po.Count; i++)
         {
-            var typeid = po[i].design.UniqueID;
             var count = po[i].count;
             var compSize= DamageMapHelpers.GetComponentSize(po[i].design, scale);
             
             var evenHeight = (int)Math.Ceiling(compSize.height);
             if (int.IsOddInteger(evenHeight)) //make heights even to simplify placement. 
                 evenHeight++;
-            partsize.Add((typeid, compSize.length, evenHeight, count));
+            partsize.Add((po[i].design, compSize.length, evenHeight, count));
             if (count > componentWidthNum)
                 componentWidthNum = count;
             totalLen += (int)Math.Ceiling(compSize.length);

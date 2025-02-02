@@ -64,10 +64,10 @@ public class ArmorBlueprintUI : BluePrintsUI
             ImGui.NextColumn();
             ImGui.Text("Density: ");
             ImGui.NextColumn();
-            var editDoub = selectedItem.Density;
+            double editDoub = selectedItem.Density;
             if (DoubleEditWidget.Display("##density"+selectedItem.UniqueID, ref editDoub))
             {
-                selectedItem.Density = editDoub;
+                selectedItem.Density = (float)editDoub;
             }
 
             ImGui.End();
