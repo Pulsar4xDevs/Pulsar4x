@@ -149,14 +149,11 @@ public class DamageMap
         var design = shipEntity.GetDataBlob<ShipInfoDB>().Design;
         var armor = design.Armor;
         List<(ComponentDesign design, int count)> placementOrder = design.Components;
-        List<(ComponentDesign design, float len, float height, int count)> partSizes = SetSize(placementOrder, Scale);
+        List<(ComponentDesign design, float len, int height, int count)> partSizes = SetSize(placementOrder, Scale);
         Dictionary<string, List<ComponentInstance>> componentInstances = shipEntity.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign;
-       
-
+        
         int centerY = Height / 2;
         int currentX = _pixBuf; // Start at the buffer size for the left side
-        List<(int x, int y)> armorVertex = new();
-        armorVertex.Add((currentX , 0));
         currentX += _armorHeadspace;
 
         int partSizesIndex = 0;
@@ -165,10 +162,13 @@ public class DamageMap
             List<ComponentInstance> instanceIDs = componentInstances[partSize.design.UniqueID];
             var mats = ParticleHelpers.GetMaterialsList(modData, partSize.design);
             
-            int partHeight = (int)Math.Round(partSize.height);
+            int partHeight = partSize.height;
             int partLength = (int)Math.Round(partSize.len);
+            int evenStackHeight = partHeight * partSize.count;
+            if (int.IsOddInteger(evenStackHeight))
+                evenStackHeight++;
+            int stackCenterY = centerY - evenStackHeight / 2;
             
-            int stackCenterY = centerY - ((partSize.count * partHeight) / 2);
             for (int i = 0; i < partSize.count; i++)
             {
                 string instanceID = instanceIDs[i].UniqueID; // Get the corresponding instanceID
@@ -219,25 +219,37 @@ public class DamageMap
         int numparts = partSizes.Count;
         
         //Grabs the height of each transtion between parts
+
+        
+        int height0 = 0;
+        int height1 =(partSizes[0].height * partSizes[0].count / 2);
         for (int partnum = 0; partnum < numparts - 1; partnum++)
         {
-            if (partSizes[partnum].height > partSizes[partnum + 1].height)
-                lineHeight.Add( (int)Math.Round(partSizes[partnum].height / 2));
+            if (height0 > height1)
+                lineHeight.Add( height0);
             else
-                lineHeight.Add( (int)Math.Round(partSizes[partnum + 1].height / 2));
+                lineHeight.Add( height1);
+            height0 = partSizes[partnum].height * partSizes[partnum].count / 2;
+            height1 = partSizes[partnum + 1].height * partSizes[partnum + 1].count / 2;
         }
-        lineHeight.Add( (int)Math.Round(partSizes[numparts - 1].height / 2));
-        armorVertex.Add((_pixBuf, 0));
-        armorVertex.Add((_pixBuf + _armorHeadspace, lineHeight[0]));
-        int currentx = _pixBuf + _armorHeadspace;
-        for (int partnum = 0; partnum < numparts; partnum++)
+        lineHeight.Add( height1);
+        
+        List<(int x, int y)> armorVertex = new();
+        int currentx = _pixBuf;
+        armorVertex.Add((currentx, 0));
+        //currentx += _armorHeadspace;
+        armorVertex.Add((currentx, lineHeight[0] + _armorHeadspace));
+        currentx += (int)Math.Round(partSizes[0].len) + _armorHeadspace;
+        
+        for (int partnum = 1; partnum < numparts; partnum++)
         {
-            currentx += (int)Math.Round(partSizes[partnum].len);
+            
             armorVertex.Add((currentx, lineHeight[partnum] + _armorHeadspace));
+            currentx += (int)Math.Round(partSizes[partnum].len);
         }
 
         
-        //TODO: this is a placeholder!!! need to rework how we're storing armor in the ship construction. 
+        armorVertex.Add((currentx, lineHeight[numparts-1] + _armorHeadspace));
         
         ParticleMaterial amMat = new ParticleMaterial()
         {
@@ -250,15 +262,12 @@ public class DamageMap
             CriticalPoint = armor.type.CriticalPoint,
             Density = armor.type.Density
         };
-        
-        var topcoordStart = armorVertex[0];
-        topcoordStart = (topcoordStart.x, topcoordStart.y);
-        for (int i = 1; i < armorVertex.Count; i++)
+
+        for (int index = 0; index < armorVertex.Count-1; index++)
         {
-            var topcoordEnd = armorVertex[i];
-            topcoordStart = (topcoordStart.x, topcoordStart.y);
-            DrawArmorSegment(this, topcoordStart, topcoordEnd,2f, amMat);
-            topcoordStart = topcoordEnd;
+            (int x, int y) av0 = armorVertex[index];
+            (int x, int y) av1 = armorVertex[index+1];
+            DrawWuArmorSegment(this, av0, av1,armor.thickness / Scale, amMat);
         }
     }
     
@@ -315,9 +324,83 @@ public class DamageMap
         }
     }
     
-    private List<(ComponentDesign design, float len, float height, int count)> SetSize(List<(ComponentDesign design, int count)> po, int scale )
+    private static void DrawWuArmorSegment(DamageMap map, (int x, int y) coordStart, (int x, int y) coordEnd, float thickness, ParticleMaterial mat)
     {
-        List<(ComponentDesign design, float len, float height, int count)> partsize = new();
+        thickness = 0.5f;
+        var x0 = coordStart.x;
+        var y0 = coordStart.y;
+        var x1 = coordEnd.x;
+        var y1 = coordEnd.y;
+        int centerY = map.Height / 2;
+        int deltax = Math.Abs(x1 - x0);
+        int deltay = Math.Abs(y1 - y0);
+        
+        List<(int x, int y, float alpha)> points = new List<(int x, int y, float alpha)>();
+
+        if (deltax > deltay)
+        {
+            if (x0 > x1) { (x0, x1) = (x1, x0); (y0, y1) = (y1, y0); }
+            float gradient = (float)(y1 - y0) / deltax;
+            float y = y0 + gradient;
+
+            for (int x = x0; x <= x1; x++)
+            {
+                AddPoint(points, x, (int)y, 1 - (y - (int)y));
+                AddPoint(points, x, (int)y + 1, y - (int)y);
+                y += gradient;
+            }
+        }
+        else
+        {
+            if (y0 > y1) { (x0, x1) = (x1, x0); (y0, y1) = (y1, y0); }
+            float gradient = (float)(x1 - x0) / deltay;
+            float x = x0 + gradient;
+
+            for (int y = y0; y <= y1; y++)
+            {
+                AddPoint(points, (int)x, y, 1 - (x - (int)x));
+                AddPoint(points, (int)x + 1, y, x - (int)x);
+                x += gradient;
+            }
+        }
+
+        // Adjust alpha based on thickness
+        float maxAlpha = thickness < 1 ? thickness : 1;
+
+        foreach (var point in points)
+        {
+            for (int i = -(int)(thickness / 2); i <= (int)(thickness / 2); i++)
+            {
+                DrawPoint(map, centerY, point.x, point.y + i, point.alpha * maxAlpha, mat);
+                DrawPoint(map, centerY, point.x, -(point.y + i), point.alpha * maxAlpha, mat); // Mirroring
+            }
+        }
+    }
+
+    private static void AddPoint(List<(int x, int y, float alpha)> points, int x, int y, float alpha)
+    {
+        alpha = Math.Max(0, Math.Min(1, alpha)); // Clamp alpha
+        points.Add((x, y, alpha));
+    }
+
+    private static void DrawPoint(DamageMap map, int centerY, int x, int y, float alpha, ParticleMaterial mat)
+    {
+        Vector2 pos = new Vector2(x, centerY + y);
+        var pmapIndex = map.GetIndex(pos);
+        map.compIDMap[pmapIndex] = map._nextComponentID;
+        
+        var newPart = new PhysicalParticle(map._nextComponentID, mat, pos, Vector2.Zero, map.Scale)
+        {
+            mapIndex = pmapIndex
+        };
+        // Adjust mass based on alpha
+        newPart.Mass *= alpha;
+        map.PMap[pmapIndex] = newPart;
+    }
+    
+    private List<(ComponentDesign design, float len, int height, int count)> SetSize(List<(ComponentDesign design, int count)> po, int scale )
+    {
+        List<(ComponentDesign design, float len, int height, int count)> partsize = new();
         int componentWidthNum = 0;
 
         int totalLen = 0;
