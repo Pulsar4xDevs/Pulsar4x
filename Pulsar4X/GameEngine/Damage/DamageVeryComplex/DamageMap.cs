@@ -255,7 +255,11 @@ public class DamageMap
             MeltingZeroPoint = armor.type.MeltingZeroPoint,
             TriplePoint = armor.type.TriplePoint,
             CriticalPoint = armor.type.CriticalPoint,
-            Density = armor.type.Density
+            Density = armor.type.Density,
+            PhotonReflectivity = armor.type.PhotonReflectivity,
+            PhotonReflectivityPeak = armor.type.PhotonReflectivityPeak,
+            PhotonTransparency = armor.type.PhotonTransparency,
+            PhotonTransperencyPeak = armor.type.PhotonTransparencyPeak
         };
 
         for (int index = 0; index < armorVertex.Count-1; index++)
@@ -370,6 +374,8 @@ public class DamageMap
         {
             for (int i = -(int)(thickness / 2); i <= (int)(thickness / 2); i++)
             {
+                if(point.alpha == 0)
+                    continue;
                 DrawPoint(map, centerY, point.x, point.y + i, point.alpha * maxAlpha, mat);
                 DrawPoint(map, centerY, point.x, -(point.y + i + 1), point.alpha * maxAlpha, mat); // Mirroring
             }
