@@ -140,6 +140,10 @@ namespace Pulsar4X.Engine
 
         public string DefaultFactionName { get; set; } = "Terran Federation";
 
+        /// <summary>
+        /// if player start has a future End of Life Event asteroid impact. 
+        /// </summary>
+        public bool EleStart { get; set; } = true;
 
         /// <summary>
         /// Defines if the default Sol Start will be used.

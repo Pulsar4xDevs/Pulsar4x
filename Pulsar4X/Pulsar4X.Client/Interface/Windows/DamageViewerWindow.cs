@@ -14,6 +14,7 @@ using Pulsar4X.Damage;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Weapons;
 using Pulsar4X.Extensions;
+using Pulsar4X.Ships;
 
 
 namespace Pulsar4X.SDL2UI.Combat
@@ -94,15 +95,14 @@ namespace Pulsar4X.SDL2UI.Combat
 
         private void Init(Entity damageableEntity)
         {
-
             if (damageableEntity.TryGetDatablob<EntityDamageProfileDB>(out var db))
             {
                 _selectedEntity = damageableEntity;
                 _profile = damageableEntity.GetDataBlob<EntityDamageProfileDB>();
                 _rawShipImage = _profile.DamageProfile;
                 _uiState.ViewPort.Renderer.CreateTexture(_rawShipImage, ref _shipImgPtr, Client.Rendering.PixelFormat.ARGB8888);
-
-                _damageMap = new DamageMap(damageableEntity);
+                var design = damageableEntity.GetDataBlob<ShipInfoDB>().Design;
+                _damageMap = new DamageMap(damageableEntity, design);
                 SDL2Helper.CreateSDLTextures(_uiState.ViewPort.Renderer, _uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
                 _dmWidth = (int)(_damageMap.Width * _dmSizeScaler);
                 _dmHeight = (int)(_damageMap.Height * _dmSizeScaler);
@@ -110,9 +110,7 @@ namespace Pulsar4X.SDL2UI.Combat
                 _dmProjectileSliderLhs = (int)(_dmHeight * 0.75);
                 _dmProjectileSliderTop = 0;
                 _dmProjectileSliderRhs = (int)(_dmHeight * 0.25);
-
-
-
+                
                 if (_profile.DamageEvents.Count > 0)
                 {
                     _damageEventIndex = _profile.DamageEvents.Count - 1;

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
@@ -42,6 +43,7 @@ public class NewGameMenu : PulsarGuiWindow
     string _selectedSystemId = "";
     string _selectedBodyId = "";
     string _selectedColonyId = "";
+    private bool _eleStart = true;
 
     List<string> _enabledSystems = new ();
 
@@ -325,6 +327,8 @@ public class NewGameMenu : PulsarGuiWindow
             }
         }
 
+        if (ImGui.Checkbox("ELE start", ref _eleStart)) ;
+
         ImGui.EndChild();
         ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
@@ -381,7 +385,8 @@ public class NewGameMenu : PulsarGuiWindow
             DefaultFactionName = ImGuiSDL2CSHelper.StringFromBytes(_factionInputBuffer),
             DefaultPlayerPassword = ImGuiSDL2CSHelper.StringFromBytes(_passInputBuffer),
             DefaultSolStart = true,
-            MasterSeed = _masterSeed
+            MasterSeed = _masterSeed,
+            EleStart = _eleStart
         };
 
         SpeciesBlueprint startingSpeciesBlueprint = _modDataStore.Species[_selectedSpeciesId];
@@ -441,7 +446,8 @@ public class NewGameMenu : PulsarGuiWindow
 
         // Setup the starting colony
         var playerColony = ColonyFactory.CreateFromBlueprint(game, playerFaction, playerSpecies, startingSystem, startingBody, _modDataStore.Colonies[_selectedColonyId]);
-
+        if(_eleStart)
+            AsteroidFactory.CreateAsteroid(startingSystem, startingBody, game.TimePulse.GameGlobalDateTime + TimeSpan.FromDays(365));
         // TODO: need to add the implementation for a random start
         // TODO: need to find a way to handle this via the mods instead of loading it here
         //var (newGameFaction, systemId) = Pulsar4X.Engine.DefaultStartFactory.LoadFromJson(game, "Data/basemod/defaultStart.json");

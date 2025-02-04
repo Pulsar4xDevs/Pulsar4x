@@ -140,12 +140,11 @@ public class DamageMap
     }
 
     
-    public DamageMap(Entity shipEntity)
+    public DamageMap(Entity shipEntity, ShipDesign design)
     {
         Random rng = shipEntity.Manager.RNG;
         var modData = shipEntity.Manager.Game.StartingGameData;
-        //ReadOnlyDictionary<string, ComponentDesign> lib = shipEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().ComponentDesigns;
-        var design = shipEntity.GetDataBlob<ShipInfoDB>().Design;
+ 
         var armor = design.Armor;
         List<(ComponentDesign design, int count)> placementOrder = design.Components;
         List<(ComponentDesign design, float len, int height, int count)> partSizes = SetSize(placementOrder, Scale);
