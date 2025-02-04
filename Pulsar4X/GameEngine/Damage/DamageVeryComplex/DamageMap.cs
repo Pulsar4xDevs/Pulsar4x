@@ -142,7 +142,6 @@ public class DamageMap
     
     public DamageMap(Entity shipEntity)
     {
-        
         Random rng = shipEntity.Manager.RNG;
         var modData = shipEntity.Manager.Game.StartingGameData;
         //ReadOnlyDictionary<string, ComponentDesign> lib = shipEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().ComponentDesigns;
@@ -153,9 +152,8 @@ public class DamageMap
         Dictionary<string, List<ComponentInstance>> componentInstances = shipEntity.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign;
         
         int centerY = Height / 2;
-        int currentX = _pixBuf; // Start at the buffer size for the left side
-        currentX += _armorHeadspace;
-
+        int currentX = _pixBuf + _armorHeadspace; // Start at the buffer size for the left side
+        
         int partSizesIndex = 0;
         foreach (var partSize in partSizes)
         {
@@ -197,7 +195,6 @@ public class DamageMap
                         totalParticles++;
                     }
                 }
-
                 componentData[instanceID] = (position, size, totalParticles);
                 AddComponentID(instanceID);//, htkPerParticle);
             }
@@ -235,15 +232,13 @@ public class DamageMap
         lineHeight.Add( height1);
         
         List<(int x, int y)> armorVertex = new();
-        int currentx = _pixBuf;
+        int currentx = _pixBuf - (int)(armor.thickness);
         armorVertex.Add((currentx, 0));
-        //currentx += _armorHeadspace;
         armorVertex.Add((currentx, lineHeight[0] + _armorHeadspace));
         currentx += (int)Math.Round(partSizes[0].len) + _armorHeadspace;
         
         for (int partnum = 1; partnum < numparts; partnum++)
         {
-            
             armorVertex.Add((currentx, lineHeight[partnum] + _armorHeadspace));
             currentx += (int)Math.Round(partSizes[partnum].len);
         }
@@ -335,7 +330,7 @@ public class DamageMap
         int deltax = Math.Abs(x1 - x0);
         int deltay = Math.Abs(y1 - y0);
         
-        List<(int x, int y, float alpha)> points = new List<(int x, int y, float alpha)>();
+        List<(float x, float y, float alpha)> points = new();
 
         if (deltax > deltay)
         {
@@ -345,8 +340,10 @@ public class DamageMap
 
             for (int x = x0; x <= x1; x++)
             {
-                AddPoint(points, x, (int)y, 1 - (y - (int)y));
-                AddPoint(points, x, (int)y + 1, y - (int)y);
+                //AddPoint(points, x, (int)y, 1 - (y - (int)y));
+                points.Add((x, y, 1 - (y - (int)y)));
+                //AddPoint(points, x, (int)y + 1, y - (int)y);
+                points.Add((x, y + 1, y - (int)y));
                 y += gradient;
             }
         }
@@ -358,8 +355,10 @@ public class DamageMap
 
             for (int y = y0; y <= y1; y++)
             {
-                AddPoint(points, (int)x, y, 1 - (x - (int)x));
-                AddPoint(points, (int)x + 1, y, x - (int)x);
+                //AddPoint(points, (int)x, y, 1 - (x - (int)x));
+                points.Add((x, y, 1 - (x - (int)x)));
+                //AddPoint(points, (int)x + 1, y, x - (int)x);
+                points.Add((x + 1, y, x - (int)x));
                 x += gradient;
             }
         }
@@ -372,18 +371,14 @@ public class DamageMap
             for (int i = -(int)(thickness / 2); i <= (int)(thickness / 2); i++)
             {
                 DrawPoint(map, centerY, point.x, point.y + i, point.alpha * maxAlpha, mat);
-                DrawPoint(map, centerY, point.x, -(point.y + i), point.alpha * maxAlpha, mat); // Mirroring
+                DrawPoint(map, centerY, point.x, -(point.y + i + 1), point.alpha * maxAlpha, mat); // Mirroring
             }
         }
     }
 
-    private static void AddPoint(List<(int x, int y, float alpha)> points, int x, int y, float alpha)
-    {
-        alpha = Math.Max(0, Math.Min(1, alpha)); // Clamp alpha
-        points.Add((x, y, alpha));
-    }
 
-    private static void DrawPoint(DamageMap map, int centerY, int x, int y, float alpha, ParticleMaterial mat)
+
+    private static void DrawPoint(DamageMap map, int centerY, float x, float y, float alpha, ParticleMaterial mat)
     {
         Vector2 pos = new Vector2(x, centerY + y);
         var pmapIndex = map.GetIndex(pos);
