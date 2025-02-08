@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Pulsar4X.Client.Rendering;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using Pulsar4X.SDL2UI.ManuverNodes;
@@ -64,7 +65,7 @@ public class ManuverLinesComplete : IDrawData
         }
         else
         {
-            SelectedSequence.ManuverNodes.Add(node); 
+            SelectedSequence.ManuverNodes.Add(node);
         }
     }
 
@@ -156,6 +157,8 @@ public class ManuverLinesComplete : IDrawData
         }
     }
 
+    public void OnFrameUpdate(Camera2 camera) {}
+
     public void OnPhysicsUpdate()
     {
     }
@@ -207,7 +210,7 @@ public static class RenderManuverLines
             Vector2 startPos = item.startPos;
             Vector2 endPos = startPos;
             if (index < data.Count - 1)
-                endPos = data[index + 1].startPos; 
+                endPos = data[index + 1].startPos;
 
             var kp = CreatePrimitiveShapes.KeplerPoints(a, e, lop, startPos, endPos);
             arraylist.Add(kp);
@@ -248,7 +251,7 @@ public static class RenderManuverLines
             Vector2 startPos = item.startPos;
             Vector2 endPos = startPos;
             if (index < data.Count - 1)
-                endPos = data[index + 1].startPos; 
+                endPos = data[index + 1].startPos;
 
             var kp = CreatePrimitiveShapes.KeplerPoints(a, e, lop, startPos, endPos);
             arraylist.Add(kp);

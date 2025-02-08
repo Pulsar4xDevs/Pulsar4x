@@ -79,6 +79,7 @@ namespace Pulsar4X.SDL2UI
         internal EntityContextMenu? ContextMenu { get; set; }
         internal SafeDictionary<string, SystemState> StarSystemStates = new ();
         internal Camera Camera;
+        internal Camera2 Camera2;
         internal ImGuiSDL2CSWindow ViewPort { get; private set; }
         internal System.Numerics.Vector2 MainWinSize { get {return ViewPort.Size;}}
 
@@ -136,6 +137,7 @@ namespace Pulsar4X.SDL2UI
             HotKeys.Push(HotKeyFactory.CreateDefault());
 
             Camera = new Camera(viewport);
+            Camera2 = new Camera2(new Vector2(viewport.Size.X, viewport.Size.Y));
 
             MainMenuItems.GetInstance().SetActive();
 

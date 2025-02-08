@@ -6,6 +6,7 @@ using SDL2;
 using static SDL2.SDL;
 using Pulsar4X.Orbits;
 using Pulsar4X.Movement;
+using Pulsar4X.Client.Rendering;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -113,6 +114,8 @@ namespace Pulsar4X.SDL2UI
 
             _transitLeavePositionrelative_m = (Vector3)MoveMath.GetRelativeFuturePosition(_movingEntity, _transitLeaveDateTime);
         }
+
+        public void OnFrameUpdate(Camera2 camera) { }
 
         public void OnFrameUpdate(Matrix matrix, Camera camera)
         {

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using ImGuiNET;
@@ -439,7 +438,7 @@ public class OpenGLRenderer : IRenderer
         GL.Scissor(lastScissorBox.X, lastScissorBox.Y, lastScissorBox.Z, lastScissorBox.W);
     }
 
-    public void RenderLine(Shape[] shapes, Camera camera)
+    public void RenderLine(Shape[] shapes, Camera2 camera)
     {
         // Save the current OpenGL context state
         _previousContext = SDL.SDL_GL_GetCurrentContext();

@@ -11,6 +11,7 @@ namespace Pulsar4X.SDL2UI
     public interface IDrawData
     {
         void OnFrameUpdate(Matrix matrix, Camera camera);
+        void OnFrameUpdate(Camera2 camera);
         void OnPhysicsUpdate();
         void Draw(IntPtr rendererPtr, Camera camera);
         //Shape[] GetDrawData();
@@ -81,16 +82,39 @@ namespace Pulsar4X.SDL2UI
 
         }
 
+        public virtual void OnFrameUpdate(Camera2 camera)
+        {
+            if(DrawShapes == null || DrawShapes.Length != Shapes.Count)
+                DrawShapes = new Shape[Shapes.Count];
+
+            var scaledPosition = camera.ScaledPosition(WorldPosition_m);
+            var mirrorMtx = Matrix.IDMirror(true, false);
+            var scaleMtx = Matrix.IDScale(Scale, Scale);
+            var posMtx = Matrix.IDTranslate(scaledPosition.X, scaledPosition.Y);
+            Matrix matrix = mirrorMtx * scaleMtx * posMtx;
+
+            var viewCoordinate = camera.WorldToScreenPosition(new Vector2(WorldPosition_m.X, WorldPosition_m.Y));
+            ViewScreenPos = new SDL.SDL_Point() { x = (int)viewCoordinate.X, y = (int)viewCoordinate.Y };
+
+            for (int i = 0; i < Shapes.Count; i++)
+            {
+                var shape = Shapes[i];
+                var manipulatedShape = new Shape();
+                manipulatedShape.Points = matrix.TransformToVector2(shape.Points);
+                manipulatedShape.Color = shape.Color;
+                DrawShapes[i] = manipulatedShape;
+            }
+        }
+
         public virtual void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-
-
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
-            var pos = camera.ViewCoordinateV2_m(WorldPosition_m);
+            var pos = camera.ScaledPosition(WorldPosition_m);
             var mirrorMtx = Matrix.IDMirror(true, false);
             var scaleMtx = Matrix.IDScale(Scale, Scale);
             var posMtx = Matrix.IDTranslate(pos.X, pos.Y);
-            Matrix mtx = mirrorMtx * scaleMtx * posMtx;
+            var rotateMatrix = Matrix.IDRotate(Heading - Math.PI * 0.5);
+            Matrix mtx = mirrorMtx * scaleMtx * rotateMatrix * posMtx;
 
             int shapeCount = Shapes.Count;
             int dsi = 0;
@@ -137,7 +161,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        public virtual Shape[] GetDrawData() => Shapes.ToArray();
+        public virtual Shape[] GetDrawData() => DrawShapes;//Shapes.ToArray();
 
         public virtual void Draw(IntPtr rendererPtr, Camera camera)
         {
@@ -243,6 +267,8 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        public void OnFrameUpdate(Camera2 camera){}
+
         public void OnFrameUpdate(Matrix matrix, Camera camera)
         {
 
@@ -318,6 +344,8 @@ namespace Pulsar4X.SDL2UI
                 SDL.SDL_RenderDrawLine(rendererPtr, x0, y0, x1, y1);
             }
         }
+
+        public void OnFrameUpdate(Camera2 camera) { }
 
         public void OnFrameUpdate(Matrix matrix, Camera camera)
         {

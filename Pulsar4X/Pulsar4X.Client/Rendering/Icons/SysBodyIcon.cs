@@ -4,6 +4,7 @@ using Pulsar4X.Orbital;
 using SDL2;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using Pulsar4X.Client.Rendering;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -98,6 +99,16 @@ namespace Pulsar4X.SDL2UI
             Shapes.Add(new Shape() { Color = colour, Points = points });
         }
 
+        public override void OnFrameUpdate(Camera2 camera)
+        {
+            _viewRadius = camera.ViewDistance(_bodyRadiusAU);
+            if (_viewRadius < _iconMinSize)
+                Scale = _iconMinSize * 0.01f;
+            else
+                Scale = _viewRadius * 0.01f;
+            Scale /= camera.Zoom;
+            base.OnFrameUpdate(camera);
+        }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
@@ -106,6 +117,7 @@ namespace Pulsar4X.SDL2UI
                 Scale = _iconMinSize * 0.01f;
             else
                 Scale = _viewRadius * 0.01f;
+            Scale /= camera.ZoomLevel;
             base.OnFrameUpdate(matrix, camera);
         }
     }

@@ -2,7 +2,6 @@ using System;
 using System.Text;
 using ImGuiSDL2CS;
 using Pulsar4X.SDL2UI;
-using SDL2;
 
 namespace Pulsar4X.Client.Rendering;
 
@@ -14,17 +13,18 @@ public class LineRenderer : IDisposable
 
     // Vertex shader
     private const string VertexShaderSource = @"
-        #version 460
+        #version 330 core
         layout(location = 0) in vec2 aPos;
         uniform mat4 transform;
         void main()
         {
-            gl_Position = transform * vec4(aPos, 0.0, 1.0);
+            vec4 pos = transform * vec4(aPos.xy, 0.0, 1.0);
+            gl_Position = pos;
         }";
 
     // Fragment shader
     private const string FragmentShaderSource = @"
-        #version 460
+        #version 330 core
         layout (location = 0) out vec4 fragColor;
         uniform vec4 color;
         void main()
@@ -142,10 +142,12 @@ public class LineRenderer : IDisposable
         return shader;
     }
 
-    public void Draw(Shape[] shapes, Camera camera)
+    public void Draw(Shape[] shapes, Camera2 camera)
     {
         if (shapes == null || shapes.Length == 0)
             return;
+
+        GL.Viewport(0, 0, (int)camera.ScreenSize.X, (int)camera.ScreenSize.Y);
 
         // Create and bind vertex buffer
         uint vbo;
@@ -177,11 +179,7 @@ public class LineRenderer : IDisposable
         GL.UseProgram(_shaderProgram);
 
         // Set camera transform
-        //float[] transform = camera.GetTransformMatrix();
-        //GL.UniformMatrix4fv(_transformLocation, 1, false, transform);
-
-        float[] projection = CreateOrthographicProjection(camera._viewPort.Width, camera._viewPort.Height);
-        GL.UniformMatrix4fv(_transformLocation, 1, false, projection);
+        GL.UniformMatrix4fv(_transformLocation, 1, false, camera.GetTransformMatrix());
 
         foreach (var shape in shapes)
         {
@@ -203,9 +201,6 @@ public class LineRenderer : IDisposable
 
             // Draw lines
             GL.DrawArrays((uint)GL.Enum.GL_LINE_STRIP, 0, shape.Points.Length);
-
-            // Clean up
-            GL.DeleteBuffers(1, ref vbo);
         }
 
         // Restore previous state
@@ -217,6 +212,8 @@ public class LineRenderer : IDisposable
         {
             GL.Disable(GL.Enum.GL_BLEND);
         }
+        // Clean up
+        GL.DeleteBuffers(1, ref vbo);
     }
 
     public void Dispose()

@@ -223,8 +223,8 @@ namespace Pulsar4X.SDL2UI
             //resize for zoom
             //translate to position
 
-            var foo = camera.ViewCoordinate_m(WorldPosition_m);
-            var trns = Matrix.IDTranslate(foo.x, foo.y);
+            var foo = camera.ScaledPosition(WorldPosition_m);
+            var trns = Matrix.IDTranslate(foo.X, foo.Y);
             var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
             var scZm = Matrix.IDScale(camera.ZoomLevel, camera.ZoomLevel);
             var mtrx = scAU * scZm *  trns;//scale to au, scale for camera zoom, and move to camera position and zoom
@@ -236,9 +236,16 @@ namespace Pulsar4X.SDL2UI
             //_drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
             for (int i = 0; i < _numberOfPoints; i++)
             {
-
-
                 _drawPoints[i] = mtrx.TransformToSDL_Point(_points[index].X, _points[index].Y);
+            }
+
+            // TODO: fix this, don't need to recreate the array every frame.
+            DrawShapes = new Shape[1];
+            DrawShapes[0].Points = new Vector2[_drawPoints.Length];
+            DrawShapes[0].Color = new SDL.SDL_Color() { r = _userSettings.Red, g = _userSettings.Grn, b = _userSettings.Blu, a = 255 };
+            for(int i = 0; i < _drawPoints.Length; i++)
+            {
+                DrawShapes[0].Points[i] = new Vector2() { X = _drawPoints[i].x, Y = _drawPoints[i].y };
             }
 
         }

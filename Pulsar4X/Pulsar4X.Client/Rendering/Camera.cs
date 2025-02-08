@@ -107,6 +107,13 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        public Orbital.Vector2 ScaledPosition(Vector3 worldPositionInMeters)
+        {
+            return new Orbital.Vector2(
+                Orbital.Distance.MToAU(worldPositionInMeters.X),
+                -Orbital.Distance.MToAU(worldPositionInMeters.Y));
+        }
+
         public Orbital.Vector2 ViewCoordinateV2_m(Orbital.Vector2 worldCoord_m)
         {
             //we're converting to AU here because zoom works best at AU...
@@ -316,28 +323,28 @@ namespace Pulsar4X.SDL2UI
     /// Cursor crosshair.
     /// Primarily made to debug a problem with getting the world coordinate of the mouse cursor.
     /// </summary>
-    class CursorCrosshair : Icon
-    {
-        public CursorCrosshair(Orbital.Vector3 positionM) : base(positionM)
-        {
-            var colour = new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 255 };
+    // class CursorCrosshair : Icon
+    // {
+    //     public CursorCrosshair(Orbital.Vector3 positionM) : base(positionM)
+    //     {
+    //         var colour = new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 255 };
 
-            Orbital.Vector2 point0 = new Orbital.Vector2() { X = -5, Y = 0 };
-            Orbital.Vector2 point1 = new Orbital.Vector2() { X = +5, Y = 0 };
-            Shape shape0 = new Shape() { Points = new Orbital.Vector2[2] { point0, point1 }, Color = colour };
+    //         Orbital.Vector2 point0 = new Orbital.Vector2() { X = -5, Y = 0 };
+    //         Orbital.Vector2 point1 = new Orbital.Vector2() { X = +5, Y = 0 };
+    //         Shape shape0 = new Shape() { Points = new Orbital.Vector2[2] { point0, point1 }, Color = colour };
 
-            Orbital.Vector2 point2 = new Orbital.Vector2() { X = 0, Y = -5 };
-            Orbital.Vector2 point3 = new Orbital.Vector2() { X = 0, Y = +5 };
-            Shape shape1 = new Shape() { Points = new Orbital.Vector2[2] { point2, point3 }, Color = colour };
+    //         Orbital.Vector2 point2 = new Orbital.Vector2() { X = 0, Y = -5 };
+    //         Orbital.Vector2 point3 = new Orbital.Vector2() { X = 0, Y = +5 };
+    //         Shape shape1 = new Shape() { Points = new Orbital.Vector2[2] { point2, point3 }, Color = colour };
 
-            this.Shapes = new System.Collections.Generic.List<Shape>() { shape0, shape1 };
-        }
+    //         this.Shapes = new System.Collections.Generic.List<Shape>() { shape0, shape1 };
+    //     }
 
-        public override void OnFrameUpdate(Matrix matrix, Camera camera)
-        {
-            WorldPosition_m = camera.MouseWorldCoordinate_m();
-            base.OnFrameUpdate(matrix, camera);
-        }
+    //     // public override void OnFrameUpdate(Matrix matrix, Camera camera)
+    //     // {
+    //     //     WorldPosition_m = camera.MouseWorldCoordinate_m();
+    //     //     base.OnFrameUpdate(matrix, camera);
+    //     // }
 
-    }
+    // }
 }

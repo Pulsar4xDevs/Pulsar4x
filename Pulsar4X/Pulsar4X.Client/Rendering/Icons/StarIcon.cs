@@ -4,6 +4,7 @@ using SDL2;
 using System.Collections.Generic;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using Pulsar4X.Client.Rendering;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -60,13 +61,13 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < spikes; i++)
             {
                 var a1 = arc * i;
-                double x1 = (0 * Math.Cos(a1) - spikeheight * Math.Sin(a1));
-                double y1 = (0 * Math.Sin(a1) + spikeheight * Math.Cos(a1));
+                double x1 = -spikeheight * Math.Sin(a1);
+                double y1 = spikeheight * Math.Cos(a1);
                 var p1 = new Vector2() { X = x1, Y = y1 };
 
                 var a2 = a1 + arc * 0.5;
-                double x2 = (0 * Math.Cos(a2) - spikeDepth * Math.Sin(a2));
-                double y2 = (0 * Math.Sin(a2) + spikeDepth * Math.Cos(a2));
+                double x2 = -spikeDepth * Math.Sin(a2);
+                double y2 = spikeDepth * Math.Cos(a2);
                 var p2 = new Vector2() { X = x2, Y = y2 };
 
                 shapePoints.Add(p1);
@@ -95,6 +96,18 @@ namespace Pulsar4X.SDL2UI
             Shapes.AddRange(shapes);
         }
 
+        public override void OnFrameUpdate(Camera2 camera)
+        {
+            var viewRadius = camera.ViewDistance(_bodyRadiusAU);
+            if (viewRadius < _iconMinSize)
+                Scale = _iconMinSize * 0.01f;
+            else
+                Scale = viewRadius * 0.01f;
+            Scale /= camera.Zoom;
+
+            base.OnFrameUpdate(camera);
+        }
+
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
             var viewRadius = camera.ViewDistance(_bodyRadiusAU);
@@ -102,6 +115,7 @@ namespace Pulsar4X.SDL2UI
                 Scale = _iconMinSize * 0.01f;
             else
                 Scale = viewRadius * 0.01f;
+            Scale /= camera.ZoomLevel;
             base.OnFrameUpdate(matrix, camera);
         }
     }

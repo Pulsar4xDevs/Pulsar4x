@@ -97,6 +97,9 @@ namespace Pulsar4X.SDL2UI
                     if(isMaximized)
                         SDL.SDL_MaximizeWindow(_Handle);
                 }
+
+                // Update the camera size
+                _state.Camera2.UpdateScreenSize(new Orbital.Vector2(Width, Height));
             }
             catch(Exception)
             {
@@ -167,6 +170,7 @@ namespace Pulsar4X.SDL2UI
                 int deltaX = _state.Camera.MouseFrameIncrementX - e.motion.x;
                 int deltaY = _state.Camera.MouseFrameIncrementY - e.motion.y;
                 _state.Camera.WorldOffset_m(deltaX, deltaY);
+                _state.Camera2.Move(new Orbital.Vector2(deltaX, deltaY));
 
                 _state.Camera.MouseFrameIncrementX = e.motion.x;
                 _state.Camera.MouseFrameIncrementY = e.motion.y;
@@ -181,31 +185,67 @@ namespace Pulsar4X.SDL2UI
                 _state.OnFocusMoved();
                 if (e.wheel.y > 0)
                 {
-                    _state.Camera.ZoomIn(mouseX, mouseY);
+                    //_state.Camera.ZoomIn(mouseX, mouseY);
+                    _state.Camera2.ZoomIn(mouseX, mouseY);
                 }
                 else if (e.wheel.y < 0)
                 {
-                    _state.Camera.ZoomOut(mouseX, mouseY);
+                    //_state.Camera.ZoomOut(mouseX, mouseY);
+                    _state.Camera2.ZoomOut(mouseX, mouseY);
                 }
             }
             return true;
         }
 
-        public override void ImGuiRender()
+        public override void PreFrameUpdate()
         {
             foreach (var (_, systemState) in _state.StarSystemStates)
             {
                 systemState.PreFrameSetup();
             }
+        }
 
+        public override void RenderFrame()
+        {
             Renderer.Clear(backColor.X, backColor.Y, backColor.Z, 1f);
             Renderer.BeginFrame();
 
-            _state.GalacticMap.Draw();
+            _state.GalacticMap?.Draw();
 
-            // Render ImGui on top of the rest. this eventualy calls overide void ImGuiLayout();
-            base.ImGuiRender();
+            // Shape[] shapes = new Shape[1]
+            // {
+            //     new Shape()
+            //     {
+            //         Points = new Orbital.Vector2[3]
+            //         {
+            //             new Orbital.Vector2() { X = 0, Y = 0 },
+            //             new Orbital.Vector2() { X = 100, Y = 100 },
+            //             new Orbital.Vector2() { X = 0, Y = 0 }
+            //         },
+            //         Color = new SDL.SDL_Color() { r = 255, g = 0, b = 0, a = 255 }
+            //     }
+            // };
 
+            // _state.ViewPort.Renderer.RenderLine(shapes, _state.Camera2);
+
+            // shapes = new Shape[1]
+            // {
+            //     new Shape()
+            //     {
+            //         Points = new Orbital.Vector2[3]
+            //         {
+            //             new Orbital.Vector2() { X = 0, Y = 0 },
+            //             new Orbital.Vector2() { X = 150, Y = 100 },
+            //             new Orbital.Vector2() { X = 0, Y = 0 }
+            //         },
+            //         Color = new SDL.SDL_Color() { r = 0, g = 0, b = 255, a = 255 }
+            //     }
+            // };
+            // _state.ViewPort.Renderer.RenderLine(shapes, _state.Camera2);
+        }
+
+        public override void PostFrameUpdate()
+        {
             foreach (var (_, systemState) in _state.StarSystemStates)
             {
                 systemState.PostFrameCleanup();
@@ -245,7 +285,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Image(_colorTesttexture, new System.Numerics.Vector2(200, 200));
                 if(ImGui.Button("refresh"))
                     SDL2Helper.CreateTestTexture(_state.ViewPort.Renderer, ref _colorTesttexture);
-                
+
                 foreach (var kvp in _state.SDLImageDictionary)
                 {
                     (int txWidth, int txHeight) = _state.ViewPort.Renderer.GetTextureDimensions(kvp.Value);

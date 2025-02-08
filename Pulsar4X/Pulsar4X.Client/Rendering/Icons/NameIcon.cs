@@ -13,6 +13,7 @@ using Pulsar4X.Client.Interface;
 using Pulsar4X.Ships;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Factions;
+using Pulsar4X.Client.Rendering;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -82,6 +83,19 @@ namespace Pulsar4X.SDL2UI
             SubNames.Remove(guid);
         }
 
+        public override void OnFrameUpdate(Camera2 camera)
+        {
+            if (camera.Zoom < DrawAtZoom)
+                return;
+
+            Vector2 defualtOffset = new Vector2(4,-(Height / 2));
+            ViewOffset = defualtOffset;
+            base.OnFrameUpdate(camera);
+
+            ViewDisplayRect.X = ViewScreenPos.x;
+            ViewDisplayRect.Y = ViewScreenPos.y;
+        }
+
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
             //DefaultViewOffset = new SDL.SDL_Point() { x = Width, y = -Height };
@@ -125,7 +139,7 @@ namespace Pulsar4X.SDL2UI
 
 
         //use to correctly draw all passed name icons
-        public static void DrawAll(IntPtr rendererPtr, Camera camera, List<NameIcon> nameIcons)
+        public static void DrawAll(IntPtr rendererPtr, Camera2 camera, List<NameIcon> nameIcons)
         {
             List<List<NameIcon>> nameIconGroupings = new List<List<NameIcon>>();
             List<bool> alreadyGroupedItems = new List<bool>();
@@ -179,9 +193,9 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private static void DisplayNameIcon(Camera camera, NameIcon icon, List<IGrouping<UserOrbitSettings.OrbitBodyType, NameIcon>> subIcons)
+        private static void DisplayNameIcon(Camera2 camera, NameIcon icon, List<IGrouping<UserOrbitSettings.OrbitBodyType, NameIcon>> subIcons)
         {
-            if (camera.ZoomLevel < icon.DrawAtZoom)
+            if (camera.Zoom < icon.DrawAtZoom)
                 return;
 
             if(!subIcons.Any())
@@ -276,7 +290,7 @@ namespace Pulsar4X.SDL2UI
             Window.End();
         }
 
-        private static void DisplayContextMenu(Camera camera, NameIcon icon)
+        private static void DisplayContextMenu(Camera2 camera, NameIcon icon)
         {
             if(ImGui.BeginPopupContextItem())
             {
@@ -285,7 +299,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private static void DisplayTooltip(Camera camera, NameIcon icon)
+        private static void DisplayTooltip(Camera2 camera, NameIcon icon)
         {
             var name = icon.NameString;
             var type = icon.EntityState.BodyType.ToString();

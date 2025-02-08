@@ -55,7 +55,7 @@ namespace ImGuiSDL2CS
             var io = ImGui.GetIO();
             ImGuiSDL2CSHelper.Init();
             OnEvent = ImGuiOnEvent;
-            OnLoop = ImGuiOnLoop;
+            OnLoop = OnFrame;
             SDL.SDL_SetHint("SDL_RENDER_LINE_METHOD", "2"); //https://github.com/libsdl-org/SDL/blob/1fc7f681187f80ccd6b9625214b47db665cd9aaf/include/SDL_hints.h#L1304-L1315
 
             // Apply ImGui theme
@@ -82,13 +82,20 @@ namespace ImGuiSDL2CS
         public bool ImGuiOnEvent(SDL2Window window, SDL.SDL_Event e)
             => ImGuiSDL2CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed);
 
-        public void ImGuiOnLoop(SDL2Window window)
+        public void OnFrame(SDL2Window window)
         {
-            ImGuiRender();
-            Swap();
+            PreFrameUpdate();
+            RenderFrame();
+            RenderUI();
+            EndFrame();
+            PostFrameUpdate();
         }
 
-        public virtual void ImGuiRender()
+        public virtual void RenderFrame() { }
+        public virtual void PreFrameUpdate() { }
+        public virtual void PostFrameUpdate() { }
+
+        public virtual void RenderUI()
         {
             uint mouseMask = SDL.SDL_GetMouseState(out int mouseX, out int mouseY);
             if ((SDL.SDL_GetWindowFlags(Handle) & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_MOUSE_FOCUS) == 0)

@@ -6,12 +6,12 @@ using SDL2;
 namespace Pulsar4X.SDL2UI
 {
 
-    
+
     public class Matrix
     {
-        double[] X = new double[3] { 1, 0, 0 };
-        double[] Y = new double[3] { 0, 1, 0};
-        double[] Z = new double[3] {0, 0, 1};
+        public double[] X = new double[3] { 1, 0, 0 };
+        public double[] Y = new double[3] { 0, 1, 0};
+        public double[] Z = new double[3] {0, 0, 1};
 
         public static Matrix IDScale(double scaleX, double scaleY)
         {
@@ -33,7 +33,7 @@ namespace Pulsar4X.SDL2UI
                 Z = new double[3] {translateX, tranlsateY, 1}
             };
             return matrix;
-            
+
         }
 
         public static Matrix IDMirror(bool x, bool y)
@@ -102,7 +102,7 @@ namespace Pulsar4X.SDL2UI
             newMatrix.Y[0] = matrixA.Y[0] * matrixB.X[0] + matrixA.Y[1] * matrixB.Y[0] + matrixA.Y[2] * matrixB.Z[0];
             newMatrix.Y[1] = matrixA.Y[0] * matrixB.X[1] + matrixA.Y[1] * matrixB.Y[1] + matrixA.Y[2] * matrixB.Z[1];
             newMatrix.Y[2] = matrixA.Y[0] * matrixB.X[2] + matrixA.Y[1] * matrixB.Y[2] + matrixA.Y[2] * matrixB.Z[2];
-            
+
             newMatrix.Z[0] = matrixA.Z[0] * matrixB.X[0] + matrixA.Z[1] * matrixB.Y[0] + matrixA.Z[2] * matrixB.Z[0];
             newMatrix.Z[1] = matrixA.Z[0] * matrixB.X[1] + matrixA.Z[1] * matrixB.Y[1] + matrixA.Z[2] * matrixB.Z[1];
             newMatrix.Z[2] = matrixA.Z[0] * matrixB.X[2] + matrixA.Z[1] * matrixB.Y[2] + matrixA.Z[2] * matrixB.Z[2];
@@ -154,10 +154,10 @@ namespace Pulsar4X.SDL2UI
             newPoint.x = (int)(X[0] * itemx + Y[0] * itemy + Z[0] * 1);
             newPoint.y = (int)(X[1] * itemx + Y[1] * itemy + Z[1] * 1);
             return newPoint;
-            
-            
+
+
         }
-        
+
         public SDL.SDL_Point[] TransformToSDL_Point(ICollection<SDL.SDL_Point> points)
         {
             SDL.SDL_Point[] newPoints = new SDL.SDL_Point[points.Count];
@@ -169,7 +169,7 @@ namespace Pulsar4X.SDL2UI
             }
             return newPoints;
         }
-        
+
         public SDL.SDL_Point[] TransformToSDL_Point(ICollection<Orbital.Vector2> points)
         {
             SDL.SDL_Point[] newPoints = new SDL.SDL_Point[points.Count];
@@ -182,14 +182,14 @@ namespace Pulsar4X.SDL2UI
             return newPoints;
         }
 
-        
-        
-        
-        
-        
+
+
+
+
+
         public Vector2 TransformD(Vector2 point)
         {
-            return TransformD(point.X, point.Y); 
+            return TransformD(point.X, point.Y);
         }
 
         public Vector2 TransformD(double itemx, double itemy)

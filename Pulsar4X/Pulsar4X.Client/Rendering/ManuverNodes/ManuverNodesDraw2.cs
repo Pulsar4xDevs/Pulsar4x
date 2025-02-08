@@ -5,6 +5,7 @@ using Pulsar4X.SDL2UI;
 
 using SDL2;
 using Pulsar4X.Movement;
+using Pulsar4X.Client.Rendering;
 
 namespace Pulsar4X.ImGuiNetUI.ManuverNodes;
 
@@ -128,6 +129,8 @@ public class ManuverNodesDraw2 : IDrawData
             i++;
         }
     }
+
+    public void OnFrameUpdate(Camera2 camera) {}
 
     public void OnPhysicsUpdate()
     {

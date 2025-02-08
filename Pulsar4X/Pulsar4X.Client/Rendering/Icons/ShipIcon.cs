@@ -8,6 +8,7 @@ using Pulsar4X.Orbits;
 using Pulsar4X.Ships;
 using Pulsar4X.Weapons;
 using Pulsar4X.Movement;
+using Pulsar4X.Client.Rendering;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -253,30 +254,46 @@ namespace Pulsar4X.SDL2UI
             Heading = (float)heading;
         }
 
+        public override void OnFrameUpdate(Camera2 camera)
+        {
+            Scale = 1f;
+            Scale /= camera.Zoom;
+            base.OnFrameUpdate(camera);
+        }
+
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
+            Scale = 1f;
+            Scale /= camera.ZoomLevel;
+            var scaledPosition = camera.ScaledPosition(WorldPosition_m);
 
             var mirrorMatrix = Matrix.IDMirror(true, false);
             var scaleMatrix = Matrix.IDScale(Scale, Scale);
             var rotateMatrix = Matrix.IDRotate(Heading - Math.PI * 0.5);//because the icons were done facing up, but angles are referenced from the right
+            var posMatrix = Matrix.IDTranslate(scaledPosition.X, scaledPosition.Y);
 
-            var shipMatrix = mirrorMatrix * scaleMatrix * rotateMatrix;
+            var shipMatrix = mirrorMatrix * scaleMatrix * rotateMatrix * posMatrix;
 
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
 
             DrawShapes = new Shape[this.Shapes.Count];
             for (int i = 0; i < Shapes.Count; i++)
             {
-                var shape = Shapes[i];
-                Vector2[] drawPoints = new Vector2[shape.Points.Length];
-                for (int i2 = 0; i2 < shape.Points.Length; i2++)
+                DrawShapes[i] = new Shape()
                 {
-                    var tranlsatedPoint = shipMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
-                    int x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
-                    int y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
-                    drawPoints[i2] = new Vector2() { X = x, Y = y };
-                }
-                DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
+                    Points = shipMatrix.TransformToVector2(Shapes[i].Points),
+                    Color = Shapes[i].Color
+                };
+                // var shape = Shapes[i];
+                // Vector2[] drawPoints = new Vector2[shape.Points.Length];
+                // for (int i2 = 0; i2 < shape.Points.Length; i2++)
+                // {
+                //     var tranlsatedPoint = shipMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
+                //     int x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
+                //     int y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
+                //     drawPoints[i2] = new Vector2() { X = x, Y = y };
+                // }
+                // DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
             }
         }
     }

@@ -679,6 +679,14 @@ namespace Pulsar4X.SDL2UI
                 BorderGroup.End();
                 ImGui.NewLine();
 
+                if (ImGui.CollapsingHeader("Camera2", ImGuiTreeNodeFlags.CollapsingHeader))
+                {
+                    ImGui.Text("Position: " + _uiState.Camera2.Position);
+                    ImGui.Text("Rotation: " + _uiState.Camera2.Rotation);
+                    ImGui.Text("Zoom: " + _uiState.Camera2.Zoom);
+                    ImGui.Text("Screen Size: " + _uiState.Camera2.ScreenSize);
+                }
+
                 if (ImGui.CollapsingHeader("Camera Functions", ImGuiTreeNodeFlags.CollapsingHeader))
                 {
                     var cam = _uiState.Camera;

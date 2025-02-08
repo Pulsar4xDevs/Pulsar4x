@@ -30,7 +30,7 @@ public interface IRenderer : IDisposable
 
     IntPtr Get();
 
-    void RenderLine(Shape[] shapes, Camera camera);
+    void RenderLine(Shape[] shapes, Camera2 camera);
 
     uint CreateDefaultFontTexture(int width, int height, IntPtr pixels);
     void RenderImGui(ImDrawDataPtr drawData, int displayWidth, int displayHeight);

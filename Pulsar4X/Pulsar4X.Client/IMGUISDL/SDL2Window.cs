@@ -135,7 +135,7 @@ namespace ImGuiSDL2CS
         public bool IsVisible => (Flags & SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN) == 0;
         public void Show() => SDL.SDL_ShowWindow(_Handle);
         public void Hide() => SDL.SDL_HideWindow(_Handle);
-        public virtual void Swap() => Renderer.EndFrame();
+        public virtual void EndFrame() => Renderer.EndFrame();
 
         public virtual void Run()
         {
