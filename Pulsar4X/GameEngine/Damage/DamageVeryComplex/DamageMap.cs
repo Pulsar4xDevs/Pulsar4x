@@ -15,7 +15,7 @@ using Pulsar4X.Weapons;
 
 namespace GameEngine.Damage;
 
-public class DamageMap
+public partial class DamageMap
 {
     public TimeSpan RunTime = TimeSpan.Zero;
     private Dictionary<string, ushort> componentIDLookup = new();
@@ -23,7 +23,7 @@ public class DamageMap
     
     public Dictionary<string, ((int x, int y) Position, (int x, int y) Size, int totalParticles)> componentData = new();
     
-    private ushort _nextComponentID = 0;
+    internal ushort _nextComponentID = 0;
 
     public double TotalEnergy = 0;
     public const int PhysicsScale = 1000;//currently not used

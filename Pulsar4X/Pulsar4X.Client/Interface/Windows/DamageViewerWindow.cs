@@ -14,6 +14,7 @@ using Pulsar4X.Damage;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Weapons;
 using Pulsar4X.Extensions;
+using Pulsar4X.Galaxy;
 using Pulsar4X.Ships;
 
 
@@ -76,9 +77,9 @@ namespace Pulsar4X.SDL2UI.Combat
             if (!_uiState.LoadedWindows.ContainsKey(typeof(DamageViewerWindow)))
             {
                 var dv = new DamageViewerWindow();
-                if (_uiState.PrimaryEntity?.Entity != null)
+                if (_uiState.LastClickedEntity?.Entity != null)
                 {
-                    dv.Init(_uiState.PrimaryEntity.Entity);
+                    dv.Init(_uiState.LastClickedEntity.Entity);
                 }
 
                 return dv;
@@ -86,8 +87,8 @@ namespace Pulsar4X.SDL2UI.Combat
             else
             {
                 var dv = (DamageViewerWindow)_uiState.LoadedWindows[typeof(DamageViewerWindow)];
-                if (_uiState.PrimaryEntity != null && _uiState.PrimaryEntity.Entity != dv._selectedEntity)
-                    dv.Init(_uiState.PrimaryEntity.Entity);
+                if (_uiState.PrimaryEntity != null && _uiState.LastClickedEntity.Entity != dv._selectedEntity)
+                    dv.Init(_uiState.LastClickedEntity.Entity);
                 return dv;
             }
 
@@ -95,34 +96,42 @@ namespace Pulsar4X.SDL2UI.Combat
 
         private void Init(Entity damageableEntity)
         {
-            if (damageableEntity.TryGetDatablob<EntityDamageProfileDB>(out var db))
+            _selectedEntity = damageableEntity;
+            
+            if(damageableEntity.TryGetDatablob<ShipInfoDB>(out var shdb))
             {
-                _selectedEntity = damageableEntity;
-                _profile = damageableEntity.GetDataBlob<EntityDamageProfileDB>();
-                _rawShipImage = _profile.DamageProfile;
-                _uiState.ViewPort.Renderer.CreateTexture(_rawShipImage, ref _shipImgPtr, Client.Rendering.PixelFormat.ARGB8888);
-                var design = damageableEntity.GetDataBlob<ShipInfoDB>().Design;
+                var design = shdb.Design;
                 _damageMap = new DamageMap(damageableEntity, design);
-                SDL2Helper.CreateSDLTextures(_uiState.ViewPort.Renderer, _uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
-                _dmWidth = (int)(_damageMap.Width * _dmSizeScaler);
-                _dmHeight = (int)(_damageMap.Height * _dmSizeScaler);
-                _dmProjectileSliderBot = _dmWidth;
-                _dmProjectileSliderLhs = (int)(_dmHeight * 0.75);
-                _dmProjectileSliderTop = 0;
-                _dmProjectileSliderRhs = (int)(_dmHeight * 0.25);
-                
+            }
+            if(damageableEntity.TryGetDatablob<SystemBodyInfoDB>(out var sbdb))
+            {
+                _damageMap = new DamageMap(damageableEntity, sbdb);
+            }
+            SDL2Helper.CreateSDLTextures(_uiState.ViewPort.Renderer, _uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
+            _dmWidth = (int)(_damageMap.Width * _dmSizeScaler);
+            _dmHeight = (int)(_damageMap.Height * _dmSizeScaler);
+            _dmProjectileSliderBot = _dmWidth;
+            _dmProjectileSliderLhs = (int)(_dmHeight * 0.75);
+            _dmProjectileSliderTop = 0;
+            _dmProjectileSliderRhs = (int)(_dmHeight * 0.25);
+            if(damageableEntity.TryGetDatablob<EntityDamageProfileDB>(out var _profile))
+            {
+                _rawShipImage = _profile.DamageProfile;
                 if (_profile.DamageEvents.Count > 0)
                 {
                     _damageEventIndex = _profile.DamageEvents.Count - 1;
                     SetDamageEventFrames();
                 }
-                _componentInstances = damageableEntity.GetDataBlob<ComponentInstancesDB>();
-                CanActive = true;
+                _uiState.ViewPort.Renderer.CreateTexture(_rawShipImage, ref _shipImgPtr, Client.Rendering.PixelFormat.ARGB8888);
             }
+            if(damageableEntity.TryGetDatablob<ComponentInstancesDB>(out var _componentInstances))
+            {}
+            CanActive = true;
+            /*
             else
             {
                 CanActive = false;
-            }
+            }*/
         }
 
         void SetDamageEventFrames()
@@ -189,7 +198,7 @@ namespace Pulsar4X.SDL2UI.Combat
         private int _dmProjectileSliderBot = 0;
         private int _dmProjectileSliderLhs = 0;
         private int _dmProjectileSliderRhs = 0;
-        private float _dmSizeScaler = 1.5f;
+        private float _dmSizeScaler = 1.0f;
         private int _dmWidth;
         private int _dmHeight;
 
@@ -347,12 +356,12 @@ namespace Pulsar4X.SDL2UI.Combat
                                 //ExsistingWeapons.SelectedWeapon.
                             }*/
 
-                            if (_profile != null && ImGui.RadioButton("Particle", ref _projectileTypes, 0))
+                            if (ImGui.RadioButton("Particle", ref _projectileTypes, 0))
                             {
 
                             }
 
-                            if (_profile != null && ImGui.RadioButton("laser", ref _projectileTypes, 1))
+                            if (ImGui.RadioButton("laser", ref _projectileTypes, 1))
                             {
 
                             }
@@ -435,16 +444,19 @@ namespace Pulsar4X.SDL2UI.Combat
                             }
                             ImGui.Text(Stringify.Energy(_damageMap.TotalEnergy));
                             ImGui.Text(_damageMap.RunTime.ToString());
-                            
-                            if(ImGui.Button("updateComponetnts"))
-                                DamagePhysicsSim.UpdateComponetHealth(_damageMap, _componentInstances);
-                            foreach (var kvp in _componentInstances.ComponentsByDesign)
+                            if(_componentInstances != null)
                             {
-                                foreach (var component in kvp.Value)
+                                if(ImGui.Button("updateComponetnts"))
+                                    DamagePhysicsSim.UpdateComponetHealth(_damageMap, _componentInstances);
+
+                                foreach (var kvp in _componentInstances.ComponentsByDesign)
                                 {
-                                    ImGui.Text(component.Name);
-                                    ImGui.SameLine();
-                                    ImGui.Text((component.HealthPercent * 100).ToString());
+                                    foreach (var component in kvp.Value)
+                                    {
+                                        ImGui.Text(component.Name);
+                                        ImGui.SameLine();
+                                        ImGui.Text((component.HealthPercent * 100).ToString());
+                                    }
                                 }
                             }
                         }
@@ -525,7 +537,7 @@ namespace Pulsar4X.SDL2UI.Combat
                 velocity *= 2.998e+8f; //speed of light
                 Vector3 vel3 = new Vector3(velocity.X, velocity.Y, 0);
                 Vector3 lPos = vel3 * _beamRange;
-                BeamInfoDB bidb = new BeamInfoDB(000, _profile.OwningEntity, true, 300)
+                BeamInfoDB bidb = new BeamInfoDB(000, _selectedEntity, true, 300)
                 {
                     VelocityVector = vel3,
                     LaunchPosition = lPos,
