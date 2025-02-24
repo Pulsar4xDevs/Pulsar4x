@@ -26,8 +26,8 @@ public partial class DamageMap
     internal ushort _nextComponentID = 0;
 
     public double TotalEnergy = 0;
-    public const int PhysicsScale = 1000;//currently not used
-    public int Scale = 1000;//particles per meter
+    public int PhysicsScale = 1000;//will scale individual particles to this for physics interactions
+    public int ParticlesPerMeter = 100; //default non physics scale. 
     int _pixBuf = 10; //this is just how much space we're leaving around the edges. 
     private int _armorHeadspace = 2; //space between skin and componenents.
     public PhysicalParticle[] PMap;
@@ -65,7 +65,7 @@ public partial class DamageMap
                 {
                     int index = y * width + x;
                     compIDMap[index] = _nextComponentID;
-                    var newPart = new PhysicalParticle(_nextComponentID, material, new Vector2(x,y), velocity, Scale);
+                    var newPart = new PhysicalParticle(_nextComponentID, material, new Vector2(x,y), velocity, ParticlesPerMeter);
                     newPart.mapIndex = index;
                     PMap[index] = newPart;
                     PresMap[index] = 1.0f; // Assuming atmospheric pressure for simplicity
@@ -75,6 +75,35 @@ public partial class DamageMap
         }
         componentIDLookup.Add("projectile"+_nextComponentID, _nextComponentID);
         _nextComponentID++;
+    }
+
+    internal DamageMap(DamageMap map, PhysicalParticle part)
+    {
+        ParticlesPerMeter = PhysicsScale;
+        var pos = map.GetPosition(part.mapIndex);
+        X = pos.x;
+        Y = pos.y;
+        Height = ParticlesPerMeter;
+        Width = ParticlesPerMeter;
+        compIDMap = new int[Width * Height];
+        PMap = new PhysicalParticle[Width * Height];
+        PresMap = new float[Width * Height];
+        
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                int index = y * Width + x;
+                compIDMap[index] = part.compID;
+                var newPart = new PhysicalParticle(part.compID, part.MatType, new Vector2(x,y), part.Velocity, ParticlesPerMeter);
+                newPart.mapIndex = index;
+                newPart.Temperature = part.Temperature;
+                PMap[index] = newPart;
+                PresMap[index] = map.PresMap[part.mapIndex];
+                
+            }
+        }
+        part.DMap = this;
     }
 
     public ushort GenerateNewCompID(string strID)
@@ -147,7 +176,7 @@ public partial class DamageMap
  
         var armor = design.Armor;
         List<(ComponentDesign design, int count)> placementOrder = design.Components;
-        List<(ComponentDesign design, float len, int height, int count)> partSizes = SetSize(placementOrder, Scale);
+        List<(ComponentDesign design, float len, int height, int count)> partSizes = SetSize(placementOrder, ParticlesPerMeter);
         Dictionary<string, List<ComponentInstance>> componentInstances = shipEntity.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign;
         
         int centerY = Height / 2;
@@ -187,7 +216,7 @@ public partial class DamageMap
                         Vector2 vel = Vector2.Zero;
                         float pressure = 1f;
                         compIDMap[index] = _nextComponentID;
-                        var newPart = new PhysicalParticle(_nextComponentID, mat, pos, vel, Scale);
+                        var newPart = new PhysicalParticle(_nextComponentID, mat, pos, vel, ParticlesPerMeter);
                         newPart.mapIndex = index;
                         PMap[index] = newPart;
                         PresMap[index] = pressure;
@@ -265,60 +294,7 @@ public partial class DamageMap
         {
             (int x, int y) av0 = armorVertex[index];
             (int x, int y) av1 = armorVertex[index+1];
-            DrawWuArmorSegment(this, av0, av1,armor.thickness / Scale, amMat);
-        }
-    }
-    
-    private static void DrawArmorSegment(DamageMap map, (int x, int y) coordStart, (int x, int y) coordEnd, float thickness, ParticleMaterial mat )
-    {
-        var x0 = coordStart.x;
-        var y0 = coordStart.y;
-        var x1 = coordEnd.x;
-        var y1 = coordEnd.y;
-        int centerY = map.Height / 2;
-        int delatx = Math.Abs(x1 - x0);
-        int delaty = y1 - y0;
-        double slope = Math.Abs((double)delaty / (double)delatx);
-        double signedslope = (double)delaty / (double)delatx;
-        double perpslope = 1 / signedslope;
-        //double dwidth = (double)(width);
-
-        float vmargin = (thickness / 2);
-        double dwidth = (double)(thickness) / Math.Sin(Math.Atan(1/slope));
-            
-        for (int yoffset = -(int)(dwidth / 2); yoffset < (int)(dwidth / 2); yoffset++)
-        {
-
-            int rx0 = x0;// - (int)((double)yoffset * signedslope);
-            int ry0 = y0 + yoffset;
-            int rx1 = x1;// - (int)((double)yoffset * signedslope);
-            int ry1 = y1 + yoffset;
-
-            for (int i = rx0; i < rx1; i++)
-            {
-                int currentx = Math.Abs(rx1 - i);
-                double progress = (double)currentx / (double)delatx;
-                int pixx = i;
-                int pixy = ry1 - (int)(progress * delaty);
-                if (pixy > Math.Max(y1, y0) + vmargin)
-                    break;
-                if (pixy < Math.Min(y1, y0) - vmargin)
-                    break;
-                
-                Vector2 pos = new Vector2(pixx, centerY + pixy);
-                var pmapIndex = map.GetIndex(pos);
-                map.compIDMap[pmapIndex] = map._nextComponentID;
-                var newPart = new PhysicalParticle(map._nextComponentID, mat, pos, Vector2.Zero, map.Scale);
-                newPart.mapIndex = pmapIndex;
-                map.PMap[pmapIndex] = newPart;
-            
-                pos = new Vector2(pixx, (centerY - pixy));
-                pmapIndex = map.GetIndex(pos);
-                map.compIDMap[pmapIndex] = map._nextComponentID;
-                newPart = new PhysicalParticle(map._nextComponentID, mat, pos, Vector2.Zero, map.Scale);
-                newPart.mapIndex = pmapIndex;
-                map.PMap[pmapIndex] = newPart;
-            }
+            DrawWuArmorSegment(this, av0, av1,armor.thickness / ParticlesPerMeter, amMat);
         }
     }
     
@@ -380,8 +356,7 @@ public partial class DamageMap
             }
         }
     }
-
-
+    
 
     private static void DrawPoint(DamageMap map, int centerY, float x, float y, float alpha, ParticleMaterial mat)
     {
@@ -389,7 +364,7 @@ public partial class DamageMap
         var pmapIndex = map.GetIndex(pos);
         map.compIDMap[pmapIndex] = map._nextComponentID;
         
-        var newPart = new PhysicalParticle(map._nextComponentID, mat, pos, Vector2.Zero, map.Scale)
+        var newPart = new PhysicalParticle(map._nextComponentID, mat, pos, Vector2.Zero, map.ParticlesPerMeter)
         {
             mapIndex = pmapIndex
         };
@@ -487,118 +462,131 @@ public partial class DamageMap
         int col = x;
         return (T)ary[row + col];
     }
-    
+
+
     public void MergeAndResize(DamageMap otherMap)
     {
-        // Determine expansion based on relative positions of maps
-        int expandX = otherMap.X < X ? -1 : (otherMap.X > X + Width ? 1 : 0);
-        int expandY = otherMap.Y < Y ? -1 : (otherMap.Y > Y + Height ? 1 : 0);
 
-        // Calculate new dimensions
-        int newWidth = Width + Math.Abs(expandX) * otherMap.Width;
-        int newHeight = Height + Math.Abs(expandY) * otherMap.Height;
-        
-
-        // Create new arrays for storing merged data
-        int[] newIDMap = new int[newWidth * newHeight];
-        PhysicalParticle[] newPMap = new PhysicalParticle[newWidth * newHeight];
-        float[] newPresMap = new float[newWidth * newHeight];
-        var newComponentData = new Dictionary<string, ((int,int) Position, (int,int) Size, int TotalParticles)>();
-        // Offset for placing particles from this map
-        int offsetX = expandX < 0 ? otherMap.Width : 0;
-        int offsetY = expandY < 0 ? otherMap.Height : 0;
-
-        foreach (var component in componentData)
+        if (ParticlesPerMeter != otherMap.ParticlesPerMeter)
         {
-            string instanceID = component.Key;
-            var (position, size, totalParticles) = component.Value;
-            (int,int) newPosition = (position.x + offsetX, position.y + offsetY);
-            newComponentData[instanceID] = (newPosition, size, totalParticles);
+            // Assume 'this' is the target resolution (e.g., low-res ship)
+            DamageMap downscaledMap = DamageMapHelpers.DownscaleHighResMap(otherMap, ParticlesPerMeter);
+            MergeAndResize(downscaledMap); // Recursive call with matching resolutions
         }
-        
-        // Copy and offset old data to new arrays
-        for (int y = 0; y < Height; y++)
+        else
         {
-            for (int x = 0; x < Width; x++)
+
+
+            // Determine expansion based on relative positions of maps
+            int expandX = otherMap.X < X ? -1 : (otherMap.X > X + Width ? 1 : 0);
+            int expandY = otherMap.Y < Y ? -1 : (otherMap.Y > Y + Height ? 1 : 0);
+
+            // Calculate new dimensions
+            int newWidth = Width + Math.Abs(expandX) * otherMap.Width;
+            int newHeight = Height + Math.Abs(expandY) * otherMap.Height;
+
+
+            // Create new arrays for storing merged data
+            int[] newIDMap = new int[newWidth * newHeight];
+            PhysicalParticle[] newPMap = new PhysicalParticle[newWidth * newHeight];
+            float[] newPresMap = new float[newWidth * newHeight];
+            var newComponentData = new Dictionary<string, ((int, int) Position, (int, int) Size, int TotalParticles)>();
+            // Offset for placing particles from this map
+            int offsetX = expandX < 0 ? otherMap.Width : 0;
+            int offsetY = expandY < 0 ? otherMap.Height : 0;
+
+            foreach (var component in componentData)
             {
-                int oldIndex = GetIndex(x, y);
-                int newIndex = (y + offsetY) * newWidth + (x + offsetX);
-                newIDMap[newIndex] = compIDMap[oldIndex];
-                if (PMap[oldIndex] != null)
-                {
-                    var p = PMap[oldIndex];
-                    p.mapIndex = newIndex;
-                    newPMap[newIndex] = p;
-                    var tempPosition = newPMap[newIndex].Position;
-                    tempPosition.X += offsetX;
-                    tempPosition.Y += offsetY;
-                    newPMap[newIndex].Position = tempPosition;
-                }
-                
-                newPresMap[newIndex] = PresMap[oldIndex];
+                string instanceID = component.Key;
+                var (position, size, totalParticles) = component.Value;
+                (int, int) newPosition = (position.x + offsetX, position.y + offsetY);
+                newComponentData[instanceID] = (newPosition, size, totalParticles);
             }
-        }
 
-        // Add particles from the other map
-        for (int y = 0; y < otherMap.Height; y++)
-        {
-            for (int x = 0; x < otherMap.Width; x++)
+            // Copy and offset old data to new arrays
+            for (int y = 0; y < Height; y++)
             {
-                int otherIndex = otherMap.GetIndex(x, y);
-                int newX = x + otherMap.X + offsetX;
-                int newY = y + otherMap.Y + offsetY;
-                int newIndex = newY * newWidth + newX;
-
-                if (newIndex >= 0 && newIndex < newPMap.Length)
+                for (int x = 0; x < Width; x++)
                 {
-                    newIDMap[newIndex] = otherMap.compIDMap[otherIndex];
-                    newPresMap[newIndex] = otherMap.PresMap[otherIndex];
-                    if (otherMap.PMap[otherIndex] != null)
+                    int oldIndex = GetIndex(x, y);
+                    int newIndex = (y + offsetY) * newWidth + (x + offsetX);
+                    newIDMap[newIndex] = compIDMap[oldIndex];
+                    if (PMap[oldIndex] != null)
                     {
-                        var p = otherMap.PMap[otherIndex];
+                        var p = PMap[oldIndex];
                         p.mapIndex = newIndex;
                         newPMap[newIndex] = p;
-                        newPMap[newIndex].Position = new(newX, newY);
+                        var tempPosition = newPMap[newIndex].Position;
+                        tempPosition.X += offsetX;
+                        tempPosition.Y += offsetY;
+                        newPMap[newIndex].Position = tempPosition;
                     }
-                    
+
+                    newPresMap[newIndex] = PresMap[oldIndex];
                 }
             }
-        }
-        
-        foreach (var bp in otherMap.BeamStarts)
-        {
-            var x = bp.Position.X + otherMap.X + offsetX;
-            var y = bp.Position.Y + otherMap.Y + offsetY;
-            bp.Position = new Vector2(x,y);
-        }
-       
-        foreach (var otherComponent in otherMap.componentData)
-        {
-            string instanceID = otherComponent.Key;
-            var (otherPosition, otherSize, otherTotalParticles) = otherComponent.Value;
-            (int,int) newPosition = (otherPosition.x + otherMap.X + offsetX, otherPosition.y + otherMap.Y + offsetY);
 
-            // If this component ID already exists, we'll merge damage or you might decide to handle conflicts differently
-            if (newComponentData.ContainsKey(instanceID))
+            // Add particles from the other map
+            for (int y = 0; y < otherMap.Height; y++)
             {
-                // Merge damage - this is a simple approach, might need refinement based on your needs
-                var (currentPosition, currentSize, currentTotalParticles) = newComponentData[instanceID];
-                newComponentData[instanceID] = (currentPosition, currentSize, currentTotalParticles);
-            }
-            else
-            {
-                newComponentData[instanceID] = (newPosition, otherSize, otherTotalParticles);
-            }
-        }
+                for (int x = 0; x < otherMap.Width; x++)
+                {
+                    int otherIndex = otherMap.GetIndex(x, y);
+                    int newX = x + otherMap.X + offsetX;
+                    int newY = y + otherMap.Y + offsetY;
+                    int newIndex = newY * newWidth + newX;
 
-        // Update map properties
-        compIDMap = newIDMap;
-        PMap = newPMap;
-        PresMap = newPresMap;
-        Width = newWidth;
-        Height = newHeight;
-        componentData = newComponentData;
-        BeamStarts = otherMap.BeamStarts;
+                    if (newIndex >= 0 && newIndex < newPMap.Length)
+                    {
+                        newIDMap[newIndex] = otherMap.compIDMap[otherIndex];
+                        newPresMap[newIndex] = otherMap.PresMap[otherIndex];
+                        if (otherMap.PMap[otherIndex] != null)
+                        {
+                            var p = otherMap.PMap[otherIndex];
+                            p.mapIndex = newIndex;
+                            newPMap[newIndex] = p;
+                            newPMap[newIndex].Position = new(newX, newY);
+                        }
+
+                    }
+                }
+            }
+
+            foreach (var bp in otherMap.BeamStarts)
+            {
+                var x = bp.Position.X + otherMap.X + offsetX;
+                var y = bp.Position.Y + otherMap.Y + offsetY;
+                bp.Position = new Vector2(x, y);
+            }
+
+            foreach (var otherComponent in otherMap.componentData)
+            {
+                string instanceID = otherComponent.Key;
+                var (otherPosition, otherSize, otherTotalParticles) = otherComponent.Value;
+                (int, int) newPosition = (otherPosition.x + otherMap.X + offsetX, otherPosition.y + otherMap.Y + offsetY);
+
+                // If this component ID already exists, we'll merge damage or you might decide to handle conflicts differently
+                if (newComponentData.ContainsKey(instanceID))
+                {
+                    // Merge damage - this is a simple approach, might need refinement based on your needs
+                    var (currentPosition, currentSize, currentTotalParticles) = newComponentData[instanceID];
+                    newComponentData[instanceID] = (currentPosition, currentSize, currentTotalParticles);
+                }
+                else
+                {
+                    newComponentData[instanceID] = (newPosition, otherSize, otherTotalParticles);
+                }
+            }
+
+            // Update map properties
+            compIDMap = newIDMap;
+            PMap = newPMap;
+            PresMap = newPresMap;
+            Width = newWidth;
+            Height = newHeight;
+            componentData = newComponentData;
+            BeamStarts = otherMap.BeamStarts;
+        }
     }
 }
 
@@ -616,6 +604,84 @@ public static class DamageMapHelpers
         float height = (float)(area / length);
         return (length, height);
     }
+    
+    internal static DamageMap DownscaleHighResMap(DamageMap highResMap, int targetPPM)
+    {
+        float scaleFactor = (float)highResMap.ParticlesPerMeter / targetPPM; // e.g., 1000/10 = 100
+        int newWidth = (int)(highResMap.Width / scaleFactor);
+        int newHeight = (int)(highResMap.Height / scaleFactor);
+
+        // Create a new map at the target (low) resolution
+        DamageMap downscaledMap = new DamageMap(newWidth, newHeight);
+        downscaledMap.X = highResMap.X / (int)scaleFactor;
+        downscaledMap.Y = highResMap.Y / (int)scaleFactor;
+        
+        downscaledMap.ParticlesPerMeter = targetPPM;
+
+        // Aggregate high-res particles into low-res grid
+        for (int y = 0; y < newHeight; y++)
+        {
+            for (int x = 0; x < newWidth; x++)
+            {
+                int lowIndex = downscaledMap.GetIndex(x, y);
+                int highXBase = (int)(x * scaleFactor);
+                int highYBase = (int)(y * scaleFactor);
+                int blockSize = (int)scaleFactor;
+
+                Vector2 avgVelocity = Vector2.Zero;
+                float totalMass = 0;
+                float avgTemp = 0;
+                float avgPressure = 0;
+                int particleCount = 0;
+                PhysicalParticle firstParticle = null;
+
+                // Collect stats from the high-res block
+                for (int dy = 0; dy < blockSize && (highYBase + dy) < highResMap.Height; dy++)
+                {
+                    for (int dx = 0; dx < blockSize && (highXBase + dx) < highResMap.Width; dx++)
+                    {
+                        int highIndex = highResMap.GetIndex(highXBase + dx, highYBase + dy);
+                        if (highResMap.PMap[highIndex] != null)
+                        {
+                            var p = highResMap.PMap[highIndex];
+                            if (firstParticle == null) firstParticle = p; // Use first for ID and material
+                            avgVelocity += p.Velocity;
+                            totalMass += p.Mass;
+                            avgTemp += p.Temperature;
+                            avgPressure += highResMap.PresMap[highIndex];
+                            particleCount++;
+                        }
+                    }
+                }
+
+                // If there’s at least one particle, create a downscaled version
+                if (particleCount > 0 && firstParticle != null)
+                {
+                    var newPart = new PhysicalParticle(
+                        firstParticle.compID,
+                        firstParticle.MatType,
+                        new Vector2(x, y),
+                        avgVelocity / particleCount,
+                        targetPPM
+                    );
+                    newPart.mapIndex = lowIndex;
+                    newPart.Mass = totalMass; // Sum mass, don’t average
+                    newPart.Temperature = avgTemp / particleCount;
+                    newPart.DMap = firstParticle.DMap; // Preserve the high-res DamageMap if it exists
+                    downscaledMap.PMap[lowIndex] = newPart;
+                    downscaledMap.compIDMap[lowIndex] = firstParticle.compID;
+                    downscaledMap.PresMap[lowIndex] = avgPressure / particleCount;
+                }
+            }
+        }
+
+        // Copy component data (simplified, adjust as needed)
+        downscaledMap.componentData = new Dictionary<string, ((int, int) Position, (int, int) Size, int TotalParticles)>(highResMap.componentData);
+        downscaledMap.BeamStarts = new List<BeamPoint>(highResMap.BeamStarts); // Copy beams, could downscale positions if needed
+
+        return downscaledMap;
+    }
+    
     public static (float length, float height) GetComponentSize(ReadOnlyDictionary<string, ComponentDesign> lib, string typeid, int scale)
     {
         ComponentDesign componentDeign = lib[typeid];

@@ -108,6 +108,7 @@ namespace Pulsar4X.SDL2UI.Combat
                 _damageMap = new DamageMap(damageableEntity, sbdb);
             }
             SDL2Helper.CreateSDLTextures(_uiState.ViewPort.Renderer, _uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
+            
             _dmWidth = (int)(_damageMap.Width * _dmSizeScaler);
             _dmHeight = (int)(_damageMap.Height * _dmSizeScaler);
             _dmProjectileSliderBot = _dmWidth;
@@ -222,7 +223,20 @@ namespace Pulsar4X.SDL2UI.Combat
             {
                 if (Window.Begin("DamageViewer Testing"))
                 {
-
+                    var availableSize = ImGui.GetContentRegionAvail();
+                    float aspectRatio = (float)_damageMap.Width / _damageMap.Height;
+                    float scaleX = availableSize.X / _damageMap.Width;
+                    float scaleY = availableSize.Y / _damageMap.Height;
+                    _dmSizeScaler = Math.Min(scaleX, scaleY);
+                    _dmWidth = (int)(_damageMap.Width * _dmSizeScaler);
+                    _dmHeight = (int)(_damageMap.Height * _dmSizeScaler);
+                    _dmProjectileSliderBot = _dmWidth;
+                    _dmProjectileSliderLhs = (int)(_dmHeight * 0.75);
+                    _dmProjectileSliderTop = 0;
+                    _dmProjectileSliderRhs = (int)(_dmHeight * 0.25);
+                    
+                    
+                    
                     if (_shipImgPtr != IntPtr.Zero && ImGui.CollapsingHeader("Old Damage View"))
                     {
                         int w = _rawShipImage.Width; // / 4;

@@ -145,7 +145,7 @@ public class PhysicalParticle
     public PhaseState StateOfPhase = PhaseState.Solid;
     public bool IsComponentPartDestroyed = false;
     public float Mass;
-    public DamageMap _pMap;
+    public DamageMap DMap;
     public bool IsDeleted  { get; set; } = false;
     public float Temperature
     {

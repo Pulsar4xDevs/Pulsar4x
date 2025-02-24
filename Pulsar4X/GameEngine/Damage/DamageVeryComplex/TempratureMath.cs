@@ -55,7 +55,7 @@ public static class TempratureMath
     
     public static void TransferHeat(DamageMap damageMap, float timeStep )
     {
-        float baseRadius = 0.1f * damageMap.Scale; // Base radius for 1 meter
+        float baseRadius = 0.1f * damageMap.ParticlesPerMeter; // Base radius for 1 meter
         //float heatTransferRadius = baseRadius * MathF.Sqrt(timeStep);
         float heatTransferRadius = 1f;
         for (int index = 0; index < damageMap.PMap.Length; index++)

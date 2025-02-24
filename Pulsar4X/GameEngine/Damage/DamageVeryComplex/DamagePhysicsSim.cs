@@ -20,7 +20,7 @@ public static class DamagePhysicsSim
             if( part.Velocity.Length() > mag)
                 mag = part.Velocity.Length();
         }
-        return (float)Math.Min(0.1f, map.Scale / mag);
+        return (float)Math.Min(0.1f, map.ParticlesPerMeter / mag);
     }
     
     public static void PhysicsLoop(DamageMap damageMap)
@@ -46,10 +46,27 @@ public static class DamagePhysicsSim
             }
         }
         
+        if(damageMap.ParticlesPerMeter < damageMap.PhysicsScale)
+        {
+            foreach (var particle in movingParticles)
+            {
+                if (particle.DMap == null)
+                {
+                    new DamageMap(damageMap, particle);
+                }
+            }
+
+            foreach (var particle in movingParticles)
+            {
+                PhysicsLoop(particle.DMap);
+            }
+            return;
+        }
+        
         // Update positions of all moving particles
         foreach (var particle in movingParticles)
         {
-            UpdateParticlePosition(particle, damageMap.Scale, timeStep);
+            UpdateParticlePosition(particle, damageMap.ParticlesPerMeter, timeStep);
         }
         HandleOutOfBounds(damageMap, ref movingParticles);
 

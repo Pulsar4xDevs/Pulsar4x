@@ -21,7 +21,7 @@ public partial class DamageMap
     public DamageMap(Entity entity, SystemBodyInfoDB asteroidInfo)
     {
         var mdb = entity.GetDataBlob<MassVolumeDB>();
-        var area = DamageMapHelpers.AreaFromVolume(mdb.Volume_m3, Scale);
+        var area = DamageMapHelpers.AreaFromVolume(mdb.Volume_m3, ParticlesPerMeter);
         float radius = (float)Math.Sqrt(area / Math.PI);
         float jitter = 0.5f;
         int numPoints = 32;
@@ -257,7 +257,7 @@ public static class AsteroidHelpers
                     Elasticity = 0.3f,
                     TensileStrength = 2 // MPa
                 };
-                var newPart = new PhysicalParticle(map._nextComponentID, ice, pos, Vector2.Zero, map.Scale);
+                var newPart = new PhysicalParticle(map._nextComponentID, ice, pos, Vector2.Zero, map.ParticlesPerMeter);
                 map.PMap[map.GetIndex(pos)] = newPart;
 
             }
