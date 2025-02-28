@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using Pulsar4X.Orbital;
 using Pulsar4X.SDL2UI;
-
-using SDL2;
+using SDL3;
 using Pulsar4X.Movement;
 
 namespace Pulsar4X.ImGuiNetUI.ManuverNodes;
@@ -12,17 +11,17 @@ public class ManuverNodesDraw2 : IDrawData
 {
     private NavSequenceDB _db;
 
-    private SDL.SDL_Color _warpColour = new SDL.SDL_Color()
+    private SDL.Color _warpColour = new SDL.Color()
     {
-        r = 0, g = 200, b = 200, a = 100,
+        R = 0, G = 200, B = 200, A = 100,
     };
-    private SDL.SDL_Color _newtStartColor = new SDL.SDL_Color()
+    private SDL.Color _newtStartColor = new SDL.Color()
     {
-        r = 200, g = 200, b = 200, a = 100,
+        R = 200, G = 200, B = 200, A = 100,
     };
-    private SDL.SDL_Color _driftColor = new SDL.SDL_Color()
+    private SDL.Color _driftColor = new SDL.Color()
     {
-        r = 200, g = 200, b = 200, a = 100,
+        R = 200, G = 200, B = 200, A = 100,
     };
 
     public ManuverNodesDraw2(EntityState entity)
@@ -35,7 +34,7 @@ public class ManuverNodesDraw2 : IDrawData
     void Setup()
     {
         _points = new List<Vector2>();
-        _colors = new List<(SDL.SDL_Color color, int count)>();
+        _colors = new List<(SDL.Color color, int count)>();
         foreach (var manuver in _db.ManuverNodes)
         {
             var startState = OrbitalMath.GetStateVectors(manuver.StartKepler, manuver.StartDateTime);
@@ -92,7 +91,7 @@ public class ManuverNodesDraw2 : IDrawData
             }
         }
         if (_drawPoints.Length != _points.Count + 1)
-            _drawPoints = new SDL.SDL_Point[_points.Count + 1];
+            _drawPoints = new SDL.Point[_points.Count + 1];
         _bodyAbsPos = (Vector2)MoveMath.GetAbsolutePosition(_db.OwningEntity);
     }
 
@@ -105,8 +104,8 @@ public class ManuverNodesDraw2 : IDrawData
     }
 
     private List<Vector2> _points = new List<Vector2>();
-    private List<(SDL.SDL_Color color, int count)> _colors = new List<(SDL.SDL_Color color, int count)>();
-    private SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
+    private List<(SDL.Color color, int count)> _colors = new List<(SDL.Color color, int count)>();
+    private SDL.Point[] _drawPoints = new SDL.Point[0];
     private Vector2 _bodyAbsPos;
     //private int _index = 0;
     public void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -120,7 +119,7 @@ public class ManuverNodesDraw2 : IDrawData
 
 
         var spos = camera.ViewCoordinateV2_m(_bodyAbsPos);
-        _drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
+        _drawPoints[0] = new SDL.Point(){ X = (int)spos.X, Y = (int)spos.Y};
         int i = 1;
         foreach (var point in _points)
         {
@@ -132,7 +131,7 @@ public class ManuverNodesDraw2 : IDrawData
     public void OnPhysicsUpdate()
     {
         if (_drawPoints.Length != _points.Count + 1)
-            _drawPoints = new SDL.SDL_Point[_points.Count + 1];
+            _drawPoints = new SDL.Point[_points.Count + 1];
         _bodyAbsPos = (Vector2)MoveMath.GetAbsolutePosition(_db.OwningEntity);
     }
 
@@ -140,16 +139,16 @@ public class ManuverNodesDraw2 : IDrawData
     {
         if (_drawPoints.Length < 1)
             return;
-        SDL.SDL_Color colour;
+        SDL.Color colour;
         int k = 0;
         for (int i = 0; i < _colors.Count - 1; i++)
         {
             colour = _colors[i].color;
-            SDL.SDL_SetRenderDrawColor(rendererPtr, colour.r, colour.g, colour.b, colour.a);
+            SDL.SetRenderDrawColor(rendererPtr, colour.R, colour.G, colour.B, colour.A);
             for (int j = 0; j < _colors[i].count; j++)
             {
                 k = i + j;
-                SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[k].x, _drawPoints[k].y, _drawPoints[k + 1].x, _drawPoints[k +1].y);
+                SDL.RenderLine(rendererPtr, _drawPoints[k].X, _drawPoints[k].Y, _drawPoints[k + 1].X, _drawPoints[k +1].Y);
             }
 
 

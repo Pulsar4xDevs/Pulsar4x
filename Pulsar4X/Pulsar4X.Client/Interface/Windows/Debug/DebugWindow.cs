@@ -4,7 +4,6 @@ using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.Engine;
-using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
 using Pulsar4X.Extensions;
 using Pulsar4X.SDL2UI.Combat;
@@ -21,6 +20,7 @@ using Pulsar4X.Weapons;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 using Pulsar4X.Storage;
+using SDL3;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -419,7 +419,7 @@ namespace Pulsar4X.SDL2UI
                                 if (_drawSOI)
                                 {
                                     var soiradius = SelectedEntity.GetSOI_AU();
-                                    var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
+                                    var colour = new SDL.Color() { R = 0, G = 255, B = 0, A = 100 };
                                     cir = new SimpleCircle(SelectedEntity.GetDataBlob<PositionDB>(), soiradius, colour);
 
                                     _uiState.SelectedSysMapRender?.UIWidgets.Add(nameof(cir), cir);
@@ -716,13 +716,13 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("(WorldCoord - CameraWorldPos) * zoomLevel + viewportCenter");
                     ImGui.Text("(" + mouseWorldCoord.X + "-" + cam.CameraWorldPosition.X + ") *" + cam.ZoomLevel + "+" + cam.ViewPortCenter.X);
                     var mouseViewCoord = cam.ViewCoordinate_m(mouseWorldCoord);
-                    ImGui.Text("x" + mouseViewCoord.x + " p");
+                    ImGui.Text("x" + mouseViewCoord.X + " p");
                     ImGui.SameLine();
-                    ImGui.Text("y" + mouseViewCoord.y + " p");
+                    ImGui.Text("y" + mouseViewCoord.Y + " p");
                     var mouseviewCoord_AU = cam.ViewCoordinate_AU(mouseWorldCoord);
-                    ImGui.Text("x" + mouseviewCoord_AU.x + " p");
+                    ImGui.Text("x" + mouseviewCoord_AU.X + " p");
                     ImGui.SameLine();
-                    ImGui.Text("y" + mouseviewCoord_AU.y + " p");
+                    ImGui.Text("y" + mouseviewCoord_AU.Y + " p");
 
                     ImGui.Text("Camrera WorldPosition");
                     var camWorldCoord_m = cam.CameraWorldPosition;
@@ -895,7 +895,7 @@ namespace Pulsar4X.SDL2UI
             var cnmve = SelectedEntity.GetDataBlob<NewtonMoveDB>();
 
             var soiradius = parent.GetSOI_AU();
-            var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
+            var colour = new SDL.Color() { R = 0, G = 255, B = 0, A = 100 };
             var psoi = new SimpleCircle(parent.GetDataBlob<PositionDB>(), soiradius, colour);
             var pmass = parent.GetDataBlob<MassVolumeDB>().MassDry;
             var mymass = SelectedEntity.GetDataBlob<MassVolumeDB>().MassDry;

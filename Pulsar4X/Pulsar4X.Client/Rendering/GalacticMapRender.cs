@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using ImGuiSDL2CS;
-using SDL2;
+using SDL3;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Names;
 using Pulsar4X.Orbits;
@@ -18,7 +18,7 @@ namespace Pulsar4X.SDL2UI
         SafeDictionary<string, SystemMapRendering> RenderedMaps = new ();
         Dictionary<string, StarIcon> StarIcons = new ();
         ConcurrentDictionary<string, NameIcon> _nameIcons = new ();
-        ImGuiSDL2CSWindow _window;
+        ImGuiSDL3CSWindow _window;
         internal string? CapitolSysMap { get; set; }
         internal string SelectedStarSysGuid { get { return _state.SelectedStarSystemId; } }
         internal SystemMapRendering? SelectedSysMapRender
@@ -33,15 +33,15 @@ namespace Pulsar4X.SDL2UI
 
         CollisionGrid grid;
 
-        public GalacticMapRender(ImGuiSDL2CSWindow window, GlobalUIState state)
+        public GalacticMapRender(ImGuiSDL3CSWindow window, GlobalUIState state)
         {
             _state = state;
             _window = window;
             _camera = state.Camera;
 
             var windowPtr = window.Handle;
-            var surfacePtr = SDL.SDL_GetWindowSurface(windowPtr);
-            _renderPtr = SDL.SDL_GetRenderer(windowPtr);
+            var surfacePtr = SDL.GetWindowSurface(windowPtr);
+            _renderPtr = SDL.GetRenderer(windowPtr);
 
             var size = window.Size;
             int cellSize = 16;

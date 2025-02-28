@@ -1,21 +1,12 @@
-﻿using SDL2;
+﻿using SDL3;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using GameEngine.Damage;
-using ImGuiNET;
 using Pulsar4X.DataStructures;
-using Pulsar4X.Orbital;
 using Pulsar4X.Client.Rendering;
-using Microsoft.VisualBasic;
 
 namespace ImGuiSDL2CS;
 
-public static class SDL2Helper
+public static class SDL3Helper
 {
 
     internal static void UpdateOrCreate(IRenderer renderer, ref IntPtr texture, int width, int height, IntPtr pixels)
@@ -96,18 +87,19 @@ public static class SDL2Helper
     internal static void CheckTexture(IntPtr renderPtr, ref IntPtr texture, int width, int height)
     {
         if(texture == IntPtr.Zero)
-            texture = SDL.SDL_CreateTexture(renderPtr, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, width, height);
-        SDL.SDL_QueryTexture(texture, out _, out _, out var txWidth, out var txHeight);
+            texture = SDL.CreateTexture(renderPtr, SDL.PixelFormat.ARGB8888, SDL.TextureAccess.Streaming, width, height);
+        SDL.GetTextureSize(texture, out var txWidth, out var txHeight);
+
         if (width != txWidth || height != txHeight)
         {
-            SDL.SDL_DestroyTexture(texture);
-            texture = SDL.SDL_CreateTexture(renderPtr, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, width, height);
+            SDL.DestroyTexture(texture);
+            texture = SDL.CreateTexture(renderPtr, SDL.PixelFormat.ARGB8888, SDL.TextureAccess.Streaming, width, height);
         }
     }
 
 
 
-    
+
     public static void CreateSDLTexture(IntPtr rendererPtr, RawBmp rawImg, ref IntPtr texturePtr)
     {
 
@@ -132,10 +124,10 @@ public static class SDL2Helper
         uint amask = 0x000000ff;
 
 
-        SDL.SDL_DestroyTexture(texturePtr);
-        IntPtr sdlSurface = SDL.SDL_CreateRGBSurfaceFrom(pxls, w, h, d, s, rmask, gmask, bmask, amask);
-        texturePtr = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
-        SDL.SDL_FreeSurface(sdlSurface);
+        SDL.DestroyTexture(texturePtr);
+        IntPtr sdlSurface = SDL_CreateRGBSurfaceFrom(pxls, w, h, d, s, rmask, gmask, bmask, amask);
+        texturePtr = SDL.CreateTextureFromSurface(rendererPtr, sdlSurface);
+        SDL.DestroySurface(sdlSurface);
 
     }
 
@@ -242,6 +234,21 @@ public static class SDL2Helper
         else if(order == ColourOrder.ARGB)
             return (uint)((a << 24) | (r << 16) | (g << 8) | b);
         else throw new Exception("Invalid ColourOrder");
+    }
+
+    /// <summary>
+    /// Local alias for converting SDL2 to SDL3
+    /// </summary>
+    public static nint SDL_CreateRGBSurfaceFrom(nint pixels, int width, int height, int depth, int pitch, uint rmask, uint gmask, uint bmask, uint amask)
+    {
+        var pixelFormat = SDL.GetPixelFormatForMasks(depth, rmask, gmask, bmask, amask);
+
+        return SDL.CreateSurfaceFrom(
+            width, height,
+            pixelFormat,
+            pixels,
+            pitch
+        );
     }
 }
 

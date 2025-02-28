@@ -88,14 +88,12 @@
   <ItemGroup>
     <PackageReference Include="ImGui.NET" Version="1.88.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="7.0.0" />
+    <PackageReference Include="SDL3-CS" Version="3.2.4.6" />
+    <PackageReference Include="SDL3-CS.Native" Version="3.2.4.2" />
+    <PackageReference Include="SDL3-CS.Native.Image" Version="3.2.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="SDL2-CS">
-      <HintPath>Libs\SDL2-CS.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Remove="Resources\CargoIco.bmp" />
@@ -125,55 +123,6 @@
     </None>
     <None Update="Resources\DejaVuSans.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Remove="Libs\SDL2-CS.dll" />
-    <None Remove="Libs\SDL2-CS.dll.config" />
-    <None Remove="Libs\SDL2-CS.pdb" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
-    <None Include="Libs\cimgui\linux-x64\cimgui.so">
-      <Link>libcimgui.so</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\sdl2\linux-x64\libSDL2.so">
-      <Link>libSDL2.so</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\sdl2\linux-x64\libSDL2_image.so">
-      <Link>libSDL2_image.so</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\sdl2\linux-x64\libSDL2_mixer.so">
-      <Link>libSDL2_mixer.so</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\sdl2\linux-x64\libSDL2_ttf.so">
-      <Link>libSDL2_ttf.so</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup Condition=" '$(OS)' == 'Windows_NT' ">
-    <None Include="Libs\cimgui\win-x64\cimgui.dll">
-      <Link>cimgui.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\sdl2\win-x64\SDL2.dll">
-      <Link>SDL2.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\sdl2\win-x64\SDL2_image.dll">
-      <Link>SDL2_image.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">
-    <None Include="Libs\cimgui\osx-x64\cimgui.dylib">
-      <Link>libcimgui</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\sdl2\win-x86\SDL2.dll">
-      <Link>SDL2.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
-using SDL2;
+using SDL3;
 using Microsoft.Extensions.Configuration;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Client.State;
@@ -18,7 +18,7 @@ namespace Pulsar4X.SDL2UI
         Middle
     }
 
-    public class PulsarMainWindow : ImGuiSDL2CSWindow
+    public class PulsarMainWindow : ImGuiSDL3CSWindow
     {
 #if DEBUG
         private ImGuiWindowFlags _gitHashFlags = ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav;
@@ -31,8 +31,8 @@ namespace Pulsar4X.SDL2UI
         private readonly GlobalUIState _state;
 
         Vector3 backColor;
-        int mouseDownX;
-        int mouseDownY;
+        float mouseDownX;
+        float mouseDownY;
         int mouseDownAltX;
         int mouseDownAltY;
 
@@ -46,7 +46,9 @@ namespace Pulsar4X.SDL2UI
 
             try
             {
-                string appDataDirectory = SDL.SDL_GetPrefPath(OrgName, AppName);
+                string? appDataDirectory = SDL.GetPrefPath(OrgName, AppName);
+
+                if(appDataDirectory == null) throw new NullReferenceException("App data directory cannot be null");
 
                 // Check for Saves directory and create it if it doesn't exist
                 string savesDirectory = Path.Combine(appDataDirectory, SavesPath);
@@ -95,7 +97,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     bool isMaximized = bool.Parse(maximized);
                     if(isMaximized)
-                        SDL.SDL_MaximizeWindow(_Handle);
+                        SDL.MaximizeWindow(_Handle);
                 }
             }
             catch(Exception)
@@ -104,11 +106,11 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private bool MyEventHandler(SDL2Window window, SDL.SDL_Event e)
+        private bool MyEventHandler(SDL3Window window, SDL.Event e)
         {
-            SDL.SDL_GetMouseState(out int mouseX, out int mouseY);
+            SDL.GetMouseState(out float mouseX, out float mouseY);
 
-            if (!ImGuiSDL2CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed))
+            if (!ImGuiSDL3CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed))
                 return false;
 
             if(!_state.IsGameLoaded)
@@ -124,17 +126,17 @@ namespace Pulsar4X.SDL2UI
                 return false;
             }
 
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 1 & !ImGui.GetIO().WantCaptureMouse)
+            if (e.Type == (uint)SDL.EventType.MouseButtonDown && e.Button.Button == 1 & !ImGui.GetIO().WantCaptureMouse)
             {
                 _state.OnFocusMoved();
                 _state.Camera.IsGrabbingMap = true;
-                _state.Camera.MouseFrameIncrementX = e.motion.x;
-                _state.Camera.MouseFrameIncrementY = e.motion.y;
+                _state.Camera.MouseFrameIncrementX = e.Motion.X;
+                _state.Camera.MouseFrameIncrementY = e.Motion.Y;
                 mouseDownX = mouseX;
                 mouseDownY = mouseY;
             }
 
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP && e.button.button == 1)
+            if (e.Type == (uint)SDL.EventType.MouseButtonUp && e.Button.Button == 1)
             {
                 _state.Camera.IsGrabbingMap = false;
 
@@ -144,14 +146,14 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 3 & !ImGui.GetIO().WantCaptureMouse)
+            if (e.Type == (uint)SDL.EventType.MouseButtonDown && e.Button.Button == 3 & !ImGui.GetIO().WantCaptureMouse)
             {
                 _state.OnFocusMoved();
-                mouseDownAltX = mouseX;
-                mouseDownAltY = mouseY;
+                mouseDownAltX = (int)mouseX;
+                mouseDownAltY = (int)mouseY;
             }
 
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP && e.button.button == 3)
+            if (e.Type == (uint)SDL.EventType.MouseButtonUp && e.Button.Button == 3)
             {
                 _state.OnFocusMoved();
                 _state.Camera.IsGrabbingMap = false;
@@ -162,30 +164,30 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            if (_state.Camera.IsGrabbingMap && e.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
+            if (_state.Camera.IsGrabbingMap && e.Type == (uint)SDL.EventType.MouseMotion)
             {
-                int deltaX = _state.Camera.MouseFrameIncrementX - e.motion.x;
-                int deltaY = _state.Camera.MouseFrameIncrementY - e.motion.y;
+                int deltaX = (int)(_state.Camera.MouseFrameIncrementX - e.Motion.X);
+                int deltaY = (int)(_state.Camera.MouseFrameIncrementY - e.Motion.Y);
                 _state.Camera.WorldOffset_m(deltaX, deltaY);
 
-                _state.Camera.MouseFrameIncrementX = e.motion.x;
-                _state.Camera.MouseFrameIncrementY = e.motion.y;
+                _state.Camera.MouseFrameIncrementX = e.Motion.X;
+                _state.Camera.MouseFrameIncrementY = e.Motion.Y;
 
             }
 
             // The top of the hotkey stack should list for hotkeys
             _state.HotKeys.Peek().HandleEvent(e);
 
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEWHEEL &! ImGui.GetIO().WantCaptureMouse)
+            if (e.Type == (uint)SDL.EventType.MouseWheel &! ImGui.GetIO().WantCaptureMouse)
             {
                 _state.OnFocusMoved();
-                if (e.wheel.y > 0)
+                if (e.Wheel.Y > 0)
                 {
-                    _state.Camera.ZoomIn(mouseX, mouseY);
+                    _state.Camera.ZoomIn((int)mouseX, (int)mouseY);
                 }
-                else if (e.wheel.y < 0)
+                else if (e.Wheel.Y < 0)
                 {
-                    _state.Camera.ZoomOut(mouseX, mouseY);
+                    _state.Camera.ZoomOut((int)mouseX, (int)mouseY);
                 }
             }
             return true;
@@ -220,39 +222,39 @@ namespace Pulsar4X.SDL2UI
             //because the nameIcons are IMGUI not SDL we draw them here.
             _state.GalacticMap.DrawNameIcons();
 
-            if (_state.ShowImgDbg)
-            {
-                ImGui.NewLine();
-                SDL.SDL_GetRendererInfo(_state.SDLRendererPtr, out var renderInfo);
-                ImGui.Text("SDL RenderInfo:");
-                ImGui.Text("Name : " + renderInfo.name.ToString());
-                ImGui.Text("Flags: " +renderInfo.flags.ToString());
-                ImGui.Text("MaxTexH: " +renderInfo.max_texture_height.ToString());
-                ImGui.Text("MaxTexW: " +renderInfo.max_texture_width.ToString());
-                ImGui.Text("NumTxtFormats: " +renderInfo.num_texture_formats.ToString());
+            // if (_state.ShowImgDbg)
+            // {
+            //     ImGui.NewLine();
+            //     SDL.SDL_GetRendererInfo(_state.SDLRendererPtr, out var renderInfo);
+            //     ImGui.Text("SDL RenderInfo:");
+            //     ImGui.Text("Name : " + renderInfo.name.ToString());
+            //     ImGui.Text("Flags: " +renderInfo.flags.ToString());
+            //     ImGui.Text("MaxTexH: " +renderInfo.max_texture_height.ToString());
+            //     ImGui.Text("MaxTexW: " +renderInfo.max_texture_width.ToString());
+            //     ImGui.Text("NumTxtFormats: " +renderInfo.num_texture_formats.ToString());
 
-                SDL.SDL_GetRenderDriverInfo(0, out renderInfo);
-                ImGui.Text("SDL RenderDriverInfo:");
-                ImGui.Text("Name : " + renderInfo.name.ToString());
-                ImGui.Text("Flags: " +renderInfo.flags.ToString());
-                ImGui.Text("MaxTexH: " +renderInfo.max_texture_height.ToString());
-                ImGui.Text("MaxTexW: " +renderInfo.max_texture_width.ToString());
-                ImGui.Text("NumTxtFormats: " +renderInfo.num_texture_formats.ToString());
-                ImGui.NewLine();
+            //     SDL.SDL_GetRenderDriverInfo(0, out renderInfo);
+            //     ImGui.Text("SDL RenderDriverInfo:");
+            //     ImGui.Text("Name : " + renderInfo.name.ToString());
+            //     ImGui.Text("Flags: " +renderInfo.flags.ToString());
+            //     ImGui.Text("MaxTexH: " +renderInfo.max_texture_height.ToString());
+            //     ImGui.Text("MaxTexW: " +renderInfo.max_texture_width.ToString());
+            //     ImGui.Text("NumTxtFormats: " +renderInfo.num_texture_formats.ToString());
+            //     ImGui.NewLine();
 
-                if(_colorTesttexture == IntPtr.Zero)
-                    SDL2Helper.CreateTestTexture(_state.ViewPort.Renderer, ref _colorTesttexture);
-                ImGui.Image(_colorTesttexture, new System.Numerics.Vector2(200, 200));
-                if(ImGui.Button("refresh"))
-                    SDL2Helper.CreateTestTexture(_state.ViewPort.Renderer, ref _colorTesttexture);
-                
-                foreach (var kvp in _state.SDLImageDictionary)
-                {
-                    (int txWidth, int txHeight) = _state.ViewPort.Renderer.GetTextureDimensions(kvp.Value);
-                    ImGui.Image(kvp.Value, new System.Numerics.Vector2(txWidth, txHeight));
-                    ImGui.Text(kvp.Key);
-                }
-            }
+            //     if(_colorTesttexture == IntPtr.Zero)
+            //         SDL2Helper.CreateTestTexture(_state.ViewPort.Renderer, ref _colorTesttexture);
+            //     ImGui.Image(_colorTesttexture, new System.Numerics.Vector2(200, 200));
+            //     if(ImGui.Button("refresh"))
+            //         SDL2Helper.CreateTestTexture(_state.ViewPort.Renderer, ref _colorTesttexture);
+
+            //     foreach (var kvp in _state.SDLImageDictionary)
+            //     {
+            //         (int txWidth, int txHeight) = _state.ViewPort.Renderer.GetTextureDimensions(kvp.Value);
+            //         ImGui.Image(kvp.Value, new System.Numerics.Vector2(txWidth, txHeight));
+            //         ImGui.Text(kvp.Key);
+            //     }
+            // }
 
             if (_state.ShowMetrixWindow)
                 ImGui.ShowMetricsWindow(ref _state.ShowMetrixWindow);
@@ -319,9 +321,9 @@ namespace Pulsar4X.SDL2UI
 #endif
         }
 
-        public static string GetAppDataPath()
+        public static string? GetAppDataPath()
         {
-            return SDL.SDL_GetPrefPath(OrgName, AppName);
+            return SDL.GetPrefPath(OrgName, AppName);
         }
 
         public static void DeleteThenCopyToDirectory(string sourceDir, string destinationDir)

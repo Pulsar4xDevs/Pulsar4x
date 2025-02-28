@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using Pulsar4X.Orbits;
-using SDL2;
+using SDL3;
 
 namespace Pulsar4X.SDL2UI;
 
@@ -67,7 +66,7 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
         var mtrx =  scAU * matrix * trns; //scale to au, scale for camera zoom, and move to camera position and zoom
         var spos = camera.ViewCoordinateV2_m(_bodyAbsolutePos);
         //_drawPoints = new SDL.SDL_Point[_points.Length];
-        _drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
+        _drawPoints[0] = new SDL.Point(){ X = (int)spos.X, Y = (int)spos.Y};
 
         /*
         for (int i = 0; i < _points.Length; i++)
@@ -107,7 +106,7 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
         _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
 
         */
-        _drawPoints = new SDL.SDL_Point[_index + 2];
+        _drawPoints = new SDL.Point[_index + 2];
         _numberOfDrawSegments = _drawPoints.Length - 1;
         _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
     }
@@ -120,8 +119,8 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
         float alpha = _userSettings.MaxAlpha;
         for (int i = 0; i < _drawPoints.Length - 1; i++)
         {
-            SDL.SDL_SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creaping up.
-            SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i +1].y);
+            SDL.SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creaping up.
+            SDL.RenderLine(rendererPtr, _drawPoints[i].X, _drawPoints[i].Y, _drawPoints[i + 1].X, _drawPoints[i +1].Y);
             alpha -= _alphaChangeAmount;
         }
     }

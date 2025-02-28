@@ -1,7 +1,7 @@
 ﻿using System;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Orbital;
-using SDL2;
+using SDL3;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 
@@ -52,7 +52,7 @@ namespace Pulsar4X.SDL2UI
             byte g = 100;
             byte b = 100;
             byte a = 255;
-            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
             Shapes.Add(new Shape() { Color = colour, Points = points });
         }
 
@@ -79,7 +79,7 @@ namespace Pulsar4X.SDL2UI
             byte g = 100;
             byte b = 50;
             byte a = 255;
-            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
             Shapes.Add(new Shape() { Color = colour, Points = points });
         }
 
@@ -94,7 +94,7 @@ namespace Pulsar4X.SDL2UI
             byte g = 100;
             byte b = 100;
             byte a = 255;
-            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
             Shapes.Add(new Shape() { Color = colour, Points = points });
         }
 

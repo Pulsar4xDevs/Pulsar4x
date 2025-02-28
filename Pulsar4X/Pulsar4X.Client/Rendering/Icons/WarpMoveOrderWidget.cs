@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
-using SDL2;
-using static SDL2.SDL;
+using SDL3;
 using Pulsar4X.Orbits;
 using Pulsar4X.Movement;
 
@@ -11,7 +10,7 @@ namespace Pulsar4X.SDL2UI
 {
     public class WarpMoveOrderWidget : IDrawData
     {
-        public SDL_Color TransitLineColor = new SDL_Color() { r = 0, g = 255, b = 255, a = 100 };
+        public SDL.Color TransitLineColor = new SDL.Color() { R = 0, G = 255, B = 255, A = 100 };
 
         Entity _movingEntity;
         OrbitDB _movingEntityCurrentOrbit;
@@ -35,7 +34,7 @@ namespace Pulsar4X.SDL2UI
         private Vector3 _transitArriverelativePos_m { get; set; }
         private Vector3 _transitArriveAbsolutePos_m { get; set; }
 
-        SDL_Point[] _linePoints;
+        SDL.Point[] _linePoints;
 
         public WarpMoveOrderWidget(GlobalUIState state, Entity orderingEntity)
         {
@@ -120,7 +119,7 @@ namespace Pulsar4X.SDL2UI
             if (_arriveIcon != null)
             {
                 _arriveIcon.OnFrameUpdate(matrix, camera);
-                _linePoints = new SDL_Point[2];
+                _linePoints = new SDL.Point[2];
 
                 var dvsp = camera.ViewCoordinate_m(_departIcon.WorldPosition_m);
                 var avsp = camera.ViewCoordinate_m(_arriveIcon.WorldPosition_m);
@@ -140,13 +139,13 @@ namespace Pulsar4X.SDL2UI
                 _arriveIcon.Draw(rendererPtr, camera);
                 //draw the transitLine
 
-                var x1 = _linePoints[0].x;
-                var y1 = _linePoints[0].y;
-                var x2 = _linePoints[1].x;
-                var y2 = _linePoints[1].y;
+                var x1 = _linePoints[0].X;
+                var y1 = _linePoints[0].Y;
+                var x2 = _linePoints[1].X;
+                var y2 = _linePoints[1].Y;
 
-                SDL_SetRenderDrawColor(rendererPtr, TransitLineColor.r, TransitLineColor.g, TransitLineColor.b, TransitLineColor.a);
-                SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
+                SDL.SetRenderDrawColor(rendererPtr, TransitLineColor.R, TransitLineColor.G, TransitLineColor.B, TransitLineColor.A);
+                SDL.RenderLine(rendererPtr, x1, y1, x2, y2);
 
             }
         }
@@ -156,8 +155,8 @@ namespace Pulsar4X.SDL2UI
 
     public class TransitIcon : Icon
     {
-        public SDL_Color PrimaryColour = new SDL_Color() { r = 0, g = 255, b = 0, a = 255 };
-        public SDL_Color VectorColour = new SDL_Color() { r = 255, g = 0, b = 255, a = 255 };
+        public SDL.Color PrimaryColour = new SDL.Color() { R = 0, G = 255, B = 0, A = 255 };
+        public SDL.Color VectorColour = new SDL.Color() { R = 255, G = 0, B = 255, A = 255 };
 
         public double ProgradeAngle = 0;
         double _arrivePntRadius;
@@ -333,8 +332,8 @@ namespace Pulsar4X.SDL2UI
                     int y;
 
                     var tranlsatedPoint = nonZoomMatrix.TransformToVector2( shape.Points[i2].X,  shape.Points[i2].Y);
-                    x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
-                    y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
+                    x = (int)(ViewScreenPos.X + tranlsatedPoint.X );
+                    y = (int)(ViewScreenPos.Y + tranlsatedPoint.Y );
                     drawPoints[i2] = new Orbital.Vector2() { X = x, Y = y };
                 }
                 DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
@@ -347,7 +346,7 @@ namespace Pulsar4X.SDL2UI
                 return;
             foreach (var shape in DrawShapes)
             {
-                SDL.SDL_SetRenderDrawColor(rendererPtr, shape.Color.r, shape.Color.g, shape.Color.b, shape.Color.a);
+                SDL.SetRenderDrawColor(rendererPtr, shape.Color.R, shape.Color.G, shape.Color.B, shape.Color.A);
 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
@@ -355,7 +354,7 @@ namespace Pulsar4X.SDL2UI
                     var y1 = Convert.ToInt32(shape.Points[i].Y);
                     var x2 = Convert.ToInt32(shape.Points[i+1].X);
                     var y2 = Convert.ToInt32(shape.Points[i+1].Y);
-                    SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
+                    SDL.RenderLine(rendererPtr, x1, y1, x2, y2);
                 }
             }
 

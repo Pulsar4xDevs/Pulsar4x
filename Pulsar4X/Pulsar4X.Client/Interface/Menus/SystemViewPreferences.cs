@@ -5,7 +5,7 @@ using System.Linq;
 using ImGuiNET;
 using Microsoft.Extensions.Configuration;
 using Pulsar4X.Client.Interface.Widgets;
-using SDL2;
+using SDL3;
 
 namespace Pulsar4X.SDL2UI;
 
@@ -95,7 +95,7 @@ public class SystemViewPreferences : PulsarGuiWindow
     internal SystemViewPreferences()
     {
         // Read and apply any view preferences
-        string baseDirectory = SDL.SDL_GetPrefPath(PulsarMainWindow.OrgName, PulsarMainWindow.AppName);
+        string baseDirectory = SDL.GetPrefPath(PulsarMainWindow.OrgName, PulsarMainWindow.AppName);
         ViewsDirectory = Path.Combine(baseDirectory, "Views");
 
         if(!Directory.Exists(ViewsDirectory))

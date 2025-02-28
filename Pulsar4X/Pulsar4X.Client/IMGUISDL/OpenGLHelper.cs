@@ -1,7 +1,7 @@
-﻿using SDL2;
+﻿using SDL3;
 using System;
-using System.Text;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace ImGuiSDL2CS
 {
@@ -10,10 +10,6 @@ namespace ImGuiSDL2CS
 
         public static void LoadFunctions()
         {
-            // Print OpenGL version
-            string version = GetString(Enum.GL_VERSION);
-            Console.WriteLine($"OpenGL Version: {version}");
-
             // Explicitly load modern functions we need
             CreateShader = _<glCreateShader>();
             ShaderSource = _<glShaderSource>();
@@ -49,6 +45,10 @@ namespace ImGuiSDL2CS
             {
                 Console.WriteLine($"GL error during function loading: 0x{error:X}");
             }
+
+            // Print OpenGL version
+            string version = GetString(Enum.GL_VERSION);
+            Console.WriteLine($"OpenGL Version: {version}");
         }
 
         private static T _<T>() where T : class {
@@ -56,21 +56,25 @@ namespace ImGuiSDL2CS
             int indexOfSplit = name.IndexOf("__");
             if (indexOfSplit != -1)
                 name = name.Substring(0, indexOfSplit);
-            IntPtr ptr = SDL.SDL_GL_GetProcAddress(name);
+            SDL.FunctionPointer ptr = SDL.GLGetProcAddress(name);
 
             // If that fails, try with ARB prefix
-            if (ptr == IntPtr.Zero)
+            if (ptr == null)
             {
                 string arbName = "ARB" + name;
                 Console.WriteLine($"Trying ARB variant: {arbName}");
-                ptr = SDL.SDL_GL_GetProcAddress(arbName);
+                ptr = SDL.GLGetProcAddress(arbName);
             }
-            if (ptr == IntPtr.Zero)
+            if (ptr == null)
             {
                 Console.WriteLine($"Failed to load GL function: {name}");
                 return null;
             }
-            return Marshal.GetDelegateForFunctionPointer(ptr, typeof(T)) as T;
+
+            IntPtr nativePtr = Marshal.GetFunctionPointerForDelegate(ptr);
+
+            Console.WriteLine($"LOADED: {name}");
+            return Marshal.GetDelegateForFunctionPointer<T>(nativePtr);
         }
 
         // In no particular order

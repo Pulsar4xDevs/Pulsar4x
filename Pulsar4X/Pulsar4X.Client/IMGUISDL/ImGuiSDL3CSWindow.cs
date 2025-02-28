@@ -1,4 +1,4 @@
-﻿using SDL2;
+﻿using SDL3;
 using System;
 using ImGuiNET;
 using System.IO;
@@ -7,7 +7,7 @@ using Pulsar4X.Client.Interface.Themes;
 
 namespace ImGuiSDL2CS
 {
-    public class ImGuiSDL2CSWindow : SDL2Window {
+    public class ImGuiSDL3CSWindow : SDL3Window {
 
         protected readonly bool _IsSuperClass;
 
@@ -22,12 +22,12 @@ namespace ImGuiSDL2CS
         {
             get
             {
-                SDL.SDL_GetWindowPosition(Handle, out int x, out int y);
+                SDL.GetWindowPosition(Handle, out int x, out int y);
                 return new Vector2(x, y);
             }
             set
             {
-                SDL.SDL_SetWindowPosition(Handle, (int) Math.Round(value.X), (int) Math.Round(value.Y));
+                SDL.SetWindowPosition(Handle, (int) Math.Round(value.X), (int) Math.Round(value.Y));
             }
         }
 
@@ -35,28 +35,28 @@ namespace ImGuiSDL2CS
         {
             get
             {
-                SDL.SDL_GetWindowSize(Handle, out int x, out int y);
+                SDL.GetWindowSize(Handle, out int x, out int y);
                 return new Vector2(x, y);
             }
             set
             {
-                SDL.SDL_SetWindowSize(Handle, (int) Math.Round(value.X), (int) Math.Round(value.Y));
+                SDL.SetWindowSize(Handle, (int) Math.Round(value.X), (int) Math.Round(value.Y));
             }
         }
 
-        public ImGuiSDL2CSWindow(
+        public ImGuiSDL3CSWindow(
             string title = "ImGui.NET-SDL2-CS Window",
-            int x = SDL.SDL_WINDOWPOS_CENTERED, int y = SDL.SDL_WINDOWPOS_CENTERED,
+            int x = 0, int y = 0,
             int width = 800, int height = 600,
-            SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN
+            SDL.WindowFlags flags = SDL.WindowFlags.OpenGL | SDL.WindowFlags.Resizable | SDL.WindowFlags.Hidden
         ) : base(title, x, y, width, height, flags)
         {
-            _IsSuperClass = GetType() == typeof(ImGuiSDL2CSWindow);
+            _IsSuperClass = GetType() == typeof(ImGuiSDL3CSWindow);
             var io = ImGui.GetIO();
-            ImGuiSDL2CSHelper.Init();
+            ImGuiSDL3CSHelper.Init();
             OnEvent = ImGuiOnEvent;
             OnLoop = ImGuiOnLoop;
-            SDL.SDL_SetHint("SDL_RENDER_LINE_METHOD", "2"); //https://github.com/libsdl-org/SDL/blob/1fc7f681187f80ccd6b9625214b47db665cd9aaf/include/SDL_hints.h#L1304-L1315
+            SDL.SetHint("SDL_RENDER_LINE_METHOD", "2"); //https://github.com/libsdl-org/SDL/blob/1fc7f681187f80ccd6b9625214b47db665cd9aaf/include/SDL_hints.h#L1304-L1315
 
             // Apply ImGui theme
             // TODO: allow player to select/change this
@@ -79,10 +79,10 @@ namespace ImGuiSDL2CS
             Theme.Apply();
         }
 
-        public bool ImGuiOnEvent(SDL2Window window, SDL.SDL_Event e)
-            => ImGuiSDL2CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed);
+        public bool ImGuiOnEvent(SDL3Window window, SDL.Event e)
+            => ImGuiSDL3CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed);
 
-        public void ImGuiOnLoop(SDL2Window window)
+        public void ImGuiOnLoop(SDL3Window window)
         {
             ImGuiRender();
             Swap();
@@ -90,11 +90,12 @@ namespace ImGuiSDL2CS
 
         public virtual void ImGuiRender()
         {
-            uint mouseMask = SDL.SDL_GetMouseState(out int mouseX, out int mouseY);
-            if ((SDL.SDL_GetWindowFlags(Handle) & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_MOUSE_FOCUS) == 0)
+            SDL.MouseButtonFlags mouseMask = SDL.GetMouseState(out float mouseX, out float mouseY);
+
+            if ((SDL.GetWindowFlags(Handle) & SDL.WindowFlags.MouseFocus) == 0)
                 mouseX = mouseY = -1;
 
-            ImGuiSDL2CSHelper.NewFrame(Size, Vector2.One, new Vector2(mouseX, mouseY), mouseMask, ref g_MouseWheel, g_MousePressed, ref g_Time);
+            ImGuiSDL3CSHelper.NewFrame(Size, Vector2.One, new Vector2(mouseX, mouseY), mouseMask, ref g_MouseWheel, g_MousePressed, ref g_Time);
 
             ImGuiLayout();
 
@@ -145,7 +146,7 @@ namespace ImGuiSDL2CS
             base.Dispose(disposing);
         }
 
-        ~ImGuiSDL2CSWindow()
+        ~ImGuiSDL3CSWindow()
         {
             Dispose(false);
         }

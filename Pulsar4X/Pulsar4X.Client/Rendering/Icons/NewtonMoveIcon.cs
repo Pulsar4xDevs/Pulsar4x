@@ -4,7 +4,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using Pulsar4X.Extensions;
 using Pulsar4X.Interfaces;
-using SDL2;
+using SDL3;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 
@@ -37,14 +37,14 @@ namespace Pulsar4X.SDL2UI
         //_drawpoints is the translated resized screen/pixel location of the above ellipse points.
         //the above Points are adjusted for camera position and zoom levels when populating this array, as these values can change between frames.
         //[0] is the position of the orbiting object and subsequent positions trail behind the velocity and drawn with decreasing alpha.
-        protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
+        protected SDL.Point[] _drawPoints = new SDL.Point[0];
 
         //for drawing the direction of thrust when newton thrusting (world coordinates)
         private Orbital.Vector2[] _thrustLinePoints = new Vector2[2];
         //above adjusted for camera position and zoom.
-        protected SDL.SDL_Point[] _drawThrustLinePoints = new SDL.SDL_Point[2];
+        protected SDL.Point[] _drawThrustLinePoints = new SDL.Point[2];
         //PointD[] _debugPoints;
-        SDL.SDL_Point[] _debugDrawPoints = new SDL.SDL_Point[0];
+        SDL.Point[] _debugDrawPoints = new SDL.Point[0];
 
         //user adjustable variables:
         internal UserOrbitSettings.OrbitBodyType BodyType = UserOrbitSettings.OrbitBodyType.Unknown;
@@ -108,7 +108,7 @@ namespace Pulsar4X.SDL2UI
                 _numberOfDrawnPoints = _numberOfDrawSegments + 1; //one extra for the object position
             }
 
-            _drawPoints = new SDL.SDL_Point[_numberOfDrawnPoints];
+            _drawPoints = new SDL.Point[_numberOfDrawnPoints];
         }
 
         /// <summary>
@@ -251,7 +251,7 @@ namespace Pulsar4X.SDL2UI
             if(_points is null || _points.Length != _numberOfEllipsePoints)
                 _points = new Orbital.Vector2[_numberOfEllipsePoints];
             if (_drawPoints.Length != _numberOfDrawnPoints)
-                _drawPoints = new SDL.SDL_Point[_numberOfDrawnPoints];
+                _drawPoints = new SDL.Point[_numberOfDrawnPoints];
 
             _points[ctrIndex] = mtx.TransformToVector2(points[0]); //periapsis
 
@@ -276,7 +276,7 @@ namespace Pulsar4X.SDL2UI
             if(_points is null || _points.Length != _numberOfEllipsePoints)
                 _points = new Orbital.Vector2[_numberOfEllipsePoints];
             if (_drawPoints.Length != _numberOfDrawnPoints)
-                _drawPoints = new SDL.SDL_Point[_numberOfDrawnPoints];
+                _drawPoints = new SDL.Point[_numberOfDrawnPoints];
             double a = _ke.SemiMajorAxis;
             double b = _ke.SemiMinorAxis;
             double linierEccentricity = _ke.Eccentricity * a;
@@ -324,7 +324,7 @@ namespace Pulsar4X.SDL2UI
             //resize for zoom
             //translate to position
             var foo = camera.ViewCoordinate_m(WorldPosition_m);
-            var trns = Matrix.IDTranslate(foo.x, foo.y);
+            var trns = Matrix.IDTranslate(foo.X, foo.Y);
             var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
             var scZm = Matrix.IDScale(camera.ZoomLevel, camera.ZoomLevel);
             var mtrx = scAU * scZm *  trns;
@@ -334,7 +334,7 @@ namespace Pulsar4X.SDL2UI
 
             //_drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
             // [0] is the position of the object.
-            _drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
+            _drawPoints[0] = new SDL.Point(){ X = (int)spos.X, Y = (int)spos.Y};
             //we should have one less segment than points.
             //we should have more Points than _drawPoints. (Points is a full ellipse, we normaly only draw an arc)
             for (int i = 1; i < _numberOfDrawnPoints; i++)
@@ -354,7 +354,7 @@ namespace Pulsar4X.SDL2UI
             }*/
 
             var foo2 = camera.ViewCoordinate_m(_myPosDB.AbsolutePosition);
-            var trns2 = Matrix.IDTranslate(foo2.x, foo2.y);
+            var trns2 = Matrix.IDTranslate(foo2.X, foo2.Y);
             var mtrx2 = scAU * scZm *  trns2;
             for (int i = 0; i < 2; i++)
             {
@@ -370,8 +370,8 @@ namespace Pulsar4X.SDL2UI
             float alpha = _userSettings.MaxAlpha;
             for (int i = 0; i < _drawPoints.Length - 1; i++)
             {
-                SDL.SDL_SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creeping up.
-                SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i +1].y);
+                SDL.SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creeping up.
+                SDL.RenderLine(rendererPtr, _drawPoints[i].X, _drawPoints[i].Y, _drawPoints[i + 1].X, _drawPoints[i +1].Y);
                 alpha -= _alphaChangeAmount;
             }
             byte r = 100;
@@ -380,8 +380,8 @@ namespace Pulsar4X.SDL2UI
             byte a = 255;
 
             //now draw the thrust line.
-            SDL.SDL_SetRenderDrawColor(rendererPtr, r, g, b, a);
-            SDL.SDL_RenderDrawLine(rendererPtr, _drawThrustLinePoints[0].x, _drawThrustLinePoints[0].y, _drawThrustLinePoints[1].x, _drawThrustLinePoints[1].y);
+            SDL.SetRenderDrawColor(rendererPtr, r, g, b, a);
+            SDL.RenderLine(rendererPtr, _drawThrustLinePoints[0].X, _drawThrustLinePoints[0].Y, _drawThrustLinePoints[1].X, _drawThrustLinePoints[1].Y);
         }
 
 
@@ -409,7 +409,7 @@ namespace Pulsar4X.SDL2UI
         //internal float a;
         //protected float b;
         protected Orbital.Vector2[] _points = new Vector2[0]; //we calculate points around the ellipse and add them here. when we draw them we translate all the points.
-        protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
+        protected SDL.Point[] _drawPoints = new SDL.Point[0];
 
         //user adjustable variables:
         internal UserOrbitSettings.OrbitBodyType BodyType = UserOrbitSettings.OrbitBodyType.Unknown;
@@ -670,17 +670,17 @@ namespace Pulsar4X.SDL2UI
             var mir = Matrix.IDMirror(true, false);
             var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
             var scZm = Matrix.IDScale(camera.ZoomLevel, camera.ZoomLevel);
-            var trns = Matrix.IDTranslate(ViewScreenPos.x, ViewScreenPos.y);
+            var trns = Matrix.IDTranslate(ViewScreenPos.X, ViewScreenPos.Y);
 
             var mtrx = mir * scAU * scZm *  trns;
-            _drawPoints = new SDL.SDL_Point[_numberOfPoints + 1];
+            _drawPoints = new SDL.Point[_numberOfPoints + 1];
 
             int shapeCount = Shapes.Count;
             DrawShapes = new Shape[shapeCount];
             if (DebugShowCenter)
             {
                 DrawShapes = new Shape[shapeCount+1];
-                var mtxb = Matrix.IDTranslate(ViewScreenPos.x, ViewScreenPos.y);
+                var mtxb = Matrix.IDTranslate(ViewScreenPos.X, ViewScreenPos.Y);
                 DrawShapes[0] = CreatePrimitiveShapes.CenterWidget(trns);
             }
 
@@ -714,8 +714,8 @@ namespace Pulsar4X.SDL2UI
             float alpha = _userSettings.MaxAlpha;
             for (int i = 0; i < _numberOfDrawSegments - 1; i++)
             {
-                SDL.SDL_SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creeping up.
-                SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i +1].y);
+                SDL.SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creeping up.
+                SDL.RenderLine(rendererPtr, _drawPoints[i].X, _drawPoints[i].Y, _drawPoints[i + 1].X, _drawPoints[i +1].Y);
                 alpha -= _alphaChangeAmount;
             }
             base.Draw(rendererPtr, camera);

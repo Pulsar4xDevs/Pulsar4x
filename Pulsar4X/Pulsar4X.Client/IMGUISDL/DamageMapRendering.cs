@@ -9,9 +9,9 @@ namespace ImGuiSDL2CS;
 
 public static class DamageMapRendering
 {
-    
-    
-    
+
+
+
     public static void CreateSDLTextures(IRenderer renderer, IntPtr renderPtr, DamageMap damageMap, ref IntPtr[] textures)
     {
         int width = damageMap.Width;
@@ -26,8 +26,8 @@ public static class DamageMapRendering
 
     }
 
-    
-    
+
+
 
     internal static void CreateTextureForIDMap(IRenderer renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
@@ -51,16 +51,16 @@ public static class DamageMapRendering
 
                 // Pack ARGB values into a single uint
                 // Note: OpenGL expects RGBA format, so we need to swap the byte order
-                pixelData[y * width + x] = SDL2Helper.GetColor(redValue, 0, 0, alpha);
+                pixelData[y * width + x] = SDL3Helper.GetColor(redValue, 0, 0, alpha);
             }
         }
-        
+
         GCHandle handle = GCHandle.Alloc(pixelData, GCHandleType.Pinned);
         try
         {
             IntPtr pixels = handle.AddrOfPinnedObject();
             // Update the texture
-            SDL2Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+            SDL3Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
         }
         finally
         {
@@ -73,7 +73,7 @@ public static class DamageMapRendering
     {
         byte alpha = 255;
         float maxPressure = damageMap.PresMap.Max();
-        
+
         // Create a buffer for the pixel data
         uint[] pixelData = new uint[width * height];
 
@@ -88,7 +88,7 @@ public static class DamageMapRendering
                 byte blueValue = (byte)(damageMap.PresMap[index] * 255.0f / maxPressure);
 
                 // Pack ARGB values into a single uint
-                pixelData[y * width + x] = SDL2Helper.GetColor(0, 0, blueValue, alpha);
+                pixelData[y * width + x] = SDL3Helper.GetColor(0, 0, blueValue, alpha);
             }
         }
 
@@ -98,7 +98,7 @@ public static class DamageMapRendering
             IntPtr pixels = handle.AddrOfPinnedObject();
 
             // Update the texture
-            SDL2Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+            SDL3Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
         }
         finally
         {
@@ -116,7 +116,7 @@ public static class DamageMapRendering
             if(part != null && part.Velocity.Length() > maxVelocity)
                 maxVelocity = part.Velocity.Length();
         }
-        
+
 
         // Create a buffer for the pixel data
         uint[] pixelData = new uint[width * height];
@@ -133,7 +133,7 @@ public static class DamageMapRendering
                     greenValue = (byte)((damageMap.PMap[index].Velocity.Length() * 255.0) / maxVelocity);
 
                 // Pack ARGB values into a single uint
-                pixelData[y * width + x] = SDL2Helper.GetColor(0, greenValue, 0, alpha);
+                pixelData[y * width + x] = SDL3Helper.GetColor(0, greenValue, 0, alpha);
             }
         }
 
@@ -143,7 +143,7 @@ public static class DamageMapRendering
             IntPtr pixels = handle.AddrOfPinnedObject();
 
             // Update the texture
-            SDL2Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+            SDL3Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
         }
         finally
         {
@@ -156,7 +156,7 @@ public static class DamageMapRendering
     {
         byte alpha = 255;
         int phaseStateCount = Enum.GetValues(typeof(PhaseState)).Length;
-        
+
         // Create a buffer for the pixel data
         uint[] pixelData = new uint[width * height];
 
@@ -171,7 +171,7 @@ public static class DamageMapRendering
                 if (physicalParticle != null)
                 {
                     // Red for Life (Health) 0 to 255
-                    byte lifeRed = (byte)(physicalParticle.IsComponentPartDestroyed ? 50 : 255); // 
+                    byte lifeRed = (byte)(physicalParticle.IsComponentPartDestroyed ? 50 : 255); //
 
                     // Blue for StateOfPhase, using full range 0 to 255
 
@@ -181,7 +181,7 @@ public static class DamageMapRendering
                     byte tempGreen = (byte)(Math.Min(physicalParticle.Temperature, 100) * 2.55f); // Normalize to 0-100 then to 0-255
 
                     // Combine all channels
-                    color = SDL2Helper.GetColor(lifeRed, tempGreen, phaseBlue, alpha);
+                    color = SDL3Helper.GetColor(lifeRed, tempGreen, phaseBlue, alpha);
                 }
 
                 // Pack ARGB values into a single uint
@@ -195,7 +195,7 @@ public static class DamageMapRendering
             IntPtr pixels = handle.AddrOfPinnedObject();
 
             // Update the texture
-            SDL2Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+            SDL3Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
         }
         finally
         {
@@ -208,7 +208,7 @@ public static class DamageMapRendering
     {
         int phaseStateCount = Enum.GetValues(typeof(PhaseState)).Length;
         uint color = 0;
-        
+
         // Create a buffer for the pixel data
         uint[] pixelData = new uint[width * height];
 
@@ -223,7 +223,7 @@ public static class DamageMapRendering
                 {
                     var phaseState = physicalParticle.StateOfPhase;
                     byte byteState = (byte)phaseState;
-                    color = SDL2Helper.ColourFromValue(byteState, phaseStateCount, 0);
+                    color = SDL3Helper.ColourFromValue(byteState, phaseStateCount, 0);
                 }
                 else color = 0;
 
@@ -237,7 +237,7 @@ public static class DamageMapRendering
         {
             IntPtr pixels = handle.AddrOfPinnedObject();
             // Update the texture
-            SDL2Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+            SDL3Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
         }
         finally
         {
@@ -265,7 +265,7 @@ public static class DamageMapRendering
                     maxTemp = particle.Temperature;
             }
         }
-        
+
         // Create a buffer for the pixel data
         uint[] pixelData = new uint[width * height];
 
@@ -331,7 +331,7 @@ public static class DamageMapRendering
                     */
                     // Convert to uint for SDL2 texture (ARGB format)
                     byte a = 255; // Full opacity
-                    color = SDL2Helper.GetColor(r, g, b, a);
+                    color = SDL3Helper.GetColor(r, g, b, a);
                 }
                 else
                 {
@@ -348,7 +348,7 @@ public static class DamageMapRendering
         {
             IntPtr pixels = handle.AddrOfPinnedObject();
             // Update the texture
-            SDL2Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+            SDL3Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
         }
         finally
         {
@@ -376,7 +376,7 @@ public static class DamageMapRendering
         // Adjust the range for visualization
         minFreq = (int)(minFreq * 0.5);
         maxFreq = (int)(maxFreq * 1.5);
-    
+
         uint color = 0;
 
         // Create a buffer for the pixel data
@@ -395,7 +395,7 @@ public static class DamageMapRendering
             if (x >= 0 && x < width && y >= 0 && y < height)
             {
                 int index = y * width + x;
-                color = SDL2Helper.ColourFromValue((int)point.Wavelength, maxFreq, minFreq, point.Power, 25, maxPow);
+                color = SDL3Helper.ColourFromValue((int)point.Wavelength, maxFreq, minFreq, point.Power, 25, maxPow);
                 pixelData[index] = color;
             }
         }
@@ -405,7 +405,7 @@ public static class DamageMapRendering
         {
             IntPtr pixels = handle.AddrOfPinnedObject();
             // Update the texture
-            SDL2Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+            SDL3Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
         }
         finally
         {

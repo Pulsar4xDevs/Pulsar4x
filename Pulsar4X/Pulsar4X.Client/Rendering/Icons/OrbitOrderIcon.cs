@@ -2,7 +2,7 @@
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Orbital;
-using SDL2;
+using SDL3;
 using System.Linq;
 using Pulsar4X.Orbits;
 using Pulsar4X.Galaxy;
@@ -50,7 +50,7 @@ namespace Pulsar4X.SDL2UI
         double _linearEccentricity_m; //distance from the center of the ellpse to one of the focal points.
 
         Vector2[] _points = new Vector2[0]; //we calculate points around the ellipse and add them here. when we draw them we translate all the points.
-        SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
+        SDL.Point[] _drawPoints = new SDL.Point[0];
         //sphere of influance radius, if the entity is outside this, then this is affected by the parent (or other) gravitational body
         double _soiWorldRadius_m;
         double _soiWorldRadius_AU;
@@ -272,7 +272,7 @@ namespace Pulsar4X.SDL2UI
 
 
             Vector2 translated;
-            _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
+            _drawPoints = new SDL.Point[_numberOfDrawSegments];
             for (int i = 0; i < _numberOfDrawSegments; i++)
             {
                 if (index < _numberOfArcSegments - 1)
@@ -284,10 +284,10 @@ namespace Pulsar4X.SDL2UI
 
                 translated = matrix.TransformD(Distance.MToAU( _points[index].X), Distance.MToAU(_points[index].Y)); //add zoom transformation.
 
-                int x = (int)(ViewScreenPos.x + translated.X);
-                int y = (int)(ViewScreenPos.y + translated.Y);
+                int x = (int)(ViewScreenPos.X + translated.X);
+                int y = (int)(ViewScreenPos.Y + translated.Y);
 
-                _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
+                _drawPoints[i] = new SDL.Point() { X = x, Y = y };
             }
 
 
@@ -307,16 +307,16 @@ namespace Pulsar4X.SDL2UI
                 if(_eccentricity > 1 && i == _index-2)//don't draw the line segment for hyperbolic orbits where it's at the SOI.
                     continue;
                 var au = 1;//UniversalConstants.Units.MetersPerAu;
-                int x1 = (int)(_drawPoints[i].x * au);
-                int y1 = (int)(_drawPoints[i].y * au);
-                int x2 = (int)(_drawPoints[i + 1].x * au);
-                int y2 = (int)(_drawPoints[i + 1].y * au);
+                int x1 = (int)(_drawPoints[i].X * au);
+                int y1 = (int)(_drawPoints[i].Y * au);
+                int x2 = (int)(_drawPoints[i + 1].X * au);
+                int y2 = (int)(_drawPoints[i + 1].Y * au);
 
                 //SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
 
-                SDL.SDL_SetRenderDrawColor(rendererPtr, Red, Grn, Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creaping up.
+                SDL.SetRenderDrawColor(rendererPtr, Red, Grn, Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creaping up.
 
-                SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
+                SDL.RenderLine(rendererPtr, x1, y1, x2, y2);
                 //SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i + 1].y);
                 alpha -= _alphaChangeAmount;
 
@@ -325,7 +325,7 @@ namespace Pulsar4X.SDL2UI
 
 
             //SOI filled circle area.
-            SDL.SDL_SetRenderDrawColor(rendererPtr, 0, 50, 100, 100);
+            SDL.SetRenderDrawColor(rendererPtr, 0, 50, 100, 100);
             //DrawPrimitive.DrawFilledCircle(rendererPtr ,ViewScreenPos.x , ViewScreenPos.y, (int)_soiViewRadius);
             //DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _soiViewRadius, _soiViewRadius);
 
@@ -336,10 +336,10 @@ namespace Pulsar4X.SDL2UI
             var lasty = 0;
             for (int i = 0; i < soipnts.Count ; i+=2)
             {
-                var x = soipnts[i].x;
-                var y = soipnts[i].y;
+                var x = soipnts[i].X;
+                var y = soipnts[i].Y;
                 if(y != lasty)
-                    SDL.SDL_RenderDrawLine(rendererPtr, ViewScreenPos.x -x, ViewScreenPos.y -y, ViewScreenPos.x + x, ViewScreenPos.y - y);
+                    SDL.RenderLine(rendererPtr, ViewScreenPos.X -x, ViewScreenPos.Y -y, ViewScreenPos.X + x, ViewScreenPos.Y - y);
                 lasty = y;
             }
 
@@ -359,12 +359,12 @@ namespace Pulsar4X.SDL2UI
             }
   */
             //Planet Filled Circle
-            SDL.SDL_SetRenderDrawColor(rendererPtr, 100, 0, 0, 255);
-            DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _targetViewRadius, _targetViewRadius);
-            var plntPts = CreatePrimitiveShapes.BresenhamCircle(ViewScreenPos.x, ViewScreenPos.y, (int)_targetViewRadius);
+            SDL.SetRenderDrawColor(rendererPtr, 100, 0, 0, 255);
+            DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.X, ViewScreenPos.Y, _targetViewRadius, _targetViewRadius);
+            var plntPts = CreatePrimitiveShapes.BresenhamCircle(ViewScreenPos.X, ViewScreenPos.Y, (int)_targetViewRadius);
             for (int i = 0; i < plntPts.Count -1; i++)
             {
-                SDL.SDL_RenderDrawLine(rendererPtr, plntPts[i].x, plntPts[i].y, plntPts[i + 1].x, plntPts[i + 1].y);
+                SDL.RenderLine(rendererPtr, plntPts[i].X, plntPts[i].Y, plntPts[i + 1].X, plntPts[i + 1].Y);
             }
 
             /*

@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulsar4X.Orbital;
-using ImGuiNET;
-using Pulsar4X.Engine;
-using SDL2;
-using Point = SDL2.SDL.SDL_Point;
+using SDL3;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -25,7 +22,7 @@ namespace Pulsar4X.SDL2UI
                 drawX = posX + (int)Math.Round(xRadius * Math.Sin(angle * i));
                 drawY = posY + (int)Math.Round(yRadius * Math.Cos(angle * i));
                 //SDL.SDL_RenderDrawPoint(renderer, drawX, drawY);
-                SDL.SDL_RenderDrawLine(renderer, lastX, lastY, drawX, drawY);
+                SDL.RenderLine(renderer, lastX, lastY, drawX, drawY);
                 lastX = drawX;
                 lastY = drawY;
             }
@@ -40,7 +37,7 @@ namespace Pulsar4X.SDL2UI
         /// <param name="posY">RelativePosition y.</param>
         /// <param name="radius">Radius.</param>
         public static void DrawFilledCircle(IntPtr renderer, int posX, int posY, int radius)
-        { 
+        {
 
             for (int w = 0; w < radius * 2; w++)
             {
@@ -50,10 +47,10 @@ namespace Pulsar4X.SDL2UI
                     int dy = radius - h; // vertical offset
                     if ((dx * dx + dy * dy) <= (radius * radius))
                     {
-                        SDL.SDL_RenderDrawPoint(renderer, posX, posY);
+                        SDL.RenderPoint(renderer, posX, posY);
                     }
                 }
-            }        
+            }
         }
 
         public static void DrawArc(IntPtr renderer, int posX, int posY, double xWidth, double yWidth, double startAngleRadians, double arcAngleRadians)
@@ -67,19 +64,19 @@ namespace Pulsar4X.SDL2UI
             int totalSegments = (int)(Math.Abs(arcAngleRadians) / incrementAngle);
 
 
-            SDL.SDL_Point[] points = new SDL.SDL_Point[totalSegments];
+            SDL.Point[] points = new SDL.Point[totalSegments];
 
             for (int i = 0; i < totalSegments; i++)
             {
                 double nextAngle = startAngleRadians + incrementAngle * i;
                 drawX = posX + (int)Math.Round(xWidth * Math.Sin(nextAngle));
                 drawY = posY + (int)Math.Round(yWidth * Math.Cos(nextAngle));
-                points[i] = new SDL.SDL_Point() { x = drawX, y = drawY };
+                points[i] = new SDL.Point() { X = drawX, Y = drawY };
             }
 
             for (int i = 0; i < points.Length - 1; i++)
             {
-                SDL.SDL_RenderDrawLine(renderer, points[i].x, points[i].y, points[i+1].x, points[i+1].y);
+                SDL.RenderLine(renderer, points[i].X, points[i].Y, points[i+1].X, points[i+1].Y);
             }
 
         }
@@ -88,12 +85,12 @@ namespace Pulsar4X.SDL2UI
         public static void DrawAlphaFadeArc(IntPtr rendererPtr, int posX, int posY, double xWidth, double yWidth, double startAngleRadians, double arcAngleRadians, byte startAlpha, byte endAlpha)
         {
             byte r, g, b, a;
-            SDL.SDL_GetRenderDrawColor(rendererPtr, out r, out g, out b, out a);
+            SDL.GetRenderDrawColor(rendererPtr, out r, out g, out b, out a);
 
-            SDL.SDL_BlendMode blendMode;
-            SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
+            SDL.BlendMode blendMode;
+            SDL.GetRenderDrawBlendMode(rendererPtr, out blendMode);
 
-            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+            SDL.SetRenderDrawBlendMode(rendererPtr, SDL.BlendMode.Blend);
             byte _numberOfArcSegments = 254;
 
 
@@ -110,18 +107,18 @@ namespace Pulsar4X.SDL2UI
             for (int i = 1; i < totalSegments; i++)
             {
                 alpha += (byte)(alphaIncrement);
-                SDL.SDL_SetRenderDrawColor(rendererPtr, r, g, b, alpha);
+                SDL.SetRenderDrawColor(rendererPtr, r, g, b, alpha);
 
                 double nextAngle = startAngleRadians + incrementAngle * i;
                 drawX = posX + (int)Math.Round(xWidth * Math.Sin(nextAngle));
                 drawY = posY + (int)Math.Round(yWidth * Math.Cos(nextAngle));
-                SDL.SDL_RenderDrawLine(rendererPtr, lastX, lastY, drawX, drawY);
+                SDL.RenderLine(rendererPtr, lastX, lastY, drawX, drawY);
                 lastX = drawX;
                 lastY = drawY;
             }
 
-            SDL.SDL_SetRenderDrawColor(rendererPtr, r, g, b, a); //set the colour back to what it was originaly
-            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
+            SDL.SetRenderDrawColor(rendererPtr, r, g, b, a); //set the colour back to what it was originaly
+            SDL.SetRenderDrawBlendMode(rendererPtr, blendMode);
         }
     }
 
@@ -135,7 +132,7 @@ namespace Pulsar4X.SDL2UI
 
 
         private static Shape _centerWidget;
-        
+
         public static Shape CenterWidget(Matrix matrix)
         {
             if(_centerWidget.Points == null)
@@ -150,11 +147,11 @@ namespace Pulsar4X.SDL2UI
                 byte g = 50;
                 byte b = 200;
                 byte a = 255;
-                SDL.SDL_Color colour = new SDL.SDL_Color() {r = r, g = g, b = b, a = a};
+                SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a};
                 _centerWidget = new Shape() {Points = drawpoints, Color = colour};
             }
-            
-            
+
+
             Shape centerWidget = new Shape();
             centerWidget.Points = matrix.TransformToVector2(_centerWidget.Points);
             centerWidget.Color = _centerWidget.Color;
@@ -178,29 +175,29 @@ namespace Pulsar4X.SDL2UI
         {
 
             double linerEccentricity =  EllipseMath.LinearEccentricityFromAxies(a, b);
-            
+
             double dphi = 2 * Math.PI / (n - 1);
 
-            
+
             double cosTheta = Math.Cos(loP);
             double sinTheta = Math.Sin(loP);
             double cosdphi = Math.Cos(dphi);
             double sindphi = Math.Sin(dphi);
             double cosLoP = Math.Cos(loP);
             double sinLoP = Math.Sin(loP);
-            
+
             //double xs = startPos.X - linerEccentricity * cosLoP;
             //double ys = startPos.Y - linerEccentricity * sinLoP;
             //double xe = endPos.X - linerEccentricity * cosLoP;
-            //double ye = endPos.Y - linerEccentricity * sinLoP;          
+            //double ye = endPos.Y - linerEccentricity * sinLoP;
             //double arcStart = Math.Atan2(ys, xs);
             //double arcEnd = Math.Atan2(ye, xe);
-            
+
             double cosStrt = Math.Cos(arcStart);
             double sinStrt = Math.Sin(arcStart);
             double cosEnd = Math.Cos(arcEnd);
             double sinEnd = Math.Sin(arcEnd);
-            
+
             double arcSize = Angle.DifferenceBetweenRadians(arcStart, arcEnd);
             if (arcSize < 1 || arcSize > 2 * Math.PI)
                 arcSize = 2 * Math.PI;
@@ -240,19 +237,19 @@ namespace Pulsar4X.SDL2UI
             var lop = ke.LoAN + ke.AoP;
             return KeplerPoints(a, e, lop, startPnt, endPnt);
         }
-              
-        
+
+
         public static Vector2[] HyperbolicPoints(double semiMaj, double eccentricity, double loP, double startAng,
                                                  int numPoints = 128)
         {
             double sweep = startAng * 2;
-            double Δθ = sweep / (numPoints - 1);            
-            
+            double Δθ = sweep / (numPoints - 1);
+
             double θ = 0;
             double x = 0;
             double y = 0;
             double r = 0;
-        
+
             Vector2[] points = new Vector2[numPoints + 1];
             for (int i = 0; i < numPoints; i++)
             {
@@ -264,7 +261,7 @@ namespace Pulsar4X.SDL2UI
             }
             return points;
         }
-        
+
         /// <summary>
         /// Creates points for an ellipse.
         /// This formula creates more points at the periapsis and less at the apoapsis.
@@ -278,12 +275,12 @@ namespace Pulsar4X.SDL2UI
         /// <returns></returns>
         public static Vector2[] KeplerPoints(double semiMaj, double eccentricity, double loP, Vector2 startPnt, Vector2 endPnt,
                                              int numPoints = 128)
-        {                    
-            
+        {
+
             double startAng = Math.Atan2(startPnt.Y, startPnt.X);
             double endAng =  Math.Atan2(endPnt.Y, endPnt.X);
-            
-            
+
+
             double θ = 0;
             double x = 0;
             double y = 0;
@@ -304,7 +301,7 @@ namespace Pulsar4X.SDL2UI
                 };
             }
             numPoints = (int)Math.Abs(sweep / Δθ) + 1; //numpoints for just the arc
-        
+
             Vector2[] points = new Vector2[numPoints + 1];
             for (int i = 0; i < numPoints; i++)
             {
@@ -332,8 +329,8 @@ namespace Pulsar4X.SDL2UI
         /// <param name="numPoints"></param>
         /// <returns></returns>
         public static void KeplerPoints(KeplerElements ke, Vector2 startPnt, Vector2 endPnt, ref Vector2[] points)
-        {                    
-            
+        {
+
             double startAng = Math.Atan2(startPnt.Y, startPnt.X);
             double endAng =  Math.Atan2(endPnt.Y, endPnt.X);
             double sweep = Angle.NormaliseRadiansPositive( endAng - startAng);
@@ -343,7 +340,7 @@ namespace Pulsar4X.SDL2UI
             double x = 0;
             double y = 0;
             double r = EllipseMath.RadiusAtTrueAnomaly(ke.SemiMajorAxis, ke.Eccentricity, loP, startAng);
-            //this is the amount of sweep per point, for a full circle/ellipse. 
+            //this is the amount of sweep per point, for a full circle/ellipse.
             double Δθ = sweep / numPoints;
             if (Δθ == 0)
             {
@@ -491,7 +488,7 @@ namespace Pulsar4X.SDL2UI
                     }
                     break;
                 case PosFrom.TopRight:
-                    { 
+                    {
                         tr.X = posX;
                         tr.Y = posY;
                         br.X = posX;
@@ -546,7 +543,7 @@ namespace Pulsar4X.SDL2UI
             }
             return points;
         }
-        
+
         /// <summary>
         /// CopyPasta straight from the french wikipedia page here: https://fr.wikipedia.org/wiki/Algorithme_de_trac%C3%A9_d%27arc_de_cercle_de_Bresenham#En_C#
         /// </summary>
@@ -554,15 +551,15 @@ namespace Pulsar4X.SDL2UI
         /// <param name="yc">center</param>
         /// <param name="r">radius</param>
         /// <returns></returns>
-        public static List<Point> BresenhamCircle(int xc,int yc,int r)
+        public static List<SDL.Point> BresenhamCircle(int xc,int yc,int r)
         {
-            List<Point> ret = new List<Point>();
+            List<SDL.Point> ret = new List<SDL.Point>();
             int x,y,p;
 
             x=0;
             y=r;
 
-            ret.Add(new Point(){x = xc+x,y = yc-y});
+            ret.Add(new SDL.Point(){ X = xc+x, Y = yc-y});
 
             p=3-(2*r);
 
@@ -578,14 +575,14 @@ namespace Pulsar4X.SDL2UI
                     p+=((4*(x-y)+10));
                 }
 
-                ret.Add(new Point(){x = xc+x,y = yc-y});
-                ret.Add(new Point(){x = xc-x,y = yc-y});
-                ret.Add(new Point(){x = xc+x,y = yc+y});
-                ret.Add(new Point(){x = xc-x,y = yc+y});
-                ret.Add(new Point(){x = xc+y,y = yc-x});
-                ret.Add(new Point(){x = xc-y,y = yc-x});
-                ret.Add(new Point(){x = xc+y,y = yc+x});
-                ret.Add(new Point(){x = xc-y,y = yc+x});
+                ret.Add(new SDL.Point(){X = xc+x, Y = yc-y});
+                ret.Add(new SDL.Point(){X = xc-x, Y = yc-y});
+                ret.Add(new SDL.Point(){X = xc+x, Y = yc+y});
+                ret.Add(new SDL.Point(){X = xc-x, Y = yc+y});
+                ret.Add(new SDL.Point(){X = xc+y, Y = yc-x});
+                ret.Add(new SDL.Point(){X = xc-y, Y = yc-x});
+                ret.Add(new SDL.Point(){X = xc+y, Y = yc+x});
+                ret.Add(new SDL.Point(){X = xc-y, Y = yc+x});
             }
             return ret;
         }
@@ -651,7 +648,7 @@ namespace Pulsar4X.SDL2UI
             {
                 var x = BezCalc(t, p0.X, p1.X, p2.X, p3.X);
                 var y = BezCalc(t, p0.Y, p1.Y, p2.Y, p3.Y);
-                
+
                 _linePoints.Add(new Vector2() {X = x, Y = y});
             }
             _linePoints.Add(p3);
@@ -659,9 +656,9 @@ namespace Pulsar4X.SDL2UI
         }
         private static double BezCalc(double t, double a0, double a1, double a2, double a3)
         {
-            double foo = a0 * Math.Pow((1 - t), 3); 
-            foo += a1 * 3 * t * Math.Pow((1 - t), 2); 
-            foo += a2 * 3 * Math.Pow(t, 2) * (1 - t); 
+            double foo = a0 * Math.Pow((1 - t), 3);
+            foo += a1 * 3 * t * Math.Pow((1 - t), 2);
+            foo += a2 * 3 * Math.Pow(t, 2) * (1 - t);
             foo += a3 * Math.Pow(t, 3);
             return foo;
         }
@@ -674,30 +671,30 @@ namespace Pulsar4X.SDL2UI
     {
         public static void Draw(IntPtr rendererPtr, Camera camera, Shape[] shapes)
         {
-            //first get the current colour and blend mode and store this. 
+            //first get the current colour and blend mode and store this.
             byte r, g, b, a;
-            SDL.SDL_BlendMode blendMode;
-            SDL.SDL_GetRenderDrawColor(rendererPtr, out r, out g, out b, out a);
-            SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
+            SDL.BlendMode blendMode;
+            SDL.GetRenderDrawColor(rendererPtr, out r, out g, out b, out a);
+            SDL.GetRenderDrawBlendMode(rendererPtr, out blendMode);
 
             //change the blendmode to blend (maybe we should store this in Shape? probilby not, I think we'll always want blend.)
-            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+            SDL.SetRenderDrawBlendMode(rendererPtr, SDL.BlendMode.Blend);
 
-            //go through each of the shapes 
+            //go through each of the shapes
             foreach (var shape in shapes)
             {
-                //set the colour as defined in the shape. 
-                SDL.SDL_SetRenderDrawColor(rendererPtr, shape.Color.r, shape.Color.g, shape.Color.b, shape.Color.a);
-                //then go through each of the points and draw a line from one point to the next. 
+                //set the colour as defined in the shape.
+                SDL.SetRenderDrawColor(rendererPtr, shape.Color.R, shape.Color.G, shape.Color.B, shape.Color.A);
+                //then go through each of the points and draw a line from one point to the next.
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
-                    SDL.SDL_RenderDrawLine(rendererPtr, (int)shape.Points[i].X, (int)shape.Points[i].Y, (int)shape.Points[i + 1].X, (int)shape.Points[i + 1].Y);
+                    SDL.RenderLine(rendererPtr, (int)shape.Points[i].X, (int)shape.Points[i].Y, (int)shape.Points[i + 1].X, (int)shape.Points[i + 1].Y);
                 }
             }
 
             //set the colour and blendmode back to what it was originaly.
-            SDL.SDL_SetRenderDrawColor(rendererPtr, r, g, b, a); //set the colour back to what it was originaly
-            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
+            SDL.SetRenderDrawColor(rendererPtr, r, g, b, a); //set the colour back to what it was originaly
+            SDL.SetRenderDrawBlendMode(rendererPtr, blendMode);
         }
     }
 
@@ -733,7 +730,7 @@ namespace Pulsar4X.SDL2UI
         }
         public static double Length(Vector2 point)
         {
-            return Math.Sqrt(LengthSquared(point)); 
+            return Math.Sqrt(LengthSquared(point));
         }
         public static double LengthSquared(Vector2 point)
         {

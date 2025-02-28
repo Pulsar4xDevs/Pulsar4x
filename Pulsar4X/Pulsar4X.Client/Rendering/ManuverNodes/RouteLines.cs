@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using Pulsar4X.SDL2UI.ManuverNodes;
-using SDL2;
+using SDL3;
 
 namespace Pulsar4X.SDL2UI;
 
@@ -25,19 +24,19 @@ public class ManuverLinesComplete : IDrawData
         RootSequence.SequenceName = "Manuvers";
     }
 
-    SDL.SDL_Color editClr = new SDL.SDL_Color()
+    SDL.Color editClr = new SDL.Color()
     {
-        r = 255,
-        g = 215,
-        b = 0,
-        a = 255
+        R = 255,
+        G = 215,
+        B = 0,
+        A = 255
     };
-    SDL.SDL_Color obtClr = new SDL.SDL_Color()
+    SDL.Color obtClr = new SDL.Color()
     {
-        r = 0,
-        g = 215,
-        b = 0,
-        a = 255
+        R = 0,
+        G = 215,
+        B = 0,
+        A = 255
     };
 
     public void AddNewNode(Entity orderEntity, DateTime nodeTime)
@@ -64,7 +63,7 @@ public class ManuverLinesComplete : IDrawData
         }
         else
         {
-            SelectedSequence.ManuverNodes.Add(node); 
+            SelectedSequence.ManuverNodes.Add(node);
         }
     }
 
@@ -129,13 +128,13 @@ public class ManuverLinesComplete : IDrawData
 
 
     private Vector2[] points = new Vector2[0];
-    private SDL.SDL_Point[] DrawPoints = new SDL.SDL_Point[0];
-    private SDL.SDL_Point[] DrawPointsEditing = new SDL.SDL_Point[0];
+    private SDL.FPoint[] DrawPoints = new SDL.FPoint[0];
+    private SDL.FPoint[] DrawPointsEditing = new SDL.FPoint[0];
     public void OnFrameUpdate(Matrix matrix, Camera camera)
     {
         points = RenderManuverLines.CreatePointArray(RootSequence);
         if (DrawPoints.Length != points.Length)
-            DrawPoints = new SDL.SDL_Point[points.Length];
+            DrawPoints = new SDL.FPoint[points.Length];
 
         var foo = camera.ViewCoordinateV2_m(RootSequence.ParentPosition.AbsolutePosition); //camera position and zoom
         var trns = Matrix.IDTranslate(foo.X, foo.Y);
@@ -144,15 +143,17 @@ public class ManuverLinesComplete : IDrawData
 
         for (int i = 0; i < points.Length; i++)
         {
-            DrawPoints[i] = mtrx.TransformToSDL_Point(points[i].X, points[i].Y);
+            var result = mtrx.TransformToSDL_Point(points[i].X, points[i].Y);
+            DrawPoints[i] = new SDL.FPoint() { X = result.X, Y = result. Y };
         }
 
         points = RenderManuverLines.CreatePointArray(EditingNodes);
         if(DrawPointsEditing.Length != points.Length)
-            DrawPointsEditing = new SDL.SDL_Point[points.Length];
+            DrawPointsEditing = new SDL.FPoint[points.Length];
         for (int i = 0; i < points.Length; i++)
         {
-            DrawPointsEditing[i] = mtrx.TransformToSDL_Point(points[i].X, points[i].Y);
+            var result = mtrx.TransformToSDL_Point(points[i].X, points[i].Y);
+            DrawPointsEditing[i] = new SDL.FPoint() { X = result.X, Y = result. Y };
         }
     }
 
@@ -162,12 +163,12 @@ public class ManuverLinesComplete : IDrawData
 
     public void Draw(IntPtr rendererPtr, Camera camera)
     {
-        SDL.SDL_SetRenderDrawColor(rendererPtr, obtClr.r, obtClr.g, obtClr.b, obtClr.a);
-        SDL.SDL_RenderDrawLines(rendererPtr, DrawPoints, DrawPoints.Length);
-        SDL.SDL_SetRenderDrawColor(rendererPtr, editClr.r, editClr.g, editClr.b, editClr.a);
-        SDL.SDL_RenderDrawLines(rendererPtr, DrawPointsEditing, DrawPointsEditing.Length);
+        SDL.SetRenderDrawColor(rendererPtr, obtClr.R, obtClr.G, obtClr.B, obtClr.A);
+        SDL.RenderLines(rendererPtr, DrawPoints, DrawPoints.Length);
+        SDL.SetRenderDrawColor(rendererPtr, editClr.R, editClr.G, editClr.B, editClr.A);
+        SDL.RenderLines(rendererPtr, DrawPointsEditing, DrawPointsEditing.Length);
         if(DrawPoints.Length > 1)
-            SDL.SDL_RenderDrawLine(rendererPtr, DrawPoints[0].x, DrawPoints[0].y, DrawPoints[1].x, DrawPoints[1].y);
+            SDL.RenderLine(rendererPtr, DrawPoints[0].X, DrawPoints[0].Y, DrawPoints[1].X, DrawPoints[1].Y);
     }
 }
 
@@ -207,7 +208,7 @@ public static class RenderManuverLines
             Vector2 startPos = item.startPos;
             Vector2 endPos = startPos;
             if (index < data.Count - 1)
-                endPos = data[index + 1].startPos; 
+                endPos = data[index + 1].startPos;
 
             var kp = CreatePrimitiveShapes.KeplerPoints(a, e, lop, startPos, endPos);
             arraylist.Add(kp);
@@ -248,7 +249,7 @@ public static class RenderManuverLines
             Vector2 startPos = item.startPos;
             Vector2 endPos = startPos;
             if (index < data.Count - 1)
-                endPos = data[index + 1].startPos; 
+                endPos = data[index + 1].startPos;
 
             var kp = CreatePrimitiveShapes.KeplerPoints(a, e, lop, startPos, endPos);
             arraylist.Add(kp);

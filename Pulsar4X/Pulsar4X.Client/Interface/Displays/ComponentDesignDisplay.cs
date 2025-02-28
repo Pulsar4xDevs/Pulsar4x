@@ -72,18 +72,18 @@ namespace Pulsar4X.SDL2UI
 
         public void SetFromComponent(ComponentDesign component, GlobalUIState state)
         {
-            
+
 
             var factionData = state.Faction.GetDataBlob<FactionInfoDB>().Data;
             var factionTech = state.Faction.GetDataBlob<FactionTechDB>();
             Template = factionData.ComponentTemplates[component.TemplateID];
             _componentDesigner = new ComponentDesigner(Template, factionData, factionTech);
-            
+
             NoTemplateState = NoTemplateState.Created;
-            
+
             var templateProperties = component.TemplatePropertyValues;
             //_componentDesigner.Name = component.Name;
-            _nameInputBuffer = ImGuiSDL2CSHelper.BytesFromString(component.Name);
+            _nameInputBuffer = ImGuiSDL3CSHelper.BytesFromString(component.Name);
             foreach (var ptup in templateProperties)
             {
                 var tprop = _componentDesigner.ComponentDesignProperties[ptup.propName];
@@ -160,7 +160,7 @@ namespace Pulsar4X.SDL2UI
                     {
                         if(_componentDesigner != null)
                         {
-                            string name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
+                            string name = ImGuiSDL3CSHelper.StringFromBytes(_nameInputBuffer);
                             _componentDesigner.Name = name;
                             _componentDesigner.CreateDesign(uiState.Faction);
                         }
@@ -641,7 +641,7 @@ namespace Pulsar4X.SDL2UI
             {
                 names.Add(cargoType.Name);
             }
-            
+
             string[] arrayNames = names.ToArray();
 
             Title(property.Name, property.Description);
@@ -657,7 +657,7 @@ namespace Pulsar4X.SDL2UI
         List<ICargoable> GetFuelTypes(ComponentDesignProperty property, GlobalUIState uiState)
         {
             var cargoTypesToDisplay = new List<ICargoable>();
-            
+
             foreach(string cargoType in property.GuidDictionary.Keys)
             {
                 var fuelType = property.GuidDictionary[cargoType].StrResult;

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulsar4X.Orbital;
-using SDL2;
+using SDL3;
 
 namespace Pulsar4X.SDL2UI
 {
 
-    
+
     public class Matrix
     {
         double[] X = new double[3] { 1, 0, 0 };
@@ -33,7 +33,7 @@ namespace Pulsar4X.SDL2UI
                 Z = new double[3] {translateX, tranlsateY, 1}
             };
             return matrix;
-            
+
         }
 
         public static Matrix IDMirror(bool x, bool y)
@@ -102,7 +102,7 @@ namespace Pulsar4X.SDL2UI
             newMatrix.Y[0] = matrixA.Y[0] * matrixB.X[0] + matrixA.Y[1] * matrixB.Y[0] + matrixA.Y[2] * matrixB.Z[0];
             newMatrix.Y[1] = matrixA.Y[0] * matrixB.X[1] + matrixA.Y[1] * matrixB.Y[1] + matrixA.Y[2] * matrixB.Z[1];
             newMatrix.Y[2] = matrixA.Y[0] * matrixB.X[2] + matrixA.Y[1] * matrixB.Y[2] + matrixA.Y[2] * matrixB.Z[2];
-            
+
             newMatrix.Z[0] = matrixA.Z[0] * matrixB.X[0] + matrixA.Z[1] * matrixB.Y[0] + matrixA.Z[2] * matrixB.Z[0];
             newMatrix.Z[1] = matrixA.Z[0] * matrixB.X[1] + matrixA.Z[1] * matrixB.Y[1] + matrixA.Z[2] * matrixB.Z[1];
             newMatrix.Z[2] = matrixA.Z[0] * matrixB.X[2] + matrixA.Z[1] * matrixB.Y[2] + matrixA.Z[2] * matrixB.Z[2];
@@ -141,7 +141,7 @@ namespace Pulsar4X.SDL2UI
             return newpoints;
         }
 
-        public SDL.SDL_Point TransformToSDL_Point(double itemx, double itemy)
+        public SDL.Point TransformToSDL_Point(double itemx, double itemy)
         {
             /*
             SDL.SDL_Point newPoint = new SDL.SDL_Point();
@@ -150,29 +150,17 @@ namespace Pulsar4X.SDL2UI
             newPoint.y = (int)newPointd.Y;
             return newPoint;
             */
-            SDL.SDL_Point newPoint = new SDL.SDL_Point();
-            newPoint.x = (int)(X[0] * itemx + Y[0] * itemy + Z[0] * 1);
-            newPoint.y = (int)(X[1] * itemx + Y[1] * itemy + Z[1] * 1);
+            SDL.Point newPoint = new SDL.Point();
+            newPoint.X = (int)(X[0] * itemx + Y[0] * itemy + Z[0] * 1);
+            newPoint.Y = (int)(X[1] * itemx + Y[1] * itemy + Z[1] * 1);
             return newPoint;
-            
-            
+
+
         }
-        
-        public SDL.SDL_Point[] TransformToSDL_Point(ICollection<SDL.SDL_Point> points)
+
+        public SDL.Point[] TransformToSDL_Point(ICollection<SDL.Point> points)
         {
-            SDL.SDL_Point[] newPoints = new SDL.SDL_Point[points.Count];
-            int i = 0;
-            foreach (var item in points)
-            {
-                newPoints[i] = TransformToSDL_Point(item.x, item.y);
-                i++;
-            }
-            return newPoints;
-        }
-        
-        public SDL.SDL_Point[] TransformToSDL_Point(ICollection<Orbital.Vector2> points)
-        {
-            SDL.SDL_Point[] newPoints = new SDL.SDL_Point[points.Count];
+            SDL.Point[] newPoints = new SDL.Point[points.Count];
             int i = 0;
             foreach (var item in points)
             {
@@ -182,14 +170,21 @@ namespace Pulsar4X.SDL2UI
             return newPoints;
         }
 
-        
-        
-        
-        
-        
+        public SDL.Point[] TransformToSDL_Point(ICollection<Orbital.Vector2> points)
+        {
+            SDL.Point[] newPoints = new SDL.Point[points.Count];
+            int i = 0;
+            foreach (var item in points)
+            {
+                newPoints[i] = TransformToSDL_Point(item.X, item.Y);
+                i++;
+            }
+            return newPoints;
+        }
+
         public Vector2 TransformD(Vector2 point)
         {
-            return TransformD(point.X, point.Y); 
+            return TransformD(point.X, point.Y);
         }
 
         public Vector2 TransformD(double itemx, double itemy)

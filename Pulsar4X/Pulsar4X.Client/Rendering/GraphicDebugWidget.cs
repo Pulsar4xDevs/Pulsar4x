@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
-using SDL2;
+using SDL3;
 using Vector3 = Pulsar4X.Orbital.Vector3;
 
 namespace Pulsar4X.SDL2UI
@@ -67,9 +67,9 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.Text("Cursor View Coordinate from math:");
             var mouseViewCoord = _state.Camera.ViewCoordinate_AU(mouseWorldCoord);
-            ImGui.Text("x" + mouseViewCoord.x);
+            ImGui.Text("x" + mouseViewCoord.X);
             ImGui.SameLine();
-            ImGui.Text("y" + mouseViewCoord.y);
+            ImGui.Text("y" + mouseViewCoord.Y);
 
             ImGui.Text("Camera World Coordinate:");
             var cameraWorldCoord = _state.Camera.CameraWorldPosition_AU;
@@ -85,9 +85,9 @@ namespace Pulsar4X.SDL2UI
             */
 
             ImGui.Text("VSP");
-            ImGui.Text("x" + _debugWidget.ViewScreenPos.x);
+            ImGui.Text("x" + _debugWidget.ViewScreenPos.X);
             ImGui.SameLine();
-            ImGui.Text("y" + _debugWidget.ViewScreenPos.y);
+            ImGui.Text("y" + _debugWidget.ViewScreenPos.Y);
 
             if(ImGui.CollapsingHeader("MatrixArrow test"))
             {
@@ -224,7 +224,7 @@ namespace Pulsar4X.SDL2UI
             set
             {
                 //_keplerEllipseItem.IsEnabled = value;
-                _keplerEllipseItem2.IsEnabled = value; 
+                _keplerEllipseItem2.IsEnabled = value;
             }
         }
 
@@ -259,10 +259,10 @@ namespace Pulsar4X.SDL2UI
         {
 
 
-            SDL.SDL_Color[] reflineColour =
-            {   new SDL.SDL_Color() { r = 255, g = 0, b = 0, a = 100 }};
-            SDL.SDL_Color[] reflineHighlight =
-            {   new SDL.SDL_Color() { r = 255, g = 0, b = 0, a = 255 },};
+            SDL.Color[] reflineColour =
+            {   new SDL.Color() { R = 255, G = 0, B = 0, A = 100 }};
+            SDL.Color[] reflineHighlight =
+            {   new SDL.Color() { R = 255, G = 0, B = 0, A = 255 },};
             ElementItem refline = new ElementItem()
             {
                 NameString = "Reference Line. ",
@@ -288,10 +288,10 @@ namespace Pulsar4X.SDL2UI
             ElementItems.Add(refline);
             refline.IsEnabled = true;
 
-            SDL.SDL_Color[] anglelineColour =
-            {   new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 }};
-            SDL.SDL_Color[] anglelineHighlight =
-            {   new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 255 },};
+            SDL.Color[] anglelineColour =
+            {   new SDL.Color() { R = 0, G = 255, B = 0, A = 100 }};
+            SDL.Color[] anglelineHighlight =
+            {   new SDL.Color() { R = 0, G = 255, B = 0, A = 255 },};
             _anglelineItem = new ElementItem()
             {
                 NameString = "Angle Line ",
@@ -317,10 +317,10 @@ namespace Pulsar4X.SDL2UI
             ElementItems.Add(_anglelineItem);
             _anglelineItem.IsEnabled = false;
 
-            SDL.SDL_Color[] testAngleColour =
-            { new SDL.SDL_Color() { r = 0, g = 0, b = 255, a = 100 } };
-            SDL.SDL_Color[] testAngleHColour =
-                { new SDL.SDL_Color() { r = 0, g = 0, b = 255, a = 255 } };
+            SDL.Color[] testAngleColour =
+            { new SDL.Color() { R = 0, G = 0, B = 255, A = 100 } };
+            SDL.Color[] testAngleHColour =
+                { new SDL.Color() { R = 0, G = 0, B = 255, A = 255 } };
             _testAngleItem = new ElementItem()
             {
                 NameString = "Angle Arc",
@@ -342,10 +342,10 @@ namespace Pulsar4X.SDL2UI
             ElementItems.Add(_testAngleItem);
             _testAngleItem.IsEnabled = false;
 
-            SDL.SDL_Color[] matxRtArwColour =
-                {new SDL.SDL_Color() {r=255, g=255, b= 255, a=100} };
-            SDL.SDL_Color[] matxRtArwHColour =
-                {new SDL.SDL_Color() {r=255, g=255, b= 255, a=255} };
+            SDL.Color[] matxRtArwColour =
+                {new SDL.Color() { R = 255, G = 255, B = 255, A = 100} };
+            SDL.Color[] matxRtArwHColour =
+                {new SDL.Color() { R = 255, G = 255, B = 255, A = 255} };
             _mtxArwItem = new ElementItem()
             {
                 NameString = "Arrow",
@@ -365,10 +365,10 @@ namespace Pulsar4X.SDL2UI
                 }
             };
 
-            SDL.SDL_Color[] ellipse1Colour =
-                {new SDL.SDL_Color() {r=255, g=255, b= 0, a=100} };
-            SDL.SDL_Color[] ellipse2Colour =
-                {new SDL.SDL_Color() {r=255, g=0, b= 255, a=100} };
+            SDL.Color[] ellipse1Colour =
+                {new SDL.Color() { R = 255, G = 255, B = 0, A = 100} };
+            SDL.Color[] ellipse2Colour =
+                {new SDL.Color() { R = 255, G = 0, B = 255, A = 100} };
             _keplerEllipseItem = new ElementItem()
             {
                 NameString = "Ellipse",
@@ -464,7 +464,7 @@ namespace Pulsar4X.SDL2UI
                 if(shape == null || shape.Points == null)
                     throw new NullReferenceException();
 
-                var startPoint = matrix.TransformD(shape.StartPoint.X, shape.StartPoint.Y); //add zoom transformation. 
+                var startPoint = matrix.TransformD(shape.StartPoint.X, shape.StartPoint.Y); //add zoom transformation.
 
                 Orbital.Vector2[] points = new Orbital.Vector2[shape.Points.Length];
 
@@ -476,12 +476,12 @@ namespace Pulsar4X.SDL2UI
                     int y;
                     Vector2 transformedPoint;
                     if (shape.Scales)
-                        transformedPoint = matrix.TransformD(pnt.X, pnt.Y); //add zoom transformation. 
+                        transformedPoint = matrix.TransformD(pnt.X, pnt.Y); //add zoom transformation.
                     else
                         transformedPoint = nonZoomMatrix.TransformD(pnt.X, pnt.Y);
 
-                    x = (int)(ViewScreenPos.x + transformedPoint.X + startPoint.X);
-                    y = (int)(ViewScreenPos.y + transformedPoint.Y + startPoint.Y);
+                    x = (int)(ViewScreenPos.X + transformedPoint.X + startPoint.X);
+                    y = (int)(ViewScreenPos.Y + transformedPoint.Y + startPoint.Y);
                     points[i] = new Orbital.Vector2() { X = x, Y = y };
                 }
 
@@ -501,7 +501,7 @@ namespace Pulsar4X.SDL2UI
                     var pnt = _mtxArwItem.Shape.Points[i];
                     var transformedPoint = tl.TransformD(pnt.X, pnt.Y);
 
-                    mtxArwPts[i] = new Orbital.Vector2() { X = ViewScreenPos.x + transformedPoint.X, Y = ViewScreenPos.y + transformedPoint.Y };
+                    mtxArwPts[i] = new Orbital.Vector2() { X = ViewScreenPos.X + transformedPoint.X, Y = ViewScreenPos.Y + transformedPoint.Y };
                 }
 
                 DrawComplexShapes.Add(new ComplexShape() { Points = mtxArwPts, Colors = _mtxArwItem.Shape.Colors, ColourChanges = _mtxArwItem.Shape.ColourChanges });
@@ -519,21 +519,21 @@ namespace Pulsar4X.SDL2UI
 
                 int ci = 0;
                 var colour = shape.Colors[shape.ColourChanges[ci].colourIndex];
-                SDL.SDL_SetRenderDrawColor(rendererPtr, colour.r, colour.g, colour.b, colour.a);
+                SDL.SetRenderDrawColor(rendererPtr, colour.R, colour.G, colour.B, colour.A);
 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
                     if (shape.ColourChanges.Length > i && shape.ColourChanges[ci].pointIndex == i)
                     {
                         colour = shape.Colors[shape.ColourChanges[ci].colourIndex];
-                        SDL.SDL_SetRenderDrawColor(rendererPtr, colour.r, colour.g, colour.b, colour.a);
+                        SDL.SetRenderDrawColor(rendererPtr, colour.R, colour.G, colour.B, colour.A);
                         ci++;
                     }
                     int x1 = Convert.ToInt32(shape.Points[i].X);
                     int y1 = Convert.ToInt32(shape.Points[i].Y);
                     int x2 = Convert.ToInt32(shape.Points[i + 1].X);
                     int y2 = Convert.ToInt32(shape.Points[i + 1].Y);
-                    SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
+                    SDL.RenderLine(rendererPtr, x1, y1, x2, y2);
                 }
             }
             if(_bezEnabled)

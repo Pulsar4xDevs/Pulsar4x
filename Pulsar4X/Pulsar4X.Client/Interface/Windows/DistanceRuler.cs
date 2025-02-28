@@ -2,7 +2,7 @@
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
-using SDL2;
+using SDL3;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -113,8 +113,8 @@ namespace Pulsar4X.SDL2UI
                         Orbital.Vector3 lastMousePos = _uiState.Camera.MouseWorldCoordinate_m();
                         System.Numerics.Vector2 lastMousePosInViewCoord = ImGui.GetMousePos();
 
-                        SDL.SDL_SetRenderDrawColor(_uiState.SDLRendererPtr, 255,255,255,255);
-                        SDL.SDL_RenderDrawLine(_uiState.SDLRendererPtr, (int)_firstClickInViewCoord.X, (int)_firstClickInViewCoord.Y, (int)lastMousePosInViewCoord.X, (int)lastMousePosInViewCoord.Y);
+                        SDL.SetRenderDrawColor(_uiState.SDLRendererPtr, 255,255,255,255);
+                        SDL.RenderLine(_uiState.SDLRendererPtr, (int)_firstClickInViewCoord.X, (int)_firstClickInViewCoord.Y, (int)lastMousePosInViewCoord.X, (int)lastMousePosInViewCoord.Y);
                         double metricDistance = Math.Sqrt(Math.Pow(_firstClick.X - lastMousePos.X, 2) + Math.Pow(_firstClick.Y - lastMousePos.Y, 2));
                         double lightseconds = metricDistance / 299792458;
                         string tooltipString = Stringify.Distance(metricDistance) + "\r\n" + lightseconds + "ls";

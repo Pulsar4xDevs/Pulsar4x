@@ -2,8 +2,8 @@
 using ImGuiSDL2CS;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
-using SDL2;
-using Point = SDL2.SDL.SDL_Point;
+using SDL3;
+using Point = SDL3.SDL.Point;
 using Vector2 = Pulsar4X.Orbital.Vector2;
 using Pulsar4X.Movement;
 
@@ -14,8 +14,8 @@ namespace Pulsar4X.SDL2UI
     public class Camera
     {
         internal bool IsGrabbingMap = false;
-        internal int MouseFrameIncrementX;
-        internal int MouseFrameIncrementY;
+        internal float MouseFrameIncrementX;
+        internal float MouseFrameIncrementY;
 
         internal bool IsPinnedToEntity { get; private set; }
         internal int PinnedEntityGuid;
@@ -61,14 +61,14 @@ namespace Pulsar4X.SDL2UI
         public double ZoomLevel_m { get; set; } = 1.496e11 / 200;
         public float zoomSpeed { get; set; } = 1.25f;
 
-        public ImGuiSDL2CSWindow _viewPort;
+        public ImGuiSDL3CSWindow _viewPort;
 
         double MAX_ZOOMLEVEL = 1.496e+11;
 
         /// <summary>
         /// Construct a new Camera class within the Graphic Control Viewport.
         /// </summary>
-        public Camera(ImGuiSDL2CSWindow viewPort)
+        public Camera(ImGuiSDL3CSWindow viewPort)
         {
             _viewPort = viewPort;
             //_viewPort.SizeChanged += _viewPort_SizeChanged;
@@ -125,7 +125,7 @@ namespace Pulsar4X.SDL2UI
         public Point ViewCoordinate_m(Orbital.Vector2 worldCoord_m)
         {
             Orbital.Vector2 coordinate = ViewCoordinateV2_m(worldCoord_m);
-            return new Point { x = (int)coordinate.X, y = (int)coordinate.Y };
+            return new Point { X = (int)coordinate.X, Y = (int)coordinate.Y };
         }
 
         public Point ViewCoordinate_m(Orbital.Vector3 worldCoord_m)
@@ -320,7 +320,7 @@ namespace Pulsar4X.SDL2UI
     {
         public CursorCrosshair(Orbital.Vector3 positionM) : base(positionM)
         {
-            var colour = new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 255 };
+            var colour = new SDL.Color() { R = 0, G = 255, B = 0, A = 255 };
 
             Orbital.Vector2 point0 = new Orbital.Vector2() { X = -5, Y = 0 };
             Orbital.Vector2 point1 = new Orbital.Vector2() { X = +5, Y = 0 };

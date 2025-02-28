@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Pulsar4X.Client.Rendering;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Orbital;
-using SDL2;
+using SDL3;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -52,7 +51,7 @@ namespace Pulsar4X.SDL2UI
         /// If this is true, WorldPosition will be the sum of the PositionDB and any value given to WorldPosition
         /// </summary>
         protected bool positionByDB;
-        public SDL.SDL_Point ViewScreenPos;
+        public SDL.Point ViewScreenPos;
         public List<Shape> Shapes = new List<Shape>(); //these could change with entity changes.
         public Shape[] DrawShapes;
         //public bool ShapesScaleWithZoom = false; //this possibly could change if you're zoomed in enough? normaly though, false for entity icons, true for orbit rings
@@ -100,7 +99,7 @@ namespace Pulsar4X.SDL2UI
             {
                 dsi = 3;
                 DrawShapes = new Shape[shapeCount+dsi];
-                var mtxb = Matrix.IDTranslate(ViewScreenPos.x, ViewScreenPos.y);
+                var mtxb = Matrix.IDTranslate(ViewScreenPos.X, ViewScreenPos.Y);
                 DrawShapes[0] = CreatePrimitiveShapes.CenterWidget(mtxb);
 
                 var abspos = camera.ViewCoordinateV2_m(_positionDB.AbsolutePosition);
@@ -110,7 +109,7 @@ namespace Pulsar4X.SDL2UI
                 byte g = 50;
                 byte b = 200;
                 byte a = 255;
-                SDL.SDL_Color colour = new SDL.SDL_Color() {r = r, g = g, b = b, a = a};
+                SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
                 absCtr.Color = colour;
                 DrawShapes[1] = absCtr;
 
@@ -121,7 +120,7 @@ namespace Pulsar4X.SDL2UI
                  g = 50;
                  b = 150;
                  a = 255;
-                colour = new SDL.SDL_Color() {r = r, g = g, b = b, a = a};
+                colour = new SDL.Color() { R = r, G = g, B = b, A = a };
                 ralCtr.Color = colour;
                 DrawShapes[1] = ralCtr;
 
@@ -146,7 +145,7 @@ namespace Pulsar4X.SDL2UI
 
             foreach (var shape in DrawShapes)
             {
-                SDL.SDL_SetRenderDrawColor(rendererPtr, shape.Color.r, shape.Color.g, shape.Color.b, shape.Color.a);
+                SDL.SetRenderDrawColor(rendererPtr, shape.Color.R, shape.Color.G, shape.Color.B, shape.Color.A);
 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
@@ -188,7 +187,7 @@ namespace Pulsar4X.SDL2UI
                     else
                         y2 = Convert.ToInt32(shape.Points[i+1].Y);
 
-                    SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
+                    SDL.RenderLine(rendererPtr, x1, y1, x2, y2);
                 }
             }
 
@@ -203,7 +202,7 @@ namespace Pulsar4X.SDL2UI
         Shape _drawShape;
         protected IPosition _positionDB;
         protected Vector3 _worldPosition;
-        public SDL.SDL_Point ViewScreenPos;
+        public SDL.Point ViewScreenPos;
 
         bool positionByDB;
 
@@ -213,7 +212,7 @@ namespace Pulsar4X.SDL2UI
             set { _worldPosition = value; }
         }
 
-        public SimpleCircle(IPosition positionDB, double radius, SDL.SDL_Color colour)
+        public SimpleCircle(IPosition positionDB, double radius, SDL.Color colour)
         {
             _positionDB = positionDB;
             positionByDB = true;
@@ -231,7 +230,7 @@ namespace Pulsar4X.SDL2UI
 
         public void Draw(IntPtr rendererPtr, Camera camera)
         {
-            SDL.SDL_SetRenderDrawColor(rendererPtr, _drawShape.Color.r, _drawShape.Color.g, _drawShape.Color.b, _drawShape.Color.a);
+            SDL.SetRenderDrawColor(rendererPtr, _drawShape.Color.R, _drawShape.Color.G, _drawShape.Color.B, _drawShape.Color.A);
 
             for (int i = 0; i < _shape.Points.Length - 1; i++)
             {
@@ -239,7 +238,7 @@ namespace Pulsar4X.SDL2UI
                 var y0 = Convert.ToInt32(_drawShape.Points[i].Y);
                 var x1 = Convert.ToInt32(_drawShape.Points[i + 1].X);
                 var y1 = Convert.ToInt32(_drawShape.Points[i + 1].Y);
-                SDL.SDL_RenderDrawLine(rendererPtr, x0, y0, x1, y1);
+                SDL.RenderLine(rendererPtr, x0, y0, x1, y1);
             }
         }
 
@@ -250,8 +249,8 @@ namespace Pulsar4X.SDL2UI
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition);
             var vsp = new Vector2
             {
-                X = ViewScreenPos.x ,
-                Y = ViewScreenPos.y
+                X = ViewScreenPos.X,
+                Y = ViewScreenPos.Y
             };
             Orbital.Vector2[] drawPoints = new Orbital.Vector2[_shape.Points.Length];
 
@@ -277,7 +276,7 @@ namespace Pulsar4X.SDL2UI
         Shape _drawShape;
         protected IPosition _positionDB;
         protected Orbital.Vector3 _worldPosition;
-        public SDL.SDL_Point ViewScreenPos;
+        public SDL.Point ViewScreenPos;
 
         bool positionByDB;
 
@@ -287,7 +286,7 @@ namespace Pulsar4X.SDL2UI
             set { _worldPosition = value; }
         }
 
-        public SimpleLine(IPosition positionDB, Orbital.Vector2 toPoint, SDL.SDL_Color colour)
+        public SimpleLine(IPosition positionDB, Orbital.Vector2 toPoint, SDL.Color colour)
         {
             _positionDB = positionDB;
             positionByDB = true;
@@ -307,7 +306,7 @@ namespace Pulsar4X.SDL2UI
 
         public void Draw(IntPtr rendererPtr, Camera camera)
         {
-            SDL.SDL_SetRenderDrawColor(rendererPtr, _drawShape.Color.r, _drawShape.Color.g, _drawShape.Color.b, _drawShape.Color.a);
+            SDL.SetRenderDrawColor(rendererPtr, _drawShape.Color.R, _drawShape.Color.G, _drawShape.Color.B, _drawShape.Color.A);
 
             for (int i = 0; i < _shape.Points.Length - 1; i++)
             {
@@ -315,7 +314,7 @@ namespace Pulsar4X.SDL2UI
                 var y0 = Convert.ToInt32(_drawShape.Points[i].Y);
                 var x1 = Convert.ToInt32(_drawShape.Points[i + 1].X);
                 var y1 = Convert.ToInt32(_drawShape.Points[i + 1].Y);
-                SDL.SDL_RenderDrawLine(rendererPtr, x0, y0, x1, y1);
+                SDL.RenderLine(rendererPtr, x0, y0, x1, y1);
             }
         }
 
@@ -324,8 +323,8 @@ namespace Pulsar4X.SDL2UI
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition);
             var vsp = new Orbital.Vector2()
             {
-                X = ViewScreenPos.x,
-                Y = ViewScreenPos.y
+                X = ViewScreenPos.X,
+                Y = ViewScreenPos.Y
             };
             Orbital.Vector2[] drawPoints = new Orbital.Vector2[_shape.Points.Length];
 

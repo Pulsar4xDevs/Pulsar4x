@@ -1,12 +1,9 @@
 ﻿using System;
 using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
-using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
-using SDL2;
-using ImGuiNET;
+using SDL3;
 using System.Collections.Generic;
-using System.Linq;
 using Pulsar4X.Orbits;
 using Pulsar4X.Movement;
 
@@ -44,7 +41,7 @@ namespace Pulsar4X.SDL2UI
         internal float _eccentricity;
         internal float _linearEccentricity; //distance from the center of the ellpse to one of the focal points.
         protected Vector2[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points.
-        protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
+        protected SDL.Point[] _drawPoints = new SDL.Point[0];
         protected bool IsRetrogradeOrbit = false;
         #endregion
 
@@ -134,7 +131,7 @@ namespace Pulsar4X.SDL2UI
             _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
             _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
             _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
-            _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
+            _drawPoints = new SDL.Point[_numberOfDrawSegments];
 
         }
         protected abstract void CreatePointArray();

@@ -7,7 +7,7 @@ using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.DataStructures;
 using Pulsar4X.SDL2UI;
-using SDL2;
+using SDL3;
 
 namespace Pulsar4X.Client.Rendering;
 
@@ -22,22 +22,41 @@ public class OpenGLRenderer : IRenderer
 
     public void SetAttributes()
     {
-        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_RED_SIZE, 8);
-        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_GREEN_SIZE, 8);
-        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_BLUE_SIZE, 8);
-        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_ALPHA_SIZE, 8);
-        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DOUBLEBUFFER, 1);
-        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DEPTH_SIZE, 24);
-        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_STENCIL_SIZE, 8);
+        SDL.GLSetAttribute(SDL.GLAttr.RedSize, 8);
+        SDL.GLSetAttribute(SDL.GLAttr.GreenSize, 8);
+        SDL.GLSetAttribute(SDL.GLAttr.BlueSize, 8);
+        SDL.GLSetAttribute(SDL.GLAttr.AlphaSize, 8);
+        SDL.GLSetAttribute(SDL.GLAttr.DoubleBuffer, 1);
+        SDL.GLSetAttribute(SDL.GLAttr.DepthSize, 24);
+        SDL.GLSetAttribute(SDL.GLAttr.StencilSize, 8);
 #if WINDOWS
-        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 6);
+        SDL.GLSetAttribute(SDL.GLAttr.ContextMajorVersion, 4);
+        SDL.GLSetAttribute(SDL.GLAttr.ContextMinorVersion, 6);
 #endif
-        SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK, (int)SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_CORE);
+        SDL.GLSetAttribute(SDL.GLAttr.ContextProfileMask, (int)SDL.GLProfile.Core);
     }
 
     public void Initialize(IntPtr windowHandle)
     {
+        _windowHandle = windowHandle;
+
+        // Create the OpenGL context
+        _glContext = SDL.GLCreateContext(_windowHandle);
+        if(_glContext == IntPtr.Zero)
+        {
+            throw new Exception($"Failed to create OpenGL context: {SDL.GetError()}");
+        }
+
+        // Make the OpenGL context current
+        bool makeCurrentResult = SDL.GLMakeCurrent(_windowHandle, _glContext);
+        if (!makeCurrentResult)
+        {
+            throw new Exception($"GL_MakeCurrent failed: {SDL.GetError()}");
+        }
+
+        // Load OpenGL functions
+        GL.LoadFunctions();
+
         // Print all OpenGL extensions
         GL.GetIntegerv(GL.Enum.GL_NUM_EXTENSIONS, out var numExtensions);
         Console.WriteLine($"Number of OpenGL extensions: {numExtensions}");
@@ -52,28 +71,9 @@ public class OpenGLRenderer : IRenderer
             }
         }
 
-        _windowHandle = windowHandle;
-
-        // Create the OpenGL context
-        _glContext = SDL.SDL_GL_CreateContext(_windowHandle);
-        if(_glContext == IntPtr.Zero)
-        {
-            throw new Exception($"Failed to create OpenGL context: {SDL.SDL_GetError()}");
-        }
-
-        // Make the OpenGL context current
-        int makeCurrentResult = SDL.SDL_GL_MakeCurrent(_windowHandle, _glContext);
-        if (makeCurrentResult < 0)
-        {
-            throw new Exception($"GL_MakeCurrent failed: {SDL.SDL_GetError()}");
-        }
-
         // After context creation
         string version = GL.GetString(GL.Enum.GL_VERSION);
         Console.WriteLine($"OpenGL Version: {version}");
-
-        // Load OpenGL functions
-        GL.LoadFunctions();
 
         _lineRenderer = new LineRenderer();
     }
@@ -85,7 +85,7 @@ public class OpenGLRenderer : IRenderer
 
     public void EndFrame()
     {
-        SDL.SDL_GL_SwapWindow(_windowHandle);
+        SDL.GLSwapWindow(_windowHandle);
     }
 
     public void Clear(float r, float g, float b, float a)
@@ -133,7 +133,7 @@ public class OpenGLRenderer : IRenderer
         }
 
         // Create the surface
-        IntPtr sdlSurface = SDL.SDL_CreateRGBSurfaceFrom(
+        IntPtr sdlSurface = SDL3Helper.SDL_CreateRGBSurfaceFrom(
                                 pixels,
                                 rawBmp.Width,
                                 rawBmp.Height,
@@ -145,7 +145,7 @@ public class OpenGLRenderer : IRenderer
                                 amask);
 
         texturePtr = (IntPtr)CreateTexture(sdlSurface, textureFilter);
-        SDL.SDL_FreeSurface(sdlSurface);
+        SDL.DestroySurface(sdlSurface);
     }
 
     public void CreateTexture(ref IntPtr texture, int width, int height, IntPtr pixels, PixelFormat pixelFormat = PixelFormat.RGBA8888, TextureFilter textureFilter = TextureFilter.Linear)
@@ -180,19 +180,18 @@ public class OpenGLRenderer : IRenderer
     public uint CreateTexture(IntPtr surfacePtr, TextureFilter textureFilter = TextureFilter.Linear)
     {
         // Convert the SDL_Surface pointer to a managed structure
-        var surface = Marshal.PtrToStructure<SDL.SDL_Surface>(surfacePtr);
-        var format = Marshal.PtrToStructure<SDL.SDL_PixelFormat>(surface.format);
+        var surface = Marshal.PtrToStructure<SDL.Surface>(surfacePtr);
 
         // Check if pixels exist
-        if (surface.pixels == IntPtr.Zero)
+        if (surface.Pixels == IntPtr.Zero)
         {
             throw new Exception("Surface contains no pixel data");
         }
 
         // Check dimensions
-        if (surface.w <= 0 || surface.h <= 0)
+        if (surface.Width <= 0 || surface.Height <= 0)
         {
-            throw new Exception($"Invalid texture dimensions: {surface.w}x{surface.h}");
+            throw new Exception($"Invalid texture dimensions: {surface.Width}x{surface.Height}");
         }
 
         // Generate texture ID
@@ -217,12 +216,12 @@ public class OpenGLRenderer : IRenderer
 
         GL.Enum glFormat = GL.Enum.GL_RGBA;
 
-        switch(format.BitsPerPixel)
+        switch(surface.Format)
         {
-            case 32:
+            case SDL.PixelFormat.RGBA8888:
                 glFormat = GL.Enum.GL_RGBA;
                 break;
-            case 24:
+            case SDL.PixelFormat.RGB24:
                 glFormat = GL.Enum.GL_RGB;
                 break;
         }
@@ -234,12 +233,12 @@ public class OpenGLRenderer : IRenderer
                 GL.Enum.GL_TEXTURE_2D,
                 0,
                 (int)glFormat,
-                surface.w,
-                surface.h,
+                surface.Width,
+                surface.Height,
                 0,
                 glFormat,
                 GL.Enum.GL_UNSIGNED_BYTE,
-                surface.pixels
+                surface.Pixels
             );
         }
         catch (Exception e)
@@ -442,16 +441,16 @@ public class OpenGLRenderer : IRenderer
     public void RenderLine(Shape[] shapes, Camera camera)
     {
         // Save the current OpenGL context state
-        _previousContext = SDL.SDL_GL_GetCurrentContext();
+        _previousContext = SDL.GLGetCurrentContext();
 
         // Make the OpenGL context current
-        SDL.SDL_GL_MakeCurrent(_windowHandle, _glContext);
+        SDL.GLMakeCurrent(_windowHandle, _glContext);
 
         // Render the lines
         _lineRenderer.Draw(shapes, camera);
 
         // Restore the previous context
-        SDL.SDL_GL_MakeCurrent(_windowHandle, _previousContext);
+        SDL.GLMakeCurrent(_windowHandle, _previousContext);
     }
 
     public void Dispose()
@@ -468,7 +467,7 @@ public class OpenGLRenderer : IRenderer
 
         if(_glContext != IntPtr.Zero)
         {
-            SDL.SDL_GL_DeleteContext(_glContext);
+            SDL.GLDestroyContext(_glContext);
             _glContext = IntPtr.Zero;
         }
     }

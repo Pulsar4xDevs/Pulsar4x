@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
 using Pulsar4X.Engine;
-using SDL2;
+using SDL3;
 using System.Numerics;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.JumpPoints;
@@ -27,8 +27,8 @@ namespace Pulsar4X.SDL2UI
         internal string NameString;
         public float Width { get; set; }
         public float Height{ get; set; }
-        public float X { get { return ViewScreenPos.x; }  }
-        public float Y { get { return ViewScreenPos.y; } }
+        public float X { get { return ViewScreenPos.X; }  }
+        public float Y { get { return ViewScreenPos.Y; } }
         string _starSysGuid;
         public Dictionary<int, string> SubNames = new ();
         public Vector2 ViewOffset { get; set; } = new Vector2();
@@ -58,12 +58,12 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-        public static NameIcon operator +(NameIcon nameIcon, SDL.SDL_Point point)
+        public static NameIcon operator +(NameIcon nameIcon, SDL.Point point)
         {
             Vector2 newpoint = new Vector2()
             {
-                X = nameIcon.ViewOffset.X + point.x,
-                Y = nameIcon.ViewOffset.Y + point.y
+                X = nameIcon.ViewOffset.X + point.X,
+                Y = nameIcon.ViewOffset.Y + point.Y
             };
             nameIcon.ViewOffset = newpoint;
 
@@ -92,8 +92,8 @@ namespace Pulsar4X.SDL2UI
             ViewOffset = defualtOffset;
             base.OnFrameUpdate(matrix, camera);
 
-            ViewDisplayRect.X = ViewScreenPos.x;
-            ViewDisplayRect.Y = ViewScreenPos.y;
+            ViewDisplayRect.X = ViewScreenPos.X;
+            ViewDisplayRect.Y = ViewScreenPos.Y;
 
         }
 

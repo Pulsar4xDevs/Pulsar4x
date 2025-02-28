@@ -1,7 +1,7 @@
 ﻿using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.Orbital;
-using SDL2;
+using SDL3;
 using System;
 using System.Collections.Generic;
 using Pulsar4X.ImGuiNetUI;
@@ -79,7 +79,7 @@ namespace Pulsar4X.SDL2UI
         internal EntityContextMenu? ContextMenu { get; set; }
         internal SafeDictionary<string, SystemState> StarSystemStates = new ();
         internal Camera Camera;
-        internal ImGuiSDL2CSWindow ViewPort { get; private set; }
+        internal ImGuiSDL3CSWindow ViewPort { get; private set; }
         internal System.Numerics.Vector2 MainWinSize { get {return ViewPort.Size;}}
 
         internal Dictionary<Type, PulsarGuiWindow> LoadedWindows = new ();
@@ -101,7 +101,7 @@ namespace Pulsar4X.SDL2UI
 
         internal View? SelectedMapView { get; set; } = null;
 
-        internal GlobalUIState(ImGuiSDL2CSWindow viewport)
+        internal GlobalUIState(ImGuiSDL3CSWindow viewport)
         {
             ViewPort = viewport;
             PulsarGuiWindow._uiState = this;
@@ -110,9 +110,9 @@ namespace Pulsar4X.SDL2UI
             // Hint the renderer to use OpenGL if the viewport renderer is OpenGL
             if(viewport.Renderer is OpenGLRenderer)
             {
-                SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_DRIVER, "opengl");
+                SDL.SetHint(SDL.Hints.RenderDriver, "opengl");
             }
-            SDLRendererPtr = SDL.SDL_CreateRenderer(windowPtr, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
+            SDLRendererPtr = SDL.CreateRenderer(windowPtr, "pulsar4x");
 
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Star, 2f);
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Planet, 32f);

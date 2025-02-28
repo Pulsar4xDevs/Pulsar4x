@@ -55,11 +55,11 @@ public class NewGameMenu : PulsarGuiWindow
     int _maxSystems = 5;
 
 
-    byte[] _nameInputBuffer = ImGuiSDL2CSHelper.BytesFromString("My Game", 32);
-    byte[] _factionInputBuffer = ImGuiSDL2CSHelper.BytesFromString("UEF", 16);
-    byte[] _passInputBuffer = ImGuiSDL2CSHelper.BytesFromString("", 16);
+    byte[] _nameInputBuffer = ImGuiSDL3CSHelper.BytesFromString("My Game", 32);
+    byte[] _factionInputBuffer = ImGuiSDL3CSHelper.BytesFromString("UEF", 16);
+    byte[] _passInputBuffer = ImGuiSDL3CSHelper.BytesFromString("", 16);
 
-    byte[] _smPassInputbuffer = ImGuiSDL2CSHelper.BytesFromString("", 16);
+    byte[] _smPassInputbuffer = ImGuiSDL3CSHelper.BytesFromString("", 16);
 
     int _masterSeed = 12345678;
 
@@ -378,12 +378,12 @@ public class NewGameMenu : PulsarGuiWindow
     {
         gameSettings = new NewGameSettings
         {
-            GameName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer),
+            GameName = ImGuiSDL3CSHelper.StringFromBytes(_nameInputBuffer),
             MaxSystems = _maxSystems,
-            SMPassword = ImGuiSDL2CSHelper.StringFromBytes(_smPassInputbuffer),
+            SMPassword = ImGuiSDL3CSHelper.StringFromBytes(_smPassInputbuffer),
             CreatePlayerFaction = true,
-            DefaultFactionName = ImGuiSDL2CSHelper.StringFromBytes(_factionInputBuffer),
-            DefaultPlayerPassword = ImGuiSDL2CSHelper.StringFromBytes(_passInputBuffer),
+            DefaultFactionName = ImGuiSDL3CSHelper.StringFromBytes(_factionInputBuffer),
+            DefaultPlayerPassword = ImGuiSDL3CSHelper.StringFromBytes(_passInputBuffer),
             DefaultSolStart = true,
             MasterSeed = _masterSeed,
             EleStart = _eleStart

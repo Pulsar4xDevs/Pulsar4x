@@ -1,10 +1,10 @@
-using SDL2;
+using SDL3;
 
 namespace Pulsar4X.Input;
 
 public interface IHotKeyHandler
 {
-    void HandleEvent(SDL.SDL_Event e);
+    void HandleEvent(SDL.Event e);
 }
 
 public abstract class HotKeyFactory

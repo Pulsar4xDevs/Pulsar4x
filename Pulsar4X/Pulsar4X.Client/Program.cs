@@ -9,7 +9,7 @@ namespace Pulsar4X.SDL2UI
 {
     public class Program
     {
-        static SDL2Window? Instance;
+        static SDL3Window? Instance;
         [STAThread]
         public static async Task Main(string[] args)
         {

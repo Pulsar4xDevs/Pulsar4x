@@ -1,6 +1,6 @@
 ﻿using System;
 using Pulsar4X.Orbital;
-using SDL2;
+using SDL3;
 using System.Collections.Generic;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
@@ -10,7 +10,7 @@ namespace Pulsar4X.SDL2UI
     class StarIcon : Icon
     {
         double _tempK;
-        SDL.SDL_Color _color;
+        SDL.Color _color;
         float _iconMinSize = 16;
         double _bodyRadiusAU;
         public StarIcon(StarInfoDB starInfoDB, PositionDB positionDB, MassVolumeDB massVolumeDB): base(positionDB)
@@ -23,32 +23,32 @@ namespace Pulsar4X.SDL2UI
 
             //Red
             if (calcTemp <= 660)
-                _color.r = 255;
+                _color.R = 255;
             else
             {
-                _color.r = (byte)(329.698727446 * Math.Pow(calcTemp - 60, -0.1332047592));
+                _color.R = (byte)(329.698727446 * Math.Pow(calcTemp - 60, -0.1332047592));
             }
 
             //Green
             if (calcTemp <= 66)
             {
-                _color.g = (byte)(99.4708025861 * Math.Log(calcTemp) - 161.1195681661);
+                _color.G = (byte)(99.4708025861 * Math.Log(calcTemp) - 161.1195681661);
             }
             else
             {
-                _color.g = (byte)(288.1221695283 * Math.Pow(calcTemp - 60, -0.0755148492));
+                _color.G = (byte)(288.1221695283 * Math.Pow(calcTemp - 60, -0.0755148492));
             }
 
             //Blue
             if (calcTemp >= 66)
-                _color.b = 255;
+                _color.B = 255;
             else if (calcTemp <= 19)
-                _color.b = 0;
+                _color.B = 0;
             else
             {
-                _color.b = (byte)(138.5177312231 * Math.Log(calcTemp - 10) - 305.0447927307);
+                _color.B = (byte)(138.5177312231 * Math.Log(calcTemp - 10) - 305.0447927307);
             }
-            _color.a = 255;
+            _color.A = 255;
 
 
             byte spikes = (byte)(starInfoDB.SpectralType + 4);

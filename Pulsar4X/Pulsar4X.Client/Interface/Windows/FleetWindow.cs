@@ -135,7 +135,7 @@ namespace Pulsar4X.SDL2UI
 
             if(selectedOrder != null)
             {
-                orderNameBuffer = selectedOrder.Name.IsNullOrEmpty() ? new byte[32] : ImGuiSDL2CSHelper.BytesFromString(selectedOrder.Name, 32);
+                orderNameBuffer = selectedOrder.Name.IsNullOrEmpty() ? new byte[32] : ImGuiSDL3CSHelper.BytesFromString(selectedOrder.Name, 32);
             }
         }
 
@@ -493,7 +493,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.SetCursorPosY(sizeAvailable.Y - 12f);
                         if(ImGui.Button("Save", new Vector2(sizeAvailable.X, 0)))
                         {
-                            string name = ImGuiSDL2CSHelper.StringFromBytes(orderNameBuffer);
+                            string name = ImGuiSDL3CSHelper.StringFromBytes(orderNameBuffer);
                             if(name.IsNotNullOrEmpty())
                             {
                                 selectedOrder.Name = name;

@@ -1,6 +1,6 @@
 ﻿using ImGuiSDL2CS;
 using Pulsar4X.Extensions;
-using SDL2;
+using SDL3;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -33,27 +33,27 @@ namespace Pulsar4X.SDL2UI
 #if DEBUG
                 Console.WriteLine($"Loading image: {path}");
 #endif
-                IntPtr sdlSurface = SDL2.SDL_image.IMG_Load(path);
+                IntPtr sdlSurface = Image.Load(path);
 
                 if (sdlSurface == IntPtr.Zero)
                 {
-                    Console.WriteLine($"Failed to load BMP: {SDL_image.IMG_GetError()}");
+                    Console.WriteLine($"Failed to load BMP: {SDL.GetError()}");
                     return IntPtr.Zero;
                 }
 
 #if DEBUG
                 // Debug surface info
-                var surface = Marshal.PtrToStructure<SDL.SDL_Surface>(sdlSurface);
-                var format = Marshal.PtrToStructure<SDL.SDL_PixelFormat>(surface.format);
+                var surface = Marshal.PtrToStructure<SDL.Surface>(sdlSurface);
+                //var format = Marshal.PtrToStructure<SDL.PixelFormat>(surface.Format);
 
                 Console.WriteLine($"Successfully loaded: {imgName}");
                 Console.WriteLine($"Format: {extension}");
                 Console.WriteLine($"Surface pointer: {sdlSurface:X}");
-                Console.WriteLine($"Pixel pointer: {surface.pixels:X}");
-                Console.WriteLine($"Dimensions: {surface.w}x{surface.h}");
-                Console.WriteLine($"BPP: {format.BitsPerPixel}");
-                Console.WriteLine($"BytesPerPixel: {format.BytesPerPixel}");
-                Console.WriteLine($"Pitch: {surface.pitch}");
+                Console.WriteLine($"Pixel pointer: {surface.Pixels:X}");
+                Console.WriteLine($"Dimensions: {surface.Width}x{surface.Height}");
+                //Console.WriteLine($"BPP: {format.BitsPerPixel}");
+                //Console.WriteLine($"BytesPerPixel: {format.BytesPerPixel}");
+                Console.WriteLine($"Pitch: {surface.Pitch}");
                 Console.WriteLine(new string('-', 50));
 #endif
                 try
@@ -66,7 +66,7 @@ namespace Pulsar4X.SDL2UI
                 finally
                 {
                     // Free the surface after the texture is created
-                    SDL.SDL_FreeSurface(sdlSurface);
+                    SDL.Free(sdlSurface);
                 }
             }
             return _uiState.SDLImageDictionary[imgName];

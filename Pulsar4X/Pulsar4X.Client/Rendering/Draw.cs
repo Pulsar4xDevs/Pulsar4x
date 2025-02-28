@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulsar4X.Orbital;
-using SDL2;
+using SDL3;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -51,13 +51,13 @@ namespace Pulsar4X.SDL2UI
     /// </summary>
     public struct Shape
     {
-        public SDL.SDL_Color Color;    //could change due to entity changes.
+        public SDL.Color Color;    //could change due to entity changes.
         public Vector2[] Points; //relative to the IconPosition. could change with entity changes.
     }
 
     public class MutableShape
     {
-        public SDL.SDL_Color Color;
+        public SDL.Color Color;
         public List<Vector2> Points = new List<Vector2>();
         public bool Scales = true;
     }
@@ -67,7 +67,7 @@ namespace Pulsar4X.SDL2UI
     {
         public Vector2 StartPoint;
         public Vector2[]? Points;
-        public SDL.SDL_Color[]? Colors;
+        public SDL.Color[]? Colors;
         public (int pointIndex, int colourIndex)[]? ColourChanges; //at Points[item1] we change to Colors[item2]
         public bool Scales;
 
@@ -79,8 +79,8 @@ namespace Pulsar4X.SDL2UI
         internal double DataItem;
         internal string DataString = "";
         internal ComplexShape? Shape;
-        internal SDL.SDL_Color[]? Colour;
-        internal SDL.SDL_Color[]? HighlightColour;
+        internal SDL.Color[]? Colour;
+        internal SDL.Color[]? HighlightColour;
         internal bool IsEnabled = false;
         internal bool ShowLines = false;
 

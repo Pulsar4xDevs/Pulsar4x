@@ -6,10 +6,10 @@ using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Extensions;
-using SDL2;
 using Pulsar4X.Orbits;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using SDL3;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -329,10 +329,10 @@ namespace Pulsar4X.SDL2UI
 
         void CreateLines()
         {
-            SDL.SDL_Color[] ctrColour =
-                {   new SDL.SDL_Color() { r = 0, g = 160, b = 0, a = 100 }};
-            SDL.SDL_Color[] ctrHighlight =
-                {   new SDL.SDL_Color() { r = 0, g = 160, b = 0, a = 255 },};
+            SDL.Color[] ctrColour =
+                {   new SDL.Color() { R = 0, G = 160, B = 0, A = 100 }};
+            SDL.Color[] ctrHighlight =
+                {   new SDL.Color() { R = 0, G = 160, B = 0, A = 255 },};
 
             ElementItem ctr = new ElementItem()
             {
@@ -363,10 +363,10 @@ namespace Pulsar4X.SDL2UI
             };
             ElementItems.Add(ctr);
 
-            SDL.SDL_Color[] SMAColour =
-            {   new SDL.SDL_Color() { r = 0, g = 160, b = 0, a = 100 }};
-            SDL.SDL_Color[] SMAHighlight =
-            {   new SDL.SDL_Color() { r = 0, g = 160, b = 0, a = 255 },};
+            SDL.Color[] SMAColour =
+            {   new SDL.Color() { R = 0, G = 160, B = 0, A = 100 }};
+            SDL.Color[] SMAHighlight =
+            {   new SDL.Color() { R = 0, G = 160, B = 0, A = 255 },};
 
             ElementItem sma1 = new ElementItem()
             {
@@ -460,10 +460,10 @@ namespace Pulsar4X.SDL2UI
             };
             ElementItems.Add(sma4);
 
-            SDL.SDL_Color[] SMinAColour =
-                { new SDL.SDL_Color(){ r = 0, g = 0, b = 150, a = 100 } };
-            SDL.SDL_Color[] SMinAHighlight =
-                { new SDL.SDL_Color(){ r = 0, g = 0, b = 150, a = 255 } };
+            SDL.Color[] SMinAColour =
+                { new SDL.Color(){ R = 0, G = 0, B = 150, A = 100 } };
+            SDL.Color[] SMinAHighlight =
+                { new SDL.Color(){ R = 0, G = 0, B = 150, A = 255 } };
 
             ElementItem smina1 = new ElementItem()
             {
@@ -536,10 +536,10 @@ namespace Pulsar4X.SDL2UI
             };
             ElementItems.Add(smina2);
 
-            SDL.SDL_Color[] LeColour =
-                { new SDL.SDL_Color() { r = 0, g = 170, b = 10, a = 100 } };
-            SDL.SDL_Color[] LeHighlight =
-                { new SDL.SDL_Color() { r = 0, g = 170, b = 10, a = 255 } };
+            SDL.Color[] LeColour =
+                { new SDL.Color() { R = 0, G = 170, B = 10, A = 100 } };
+            SDL.Color[] LeHighlight =
+                { new SDL.Color() { R = 0, G = 170, B = 10, A = 255 } };
 
             //string datastring = a_m.ToString() + " * " + e.ToString() + " = " + Stringify.Distance(a_m * e);
 
@@ -620,12 +620,12 @@ namespace Pulsar4X.SDL2UI
             };
             ElementItems.Add(linec2);
 
-            SDL.SDL_Color[] F1PointColour =
-            {   new SDL.SDL_Color(){ r = 200, g = 0, b = 0, a = 100 },
-                new SDL.SDL_Color(){a = 0} };
-            SDL.SDL_Color[] F1PointHighlight =
-            {   new SDL.SDL_Color(){ r = 200, g = 0, b = 0, a = 255 },
-                new SDL.SDL_Color(){a = 0} };
+            SDL.Color[] F1PointColour =
+            {   new SDL.Color(){ R = 200, G = 0, B = 0, A = 100 },
+                new SDL.Color(){A = 0} };
+            SDL.Color[] F1PointHighlight =
+            {   new SDL.Color(){ R = 200, G = 0, B = 0, A = 255 },
+                new SDL.Color(){A = 0} };
             ElementItem f1pnt = new ElementItem()
             {
                 NameString = "Focal Point 1 (Barycenter)",
@@ -681,12 +681,12 @@ namespace Pulsar4X.SDL2UI
             };
             ElementItems.Add(f2pnt);
 
-            SDL.SDL_Color[] coVertexColour =
-            {   new SDL.SDL_Color(){ r = 50, g = 50, b = 0, a = 100 },
-                new SDL.SDL_Color(){a = 0} };
-            SDL.SDL_Color[] coVertexHColour =
-            {   new SDL.SDL_Color(){ r = 150, g = 50, b = 0, a = 255 },
-                new SDL.SDL_Color(){a = 0} };
+            SDL.Color[] coVertexColour =
+            {   new SDL.Color(){ R = 50, G = 50, B = 0, A = 100 },
+                new SDL.Color(){A = 0} };
+            SDL.Color[] coVertexHColour =
+            {   new SDL.Color(){ R = 150, G = 50, B = 0, A = 255 },
+                new SDL.Color(){A = 0} };
             ElementItem coVertex = new ElementItem()
             {
                 NameString = "Co-Vertex",
@@ -715,12 +715,12 @@ namespace Pulsar4X.SDL2UI
             };
             ElementItems.Add(coVertex);
 
-            SDL.SDL_Color[] objPntColour =
-                {   new SDL.SDL_Color(){ r = 50, g = 50, b = 0, a = 100 },
-                    new SDL.SDL_Color(){a = 0} };
-            SDL.SDL_Color[] objPntHColour =
-                {   new SDL.SDL_Color(){ r = 150, g = 50, b = 0, a = 255 },
-                    new SDL.SDL_Color(){a = 0} };
+            SDL.Color[] objPntColour =
+                {   new SDL.Color(){ R = 50, G = 50, B = 0, A = 100 },
+                    new SDL.Color(){A = 0} };
+            SDL.Color[] objPntHColour =
+                {   new SDL.Color(){ R = 150, G = 50, B = 0, A = 255 },
+                    new SDL.Color(){A = 0} };
             _bodyPosItem = new ElementItem()
             {
                 NameString = "Object RelativePosition (P) - from PosDB",
@@ -783,10 +783,10 @@ namespace Pulsar4X.SDL2UI
             ElementItems.Add(_bodyPosFromState);
 
             //loan angle
-            SDL.SDL_Color[] loanColour =
-                { new SDL.SDL_Color() { r = 0, g = 100, b = 0, a = 100 } };
-            SDL.SDL_Color[] loanHColour =
-                { new SDL.SDL_Color() { r = 0, g = 100, b = 0, a = 255 } };
+            SDL.Color[] loanColour =
+                { new SDL.Color() { R = 0, G = 100, B = 0, A = 100 } };
+            SDL.Color[] loanHColour =
+                { new SDL.Color() { R = 0, G = 100, B = 0, A = 255 } };
             ElementItem loanAngle = new ElementItem()
             {
                 NameString = "Longditude Of Assending Node (Ω)",
@@ -810,8 +810,8 @@ namespace Pulsar4X.SDL2UI
             ElementItems.Add(loanAngle);
 
             //aop angle
-            SDL.SDL_Color[] aopColour = { new SDL.SDL_Color() { r = 100, g = 0, b = 100, a = 100 } };
-            SDL.SDL_Color[] aopHColour = { new SDL.SDL_Color() { r = 100, g = 0, b = 100, a = 255 } };
+            SDL.Color[] aopColour = { new SDL.Color() { R = 100, G = 0, B = 100, A = 100 } };
+            SDL.Color[] aopHColour = { new SDL.Color() { R = 100, G = 0, B = 100, A = 255 } };
             ElementItem aopAngle = new ElementItem()
             {
                 NameString = "Argument Of Periapsis (ω) - from elements",
@@ -917,8 +917,8 @@ namespace Pulsar4X.SDL2UI
             ElementItems.Add(_aopItem_FromCalc4);
 
             //lop angle
-            SDL.SDL_Color[] lopColour = { new SDL.SDL_Color() { r = 100, g = 100, b = 60, a = 100 } };
-            SDL.SDL_Color[] lopHColour = { new SDL.SDL_Color() { r = 100, g = 100, b = 60, a = 255 } };
+            SDL.Color[] lopColour = { new SDL.Color() { R = 100, G = 100, B = 60, A = 100 } };
+            SDL.Color[] lopHColour = { new SDL.Color() { R = 100, G = 100, B = 60, A = 255 } };
             ElementItem lopAngle = new ElementItem()
             {
                 NameString = "Longditude Of Periapsis (ϖ = Ω + ω)",
@@ -989,13 +989,13 @@ namespace Pulsar4X.SDL2UI
             #region TrueAnomaly
 
             //trueAnom angle index 3
-            SDL.SDL_Color[] trueAnomColour =
+            SDL.Color[] trueAnomColour =
             {
-                new SDL.SDL_Color { r = 100, g = 0, b = 0, a = 100 },
+                new SDL.Color { R = 100, G = 0, B = 0, A = 100 },
             };
-            SDL.SDL_Color[] trueAnomHColour =
+            SDL.Color[] trueAnomHColour =
             {
-                new SDL.SDL_Color { r = 100, g = 0, b = 0, a = 255},
+                new SDL.Color { R = 100, G = 0, B = 0, A = 255},
             };
 
 
@@ -1084,8 +1084,8 @@ namespace Pulsar4X.SDL2UI
             ElementItems.Add(_radiusToBody);
 
             //MeanAnom angle index 4
-            SDL.SDL_Color[] meanAnomColour = { new SDL.SDL_Color() { r = 100, g = 100, b = 100, a = 100 } };
-            SDL.SDL_Color[] meanAnomHColour = { new SDL.SDL_Color() { r = 100, g = 100, b = 100, a = 255 } };
+            SDL.Color[] meanAnomColour = { new SDL.Color() { R = 100, G = 100, B = 100, A = 100 } };
+            SDL.Color[] meanAnomHColour = { new SDL.Color() { R = 100, G = 100, B = 100, A = 255 } };
 
             _meanAnomalyItem = new ElementItem()
             {
@@ -1111,8 +1111,8 @@ namespace Pulsar4X.SDL2UI
             #region EccentricAnomaly
 
             //EccentricAnom angle index 5
-            SDL.SDL_Color[] eAnomColour = { new SDL.SDL_Color() { r = 100, g = 0, b = 100, a = 100 } };
-            SDL.SDL_Color[] eAnomHColour = { new SDL.SDL_Color() { r = 100, g = 0, b = 100, a = 255 } };
+            SDL.Color[] eAnomColour = { new SDL.Color() { R = 100, G = 0, B = 100, A = 100 } };
+            SDL.Color[] eAnomHColour = { new SDL.Color() { R = 100, G = 0, B = 100, A = 255 } };
             _eccentricAnomalyItem = new ElementItem()
             {
                 NameString = "Eccentric Anomoly (E)",
@@ -1550,21 +1550,21 @@ namespace Pulsar4X.SDL2UI
 
                 int ci = 0;
                 var colour = shape.Colors[shape.ColourChanges[ci].colourIndex];
-                SDL.SDL_SetRenderDrawColor(rendererPtr, colour.r, colour.g, colour.b, colour.a);
+                SDL.SetRenderDrawColor(rendererPtr, colour.R, colour.G, colour.B, colour.A);
 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
                     if(shape.ColourChanges.Length > i && shape.ColourChanges[ci].pointIndex == i)
                     {
                         colour = shape.Colors[shape.ColourChanges[ci].colourIndex];
-                        SDL.SDL_SetRenderDrawColor(rendererPtr, colour.r, colour.g, colour.b, colour.a);
+                        SDL.SetRenderDrawColor(rendererPtr, colour.R, colour.G, colour.B, colour.A);
                         ci++;
                     }
                     int x1 = Convert.ToInt32(shape.Points[i].X);
                     int y1 = Convert.ToInt32(shape.Points[i].Y);
                     int x2 = Convert.ToInt32(shape.Points[i + 1].X);
                     int y2 = Convert.ToInt32(shape.Points[i + 1].Y);
-                    SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
+                    SDL.RenderLine(rendererPtr, x1, y1, x2, y2);
                 }
             }
         }
@@ -1591,15 +1591,15 @@ namespace Pulsar4X.SDL2UI
                 double lop = _ke.LoAN + _ke.AoP;
                 double speed = OrbitalMath.InstantaneousOrbitalSpeed(_sgp, _bodyPosition.RelativePosition.Length(), _ke.SemiMajorAxis);
 
-                SDL.SDL_Color[] headingColour =
+                SDL.Color[] headingColour =
                 {
-                    new () { r = 100, g = 100, b = 100, a = 100 },
-                    new () {a = 0}
+                    new () { R = 100, G = 100, B = 100, A = 100 },
+                    new () {A = 0}
                 };
-                SDL.SDL_Color[] headingHColour =
+                SDL.Color[] headingHColour =
                 {
-                    new () { r = 100, g = 100, b = 100, a = 255 },
-                    new () {a = 0}
+                    new () { R = 100, G = 100, B = 100, A = 255 },
+                    new () {A = 0}
                 };
 
                 NameString = "Heading";
@@ -1672,15 +1672,15 @@ namespace Pulsar4X.SDL2UI
                 //double speed = OrbitMath.InstantaneousOrbitalSpeed(_sgp, _bodyPosition.RelativePosition_m.Length(), _ke.SemiMajorAxis);
 
 
-                SDL.SDL_Color[] headingColour =
+                SDL.Color[] headingColour =
                 {
-                    new() { r = 255, g = 100, b = 100, a = 100 },
-                    new SDL.SDL_Color() {a = 0}
+                    new() { R = 255, G = 100, B = 100, A = 100 },
+                    new SDL.Color() {A = 0}
                 };
-                SDL.SDL_Color[] headingHColour =
+                SDL.Color[] headingHColour =
                 {
-                    new() { r = 255, g = 100, b = 100, a = 255 },
-                    new SDL.SDL_Color() {a = 0}
+                    new() { R = 255, G = 100, B = 100, A = 255 },
+                    new SDL.Color() {A = 0}
                 };
 
                 NameString = "VelocityVector";

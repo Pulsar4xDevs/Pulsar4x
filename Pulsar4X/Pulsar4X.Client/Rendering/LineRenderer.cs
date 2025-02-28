@@ -2,7 +2,6 @@ using System;
 using System.Text;
 using ImGuiSDL2CS;
 using Pulsar4X.SDL2UI;
-using SDL2;
 
 namespace Pulsar4X.Client.Rendering;
 
@@ -186,10 +185,10 @@ public class LineRenderer : IDisposable
         foreach (var shape in shapes)
         {
             GL.Uniform4f(_colorLocation,
-                shape.Color.r / 255f,
-                shape.Color.g / 255f,
-                shape.Color.b / 255f,
-                shape.Color.a / 255f);
+                shape.Color.R / 255f,
+                shape.Color.G / 255f,
+                shape.Color.B / 255f,
+                shape.Color.A / 255f);
 
             // Convert points to float array
             var vertices = new float[shape.Points.Length * 2];

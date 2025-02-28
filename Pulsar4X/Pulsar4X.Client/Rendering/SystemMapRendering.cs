@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
 using ImGuiSDL2CS;
-using SDL2;
+using SDL3;
 using Pulsar4X.Orbital;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Sensors;
@@ -28,7 +28,7 @@ namespace Pulsar4X.SDL2UI
         internal IntPtr windowPtr;
         internal IntPtr surfacePtr;
         internal IntPtr rendererPtr;
-        ImGuiSDL2CSWindow _window;
+        ImGuiSDL3CSWindow _window;
         internal Dictionary<string, IDrawData> UIWidgets = new ();
         ConcurrentDictionary<int, Icon> _testIcons = new ();
         ConcurrentDictionary<int, IDrawData> _entityIcons = new ();
@@ -41,15 +41,15 @@ namespace Pulsar4X.SDL2UI
         //internal SystemMap_DrawableVM SysMap;
         Entity? _faction;
 
-        internal SystemMapRendering(ImGuiSDL2CSWindow window, GlobalUIState state)
+        internal SystemMapRendering(ImGuiSDL3CSWindow window, GlobalUIState state)
         {
             _state = state;
 
             _camera = _state.Camera;
             _window = window;
             windowPtr = window.Handle;
-            surfacePtr = SDL.SDL_GetWindowSurface(windowPtr);
-            rendererPtr = SDL.SDL_GetRenderer(windowPtr);
+            surfacePtr = SDL.GetWindowSurface(windowPtr);
+            rendererPtr = SDL.GetRenderer(windowPtr);
             //UIWidgets.Add(new CursorCrosshair(new Vector4())); //used for debugging the cursor world position.
             foreach (var item in TestDrawIconData.GetTestIcons())
             {
@@ -400,10 +400,10 @@ namespace Pulsar4X.SDL2UI
             }
 
             byte oR, oG, oB, oA;
-            SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
-            SDL.SDL_BlendMode blendMode;
-            SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
-            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+            SDL.GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
+            SDL.BlendMode blendMode;
+            SDL.GetRenderDrawBlendMode(rendererPtr, out blendMode);
+            SDL.SetRenderDrawBlendMode(rendererPtr, SDL.BlendMode.Blend);
 
             var matrix = _camera.GetZoomMatrix();
 
@@ -429,8 +429,8 @@ namespace Pulsar4X.SDL2UI
 
             //ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
 
-            SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
-            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
+            SDL.SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
+            SDL.SetRenderDrawBlendMode(rendererPtr, blendMode);
         }
 
         public void DrawNameIcons()
@@ -476,7 +476,7 @@ namespace Pulsar4X.SDL2UI
                         new Vector2() { X = 100, Y = 100 },
                         new Vector2() { X = 0, Y = 0 }
                     },
-                    Color = new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 255 }
+                    Color = new SDL.Color() { R = 0, G = 255, B = 0, A = 255 }
                 }
             };
             _uiState.ViewPort.Renderer.RenderLine(shapes, _uiState.Camera);
@@ -491,7 +491,7 @@ namespace Pulsar4X.SDL2UI
                         new Vector2() { X = 150, Y = 100 },
                         new Vector2() { X = 0, Y = 0 }
                     },
-                    Color = new SDL.SDL_Color() { r = 255, g = 255, b = 128, a = 255 }
+                    Color = new SDL.Color() { R = 255, G = 255, B = 128, A = 255 }
                 }
             };
             _uiState.ViewPort.Renderer.RenderLine(shapes, _uiState.Camera);

@@ -8,7 +8,7 @@ public static class TextEditWidget
     private static uint _buffSize = 128;
     private static byte[] _strInputBuffer = new byte[128];
     private static string? _editingID;
-    
+
     public static uint BufferSize
     {
         get { return _buffSize ;}
@@ -18,7 +18,7 @@ public static class TextEditWidget
             _strInputBuffer = new byte[value];
         }
     }
-    
+
     public static bool Display(string label, ref string text)
     {
         bool hasChanged = false;
@@ -30,7 +30,7 @@ public static class TextEditWidget
             if(ImGui.IsItemClicked())
             {
                 _editingID = label;
-                _strInputBuffer = ImGuiSDL2CSHelper.BytesFromString(text);
+                _strInputBuffer = ImGuiSDL3CSHelper.BytesFromString(text);
 
             }
         }
@@ -38,7 +38,7 @@ public static class TextEditWidget
         {
             if (ImGui.InputText(label, _strInputBuffer, _buffSize, ImGuiInputTextFlags.EnterReturnsTrue))
             {
-                text = ImGuiSDL2CSHelper.StringFromBytes(_strInputBuffer);
+                text = ImGuiSDL3CSHelper.StringFromBytes(_strInputBuffer);
                 _editingID = null;
                 hasChanged = true;
             }

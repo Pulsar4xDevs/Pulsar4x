@@ -17,14 +17,13 @@ using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
-using SDL2;
 
 namespace Pulsar4X.SDL2UI
 {
     public class ShipDesignWindow : PulsarGuiWindow
     {
         private bool ShowNoDesigns = false;
-        private byte[] SelectedDesignName =  ImGuiSDL2CSHelper.BytesFromString("foo", 32);
+        private byte[] SelectedDesignName =  ImGuiSDL3CSHelper.BytesFromString("foo", 32);
         private List<string> _existingShipDesignNames = new();
         private List<string> _existingShipDesignIDs = new();
         private string SelectedExistingDesignID = String.Empty;
@@ -187,7 +186,7 @@ namespace Pulsar4X.SDL2UI
         {
             _workingDesign = design.Clone(_factionInfoDB);
             SelectedExistingDesignID = _workingDesign.UniqueID;
-            SelectedDesignName = ImGuiSDL2CSHelper.BytesFromString(_workingDesign.Name, 32);
+            SelectedDesignName = ImGuiSDL3CSHelper.BytesFromString(_workingDesign.Name, 32);
             SelectedComponents = _workingDesign.Components;
             SelectedDesignObsolete = _workingDesign.IsObsolete;
             _armor = _workingDesign.Armor.type;
@@ -252,7 +251,7 @@ namespace Pulsar4X.SDL2UI
             if (ImGui.Button("Save Design"))
             {
                 int version = 0;
-                var name = ImGuiSDL2CSHelper.StringFromBytes(SelectedDesignName);
+                var name = ImGuiSDL3CSHelper.StringFromBytes(SelectedDesignName);
 
                 if(name.IsNotNullOrEmpty())
                 {
@@ -359,7 +358,7 @@ namespace Pulsar4X.SDL2UI
                     name = originalName + " " + counter.ToString();
                     counter++;
                 }
-                SelectedDesignName = ImGuiSDL2CSHelper.BytesFromString(name);
+                SelectedDesignName = ImGuiSDL3CSHelper.BytesFromString(name);
                 SelectedComponents = new List<(ComponentDesign design, int count)>();
                 GenImage();
                 RefreshArmor();
