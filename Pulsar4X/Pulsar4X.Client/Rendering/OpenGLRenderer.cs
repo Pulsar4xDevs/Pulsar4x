@@ -372,7 +372,7 @@ public class OpenGLRenderer : IRenderer
 
         for (int n = 0; n < drawData.CmdListsCount; n++)
         {
-            ImDrawListPtr cmdList = drawData.CmdListsRange[n];
+            ImDrawListPtr cmdList = drawData.CmdLists[n];
             //ImDrawList cmdList = drawData[n];
             ImPtrVector<ImDrawVertPtr> vtxBuffer = cmdList.VtxBuffer;
             ImVector<ushort> idxBuffer = cmdList.IdxBuffer;
