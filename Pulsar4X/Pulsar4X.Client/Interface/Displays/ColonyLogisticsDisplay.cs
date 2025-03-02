@@ -130,7 +130,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             Vector2 topSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("LogisticsHeader", new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            if(ImGui.BeginChild("LogisticsHeader", new Vector2(topSize.X, 28f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 ImGui.Text("Logistics Capacity:");
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
@@ -456,7 +456,7 @@ namespace Pulsar4X.SDL2UI
         private void DisplayDisabledMessage()
         {
             Vector2 topSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("LogisticsDisabled", new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            if(ImGui.BeginChild("LogisticsDisabled", new Vector2(topSize.X, 28f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
                 ImGui.Text("You need an Installation with a Logistics component to enable logistics on this colony.");

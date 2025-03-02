@@ -640,7 +640,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             if (ImGui.CollapsingHeader("DamageProfile"))
                             {
-                                if (ImGui.ImageButton(_dmgTxtr, new System.Numerics.Vector2(64, 64)))
+                                if (ImGui.ImageButton("##fullsize", _dmgTxtr, new System.Numerics.Vector2(64, 64)))
                                 {
                                     //show a full sized scrollable image.
                                 }
@@ -778,7 +778,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("Number Of Entites: " + _uiState.SelectedSystem.EntityCount);
                 if (ImGui.CollapsingHeader("Log"))
                 {
-                    ImGui.BeginChild("LogChild", new System.Numerics.Vector2(800, 300), true);
+                    ImGui.BeginChild("LogChild", new System.Numerics.Vector2(800, 300), ImGuiChildFlags.Borders);
                     ImGui.Columns(4, "Events", true);
                     ImGui.Text("DateTime");
                     ImGui.NextColumn();
@@ -1032,7 +1032,7 @@ namespace Pulsar4X.SDL2UI
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 0.5f);
                 ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 2f);
-                ImGui.BeginChild("Buttons", new System.Numerics.Vector2(400, hoverHeigt), true);
+                ImGui.BeginChild("Buttons", new System.Numerics.Vector2(400, hoverHeigt), ImGuiChildFlags.Borders);
                 ImGui.Columns(2);
                 ImGui.SetColumnWidth(0, 300);
 
@@ -1187,7 +1187,7 @@ namespace Pulsar4X.SDL2UI
         {
 
             ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
-            ImGui.BeginChild("ButtonBoxList", new System.Numerics.Vector2(280, 100), true, ImGuiWindowFlags.ChildWindow);
+            ImGui.BeginChild("ButtonBoxList", new System.Numerics.Vector2(280, 100), ImGuiChildFlags.Borders, ImGuiWindowFlags.ChildWindow);
             ImGui.Columns(2);
             for (int i = 0; i < _listfoo.Count; i++)
             {
@@ -1206,7 +1206,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.EndChild();
             ImGui.SameLine();
 
-            ImGui.BeginChild("Buttons##bb", new System.Numerics.Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
+            ImGui.BeginChild("Buttons##bb", new System.Numerics.Vector2(116, 100), ImGuiChildFlags.Borders, ImGuiWindowFlags.ChildWindow);
             ImGui.BeginGroup();
             //if (ImGui.ImageButton(_uiState.UpImg(), new Vector2(16, 8)))
             if (ImGui.Button("^" + "##bb" + _bbSelectedIndex))

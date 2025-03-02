@@ -62,7 +62,7 @@ namespace Pulsar4X.SDL2UI
         {
             // Pin Camera
             ImGui.PushID(0);
-            if(ImGui.ImageButton(_uiState.Img_Pin(), ButtonSize))
+            if(ImGui.ImageButton("##pin",_uiState.Img_Pin(), ButtonSize))
             {
                 _uiState.Camera.PinToEntity(Entity);
             }

@@ -53,7 +53,7 @@ public class BlueprintsWindow : PulsarGuiWindow
         if(Window.Begin("Blueprints Window"))
         {
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("BlueprintListSelection", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y), true))
+            if(ImGui.BeginChild("BlueprintListSelection", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y), ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Blueprints", "Select a blueprint to view details.");
 
@@ -80,7 +80,7 @@ public class BlueprintsWindow : PulsarGuiWindow
             ImGui.SetCursorPosY(27f);
 
             windowContentSize = ImGui.GetContentRegionAvail();
-            if(_selectedBlueprint != null && ImGui.BeginChild("BlueprintContent", windowContentSize, true))
+            if(_selectedBlueprint != null && ImGui.BeginChild("BlueprintContent", windowContentSize, ImGuiChildFlags.Borders))
             {
                 DisplayKeyValue("Full ID", _selectedBlueprint.FullIdentifier);
                 DisplayKeyValue("Unique ID", _selectedBlueprint.UniqueID);

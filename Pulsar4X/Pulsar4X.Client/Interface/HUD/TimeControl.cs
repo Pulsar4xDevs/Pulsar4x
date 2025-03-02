@@ -32,7 +32,7 @@ namespace Pulsar4X.SDL2UI
 
         bool _expanded;
 
-        ImGuiTreeNodeFlags _xpanderFlags = ImGuiTreeNodeFlags.AllowItemOverlap;
+        ImGuiTreeNodeFlags _xpanderFlags = ImGuiTreeNodeFlags.AllowOverlap;
         float _freqTimeSpanValue = 0.1f;
         int _freqSpanType = 1;
 
@@ -87,15 +87,15 @@ namespace Pulsar4X.SDL2UI
             ImGui.SameLine();
             if (_isPaused == true)//When time is paused
             {
-                if (ImGui.ImageButton(_uiState.Img_Play(), iconSize))//Provide a button to unpause
+                if (ImGui.ImageButton("##ply",_uiState.Img_Play(), iconSize))//Provide a button to unpause
                     PausePlayPressed();
                 ImGui.SameLine();
-                if (ImGui.ImageButton(_uiState.Img_OneStep(), iconSize))//Provide a button to increment time
+                if (ImGui.ImageButton("##stp",_uiState.Img_OneStep(), iconSize))//Provide a button to increment time
                     OneStepPressed();
             }
             else//When time is running
             {
-                if (ImGui.ImageButton(_uiState.Img_Pause(), iconSize))//Provide a button to unpause time
+                if (ImGui.ImageButton("##pse",_uiState.Img_Pause(), iconSize))//Provide a button to unpause time
                     PausePlayPressed();
             }
             

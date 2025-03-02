@@ -93,7 +93,7 @@ public class NewGameMenu : PulsarGuiWindow
             _contentRegion = ImGui.GetContentRegionAvail();
             // Get window dimensions
             _windowPos = ImGui.GetWindowPos();
-            _windowSize = ImGui.GetWindowContentRegionMax();
+            _windowSize = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();// ImGui.GetWindowContentRegionMax();
             _footerHeight = ImGui.GetFrameHeightWithSpacing();
 
             // Calculate content area height (window height minus footer)
@@ -162,7 +162,7 @@ public class NewGameMenu : PulsarGuiWindow
         //     ImGui.InputText("Network Port", _netPortInputBuffer, 8);
 
         ImGui.EndChild();
-        ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+        ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
         CancelButton();
         ImGui.SameLine();
@@ -223,7 +223,7 @@ public class NewGameMenu : PulsarGuiWindow
         }
 
         ImGui.EndChild();
-        ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+        ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
         CancelButton();
         ImGui.SameLine();
@@ -330,7 +330,7 @@ public class NewGameMenu : PulsarGuiWindow
         if (ImGui.Checkbox("ELE start", ref _eleStart)) ;
 
         ImGui.EndChild();
-        ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+        ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
         CancelButton();
         ImGui.SameLine();

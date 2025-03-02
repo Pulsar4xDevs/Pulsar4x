@@ -123,7 +123,7 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.PushStyleColor(buttonidx, unclickedcolor);                                //Have the button be colored normally
                             }
 
-                            if (ImGui.ImageButton(button.Picture, BtnSizes))
+                            if (ImGui.ImageButton("##opnui", button.Picture, BtnSizes))
                             {
                                 EntityUIWindows.OpenUIWindow(button.ClickType, _entityState, _uiState);
                             }

@@ -23,8 +23,8 @@ namespace ImGuiSDL2CS
 
             ImGuiIOPtr io = ImGui.GetIO();
 
-            io.AddKeyEvent(ImGuiKey.Tab, true);// =  SDL.SDL_Keycode.SDLK_TAB;
-            
+            //io.AddKeyEvent(ImGuiKey.Tab, true);// =  SDL.SDL_Keycode.SDLK_TAB;
+            /*
             io.KeyMap[(int)ImGuiKey.Tab] = (int) SDL.SDL_Keycode.SDLK_TAB;
             io.KeyMap[(int)ImGuiKey.LeftArrow] = (int) SDL.SDL_Scancode.SDL_SCANCODE_LEFT;
             io.KeyMap[(int)ImGuiKey.RightArrow] = (int) SDL.SDL_Scancode.SDL_SCANCODE_RIGHT;
@@ -44,6 +44,7 @@ namespace ImGuiSDL2CS
             io.KeyMap[(int)ImGuiKey.X] = (int) SDL.SDL_Keycode.SDLK_x;
             io.KeyMap[(int)ImGuiKey.Y] = (int) SDL.SDL_Keycode.SDLK_y;
             io.KeyMap[(int)ImGuiKey.Z] = (int) SDL.SDL_Keycode.SDLK_z;
+            */
             io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 
             //io.GetClipboardTextFn((userData) => SDL.SDL_GetClipboardText());
@@ -135,7 +136,7 @@ namespace ImGuiSDL2CS
                 case SDL.SDL_EventType.SDL_KEYDOWN:
                 case SDL.SDL_EventType.SDL_KEYUP:
                     int key = (int) e.key.keysym.sym & ~SDL.SDLK_SCANCODE_MASK;
-                    io.KeysDown[key] = e.type == SDL.SDL_EventType.SDL_KEYDOWN;
+                    //io.KeysDown[key] = e.type == SDL.SDL_EventType.SDL_KEYDOWN;
                     SDL.SDL_Keymod keyModState = SDL.SDL_GetModState();
 
                     io.KeyShift = (keyModState & SDL.SDL_Keymod.KMOD_SHIFT) != 0;

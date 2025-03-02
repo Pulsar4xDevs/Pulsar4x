@@ -90,7 +90,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     if(entity.TryGetDatablob<CargoStorageDB>(out var storage))
                     {
-                        var size = ImGui.GetContentRegionMax();
+                        var size = ImGui.GetContentRegionAvail() + ImGui.GetCursorScreenPos() - ImGui.GetWindowPos();// ImGui.GetContentRegionMax();
                         ImGui.PushStyleColor(ImGuiCol.Button, Styles.SelectedColor);
                         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Styles.SelectedColorHover);
                         ImGui.PushStyleColor(ImGuiCol.ButtonActive, Styles.SelectedColorActive);
@@ -127,7 +127,7 @@ namespace Pulsar4X.SDL2UI
             var storage = entity.GetDataBlob<CargoStorageDB>()?.TypeStores;
 
             Vector2 topSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("NumberOfMines" + entity.Id, new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            if(ImGui.BeginChild("NumberOfMines" + entity.Id, new Vector2(topSize.X, 28f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 if(entity.TryGetDatablob<MiningDB>(out var miningDB))
                 {
@@ -238,7 +238,7 @@ namespace Pulsar4X.SDL2UI
             if(!entity.TryGetDatablob<EntityResearchDB>(out var researchDB)) return;
 
             Vector2 topSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("NumberOfResearchLabs" + entity.Id, new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            if(ImGui.BeginChild("NumberOfResearchLabs" + entity.Id, new Vector2(topSize.X, 28f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 ImGui.Text("Universities:");
                 ImGui.SameLine();
@@ -277,7 +277,7 @@ namespace Pulsar4X.SDL2UI
             if(!entity.TryGetDatablob<NavalAcademyDB>(out var navalAcademyDB)) return;
 
             Vector2 topSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("NumberOfAcademies" + entity.Id, new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            if(ImGui.BeginChild("NumberOfAcademies" + entity.Id, new Vector2(topSize.X, 28f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 ImGui.Text("Academies:");
                 ImGui.SameLine();

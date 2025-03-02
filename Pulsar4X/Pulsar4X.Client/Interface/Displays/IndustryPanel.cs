@@ -156,7 +156,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         public void ProdLineDisplay()
         {
-            ImGui.BeginChild("prodline", new Vector2(280, 300), true, ImGuiWindowFlags.ChildWindow | ImGuiWindowFlags.AlwaysAutoResize);
+            ImGui.BeginChild("prodline", new Vector2(280, 300), ImGuiChildFlags.Borders, ImGuiWindowFlags.ChildWindow | ImGuiWindowFlags.AlwaysAutoResize);
 
 
             foreach (var kvp in _prodLines)
@@ -223,13 +223,13 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             //ImGui.BeginChild("Buttons", new Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
             ImGui.BeginGroup();
 
-            if (ImGui.ImageButton(_state.Img_Up(), new Vector2(16, 8)) && _selectedExistingConJob != null)
+            if (ImGui.ImageButton("##up", _state.Img_Up(), new Vector2(16, 8)) && _selectedExistingConJob != null)
             {
                 var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID, -1);
                 _uiState.Game.OrderHandler.HandleOrder(cmd);
             }
 
-            if (ImGui.ImageButton(_state.Img_Down(), new Vector2(16, 8)) && _selectedExistingConJob != null)
+            if (ImGui.ImageButton("##dn", _state.Img_Down(), new Vector2(16, 8)) && _selectedExistingConJob != null)
             {
                 var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID, 1);
                 _uiState.Game.OrderHandler.HandleOrder(cmd);
@@ -237,7 +237,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
             ImGui.EndGroup();
             ImGui.SameLine();
-            if (ImGui.ImageButton(_state.Img_Repeat(), new Vector2(16, 16)) && _selectedExistingConJob != null)
+            if (ImGui.ImageButton("##rpt",_state.Img_Repeat(), new Vector2(16, 16)) && _selectedExistingConJob != null)
             {
 
                 var jobcount = _selectedExistingConJob.NumberOrdered;
@@ -248,7 +248,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             }
 
             ImGui.SameLine();
-            if (ImGui.ImageButton(_state.Img_Cancel(), new Vector2(16, 16)) && _selectedExistingConJob != null)
+            if (ImGui.ImageButton("##can",_state.Img_Cancel(), new Vector2(16, 16)) && _selectedExistingConJob != null)
             {
                 //new ConstructCancelJob(_uiState.Faction.Guid, _selectedEntity.Guid, _selectedEntity.StarSysDateTime, _selectedExistingConJob.JobID);
                 var cmd = IndustryOrder2.CreateCancelJobOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID);
@@ -346,7 +346,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         void CostsDisplay(JobBase selectedJob)
         {
-            ImGui.BeginChild("Resources Requred", new Vector2(294, 184 ), true, ImGuiWindowFlags.ChildWindow);
+            ImGui.BeginChild("Resources Requred", new Vector2(294, 184 ), ImGuiChildFlags.Borders, ImGuiWindowFlags.ChildWindow);
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 140);
             ImGui.SetColumnWidth(1, 48);

@@ -209,7 +209,7 @@ namespace Pulsar4X.SDL2UI
                         }
                     }
 
-                    if (button.OnClick != null && ImGui.ImageButton(button.Picture, ButtonSize))//Make the button
+                    if (button.OnClick != null && ImGui.ImageButton("", button.Picture, ButtonSize))//Make the button
                     {
                         button.OnClick();
                     }
