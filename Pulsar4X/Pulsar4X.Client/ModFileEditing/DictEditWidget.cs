@@ -96,7 +96,7 @@ public static class DictEditWidget
     
     public static bool Display(string label, ref Dictionary<string, string> dict)
     {
-        ImGui.BeginChild("##dic" + label, new Vector2(400,160), true);
+        ImGui.BeginChild("##dic" + label, new Vector2(400,160), ImGuiChildFlags.Borders);
         ImGui.Columns(2);
         bool isChanged = false;
         if (dict is null)
@@ -136,7 +136,7 @@ public static class DictEditWidget
     /// <returns></returns>
     public static bool Display(string label, ref Dictionary<string, long> dict)
     {
-        ImGui.BeginChild("##dic" + label, new Vector2(400,160), true);
+        ImGui.BeginChild("##dic" + label, new Vector2(400,160), ImGuiChildFlags.Borders);
         ImGui.Columns(2);
         bool isChanged = false;
         if (dict is null)
@@ -177,7 +177,7 @@ public static class DictEditWidget
     
     public static bool Display(string label, ref Dictionary<BodyType, double> dict)
     {
-        ImGui.BeginChild("##dic" + label, new Vector2(400,160), true);
+        ImGui.BeginChild("##dic" + label, new Vector2(400,160), ImGuiChildFlags.Borders);
         ImGui.Columns(2);
         bool isChanged = false;
         if (dict is null)

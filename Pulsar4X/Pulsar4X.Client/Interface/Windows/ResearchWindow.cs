@@ -110,7 +110,7 @@ namespace Pulsar4X.SDL2UI
                 var firstChildSize = new Vector2(windowContentSize.X * 0.75f, windowContentSize.Y);
                 var secondChildSize = new Vector2(windowContentSize.X * 0.245f, windowContentSize.Y);
 
-                if(ImGui.BeginChild("Techs", secondChildSize, true))
+                if(ImGui.BeginChild("Techs", secondChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayHelpers.Header("Available Techs", "Double click to add to research queue");
 
@@ -125,7 +125,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.EndChild();
                 }
                 ImGui.SameLine();
-                if(ImGui.BeginChild("Teams", firstChildSize, true))
+                if(ImGui.BeginChild("Teams", firstChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayHelpers.Header("Teams");
 

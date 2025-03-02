@@ -165,7 +165,7 @@ namespace Pulsar4X.SDL2UI
             var firstChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
             var secondChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
             var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
-            if(ImGui.BeginChild("ColonyLogistics1", firstChildSize, true))
+            if(ImGui.BeginChild("ColonyLogistics1", firstChildSize, ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Imports");
 
@@ -200,7 +200,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndChild();
             }
             ImGui.SameLine();
-            if(ImGui.BeginChild("ColonyLogistics2", secondChildSize, true))
+            if(ImGui.BeginChild("ColonyLogistics2", secondChildSize, ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Goods Available to Import or Export");
 
@@ -306,7 +306,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndChild();
             }
             ImGui.SameLine();
-            if(ImGui.BeginChild("ColonyLogistics3", thirdChildSize, true))
+            if(ImGui.BeginChild("ColonyLogistics3", thirdChildSize, ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Exports");
 

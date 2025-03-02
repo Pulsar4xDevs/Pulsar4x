@@ -123,7 +123,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             var windowContentSize = ImGui.GetContentRegionAvail();
-            if (ImGui.BeginChild("ComponentDesignChildWindow", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), true))
+            if (ImGui.BeginChild("ComponentDesignChildWindow", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Specifications",
                     "Configure the specifications for the component below.\n\n" +
@@ -138,7 +138,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetCursorPosY(27f);
 
             var position = ImGui.GetCursorPos();
-            if (ImGui.BeginChild("ComponentDesignChildWindow2", new Vector2(windowContentSize.X * 0.49f, windowContentSize.Y * 0.65f), true))
+            if (ImGui.BeginChild("ComponentDesignChildWindow2", new Vector2(windowContentSize.X * 0.49f, windowContentSize.Y * 0.65f), ImGuiChildFlags.Borders))
             {
                 GuiCostText(uiState); //Print cost
 
@@ -146,7 +146,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             ImGui.SetCursorPos(new Vector2(position.X, position.Y + windowContentSize.Y * 0.662f));
-            if (ImGui.BeginChild("ComponentDesignChildWindow3", new Vector2(windowContentSize.X * 0.49f, windowContentSize.Y * 0.34f), true))
+            if (ImGui.BeginChild("ComponentDesignChildWindow3", new Vector2(windowContentSize.X * 0.49f, windowContentSize.Y * 0.34f), ImGuiChildFlags.Borders))
             {
                 var sizeAvailable = ImGui.GetContentRegionAvail();
 
@@ -729,7 +729,7 @@ namespace Pulsar4X.SDL2UI
         private void DisplayPleaseSelectTemplate()
         {
             var windowContentSize = ImGui.GetContentRegionAvail();
-            if (ImGui.BeginChild("ComponentDesignSelectTemplate", windowContentSize, false))
+            if (ImGui.BeginChild("ComponentDesignSelectTemplate", windowContentSize))
             {
                 string message = "Please select a template on the left.";
                 var size = ImGui.GetContentRegionAvail();
@@ -743,7 +743,7 @@ namespace Pulsar4X.SDL2UI
         private void DisplayCreatedTemplate()
         {
             var windowContentSize = ImGui.GetContentRegionAvail();
-            if (ImGui.BeginChild("ComponentDesignCreated", windowContentSize, false))
+            if (ImGui.BeginChild("ComponentDesignCreated", windowContentSize))
             {
                 string message = "Design has been created, it will now be availble to Research.";
                 var size = ImGui.GetContentRegionAvail();

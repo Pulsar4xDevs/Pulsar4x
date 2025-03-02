@@ -23,6 +23,8 @@ namespace ImGuiSDL2CS
 
             ImGuiIOPtr io = ImGui.GetIO();
 
+            io.AddKeyEvent(ImGuiKey.Tab, true);// =  SDL.SDL_Keycode.SDLK_TAB;
+            
             io.KeyMap[(int)ImGuiKey.Tab] = (int) SDL.SDL_Keycode.SDLK_TAB;
             io.KeyMap[(int)ImGuiKey.LeftArrow] = (int) SDL.SDL_Scancode.SDL_SCANCODE_LEFT;
             io.KeyMap[(int)ImGuiKey.RightArrow] = (int) SDL.SDL_Scancode.SDL_SCANCODE_RIGHT;

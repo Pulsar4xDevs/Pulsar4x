@@ -210,7 +210,7 @@ public class CargoListPanelComplex
     public void Display()
     {
 
-        ImGui.BeginChild(_entityState.Name, new Vector2(360, 200), true);
+        ImGui.BeginChild(_entityState.Name, new Vector2(360, 200), ImGuiChildFlags.Borders);
         ImGui.Text(_entityState.Name);
         ImGui.Text("Transfer Rate: " + _volStorageDB.TransferRate);
         ImGui.Text("At DeltaV < " + Stringify.Velocity(_volStorageDB.TransferRangeDv_mps));

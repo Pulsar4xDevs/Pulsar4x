@@ -41,7 +41,7 @@ namespace Pulsar4X.SDL2UI
             if(Window.Begin("Manage Colonies", ref IsActive))
             {
                 Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-                if(ImGui.BeginChild("Colonies", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y), true))
+                if(ImGui.BeginChild("Colonies", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y), ImGuiChildFlags.None))
                 {
                     DisplayHelpers.Header("Select Colony to Manage");
                     foreach(var (id, systemState) in _uiState.StarSystemStates)

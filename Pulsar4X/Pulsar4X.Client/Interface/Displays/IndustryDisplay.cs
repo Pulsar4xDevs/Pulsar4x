@@ -150,7 +150,7 @@ namespace Pulsar4X.SDL2UI
             if(string.IsNullOrEmpty(_selectedProdLine) || _prodLines == null)
                 return;
 
-            if(ImGui.BeginChild("JobDescriptionPane", new Vector2(windowContentSize.X * 0.5f - 8f, windowContentSize.Y), true))
+            if(ImGui.BeginChild("JobDescriptionPane", new Vector2(windowContentSize.X * 0.5f - 8f, windowContentSize.Y), ImGuiChildFlags.Borders))
             {
                 if(_prodLines.ContainsKey(_selectedProdLine) &&_prodLines[_selectedProdLine] != null)
                 {
@@ -175,7 +175,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("ColonyProductionLines", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), true))
+            if(ImGui.BeginChild("ColonyProductionLines", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Production Lines");
 

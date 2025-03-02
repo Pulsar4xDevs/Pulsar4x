@@ -24,7 +24,7 @@ namespace Pulsar4X.SDL2UI
             var firstChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
             var secondChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
             var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
-            if(ImGui.BeginChild("ColonySummary1", firstChildSize, true))
+            if(ImGui.BeginChild("ColonySummary1", firstChildSize, ImGuiChildFlags.Borders))
             {
                 var colonyInfoDb = entity.GetDataBlob<ColonyInfoDB>();
                 var bodyInfoDb = colonyInfoDb.PlanetEntity.GetDataBlob<SystemBodyInfoDB>();
@@ -68,7 +68,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndChild();
             }
             ImGui.SameLine();
-            if(ImGui.BeginChild("ColonySummary2", secondChildSize, true))
+            if(ImGui.BeginChild("ColonySummary2", secondChildSize, ImGuiChildFlags.Borders))
             {
                 entity.GetDataBlob<ColonyInfoDB>().Display(entityState, uiState);
                 ImGui.Columns(1);
@@ -84,7 +84,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndChild();
             }
             ImGui.SameLine();
-            if(ImGui.BeginChild("ColonySummary3", thirdChildSize, true))
+            if(ImGui.BeginChild("ColonySummary3", thirdChildSize, ImGuiChildFlags.Borders))
             {
                 if(ImGui.CollapsingHeader("Stockpile", ImGuiTreeNodeFlags.DefaultOpen))
                 {
@@ -256,7 +256,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             Vector2 sizeAvailable = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("UniversityList", sizeAvailable, true))
+            if(ImGui.BeginChild("UniversityList", sizeAvailable, ImGuiChildFlags.Borders))
             {
                 foreach(var (instance, value) in researchDB.Labs)
                 {
@@ -288,7 +288,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             Vector2 sizeAvailable = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("AcademyList", new Vector2(sizeAvailable.X * .25f, sizeAvailable.Y), true))
+            if(ImGui.BeginChild("AcademyList", new Vector2(sizeAvailable.X * .25f, sizeAvailable.Y), ImGuiChildFlags.Borders))
             {
                 if(ImGui.BeginTable("AcademyListTable", 4, Styles.TableFlags))
                 {

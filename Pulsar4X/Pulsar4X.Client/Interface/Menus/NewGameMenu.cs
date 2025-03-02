@@ -117,7 +117,7 @@ public class NewGameMenu : PulsarGuiWindow
 
     private void DisplayModsPage()
     {
-        ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), false);
+        ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight));
 
         DisplayHelpers.Header("New Game Options");
         ImGui.InputText("Game Name", _nameInputBuffer, 32);
@@ -194,7 +194,7 @@ public class NewGameMenu : PulsarGuiWindow
 
     private void DisplayConfigureGalaxy()
     {
-        ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), false);
+        ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight));
 
         DisplayHelpers.Header("Select pre-configured Systems to include");
 
@@ -245,7 +245,7 @@ public class NewGameMenu : PulsarGuiWindow
 
     private void DisplayDetailsPage()
     {
-        ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), false);
+        ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight));
 
         DisplayHelpers.Header("Game Setup");
         ImGui.InputText("Faction Name", _factionInputBuffer, 16);

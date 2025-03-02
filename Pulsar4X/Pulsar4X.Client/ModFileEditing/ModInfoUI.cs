@@ -51,7 +51,7 @@ public class ModInfoUI
         {
 
             
-            ImGui.BeginChild(label,_childSize, true);
+            ImGui.BeginChild(label,_childSize, ImGuiChildFlags.Borders);
             
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0,150);

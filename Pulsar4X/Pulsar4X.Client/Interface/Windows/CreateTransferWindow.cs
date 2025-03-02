@@ -43,7 +43,7 @@ public class CreateTransferWindow : PulsarGuiWindow
             var firstChildSize = new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y);
             var secondChildSize = new Vector2(windowContentSize.X - (Styles.LeftColumnWidthLg * 2) - (windowContentSize.X * 0.01f), windowContentSize.Y);
             var thirdChildSize = new Vector2(Styles.LeftColumnWidthLg - (windowContentSize.X * 0.01f), windowContentSize.Y);
-            if(ImGui.BeginChild(GetLeftTitle() + "###left", firstChildSize, true))
+            if(ImGui.BeginChild(GetLeftTitle() + "###left", firstChildSize, ImGuiChildFlags.Borders))
             {
                 if(TransferLeft != null)
                     DisplayStorageList(TransferLeft);
@@ -52,7 +52,7 @@ public class CreateTransferWindow : PulsarGuiWindow
             }
             ImGui.SameLine();
 
-            if(ImGui.BeginChild("Transfer Details", secondChildSize, true))
+            if(ImGui.BeginChild("Transfer Details", secondChildSize, ImGuiChildFlags.Borders))
             {
 
                 ImGui.Columns(2);
@@ -94,7 +94,7 @@ public class CreateTransferWindow : PulsarGuiWindow
             }
             ImGui.SameLine();
 
-            if(ImGui.BeginChild(GetRightTitle() + "###right", thirdChildSize, true))
+            if(ImGui.BeginChild(GetRightTitle() + "###right", thirdChildSize, ImGuiChildFlags.Borders))
             {
                 if(TransferRight != null)
                     DisplayStorageList(TransferRight);

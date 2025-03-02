@@ -65,19 +65,19 @@ namespace Pulsar4X.SDL2UI
                 var secondChildSize = new Vector2(windowContentSize.X * 0.15f, windowContentSize.Y);
                 var thirdChildSize = new Vector2(windowContentSize.X * 0.7f - (windowContentSize.X * 0.01f), windowContentSize.Y);
 
-                if(ImGui.BeginChild("ComponentDesignSelection", firstChildSize, true))
+                if(ImGui.BeginChild("ComponentDesignSelection", firstChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayTemplateSelection();
                     ImGui.EndChild();
                 }
                 ImGui.SameLine();
-                if (ImGui.BeginChild("ComponentSelection", secondChildSize, true))
+                if (ImGui.BeginChild("ComponentSelection", secondChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayComponentList();
                     ImGui.EndChild();
                 }
                 ImGui.SameLine();
-                if (ImGui.BeginChild("ComponentDesign", thirdChildSize, true))
+                if (ImGui.BeginChild("ComponentDesign", thirdChildSize, ImGuiChildFlags.Borders))
                 {
                     if(selectedTemplate != null)
                     {

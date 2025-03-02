@@ -224,21 +224,21 @@ namespace Pulsar4X.SDL2UI
                 var firstChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
                 var secondChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
                 var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
-                if(ImGui.BeginChild("ShipDesign1", firstChildSize, true))
+                if(ImGui.BeginChild("ShipDesign1", firstChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayComponentSelection();
                     ImGui.EndChild();
                 }
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(27f);
-                if(ImGui.BeginChild("ShipDesign2", secondChildSize, true))
+                if(ImGui.BeginChild("ShipDesign2", secondChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayComponents();
                     ImGui.EndChild();
                 }
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(27f);
-                if(ImGui.BeginChild("ShipDesign3", thirdChildSize, true))
+                if(ImGui.BeginChild("ShipDesign3", thirdChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayStats();
                     ImGui.EndChild();
@@ -307,7 +307,7 @@ namespace Pulsar4X.SDL2UI
         internal void DisplayExistingDesigns()
         {
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("ComponentDesignSelection", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y - 24f), true))
+            if(ImGui.BeginChild("ComponentDesignSelection", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y - 24f), ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Existing Designs", "Select an existing ship design to edit it.");
                 ImGui.Columns(2);

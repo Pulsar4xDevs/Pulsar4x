@@ -50,7 +50,7 @@ public class CargoListPanelSimple : UpdateWindowState
     {
         var width = ImGui.GetWindowWidth() * 0.5f;
 
-        ImGui.BeginChild(_entityState.Name, new Vector2(240, 200), true, ImGuiWindowFlags.AlwaysAutoResize);
+        ImGui.BeginChild(_entityState.Name, new Vector2(240, 200), ImGuiChildFlags.AlwaysAutoResize | ImGuiChildFlags.Borders );
         foreach (var typeStore in _stores)
         {
             CargoTypeBlueprint stype = _staticData.CargoTypes[typeStore.Key];

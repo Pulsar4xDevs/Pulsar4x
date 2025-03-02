@@ -29,13 +29,13 @@ public static class SizesDemo
             var getCursorStartPos = ImGui.GetCursorStartPos();
             _windowPos = ImGui.GetWindowPos();
             
-            var getContentRegionMax = ImGui.GetContentRegionMax();
+            //var getContentRegionMax = ImGui.GetContentRegionMax();
             var getContentRegionAvail = ImGui.GetContentRegionAvail();
                 
             var getWindowSize = ImGui.GetWindowSize();
-            var getWindowContentRegionMax = ImGui.GetWindowContentRegionMax();
-            var getWindowContentRegionMin = ImGui.GetWindowContentRegionMin();
-            var getWindowContentRegionWidth = ImGui.GetWindowContentRegionMax().X - getWindowContentRegionMin.X;
+            //var getWindowContentRegionMax = ImGui.GetWindowContentRegionMax();
+            //var getWindowContentRegionMin = ImGui.GetWindowContentRegionMin();
+            //var getWindowContentRegionWidth = ImGui.GetWindowContentRegionMax().X - getWindowContentRegionMin.X;
                 
             var getFontSize = ImGui.GetFontSize();
 
@@ -70,14 +70,14 @@ public static class SizesDemo
             DoRectangle("GetWindowSize", _windowPos, getWindowSize);
 
             var windowContentRegionStart = new Vector2(cursorScreenStartPos.X, _windowPos.Y);//this seems a bit obtuse
-            DoRectangle("GetWindowContentRegionMax", windowContentRegionStart, getWindowContentRegionMax);
-            DoRectangle("GetWindowContentRegionMin", cursorScreenStartPos, getWindowContentRegionMin);               
+            //DoRectangle("GetWindowContentRegionMax", windowContentRegionStart, getWindowContentRegionMax);
+            //DoRectangle("GetWindowContentRegionMin", cursorScreenStartPos, getWindowContentRegionMin);               
                 
-            DoRectangle("GetContentRegionMax", _windowPos ,getContentRegionMax);
+            //DoRectangle("GetContentRegionMax", _windowPos ,getContentRegionMax);
             DoRectangle("GetContentRegionAvail", cursorScreenStartPos, getContentRegionAvail);
                 
             itemStartPos = ImGui.GetCursorScreenPos();
-            DoHLine("GetWindowContentRegionWidth", cursorScreenStartPos, getWindowContentRegionWidth);
+            //DoHLine("GetWindowContentRegionWidth", cursorScreenStartPos, getWindowContentRegionWidth);
                 
             var colomnWidthstart = new Vector2(_windowPos.X, cursorScreenStartPos.Y);
             DoHLine("GetColomnWidth", colomnWidthstart, getColomnWidth);
