@@ -216,11 +216,14 @@ namespace Pulsar4X.Client
                     if (ImGui.IsItemHovered())
                         ImGui.SetTooltip(button.TooltipText);
 
+                    if (button.GetActive != null)//If the windows state can be checked
+                    {
+                        ImGui.PopStyleColor();
+                    }
 
                     ImGui.PopID();
                     iterations++;
                 }
-                ImGui.PushStyleColor(buttonidx, UnClickedColour);
 
                 Window.End();
             }

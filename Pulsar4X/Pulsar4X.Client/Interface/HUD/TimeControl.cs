@@ -71,7 +71,7 @@ namespace Pulsar4X.Client
             ImGui.PushStyleColor(ImGuiCol.HeaderHovered, col);
 
             DateTime currenttime = _uiState.SelectedSystemTime;
-            if (ImGui.CollapsingHeader("", _xpanderFlags))//Let the user open up the the time frequency menu
+            if (ImGui.CollapsingHeader("###time_freq", _xpanderFlags))//Let the user open up the the time frequency menu
                 _expanded = true;
             else
                 _expanded = false;
