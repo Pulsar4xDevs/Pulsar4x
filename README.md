@@ -1,6 +1,6 @@
 # Pulsar4x
 
-[![Discord](https://img.shields.io/discord/597360950517039117?color=%237289DA&label=Discord&logo=discord&logoColor=white)](https://discord.gg/3uwCQSn)
+[![Discord](https://img.shields.io/discord/597360950517039117)](https://discord.gg/3uwCQSn)
 
 ## Overview
 
