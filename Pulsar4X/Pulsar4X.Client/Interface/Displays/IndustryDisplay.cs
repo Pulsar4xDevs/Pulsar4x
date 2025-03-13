@@ -186,9 +186,12 @@ namespace Pulsar4X.Client
                     if(jobs.Count == 0)
                         headerTitle += " (Idle)";
                     ImGui.PushID(id.ToString());
+
+                    var pop = false;
                     if(_selectedProdLine == id)
                     {
                         ImGui.PushStyleColor(ImGuiCol.Header, Styles.DescriptiveColor);
+                        pop = true;
                     }
                     if (ImGui.CollapsingHeader(headerTitle, ImGuiTreeNodeFlags.DefaultOpen ))
                     {
@@ -221,12 +224,12 @@ namespace Pulsar4X.Client
                             if(ImGui.IsItemHovered())
                                 ImGui.SetTooltip("Assuming all resources needed are available.");
 
-                            if(ImGui.BeginTable(line.Name, 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+                            if(ImGui.BeginTable(line.Name, 4, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
                             {
-                                ImGui.TableSetupColumn("Job", ImGuiTableColumnFlags.None, 1f);
-                                ImGui.TableSetupColumn("Batch", ImGuiTableColumnFlags.None, 0.5f);
-                                ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 1f);
-                                ImGui.TableSetupColumn("Actions", ImGuiTableColumnFlags.None, 1f);
+                                ImGui.TableSetupColumn("Job", ImGuiTableColumnFlags.None, 0.3f);
+                                ImGui.TableSetupColumn("Batch", ImGuiTableColumnFlags.None, 0.1f);
+                                ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 0.3f);
+                                ImGui.TableSetupColumn("Actions", ImGuiTableColumnFlags.None, 0.3f);
                                 ImGui.TableHeadersRow();
                                 var progsize = new Vector2(128, ImGui.GetTextLineHeight());
                                 for (int ji = 0; ji < jobs.Count; ji++)
@@ -308,7 +311,7 @@ namespace Pulsar4X.Client
                             }
                         }
                     }
-                    if(_selectedProdLine == id)
+                    if(pop)
                     {
                         ImGui.PopStyleColor();
                     }
@@ -345,7 +348,7 @@ namespace Pulsar4X.Client
 
             ImGui.NewLine();
             ImGui.Text("Select a design:");
-            if (ImGui.Combo("", ref curItemIndex, constructableNames, constructableNames.Length))
+            if (ImGui.Combo("###newjobselection", ref curItemIndex, constructableNames, constructableNames.Length))
             {
                 _newjobSelectionIndex = (_newjobSelectionIndex.pline, curItemIndex);
                 _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
@@ -431,12 +434,12 @@ namespace Pulsar4X.Client
         {
             ImGui.NewLine();
             ImGui.Text("Inputs Needed:");
-            if(ImGui.BeginTable("JobCostsTables", 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+            if(ImGui.BeginTable("JobCostsTables", 4, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
             {
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
-                ImGui.TableSetupColumn("Cost Per Quantity", ImGuiTableColumnFlags.None, 1f);
-                ImGui.TableSetupColumn("Total Cost", ImGuiTableColumnFlags.None, 1f);
-                ImGui.TableSetupColumn("Available", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 0.4f);
+                ImGui.TableSetupColumn("Cost Per Quantity", ImGuiTableColumnFlags.None, 0.2f);
+                ImGui.TableSetupColumn("Total Cost", ImGuiTableColumnFlags.None, 0.2f);
+                ImGui.TableSetupColumn("Available", ImGuiTableColumnFlags.None, 0.2f);
                 ImGui.TableHeadersRow();
 
                 ImGui.TableNextColumn();
@@ -516,11 +519,11 @@ namespace Pulsar4X.Client
             ImGui.NewLine();
             ImGui.Text("Outputs:");
 
-            if(ImGui.BeginTable("JobOutputsTables", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+            if(ImGui.BeginTable("JobOutputsTables", 3, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
             {
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
-                ImGui.TableSetupColumn("Amount Per Quantity", ImGuiTableColumnFlags.None, 1f);
-                ImGui.TableSetupColumn("Total", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 0.4f);
+                ImGui.TableSetupColumn("Amount Per Quantity", ImGuiTableColumnFlags.None, 0.3f);
+                ImGui.TableSetupColumn("Total", ImGuiTableColumnFlags.None, 0.3f);
                 ImGui.TableHeadersRow();
 
                 var outputAmount = _lastClickedDesign?.OutputAmount ?? 0;
@@ -553,7 +556,7 @@ namespace Pulsar4X.Client
             }
             else
             {
-                ImGui.InvisibleButton("invis", invisButtonSize);
+                ImGui.InvisibleButton("invis1", invisButtonSize);
             }
             ImGui.SameLine();
 
@@ -569,7 +572,7 @@ namespace Pulsar4X.Client
             }
             else
             {
-                ImGui.InvisibleButton("invis", invisButtonSize);
+                ImGui.InvisibleButton("invis2", invisButtonSize);
             }
 
             ImGui.SameLine();

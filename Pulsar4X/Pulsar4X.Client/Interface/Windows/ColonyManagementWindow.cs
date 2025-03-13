@@ -115,9 +115,8 @@ namespace Pulsar4X.Client
                     ImGui.EndTabBar();
                     ImGui.EndChild();
                 }
-
-                Window.End();
             }
+            Window.End();
         }
     }
 }

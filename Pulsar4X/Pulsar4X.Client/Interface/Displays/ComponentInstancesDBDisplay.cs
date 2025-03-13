@@ -12,11 +12,11 @@ namespace Pulsar4X.Client
     {
         public static void Display(this ComponentInstancesDB db, EntityState entityState, GlobalUIState uiState)
         {
-            if(ImGui.BeginTable("InstallationTable", 3, Styles.TableFlags))
+            if(ImGui.BeginTable("InstallationTable", 3, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
             {
-                ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, 1f);
-                ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.25f);
-                ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, 0.45f);
+                ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.1f);
+                ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 0.45f);
                 ImGui.TableHeadersRow();
 
                 // FIXME: we should probably not do this every frame

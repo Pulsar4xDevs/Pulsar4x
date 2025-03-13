@@ -147,7 +147,7 @@ namespace Pulsar4X.Client
                 ImGui.EndChild();
             }
 
-            if(ImGui.BeginTable("###MineralTable" + entity.Id, 6, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+            if(ImGui.BeginTable("###MineralTable" + entity.Id, 6, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
             {
                 ImGui.TableSetupColumn("Mineral");
                 ImGui.TableSetupColumn("Stockpile");
