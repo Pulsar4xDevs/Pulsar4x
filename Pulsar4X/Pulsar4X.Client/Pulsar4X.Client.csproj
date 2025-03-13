@@ -88,9 +88,10 @@
   <ItemGroup>
     <PackageReference Include="ImGui.NET" Version="1.88.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="7.0.0" />
-    <PackageReference Include="SDL3-CS" Version="3.2.4.6" />
-    <PackageReference Include="SDL3-CS.Native" Version="3.2.4.2" />
-    <PackageReference Include="SDL3-CS.Native.Image" Version="3.2.0" />
+    <PackageReference Include="SDL3-CS" Version="3.2.8.2" />
+    <PackageReference Include="SDL3-CS.Native" Version="3.2.*" />
+    <PackageReference Include="SDL3-CS.Native.Image" Version="3.2.*" />
+    <PackageReference Include="SDL3-CS.Native.TTF" Version="3.2.*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
@@ -124,6 +125,24 @@
     <None Update="Resources\DejaVuSans.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
+    <Content Include="Libs\linux-x64\libSDL3.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </Content>
+    <Content Include="Libs\linux-x64\libSDL3_image.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </Content>
+    <Content Include="Libs\linux-x64\libSDL3_ttf.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </Content>
+    <Content Include="Libs\linux-x64\cimgui.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\CargoIco.bmp">
