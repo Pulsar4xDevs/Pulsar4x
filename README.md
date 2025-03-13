@@ -1,47 +1,84 @@
 # Pulsar4x
-[![Build status](https://ci.appveyor.com/api/projects/status/owpp4y7ruyn0skm1/branch/Master?svg=true)](https://ci.appveyor.com/project/intercross21/pulsar4x/branch/Master)
-[![Join the chat at https://gitter.im/Pulsar4x/Lobby](https://badges.gitter.im/Pulsar4x/Lobby.svg)](https://gitter.im/Pulsar4x/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-# Welcome to Pulsar4x.
+[![Discord](https://img.shields.io/discord/597360950517039117?color=%237289DA&label=Discord&logo=discord&logoColor=white)](https://discord.gg/3uwCQSn)
 
-A fan-made project to recreate a more user-friendly and better optimized version of Aurora, a 4x space sim created by Steve Walmsley. Pulsar4x is developed in C#. The long term goal of the project was originally to reproduce a feature-complete clone of Aurora. However, due to Steve Walmsley picking up development on his own C# version of Aurora, this has started to veer off on its own path, and has become a flexible, moddable aurora-like engine.
+## Overview
 
+Pulsar4x is a fan-made 4X space simulation game developed in C#, inspired by Aurora (created by Steve Walmsley). The project aims to create a user-friendly and optimized experience while providing a flexible, moddable aurora-like engine.
 
-#### How to [Compile](https://github.com/Pulsar4xDevs/Pulsar4x/wiki/Compilation).
-#### Here are some [FAQs](https://github.com/Pulsar4xDevs/Pulsar4x/wiki/FAQ).
-#### Here are our current [Tasks](https://github.com/Pulsar4xDevs/Pulsar4x/wiki/Issues-&-Projects).
-#### Our current [Projects](https://github.com/Pulsar4xDevs/Pulsar4x/projects).
-#### Documentation is available on the [Wiki](https://github.com/Pulsar4xDevs/Pulsar4x/wiki).
-#### We track bugs in [Issues](https://github.com/Pulsar4xDevs/Pulsar4x/issues).
+## Features
 
-### Contributing:
-* Create a fork of the project.
-* Ensure you're on the DevBranch.
-* Find an issue you'd like to look at, either by looking through the issues on github or something that looks like it needs doing just from compiling and running the project (some low hanging fruit ie ui improvements, we've not created issues for).
-* Ask questions, either in Discord, creating a github issue, or gitter.
-* Fix issue.
-* Create a pull request.
-* Wait for it to get looked at, fix any minor pointers brought up in the pull request if any.
-* Celebrate your first successfull PR to the project.
-Once you've got a couple of PRs under your belt we'll consider adding you to the group which will give you permisisons to push directly.
-***
+- Detailed space simulation
+- Complex economic and military systems
+- Procedurally generated galaxies
+- Extensive modding capabilities
+- Cross-platform compatibility
 
-### Community
+## Getting Started
 
-* Discord [Server](https://discord.gg/3uwCQSn) (primary)
-* Aurora [Subforum](http://aurora2.pentarch.org/index.php?board=169.0)
-* Gitter [Community](https://gitter.im/Pulsar4x/Lobby)
-* IRC [Channel](http://webchat.freenode.net/) (inactive)
-  * Enter #Pulsar4x as your Channel.
+### Prerequisites
 
-***
+- .NET 8.0 SDK or higher
+- Visual Studio 2022, VS Code, or Rider (recommended)
 
-Also we're recruiting. We need people who:
-* Are interested, seriously if you are interested then that is all you really need to know , you can learn the rest "on the job".
-* Can code C#, tho any language will do, C# is pretty easy to pick up.
-* Can do nice Art (we want to make a pretty UI)
-* Can work with JSON (there is a lot of data to be setup, research, names, gases, etc.)
-* Want to work on pulsar (seriously this is the important one, even if you don't know anything else YOU CAN LEARN)
+### Installation
 
+1. Clone the repository:
+   ```
+   git clone https://github.com/Pulsar4xDevs/Pulsar4x.git && cd Pulsar4x
+   ```
+2. Checkout the development branch:
+   ```
+   git checkout DevBranch
+   ```
+3. Build the solution following our [Compilation Guide](https://github.com/Pulsar4xDevs/Pulsar4x/wiki/Compilation)
 
-***
+## Documentation
+
+- [Wiki](https://github.com/Pulsar4xDevs/Pulsar4x/wiki) - Comprehensive documentation
+- [FAQ](https://github.com/Pulsar4xDevs/Pulsar4x/wiki/FAQ) - Frequently asked questions
+- [Issues](https://github.com/Pulsar4xDevs/Pulsar4x/issues) - Current development tasks
+
+## Contributing
+
+We welcome contributions from developers of all skill levels! Here's how to get started:
+
+1. Fork the repository
+2. Ensure you're working on the `DevBranch`
+3. Find an issue to work on (check [Issues](https://github.com/Pulsar4xDevs/Pulsar4x/issues))
+4. Make your changes
+5. Submit a pull request
+6. Wait for review and address any feedback
+
+After a few successful contributions, you may be invited to join the core development team!
+
+### We're Looking For:
+
+- C# developers (any skill level - you can learn as you go!)
+- UI/UX designers for improving the interface
+- Content creators for JSON data configuration
+- Anyone interested in the project willing to learn!
+
+## Community
+
+- [Discord Server](https://discord.gg/3uwCQSn) (Primary community hub)
+- [Aurora Subforum](http://aurora2.pentarch.org/index.php?board=169.0)
+- [Gitter Community](https://gitter.im/Pulsar4x/Lobby)
+
+## Contributors
+
+<a href="https://github.com/Pulsar4xDevs/Pulsar4x/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Pulsar4xDevs/Pulsar4x&max=8" />
+</a>
+
+See also the list of [contributors](https://github.com/Pulsar4xDevs/Pulsar4x/graphs/contributors) who participated in this project.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Steve Walmsley for creating Aurora, the inspiration for this project
+- All contributors who have helped make Pulsar4x possible
+- The community for their continued support and feedback
