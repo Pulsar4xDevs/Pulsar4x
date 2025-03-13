@@ -152,12 +152,12 @@ namespace Pulsar4X.Client
                 || _researchableTechsByGuid == null)
                 return;
 
-            if(ImGui.BeginTable("Teams", 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersInnerH))
+            if(ImGui.BeginTable("Teams", 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.SizingStretchProp))
             {
-                ImGui.TableSetupColumn("Scientist", ImGuiTableColumnFlags.None, 1f);
-                ImGui.TableSetupColumn("Labs", ImGuiTableColumnFlags.None, 0.25f);
-                ImGui.TableSetupColumn("Current Project", ImGuiTableColumnFlags.None, 1f);
-                ImGui.TableSetupColumn("Location", ImGuiTableColumnFlags.None, 0.75f);
+                ImGui.TableSetupColumn("Scientist", ImGuiTableColumnFlags.None, 0.35f);
+                ImGui.TableSetupColumn("Labs", ImGuiTableColumnFlags.None, 0.1f);
+                ImGui.TableSetupColumn("Current Project", ImGuiTableColumnFlags.None, 0.35f);
+                ImGui.TableSetupColumn("Location", ImGuiTableColumnFlags.None, 0.2f);
                 ImGui.TableHeadersRow();
 
                 for (int i = 0; i < _scienceTeams.Count; i++)
@@ -306,10 +306,10 @@ namespace Pulsar4X.Client
             if(_scienceTeams == null || _researchableTechsByGuid == null)
                 return;
 
-            if(ImGui.BeginTable("TechQueue", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+            if(ImGui.BeginTable("TechQueue", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
             {
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1f);
-                ImGui.TableSetupColumn("Options", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 0.5f);
+                ImGui.TableSetupColumn("Options", ImGuiTableColumnFlags.None, 0.5f);
                 ImGui.TableHeadersRow();
 
                 Scientist scientist = _scienceTeams[selected].scientist;
