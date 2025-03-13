@@ -3,13 +3,10 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
-using ImGuiSDL2CS;
 using SDL3;
 using Microsoft.Extensions.Configuration;
-using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Client.State;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public enum MouseButtons
     {
@@ -18,7 +15,7 @@ namespace Pulsar4X.SDL2UI
         Middle
     }
 
-    public class PulsarMainWindow : ImGuiSDL3CSWindow
+    public class PulsarMainWindow : SDL3Window
     {
 #if DEBUG
         private ImGuiWindowFlags _gitHashFlags = ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav;
@@ -30,7 +27,6 @@ namespace Pulsar4X.SDL2UI
         public const string ModsPath = "Mods";
         private readonly GlobalUIState _state;
 
-        Vector3 backColor;
         float mouseDownX;
         float mouseDownY;
         int mouseDownAltX;
@@ -41,8 +37,6 @@ namespace Pulsar4X.SDL2UI
         {
             _state = new GlobalUIState(this);
             _state.GalacticMap = new GalacticMapRender(this, _state);
-            backColor = new Vector3(0 / 255f, 0 / 255f, 28 / 255f);
-            OnEvent = MyEventHandler;
 
             try
             {
@@ -97,7 +91,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     bool isMaximized = bool.Parse(maximized);
                     if(isMaximized)
-                        SDL.MaximizeWindow(_Handle);
+                        SDL.MaximizeWindow(Window);
                 }
             }
             catch(Exception)
@@ -106,12 +100,9 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private bool MyEventHandler(SDL3Window window, SDL.Event e)
+        public override void HandleEvent(SDL.Event e)
         {
             SDL.GetMouseState(out float mouseX, out float mouseY);
-
-            if (!ImGuiSDL3CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed))
-                return false;
 
             if(!_state.IsGameLoaded)
             {
@@ -123,7 +114,7 @@ namespace Pulsar4X.SDL2UI
                 // Open the main menu if no other windows are open
                 if(ImGui.GetIO().MetricsRenderWindows == compare)
                     MainMenuItems.GetInstance().SetActive(true);
-                return false;
+                return;
             }
 
             if (e.Type == (uint)SDL.EventType.MouseButtonDown && e.Button.Button == 1 & !ImGui.GetIO().WantCaptureMouse)
@@ -190,23 +181,32 @@ namespace Pulsar4X.SDL2UI
                     _state.Camera.ZoomOut((int)mouseX, (int)mouseY);
                 }
             }
-            return true;
         }
 
-        public override void ImGuiRender()
+        public override void Update()
         {
+            base.Update();
+
             foreach (var (_, systemState) in _state.StarSystemStates)
             {
                 systemState.PreFrameSetup();
             }
+        }
 
-            Renderer.Clear(backColor.X, backColor.Y, backColor.Z, 1f);
-            Renderer.BeginFrame();
+        public override void Render()
+        {
+            base.Render();
 
-            _state.GalacticMap.Draw();
+            // Render the game
+            _state.GalacticMap?.Draw();
 
-            // Render ImGui on top of the rest. this eventualy calls overide void ImGuiLayout();
-            base.ImGuiRender();
+            // Render the UI
+            ImGuiLayout();
+        }
+
+        public override void PostFrameUpdate()
+        {
+            base.PostFrameUpdate();
 
             foreach (var (_, systemState) in _state.StarSystemStates)
             {
@@ -217,10 +217,10 @@ namespace Pulsar4X.SDL2UI
         private IntPtr _colorTesttexture = IntPtr.Zero;
         private IntPtr _pixels;
 
-        public unsafe override void ImGuiLayout()
+        public unsafe void ImGuiLayout()
         {
             //because the nameIcons are IMGUI not SDL we draw them here.
-            _state.GalacticMap.DrawNameIcons();
+            _state.GalacticMap?.DrawNameIcons();
 
             // if (_state.ShowImgDbg)
             // {
@@ -311,12 +311,12 @@ namespace Pulsar4X.SDL2UI
 
 #if DEBUG
             var dispsize = ImGui.GetIO().DisplaySize;
-            var pos = new System.Numerics.Vector2(0, dispsize.Y - ImGui.GetFrameHeightWithSpacing());
+            var pos = new Vector2(0, dispsize.Y - ImGui.GetFrameHeightWithSpacing());
             ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-            if (Window.Begin("GitHash", _gitHashFlags))
+            if (Client.Interface.Widgets.Window.Begin("GitHash", _gitHashFlags))
             {
                 ImGui.Text("Version: " + AssemblyInfo.GetGitHash());
-                Window.End();
+                Client.Interface.Widgets.Window.End();
             }
 #endif
         }

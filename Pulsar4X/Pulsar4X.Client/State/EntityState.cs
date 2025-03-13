@@ -15,7 +15,7 @@ using Pulsar4X.Technology;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class EntityState
     {

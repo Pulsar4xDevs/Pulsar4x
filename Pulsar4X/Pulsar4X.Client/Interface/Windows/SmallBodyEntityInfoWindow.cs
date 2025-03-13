@@ -1,7 +1,7 @@
 ﻿using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     //displays all asteroids and comets in current system
     class SmallBodyEntityInfoWindow : PulsarGuiWindow

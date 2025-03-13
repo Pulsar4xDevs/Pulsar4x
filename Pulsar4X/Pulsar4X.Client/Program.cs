@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class Program
     {

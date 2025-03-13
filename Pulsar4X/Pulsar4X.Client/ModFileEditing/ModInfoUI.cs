@@ -7,16 +7,16 @@ using Newtonsoft.Json.Linq;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Modding;
 
-namespace Pulsar4X.SDL2UI.ModFileEditing;
+namespace Pulsar4X.Client.ModFileEditing;
 
 public class ModInfoUI
 {
     private bool[] _isActive;
     private ModManifest[] _modManafests;
     private protected string[] _itemNames;
-    
+
     private protected Vector2 _childSize = new Vector2(640, 200);
-    
+
     private protected bool _showSaveDialog = false;
     private protected bool _showLoadDialog = false;
     private protected string _fileDialogPath = "";
@@ -38,7 +38,7 @@ public class ModInfoUI
         {
             _isActive[i] = false;
             _itemNames[i] = modinfo.ModName;
-            
+
 
             i++;
         }
@@ -50,9 +50,8 @@ public class ModInfoUI
         if(ImGui.TreeNode(label))
         {
 
-            
-            ImGui.BeginChild(label,_childSize, true);
-            
+            ImGui.BeginChild(label,_childSize, ImGuiChildFlags.Borders);
+
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0,150);
             ImGui.SetColumnWidth(1,500);
@@ -125,7 +124,7 @@ public class ModInfoUI
         string modDir = selectedItem.ModDirectory;
         string nameSpace = selectedItem.Namespace;
         int removeDatafileIndex = -1;
-        
+
         if (ImGui.Begin("Tech Category Editor: " + name, ref _isActive[selectedIndex]))
         {
             ImGui.Columns(2);
@@ -139,7 +138,7 @@ public class ModInfoUI
                 _itemNames[selectedIndex] = name;
 
             }
-            
+
             ImGui.NextColumn();
             ImGui.Text("Author: ");
             ImGui.NextColumn();
@@ -147,7 +146,7 @@ public class ModInfoUI
             {
                 selectedItem.Author = author;
             }
-            
+
             ImGui.NextColumn();
             ImGui.Text("Version: ");
             ImGui.NextColumn();
@@ -155,7 +154,7 @@ public class ModInfoUI
             {
                 selectedItem.Version = version;
             }
-            
+
             ImGui.NextColumn();
             ImGui.Text("ModDir: ");
             ImGui.NextColumn();
@@ -163,7 +162,7 @@ public class ModInfoUI
             {
                 selectedItem.ModDirectory = modDir;
             }
-            
+
             ImGui.NextColumn();
             ImGui.Text("Namespace: ");
             ImGui.NextColumn();
@@ -171,7 +170,7 @@ public class ModInfoUI
             {
                 selectedItem.Namespace = nameSpace;
             }
-            
+
             ImGui.NextColumn();
             ImGui.Text("DataFiles: ");
             ImGui.NextColumn();
@@ -195,7 +194,7 @@ public class ModInfoUI
             {
                 selectedItem.DataFiles.RemoveAt(removeDatafileIndex);
             }
-            
+
             if (_showLoadFileDialogDatafiles && (FileDialog.DisplayLoad(ref _fileDialogPath, ref _fileName, ref _showLoadFileDialogDatafiles)))
             {
                 selectedItem.DataFiles.Add(_fileName);
@@ -203,7 +202,7 @@ public class ModInfoUI
             ImGui.End();
         }
     }
-    
+
     private void Save()
     {
         var selectedItem = _modManafests[_selectedIndex];
@@ -211,7 +210,7 @@ public class ModInfoUI
         //var modManifest = JsonConvert.DeserializeObject<ModManifest>(manifestJson);
 
         var serialisedItem = JsonConvert.SerializeObject(selectedItem, Formatting.Indented);
-        
+
         using (StreamWriter outputFile = new StreamWriter(Path.Combine(_fileDialogPath, _fileName)))
         {
             //output.Add(selectedItem);
@@ -227,11 +226,11 @@ public class ModInfoUI
         var editor = ModFileEditor.GetInstance();
         editor.Refresh(modDataStore);
     }
-    
+
     public void NewItem(string label)
     {
         ModManifest newManifest = new ModManifest();
-        
+
         if (ImGui.Button(label))
         {
             Array.Resize(ref _modManafests, _modManafests.Length + 1);
@@ -242,7 +241,7 @@ public class ModInfoUI
             _isActive[^1] = true;
         }
     }
-    
+
     void RemoveAtIndex(int index)
     {
         int newlen = _modManafests.Length - 1;

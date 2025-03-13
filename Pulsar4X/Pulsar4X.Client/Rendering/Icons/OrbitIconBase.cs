@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using Pulsar4X.Orbits;
 using Pulsar4X.Movement;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
 
     public interface IKepler

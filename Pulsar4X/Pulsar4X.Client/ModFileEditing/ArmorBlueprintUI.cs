@@ -4,7 +4,7 @@ using ImGuiNET;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Modding;
 
-namespace Pulsar4X.SDL2UI.ModFileEditing;
+namespace Pulsar4X.Client.ModFileEditing;
 
 public class ArmorBlueprintUI : BluePrintsUI
 {
@@ -30,7 +30,7 @@ public class ArmorBlueprintUI : BluePrintsUI
         newEmpty.UniqueID = "New Blueprint";
         _newEmpty = newEmpty;
     }
-    
+
 
     public override void DisplayEditorWindow(int selectedIndex)
     {
@@ -50,7 +50,7 @@ public class ArmorBlueprintUI : BluePrintsUI
             {
                 selectedItem.UniqueID = _editStr;
             }
-            
+
             ImGui.NextColumn();
             ImGui.Text("ResourceID: ");
             ImGui.NextColumn();
@@ -59,8 +59,8 @@ public class ArmorBlueprintUI : BluePrintsUI
             {
                 selectedItem.ResourceID = _editStr;
             }
-            
-            
+
+
             ImGui.NextColumn();
             ImGui.Text("Density: ");
             ImGui.NextColumn();

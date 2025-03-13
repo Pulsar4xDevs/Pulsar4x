@@ -5,7 +5,7 @@ using Pulsar4X.Industry;
 using Pulsar4X.Names;
 using Pulsar4X.Storage;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public static class EntityExtensions
     {

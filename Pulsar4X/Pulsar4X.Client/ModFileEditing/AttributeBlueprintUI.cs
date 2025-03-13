@@ -5,7 +5,7 @@ using Pulsar4X.Blueprints;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Modding;
 
-namespace Pulsar4X.SDL2UI.ModFileEditing;
+namespace Pulsar4X.Client.ModFileEditing;
 
 public class AttributeBlueprintUI : BluePrintsUI
 {
@@ -20,12 +20,12 @@ public class AttributeBlueprintUI : BluePrintsUI
             _blueprints = componentBlueprint.Properties.ToArray();
         else
             _blueprints = new ComponentTemplatePropertyBlueprint[1];
-        
+
         Refresh();
-        
+
 
     }
-    
+
 
 
     public sealed override void Refresh()
@@ -45,7 +45,7 @@ public class AttributeBlueprintUI : BluePrintsUI
         //var newEmpty = new ComponentTemplateAttributeBlueprint();
         //newEmpty.Name = "New Blueprint";
         //_newEmpty = newEmpty;
-        
+
         var type = typeof(IComponentDesignAttribute);
         var attributeTypes = AppDomain.CurrentDomain.GetAssemblies()
                                       .SelectMany(s => s.GetTypes())
@@ -87,10 +87,10 @@ public class AttributeBlueprintUI : BluePrintsUI
             selectedItem = new ComponentTemplatePropertyBlueprint();
             selectedItem.Name = "newAttribute";
         }
-        
+
         string name = selectedItem.Name;
         string editStr;
-        
+
         ImGui.NextColumn();
         ImGui.Text("Name: ");
         ImGui.NextColumn();
@@ -100,7 +100,7 @@ public class AttributeBlueprintUI : BluePrintsUI
             selectedItem.Name = editStr;
         }
         ImGui.NextColumn();
-            
+
         ImGui.Text("Units: ");
         ImGui.NextColumn();
         var editIndex = Array.IndexOf(_units, selectedItem.Units);
@@ -137,7 +137,7 @@ public class AttributeBlueprintUI : BluePrintsUI
         }
         ImGui.NextColumn();
 
-           
+
         ImGui.Text("AttributeType: ");
         ImGui.NextColumn();
         editIndex = Array.IndexOf(_attributeFullNames, selectedItem.AttributeType);

@@ -8,7 +8,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Names;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class SMWindow : PulsarGuiWindow
     {
@@ -148,7 +148,7 @@ namespace Pulsar4X.SDL2UI
                 */
                 Window.End();
             }
-            
+
         }
 
         internal override void EntityClicked(EntityState entity, MouseButtons button)

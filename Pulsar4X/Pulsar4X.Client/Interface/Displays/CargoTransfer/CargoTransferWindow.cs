@@ -8,7 +8,7 @@ using Pulsar4X.Factions;
 using Pulsar4X.Orbits;
 using Pulsar4X.Storage;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class CargoTransferWindow : PulsarGuiWindow
     {
@@ -231,7 +231,7 @@ namespace Pulsar4X.SDL2UI
                 _selectedEntityRight.Entity,
                 CargoListLeft.GetAllToMove()
                 );
-            
+
             CargoListLeft.ClearUINumbers();
             CargoListRight.ClearUINumbers();
         }
@@ -273,7 +273,7 @@ namespace Pulsar4X.SDL2UI
                                     ComponentInstance specificComponent = new((ComponentDesign)SelectedCargoPanel.selectedCargo);
                                     CargoInstallOrder.CreateCommand(
                                         _uiState.Faction.Id,
-                                        _selectedEntityLeft.Entity, 
+                                        _selectedEntityLeft.Entity,
                                         _selectedEntityRight.Entity,
                                         specificComponent
                                         );

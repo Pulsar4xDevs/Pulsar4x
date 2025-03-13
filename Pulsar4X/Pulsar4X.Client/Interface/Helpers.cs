@@ -6,7 +6,7 @@ using Pulsar4X.Extensions;
 using Pulsar4X.Orbital;
 using Vector3 = System.Numerics.Vector3;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public enum TextAlign
     {

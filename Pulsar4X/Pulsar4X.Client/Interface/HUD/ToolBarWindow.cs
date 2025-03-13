@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.ImGuiNetUI.EntityManagement;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class ToolBarWindow : PulsarGuiWindow
     {
@@ -209,7 +208,7 @@ namespace Pulsar4X.SDL2UI
                         }
                     }
 
-                    if (button.OnClick != null && ImGui.ImageButton(button.Picture, ButtonSize))//Make the button
+                    if (button.OnClick != null && ImGui.ImageButton($"###{name}-nonblank", button.Picture, ButtonSize))//Make the button
                     {
                         button.OnClick();
                     }

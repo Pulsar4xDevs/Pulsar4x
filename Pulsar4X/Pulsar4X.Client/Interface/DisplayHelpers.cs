@@ -5,7 +5,7 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
 using Pulsar4X.Ships;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public static class DisplayHelpers
     {

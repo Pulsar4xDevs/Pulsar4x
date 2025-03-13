@@ -12,7 +12,7 @@ using Pulsar4X.Sensors;
 using Pulsar4X.Weapons;
 using Pulsar4X.Movement;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class OrdnanceDesignWindow : PulsarGuiWindow
     {

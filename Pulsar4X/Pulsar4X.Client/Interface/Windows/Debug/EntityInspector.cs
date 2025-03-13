@@ -16,7 +16,7 @@ using Pulsar4X.Names;
 using Pulsar4X.Sensors;
 using Pulsar4X.Technology;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public static class EntityInspector
     {
@@ -225,7 +225,7 @@ namespace Pulsar4X.SDL2UI
                         if(items == null) continue;
                         //int itemsCount = items.Count;
                         ImGui.Text(memberInfo.Name);
-                        
+
                         if (ImGui.TreeNode(memberInfo.Name))
                         {
                             ImGui.NextColumn();

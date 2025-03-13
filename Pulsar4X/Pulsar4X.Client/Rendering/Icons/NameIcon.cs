@@ -14,7 +14,7 @@ using Pulsar4X.Ships;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Factions;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class NameIcon : Icon, IComparable<NameIcon>, IRectangle
     {
@@ -329,6 +329,10 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 2);
                 ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(1, 2));
                 ImGui.SetNextWindowPos(new Vector2(X, Y), ImGuiCond.Always);
+
+                if(string.IsNullOrEmpty(NameString))
+                    throw new NullReferenceException("NameString cannot be null or empty");
+
                 ImGui.Begin(NameString, ref IsActive, _flags);
             }
 

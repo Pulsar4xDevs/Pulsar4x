@@ -9,7 +9,7 @@ using Pulsar4X.Ships;
 using Pulsar4X.Weapons;
 using Pulsar4X.Movement;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class ShipIcon : Icon
     {

@@ -4,10 +4,9 @@ using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
-using Pulsar4X.SDL2UI;
-using static Pulsar4X.SDL2UI.UserOrbitSettings;
+using static Pulsar4X.Client.UserOrbitSettings;
 
-namespace Pulsar4X.ImGuiNetUI.EntityManagement
+namespace Pulsar4X.Client
 {
     public class OrderCreationWindow : PulsarGuiWindow
     {

@@ -12,7 +12,7 @@ using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 using Pulsar4X.Weapons;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public static class CargoStorageDBDisplay
     {
@@ -96,7 +96,7 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.BeginTooltip();
                                 ImGui.Text("+" + Stringify.Quantity(itemsInEscro) + " in escro");
                                 ImGui.Text("Mass: " + Stringify.Mass(massStored) + " (" + Stringify.Mass(cargoType.MassPerUnit) + " each)");
-                                
+
                                 ImGui.Text("can store " + Stringify.Quantity(itemCanStore) + " more items");
                                 ImGui.EndTooltip();
                             }

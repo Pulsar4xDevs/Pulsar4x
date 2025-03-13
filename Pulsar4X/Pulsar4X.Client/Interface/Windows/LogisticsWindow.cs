@@ -9,7 +9,7 @@ using Pulsar4X.Factions;
 using Pulsar4X.Logistics;
 using Pulsar4X.Storage;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class LogiShipWindow : PulsarGuiWindow
     {

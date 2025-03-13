@@ -2,12 +2,11 @@ using System.Collections.Generic;
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
-using Pulsar4X.ImGuiNetUI;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
 using Pulsar4X.People;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class CommanderWindow : PulsarGuiWindow
     {

@@ -38,9 +38,9 @@ public class FuturisticTheme : ITheme
         // Tabs
         colors[(int)ImGuiCol.Tab] = new Vector4(0.11f, 0.20f, 0.33f, 0.86f);
         colors[(int)ImGuiCol.TabHovered] = new Vector4(0.24f, 0.46f, 0.98f, 0.80f);
-        colors[(int)ImGuiCol.TabActive] = new Vector4(0.19f, 0.34f, 0.58f, 1.00f);
-        colors[(int)ImGuiCol.TabUnfocused] = new Vector4(0.07f, 0.10f, 0.15f, 0.97f);
-        colors[(int)ImGuiCol.TabUnfocusedActive] = new Vector4(0.14f, 0.26f, 0.42f, 1.00f);
+        colors[(int)ImGuiCol.TabDimmed] = new Vector4(0.19f, 0.34f, 0.58f, 1.00f);
+        colors[(int)ImGuiCol.TabDimmedSelected] = new Vector4(0.07f, 0.10f, 0.15f, 0.97f);
+        colors[(int)ImGuiCol.TabDimmedSelectedOverline] = new Vector4(0.14f, 0.26f, 0.42f, 1.00f);
 
         // Sliders and scrollbars
         colors[(int)ImGuiCol.SliderGrab] = new Vector4(0.24f, 0.46f, 0.98f, 0.78f);    // Bright blue

@@ -1,12 +1,12 @@
 ﻿using ImGuiNET;
 using System.Collections.Generic;
 using Pulsar4X.Engine;
-using Pulsar4X.SDL2UI.Combat;
 using Vector3 = System.Numerics.Vector3;
 using Pulsar4X.Orbits;
 using Pulsar4X.Movement;
+using Pulsar4X.Client.Combat;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class SettingsWindow : PulsarGuiWindow
     {

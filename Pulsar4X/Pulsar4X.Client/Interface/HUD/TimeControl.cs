@@ -7,7 +7,7 @@ using Pulsar4X.Client.Interface.Widgets;
 using Vector2 = System.Numerics.Vector2;
 using Pulsar4X.Engine;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class TimeControl : PulsarGuiWindow
     {
@@ -32,7 +32,7 @@ namespace Pulsar4X.SDL2UI
 
         bool _expanded;
 
-        ImGuiTreeNodeFlags _xpanderFlags = ImGuiTreeNodeFlags.AllowItemOverlap;
+        ImGuiTreeNodeFlags _xpanderFlags = ImGuiTreeNodeFlags.AllowOverlap;
         float _freqTimeSpanValue = 0.1f;
         int _freqSpanType = 1;
 
@@ -87,20 +87,20 @@ namespace Pulsar4X.SDL2UI
             ImGui.SameLine();
             if (_isPaused == true)//When time is paused
             {
-                if (ImGui.ImageButton(_uiState.Img_Play(), iconSize))//Provide a button to unpause
+                if (ImGui.ImageButton("play", _uiState.Img_Play(), iconSize))//Provide a button to unpause
                     PausePlayPressed();
                 ImGui.SameLine();
-                if (ImGui.ImageButton(_uiState.Img_OneStep(), iconSize))//Provide a button to increment time
+                if (ImGui.ImageButton("onestep", _uiState.Img_OneStep(), iconSize))//Provide a button to increment time
                     OneStepPressed();
             }
             else//When time is running
             {
-                if (ImGui.ImageButton(_uiState.Img_Pause(), iconSize))//Provide a button to unpause time
+                if (ImGui.ImageButton("pause", _uiState.Img_Pause(), iconSize))//Provide a button to unpause time
                     PausePlayPressed();
             }
-            
 
-            
+
+
             if (_expanded)//When the submenu is expanded allow the user to adjust time frequency
             {
                 ImGui.PushItemWidth(100);
@@ -111,7 +111,7 @@ namespace Pulsar4X.SDL2UI
                     _freqTimeSpanValue = (float)Math.Round(_freqTimeSpanValue, 1);
                     AdjustFreqency();
                 }
-                
+
                 ImGui.SameLine();
                 if (ImGui.Combo("##freqCmbo", ref _freqSpanType, _timespanTypeSelection, _timespanTypeSelection.Length))
                     AdjustFreqency();
@@ -120,12 +120,12 @@ namespace Pulsar4X.SDL2UI
         }
 
         void AdjustTimeSpan()
-        { 
+        {
             switch (_timeSpanType)
             {
                 case 0:
                     _timeloop.Ticklength = TimeSpan.FromMilliseconds(_timeSpanValue);
-                    break;   
+                    break;
                 case 1:
                     _timeloop.Ticklength = TimeSpan.FromSeconds(_timeSpanValue);
                     break;
@@ -150,7 +150,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
         void ReadTimeSpan()
-        { 
+        {
             switch (_timeSpanType)
             {
                 case 0:
@@ -254,7 +254,7 @@ namespace Pulsar4X.SDL2UI
             {
                 _timeloop.PauseTime();
                 _isPaused = true;
-            }   
+            }
         }
 
         void OneStepPressed()

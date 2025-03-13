@@ -3,7 +3,7 @@ using Pulsar4X.Orbital;
 using SDL3;
 using Pulsar4X.Movement;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class WarpMovingIcon : Icon
     {

@@ -1,7 +1,7 @@
 using ImGuiNET;
 using Pulsar4X.Modding;
 
-namespace Pulsar4X.SDL2UI.ModFileEditing;
+namespace Pulsar4X.Client.ModFileEditing;
 
 public class ModFileEditor : PulsarGuiWindow
 {
@@ -14,8 +14,8 @@ public class ModFileEditor : PulsarGuiWindow
     private ArmorBlueprintUI _armorBlueprintUI;
     private ProcessedMateralsUI _processedMateralsUI;
     private MineralBlueprintUI _mineralsBlueprintUI;
-    
-    
+
+
     private ModFileEditor()
     {
 
@@ -51,10 +51,10 @@ public class ModFileEditor : PulsarGuiWindow
         _mineralsBlueprintUI = new MineralBlueprintUI(modDataStore);
     }
 
-    
+
     internal override void Display()
     {
-        
+
         if (IsActive)
         {
             if (ImGui.Begin("Editor", ref IsActive))

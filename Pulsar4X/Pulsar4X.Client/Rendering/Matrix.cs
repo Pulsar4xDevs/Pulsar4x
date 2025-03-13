@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Pulsar4X.Orbital;
 using SDL3;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
 
 

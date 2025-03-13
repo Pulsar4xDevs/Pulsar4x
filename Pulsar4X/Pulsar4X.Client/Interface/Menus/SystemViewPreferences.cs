@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Pulsar4X.Client.Interface.Widgets;
 using SDL3;
 
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.Client;
 
 /// <summary>
 /// This class acts as an editor window for the view preferences

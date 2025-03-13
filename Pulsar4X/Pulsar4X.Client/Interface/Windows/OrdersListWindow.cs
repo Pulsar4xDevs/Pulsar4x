@@ -5,10 +5,9 @@ using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
-using Pulsar4X.SDL2UI;
 using Pulsar4X.Engine.Orders;
 
-namespace Pulsar4X.ImGuiNetUI.EntityManagement
+namespace Pulsar4X.Client
 {
     public class OrdersListWindow : NonUniquePulsarGuiWindow
     {

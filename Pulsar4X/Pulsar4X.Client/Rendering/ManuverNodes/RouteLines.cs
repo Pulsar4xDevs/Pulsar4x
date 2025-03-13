@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
-using Pulsar4X.SDL2UI.ManuverNodes;
 using SDL3;
 
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.Client;
 
 public class ManuverLinesComplete : IDrawData
 {

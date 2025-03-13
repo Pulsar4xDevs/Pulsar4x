@@ -20,7 +20,7 @@ using Pulsar4X.Storage;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class FleetWindow : PulsarGuiWindow
     {
@@ -178,7 +178,7 @@ namespace Pulsar4X.SDL2UI
                     Vector2 windowContentSize = ImGui.GetContentRegionAvail();
                     var firstChildSize = new Vector2(windowContentSize.X * 0.99f, windowContentSize.Y);
                     var secondChildSize = new Vector2(windowContentSize.X * 0.5f - (windowContentSize.X * 0.01f), windowContentSize.Y);
-                    if (ImGui.BeginChild("FleetSummary1", firstChildSize, true))
+                    if (ImGui.BeginChild("FleetSummary1", firstChildSize, ImGuiChildFlags.Borders))
                     {
                         if (ImGui.CollapsingHeader("Fleet Information", ImGuiTreeNodeFlags.DefaultOpen))
                         {
@@ -266,7 +266,7 @@ namespace Pulsar4X.SDL2UI
                     var size = ImGui.GetContentRegionAvail();
                     var firstChildSize = new Vector2(size.X * 0.27f, size.Y);
                     var secondChildSize = new Vector2(size.X * 0.73f - (size.X * 0.01f), size.Y);
-                    if(ImGui.BeginChild("IssueOrders-List", firstChildSize, true))
+                    if(ImGui.BeginChild("IssueOrders-List", firstChildSize, ImGuiChildFlags.Borders))
                     {
                         DisplayHelpers.Header("Available Orders");
 
@@ -303,7 +303,7 @@ namespace Pulsar4X.SDL2UI
                     var size = ImGui.GetContentRegionAvail();
                     var firstChildSize = new Vector2(size.X * 0.33f, size.Y);
                     var secondChildSize = new Vector2(size.X * 0.67f - (size.X * 0.01f), size.Y);
-                    if(ImGui.BeginChild("StandingOrders-List", firstChildSize, true))
+                    if(ImGui.BeginChild("StandingOrders-List", firstChildSize, ImGuiChildFlags.Borders))
                     {
                         var sizeAvailable = ImGui.GetContentRegionAvail();
                         DisplayHelpers.Header("Order List");
@@ -375,7 +375,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.EndChild();
                     }
                     ImGui.SameLine();
-                    if(selectedOrder != null && ImGui.BeginChild("StandingOrders-edit", secondChildSize, true))
+                    if(selectedOrder != null && ImGui.BeginChild("StandingOrders-edit", secondChildSize, ImGuiChildFlags.Borders))
                     {
                         var sizeAvailable = ImGui.GetContentRegionAvail();
                         DisplayHelpers.Header("Order Name");
@@ -511,7 +511,7 @@ namespace Pulsar4X.SDL2UI
 
         private void IssueOrdersDisplay(Vector2 size)
         {
-            if(ImGui.BeginChild("IssueOrders", size, true))
+            if(ImGui.BeginChild("IssueOrders", size, ImGuiChildFlags.Borders))
             {
                 if(SelectedFleet == null || SelectedFleet.Manager == null)
                 {
@@ -654,7 +654,7 @@ namespace Pulsar4X.SDL2UI
             var xPosition = ImGui.GetCursorPosX();
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
 
-            if (ImGui.BeginChild("Fleet Orders", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y), true))
+            if (ImGui.BeginChild("Fleet Orders", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y), ImGuiChildFlags.Borders))
             {
                 var orderableDB = SelectedFleet.GetDataBlob<OrderableDB>();
                 DisplayHelpers.Header("Fleet Orders");
@@ -700,7 +700,7 @@ namespace Pulsar4X.SDL2UI
 
             var xPosition = ImGui.GetCursorPosX();
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            if (ImGui.BeginChild("FleetSummary2", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y * 0.5f - 24f), true))
+            if (ImGui.BeginChild("FleetSummary2", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y * 0.5f - 24f), ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Assigned Ships");
 
@@ -755,7 +755,7 @@ namespace Pulsar4X.SDL2UI
             if(factionRoot == null) return;
 
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("FleetListSelection", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y - 24f), true))
+            if(ImGui.BeginChild("FleetListSelection", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y - 24f), ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Fleets", "Select a fleet to manage it.");
 

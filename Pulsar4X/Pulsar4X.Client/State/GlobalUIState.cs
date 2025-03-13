@@ -1,25 +1,21 @@
 ﻿using ImGuiNET;
-using ImGuiSDL2CS;
 using Pulsar4X.Orbital;
 using SDL3;
 using System;
 using System.Collections.Generic;
-using Pulsar4X.ImGuiNetUI;
-using Pulsar4X.ImGuiNetUI.EntityManagement;
 using Pulsar4X.Engine;
 using System.Linq;
 using Pulsar4X.Input;
 using Pulsar4X.Messaging;
 using System.Threading.Tasks;
 using Pulsar4X.DataStructures;
-using Pulsar4X.ImGuiNetUI.ManuverNodes;
-using static Pulsar4X.SDL2UI.SystemViewPreferences;
+using static Pulsar4X.Client.SystemViewPreferences;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 using Pulsar4X.Client.Rendering;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public delegate void EntityClickedEventHandler(EntityState entityState, MouseButtons mouseButton);
 
@@ -79,7 +75,7 @@ namespace Pulsar4X.SDL2UI
         internal EntityContextMenu? ContextMenu { get; set; }
         internal SafeDictionary<string, SystemState> StarSystemStates = new ();
         internal Camera Camera;
-        internal ImGuiSDL3CSWindow ViewPort { get; private set; }
+        internal SDL3Window ViewPort { get; private set; }
         internal System.Numerics.Vector2 MainWinSize { get {return ViewPort.Size;}}
 
         internal Dictionary<Type, PulsarGuiWindow> LoadedWindows = new ();
@@ -101,17 +97,12 @@ namespace Pulsar4X.SDL2UI
 
         internal View? SelectedMapView { get; set; } = null;
 
-        internal GlobalUIState(ImGuiSDL3CSWindow viewport)
+        internal GlobalUIState(SDL3Window viewport)
         {
             ViewPort = viewport;
             PulsarGuiWindow._uiState = this;
-            var windowPtr = viewport.Handle;
+            var windowPtr = viewport.Window;
 
-            // Hint the renderer to use OpenGL if the viewport renderer is OpenGL
-            if(viewport.Renderer is OpenGLRenderer)
-            {
-                SDL.SetHint(SDL.Hints.RenderDriver, "opengl");
-            }
             SDLRendererPtr = SDL.CreateRenderer(windowPtr, "pulsar4x");
 
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Star, 2f);

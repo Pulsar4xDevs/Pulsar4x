@@ -10,7 +10,7 @@ using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Factions;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class ComponentDesignWindow : PulsarGuiWindow
     {
@@ -19,13 +19,13 @@ namespace Pulsar4X.SDL2UI
         private static string[]? sortedGroupNames;
         private static int selectedFilterIndex = 0;
         private static ComponentTemplateBlueprint? selectedTemplate;
-        
-        
+
+
         private static Dictionary<string, ComponentDesign> componentDesigns = new();
         private static List<ComponentDesign> componentsOfType = new();
         private static string[]? componentNames = new string[0];
         private static ComponentDesign selectedComponent;
-        
+
         private ComponentDesignWindow() { }
 
         internal static ComponentDesignWindow GetInstance()
@@ -65,19 +65,19 @@ namespace Pulsar4X.SDL2UI
                 var secondChildSize = new Vector2(windowContentSize.X * 0.15f, windowContentSize.Y);
                 var thirdChildSize = new Vector2(windowContentSize.X * 0.7f - (windowContentSize.X * 0.01f), windowContentSize.Y);
 
-                if(ImGui.BeginChild("ComponentDesignSelection", firstChildSize, true))
+                if(ImGui.BeginChild("ComponentDesignSelection", firstChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayTemplateSelection();
                     ImGui.EndChild();
                 }
                 ImGui.SameLine();
-                if (ImGui.BeginChild("ComponentSelection", secondChildSize, true))
+                if (ImGui.BeginChild("ComponentSelection", secondChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayComponentList();
                     ImGui.EndChild();
                 }
                 ImGui.SameLine();
-                if (ImGui.BeginChild("ComponentDesign", thirdChildSize, true))
+                if (ImGui.BeginChild("ComponentDesign", thirdChildSize, ImGuiChildFlags.Borders))
                 {
                     if(selectedTemplate != null)
                     {
@@ -89,7 +89,7 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.SameLine();
                 //ImGui.SetCursorPosY(27f); // FIXME: this should somehow be calculated
-                
+
 
                 Window.End();
             }
@@ -140,7 +140,7 @@ namespace Pulsar4X.SDL2UI
                             componentNames[c] = componentsOfType[c].Name;
                         }
                     }
-                    
+
                 }
                 DisplayHelpers.DescriptiveTooltip(template.Name, template.ComponentType, template.Formulas["Description"]);
             }
@@ -164,14 +164,14 @@ namespace Pulsar4X.SDL2UI
                     }
                 }
             }
-            
+
             ImGui.BeginDisabled();
             if(ImGui.Button("Create Template", new Vector2(204f, 0f)))
             {
 
             }
             ImGui.EndDisabled();
-    
+
         }
 
         public override void OnGameTickChange(DateTime newDate)

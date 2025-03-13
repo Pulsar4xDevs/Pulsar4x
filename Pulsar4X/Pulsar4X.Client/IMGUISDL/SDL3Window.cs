@@ -1,27 +1,31 @@
-﻿using Pulsar4X.Client.Rendering;
+﻿using ImGuiNET;
 using SDL3;
 using System;
+using System.Numerics;
 
-namespace ImGuiSDL2CS
+namespace Pulsar4X.Client
 {
-    public class SDL3Window : IDisposable
+    public partial class SDL3Window : IDisposable
     {
-        private const String defaultTitle = "SDL3 Window";
+        private const string _defaultTitle = "SDL3 Window";
 
-        protected IntPtr _Handle;
-        public IntPtr Handle => _Handle;
+        public readonly nint Window;
+        public readonly nint Renderer;
+        public readonly nint ImGuiContext;
+        public readonly ImGuiSDL3 PlatformBackend;
+        public readonly ImGuiSDL3Renderer ImGuiRenderer;
 
-        public IRenderer Renderer { get; set; }
+        private SDL.Rect _screenClipRect;
 
         /// <summary>
         /// Window title
         /// </summary>
         public string Title {
             get {
-                return SDL.GetWindowTitle(_Handle);
+                return SDL.GetWindowTitle(Window);
             }
             set {
-                SDL.SetWindowTitle(_Handle, value);
+                SDL.SetWindowTitle(Window, value);
             }
         }
 
@@ -30,12 +34,12 @@ namespace ImGuiSDL2CS
         /// </summary>
         public int X {
             get {
-                SDL.GetWindowPosition(_Handle, out int x, out _);
+                SDL.GetWindowPosition(Window, out int x, out _);
                 return x;
             }
             set {
-                SDL.GetWindowPosition(_Handle, out _, out int y);
-                SDL.SetWindowPosition(_Handle, value, y);
+                SDL.GetWindowPosition(Window, out _, out int y);
+                SDL.SetWindowPosition(Window, value, y);
             }
         }
 
@@ -44,12 +48,12 @@ namespace ImGuiSDL2CS
         /// </summary>
         public int Y {
             get {
-                SDL.GetWindowPosition(_Handle, out _, out int y);
+                SDL.GetWindowPosition(Window, out _, out int y);
                 return y;
             }
             set {
-                SDL.GetWindowPosition(_Handle, out int x, out _);
-                SDL.SetWindowPosition(_Handle, x, value);
+                SDL.GetWindowPosition(Window, out int x, out _);
+                SDL.SetWindowPosition(Window, x, value);
             }
         }
 
@@ -58,12 +62,12 @@ namespace ImGuiSDL2CS
         /// </summary>
         public int Width {
             get {
-                SDL.GetWindowSize(_Handle, out int x, out _);
+                SDL.GetWindowSize(Window, out int x, out _);
                 return x;
             }
             set {
-                SDL.GetWindowSize(_Handle, out _, out int y);
-                SDL.SetWindowSize(_Handle, value, y);
+                SDL.GetWindowSize(Window, out _, out int y);
+                SDL.SetWindowSize(Window, value, y);
             }
         }
 
@@ -72,123 +76,180 @@ namespace ImGuiSDL2CS
         /// </summary>
         public int Height {
             get {
-                SDL.GetWindowSize(_Handle, out _, out int y);
+                SDL.GetWindowSize(Window, out _, out int y);
                 return y;
             }
             set {
-                SDL.GetWindowSize(_Handle, out int x, out _);
-                SDL.SetWindowSize(_Handle, x, value);
+                SDL.GetWindowSize(Window, out int x, out _);
+                SDL.SetWindowSize(Window, x, value);
             }
         }
 
-        public SDL.WindowFlags Flags => (SDL.WindowFlags) SDL.GetWindowFlags(_Handle);
-
-        public Action<SDL3Window>? OnLoop;
-        public Func<SDL3Window, SDL.Event, bool>? OnEvent;
-        public bool IsAlive = false;
-
-        public SDL3Window(
-            string title = defaultTitle,
-            int x = 0, int y = 0,
-            int width = 800, int height = 600,
-            SDL.WindowFlags flags = SDL.WindowFlags.OpenGL | SDL.WindowFlags.Resizable | SDL.WindowFlags.Hidden
-        )
+        public Vector2 Size
         {
-            Init(title, x, y, width, height, flags);
+            get
+            {
+                SDL.GetWindowSize(Window, out int w, out int h);
+                return new(w, h);
+            }
+            set
+            {
+                SDL.SetWindowSize(Window, (int) Math.Round(value.X), (int) Math.Round(value.Y));
+            }
         }
 
-        public void Init(
-            string title = defaultTitle,
-            int x = 0, int y = 0,
-            int width = 800, int height = 600,
-            SDL.WindowFlags flags = SDL.WindowFlags.OpenGL | SDL.WindowFlags.Resizable | SDL.WindowFlags.Hidden
+        public SDL.WindowFlags Flags => (SDL.WindowFlags) SDL.GetWindowFlags(Window);
+        public bool IsAlive { get; set; } = false;
+
+        public SDL3Window(
+            string title = _defaultTitle,
+            int width = 1280, int height = 720,
+            SDL.WindowFlags flags = SDL.WindowFlags.Resizable | SDL.WindowFlags.Hidden
         )
         {
-            // init SDL
-            SDL.Init(SDL.InitFlags.Video);
+            // Initialize SDL
+            if(!SDL.Init(SDL.InitFlags.Video))
+            throw new Exception($"SDL_Init failed: {SDL.GetError()}");
 
-            // SDL3 no longer needs to init SDL_image
-            // https://github.com/libsdl-org/SDL_image/blob/main/docs/README-migration.md
-            //
-            // // init SDL_image
-            // var sdlImageFlags = SDL_image.IMG_InitFlags.IMG_INIT_PNG | SDL_image.IMG_InitFlags.IMG_INIT_JPG;
-            // var result = SDL_image.IMG_Init(sdlImageFlags);
+            // Create window & renderer
+            if(!SDL.CreateWindowAndRenderer(title, width, height, flags, out Window, out Renderer))
+                throw new Exception($"SDL_CreateWindowAndRenderer failed: {SDL.GetError()}");
 
-            // if ((result & (int)sdlImageFlags) != (int)sdlImageFlags)
-            // {
-            //     // Some format failed to initialize
-            //     throw new Exception($"SDL2_image failed to initialize: {SDL.SDL_GetError()}");
-            // }
+            // Enable VSync
+            SDL.SetRenderVSync(Renderer, 1);
 
-            if (_Handle != IntPtr.Zero)
-                throw new InvalidOperationException("SDL2Window already initialized, Dispose() first before reusing!");
+            // Create ImGui context
+            ImGuiContext = ImGui.CreateContext();
+            ImGui.SetCurrentContext(ImGuiContext);
 
-            _Handle = SDL.CreateWindow(title, width, height, flags);
+            // Init platform and imgui renderer
+            PlatformBackend = new (Window, Renderer);
+            ImGuiRenderer = new (Renderer);
 
-            Renderer = RendererFactory.CreateRenderer(RendererType.OpenGL);
-            Renderer.SetAttributes();
-            Renderer.Initialize(_Handle);
+            // Setup screen clip rect
+            SetupScreenClipRect();
+
+            // Set the background color
+            SetRenderDrawColor(0, 0, 28, 255);
         }
 
         public bool IsVisible => (Flags & SDL.WindowFlags.Hidden) == 0;
-        public void Show() => SDL.ShowWindow(_Handle);
-        public void Hide() => SDL.HideWindow(_Handle);
-        public virtual void Swap() => Renderer.EndFrame();
+        public void Show() => SDL.ShowWindow(Window);
+        public void Hide() => SDL.HideWindow(Window);
 
         public virtual void Run()
         {
+            IsAlive = true;
             Show();
 
-            IsAlive = true;
             while(IsAlive)
             {
                 PollEvents();
-                OnLoop?.Invoke(this);
+
+                // Is alive is set to false on poll events if the window closes or the user exits
+                // so we should force exit here
+                if(!IsAlive)
+                    return;
+
+                Update();
+                BeginFrame();
+                Render();
+                EndFrame();
+                PostFrameUpdate();
             }
         }
 
         public virtual void PollEvents()
         {
-            while (SDL.PollEvent(out var e))
-                if (OnEvent == null || OnEvent.Invoke(this, e))
-                    HandleEvent(e);
+            if(ImGui.GetIO().WantTextInput && !SDL.TextInputActive(Window))
+                SDL.StartTextInput(Window);
+            else if(!ImGui.GetIO().WantTextInput && SDL.TextInputActive(Window))
+                SDL.StopTextInput(Window);
+
+            while(SDL.PollEvent(out var ev))
+            {
+                if(PlatformBackend.ProcessEvent(ev))
+                    continue;
+
+                switch((SDL.EventType)ev.Type)
+                {
+                    case SDL.EventType.WindowCloseRequested:
+                    case SDL.EventType.Quit:
+                        IsAlive = false;
+                        break;
+                    case SDL.EventType.WindowResized:
+                        SetupScreenClipRect();
+                        break;
+                }
+
+                HandleEvent(ev);
+            }
         }
 
-        public virtual void HandleEvent(SDL.Event e)
+        public virtual void HandleEvent(SDL.Event ev) {}
+
+        public virtual void Update() {}
+
+        public virtual void BeginFrame()
         {
-            if ((SDL.EventType)e.Type == SDL.EventType.Quit)
-                IsAlive = false;
+            // Setup the new frame
+            PlatformBackend.NewFrame();
+            ImGuiRenderer.NewFrame();
+            ImGui.NewFrame();
+
+            // Clear the buffer
+            SDL.RenderClear(Renderer);
+
+            // Reset the clip rect to the screen size
+            SDL.SetRenderClipRect(Renderer, _screenClipRect);
+        }
+        public virtual void Render() {}
+        public virtual void EndFrame()
+        {
+            // Finish ImGui frame
+            ImGui.EndFrame();
+
+            // Render ImGui
+            ImGui.Render();
+            ImGuiRenderer.RenderDrawData(ImGui.GetDrawData());
+
+            // Swap the buffer to screen
+            SDL.RenderPresent(Renderer);
         }
 
-        protected virtual void Dispose(bool disposing)
+        public virtual void PostFrameUpdate() {}
+
+        public void SetRenderDrawColor(byte r, byte g, byte b, byte a)
         {
-            if (disposing) {
-                // Dispose managed state (managed objects).
-            }
+            SDL.SetRenderDrawColor(Renderer, r, g, b, a);
+        }
 
-            // Free unmanaged resources (unmanaged objects) and override a finalizer below.
-            // Set large fields to null.
-            Renderer.Dispose();
-
-            // No longer needed in SDL3
-            //SDL_image.IMG_Quit();
-
-            if (_Handle != IntPtr.Zero) {
-                SDL.DestroyWindow(_Handle);
-                _Handle = IntPtr.Zero;
-            }
+        public virtual void Dispose()
+        {
+            GC.SuppressFinalize(this);
+            IsAlive = false;
+            ImGuiRenderer.Dispose();
+            ImGui.DestroyContext();
+            SDL.DestroyWindow(Window);
+            SDL.DestroyRenderer(Renderer);
+            SDL.Quit();
         }
 
         ~SDL3Window()
         {
-            Dispose(false);
+            Dispose();
         }
 
-        public void Dispose()
+        private void SetupScreenClipRect()
         {
-            Renderer.Dispose();
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            SDL.GetWindowSize(Window, out int w, out int h);
+            _screenClipRect = new()
+            {
+                X = 0,
+                Y = 0,
+                W = w,
+                H = h
+            };
         }
     }
 }

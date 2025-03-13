@@ -6,7 +6,6 @@ using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Client.State;
 using Pulsar4X.Colonies;
 using Pulsar4X.Energy;
 using Pulsar4X.Engine;
@@ -16,7 +15,7 @@ using Pulsar4X.Galaxy;
 using Pulsar4X.Modding;
 using Pulsar4X.People;
 
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.Client;
 
 enum Page
 {
@@ -93,7 +92,7 @@ public class NewGameMenu : PulsarGuiWindow
             _contentRegion = ImGui.GetContentRegionAvail();
             // Get window dimensions
             _windowPos = ImGui.GetWindowPos();
-            _windowSize = ImGui.GetWindowContentRegionMax();
+            _windowSize = ImGui.GetContentRegionAvail();
             _footerHeight = ImGui.GetFrameHeightWithSpacing();
 
             // Calculate content area height (window height minus footer)
@@ -117,7 +116,7 @@ public class NewGameMenu : PulsarGuiWindow
 
     private void DisplayModsPage()
     {
-        ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), false);
+        ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), ImGuiChildFlags.None);
 
         DisplayHelpers.Header("New Game Options");
         ImGui.InputText("Game Name", _nameInputBuffer, 32);
@@ -162,7 +161,7 @@ public class NewGameMenu : PulsarGuiWindow
         //     ImGui.InputText("Network Port", _netPortInputBuffer, 8);
 
         ImGui.EndChild();
-        ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+        ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
         CancelButton();
         ImGui.SameLine();
@@ -194,7 +193,7 @@ public class NewGameMenu : PulsarGuiWindow
 
     private void DisplayConfigureGalaxy()
     {
-        ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), false);
+        ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), ImGuiChildFlags.None);
 
         DisplayHelpers.Header("Select pre-configured Systems to include");
 
@@ -223,7 +222,7 @@ public class NewGameMenu : PulsarGuiWindow
         }
 
         ImGui.EndChild();
-        ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+        ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
         CancelButton();
         ImGui.SameLine();
@@ -245,7 +244,7 @@ public class NewGameMenu : PulsarGuiWindow
 
     private void DisplayDetailsPage()
     {
-        ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), false);
+        ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), ImGuiChildFlags.None);
 
         DisplayHelpers.Header("Game Setup");
         ImGui.InputText("Faction Name", _factionInputBuffer, 16);
@@ -330,7 +329,7 @@ public class NewGameMenu : PulsarGuiWindow
         if (ImGui.Checkbox("ELE start", ref _eleStart)) ;
 
         ImGui.EndChild();
-        ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+        ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
         CancelButton();
         ImGui.SameLine();

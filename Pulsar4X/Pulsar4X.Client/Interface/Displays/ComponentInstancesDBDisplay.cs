@@ -6,7 +6,7 @@ using Pulsar4X.Components;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Storage;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public static class ComponentInstancesDBDisplay
     {

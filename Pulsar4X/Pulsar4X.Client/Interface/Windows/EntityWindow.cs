@@ -18,7 +18,7 @@ using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 using Pulsar4X.Client.Interface;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class EntityWindow : NonUniquePulsarGuiWindow
     {
@@ -62,7 +62,7 @@ namespace Pulsar4X.SDL2UI
         {
             // Pin Camera
             ImGui.PushID(0);
-            if(ImGui.ImageButton(_uiState.Img_Pin(), ButtonSize))
+            if(ImGui.ImageButton("###entitywindowactions", _uiState.Img_Pin(), ButtonSize))
             {
                 _uiState.Camera.PinToEntity(Entity);
             }

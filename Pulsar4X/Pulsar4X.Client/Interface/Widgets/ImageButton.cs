@@ -34,7 +34,7 @@ public static class ImageButton
         var currentColors = ButtonColors.FromCurrentStyle();
         var style = ImGui.GetStyle();
 
-        if(ImGui.BeginChild(label, buttonSize, false, ImGuiWindowFlags.NoScrollbar))
+        if(ImGui.BeginChild(label, buttonSize, ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar))
         {
             float textWidth = ImGui.CalcTextSize(label).X;
             float totalWidth = imageSize.X + textWidth + 5; // spacing 5 pixels between image and text

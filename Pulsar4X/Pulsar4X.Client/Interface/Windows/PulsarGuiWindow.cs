@@ -1,8 +1,7 @@
 ﻿using ImGuiNET;
-using Pulsar4X.Engine;
 using System;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public abstract class PulsarGuiWindow : UpdateWindowState
     {

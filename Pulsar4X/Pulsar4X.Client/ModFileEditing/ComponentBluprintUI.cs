@@ -6,7 +6,7 @@ using Pulsar4X.Blueprints;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Modding;
 
-namespace Pulsar4X.SDL2UI.ModFileEditing;
+namespace Pulsar4X.Client.ModFileEditing;
 
 public class ComponentBluprintUI : BluePrintsUI
 {
@@ -33,7 +33,7 @@ public class ComponentBluprintUI : BluePrintsUI
         newEmpty.Name = "New Blueprint";
         _newEmpty = newEmpty;
     }
-    
+
 
     public override void DisplayEditorWindow(int selectedIndex)
     {
@@ -42,10 +42,10 @@ public class ComponentBluprintUI : BluePrintsUI
             return;
         var selectedItem = (ComponentTemplateBlueprint)_itemBlueprints[selectedIndex];
         _selectedAttributes = selectedItem.Properties;
-        
+
         if(_attributeBlueprintUI == null)
             _attributeBlueprintUI = new AttributeBlueprintUI(_modDataStore, selectedItem);
-            
+
         string name = selectedItem.Name;
         string editStr;
         if (ImGui.Begin("Tech Category Editor: " + name, ref _isActive[selectedIndex]))
@@ -53,7 +53,7 @@ public class ComponentBluprintUI : BluePrintsUI
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 150);
             ImGui.SetColumnWidth(1, 500);
-            
+
             ImGui.Text("Name: ");
             ImGui.NextColumn();
             editStr = selectedItem.Name;
@@ -73,7 +73,7 @@ public class ComponentBluprintUI : BluePrintsUI
             }
             ImGui.NextColumn();
 
-            
+
             ImGui.Text("CargoType: ");
             ImGui.NextColumn();
             _editInt = Array.IndexOf(_cargoTypes, selectedItem.CargoTypeID);
@@ -83,7 +83,7 @@ public class ComponentBluprintUI : BluePrintsUI
             }
             ImGui.NextColumn();
 
-            
+
             ImGui.Text("Fomula: ");
             ImGui.NextColumn();
             var editDicf = selectedItem.Formulas;
@@ -92,8 +92,8 @@ public class ComponentBluprintUI : BluePrintsUI
                 selectedItem.Formulas = editDicf;
             }
             ImGui.NextColumn();
-            
-            
+
+
             ImGui.Text("ResourceCosts: ");
             ImGui.NextColumn();
             var editDic = selectedItem.ResourceCost;
@@ -102,8 +102,8 @@ public class ComponentBluprintUI : BluePrintsUI
                 selectedItem.ResourceCost = editDic;
             }
             ImGui.NextColumn();
-            
-            
+
+
             ImGui.Text("IndustryType: ");
             ImGui.NextColumn();
             _editInt = Array.IndexOf(_industryTypes, selectedItem.IndustryTypeID);
@@ -112,8 +112,8 @@ public class ComponentBluprintUI : BluePrintsUI
                 selectedItem.IndustryTypeID = _industryTypes[_editInt];
             }
             ImGui.NextColumn();
-            
-            
+
+
             ImGui.Text("MountType: ");
             ImGui.NextColumn();
             _editInt = Array.IndexOf(_mountTypes, selectedItem.MountType);
@@ -124,7 +124,7 @@ public class ComponentBluprintUI : BluePrintsUI
                     selectedItem.MountType = (ComponentMountType)mtype;
             }
             ImGui.NextColumn();
-            
+
             _attributeBlueprintUI.Display();
 
             ImGui.End();

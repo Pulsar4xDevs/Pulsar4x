@@ -1,9 +1,7 @@
 ﻿using System;
 using ImGuiNET;
-using Pulsar4X.ImGuiNetUI;
-using Pulsar4X.ImGuiNetUI.EntityManagement;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
 
     public class EntityContextMenu

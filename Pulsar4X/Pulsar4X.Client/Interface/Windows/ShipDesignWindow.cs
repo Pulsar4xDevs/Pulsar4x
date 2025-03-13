@@ -18,7 +18,7 @@ using Pulsar4X.Storage;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class ShipDesignWindow : PulsarGuiWindow
     {
@@ -223,21 +223,21 @@ namespace Pulsar4X.SDL2UI
                 var firstChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
                 var secondChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
                 var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
-                if(ImGui.BeginChild("ShipDesign1", firstChildSize, true))
+                if(ImGui.BeginChild("ShipDesign1", firstChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayComponentSelection();
                     ImGui.EndChild();
                 }
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(27f);
-                if(ImGui.BeginChild("ShipDesign2", secondChildSize, true))
+                if(ImGui.BeginChild("ShipDesign2", secondChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayComponents();
                     ImGui.EndChild();
                 }
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(27f);
-                if(ImGui.BeginChild("ShipDesign3", thirdChildSize, true))
+                if(ImGui.BeginChild("ShipDesign3", thirdChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayStats();
                     ImGui.EndChild();
@@ -306,7 +306,7 @@ namespace Pulsar4X.SDL2UI
         internal void DisplayExistingDesigns()
         {
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("ComponentDesignSelection", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y - 24f), true))
+            if(ImGui.BeginChild("ComponentDesignSelection", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y - 24f), ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Existing Designs", "Select an existing ship design to edit it.");
                 ImGui.Columns(2);
@@ -593,7 +593,7 @@ namespace Pulsar4X.SDL2UI
             if(_profile == null)
                 throw new NullReferenceException();
 
-            _uiState.ViewPort.Renderer.CreateTexture(_profile.DamageProfile, ref _shipImgPtr, Client.Rendering.PixelFormat.ARGB8888);
+            Textures.CreateTexture(_uiState.ViewPort.Renderer, _profile.DamageProfile, ref _shipImgPtr, Rendering.PixelFormat.ARGB8888);
             rawimagewidth = _profile.DamageProfile.Width;
             rawimageheight = _profile.DamageProfile.Height;
             _imagecreated = true;

@@ -3,7 +3,7 @@ using ImGuiNET;
 using Pulsar4X.Factions;
 using Pulsar4X.Industry;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public static class MineralsDBDisplay
     {

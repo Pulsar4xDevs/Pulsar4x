@@ -10,7 +10,7 @@ using Pulsar4X.Storage;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 
-namespace Pulsar4X.SDL2UI.ManuverNodes;
+namespace Pulsar4X.Client;
 
 public class ManuverNode
 {

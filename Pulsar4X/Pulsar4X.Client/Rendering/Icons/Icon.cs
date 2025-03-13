@@ -4,7 +4,7 @@ using Pulsar4X.Interfaces;
 using Pulsar4X.Orbital;
 using SDL3;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
 
     public interface IDrawData

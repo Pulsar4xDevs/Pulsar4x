@@ -1,9 +1,6 @@
-﻿using SDL3;
-using System;
+﻿using System;
 using ImGuiNET;
 using System.IO;
-using Pulsar4X.DataStructures;
-using Vector2 = System.Numerics.Vector2;
 using System.Runtime.InteropServices;
 
 namespace ImGuiSDL2CS
@@ -23,26 +20,8 @@ namespace ImGuiSDL2CS
 
             ImGuiIOPtr io = ImGui.GetIO();
 
-            io.KeyMap[(int)ImGuiKey.Tab] = (int) SDL.Keycode.Tab;
-            io.KeyMap[(int)ImGuiKey.LeftArrow] = (int) SDL.Scancode.Left;
-            io.KeyMap[(int)ImGuiKey.RightArrow] = (int) SDL.Scancode.Right;
-            io.KeyMap[(int)ImGuiKey.UpArrow] = (int) SDL.Scancode.Up;
-            io.KeyMap[(int)ImGuiKey.DownArrow] = (int) SDL.Scancode.Down;
-            io.KeyMap[(int)ImGuiKey.PageUp] = (int) SDL.Scancode.Pageup;
-            io.KeyMap[(int)ImGuiKey.PageDown] = (int) SDL.Scancode.Pagedown;
-            io.KeyMap[(int)ImGuiKey.Home] = (int) SDL.Scancode.Home;
-            io.KeyMap[(int)ImGuiKey.End] = (int) SDL.Scancode.End;
-            io.KeyMap[(int)ImGuiKey.Delete] = (int) SDL.Keycode.Delete;
-            io.KeyMap[(int)ImGuiKey.Backspace] = (int) SDL.Keycode.Backspace;
-            io.KeyMap[(int)ImGuiKey.Enter] = (int) SDL.Keycode.Return;
-            io.KeyMap[(int)ImGuiKey.Escape] = (int) SDL.Keycode.Escape;
-            io.KeyMap[(int)ImGuiKey.A] = (int) SDL.Keycode.A;
-            io.KeyMap[(int)ImGuiKey.C] = (int) SDL.Keycode.C;
-            io.KeyMap[(int)ImGuiKey.V] = (int) SDL.Keycode.V;
-            io.KeyMap[(int)ImGuiKey.X] = (int) SDL.Keycode.X;
-            io.KeyMap[(int)ImGuiKey.Y] = (int) SDL.Keycode.Y;
-            io.KeyMap[(int)ImGuiKey.Z] = (int) SDL.Keycode.Z;
-            io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
+            io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
+            io.BackendFlags |= ImGuiBackendFlags.HasSetMousePos;
 
             //io.GetClipboardTextFn((userData) => SDL.SDL_GetClipboardText());
 
@@ -68,87 +47,6 @@ namespace ImGuiSDL2CS
 
             if (io.Fonts.Fonts.Size == 0)
                 io.Fonts.AddFontDefault();
-        }
-
-        public static void NewFrame(Vector2 size, Vector2 scale, Vector2 mousePosition, SDL.MouseButtonFlags mouseMask, ref float mouseWheel, bool[] mousePressed, ref double g_Time)
-        {
-            ImGuiIOPtr io = ImGui.GetIO();
-            io.DisplaySize = size;
-            io.DisplayFramebufferScale = scale;
-
-            double currentTime = SDL.GetTicks() / 1000D;
-            io.DeltaTime = g_Time > 0D ? (float) (currentTime - g_Time) : (1f/60f);
-            g_Time = currentTime;
-
-            io.MousePos = mousePosition;
-
-            io.MouseDown[0] = mousePressed[0] || (mouseMask & SDL.MouseButtonFlags.Left) != 0;
-            io.MouseDown[1] = mousePressed[1] || (mouseMask & SDL.MouseButtonFlags.Right) != 0;
-            io.MouseDown[2] = mousePressed[2] || (mouseMask & SDL.MouseButtonFlags.Middle) != 0;
-            mousePressed[0] = mousePressed[1] = mousePressed[2] = false;
-
-            io.MouseWheel = mouseWheel;
-            mouseWheel = 0f;
-
-            if(io.MouseDrawCursor)
-                SDL.ShowCursor();
-            else
-                SDL.HideCursor();
-
-            ImGui.NewFrame();
-        }
-
-        public static bool HandleEvent(SDL.Event e, ref float mouseWheel, bool[] mousePressed)
-        {
-            ImGuiIOPtr io = ImGui.GetIO();
-            switch (e.Type)
-            {
-                case (uint)SDL.EventType.MouseWheel:
-                    if (e.Wheel.Y > 0)
-                        mouseWheel = 1;
-                    if (e.Wheel.X < 0)
-                        mouseWheel = -1;
-                    return true;
-                case (uint)SDL.EventType.MouseButtonDown:
-                    if (mousePressed == null)
-                        return true;
-                    if (e.Button.Button == SDL.ButtonLeft && mousePressed.Length > 0)
-                        mousePressed[0] = true;
-                    if (e.Button.Button == SDL.ButtonRight && mousePressed.Length > 1)
-                        mousePressed[1] = true;
-                    if (e.Button.Button == SDL.ButtonMiddle && mousePressed.Length > 2)
-                        mousePressed[2] = true;
-                    return true;
-                case (uint)SDL.EventType.TextInput:
-                    ImGui.GetIO().AddInputCharacter((uint)e.Text.Text);
-                    // unsafe
-                    // {
-                    //     // THIS IS THE ONLY UNSAFE THING LEFT!
-
-                    //     //ImGui.GetIO().AddInputCharactersUTF8(e.text.ToString());
-
-                    //     int i = 0;
-                    //     while (e.text.text[i] != 0)
-                    //     {
-                    //         ImGui.GetIO().AddInputCharacter(e.text.text[i]);
-                    //         i += 1;
-                    //     }
-                    // }
-                    return true;
-                case (uint)SDL.EventType.KeyDown:
-                case (uint)SDL.EventType.KeyUp:
-                    SDL.Keycode key = e.Key.Key & ~SDL.Keycode.ScanCodeMask;
-                    io.KeysDown[(int)key] = e.Type == (uint)SDL.EventType.KeyDown;
-                    SDL.Keymod keyModState = SDL.GetModState();
-
-                    io.KeyShift = (keyModState & SDL.Keymod.Shift) != 0;
-                    io.KeyCtrl = (keyModState & SDL.Keymod.Ctrl) != 0;
-                    io.KeyAlt = (keyModState & SDL.Keymod.Alt) != 0;
-                    io.KeySuper = (keyModState & SDL.Keymod.GUI) != 0;
-                    return true;
-            }
-
-            return true;
         }
 
         public static byte[] BytesFromString(string str, int sizeMax = 128)

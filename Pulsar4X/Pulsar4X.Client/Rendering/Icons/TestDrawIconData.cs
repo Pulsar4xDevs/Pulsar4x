@@ -3,7 +3,7 @@ using SDL3;
 using System.Collections.Generic;
 using Pulsar4X.Movement;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public static class TestDrawIconData
     {

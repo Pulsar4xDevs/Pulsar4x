@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.Client;
 
 public class UserOrbitSettings
 {

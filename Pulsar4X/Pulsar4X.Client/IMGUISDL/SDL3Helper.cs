@@ -1,33 +1,12 @@
-﻿using SDL3;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
-using Pulsar4X.DataStructures;
-using Pulsar4X.Client.Rendering;
+using Pulsar4X.Client;
 
 namespace ImGuiSDL2CS;
 
 public static class SDL3Helper
 {
-
-    internal static void UpdateOrCreate(IRenderer renderer, ref IntPtr texture, int width, int height, IntPtr pixels)
-    {
-        // If the texture doesn't exist, create it
-        if(texture == IntPtr.Zero)
-        {
-            renderer.CreateTexture(ref texture, width, height, pixels, PixelFormat.RGBA8888, TextureFilter.Nearest);
-            return;
-        }
-        // If the dimensions don't match, recreate the texture
-        (int txWidth, int txHeight) = renderer.GetTextureDimensions(texture);
-        if(width != txWidth || height != txHeight)
-        {
-            renderer.CreateTexture(ref texture, width, height, pixels, PixelFormat.RGBA8888, TextureFilter.Nearest);
-            return;
-        }
-        else
-            renderer.UpdateTexture(ref texture, width, height, pixels);
-    }
-    internal static void CreateTestTexture(IRenderer renderer, ref IntPtr texture)
+    internal static void CreateTestTexture(IntPtr renderer, ref IntPtr texture)
     {
         const int squareSize = 100;
         const int width = squareSize * 2;  // 200 pixels wide
@@ -69,7 +48,7 @@ public static class SDL3Helper
         {
             IntPtr pixels = handle.AddrOfPinnedObject();
             // Update or create the texture with this pixel data
-            UpdateOrCreate(renderer, ref texture, width, height, pixels);
+            Textures.UpdateOrCreate(renderer, ref texture, width, height, pixels);
         }
         finally
         {
@@ -80,55 +59,6 @@ public static class SDL3Helper
     public static uint GetColor(byte r, byte g, byte b, byte a)
     {
         return (uint)((r << 0) | (g << 8) | (b << 16) | (a << 24));
-    }
-
-
-
-    internal static void CheckTexture(IntPtr renderPtr, ref IntPtr texture, int width, int height)
-    {
-        if(texture == IntPtr.Zero)
-            texture = SDL.CreateTexture(renderPtr, SDL.PixelFormat.ARGB8888, SDL.TextureAccess.Streaming, width, height);
-        SDL.GetTextureSize(texture, out var txWidth, out var txHeight);
-
-        if (width != txWidth || height != txHeight)
-        {
-            SDL.DestroyTexture(texture);
-            texture = SDL.CreateTexture(renderPtr, SDL.PixelFormat.ARGB8888, SDL.TextureAccess.Streaming, width, height);
-        }
-    }
-
-
-
-
-    public static void CreateSDLTexture(IntPtr rendererPtr, RawBmp rawImg, ref IntPtr texturePtr)
-    {
-
-
-        //IntPtr texture;
-        int h = rawImg.Height;
-        int w = rawImg.Width;
-        int d = rawImg.Depth * 8;
-        int s = rawImg.Stride;
-        IntPtr pxls;
-        unsafe
-        {
-            fixed (byte* ptr = rawImg.ByteArray)
-            {
-                pxls = new IntPtr(ptr);
-            }
-        }
-
-        uint rmask = 0xff000000;
-        uint gmask = 0x00ff0000;
-        uint bmask = 0x0000ff00;
-        uint amask = 0x000000ff;
-
-
-        SDL.DestroyTexture(texturePtr);
-        IntPtr sdlSurface = SDL_CreateRGBSurfaceFrom(pxls, w, h, d, s, rmask, gmask, bmask, amask);
-        texturePtr = SDL.CreateTextureFromSurface(rendererPtr, sdlSurface);
-        SDL.DestroySurface(sdlSurface);
-
     }
 
     public static (float, float, float) AdjustSaturation(float r, float g, float b, float saturation)
@@ -234,21 +164,6 @@ public static class SDL3Helper
         else if(order == ColourOrder.ARGB)
             return (uint)((a << 24) | (r << 16) | (g << 8) | b);
         else throw new Exception("Invalid ColourOrder");
-    }
-
-    /// <summary>
-    /// Local alias for converting SDL2 to SDL3
-    /// </summary>
-    public static nint SDL_CreateRGBSurfaceFrom(nint pixels, int width, int height, int depth, int pitch, uint rmask, uint gmask, uint bmask, uint amask)
-    {
-        var pixelFormat = SDL.GetPixelFormatForMasks(depth, rmask, gmask, bmask, amask);
-
-        return SDL.CreateSurfaceFrom(
-            width, height,
-            pixelFormat,
-            pixels,
-            pitch
-        );
     }
 }
 

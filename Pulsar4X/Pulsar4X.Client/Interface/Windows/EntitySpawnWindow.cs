@@ -16,7 +16,7 @@
 // using Pulsar4X.DataStructures;
 // using Pulsar4X.Extensions;
 
-// namespace Pulsar4X.SDL2UI
+// namespace Pulsar4X.Client
 // {
 //     public class EntitySpawnWindow : PulsarGuiWindow
 //     {
@@ -29,7 +29,7 @@
 //         Random _rng = new Random();
 //         //private Vector3 _graphicPos = new Vector3();
 //         private EntitySpawnGraphic _icon;
-        
+
 //         private EntityNameSelector _sysBodies;
 //         private EntityNameSelector _factionEntites;
 //         private EntityNameSelector _factionOwnerEntites;
@@ -43,18 +43,18 @@
 //         private Icon _soiIcon;
 //         private double _parentSOI = 0;
 //         private Entity _parentObect;
-        
+
 //         private EntitySpawnWindow()
 // 	    {
 // 	        _flags = ImGuiWindowFlags.AlwaysAutoResize;
 //             _bodyTypes = Enum.GetNames(typeof(BodyType));
 
-            
+
 //             _factionEntites = new EntityNameSelector(
-//                 StaticRefLib.Game.Factions.ToArray(), 
+//                 StaticRefLib.Game.Factions.ToArray(),
 //                 EntityNameSelector.NameType.Owner );
 //             _factionOwnerEntites = new EntityNameSelector(
-//                 StaticRefLib.Game.Factions.ToArray(), 
+//                 StaticRefLib.Game.Factions.ToArray(),
 //                 EntityNameSelector.NameType.Owner );
 
 //             var bodies = _uiState.SelectedSystem.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>();
@@ -64,7 +64,7 @@
 //             _parentObect = _sysBodies.GetSelectedEntity();
 //             var species = StaticRefLib.Game.GlobalManager.GetAllEntitiesWithDataBlob<SpeciesDB>().ToArray();
 //             _speciesEntites = new EntityNameSelector(species, EntityNameSelector.NameType.Owner);
-            
+
 //             MinMaxStruct inner = new MinMaxStruct(10, 10000);
 //             MinMaxStruct hab = new MinMaxStruct(10000, 100000);
 //             MinMaxStruct outer = new MinMaxStruct(100000, 10000000);
@@ -74,7 +74,7 @@
 //             _parentSOI = _parentObect.GetSOI_m();
 //             _sgp = GeneralMath.StandardGravitationalParameter(_objMass + _parentMass);
 //             _ke = OrbitalMath.KeplerCircularFromPosition(new Vector3(10000, 0, 0), _sgp, date);
-            
+
 //             _soiIcon = new Icon(_parentObect.GetDataBlob<PositionDB>());
 //             Shape soishape = new Shape();
 //             var soiau = Distance.MToAU(_parentSOI);
@@ -101,7 +101,7 @@
 //             {
 //                 thisItem = (EntitySpawnWindow)_uiState.LoadedWindows[typeof(EntitySpawnWindow)];
 //             }
-             
+
 
 //             return thisItem;
 
@@ -110,7 +110,7 @@
 //         //displays selected entity info
 //         internal override void Display()
 //         {
-           
+
 //             if (IsActive && ImGui.Begin("Spawn Entity", _flags))
 //             {
 //                 if (ImGui.IsWindowAppearing())
@@ -131,13 +131,13 @@
 //                 {
 //                     if (_uiState.SelectedSysMapRender.UIWidgets.ContainsKey(nameof(EntitySpawnGraphic)))
 //                         _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(EntitySpawnGraphic));
-                    
+
 //                     if (_uiState.SelectedSysMapRender.UIWidgets.ContainsKey("soiIcon"))
 //                         _uiState.SelectedSysMapRender.UIWidgets.Remove("soiIcon");
 //                 }
-                
-//                 if (ImGui.Combo("##entityselector", ref _entityindex, _entitytypes, _entitytypes.Length)) 
-//                 { 
+
+//                 if (ImGui.Combo("##entityselector", ref _entityindex, _entitytypes, _entitytypes.Length))
+//                 {
 
 //                 }
 
@@ -145,16 +145,16 @@
 //                     _soiIcon.Scale = _uiState.Camera.ZoomLevel;
 
 
-//                 if (_entitytypes[_entityindex] == "Ship") 
+//                 if (_entitytypes[_entityindex] == "Ship")
 //                 {
 //                     Ship();
 //                 }
-                
+
 //                 if (_entitytypes[_entityindex] == "Planet")
 //                 {
 //                     Planet();
 //                 }
-                
+
 //                 if(_entitytypes[_entityindex] == "Colony")
 //                     Colony();
 //             }
@@ -163,9 +163,9 @@
 
 //             }
 //             ImGui.End();
-            
+
 //         }
-        
+
 //         float _radiusKM = 5000;
 //         float _massTon = 500000;
 //         float _density = 500;
@@ -179,7 +179,7 @@
 //         private StarInfoDB _starInfo;
 //         void Planet()
 //         {
-            
+
 //             ImGui.InputText("Name", _nameInputBuffer, 16);
 
 //             SetParent();
@@ -193,21 +193,21 @@
 //             if (_parentStar != null && _starInfo != null)
 //                 enabled = true;
 
-            
+
 //             if (ImGui.DragInt("Radius from parent", ref _rad, 100, (int)min * 1000, (int)max * 1000) && enabled)
 //             {
 //                 var datetime = _sysBodies.GetSelectedEntity().StarSysDateTime;
 //                 var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
 //                 _icon.WorldPosition_m = new Vector3( parentPos.X + _xpos * 1000, parentPos.Y, _xpos);
 
-                
-                
-                
-                
+
+
+
+
 //                 var bandRadius = _parentObect.GetAbsoluteFuturePosition(_parentStar.StarSysDateTime).Length();
 //                 var zones = SystemBodyFactory.HabitibleZones(_sysGensettings, _starInfo);
 //                 MinMaxStruct zone;
-//                 // SystemBand band; 
+//                 // SystemBand band;
 //                 if (zones.hasHabitible && bandRadius > zones.habitible.Min && bandRadius < zones.habitible.Max)
 //                 {
 //                     zone = zones.habitible;
@@ -224,9 +224,9 @@
 //                     //band = SystemBand.OuterBand;
 //                 }
 //                 //else throw new Exception("bad radius");
-                
+
 //             }
-            
+
 
 //             //ImGui.Text("Band: " + );
 
@@ -234,7 +234,7 @@
 //             BodyType btype = BodyType.Unknown;
 //             if (ImGui.Combo("Body Type", ref _bodyTypeIndex, _bodyTypes, _bodyTypes.Length))
 //             {
-                
+
 //                 btype = (BodyType)_bodyTypeIndex;
 //                 _massTon = (float)(0.001 * GeneralMath.Lerp(_sysGensettings.SystemBodyMassByType[btype], Math.Pow(_rng.NextDouble(), 3))); // cache mass, alos cube random nuber to make smaller bodies more likly.
 //                 _density = (float) GeneralMath.Lerp(_sysGensettings.SystemBodyDensityByType[btype], _rng.NextDouble());
@@ -258,24 +258,24 @@
 //                 _density = (float)MassVolumeDB.CalculateDensity(_massTon * 1000, volume);
 //             }
 
-            
+
 
 //             OrbitEditWidget.Display(ref _ke, ref _sv, _parentSOI, OrbitEditWidget.WidgetStyle.Newtonion);
-            
+
 
 
 //             if (ButtonED("Create Entity", enabled))
 //             {
-                
+
 //                 var system = _uiState.SelectedSystem;
 //                 var newBody = SystemBodyFactory.GenerateSingleBody(_sysGensettings, system, _sysBodies.GetSelectedEntity(), btype, _rad);
 //                 MassVolumeDB massvol = MassVolumeDB.NewFromMassAndDensity(_massTon * 1000, _density);
 //                 newBody.SetDataBlob(massvol);
 //             }
-            
+
 //         }
 
-   
+
 //         private string[] _shipDesignNames = new string[0];
 //         private int _selectedDesignIndex = 0;
 
@@ -294,7 +294,7 @@
 //                 if (_exsistingClasses.Count > 0 && _selectedDesignIndex >= 0)
 //                 {
 //                     _parentMass = _sysBodies.GetSelectedEntity().GetDataBlob<MassVolumeDB>().MassDry;
-//                     _objMass = _exsistingClasses[_selectedDesignIndex].MassPerUnit; 
+//                     _objMass = _exsistingClasses[_selectedDesignIndex].MassPerUnit;
 //                     _sgp = GeneralMath.StandardGravitationalParameter(_objMass + _parentMass);
 //                     _ke.StandardGravParameter = _sgp;
 //                     if(_keIcon != null)
@@ -305,9 +305,9 @@
 
 //             if (ImGui.Combo("Select Design", ref _selectedDesignIndex, _shipDesignNames, _shipDesignNames.Length))
 //             {
-                
+
 //                 _parentMass = _sysBodies.GetSelectedEntity().GetDataBlob<MassVolumeDB>().MassDry;
-//                 _objMass = _exsistingClasses[_selectedDesignIndex].MassPerUnit; 
+//                 _objMass = _exsistingClasses[_selectedDesignIndex].MassPerUnit;
 //                 _sgp = GeneralMath.StandardGravitationalParameter(_objMass + _parentMass);
 //                 _ke.StandardGravParameter = _sgp;
 //                 if(_keIcon != null)
@@ -340,13 +340,13 @@
 //             bool createEnabled = false;
 
 //             if ( //check if we can enable the create button.
-//                 _exsistingClasses.Count > 0 && 
+//                 _exsistingClasses.Count > 0 &&
 //                 _selectedDesignIndex >= 0 &&
 //                 _factionEntites.IsItemSelected &&
 //                 _sysBodies.IsItemSelected)
 //             {
 //                 createEnabled = true;
-                
+
 //                 if(_keIcon == null)
 //                 {
 //                     var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
@@ -355,15 +355,15 @@
 //                 }
 //             }
 
-            
-            
-            
+
+
+
 //             if(ButtonED("Create Entity", createEnabled))
 //             {
 //                 var selectedSystem = _uiState.SelectedSystem;
 //                 string shipName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
 //                 //var parent = OrbitProcessor.FindSOIForPosition(_uiState.SelectedSystem, _icon.WorldPosition_m);
-                
+
 //                 ShipFactory.CreateShip(
 //                     _exsistingClasses[_selectedDesignIndex],
 //                     _factionEntites.GetSelectedEntity(),
@@ -376,8 +376,8 @@
 
 //                 _uiState.SelectedSysMapRender.UIWidgets.Remove("keIcon");
 //             }
-            
-            
+
+
 //         }
 
 //         private int _popCount = 100000;
@@ -390,10 +390,10 @@
 //             _speciesEntites.Combo("Species");
 
 //             ImGui.SliderInt("Population Count", ref _popCount, 0, int.MaxValue);
-            
+
 //             if (_sysBodies.IsItemSelected && _factionOwnerEntites.IsItemSelected && _speciesEntites.IsItemSelected)
 //                 createEnabled = true;
-            
+
 //             if(ButtonED("Create Entity", createEnabled))
 //             {
 //                 var selectedSystem = _uiState.SelectedSystem;
@@ -404,7 +404,7 @@
 //                 //hacky force a refresh
 //                 _uiState.StarSystemStates[selectedSystem.Guid] = SystemState.GetMasterState(selectedSystem);
 //                 _uiState.SelectedSysMapRender.OnSelectedSystemChange(_uiState.SelectedSystem);
-                
+
 //             }
 //         }
 
@@ -416,13 +416,13 @@
 //                 _parentStar = _parentObect;
 //                 _parentMass = _parentObect.GetDataBlob<MassVolumeDB>().MassDry;
 //                 _starInfo = _parentStar.GetDataBlob<StarInfoDB>();
-                
+
 //                 while (_starInfo == null)
 //                 {
 //                     _parentStar = _sysBodies.GetSelectedEntity().GetSOIParentEntity();
 //                     _starInfo = _parentStar.GetDataBlob<StarInfoDB>();
 //                     _bandinfo = SystemBodyFactory.HabitibleZones(_sysGensettings, _starInfo);
-                
+
 //                 }
 //                 _sgp = GeneralMath.StandardGravitationalParameter(_objMass + _parentMass);
 //                 _ke.StandardGravParameter = _sgp;
@@ -435,7 +435,7 @@
 //                     _keIcon.ForceUpdate(_ke, _sv);
 //                 }
 
- 
+
 //                 _soiIcon.ResetPositionDB(_parentObect.GetDataBlob<PositionDB>());
 //                 Shape soishape = new Shape();
 //                 var soiau = Distance.MToAU(_parentSOI);
@@ -448,7 +448,7 @@
 //                 soishape.Color = colour;
 //                 _soiIcon.Shapes[0]=soishape;
 
-                
+
 
 //                 return true;
 //             }
@@ -472,28 +472,28 @@
 
 //         public override void OnSelectedSystemChange(StarSystem newStarSys)
 //         {
-            
+
 //         }
 //     }
 
 //     public class EntitySpawnGraphic : Icon
 //     {
-       
+
 
 //         public EntitySpawnGraphic(Vector3 position_m) : base(position_m)
 //         {
-                 
+
 //             BasicShape();
 //         }
-        
-        
+
+
 //         void BasicShape()
 //         {
 //             byte r = 150;
 //             byte g = 50;
 //             byte b = 200;
 //             byte a = 255;
-            
+
 //             Orbital.Vector2[] points = CreatePrimitiveShapes.Circle(0, 0, 3, 12);
 
 //             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
@@ -505,7 +505,7 @@
 //             var foo = camera.ViewCoordinate_m(WorldPosition_m);
 //             var trns = Matrix.IDTranslate(foo.x, foo.y);
 //             var scaleMtx = Matrix.IDScale(Scale, Scale);
-            
+
 //             var scZm = Matrix.IDScale(camera.ZoomLevel, camera.ZoomLevel);
 //             var mtrx = scZm *  trns;
 //             DrawShapes = new Shape[Shapes.Count];
@@ -548,7 +548,7 @@
 //         private static Orbital.Vector2 _pos = new Orbital.Vector2();
 //         private static VectorWidget2d.Style posStyle = VectorWidget2d.Style.Cartesian;
 //         private static VectorWidget2d.Style velStyle = VectorWidget2d.Style.Polar;
-        
+
 //         public static bool Display(ref KeplerElements ke, ref StateVectors sv, double soi, WidgetStyle style)
 //         {
 //             //_ke = ke;
@@ -563,13 +563,13 @@
 //             {
 //                 sv.RelativePosition = new Vector3(_pos.X, _pos.Y, 0);
 //                 ke = OrbitalMath.KeplerFromPositionAndVelocity(
-//                     ke.StandardGravParameter, 
+//                     ke.StandardGravParameter,
 //                     sv.RelativePosition,
-//                     sv.Velocity, 
+//                     sv.Velocity,
 //                     ke.Epoch);
 //                 changed = true;
 //             }
-            
+
 //             switch (style)
 //             {
 //                 case WidgetStyle.Newtonion:
@@ -588,22 +588,22 @@
 //                     if(KeplerianStyle3d_1(ref ke, ref sv))
 //                         changed = true;
 //                     break;
-                
+
 //             }
 //             return changed;
 //         }
 
 
-        
+
 //         static bool NewtonionStyle(ref KeplerElements ke, ref StateVectors sv)
 //         {
 //             if(VectorWidget2d.Display("Velocity Vector", ref _vel, 0, 299792458))
 //             {
 //                 sv.Velocity = new Vector3(_vel.X, _vel.Y, 0);
 //                 ke = OrbitalMath.KeplerFromPositionAndVelocity(
-//                     ke.StandardGravParameter, 
-//                     sv.RelativePosition, 
-//                     sv.Velocity, 
+//                     ke.StandardGravParameter,
+//                     sv.RelativePosition,
+//                     sv.Velocity,
 //                     ke.Epoch);
 //                 return true;
 //             }
@@ -633,8 +633,8 @@
 
 //             if (SliderDouble("e", ref ke.Eccentricity, 0, double.MaxValue))
 //             {
-                
-                
+
+
 //                 //double trueAnomaly = OrbitalMath.TrueAnomaly(eccentVector, position, velocity);
 //                 //double eccentricAnomoly = OrbitalMath.GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, _ke.Eccentricity);
 //                 //var meanAnomaly = OrbitalMath.GetEllipticMeanAnomaly(_ke.Eccentricity, eccentricAnomoly);
@@ -682,7 +682,7 @@
 //                 changed = true;
 //             if(ImGui.IsItemHovered())
 //                 ImGui.SetTooltip("Semi Major Axis");
-            
+
 //             if(SliderDouble("e", ref ke.Eccentricity, 0, double.MaxValue))
 //                 changed = true;
 //             if(ImGui.IsItemHovered())
@@ -692,12 +692,12 @@
 //                 changed = true;
 //             if(ImGui.IsItemHovered())
 //                 ImGui.SetTooltip("Londitude of AccendingNode");
-            
+
 //             if(ImGui.SliderAngle("ω", ref _aoP))
 //                 changed = true;
 //             if(ImGui.IsItemHovered())
 //                 ImGui.SetTooltip("Argument of Periapsis)");
-            
+
 //             if(ImGui.SliderAngle("i", ref _inclination))
 //                 changed = true;
 //             if(ImGui.IsItemHovered())

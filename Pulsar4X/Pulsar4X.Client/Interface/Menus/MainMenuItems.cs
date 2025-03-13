@@ -2,12 +2,12 @@
 using ImGuiNET;
 using System.IO;
 using Pulsar4X.Client.Interface.Menus;
-using Pulsar4X.SDL2UI.ModFileEditing;
 using System.Numerics;
 using Pulsar4X.Client.Interface.Widgets;
 using System.Diagnostics;
+using Pulsar4X.Client.ModFileEditing;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class MainMenuItems : PulsarGuiWindow
     {

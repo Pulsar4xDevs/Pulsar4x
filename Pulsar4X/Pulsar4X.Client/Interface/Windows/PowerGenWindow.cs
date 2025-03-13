@@ -1,11 +1,10 @@
 using System;
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.SDL2UI;
 using Vector2 = System.Numerics.Vector2;
 using Pulsar4X.Energy;
 
-namespace Pulsar4X.ImGuiNetUI.EntityManagement
+namespace Pulsar4X.Client
 {
     public class PowerGenWindow : PulsarGuiWindow
     {

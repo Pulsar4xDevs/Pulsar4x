@@ -11,7 +11,7 @@ using Pulsar4X.Colonies;
 using Pulsar4X.Names;
 using Pulsar4X.Movement;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     /// <summary>
     /// Maintains client side state for a StarSystem

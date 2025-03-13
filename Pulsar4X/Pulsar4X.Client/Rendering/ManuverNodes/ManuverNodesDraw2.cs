@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Pulsar4X.Orbital;
-using Pulsar4X.SDL2UI;
 using SDL3;
 using Pulsar4X.Movement;
 
-namespace Pulsar4X.ImGuiNetUI.ManuverNodes;
+namespace Pulsar4X.Client;
 
 public class ManuverNodesDraw2 : IDrawData
 {

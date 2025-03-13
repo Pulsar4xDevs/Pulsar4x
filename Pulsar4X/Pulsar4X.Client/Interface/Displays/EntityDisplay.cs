@@ -14,7 +14,7 @@ using Pulsar4X.Storage;
 using Pulsar4X.Technology;
 using Pulsar4X.Galaxy;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public static class EntityDisplay
     {
@@ -24,7 +24,7 @@ namespace Pulsar4X.SDL2UI
             var firstChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
             var secondChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
             var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
-            if(ImGui.BeginChild("ColonySummary1", firstChildSize, true))
+            if(ImGui.BeginChild("ColonySummary1", firstChildSize, ImGuiChildFlags.Borders))
             {
                 var colonyInfoDb = entity.GetDataBlob<ColonyInfoDB>();
                 var bodyInfoDb = colonyInfoDb.PlanetEntity.GetDataBlob<SystemBodyInfoDB>();
@@ -68,7 +68,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndChild();
             }
             ImGui.SameLine();
-            if(ImGui.BeginChild("ColonySummary2", secondChildSize, true))
+            if(ImGui.BeginChild("ColonySummary2", secondChildSize, ImGuiChildFlags.Borders))
             {
                 entity.GetDataBlob<ColonyInfoDB>().Display(entityState, uiState);
                 ImGui.Columns(1);
@@ -84,13 +84,13 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndChild();
             }
             ImGui.SameLine();
-            if(ImGui.BeginChild("ColonySummary3", thirdChildSize, true))
+            if(ImGui.BeginChild("ColonySummary3", thirdChildSize, ImGuiChildFlags.Borders))
             {
                 if(ImGui.CollapsingHeader("Stockpile", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     if(entity.TryGetDatablob<CargoStorageDB>(out var storage))
                     {
-                        var size = ImGui.GetContentRegionMax();
+                        var size = ImGui.GetContentRegionAvail();
                         ImGui.PushStyleColor(ImGuiCol.Button, Styles.SelectedColor);
                         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Styles.SelectedColorHover);
                         ImGui.PushStyleColor(ImGuiCol.ButtonActive, Styles.SelectedColorActive);
@@ -127,7 +127,7 @@ namespace Pulsar4X.SDL2UI
             var storage = entity.GetDataBlob<CargoStorageDB>()?.TypeStores;
 
             Vector2 topSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("NumberOfMines" + entity.Id, new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            if(ImGui.BeginChild("NumberOfMines" + entity.Id, new Vector2(topSize.X, 28f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 if(entity.TryGetDatablob<MiningDB>(out var miningDB))
                 {
@@ -238,7 +238,7 @@ namespace Pulsar4X.SDL2UI
             if(!entity.TryGetDatablob<EntityResearchDB>(out var researchDB)) return;
 
             Vector2 topSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("NumberOfResearchLabs" + entity.Id, new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            if(ImGui.BeginChild("NumberOfResearchLabs" + entity.Id, new Vector2(topSize.X, 28f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 ImGui.Text("Universities:");
                 ImGui.SameLine();
@@ -256,7 +256,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             Vector2 sizeAvailable = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("UniversityList", sizeAvailable, true))
+            if(ImGui.BeginChild("UniversityList", sizeAvailable, ImGuiChildFlags.Borders))
             {
                 foreach(var (instance, value) in researchDB.Labs)
                 {
@@ -277,7 +277,7 @@ namespace Pulsar4X.SDL2UI
             if(!entity.TryGetDatablob<NavalAcademyDB>(out var navalAcademyDB)) return;
 
             Vector2 topSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("NumberOfAcademies" + entity.Id, new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            if(ImGui.BeginChild("NumberOfAcademies" + entity.Id, new Vector2(topSize.X, 28f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 ImGui.Text("Academies:");
                 ImGui.SameLine();
@@ -288,7 +288,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             Vector2 sizeAvailable = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("AcademyList", new Vector2(sizeAvailable.X * .25f, sizeAvailable.Y), true))
+            if(ImGui.BeginChild("AcademyList", new Vector2(sizeAvailable.X * .25f, sizeAvailable.Y), ImGuiChildFlags.Borders))
             {
                 if(ImGui.BeginTable("AcademyListTable", 4, Styles.TableFlags))
                 {

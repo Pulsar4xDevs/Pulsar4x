@@ -3,7 +3,7 @@ using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Energy;
 
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.Client;
 
 public static class PowerDBDisplay
 {

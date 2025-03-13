@@ -7,7 +7,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Colonies;
 using Pulsar4X.People;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class ColonyManagementWindow : PulsarGuiWindow
     {
@@ -41,7 +41,7 @@ namespace Pulsar4X.SDL2UI
             if(Window.Begin("Manage Colonies", ref IsActive))
             {
                 Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-                if(ImGui.BeginChild("Colonies", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y), true))
+                if(ImGui.BeginChild("Colonies", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y), ImGuiChildFlags.Borders))
                 {
                     DisplayHelpers.Header("Select Colony to Manage");
                     foreach(var (id, systemState) in _uiState.StarSystemStates)

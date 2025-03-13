@@ -1,11 +1,9 @@
-﻿using ImGuiSDL2CS;
-using Pulsar4X.Extensions;
+﻿using Pulsar4X.Extensions;
 using SDL3;
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public static class ImageLoadingExtensions
     {
@@ -33,41 +31,32 @@ namespace Pulsar4X.SDL2UI
 #if DEBUG
                 Console.WriteLine($"Loading image: {path}");
 #endif
-                IntPtr sdlSurface = Image.Load(path);
-
-                if (sdlSurface == IntPtr.Zero)
+                IntPtr texture = Image.LoadTexture(_uiState.ViewPort.Renderer, path);
+                if (texture == IntPtr.Zero)
                 {
-                    Console.WriteLine($"Failed to load BMP: {SDL.GetError()}");
+                    Console.WriteLine($"Failed to load image: {SDL.GetError()}");
                     return IntPtr.Zero;
                 }
 
 #if DEBUG
                 // Debug surface info
-                var surface = Marshal.PtrToStructure<SDL.Surface>(sdlSurface);
+                //var surface = Marshal.PtrToStructure<SDL.Surface>(sdlSurface);
                 //var format = Marshal.PtrToStructure<SDL.PixelFormat>(surface.Format);
+                SDL.GetTextureSize(texture, out var w, out var h);
 
                 Console.WriteLine($"Successfully loaded: {imgName}");
                 Console.WriteLine($"Format: {extension}");
-                Console.WriteLine($"Surface pointer: {sdlSurface:X}");
-                Console.WriteLine($"Pixel pointer: {surface.Pixels:X}");
-                Console.WriteLine($"Dimensions: {surface.Width}x{surface.Height}");
+                Console.WriteLine($"Texture pointer: {texture:X}");
+                //Console.WriteLine($"Pixel pointer: {surface.Pixels:X}");
+                Console.WriteLine($"Dimensions: {w}x{h}");
                 //Console.WriteLine($"BPP: {format.BitsPerPixel}");
                 //Console.WriteLine($"BytesPerPixel: {format.BytesPerPixel}");
-                Console.WriteLine($"Pitch: {surface.Pitch}");
+                //Console.WriteLine($"Pitch: {surface.Pitch}");
                 Console.WriteLine(new string('-', 50));
 #endif
-                try
-                {
-                    // Create the texture
-                    uint textureId = _uiState.ViewPort.Renderer.CreateTexture(sdlSurface);
-                    _uiState.SDLImageDictionary.Add(imgName, (IntPtr)textureId);
-                    return (IntPtr)textureId;
-                }
-                finally
-                {
-                    // Free the surface after the texture is created
-                    SDL.Free(sdlSurface);
-                }
+
+                _uiState.SDLImageDictionary.Add(imgName, texture);
+                return texture;
             }
             return _uiState.SDLImageDictionary[imgName];
         }

@@ -2,8 +2,6 @@
 using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
-using Pulsar4X.ImGuiNetUI;
-using Pulsar4X.ImGuiNetUI.EntityManagement;
 using Pulsar4X.Colonies;
 using Pulsar4X.Energy;
 using Pulsar4X.Factions;
@@ -13,7 +11,7 @@ using Pulsar4X.Weapons;
 using Pulsar4X.Movement;
 
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     //a do nothing helper class that is plugged into generics for static checks
     public class PinCameraBlankMenuHelper : PulsarGuiWindow

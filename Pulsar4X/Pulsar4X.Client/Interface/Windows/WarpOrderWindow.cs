@@ -10,7 +10,7 @@ using Pulsar4X.Orbits;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     /// <summary>
     /// Orbit order window - this whole thing is a somewhat horrible state machine
@@ -145,7 +145,7 @@ namespace Pulsar4X.SDL2UI
             {
                 return new WarpOrderWindow(entity);
             }
-            
+
             instance.OrderingEntityState = entity;
             instance.CurrentState = States.NeedsTarget;
             instance._departureDateTime = _uiState.PrimarySystemDateTime;

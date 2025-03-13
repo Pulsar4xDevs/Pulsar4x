@@ -7,7 +7,6 @@ using Pulsar4X.GeoSurveys;
 using Pulsar4X.JumpPoints;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
-using Pulsar4X.SDL2UI;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 

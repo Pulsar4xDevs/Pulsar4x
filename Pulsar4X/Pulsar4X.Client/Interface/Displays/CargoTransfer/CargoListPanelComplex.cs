@@ -14,7 +14,7 @@ using Pulsar4X.Factions;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.Client;
 public delegate void CargoItemSelectedHandler(CargoListPanelComplex cargoPannel);
 public class CargoListPanelComplex
 {
@@ -49,7 +49,7 @@ public class CargoListPanelComplex
     {
 
         _stores = _volStorageDB.TypeStores;
-        
+
 
         if (_entityState.Entity.TryGetDatablob<CargoTransferDB>(out var db))
         {
@@ -141,7 +141,7 @@ public class CargoListPanelComplex
                     return true;
                 }
             }
-            
+
         }
         if (_entityState.Entity.HasDataBlob<ShipInfoDB>())
         {
@@ -153,7 +153,7 @@ public class CargoListPanelComplex
                     return true;
                 }
             }
-            
+
         }
         return false;
     }
@@ -172,7 +172,7 @@ public class CargoListPanelComplex
     public void UpdateTotalMoving()
     {
         var newDict = new Dictionary<ICargoable, long>();
-        
+
         foreach (var kvp in _cargoToMoveDatablob)
         {
             if(!newDict.ContainsKey(kvp.Key))
@@ -210,7 +210,7 @@ public class CargoListPanelComplex
     public void Display()
     {
 
-        ImGui.BeginChild(_entityState.Name, new Vector2(360, 200), true);
+        ImGui.BeginChild(_entityState.Name, new Vector2(360, 200), ImGuiChildFlags.Borders);
         ImGui.Text(_entityState.Name);
         ImGui.Text("Transfer Rate: " + _volStorageDB.TransferRate);
         ImGui.Text("At DeltaV < " + Stringify.Velocity(_volStorageDB.TransferRangeDv_mps));
@@ -246,18 +246,18 @@ public class CargoListPanelComplex
 
                 var cargoables = _stores[typeStoreKVP.Key].GetCargoables();
                 var storeInUnits = typeStoreKVP.Value.CurrentStoreInUnits;
-                Dictionary<int, ICargoable> cargoToDisplay = new (cargoables); 
+                Dictionary<int, ICargoable> cargoToDisplay = new (cargoables);
                 foreach (var item in _cargoToMove)
                 {
                     if (!cargoToDisplay.ContainsKey(item.Key.ID))
                         cargoToDisplay.Add(item.Key.ID, item.Key);
                 }
-                
+
                 foreach (var cargoItem in cargoToDisplay.Values)
                 {
                     var cname = cargoItem.Name;
                     long unitsStored = 0;
-                    if(storeInUnits.ContainsKey(cargoItem.ID)) 
+                    if(storeInUnits.ContainsKey(cargoItem.ID))
                         unitsStored = storeInUnits[cargoItem.ID];
 
                     var volumePerItem = cargoItem.VolumePerUnit;

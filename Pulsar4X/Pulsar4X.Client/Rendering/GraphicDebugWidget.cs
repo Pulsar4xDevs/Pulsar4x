@@ -6,7 +6,7 @@ using Pulsar4X.Orbital;
 using SDL3;
 using Vector3 = Pulsar4X.Orbital.Vector3;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class GraphicDebugWindow
     {

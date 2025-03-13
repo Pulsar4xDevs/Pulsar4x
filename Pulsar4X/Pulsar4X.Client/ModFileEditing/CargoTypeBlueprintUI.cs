@@ -3,17 +3,17 @@ using ImGuiNET;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Modding;
 
-namespace Pulsar4X.SDL2UI.ModFileEditing;
+namespace Pulsar4X.Client.ModFileEditing;
 
 public class CargoTypeBlueprintUI : BluePrintsUI
 {
-    
-    
+
+
     public CargoTypeBlueprintUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.CargoType)
     {
         var blueprints = modDataStore.CargoTypes;
         _itemBlueprints = blueprints.Values.ToArray();
-        
+
         Refresh();
     }
 
@@ -32,7 +32,7 @@ public class CargoTypeBlueprintUI : BluePrintsUI
         newEmpty.Name = "New Blueprint";
         _newEmpty = newEmpty;
     }
-    
+
 
     public override void DisplayEditorWindow(int selectedIndex)
     {

@@ -4,7 +4,7 @@ using ImGuiNET;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Modding;
 
-namespace Pulsar4X.SDL2UI.ModFileEditing;
+namespace Pulsar4X.Client.ModFileEditing;
 
 public class TechCatBlueprintUI : BluePrintsUI
 {
@@ -30,8 +30,8 @@ public class TechCatBlueprintUI : BluePrintsUI
         newEmpty.Name = "New Blueprint";
         _newEmpty = newEmpty;
     }
-    
-    
+
+
     public override void DisplayEditorWindow(int selectedIndex)
     {
         if(!_isActive[selectedIndex])
@@ -50,7 +50,7 @@ public class TechCatBlueprintUI : BluePrintsUI
             {
                 selectedItem.Name = name;
             }
-            
+
             ImGui.NextColumn();
             ImGui.Text("Description: ");
             ImGui.NextColumn();

@@ -4,7 +4,7 @@ using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using SDL3;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     class DistanceRuler : PulsarGuiWindow
     {

@@ -5,7 +5,7 @@ using ImGuiSDL2CS;
 using Pulsar4X.Engine;
 using Pulsar4X.Galaxy;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class SystemIcon
     {

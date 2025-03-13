@@ -3,7 +3,7 @@ using Pulsar4X.Movement;
 using Pulsar4X.Orbital;
 using SDL3;
 
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.Client;
 public class PointOfInterestIcon : Icon
 {
     public PointOfInterestIcon(PositionDB positionDB) : base(positionDB)

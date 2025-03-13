@@ -16,12 +16,12 @@ public static class Window
 {
 #if DEBUG
     private static ConcurrentDictionary<string, string> _cachedPrefixs = new();
-    
+
     // Track whether we're inside a Begin/End block
-    private static int _beginCount = 0; 
+    private static int _beginCount = 0;
     private static string _currentWindowTitle = "";
 #endif
-    
+
     public static bool Begin(string title, [CallerFilePath] string callerFilePath = "")
     {
 #if DEBUG
@@ -29,7 +29,7 @@ public static class Window
 #endif
         return ImGui.Begin(GetWindowTitle(title, callerFilePath));
     }
-    
+
     public static bool Begin(string title, ref bool isActive, [CallerFilePath] string callerFilePath = "")
     {
 #if DEBUG
@@ -69,7 +69,7 @@ public static class Window
 #endif
         ImGui.End();
     }
-    
+
 #if DEBUG
     private static void ValidateBeginCall(string title)
     {
@@ -83,7 +83,7 @@ public static class Window
         _currentWindowTitle = title;
     }
 #endif
-    
+
     /// <summary>
     /// Prepends the calling class path and name to the provided title string when in debug mode.
     /// </summary>
@@ -92,6 +92,9 @@ public static class Window
     /// <returns>Modified title string with class path in debug mode, original string in release mode</returns>
     private static string GetWindowTitle(string title, string callerFilePath)
     {
+        if(string.IsNullOrEmpty(title))
+            throw new NullReferenceException("Title cannot be null");
+
 #if DEBUG
         if (!_cachedPrefixs.ContainsKey(callerFilePath))
         {
@@ -120,7 +123,7 @@ public static class Window
         return title;
 #endif
     }
-    
+
     /// <summary>
     /// Attempts to find the project root directory by looking for the .csproj file
     /// </summary>

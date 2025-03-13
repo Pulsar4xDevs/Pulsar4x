@@ -5,7 +5,7 @@ using Pulsar4X.Extensions;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Names;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class RenameWindow : PulsarGuiWindow
     {

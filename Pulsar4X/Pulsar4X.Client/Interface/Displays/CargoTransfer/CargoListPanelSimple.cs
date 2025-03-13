@@ -9,7 +9,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Factions;
 using Pulsar4X.Storage;
 
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.Client;
 
 public class CargoListPanelSimple : UpdateWindowState
 {
@@ -50,7 +50,7 @@ public class CargoListPanelSimple : UpdateWindowState
     {
         var width = ImGui.GetWindowWidth() * 0.5f;
 
-        ImGui.BeginChild(_entityState.Name, new Vector2(240, 200), true, ImGuiWindowFlags.AlwaysAutoResize);
+        ImGui.BeginChild(_entityState.Name, new Vector2(240, 200), ImGuiChildFlags.Borders, ImGuiWindowFlags.AlwaysAutoResize);
         foreach (var typeStore in _stores)
         {
             CargoTypeBlueprint stype = _staticData.CargoTypes[typeStore.Key];

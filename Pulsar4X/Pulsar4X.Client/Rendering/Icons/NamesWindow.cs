@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     class NameWidget : IComparable<NameWidget>, IRectangle
     {
@@ -35,7 +35,7 @@ namespace Pulsar4X.SDL2UI
     public class NamesWindow
     {
         List<EntityState> PrimaryEntities = new List<EntityState>();
-        Dictionary<EntityState, List<EntityState>> SecondaryEntitys = new Dictionary<EntityState, List<EntityState>> ();      
+        Dictionary<EntityState, List<EntityState>> SecondaryEntitys = new Dictionary<EntityState, List<EntityState>> ();
 
         public NamesWindow()
         {
@@ -44,7 +44,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void AddPrimary(EntityState entityState)
         {
-            PrimaryEntities.Add(entityState); 
+            PrimaryEntities.Add(entityState);
         }
 
 

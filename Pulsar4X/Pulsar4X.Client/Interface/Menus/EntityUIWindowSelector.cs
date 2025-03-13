@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Engine;
-using Pulsar4X.ImGuiNetUI;
-using Pulsar4X.ImGuiNetUI.EntityManagement;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     //basically an always open context menu for the currently selected entity.
     public class EntityUIWindowSelector : PulsarGuiWindow
@@ -123,7 +121,7 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.PushStyleColor(buttonidx, unclickedcolor);                                //Have the button be colored normally
                             }
 
-                            if (ImGui.ImageButton(button.Picture, BtnSizes))
+                            if (ImGui.ImageButton("btnimage", button.Picture, BtnSizes))
                             {
                                 EntityUIWindows.OpenUIWindow(button.ClickType, _entityState, _uiState);
                             }

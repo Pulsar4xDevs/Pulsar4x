@@ -2,9 +2,8 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using Pulsar4X.Modding;
-using Pulsar4X.SDL2UI;
 
-namespace Pulsar4X.Client.State;
+namespace Pulsar4X.Client;
 
 public class ModsState
 {

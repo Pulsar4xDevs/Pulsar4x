@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using Pulsar4X.Industry;
 using Pulsar4X.Galaxy;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     class UniquePlanetaryWindow : PulsarGuiWindow
     {

@@ -5,7 +5,7 @@ using Pulsar4X.Orbital;
 using Pulsar4X.Orbits;
 using SDL3;
 
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.Client;
 
 public class OrbitHyperbolicIcon2 : OrbitIconBase
 {

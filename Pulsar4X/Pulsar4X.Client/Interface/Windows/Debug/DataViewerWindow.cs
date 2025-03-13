@@ -12,7 +12,7 @@ using Pulsar4X.Modding;
 using Pulsar4X.Orbital;
 using Pulsar4X.Technology;
 
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.Client;
 
 public class DataViewerWindow : PulsarGuiWindow
 {

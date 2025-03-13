@@ -10,7 +10,7 @@ using Pulsar4X.Components;
 using Pulsar4X.Factions;
 using Pulsar4X.Storage;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public sealed class IndustryDisplay
     {
@@ -129,7 +129,7 @@ namespace Pulsar4X.SDL2UI
             if(!Entity.TryGetDatablob<IndustryAbilityDB>(out _industryDB) || !state.Faction.TryGetDatablob<FactionInfoDB>(out _factionInfoDB))
             {
                 Vector2 topSize = ImGui.GetContentRegionAvail();
-                if(ImGui.BeginChild("NoProductionAvailable", new Vector2(topSize.X, 56f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                if(ImGui.BeginChild("NoProductionAvailable", new Vector2(topSize.X, 56f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
                     ImGui.Text("You need an installation capable of production. Consider importing one.\n\nExamples: Factory, Shipyard or Refinery");
@@ -150,7 +150,7 @@ namespace Pulsar4X.SDL2UI
             if(string.IsNullOrEmpty(_selectedProdLine) || _prodLines == null)
                 return;
 
-            if(ImGui.BeginChild("JobDescriptionPane", new Vector2(windowContentSize.X * 0.5f - 8f, windowContentSize.Y), true))
+            if(ImGui.BeginChild("JobDescriptionPane", new Vector2(windowContentSize.X * 0.5f - 8f, windowContentSize.Y), ImGuiChildFlags.Borders))
             {
                 if(_prodLines.ContainsKey(_selectedProdLine) &&_prodLines[_selectedProdLine] != null)
                 {
@@ -175,7 +175,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("ColonyProductionLines", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), true))
+            if(ImGui.BeginChild("ColonyProductionLines", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Production Lines");
 

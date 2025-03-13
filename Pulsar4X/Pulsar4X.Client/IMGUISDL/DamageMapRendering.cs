@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using GameEngine.Damage;
-using Pulsar4X.Client.Rendering;
+using Pulsar4X.Client;
 
 namespace ImGuiSDL2CS;
 
@@ -12,7 +12,7 @@ public static class DamageMapRendering
 
 
 
-    public static void CreateSDLTextures(IRenderer renderer, IntPtr renderPtr, DamageMap damageMap, ref IntPtr[] textures)
+    public static void CreateSDLTextures(IntPtr renderer, DamageMap damageMap, ref IntPtr[] textures)
     {
         int width = damageMap.Width;
         int height = damageMap.Height;
@@ -23,13 +23,9 @@ public static class DamageMapRendering
         CreateTextureForTemp(renderer, damageMap, ref textures[4], width, height);
         CreateTextureForPhaseState(renderer, damageMap, ref textures[5], width, height);
         CreateTextureForBeamPoints(renderer, damageMap, ref textures[6], width, height);
-
     }
 
-
-
-
-    internal static void CreateTextureForIDMap(IRenderer renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    internal static void CreateTextureForIDMap(IntPtr renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
         byte alpha = 255;
         // Create a buffer for the pixel data
@@ -60,7 +56,7 @@ public static class DamageMapRendering
         {
             IntPtr pixels = handle.AddrOfPinnedObject();
             // Update the texture
-            SDL3Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+            Textures.UpdateOrCreate(renderer, ref texture, width, height, pixels);
         }
         finally
         {
@@ -69,7 +65,7 @@ public static class DamageMapRendering
     }
 
 
-    internal static void CreateTextureForPresMap(IRenderer renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    internal static void CreateTextureForPresMap(IntPtr renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
         byte alpha = 255;
         float maxPressure = damageMap.PresMap.Max();
@@ -98,7 +94,7 @@ public static class DamageMapRendering
             IntPtr pixels = handle.AddrOfPinnedObject();
 
             // Update the texture
-            SDL3Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+            Textures.UpdateOrCreate(renderer, ref texture, width, height, pixels);
         }
         finally
         {
@@ -107,7 +103,7 @@ public static class DamageMapRendering
     }
 
 
-    internal static void CreateTextureForVMap(IRenderer renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    internal static void CreateTextureForVMap(IntPtr renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
         byte alpha = 255;
         double maxVelocity = 0;
@@ -143,7 +139,7 @@ public static class DamageMapRendering
             IntPtr pixels = handle.AddrOfPinnedObject();
 
             // Update the texture
-            SDL3Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+            Textures.UpdateOrCreate(renderer, ref texture, width, height, pixels);
         }
         finally
         {
@@ -152,7 +148,7 @@ public static class DamageMapRendering
     }
 
 
-    internal static void CreateTextureForPMap(IRenderer renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    internal static void CreateTextureForPMap(IntPtr renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
         byte alpha = 255;
         int phaseStateCount = Enum.GetValues(typeof(PhaseState)).Length;
@@ -195,7 +191,7 @@ public static class DamageMapRendering
             IntPtr pixels = handle.AddrOfPinnedObject();
 
             // Update the texture
-            SDL3Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+            Textures.UpdateOrCreate(renderer, ref texture, width, height, pixels);
         }
         finally
         {
@@ -204,7 +200,7 @@ public static class DamageMapRendering
     }
 
 
-    internal static void CreateTextureForPhaseState(IRenderer renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    internal static void CreateTextureForPhaseState(IntPtr renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
         int phaseStateCount = Enum.GetValues(typeof(PhaseState)).Length;
         uint color = 0;
@@ -237,7 +233,7 @@ public static class DamageMapRendering
         {
             IntPtr pixels = handle.AddrOfPinnedObject();
             // Update the texture
-            SDL3Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+            Textures.UpdateOrCreate(renderer, ref texture, width, height, pixels);
         }
         finally
         {
@@ -246,7 +242,7 @@ public static class DamageMapRendering
     }
 
 
-    internal static void CreateTextureForTemp(IRenderer renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    internal static void CreateTextureForTemp(IntPtr renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
         uint color = 0;
         float temperatureInKelvin = 0;
@@ -348,21 +344,21 @@ public static class DamageMapRendering
         {
             IntPtr pixels = handle.AddrOfPinnedObject();
             // Update the texture
-            SDL3Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+            Textures.UpdateOrCreate(renderer, ref texture, width, height, pixels);
         }
         finally
         {
             handle.Free();
         }
     }
-    internal static void CreateTextureForBeamPoints(IRenderer renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    internal static void CreateTextureForBeamPoints(IntPtr renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
         List<BeamPoint> beamPoints = damageMap.BeamPoints;
         if (beamPoints == null || beamPoints.Count == 0)
         {
             if (texture != IntPtr.Zero)
             {
-                renderer.DeleteTexture((uint)texture);
+                Textures.DeleteTexture(texture);
                 texture = IntPtr.Zero;
             }
             return;
@@ -405,7 +401,7 @@ public static class DamageMapRendering
         {
             IntPtr pixels = handle.AddrOfPinnedObject();
             // Update the texture
-            SDL3Helper.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+            Textures.UpdateOrCreate(renderer, ref texture, width, height, pixels);
         }
         finally
         {

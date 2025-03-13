@@ -11,7 +11,7 @@ using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Modding;
 
-namespace Pulsar4X.SDL2UI.ModFileEditing;
+namespace Pulsar4X.Client.ModFileEditing;
 
 public abstract class BluePrintsUI
 {
@@ -38,7 +38,7 @@ public abstract class BluePrintsUI
     private protected string _fileDialogPath = "";
     private protected string _fileName = "";
     private protected ModInstruction.DataType _dataType;
-    
+
     protected BluePrintsUI(ModDataStore modDataStore, ModInstruction.DataType dataType)
     {
         _modDataStore = modDataStore;
@@ -47,7 +47,7 @@ public abstract class BluePrintsUI
         _techTypes = modDataStore.Techs.Keys.ToArray();
         _industryTypes = modDataStore.IndustryTypes.Keys.ToArray();
         _dataType = dataType;
-        
+
         _units = new string[9];
         _units[0] = "";
         _units[1] = "KJ";
@@ -58,7 +58,7 @@ public abstract class BluePrintsUI
         _units[6] = "m";
         _units[7] = "N";
         _units[8] = "m/s";
-        
+
         _mountTypes = Enum.GetNames(typeof(ComponentMountType));
         _constrGuiHints = Enum.GetNames(typeof(ConstructableGuiHints));
         _guiHints = Enum.GetNames(typeof(GuiHint));
@@ -87,7 +87,7 @@ public abstract class BluePrintsUI
             outputFile.Write(output);
         };
     }
-    
+
     public void Display(string label)
     {
         int i = 0;
@@ -101,9 +101,9 @@ public abstract class BluePrintsUI
             }
             ImGui.SameLine();
             ImGui.Button("SaveToMemory");
-            
-            ImGui.BeginChild(label,_childSize, true);
-            
+
+            ImGui.BeginChild(label,_childSize, ImGuiChildFlags.Borders);
+
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0,150);
             ImGui.SetColumnWidth(1,500);

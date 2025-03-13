@@ -5,8 +5,6 @@ using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
-using Pulsar4X.SDL2UI;
-using Pulsar4X.SDL2UI.ModFileEditing;
 
 namespace Pulsar4X.Client.Interface.Menus;
 
@@ -16,7 +14,7 @@ public class LoadGame : PulsarGuiWindow
     private string _fileName = "savegame";
 
     private LoadGame() {}
-    
+
     internal static LoadGame GetInstance()
     {
         if (!_uiState.LoadedWindows.ContainsKey(typeof(LoadGame)))
@@ -42,7 +40,7 @@ public class LoadGame : PulsarGuiWindow
         }
         if(!string.IsNullOrEmpty(fileToLoad))
             LoadFile(Path.Combine(fileToLoad, fileToLoad));
-            
+
     }
 
     internal void LoadFile(string filenamepath)
@@ -56,7 +54,7 @@ public class LoadGame : PulsarGuiWindow
         (int id, Entity faction) = loadedGame.Factions.First(f => f.Value.GetOwnersName().Equals("UEF"));
         _uiState.SetFaction(faction, true);
         _uiState.SetActiveSystem(faction.GetDataBlob<FactionInfoDB>().KnownSystems[0]);
-            
+
         DebugWindow.GetInstance().SetGameEvents();
         //we initialize window instances so that they get always displayed and automatically open after new game is created.
         TimeControl.GetInstance().SetActive();
@@ -74,7 +72,7 @@ public class LoadGame : PulsarGuiWindow
                 return;
             }
             LoadFile(Path.Combine(_filePath, _fileName));
-            
+
             IsActive = false;
         }
     }

@@ -11,7 +11,7 @@ using Pulsar4X.Fleets;
 using Pulsar4X.Movement;
 using Pulsar4X.Ships;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class Selector : PulsarGuiWindow
     {

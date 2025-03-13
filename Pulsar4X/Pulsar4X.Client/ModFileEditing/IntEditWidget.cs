@@ -1,11 +1,11 @@
 using ImGuiNET;
 
-namespace Pulsar4X.SDL2UI.ModFileEditing;
+namespace Pulsar4X.Client.ModFileEditing;
 
 public static class IntEditWidget
 {
     private static string? _editingID;
-    
+
     public static bool Display(string label, ref int num)
     {
         bool hasChanged = false;

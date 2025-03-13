@@ -5,7 +5,6 @@ using System.Linq;
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
-using Pulsar4X.SDL2UI;
 using Vector2 = System.Numerics.Vector2;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Factions;
@@ -13,7 +12,7 @@ using Pulsar4X.Storage;
 using Pulsar4X.Weapons;
 using Pulsar4X.Movement;
 
-namespace Pulsar4X.ImGuiNetUI
+namespace Pulsar4X.Client
 {
 
     public class FireControl : PulsarGuiWindow

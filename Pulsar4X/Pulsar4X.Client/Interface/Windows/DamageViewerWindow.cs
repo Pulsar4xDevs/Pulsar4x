@@ -18,7 +18,7 @@ using Pulsar4X.Galaxy;
 using Pulsar4X.Ships;
 
 
-namespace Pulsar4X.SDL2UI.Combat
+namespace Pulsar4X.Client.Combat
 {
     public class DamageViewerWindow : PulsarGuiWindow
     {
@@ -55,7 +55,7 @@ namespace Pulsar4X.SDL2UI.Combat
         IntPtr[] _damageMapPtr = new IntPtr[7];
         DamageMap _projectileDamageMap;
         IntPtr _projectileDMapPtr;
-        
+
         ComponentInstancesDB _componentInstances;
 
         private DamageViewerWindow()
@@ -97,7 +97,7 @@ namespace Pulsar4X.SDL2UI.Combat
         private void Init(Entity damageableEntity)
         {
             _selectedEntity = damageableEntity;
-            
+
             if(damageableEntity.TryGetDatablob<ShipInfoDB>(out var shdb))
             {
                 var design = shdb.Design;
@@ -107,8 +107,8 @@ namespace Pulsar4X.SDL2UI.Combat
             {
                 _damageMap = new DamageMap(damageableEntity, sbdb);
             }
-            DamageMapRendering.CreateSDLTextures(_uiState.ViewPort.Renderer, _uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
-            
+            DamageMapRendering.CreateSDLTextures(_uiState.ViewPort.Renderer, _damageMap, ref _damageMapPtr);
+
             _dmWidth = (int)(_damageMap.Width * _dmSizeScaler);
             _dmHeight = (int)(_damageMap.Height * _dmSizeScaler);
             _dmProjectileSliderBot = _dmWidth;
@@ -123,7 +123,7 @@ namespace Pulsar4X.SDL2UI.Combat
                     _damageEventIndex = _profile.DamageEvents.Count - 1;
                     SetDamageEventFrames();
                 }
-                _uiState.ViewPort.Renderer.CreateTexture(_rawShipImage, ref _shipImgPtr, Client.Rendering.PixelFormat.ARGB8888);
+                Textures.CreateTexture(_uiState.ViewPort.Renderer, _rawShipImage, ref _shipImgPtr, Rendering.PixelFormat.ARGB8888);
             }
             if(damageableEntity.TryGetDatablob<ComponentInstancesDB>(out var _componentInstances))
             {}
@@ -142,7 +142,7 @@ namespace Pulsar4X.SDL2UI.Combat
             _damageFrames = DamageTools.DealDamageSim(_profile, _profile.DamageEvents[_damageEventIndex]).damageFrames;
             _showFrameNum = 0;
             if (_damageFrames != null)
-                _uiState.ViewPort.Renderer.CreateTexture(_damageFrames[_showFrameNum], ref _showDmgFrametx, Client.Rendering.PixelFormat.ARGB8888);
+                Textures.CreateTexture(_uiState.ViewPort.Renderer, _damageFrames[_showFrameNum], ref _showDmgFrametx, Rendering.PixelFormat.ARGB8888);
         }
 
 
@@ -234,9 +234,9 @@ namespace Pulsar4X.SDL2UI.Combat
                     _dmProjectileSliderLhs = (int)(_dmHeight * 0.75);
                     _dmProjectileSliderTop = 0;
                     _dmProjectileSliderRhs = (int)(_dmHeight * 0.25);
-                    
-                    
-                    
+
+
+
                     if (_shipImgPtr != IntPtr.Zero && ImGui.CollapsingHeader("Old Damage View"))
                     {
                         int w = _rawShipImage.Width; // / 4;
@@ -422,7 +422,7 @@ namespace Pulsar4X.SDL2UI.Combat
                                 SetDMVectors();
 
                                 _damageMap.MergeAndResize(_projectileDamageMap);
-                                DamageMapRendering.CreateSDLTextures(_uiState.ViewPort.Renderer, _uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
+                                DamageMapRendering.CreateSDLTextures(_uiState.ViewPort.Renderer, _damageMap, ref _damageMapPtr);
 
 
 
@@ -448,13 +448,13 @@ namespace Pulsar4X.SDL2UI.Combat
                             {
                                 _runSimLoop = false;
                                 DamagePhysicsSim.PhysicsLoop(_damageMap);
-                                DamageMapRendering.CreateSDLTextures(_uiState.ViewPort.Renderer, _uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
+                                DamageMapRendering.CreateSDLTextures(_uiState.ViewPort.Renderer, _damageMap, ref _damageMapPtr);
                             }
 
                             if (_runSimLoop)
                             {
                                 DamagePhysicsSim.PhysicsLoop(_damageMap);
-                                DamageMapRendering.CreateSDLTextures(_uiState.ViewPort.Renderer, _uiState.SDLRendererPtr, _damageMap, ref _damageMapPtr);
+                                DamageMapRendering.CreateSDLTextures(_uiState.ViewPort.Renderer, _damageMap, ref _damageMapPtr);
                             }
                             ImGui.Text(Stringify.Energy(_damageMap.TotalEnergy));
                             ImGui.Text(_damageMap.RunTime.ToString());
@@ -498,7 +498,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             _showFrameNum--;
                             if (_showFrameNum < 0)
                                 _showFrameNum = _damageFrames.Count - 1;
-                            _uiState.ViewPort.Renderer.CreateTexture(_damageFrames[_showFrameNum], ref _showDmgFrametx, Client.Rendering.PixelFormat.ARGB8888);
+                            Textures.CreateTexture(_uiState.ViewPort.Renderer, _damageFrames[_showFrameNum], ref _showDmgFrametx, Rendering.PixelFormat.ARGB8888);
                         }
 
                         ImGui.SameLine();
@@ -507,7 +507,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             _showFrameNum++;
                             if (_showFrameNum > _damageFrames.Count - 1)
                                 _showFrameNum = 0;
-                            _uiState.ViewPort.Renderer.CreateTexture(_damageFrames[_showFrameNum], ref _showDmgFrametx, Client.Rendering.PixelFormat.ARGB8888);
+                            Textures.CreateTexture(_uiState.ViewPort.Renderer, _damageFrames[_showFrameNum], ref _showDmgFrametx, Rendering.PixelFormat.ARGB8888);
                         }
 
                         ImGui.Text(_showFrameNum + 1 + " of " + _damageFrames.Count);

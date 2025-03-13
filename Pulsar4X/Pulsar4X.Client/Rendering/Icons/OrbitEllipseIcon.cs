@@ -4,7 +4,7 @@ using SDL3;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
 
 

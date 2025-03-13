@@ -8,7 +8,7 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class GameLogWindow : PulsarGuiWindow
     {

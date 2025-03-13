@@ -5,7 +5,7 @@ using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.DataStructures;
 
-namespace Pulsar4X.SDL2UI.ModFileEditing;
+namespace Pulsar4X.Client.ModFileEditing;
 
 public static class DictEditWidget
 {
@@ -51,7 +51,7 @@ public static class DictEditWidget
                 }
                 valIndex++;
             }
-            
+
             if(_editingID != label+"addValue")
             {
                 if (ImGui.Button("+##addval" + label))
@@ -89,14 +89,14 @@ public static class DictEditWidget
                 _editingID = null;
             }
         }
-        
+
         ImGui.EndChild();
         return isChanged;
     }
-    
+
     public static bool Display(string label, ref Dictionary<string, string> dict)
     {
-        ImGui.BeginChild("##dic" + label, new Vector2(400,160), true);
+        ImGui.BeginChild("##dic" + label, new Vector2(400,160), ImGuiChildFlags.Borders);
         ImGui.Columns(2);
         bool isChanged = false;
         if (dict is null)
@@ -112,7 +112,7 @@ public static class DictEditWidget
                     dict.Add(_editStr,kvp.Value);
             }
             ImGui.NextColumn();
-            
+
             //values
             _editStr = kvp.Value;
             if(TextEditWidget.Display(label+kvp.Key + "v", ref _editStr))
@@ -127,7 +127,7 @@ public static class DictEditWidget
 
         return isChanged;
     }
-    
+
     /// <summary>
     /// Note this casts to an int, not long.
     /// </summary>
@@ -136,7 +136,7 @@ public static class DictEditWidget
     /// <returns></returns>
     public static bool Display(string label, ref Dictionary<string, long> dict)
     {
-        ImGui.BeginChild("##dic" + label, new Vector2(400,160), true);
+        ImGui.BeginChild("##dic" + label, new Vector2(400,160), ImGuiChildFlags.Borders);
         ImGui.Columns(2);
         bool isChanged = false;
         if (dict is null)
@@ -152,7 +152,7 @@ public static class DictEditWidget
                     dict.Add(_editStr,kvp.Value);
             }
             ImGui.NextColumn();
-            
+
             //values
             _editInt = (int)kvp.Value;
             if(IntEditWidget.Display(label+kvp.Key + "v", ref _editInt))
@@ -166,18 +166,18 @@ public static class DictEditWidget
         {
             dict.Add("???", 0);
         }
-        
-        
+
+
         ImGui.Columns(0);
         ImGui.NewLine();
         ImGui.EndChild();
 
         return isChanged;
     }
-    
+
     public static bool Display(string label, ref Dictionary<BodyType, double> dict)
     {
-        ImGui.BeginChild("##dic" + label, new Vector2(400,160), true);
+        ImGui.BeginChild("##dic" + label, new Vector2(400,160), ImGuiChildFlags.Borders);
         ImGui.Columns(2);
         bool isChanged = false;
         if (dict is null)
@@ -193,7 +193,7 @@ public static class DictEditWidget
         {
             _editStr = Enum.GetName(kvp.Key);
             _editDouble = kvp.Value;
-            
+
             ImGui.Text(_editStr);
             ImGui.NextColumn();
 
@@ -208,5 +208,5 @@ public static class DictEditWidget
         ImGui.EndChild();
         return isChanged;
     }
-    
+
 }

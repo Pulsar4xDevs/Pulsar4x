@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
-using ImGuiSDL2CS;
 using SDL3;
 using Pulsar4X.Orbital;
 using Pulsar4X.Engine;
@@ -16,7 +15,7 @@ using Pulsar4X.Weapons;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client.Rendering
 {
     internal class SystemMapRendering : UpdateWindowState
     {
@@ -28,7 +27,7 @@ namespace Pulsar4X.SDL2UI
         internal IntPtr windowPtr;
         internal IntPtr surfacePtr;
         internal IntPtr rendererPtr;
-        ImGuiSDL3CSWindow _window;
+        SDL3Window _window;
         internal Dictionary<string, IDrawData> UIWidgets = new ();
         ConcurrentDictionary<int, Icon> _testIcons = new ();
         ConcurrentDictionary<int, IDrawData> _entityIcons = new ();
@@ -41,13 +40,13 @@ namespace Pulsar4X.SDL2UI
         //internal SystemMap_DrawableVM SysMap;
         Entity? _faction;
 
-        internal SystemMapRendering(ImGuiSDL3CSWindow window, GlobalUIState state)
+        internal SystemMapRendering(SDL3Window window, GlobalUIState state)
         {
             _state = state;
 
             _camera = _state.Camera;
             _window = window;
-            windowPtr = window.Handle;
+            windowPtr = window.Window;
             surfacePtr = SDL.GetWindowSurface(windowPtr);
             rendererPtr = SDL.GetRenderer(windowPtr);
             //UIWidgets.Add(new CursorCrosshair(new Vector4())); //used for debugging the cursor world position.
@@ -479,7 +478,7 @@ namespace Pulsar4X.SDL2UI
                     Color = new SDL.Color() { R = 0, G = 255, B = 0, A = 255 }
                 }
             };
-            _uiState.ViewPort.Renderer.RenderLine(shapes, _uiState.Camera);
+            //_uiState.ViewPort.Renderer.RenderLine(shapes, _uiState.Camera);
 
             shapes = new Shape[1]
             {
@@ -494,7 +493,7 @@ namespace Pulsar4X.SDL2UI
                     Color = new SDL.Color() { R = 255, G = 255, B = 128, A = 255 }
                 }
             };
-            _uiState.ViewPort.Renderer.RenderLine(shapes, _uiState.Camera);
+            //_uiState.ViewPort.Renderer.RenderLine(shapes, _uiState.Camera);
         }
 
         void UpdateAndDraw(IList<IDrawData> icons, Matrix matrix)

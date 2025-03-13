@@ -6,8 +6,9 @@ using SDL3;
 using Point = SDL3.SDL.Point;
 using Vector2 = Pulsar4X.Orbital.Vector2;
 using Pulsar4X.Movement;
+using Pulsar4X.Client;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
 
 
@@ -61,14 +62,14 @@ namespace Pulsar4X.SDL2UI
         public double ZoomLevel_m { get; set; } = 1.496e11 / 200;
         public float zoomSpeed { get; set; } = 1.25f;
 
-        public ImGuiSDL3CSWindow _viewPort;
+        public SDL3Window _viewPort;
 
         double MAX_ZOOMLEVEL = 1.496e+11;
 
         /// <summary>
         /// Construct a new Camera class within the Graphic Control Viewport.
         /// </summary>
-        public Camera(ImGuiSDL3CSWindow viewPort)
+        public Camera(SDL3Window viewPort)
         {
             _viewPort = viewPort;
             //_viewPort.SizeChanged += _viewPort_SizeChanged;

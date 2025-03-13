@@ -10,7 +10,7 @@ using Pulsar4X.Factions;
 using Pulsar4X.Logistics;
 using Pulsar4X.Storage;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class ColonyLogisticsDisplay
     {
@@ -130,7 +130,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             Vector2 topSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("LogisticsHeader", new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            if(ImGui.BeginChild("LogisticsHeader", new Vector2(topSize.X, 28f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 ImGui.Text("Logistics Capacity:");
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
@@ -165,7 +165,7 @@ namespace Pulsar4X.SDL2UI
             var firstChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
             var secondChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
             var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
-            if(ImGui.BeginChild("ColonyLogistics1", firstChildSize, true))
+            if(ImGui.BeginChild("ColonyLogistics1", firstChildSize, ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Imports");
 
@@ -200,7 +200,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndChild();
             }
             ImGui.SameLine();
-            if(ImGui.BeginChild("ColonyLogistics2", secondChildSize, true))
+            if(ImGui.BeginChild("ColonyLogistics2", secondChildSize, ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Goods Available to Import or Export");
 
@@ -306,7 +306,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndChild();
             }
             ImGui.SameLine();
-            if(ImGui.BeginChild("ColonyLogistics3", thirdChildSize, true))
+            if(ImGui.BeginChild("ColonyLogistics3", thirdChildSize, ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Exports");
 
@@ -456,7 +456,7 @@ namespace Pulsar4X.SDL2UI
         private void DisplayDisabledMessage()
         {
             Vector2 topSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("LogisticsDisabled", new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            if(ImGui.BeginChild("LogisticsDisabled", new Vector2(topSize.X, 28f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
                 ImGui.Text("You need an Installation with a Logistics component to enable logistics on this colony.");

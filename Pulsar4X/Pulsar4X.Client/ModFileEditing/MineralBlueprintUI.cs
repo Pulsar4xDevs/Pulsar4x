@@ -4,7 +4,7 @@ using ImGuiNET;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Modding;
 
-namespace Pulsar4X.SDL2UI.ModFileEditing;
+namespace Pulsar4X.Client.ModFileEditing;
 
 public class MineralBlueprintUI : BluePrintsUI
 {
@@ -45,16 +45,16 @@ public class MineralBlueprintUI : BluePrintsUI
             ImGui.SetColumnWidth(1, 500);
             ImGui.Text("Name: ");
             ImGui.NextColumn();
-            
-            
+
+
             _editStr = selectedItem.Name;
             if (TextEditWidget.Display("##name" + selectedItem.UniqueID, ref _editStr))
             {
                 selectedItem.Name = _editStr;
             }
             ImGui.NextColumn();
-            
-            
+
+
             ImGui.Text("Description: ");
             ImGui.NextColumn();
             _editStr = selectedItem.Description;
@@ -63,7 +63,7 @@ public class MineralBlueprintUI : BluePrintsUI
                 selectedItem.Name = _editStr;
             }
             ImGui.NextColumn();
-            
+
             ImGui.Text("Cargo Type: ");
             ImGui.NextColumn();
             _editInt = Array.IndexOf(_cargoTypes, selectedItem.CargoTypeID);
@@ -73,7 +73,7 @@ public class MineralBlueprintUI : BluePrintsUI
                 _editInt = -1;
             }
             ImGui.NextColumn();
-                        
+
             ImGui.Text("Mass: ");
             ImGui.NextColumn();
             _editInt = (int)selectedItem.MassPerUnit;
@@ -82,7 +82,7 @@ public class MineralBlueprintUI : BluePrintsUI
                 selectedItem.MassPerUnit = _editInt;
             }
             ImGui.NextColumn();
-            
+
             ImGui.Text("Volume: ");
             ImGui.NextColumn();
             var editDouble= selectedItem.VolumePerUnit;
@@ -91,7 +91,7 @@ public class MineralBlueprintUI : BluePrintsUI
                 selectedItem.VolumePerUnit = editDouble;
             }
             ImGui.NextColumn();
-            
+
             ImGui.Text("Abundance: ");
             ImGui.NextColumn();
             var editDict = selectedItem.Abundance;
@@ -100,7 +100,7 @@ public class MineralBlueprintUI : BluePrintsUI
                 selectedItem.Abundance = editDict;
             }
             ImGui.NextColumn();
-            
+
             ImGui.End();
         }
     }

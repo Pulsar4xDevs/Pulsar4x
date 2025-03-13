@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using ImGuiNET;
 
-namespace Pulsar4X.SDL2UI.ModFileEditing;
+namespace Pulsar4X.Client.ModFileEditing;
 
 public static class SelectFromListWiget
 {
@@ -9,12 +9,12 @@ public static class SelectFromListWiget
     private static int _currentItem;
     private static string[] _items;
     private static int _itemCount;
-    
+
     public static bool Display(string label, string[] selectFrom, ref int selected)
     {
         bool hasChanged = false;
         string displayText = "null";
-        if(selected > -1)   
+        if(selected > -1)
             displayText = selectFrom[selected];
         if (label != _editingID)
         {
@@ -47,7 +47,7 @@ public static class SelectMultipleFromListWidget
     private static int _currentItem;
     private static string[] _items;
     private static int _itemCount;
-    
+
     public static bool Display(string label, string[] selectFrom, ref List<bool> selected)
     {
         bool hasChanged = false;

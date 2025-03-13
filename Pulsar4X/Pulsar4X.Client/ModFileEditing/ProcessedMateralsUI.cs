@@ -5,7 +5,7 @@ using Pulsar4X.Blueprints;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Modding;
 
-namespace Pulsar4X.SDL2UI.ModFileEditing;
+namespace Pulsar4X.Client.ModFileEditing;
 
 public class ProcessedMateralsUI : BluePrintsUI
 {
@@ -32,15 +32,15 @@ public class ProcessedMateralsUI : BluePrintsUI
         newEmpty.Name = "New Blueprint";
         _newEmpty = newEmpty;
     }
-    
+
 
     public override void DisplayEditorWindow(int selectedIndex)
     {
-        
+
         if(!_isActive[selectedIndex])
             return;
         var selectedItem = (ProcessedMaterialBlueprint)_itemBlueprints[selectedIndex];
-        
+
         if (ImGui.Begin("Processed Materials Editor: " + selectedItem.Name, ref _isActive[selectedIndex]))
         {
             ImGui.Columns(2);
@@ -55,8 +55,8 @@ public class ProcessedMateralsUI : BluePrintsUI
                 selectedItem.Name = _editStr;
             }
             ImGui.NextColumn();
-            
-            
+
+
             ImGui.Text("Description: ");
             ImGui.NextColumn();
             _editStr = selectedItem.Description;
@@ -65,8 +65,8 @@ public class ProcessedMateralsUI : BluePrintsUI
                 selectedItem.Name = _editStr;
             }
             ImGui.NextColumn();
-            
-            
+
+
             ImGui.Text("IndustryType: ");
             ImGui.NextColumn();
             _selectedIndex = Array.IndexOf(_industryTypes, selectedItem.IndustryTypeID);
@@ -76,8 +76,8 @@ public class ProcessedMateralsUI : BluePrintsUI
                 _selectedIndex = -1;
             }
             ImGui.NextColumn();
-            
-            
+
+
             ImGui.Text("CostFormula: ");
             ImGui.NextColumn();
             var edtdic = selectedItem.ResourceCosts;
@@ -86,8 +86,8 @@ public class ProcessedMateralsUI : BluePrintsUI
                 selectedItem.ResourceCosts = edtdic;
             }
             ImGui.NextColumn();
-            
-            
+
+
             ImGui.Text("Formula: ");
             ImGui.NextColumn();
             var editDict2 = selectedItem.Formulas;
@@ -96,8 +96,8 @@ public class ProcessedMateralsUI : BluePrintsUI
                 selectedItem.Formulas = editDict2;
             }
             ImGui.NextColumn();
-            
-            
+
+
             ImGui.Text("Output Amount: ");
             ImGui.NextColumn();
             int editInt = selectedItem.OutputAmount;
@@ -106,7 +106,7 @@ public class ProcessedMateralsUI : BluePrintsUI
                 selectedItem.OutputAmount = (ushort)editInt;
             }
             ImGui.NextColumn();
-            
+
             ImGui.Text("Industry Point Cost: ");
             ImGui.NextColumn();
             _editInt = (int)selectedItem.IndustryPointCosts;
@@ -115,7 +115,7 @@ public class ProcessedMateralsUI : BluePrintsUI
                 selectedItem.IndustryPointCosts = _editInt;
             }
             ImGui.NextColumn();
-            
+
             ImGui.Text("Wealth Point Cost: ");
             ImGui.NextColumn();
             _editInt = selectedItem.WealthCost;
@@ -134,7 +134,7 @@ public class ProcessedMateralsUI : BluePrintsUI
                     selectedItem.GuiHints = (ConstructableGuiHints)mtype;
             }
             ImGui.NextColumn();
-            
+
             ImGui.Text("Cargo Type: ");
             ImGui.NextColumn();
             _selectedIndex = Array.IndexOf(_cargoTypes, selectedItem.CargoTypeID);
@@ -144,7 +144,7 @@ public class ProcessedMateralsUI : BluePrintsUI
                 _selectedIndex = -1;
             }
             ImGui.NextColumn();
-            
+
             ImGui.Text("Volume: ");
             ImGui.NextColumn();
             var editDouble= selectedItem.VolumePerUnit;
@@ -153,7 +153,7 @@ public class ProcessedMateralsUI : BluePrintsUI
                 selectedItem.VolumePerUnit = editDouble;
             }
             ImGui.NextColumn();
-            
+
             ImGui.Text("Mass: ");
             ImGui.NextColumn();
             _editInt = (int)selectedItem.MassPerUnit;
@@ -162,7 +162,7 @@ public class ProcessedMateralsUI : BluePrintsUI
                 selectedItem.MassPerUnit = _editInt;
             }
             ImGui.NextColumn();
-            
+
             ImGui.End();
         }
     }

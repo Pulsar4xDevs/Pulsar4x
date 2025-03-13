@@ -11,7 +11,7 @@ using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 using SDL3;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
 
 
