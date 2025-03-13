@@ -152,7 +152,7 @@ namespace Pulsar4X.Client
 
                 DisplayHelpers.Header("Finalize the Design");
                 ImGui.Text("Name");
-                ImGui.InputText("", _nameInputBuffer, 32);
+                ImGui.InputText("###designname", _nameInputBuffer, 32);
                 ImGui.SetCursorPosY(sizeAvailable.Y - 12f);
                 if(ImGui.Button("Save", new Vector2(sizeAvailable.X, 0)))
                 {
