@@ -52,17 +52,17 @@ public class SystemWindow : PulsarGuiWindow
                     .OrderBy(x => x.Position?.AbsolutePosition ?? Orbital.Vector3.Zero)
                     .ToList();
 
-                if(ImGui.BeginTable("DesignStatsTables", 9, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+                if(ImGui.BeginTable("DesignStatsTables", 9, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
                 {
-                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 0.1f);
-                    ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, 0.1f);
-                    ImGui.TableSetupColumn("Colony", ImGuiTableColumnFlags.None, 0.075f);
-                    ImGui.TableSetupColumn("GeoSurvey", ImGuiTableColumnFlags.None, 0.075f);
-                    ImGui.TableSetupColumn("Gravity", ImGuiTableColumnFlags.None, 0.075f);
-                    ImGui.TableSetupColumn("Temperature", ImGuiTableColumnFlags.None, 0.075f);
-                    ImGui.TableSetupColumn("Atm Pressure", ImGuiTableColumnFlags.None, 0.075f);
-                    ImGui.TableSetupColumn("Oxygen", ImGuiTableColumnFlags.None, 0.075f);
-                    ImGui.TableSetupColumn("Minerals", ImGuiTableColumnFlags.None, 0.075f);
+                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 0.15f);
+                    ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, 0.15f);
+                    ImGui.TableSetupColumn("Colony", ImGuiTableColumnFlags.None, 0.1f);
+                    ImGui.TableSetupColumn("GeoSurvey", ImGuiTableColumnFlags.None, 0.1f);
+                    ImGui.TableSetupColumn("Gravity", ImGuiTableColumnFlags.None, 0.1f);
+                    ImGui.TableSetupColumn("Temperature", ImGuiTableColumnFlags.None, 0.1f);
+                    ImGui.TableSetupColumn("Atm Pressure", ImGuiTableColumnFlags.None, 0.1f);
+                    ImGui.TableSetupColumn("Oxygen", ImGuiTableColumnFlags.None, 0.1f);
+                    ImGui.TableSetupColumn("Minerals", ImGuiTableColumnFlags.None, 0.1f);
                     ImGui.TableHeadersRow();
 
                     foreach (var body in stars)
