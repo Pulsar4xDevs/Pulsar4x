@@ -9,6 +9,7 @@ namespace Pulsar4X.Client
     {
         public static void Display(this AtmosphereDB atmosphereDB, EntityState entityState, GlobalUIState uiState)
         {
+            ImGui.PushID("atmosphere-display");
             if(ImGui.CollapsingHeader("Atmosphere", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 ImGui.Columns(2);
@@ -26,6 +27,7 @@ namespace Pulsar4X.Client
                     DisplayHelpers.PrintRow(blueprint.Name, amountString);
                 }
             }
+            ImGui.PopID();
             ImGui.Columns(1);
         }
     }
