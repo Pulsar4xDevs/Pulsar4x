@@ -77,7 +77,7 @@ namespace Pulsar4X.Client
                     ImGui.EndChild();
                 }
                 ImGui.SameLine();
-                if (ImGui.BeginChild("ComponentDesign", thirdChildSize, ImGuiChildFlags.Borders))
+                if (ImGui.BeginChild("ComponentDesign", thirdChildSize, ImGuiChildFlags.None))
                 {
                     if(selectedTemplate != null)
                     {
