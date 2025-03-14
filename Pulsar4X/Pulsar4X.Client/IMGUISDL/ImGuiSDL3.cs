@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using ImGuiNET;
 using SDL3;
@@ -377,5 +378,34 @@ public class ImGuiSDL3 : IDisposable
 #elif __APPLE__ && SDL_VIDEO_DRIVER_COCOA
         SDL.GetPointerProperty(SDL.GetWindowProperties(window), SDL.Props.WindowCocoaWindow, 0);
 #endif
+    }
+
+    public unsafe ImFontPtr LoadFont(string path, string file, float fontSize, string? glyphs = null, bool merge = false)
+    {
+        ImFontPtr font = null;
+        ImFontAtlasPtr fontAtlas = ImGui.GetIO().Fonts;
+        ImFontConfigPtr config = new (ImGuiNative.ImFontConfig_ImFontConfig());
+        ImFontGlyphRangesBuilderPtr builder = new (ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
+        string filePath = Path.Combine(path, file);
+
+        config.PixelSnapH = true;
+        config.MergeMode = merge;
+        if(string.IsNullOrEmpty(glyphs))
+        {
+
+            font = fontAtlas.AddFontFromFileTTF(filePath, fontSize, config);
+        }
+        else
+        {
+            builder.AddText(glyphs);
+            builder.BuildRanges(out ImVector ranges);
+
+            font = fontAtlas.AddFontFromFileTTF(filePath, fontSize, config, ranges.Data);
+        }
+
+        if(merge)
+            fontAtlas.Build();
+
+        return font;
     }
 }
