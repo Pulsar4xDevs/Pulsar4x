@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Pulsar4X.Client.Rendering;
 using Pulsar4X.DataStructures;
 using SDL3;
@@ -108,5 +109,55 @@ public static class Textures
     {
         SDL.GetTextureSize(texture, out float w, out float h);
         return ((int)w, (int)h);
+    }
+
+    internal static void CreateTestTexture(IntPtr renderer, ref IntPtr texture)
+    {
+        const int squareSize = 100;
+        const int width = squareSize * 2;  // 200 pixels wide
+        const int height = squareSize * 2; // 200 pixels high
+
+        // Create a buffer for the pixel data
+        uint[] pixelData = new uint[width * height];
+
+        // Fill the pixel data
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                uint color = 0; // Default to black or transparent
+
+                // Determine which square we're in
+                int squareX = x / squareSize;
+                int squareY = y / squareSize;
+                byte valueMax = 255;
+                byte valueMin = 0;
+
+
+                if (squareX == 0 && squareY == 0) // Top left - Red
+                    color = (uint)((valueMax << 0) | (valueMin << 8) | (valueMin << 16) | (valueMax << 24));
+                else if (squareX == 1 && squareY == 0) // Top right - Green
+                    color = (uint)((valueMin << 0) | (valueMax << 8) | (valueMin << 16) | (valueMax << 24));
+                else if (squareX == 0 && squareY == 1) // Bottom left - Blue
+                    color = (uint)((valueMin << 0) | (valueMin << 8) | (valueMax << 16) | (valueMax << 24));
+                else if (squareX == 1 && squareY == 1) // Bottom right - Alpha only (black but full alpha)
+                    color = (uint)((valueMin << 0) | (valueMin << 8) | (valueMin << 16) | (valueMax << 24));
+
+                pixelData[y * width + x] = color;
+            }
+        }
+
+        // Pin the pixel data in memory
+        GCHandle handle = GCHandle.Alloc(pixelData, GCHandleType.Pinned);
+        try
+        {
+            IntPtr pixels = handle.AddrOfPinnedObject();
+            // Update or create the texture with this pixel data
+            Textures.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+        }
+        finally
+        {
+            handle.Free();
+        }
     }
 }
