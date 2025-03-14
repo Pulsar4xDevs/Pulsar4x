@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using SDL3;
 using System;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace Pulsar4X.Client
@@ -137,6 +138,9 @@ namespace Pulsar4X.Client
         public void Show() => SDL.ShowWindow(Window);
         public void Hide() => SDL.HideWindow(Window);
 
+        private readonly Stopwatch timer = Stopwatch.StartNew();
+        private TimeSpan time = TimeSpan.Zero;
+
         public virtual void Run()
         {
             IsAlive = true;
@@ -144,6 +148,9 @@ namespace Pulsar4X.Client
 
             while(IsAlive)
             {
+                ImGui.GetIO().DeltaTime = (float)(timer.Elapsed - time).TotalSeconds;
+                time = timer.Elapsed;
+
                 PollEvents();
 
                 // Is alive is set to false on poll events if the window closes or the user exits
