@@ -20,8 +20,6 @@ namespace Pulsar4X.Client
 #if DEBUG
         private ImGuiWindowFlags _gitHashFlags = ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav;
 #endif
-        public const string OrgName = "Pulsar4X";
-        public const string AppName = "Pulsar4X";
         public const string PreferencesFile = "preferences.ini";
         public const string SavesPath = "Saves";
         public const string ModsPath = "Mods";
@@ -40,69 +38,34 @@ namespace Pulsar4X.Client
 
             try
             {
-                string? appDataDirectory = SDL.GetPrefPath(OrgName, AppName);
+                string? appDataDirectory = GetAppDataPath();
 
-                if(appDataDirectory == null) throw new NullReferenceException("App data directory cannot be null");
+                if(string.IsNullOrEmpty(appDataDirectory)) throw new NullReferenceException("App data directory cannot be null");
 
-                // Check for Saves directory and create it if it doesn't exist
-                string savesDirectory = Path.Combine(appDataDirectory, SavesPath);
-                if (!Directory.Exists(savesDirectory))
-                {
-                    Directory.CreateDirectory(savesDirectory);
-                }
-
-                // Check for Mods directory and create it if it doesn't exist
-                string modsDirectory = Path.Combine(appDataDirectory, ModsPath);
-                if(!Directory.Exists(modsDirectory))
-                {
-                    Directory.CreateDirectory(modsDirectory);
-                }
+                // Create directories we need if they don't exist
+                TryCreateDirectory(appDataDirectory, SavesPath);
+                TryCreateDirectory(appDataDirectory, ModsPath);
 
                 // Make sure the base game mod is copied over to the mod directory
                 string sourceData = "Data";
+                string modsDirectory = Path.Combine(appDataDirectory, ModsPath);
                 DeleteThenCopyToDirectory(sourceData, modsDirectory);
 
                 // Load the available mods
                 ModsState.RefreshModListFromModsDirectory();
 
-
                 // Read and apply any window preferences
-                string preferencesPath = Path.Combine(appDataDirectory, PreferencesFile);
-                if(!File.Exists(preferencesPath))
-                {
-                    File.Create(preferencesPath).Close();
-                }
-
-                IConfiguration preferences = new ConfigurationBuilder().AddIniFile(preferencesPath).Build();
-                IConfigurationSection windowSection = preferences.GetSection("Window Settings");
-                string? xPosition = windowSection["X"];
-                string? yPosition = windowSection["Y"];
-                string? width = windowSection["Width"];
-                string? height = windowSection["Height"];
-                string? maximized = windowSection["Maximized"];
-
-                if(xPosition != null) X = int.Parse(xPosition);
-                if(yPosition != null) Y = int.Parse(yPosition);
-                if(width != null) Width = int.Parse(width);
-                if(height != null) Height = int.Parse(height);
-
-                // if maximized is set to true it will override the other preferences
-                if(maximized != null)
-                {
-                    bool isMaximized = bool.Parse(maximized);
-                    if(isMaximized)
-                        SDL.MaximizeWindow(Window);
-                }
+                LoadPreferences();
             }
-            catch(Exception)
+            catch(Exception e)
             {
-                // It's just a preferences file, continue on
+                Console.WriteLine($"Error setting up game data: {e.Message}");
             }
         }
 
         public override void HandleEvent(SDL.Event e)
         {
-            SDL.GetMouseState(out float mouseX, out float mouseY);
+            (float mouseX, float mouseY, SDL.MouseButtonFlags mouseFlags) = GetMouseState();
 
             if(!_state.IsGameLoaded)
             {
@@ -117,7 +80,7 @@ namespace Pulsar4X.Client
                 return;
             }
 
-            if (e.Type == (uint)SDL.EventType.MouseButtonDown && e.Button.Button == 1 & !ImGui.GetIO().WantCaptureMouse)
+            if (e.Type == (uint)SDL.EventType.MouseButtonDown && e.Button.Button == 1 & !PlatformBackend.WantsMouseCapture())
             {
                 _state.OnFocusMoved();
                 _state.Camera.IsGrabbingMap = true;
@@ -137,7 +100,7 @@ namespace Pulsar4X.Client
                 }
             }
 
-            if (e.Type == (uint)SDL.EventType.MouseButtonDown && e.Button.Button == 3 & !ImGui.GetIO().WantCaptureMouse)
+            if (e.Type == (uint)SDL.EventType.MouseButtonDown && e.Button.Button == 3 & !PlatformBackend.WantsMouseCapture())
             {
                 _state.OnFocusMoved();
                 mouseDownAltX = (int)mouseX;
@@ -169,7 +132,7 @@ namespace Pulsar4X.Client
             // The top of the hotkey stack should list for hotkeys
             _state.HotKeys.Peek().HandleEvent(e);
 
-            if (e.Type == (uint)SDL.EventType.MouseWheel &! ImGui.GetIO().WantCaptureMouse)
+            if (e.Type == (uint)SDL.EventType.MouseWheel & !PlatformBackend.WantsMouseCapture())
             {
                 _state.OnFocusMoved();
                 if (e.Wheel.Y > 0)
@@ -186,84 +149,6 @@ namespace Pulsar4X.Client
         public override void Update()
         {
             base.Update();
-
-            foreach (var (_, systemState) in _state.StarSystemStates)
-            {
-                systemState.PreFrameSetup();
-            }
-        }
-
-        public override void Render()
-        {
-            base.Render();
-
-            // Render the game
-            _state.GalacticMap?.Draw();
-
-            // Render the UI
-            ImGuiLayout();
-        }
-
-        public override void PostFrameUpdate()
-        {
-            base.PostFrameUpdate();
-
-            foreach (var (_, systemState) in _state.StarSystemStates)
-            {
-                systemState.PostFrameCleanup();
-            }
-        }
-
-        private IntPtr _colorTesttexture = IntPtr.Zero;
-        private IntPtr _pixels;
-
-        public unsafe void ImGuiLayout()
-        {
-            //because the nameIcons are IMGUI not SDL we draw them here.
-            _state.GalacticMap?.DrawNameIcons();
-
-            // if (_state.ShowImgDbg)
-            // {
-            //     ImGui.NewLine();
-            //     SDL.SDL_GetRendererInfo(_state.SDLRendererPtr, out var renderInfo);
-            //     ImGui.Text("SDL RenderInfo:");
-            //     ImGui.Text("Name : " + renderInfo.name.ToString());
-            //     ImGui.Text("Flags: " +renderInfo.flags.ToString());
-            //     ImGui.Text("MaxTexH: " +renderInfo.max_texture_height.ToString());
-            //     ImGui.Text("MaxTexW: " +renderInfo.max_texture_width.ToString());
-            //     ImGui.Text("NumTxtFormats: " +renderInfo.num_texture_formats.ToString());
-
-            //     SDL.SDL_GetRenderDriverInfo(0, out renderInfo);
-            //     ImGui.Text("SDL RenderDriverInfo:");
-            //     ImGui.Text("Name : " + renderInfo.name.ToString());
-            //     ImGui.Text("Flags: " +renderInfo.flags.ToString());
-            //     ImGui.Text("MaxTexH: " +renderInfo.max_texture_height.ToString());
-            //     ImGui.Text("MaxTexW: " +renderInfo.max_texture_width.ToString());
-            //     ImGui.Text("NumTxtFormats: " +renderInfo.num_texture_formats.ToString());
-            //     ImGui.NewLine();
-
-            //     if(_colorTesttexture == IntPtr.Zero)
-            //         SDL2Helper.CreateTestTexture(_state.ViewPort.Renderer, ref _colorTesttexture);
-            //     ImGui.Image(_colorTesttexture, new System.Numerics.Vector2(200, 200));
-            //     if(ImGui.Button("refresh"))
-            //         SDL2Helper.CreateTestTexture(_state.ViewPort.Renderer, ref _colorTesttexture);
-
-            //     foreach (var kvp in _state.SDLImageDictionary)
-            //     {
-            //         (int txWidth, int txHeight) = _state.ViewPort.Renderer.GetTextureDimensions(kvp.Value);
-            //         ImGui.Image(kvp.Value, new System.Numerics.Vector2(txWidth, txHeight));
-            //         ImGui.Text(kvp.Key);
-            //     }
-            // }
-
-            if (_state.ShowMetrixWindow)
-                ImGui.ShowMetricsWindow(ref _state.ShowMetrixWindow);
-
-            if (_state.ShowDemoWindow)
-            {
-                ImGui.ShowDemoWindow();
-                ImGui.ShowUserGuide();
-            }
 
             //update and refresh state for GameDateTimechange
             if(_state.Game != null)
@@ -294,6 +179,52 @@ namespace Pulsar4X.Client
                 }
             }
 
+            foreach (var (_, systemState) in _state.StarSystemStates)
+            {
+                systemState.PreFrameSetup();
+            }
+        }
+
+        public override void Render()
+        {
+            base.Render();
+
+            // Render the game
+            _state.GalacticMap?.Draw();
+
+            // Render the UI
+            RenderUI();
+        }
+
+        public override void PostFrameUpdate()
+        {
+            base.PostFrameUpdate();
+
+            foreach (var (_, systemState) in _state.StarSystemStates)
+            {
+                systemState.PostFrameCleanup();
+            }
+        }
+
+        /// <summary>
+        /// Render the UI
+        /// </summary>
+        public void RenderUI()
+        {
+            // ImGui helper windows
+            if (_state.ShowMetrixWindow)
+                ImGui.ShowMetricsWindow(ref _state.ShowMetrixWindow);
+
+            if (_state.ShowDemoWindow)
+            {
+                ImGui.ShowDemoWindow();
+                ImGui.ShowUserGuide();
+            }
+
+            // Render name icons
+            _state.GalacticMap?.DrawNameIcons();
+
+            // Render any windows that have registered themselves
             foreach (var item in _state.LoadedWindows.Values.ToArray())
             {
                 item.Display();
@@ -309,6 +240,7 @@ namespace Pulsar4X.Client
                 item.Display();
             }
 
+            // If in DEBUG render the git hash as the version in the corner of the screen
 #if DEBUG
             var dispsize = ImGui.GetIO().DisplaySize;
             var pos = new Vector2(0, dispsize.Y - ImGui.GetFrameHeightWithSpacing());
@@ -321,11 +253,63 @@ namespace Pulsar4X.Client
 #endif
         }
 
-        public static string? GetAppDataPath()
+        /// <summary>
+        /// If the given path & name don't exist create it
+        /// </summary>
+        /// <param name="path">A path to where to create the given name folder</param>
+        /// <param name="name">The name of the folder to create</param>
+        private void TryCreateDirectory(string path, string name)
         {
-            return SDL.GetPrefPath(OrgName, AppName);
+            string directory = Path.Combine(path, name);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
         }
 
+        /// <summary>
+        /// Load the players preferences
+        /// </summary>
+        private void LoadPreferences()
+        {
+            string? appDataDirectory = GetAppDataPath();
+
+            // If the app data path is bad here, just return its only the preferences
+            if(string.IsNullOrEmpty(appDataDirectory)) return;
+
+            string preferencesPath = Path.Combine(appDataDirectory, PreferencesFile);
+            if(!File.Exists(preferencesPath))
+            {
+                File.Create(preferencesPath).Close();
+            }
+
+            IConfiguration preferences = new ConfigurationBuilder().AddIniFile(preferencesPath).Build();
+            IConfigurationSection windowSection = preferences.GetSection("Window Settings");
+            string? xPosition = windowSection["X"];
+            string? yPosition = windowSection["Y"];
+            string? width = windowSection["Width"];
+            string? height = windowSection["Height"];
+            string? maximized = windowSection["Maximized"];
+
+            if(xPosition != null) X = int.Parse(xPosition);
+            if(yPosition != null) Y = int.Parse(yPosition);
+            if(width != null) Width = int.Parse(width);
+            if(height != null) Height = int.Parse(height);
+
+            // if maximized is set to true it will override the other preferences
+            if(maximized != null)
+            {
+                if(bool.Parse(maximized))
+                    Maximize();
+            }
+        }
+
+        /// <summary>
+        /// Deletes the contents of the destination directory and then copies the
+        /// contents of the source directory to the destination directory.
+        /// </summary>
+        /// <param name="sourceDir">The directory to copy from</param>
+        /// <param name="destinationDir">The directory to delete and then receive a copy of the source directory</param>
         public static void DeleteThenCopyToDirectory(string sourceDir, string destinationDir)
         {
             // Check if destination exists, if so delete it and all its contents

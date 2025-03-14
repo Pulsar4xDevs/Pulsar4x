@@ -9,7 +9,8 @@ namespace Pulsar4X.Client
     public partial class SDL3Window : IDisposable
     {
         private const string _defaultTitle = "SDL3 Window";
-
+        public const string OrgName = "Pulsar4X";
+        public const string AppName = "Pulsar4X";
         public readonly nint Window;
         public readonly nint Renderer;
         public readonly nint ImGuiContext;
@@ -137,6 +138,12 @@ namespace Pulsar4X.Client
         public bool IsVisible => (Flags & SDL.WindowFlags.Hidden) == 0;
         public void Show() => SDL.ShowWindow(Window);
         public void Hide() => SDL.HideWindow(Window);
+        public void Maximize() => SDL.MaximizeWindow(Window);
+        public (float, float, SDL.MouseButtonFlags) GetMouseState()
+        {
+            var flags = SDL.GetMouseState(out float x, out float y);
+            return (x, y, flags);
+        }
 
         private readonly Stopwatch timer = Stopwatch.StartNew();
         private TimeSpan time = TimeSpan.Zero;
@@ -256,6 +263,11 @@ namespace Pulsar4X.Client
                 W = w,
                 H = h
             };
+        }
+
+        public static string? GetAppDataPath()
+        {
+            return SDL.GetPrefPath(OrgName, AppName);
         }
     }
 }

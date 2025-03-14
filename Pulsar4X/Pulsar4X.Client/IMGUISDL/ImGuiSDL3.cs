@@ -26,6 +26,8 @@ public class ImGuiSDL3 : IDisposable
     nint _mouseLastCursor = -1;
     int _mouseButtonsDown = 0;
 
+    public bool WantsMouseCapture() => ImGui.GetIO().WantCaptureMouse;
+
     public ImGuiSDL3(nint window, nint renderer)
     {
         ImGuiIOPtr io = ImGui.GetIO();
