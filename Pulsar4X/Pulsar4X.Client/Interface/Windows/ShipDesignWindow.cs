@@ -198,7 +198,9 @@ namespace Pulsar4X.Client
 
         internal override void Display()
         {
-            if (IsActive && Window.Begin("Ship Design", ref IsActive, _flags))
+            if(!IsActive) return;
+
+            if (Window.Begin("Ship Design", ref IsActive, _flags))
             {
                 if(_existingShipDesignNames.Count != _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.Count)
                 {
@@ -226,24 +228,24 @@ namespace Pulsar4X.Client
                 if(ImGui.BeginChild("ShipDesign1", firstChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayComponentSelection();
-                    ImGui.EndChild();
                 }
+                ImGui.EndChild();
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(27f);
                 if(ImGui.BeginChild("ShipDesign2", secondChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayComponents();
-                    ImGui.EndChild();
                 }
+                ImGui.EndChild();
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(27f);
                 if(ImGui.BeginChild("ShipDesign3", thirdChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayStats();
-                    ImGui.EndChild();
                 }
-                Window.End();
+                ImGui.EndChild();
             }
+            Window.End();
         }
 
         internal void NewShipButton()
@@ -306,7 +308,7 @@ namespace Pulsar4X.Client
         internal void DisplayExistingDesigns()
         {
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("ComponentDesignSelection", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y - 24f), ImGuiChildFlags.Borders))
+            if(ImGui.BeginChild("ComponentDesignSelection", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y - 24f), ImGuiChildFlags.Borders, ImGuiWindowFlags.ChildWindow))
             {
                 DisplayHelpers.Header("Existing Designs", "Select an existing ship design to edit it.");
                 ImGui.Columns(2);
@@ -345,9 +347,9 @@ namespace Pulsar4X.Client
                     ImGui.Text(versionText);
                     ImGui.NextColumn();
                 }
-                ImGui.Columns(0);
-                ImGui.EndChild();
+                ImGui.Columns(1);
             }
+            ImGui.EndChild();
 
             if(ImGui.Button("Create New Design", new Vector2(204f, 0f)))
             {
@@ -393,10 +395,10 @@ namespace Pulsar4X.Client
 
             ImGui.NewLine();
             DisplayHelpers.Header("Armor");
-            if(ImGui.BeginTable("CurrentShipDesignTable", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+            if(ImGui.BeginTable("CurrentShipDesignTable", 2, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
             {
-                ImGui.TableSetupColumn("Attribute", ImGuiTableColumnFlags.None, 1.5f);
-                ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("Attribute", ImGuiTableColumnFlags.None, 0.6f);
+                ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.None, 0.4f);
                 ImGui.TableHeadersRow();
 
                 ImGui.TableNextColumn();
@@ -447,11 +449,11 @@ namespace Pulsar4X.Client
 
         internal void DisplayComponentsTable()
         {
-            if(ImGui.BeginTable("CurrentShipDesignTable", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+            if(ImGui.BeginTable("CurrentShipDesignTable", 3, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
             {
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
-                ImGui.TableSetupColumn("Amount", ImGuiTableColumnFlags.None, 1f);
-                ImGui.TableSetupColumn("Actions", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 0.5f);
+                ImGui.TableSetupColumn("Amount", ImGuiTableColumnFlags.None, 0.25f);
+                ImGui.TableSetupColumn("Actions", ImGuiTableColumnFlags.None, 0.25f);
                 ImGui.TableHeadersRow();
 
                 int selectedItem = -1;
@@ -544,11 +546,11 @@ namespace Pulsar4X.Client
                 ImGui.EndCombo();
             }
 
-            if(ImGui.BeginTable("DesignStatsTables", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+            if(ImGui.BeginTable("DesignStatsTables", 3, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
             {
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 2f);
-                ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, 1f);
-                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, .6f);
+                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 0.5f);
+                ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, 0.3f);
+                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 0.2f);
                 ImGui.TableHeadersRow();
 
                 for (int i = 0; i < AvailableShipComponents.Count; i++)
@@ -575,7 +577,7 @@ namespace Pulsar4X.Client
                     ImGui.TableNextColumn();
                     ImGui.Text(design.ComponentType);
                     ImGui.TableNextColumn();
-                    ImGui.InvisibleButton("", new Vector2(4, 8));
+                    ImGui.InvisibleButton($"{i}", new Vector2(4, 8));
                     ImGui.SameLine();
                     if(ImGui.SmallButton("+ Add###add-component-" + i))
                     {
@@ -604,7 +606,7 @@ namespace Pulsar4X.Client
             DisplayHelpers.Header("Statisitcs", "The attributes of the ship are calculated based on the components you have added to the design.");
 
             UpdateShipStats();
-            if(ImGui.BeginTable("DesignStatsTables", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+            if(ImGui.BeginTable("DesignStatsTables", 2, Styles.TableFlags | ImGuiTableFlags.SizingStretchSame))
             {
                 ImGui.TableSetupColumn("Attribute", ImGuiTableColumnFlags.None);
                 ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.None);
@@ -743,8 +745,6 @@ namespace Pulsar4X.Client
 
             var size = ImGui.GetContentRegionAvail();
             DisplayImage(size.X, size.Y);
-
-            ImGui.EndChild();
         }
 
         private void UpdateShipStats()
