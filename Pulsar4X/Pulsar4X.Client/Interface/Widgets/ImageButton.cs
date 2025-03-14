@@ -90,8 +90,8 @@ public static class ImageButton
             ImGui.PushStyleColor(ImGuiCol.Text, currentColors.Text);
             ImGui.Text(label);
             ImGui.PopStyleColor();
-            ImGui.EndChild();
         }
+        ImGui.EndChild();
 
         return clicked;
     }
