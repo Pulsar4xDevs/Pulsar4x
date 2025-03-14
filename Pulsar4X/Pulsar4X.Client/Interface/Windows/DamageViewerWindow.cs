@@ -219,7 +219,7 @@ namespace Pulsar4X.Client.Combat
         {
             if (IsActive)
             {
-                if (Window.Begin("DamageViewer Testing"))
+                if (Window.Begin("DamageViewer Testing") && _damageMap != null)
                 {
                     var availableSize = ImGui.GetContentRegionAvail();
                     float aspectRatio = (float)_damageMap.Width / _damageMap.Height;
@@ -409,7 +409,7 @@ namespace Pulsar4X.Client.Combat
                                 {}
                             }
 
-                            ImGui.Columns(0);
+                            ImGui.Columns(1);
 
 
 
@@ -513,9 +513,8 @@ namespace Pulsar4X.Client.Combat
                         int w = _damageFrames[_showFrameNum].Width;
                         ImGui.Image(_showDmgFrametx, new System.Numerics.Vector2(w, h));
                     }
-
-                    Window.End();
                 }
+                Window.End();
             }
         }
 
