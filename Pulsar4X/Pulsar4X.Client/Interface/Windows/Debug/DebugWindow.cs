@@ -751,25 +751,25 @@ namespace Pulsar4X.Client
 
 
 
-                if (ImGui.CollapsingHeader("UI Examples"))
-                {
-                    ImGui.Text("ReOrderable List Exampeles");
+                // if (ImGui.CollapsingHeader("UI Examples"))
+                // {
+                //     ImGui.Text("ReOrderable List Exampeles");
 
-                    ImGui.Text("HoverButtons");
-                    HoverButtons();
+                //     ImGui.Text("HoverButtons");
+                //     HoverButtons();
 
-                    ImGui.Text("Static Buttons");
-                    StaticButtons();
+                //     ImGui.Text("Static Buttons");
+                //     StaticButtons();
 
-                    ImGui.Text("Buttons Group");
-                    ButtonBox();
+                //     ImGui.Text("Buttons Group");
+                //     ButtonBox();
 
-                    ImGui.NewLine();
-                    //ImGui.Text("BorderListOptionsWidget");
-                    BorderListOptionsWiget();
+                //     ImGui.NewLine();
+                //     //ImGui.Text("BorderListOptionsWidget");
+                //     BorderListOptionsWiget();
 
-                    ImGui.NewLine();
-                }
+                //     ImGui.NewLine();
+                // }
 
                 ImGui.Text("Selected Star System: " + _uiState.SelectedStarSystemId);
                 ImGui.Text("Number Of Entites: " + _uiState.SelectedSystem.EntityCount);
