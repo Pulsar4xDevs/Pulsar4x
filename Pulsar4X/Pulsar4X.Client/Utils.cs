@@ -1,11 +1,39 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
-using Pulsar4X.Client;
 
-namespace ImGuiSDL2CS;
+namespace Pulsar4X.Client;
 
-public static class SDL3Helper
+public static class Utils
 {
+    public static byte[] BytesFromString(string str, int sizeMax = 128)
+    {
+        byte[] dstArray = new byte[sizeMax];
+        byte[] srsArray = System.Text.Encoding.UTF8.GetBytes(str);
+        int srsSize = Math.Min(srsArray.Length, sizeMax);
+        Buffer.BlockCopy(srsArray, 0, dstArray, 0, srsSize);
+        return dstArray;
+    }
+
+    public static string StringFromBytes(byte[] byteArray)
+    {
+        // Get the string and trim off any trailing null characters
+        string result = System.Text.Encoding.UTF8.GetString(byteArray);
+        int nullIndex = result.IndexOf('\0');
+        if(nullIndex >= 0)
+        {
+            result = result.Substring(0, nullIndex);
+        }
+        return result;
+    }
+
+    public static (IntPtr, uint) GuidToIntPtr(Guid guid)
+    {
+        byte[] bytes = guid.ToByteArray();
+        IntPtr ptr = Marshal.AllocHGlobal(bytes.Length);
+        Marshal.Copy(bytes, 0, ptr, bytes.Length);
+        return (ptr, (uint)bytes.Length);
+    }
+
     public static uint GetColor(byte r, byte g, byte b, byte a)
     {
         return (uint)((r << 0) | (g << 8) | (b << 16) | (a << 24));
@@ -116,10 +144,3 @@ public static class SDL3Helper
         else throw new Exception("Invalid ColourOrder");
     }
 }
-
-[StructLayout(LayoutKind.Sequential)]
-public struct Int4
-{
-    public readonly int X, Y, Z, W;
-}
-

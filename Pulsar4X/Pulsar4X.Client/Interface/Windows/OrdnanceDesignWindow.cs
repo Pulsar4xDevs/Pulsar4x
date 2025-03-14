@@ -18,7 +18,7 @@ namespace Pulsar4X.Client
     {
         private Entity? _faction;
         private FactionTechDB? _factionTech;
-        private byte[] _designName =  ImGuiSDL3CSHelper.BytesFromString("foo", 32);
+        private byte[] _designName =  Utils.BytesFromString("foo", 32);
         private OrdnanceDesign[]? _currentDesigns;
         private string[]? _currentDesignNames;
         private int _currentDesignsSelectedIndex = 0;
@@ -267,7 +267,7 @@ namespace Pulsar4X.Client
             if (ImGui.Button("Create Design") && _engineDesigner != null)
             {
                 int version = 0;
-                var strName = ImGuiSDL3CSHelper.StringFromBytes(_designName);
+                var strName = Utils.StringFromBytes(_designName);
                 foreach (var design in _currentDesigns)
                 {
                     if (design.Name == strName)

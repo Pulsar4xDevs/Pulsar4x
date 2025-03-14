@@ -30,7 +30,7 @@ public static class TextEditWidget
             if(ImGui.IsItemClicked())
             {
                 _editingID = label;
-                _strInputBuffer = ImGuiSDL3CSHelper.BytesFromString(text);
+                _strInputBuffer = Utils.BytesFromString(text);
 
             }
         }
@@ -38,7 +38,7 @@ public static class TextEditWidget
         {
             if (ImGui.InputText(label, _strInputBuffer, _buffSize, ImGuiInputTextFlags.EnterReturnsTrue))
             {
-                text = ImGuiSDL3CSHelper.StringFromBytes(_strInputBuffer);
+                text = Utils.StringFromBytes(_strInputBuffer);
                 _editingID = null;
                 hasChanged = true;
             }

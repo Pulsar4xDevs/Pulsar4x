@@ -47,7 +47,7 @@ public static class DamageMapRendering
 
                 // Pack ARGB values into a single uint
                 // Note: OpenGL expects RGBA format, so we need to swap the byte order
-                pixelData[y * width + x] = SDL3Helper.GetColor(redValue, 0, 0, alpha);
+                pixelData[y * width + x] = Utils.GetColor(redValue, 0, 0, alpha);
             }
         }
 
@@ -84,7 +84,7 @@ public static class DamageMapRendering
                 byte blueValue = (byte)(damageMap.PresMap[index] * 255.0f / maxPressure);
 
                 // Pack ARGB values into a single uint
-                pixelData[y * width + x] = SDL3Helper.GetColor(0, 0, blueValue, alpha);
+                pixelData[y * width + x] = Utils.GetColor(0, 0, blueValue, alpha);
             }
         }
 
@@ -129,7 +129,7 @@ public static class DamageMapRendering
                     greenValue = (byte)((damageMap.PMap[index].Velocity.Length() * 255.0) / maxVelocity);
 
                 // Pack ARGB values into a single uint
-                pixelData[y * width + x] = SDL3Helper.GetColor(0, greenValue, 0, alpha);
+                pixelData[y * width + x] = Utils.GetColor(0, greenValue, 0, alpha);
             }
         }
 
@@ -177,7 +177,7 @@ public static class DamageMapRendering
                     byte tempGreen = (byte)(Math.Min(physicalParticle.Temperature, 100) * 2.55f); // Normalize to 0-100 then to 0-255
 
                     // Combine all channels
-                    color = SDL3Helper.GetColor(lifeRed, tempGreen, phaseBlue, alpha);
+                    color = Utils.GetColor(lifeRed, tempGreen, phaseBlue, alpha);
                 }
 
                 // Pack ARGB values into a single uint
@@ -219,7 +219,7 @@ public static class DamageMapRendering
                 {
                     var phaseState = physicalParticle.StateOfPhase;
                     byte byteState = (byte)phaseState;
-                    color = SDL3Helper.ColourFromValue(byteState, phaseStateCount, 0);
+                    color = Utils.ColourFromValue(byteState, phaseStateCount, 0);
                 }
                 else color = 0;
 
@@ -327,7 +327,7 @@ public static class DamageMapRendering
                     */
                     // Convert to uint for SDL2 texture (ARGB format)
                     byte a = 255; // Full opacity
-                    color = SDL3Helper.GetColor(r, g, b, a);
+                    color = Utils.GetColor(r, g, b, a);
                 }
                 else
                 {
@@ -391,7 +391,7 @@ public static class DamageMapRendering
             if (x >= 0 && x < width && y >= 0 && y < height)
             {
                 int index = y * width + x;
-                color = SDL3Helper.ColourFromValue((int)point.Wavelength, maxFreq, minFreq, point.Power, 25, maxPow);
+                color = Utils.ColourFromValue((int)point.Wavelength, maxFreq, minFreq, point.Power, 25, maxPow);
                 pixelData[index] = color;
             }
         }

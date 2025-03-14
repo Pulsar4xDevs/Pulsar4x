@@ -23,7 +23,7 @@ namespace Pulsar4X.Client
     public class ShipDesignWindow : PulsarGuiWindow
     {
         private bool ShowNoDesigns = false;
-        private byte[] SelectedDesignName =  ImGuiSDL3CSHelper.BytesFromString("foo", 32);
+        private byte[] SelectedDesignName =  Utils.BytesFromString("foo", 32);
         private List<string> _existingShipDesignNames = new();
         private List<string> _existingShipDesignIDs = new();
         private string SelectedExistingDesignID = String.Empty;
@@ -186,7 +186,7 @@ namespace Pulsar4X.Client
         {
             _workingDesign = design.Clone(_factionInfoDB);
             SelectedExistingDesignID = _workingDesign.UniqueID;
-            SelectedDesignName = ImGuiSDL3CSHelper.BytesFromString(_workingDesign.Name, 32);
+            SelectedDesignName = Utils.BytesFromString(_workingDesign.Name, 32);
             SelectedComponents = _workingDesign.Components;
             SelectedDesignObsolete = _workingDesign.IsObsolete;
             _armor = _workingDesign.Armor.type;
@@ -253,7 +253,7 @@ namespace Pulsar4X.Client
             if (ImGui.Button("Save Design"))
             {
                 int version = 0;
-                var name = ImGuiSDL3CSHelper.StringFromBytes(SelectedDesignName);
+                var name = Utils.StringFromBytes(SelectedDesignName);
 
                 if(name.IsNotNullOrEmpty())
                 {
@@ -360,7 +360,7 @@ namespace Pulsar4X.Client
                     name = originalName + " " + counter.ToString();
                     counter++;
                 }
-                SelectedDesignName = ImGuiSDL3CSHelper.BytesFromString(name);
+                SelectedDesignName = Utils.BytesFromString(name);
                 SelectedComponents = new List<(ComponentDesign design, int count)>();
                 GenImage();
                 RefreshArmor();

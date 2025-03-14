@@ -47,13 +47,13 @@ public static class FileDialog
             _pathString = _curDir;
         else
             _pathString = path;
-        _strInputBuffer = ImGuiSDL3CSHelper.BytesFromString(fileName);
+        _strInputBuffer = Utils.BytesFromString(fileName);
         ImGui.Begin("File Dialog", ref IsActive);
         ImGui.Text("Name:");
         ImGui.SameLine();
         if (ImGui.InputText("##Name", _strInputBuffer, 128))
         {
-            fileName = ImGuiSDL3CSHelper.StringFromBytes(_strInputBuffer);
+            fileName = Utils.StringFromBytes(_strInputBuffer);
         }
 
         ImGui.Columns(2);
@@ -151,7 +151,7 @@ public static class FileDialog
             if (ImGui.Selectable(fi.Name, _b, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowDoubleClick))
             {
                 _selectedIndex = _i;
-                _strInputBuffer = ImGuiSDL3CSHelper.BytesFromString(fi.Name);
+                _strInputBuffer = Utils.BytesFromString(fi.Name);
                 fileName = fi.Name;
 
                 if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))

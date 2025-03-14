@@ -83,7 +83,7 @@ namespace Pulsar4X.Client
 
             var templateProperties = component.TemplatePropertyValues;
             //_componentDesigner.Name = component.Name;
-            _nameInputBuffer = ImGuiSDL3CSHelper.BytesFromString(component.Name);
+            _nameInputBuffer = Utils.BytesFromString(component.Name);
             foreach (var ptup in templateProperties)
             {
                 var tprop = _componentDesigner.ComponentDesignProperties[ptup.propName];
@@ -160,7 +160,7 @@ namespace Pulsar4X.Client
                     {
                         if(_componentDesigner != null)
                         {
-                            string name = ImGuiSDL3CSHelper.StringFromBytes(_nameInputBuffer);
+                            string name = Utils.StringFromBytes(_nameInputBuffer);
                             _componentDesigner.Name = name;
                             _componentDesigner.CreateDesign(uiState.Faction);
                         }
