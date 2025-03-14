@@ -175,8 +175,7 @@ namespace Pulsar4X.Client
 
             while(SDL.PollEvent(out var ev))
             {
-                if(PlatformBackend.ProcessEvent(ev))
-                    continue;
+                PlatformBackend.ProcessEvent(ev);
 
                 switch((SDL.EventType)ev.Type)
                 {
