@@ -1,12 +1,10 @@
 ﻿using ImGuiNET;
-using ImGuiSDL2CS;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using SDL3;
 using Point = SDL3.SDL.Point;
 using Vector2 = Pulsar4X.Orbital.Vector2;
 using Pulsar4X.Movement;
-using Pulsar4X.Client;
 
 namespace Pulsar4X.Client
 {

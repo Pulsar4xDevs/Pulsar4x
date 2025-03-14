@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
-using ImGuiSDL2CS;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Colonies;
 using Pulsar4X.Engine;

@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using GameEngine.Damage;
-using Pulsar4X.Client;
 
-namespace ImGuiSDL2CS;
+namespace Pulsar4X.Client;
 
 public static class DamageMapRendering
 {

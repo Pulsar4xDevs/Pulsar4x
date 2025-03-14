@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
-using ImGuiSDL2CS;
 using Pulsar4X.Engine;
 using Pulsar4X.Components;
 using Pulsar4X.DataStructures;

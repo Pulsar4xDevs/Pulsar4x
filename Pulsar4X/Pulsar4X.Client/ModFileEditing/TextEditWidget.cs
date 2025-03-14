@@ -1,5 +1,4 @@
 using ImGuiNET;
-using ImGuiSDL2CS;
 
 namespace Pulsar4X.Client.ModFileEditing;
 

@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using ImGuiNET;
-using ImGuiSDL2CS;
 
 namespace Pulsar4X.Client.Interface.Widgets;
 

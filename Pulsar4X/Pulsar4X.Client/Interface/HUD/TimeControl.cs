@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using ImGuiNET;
-using ImGuiSDL2CS;
 using System.Numerics;
 using Pulsar4X.Client.Interface.Widgets;
-using Vector2 = System.Numerics.Vector2;
 using Pulsar4X.Engine;
 
 namespace Pulsar4X.Client

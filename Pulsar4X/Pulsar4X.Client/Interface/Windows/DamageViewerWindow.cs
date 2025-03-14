@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using GameEngine.Damage;
 using ImGuiNET;
-using ImGuiSDL2CS;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
@@ -13,7 +12,6 @@ using Pulsar4X.Factions;
 using Pulsar4X.Damage;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Weapons;
-using Pulsar4X.Extensions;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Ships;
 
