@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using ImGuiNET;
 using SDL3;
 
@@ -10,6 +11,12 @@ namespace Pulsar4X.Client;
 /// </summary>
 public class ImGuiSDL3 : IDisposable
 {
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate bool ImGuiIOSetClipboardTextFn(string text);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate string ImGuiIOGetClipboardTextFn();
+
     public readonly nint Window;
     public readonly nint Renderer;
     public readonly uint WindowId;
@@ -30,9 +37,8 @@ public class ImGuiSDL3 : IDisposable
         Renderer = renderer;
 
         ImGuiPlatformIOPtr platformIo = ImGui.GetPlatformIO();
-        // TODO: Implement clipboard
-        // platformIo.Platform_SetClipboardTextFn = SetClipboardText;
-        // platformIo.Platform_GetClipboardTextFn = GetClipboardText;
+        platformIo.Platform_SetClipboardTextFn = Marshal.GetFunctionPointerForDelegate<ImGuiIOSetClipboardTextFn>(SDL.SetClipboardText);
+        platformIo.Platform_GetClipboardTextFn = Marshal.GetFunctionPointerForDelegate<ImGuiIOGetClipboardTextFn>(SDL.GetClipboardText);
 
         _mouseCursors[(int)ImGuiMouseCursor.Arrow] = SDL.CreateSystemCursor(SDL.SystemCursor.Default);
         _mouseCursors[(int)ImGuiMouseCursor.TextInput] = SDL.CreateSystemCursor(SDL.SystemCursor.Text);
@@ -344,8 +350,7 @@ public class ImGuiSDL3 : IDisposable
     }
 
     public static nint Data() => ImGui.GetIO().BackendPlatformUserData;
-    public static void SetClipboardText(string text) => SDL.SetClipboardText(text);
-    public static string GetClipboardText() => SDL.GetClipboardText();
+
     public static void UpdateKeyModifiers(SDL.Keymod keymods)
     {
         ImGuiIOPtr io = ImGui.GetIO();
