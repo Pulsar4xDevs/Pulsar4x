@@ -76,7 +76,7 @@ public class BlueprintsWindow : PulsarGuiWindow
             }
 
             ImGui.SameLine();
-            ImGui.SetCursorPosY(27f);
+            //ImGui.SetCursorPosY(27f);
 
             windowContentSize = ImGui.GetContentRegionAvail();
             if(_selectedBlueprint != null && ImGui.BeginChild("BlueprintContent", windowContentSize, ImGuiChildFlags.Borders))
