@@ -193,8 +193,7 @@ namespace Pulsar4X.Client
                     }
                     else// Otherwise create an invisible button for spacing
                     {
-                        System.Numerics.Vector2 buttonsize = new System.Numerics.Vector2(15, 0);
-                        ImGui.InvisibleButton(" ", buttonsize);
+                        ImGui.InvisibleButton("###invis-add", invisButtonSize);
                     }
 
                     if(facsAssigned > 0)
@@ -449,7 +448,7 @@ namespace Pulsar4X.Client
             }
             else
             {
-                ImGui.InvisibleButton("invis", invisButtonSize);
+                ImGui.InvisibleButton("invis1", invisButtonSize);
             }
             ImGui.SameLine();
 
@@ -463,7 +462,7 @@ namespace Pulsar4X.Client
             }
             else
             {
-                ImGui.InvisibleButton("invis", invisButtonSize);
+                ImGui.InvisibleButton("invis2", invisButtonSize);
             }
             ImGui.SameLine();
 
@@ -477,7 +476,7 @@ namespace Pulsar4X.Client
             }
             else
             {
-                ImGui.InvisibleButton("invis", invisButtonSize);
+                ImGui.InvisibleButton("invis3", invisButtonSize);
             }
             ImGui.SameLine();
 
