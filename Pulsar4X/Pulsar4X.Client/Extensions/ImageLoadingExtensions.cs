@@ -20,7 +20,7 @@ namespace Pulsar4X.Client
             {
                 // Load the image
                 var filename = differentFilename.IsNotNullOrEmpty() ? differentFilename : imgName;
-                var path = Path.Combine("Resources", filename + extension);
+                var path = Path.Combine(PulsarMainWindow.ResourcesPath, filename + extension);
 
                 // Check if file exists
                 if (!File.Exists(path))

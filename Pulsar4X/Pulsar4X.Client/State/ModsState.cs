@@ -21,7 +21,7 @@ public class ModsState
         AvailableMods.Clear();
         IsModEnabled.Clear();
 
-        var modsDirectory = Path.Combine(PulsarMainWindow.GetAppDataPath(), PulsarMainWindow.ModsPath);
+        var modsDirectory = PulsarMainWindow.ModsPath;
 
         foreach(var directory in Directory.GetDirectories(modsDirectory))
         {

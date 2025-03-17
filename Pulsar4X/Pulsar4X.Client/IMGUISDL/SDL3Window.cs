@@ -128,10 +128,6 @@ namespace Pulsar4X.Client
             PlatformBackend = new (Window, Renderer);
             ImGuiRenderer = new (Renderer);
 
-            // Load fonts
-            PlatformBackend.LoadFont("Resources", "ProggyClean.ttf", 13f);
-            PlatformBackend.LoadFont("Resources", "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ");
-
             // Setup screen clip rect
             SetupScreenClipRect();
 
