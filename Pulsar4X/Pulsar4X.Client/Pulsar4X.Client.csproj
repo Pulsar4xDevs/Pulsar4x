@@ -254,6 +254,12 @@
     </Content>
   </ItemGroup>
 
+  <PropertyGroup>
+    <!-- Define a custom property for the data path -->
+    <AppDataPath Condition="'$(OS)' == 'Windows_NT'">$(LOCALAPPDATA)\Pulsar4X\Pulsar4X</AppDataPath>
+    <AppDataPath Condition="'$(OS)' != 'Windows_NT'">$(HOME)/.local/share/Pulsar4X/Pulsar4X</AppDataPath>
+  </PropertyGroup>
+
   <Target Name="WriteGitHash" BeforeTargets="CoreCompile">
     <!-- names the obj/.../CustomAssemblyInfo.cs file -->
     <PropertyGroup>
@@ -274,13 +280,13 @@
     <WriteCodeFragment Language="C#" OutputFile="$(CustomAssemblyInfoFile)" AssemblyAttributes="@(AssemblyAttributes)" />
   </Target>
   <Target Name="CleanDataDirectory" BeforeTargets="PreBuildEvent">
-    <RemoveDir Directories="$(OutputPath)Data" />
+    <!--<RemoveDir Directories="$(OutputPath)Data" />-->
   </Target>
   <Target Name="CopyJsonData" AfterTargets="Build">
     <ItemGroup>
-      <JsonDataFiles Include="..\GameEngine\Data\**\*" />
+      <JsonDataFiles Include="..\GameData\**\*" />
     </ItemGroup>
-    <Copy SourceFiles="@(JsonDataFiles)" DestinationFolder="$(OutputPath)Data\%(RecursiveDir)" />
+    <Copy SourceFiles="@(JsonDataFiles)" DestinationFolder="$(AppDataPath)\Mods\%(RecursiveDir)" />
   </Target>
 
 </Project>
