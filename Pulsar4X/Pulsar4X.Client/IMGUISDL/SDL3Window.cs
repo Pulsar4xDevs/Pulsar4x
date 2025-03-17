@@ -269,5 +269,28 @@ namespace Pulsar4X.Client
         {
             return SDL.GetPrefPath(OrgName, AppName);
         }
+
+        public RenderState GetRenderState()
+        {
+            SDL.GetRenderDrawColor(Renderer, out byte r, out byte g, out byte b, out byte a);
+            SDL.GetRenderDrawBlendMode(Renderer, out SDL.BlendMode blendMode);
+
+            return new RenderState()
+            {
+                BlendMode = blendMode,
+                Red = r,
+                Green = g,
+                Blue = b,
+                Alpha = a,
+            };
+        }
+
+        public void SetRenderState(RenderState renderState)
+        {
+            SDL.SetRenderDrawBlendMode(Renderer, renderState.BlendMode);
+            SDL.SetRenderDrawColor(Renderer, renderState.Red, renderState.Green, renderState.Blue,  renderState.Alpha);
+        }
+        
+        public void SetBlendMode(SDL.BlendMode mode) => SDL.SetRenderDrawBlendMode(Renderer, mode);
     }
 }

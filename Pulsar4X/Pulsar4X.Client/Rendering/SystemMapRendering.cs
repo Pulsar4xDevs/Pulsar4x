@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
+using Pulsar4X.Client.Interface.Widgets;
 using SDL3;
 using Pulsar4X.Orbital;
 using Pulsar4X.Engine;
@@ -24,9 +25,6 @@ namespace Pulsar4X.Client.Rendering
         ConcurrentQueue<Message>? _sensorChanges;
         SystemState? _sysState;
         Camera _camera;
-        internal IntPtr windowPtr;
-        internal IntPtr surfacePtr;
-        internal IntPtr rendererPtr;
         SDL3Window _window;
         internal Dictionary<string, IDrawData> UIWidgets = new ();
         ConcurrentDictionary<int, Icon> _testIcons = new ();
@@ -46,9 +44,6 @@ namespace Pulsar4X.Client.Rendering
 
             _camera = _state.Camera;
             _window = window;
-            windowPtr = window.Window;
-            surfacePtr = SDL.GetWindowSurface(windowPtr);
-            rendererPtr = SDL.GetRenderer(windowPtr);
             //UIWidgets.Add(new CursorCrosshair(new Vector4())); //used for debugging the cursor world position.
             foreach (var item in TestDrawIconData.GetTestIcons())
             {
@@ -398,11 +393,8 @@ namespace Pulsar4X.Client.Rendering
                 }
             }
 
-            byte oR, oG, oB, oA;
-            SDL.GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
-            SDL.BlendMode blendMode;
-            SDL.GetRenderDrawBlendMode(rendererPtr, out blendMode);
-            SDL.SetRenderDrawBlendMode(rendererPtr, SDL.BlendMode.Blend);
+            RenderState savedRenderState = _window.GetRenderState();
+            _window.SetBlendMode(SDL.BlendMode.Blend);
 
             var matrix = _camera.GetZoomMatrix();
 
@@ -426,10 +418,7 @@ namespace Pulsar4X.Client.Rendering
             }
             TextIconsDistribute();
 
-            //ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
-
-            SDL.SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
-            SDL.SetRenderDrawBlendMode(rendererPtr, blendMode);
+            _window.SetRenderState(savedRenderState);
         }
 
         public void DrawNameIcons()
@@ -461,39 +450,9 @@ namespace Pulsar4X.Client.Rendering
                 // }
                 // else
                 // {
-                    item.Draw(rendererPtr, _camera);
+                    item.Draw(_window.Renderer, _camera);
                 //}
             }
-
-            Shape[] shapes = new Shape[1]
-            {
-                new Shape()
-                {
-                    Points = new Vector2[3]
-                    {
-                        new Vector2() { X = 0, Y = 0 },
-                        new Vector2() { X = 100, Y = 100 },
-                        new Vector2() { X = 0, Y = 0 }
-                    },
-                    Color = new SDL.Color() { R = 0, G = 255, B = 0, A = 255 }
-                }
-            };
-            //_uiState.ViewPort.Renderer.RenderLine(shapes, _uiState.Camera);
-
-            shapes = new Shape[1]
-            {
-                new Shape()
-                {
-                    Points = new Vector2[3]
-                    {
-                        new Vector2() { X = 0, Y = 0 },
-                        new Vector2() { X = 150, Y = 100 },
-                        new Vector2() { X = 0, Y = 0 }
-                    },
-                    Color = new SDL.Color() { R = 255, G = 255, B = 128, A = 255 }
-                }
-            };
-            //_uiState.ViewPort.Renderer.RenderLine(shapes, _uiState.Camera);
         }
 
         void UpdateAndDraw(IList<IDrawData> icons, Matrix matrix)
@@ -501,7 +460,7 @@ namespace Pulsar4X.Client.Rendering
             foreach (var item in icons)
                 item.OnFrameUpdate(matrix, _camera);
             foreach (var item in icons)
-                item.Draw(rendererPtr, _camera);
+                item.Draw(_window.Renderer, _camera);
         }
         // void UpdateAndDraw(Dictionary<string, IDrawData> icons, Matrix matrix)
         // {
