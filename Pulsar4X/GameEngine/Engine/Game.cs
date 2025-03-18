@@ -83,7 +83,7 @@ namespace Pulsar4X.Engine
         public ModDataStore StartingGameData { get; private set; }
 
         [JsonProperty]
-        internal GalaxyFactory GalaxyGen { get; private set; }
+        public GalaxyFactory GalaxyGen { get; private set; }
 
         [JsonProperty]
         public Dictionary<int, Entity> Factions { get; } = new ();

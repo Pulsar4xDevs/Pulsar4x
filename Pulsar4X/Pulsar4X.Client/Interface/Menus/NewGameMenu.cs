@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Security.Cryptography;
 using ImGuiNET;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Client.Interface.Widgets;
@@ -44,9 +45,9 @@ public class NewGameMenu : PulsarGuiWindow
 
     List<string> _enabledSystems = new ();
 
-    enum gameType { Nethost, Standalone }
+    enum GameType { Nethost, Standalone }
     int _gameTypeButtonGrp = 0;
-    gameType _selectedGameType = gameType.Standalone;
+    GameType _selectedGameType = GameType.Standalone;
     byte[] _netPortInputBuffer = new byte[8];
     string _netPortString { get { return System.Text.Encoding.UTF8.GetString(_netPortInputBuffer); } }
     int _maxSystems = 5;
@@ -68,7 +69,7 @@ public class NewGameMenu : PulsarGuiWindow
     float _buttonWidth = 100f;
     private NewGameMenu()
     {
-
+        _masterSeed = RandomNumberGenerator.GetInt32(999999999);
     }
     internal static NewGameMenu GetInstance()
     {
@@ -94,7 +95,7 @@ public class NewGameMenu : PulsarGuiWindow
             _footerHeight = ImGui.GetFrameHeightWithSpacing();
 
             // Calculate content area height (window height minus footer)
-            _contentHeight = _windowSize.Y - _footerHeight - ImGui.GetFrameHeightWithSpacing();
+            _contentHeight = _windowSize.Y - _footerHeight;// - ImGui.GetFrameHeightWithSpacing();
 
             switch(_currentPage)
             {
@@ -198,7 +199,7 @@ public class NewGameMenu : PulsarGuiWindow
         if(ImGui.BeginTable("SystemsSelection", 2, Styles.TableFlags))
         {
             ImGui.TableSetupColumn("Name");
-            ImGui.TableSetupColumn("Enabled");
+            ImGui.TableSetupColumn("Include");
             ImGui.TableHeadersRow();
 
             foreach(var (id, system) in _modDataStore.Systems)
@@ -324,7 +325,8 @@ public class NewGameMenu : PulsarGuiWindow
             }
         }
 
-        if (ImGui.Checkbox("ELE start", ref _eleStart)) ;
+        ImGui.Checkbox("ELE start", ref _eleStart);
+        ImGui.InputInt("Galaxy Size", ref _maxSystems);
 
         ImGui.EndChild();
         ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
@@ -389,12 +391,34 @@ public class NewGameMenu : PulsarGuiWindow
         SpeciesBlueprint startingSpeciesBlueprint = _modDataStore.Species[_selectedSpeciesId];
         ThemeBlueprint startingThemeBlueprint = _modDataStore.Themes[_selectedThemeId];
         ColonyBlueprint startingColonyBlueprint = _modDataStore.Colonies[_selectedColonyId];
-        SystemBlueprint? startingSystemBlueprint;
-        SystemBodyBlueprint? startingBodyBlueprint;
+        SystemBlueprint? startingSystemBlueprint = null;
+        SystemBodyBlueprint? startingBodyBlueprint = null;
+
+
+        Game game = GameFactory.CreateGame(_modDataStore, gameSettings);
+        game.CreatedOnGitHash = AssemblyInfo.GetGitHash(); // Save the git hash to the game
+        game.LastSaveGitHash = AssemblyInfo.GetGitHash();
+
+        StarSystem? startingSystem = null;
+        Entity? startingBody = null;
+
+        // Generate random systems up to the number of "Galaxy Size" minus the
+        // number of included pre-made systems
+        int numberToGenerate = _maxSystems - _enabledSystems.Count;
+        if(numberToGenerate > 0)
+        {
+            for(int i = 0; i < numberToGenerate; i++)
+            {
+                // TODO: add random system names
+                string systemName = $"Generated System #{i + 1}";
+                game.GalaxyGen.GenerateSystem(game, systemName, _masterSeed);
+            }
+        }
+
 
         if(_selectedSystemId.Equals("random"))
         {
-            // TODO: implement random generation
+            // TODO: support starting in a random system
             return;
         }
         else
@@ -403,14 +427,7 @@ public class NewGameMenu : PulsarGuiWindow
             startingBodyBlueprint = _modDataStore.SystemBodies[_selectedBodyId];
         }
 
-
-        Pulsar4X.Engine.Game game = GameFactory.CreateGame(_modDataStore, gameSettings);
-        game.CreatedOnGitHash = AssemblyInfo.GetGitHash(); // Save the git hash to the game
-        game.LastSaveGitHash = AssemblyInfo.GetGitHash();
-
         // Load in the selected systems
-        StarSystem? startingSystem = null;
-        Entity? startingBody = null;
         foreach(var id in _enabledSystems)
         {
             var system = StarSystemFactory.LoadFromBlueprint(game, _modDataStore.Systems[id]);
@@ -419,7 +436,7 @@ public class NewGameMenu : PulsarGuiWindow
                 startingSystem = system;
                 foreach(var systemBody in startingSystem.GetAllDataBlobsOfType<SystemBodyInfoDB>())
                 {
-                    if(systemBody.OwningEntity?.GetDefaultName()?.Equals(startingBodyBlueprint.Name) == true)
+                    if(startingBodyBlueprint != null && systemBody.OwningEntity?.GetDefaultName()?.Equals(startingBodyBlueprint.Name) == true)
                     {
                         startingBody = systemBody.OwningEntity;
                     }
