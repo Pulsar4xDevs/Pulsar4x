@@ -204,6 +204,8 @@ namespace Pulsar4X.Client
             {
                 systemState.PreFrameSetup();
             }
+
+            _state.GalacticMap?.Update();
         }
 
         public override void Render()

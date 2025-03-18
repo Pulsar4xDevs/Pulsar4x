@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
-using Pulsar4X.Client.Interface.Widgets;
-using SDL3;
 using Pulsar4X.Orbital;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Sensors;
@@ -379,46 +377,49 @@ namespace Pulsar4X.Client.Rendering
             RemoveIconable(entityId);
         }
 
-        internal void Draw()
+        internal void Update()
         {
+            if(_sysState == null) return;
 
-            if (_sysState != null)
+            foreach (var item in _sysState.EntityStatesWithPosition.Values)
             {
-                foreach (var item in _sysState.EntityStatesWithPosition.Values)
+                if (item.Changes.Count > 0)
                 {
-                    if (item.Changes.Count > 0)
-                    {
-                        HandleChanges(item);
-                    }
+                    HandleChanges(item);
                 }
             }
 
-            RenderState savedRenderState = _window.GetRenderState();
-            _window.SetBlendMode(SDL.BlendMode.Blend);
-
             var matrix = _camera.GetZoomMatrix();
+            foreach (var (_, item) in UIWidgets)
+                item.OnFrameUpdate(matrix, _camera);
 
-            UpdateAndDraw(UIWidgets.Values.ToList(), matrix);
+            foreach (var (_, item) in _orbitRings)
+                item.OnFrameUpdate(matrix, _camera);
 
-            UpdateAndDraw(_orbitRings.Values.ToList(), matrix);
+            foreach (var (_, item) in _moveIcons)
+                item.OnFrameUpdate(matrix, _camera);
 
-            UpdateAndDraw(_moveIcons.Values.ToList(), matrix);
+            foreach (var (_, item) in _entityIcons)
+                item.OnFrameUpdate(matrix, _camera);
 
-            UpdateAndDraw(_entityIcons.Values.ToList(), matrix);
+            foreach (var item in SelectedEntityExtras)
+                item.OnFrameUpdate(matrix, _camera);
 
-            UpdateAndDraw(SelectedEntityExtras, matrix);
-
-
-            //because _nameIcons are imgui not sdl, we don't draw them here.
-            //we draw them in PulsarMainWindow.ImGuiLayout
             lock (_nameIcons)
             {
                 foreach (var item in _nameIcons.Values)
                     item.OnFrameUpdate(matrix, _camera);
             }
             TextIconsDistribute();
+        }
 
-            _window.SetRenderState(savedRenderState);
+        internal void Draw()
+        {
+            DrawIcons(UIWidgets.Values.ToList());
+            DrawIcons(_orbitRings.Values.ToList());
+            DrawIcons(_moveIcons.Values.ToList());
+            DrawIcons(_entityIcons.Values.ToList());
+            DrawIcons(SelectedEntityExtras);
         }
 
         public void DrawNameIcons()
@@ -438,40 +439,11 @@ namespace Pulsar4X.Client.Rendering
 
         }
 
-        void UpdateAndDraw(List<IDrawData> icons, Matrix matrix)
+        void DrawIcons(List<IDrawData> icons)
         {
-            foreach (var item in icons)
-                item.OnFrameUpdate(matrix, _camera);
-            foreach (var item in icons)
-            {
-                // if(item is Icon)
-                // {
-                //     _uiState.ViewPort.Renderer.RenderLine(((Icon)item).GetDrawData(), _uiState.Camera);
-                // }
-                // else
-                // {
-                    item.Draw(_window.Renderer, _camera);
-                //}
-            }
-        }
-
-        void UpdateAndDraw(IList<IDrawData> icons, Matrix matrix)
-        {
-            foreach (var item in icons)
-                item.OnFrameUpdate(matrix, _camera);
             foreach (var item in icons)
                 item.Draw(_window.Renderer, _camera);
         }
-        // void UpdateAndDraw(Dictionary<string, IDrawData> icons, Matrix matrix)
-        // {
-        //     lock (icons)
-        //     {
-        //         foreach (var item in icons.Values)
-        //             item.OnFrameUpdate(matrix, _camera);
-        //         foreach (var item in icons.Values)
-        //             item.Draw(rendererPtr, _camera);
-        //     }
-        // }
 
         public override bool GetActive()
         {
