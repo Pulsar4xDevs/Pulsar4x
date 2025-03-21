@@ -23,7 +23,7 @@ namespace Pulsar4X.Client
 
         internal static Selector GetInstance()
         {
-            if (!PulsarGuiWindow._uiState.LoadedWindows.ContainsKey(typeof(Selector)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(Selector)))
             {
                 return new Selector();
             }
@@ -33,99 +33,126 @@ namespace Pulsar4X.Client
 
         internal override void Display()
         {
-            if(!IsActive) return;
+            if(!IsActive || _uiState.Faction == null) return;
 
             ImGui.SetNextWindowSize(new Vector2(256, 0));
             ImGui.SetNextWindowPos(new Vector2(ImGui.GetMainViewport().WorkSize.X - 256, 0));
             ImGui.SetNextWindowBgAlpha(0);
             if(Window.Begin("###selector", _flags))
             {
-                SystemViewPreferences.GetInstance().DisplayCombo("map", selectedIndex =>
-                {
-                    _uiState.SelectedMapView = SystemViewPreferences.GetInstance().GetViewByIndex(selectedIndex);
-                });
+                // TODO: re-implement this somewhere
+                // SystemViewPreferences.GetInstance().DisplayCombo("map", selectedIndex =>
+                // {
+                //     _uiState.SelectedMapView = SystemViewPreferences.GetInstance().GetViewByIndex(selectedIndex);
+                // });
 
-                if(ImGui.CollapsingHeader("Systems", ImGuiTreeNodeFlags.DefaultOpen))
-                {
-                    // FIXME: this can be done once and updated only when KnownSystems changes
-                    var knownSystems = _uiState.Faction.GetDataBlob<FactionInfoDB>().KnownSystems;
-                    var filteredAndSortedSystems = _uiState.Game.Systems
-                                                        .Where(s => knownSystems.Contains(s.ID))
-                                                        .OrderBy(s => s.NameDB.OwnersName)
-                                                        .ToList();
+                DisplayHelpers.Header($"{_uiState.Faction.GetFactionName()} [{_uiState.Faction.GetFactionAbbreviation()}]");
+                DisplaySystems();
+                DisplayColonies();
+                DisplayFleets();
+            }
+            Window.End();
+        }
 
-                    foreach(var system in filteredAndSortedSystems)
+        private static void DisplaySystems()
+        {
+            if (ImGui.CollapsingHeader("Systems", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                // FIXME: this can be done once and updated only when KnownSystems changes
+                var knownSystems = _uiState.Faction?.GetDataBlob<FactionInfoDB>().KnownSystems;
+
+                if(knownSystems == null) return;
+
+                var filteredAndSortedSystems = _uiState.Game?.Systems
+                                                    .Where(s => knownSystems.Contains(s.ID))
+                                                    .OrderBy(s => s.NameDB.OwnersName)
+                                                    .ToList();
+
+                if(filteredAndSortedSystems == null) return;
+
+                foreach (var system in filteredAndSortedSystems)
+                {
+                    if (ImGui.Selectable(system.NameDB.OwnersName, _uiState.SelectedStarSystemId.Equals(system.ID)))
                     {
-                        if(ImGui.Selectable(system.NameDB.OwnersName, _uiState.SelectedStarSystemId.Equals(system.ID)))
+                        _uiState.SetActiveSystem(system.ID);
+                    }
+                }
+            }
+        }
+
+        private static void DisplayColonies()
+        {
+            if (ImGui.CollapsingHeader("Colonies", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                if(_uiState.Faction == null) return;
+
+                var colonies = _uiState.Faction.GetDataBlob<FactionInfoDB>().Colonies;
+
+                foreach (var colony in colonies)
+                {
+                    bool visible = ColonyManagementWindow.GetInstance().GetActive() && ColonyManagementWindow.GetInstance().SelectedEntity?.Entity.Id == colony.Id;
+                    if (ImGui.Selectable(colony.GetName(_uiState.Faction.Id), visible))
+                    {
+                        if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId) && _uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies.ContainsKey(colony.Id))
                         {
-                            _uiState.SetActiveSystem(system.ID);
+                            ColonyManagementWindow.GetInstance().SetActive(true);
+                            ColonyManagementWindow.GetInstance().SelectEntity(_uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies[colony.Id]);
                         }
                     }
                 }
-                if(ImGui.CollapsingHeader("Colonies", ImGuiTreeNodeFlags.DefaultOpen))
+            }
+        }
+
+        private static void DisplayFleets()
+        {
+            if (ImGui.CollapsingHeader("Fleets", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                if(_uiState.Faction == null) return;
+
+                var fleets = _uiState.Faction.GetDataBlob<FleetDB>().RootDB?.Children ?? new SafeList<Entity>();
+
+                foreach (var fleet in fleets)
                 {
-                    var colonies = _uiState.Faction.GetDataBlob<FactionInfoDB>().Colonies;
-                    foreach(var colony in colonies)
+                    // Check if the entity is actually a ship
+                    if (fleet.HasDataBlob<ShipInfoDB>())
+                        continue;
+
+                    bool visible = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleet?.Id == fleet.Id;
+                    string display = fleet.GetName(_uiState.Faction.Id);
+                    if (ImGui.Selectable(display, visible))
                     {
-                        bool visible = ColonyManagementWindow.GetInstance().GetActive() && ColonyManagementWindow.GetInstance().SelectedEntity?.Entity.Id == colony.Id;
-                        if(ImGui.Selectable(colony.GetName(_uiState.Faction.Id), visible))
-                        {
-                            if(_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId) && _uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies.ContainsKey(colony.Id))
-                            {
-                                ColonyManagementWindow.GetInstance().SetActive(true);
-                                ColonyManagementWindow.GetInstance().SelectEntity(_uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies[colony.Id]);
-                            }
-                        }
+                        FleetWindow.GetInstance().SetActive(true);
+                        FleetWindow.GetInstance().SelectFleet(fleet);
                     }
-                }
-                if(ImGui.CollapsingHeader("Fleets", ImGuiTreeNodeFlags.DefaultOpen))
-                {
-                    var fleets = _uiState.Faction.GetDataBlob<FleetDB>().RootDB?.Children ?? new SafeList<Entity>();
 
-                    foreach(var fleet in fleets)
+                    if (ImGui.IsItemHovered())
                     {
-                        // Check if the entity is actually a ship
-                        if (fleet.HasDataBlob<ShipInfoDB>())
-                            continue;
-
-                        bool visible = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleet?.Id == fleet.Id;
-                        string display = fleet.GetName(_uiState.Faction.Id);
-                        if(ImGui.Selectable(display, visible))
+                        void Callback()
                         {
-                            FleetWindow.GetInstance().SetActive(true);
-                            FleetWindow.GetInstance().SelectFleet(fleet);
-                        }
-
-                        if (ImGui.IsItemHovered())
-                        {
-                            void Callback()
+                            if (fleet.TryGetDatablob<OrderableDB>(out var orderableDb)
+                            && orderableDb.ActionList.Count > 0)
                             {
-                                if(fleet.TryGetDatablob<OrderableDB>(out var orderableDb)
-                                && orderableDb.ActionList.Count > 0)
+                                ImGui.Text("Orders:");
+                                for (int i = 0; i < orderableDb.ActionList.Count; i++)
                                 {
-                                    ImGui.Text("Orders:");
-                                    for(int i = 0; i < orderableDb.ActionList.Count; i++)
-                                    {
-                                        ImGui.Text(orderableDb.ActionList[i].Name);
-                                    }
-                                }
-                                else
-                                {
-                                    ImGui.Text("No orders");
+                                    ImGui.Text(orderableDb.ActionList[i].Name);
                                 }
                             }
-
-                            fleet.TryGetDatablob<FleetDB>(out var fleetDB);
-                            var flagshipID = fleetDB?.FlagShipID ?? -9999;
-                            if(fleet.Manager?.TryGetEntityById(flagshipID, out var flagship) ?? false)
+                            else
                             {
-                                var positionDB = flagship.GetDataBlob<PositionDB>();
-                                DisplayHelpers.DescriptiveTooltip(display, positionDB.Parent?.GetName(_uiState.Faction.Id) ?? "Unknown", "", Callback);
+                                ImGui.Text("No orders");
                             }
+                        }
+
+                        fleet.TryGetDatablob<FleetDB>(out var fleetDB);
+                        var flagshipID = fleetDB?.FlagShipID ?? -9999;
+                        if (fleet.Manager?.TryGetEntityById(flagshipID, out var flagship) ?? false)
+                        {
+                            var positionDB = flagship.GetDataBlob<PositionDB>();
+                            DisplayHelpers.DescriptiveTooltip(display, positionDB.Parent?.GetName(_uiState.Faction.Id) ?? "Unknown", "", Callback);
                         }
                     }
                 }
-                Window.End();
             }
         }
     }
