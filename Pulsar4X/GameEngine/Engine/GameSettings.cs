@@ -13,8 +13,6 @@ namespace Pulsar4X.Engine
 
         #region General Game Settings
 
-        public string GameName { get; set; } = "New Game";
-
         public int MaxSystems { get; set; } = 1000;
 
         public WeightedList<int> StarChances { get; set; } = new WeightedList<int>();
@@ -41,24 +39,24 @@ namespace Pulsar4X.Engine
 
         public bool EnableMultiThreading { get; set; } = false;
         public bool EnforceSingleThread { get; set; } = false; //if above is false and this is true, everything will be done on the main thread, and the UI will wait for processes to finish before updating.
-        
+
         #endregion
 
         #region warp settings
 
         /// <summary>
         /// when true, end of warp will put the entity on the same Newtonion trajectory that it had when it started warp.
-        /// when false the ship will just get dropped into a circular orbit. 
+        /// when false the ship will just get dropped into a circular orbit.
         /// </summary>
         public bool StrictNewtonion { get; set; } = true;
         /// <summary>
         /// when true ships saved Newtonion trajectory will be ralative to their immediate SOI parent,
-        /// when false it will be ralitive to the root star (ie the absolute velocity). 
+        /// when false it will be ralitive to the root star (ie the absolute velocity).
         /// </summary>
         public bool UseRelativeVelocity { get; set; } = true;
 
         #endregion
-        
+
         #region Network Settings
 
         public int portNumber { get; set; }
@@ -141,7 +139,7 @@ namespace Pulsar4X.Engine
         public string DefaultFactionName { get; set; } = "Terran Federation";
 
         /// <summary>
-        /// if player start has a future End of Life Event asteroid impact. 
+        /// if player start has a future End of Life Event asteroid impact.
         /// </summary>
         public bool EleStart { get; set; } = true;
 

@@ -33,7 +33,7 @@ namespace Pulsar4X.Tests
 
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
             var startDate = new DateTime(2050, 1, 1);
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0 }, modDataStore); // reinit with empty game, so we can do a clean test.
+            _game = new Game(new NewGameSettings { StartDateTime = startDate, MaxSystems = 0 }, modDataStore); // reinit with empty game, so we can do a clean test.
             _game.Settings.EnableMultiThreading = true;
             _game.Settings.EnforceSingleThread = false;
 

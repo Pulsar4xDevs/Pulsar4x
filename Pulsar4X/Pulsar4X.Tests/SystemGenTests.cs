@@ -342,7 +342,7 @@ namespace Pulsar4X.Tests
         public void JPConnectivity()
         {
             const int numSystems = 2000;
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = numSystems }, _game.StartingGameData);
+            _game = new Game(new NewGameSettings { StartDateTime = DateTime.Now, MaxSystems = numSystems }, _game.StartingGameData);
             List<StarSystem> systems = _game.Systems;
 
 

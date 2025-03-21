@@ -105,8 +105,6 @@ namespace Pulsar4X.Engine
 
         public Game(NewGameSettings settings, ModDataStore modDataStore)
         {
-            Name = settings.GameName;
-
             ApplyModData(modDataStore);
             ApplySettings(settings);
 

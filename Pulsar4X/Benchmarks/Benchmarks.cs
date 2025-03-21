@@ -18,7 +18,6 @@ public class Benchmarks
         string[] modsToLoad = new[] { "../../../../Data/basemod/modInfo.json" };
         NewGameSettings newGameSettings = new NewGameSettings
         {
-            GameName = "Benchmarks",
             MaxSystems = 2,
             SMPassword = "",
             CreatePlayerFaction = true,
@@ -27,7 +26,7 @@ public class Benchmarks
             DefaultSolStart = true,
             MasterSeed = 1234
         };
-        
+
         _game = GameFactory.CreateGame(modsToLoad, newGameSettings);
         (_playerFaction, _startingSystemId) = DefaultStartFactory.LoadFromJson(_game, "../../../../Data/basemod/defaultStart.json");
     }
@@ -43,16 +42,16 @@ public class Benchmarks
     public void Benchmark30DaysTimeStep()
     {
         if (_game == null) return;
-        
+
         _game.TimePulse.Ticklength = TimeSpan.FromDays(30);
         _game.TimePulse.TimeStep();
     }
-    
+
     [Benchmark]
     public void Benchmark365DaysTimeStep()
     {
         if (_game == null) return;
-        
+
         _game.TimePulse.Ticklength = TimeSpan.FromDays(365);
         _game.TimePulse.TimeStep();
     }

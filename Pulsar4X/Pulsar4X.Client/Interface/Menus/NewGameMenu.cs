@@ -52,8 +52,6 @@ public class NewGameMenu : PulsarGuiWindow
     string _netPortString { get { return System.Text.Encoding.UTF8.GetString(_netPortInputBuffer); } }
     int _maxSystems = 5;
 
-
-    byte[] _nameInputBuffer = Utils.BytesFromString("My Game", 32);
     byte[] _factionInputBuffer = Utils.BytesFromString("UEF", 16);
     byte[] _passInputBuffer = Utils.BytesFromString("", 16);
 
@@ -118,7 +116,6 @@ public class NewGameMenu : PulsarGuiWindow
         ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), ImGuiChildFlags.None);
 
         DisplayHelpers.Header("New Game Options");
-        ImGui.InputText("Game Name", _nameInputBuffer, 32);
         // ImGui.InputText("SM Pass", _smPassInputbuffer, 16);
         // ImGui.InputText("Password", _passInputBuffer, 16);
         //ImGui.InputInt("Max Systems", ref _maxSystems);
@@ -377,7 +374,6 @@ public class NewGameMenu : PulsarGuiWindow
     {
         gameSettings = new NewGameSettings
         {
-            GameName = Utils.StringFromBytes(_nameInputBuffer),
             MaxSystems = _maxSystems,
             SMPassword = Utils.StringFromBytes(_smPassInputbuffer),
             CreatePlayerFaction = true,
