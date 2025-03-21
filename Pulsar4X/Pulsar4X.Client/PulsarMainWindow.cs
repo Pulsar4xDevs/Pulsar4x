@@ -75,8 +75,16 @@ namespace Pulsar4X.Client
                 LoadPreferences();
 
                 // Load fonts
-                PlatformBackend.LoadFont(ResourcesPath, "ProggyClean.ttf", 13f);
-                PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ");
+                //PlatformBackend.LoadFont(ResourcesPath, "ProggyClean.ttf", 13f);
+                //PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ");
+
+                // This one works
+                var fontPtr = PlatformBackend.LoadFont(ResourcesPath, "PixelOperator.ttf", 16f);
+                var fontTexture = ImGuiRenderer.CreateFontsTexture(fontPtr);
+
+                // This one doesn't
+                // var fontPtr = PlatformBackend.LoadFont(ResourcesPath, "JetBrainsMono-Regular.ttf", 16f);
+                // var fontTexture = ImGuiRenderer.CreateFontsTexture(fontPtr);
             }
             catch(Exception e)
             {

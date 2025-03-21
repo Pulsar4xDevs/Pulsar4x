@@ -236,7 +236,8 @@ public class ImGuiSDL3Renderer : IDisposable
 
     private bool CreateDeviceObjects()
     {
-        return CreateFontsTexture();
+        //return CreateFontsTexture();
+        return true;
     }
 
     private void DestroyDeviceObjects()
@@ -244,11 +245,9 @@ public class ImGuiSDL3Renderer : IDisposable
         DestroyFontsTexture();
     }
 
-    private unsafe bool CreateFontsTexture()
+    public unsafe IntPtr CreateFontsTexture(ImFontPtr font)
     {
         ImGuiIOPtr io = ImGui.GetIO();
-
-        var font = io.Fonts.AddFontDefault();
 
         // Build texture atlas
         io.Fonts.GetTexDataAsRGBA32(out byte* pixels, out int width, out int height);
@@ -258,37 +257,37 @@ public class ImGuiSDL3Renderer : IDisposable
         if(surface == IntPtr.Zero)
         {
             SDL.LogError(SDL.LogCategory.Application, $"Failed to create font surface: {SDL.GetError()}");
-            return false;
+            return IntPtr.Zero;
         }
 
         // Create texture
-        _fontTexture = SDL.CreateTextureFromSurface(Renderer, surface);
-        if (_fontTexture == IntPtr.Zero)
+        var fontTexture = SDL.CreateTextureFromSurface(Renderer, surface);
+        if (fontTexture == IntPtr.Zero)
         {
             SDL.LogError(SDL.LogCategory.Application, $"Failed to create font texture: {SDL.GetError()}");
-            return false;
+            return IntPtr.Zero;
         }
 
         // Update texture directly without converting pixel format
-        if (!SDL.UpdateTexture(_fontTexture, IntPtr.Zero, (IntPtr)pixels, width * 4))
+        if (!SDL.UpdateTexture(fontTexture, IntPtr.Zero, (IntPtr)pixels, width * 4))
         {
             SDL.LogError(SDL.LogCategory.Application, $"Failed to update font texture: {SDL.GetError()}");
-            return false;
+            return IntPtr.Zero;
         }
 
         // Ensure proper blending for font rendering
-        SDL.SetTextureBlendMode(_fontTexture, SDL.BlendMode.Blend);
+        SDL.SetTextureBlendMode(fontTexture, SDL.BlendMode.Blend);
 
         // Use nearest neighbor filtering for crisp font rendering at small sizes
-        SDL.SetTextureScaleMode(_fontTexture, SDL.ScaleMode.Linear);
+        SDL.SetTextureScaleMode(fontTexture, SDL.ScaleMode.Nearest);
 
         // Store our identifier
-        io.Fonts.SetTexID(_fontTexture);
+        io.Fonts.SetTexID(fontTexture);
 
         SDL.DestroySurface(surface);
         io.Fonts.ClearTexData();
 
-        return true;
+        return fontTexture;
     }
 
     private void DestroyFontsTexture()
