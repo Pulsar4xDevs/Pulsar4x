@@ -51,6 +51,8 @@ namespace Pulsar4X.Client.Combat
 
         DamageMap _damageMap;
         IntPtr[] _damageMapPtr = new IntPtr[7];
+        private IntPtr _hiResPtr = new IntPtr();
+        private int _hiResSize = 128;
         DamageMap _projectileDamageMap;
         IntPtr _projectileDMapPtr;
 
@@ -340,6 +342,11 @@ namespace Pulsar4X.Client.Combat
                         ImGui.Checkbox("PhotonMap", ref _showPhMap);
                     }
 
+                    if (_hiResPtr != IntPtr.Zero)
+                    {
+                        ImGui.Image(_hiResPtr, new System.Numerics.Vector2(_hiResSize, _hiResSize));
+                    }
+
 
 
                     if (_shipImgPtr != IntPtr.Zero)
@@ -421,7 +428,8 @@ namespace Pulsar4X.Client.Combat
 
                                 _damageMap.MergeAndResize(_projectileDamageMap);
                                 DamageMapRendering.CreateSDLTextures(_uiState.ViewPort.Renderer, _damageMap, ref _damageMapPtr);
-
+                                var fpart = KineticMath.GetFastestPart(_damageMap);
+                                DamageMapRendering.CreateTextureForFastestParticleRegion(_uiState.ViewPort.Renderer, _damageMap, fpart, ref _hiResPtr, _hiResSize);
 
 
 
@@ -447,12 +455,16 @@ namespace Pulsar4X.Client.Combat
                                 _runSimLoop = false;
                                 DamagePhysicsSim.PhysicsLoop(_damageMap);
                                 DamageMapRendering.CreateSDLTextures(_uiState.ViewPort.Renderer, _damageMap, ref _damageMapPtr);
+                                var fpart = KineticMath.GetFastestPart(_damageMap);
+                                DamageMapRendering.CreateTextureForFastestParticleRegion(_uiState.ViewPort.Renderer, _damageMap, fpart, ref _hiResPtr, _hiResSize);
                             }
 
                             if (_runSimLoop)
                             {
                                 DamagePhysicsSim.PhysicsLoop(_damageMap);
                                 DamageMapRendering.CreateSDLTextures(_uiState.ViewPort.Renderer, _damageMap, ref _damageMapPtr);
+                                var fpart = KineticMath.GetFastestPart(_damageMap);
+                                DamageMapRendering.CreateTextureForFastestParticleRegion(_uiState.ViewPort.Renderer, _damageMap, fpart, ref _hiResPtr, _hiResSize);
                             }
                             ImGui.Text(Stringify.Energy(_damageMap.TotalEnergy));
                             ImGui.Text(_damageMap.RunTime.ToString());
@@ -472,6 +484,14 @@ namespace Pulsar4X.Client.Combat
                                 }
                             }
                         }
+                    }
+
+                    if (_hiResPtr != IntPtr.Zero)
+                    {
+                        
+                        
+                        
+                        
                     }
 
                     if (_profile != null && _profile.DamageEvents.Count > 0)

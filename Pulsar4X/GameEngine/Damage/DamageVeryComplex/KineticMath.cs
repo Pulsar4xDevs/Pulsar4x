@@ -384,7 +384,22 @@ public static class KineticMath
     }
     
 
-    
+    public static PhysicalParticle GetFastestPart(DamageMap map)
+    {
+        double mag = 0;
+        PhysicalParticle fastPart = null;
+        foreach (var part in map.PMap)
+        {
+            if(part == null)
+                continue;
+            if( part.Velocity.Length() > mag)
+            {
+                fastPart = part;
+
+            }
+        }
+        return fastPart; 
+    }
     
     public static float TensileConnectionData(PhysicalParticle physicalParticle, List<PhysicalParticle> neighbors)
     {

@@ -63,7 +63,102 @@ public static class DamageMapRendering
         }
     }
 
+    internal static void CreateTextureForFastestParticleRegion(
+        IntPtr renderer,
+        DamageMap baseMap, // Top-level low-res map
+        PhysicalParticle fastestParticle,
+        ref IntPtr texture,
+        int textureSize) // Size in pixels (e.g., 64 for a 64x64 texture)
+    {
+        if (fastestParticle == null)
+        {
+            texture = IntPtr.Zero;
+            return;
+        }
 
+        // Verify fastestParticle is in baseMap
+        bool foundInBase = Array.Exists(baseMap.PMap, p => p == fastestParticle);
+        if (!foundInBase)
+            throw new Exception($"Fastest particle (ID {fastestParticle.ID}) not found in baseMap.PMap");
+
+        // Resolution setup
+        int highResPPM = baseMap.PhysicsScale; // e.g., 1000
+        int lowResPPM = baseMap.ParticlesPerMeter; // e.g., 10
+        float scaleFactor = (float)highResPPM / lowResPPM; // e.g., 100
+        int blockSize = (int)scaleFactor; // Block size in high-res pixels (e.g., 100)
+
+        // Texture is at high-res scale
+        int highResTextureSize = textureSize; // e.g., 64 pixels
+        uint[] pixelData = new uint[highResTextureSize * highResTextureSize];
+        byte alpha = 255;
+
+        // Center on fastest particle in low-res coordinates
+        float centerX = fastestParticle.Position.X; // Keep as float for precision
+        float centerY = fastestParticle.Position.Y;
+
+        // Iterate over high-res texture pixels
+        for (int y = 0; y < highResTextureSize; y++)
+        {
+            for (int x = 0; x < highResTextureSize; x++)
+            {
+                // Map high-res texture pixel to low-res baseMap coordinates
+                float offsetX = (x - highResTextureSize / 2f) / scaleFactor; // Center texture on particle
+                float offsetY = (y - highResTextureSize / 2f) / scaleFactor;
+                float baseX = centerX + offsetX;
+                float baseY = centerY + offsetY;
+
+                int baseXInt = (int)Math.Floor(baseX);
+                int baseYInt = (int)Math.Floor(baseY);
+
+                // Check bounds
+                if (baseXInt >= 0 && baseXInt < baseMap.Width && baseYInt >= 0 && baseYInt < baseMap.Height)
+                {
+                    int baseIndex = baseMap.GetIndex(baseXInt, baseYInt);
+                    var particle = baseMap.PMap[baseIndex];
+
+                    if (particle != null && particle.DMap != null && particle.DMap.ParticlesPerMeter == highResPPM)
+                    {
+                        // High-res: Map to DMap pixel
+                        DamageMap dmap = particle.DMap;
+                        // DMap coords relative to particle’s baseMap position
+                        int dmapX = (int)((baseX - particle.Position.X) * scaleFactor + dmap.Width / 2f);
+                        int dmapY = (int)((baseY - particle.Position.Y) * scaleFactor + dmap.Height / 2f);
+
+                        if (dmapX >= 0 && dmapX < dmap.Width && dmapY >= 0 && dmapY < dmap.Height)
+                        {
+                            int dmapIndex = dmap.GetIndex(dmapX, dmapY);
+                            var uniqueInstances = dmap.compIDMap.Distinct().Where(id => id != 0).ToList();
+                            int id = dmap.compIDMap[dmapIndex];
+                            byte red = id != 0 ? (byte)(255 * uniqueInstances.IndexOf(id) / uniqueInstances.Count) : (byte)0;
+                            pixelData[y * highResTextureSize + x] = Utils.GetColor(red, 0, 0, alpha);
+                        }
+                    }
+                    else
+                    {
+                        // Low-res: Use baseMap ID for the whole block area
+                        int id = particle != null ? baseMap.compIDMap[baseIndex] : 0;
+                        var uniqueInstances = baseMap.compIDMap.Distinct().Where(id => id != 0).ToList();
+                        byte red = id != 0 ? (byte)(255 * uniqueInstances.IndexOf(id) / uniqueInstances.Count) : (byte)0;
+                        pixelData[y * highResTextureSize + x] = Utils.GetColor(red, 0, 0, alpha);
+                    }
+                }
+                // Leave out-of-bounds pixels black (default 0 from array init)
+            }
+        }
+        // Create texture
+        GCHandle handle = GCHandle.Alloc(pixelData, GCHandleType.Pinned);
+        try
+        {
+            IntPtr pixels = handle.AddrOfPinnedObject();
+             texture = IntPtr.Zero;
+            Textures.UpdateOrCreate(renderer, ref texture, highResTextureSize, highResTextureSize, pixels);
+        }
+        finally
+        {
+            handle.Free();
+        }
+    }
+    
     internal static void CreateTextureForPresMap(IntPtr renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
         byte alpha = 255;

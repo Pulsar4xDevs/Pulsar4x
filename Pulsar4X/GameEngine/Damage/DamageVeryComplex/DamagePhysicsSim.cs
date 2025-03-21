@@ -13,14 +13,8 @@ public static class DamagePhysicsSim
     public static float CalculateTickLength(DamageMap map)
     {
         double mag = 0;
-        foreach (var part in map.PMap)
-        {
-            if(part == null)
-                continue;
-            if( part.Velocity.Length() > mag)
-                mag = part.Velocity.Length();
-        }
-        return (float)Math.Min(0.1f, map.ParticlesPerMeter / mag);
+        PhysicalParticle fastPart = KineticMath.GetFastestPart(map);
+        return (float)Math.Min(0.1f, map.ParticlesPerMeter / fastPart.Velocity.Length());
     }
     
     public static void PhysicsLoop(DamageMap damageMap)
@@ -75,14 +69,12 @@ public static class DamagePhysicsSim
         {
             KineticMath.DetectCollision(particle, damageMap, collisions);
         }
-   
         
         foreach (var partPair in collisions)
         {
             KineticMath.ResolveCollision(partPair.Item1, partPair.Item2, damageMap);
         }
-
-
+        
         foreach (var bp in damageMap.BeamPoints)
         {
             if (bp.AbsorbPercentage > 0.0f)
@@ -92,8 +84,6 @@ public static class DamagePhysicsSim
             }
         }
         
-    
-         
         List<PhysicalParticle> flatList = collisions.SelectMany(t => new[] { t.Item1, t.Item2 }).ToList();
         HandleOutOfBounds(damageMap, ref flatList);
   
