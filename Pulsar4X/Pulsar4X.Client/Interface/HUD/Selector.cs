@@ -112,8 +112,8 @@ namespace Pulsar4X.Client
                     {
                         if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId) && _uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies.ContainsKey(colony.Id))
                         {
-                            ColonyManagementWindow.GetInstance().SetActive(true);
                             ColonyManagementWindow.GetInstance().SelectEntity(_uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies[colony.Id]);
+                            ColonyManagementWindow.GetInstance().SetActive(true);
                         }
                     }
                 }
