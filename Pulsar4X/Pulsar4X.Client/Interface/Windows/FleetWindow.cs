@@ -159,9 +159,8 @@ namespace Pulsar4X.Client
                 ImGui.SetCursorPosY(27f);
 
                 DisplayTabs();
-
-                Window.End();
             }
+            Window.End();
         }
 
         private void DisplayTabs()
@@ -248,14 +247,8 @@ namespace Pulsar4X.Client
                             DisplayHelpers.PrintRow("Ships", SelectedFleet.GetDataBlob<FleetDB>().GetChildren().Where(x => !x.HasDataBlob<FleetDB>()).Count().ToString());
                         }
                         ImGui.Columns(1);
-
-
-
-
-
-
-                        ImGui.EndChild();
                     }
+                    ImGui.EndChild();
                     ImGui.SameLine();
                     ImGui.EndTabItem();
                 }
@@ -374,7 +367,7 @@ namespace Pulsar4X.Client
                         ImGui.EndChild();
                     }
                     ImGui.SameLine();
-                    if(selectedOrder != null && ImGui.BeginChild("StandingOrders-edit", secondChildSize, ImGuiChildFlags.Borders))
+                    if(ImGui.BeginChild("StandingOrders-edit", secondChildSize, ImGuiChildFlags.Borders) && selectedOrder != null)
                     {
                         var sizeAvailable = ImGui.GetContentRegionAvail();
                         DisplayHelpers.Header("Order Name");
@@ -498,14 +491,14 @@ namespace Pulsar4X.Client
                                 selectedOrder.Name = name;
                             }
                         }
-                        ImGui.EndChild();
                     }
+                    ImGui.EndChild();
                     ImGui.EndTabItem();
                 }
 
                 ImGui.EndTabBar();
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
         }
 
         private void IssueOrdersDisplay(Vector2 size)
@@ -688,8 +681,8 @@ namespace Pulsar4X.Client
                         ImGui.EndTable();
                     }
                 }
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
             ImGui.SetCursorPosX(xPosition);
         }
 
@@ -704,7 +697,8 @@ namespace Pulsar4X.Client
                 DisplayHelpers.Header("Assigned Ships");
 
                 ImGui.PushStyleColor(ImGuiCol.FrameBg, Styles.InvisibleColor);
-                if (ImGui.BeginListBox("###assigned-ships", ImGui.GetContentRegionAvail()))
+                var contentSizeAvail = ImGui.GetContentRegionAvail();
+                if (ImGui.BeginListBox("###assigned-ships", new Vector2(contentSizeAvail.X, contentSizeAvail.Y - Styles.ButtonVerticalOffset)))
                 {
                     var fleet = SelectedFleet.GetDataBlob<FleetDB>();
                     foreach (var ship in fleet.GetChildren())
@@ -733,9 +727,7 @@ namespace Pulsar4X.Client
                 }
                 ImGui.PopStyleColor();
 
-
-                ImGui.SetCursorPosY(ImGui.GetCursorPosY() - Styles.ButtonVerticalOffset);
-                if(ImGui.Button("Select All/None", new Vector2(Styles.LeftColumnWidthLg, 0f)))
+                if(ImGui.Button("Select All/None", new Vector2(contentSizeAvail.X, 0)))
                 {
                     bool selectAll = !selectedShips.Values.Any(v => v == true);
                     foreach(var (ship, selected) in selectedShips)
@@ -743,9 +735,8 @@ namespace Pulsar4X.Client
                         selectedShips[ship] = selectAll;
                     }
                 }
-
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
             ImGui.SetCursorPosX(xPosition);
         }
 
@@ -791,9 +782,8 @@ namespace Pulsar4X.Client
                         DisplayShipContextMenu(selectedUnattachedShips, ship, isUnattached: true);
                     }
                 }
-
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
 
             if(ImGui.Button("Create New Fleet", new Vector2(Styles.LeftColumnWidthLg, 0f)))
             {

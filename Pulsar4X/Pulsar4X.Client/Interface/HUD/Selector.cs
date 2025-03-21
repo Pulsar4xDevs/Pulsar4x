@@ -138,8 +138,8 @@ namespace Pulsar4X.Client
                     string display = fleet.GetName(_uiState.Faction.Id);
                     if (ImGui.Selectable(display, visible))
                     {
-                        FleetWindow.GetInstance().SetActive(true);
                         FleetWindow.GetInstance().SelectFleet(fleet);
+                        FleetWindow.GetInstance().SetActive(true);
                     }
 
                     if (ImGui.IsItemHovered())
