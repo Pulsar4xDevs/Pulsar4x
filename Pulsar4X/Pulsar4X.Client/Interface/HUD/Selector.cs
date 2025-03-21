@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
@@ -15,10 +16,15 @@ namespace Pulsar4X.Client
 {
     public class Selector : PulsarGuiWindow
     {
+        private List<string> _knownSystems = new ();
+        private List<StarSystem> _filteredAndSortedSystems = new ();
+
         //constructs the toolbar with the given buttons
         private Selector()
         {
             _flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDocking;
+
+            _uiState.OnStarSystemAdded += SystemAdded;
         }
 
         internal static Selector GetInstance()
@@ -34,6 +40,7 @@ namespace Pulsar4X.Client
         internal override void Display()
         {
             if(!IsActive || _uiState.Faction == null) return;
+            if(_knownSystems.Count == 0) RefreshSystems();
 
             ImGui.SetNextWindowSize(new Vector2(256, 0));
             ImGui.SetNextWindowPos(new Vector2(ImGui.GetMainViewport().WorkSize.X - 256, 0));
@@ -54,23 +61,33 @@ namespace Pulsar4X.Client
             Window.End();
         }
 
-        private static void DisplaySystems()
+        private void RefreshSystems()
+        {
+            _knownSystems = _uiState.Faction?.GetDataBlob<FactionInfoDB>().KnownSystems ?? new ();
+            FilterAndSortSystems();
+        }
+
+        private void FilterAndSortSystems()
+        {
+            _filteredAndSortedSystems = _uiState.Game?.Systems
+                                            .Where(s => _knownSystems.Contains(s.ID))
+                                            .OrderBy(s => s.NameDB.OwnersName)
+                                            .ToList() ?? new ();
+        }
+
+        private void SystemAdded(GlobalUIState state, string systemId)
+        {
+            if(!_knownSystems.Contains(systemId))
+                _knownSystems.Add(systemId);
+
+            FilterAndSortSystems();
+        }
+
+        private void DisplaySystems()
         {
             if (ImGui.CollapsingHeader("Systems", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                // FIXME: this can be done once and updated only when KnownSystems changes
-                var knownSystems = _uiState.Faction?.GetDataBlob<FactionInfoDB>().KnownSystems;
-
-                if(knownSystems == null) return;
-
-                var filteredAndSortedSystems = _uiState.Game?.Systems
-                                                    .Where(s => knownSystems.Contains(s.ID))
-                                                    .OrderBy(s => s.NameDB.OwnersName)
-                                                    .ToList();
-
-                if(filteredAndSortedSystems == null) return;
-
-                foreach (var system in filteredAndSortedSystems)
+                foreach (var system in _filteredAndSortedSystems)
                 {
                     if (ImGui.Selectable(system.NameDB.OwnersName, _uiState.SelectedStarSystemId.Equals(system.ID)))
                     {
