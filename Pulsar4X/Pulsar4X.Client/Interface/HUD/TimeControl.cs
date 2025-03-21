@@ -8,7 +8,7 @@ namespace Pulsar4X.Client
 {
     public class TimeControl : PulsarGuiWindow
     {
-        MasterTimePulse _timeloop => _uiState.Game.TimePulse;
+        MasterTimePulse? _timeloop => _uiState.Game?.TimePulse;
 
         bool _isPaused = true;
         int _timeSpanValue = 1;
@@ -33,6 +33,10 @@ namespace Pulsar4X.Client
         float _freqTimeSpanValue = 0.1f;
         int _freqSpanType = 1;
 
+        Vector2 _iconSize = new Vector2(16, 16);
+        Vector2 _windowSize = new Vector2(200, 100);
+        Vector2 _windowPosition = new Vector2(0, 0);
+
         private TimeControl()
         {
             IsActive = true;
@@ -51,57 +55,60 @@ namespace Pulsar4X.Client
 
         internal override void Display()
         {
-            var iconSize = new System.Numerics.Vector2(16, 16);
-            var size = new System.Numerics.Vector2(200, 100);
-            var pos = new System.Numerics.Vector2(0,0);
-            var col = new Vector4(0, 0, 0, 0);
-
-
-            ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
-            ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
+            ImGui.SetNextWindowSize(_windowSize, ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowPos(_windowPosition, ImGuiCond.Appearing);
 
             Window.Begin("TimeControl", ref IsActive, _flags);
             ImGui.PushItemWidth(100);
 
-            ImGui.PushStyleColor(ImGuiCol.Header, col);
-            ImGui.PushStyleColor(ImGuiCol.HeaderActive, col);
-            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, col);
+            ImGui.PushStyleColor(ImGuiCol.Header, Styles.InvisibleColor);
+            ImGui.PushStyleColor(ImGuiCol.HeaderActive, Styles.InvisibleColor);
+            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Styles.InvisibleColor);
 
             DateTime currenttime = _uiState.SelectedSystemTime;
-            if (ImGui.CollapsingHeader("###time_freq", _xpanderFlags))//Let the user open up the the time frequency menu
-                _expanded = true;
-            else
-                _expanded = false;
+            _expanded = ImGui.CollapsingHeader("###time_freq", _xpanderFlags); //Let the user open up the the time frequency menu
+
             ImGui.PopStyleColor(3);
+
+            // Date display
             ImGui.SameLine();
             ImGui.Text(currenttime.ToShortDateString());
+
+            // Time span slider
             ImGui.SameLine();
             if (ImGui.SliderInt("##spnSldr", ref _timeSpanValue, 1, 60, _timeSpanValue.ToString()))
                 AdjustTimeSpan();
+
+            // Time duration combo
             ImGui.SameLine();
             if (ImGui.Combo("##spnCmbo", ref _timeSpanType, _timespanTypeSelection, _timespanTypeSelection.Length))
                 AdjustTimeSpan();
+
             ImGui.SameLine();
-            if (_isPaused == true)//When time is paused
+            if (_isPaused) //Time is paused
             {
-                if (ImGui.ImageButton("play", _uiState.Img_Play(), iconSize))//Provide a button to unpause
+                // Play button, runs the game until paused again
+                if (ImGui.ImageButton("play", _uiState.Img_Play(), _iconSize))
                     PausePlayPressed();
+
+                // Step button, run a single time step
                 ImGui.SameLine();
-                if (ImGui.ImageButton("onestep", _uiState.Img_OneStep(), iconSize))//Provide a button to increment time
+                if (ImGui.ImageButton("onestep", _uiState.Img_OneStep(), _iconSize))
                     OneStepPressed();
             }
-            else//When time is running
+            else // Time is running
             {
-                if (ImGui.ImageButton("pause", _uiState.Img_Pause(), iconSize))//Provide a button to unpause time
+                // Pause button
+                if (ImGui.ImageButton("pause", _uiState.Img_Pause(), _iconSize))
                     PausePlayPressed();
             }
 
-
-
-            if (_expanded)//When the submenu is expanded allow the user to adjust time frequency
+            //When the submenu is expanded allow the user to adjust time frequency
+            if (_expanded)
             {
                 ImGui.PushItemWidth(100);
-                ImGui.Text("   " + currenttime.ToLongTimeString());
+                ImGui.Indent();
+                ImGui.Text(currenttime.ToLongTimeString());
                 ImGui.SameLine();
                 if (ImGui.SliderFloat("##freqSldr", ref _freqTimeSpanValue, 0.1f, 1, _freqTimeSpanValue.ToString(), ImGuiSliderFlags.None))
                 {
@@ -118,6 +125,8 @@ namespace Pulsar4X.Client
 
         void AdjustTimeSpan()
         {
+            if(_timeloop == null) return;
+
             switch (_timeSpanType)
             {
                 case 0:
@@ -148,6 +157,8 @@ namespace Pulsar4X.Client
         }
         void ReadTimeSpan()
         {
+            if(_timeloop == null) return;
+
             switch (_timeSpanType)
             {
                 case 0:
@@ -178,6 +189,8 @@ namespace Pulsar4X.Client
         }
         void AdjustFreqency()
         {
+            if(_timeloop == null) return;
+
             switch (_freqSpanType)
             {
                 case 0:
@@ -208,6 +221,8 @@ namespace Pulsar4X.Client
         }
         void ReadFreqency()
         {
+            if(_timeloop == null) return;
+
             switch (_freqSpanType)
             {
                 case 0:

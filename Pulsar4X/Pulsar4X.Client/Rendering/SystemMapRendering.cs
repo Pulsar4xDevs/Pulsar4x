@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
-using SDL3;
 using Pulsar4X.Orbital;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Sensors;
@@ -24,9 +23,6 @@ namespace Pulsar4X.Client.Rendering
         ConcurrentQueue<Message>? _sensorChanges;
         SystemState? _sysState;
         Camera _camera;
-        internal IntPtr windowPtr;
-        internal IntPtr surfacePtr;
-        internal IntPtr rendererPtr;
         SDL3Window _window;
         internal Dictionary<string, IDrawData> UIWidgets = new ();
         ConcurrentDictionary<int, Icon> _testIcons = new ();
@@ -46,9 +42,6 @@ namespace Pulsar4X.Client.Rendering
 
             _camera = _state.Camera;
             _window = window;
-            windowPtr = window.Window;
-            surfacePtr = SDL.GetWindowSurface(windowPtr);
-            rendererPtr = SDL.GetRenderer(windowPtr);
             //UIWidgets.Add(new CursorCrosshair(new Vector4())); //used for debugging the cursor world position.
             foreach (var item in TestDrawIconData.GetTestIcons())
             {
@@ -384,52 +377,49 @@ namespace Pulsar4X.Client.Rendering
             RemoveIconable(entityId);
         }
 
-        internal void Draw()
+        internal void Update()
         {
+            if(_sysState == null) return;
 
-            if (_sysState != null)
+            foreach (var item in _sysState.EntityStatesWithPosition.Values)
             {
-                foreach (var item in _sysState.EntityStatesWithPosition.Values)
+                if (item.Changes.Count > 0)
                 {
-                    if (item.Changes.Count > 0)
-                    {
-                        HandleChanges(item);
-                    }
+                    HandleChanges(item);
                 }
             }
 
-            byte oR, oG, oB, oA;
-            SDL.GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
-            SDL.BlendMode blendMode;
-            SDL.GetRenderDrawBlendMode(rendererPtr, out blendMode);
-            SDL.SetRenderDrawBlendMode(rendererPtr, SDL.BlendMode.Blend);
-
             var matrix = _camera.GetZoomMatrix();
+            foreach (var (_, item) in UIWidgets)
+                item.OnFrameUpdate(matrix, _camera);
 
-            UpdateAndDraw(UIWidgets.Values.ToList(), matrix);
+            foreach (var (_, item) in _orbitRings)
+                item.OnFrameUpdate(matrix, _camera);
 
-            UpdateAndDraw(_orbitRings.Values.ToList(), matrix);
+            foreach (var (_, item) in _moveIcons)
+                item.OnFrameUpdate(matrix, _camera);
 
-            UpdateAndDraw(_moveIcons.Values.ToList(), matrix);
+            foreach (var (_, item) in _entityIcons)
+                item.OnFrameUpdate(matrix, _camera);
 
-            UpdateAndDraw(_entityIcons.Values.ToList(), matrix);
+            foreach (var item in SelectedEntityExtras)
+                item.OnFrameUpdate(matrix, _camera);
 
-            UpdateAndDraw(SelectedEntityExtras, matrix);
-
-
-            //because _nameIcons are imgui not sdl, we don't draw them here.
-            //we draw them in PulsarMainWindow.ImGuiLayout
             lock (_nameIcons)
             {
                 foreach (var item in _nameIcons.Values)
                     item.OnFrameUpdate(matrix, _camera);
             }
             TextIconsDistribute();
+        }
 
-            //ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
-
-            SDL.SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
-            SDL.SetRenderDrawBlendMode(rendererPtr, blendMode);
+        internal void Draw()
+        {
+            DrawIcons(UIWidgets.Values.ToList());
+            DrawIcons(_orbitRings.Values.ToList());
+            DrawIcons(_moveIcons.Values.ToList());
+            DrawIcons(_entityIcons.Values.ToList());
+            DrawIcons(SelectedEntityExtras);
         }
 
         public void DrawNameIcons()
@@ -449,70 +439,11 @@ namespace Pulsar4X.Client.Rendering
 
         }
 
-        void UpdateAndDraw(List<IDrawData> icons, Matrix matrix)
+        void DrawIcons(List<IDrawData> icons)
         {
             foreach (var item in icons)
-                item.OnFrameUpdate(matrix, _camera);
-            foreach (var item in icons)
-            {
-                // if(item is Icon)
-                // {
-                //     _uiState.ViewPort.Renderer.RenderLine(((Icon)item).GetDrawData(), _uiState.Camera);
-                // }
-                // else
-                // {
-                    item.Draw(rendererPtr, _camera);
-                //}
-            }
-
-            Shape[] shapes = new Shape[1]
-            {
-                new Shape()
-                {
-                    Points = new Vector2[3]
-                    {
-                        new Vector2() { X = 0, Y = 0 },
-                        new Vector2() { X = 100, Y = 100 },
-                        new Vector2() { X = 0, Y = 0 }
-                    },
-                    Color = new SDL.Color() { R = 0, G = 255, B = 0, A = 255 }
-                }
-            };
-            //_uiState.ViewPort.Renderer.RenderLine(shapes, _uiState.Camera);
-
-            shapes = new Shape[1]
-            {
-                new Shape()
-                {
-                    Points = new Vector2[3]
-                    {
-                        new Vector2() { X = 0, Y = 0 },
-                        new Vector2() { X = 150, Y = 100 },
-                        new Vector2() { X = 0, Y = 0 }
-                    },
-                    Color = new SDL.Color() { R = 255, G = 255, B = 128, A = 255 }
-                }
-            };
-            //_uiState.ViewPort.Renderer.RenderLine(shapes, _uiState.Camera);
+                item.Draw(_window.Renderer, _camera);
         }
-
-        void UpdateAndDraw(IList<IDrawData> icons, Matrix matrix)
-        {
-            foreach (var item in icons)
-                item.OnFrameUpdate(matrix, _camera);
-            foreach (var item in icons)
-                item.Draw(rendererPtr, _camera);
-        }
-        // void UpdateAndDraw(Dictionary<string, IDrawData> icons, Matrix matrix)
-        // {
-        //     lock (icons)
-        //     {
-        //         foreach (var item in icons.Values)
-        //             item.OnFrameUpdate(matrix, _camera);
-        //         foreach (var item in icons.Values)
-        //             item.Draw(rendererPtr, _camera);
-        //     }
-        // }
 
         public override bool GetActive()
         {

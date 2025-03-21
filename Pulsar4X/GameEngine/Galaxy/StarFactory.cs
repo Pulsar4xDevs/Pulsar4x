@@ -204,8 +204,10 @@ namespace Pulsar4X.Galaxy
 
                 // Initialize RelativePosition as 0,0,0. It will be updated when the star's orbit is calculated.
                 PositionDB positionData = new PositionDB(Vector3.Zero);
+                var nameDB = new NameDB($"{system.ManagerID} {stars.Count + 1}");
+                var orbitDB = new OrbitDB();
 
-                var baseDataBlobs = new List<BaseDataBlob> {starMVDB, starData, positionData};
+                var baseDataBlobs = new List<BaseDataBlob> { nameDB, starMVDB, starData, positionData, orbitDB };
 
                 var entity = Entity.Create();
                 system.AddEntity(entity, baseDataBlobs);
@@ -220,14 +222,13 @@ namespace Pulsar4X.Galaxy
             Entity anchorStar = stars[0];
             MassVolumeDB anchorMVDB = anchorStar.GetDataBlob<MassVolumeDB>();
             Entity previousStar = stars[0];
-            previousStar.SetDataBlob(new OrbitDB());
 
             int starIndex = 0;
             foreach (Entity currentStar in stars)
             {
                 StarInfoDB currentStarInfo = currentStar.GetDataBlob<StarInfoDB>();
-                NameDB currentStarNameDB = new NameDB(system.NameDB.DefaultName + " " + (char)('A' + starIndex) + " " + currentStarInfo.SpectralType + currentStarInfo.SpectralSubDivision + currentStarInfo.LuminosityClass);
-                currentStar.SetDataBlob(currentStarNameDB);
+                var currentStarNameDB = currentStar.GetDataBlob<NameDB>();
+                currentStarNameDB.SetDefaultName(system.NameDB.DefaultName + " " + (char)('A' + starIndex) + " " + currentStarInfo.SpectralType + currentStarInfo.SpectralSubDivision + currentStarInfo.LuminosityClass);
 
                 if (previousStar == currentStar)
                 {

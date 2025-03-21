@@ -22,7 +22,8 @@ namespace Pulsar4X.Client
 #endif
         public const string PreferencesFile = "preferences.ini";
         public const string SavesPath = "Saves";
-        public const string ModsPath = "Mods";
+        public static string ModsPath = "Mods";
+        public static string ResourcesPath = "Resources";
         private readonly GlobalUIState _state;
 
         float mouseDownX;
@@ -30,7 +31,7 @@ namespace Pulsar4X.Client
         int mouseDownAltX;
         int mouseDownAltY;
 
-        public PulsarMainWindow()
+        public PulsarMainWindow(string[] args)
             : base(AppName)
         {
             _state = new GlobalUIState(this);
@@ -42,20 +43,48 @@ namespace Pulsar4X.Client
 
                 if(string.IsNullOrEmpty(appDataDirectory)) throw new NullReferenceException("App data directory cannot be null");
 
+                // Set the deafault mods path
+                ModsPath = Path.Combine(appDataDirectory, ModsPath);
+
+                // Set the default resources path
+                {
+                    var exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    var exeDiretory = Path.GetDirectoryName(exePath);
+
+                    if(string.IsNullOrEmpty(exeDiretory)) throw new NullReferenceException("exe path cannot be null");
+
+                    ResourcesPath = Path.Combine(exeDiretory, ResourcesPath);
+                }
+
+                // Parse optional command line arguments
+                ParseCommandLineArguments(args);
+
                 // Create directories we need if they don't exist
                 TryCreateDirectory(appDataDirectory, SavesPath);
                 TryCreateDirectory(appDataDirectory, ModsPath);
 
                 // Make sure the base game mod is copied over to the mod directory
-                string sourceData = "Data";
-                string modsDirectory = Path.Combine(appDataDirectory, ModsPath);
-                DeleteThenCopyToDirectory(sourceData, modsDirectory);
+                // string sourceData = "Data";
+                // string modsDirectory = Path.Combine(appDataDirectory, ModsPath);
+                // DeleteThenCopyToDirectory(sourceData, modsDirectory);
 
                 // Load the available mods
                 ModsState.RefreshModListFromModsDirectory();
 
                 // Read and apply any window preferences
                 LoadPreferences();
+
+                // Load fonts
+                //PlatformBackend.LoadFont(ResourcesPath, "ProggyClean.ttf", 13f);
+                //PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ");
+
+                // This one works
+                var fontPtr = PlatformBackend.LoadFont(ResourcesPath, "PixelOperator.ttf", 16f);
+                var fontTexture = ImGuiRenderer.CreateFontsTexture(fontPtr);
+
+                // This one doesn't
+                // var fontPtr = PlatformBackend.LoadFont(ResourcesPath, "JetBrainsMono-Regular.ttf", 16f);
+                // var fontTexture = ImGuiRenderer.CreateFontsTexture(fontPtr);
             }
             catch(Exception e)
             {
@@ -183,6 +212,8 @@ namespace Pulsar4X.Client
             {
                 systemState.PreFrameSetup();
             }
+
+            _state.GalacticMap?.Update();
         }
 
         public override void Render()
@@ -264,6 +295,39 @@ namespace Pulsar4X.Client
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
+            }
+        }
+
+        /// <summary>
+        /// Parse command line arguments to setup the data and
+        /// resource paths
+        /// </summary>
+        /// <param name="args"></param>
+        private void ParseCommandLineArguments(string[] args)
+        {
+            for(int i = 0; i < args.Length; i++)
+            {
+                switch(args[i].ToLower())
+                {
+                    case "--data":
+                    case "-d":
+                        if(i + 1 < args.Length)
+                        {
+                            Console.WriteLine($"Using {args[i].ToLower()} = {ModsPath}");
+                            ModsPath = args[i + 1];
+                            i++;
+                        }
+                        break;
+                    case "--resources":
+                    case "-r":
+                        if(i + 1 < args.Length)
+                        {
+                            Console.WriteLine($"Using {args[i].ToLower()} = {ResourcesPath}");
+                            ResourcesPath = args[i + 1];
+                            i++;
+                        }
+                        break;
+                }
             }
         }
 

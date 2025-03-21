@@ -29,7 +29,6 @@ namespace Pulsar4X.Client
             }
         }
         Camera _camera;
-        IntPtr _renderPtr;
 
         CollisionGrid grid;
 
@@ -38,10 +37,6 @@ namespace Pulsar4X.Client
             _state = state;
             _window = window;
             _camera = state.Camera;
-
-            var windowPtr = window.Window;
-            var surfacePtr = SDL.GetWindowSurface(windowPtr);
-            _renderPtr = SDL.GetRenderer(windowPtr);
 
             var size = window.Size;
             int cellSize = 16;
@@ -173,8 +168,21 @@ namespace Pulsar4X.Client
             }
         }
 
+        internal void Update()
+        {
+            foreach(var (id, system) in RenderedMaps)
+            {
+                system.Update();
+            }
+        }
+
         internal void Draw()
         {
+            // Save the current render state & turn on blend mode
+            RenderState savedRenderState = _window.GetRenderState();
+            _window.SetBlendMode(SDL.BlendMode.Blend);
+
+            // Draw the appropriate map
             var matrix = _camera.GetZoomMatrix();
             var zoomlvl = _state.Camera.ZoomLevel;
             if (zoomlvl < 0.99) // draw galmap
@@ -199,11 +207,12 @@ namespace Pulsar4X.Client
                     RenderedMaps[SelectedStarSysGuid].Draw();
             }
 
+            // Restore the render state
+            _window.SetRenderState(savedRenderState);
         }
 
         private void DrawGalmap(Matrix matrix)
         {
-
             foreach (var item in StarIcons)
             {
                 item.Value.OnFrameUpdate(matrix, _camera);
@@ -213,21 +222,17 @@ namespace Pulsar4X.Client
                         name.OnFrameUpdate(matrix, _camera);
                 }
                 if(item.Key == _state.SelectedStarSystemId){
-                     item.Value.Draw(_renderPtr, _camera);
+                     item.Value.Draw(_window.Renderer, _camera);
                 }
-
-
-
             }
+
             lock (_nameIcons)
             {
                 foreach (var item in _nameIcons)
                 {
                     item.Value.OnFrameUpdate(matrix, _camera);
-
                 }
             }
-
         }
     }
 

@@ -91,6 +91,11 @@ namespace Pulsar4X.Names
             //do nothing for this.
         }
 
+        internal void SetDefaultName(string name)
+        {
+            _names[-1] = name;
+        }
+
         NameDB(NameDB db, SensorInfoDB sensorInfo)
         {
             _names.Add(-1, db.DefaultName);
