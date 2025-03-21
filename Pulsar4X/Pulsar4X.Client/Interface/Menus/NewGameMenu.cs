@@ -33,6 +33,11 @@ static class Helper
 
 public class NewGameMenu : PulsarGuiWindow
 {
+    private const int NAME_BUFFER_SIZE = 32;
+    private const int SHORTNAME_BUFFER_SIZE = 5;
+    private const string DEFAULT_NAME = "United Earth Corp";
+    private const string DEFAULT_ABBREVIATION = "UEC";
+
     Page _currentPage = Page.SelectMods;
     ModLoader _modLoader = new ModLoader();
     ModDataStore _modDataStore = new ModDataStore();
@@ -52,7 +57,8 @@ public class NewGameMenu : PulsarGuiWindow
     string _netPortString { get { return System.Text.Encoding.UTF8.GetString(_netPortInputBuffer); } }
     int _maxSystems = 5;
 
-    byte[] _factionInputBuffer = Utils.BytesFromString("UEF", 16);
+    byte[] _corporationNameBuffer = Utils.BytesFromString(DEFAULT_NAME, NAME_BUFFER_SIZE);
+    byte[] _corporationAbbreviationBuffer = Utils.BytesFromString(DEFAULT_ABBREVIATION, SHORTNAME_BUFFER_SIZE);
     byte[] _passInputBuffer = Utils.BytesFromString("", 16);
 
     byte[] _smPassInputbuffer = Utils.BytesFromString("", 16);
@@ -115,13 +121,6 @@ public class NewGameMenu : PulsarGuiWindow
     {
         ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), ImGuiChildFlags.None);
 
-        DisplayHelpers.Header("New Game Options");
-        // ImGui.InputText("SM Pass", _smPassInputbuffer, 16);
-        // ImGui.InputText("Password", _passInputBuffer, 16);
-        //ImGui.InputInt("Max Systems", ref _maxSystems);
-        ImGui.InputInt("Seed", ref _masterSeed);
-
-        ImGui.NewLine();
         DisplayHelpers.Header("Select Mods to Enable");
         if(ImGui.BeginTable("ModsList", 3, Styles.TableFlags))
         {
@@ -242,8 +241,9 @@ public class NewGameMenu : PulsarGuiWindow
     {
         ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), ImGuiChildFlags.None);
 
-        DisplayHelpers.Header("Game Setup");
-        ImGui.InputText("Faction Name", _factionInputBuffer, 16);
+        DisplayHelpers.Header("CORPORTATION SETUP");
+        ImGui.InputText("Corporation Name", _corporationNameBuffer, NAME_BUFFER_SIZE);
+        ImGui.InputText("Corporation Abbreviation", _corporationAbbreviationBuffer, SHORTNAME_BUFFER_SIZE);
 
         var display = _modDataStore.Species.TryGetValue(_selectedSpeciesId, out var speciesBlueprint) ? speciesBlueprint.Name : "";
         if(ImGui.BeginCombo("Select Species", display))
@@ -274,7 +274,7 @@ public class NewGameMenu : PulsarGuiWindow
         }
 
         display = _modDataStore.Colonies.TryGetValue(_selectedColonyId, out var colonyBlueprint) ? colonyBlueprint.Name : "";
-        if(ImGui.BeginCombo("Starting Colony Configuration", display))
+        if(ImGui.BeginCombo("Starting Corporation Configuration", display))
         {
             foreach(var (id, colony) in _modDataStore.Colonies)
             {
@@ -322,8 +322,26 @@ public class NewGameMenu : PulsarGuiWindow
             }
         }
 
-        ImGui.Checkbox("ELE start", ref _eleStart);
+        ImGui.NewLine();
+        DisplayHelpers.Header("GAME OPTIONS");
+
+        ImGui.InputInt("Game Seed", ref _masterSeed);
         ImGui.InputInt("Galaxy Size", ref _maxSystems);
+        if(ImGui.IsItemHovered())
+        {
+            DisplayHelpers.DescriptiveTooltip(
+                "Galaxy Size",
+                "",
+                "How many playable star systems the galaxy will have.");
+        }
+        ImGui.Checkbox("Include ELE", ref _eleStart);
+        if(ImGui.IsItemHovered())
+        {
+            DisplayHelpers.DescriptiveTooltip(
+                "End of Life Event",
+                "",
+                "Adds an end of life event the player must endeavor to discover and prevent.");
+        }
 
         ImGui.EndChild();
         ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
@@ -377,7 +395,7 @@ public class NewGameMenu : PulsarGuiWindow
             MaxSystems = _maxSystems,
             SMPassword = Utils.StringFromBytes(_smPassInputbuffer),
             CreatePlayerFaction = true,
-            DefaultFactionName = Utils.StringFromBytes(_factionInputBuffer),
+            DefaultFactionName = Utils.StringFromBytes(_corporationNameBuffer),
             DefaultPlayerPassword = Utils.StringFromBytes(_passInputBuffer),
             DefaultSolStart = true,
             MasterSeed = _masterSeed,
@@ -443,7 +461,7 @@ public class NewGameMenu : PulsarGuiWindow
         if(startingSystem == null || startingBody == null) return;
 
         // Create the players faction
-        var playerFaction = FactionFactory.CreateBasicFaction(game, gameSettings.DefaultFactionName);
+        var playerFaction = FactionFactory.CreateBasicFaction(game, gameSettings.DefaultFactionName, Utils.StringFromBytes(_corporationAbbreviationBuffer));
 
         if(playerFaction == null) return;
 
