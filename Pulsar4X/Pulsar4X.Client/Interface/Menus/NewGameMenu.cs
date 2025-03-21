@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Security.Cryptography;
@@ -37,6 +38,8 @@ public class NewGameMenu : PulsarGuiWindow
     private const int SHORTNAME_BUFFER_SIZE = 5;
     private const string DEFAULT_NAME = "United Earth Corp";
     private const string DEFAULT_ABBREVIATION = "UEC";
+    private const int MIN_STARTING_FUNDS = 1_000_000;
+    private const int MAX_STARTING_FUNDS = 1_000_000_000;
 
     Page _currentPage = Page.SelectMods;
     ModLoader _modLoader = new ModLoader();
@@ -56,6 +59,7 @@ public class NewGameMenu : PulsarGuiWindow
     byte[] _netPortInputBuffer = new byte[8];
     string _netPortString { get { return System.Text.Encoding.UTF8.GetString(_netPortInputBuffer); } }
     int _maxSystems = 5;
+    int _startingFunds = 100_000_000;
 
     byte[] _corporationNameBuffer = Utils.BytesFromString(DEFAULT_NAME, NAME_BUFFER_SIZE);
     byte[] _corporationAbbreviationBuffer = Utils.BytesFromString(DEFAULT_ABBREVIATION, SHORTNAME_BUFFER_SIZE);
@@ -322,6 +326,17 @@ public class NewGameMenu : PulsarGuiWindow
             }
         }
 
+        int tempStartingFunds = _startingFunds;
+
+        if (ImGui.SliderInt("Starting Funds", ref tempStartingFunds,
+                            MIN_STARTING_FUNDS, MAX_STARTING_FUNDS,
+                            tempStartingFunds.ToString("C0", CultureInfo.CurrentCulture),
+                            ImGuiSliderFlags.ClampOnInput))
+        {
+            // Round to the nearest million when the value changes
+            _startingFunds = (int)Math.Round(tempStartingFunds / 1000000.0) * 1000000;
+        }
+
         ImGui.NewLine();
         DisplayHelpers.Header("GAME OPTIONS");
 
@@ -461,7 +476,11 @@ public class NewGameMenu : PulsarGuiWindow
         if(startingSystem == null || startingBody == null) return;
 
         // Create the players faction
-        var playerFaction = FactionFactory.CreateBasicFaction(game, gameSettings.DefaultFactionName, Utils.StringFromBytes(_corporationAbbreviationBuffer));
+        var playerFaction = FactionFactory.CreateBasicFaction(
+                                game,
+                                gameSettings.DefaultFactionName,
+                                Utils.StringFromBytes(_corporationAbbreviationBuffer),
+                                _startingFunds);
 
         if(playerFaction == null) return;
 

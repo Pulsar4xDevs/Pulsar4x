@@ -21,6 +21,9 @@ namespace Pulsar4X.Factions
         public string Abbreviation { get; internal set; } = "";
 
         [JsonProperty]
+        public long Money { get; internal set; } = 0;
+
+        [JsonProperty]
         public FactionDataStore Data { get; internal set; } = new FactionDataStore();
 
         [JsonProperty]

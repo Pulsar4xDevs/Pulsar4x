@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
@@ -52,8 +54,7 @@ namespace Pulsar4X.Client
                 // {
                 //     _uiState.SelectedMapView = SystemViewPreferences.GetInstance().GetViewByIndex(selectedIndex);
                 // });
-
-                DisplayHelpers.Header($"{_uiState.Faction.GetFactionName()} [{_uiState.Faction.GetFactionAbbreviation()}]");
+                DisplayCorporation();
                 DisplaySystems();
                 DisplayColonies();
                 DisplayFleets();
@@ -81,6 +82,44 @@ namespace Pulsar4X.Client
                 _knownSystems.Add(systemId);
 
             FilterAndSortSystems();
+        }
+
+        private void DisplayCorporation()
+        {
+            if(_uiState.Faction == null) return;
+
+            if(ImGui.CollapsingHeader($"{_uiState.Faction.GetFactionName()} [{_uiState.Faction.GetFactionAbbreviation()}]", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                if(!_uiState.Faction.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+                    return;
+
+                string label = "Funds";
+                string value = factionInfoDB.Money.ToString("C0", CultureInfo.CurrentCulture);
+
+                // Get available width in current line
+                float availWidth = ImGui.GetContentRegionAvail().X;
+
+                // Calculate the width of the value text
+                Vector2 valueSize = ImGui.CalcTextSize(value);
+
+                // Calculate how many spaces we need to add
+                float textWidth = ImGui.CalcTextSize(label).X + valueSize.X;
+                float remainingWidth = availWidth - textWidth;
+
+
+                // Create a padding string
+                string padding = "";
+                if (remainingWidth > 0)
+                {
+                    // Estimate how many spaces we need based on space width
+                    float spaceWidth = ImGui.CalcTextSize(" ").X;
+                    int spacesNeeded = (int)(remainingWidth / spaceWidth);
+                    padding = new string(' ', Math.Max(0, spacesNeeded));
+                }
+
+                // Create the selectable with the label, padding, and value
+                ImGui.Selectable($"{label}{padding}{value}");
+            }
         }
 
         private void DisplaySystems()
