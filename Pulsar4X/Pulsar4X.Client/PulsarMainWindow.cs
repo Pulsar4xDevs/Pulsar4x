@@ -69,7 +69,7 @@ namespace Pulsar4X.Client
                 // DeleteThenCopyToDirectory(sourceData, modsDirectory);
 
                 // Load the available mods
-                ModsState.RefreshModListFromModsDirectory();
+                ModsState.RefreshModsList(ModsPath);
 
                 // Read and apply any window preferences
                 LoadPreferences();
