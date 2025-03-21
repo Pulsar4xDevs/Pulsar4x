@@ -52,8 +52,16 @@ namespace Pulsar4X.Client
                     {
                         _saveGame = !_saveGame;
 
-                        // Set the save name equal to the game name by default (player can change it in the dialog)
-                        SaveGame.GetInstance().UpdateSaveName(_uiState.Game.Name);
+                        // Set the save name equal to the corporation name by default (player can change it in the dialog)
+                        string corpName = _uiState.Faction?.GetFactionName() ?? "Unknown";
+                        string dateTime = _uiState.SelectedSystemTime.ToString("yyyy-MM-dd_HH-mm-ss");
+                        string unsanitizedName = $"{corpName} - {dateTime}";
+
+                        // Remove any invalid filename characters
+                        char[] invalidChars = Path.GetInvalidFileNameChars();
+                        string saveName = string.Join("_", unsanitizedName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries));
+
+                        SaveGame.GetInstance().UpdateSaveName(saveName);
                         SaveGame.GetInstance().ToggleActive();
                         SetActive(false);
                     }
