@@ -22,6 +22,8 @@ namespace Pulsar4X.Colonies
 {
     public static class ColonyFactory
     {
+        public const string DEFAULT_SUFFIX = "HQ";
+
         public static Entity CreateFromBlueprint(Game game, Entity faction, Entity species, StarSystem startingSystem, Entity systemBody, ColonyBlueprint colonyBlueprint)
         {
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
@@ -60,7 +62,7 @@ namespace Pulsar4X.Colonies
             var blobs = new List<BaseDataBlob>();
 
             string planetName = systemBody.GetDataBlob<NameDB>().GetName(faction.Id);
-            NameDB name = new NameDB(planetName + " Colony"); // TODO: Review default name.
+            NameDB name = new NameDB($"{planetName} {DEFAULT_SUFFIX}"); // TODO: Review default name.
             name.SetName(faction.Id, name.DefaultName);
 
             var pos = new Vector3(systemBody.GetDataBlob<MassVolumeDB>().RadiusInM, 0, 0);
