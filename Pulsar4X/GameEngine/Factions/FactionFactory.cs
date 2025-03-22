@@ -312,12 +312,16 @@ namespace Pulsar4X.Factions
             return factionEntity;
         }
 
-        public static Entity CreateBasicFaction(Game game, string factionName)
+        public static Entity CreateBasicFaction(Game game, string factionName, string abbreviation, int startingFunds)
         {
             var name = new NameDB(factionName);
 
             //var facinfo = new FactionInfoDB(new List<Entity>(), new List<Guid>(), );
-            var factionInfo = new FactionInfoDB();
+            var factionInfo = new FactionInfoDB()
+            {
+                Abbreviation = abbreviation,
+                Money = (long)startingFunds
+            };
             factionInfo.Data = new FactionDataStore(game.StartingGameData);
 
             var factionTechDB = new FactionTechDB();

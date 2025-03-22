@@ -69,18 +69,20 @@ namespace Pulsar4X.Client
                 // DeleteThenCopyToDirectory(sourceData, modsDirectory);
 
                 // Load the available mods
-                ModsState.RefreshModListFromModsDirectory();
+                ModsState.RefreshModsList(ModsPath);
 
                 // Read and apply any window preferences
                 LoadPreferences();
 
                 // Load fonts
-                //PlatformBackend.LoadFont(ResourcesPath, "ProggyClean.ttf", 13f);
-                //PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ");
+                var fontPtr = PlatformBackend.LoadFont(ResourcesPath, "ProggyClean.ttf", 13f);
+                var texturePtr = ImGuiRenderer.CreateFontsTexture(fontPtr);
+                fontPtr = PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ", true);
+                texturePtr = ImGuiRenderer.CreateFontsTexture(fontPtr);
 
                 // This one works
-                var fontPtr = PlatformBackend.LoadFont(ResourcesPath, "PixelOperator.ttf", 16f);
-                var fontTexture = ImGuiRenderer.CreateFontsTexture(fontPtr);
+                // var fontPtr = PlatformBackend.LoadFont(ResourcesPath, "PixelOperator.ttf", 16f);
+                // var fontTexture = ImGuiRenderer.CreateFontsTexture(fontPtr);
 
                 // This one doesn't
                 // var fontPtr = PlatformBackend.LoadFont(ResourcesPath, "JetBrainsMono-Regular.ttf", 16f);

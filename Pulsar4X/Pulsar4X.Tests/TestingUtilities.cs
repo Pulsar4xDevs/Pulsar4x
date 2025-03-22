@@ -49,7 +49,7 @@ namespace Pulsar4X.Tests
 
         internal static Game CreateTestUniverse(int numSystems, DateTime testTime, bool generateDefaultHumans = false)
         {
-            var gamesettings = new NewGameSettings { GameName = "Unit Test Game", StartDateTime = testTime, MaxSystems = numSystems, DefaultSolStart = generateDefaultHumans, CreatePlayerFaction = false };
+            var gamesettings = new NewGameSettings { StartDateTime = testTime, MaxSystems = numSystems, DefaultSolStart = generateDefaultHumans, CreatePlayerFaction = false };
             ModLoader modLoader = new ModLoader();
             ModDataStore modDataStore = new ModDataStore();
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
@@ -125,7 +125,7 @@ namespace Pulsar4X.Tests
         internal TestGame(int numSystems = 10)
         {
 
-            GameSettings = new  NewGameSettings { GameName = "Unit Test Game", MaxSystems = numSystems, CreatePlayerFaction = false };
+            GameSettings = new  NewGameSettings { MaxSystems = numSystems, CreatePlayerFaction = false };
             ModLoader modLoader = new ModLoader();
             ModDataStore modDataStore = new ModDataStore();
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);

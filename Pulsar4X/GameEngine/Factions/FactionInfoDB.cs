@@ -18,6 +18,12 @@ namespace Pulsar4X.Factions
     public class FactionInfoDB : BaseDataBlob
     {
         [JsonProperty]
+        public string Abbreviation { get; internal set; } = "";
+
+        [JsonProperty]
+        public long Money { get; internal set; } = 0;
+
+        [JsonProperty]
         public FactionDataStore Data { get; internal set; } = new FactionDataStore();
 
         [JsonProperty]
@@ -68,7 +74,7 @@ namespace Pulsar4X.Factions
 
 
 
-        
+
         /// <summary>
         /// stores sensor contacts for the entire faction, when a contact is created it gets added here.
         /// </summary>
