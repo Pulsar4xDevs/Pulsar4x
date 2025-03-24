@@ -124,18 +124,17 @@ namespace Pulsar4X.Client
                     {
                         RefreshTechs();
                     }
-
                     DisplayTechs();
-                    ImGui.EndChild();
                 }
+                ImGui.EndChild();
+
                 ImGui.SameLine();
                 if(ImGui.BeginChild("Teams", firstChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayHelpers.Header("Teams");
-
                     DisplayTeams();
-                    ImGui.EndChild();
                 }
+                ImGui.EndChild();
 
                 if (_selectedTeam == -1)
                 {
@@ -144,9 +143,8 @@ namespace Pulsar4X.Client
                        _selectedTeam = 0;
                     }
                 }
-
-                Window.End();
             }
+            Window.End();
         }
 
         private void DisplayTeams()
