@@ -72,8 +72,8 @@ namespace Pulsar4X.Client
                             ImGui.TreePop();
                         }
                     }
-                    ImGui.EndChild();
                 }
+                ImGui.EndChild();
 
                 if (SelectedEntity == null)
                 {
@@ -113,8 +113,8 @@ namespace Pulsar4X.Client
                         ImGui.EndTabItem();
                     }
                     ImGui.EndTabBar();
-                    ImGui.EndChild();
                 }
+                ImGui.EndChild();
             }
             Window.End();
         }

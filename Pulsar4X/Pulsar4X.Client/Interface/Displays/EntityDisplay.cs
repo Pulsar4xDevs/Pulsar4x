@@ -65,8 +65,9 @@ namespace Pulsar4X.Client
                         ImGui.Text("No Atmosphere");
                     }
                 }
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
+
             ImGui.SameLine();
             if(ImGui.BeginChild("ColonySummary2", secondChildSize, ImGuiChildFlags.Borders))
             {
@@ -80,9 +81,9 @@ namespace Pulsar4X.Client
                         componentInstances.Display(entityState, uiState);
                     }
                 }
-
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
+
             ImGui.SameLine();
             if(ImGui.BeginChild("ColonySummary3", thirdChildSize, ImGuiChildFlags.Borders))
             {
@@ -109,8 +110,8 @@ namespace Pulsar4X.Client
                         storage.Display(entityState, uiState, ImGuiTreeNodeFlags.None);
                     }
                 }
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
         }
 
         public static void DisplayIndustry(this Entity entity, EntityState entityState, GlobalUIState uiState)
