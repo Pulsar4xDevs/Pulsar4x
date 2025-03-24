@@ -29,6 +29,9 @@ namespace Pulsar4X.Client
 
         public void SetEntity(Entity entity)
         {
+            if(_uiState.Faction == null)
+                throw new NullReferenceException("_uiState.Faction cannot be null");
+
             _selectedEntity = entity;
             _nameInputBuffer = System.Text.Encoding.UTF8.GetBytes(entity.GetName(_uiState.Faction.Id));
             IsActive = true;
@@ -66,7 +69,9 @@ namespace Pulsar4X.Client
                 ImGui.SameLine();
                 if (ImGui.SmallButton("Save"))//Gives the user the option to set the name
                 {
-                    if(_nameInputBuffer[0] != 0 && _selectedEntity != null)//If the user has not entered an empty name
+                    //If the user has not entered an empty name
+                    if(_nameInputBuffer[0] != 0 && _selectedEntity != null
+                        && _uiState.Game != null && _uiState.Faction != null)
                     {
                         RenameCommand.CreateRenameCommand(_uiState.Game, _uiState.Faction, _selectedEntity, NameString);
                         ImGui.CloseCurrentPopup();

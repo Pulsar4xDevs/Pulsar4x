@@ -90,6 +90,9 @@ namespace Pulsar4X.Client
         private ShipDesignWindow()
         {
             //_flags = ImGuiWindowFlags.NoCollapse;
+            if(_uiState.Faction == null)
+                throw new NullReferenceException("_uiState.Faction cannot be null");
+
             _factionInfoDB = _uiState.Faction.GetDataBlob<FactionInfoDB>();
 
             RefreshComponentDesigns();
@@ -750,7 +753,7 @@ namespace Pulsar4X.Client
         {
             if(!DesignChanged) return;
 
-            if(_armor == null)
+            if(_armor == null || _uiState.Faction == null)
                 throw new NullReferenceException();
 
             _profile = new EntityDamageProfileDB(SelectedComponents, (_armor, _armorThickness));

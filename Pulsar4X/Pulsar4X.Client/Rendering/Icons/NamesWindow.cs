@@ -5,9 +5,8 @@ namespace Pulsar4X.Client
 {
     class NameWidget : IComparable<NameWidget>, IRectangle
     {
-        EntityState EntityState;
-        string NameString { get { return EntityState.Name; } }
-        List<EntityState> SubEntites;
+        EntityState? EntityState;
+        string? NameString { get { return EntityState?.Name; } }
 
         public System.Numerics.Vector2 WorldPosition;
         public System.Numerics.Vector2 ViewPostion;
@@ -19,15 +18,21 @@ namespace Pulsar4X.Client
         public float Width { get; set; }
         public float Height { get; set; }
 
-        public int CompareTo(NameWidget compareIcon)
+        public int CompareTo(NameWidget? compareIcon)
         {
+            if (compareIcon == null) throw new ArgumentNullException(nameof(compareIcon));
             if (WorldPosition.Y > compareIcon.WorldPosition.Y) return -1;
             else if (this.WorldPosition.Y < compareIcon.WorldPosition.Y) return 1;
             else
             {
                 if (this.WorldPosition.X > compareIcon.WorldPosition.X) return 1;
                 else if (this.WorldPosition.X < compareIcon.WorldPosition.X) return -1;
-                else return -NameString.CompareTo(compareIcon.NameString);
+                else
+                {
+                    if (NameString == null) return compareIcon.NameString == null ? 0 : 1;
+                    if (compareIcon.NameString == null) return -1;
+                    return -NameString.CompareTo(compareIcon.NameString);
+                }
             }
         }
     }

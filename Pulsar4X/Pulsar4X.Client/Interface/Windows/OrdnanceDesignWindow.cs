@@ -59,6 +59,8 @@ namespace Pulsar4X.Client
 
         public void HardRefresh()
         {
+            if(_uiState.Faction == null) return;
+
             var designs = _uiState.Faction.GetDataBlob<FactionInfoDB>().MissileDesigns;
             var componentDesigns = _uiState.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns;
             _faction = _uiState.Faction;
@@ -157,7 +159,8 @@ namespace Pulsar4X.Client
                 || _currentDesignNames == null
                 || _payload == null
                 || _electronicsPackage == null
-                || _factionTech == null)
+                || _factionTech == null
+                || _uiState.Faction == null)
                 return;
 
             if (Window.Begin("Ordnance Design"))
@@ -289,7 +292,7 @@ namespace Pulsar4X.Client
                 _engineDesigner.Name = "MissileEngine" + _engineDesigner.MassValue +","+ thrustNewtons;
                 var engineDesign = _engineDesigner.CreateDesign(_faction);
                 misslcomponents.Add((engineDesign, 1));
-                OrdnanceDesign missileDesign = new OrdnanceDesign(_uiState.Faction.GetDataBlob<FactionInfoDB>(), strName, _fuelKG, misslcomponents);
+                OrdnanceDesign missileDesign = new OrdnanceDesign(_faction.GetDataBlob<FactionInfoDB>(), strName, _fuelKG, misslcomponents);
                 //missileDesign.DesignVersion = version;
             }
         }

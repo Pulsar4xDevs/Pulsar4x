@@ -148,7 +148,14 @@ namespace Pulsar4X.Client
 
         private bool DoAnySavesExist()
         {
-            var path = Path.Combine(PulsarMainWindow.GetAppDataPath(), PulsarMainWindow.SavesPath);
+            var appDataDirectory = PulsarMainWindow.GetAppDataPath();
+
+            if(string.IsNullOrEmpty(appDataDirectory))
+            {
+                return false;
+            }
+
+            var path = Path.Combine(appDataDirectory, PulsarMainWindow.SavesPath);
             var saveFiles = Directory.GetFiles(path, "*.sav");
 
             return saveFiles.Length > 0;

@@ -287,6 +287,9 @@ namespace Pulsar4X.Client
 
         private static void DisplayTooltip(Camera camera, NameIcon icon)
         {
+            if(icon._state.Faction == null)
+                throw new NullReferenceException();
+
             var name = icon.NameString;
             var type = icon.EntityState.BodyType.ToString();
             Action? callback = null;

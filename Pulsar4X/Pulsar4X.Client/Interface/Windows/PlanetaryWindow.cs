@@ -30,7 +30,7 @@ namespace Pulsar4X.Client
         {
             _uiState = state;
             SetName("PlanetaryWindow|" + entity.Entity.Id.ToString());
-            if (_mineralDefinitions == null) {
+            if (_mineralDefinitions == null && _uiState.Faction != null) {
                 _mineralDefinitions = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMineralsList().ToList();
                 _maxMineralNameLength = _mineralDefinitions.Max(x => x.Name.Length);
             }
@@ -125,6 +125,9 @@ namespace Pulsar4X.Client
 
         private void RenderGeneralInfo()
         {
+            if(_lookedAtEntity == null
+                || _uiState.Game == null) return;
+
             var headerRow = new List<KeyValuePair<string, TextAlign>>
             {
                 new KeyValuePair<string, TextAlign>("", TextAlign.Left),
@@ -132,8 +135,6 @@ namespace Pulsar4X.Client
             };
 
             List<string[]> rowData = new List<string[]>();
-
-            if(_lookedAtEntity == null) return;
 
             if (_lookedAtEntity.Entity.HasDataBlob<SystemBodyInfoDB>())
             {
