@@ -27,6 +27,7 @@ namespace Pulsar4X.Client
             _flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDocking;
 
             _uiState.OnStarSystemAdded += SystemAdded;
+            _uiState.OnFactionChanged += FactionChanged;
         }
 
         internal static Selector GetInstance()
@@ -74,6 +75,11 @@ namespace Pulsar4X.Client
                                             .Where(s => _knownSystems.Contains(s.ID))
                                             .OrderBy(s => s.NameDB.OwnersName)
                                             .ToList() ?? new ();
+        }
+
+        private void FactionChanged(GlobalUIState state)
+        {
+            RefreshSystems();
         }
 
         private void SystemAdded(GlobalUIState state, string systemId)

@@ -55,17 +55,21 @@ namespace Pulsar4X.Client.Rendering
 
         internal void Initialize(StarSystem starSys)
         {
+            if(_state.Faction == null)
+                throw new NullReferenceException();
+
+            _faction = _state.Faction;
+
             if (_state.StarSystemStates.ContainsKey(starSys.ID))
             {
                 _sysState = _state.StarSystemStates[starSys.ID];
             }
             else
             {
-                _sysState = new SystemState(starSys, _state.Faction.Id);
+                _sysState = new SystemState(starSys, _faction.Id);
                 _state.StarSystemStates[_sysState.StarSystem.ID] = _sysState;
             }
 
-            _faction = _state.Faction;
             _sensorMgr = starSys.GetSensorContacts(_faction.Id);
             _sensorChanges = _sensorMgr.Changes.Subscribe();
             _sysState.OnEntityAdded += OnSystemStateEntityAdded;
@@ -88,6 +92,9 @@ namespace Pulsar4X.Client.Rendering
 
             _sysState = systemState;
             _state.StarSystemStates[_sysState.StarSystem.ID] = _sysState;
+
+            if(_state.Faction == null)
+                throw new NullReferenceException();
 
             _faction = _state.Faction;
             _sensorMgr = systemState.StarSystem.GetSensorContacts(_faction.Id);

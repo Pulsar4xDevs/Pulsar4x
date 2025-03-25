@@ -52,26 +52,3 @@ jobs:
       run: |
         cd Pulsar4X
         dotnet test --no-restore
-
-  macOS-14:
-    runs-on: macos-14
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-
-    - name: Build
-      shell: bash
-      run: |
-        cd Pulsar4X
-        dotnet restore "Pulsar4X.sln"
-        dotnet build --no-restore
-
-    - name: Run tests
-      shell: bash
-      run: |
-        cd Pulsar4X
-        dotnet test --no-restore

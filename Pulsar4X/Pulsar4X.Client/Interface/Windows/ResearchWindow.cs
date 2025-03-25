@@ -29,7 +29,8 @@ namespace Pulsar4X.Client
         private ResearchWindow()
         {
             OnFactionChange();
-            _uiState.Game.TimePulse.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent;
+            if(_uiState.Game != null)
+                _uiState.Game.TimePulse.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent;
         }
 
         private void GameLoopOnGameGlobalDateChangedEvent(DateTime newdate)
@@ -54,6 +55,9 @@ namespace Pulsar4X.Client
 
         private void OnFactionChange()
         {
+            if(_uiState.Faction == null || _uiState.Game == null)
+                return;
+
             _factionData = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data;
             _factionTechDB = _uiState.Faction.GetDataBlob<FactionTechDB>();
             _scienceTeams = _factionTechDB.AllScientists;
@@ -120,18 +124,17 @@ namespace Pulsar4X.Client
                     {
                         RefreshTechs();
                     }
-
                     DisplayTechs();
-                    ImGui.EndChild();
                 }
+                ImGui.EndChild();
+
                 ImGui.SameLine();
                 if(ImGui.BeginChild("Teams", firstChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayHelpers.Header("Teams");
-
                     DisplayTeams();
-                    ImGui.EndChild();
                 }
+                ImGui.EndChild();
 
                 if (_selectedTeam == -1)
                 {
@@ -140,16 +143,16 @@ namespace Pulsar4X.Client
                        _selectedTeam = 0;
                     }
                 }
-
-                Window.End();
             }
+            Window.End();
         }
 
         private void DisplayTeams()
         {
             if(_scienceTeams == null
                 || _factionData == null
-                || _researchableTechsByGuid == null)
+                || _researchableTechsByGuid == null
+                || _uiState.Faction == null)
                 return;
 
             if(ImGui.BeginTable("Teams", 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.SizingStretchProp))
@@ -247,7 +250,7 @@ namespace Pulsar4X.Client
         }
         private void DisplayTechs()
         {
-            if(_factionData == null || _scienceTeams == null)
+            if(_factionData == null || _scienceTeams == null || _uiState.Game == null)
                 return;
 
             if(ImGui.BeginTable("ResearchableTechs", 1, ImGuiTableFlags.BordersInnerV))

@@ -614,17 +614,17 @@ namespace Pulsar4X.Client
             _radialDV = 0;
             if (_endpointInitalOrbitWidget != null)
             {
-                _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(_endpointInitalOrbitWidget)+"initOrbit");
+                _uiState.SelectedSysMapRender?.UIWidgets.Remove(nameof(_endpointInitalOrbitWidget)+"initOrbit");
                 _endpointInitalOrbitWidget = null;
             }
             if (_endpointTargetOrbitWidget != null)
             {
-                _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(_endpointTargetOrbitWidget)+"tgtOrbit");
+                _uiState.SelectedSysMapRender?.UIWidgets.Remove(nameof(_endpointTargetOrbitWidget)+"tgtOrbit");
                 _endpointTargetOrbitWidget = null;
             }
             if (_moveWidget != null)
             {
-                _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(_moveWidget));
+                _uiState.SelectedSysMapRender?.UIWidgets.Remove(nameof(_moveWidget));
                 _moveWidget = null;
             }
         }

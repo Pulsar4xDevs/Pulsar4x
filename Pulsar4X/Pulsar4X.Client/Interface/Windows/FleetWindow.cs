@@ -87,6 +87,9 @@ namespace Pulsar4X.Client
 
         private void FactionChanged(GlobalUIState uiState)
         {
+            if(uiState.Faction == null)
+                throw new NullReferenceException();
+
             factionID = uiState.Faction.Id;
             factionRoot = uiState.Faction.GetDataBlob<FleetDB>();
 
@@ -227,7 +230,7 @@ namespace Pulsar4X.Client
                                 ImGui.NextColumn();
                                 if (ImGui.SmallButton(positionDB.Parent?.GetName(factionID) ?? "Unknown"))
                                 {
-                                    if(positionDB.Parent != null)
+                                    if(positionDB.Parent != null && starSystem != null)
                                         _uiState.EntityClicked(positionDB.Parent.Id, starSystem.ManagerID, MouseButtons.Primary);
                                 }
                             }
@@ -503,9 +506,11 @@ namespace Pulsar4X.Client
 
         private void IssueOrdersDisplay(Vector2 size)
         {
+
             if(ImGui.BeginChild("IssueOrders", size, ImGuiChildFlags.Borders))
             {
-                if(SelectedFleet == null || SelectedFleet.Manager == null)
+                if(SelectedFleet == null || SelectedFleet.Manager == null
+                    || _uiState.Faction == null || _uiState.Game == null)
                 {
                     ImGui.EndChild();
                     return;
@@ -643,6 +648,9 @@ namespace Pulsar4X.Client
 
         private void DisplayOrders()
         {
+            if(SelectedFleet == null)
+                return;
+
             var xPosition = ImGui.GetCursorPosX();
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
 
@@ -787,9 +795,12 @@ namespace Pulsar4X.Client
 
             if(ImGui.Button("Create New Fleet", new Vector2(Styles.LeftColumnWidthLg, 0f)))
             {
-                string name = NameFactory.GetFleetName(_uiState.Game);
-                var order = FleetOrder.CreateFleetOrder(name, _uiState.Faction, _uiState.SelectedSystem);
-                _uiState.Game.OrderHandler.HandleOrder(order);
+                if(_uiState.Game != null && _uiState.Faction != null)
+                {
+                    string name = NameFactory.GetFleetName(_uiState.Game);
+                    var order = FleetOrder.CreateFleetOrder(name, _uiState.Faction, _uiState.SelectedSystem);
+                    _uiState.Game.OrderHandler.HandleOrder(order);
+                }
             }
         }
 
@@ -873,7 +884,7 @@ namespace Pulsar4X.Client
                 if(ImGui.MenuItem("Disband###delete-" + fleet.Id))
                 {
                     var order = FleetOrder.DisbandFleet(factionID, fleet);
-                    _uiState.Game.OrderHandler.HandleOrder(order);
+                    _uiState.Game?.OrderHandler.HandleOrder(order);
                     SelectFleet(null);
                 }
                 ImGui.PopStyleColor();
@@ -900,7 +911,7 @@ namespace Pulsar4X.Client
                     if(ImGui.MenuItem("Promote to Flagship"))
                     {
                         var setFlagshipOrder = FleetOrder.SetFlagShip(factionID, SelectedFleet, ship);
-                        _uiState.Game.OrderHandler.HandleOrder(setFlagshipOrder);
+                        _uiState.Game?.OrderHandler.HandleOrder(setFlagshipOrder);
                         SelectFleet(SelectedFleet);
                     }
                     if(selectedFleetFlagship != null && ship.Id == selectedFleetFlagship.Id)
@@ -953,10 +964,10 @@ namespace Pulsar4X.Client
                     {
                         var unassignFrom = factionRoot.Children.Contains(ship) ? factionRoot.OwningEntity : SelectedFleet;
                         var unassignOrder = FleetOrder.UnassignShip(factionID, unassignFrom, ship);
-                        _uiState.Game.OrderHandler.HandleOrder(unassignOrder);
+                        _uiState.Game?.OrderHandler.HandleOrder(unassignOrder);
 
                         var assignOrder = FleetOrder.AssignShip(factionID, fleet, ship);
-                        _uiState.Game.OrderHandler.HandleOrder(assignOrder);
+                        _uiState.Game?.OrderHandler.HandleOrder(assignOrder);
                     }
                     else
                     {
@@ -966,10 +977,10 @@ namespace Pulsar4X.Client
 
                             var unassignFrom = factionRoot.Children.Contains(selectedShip) ? factionRoot.OwningEntity : SelectedFleet;
                             var unassignOrder = FleetOrder.UnassignShip(factionID, unassignFrom, selectedShip);
-                            _uiState.Game.OrderHandler.HandleOrder(unassignOrder);
+                            _uiState.Game?.OrderHandler.HandleOrder(unassignOrder);
 
                             var assignOrder = FleetOrder.AssignShip(factionID, fleet, selectedShip);
-                            _uiState.Game.OrderHandler.HandleOrder(assignOrder);
+                            _uiState.Game?.OrderHandler.HandleOrder(assignOrder);
                         }
                         // Clean up the selections
                         selected.Clear();
@@ -994,7 +1005,7 @@ namespace Pulsar4X.Client
                     if(factionRoot != null && factionRoot.OwningEntity !=null)
                     {
                         var order = FleetOrder.ChangeParent(factionID, dragEntity, factionRoot.OwningEntity);
-                        _uiState.Game.OrderHandler.HandleOrder(order);
+                        _uiState.Game?.OrderHandler.HandleOrder(order);
                     }
                 }
                 ImGui.EndDragDropTarget();
@@ -1010,7 +1021,7 @@ namespace Pulsar4X.Client
                 if(ImGui.IsMouseReleased(ImGuiMouseButton.Left) && dragEntity != Entity.InvalidEntity)
                 {
                     var order = FleetOrder.ChangeParent(factionID, dragEntity, fleet);
-                    _uiState.Game.OrderHandler.HandleOrder(order);
+                    _uiState.Game?.OrderHandler.HandleOrder(order);
                 }
                 ImGui.EndDragDropTarget();
             }

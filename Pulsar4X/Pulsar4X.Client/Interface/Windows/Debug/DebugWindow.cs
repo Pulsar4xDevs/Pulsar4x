@@ -929,6 +929,9 @@ namespace Pulsar4X.Client
 
         void RefreshFactionEntites(GlobalUIState uiState)
         {
+            if(_uiState.Faction == null || _uiState.Game == null)
+                throw new NullReferenceException();
+
             SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
             _factionOwnedEntites = new List<(string name, Entity entity)>();
             var factionEntites = _uiState.SelectedSystem.GetFilteredEntities(DataStructures.EntityFilter.Friendly, _uiState.Faction.Id);
@@ -956,7 +959,7 @@ namespace Pulsar4X.Client
 
             void addEntity(Entity entity)
             {
-                if(entity == null)
+                if(entity == null || _uiState.Game == null)
                     return;
                 string name = entity.Id.ToString();
                 if(entity.HasDataBlob<NameDB>())
