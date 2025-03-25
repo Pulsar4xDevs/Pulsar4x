@@ -62,7 +62,7 @@
         { "id": "default-design-refinery", "amount": 1 },
         { "id": "default-design-factory", "amount": 1 },
         { "id": "default-design-shipyard", "amount": 1 },
-        { "id": "default-design-university", "amount": 1 }
+        { "id": "default-design-research-lab", "amount": 1 }
       ],
       "cargo": [
         { "id": "iron", "amount": 500000 },
