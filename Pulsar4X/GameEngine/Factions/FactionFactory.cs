@@ -320,9 +320,13 @@ namespace Pulsar4X.Factions
             var factionInfo = new FactionInfoDB()
             {
                 Abbreviation = abbreviation,
-                Money = (long)startingFunds
             };
             factionInfo.Data = new FactionDataStore(game.StartingGameData);
+            factionInfo.Money.AddIncome(
+                game.TimePulse.GameGlobalDateTime,
+                TransactionCategory.InitialInvestment,
+                "Add initial investments funds",
+                startingFunds);
 
             var factionTechDB = new FactionTechDB();
 
