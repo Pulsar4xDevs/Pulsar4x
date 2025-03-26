@@ -100,7 +100,7 @@ namespace Pulsar4X.Client
                     return;
 
                 string label = "Funds";
-                string value = factionInfoDB.Money.ToString("C0", CultureInfo.CurrentCulture);
+                string value = factionInfoDB.Money.GetCurrentFunds().ToString("C0", CultureInfo.CurrentCulture);
 
                 // Get available width in current line
                 float availWidth = ImGui.GetContentRegionAvail().X;

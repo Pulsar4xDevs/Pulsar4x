@@ -375,9 +375,9 @@
   {
     "Type": "ComponentDesign",
     "Payload": {
-      "UniqueId": "default-design-university",
-      "Name": "University",
-      "TemplateId": "university"
+      "UniqueId": "default-design-research-lab",
+      "Name": "Research Lab",
+      "TemplateId": "research-lab"
     }
   },
   {

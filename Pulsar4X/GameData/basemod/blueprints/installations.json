@@ -6,10 +6,10 @@
       "Name": "Mine",
       "Formulas": {
         "Description": "A large-scale mining operation with vehicles, structures, and extensive infrastructure for resource extraction.",
-        "Mass": "PropertyValue('Area') * 0.05", 
-        "Volume": "PropertyValue('Area') * 0.01", 
+        "Mass": "PropertyValue('Area') * 0.05",
+        "Volume": "PropertyValue('Area') * 0.01",
         "HTK": "0.5",
-        "CrewReq": "PropertyValue('Area') * 0.005", 
+        "CrewReq": "PropertyValue('Area') * 0.005",
         "ResearchCost": "0",
         "CreditCost": "120",
         "BuildPointCost": "[Mass]"
@@ -34,10 +34,10 @@
           "Name": "Area",
           "DescriptionFormula": "'Area covered by this mining operation in square meters'",
           "GuiHint": "GuiSelectionMaxMinInt",
-          "MaxFormula": "100000000", 
-          "MinFormula": "10000", 
-          "StepFormula": "10000", 
-          "PropertyFormula": "1000000" 
+          "MaxFormula": "100000000",
+          "MinFormula": "10000",
+          "StepFormula": "10000",
+          "PropertyFormula": "1000000"
         },
         {
           "Name": "MiningAmount",
@@ -146,8 +146,8 @@
   {
     "Type": "ComponentTemplate",
     "Payload": {
-      "UniqueID": "university",
-      "Name": "University",
+      "UniqueID": "research-lab",
+      "Name": "Research Lab",
       "Formulas": {
         "Description": "Research new technologies",
         "Mass": "PropertyValue('Size') * 100",
@@ -170,7 +170,7 @@
       "Properties": [
         {
           "Name": "Size",
-          "DescriptionFormula": "'Size of the university'",
+          "DescriptionFormula": "'Size of the lab'",
           "GuiHint": "GuiSelectionMaxMin",
           "MaxFormula": "50000",
           "MinFormula": "500",
