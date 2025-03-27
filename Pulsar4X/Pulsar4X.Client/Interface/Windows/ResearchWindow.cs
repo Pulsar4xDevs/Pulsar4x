@@ -21,6 +21,7 @@ namespace Pulsar4X.Client
         private Dictionary<string, Tech>? _researchableTechsByGuid;
         private List<(Scientist scientist, Entity atEntity)>? _scienceTeams;
         private int _selectedTeam = -1;
+        private Entity? _selectedLab = null;
 
         private string[]? techCategoryNames;
         private string[]? techCategoryIds;
@@ -131,8 +132,9 @@ namespace Pulsar4X.Client
                 ImGui.SameLine();
                 if(ImGui.BeginChild("Teams", firstChildSize, ImGuiChildFlags.Borders))
                 {
-                    DisplayHelpers.Header("Teams");
-                    DisplayTeams();
+                    DisplayHelpers.Header("Research Labs");
+                    //DisplayTeams();
+                    DisplayLabs();
                 }
                 ImGui.EndChild();
 
@@ -145,6 +147,112 @@ namespace Pulsar4X.Client
                 }
             }
             Window.End();
+        }
+
+        private void DisplayLabs()
+        {
+            if(_factionData == null
+                || _researchableTechsByGuid == null
+                || _uiState.Faction == null)
+                return;
+
+            if(ImGui.BeginTable("Research Labs", 5, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
+            {
+                ImGui.TableSetupColumn("Lab", ImGuiTableColumnFlags.None, 0.25f);
+                ImGui.TableSetupColumn("Location", ImGuiTableColumnFlags.None, 0.1f);
+                ImGui.TableSetupColumn("Scientist", ImGuiTableColumnFlags.None, 0.1f);
+                ImGui.TableSetupColumn("Researching", ImGuiTableColumnFlags.None, 0.35f);
+                ImGui.TableSetupColumn("Funding", ImGuiTableColumnFlags.None, 0.2f);
+                ImGui.TableHeadersRow();
+
+                var labs = _uiState.SelectedSystem.GetFilteredEntities(
+                                DataStructures.EntityFilter.Friendly,
+                                _uiState.Faction.Id,
+                                typeof(ResearcherDB));
+
+                foreach(var lab in labs)
+                {
+                    if(!lab.TryGetDatablob<ResearcherDB>(out var researcherDB))
+                        continue;
+
+                    ImGui.TableNextColumn();
+                    if(ImGui.Selectable(researcherDB.Design.Name + $"###{lab.Id}", _selectedLab?.Id == lab.Id))
+                    {
+                        _selectedLab = lab;
+                    }
+                    ImGui.TableNextColumn();
+                    ImGui.Text("TODO");
+                    ImGui.TableNextColumn();
+                    ImGui.Text("TODO");
+                    ImGui.TableNextColumn();
+                    if(researcherDB.TechQueue.Count > 0 && _factionData.IsResearchable(researcherDB.TechQueue.Peek()))
+                    {
+                        var tech = _researchableTechsByGuid[researcherDB.TechQueue.Peek()];
+
+                        float frac = (float)tech.ResearchProgress / tech.ResearchCost;
+                        var size = ImGui.GetTextLineHeight();
+                        var pos = ImGui.GetCursorPos();
+                        ImGui.ProgressBar(frac, new System.Numerics.Vector2(245, size), "");
+                        ImGui.SetCursorPos(pos);
+                        ImGui.Text(tech.Name);
+                        if (ImGui.IsItemHovered())
+                        {
+                            string queue = "";
+                            foreach (var queueItem in researcherDB.TechQueue)
+                            {
+                                queue += _researchableTechsByGuid[queueItem].Name + "\n";
+                            }
+                            ImGui.SetTooltip(queue);
+                        }
+                    }
+                    ImGui.TableNextColumn();
+                    int funding = researcherDB.FundingLevel;
+                    string label = researcherDB.FundingLevel switch
+                    {
+                        0 => "No Funding",
+                        1 => "Standard",
+                        2 => "Enhanced",
+                        3 => "Robust",
+                        4 => "Generous",
+                        5 => "Spared No Expense",
+                        _ => ""
+                    };
+                    if(ImGui.SliderInt($"###{lab.Id}-funding", ref funding, 0, 5, label))
+                    {
+                        researcherDB.FundingLevel = (byte)funding;
+                    }
+                }
+
+                ImGui.EndTable();
+            }
+
+            if(_selectedLab == null)
+                return;
+
+            ImGui.NewLine();
+            DisplayHelpers.Header("Tech Queue for Selected Lab");
+
+            if(ImGui.BeginTable("TechQueue", 2, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
+            {
+                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 0.5f);
+                ImGui.TableSetupColumn("Options", ImGuiTableColumnFlags.None, 0.5f);
+                ImGui.TableHeadersRow();
+
+                if(_selectedLab.TryGetDatablob<ResearcherDB>(out var researcherDB))
+                {
+                    int index = 0;
+                    foreach(var tech in researcherDB.TechQueue)
+                    {
+                        ImGui.TableNextColumn();
+                        ImGui.Text(_researchableTechsByGuid[tech].Name);
+                        ImGui.TableNextColumn();
+                        //Buttons(scientist, (techID, cycle), ref index);
+                        index++;
+                    }
+                }
+
+                ImGui.EndTable();
+            }
         }
 
         private void DisplayTeams()
@@ -293,8 +401,10 @@ namespace Pulsar4X.Client
 
                         if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(0))
                         {
-                            if (_selectedTeam > -1)
-                                ResearchProcessor.AssignProject(_scienceTeams[_selectedTeam].scientist, _researchableTechs[i].UniqueID);
+                            if(_selectedLab != null && _selectedLab.TryGetDatablob<ResearcherDB>(out var researcherDB))
+                            {
+                                ResearchProcessor.AssignTech(researcherDB, _researchableTechs[i].UniqueID);
+                            }
                         }
                     }
                 }

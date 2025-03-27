@@ -21,7 +21,7 @@ namespace Pulsar4X.Components
         [JsonProperty]
         public string Name { get; private set; }
 
-        
+
         public string CargoTypeID
         {
             get { return Design.CargoTypeID; }
@@ -53,12 +53,15 @@ namespace Pulsar4X.Components
             get { return _parentEntity; }
             internal set
             {
-                _parentEntity = value; 
+                _parentEntity = value;
                 ParentInstances = ParentEntity.GetDataBlob<ComponentInstancesDB>();
             }
         }
         [JsonProperty]
         private Entity _parentEntity;
+
+        [JsonProperty]
+        public int SpawnedEntityId { get; internal set; } = -1;
 
         [JsonProperty]
         public ComponentInstancesDB ParentInstances { get; private set; }
@@ -75,7 +78,7 @@ namespace Pulsar4X.Components
 
         [JsonProperty] public float HealthPercent { get; internal set; } = 1.0f;
 
-        public float StopWorkingAtPercent   
+        public float StopWorkingAtPercent
         {
             get { return Design.DestructionPercent; }
         }
@@ -159,6 +162,6 @@ namespace Pulsar4X.Components
             ComponentLoadPercent = instance.ComponentLoadPercent;
             Name = instance.Name;
         }
-        
+
     }
 }

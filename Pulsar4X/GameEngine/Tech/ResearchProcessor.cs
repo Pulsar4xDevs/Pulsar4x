@@ -1,136 +1,177 @@
 using System;
-using System.Collections.Generic;
-using Pulsar4X.DataStructures;
-using Pulsar4X.Components;
 using Pulsar4X.Interfaces;
-using Pulsar4X.Datablobs;
 using Pulsar4X.Factions;
-using Pulsar4X.People;
 using Pulsar4X.Engine;
 using Pulsar4X.Events;
+using System.IO;
 
 namespace Pulsar4X.Technology
 {
     /// <summary>
     /// See also the Installation Processors for DoResearch
     /// </summary>
-    public class ResearchProcessor : IHotloopProcessor 
-    { 
+    public class ResearchProcessor : IHotloopProcessor
+    {
         public TimeSpan RunFrequency => TimeSpan.FromDays(1);
-        
+
         public TimeSpan FirstRunOffset => TimeSpan.FromHours(0.5);
-        
-        public Type GetParameterType => typeof(EntityResearchDB);
-        
-        public void Init(Game game) 
+
+        public Type GetParameterType => typeof(ResearcherDB);
+
+        public void Init(Game game)
         {
-            
+
         }
-        
-        public void ProcessEntity(Entity entity, int deltaSeconds) 
-        { 
-            DoResearch(entity); 
+
+        public void ProcessEntity(Entity entity, int deltaSeconds)
+        {
+            DoResearch(entity);
         }
-        
-        public int ProcessManager(EntityManager manager, int deltaSeconds) 
-        { 
-            List<Entity> entitysWithReserch = manager.GetAllEntitiesWithDataBlob<EntityResearchDB>(); 
-            foreach(var entity in entitysWithReserch) 
-            { 
-                ProcessEntity(entity, deltaSeconds); 
+
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
+        {
+            var entitysWithResearch = manager.GetAllEntitiesWithDataBlob<ResearcherDB>();
+            foreach(var entity in entitysWithResearch)
+            {
+                ProcessEntity(entity, deltaSeconds);
             }
-            
-            return entitysWithReserch.Count; 
+
+            return entitysWithResearch.Count;
         }
-        
+
         /// <summary>
         /// adds research points to a scientists project.
         /// </summary>
         /// <param name="entity"></param>
         /// <param name="factionAbilities"></param>
         /// <param name="factionTechs"></param>
-        internal void DoResearch(Entity entity) 
-        { 
-            Entity faction = entity.Manager.Game.Factions[entity.FactionOwnerID]; 
-            FactionAbilitiesDB factionAbilities = faction.GetDataBlob<FactionAbilitiesDB>(); 
-            FactionTechDB factionTechs = faction.GetDataBlob<FactionTechDB>(); 
-            EntityResearchDB entityResearch = entity.GetDataBlob<EntityResearchDB>(); 
-            FactionDataStore factionDataStore = faction.GetDataBlob<FactionInfoDB>().Data;
-            
-            List<(ComponentInstance lab, int pnts)> allLabs = new List<(ComponentInstance lab, int pnts)>(); 
-            if (entity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<ResearchPointsAtbDB>(out var labs)) 
-            { 
-                foreach (var labInstance in labs) 
-                { 
-                    var points = labInstance.Design.GetAttribute<ResearchPointsAtbDB>().PointsPerEconTick; 
-                    allLabs.Add((labInstance, points)); 
-                } 
-            }
-            
-            int labIndex = 0; 
-            int maxLabs = allLabs.Count;
-            
-            foreach (Scientist scientist in entity.GetDataBlob<TeamsHousedDB>().TeamsByType[TeamTypes.Science]) 
-            { 
-                if (scientist.ProjectQueue.Count == 0) 
-                { 
-                    continue; 
-                }
-                
-                string projectGuid = scientist.ProjectQueue[0].techID; 
-                bool cycleProject = scientist.ProjectQueue[0].cycle;
-                
-                if (!factionDataStore.IsResearchable(projectGuid)) 
-                { 
-                    scientist.ProjectQueue.RemoveAt(0); 
-                    continue;
-                }
-                
-                int assignedLabs = scientist.AssignedLabs; 
-                Tech project = factionDataStore.Techs[projectGuid]; 
-                float bonus = 1; 
-                if (scientist.Bonuses.ContainsKey(project.Category)) 
-                    bonus += scientist.Bonuses[project.Category];
-                
-                int researchPoints = 0; 
-                var maxIndex = Math.Min(labIndex + assignedLabs, maxLabs);
-                
-                for (int i = labIndex; i < maxIndex; i++) 
-                { 
-                    researchPoints += allLabs[i].pnts; 
-                }
-                
-                researchPoints = (int)(researchPoints * bonus);
-                
-                if (factionDataStore.IsResearchable(project.UniqueID)) 
-                { 
-                    int currentLvl = project.Level; 
-                    factionDataStore.AddTechPoints(project, researchPoints);
-                    
-                    if (project.Level > currentLvl) 
-                    { 
-                        scientist.ProjectQueue.RemoveAt(0);
-                        
-                        if (project.Faction != null && project.Faction.TryGetDatablob<FactionInfoDB>(out var factionInfo) && project.Design != null) 
-                        { 
-                            factionInfo.IndustryDesigns[project.UniqueID] = project.Design; 
-                        }
-                        
-                        if (cycleProject) 
-                            scientist.ProjectQueue.Add((project.UniqueID, true));
+        internal void DoResearch(Entity entity)
+        {
+            Entity faction = entity.Manager.Game.Factions[entity.FactionOwnerID];
+            FactionAbilitiesDB factionAbilities = faction.GetDataBlob<FactionAbilitiesDB>();
+            FactionTechDB factionTechs = faction.GetDataBlob<FactionTechDB>();
+            FactionInfoDB factionInfoDB = faction.GetDataBlob<FactionInfoDB>();
+            FactionDataStore factionDataStore = factionInfoDB.Data;
 
-                        // Publish an event for research completion
-                        EventManager.Instance.Publish(
-                            Event.Create(
-                                EventType.ResearchCompleted, 
-                                entity.StarSysDateTime, 
-                                $"{project.Name} research completed!", 
-                                entity.FactionOwnerID, 
-                                entity.Manager.ManagerID, 
-                                entity.Id));
-                    }
-                }
+            // If unable to get the db return
+            if(!entity.TryGetDatablob<ResearcherDB>(out var researcherDB))
+                return;
+
+            // Check if queue is empty
+            if(researcherDB.TechQueue.Count == 0)
+                return;
+
+            // Get the tech that is being researched
+            var tech = factionDataStore.Techs[researcherDB.TechQueue.Peek()];
+
+            // Make sure that the tech is researchable
+            if(!factionDataStore.IsResearchable(tech.UniqueID))
+            {
+                // If it isn't, dequeue the tech and return
+                researcherDB.TechQueue.Dequeue();
+                return;
             }
+
+            // Calculate the cost to run
+            CalculateCost(researcherDB);
+
+            // Calculate the research output
+            CalculateResearchPoints(researcherDB, tech);
+
+            // Make sure the calculated total is > 0
+            if(researcherDB.CalculatedResearchPoints <= 0)
+                return;
+
+            // Check to make sure the cost can be paid
+            if(factionInfoDB.Money.GetCurrentFunds() < researcherDB.CalculatedCostPerDay)
+                return;
+
+            // Pay the costs
+            factionInfoDB.Money.AddExpense(
+                entity.Manager.StarSysDateTime,
+                TransactionCategory.Research,
+                $"Payment to run research lab on {entity.Manager.StarSysDateTime.ToShortDateString()}",
+                researcherDB.CalculatedCostPerDay);
+
+            // Apply the research points
+            int currentLvl = tech.Level;
+            factionDataStore.AddTechPoints(tech, researcherDB.CalculatedResearchPoints);
+
+            // If the tech level increased the tech research completed
+            if (tech.Level > currentLvl)
+            {
+                researcherDB.TechQueue.Dequeue();
+
+                if (tech.Faction != null && tech.Design != null && tech.Faction.TryGetDatablob<FactionInfoDB>(out var factionInfo))
+                {
+                    factionInfo.IndustryDesigns[tech.UniqueID] = tech.Design;
+                }
+
+                // if (cycleProject)
+                //     scientist.ProjectQueue.Add((project.UniqueID, true));
+
+                // Publish an event for research completion
+                EventManager.Instance.Publish(
+                    Event.Create(
+                        EventType.ResearchCompleted,
+                        entity.StarSysDateTime,
+                        $"{tech.Name} research completed!",
+                        entity.FactionOwnerID,
+                        entity.Manager.ManagerID,
+                        entity.Id));
+            }
+        }
+
+        public static void CalculateCost(ResearcherDB researcherDB)
+        {
+            // TODO: Add bonuses for corporation administration
+
+            // See the comments on ResearchDB.FundingLevel for an explanation
+            researcherDB.CalculatedCostPerDay = researcherDB.FundingLevel switch
+            {
+                0 => 0,
+                1 => researcherDB.BaseCostPerDay * 1,
+                2 => researcherDB.BaseCostPerDay * 3,
+                3 => researcherDB.BaseCostPerDay * 7,
+                4 => researcherDB.BaseCostPerDay * 13,
+                5 => researcherDB.BaseCostPerDay * 22,
+                _ => throw new InvalidDataException("Unable to determine funding level")
+            };
+        }
+
+        public static void CalculateResearchPoints(ResearcherDB researcherDB, Tech currentTech)
+        {
+            int output = researcherDB.BaseResearchPoints;
+
+            // See the comments on ResearchDB.FundingLevel for an explanation
+            int fundingMultiplier = researcherDB.FundingLevel switch
+            {
+                0 => 0,
+                1 => 1,
+                2 => 2,
+                3 => 3,
+                4 => 4,
+                5 => 5,
+                _ => throw new InvalidDataException("Unable to determine funding level")
+            };
+
+            // Apply funding bonus
+            output *= fundingMultiplier;
+
+            // Apply any category bonuses
+            foreach(var (category, bonus) in researcherDB.BonusCategories)
+            {
+                // Make sure the categories match
+                if(!currentTech.Category.Equals(category))
+                    continue;
+
+                output += (int)(output * bonus);
+            }
+
+            //TODO: apply scientist bonus
+
+            // Set the actual RP
+            researcherDB.CalculatedResearchPoints = output;
         }
 
         /// <summary>
@@ -164,6 +205,11 @@ namespace Pulsar4X.Technology
             //TODO: check valid research, scientist etc for the empire.
             //TechSD project = _game.StaticData.Techs[techID];
             scientist.ProjectQueue.Add((techID, false));
+        }
+
+        public static void AssignTech(ResearcherDB researcherDB, string techId)
+        {
+            researcherDB.TechQueue.Enqueue(techId);
         }
     }
 }

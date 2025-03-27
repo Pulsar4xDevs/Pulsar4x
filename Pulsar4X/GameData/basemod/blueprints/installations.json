@@ -150,10 +150,10 @@
       "Name": "Research Lab",
       "Formulas": {
         "Description": "Research new technologies",
-        "Mass": "PropertyValue('Size') * 100",
-        "Volume": "PropertyValue('Size') * 0.1",
+        "Mass": "100000",
+        "Volume": "1000",
         "HTK": "0.5",
-        "CrewReq": "PropertyValue('Size')",
+        "CrewReq": "20",
         "ResearchCost": "10",
         "CreditCost": "120",
         "BuildPointCost": "[Mass] / 2"
@@ -169,22 +169,20 @@
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
-          "Name": "Size",
-          "DescriptionFormula": "'Size of the lab'",
-          "GuiHint": "GuiSelectionMaxMin",
-          "MaxFormula": "50000",
-          "MinFormula": "500",
-          "StepFormula": "100",
-          "PropertyFormula": "1000"
-        },
-        {
           "Name": "Research Points",
-          "DescriptionFormula": "'Research points produced per update'",
+          "DescriptionFormula": "'Research points produced per day'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Size') * 0.01"
+          "PropertyFormula": "10"
         },
         {
-          "Name": "Bonus",
+          "Name": "Cost Per Day",
+          "DescriptionFormula": "'Base cost to operate the research lab per day'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "10000"
+        },
+        {
+          "Name": "Research Specialty",
+          "DescriptionFormula": "'Provides a 10 percent bonus towards research in the specialty category. May still research other categories without the bonus.'",
           "GuiHint": "GuiTechCategorySelection",
           "DataDict": {},
           "PropertyFormula": "GuidString('tech-category-power-propulsion')"
@@ -193,7 +191,7 @@
           "Name": "RP Amount Per EconTick",
           "DescriptionFormula": "''",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(PropertyValue('Research Points'))",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Research Points'), PropertyValue('Cost Per Day'), PropertyValue('Research Specialty'))",
           "AttributeType": "Pulsar4X.Technology.ResearchPointsAtbDB"
         }
       ]
