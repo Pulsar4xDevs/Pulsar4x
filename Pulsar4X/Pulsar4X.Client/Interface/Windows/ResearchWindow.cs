@@ -10,6 +10,8 @@ using Pulsar4X.Factions;
 using Pulsar4X.Names;
 using Pulsar4X.Technology;
 using System.Globalization;
+using Pulsar4X.Extensions;
+using Pulsar4X.People;
 
 namespace Pulsar4X.Client
 {
@@ -27,6 +29,7 @@ namespace Pulsar4X.Client
         private string[]? techCategoryNames;
         private string[]? techCategoryIds;
         private int selectCategoryFilterIndex = 0;
+        bool _showAssignmentModal = false;
 
         private ResearchWindow()
         {
@@ -190,7 +193,56 @@ namespace Pulsar4X.Client
                     var location = _uiState.SelectedSystemState.GetEntityById(researcherDB.LocationId);
                     ImGui.Text(location?.Name);
                     ImGui.TableNextColumn();
-                    ImGui.Text("TODO");
+
+                    if(researcherDB.ScientistId < 0)
+                    {
+                        if(ImGui.Button("Assign Scientist"))
+                        {
+                            _showAssignmentModal = true;
+                        }
+
+                        if(_showAssignmentModal)
+                        {
+                            ResultModal.GetInstance().Display(
+                                "Assign Scientist",
+                                () => // Ok
+                                {
+                                    _showAssignmentModal = false;
+                                }, () => // Cancel
+                                {
+                                    _showAssignmentModal = false;
+                                }, () => // Custom render
+                                {
+                                    if(!_uiState.Faction.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+                                        return;
+
+                                    foreach(var commanderId in factionInfoDB.Commanders)
+                                    {
+                                        // TODO: this is probably super slow and should be improved
+                                        // TODO: remove the call into the game
+                                        var commander = _uiState.Game.GlobalManager.GetGlobalEntityById(commanderId);
+
+                                        if(!commander.TryGetDatablob<CommanderDB>(out var commanderDB))
+                                            continue;
+
+                                        if(commanderDB.Type != DataStructures.CommanderTypes.Civilian)
+                                            continue;
+
+                                        if(ImGui.Button(commander.GetName(_uiState.Faction.Id)))
+                                        {
+                                            var assignmentOrder = AssignScientistOrder.Create(lab.Entity, commanderId);
+                                            _uiState.Game.OrderHandler.HandleOrder(assignmentOrder);
+                                        }
+                                    }
+                                });
+                        }
+                    }
+                    else
+                    {
+                        var commander = _uiState.Game.GlobalManager.GetGlobalEntityById(researcherDB.ScientistId);
+                        ImGui.Text(commander.GetName(_uiState.Faction.Id));
+                    }
+
                     ImGui.TableNextColumn();
                     ImGui.Text(researcherDB.CalculatedCostPerDay.ToString("C0", CultureInfo.CurrentCulture));
                     ImGui.TableNextColumn();

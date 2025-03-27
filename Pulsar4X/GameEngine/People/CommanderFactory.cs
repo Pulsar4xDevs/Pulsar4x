@@ -58,6 +58,18 @@ namespace Pulsar4X.People
             return commander;
         }
 
+        public static CommanderDB CreateScientist(Game game)
+        {
+            var scientist = new CommanderDB()
+            {
+                Name = NameFactory.GetCommanderName(game),
+                Rank = 1,
+                Type = CommanderTypes.Civilian
+            };
+
+            return scientist;
+        }
+
         public static Scientist CreateScientist(Entity faction, Entity location)
         {
             //all this stuff needs a proper bit of code to get names from a file or something

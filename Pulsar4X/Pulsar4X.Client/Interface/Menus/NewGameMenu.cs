@@ -495,6 +495,11 @@ public class NewGameMenu : PulsarGuiWindow
         var playerColony = ColonyFactory.CreateFromBlueprint(game, playerFaction, playerSpecies, startingSystem, startingBody, _modDataStore.Colonies[_selectedColonyId]);
         if(_eleStart)
             AsteroidFactory.CreateAsteroid(startingSystem, startingBody, game.TimePulse.GameGlobalDateTime + TimeSpan.FromDays(365));
+
+        // Create starting people
+        var scientistDB = CommanderFactory.CreateScientist(game);
+        CommanderFactory.Create(startingSystem, playerFaction.Id, scientistDB);
+
         // TODO: need to add the implementation for a random start
         // TODO: need to find a way to handle this via the mods instead of loading it here
         //var (newGameFaction, systemId) = Pulsar4X.Engine.DefaultStartFactory.LoadFromJson(game, "Data/basemod/defaultStart.json");
