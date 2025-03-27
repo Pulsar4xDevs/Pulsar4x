@@ -2,12 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.Engine;
-using Pulsar4X.Datablobs;
 using System.Linq;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Factions;
-using Pulsar4X.Names;
 using Pulsar4X.Technology;
 using System.Globalization;
 using Pulsar4X.Extensions;
@@ -19,11 +16,8 @@ namespace Pulsar4X.Client
     {
         private readonly Vector2 invisButtonSize = new (15, 15);
         private FactionDataStore? _factionData;
-        private FactionTechDB? _factionTechDB;
         private List<Tech> _researchableTechs = new();
         private Dictionary<string, Tech>? _researchableTechsByGuid;
-        private List<(Scientist scientist, Entity atEntity)>? _scienceTeams;
-        private int _selectedTeam = -1;
         private EntityState? _selectedLab = null;
 
         private string[]? techCategoryNames;
@@ -64,8 +58,6 @@ namespace Pulsar4X.Client
                 return;
 
             _factionData = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data;
-            _factionTechDB = _uiState.Faction.GetDataBlob<FactionTechDB>();
-            _scienceTeams = _factionTechDB.AllScientists;
 
             selectCategoryFilterIndex = 0;
 
@@ -109,8 +101,7 @@ namespace Pulsar4X.Client
         internal override void Display()
         {
             if(!IsActive
-                || techCategoryNames == null
-                || _scienceTeams == null)
+                || techCategoryNames == null)
                 return;
 
             if (Window.Begin("Research and Development", ref IsActive, _flags))
@@ -137,18 +128,9 @@ namespace Pulsar4X.Client
                 if(ImGui.BeginChild("Teams", firstChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayHelpers.Header("Research Labs");
-                    //DisplayTeams();
                     DisplayLabs();
                 }
                 ImGui.EndChild();
-
-                if (_selectedTeam == -1)
-                {
-                    if (_scienceTeams.Count > 0 && _scienceTeams != null)
-                    {
-                       _selectedTeam = 0;
-                    }
-                }
             }
             Window.End();
         }
@@ -338,110 +320,9 @@ namespace Pulsar4X.Client
             }
         }
 
-        private void DisplayTeams()
-        {
-            if(_scienceTeams == null
-                || _factionData == null
-                || _researchableTechsByGuid == null
-                || _uiState.Faction == null)
-                return;
-
-            if(ImGui.BeginTable("Teams", 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.SizingStretchProp))
-            {
-                ImGui.TableSetupColumn("Scientist", ImGuiTableColumnFlags.None, 0.35f);
-                ImGui.TableSetupColumn("Labs", ImGuiTableColumnFlags.None, 0.1f);
-                ImGui.TableSetupColumn("Current Project", ImGuiTableColumnFlags.None, 0.35f);
-                ImGui.TableSetupColumn("Location", ImGuiTableColumnFlags.None, 0.2f);
-                ImGui.TableHeadersRow();
-
-                for (int i = 0; i < _scienceTeams.Count; i++)
-                {
-                    bool isSelected = _selectedTeam == i;
-
-                    Scientist scientist = _scienceTeams[i].scientist;
-                    ImGui.TableNextColumn();
-                    if (ImGui.Selectable(_scienceTeams[i].Item1.Name, isSelected))
-                    {
-                        _selectedTeam = i;
-                    }
-
-                    ImGui.TableNextColumn();
-                    int allfacs = 0;
-                    int facsAssigned = scientist.AssignedLabs;
-                    if (_scienceTeams[i].atEntity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<ResearchPointsAtbDB>(out var foo))
-                    {
-                        allfacs = foo.Count;
-                    }
-                    ImGui.Text(facsAssigned.ToString() + "/" + allfacs.ToString());
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Assigned / Total");
-                    ImGui.SameLine();
-
-                    //Checks if more labs can be assigned
-                    if (facsAssigned < allfacs)
-                    {
-                        if (ImGui.SmallButton("+"))//If so allow the user to add more labs
-                        {
-                            ResearchProcessor.AddLabs(scientist, 1);
-                        }
-                    }
-                    else// Otherwise create an invisible button for spacing
-                    {
-                        ImGui.InvisibleButton("###invis-add", invisButtonSize);
-                    }
-
-                    if(facsAssigned > 0)
-                    {
-                        ImGui.SameLine();
-                        if (ImGui.SmallButton("-"))
-                        {
-                            if (facsAssigned == 0)//If there are no labs to remove
-                                ResearchProcessor.AddLabs(scientist, allfacs);//Roll over to max number of labs
-                            else
-                                ResearchProcessor.AddLabs(scientist, -1);//Otherwise remove a lab
-                        }
-                    }
-
-                    ImGui.TableNextColumn();
-                    if (scientist.ProjectQueue.Count > 0 && _factionData.IsResearchable(scientist.ProjectQueue[0].techID))
-                    {
-                        var proj = _researchableTechsByGuid[scientist.ProjectQueue[0].techID];
-
-                        float frac = (float)proj.ResearchProgress / proj.ResearchCost;
-                        var size = ImGui.GetTextLineHeight();
-                        var pos = ImGui.GetCursorPos();
-                        ImGui.ProgressBar(frac, new System.Numerics.Vector2(245, size), "");
-                        ImGui.SetCursorPos(pos);
-                        ImGui.Text(proj.Name);
-                        if (ImGui.IsItemHovered())
-                        {
-                            string queue = "";
-                            foreach (var queueItem in _scienceTeams[i].scientist.ProjectQueue)
-                            {
-                                queue += _researchableTechsByGuid[queueItem.techID].Name + "\n";
-                            }
-                            ImGui.SetTooltip(queue);
-                        }
-                    }
-
-                    ImGui.TableNextColumn();
-                    ImGui.Text(_scienceTeams[i].atEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction));
-                }
-
-                ImGui.EndTable();
-            }
-
-            ImGui.NewLine();
-            DisplayHelpers.Header("Tech Queue");
-
-            if (_selectedTeam > -1)
-            {
-                SelectedSci(_selectedTeam);
-            }
-        }
         private void DisplayTechs()
         {
-            if(_factionData == null || _scienceTeams == null || _uiState.Game == null)
+            if(_factionData == null || _uiState.Game == null)
                 return;
 
             if(ImGui.BeginTable("ResearchableTechs", 1, ImGuiTableFlags.BordersInnerV))
@@ -497,55 +378,12 @@ namespace Pulsar4X.Client
             }
         }
 
-        private void SelectedSci(int selected)
-        {
-            if(_scienceTeams == null || _researchableTechsByGuid == null)
-                return;
-
-            if(ImGui.BeginTable("TechQueue", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
-            {
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 0.5f);
-                ImGui.TableSetupColumn("Options", ImGuiTableColumnFlags.None, 0.5f);
-                ImGui.TableHeadersRow();
-
-                Scientist scientist = _scienceTeams[selected].scientist;
-                int index = 0;
-                foreach(var (techID, cycle) in scientist.ProjectQueue)
-                {
-                    ImGui.TableNextColumn();
-                    ImGui.Text(_researchableTechsByGuid[techID].Name);
-                    ImGui.TableNextColumn();
-                    //Buttons(scientist, (techID, cycle), ref index);
-                    index++;
-                }
-
-                ImGui.EndTable();
-            }
-        }
-
         void Buttons(ResearcherDB researcherDB, string techID, ref int i)
         {
             if(researcherDB.OwningEntity == null || _uiState.Game == null)
                 return;
 
             ImGui.BeginGroup();
-
-            // if(_researchableTechsByGuid != null &&_researchableTechsByGuid[queueItem.techID].MaxLevel > 1)
-            // {
-            //     string cyclestr = queueItem.cycle ? "O": "*";
-            //     if (ImGui.SmallButton(cyclestr + "##" + i))
-            //     {
-            //         scientist.ProjectQueue[i] = (queueItem.techID, !queueItem.cycle);
-            //     }
-
-            //     if (ImGui.IsItemHovered())
-            //         ImGui.SetTooltip("Requeue Project");
-            // }
-            // else
-            // {
-            //     ImGui.InvisibleButton("invis1", invisButtonSize);
-            // }
-            // ImGui.SameLine();
 
             if (i > 0)
             {
