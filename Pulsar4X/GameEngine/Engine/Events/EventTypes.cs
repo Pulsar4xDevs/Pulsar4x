@@ -423,6 +423,7 @@ namespace Pulsar4X.Events
         TechnologyQueued,
         TechnologyRemovedFromQueue,
         TechnologyMovedInQueue,
+        TechnologyFundingChanged,
     }
 
 }

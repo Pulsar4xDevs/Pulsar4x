@@ -239,11 +239,8 @@ namespace Pulsar4X.Client
                     ImGui.SetNextItemWidth(width);
                     if(ImGui.SliderInt($"###{lab.Id}-funding", ref funding, 0, 5, label))
                     {
-                        researcherDB.FundingLevel = (byte)funding;
-                        ResearchProcessor.CalculateCost(researcherDB);
-
-                        var tech = techId == null ? null : _researchableTechsByGuid[techId];
-                        ResearchProcessor.CalculateResearchPoints(researcherDB, tech);
+                        var changeOrder = FundingChangedOrder.Create(lab.Entity, (byte)funding);
+                        _uiState.Game.OrderHandler.HandleOrder(changeOrder);
                     }
                 }
 
