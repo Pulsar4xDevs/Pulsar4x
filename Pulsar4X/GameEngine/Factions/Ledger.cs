@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.Factions;
 
@@ -37,7 +38,9 @@ public class Transaction
 
 public class Ledger
 {
+    [JsonProperty]
     private List<Transaction> _transactions;
+    [JsonProperty]
     private decimal _currentFunds;
 
     public Ledger()

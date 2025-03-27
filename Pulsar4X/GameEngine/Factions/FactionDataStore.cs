@@ -1,13 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
 using Pulsar4X.DataStructures;
-using Pulsar4X.Interfaces;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Modding;
-using Pulsar4X.Engine;
 using Pulsar4X.Storage;
 using Pulsar4X.Technology;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.Factions
 {
@@ -19,18 +17,29 @@ namespace Pulsar4X.Factions
         /// <summary>
         /// Armor types that not been unlocked by the faction
         /// </summary>
+        [JsonProperty]
         public SafeDictionary<string, ArmorBlueprint> LockedArmor { get; private set; }
+        [JsonProperty]
         public SafeDictionary<string, CargoTypeBlueprint> LockedCargoTypes { get; private set; }
+        [JsonProperty]
         public SafeDictionary<string, ComponentTemplateBlueprint> LockedComponentTemplates { get; private set; }
+        [JsonProperty]
         public SafeDictionary<string, IndustryTypeBlueprint> LockedIndustryTypes { get; private set; }
+        [JsonProperty]
         public SafeDictionary<string, Tech> LockedTechs { get; private set; }
+        [JsonProperty]
         public SafeDictionary<string, ArmorBlueprint> Armor { get; private set; }
+        [JsonProperty]
         public SafeDictionary<string, CargoTypeBlueprint> CargoTypes { get; private set; }
+        [JsonProperty]
         public SafeDictionary<string, ComponentTemplateBlueprint> ComponentTemplates { get; private set; }
+        [JsonProperty]
         public SafeDictionary<string, IndustryTypeBlueprint> IndustryTypes { get; private set; }
+        [JsonProperty]
         public SafeDictionary<string, Tech> Techs { get; private set; }
-
+        [JsonProperty]
         public CargoDefinitionsLibrary LockedCargoGoods { get; private set; }
+        [JsonProperty]
         public CargoDefinitionsLibrary CargoGoods { get; private set; }
 
         public FactionDataStore()

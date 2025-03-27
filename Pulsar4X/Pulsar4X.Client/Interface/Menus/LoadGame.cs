@@ -51,7 +51,7 @@ public class LoadGame : PulsarGuiWindow
         _uiState.Game = loadedGame;
 
         // TODO: need to figure out a way to properly handle this
-        (int id, Entity faction) = loadedGame.Factions.First(f => f.Value.GetOwnersName().Equals("UEF"));
+        (int id, Entity faction) = loadedGame.Factions.Last();
         _uiState.SetFaction(faction, true);
         _uiState.SetActiveSystem(faction.GetDataBlob<FactionInfoDB>().KnownSystems[0]);
 
