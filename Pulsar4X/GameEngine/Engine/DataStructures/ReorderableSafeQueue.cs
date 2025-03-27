@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Pulsar4X.DataStructures;
@@ -43,13 +44,13 @@ public class ReorderableSafeQueue<T>
         }
     }
 
-    public bool TryPeek(out T? result)
+    public bool TryPeek([NotNullWhen(true)] out T? result)
     {
         lock(_lockObject)
         {
-            if(_items.Count > 0)
+            if(_items.First != null)
             {
-                result = _items.First.Value;
+                result = _items.First.Value!;
                 return true;
             }
             result = default(T);

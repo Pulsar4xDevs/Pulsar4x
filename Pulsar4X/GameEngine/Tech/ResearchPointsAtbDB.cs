@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using Pulsar4X.Components;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
 
@@ -77,6 +78,7 @@ namespace Pulsar4X.Technology
 
             // Finally add the db to the entity
             entity.SetDataBlob(researcherDB);
+            entity.SetDataBlob(new OrderableDB());
 
             // Calculate the initial stats
             ResearchProcessor.CalculateCost(researcherDB);

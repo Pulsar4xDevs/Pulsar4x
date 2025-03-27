@@ -430,14 +430,8 @@ namespace Pulsar4X.Client
                         {
                             if(_selectedLab != null && _selectedLab.TryGetDataBlob<ResearcherDB>(out var researcherDB))
                             {
-                                ResearchProcessor.AssignTech(researcherDB, _researchableTechs[i].UniqueID);
-
-                                // If the count == 1 we added to an empty queue, re-calculate the costs
-                                if(researcherDB.TechQueue.Count == 1)
-                                {
-                                    ResearchProcessor.CalculateCost(researcherDB);
-                                    ResearchProcessor.CalculateResearchPoints(researcherDB, _researchableTechs[i]);
-                                }
+                                var addOrder = AddTechToQueueOrder.Create(_selectedLab.Entity, _researchableTechs[i].UniqueID);
+                                _uiState.Game.OrderHandler.HandleOrder(addOrder);
                             }
                         }
                     }
@@ -475,6 +469,9 @@ namespace Pulsar4X.Client
 
         void Buttons(ResearcherDB researcherDB, string techID, ref int i)
         {
+            if(researcherDB.OwningEntity == null || _uiState.Game == null)
+                return;
+
             ImGui.BeginGroup();
 
             // if(_researchableTechsByGuid != null &&_researchableTechsByGuid[queueItem.techID].MaxLevel > 1)
@@ -498,9 +495,8 @@ namespace Pulsar4X.Client
             {
                 if(ImGui.SmallButton("^" + "##" + i))
                 {
-                    researcherDB.TechQueue.TryMoveUp(techID);
-                    // scientist.ProjectQueue.RemoveAt(i);
-                    // scientist.ProjectQueue.Insert(i - 1, queueItem);
+                    var moveOrder = MoveUpInQueueOrder.Create(researcherDB.OwningEntity, techID);
+                    _uiState.Game.OrderHandler.HandleOrder(moveOrder);
                 }
             }
             else
@@ -513,9 +509,8 @@ namespace Pulsar4X.Client
             {
                 if(ImGui.SmallButton("v" + "##" + i))
                 {
-                    researcherDB.TechQueue.TryMoveDown(techID);
-                    // scientist.ProjectQueue.RemoveAt(i);
-                    // scientist.ProjectQueue.Insert(i + 1, queueItem);
+                    var moveOrder = MoveDownInQueueOrder.Create(researcherDB.OwningEntity, techID);
+                    _uiState.Game.OrderHandler.HandleOrder(moveOrder);
                 }
             }
             else
@@ -526,7 +521,9 @@ namespace Pulsar4X.Client
 
             if (ImGui.SmallButton("x" + "##" + i))
             {
-                researcherDB.TechQueue.TryRemoveItem(techID);
+
+                var removeOrder = RemoveTechFromQueueOrder.Create(researcherDB.OwningEntity, techID);
+                _uiState.Game.OrderHandler.HandleOrder(removeOrder);
                 i--;
             }
 

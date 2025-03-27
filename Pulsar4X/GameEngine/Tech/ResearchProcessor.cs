@@ -18,9 +18,14 @@ namespace Pulsar4X.Technology
 
         public Type GetParameterType => typeof(ResearcherDB);
 
+        private Game _game;
+
         public void Init(Game game)
         {
-
+            _game = game;
+            EventManager.Instance.Subscribe(EventType.TechnologyQueued, OnTechnologyChanged);
+            EventManager.Instance.Subscribe(EventType.TechnologyRemovedFromQueue, OnTechnologyChanged);
+            EventManager.Instance.Subscribe(EventType.TechnologyMovedInQueue, OnTechnologyChanged);
         }
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
@@ -122,6 +127,37 @@ namespace Pulsar4X.Technology
                         entity.Manager.ManagerID,
                         entity.Id));
             }
+        }
+
+        private void OnTechnologyChanged(Event e)
+        {
+            // Recalculate the stats of the researchDB
+            var system = _game.Systems.Find(s => s.ManagerID.Equals(e.SystemId));
+
+            if(system == null)
+                return;
+
+            if(e.EntityId == null || e.FactionId == null)
+                return;
+
+            if(!system.TryGetEntityById((int)e.EntityId, out var labEntity))
+                return;
+
+            if(!labEntity.TryGetDatablob<ResearcherDB>(out var researcherDB))
+                return;
+
+            // Try to find the tech at the front of the queue
+            Tech? tech = null;
+            if(researcherDB.TechQueue.TryPeek(out var techId))
+            {
+                if(_game.Factions[(int)e.FactionId].TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+                {
+                    tech = factionInfoDB.Data.Techs[techId];
+                }
+            }
+
+            CalculateCost(researcherDB);
+            CalculateResearchPoints(researcherDB, tech);
         }
 
         public static void CalculateCost(ResearcherDB researcherDB)

@@ -420,6 +420,9 @@ namespace Pulsar4X.Events
         #endregion
 
         ColonyCreated,
+        TechnologyQueued,
+        TechnologyRemovedFromQueue,
+        TechnologyMovedInQueue,
     }
 
 }
