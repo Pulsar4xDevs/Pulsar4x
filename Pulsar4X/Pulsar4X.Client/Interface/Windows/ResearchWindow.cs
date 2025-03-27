@@ -9,6 +9,7 @@ using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Factions;
 using Pulsar4X.Names;
 using Pulsar4X.Technology;
+using System.Globalization;
 
 namespace Pulsar4X.Client
 {
@@ -112,8 +113,8 @@ namespace Pulsar4X.Client
             if (Window.Begin("Research and Development", ref IsActive, _flags))
             {
                 Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-                var firstChildSize = new Vector2(windowContentSize.X * 0.75f, windowContentSize.Y);
-                var secondChildSize = new Vector2(windowContentSize.X * 0.245f, windowContentSize.Y);
+                var firstChildSize = new Vector2(windowContentSize.X - Styles.LeftColumnWidthLg - 8, windowContentSize.Y);
+                var secondChildSize = new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y);
 
                 if(ImGui.BeginChild("Techs", secondChildSize, ImGuiChildFlags.Borders))
                 {
@@ -153,16 +154,19 @@ namespace Pulsar4X.Client
         {
             if(_factionData == null
                 || _researchableTechsByGuid == null
-                || _uiState.Faction == null)
+                || _uiState.Faction == null
+                || _uiState.Game == null)
                 return;
 
-            if(ImGui.BeginTable("Research Labs", 5, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
+            if(ImGui.BeginTable("Research Labs", 7, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
             {
-                ImGui.TableSetupColumn("Lab", ImGuiTableColumnFlags.None, 0.25f);
-                ImGui.TableSetupColumn("Location", ImGuiTableColumnFlags.None, 0.1f);
-                ImGui.TableSetupColumn("Scientist", ImGuiTableColumnFlags.None, 0.1f);
-                ImGui.TableSetupColumn("Researching", ImGuiTableColumnFlags.None, 0.35f);
-                ImGui.TableSetupColumn("Funding", ImGuiTableColumnFlags.None, 0.2f);
+                ImGui.TableSetupColumn("Lab", ImGuiTableColumnFlags.None, 0.15f);
+                ImGui.TableSetupColumn("Location", ImGuiTableColumnFlags.None, 0.125f);
+                ImGui.TableSetupColumn("Scientist", ImGuiTableColumnFlags.None, 0.125f);
+                ImGui.TableSetupColumn("Cost/Day", ImGuiTableColumnFlags.None, 0.075f);
+                ImGui.TableSetupColumn("Progress/Day", ImGuiTableColumnFlags.None, 0.075f);
+                ImGui.TableSetupColumn("Researching", ImGuiTableColumnFlags.None, 0.20f);
+                ImGui.TableSetupColumn("Funding", ImGuiTableColumnFlags.None, 0.15f);
                 ImGui.TableHeadersRow();
 
                 var labs = _uiState.SelectedSystem.GetFilteredEntities(
@@ -175,6 +179,8 @@ namespace Pulsar4X.Client
                     if(!lab.TryGetDatablob<ResearcherDB>(out var researcherDB))
                         continue;
 
+                    researcherDB.TechQueue.TryPeek(out var techId);
+
                     ImGui.TableNextColumn();
                     if(ImGui.Selectable(researcherDB.Design.Name + $"###{lab.Id}", _selectedLab?.Id == lab.Id))
                     {
@@ -185,24 +191,35 @@ namespace Pulsar4X.Client
                     ImGui.TableNextColumn();
                     ImGui.Text("TODO");
                     ImGui.TableNextColumn();
-                    if(researcherDB.TechQueue.Count > 0 && _factionData.IsResearchable(researcherDB.TechQueue.Peek()))
+                    ImGui.Text(researcherDB.CalculatedCostPerDay.ToString("C0", CultureInfo.CurrentCulture));
+                    ImGui.TableNextColumn();
+                    ImGui.Text(researcherDB.CalculatedResearchPoints.ToString());
+                    if(ImGui.IsItemHovered())
                     {
-                        var tech = _researchableTechsByGuid[researcherDB.TechQueue.Peek()];
+                        DisplayHelpers.DescriptiveTooltip(
+                            "Progress per Day",
+                            "",
+                            $"Base: {researcherDB.BaseResearchPoints}\nBonus: {researcherDB.CalculatedResearchPoints - researcherDB.BaseResearchPoints}");
+                    }
+                    ImGui.TableNextColumn();
+                    if(techId != null && _factionData.IsResearchable(techId))
+                    {
+                        var tech = _researchableTechsByGuid[techId];
 
                         float frac = (float)tech.ResearchProgress / tech.ResearchCost;
                         var size = ImGui.GetTextLineHeight();
+                        var barWidth = ImGui.GetContentRegionAvail().X;
                         var pos = ImGui.GetCursorPos();
-                        ImGui.ProgressBar(frac, new System.Numerics.Vector2(245, size), "");
-                        ImGui.SetCursorPos(pos);
-                        ImGui.Text(tech.Name);
+                        ImGui.ProgressBar(frac, new Vector2(barWidth, size + 4), $"{tech.Name} {tech.ResearchProgress}/{tech.ResearchCost}");
+                        //ImGui.SetCursorPos(pos);
+                        //ImGui.Text();
+
                         if (ImGui.IsItemHovered())
                         {
-                            string queue = "";
-                            foreach (var queueItem in researcherDB.TechQueue)
-                            {
-                                queue += _researchableTechsByGuid[queueItem].Name + "\n";
-                            }
-                            ImGui.SetTooltip(queue);
+                            DisplayHelpers.DescriptiveTooltip(
+                                tech.Name,
+                                _uiState.Game.TechCategories[tech.Category].Name,
+                                $"{tech.Description}\n\nProgress: {tech.ResearchProgress}/{tech.ResearchCost}");
                         }
                     }
                     ImGui.TableNextColumn();
@@ -217,9 +234,15 @@ namespace Pulsar4X.Client
                         5 => "Spared No Expense",
                         _ => ""
                     };
+                    var width = ImGui.GetContentRegionAvail().X;
+                    ImGui.SetNextItemWidth(width);
                     if(ImGui.SliderInt($"###{lab.Id}-funding", ref funding, 0, 5, label))
                     {
                         researcherDB.FundingLevel = (byte)funding;
+                        ResearchProcessor.CalculateCost(researcherDB);
+
+                        var tech = techId == null ? null : _researchableTechsByGuid[techId];
+                        ResearchProcessor.CalculateResearchPoints(researcherDB, tech);
                     }
                 }
 

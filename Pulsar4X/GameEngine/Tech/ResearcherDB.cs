@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Pulsar4X.Components;
@@ -63,7 +64,7 @@ public class ResearcherDB : BaseDataBlob
     /// The Id of the tech this researcher is researching
     /// </summary>
     [JsonProperty]
-    public Queue<string> TechQueue { get; private set; } = new ();
+    public ConcurrentQueue<string> TechQueue { get; private set; } = new ();
 
     /// <summary>
     /// Needed for the UI

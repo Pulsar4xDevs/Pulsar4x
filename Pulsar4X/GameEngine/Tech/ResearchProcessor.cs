@@ -58,17 +58,17 @@ namespace Pulsar4X.Technology
                 return;
 
             // Check if queue is empty
-            if(researcherDB.TechQueue.Count == 0)
+            if(!researcherDB.TechQueue.TryPeek(out var techId))
                 return;
 
             // Get the tech that is being researched
-            var tech = factionDataStore.Techs[researcherDB.TechQueue.Peek()];
+            var tech = factionDataStore.Techs[techId];
 
             // Make sure that the tech is researchable
             if(!factionDataStore.IsResearchable(tech.UniqueID))
             {
                 // If it isn't, dequeue the tech and return
-                researcherDB.TechQueue.Dequeue();
+                researcherDB.TechQueue.TryDequeue(out var result);
                 return;
             }
 
@@ -100,7 +100,9 @@ namespace Pulsar4X.Technology
             // If the tech level increased the tech research completed
             if (tech.Level > currentLvl)
             {
-                researcherDB.TechQueue.Dequeue();
+                // Remove the current tech from the queue
+                if(!researcherDB.TechQueue.TryDequeue(out var result))
+                    throw new Exception("Unable to dequeue from tech queue");
 
                 if (tech.Faction != null && tech.Design != null && tech.Faction.TryGetDatablob<FactionInfoDB>(out var factionInfo))
                 {
@@ -139,7 +141,7 @@ namespace Pulsar4X.Technology
             };
         }
 
-        public static void CalculateResearchPoints(ResearcherDB researcherDB, Tech currentTech)
+        public static void CalculateResearchPoints(ResearcherDB researcherDB, Tech? currentTech)
         {
             int output = researcherDB.BaseResearchPoints;
 
@@ -158,14 +160,17 @@ namespace Pulsar4X.Technology
             // Apply funding bonus
             output *= fundingMultiplier;
 
-            // Apply any category bonuses
-            foreach(var (category, bonus) in researcherDB.BonusCategories)
+            if(currentTech != null)
             {
-                // Make sure the categories match
-                if(!currentTech.Category.Equals(category))
-                    continue;
+                // Apply any category bonuses
+                foreach(var (category, bonus) in researcherDB.BonusCategories)
+                {
+                    // Make sure the categories match
+                    if(!currentTech.Category.Equals(category))
+                        continue;
 
-                output += (int)(output * bonus);
+                    output += (int)(output * bonus);
+                }
             }
 
             //TODO: apply scientist bonus
