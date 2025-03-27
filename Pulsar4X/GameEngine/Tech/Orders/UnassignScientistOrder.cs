@@ -6,30 +6,30 @@ using Pulsar4X.People;
 
 namespace Pulsar4X.Technology;
 
-public class AssignScientistOrder : EntityCommand
+public class UnassignScientistOrder : EntityCommand
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
     public override bool IsBlocking => false;
 
-    public override string Name => "Assign Scientist to Lab";
+    public override string Name => "Unassign Scientist from Lab";
 
-    public override string Details => "Instantly assigns a scientist to a lab";
+    public override string Details => "Instantly unassigns a scientist from a lab";
 
     internal override Entity EntityCommanding => _labEntity;
 
     private Entity _labEntity;
     private int _scientistId;
 
-    private AssignScientistOrder(Entity labEntity, int scientistId)
+    private UnassignScientistOrder(Entity labEntity, int scientistId)
     {
         _labEntity = labEntity;
         _scientistId = scientistId;
     }
 
-    public static AssignScientistOrder Create(Entity labEntity, int scientistId)
+    public static UnassignScientistOrder Create(Entity labEntity, int scientistId)
     {
-        return new AssignScientistOrder(labEntity, scientistId);
+        return new UnassignScientistOrder(labEntity, scientistId);
     }
 
     public override EntityCommand Clone()
@@ -48,26 +48,16 @@ public class AssignScientistOrder : EntityCommand
         if(!scientist.TryGetDatablob<CommanderDB>(out var commanderDB))
             return;
 
-        // Need to find the current assignment and unassign them
-        if(commanderDB.AssignedTo >= 0)
-        {
-            if(_labEntity.Manager.TryGetGlobalEntityById(commanderDB.AssignedTo, out var previousLab))
-            {
-                var unassignOrder = UnassignScientistOrder.Create(previousLab, commanderDB.AssignedTo);
-                _labEntity.Manager.Game.OrderHandler.HandleOrder(unassignOrder);
-            }
-        }
-
-        // Assign the scientist
-        researcherDB.ScientistId = _scientistId;
-        commanderDB.AssignedTo = _labEntity.Id;
+        // Clear the assignments
+        commanderDB.AssignedTo = -1;
+        researcherDB.ScientistId = -1;
 
         // From the lab perspective
         EventManager.Instance.Publish(
             Event.Create(
-                    EventType.TechnologyLabScientistAssigned,
+                    EventType.TechnologyLabScientistUnassigned,
                     atDateTime,
-                    "Lab was assigned a scientist",
+                    "Lab was unassigned a scientist",
                     _labEntity.FactionOwnerID,
                     _labEntity.Manager.ManagerID,
                     _labEntity.Id));
@@ -75,9 +65,9 @@ public class AssignScientistOrder : EntityCommand
         // From the scientist perspective
         EventManager.Instance.Publish(
             Event.Create(
-                    EventType.ScientistAssignedToLab,
+                    EventType.ScientistUnassignedFromLab,
                     atDateTime,
-                    "Scientist assigned to lab",
+                    "Scientist was unassigned from lab",
                     _labEntity.FactionOwnerID,
                     _labEntity.Manager.ManagerID,
                     _scientistId));

@@ -425,7 +425,9 @@ namespace Pulsar4X.Events
         TechnologyMovedInQueue,
         TechnologyFundingChanged,
         TechnologyLabScientistAssigned, // from the lab perspective
+        TechnologyLabScientistUnassigned,
         ScientistAssignedToLab, // from the scientist perspective
+        ScientistUnassignedFromLab,
 
 
     }

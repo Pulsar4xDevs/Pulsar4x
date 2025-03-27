@@ -194,53 +194,60 @@ namespace Pulsar4X.Client
                     ImGui.Text(location?.Name);
                     ImGui.TableNextColumn();
 
-                    if(researcherDB.ScientistId < 0)
-                    {
-                        if(ImGui.Button("Assign Scientist"))
-                        {
-                            _showAssignmentModal = true;
-                        }
-
-                        if(_showAssignmentModal)
-                        {
-                            ResultModal.GetInstance().Display(
-                                "Assign Scientist",
-                                () => // Ok
-                                {
-                                    _showAssignmentModal = false;
-                                }, () => // Cancel
-                                {
-                                    _showAssignmentModal = false;
-                                }, () => // Custom render
-                                {
-                                    if(!_uiState.Faction.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
-                                        return;
-
-                                    foreach(var commanderId in factionInfoDB.Commanders)
-                                    {
-                                        // TODO: this is probably super slow and should be improved
-                                        // TODO: remove the call into the game
-                                        var commander = _uiState.Game.GlobalManager.GetGlobalEntityById(commanderId);
-
-                                        if(!commander.TryGetDatablob<CommanderDB>(out var commanderDB))
-                                            continue;
-
-                                        if(commanderDB.Type != DataStructures.CommanderTypes.Civilian)
-                                            continue;
-
-                                        if(ImGui.Button(commander.GetName(_uiState.Faction.Id)))
-                                        {
-                                            var assignmentOrder = AssignScientistOrder.Create(lab.Entity, commanderId);
-                                            _uiState.Game.OrderHandler.HandleOrder(assignmentOrder);
-                                        }
-                                    }
-                                });
-                        }
-                    }
-                    else
+                    var nameDisplay = "Assign Scientist";
+                    if(researcherDB.ScientistId >= 0)
                     {
                         var commander = _uiState.Game.GlobalManager.GetGlobalEntityById(researcherDB.ScientistId);
-                        ImGui.Text(commander.GetName(_uiState.Faction.Id));
+                        nameDisplay = commander.GetName(_uiState.Faction.Id);
+                    }
+                    if(ImGui.Button(nameDisplay))
+                    {
+                        _showAssignmentModal = true;
+                    }
+
+                    if(_showAssignmentModal)
+                    {
+                        ResultModal.GetInstance().Display(
+                            "Assign Scientist",
+                            () => // Ok
+                            {
+                                _showAssignmentModal = false;
+                            }, () => // Cancel
+                            {
+                                _showAssignmentModal = false;
+                            }, () => // Custom render
+                            {
+                                if(!_uiState.Faction.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+                                    return;
+
+                                foreach(var commanderId in factionInfoDB.Commanders)
+                                {
+                                    if(commanderId == researcherDB.ScientistId)
+                                        continue;
+
+                                    // TODO: this is probably super slow and should be improved
+                                    // TODO: remove the call into the game
+                                    var commander = _uiState.Game.GlobalManager.GetGlobalEntityById(commanderId);
+
+                                    if(!commander.TryGetDatablob<CommanderDB>(out var commanderDB))
+                                        continue;
+
+                                    if(commanderDB.Type != DataStructures.CommanderTypes.Civilian)
+                                        continue;
+
+                                    if(ImGui.Button(commander.GetName(_uiState.Faction.Id)))
+                                    {
+                                        var assignmentOrder = AssignScientistOrder.Create(lab.Entity, commanderId);
+                                        _uiState.Game.OrderHandler.HandleOrder(assignmentOrder);
+                                    }
+                                }
+
+                                if(researcherDB.ScientistId >= 0 && ImGui.Button("None"))
+                                {
+                                    var unassignOrder = UnassignScientistOrder.Create(lab.Entity, researcherDB.ScientistId);
+                                    _uiState.Game.OrderHandler.HandleOrder(unassignOrder);
+                                }
+                            });
                     }
 
                     ImGui.TableNextColumn();

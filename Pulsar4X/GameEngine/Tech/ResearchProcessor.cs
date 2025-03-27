@@ -28,6 +28,7 @@ namespace Pulsar4X.Technology
             EventManager.Instance.Subscribe(EventType.TechnologyMovedInQueue, OnTechnologyChanged);
             EventManager.Instance.Subscribe(EventType.TechnologyFundingChanged, OnTechnologyChanged);
             EventManager.Instance.Subscribe(EventType.TechnologyLabScientistAssigned, OnTechnologyChanged);
+            EventManager.Instance.Subscribe(EventType.TechnologyLabScientistUnassigned, OnTechnologyChanged);
         }
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
