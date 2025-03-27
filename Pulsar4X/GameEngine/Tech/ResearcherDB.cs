@@ -1,8 +1,8 @@
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.Technology;
 
@@ -52,19 +52,25 @@ public class ResearcherDB : BaseDataBlob
     /// 5 = spared no expense, multiplies the research point output by 5, multiplies the cost by day by 22
     /// </summary>
     [JsonProperty]
-    public byte FundingLevel { get; set; } = 0;
+    public byte FundingLevel { get; set; } = 1;
 
     /// <summary>
     /// The entity Id of the scientist assigned to the researcher
     /// </summary>
     [JsonProperty]
-    public int ScientistId { get; internal set; } = 0;
+    public int ScientistId { get; internal set; } = -1;
+
+    /// <summary>
+    /// The entity Id of the location the lab is at
+    /// </summary>
+    [JsonProperty]
+    public int LocationId { get; internal set; } = -1;
 
     /// <summary>
     /// The Id of the tech this researcher is researching
     /// </summary>
     [JsonProperty]
-    public ConcurrentQueue<string> TechQueue { get; private set; } = new ();
+    public ReorderableSafeQueue<string> TechQueue { get; private set; } = new ();
 
     /// <summary>
     /// Needed for the UI

@@ -185,6 +185,14 @@ namespace Pulsar4X.Client
                 .ToList();
         }
 
+        public EntityState? GetEntityById(int id)
+        {
+            if(!AllEntities.ContainsKey(id))
+                return null;
+
+            return AllEntities[id];
+        }
+
         private bool EvaluateDataBlobs(EntityState entityState, List<Type> dataTypes, FilterLogic logic)
         {
             var results = dataTypes.Select(type => entityState.HasDataBlob(type)).ToList();

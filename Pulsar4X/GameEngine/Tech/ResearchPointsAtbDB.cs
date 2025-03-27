@@ -1,9 +1,7 @@
 using Newtonsoft.Json;
-using NUnit.Framework.Constraints;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
-using Pulsar4X.People;
 
 namespace Pulsar4X.Technology
 {
@@ -69,14 +67,20 @@ namespace Pulsar4X.Technology
             var researcherDB = new ResearcherDB(componentInstance.Design)
             {
                 BaseResearchPoints = _pointsPerEconTick,
-                BaseCostPerDay = _costPerDay
+                BaseCostPerDay = _costPerDay,
+                LocationId = parentEntity.Id
             };
 
             // By default the bonus category gets a 10% bonus
-            researcherDB.BonusCategories.Add(_bonusCategory, 0.1);
+            if(!string.IsNullOrEmpty(_bonusCategory))
+                researcherDB.BonusCategories.Add(_bonusCategory, 0.1);
 
             // Finally add the db to the entity
             entity.SetDataBlob(researcherDB);
+
+            // Calculate the initial stats
+            ResearchProcessor.CalculateCost(researcherDB);
+            ResearchProcessor.CalculateResearchPoints(researcherDB, null);
         }
 
         public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)

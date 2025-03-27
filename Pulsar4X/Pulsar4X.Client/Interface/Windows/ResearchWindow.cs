@@ -22,7 +22,7 @@ namespace Pulsar4X.Client
         private Dictionary<string, Tech>? _researchableTechsByGuid;
         private List<(Scientist scientist, Entity atEntity)>? _scienceTeams;
         private int _selectedTeam = -1;
-        private Entity? _selectedLab = null;
+        private EntityState? _selectedLab = null;
 
         private string[]? techCategoryNames;
         private string[]? techCategoryIds;
@@ -169,14 +169,14 @@ namespace Pulsar4X.Client
                 ImGui.TableSetupColumn("Funding", ImGuiTableColumnFlags.None, 0.15f);
                 ImGui.TableHeadersRow();
 
-                var labs = _uiState.SelectedSystem.GetFilteredEntities(
+                var labs = _uiState.SelectedSystemState.GetFilteredEntities(
                                 DataStructures.EntityFilter.Friendly,
                                 _uiState.Faction.Id,
                                 typeof(ResearcherDB));
 
                 foreach(var lab in labs)
                 {
-                    if(!lab.TryGetDatablob<ResearcherDB>(out var researcherDB))
+                    if(!lab.TryGetDataBlob<ResearcherDB>(out var researcherDB))
                         continue;
 
                     researcherDB.TechQueue.TryPeek(out var techId);
@@ -187,7 +187,8 @@ namespace Pulsar4X.Client
                         _selectedLab = lab;
                     }
                     ImGui.TableNextColumn();
-                    ImGui.Text("TODO");
+                    var location = _uiState.SelectedSystemState.GetEntityById(researcherDB.LocationId);
+                    ImGui.Text(location?.Name);
                     ImGui.TableNextColumn();
                     ImGui.Text("TODO");
                     ImGui.TableNextColumn();
@@ -255,21 +256,24 @@ namespace Pulsar4X.Client
             ImGui.NewLine();
             DisplayHelpers.Header("Tech Queue for Selected Lab");
 
-            if(ImGui.BeginTable("TechQueue", 2, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
+            if(ImGui.BeginTable("TechQueue", 3, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
             {
+                ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.05f);
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 0.5f);
-                ImGui.TableSetupColumn("Options", ImGuiTableColumnFlags.None, 0.5f);
+                ImGui.TableSetupColumn("Options", ImGuiTableColumnFlags.None, 0.45f);
                 ImGui.TableHeadersRow();
 
-                if(_selectedLab.TryGetDatablob<ResearcherDB>(out var researcherDB))
+                if(_selectedLab.TryGetDataBlob<ResearcherDB>(out var researcherDB))
                 {
                     int index = 0;
-                    foreach(var tech in researcherDB.TechQueue)
+                    foreach(var tech in researcherDB.TechQueue.ToList())
                     {
+                        ImGui.TableNextColumn();
+                        ImGui.Text($"{index + 1}");
                         ImGui.TableNextColumn();
                         ImGui.Text(_researchableTechsByGuid[tech].Name);
                         ImGui.TableNextColumn();
-                        //Buttons(scientist, (techID, cycle), ref index);
+                        Buttons(researcherDB, tech, ref index);
                         index++;
                     }
                 }
@@ -424,9 +428,16 @@ namespace Pulsar4X.Client
 
                         if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(0))
                         {
-                            if(_selectedLab != null && _selectedLab.TryGetDatablob<ResearcherDB>(out var researcherDB))
+                            if(_selectedLab != null && _selectedLab.TryGetDataBlob<ResearcherDB>(out var researcherDB))
                             {
                                 ResearchProcessor.AssignTech(researcherDB, _researchableTechs[i].UniqueID);
+
+                                // If the count == 1 we added to an empty queue, re-calculate the costs
+                                if(researcherDB.TechQueue.Count == 1)
+                                {
+                                    ResearchProcessor.CalculateCost(researcherDB);
+                                    ResearchProcessor.CalculateResearchPoints(researcherDB, _researchableTechs[i]);
+                                }
                             }
                         }
                     }
@@ -454,146 +465,42 @@ namespace Pulsar4X.Client
                     ImGui.TableNextColumn();
                     ImGui.Text(_researchableTechsByGuid[techID].Name);
                     ImGui.TableNextColumn();
-                    Buttons(scientist, (techID, cycle), ref index);
+                    //Buttons(scientist, (techID, cycle), ref index);
                     index++;
                 }
 
                 ImGui.EndTable();
             }
-
-            //ImGui.BeginChild("SelectedSci");
-
-
-            //ImGui.Columns(2);
-            //ImGui.SetColumnWidth(0, 300);
-            //ImGui.SetColumnWidth(1, 150);
-            /*
-            int loopto = scientist.ProjectQueue.Count;
-            if (hoveredi >= scientist.ProjectQueue.Count)
-                hoveredi = -1;
-            if (hoveredi > -1)
-                loopto = hoveredi;
-
-            var spacingH = ImGui.GetTextLineHeightWithSpacing() - ImGui.GetTextLineHeight();
-
-
-            float heightt = ImGui.GetTextLineHeightWithSpacing() * loopto + spacingH * loopto;
-            float hoverHeigt = ImGui.GetTextLineHeightWithSpacing() + spacingH * 3;
-            float heightb = ImGui.GetTextLineHeightWithSpacing() * scientist.ProjectQueue.Count - loopto;
-            float colomnWidth0 = 300;
-
-            for (int i = 0; i < loopto; i++)
-            {
-                ImGui.BeginChild("Top", new System.Numerics.Vector2(400, heightt));
-                ImGui.Columns(2);
-                ImGui.SetColumnWidth(0, 300);
-                (Guid techID, bool cycle) queueItem = _scienceTeams[selected].scientist.ProjectQueue[i];
-                (TechSD tech, int amountDone, int amountMax) projItem = _researchableTechsByGuid[queueItem.techID];
-
-                ImGui.BeginGroup();
-                var cpos = ImGui.GetCursorPos();
-                ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.ChildBg));
-                ImGui.Button("##projItem.tech.Name", new System.Numerics.Vector2(colomnWidth0 - spacingH, ImGui.GetTextLineHeightWithSpacing()));
-                ImGui.PopStyleColor();
-                ImGui.SetCursorPos(cpos);
-                ImGui.Text(projItem.tech.Name);
-                ImGui.EndGroup();
-
-                if (ImGui.IsItemHovered())
-                {
-                    hoveredi = i;
-                }
-                ImGui.NextColumn();
-                ImGui.NextColumn();
-                ImGui.EndChild();
-            }
-
-            if (hoveredi > -1)
-            {
-                ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 0.5f);
-                ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 2f);
-                ImGui.BeginChild("Buttons", new System.Numerics.Vector2(400, hoverHeigt), true);
-                ImGui.Columns(2);
-                ImGui.SetColumnWidth(0, 300);
-
-                (Guid techID, bool cycle) queueItem = _scienceTeams[selected].scientist.ProjectQueue[hoveredi];
-                (TechSD tech, int amountDone, int amountMax) projItem = _researchableTechsByGuid[queueItem.techID];
-
-
-                ImGui.BeginGroup();
-                ImGui.Text(projItem.tech.Name);
-                ImGui.EndGroup();
-
-                ImGui.NextColumn();
-
-                Buttons(scientist, queueItem, hoveredi);
-
-                ImGui.NextColumn();
-
-                ImGui.EndChild();
-                ImGui.PopStyleVar(2);
-
-
-                for (int i = hoveredi + 1; i < scientist.ProjectQueue.Count; i++)
-                {
-                    ImGui.BeginChild("Bottom");
-                    ImGui.Columns(2);
-                    ImGui.SetColumnWidth(0, 300);
-                    (Guid techID, bool cycle) queueItem1 = _scienceTeams[selected].scientist.ProjectQueue[i];
-                    (TechSD tech, int amountDone, int amountMax) projItem1 = _researchableTechsByGuid[queueItem1.techID];
-
-                    ImGui.BeginGroup();
-                    var cpos = ImGui.GetCursorPos();
-                    ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.ChildBg));
-                    ImGui.Button("##projItem1.tech.Name", new System.Numerics.Vector2(colomnWidth0 - spacingH, ImGui.GetTextLineHeightWithSpacing()));
-                    ImGui.PopStyleColor();
-                    ImGui.SetCursorPos(cpos);
-                    ImGui.Text(projItem1.tech.Name);
-                    ImGui.EndGroup();
-
-                    if (ImGui.IsItemHovered())
-                    {
-                        hoveredi = i;
-                    }
-
-                    ImGui.NextColumn();
-                    ImGui.NextColumn();
-
-                    ImGui.EndChild();
-                }
-            }
-
-            ImGui.EndChild();
-            */
         }
 
-        void Buttons(Scientist scientist, (string techID, bool cycle) queueItem, ref int i)
+        void Buttons(ResearcherDB researcherDB, string techID, ref int i)
         {
             ImGui.BeginGroup();
 
-            if(_researchableTechsByGuid != null &&_researchableTechsByGuid[scientist.ProjectQueue[i].techID].MaxLevel > 1)
-            {
-                string cyclestr = queueItem.cycle ? "O": "*";
-                if (ImGui.SmallButton(cyclestr + "##" + i))
-                {
-                    scientist.ProjectQueue[i] = (queueItem.techID, !queueItem.cycle);
-                }
+            // if(_researchableTechsByGuid != null &&_researchableTechsByGuid[queueItem.techID].MaxLevel > 1)
+            // {
+            //     string cyclestr = queueItem.cycle ? "O": "*";
+            //     if (ImGui.SmallButton(cyclestr + "##" + i))
+            //     {
+            //         scientist.ProjectQueue[i] = (queueItem.techID, !queueItem.cycle);
+            //     }
 
-                if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Requeue Project");
-            }
-            else
-            {
-                ImGui.InvisibleButton("invis1", invisButtonSize);
-            }
-            ImGui.SameLine();
+            //     if (ImGui.IsItemHovered())
+            //         ImGui.SetTooltip("Requeue Project");
+            // }
+            // else
+            // {
+            //     ImGui.InvisibleButton("invis1", invisButtonSize);
+            // }
+            // ImGui.SameLine();
 
             if (i > 0)
             {
                 if(ImGui.SmallButton("^" + "##" + i))
                 {
-                    scientist.ProjectQueue.RemoveAt(i);
-                    scientist.ProjectQueue.Insert(i - 1, queueItem);
+                    researcherDB.TechQueue.TryMoveUp(techID);
+                    // scientist.ProjectQueue.RemoveAt(i);
+                    // scientist.ProjectQueue.Insert(i - 1, queueItem);
                 }
             }
             else
@@ -602,12 +509,13 @@ namespace Pulsar4X.Client
             }
             ImGui.SameLine();
 
-            if (i < scientist.ProjectQueue.Count - 1)
+            if (i < researcherDB.TechQueue.Count - 1)
             {
                 if(ImGui.SmallButton("v" + "##" + i))
                 {
-                    scientist.ProjectQueue.RemoveAt(i);
-                    scientist.ProjectQueue.Insert(i + 1, queueItem);
+                    researcherDB.TechQueue.TryMoveDown(techID);
+                    // scientist.ProjectQueue.RemoveAt(i);
+                    // scientist.ProjectQueue.Insert(i + 1, queueItem);
                 }
             }
             else
@@ -618,7 +526,7 @@ namespace Pulsar4X.Client
 
             if (ImGui.SmallButton("x" + "##" + i))
             {
-                scientist.ProjectQueue.RemoveAt(i);
+                researcherDB.TechQueue.TryRemoveItem(techID);
                 i--;
             }
 
