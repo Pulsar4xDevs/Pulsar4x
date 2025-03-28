@@ -1,6 +1,6 @@
 using NUnit.Framework;
-using Pulsar4X.Colonies;
 using Pulsar4X.DataStructures;
+using Pulsar4X.Factions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -128,5 +128,15 @@ public class SerializationTests
         AssertSerialization(new WeightedList<string>() { { 0.1, "one"}, {0.2, "two"}, {0.3, "three"}, {0.4, "four"} }, "WeightedList<string>");
         AssertSerialization(new ManuverState() { At = DateTime.Now, Mass = 12345.67, Position = new Orbital.Vector3(1.1, 2.2, 3.3), Velocity = new Orbital.Vector3(4.4, 5.5, 6.6) }, "ManuverState");
         AssertSerialization(new ValueTypeStruct() { ValueSize = ValueTypeStruct.ValueSizes.Centi, ValueType = ValueTypeStruct.ValueTypes.Volume }, "ValueTypeStruct");
+        AssertSerialization(new ReorderableSafeQueue<string>(new List<string>(){"one","two","three"}), "ReorderableSafeQueue<string");
+    }
+
+    [Test]
+    public void VerifyLedger()
+    {
+        var ledger = new Ledger();
+        ledger.AddTransaction(DateTime.Now, TransactionCategory.InitialInvestment, "My transaction description", 1000);
+
+        AssertSerialization(ledger, "Ledger");
     }
 }

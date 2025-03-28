@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
+using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Technology;
 
@@ -76,9 +77,9 @@ public class ResearcherDB : BaseDataBlob
     /// Needed for the UI
     /// </summary>
     [JsonProperty]
-    public ComponentDesign Design { get; internal set; }
+    public IConstructableDesign Design { get; internal set; }
 
-    public ResearcherDB(ComponentDesign design)
+    public ResearcherDB(IConstructableDesign design)
     {
         Design = design;
     }

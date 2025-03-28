@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -8,7 +9,7 @@ using Newtonsoft.Json;
 namespace Pulsar4X.DataStructures;
 
 [JsonConverter(typeof(ReorderableSafeQueueConverter))]
-public class ReorderableSafeQueue<T>
+public class ReorderableSafeQueue<T> : IEnumerable<T>
 {
     private readonly object _lockObject = new object();
     private readonly LinkedList<T> _items = new LinkedList<T>();
@@ -131,6 +132,11 @@ public class ReorderableSafeQueue<T>
         {
             return new LinkedList<T>(_items).GetEnumerator();
         }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 
     /// <summary>
