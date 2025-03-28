@@ -224,9 +224,9 @@ namespace Pulsar4X.Client
 
                     }
                 }
-                if(Entity.HasDataBlob<ColonyInfoDB>())
+                if(Entity.TryGetDataBlob<ColonyInfoDB>(out var colonyInfoDB))
                 {
-                    Entity.GetDataBlob<ColonyInfoDB>().Display(EntityState, _uiState);
+                    colonyInfoDB.Display(EntityState, _uiState);
                 }
 
                 if(Entity.TryGetDataBlob<StarInfoDB>(out var starInfoDB))
