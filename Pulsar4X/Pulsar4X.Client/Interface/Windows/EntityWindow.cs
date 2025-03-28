@@ -1,4 +1,3 @@
-using System;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
@@ -6,7 +5,6 @@ using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
 using Pulsar4X.Colonies;
-using Pulsar4X.Damage;
 using Pulsar4X.Factions;
 using Pulsar4X.GeoSurveys;
 using Pulsar4X.Industry;
@@ -24,7 +22,7 @@ namespace Pulsar4X.Client
     {
         public Entity Entity { get; private set; }
         public EntityState EntityState { get; private set; }
-        public String Title { get; private set; }
+        public string Title { get; private set; }
 
         private Vector2 ButtonSize = new Vector2(32, 32);
 
@@ -33,9 +31,9 @@ namespace Pulsar4X.Client
             Entity = entityState.Entity;
             EntityState = entityState;
 
-            if(Entity.HasDataBlob<NameDB>())
+            if(_uiState.Faction != null && Entity.TryGetDataBlob<NameDB>(out var nameDB))
             {
-                Title = Entity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
+                Title = nameDB.GetName(_uiState.Faction);
             }
             else
             {
@@ -61,7 +59,7 @@ namespace Pulsar4X.Client
         private void DisplayActions()
         {
             // Pin Camera
-            ImGui.PushID(0);
+            ImGui.PushID(EntityState.Id);
             if(ImGui.ImageButton("###entitywindowactions", _uiState.Img_Pin(), ButtonSize))
             {
                 _uiState.Camera.PinToEntity(Entity);
@@ -164,6 +162,10 @@ namespace Pulsar4X.Client
 
         private void DisplayInfo()
         {
+            if(_uiState.Game == null
+                || _uiState.Faction == null)
+                return;
+
             if(ImGui.CollapsingHeader("Info", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 if(Entity.HasDataBlob<ShipInfoDB>() && Entity.HasDataBlob<CargoStorageDB>())
@@ -250,7 +252,8 @@ namespace Pulsar4X.Client
 
         private void DisplayConditional()
         {
-            if(Entity.Manager == null) return;
+            if(Entity.Manager == null
+                || _uiState.Faction == null) return;
 
             bool isGeoSurveyed = Entity.HasDataBlob<GeoSurveyableDB>() ? Entity.GetDataBlob<GeoSurveyableDB>().IsSurveyComplete(_uiState.Faction.Id) : false;
 
@@ -265,7 +268,7 @@ namespace Pulsar4X.Client
                     {
                         if (ImGui.BeginTable("OrdersTable", 3, Styles.TableFlags))
                         {
-                            ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.02f);
+                            ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.1f);
                             ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.None, 0.2f);
                             ImGui.TableSetupColumn("Details", ImGuiTableColumnFlags.None, 0.7f);
                             ImGui.TableHeadersRow();
@@ -286,8 +289,6 @@ namespace Pulsar4X.Client
                                 }
                                 ImGui.TableNextColumn();
                                 ImGui.Text(actions[i].Details);
-
-
                             }
 
                             ImGui.EndTable();

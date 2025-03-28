@@ -120,6 +120,8 @@ namespace Pulsar4X.Client
         }
         public static void DisplayMining(this Entity entity, GlobalUIState uiState)
         {
+            if(uiState.Faction == null) return;
+
             var mineralStaticInfo = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMineralsList();
             var minerals = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.HasDataBlob<MineralsDB>() ?
                             entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>()?.Minerals :
@@ -145,8 +147,8 @@ namespace Pulsar4X.Client
                 {
                     ImGui.Text("Number of Mines: 0");
                 }
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
 
             if(ImGui.BeginTable("###MineralTable" + entity.Id, 6, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
             {
