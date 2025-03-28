@@ -126,7 +126,7 @@ namespace Pulsar4X.Client
             Entity = EntityState?.Entity;
             if(Entity == null) return;
 
-            if(!Entity.TryGetDatablob<IndustryAbilityDB>(out _industryDB) || !state.Faction.TryGetDatablob<FactionInfoDB>(out _factionInfoDB))
+            if(!Entity.TryGetDataBlob<IndustryAbilityDB>(out _industryDB) || !state.Faction.TryGetDataBlob<FactionInfoDB>(out _factionInfoDB))
             {
                 Vector2 topSize = ImGui.GetContentRegionAvail();
                 if(ImGui.BeginChild("NoProductionAvailable", new Vector2(topSize.X, 56f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
@@ -139,7 +139,7 @@ namespace Pulsar4X.Client
                 return;
             }
 
-            Entity.TryGetDatablob(out _volStorageDB);
+            Entity.TryGetDataBlob(out _volStorageDB);
             _factionID = state.Faction.Id;
             Update();
 

@@ -19,7 +19,7 @@ public class SensorReflectionProcessor : IHotloopProcessor
 
     public void ProcessEntity(Entity entity, int deltaSeconds)
     {
-        if(!entity.TryGetDatablob<PositionDB>(out var detectablePosDB))
+        if(!entity.TryGetDataBlob<PositionDB>(out var detectablePosDB))
         {
             return;
         }

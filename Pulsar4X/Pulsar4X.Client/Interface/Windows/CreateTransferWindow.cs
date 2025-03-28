@@ -109,7 +109,7 @@ public class CreateTransferWindow : PulsarGuiWindow
 
     private void DisplayStorageList(Entity entity)
     {
-        if(entity.TryGetDatablob<CargoStorageDB>(out var leftVolumeStorageDB))
+        if(entity.TryGetDataBlob<CargoStorageDB>(out var leftVolumeStorageDB))
         {
             ImGui.Text(entity.GetName(_uiState.Faction.Id));
             ImGui.Separator();

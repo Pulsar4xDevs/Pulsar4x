@@ -72,12 +72,12 @@ namespace Pulsar4X.Client
             if(!AllEntities.ContainsKey(entity.Id))
                 AllEntities.Add(entity.Id, entityState);
 
-            if (!EntityStatesWithNames.ContainsKey(entity.Id) && entity.TryGetDatablob<NameDB>(out var nameDB))
+            if (!EntityStatesWithNames.ContainsKey(entity.Id) && entity.TryGetDataBlob<NameDB>(out var nameDB))
             {
                 entityState.Name = nameDB.GetName(factionId); // TODO: doesn't update when if/when the entity is renamed
                 EntityStatesWithNames.Add(entity.Id, entityState);
             }
-            if (!EntityStatesWithPosition.ContainsKey(entity.Id) && entity.TryGetDatablob<PositionDB>(out var positionDB))
+            if (!EntityStatesWithPosition.ContainsKey(entity.Id) && entity.TryGetDataBlob<PositionDB>(out var positionDB))
             {
                 entityState.Position = positionDB;
                 EntityStatesWithPosition.Add(entity.Id, entityState);

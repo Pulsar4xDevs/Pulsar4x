@@ -11,7 +11,7 @@ public class LogiBaseAtb : IComponentDesignAttribute
     public int LogisicCapacity { get; internal set; }
     public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
-        if (!parentEntity.TryGetDatablob(out LogiBaseDB? lbdb))
+        if (!parentEntity.TryGetDataBlob(out LogiBaseDB? lbdb))
         {
             parentEntity.SetDataBlob(lbdb = new LogiBaseDB());
         }
@@ -30,8 +30,8 @@ public class LogiBaseAtb : IComponentDesignAttribute
 
     public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
-        if(parentEntity.TryGetDatablob<LogiBaseDB>(out var logiBaseDB)
-            && parentEntity.TryGetDatablob<ComponentInstancesDB>(out var componentInstancesDB))
+        if(parentEntity.TryGetDataBlob<LogiBaseDB>(out var logiBaseDB)
+            && parentEntity.TryGetDataBlob<ComponentInstancesDB>(out var componentInstancesDB))
         {
             logiBaseDB.Capacity -= LogisicCapacity;
 

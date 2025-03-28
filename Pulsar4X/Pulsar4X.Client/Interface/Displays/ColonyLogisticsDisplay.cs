@@ -71,8 +71,8 @@ namespace Pulsar4X.Client
             _selectedEntity = _entityState.Entity;
             if (entityState.HasDataBlob(typeof(OrderableDB)))
             {
-                _selectedEntity.TryGetDatablob<LogiBaseDB>(out _logisticsDB);
-                _selectedEntity.TryGetDatablob<CargoStorageDB>(out _volStorageDB);
+                _selectedEntity.TryGetDataBlob<LogiBaseDB>(out _logisticsDB);
+                _selectedEntity.TryGetDataBlob<CargoStorageDB>(out _volStorageDB);
 
                 Update();
             }

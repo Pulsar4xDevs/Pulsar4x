@@ -29,7 +29,7 @@ public class PositionDB : TreeHierarchyDB, IPosition
     public MoveTypes MoveType { get; internal set; }
 
     public KeplerElements GetKeplerElements { get; internal set; }
-    
+
     public Vector3 RelativePosition { get; internal set; }
 
     public Vector2 RelativePosition2
@@ -177,7 +177,7 @@ public class MoveStateProcessor : IInstanceProcessor
     {
         if(orbitDB.OwningEntity is null)
             return;
-        if(!orbitDB.OwningEntity.TryGetDatablob(out PositionDB stateDB))
+        if(!orbitDB.OwningEntity.TryGetDataBlob(out PositionDB stateDB))
         {
             stateDB = new PositionDB(orbitDB.Parent);
             orbitDB.OwningEntity.SetDataBlob(stateDB);
@@ -205,7 +205,7 @@ public class MoveStateProcessor : IInstanceProcessor
     {
         if(orbitDB.OwningEntity is null)
             return;
-        if(!orbitDB.OwningEntity.TryGetDatablob(out PositionDB stateDB))
+        if(!orbitDB.OwningEntity.TryGetDataBlob(out PositionDB stateDB))
         {
             stateDB = new PositionDB(orbitDB.Parent);
             orbitDB.OwningEntity.SetDataBlob(stateDB);
@@ -226,7 +226,7 @@ public class MoveStateProcessor : IInstanceProcessor
         {
             if(movedb.OwningEntity is null)
                 continue;
-            if(!movedb.OwningEntity.TryGetDatablob(out PositionDB stateDB))
+            if(!movedb.OwningEntity.TryGetDataBlob(out PositionDB stateDB))
             {
                 stateDB = new PositionDB(movedb.SOIParent);
                 movedb.OwningEntity.SetDataBlob(stateDB);
@@ -248,7 +248,7 @@ public class MoveStateProcessor : IInstanceProcessor
     {
         if (movedb.OwningEntity is null)
             return;
-        if(!movedb.OwningEntity.TryGetDatablob(out PositionDB stateDB))
+        if(!movedb.OwningEntity.TryGetDataBlob(out PositionDB stateDB))
         {
             stateDB = new PositionDB(movedb.SOIParent);
             movedb.OwningEntity.SetDataBlob(stateDB);
@@ -279,7 +279,7 @@ public class MoveStateProcessor : IInstanceProcessor
     {
         if(movedb.OwningEntity is null)
             return;
-        if(!movedb.OwningEntity.TryGetDatablob(out PositionDB stateDB))
+        if(!movedb.OwningEntity.TryGetDataBlob(out PositionDB stateDB))
         {
             stateDB = new PositionDB(movedb.SOIParent);
             movedb.OwningEntity.SetDataBlob(stateDB);
@@ -308,7 +308,7 @@ public class MoveStateProcessor : IInstanceProcessor
     {
         if(warpdb.OwningEntity is null)
             return;
-        if(!warpdb.OwningEntity.TryGetDatablob(out PositionDB stateDB))
+        if(!warpdb.OwningEntity.TryGetDataBlob(out PositionDB stateDB))
         {
             stateDB = new PositionDB(warpdb._parentEnitity);
             warpdb.OwningEntity.SetDataBlob(stateDB);
@@ -328,15 +328,15 @@ public class MoveStateProcessor : IInstanceProcessor
     internal override void ProcessEntity(Entity entity, DateTime atDateTime)
     {
 
-        if(entity.TryGetDatablob(out OrbitDB odb))
+        if(entity.TryGetDataBlob(out OrbitDB odb))
             ProcessForType(odb, atDateTime);
-        else if(entity.TryGetDatablob(out OrbitUpdateOftenDB oudb))
+        else if(entity.TryGetDataBlob(out OrbitUpdateOftenDB oudb))
             ProcessForType(oudb, atDateTime);
-        else if(entity.TryGetDatablob(out NewtonMoveDB mdb))
+        else if(entity.TryGetDataBlob(out NewtonMoveDB mdb))
             ProcessForType(mdb, atDateTime);
-        else if(entity.TryGetDatablob(out NewtonSimpleMoveDB nmdb))
+        else if(entity.TryGetDataBlob(out NewtonSimpleMoveDB nmdb))
             ProcessForType(nmdb, atDateTime);
-        else if(entity.TryGetDatablob(out NewtonSimpleMoveDB warpdb))
+        else if(entity.TryGetDataBlob(out NewtonSimpleMoveDB warpdb))
             ProcessForType(warpdb, atDateTime);
     }
 

@@ -171,7 +171,7 @@ namespace Pulsar4X.Client
                     var cargoLibrary = Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
                     var (fuelType, fuelPercent) = Entity.GetFuelInfo(cargoLibrary);
                     string fuelStr = "Fuel (" + (fuelPercent * 100) + "%) ";
-                    if (Entity.TryGetDatablob<NewtonThrustAbilityDB>(out var newtDB))
+                    if (Entity.TryGetDataBlob<NewtonThrustAbilityDB>(out var newtDB))
                         fuelStr += Stringify.Velocity(newtDB.DeltaV) + " Δv";
                     var size = ImGui.GetContentRegionAvail();
                     ImGui.ProgressBar((float)fuelPercent, new Vector2(size.X, 24), fuelStr);
@@ -183,12 +183,12 @@ namespace Pulsar4X.Client
 
                 ImGui.Columns(2);
 
-                if(Entity.TryGetDatablob<SystemBodyInfoDB>(out var systemBodyInfoDB))
+                if(Entity.TryGetDataBlob<SystemBodyInfoDB>(out var systemBodyInfoDB))
                 {
                     DisplayHelpers.PrintRow("Body Type", systemBodyInfoDB.BodyType.ToDescription());
                 }
 
-                if(Entity.TryGetDatablob<MassVolumeDB>(out var massVolumeDB))
+                if(Entity.TryGetDataBlob<MassVolumeDB>(out var massVolumeDB))
                 {
                     DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolumeDB.RadiusInM));
                     DisplayHelpers.PrintRow("Mass", Stringify.Mass(massVolumeDB.MassTotal));
@@ -200,12 +200,12 @@ namespace Pulsar4X.Client
                     DisplayHelpers.PrintRow("Density", massVolumeDB.DensityDry_gcm.ToString("##0.000") + " kg/m^3");
                 }
 
-                if(Entity.TryGetDatablob<PositionDB>(out var positionDB))
+                if(Entity.TryGetDataBlob<PositionDB>(out var positionDB))
                 {
                     Entity? parent = positionDB.Parent;
                     if(parent != null)
                     {
-                        if (Entity.TryGetDatablob<WarpMovingDB>(out var movedb))
+                        if (Entity.TryGetDataBlob<WarpMovingDB>(out var movedb))
                         {
                             DisplayHelpers.PrintRow("Warping", Stringify.Velocity(movedb.CurrentNonNewtonionVectorMS.Length()));
                         }
@@ -227,18 +227,18 @@ namespace Pulsar4X.Client
                     Entity.GetDataBlob<ColonyInfoDB>().Display(EntityState, _uiState);
                 }
 
-                if(Entity.TryGetDatablob<StarInfoDB>(out var starInfoDB))
+                if(Entity.TryGetDataBlob<StarInfoDB>(out var starInfoDB))
                 {
                     starInfoDB.Display(EntityState, _uiState);
                 }
 
-                if(Entity.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB) && !geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id))
+                if(Entity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB) && !geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id))
                 {
                     ImGui.Columns(2);
                     DisplayHelpers.PrintRow("Geo Surveyable", "Yes");
                 }
 
-                if(Entity.TryGetDatablob<JPSurveyableDB>(out var jPSurveyableDB))
+                if(Entity.TryGetDataBlob<JPSurveyableDB>(out var jPSurveyableDB))
                 {
                     ImGui.Columns(1);
                     Displays.GravitationalAnomlay(_uiState, jPSurveyableDB);

@@ -38,7 +38,7 @@ public class AddTechToQueueOrder : EntityCommand
 
     internal override void Execute(DateTime atDateTime)
     {
-        if(!_labEntity.TryGetDatablob<ResearcherDB>(out var researcherDB))
+        if(!_labEntity.TryGetDataBlob<ResearcherDB>(out var researcherDB))
             return;
 
         if(string.IsNullOrEmpty(_techId))

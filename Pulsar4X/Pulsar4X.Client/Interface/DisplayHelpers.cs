@@ -57,10 +57,10 @@ namespace Pulsar4X.Client
 
         public static void ShipTooltip(Entity ship, int factionId)
         {
-            if(!ship.TryGetDatablob<ShipInfoDB>(out var shipInfo))
+            if(!ship.TryGetDataBlob<ShipInfoDB>(out var shipInfo))
                 return;
 
-            if(!ship.TryGetDatablob<OrderableDB>(out var orderableDB))
+            if(!ship.TryGetDataBlob<OrderableDB>(out var orderableDB))
                 return;
 
             var description = "No orders";

@@ -104,11 +104,11 @@ public static class MoveMath
             }
             case PositionDB.MoveTypes.Orbit:
             {
-                if(entity.TryGetDatablob<OrbitDB>(out var orbitDB))
+                if(entity.TryGetDataBlob<OrbitDB>(out var orbitDB))
                 {
                     pos = (Vector2)OrbitMath.GetAbsolutePosition(orbitDB, atDateTime);
                 }
-                else if (entity.TryGetDatablob<OrbitUpdateOftenDB>(out var orbitDB2))
+                else if (entity.TryGetDataBlob<OrbitUpdateOftenDB>(out var orbitDB2))
                 {
                     pos = (Vector2)OrbitMath.GetAbsolutePosition(orbitDB2, atDateTime);
                 }
@@ -165,11 +165,11 @@ public static class MoveMath
             }
             case PositionDB.MoveTypes.Orbit:
             {
-                if(entity.TryGetDatablob<OrbitDB>(out var orbitDB))
+                if(entity.TryGetDataBlob<OrbitDB>(out var orbitDB))
                 {
                     pos = (Vector2)OrbitMath.GetPosition(orbitDB, OrbitMath.GetTrueAnomaly(orbitDB, atDateTime));
                 }
-                else if (entity.TryGetDatablob<OrbitUpdateOftenDB>(out var orbitDB2))
+                else if (entity.TryGetDataBlob<OrbitUpdateOftenDB>(out var orbitDB2))
                 {
                     pos = (Vector2)OrbitMath.GetPosition(orbitDB2, OrbitMath.GetTrueAnomaly(orbitDB2, atDateTime));
                 }

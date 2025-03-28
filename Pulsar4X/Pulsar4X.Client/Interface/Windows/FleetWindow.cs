@@ -109,7 +109,7 @@ namespace Pulsar4X.Client
             selectedShips = new ();
             SelectOrder(null);
 
-            SelectedFleet?.TryGetDatablob<FleetDB>(out selectedFleetDB);
+            SelectedFleet?.TryGetDataBlob<FleetDB>(out selectedFleetDB);
             if(selectedFleetDB == null || selectedFleetDB.FlagShipID == -1)
             {
                 selectedFleetFlagship = null;
@@ -118,7 +118,7 @@ namespace Pulsar4X.Client
             else
             {
                 selectedFleetDB.OwningEntity?.Manager?.TryGetEntityById(selectedFleetDB.FlagShipID, out selectedFleetFlagship);
-                if(selectedFleetFlagship != null && selectedFleetFlagship.IsValid && selectedFleetFlagship.TryGetDatablob<PositionDB>(out var positionDB))
+                if(selectedFleetFlagship != null && selectedFleetFlagship.IsValid && selectedFleetFlagship.TryGetDataBlob<PositionDB>(out var positionDB))
                 {
                     selectedFleetSystem = positionDB?.Root;
                 }
@@ -191,7 +191,7 @@ namespace Pulsar4X.Client
                                 DisplayHelpers.PrintRow("Flagship", selectedFleetFlagship.GetName(factionID));
 
                                 string commanderName = "None";
-                                if (selectedFleetFlagship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB)
+                                if (selectedFleetFlagship.TryGetDataBlob<ShipInfoDB>(out var shipInfoDB)
                                     && shipInfoDB.CommanderID != -1)
                                 {
                                     if(shipInfoDB.OwningEntity != null && shipInfoDB.OwningEntity.Manager != null)
@@ -213,7 +213,7 @@ namespace Pulsar4X.Client
                             ImGui.Text("Current System");
                             ImGui.PopStyleColor();
                             ImGui.NextColumn();
-                            if (selectedFleetFlagship != null && selectedFleetSystem != null && selectedFleetFlagship.TryGetDatablob<PositionDB>(out var positionDB))
+                            if (selectedFleetFlagship != null && selectedFleetSystem != null && selectedFleetFlagship.TryGetDataBlob<PositionDB>(out var positionDB))
                             {
                                 StarSystem? starSystem = (StarSystem?)positionDB.OwningEntity?.Manager;
                                 if (ImGui.SmallButton(starSystem?.NameDB.OwnersName ?? "Unknown"))
@@ -545,7 +545,7 @@ namespace Pulsar4X.Client
 
                         foreach(var bodyState in geoSurveyList)
                         {
-                            if(!bodyState.Entity.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB)) continue;
+                            if(!bodyState.Entity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB)) continue;
                             if(geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id)) continue;
 
                             var name = bodyState.Name;
@@ -567,13 +567,13 @@ namespace Pulsar4X.Client
 
                         foreach(var jpBody in gravSurveyList)
                         {
-                            if(!jpBody.Entity.TryGetDatablob<JPSurveyableDB>(out var jpSurveyableDB)) continue;
+                            if(!jpBody.Entity.TryGetDataBlob<JPSurveyableDB>(out var jpSurveyableDB)) continue;
                             if(jpSurveyableDB.IsSurveyComplete(_uiState.Faction.Id)) continue;
 
                             var name = jpBody.Name;
                             if(ImGui.Button(name + "###jpsurvey-button-" + name))
                             {
-                                if(jpSurveyableDB.OwningEntity != null && SelectedFleet.TryGetDatablob<FleetDB>(out var fleetDB))
+                                if(jpSurveyableDB.OwningEntity != null && SelectedFleet.TryGetDataBlob<FleetDB>(out var fleetDB))
                                 {
                                     //var order = MoveFleetTowardsTargetOrder.CreateCommand(SelectedFleet, jpSurveyableDB.OwningEntity);
                                     var order = WarpFleetTowardsTargetOrder.CreateCommand(SelectedFleet, jpSurveyableDB.OwningEntity);
@@ -600,7 +600,7 @@ namespace Pulsar4X.Client
 
                         foreach(var jumpGate in jumpPointList)
                         {
-                            if(!jumpGate.Entity.TryGetDatablob<JumpPointDB>(out var jumpGateDB)) continue;
+                            if(!jumpGate.Entity.TryGetDataBlob<JumpPointDB>(out var jumpGateDB)) continue;
                             if(!jumpGateDB.IsDiscovered.Contains(_uiState.Faction.Id)) continue;
 
                             var name = jumpGate.Name;
@@ -624,7 +624,7 @@ namespace Pulsar4X.Client
 
                         foreach(var colony in colonyList)
                         {
-                            if(!colony.Entity.TryGetDatablob<CargoStorageDB>(out var storageDB)) continue;
+                            if(!colony.Entity.TryGetDataBlob<CargoStorageDB>(out var storageDB)) continue;
 
                             var name = colony.Name;
                             if(ImGui.Button(name + "###refuelAt-button-" + name))
@@ -806,7 +806,7 @@ namespace Pulsar4X.Client
 
         private void DisplayFleetItem(Entity fleet)
         {
-            if(!fleet.TryGetDatablob<FleetDB>(out var fleetInfo))
+            if(!fleet.TryGetDataBlob<FleetDB>(out var fleetInfo))
             {
                 return;
             }
@@ -827,7 +827,7 @@ namespace Pulsar4X.Client
 
             string description = "";
 
-            fleet.TryGetDatablob<OrderableDB>(out var orderableDB);
+            fleet.TryGetDataBlob<OrderableDB>(out var orderableDB);
 
             if(orderableDB == null || orderableDB.ActionList.Count == 0)
             {

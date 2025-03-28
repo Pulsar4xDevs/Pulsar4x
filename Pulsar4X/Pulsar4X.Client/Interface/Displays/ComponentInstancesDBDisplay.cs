@@ -71,7 +71,7 @@ namespace Pulsar4X.Client
                 if(component.Design.ComponentMountType.HasFlag(ComponentMountType.ShipCargo) && ImGui.MenuItem("Move to Storage"))
                 {
                     // Check if the components parent has storage
-                    if(component.ParentEntity.TryGetDatablob<CargoStorageDB>(out var volumeStorageDB)
+                    if(component.ParentEntity.TryGetDataBlob<CargoStorageDB>(out var volumeStorageDB)
                         && volumeStorageDB.TypeStores.ContainsKey(component.CargoTypeID))
                     {
                         var uninstallOrder = UninstallComponentInstanceOrder.Create(component.ParentEntity, component, 1);

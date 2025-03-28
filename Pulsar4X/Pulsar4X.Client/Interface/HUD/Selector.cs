@@ -96,7 +96,7 @@ namespace Pulsar4X.Client
 
             if(ImGui.CollapsingHeader($"{_uiState.Faction.GetFactionName()} [{_uiState.Faction.GetFactionAbbreviation()}]", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                if(!_uiState.Faction.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+                if(!_uiState.Faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
                     return;
 
                 string label = "Funds";
@@ -191,7 +191,7 @@ namespace Pulsar4X.Client
                     {
                         void Callback()
                         {
-                            if (fleet.TryGetDatablob<OrderableDB>(out var orderableDb)
+                            if (fleet.TryGetDataBlob<OrderableDB>(out var orderableDb)
                             && orderableDb.ActionList.Count > 0)
                             {
                                 ImGui.Text("Orders:");
@@ -206,7 +206,7 @@ namespace Pulsar4X.Client
                             }
                         }
 
-                        fleet.TryGetDatablob<FleetDB>(out var fleetDB);
+                        fleet.TryGetDataBlob<FleetDB>(out var fleetDB);
                         var flagshipID = fleetDB?.FlagShipID ?? -9999;
                         if (fleet.Manager?.TryGetEntityById(flagshipID, out var flagship) ?? false)
                         {

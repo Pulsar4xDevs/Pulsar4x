@@ -26,7 +26,7 @@ namespace Pulsar4X.People
             manager.AddEntity(entity, blobs);
 
             var faction = manager.Game.Factions[factionID];
-            if(faction.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+            if(faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
             {
                 factionInfoDB.Commanders.Add(entity.Id);
             }
@@ -95,7 +95,7 @@ namespace Pulsar4X.People
             var game = commanderToDestroy.Manager.Game;
             var faction = game.Factions[commanderToDestroy.FactionOwnerID];
 
-            if(faction.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+            if(faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
             {
                 factionInfoDB.Commanders.Remove(commanderToDestroy.Id);
             }

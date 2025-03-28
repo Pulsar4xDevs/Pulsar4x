@@ -85,7 +85,7 @@ public class SystemWindow : PulsarGuiWindow
 
         if (entityStates.ContainsKey(currentBody.Id) && (currentBody.HasDataBlob<StarInfoDB>() || currentBody.HasDataBlob<SystemBodyInfoDB>()))
         {
-            if(!currentBody.TryGetDatablob<PositionDB>(out var positionDB))
+            if(!currentBody.TryGetDataBlob<PositionDB>(out var positionDB))
                 return;
 
             if(SystemViewPreferences.GetInstance().ShouldDisplay(SystemViewPreferencesKey, entityStates[currentBody.Id].BodyType))
@@ -109,7 +109,7 @@ public class SystemWindow : PulsarGuiWindow
             entity.GetDataBlob<SystemBodyInfoDB>().BodyType.ToDescription() :
             "Star";
 
-        entity.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB);
+        entity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB);
         bool isSurveyComplete = geoSurveyableDB == null ? false : geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id);
 
         ImGui.TableNextColumn();
@@ -179,7 +179,7 @@ public class SystemWindow : PulsarGuiWindow
             ImGui.TableNextColumn();
             ImGui.Text(bodyInfoDb.BaseTemperature.ToString("#.#") + " C");
 
-            if(entity.TryGetDatablob<AtmosphereDB>(out var atmosphereDB))
+            if(entity.TryGetDataBlob<AtmosphereDB>(out var atmosphereDB))
             {
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.Quantity(atmosphereDB.Pressure));
@@ -199,7 +199,7 @@ public class SystemWindow : PulsarGuiWindow
                 ImGui.TableNextColumn();
             }
 
-            if(entity.TryGetDatablob<MineralsDB>(out var mineralsDB))
+            if(entity.TryGetDataBlob<MineralsDB>(out var mineralsDB))
             {
                 ImGui.TableNextColumn();
                 ImGui.Text("Yes");

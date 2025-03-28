@@ -73,7 +73,7 @@ namespace Pulsar4X.Ships
             if(industryParent == null) throw new NullReferenceException("industryParent cannot be null");
 
             var ship = ShipFactory.CreateShip((ShipDesign)designInfo, faction, industryParent);
-            if(faction.TryGetDatablob<FleetDB>(out var fleetDB))
+            if(faction.TryGetDataBlob<FleetDB>(out var fleetDB))
             {
                 fleetDB.AddChild(ship);
             }
@@ -129,7 +129,7 @@ namespace Pulsar4X.Ships
             ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             IndustryPointCosts = (long)(MassPerUnit * 0.1);
         }
-        
+
         /// <summary>
         /// this just stores the design in the factionInfo
         /// </summary>
@@ -214,7 +214,7 @@ namespace Pulsar4X.Ships
             return dict;
         }
 
-        
+
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue(nameof(UniqueID), UniqueID);
@@ -233,9 +233,9 @@ namespace Pulsar4X.Ships
             var components = new List<(ComponentDesign design, int count)>(Components);
             var armor = Armor;
             var newDesign = new ShipDesign(faction, Name, components, armor);
-            
+
             return newDesign;
-            
+
         }
     }
 }

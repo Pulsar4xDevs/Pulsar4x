@@ -57,13 +57,13 @@ namespace Pulsar4X.Technology
         {
             Entity faction = entity.Manager.Game.Factions[entity.FactionOwnerID];
 
-            if(!faction.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+            if(!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
                 return;
 
             FactionDataStore factionDataStore = factionInfoDB.Data;
 
             // If unable to get the db return
-            if(!entity.TryGetDatablob<ResearcherDB>(out var researcherDB))
+            if(!entity.TryGetDataBlob<ResearcherDB>(out var researcherDB))
                 return;
 
             // Check if queue is empty
@@ -113,7 +113,7 @@ namespace Pulsar4X.Technology
                 if(!researcherDB.TechQueue.TryDequeue(out var result))
                     throw new Exception("Unable to dequeue from tech queue");
 
-                if (tech.Faction != null && tech.Design != null && tech.Faction.TryGetDatablob<FactionInfoDB>(out var factionInfo))
+                if (tech.Faction != null && tech.Design != null && tech.Faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo))
                 {
                     factionInfo.IndustryDesigns[tech.UniqueID] = tech.Design;
                 }
@@ -147,14 +147,14 @@ namespace Pulsar4X.Technology
             if(!system.TryGetEntityById((int)e.EntityId, out var labEntity))
                 return;
 
-            if(!labEntity.TryGetDatablob<ResearcherDB>(out var researcherDB))
+            if(!labEntity.TryGetDataBlob<ResearcherDB>(out var researcherDB))
                 return;
 
             // Try to find the tech at the front of the queue
             Tech? tech = null;
             if(researcherDB.TechQueue.TryPeek(out var techId))
             {
-                if(_game.Factions[(int)e.FactionId].TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+                if(_game.Factions[(int)e.FactionId].TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
                 {
                     tech = factionInfoDB.Data.Techs[techId];
                 }

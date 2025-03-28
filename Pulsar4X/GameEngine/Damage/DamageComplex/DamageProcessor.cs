@@ -28,12 +28,12 @@ namespace Pulsar4X.Damage
         public static void OnTakingDamage(Entity damageableEntity, DamageFragment damageFragment)
         {
 
-            if(!damageableEntity.TryGetDatablob<EntityDamageProfileDB>(out var entityDamageProfileDB))
+            if(!damageableEntity.TryGetDataBlob<EntityDamageProfileDB>(out var entityDamageProfileDB))
             {
                 //I think currently most damageable entites should already have this,
                 //need to consider whether an undamaged entity needs this or if we should create it if and when it gets damaged.
 
-                if(damageableEntity.TryGetDatablob<ShipInfoDB>(out var shipInfoDB))
+                if(damageableEntity.TryGetDataBlob<ShipInfoDB>(out var shipInfoDB))
                 {
                     entityDamageProfileDB = new EntityDamageProfileDB(shipInfoDB.Design);
                     damageableEntity.SetDataBlob(entityDamageProfileDB);
@@ -50,7 +50,7 @@ namespace Pulsar4X.Damage
                 entityDamageProfileDB.ComponentLookupTable[damage.id].HealthPercent -= damage.damageAmount;
             }
 
-            if(damageableEntity.TryGetDatablob<ComponentInstancesDB>(out var damagedComponentInstancesDB))
+            if(damageableEntity.TryGetDataBlob<ComponentInstancesDB>(out var damagedComponentInstancesDB))
             {
 
             }
@@ -222,7 +222,7 @@ namespace Pulsar4X.Damage
 
 
                 var origVel = origOrbit.AbsoluteOrbitalVector_m(atDateTime);
-                
+
                 //public static Entity CreateAsteroid(StarSystem starSys, Entity target, DateTime collisionDate, double asteroidMass = -1.0)
                 //I need the target entity, the collisionDate, and the starSystem. I may have starsystem from guid.
                 //Ok so this should create the asteroid without having to add the new asteroids to a list. as that is done in the factory.

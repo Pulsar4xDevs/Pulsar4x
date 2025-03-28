@@ -250,7 +250,7 @@ namespace Pulsar4X.Client.Rendering
                     if (message.DataBlob is WarpMovingDB
                         && _sysState != null
                         && _sysState.StarSystem.TryGetEntityById(message.EntityId.Value, out var entity)
-                        && entity.TryGetDatablob<PositionDB>(out var positionDB))
+                        && entity.TryGetDataBlob<PositionDB>(out var positionDB))
                     {
                         var widget = new WarpMovingIcon((WarpMovingDB)message.DataBlob, positionDB);
                         widget.OnPhysicsUpdate();

@@ -136,7 +136,7 @@ namespace Pulsar4X.Movement
             DateTime transitStartDatetime)
         {
             //if target is a colony, just make the target the parent planet.
-            if(targetEntity.TryGetDatablob<ColonyInfoDB>(out ColonyInfoDB info))
+            if(targetEntity.TryGetDataBlob<ColonyInfoDB>(out ColonyInfoDB info))
                 targetEntity = info.PlanetEntity;
 
             (Vector3 pos, Vector3 vel) departureState;
@@ -252,7 +252,7 @@ namespace Pulsar4X.Movement
                 //if we're already in a warp moving state,
                 //then we should carry over the SavedNewtonionVector.
                 //this will happen in the case of serveying grav anomalies.
-                if (_entityCommanding.TryGetDatablob<WarpMovingDB>(out var warpMovingDB))
+                if (_entityCommanding.TryGetDataBlob<WarpMovingDB>(out var warpMovingDB))
                 {
                     _warpingDB.SavedNewtonionVector = warpMovingDB.SavedNewtonionVector;
                 }
@@ -310,7 +310,7 @@ namespace Pulsar4X.Movement
 
         internal override bool IsFinished()
         {
-            if(!IsRunning) 
+            if(!IsRunning)
                 _isFinished = false;
             else
             {
@@ -327,7 +327,7 @@ namespace Pulsar4X.Movement
         internal override void Execute(DateTime atDateTime)
         {
             if(IsRunning) return;
-            if(!_entityCommanding.TryGetDatablob<FleetDB>(out var fleetDB)) return;
+            if(!_entityCommanding.TryGetDataBlob<FleetDB>(out var fleetDB)) return;
             // Get all the ships we need to add the movement command to
             var ships = fleetDB.Children.Where(c => c.HasDataBlob<ShipInfoDB>());
 
@@ -338,7 +338,7 @@ namespace Pulsar4X.Movement
                 var shipParent = ship.GetDataBlob<PositionDB>().Parent;
                 if(shipParent == Target)
                     continue;
-                if (Target.TryGetDatablob<ColonyInfoDB>(out var colonyDB) && colonyDB.PlanetEntity == shipParent)
+                if (Target.TryGetDataBlob<ColonyInfoDB>(out var colonyDB) && colonyDB.PlanetEntity == shipParent)
                     continue;
 
                 var shipCommand = WarpMoveCommand.CreateCommandEZ(ship, Target, atDateTime);

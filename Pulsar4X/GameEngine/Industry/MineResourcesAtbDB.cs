@@ -44,7 +44,7 @@ namespace Pulsar4X.Industry
 
         public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            if(parentEntity.TryGetDatablob<MiningDB>(out var miningDB))
+            if(parentEntity.TryGetDataBlob<MiningDB>(out var miningDB))
             {
                 miningDB.NumberOfMines--;
 

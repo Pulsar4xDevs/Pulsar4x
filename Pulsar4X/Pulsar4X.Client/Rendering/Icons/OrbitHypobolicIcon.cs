@@ -65,12 +65,12 @@ namespace Pulsar4X.Client
             BodyType = entityState.BodyType;
             TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
             _mgr = entityState.Entity.Manager;
-            if (entityState.Entity.TryGetDatablob<NewtonMoveDB>(out _newtonMoveDB))
+            if (entityState.Entity.TryGetDataBlob<NewtonMoveDB>(out _newtonMoveDB))
             {
                 _ke = _newtonMoveDB.GetElements();
                 _soi = _newtonMoveDB.SOIParent.GetSOI_m();
             }
-            else if (entityState.Entity.TryGetDatablob(out _orbitDB))
+            else if (entityState.Entity.TryGetDataBlob(out _orbitDB))
             {
                 _ke = _orbitDB.GetElements();
                 _soi = entityState.Entity.GetSOI_m();

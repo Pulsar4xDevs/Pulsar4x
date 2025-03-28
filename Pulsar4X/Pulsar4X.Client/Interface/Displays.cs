@@ -50,7 +50,7 @@ public class Displays
 
         var (fuelType, fuelPercent) = shipInfoDB.OwningEntity.GetFuelInfo(cargoLibrary);
         string fuelStr = "Fuel (" + (fuelPercent * 100) + "%) ";
-        if (shipInfoDB.OwningEntity.TryGetDatablob<NewtonThrustAbilityDB>(out var newtDB))
+        if (shipInfoDB.OwningEntity.TryGetDataBlob<NewtonThrustAbilityDB>(out var newtDB))
             fuelStr += Stringify.Velocity(newtDB.DeltaV) + " Δv";
         var size = ImGui.GetContentRegionAvail();
 
@@ -75,7 +75,7 @@ public class Displays
 
         ImGui.TextWrapped(text);
 
-        if(systemBodyInfoDB.OwningEntity.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB))
+        if(systemBodyInfoDB.OwningEntity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB))
         {
             var factionID = state.Faction.Id;
             var remainingPoints = geoSurveyableDB.PointsRequired;

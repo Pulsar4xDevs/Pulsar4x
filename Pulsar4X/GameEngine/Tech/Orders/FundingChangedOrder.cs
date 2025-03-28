@@ -38,7 +38,7 @@ public class FundingChangedOrder : EntityCommand
 
     internal override void Execute(DateTime atDateTime)
     {
-        if(!_labEntity.TryGetDatablob<ResearcherDB>(out var researcherDB))
+        if(!_labEntity.TryGetDataBlob<ResearcherDB>(out var researcherDB))
             return;
 
         if(_fundingLevel < 0 || _fundingLevel > 5)

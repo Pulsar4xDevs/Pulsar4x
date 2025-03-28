@@ -28,13 +28,13 @@ public class JPSurveyOrder : EntityCommand
     {
         get { return _entityCommanding; }
     }
-    
+
     public JPSurveyOrder() { }
     public JPSurveyOrder(Entity commandingEntity, Entity target)
     {
         _entityCommanding = commandingEntity;
         Target = target;
-        if(Target.TryGetDatablob<JPSurveyableDB>(out var jpSurveyableDB))
+        if(Target.TryGetDataBlob<JPSurveyableDB>(out var jpSurveyableDB))
         {
             TargetSurveyDB = jpSurveyableDB;
         }
@@ -69,7 +69,7 @@ public class JPSurveyOrder : EntityCommand
             PreviousUpdate = atDateTime;
 
             // Get any ships in the fleet that can survey and add the JPSurveyDB to them
-            if (_entityCommanding.TryGetDatablob<FleetDB>(out var fleetDB))
+            if (_entityCommanding.TryGetDataBlob<FleetDB>(out var fleetDB))
             {
                 foreach (var child in fleetDB.Children)
                 {
@@ -80,7 +80,7 @@ public class JPSurveyOrder : EntityCommand
                     }
                 }
             }
-            else if (_entityCommanding.TryGetDatablob<ShipInfoDB>(out var shipInfoDB))
+            else if (_entityCommanding.TryGetDataBlob<ShipInfoDB>(out var shipInfoDB))
             {
                 _entityCommanding.SetDataBlob(new JPSurveyDB() { TargetId = Target.Id });
             }

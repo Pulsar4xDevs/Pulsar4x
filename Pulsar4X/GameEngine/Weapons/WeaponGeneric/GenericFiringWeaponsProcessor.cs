@@ -14,7 +14,7 @@ public class GenericFiringWeaponsProcessor : IHotloopProcessor
 
     public void ProcessEntity(Entity entity, int deltaSeconds)
     {
-        if(entity.TryGetDatablob<GenericFiringWeaponsDB>(out var db))
+        if(entity.TryGetDataBlob<GenericFiringWeaponsDB>(out var db))
             UpdateWeapons(db);
     }
 

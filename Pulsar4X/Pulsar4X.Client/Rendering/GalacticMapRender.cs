@@ -83,22 +83,22 @@ namespace Pulsar4X.Client
                     systemState.EntityStatesWithNames[starEntity.Id] :
                     new EntityState(starEntity, starEntity.Id, starEntity.FactionOwnerID);
 
-                if(!starEntity.TryGetDatablob<StarInfoDB>(out var starInfoDB))
+                if(!starEntity.TryGetDataBlob<StarInfoDB>(out var starInfoDB))
                 {
                     throw new NullReferenceException("Star must have a StarInfoDB");
                 }
 
-                if(!starEntity.TryGetDatablob<PositionDB>(out var starPositionDB))
+                if(!starEntity.TryGetDataBlob<PositionDB>(out var starPositionDB))
                 {
                     throw new NullReferenceException("Star must have a PositionDB");
                 }
 
-                if(!starEntity.TryGetDatablob<MassVolumeDB>(out var starMassVolumeDB))
+                if(!starEntity.TryGetDataBlob<MassVolumeDB>(out var starMassVolumeDB))
                 {
                     throw new NullReferenceException("Star must have a MassVolumeDB");
                 }
 
-                if(!starEntity.TryGetDatablob<NameDB>(out var starNameDB))
+                if(!starEntity.TryGetDataBlob<NameDB>(out var starNameDB))
                 {
                     throw new NullReferenceException("Star must have a NameDB");
                 }

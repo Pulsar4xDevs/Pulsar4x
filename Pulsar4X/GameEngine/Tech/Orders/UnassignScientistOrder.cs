@@ -39,13 +39,13 @@ public class UnassignScientistOrder : EntityCommand
 
     internal override void Execute(DateTime atDateTime)
     {
-        if(!_labEntity.TryGetDatablob<ResearcherDB>(out var researcherDB))
+        if(!_labEntity.TryGetDataBlob<ResearcherDB>(out var researcherDB))
             return;
 
         if(!_labEntity.Manager.TryGetGlobalEntityById(_scientistId, out var scientist))
             return;
 
-        if(!scientist.TryGetDatablob<CommanderDB>(out var commanderDB))
+        if(!scientist.TryGetDataBlob<CommanderDB>(out var commanderDB))
             return;
 
         // Clear the assignments

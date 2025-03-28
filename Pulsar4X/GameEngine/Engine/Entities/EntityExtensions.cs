@@ -52,7 +52,7 @@ namespace Pulsar4X.Extensions
         public static Entity? GetSOIParentEntity(this Entity entity, PositionDB? positionDB = null)
         {
             if(positionDB == null)
-                return entity.TryGetDatablob<PositionDB>(out positionDB) ? positionDB.Parent : null;
+                return entity.TryGetDataBlob<PositionDB>(out positionDB) ? positionDB.Parent : null;
 
             return positionDB.Parent;
         }
@@ -60,7 +60,7 @@ namespace Pulsar4X.Extensions
 
         public static double GetSOI_m(this Entity entity)
         {
-            if(entity.TryGetDatablob<OrbitDB>(out var orbitDB) && orbitDB.Parent != null) //if we're not the parent star
+            if(entity.TryGetDataBlob<OrbitDB>(out var orbitDB) && orbitDB.Parent != null) //if we're not the parent star
             {
                 var semiMajAxis = orbitDB.SemiMajorAxis;
 
@@ -85,7 +85,7 @@ namespace Pulsar4X.Extensions
 
         public static double GetFuelPercent(this Entity entity, CargoDefinitionsLibrary cargoLibrary)
         {
-            if(entity.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) && entity.TryGetDatablob<CargoStorageDB>(out var volumeStorageDB))
+            if(entity.TryGetDataBlob<ShipInfoDB>(out var shipInfoDB) && entity.TryGetDataBlob<CargoStorageDB>(out var volumeStorageDB))
             {
                 string thrusterFuel = String.Empty;
                 foreach(var component in shipInfoDB.Design.Components.ToArray())
@@ -110,7 +110,7 @@ namespace Pulsar4X.Extensions
 
         public static (ICargoable?, double) GetFuelInfo(this Entity entity, CargoDefinitionsLibrary cargoLibrary)
         {
-            if(entity.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) && entity.TryGetDatablob<CargoStorageDB>(out var volumeStorageDB))
+            if(entity.TryGetDataBlob<ShipInfoDB>(out var shipInfoDB) && entity.TryGetDataBlob<CargoStorageDB>(out var volumeStorageDB))
             {
                 string thrusterFuel = String.Empty;
                 foreach(var component in shipInfoDB.Design.Components.ToArray())
@@ -175,7 +175,7 @@ namespace Pulsar4X.Extensions
         {
             if(entity.HasDataBlob<ColonyInfoDB>()) return (true, entity.Id);
 
-            if(entity.TryGetDatablob<PositionDB>(out var positionDB))
+            if(entity.TryGetDataBlob<PositionDB>(out var positionDB))
             {
                 foreach(var child in positionDB.Children)
                 {
@@ -196,7 +196,7 @@ namespace Pulsar4X.Extensions
         {
             if(entity.HasDataBlob<GeoSurveyAbilityDB>()) return true;
 
-            if(entity.TryGetDatablob<FleetDB>(out var fleetDB))
+            if(entity.TryGetDataBlob<FleetDB>(out var fleetDB))
             {
                 foreach(var child in fleetDB.Children)
                 {
@@ -212,7 +212,7 @@ namespace Pulsar4X.Extensions
         {
             if(entity.HasDataBlob<JPSurveyAbilityDB>()) return true;
 
-            if(entity.TryGetDatablob<FleetDB>(out var fleetDB))
+            if(entity.TryGetDataBlob<FleetDB>(out var fleetDB))
             {
                 foreach(var child in fleetDB.Children)
                 {
@@ -226,7 +226,7 @@ namespace Pulsar4X.Extensions
 
         public static CargoDefinitionsLibrary? GetFactionCargoDefinitions(this Entity entity)
         {
-            if(entity.GetFactionOwner.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+            if(entity.GetFactionOwner.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
             {
                 return factionInfoDB.Data.CargoGoods;
             }

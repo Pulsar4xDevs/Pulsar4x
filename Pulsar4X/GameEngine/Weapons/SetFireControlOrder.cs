@@ -66,7 +66,7 @@ namespace Pulsar4X.Weapons
         {
             if (IsRunning)
                 _isFinished = true;
-            else 
+            else
                 _isFinished = false;
             return _isFinished;
         }
@@ -167,7 +167,7 @@ namespace Pulsar4X.Weapons
         {
             if (IsRunning)
                 _isFinished = true;
-            else 
+            else
                 _isFinished = false;
             return _isFinished;
             //if target is dead? or not seen for x amount of time?
@@ -271,7 +271,7 @@ namespace Pulsar4X.Weapons
                 {
                     fcState.IsEngaging = true;
                     DateTime dateTimeNow = _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime;
-                    if(!_entityCommanding.TryGetDatablob<GenericFiringWeaponsDB>(out var blob))
+                    if(!_entityCommanding.TryGetDataBlob<GenericFiringWeaponsDB>(out var blob))
                     {
                         blob = new GenericFiringWeaponsDB(fcState.GetChildrenInstances());
                         _entityCommanding.SetDataBlob(blob);
@@ -296,7 +296,7 @@ namespace Pulsar4X.Weapons
         {
             if (IsRunning)
                 _isFinished = true;
-            else 
+            else
                 _isFinished = false;
             return _isFinished;
         }
@@ -381,7 +381,7 @@ namespace Pulsar4X.Weapons
         {
             if (IsRunning)
                 _isFinished = true;
-            else 
+            else
                 _isFinished = false;
             return _isFinished;
         }

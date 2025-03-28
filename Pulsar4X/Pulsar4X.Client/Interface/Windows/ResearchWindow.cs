@@ -199,7 +199,7 @@ namespace Pulsar4X.Client
                                 _showAssignmentModal = false;
                             }, () => // Custom render
                             {
-                                if(!_uiState.Faction.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+                                if(!_uiState.Faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
                                     return;
 
                                 foreach(var commanderId in factionInfoDB.Commanders)
@@ -211,7 +211,7 @@ namespace Pulsar4X.Client
                                     // TODO: remove the call into the game
                                     var commander = _uiState.Game.GlobalManager.GetGlobalEntityById(commanderId);
 
-                                    if(!commander.TryGetDatablob<CommanderDB>(out var commanderDB))
+                                    if(!commander.TryGetDataBlob<CommanderDB>(out var commanderDB))
                                         continue;
 
                                     if(commanderDB.Type != DataStructures.CommanderTypes.Civilian)

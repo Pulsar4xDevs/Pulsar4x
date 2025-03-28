@@ -51,7 +51,7 @@ public class CargoListPanelComplex
         _stores = _volStorageDB.TypeStores;
 
 
-        if (_entityState.Entity.TryGetDatablob<CargoTransferDB>(out var db))
+        if (_entityState.Entity.TryGetDataBlob<CargoTransferDB>(out var db))
         {
             var itemsToXfer = db.GetItemsToTransfer();
             var newxferDict = new Dictionary<ICargoable, long>();

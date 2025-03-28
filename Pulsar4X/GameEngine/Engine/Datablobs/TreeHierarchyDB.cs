@@ -178,7 +178,7 @@ namespace Pulsar4X.Datablobs
             {
                 foreach(var child in Children)
                 {
-                    if(child.TryGetDatablob<T>(out var fleetDB))
+                    if(child.TryGetDataBlob<T>(out var fleetDB))
                     {
                         var childDB = fleetDB.TryGetChild<T>(entity);
                         if(childDB != null) return childDB;
