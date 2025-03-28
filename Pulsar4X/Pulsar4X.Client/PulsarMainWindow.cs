@@ -5,6 +5,7 @@ using System.Numerics;
 using ImGuiNET;
 using SDL3;
 using Microsoft.Extensions.Configuration;
+using Pulsar4X.Client.Interface.Themes;
 
 namespace Pulsar4X.Client
 {
@@ -356,6 +357,7 @@ namespace Pulsar4X.Client
             string? width = windowSection["Width"];
             string? height = windowSection["Height"];
             string? maximized = windowSection["Maximized"];
+            string? themeEnabled = windowSection["Theme"];
 
             if(xPosition != null) X = int.Parse(xPosition);
             if(yPosition != null) Y = int.Parse(yPosition);
@@ -367,6 +369,15 @@ namespace Pulsar4X.Client
             {
                 if(bool.Parse(maximized))
                     Maximize();
+            }
+
+            if(themeEnabled != null)
+            {
+                if(bool.Parse(themeEnabled))
+                {
+                    var theme = new FuturisticTheme();
+                    theme.Apply();
+                }
             }
         }
 
