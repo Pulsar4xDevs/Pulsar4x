@@ -6,6 +6,8 @@ using ImGuiNET;
 using SDL3;
 using Microsoft.Extensions.Configuration;
 using Pulsar4X.Client.Interface.Themes;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Pulsar4X.Client
 {
@@ -22,6 +24,7 @@ namespace Pulsar4X.Client
         private ImGuiWindowFlags _gitHashFlags = ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav;
 #endif
         public const string PreferencesFile = "preferences.ini";
+        public const string UserOrbitSettingsFile = "orbit-settings.json";
         public const string SavesPath = "Saves";
         public static string ModsPath = "Mods";
         public static string ResourcesPath = "Resources";
@@ -74,6 +77,9 @@ namespace Pulsar4X.Client
 
                 // Read and apply any window preferences
                 LoadPreferences();
+
+                // Apply any saved user orbit settings
+                LoadUserOrbitSettings();
 
                 // Load fonts
                 var fontPtr = PlatformBackend.LoadFont(ResourcesPath, "ProggyClean.ttf", 13f);
@@ -287,6 +293,12 @@ namespace Pulsar4X.Client
 #endif
         }
 
+        public override void Exit()
+        {
+            // save the user orbit settings on exit
+            SaveOrbitSettings();
+        }
+
         /// <summary>
         /// If the given path & name don't exist create it
         /// </summary>
@@ -379,6 +391,44 @@ namespace Pulsar4X.Client
                     theme.Apply();
                 }
             }
+        }
+
+        /// <summary>
+        /// Load the UserOrbitSettingsFile
+        /// </summary>
+        private void LoadUserOrbitSettings()
+        {
+            string? appDataDirectory = GetAppDataPath();
+
+            if(string.IsNullOrEmpty(appDataDirectory))
+                return;
+
+            // Give up if the file doesn't exist
+            string filePath = Path.Combine(appDataDirectory, UserOrbitSettingsFile);
+            if(!File.Exists(filePath))
+                return;
+
+            string text = File.ReadAllText(filePath);
+            var result = JsonConvert.DeserializeObject<List<List<UserOrbitSettings>>>(text);
+
+            if(result != null)
+                _state.UserOrbitSettingsMtx = result;
+        }
+
+        public void SaveOrbitSettings()
+        {
+            string? appDataDirectory = GetAppDataPath();
+            if(appDataDirectory == null)
+                return;
+
+            string filePath = Path.Combine(appDataDirectory, UserOrbitSettingsFile);
+
+            if(!File.Exists(filePath))
+                File.Create(filePath);
+
+            string output = JsonConvert.SerializeObject(_state.UserOrbitSettingsMtx);
+
+            File.WriteAllText(filePath, output);
         }
 
         /// <summary>

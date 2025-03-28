@@ -5,6 +5,7 @@ using Vector3 = System.Numerics.Vector3;
 using Pulsar4X.Orbits;
 using Pulsar4X.Movement;
 using Pulsar4X.Client.Combat;
+using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
@@ -58,7 +59,7 @@ namespace Pulsar4X.Client
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
 
-                if (ImGui.Begin("Settings", ref IsActive, _flags))
+                if (Window.Begin("Settings", ref IsActive, _flags))
                 {
                     bool debugActive = DebugWindow.GetInstance().GetActive();
 
@@ -181,8 +182,6 @@ namespace Pulsar4X.Client
 
                     if (ImGui.CollapsingHeader("Map Settings", _xpanderFlags))
                     {
-
-
                         for (int i = 0; i < (int)UserOrbitSettings.OrbitBodyType.NumberOf; i++)
                         {
                             UserOrbitSettings.OrbitBodyType otype = (UserOrbitSettings.OrbitBodyType)i;
@@ -209,7 +208,9 @@ namespace Pulsar4X.Client
 
                                         //TODO: make this a knob/dial? need to create a custom control: https://github.com/ocornut/imgui/issues/942
                                         if (ImGui.SliderAngle("Sweep Angle ##" + i + j, ref _userOrbitSettings.EllipseSweepRadians, 1f, 360f))
+                                        {
                                             _uiState.SelectedSysMapRender?.UpdateUserOrbitSettings();
+                                        }
 
                                         if (ImGui.SliderInt("Number Of Segments ##" + i + j, ref _arcSegments, 1, 255, _userOrbitSettings.NumberOfArcSegments.ToString()))
                                         {
@@ -234,16 +235,22 @@ namespace Pulsar4X.Client
                                             _userOrbitSettings.MinAlpha = (byte)_minAlpha;
                                             _uiState.SelectedSysMapRender?.UpdateUserOrbitSettings();
                                         }
+                                        ImGui.TreePop();
                                     }
                                 }
                                 ImGui.TreePop();
                             }
                         }
+
+                        if(ImGui.Button("Save Changes"))
+                        {
+                            ((PulsarMainWindow)_uiState.ViewPort).SaveOrbitSettings();
+                        }
                     }
 
                 }
 
-                ImGui.End();
+                Window.End();
             }
         }
     }

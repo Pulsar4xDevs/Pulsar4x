@@ -171,6 +171,8 @@ namespace Pulsar4X.Client
                 EndFrame();
                 PostFrameUpdate();
             }
+
+            Exit();
         }
 
         public virtual void PollEvents()
@@ -232,6 +234,8 @@ namespace Pulsar4X.Client
 
         public virtual void PostFrameUpdate() {}
 
+        public virtual void Exit() {}
+
         public void SetRenderDrawColor(byte r, byte g, byte b, byte a)
         {
             SDL.SetRenderDrawColor(Renderer, r, g, b, a);
@@ -290,7 +294,7 @@ namespace Pulsar4X.Client
             SDL.SetRenderDrawBlendMode(Renderer, renderState.BlendMode);
             SDL.SetRenderDrawColor(Renderer, renderState.Red, renderState.Green, renderState.Blue,  renderState.Alpha);
         }
-        
+
         public void SetBlendMode(SDL.BlendMode mode) => SDL.SetRenderDrawBlendMode(Renderer, mode);
     }
 }
