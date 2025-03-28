@@ -510,6 +510,8 @@ public class NewGameMenu : PulsarGuiWindow
         _uiState.Game = game;
         _uiState.SetFaction(playerFaction, true);
         _uiState.SetActiveSystem(startingSystem.ManagerID);
+        _uiState.Camera.CenterOnEntity(startingBody);
+        _uiState.Camera.ZoomLevel = 2_245_000f;
 
         DebugWindow.GetInstance().SetGameEvents();
         IsActive = false;
