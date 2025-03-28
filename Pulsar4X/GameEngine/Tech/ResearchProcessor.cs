@@ -56,9 +56,10 @@ namespace Pulsar4X.Technology
         internal void DoResearch(Entity entity)
         {
             Entity faction = entity.Manager.Game.Factions[entity.FactionOwnerID];
-            FactionAbilitiesDB factionAbilities = faction.GetDataBlob<FactionAbilitiesDB>();
-            FactionTechDB factionTechs = faction.GetDataBlob<FactionTechDB>();
-            FactionInfoDB factionInfoDB = faction.GetDataBlob<FactionInfoDB>();
+
+            if(!faction.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+                return;
+
             FactionDataStore factionDataStore = factionInfoDB.Data;
 
             // If unable to get the db return
