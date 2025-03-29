@@ -22,6 +22,7 @@ public static class DamageMapRendering
         CreateTextureForTemp(renderer, damageMap, ref textures[4], width, height);
         CreateTextureForPhaseState(renderer, damageMap, ref textures[5], width, height);
         CreateTextureForBeamPoints(renderer, damageMap, ref textures[6], width, height);
+        CreateTextureForCompisiteMap(renderer, damageMap, ref textures[7], width, height);
     }
 
     internal static void CreateTextureForIDMap(IntPtr renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
@@ -133,7 +134,7 @@ public static class DamageMapRendering
                                 byte red = id != 0 ? (byte)(255 * uniqueInstances.IndexOf(id) / uniqueInstances.Count) : (byte)0;
                                 int pixelIndex = (highYBase + dy) * highResTextureSize + (highXBase + dx);
                                 if (pixelIndex >= 0 && pixelIndex < pixelData.Length)
-                                    pixelData[pixelIndex] = Utils.GetColor(red, 0, 0, alpha);
+                                    pixelData[pixelIndex] = GetCompisiteDamageColor(particle);
                             }
                         }
                     }
@@ -151,7 +152,7 @@ public static class DamageMapRendering
                         {
                             int pixelIndex = (highYBase + dy) * highResTextureSize + (highXBase + dx);
                             if (pixelIndex >= 0 && pixelIndex < pixelData.Length)
-                                pixelData[pixelIndex] = Utils.GetColor(red, 0, 0, alpha);
+                                pixelData[pixelIndex] = GetCompisiteDamageColor(particle);
                         }
                     }
                 }
@@ -171,7 +172,59 @@ public static class DamageMapRendering
             handle.Free();
         }
     }
-    
+    private static uint GetCompisiteDamageColor(PhysicalParticle particle)
+    {
+        uint color = 0;
+        if (particle != null)
+        {
+            float healthPercent = particle.IsComponentPartDestroyed ? 0f : 1f; // Needs real health
+            float tempRatio = particle.Temperature / particle.MatType.MeltingZeroPoint;
+            byte r = (byte)(255 * (1 - healthPercent)); // Gray to red
+            byte g = healthPercent > 0 ? (byte)200 : (byte)0;
+            byte b = g;
+            byte a = 255;
+
+            if (tempRatio > 0.9f) // Heat tint
+            {
+                g = (byte)(g + (255 - g) * (tempRatio - 0.9f));
+                if (tempRatio > 1f) b = (byte)(b + (255 - b) * (tempRatio - 1));
+            }
+
+            if (particle.StateOfPhase == PhaseState.Liquid) a = 200; // Drip effect
+            else if (particle.StateOfPhase == PhaseState.Gas) a = 150; // Haze
+            color = Utils.GetColor(r, g, b, a);
+        }
+        return color;
+    }
+    internal static void CreateTextureForCompisiteMap(IntPtr renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
+    {
+        byte alpha = 255;
+        // Create a buffer for the pixel data
+        uint[] pixelData = new uint[width * height];
+
+        // Fill the pixel data
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int index = y * width + x;
+                pixelData[y * width + x] = GetCompisiteDamageColor(damageMap.PMap[index]);
+            }
+        }
+
+        GCHandle handle = GCHandle.Alloc(pixelData, GCHandleType.Pinned);
+        try
+        {
+            IntPtr pixels = handle.AddrOfPinnedObject();
+
+            // Update the texture
+            Textures.UpdateOrCreate(renderer, ref texture, width, height, pixels);
+        }
+        finally
+        {
+            handle.Free();
+        }
+    }
     internal static void CreateTextureForPresMap(IntPtr renderer, DamageMap damageMap, ref IntPtr texture, int width, int height)
     {
         byte alpha = 255;

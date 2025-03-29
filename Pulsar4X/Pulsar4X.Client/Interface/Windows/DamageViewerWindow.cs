@@ -50,7 +50,7 @@ namespace Pulsar4X.Client.Combat
         private IntPtr _shipImgPtr;
 
         DamageMap _damageMap;
-        IntPtr[] _damageMapPtr = new IntPtr[7];
+        IntPtr[] _damageMapPtr = new IntPtr[8];
         private IntPtr _hiResPtr = new IntPtr();
         private int _hiResSize = 128;
         DamageMap _projectileDamageMap;
@@ -208,9 +208,10 @@ namespace Pulsar4X.Client.Combat
         private bool _showVMap = false;
         private bool _showPresMap = false;
         private bool _showPMap = false;
-        private bool _showTemp = true;
+        private bool _showTemp = false;
         private bool _showPState = false;
-        private bool _showPhMap = true;
+        private bool _showPhMap = false;
+        private bool _showCompisite = true;
         private bool _runSimLoop = false;
         private int _projectileTypes;
         private int _beamRange = 10000;
@@ -307,6 +308,12 @@ namespace Pulsar4X.Client.Combat
                             ImGui.Image(_damageMapPtr[6], new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
 
+                        if (_showCompisite && _damageMapPtr[7] != IntPtr.Zero)
+                        {
+                            ImGui.SetCursorPos(cpos);
+                            ImGui.Image(_damageMapPtr[7], new System.Numerics.Vector2(_dmWidth, _dmHeight));
+                        }
+
 
 
                         ImGui.SameLine();
@@ -340,14 +347,14 @@ namespace Pulsar4X.Client.Combat
                         ImGui.Checkbox("PhaseStateMap", ref _showPState);
                         ImGui.SameLine();
                         ImGui.Checkbox("PhotonMap", ref _showPhMap);
+                        ImGui.SameLine();
+                        ImGui.Checkbox("compisite", ref _showCompisite);
                     }
 
                     if (_hiResPtr != IntPtr.Zero)
                     {
                         ImGui.Image(_hiResPtr, new System.Numerics.Vector2(_hiResSize, _hiResSize));
                     }
-
-
 
                     if (_shipImgPtr != IntPtr.Zero)
                     {
