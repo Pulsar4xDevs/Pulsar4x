@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Pulsar4X.DataStructures;
+using Pulsar4X.Engine;
 using Pulsar4X.Factions;
 using System;
 using System.Collections.Generic;
@@ -138,5 +139,23 @@ public class SerializationTests
         ledger.AddTransaction(DateTime.Now, TransactionCategory.InitialInvestment, "My transaction description", 1000);
 
         AssertSerialization(ledger, "Ledger");
+    }
+
+    [Test]
+    public void VerifyModifiableValue()
+    {
+        var modifiableValue = new ModifiableValue<int>(1000);
+
+        modifiableValue.AddModifier(
+            new Modifier<int>(
+                "test-id",
+                "Test Modifier",
+                100,
+                (current, modifier) => current + modifier,
+                1.0f
+            )
+        );
+
+        AssertSerialization(modifiableValue, "ModifiableValue<int>");
     }
 }

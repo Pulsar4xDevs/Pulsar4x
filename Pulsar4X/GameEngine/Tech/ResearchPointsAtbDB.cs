@@ -67,8 +67,8 @@ namespace Pulsar4X.Technology
             // Setup the ResearcherDB
             var researcherDB = new ResearcherDB(componentInstance.Design)
             {
-                BaseResearchPoints = _pointsPerEconTick,
-                BaseCostPerDay = _costPerDay,
+                PointsPerDay = new(_pointsPerEconTick),
+                CostPerDay = new(_costPerDay),
                 LocationId = parentEntity.Id
             };
 
@@ -80,9 +80,9 @@ namespace Pulsar4X.Technology
             entity.SetDataBlob(researcherDB);
             entity.SetDataBlob(new OrderableDB());
 
-            // Calculate the initial stats
-            ResearchProcessor.CalculateCost(researcherDB);
-            ResearchProcessor.CalculateResearchPoints(researcherDB, null);
+            // Calculate the initial modifiers
+            ResearchProcessor.RefreshCostModifiers(researcherDB);
+            ResearchProcessor.RefreshPointModifiers(researcherDB, null);
         }
 
         public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)

@@ -233,15 +233,34 @@ namespace Pulsar4X.Client
                     }
 
                     ImGui.TableNextColumn();
-                    ImGui.Text(researcherDB.CalculatedCostPerDay.ToString("C0", CultureInfo.CurrentCulture));
+                    ImGui.Text(researcherDB.CostPerDay.GetValue().ToString("C0", CultureInfo.CurrentCulture));
+                    if(ImGui.IsItemHovered())
+                    {
+                        DisplayHelpers.DescriptiveTooltip(
+                            "Cost per Day",
+                            "",
+                            $"{researcherDB.CostPerDay.BaseValue.ToString("C0", CultureInfo.CurrentCulture)} Base Value",
+                            delegate {
+                                foreach(var modifier in researcherDB.CostPerDay.GetModifiers())
+                                {
+                                    ImGui.Text($"{(modifier.After - modifier.Before).ToString("C0", CultureInfo.CurrentCulture)} {modifier.Name}");
+                                }
+                            });
+                    }
                     ImGui.TableNextColumn();
-                    ImGui.Text(researcherDB.CalculatedResearchPoints.ToString());
+                    ImGui.Text(researcherDB.PointsPerDay.GetValue().ToString());
                     if(ImGui.IsItemHovered())
                     {
                         DisplayHelpers.DescriptiveTooltip(
                             "Progress per Day",
                             "",
-                            $"Base: {researcherDB.BaseResearchPoints}\nBonus: {researcherDB.CalculatedResearchPoints - researcherDB.BaseResearchPoints}");
+                            $"{researcherDB.PointsPerDay.BaseValue} Base Value",
+                            delegate {
+                                foreach(var modifier in researcherDB.PointsPerDay.GetModifiers())
+                                {
+                                    ImGui.Text($"{modifier.After - modifier.Before} {modifier.Name}");
+                                }
+                            });
                     }
                     ImGui.TableNextColumn();
                     if(techId != null && _factionData.IsResearchable(techId))

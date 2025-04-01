@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
+using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Technology;
@@ -10,18 +10,10 @@ namespace Pulsar4X.Technology;
 public class ResearcherDB : BaseDataBlob
 {
     /// <summary>
-    /// The *base* amount of points per day the researcher outputs
+    /// The amount of points per day the researcher outputs
     /// </summary>
     [JsonProperty]
-    public int BaseResearchPoints { get; internal set; } = 0;
-
-    /// <summary>
-    /// The actual amount of points per day the researcher outputs.
-    /// The base value is modified by category bonus, scientist bonus, corporation bonuses
-    /// as appropriate to get the calculated cost.
-    /// </summary>
-    [JsonProperty]
-    public int CalculatedResearchPoints { get; internal set; } = 0;
+    public ModifiableValue<int> PointsPerDay { get; internal set; } = new (0);
 
     /// <summary>
     /// key = category Id
@@ -34,14 +26,7 @@ public class ResearcherDB : BaseDataBlob
     /// The *base* cost per day to operate the researcher
     /// </summary>
     [JsonProperty]
-    public decimal BaseCostPerDay { get; internal set; } = 0;
-
-    /// <summary>
-    /// The actual cost per day to operate the researcher.
-    /// The base cost is modified by various bonuses to get the calculated cost.
-    /// </summary>
-    [JsonProperty]
-    public decimal CalculatedCostPerDay { get; internal set; } = 0;
+    public ModifiableValue<decimal> CostPerDay { get; internal set; } = new(0);
 
     /// <summary>
     /// Represents the funding level for the researcher. A value from 0-5.
@@ -54,6 +39,12 @@ public class ResearcherDB : BaseDataBlob
     /// </summary>
     [JsonProperty]
     public byte FundingLevel { get; set; } = 1;
+
+    [JsonProperty]
+    public string FundingPointModifierId { get; internal set; } = "";
+
+    [JsonProperty]
+    public string FundingCostModifierId { get; internal set; } = "";
 
     /// <summary>
     /// The entity Id of the scientist assigned to the researcher

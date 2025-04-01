@@ -81,18 +81,17 @@ namespace Pulsar4X.Technology
                 return;
             }
 
-            // Calculate the cost to run
-            CalculateCost(researcherDB);
-
-            // Calculate the research output
-            CalculateResearchPoints(researcherDB, tech);
+            // Get the calculated total number of points to add
+            var pointsToAdd = researcherDB.PointsPerDay.GetValue();
 
             // Make sure the calculated total is > 0
-            if(researcherDB.CalculatedResearchPoints <= 0)
+            if(pointsToAdd <= 0)
                 return;
 
+            var cost = researcherDB.CostPerDay.GetValue();
+
             // Check to make sure the cost can be paid
-            if(factionInfoDB.Money.GetCurrentFunds() < researcherDB.CalculatedCostPerDay)
+            if(factionInfoDB.Money.GetCurrentFunds() < cost)
                 return;
 
             // Pay the costs
@@ -100,11 +99,11 @@ namespace Pulsar4X.Technology
                 entity.Manager.StarSysDateTime,
                 TransactionCategory.Research,
                 $"Payment to run research lab on {entity.Manager.StarSysDateTime.ToShortDateString()}",
-                researcherDB.CalculatedCostPerDay);
+                cost);
 
             // Apply the research points
             int currentLvl = tech.Level;
-            factionDataStore.AddTechPoints(tech, researcherDB.CalculatedResearchPoints);
+            factionDataStore.AddTechPoints(tech, pointsToAdd);
 
             // If the tech level increased the tech research completed
             if (tech.Level > currentLvl)
@@ -160,33 +159,48 @@ namespace Pulsar4X.Technology
                 }
             }
 
-            CalculateCost(researcherDB);
-            CalculateResearchPoints(researcherDB, tech);
+            RefreshCostModifiers(researcherDB);
+            RefreshPointModifiers(researcherDB, tech);
         }
 
-        public static void CalculateCost(ResearcherDB researcherDB)
+        public static void RefreshCostModifiers(ResearcherDB researcherDB)
         {
             // TODO: Add bonuses for corporation administration
 
-            // See the comments on ResearchDB.FundingLevel for an explanation
-            researcherDB.CalculatedCostPerDay = researcherDB.FundingLevel switch
+            // Remove any previous cost modifier
+            researcherDB.CostPerDay.RemoveModifier(researcherDB.FundingCostModifierId);
+
+            researcherDB.FundingCostModifierId = "funding-cost-modifier";
+
+            // Add new modifier
+            researcherDB.CostPerDay.AddModifier(
+                new Modifier<decimal>(
+                    researcherDB.FundingCostModifierId,
+                    "Funding Cost Modifier",
+                    GetFundingCostModifier(researcherDB.FundingLevel),
+                    (current, multiplier) => current * multiplier,
+                    1.0f
+                )
+            );
+        }
+
+        public static decimal GetFundingCostModifier(byte level)
+        {
+            return level switch
             {
                 0 => 0,
-                1 => researcherDB.BaseCostPerDay * 1,
-                2 => researcherDB.BaseCostPerDay * 3,
-                3 => researcherDB.BaseCostPerDay * 7,
-                4 => researcherDB.BaseCostPerDay * 13,
-                5 => researcherDB.BaseCostPerDay * 22,
-                _ => throw new InvalidDataException("Unable to determine funding level")
+                1 => 1,
+                2 => 3,
+                3 => 7,
+                4 => 13,
+                5 => 22,
+                _ => throw new InvalidDataException("Unable to determine funding modifier")
             };
         }
 
-        public static void CalculateResearchPoints(ResearcherDB researcherDB, Tech? currentTech)
+        public static int GetFundingPointModifier(byte level)
         {
-            int output = researcherDB.BaseResearchPoints;
-
-            // See the comments on ResearchDB.FundingLevel for an explanation
-            int fundingMultiplier = researcherDB.FundingLevel switch
+            return level switch
             {
                 0 => 0,
                 1 => 1,
@@ -194,11 +208,28 @@ namespace Pulsar4X.Technology
                 3 => 3,
                 4 => 4,
                 5 => 5,
-                _ => throw new InvalidDataException("Unable to determine funding level")
+                _ => throw new InvalidDataException("Unable to determine funding modifier")
             };
+        }
 
-            // Apply funding bonus
-            output *= fundingMultiplier;
+        public static void RefreshPointModifiers(ResearcherDB researcherDB, Tech? currentTech)
+        {
+            // clear all modifiers, this may not be the best way to handle this?
+            researcherDB.PointsPerDay.ClearAllModifiers();
+
+
+            researcherDB.FundingPointModifierId = "funding-point-modifier";
+
+            // Add new modifier
+            researcherDB.PointsPerDay.AddModifier(
+                new Modifier<int>(
+                    researcherDB.FundingPointModifierId,
+                    "Funding Points Modifier",
+                    GetFundingPointModifier(researcherDB.FundingLevel),
+                    (current, multiplier) => current * multiplier,
+                    1.0f
+                )
+            );
 
             if(currentTech != null)
             {
@@ -209,14 +240,23 @@ namespace Pulsar4X.Technology
                     if(!currentTech.Category.Equals(category))
                         continue;
 
-                    output += (int)(output * bonus);
+                    // Add in the modifier as a percentage increase
+                    researcherDB.PointsPerDay.AddModifier(
+                        new Modifier<int>(
+                            category,
+                            $"Research Category Bonus",
+                            (int)(bonus * 100),
+                            (current, multiplier) => current + (current * multiplier / 100),
+                            2.0f
+                        )
+                    );
                 }
             }
 
-            //TODO: apply scientist bonus
+            // //TODO: apply scientist bonus
 
-            // Set the actual RP
-            researcherDB.CalculatedResearchPoints = output;
+            // // Set the actual RP
+            // researcherDB.CalculatedResearchPoints = output;
         }
 
         /// <summary>
