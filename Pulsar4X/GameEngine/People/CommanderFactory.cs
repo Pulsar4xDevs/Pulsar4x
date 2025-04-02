@@ -21,6 +21,7 @@ namespace Pulsar4X.People
             var nameDB = new NameDB(commanderDB.ToString(), factionID, commanderDB.ToString());
             blobs.Add(nameDB);
             blobs.Add(commanderDB);
+            blobs.Add(new BonusesDB());
             var entity = Entity.Create();
             entity.FactionOwnerID = factionID;
             manager.AddEntity(entity, blobs);

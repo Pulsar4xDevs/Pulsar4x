@@ -258,7 +258,7 @@ namespace Pulsar4X.Client
                             delegate {
                                 foreach(var modifier in researcherDB.PointsPerDay.GetModifiers())
                                 {
-                                    ImGui.Text($"{modifier.After - modifier.Before} {modifier.Name}");
+                                    ImGui.TextUnformatted($"{modifier.After - modifier.Before} {modifier.Name}");
                                 }
                             });
                     }

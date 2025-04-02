@@ -498,7 +498,18 @@ public class NewGameMenu : PulsarGuiWindow
 
         // Create starting people
         var scientistDB = CommanderFactory.CreateScientist(game);
-        CommanderFactory.Create(startingSystem, playerFaction.Id, scientistDB);
+        var scientist = CommanderFactory.Create(startingSystem, playerFaction.Id, scientistDB);
+
+        if(scientist.TryGetDataBlob<BonusesDB>(out var bonusesDB))
+        {
+            bonusesDB.Bonuses.Add(new Bonus(
+                "Research Points",
+                0.1,
+                BonusType.Perentage,
+                BonusCategory.ResearchPoints,
+                "tech-category-power-propulsion"
+            ));
+        }
 
         // TODO: need to add the implementation for a random start
         // TODO: need to find a way to handle this via the mods instead of loading it here

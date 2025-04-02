@@ -4,6 +4,8 @@ using Pulsar4X.Factions;
 using Pulsar4X.Engine;
 using Pulsar4X.Events;
 using System.IO;
+using Pulsar4X.People;
+using Pulsar4X.Names;
 
 namespace Pulsar4X.Technology
 {
@@ -159,8 +161,17 @@ namespace Pulsar4X.Technology
                 }
             }
 
+            Entity? scientist = null;
+            if(researcherDB.ScientistId >= 0)
+            {
+                if(system.TryGetGlobalEntityById(researcherDB.ScientistId, out var scientistEntity))
+                {
+                    scientist = scientistEntity;
+                }
+            }
+
             RefreshCostModifiers(researcherDB);
-            RefreshPointModifiers(researcherDB, tech);
+            RefreshPointModifiers(researcherDB, tech, scientist);
         }
 
         public static void RefreshCostModifiers(ResearcherDB researcherDB)
@@ -172,16 +183,21 @@ namespace Pulsar4X.Technology
 
             researcherDB.FundingCostModifierId = "funding-cost-modifier";
 
-            // Add new modifier
-            researcherDB.CostPerDay.AddModifier(
-                new Modifier<decimal>(
-                    researcherDB.FundingCostModifierId,
-                    "Funding Cost Modifier",
-                    GetFundingCostModifier(researcherDB.FundingLevel),
-                    (current, multiplier) => current * multiplier,
-                    1.0f
-                )
-            );
+            decimal fundingModifier = GetFundingCostModifier(researcherDB.FundingLevel);
+
+            if(fundingModifier != 1)
+            {
+                // Add new modifier
+                researcherDB.CostPerDay.AddModifier(
+                    new Modifier<decimal>(
+                        researcherDB.FundingCostModifierId,
+                        "Funding Cost Modifier",
+                        fundingModifier,
+                        (current, multiplier) => current * multiplier,
+                        1.0f
+                    )
+                );
+            }
         }
 
         public static decimal GetFundingCostModifier(byte level)
@@ -212,7 +228,7 @@ namespace Pulsar4X.Technology
             };
         }
 
-        public static void RefreshPointModifiers(ResearcherDB researcherDB, Tech? currentTech)
+        public static void RefreshPointModifiers(ResearcherDB researcherDB, Tech? currentTech, Entity? scientist)
         {
             // clear all modifiers, this may not be the best way to handle this?
             researcherDB.PointsPerDay.ClearAllModifiers();
@@ -221,15 +237,20 @@ namespace Pulsar4X.Technology
             researcherDB.FundingPointModifierId = "funding-point-modifier";
 
             // Add new modifier
-            researcherDB.PointsPerDay.AddModifier(
-                new Modifier<int>(
-                    researcherDB.FundingPointModifierId,
-                    "Funding Points Modifier",
-                    GetFundingPointModifier(researcherDB.FundingLevel),
-                    (current, multiplier) => current * multiplier,
-                    1.0f
-                )
-            );
+            int fundingMultiplier = GetFundingPointModifier(researcherDB.FundingLevel);
+
+            if(fundingMultiplier != 1)
+            {
+                researcherDB.PointsPerDay.AddModifier(
+                    new Modifier<int>(
+                        researcherDB.FundingPointModifierId,
+                        $"Funding Modifier",
+                        fundingMultiplier,
+                        (current, multiplier) => current * multiplier,
+                        1.0f
+                    )
+                );
+            }
 
             if(currentTech != null)
             {
@@ -244,7 +265,7 @@ namespace Pulsar4X.Technology
                     researcherDB.PointsPerDay.AddModifier(
                         new Modifier<int>(
                             category,
-                            $"Research Category Bonus",
+                            $"{bonus * 100}% {researcherDB.OwningEntity.Manager.Game.StartingGameData.TechCategories[category].Name} Category Bonus",
                             (int)(bonus * 100),
                             (current, multiplier) => current + (current * multiplier / 100),
                             2.0f
@@ -253,10 +274,48 @@ namespace Pulsar4X.Technology
                 }
             }
 
-            // //TODO: apply scientist bonus
+            if(scientist != null && currentTech != null)
+            {
+                // Apply any scientist bonuses
+                if(scientist.TryGetDataBlob<BonusesDB>(out var bonusesDB))
+                {
+                    var name = scientist.TryGetDataBlob<NameDB>(out var nameDB) ? nameDB.DefaultName : "Unknown Scientist";
 
-            // // Set the actual RP
-            // researcherDB.CalculatedResearchPoints = output;
+                    foreach(var bonus in bonusesDB.Bonuses)
+                    {
+                        // Make sure the categories match
+                        if(!currentTech.Category.Equals(bonus.FilterId))
+                            continue;
+
+                        if(bonus.Type == BonusType.Number)
+                        {
+                            // Add in the modifier as a flat increase
+                            researcherDB.PointsPerDay.AddModifier(
+                                new Modifier<int>(
+                                    bonus.Name,
+                                    $"{bonus.Value} {name} {bonus.Name}",
+                                    (int)bonus.Value,
+                                    (current, multiplier) => current + multiplier,
+                                    3.0f
+                                )
+                            );
+                        }
+                        else if(bonus.Type == BonusType.Perentage)
+                        {
+                            // Add in the modifier as a percentage increase
+                            researcherDB.PointsPerDay.AddModifier(
+                                new Modifier<int>(
+                                    bonus.Name,
+                                    $"{bonus.Value * 100}% from {name}",
+                                    (int)(bonus.Value * 100),
+                                    (current, multiplier) => current + (current * multiplier / 100),
+                                    3.0f
+                                )
+                            );
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>

@@ -82,7 +82,7 @@ namespace Pulsar4X.Technology
 
             // Calculate the initial modifiers
             ResearchProcessor.RefreshCostModifiers(researcherDB);
-            ResearchProcessor.RefreshPointModifiers(researcherDB, null);
+            ResearchProcessor.RefreshPointModifiers(researcherDB, null, null);
         }
 
         public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
