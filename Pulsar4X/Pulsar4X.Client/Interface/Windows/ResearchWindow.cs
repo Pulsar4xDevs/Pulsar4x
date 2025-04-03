@@ -9,6 +9,7 @@ using Pulsar4X.Technology;
 using System.Globalization;
 using Pulsar4X.Extensions;
 using Pulsar4X.People;
+using Pulsar4X.Components;
 
 namespace Pulsar4X.Client
 {
@@ -170,6 +171,14 @@ namespace Pulsar4X.Client
                     if(ImGui.Selectable(researcherDB.Design.Name + $"###{lab.Id}", _selectedLab?.Id == lab.Id))
                     {
                         _selectedLab = lab;
+                    }
+                    if(ImGui.IsItemHovered() && researcherDB.Design is ComponentDesign)
+                    {
+                        ComponentDesign design = (ComponentDesign)researcherDB.Design;
+                        DisplayHelpers.DescriptiveTooltip(
+                            researcherDB.Design.Name,
+                            design.TemplateName,
+                            design.Description);
                     }
                     ImGui.TableNextColumn();
                     var location = _uiState.SelectedSystemState.GetEntityById(researcherDB.LocationId);
