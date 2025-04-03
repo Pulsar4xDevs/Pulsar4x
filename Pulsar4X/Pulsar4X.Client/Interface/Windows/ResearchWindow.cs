@@ -264,7 +264,7 @@ namespace Pulsar4X.Client
                         var size = ImGui.GetTextLineHeight();
                         var barWidth = ImGui.GetContentRegionAvail().X;
                         var pos = ImGui.GetCursorPos();
-                        ImGui.ProgressBar(frac, new Vector2(barWidth, size + 4), $"{tech.Name} {tech.ResearchProgress}/{tech.ResearchCost}");
+                        ImGui.ProgressBar(frac, new Vector2(barWidth, size + 6), $"{tech.Name} {tech.ResearchProgress}/{tech.ResearchCost}");
                         DisplayHelpers.TechTooltip(tech, _uiState);
                     }
                     ImGui.TableNextColumn();
