@@ -376,7 +376,7 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-research-lab",
-      "Name": "Research Lab",
+      "Name": "Power & Propulsion Lab",
       "TemplateId": "research-lab"
     }
   },
