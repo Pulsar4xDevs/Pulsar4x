@@ -4,6 +4,10 @@ using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
 using Pulsar4X.Ships;
+using Pulsar4X.Technology;
+using Pulsar4X.Factions;
+using Pulsar4X.People;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.Client
 {
@@ -126,6 +130,54 @@ namespace Pulsar4X.Client
         {
             ImGui.InvisibleButton("", Styles.Indent);
             ImGui.SameLine();
+        }
+
+        public static void TechTooltip(Tech tech, GlobalUIState state)
+        {
+            if (ImGui.IsItemHovered())
+            {
+                DescriptiveTooltip(
+                    tech.Name,
+                    state.Game?.TechCategories[tech.Category].Name ?? "Unknown",
+                    $"{tech.Description}\n\nProgress: {tech.ResearchProgress}/{tech.ResearchCost}");
+            }
+        }
+
+        public static int PeopleChooser(GlobalUIState state, int currentlySelectedId, CommanderTypes defaultFilterTypes)
+        {
+            if(state.Faction == null
+                || state.Game == null
+                || !state.Faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
+                return currentlySelectedId;
+
+            foreach(var commanderId in factionInfoDB.Commanders)
+            {
+                if(commanderId == currentlySelectedId)
+                    continue;
+
+                // TODO: this is probably super slow and should be improved
+                // TODO: remove the call into the game
+                var commander = state.Game.GlobalManager.GetGlobalEntityById(commanderId);
+
+                if(!commander.TryGetDataBlob<CommanderDB>(out var commanderDB))
+                    continue;
+
+                if(commanderDB.Type != defaultFilterTypes)
+                    continue;
+
+                if(ImGui.Button(commander.GetName(state.Faction.Id)))
+                {
+                    return commanderId;
+                }
+            }
+
+            if(currentlySelectedId >= 0 && ImGui.Button("None"))
+            {
+                // -1 to indicate no commander selected
+                return -1;
+            }
+
+            return currentlySelectedId;
         }
     }
 }

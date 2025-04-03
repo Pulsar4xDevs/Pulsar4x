@@ -208,35 +208,19 @@ namespace Pulsar4X.Client
                                 _showAssignmentModal = false;
                             }, () => // Custom render
                             {
-                                if(!_uiState.Faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
-                                    return;
+                                int selectedId = DisplayHelpers.PeopleChooser(_uiState, researcherDB.ScientistId, DataStructures.CommanderTypes.Civilian);
 
-                                foreach(var commanderId in factionInfoDB.Commanders)
+                                if(selectedId == -1)
                                 {
-                                    if(commanderId == researcherDB.ScientistId)
-                                        continue;
-
-                                    // TODO: this is probably super slow and should be improved
-                                    // TODO: remove the call into the game
-                                    var commander = _uiState.Game.GlobalManager.GetGlobalEntityById(commanderId);
-
-                                    if(!commander.TryGetDataBlob<CommanderDB>(out var commanderDB))
-                                        continue;
-
-                                    if(commanderDB.Type != DataStructures.CommanderTypes.Civilian)
-                                        continue;
-
-                                    if(ImGui.Button(commander.GetName(_uiState.Faction.Id)))
-                                    {
-                                        var assignmentOrder = AssignScientistOrder.Create(lab.Entity, commanderId);
-                                        _uiState.Game.OrderHandler.HandleOrder(assignmentOrder);
-                                    }
-                                }
-
-                                if(researcherDB.ScientistId >= 0 && ImGui.Button("None"))
-                                {
+                                    // Unassign the scientist, the player selected "None"
                                     var unassignOrder = UnassignScientistOrder.Create(lab.Entity, researcherDB.ScientistId);
                                     _uiState.Game.OrderHandler.HandleOrder(unassignOrder);
+                                }
+                                else if(selectedId > 0 && selectedId != researcherDB.ScientistId)
+                                {
+                                    // Assign the new scientist
+                                    var assignmentOrder = AssignScientistOrder.Create(lab.Entity, selectedId);
+                                    _uiState.Game.OrderHandler.HandleOrder(assignmentOrder);
                                 }
                             });
                     }
@@ -281,16 +265,7 @@ namespace Pulsar4X.Client
                         var barWidth = ImGui.GetContentRegionAvail().X;
                         var pos = ImGui.GetCursorPos();
                         ImGui.ProgressBar(frac, new Vector2(barWidth, size + 4), $"{tech.Name} {tech.ResearchProgress}/{tech.ResearchCost}");
-                        //ImGui.SetCursorPos(pos);
-                        //ImGui.Text();
-
-                        if (ImGui.IsItemHovered())
-                        {
-                            DisplayHelpers.DescriptiveTooltip(
-                                tech.Name,
-                                _uiState.Game.TechCategories[tech.Category].Name,
-                                $"{tech.Description}\n\nProgress: {tech.ResearchProgress}/{tech.ResearchCost}");
-                        }
+                        DisplayHelpers.TechTooltip(tech, _uiState);
                     }
                     ImGui.TableNextColumn();
                     int funding = researcherDB.FundingLevel;
@@ -332,14 +307,16 @@ namespace Pulsar4X.Client
                 if(_selectedLab.TryGetDataBlob<ResearcherDB>(out var researcherDB))
                 {
                     int index = 0;
-                    foreach(var tech in researcherDB.TechQueue.ToList())
+                    foreach(var techId in researcherDB.TechQueue.ToList())
                     {
+                        Tech tech = _researchableTechsByGuid[techId];
                         ImGui.TableNextColumn();
                         ImGui.Text($"{index + 1}");
                         ImGui.TableNextColumn();
-                        ImGui.Text(_researchableTechsByGuid[tech].Name);
+                        ImGui.Text(tech.Name);
+                        DisplayHelpers.TechTooltip(tech, _uiState);
                         ImGui.TableNextColumn();
-                        Buttons(researcherDB, tech, ref index);
+                        Buttons(researcherDB, techId, ref index);
                         index++;
                     }
                 }
