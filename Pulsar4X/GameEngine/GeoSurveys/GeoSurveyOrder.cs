@@ -31,7 +31,7 @@ public class GeoSurveyOrder : EntityCommand
     {
         _entityCommanding = commandingEntity;
         Target = target;
-        if(Target.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB))
+        if(Target.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB))
         {
             TargetGeoSurveyDB = geoSurveyableDB;
         }

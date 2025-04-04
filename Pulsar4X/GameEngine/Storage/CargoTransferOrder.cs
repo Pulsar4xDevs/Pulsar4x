@@ -22,7 +22,7 @@ public class CargoTransferOrder : EntityCommand
         WaitTillFull,
         WailTillEmpty,
         TakeAvailible
-        
+
     }
     [JsonProperty]
     public Conditionals Condition {get; private set;} = Conditionals.TakeAvailibleAtOrder;
@@ -62,13 +62,13 @@ public class CargoTransferOrder : EntityCommand
     private CargoTransferDataDB TransferData { get; }
 
 
-    
+
 
     private CargoTransferOrder(CargoTransferDataDB transferData)
     {
         TransferData = transferData;
     }
-    
+
     public static void CreateCommands(int faction, Entity primaryEntity, Entity secondaryEntity, List<(ICargoable item, long amount)> itemsToMove )
     {
         CargoTransferDataDB cargoData = new(primaryEntity, secondaryEntity, itemsToMove);
@@ -80,7 +80,7 @@ public class CargoTransferOrder : EntityCommand
             IsPrimaryEntity = true,
         };
         primaryEntity.Manager.Game.OrderHandler.HandleOrder(cmd1);
-        
+
         var cmd2 = new CargoTransferOrder(cargoData)
         {
             RequestingFactionGuid = faction,
@@ -90,7 +90,7 @@ public class CargoTransferOrder : EntityCommand
         };
         secondaryEntity.Manager.Game.OrderHandler.HandleOrder(cmd2);
     }
-    
+
     /// <summary>
     /// Single item conditional order.
     /// Assumes transfer from secondary to primary
@@ -111,7 +111,7 @@ public class CargoTransferOrder : EntityCommand
         List<(ICargoable item, long amount)> itemList = new List<(ICargoable item, long amount)>();
         itemList.Add((item, amount));
         CargoTransferDataDB cargoData = new(primaryEntity, secondaryEntity, itemList);
-        
+
         var cmd1 = new CargoTransferOrder(cargoData)
         {
             RequestingFactionGuid = faction,
@@ -121,7 +121,7 @@ public class CargoTransferOrder : EntityCommand
             Condition = condition
         };
         primaryEntity.Manager.Game.OrderHandler.HandleOrder(cmd1);
-        
+
         var cmd2 = new CargoTransferOrder(cargoData)
         {
             RequestingFactionGuid = faction,
@@ -137,7 +137,7 @@ public class CargoTransferOrder : EntityCommand
     {
         var fleetOwner = fleet.GetFactionOwner;
         var cargoLibrary = fleetOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
-        if(fleet.TryGetDatablob<FleetDB>(out var fleetDB))
+        if(fleet.TryGetDataBlob<FleetDB>(out var fleetDB))
         {
             var ships = fleetDB.Children.Where(c => c.HasDataBlob<ShipInfoDB>());
 
@@ -154,8 +154,8 @@ public class CargoTransferOrder : EntityCommand
             }
         }
     }
-    
-    
+
+
     /// <summary>
     /// Validates and actions the command.
     /// may eventualy need to return a responce instead of void.
@@ -186,7 +186,7 @@ public class CargoTransferOrder : EntityCommand
     {
         if(!IsRunning)
             return _isFinished = false;
-        
+
         switch (Condition)
         {
             case Conditionals.TakeAvailibleAtOrder:
@@ -248,10 +248,10 @@ public class CargoTransferOrder : EntityCommand
         }
         return amount;
     }
-    
+
     public override EntityCommand Clone()
     {
         throw new NotImplementedException();
     }
-    
+
 }

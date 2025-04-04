@@ -48,15 +48,15 @@ namespace Pulsar4X.Storage
             var transferRange = transferDB.ParentStorageDB.TransferRangeDv_mps;
             var transferRate = transferDB.ParentStorageDB.TransferRate;
             double dv_mps = CalcDVDifference_m(transferData.PrimaryEntity, transferData.SecondaryEntity);
-            
+
 
             double massTransferable = transferRate * deltaSeconds;
             if(dv_mps > transferRange || massTransferable <=0)
                 return;//early out if we're out of range or no more mass to move.
-            
+
             massTransferable -= MoveFromEscro(transferData.EscroHeldInPrimary, transferData.SecondaryStorageDB, transferData.PrimaryStorageDB, massTransferable);
             massTransferable -= MoveFromEscro(transferData.EscroHeldInSecondary, transferData.PrimaryStorageDB, transferData.SecondaryStorageDB, massTransferable);
-            
+
             UpdateMassFuelAndDeltaV(transferData.PrimaryEntity);
             UpdateMassFuelAndDeltaV(transferData.SecondaryEntity);
 
@@ -72,29 +72,29 @@ namespace Pulsar4X.Storage
                 double itemMassPerUnit = cargoItem.MassPerUnit;
                 double massToXfer = Math.Min(massTransferable, tuple.mass);
                 massToXfer = Math.Min(massToXfer, CargoMath.GetFreeMass(moveTo, cargoItem));
-                
+
                 double massLeft = tuple.mass - massToXfer;
-                //we use Ceaaling here to signify whole part items not fully moved yet. 
+                //we use Ceaaling here to signify whole part items not fully moved yet.
                 long itemsLeft = (int)Math.Ceiling(massLeft * itemMassPerUnit);
                 var countToXfer = tuple.count - itemsLeft;
                 escroList[index] = (cargoItem,itemsLeft, massLeft);
-                
+
                 //add items to cargo of seconddary entity store
                 moveTo.AddCargoByUnit(cargoItem, countToXfer);
-                
+
                 //update mass and volume of primary entity store.
                 double volumeStoring = countToXfer * cargoItem.VolumePerUnit;
                 double massStoring = countToXfer * cargoItem.MassPerUnit;
                 TypeStore store = moveFrom.TypeStores[cargoItem.CargoTypeID];
                 store.FreeVolume += volumeStoring;
                 moveFrom.TotalStoredMass += massStoring;
-                
+
                 massTransferable -= massToXfer;
                 totalMassXfered += massToXfer;
             }
             return totalMassXfered;
         }
-        
+
         /// <summary>
         /// Add cargo and updates the entites MassTotal
         /// </summary>
@@ -150,7 +150,7 @@ namespace Pulsar4X.Storage
         }
 
 
-        
+
         /// <summary>
         /// Add or Removes cargo and updates the entites MassTotal
         /// </summary>
@@ -167,11 +167,11 @@ namespace Pulsar4X.Storage
 
         internal static void UpdateMassFuelAndDeltaV(Entity entity)
         {
-            if(!entity.TryGetDatablob(out NewtonThrustAbilityDB newtdb))
+            if(!entity.TryGetDataBlob(out NewtonThrustAbilityDB newtdb))
                 return;
-            if (!entity.TryGetDatablob(out MassVolumeDB massdb))
+            if (!entity.TryGetDataBlob(out MassVolumeDB massdb))
                 return;
-            if(!entity.TryGetDatablob(out CargoStorageDB storedb))
+            if(!entity.TryGetDataBlob(out CargoStorageDB storedb))
                 return;
 
             massdb.UpdateMassTotal();
@@ -223,7 +223,7 @@ namespace Pulsar4X.Storage
             var hohmann = OrbitalMath.Hohmann(sgp, r1, r2);
             dvDif = hohmann[0].deltaV.Length() + hohmann[1].deltaV.Length();
             return dvDif;
-            
+
         }
 
 
@@ -291,7 +291,7 @@ namespace Pulsar4X.Storage
                 transferRate = 0;
             return (int)transferRate;
         }
-        
+
 
         public static (double bestDVRange, double bestRate) GetBestRangeRate(Entity from, Entity to)
         {

@@ -23,7 +23,7 @@ namespace Pulsar4X.Sensors
                     continue;
                 else
                 {
-                    if(!detectableEntity.TryGetDatablob<PositionDB>(out var detectablePosDB))
+                    if(!detectableEntity.TryGetDataBlob<PositionDB>(out var detectablePosDB))
                     {
                         continue;
                     }

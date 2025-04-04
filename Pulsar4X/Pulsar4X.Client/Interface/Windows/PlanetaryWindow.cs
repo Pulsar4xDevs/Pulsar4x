@@ -113,7 +113,7 @@ namespace Pulsar4X.Client
                 }
             }
 
-            if (_lookedAtEntity.Entity.TryGetDatablob<MineralsDB>(out var mindb) && mindb.Minerals.Any() )
+            if (_lookedAtEntity.Entity.TryGetDataBlob<MineralsDB>(out var mindb) && mindb.Minerals.Any() )
             {
                 ImGui.SameLine();
                 if (ImGui.SmallButton("Mineral Deposits"))

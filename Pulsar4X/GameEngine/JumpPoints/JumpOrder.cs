@@ -43,7 +43,7 @@ public class JumpOrder : EntityCommand
     {
         if(JumpGate.OwningEntity.Manager.TryGetGlobalEntityById(JumpGate.DestinationId, out var destinationEntity))
         {
-            if(!_entityCommanding.TryGetDatablob<FleetDB>(out var fleetDB)) return;
+            if(!_entityCommanding.TryGetDataBlob<FleetDB>(out var fleetDB)) return;
 
             var destinationPositionDB = destinationEntity.GetDataBlob<PositionDB>();
             var ships = fleetDB.Children.Where(c => c.HasDataBlob<ShipInfoDB>());

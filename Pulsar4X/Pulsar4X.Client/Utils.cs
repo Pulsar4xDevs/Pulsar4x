@@ -130,6 +130,12 @@ public static class Utils
         return GetColor(r, g, b, a);
     }
 
+    public static string Truncate(string value, int maxLength)
+    {
+        if (string.IsNullOrEmpty(value)) return value;
+        return value.Length <= maxLength ? value : value.Substring(0, maxLength) + "...";
+    }
+
     enum ColourOrder
     {
         ARGB,

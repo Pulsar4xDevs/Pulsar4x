@@ -57,10 +57,10 @@ namespace Pulsar4X.Client
 
         public static void ShipTooltip(Entity ship, int factionId)
         {
-            if(!ship.TryGetDatablob<ShipInfoDB>(out var shipInfo))
+            if(!ship.TryGetDataBlob<ShipInfoDB>(out var shipInfo))
                 return;
 
-            if(!ship.TryGetDatablob<OrderableDB>(out var orderableDB))
+            if(!ship.TryGetDataBlob<OrderableDB>(out var orderableDB))
                 return;
 
             var description = "No orders";
@@ -92,15 +92,16 @@ namespace Pulsar4X.Client
             {
                 ImGui.SetNextWindowSize(Styles.ToolTipsize);
                 ImGui.BeginTooltip();
-                ImGui.Text(name);
+                ImGui.Text(Utils.Truncate(name, 32));
                 if(type.IsNotNullOrEmpty() && (!hideTypeIfSameAsName || (hideTypeIfSameAsName && !type.Equals(name))))
                 {
                     var size = ImGui.GetContentRegionAvail();
-                    var textSize = ImGui.CalcTextSize(type);
+                    var text = Utils.Truncate(type, 21);
+                    var textSize = ImGui.CalcTextSize(text);
                     ImGui.SameLine();
                     ImGui.SetCursorPosX(size.X - textSize.X);
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-                    ImGui.Text(type);
+                    ImGui.Text(text);
                     ImGui.PopStyleColor();
                 }
                 var showDescription = description.IsNotNullOrEmpty();

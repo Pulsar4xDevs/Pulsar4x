@@ -44,7 +44,7 @@ namespace Pulsar4X.Engine
 
         internal override void ProcessEntity(Entity entity, DateTime atDateTime)
         {
-            if(entity.TryGetDatablob<OrderableDB>(out var orderableDB))
+            if(entity.TryGetDataBlob<OrderableDB>(out var orderableDB))
             {
                 int mask = 0;
 

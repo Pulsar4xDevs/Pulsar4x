@@ -16,7 +16,6 @@ using Pulsar4X.Components;
 using Pulsar4X.Fleets;
 using Pulsar4X.Ships;
 using System;
-using Pulsar4X.Technology;
 
 namespace Pulsar4X.Colonies
 {
@@ -111,7 +110,8 @@ namespace Pulsar4X.Colonies
 
                 foreach(var ship in fleet.Ships)
                 {
-                    var shipEntity = ShipFactory.CreateShip(factionInfo.ShipDesigns[ship.DesignId], faction, systemBody, ship.Name);
+                    double randomRadian = game.RNG.NextDouble() * Math.PI * 2;
+                    var shipEntity = ShipFactory.CreateShip(factionInfo.ShipDesigns[ship.DesignId], faction, systemBody, randomRadian, ship.Name);
                     fleetDB.AddChild(shipEntity);
 
                     var commanderDB = CommanderFactory.CreateShipCaptain(game);

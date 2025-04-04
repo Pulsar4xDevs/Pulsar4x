@@ -53,7 +53,7 @@ namespace Pulsar4X.Storage
             get
             {
                 if(OwningEntity == null) return UNKNOWN;
-                if(OwningEntity.TryGetDatablob<NameDB>(out var nameDB))
+                if(OwningEntity.TryGetDataBlob<NameDB>(out var nameDB))
                 {
                     return nameDB.GetName(OwningEntity.FactionOwnerID);
                 }

@@ -42,16 +42,16 @@ namespace Pulsar4X.Client
             _state = state;
             EntityState = entityState;
             StarSystem? starsys = (StarSystem?)entityState.Entity.Manager;
-            _starSysGuid = starsys.ID;
+            _starSysGuid = starsys?.ID ?? "unknown";
             _nameDB = nameDB;
-            NameString = _nameDB.GetName(state.Faction);
+            NameString = _nameDB.GetName(state.Faction?.Id ?? Game.NeutralFactionId);
             entityState.Name = NameString;
             entityState.NameIcon = this;
             if(entityState.Entity.FactionOwnerID == Game.NeutralFactionId)
             {
                 TextDisplayColor = Styles.NeutralColor;
             }
-            else if(entityState.Entity.FactionOwnerID != _state.Faction.Id)
+            else if(entityState.Entity.FactionOwnerID != _state.Faction?.Id)
             {
                 TextDisplayColor = Styles.BadColor;
             }
@@ -74,7 +74,7 @@ namespace Pulsar4X.Client
         //adds or updates the subname - this is mostly used for colonys on a planet
         public void AddSubName(Entity entity)
         {
-            var nameString = entity.GetDataBlob<NameDB>().GetName(_state.Faction);
+            var nameString = entity.GetDataBlob<NameDB>().GetName(_state.Faction?.Id ?? Game.NeutralFactionId);
             SubNames[entity.Id] = nameString;
         }
         public void RemoveSubName(int guid)
@@ -103,8 +103,9 @@ namespace Pulsar4X.Client
         /// </summary>
         /// <param name="compareIcon"></param>
         /// <returns></returns>
-        public int CompareTo(NameIcon compareIcon)
+        public int CompareTo(NameIcon? compareIcon)
         {
+            if(compareIcon == null) return 0;
 
             if (WorldPosition_AU.Y > compareIcon.WorldPosition_AU.Y) return -1;
             else if (this.WorldPosition_AU.Y < compareIcon.WorldPosition_AU.Y) return 1;
@@ -417,8 +418,12 @@ namespace Pulsar4X.Client
     /// </summary>
     internal class ByViewPosition : IComparer<IRectangle>
     {
-        public int Compare(IRectangle r1, IRectangle r2)
+        public int Compare(IRectangle? r1, IRectangle? r2)
         {
+            if(r1 == null && r2 == null) return 0;
+            if(r1 == null) return -1;
+            if(r2 == null) return 1;
+
             float r1B = r1.Y + r1.Height;
             float r1L = r1.X;
             float r2B = r2.Y + r1.Height;

@@ -10,6 +10,8 @@ namespace Pulsar4X.Client
     {
         public static void Display(this ColonyInfoDB colony, EntityState entityState, GlobalUIState uiState)
         {
+            if(uiState.Game == null) return;
+
             ImGui.PushID("###Population " + entityState.Id);
             ImGui.Columns(1);
             if(ImGui.CollapsingHeader("Population", ImGuiTreeNodeFlags.DefaultOpen))

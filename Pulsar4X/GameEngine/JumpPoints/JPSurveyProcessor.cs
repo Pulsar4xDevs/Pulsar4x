@@ -17,23 +17,23 @@ public class JPSurveyProcessor : IHotloopProcessor
     public TimeSpan RunFrequency { get; } = TimeSpan.FromHours(1);
     public TimeSpan FirstRunOffset { get; } = TimeSpan.FromHours(1);
     public Type GetParameterType { get; } = typeof(JPSurveyDB);
-    
+
     public JPSurveyProcessor() {}
-    
+
     public void Init(Game game)
     {
     }
 
     public void ProcessEntity(Entity entity, int deltaSeconds)
     {
-        if (entity.TryGetDatablob<JPSurveyDB>(out var jpSurveyDB)
-            && entity.TryGetDatablob<JPSurveyAbilityDB>(out var jpSurveyAbilityDB)
+        if (entity.TryGetDataBlob<JPSurveyDB>(out var jpSurveyDB)
+            && entity.TryGetDataBlob<JPSurveyAbilityDB>(out var jpSurveyAbilityDB)
             && entity.Manager.TryGetDataBlob<JPSurveyableDB>(jpSurveyDB.TargetId, out var jpSurveyableDB))
         {
             // Factions are lazily added to the surveys
             if(!jpSurveyableDB.SurveyPointsRemaining.ContainsKey(entity.FactionOwnerID))
                 jpSurveyableDB.SurveyPointsRemaining[entity.FactionOwnerID] = jpSurveyableDB.PointsRequired;
-            
+
             // Check if the survey has been completed (possibly some other entity completed the survey already
             if (jpSurveyableDB.SurveyPointsRemaining[entity.FactionOwnerID] == 0)
             {
@@ -41,7 +41,7 @@ public class JPSurveyProcessor : IHotloopProcessor
                 entity.RemoveDataBlob<JPSurveyDB>();
                 return;
             }
-            
+
             // Make sure the surveyor is within distance of the target
             var distance =  MoveMath.GetDistanceBetween(entity, jpSurveyableDB.OwningEntity);
             if (distance < 100000) // FIXME: needs to be an attribute of the JPSurveyAbilityDB
@@ -62,12 +62,12 @@ public class JPSurveyProcessor : IHotloopProcessor
     public int ProcessManager(EntityManager manager, int deltaSeconds)
     {
         List<JPSurveyDB> surveyors = manager.GetAllDataBlobsOfType<JPSurveyDB>();
-        
+
         foreach (var db in surveyors)
         {
             ProcessEntity(db.OwningEntity, deltaSeconds);
         }
-        
+
         return surveyors.Count;
     }
 
@@ -163,7 +163,7 @@ public class JPSurveyProcessor : IHotloopProcessor
             }
 
             // Reveal the JP
-            if(destinationEntity.TryGetDatablob<JumpPointDB>(out var destinationDB))
+            if(destinationEntity.TryGetDataBlob<JumpPointDB>(out var destinationDB))
             {
                 destinationDB.IsDiscovered.Add(discoveringEntity.FactionOwnerID);
                 destinationEntity.Manager.ShowNeutralEntityToFaction(discoveringEntity.FactionOwnerID, destinationEntity.Id);

@@ -487,7 +487,7 @@ namespace Pulsar4X.Client
 
 
                         }
-                        if (SelectedEntity.TryGetDatablob<NewtonMoveDB>(out var nmdb) && SelectedEntity.TryGetDatablob<NewtonThrustAbilityDB>(out var ntdb))
+                        if (SelectedEntity.TryGetDataBlob<NewtonMoveDB>(out var nmdb) && SelectedEntity.TryGetDataBlob<NewtonThrustAbilityDB>(out var ntdb))
                         {
                             if (ImGui.CollapsingHeader("NewtonMove: ###NewtHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                             {
@@ -507,7 +507,7 @@ namespace Pulsar4X.Client
 
                         }
 
-                        if (SelectedEntity.TryGetDatablob<WarpMovingDB>(out var db))
+                        if (SelectedEntity.TryGetDataBlob<WarpMovingDB>(out var db))
                         {
                             if (ImGui.CollapsingHeader("Transit: ###TransitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                             {
@@ -587,7 +587,7 @@ namespace Pulsar4X.Client
 
                         }
 
-                        if (SelectedEntity.TryGetDatablob<GenericFiringWeaponsDB>(out var genericFiringWeaponsDB))
+                        if (SelectedEntity.TryGetDataBlob<GenericFiringWeaponsDB>(out var genericFiringWeaponsDB))
                         {
                             if (ImGui.CollapsingHeader("Firing Weapons"))
                             {

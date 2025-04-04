@@ -1393,7 +1393,7 @@ namespace Pulsar4X.Galaxy
         {
             var bodyInfo = body.GetDataBlob<SystemBodyInfoDB>();
             var bodyMass = body.GetDataBlob<MassVolumeDB>();
-            body.TryGetDatablob<MineralsDB>(out var mineralInfo);
+            body.TryGetDataBlob<MineralsDB>(out var mineralInfo);
 
             // get the mass ratio for this body to planet:
             double massRatio = bodyMass.MassDry / UniversalConstants.Units.EarthMassInKG;
@@ -1448,7 +1448,7 @@ namespace Pulsar4X.Galaxy
         public void HomeworldMineralGeneration(List<Mineral> minerals, StarSystem system, Entity body)
         {
             var bodyInfo = body.GetDataBlob<SystemBodyInfoDB>();
-            body.TryGetDatablob<MineralsDB>(out var mineralInfo);
+            body.TryGetDataBlob<MineralsDB>(out var mineralInfo);
 
             if(mineralInfo == null)
             {

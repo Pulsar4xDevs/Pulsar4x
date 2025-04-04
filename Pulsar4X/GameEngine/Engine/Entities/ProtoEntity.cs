@@ -46,7 +46,7 @@ public class ProtoEntity : IHasDataBlobs
         DataBlobTypes.Add(dbType);
     }
 
-    public bool TryGetDatablob<T>(out T? value) where T : BaseDataBlob
+    public bool TryGetDataBlob<T>(out T? value) where T : BaseDataBlob
     {
         var type = typeof(T);
 

@@ -40,7 +40,7 @@ namespace Pulsar4X.Movement
 
         internal override void Execute(DateTime atDateTime)
         {
-            if (!EntityCommanding.TryGetDatablob(out NavSequenceDB navDB))
+            if (!EntityCommanding.TryGetDataBlob(out NavSequenceDB navDB))
             {
                 navDB = new NavSequenceDB();
                 EntityCommanding.SetDataBlob(navDB);

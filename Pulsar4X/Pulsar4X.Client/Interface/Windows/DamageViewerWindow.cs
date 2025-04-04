@@ -98,12 +98,12 @@ namespace Pulsar4X.Client.Combat
         {
             _selectedEntity = damageableEntity;
 
-            if(damageableEntity.TryGetDatablob<ShipInfoDB>(out var shdb))
+            if(damageableEntity.TryGetDataBlob<ShipInfoDB>(out var shdb))
             {
                 var design = shdb.Design;
                 _damageMap = new DamageMap(damageableEntity, design);
             }
-            if(damageableEntity.TryGetDatablob<SystemBodyInfoDB>(out var sbdb))
+            if(damageableEntity.TryGetDataBlob<SystemBodyInfoDB>(out var sbdb))
             {
                 _damageMap = new DamageMap(damageableEntity, sbdb);
             }
@@ -115,7 +115,7 @@ namespace Pulsar4X.Client.Combat
             _dmProjectileSliderLhs = (int)(_dmHeight * 0.75);
             _dmProjectileSliderTop = 0;
             _dmProjectileSliderRhs = (int)(_dmHeight * 0.25);
-            if(damageableEntity.TryGetDatablob<EntityDamageProfileDB>(out var _profile))
+            if(damageableEntity.TryGetDataBlob<EntityDamageProfileDB>(out var _profile))
             {
                 _rawShipImage = _profile.DamageProfile;
                 if (_profile.DamageEvents.Count > 0)
@@ -125,7 +125,7 @@ namespace Pulsar4X.Client.Combat
                 }
                 Textures.CreateTexture(_uiState.ViewPort.Renderer, _rawShipImage, ref _shipImgPtr, Rendering.PixelFormat.ARGB8888);
             }
-            if(damageableEntity.TryGetDatablob<ComponentInstancesDB>(out var _componentInstances))
+            if(damageableEntity.TryGetDataBlob<ComponentInstancesDB>(out var _componentInstances))
             {}
             CanActive = true;
             /*
@@ -495,10 +495,10 @@ namespace Pulsar4X.Client.Combat
 
                     if (_hiResPtr != IntPtr.Zero)
                     {
-                        
-                        
-                        
-                        
+
+
+
+
                     }
 
                     if (_profile != null && _profile.DamageEvents.Count > 0)

@@ -54,7 +54,7 @@ namespace Pulsar4X.Client
                     DisplayHelpers.PrintRow("Atmospheric Dust", bodyInfoDb.AtmosphericDust.ToString("#"), separator: false);
                 }
                 ImGui.Columns(1);
-                if(colonyInfoDb.PlanetEntity.TryGetDatablob<AtmosphereDB>(out var atmosphereDB))
+                if(colonyInfoDb.PlanetEntity.TryGetDataBlob<AtmosphereDB>(out var atmosphereDB))
                 {
                     atmosphereDB.Display(entityState, uiState);
                 }
@@ -76,7 +76,7 @@ namespace Pulsar4X.Client
 
                 if(ImGui.CollapsingHeader("Installations", ImGuiTreeNodeFlags.DefaultOpen))
                 {
-                    if(entity.TryGetDatablob<ComponentInstancesDB>(out var componentInstances))
+                    if(entity.TryGetDataBlob<ComponentInstancesDB>(out var componentInstances))
                     {
                         componentInstances.Display(entityState, uiState);
                     }
@@ -89,7 +89,7 @@ namespace Pulsar4X.Client
             {
                 if(ImGui.CollapsingHeader("Stockpile", ImGuiTreeNodeFlags.DefaultOpen))
                 {
-                    if(entity.TryGetDatablob<CargoStorageDB>(out var storage))
+                    if(entity.TryGetDataBlob<CargoStorageDB>(out var storage))
                     {
                         var size = ImGui.GetContentRegionAvail();
                         ImGui.PushStyleColor(ImGuiCol.Button, Styles.SelectedColor);
@@ -120,6 +120,8 @@ namespace Pulsar4X.Client
         }
         public static void DisplayMining(this Entity entity, GlobalUIState uiState)
         {
+            if(uiState.Faction == null) return;
+
             var mineralStaticInfo = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMineralsList();
             var minerals = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.HasDataBlob<MineralsDB>() ?
                             entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>()?.Minerals :
@@ -130,7 +132,7 @@ namespace Pulsar4X.Client
             Vector2 topSize = ImGui.GetContentRegionAvail();
             if(ImGui.BeginChild("NumberOfMines" + entity.Id, new Vector2(topSize.X, 28f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
-                if(entity.TryGetDatablob<MiningDB>(out var miningDB))
+                if(entity.TryGetDataBlob<MiningDB>(out var miningDB))
                 {
                     ImGui.Text("Number of Mines:");
                     if(ImGui.IsItemHovered())
@@ -145,8 +147,8 @@ namespace Pulsar4X.Client
                 {
                     ImGui.Text("Number of Mines: 0");
                 }
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
 
             if(ImGui.BeginTable("###MineralTable" + entity.Id, 6, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
             {
@@ -236,7 +238,7 @@ namespace Pulsar4X.Client
 
         public static void DisplayResearch(this Entity entity, EntityState entityState, GlobalUIState uiState)
         {
-            if(!entity.TryGetDatablob<EntityResearchDB>(out var researchDB)) return;
+            if(!entity.TryGetDataBlob<EntityResearchDB>(out var researchDB)) return;
 
             Vector2 topSize = ImGui.GetContentRegionAvail();
             if(ImGui.BeginChild("NumberOfResearchLabs" + entity.Id, new Vector2(topSize.X, 28f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
@@ -275,7 +277,7 @@ namespace Pulsar4X.Client
 
         public static void DisplayNavalAcademy(this Entity entity, EntityState entityState, GlobalUIState uiState)
         {
-            if(!entity.TryGetDatablob<NavalAcademyDB>(out var navalAcademyDB)) return;
+            if(!entity.TryGetDataBlob<NavalAcademyDB>(out var navalAcademyDB)) return;
 
             Vector2 topSize = ImGui.GetContentRegionAvail();
             if(ImGui.BeginChild("NumberOfAcademies" + entity.Id, new Vector2(topSize.X, 28f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))

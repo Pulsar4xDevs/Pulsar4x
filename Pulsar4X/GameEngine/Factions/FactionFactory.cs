@@ -157,7 +157,7 @@ namespace Pulsar4X.Factions
                     var location = NameLookup.GetFirstEntityWithName(system, colonyToLoad["location"].ToString());
 
                     // Mark the colony location as geo surveyed
-                    if(location.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB))
+                    if(location.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB))
                     {
                         geoSurveyableDB.GeoSurveyStatus[faction.Id] = 0;
                     }

@@ -481,7 +481,7 @@ namespace Pulsar4X.Client
         {
             if(db.OwningEntity ==  null) return;
 
-            if(!db.OwningEntity.TryGetDatablob<ComponentInstancesDB>(out var componentInstancesDB))
+            if(!db.OwningEntity.TryGetDataBlob<ComponentInstancesDB>(out var componentInstancesDB))
             {
                 return;
             }

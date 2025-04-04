@@ -83,7 +83,7 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
         return false;
     }
 
-    public bool TryGetDatablob<T>([NotNullWhen(true)] out T? value) where T : BaseDataBlob
+    public bool TryGetDataBlob<T>([NotNullWhen(true)] out T? value) where T : BaseDataBlob
     {
         if (Manager.TryGetDataBlob<T>(Id, out value))
         {

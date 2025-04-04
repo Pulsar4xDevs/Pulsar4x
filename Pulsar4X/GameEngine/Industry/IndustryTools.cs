@@ -89,7 +89,7 @@ namespace Pulsar4X.Industry
 
         internal static void ConstructStuff(Entity industryEntity)
         {
-            if(!industryEntity.TryGetDatablob<CargoStorageDB>(out var stockpile))
+            if(!industryEntity.TryGetDataBlob<CargoStorageDB>(out var stockpile))
             {
                 throw new Exception("Tried to ConstructStuff on an entity with no CargoStorageDB");
             }
@@ -100,12 +100,12 @@ namespace Pulsar4X.Industry
             }
             var faction = industryEntity.Manager.Game.Factions[industryEntity.FactionOwnerID];
 
-            if(!faction.TryGetDatablob<FactionInfoDB>(out var factionInfo))
+            if(!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo))
             {
                 throw new Exception("Unable to find FactionInfoDB");
             }
 
-            if(!industryEntity.TryGetDatablob<IndustryAbilityDB>(out var industryDB))
+            if(!industryEntity.TryGetDataBlob<IndustryAbilityDB>(out var industryDB))
             {
                 throw new Exception("Unable to find IndustryAbilityDB");
             }
@@ -235,11 +235,11 @@ namespace Pulsar4X.Industry
 
         public static void AutoAddSubJobs(Entity industryEntity, IndustryJob job)
         {
-            if(!industryEntity.TryGetDatablob<CargoStorageDB>(out var stockpile))
+            if(!industryEntity.TryGetDataBlob<CargoStorageDB>(out var stockpile))
             {
                 throw new Exception("Tried to ConstructStuff on an entity with no CargoStorageDB");
             }
-            if(!industryEntity.TryGetDatablob<IndustryAbilityDB>(out var industryDB))
+            if(!industryEntity.TryGetDataBlob<IndustryAbilityDB>(out var industryDB))
             {
                 throw new Exception("Unable to find IndustryAbilityDB");
             }

@@ -41,11 +41,11 @@ namespace Pulsar4X.Movement
 
         private void FindColonyAndSetupWarpCommands()
         {
-            if(!EntityCommanding.TryGetDatablob<FleetDB>(out var fleetDB)) return;
+            if(!EntityCommanding.TryGetDataBlob<FleetDB>(out var fleetDB)) return;
             if(fleetDB.FlagShipID == -1) return;
 
             // Get the colonies parent radius
-            Target.TryGetDatablob<PositionDB>(out var targetPositionDB);
+            Target.TryGetDataBlob<PositionDB>(out var targetPositionDB);
 
             if(targetPositionDB.OwningEntity == null) throw new NullReferenceException("targetPositionDB.OwningEntity cannot be null");
 
@@ -56,12 +56,12 @@ namespace Pulsar4X.Movement
 
             // Get all the ships we need to add the movement command to
             var ships = fleetDB.Children.Where(c => c.HasDataBlob<ShipInfoDB>());
-            Target.TryGetDatablob<OrbitDB>(out var targetOrbitDB);
+            Target.TryGetDataBlob<OrbitDB>(out var targetOrbitDB);
 
             foreach(var ship in ships)
             {
                 if(!ship.HasDataBlob<WarpAbilityDB>()) continue;
-                if(!ship.TryGetDatablob<PositionDB>(out var shipPositionDB)) continue;
+                if(!ship.TryGetDataBlob<PositionDB>(out var shipPositionDB)) continue;
 
                 var shipMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
 
