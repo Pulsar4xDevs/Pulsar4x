@@ -789,5 +789,60 @@
         }
       ]
     }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "admin-complex",
+      "Name": "Administrative Complex",
+      "Formulas": {
+        "Description": "Office space for bureaucracy",
+        "Mass": "PropertyValue('Office Space') * 100",
+        "Volume": "[Mass] * 0.1",
+        "HTK": "0.5",
+        "CrewReq": "PropertyValue('Office Space') * 0.25",
+        "ResearchCost": "PropertyValue('Office Space') * 0.5",
+        "CreditCost": "120",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "iron": "[Mass] * 0.5",
+        "aluminium": "[Mass] * 0.2",
+        "copper": "[Mass] * 0.1",
+        "plastic": "[Mass] * 0.1",
+        "stainless-steel": "[Mass] * 0.1"
+      },
+      "ComponentType": "Facility",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Admin Level",
+          "DescriptionFormula": "'Area of influence this  office covers'",
+          "GuiHint": "GuiEnumSelectionList",
+          "EnumTypeName" : "Pulsar4X.ECSLib.AdminLevel",
+          "MaxFormula": "10",
+          "MinFormula": "5",
+          "StepFormula": "1",
+          "PropertyFormula": "5"
+        },
+        {
+          "Name": "Office Space",
+          "DescriptionFormula": "'Provides desk space for workers'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "10000",
+          "MinFormula": "10",
+          "StepFormula": "100",
+          "PropertyFormula": "100"
+        },
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Admin Level'), PropertyValue('Office Space'))",
+          "AttributeType": "Pulsar4X.ECSLib.AdminSpaceAtb"
+        }
+      ]
+    }
   }
 ]

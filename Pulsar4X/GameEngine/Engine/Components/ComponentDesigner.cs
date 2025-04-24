@@ -185,6 +185,11 @@ namespace Pulsar4X.Components
                         //ignore it, it's not player settable.
                         break;
                     }
+                    case GuiHint.GuiEnumSelectionList:
+                    {
+                        _design.TemplatePropertyValues.Add((designAttribute.Name, typeof(string), designAttribute.Value));
+                        break;
+                    }
                     default:
                     {
                         _design.TemplatePropertyValues.Add((designAttribute.Name, typeof(string), designAttribute.ValueString));

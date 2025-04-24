@@ -428,6 +428,11 @@ namespace Pulsar4X.Events
         TechnologyLabScientistUnassigned,
         ScientistAssignedToLab, // from the scientist perspective
         ScientistUnassignedFromLab,
+        ColonyAdministratorAssigned,// from colony perspective
+        ColonyAdministratorUnassigned,
+        AdministratorAssignedToColony, //from admin perspective
+        AdministratorUnassignedFromColony,
+        
 
 
     }
