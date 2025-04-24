@@ -591,12 +591,21 @@ namespace Pulsar4X.Client
         {
             _listNames = Enum.GetNames(property.EnumType);
 
+            int maxValue = Math.Min((int)property.MaxValue, _listNames.Length);
+            int minValue = Math.Max((int)property.MinValue, 0);
+            int length = maxValue - minValue;
+
+            _listNames = new string[length];
+            for (int i = 0; i < length; i++)
+            {
+                _listNames[i] = Enum.GetName(property.EnumType, i + minValue) ?? string.Empty;
+            }
+
             Title(property.Name, property.Description);
 
-            int listCount = Math.Min((int)property.MaxValue, _listNames.Length);
             var sizeAvailable = ImGui.GetContentRegionAvail();
             ImGui.SetNextItemWidth(sizeAvailable.X);
-            if (ImGui.Combo("###Select", ref property.ListSelection, _listNames, listCount))
+            if (ImGui.Combo("###Select", ref property.ListSelection, _listNames, length))
             {
                 int enumVal = (int)Enum.Parse(property.EnumType, _listNames[property.ListSelection]);
                 property.SetValueFromInput(enumVal);
