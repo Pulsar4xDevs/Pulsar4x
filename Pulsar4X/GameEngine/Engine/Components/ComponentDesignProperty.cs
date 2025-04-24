@@ -107,7 +107,7 @@ namespace Pulsar4X.Components
                 //Dont set a max value above the max length of the enum list.
                 MaxValue = Math.Min(MaxValue , Enum.GetNames(EnumType).Length);
 
-                ListSelection = (int)Value;
+                ListSelection = (int)Value - (int)MinValue;
                 //string[] names = Enum.GetNames(EnumType);
             }
 
