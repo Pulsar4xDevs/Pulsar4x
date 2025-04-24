@@ -9,6 +9,7 @@ public enum BonusCategory
     None,
     ResearchPoints,
     ResearchCosts,
+    Mining
 }
 
 public enum BonusType

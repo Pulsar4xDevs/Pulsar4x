@@ -239,5 +239,60 @@
         }
       ]
     }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "ship-command",
+      "Name": "Ship Bridge",
+      "Formulas": {
+        "Description": "Primary command space for ships",
+        "Mass": "PropertyValue('Console Space') * 100",
+        "Volume": "[Mass] * 0.1",
+        "HTK": "0.5",
+        "CrewReq": "PropertyValue('Console Space') * 0.25",
+        "ResearchCost": "PropertyValue('Console Space') * 0.5",
+        "CreditCost": "120",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "iron": "[Mass] * 0.5",
+        "aluminium": "[Mass] * 0.2",
+        "copper": "[Mass] * 0.1",
+        "plastic": "[Mass] * 0.1",
+        "stainless-steel": "[Mass] * 0.1"
+      },
+      "ComponentType": "Admin",
+      "MountType": "ShipComponent, ShipCargo",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Admin Level",
+          "DescriptionFormula": "'Command level of this office'",
+          "GuiHint": "GuiEnumSelectionList",
+          "EnumTypeName" : "Pulsar4X.ECSLib.AdminLevel",
+          "MaxFormula": "5",
+          "MinFormula": "0",
+          "StepFormula": "1",
+          "PropertyFormula": "0"
+        },
+        {
+          "Name": "Console Space",
+          "DescriptionFormula": "'Provides console space for bridge crew'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "20",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "5"
+        },
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Admin Level'), PropertyValue('Console Space'))",
+          "AttributeType": "Pulsar4X.ECSLib.AdminSpaceAtb"
+        }
+      ]
+    }
   }
 ]

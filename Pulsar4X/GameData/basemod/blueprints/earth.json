@@ -142,7 +142,9 @@
         "rare-earth-elements",
         "regolith",
         "space-crete",
-        "laser-weapon"
+        "laser-weapon",
+        "admin-complex",
+        "ship-command"
       ],
       "ComponentDesigns": [
         "default-design-alcubierre-2k",

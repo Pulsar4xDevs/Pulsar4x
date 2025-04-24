@@ -6,6 +6,7 @@ using Pulsar4X.Interfaces;
 using Pulsar4X.Extensions;
 using Pulsar4X.Engine;
 using Pulsar4X.Colonies;
+using Pulsar4X.Events;
 using Pulsar4X.Factions;
 using Pulsar4X.Storage;
 
@@ -25,6 +26,8 @@ namespace Pulsar4X.Industry
         {
             _minerals = new ();
 
+            EventManager.Instance.Subscribe(EventType.ColonyAdministratorAssigned, OnAdminAssigned);
+            
             foreach(var (uniqueID, mineral) in game.StartingGameData.Minerals)
             {
                 _minerals.Add(mineral.ID, mineral);
@@ -132,6 +135,12 @@ namespace Pulsar4X.Industry
         public void RecalcEntity(Entity entity)
         {
             CalcMaxRate(entity);
+        }
+
+        private void OnAdminAssigned(Event e)
+        {
+            
+            
         }
 
 
