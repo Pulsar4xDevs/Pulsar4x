@@ -126,12 +126,14 @@ public class NewGameMenu : PulsarGuiWindow
         ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), ImGuiChildFlags.None);
 
         DisplayHelpers.Header("Select Mods to Enable");
-        if(ImGui.BeginTable("ModsList", 3, Styles.TableFlags))
+        if(ImGui.BeginTable("ModsList", 4, Styles.TableFlags))
         {
             ImGui.TableNextColumn();
             ImGui.TableHeader("Mod Name");
             ImGui.TableNextColumn();
             ImGui.TableHeader("Version");
+            ImGui.TableNextColumn();
+            ImGui.TableHeader("Hash");
             ImGui.TableNextColumn();
             ImGui.TableHeader("Enable?");
 
@@ -141,6 +143,8 @@ public class NewGameMenu : PulsarGuiWindow
                 ImGui.Text(modMetadata.Mod.ModName);
                 ImGui.TableNextColumn();
                 ImGui.Text(modMetadata.Mod.Version);
+                ImGui.TableNextColumn();
+                ImGui.Text(modMetadata.ManifestHash);
                 var isEnabled = ModsState.IsModEnabled[modMetadata.Mod.ModName];
                 ImGui.TableNextColumn();
                 if(ImGui.Checkbox("###" + modMetadata.Mod.ModName + "-checkbox", ref isEnabled))
