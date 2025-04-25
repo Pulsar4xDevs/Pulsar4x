@@ -822,7 +822,7 @@
           "DescriptionFormula": "'Area of influence this  office covers'",
           "GuiHint": "GuiEnumSelectionList",
           "EnumTypeName" : "Pulsar4X.ECSLib.AdminLevel",
-          "MaxFormula": "10",
+          "MaxFormula": "TechData('tech-administration-level') + 5",
           "MinFormula": "5",
           "StepFormula": "1",
           "PropertyFormula": "5"

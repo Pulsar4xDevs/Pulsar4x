@@ -32,7 +32,7 @@
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 10,
       "DataFormula": "1 + ([Level] / 5.0)",
-      "CostFormula": "(1 + [Level]) * 200" 
+      "CostFormula": "(1 + [Level]) * 200"
     }
   },
   {
@@ -442,7 +442,8 @@
           "tech-antenna-bandwidth",
           "tech-factory-max-size",
           "tech-shipyard-slip-max-size",
-          "tech-geo-surveyor"
+          "tech-geo-surveyor",
+          "tech-administration-level"
         ]
       }
     }
