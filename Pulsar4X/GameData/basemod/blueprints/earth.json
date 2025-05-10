@@ -59,7 +59,8 @@
         { "Id": "default-design-factory", "Amount": 1 },
         { "Id": "default-design-shipyard", "Amount": 1 },
         { "Id": "default-design-spaceport", "Amount": 1 },
-        { "Id": "default-design-research-lab", "Amount": 1 }
+        { "Id": "default-design-research-lab", "Amount": 1 },
+        { "id": "default-design-city-hall", "amount": 1 }
       ],
       "Cargo": [
         { "Id": "iron", "Amount": 500000 },
@@ -176,7 +177,8 @@
         "default-design-shuttlebay",
         "default-design-spaceport",
         "default-design-research-lab",
-        "default-design-warehouse"
+        "default-design-warehouse",
+        "default-design-city-hall"
       ],
       "ShipDesigns": [
         "default-ship-design-courier",

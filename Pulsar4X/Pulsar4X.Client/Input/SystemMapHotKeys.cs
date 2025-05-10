@@ -53,7 +53,7 @@ public class SystemMapHotKeys : IHotKeyHandler
             }
             else if(e.Key.Key == SDL.Keycode.Alpha6)
             {
-                CommanderWindow.GetInstance().ToggleActive();
+                AdminWindow.GetInstance().ToggleActive();
             }
         }
     }

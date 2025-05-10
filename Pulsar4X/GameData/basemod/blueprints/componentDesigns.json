@@ -390,5 +390,16 @@
         { "Key": "Storage Volume", "Value": 1000000 }
       ]
     }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-city-hall",
+      "Name": "City Hall",
+      "TemplateId": "admin-complex",
+      "Properties": [
+        { "Key": "Office Space", "Value": 1000 }
+      ]
+    }
   }
 ]

@@ -8,6 +8,7 @@
     "componentDesigns/cargoHold-1t.json",
     "componentDesigns/cargoHold-5t.json",
     "componentDesigns/warehouse-facility.json",
+    "componentDesigns/university.json",
     "componentDesigns/cargoSpacePort.json",
     "componentDesigns/cargoShuttleBay.json",
     "componentDesigns/f1.json",
@@ -30,7 +31,7 @@
     "componentDesigns/rs-25.json",
     "componentDesigns/solidCoreNTR.json",
     "componentDesigns/shipyard.json",
-    "componentDesigns/university.json"
+    "componentDesigns/admin-complex.json"
   ],
   "ordnanceDesigns": [
   ],
@@ -62,7 +63,8 @@
         { "id": "default-design-refinery", "amount": 1 },
         { "id": "default-design-factory", "amount": 1 },
         { "id": "default-design-shipyard", "amount": 1 },
-        { "id": "default-design-research-lab", "amount": 1 }
+        { "id": "default-design-research-lab", "amount": 1 },
+        { "id": "default-design-city-hall", "amount": 1 }
       ],
       "cargo": [
         { "id": "iron", "amount": 500000 },
