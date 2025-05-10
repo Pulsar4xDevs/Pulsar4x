@@ -166,10 +166,9 @@ namespace Pulsar4X.Client
                         ImGui.TableNextColumn();
 
                         var nameDisplay = "Assign Administrator";
-                        if (post.Commander.OwningEntity.Id >= 0)
+                        if (post.TryGetCommander(out var commander))
                         {
-                            var commander = _uiState.Game.GlobalManager.GetGlobalEntityById(post.Commander.OwningEntity.Id);
-                            nameDisplay = commander.GetName(_uiState.Faction.Id);
+                            nameDisplay = commander.OwningEntity.GetName(_uiState.Faction.Id);
                         }
 
                         if (ImGui.Button(nameDisplay))
@@ -190,15 +189,15 @@ namespace Pulsar4X.Client
                                                               },
                                                               () => // Custom render
                                                               {
-                                                                  int selectedId = DisplayHelpers.PeopleChooser(_uiState, post.Commander.OwningEntity.Id, DataStructures.CommanderTypes.Civilian);
+                                                                  int selectedId = DisplayHelpers.PeopleChooser(_uiState, commander.OwningEntity.Id, DataStructures.CommanderTypes.Civilian);
 
                                                                   if (selectedId == -1)
                                                                   {
                                                                       // Unassign the scientist, the player selected "None"
-                                                                      var unassignOrder = UnassignScientistOrder.Create(post.ComponentInstance.ParentEntity, post.Commander.OwningEntity.Id);
+                                                                      var unassignOrder = UnassignScientistOrder.Create(post.ComponentInstance.ParentEntity, commander.OwningEntity.Id);
                                                                       _uiState.Game.OrderHandler.HandleOrder(unassignOrder);
                                                                   }
-                                                                  else if (selectedId > 0 && selectedId != post.Commander.OwningEntity.Id)
+                                                                  else if (selectedId > 0 && selectedId != commander.OwningEntity.Id)
                                                                   {
                                                                       // Assign the new scientist
                                                                       var assignmentOrder = AssignScientistOrder.Create(post.ComponentInstance.ParentEntity, selectedId);
