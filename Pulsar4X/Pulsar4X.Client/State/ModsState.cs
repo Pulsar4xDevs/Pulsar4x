@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using Newtonsoft.Json;
 using Pulsar4X.Modding;
 
@@ -12,11 +14,13 @@ public class ModsState
     {
         public string Path;
         public ModManifest Mod;
+        public string ManifestHash { get; }
 
-        public ModMetaData(string path, ModManifest modManifest)
+        public ModMetaData(string path, ModManifest modManifest, string? manifestHash = null)
         {
             Path = path;
             Mod = modManifest;
+            ManifestHash = manifestHash ?? string.Empty;
         }
     }
 
@@ -47,16 +51,34 @@ public class ModsState
             var manifestPath = Path.Combine(directory, "modInfo.json");
             if(File.Exists(manifestPath))
             {
+                string manifestHash = GetSha1Hash(manifestPath);
                 var modManifest = JsonConvert.DeserializeObject<ModManifest>(File.ReadAllText(manifestPath));
                 if(modManifest != null)
                 {
 #if DEBUG
                     Console.WriteLine($"Found mod '{modManifest.ModName}' from {manifestPath}");
 #endif
-                    AvailableMods.Add(new ModMetaData(manifestPath, modManifest));
+                    AvailableMods.Add(new ModMetaData(manifestPath, modManifest, manifestHash));
                     IsModEnabled.Add(modManifest.ModName, modManifest.DefaultEnabled);
                 }
             }
+        }
+    }
+
+    private static string GetSha1Hash(string filePath, int charCount = 8)
+    {
+        using (FileStream stream = File.OpenRead(filePath))
+        using (SHA1 sha1 = SHA1.Create())
+        {
+            byte[] hashBytes = sha1.ComputeHash(stream);
+            StringBuilder builder = new StringBuilder();
+
+            for (int i = 0; i < hashBytes.Length; i++)
+            {
+                builder.Append(hashBytes[i].ToString("x2"));
+            }
+
+            return builder.ToString()[..Math.Min(charCount, builder.Length)];
         }
     }
 }

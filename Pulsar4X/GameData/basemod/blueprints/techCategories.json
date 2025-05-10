@@ -70,5 +70,13 @@
       "Name": "Sensors",
       "Description": "Research into new and improved sensors"
     }
+  },
+  {
+    "Type": "TechCategory",
+    "Payload": {
+      "UniqueID": "tech-category-bureaucracy",
+      "Name": "Bureaucracy",
+      "Description": "Research into improvements in bureaucracy and administration"
+    }
   }
 ]

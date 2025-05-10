@@ -1,0 +1,14 @@
+[
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-administration-level",
+      "Name": "Administration Level",
+      "Description": "Allow access to improved designs for administrative systems",
+      "Category": "tech-category-bureaucracy",
+      "MaxLevel": 5,
+      "DataFormula": "[Level] + 1",
+      "CostFormula": "50000 * Pow([Level] + 1, 3)"
+    }
+  }
+]
