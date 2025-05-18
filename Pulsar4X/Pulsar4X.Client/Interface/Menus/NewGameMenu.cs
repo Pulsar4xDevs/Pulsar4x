@@ -184,6 +184,8 @@ public class NewGameMenu : PulsarGuiWindow
             _enabledSystems.Clear();
             foreach(var (id, system) in _modDataStore.Systems)
             {
+                if(!_modDataStore.SystemBodies.Any(kvp => kvp.Value.CanStartHere && _modDataStore.Systems[id].Bodies.Contains(kvp.Key)))
+                    continue;
                 _enabledSystems.Add(id);
             }
             _selectedSystemId = _enabledSystems.Any() ? _enabledSystems.First() : "";
