@@ -32,9 +32,6 @@ public class AdminSpaceAtb  : IComponentDesignAttribute
     }
     public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
-
-        if (!componentInstance.HasAblity<AdminSpaceAbilityState>())
-            componentInstance.SetAbilityState<AdminSpaceAbilityState>(new AdminSpaceAbilityState(componentInstance));//'this' should be the instance's designs db.
         if (!parentEntity.TryGetDataBlob<AdminSpaceDB>(out var adminSpaceDB))
         {
             adminSpaceDB = new AdminSpaceDB();

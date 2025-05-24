@@ -15,9 +15,13 @@ public class AdminSpaceProcessor : IInstanceProcessor
             CalcEntityAdminSpace(entity, adminSpaceDB);
     }
 
+    /// <summary>
+    /// Currently this resets the list, need to check if we want that, or keep exsisting. 
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <param name="adminSpaceDB"></param>
     internal static void CalcEntityAdminSpace(Entity entity, AdminSpaceDB adminSpaceDB)
     {
-        var level = 0;
         var seats = 0;
         if (entity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<AdminSpaceAtb>(out var adminSpaces))
         {
@@ -25,17 +29,14 @@ public class AdminSpaceProcessor : IInstanceProcessor
             adminSpaceDB.CommanderSeats = commanderSeats;
             foreach (var adminSpace in adminSpaces)
             {
-                var state = adminSpace.GetAbilityState<AdminSpaceAbilityState>();
-                
                 var attributes = adminSpace.GetAttributes();
                 var atb = (AdminSpaceAtb)attributes[typeof(AdminSpaceAtb)];
-                if(level > (int)atb.AdminLevel)
-                {level = (int)atb.AdminLevel;}
-                seats += atb.ConsoleSpace;
 
+                seats += atb.ConsoleSpace;
+                
+                var state = new AdminSpaceAbilityState(atb.AdminLevel, adminSpace.Name);
+                commanderSeats.Add(state);
             }
-            
-            
         }
     }
 }

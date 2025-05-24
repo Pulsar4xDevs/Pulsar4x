@@ -9,9 +9,8 @@ public class AdminSpaceDB : BaseDataBlob
     /// <summary>
     ///  
     /// </summary>
-    public List<AdminSpaceAbilityState> CommanderSeats { get; internal set; }
+    public List<AdminSpaceAbilityState> CommanderSeats { get; internal set; } =  new List<AdminSpaceAbilityState>();
     
-    public int DesksAndConsoles { get; internal set; }
     
     public AdminSpaceDB() { }
 }

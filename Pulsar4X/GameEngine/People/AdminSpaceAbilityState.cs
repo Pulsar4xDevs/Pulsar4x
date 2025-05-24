@@ -1,12 +1,15 @@
 using Pulsar4X.Components;
+using Pulsar4X.DataStructures;
+using Pulsar4X.ECSLib;
 using Pulsar4X.People;
 
 namespace GameEngine.People;
 
-public class AdminSpaceAbilityState : ComponentAbilityState
+public class AdminSpaceAbilityState// : ComponentAbilityState
 {
+    public string ComponentName  { get; internal set; }
     internal CommanderDB Commander { get;  set; }
-
+    public AdminLevel SeatType { get; internal set; }
     public bool TryGetCommander(out CommanderDB commander)
     {
         commander = Commander;
@@ -15,8 +18,9 @@ public class AdminSpaceAbilityState : ComponentAbilityState
         return true;
     }
     
-    public AdminSpaceAbilityState(ComponentInstance componentInstance) : base(componentInstance)
+    public AdminSpaceAbilityState(AdminLevel type, string componentName)
     {
-        
+        SeatType = type;
+        ComponentName = componentName;
     }
 }

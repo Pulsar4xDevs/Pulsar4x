@@ -133,31 +133,26 @@ namespace Pulsar4X.Client
                                 typeof(AdminSpaceDB));
 
 
-                foreach (var p in entities)
+                foreach (var entityState in entities)
                 {
-                    if (!p.TryGetDataBlob<AdminSpaceDB>(out var adminSpaceDB))
+                    if (!entityState.TryGetDataBlob<AdminSpaceDB>(out var adminSpaceDB))
                         continue;
-                    p.Entity.TryGetDataBlob<ComponentInstancesDB>(out ComponentInstancesDB? instanceDB);
-
-                    instanceDB.TryGetComponentStates<AdminSpaceAbilityState>(out var posts);
-
                     
 
-                    foreach (var post in posts)
+                    foreach (var post in adminSpaceDB.CommanderSeats)
                     {
                         //adminSpaceDB.TechQueue.TryPeek(out var techId);
                         
                         ImGui.TableNextColumn();
 
-                        if (ImGui.Selectable(post.ComponentInstance.Design.Name + $"###{post.ID}", _selectedAdminComponent?.ID == post.ID))
+                        if (ImGui.Selectable(post.SeatType + $"###{entityState.Name}"))
                         {
                             _selectedAdminComponent = post;
                         }
 
-                        if (ImGui.IsItemHovered() && post.ComponentInstance.Design is ComponentDesign)
+                        if (ImGui.IsItemHovered() )
                         {
-                            ComponentDesign design = (ComponentDesign)post.ComponentInstance.Design;
-                            DisplayHelpers.DescriptiveTooltip(post.ComponentInstance.Design.Name, design.TemplateName, design.Description);
+
                         }
 
                         ImGui.TableNextColumn();
@@ -170,6 +165,10 @@ namespace Pulsar4X.Client
                         {
                             nameDisplay = commander.OwningEntity.GetName(_uiState.Faction.Id);
                         }
+                        else
+                        {
+                            continue;
+                        }
 
                         if (ImGui.Button(nameDisplay))
                         {
@@ -178,7 +177,7 @@ namespace Pulsar4X.Client
 
                         if (_showAssignmentModal)
                         {
-                            ResultModal.GetInstance().Display("Assign Scientist",
+                            ResultModal.GetInstance().Display("Assign Admin",
                                                               () => // Ok
                                                               {
                                                                   _showAssignmentModal = false;
@@ -194,13 +193,13 @@ namespace Pulsar4X.Client
                                                                   if (selectedId == -1)
                                                                   {
                                                                       // Unassign the scientist, the player selected "None"
-                                                                      var unassignOrder = UnassignScientistOrder.Create(post.ComponentInstance.ParentEntity, commander.OwningEntity.Id);
+                                                                      var unassignOrder = UnassignScientistOrder.Create(entityState.Entity, commander.OwningEntity.Id);
                                                                       _uiState.Game.OrderHandler.HandleOrder(unassignOrder);
                                                                   }
                                                                   else if (selectedId > 0 && selectedId != commander.OwningEntity.Id)
                                                                   {
                                                                       // Assign the new scientist
-                                                                      var assignmentOrder = AssignScientistOrder.Create(post.ComponentInstance.ParentEntity, selectedId);
+                                                                      var assignmentOrder = AssignScientistOrder.Create(entityState.Entity, selectedId);
                                                                       _uiState.Game.OrderHandler.HandleOrder(assignmentOrder);
                                                                   }
                                                               });
