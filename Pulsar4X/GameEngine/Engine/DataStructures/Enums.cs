@@ -261,6 +261,7 @@ namespace Pulsar4X.DataStructures
     {
         Navy,
         Ground,
+        Scientist,
         Civilian
     }
 

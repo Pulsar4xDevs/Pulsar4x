@@ -36,6 +36,7 @@ public class AdminSpaceAtb  : IComponentDesignAttribute
         {
             adminSpaceDB = new AdminSpaceDB();
             parentEntity.SetDataBlob(adminSpaceDB);
+            AdminSpaceProcessor.CalcEntityAdminSpace(parentEntity, adminSpaceDB);
         }
     }
 

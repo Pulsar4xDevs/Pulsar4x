@@ -65,10 +65,21 @@ namespace Pulsar4X.People
             {
                 Name = NameFactory.GetCommanderName(game),
                 Rank = 1,
-                Type = CommanderTypes.Civilian
+                Type = CommanderTypes.Scientist
             };
 
             return scientist;
+        }
+
+        public static CommanderDB CreateAdmin(Game game)
+        {
+            var db = new CommanderDB()
+            {
+                Name = NameFactory.GetCommanderName(game),
+                Rank = 1,
+                Type = CommanderTypes.Civilian
+            };
+            return db;
         }
 
         public static Scientist CreateScientist(Entity faction, Entity location)

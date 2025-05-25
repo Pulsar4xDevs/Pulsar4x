@@ -11,6 +11,5 @@ public class AdminSpaceDB : BaseDataBlob
     /// </summary>
     public List<AdminSpaceAbilityState> CommanderSeats { get; internal set; } =  new List<AdminSpaceAbilityState>();
     
-    
     public AdminSpaceDB() { }
 }

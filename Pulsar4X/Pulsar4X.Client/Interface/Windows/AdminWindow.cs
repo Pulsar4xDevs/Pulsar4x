@@ -135,7 +135,7 @@ namespace Pulsar4X.Client
 
                 foreach (var entityState in entities)
                 {
-                    if (!entityState.TryGetDataBlob<AdminSpaceDB>(out var adminSpaceDB))
+                    if (!entityState.Entity.TryGetDataBlob<AdminSpaceDB>(out var adminSpaceDB))
                         continue;
                     
 

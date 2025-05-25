@@ -505,6 +505,10 @@ public class NewGameMenu : PulsarGuiWindow
         // Create starting people
         var scientistDB = CommanderFactory.CreateScientist(game);
         var scientist = CommanderFactory.Create(startingSystem, playerFaction.Id, scientistDB);
+        
+        var adminDB = CommanderFactory.CreateAdmin(game);
+        var admin = CommanderFactory.Create(startingSystem, playerFaction.Id, adminDB);
+        
 
         if(scientist.TryGetDataBlob<BonusesDB>(out var bonusesDB))
         {
