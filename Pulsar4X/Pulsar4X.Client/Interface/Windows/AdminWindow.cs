@@ -165,10 +165,7 @@ namespace Pulsar4X.Client
                         {
                             nameDisplay = commander.OwningEntity.GetName(_uiState.Faction.Id);
                         }
-                        else
-                        {
-                            continue;
-                        }
+
 
                         if (ImGui.Button(nameDisplay))
                         {
@@ -188,15 +185,15 @@ namespace Pulsar4X.Client
                                                               },
                                                               () => // Custom render
                                                               {
-                                                                  int selectedId = DisplayHelpers.PeopleChooser(_uiState, commander.OwningEntity.Id, DataStructures.CommanderTypes.Civilian);
+                                                                  int selectedId = DisplayHelpers.PeopleChooser(_uiState, post.CommanderID, DataStructures.CommanderTypes.Civilian);
 
                                                                   if (selectedId == -1)
                                                                   {
                                                                       // Unassign the scientist, the player selected "None"
-                                                                      var unassignOrder = UnassignScientistOrder.Create(entityState.Entity, commander.OwningEntity.Id);
+                                                                      var unassignOrder = UnassignScientistOrder.Create(entityState.Entity, post.CommanderID);
                                                                       _uiState.Game.OrderHandler.HandleOrder(unassignOrder);
                                                                   }
-                                                                  else if (selectedId > 0 && selectedId != commander.OwningEntity.Id)
+                                                                  else if (selectedId > 0 && selectedId != post.CommanderID)
                                                                   {
                                                                       // Assign the new scientist
                                                                       var assignmentOrder = AssignScientistOrder.Create(entityState.Entity, selectedId);

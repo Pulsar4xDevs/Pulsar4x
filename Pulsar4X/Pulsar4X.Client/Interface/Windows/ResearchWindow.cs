@@ -208,7 +208,7 @@ namespace Pulsar4X.Client
                                 _showAssignmentModal = false;
                             }, () => // Custom render
                             {
-                                int selectedId = DisplayHelpers.PeopleChooser(_uiState, researcherDB.ScientistId, DataStructures.CommanderTypes.Civilian);
+                                int selectedId = DisplayHelpers.PeopleChooser(_uiState, researcherDB.ScientistId, DataStructures.CommanderTypes.Scientist);
 
                                 if(selectedId == -1)
                                 {
