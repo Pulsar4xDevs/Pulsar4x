@@ -134,7 +134,9 @@ namespace Pulsar4X.Client
 
                 if (mouseDownX == mouseX && mouseDownY == mouseY) //click on map.
                 {
-                    _state.MapClicked(_state.Camera.WorldCoordinate_m(mouseX, mouseY), MouseButtons.Primary); //sdl and imgu use different numbers for buttons.
+                    var keyMods = SDL.GetModState();
+                    bool ctrlPressed = keyMods.HasFlag(SDL.Keymod.LCtrl) || keyMods.HasFlag(SDL.Keymod.RCtrl);
+                    _state.MapClicked(_state.Camera.WorldCoordinate_m(mouseX, mouseY), MouseButtons.Primary, ctrlPressed); //sdl and imgu use different numbers for buttons.
                 }
             }
 
@@ -152,7 +154,9 @@ namespace Pulsar4X.Client
 
                 if (mouseDownAltX == mouseX && mouseDownAltY == mouseY) //click on map.
                 {
-                    _state.MapClicked(_state.Camera.WorldCoordinate_m(mouseX, mouseY), MouseButtons.Alt);//sdl and imgu use different numbers for buttons.
+                    var keyMods = SDL.GetModState();
+                    bool ctrlPressed = keyMods.HasFlag(SDL.Keymod.LCtrl) || keyMods.HasFlag(SDL.Keymod.RCtrl);
+                    _state.MapClicked(_state.Camera.WorldCoordinate_m(mouseX, mouseY), MouseButtons.Alt, ctrlPressed);//sdl and imgu use different numbers for buttons.
                 }
             }
 

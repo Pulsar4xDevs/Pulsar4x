@@ -259,7 +259,7 @@ namespace Pulsar4X.Client
         }
 
         //checks wether the planet icon is clicked
-        internal void MapClicked(Orbital.Vector3 worldCoord, MouseButtons button)
+        internal void MapClicked(Orbital.Vector3 worldCoord, MouseButtons button, bool ctrlPressed = false)
         {
             if (button == MouseButtons.Primary)
                 LastWorldPointClicked_m = worldCoord;
@@ -304,10 +304,7 @@ namespace Pulsar4X.Client
                     //int distComp = (int)Math.Sqrt(Math.Pow(50,2)/2);
 
                     if(closestEntityDistInM <= closestEntity.GetDataBlob<MassVolumeDB>().RadiusInM || Camera.WorldDistance_AU(minPixelRadius) >=  Distance.MToAU(closestEntityDistInM)){
-                        ImGui.Begin("--crash fixer--(this menu`s whole purpose is preventing a ImGui global state related game crash)");
-
-                        EntityClicked(closestEntity.Id, SelectedStarSystemId, button);
-                        ImGui.End();
+                        EntityClicked(closestEntity.Id, SelectedStarSystemId, button, ctrlPressed);
 
                         if(button == MouseButtons.Alt){
                             _lastContextMenuOpenedEntityGuid = closestEntity.Id;
@@ -326,7 +323,7 @@ namespace Pulsar4X.Client
             ActiveWindow?.EntitySelectedAsPrimary(PrimaryEntity);
         }
 
-        internal void EntityClicked(int entityGuid, string starSys, MouseButtons button)
+        internal void EntityClicked(int entityGuid, string starSys, MouseButtons button, bool ctrlPressed = false)
         {
             if(SelectedSysMapRender == null) throw new NullReferenceException("SelectedSysMapRender is null");
 
@@ -360,7 +357,7 @@ namespace Pulsar4X.Client
                 }
                 EntityWindows[entityGuid].ToggleActive();
 
-                if(!ImGui.GetIO().KeyCtrl)
+                if(!ctrlPressed)
                 {
                     foreach(var (id, window) in EntityWindows)
                     {
@@ -372,10 +369,10 @@ namespace Pulsar4X.Client
             }
         }
 
-        internal void EntityClicked(EntityState entityState, MouseButtons button)
+        internal void EntityClicked(EntityState entityState, MouseButtons button, bool ctrlPressed = false)
         {
             if(entityState.StarSystemId == null) throw new NullReferenceException("StarSystemId is null");
-            EntityClicked(entityState.Id, entityState.StarSystemId, button);
+            EntityClicked(entityState.Id, entityState.StarSystemId, button, ctrlPressed);
         }
     }
 
