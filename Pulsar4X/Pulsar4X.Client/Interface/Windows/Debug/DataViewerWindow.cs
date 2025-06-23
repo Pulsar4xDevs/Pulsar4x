@@ -24,13 +24,16 @@ public class DataViewerWindow : PulsarGuiWindow
     {
         DataViewerWindow instance;
         if (!_uiState.LoadedWindows.ContainsKey(typeof(DataViewerWindow)))
-            instance = new DataViewerWindow(_uiState.Game.StartingGameData);
+            instance = new DataViewerWindow(_uiState.Game?.StartingGameData);
         else
         {
             instance = (DataViewerWindow)_uiState.LoadedWindows[typeof(DataViewerWindow)];
         }
 
-        instance._systemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+        if (_uiState.IsGameLoaded && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
+            instance._systemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+        else
+            instance._systemState = null;
         return instance;
     }
 

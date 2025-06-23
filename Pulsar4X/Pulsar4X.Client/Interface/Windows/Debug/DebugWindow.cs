@@ -94,13 +94,17 @@ namespace Pulsar4X.Client
             else
             {
                 instance = (DebugWindow)_uiState.LoadedWindows[typeof(DebugWindow)];
-                instance.RefreshFactionEntites(_uiState);
+                if (_uiState.IsGameLoaded)
+                    instance.RefreshFactionEntites(_uiState);
                 //if(_uiState.LastClickedEntity?.Entity != null)
                 //    instance.SelectedEntity = _uiState.LastClickedEntity.Entity;
             }
             //if(_uiState.LastClickedEntity?.Entity != null && instance.SelectedEntity != _uiState.LastClickedEntity.Entity)
             //    instance.SelectedEntity = _uiState.LastClickedEntity.Entity;
-            instance.SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+            if (_uiState.IsGameLoaded && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
+                instance.SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+            else
+                instance.SystemState = null;
             return instance;
         }
 

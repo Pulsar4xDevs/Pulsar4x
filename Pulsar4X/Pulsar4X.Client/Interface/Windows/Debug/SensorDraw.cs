@@ -75,7 +75,10 @@ namespace Pulsar4X.Client
                     instance._selectedEntitySate = _uiState.LastClickedEntity;
             }
 
-            instance._selectedStarSysState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+            if (_uiState.IsGameLoaded && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
+                instance._selectedStarSysState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+            else
+                instance._selectedStarSysState = null;
             return instance;
         }
 
