@@ -96,6 +96,9 @@ namespace Pulsar4X.Client
         internal Stack<IHotKeyHandler> HotKeys { get; private set; } = new ();
 
         internal View? SelectedMapView { get; set; } = null;
+        
+        // Game Settings
+        internal GameSettings GameSettings { get; set; }
 
         internal GlobalUIState(SDL3Window viewport)
         {
@@ -104,6 +107,9 @@ namespace Pulsar4X.Client
             var windowPtr = viewport.Window;
 
             SDLRendererPtr = SDL.CreateRenderer(windowPtr, "pulsar4x");
+            
+            // Load game settings
+            GameSettings = GameSettings.Load();
 
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Star, 2f);
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Planet, 32f);

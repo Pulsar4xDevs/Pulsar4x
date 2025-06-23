@@ -109,6 +109,10 @@ namespace Pulsar4X.Client
                     SetActive(false);
                 }
 
+                if (ImGui.Button("Settings", _buttonSize))
+                {
+                    SettingsWindow.GetInstance().ToggleActive();
+                }
 
                 if(ImageButton.Begin(_uiState.Img_Discord(), "Discord", new Vector2(16, 12), _buttonSize))
                 {
