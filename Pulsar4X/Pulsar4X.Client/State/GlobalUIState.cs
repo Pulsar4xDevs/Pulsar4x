@@ -310,10 +310,7 @@ namespace Pulsar4X.Client
                     //int distComp = (int)Math.Sqrt(Math.Pow(50,2)/2);
 
                     if(closestEntityDistInM <= closestEntity.GetDataBlob<MassVolumeDB>().RadiusInM || Camera.WorldDistance_AU(minPixelRadius) >=  Distance.MToAU(closestEntityDistInM)){
-                        ImGui.Begin("--crash fixer--(this menu`s whole purpose is preventing a ImGui global state related game crash)");
-
                         EntityClicked(closestEntity.Id, SelectedStarSystemId, button);
-                        ImGui.End();
 
                         if(button == MouseButtons.Alt){
                             _lastContextMenuOpenedEntityGuid = closestEntity.Id;
@@ -366,7 +363,7 @@ namespace Pulsar4X.Client
                 }
                 EntityWindows[entityGuid].ToggleActive();
 
-                if(!ImGui.GetIO().KeyCtrl)
+                if(!ViewPort.IsCtrlPressed)
                 {
                     foreach(var (id, window) in EntityWindows)
                     {
