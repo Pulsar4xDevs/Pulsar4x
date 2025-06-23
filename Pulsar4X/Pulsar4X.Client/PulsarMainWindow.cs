@@ -77,6 +77,12 @@ namespace Pulsar4X.Client
 
                 // Read and apply any window preferences
                 LoadPreferences();
+                
+                // Apply game settings (resolution, display mode, etc.) - this should override old preferences
+                _state.GameSettings.ApplyDisplaySettings(this);
+                
+                // Apply UI scaling
+                ImGui.GetIO().FontGlobalScale = _state.GameSettings.UIScale;
 
                 // Apply any saved user orbit settings
                 LoadUserOrbitSettings();
@@ -280,6 +286,20 @@ namespace Pulsar4X.Client
                 item.Display();
             }
 
+            // Show FPS counter if enabled
+            if (_state.GameSettings.ShowFPS)
+            {
+                var fpsDispsize = ImGui.GetIO().DisplaySize;
+                var fpsPos = new Vector2(fpsDispsize.X - 120, 10);
+                ImGui.SetNextWindowPos(fpsPos, ImGuiCond.Always);
+                ImGui.SetNextWindowBgAlpha(0.7f);
+                if (Client.Interface.Widgets.Window.Begin("FPS", _gitHashFlags))
+                {
+                    ImGui.Text($"FPS: {ImGui.GetIO().Framerate:F1}");
+                    Client.Interface.Widgets.Window.End();
+                }
+            }
+
             // If in DEBUG render the git hash as the version in the corner of the screen
 #if DEBUG
             var dispsize = ImGui.GetIO().DisplaySize;
@@ -297,6 +317,9 @@ namespace Pulsar4X.Client
         {
             // save the user orbit settings on exit
             SaveOrbitSettings();
+            
+            // save the game settings on exit
+            _state.GameSettings.Save();
         }
 
         /// <summary>

@@ -61,7 +61,10 @@ namespace Pulsar4X.Client
             {
                 instance = (PerformanceWindow)_uiState.LoadedWindows[typeof(PerformanceWindow)];
             }
-            instance._systemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+            if (_uiState.IsGameLoaded && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
+                instance._systemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+            else
+                instance._systemState = null;
             return instance;
         }
 
