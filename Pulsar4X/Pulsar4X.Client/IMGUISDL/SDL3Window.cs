@@ -102,6 +102,9 @@ namespace Pulsar4X.Client
 
         public SDL.WindowFlags Flags => (SDL.WindowFlags) SDL.GetWindowFlags(Window);
         public bool IsAlive { get; set; } = false;
+        
+        protected bool _ctrlPressed = false;
+        public bool IsCtrlPressed => _ctrlPressed;
 
         public SDL3Window(
             string title = _defaultTitle,
@@ -181,6 +184,10 @@ namespace Pulsar4X.Client
                 SDL.StartTextInput(Window);
             else if(!ImGui.GetIO().WantTextInput && SDL.TextInputActive(Window))
                 SDL.StopTextInput(Window);
+
+            // Update Ctrl key state
+            var keyMods = SDL.GetModState();
+            _ctrlPressed = keyMods.HasFlag(SDL.Keymod.LCtrl) || keyMods.HasFlag(SDL.Keymod.RCtrl);
 
             while(SDL.PollEvent(out var ev))
             {
