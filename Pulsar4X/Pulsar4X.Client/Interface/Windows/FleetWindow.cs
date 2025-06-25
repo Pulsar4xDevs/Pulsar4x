@@ -664,10 +664,10 @@ namespace Pulsar4X.Client
                 }
                 else
                 {
-                    if (ImGui.BeginTable("FleetOrdersTable", 2, Styles.TableFlags))
+                    if (ImGui.BeginTable("FleetOrdersTable", 2, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
                     {
                         ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.1f);
-                        ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.None, 1f);
+                        ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.None, 0.9f);
                         ImGui.TableHeadersRow();
 
                         var actions = orderableDB.ActionList.ToArray();
