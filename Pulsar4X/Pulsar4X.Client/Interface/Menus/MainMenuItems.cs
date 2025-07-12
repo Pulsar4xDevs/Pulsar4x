@@ -66,11 +66,12 @@ namespace Pulsar4X.Client
                         SetActive(false);
                     }
 
-                    if (ImGui.Button("Options", _buttonSize))
+                    if (ImGui.Button("Settings", _buttonSize))
                     {
                         SettingsWindow.GetInstance().ToggleActive();
                         this.SetActive(false);
                     }
+                    
                     if (ImGui.Button("Editor", _buttonSize))
                     {
                         ModFileEditor.GetInstance().ToggleActive();
@@ -108,11 +109,7 @@ namespace Pulsar4X.Client
                     LoadGame.GetInstance().ToggleActive();
                     SetActive(false);
                 }
-
-                if (ImGui.Button("Settings", _buttonSize))
-                {
-                    SettingsWindow.GetInstance().ToggleActive();
-                }
+                
 
                 if(ImageButton.Begin(_uiState.Img_Discord(), "Discord", new Vector2(16, 12), _buttonSize))
                 {
