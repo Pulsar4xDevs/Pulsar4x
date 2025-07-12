@@ -600,6 +600,60 @@ public class BlueprintsWindow : PulsarGuiWindow
 
     private void DisplayThemeBlueprint(ThemeBlueprint themeBlueprint)
     {
-        ImGui.Text("TODO...");
+        DisplayKeyValue("Name", themeBlueprint.Name);
+
+        if(themeBlueprint.FleetNames?.Count > 0
+            && ImGui.CollapsingHeader("Fleet Names"))
+        {
+            foreach(var fleetName in themeBlueprint.FleetNames)
+            {
+                ImGui.Text(fleetName);
+            }
+        }
+
+        if(themeBlueprint.ShipNames?.Count > 0
+            && ImGui.CollapsingHeader("Ship Names"))
+        {
+            foreach(var shipName in themeBlueprint.ShipNames)
+            {
+                ImGui.Text(shipName);
+            }
+        }
+
+        if(themeBlueprint.FirstNames?.Count > 0
+            && ImGui.CollapsingHeader("First Names"))
+        {
+            foreach(var firstName in themeBlueprint.FirstNames)
+            {
+                ImGui.Text(firstName);
+            }
+        }
+
+        if(themeBlueprint.LastNames?.Count > 0
+            && ImGui.CollapsingHeader("Last Names"))
+        {
+            foreach(var lastName in themeBlueprint.LastNames)
+            {
+                ImGui.Text(lastName);
+            }
+        }
+
+        if(themeBlueprint.NavyRanks?.Count > 0
+            && ImGui.CollapsingHeader("Navy Ranks"))
+        {
+            foreach(var kvp in themeBlueprint.NavyRanks)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), kvp.Value);
+            }
+        }
+
+        if(themeBlueprint.NavyRanksAbbreviations?.Count > 0
+            && ImGui.CollapsingHeader("Navy Ranks Abbreviations"))
+        {
+            foreach(var kvp in themeBlueprint.NavyRanksAbbreviations)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), kvp.Value);
+            }
+        }
     }
 }
