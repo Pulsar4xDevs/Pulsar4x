@@ -562,7 +562,294 @@ public class BlueprintsWindow : PulsarGuiWindow
 
     private void DisplaySystemGenSettingsBlueprint(SystemGenSettingsBlueprint systemGenSettingsBlueprint)
     {
-        ImGui.Text("TODO...");
+        DisplayKeyValue("Real Star Systems", systemGenSettingsBlueprint.RealStarSystems.ToString());
+        DisplayKeyValue("NPR Generation Chance", systemGenSettingsBlueprint.NPRGenerationChance.ToString());
+        DisplayKeyValue("Planet Generation Chance", systemGenSettingsBlueprint.PlanetGenerationChance.ToString());
+        DisplayKeyValue("Max No Of Planets", systemGenSettingsBlueprint.MaxNoOfPlanets.ToString());
+        DisplayKeyValue("Max No Of Asteroids Per Belt", systemGenSettingsBlueprint.MaxNoOfAsteroidsPerBelt.ToString());
+        DisplayKeyValue("Max No Of Asteroid Belts", systemGenSettingsBlueprint.MaxNoOfAsteroidBelts.ToString());
+        DisplayKeyValue("Number Of Asteroids Per Dwarf Planet", systemGenSettingsBlueprint.NumberOfAsteroidsPerDwarfPlanet.ToString());
+        DisplayKeyValue("Minimum Comets Per System", systemGenSettingsBlueprint.MiniumCometsPerSystem.ToString());
+        DisplayKeyValue("Max No Of Comets", systemGenSettingsBlueprint.MaxNoOfComets.ToString());
+        DisplayKeyValue("Max Asteroid Orbit Deviation", systemGenSettingsBlueprint.MaxAsteroidOrbitDeviation.ToString());
+        DisplayKeyValue("Max Body Inclination", systemGenSettingsBlueprint.MaxBodyInclination.ToString());
+        DisplayKeyValue("Max Moon Mass Relative To Parent Body", systemGenSettingsBlueprint.MaxMoonMassRelativeToParentBody.ToString());
+        DisplayKeyValue("Orbit Gravity Factor", systemGenSettingsBlueprint.OrbitGravityFactor.ToString());
+        DisplayKeyValue("Terrestrial Body Tectonic Activity Chance", systemGenSettingsBlueprint.TerrestrialBodyTectonicActivityChance.ToString());
+        DisplayKeyValue("Minimum Possible Day Length", systemGenSettingsBlueprint.MiniumPossibleDayLength.ToString());
+        DisplayKeyValue("Min Moon Orbit Multiplier", systemGenSettingsBlueprint.MinMoonOrbitMultiplier.ToString());
+        DisplayKeyValue("Runaway Greenhouse Effect Chance", systemGenSettingsBlueprint.RunawayGreenhouseEffectChance.ToString());
+        DisplayKeyValue("Runaway Greenhouse Effect Multiplier", systemGenSettingsBlueprint.RunawayGreenhouseEffectMultiplyer.ToString());
+        DisplayKeyValue("J2000", systemGenSettingsBlueprint.J2000.ToString());
+        DisplayKeyValue("Ruins Generation Chance", systemGenSettingsBlueprint.RuinsGenerationChance.ToString());
+        DisplayKeyValue("Min Mineral Accessibility", systemGenSettingsBlueprint.MinMineralAccessibility.ToString());
+        DisplayKeyValue("Min Homeworld Mineral Accessibility", systemGenSettingsBlueprint.MinHomeworldMineralAccessibility.ToString());
+        DisplayKeyValue("Min Homeworld Mineral Amount", systemGenSettingsBlueprint.MinHomeworldMineralAmmount.ToString());
+        DisplayKeyValue("Homeworld Mineral Amount", systemGenSettingsBlueprint.HomeworldMineralAmmount.ToString());
+        DisplayKeyValue("Base Mineral Chance", systemGenSettingsBlueprint.BaseMineralChance.ToString());
+        DisplayKeyValue("Min Max Atmospheric Pressure", $"Min: {systemGenSettingsBlueprint.MinMaxAtmosphericPressure.Min}, Max: {systemGenSettingsBlueprint.MinMaxAtmosphericPressure.Max}");
+
+        if (ImGui.CollapsingHeader("Star Type Distribution For Real Stars"))
+        {
+            foreach (var kvp in systemGenSettingsBlueprint.StarTypeDistributionForRealStars)
+            {
+                DisplayKeyValue(kvp.Value.ToString(), kvp.Weight.ToString());
+            }
+        }
+
+        if(ImGui.CollapsingHeader("Star Type Distribution For Fake Stars"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.StarTypeDistributionForFakeStars)
+            {
+                DisplayKeyValue(kvp.Value.ToString(), kvp.Weight.ToString());
+            }
+        }
+
+        if(systemGenSettingsBlueprint.StarRadiusBySpectralType?.Count > 0
+            && ImGui.CollapsingHeader("Star Radius By Spectral Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.StarRadiusBySpectralType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), $"Min: {kvp.Value.Min}, Max: {kvp.Value.Max}");
+            }
+        }
+
+        if(systemGenSettingsBlueprint.StarTemperatureBySpectralType?.Count > 0
+            && ImGui.CollapsingHeader("Star Temperature By Spectral Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.StarTemperatureBySpectralType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), $"Min: {kvp.Value.Min}, Max: {kvp.Value.Max}");
+            }
+        }
+
+        if(systemGenSettingsBlueprint.StarLuminosityBySpectralType?.Count > 0
+            && ImGui.CollapsingHeader("Star Luminosity By Spectral Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.StarLuminosityBySpectralType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), $"Min: {kvp.Value.Min}, Max: {kvp.Value.Max}");
+            }
+        }
+
+        if(systemGenSettingsBlueprint.StarMassBySpectralType?.Count > 0
+            && ImGui.CollapsingHeader("Star Mass By Spectral Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.StarMassBySpectralType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), $"Min: {kvp.Value.Min}, Max: {kvp.Value.Max}");
+            }
+        }
+
+        if(systemGenSettingsBlueprint.StarAgeBySpectralType?.Count > 0
+            && ImGui.CollapsingHeader("Star Age By Spectral Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.StarAgeBySpectralType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), $"Min: {kvp.Value.Min}, Max: {kvp.Value.Max}");
+            }
+        }
+
+        if(systemGenSettingsBlueprint.StarSpectralTypePlanetGenerationRatio?.Count > 0
+            && ImGui.CollapsingHeader("Star Spectral Type Planet Generation Ratio"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.StarSpectralTypePlanetGenerationRatio)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), kvp.Value.ToString());
+            }
+        }
+
+        if(systemGenSettingsBlueprint.SystemBodyMassByType?.Count > 0
+            && ImGui.CollapsingHeader("System Body Mass By Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.SystemBodyMassByType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), $"Min: {kvp.Value.Min}, Max: {kvp.Value.Max}");
+            }
+        }
+
+        if(systemGenSettingsBlueprint.SystemBodyDensityByType?.Count > 0
+            && ImGui.CollapsingHeader("System Body Density By Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.SystemBodyDensityByType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), $"Min: {kvp.Value.Min}, Max: {kvp.Value.Max}");
+            }
+        }
+
+        if(systemGenSettingsBlueprint.OrbitalDistanceByStarSpectralType_AU?.Count > 0
+            && ImGui.CollapsingHeader("Orbital Distance By Star Spectral Type (AU)"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.OrbitalDistanceByStarSpectralType_AU)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), $"Min: {kvp.Value.Min}, Max: {kvp.Value.Max}");
+            }
+        }
+
+        if(systemGenSettingsBlueprint.OrbitalDistanceByStarSpectralType?.Count > 0
+            && ImGui.CollapsingHeader("Orbital Distance By Star Spectral Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.OrbitalDistanceByStarSpectralType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), $"Min: {kvp.Value.Min}, Max: {kvp.Value.Max}");
+            }
+        }
+
+        if(systemGenSettingsBlueprint.BodyEccentricityByType?.Count > 0
+            && ImGui.CollapsingHeader("Body Eccentricity By Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.BodyEccentricityByType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), $"Min: {kvp.Value.Min}, Max: {kvp.Value.Max}");
+            }
+        }
+
+        if(systemGenSettingsBlueprint.PlanetAlbedoByType?.Count > 0
+            && ImGui.CollapsingHeader("Planet Albedo By Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.PlanetAlbedoByType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), $"Min: {kvp.Value.Min}, Max: {kvp.Value.Max}");
+            }
+        }
+
+        if(systemGenSettingsBlueprint.PlanetMagneticFieldByType?.Count > 0
+            && ImGui.CollapsingHeader("Planet Magnetic Field By Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.PlanetMagneticFieldByType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), $"Min: {kvp.Value.Min}, Max: {kvp.Value.Max}");
+            }
+        }
+
+        if(systemGenSettingsBlueprint.AtmosphereGenerationModifier?.Count > 0
+            && ImGui.CollapsingHeader("Atmosphere Generation Modifier"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.AtmosphereGenerationModifier)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), kvp.Value.ToString());
+            }
+        }
+
+        if(systemGenSettingsBlueprint.MoonGenerationChanceByPlanetType?.Count > 0
+            && ImGui.CollapsingHeader("Moon Generation Chance By Planet Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.MoonGenerationChanceByPlanetType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), kvp.Value.ToString());
+            }
+        }
+
+        if(systemGenSettingsBlueprint.MaxMoonOrbitDistanceByPlanetType?.Count > 0
+            && ImGui.CollapsingHeader("Max Moon Orbit Distance By Planet Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.MaxMoonOrbitDistanceByPlanetType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), kvp.Value.ToString());
+            }
+        }
+
+        if(systemGenSettingsBlueprint.MaxNoOfMoonsByPlanetType?.Count > 0
+            && ImGui.CollapsingHeader("Max No Of Moons By Planet Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.MaxNoOfMoonsByPlanetType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), kvp.Value.ToString());
+            }
+        }
+
+        if(systemGenSettingsBlueprint.BodyTectonicsThresholds?.Count > 0
+            && ImGui.CollapsingHeader("Body Tectonics Thresholds"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.BodyTectonicsThresholds)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), kvp.Value.ToString());
+            }
+        }
+
+        if(ImGui.CollapsingHeader("Band Body Weight"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.BandBodyWeight)
+            {
+                DisplayKeyValue(kvp.Value.ToString(), kvp.Weight.ToString());
+            }
+        }
+
+        if(ImGui.CollapsingHeader("Inner Band Type Weights"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.InnerBandTypeWeights)
+            {
+                DisplayKeyValue(kvp.Value.ToString(), kvp.Weight.ToString());
+            }
+        }
+
+        if(ImGui.CollapsingHeader("Habitable Band Type Weights"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.HabitableBandTypeWeights)
+            {
+                DisplayKeyValue(kvp.Value.ToString(), kvp.Weight.ToString());
+            }
+        }
+
+        if(ImGui.CollapsingHeader("Outer Band Type Weights"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.OuterBandTypeWeights)
+            {
+                DisplayKeyValue(kvp.Value.ToString(), kvp.Weight.ToString());
+            }
+        }
+
+        if(ImGui.CollapsingHeader("Ruins Size Distribution"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.RuinsSizeDistribution)
+            {
+                DisplayKeyValue(kvp.Value.ToString(), kvp.Weight.ToString());
+            }
+        }
+
+        if(ImGui.CollapsingHeader("Ruins Quality Distribution"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.RuinsQualityDistribution)
+            {
+                DisplayKeyValue(kvp.Value.ToString(), kvp.Weight.ToString());
+            }
+        }
+
+        if(systemGenSettingsBlueprint.RuinsCountRangeBySize?.Count > 0
+            && ImGui.CollapsingHeader("Ruins Count Range By Size"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.RuinsCountRangeBySize)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), $"Min: {kvp.Value.Min}, Max: {kvp.Value.Max}");
+            }
+        }
+
+        if(systemGenSettingsBlueprint.RuinsQualityAdjustment?.Count > 0
+            && ImGui.CollapsingHeader("Ruins Quality Adjustment"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.RuinsQualityAdjustment)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), kvp.Value.ToString());
+            }
+        }
+
+        if(systemGenSettingsBlueprint.MineralGenerationChanceByBodyType?.Count > 0
+            && ImGui.CollapsingHeader("Mineral Generation Chance By Body Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.MineralGenerationChanceByBodyType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), kvp.Value.ToString());
+            }
+        }
+
+        if(systemGenSettingsBlueprint.MaxMineralAmmountByBodyType?.Count > 0
+            && ImGui.CollapsingHeader("Max Mineral Amount By Body Type"))
+        {
+            foreach(var kvp in systemGenSettingsBlueprint.MaxMineralAmmountByBodyType)
+            {
+                DisplayKeyValue(kvp.Key.ToString(), kvp.Value.ToString());
+            }
+        }
     }
 
     private void DisplayTechBlueprint(TechBlueprint techBlueprint)
