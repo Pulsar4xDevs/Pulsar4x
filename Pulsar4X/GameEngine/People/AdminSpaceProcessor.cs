@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
 using Pulsar4X.ECSLib;
 using Pulsar4X.Engine;
@@ -12,7 +13,15 @@ public class AdminSpaceProcessor : IInstanceProcessor
     internal override void ProcessEntity(Entity entity, DateTime atDateTime)
     {
         if(entity.TryGetDataBlob<AdminSpaceDB>(out var adminSpaceDB))
+        {
             CalcEntityAdminSpace(entity, adminSpaceDB);
+            
+            // Update colony hex map if this is a colony
+            if (entity.HasDataBlob<ColonyInfoDB>())
+            {
+                ColonyHexMapProcessor.ForceUpdateColonyHexMap(entity);
+            }
+        }
     }
 
     /// <summary>

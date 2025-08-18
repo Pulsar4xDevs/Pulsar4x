@@ -15,6 +15,7 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.ECSLib;
 using Pulsar4X.Engine;
+using Pulsar4X.Colonies;
 
 namespace Pulsar4X.Client
 {
@@ -24,7 +25,7 @@ namespace Pulsar4X.Client
         private FactionDataStore? _factionData;
         private AdminSpaceAbilityState? _selectedAdminComponent = null;
         private Dictionary<int, Entity> _commanders;
-        
+
         bool _showAssignmentModal = false;
 
         private AdminWindow()
@@ -61,15 +62,35 @@ namespace Pulsar4X.Client
 
             _factionData = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data;
 
-            
+
 
             RefreshCommandPosts();
         }
 
         private void RefreshCommandPosts()
         {
-            
+
             //var _uiState.Game.GlobalManager.GetAllDataBlobsOfType<AdminSpaceDB>()
+        }
+
+        private void OpenColonyHexMap()
+        {
+            // Find the first colony entity for the current faction
+            if (_uiState.Faction == null || _uiState.SelectedSystemState == null)
+                return;
+
+            var colonies = _uiState.SelectedSystemState.GetFilteredEntities(
+                DataStructures.EntityFilter.Friendly,
+                _uiState.Faction.Id,
+                typeof(ColonyInfoDB));
+
+            if (colonies.Any())
+            {
+                var firstColony = colonies.First().Entity;
+                var hexMapWindow = ColonyHexMapWindow.GetInstance();
+                hexMapWindow.SetSelectedColony(firstColony);
+                hexMapWindow.ToggleActive();
+            }
         }
 
         internal override void Display()
@@ -89,7 +110,7 @@ namespace Pulsar4X.Client
 
                     var availableSize = ImGui.GetContentRegionAvail();
                     ImGui.SetNextItemWidth(availableSize.X);
-                    
+
                     if(ImGui.Combo("###template-filter", ref selectCategoryFilterIndex, techCategoryNames, techCategoryNames.Length))
                     {
                         RefreshTechs();
@@ -102,6 +123,14 @@ namespace Pulsar4X.Client
                 if(ImGui.BeginChild("Teams", firstChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayHelpers.Header("Admin Posts");
+
+                    // Add button to open hex map
+                    if (ImGui.Button("Open Colony Hex Map"))
+                    {
+                        OpenColonyHexMap();
+                    }
+                    ImGui.Separator();
+
                     DisplayLabs();
                 }
                 ImGui.EndChild();
@@ -137,12 +166,12 @@ namespace Pulsar4X.Client
                 {
                     if (!entityState.Entity.TryGetDataBlob<AdminSpaceDB>(out var adminSpaceDB))
                         continue;
-                    
+
 
                     foreach (var post in adminSpaceDB.CommanderSeats)
                     {
                         //adminSpaceDB.TechQueue.TryPeek(out var techId);
-                        
+
                         ImGui.TableNextColumn();
 
                         if (ImGui.Selectable(post.SeatType + $"###{entityState.Name}"))
