@@ -41,7 +41,7 @@ public class TechBlueprintUI : BluePrintsUI
         var selectedItem = (TechBlueprint)_itemBlueprints[selectedIndex];
         string name = selectedItem.Name;
         string editStr;
-        if (ImGui.Begin("Tech Editor: " + name, ref _isActive[selectedIndex]))
+        if (ImGui.Begin($"Tech Editor: {name}###{selectedItem.UniqueID}", ref _isActive[selectedIndex]))
         {
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0,150);

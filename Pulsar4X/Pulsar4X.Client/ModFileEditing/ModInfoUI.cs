@@ -125,7 +125,7 @@ public class ModInfoUI
         string nameSpace = selectedItem.Namespace;
         int removeDatafileIndex = -1;
 
-        if (ImGui.Begin("Tech Category Editor: " + name, ref _isActive[selectedIndex]))
+        if (ImGui.Begin($"Tech Category Editor: {name}###{selectedItem.Namespace}", ref _isActive[selectedIndex]))
         {
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0,150);

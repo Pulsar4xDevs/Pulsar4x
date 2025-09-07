@@ -38,7 +38,7 @@ public class MineralBlueprintUI : BluePrintsUI
             return;
         var selectedItem = (MineralBlueprint)_itemBlueprints[selectedIndex];
 
-        if (ImGui.Begin("Processed Materials Editor: " + selectedItem.Name, ref _isActive[selectedIndex]))
+        if (ImGui.Begin($"Processed Materials Editor: {selectedItem.Name}###{selectedItem.UniqueID}", ref _isActive[selectedIndex]))
         {
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 150);
