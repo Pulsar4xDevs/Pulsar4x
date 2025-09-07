@@ -6,12 +6,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Pulsar4X.Client.ModFileEditing;
 
 namespace Pulsar4X.Client.Interface.Windows;
 
 public class BlueprintsWindow : PulsarGuiWindow
 {
 
+    List<object> _editStack = new List<object>();
+    
     private string _selectedBlueprintId = "";
     private Blueprint? _selectedBlueprint = null;
 
@@ -184,6 +187,7 @@ public class BlueprintsWindow : PulsarGuiWindow
     private void DisplayArmorBlueprint(ArmorBlueprint armorBlueprint)
     {
         DisplayKeyValue("Resource ID", armorBlueprint.ResourceID);
+        //IntEditWidget.Display("Density", ref armorBlueprint.Density);
         DisplayKeyValue("Density", armorBlueprint.Density.ToString());
     }
 

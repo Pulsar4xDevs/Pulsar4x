@@ -6,7 +6,7 @@ public static class DoubleEditWidget
 {
     private static string? _editingID;
 
-    public static bool Display(string label, ref double num, string format = "")
+    public static bool Display(string label, ref double num, string format = "", bool exitEditOnFocusLoss = true)
     {
         bool hasChanged = false;
         if(label != _editingID)
@@ -15,14 +15,26 @@ public static class DoubleEditWidget
             if(ImGui.IsItemClicked())
             {
                 _editingID = label;
+                ImGui.SetKeyboardFocusHere(0); // Ensure focus on the input field when editing starts
             }
         }
         else
         {
-            if (ImGui.InputDouble(label, ref num, 1, 1, format, ImGuiInputTextFlags.EnterReturnsTrue))
+            double tempNum = num;
+            if (ImGui.InputDouble(label, ref tempNum, 1, 1, format, ImGuiInputTextFlags.EnterReturnsTrue))
+            {
+                num = tempNum;
+                hasChanged = true;
+            }
+            // Exit editing mode only on Enter or KeypadEnter
+            if (ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter))
             {
                 _editingID = null;
-                hasChanged = true;
+            }
+            //Exit editing mode if the input loses focus (e.g., clicking elsewhere)
+            if (exitEditOnFocusLoss && !ImGui.IsItemActive() && ImGui.IsMouseClicked(0))
+            {
+                _editingID = null;
             }
         }
 
