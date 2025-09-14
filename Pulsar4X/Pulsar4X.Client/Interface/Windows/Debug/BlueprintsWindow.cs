@@ -187,8 +187,14 @@ public class BlueprintsWindow : PulsarGuiWindow
     private void DisplayArmorBlueprint(ArmorBlueprint armorBlueprint)
     {
         DisplayKeyValue("Resource ID", armorBlueprint.ResourceID);
-        //IntEditWidget.Display("Density", ref armorBlueprint.Density);
-        DisplayKeyValue("Density", armorBlueprint.Density.ToString());
+        ImGui.Text("Density: ");
+        ImGui.SameLine();
+        float density = armorBlueprint.Density;
+        if (FloatEditWidget.Display("##density"+ armorBlueprint.UniqueID, ref density))
+        {
+            armorBlueprint.Density = density;
+        }
+        //DisplayKeyValue("Density", armorBlueprint.Density.ToString());
     }
 
     private void DisplayCargoTypeBlueprint(CargoTypeBlueprint cargoTypeBlueprint)
