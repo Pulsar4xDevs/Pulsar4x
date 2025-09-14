@@ -6,7 +6,7 @@ public static class DoubleEditWidget
 {
     private static string? _editingID;
 
-    public static bool Display(string label, ref double num, string format = "", bool exitEditOnFocusLoss = true)
+    public static bool Display(string label, ref double num, string format = "%.2f", bool exitEditOnFocusLoss = true)
     {
         bool hasChanged = false;
         if(label != _editingID)
@@ -21,7 +21,7 @@ public static class DoubleEditWidget
         else
         {
             double tempNum = num;
-            if (ImGui.InputDouble(label, ref tempNum, 1, 1, format, ImGuiInputTextFlags.EnterReturnsTrue))
+            if (ImGui.InputDouble(label, ref tempNum, 1, 1, format))
             {
                 num = tempNum;
                 hasChanged = true;
