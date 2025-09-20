@@ -7,10 +7,10 @@ using Pulsar4X.Modding;
 
 namespace Pulsar4X.Client.ModFileEditing;
 
-public class ProcessedMateralsUI : BluePrintsUI
+public class ProcessedMaterialsUI : BluePrintsUI
 {
     private int _selectedIndex = -1;
-    public ProcessedMateralsUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.ProcessedMaterial)
+    public ProcessedMaterialsUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.ProcessedMaterial)
     {
         var blueprints = modDataStore.ProcessedMaterials;
         _itemBlueprints = blueprints.Values.ToArray();

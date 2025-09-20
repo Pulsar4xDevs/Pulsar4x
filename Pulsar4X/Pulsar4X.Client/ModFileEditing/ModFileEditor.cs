@@ -12,7 +12,7 @@ public class ModFileEditor : PulsarGuiWindow
     private CargoTypeBlueprintUI _cargoTypeBlueprintUI;
     private AttributeBlueprintUI _attributeBlueprintUI;
     private ArmorBlueprintUI _armorBlueprintUI;
-    private ProcessedMateralsUI _processedMateralsUI;
+    private ProcessedMaterialsUI _processedMaterialsUI;
     private MineralBlueprintUI _mineralsBlueprintUI;
 
 
@@ -47,7 +47,7 @@ public class ModFileEditor : PulsarGuiWindow
         _cargoTypeBlueprintUI = new CargoTypeBlueprintUI(modDataStore);
 
         _armorBlueprintUI = new ArmorBlueprintUI(modDataStore);
-        _processedMateralsUI = new ProcessedMateralsUI(modDataStore);
+        _processedMaterialsUI = new ProcessedMaterialsUI(modDataStore);
         _mineralsBlueprintUI = new MineralBlueprintUI(modDataStore);
     }
 
@@ -71,7 +71,7 @@ public class ModFileEditor : PulsarGuiWindow
                 ImGui.NewLine();
                 _armorBlueprintUI.Display("Armor");
                 ImGui.NewLine();
-                _processedMateralsUI.Display("Processed Materials");
+                _processedMaterialsUI.Display("Processed Materials");
                 ImGui.NewLine();
                 _mineralsBlueprintUI.Display("Minerals");
                 ImGui.NewLine();
