@@ -62,7 +62,7 @@ public class ProcessedMateralsUI : BluePrintsUI
             _editStr = selectedItem.Description;
             if (TextEditWidget.Display("##desc" + selectedItem.UniqueID, ref _editStr))
             {
-                selectedItem.Name = _editStr;
+                selectedItem.Description = _editStr;
             }
             ImGui.NextColumn();
 
@@ -162,7 +162,6 @@ public class ProcessedMateralsUI : BluePrintsUI
                 selectedItem.MassPerUnit = _editInt;
             }
             ImGui.NextColumn();
-
             ImGui.End();
         }
     }

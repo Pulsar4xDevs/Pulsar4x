@@ -121,7 +121,7 @@ public static class DictEditWidget
             }
             ImGui.NextColumn();
         }
-        ImGui.Columns(0);
+        ImGui.Columns(1);
         ImGui.NewLine();
         ImGui.EndChild();
 
@@ -168,7 +168,7 @@ public static class DictEditWidget
         }
 
 
-        ImGui.Columns(0);
+        ImGui.Columns(1);
         ImGui.NewLine();
         ImGui.EndChild();
 
