@@ -23,7 +23,8 @@ public static class DictEditWidget
     {
         ImGui.BeginChild("##dic");
         ImGui.Columns(2);
-        ImGui.SetColumnWidth(0, 64);
+        ImGui.SetColumnWidth(0, 150);
+        ImGui.SetColumnWidth(1, 500);
         bool isChanged = false;
         _addKey = -1;
         foreach (var kvp in dict.ToArray())
@@ -96,8 +97,10 @@ public static class DictEditWidget
 
     public static bool Display(string label, ref Dictionary<string, string> dict)
     {
-        ImGui.BeginChild("##dic" + label, new Vector2(400,160), ImGuiChildFlags.Borders);
+        ImGui.BeginChild("##dic" + label, new Vector2(800,160), ImGuiChildFlags.Borders);
         ImGui.Columns(2);
+        ImGui.SetColumnWidth(0, 150);
+        ImGui.SetColumnWidth(1, 500);
         bool isChanged = false;
         if (dict is null)
             dict = new Dictionary<string, string>();
@@ -115,10 +118,16 @@ public static class DictEditWidget
 
             //values
             _editStr = kvp.Value;
+            
             if(TextEditWidget.Display(label+kvp.Key + "v", ref _editStr))
             {
                 dict[kvp.Key] = _editStr;
+            }/*
+            if (FunctionEditWidget.Display(label+kvp.Key + "v", ref _editStr))
+            {
+                dict[kvp.Key] = _editStr;
             }
+            */
             ImGui.NextColumn();
         }
         ImGui.Columns(1);
@@ -136,8 +145,10 @@ public static class DictEditWidget
     /// <returns></returns>
     public static bool Display(string label, ref Dictionary<string, long> dict)
     {
-        ImGui.BeginChild("##dic" + label, new Vector2(400,160), ImGuiChildFlags.Borders);
+        ImGui.BeginChild("##dic" + label, new Vector2(800,160), ImGuiChildFlags.Borders);
         ImGui.Columns(2);
+        ImGui.SetColumnWidth(0, 150);
+        ImGui.SetColumnWidth(1, 500);
         bool isChanged = false;
         if (dict is null)
             dict = new Dictionary<string, long>();
@@ -179,6 +190,8 @@ public static class DictEditWidget
     {
         ImGui.BeginChild("##dic" + label, new Vector2(400,160), ImGuiChildFlags.Borders);
         ImGui.Columns(2);
+        ImGui.SetColumnWidth(0, 150);
+        ImGui.SetColumnWidth(1, 500);
         bool isChanged = false;
         if (dict is null)
         {

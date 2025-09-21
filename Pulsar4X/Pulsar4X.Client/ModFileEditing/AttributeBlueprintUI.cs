@@ -75,7 +75,7 @@ public class AttributeBlueprintUI : BluePrintsUI
             DisplayEditorWindow(i);
             i++;
         }
-        ImGui.Columns(0);
+        ImGui.Columns(1);
     }
 
     public override void DisplayEditorWindow(int selectedIndex)
