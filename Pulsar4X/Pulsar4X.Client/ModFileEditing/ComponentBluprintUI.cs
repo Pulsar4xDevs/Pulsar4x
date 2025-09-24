@@ -93,7 +93,7 @@ public class ComponentBluprintUI : BluePrintsUI
                 ImGui.Text("Fomula: ");
                 ImGui.TableNextColumn();
                 var editDicf = selectedItem.Formulas;
-                if (DictEditWidget.Display("##fmula", ref editDicf))
+                if (DictEditWidget.Display("##fmula", ref editDicf, _modDataStore, selectedItem))
                 {
                     selectedItem.Formulas = editDicf;
                 }
@@ -103,7 +103,7 @@ public class ComponentBluprintUI : BluePrintsUI
                 ImGui.Text("ResourceCosts: ");
                 ImGui.TableNextColumn();
                 var editDic = selectedItem.ResourceCost;
-                if (DictEditWidget.Display("##resc", ref editDic))
+                if (DictEditWidget.Display("##resc", ref editDicf, _modDataStore, selectedItem))
                 {
                     selectedItem.ResourceCost = editDic;
                 }

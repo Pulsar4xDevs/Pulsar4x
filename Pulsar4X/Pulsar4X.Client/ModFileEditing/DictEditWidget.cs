@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Blueprints;
 using Pulsar4X.DataStructures;
+using Pulsar4X.Modding;
 
 namespace Pulsar4X.Client.ModFileEditing;
 
@@ -122,12 +124,49 @@ public static class DictEditWidget
             if(TextEditWidget.Display(label+kvp.Key + "v", ref _editStr))
             {
                 dict[kvp.Key] = _editStr;
-            }/*
-            if (FunctionEditWidget.Display(label+kvp.Key + "v", ref _editStr))
+            }
+            
+            ImGui.NextColumn();
+        }
+        ImGui.Columns(1);
+        ImGui.NewLine();
+        ImGui.EndChild();
+
+        return isChanged;
+    }
+    
+    public static bool Display(string label, ref Dictionary<string, string> dict, ModDataStore  modDataStore,  ComponentTemplateBlueprint selectedItem)
+    {
+        var propertyNames = new string[selectedItem.Properties.Count];
+        for(int i = 0; i < selectedItem.Properties.Count; i++)
+            propertyNames[i] = selectedItem.Properties[i].Name;
+        ImGui.BeginChild("##dic" + label, new Vector2(800,160), ImGuiChildFlags.Borders);
+        ImGui.Columns(2);
+        ImGui.SetColumnWidth(0, 150);
+        ImGui.SetColumnWidth(1, 500);
+        bool isChanged = false;
+        if (dict is null)
+            dict = new Dictionary<string, string>();
+        _addKey = -1;
+        foreach (var kvp in dict)
+        {
+            _editStr = kvp.Key;
+            if (TextEditWidget.Display(label + kvp.Key + "k", ref _editStr))
+            {
+                isChanged = true;
+                if(!dict.ContainsKey(_editStr))
+                    dict.Add(_editStr,kvp.Value);
+            }
+            ImGui.NextColumn();
+
+            //values
+            _editStr = kvp.Value;
+    
+            if (FunctionEditWidget.Display(label+kvp.Key + "v", ref _editStr,  modDataStore, propertyNames))
             {
                 dict[kvp.Key] = _editStr;
             }
-            */
+            
             ImGui.NextColumn();
         }
         ImGui.Columns(1);
