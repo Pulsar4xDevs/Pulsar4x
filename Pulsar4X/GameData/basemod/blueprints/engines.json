@@ -57,7 +57,7 @@
           "DataDict": {
             "fuel-storage": "'conventional'"
           },
-          "PropertyFormula": "GuidString('rp-1')"
+          "PropertyFormula": "UniqueID('rp-1')"
         },
         {
           "Name": "Fuel Consumption",
@@ -129,7 +129,7 @@
           "DataDict": {
             "fuel-storage": "'ntr'"
           },
-          "PropertyFormula": "GuidString('ntp')"
+          "PropertyFormula": "UniqueID('ntp')"
         },
         {
           "Name": "Exhaust Velocity",

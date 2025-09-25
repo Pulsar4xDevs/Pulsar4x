@@ -185,7 +185,7 @@
           "DescriptionFormula": "'Provides a 10 percent bonus towards research in the specialty category. May still research other categories without the bonus.'",
           "GuiHint": "GuiTechCategorySelection",
           "DataDict": {},
-          "PropertyFormula": "GuidString('tech-category-power-propulsion')"
+          "PropertyFormula": "UniqueID('tech-category-power-propulsion')"
         },
         {
           "Name": "RP Amount Per EconTick",
@@ -728,7 +728,7 @@
         {
           "Name": "DBargs",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(GuidString('general-storage'), PropertyValue('Storage Amount'))",
+          "PropertyFormula": "AtbConstrArgs(UniqueID('general-storage'), PropertyValue('Storage Amount'))",
           "AttributeType": "Pulsar4X.Storage.CargoStorageAtb"
         }
       ]

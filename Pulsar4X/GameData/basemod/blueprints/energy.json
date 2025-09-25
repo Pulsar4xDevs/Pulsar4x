@@ -238,7 +238,7 @@
           "Name": "DB",
           "DescriptionFormula": "''",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(GuidString('fissile-fuels'), PropertyValue('Fuel Consumption'), GuidString('electricity'), PropertyValue('Power Output'), PropertyValue('Operational Lifetime'))",
+          "PropertyFormula": "AtbConstrArgs(UniqueID('fissile-fuels'), PropertyValue('Fuel Consumption'), UniqueID('electricity'), PropertyValue('Power Output'), PropertyValue('Operational Lifetime'))",
           "AttributeType": "Pulsar4X.Energy.EnergyGenerationAtb"
         },
         {
@@ -369,7 +369,7 @@
         {
           "Name": "DB",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(GuidString('fissile-fuels'), PropertyValue('Fuel Burn Rate'), GuidString('electricity'), PropertyValue('GeneratorOutput'), PropertyValue('FuelDuration'))",
+          "PropertyFormula": "AtbConstrArgs(UniqueID('fissile-fuels'), PropertyValue('Fuel Burn Rate'), UniqueID('electricity'), PropertyValue('GeneratorOutput'), PropertyValue('FuelDuration'))",
           "AttributeType": "Pulsar4X.Energy.EnergyGenerationAtb"
         },
         {

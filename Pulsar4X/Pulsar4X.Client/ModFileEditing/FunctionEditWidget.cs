@@ -105,7 +105,6 @@ namespace Pulsar4X.Client.ModFileEditing
                     _strInputBuffer = Utils.BytesFromString(initExpr);
                     ImGui.SetKeyboardFocusHere(0);
                     ValidateExpression(initExpr);
-                    Console.WriteLine($"Entered edit mode for ID: {uniqueLabel}");
                 }
             }
             else
@@ -126,7 +125,6 @@ namespace Pulsar4X.Client.ModFileEditing
                     string searchFilter = "";
                     if (ImGui.InputText("##search" + uniqueLabel, ref searchFilter, 128))
                     {
-                        Console.WriteLine($"Search filter: {searchFilter}");
                     }
 
                     ImGui.Text("NCalc Built-ins:");
@@ -136,7 +134,6 @@ namespace Pulsar4X.Client.ModFileEditing
                         if (func.Key.Contains(searchFilter, StringComparison.OrdinalIgnoreCase) && ImGui.Selectable(func.Key))
                         {
                             InsertItem(func.Key);
-                            Console.WriteLine($"Selected: {func.Key}");
                         }
                         if (ImGui.IsItemHovered())
                         {
