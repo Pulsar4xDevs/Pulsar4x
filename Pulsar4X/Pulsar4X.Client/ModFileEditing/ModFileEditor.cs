@@ -1,3 +1,4 @@
+using System.IO;
 using ImGuiNET;
 using Pulsar4X.Modding;
 
@@ -28,7 +29,9 @@ public class ModFileEditor : PulsarGuiWindow
             instance = new ModFileEditor();
             ModLoader modLoader = new ModLoader();
             ModDataStore modDataStore = new ModDataStore();
-            modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
+            string? appDataDirectory = PulsarMainWindow.GetAppDataPath();
+            string modPath = Path.Combine(appDataDirectory, PulsarMainWindow.ModsPath, "basemod/modInfo.json");
+            modLoader.LoadModManifest(modPath, modDataStore);
             instance.Refresh(modDataStore);
         }
         else
