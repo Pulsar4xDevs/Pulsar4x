@@ -102,10 +102,10 @@ public class ComponentBluprintUI : BluePrintsUI
                 ImGui.TableNextColumn();
                 ImGui.Text("ResourceCosts: ");
                 ImGui.TableNextColumn();
-                var editDic = selectedItem.ResourceCost;
-                if (DictEditWidget.Display("##resc", ref editDicf, _modDataStore, selectedItem))
+                var editDicRC = selectedItem.ResourceCost;
+                if (DictEditWidget.Display("##resc", ref editDicRC, _modDataStore, selectedItem))
                 {
-                    selectedItem.ResourceCost = editDic;
+                    selectedItem.ResourceCost = editDicRC;
                 }
 
                 ImGui.TableNextRow();

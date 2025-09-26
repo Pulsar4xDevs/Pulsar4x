@@ -16,6 +16,7 @@ namespace Pulsar4X.Client.ModFileEditing
         private static string _errorMessage = "";
         private static bool _hasError = false;
         private static bool _isComboActive = false;
+        private static bool _isSelectActive = false;
 
         private static readonly Dictionary<string, string> _builtInFunctions = new Dictionary<string, string>
         {
@@ -46,12 +47,12 @@ namespace Pulsar4X.Client.ModFileEditing
             {"PropertyValue(key)", "Gets the value of a component property by key."},
             {"SetPropertyValue(key, value)", "Sets a component property value by key."},
             {"EnumDict(type)", "Creates a dictionary of enum values for the given type."},
-            {"TechData(techGuid)", "Gets tech data for the given tech GUID."},
-            {"TechLevel(techGuid)", "Gets tech level for the given tech GUID."},
-            {"CargoType(typeGuid)", "Gets cargo type data for the given GUID."},
-            {"GuidString(typeGuid)", "Returns the GUID string for use in datablob args."},
+            {"TechData(techID)", "Gets tech data for the given tech ID."},
+            {"TechLevel(techID)", "Gets tech level for the given tech ID."},
+            {"CargoType(typeID)", "Gets cargo type data for the given ID."},
+            {"UniqueID(typeID)", "Returns the ID string for use in datablob args."},
             {"AtbConstrArgs(args...)", "Sets attribute construction args for a datablob."},
-            {"ExhaustVelocityLookup(cargoGuid)", "Looks up exhaust velocity for a cargo material."}
+            {"ExhaustVelocityLookup(cargoID)", "Looks up exhaust velocity for a cargo material."}
         };
 
         private static readonly Dictionary<string, string> _pulsarParameters = new Dictionary<string, string>
@@ -135,6 +136,8 @@ namespace Pulsar4X.Client.ModFileEditing
                         {
                             InsertItem(func.Key);
                         }
+                        if(ImGui.IsItemActive())
+                            _isSelectActive = true;
                         if (ImGui.IsItemHovered())
                         {
                             ImGui.SetTooltip(func.Value);
@@ -154,9 +157,10 @@ namespace Pulsar4X.Client.ModFileEditing
                                     if (ImGui.Selectable(prop))
                                     {
                                         InsertItem($"PropertyValue('{prop}')");
-                                        Console.WriteLine($"Selected PropertyValue: {prop}");
                                     }
-                                    //if (ImGui.IsItemHovered()) ImGui.SetTooltip(prop.Value);
+                                    if(ImGui.IsItemActive())
+                                        _isSelectActive = true;
+                                    if (ImGui.IsItemHovered()) ImGui.SetTooltip("Component property key.");
                                 }
                                 ImGui.EndMenu();
                             }
@@ -167,12 +171,28 @@ namespace Pulsar4X.Client.ModFileEditing
                                     if (ImGui.Selectable(tech.Key))
                                     {
                                         InsertItem($"TechData('{tech.Key}')");
-                                        Console.WriteLine($"Selected TechData: {tech.Key}");
                                     }
+                                    if(ImGui.IsItemActive())
+                                        _isSelectActive = true;
                                     if (ImGui.IsItemHovered()) ImGui.SetTooltip($"Tech: {tech.Value.Name}");
                                 }
                                 ImGui.EndMenu();
                             }
+                            else if (func.Key.StartsWith("CargoType") && ImGui.BeginMenu("CargoType"))
+                            {
+                                foreach (var cargo in modDataStore.CargoTypes)
+                                {
+                                    if (ImGui.Selectable(cargo.Key))
+                                    {
+                                        InsertItem($"CargoType('{cargo.Key}')");
+                                    }
+                                    if(ImGui.IsItemActive())
+                                        _isSelectActive = true;
+                                    if (ImGui.IsItemHovered()) ImGui.SetTooltip($"Cargo: {cargo.Value.Name}");
+                                }
+                                ImGui.EndMenu();
+                            }
+                            
                             else if (func.Key.StartsWith("TechLevel") && ImGui.BeginMenu("TechLevel"))
                             {
                                 foreach (var tech in modDataStore.Techs)
@@ -180,17 +200,19 @@ namespace Pulsar4X.Client.ModFileEditing
                                     if (ImGui.Selectable(tech.Key))
                                     {
                                         InsertItem($"TechLevel('{tech.Key}')");
-                                        Console.WriteLine($"Selected TechLevel: {tech.Key}");
-                                    }
+                                    }                        
+                                    if(ImGui.IsItemActive())
+                                        _isSelectActive = true;
                                     if (ImGui.IsItemHovered()) ImGui.SetTooltip($"Tech: {tech.Value.Name}");
                                 }
                                 ImGui.EndMenu();
                             }
-                            else if (ImGui.Selectable(func.Key))
+                            else if (!func.Key.StartsWith("PropertyValue") && !func.Key.StartsWith("TechData") && !func.Key.StartsWith("TechLevel") && ImGui.Selectable(func.Key))
                             {
                                 InsertItem(func.Key);
-                                Console.WriteLine($"Selected: {func.Key}");
                             }
+                            if(ImGui.IsItemActive())
+                                _isSelectActive = true;
                             if (ImGui.IsItemHovered()) ImGui.SetTooltip(func.Value);
                         }
                     }
@@ -199,18 +221,19 @@ namespace Pulsar4X.Client.ModFileEditing
                     ImGui.Text("Parameters:");
                     foreach (var param in _pulsarParameters)
                     {
-                        if (param.Key.Contains(searchFilter, StringComparison.OrdinalIgnoreCase) && ImGui.Selectable(param.Key))
+                        if (ImGui.Selectable(param.Key))
                         {
                             InsertItem(param.Key);
-                            Console.WriteLine($"Selected: {param.Key}");
                         }
+                        if(ImGui.IsItemActive())
+                            _isSelectActive = true;
                         if (ImGui.IsItemHovered()) ImGui.SetTooltip(param.Value);
+                        
                     }
 
                     ImGui.EndCombo();
                 }
                 _isComboActive = ImGui.IsItemActive();
-                Console.WriteLine($"Combo active: {_isComboActive}");
 
                 if (_hasError)
                 {
@@ -220,12 +243,12 @@ namespace Pulsar4X.Client.ModFileEditing
                 if (ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter))
                 {
                     _editingID = null;
-                    Console.WriteLine("Exited edit mode on Enter");
                 }
-                if (exitEditOnFocusLoss && !ImGui.IsItemActive() && ImGui.IsMouseClicked(0) && !_isComboActive)
+                if (exitEditOnFocusLoss && !ImGui.IsItemActive() && ImGui.IsMouseClicked(0) && !_isComboActive && !_isSelectActive)
                 {
                     _editingID = null;
-                    Console.WriteLine("Exited edit mode on focus loss");
+                    _isSelectActive = false;
+                    _isComboActive = false;
                 }
             }
 
