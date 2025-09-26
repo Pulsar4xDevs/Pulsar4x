@@ -7,10 +7,10 @@ using Pulsar4X.Modding;
 
 namespace Pulsar4X.Client.ModFileEditing;
 
-public class ProcessedMateralsUI : BluePrintsUI
+public class ProcessedMaterialsUI : BluePrintsUI
 {
     private int _selectedIndex = -1;
-    public ProcessedMateralsUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.ProcessedMaterial)
+    public ProcessedMaterialsUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.ProcessedMaterial)
     {
         var blueprints = modDataStore.ProcessedMaterials;
         _itemBlueprints = blueprints.Values.ToArray();
@@ -41,7 +41,7 @@ public class ProcessedMateralsUI : BluePrintsUI
             return;
         var selectedItem = (ProcessedMaterialBlueprint)_itemBlueprints[selectedIndex];
 
-        if (ImGui.Begin("Processed Materials Editor: " + selectedItem.Name, ref _isActive[selectedIndex]))
+        if (ImGui.Begin($"Processed Materials Editor: {selectedItem.Name}###{selectedItem.UniqueID}", ref _isActive[selectedIndex]))
         {
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0,150);
@@ -62,7 +62,7 @@ public class ProcessedMateralsUI : BluePrintsUI
             _editStr = selectedItem.Description;
             if (TextEditWidget.Display("##desc" + selectedItem.UniqueID, ref _editStr))
             {
-                selectedItem.Name = _editStr;
+                selectedItem.Description = _editStr;
             }
             ImGui.NextColumn();
 
@@ -162,7 +162,6 @@ public class ProcessedMateralsUI : BluePrintsUI
                 selectedItem.MassPerUnit = _editInt;
             }
             ImGui.NextColumn();
-
             ImGui.End();
         }
     }

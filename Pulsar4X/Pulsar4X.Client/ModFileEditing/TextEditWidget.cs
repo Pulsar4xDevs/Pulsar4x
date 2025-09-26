@@ -18,7 +18,7 @@ public static class TextEditWidget
         }
     }
 
-    public static bool Display(string label, ref string text)
+    public static bool Display(string label, ref string text, bool exitEditOnFocusLoss = true)
     {
         bool hasChanged = false;
         if(string.IsNullOrEmpty(text))
@@ -30,16 +30,25 @@ public static class TextEditWidget
             {
                 _editingID = label;
                 _strInputBuffer = Utils.BytesFromString(text);
-
+                ImGui.SetKeyboardFocusHere(0); // Ensure focus on the input field when editing starts
             }
         }
         else
         {
-            if (ImGui.InputText(label, _strInputBuffer, _buffSize, ImGuiInputTextFlags.EnterReturnsTrue))
+            if (ImGui.InputText(label, _strInputBuffer, _buffSize))
             {
                 text = Utils.StringFromBytes(_strInputBuffer);
-                _editingID = null;
                 hasChanged = true;
+            }
+            // Exit editing mode only on Enter or KeypadEnter
+            if (ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter))
+            {
+                _editingID = null;
+            }
+            //Exit editing mode if the input loses focus (e.g., clicking elsewhere)
+            if (exitEditOnFocusLoss && !ImGui.IsItemActive() && ImGui.IsMouseClicked(0))
+            {
+                _editingID = null;
             }
         }
 

@@ -396,8 +396,8 @@ namespace Pulsar4X.Components
         {
             string key = "Unknown Key";
             int index = -1;
-            string techGuid;
-            string typeGuid;
+            string techID;
+            string typeID;
 
             switch (name)
             {
@@ -483,28 +483,28 @@ namespace Pulsar4X.Components
                     break;
 
                 case "TechData":
-                    techGuid = (string)args.EvaluateParameters()[0];
-                    var tech = _factionDataStore.Techs[techGuid];
+                    techID = (string)args.EvaluateParameters()[0];
+                    var tech = _factionDataStore.Techs[techID];
                     args.Result = tech.TechDataFormula();
                     break;
 
                 //Returns the tech level for the given guid
                 case "TechLevel":
-                    techGuid = (string)args.EvaluateParameters()[0];
-                    if (_factionDataStore.Techs.ContainsKey(techGuid))
-                        args.Result = _factionDataStore.Techs[techGuid].Level;
+                    techID = (string)args.EvaluateParameters()[0];
+                    if (_factionDataStore.Techs.ContainsKey(techID))
+                        args.Result = _factionDataStore.Techs[techID].Level;
                     else args.Result = 0;
                     break;
                 //currently not used, but an future experiment to pass the CargoTypeSD as a parameter
                 case "CargoType":
-                    typeGuid = (string)args.EvaluateParameters()[0];
-                    CargoTypeBlueprint typeSD = _factionDataStore.CargoTypes[typeGuid];
+                    typeID = (string)args.EvaluateParameters()[0];
+                    CargoTypeBlueprint typeSD = _factionDataStore.CargoTypes[typeID];
                     args.Result = typeSD;
                     break;
                 //used for datablob args for when a guid is required as a parameter
-                case "GuidString":
-                    typeGuid = (string)args.EvaluateParameters()[0];
-                    args.Result = typeGuid;
+                case "UniqueID":
+                    typeID = (string)args.EvaluateParameters()[0];
+                    args.Result = typeID;
                     break;
 
                 //This sets the DatablobArgs. it's up to the user to ensure the right number of args for a specific datablob

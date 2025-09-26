@@ -41,7 +41,7 @@ public class CargoTypeBlueprintUI : BluePrintsUI
             return;
         var selectedItem = (CargoTypeBlueprint)_itemBlueprints[selectedIndex];
 
-        if (ImGui.Begin("Cargo Type Editor: " + selectedItem.Name, ref _isActive[selectedIndex]))
+        if (ImGui.Begin($"Cargo Type Editor: {selectedItem.Name}###{selectedItem.UniqueID}", ref _isActive[selectedIndex]))
         {
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 150);

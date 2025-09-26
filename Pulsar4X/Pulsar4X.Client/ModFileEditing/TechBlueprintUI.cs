@@ -41,7 +41,7 @@ public class TechBlueprintUI : BluePrintsUI
         var selectedItem = (TechBlueprint)_itemBlueprints[selectedIndex];
         string name = selectedItem.Name;
         string editStr;
-        if (ImGui.Begin("Tech Editor: " + name, ref _isActive[selectedIndex]))
+        if (ImGui.Begin($"Tech Editor: {name}###{selectedItem.UniqueID}", ref _isActive[selectedIndex]))
         {
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0,150);
@@ -50,7 +50,7 @@ public class TechBlueprintUI : BluePrintsUI
             ImGui.NextColumn();
 
             editStr = selectedItem.Name;
-            if (TextEditWidget.Display("##name" + selectedItem.Name, ref editStr))
+            if (TextEditWidget.Display("##name" + selectedItem.UniqueID, ref editStr))
             {
                 selectedItem.Name = editStr;
             }
@@ -60,9 +60,9 @@ public class TechBlueprintUI : BluePrintsUI
             ImGui.Text("Description: ");
             ImGui.NextColumn();
             editStr = selectedItem.Description;
-            if (TextEditWidget.Display("##desc" + selectedItem.Description, ref editStr))
+            if (TextEditWidget.Display("##desc" + selectedItem.UniqueID, ref editStr))
             {
-                selectedItem.Name = editStr;
+                selectedItem.Description = editStr;
             }
             ImGui.NextColumn();
 
@@ -82,7 +82,7 @@ public class TechBlueprintUI : BluePrintsUI
             ImGui.Text("CostFormula: ");
             ImGui.NextColumn();
             editStr = selectedItem.CostFormula;
-            if (TextEditWidget.Display("##cf" + selectedItem.CostFormula, ref editStr))
+            if (TextEditWidget.Display("##cf" + selectedItem.UniqueID, ref editStr))
             {
                 selectedItem.CostFormula = editStr;
             }
@@ -92,7 +92,7 @@ public class TechBlueprintUI : BluePrintsUI
             ImGui.Text("DataFormula: ");
             ImGui.NextColumn();
             editStr = selectedItem.DataFormula;
-            if (TextEditWidget.Display("##df" + selectedItem.DataFormula, ref editStr))
+            if (TextEditWidget.Display("##df" + selectedItem.UniqueID, ref editStr))
             {
                 selectedItem.DataFormula = editStr;
             }
@@ -102,7 +102,7 @@ public class TechBlueprintUI : BluePrintsUI
             ImGui.Text("MaxLevel: ");
             ImGui.NextColumn();
             int editInt = selectedItem.MaxLevel;
-            if (IntEditWidget.Display("##ml" + selectedItem.MaxLevel.ToString(), ref editInt))
+            if (IntEditWidget.Display("##ml" + selectedItem.MaxLevel, ref editInt))
             {
                 selectedItem.MaxLevel = editInt;
             }

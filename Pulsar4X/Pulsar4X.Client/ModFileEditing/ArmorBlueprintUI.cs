@@ -39,7 +39,7 @@ public class ArmorBlueprintUI : BluePrintsUI
         var selectedItem = (ArmorBlueprint)_itemBlueprints[selectedIndex];
         _editStr = selectedItem.UniqueID;
         //string desc = selectedItem.Description;
-        if (ImGui.Begin("Tech Category Editor: " + _editStr, ref _isActive[selectedIndex]))
+        if (ImGui.Begin($"Tech Category Editor: {_editStr}###{selectedItem.UniqueID}", ref _isActive[selectedIndex]))
         {
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0,150);
