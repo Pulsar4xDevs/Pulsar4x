@@ -20,7 +20,7 @@ public class AttributeBlueprintUI : BluePrintsUI
             _blueprints = componentBlueprint.Properties.ToArray();
         else
             _blueprints = new ComponentTemplatePropertyBlueprint[1];
-
+        
         Refresh();
 
 
@@ -65,7 +65,7 @@ public class AttributeBlueprintUI : BluePrintsUI
     {
         ImGui.Columns(2);
         ImGui.SetColumnWidth(0,150);
-        ImGui.SetColumnWidth(1,400);
+        //ImGui.SetColumnWidth(1,400);
 
         int i = 0;
         foreach (var item in _blueprints)
@@ -80,17 +80,14 @@ public class AttributeBlueprintUI : BluePrintsUI
 
     public override void DisplayEditorWindow(int selectedIndex)
     {
-
         var selectedItem = _blueprints[selectedIndex];
         if (selectedItem is null)
         {
             selectedItem = new ComponentTemplatePropertyBlueprint();
             selectedItem.Name = "newAttribute";
         }
-
-        string name = selectedItem.Name;
+        
         string editStr;
-
         ImGui.NextColumn();
         ImGui.Text("Name: ");
         ImGui.NextColumn();
@@ -104,7 +101,7 @@ public class AttributeBlueprintUI : BluePrintsUI
         ImGui.Text("Units: ");
         ImGui.NextColumn();
         var editIndex = Array.IndexOf(_units, selectedItem.Units);
-        if (SelectFromListWiget.Display("##indt" + selectedItem.Units, _units, ref editIndex))
+        if (SelectFromListWiget.Display("##indt" + selectedItem.Name, _units, ref editIndex))
         {
             selectedItem.Units = _units[editIndex];
         }
@@ -113,7 +110,7 @@ public class AttributeBlueprintUI : BluePrintsUI
         ImGui.Text("MaxFormula: ");
         ImGui.NextColumn();
         editStr = selectedItem.MaxFormula;
-        if (TextEditWidget.Display("##maxf" + selectedItem.MaxFormula, ref editStr))
+        if (FunctionEditWidget.Display("##maxf"  + selectedItem.Name, ref editStr, _modDataStore, _itemNames))
         {
             selectedItem.MaxFormula = editStr;
         }
@@ -122,7 +119,7 @@ public class AttributeBlueprintUI : BluePrintsUI
         ImGui.Text("AttributeFormula: ");
         ImGui.NextColumn();
         editStr = selectedItem.PropertyFormula;
-        if (TextEditWidget.Display("##atbf", ref editStr))
+        if (FunctionEditWidget.Display("##atbf"  + selectedItem.Name, ref editStr, _modDataStore, _itemNames))
         {
             selectedItem.PropertyFormula = editStr;
         }
@@ -131,7 +128,7 @@ public class AttributeBlueprintUI : BluePrintsUI
         ImGui.Text("DescriptionFormula: ");
         ImGui.NextColumn();
         editStr = selectedItem.DescriptionFormula;
-        if (TextEditWidget.Display("##descf", ref editStr))
+        if (FunctionEditWidget.Display("##descf"  + selectedItem.Name, ref editStr, _modDataStore, _itemNames))
         {
             selectedItem.DescriptionFormula = editStr;
         }
@@ -141,7 +138,7 @@ public class AttributeBlueprintUI : BluePrintsUI
         ImGui.Text("AttributeType: ");
         ImGui.NextColumn();
         editIndex = Array.IndexOf(_attributeFullNames, selectedItem.AttributeType);
-        if (SelectFromListWiget.Display("##indt" + selectedItem.AttributeType, _attributeTypeNames, ref editIndex))
+        if (SelectFromListWiget.Display("##indt" + selectedItem.Name, _attributeTypeNames, ref editIndex))
         {
             selectedItem.AttributeType = _attributeFullNames[editIndex];
         }

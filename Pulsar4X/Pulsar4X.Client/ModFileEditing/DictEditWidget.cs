@@ -137,6 +137,7 @@ public static class DictEditWidget
     
     public static bool Display(string label, ref Dictionary<string, string> dict, ModDataStore  modDataStore,  ComponentTemplateBlueprint selectedItem)
     {
+        //TODO: building this each frame is not ideal
         var propertyNames = new string[selectedItem.Properties.Count];
         for(int i = 0; i < selectedItem.Properties.Count; i++)
             propertyNames[i] = selectedItem.Properties[i].Name;
