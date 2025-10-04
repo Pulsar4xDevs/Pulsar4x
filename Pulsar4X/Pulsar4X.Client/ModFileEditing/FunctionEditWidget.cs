@@ -150,66 +150,87 @@ namespace Pulsar4X.Client.ModFileEditing
                     {
                         if (func.Key.Contains(searchFilter, StringComparison.OrdinalIgnoreCase))
                         {
-                            if (func.Key.StartsWith("PropertyValue") && ImGui.BeginMenu("PropertyValue"))
+                            if (func.Key.StartsWith("PropertyValue"))
                             {
-                                foreach (var prop in propertyNames)
+                                if(ImGui.BeginMenu("PropertyValue"))
                                 {
-                                    if (ImGui.Selectable(prop))
+                                    foreach (var prop in propertyNames)
                                     {
-                                        InsertItem($"PropertyValue('{prop}')");
+                                        if (ImGui.Selectable(prop))
+                                        {
+                                            InsertItem($"PropertyValue('{prop}')");
+                                        }
+
+                                        if (ImGui.IsItemActive())
+                                            _isSelectActive = true;
+                                        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Component property key.");
                                     }
-                                    if(ImGui.IsItemActive())
-                                        _isSelectActive = true;
-                                    if (ImGui.IsItemHovered()) ImGui.SetTooltip("Component property key.");
+
+                                    ImGui.EndMenu();
                                 }
-                                ImGui.EndMenu();
                             }
-                            else if (func.Key.StartsWith("TechData") && ImGui.BeginMenu("TechData"))
+                            else if (func.Key.StartsWith("TechData"))
                             {
-                                foreach (var tech in modDataStore.Techs)
+                                if(ImGui.BeginMenu("TechData"))
                                 {
-                                    if (ImGui.Selectable(tech.Key))
+                                    foreach (var tech in modDataStore.Techs)
                                     {
-                                        InsertItem($"TechData('{tech.Key}')");
+                                        if (ImGui.Selectable(tech.Key))
+                                        {
+                                            InsertItem($"TechData('{tech.Key}')");
+                                        }
+
+                                        if (ImGui.IsItemActive())
+                                            _isSelectActive = true;
+                                        if (ImGui.IsItemHovered()) ImGui.SetTooltip($"Tech: {tech.Value.Name}");
                                     }
-                                    if(ImGui.IsItemActive())
-                                        _isSelectActive = true;
-                                    if (ImGui.IsItemHovered()) ImGui.SetTooltip($"Tech: {tech.Value.Name}");
+
+                                    ImGui.EndMenu();
                                 }
-                                ImGui.EndMenu();
                             }
-                            else if (func.Key.StartsWith("CargoType") && ImGui.BeginMenu("CargoType"))
+                            else if (func.Key.StartsWith("CargoType"))
                             {
-                                foreach (var cargo in modDataStore.CargoTypes)
+                                if (ImGui.BeginMenu("CargoType"))
                                 {
-                                    if (ImGui.Selectable(cargo.Key))
+                                    foreach (var cargo in modDataStore.CargoTypes)
                                     {
-                                        InsertItem($"CargoType('{cargo.Key}')");
+                                        if (ImGui.Selectable(cargo.Key))
+                                        {
+                                            InsertItem($"CargoType('{cargo.Key}')");
+                                        }
+
+                                        if (ImGui.IsItemActive())
+                                            _isSelectActive = true;
+                                        if (ImGui.IsItemHovered()) ImGui.SetTooltip($"Cargo: {cargo.Value.Name}");
                                     }
-                                    if(ImGui.IsItemActive())
-                                        _isSelectActive = true;
-                                    if (ImGui.IsItemHovered()) ImGui.SetTooltip($"Cargo: {cargo.Value.Name}");
+
+                                    ImGui.EndMenu();
                                 }
-                                ImGui.EndMenu();
                             }
                             
-                            else if (func.Key.StartsWith("TechLevel") && ImGui.BeginMenu("TechLevel"))
+                            else if (func.Key.StartsWith("TechLevel"))
                             {
-                                foreach (var tech in modDataStore.Techs)
+                                if (ImGui.BeginMenu("TechLevel"))
                                 {
-                                    if (ImGui.Selectable(tech.Key))
+                                    foreach (var tech in modDataStore.Techs)
                                     {
-                                        InsertItem($"TechLevel('{tech.Key}')");
-                                    }                        
-                                    if(ImGui.IsItemActive())
-                                        _isSelectActive = true;
-                                    if (ImGui.IsItemHovered()) ImGui.SetTooltip($"Tech: {tech.Value.Name}");
+                                        if (ImGui.Selectable(tech.Key))
+                                        {
+                                            InsertItem($"TechLevel('{tech.Key}')");
+                                        }
+
+                                        if (ImGui.IsItemActive())
+                                            _isSelectActive = true;
+                                        if (ImGui.IsItemHovered()) ImGui.SetTooltip($"Tech: {tech.Value.Name}");
+                                    }
+
+                                    ImGui.EndMenu();
                                 }
-                                ImGui.EndMenu();
                             }
-                            else if (!func.Key.StartsWith("PropertyValue") && !func.Key.StartsWith("TechData") && !func.Key.StartsWith("TechLevel") && ImGui.Selectable(func.Key))
+                            else 
                             {
-                                InsertItem(func.Key);
+                                if(ImGui.Selectable(func.Key))
+                                    InsertItem(func.Key);
                             }
                             if(ImGui.IsItemActive())
                                 _isSelectActive = true;

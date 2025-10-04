@@ -75,17 +75,19 @@ public static class FileDialog
         {
             _pathString = "Data/basemod";
         }
-
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Save to Binary location");
+        
         //this is Editor specific TODO: add a way to add specific dir to the LH colomn
-        if (ImGui.Button("GameEngine/Data/basemod"))
+        if (ImGui.Button("GameData/basemod"))
         {
             var dir = new DirectoryInfo(_curDir);
             while (dir.Name != "Pulsar4X")
             {
                 dir = Directory.GetParent(dir.FullName);
             }
-            _pathString = Path.Combine(dir.FullName, "GameEngine/Data/basemod");
+            _pathString = Path.Combine(dir.FullName, "GameData/basemod");
         }
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Save to Source location");
 
 
         ImGui.NextColumn();

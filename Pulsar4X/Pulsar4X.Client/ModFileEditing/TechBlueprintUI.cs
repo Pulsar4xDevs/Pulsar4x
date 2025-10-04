@@ -82,7 +82,7 @@ public class TechBlueprintUI : BluePrintsUI
             ImGui.Text("CostFormula: ");
             ImGui.NextColumn();
             editStr = selectedItem.CostFormula;
-            if (TextEditWidget.Display("##cf" + selectedItem.UniqueID, ref editStr))
+            if (FunctionEditWidget.Display("##cf" + selectedItem.UniqueID, ref editStr, _modDataStore, new string[0]))
             {
                 selectedItem.CostFormula = editStr;
             }
@@ -92,7 +92,7 @@ public class TechBlueprintUI : BluePrintsUI
             ImGui.Text("DataFormula: ");
             ImGui.NextColumn();
             editStr = selectedItem.DataFormula;
-            if (TextEditWidget.Display("##df" + selectedItem.UniqueID, ref editStr))
+            if (FunctionEditWidget.Display("##df" + selectedItem.UniqueID, ref editStr, _modDataStore, new string[0]))
             {
                 selectedItem.DataFormula = editStr;
             }
