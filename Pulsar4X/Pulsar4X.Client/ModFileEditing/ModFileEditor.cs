@@ -1,5 +1,6 @@
 using System.IO;
 using ImGuiNET;
+using Pulsar4X.Blueprints;
 using Pulsar4X.Modding;
 
 namespace Pulsar4X.Client.ModFileEditing;
@@ -15,7 +16,7 @@ public class ModFileEditor : PulsarGuiWindow
     private ArmorBlueprintUI _armorBlueprintUI;
     private ProcessedMaterialsUI _processedMaterialsUI;
     private MineralBlueprintUI _mineralsBlueprintUI;
-
+    private ShipDesignBlueprintUI _shipDesignBlueprintUI;
 
     private ModFileEditor()
     {
@@ -52,6 +53,7 @@ public class ModFileEditor : PulsarGuiWindow
         _armorBlueprintUI = new ArmorBlueprintUI(modDataStore);
         _processedMaterialsUI = new ProcessedMaterialsUI(modDataStore);
         _mineralsBlueprintUI = new MineralBlueprintUI(modDataStore);
+        _shipDesignBlueprintUI = new ShipDesignBlueprintUI(modDataStore);
     }
 
 
@@ -77,6 +79,8 @@ public class ModFileEditor : PulsarGuiWindow
                 _processedMaterialsUI.Display("Processed Materials");
                 ImGui.NewLine();
                 _mineralsBlueprintUI.Display("Minerals");
+                ImGui.NewLine();
+                _shipDesignBlueprintUI.Display("Ship Designs");
                 ImGui.NewLine();
             }
 

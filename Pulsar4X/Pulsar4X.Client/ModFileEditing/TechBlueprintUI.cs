@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
 using Pulsar4X.Blueprints;
@@ -11,7 +12,7 @@ public class TechBlueprintUI : BluePrintsUI
     private int _selectedIndex = -1;
     public TechBlueprintUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.Tech)
     {
-        var blueprints = modDataStore.Techs;
+        Dictionary<string, TechBlueprint> blueprints = modDataStore.Techs;
         _itemBlueprints = blueprints.Values.ToArray();
         Refresh();
     }

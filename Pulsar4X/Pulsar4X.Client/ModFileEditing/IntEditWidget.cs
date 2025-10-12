@@ -1,10 +1,24 @@
+using System;
 using ImGuiNET;
+using Pulsar4X.Blueprints;
 
 namespace Pulsar4X.Client.ModFileEditing;
 
 public static class IntEditWidget
 {
     private static string? _editingID;
+    private static int _min = Int32.MinValue;
+    private static int _max = Int32.MaxValue;
+
+    public static bool Display(string label, ref int num, int max, int min, bool exitEditOnFocusLoss = true)
+    {
+        _min = min;
+        _max = max;
+        bool retval = Display(label, ref num);
+        _min = int.MinValue;
+        _max = int.MaxValue;
+        return retval;
+    }
     public static bool Display(string label, ref int num, bool exitEditOnFocusLoss = true)
     {
         bool hasChanged = false;
