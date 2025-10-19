@@ -11,6 +11,7 @@ namespace Pulsar4X.Client.ModFileEditing;
 public class ShipDesignBlueprintUI : BluePrintsUI
 {
     string[] _armorBlueprints;
+    string[] _componentBlueprintIDs;
     public ShipDesignBlueprintUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.ShipDesign)
     {
         Dictionary<string, ShipDesignBlueprint> blueprints = _modDataStore.ShipDesigns;
@@ -36,6 +37,13 @@ public class ShipDesignBlueprintUI : BluePrintsUI
             _isActive[i] = false;
             i++;
         }
+        
+        _componentBlueprintIDs = new string[_componentBlueprints.Length];
+        for (int index = 0; index < _componentBlueprints.Length; index++)
+        {
+            _componentBlueprintIDs[index] = _componentBlueprints[index].UniqueID;
+        }
+
         var newEmpty = new ShipDesignBlueprint();
         newEmpty.Name = "New Blueprint";
         _newEmpty = newEmpty;
@@ -83,10 +91,31 @@ public class ShipDesignBlueprintUI : BluePrintsUI
                     { Id = _armorBlueprints[_editInt], Thickness = (uint)thinkness, };
             }
             
-            
-            
-            
-            
+            ImGui.NextColumn();
+            int index = 0;
+            for (int i = 0; i < selectedItem.Components.Count; i++)
+            {
+                ShipDesignBlueprint.ShipComponentBlueprint component = selectedItem.Components[i];
+                string id = component.Id;
+                int amount = (int)component.Amount;
+                _editInt = Array.IndexOf(_componentBlueprintIDs, id);
+                
+                if (SelectFromListWiget.Display("##comp" + index, _componentBlueprintIDs, ref _editInt))
+                {
+                    id = _componentBlueprintIDs[_editInt];
+                    selectedItem.Components[i] = new ShipDesignBlueprint.ShipComponentBlueprint() { Id = id, Amount = (uint)amount };
+                }
+
+                ImGui.NextColumn();
+                _editInt = (int)component.Amount;
+                if (IntEditWidget.Display("##compCount" + index, ref _editInt))
+                {
+                    amount = _editInt;
+                    selectedItem.Components[i] = new ShipDesignBlueprint.ShipComponentBlueprint() { Id = id, Amount = (uint)amount };
+                }
+
+                ImGui.NextColumn();
+            }
         }
         ImGui.End();
     }

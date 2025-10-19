@@ -18,6 +18,7 @@ public abstract class BluePrintsUI
     private protected int _selecteditem = 0;
     private protected string[] _itemNames;
     private protected Blueprint[] _itemBlueprints;
+    private protected ComponentDesignBlueprint[] _componentBlueprints;
     private protected bool[] _isActive;
     private protected ModDataStore _modDataStore;
     private protected string[] _cargoTypes;
@@ -47,7 +48,8 @@ public abstract class BluePrintsUI
         _techTypes = modDataStore.Techs.Keys.ToArray();
         _industryTypes = modDataStore.IndustryTypes.Keys.ToArray();
         _dataType = dataType;
-
+        _componentBlueprints = modDataStore.ComponentDesigns.Values.ToArray();
+        
         _units = new string[9];
         _units[0] = "";
         _units[1] = "KJ";
