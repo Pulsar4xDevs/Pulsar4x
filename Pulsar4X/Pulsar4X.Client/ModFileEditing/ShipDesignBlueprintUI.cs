@@ -59,7 +59,7 @@ public class ShipDesignBlueprintUI : BluePrintsUI
         string name = selectedItem.Name;
         string editStr;
         ImGui.SetNextWindowSize(new Vector2(1500, 900));
-        if (ImGui.Begin("Ship Editor: " + name, ref _isActive[selectedIndex]))
+        if (ImGui.Begin("Ship Design Editor: " + name, ref _isActive[selectedIndex]))
         {
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 150);
@@ -72,50 +72,86 @@ public class ShipDesignBlueprintUI : BluePrintsUI
             {
                 selectedItem.Name = _editStr;
             }
-            ImGui.NextColumn();
-            ImGui.Text("Armor:");
-            ImGui.NextColumn();
-            ImGui.Text("Thickness:");
-            ImGui.NextColumn();
-            int thinkness = (int)selectedItem.Armor.Thickness;
-            _editInt = Array.IndexOf(_armorBlueprints, selectedItem.Armor.Id);
-            if (SelectFromListWiget.Display("##armor", _armorBlueprints, ref _editInt))
+            ImGui.Columns(1);
+
+            if (ImGui.BeginTable("Armor", 2, ImGuiTableFlags.Borders | ImGuiTableFlags.Resizable))
             {
-                selectedItem.Armor = new ShipDesignBlueprint.ShipArmorBlueprint() 
-                    { Id = _armorBlueprints[_editInt], Thickness = (uint)thinkness, };
+                ImGui.TableSetupColumn("Thckness", ImGuiTableColumnFlags.WidthFixed, 40f);
+                ImGui.TableSetupColumn("Type");
+
+                ImGui.TableHeadersRow(); // Optional header row
+
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
+
+                int thickness = (int)selectedItem.Armor.Thickness;
+                if (IntEditWidget.Display("##thinkness", ref thickness, int.MaxValue, (int)uint.MinValue))
+                {
+                    selectedItem.Armor = new ShipDesignBlueprint.ShipArmorBlueprint() { Id = _armorBlueprints[_editInt], Thickness = (uint)thickness, };
+                }
+                ImGui.TableNextColumn();
+                _editInt = Array.IndexOf(_armorBlueprints, selectedItem.Armor.Id);
+                if (SelectFromListWiget.Display("##armor", _armorBlueprints, ref _editInt))
+                {
+                    selectedItem.Armor = new ShipDesignBlueprint.ShipArmorBlueprint() { Id = _armorBlueprints[_editInt], Thickness = (uint)thickness, };
+                }
+
+
             }
-            ImGui.NextColumn();
-            if (IntEditWidget.Display("##thinkness", ref thinkness, int.MaxValue, (int)uint.MinValue))
+            ImGui.EndTable();
+
+            if (ImGui.BeginTable("Components", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.Resizable))
             {
-                selectedItem.Armor = new ShipDesignBlueprint.ShipArmorBlueprint() 
-                    { Id = _armorBlueprints[_editInt], Thickness = (uint)thinkness, };
-            }
-            
-            ImGui.NextColumn();
-            int index = 0;
-            for (int i = 0; i < selectedItem.Components.Count; i++)
-            {
-                ShipDesignBlueprint.ShipComponentBlueprint component = selectedItem.Components[i];
-                string id = component.Id;
-                int amount = (int)component.Amount;
-                _editInt = Array.IndexOf(_componentBlueprintIDs, id);
+                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 40f);
+                ImGui.TableSetupColumn("Count", ImGuiTableColumnFlags.WidthFixed, 120f);
+                ImGui.TableSetupColumn("Design");
+                
+                ImGui.TableHeadersRow(); // Optional header row
+                
+                ImGui.TableNextRow();
+                
+                int index = 0;
+                for (index = 0; index < selectedItem.Components.Count; index++)
+                {
+                    ShipDesignBlueprint.ShipComponentBlueprint component = selectedItem.Components[index];
+                    string id = component.Id;
+                    int amount = (int)component.Amount;
+                    
+                    ImGui.TableNextColumn();
+                    if (ImGui.Button("x##" + index))
+                    {
+                        selectedItem.Components.RemoveAt(index);
+                    }
+                    ImGui.TableNextColumn();
+
+                    
+                    _editInt = (int)component.Amount;
+                    if (IntEditWidget.Display("##compCount" + index, ref _editInt))
+                    {
+                        amount = _editInt;
+                        selectedItem.Components[index] = new ShipDesignBlueprint.ShipComponentBlueprint() { Id = id, Amount = (uint)amount };
+                    }
+                    ImGui.TableNextColumn();
+                    
+                    _editInt = Array.IndexOf(_componentBlueprintIDs, id);
+                    if (SelectFromListWiget.Display("##comp" + index, _componentBlueprintIDs, ref _editInt))
+                    {
+                        id = _componentBlueprintIDs[_editInt];
+                        selectedItem.Components[index] = new ShipDesignBlueprint.ShipComponentBlueprint() { Id = id, Amount = (uint)amount };
+                    }
+                    ImGui.TableNextRow();
+                }
+                ImGui.TableNextColumn();
+                ImGui.TableNextColumn();
+                _editInt = Array.IndexOf(_componentBlueprintIDs, index);
                 
                 if (SelectFromListWiget.Display("##comp" + index, _componentBlueprintIDs, ref _editInt))
                 {
-                    id = _componentBlueprintIDs[_editInt];
-                    selectedItem.Components[i] = new ShipDesignBlueprint.ShipComponentBlueprint() { Id = id, Amount = (uint)amount };
+                    string id = _componentBlueprintIDs[_editInt];
+                    selectedItem.Components.Add( new ShipDesignBlueprint.ShipComponentBlueprint() { Id = id, Amount = (uint)1 });
                 }
-
-                ImGui.NextColumn();
-                _editInt = (int)component.Amount;
-                if (IntEditWidget.Display("##compCount" + index, ref _editInt))
-                {
-                    amount = _editInt;
-                    selectedItem.Components[i] = new ShipDesignBlueprint.ShipComponentBlueprint() { Id = id, Amount = (uint)amount };
-                }
-
-                ImGui.NextColumn();
             }
+            ImGui.EndTable();
         }
         ImGui.End();
     }
