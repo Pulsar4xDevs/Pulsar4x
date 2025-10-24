@@ -46,8 +46,9 @@ public class ShipDesignBlueprintUI : BluePrintsUI
 
         var newEmpty = new ShipDesignBlueprint();
         newEmpty.Name = "New Blueprint";
+        newEmpty.Components = new List<ShipDesignBlueprint.ShipComponentBlueprint>();
         _newEmpty = newEmpty;
-
+        
     }
 
     public override void DisplayEditorWindow(int selectedIndex)
@@ -83,14 +84,14 @@ public class ShipDesignBlueprintUI : BluePrintsUI
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-
+                _editInt = Array.IndexOf(_armorBlueprints, selectedItem.Armor.Id);
                 int thickness = (int)selectedItem.Armor.Thickness;
                 if (IntEditWidget.Display("##thinkness", ref thickness, int.MaxValue, (int)uint.MinValue))
                 {
                     selectedItem.Armor = new ShipDesignBlueprint.ShipArmorBlueprint() { Id = _armorBlueprints[_editInt], Thickness = (uint)thickness, };
                 }
                 ImGui.TableNextColumn();
-                _editInt = Array.IndexOf(_armorBlueprints, selectedItem.Armor.Id);
+                
                 if (SelectFromListWiget.Display("##armor", _armorBlueprints, ref _editInt))
                 {
                     selectedItem.Armor = new ShipDesignBlueprint.ShipArmorBlueprint() { Id = _armorBlueprints[_editInt], Thickness = (uint)thickness, };
@@ -141,6 +142,7 @@ public class ShipDesignBlueprintUI : BluePrintsUI
                     }
                     ImGui.TableNextRow();
                 }
+                ImGui.TableNextColumn();
                 ImGui.TableNextColumn();
                 ImGui.TableNextColumn();
                 _editInt = Array.IndexOf(_componentBlueprintIDs, index);
