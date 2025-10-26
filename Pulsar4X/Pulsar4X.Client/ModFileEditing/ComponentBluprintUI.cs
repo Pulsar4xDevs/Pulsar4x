@@ -15,7 +15,8 @@ public class ComponentBluprintUI : BluePrintsUI
     private List<ComponentTemplatePropertyBlueprint> _selectedAttributes;
     public ComponentBluprintUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.ComponentTemplate)
     {
-        _itemBlueprints = _componentBlueprints;
+        Dictionary<string, ComponentTemplateBlueprint> blueprints = modDataStore.ComponentTemplates;
+        _itemBlueprints = blueprints.Values.ToArray();
         Refresh();
     }
     public sealed override void Refresh()
@@ -23,7 +24,7 @@ public class ComponentBluprintUI : BluePrintsUI
         _itemNames = new string[_itemBlueprints.Length];
         _isActive = new bool[_itemBlueprints.Length];
         int i = 0;
-        foreach (ComponentDesignBlueprint item in _itemBlueprints)
+        foreach (ComponentTemplateBlueprint item in _itemBlueprints)
         {
             _itemNames[i] = item.Name;
             _isActive[i] = false;
