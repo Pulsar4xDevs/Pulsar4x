@@ -1,0 +1,50 @@
+[
+  {
+    "Type": "Species",
+    "Payload": {
+      "UniqueID": "species-human",
+      "Name": "Human",
+      "Playable": true,
+      "BreathableGasSymbol": "O2",
+      "Gravity": {
+        "Ideal": 9.8,
+        "Minimum": 0.1,
+        "Maximum": 18.62
+      },
+      "Pressure": {
+        "Ideal": 1,
+        "Minimum": 0.4,
+        "Maximum": 4
+      },
+      "Temperature": {
+        "Ideal": 14,
+        "Minimum": -15,
+        "Maximum": 45
+      }
+    }
+  },
+  {
+    "Type": "Species",
+    "Payload": {
+      "UniqueID": "species-xenos",
+      "Name": "Xenos",
+      "Playable": false,
+      "BreathableGasSymbol": "Xe",
+      "Gravity": {
+        "Ideal": 9.8,
+        "Minimum": 0.1,
+        "Maximum": 18.62
+      },
+      "Pressure": {
+        "Ideal": 1,
+        "Minimum": 0.4,
+        "Maximum": 4
+      },
+      "Temperature": {
+        "Ideal": 14,
+        "Minimum": -15,
+        "Maximum": 45
+      }
+    }
+  }
+]

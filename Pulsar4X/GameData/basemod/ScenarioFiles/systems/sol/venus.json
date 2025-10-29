@@ -1,0 +1,47 @@
+[
+    {
+      "Type": "SystemBody",
+      "Payload": {
+        "UniqueID": "venus",
+        "Name": "Venus",
+        "Colonizable": true,
+        "GeoSurveyPointsRequired": 1500,
+        "GenerateMinerals": "random",
+        "Info": {
+          "Gravity": 8.87,
+          "Type": "terrestrial",
+          "Albedo": 0.76,
+          "AxialTilt": 177.36,
+          "Mass": 4.8675E24,
+          "Radius": 6051.8,
+          "Tectonics": "earth-like"
+        },
+        "Orbit": {
+          "SemiMajorAxis_km": 108.21E6,
+          "Eccentricity": 0.006772,
+          "EclipticInclination_d": 3.39458,
+          "LoAN_d": 76.680,
+          "AoP_d": 54.884,
+          "MeanAnomaly_d": 50.115
+        },
+        "Atmosphere": {
+          "Pressure": 92,
+          "Hydrosphere": false,
+          "HydroExtent": 0,
+          "GreenhouseFactor": 0,
+          "GreenhousePressure": 0,
+          "SurfaceTemperature": 464,
+          "Gases": [
+            { "Symbol": "CO2", "Percent": 0.965 },
+            { "Symbol": "N2", "Percent": 0.035 },
+            { "Symbol": "SO2", "Percent": 0.00015 },
+            { "Symbol": "Ar", "Percent": 0.00007 },
+            { "Symbol": "H2O", "Percent": 0.00002 },
+            { "Symbol": "CO", "Percent": 0.000017 },
+            { "Symbol": "He", "Percent": 0.000012 },
+            { "Symbol": "Ne", "Percent": 0.000007 }
+          ]
+        }
+      }
+    }
+  ]

@@ -1,0 +1,239 @@
+[
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "planet-earth",
+      "Name": "Earth",
+      "CanStartHere": true,
+      "Colonizable": true,
+      "GenerateMinerals": "randomHW",
+      "Info": {
+        "Gravity": 9.8,
+        "Type": "terrestrial",
+        "Albedo": 0.306,
+        "AxialTilt": 23.439,
+        "MagneticField": 45,
+        "Mass": 5.9726E24,
+        "Radius": 6378.1,
+        "Tectonics": "earth-like",
+        "LengthOfDay": "1.00:00:00"
+      },
+      "Orbit": {
+        "SemiMajorAxis_km": 149597887,
+        "Eccentricity": 0.01671022,
+        "EclipticInclination_d": 7.155,
+        "LoAN_d": -11.26064,
+        "AoP_d": 102.94719,
+        "MeanAnomaly_d": 358.617
+      },
+      "Atmosphere": {
+        "Pressure": 1,
+        "Hydrosphere": true,
+        "HydroExtent": 71,
+        "GreenhouseFactor": 1,
+        "GreenhousePressure": 1,
+        "SurfaceTemperature": 14.76,
+        "Gases": [
+          { "Symbol": "N2", "Percent": 0.7808 },
+          { "Symbol": "O2", "Percent": 0.2095 },
+          { "Symbol": "H2O", "Percent": 0.005 },
+          { "Symbol": "Ar", "Percent": 0.00934 },
+          { "Symbol": "CO2", "Percent": 0.000415 },
+          { "Symbol": "Ne", "Percent": 0.0000182 }
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Colony",
+    "Payload": {
+      "UniqueID": "colony-earth",
+      "Name": "Default Earth Start",
+      "StartingPopulation": 8.2E9,
+      "Installations": [
+        { "Id": "default-design-mine", "Amount": 1 },
+        { "Id": "default-design-warehouse", "Amount": 1 },
+        { "Id": "default-design-fuel-farm-5000k", "Amount": 1 },
+        { "Id": "default-design-passive-sensor", "Amount": 1 },
+        { "Id": "default-design-refinery", "Amount": 1 },
+        { "Id": "default-design-factory", "Amount": 1 },
+        { "Id": "default-design-shipyard", "Amount": 1 },
+        { "Id": "default-design-spaceport", "Amount": 1 },
+        { "Id": "default-design-research-lab", "Amount": 1 },
+        { "id": "default-design-city-hall", "amount": 1 }
+      ],
+      "Cargo": [
+        { "Id": "iron", "Amount": 500000 },
+        { "Id": "hydrocarbons", "Amount": 50000 },
+        { "Id": "stainless-steel", "Amount": 100000 },
+        { "Id": "chromium", "Amount": 50000 },
+        { "Id": "fissionables", "Amount": 50000 },
+        { "Id": "copper", "Amount": 50000 },
+        { "Id": "aluminium", "Amount": 50000 },
+        { "Id": "lithium", "Amount": 50000 },
+        { "Id": "titanium", "Amount": 50000 },
+        { "Id": "silicon", "Amount": 5000 },
+        { "Id": "graphite", "Amount": 5000 },
+        { "Id": "tungsten", "Amount": 5000 },
+        { "Id": "nickel", "Amount": 5000 },
+        { "Id": "default-design-merlin", "Amount": 5, "Type": "byCount" },
+        { "Id": "rp-1", "Amount": 50000000, "Type": "byCount" },
+        { "Id": "methalox", "Amount": 10000, "Type": "byCount" },
+        { "Id": "hydrolox", "Amount": 10000, "Type": "byCount" }
+      ],
+      "StartingItems": [
+        "tech-modern-technology",
+        "tech-conventional-engine",
+        "tech-geo-surveyor",
+        "tech-gravitational-surveyor",
+        "stainless-steel-armor",
+        "plastic-armor",
+        "aluminium-armor",
+        "titanium-armor",
+        "general-storage",
+        "warehouse-facility",
+        "spaceport",
+        "cargo-Shuttlebay",
+        "fuel-storage",
+        "battery-storage",
+        "passive-sensor",
+        "beam-fire-control",
+        "reactor",
+        "battery-bank",
+        "rtg",
+        "steam-turbine-reactor",
+        "conventional-engine",
+        "scntr-engine",
+        "alcubierre-warp-drive",
+        "refining",
+        "component-construction",
+        "installation-construction",
+        "ship-assembly",
+        "mine",
+        "automine",
+        "research-lab",
+        "refinery",
+        "factory",
+        "shipyard",
+        "general-cargo-hold",
+        "fuel-cargo-hold",
+        "stainless-steel-fuel-tank",
+        "infrastructure",
+        "stainless-steel",
+        "rp-1",
+        "methalox",
+        "hydrolox",
+        "ntp",
+        "plastic",
+        "fissile-fuels",
+        "electricity",
+        "hydrocarbons",
+        "iron",
+        "aluminium",
+        "copper",
+        "titanium",
+        "lithium",
+        "chromium",
+        "fissionables",
+        "silicon",
+        "graphite",
+        "tungsten",
+        "nickel",
+        "water",
+        "rare-earth-elements",
+        "regolith",
+        "space-crete",
+        "laser-weapon",
+        "admin-complex",
+        "ship-command"
+      ],
+      "ComponentDesigns": [
+        "default-design-alcubierre-2k",
+        "default-design-alcubierre-500",
+        "default-design-auto-mine",
+        "default-design-battery-2t",
+        "default-design-beam-fire-control",
+        "default-design-cargo-hold-1t",
+        "default-design-cargo-hold-5t",
+        "default-design-f1",
+        "default-design-factory",
+        "default-design-fuel-farm-5000k",
+        "default-design-fuel-tank-1000",
+        "default-design-fuel-tank-1500",
+        "default-design-fuel-tank-3000",
+        "default-design-geo-surveyor",
+        "default-design-gravitational-surveyor",
+        "default-design-laser-weapon",
+        "default-design-merlin",
+        "default-design-mine",
+        "default-design-NTR1.8",
+        "default-design-passive-sensor",
+        "default-design-passive-sensor-s50",
+        "default-design-raptor",
+        "default-design-reactor-2t",
+        "default-design-refinery",
+        "default-design-rs-25",
+        "default-design-shipyard",
+        "default-design-shuttlebay",
+        "default-design-spaceport",
+        "default-design-research-lab",
+        "default-design-warehouse",
+        "default-design-city-hall"
+      ],
+      "ShipDesigns": [
+        "default-ship-design-courier",
+        "default-ship-design-freighter",
+        "default-ship-design-gunship",
+        "default-ship-design-dropship",
+        "default-ship-design-starship",
+        "default-ship-design-surveyor"
+      ],
+      "Fleets": [
+        {
+          "Name": "Freight Fleet",
+          "Ships": [
+            {
+              "DesignId": "default-ship-design-freighter",
+              "Name": "Planet Express Ship",
+              "Cargo": [
+                { "Id": "methalox", "Amount": 20000000, "Type": "byVolume" },
+                { "Id": "default-design-auto-mine", "Amount": 1, "Type": "byCount" }
+              ]
+            }
+          ]
+        },
+        {
+          "Name": "Military Fleet",
+          "Ships": [
+            {
+              "DesignId": "default-ship-design-gunship",
+              "Name": "Serial Peacemaker",
+              "Cargo": [
+                { "Id": "ntp", "Amount": 20000000, "Type": "byVolume" }
+              ]
+            },
+            {
+              "DesignId": "default-ship-design-gunship",
+              "Name": "Prevailing Stillness",
+              "Cargo": [
+                { "Id": "ntp", "Amount": 20000000, "Type": "byVolume" }
+              ]
+            }
+          ]
+        },
+        {
+          "Name": "Science Fleet",
+          "Ships": [
+            {
+              "DesignId": "default-ship-design-surveyor",
+              "Name": "Surveyor I",
+              "Cargo": [
+                { "Id": "rp-1", "Amount": 20000000, "Type": "byVolume" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

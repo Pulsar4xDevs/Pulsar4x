@@ -1,0 +1,42 @@
+[
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "uranus",
+      "Name": "Uranus",
+      "Colonizable": true,
+      "GeoSurveyPointsRequired": 2500,
+      "GenerateMinerals": "random",
+      "Info": {
+        "Gravity": 8.69,
+        "Type": "ice-giant",
+        "Albedo": 0.3,
+        "AxialTilt": 82.23,
+        "Mass": 8.6810E25,
+        "Radius": 25559
+      },
+      "Orbit": {
+        "SemiMajorAxis": 2.870972E9,
+        "Eccentricity": 0.04717,
+        "EclipticInclination": 0.773,
+        "LoAN": 74.006,
+        "AoP": 96.998857,
+        "MeanAnomaly": 142.2386
+      },
+      "Atmosphere": {
+        "Pressure": 1.28300025,
+        "Hydrosphere": false,
+        "HyrdoExtent": 0,
+        "GreenhouseFactor": 0,
+        "GreenhousePressure": 0,
+        "SurfaceTemperature": -197.2,
+        "Gases": [
+          { "Symbol": "H2", "Percent": 0.83 },
+          { "Symbol": "He", "Percent": 0.15 },
+          { "Symbol": "CH4", "Percent": 0.023 },
+          { "Symbol": "HD", "Percent": 0.00009 }
+        ]
+      }
+    }
+  }
+]

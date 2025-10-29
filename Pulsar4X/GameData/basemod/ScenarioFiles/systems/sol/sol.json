@@ -1,0 +1,65 @@
+[
+  {
+    "Type": "Star",
+    "Payload": {
+      "UniqueID": "sol",
+      "Name": "Sol",
+      "Info": {
+        "Mass": 1.98855E30,
+        "Radius": 696342,
+        "Age": 4.6E9,
+        "Class": "G",
+        "Temperature": 5778,
+        "Luminosity": 1,
+        "LuminosityClass": "V",
+        "SpectralType": "G"
+      }
+    }
+  },
+  {
+    "Type": "System",
+    "Payload": {
+      "UniqueID": "system-sol",
+      "Name": "Sol",
+      "Stars": [
+        "sol"
+      ],
+      "Bodies": [
+        "mercury",
+        "venus",
+        "planet-earth",
+        "moon-luna",
+        "mars",
+        "jupiter",
+        "moon-io",
+        "moon-europa",
+        "moon-ganymede",
+        "moon-callisto",
+        "moon-amalthea",
+        "moon-elara",
+        "moon-himalia",
+        "moon-lysithea",
+        "moon-pasiphae",
+        "moon-sinope",
+        "saturn",
+        "moon-dione",
+        "moon-enceladus",
+        "moon-mimas",
+        "moon-rhea",
+        "moon-tethys",
+        "moon-titan",
+        "uranus",
+        "neptune",
+        "dwarf-ceres",
+        "dwarf-eris",
+        "dwarf-haumea",
+        "dwarf-makemake",
+        "dwarf-pluto",
+        "comet-halleys"
+      ],
+      "SurveyRings": [
+        { "RingRadiusInAU": 2, "Count": 2 }
+      ]
+    }
+  }
+]

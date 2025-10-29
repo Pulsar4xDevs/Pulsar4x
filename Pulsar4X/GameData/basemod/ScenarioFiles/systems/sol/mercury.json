@@ -1,0 +1,29 @@
+[
+    {
+      "Type": "SystemBody",
+      "Payload": {
+        "UniqueID": "mercury",
+        "Name": "Mercury",
+        "Colonizable": true,
+        "GeoSurveyPointsRequired": 1500,
+        "GenerateMinerals": "random",
+        "Info": {
+          "Gravity": 3.7,
+          "Type": "terrestrial",
+          "Albedo": 0.088,
+          "AxialTilt": 2.04,
+          "Mass": 3.3022E23,
+          "Radius": 2439.7,
+          "Tectonics": "earth-like"
+        },
+        "Orbit": {
+          "SemiMajorAxis_km": 57.91E6,
+          "Eccentricity": 0.205630,
+          "EclipticInclination_d": 7.005,
+          "LoAN_d": 48.331,
+          "AoP_d": 29.124,
+          "MeanAnomaly_d": 174.796
+        }
+      }
+    }
+  ]

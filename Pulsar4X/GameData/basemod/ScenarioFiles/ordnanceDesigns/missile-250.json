@@ -1,0 +1,10 @@
+{
+  "id": "default-ordnance-missile-250",
+  "name": "Missle 250",
+  "fuelAmount": 225,
+  "components": [
+    { "id": "default-design-prox-frag-5kg", "amount": 1 },
+    { "id": "default-design-missile-sensors", "amount": 1 },
+    { "id": "default-design-missile-srb", "amount": 1 }
+  ]
+}

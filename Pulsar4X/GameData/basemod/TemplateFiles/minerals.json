@@ -1,0 +1,319 @@
+[
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "hydrocarbons",
+      "Name": "Hydrocarbons",
+      "Description": "Cruid Oil, Coal and Natural Gas",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0011111,
+      "Abundance": {
+        "Terrestrial": 0.2,
+        "GasGiant": 0.5,
+        "IceGiant": 0.6,
+        "Asteroid": 0.05,
+        "Comet": 0.3,
+        "DwarfPlanet": 0.4,
+        "Moon": 0.2,
+        "GasDwarf": 0.4
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "iron",
+      "Name": "Iron",
+      "Description": "A naturally-occurring mineral in large deposits.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0001270648,
+      "Abundance": {
+        "Terrestrial": 0.8,
+        "GasGiant": 0.01,
+        "IceGiant": 0.05,
+        "Asteroid": 0.3,
+        "Comet": 0.01,
+        "DwarfPlanet": 0.1,
+        "Moon": 0.2,
+        "GasDwarf": 0.01
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "aluminium",
+      "Name": "Aluminium",
+      "Description": "A naturally-occurring mineral in large deposits.",
+      "CargoTypeID": "general-storage",
+      "PartMatUniqueID": "aluminum",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0003703703,
+      "Abundance": {
+        "Terrestrial": 0.7,
+        "GasGiant": 0.0,
+        "IceGiant": 0.0,
+        "Asteroid": 0.1,
+        "Comet": 0.01,
+        "DwarfPlanet": 0.1,
+        "Moon": 0.1,
+        "GasDwarf": 0.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "copper",
+      "Name": "Copper",
+      "Description": "A naturally-occurring mineral in large deposits.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0001118568,
+      "Abundance": {
+        "Terrestrial": 0.0001,
+        "GasGiant": 0.0,
+        "IceGiant": 0.0,
+        "Asteroid": 0.001,
+        "Comet": 0.0,
+        "DwarfPlanet": 0.0005,
+        "Moon": 0.0001,
+        "GasDwarf": 0.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "titanium",
+      "Name": "Titanium",
+      "Description": "A naturally-occurring mineral in large deposits.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0002202643,
+      "Abundance": {
+        "Terrestrial": 0.005,
+        "GasGiant": 0.0,
+        "IceGiant": 0.0,
+        "Asteroid": 0.001,
+        "Comet": 0.0,
+        "DwarfPlanet": 0.002,
+        "Moon": 0.001,
+        "GasDwarf": 0.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "lithium",
+      "Name": "Lithium",
+      "Description": "A naturally-occurring mineral in large deposits.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0018691589,
+      "Abundance": {
+        "Terrestrial": 0.00002,
+        "GasGiant": 0.0,
+        "IceGiant": 0.001,
+        "Asteroid": 0.0001,
+        "Comet": 0.00001,
+        "DwarfPlanet": 0.00005,
+        "Moon": 0.00001,
+        "GasDwarf": 0.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "chromium",
+      "Name": "Chromium",
+      "Description": "A naturally-occurring mineral in large deposits.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0001388889,
+      "Abundance": {
+        "Terrestrial": 0.001,
+        "GasGiant": 0.0,
+        "IceGiant": 0.0,
+        "Asteroid": 0.0005,
+        "Comet": 0.0,
+        "DwarfPlanet": 0.0001,
+        "Moon": 0.0001,
+        "GasDwarf": 0.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "fissionables",
+      "Name": "Fissionables",
+      "Description": "Un-refined Fissionable Metals",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0000531915,
+      "Abundance": {
+        "Terrestrial": 0.001,
+        "GasGiant": 0.0,
+        "IceGiant": 0.0,
+        "Asteroid": 0.0001,
+        "Comet": 0.0,
+        "DwarfPlanet": 0.0005,
+        "Moon": 0.0001,
+        "GasDwarf": 0.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "silicon",
+      "Name": "Silicon",
+      "Description": "A naturally-occurring mineral in large deposits.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.000429185,
+      "Abundance": {
+        "Terrestrial": 0.9,
+        "GasGiant": 0.0,
+        "IceGiant": 0.0,
+        "Asteroid": 0.3,
+        "Comet": 0.01,
+        "DwarfPlanet": 0.5,
+        "Moon": 0.2,
+        "GasDwarf": 0.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "graphite",
+      "Name": "Graphite",
+      "Description": "A naturally-occurring mineral in large deposits.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.00044,
+      "Abundance": {
+        "Terrestrial": 0.01,
+        "GasGiant": 0.0,
+        "IceGiant": 0.0,
+        "Asteroid": 0.001,
+        "Comet": 0.0,
+        "DwarfPlanet": 0.005,
+        "Moon": 0.001,
+        "GasDwarf": 0.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "tungsten",
+      "Name": "Tungsten",
+      "Description": "A naturally-occurring mineral.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.052,
+      "Abundance": {
+        "Terrestrial": 0.00001,
+        "GasGiant": 0.0,
+        "IceGiant": 0.0,
+        "Asteroid": 0.000001,
+        "Comet": 0.0,
+        "DwarfPlanet": 0.000005,
+        "Moon": 0.000001,
+        "GasDwarf": 0.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "nickel",
+      "Name": "Nickel",
+      "Description": "A naturally-occurring mineral in large deposits.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.000112259,
+      "Abundance": {
+        "Terrestrial": 0.008,
+        "GasGiant": 0.01,
+        "IceGiant": 0.03,
+        "Asteroid": 0.4,
+        "Comet": 0.0,
+        "DwarfPlanet": 0.05,
+        "Moon": 0.01,
+        "GasDwarf": 0.01
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "water",
+      "Name": "Water",
+      "Description": "Essential for life, found in various forms across celestial bodies.",
+      "CargoTypeID": "general-storage",
+      "UniqueID": "water",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.001,
+      "Abundance": {
+        "Terrestrial": 0.5,
+        "GasGiant": 0.0,
+        "IceGiant": 0.5,
+        "Asteroid": 0.05,
+        "Comet": 0.8,
+        "DwarfPlanet": 0.3,
+        "Moon": 0.4,
+        "GasDwarf": 0.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "rare-earth-elements",
+      "Name": "Rare Earth Elements",
+      "Description": "A group of metals crucial for advanced technology and industry.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.00018,
+      "Abundance": {
+        "Terrestrial": 0.0002,
+        "GasGiant": 0.0,
+        "IceGiant": 0.0,
+        "Asteroid": 0.0001,
+        "Comet": 0.0,
+        "DwarfPlanet": 0.0001,
+        "Moon": 0.0001,
+        "GasDwarf": 0.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "regolith",
+      "Name": "Regolith",
+      "Description": "Loose, heterogeneous material covering solid rock on celestial bodies.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0, 
+      "VolumePerUnit": 0.0004, 
+      "Abundance": {
+        "Terrestrial": 0.9,
+        "GasGiant": 0.0,
+        "IceGiant": 0.3,
+        "Asteroid": 0.8,
+        "Comet": 0.2,
+        "DwarfPlanet": 0.7,
+        "Moon": 0.8,
+        "GasDwarf": 0.0
+      }
+    }
+  }
+]
