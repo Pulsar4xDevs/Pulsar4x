@@ -11,8 +11,8 @@ namespace Pulsar4X.Client.ModFileEditing;
 
 public class ComponentBluprintUI : BluePrintsUI
 {
-    private AttributeBlueprintUI? _attributeBlueprintUI;
-    private List<ComponentTemplatePropertyBlueprint> _selectedAttributes;
+    private ComponentPropertyBlueprintUI? _propertyBlueprintUI;
+    private List<ComponentTemplatePropertyBlueprint> _selectedProperties;
     public ComponentBluprintUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.ComponentTemplate)
     {
         Dictionary<string, ComponentTemplateBlueprint> blueprints = modDataStore.ComponentTemplates;
@@ -32,6 +32,7 @@ public class ComponentBluprintUI : BluePrintsUI
         }
         var newEmpty = new ComponentTemplateBlueprint();
         newEmpty.Name = "New Blueprint";
+        newEmpty.Properties = new List<ComponentTemplatePropertyBlueprint>();
         _newEmpty = newEmpty;
     }
 
@@ -42,10 +43,10 @@ public class ComponentBluprintUI : BluePrintsUI
         if (!_isActive[selectedIndex])
             return;
         var selectedItem = (ComponentTemplateBlueprint)_itemBlueprints[selectedIndex];
-        _selectedAttributes = selectedItem.Properties;
+        _selectedProperties = selectedItem.Properties;
 
-        if(_attributeBlueprintUI == null)
-            _attributeBlueprintUI = new AttributeBlueprintUI(_modDataStore, selectedItem);
+        if(_propertyBlueprintUI == null || _propertyBlueprintUI.ParentID != selectedItem.UniqueID)
+            _propertyBlueprintUI = new ComponentPropertyBlueprintUI(_modDataStore, selectedItem);
 
         string name = selectedItem.Name;
         string editStr;
@@ -63,7 +64,7 @@ public class ComponentBluprintUI : BluePrintsUI
                 ImGui.Text("Name: ");
                 ImGui.TableNextColumn();
                 editStr = selectedItem.Name;
-                if (TextEditWidget.Display("##name" + selectedItem.Name, ref editStr))
+                if (TextEditWidget.Display("##name" + selectedItem.UniqueID, ref editStr))
                 {
                     selectedItem.Name = editStr;
                 }
@@ -73,9 +74,9 @@ public class ComponentBluprintUI : BluePrintsUI
                 ImGui.Text("ComponentType: ");
                 ImGui.TableNextColumn();
                 editStr = selectedItem.ComponentType;
-                if (TextEditWidget.Display("##cmpt" + selectedItem.ComponentType, ref editStr))
+                if (TextEditWidget.Display("##cmpt" + selectedItem.UniqueID, ref editStr))
                 {
-                    selectedItem.Name = editStr;
+                    selectedItem.ComponentType = editStr;
                 }
 
                 ImGui.TableNextRow();
@@ -83,9 +84,9 @@ public class ComponentBluprintUI : BluePrintsUI
                 ImGui.Text("CargoType: ");
                 ImGui.TableNextColumn();
                 _editInt = Array.IndexOf(_cargoTypes, selectedItem.CargoTypeID);
-                if (SelectFromListWiget.Display("##cgot" + selectedItem.CargoTypeID, _cargoTypes, ref _editInt))
+                if (SelectFromListWiget.Display("##cgot" + selectedItem.UniqueID, _cargoTypes, ref _editInt))
                 {
-                    selectedItem.Name = _cargoTypes[_editInt];
+                    selectedItem.CargoTypeID = _cargoTypes[_editInt];
                 }
 
                 ImGui.TableNextRow();
@@ -122,16 +123,16 @@ public class ComponentBluprintUI : BluePrintsUI
                 ImGui.TableNextColumn();
                 ImGui.Text("MountType: ");
                 ImGui.TableNextColumn();
-                _editInt = Array.IndexOf(_mountTypes, selectedItem.MountType);
-                if (SelectFromListWiget.Display("##mntt" + selectedItem.UniqueID, _mountTypes, ref _editInt))
+                
+                _editInt = Array.IndexOf(_mountTypes, selectedItem.MountType.ToString());
+                ComponentMountType _mtype = selectedItem.MountType;
+                if (SelectFromListWiget.Display("##mntt" + selectedItem.UniqueID, ref _mtype))
                 {
-
-                    if (Enum.TryParse(typeof(ComponentMountType), _mountTypes[_editInt], out var mtype))
-                        selectedItem.MountType = (ComponentMountType)mtype;
+                    selectedItem.MountType = _mtype;
                 }
 
                 ImGui.EndTable();
-                _attributeBlueprintUI.Display();
+                _propertyBlueprintUI.Display();
 
             }
 

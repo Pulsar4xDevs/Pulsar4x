@@ -12,7 +12,7 @@ public class ModFileEditor : PulsarGuiWindow
     private TechCatBlueprintUI _techCatBlueprintUI;
     private ComponentBluprintUI _componentBluprintUI;
     private CargoTypeBlueprintUI _cargoTypeBlueprintUI;
-    private AttributeBlueprintUI _attributeBlueprintUI;
+    private ComponentPropertyBlueprintUI _componentPropertyBlueprintUI;
     private ArmorBlueprintUI _armorBlueprintUI;
     private ProcessedMaterialsUI _processedMaterialsUI;
     private MineralBlueprintUI _mineralsBlueprintUI;

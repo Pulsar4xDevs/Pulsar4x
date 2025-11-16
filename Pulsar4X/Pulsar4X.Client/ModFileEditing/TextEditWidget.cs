@@ -21,6 +21,7 @@ public static class TextEditWidget
     public static bool Display(string label, ref string text, bool exitEditOnFocusLoss = true)
     {
         bool hasChanged = false;
+        bool doneEditing = false;
         if(string.IsNullOrEmpty(text))
             text = "null";
         if(label != _editingID)
@@ -44,14 +45,18 @@ public static class TextEditWidget
             if (ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter))
             {
                 _editingID = null;
+                text = Utils.StringFromBytes(_strInputBuffer);
+                doneEditing = true;
             }
             //Exit editing mode if the input loses focus (e.g., clicking elsewhere)
             if (exitEditOnFocusLoss && !ImGui.IsItemActive() && ImGui.IsMouseClicked(0))
             {
                 _editingID = null;
+                text = Utils.StringFromBytes(_strInputBuffer);
+                doneEditing = true;
             }
         }
 
-        return hasChanged;
+        return doneEditing;
     }
 }
