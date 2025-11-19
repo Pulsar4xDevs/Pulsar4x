@@ -66,18 +66,18 @@ public class ComponentPropertyBlueprintUI : BluePrintsUI
         ImGui.SetColumnWidth(0,150);
         //ImGui.SetColumnWidth(1,400);
 
-        int i = 0;
-        foreach (var item in _blueprints)
+        
+        for (int i = 0; i < _blueprints.Length; i++)
         {
             ImGui.Text("Properties: ");
             ImGui.NextColumn();
             DisplayEditorWindow(i);
-            i++;
         }
 
         if (ImGui.Button("Add New"))
         {
             var newItem = new ComponentTemplatePropertyBlueprint();
+            
             var newblueprints = new ComponentTemplatePropertyBlueprint[_blueprints.Length + 1];
             Array.Copy(_blueprints, newblueprints, _blueprints.Length);
             newblueprints[_blueprints.Length] = newItem;

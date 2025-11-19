@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Security.AccessControl;
 using ImGuiNET;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -32,7 +34,9 @@ public abstract class BluePrintsUI
     private protected string[] _constrGuiHints;
     private protected string[] _mountTypes;
     private protected string[] _guiHints;
-
+    private protected string[] _minerals;
+    private protected string[] _materials;
+    private protected string[] _resources; //mins and mats
     private protected Vector2 _childSize = new Vector2(640, 200);
 
     private protected bool _showFileDialog = false;
@@ -64,6 +68,10 @@ public abstract class BluePrintsUI
         _mountTypes = Enum.GetNames(typeof(ComponentMountType));
         _constrGuiHints = Enum.GetNames(typeof(ConstructableGuiHints));
         _guiHints = Enum.GetNames(typeof(GuiHint));
+        
+        _minerals = modDataStore.Minerals.Keys.ToArray();
+        _materials = modDataStore.ProcessedMaterials.Keys.ToArray();
+        _resources = _minerals.Concat(_materials).ToArray();
     }
 
     public abstract void Refresh();

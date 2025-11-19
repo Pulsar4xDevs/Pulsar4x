@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
@@ -13,6 +14,7 @@ public class ComponentBluprintUI : BluePrintsUI
 {
     private ComponentPropertyBlueprintUI? _propertyBlueprintUI;
     private List<ComponentTemplatePropertyBlueprint> _selectedProperties;
+    private string[] _propertyNames;
     public ComponentBluprintUI(ModDataStore modDataStore) : base(modDataStore, ModInstruction.DataType.ComponentTemplate)
     {
         Dictionary<string, ComponentTemplateBlueprint> blueprints = modDataStore.ComponentTemplates;
@@ -33,6 +35,18 @@ public class ComponentBluprintUI : BluePrintsUI
         var newEmpty = new ComponentTemplateBlueprint();
         newEmpty.Name = "New Blueprint";
         newEmpty.Properties = new List<ComponentTemplatePropertyBlueprint>();
+        var formula = new Dictionary<string, string>();
+        formula.Add("Description", "");
+        formula.Add("Mass", "");
+        formula.Add("Volume", "");
+        formula.Add("HTK", "");
+        formula.Add("CrewReq", "");
+        formula.Add("ResearchCost", "");
+        formula.Add("CreditCost","");
+        formula.Add("BuildPointCost","");
+
+        newEmpty.Formulas = formula;
+        newEmpty.ResourceCost = new Dictionary<string, string>();
         _newEmpty = newEmpty;
     }
 
@@ -44,6 +58,11 @@ public class ComponentBluprintUI : BluePrintsUI
             return;
         var selectedItem = (ComponentTemplateBlueprint)_itemBlueprints[selectedIndex];
         _selectedProperties = selectedItem.Properties;
+        _propertyNames = new string[_selectedProperties.Count];
+        for (int i = 0; i < _selectedProperties.Count; i++)
+        {
+            _propertyNames[i] = _selectedProperties[i].Name;
+        }
 
         if(_propertyBlueprintUI == null || _propertyBlueprintUI.ParentID != selectedItem.UniqueID)
             _propertyBlueprintUI = new ComponentPropertyBlueprintUI(_modDataStore, selectedItem);
@@ -53,7 +72,7 @@ public class ComponentBluprintUI : BluePrintsUI
         ImGui.SetNextWindowSize(new Vector2(1500,  900));
         if (ImGui.Begin("Component Editor: " + name, ref _isActive[selectedIndex]))
         {
-            if (ImGui.BeginTable("MaterialsTable", 2, ImGuiTableFlags.Borders | ImGuiTableFlags.Resizable))
+            if (ImGui.BeginTable("table", 2, ImGuiTableFlags.Borders | ImGuiTableFlags.Resizable))
             {
                 ImGui.TableSetupColumn("Field", ImGuiTableColumnFlags.WidthFixed, 150f);
                 ImGui.TableSetupColumn("Value");
@@ -101,13 +120,10 @@ public class ComponentBluprintUI : BluePrintsUI
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.Text("ResourceCosts: ");
+                ImGui.Text("Resource Costs");
                 ImGui.TableNextColumn();
-                var editDicRC = selectedItem.ResourceCost;
-                if (DictEditWidget.Display("##resc", ref editDicRC, _modDataStore, selectedItem))
-                {
-                    selectedItem.ResourceCost = editDicRC;
-                }
+                ResourceList(selectedItem);
+                
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
@@ -138,5 +154,79 @@ public class ComponentBluprintUI : BluePrintsUI
 
             ImGui.End();
         }
+    }
+
+    public void ResourceList(ComponentTemplateBlueprint selectedItem)
+    {
+        
+        
+        ImGui.BeginChild("resources");
+        ImGui.BeginTable("resouceTable", 2, ImGuiTableFlags.Resizable);
+        ImGui.TableSetupColumn("ResourceID", ImGuiTableColumnFlags.WidthFixed, 150f);
+        ImGui.TableSetupColumn("Amount Formula");
+        ImGui.TableHeadersRow(); // Optional header row
+                
+       
+        
+        var editDicRC = selectedItem.ResourceCost.ToDictionary();
+        bool hasChanged = false;
+        foreach (var resKVP in selectedItem.ResourceCost)
+        {
+            ImGui.TableNextRow();
+            ImGui.TableNextColumn();
+            //ImGui.Text(resKVP.Key);
+            int resIndex = Array.IndexOf(_resources, resKVP.Key);
+            if (SelectFromListWiget.Display("##reskey" + resKVP.Key, _resources, ref resIndex))
+            {
+                string newRes = _resources[resIndex];
+                if (!editDicRC.ContainsKey(newRes))
+                {
+                    editDicRC.Add(newRes, "1");
+                    hasChanged = true;
+                }//else do nothing, we already have that resource in the dictionary.
+            }
+            
+            ImGui.TableNextColumn();
+            _editStr = resKVP.Value;
+            if (FunctionEditWidget.Display("##rescost" + resKVP.Key, ref _editStr, _modDataStore, _propertyNames))
+            {
+                editDicRC[resKVP.Key] = _editStr;
+                hasChanged = true;
+            }
+            //ImGui.TableNextColumn();
+            //ImGui.TableNextRow();
+        }
+        ImGui.TableNextColumn();
+        
+        int newresIndex = -1;
+        if (SelectFromListWiget.Display("reskeynew" , _resources, ref  newresIndex, "Add New Resource"))
+        {
+            string newRes = _resources[newresIndex];
+            if (!editDicRC.ContainsKey(newRes))
+            {
+                editDicRC.Add(newRes, "1");
+                hasChanged = true;
+            }
+        }
+        
+        ImGui.EndTable();
+        if(hasChanged)
+            selectedItem.ResourceCost = editDicRC;
+        
+        
+        ImGui.EndChild();
+        /*
+        var editDicRC = selectedItem.ResourceCost;
+        ImGui.Text("ResourceCosts: ");
+        if (ImGui.Button("Add Resource"))
+        {
+            editDicRC.Add("selectResource", "amountFormula");
+        }
+        ImGui.TableNextColumn();
+        if (DictEditWidget.Display("##resc", ref editDicRC, _modDataStore, selectedItem))
+        {
+            selectedItem.ResourceCost = editDicRC;
+        }*/
+        
     }
 }

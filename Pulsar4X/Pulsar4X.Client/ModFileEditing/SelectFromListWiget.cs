@@ -11,10 +11,10 @@ public static class SelectFromListWiget
     private static string[] _items;
     private static int _itemCount;
 
-    public static bool Display(string label, string[] selectFrom, ref int selected)
+    public static bool Display(string label, string[] selectFrom, ref int selected, string noselectText = "null")
     {
         bool hasChanged = false;
-        string displayText = "null";
+        string displayText = noselectText;
         if(selected > -1)
             displayText = selectFrom[selected];
         if (label != _editingID)
