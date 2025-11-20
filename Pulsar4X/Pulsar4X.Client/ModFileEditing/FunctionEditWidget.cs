@@ -106,6 +106,7 @@ namespace Pulsar4X.Client.ModFileEditing
                     _strInputBuffer = Utils.BytesFromString(initExpr);
                     ImGui.SetKeyboardFocusHere(0);
                     ValidateExpression(initExpr);
+                    _isSelectActive = true;
                 }
             }
             else

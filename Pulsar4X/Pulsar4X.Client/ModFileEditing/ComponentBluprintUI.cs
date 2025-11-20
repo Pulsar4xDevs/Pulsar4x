@@ -33,17 +33,19 @@ public class ComponentBluprintUI : BluePrintsUI
             i++;
         }
         var newEmpty = new ComponentTemplateBlueprint();
+        
         newEmpty.Name = "New Blueprint";
+        newEmpty.UniqueID = newEmpty.Name;
         newEmpty.Properties = new List<ComponentTemplatePropertyBlueprint>();
         var formula = new Dictionary<string, string>();
-        formula.Add("Description", "");
-        formula.Add("Mass", "");
-        formula.Add("Volume", "");
-        formula.Add("HTK", "");
-        formula.Add("CrewReq", "");
-        formula.Add("ResearchCost", "");
-        formula.Add("CreditCost","");
-        formula.Add("BuildPointCost","");
+        formula.Add("Description", "componentDescription");
+        formula.Add("Mass", "1");
+        formula.Add("Volume", "[Mass]");
+        formula.Add("HTK", "[Mass]");
+        formula.Add("CrewReq", "[Mass] * 0.5");
+        formula.Add("ResearchCost", "[Mass]");
+        formula.Add("CreditCost","[Mass]");
+        formula.Add("BuildPointCost","[Mass]");
 
         newEmpty.Formulas = formula;
         newEmpty.ResourceCost = new Dictionary<string, string>();
@@ -80,10 +82,21 @@ public class ComponentBluprintUI : BluePrintsUI
                 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
+                ImGui.Text("ID: ");
+                ImGui.TableNextColumn();
+                editStr = selectedItem.UniqueID;
+                if (TextEditWidget.Display("##id" + selectedItem.UniqueID, ref editStr))
+                {
+                    selectedItem.UniqueID = editStr;
+                    Refresh();
+                }
+                
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
                 ImGui.Text("Name: ");
                 ImGui.TableNextColumn();
                 editStr = selectedItem.Name;
-                if (TextEditWidget.Display("##name" + selectedItem.UniqueID, ref editStr))
+                if (TextEditWidget.Display("##name" + selectedItem.Name, ref editStr))
                 {
                     selectedItem.Name = editStr;
                 }
@@ -110,7 +123,7 @@ public class ComponentBluprintUI : BluePrintsUI
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.Text("Fomula: ");
+                ImGui.Text("Formula: ");
                 ImGui.TableNextColumn();
                 var editDicf = selectedItem.Formulas;
                 if (DictEditWidget.Display("##fmula", ref editDicf, _modDataStore, selectedItem))
@@ -160,7 +173,7 @@ public class ComponentBluprintUI : BluePrintsUI
     {
         
         
-        ImGui.BeginChild("resources");
+        ImGui.BeginChild("resources", _childSize);
         ImGui.BeginTable("resouceTable", 2, ImGuiTableFlags.Resizable);
         ImGui.TableSetupColumn("ResourceID", ImGuiTableColumnFlags.WidthFixed, 150f);
         ImGui.TableSetupColumn("Amount Formula");

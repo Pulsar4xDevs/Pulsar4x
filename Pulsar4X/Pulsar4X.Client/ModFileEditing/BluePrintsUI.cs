@@ -155,6 +155,7 @@ public abstract class BluePrintsUI
 
     public void NewItem(string label, Blueprint newBlueprint)
     {
+
         if (ImGui.Button(label))
         {
             Array.Resize(ref _itemBlueprints, _itemBlueprints.Length + 1);
@@ -163,7 +164,9 @@ public abstract class BluePrintsUI
             _itemNames[^1] = "newBluprint";
             Array.Resize(ref _isActive, _isActive.Length + 1);
             _isActive[^1] = true;
+            Refresh();
         }
+        
     }
 
     void RemoveAtIndex(int index)
