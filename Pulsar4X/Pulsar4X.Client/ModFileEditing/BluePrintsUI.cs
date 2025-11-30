@@ -54,7 +54,7 @@ public abstract class BluePrintsUI
         _dataType = dataType;
         _componentBlueprints = modDataStore.ComponentDesigns.Values.ToArray();
         
-        _units = new string[9];
+        _units = new string[10];
         _units[0] = "";
         _units[1] = "KJ";
         _units[2] = "KW";
@@ -64,6 +64,7 @@ public abstract class BluePrintsUI
         _units[6] = "m";
         _units[7] = "N";
         _units[8] = "m/s";
+        _units[9] = "%";
 
         _mountTypes = Enum.GetNames(typeof(ComponentMountType));
         _constrGuiHints = Enum.GetNames(typeof(ConstructableGuiHints));

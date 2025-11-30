@@ -380,9 +380,10 @@ namespace Pulsar4X.Client
                                     }
                                 }
 
-                                ImGui.Text(displayStr);
+                                ImGui.TextUnformatted(displayStr);
                                 if(ImGui.IsItemHovered())
-                                    ImGui.SetTooltip(attribute.Value.ToString(Styles.IntFormat) + " " + attribute.Unit);
+                                    ImGui.SetTooltip(@attribute.Value.ToString(Styles.IntFormat) + " " + attribute.Unit.Replace("%", "%%"));
+                                
                             }
                             else
                             {
