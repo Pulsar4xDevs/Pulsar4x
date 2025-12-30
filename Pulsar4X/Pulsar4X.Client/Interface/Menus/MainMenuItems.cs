@@ -46,6 +46,11 @@ namespace Pulsar4X.Client
                     newgameoptions.SetActive(true);
                     this.IsActive = false;
                 }
+                if (ImGui.Button("Quickstart", _buttonSize))
+                {
+                    NewGameMenu.QuickstartGame();
+                    this.IsActive = false;
+                }
                 if (_uiState.IsGameLoaded)
                 {
                     if (ImGui.Button("Save Game...", _buttonSize))
