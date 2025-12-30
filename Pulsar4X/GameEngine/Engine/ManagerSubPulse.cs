@@ -37,43 +37,6 @@ namespace Pulsar4X.Engine
 
         private EntityManager _entityManager;
 
-        internal Dictionary<DateTime, List<String>> GetInstanceProcForEntity(Entity entity)
-        {
-            var procDict = new Dictionary<DateTime, List<string>>();
-            foreach (var (key, queue) in InstanceProcessorsQueue)
-            {
-                foreach(var (name, list) in queue)
-                {
-                    if(list.Contains(entity))
-                    {
-                        if(!procDict.ContainsKey(key))
-                            procDict.Add(key, new List<string>());
-                    }
-                    procDict[key].Add(name);
-                }
-            }
-
-            return procDict;
-        }
-
-        internal void ImportProcDictForEntity(Entity entity, Dictionary<DateTime, List<string>> procDict)
-        {
-            foreach (var kvp in procDict)
-            {
-                if(kvp.Key < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
-
-                if (!InstanceProcessorsQueue.ContainsKey(kvp.Key))
-                    InstanceProcessorsQueue.Add(kvp.Key, new Dictionary<string, List<Entity>>());
-                foreach (var procName in kvp.Value)
-                {
-                    if (!InstanceProcessorsQueue[kvp.Key].ContainsKey(procName))
-                        InstanceProcessorsQueue[kvp.Key].Add(procName, new List<Entity>());
-                    if (!InstanceProcessorsQueue[kvp.Key][procName].Contains(entity))
-                        InstanceProcessorsQueue[kvp.Key][procName].Add(entity);
-                }
-            }
-        }
-
         /// <summary>
         /// Fires when the system date is updated,
         /// Any entitys that have move (though not neccicarly orbits) will have updated
@@ -255,25 +218,6 @@ namespace Pulsar4X.Engine
             }
 
         }
-
-        /// <summary>
-        /// transfers all references from this starSystem to the new one
-        /// Note that doing this could cause a temporal anomaly if the system we're moving to is ahead of this one.
-        /// This should only be done from the MasterTimePulse when it has synched the systems.
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="starsys"></param>
-        internal void TransferEntity(Entity entity, StarSystem starsys)
-        {
-
-            Dictionary<DateTime, List<string>> procDict = GetInstanceProcForEntity(entity);
-
-            RemoveEntity(entity);
-
-            //add the processors to the new system
-            starsys.ManagerSubpulses.ImportProcDictForEntity(entity, procDict);
-        }
-
 
         internal void ProcessSystem(DateTime targetDateTime)
         {
