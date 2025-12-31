@@ -632,7 +632,7 @@ public class NewGameMenu : PulsarGuiWindow
 
             // Generate random seed
             int masterSeed = RandomNumberGenerator.GetInt32(999999999);
-            int maxSystems = 5;
+            int maxSystems = 2;
             int startingFunds = 100_000_000;
             bool eleStart = true;
 
