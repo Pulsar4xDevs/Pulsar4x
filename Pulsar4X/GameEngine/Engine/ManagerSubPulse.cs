@@ -23,11 +23,21 @@ namespace Pulsar4X.Engine
 
         public PerformanceStopwatch Performance { get; private set; } = new PerformanceStopwatch();
 
+        private readonly object _lock = new();
         [JsonProperty]
-        public SortedDictionary<DateTime, Dictionary<string, List<Entity>>> InstanceProcessorsQueue { get; set; } = new ();
+        private TimeQueue<(string, Entity)> _instanceProcessorsQueue = new();
+        public TimeQueue<(string, Entity)> InstanceProcessorsQueue {
+            get {
+                lock (_lock)
+                {
+                    return new TimeQueue<(string, Entity)>(_instanceProcessorsQueue);
+                }
+            }
+            private set {}
+        }
 
         [JsonProperty]
-        public SafeDictionary<Type , DateTime?> HotLoopProcessorsNextRun { get; private set;} = new ();
+        public SafeDictionary<Type , DateTime?> HotLoopProcessorsNextRun { get; private set;} = new();
 
         //public readonly ConcurrentDictionary<Type, TimeSpan> ProcessTime = new ConcurrentDictionary<Type, TimeSpan>();
         public bool IsProcessing = false;
@@ -85,6 +95,7 @@ namespace Pulsar4X.Engine
         [JsonConstructor]
         internal ManagerSubPulse()
         {
+            InstanceProcessorsQueue = _instanceProcessorsQueue;
         }
 
         internal void Initialize(EntityManager entityManager, ProcessorManager processorManager)
@@ -125,15 +136,16 @@ namespace Pulsar4X.Engine
         /// <param name="entity"></param>
         internal void AddEntityInterupt(DateTime nextDateTime, string actionProcessor, Entity entity)
         {
-            if(nextDateTime < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
+            if(nextDateTime < StarSysDateTime)
+                throw new Exception("Trying to add an interrupt in the past");
+
             if (nextDateTime < _subStepDateTime)
                 _subStepDateTime = nextDateTime;
-            if (!InstanceProcessorsQueue.ContainsKey(nextDateTime))
-                InstanceProcessorsQueue.Add(nextDateTime, new Dictionary<string, List<Entity>>());
-            if (!InstanceProcessorsQueue[nextDateTime].ContainsKey(actionProcessor))
-                InstanceProcessorsQueue[nextDateTime].Add(actionProcessor, new List<Entity>());
-            if (!InstanceProcessorsQueue[nextDateTime][actionProcessor].Contains(entity))
-                InstanceProcessorsQueue[nextDateTime][actionProcessor].Add(entity);
+
+            lock (_lock)
+            {
+                _instanceProcessorsQueue.Add(nextDateTime, (actionProcessor, entity));
+            }
         }
         
         /// <summary>
@@ -196,26 +208,22 @@ namespace Pulsar4X.Engine
         internal void RemoveEntity(Entity entity)
         {
             //possibly need to implement a reverse dictionary so entities can be looked up backwards, rather than itterating through?
-            //MUST remove empty entries in the dictionary as an empty entitylist will be seen as a systemInterupt.
-            //throw new NotImplementedException();
 
-            List<DateTime> removekeys = new List<DateTime>();
-            foreach (var (dateTime, dict) in InstanceProcessorsQueue)
+            List<int> removekeys = new();
+            var idx = 0;
+
+            lock (_lock)
             {
-                foreach(var (key, list) in dict)
+                foreach (var qi in _instanceProcessorsQueue)
                 {
-                    list.Remove(entity);
+                    if (qi.Item.Item2 == entity)
+                        removekeys.Add(idx);
+                    idx += 1;
                 }
 
-                if(dict.Values.Count == 0)
-                    removekeys.Add(dateTime);
+                foreach (var i in removekeys)
+                    _instanceProcessorsQueue.RemoveAt(i);
             }
-
-            foreach (var item in removekeys)
-            {
-                InstanceProcessorsQueue.Remove(item);
-            }
-
         }
 
         internal void ProcessSystem(DateTime targetDateTime)
@@ -266,10 +274,12 @@ namespace Pulsar4X.Engine
                 nextInteruptDateTime = HotLoopProcessorsNextRun.Values.Min() ?? nextInteruptDateTime;
             }
 
-            if (InstanceProcessorsQueue.Keys.Count != 0 && nextInteruptDateTime >= InstanceProcessorsQueue.Keys.Min())
+            lock (_lock)
             {
-                nextInteruptDateTime = InstanceProcessorsQueue.Keys.Min();
+                if (_instanceProcessorsQueue.Any() && nextInteruptDateTime >= _instanceProcessorsQueue.First().Time)
+                    nextInteruptDateTime = _instanceProcessorsQueue.First().Time;
             }
+
             if (nextInteruptDateTime < StarSysDateTime)
                 throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow.
             return nextInteruptDateTime;
@@ -305,26 +315,26 @@ namespace Pulsar4X.Engine
                         HotLoopProcessorsNextRun[type] = _subStepDateTime + _processManager.HotloopProcessors[type].RunFrequency; //sets the next interupt for this hotloop process
                 }
 
-                if (InstanceProcessorsQueue.ContainsKey(_subStepDateTime))
+                TimeQueueItem<(string, Entity)>[] split;
+                lock (_lock)
                 {
-                    var qp = InstanceProcessorsQueue[_subStepDateTime];
-
-                    foreach (var instanceProcessSet in qp)
-                    {
-                        var processor = _processManager.GetInstanceProcessor(instanceProcessSet.Key);
-                        Performance.Start(processor.GetType().Name);
-                        CurrentProcess = instanceProcessSet.Key;
-                        foreach (var entity in instanceProcessSet.Value)
-                        {
-
-                            processor.ProcessEntity(entity, _subStepDateTime);
-                        }
-
-                        Performance.Stop(processor.GetType().Name);
-                    }
-
-                    InstanceProcessorsQueue.Remove(_subStepDateTime); //once all the processes have been run for that datetime, remove it from the dictionary.
+                    split = _instanceProcessorsQueue.Split(_subStepDateTime);
                 }
+
+                foreach (var qi in split)
+                {
+                    var itm = qi.Item;
+                    var s = itm.Item1;
+                    var e = itm.Item2;
+
+                    var processor = _processManager.GetInstanceProcessor(s);
+
+                    Performance.Start(processor.GetType().Name);
+                    CurrentProcess = s;
+                    processor.ProcessEntity(e, _subStepDateTime);
+                    Performance.Stop(processor.GetType().Name);
+                }
+
                 StarSysDateTime = _subStepDateTime; //update the localDateTime and invoke the SystemDateChangedEvent
                 _subStepDateTime = GetNextInterupt(_processToDateTime - _subStepDateTime);
 
@@ -336,29 +346,5 @@ namespace Pulsar4X.Engine
                     break;
             }
         }
-
-        public int GetTotalNumberOfProceses()
-        {
-            int i = 0;
-            foreach (var processSet in InstanceProcessorsQueue)
-            {
-                i += processSet.Value.Count;
-            }
-
-            return i;
-        }
-
-        public List<DateTime> GetInteruptDateTimes()
-        {
-            List<DateTime> dates = new List<DateTime>();
-            foreach (var item in InstanceProcessorsQueue)
-            {
-                dates.Add(item.Key);
-            }
-            return dates;
-        }
-
     }
 }
-
-
