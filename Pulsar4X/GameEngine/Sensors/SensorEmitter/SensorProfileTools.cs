@@ -44,7 +44,12 @@ public static class SensorProfileTools
 
             foreach (var emitedItem in emmissionDB.EmittedEMSpectra)
             {
-
+                //TODO: we're ignoring anything under a petawatt(pre attenuated) for reflection.
+                //we may have to balance this later, maybe add a flag in the emmissionDB or a seperate dictionary for stuff that should be reflected.
+                //picking up ALL emmisions for reflection is probabily overkill/too much ui data/too much processing.
+                if(emitedItem.Value < 1e+12)
+                    continue;
+                
                 var attenuated = SensorTools.AttenuationCalc(emitedItem.Value, distance);//per meter^2
                 var reflectedMagnatude = attenuated * reflectionCoefficent;
 
