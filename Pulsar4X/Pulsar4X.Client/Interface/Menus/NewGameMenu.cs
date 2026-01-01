@@ -566,4 +566,203 @@ public class NewGameMenu : PulsarGuiWindow
             MainMenuItems.GetInstance().SetActive(true);
         }
     }
+
+    /// <summary>
+    /// Creates a new game instantly with default settings, bypassing the wizard
+    /// </summary>
+    public static void QuickstartGame()
+    {
+        try
+        {
+            // Initialize mod loader and data store
+            ModLoader modLoader = new ModLoader();
+            ModDataStore modDataStore = new ModDataStore();
+
+            // Load all default-enabled mods
+            foreach (var modMetadata in ModsState.AvailableMods)
+            {
+                if (ModsState.IsModEnabled[modMetadata.Mod.ModName])
+                {
+                    modLoader.LoadModManifest(modMetadata.Path, modDataStore);
+                }
+            }
+
+            // Validate we have required data
+            if (!modDataStore.Species.Any(kvp => kvp.Value.Playable))
+            {
+                Console.WriteLine("Quickstart Error: No playable species found in loaded mods");
+                return;
+            }
+
+            if (!modDataStore.Colonies.Any())
+            {
+                Console.WriteLine("Quickstart Error: No colonies found in loaded mods");
+                return;
+            }
+
+            // Select default values
+            string selectedSpeciesId = modDataStore.Species.First(kvp => kvp.Value.Playable).Key;
+            string selectedThemeId = modDataStore.Themes.First().Key;
+            string selectedColonyId = modDataStore.Colonies.First().Key;
+
+            // Find all systems with CanStartHere bodies
+            List<string> enabledSystems = new();
+            foreach (var (id, system) in modDataStore.Systems)
+            {
+                if (modDataStore.SystemBodies.Any(kvp =>
+                    kvp.Value.CanStartHere && system.Bodies.Contains(kvp.Key)))
+                {
+                    enabledSystems.Add(id);
+                }
+            }
+
+            if (enabledSystems.Count == 0)
+            {
+                Console.WriteLine("Quickstart Error: No compatible starting systems found");
+                return;
+            }
+
+            // Select first available system and body
+            string selectedSystemId = enabledSystems.First();
+            SystemBlueprint selectedSystemBlueprint = modDataStore.Systems[selectedSystemId];
+
+            string selectedBodyId = modDataStore.SystemBodies
+                .Where(kvp => kvp.Value.CanStartHere && selectedSystemBlueprint.Bodies.Contains(kvp.Key))
+                .First().Key;
+
+            // Generate random seed
+            int masterSeed = RandomNumberGenerator.GetInt32(999999999);
+            int maxSystems = 2;
+            int startingFunds = 100_000_000;
+            bool eleStart = true;
+
+            // Create game settings
+            NewGameSettings gameSettings = new NewGameSettings
+            {
+                MaxSystems = maxSystems,
+                SMPassword = "",
+                CreatePlayerFaction = true,
+                DefaultFactionName = DEFAULT_NAME,
+                DefaultPlayerPassword = "",
+                DefaultSolStart = true,
+                MasterSeed = masterSeed,
+                EleStart = eleStart
+            };
+
+            // Create game
+            SpeciesBlueprint startingSpeciesBlueprint = modDataStore.Species[selectedSpeciesId];
+            ThemeBlueprint startingThemeBlueprint = modDataStore.Themes[selectedThemeId];
+            ColonyBlueprint startingColonyBlueprint = modDataStore.Colonies[selectedColonyId];
+            SystemBlueprint? startingSystemBlueprint = null;
+            SystemBodyBlueprint? startingBodyBlueprint = null;
+
+            Game game = GameFactory.CreateGame(modDataStore, gameSettings);
+            game.CreatedOnGitHash = AssemblyInfo.GetGitHash();
+            game.LastSaveGitHash = AssemblyInfo.GetGitHash();
+
+            StarSystem? startingSystem = null;
+            Entity? startingBody = null;
+
+            // Generate random systems
+            int numberToGenerate = maxSystems - enabledSystems.Count;
+            if(numberToGenerate > 0)
+            {
+                for(int i = 0; i < numberToGenerate; i++)
+                {
+                    string systemName = $"Generated System #{i + 1}";
+                    game.GalaxyGen.GenerateSystem(game, systemName, masterSeed);
+                }
+            }
+
+            startingSystemBlueprint = modDataStore.Systems[selectedSystemId];
+            startingBodyBlueprint = modDataStore.SystemBodies[selectedBodyId];
+
+            // Load pre-made systems
+            foreach(var id in enabledSystems)
+            {
+                var system = StarSystemFactory.LoadFromBlueprint(game, modDataStore.Systems[id]);
+                if(id.Equals(selectedSystemId))
+                {
+                    startingSystem = system;
+                    foreach(var systemBody in startingSystem.GetAllDataBlobsOfType<SystemBodyInfoDB>())
+                    {
+                        if(startingBodyBlueprint != null && systemBody.OwningEntity?.GetDefaultName()?.Equals(startingBodyBlueprint.Name) == true)
+                        {
+                            startingBody = systemBody.OwningEntity;
+                        }
+                    }
+                }
+            }
+
+            if(startingSystem == null || startingBody == null)
+            {
+                Console.WriteLine("Quickstart Error: Could not create starting system or body");
+                return;
+            }
+
+            // Create player faction
+            var playerFaction = FactionFactory.CreateBasicFaction(
+                game,
+                DEFAULT_NAME,
+                DEFAULT_ABBREVIATION,
+                startingFunds);
+
+            if(playerFaction == null)
+            {
+                Console.WriteLine("Quickstart Error: Could not create player faction");
+                return;
+            }
+
+            playerFaction.FactionOwnerID = playerFaction.Id;
+            playerFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(startingSystem.ID);
+
+            var playerSpecies = SpeciesFactory.CreateFromBlueprint(startingSystem, modDataStore.Species[selectedSpeciesId]);
+            playerSpecies.FactionOwnerID = playerFaction.Id;
+            playerFaction.GetDataBlob<FactionInfoDB>().Species.Add(playerSpecies);
+
+            // Setup starting colony
+            var playerColony = ColonyFactory.CreateFromBlueprint(game, playerFaction, playerSpecies, startingSystem, startingBody, modDataStore.Colonies[selectedColonyId]);
+            if(eleStart)
+                AsteroidFactory.CreateAsteroid(startingSystem, startingBody, game.TimePulse.GameGlobalDateTime + TimeSpan.FromDays(365));
+
+            // Create starting people
+            var scientistDB = CommanderFactory.CreateScientist(game);
+            var scientist = CommanderFactory.Create(startingSystem, playerFaction.Id, scientistDB);
+
+            var adminDB = CommanderFactory.CreateAdmin(game);
+            var admin = CommanderFactory.Create(startingSystem, playerFaction.Id, adminDB);
+
+            if(scientist.TryGetDataBlob<BonusesDB>(out var bonusesDB))
+            {
+                bonusesDB.Bonuses.Add(new Bonus(
+                    "Research Points",
+                    0.1,
+                    BonusType.Perentage,
+                    BonusCategory.ResearchPoints,
+                    "tech-category-power-propulsion"
+                ));
+            }
+
+            // Initialize game
+            game.PostNewGameInitialization();
+
+            _uiState.Game = game;
+            _uiState.SetFaction(playerFaction, true);
+            _uiState.SetActiveSystem(startingSystem.ManagerID);
+            _uiState.Camera.CenterOnEntity(startingBody);
+            _uiState.Camera.ZoomLevel = 2_245_000f;
+
+            DebugWindow.GetInstance().SetGameEvents();
+
+            // Initialize game windows
+            TimeControl.GetInstance().SetActive();
+            ToolBarWindow.GetInstance().SetActive();
+            Selector.GetInstance().SetActive();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Quickstart Error: {ex.Message}");
+            Console.WriteLine(ex.StackTrace);
+        }
+    }
 }

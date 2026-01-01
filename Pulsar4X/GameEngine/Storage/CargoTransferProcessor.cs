@@ -74,8 +74,8 @@ namespace Pulsar4X.Storage
                 massToXfer = Math.Min(massToXfer, CargoMath.GetFreeMass(moveTo, cargoItem));
 
                 double massLeft = tuple.mass - massToXfer;
-                //we use Ceaaling here to signify whole part items not fully moved yet.
-                long itemsLeft = (int)Math.Ceiling(massLeft * itemMassPerUnit);
+                //we use Ceiling here to signify whole part items not fully moved yet.
+                long itemsLeft = (long)Math.Ceiling(massLeft / itemMassPerUnit);
                 var countToXfer = tuple.count - itemsLeft;
                 escroList[index] = (cargoItem,itemsLeft, massLeft);
 
