@@ -35,6 +35,11 @@ namespace Pulsar4X.Sensors
         public int ScanTime { get; internal set; } //the time it takes to complete a full 360 degree sweep.
         //internal int Size; //basicly increases sensitivity at the cost of mass
 
+        /// <summary>
+        /// Solar arrays use the same code as sensor detection.
+        /// </summary>
+        [JsonProperty] public bool IsEnergyGen { get; internal set; } = false;
+    
 
 
         [JsonConstructor]
@@ -73,6 +78,31 @@ namespace Pulsar4X.Sensors
             Resolution = (float)resolution;
             ScanTime = (int)scanTime;
         }
+        
+        public SensorReceiverAtb(double peakWaveLength, double bandwidth, double bestSensitivity, double worstSensitivity, double efficency)
+        {
+            //TODO:  should make this component invalid.
+            if (bestSensitivity < 0)
+            {
+                // var ev = new Event("Sensitivity is" + bestSensitivity + " *Must* be a positiveNumber Sensitivity is the kilowatt threshhold");
+                // StaticRefLib.EventLog.AddEvent(ev);
+                bestSensitivity = 0;
+
+            }
+            if (bestSensitivity > worstSensitivity)
+            {
+                // var ev = new Event("bestSensitivity " + bestSensitivity + " *Must* be < than worstSensitivity" + worstSensitivity +
+                //                    "(lower is better) Sensitivity is the kilowatt threshhold");
+                // StaticRefLib.EventLog.AddEvent(ev);
+                worstSensitivity = bestSensitivity;
+            }
+            RecevingWaveformCapabilty = new EMWaveForm(peakWaveLength - bandwidth * 0.5,peakWaveLength, peakWaveLength + bandwidth * 0.5);
+            BestSensitivity_kW = bestSensitivity * 0.001;
+            WorstSensitivity_kW = worstSensitivity * 0.001;
+            Resolution = (float)efficency;
+            ScanTime = (int)3600;
+            IsEnergyGen = true;
+        }
 
         public SensorReceiverAtb(SensorReceiverAtb db)
         {
@@ -86,15 +116,8 @@ namespace Pulsar4X.Sensors
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            //we're cloning the design to the instance here. when we do another pass on the sensors we'll likely change this.
-            if (!componentInstance.HasAblity<SensorReceiverAbility>())
-                componentInstance.SetAbilityState<SensorReceiverAbility>(new SensorReceiverAbility(componentInstance));//'this' should be the instance's designs db.
-            if (!parentEntity.HasDataBlob<SensorAbilityDB>())
-            {
-                parentEntity.SetDataBlob(new SensorAbilityDB());
-            }
-            //SensorTools.(componentInstance);
-
+            //add the instance atb to the ship SensorAbilityDB.
+            SensorTools.SetInstances(parentEntity);
         }
 
         public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)

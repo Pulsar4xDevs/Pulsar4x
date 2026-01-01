@@ -145,7 +145,11 @@
         "space-crete",
         "laser-weapon",
         "admin-complex",
-        "ship-command"
+        "ship-command",
+        "tech-panel-efficiency",
+        "tech-panel-bandwidth",
+        "tech-panel-density",
+        "solarArray"
       ],
       "ComponentDesigns": [
         "default-design-alcubierre-2k",
@@ -178,7 +182,9 @@
         "default-design-spaceport",
         "default-design-research-lab",
         "default-design-warehouse",
-        "default-design-city-hall"
+        "default-design-city-hall",
+        "default-design_solarpanel",
+        "default-design-battery-25kg"
       ],
       "ShipDesigns": [
         "default-ship-design-courier",
@@ -186,7 +192,8 @@
         "default-ship-design-gunship",
         "default-ship-design-dropship",
         "default-ship-design-starship",
-        "default-ship-design-surveyor"
+        "default-ship-design-surveyor",
+        "default-ship-design-sensorsat"
       ],
       "Fleets": [
         {
@@ -230,6 +237,10 @@
               "Cargo": [
                 { "Id": "rp-1", "Amount": 20000000, "Type": "byVolume" }
               ]
+            },
+            {
+              "DesignId": "default-ship-design-sensorsat",
+              "Name": "SensorSat I"
             }
           ]
         }

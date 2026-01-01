@@ -51,6 +51,17 @@
   {
     "Type": "ComponentDesign",
     "Payload": {
+      "UniqueId": "default-design-battery-25kg",
+      "Name": "Battery 25kg",
+      "TemplateId": "battery-bank",
+      "Properties": [
+        { "Key": "Mass", "Value": 25 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
       "UniqueId": "default-design-beam-fire-control",
       "Name": "Beam Fire Control",
       "TemplateId": "beam-fire-control",
@@ -399,6 +410,17 @@
       "TemplateId": "admin-complex",
       "Properties": [
         { "Key": "Office Space", "Value": 1000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design_solarpanel",
+      "Name": "solar panel",
+      "TemplateId": "solarArray",
+      "Properties": [
+        { "Key": "Area", "Value": 100 }
       ]
     }
   }

@@ -457,9 +457,12 @@ namespace Pulsar4X.Client
                                 var powerDB = SelectedEntity.GetDataBlob<EnergyGenAbilityDB>();
                                 ImGui.Text("Generates " + powerDB.EnergyType.Name);
                                 ImGui.Text("Max of: " + powerDB.TotalOutputMax + "/s");
-                                string fueltype = SelectedEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(powerDB.TotalFuelUseAtMax.type).Name;
-                                ImGui.Text("Burning " + powerDB.TotalFuelUseAtMax.maxUse + " of " + fueltype);
-                                ImGui.Text("With " + powerDB.LocalFuel + " remaining reactor fuel");
+                                if(!string.IsNullOrEmpty(powerDB.TotalFuelUseAtMax.type))
+                                {
+                                    string fueltype = SelectedEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(powerDB.TotalFuelUseAtMax.type).Name;
+                                    ImGui.Text("Burning " + powerDB.TotalFuelUseAtMax.maxUse + " of " + fueltype);
+                                    ImGui.Text("With " + powerDB.LocalFuel + " remaining reactor fuel");
+                                }
 
                                 foreach (var etype in powerDB.EnergyStored)
                                 {
@@ -468,7 +471,6 @@ namespace Pulsar4X.Client
 
                                     ImGui.Text(etype.Value.ToString() + "/" + powerDB.EnergyStoreMax[etype.Key].ToString());
                                 }
-
                             }
                         }
 

@@ -8,7 +8,11 @@ namespace Pulsar4X.Sensors
 {
     /// <summary>
     /// This datablob goes into the sensor contact.
-    /// TODO: I can't see this actualy getting added to an entity anywhere, maybe it does not need to be a datablob.
+    /// QUESTION: I can't see this actualy getting added to an entity anywhere, maybe it does not need to be a datablob.
+    /// Answer:
+    /// This datablob gets added to the SensorEntity in SensorEntityFactory.
+    /// SensorScan creates this datablob and passes it to the SensorEntity factory either updating or creating a new entity.
+    /// the SensorEntity is what the player sees, the player doesnt get access to the actual entity. 
     /// </summary>
     public class SensorInfoDB : BaseDataBlob
     {

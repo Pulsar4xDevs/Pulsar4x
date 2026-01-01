@@ -382,5 +382,92 @@
         }
       ]
     }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "Name": "Solar Array",
+      "UniqueID": "solarArray",
+      "Formulas": {
+        "Description": "'Generates power from sunlight, effiency tuned to specific wavelengths'",
+        "Mass": "PropertyValue('Mass')",
+        "Volume": "[Mass] / 2000",
+        "HTK": "[Mass] * 0.5",
+        "CrewReq": "0",
+        "ResearchCost": "[Mass] * 0.5",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "plastic": "[Mass] * 0.3",
+        "copper": "[Mass] * 0.05",
+        "aluminium": "[Mass] * 0.2",
+        "silicon": "[Mass] * 0.4",
+        "rare-earth-elements": "[Mass] * 0.05"
+      },
+      "ComponentType": "Energy Generation",
+      "MountType": 1,
+      "IndustryTypeID": "component-construction",
+      "CargoTypeID": "general-storage",
+      "Properties": [
+        {
+          "Name": "Area",
+          "Units": "m^2",
+          "DescriptionFormula": "'Panel surface area, scales power output'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "10000",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "100"
+        },
+        {
+          "Name": "Ideal Absorption Wavelength",
+          "Units": "nm",
+          "DescriptionFormula": "'Peak wavelength for optimal absorption'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "2000",
+          "MinFormula": "300",
+          "StepFormula": "1",
+          "PropertyFormula": "550"
+        },
+        {
+          "Name": "Bandwidth",
+          "Units": "nm",
+          "DescriptionFormula": "'Range around peak; wider reduces peak efficiency but increases versatility'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "TechData('tech-panel-bandwidth')",
+          "MinFormula": "50",
+          "StepFormula": "1",
+          "PropertyFormula": "300"
+        },
+        {
+          "Name": "Best Efficiency",
+          "Units": "%",
+          "DescriptionFormula": "'Absorption efficiency at peak wavelength'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "TechData('tech-panel-efficiency') / (1 + PropertyValue('Bandwidth') / TechData('tech-panel-bandwidth'))"
+        },
+        {
+          "Name": "Worst Efficiency",
+          "Units": "%",
+          "DescriptionFormula": "'Absorption efficiency at bandwidth edges'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Best Efficiency') * 0.5"
+        },
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Derived mass based on area and tech density'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Area') * TechData('tech-panel-density')"
+        },
+        {
+          "Name": "DB",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Ideal Absorption Wavelength'), PropertyValue('Bandwidth'), PropertyValue('Best Efficiency') * 0.01, PropertyValue('Worst Efficiency') * 0.01, PropertyValue('Area'))",
+          "AttributeType": "Pulsar4X.Energy.EnergySolarGenerationAtb"
+        }
+      ]
+    }
   }
 ]

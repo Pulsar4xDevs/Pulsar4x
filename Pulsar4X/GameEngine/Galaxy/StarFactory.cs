@@ -60,7 +60,7 @@ namespace Pulsar4X.Galaxy
             blobsToAdd.Add(starInfoDb);
             blobsToAdd.Add(new PositionDB(Orbital.Vector3.Zero));
             blobsToAdd.Add(new OrbitDB());
-            //blobsToAdd.Add(SensorTools.SetStarEmmisionSig(starInfoDb, massVolumeDb));
+            blobsToAdd.Add(SensorTools.SetStarEmmisionSig(starInfoDb, massVolumeDb));
             blobsToAdd.Add(new VisibleByDefaultDB());
 
 
@@ -111,7 +111,7 @@ namespace Pulsar4X.Galaxy
             blobsToAdd.Add(starInfoDb);
             blobsToAdd.Add(new PositionDB(Orbital.Vector3.Zero));
             blobsToAdd.Add(new OrbitDB());
-            //blobsToAdd.Add(SensorTools.SetStarEmmisionSig(starInfoDb, massVolumeDb));
+            blobsToAdd.Add(SensorTools.SetStarEmmisionSig(starInfoDb, massVolumeDb));
             blobsToAdd.Add(new VisibleByDefaultDB());
 
 

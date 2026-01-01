@@ -26,6 +26,7 @@ namespace Pulsar4X.Interfaces
         /// </summary>
         /// <param name="manager">Manager.</param>
         /// <param name="deltaSeconds">Delta seconds.</param>
+        /// <returns>Number of entites processed</returns>
         int ProcessManager(EntityManager manager, int deltaSeconds);
 
         /// <summary>

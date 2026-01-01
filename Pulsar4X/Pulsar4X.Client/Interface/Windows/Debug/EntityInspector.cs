@@ -110,7 +110,7 @@ namespace Pulsar4X.Client
             RecursiveReflection(dataBlob);
 
 
-            ImGui.Columns(0);
+            ImGui.Columns(1);
 
             ImGui.EndChild();
             DisplayDBSpecifics(dataBlob);

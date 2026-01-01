@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
+using Pulsar4X.Components;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine.Sensors;
@@ -14,9 +16,6 @@ namespace Pulsar4X.Client
 {
     public class SensorDraw : PulsarGuiWindow
     {
-
-
-
         private EntityState? _selectedEntitySate;
         private Entity? _selectedEntity => _selectedEntitySate?.Entity;
         private Entity[]? _potentialTargetEntities;
@@ -38,17 +37,37 @@ namespace Pulsar4X.Client
         private ImDrawListPtr _draw_list;
 
         private WaveDrawData? _receverDat;
+        
         private WaveDrawData? _reflectDat;
         private WaveDrawData? _emmittrDat;
         private WaveDrawData? _detectedDat;
 
 
-        private double lowestWave = 0;
-        private double highestWave = 0;
-        private double lowestMag = 0;
-        private double highestMag = 0;
+        private double rlowestWave = 0;
+        private double rhighestWave = 0;
+        private double rlowestMag = 0;
+        private double rhighestMag = 0;
+        private double slowestWave = 0;
+        private double shighestWave = 0;
+        private double slowestMag = 0;
+        private double shighestMag = 0;
+        private (double, double) _recDatWave;
+        private (double, double) _recDatMag;
+        private (double, double) _sigDatWave;
+        private (double, double) _sigDatMag;
+        
         private System.Numerics.Vector2 _scalingFactor = new System.Numerics.Vector2(0.1f, 0.1f);
         private System.Numerics.Vector2 _translation = new System.Numerics.Vector2(0,0);
+        
+        uint _borderColour = ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 1.0f));
+        uint _receverColour = ImGui.ColorConvertFloat4ToU32(new Vector4(0.25f, 1.0f, 0.5f, 1.0f));
+        uint _receverFill = ImGui.ColorConvertFloat4ToU32(new Vector4(0.25f, 1.0f, 0.5f, 0.9f));
+        uint _reflectedColour = ImGui.ColorConvertFloat4ToU32(new Vector4(1.0f, 0.0f, 0.5f, 1.0f));
+        uint _reflectedFill = ImGui.ColorConvertFloat4ToU32(new Vector4(1.0f, 0.0f, 0.5f, 0.75f));
+        uint _emittedColour = ImGui.ColorConvertFloat4ToU32(new Vector4(1.0f, 0.0f, 0.25f, 1.0f));
+        uint _emittedFill = ImGui.ColorConvertFloat4ToU32(new Vector4(1.0f, 0.0f, 0.1f, 0.1f));
+        uint _detectedColour = ImGui.ColorConvertFloat4ToU32(new Vector4(0.0f, 0.0f, 1.0f, 0.1f));
+        
         private SensorDraw()
         {
             _draw_list = ImGui.GetWindowDrawList();
@@ -89,17 +108,19 @@ namespace Pulsar4X.Client
 
         internal override void Display()
         {
+            //_draw_list = ImGui.GetWindowDrawList();
             if(!IsActive || _selectedEntitySate == null || _selectedEntity == null)
                 return;
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(1500, 800));
-            if (ImGui.Begin("Sensor Display", ref IsActive))
+            
+            if (Window.Begin("Sensor Display: " + _selectedEntitySate.Name, ref IsActive))
             {
-
                 if (_selectedEntity.HasDataBlob<SensorAbilityDB>())
                 {
                     if (_selectedReceverAtb == null || ImGui.Button("refresh"))
                     {
                         SetSensorData();
+                        SetTargetData();
                     }
 
                     ImGui.Columns(2);
@@ -114,37 +135,23 @@ namespace Pulsar4X.Client
                     }
 
 
-                    ImGui.Text("lowest_x: " + lowestWave);
-                    ImGui.Text("highest_x: " + highestWave);
-                    ImGui.Text("lowest_y: " + lowestMag);
-                    ImGui.Text("highest_y: " + highestMag);
+                    ImGui.Text("rlowest_x: " + rlowestWave);
+                    ImGui.Text("rhighest_x: " + rhighestWave);
+                    ImGui.Text("rlowest_y: " + rlowestMag);
+                    ImGui.Text("rhighest_y: " + rhighestMag);
                     if (_targetSensorProfile != null)
                         ImGui.Text("target cross section: " + _targetSensorProfile.TargetCrossSection_msq);
-
-
-
-                    uint borderColour = ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 1.0f));
-
-                    uint receverColour = ImGui.ColorConvertFloat4ToU32(new Vector4(0.25f, 1.0f, 0.5f, 1.0f));
-                    uint receverFill = ImGui.ColorConvertFloat4ToU32(new Vector4(0.25f, 1.0f, 0.5f, 0.75f));
-
-                    uint reflectedColour = ImGui.ColorConvertFloat4ToU32(new Vector4(1.0f, 0.0f, 0.5f, 1.0f));
-                    uint reflectedFill = ImGui.ColorConvertFloat4ToU32(new Vector4(1.0f, 0.0f, 0.5f, 0.75f));
-
-                    uint emittedColour = ImGui.ColorConvertFloat4ToU32(new Vector4(1.0f, 0.0f, 0.25f, 1.0f));
-                    uint emittedFill = ImGui.ColorConvertFloat4ToU32(new Vector4(1.0f, 0.0f, 0.25f, 0.5f));
-
-                    uint detectedColour = ImGui.ColorConvertFloat4ToU32(new Vector4(0.0f, 0.0f, 1.0f, 0.75f));
+                    
 
                     ImGui.BeginChild("stuff");
 
-                    BorderGroup.Begin("Recevers:", borderColour);
+                    BorderGroup.Begin("Recevers:", _borderColour);
                     DisplayWavInfo(_receverDat);
                     BorderGroup.End();
 
                     if (_reflectDat != null)
                     {
-                        BorderGroup.Begin("Reflectors:", borderColour);
+                        BorderGroup.Begin("Reflectors:", _borderColour);
                         DisplayWavInfo(_reflectDat);
                         BorderGroup.End();
 
@@ -152,7 +159,7 @@ namespace Pulsar4X.Client
 
                     if (_emmittrDat != null)
                     {
-                        BorderGroup.Begin("Emmiters:", borderColour);
+                        BorderGroup.Begin("Emmiters:", _borderColour);
                         DisplayWavInfo(_emmittrDat);
                         BorderGroup.End();
 
@@ -160,7 +167,7 @@ namespace Pulsar4X.Client
 
                     if (_detectedDat != null)
                     {
-                        BorderGroup.Begin("Detected:", borderColour);
+                        BorderGroup.Begin("Detected:", _borderColour);
                         DisplayWavInfo(_detectedDat);
                         BorderGroup.End();
                     }
@@ -168,47 +175,51 @@ namespace Pulsar4X.Client
                     ImGui.EndChild();
 
                     ImGui.NextColumn();
-
-                    // ImDrawList API uses screen coordinates!
-                    System.Numerics.Vector2 canvas_pos = ImGui.GetCursorScreenPos();
-                    System.Numerics.Vector2 canvas_size = ImGui.GetContentRegionAvail();
-                    System.Numerics.Vector2 canvas_endPos = canvas_pos + canvas_size;
-                    System.Numerics.Vector2 waveBounds = new System.Numerics.Vector2((float)(highestWave - lowestWave), (float)(highestMag - lowestMag));
-
-                    _scalingFactor.X = 1 / (waveBounds.X / canvas_size.X);
-                    _scalingFactor.Y = 1 / (waveBounds.Y / canvas_size.Y);
-
-                    _translation.X = (float)(canvas_pos.X - lowestWave * _scalingFactor.X);
-                    _translation.Y = (float)(canvas_pos.Y - lowestMag * _scalingFactor.Y);
-
-                    _draw_list.AddRect(canvas_pos, canvas_endPos, borderColour);
-
-                    ImGui.Text("Scale:");
-                    ImGui.Text("X: " + _scalingFactor.X + " Y: " + _scalingFactor.Y);
-
-                    System.Numerics.Vector2 p0 = _translation + new System.Numerics.Vector2((float)lowestWave, (float)lowestMag) * _scalingFactor;
-                    System.Numerics.Vector2 p1 = _translation + new System.Numerics.Vector2((float)highestWave, (float)highestMag) * _scalingFactor;
-                    ImGui.Text("Box From: " + p0);
-                    ImGui.Text("Box To:   " + p1);
-
-                    DrawWav(_receverDat, receverFill);
-
-                    if (_reflectDat != null)
-                        DrawWav(_reflectDat, reflectedFill);
-                    if (_emmittrDat != null)
-                        DrawWav(_emmittrDat, emittedFill);
-                    if (_detectedDat != null)
-                        DrawWav(_detectedDat, detectedColour);
+                    Draw();
 
                 }
+                Window.End();
 
+            }
 
+            void Draw()
+            {
+                _draw_list = ImGui.GetWindowDrawList();
+                // ImDrawList API uses screen coordinates!
+                System.Numerics.Vector2 canvas_pos = ImGui.GetCursorScreenPos();
+                System.Numerics.Vector2 canvas_size = ImGui.GetContentRegionAvail();
+                System.Numerics.Vector2 canvas_endPos = canvas_pos + canvas_size;
+                System.Numerics.Vector2 waveBounds = new System.Numerics.Vector2((float)(rhighestWave - rlowestWave), (float)(rhighestMag - rlowestMag));
+
+                _scalingFactor.X = 1 / (waveBounds.X / canvas_size.X);
+                _scalingFactor.Y = 1 / (waveBounds.Y / canvas_size.Y);
+
+                _translation.X = (float)(canvas_pos.X - rlowestWave * _scalingFactor.X);
+                _translation.Y = (float)(canvas_pos.Y - rlowestMag * _scalingFactor.Y);
+
+                _draw_list.AddRect(canvas_pos, canvas_endPos, _borderColour);
+
+                ImGui.Text("Scale:");
+                ImGui.Text("X: " + _scalingFactor.X + " Y: " + _scalingFactor.Y);
+
+                System.Numerics.Vector2 p0 = _translation + new System.Numerics.Vector2((float)rlowestWave, (float)rlowestMag) * _scalingFactor;
+                System.Numerics.Vector2 p1 = _translation + new System.Numerics.Vector2((float)rhighestWave, (float)rhighestMag) * _scalingFactor;
+                ImGui.Text("Box From: " + p0);
+                ImGui.Text("Box To:   " + p1);
+
+                DrawWav(_receverDat, _receverFill);
+
+                if (_reflectDat != null)
+                    DrawWav(_reflectDat, _reflectedFill);
+                if (_emmittrDat != null)
+                    DrawWav(_emmittrDat, _emittedFill);
+                if (_detectedDat != null)
+                    DrawWav(_detectedDat, _detectedColour);
             }
 
             void DrawWav(WaveDrawData? wavesArry, uint colour)
             {
                 if(wavesArry == null) return;
-
                 for (int i = 0; i < wavesArry.Count; i++)
                 {
                     System.Numerics.Vector2 p0 = _translation + wavesArry.Points[i].p0 * _scalingFactor;
@@ -276,10 +287,10 @@ namespace Pulsar4X.Client
             void ResetBounds()
             {
                 if(_receverDat == null) return;
-                lowestWave = float.PositiveInfinity;
-                lowestMag = float.PositiveInfinity;
-                highestMag = float.NegativeInfinity;
-                highestWave = float.NegativeInfinity;
+                 rlowestWave = float.PositiveInfinity;
+                 rlowestMag = float.PositiveInfinity;
+                 rhighestMag = float.NegativeInfinity;
+                 rhighestWave = float.NegativeInfinity;
 
                 for (int i = 0; i < _receverDat.Count; i++)
                 {
@@ -287,18 +298,20 @@ namespace Pulsar4X.Client
                     {
                         float low = _receverDat.Points[i].p0.X;
                         float high = _receverDat.Points[i].p2.X;
-                        float mag1 = _receverDat.Points[i].p0.Y; //recever highest value
-                        float mag2 = _receverDat.Points[i].p1.Y; //recever lowest value
-                        if (low < lowestWave)
-                            lowestWave = low;
-                        if (high > highestWave)
-                            highestWave = high;
-                        if (mag1 > highestMag)
-                            highestMag = mag1;
-                        if (mag2 < lowestMag)
-                            lowestMag = mag2;
+                        float mag1 = _receverDat.Points[i].p0.Y; //recever Worst sensitivity/highest value
+                        float mag2 = _receverDat.Points[i].p1.Y; //recever Best sensitivity
+                        if (low < rlowestWave)
+                            rlowestWave = low;
+                        if (high > rhighestWave)
+                            rhighestWave = high;
+                        if (mag1 > rhighestMag)
+                            rhighestMag = mag1;
+                        if (mag2 < rlowestMag)
+                            rlowestMag = mag2;
                     }
                 }
+                _recDatWave = (rlowestWave, rhighestWave);
+                _recDatMag = (rlowestMag, rhighestMag);
 
                 if(_reflectDat != null)
                     ResetTargetBounds(_reflectDat);
@@ -310,6 +323,11 @@ namespace Pulsar4X.Client
 
             void ResetTargetBounds(WaveDrawData dat)
             {
+                 slowestWave = float.PositiveInfinity;
+                 slowestMag = float.PositiveInfinity;
+                 shighestMag = float.NegativeInfinity;
+                 shighestWave = float.NegativeInfinity;
+                
                 for (int i = 0; i < dat.Count; i++)
                 {
                     if(dat.IsWaveDrawn[i].drawSrc || dat.IsWaveDrawn[i].drawAtn)
@@ -320,26 +338,32 @@ namespace Pulsar4X.Client
                         float mag2 = dat.Points[i].p1.Y; //xmit highest value
                         float mag3 = dat.Points[i].p3.Y; //xmit 2nd highest value
 
-                        if (low < lowestWave)
-                            lowestWave = low;
-                        if (high > highestWave)
-                            highestWave = high;
-
-                        if (mag1 < lowestMag) //will likely be 0
-                            lowestMag = mag1;
+                        
+                        
+                        if (low < slowestWave)
+                            slowestWave = low;
+                        if (high > shighestWave)
+                            shighestWave = high;
+                        if (mag1 > shighestMag)
+                            shighestMag = mag1;
+                        if (mag2 < slowestMag)
+                            slowestMag = mag2;
+                        
 
                         if(dat.IsWaveDrawn[i].drawSrc)
                         {
-                            if (mag2 > highestMag)
-                                highestMag = mag2;
+                            if (mag2 > shighestMag)
+                                shighestMag = mag2;
                         }
                         if(dat.IsWaveDrawn[i].drawAtn)
                         {
-                            if (mag3 > highestMag)
-                                highestMag = mag3;
+                            if (mag3 > shighestMag)
+                                shighestMag = mag3;
                         }
                     }
                 }
+                _sigDatWave = (slowestWave, shighestWave);
+                _sigDatMag = (slowestMag, shighestMag);
             }
 
 
@@ -404,9 +428,9 @@ namespace Pulsar4X.Client
             void SetTargetData()
             {
                 if(_selectedReceverAtb == null) return;
-
+                
                 _targetSensorProfile = _targetEntity.GetDataBlob<SensorProfileDB>();
-                _targetSensorProfile.SetReflectionProfile(_uiState.PrimarySystemDateTime);
+                SensorProfileTools.SetReflectionProfile(_targetSensorProfile, _uiState.PrimarySystemDateTime);
                 var emitted = _targetSensorProfile.EmittedEMSpectra;
                 var reflected = _targetSensorProfile.ReflectedEMSpectra;
 
@@ -478,5 +502,106 @@ namespace Pulsar4X.Client
         public (System.Numerics.Vector2 p0, System.Numerics.Vector2 p1, System.Numerics.Vector2 p2, System.Numerics.Vector2 p3)[] Points = new (System.Numerics.Vector2, System.Numerics.Vector2, System.Numerics.Vector2, System.Numerics.Vector2)[0];
         public (bool drawSrc, bool drawAtn)[] IsWaveDrawn = new (bool, bool)[0];
         public uint[]? _receverColours;
+        
+    }
+
+
+    public class SensorData : PulsarGuiWindow
+    {
+        private EntityState? _selectedEntitySate;
+        private Entity? _selectedEntity => _selectedEntitySate?.Entity;
+        private SystemState? _selectedStarSysState;
+
+        private SensorAbilityDB _abilityDB;
+        
+        internal static SensorData GetInstance()
+        {
+            SensorData instance;
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(SensorData)))
+                instance = new SensorData();
+            else
+            {
+                instance = (SensorData)_uiState.LoadedWindows[typeof(SensorData)];
+                if(_uiState.LastClickedEntity?.Entity != null)
+                    instance._selectedEntitySate = _uiState.LastClickedEntity;
+            }
+            if(instance._selectedEntitySate != null)
+            {
+                if (_uiState.LastClickedEntity?.Entity != null && instance._selectedEntity != _uiState.LastClickedEntity.Entity)
+                    instance._selectedEntitySate = _uiState.LastClickedEntity;
+            }
+            else
+            {
+                if(_uiState.LastClickedEntity?.Entity != null)
+                    instance._selectedEntitySate = _uiState.LastClickedEntity;
+            }
+
+            if (_uiState.IsGameLoaded && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
+                instance._selectedStarSysState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+            else
+                instance._selectedStarSysState = null;
+            
+            if (instance._abilityDB == null || instance._abilityDB.OwningEntity != instance._selectedEntity)
+            {
+                instance.Setup();
+            }
+            return instance;
+        }
+        internal override void Display()
+        {
+            if(!IsActive || _selectedEntitySate == null || _selectedEntity == null)
+                return;
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(1500, 800));
+
+            if (Window.Begin("Sensor Display: " + _selectedEntitySate.Name, ref IsActive))
+            {
+                if (_abilityDB != null)
+                {
+                    if (ImGui.Button("Scan"))
+                    {
+                        var ss = new SensorScan();
+                        ss.TriggerProcess(_selectedEntity, _selectedStarSysState.StarSystem.StarSysDateTime);
+                    }
+                    
+                    foreach (var data in _abilityDB.CurrentContacts)
+                    {
+                        string tgtname = data.entity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
+                        var targetSensorProfile = data.entity.GetDataBlob<SensorProfileDB>();
+                        ImGui.Text(tgtname);
+                        ImGui.Text("Strength:");
+                        ImGui.SameLine();
+                        ImGui.Text(Stringify.Power(data.Item2.SignalStrength_kW));
+                        ImGui.Text("Quality:");
+                        ImGui.SameLine();
+                        ImGui.Text(data.returnValues.SignalQuality.Percent.ToString());
+                        
+                        var emitted = targetSensorProfile.EmittedEMSpectra;
+                        var reflected = targetSensorProfile.ReflectedEMSpectra;
+                        /*
+                        var range = _selectedEntity.GetDataBlob<PositionDB>().GetDistanceTo_m(data.entity.GetDataBlob<PositionDB>());
+                        var attenuatedWaveForms =  SensorTools.AttenuatedForDistance(targetSensorProfile, range);
+                        foreach (var wf in attenuatedWaveForms)
+                        {
+                            ImGui.Text("Signal Strength: " + Stringify.Power(wf.Value));
+                        }
+                        */
+                    }
+                }
+                
+                
+                Window.End();
+            }
+        }
+
+        void Setup()
+        {
+            if(_selectedEntity == null)
+                return;
+            if (_selectedEntity.TryGetDataBlob<SensorAbilityDB>(out var sensorData))
+            {
+                _abilityDB = sensorData;
+            }
+        }
+            
     }
 }

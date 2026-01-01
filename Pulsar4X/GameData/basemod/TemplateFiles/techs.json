@@ -505,5 +505,42 @@
         ]
       }
     }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-panel-efficiency",
+      "Name": "Solar Panel Efficiency",
+      "Description": "Improves the base absorption efficiency of solar panels",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 10,
+      "DataFormula": "0.1 + [Level] * 0.05",
+      "CostFormula": "(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-panel-bandwidth",
+      "Name": "Solar Panel Bandwidth",
+      "Description": "Increases the maximum tunable bandwidth for solar panels",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 10,
+      "DataFormula": "300 + [Level] * 100",
+      "CostFormula": "(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-panel-density",
+      "Name": "Solar Panel Density",
+      "Description": "Reduces the mass per square meter of solar panels",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 10,
+      "DataFormula": "0.2 - [Level] * 0.01",
+      "CostFormula": "(1 + [Level]) * 500"
+    }
   }
+  
 ]

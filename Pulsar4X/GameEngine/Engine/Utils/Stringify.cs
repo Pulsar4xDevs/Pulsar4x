@@ -108,7 +108,11 @@ namespace Pulsar4X.Engine
                 amountInKw = amountInKw * 0.001;
                 stringPower = amountInKw.ToString(format) + " MW";
             }
-            else if (amountInKw < 0.1)
+            else if (amountInKw > 0.1)
+            {
+                stringPower = amountInKw.ToString(format) + " kW";
+            }
+            else if (amountInKw > 0.001)
             {
                 amountInKw = amountInKw * 1000;
                 stringPower = amountInKw.ToString(format) + " W";

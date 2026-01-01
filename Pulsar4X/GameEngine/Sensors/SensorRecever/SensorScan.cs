@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Colonies;
+using Pulsar4X.Energy;
 using Pulsar4X.Engine;
 using Pulsar4X.Movement;
 
@@ -10,6 +12,10 @@ namespace Pulsar4X.Sensors
     public class SensorScan : IInstanceProcessor
     {
 
+        public void TriggerProcess(Entity entity, DateTime atDateTime)
+        {
+            ProcessEntity(entity, atDateTime);
+        }
         //TODO: ReWrite this, instead of each component trying to do a scan,
         //multiple components should mix together to form a single suite and the ship itself should scan.
         //maybe the scan freqency /attribute.scanTime should just effect the chance of a detection.
@@ -23,27 +29,33 @@ namespace Pulsar4X.Sensors
             var position = entity.GetDataBlob<PositionDB>();//recever is a componentDB. not a shipDB
             if (position == null) //then it's probilby a colony
                 position = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<PositionDB>();
-
-            if( entity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<SensorReceiverAtb>(out var receivers))
+            
+            if( entity.TryGetDataBlob<SensorAbilityDB>(out var sensorAbility))
             {
                 var detectableEntitys = manager.GetAllEntitiesWithDataBlob<SensorProfileDB>();
-
-                foreach (var receiver in receivers)
+                sensorAbility.CurrentContacts = new List<(Entity, SensorReturnValues)>();
+                for(int i = 0; i < sensorAbility.InstanceStates.Count; i++)
                 {
-                    var sensorAbl = receiver.GetAbilityState<SensorReceiverAbility>();
-                    var sensorAtb = receiver.Design.GetAttribute<SensorReceiverAtb>();
+                    var sensorAbl = sensorAbility.InstanceStates[i];
+                    var sensorAtb = sensorAbility.InstanceAtributes[i];
                     var sensorMgr = manager.GetSensorContacts(entity.FactionOwnerID);
                     var detections = SensorTools.GetDetectedEntites(sensorAtb, position.AbsolutePosition, detectableEntitys, atDateTime, faction.Id, true);
-
+                    
                     SensorInfoDB sensorInfo;
-                    for (int i = 0; i < detections.Length; i++)
+                    for (int j = 0; j < detections.Length; j++)
                     {
-                        var detectionValues = detections[i];
-                        var detectableEntity = detectableEntitys[i];
-
+                        var detectionValues = detections[j];
+                        var detectableEntity = detectableEntitys[j];
+                        sensorAbility.CurrentContacts.Add((detectableEntity, detectionValues));
                         if (detectionValues.SignalStrength_kW > 0.0)
                         {
-                            if (sensorMgr.SensorContactExists(detectableEntity.Id))
+                            
+                            if (sensorAtb.IsEnergyGen)//if solar array not sensor
+                            {
+                                var genAbil = entity.GetDataBlob<EnergyGenAbilityDB>();
+                                genAbil.LocalFuel = genAbil.TotalFuelUseAtMax.maxUse * sensorAtb.ScanTime;
+                            }
+                            else if (sensorMgr.SensorContactExists(detectableEntity.Id))
                             {
                                 //sensorInfo = knownContacts[detectableEntity.ID].GetDataBlob<SensorInfoDB>();
                                 sensorInfo = sensorMgr.GetSensorContact(detectableEntity.Id).SensorInfo;

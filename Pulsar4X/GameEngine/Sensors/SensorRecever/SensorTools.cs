@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Extensions;
@@ -45,66 +46,7 @@ namespace Pulsar4X.Sensors
 
             return detectionValues;
         }
-
-        /*
-        internal static void DetectEntites(SystemSensorContacts sensorMgr, FactionInfoDB factionInfo, PositionDB receverPos, SensorReceiverAtb receverDB, Entity detectableEntity, DateTime atDate)
-        {
-            Entity receverFaction = sensorMgr.FactionId;
-            //Entity receverFaction;// = receverDB.OwningEntity.GetDataBlob<OwnedDB>().OwnedByFaction;
-            //detectableEntity.Manager.FindEntityByGuid(receverDB.OwningEntity.FactionOwner, out receverFaction);
-            var knownContacts = factionInfo.SensorContacts; //receverFaction.GetDataBlob<FactionInfoDB>().SensorEntites;
-            var knownContacts1 = sensorMgr.GetAllContacts();
-
-
-            SensorProfileDB sensorProfile = detectableEntity.GetDataBlob<SensorProfileDB>();
-
-            TimeSpan timeSinceLastCalc = atDate - sensorProfile.LastDatetimeOfReflectionSet;
-            PositionDB positionOfSensorProfile = detectableEntity.GetDataBlob<PositionDB>();//sensorProfile.OwningEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();
-            double distanceSinceLastCalc = sensorProfile.LastPositionOfReflectionSet.GetDistanceTo_m(positionOfSensorProfile);
-
-            //Only set the reflectedEMProfile of the target if it's not been done recently:
-            //TODO: is this still neccicary now that I've found and fixed the loop? (refelctions were getting bounced around)
-            if (timeSinceLastCalc > TimeSpan.FromMinutes(30) || distanceSinceLastCalc > 5000) //TODO: move the time and distance numbers here to settings?
-                sensorProfile.SetReflectionProfile(atDate);
-
-
-
-            PositionDB targetPosition;
-            if (detectableEntity.HasDataBlob<PositionDB>())
-                targetPosition = detectableEntity.GetDataBlob<PositionDB>();
-            else throw new Exception("This Object does not have a position.");
-
-            var distance = receverPos.GetDistanceTo_m(targetPosition);
-            SensorReturnValues detectionValues = DetectonQuality(receverDB, AttenuatedForDistance(sensorProfile, distance));
-            SensorInfoDB sensorInfo;
-            if (detectionValues.SignalStrength_kW > 0.0)
-            {
-                if (sensorMgr.SensorContactExists(detectableEntity.Id))
-                {
-                    //sensorInfo = knownContacts[detectableEntity.ID].GetDataBlob<SensorInfoDB>();
-                    sensorInfo = sensorMgr.GetSensorContact(detectableEntity.Id).SensorInfo;
-                    sensorInfo.LatestDetectionQuality = detectionValues;
-                    sensorInfo.LastDetection = atDate;
-                    if (sensorInfo.HighestDetectionQuality.SignalQuality < detectionValues.SignalQuality)
-                        sensorInfo.HighestDetectionQuality.SignalQuality = detectionValues.SignalQuality;
-
-                    if (sensorInfo.HighestDetectionQuality.SignalStrength_kW < detectionValues.SignalStrength_kW)
-                        sensorInfo.HighestDetectionQuality.SignalStrength_kW = detectionValues.SignalStrength_kW;
-                    SensorEntityFactory.UpdateSensorContact(receverFaction, sensorInfo);
-                }
-                else
-                {
-                    SensorContact contact = new SensorContact(receverFaction, detectableEntity, atDate);
-                    sensorMgr.AddContact(contact);
-
-
-                    //knownContacts.Add(detectableEntity.ID, SensorEntityFactory.UpdateSensorContact(receverFaction, sensorInfo)); moved this line to the SensorInfoDB constructor
-                }
-
-            }
-        }
-        */
-
+        
         public static SensorReturnValues DetectonQuality(SensorReceiverAtb recever, Dictionary<EMWaveForm, double> signalAtPosition)
         {
             /*
@@ -242,6 +184,39 @@ namespace Pulsar4X.Sensors
             };
         }
 
+        /// <summary>
+        /// Clears recever InstanceAtributes and InstanceStates lists from the SensorAbilityDB and re-adds the attributes and states.
+        /// </summary>
+        /// <param name="entity"></param>
+        internal static void SetInstances(Entity entity)
+        {
+
+            if (entity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<SensorReceiverAtb>(out var receivers))
+            {
+                if (!entity.TryGetDataBlob<SensorAbilityDB>(out var abilityDB))
+                {
+                    abilityDB = new SensorAbilityDB();
+                    entity.SetDataBlob(abilityDB);
+                }
+                
+                abilityDB.InstanceAtributes = new ();
+                abilityDB.InstanceStates = new ();
+                foreach (var receiverInstance in receivers)
+                {
+                    //we're cloning the design to the instance here.
+                    if (!receiverInstance.TryGetAbilityState<SensorReceiverAbility>(out var abilityState))
+                    {
+                        abilityState = new SensorReceiverAbility(receiverInstance);
+                        receiverInstance.SetAbilityState<SensorReceiverAbility>(abilityState);
+                    }
+                    //add the state to a list in the SensorAbilityDB
+                    abilityDB.InstanceStates.Add(abilityState);
+                    //add the SensorReceiverAtb to a list in the SensorAbilityDB
+                    var sensorAtb = receiverInstance.Design.GetAttribute<SensorReceiverAtb>();
+                    abilityDB.InstanceAtributes.Add(sensorAtb);
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the line intersection.
@@ -319,7 +294,7 @@ namespace Pulsar4X.Sensors
         /// </summary>
         /// <returns>souce / (4 pi r^2)</returns>
         /// <param name="sourceValue">Source value.</param>
-        /// <param name="distance">Distance. must be > 0.3 or it'll just return the source value</param>
+        /// <param name="distance">Distance. must be > 1 or it'll just return the source value</param>
         public static double AttenuationCalc(double sourceValue, double distance)
         {
             // source / (4 pi r^2)
@@ -330,8 +305,8 @@ namespace Pulsar4X.Sensors
             // dividing by 4pi r^2 makes it incredibly hard to detect things from far away
             // even if they have large signatures. For example, using this formula the default
             // sensor on Earth doesn't detect Uranus or Neptune.
-            //return sourceValue / (4 * Math.PI * distance * distance);
-            return sourceValue;
+            return sourceValue / (4 * Math.PI * distance * distance);
+            //return sourceValue;
         }
 
         /// <summary>

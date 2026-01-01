@@ -282,6 +282,12 @@ namespace Pulsar4X.Client
             {
                 SensorDraw.GetInstance().ToggleActive();
             }
+            
+            bool sensorActive2 = SensorData.GetInstance().GetActive();
+            if (ImGui.Checkbox("Show Sensor Draw2", ref sensorActive2))
+            {
+                SensorData.GetInstance().ToggleActive();
+            }
 
             bool debugGUIActive = DebugGUIWindow.GetInstance().GetActive();
             if (ImGui.Checkbox("Show Pulsar GUI Debug Window", ref debugGUIActive))

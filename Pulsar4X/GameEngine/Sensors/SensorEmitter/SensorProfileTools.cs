@@ -6,9 +6,9 @@ using Pulsar4X.Movement;
 
 namespace Pulsar4X.Sensors;
 
-public static class SensorProfileDBExtensions
+public static class SensorProfileTools
 {
-    public static void SetReflectionProfile(this SensorProfileDB sensorProfileDB, DateTime atDateTime)
+    public static void SetReflectionProfile(SensorProfileDB sensorProfileDB, DateTime atDateTime)
     {
         var entity = sensorProfileDB.OwningEntity;
         var position = sensorProfileDB.OwningEntity.GetDataBlob<PositionDB>();
@@ -37,10 +37,9 @@ public static class SensorProfileDBExtensions
             double distance = position.GetDistanceTo_m(emittingEntity.GetDataBlob<PositionDB>());
             if (distance < 1)
                 distance = 1;
-
-            var drad = Math.Sin(tRad / distance);
-            var srad = Math.Sin(drad) * tRad;
-            var surfaceArea = Math.PI * srad * srad;
+            
+            double surfaceArea = Math.PI * tRad * tRad;
+            
             double reflectionCoefficent = surfaceArea * sensorProfileDB.Reflectivity;
 
             foreach (var emitedItem in emmissionDB.EmittedEMSpectra)

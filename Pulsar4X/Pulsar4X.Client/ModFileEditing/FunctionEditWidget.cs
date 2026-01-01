@@ -98,11 +98,11 @@ namespace Pulsar4X.Client.ModFileEditing
 
             if (uniqueLabel != _editingID)
             {
-                ImGui.Text(expression ?? "");
+                ImGui.Text(expression ?? "null");
                 if (ImGui.IsItemClicked())
                 {
                     _editingID = uniqueLabel;
-                    string initExpr = expression ?? "";
+                    string initExpr = expression ?? "null";
                     _strInputBuffer = Utils.BytesFromString(initExpr);
                     ImGui.SetKeyboardFocusHere(0);
                     ValidateExpression(initExpr);
