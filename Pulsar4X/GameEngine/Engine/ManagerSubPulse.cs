@@ -331,7 +331,7 @@ namespace Pulsar4X.Engine
 
                     Performance.Start(processor.GetType().Name);
                     CurrentProcess = s;
-                    processor.ProcessEntity(e, _subStepDateTime);
+                    processor.ProcessEntity(e, qi.Time);
                     Performance.Stop(processor.GetType().Name);
                 }
 
