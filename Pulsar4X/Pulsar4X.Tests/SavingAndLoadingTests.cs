@@ -104,12 +104,10 @@ namespace Pulsar4X.Tests
                     }
                 }
 
-                Assert.AreEqual(saved.ManagerSubpulses.InstanceProcessorsQueue.Count, loaded.ManagerSubpulses.InstanceProcessorsQueue.Count, "Star System Queued Processes Count");
-                Assert.AreEqual(saved.ManagerSubpulses.GetTotalNumberOfProceses(), loaded.ManagerSubpulses.GetTotalNumberOfProceses(), "Star System Subpulse Count");
+                Assert.AreEqual(saved.ManagerSubpulses.InstanceProcessorsQueue.Count(), loaded.ManagerSubpulses.InstanceProcessorsQueue.Count(), "Star System Queued Processes Count");
             }
 
             Assert.AreEqual(_game.GameMasterFaction.Id, loadedGame.GameMasterFaction.Id, "Game Master Fation Guid");
         }
-
     }
 }

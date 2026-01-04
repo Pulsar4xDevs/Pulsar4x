@@ -848,20 +848,18 @@ namespace Pulsar4X.Client
             if(ImGui.BeginTabItem("Instance Processors"))
             {
                 ImGui.Columns(3);
-                foreach(var (dateTime, processSet) in SystemState.StarSystem.ManagerSubpulses.InstanceProcessorsQueue.ToArray())
+                foreach (var qi in SystemState.StarSystem.ManagerSubpulses.InstanceProcessorsQueue)
                 {
-                    if(processSet.Count > 0)
-                        ImGui.Separator();
+                    var instanceProcess = qi.Item;
+                    var s = instanceProcess.Item1;
+                    var e = instanceProcess.Item2;
 
-                    foreach(var thing in processSet.ToArray())
-                    {
-                        ImGui.Text(dateTime.ToString());
-                        ImGui.NextColumn();
-                        ImGui.Text("Instance (" + thing.Value.Count + ")");
-                        ImGui.NextColumn();
-                        ImGui.Text(thing.Key);
-                        ImGui.NextColumn();
-                    }
+                    ImGui.Text(qi.Time.ToString());
+                    ImGui.NextColumn();
+                    ImGui.Text(s);
+                    ImGui.NextColumn();
+                    ImGui.Text(e.DebuggerDisplay);
+                    ImGui.NextColumn();
                 }
 
                 ImGui.EndTabItem();
