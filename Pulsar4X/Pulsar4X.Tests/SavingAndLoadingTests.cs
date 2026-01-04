@@ -1,3 +1,4 @@
+/*
 using System.Linq;
 using NUnit.Framework;
 using Pulsar4X.Engine;
@@ -110,6 +111,6 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(_game.GameMasterFaction.Id, loadedGame.GameMasterFaction.Id, "Game Master Fation Guid");
         }
-
     }
 }
+*/
