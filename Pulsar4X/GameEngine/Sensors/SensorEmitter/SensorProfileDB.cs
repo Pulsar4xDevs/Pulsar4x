@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Pulsar4X.Components;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Galaxy;
 
 namespace Pulsar4X.Sensors
@@ -63,13 +65,15 @@ namespace Pulsar4X.Sensors
         /// </summary>
         /// <key>defines the average and dropout wavelengths in nanometers</key>
         /// <value>the volume or magnatude of the spectra</value>
-        public Dictionary<EMWaveForm, double> EmittedEMSpectra { get; } = new Dictionary<EMWaveForm, double>();
+        //public Dictionary<EMWaveForm, double> EmittedEMSpectra { get; } = new Dictionary<EMWaveForm, double>();
 
+        public List<EMData> EmittedEMSpectra = new();
         public SensorProfileDB() { }
 
         public SensorProfileDB(SensorProfileDB db)
         {
-            EmittedEMSpectra = new Dictionary<EMWaveForm, double>(db.EmittedEMSpectra);
+            //EmittedEMSpectra = new Dictionary<EMWaveForm, double>(db.EmittedEMSpectra);
+            EmittedEMSpectra = new List<EMData>( db.EmittedEMSpectra);
             ReflectedEMSpectra = new Dictionary<EMWaveForm, double>(db.ReflectedEMSpectra);
             _targetCrossSection = db._targetCrossSection;
         }
@@ -78,5 +82,32 @@ namespace Pulsar4X.Sensors
         {
             return new SensorProfileDB(this);
         }
+    }
+
+    public struct EMData
+    {
+        internal ComponentInstance Instance;
+        public EMWaveForm WaveForm;
+        public double Magnitude;
+        public float StateLoad
+        {
+            get
+            {
+                if (Instance != null)
+                    return Instance.ComponentLoadPercent;
+                else return 1;
+            }
+        }
+
+        public string GetName
+        {
+            get
+            {
+                if(Instance != null)
+                    return Instance.Name;
+                else return "unknown";
+            }
+        }
+
     }
 }

@@ -271,8 +271,8 @@ namespace Pulsar4X.Sensors
             var dict = new Dictionary<EMWaveForm, double>();
             foreach (var emitedItem in emissionProfile.EmittedEMSpectra)
             {
-                var powerAtDistance = AttenuationCalc(emitedItem.Value, distance);
-                dict.Add(emitedItem.Key, powerAtDistance);
+                var powerAtDistance = AttenuationCalc(emitedItem.Magnitude, distance);
+                dict.Add(emitedItem.WaveForm, powerAtDistance);
             }
             foreach (var reflectedItem in emissionProfile.ReflectedEMSpectra)
             {
@@ -331,13 +331,20 @@ namespace Pulsar4X.Sensors
             var emisionSignature = new SensorProfileDB() {
 
             };
-            emisionSignature.EmittedEMSpectra.Add(waveform, magnitudeInKW);// this will need adjusting...
+            EMData emdata = new EMData()
+            {
+                WaveForm = waveform,
+                Magnitude = magnitudeInKW,
+            };
+                
+            emisionSignature.EmittedEMSpectra.Add(emdata);
 
             return emisionSignature;
         }
 
         /// <summary>
         /// probibly only needs to be done at entity creation, once the bodies mass is set.
+        /// some of this should be taken out and done with reflective.
         /// </summary>
         /// <returns>The emmision sig.</returns>
         /// <param name="sysBodyInfoDB">Sys body info db.</param>
@@ -359,8 +366,12 @@ namespace Pulsar4X.Sensors
             //-400 & +600, semi arbitrary number pulled outa my ass from 0min of internet research.
             EMWaveForm waveform = new EMWaveForm(wavelength - 400, wavelength, wavelength + 600);
 
-
-            profile.EmittedEMSpectra.Add(waveform, magnitude);//TODO this may need adjusting to make good balanced detections.
+            EMData emdata = new EMData()
+            {
+                WaveForm = waveform,
+                Magnitude = magnitude,
+            };
+            profile.EmittedEMSpectra.Add(emdata);//TODO this may need adjusting to make good balanced detections.
             profile.Reflectivity = sysBodyInfoDB.Albedo;
         }
 

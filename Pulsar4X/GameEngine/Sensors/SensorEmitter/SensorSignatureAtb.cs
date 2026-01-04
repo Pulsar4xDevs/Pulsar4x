@@ -53,23 +53,7 @@ namespace Pulsar4X.Sensors
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            if (!parentEntity.HasDataBlob<SensorProfileDB>())
-                parentEntity.SetDataBlob(new SensorProfileDB());
-
-            if (PartWaveForm.WavelengthAverage_nm == 0)
-            {
-            }
-
-            SensorProfileDB _PartSensorProfile = parentEntity.GetDataBlob<SensorProfileDB>();
-
-            if(_PartSensorProfile.EmittedEMSpectra.ContainsKey(PartWaveForm))
-            {
-                _PartSensorProfile.EmittedEMSpectra[PartWaveForm] = _PartSensorProfile.EmittedEMSpectra[PartWaveForm] + PartWaveFormMag;
-            }
-            else
-                _PartSensorProfile.EmittedEMSpectra.Add(PartWaveForm, PartWaveFormMag);
-
-            parentEntity.SetDataBlob<SensorProfileDB>(_PartSensorProfile);
+            SensorProfileTools.SetEmmissionProfile(parentEntity);
         }
 
         public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)

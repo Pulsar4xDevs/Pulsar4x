@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Galaxy;
@@ -8,6 +10,39 @@ namespace Pulsar4X.Sensors;
 
 public static class SensorProfileTools
 {
+
+    public static void SetEmmissionProfile(Entity parentEntity)
+    {
+        
+        if (!parentEntity.TryGetDataBlob<SensorProfileDB>(out var sensorProfileDB))
+        {
+            sensorProfileDB = new SensorProfileDB();
+            parentEntity.SetDataBlob<SensorProfileDB>(sensorProfileDB);
+        }
+        ComponentInstancesDB components = parentEntity.GetDataBlob<ComponentInstancesDB>();
+        sensorProfileDB.EmittedEMSpectra.Clear();
+        
+        if (components.TryGetComponentsByAttribute<SensorSignatureAtb>(out var componentInstances))
+        {
+            foreach (var instance in componentInstances)
+            {
+                var atts = instance.GetAttributes();
+                var sensorAtb = (SensorSignatureAtb)atts[typeof(SensorSignatureAtb)];
+                var partWaveForm = sensorAtb.PartWaveForm;
+                var partWaveFormMag = sensorAtb.PartWaveFormMag;
+                
+                var emdata = new EMData()
+                {
+                    Instance = instance, 
+                    WaveForm = partWaveForm,
+                    Magnitude = partWaveFormMag,
+                };
+
+                sensorProfileDB.EmittedEMSpectra.Add(emdata);
+            }
+        }
+    }
+
     public static void SetReflectionProfile(SensorProfileDB sensorProfileDB, DateTime atDateTime)
     {
         var entity = sensorProfileDB.OwningEntity;
@@ -24,11 +59,11 @@ public static class SensorProfileTools
         if (entity.HasDataBlob<MassVolumeDB>())
             tRad = entity.GetDataBlob<MassVolumeDB>().RadiusInM;
 
-        var emmiters = entity.Manager.GetAllDataBlobsOfType<SensorProfileDB>();
-        int numberOfEmmitters = emmiters.Count;
-        foreach (var emmissionDB in emmiters)
+        var profiles = entity.Manager.GetAllDataBlobsOfType<SensorProfileDB>();
+        
+        foreach (var profileDB in profiles)
         {
-            var emittingEntity = emmissionDB.OwningEntity;
+            var emittingEntity = profileDB.OwningEntity;
 
             // onlyl reflect valid entities and not ourself
             if(emittingEntity == Entity.InvalidEntity || emittingEntity == entity)
@@ -42,24 +77,24 @@ public static class SensorProfileTools
             
             double reflectionCoefficent = surfaceArea * sensorProfileDB.Reflectivity;
 
-            foreach (var emitedItem in emmissionDB.EmittedEMSpectra)
+            foreach (var emitedItem in profileDB.EmittedEMSpectra)
             {
                 //TODO: we're ignoring anything under a petawatt(pre attenuated) for reflection.
                 //we may have to balance this later, maybe add a flag in the emmissionDB or a seperate dictionary for stuff that should be reflected.
                 //picking up ALL emmisions for reflection is probabily overkill/too much ui data/too much processing.
-                if(emitedItem.Value < 1e+12)
+                if(emitedItem.Magnitude < 1e+12)
                     continue;
                 
-                var attenuated = SensorTools.AttenuationCalc(emitedItem.Value, distance);//per meter^2
+                var attenuated = SensorTools.AttenuationCalc(emitedItem.Magnitude, distance);//per meter^2
                 var reflectedMagnatude = attenuated * reflectionCoefficent;
 
 
                 //debug code:
-                if (emitedItem.Value < 0)
+                if (emitedItem.Magnitude < 0)
                     throw new Exception("Source should not be less than 0");
-                if(attenuated > emitedItem.Value)
+                if(attenuated > emitedItem.Magnitude)
                     throw new Exception("Attenuated value shoudl be less than source");
-                if(reflectedMagnatude > emitedItem.Value)
+                if(reflectedMagnatude > emitedItem.Magnitude)
                 {
                     // var source = Stringify.Power(emitedItem.Value);
                     // var reflec = Stringify.Power(reflectedMagnatude);
@@ -69,7 +104,7 @@ public static class SensorProfileTools
                     //throw new Exception("final magnitude shoudl not be more than source");
                     //TODO: there's got to be a better way of calculating this. for now I'm just going to hack it.
 
-                    reflectedMagnatude = emitedItem.Value * sensorProfileDB.Reflectivity;
+                    reflectedMagnatude = emitedItem.Magnitude * sensorProfileDB.Reflectivity;
 
                 }
                 if(reflectedMagnatude < 0)
@@ -77,12 +112,12 @@ public static class SensorProfileTools
 
                 if(reflectedMagnatude > 0.001) //ignore it if the signal is less than a watt
                 {
-                    if (sensorProfileDB.ReflectedEMSpectra.ContainsKey(emitedItem.Key))
+                    if (sensorProfileDB.ReflectedEMSpectra.ContainsKey(emitedItem.WaveForm))
                     {
-                        sensorProfileDB.ReflectedEMSpectra[emitedItem.Key] = sensorProfileDB.ReflectedEMSpectra[emitedItem.Key] + reflectedMagnatude;
+                        sensorProfileDB.ReflectedEMSpectra[emitedItem.WaveForm] = sensorProfileDB.ReflectedEMSpectra[emitedItem.WaveForm] + reflectedMagnatude;
                     }
                     else
-                        sensorProfileDB.ReflectedEMSpectra.Add(emitedItem.Key, reflectedMagnatude);
+                        sensorProfileDB.ReflectedEMSpectra.Add(emitedItem.WaveForm, reflectedMagnatude);
                 }
             }
         }

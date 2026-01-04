@@ -496,7 +496,7 @@ namespace Pulsar4X.Client
             ImGui.Text("Emmitted");
             foreach (var kvp in db.EmittedEMSpectra)
             {
-                DisplayValues(kvp.Key, kvp.Value);
+                DisplayValues(kvp.WaveForm, kvp.Magnitude);
             }
 
             ImGui.Text("By Component:");
