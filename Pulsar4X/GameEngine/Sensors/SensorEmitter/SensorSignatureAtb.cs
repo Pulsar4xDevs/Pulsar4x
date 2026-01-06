@@ -53,7 +53,7 @@ namespace Pulsar4X.Sensors
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            SensorProfileTools.SetEmmissionProfile(parentEntity);
+            SensorProfileTools.SetProfileDB(parentEntity);
         }
 
         public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)

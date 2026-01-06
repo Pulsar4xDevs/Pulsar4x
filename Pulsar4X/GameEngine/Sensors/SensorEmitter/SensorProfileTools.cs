@@ -11,7 +11,7 @@ namespace Pulsar4X.Sensors;
 public static class SensorProfileTools
 {
 
-    public static void SetEmmissionProfile(Entity parentEntity)
+    public static void SetProfileDB(Entity parentEntity)
     {
         
         if (!parentEntity.TryGetDataBlob<SensorProfileDB>(out var sensorProfileDB))
@@ -43,7 +43,7 @@ public static class SensorProfileTools
         }
     }
 
-    public static void SetReflectionProfile(SensorProfileDB sensorProfileDB, DateTime atDateTime)
+    public static void UpdateReflectionProfile(SensorProfileDB sensorProfileDB, DateTime atDateTime)
     {
         var entity = sensorProfileDB.OwningEntity;
         var position = sensorProfileDB.OwningEntity.GetDataBlob<PositionDB>();
@@ -51,14 +51,7 @@ public static class SensorProfileTools
         sensorProfileDB.LastPositionOfReflectionSet = position.AbsolutePosition;
         sensorProfileDB.LastDatetimeOfReflectionSet = atDateTime;
         sensorProfileDB.ReflectedEMSpectra.Clear();
-
-        //PercentValue reflectionPercent = 0.1f; //TODO: this should be calculated from crossSection(size), and a reflectivity value(stealth armor?/ other design factors?).
-        //var surfaceArea = sensorSig.TargetCrossSection_msq;
-
-        double tRad = 500;
-        if (entity.HasDataBlob<MassVolumeDB>())
-            tRad = entity.GetDataBlob<MassVolumeDB>().RadiusInM;
-
+        
         var profiles = entity.Manager.GetAllDataBlobsOfType<SensorProfileDB>();
         
         foreach (var profileDB in profiles)
@@ -73,10 +66,6 @@ public static class SensorProfileTools
             if (distance < 1)
                 distance = 1;
             
-            double surfaceArea = Math.PI * tRad * tRad;
-            
-            double reflectionCoefficent = surfaceArea * sensorProfileDB.Reflectivity;
-
             foreach (var emitedItem in profileDB.EmittedEMSpectra)
             {
                 //TODO: we're ignoring anything under a petawatt(pre attenuated) for reflection.
@@ -86,9 +75,8 @@ public static class SensorProfileTools
                     continue;
                 
                 var attenuated = SensorTools.AttenuationCalc(emitedItem.Magnitude, distance);//per meter^2
-                var reflectedMagnatude = attenuated * reflectionCoefficent;
-
-
+                var reflectedMagnatude = profileDB.ReflectionCoefficent * attenuated;
+                
                 //debug code:
                 if (emitedItem.Magnitude < 0)
                     throw new Exception("Source should not be less than 0");

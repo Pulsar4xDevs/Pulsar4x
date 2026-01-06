@@ -49,7 +49,12 @@ namespace Pulsar4X.Sensors
         //key is frequency, value is 0.0-1.0 for that freqency. for most entites this will create a wave type spectrum.
         //internal Dictionary<double, float> Reflectivity { get; private set; } = new Dictionary<double, float>();
         internal double Reflectivity = 0.9;
-
+        
+        /// <summary>
+        /// reflection coefficent. 
+        /// </summary>
+        internal double ReflectionCoefficent {get {return Reflectivity * TargetCrossSection_msq;}}
+        
         /// <summary>
         /// This dictionary gets replaced frequently by SetReflectedEMSig()
         /// </summary>

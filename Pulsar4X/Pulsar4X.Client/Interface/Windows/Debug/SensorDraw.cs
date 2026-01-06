@@ -430,7 +430,7 @@ namespace Pulsar4X.Client
                 if(_selectedReceverAtb == null) return;
                 if(_targetEntity == null) return;
                  _targetSensorProfile = _targetEntity.GetDataBlob<SensorProfileDB>();
-                SensorProfileTools.SetReflectionProfile(_targetSensorProfile, _uiState.PrimarySystemDateTime);
+                SensorProfileTools.UpdateReflectionProfile(_targetSensorProfile, _uiState.PrimarySystemDateTime);
                 var emitted = _targetSensorProfile.EmittedEMSpectra;
                 var reflected = _targetSensorProfile.ReflectedEMSpectra;
 
@@ -522,10 +522,11 @@ namespace Pulsar4X.Client
         private string[]? _potentialTargetNames;
         private int _targetIndex = -1;
         //private Entity? _targetEntity;
-        private SensorProfileDB? _targetSensorProfile;
+        private SensorProfileDB? _emitSensorProfile;
         private SensorReturnValues[]? _targetDetectionQuality;
         //Dictionary<EMWaveForm, double> _emitted = new ();
         List<EMData> _emitted = new ();
+        private int _highlightIndex = -1;
         Dictionary<EMWaveForm, double> _reflected = new ();
         #endregion
 
@@ -541,6 +542,7 @@ namespace Pulsar4X.Client
         uint _canvasBorderColour = ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 1.0f));
         uint _reflectedColour = ImGui.ColorConvertFloat4ToU32(new Vector4(0.0f, 1.0f, 0.0f, 1.0f));
         uint _emittedColour = ImGui.ColorConvertFloat4ToU32(new Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+        uint _highlightColour = ImGui.ColorConvertFloat4ToU32(new Vector4(0.0f, 1.0f, 1.0f, 0.3f));
 
         private System.Numerics.Vector2 _canvasPos;
         private System.Numerics.Vector2 _canvasSize;
@@ -550,7 +552,8 @@ namespace Pulsar4X.Client
         private System.Numerics.Vector2 wavP0;
         private System.Numerics.Vector2 wavP1;
         private System.Numerics.Vector2 wavP2;
-        
+
+        private bool _logScale = true;
         #endregion
         
         
@@ -581,7 +584,7 @@ namespace Pulsar4X.Client
             else
                 instance._selectedStarSysState = null;
             
-            if (instance._abilityDB == null || instance._abilityDB.OwningEntity != instance._selectedEntity)
+            if (instance._emitSensorProfile == null || instance._emitSensorProfile.OwningEntity != instance._selectedEntity)
             {
                 instance.Setup();
             }
@@ -602,11 +605,11 @@ namespace Pulsar4X.Client
                     && _potentialTargetEntities != null
                     && ImGui.Combo("Targets", ref _targetIndex, _potentialTargetNames, _potentialTargetNames.Length))
                 {
-                    SetTargetData(_potentialTargetEntities[_targetIndex]);
+                    _abilityDB = _potentialTargetEntities[_targetIndex].GetDataBlob<SensorAbilityDB>();
                 }
                 if (ImGui.Button("Refresh ReflectionProfile"))
                 {
-                    SensorProfileTools.SetReflectionProfile(_targetSensorProfile, _uiState.PrimarySystemDateTime);
+                    SetEmitData();
                 }
                 
                 
@@ -617,52 +620,34 @@ namespace Pulsar4X.Client
                         var ss = new SensorScan();
                         ss.TriggerProcess(_selectedEntity, _selectedStarSysState.StarSystem.StarSysDateTime);
                     }
-                    
-                    /*
-                    foreach (var data in _abilityDB.CurrentContacts)
-                    {
-                        string tgtname = data.entity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
-                        var targetSensorProfile = data.entity.GetDataBlob<SensorProfileDB>();
-                        ImGui.Text(tgtname);
-                        ImGui.Text("Strength:");
-                        ImGui.SameLine();
-                        ImGui.Text(Stringify.Power(data.Item2.SignalStrength_kW));
-                        ImGui.Text("Quality:");
-                        ImGui.SameLine();
-                        ImGui.Text(data.returnValues.SignalQuality.Percent.ToString());
-                        
-                        var emitted = targetSensorProfile.EmittedEMSpectra;
-                        var reflected = targetSensorProfile.ReflectedEMSpectra;
-                        
-                        /*
-                        var range = _selectedEntity.GetDataBlob<PositionDB>().GetDistanceTo_m(data.entity.GetDataBlob<PositionDB>());
-                        var attenuatedWaveForms =  SensorTools.AttenuatedForDistance(targetSensorProfile, range);
-                        foreach (var wf in attenuatedWaveForms)
-                        {
-                            ImGui.Text("Signal Strength: " + Stringify.Power(wf.Value));
-                        }
-                        */
-                    //}
-                
                 }
-
-                if (_targetSensorProfile != null)
+                
+                if(ImGui.Checkbox("LogScale",  ref _logScale))
+                {}
+                
+                if (_emitSensorProfile != null)
                 {
-                    var emitted = _targetSensorProfile.EmittedEMSpectra;
-                    var reflected = _targetSensorProfile.ReflectedEMSpectra;
+                    var emitted = _emitSensorProfile.EmittedEMSpectra;
+                    var reflected = _emitSensorProfile.ReflectedEMSpectra;
 
                     ImGui.Text("Emitted");
-                    foreach (var em in emitted)
+                    for (int i = 0; i < emitted.Count; i++)
                     {
+                        EMData em = emitted[i];
                         ImGui.Text(em.GetName);
-                        ImGui.Text(Stringify.Power( em.Magnitude));
+                        if (ImGui.IsItemHovered())
+                        {
+                            _highlightIndex = i;
+                        }
+                        
+                        ImGui.Text(Stringify.Power(em.Magnitude));
                     }
                 }
                 
                 ImGui.NextColumn();
-                if(_targetSensorProfile != null)
+                if(_emitSensorProfile != null)
                     Draw();
-                
+                _highlightIndex = -1;
                 
                 Window.End();
             }
@@ -672,13 +657,14 @@ namespace Pulsar4X.Client
         {
             if(_selectedEntity == null)
                 return;
-            if (_selectedEntity.TryGetDataBlob<SensorAbilityDB>(out var sensorData))
+            if (_selectedEntity.TryGetDataBlob<SensorProfileDB>(out var sensorData))
             {
-                _abilityDB = sensorData;
+                _emitSensorProfile = sensorData;
+                SetEmitData();
             }
             
             //gather potential targets data
-            var tgts = _selectedStarSysState.StarSystem.GetAllEntitiesWithDataBlob<SensorProfileDB>();
+            var tgts = _selectedStarSysState.StarSystem.GetAllEntitiesWithDataBlob<SensorAbilityDB>();
             _potentialTargetNames = new string[tgts.Count];
             _potentialTargetEntities = tgts.ToArray();
             var i = 0;
@@ -690,11 +676,11 @@ namespace Pulsar4X.Client
             }
         }
 
-        void SetTargetData(Entity targetEntity)
+        void SetEmitData()
         {
-            _targetSensorProfile = targetEntity.GetDataBlob<SensorProfileDB>();
-            _emitted = _targetSensorProfile.EmittedEMSpectra;
-            _reflected = _targetSensorProfile.ReflectedEMSpectra;
+            SensorProfileTools.UpdateReflectionProfile(_emitSensorProfile, _uiState.PrimarySystemDateTime);
+            _emitted = _emitSensorProfile.EmittedEMSpectra;
+            _reflected = _emitSensorProfile.ReflectedEMSpectra;
             
             _lowestWave = double.MaxValue;
             _highestWave = double.MinValue;
@@ -715,8 +701,6 @@ namespace Pulsar4X.Client
                 _lowestMagnitude = Math.Min(_lowestMagnitude, reflect.Value);
                 _highestMagnitude = Math.Max(_highestMagnitude, reflect.Value);
             }
-            
-            
         }
 
 
@@ -730,42 +714,74 @@ namespace Pulsar4X.Client
             
             //calculate scale for canvas size.
             _scalingFactor.X = _canvasSize.X / (float)(_highestWave - _lowestWave);
-            _scalingFactor.Y = _canvasSize.Y / (float)_highestMagnitude; 
+            if(_logScale)
+                _scalingFactor.Y = (float)(_canvasSize.Y * 0.5f / Math.Log10(_highestMagnitude));
+            else
+                _scalingFactor.Y = _canvasSize.Y * 0.5f / (float)_highestMagnitude; 
             
             _translation.X = (float)(_canvasPos.X - _lowestWave * _scalingFactor.X);
             _translation.Y = _canvasEndPos.Y - 2;
-            
+            double midVal = 1;
             //draw canvas boarder.
             draw_list.AddRect(_canvasPos, _canvasEndPos, _canvasBorderColour);
             foreach (var em in _reflected)
             { 
+                if(_logScale) 
+                    midVal = Math.Log10(em.Value) * _scalingFactor.Y;
+                else 
+                    midVal = em.Value * _scalingFactor.Y;
+                
                 wavP0.X =  (float)(_translation.X + em.Key.WavelengthMin_nm * _scalingFactor.X);
                 wavP0.Y = _translation.Y;
                 
                 wavP1.X =  (float)(_translation.X + em.Key.WavelengthAverage_nm * _scalingFactor.X);
-                wavP1.Y = (float)(_translation.Y - em.Value * _scalingFactor.Y);
+                wavP1.Y = (float)(_translation.Y - midVal);
                 
                 wavP2.X =  (float)(_translation.X + em.Key.WavelengthMax_nm * _scalingFactor.X);
                 wavP2.Y = _translation.Y;
-                draw_list = ImGui.GetWindowDrawList();
+                //draw_list = ImGui.GetWindowDrawList();
                 draw_list.AddTriangle(wavP0, wavP1, wavP2, _reflectedColour );
             }
             foreach (var em in _emitted)
             { 
+                if(_logScale) 
+                    midVal = Math.Log10(em.Magnitude) * _scalingFactor.Y;
+                else 
+                    midVal = em.Magnitude * _scalingFactor.Y;
+                
                 wavP0.X =  (float)(_translation.X + em.WaveForm.WavelengthMin_nm * _scalingFactor.X);
                 wavP0.Y = _translation.Y;
                 
                 wavP1.X =  (float)(_translation.X + em.WaveForm.WavelengthAverage_nm * _scalingFactor.X);
-                wavP1.Y =  (float)(_translation.Y - em.Magnitude * _scalingFactor.Y);
+                wavP1.Y =  (float)(_translation.Y - midVal);
                 
                 wavP2.X =  (float)(_translation.X + em.WaveForm.WavelengthMax_nm * _scalingFactor.X);
                 wavP2.Y = _translation.Y;
-                draw_list = ImGui.GetWindowDrawList();
+                //draw_list = ImGui.GetWindowDrawList();
                 draw_list.AddTriangle(wavP0, wavP1, wavP2, _emittedColour );
             }
-            
+
+            if (_highlightIndex > -1)
+            {
+                var em = _emitted[_highlightIndex];
+                if(_logScale) 
+                    midVal = Math.Log10(em.Magnitude) * _scalingFactor.Y;
+                else 
+                    midVal = em.Magnitude * _scalingFactor.Y;
+                wavP0.X =  (float)(_translation.X + em.WaveForm.WavelengthMin_nm * _scalingFactor.X);
+                wavP0.Y = _translation.Y;
+                
+                wavP1.X =  (float)(_translation.X + em.WaveForm.WavelengthAverage_nm * _scalingFactor.X);
+                wavP1.Y =  (float)(_translation.Y - midVal);
+                
+                wavP2.X =  (float)(_translation.X + em.WaveForm.WavelengthMax_nm * _scalingFactor.X);
+                wavP2.Y = _translation.Y;
+                //draw_list = ImGui.GetWindowDrawList();
+                draw_list.AddTriangleFilled(wavP0, wavP1, wavP2, _highlightColour );
+            }
 
         }
-            
+        
+
     }
 }

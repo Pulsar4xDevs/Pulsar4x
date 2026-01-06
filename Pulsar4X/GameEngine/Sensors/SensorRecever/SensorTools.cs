@@ -310,6 +310,19 @@ namespace Pulsar4X.Sensors
         }
 
         /// <summary>
+        /// Multiply sourceValue by this to get attenuation value.
+        /// usefull for instances where you have multiple sources for the same distance.
+        /// </summary>
+        /// <param name="distance">in meters</param>
+        /// <returns></returns>
+        public static double AttenuationFactor(double distance)
+        {
+            if(distance < 1)
+                distance = 1;
+            return 1 / (4 * Math.PI * distance * distance);
+        }
+
+        /// <summary>
         /// Probibly only needs to be done at star creation, unless we do funky stuff like change a stars temprature and stuff.
         /// </summary>
         /// <returns>The star emmision sig.</returns>
