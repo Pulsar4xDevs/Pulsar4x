@@ -54,12 +54,13 @@ namespace Pulsar4X.Sensors
         /// reflection coefficent. 
         /// </summary>
         internal double ReflectionCoefficent {get {return Reflectivity * TargetCrossSection_msq;}}
-        
+
         /// <summary>
         /// This dictionary gets replaced frequently by SetReflectedEMSig()
         /// </summary>
         /// <value>The reflected EMS pectra.</value>
-        public Dictionary<EMWaveForm, double> ReflectedEMSpectra { get; } = new Dictionary<EMWaveForm, double>();
+        //public Dictionary<EMWaveForm, double> ReflectedEMSpectra { get; } = new Dictionary<EMWaveForm, double>();
+        public List<EMData> ReflectedEMSpectra { get; } = new();
         internal DateTime LastDatetimeOfReflectionSet = new DateTime();
         internal Vector3 LastPositionOfReflectionSet = new Vector3();
 
@@ -78,8 +79,9 @@ namespace Pulsar4X.Sensors
         public SensorProfileDB(SensorProfileDB db)
         {
             //EmittedEMSpectra = new Dictionary<EMWaveForm, double>(db.EmittedEMSpectra);
+            //ReflectedEMSpectra = new Dictionary<EMWaveForm, double>(db.ReflectedEMSpectra);
             EmittedEMSpectra = new List<EMData>( db.EmittedEMSpectra);
-            ReflectedEMSpectra = new Dictionary<EMWaveForm, double>(db.ReflectedEMSpectra);
+            ReflectedEMSpectra = new List<EMData>( db.ReflectedEMSpectra);
             _targetCrossSection = db._targetCrossSection;
         }
 

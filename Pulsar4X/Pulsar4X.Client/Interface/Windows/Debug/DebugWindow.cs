@@ -581,10 +581,10 @@ namespace Pulsar4X.Client
                             atWavelength = 0;
                             foreach (var kvp in profile.ReflectedEMSpectra)
                             {
-                                if (kvp.Value > highestMagnatude)
+                                if (kvp.Magnitude > highestMagnatude)
                                 {
-                                    highestMagnatude = kvp.Value;
-                                    atWavelength = kvp.Key.WavelengthAverage_nm;
+                                    highestMagnatude = kvp.Magnitude;
+                                    atWavelength = kvp.WaveForm.WavelengthAverage_nm;
                                 }
                             }
 

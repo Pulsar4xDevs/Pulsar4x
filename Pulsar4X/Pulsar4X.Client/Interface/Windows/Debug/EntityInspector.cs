@@ -489,7 +489,7 @@ namespace Pulsar4X.Client
             ImGui.Text("Reflected");
             foreach (var kvp in db.ReflectedEMSpectra)
             {
-                DisplayValues(kvp.Key, kvp.Value);
+                DisplayValues(kvp.WaveForm, kvp.Magnitude);
 
             }
 

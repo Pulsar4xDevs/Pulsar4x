@@ -276,12 +276,12 @@ namespace Pulsar4X.Sensors
             }
             foreach (var reflectedItem in emissionProfile.ReflectedEMSpectra)
             {
-                var reflectedValue = AttenuationCalc(reflectedItem.Value, distance);
-                if(!dict.ContainsKey(reflectedItem.Key))
-                    dict.Add(reflectedItem.Key, reflectedValue);
+                var reflectedValue = AttenuationCalc(reflectedItem.Magnitude, distance);
+                if(!dict.ContainsKey(reflectedItem.WaveForm))
+                    dict.Add(reflectedItem.WaveForm, reflectedValue);
                 else
                 {
-                    dict[reflectedItem.Key] += reflectedValue;
+                    dict[reflectedItem.WaveForm] += reflectedValue;
                 }
 
             }

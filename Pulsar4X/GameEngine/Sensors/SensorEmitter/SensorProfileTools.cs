@@ -65,7 +65,7 @@ public static class SensorProfileTools
             double distance = position.GetDistanceTo_m(emittingEntity.GetDataBlob<PositionDB>());
             if (distance < 1)
                 distance = 1;
-            
+            profileDB.ReflectedEMSpectra.Clear();
             foreach (var emitedItem in profileDB.EmittedEMSpectra)
             {
                 //TODO: we're ignoring anything under a petawatt(pre attenuated) for reflection.
@@ -100,12 +100,13 @@ public static class SensorProfileTools
 
                 if(reflectedMagnatude > 0.001) //ignore it if the signal is less than a watt
                 {
-                    if (sensorProfileDB.ReflectedEMSpectra.ContainsKey(emitedItem.WaveForm))
+                    var emdata = new EMData()
                     {
-                        sensorProfileDB.ReflectedEMSpectra[emitedItem.WaveForm] = sensorProfileDB.ReflectedEMSpectra[emitedItem.WaveForm] + reflectedMagnatude;
-                    }
-                    else
-                        sensorProfileDB.ReflectedEMSpectra.Add(emitedItem.WaveForm, reflectedMagnatude);
+                        Instance = emitedItem.Instance,
+                        WaveForm = emitedItem.WaveForm,
+                        Magnitude = reflectedMagnatude,
+                    };
+                    sensorProfileDB.ReflectedEMSpectra.Add(emdata);
                 }
             }
         }
