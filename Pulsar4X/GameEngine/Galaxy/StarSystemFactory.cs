@@ -56,6 +56,12 @@ namespace Pulsar4X.Galaxy
             JPSurveyFactory.GenerateJPSurveyPoints(newSystem);
             JPFactory.GenerateJumpPoints(this, newSystem, stars[0].GetDataBlob<PositionDB>().Root);
 
+            // Go through all the created entities and set them to be neutral
+            foreach(var entity in newSystem.GetAllEntites())
+            {
+                entity.FactionOwnerID = Game.NeutralFactionId;
+            }
+
             //add this system to the GameMaster's Known Systems list.
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(newSystem.ID);
             OrbitProcessor.UpdateSystemOrbits(newSystem, game.TimePulse.GameGlobalDateTime); //sets the positions of all the entites.
