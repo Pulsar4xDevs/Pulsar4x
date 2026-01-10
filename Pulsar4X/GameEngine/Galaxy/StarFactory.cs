@@ -239,7 +239,7 @@ namespace Pulsar4X.Galaxy
                 OrbitDB previousOrbit = previousStar.GetDataBlob<OrbitDB>();
                 StarInfoDB previousStarInfo = previousStar.GetDataBlob<StarInfoDB>();
 
-                double minDistance = _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[previousStarInfo.SpectralType].Max + _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[currentStarInfo.SpectralType].Max + previousOrbit.SemiMajorAxis;
+                double minDistance = Distance.AuToMt(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType[previousStarInfo.SpectralType].Max) + Distance.AuToMt(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType[currentStarInfo.SpectralType].Max) + previousOrbit.SemiMajorAxis;
 
                 double sma = minDistance * Math.Pow(system.RNGNextDouble(), 3);
                 double eccentricity = Math.Pow(system.RNGNextDouble() * 0.8, 3);

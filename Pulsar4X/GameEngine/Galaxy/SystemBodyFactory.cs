@@ -625,8 +625,8 @@ namespace Pulsar4X.Galaxy
             MinMaxStruct innerZone_m;
             MinMaxStruct habitableZone_m;
             MinMaxStruct outerZone_m;
-            var zoneMin_m = settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Min;
-            var zoneMax_m = settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Max;
+            var zoneMin_m = Distance.AuToMt(settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Min);
+            var zoneMax_m = Distance.AuToMt(settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Max);
             bool skipHabitableZone = false;
             if (starInfo.MinHabitableRadius_m > zoneMax_m ||
                 starInfo.MaxHabitableRadius_m < zoneMin_m)
@@ -686,6 +686,7 @@ namespace Pulsar4X.Galaxy
                 var comet = system.CreateAndAddEntity(newCometProto);
                 var pos = comet.GetDataBlob<PositionDB>();
                 pos.SetParent(comet.GetDataBlob<OrbitDB>().Parent);
+                pos.AbsolutePosition = comet.GetDataBlob<OrbitDB>().GetPosition(currentDateTime);
             }
 
         }
@@ -699,7 +700,8 @@ namespace Pulsar4X.Galaxy
             MassVolumeDB starMVDB = star.GetDataBlob<MassVolumeDB>();
             MassVolumeDB cometMVDB = comet.GetDataBlob<MassVolumeDB>();
 
-            double semiMajorAxis = GeneralMath.Lerp(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType], system.RNGNextDouble());
+            var orbitalDistanceRange = _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType];
+            double semiMajorAxis = Distance.AuToMt(GeneralMath.Lerp(orbitalDistanceRange, system.RNGNextDouble()));
             double eccentricity = GeneralMath.Lerp(_galaxyGen.Settings.BodyEccentricityByType[BodyType.Comet], system.RNGNextDouble());
             double inclination = system.RNGNextDouble() * _galaxyGen.Settings.MaxBodyInclination;
             double longitudeOfAscendingNode = system.RNGNextDouble() * 2 * Math.PI;
@@ -940,7 +942,7 @@ namespace Pulsar4X.Galaxy
                 currentBody.SetDataBlob(currentOrbit);
 
                 insideMass = currentMVDB.MassDry;
-                insideApoapsis_m = Distance.MToAU(currentOrbit.Apoapsis);
+                insideApoapsis_m = currentOrbit.Apoapsis;
             }
         }
 
@@ -1118,6 +1120,7 @@ namespace Pulsar4X.Galaxy
                 var realMoon = system.CreateAndAddEntity(moon);
                 var pos = realMoon.GetDataBlob<PositionDB>();
                 pos.SetParent(realMoon.GetDataBlob<OrbitDB>().Parent);
+                pos.AbsolutePosition = realMoon.GetDataBlob<OrbitDB>().GetPosition(currentDateTime);
             }
         }
 
@@ -1191,7 +1194,9 @@ namespace Pulsar4X.Galaxy
             OrbitDB newOrbit = OrbitDB.FromAsteroidFormat(referenceOrbit.Parent, parentMVDB.MassDry, myMVDB.MassDry, semiMajorAxis, eccentricity, inclination,
                                                     longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, _galaxyGen.Settings.J2000);
             newBody.SetDataBlob(newOrbit);
-            newBody.GetDataBlob<PositionDB>().SetParent(newOrbit.Parent);
+            var asteroidPos = newBody.GetDataBlob<PositionDB>();
+            asteroidPos.SetParent(newOrbit.Parent);
+            asteroidPos.AbsolutePosition = newOrbit.GetPosition(_galaxyGen.Settings.J2000);
         }
 
         /// <summary>
