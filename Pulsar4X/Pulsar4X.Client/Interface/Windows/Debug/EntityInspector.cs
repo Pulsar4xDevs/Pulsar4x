@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
@@ -37,16 +38,15 @@ namespace Pulsar4X.Client
         {
 
             string ownerName = entity.GetDataBlob<NameDB>().OwnersName;
-            if (ImGui.Begin("Entity Inspector:  " + ownerName, ref _isActive))
+            if (Window.Begin("Entity Inspector", ref _isActive))
             {
                 if(entity.Id != _entityID || (entity.Manager != null && entity.Manager.GetAllDataBlobsForEntity(entity.Id).Count != _dataBlobs.Length))
                     Refresh(entity);
 
                 DisplayDatablobs(entity);
-
-
-
             }
+
+            Window.End();
 
         }
 
@@ -489,14 +489,14 @@ namespace Pulsar4X.Client
             ImGui.Text("Reflected");
             foreach (var kvp in db.ReflectedEMSpectra)
             {
-                DisplayValues(kvp.Key, kvp.Value);
+                DisplayValues(kvp.WaveForm, kvp.Magnitude);
 
             }
 
             ImGui.Text("Emmitted");
             foreach (var kvp in db.EmittedEMSpectra)
             {
-                DisplayValues(kvp.Key, kvp.Value);
+                DisplayValues(kvp.WaveForm, kvp.Magnitude);
             }
 
             ImGui.Text("By Component:");

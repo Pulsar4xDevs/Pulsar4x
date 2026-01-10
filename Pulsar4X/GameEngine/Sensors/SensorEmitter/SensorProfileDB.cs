@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Pulsar4X.Components;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Galaxy;
 
 namespace Pulsar4X.Sensors
@@ -47,12 +49,18 @@ namespace Pulsar4X.Sensors
         //key is frequency, value is 0.0-1.0 for that freqency. for most entites this will create a wave type spectrum.
         //internal Dictionary<double, float> Reflectivity { get; private set; } = new Dictionary<double, float>();
         internal double Reflectivity = 0.9;
+        
+        /// <summary>
+        /// reflection coefficent. 
+        /// </summary>
+        internal double ReflectionCoefficent {get {return Reflectivity * TargetCrossSection_msq;}}
 
         /// <summary>
         /// This dictionary gets replaced frequently by SetReflectedEMSig()
         /// </summary>
         /// <value>The reflected EMS pectra.</value>
-        public Dictionary<EMWaveForm, double> ReflectedEMSpectra { get; } = new Dictionary<EMWaveForm, double>();
+        //public Dictionary<EMWaveForm, double> ReflectedEMSpectra { get; } = new Dictionary<EMWaveForm, double>();
+        public List<EMData> ReflectedEMSpectra { get; } = new();
         internal DateTime LastDatetimeOfReflectionSet = new DateTime();
         internal Vector3 LastPositionOfReflectionSet = new Vector3();
 
@@ -63,14 +71,17 @@ namespace Pulsar4X.Sensors
         /// </summary>
         /// <key>defines the average and dropout wavelengths in nanometers</key>
         /// <value>the volume or magnatude of the spectra</value>
-        public Dictionary<EMWaveForm, double> EmittedEMSpectra { get; } = new Dictionary<EMWaveForm, double>();
+        //public Dictionary<EMWaveForm, double> EmittedEMSpectra { get; } = new Dictionary<EMWaveForm, double>();
 
+        public List<EMData> EmittedEMSpectra = new();
         public SensorProfileDB() { }
 
         public SensorProfileDB(SensorProfileDB db)
         {
-            EmittedEMSpectra = new Dictionary<EMWaveForm, double>(db.EmittedEMSpectra);
-            ReflectedEMSpectra = new Dictionary<EMWaveForm, double>(db.ReflectedEMSpectra);
+            //EmittedEMSpectra = new Dictionary<EMWaveForm, double>(db.EmittedEMSpectra);
+            //ReflectedEMSpectra = new Dictionary<EMWaveForm, double>(db.ReflectedEMSpectra);
+            EmittedEMSpectra = new List<EMData>( db.EmittedEMSpectra);
+            ReflectedEMSpectra = new List<EMData>( db.ReflectedEMSpectra);
             _targetCrossSection = db._targetCrossSection;
         }
 
@@ -78,5 +89,32 @@ namespace Pulsar4X.Sensors
         {
             return new SensorProfileDB(this);
         }
+    }
+
+    public struct EMData
+    {
+        internal ComponentInstance Instance;
+        public EMWaveForm WaveForm;
+        public double Magnitude;
+        public float StateLoad
+        {
+            get
+            {
+                if (Instance != null)
+                    return Instance.ComponentLoadPercent;
+                else return 1;
+            }
+        }
+
+        public string GetName
+        {
+            get
+            {
+                if(Instance != null)
+                    return Instance.Name;
+                else return "unknown";
+            }
+        }
+
     }
 }

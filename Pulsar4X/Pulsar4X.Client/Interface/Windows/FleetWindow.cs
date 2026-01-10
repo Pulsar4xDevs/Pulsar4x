@@ -149,19 +149,20 @@ namespace Pulsar4X.Client
             {
                 DisplayFleetList();
 
-                if(SelectedFleet == null) return;
+                if(SelectedFleet != null)
+                {
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosY(27f);
+                    var ysize = ImGui.GetContentRegionAvail().Y;
+                    DisplayShips();
+                    ImGui.SetCursorPosY(ysize * 0.5f);
+                    DisplayOrders();
 
-                ImGui.SameLine();
-                ImGui.SetCursorPosY(27f);
-                var ysize = ImGui.GetContentRegionAvail().Y;
-                DisplayShips();
-                ImGui.SetCursorPosY(ysize * 0.5f);
-                DisplayOrders();
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosY(27f);
 
-                ImGui.SameLine();
-                ImGui.SetCursorPosY(27f);
-
-                DisplayTabs();
+                    DisplayTabs();
+                }
             }
             Window.End();
         }

@@ -92,6 +92,7 @@ namespace Pulsar4X.Client
         //internal SpaceMasterVM SpaceMasterVM;
         internal bool SMenabled = false;
         internal Dictionary<int, EntityWindow> EntityWindows { get; private set; } = new();
+        private string _previousSystemIdBeforeSM = "";
 
         internal Stack<IHotKeyHandler> HotKeys { get; private set; } = new ();
 
@@ -239,6 +240,8 @@ namespace Pulsar4X.Client
         {
             if(Game == null) throw new NullReferenceException("Game is null");
             SMenabled = true;
+            // Store the current system ID before switching to GameMaster
+            _previousSystemIdBeforeSM = SelectedStarSystemId;
             SetFaction(Game.GameMasterFaction);
         }
 
@@ -247,6 +250,17 @@ namespace Pulsar4X.Client
             if(PlayerFaction == null) throw new NullReferenceException("PlayerFaction is null");
             SMenabled = false;
             SetFaction(PlayerFaction);
+
+            // Restore the previous system if the player has access to it
+            if(!string.IsNullOrEmpty(_previousSystemIdBeforeSM) && StarSystemStates.ContainsKey(_previousSystemIdBeforeSM))
+            {
+                SetActiveSystem(_previousSystemIdBeforeSM);
+            }
+            else if(StarSystemStates.Count > 0)
+            {
+                // If the previous system is not available, switch to the first known system
+                SetActiveSystem(StarSystemStates.Keys.First());
+            }
         }
 
         internal void ToggleGameMaster()

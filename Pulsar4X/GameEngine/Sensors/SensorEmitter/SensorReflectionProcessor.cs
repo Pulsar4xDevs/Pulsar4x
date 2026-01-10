@@ -24,7 +24,7 @@ public class SensorReflectionProcessor : IHotloopProcessor
             return;
         }
 
-        SensorProfileTools.SetReflectionProfile(entity.GetDataBlob<SensorProfileDB>(), entity.StarSysDateTime);
+        SensorProfileTools.UpdateReflectionProfile(entity.GetDataBlob<SensorProfileDB>(), entity.StarSysDateTime);
     }
 
     public int ProcessManager(EntityManager manager, int deltaSeconds)

@@ -188,14 +188,14 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
     }
 
     [JsonIgnore]
-    private string DebuggerDisplay
+    public string DebuggerDisplay
     {
         get
         {
-            string value = $"({Id})";
-            if(HasDataBlob<NameDB>()) value += " " + GetDataBlob<NameDB>().OwnersName;
-
-            return value;
+            var v = $"({Id})";
+            if (HasDataBlob<NameDB>())
+                v += " " + GetDataBlob<NameDB>().OwnersName;
+            return v;
         }
     }
 }

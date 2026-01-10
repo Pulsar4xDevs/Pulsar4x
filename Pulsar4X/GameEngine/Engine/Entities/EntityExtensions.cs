@@ -98,6 +98,8 @@ namespace Pulsar4X.Extensions
                 if(thrusterFuel == String.Empty) return 0;
 
                 var fuelType = cargoLibrary.GetAny(thrusterFuel);
+                if(fuelType == null) return 0;
+
                 var typeStore = volumeStorageDB.TypeStores[fuelType.CargoTypeID];
                 var freeVolume = volumeStorageDB.GetFreeVolume(fuelType.CargoTypeID);
                 var percentFree = (freeVolume / typeStore.MaxVolume) * 100;
@@ -123,6 +125,8 @@ namespace Pulsar4X.Extensions
                 if(thrusterFuel == String.Empty) return (null, 0);
 
                 var fuelType = cargoLibrary.GetAny(thrusterFuel);
+                if(fuelType == null) return (null, 0);
+
                 var typeStore = volumeStorageDB.TypeStores[fuelType.CargoTypeID];
                 var freeVolume = volumeStorageDB.GetFreeVolume(fuelType.CargoTypeID);
                 var percentFree = freeVolume / typeStore.MaxVolume;

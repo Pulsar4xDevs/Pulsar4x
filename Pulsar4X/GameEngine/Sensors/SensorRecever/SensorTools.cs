@@ -271,17 +271,17 @@ namespace Pulsar4X.Sensors
             var dict = new Dictionary<EMWaveForm, double>();
             foreach (var emitedItem in emissionProfile.EmittedEMSpectra)
             {
-                var powerAtDistance = AttenuationCalc(emitedItem.Value, distance);
-                dict.Add(emitedItem.Key, powerAtDistance);
+                var powerAtDistance = AttenuationCalc(emitedItem.Magnitude, distance);
+                dict.Add(emitedItem.WaveForm, powerAtDistance);
             }
             foreach (var reflectedItem in emissionProfile.ReflectedEMSpectra)
             {
-                var reflectedValue = AttenuationCalc(reflectedItem.Value, distance);
-                if(!dict.ContainsKey(reflectedItem.Key))
-                    dict.Add(reflectedItem.Key, reflectedValue);
+                var reflectedValue = AttenuationCalc(reflectedItem.Magnitude, distance);
+                if(!dict.ContainsKey(reflectedItem.WaveForm))
+                    dict.Add(reflectedItem.WaveForm, reflectedValue);
                 else
                 {
-                    dict[reflectedItem.Key] += reflectedValue;
+                    dict[reflectedItem.WaveForm] += reflectedValue;
                 }
 
             }
@@ -310,6 +310,19 @@ namespace Pulsar4X.Sensors
         }
 
         /// <summary>
+        /// Multiply sourceValue by this to get attenuation value.
+        /// usefull for instances where you have multiple sources for the same distance.
+        /// </summary>
+        /// <param name="distance">in meters</param>
+        /// <returns></returns>
+        public static double AttenuationFactor(double distance)
+        {
+            if(distance < 1)
+                distance = 1;
+            return 1 / (4 * Math.PI * distance * distance);
+        }
+
+        /// <summary>
         /// Probibly only needs to be done at star creation, unless we do funky stuff like change a stars temprature and stuff.
         /// </summary>
         /// <returns>The star emmision sig.</returns>
@@ -331,13 +344,20 @@ namespace Pulsar4X.Sensors
             var emisionSignature = new SensorProfileDB() {
 
             };
-            emisionSignature.EmittedEMSpectra.Add(waveform, magnitudeInKW);// this will need adjusting...
+            EMData emdata = new EMData()
+            {
+                WaveForm = waveform,
+                Magnitude = magnitudeInKW,
+            };
+                
+            emisionSignature.EmittedEMSpectra.Add(emdata);
 
             return emisionSignature;
         }
 
         /// <summary>
         /// probibly only needs to be done at entity creation, once the bodies mass is set.
+        /// some of this should be taken out and done with reflective.
         /// </summary>
         /// <returns>The emmision sig.</returns>
         /// <param name="sysBodyInfoDB">Sys body info db.</param>
@@ -359,8 +379,12 @@ namespace Pulsar4X.Sensors
             //-400 & +600, semi arbitrary number pulled outa my ass from 0min of internet research.
             EMWaveForm waveform = new EMWaveForm(wavelength - 400, wavelength, wavelength + 600);
 
-
-            profile.EmittedEMSpectra.Add(waveform, magnitude);//TODO this may need adjusting to make good balanced detections.
+            EMData emdata = new EMData()
+            {
+                WaveForm = waveform,
+                Magnitude = magnitude,
+            };
+            profile.EmittedEMSpectra.Add(emdata);//TODO this may need adjusting to make good balanced detections.
             profile.Reflectivity = sysBodyInfoDB.Albedo;
         }
 

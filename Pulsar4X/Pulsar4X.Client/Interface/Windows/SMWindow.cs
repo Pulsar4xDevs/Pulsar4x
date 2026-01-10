@@ -13,18 +13,13 @@ namespace Pulsar4X.Client
     public class SMWindow : PulsarGuiWindow
     {
         private Game? _game;
-        private Entity[] _factions = new Entity[0];
-        private StarSystem[] _starSystems = new StarSystem[0];
         private StarSystem? _currentSystem;
 
         private int _selectedEntityIndex = -1;
         private Entity[] _systemEntities = new Entity[0];
         private string[] _systemEntityNames = new string[0];
 
-
-        private Entity[] _filteredEntities = new Entity[0];
-
-        Entity? _selectedEntity
+        Entity? SelectedEntity
         {
             get
             {
@@ -38,8 +33,13 @@ namespace Pulsar4X.Client
 
         private SMWindow()
         {
-            //_uiState.SpaceMasterVM = new SpaceMasterVM();
             HardRefresh();
+
+            _uiState.OnStarSystemChanged += state =>
+            {
+                _selectedEntityIndex = -1;
+                HardRefresh();
+            };
         }
 
         //TODO auth of some kind.
@@ -55,36 +55,17 @@ namespace Pulsar4X.Client
         void HardRefresh()
         {
             _game = _uiState.Game;
-            _starSystems = new StarSystem[_uiState.Game.Systems.Count];
-            int i = 0;
-            foreach (var starsys in _uiState.Game.Systems)
-            {
-                _starSystems[i] = starsys;
-
-                i++;
-            }
-
             _currentSystem = _uiState.SelectedSystem;
-
-            //_systemEntities = _currentSystem.GetAllEntites().ToArray();
-            List<Entity> allEntites = new List<Entity>();
-            foreach (var entity in _currentSystem.GetAllEntites())
-            {
-                if(entity == null)
-                    continue;
-                allEntites.Add(entity);
-            }
-            _systemEntities = allEntites.ToArray();
-
+            _systemEntities = _currentSystem.GetAllEntites().ToArray();
             _systemEntityNames = new string[_systemEntities.Length];
-            for (int j = 0; j < _systemEntities.Length; j++)
+            for (int i = 0; i < _systemEntities.Length; i++)
             {
-                var entity = _systemEntities[j];
+                var entity = _systemEntities[i];
                 if(entity.HasDataBlob<NameDB>())
-                    _systemEntityNames[j] = _systemEntities[j].GetDataBlob<NameDB>().OwnersName;
+                    _systemEntityNames[i] = _systemEntities[i].GetDataBlob<NameDB>().OwnersName;
                 else
                 {
-                    _systemEntityNames[j] = "No NameDB";
+                    _systemEntityNames[i] = "No NameDB";
                 }
             }
         }
@@ -92,40 +73,35 @@ namespace Pulsar4X.Client
         private bool _entityInspectorWindow = false;
         internal override void Display()
         {
+            if (!_uiState.SMenabled || _game == null) return;
+
             //selectedEntityData
             ImGui.SetNextWindowSizeConstraints(new System.Numerics.Vector2(32, 32), new System.Numerics.Vector2(720, 720));
-            if (_uiState.SMenabled && Window.Begin("SM", ref IsActive, _flags))
+            if (Window.Begin("SM", ref IsActive, _flags))
             {
-                if(_currentSystem != _uiState.SelectedSystem)
-                    HardRefresh();
-
-                if(_game == null)
-                {
-                    ImGui.End();
-                    return;
-                }
-
                 ImGui.Columns(2);
                 ImGui.SetColumnWidth(0, 200);
                 for (int i = 0; i < _systemEntities.Length; i++)
                 {
-                    if (ImGui.Selectable(_systemEntityNames[i]))
+                    bool isSelected = _selectedEntityIndex == i;
+                    if (ImGui.Selectable(_systemEntityNames[i], isSelected))
                     {
-                        _selectedEntityIndex = i;
-                        _entityInspectorWindow = !_entityInspectorWindow;
+                        if (i == _selectedEntityIndex)
+                        {
+                            _selectedEntityIndex = -1;
+                            _entityInspectorWindow = false;
+                        }
+                        else
+                        {
+                            _selectedEntityIndex = i;
+                            _entityInspectorWindow = true;
+                        }
                     }
 
                     ImGui.NextColumn();
                     ImGui.Text(_systemEntities[i].GetFactionName());
                     ImGui.NextColumn();
                 }
-
-                if (_entityInspectorWindow && _selectedEntity != null)
-                {
-                    EntityInspector.Begin(_selectedEntity);
-                }
-
-
 
                 /*
                 if (_selectedEntity != null && _selectedEntity.Entity != null)
@@ -146,9 +122,13 @@ namespace Pulsar4X.Client
 
                 }
                 */
-                Window.End();
             }
+            Window.End();
 
+            if (_entityInspectorWindow && SelectedEntity != null)
+            {
+                EntityInspector.Begin(SelectedEntity);
+            }
         }
 
         internal override void EntityClicked(EntityState entity, MouseButtons button)
