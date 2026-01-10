@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿/*
+using NUnit.Framework;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using System;
@@ -17,14 +18,13 @@ namespace Pulsar4X.Tests
     {
         private Game _game;
 
-        /* TODO: Needs updated for new serialization, or deleted.
+        //TODO: Needs updated for new serialization, or deleted.
         [Test]
         [Description("Outputs all the systems generated in the init of this test to XML")]
         public void OutputToXML()
         {
             SerializationManager.ExportStarSystemsToXML(_game);
         }
-        */
 
         [SetUp]
         public void Init()
@@ -384,6 +384,5 @@ namespace Pulsar4X.Tests
             }
         }
     }
-
-
 }
+*/

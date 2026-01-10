@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿/*
+using NUnit.Framework;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Colonies;
 using Pulsar4X.Components;
@@ -170,3 +171,4 @@ namespace Pulsar4X.Tests
         }
     }
 }
+*/

@@ -164,15 +164,7 @@ namespace Pulsar4X.Engine
         /// </summary>
         public void TimeStep()
         {
-            if (_isProcessing)
-                return;
-
-            Task tsk = Task.Run(() => DoProcessing(GameGlobalDateTime + Ticklength));
-
-            if (_game.Settings.EnforceSingleThread)
-                tsk.Wait();
-
-            _timer.Stop();
+            TimeStep(GameGlobalDateTime + Ticklength);
         }
 
         /// <summary>
