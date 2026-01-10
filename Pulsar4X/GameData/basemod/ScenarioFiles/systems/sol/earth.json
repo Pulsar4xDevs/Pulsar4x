@@ -192,7 +192,8 @@
         "default-ship-design-gunship",
         "default-ship-design-dropship",
         "default-ship-design-starship",
-        "default-ship-design-surveyor"
+        "default-ship-design-surveyor",
+        "default-ship-design-sensorsat"
       ],
       "Fleets": [
         {
@@ -236,8 +237,11 @@
               "Cargo": [
                 { "Id": "rp-1", "Amount": 20000000, "Type": "byVolume" }
               ]
+            },
+            {
+              "DesignId": "default-ship-design-sensorsat",
+              "Name": "SensorSat I"
             }
-
           ]
         }
       ]

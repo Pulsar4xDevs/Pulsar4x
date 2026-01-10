@@ -56,6 +56,7 @@
         { "Id": "default-design-cargo-hold-1t", "Amount": 1 },
         { "Id": "default-design-fuel-tank-1000", "Amount": 2 },
         { "Id": "default-design-alcubierre-500", "Amount": 4 },
+        { "Id": "default-design_solarpanel", "Amount": 1 },
         { "Id": "default-design-battery-2t", "Amount": 3 },
         { "Id": "default-design-reactor-2t", "Amount": 1 },
         { "Id": "default-design-NTR1.8", "Amount": 4 }
@@ -141,6 +142,22 @@
         { "Id": "default-design-battery-2t", "Amount": 3 },
         { "Id": "default-design-reactor-2t", "Amount": 1 },
         { "Id": "default-design-merlin", "Amount": 4 }
+      ]
+    }
+  },
+  {
+    "Type": "ShipDesign",
+    "Payload": {
+      "UniqueID": "default-ship-design-sensorsat",
+      "Name": "Sensor Sat",
+      "Armor": {
+        "Id": "plastic-armor",
+        "Thickness": 1
+      },
+      "Components": [
+        { "Id": "default-design-passive-sensor-s50", "Amount": 1 },
+        { "Id": "default-design-battery-25kg", "Amount": 1 },
+        { "Id": "default-design_solarpanel", "Amount": 3 }
       ]
     }
   }

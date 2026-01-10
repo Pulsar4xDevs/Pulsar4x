@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
 using Pulsar4X.DataStructures;
@@ -269,19 +270,14 @@ namespace Pulsar4X.Sensors
         public static Dictionary<EMWaveForm, double> AttenuatedForDistance(SensorProfileDB emissionProfile, double distance)
         {
             var dict = new Dictionary<EMWaveForm, double>();
-            foreach (var emitedItem in emissionProfile.EmittedEMSpectra)
+            foreach (var emdat in emissionProfile.EmittedEMSpectra.Concat(emissionProfile.ReflectedEMSpectra))
             {
-                var powerAtDistance = AttenuationCalc(emitedItem.Magnitude, distance);
-                dict.Add(emitedItem.WaveForm, powerAtDistance);
-            }
-            foreach (var reflectedItem in emissionProfile.ReflectedEMSpectra)
-            {
-                var reflectedValue = AttenuationCalc(reflectedItem.Magnitude, distance);
-                if(!dict.ContainsKey(reflectedItem.WaveForm))
-                    dict.Add(reflectedItem.WaveForm, reflectedValue);
+                var reflectedValue = AttenuationCalc(emdat.Magnitude, distance);
+                if(!dict.ContainsKey(emdat.WaveForm))
+                    dict.Add(emdat.WaveForm, reflectedValue);
                 else
                 {
-                    dict[reflectedItem.WaveForm] += reflectedValue;
+                    dict[emdat.WaveForm] += reflectedValue;
                 }
 
             }
