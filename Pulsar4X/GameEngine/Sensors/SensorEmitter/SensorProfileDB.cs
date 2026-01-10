@@ -4,6 +4,8 @@ using Pulsar4X.Components;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
+using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
 using Pulsar4X.Galaxy;
 
 namespace Pulsar4X.Sensors
@@ -94,6 +96,7 @@ namespace Pulsar4X.Sensors
     public struct EMData
     {
         internal ComponentInstance Instance;
+        internal Entity SourceEntity;
         public EMWaveForm WaveForm;
         public double Magnitude;
         public float StateLoad
@@ -112,7 +115,10 @@ namespace Pulsar4X.Sensors
             {
                 if(Instance != null)
                     return Instance.Name;
-                else return "unknown";
+                else if (SourceEntity != null)
+                    return SourceEntity.GetOwnersName();
+                else
+                    return "Unknown EM Signature";
             }
         }
 

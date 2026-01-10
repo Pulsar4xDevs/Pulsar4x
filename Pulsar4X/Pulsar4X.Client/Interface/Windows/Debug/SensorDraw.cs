@@ -34,7 +34,7 @@ namespace Pulsar4X.Client
         private SensorReturnValues[]? _targetDetectionQuality;
 
         List<EMData> _emitted = new ();
-        private int _highlightIndex = -1;
+        private (int type, int index) _highlightIndex = (-1, -1);
         List<EMData> _reflected = new ();
         double _distance = 1.0;
         double _attenuationFactor = 1.0;
@@ -143,6 +143,7 @@ namespace Pulsar4X.Client
 
                 if (_sensorAbilityDB != null)
                 {
+                    BorderGroup.Begin("Sensors");
                     for (int i = 0; i < _sensorAbilityDB.InstanceAtributes.Count; i++)
                     {
                         SensorReceiverAtb? recever = _sensorAbilityDB.InstanceAtributes[i];
@@ -155,10 +156,13 @@ namespace Pulsar4X.Client
                         ImGui.Text(_sensorAbilityDB.InstanceStates[i].Name);
                         if (ImGui.IsItemHovered())
                         {
-                            //_highlightIndex = i;
+                            _highlightIndex = (0, i);
                         }
+                        ImGui.Indent();
                         ImGui.Text(Stringify.Power(recever.BestSensitivity_kW));
+                        ImGui.Unindent();
                     }
+                    BorderGroup.End();
                 }
                 
                 if (_emitSensorProfile != null)
@@ -171,35 +175,43 @@ namespace Pulsar4X.Client
                     }
                     ImGui.Text("Range: " + Stringify.Distance(_distance));
 
-                    ImGui.Text("Reflected");
-                    foreach (var emdat in reflected)
+                    BorderGroup.Begin("Reflected");
+                    for (int i = 0; i < reflected.Count; i++)
                     {
+                        EMData emdat = reflected[i];
                         ImGui.Text(emdat.GetName);
                         if (ImGui.IsItemHovered())
                         {
-                            //_highlightIndex = i;
+                            _highlightIndex = (1, i);
                         }
+                        ImGui.Indent();
                         ImGui.Text(Stringify.Power(emdat.Magnitude * _attenuationFactor));
+                        ImGui.Unindent();
                     }
+
+                    BorderGroup.End();
                     
-                    ImGui.Text("Emitted");
+                    BorderGroup.Begin("Emitted");
                     for (int i = 0; i < emitted.Count; i++)
                     {
                         EMData em = emitted[i];
                         ImGui.Text(em.GetName);
                         if (ImGui.IsItemHovered())
                         {
-                            _highlightIndex = i;
+                            _highlightIndex = (2, i);
                         }
-                        
+                        ImGui.Indent();
                         ImGui.Text(Stringify.Power(em.Magnitude * _attenuationFactor));
+                        ImGui.Unindent();
+                        
                     }
+                    BorderGroup.End();
                 }
                 
                 ImGui.NextColumn();
                 if(_emitSensorProfile != null)
                     Draw();
-                _highlightIndex = -1;
+                _highlightIndex = (-1, -1);
                 
                 Window.End();
             }
@@ -323,6 +335,8 @@ namespace Pulsar4X.Client
                 wavP2.Y = _translation.Y;
 
                 draw_list.AddTriangle(wavP0, wavP1, wavP2, _reflectedColour);
+                if(_highlightIndex == (1, i))
+                    draw_list.AddTriangleFilled(wavP0, wavP1, wavP2, _highlightColour);
             }
 
             for (int i = 0; i < _emitted.Count; i++)
@@ -344,7 +358,7 @@ namespace Pulsar4X.Client
                 
                 
                 draw_list.AddTriangle(wavP0, wavP1, wavP2, _emittedColour);
-                if(_highlightIndex == i)
+                if(_highlightIndex == (2, i))
                     draw_list.AddTriangleFilled(wavP0, wavP1, wavP2, _highlightColour);
             }
 
@@ -367,6 +381,8 @@ namespace Pulsar4X.Client
                     wavP2.X = (float)(_translation.X + em.RecevingWaveformCapabilty.WavelengthMax_nm * _scalingFactor.X);
                     wavP2.Y = _canvasPos.Y;
                     draw_list.AddTriangle(wavP0, wavP1, wavP2, _receverColour);
+                    if(_highlightIndex == (0, i))
+                        draw_list.AddTriangleFilled(wavP0, wavP1, wavP2, _highlightColour);
                 }
             }
             

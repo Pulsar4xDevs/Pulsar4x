@@ -33,6 +33,7 @@ public static class SensorProfileTools
                 
                 var emdata = new EMData()
                 {
+                    SourceEntity = parentEntity,
                     Instance = instance, 
                     WaveForm = partWaveForm,
                     Magnitude = partWaveFormMag,
@@ -102,6 +103,7 @@ public static class SensorProfileTools
                 {
                     var emdata = new EMData()
                     {
+                        SourceEntity = emittingEntity,
                         Instance = emitedItem.Instance,
                         WaveForm = emitedItem.WaveForm,
                         Magnitude = reflectedMagnatude,
