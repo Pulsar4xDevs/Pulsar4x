@@ -390,7 +390,7 @@
       "UniqueID": "solarArray",
       "Formulas": {
         "Description": "'Generates power from sunlight, effiency tuned to specific wavelengths'",
-        "Mass": "PropertyValue('Mass')",
+        "Mass": "PropertyValue('Area') * TechData('tech-panel-density')",
         "Volume": "[Mass] / 2000",
         "HTK": "[Mass] * 0.5",
         "CrewReq": "0",
@@ -436,8 +436,8 @@
           "DescriptionFormula": "'Range around peak; wider reduces peak efficiency but increases versatility'",
           "GuiHint": "GuiSelectionMaxMin",
           "MaxFormula": "TechData('tech-panel-bandwidth')",
-          "MinFormula": "50",
-          "StepFormula": "1",
+          "MinFormula": "TechData('tech-panel-bandwidth') * 0.5",
+          "StepFormula": "50",
           "PropertyFormula": "300"
         },
         {
@@ -445,7 +445,7 @@
           "Units": "%",
           "DescriptionFormula": "'Absorption efficiency at peak wavelength'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "TechData('tech-panel-efficiency') / (1 + PropertyValue('Bandwidth') / TechData('tech-panel-bandwidth'))"
+          "PropertyFormula": "TechData('tech-panel-efficiency') * ((TechData('tech-panel-bandwidth') * 0.5) / PropertyValue('Bandwidth'))"
         },
         {
           "Name": "Worst Efficiency",
@@ -455,16 +455,16 @@
           "PropertyFormula": "PropertyValue('Best Efficiency') * 0.5"
         },
         {
-          "Name": "Mass",
-          "Units": "kg",
-          "DescriptionFormula": "'Derived mass based on area and tech density'",
+          "Name": "Area ",
+          "Units": "m^2",
+          "DescriptionFormula": "'Panel surface area'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Area') * TechData('tech-panel-density')"
+          "PropertyFormula": "PropertyValue('Area')"
         },
         {
           "Name": "DB",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(PropertyValue('Ideal Absorption Wavelength'), PropertyValue('Bandwidth'), PropertyValue('Best Efficiency') * 0.01, PropertyValue('Worst Efficiency') * 0.01, PropertyValue('Area'))",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Ideal Absorption Wavelength'), PropertyValue('Bandwidth'), PropertyValue('Best Efficiency'), PropertyValue('Worst Efficiency'), PropertyValue('Area'))",
           "AttributeType": "Pulsar4X.Energy.EnergySolarGenerationAtb"
         }
       ]

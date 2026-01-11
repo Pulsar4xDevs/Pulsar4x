@@ -513,8 +513,8 @@
       "Name": "Solar Panel Efficiency",
       "Description": "Improves the base absorption efficiency of solar panels",
       "Category": "tech-category-power-propulsion",
-      "MaxLevel": 10,
-      "DataFormula": "0.1 + [Level] * 0.05",
+      "MaxLevel": 25,
+      "DataFormula": "12.0 + [Level] * 3.0",
       "CostFormula": "(1 + [Level]) * 500"
     }
   },
@@ -526,7 +526,7 @@
       "Description": "Increases the maximum tunable bandwidth for solar panels",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 10,
-      "DataFormula": "300 + [Level] * 100",
+      "DataFormula": "200 + [Level] * 100",
       "CostFormula": "(1 + [Level]) * 500"
     }
   },

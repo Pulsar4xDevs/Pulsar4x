@@ -420,7 +420,9 @@
       "Name": "solar panel",
       "TemplateId": "solarArray",
       "Properties": [
-        { "Key": "Area", "Value": 100 }
+        { "Key": "Area", "Value": 100 },
+        { "Key": "Ideal Absorption Wavelength", "Value": 479 },
+        { "Key": "Bandwidth", "Value": 150 }
       ]
     }
   }

@@ -344,7 +344,7 @@ namespace Pulsar4X.Client
                                     }
                                     case "m^2":
                                     {
-                                        displayStr = Stringify.VolumeLtr(value);
+                                        displayStr = Stringify.Area(value);
                                         break;
                                     }
                                     case "nm":
