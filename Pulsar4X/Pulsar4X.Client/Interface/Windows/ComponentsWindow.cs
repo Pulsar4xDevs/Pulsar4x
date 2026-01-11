@@ -445,22 +445,36 @@ public class ComponentsWindow : PulsarGuiWindow
             ImGui.Indent();
 
             // Show current/default value
-            DisplayKeyValue("Default Value", designProp.Value.ToString() ?? "N/A");
+            try
+            {
+                DisplayKeyValue("Default Value", designProp.Value.ToString() ?? "N/A");
+            }
+            catch
+            {
+                DisplayKeyValue("Default Value", "N/A");
+            }
 
             // Show range if applicable
             DisplayKeyValue("Range", $"{designProp.MinValue:F1} - {designProp.MaxValue:F1}");
 
-            if(designProp.Value is double val)
+            try
             {
-                float current = (float)val;
-                float min = (float)designProp.MinValue;
-                float max = (float)designProp.MaxValue;
-
-                if(max > min)
+                if(designProp.Value is double val)
                 {
-                    float normalized = (current - min) / (max - min);
-                    DisplayStatBar("Value", current, max, new Vector4(0.4f, 0.8f, 0.6f, 1.0f), property.Units ?? "", false);
+                    float current = (float)val;
+                    float min = (float)designProp.MinValue;
+                    float max = (float)designProp.MaxValue;
+
+                    if(max > min)
+                    {
+                        float normalized = (current - min) / (max - min);
+                        DisplayStatBar("Value", current, max, new Vector4(0.4f, 0.8f, 0.6f, 1.0f), property.Units ?? "", false);
+                    }
                 }
+            }
+            catch
+            {
+                // Ignore stat bar if value is not a double
             }
 
             // Show units
