@@ -31,6 +31,10 @@ public class SystemMapHotKeys : IHotKeyHandler
             {
                 BlueprintsWindow.GetInstance().ToggleActive();
             }
+            else if(e.Key.Key == SDL.Keycode.F5)
+            {
+                ComponentsWindow.GetInstance().ToggleActive();
+            }
             else if(e.Key.Key == SDL.Keycode.Alpha1)
             {
                 ComponentDesignWindow.GetInstance().ToggleActive();
