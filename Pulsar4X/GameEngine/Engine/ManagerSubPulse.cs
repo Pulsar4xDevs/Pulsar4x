@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Diagnostics;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
 using Pulsar4X.DataStructures;
@@ -303,6 +304,9 @@ namespace Pulsar4X.Engine
                     if (runAt == null || runAt > _subStepDateTime)
                         continue;
 
+                    Trace.WriteLine(String.Format("[{0:u}|{1:u}] running hotloop processor: {2} with entity manager: {3}",
+                                StarSysDateTime, _subStepDateTime, type.Name, _entityManager.ManagerID));
+
                     Performance.Start(type.Name);
                     CurrentProcess = type.ToString();
                     var proc = _game.ProcessorManager.HotloopProcessors[type];
@@ -328,11 +332,15 @@ namespace Pulsar4X.Engine
                     var e = itm.Item2;
 
                     var processor = _processManager.GetInstanceProcessor(s);
+                    var pn = processor.GetType().Name;
 
-                    Performance.Start(processor.GetType().Name);
+                    Trace.WriteLine(String.Format("[{0:u}|{1:u}] running instance processor: {2} with entity: {3}",
+                                StarSysDateTime, _subStepDateTime, pn, e.DebuggerDisplay));
+
+                    Performance.Start(pn);
                     CurrentProcess = s;
                     processor.ProcessEntity(e, qi.Time);
-                    Performance.Stop(processor.GetType().Name);
+                    Performance.Stop(pn);
                 }
 
                 StarSysDateTime = _subStepDateTime; //update the localDateTime and invoke the SystemDateChangedEvent

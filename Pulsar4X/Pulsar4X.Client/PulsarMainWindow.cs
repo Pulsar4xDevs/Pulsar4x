@@ -1,3 +1,7 @@
+#if TRACE
+#define DEBUG
+#endif
+
 using System;
 using System.IO;
 using System.Linq;
