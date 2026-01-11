@@ -58,7 +58,7 @@ public class EnergyGenHotloopProcessor : IHotloopProcessor
                 var attenuated = SensorTools.AttenuatedForDistance(starProfile, distance);
                 panelAbsorbed += AbsorbedPower(panelAtb, attenuated); // Reuse/adapt DetectonQuality
             }
-            totalSolar += panelAbsorbed * panelAtb.Area_m2;
+            totalSolar += panelAbsorbed;
         }
         return totalSolar;
     }
@@ -75,20 +75,14 @@ public class EnergyGenHotloopProcessor : IHotloopProcessor
     {
         double totalAbsorbed = 0.0;
 
-        foreach (var kvp in attenuatedSignal)
-        {
-            EMWaveForm signalWave = kvp.Key;
-            double magnitude = kvp.Value;
+        var sol = SolarFraction(panelAtb, attenuatedSignal);
 
-            // No overlap: skip
-            double minOverlap = Math.Max(signalWave.WavelengthMin_nm, panelAtb.AbsorptionWaveformCapability.WavelengthMin_nm);
-            double maxOverlap = Math.Min(signalWave.WavelengthMax_nm, panelAtb.AbsorptionWaveformCapability.WavelengthMax_nm);
-            if (minOverlap >= maxOverlap) continue;
+        totalAbsorbed = sol.SignalStrength_kW * sol.SignalQuality * panelAtb.Area_m2; 
+        /*
+            
+            double magnitude = sol.SignalStrength_kW;
 
-            // Overlap fraction
-            double overlapWidth = maxOverlap - minOverlap;
-            double signalWidth = signalWave.WavelengthMax_nm - signalWave.WavelengthMin_nm;
-            double overlapFraction = overlapWidth / signalWidth;
+            
 
             // Falloff: normalized distance from panel peak (0 at peak, 1 at edges)
             double panelPeak = panelAtb.AbsorptionWaveformCapability.WavelengthAverage_nm;
@@ -103,10 +97,90 @@ public class EnergyGenHotloopProcessor : IHotloopProcessor
 
             // Absorbed: fraction of magnitude * efficiency
             totalAbsorbed += magnitude * overlapFraction * interpolatedEff;
-        }
+        */
 
         return totalAbsorbed;
     }
+    
+        public static SensorReturnValues SolarFraction(EnergySolarGenerationAtb recever, Dictionary<EMWaveForm, double> signalAtPosition)
+        {
+
+            double receverSensitivityFreqMin = recever.AbsorptionWaveformCapability.WavelengthMin_nm;
+            double receverSensitivityFreqAvg = recever.AbsorptionWaveformCapability.WavelengthAverage_nm;
+            double receverSensitivityFreqMax = recever.AbsorptionWaveformCapability.WavelengthMax_nm;
+            double receverSensitivityBest = recever.BestEfficiency;
+            double receverSensitivityAltitiude = recever.BestEfficiency - recever.WorstEfficiency;
+            PercentValue quality = new PercentValue(0.0f);
+            double detectedMagnatude = 0;
+            foreach (var waveSpectra in signalAtPosition)
+            {
+                double signalWaveSpectraFreqMin = waveSpectra.Key.WavelengthMin_nm;
+                double signalWaveSpectraFreqAvg = waveSpectra.Key.WavelengthAverage_nm;
+                double signalWaveSpectraFreqMax = waveSpectra.Key.WavelengthMax_nm;
+                double signalWaveSpectraMagnatude_kW = waveSpectra.Value;
+                
+                if (Math.Max(receverSensitivityFreqMin, signalWaveSpectraFreqMin) < Math.Max(signalWaveSpectraFreqMin, signalWaveSpectraFreqMax))
+                {
+                    //we've got something we can detect
+                    double minDetectableWavelength = Math.Min(receverSensitivityFreqMin, signalWaveSpectraFreqMin);
+                    double maxDetectableWavelenght = Math.Min(receverSensitivityFreqMax, signalWaveSpectraFreqMax);
+
+                    double detectedAngleA = Math.Atan(receverSensitivityAltitiude / (receverSensitivityFreqAvg - receverSensitivityFreqMin ));
+                    double receverBaseLen = maxDetectableWavelenght - minDetectableWavelength;
+                    double detectedAngleB = Math.Atan(signalWaveSpectraMagnatude_kW / (signalWaveSpectraFreqAvg - signalWaveSpectraFreqMax));
+
+                    bool doesIntersect;
+                    double intersectPointX;
+                    double intersectPointY;
+                    double distortion;
+
+                    if (signalWaveSpectraFreqAvg < receverSensitivityFreqAvg)  //RightsideDetection (recever's ideal wavelenght is higher than the signal wavelenght at it's loudest)
+                    {
+                        doesIntersect = SensorTools.Get_line_intersection(
+                            signalWaveSpectraFreqAvg, signalWaveSpectraMagnatude_kW,
+                            signalWaveSpectraFreqMin, 0,
+
+                            receverSensitivityFreqAvg, recever.BestEfficiency,
+                            receverSensitivityFreqMax, recever.WorstEfficiency,
+
+                            out intersectPointX, out intersectPointY);
+                        //offsetFromCenter = intersectPointX - signalWaveSpectraFreqAvg; //was going to use this for distortion but decided to simplify.
+                        distortion = receverSensitivityFreqAvg - signalWaveSpectraFreqAvg;
+
+                    }
+                    else                                                        //LeftSideDetection
+                    {
+                        doesIntersect = SensorTools.Get_line_intersection(
+                            signalWaveSpectraFreqAvg, signalWaveSpectraMagnatude_kW,
+                            signalWaveSpectraFreqMax, 0,
+
+                            receverSensitivityFreqAvg, recever.BestEfficiency,
+                            receverSensitivityFreqMin, recever.WorstEfficiency,
+
+                            out intersectPointX, out intersectPointY);
+                        //offsetFromCenter = intersectPointX - signalWaveSpectraFreqAvg;
+                        distortion = signalWaveSpectraFreqAvg - receverSensitivityFreqAvg;
+
+                    }
+
+                    if (doesIntersect) // then we're not detecting the peak of the signal
+                    {
+                        detectedMagnatude = intersectPointY - recever.BestEfficiency;
+                        distortion *= 2; //pentalty to quality of signal
+                    }
+                    else
+                        detectedMagnatude = signalWaveSpectraMagnatude_kW - recever.BestEfficiency;
+
+                    quality = new PercentValue((float)(100 - distortion / signalWaveSpectraFreqMax));
+
+                }
+            }
+            return new SensorReturnValues()
+            {
+                SignalStrength_kW = detectedMagnatude,
+                SignalQuality = quality
+            };
+        }
 
 }
 
