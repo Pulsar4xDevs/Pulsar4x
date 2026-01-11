@@ -243,6 +243,47 @@ namespace Pulsar4X.Engine
             return stringVolume;
         }
         
+        public static string Area(double area_m2, string format = "0.###")
+        {
+            string stringArea = "0 m^2";
+
+            if (area_m2 > 1.0e18)
+            {
+                area_m2 = area_m2 * 1.0e-18;
+                stringArea = area_m2.ToString(format) + " Em^2";
+            }
+            else if (area_m2 > 1.0e15)
+            {
+                area_m2 = area_m2 * 1.0e-15;
+                stringArea = area_m2.ToString(format) + " Pm^2";
+            }
+            else if(area_m2 > 1.0e12)
+            {
+                area_m2 = area_m2 * 1.0e-12;
+                stringArea = area_m2.ToString(format) + " Tm^2";
+            }
+            else if (area_m2 > 1.0e9)
+            {
+                area_m2 = area_m2 * 1.0e-9;
+                stringArea = area_m2.ToString(format) + " Gm^2";
+            }
+            else if (area_m2 > 1.0e6)
+            {
+                area_m2 = area_m2 * 1.0e-6;
+                stringArea = area_m2.ToString(format) + " Mm^2";
+            }
+            else if (area_m2 > 1.0e3)
+            {
+                area_m2 = area_m2 * 1.0e-3;
+                stringArea = area_m2.ToString(format) + " Km^2";
+            }
+            else {
+                stringArea = area_m2.ToString(format) + " m^2";
+            }
+
+            return stringArea;
+        }
+        
         public static string VolumeLtr(double volume_m, string format = "0.###", bool fullSuffix = false)
         {
             string stringVolume = "0 Ltr";
