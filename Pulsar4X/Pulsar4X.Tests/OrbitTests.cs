@@ -128,16 +128,24 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void TestPreciseOrbitalSpeed()
+        public void TestOrbitalSpeed()
         {
+            // https://en.wikipedia.org/wiki/Earth
+            var earthMass = 5.972168E24; //kg
 
-            var parentMass = 5.97237e24;
-            var objMass = 7.342e22;
-            var sgpm = GeneralMath.StandardGravitationalParameter(parentMass + objMass);
-            var speedm = OrbitMath.InstantaneousOrbitalSpeed(sgpm, 405400000, 384399000);
-            Assert.AreEqual(970, speedm, 0.025);
+            // https://en.wikipedia.org/wiki/Moon
+            var moonMass = 7.346E22; //kg
+
+            // https://en.wikipedia.org/wiki/Orbit_of_the_Moon
+            var moonSemiMajorAxis = 384748E3; //m
+            var moonDistance = 385000E3; //m
+            var moonSpeedWikipedia = 1.022E3; //m/s
+
+            var sgp = GeneralMath.StandardGravitationalParameter(earthMass + moonMass);
+            var speed = OrbitMath.InstantaneousOrbitalSpeed(sgp, moonDistance, moonSemiMajorAxis);
+
+            Assert.AreEqual(moonSpeedWikipedia, speed, 3); //3 m/s error
         }
-
 
         [Test]
         public void TestAngles()
