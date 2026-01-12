@@ -1,9 +1,8 @@
-using GameEngine.People;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
 
-namespace Pulsar4X.ECSLib;
+namespace GameEngine.People;
 
 public enum AdminLevel
 {
