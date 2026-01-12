@@ -1,9 +1,17 @@
 ﻿using System;
+using System.Diagnostics;
 using Pulsar4X.Client;
 
 // Run the game
 using (var pulsar = new PulsarMainWindow(args))
 {
+#if TRACE
+    Trace.Listeners.Add(new ConsoleTraceListener());
+#endif
+    // dotnet core doesn't have Debug.Listeners for some reason...
+    // https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.debug?view=net-10.0
+    // https://github.com/dotnet/dotnet-api-docs/issues/4866
+
     pulsar.Run();
     /*
     try
