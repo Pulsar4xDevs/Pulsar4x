@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
@@ -163,6 +164,13 @@ namespace Pulsar4X.Client
         public static double GetDistanceSquared(float x1, float y1, float x2, float y2)
         {
             return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+        }
+
+        public static void SetClock(string cultureName)
+        {
+            var c = (CultureInfo)CultureInfo.CurrentCulture.Clone();
+            c.DateTimeFormat = CultureInfo.GetCultureInfo(cultureName).DateTimeFormat;
+            CultureInfo.CurrentCulture = c;
         }
     }
 
