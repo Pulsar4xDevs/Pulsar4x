@@ -1,8 +1,6 @@
 using System;
 using GameEngine.People;
-using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
-using Pulsar4X.ECSLib;
 using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
 

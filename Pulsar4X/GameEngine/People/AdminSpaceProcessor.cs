@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
-using Pulsar4X.ECSLib;
 using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
 
@@ -15,7 +14,7 @@ public class AdminSpaceProcessor : IInstanceProcessor
         if(entity.TryGetDataBlob<AdminSpaceDB>(out var adminSpaceDB))
         {
             CalcEntityAdminSpace(entity, adminSpaceDB);
-            
+
             // Update colony hex map if this is a colony
             if (entity.HasDataBlob<ColonyInfoDB>())
             {
@@ -25,7 +24,7 @@ public class AdminSpaceProcessor : IInstanceProcessor
     }
 
     /// <summary>
-    /// Currently this resets the list, need to check if we want that, or keep exsisting. 
+    /// Currently this resets the list, need to check if we want that, or keep exsisting.
     /// </summary>
     /// <param name="entity"></param>
     /// <param name="adminSpaceDB"></param>
@@ -42,7 +41,7 @@ public class AdminSpaceProcessor : IInstanceProcessor
                 var atb = (AdminSpaceAtb)attributes[typeof(AdminSpaceAtb)];
 
                 seats += atb.ConsoleSpace;
-                
+
                 var state = new AdminSpaceAbilityState(atb.AdminLevel, adminSpace.Name);
                 commanderSeats.Add(state);
             }

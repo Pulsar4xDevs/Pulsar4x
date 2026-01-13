@@ -6,14 +6,8 @@ using System.Linq;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Factions;
 using Pulsar4X.Technology;
-using System.Globalization;
 using GameEngine.People;
 using Pulsar4X.Extensions;
-using Pulsar4X.People;
-using Pulsar4X.Components;
-using Pulsar4X.Datablobs;
-using Pulsar4X.DataStructures;
-using Pulsar4X.ECSLib;
 using Pulsar4X.Engine;
 using Pulsar4X.Colonies;
 
