@@ -821,7 +821,7 @@
           "Name": "Admin Level",
           "DescriptionFormula": "'Area of influence this  office covers'",
           "GuiHint": "GuiEnumSelectionList",
-          "EnumTypeName" : "Pulsar4X.ECSLib.AdminLevel",
+          "EnumTypeName" : "GameEngine.People.AdminLevel",
           "MaxFormula": "TechData('tech-administration-level') + 5",
           "MinFormula": "5",
           "StepFormula": "1",
@@ -840,7 +840,52 @@
           "Name": "DBargs",
           "GuiHint": "None",
           "PropertyFormula": "AtbConstrArgs(PropertyValue('Admin Level'), PropertyValue('Office Space'))",
-          "AttributeType": "Pulsar4X.ECSLib.AdminSpaceAtb"
+          "AttributeType": "GameEngine.People.AdminSpaceAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "local-construction",
+      "Name": "Construction Services",
+      "Formulas": {
+        "Description": "Provides construction points for construction projects at this colony",
+        "Mass": "PropertyValue('Level') * 5000",
+        "Volume": "[Mass] * 0.1",
+        "HTK": "1.0",
+        "CrewReq": "PropertyValue('Level') * 55",
+        "ResearchCost": "0",
+        "CreditCost": "0",
+        "BuildPointCost": "PropertyValue('Level') * 200"
+      },
+      "ResourceCost": {
+        "iron": "[Mass] * 0.6",
+        "aluminium": "[Mass] * 0.1",
+        "copper": "[Mass] * 0.1",
+        "plastic": "[Mass] * 0.1",
+        "stainless-steel": "[Mass] * 0.1"
+      },
+      "ComponentType": "Facility",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Level",
+          "DescriptionFormula": "'Level of construction services provided, each level provides additional construction points per day.'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "256",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "1"
+        },
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Level'), 5)",
+          "AttributeType": "Pulsar4X.Industry.LocalConstructionAtb"
         }
       ]
     }
