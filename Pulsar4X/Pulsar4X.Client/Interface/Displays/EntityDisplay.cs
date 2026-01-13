@@ -118,6 +118,11 @@ namespace Pulsar4X.Client
         {
             IndustryDisplay.GetInstance(entityState).Display(uiState);
         }
+
+        public static void DisplayConstruction(this Entity entity, EntityState entityState, GlobalUIState uiState)
+        {
+            ConstructionDisplay.GetInstance(entityState).Display(uiState);
+        }
         public static void DisplayMining(this Entity entity, GlobalUIState uiState)
         {
             if(uiState.Faction == null) return;

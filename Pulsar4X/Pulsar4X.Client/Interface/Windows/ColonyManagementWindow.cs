@@ -97,6 +97,11 @@ namespace Pulsar4X.Client
                         SelectedEntity.Entity.DisplayIndustry(SelectedEntity, _uiState);
                         ImGui.EndTabItem();
                     }
+                    if(ImGui.BeginTabItem("Construction"))
+                    {
+                        SelectedEntity.Entity.DisplayConstruction(SelectedEntity, _uiState);
+                        ImGui.EndTabItem();
+                    }
                     if(ImGui.BeginTabItem("Mining"))
                     {
                         SelectedEntity.Entity.DisplayMining(_uiState);
