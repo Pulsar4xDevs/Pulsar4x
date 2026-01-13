@@ -425,5 +425,16 @@
         { "Key": "Bandwidth", "Value": 150 }
       ]
     }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-local-construction",
+      "Name": "Construction Office",
+      "TemplateId": "local-construction",
+      "Properties": [
+        { "Key": "Level", "Value": 1 }
+      ]
+    }
   }
 ]

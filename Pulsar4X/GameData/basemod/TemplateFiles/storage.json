@@ -271,7 +271,7 @@
           "Name": "Admin Level",
           "DescriptionFormula": "'Command level of this office'",
           "GuiHint": "GuiEnumSelectionList",
-          "EnumTypeName" : "Pulsar4X.ECSLib.AdminLevel",
+          "EnumTypeName" : "GameEngine.People.AdminLevel",
           "MaxFormula": "5",
           "MinFormula": "0",
           "StepFormula": "1",
@@ -290,7 +290,7 @@
           "Name": "DBargs",
           "GuiHint": "None",
           "PropertyFormula": "AtbConstrArgs(PropertyValue('Admin Level'), PropertyValue('Console Space'))",
-          "AttributeType": "Pulsar4X.ECSLib.AdminSpaceAtb"
+          "AttributeType": "GameEngine.People.AdminSpaceAtb"
         }
       ]
     }

@@ -60,7 +60,8 @@
         { "Id": "default-design-shipyard", "Amount": 1 },
         { "Id": "default-design-spaceport", "Amount": 1 },
         { "Id": "default-design-research-lab", "Amount": 1 },
-        { "id": "default-design-city-hall", "amount": 1 }
+        { "id": "default-design-city-hall", "amount": 1 },
+        { "Id": "default-design-local-construction", "Amount": 1}
       ],
       "Cargo": [
         { "Id": "iron", "Amount": 500000 },
@@ -149,7 +150,8 @@
         "tech-panel-efficiency",
         "tech-panel-bandwidth",
         "tech-panel-density",
-        "solarArray"
+        "solarArray",
+        "local-construction"
       ],
       "ComponentDesigns": [
         "default-design-alcubierre-2k",
@@ -184,7 +186,8 @@
         "default-design-warehouse",
         "default-design-city-hall",
         "default-design_solarpanel",
-        "default-design-battery-25kg"
+        "default-design-battery-25kg",
+        "default-design-local-construction"
       ],
       "ShipDesigns": [
         "default-ship-design-courier",
