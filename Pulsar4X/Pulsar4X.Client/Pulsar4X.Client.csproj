@@ -15,13 +15,13 @@
     <DebugType>
     </DebugType>
     <OutputPath>bin\Linux_x64\Debug</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <NoWarn>
     </NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DefineConstants>DEBUG</DefineConstants>
     <NoWarn>0414;0649;0169</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Linux_x64' ">
@@ -43,8 +43,7 @@
     <DebugType>
     </DebugType>
     <OutputPath>bin\Windows_x64\Debug</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <NoWarn>
     </NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -67,8 +66,7 @@
     <DebugType>
     </DebugType>
     <OutputPath>bin\Windows_x86\Debug</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <NoWarn>
     </NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
