@@ -149,12 +149,14 @@ namespace Pulsar4X.Engine
         public void PauseTime()
         {
             _timer.Stop();
+            _timer.Enabled = false;
         }
         /// <summary>
         /// Starts the timeloop
         /// </summary>
         public void StartTime()
         {
+            _timer.Enabled = true;
             _timer.Start();
         }
 
@@ -233,16 +235,7 @@ namespace Pulsar4X.Engine
                 _isOvertime = false;
             }
 
-            if(_timer.Enabled)
-            {
-                _timer.Stop();
-                _timer.Start(); //reset timer so we're counting from 0
-            }
             _stopwatch.Start(); //start the processor loop stopwatch (performance counter)
-
-            //check for global interupts
-            //_targetDateTime = GameGlobalDateTime + Ticklength;
-
 
             while (GameGlobalDateTime < targetDateTime)
             {

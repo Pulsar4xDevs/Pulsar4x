@@ -182,26 +182,32 @@ namespace Pulsar4X.Client
             if (ImGui.BeginTabItem("Entities"))
             {
                 var size = ImGui.GetContentRegionAvail();
-                var firstChildSize = new System.Numerics.Vector2(size.X * 0.27f, 0);
-                var secondChildSize = new System.Numerics.Vector2(size.X * 0.72f, 0);
+                var firstChildSize = new System.Numerics.Vector2(size.X * 0.33f, 0);
+                var secondChildSize = new System.Numerics.Vector2(size.X * 0.67f, 0);
 
                 if (ImGui.BeginChild("Enttiy Selector", firstChildSize))
                 {
-                    ImGui.Columns(3);
-                    for (int i = 0; i < _allEntites.Count; i++)
+                    if(ImGui.BeginTable("EntityTable", 3, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
                     {
-                        if (ImGui.Selectable(_allEntites[i].name + "##" + i))
+                        ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 0.4f);
+                        ImGui.TableSetupColumn("ID", ImGuiTableColumnFlags.None, 0.2f);
+                        ImGui.TableSetupColumn("Faction", ImGuiTableColumnFlags.None, 0.4f);
+                        ImGui.TableHeadersRow();
+                        for (int i = 0; i < _allEntites.Count; i++)
                         {
-                            SelectedEntity = _allEntites[i].entity;
+                            ImGui.TableNextRow();
+                            ImGui.TableSetColumnIndex(0);
+                            if (ImGui.Selectable(_allEntites[i].name + "##" + i, SelectedEntity != null && SelectedEntity.Id == _allEntites[i].entity.Id))
+                            {
+                                SelectedEntity = _allEntites[i].entity;
+                            }
+                            ImGui.TableSetColumnIndex(1);
+                            ImGui.Text(_allEntites[i].entity.Id.ToString());
+                            ImGui.TableSetColumnIndex(2);
+                            ImGui.Text(_allEntites[i].faction);
                         }
-                        ImGui.NextColumn();
-                        ImGui.Text(_allEntites[i].entity.Id.ToString());
-                        ImGui.NextColumn();
-                        ImGui.Text(_allEntites[i].faction);
-                        ImGui.NextColumn();
-
+                        ImGui.EndTable();
                     }
-                    ImGui.Columns(1);
                     ImGui.EndChild();
                 }
 
@@ -213,18 +219,15 @@ namespace Pulsar4X.Client
                     {
 
                         ImGui.Text(SelectedEntity.Id.ToString());
-                        if (SelectedEntity.HasDataBlob<PositionDB>())
+                        if (SelectedEntity.TryGetDataBlob<PositionDB>(out var positionDB))
                         {
-                            var positiondb = SelectedEntity.GetDataBlob<PositionDB>();
-                            var posAbs = positiondb.AbsolutePosition;
-                            ImGui.Text("x: " + Stringify.Distance(posAbs.X));
-                            ImGui.Text("y: " + Stringify.Distance(posAbs.Y));
-                            ImGui.Text("z: " + Stringify.Distance(posAbs.Z));
-                            if (positiondb.Parent != null)
-                            {
-                                ImGui.Text("Parent: " + positiondb.Parent.GetDataBlob<NameDB>().DefaultName);
+                            ImGui.Text($"Position x: {Stringify.Distance(positionDB.AbsolutePosition.X)}, y: {Stringify.Distance(positionDB.AbsolutePosition.Y)}, z: {Stringify.Distance(positionDB.AbsolutePosition.Z)}");
 
-                                ImGui.Text("Dist: " + Stringify.Distance(positiondb.RelativePosition.Length()));
+                            if (positionDB.Parent != null)
+                            {
+                                ImGui.Text("Parent: " + positionDB.Parent.GetDataBlob<NameDB>().DefaultName);
+
+                                ImGui.Text("Distance To Parent: " + Stringify.Distance(positionDB.RelativePosition.Length()));
                             }
 
                             (Vector3 position, Vector3 Velocity) relativeState;
@@ -237,8 +240,8 @@ namespace Pulsar4X.Client
                                 relativeState.Velocity = Vector3.Zero;
                             }
 
-                            ImGui.Text("relative Velocity: " + relativeState.Velocity);
-                            ImGui.Text("relative Speed: " + Stringify.Velocity(relativeState.Velocity.Length()));
+                            ImGui.Text("Relative Velocity: " + relativeState.Velocity);
+                            ImGui.Text("Relative Speed: " + Stringify.Velocity(relativeState.Velocity.Length()));
                         }
 
                         if (ImGui.CollapsingHeader("DataBlob List"))
@@ -251,11 +254,10 @@ namespace Pulsar4X.Client
 
 
 
-                        if (SelectedEntity.HasDataBlob<MassVolumeDB>())
+                        if (SelectedEntity.TryGetDataBlob<MassVolumeDB>(out var mvdb))
                         {
                             if (ImGui.CollapsingHeader("MassVolumeDB: ###MassVolDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                             {
-                                MassVolumeDB mvdb = SelectedEntity.GetDataBlob<MassVolumeDB>();
                                 ImGui.Text("Mass " + Stringify.Mass(mvdb.MassDry));
                                 ImGui.Text("Volume " + Stringify.Velocity(mvdb.Volume_m3));
                                 ImGui.Text("Density " + mvdb.DensityDry_gcm + "g/cm^3");
@@ -263,20 +265,22 @@ namespace Pulsar4X.Client
                             }
 
                         }
-                        if (SelectedEntity.HasDataBlob<CargoStorageDB>())
+                        if (SelectedEntity.TryGetDataBlob<CargoStorageDB>(out var storeDB))
                         {
                             if (ImGui.CollapsingHeader("CargoStorageDB: ###VolStorDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                             {
-                                CargoStorageDB storeDB = SelectedEntity.GetDataBlob<CargoStorageDB>();
                                 ImGui.Indent();
-                                storeDB.Display(_selectedEntityState, _uiState);
+
+                                if(_selectedEntityState != null)
+                                    storeDB.Display(_selectedEntityState, _uiState);
+
                                 ImGui.Text("Total Stored Mass inc. escro: " + Stringify.Mass(storeDB.TotalStoredMass));
                                 ImGui.Text("Transfer Range: " + Stringify.Velocity(storeDB.TransferRangeDv_mps));
                                 ImGui.Text("Transfer Rate: " + Stringify.Mass(storeDB.TransferRate));
                                 double totalMassIncEscro = 0;
                                 double totalMassLesEscro = 0;
-                                double totalVolumeIncEscro = 0;
-                                double totalVolumeLesEscro = 0;
+                                // double totalVolumeIncEscro = 0;
+                                // double totalVolumeLesEscro = 0;
                                 long totalCountIncEscro = 0;
                                 long totalCountLesEscro = 0;
                                 foreach (var store in storeDB.TypeStores)
@@ -479,12 +483,10 @@ namespace Pulsar4X.Client
                         }
 
 
-                        if (SelectedEntity.HasDataBlob<WarpAbilityDB>())
+                        if (SelectedEntity.TryGetDataBlob<WarpAbilityDB>(out var warpDB))
                         {
                             if (ImGui.CollapsingHeader("Warp: ###WarpHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                             {
-                                WarpAbilityDB warpDB = SelectedEntity.GetDataBlob<WarpAbilityDB>();
-
                                 ImGui.Text("Max Speed: " + warpDB.MaxSpeed);
                                 //ImGui.Text("Energy type: " + warpDB.EnergyType);
                                 ImGui.Text(SelectedEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(warpDB.EnergyType).Name);
@@ -560,9 +562,8 @@ namespace Pulsar4X.Client
                             }
                         }
 
-                        if (SelectedEntity.HasDataBlob<SensorProfileDB>() && ImGui.CollapsingHeader("SensorProfile"))
+                        if (SelectedEntity.TryGetDataBlob<SensorProfileDB>(out var profile) && ImGui.CollapsingHeader("SensorProfile"))
                         {
-                            var profile = SelectedEntity.GetDataBlob<SensorProfileDB>();
                             ImGui.Text("Target CrossSection: " + profile.TargetCrossSection_msq + " m^2");
                             ImGui.Text("Emitted Count: " + profile.EmittedEMSpectra.Count);
                             ImGui.Text("Reflected Count: " + profile.ReflectedEMSpectra.Count);
@@ -633,13 +634,12 @@ namespace Pulsar4X.Client
                             }
                         }
 
-                        if (SelectedEntity.HasDataBlob<SensorInfoDB>())
+                        if (SelectedEntity.TryGetDataBlob<SensorInfoDB>(out var sensorInfoDB))
                         {
-                            var actualEntity = SelectedEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
+                            var actualEntity = sensorInfoDB.DetectedEntity;
 
-                            if (actualEntity.IsValid && actualEntity.HasDataBlob<AsteroidDamageDB>())
+                            if (actualEntity.IsValid && actualEntity.TryGetDataBlob<AsteroidDamageDB>(out var dmgDB))
                             {
-                                var dmgDB = actualEntity.GetDataBlob<AsteroidDamageDB>();
                                 ImGui.Text("Remaining HP: " + dmgDB.Health.ToString());
                             }
                         }
@@ -851,19 +851,27 @@ namespace Pulsar4X.Client
 
             if(ImGui.BeginTabItem("Instance Processors"))
             {
-                ImGui.Columns(3);
-                foreach (var qi in SystemState.StarSystem.ManagerSubpulses.InstanceProcessorsQueue)
+                if(ImGui.BeginTable("InstanceProcessors", 3, Styles.TableFlags))
                 {
-                    var instanceProcess = qi.Item;
-                    var s = instanceProcess.Item1;
-                    var e = instanceProcess.Item2;
+                    ImGui.TableSetupColumn("Next Run Time", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("System", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("Processor", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableHeadersRow();
+                    foreach(var qi in SystemState.StarSystem.ManagerSubpulses.InstanceProcessorsQueue)
+                    {
+                        var instanceProcess = qi.Item;
+                        var s = instanceProcess.Item1;
+                        var e = instanceProcess.Item2;
 
-                    ImGui.Text(qi.Time.ToString());
-                    ImGui.NextColumn();
-                    ImGui.Text(s);
-                    ImGui.NextColumn();
-                    ImGui.Text(e.DebuggerDisplay);
-                    ImGui.NextColumn();
+                        ImGui.TableNextRow();
+                        ImGui.TableSetColumnIndex(0);
+                        ImGui.Text(qi.Time.ToString());
+                        ImGui.TableSetColumnIndex(1);
+                        ImGui.Text(s);
+                        ImGui.TableSetColumnIndex(2);
+                        ImGui.Text(e.DebuggerDisplay);
+                    }
+                    ImGui.EndTable();
                 }
 
                 ImGui.EndTabItem();
@@ -876,16 +884,25 @@ namespace Pulsar4X.Client
 
             if(ImGui.BeginTabItem("HotLoop Processors"))
             {
-                ImGui.Columns(3);
-                foreach(var (type, dateTime) in SystemState.StarSystem.ManagerSubpulses.HotLoopProcessorsNextRun)
+                if(ImGui.BeginTable("HotLoopProcessors", 4, Styles.TableFlags))
                 {
-                    ImGui.Text(dateTime.ToString());
-                    ImGui.NextColumn();
-                    ImGui.Text("System");
-                    ImGui.NextColumn();
-                    ImGui.Text(type.Name);
-                    ImGui.NextColumn();
+                    ImGui.TableSetupColumn("Next Run Time", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("Processor", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableHeadersRow();
+                    foreach(var (type, dateTime) in SystemState.StarSystem.ManagerSubpulses.HotLoopProcessorsNextRun)
+                    {
+                        ImGui.TableNextRow();
+                        ImGui.TableSetColumnIndex(0);
+                        ImGui.Text(dateTime.ToString());
+                        ImGui.TableSetColumnIndex(1);
+                        ImGui.Text("System");
+                        ImGui.TableSetColumnIndex(2);
+                        ImGui.Text(type.Name);
+                    }
+                    ImGui.EndTable();
                 }
+
                 ImGui.EndTabItem();
             }
         }
