@@ -450,19 +450,23 @@ namespace Pulsar4X.Client
                         }
 
 
-                        if (SelectedEntity.HasDataBlob<EnergyGenAbilityDB>())
+                        if (SelectedEntity.TryGetDataBlob<EnergyGenAbilityDB>(out var powerDB))
                         {
                             if (ImGui.CollapsingHeader("Power ###PowerHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                             {
-                                var powerDB = SelectedEntity.GetDataBlob<EnergyGenAbilityDB>();
                                 ImGui.Text("Generates " + powerDB.EnergyType.Name);
-                                ImGui.Text("Max of: " + powerDB.TotalOutputMax + "/s");
+                                
+                                ImGui.Text("Reactor : " + Stringify.Power(powerDB.MaxOutputFromReactor));
+                                ImGui.Text("Solar   : " + Stringify.Power(powerDB.MaxOutputFromSolar));
+                                
+                                ImGui.Text("Max of: " + Stringify.Power(powerDB.TotalOutputMax) + "/s");
                                 if(!string.IsNullOrEmpty(powerDB.TotalFuelUseAtMax.type))
                                 {
                                     string fueltype = SelectedEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(powerDB.TotalFuelUseAtMax.type).Name;
                                     ImGui.Text("Burning " + powerDB.TotalFuelUseAtMax.maxUse + " of " + fueltype);
                                     ImGui.Text("With " + powerDB.LocalFuel + " remaining reactor fuel");
                                 }
+                                
 
                                 foreach (var etype in powerDB.EnergyStored)
                                 {

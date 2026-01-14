@@ -283,6 +283,30 @@ namespace Pulsar4X.Sensors
             }
             return dict;
         }
+        
+        /// <summary>
+        /// returns a dictionary of all emmisions including reflected emmisions.
+        /// </summary>
+        /// <returns>The for distance.</returns>
+        /// <param name="emissionProfile">Emission.</param>
+        /// <param name="distance">Distance.</param>
+        public static List<EMData> AttenuatedForDistanceList(SensorProfileDB emissionProfile, double distance, double cullBelow = 0.01)
+        {
+            var list = new List<EMData>();
+            var factor = AttenuationFactor(distance);
+            foreach (var emdat in emissionProfile.EmittedEMSpectra.Concat(emissionProfile.ReflectedEMSpectra))
+            {
+                var reflectedValue = emdat.Magnitude * factor;
+                if(reflectedValue >= cullBelow)
+                {
+                    EMData newdata = new EMData();
+                    newdata.WaveForm = emdat.WaveForm;
+                    newdata.Magnitude = reflectedValue;
+                    list.Add(newdata);
+                }
+            }
+            return list;
+        }
 
         /// <summary>
         /// Power per unit of area.
