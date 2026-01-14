@@ -193,7 +193,9 @@ public class MoveStateProcessor : IInstanceProcessor
         }
 
         stateDB.MoveType = PositionDB.MoveTypes.Orbit;
-        stateDB.SetParent(orbitDB.Parent);
+        // Only update parent if it has changed to avoid expensive SetParent operation
+        if (stateDB.Parent != orbitDB.Parent)
+            stateDB.SetParent(orbitDB.Parent);
         stateDB.SGP = orbitDB.GravitationalParameter_m3S2;
         stateDB.GetKeplerElements = orbitDB.GetElements();
         stateDB.RelativePosition2 = orbitDB._position; //(Vector2)orbitDB.OwningEntity.GetDataBlob<PositionDB>().RelativePosition;
@@ -212,7 +214,9 @@ public class MoveStateProcessor : IInstanceProcessor
         }
 
         stateDB.MoveType = PositionDB.MoveTypes.Orbit;
-        stateDB.SetParent(orbitDB.Parent);
+        // Only update parent if it has changed to avoid expensive SetParent operation
+        if (stateDB.Parent != orbitDB.Parent)
+            stateDB.SetParent(orbitDB.Parent);
         stateDB.SGP = orbitDB.GravitationalParameter_m3S2;
         stateDB.GetKeplerElements = orbitDB.GetElements(preCalculatedTrueAnomaly);
         stateDB.RelativePosition2 = orbitDB._position; //(Vector2)orbitDB.OwningEntity.GetDataBlob<PositionDB>().RelativePosition;
@@ -240,7 +244,9 @@ public class MoveStateProcessor : IInstanceProcessor
         }
 
         stateDB.MoveType = PositionDB.MoveTypes.Orbit;
-        stateDB.SetParent(orbitDB.Parent);
+        // Only update parent if it has changed to avoid expensive SetParent operation
+        if (stateDB.Parent != orbitDB.Parent)
+            stateDB.SetParent(orbitDB.Parent);
         stateDB.SGP = orbitDB.GravitationalParameter_m3S2;
         stateDB.GetKeplerElements = orbitDB.GetElements();
         stateDB.RelativePosition2 = orbitDB._position;
@@ -261,7 +267,9 @@ public class MoveStateProcessor : IInstanceProcessor
             }
 
             stateDB.MoveType = PositionDB.MoveTypes.NewtonSimple;
-            stateDB.SetParent(movedb.SOIParent);
+            // Only update parent if it has changed to avoid expensive SetParent operation
+            if (stateDB.Parent != movedb.SOIParent)
+                stateDB.SetParent(movedb.SOIParent);
             var myMass = movedb.OwningEntity.GetDataBlob<MassVolumeDB>().MassTotal;
             var pMass = movedb.SOIParent.GetDataBlob<MassVolumeDB>().MassTotal;
             stateDB.SGP = GeneralMath.StandardGravitationalParameter(myMass + pMass);
@@ -283,7 +291,9 @@ public class MoveStateProcessor : IInstanceProcessor
         }
 
         stateDB.MoveType = PositionDB.MoveTypes.NewtonSimple;
-        stateDB.SetParent(movedb.SOIParent);
+        // Only update parent if it has changed to avoid expensive SetParent operation
+        if (stateDB.Parent != movedb.SOIParent)
+            stateDB.SetParent(movedb.SOIParent);
         var myMass = movedb.OwningEntity.GetDataBlob<MassVolumeDB>().MassTotal;
         var pMass = movedb.SOIParent.GetDataBlob<MassVolumeDB>().MassTotal;
         stateDB.SGP = GeneralMath.StandardGravitationalParameter(myMass + pMass);
@@ -314,7 +324,9 @@ public class MoveStateProcessor : IInstanceProcessor
         }
 
         stateDB.MoveType = PositionDB.MoveTypes.NewtonSimple;
-        stateDB.SetParent(movedb.SOIParent);
+        // Only update parent if it has changed to avoid expensive SetParent operation
+        if (stateDB.Parent != movedb.SOIParent)
+            stateDB.SetParent(movedb.SOIParent);
         stateDB.GetKeplerElements = movedb.GetElements();
         stateDB.SGP = stateDB.GetKeplerElements.StandardGravParameter;
         //newtonmove processor still updates positon in the processor.
@@ -344,7 +356,9 @@ public class MoveStateProcessor : IInstanceProcessor
 
         stateDB.MoveType = PositionDB.MoveTypes.Warp;
 
-        stateDB.SetParent(warpdb._parentEnitity);
+        // Only update parent if it has changed to avoid expensive SetParent operation
+        if (stateDB.Parent != warpdb._parentEnitity)
+            stateDB.SetParent(warpdb._parentEnitity);
         stateDB.GetKeplerElements = warpdb.EndpointTargetOrbit;
         stateDB.SGP = stateDB.GetKeplerElements.StandardGravParameter;
         stateDB.RelativePosition2 = warpdb._position;

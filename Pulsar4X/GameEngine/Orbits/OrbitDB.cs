@@ -126,6 +126,13 @@ namespace Pulsar4X.Orbits
 
         internal Vector2 _position;
 
+        // Cached trigonometric values for performance
+        private double _cachedCosLoAN;
+        private double _cachedSinLoAN;
+        private double _cachedCosIncl;
+        private double _cachedSinIncl;
+        private bool _trigCacheValid = false;
+
         #region Construction Interface
 
 
@@ -517,6 +524,30 @@ namespace Pulsar4X.Orbits
 
             SOI_m = OrbitMath.GetSOI(SemiMajorAxis, _myMass, _parentMass);
 
+            // Cache trigonometric values for performance
+            UpdateTrigCache();
+        }
+
+        /// <summary>
+        /// Updates cached trigonometric values
+        /// </summary>
+        internal void UpdateTrigCache()
+        {
+            _cachedCosLoAN = Math.Cos(LongitudeOfAscendingNode);
+            _cachedSinLoAN = Math.Sin(LongitudeOfAscendingNode);
+            _cachedCosIncl = Math.Cos(Inclination);
+            _cachedSinIncl = Math.Sin(Inclination);
+            _trigCacheValid = true;
+        }
+
+        /// <summary>
+        /// Gets cached trigonometric values for position calculations
+        /// </summary>
+        internal (double cosLoAN, double sinLoAN, double cosIncl, double sinIncl) GetCachedTrigValues()
+        {
+            if (!_trigCacheValid)
+                UpdateTrigCache();
+            return (_cachedCosLoAN, _cachedSinLoAN, _cachedCosIncl, _cachedSinIncl);
         }
 
         [OnDeserialized]
