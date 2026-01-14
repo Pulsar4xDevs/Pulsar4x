@@ -219,18 +219,15 @@ namespace Pulsar4X.Client
                     {
 
                         ImGui.Text(SelectedEntity.Id.ToString());
-                        if (SelectedEntity.HasDataBlob<PositionDB>())
+                        if (SelectedEntity.TryGetDataBlob<PositionDB>(out var positionDB))
                         {
-                            var positiondb = SelectedEntity.GetDataBlob<PositionDB>();
-                            var posAbs = positiondb.AbsolutePosition;
-                            ImGui.Text("x: " + Stringify.Distance(posAbs.X));
-                            ImGui.Text("y: " + Stringify.Distance(posAbs.Y));
-                            ImGui.Text("z: " + Stringify.Distance(posAbs.Z));
-                            if (positiondb.Parent != null)
-                            {
-                                ImGui.Text("Parent: " + positiondb.Parent.GetDataBlob<NameDB>().DefaultName);
+                            ImGui.Text($"Position x: {Stringify.Distance(positionDB.AbsolutePosition.X)}, y: {Stringify.Distance(positionDB.AbsolutePosition.Y)}, z: {Stringify.Distance(positionDB.AbsolutePosition.Z)}");
 
-                                ImGui.Text("Dist: " + Stringify.Distance(positiondb.RelativePosition.Length()));
+                            if (positionDB.Parent != null)
+                            {
+                                ImGui.Text("Parent: " + positionDB.Parent.GetDataBlob<NameDB>().DefaultName);
+
+                                ImGui.Text("Distance To Parent: " + Stringify.Distance(positionDB.RelativePosition.Length()));
                             }
 
                             (Vector3 position, Vector3 Velocity) relativeState;
@@ -243,8 +240,8 @@ namespace Pulsar4X.Client
                                 relativeState.Velocity = Vector3.Zero;
                             }
 
-                            ImGui.Text("relative Velocity: " + relativeState.Velocity);
-                            ImGui.Text("relative Speed: " + Stringify.Velocity(relativeState.Velocity.Length()));
+                            ImGui.Text("Relative Velocity: " + relativeState.Velocity);
+                            ImGui.Text("Relative Speed: " + Stringify.Velocity(relativeState.Velocity.Length()));
                         }
 
                         if (ImGui.CollapsingHeader("DataBlob List"))
@@ -257,11 +254,10 @@ namespace Pulsar4X.Client
 
 
 
-                        if (SelectedEntity.HasDataBlob<MassVolumeDB>())
+                        if (SelectedEntity.TryGetDataBlob<MassVolumeDB>(out var mvdb))
                         {
                             if (ImGui.CollapsingHeader("MassVolumeDB: ###MassVolDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                             {
-                                MassVolumeDB mvdb = SelectedEntity.GetDataBlob<MassVolumeDB>();
                                 ImGui.Text("Mass " + Stringify.Mass(mvdb.MassDry));
                                 ImGui.Text("Volume " + Stringify.Velocity(mvdb.Volume_m3));
                                 ImGui.Text("Density " + mvdb.DensityDry_gcm + "g/cm^3");
@@ -269,20 +265,22 @@ namespace Pulsar4X.Client
                             }
 
                         }
-                        if (SelectedEntity.HasDataBlob<CargoStorageDB>())
+                        if (SelectedEntity.TryGetDataBlob<CargoStorageDB>(out var storeDB))
                         {
                             if (ImGui.CollapsingHeader("CargoStorageDB: ###VolStorDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                             {
-                                CargoStorageDB storeDB = SelectedEntity.GetDataBlob<CargoStorageDB>();
                                 ImGui.Indent();
-                                storeDB.Display(_selectedEntityState, _uiState);
+
+                                if(_selectedEntityState != null)
+                                    storeDB.Display(_selectedEntityState, _uiState);
+
                                 ImGui.Text("Total Stored Mass inc. escro: " + Stringify.Mass(storeDB.TotalStoredMass));
                                 ImGui.Text("Transfer Range: " + Stringify.Velocity(storeDB.TransferRangeDv_mps));
                                 ImGui.Text("Transfer Rate: " + Stringify.Mass(storeDB.TransferRate));
                                 double totalMassIncEscro = 0;
                                 double totalMassLesEscro = 0;
-                                double totalVolumeIncEscro = 0;
-                                double totalVolumeLesEscro = 0;
+                                // double totalVolumeIncEscro = 0;
+                                // double totalVolumeLesEscro = 0;
                                 long totalCountIncEscro = 0;
                                 long totalCountLesEscro = 0;
                                 foreach (var store in storeDB.TypeStores)
@@ -456,11 +454,10 @@ namespace Pulsar4X.Client
                         }
 
 
-                        if (SelectedEntity.HasDataBlob<EnergyGenAbilityDB>())
+                        if (SelectedEntity.TryGetDataBlob<EnergyGenAbilityDB>(out var powerDB))
                         {
                             if (ImGui.CollapsingHeader("Power ###PowerHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                             {
-                                var powerDB = SelectedEntity.GetDataBlob<EnergyGenAbilityDB>();
                                 ImGui.Text("Generates " + powerDB.EnergyType.Name);
                                 ImGui.Text("Max of: " + powerDB.TotalOutputMax + "/s");
                                 if(!string.IsNullOrEmpty(powerDB.TotalFuelUseAtMax.type))
@@ -481,12 +478,10 @@ namespace Pulsar4X.Client
                         }
 
 
-                        if (SelectedEntity.HasDataBlob<WarpAbilityDB>())
+                        if (SelectedEntity.TryGetDataBlob<WarpAbilityDB>(out var warpDB))
                         {
                             if (ImGui.CollapsingHeader("Warp: ###WarpHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                             {
-                                WarpAbilityDB warpDB = SelectedEntity.GetDataBlob<WarpAbilityDB>();
-
                                 ImGui.Text("Max Speed: " + warpDB.MaxSpeed);
                                 //ImGui.Text("Energy type: " + warpDB.EnergyType);
                                 ImGui.Text(SelectedEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(warpDB.EnergyType).Name);
@@ -562,9 +557,8 @@ namespace Pulsar4X.Client
                             }
                         }
 
-                        if (SelectedEntity.HasDataBlob<SensorProfileDB>() && ImGui.CollapsingHeader("SensorProfile"))
+                        if (SelectedEntity.TryGetDataBlob<SensorProfileDB>(out var profile) && ImGui.CollapsingHeader("SensorProfile"))
                         {
-                            var profile = SelectedEntity.GetDataBlob<SensorProfileDB>();
                             ImGui.Text("Target CrossSection: " + profile.TargetCrossSection_msq + " m^2");
                             ImGui.Text("Emitted Count: " + profile.EmittedEMSpectra.Count);
                             ImGui.Text("Reflected Count: " + profile.ReflectedEMSpectra.Count);
@@ -635,13 +629,12 @@ namespace Pulsar4X.Client
                             }
                         }
 
-                        if (SelectedEntity.HasDataBlob<SensorInfoDB>())
+                        if (SelectedEntity.TryGetDataBlob<SensorInfoDB>(out var sensorInfoDB))
                         {
-                            var actualEntity = SelectedEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
+                            var actualEntity = sensorInfoDB.DetectedEntity;
 
-                            if (actualEntity.IsValid && actualEntity.HasDataBlob<AsteroidDamageDB>())
+                            if (actualEntity.IsValid && actualEntity.TryGetDataBlob<AsteroidDamageDB>(out var dmgDB))
                             {
-                                var dmgDB = actualEntity.GetDataBlob<AsteroidDamageDB>();
                                 ImGui.Text("Remaining HP: " + dmgDB.Health.ToString());
                             }
                         }
