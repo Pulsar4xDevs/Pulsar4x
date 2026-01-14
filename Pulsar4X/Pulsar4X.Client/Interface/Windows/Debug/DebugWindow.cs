@@ -182,26 +182,32 @@ namespace Pulsar4X.Client
             if (ImGui.BeginTabItem("Entities"))
             {
                 var size = ImGui.GetContentRegionAvail();
-                var firstChildSize = new System.Numerics.Vector2(size.X * 0.27f, 0);
-                var secondChildSize = new System.Numerics.Vector2(size.X * 0.72f, 0);
+                var firstChildSize = new System.Numerics.Vector2(size.X * 0.33f, 0);
+                var secondChildSize = new System.Numerics.Vector2(size.X * 0.67f, 0);
 
                 if (ImGui.BeginChild("Enttiy Selector", firstChildSize))
                 {
-                    ImGui.Columns(3);
-                    for (int i = 0; i < _allEntites.Count; i++)
+                    if(ImGui.BeginTable("EntityTable", 3, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
                     {
-                        if (ImGui.Selectable(_allEntites[i].name + "##" + i))
+                        ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 0.4f);
+                        ImGui.TableSetupColumn("ID", ImGuiTableColumnFlags.None, 0.2f);
+                        ImGui.TableSetupColumn("Faction", ImGuiTableColumnFlags.None, 0.4f);
+                        ImGui.TableHeadersRow();
+                        for (int i = 0; i < _allEntites.Count; i++)
                         {
-                            SelectedEntity = _allEntites[i].entity;
+                            ImGui.TableNextRow();
+                            ImGui.TableSetColumnIndex(0);
+                            if (ImGui.Selectable(_allEntites[i].name + "##" + i, SelectedEntity != null && SelectedEntity.Id == _allEntites[i].entity.Id))
+                            {
+                                SelectedEntity = _allEntites[i].entity;
+                            }
+                            ImGui.TableSetColumnIndex(1);
+                            ImGui.Text(_allEntites[i].entity.Id.ToString());
+                            ImGui.TableSetColumnIndex(2);
+                            ImGui.Text(_allEntites[i].faction);
                         }
-                        ImGui.NextColumn();
-                        ImGui.Text(_allEntites[i].entity.Id.ToString());
-                        ImGui.NextColumn();
-                        ImGui.Text(_allEntites[i].faction);
-                        ImGui.NextColumn();
-
+                        ImGui.EndTable();
                     }
-                    ImGui.Columns(1);
                     ImGui.EndChild();
                 }
 
@@ -847,19 +853,27 @@ namespace Pulsar4X.Client
 
             if(ImGui.BeginTabItem("Instance Processors"))
             {
-                ImGui.Columns(3);
-                foreach (var qi in SystemState.StarSystem.ManagerSubpulses.InstanceProcessorsQueue)
+                if(ImGui.BeginTable("InstanceProcessors", 3, Styles.TableFlags))
                 {
-                    var instanceProcess = qi.Item;
-                    var s = instanceProcess.Item1;
-                    var e = instanceProcess.Item2;
+                    ImGui.TableSetupColumn("Next Run Time", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("System", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("Processor", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableHeadersRow();
+                    foreach(var qi in SystemState.StarSystem.ManagerSubpulses.InstanceProcessorsQueue)
+                    {
+                        var instanceProcess = qi.Item;
+                        var s = instanceProcess.Item1;
+                        var e = instanceProcess.Item2;
 
-                    ImGui.Text(qi.Time.ToString());
-                    ImGui.NextColumn();
-                    ImGui.Text(s);
-                    ImGui.NextColumn();
-                    ImGui.Text(e.DebuggerDisplay);
-                    ImGui.NextColumn();
+                        ImGui.TableNextRow();
+                        ImGui.TableSetColumnIndex(0);
+                        ImGui.Text(qi.Time.ToString());
+                        ImGui.TableSetColumnIndex(1);
+                        ImGui.Text(s);
+                        ImGui.TableSetColumnIndex(2);
+                        ImGui.Text(e.DebuggerDisplay);
+                    }
+                    ImGui.EndTable();
                 }
 
                 ImGui.EndTabItem();
@@ -872,16 +886,25 @@ namespace Pulsar4X.Client
 
             if(ImGui.BeginTabItem("HotLoop Processors"))
             {
-                ImGui.Columns(3);
-                foreach(var (type, dateTime) in SystemState.StarSystem.ManagerSubpulses.HotLoopProcessorsNextRun)
+                if(ImGui.BeginTable("HotLoopProcessors", 4, Styles.TableFlags))
                 {
-                    ImGui.Text(dateTime.ToString());
-                    ImGui.NextColumn();
-                    ImGui.Text("System");
-                    ImGui.NextColumn();
-                    ImGui.Text(type.Name);
-                    ImGui.NextColumn();
+                    ImGui.TableSetupColumn("Next Run Time", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("Processor", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableHeadersRow();
+                    foreach(var (type, dateTime) in SystemState.StarSystem.ManagerSubpulses.HotLoopProcessorsNextRun)
+                    {
+                        ImGui.TableNextRow();
+                        ImGui.TableSetColumnIndex(0);
+                        ImGui.Text(dateTime.ToString());
+                        ImGui.TableSetColumnIndex(1);
+                        ImGui.Text("System");
+                        ImGui.TableSetColumnIndex(2);
+                        ImGui.Text(type.Name);
+                    }
+                    ImGui.EndTable();
                 }
+
                 ImGui.EndTabItem();
             }
         }
