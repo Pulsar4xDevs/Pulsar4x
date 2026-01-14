@@ -546,6 +546,27 @@ namespace Pulsar4X.Orbits
 			return ke;
         }
 
+        public KeplerElements GetElements(double preCalculatedTrueAnomaly)
+        {
+            KeplerElements ke = new KeplerElements();
+            ke.SemiMajorAxis = SemiMajorAxis;                                            //a
+            ke.SemiMinorAxis = SemiMajorAxis * Math.Sqrt(1 - Eccentricity * Eccentricity);//b
+            ke.Eccentricity = Eccentricity;                                              //e
+            ke.Periapsis = Periapsis;                                                    //q
+            ke.Apoapsis = Apoapsis;                                                      //Q
+            ke.LoAN = LongitudeOfAscendingNode;                                          //Ω (upper case Omega)
+            ke.AoP = ArgumentOfPeriapsis;                                                //ω (lower case omega)
+            ke.Inclination = Inclination;                                                //i
+            ke.MeanMotion = MeanMotion;                                                  //n
+            ke.MeanAnomalyAtEpoch = MeanAnomalyAtEpoch;                                  //M0
+            ke.Epoch = Epoch;
+            ke.LinearEccentricity = Eccentricity * SemiMajorAxis;                        //ae
+            ke.Period = OrbitalPeriod.TotalSeconds;
+			ke.StandardGravParameter = GravitationalParameter_m3S2;
+            ke.TrueAnomalyAtEpoch = preCalculatedTrueAnomaly;                            //ν or f or  θ (use pre-calculated value)
+			return ke;
+        }
+
         public override object Clone()
         {
             return new OrbitDB(this);

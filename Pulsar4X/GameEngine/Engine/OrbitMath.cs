@@ -274,6 +274,29 @@ namespace Pulsar4X.Engine
         }
 
         /// <summary>
+        /// Parent relative velocity vector.
+        /// </summary>
+        /// <returns>The orbital vector relative to the parent</returns>
+        /// <param name="orbit">Orbit.</param>
+        /// <param name="atDateTime">At date time.</param>
+        /// <param name="preCalculatedTrueAnomaly">Pre-calculated true anomaly to avoid redundant calculation.</param>
+        public static Vector3 InstantaneousOrbitalVelocityVector_m(OrbitDB orbit, DateTime atDateTime, double preCalculatedTrueAnomaly)
+        {
+            var position = GetPosition(orbit, preCalculatedTrueAnomaly);
+            var sma = orbit.SemiMajorAxis;
+            if (orbit.GravitationalParameter_m3S2 == 0 || sma == 0)
+                return new Vector3(); //so we're not returning NaN;
+            var sgp = orbit.GravitationalParameter_m3S2;
+
+            double e = orbit.Eccentricity;
+            double trueAnomaly = preCalculatedTrueAnomaly;
+            double aoP = orbit.ArgumentOfPeriapsis;
+            double i = orbit.Inclination;
+            double loAN = orbit.LongitudeOfAscendingNode;
+            return ParentLocalVeclocityVector(sgp, position, sma, e, trueAnomaly, aoP, i, loAN);
+        }
+
+        /// <summary>
         /// basicaly the radius of the planet * 1.1
         /// in future we may have this dependant on atmosphere (thickness and or gravity?)
         /// maybe we should return a lower and an upper bound? ie 1.05 to 1.333 which would allow some flexability with eccentricity,

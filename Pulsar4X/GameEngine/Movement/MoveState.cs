@@ -173,6 +173,15 @@ public class MoveStateProcessor : IInstanceProcessor
         }
     }
 
+    public static void ProcessForType(List<OrbitDB> orbits, DateTime atDateTime, double[] preCalculatedTrueAnomalies)
+    {
+        for (int i = 0; i < orbits.Count; i++)
+        {
+            if(orbits[i].OwningEntity is not null)
+                ProcessForType(orbits[i], atDateTime, preCalculatedTrueAnomalies[i]);
+        }
+    }
+
     public static void ProcessForType(OrbitDB orbitDB, DateTime atDateTime)
     {
         if(orbitDB.OwningEntity is null)
@@ -190,6 +199,25 @@ public class MoveStateProcessor : IInstanceProcessor
         stateDB.RelativePosition2 = orbitDB._position; //(Vector2)orbitDB.OwningEntity.GetDataBlob<PositionDB>().RelativePosition;
         orbitDB.OwningEntity.GetDataBlob<PositionDB>().RelativePosition = (Vector3)orbitDB._position;
         stateDB.Velocity = (Vector2)orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
+    }
+
+    public static void ProcessForType(OrbitDB orbitDB, DateTime atDateTime, double preCalculatedTrueAnomaly)
+    {
+        if(orbitDB.OwningEntity is null)
+            return;
+        if(!orbitDB.OwningEntity.TryGetDataBlob(out PositionDB stateDB))
+        {
+            stateDB = new PositionDB(orbitDB.Parent);
+            orbitDB.OwningEntity.SetDataBlob(stateDB);
+        }
+
+        stateDB.MoveType = PositionDB.MoveTypes.Orbit;
+        stateDB.SetParent(orbitDB.Parent);
+        stateDB.SGP = orbitDB.GravitationalParameter_m3S2;
+        stateDB.GetKeplerElements = orbitDB.GetElements(preCalculatedTrueAnomaly);
+        stateDB.RelativePosition2 = orbitDB._position; //(Vector2)orbitDB.OwningEntity.GetDataBlob<PositionDB>().RelativePosition;
+        orbitDB.OwningEntity.GetDataBlob<PositionDB>().RelativePosition = (Vector3)orbitDB._position;
+        stateDB.Velocity = (Vector2)orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime, preCalculatedTrueAnomaly);
     }
 
     public static void ProcessForType(List<OrbitUpdateOftenDB> orbits, DateTime atDateTime)
