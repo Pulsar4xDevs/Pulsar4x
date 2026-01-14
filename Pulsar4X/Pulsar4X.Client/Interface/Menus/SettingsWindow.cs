@@ -243,6 +243,13 @@ namespace Pulsar4X.Client
             {
                 settings.ShowFPS = showFPS;
             }
+
+            // 24-hour clock
+            bool europeClock = settings.EuropeClock;
+            if (ImGui.Checkbox("24-hour clock", ref europeClock))
+            {
+                settings.EuropeClock = europeClock;
+            }
         }
 
         private void DisplayDebugSettings()
@@ -445,6 +452,7 @@ namespace Pulsar4X.Client
 
         private void ApplySettings()
         {
+            Helpers.SetClock((_uiState.GameSettings.EuropeClock) ? "en-150" : "en");
             _uiState.GameSettings.ApplyDisplaySettings(_uiState.ViewPort);
         }
 

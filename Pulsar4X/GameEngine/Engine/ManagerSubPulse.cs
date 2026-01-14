@@ -303,10 +303,10 @@ namespace Pulsar4X.Engine
                 {
                     if (runAt == null || runAt > _subStepDateTime)
                         continue;
-
+#if TRACE
                     Trace.WriteLine(String.Format("[{0:u}|{1:u}] running hotloop processor: {2} with entity manager: {3}",
                                 StarSysDateTime, _subStepDateTime, type.Name, _entityManager.ManagerID));
-
+#endif
                     Performance.Start(type.Name);
                     CurrentProcess = type.ToString();
                     var proc = _game.ProcessorManager.HotloopProcessors[type];
@@ -333,10 +333,10 @@ namespace Pulsar4X.Engine
 
                     var processor = _processManager.GetInstanceProcessor(s);
                     var pn = processor.GetType().Name;
-
+#if TRACE
                     Trace.WriteLine(String.Format("[{0:u}|{1:u}] running instance processor: {2} with entity: {3}",
                                 StarSysDateTime, _subStepDateTime, pn, e.DebuggerDisplay));
-
+#endif
                     Performance.Start(pn);
                     CurrentProcess = s;
                     processor.ProcessEntity(e, qi.Time);

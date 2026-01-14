@@ -26,6 +26,7 @@ namespace Pulsar4X.Client
         public float UIScale { get; set; } = 1.0f;
         public bool ShowTooltips { get; set; } = true;
         public bool ShowFPS { get; set; } = false;
+        public bool EuropeClock { get; set; } = false;
         
         // Input Settings
         public bool MouseInvertY { get; set; } = false;
@@ -71,7 +72,7 @@ namespace Pulsar4X.Client
                 Console.WriteLine($"Failed to save game settings: {ex.Message}");
             }
         }
-        
+
         public static GameSettings Load()
         {
             try
@@ -85,8 +86,12 @@ namespace Pulsar4X.Client
                     return new GameSettings();
                     
                 string json = File.ReadAllText(settingsPath);
-                var settings = JsonConvert.DeserializeObject<GameSettings>(json);
-                return settings ?? new GameSettings();
+
+                var settings = JsonConvert.DeserializeObject<GameSettings>(json) ?? new GameSettings();
+
+                Helpers.SetClock((settings.EuropeClock) ? "en-150" : "en");
+
+                return settings;
             }
             catch (Exception ex)
             {

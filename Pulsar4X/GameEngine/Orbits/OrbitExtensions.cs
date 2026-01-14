@@ -47,6 +47,18 @@ namespace Pulsar4X.Orbits
             return OrbitMath.InstantaneousOrbitalVelocityVector_m(orbit, atDateTime);
         }
 
+        /// <summary>
+        /// Parent relative velocity vector.
+        /// </summary>
+        /// <returns>The orbital vector relative to the parent</returns>
+        /// <param name="orbit">Orbit.</param>
+        /// <param name="atDateTime">At date time.</param>
+        /// <param name="preCalculatedTrueAnomaly">Pre-calculated true anomaly to avoid redundant calculation.</param>
+        public static Vector3 InstantaneousOrbitalVelocityVector_m(this OrbitDB orbit, DateTime atDateTime, double preCalculatedTrueAnomaly)
+        {
+            return OrbitMath.InstantaneousOrbitalVelocityVector_m(orbit, atDateTime, preCalculatedTrueAnomaly);
+        }
+
 
 
 

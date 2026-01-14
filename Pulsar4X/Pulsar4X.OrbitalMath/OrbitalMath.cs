@@ -508,6 +508,26 @@ namespace Pulsar4X.Orbital
 
             return new Vector3(x, y, z) * r;
         }
+
+        /// <summary>
+        /// Optimized position calculation using pre-cached trigonometric values
+        /// </summary>
+        public static Vector3 GetPosition(double a, double e, double aoP, double trueAnomaly,
+            double cosLoAN, double sinLoAN, double cosIncl, double sinIncl)
+        {
+            var p = EllipseMath.SemiLatusRectum(a, e);
+            var r = EllipseMath.RadiusAtTrueAnomaly(trueAnomaly, p, e);
+
+            double angleFromLoAN = trueAnomaly + aoP;
+            double cosAngle = Math.Cos(angleFromLoAN);
+            double sinAngle = Math.Sin(angleFromLoAN);
+
+            double x = cosLoAN * cosAngle - sinLoAN * sinAngle * cosIncl;
+            double y = sinLoAN * cosAngle + cosLoAN * sinAngle * cosIncl;
+            double z = sinIncl * sinAngle;
+
+            return new Vector3(x, y, z) * r;
+        }
         
         public static Vector3 GetRelativePosition(double lofAN, double aoP, double incl, double trueAnomaly, double radius)
         {

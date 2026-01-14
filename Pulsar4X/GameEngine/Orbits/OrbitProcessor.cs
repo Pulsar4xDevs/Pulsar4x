@@ -57,15 +57,17 @@ namespace Pulsar4X.Orbits
         internal static int UpdateSystemOrbits(EntityManager manager, DateTime toDate)
         {
             var orbits = manager.GetAllDataBlobsOfType<OrbitDB>();
-            foreach (var orbit in orbits)
+
+            // Pre-calculate true anomalies once to avoid triple calculation
+            var trueAnomalies = new double[orbits.Count];
+            for (int i = 0; i < orbits.Count; i++)
             {
-                Vector3 newPosition = OrbitMath.GetPosition(orbit, toDate);
-                //PositionDB entityPosition = orbit.OwningEntity.GetDataBlob<PositionDB>();
-                //entityPosition.RelativePosition = newPosition;
-                orbit._position = (Vector2)newPosition;
+                trueAnomalies[i] = OrbitMath.GetTrueAnomaly(orbits[i], toDate);
+                Vector3 newPosition = OrbitMath.GetPosition(orbits[i], trueAnomalies[i]);
+                orbits[i]._position = (Vector2)newPosition;
             }
 
-            MoveStateProcessor.ProcessForType(orbits, toDate);
+            MoveStateProcessor.ProcessForType(orbits, toDate, trueAnomalies);
             return orbits.Count;
         }
 

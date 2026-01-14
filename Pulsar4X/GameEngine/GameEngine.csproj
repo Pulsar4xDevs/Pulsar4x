@@ -19,7 +19,11 @@
     <ProjectReference Include="..\Pulsar4X.OrbitalMath\Pulsar4X.Orbital.csproj" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DefineConstants>DEBUG</DefineConstants>
     <NoWarn>0414;0649;0169;8601,8602,8618,8714</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DefineConstants></DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <None Update="Data\*.*">

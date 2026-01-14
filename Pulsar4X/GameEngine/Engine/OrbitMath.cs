@@ -223,7 +223,10 @@ namespace Pulsar4X.Engine
             {
                 return Vector3.Zero;
             }
-            return OrbitalMath.GetPosition(orbit.SemiMajorAxis, orbit.Eccentricity, orbit.LongitudeOfAscendingNode, orbit.ArgumentOfPeriapsis, orbit.Inclination, trueAnomaly);
+            // Use cached trigonometric values for performance
+            var (cosLoAN, sinLoAN, cosIncl, sinIncl) = orbit.GetCachedTrigValues();
+            return OrbitalMath.GetPosition(orbit.SemiMajorAxis, orbit.Eccentricity, orbit.ArgumentOfPeriapsis, trueAnomaly,
+                cosLoAN, sinLoAN, cosIncl, sinIncl);
         }
 
         public static Vector3 GetAbsolutePosition(OrbitDB orbit, DateTime atDateTime)
@@ -274,6 +277,29 @@ namespace Pulsar4X.Engine
         }
 
         /// <summary>
+        /// Parent relative velocity vector.
+        /// </summary>
+        /// <returns>The orbital vector relative to the parent</returns>
+        /// <param name="orbit">Orbit.</param>
+        /// <param name="atDateTime">At date time.</param>
+        /// <param name="preCalculatedTrueAnomaly">Pre-calculated true anomaly to avoid redundant calculation.</param>
+        public static Vector3 InstantaneousOrbitalVelocityVector_m(OrbitDB orbit, DateTime atDateTime, double preCalculatedTrueAnomaly)
+        {
+            var position = GetPosition(orbit, preCalculatedTrueAnomaly);
+            var sma = orbit.SemiMajorAxis;
+            if (orbit.GravitationalParameter_m3S2 == 0 || sma == 0)
+                return new Vector3(); //so we're not returning NaN;
+            var sgp = orbit.GravitationalParameter_m3S2;
+
+            double e = orbit.Eccentricity;
+            double trueAnomaly = preCalculatedTrueAnomaly;
+            double aoP = orbit.ArgumentOfPeriapsis;
+            double i = orbit.Inclination;
+            double loAN = orbit.LongitudeOfAscendingNode;
+            return ParentLocalVeclocityVector(sgp, position, sma, e, trueAnomaly, aoP, i, loAN);
+        }
+
+        /// <summary>
         /// basicaly the radius of the planet * 1.1
         /// in future we may have this dependant on atmosphere (thickness and or gravity?)
         /// maybe we should return a lower and an upper bound? ie 1.05 to 1.333 which would allow some flexability with eccentricity,
@@ -298,18 +324,17 @@ namespace Pulsar4X.Engine
         public static double GetTrueAnomaly(OrbitDB orbit, DateTime time)
         {
             TimeSpan timeSinceEpoch = time - orbit.Epoch;
-
-            // Don't attempt to calculate large timeframes.
-            while (timeSinceEpoch > orbit.OrbitalPeriod && orbit.OrbitalPeriod.Ticks != 0)
-            {
-                long years = timeSinceEpoch.Ticks / orbit.OrbitalPeriod.Ticks;
-                timeSinceEpoch -= TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
-                orbit.Epoch += TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
-            }
-
             var secondsFromEpoch = timeSinceEpoch.TotalSeconds;
+
             if (orbit.Eccentricity < 1) //elliptical orbit
             {
+                // For elliptical orbits, normalize time using modulo to avoid large numbers
+                // GetMeanAnomalyFromTime already normalizes the angle, so we just need to handle the time
+                if (orbit.OrbitalPeriod.Ticks != 0 && Math.Abs(secondsFromEpoch) > orbit.OrbitalPeriod.TotalSeconds)
+                {
+                    secondsFromEpoch = secondsFromEpoch % orbit.OrbitalPeriod.TotalSeconds;
+                }
+
                 double o_M0 = orbit.MeanAnomalyAtEpoch;
                 double o_M1 = GetMeanAnomalyFromTime(o_M0, orbit.MeanMotion, secondsFromEpoch);
                 double o_E = GetEccentricAnomaly(orbit, o_M1);
@@ -317,6 +342,7 @@ namespace Pulsar4X.Engine
             }
             else //hyperbolic orbit
             {
+                // Hyperbolic orbits don't have a period, so no normalization needed
                 double o_Mh = GetHyperbolicMeanAnomalyFromTime(orbit.MeanMotion, secondsFromEpoch);
                 double o_F =  GetHyperbolicAnomaly(orbit, o_Mh);
                 return TrueAnomalyFromHyperbolicAnomaly(orbit.Eccentricity, o_F);
