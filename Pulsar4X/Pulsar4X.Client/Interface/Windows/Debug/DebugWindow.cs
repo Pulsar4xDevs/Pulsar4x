@@ -459,10 +459,10 @@ namespace Pulsar4X.Client
                             if (ImGui.CollapsingHeader("Power ###PowerHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                             {
                                 ImGui.Text("Generates " + powerDB.EnergyType.Name);
-                                
+
                                 ImGui.Text("Reactor : " + Stringify.Power(powerDB.MaxOutputFromReactor));
                                 ImGui.Text("Solar   : " + Stringify.Power(powerDB.MaxOutputFromSolar));
-                                
+
                                 ImGui.Text("Max of: " + Stringify.Power(powerDB.TotalOutputMax) + "/s");
                                 if(!string.IsNullOrEmpty(powerDB.TotalFuelUseAtMax.type))
                                 {
@@ -470,7 +470,7 @@ namespace Pulsar4X.Client
                                     ImGui.Text("Burning " + powerDB.TotalFuelUseAtMax.maxUse + " of " + fueltype);
                                     ImGui.Text("With " + powerDB.LocalFuel + " remaining reactor fuel");
                                 }
-                                
+
 
                                 foreach (var etype in powerDB.EnergyStored)
                                 {
@@ -865,7 +865,7 @@ namespace Pulsar4X.Client
 
                         ImGui.TableNextRow();
                         ImGui.TableSetColumnIndex(0);
-                        ImGui.Text(qi.Time.ToString());
+                        ImGui.Text(qi.Time.ToString(_uiState.GameSettings.GetDateTimeFormat()));
                         ImGui.TableSetColumnIndex(1);
                         ImGui.Text(s);
                         ImGui.TableSetColumnIndex(2);
@@ -889,16 +889,20 @@ namespace Pulsar4X.Client
                     ImGui.TableSetupColumn("Next Run Time", ImGuiTableColumnFlags.WidthStretch);
                     ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.WidthStretch);
                     ImGui.TableSetupColumn("Processor", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("Run Frequency", ImGuiTableColumnFlags.WidthStretch);
                     ImGui.TableHeadersRow();
                     foreach(var (type, dateTime) in SystemState.StarSystem.ManagerSubpulses.HotLoopProcessorsNextRun)
                     {
                         ImGui.TableNextRow();
                         ImGui.TableSetColumnIndex(0);
-                        ImGui.Text(dateTime.ToString());
+                        ImGui.Text(dateTime?.ToString(_uiState.GameSettings.GetDateTimeFormat()) ?? "N/A");
                         ImGui.TableSetColumnIndex(1);
                         ImGui.Text("System");
                         ImGui.TableSetColumnIndex(2);
                         ImGui.Text(type.Name);
+                        ImGui.TableSetColumnIndex(3);
+                        var runFrequency = SystemState.StarSystem.ManagerSubpulses.GetProcessorRunFrequency(type);
+                        ImGui.Text(runFrequency?.ToString() ?? "N/A");
                     }
                     ImGui.EndTable();
                 }

@@ -9,29 +9,29 @@ namespace Pulsar4X.Client
     public class GameSettings
     {
         public static string SettingsFileName = "game-settings.json";
-        
+
         // Display Settings
         public int WindowWidth { get; set; } = 1280;
         public int WindowHeight { get; set; } = 720;
         public DisplayModeType DisplayMode { get; set; } = DisplayModeType.Windowed;
         public bool VSync { get; set; } = true;
-        
+
         // Audio Settings
         public float MasterVolume { get; set; } = 1.0f;
         public float MusicVolume { get; set; } = 0.8f;
         public float SoundEffectsVolume { get; set; } = 0.9f;
         public bool AudioEnabled { get; set; } = true;
-        
+
         // UI Settings
         public float UIScale { get; set; } = 1.0f;
         public bool ShowTooltips { get; set; } = true;
         public bool ShowFPS { get; set; } = false;
         public bool EuropeClock { get; set; } = false;
-        
+
         // Input Settings
         public bool MouseInvertY { get; set; } = false;
         public float MouseSensitivity { get; set; } = 1.0f;
-        
+
         // Available display modes
         public enum DisplayModeType
         {
@@ -39,7 +39,7 @@ namespace Pulsar4X.Client
             Fullscreen,
             BorderlessFullscreen
         }
-        
+
         // Available resolutions (common ones)
         public static readonly List<(int width, int height)> CommonResolutions = new List<(int, int)>
         {
@@ -54,7 +54,7 @@ namespace Pulsar4X.Client
             (2560, 1080),
             (3440, 1440)
         };
-        
+
         public void Save()
         {
             try
@@ -62,7 +62,7 @@ namespace Pulsar4X.Client
                 string? appDataPath = PulsarMainWindow.GetAppDataPath();
                 if (string.IsNullOrEmpty(appDataPath))
                     return;
-                    
+
                 string settingsPath = Path.Combine(appDataPath, SettingsFileName);
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
                 File.WriteAllText(settingsPath, json);
@@ -80,11 +80,11 @@ namespace Pulsar4X.Client
                 string? appDataPath = PulsarMainWindow.GetAppDataPath();
                 if (string.IsNullOrEmpty(appDataPath))
                     return new GameSettings();
-                    
+
                 string settingsPath = Path.Combine(appDataPath, SettingsFileName);
                 if (!File.Exists(settingsPath))
                     return new GameSettings();
-                    
+
                 string json = File.ReadAllText(settingsPath);
 
                 var settings = JsonConvert.DeserializeObject<GameSettings>(json) ?? new GameSettings();
@@ -99,14 +99,14 @@ namespace Pulsar4X.Client
                 return new GameSettings();
             }
         }
-        
+
         public void ApplyDisplaySettings(SDL3Window window)
         {
             try
             {
                 // Apply resolution
                 window.Size = new System.Numerics.Vector2(WindowWidth, WindowHeight);
-                
+
                 // Apply display mode
                 switch (DisplayMode)
                 {
@@ -114,11 +114,11 @@ namespace Pulsar4X.Client
                         SDL.SetWindowFullscreen(window.Window, false);
                         SDL.SetWindowBordered(window.Window, true);
                         break;
-                        
+
                     case DisplayModeType.Fullscreen:
                         SDL.SetWindowFullscreen(window.Window, true);
                         break;
-                        
+
                     case DisplayModeType.BorderlessFullscreen:
                         SDL.SetWindowFullscreen(window.Window, false);
                         SDL.SetWindowBordered(window.Window, false);
@@ -131,7 +131,7 @@ namespace Pulsar4X.Client
                         }
                         break;
                 }
-                
+
                 // Apply VSync
                 SDL.SetRenderVSync(window.Renderer, VSync ? 1 : 0);
             }
@@ -140,5 +140,9 @@ namespace Pulsar4X.Client
                 Console.WriteLine($"Failed to apply display settings: {ex.Message}");
             }
         }
+
+        public string GetTimeFormat() => EuropeClock ? "HH:mm:ss" : "hh:mm:ss tt";
+        public string GetDateFormat() => EuropeClock ? "dd/MM/yyyy" : "MM/dd/yyyy";
+        public string GetDateTimeFormat() => GetDateFormat() + " " + GetTimeFormat();
     }
-} 
+}

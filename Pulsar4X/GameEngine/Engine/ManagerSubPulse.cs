@@ -172,6 +172,18 @@ namespace Pulsar4X.Engine
                     HotLoopProcessorsNextRun[(dbType)] = nextDateTime;
             }
         }
+
+        /// <summary>
+        /// Gets the run frequency for a hotloop processor by its datablob type.
+        /// </summary>
+        /// <param name="dbType">The datablob type associated with the processor</param>
+        /// <returns>The run frequency TimeSpan, or null if the processor is not found</returns>
+        public TimeSpan? GetProcessorRunFrequency(Type dbType)
+        {
+            if (_processManager != null && _processManager.HotloopProcessors.TryGetValue(dbType, out var processor))
+                return processor.RunFrequency;
+            return null;
+        }
         
 
         internal void AddSystemInterupt(BaseDataBlob db)

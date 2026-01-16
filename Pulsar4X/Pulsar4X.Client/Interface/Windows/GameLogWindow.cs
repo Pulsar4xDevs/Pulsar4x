@@ -140,7 +140,7 @@ namespace Pulsar4X.Client
 
                     string typStr = e.EventType.ToString();
                     ImGui.Separator();
-                    ImGui.Text(e.StarDate.ToString());
+                    ImGui.Text(e.StarDate.ToString(_uiState.GameSettings.GetDateTimeFormat()));
                     ImGui.NextColumn();
                     ImGui.Text(typStr);
                     ImGui.NextColumn();

@@ -108,8 +108,7 @@ namespace Pulsar4X.Client
             {
                 ImGui.PushItemWidth(100);
                 ImGui.Indent();
-                var timeFormat = _uiState.GameSettings.EuropeClock ? "HH:mm:ss" : "h:mm:ss tt";
-                ImGui.Text(currenttime.ToString(timeFormat));
+                ImGui.Text(currenttime.ToString(_uiState.GameSettings.GetTimeFormat()));
                 ImGui.SameLine();
                 if (ImGui.SliderFloat("##freqSldr", ref _freqTimeSpanValue, 0.1f, 1, _freqTimeSpanValue.ToString(), ImGuiSliderFlags.None))
                 {
