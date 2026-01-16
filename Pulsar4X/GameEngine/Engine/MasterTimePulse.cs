@@ -28,6 +28,12 @@ namespace Pulsar4X.Engine
         [JsonIgnore]
         private Timer _timer = new Timer();
 
+        /// <summary>
+        /// Returns true if the time loop is currently running (not paused)
+        /// </summary>
+        [JsonIgnore]
+        public bool IsRunning => _timer.Enabled;
+
         [JsonIgnore]
         private Action<MasterTimePulse> runSystemProcesses = (MasterTimePulse obj) =>
         {

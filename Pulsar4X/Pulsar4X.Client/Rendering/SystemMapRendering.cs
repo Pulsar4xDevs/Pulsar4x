@@ -437,9 +437,14 @@ namespace Pulsar4X.Client.Rendering
                 List<NameIcon> nameIcons = new List<NameIcon>();
                 foreach (var icon in _nameIcons.Values)
                 {
-                    if(SystemViewPreferences.GetInstance().ShouldDisplay("map", icon.EntityState.BodyType))
-                        nameIcons.Add(icon);
-                    //item.Draw(_uiState.rendererPtr, _uiState.Camera);
+                    if(!SystemViewPreferences.GetInstance().ShouldDisplay("map", icon.EntityState.BodyType))
+                        continue;
+
+                    // Skip icons that are off-screen for performance
+                    if(!_camera.IsOnScreen(icon.ViewScreenPos.X, icon.ViewScreenPos.Y, icon.Width, icon.Height))
+                        continue;
+
+                    nameIcons.Add(icon);
                 }
                 NameIcon.DrawAll(_state.SDLRendererPtr, _state.Camera, nameIcons);
             }

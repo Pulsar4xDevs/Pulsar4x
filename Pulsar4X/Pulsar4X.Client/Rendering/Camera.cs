@@ -82,6 +82,29 @@ namespace Pulsar4X.Client
                 return false;
         }
 
+        /// <summary>
+        /// Checks if a screen position is within the viewport bounds (with optional margin).
+        /// </summary>
+        /// <param name="screenX">X coordinate in screen/view space</param>
+        /// <param name="screenY">Y coordinate in screen/view space</param>
+        /// <param name="width">Width of the element (for right/bottom edge check)</param>
+        /// <param name="height">Height of the element (for right/bottom edge check)</param>
+        /// <param name="margin">Extra margin around viewport to include partially visible elements</param>
+        /// <returns>True if the element is at least partially visible on screen</returns>
+        public bool IsOnScreen(float screenX, float screenY, float width = 0, float height = 0, float margin = 50)
+        {
+            // Check if the element's bounding box intersects with the viewport
+            // Element is visible if:
+            // - Right edge (screenX + width) is past the left viewport edge (-margin)
+            // - Left edge (screenX) is before the right viewport edge (ViewPortSize.X + margin)
+            // - Bottom edge (screenY + height) is past the top viewport edge (-margin)
+            // - Top edge (screenY) is before the bottom viewport edge (ViewPortSize.Y + margin)
+            return screenX + width > -margin &&
+                   screenX < ViewPortSize.X + margin &&
+                   screenY + height > -margin &&
+                   screenY < ViewPortSize.Y + margin;
+        }
+
         public void PinToEntity(Entity? entity)
         {
             if(entity == null)

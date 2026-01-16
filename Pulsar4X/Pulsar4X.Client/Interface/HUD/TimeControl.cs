@@ -10,7 +10,6 @@ namespace Pulsar4X.Client
     {
         MasterTimePulse? _timeloop => _uiState.Game?.TimePulse;
 
-        bool _isPaused = true;
         int _timeSpanValue = 1;
         int _timeSpanType = 3;
         new ImGuiWindowFlags _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar;
@@ -29,7 +28,6 @@ namespace Pulsar4X.Client
 
         bool _expanded;
 
-        ImGuiTreeNodeFlags _xpanderFlags = ImGuiTreeNodeFlags.AllowOverlap;
         float _freqTimeSpanValue = 0.1f;
         int _freqSpanType = 1;
 
@@ -61,14 +59,11 @@ namespace Pulsar4X.Client
             Window.Begin("TimeControl", ref IsActive, _flags);
             ImGui.PushItemWidth(100);
 
-            ImGui.PushStyleColor(ImGuiCol.Header, Styles.InvisibleColor);
-            ImGui.PushStyleColor(ImGuiCol.HeaderActive, Styles.InvisibleColor);
-            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Styles.InvisibleColor);
-
             DateTime currenttime = _uiState.SelectedSystemTime;
-            _expanded = ImGui.CollapsingHeader("###time_freq", _xpanderFlags); //Let the user open up the the time frequency menu
 
-            ImGui.PopStyleColor(3);
+            // Small arrow button for expanding time frequency menu
+            if (ImGui.ArrowButton("##expand", _expanded ? ImGuiDir.Down : ImGuiDir.Right))
+                _expanded = !_expanded;
 
             // Date display
             ImGui.SameLine();
@@ -84,23 +79,28 @@ namespace Pulsar4X.Client
             if (ImGui.Combo("##spnCmbo", ref _timeSpanType, _timespanTypeSelection, _timespanTypeSelection.Length))
                 AdjustTimeSpan();
 
-            ImGui.SameLine();
-            if (_isPaused) //Time is paused
-            {
-                // Play button, runs the game until paused again
-                if (ImGui.ImageButton("play", _uiState.Img_Play(), _iconSize))
-                    PausePlayPressed();
+            bool isPaused = !(_timeloop?.IsRunning ?? false);
+            var buttonTexture = isPaused ? _uiState.Img_Play() : _uiState.Img_Pause();
 
-                // Step button, run a single time step
+            ImGui.SameLine();
+            if (ImGui.ImageButton("playpause", buttonTexture, _iconSize))
+            {
+                PausePlayPressed();
+            }
+
+            // Step button only shown when paused
+            if (isPaused)
+            {
                 ImGui.SameLine();
                 if (ImGui.ImageButton("onestep", _uiState.Img_OneStep(), _iconSize))
+                {
                     OneStepPressed();
+                }
             }
-            else // Time is running
+            else
             {
-                // Pause button
-                if (ImGui.ImageButton("pause", _uiState.Img_Pause(), _iconSize))
-                    PausePlayPressed();
+                ImGui.SameLine();
+                ImGui.InvisibleButton("##onestep_invisbtn", _iconSize);
             }
 
             //When the submenu is expanded allow the user to adjust time frequency
@@ -108,7 +108,7 @@ namespace Pulsar4X.Client
             {
                 ImGui.PushItemWidth(100);
                 ImGui.Indent();
-                ImGui.Text(currenttime.ToLongTimeString());
+                ImGui.Text(currenttime.ToString("HH:mm:ss fff"));
                 ImGui.SameLine();
                 if (ImGui.SliderFloat("##freqSldr", ref _freqTimeSpanValue, 0.1f, 1, _freqTimeSpanValue.ToString(), ImGuiSliderFlags.None))
                 {
@@ -257,15 +257,13 @@ namespace Pulsar4X.Client
             if (_timeloop == null)
                 return;
 
-            if (_isPaused)
+            if (_timeloop.IsRunning)
             {
-                _timeloop.StartTime();
-                _isPaused = false;
+                _timeloop.PauseTime();
             }
             else
             {
-                _timeloop.PauseTime();
-                _isPaused = true;
+                _timeloop.StartTime();
             }
         }
 
