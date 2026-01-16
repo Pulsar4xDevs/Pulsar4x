@@ -169,11 +169,10 @@ namespace Pulsar4X.Orbital
         public static Vector3 CalculateAngularMomentum(Vector3 position, Vector3 velocity) =>
             Vector3.Cross(position, velocity);
 
-        public static Vector3 CalculateNode(Vector3 angularVelocity)
-        {
-            var (X, Y, Z) = Vector3.CrossPrecise(Vector3.UnitZ, angularVelocity);
-            return new Vector3((double)X, (double)Y, (double)Z);
-        }
+        // https://en.wikipedia.org/wiki/Longitude_of_the_ascending_node#Calculation_from_state_vectors
+        // Returns a vector pointing towards an orbital node.
+        public static Vector3 CalculateNode(Vector3 angularMomentum) =>
+            new Vector3(-angularMomentum.Y, angularMomentum.X, 0);
 
         public static double GetSpecificOrbitalEnergy(double sgp, Vector3 position, Vector3 velocity)
         {
