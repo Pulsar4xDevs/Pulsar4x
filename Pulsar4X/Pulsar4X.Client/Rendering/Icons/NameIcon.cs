@@ -215,10 +215,18 @@ namespace Pulsar4X.Client
                 if(subIcons.Any())
                     ImGui.Separator();
 
-                // If there is only a single type of subIcon it doesn't need to be buried in another menu
-                if(subIcons.Count == 1)
+                // Display all subIcons in a flat list, separated by type
+                for(int i = 0; i < subIcons.Count; i++)
                 {
-                    foreach(var subIcon in subIcons[0])
+                    var group = subIcons[i];
+
+                    // Add a type header if there are multiple types
+                    if(subIcons.Count > 1)
+                    {
+                        ImGui.TextDisabled(group.Key.ToString());
+                    }
+
+                    foreach(var subIcon in group)
                     {
                         if(ImGui.MenuItem(subIcon.NameString))
                         {
@@ -226,23 +234,11 @@ namespace Pulsar4X.Client
                         }
                         DisplayContextMenu(camera, subIcon);
                     }
-                }
-                else
-                {
-                    foreach(var group in subIcons)
+
+                    // Add separator between groups (but not after the last one)
+                    if(i < subIcons.Count - 1)
                     {
-                        if(ImGui.BeginMenu(group.Key.ToString()))
-                        {
-                            foreach(var subIcon in group)
-                            {
-                                if(ImGui.MenuItem(subIcon.NameString))
-                                {
-                                    subIcon._state.EntityClicked(subIcon.EntityState.Entity.Id, subIcon._starSysGuid, MouseButtons.Primary);
-                                }
-                                DisplayContextMenu(camera, subIcon);
-                            }
-                            ImGui.EndMenu();
-                        }
+                        ImGui.Separator();
                     }
                 }
                 ImGui.EndMenu();
