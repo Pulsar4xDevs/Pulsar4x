@@ -36,10 +36,6 @@ namespace Pulsar4X.Orbital
 
             double specificOrbitalEnergy = GetSpecificOrbitalEnergy(standardGravParam, position, velocity);
 
-			// If we run into negative eccentricity we have big problems
-			if(eccentricity < 0)
-                throw new Exception("Negative eccentricity, this is physically impossible");
-            
             //note that a hyperbolic orbit will have a negitive semiMajorAxis
             double semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
 
