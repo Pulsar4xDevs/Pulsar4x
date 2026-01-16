@@ -36,26 +36,16 @@ namespace Pulsar4X.Orbital
 
             double specificOrbitalEnergy = GetSpecificOrbitalEnergy(standardGravParam, position, velocity);
 
-            double semiMajorAxis;
-            double p; //p is where the ellipse or hypobola crosses a line from the focal point 90 degrees from the sma
-
 			// If we run into negative eccentricity we have big problems
 			if(eccentricity < 0)
                 throw new Exception("Negative eccentricity, this is physically impossible");
             
             //note that a hyperbolic orbit will have a negitive semiMajorAxis
-            semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
-            if (eccentricity > 1) //hypobola
+            double semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
+
+            //parabola, currently forcing this to be a hyperbola. TODO: look at handling parabola properly. will likely need tests written.
+            if (eccentricity == 1)
             {
-                p = semiMajorAxis * (1 - eccentricity * eccentricity);
-            }
-            else if (eccentricity < 1) //ellipse
-            {
-                p = semiMajorAxis * (1 - eccentricity * eccentricity);
-            }
-            else //parabola, currently forcing this to be a hyperbola. TODO: look at handling parabola properly. will likely need tests written.
-            {
-                p = angularSpeed * angularSpeed / standardGravParam;
                 eccentricity += 1.0E-15;
                 if (semiMajorAxis > 0)
                     semiMajorAxis *= -1;//ensure semimajor axis is negative.
