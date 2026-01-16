@@ -311,7 +311,7 @@ namespace Pulsar4X.Tests
                 0,
                 74798935350000.0
             );
-            var calculatedResult = OrbitMath.CalculateAngularMomentum(position, velocity);
+            var calculatedResult = OrbitMath.AngularMomentum(position, velocity);
             Assert.IsTrue(TestVectorsAreEqual(expectedResult, calculatedResult, 1.0d));
         }
 
@@ -326,7 +326,7 @@ namespace Pulsar4X.Tests
                 0,
                 -37399467675000.0d
             );
-            var calculatedResult = OrbitMath.CalculateAngularMomentum(position, velocity);
+            var calculatedResult = OrbitMath.AngularMomentum(position, velocity);
             Assert.IsTrue(TestVectorsAreEqual(expectedResult, calculatedResult, 1.0d));
         }
 
@@ -338,7 +338,7 @@ namespace Pulsar4X.Tests
                 0,
                 37399467675000.0d
             );
-            var calculatedResult = OrbitMath.CalculateLongitudeOfAscendingNode(nodeVector);
+            var calculatedResult = OrbitMath.LongitudeOfAscendingNode(nodeVector);
             Assert.AreEqual(0, calculatedResult, 0.000000001d);
         }
 

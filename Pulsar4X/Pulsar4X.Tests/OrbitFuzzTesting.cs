@@ -549,8 +549,8 @@ namespace Pulsar4X.Tests
                 var pos = OrbitMath.GetPosition(orbitDB, segmentDatetime);
                 var vel = OrbitMath.InstantaneousOrbitalVelocityVector_m(orbitDB, segmentDatetime);
 
-                var nodeVector = OrbitMath.CalculateNode(OrbitMath.CalculateAngularMomentum(pos, (Vector3)vel));
-                double loAN = OrbitMath.CalculateLongitudeOfAscendingNode(nodeVector);
+                var nodeVector = OrbitMath.Node(OrbitMath.AngularMomentum(pos, (Vector3)vel));
+                double loAN = OrbitMath.LongitudeOfAscendingNode(nodeVector);
                 string message = "Expected: " + Angle.ToDegrees(o_Ω).ToString() + "°\nBut was: " + Angle.ToDegrees(loAN).ToString() + "° ";
                 AssertExtensions.AreAngleEqual(o_Ω, loAN, 1.0e-10, message);
 
