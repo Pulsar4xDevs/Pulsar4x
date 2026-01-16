@@ -160,15 +160,14 @@ namespace Pulsar4X.Orbital
 
         #region Vector Calculations
 
-        public static Vector3 CalculateAngularMomentum(Vector3 position, Vector3 velocity)
-        {
-            /*
-            * position vector       m
-            * velocity              m/sec
-            */
-            var (X, Y, Z) = Vector3.CrossPrecise(position, velocity);
-            return new Vector3((double)X, (double)Y, (double)Z);
-        }
+        // Returns the specific relative angular momentum.
+        // https://en.wikipedia.org/wiki/Specific_relative_angular_momentum#Definition
+        /*
+        * position vector       m
+        * velocity              m/sec
+        */
+        public static Vector3 CalculateAngularMomentum(Vector3 position, Vector3 velocity) =>
+            Vector3.Cross(position, velocity);
 
         public static Vector3 CalculateNode(Vector3 angularVelocity)
         {
