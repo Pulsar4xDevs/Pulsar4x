@@ -311,8 +311,8 @@ namespace Pulsar4X.Client
             //_ecctricAnom_FromStateVectors = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, _semiMajAxis, _ae, _aop);
             //_ecctricAnom_FromStateVectors2 = OrbitMath.GetEccentricAnomalyFromStateVectors2(_sgp, _semiMajAxis, pos, (Vector3)vel);
 
-            Vector3 angularVelocity = Vector3.Cross(pos_m, (Vector3)vel_m);
-            Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
+            var angularMomentum = OrbitMath.AngularMomentum(pos_m, vel_m);
+            var nodeVector = OrbitMath.Node(angularMomentum);
 
             _aopFromCalc1 = OrbitMath.GetArgumentOfPeriapsis1(nodeVector, ecvec, pos_m, vel_m);
             _aopFromCalc2 = OrbitMath.GetArgumentOfPeriapsis(pos_m, _keplerElements.Inclination, _loan, _trueAnom);

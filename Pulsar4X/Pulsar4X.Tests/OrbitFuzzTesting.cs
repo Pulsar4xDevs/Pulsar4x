@@ -577,8 +577,9 @@ namespace Pulsar4X.Tests
                 var pos = OrbitMath.GetPosition(orbitDB, segmentDatetime);
                 var vel = OrbitMath.InstantaneousOrbitalVelocityVector_m(orbitDB, segmentDatetime);
 
-                Vector3 angularVelocity = Vector3.Cross(pos, (Vector3)vel);
-                Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
+                var angularMomentum = OrbitMath.AngularMomentum(pos, vel);
+                var nodeVector = OrbitMath.Node(angularMomentum);
+
                 Vector3 eccentVector = OrbitMath.EccentricityVector(sgp, pos, vel);
 
                 var ω2 = OrbitMath.GetArgumentOfPeriapsis(pos, o_i, o_Ω, o_ν);

@@ -34,8 +34,9 @@ namespace Pulsar4X.Orbital
         public static KeplerElements KeplerFromPositionAndVelocity(double standardGravParam, Vector3 position, Vector3 velocity, DateTime epoch)
         {
             KeplerElements ke = new KeplerElements();
-            Vector3 angularVelocity = Vector3.Cross(position, velocity);
-            Vector3 nodeVector = Vector3.Cross(Vector3.UnitZ, angularVelocity);
+
+            var angularMomentum = AngularMomentum(position, velocity);
+            var nodeVector = Node(angularMomentum);
 
             Vector3 eccentVector = EccentricityVector(standardGravParam, position, velocity);
 
@@ -56,7 +57,7 @@ namespace Pulsar4X.Orbital
 
             double semiMinorAxis = EllipseMath.SemiMinorAxis(semiMajorAxis, eccentricity);
 
-            var inclination = Inclination(angularVelocity);
+            var inclination = Inclination(angularMomentum);
 
             double trueAnomaly = TrueAnomaly(eccentVector, position, velocity);
             double eccentricAnomaly = GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
@@ -708,12 +709,13 @@ namespace Pulsar4X.Orbital
         /// <returns></returns>
         public static Vector3 ProgradeToStateVector(double sgp, Vector3 progradeVector, Vector3 position, Vector3 currentVelocityVector)
         {
-            Vector3 angularVelocity = Vector3.Cross(position, currentVelocityVector);
-            Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
+            var angularMomentum = AngularMomentum(position, currentVelocityVector);
+            var nodeVector = Node(angularMomentum);
+
             var loAN = LongitudeOfAscendingNode(nodeVector);
             var trueAnomaly = OrbitalMath.TrueAnomaly(sgp, position, currentVelocityVector);
 
-            var inclination = Inclination(angularVelocity);
+            var inclination = Inclination(angularMomentum);
             var aop = OrbitalMath.GetArgumentOfPeriapsis(position, inclination, loAN, trueAnomaly);
 
             return ProgradeToStateVector(progradeVector, trueAnomaly, aop, loAN, inclination);
@@ -777,12 +779,13 @@ namespace Pulsar4X.Orbital
         /// <returns></returns>
         public static Vector3 StateToProgradeVector(double sgp, Vector3 orbitLocalVec, Vector3 position, Vector3 currentVelocityVector)
         {
-            Vector3 angularVelocity = Vector3.Cross(position, currentVelocityVector);
-            Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
+            var angularMomentum = AngularMomentum(position, currentVelocityVector);
+            var nodeVector = Node(angularMomentum);
+
             var loAN = LongitudeOfAscendingNode(nodeVector);
             var trueAnomaly = OrbitalMath.TrueAnomaly(sgp, position, currentVelocityVector);
 
-            var inclination = Inclination(angularVelocity);
+            var inclination = Inclination(angularMomentum);
             var aop = OrbitalMath.GetArgumentOfPeriapsis(position, inclination, loAN, trueAnomaly);
 
             return StateToProgradeVector(orbitLocalVec, trueAnomaly, aop, loAN, inclination);
