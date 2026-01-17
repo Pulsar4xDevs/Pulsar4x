@@ -155,7 +155,11 @@ namespace Pulsar4X.Client
         {
             IsAlive = true;
             Show();
-
+            ImGui.GetIO().ConfigErrorRecovery = true;
+            ImGui.GetIO().ConfigErrorRecoveryEnableAssert = false;
+            ImGui.GetIO().ConfigErrorRecoveryEnableTooltip = true;
+            ImGui.GetIO().ConfigErrorRecoveryEnableDebugLog = true;
+            
             while(IsAlive)
             {
                 ImGui.GetIO().DeltaTime = (float)(timer.Elapsed - time).TotalSeconds;
