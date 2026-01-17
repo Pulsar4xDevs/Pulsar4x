@@ -340,7 +340,8 @@ namespace Pulsar4X.Movement
                     continue;
                 if (Target.TryGetDataBlob<ColonyInfoDB>(out var colonyDB) && colonyDB.PlanetEntity == shipParent)
                     continue;
-
+                if(!ship.HasDataBlob<WarpAbilityDB>()) continue;
+                
                 var shipCommand = WarpMoveCommand.CreateCommandEZ(ship, Target, atDateTime);
 
                 _shipCommands.Add(shipCommand);
