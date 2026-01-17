@@ -23,7 +23,7 @@ namespace Pulsar4X.Client
         public static Vector4 NeutralColor = new (0.65f, 0.65f, 0.65f, 1f);
         public static Vector4 NameIconHighlight = new (.2f, .2f, .2f, .9f);
 
-        public static ImGuiTableFlags TableFlags = ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg;
+        public static ImGuiTableFlags TableFlags = ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg |ImGuiTableFlags.SizingStretchProp;
         public static float LeftColumnWidth = 204f;
         public static float LeftColumnWidthLg = 256f;
         public static Vector2 ToolTipsize = new Vector2(426, 0);
