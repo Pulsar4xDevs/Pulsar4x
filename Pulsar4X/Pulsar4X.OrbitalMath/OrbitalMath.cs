@@ -15,6 +15,14 @@ namespace Pulsar4X.Orbital
     {
         private const double Epsilon = 1.0e-15; //TODO: test how low we can go
 
+        // Returns the orbital inclination
+        // https://en.wikipedia.org/wiki/Orbital_inclination#Calculation
+        public static double Inclination(Vector3 angularMomentum)
+        {
+            var i = Math.Acos(angularMomentum.Z / angularMomentum.Length());
+            return (double.IsNaN(i)) ? 0 : i; // should this check be here?
+        }
+
         /// <summary>
         /// Kepler elements from velocity and position.
         /// Note, to get correct results ensure all Sgp, position, and velocity values are all in the same unit (ie meters, km, or AU)
@@ -32,7 +40,6 @@ namespace Pulsar4X.Orbital
             Vector3 eccentVector = EccentricityVector(standardGravParam, position, velocity);
 
             double eccentricity = eccentVector.Length();
-            double angularSpeed = angularVelocity.Length();
 
             double specificOrbitalEnergy = GetSpecificOrbitalEnergy(standardGravParam, position, velocity);
 
@@ -49,10 +56,7 @@ namespace Pulsar4X.Orbital
 
             double semiMinorAxis = EllipseMath.SemiMinorAxis(semiMajorAxis, eccentricity);
 
-            double inclination = Math.Acos(angularVelocity.Z / angularSpeed); //should be 0 in 2d. or pi if counter clockwise orbit. 
-
-            if (double.IsNaN(inclination))
-                inclination = 0;
+            var inclination = Inclination(angularVelocity);
 
             double trueAnomaly = TrueAnomaly(eccentVector, position, velocity);
             double eccentricAnomaly = GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
@@ -709,9 +713,7 @@ namespace Pulsar4X.Orbital
             var loAN = LongitudeOfAscendingNode(nodeVector);
             var trueAnomaly = OrbitalMath.TrueAnomaly(sgp, position, currentVelocityVector);
 
-            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
-            if (double.IsNaN(inclination))
-                inclination = 0;
+            var inclination = Inclination(angularVelocity);
             var aop = OrbitalMath.GetArgumentOfPeriapsis(position, inclination, loAN, trueAnomaly);
 
             return ProgradeToStateVector(progradeVector, trueAnomaly, aop, loAN, inclination);
@@ -780,9 +782,7 @@ namespace Pulsar4X.Orbital
             var loAN = LongitudeOfAscendingNode(nodeVector);
             var trueAnomaly = OrbitalMath.TrueAnomaly(sgp, position, currentVelocityVector);
 
-            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
-            if (double.IsNaN(inclination))
-                inclination = 0;
+            var inclination = Inclination(angularVelocity);
             var aop = OrbitalMath.GetArgumentOfPeriapsis(position, inclination, loAN, trueAnomaly);
 
             return StateToProgradeVector(orbitLocalVec, trueAnomaly, aop, loAN, inclination);
