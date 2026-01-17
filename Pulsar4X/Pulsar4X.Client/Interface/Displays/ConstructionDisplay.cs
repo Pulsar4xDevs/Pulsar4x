@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -161,34 +160,55 @@ namespace Pulsar4X.Client
                 var job = queueList[i];
                 ImGui.PushID(i);
 
-                // Selection highlight
-                bool isSelected = i == _selectedQueueIndex;
-                if (isSelected)
+                // Layout: arrows | content | remove button
+                if (ImGui.BeginTable($"QueueItem{i}", 3, ImGuiTableFlags.None))
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Header, Styles.SelectedColor);
-                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Styles.SelectedColorHover);
-                    ImGui.PushStyleColor(ImGuiCol.HeaderActive, Styles.SelectedColorActive);
-                }
+                    ImGui.TableSetupColumn("Arrows", ImGuiTableColumnFlags.WidthFixed, 26f);
+                    ImGui.TableSetupColumn("Content", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("Remove", ImGuiTableColumnFlags.WidthFixed, 24f);
 
-                bool headerOpen = ImGui.CollapsingHeader($"{job.Design.Name}###{i}", ImGuiTreeNodeFlags.DefaultOpen);
+                    ImGui.TableNextRow();
 
-                if (ImGui.IsItemClicked())
-                {
-                    _selectedQueueIndex = i;
-                }
+                    // Arrow buttons column
+                    ImGui.TableNextColumn();
 
-                if (isSelected)
-                {
-                    ImGui.PopStyleColor(3);
-                }
+                    bool canMoveUp = i > 0;
+                    bool canMoveDown = i < queueList.Count - 1;
 
-                if (headerOpen)
-                {
-                    ImGui.Indent(16);
+                    if (!canMoveUp) ImGui.BeginDisabled();
+                    if (ImGui.ArrowButton("up", ImGuiDir.Up))
+                    {
+                        var order = MoveUpInConstructionQueueOrder.Create(Entity, job);
+                        state.Game.OrderHandler.HandleOrder(order);
+                    }
+                    if (!canMoveUp) ImGui.EndDisabled();
+                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                        ImGui.SetTooltip(canMoveUp ? "Move up in queue" : "Already at top");
+
+                    if (!canMoveDown) ImGui.BeginDisabled();
+                    if (ImGui.ArrowButton("down", ImGuiDir.Down))
+                    {
+                        var order = MoveDownInConstructionQueueOrder.Create(Entity, job);
+                        state.Game.OrderHandler.HandleOrder(order);
+                    }
+                    if (!canMoveDown) ImGui.EndDisabled();
+                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                        ImGui.SetTooltip(canMoveDown ? "Move down in queue" : "Already at bottom");
+
+                    // Content column
+                    ImGui.TableNextColumn();
+
+                    // Item name
+                    ImGui.Text(job.Design.Name);
+
+                    // Component type
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                    ImGui.Text(job.Design.ComponentType);
+                    ImGui.PopStyleColor();
 
                     // Progress bar
                     float progress = (float)job.CurrentItemProgress;
-                    string progressText = $"{job.PointsAccumulated:N0} / {job.Design.IndustryPointCosts:N0} points";
+                    string progressText = $"{job.PointsAccumulated:N0} / {job.Design.IndustryPointCosts:N0}";
 
                     ImGui.PushStyleColor(ImGuiCol.PlotHistogram, new Vector4(0.4f, 0.8f, 0.4f, 0.8f));
                     ImGui.ProgressBar(progress, new Vector2(-1, 0), progressText);
@@ -196,26 +216,10 @@ namespace Pulsar4X.Client
 
                     if (ImGui.IsItemHovered())
                     {
-                        ImGui.SetTooltip($"Progress: {progress * 100:F1}%\n{job.PointsAccumulated:N0} of {job.Design.IndustryPointCosts:N0} construction points completed");
+                        ImGui.SetTooltip($"Progress: {progress * 100:F1}%\n{job.PointsAccumulated:N0} of {job.Design.IndustryPointCosts:N0} construction points");
                     }
 
-                    // Job details
-                    ImGui.Columns(2, "jobDetails", false);
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                    ImGui.Text("Component Type:");
-                    ImGui.PopStyleColor();
-                    ImGui.NextColumn();
-                    ImGui.Text(job.Design.ComponentType);
-                    ImGui.NextColumn();
-
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                    ImGui.Text("Cost:");
-                    ImGui.PopStyleColor();
-                    ImGui.NextColumn();
-                    ImGui.Text($"{job.Design.IndustryPointCosts:N0} points");
-                    ImGui.NextColumn();
-
-                    // Estimated time to completion
+                    // Estimated completion time
                     if (_constructionDB.PointsPerDay > 0)
                     {
                         long pointsRemaining = job.Design.IndustryPointCosts - job.PointsAccumulated;
@@ -231,9 +235,9 @@ namespace Pulsar4X.Client
                         double totalDays = (double)(pointsBeforeThisJob + pointsRemaining) / _constructionDB.PointsPerDay;
 
                         ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                        ImGui.Text("Est. Completion:");
+                        ImGui.Text("Est:");
                         ImGui.PopStyleColor();
-                        ImGui.NextColumn();
+                        ImGui.SameLine();
 
                         if (totalDays < 1)
                         {
@@ -252,53 +256,31 @@ namespace Pulsar4X.Client
                             ImGui.Text($"{years:F1} years");
                             ImGui.PopStyleColor();
                         }
-
-                        ImGui.NextColumn();
                     }
 
-                    ImGui.Columns(1);
-
-                    // Control buttons
-                    ImGui.Spacing();
-                    var buttonSize = new Vector2(80, 20);
-
-                    if (i > 0 && ImGui.Button("Move Up", buttonSize))
-                    {
-                        var order = MoveUpInConstructionQueueOrder.Create(Entity, job);
-                        state.Game.OrderHandler.HandleOrder(order);
-                        _selectedQueueIndex = i - 1;
-                    }
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Move this item higher in the queue");
-
-                    ImGui.SameLine();
-
-                    if (i < queueList.Count - 1 && ImGui.Button("Move Down", buttonSize))
-                    {
-                        var order = MoveDownInConstructionQueueOrder.Create(Entity, job);
-                        state.Game.OrderHandler.HandleOrder(order);
-                        _selectedQueueIndex = i + 1;
-                    }
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Move this item lower in the queue");
-
-                    ImGui.SameLine();
-
+                    // Remove button column
+                    ImGui.TableNextColumn();
                     ImGui.PushStyleColor(ImGuiCol.Button, Styles.BadColor);
                     ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(1f, 0.35f, 0.35f, 1f));
                     ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.9f, 0.15f, 0.15f, 1f));
-                    if (ImGui.Button("Remove", buttonSize))
+                    if (ImGui.Button("X"))
                     {
                         var order = RemoveFromConstructionQueueOrder.Create(Entity, job);
                         state.Game.OrderHandler.HandleOrder(order);
-                        _selectedQueueIndex = -1;
                     }
                     ImGui.PopStyleColor(3);
-
                     if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Remove this item from the queue");
+                        ImGui.SetTooltip("Remove from queue");
 
-                    ImGui.Unindent(16);
+                    ImGui.EndTable();
+                }
+
+                // Add separator between items
+                ImGui.Spacing();
+                if (i < queueList.Count - 1)
+                {
+                    ImGui.Separator();
+                    ImGui.Spacing();
                 }
 
                 ImGui.PopID();
