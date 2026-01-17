@@ -18,8 +18,8 @@ public class PerformanceStopwatch
     public struct PerformanceData
     {
         public double FullIntervalTime = 0;
-        public List<double> PartialIntervalTimes = new ();
-        public Dictionary<string, (List<double> times, double sum)> TimesById = new ();
+        public SafeList<double> PartialIntervalTimes = new ();
+        public SafeDictionary<string, (List<double> times, double sum)> TimesById = new ();
 
         public PerformanceData()
         {
