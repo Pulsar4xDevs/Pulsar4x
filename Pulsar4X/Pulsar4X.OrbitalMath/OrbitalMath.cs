@@ -19,8 +19,11 @@ namespace Pulsar4X.Orbital
         // https://en.wikipedia.org/wiki/Orbital_inclination#Calculation
         public static double Inclination(Vector3 angularMomentum)
         {
-            var i = Math.Acos(angularMomentum.Z / angularMomentum.Length());
-            return (double.IsNaN(i)) ? 0 : i; // should this check be here?
+            var mag = angularMomentum.Length();
+            if (mag == 0) // should this check be here?
+                return 0;
+
+            return Math.Acos(angularMomentum.Z / mag);
         }
 
         /// <summary>
