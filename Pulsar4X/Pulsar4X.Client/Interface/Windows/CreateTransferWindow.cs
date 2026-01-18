@@ -47,9 +47,8 @@ public class CreateTransferWindow : PulsarGuiWindow
             {
                 if(TransferLeft != null)
                     DisplayStorageList(TransferLeft);
-
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
             ImGui.SameLine();
 
             if(ImGui.BeginChild("Transfer Details", secondChildSize, ImGuiChildFlags.Borders))
@@ -89,9 +88,8 @@ public class CreateTransferWindow : PulsarGuiWindow
                         }
                     }
                 }
-
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
             ImGui.SameLine();
 
             if(ImGui.BeginChild(GetRightTitle() + "###right", thirdChildSize, ImGuiChildFlags.Borders))
@@ -101,10 +99,12 @@ public class CreateTransferWindow : PulsarGuiWindow
                 else
                     DisplayTransferSelection();
 
-                ImGui.EndChild();
+                
             }
-            Window.End();
+            ImGui.EndChild();
+            
         }
+        Window.End();
     }
 
     private void DisplayStorageList(Entity entity)
