@@ -96,10 +96,17 @@ namespace Pulsar4X.Orbital
         /// </summary>
         /// <returns>The gravitational parameter.</returns>
         /// <param name="mass">Mass.</param>
-        public static double StandardGravitationalParameter(double mass)
-        {
-            return mass * UniversalConstants.Science.GravitationalConstant;
-        }
+        public static double StandardGravitationalParameter(double mass) =>
+            mass * UniversalConstants.Science.GravitationalConstant;
+
+        /// <summary>
+        /// Standard Gravitational parameter. in m^3 s^-2
+        /// </summary>
+        /// <returns>The gravitational parameter.</returns>
+        /// <param name="mass1">Mass 1.</param>
+        /// <param name="mass2">Mass 2.</param>
+        public static double StandardGravitationalParameter(double mass1, double mass2) =>
+            StandardGravitationalParameter(mass1 + mass2);
 
 		/// <summary>
 		/// calculates a vector from two positions and a magnatude
