@@ -266,11 +266,13 @@ namespace Pulsar4X.Client
                         continue;
                     if (ImGui.CollapsingHeader("Orders", ImGuiTreeNodeFlags.DefaultOpen))
                     {
+                        ImGuiTableFlags flags = ImGuiTableFlags.SizingStretchProp;
                         if (ImGui.BeginTable("OrdersTable", 3, Styles.TableFlags))
                         {
-                            ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.1f);
-                            ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.None, 0.2f);
-                            ImGui.TableSetupColumn("Details", ImGuiTableColumnFlags.None, 0.7f);
+                            
+                            ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.WidthStretch, 0.1f);
+                            ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.WidthStretch, 0.2f);
+                            ImGui.TableSetupColumn("Details", ImGuiTableColumnFlags.WidthStretch, 0.7f);
                             ImGui.TableHeadersRow();
 
                             var actions = orderableDB.ActionList.ToArray();

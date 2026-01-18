@@ -143,14 +143,17 @@ public class CargoTransferOrder : EntityCommand
 
             foreach (var ship in ships)
             {
-                var fuelInfo = ship.GetFuelInfo(cargoLibrary);
-                ICargoable fuel = fuelInfo.Item1;
-                long amountToMove = ship.GetDataBlob<CargoStorageDB>().GetFreeUnitSpace(fuel);
-                var fuelAndAmount =(fuel, amountToMove);
-                var list = new List<(ICargoable, long)>();
-                list.Add(fuelAndAmount);
+                if(ship.TryGetDataBlob<CargoStorageDB>(out var cargoStorageDB))
+                {
+                    var fuelInfo = ship.GetFuelInfo(cargoLibrary);
+                    ICargoable fuel = fuelInfo.Item1;
+                    long amountToMove = cargoStorageDB.GetFreeUnitSpace(fuel);
+                    var fuelAndAmount = (fuel, amountToMove);
+                    var list = new List<(ICargoable, long)>();
+                    list.Add(fuelAndAmount);
 
-                CreateCommands(fleet.FactionOwnerID, ship, cargoFromEntity,  fuel, Conditionals.WaitTillFull);
+                    CreateCommands(fleet.FactionOwnerID, ship, cargoFromEntity, fuel, Conditionals.WaitTillFull);
+                }
             }
         }
     }
