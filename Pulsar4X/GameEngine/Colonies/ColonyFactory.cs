@@ -83,6 +83,12 @@ namespace Pulsar4X.Colonies
             factionInfo.Colonies.Add(colonyEntity);
             faction.GetDataBlob<FactionOwnerDB>().SetOwned(colonyEntity);
 
+            // Grant faction access to mineral data on this planet
+            if (systemBody.TryGetDataBlob<MineralsDB>(out var mineralsDB))
+            {
+                mineralsDB.GrantFactionAccess(factionInfo.FactionMask);
+            }
+
             // Add starting installations
             foreach(var installation in colonyBlueprint.Installations)
             {
@@ -161,6 +167,13 @@ namespace Pulsar4X.Colonies
             var factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
             factionInfo.Colonies.Add(colonyEntity);
             factionEntity.GetDataBlob<FactionOwnerDB>().SetOwned(colonyEntity);
+
+            // Grant faction access to mineral data on this planet
+            if (planetEntity.TryGetDataBlob<MineralsDB>(out var mineralsDB))
+            {
+                mineralsDB.GrantFactionAccess(factionInfo.FactionMask);
+            }
+
             return colonyEntity;
         }
 

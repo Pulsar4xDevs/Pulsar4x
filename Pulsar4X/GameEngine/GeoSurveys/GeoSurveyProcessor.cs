@@ -2,7 +2,9 @@ using System;
 using Pulsar4X.Engine;
 using Pulsar4X.Events;
 using Pulsar4X.Extensions;
+using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
+using Pulsar4X.Industry;
 using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.GeoSurveys;
@@ -34,6 +36,13 @@ public class GeoSurveyProcessor : IInstanceProcessor
             {
                 // Survey is complete
                 geoSurveyableDB.GeoSurveyStatus[Fleet.FactionOwnerID] = 0;
+
+                // Grant partial access to mineral data
+                if (Target.TryGetDataBlob<MineralsDB>(out var mineralsDB))
+                {
+                    var factionMask = Fleet.GetFactionOwner.GetDataBlob<FactionInfoDB>().FactionMask;
+                    mineralsDB.GrantFactionPartialAccess(factionMask);
+                }
 
                 EventManager.Instance.Publish(
                     Event.Create(

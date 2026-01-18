@@ -1432,8 +1432,8 @@ namespace Pulsar4X.Galaxy
                 if (genChance >= genChanceThreshold)
                 {
                     mdi.Accessibility = GeneralMath.Clamp(_galaxyGen.Settings.MinMineralAccessibility + genChance, 0, 1);
-                    mdi.Amount = (long)Math.Round(_galaxyGen.Settings.MaxMineralAmmountByBodyType[bodyInfo.BodyType] * genChance);
-                    mdi.HalfOriginalAmount = mdi.Amount / 2;
+                    mdi.Amount = new Masked<long>((long)Math.Round(_galaxyGen.Settings.MaxMineralAmmountByBodyType[bodyInfo.BodyType] * genChance), AccessLevel.None);
+                    mdi.HalfOriginalAmount = mdi.Amount.Actual / 2;
 
                     if (!mineralInfo.Minerals.ContainsKey(min.ID))
                     {
@@ -1469,9 +1469,9 @@ namespace Pulsar4X.Galaxy
                 MineralDeposit mdi = new MineralDeposit
                 {
                     Accessibility = GeneralMath.Clamp(_galaxyGen.Settings.MinHomeworldMineralAccessibility + system.RNGNextDouble() * min.Abundance[bodyInfo.BodyType], 0, 1),
-                    Amount = (long)Math.Round(_galaxyGen.Settings.MinHomeworldMineralAmmount + _galaxyGen.Settings.HomeworldMineralAmmount * system.RNGNextDouble() * min.Abundance[bodyInfo.BodyType])
+                    Amount = new Masked<long>((long)Math.Round(_galaxyGen.Settings.MinHomeworldMineralAmmount + _galaxyGen.Settings.HomeworldMineralAmmount * system.RNGNextDouble() * min.Abundance[bodyInfo.BodyType]), AccessLevel.None)
                 };
-                mdi.HalfOriginalAmount = mdi.Amount / 2;
+                mdi.HalfOriginalAmount = mdi.Amount.Actual / 2;
 
                 mineralInfo.Minerals.Add(min.ID, mdi);
             }

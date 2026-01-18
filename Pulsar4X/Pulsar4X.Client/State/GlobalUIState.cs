@@ -53,6 +53,13 @@ namespace Pulsar4X.Client
         internal Entity? Faction { get; set; }
 
         /// <summary>
+        /// Gets the faction bit mask for the current faction.
+        /// Use this with Masked&lt;T&gt;.For() to retrieve faction-visible data.
+        /// Returns 0 if no faction is set.
+        /// </summary>
+        internal int FactionMask => Faction?.GetDataBlob<FactionInfoDB>().FactionMask ?? 0;
+
+        /// <summary>
         /// The player running this clients faction
         /// </summary>
         internal Entity? PlayerFaction { get; set; }

@@ -270,6 +270,7 @@ namespace Pulsar4X.Factions
             //var facinfo = new FactionInfoDB(new List<Entity>(), new List<Guid>(), );
             var factionInfo = new FactionInfoDB();
             factionInfo.Data = new FactionDataStore(game.StartingGameData);
+            factionInfo.FactionMaskIndex = game.AllocateFactionMaskIndex();
 
             var factionTechDB = new FactionTechDB();
 
@@ -322,6 +323,7 @@ namespace Pulsar4X.Factions
                 Abbreviation = abbreviation,
             };
             factionInfo.Data = new FactionDataStore(game.StartingGameData);
+            factionInfo.FactionMaskIndex = game.AllocateFactionMaskIndex();
             factionInfo.Money.AddIncome(
                 game.TimePulse.GameGlobalDateTime,
                 TransactionCategory.InitialInvestment,

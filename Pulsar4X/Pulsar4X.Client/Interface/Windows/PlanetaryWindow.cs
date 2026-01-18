@@ -258,10 +258,11 @@ namespace Pulsar4X.Client
                 //     }
                 // }
 
-                var deposits = mineralsDB.Minerals.Where(x => x.Value.Amount > 0);
+                var factionMask = _uiState.FactionMask;
+                var deposits = mineralsDB.Minerals.Where(x => (x.Value.Amount.For(factionMask) ?? 0) > 0);
                 if (deposits.Any())
                 {
-                    var maxMineralQuantity = mineralsDB.Minerals.Values.Max(x => x.Amount).ToString(_amountFormat).Length;
+                    var maxMineralQuantity = mineralsDB.Minerals.Values.Max(x => x.Amount.For(factionMask) ?? 0).ToString(_amountFormat).Length;
 
                     List<string[]> rowData = new List<string[]>();
                     var row = new List<string>();
@@ -274,7 +275,7 @@ namespace Pulsar4X.Client
                             var mineralValues = mineralsDB.Minerals[key];
 
                             row.Add(mineralData.Name);
-                            row.Add(mineralValues.Amount.ToString(_amountFormat));
+                            row.Add((mineralValues.Amount.For(factionMask) ?? 0).ToString(_amountFormat));
                             row.Add(mineralValues.Accessibility.ToString("0.00"));
                             if (mineRates.Any())
                             {

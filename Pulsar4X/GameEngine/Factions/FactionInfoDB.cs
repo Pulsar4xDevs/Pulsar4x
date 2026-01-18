@@ -20,6 +20,20 @@ namespace Pulsar4X.Factions
         [JsonProperty]
         public string Abbreviation { get; internal set; } = "";
 
+        /// <summary>
+        /// The unique index (0-31) for this faction used in Masked&lt;T&gt; bit masks.
+        /// Use FactionMask property to get the actual bit mask value.
+        /// </summary>
+        [JsonProperty]
+        public int FactionMaskIndex { get; internal set; } = -1;
+
+        /// <summary>
+        /// The bit mask for this faction, computed from FactionMaskIndex.
+        /// Use this value with Masked&lt;T&gt;.For() to retrieve faction-visible data.
+        /// </summary>
+        [JsonIgnore]
+        public int FactionMask => FactionMaskIndex >= 0 ? 1 << FactionMaskIndex : 0;
+
         [JsonProperty]
         public Ledger Money { get; internal set; } = new ();
 

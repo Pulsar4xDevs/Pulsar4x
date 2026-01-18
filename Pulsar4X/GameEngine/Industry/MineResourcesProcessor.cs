@@ -27,7 +27,7 @@ namespace Pulsar4X.Industry
             _minerals = new ();
 
             EventManager.Instance.Subscribe(EventType.ColonyAdministratorAssigned, OnAdminAssigned);
-            
+
             foreach(var (uniqueID, mineral) in game.StartingGameData.Minerals)
             {
                 _minerals.Add(mineral.ID, mineral);
@@ -61,7 +61,7 @@ namespace Pulsar4X.Industry
                 ICargoable mineral = _minerals[kvp.Key];
                 string cargoTypeID = mineral.CargoTypeID;
 
-                var unitsMinableThisTick = (long)Math.Min(actualMiningRates[kvp.Key], planetMinerals[kvp.Key].Amount);
+                var unitsMinableThisTick = (long)Math.Min(actualMiningRates[kvp.Key], planetMinerals[kvp.Key].Amount.Actual);
 
                 if(!stockpile.TypeStores.ContainsKey(cargoTypeID))
                 {
@@ -82,12 +82,14 @@ namespace Pulsar4X.Industry
                 }
 
                 MineralDeposit mineralDeposit = planetMinerals[kvp.Key];
-                long newAmount = mineralDeposit.Amount -= unitsMinedThisTick;
+                long newAmount = mineralDeposit.Amount.Actual - unitsMinedThisTick;
 
-                var accessability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
+                var amount = mineralDeposit.Amount;
+                amount.Actual = newAmount;
+                mineralDeposit.Amount = amount;
+
+                var accessability = Math.Pow((float)newAmount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
                 double newAccess = GeneralMath.Clamp(accessability, 0.1, mineralDeposit.Accessibility);
-
-                mineralDeposit.Amount = newAmount;
                 mineralDeposit.Accessibility = newAccess;
             }
         }
@@ -139,8 +141,8 @@ namespace Pulsar4X.Industry
 
         private void OnAdminAssigned(Event e)
         {
-            
-            
+
+
         }
 
 

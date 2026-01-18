@@ -198,7 +198,7 @@ namespace Pulsar4X.Client
                         ImGui.SetTooltip("Amount of " + mineralData.Name + " available for use in the colony stockpile.");
 
                     ImGui.TableNextColumn();
-                    ImGui.Text(mineral.Amount.ToString("#,###,###,###,###,###,##0"));
+                    ImGui.Text(mineral.Amount.For(uiState.FactionMask)?.ToString("#,###,###,###,###,###,##0") ?? "N/A");
                     if(ImGui.IsItemHovered())
                         ImGui.SetTooltip("Amount of " + mineralData.Name + " available that can be mined from this colony.");
                     ImGui.TableNextColumn();
@@ -221,7 +221,8 @@ namespace Pulsar4X.Client
                     ImGui.TableNextColumn();
                     if(annualProduction > 0)
                     {
-                        string yearsToDepletion = Math.Round((double)mineral.Amount / (double)annualProduction, 4).ToString("#.0");
+                        var amount = mineral.Amount.For(uiState.FactionMask) ?? 0;
+                        string yearsToDepletion = Math.Round((double)amount / (double)annualProduction, 4).ToString("#.0");
                         ImGui.Text(yearsToDepletion);
                         if(ImGui.IsItemHovered())
                             ImGui.SetTooltip("The colony will exhaust the available " + mineralData.Name + " in " + yearsToDepletion + " years.");

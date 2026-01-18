@@ -88,6 +88,18 @@ namespace Pulsar4X.Engine
         [JsonProperty]
         public Dictionary<int, Entity> Factions { get; } = new ();
 
+        /// <summary>
+        /// Tracks the next available faction mask index (0-31).
+        /// Used by FactionFactory when creating new factions.
+        /// </summary>
+        [JsonProperty]
+        internal int NextFactionMaskIndex { get; set; } = 0;
+
+        /// <summary>
+        /// Maximum number of factions supported by the mask system (32 bits in an int).
+        /// </summary>
+        public const int MaxFactions = 32;
+
         // This is horribly named, it generates the ID's for the ICargoables NOT Entities
         [JsonProperty]
         private int EntityIDCounterValue => EntityIDCounter;
@@ -153,6 +165,18 @@ namespace Pulsar4X.Engine
         }
 
         public static int GetEntityID() => EntityIDCounter++;
+
+        /// <summary>
+        /// Allocates and returns the next available faction mask index.
+        /// </summary>
+        /// <returns>A unique index (0-31) for use in faction bit masks.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if all 32 faction slots are used.</exception>
+        internal int AllocateFactionMaskIndex()
+        {
+            if (NextFactionMaskIndex >= MaxFactions)
+                throw new InvalidOperationException($"Cannot create more than {MaxFactions} factions.");
+            return NextFactionMaskIndex++;
+        }
 
         public static string Save(Game game)
         {
