@@ -15,6 +15,17 @@ namespace Pulsar4X.Orbital
     {
         private const double Epsilon = 1.0e-15; //TODO: test how low we can go
 
+        // Returns the orbital inclination
+        // https://en.wikipedia.org/wiki/Orbital_inclination#Calculation
+        public static double Inclination(Vector3 angularMomentum)
+        {
+            var mag = angularMomentum.Length();
+            if (mag == 0) // should this check be here?
+                return 0;
+
+            return Math.Acos(angularMomentum.Z / mag);
+        }
+
         /// <summary>
         /// Kepler elements from velocity and position.
         /// Note, to get correct results ensure all Sgp, position, and velocity values are all in the same unit (ie meters, km, or AU)
@@ -26,36 +37,22 @@ namespace Pulsar4X.Orbital
         public static KeplerElements KeplerFromPositionAndVelocity(double standardGravParam, Vector3 position, Vector3 velocity, DateTime epoch)
         {
             KeplerElements ke = new KeplerElements();
-            Vector3 angularVelocity = Vector3.Cross(position, velocity);
-            Vector3 nodeVector = Vector3.Cross(Vector3.UnitZ, angularVelocity);
+
+            var angularMomentum = AngularMomentum(position, velocity);
+            var nodeVector = Node(angularMomentum);
 
             Vector3 eccentVector = EccentricityVector(standardGravParam, position, velocity);
 
             double eccentricity = eccentVector.Length();
-            double angularSpeed = angularVelocity.Length();
 
             double specificOrbitalEnergy = GetSpecificOrbitalEnergy(standardGravParam, position, velocity);
 
-            double semiMajorAxis;
-            double p; //p is where the ellipse or hypobola crosses a line from the focal point 90 degrees from the sma
-
-			// If we run into negative eccentricity we have big problems
-			if(eccentricity < 0)
-                throw new Exception("Negative eccentricity, this is physically impossible");
-            
             //note that a hyperbolic orbit will have a negitive semiMajorAxis
-            semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
-            if (eccentricity > 1) //hypobola
+            double semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
+
+            //parabola, currently forcing this to be a hyperbola. TODO: look at handling parabola properly. will likely need tests written.
+            if (eccentricity == 1)
             {
-                p = semiMajorAxis * (1 - eccentricity * eccentricity);
-            }
-            else if (eccentricity < 1) //ellipse
-            {
-                p = semiMajorAxis * (1 - eccentricity * eccentricity);
-            }
-            else //parabola, currently forcing this to be a hyperbola. TODO: look at handling parabola properly. will likely need tests written.
-            {
-                p = angularSpeed * angularSpeed / standardGravParam;
                 eccentricity += 1.0E-15;
                 if (semiMajorAxis > 0)
                     semiMajorAxis *= -1;//ensure semimajor axis is negative.
@@ -63,10 +60,7 @@ namespace Pulsar4X.Orbital
 
             double semiMinorAxis = EllipseMath.SemiMinorAxis(semiMajorAxis, eccentricity);
 
-            double inclination = Math.Acos(angularVelocity.Z / angularSpeed); //should be 0 in 2d. or pi if counter clockwise orbit. 
-
-            if (double.IsNaN(inclination))
-                inclination = 0;
+            var inclination = Inclination(angularMomentum);
 
             double trueAnomaly = TrueAnomaly(eccentVector, position, velocity);
             double eccentricAnomaly = GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
@@ -79,8 +73,8 @@ namespace Pulsar4X.Orbital
             ke.Apoapsis = EllipseMath.Apoapsis(eccentricity, semiMajorAxis);
             ke.Periapsis = EllipseMath.Periapsis(eccentricity, semiMajorAxis);
             ke.LinearEccentricity = EllipseMath.LinearEccentricity(ke.Apoapsis, semiMajorAxis);
-            ke.LoAN = CalculateLongitudeOfAscendingNode(nodeVector); ;
-            ke.AoP = GetArgumentOfPeriapsis(position, inclination, ke.LoAN, trueAnomaly); ;
+            ke.LoAN = LongitudeOfAscendingNode(nodeVector);
+            ke.AoP = GetArgumentOfPeriapsis(position, inclination, ke.LoAN, trueAnomaly);
             ke.Inclination = inclination;
             ke.MeanMotion = GetMeanMotion(standardGravParam, semiMajorAxis);
             if(eccentricity < 1)
@@ -174,21 +168,19 @@ namespace Pulsar4X.Orbital
 
         #region Vector Calculations
 
-        public static Vector3 CalculateAngularMomentum(Vector3 position, Vector3 velocity)
-        {
-            /*
-            * position vector       m
-            * velocity              m/sec
-            */
-            var (X, Y, Z) = Vector3.CrossPrecise(position, velocity);
-            return new Vector3((double)X, (double)Y, (double)Z);
-        }
+        // Returns the specific relative angular momentum.
+        // https://en.wikipedia.org/wiki/Specific_relative_angular_momentum#Definition
+        /*
+        * position vector       m
+        * velocity              m/sec
+        */
+        public static Vector3 AngularMomentum(Vector3 position, Vector3 velocity) =>
+            Vector3.Cross(position, velocity);
 
-        public static Vector3 CalculateNode(Vector3 angularVelocity)
-        {
-            var (X, Y, Z) = Vector3.CrossPrecise(Vector3.UnitZ, angularVelocity);
-            return new Vector3((double)X, (double)Y, (double)Z);
-        }
+        // https://en.wikipedia.org/wiki/Longitude_of_the_ascending_node#Calculation_from_state_vectors
+        // Returns a vector pointing towards an orbital node.
+        public static Vector3 Node(Vector3 angularMomentum) =>
+            new Vector3(-angularMomentum.Y, angularMomentum.X, 0);
 
         public static double GetSpecificOrbitalEnergy(double sgp, Vector3 position, Vector3 velocity)
         {
@@ -199,22 +191,18 @@ namespace Pulsar4X.Orbital
         
         /// <summary>
         /// In calculation this is referred to as RAAN or LoAN or Ω
+        /// https://en.wikipedia.org/wiki/Longitude_of_the_ascending_node#Calculation_from_state_vectors
         /// </summary>
         /// <param name="nodeVector">The node vector of the Kepler elements</param>
         /// <returns>Radians as a double</returns>
-        public static double CalculateLongitudeOfAscendingNode(Vector3 nodeVector)
+        public static double LongitudeOfAscendingNode(Vector3 nodeVector)
         {
-            double longitudeOfAscendingNodeLength = nodeVector.X / nodeVector.Length();
-            if (double.IsNaN(longitudeOfAscendingNodeLength))
-                longitudeOfAscendingNodeLength = 0;
-            else
-                longitudeOfAscendingNodeLength = GeneralMath.Clamp(longitudeOfAscendingNodeLength, -1, 1);
+            var mag = nodeVector.Length();
+            if (mag == 0) // should this check be here?
+                return 0;
 
-            double longitudeOfAscendingNode = 0;
-            if (longitudeOfAscendingNodeLength != 0)
-                longitudeOfAscendingNode = Math.Acos(longitudeOfAscendingNodeLength);
-
-            return longitudeOfAscendingNode;
+            var o = Math.Acos(nodeVector.X / mag);
+            return (nodeVector.Y < 0) ? 2 * Math.PI - o : o;
         }
 
         #endregion
@@ -720,14 +708,13 @@ namespace Pulsar4X.Orbital
         /// <returns></returns>
         public static Vector3 ProgradeToStateVector(double sgp, Vector3 progradeVector, Vector3 position, Vector3 currentVelocityVector)
         {
-            Vector3 angularVelocity = Vector3.Cross(position, currentVelocityVector);
-            Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
-            var loAN = CalculateLongitudeOfAscendingNode(nodeVector);
+            var angularMomentum = AngularMomentum(position, currentVelocityVector);
+            var nodeVector = Node(angularMomentum);
+
+            var loAN = LongitudeOfAscendingNode(nodeVector);
             var trueAnomaly = OrbitalMath.TrueAnomaly(sgp, position, currentVelocityVector);
 
-            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
-            if (double.IsNaN(inclination))
-                inclination = 0;
+            var inclination = Inclination(angularMomentum);
             var aop = OrbitalMath.GetArgumentOfPeriapsis(position, inclination, loAN, trueAnomaly);
 
             return ProgradeToStateVector(progradeVector, trueAnomaly, aop, loAN, inclination);
@@ -791,14 +778,13 @@ namespace Pulsar4X.Orbital
         /// <returns></returns>
         public static Vector3 StateToProgradeVector(double sgp, Vector3 orbitLocalVec, Vector3 position, Vector3 currentVelocityVector)
         {
-            Vector3 angularVelocity = Vector3.Cross(position, currentVelocityVector);
-            Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
-            var loAN = CalculateLongitudeOfAscendingNode(nodeVector);
+            var angularMomentum = AngularMomentum(position, currentVelocityVector);
+            var nodeVector = Node(angularMomentum);
+
+            var loAN = LongitudeOfAscendingNode(nodeVector);
             var trueAnomaly = OrbitalMath.TrueAnomaly(sgp, position, currentVelocityVector);
 
-            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
-            if (double.IsNaN(inclination))
-                inclination = 0;
+            var inclination = Inclination(angularMomentum);
             var aop = OrbitalMath.GetArgumentOfPeriapsis(position, inclination, loAN, trueAnomaly);
 
             return StateToProgradeVector(orbitLocalVec, trueAnomaly, aop, loAN, inclination);
