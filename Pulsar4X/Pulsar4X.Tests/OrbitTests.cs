@@ -331,30 +331,28 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void OrbitMath_CalculateLongitudeOfAscendingNode_When_APositiveNodeVector_Should_GiveCorrectResult()
+        public void OrbitMath_LongitudeOfAscendingNode()
         {
-            var nodeVector = new Vector3(
-                0,
-                0,
-                37399467675000.0d
-            );
-            var calculatedResult = OrbitMath.LongitudeOfAscendingNode(nodeVector);
-            Assert.AreEqual(0, calculatedResult, 0.000000001d);
-        }
+            var n1 = new Vector3(0, 0, 0);
+            var l1 = OrbitMath.LongitudeOfAscendingNode(n1);
+            Assert.AreEqual(0, l1); // possibly change this to NaN?
 
-        /*
-        [Test]
-        public void OrbitMath_CalculateLongitudeOfAscendingNode_When_ANegativeNodeVector_Should_GiveCorrectResult()
-        {
-            var nodeVector = new Vector3(
-                0,
-                0,
-                -37399467675000.0d
-            );
-            var calculatedResult = OrbitMath.CalculateLongitudeOfAscendingNode(nodeVector);
-            Assert.AreEqual(0.7853981767666225d, calculatedResult, 0.000000001d);
+            var n2 = new Vector3(1, 0, 0);
+            var l2 = OrbitMath.LongitudeOfAscendingNode(n2);
+            Assert.AreEqual(0, l2);
+
+            var n3 = new Vector3(-1, 0, 0);
+            var l3 = OrbitMath.LongitudeOfAscendingNode(n3);
+            Assert.AreEqual(Math.PI, l3);
+
+            var n4 = new Vector3(0, 1, 0);
+            var l4 = OrbitMath.LongitudeOfAscendingNode(n4);
+            Assert.AreEqual(Math.PI / 2, l4);
+
+            var n5 = new Vector3(0, -1, 0);
+            var l5 = OrbitMath.LongitudeOfAscendingNode(n5);
+            Assert.AreEqual(2 * Math.PI - (Math.PI / 2), l5);
         }
-        */
 
         [Test]
         public void OrbitMath_KeplerFromPositionAndVelocity_When_ZeroXPositiveYVelocity_Should_GiveCorrectResults()

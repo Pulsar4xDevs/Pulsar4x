@@ -191,22 +191,18 @@ namespace Pulsar4X.Orbital
         
         /// <summary>
         /// In calculation this is referred to as RAAN or LoAN or Ω
+        /// https://en.wikipedia.org/wiki/Longitude_of_the_ascending_node#Calculation_from_state_vectors
         /// </summary>
         /// <param name="nodeVector">The node vector of the Kepler elements</param>
         /// <returns>Radians as a double</returns>
         public static double LongitudeOfAscendingNode(Vector3 nodeVector)
         {
-            double longitudeOfAscendingNodeLength = nodeVector.X / nodeVector.Length();
-            if (double.IsNaN(longitudeOfAscendingNodeLength))
-                longitudeOfAscendingNodeLength = 0;
-            else
-                longitudeOfAscendingNodeLength = GeneralMath.Clamp(longitudeOfAscendingNodeLength, -1, 1);
+            var mag = nodeVector.Length();
+            if (mag == 0) // should this check be here?
+                return 0;
 
-            double longitudeOfAscendingNode = 0;
-            if (longitudeOfAscendingNodeLength != 0)
-                longitudeOfAscendingNode = Math.Acos(longitudeOfAscendingNodeLength);
-
-            return longitudeOfAscendingNode;
+            var o = Math.Acos(nodeVector.X / mag);
+            return (nodeVector.Y < 0) ? 2 * Math.PI - o : o;
         }
 
         #endregion
