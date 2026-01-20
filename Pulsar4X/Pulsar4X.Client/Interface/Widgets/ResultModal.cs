@@ -64,4 +64,35 @@ public class ResultModal : PulsarGuiWindow
             ImGui.EndPopup();
         }
     }
+
+    /// <summary>
+    /// Display a modal where the content renderer handles all buttons.
+    /// The closeModal action is passed to the content renderer to allow custom button placement.
+    /// </summary>
+    public void DisplayCustomButtons(string title, Action? onClose, Action<Action> contentRenderer)
+    {
+        string fullTitle = title + $"###{title}-display-modal";
+
+        if(!IsActive)
+        {
+            ImGui.OpenPopup(fullTitle);
+            IsActive = true;
+        }
+
+        if (ImGui.BeginPopupModal(fullTitle, _flags))
+        {
+            // Create the close action that the content renderer can use
+            Action closeModal = () =>
+            {
+                ImGui.CloseCurrentPopup();
+                IsActive = false;
+                onClose?.Invoke();
+            };
+
+            // Call the content renderer with the close action
+            contentRenderer?.Invoke(closeModal);
+
+            ImGui.EndPopup();
+        }
+    }
 }

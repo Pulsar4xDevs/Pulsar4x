@@ -203,6 +203,11 @@ namespace Pulsar4X.Client
         {
             return _uiState.ImgByName("discord", "discord-mark-white", ".png");
         }
+
+        public static IntPtr Img_Character(this GlobalUIState _uiState)
+        {
+            return _uiState.ImgByName("character", "character", ".png");
+        }
         #endregion
     }
 }

@@ -200,27 +200,33 @@ namespace Pulsar4X.Client
 
                     if(_showAssignmentModal > 0 && _showAssignmentModal == lab.Id)
                     {
-                        ResultModal.GetInstance().Display(
+                        ResultModal.GetInstance().DisplayCustomButtons(
                             "Assign Scientist",
-                            null,
-                            () => // Cancel
+                            () => _showAssignmentModal = -1, // onClose
+                            (closeModal) => // Custom render with close action
                             {
-                                _showAssignmentModal = -1;
-                            }, () => // Custom render
-                            {
-                                int selectedId = DisplayHelpers.PeopleChooser(_uiState, researcherDB.ScientistId, DataStructures.CommanderTypes.Scientist);
+                                int selectedId = DisplayHelpers.PeopleChooser(
+                                    _uiState,
+                                    researcherDB.ScientistId,
+                                    DataStructures.CommanderTypes.Scientist,
+                                    $"lab_{lab.Id}",
+                                    closeModal); // Pass close action as cancel
 
-                                if (selectedId == -1)
+                                if (selectedId != researcherDB.ScientistId)
                                 {
-                                    // Unassign the scientist, the player selected "None"
-                                    var unassignOrder = UnassignScientistOrder.Create(lab.Entity, researcherDB.ScientistId);
-                                    _uiState.Game.OrderHandler.HandleOrder(unassignOrder);
-                                }
-                                else if (selectedId > 0 && selectedId != researcherDB.ScientistId)
-                                {
-                                    // Assign the new scientist
-                                    var assignmentOrder = AssignScientistOrder.Create(lab.Entity, selectedId);
-                                    _uiState.Game.OrderHandler.HandleOrder(assignmentOrder);
+                                    if (selectedId == -1)
+                                    {
+                                        // Unassign the scientist, the player selected "None"
+                                        var unassignOrder = UnassignScientistOrder.Create(lab.Entity, researcherDB.ScientistId);
+                                        _uiState.Game.OrderHandler.HandleOrder(unassignOrder);
+                                    }
+                                    else if (selectedId > 0)
+                                    {
+                                        // Assign the new scientist
+                                        var assignmentOrder = AssignScientistOrder.Create(lab.Entity, selectedId);
+                                        _uiState.Game.OrderHandler.HandleOrder(assignmentOrder);
+                                    }
+                                    closeModal();
                                 }
                             });
                     }
