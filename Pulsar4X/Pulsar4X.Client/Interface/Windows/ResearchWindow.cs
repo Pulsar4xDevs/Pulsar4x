@@ -202,23 +202,21 @@ namespace Pulsar4X.Client
                     {
                         ResultModal.GetInstance().Display(
                             "Assign Scientist",
-                            () => // Ok
-                            {
-                                _showAssignmentModal = -1;
-                            }, () => // Cancel
+                            null,
+                            () => // Cancel
                             {
                                 _showAssignmentModal = -1;
                             }, () => // Custom render
                             {
                                 int selectedId = DisplayHelpers.PeopleChooser(_uiState, researcherDB.ScientistId, DataStructures.CommanderTypes.Scientist);
 
-                                if(selectedId == -1)
+                                if (selectedId == -1)
                                 {
                                     // Unassign the scientist, the player selected "None"
                                     var unassignOrder = UnassignScientistOrder.Create(lab.Entity, researcherDB.ScientistId);
                                     _uiState.Game.OrderHandler.HandleOrder(unassignOrder);
                                 }
-                                else if(selectedId > 0 && selectedId != researcherDB.ScientistId)
+                                else if (selectedId > 0 && selectedId != researcherDB.ScientistId)
                                 {
                                     // Assign the new scientist
                                     var assignmentOrder = AssignScientistOrder.Create(lab.Entity, selectedId);
