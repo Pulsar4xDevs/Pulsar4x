@@ -30,7 +30,7 @@ public class ResultModal : PulsarGuiWindow
     }
 
     // Generic modal with custom renderer
-    public void Display(string title, Action onOk, Action onCancel, Action contentRenderer, string okLabel = "Ok", string cancelLabel = "Cancel")
+    public void Display(string title, Action? onOk, Action? onCancel, Action contentRenderer, string okLabel = "Ok", string cancelLabel = "Cancel")
     {
         string fullTitle = title + $"###{title}-display-modal";
 
@@ -45,7 +45,7 @@ public class ResultModal : PulsarGuiWindow
             // Call the content renderer and provide a callback for submitting the result
             contentRenderer?.Invoke();
 
-            if (ImGui.Button(okLabel))
+            if (onOk != null && ImGui.Button(okLabel))
             {
                 ImGui.CloseCurrentPopup();
                 IsActive = false;
@@ -54,7 +54,7 @@ public class ResultModal : PulsarGuiWindow
 
             ImGui.SameLine();
 
-            if (ImGui.Button(cancelLabel))
+            if (onCancel != null && ImGui.Button(cancelLabel))
             {
                 ImGui.CloseCurrentPopup();
                 IsActive = false;
