@@ -12,12 +12,10 @@ namespace Pulsar4X.Client
     {
         private Entity _faction;
         private FactionInfoDB _factionInfoDB;
-        private Dictionary<int, Entity> _commanders;
         private CommanderWindow()
         {
             _faction = _uiState.Faction;
             _factionInfoDB = _faction.GetDataBlob<FactionInfoDB>();
-            _commanders = new Dictionary<int, Entity>();
         }
 
         internal static CommanderWindow GetInstance()
@@ -42,19 +40,8 @@ namespace Pulsar4X.Client
                     ImGui.TableSetupColumn("Yrs in Rank");
                     ImGui.TableHeadersRow();
 
-                    foreach(var commanderID in _factionInfoDB.Commanders)
+                    foreach(var commander in _factionInfoDB.Commanders)
                     {
-                        Entity commander;
-                        if(_commanders.ContainsKey(commanderID))
-                        {
-                            commander = _commanders[commanderID];
-                        }
-                        else
-                        {
-                            commander = _uiState.Game.GlobalManager.GetGlobalEntityById(commanderID);
-                            _commanders.Add(commanderID, commander);
-                        }
-
                         ImGui.TableNextColumn();
                         ImGui.Text(commander.GetName(_faction.Id));
                         ImGui.TableNextColumn();

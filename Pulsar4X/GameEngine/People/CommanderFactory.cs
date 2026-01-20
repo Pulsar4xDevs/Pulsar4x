@@ -29,7 +29,7 @@ namespace Pulsar4X.People
             var faction = manager.Game.Factions[factionID];
             if(faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
             {
-                factionInfoDB.Commanders.Add(entity.Id);
+                factionInfoDB.Commanders.Add(entity);
             }
 
             return entity;
@@ -109,7 +109,7 @@ namespace Pulsar4X.People
 
             if(faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
             {
-                factionInfoDB.Commanders.Remove(commanderToDestroy.Id);
+                factionInfoDB.Commanders.Remove(commanderToDestroy);
             }
 
             EventManager.Instance.Publish(

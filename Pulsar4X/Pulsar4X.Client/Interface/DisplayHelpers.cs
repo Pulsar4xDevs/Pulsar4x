@@ -150,14 +150,10 @@ namespace Pulsar4X.Client
                 || !state.Faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
                 return currentlySelectedId;
 
-            foreach(var commanderId in factionInfoDB.Commanders)
+            foreach(var commander in factionInfoDB.Commanders)
             {
-                if(commanderId == currentlySelectedId)
+                if(commander.Id == currentlySelectedId)
                     continue;
-
-                // TODO: this is probably super slow and should be improved
-                // TODO: remove the call into the game
-                var commander = state.Game.GlobalManager.GetGlobalEntityById(commanderId);
 
                 if(!commander.TryGetDataBlob<CommanderDB>(out var commanderDB))
                     continue;
@@ -167,7 +163,7 @@ namespace Pulsar4X.Client
 
                 if(ImGui.Button(commander.GetName(state.Faction.Id)))
                 {
-                    return commanderId;
+                    return commander.Id;
                 }
             }
 

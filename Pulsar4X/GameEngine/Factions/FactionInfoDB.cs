@@ -62,7 +62,7 @@ namespace Pulsar4X.Factions
         public List<Entity> Colonies { get; internal set; } = new ();
 
         [JsonProperty]
-        public SafeList<int> Commanders { get; internal set; } = new ();
+        public SafeList<Entity> Commanders { get; internal set; } = new ();
 
         [JsonProperty]
         public Dictionary<string, ShipDesign> ShipDesigns = new ();
