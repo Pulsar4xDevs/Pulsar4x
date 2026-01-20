@@ -77,6 +77,8 @@ public class CreateTransferWindow : PulsarGuiWindow
                     ImGui.Separator();
                     if(ImGui.Button("Create"))
                     {
+                        var tlNull = TransferLeft == null;
+                        var trNull = TransferRight == null;
                         if(TransferLeft != null && TransferRight != null && TransferLeftGoods.Count > 0)
                         {
                             var itemsToTransfer = new List<(ICargoable, long)>();
@@ -85,6 +87,15 @@ public class CreateTransferWindow : PulsarGuiWindow
                                 itemsToTransfer.Add((item.Key, -item.Value.Item1));
                             }
                             CargoTransferOrder.CreateCommands(_uiState.Faction.Id, TransferLeft, TransferRight, itemsToTransfer);
+                        }
+                        if(TransferLeft != null && TransferRight != null && TransferRightGoods.Count > 0)
+                        {
+                            var itemsToTransfer = new List<(ICargoable, long)>();
+                            foreach(var item in TransferRightGoods)
+                            {
+                                itemsToTransfer.Add((item.Key, -item.Value.Item1));
+                            }
+                            CargoTransferOrder.CreateCommands(_uiState.Faction.Id, TransferRight, TransferLeft, itemsToTransfer);
                         }
                     }
                 }
