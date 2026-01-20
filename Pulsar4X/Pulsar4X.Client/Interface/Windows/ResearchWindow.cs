@@ -24,7 +24,7 @@ namespace Pulsar4X.Client
         private string[]? techCategoryNames;
         private string[]? techCategoryIds;
         private int selectCategoryFilterIndex = 0;
-        bool _showAssignmentModal = false;
+        int _showAssignmentModal = -1;
 
         private ResearchWindow()
         {
@@ -165,6 +165,8 @@ namespace Pulsar4X.Client
                     if(!lab.TryGetDataBlob<ResearcherDB>(out var researcherDB))
                         continue;
 
+                    ImGui.PushID(lab.Id);
+
                     researcherDB.TechQueue.TryPeek(out var techId);
 
                     ImGui.TableNextColumn();
@@ -185,7 +187,7 @@ namespace Pulsar4X.Client
                     ImGui.Text(location?.Name);
                     ImGui.TableNextColumn();
 
-                    var nameDisplay = "Assign Scientist";
+                    var nameDisplay = "Assign Scientist###assignbtn" + lab.Id;
                     if(researcherDB.ScientistId >= 0)
                     {
                         var commander = _uiState.Game.GlobalManager.GetGlobalEntityById(researcherDB.ScientistId);
@@ -193,19 +195,19 @@ namespace Pulsar4X.Client
                     }
                     if(ImGui.Button(nameDisplay))
                     {
-                        _showAssignmentModal = true;
+                        _showAssignmentModal = lab.Id;
                     }
 
-                    if(_showAssignmentModal)
+                    if(_showAssignmentModal > 0 && _showAssignmentModal == lab.Id)
                     {
                         ResultModal.GetInstance().Display(
                             "Assign Scientist",
                             () => // Ok
                             {
-                                _showAssignmentModal = false;
+                                _showAssignmentModal = -1;
                             }, () => // Cancel
                             {
-                                _showAssignmentModal = false;
+                                _showAssignmentModal = -1;
                             }, () => // Custom render
                             {
                                 int selectedId = DisplayHelpers.PeopleChooser(_uiState, researcherDB.ScientistId, DataStructures.CommanderTypes.Scientist);
@@ -286,6 +288,8 @@ namespace Pulsar4X.Client
                         var changeOrder = FundingChangedOrder.Create(lab.Entity, (byte)funding);
                         _uiState.Game.OrderHandler.HandleOrder(changeOrder);
                     }
+
+                    ImGui.PopID();
                 }
 
                 ImGui.EndTable();
