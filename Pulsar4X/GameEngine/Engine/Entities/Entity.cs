@@ -52,11 +52,13 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
         }
     }*/
 
+    [Obsolete("Use TryGetDataBlob<T>() instead.")]
     public T GetDataBlob<T>() where T : BaseDataBlob
     {
         return Manager.GetDataBlob<T>(Id);
     }
 
+    [Obsolete("Use TryGetDataBlob<T>() instead.")]
     public BaseDataBlob GetDataBlob(Type type)
     {
         return Manager.GetDataBlob(Id, type);

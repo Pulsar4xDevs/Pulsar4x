@@ -74,7 +74,7 @@ namespace Pulsar4X.Engine
         /// <param name="entity"></param>
         /// <returns></returns>
         public delegate bool FilterEntities(Entity entity);
-        
+
         #region PsudoRNG
 
         [JsonProperty] private int _rngSeed = -1;
@@ -89,7 +89,7 @@ namespace Pulsar4X.Engine
         {
             return RNG.Next(maxValue);
         }
-        
+
         internal int RNGNext(int min, int max)
         {
             var next = RNG.Next(min, max);
@@ -136,7 +136,7 @@ namespace Pulsar4X.Engine
             }
 
             RNG = new Random(seed);
-            
+
             SetEntities();
             InitializeManagerSubPulse(game, postLoad);
 
@@ -366,6 +366,7 @@ namespace Pulsar4X.Engine
             return new List<T>();  // Return an empty list if no datablobs of the specified type exist
         }
 
+        [Obsolete("Use TryGetDataBlob<T>() instead.")]
         internal T GetDataBlob<T>(int entityID) where T : BaseDataBlob
         {
             Type blobType = typeof(T);
@@ -376,6 +377,7 @@ namespace Pulsar4X.Engine
             return (T)_datablobStores[blobType][entityID];
         }
 
+        [Obsolete("Use TryGetDataBlob<T>() instead.")]
         internal BaseDataBlob GetDataBlob(int entityID, Type type)
         {
             return _datablobStores[type][entityID];
