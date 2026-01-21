@@ -647,7 +647,7 @@ namespace Pulsar4X.Client
                         {
                             if (ImGui.CollapsingHeader("DamageProfile"))
                             {
-                                if (ImGui.ImageButton("damageprofileimg", _dmgTxtr, new System.Numerics.Vector2(64, 64)))
+                                if (ImGui.ImageButton("damageprofileimg", _dmgTxtr.ToTextureRef(), new System.Numerics.Vector2(64, 64)))
                                 {
                                     //show a full sized scrollable image.
                                 }

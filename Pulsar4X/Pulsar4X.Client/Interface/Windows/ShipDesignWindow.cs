@@ -934,7 +934,7 @@ namespace Pulsar4X.Client
 
                 scale = Math.Min(scaleh, scalew);
 
-                ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(rawimagewidth * scale, rawimageheight * scale));
+                ImGui.Image(_shipImgPtr.ToTextureRef(), new System.Numerics.Vector2(rawimagewidth * scale, rawimageheight * scale));
             }
         }
 

@@ -12,7 +12,7 @@ public class ResultModal : PulsarGuiWindow
     internal ResultModal()
     {
         Array.Resize(ref _inputBuffer, checked((int)_bufferMaxSize)); //Resize the text buffer
-        _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking;
+        _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse;
     }
 
     internal static ResultModal GetInstance()

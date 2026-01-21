@@ -148,7 +148,7 @@ namespace Pulsar4X.Engine
                 _instanceProcessorsQueue.Add(nextDateTime, (actionProcessor, entity));
             }
         }
-        
+
         /// <summary>
         /// this type of interupt will attempt to run the action processor on all entities within the system
         /// </summary>
@@ -184,7 +184,7 @@ namespace Pulsar4X.Engine
                 return processor.RunFrequency;
             return null;
         }
-        
+
 
         internal void AddSystemInterupt(BaseDataBlob db)
         {
@@ -208,7 +208,7 @@ namespace Pulsar4X.Engine
             DateTime nextDT = _processToDateTime + next;
 
             if(nextDT < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
-            
+
             Type dbType = db.GetType();
             AddSystemInterupt(nextDT, dbType);
 
@@ -319,11 +319,11 @@ namespace Pulsar4X.Engine
                     Trace.WriteLine(String.Format("[{0:u}|{1:u}] running hotloop processor: {2} with entity manager: {3}",
                                 StarSysDateTime, _subStepDateTime, type.Name, _entityManager.ManagerID));
 #endif
-                    Performance.Start(type.Name);
+                    Performance.Start(_entityManager.ManagerID + "-" + type.Name);
                     CurrentProcess = type.ToString();
                     var proc = _game.ProcessorManager.HotloopProcessors[type];
                     int count = proc.ProcessManager(_entityManager, deltaSeconds);
-                    Performance.Stop(type.Name);
+                    Performance.Stop(_entityManager.ManagerID + "-" + type.Name);
 
                     if (count == 0)
                         HotLoopProcessorsNextRun[type] = null;

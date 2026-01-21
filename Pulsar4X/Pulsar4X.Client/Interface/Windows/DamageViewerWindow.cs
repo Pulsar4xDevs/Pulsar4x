@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GameEngine.Damage;
 using ImGuiNET;
+using Pulsar4X.Client;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
@@ -242,7 +243,7 @@ namespace Pulsar4X.Client.Combat
                     {
                         int w = _rawShipImage.Width; // / 4;
                         int h = _rawShipImage.Height; // / 4;
-                        ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(w, h));
+                        ImGui.Image(_shipImgPtr.ToTextureRef(), new System.Numerics.Vector2(w, h));
 
                     }
 
@@ -275,43 +276,43 @@ namespace Pulsar4X.Client.Combat
                         if(_showCompIDMap)
                         {
                             ImGui.SetCursorPos(cpos);
-                            ImGui.Image(_damageMapPtr[0], new System.Numerics.Vector2(_dmWidth, _dmHeight));
+                            ImGui.Image(_damageMapPtr[0].ToTextureRef(), new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
                         if(_showPresMap)
                         {
                             ImGui.SetCursorPos(cpos);
-                            ImGui.Image(_damageMapPtr[1], new System.Numerics.Vector2(_dmWidth, _dmHeight));
+                            ImGui.Image(_damageMapPtr[1].ToTextureRef(), new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
                         if(_showVMap)
                         {
                             ImGui.SetCursorPos(cpos);
-                            ImGui.Image(_damageMapPtr[2], new System.Numerics.Vector2(_dmWidth, _dmHeight));
+                            ImGui.Image(_damageMapPtr[2].ToTextureRef(), new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
                         if(_showPMap)
                         {
                             ImGui.SetCursorPos(cpos);
-                            ImGui.Image(_damageMapPtr[3], new System.Numerics.Vector2(_dmWidth, _dmHeight));
+                            ImGui.Image(_damageMapPtr[3].ToTextureRef(), new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
                         if(_showTemp)
                         {
                             ImGui.SetCursorPos(cpos);
-                            ImGui.Image(_damageMapPtr[4], new System.Numerics.Vector2(_dmWidth, _dmHeight));
+                            ImGui.Image(_damageMapPtr[4].ToTextureRef(), new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
                         if(_showPState)
                         {
                             ImGui.SetCursorPos(cpos);
-                            ImGui.Image(_damageMapPtr[5], new System.Numerics.Vector2(_dmWidth, _dmHeight));
+                            ImGui.Image(_damageMapPtr[5].ToTextureRef(), new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
                         if(_showPhMap && _damageMapPtr[6] != IntPtr.Zero)
                         {
                             ImGui.SetCursorPos(cpos);
-                            ImGui.Image(_damageMapPtr[6], new System.Numerics.Vector2(_dmWidth, _dmHeight));
+                            ImGui.Image(_damageMapPtr[6].ToTextureRef(), new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
 
                         if (_showCompisite && _damageMapPtr[7] != IntPtr.Zero)
                         {
                             ImGui.SetCursorPos(cpos);
-                            ImGui.Image(_damageMapPtr[7], new System.Numerics.Vector2(_dmWidth, _dmHeight));
+                            ImGui.Image(_damageMapPtr[7].ToTextureRef(), new System.Numerics.Vector2(_dmWidth, _dmHeight));
                         }
 
 
@@ -353,7 +354,7 @@ namespace Pulsar4X.Client.Combat
 
                     if (_hiResPtr != IntPtr.Zero)
                     {
-                        ImGui.Image(_hiResPtr, new System.Numerics.Vector2(_hiResSize, _hiResSize));
+                        ImGui.Image(_hiResPtr.ToTextureRef(), new System.Numerics.Vector2(_hiResSize, _hiResSize));
                     }
 
                     if (_shipImgPtr != IntPtr.Zero)
@@ -538,7 +539,7 @@ namespace Pulsar4X.Client.Combat
                         ImGui.Text(_showFrameNum + 1 + " of " + _damageFrames.Count);
                         int h = _damageFrames[_showFrameNum].Height;
                         int w = _damageFrames[_showFrameNum].Width;
-                        ImGui.Image(_showDmgFrametx, new System.Numerics.Vector2(w, h));
+                        ImGui.Image(_showDmgFrametx.ToTextureRef(), new System.Numerics.Vector2(w, h));
                     }
                 }
                 Window.End();

@@ -258,7 +258,7 @@ namespace Pulsar4X.Client
 
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(1, 2));
             ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-            Window.Begin(icon.NameString, ref icon.IsActive, icon._flags | ImGuiWindowFlags.NoDocking);
+            Window.Begin(icon.NameString, ref icon.IsActive, icon._flags);
             ImGui.PopStyleColor(); //have to pop the color change after pushing it.
             ImGui.PopStyleVar(3);
         }

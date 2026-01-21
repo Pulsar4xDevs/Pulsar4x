@@ -226,7 +226,7 @@ namespace Pulsar4X.Client
             {
                 settings.UIScale = uiScale;
                 // Apply UI scale immediately
-                ImGui.GetIO().FontGlobalScale = uiScale;
+                ImGui.GetStyle().FontScaleMain = uiScale;
                 //ImGui.GetStyle().ScaleAllSizes(uiScale);
             }
 
@@ -465,7 +465,7 @@ namespace Pulsar4X.Client
         private void ResetToDefaults()
         {
             _uiState.GameSettings = new GameSettings();
-            ImGui.GetIO().FontGlobalScale = 1.0f;
+            ImGui.GetStyle().FontScaleMain = 1.0f;
             //ImGui.GetStyle().ScaleAllSizes(1.0f);
         }
     }

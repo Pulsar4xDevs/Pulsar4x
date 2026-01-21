@@ -37,7 +37,7 @@ namespace Pulsar4X.Client
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(10, 10));
             if (Window.Begin("Pulsar4X Main Menu", ref IsActive, _flags))
             {
-                ImGui.Image(_uiState.Img_MainMenuLogo(), new System.Numerics.Vector2(400, 200));
+                ImGui.Image(_uiState.Img_MainMenuLogo().ToTextureRef(), new System.Numerics.Vector2(400, 200));
 
                 if (ImGui.Button("New Game...", _buttonSize) || _uiState.debugnewgame)
                 {

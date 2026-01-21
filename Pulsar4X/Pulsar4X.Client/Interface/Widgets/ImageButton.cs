@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Client;
 
 namespace Pulsar4X.Client.Interface.Widgets;
 
@@ -84,7 +85,7 @@ public static class ImageButton
             // Draw the image & text
             float cursorY = ImGui.GetCursorPosY() - buttonSize.Y + imageSize.Y * 0.25f;
             ImGui.SetCursorPos(new Vector2(startX, cursorY));
-            ImGui.Image(textureId, imageSize);
+            ImGui.Image(textureId.ToTextureRef(), imageSize);
             ImGui.SameLine();
 
             ImGui.PushStyleColor(ImGuiCol.Text, currentColors.Text);

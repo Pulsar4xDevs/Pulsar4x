@@ -208,7 +208,7 @@ namespace Pulsar4X.Client
                         }
                     }
 
-                    if (button.OnClick != null && ImGui.ImageButton($"###{name}-nonblank", button.Picture, ButtonSize))//Make the button
+                    if (button.OnClick != null && ImGui.ImageButton($"###{name}-nonblank", button.Picture.ToTextureRef(), ButtonSize))//Make the button
                     {
                         button.OnClick();
                     }
