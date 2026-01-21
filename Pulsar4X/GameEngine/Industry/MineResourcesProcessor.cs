@@ -36,8 +36,11 @@ namespace Pulsar4X.Industry
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            if(entity.HasDataBlob<ColonyInfoDB>() && entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.HasDataBlob<MineralsDB>())
-                MineResources(entity);
+            if(entity.TryGetDataBlob<ColonyInfoDB>(out var colonyInfoDB)
+                && colonyInfoDB.PlanetEntity.TryGetDataBlob<MineralsDB>(out var mineralsDB)
+                && entity.TryGetDataBlob<MiningDB>(out var miningDB)
+                && entity.TryGetDataBlob<CargoStorageDB>(out var stockpile))
+                MineResources(entity, colonyInfoDB, mineralsDB, miningDB, stockpile);
         }
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)
@@ -50,11 +53,10 @@ namespace Pulsar4X.Industry
             return entities.Count;
         }
 
-        private void MineResources(Entity colonyEntity)
+        private void MineResources(Entity colonyEntity, ColonyInfoDB colonyInfoDB, MineralsDB mineralsDB, MiningDB miningDB, CargoStorageDB stockpile)
         {
-            Dictionary<int, long> actualMiningRates = colonyEntity.GetDataBlob<MiningDB>().ActualMiningRate;
-            Dictionary<int, MineralDeposit> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>().Minerals;
-            CargoStorageDB stockpile = colonyEntity.GetDataBlob<CargoStorageDB>();
+            Dictionary<int, long> actualMiningRates = miningDB.ActualMiningRate;
+            Dictionary<int, MineralDeposit> planetMinerals = mineralsDB.Minerals;
 
             foreach (var kvp in actualMiningRates)
             {
@@ -100,13 +102,17 @@ namespace Pulsar4X.Industry
         /// <param name="colonyEntity"></param>
         internal static void CalcMaxRate(Entity colonyEntity)
         {
+            if (!colonyEntity.TryGetDataBlob<ComponentInstancesDB>(out var instancesDB) ||
+                !colonyEntity.GetFactionOwner.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB) ||
+                !colonyEntity.TryGetDataBlob<MiningDB>(out var miningDB))
+                return;
+
             var rates = new Dictionary<int, long>();
-            var instancesDB = colonyEntity.GetDataBlob<ComponentInstancesDB>();
-            var cargoLibrary = colonyEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
+            var cargoLibrary = factionInfoDB.Data.CargoGoods;
 
             if (instancesDB.TryGetComponentsByAttribute<MineResourcesAtbDB>(out var instances))
             {
-                colonyEntity.GetDataBlob<MiningDB>().NumberOfMines = instances.Count;
+                miningDB.NumberOfMines = instances.Count;
 
                 foreach (var instance in instances)
                 {
@@ -122,12 +128,12 @@ namespace Pulsar4X.Industry
                 }
             }
 
-            colonyEntity.GetDataBlob<MiningDB>().BaseMiningRate = rates;
+            miningDB.BaseMiningRate = rates;
 
             // Calculate the actual mining rates if the planet entity has minerals
-            if(colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.HasDataBlob<MineralsDB>())
+            if (colonyEntity.TryGetDataBlob<ColonyInfoDB>(out var colonyInfoDB) && colonyInfoDB.PlanetEntity.HasDataBlob<MineralsDB>())
             {
-                colonyEntity.GetDataBlob<MiningDB>().ActualMiningRate = MiningHelper.CalculateActualMiningRates(colonyEntity);
+                miningDB.ActualMiningRate = MiningHelper.CalculateActualMiningRates(colonyEntity);
             }
         }
 
