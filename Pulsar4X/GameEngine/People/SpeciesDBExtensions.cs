@@ -52,8 +52,10 @@ namespace Pulsar4X.People
         /// <returns></returns>
         public static double ColonyToxicityCost(this SpeciesDB species, Entity planet)
         {
-            AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
-            if(atmosphere == null) return NO_COST;
+            if (!planet.TryGetDataBlob<AtmosphereDB>(out var atmosphere))
+            {
+                return NO_COST;
+            }
 
             double totalPressure = atmosphere.Composition.Values.Sum();
 
@@ -89,9 +91,7 @@ namespace Pulsar4X.People
         /// <returns></returns>
         public static double ColonyPressureCost(this SpeciesDB species, Entity planet)
         {
-            AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
-
-            if (atmosphere == null)
+            if (!planet.TryGetDataBlob<AtmosphereDB>(out var atmosphere))
             {
                 // No atmosphere on the planet, return 1.0?
                 // @todo - some other rule for no atmosphere planets?
@@ -122,9 +122,9 @@ namespace Pulsar4X.People
             OrbitDB orbitDB = planet.GetDataBlob<OrbitDB>();
 
             double planetTemp = sysBody.BaseTemperature;
-            if (planet.HasDataBlob<AtmosphereDB>())
+            if (planet.TryGetDataBlob<AtmosphereDB>(out var atmosphereDB))
             {
-                planetTemp = planet.GetDataBlob<AtmosphereDB>().SurfaceTemperature;
+                planetTemp = atmosphereDB.SurfaceTemperature;
             }
 
             bool isTidallyLocked = sysBody.IsTidallyLocked(orbitDB);
@@ -164,19 +164,16 @@ namespace Pulsar4X.People
         /// </summary>
         public static double ColonyGasCost(this SpeciesDB species, Entity planet)
         {
-            const float MIN_COST = 2.0f;
-            const float NO_COST = 0.0f;
             const float DANGEROUS_GAS_COST_HIGH = 3.0f;
             const float DANGEROUS_GAS_COST_LOW = 2.0f;
 
-            float speciesBreathablePressure = 0.0f;
-            float totalPressure = 0.0f;
-            AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
-
-            if (atmosphere == null)
+            if (!planet.TryGetDataBlob<AtmosphereDB>(out var atmosphere))
             {
                 return MIN_COST;
             }
+
+            float speciesBreathablePressure = 0.0f;
+            float totalPressure = 0.0f;
 
             foreach (KeyValuePair<string, float> kvp in atmosphere.Composition)
             {
