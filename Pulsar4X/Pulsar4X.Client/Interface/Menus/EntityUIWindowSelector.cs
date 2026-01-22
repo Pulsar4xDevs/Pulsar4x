@@ -121,7 +121,7 @@ namespace Pulsar4X.Client
                                 ImGui.PushStyleColor(buttonidx, unclickedcolor);                                //Have the button be colored normally
                             }
 
-                            if (ImGui.ImageButton("btnimage", button.Picture, BtnSizes))
+                            if (ImGui.ImageButton("btnimage", button.Picture.ToTextureRef(), BtnSizes))
                             {
                                 EntityUIWindows.OpenUIWindow(button.ClickType, _entityState, _uiState);
                             }

@@ -193,7 +193,7 @@ namespace Pulsar4X.Client
                         if (batchJob.Auto)
                         {
                             ImGui.SameLine();
-                            ImGui.Image(_state.Img_Repeat(), new Vector2(16, 16));
+                            ImGui.Image(_state.Img_Repeat().ToTextureRef(), new Vector2(16, 16));
                         }
 
                         ImGui.NextColumn();
@@ -222,13 +222,13 @@ namespace Pulsar4X.Client
             //ImGui.BeginChild("Buttons", new Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
             ImGui.BeginGroup();
 
-            if (ImGui.ImageButton("up", _state.Img_Up(), new Vector2(16, 8)) && _selectedExistingConJob != null)
+            if (ImGui.ImageButton("up", _state.Img_Up().ToTextureRef(), new Vector2(16, 8)) && _selectedExistingConJob != null)
             {
                 var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID, -1);
                 _uiState.Game.OrderHandler.HandleOrder(cmd);
             }
 
-            if (ImGui.ImageButton("down", _state.Img_Down(), new Vector2(16, 8)) && _selectedExistingConJob != null)
+            if (ImGui.ImageButton("down", _state.Img_Down().ToTextureRef(), new Vector2(16, 8)) && _selectedExistingConJob != null)
             {
                 var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID, 1);
                 _uiState.Game.OrderHandler.HandleOrder(cmd);
@@ -236,7 +236,7 @@ namespace Pulsar4X.Client
 
             ImGui.EndGroup();
             ImGui.SameLine();
-            if (ImGui.ImageButton("repeat", _state.Img_Repeat(), new Vector2(16, 16)) && _selectedExistingConJob != null)
+            if (ImGui.ImageButton("repeat", _state.Img_Repeat().ToTextureRef(), new Vector2(16, 16)) && _selectedExistingConJob != null)
             {
 
                 var jobcount = _selectedExistingConJob.NumberOrdered;
@@ -247,7 +247,7 @@ namespace Pulsar4X.Client
             }
 
             ImGui.SameLine();
-            if (ImGui.ImageButton("cancel", _state.Img_Cancel(), new Vector2(16, 16)) && _selectedExistingConJob != null)
+            if (ImGui.ImageButton("cancel", _state.Img_Cancel().ToTextureRef(), new Vector2(16, 16)) && _selectedExistingConJob != null)
             {
                 //new ConstructCancelJob(_uiState.Faction.Guid, _selectedEntity.Guid, _selectedEntity.StarSysDateTime, _selectedExistingConJob.JobID);
                 var cmd = IndustryOrder2.CreateCancelJobOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID);

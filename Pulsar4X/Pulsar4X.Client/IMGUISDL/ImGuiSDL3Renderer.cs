@@ -29,6 +29,10 @@ public class ImGuiSDL3Renderer : IDisposable
 
         ImGuiIOPtr io = ImGui.GetIO();
         io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
+        io.BackendFlags |= ImGuiBackendFlags.RendererHasTextures;
+
+        // Mark that we support the new texture system
+        io.Fonts.RendererHasTextures = true;
     }
 
     public void Dispose()
@@ -36,11 +40,59 @@ public class ImGuiSDL3Renderer : IDisposable
         DestroyDeviceObjects();
     }
 
-    public void NewFrame()
+    public unsafe void NewFrame()
     {
-        if (_fontTexture == IntPtr.Zero)
+        // Handle texture updates for the new ImGui 1.92+ texture system
+        ImGuiIOPtr io = ImGui.GetIO();
+        var texList = io.Fonts.TexList;
+
+        for (int i = 0; i < texList.Size; i++)
         {
-            CreateDeviceObjects();
+            var texData = texList[i];
+            var status = texData.Status;
+
+            if (status == ImTextureStatus.WantCreate || status == ImTextureStatus.WantUpdates)
+            {
+                // Create or update the texture
+                int width = texData.Width;
+                int height = texData.Height;
+                byte* pixels = (byte*)texData.Pixels;
+
+                if (width > 0 && height > 0 && pixels != null)
+                {
+                    // Create SDL texture
+                    var surface = SDL.CreateSurfaceFrom(width, height, SDL.PixelFormat.RGBA8888, (IntPtr)pixels, width * 4);
+                    if (surface != IntPtr.Zero)
+                    {
+                        var texture = SDL.CreateTextureFromSurface(Renderer, surface);
+                        if (texture != IntPtr.Zero)
+                        {
+                            SDL.UpdateTexture(texture, IntPtr.Zero, (IntPtr)pixels, width * 4);
+                            SDL.SetTextureBlendMode(texture, SDL.BlendMode.Blend);
+                            SDL.SetTextureScaleMode(texture, SDL.ScaleMode.Nearest);
+
+                            // Store the texture ID
+                            texData.SetTexID(texture);
+                            texData.SetStatus(ImTextureStatus.OK);
+
+                            // Track font texture for cleanup
+                            if (i == 0)
+                                _fontTexture = texture;
+                        }
+                        SDL.DestroySurface(surface);
+                    }
+                }
+            }
+            else if (status == ImTextureStatus.WantDestroy)
+            {
+                var texId = texData.TexID;
+                if (texId != IntPtr.Zero)
+                {
+                    SDL.DestroyTexture(texId);
+                    texData.SetTexID(IntPtr.Zero);
+                }
+                texData.SetStatus(ImTextureStatus.Destroyed);
+            }
         }
     }
 
@@ -245,57 +297,10 @@ public class ImGuiSDL3Renderer : IDisposable
         DestroyFontsTexture();
     }
 
-    public unsafe IntPtr CreateFontsTexture(ImFontPtr font)
-    {
-        ImGuiIOPtr io = ImGui.GetIO();
-
-        // Build texture atlas
-        io.Fonts.GetTexDataAsRGBA32(out byte* pixels, out int width, out int height);
-
-        // Create surface from pixel data
-        var surface = SDL.CreateSurfaceFrom(width, height, SDL.PixelFormat.RGBA8888, (IntPtr)pixels, width * 4);
-        if(surface == IntPtr.Zero)
-        {
-            SDL.LogError(SDL.LogCategory.Application, $"Failed to create font surface: {SDL.GetError()}");
-            return IntPtr.Zero;
-        }
-
-        // Create texture
-        var fontTexture = SDL.CreateTextureFromSurface(Renderer, surface);
-        if (fontTexture == IntPtr.Zero)
-        {
-            SDL.LogError(SDL.LogCategory.Application, $"Failed to create font texture: {SDL.GetError()}");
-            return IntPtr.Zero;
-        }
-
-        // Update texture directly without converting pixel format
-        if (!SDL.UpdateTexture(fontTexture, IntPtr.Zero, (IntPtr)pixels, width * 4))
-        {
-            SDL.LogError(SDL.LogCategory.Application, $"Failed to update font texture: {SDL.GetError()}");
-            return IntPtr.Zero;
-        }
-
-        // Ensure proper blending for font rendering
-        SDL.SetTextureBlendMode(fontTexture, SDL.BlendMode.Blend);
-
-        // Use nearest neighbor filtering for crisp font rendering at small sizes
-        SDL.SetTextureScaleMode(fontTexture, SDL.ScaleMode.Nearest);
-
-        // Store our identifier
-        io.Fonts.SetTexID(fontTexture);
-
-        SDL.DestroySurface(surface);
-        io.Fonts.ClearTexData();
-
-        return fontTexture;
-    }
-
     private void DestroyFontsTexture()
     {
-        ImGuiIOPtr io = ImGui.GetIO();
         if(_fontTexture != IntPtr.Zero)
         {
-            io.Fonts.SetTexID(IntPtr.Zero);
             SDL.DestroyTexture(_fontTexture);
             _fontTexture = IntPtr.Zero;
         }

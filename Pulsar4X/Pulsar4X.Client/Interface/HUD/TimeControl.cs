@@ -83,7 +83,7 @@ namespace Pulsar4X.Client
             var buttonTexture = isPaused ? _uiState.Img_Play() : _uiState.Img_Pause();
 
             ImGui.SameLine();
-            if (ImGui.ImageButton("playpause", buttonTexture, _iconSize))
+            if (ImGui.ImageButton("playpause", buttonTexture.ToTextureRef(), _iconSize))
             {
                 PausePlayPressed();
             }
@@ -92,7 +92,7 @@ namespace Pulsar4X.Client
             if (isPaused)
             {
                 ImGui.SameLine();
-                if (ImGui.ImageButton("onestep", _uiState.Img_OneStep(), _iconSize))
+                if (ImGui.ImageButton("onestep", _uiState.Img_OneStep().ToTextureRef(), _iconSize))
                 {
                     OneStepPressed();
                 }

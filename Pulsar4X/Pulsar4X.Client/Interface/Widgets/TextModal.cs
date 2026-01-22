@@ -11,7 +11,7 @@ public class TextModal : PulsarGuiWindow
     internal TextModal()
     {
         Array.Resize(ref _inputBuffer, checked((int)_bufferMaxSize));//Resize the text buffer
-        _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking;
+        _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse;
     }
 
     internal static TextModal GetInstance()

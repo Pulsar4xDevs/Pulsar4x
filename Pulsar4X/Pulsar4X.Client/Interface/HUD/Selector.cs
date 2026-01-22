@@ -24,7 +24,7 @@ namespace Pulsar4X.Client
         //constructs the toolbar with the given buttons
         private Selector()
         {
-            _flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDocking;
+            _flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoBackground;
 
             _uiState.OnStarSystemAdded += SystemAdded;
             _uiState.OnFactionChanged += FactionChanged;

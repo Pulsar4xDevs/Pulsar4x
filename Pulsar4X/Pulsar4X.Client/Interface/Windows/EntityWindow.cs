@@ -60,7 +60,7 @@ namespace Pulsar4X.Client
         {
             // Pin Camera
             ImGui.PushID(EntityState.Id);
-            if(ImGui.ImageButton("###entitywindowactions", _uiState.Img_Pin(), ButtonSize))
+            if(ImGui.ImageButton("###entitywindowactions", _uiState.Img_Pin().ToTextureRef(), ButtonSize))
             {
                 _uiState.Camera.PinToEntity(Entity);
             }

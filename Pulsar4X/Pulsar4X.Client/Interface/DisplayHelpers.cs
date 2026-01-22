@@ -16,6 +16,14 @@ namespace Pulsar4X.Client
     public static class DisplayHelpers
     {
         private static Dictionary<string, int> _peopleChooserSelections = new();
+
+        /// <summary>
+        /// Creates an ImTextureRef from an IntPtr texture ID for use with ImGui.Image and ImGui.ImageButton.
+        /// </summary>
+        public static unsafe ImTextureRef ToTextureRef(this IntPtr textureId)
+        {
+            return new ImTextureRef { _TexData = null, _TexID = textureId };
+        }
         public static void Header(string text, string? tooltip = null)
         {
             ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
@@ -288,7 +296,7 @@ namespace Pulsar4X.Client
                             IntPtr portraitTexture = state.Img_Character();
                             if(portraitTexture != IntPtr.Zero)
                             {
-                                ImGui.Image(portraitTexture, new Vector2(portraitSize, portraitSize));
+                                ImGui.Image(portraitTexture.ToTextureRef(), new Vector2(portraitSize, portraitSize));
                                 ImGui.SameLine();
                             }
 

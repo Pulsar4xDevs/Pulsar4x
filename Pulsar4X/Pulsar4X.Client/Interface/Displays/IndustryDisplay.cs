@@ -250,7 +250,7 @@ namespace Pulsar4X.Client
                                     if (batchJob.Auto)
                                     {
                                         ImGui.SameLine();
-                                        ImGui.Image(state.Img_Repeat(), new Vector2(16, 16));
+                                        ImGui.Image(state.Img_Repeat().ToTextureRef(), new Vector2(16, 16));
                                     }
 
                                     ImGui.TableNextColumn();

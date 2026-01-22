@@ -403,8 +403,7 @@ public class ImGuiSDL3 : IDisposable
             font = fontAtlas.AddFontFromFileTTF(filePath, fontSize, config, ranges.Data);
         }
 
-        if(merge)
-            fontAtlas.Build();
+        // Note: In ImGui 1.92+, font atlas is built automatically when needed
 
         return font;
     }

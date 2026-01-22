@@ -1,0 +1,3 @@
+[submodule "Pulsar4X/external/ImGui.NET"]
+	path = Pulsar4X/external/ImGui.NET
+	url = https://github.com/behindcurtain3/ImGui.NET.git

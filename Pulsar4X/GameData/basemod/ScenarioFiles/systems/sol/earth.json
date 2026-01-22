@@ -59,7 +59,7 @@
         { "Id": "default-design-factory", "Amount": 1 },
         { "Id": "default-design-shipyard", "Amount": 1 },
         { "Id": "default-design-spaceport", "Amount": 1 },
-        { "Id": "default-design-research-lab", "Amount": 1 },
+        { "Id": "default-design-research-lab", "Amount": 2 },
         { "id": "default-design-city-hall", "amount": 1 },
         { "Id": "default-design-local-construction", "Amount": 1}
       ],

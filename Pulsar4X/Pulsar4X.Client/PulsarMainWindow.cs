@@ -86,24 +86,14 @@ namespace Pulsar4X.Client
                 _state.GameSettings.ApplyDisplaySettings(this);
                 
                 // Apply UI scaling
-                ImGui.GetIO().FontGlobalScale = _state.GameSettings.UIScale;
+                ImGui.GetStyle().FontScaleMain = _state.GameSettings.UIScale;
 
                 // Apply any saved user orbit settings
                 LoadUserOrbitSettings();
 
-                // Load fonts
-                var fontPtr = PlatformBackend.LoadFont(ResourcesPath, "ProggyClean.ttf", 13f);
-                var texturePtr = ImGuiRenderer.CreateFontsTexture(fontPtr);
-                fontPtr = PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ", true);
-                texturePtr = ImGuiRenderer.CreateFontsTexture(fontPtr);
-
-                // This one works
-                // var fontPtr = PlatformBackend.LoadFont(ResourcesPath, "PixelOperator.ttf", 16f);
-                // var fontTexture = ImGuiRenderer.CreateFontsTexture(fontPtr);
-
-                // This one doesn't
-                // var fontPtr = PlatformBackend.LoadFont(ResourcesPath, "JetBrainsMono-Regular.ttf", 16f);
-                // var fontTexture = ImGuiRenderer.CreateFontsTexture(fontPtr);
+                // Load fonts - texture will be created automatically by the new texture system
+                PlatformBackend.LoadFont(ResourcesPath, "ProggyClean.ttf", 13f);
+                PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ", true);
             }
             catch(Exception e)
             {
