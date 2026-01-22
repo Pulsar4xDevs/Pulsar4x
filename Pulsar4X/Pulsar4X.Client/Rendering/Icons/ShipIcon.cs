@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using SDL3;
@@ -13,10 +14,48 @@ namespace Pulsar4X.Client
 {
     public class ShipIcon : Icon
     {
+        // Static texture for all ship icons
+        private static IntPtr _shipTexture = IntPtr.Zero;
+        private static int _textureWidth = 24;
+        private static int _textureHeight = 12;
+        private static bool _textureInitialized = false;
+
         OrbitDB? _orbitDB;
         NewtonMoveDB? _newtonMoveDB;
         float _lop;
         Entity? _entity;
+
+        /// <summary>
+        /// Initialize the ship icon texture. Call this once during startup.
+        /// </summary>
+        public static void InitializeTexture(IntPtr renderer)
+        {
+            if (_textureInitialized) return;
+
+            var path = Path.Combine(PulsarMainWindow.ResourcesPath, "ship-icons", "01.png");
+            if (File.Exists(path))
+            {
+                _shipTexture = Image.LoadTexture(renderer, path);
+                if (_shipTexture != IntPtr.Zero)
+                {
+                    SDL.GetTextureSize(_shipTexture, out float w, out float h);
+                    _textureWidth = (int)w;
+                    _textureHeight = (int)h;
+                    _textureInitialized = true;
+#if DEBUG
+                    Console.WriteLine($"Ship icon texture loaded: {_textureWidth}x{_textureHeight}");
+#endif
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to load ship icon texture: {SDL.GetError()}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Ship icon texture not found: {path}");
+            }
+        }
         public ShipIcon(EntityState entity, ShipInfoDB shipInfoDB, PositionDB positionDB) : base(positionDB)
         {
             _entity = entity.Entity;
@@ -277,6 +316,41 @@ namespace Pulsar4X.Client
                     drawPoints[i2] = new Vector2() { X = x, Y = y };
                 }
                 DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
+            }
+        }
+
+        public override void Draw(IntPtr rendererPtr, Camera camera)
+        {
+            if (_textureInitialized && _shipTexture != IntPtr.Zero)
+            {
+                // Calculate destination rectangle centered on the ship's position
+                var dstRect = new SDL.FRect
+                {
+                    X = ViewScreenPos.X - (_textureWidth * Scale) / 2f,
+                    Y = ViewScreenPos.Y - (_textureHeight * Scale) / 2f,
+                    W = _textureWidth * Scale,
+                    H = _textureHeight * Scale
+                };
+
+                // Can add rotation if needed in future
+                // double angleDegrees = Angle.ToDegrees(Heading);
+                double angleDegrees = 0;
+
+                // Render the texture with rotation
+                SDL.RenderTextureRotated(
+                    rendererPtr,
+                    _shipTexture,
+                    IntPtr.Zero,      // Source rect (null = entire texture)
+                    ref dstRect,
+                    angleDegrees,
+                    IntPtr.Zero,      // Center point (null = center of dstRect)
+                    SDL.FlipMode.None
+                );
+            }
+            else
+            {
+                // Fall back to the base line drawing if texture not available
+                base.Draw(rendererPtr, camera);
             }
         }
     }

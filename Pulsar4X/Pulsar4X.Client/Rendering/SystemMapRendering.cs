@@ -42,6 +42,10 @@ namespace Pulsar4X.Client.Rendering
 
             _camera = _state.Camera;
             _window = window;
+
+            // Initialize ship icon texture
+            ShipIcon.InitializeTexture(window.Renderer);
+
             //UIWidgets.Add(new CursorCrosshair(new Vector4())); //used for debugging the cursor world position.
             foreach (var item in TestDrawIconData.GetTestIcons())
             {

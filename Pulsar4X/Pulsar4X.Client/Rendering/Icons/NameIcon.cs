@@ -265,7 +265,7 @@ namespace Pulsar4X.Client
 
         private static int GetXOffset(NameIcon icon)
         {
-            return icon.EntityState.BodyType == UserOrbitSettings.OrbitBodyType.Star ? 14 : icon.EntityState.BodyType == UserOrbitSettings.OrbitBodyType.Ship ? 4 : 10;
+            return icon.EntityState.BodyType == UserOrbitSettings.OrbitBodyType.Star ? 14 : icon.EntityState.BodyType == UserOrbitSettings.OrbitBodyType.Ship ? 12 : 10;
         }
 
         private static void EndNameIcon(NameIcon icon)
