@@ -81,10 +81,10 @@ namespace Pulsar4X.Client
 
                 // Read and apply any window preferences
                 LoadPreferences();
-                
+
                 // Apply game settings (resolution, display mode, etc.) - this should override old preferences
                 _state.GameSettings.ApplyDisplaySettings(this);
-                
+
                 // Apply UI scaling
                 ImGui.GetStyle().FontScaleMain = _state.GameSettings.UIScale;
 
@@ -92,8 +92,10 @@ namespace Pulsar4X.Client
                 LoadUserOrbitSettings();
 
                 // Load fonts - texture will be created automatically by the new texture system
-                PlatformBackend.LoadFont(ResourcesPath, "ProggyClean.ttf", 13f);
+                Styles.DefaultFont = PlatformBackend.LoadFont(ResourcesPath, "ProggyClean.ttf", 13f);
                 PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ", true);
+                Styles.MonospaceFont = PlatformBackend.LoadFont(ResourcesPath, "JetBrainsMono-Regular.ttf", 14f);
+                Styles.MediumFont = PlatformBackend.LoadFont(ResourcesPath, "Roboto-Medium.ttf", 14f);
             }
             catch(Exception e)
             {
@@ -302,8 +304,8 @@ namespace Pulsar4X.Client
             if (Client.Interface.Widgets.Window.Begin("GitHash", _gitHashFlags))
             {
                 ImGui.Text("Version: " + AssemblyInfo.GetGitHash());
-                Client.Interface.Widgets.Window.End();
             }
+            Client.Interface.Widgets.Window.End();
 #endif
         }
 
@@ -311,7 +313,7 @@ namespace Pulsar4X.Client
         {
             // save the user orbit settings on exit
             SaveOrbitSettings();
-            
+
             // save the game settings on exit
             _state.GameSettings.Save();
         }

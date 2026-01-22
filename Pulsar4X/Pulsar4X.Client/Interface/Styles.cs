@@ -5,6 +5,11 @@ namespace Pulsar4X.Client
 {
     public static class Styles
     {
+        // Fonts
+        public static ImFontPtr DefaultFont;
+        public static ImFontPtr MonospaceFont;
+        public static ImFontPtr MediumFont;
+
         public static Vector4 StandardText = new Vector4(1f, 1f, 1f, 1f);
         public static Vector4 HighlightColor = new(0.25f, 1f, 0.25f, 0.9f);
         public static Vector4 GoodColor = new (0.25f, 1f, 0.25f, 0.9f);

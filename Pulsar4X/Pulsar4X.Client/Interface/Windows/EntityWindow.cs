@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
@@ -26,10 +27,24 @@ namespace Pulsar4X.Client
 
         private Vector2 ButtonSize = new Vector2(32, 32);
 
+        // Animation constants
+        private const float WindowWidth = 624f;
+        private const float WindowHeight = 364f;
+        private const float AnimationDuration = 0.2f; // seconds
+        private const float BottomMargin = 4f;
+        private const float RightMargin = 4f;
+
+        // Animation state
+        private enum AnimationState { Closed, Opening, Open, Closing }
+        private AnimationState _animationState = AnimationState.Closed;
+        private float _animationProgress = 0f;
+        private DateTime _animationStartTime;
+
         public EntityWindow(EntityState entityState)
         {
             Entity = entityState.Entity;
             EntityState = entityState;
+            _flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar;
 
             if(_uiState.Faction != null && Entity.TryGetDataBlob<NameDB>(out var nameDB))
             {
@@ -41,19 +56,128 @@ namespace Pulsar4X.Client
             }
         }
 
+        public new void SetActive(bool activeVal = true)
+        {
+            if (activeVal && !IsActive)
+            {
+                // Starting to open
+                _animationState = AnimationState.Opening;
+                _animationStartTime = DateTime.Now;
+                _animationProgress = 0f;
+                IsActive = true;
+            }
+            else if (!activeVal && IsActive)
+            {
+                // Starting to close
+                _animationState = AnimationState.Closing;
+                _animationStartTime = DateTime.Now;
+                _animationProgress = 1f;
+            }
+        }
+
+        public new void ToggleActive()
+        {
+            SetActive(!IsActive);
+        }
+
+        private float EaseOutCubic(float t)
+        {
+            return 1f - MathF.Pow(1f - t, 3f);
+        }
+
+        private float EaseInCubic(float t)
+        {
+            return t * t * t;
+        }
+
+        private void UpdateAnimation()
+        {
+            if (_animationState == AnimationState.Open || _animationState == AnimationState.Closed)
+                return;
+
+            float elapsed = (float)(DateTime.Now - _animationStartTime).TotalSeconds;
+            float t = Math.Clamp(elapsed / AnimationDuration, 0f, 1f);
+
+            if (_animationState == AnimationState.Opening)
+            {
+                _animationProgress = EaseOutCubic(t);
+                if (t >= 1f)
+                {
+                    _animationState = AnimationState.Open;
+                    _animationProgress = 1f;
+                }
+            }
+            else if (_animationState == AnimationState.Closing)
+            {
+                _animationProgress = 1f - EaseInCubic(t);
+                if (t >= 1f)
+                {
+                    _animationState = AnimationState.Closed;
+                    _animationProgress = 0f;
+                    IsActive = false;
+                }
+            }
+        }
+
+        private Vector2 CalculateWindowPosition()
+        {
+            var viewportSize = _uiState.MainWinSize;
+
+            // Final position: bottom right corner
+            float finalX = viewportSize.X - WindowWidth - RightMargin;
+            float finalY = viewportSize.Y - WindowHeight - BottomMargin;
+
+            // Animate from right (offscreen beyond right edge) into final position
+            // When progress is 0, window is offscreen to the right
+            // When progress is 1, window is at its final position
+            float startX = viewportSize.X; // Start completely off-screen to the right
+            float currentX = startX + (finalX - startX) * _animationProgress;
+
+            return new Vector2(currentX, finalY);
+        }
+
         internal override void Display()
         {
-            if(!IsActive) return;
+            if(!IsActive && _animationState == AnimationState.Closed) return;
 
-            ImGui.SetNextWindowSize(new System.Numerics.Vector2(512, 325), ImGuiCond.Once);
-            if (Window.Begin(Title + " (" + EntityState.BodyType.ToDescription() + ")" + "###" + Entity.Id, ref IsActive, _flags))
+            UpdateAnimation();
+
+            // Don't render if fully closed
+            if (_animationState == AnimationState.Closed) return;
+
+            var windowPos = CalculateWindowPosition();
+            ImGui.SetNextWindowPos(windowPos, ImGuiCond.Always);
+            ImGui.SetNextWindowSize(new Vector2(WindowWidth, WindowHeight), ImGuiCond.Always);
+            ImGui.SetNextWindowBgAlpha(0.8f);
+
+            // Remove window border
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0f);
+
+            // Track if window is closed via the X button
+            bool windowOpen = true;
+            if (Window.Begin(Title + " (" + EntityState.BodyType.ToDescription() + ")" + "###" + Entity.Id, ref windowOpen, _flags))
             {
+                DisplayHeader();
                 DisplayActions();
                 DisplayInfo();
                 DisplayConditional();
-
-                Window.End();
             }
+            Window.End();
+
+            ImGui.PopStyleVar();
+
+            // Handle close button click
+            if (!windowOpen && _animationState != AnimationState.Closing)
+            {
+                SetActive(false);
+            }
+        }
+
+        private void DisplayHeader()
+        {
+            ImGui.PushFont(Styles.MediumFont, 16f);
+            ImGui.Text(Title.ToUpper());
+            ImGui.PopFont();
         }
 
         private void DisplayActions()
@@ -269,7 +393,7 @@ namespace Pulsar4X.Client
                         ImGuiTableFlags flags = ImGuiTableFlags.SizingStretchProp;
                         if (ImGui.BeginTable("OrdersTable", 3, Styles.TableFlags))
                         {
-                            
+
                             ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.WidthStretch, 0.1f);
                             ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.WidthStretch, 0.2f);
                             ImGui.TableSetupColumn("Details", ImGuiTableColumnFlags.WidthStretch, 0.7f);
