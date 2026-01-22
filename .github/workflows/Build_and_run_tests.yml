@@ -20,6 +20,7 @@ jobs:
       - name: Build
         shell: pwsh
         run: |
+          git submodule update --init
           cd Pulsar4X
           dotnet restore "Pulsar4X.sln"
           dotnet build --no-restore
@@ -43,6 +44,7 @@ jobs:
     - name: Build
       shell: bash
       run: |
+        git submodule update --init
         cd Pulsar4X
         dotnet restore "Pulsar4X.sln"
         dotnet build --no-restore
