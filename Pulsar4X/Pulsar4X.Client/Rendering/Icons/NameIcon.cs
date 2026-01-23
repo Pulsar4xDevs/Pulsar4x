@@ -247,7 +247,7 @@ namespace Pulsar4X.Client
 
         private static void BeginNameIcon(NameIcon icon)
         {
-            var yOffset = 10;
+            var yOffset = 12;
             int xOffset = GetXOffset(icon);
             Vector2 pos = new Vector2(icon.X + xOffset, icon.Y - yOffset);
 
@@ -265,7 +265,7 @@ namespace Pulsar4X.Client
 
         private static int GetXOffset(NameIcon icon)
         {
-            return icon.EntityState.BodyType == UserOrbitSettings.OrbitBodyType.Star ? 14 : icon.EntityState.BodyType == UserOrbitSettings.OrbitBodyType.Ship ? 12 : 10;
+            return icon.EntityState.BodyType == UserOrbitSettings.OrbitBodyType.Star ? 14 : icon.EntityState.BodyType == UserOrbitSettings.OrbitBodyType.Ship ? 14 : 10;
         }
 
         private static void EndNameIcon(NameIcon icon)
