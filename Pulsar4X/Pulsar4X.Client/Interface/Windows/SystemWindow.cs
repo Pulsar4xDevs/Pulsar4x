@@ -73,9 +73,8 @@ public class SystemWindow : PulsarGuiWindow
                     ImGui.EndTable();
                 }
             }
-
-            Window.End();
         }
+        Window.End();
     }
 
     void TreeGen(Entity currentBody, Entity selectedBody, int depth = 0)
