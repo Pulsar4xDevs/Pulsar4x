@@ -232,7 +232,7 @@ namespace Pulsar4X.Client
                     }
 
                     ImGui.TableNextColumn();
-                    ImGui.Text(researcherDB.CostPerDay.GetValue().ToString("C0", CultureInfo.CurrentCulture));
+                    ImGui.TextUnformatted(researcherDB.CostPerDay.GetValue().ToString("C0", CultureInfo.CurrentCulture));
                     if(ImGui.IsItemHovered())
                     {
                         DisplayHelpers.DescriptiveTooltip(
@@ -242,7 +242,7 @@ namespace Pulsar4X.Client
                             delegate {
                                 foreach(var modifier in researcherDB.CostPerDay.GetModifiers())
                                 {
-                                    ImGui.Text($"{(modifier.After - modifier.Before).ToString("C0", CultureInfo.CurrentCulture)} {modifier.Name}");
+                                    ImGui.TextUnformatted($"{(modifier.After - modifier.Before).ToString("C0", CultureInfo.CurrentCulture)} {modifier.Name}");
                                 }
                             });
                     }
