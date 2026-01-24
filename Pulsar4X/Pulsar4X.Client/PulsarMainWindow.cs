@@ -441,10 +441,6 @@ namespace Pulsar4X.Client
                 return;
 
             string filePath = Path.Combine(appDataDirectory, UserOrbitSettingsFile);
-
-            if(!File.Exists(filePath))
-                File.Create(filePath);
-
             string output = JsonConvert.SerializeObject(_state.UserOrbitSettingsMtx);
 
             File.WriteAllText(filePath, output);
