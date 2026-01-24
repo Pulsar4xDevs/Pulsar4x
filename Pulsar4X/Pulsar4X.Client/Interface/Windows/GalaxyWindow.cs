@@ -30,11 +30,10 @@ namespace Pulsar4X.Client
 
         internal override void Display()
         {
-
+            if (!IsActive) return;
             //ImGui.SetNextWindowSize();
-            if (IsActive && Window.Begin("Galaxy Browser", ref IsActive, _flags))
+            if (Window.Begin("Galaxy Browser", ref IsActive, _flags))
             {
-
                 uint iterations = 0;
                 foreach (var starSystem in _uiState.StarSystemStates)
                 {
@@ -46,8 +45,8 @@ namespace Pulsar4X.Client
                     ImGui.PopID();
                     iterations++;
                 }
-                Window.End();
             }
+            Window.End();
         }
     }
 }
