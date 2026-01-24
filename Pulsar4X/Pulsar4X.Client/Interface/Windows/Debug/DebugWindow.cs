@@ -20,6 +20,7 @@ using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 using Pulsar4X.Storage;
 using SDL3;
+using NUnit.Framework;
 
 namespace Pulsar4X.Client
 {
@@ -157,8 +158,10 @@ namespace Pulsar4X.Client
 
         internal override void Display()
         {
+            if (!IsActive) return;
+
             _isRunningFrame = true;
-            if(IsActive && Window.Begin("Debug Window", ref IsActive))
+            if(Window.Begin("Debug Window", ref IsActive))
             {
                 if(ImGui.BeginTabBar("DebugTabs"))
                 {
@@ -169,9 +172,8 @@ namespace Pulsar4X.Client
 
                     ImGui.EndTabBar();
                 }
-
-                Window.End();
             }
+            Window.End();
 
             _isRunningFrame = false;
             _dateChangeSinceLastFrame = false;
