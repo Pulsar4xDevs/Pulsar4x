@@ -130,9 +130,8 @@ namespace Pulsar4X.Client
                     "of the component.");
 
                 GuiDesignUI(uiState); //Part design
-
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
             ImGui.SameLine();
             //ImGui.SetCursorPosY(27f);
 
@@ -140,9 +139,8 @@ namespace Pulsar4X.Client
             if (ImGui.BeginChild("ComponentDesignChildWindow2", new Vector2(windowContentSize.X * 0.49f, windowContentSize.Y * 0.65f), ImGuiChildFlags.Borders))
             {
                 GuiCostText(uiState); //Print cost
-
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
 
             ImGui.SetCursorPos(new Vector2(position.X, position.Y + windowContentSize.Y * 0.662f));
             if (ImGui.BeginChild("ComponentDesignChildWindow3", new Vector2(windowContentSize.X * 0.49f, windowContentSize.Y * 0.34f), ImGuiChildFlags.Borders))
@@ -174,8 +172,8 @@ namespace Pulsar4X.Client
                         _nameInputBuffer = new byte[128];
                     }
                 }
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
         }
 
         internal void GuiDesignUI(GlobalUIState uiState) //Creates all UI elements need for designing the Component
@@ -383,7 +381,7 @@ namespace Pulsar4X.Client
                                 ImGui.TextUnformatted(displayStr);
                                 if(ImGui.IsItemHovered())
                                     ImGui.SetTooltip(@attribute.Value.ToString(Styles.IntFormat) + " " + attribute.Unit.Replace("%", "%%"));
-                                
+
                             }
                             else
                             {
@@ -745,8 +743,8 @@ namespace Pulsar4X.Client
                 var textSize = ImGui.CalcTextSize(message);
                 ImGui.SetCursorPos(new Vector2(size.X / 2 - textSize.X / 2, size.Y / 2 - textSize.Y / 2));
                 ImGui.Text(message);
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
         }
 
         private void DisplayCreatedTemplate()
@@ -759,8 +757,8 @@ namespace Pulsar4X.Client
                 var textSize = ImGui.CalcTextSize(message);
                 ImGui.SetCursorPos(new Vector2(size.X / 2 - textSize.X / 2, size.Y / 2 - textSize.Y / 2));
                 ImGui.Text(message);
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
         }
 
         private void Title(string title, string tooltip)
