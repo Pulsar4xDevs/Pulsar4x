@@ -361,8 +361,8 @@ public class SystemViewPreferences : PulsarGuiWindow
                     SaveViewIni(Views[_selectedEditorViewIndex]);
                 }
             }
-            Window.End();
         }
+        Window.End();
     }
 
     internal void DisplayCombo(string key, Action<int> onItemSelected)
