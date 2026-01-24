@@ -132,8 +132,8 @@ namespace Pulsar4X.Client
                             ImGui.TreePop();
                         }
                     }
-                    ImGui.TreePop();
                 }
+                ImGui.TreePop();
             }
 
             ImGui.NextColumn();
