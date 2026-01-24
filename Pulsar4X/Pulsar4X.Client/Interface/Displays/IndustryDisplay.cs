@@ -134,8 +134,8 @@ namespace Pulsar4X.Client
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
                     ImGui.Text("You need an installation capable of production. Consider importing one.\n\nExamples: Factory, Shipyard or Refinery");
                     ImGui.PopStyleColor();
-                    ImGui.EndChild();
                 }
+                ImGui.EndChild();
                 return;
             }
 
@@ -162,8 +162,8 @@ namespace Pulsar4X.Client
                 }
 
                 NewJobDisplay(state);
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
         }
 
         public void ProductionLineDisplay(GlobalUIState state)
@@ -317,8 +317,8 @@ namespace Pulsar4X.Client
                     }
                     ImGui.PopID();
                 }
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
         }
 
         void NewJobDisplay(GlobalUIState state)

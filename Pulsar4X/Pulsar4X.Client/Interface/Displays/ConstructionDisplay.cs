@@ -76,8 +76,8 @@ namespace Pulsar4X.Client
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
                     ImGui.Text("No local construction capability available at this colony.\n\nBuild installations with Local Construction capability to enable this feature.");
                     ImGui.PopStyleColor();
-                    ImGui.EndChild();
                 }
+                ImGui.EndChild();
                 return;
             }
 
@@ -92,16 +92,16 @@ namespace Pulsar4X.Client
             if (ImGui.BeginChild("ConstructionQueue", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y - 50), ImGuiChildFlags.Borders))
             {
                 DisplayQueue(state);
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
 
             ImGui.SameLine();
 
             if (ImGui.BeginChild("AvailableDesigns", new Vector2(windowContentSize.X * 0.5f - 8f, windowContentSize.Y - 50), ImGuiChildFlags.Borders))
             {
                 DisplayAvailableDesigns(state);
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
         }
 
         private void DisplayConstructionHeader()
@@ -135,8 +135,8 @@ namespace Pulsar4X.Client
                 ImGui.PopStyleColor();
 
                 ImGui.Unindent(8);
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
         }
 
         private void DisplayQueue(GlobalUIState state)
@@ -345,8 +345,8 @@ namespace Pulsar4X.Client
 
                     ImGui.EndTable();
                 }
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
 
             // Add to queue button - always visible at bottom
             ImGui.Spacing();
