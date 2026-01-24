@@ -369,8 +369,8 @@ namespace Pulsar4X.Client
                 ImGui.Text(fuelName + " Fuel: " + Stringify.Mass(_fuelMass));
                 var thrust = _newtonThrust?.ThrustInNewtons ?? 0;
                 ImGui.Text("Total Thrust: " + Stringify.Thrust(thrust));
-                Window.End();
             }
+            Window.End();
         }
 
         void DisplayEditMode()
