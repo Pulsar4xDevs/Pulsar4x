@@ -210,8 +210,8 @@ namespace Pulsar4X.Client
                         }
                         ImGui.EndTable();
                     }
-                    ImGui.EndChild();
                 }
+                ImGui.EndChild();
 
                 ImGui.SameLine();
 
