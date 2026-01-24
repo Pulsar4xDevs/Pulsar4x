@@ -321,7 +321,7 @@ namespace Pulsar4X.Client
                             var orders = selectedFleetDB.StandingOrders.ToArray();
                             for(int i = 0; i < count; i++)
                             {
-                                ImGui.PushID(orders[i].GetHashCode());
+                                ImGui.PushID("###" + i);
                                 bool isSelected = selectedOrder == orders[i];
                                 var name = orders[i].Name.IsNullOrEmpty() ? "<un-named>" : orders[i].Name;
                                 if(ImGui.Selectable((i + 1) + ". " + name, ref isSelected))
@@ -375,7 +375,7 @@ namespace Pulsar4X.Client
                     {
                         var sizeAvailable = ImGui.GetContentRegionAvail();
                         DisplayHelpers.Header("Order Name");
-                        ImGui.InputText("", orderNameBuffer, 32);
+                        ImGui.InputText("###order-name-input", orderNameBuffer, 32);
                         ImGui.NewLine();
                         DisplayHelpers.Header("Conditions", "If the conditions listed are true, the actions will execute.");
 
