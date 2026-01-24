@@ -68,14 +68,14 @@ namespace Pulsar4X.Client
                 if(ImGui.BeginChild("ComponentDesignSelection", firstChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayTemplateSelection();
-                    ImGui.EndChild();
                 }
+                ImGui.EndChild();
                 ImGui.SameLine();
                 if (ImGui.BeginChild("ComponentSelection", secondChildSize, ImGuiChildFlags.Borders))
                 {
                     DisplayComponentList();
-                    ImGui.EndChild();
                 }
+                ImGui.EndChild();
                 ImGui.SameLine();
                 if (ImGui.BeginChild("ComponentDesign", thirdChildSize, ImGuiChildFlags.None))
                 {
@@ -83,8 +83,8 @@ namespace Pulsar4X.Client
                     {
                         ComponentDesignDisplay.GetInstance().Display(_uiState);
                     }
-                    ImGui.EndChild();
                 }
+                ImGui.EndChild();
 
 
                 ImGui.SameLine();
