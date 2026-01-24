@@ -286,9 +286,8 @@ namespace Pulsar4X.Client
                         {
                             selectedIssueOrderType = IssueOrderType.Jump;
                         }
-
-                        ImGui.EndChild();
                     }
+                    ImGui.EndChild();
                     ImGui.SameLine();
                     IssueOrdersDisplay(secondChildSize);
                     ImGui.EndTabItem();
@@ -368,8 +367,8 @@ namespace Pulsar4X.Client
                             if(selectedFleetDB?.StandingOrders.Count == 1)
                                 SelectOrder(order);
                         }
-                        ImGui.EndChild();
                     }
+                    ImGui.EndChild();
                     ImGui.SameLine();
                     if(ImGui.BeginChild("StandingOrders-edit", secondChildSize, ImGuiChildFlags.Borders) && selectedOrder != null)
                     {
@@ -642,9 +641,8 @@ namespace Pulsar4X.Client
                         }
                         break;
                 }
-
-                ImGui.EndChild();
             }
+            ImGui.EndChild();
         }
 
         private void DisplayOrders()
