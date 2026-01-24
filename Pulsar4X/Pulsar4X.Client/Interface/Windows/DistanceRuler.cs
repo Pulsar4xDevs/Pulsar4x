@@ -76,7 +76,13 @@ namespace Pulsar4X.Client
         }
         internal override void Display()
         {
-            if(IsActive == true && Window.Begin("Map Scale", ref IsActive, _flags))//Lets the user close the ruler
+            if (!IsActive)
+            {
+                _stopMeasuring();
+                return;
+            }
+
+            if(Window.Begin("Map Scale", ref IsActive, _flags))//Lets the user close the ruler
             {
                 //displays the size in meters of the current screen area account for zoom and window dimensions
                 var windowCornerInWorldCoordinate = _uiState.Camera.WorldCoordinate_m((int)_uiState.MainWinSize.X, (int)_uiState.MainWinSize.Y);
@@ -121,13 +127,8 @@ namespace Pulsar4X.Client
                         ImGui.SetTooltip(tooltipString);
                     }
                 }
-
-                Window.End();
             }
-            else
-            {
-                _stopMeasuring();
-            }
+            Window.End();
 
         }
 
