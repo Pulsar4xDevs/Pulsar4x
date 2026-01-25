@@ -58,89 +58,85 @@ namespace Pulsar4X.Client
 
         internal override void Display()
         {
+            if (!IsActive) return;
+
             var orders = _orderableDB.ActionList;
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(550, 325), ImGuiCond.Once);
-            if (IsActive == true && Window.Begin("Orders: " + _orderEntity.GetOwnersName(), ref IsActive, _flags))
+            if (Window.Begin("Orders: " + _orderEntity.GetOwnersName(), ref IsActive, _flags))
             {
-                ImGui.Columns(6);
-                ImGui.SetColumnWidth(0, 124);
-                ImGui.Text("Name");
-                ImGui.NextColumn();
-                ImGui.SetColumnWidth(1, 280);
-                ImGui.Text("Details");
-                ImGui.NextColumn();
-                ImGui.SetColumnWidth(2, 32);
-                ImGui.Text("Mov");
-                ImGui.NextColumn();
-                ImGui.SetColumnWidth(3, 32);
-                ImGui.Text("IE");
-                ImGui.NextColumn();
-                ImGui.SetColumnWidth(4, 32);
-                ImGui.Text("IS");
-                ImGui.NextColumn();
-                ImGui.SetColumnWidth(5, 44);
-                ImGui.Text("Pause");
-                ImGui.NextColumn();
-                ImGui.Separator();
-
-                if (orders.Any())
+                var tableFlags = ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingFixedFit;
+                if (ImGui.BeginTable("OrdersTable", 6, tableFlags))
                 {
-                    foreach (EntityCommand order in orders)
+                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthFixed, 124);
+                    ImGui.TableSetupColumn("Details", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("Mov", ImGuiTableColumnFlags.WidthFixed, 32);
+                    ImGui.TableSetupColumn("IE", ImGuiTableColumnFlags.WidthFixed, 32);
+                    ImGui.TableSetupColumn("IS", ImGuiTableColumnFlags.WidthFixed, 32);
+                    ImGui.TableSetupColumn("Pause", ImGuiTableColumnFlags.WidthFixed, 44);
+                    ImGui.TableHeadersRow();
+
+                    if (orders.Any())
                     {
-                        if (ImGui.Selectable(order.Name))
+                        foreach (EntityCommand order in orders)
                         {
-                        }
+                            ImGui.TableNextRow();
+                            ImGui.TableNextColumn();
+                            if (ImGui.Selectable(order.Name, false, ImGuiSelectableFlags.SpanAllColumns))
+                            {
+                            }
 
-                        ImGui.NextColumn();
-                        ImGui.Text(order.Details);
-                        ImGui.NextColumn();
-                        if(order.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.Movement))
-                        {
-                            if(order.IsBlocking)
-                                ImGui.TextColored(new System.Numerics.Vector4(1,0,0,1), "--");
-                            else
-                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "|");
-                        }
-                        ImGui.NextColumn();
-                        if (order.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.InteractWithExternalEntity))
-                        {
-                            if (order.IsBlocking)
-                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "--");
-                            else
-                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "|");
-                        }
-                        ImGui.NextColumn();
-                        if (order.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.IneteractWithSelf))
-                        {
-                            if (order.IsBlocking)
-                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "--");
-                            else
-                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "|");
-                        }
-                        ImGui.NextColumn();
-                        if (ImGui.Checkbox("##"+order.CmdID, ref order.PauseOnAction))
-                        {
-                        }
+                            ImGui.TableNextColumn();
+                            ImGui.Text(order.Details);
 
-                        ImGui.NextColumn();
+                            ImGui.TableNextColumn();
+                            if (order.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.Movement))
+                            {
+                                if (order.IsBlocking)
+                                    ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "--");
+                                else
+                                    ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "|");
+                            }
 
+                            ImGui.TableNextColumn();
+                            if (order.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.InteractWithExternalEntity))
+                            {
+                                if (order.IsBlocking)
+                                    ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "--");
+                                else
+                                    ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "|");
+                            }
+
+                            ImGui.TableNextColumn();
+                            if (order.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.IneteractWithSelf))
+                            {
+                                if (order.IsBlocking)
+                                    ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "--");
+                                else
+                                    ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "|");
+                            }
+
+                            ImGui.TableNextColumn();
+                            if (ImGui.Checkbox("##" + order.CmdID, ref order.PauseOnAction))
+                            {
+                            }
+                        }
                     }
-                }
-                else
-                {
-                    ImGui.Text("No Orders");
-
-                    ImGui.NextColumn();
-                    if (ImGui.Selectable("* Double Click to add some now *"))
+                    else
                     {
-                    }
-                    ImGui.NextColumn();
-                }
+                        ImGui.TableNextRow();
+                        ImGui.TableNextColumn();
+                        ImGui.Text("No Orders");
 
-                ImGui.Columns(1);
-                Window.End();
+                        ImGui.TableNextColumn();
+                        if (ImGui.Selectable("* Double Click to add some now *"))
+                        {
+                        }
+                    }
+
+                    ImGui.EndTable();
+                }
             }
-
+            Window.End();
         }
     }
 }
