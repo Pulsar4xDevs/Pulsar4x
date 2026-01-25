@@ -91,8 +91,8 @@ namespace Pulsar4X.Client
                         break;
                 }
                 ImGui.EndChild();
-                Window.End();
             }
+            Window.End();
         }
 
         private void RenderTabOptions()
