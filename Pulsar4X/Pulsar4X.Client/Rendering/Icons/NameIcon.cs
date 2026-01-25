@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using ImGuiNET;
 using Pulsar4X.Engine;
 using SDL3;
 using System.Numerics;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.JumpPoints;
+using Pulsar4X.Messaging;
 using Pulsar4X.Names;
 using Pulsar4X.Movement;
 using Pulsar4X.Client.Interface;
@@ -55,6 +57,17 @@ namespace Pulsar4X.Client
             {
                 TextDisplayColor = Styles.BadColor;
             }
+
+            // Subscribe to name changes
+            Func<Message, bool> filterById = msg => msg.EntityId == entityState.Entity.Id;
+            MessagePublisher.Instance.Subscribe(MessageTypes.EntityRenamed, OnEntityRenamed, filterById);
+        }
+
+        private Task OnEntityRenamed(Message message)
+        {
+            NameString = _nameDB.GetName(_state.Faction?.Id ?? Game.NeutralFactionId);
+            EntityState.Name = NameString;
+            return Task.CompletedTask;
         }
 
 
