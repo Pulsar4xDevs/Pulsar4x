@@ -219,12 +219,13 @@ namespace Pulsar4X.Client
                 //Menu is rename menu
                 else if (T == typeof(RenameWindow))
                 {
-                    // RenameWindow.GetInstance(_entityState).ToggleActive();
-                    // _state.ActiveWindow = RenameWindow.GetInstance(_entityState);
-                    // if (managesUIPopUps)
-                    // {
-                    //     ImGui.CloseCurrentPopup();
-                    // }
+                    var renameWindow = RenameWindow.GetInstance();
+                    renameWindow.SetEntity(_entityState.Entity);
+                    _state.ActiveWindow = renameWindow;
+                    if (managesUIPopUps)
+                    {
+                        ImGui.CloseCurrentPopup();
+                    }
 
                 }
                 //Menu is cargo menu
