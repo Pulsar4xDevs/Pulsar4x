@@ -112,8 +112,6 @@ namespace Pulsar4X.Industry
 
             if (instancesDB.TryGetComponentsByAttribute<MineResourcesAtbDB>(out var instances))
             {
-                miningDB.NumberOfMines = instances.Count;
-
                 foreach (var instance in instances)
                 {
                     float healthPercent = instance.HealthPercent;

@@ -11,11 +11,23 @@ namespace Pulsar4X.Industry
     {
         public static Dictionary<int, long> CalculateActualMiningRates(Entity colonyEntity)
         {
-            var mineRates = colonyEntity.GetDataBlob<MiningDB>().BaseMiningRate.ToDictionary(k => k.Key, v => v.Value);
-            var planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>().Minerals;
-            float miningBonuses = colonyEntity.HasDataBlob<ColonyBonusesDB>() ? colonyEntity.GetDataBlob<ColonyBonusesDB>().GetBonus(AbilityType.Mine) : 1.0f;
+            if (!colonyEntity.TryGetDataBlob<MiningDB>(out var miningDB))
+                throw new Exception("Entity does not have MiningDB");
+            if (!colonyEntity.TryGetDataBlob<ColonyInfoDB>(out var colonyInfoDB))
+                throw new Exception("Entity does not have ColonyInfoDB");
+            if (!colonyInfoDB.PlanetEntity.TryGetDataBlob<MineralsDB>(out var mineralsDB))
+                throw new Exception("Planet entity does not have MineralsDB");
 
-            foreach (var key in mineRates.Keys.ToArray())
+            float miningBonuses = 1.0f;
+            if (colonyEntity.TryGetDataBlob<ColonyBonusesDB>(out var colonyBonusesDB))
+            {
+                miningBonuses = colonyBonusesDB.GetBonus(AbilityType.Mine);
+            }
+
+            var mineRates = miningDB.BaseMiningRate.ToDictionary(k => k.Key, v => v.Value);
+            var planetMinerals = mineralsDB.Minerals;
+
+            foreach (var (key, value) in mineRates)
             {
                 long baseRateFromMiningInstallations = mineRates[key];
                 double accessibility = planetMinerals.ContainsKey(key) ? planetMinerals[key].Accessibility : 0;

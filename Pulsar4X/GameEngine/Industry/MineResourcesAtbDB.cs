@@ -37,8 +37,14 @@ namespace Pulsar4X.Industry
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            if (!parentEntity.HasDataBlob<MiningDB>())
-                parentEntity.SetDataBlob(new MiningDB());
+            if (!parentEntity.TryGetDataBlob<MiningDB>(out var miningDB))
+            {
+                parentEntity.SetDataBlob(new MiningDB() { NumberOfMines = 1 });
+            }
+            else
+            {
+                miningDB.NumberOfMines++;
+            }
             MineResourcesProcessor.CalcMaxRate(parentEntity);
         }
 
