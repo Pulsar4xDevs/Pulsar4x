@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
@@ -239,81 +240,80 @@ namespace Pulsar4X.Client
 
         internal override void Display()
         {
-            if (IsActive)
+            if (!IsActive) return;
+
+            if (Window.Begin("Cargo", ref IsActive, _flags))
             {
-                if (ImGui.Begin("Cargo", ref IsActive, _flags))
+                if (_hasCargoAbilityLeft && CargoListLeft != null)
                 {
-                    if (_hasCargoAbilityLeft && CargoListLeft != null)
+                    CargoListLeft.Display();
+                    ImGui.SameLine();
+                    ImGui.BeginChild("xfer", new Vector2(100, 200));
+                    ImGui.Text("Transfer");
+
+                    if (SelectedCargoPanel != null && SelectedCargoPanel.selectedCargo != null)
                     {
-                        CargoListLeft.Display();
-                        ImGui.SameLine();
-                        ImGui.BeginChild("xfer", new Vector2(100, 200));
-                        ImGui.Text("Transfer");
-
-                        if (SelectedCargoPanel != null && SelectedCargoPanel.selectedCargo != null)
+                        if (UnselectedCargoPanel != null && UnselectedCargoPanel.CanStore(SelectedCargoPanel.selectedCargo.CargoTypeID))
                         {
-                            if (UnselectedCargoPanel != null && UnselectedCargoPanel.CanStore(SelectedCargoPanel.selectedCargo.CargoTypeID))
+                            if (ImGui.Button("x100"))
+                            { MoveItems(100); }
+                            ImGui.SameLine();
+                            if (ImGui.Button("x10"))
+                            { MoveItems(10); }
+                            ImGui.SameLine();
+                            if (ImGui.Button("x1"))
+                            { MoveItems(1); }
+                            if (ImGui.Button("Action Order"))
+                            { ActionXferOrder(); }
+                        }
+
+                        if (UnselectedCargoPanel != null && UnselectedCargoPanel.CanInstall(SelectedCargoPanel.selectedCargo))
+                        {
+                            if (ImGui.Button("Install"))
                             {
-                                if (ImGui.Button("x100"))
-                                { MoveItems(100); }
-                                ImGui.SameLine();
-                                if (ImGui.Button("x10"))
-                                { MoveItems(10); }
-                                ImGui.SameLine();
-                                if (ImGui.Button("x1"))
-                                { MoveItems(1); }
-                                if (ImGui.Button("Action Order"))
-                                { ActionXferOrder(); }
+                                ComponentInstance specificComponent = new((ComponentDesign)SelectedCargoPanel.selectedCargo);
+                                CargoInstallOrder.CreateCommand(
+                                    _uiState.Faction.Id,
+                                    _selectedEntityLeft.Entity,
+                                    _selectedEntityRight.Entity,
+                                    specificComponent
+                                    );
                             }
-
-                            if (UnselectedCargoPanel != null && UnselectedCargoPanel.CanInstall(SelectedCargoPanel.selectedCargo))
-                            {
-                                if (ImGui.Button("Install"))
-                                {
-                                    ComponentInstance specificComponent = new((ComponentDesign)SelectedCargoPanel.selectedCargo);
-                                    CargoInstallOrder.CreateCommand(
-                                        _uiState.Faction.Id,
-                                        _selectedEntityLeft.Entity,
-                                        _selectedEntityRight.Entity,
-                                        specificComponent
-                                        );
-                                }
-                            }
-                            //else
-                                //can't transfer due to target unable to store this type
                         }
-
-                        ImGui.EndChild();
-                        ImGui.SameLine();
-                        if (_hasCargoAbilityRight && CargoListRight != null)
-                        {
-
-                            CargoListRight.Display();
-                            ImGui.Text("DeltaV Difference: " + Stringify.Velocity(_dvDifference_ms));
-                            ImGui.Text("Max DeltaV Difference: " + Stringify.Velocity(_dvMaxRangeDiff_ms));
-                            ImGui.Text("Transfer Rate Kg/s: " + _transferRate);
-
-                        }
-
-                        string label = "Click to Select Entity For Transfer";
-                        if (_isSelectingRight)
-                            label = "Select Entity For Transfer";
-                        else if (ImGui.SmallButton(label))
-                        {
-                            _isSelectingRight = !_isSelectingRight;
-                            if (_isSelectingRight)
-                                ClickedEntityIsPrimary = false;
-                            else
-                                ClickedEntityIsPrimary = true;
-
-                        }
-                        if(!_isSelectingRight)
-                            ClickedEntityIsPrimary = true;
+                        //else
+                            //can't transfer due to target unable to store this type
                     }
 
+                    ImGui.EndChild();
+                    ImGui.SameLine();
+                    if (_hasCargoAbilityRight && CargoListRight != null)
+                    {
+
+                        CargoListRight.Display();
+                        ImGui.Text("DeltaV Difference: " + Stringify.Velocity(_dvDifference_ms));
+                        ImGui.Text("Max DeltaV Difference: " + Stringify.Velocity(_dvMaxRangeDiff_ms));
+                        ImGui.Text("Transfer Rate Kg/s: " + _transferRate);
+
+                    }
+
+                    string label = "Click to Select Entity For Transfer";
+                    if (_isSelectingRight)
+                        label = "Select Entity For Transfer";
+                    else if (ImGui.SmallButton(label))
+                    {
+                        _isSelectingRight = !_isSelectingRight;
+                        if (_isSelectingRight)
+                            ClickedEntityIsPrimary = false;
+                        else
+                            ClickedEntityIsPrimary = true;
+
+                    }
+                    if(!_isSelectingRight)
+                        ClickedEntityIsPrimary = true;
                 }
-                ImGui.End();
+
             }
+            Window.End();
         }
     }
 

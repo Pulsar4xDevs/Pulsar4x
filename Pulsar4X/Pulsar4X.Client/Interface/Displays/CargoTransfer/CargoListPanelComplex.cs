@@ -222,7 +222,7 @@ public class CargoListPanelComplex
             var freeVolume = _volStorageDB.GetFreeVolume(typeStoreKVP.Key);
             var maxVolume = typeStore.MaxVolume;
             var storedVolume = maxVolume - freeVolume;
-            ImGui.PushID(_entityState.Entity.Id.ToString()); //this helps the ui diferentiate between the left and right side
+            //ImGui.PushID(_entityState.Entity.Id.ToString()); //this helps the ui diferentiate between the left and right side
             //and the three ### below forces it to ignore everything before the ### wrt being an ID and the stuff after the ### is an id.
             //this stops the header closing whenever we change the headertext (ie in this case, change the volume)
             string headerText = stype.Name + " " + Stringify.VolumeLtr(freeVolume) + " / " + Stringify.VolumeLtr(maxVolume) + " free" + "###" + stype.UniqueID;
