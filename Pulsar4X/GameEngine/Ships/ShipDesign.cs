@@ -104,8 +104,25 @@ namespace Pulsar4X.Ships
             Name = name;
             Components = components;
             Armor = armor;
+            Recalculate(faction);
+        }
+
+        /// <summary>
+        /// Recalculates all derived properties (costs, mass, crew, etc.) from the current Components and Armor.
+        /// </summary>
+        public void Recalculate(FactionInfoDB faction)
+        {
             MassPerUnit = 0;
-            foreach (var component in components)
+            CrewReq = 0;
+            CreditCost = 0;
+            VolumePerUnit = 0;
+            ResourceCosts.Clear();
+            MineralCosts.Clear();
+            MaterialCosts.Clear();
+            ComponentCosts.Clear();
+            ShipInstanceCost.Clear();
+
+            foreach (var component in Components)
             {
                 MassPerUnit += component.design.MassPerUnit * component.count;
                 CrewReq += component.design.CrewReq;
@@ -121,7 +138,7 @@ namespace Pulsar4X.Ships
                 }
 
             }
-            DamageProfileDB = new EntityDamageProfileDB(components, armor);
+            DamageProfileDB = new EntityDamageProfileDB(Components, Armor);
             var armorMass = GetArmorMass(DamageProfileDB, faction.Data.CargoGoods);
             MassPerUnit += (long)Math.Round(armorMass);
             MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
@@ -131,11 +148,12 @@ namespace Pulsar4X.Ships
         }
 
         /// <summary>
-        /// this just stores the design in the factionInfo
+        /// Recalculates derived properties and stores the design in the factionInfo.
         /// </summary>
         /// <param name="faction"></param>
         public void Initialise(FactionInfoDB faction)
         {
+            Recalculate(faction);
             faction.ShipDesigns[UniqueID] = this;
             faction.IndustryDesigns[UniqueID] = this;
         }
