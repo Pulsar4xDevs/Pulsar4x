@@ -9,6 +9,7 @@ using Pulsar4X.Interfaces;
 using Pulsar4X.Components;
 using Pulsar4X.Factions;
 using Pulsar4X.Storage;
+using static Pulsar4X.Industry.IndustryAbilityDB;
 
 namespace Pulsar4X.Client
 {
@@ -232,11 +233,11 @@ namespace Pulsar4X.Client
                                 ImGui.TableSetupColumn("Actions", ImGuiTableColumnFlags.None, 0.3f);
                                 ImGui.TableHeadersRow();
                                 var progsize = new Vector2(128, ImGui.GetTextLineHeight());
-                                for (int ji = 0; ji < jobs.Count; ji++)
+                                foreach (var job in jobs)
                                 {
                                     var cpos = ImGui.GetCursorPos();
-                                    var batchJob = jobs[ji];
-                                    string jobname = jobs[ji].Name;
+                                    var batchJob = job;
+                                    string jobname = job.Name;
 
                                     //bool selected = _selectedExistingIndex ==  ji && id == _selectedProdLine;
                                     float percent = (1 - (float)batchJob.ProductionPointsLeft / batchJob.ProductionPointsCost) * 100;
@@ -276,7 +277,7 @@ namespace Pulsar4X.Client
                                         ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, 0f);
                                         ImGui.PushStyleColor(ImGuiCol.PopupBg, new Vector4(0.1f, 0.1f, 0.1f, 1f));
                                         ImGui.BeginTooltip();
-                                        if(ImGui.BeginTable(jobs[ji].ItemGuid.ToString(), 2, ImGuiTableFlags.Borders))
+                                        if(ImGui.BeginTable(job.ItemGuid.ToString(), 2, ImGuiTableFlags.Borders))
                                         {
                                             ImGui.TableSetupColumn("Resource Required");
                                             ImGui.TableSetupColumn("Quantity Needed");
@@ -286,7 +287,7 @@ namespace Pulsar4X.Client
                                             ImGui.TableNextColumn();
                                             ImGui.Text(batchJob.ProductionPointsLeft.ToString());
 
-                                            foreach(var (rId, amountRemaining) in jobs[ji].ResourcesRequiredRemaining)
+                                            foreach(var (rId, amountRemaining) in job.ResourcesRequiredRemaining)
                                             {
                                                 ICargoable? cargoItem = _factionInfoDB.Data.CargoGoods.GetAny(rId);
                                                 if (cargoItem == null)
@@ -304,7 +305,7 @@ namespace Pulsar4X.Client
                                         ImGui.PopStyleVar(2);
                                     }
                                     ImGui.TableNextColumn();
-                                    ActionButtons(id, line.Jobs[ji].JobID, ji, line.Jobs.Count, state);
+                                    ActionButtons(id, line, job.JobID, state);
                                     ImGui.TableNextRow();
                                 }
                                 ImGui.EndTable();
@@ -540,11 +541,11 @@ namespace Pulsar4X.Client
             }
         }
 
-        private void ActionButtons(string productionLineID, string jobID, int index, int count, GlobalUIState state)
+        private void ActionButtons(string productionLineID, ProductionLine line, string jobID, GlobalUIState state)
         {
             var invisButtonSize = new Vector2(15, 15);
             ImGui.PushID(jobID.ToString());
-            if(index > 0)
+            if(line.Jobs.IndexOf(line.Jobs.First(j => j.JobID == jobID)) > 0)
             {
                 if (ImGui.SmallButton("^") && Entity != null)
                 {
@@ -560,7 +561,7 @@ namespace Pulsar4X.Client
             }
             ImGui.SameLine();
 
-            if(index < count - 1)
+            if(line.Jobs.IndexOf(line.Jobs.First(j => j.JobID == jobID)) < line.Jobs.Count - 1)
             {
                 if (ImGui.SmallButton("v") && Entity != null)
                 {
