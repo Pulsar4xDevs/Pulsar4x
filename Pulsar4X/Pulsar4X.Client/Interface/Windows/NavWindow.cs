@@ -204,7 +204,7 @@ namespace Pulsar4X.Client
         void ManuverTree(ManuverSequence mseq)
         {
 
-
+            ImGui.PushID(mseq.GetHashCode());
             if (ImGui.Selectable(mseq.SequenceName))
             {
                 _navMode = NavMode.None;
@@ -227,6 +227,7 @@ namespace Pulsar4X.Client
                 }
             }
             ImGui.Unindent();
+            ImGui.PopID();
             ImGui.Indent(indent);
             foreach (var seq in mseq.ManuverSequences)
             {
