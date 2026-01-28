@@ -154,6 +154,7 @@ namespace Pulsar4X.Client
                 {
                     _movementAction = MovementAction.Follow;
                 }
+                ImGui.TreePop();
             }
 
 
