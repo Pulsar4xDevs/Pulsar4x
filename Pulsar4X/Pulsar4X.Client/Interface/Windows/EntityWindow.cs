@@ -17,6 +17,9 @@ using Pulsar4X.Storage;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 using Pulsar4X.Client.Interface;
+using Pulsar4X.Components;
+using Pulsar4X.Damage;
+using Pulsar4X.People;
 
 namespace Pulsar4X.Client
 {
@@ -30,7 +33,7 @@ namespace Pulsar4X.Client
 
         // Animation constants
         private const float WindowWidth = 624f;
-        private const float WindowHeight = 364f;
+        private const float WindowHeight = 420f;
         private const float AnimationDuration = 0.2f; // seconds
         private const float BottomMargin = 4f;
         private const float RightMargin = 4f;
@@ -482,35 +485,223 @@ namespace Pulsar4X.Client
                 ImGui.PopStyleColor();
         }
 
+        private Vector4 GetHealthColor(float value)
+        {
+            if (value >= 0.75f) return Styles.GoodColor;
+            if (value >= 0.50f) return Styles.OkColor;
+            if (value >= 0.25f) return Styles.MediocreColor;
+            return Styles.BadColor;
+        }
+
+        private void DrawRadialIndicator(
+            ImDrawListPtr drawList, Vector2 center, float radius, float ringThickness,
+            float value, string label, string centerText, bool isPlaceholder)
+        {
+            var dimColor = new Vector4(
+                _accentColor.X * 0.3f, _accentColor.Y * 0.3f, _accentColor.Z * 0.3f, 0.4f);
+            var healthColor = isPlaceholder ? Styles.DescriptiveColor : GetHealthColor(value);
+            var textColor = isPlaceholder ? Styles.DescriptiveColor : healthColor;
+
+            // Background ring (full circle, dim)
+            drawList.AddCircle(center, radius, ImGui.ColorConvertFloat4ToU32(dimColor), 32, ringThickness);
+
+            // Foreground arc (starts at 12 o'clock, sweeps clockwise)
+            if (!isPlaceholder && value > 0f)
+            {
+                float startAngle = -MathF.PI / 2f;
+                float endAngle = startAngle + value * 2f * MathF.PI;
+                drawList.PathArcTo(center, radius, startAngle, endAngle, 32);
+                drawList.PathStroke(ImGui.ColorConvertFloat4ToU32(healthColor), ImDrawFlags.None, ringThickness);
+            }
+
+            // Center text (centered in the ring)
+            var centerTextSize = ImGui.CalcTextSize(centerText);
+            drawList.AddText(
+                new Vector2(center.X - centerTextSize.X * 0.5f, center.Y - centerTextSize.Y * 0.5f),
+                ImGui.ColorConvertFloat4ToU32(textColor),
+                centerText);
+
+            // Label below the ring
+            var labelSize = ImGui.CalcTextSize(label);
+            drawList.AddText(
+                new Vector2(center.X - labelSize.X * 0.5f, center.Y + radius + ringThickness * 0.5f + 2f),
+                ImGui.ColorConvertFloat4ToU32(Styles.DescriptiveColor),
+                label);
+
+            // Tooltip on hover
+            var min = new Vector2(center.X - radius - ringThickness, center.Y - radius - ringThickness);
+            var max = new Vector2(center.X + radius + ringThickness, center.Y + radius + ringThickness);
+            if (ImGui.IsMouseHoveringRect(min, max))
+            {
+                ImGui.BeginTooltip();
+                ImGui.TextUnformatted(label + ": " + (isPlaceholder ? "N/A" : (value * 100f).ToString("0") + "%"));
+                ImGui.EndTooltip();
+            }
+        }
+
+        private void DisplayShipStatusRow()
+        {
+            float radius = 22f;
+            float ringThickness = 4f;
+            float indicatorSpacing = 16f;
+            float indicatorWidth = radius * 2f + indicatorSpacing;
+            float availWidth = ImGui.GetContentRegionAvail().X;
+
+            var cursorPos = ImGui.GetCursorScreenPos();
+            float centerY = cursorPos.Y + radius + 4f;
+
+            var drawList = ImGui.GetWindowDrawList();
+
+            // Compute values
+            float htkValue = 0f;
+            string htkText = "-";
+            float compValue = 0f;
+            string compText = "-";
+            float armorValue = 0f;
+            string armorText = "N/A";
+            bool armorPlaceholder = true;
+
+            if (Entity.TryGetDataBlob<ComponentInstancesDB>(out var compDB))
+            {
+                float totalHealth = 0f;
+                int totalCount = 0;
+                int operationalCount = 0;
+
+                foreach (var (designId, instances) in compDB.ComponentsByDesign)
+                {
+                    foreach (var instance in instances)
+                    {
+                        totalHealth += instance.HealthPercent;
+                        totalCount++;
+                        if (instance.HealthPercent > instance.StopWorkingAtPercent && instance.IsEnabled)
+                            operationalCount++;
+                    }
+                }
+
+                if (totalCount > 0)
+                {
+                    htkValue = totalHealth / totalCount;
+                    htkText = (htkValue * 100f).ToString("0") + "%";
+                    compValue = (float)operationalCount / totalCount;
+                    compText = operationalCount + "/" + totalCount;
+                }
+            }
+
+            if (Entity.TryGetDataBlob<EntityDamageProfileDB>(out var damageDB))
+            {
+                if (damageDB.Armor.thickness > 0)
+                {
+                    armorPlaceholder = false;
+                    armorValue = 1.0f;
+                    armorText = damageDB.Armor.thickness.ToString("0.#") + "mm";
+                }
+            }
+
+            // Draw four indicators left-aligned
+            float x0 = cursorPos.X + radius;
+
+            DrawRadialIndicator(drawList, new Vector2(x0, centerY),
+                radius, ringThickness, htkValue, "HTK", htkText, false);
+            DrawRadialIndicator(drawList, new Vector2(x0 + indicatorWidth, centerY),
+                radius, ringThickness, compValue, "COMP", compText, false);
+            DrawRadialIndicator(drawList, new Vector2(x0 + indicatorWidth * 2f, centerY),
+                radius, ringThickness, armorValue, "ARMOR", armorText, armorPlaceholder);
+            DrawRadialIndicator(drawList, new Vector2(x0 + indicatorWidth * 3f, centerY),
+                radius, ringThickness, 0f, "SHIELD", "N/A", true);
+
+            // Current order (right-aligned on the same row)
+            string orderLabel = "CURRENT ORDER";
+            string orderName = "Idle";
+            string orderDetails = "";
+
+            if (Entity.Manager != null)
+            {
+                foreach (var db in Entity.Manager.GetAllDataBlobsForEntity(Entity.Id))
+                {
+                    if (db is not OrderableDB orderableDB) continue;
+                    if (orderableDB.ActionList.Count == 0) continue;
+
+                    var current = orderableDB.ActionList.ToArray()[0];
+                    orderName = current.Name;
+                    orderDetails = current.Details;
+                    break;
+                }
+            }
+
+            float rightEdge = cursorPos.X + availWidth;
+            var labelSize = ImGui.CalcTextSize(orderLabel);
+            var nameSize = ImGui.CalcTextSize(orderName);
+
+            // Right-align: find the widest text to anchor from
+            float maxTextWidth = Math.Max(labelSize.X, nameSize.X);
+            if (orderDetails.Length > 0)
+            {
+                var detailSize = ImGui.CalcTextSize(orderDetails);
+                maxTextWidth = Math.Max(maxTextWidth, detailSize.X);
+            }
+            float textX = rightEdge - maxTextWidth;
+
+            // Label
+            float textY = cursorPos.Y + 4f;
+            drawList.AddText(
+                new Vector2(textX, textY),
+                ImGui.ColorConvertFloat4ToU32(Styles.DescriptiveColor),
+                orderLabel);
+
+            // Order name
+            float nameY = textY + labelSize.Y + 2f;
+            var nameColor = orderDetails.Length > 0 ? _accentColor : Styles.NeutralColor;
+            drawList.AddText(
+                new Vector2(textX, nameY),
+                ImGui.ColorConvertFloat4ToU32(nameColor),
+                orderName);
+
+            // Order details (if any)
+            if (orderDetails.Length > 0)
+            {
+                float detailY = nameY + nameSize.Y + 1f;
+                drawList.AddText(
+                    new Vector2(textX, detailY),
+                    ImGui.ColorConvertFloat4ToU32(Styles.DescriptiveColor),
+                    orderDetails);
+            }
+
+            // Reserve vertical space for the indicator row
+            ImGui.InvisibleButton("##statusRow", new Vector2(availWidth, radius * 2f + 24f));
+        }
+
         // --- Type-Specific Content ---
 
         private void DisplayShipContent()
         {
             Entity.TryGetDataBlob<ShipInfoDB>(out var shipInfo);
-            Entity.TryGetDataBlob<MassVolumeDB>(out var mvDB);
 
-            // Ship overview stat grid
-            if (ImGui.BeginTable("##shipOverview", 4, ImGuiTableFlags.SizingStretchSame))
+            DisplayShipStatusRow();
+
+            // Crew row: captain + crew count
+            SectionLabel("CREW");
+
+            string captainName = "Unassigned";
+            if (shipInfo != null && shipInfo.CommanderID >= 0 && Entity.Manager != null
+                && Entity.Manager.TryGetEntityById(shipInfo.CommanderID, out var cmdEntity)
+                && cmdEntity.TryGetDataBlob<CommanderDB>(out var cmdDB))
             {
-                ImGui.TableNextColumn();
-                StatBlock("MASS", mvDB != null ? Stringify.Mass(mvDB.MassTotal) : "-");
-                if (mvDB != null && ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Dry: " + Stringify.Mass(mvDB.MassDry));
+                captainName = cmdDB.Name;
+            }
 
-                ImGui.TableNextColumn();
-                StatBlock("CREW", shipInfo != null ? shipInfo.Design.CrewReq.ToString() : "-");
+            ImGui.PushStyleColor(ImGuiCol.Text, _accentColor);
+            ImGui.TextUnformatted("  " + captainName);
+            ImGui.PopStyleColor();
 
-                ImGui.TableNextColumn();
-                StatBlock("HTK", shipInfo != null ? shipInfo.InternalHTK.ToString() : "-");
-
-                ImGui.TableNextColumn();
-                if (shipInfo != null)
-                    StatBlock("STATUS", shipInfo.IsMilitary ? "Military" : "Civilian",
-                        shipInfo.IsMilitary ? Styles.OkColor : Styles.NeutralColor);
-                else
-                    StatBlock("STATUS", "-");
-
-                ImGui.EndTable();
+            if (shipInfo != null)
+            {
+                ImGui.SameLine();
+                float crewTextWidth = ImGui.CalcTextSize(shipInfo.Design.CrewReq + " crew").X;
+                float rightEdge = ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X;
+                ImGui.SetCursorPosX(rightEdge - crewTextWidth);
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.TextUnformatted(shipInfo.Design.CrewReq + " crew");
+                ImGui.PopStyleColor();
             }
 
             // Propulsion stat grid
