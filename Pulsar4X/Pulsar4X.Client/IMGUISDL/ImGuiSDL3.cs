@@ -278,7 +278,6 @@ public class ImGuiSDL3 : IDisposable
             case SDL.Keycode.LCtrl: return ImGuiKey.LeftCtrl;
             case SDL.Keycode.LShift: return ImGuiKey.LeftShift;
             case SDL.Keycode.LAlt: return ImGuiKey.LeftAlt;
-            case SDL.Keycode.LGui: return ImGuiKey.LeftSuper;
             case SDL.Keycode.RCtrl: return ImGuiKey.RightCtrl;
             case SDL.Keycode.RShift: return ImGuiKey.RightShift;
             case SDL.Keycode.RAlt: return ImGuiKey.RightAlt;
