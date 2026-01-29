@@ -58,7 +58,7 @@ public class JPSurveyOrder : EntityCommand
 
     internal override bool IsFinished()
     {
-        return _isFinished = TargetSurveyDB.IsSurveyComplete(EntityCommanding.FactionOwnerID);
+        return _isFinished = TargetSurveyDB == null ? true : TargetSurveyDB.IsSurveyComplete(EntityCommanding.FactionOwnerID);
     }
 
     internal override void Execute(DateTime atDateTime)
