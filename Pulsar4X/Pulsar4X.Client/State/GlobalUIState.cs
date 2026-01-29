@@ -104,6 +104,13 @@ namespace Pulsar4X.Client
         internal Stack<IHotKeyHandler> HotKeys { get; private set; } = new ();
 
         internal View? SelectedMapView { get; set; } = null;
+
+        /// <summary>
+        /// True when the mouse is hovering over a map overlay (like name icons) that should
+        /// allow scroll wheel input to pass through to the map for zooming.
+        /// This is set during rendering and checked during the next frame's event handling.
+        /// </summary>
+        internal bool IsMouseOverMapOverlay = false;
         
         // Game Settings
         internal GameSettings GameSettings { get; set; }

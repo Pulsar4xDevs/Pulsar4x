@@ -172,7 +172,7 @@ namespace Pulsar4X.Client
             // The top of the hotkey stack should list for hotkeys
             _state.HotKeys.Peek().HandleEvent(e);
 
-            if (e.Type == (uint)SDL.EventType.MouseWheel & !PlatformBackend.WantsMouseCapture())
+            if (e.Type == (uint)SDL.EventType.MouseWheel && (!PlatformBackend.WantsMouseCapture() || _state.IsMouseOverMapOverlay))
             {
                 _state.OnFocusMoved();
                 if (e.Wheel.Y > 0)
@@ -189,6 +189,9 @@ namespace Pulsar4X.Client
         public override void Update()
         {
             base.Update();
+
+            // Reset map overlay hover state at the start of each frame
+            _state.IsMouseOverMapOverlay = false;
 
             //update and refresh state for GameDateTimechange
             if(_state.Game != null)
