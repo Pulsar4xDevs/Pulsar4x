@@ -188,6 +188,27 @@ namespace Pulsar4X.Client
             }
         }
 
+        /// <summary>
+        /// Clears all cached UI state to prepare for a new game.
+        /// This must be called before setting up a new game to prevent stale
+        /// references from the previous game
+        /// </summary>
+        internal void ClearGameState()
+        {
+            LoadedWindows.Clear();
+            LoadedNonUniqueWindows.Clear();
+            EntityWindows.Clear();
+            StarSystemStates.Clear();
+            LastClickedEntity = null;
+            PrimaryEntity = null;
+            Faction = null;
+            PlayerFaction = null;
+            SelectedStarSystemId = "";
+            _lastContextMenuOpenedEntityGuid = -1;
+            ContextMenu = null;
+            ActiveWindow = null;
+        }
+
         internal void SetFaction(Entity factionEntity, bool setAsPlayer = false)
         {
             if(Game == null) throw new NullReferenceException("Game is null");

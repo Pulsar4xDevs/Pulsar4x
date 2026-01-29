@@ -528,6 +528,7 @@ public class NewGameMenu : PulsarGuiWindow
         // Call the game post new game initialization
         game.PostNewGameInitialization();
 
+        _uiState.ClearGameState();
         _uiState.Game = game;
         _uiState.SetFaction(playerFaction, true);
         _uiState.SetActiveSystem(startingSystem.ManagerID);
@@ -746,6 +747,7 @@ public class NewGameMenu : PulsarGuiWindow
             // Initialize game
             game.PostNewGameInitialization();
 
+            _uiState.ClearGameState();
             _uiState.Game = game;
             _uiState.SetFaction(playerFaction, true);
             _uiState.SetActiveSystem(startingSystem.ManagerID);
