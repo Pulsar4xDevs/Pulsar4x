@@ -82,7 +82,12 @@ public class LogiShipProcessor : IHotloopProcessor
 }
 public static class LogisticsCycle
 {
-    public static List<Entity> ShippingEntites;
+    public static List<Entity> ShippingEntites = new List<Entity>();
+
+    public static void Clear()
+    {
+        ShippingEntites.Clear();
+    }
 
     public class CargoTask
     {

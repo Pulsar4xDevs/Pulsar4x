@@ -31,6 +31,11 @@ public class MessagePublisher
         }
     }
 
+    internal void Clear()
+    {
+        subscribers.Clear();
+    }
+
     public async Task Publish(Message message)
     {
         if (subscribers.TryGetValue(message.MessageType, out var handlers))
