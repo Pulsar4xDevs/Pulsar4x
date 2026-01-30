@@ -1,11 +1,13 @@
-using Pulsar4X.Orbital;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
-using Pulsar4X.Names;
-using Pulsar4X.Orbits;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using Pulsar4X.Names;
+using Pulsar4X.Orbital;
+using Pulsar4X.Orbits;
 
 namespace Pulsar4X.JumpPoints
 {
@@ -102,6 +104,14 @@ namespace Pulsar4X.JumpPoints
         {
             int numJumpPoints = GetNumJPForSystem(system);
 
+            // Cap JumpPoints to maxSystems - 1 to ensure we don't create more than can be linked
+            // In a 2-system game, each system should have at most 1 JP
+            int maxSystems = system.Game.Settings.MaxSystems;
+            if (maxSystems > 1 && numJumpPoints > maxSystems - 1)
+            {
+                numJumpPoints = maxSystems - 1;
+            }
+
             while (numJumpPoints > 0)
             {
                 numJumpPoints--;
@@ -128,6 +138,72 @@ namespace Pulsar4X.JumpPoints
 
             jp1TransitableDB.DestinationId = JP2.Id;
             jp2TransitableDB.DestinationId = JP1.Id;
+        }
+
+        /// <summary>
+        /// Links all unlinked JumpPoints across all systems in the game.
+        /// JumpPoints are paired between different systems to create inter-system connections.
+        /// </summary>
+        public static void LinkAllJumpPoints(Game game)
+        {
+            // Collect all unlinked JumpPoints grouped by system
+            var unlinkedBySystem = new Dictionary<string, List<Entity>>();
+
+            foreach (var system in game.Systems)
+            {
+                var jumpPoints = system.GetAllEntitiesWithDataBlob<JumpPointDB>()
+                    .Where(jp => jp.GetDataBlob<JumpPointDB>().DestinationId <= 0)
+                    .ToList();
+
+                if (jumpPoints.Count > 0)
+                {
+                    unlinkedBySystem[system.ID] = jumpPoints;
+                }
+            }
+
+            // If we have fewer than 2 systems with JumpPoints, nothing to link
+            if (unlinkedBySystem.Count < 2)
+                return;
+
+            var systemIds = unlinkedBySystem.Keys.ToList();
+            var random = new Random(game.Settings.MasterSeed);
+
+            // Keep linking JumpPoints until we can't make any more pairs
+            bool madeLink;
+            do
+            {
+                madeLink = false;
+
+                // Find two systems that both have unlinked JumpPoints
+                var systemsWithJPs = systemIds.Where(id => unlinkedBySystem[id].Count > 0).ToList();
+
+                if (systemsWithJPs.Count < 2)
+                    break;
+
+                // Pick two different systems randomly
+                int idx1 = random.Next(systemsWithJPs.Count);
+                string system1Id = systemsWithJPs[idx1];
+                systemsWithJPs.RemoveAt(idx1);
+
+                int idx2 = random.Next(systemsWithJPs.Count);
+                string system2Id = systemsWithJPs[idx2];
+
+                // Get one JumpPoint from each system
+                var jp1List = unlinkedBySystem[system1Id];
+                var jp2List = unlinkedBySystem[system2Id];
+
+                var jp1 = jp1List[random.Next(jp1List.Count)];
+                var jp2 = jp2List[random.Next(jp2List.Count)];
+
+                // Link them
+                LinkJumpPoints(jp1, jp2);
+
+                // Remove from unlinked lists
+                jp1List.Remove(jp1);
+                jp2List.Remove(jp2);
+
+                madeLink = true;
+            } while (madeLink);
         }
     }
 }

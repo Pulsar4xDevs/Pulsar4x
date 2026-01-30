@@ -221,7 +221,8 @@ namespace Pulsar4X.Client
             StarSystemStates = new SafeDictionary<string, SystemState>();
             foreach (var guid in factionInfo.KnownSystems)
             {
-                var system = Game.Systems.First(s => s.ID.Equals(guid));
+                var system = Game.Systems.FirstOrDefault(s => s.ID.Equals(guid));
+                if(system == null) continue;
                 StarSystemStates[guid] = new SystemState(system, factionEntity.Id);
             }
 
@@ -242,7 +243,13 @@ namespace Pulsar4X.Client
                 if(message.SystemId != null)
                 {
                     if(!StarSystemStates.ContainsKey(message.SystemId)){
-                        StarSystemStates[message.SystemId] = new SystemState(Game.Systems.First(s => s.ID.Equals(message.SystemId)), Faction.Id);
+                        var system = Game.Systems.FirstOrDefault(s => s.ID.Equals(message.SystemId));
+                        if(system == null)
+                        {
+                            Console.WriteLine($"ERROR: {message.SystemId} was revealed but not found in the game systems.");
+                            return;
+                        }
+                        StarSystemStates[message.SystemId] = new SystemState(system, Faction.Id);
                     }
                     OnStarSystemAdded?.Invoke(this, message.SystemId);
                 }

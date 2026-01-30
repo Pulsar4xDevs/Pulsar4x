@@ -13,6 +13,7 @@ using Pulsar4X.Events;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Energy;
+using Pulsar4X.JumpPoints;
 using Pulsar4X.Sensors;
 using Pulsar4X.Logistics;
 using Pulsar4X.Messaging;
@@ -249,6 +250,9 @@ namespace Pulsar4X.Engine
 
         public void PostNewGameInitialization()
         {
+            // Link all JumpPoints between systems
+            JPFactory.LinkAllJumpPoints(this);
+
             // There are few DB's that need to run the processor when the game begins
             foreach(var system in Systems)
             {
