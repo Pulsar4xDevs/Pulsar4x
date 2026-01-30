@@ -20,6 +20,7 @@ namespace Pulsar4X.Client
 
         EntityState OrderingEntityState;
         EntityState TargetEntity;
+        Entity _orbitTargetEntity;
         //Vector4 _apoapsisPoint;
         //Vector4 _periapsisPoint;
         float _maxDV;
@@ -117,9 +118,8 @@ namespace Pulsar4X.Client
 
                 }
             }
-            if(OrderingEntityState.Entity.HasDataBlob<NewtonThrustAbilityDB>())
+            if(OrderingEntityState.Entity.TryGetDataBlob<NewtonThrustAbilityDB>(out var newtDB))
             {
-                var newtDB = OrderingEntityState.Entity.GetDataBlob<NewtonThrustAbilityDB>();
                 _maxDV = (float)newtDB.DeltaV;
             }
 
@@ -158,13 +158,17 @@ namespace Pulsar4X.Client
         void EntitySelected()
         {
             OrderingEntityState = _uiState.LastClickedEntity;
-            PositionDB pdb = OrderingEntityState.Entity.GetDataBlob<PositionDB>();
+            if (!OrderingEntityState.Entity.TryGetDataBlob<PositionDB>(out var pdb))
+                return;
 
-            _massCurrentBody = pdb.Parent.GetDataBlob<MassVolumeDB>().MassTotal;
+            if (pdb.Parent != null && pdb.Parent.TryGetDataBlob<MassVolumeDB>(out var parentMassDB))
+                _massCurrentBody = parentMassDB.MassTotal;
 
             CurrentState = States.NeedsTarget;
 
-            _massOrderingEntity = OrderingEntityState.Entity.GetDataBlob<MassVolumeDB>().MassTotal;
+            if (OrderingEntityState.Entity.TryGetDataBlob<MassVolumeDB>(out var orderingMassDB))
+                _massOrderingEntity = orderingMassDB.MassTotal;
+
             _stdGravParamCurrentBody = UniversalConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;
             if (_moveWidget == null)
             {
@@ -179,26 +183,60 @@ namespace Pulsar4X.Client
         void TargetSelected()
         {
             TargetEntity = _uiState.LastClickedEntity;
-            _targetEntityOrbitDB = TargetEntity.Entity.GetDataBlob<OrbitDB>();
-            _targetIntercept  = WarpMath.GetInterceptPosition(OrderingEntityState.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
-            _uiState.Camera.PinToEntity(TargetEntity.Entity);
-            _targetRadiusAU = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().RadiusInAU;
-            _targetRadius_m = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().RadiusInM;
+
+            // Determine the orbit target - if the selected entity doesn't have an OrbitDB,
+            // try to use its parent (e.g., for colonies on a planet)
+            Entity orbitTarget = TargetEntity.Entity;
+            if (!orbitTarget.TryGetDataBlob<OrbitDB>(out _targetEntityOrbitDB))
+            {
+                if (orbitTarget.TryGetDataBlob<PositionDB>(out var posDB) && posDB.Parent != null)
+                {
+                    if (posDB.Parent.TryGetDataBlob<OrbitDB>(out _targetEntityOrbitDB))
+                    {
+                        orbitTarget = posDB.Parent;
+                    }
+                    else
+                    {
+                        // No valid orbit target found, fail gracefully
+                        TargetEntity = null;
+                        return;
+                    }
+                }
+                else
+                {
+                    // No position data, fail gracefully
+                    TargetEntity = null;
+                    return;
+                }
+            }
+
+            _orbitTargetEntity = orbitTarget;
+            _targetIntercept  = WarpMath.GetInterceptPosition(OrderingEntityState.Entity, _targetEntityOrbitDB, _departureDateTime);
+            _uiState.Camera.PinToEntity(_orbitTargetEntity);
+
+            if (!_orbitTargetEntity.TryGetDataBlob<MassVolumeDB>(out var massVolumeDB))
+            {
+                // No mass/volume data, fail gracefully
+                TargetEntity = null;
+                _orbitTargetEntity = null;
+                return;
+            }
+            _targetRadiusAU = massVolumeDB.RadiusInAU;
+            _targetRadius_m = massVolumeDB.RadiusInM;
             Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(_departureState.vel, _targetEntityOrbitDB, _targetIntercept.eti);
             _endpointInitalVelocity_m = insertionVector;
-            _apMax = TargetEntity.Entity.GetSOI_m();
-            var soiAU = TargetEntity.Entity.GetSOI_AU();
+            _apMax = _orbitTargetEntity.GetSOI_m();
+            var soiAU = _orbitTargetEntity.GetSOI_AU();
             float soiViewUnits = _uiState.Camera.ViewDistance(soiAU);
 
 
-            _massTargetBody = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().MassDry;
+            _massTargetBody = massVolumeDB.MassDry;
             _stdGravParamTargetBody_m = GeneralMath.StandardGravitationalParameter(_massOrderingEntity + _massTargetBody);
 
 
-            if (OrderingEntityState.Entity.HasDataBlob<NewtonThrustAbilityDB>())
+            if (OrderingEntityState.Entity.TryGetDataBlob<NewtonThrustAbilityDB>(out var newtonDB))
             {
-                var db = OrderingEntityState.Entity.GetDataBlob<NewtonThrustAbilityDB>();
-                _newtonUI = new NewtonionRadialOrderUI(db, _massOrderingEntity, (float)_peMin, (float)_apMax);
+                _newtonUI = new NewtonionRadialOrderUI(newtonDB, _massOrderingEntity, (float)_peMin, (float)_apMax);
                 _newtonUI.ProgradeAngle = _departureProgradeAngle;
             }
 
@@ -213,7 +251,7 @@ namespace Pulsar4X.Client
             }
 
 
-            _endpointInitalOrbitWidget = new OrbitOrderIcon(TargetEntity.Entity);
+            _endpointInitalOrbitWidget = new OrbitOrderIcon(_orbitTargetEntity);
             if (_endpointInitalOrbitWidget != null)
             {
                 _uiState.SelectedSysMapRender.UIWidgets[nameof(_endpointInitalOrbitWidget)+"initOrbit"] = _endpointInitalOrbitWidget;
@@ -225,7 +263,7 @@ namespace Pulsar4X.Client
             //_endpointInitalOrbitWidget.SetParametersFromKeplerElements(_endpointInitialOrbit, _endpointInsertionPoint_m);
             _endpointInitalOrbitWidget.Red = 100;
 
-            _endpointTargetOrbitWidget = new OrbitOrderIcon(TargetEntity.Entity);
+            _endpointTargetOrbitWidget = new OrbitOrderIcon(_orbitTargetEntity);
             if (_endpointTargetOrbitWidget != null)
             {
                 _uiState.SelectedSysMapRender.UIWidgets[nameof(_endpointTargetOrbitWidget)+"tgtOrbit"] = _endpointTargetOrbitWidget;
@@ -238,7 +276,7 @@ namespace Pulsar4X.Client
 
 
             OrderingEntityState.DebugOrbitOrder = _endpointTargetOrbitWidget;
-            _moveWidget.SetArrivalTarget(TargetEntity.Entity);
+            _moveWidget.SetArrivalTarget(_orbitTargetEntity);
             InitialPlacement();
             InsertionCalcs();
 
@@ -256,7 +294,7 @@ namespace Pulsar4X.Client
 
             WarpMoveCommand.CreateCommand(
                 OrderingEntityState.Entity,
-                TargetEntity.Entity,
+                _orbitTargetEntity,
                 _departureDateTime,
                 _endpointTargetOrbit,
                 _endpointInsertionPoint_m);
@@ -365,7 +403,7 @@ namespace Pulsar4X.Client
                                 else
                                 {
                                     var mouseWorldPos = _uiState.Camera.MouseWorldCoordinate_m();
-                                    _endpointInsertionPoint_m = mouseWorldPos - MoveMath.GetAbsolutePosition(TargetEntity.Entity); //relative to the target body
+                                    _endpointInsertionPoint_m = mouseWorldPos - MoveMath.GetAbsolutePosition(_orbitTargetEntity); //relative to the target body
 
                                     _moveWidget.SetArrivalPosition(_endpointInsertionPoint_m);
                                     _endpointTargetOrbit = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody_m, _endpointInsertionPoint_m, _endpointInitalVelocity_m, _departureDateTime);
@@ -544,7 +582,7 @@ namespace Pulsar4X.Client
 
         void InitialPlacement()
         {
-            var lowOrbitRadius = OrbitMath.LowOrbitRadius(TargetEntity.Entity);
+            var lowOrbitRadius = OrbitMath.LowOrbitRadius(_orbitTargetEntity);
             var lowOrbitPos = _perpVec * lowOrbitRadius;
             var lowOrbit = OrbitMath.KeplerCircularFromPosition(_stdGravParamTargetBody_m, lowOrbitPos, _targetIntercept.eti);
             var lowOrbitState = OrbitMath.GetStateVectors(lowOrbit, _targetIntercept.eti);
