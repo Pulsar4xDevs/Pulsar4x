@@ -88,6 +88,13 @@ namespace Pulsar4X.Client
         {
             _orderEntity = orderEntity.Entity;
             _orderEntityName = _orderEntity.GetName(_uiState.Faction.Id);
+
+            // Reset maneuver data when switching to a different entity
+            _manuverLines = new ManuverLinesComplete();
+            _navMode = NavMode.None;
+            _selectedSibling = -1;
+            _selectedUncle = -1;
+
             _newtonThrust = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>();
             _totalMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassTotal;
             _dryMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassDry;
