@@ -36,8 +36,6 @@ namespace Pulsar4X.Client
         /// <param name="entity"></param>
         public static void Begin(Entity entity)
         {
-
-            string ownerName = entity.GetDataBlob<NameDB>().OwnersName;
             if (Window.Begin("Entity Inspector", ref _isActive))
             {
                 if(entity.Id != _entityID || (entity.Manager != null && entity.Manager.GetAllDataBlobsForEntity(entity.Id).Count != _dataBlobs.Length))
