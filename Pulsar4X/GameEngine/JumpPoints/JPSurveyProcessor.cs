@@ -136,7 +136,12 @@ public class JPSurveyProcessor : IHotloopProcessor
 
     private void RevealOtherSide(JumpPointDB jumpPointDB, DateTime atDateTime, Entity discoveringEntity)
     {
-        if(discoveringEntity.Manager.TryGetGlobalEntityById(jumpPointDB.DestinationId, out var destinationEntity))
+        // Skip if no destination is linked (DestinationId defaults to 0 which could match an unrelated entity)
+        if(jumpPointDB.DestinationId <= 0)
+            return;
+
+        if(discoveringEntity.Manager.TryGetGlobalEntityById(jumpPointDB.DestinationId, out var destinationEntity)
+            && destinationEntity.HasDataBlob<JumpPointDB>())
         {
             var factionInfoDB = discoveringEntity.Manager.Game.Factions[discoveringEntity.FactionOwnerID].GetDataBlob<FactionInfoDB>();
 

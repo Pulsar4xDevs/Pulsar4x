@@ -104,6 +104,13 @@ namespace Pulsar4X.Client
         internal Stack<IHotKeyHandler> HotKeys { get; private set; } = new ();
 
         internal View? SelectedMapView { get; set; } = null;
+
+        /// <summary>
+        /// True when the mouse is hovering over a map overlay (like name icons) that should
+        /// allow scroll wheel input to pass through to the map for zooming.
+        /// This is set during rendering and checked during the next frame's event handling.
+        /// </summary>
+        internal bool IsMouseOverMapOverlay = false;
         
         // Game Settings
         internal GameSettings GameSettings { get; set; }
@@ -181,6 +188,27 @@ namespace Pulsar4X.Client
             }
         }
 
+        /// <summary>
+        /// Clears all cached UI state to prepare for a new game.
+        /// This must be called before setting up a new game to prevent stale
+        /// references from the previous game
+        /// </summary>
+        internal void ClearGameState()
+        {
+            LoadedWindows.Clear();
+            LoadedNonUniqueWindows.Clear();
+            EntityWindows.Clear();
+            StarSystemStates.Clear();
+            LastClickedEntity = null;
+            PrimaryEntity = null;
+            Faction = null;
+            PlayerFaction = null;
+            SelectedStarSystemId = "";
+            _lastContextMenuOpenedEntityGuid = -1;
+            ContextMenu = null;
+            ActiveWindow = null;
+        }
+
         internal void SetFaction(Entity factionEntity, bool setAsPlayer = false)
         {
             if(Game == null) throw new NullReferenceException("Game is null");
@@ -193,7 +221,8 @@ namespace Pulsar4X.Client
             StarSystemStates = new SafeDictionary<string, SystemState>();
             foreach (var guid in factionInfo.KnownSystems)
             {
-                var system = Game.Systems.First(s => s.ID.Equals(guid));
+                var system = Game.Systems.FirstOrDefault(s => s.ID.Equals(guid));
+                if(system == null) continue;
                 StarSystemStates[guid] = new SystemState(system, factionEntity.Id);
             }
 
@@ -214,7 +243,13 @@ namespace Pulsar4X.Client
                 if(message.SystemId != null)
                 {
                     if(!StarSystemStates.ContainsKey(message.SystemId)){
-                        StarSystemStates[message.SystemId] = new SystemState(Game.Systems.First(s => s.ID.Equals(message.SystemId)), Faction.Id);
+                        var system = Game.Systems.FirstOrDefault(s => s.ID.Equals(message.SystemId));
+                        if(system == null)
+                        {
+                            Console.WriteLine($"ERROR: {message.SystemId} was revealed but not found in the game systems.");
+                            return;
+                        }
+                        StarSystemStates[message.SystemId] = new SystemState(system, Faction.Id);
                     }
                     OnStarSystemAdded?.Invoke(this, message.SystemId);
                 }

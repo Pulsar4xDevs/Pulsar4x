@@ -191,6 +191,7 @@ namespace Pulsar4X.Galaxy
             SensorTools.PlanetEmmisionSig(sensorProfile, halleysBodyDB, halleysMVDB);
 
             JPSurveyFactory.GenerateJPSurveyPoints(sol);
+            JPFactory.GenerateJumpPoints(this, sol, sun.GetDataBlob<PositionDB>().Root);
 
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.ID);
             return sol;
@@ -303,8 +304,8 @@ namespace Pulsar4X.Galaxy
             var halleysComet = SystemBodyFactory.Create(game, sol, sun, new System.DateTime(1994, 2, 17), new SensorProfileDB(), "Data/basemod/bodies/halleyscomet.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, halleysComet);
 
-            // Clean up cached RNG:
             JPSurveyFactory.GenerateJPSurveyPoints(sol);
+            JPFactory.GenerateJumpPoints(this, sol, sun.GetDataBlob<PositionDB>().Root);
 
             // Go through all the created entities and set them to be neutral
             foreach(var entity in sol.GetAllEntites())
@@ -370,6 +371,11 @@ namespace Pulsar4X.Galaxy
                 JPSurveyFactory.GenerateJPSurveyPoints(system);
             }
 
+            if(rootStar != null)
+            {
+                JPFactory.GenerateJumpPoints(this, system, rootStar.GetDataBlob<PositionDB>().Root);
+            }
+
             // Go through all the created entities and set them to be neutral
             foreach(var entity in system.GetAllEntites())
             {
@@ -416,6 +422,11 @@ namespace Pulsar4X.Galaxy
             else
             {
                 JPSurveyFactory.GenerateJPSurveyPoints(system);
+            }
+
+            if(rootStar != null)
+            {
+                JPFactory.GenerateJumpPoints(galaxyGen.StarSystemFactory, system, rootStar.GetDataBlob<PositionDB>().Root);
             }
 
             // Go through all the created entities and set them to be neutral

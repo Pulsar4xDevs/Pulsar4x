@@ -154,10 +154,12 @@ namespace Pulsar4X.Client
             }
 
             var queueList = _constructionDB.BuildQueue.ToList();
+            int queueCount = queueList.Count;
+            int i = 0;
+            long pointsAccumulatedBefore = 0;
 
-            for (int i = 0; i < queueList.Count; i++)
+            foreach (var job in queueList)
             {
-                var job = queueList[i];
                 ImGui.PushID(i);
 
                 // Layout: arrows | content | remove button
@@ -173,7 +175,7 @@ namespace Pulsar4X.Client
                     ImGui.TableNextColumn();
 
                     bool canMoveUp = i > 0;
-                    bool canMoveDown = i < queueList.Count - 1;
+                    bool canMoveDown = i < queueCount - 1;
 
                     if (!canMoveUp) ImGui.BeginDisabled();
                     if (ImGui.ArrowButton("up", ImGuiDir.Up))
@@ -223,16 +225,7 @@ namespace Pulsar4X.Client
                     if (_constructionDB.PointsPerDay > 0)
                     {
                         long pointsRemaining = job.Design.IndustryPointCosts - job.PointsAccumulated;
-
-                        // Calculate points before this job
-                        long pointsBeforeThisJob = 0;
-                        for (int j = 0; j < i; j++)
-                        {
-                            var earlierJob = queueList[j];
-                            pointsBeforeThisJob += earlierJob.Design.IndustryPointCosts - earlierJob.PointsAccumulated;
-                        }
-
-                        double totalDays = (double)(pointsBeforeThisJob + pointsRemaining) / _constructionDB.PointsPerDay;
+                        double totalDays = (double)(pointsAccumulatedBefore + pointsRemaining) / _constructionDB.PointsPerDay;
 
                         ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                         ImGui.Text("Est:");
@@ -277,13 +270,16 @@ namespace Pulsar4X.Client
 
                 // Add separator between items
                 ImGui.Spacing();
-                if (i < queueList.Count - 1)
+                if (i < queueCount - 1)
                 {
                     ImGui.Separator();
                     ImGui.Spacing();
                 }
 
                 ImGui.PopID();
+
+                pointsAccumulatedBefore += job.Design.IndustryPointCosts - job.PointsAccumulated;
+                i++;
             }
         }
 

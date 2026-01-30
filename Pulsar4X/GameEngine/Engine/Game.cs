@@ -13,7 +13,10 @@ using Pulsar4X.Events;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Energy;
+using Pulsar4X.JumpPoints;
 using Pulsar4X.Sensors;
+using Pulsar4X.Logistics;
+using Pulsar4X.Messaging;
 [assembly: InternalsVisibleTo("Pulsar4X.Tests")]
 
 namespace Pulsar4X.Engine
@@ -115,8 +118,21 @@ namespace Pulsar4X.Engine
 
         public Game() { }
 
+        /// <summary>
+        /// Clears all static/singleton state to prepare for a new game session.
+        /// This must be called before creating a new game to prevent state leakage
+        /// from a previous game session.
+        /// </summary>
+        internal static void ClearGlobalState()
+        {
+            EventManager.Instance.Clear();
+            MessagePublisher.Instance.Clear();
+            LogisticsCycle.Clear();
+        }
+
         public Game(NewGameSettings settings, ModDataStore modDataStore)
         {
+            ClearGlobalState();
             ApplyModData(modDataStore);
             ApplySettings(settings);
 
@@ -200,6 +216,7 @@ namespace Pulsar4X.Engine
             };
             var loadedGame = JsonConvert.DeserializeObject<Game>(json, settings);
 
+            ClearGlobalState();
             loadedGame.TimePulse.Initialize(loadedGame);
             loadedGame.ProcessorManager = new ProcessorManager(loadedGame);
             loadedGame.OrderHandler = new StandAloneOrderHandler(loadedGame);
@@ -212,7 +229,6 @@ namespace Pulsar4X.Engine
             }
 
             // Hook up the event logs
-            EventManager.Instance.Clear();
             foreach(var (id, faction) in loadedGame.Factions)
             {
                 faction.GetDataBlob<FactionInfoDB>().EventLog.Subscribe();
@@ -234,6 +250,9 @@ namespace Pulsar4X.Engine
 
         public void PostNewGameInitialization()
         {
+            // Link all JumpPoints between systems
+            JPFactory.LinkAllJumpPoints(this);
+
             // There are few DB's that need to run the processor when the game begins
             foreach(var system in Systems)
             {

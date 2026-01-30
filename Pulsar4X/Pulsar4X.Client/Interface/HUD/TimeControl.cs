@@ -53,6 +53,9 @@ namespace Pulsar4X.Client
 
         internal override void Display()
         {
+            bool isPaused = !(_timeloop?.IsRunning ?? false);
+            var buttonTexture = isPaused ? _uiState.Img_Play() : _uiState.Img_Pause();
+
             ImGui.SetNextWindowSize(_windowSize, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowPos(_windowPosition, ImGuiCond.Appearing);
 
@@ -71,6 +74,7 @@ namespace Pulsar4X.Client
 
             // Time span slider
             ImGui.SameLine();
+            ImGui.BeginDisabled(!isPaused);
             if (ImGui.SliderInt("##spnSldr", ref _timeSpanValue, 1, 60, _timeSpanValue.ToString()))
                 AdjustTimeSpan();
 
@@ -79,8 +83,7 @@ namespace Pulsar4X.Client
             if (ImGui.Combo("##spnCmbo", ref _timeSpanType, _timespanTypeSelection, _timespanTypeSelection.Length))
                 AdjustTimeSpan();
 
-            bool isPaused = !(_timeloop?.IsRunning ?? false);
-            var buttonTexture = isPaused ? _uiState.Img_Play() : _uiState.Img_Pause();
+            ImGui.EndDisabled();
 
             ImGui.SameLine();
             if (ImGui.ImageButton("playpause", buttonTexture.ToTextureRef(), _iconSize))
@@ -109,6 +112,8 @@ namespace Pulsar4X.Client
                 ImGui.PushItemWidth(100);
                 ImGui.Indent();
                 ImGui.Text(currenttime.ToString(_uiState.GameSettings.GetTimeFormat()));
+
+                ImGui.BeginDisabled(!isPaused);
                 ImGui.SameLine();
                 if (ImGui.SliderFloat("##freqSldr", ref _freqTimeSpanValue, 0.1f, 1, _freqTimeSpanValue.ToString(), ImGuiSliderFlags.None))
                 {
@@ -119,6 +124,7 @@ namespace Pulsar4X.Client
                 ImGui.SameLine();
                 if (ImGui.Combo("##freqCmbo", ref _freqSpanType, _timespanTypeSelection, _timespanTypeSelection.Length))
                     AdjustFreqency();
+                ImGui.EndDisabled();
             }
             Window.End();
         }

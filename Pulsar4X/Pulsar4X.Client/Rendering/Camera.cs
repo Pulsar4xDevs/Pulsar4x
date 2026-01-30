@@ -63,6 +63,7 @@ namespace Pulsar4X.Client
         public SDL3Window _viewPort;
 
         double MAX_ZOOMLEVEL = 1.496e+11;
+        double MIN_ZOOMLEVEL = 1e-2; // Reasonable min zoom to prevent zooming out so far that coordinates overflow
 
         /// <summary>
         /// Construct a new Camera class within the Graphic Control Viewport.
@@ -289,7 +290,7 @@ namespace Pulsar4X.Client
         {
             var worldCoord = WorldCoordinate_m(mouseX, mouseY);
 
-            if (ZoomLevel > 0)
+            if (ZoomLevel > MIN_ZOOMLEVEL)
             {
                 ZoomLevel /= zoomSpeed;
                 double xOffset = mouseX - ViewPortCenter.X - (mouseX - ViewPortCenter.X) / zoomSpeed;

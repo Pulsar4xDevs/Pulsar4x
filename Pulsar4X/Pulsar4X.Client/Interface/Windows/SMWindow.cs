@@ -83,6 +83,7 @@ namespace Pulsar4X.Client
                 ImGui.SetColumnWidth(0, 200);
                 for (int i = 0; i < _systemEntities.Length; i++)
                 {
+                    ImGui.PushID(_systemEntities[i].Id);
                     bool isSelected = _selectedEntityIndex == i;
                     if (ImGui.Selectable(_systemEntityNames[i], isSelected))
                     {
@@ -101,6 +102,7 @@ namespace Pulsar4X.Client
                     ImGui.NextColumn();
                     ImGui.Text(_systemEntities[i].GetFactionName());
                     ImGui.NextColumn();
+                    ImGui.PopID();
                 }
 
                 /*

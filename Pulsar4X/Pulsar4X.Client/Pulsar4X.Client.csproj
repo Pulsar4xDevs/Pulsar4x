@@ -84,29 +84,17 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="SDL3-CS" Version="3.3.7" />
+    <PackageReference Include="SDL3-CS.Native" Version="3.3.7" />
+    <PackageReference Include="SDL3-CS.Native.Image" Version="3.3.2-preview.20260112-124645" />
+    <PackageReference Include="SDL3-CS.Native.TTF" Version="3.3.0-preview.20260112-124039" />
     <ProjectReference Include="..\external\ImGui.NET\src\ImGui.NET\ImGui.NET.csproj" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="7.0.0" />
-    <PackageReference Include="SDL3-CS" Version="3.2.8.2" />
-    <PackageReference Include="SDL3-CS.Native" Version="3.2.*" />
-    <PackageReference Include="SDL3-CS.Native.Image" Version="3.2.*" />
-    <PackageReference Include="SDL3-CS.Native.TTF" Version="3.2.*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
   </ItemGroup>
   <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
-    <Content Include="Libs\linux-x64\libSDL3.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>%(Filename)%(Extension)</Link>
-    </Content>
-    <Content Include="Libs\linux-x64\libSDL3_image.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>%(Filename)%(Extension)</Link>
-    </Content>
-    <Content Include="Libs\linux-x64\libSDL3_ttf.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>%(Filename)%(Extension)</Link>
-    </Content>
     <Content Include="Libs\linux-x64\cimgui.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>%(Filename)%(Extension)</Link>

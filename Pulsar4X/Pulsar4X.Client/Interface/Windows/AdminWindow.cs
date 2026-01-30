@@ -6,6 +6,7 @@ using System.Linq;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Factions;
 using Pulsar4X.Technology;
+using Pulsar4X.People.Orders;
 using GameEngine.People;
 using Pulsar4X.Extensions;
 using Pulsar4X.Engine;
@@ -214,13 +215,13 @@ namespace Pulsar4X.Client
                                         if (selectedId == -1)
                                         {
                                             // Unassign the administrator, the player selected "None"
-                                            var unassignOrder = UnassignScientistOrder.Create(entityState.Entity, post.CommanderID);
+                                            var unassignOrder = UnassignAdministratorOrder.Create(entityState.Entity, post.CommanderID, post.ComponentName);
                                             _uiState.Game.OrderHandler.HandleOrder(unassignOrder);
                                         }
                                         else if (selectedId > 0)
                                         {
                                             // Assign the new administrator
-                                            var assignmentOrder = AssignScientistOrder.Create(entityState.Entity, selectedId);
+                                            var assignmentOrder = AssignAdministratorOrder.Create(entityState.Entity, selectedId, post.ComponentName);
                                             _uiState.Game.OrderHandler.HandleOrder(assignmentOrder);
                                         }
                                         closeModal();

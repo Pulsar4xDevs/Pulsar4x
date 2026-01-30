@@ -48,6 +48,7 @@ public class LoadGame : PulsarGuiWindow
         string contents = File.ReadAllText(filenamepath);
         var loadedGame = Game.Load(contents);
 
+        _uiState.ClearGameState();
         _uiState.Game = loadedGame;
 
         // TODO: need to figure out a way to properly handle this

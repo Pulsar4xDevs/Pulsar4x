@@ -573,21 +573,13 @@ namespace Pulsar4X.Client
                             var name = jpBody.Name;
                             if(ImGui.Button(name + "###jpsurvey-button-" + name))
                             {
-                                if(jpSurveyableDB.OwningEntity != null && SelectedFleet.TryGetDataBlob<FleetDB>(out var fleetDB))
+                                if(jpSurveyableDB.OwningEntity != null)
                                 {
-                                    //var order = MoveFleetTowardsTargetOrder.CreateCommand(SelectedFleet, jpSurveyableDB.OwningEntity);
                                     var order = WarpFleetTowardsTargetOrder.CreateCommand(SelectedFleet, jpSurveyableDB.OwningEntity);
                                     _uiState.Game.OrderHandler.HandleOrder(order);
 
-
-                                    foreach (var child in fleetDB.Children)
-                                    {
-                                        if (child.HasJPSurveyAbililty())
-                                        {
-                                            var order2 = JPSurveyOrder.CreateCommand(_uiState.Faction.Id, child, jpSurveyableDB.OwningEntity);
-                                            _uiState.Game.OrderHandler.HandleOrder(order2);
-                                        }
-                                    }
+                                    var order2 = JPSurveyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, jpSurveyableDB.OwningEntity);
+                                    _uiState.Game.OrderHandler.HandleOrder(order2);
                                 }
                             }
                         }

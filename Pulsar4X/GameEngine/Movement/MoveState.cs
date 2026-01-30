@@ -138,7 +138,7 @@ public class PositionDB : TreeHierarchyDB, IPosition
 
         Vector3 currentAbsolute = this.AbsolutePosition;
         Vector3 newRelative;
-        if (newParent == null)
+        if (newParent == null || !newParent.HasDataBlob<MassVolumeDB>())
         {
             newRelative = currentAbsolute;
             SGP = double.PositiveInfinity;

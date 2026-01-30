@@ -21,7 +21,7 @@ namespace Pulsar4X.Client
     public class NameIcon : Icon, IComparable<NameIcon>, IRectangle
     {
 
-        protected ImGuiWindowFlags _flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBringToFrontOnFocus;
+        protected ImGuiWindowFlags _flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoScrollWithMouse;
         internal bool IsActive = true;
         GlobalUIState _state;
         public EntityState EntityState { get; private set; }
@@ -209,6 +209,8 @@ namespace Pulsar4X.Client
                 }
                 if(ImGui.IsItemHovered())
                 {
+                    // Mark as hovering map overlay so scroll passes through to map zoom
+                    icon._state.IsMouseOverMapOverlay = true;
                     DisplayTooltip(camera, icon);
                 }
                 DisplayContextMenu(camera, icon);
@@ -217,8 +219,22 @@ namespace Pulsar4X.Client
                 return;
             }
 
-            if(ImGui.BeginMenu(icon.NameString))
+            bool menuOpen = ImGui.BeginMenu(icon.NameString);
+
+            // Check if hovering the menu trigger (the label that opens the menu)
+            if(ImGui.IsItemHovered())
             {
+                icon._state.IsMouseOverMapOverlay = true;
+            }
+
+            if(menuOpen)
+            {
+                // Also check if hovering inside the open menu popup
+                if(ImGui.IsWindowHovered(ImGuiHoveredFlags.None))
+                {
+                    icon._state.IsMouseOverMapOverlay = true;
+                }
+
                 if(ImGui.MenuItem("View " + icon.NameString))
                 {
                     icon._state.EntityClicked(icon.EntityState.Entity.Id, icon._starSysGuid, MouseButtons.Primary);
@@ -283,6 +299,11 @@ namespace Pulsar4X.Client
 
         private static void EndNameIcon(NameIcon icon)
         {
+            // Check if mouse is hovering this name icon window
+            if (ImGui.IsWindowHovered(ImGuiHoveredFlags.None))
+            {
+                icon._state.IsMouseOverMapOverlay = true;
+            }
             Window.End();
         }
 
@@ -414,6 +435,11 @@ namespace Pulsar4X.Client
             ImGui.PopStyleColor();
             if(createNewWindow)
             {
+               // Check if mouse is hovering this name icon window
+               if (ImGui.IsWindowHovered(ImGuiHoveredFlags.None))
+               {
+                   _state.IsMouseOverMapOverlay = true;
+               }
                ImGui.PopStyleColor(); //have to pop the color change after pushing it.
                ImGui.PopStyleVar(3);
                ImGui.End();
