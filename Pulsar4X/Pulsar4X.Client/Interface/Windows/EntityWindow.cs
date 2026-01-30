@@ -1,5 +1,4 @@
 using System;
-
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
@@ -17,7 +16,6 @@ using Pulsar4X.Storage;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 using Pulsar4X.Client.Interface;
-using Pulsar4X.Components;
 using Pulsar4X.Damage;
 using Pulsar4X.People;
 
@@ -810,27 +808,30 @@ namespace Pulsar4X.Client
             {
                 SectionLabel("CARGO");
 
-                foreach (var (sid, storageType) in storage.TypeStores)
+                if (Entity.GetFactionOwner.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
                 {
-                    string name = Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoTypes[sid].Name;
-                    double freeVolume = storage.GetFreeVolume(sid);
-                    double usedVolume = storageType.MaxVolume - freeVolume;
-                    double percent = storageType.MaxVolume > 0 ? usedVolume / storageType.MaxVolume : 0;
+                    foreach (var (sid, storageType) in storage.TypeStores)
+                    {
+                        string name = factionInfoDB.Data.CargoTypes[sid].Name;
+                        double freeVolume = storage.GetFreeVolume(sid);
+                        double usedVolume = storageType.MaxVolume - freeVolume;
+                        double percent = storageType.MaxVolume > 0 ? usedVolume / storageType.MaxVolume : 0;
 
-                    string barLabel = name + "  " + (percent * 100).ToString("0") + "%  ·  " +
-                        Stringify.VolumeLtr(usedVolume) + " / " + Stringify.VolumeLtr(storageType.MaxVolume);
+                        string barLabel = name + "  " + (percent * 100).ToString("0") + "%  ·  " +
+                            Stringify.VolumeLtr(usedVolume) + " / " + Stringify.VolumeLtr(storageType.MaxVolume);
 
-                    Vector4 barColor = new Vector4(
-                        _accentColor.X * 0.4f, _accentColor.Y * 0.4f, _accentColor.Z * 0.4f, 0.8f);
-                    if (percent > 0.9)
-                        barColor = Styles.BadColor;
-                    else if (percent > 0.75)
-                        barColor = Styles.OkColor;
+                        Vector4 barColor = new Vector4(
+                            _accentColor.X * 0.4f, _accentColor.Y * 0.4f, _accentColor.Z * 0.4f, 0.8f);
+                        if (percent > 0.9)
+                            barColor = Styles.BadColor;
+                        else if (percent > 0.75)
+                            barColor = Styles.OkColor;
 
-                    ImGui.PushStyleColor(ImGuiCol.FrameBg, new Vector4(0.08f, 0.08f, 0.1f, 0.5f));
-                    ImGui.PushStyleColor(ImGuiCol.PlotHistogram, barColor);
-                    ImGui.ProgressBar((float)percent, new Vector2(ImGui.GetContentRegionAvail().X, 16), barLabel);
-                    ImGui.PopStyleColor(2);
+                        ImGui.PushStyleColor(ImGuiCol.FrameBg, new Vector4(0.08f, 0.08f, 0.1f, 0.5f));
+                        ImGui.PushStyleColor(ImGuiCol.PlotHistogram, barColor);
+                        ImGui.ProgressBar((float)percent, new Vector2(ImGui.GetContentRegionAvail().X, 16), barLabel);
+                        ImGui.PopStyleColor(2);
+                    }   
                 }
             }
         }
