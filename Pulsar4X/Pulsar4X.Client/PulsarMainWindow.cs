@@ -175,6 +175,7 @@ namespace Pulsar4X.Client
             if (e.Type == (uint)SDL.EventType.MouseWheel && (!PlatformBackend.WantsMouseCapture() || _state.IsMouseOverMapOverlay))
             {
                 _state.OnFocusMoved();
+                _state.LastZoomTime = DateTime.Now;
                 if (e.Wheel.Y > 0)
                 {
                     _state.Camera.ZoomIn((int)mouseX, (int)mouseY);

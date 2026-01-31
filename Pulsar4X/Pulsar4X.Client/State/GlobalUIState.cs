@@ -72,6 +72,8 @@ namespace Pulsar4X.Client
         internal GalacticMapRender? GalacticMap;
         internal SafeList<UpdateWindowState> UpdateableWindows = new ();
         internal DateTime LastGameUpdateTime = new ();
+        internal DateTime LastZoomTime = DateTime.MinValue;
+        internal bool IsRecentlyZoomed => (DateTime.Now - LastZoomTime).TotalMilliseconds < 150;
         internal StarSystem SelectedSystem => StarSystemStates[SelectedStarSystemId].StarSystem;
         internal SystemState SelectedSystemState => StarSystemStates[SelectedStarSystemId];
         internal DateTime SelectedSystemTime => StarSystemStates[SelectedStarSystemId].StarSystem.StarSysDateTime;

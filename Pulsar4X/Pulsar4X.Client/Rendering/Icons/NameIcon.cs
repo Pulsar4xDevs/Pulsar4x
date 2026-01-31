@@ -219,7 +219,17 @@ namespace Pulsar4X.Client
                 return;
             }
 
-            bool menuOpen = ImGui.BeginMenu(icon.NameString);
+            // Suppress menu opening during zoom to prevent accidental activation
+            // when icons move under the mouse cursor
+            bool menuOpen = false;
+            if(icon._state.IsRecentlyZoomed)
+            {
+                ImGui.TextUnformatted(icon.NameString);
+            }
+            else
+            {
+                menuOpen = ImGui.BeginMenu(icon.NameString);
+            }
 
             // Check if hovering the menu trigger (the label that opens the menu)
             if(ImGui.IsItemHovered())
