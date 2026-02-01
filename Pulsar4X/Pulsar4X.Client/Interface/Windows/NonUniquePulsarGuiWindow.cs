@@ -52,8 +52,6 @@ namespace Pulsar4X.Client
 
         internal virtual void EntitySelectedAsPrimary(EntityState entity) { }
 
-        internal virtual void MapClicked(Orbital.Vector3 worldPos_m, MouseButtons button) { }
-
         internal void Destroy()
         {
         }

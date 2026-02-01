@@ -61,12 +61,6 @@ namespace Pulsar4X.Client
             return thisItem;
         }
 
-
-        internal override void MapClicked(Orbital.Vector3 worldPos_m, MouseButtons button)
-        {
-
-        }
-
         internal override void Display()
         {
             if(!IsActive || _lookedAtEntity == null) return;

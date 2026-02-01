@@ -9,6 +9,7 @@ using Pulsar4X.Extensions;
 using Pulsar4X.Orbits;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using SDL3;
 
 namespace Pulsar4X.Client
 {
@@ -131,6 +132,14 @@ namespace Pulsar4X.Client
                 {DoNothing,         InsertionPntSelected,   DoNothing,      GoBackState, },     //needsApopapsis
                 //{DoNothing,         PeriapsisPntSelected,   DoNothing,      GoBackState, },   //needsPeriapsis
                 {DoNothing,         DoNothing,              ActionCmd,      GoBackState, }      //needsActoning
+            };
+
+            var mainWin = (PulsarMainWindow)_uiState.ViewPort;
+            mainWin.MouseButtonUpOccured += (object sender, SDL.Event e) => {
+                if (e.Button.Button == 1)
+                    fsm[(byte)CurrentState, (byte)Events.SelectedPosition].Invoke();
+                else if (e.Button.Button == 3)
+                    fsm[(byte)CurrentState, (byte)Events.AltClicked].Invoke();
             };
         }
 
@@ -592,17 +601,6 @@ namespace Pulsar4X.Client
             else if(button == MouseButtons.Primary && io.KeyShift)
             {
                 fsm[(byte)CurrentState, (byte)Events.SelectedEntity].Invoke();
-            }
-        }
-        internal override void MapClicked(Vector3 worldPos_m, MouseButtons button)
-        {
-            if (button == MouseButtons.Primary)
-            {
-                fsm[(byte)CurrentState, (byte)Events.SelectedPosition].Invoke();
-            }
-            if (button == MouseButtons.Alt)
-            {
-                fsm[(byte)CurrentState, (byte)Events.AltClicked].Invoke();
             }
         }
 

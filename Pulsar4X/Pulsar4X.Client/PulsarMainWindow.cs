@@ -34,10 +34,8 @@ namespace Pulsar4X.Client
         public static string ResourcesPath = "Resources";
         private readonly GlobalUIState _state;
 
-        float mouseDownX;
-        float mouseDownY;
-        int mouseDownAltX;
-        int mouseDownAltY;
+        float mouseX;
+        float mouseY;
 
         public PulsarMainWindow(string[] args)
             : base(AppName)
@@ -103,9 +101,20 @@ namespace Pulsar4X.Client
             }
         }
 
+        internal event EventHandler<SDL.Event> MouseMoveOccured;
+        internal event EventHandler<SDL.Event> MouseButtonDownOccured;
+        internal event EventHandler<SDL.Event> MouseButtonUpOccured;
+        internal event EventHandler<SDL.Event> MouseWheelOccured;
+
         public override void HandleEvent(SDL.Event e)
         {
-            (float mouseX, float mouseY, SDL.MouseButtonFlags mouseFlags) = GetMouseState();
+            (float mX, float mY, SDL.MouseButtonFlags mouseFlags) = GetMouseState();
+
+            if (mX != mouseX || mY != mouseY)
+                MouseMoveOccured?.Invoke(this, e);
+
+            mouseX = mX;
+            mouseY = mY;
 
             if(!_state.IsGameLoaded)
             {
@@ -120,70 +129,24 @@ namespace Pulsar4X.Client
                 return;
             }
 
-            if (e.Type == (uint)SDL.EventType.MouseButtonDown && e.Button.Button == 1 & !PlatformBackend.WantsMouseCapture())
+            if (!PlatformBackend.WantsMouseCapture())
             {
-                _state.OnFocusMoved();
-                _state.Camera.IsGrabbingMap = true;
-                _state.Camera.MouseFrameIncrementX = e.Motion.X;
-                _state.Camera.MouseFrameIncrementY = e.Motion.Y;
-                mouseDownX = mouseX;
-                mouseDownY = mouseY;
-            }
-
-            if (e.Type == (uint)SDL.EventType.MouseButtonUp && e.Button.Button == 1)
-            {
-                _state.Camera.IsGrabbingMap = false;
-
-                if (mouseDownX == mouseX && mouseDownY == mouseY) //click on map.
+                switch (e.Type)
                 {
-                    _state.MapClicked(_state.Camera.WorldCoordinate_m(mouseX, mouseY), MouseButtons.Primary); //sdl and imgu use different numbers for buttons.
+                    case (uint)SDL.EventType.MouseButtonDown:
+                        MouseButtonDownOccured?.Invoke(this, e);
+                        break;
+                    case (uint)SDL.EventType.MouseButtonUp:
+                        MouseButtonUpOccured?.Invoke(this, e);
+                        break;
+                    case (uint)SDL.EventType.MouseWheel:
+                        MouseWheelOccured?.Invoke(this, e);
+                        break;
                 }
-            }
-
-            if (e.Type == (uint)SDL.EventType.MouseButtonDown && e.Button.Button == 3 & !PlatformBackend.WantsMouseCapture())
-            {
-                _state.OnFocusMoved();
-                mouseDownAltX = (int)mouseX;
-                mouseDownAltY = (int)mouseY;
-            }
-
-            if (e.Type == (uint)SDL.EventType.MouseButtonUp && e.Button.Button == 3)
-            {
-                _state.OnFocusMoved();
-                _state.Camera.IsGrabbingMap = false;
-
-                if (mouseDownAltX == mouseX && mouseDownAltY == mouseY) //click on map.
-                {
-                    _state.MapClicked(_state.Camera.WorldCoordinate_m(mouseX, mouseY), MouseButtons.Alt);//sdl and imgu use different numbers for buttons.
-                }
-            }
-
-            if (_state.Camera.IsGrabbingMap && e.Type == (uint)SDL.EventType.MouseMotion)
-            {
-                int deltaX = (int)(_state.Camera.MouseFrameIncrementX - e.Motion.X);
-                int deltaY = (int)(_state.Camera.MouseFrameIncrementY - e.Motion.Y);
-                _state.Camera.WorldOffset_m(deltaX, deltaY);
-
-                _state.Camera.MouseFrameIncrementX = e.Motion.X;
-                _state.Camera.MouseFrameIncrementY = e.Motion.Y;
-
             }
 
             // The top of the hotkey stack should list for hotkeys
             _state.HotKeys.Peek().HandleEvent(e);
-
-            if (e.Type == (uint)SDL.EventType.MouseWheel & !PlatformBackend.WantsMouseCapture())
-            {
-                _state.OnFocusMoved();
-                if (e.Wheel.Y > 0)
-                {
-                    _state.Camera.ZoomIn((int)mouseX, (int)mouseY);
-                }
-                else if (e.Wheel.Y < 0)
-                {
-                    _state.Camera.ZoomOut((int)mouseX, (int)mouseY);
-                }
-            }
         }
 
         public override void Update()

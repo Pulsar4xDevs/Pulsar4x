@@ -26,9 +26,29 @@ namespace Pulsar4X.Client
 
         private DistanceRuler() {
             //_flags = ImGuiWindowFlags.NoCollapse;
+
+            var mainWin = (PulsarMainWindow)_uiState.ViewPort;
+            mainWin.MouseButtonUpOccured += (object sender, SDL.Event e) => {
+                if (_uiState.LoadedWindows.ContainsKey(typeof(DistanceRuler)) &&
+                        e.Button.Button == 1 &&
+                        _measuring)
+                {
+                    //if measuring register first click
+                    if (!_firstClickDone)
+                    {
+                        _zoomLevelAtFirstClick = _uiState.Camera.ZoomLevel;
+                        _firstClick = _uiState.Camera.WorldCoordinate_m(e.Motion.X, e.Motion.Y);
+                        _firstClickInViewCoord = ImGui.GetMousePos();
+                        _firstClickDone = true;
+                    }
+                    //if first registered then the click after stops the measuting, resetting all measuring booleans(marked with comments above)
+                    else
+                    {
+                        _stopMeasuring();
+                    }
+                }
+            };
         }
-
-
 
         internal static DistanceRuler GetInstance() {
 
@@ -48,32 +68,6 @@ namespace Pulsar4X.Client
 
         }
 
-
-        internal override void MapClicked(Orbital.Vector3 worldPos_m, MouseButtons button)
-        {
-            base.MapClicked(worldPos_m, button);
-            if (true)//button == MouseButtons::Primary)
-            {
-                //first checks if measuting
-                if (_measuring)
-                {
-                    //if measuring register first click
-                    if (!_firstClickDone)
-                    {
-                        _zoomLevelAtFirstClick = _uiState.Camera.ZoomLevel;
-                        _firstClick = worldPos_m;
-                        _firstClickInViewCoord = ImGui.GetMousePos();
-                        _firstClickDone = true;
-                    }
-                    //if first registered then the click after stops the measuting, resetting all measuring booleans(marked with comments above)
-                    else
-                    {
-                        _stopMeasuring();
-                    }
-                }
-            }
-
-        }
         internal override void Display()
         {
             if (!IsActive)
