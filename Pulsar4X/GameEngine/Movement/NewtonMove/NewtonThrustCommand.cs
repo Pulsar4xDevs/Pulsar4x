@@ -41,42 +41,37 @@ namespace Pulsar4X.Movement
 
         public List<(string item, double value)> DebugDetails = new List<(string, double)>();
 
-        public static void CreateCommand(int faction, Entity orderEntity, DateTime manuverNodeTime, Vector3 expendDeltaV_m, double burnTime, string name="Newtonion thrust")
+        public static NewtonThrustCommand CreateCommand(int faction, Entity orderEntity, DateTime manuverNodeTime, Vector3 expendDeltaV_m, double burnTime, string name = "Newtonion thrust")
         {
-
-
-
             var cmd = new NewtonThrustCommand()
             {
                 RequestingFactionGuid = faction,
                 EntityCommandingGuid = orderEntity.Id,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 OrbitrelativeDeltaV = expendDeltaV_m,
-
-
-                //var sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2()
-
-                //_parentRalitiveDeltaV = pralitiveDV,
                 _vectorDateTime = manuverNodeTime,
                 ActionOnDate = manuverNodeTime - TimeSpan.FromSeconds(burnTime * 0.5),
                 _name = name,
-
             };
 
-            // FIXME:
-            //StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
             cmd.UpdateDetailString();
+            return cmd;
         }
 
-        public static void CreateCommands(CargoDefinitionsLibrary cargoLibrary, Entity ship, (Vector3 dv, double t)[] manuvers)
+        public static List<NewtonThrustCommand> CreateCommands(CargoDefinitionsLibrary cargoLibrary, Entity ship, (Vector3 dv, double t)[] manuvers)
         {
-            var fuelTypeID = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
-            var fuelType = cargoLibrary.GetAny(fuelTypeID);
-            var burnRate = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
-            var exhaustVelocity = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
-            var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
-            var tnow = ship.StarSysDateTime;
+            var commands = new List<NewtonThrustCommand>();
 
+            if (!ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrustDB))
+                return commands;
+
+            if (!ship.TryGetDataBlob<MassVolumeDB>(out var massDB))
+                return commands;
+
+            var burnRate = thrustDB.FuelBurnRate;
+            var exhaustVelocity = thrustDB.ExhaustVelocity;
+            var mass = massDB.MassTotal;
+            var tnow = ship.StarSysDateTime;
 
             foreach (var manuver in manuvers)
             {
@@ -91,63 +86,62 @@ namespace Pulsar4X.Movement
                     EntityCommandingGuid = ship.Id,
                     CreatedDate = ship.Manager.ManagerSubpulses.StarSysDateTime,
                     OrbitrelativeDeltaV = manuver.dv,
-
                     _vectorDateTime = tmanuver,
                     ActionOnDate = tmanuver - TimeSpan.FromSeconds(tburn * 0.5),
                 };
 
-                // FIXME:
-                //StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
                 cmd.UpdateDetailString();
+                commands.Add(cmd);
             }
+
+            return commands;
         }
 
-        public static NewtonThrustCommand CreateCommand(CargoDefinitionsLibrary cargoLibrary, Entity ship, (Vector3 dv, double t) manuver)
+        public static NewtonThrustCommand? CreateCommand(CargoDefinitionsLibrary cargoLibrary, Entity ship, (Vector3 dv, double t) manuver)
         {
-            var fuelTypeID = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
-            var fuelType = cargoLibrary.GetAny(fuelTypeID);
-            var burnRate = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
-            var exhaustVelocity = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
-            var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
+            if (!ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrustDB))
+                return null;
+
+            if (!ship.TryGetDataBlob<MassVolumeDB>(out var massDB))
+                return null;
+
+            var burnRate = thrustDB.FuelBurnRate;
+            var exhaustVelocity = thrustDB.ExhaustVelocity;
+            var mass = massDB.MassTotal;
             var tnow = ship.StarSysDateTime;
 
-                var tmanuver = tnow + TimeSpan.FromSeconds(manuver.t);
-                double fuelBurned = OrbitMath.TsiolkovskyFuelUse(mass, exhaustVelocity, manuver.dv.Length());
-                double tburn = fuelBurned / burnRate;
-                mass -= fuelBurned;
+            var tmanuver = tnow + TimeSpan.FromSeconds(manuver.t);
+            double fuelBurned = OrbitMath.TsiolkovskyFuelUse(mass, exhaustVelocity, manuver.dv.Length());
+            double tburn = fuelBurned / burnRate;
 
-                var cmd = new NewtonThrustCommand()
-                {
-                    RequestingFactionGuid = ship.FactionOwnerID,
-                    EntityCommandingGuid = ship.Id,
-                    CreatedDate = ship.Manager.ManagerSubpulses.StarSysDateTime,
-                    OrbitrelativeDeltaV = manuver.dv,
+            var cmd = new NewtonThrustCommand()
+            {
+                RequestingFactionGuid = ship.FactionOwnerID,
+                EntityCommandingGuid = ship.Id,
+                CreatedDate = ship.Manager.ManagerSubpulses.StarSysDateTime,
+                OrbitrelativeDeltaV = manuver.dv,
+                _vectorDateTime = tmanuver,
+                ActionOnDate = tmanuver - TimeSpan.FromSeconds(tburn * 0.5),
+            };
 
-                    _vectorDateTime = tmanuver,
-                    ActionOnDate = tmanuver - TimeSpan.FromSeconds(tburn * 0.5),
-                };
-
-                // FIXME:
-                //StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
-                cmd.UpdateDetailString();
-
-                return cmd;
-
+            cmd.UpdateDetailString();
+            return cmd;
         }
 
-        public static NewtonThrustCommand CreateCommand(CargoDefinitionsLibrary cargoLibrary, Entity ship, Vector3 dv, DateTime tmanuver)
+        public static NewtonThrustCommand? CreateCommand(CargoDefinitionsLibrary cargoLibrary, Entity ship, Vector3 dv, DateTime tmanuver)
         {
-            var fuelTypeID = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
-            var fuelType = cargoLibrary.GetAny(fuelTypeID);
-            var burnRate = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
-            var exhaustVelocity = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
-            var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
-            var tnow = ship.StarSysDateTime;
+            if (!ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrustDB))
+                return null;
 
+            if (!ship.TryGetDataBlob<MassVolumeDB>(out var massDB))
+                return null;
+
+            var burnRate = thrustDB.FuelBurnRate;
+            var exhaustVelocity = thrustDB.ExhaustVelocity;
+            var mass = massDB.MassTotal;
 
             double fuelBurned = OrbitMath.TsiolkovskyFuelUse(mass, exhaustVelocity, dv.Length());
             double tburn = fuelBurned / burnRate;
-            mass -= fuelBurned;
 
             var cmd = new NewtonThrustCommand()
             {
@@ -160,12 +154,8 @@ namespace Pulsar4X.Movement
                 ActionOnDate = tmanuver - TimeSpan.FromSeconds(tburn * 0.5),
             };
 
-            // FIXME:
-            //StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
             cmd.UpdateDetailString();
-
             return cmd;
-
         }
 
         internal override void Execute(DateTime atDateTime)
@@ -264,7 +254,7 @@ namespace Pulsar4X.Movement
 
         private double _soiParentMass;
 
-        public static void CreateCommand(int factionId, Entity orderEntity, DateTime actionDateTime, Entity targetEntity)
+        public static ThrustToTargetCmd CreateCommand(int factionId, Entity orderEntity, DateTime actionDateTime, Entity targetEntity)
         {
             var cmd = new ThrustToTargetCmd()
             {
@@ -274,8 +264,8 @@ namespace Pulsar4X.Movement
                 _targetEntity = targetEntity,
                 ActionOnDate = actionDateTime,
             };
-            // FIXME:
-            //StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
+
+            return cmd;
         }
 
         internal override void Execute(DateTime atDateTime)
@@ -486,7 +476,7 @@ namespace Pulsar4X.Movement
         private double _totalFuel;
         private double _soiParentMass;
 
-        public static void CreateCommand(int faction, Entity orderEntity, DateTime actionDateTime, Entity targetEntity)
+        public static Thrust90ToTargetCmd CreateCommand(int faction, Entity orderEntity, DateTime actionDateTime, Entity targetEntity)
         {
             var cmd = new Thrust90ToTargetCmd()
             {
@@ -496,8 +486,8 @@ namespace Pulsar4X.Movement
                 _targetEntity = targetEntity,
                 ActionOnDate = actionDateTime,
             };
-            // FIXME:
-            //StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
+
+            return cmd;
         }
 
         internal override void Execute(DateTime atDateTime)
