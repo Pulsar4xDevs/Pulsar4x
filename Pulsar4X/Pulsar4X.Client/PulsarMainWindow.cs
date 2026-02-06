@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Diagnostics;
 using ImGuiNET;
 using SDL3;
 using Microsoft.Extensions.Configuration;
@@ -90,7 +91,17 @@ namespace Pulsar4X.Client
                 LoadUserOrbitSettings();
 
                 // Load fonts - texture will be created automatically by the new texture system
-                Styles.DefaultFont = PlatformBackend.LoadFont(ResourcesPath, "ProggyClean.ttf", 13f);
+                var defaultFont = "ProggyClean.ttf";
+                var defaultFontPath = Path.Combine(ResourcesPath, defaultFont);
+                var defaultFontSize = 13f;
+
+                if (! SDL3.TTF.Init())
+                    throw new Exception("SDL TTF init failed");
+
+                Trace.WriteLine("loading font: " + defaultFontPath);
+                Styles.SDLDefaultFont = SDL3.TTF.OpenFont(defaultFontPath, 16f); // FIXME: set this and imgui font to same size. 13f looks terrible.
+                Styles.DefaultFont = PlatformBackend.LoadFont(ResourcesPath, defaultFont, defaultFontSize);
+
                 PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ", true);
                 Styles.MonospaceFont = PlatformBackend.LoadFont(ResourcesPath, "JetBrainsMono-Regular.ttf", 14f);
                 Styles.MediumFont = PlatformBackend.LoadFont(ResourcesPath, "Roboto-Medium.ttf", 14f);
@@ -279,6 +290,10 @@ namespace Pulsar4X.Client
 
             // save the game settings on exit
             _state.GameSettings.Save();
+
+            // Cleanup SDL TTF
+            SDL3.TTF.CloseFont(Styles.SDLDefaultFont);
+            SDL3.TTF.Quit();
         }
 
         /// <summary>
