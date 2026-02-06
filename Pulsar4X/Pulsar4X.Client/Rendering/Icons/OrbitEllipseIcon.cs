@@ -42,48 +42,36 @@ namespace Pulsar4X.Client
         {
             _points = new Vector2[_numberOfArcSegments + 1];
 
-            var loAN = -_orbitDB.LongitudeOfAscendingNode;
-            var incl = _orbitDB.Inclination;
-            var mtxloan = Matrix3d.IDRotateZ(loAN);
-            var mtxincl = Matrix3d.IDRotateX(incl);
-            var mtxaop = Matrix3d.IDRotateZ(_aop);
+            // Use the same position formula as OrbitMath.GetPosition() so the rendered
+            // orbit matches actual body positions. The old code used a simplified 2D
+            // rotation by LoP which ignored inclination, causing orbit arcs to be offset
+            // from body positions in generated systems with significant inclinations.
+            double loAN = _orbitDB.LongitudeOfAscendingNode;
+            double aoP = _orbitDB.ArgumentOfPeriapsis;
+            double incl = _orbitDB.Inclination;
+            double e = _eccentricity;
+            double a = SemiMaj;
+            double semiLatusRectum = a * (1.0 - (double)e * e);
 
-            //var mtx =  mtxaop * mtxincl * mtxloan;
-            var mtx =  mtxaop * mtxloan;
-            double angle = 0;
+            double cosLoAN = Math.Cos(loAN);
+            double sinLoAN = Math.Sin(loAN);
+            double cosIncl = Math.Cos(incl);
 
-            var coslop = 1 * Math.Cos(_loP_radians);
-            var sinlop = 1 * Math.Sin(_loP_radians);
-            //TODO: figure out propper matrix rotations for this, will be a bit more elegent.
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
+                double trueAnomaly = i * _segmentArcSweepRadians;
+                double r = semiLatusRectum / (1.0 + e * Math.Cos(trueAnomaly));
 
-                double x1 = SemiMaj *  Math.Sin(angle) - _linearEccentricity; //we add the focal distance so the focal point is "center"
-                double y1 = SemiMinor * Math.Cos(angle);
+                double angleFromLoAN = trueAnomaly + aoP;
+                double cosAngle = Math.Cos(angleFromLoAN);
+                double sinAngle = Math.Sin(angleFromLoAN);
 
-                double x2 = (x1 * coslop) - (y1 * sinlop);
-                double y2 = (x1 * sinlop) + (y1 * coslop);
+                // Full 3D rotation matching OrbitMath.GetPosition(), projected to 2D
+                double x = (cosLoAN * cosAngle - sinLoAN * sinAngle * cosIncl) * r;
+                double y = (sinLoAN * cosAngle + cosLoAN * sinAngle * cosIncl) * r;
 
-                //Vector3 pnt = new Vector3(x1, y1, 0);
-                //pnt = mtx.Transform(pnt);
-                //Points[i] = new PointD() {X = pnt.X, Y = pnt.Y};
-                _points[i] = new Vector2() { X = x2, Y = y2 };
-                angle += _segmentArcSweepRadians;
+                _points[i] = new Vector2() { X = x, Y = y };
             }
-
-            if (IsRetrogradeOrbit)
-            {
-                var mtxr1 = Matrix3d.IDRotateZ(-_loP_radians);
-                var mtxr2 = Matrix3d.IDRotateZ(_loP_radians);
-                var mtxr = mtxr1 * mtxincl * mtxr2;
-                for (int i = 0; i < _points.Length; i++)
-                {
-                    var pnt = mtxr.Transform(new Vector3(_points[i].X, _points[i].Y, 0));
-                        _points[i] = new Vector2() {X = pnt.X, Y = pnt.Y};
-                }
-            }
-            //TODO: try a Chaikins curve for this and increase the points depending on zoom and curviture.
-
         }
 
 
