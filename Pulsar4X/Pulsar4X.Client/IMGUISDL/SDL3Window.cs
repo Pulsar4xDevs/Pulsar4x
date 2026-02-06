@@ -113,8 +113,10 @@ namespace Pulsar4X.Client
         )
         {
             // Initialize SDL
-            if(!SDL.Init(SDL.InitFlags.Video))
-            throw new Exception($"SDL_Init failed: {SDL.GetError()}");
+            if (!SDL.Init(SDL.InitFlags.Video))
+                throw new Exception($"SDL_Init failed: {SDL.GetError()}");
+            if (!SDL3.TTF.Init())
+                throw new Exception("SDL TTF init failed");
 
             // Create window & renderer
             if(!SDL.CreateWindowAndRenderer(title, width, height, flags, out Window, out Renderer))
@@ -260,6 +262,7 @@ namespace Pulsar4X.Client
             ImGui.DestroyContext();
             SDL.DestroyWindow(Window);
             SDL.DestroyRenderer(Renderer);
+            SDL3.TTF.Quit();
             SDL.Quit();
         }
 

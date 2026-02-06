@@ -38,6 +38,12 @@ namespace Pulsar4X.Client
         float mouseX;
         float mouseY;
 
+        int _debugSDLFontHeight;
+
+        ulong _fpsFrames = 0;
+        ulong _fpsLastMeasurementTime = 0;
+        float _fpsLastMeasurement = 0;
+
         public PulsarMainWindow(string[] args)
             : base(AppName)
         {
@@ -95,9 +101,6 @@ namespace Pulsar4X.Client
                 var defaultFontPath = Path.Combine(ResourcesPath, defaultFont);
                 var defaultFontSize = 13f;
 
-                if (! SDL3.TTF.Init())
-                    throw new Exception("SDL TTF init failed");
-
                 Trace.WriteLine("loading font: " + defaultFontPath);
                 Styles.SDLDefaultFont = SDL3.TTF.OpenFont(defaultFontPath, 16f); // FIXME: set this and imgui font to same size. 13f looks terrible.
                 Styles.DefaultFont = PlatformBackend.LoadFont(ResourcesPath, defaultFont, defaultFontSize);
@@ -110,6 +113,8 @@ namespace Pulsar4X.Client
             {
                 Console.WriteLine($"Error setting up game data: {e.Message}");
             }
+
+            _debugSDLFontHeight = SDL3.TTF.GetFontHeight(Styles.SDLDefaultFont);
         }
 
         internal event EventHandler<SDL.Event> MouseMoveOccured;
@@ -210,6 +215,31 @@ namespace Pulsar4X.Client
 
             // Render the UI
             RenderUI();
+
+            // If in DEBUG render the git hash as the version in the corner of the screen
+#if DEBUG
+            var version = "Version: " + AssemblyInfo.GetGitHash();
+            RenderDebugText(this.Renderer, version, 50);
+#endif
+
+            // Show FPS counter if enabled
+            if (_state.GameSettings.ShowFPS)
+            {
+                _fpsFrames += 1;
+
+                var currentTime = SDL.GetTicks();
+                var elapsedTime = currentTime - _fpsLastMeasurementTime;
+
+                if (elapsedTime >= 1000)
+                {
+                    _fpsLastMeasurement = _fpsFrames / (elapsedTime / 1000f);
+                    _fpsFrames = 0;
+                    _fpsLastMeasurementTime = currentTime;
+                }
+
+                var fps = "FPS: " + _fpsLastMeasurement.ToString();
+                RenderDebugText(this.Renderer, fps, 50 + _debugSDLFontHeight);
+            }
         }
 
         public override void PostFrameUpdate()
@@ -255,32 +285,6 @@ namespace Pulsar4X.Client
             {
                 item.Display();
             }
-
-            // Show FPS counter if enabled
-            if (_state.GameSettings.ShowFPS)
-            {
-                var fpsDispsize = ImGui.GetIO().DisplaySize;
-                var fpsPos = new Vector2(fpsDispsize.X - 120, 10);
-                ImGui.SetNextWindowPos(fpsPos, ImGuiCond.Always);
-                ImGui.SetNextWindowBgAlpha(0.7f);
-                if (Client.Interface.Widgets.Window.Begin("FPS", _gitHashFlags))
-                {
-                    ImGui.Text($"FPS: {ImGui.GetIO().Framerate:F1}");
-                    Client.Interface.Widgets.Window.End();
-                }
-            }
-
-            // If in DEBUG render the git hash as the version in the corner of the screen
-#if DEBUG
-            var dispsize = ImGui.GetIO().DisplaySize;
-            var pos = new Vector2(0, dispsize.Y - ImGui.GetFrameHeightWithSpacing());
-            ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-            if (Client.Interface.Widgets.Window.Begin("GitHash", _gitHashFlags))
-            {
-                ImGui.Text("Version: " + AssemblyInfo.GetGitHash());
-            }
-            Client.Interface.Widgets.Window.End();
-#endif
         }
 
         public override void Exit()
@@ -293,7 +297,6 @@ namespace Pulsar4X.Client
 
             // Cleanup SDL TTF
             SDL3.TTF.CloseFont(Styles.SDLDefaultFont);
-            SDL3.TTF.Quit();
         }
 
         /// <summary>
@@ -456,6 +459,55 @@ namespace Pulsar4X.Client
                 string destSubDir = Path.Combine(destinationDir, subDirName);
                 DeleteThenCopyToDirectory(subDir, destSubDir);
             }
+        }
+
+        private static void RenderDebugText(IntPtr renderer, string text, int y)
+        {
+            if (renderer == IntPtr.Zero)
+                return;
+
+            SDL.Color white = new () {
+                R = 255,
+                G = 255,
+                B = 255,
+                A = 255
+            };
+
+            IntPtr surface = SDL3.TTF.RenderTextSolid(
+                    Styles.SDLDefaultFont,
+                    text,
+                    0,
+                    white);
+
+            if (surface == IntPtr.Zero) {
+                Trace.WriteLine("RenderDebugText: failed to create surface");
+                return;
+            }
+
+            IntPtr texture = SDL.CreateTextureFromSurface(renderer, surface);
+
+            if (texture == IntPtr.Zero) {
+                SDL.DestroySurface(surface);
+
+                Trace.WriteLine("RenderDebugText: failed to create texture from surface");
+                return;
+            }
+
+            int h;
+            int w;
+            SDL3.TTF.GetStringSize(Styles.SDLDefaultFont, text, 0, out w, out h);
+
+            SDL.FRect frect = new () {
+                X = 5,
+                Y = y,
+                W = w,
+                H = h
+            };
+
+            SDL.RenderTexture(renderer, texture, IntPtr.Zero, ref frect);
+
+            SDL.DestroyTexture(texture);
+            SDL.DestroySurface(surface);
         }
     }
 }
