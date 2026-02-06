@@ -1,5 +1,4 @@
-﻿using ImGuiNET;
-using Pulsar4X.Engine;
+﻿using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using SDL3;
 using Point = SDL3.SDL.Point;
@@ -8,10 +7,11 @@ using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
-
-
     public class Camera
     {
+        float _mouseX = 0;
+        float _mouseY = 0;
+
         internal bool IsGrabbingMap = false;
         internal float MouseFrameIncrementX;
         internal float MouseFrameIncrementY;
@@ -70,7 +70,12 @@ namespace Pulsar4X.Client
         public Camera(SDL3Window viewPort)
         {
             _viewPort = viewPort;
-            //_viewPort.SizeChanged += _viewPort_SizeChanged;
+
+            var mainWin = (PulsarMainWindow)viewPort;
+            mainWin.MouseMoveOccured += (object sender, SDL.Event e) => {
+                _mouseX = e.Motion.X;
+                _mouseY = e.Motion.Y;
+            };
 
         }
 
@@ -176,12 +181,9 @@ namespace Pulsar4X.Client
 
         public Orbital.Vector3 MouseWorldCoordinate_m()
         {
-			Orbital.Vector2 mouseCoord = new Orbital.Vector2(ImGui.GetMousePos());
-            return WorldCoordinate_m(mouseCoord.X, mouseCoord.Y);
-			//double x = (Distance.AuToMt(mouseCoord.X - ViewPortCenter.X) / ZoomLevel) + CameraWorldPosition.X;
-			//double y = -((Distance.AuToMt(mouseCoord.Y - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition.Y);
-			//return new Orbital.Vector3(x, y, 0);
+            return WorldCoordinate_m(_mouseX, _mouseY);
         }
+
         public Orbital.Vector3 MouseWorldCoordinate_AU()
         {
             return Distance.MToAU(MouseWorldCoordinate_m());
