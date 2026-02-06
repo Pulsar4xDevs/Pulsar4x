@@ -1,13 +1,17 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using SDL3;
+using ImGuiNET;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Names;
 using Pulsar4X.Orbits;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using Pulsar4X.Engine;
+using Pulsar4X.Orbital;
 using Pulsar4X.Client.Rendering;
+using Pulsar4X.Client.Interface;
+using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
@@ -17,7 +21,7 @@ namespace Pulsar4X.Client
         List<SystemState> SystemStates = new List<SystemState>();
         SafeDictionary<string, SystemMapRendering> RenderedMaps = new ();
         Dictionary<string, StarIcon> StarIcons = new ();
-        ConcurrentDictionary<string, NameIcon> _nameIcons = new ();
+        Dictionary<string, string> _galMapLabels = new ();
         SDL3Window _window;
         internal string? CapitolSysMap { get; set; }
         internal string SelectedStarSysGuid { get { return _state.SelectedStarSystemId; } }
@@ -50,38 +54,41 @@ namespace Pulsar4X.Client
 
         internal void SetFaction(GlobalUIState uIState)
         {
-            //StarIcons = new Dictionary<ID, IDrawData>();
+            if (_state.Game == null) return;
+
             int i = 0;
-            double startangle = 0;//Math.PI * 0.5;
-            float angleIncrease = (float)Math.Max(0.78539816339, 6.28318530718 / _state.StarSystemStates.Count);
+            double startangle = 0;
+            float angleIncrease = (float)Math.Max(0.78539816339, 6.28318530718 / Math.Max(1, _state.Game.Systems.Count));
             int startR = 200;
             int radInc = 5;
-            foreach ((var starSystemId, var systemState) in _state.StarSystemStates)
+
+            foreach (var starSystem in _state.Game.Systems)
             {
+                var starSystemId = starSystem.ID;
                 var x = (startR + radInc * i) * Math.Sin(startangle - angleIncrease * i);
                 var y = (startR + radInc * i) * Math.Cos(startangle - angleIncrease * i);
 
-                if(!RenderedMaps.ContainsKey(starSystemId))
-                {
-                    SystemMapRendering map = new SystemMapRendering(_window, _state);
+                bool isKnown = _state.StarSystemStates.ContainsKey(starSystemId);
 
-                    map.Initialize(systemState.StarSystem);
-                    RenderedMaps[starSystemId] = map;
-                    map.GalacticMapPosition.X = x;
-                    map.GalacticMapPosition.Y = y;
-                }
+                // Create SystemMapRendering only for known systems
+                if (isKnown)
                 {
+                    var systemState = _state.StarSystemStates[starSystemId];
+                    if(!RenderedMaps.ContainsKey(starSystemId))
+                    {
+                        SystemMapRendering map = new SystemMapRendering(_window, _state);
+                        map.Initialize(systemState.StarSystem);
+                        RenderedMaps[starSystemId] = map;
+                        map.GalacticMapPosition.X = x;
+                        map.GalacticMapPosition.Y = y;
+                    }
                     RenderedMaps[starSystemId].UpdateSystemState(systemState);
                 }
 
                 //TODO: handle binary/multiple star systems better.
-                var starEntity = systemState.StarSystem.GetFirstEntityWithDataBlob<StarInfoDB>();
+                var starEntity = starSystem.GetFirstEntityWithDataBlob<StarInfoDB>();
                 var orbitdb = starEntity.GetDataBlob<OrbitDB>();
                 starEntity = orbitdb.Root; //just incase it's a binary system and the entity we got was not the primary
-
-                var starEntityState = systemState.EntityStatesWithNames.ContainsKey(starEntity.Id) ?
-                    systemState.EntityStatesWithNames[starEntity.Id] :
-                    new EntityState(starEntity, starEntity.Id, starEntity.FactionOwnerID);
 
                 if(!starEntity.TryGetDataBlob<StarInfoDB>(out var starInfoDB))
                 {
@@ -98,17 +105,23 @@ namespace Pulsar4X.Client
                     throw new NullReferenceException("Star must have a MassVolumeDB");
                 }
 
-                if(!starEntity.TryGetDataBlob<NameDB>(out var starNameDB))
-                {
-                    throw new NullReferenceException("Star must have a NameDB");
-                }
-
                 var starIcon = new StarIcon(starInfoDB, starPositionDB, starMassVolumeDB);
                 StarIcons[starSystemId] = starIcon;
-                var nameIcon = new NameIcon(starEntityState, starNameDB, starPositionDB, _state);
-                _nameIcons[starSystemId] = nameIcon;
-                starIcon.WorldPosition_m = new Orbital.Vector3(x, y, 0);
-                nameIcon.WorldPosition_m = new Orbital.Vector3(x, y, 0);
+
+                // Treat galactic layout values as AU and convert to meters
+                var posAU = new Orbital.Vector3(x, y, 0);
+                starIcon.WorldPosition_m = Distance.AuToMt(posAU);
+
+                // Store galmap label: actual name for known systems, "??" for unknown
+                if (isKnown)
+                {
+                    var factionId = _state.Faction?.Id ?? Game.NeutralFactionId;
+                    _galMapLabels[starSystemId] = starSystem.NameDB.GetName(factionId);
+                }
+                else
+                {
+                    _galMapLabels[starSystemId] = "??";
+                }
 
                 i++;
             }
@@ -116,9 +129,16 @@ namespace Pulsar4X.Client
 
         void OnSystemAdded(GlobalUIState globalUIState, string systemId)
         {
+            if (!_state.StarSystemStates.ContainsKey(systemId)) return;
+
+            var systemState = _state.StarSystemStates[systemId];
             SystemMapRendering map = new SystemMapRendering(_window, _state);
-            map.Initialize(_state.StarSystemStates[systemId].StarSystem);
+            map.Initialize(systemState.StarSystem);
             RenderedMaps[systemId] = map;
+
+            // Update galmap label from "??" to actual name
+            var factionId = _state.Faction?.Id ?? Game.NeutralFactionId;
+            _galMapLabels[systemId] = systemState.StarSystem.NameDB.GetName(factionId);
         }
 
         void _state_EntityClickedEvent(EntityState entityState, MouseButtons mouseButton)
@@ -134,36 +154,49 @@ namespace Pulsar4X.Client
         internal void DrawNameIcons()
         {
             var zoomlvl = _state.Camera.ZoomLevel;
-            if (zoomlvl >= 2.0)
+            if (zoomlvl >= 0.99)
             {
-                foreach (var kvp in RenderedMaps)
+                if (!string.IsNullOrEmpty(_state.SelectedStarSystemId) && RenderedMaps.ContainsKey(_state.SelectedStarSystemId))
                 {
-                    var sysid = kvp.Key;
-                    var sysmap = kvp.Value;
-                    if(sysid == _state.SelectedStarSystemId){
-                        sysmap.DrawNameIcons();
-                    }
-
+                    RenderedMaps[_state.SelectedStarSystemId].DrawNameIcons();
                 }
             }
             else
             {
-                lock (_nameIcons)
+                // Draw galmap labels for all systems
+                foreach (var (systemId, label) in _galMapLabels)
                 {
-                    List<NameIcon> nameIcons = new List<NameIcon>();
-                    foreach ((var id, var icon) in _nameIcons)
-                    {
-                        //if(_uiState.StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames.ContainsKey(item.Key)){
-                        if(id.Equals(_state.SelectedStarSystemId)
-                            && SystemViewPreferences.GetInstance().ShouldDisplay("map", icon.EntityState.BodyType))
-                        {
-                            nameIcons.Add(icon);
-                        }
+                    if (!StarIcons.TryGetValue(systemId, out var starIcon))
+                        continue;
 
-                        //}
-                        //item.Value.Draw(_uiState.rendererPtr, _uiState.Camera);
-                    }
-                    NameIcon.DrawAll(_state.SDLRendererPtr, _state.Camera, nameIcons);
+                    var screenPos = starIcon.ViewScreenPos;
+                    if (!_camera.IsOnScreen(screenPos.X, screenPos.Y))
+                        continue;
+
+                    bool isKnown = _state.StarSystemStates.ContainsKey(systemId);
+                    var textColor = isKnown
+                        ? new System.Numerics.Vector4(1f, 1f, 1f, 1f)
+                        : new System.Numerics.Vector4(0.5f, 0.5f, 0.5f, 0.7f);
+
+                    ImGui.PushStyleColor(ImGuiCol.WindowBg, Styles.InvisibleColor);
+                    ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
+                    ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(1, 2));
+                    float textHeight = ImGui.GetTextLineHeight() + 4; // 4 for window padding
+                    ImGui.SetNextWindowPos(new System.Numerics.Vector2(screenPos.X + 20, screenPos.Y - textHeight * 0.5f), ImGuiCond.Always);
+
+                    bool isActive = true;
+                    Window.Begin("galLabel##" + systemId, ref isActive,
+                        ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize |
+                        ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBringToFrontOnFocus |
+                        ImGuiWindowFlags.NoScrollWithMouse);
+
+                    ImGui.PushStyleColor(ImGuiCol.Text, textColor);
+                    ImGui.TextUnformatted(label);
+                    ImGui.PopStyleColor();
+
+                    Window.End();
+                    ImGui.PopStyleColor();
+                    ImGui.PopStyleVar(2);
                 }
             }
         }
@@ -185,25 +218,13 @@ namespace Pulsar4X.Client
             // Draw the appropriate map
             var matrix = _camera.GetZoomMatrix();
             var zoomlvl = _state.Camera.ZoomLevel;
-            if (zoomlvl < 0.99) // draw galmap
+            if (zoomlvl < 0.99)
             {
-                if (zoomlvl < 0.99 && zoomlvl > 0.99) //draw systems as well as galmap
-                {
-                    foreach (var kvp in RenderedMaps)
-                    {
-                        var sysid = kvp.Key;
-                        var sysmap = kvp.Value;
-                        sysmap.Draw();
-                    }
-                }
-                else
-                {
-                    DrawGalmap(matrix);
-                }
+                DrawGalmap(matrix);
             }
-            else// only draw the systemmap.
+            else
             {
-                if (!string.IsNullOrEmpty(SelectedStarSysGuid))
+                if (!string.IsNullOrEmpty(SelectedStarSysGuid) && RenderedMaps.ContainsKey(SelectedStarSysGuid))
                     RenderedMaps[SelectedStarSysGuid].Draw();
             }
 
@@ -216,22 +237,7 @@ namespace Pulsar4X.Client
             foreach (var item in StarIcons)
             {
                 item.Value.OnFrameUpdate(matrix, _camera);
-                lock (_nameIcons)
-                {
-                    foreach (var name in _nameIcons.Values)
-                        name.OnFrameUpdate(matrix, _camera);
-                }
-                if(item.Key == _state.SelectedStarSystemId){
-                     item.Value.Draw(_window.Renderer, _camera);
-                }
-            }
-
-            lock (_nameIcons)
-            {
-                foreach (var item in _nameIcons)
-                {
-                    item.Value.OnFrameUpdate(matrix, _camera);
-                }
+                item.Value.Draw(_window.Renderer, _camera);
             }
         }
     }
