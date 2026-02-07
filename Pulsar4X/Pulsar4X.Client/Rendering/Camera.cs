@@ -8,7 +8,13 @@ using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
-
+    public struct CameraState
+    {
+        public Orbital.Vector3 Position;
+        public float ZoomLevel;
+        public bool IsPinnedToEntity;
+        public int PinnedEntityGuid;
+    }
 
     public class Camera
     {
@@ -127,6 +133,32 @@ namespace Pulsar4X.Client
             if (entity.HasDataBlob<PositionDB>())
             {
                 _camWorldPos_m = entity.GetDataBlob<PositionDB>().AbsolutePosition;
+            }
+        }
+
+        public CameraState SaveState()
+        {
+            return new CameraState
+            {
+                Position = _camWorldPos_m,
+                ZoomLevel = ZoomLevel,
+                IsPinnedToEntity = IsPinnedToEntity,
+                PinnedEntityGuid = PinnedEntityGuid
+            };
+        }
+
+        public void RestoreState(CameraState state, StarSystem system)
+        {
+            _camWorldPos_m = state.Position;
+            ZoomLevel = state.ZoomLevel;
+
+            if (state.IsPinnedToEntity && system.TryGetEntityById(state.PinnedEntityGuid, out var entity))
+            {
+                PinToEntity(entity);
+            }
+            else
+            {
+                PinToEntity(null);
             }
         }
 
