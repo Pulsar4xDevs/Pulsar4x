@@ -38,6 +38,7 @@ namespace Pulsar4X.Client
         public SafeDictionary<int, EntityState> EntityStatesWithNames = new ();
         public SafeDictionary<int, EntityState> EntityStatesWithPosition = new ();
         public SafeDictionary<int, EntityState> EntityStatesColonies = new ();
+        public CameraState? SavedCameraState = null;
 
         public readonly object Lock = new object();
 

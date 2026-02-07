@@ -263,18 +263,41 @@ namespace Pulsar4X.Client
             if(Game == null || Faction == null) throw new NullReferenceException("Game or Faction is null");
 
             if(!activeSysID.Equals(SelectedStarSystemId) || refresh){
+                // Save camera state for the outgoing system
+                if(!string.IsNullOrEmpty(SelectedStarSystemId) && StarSystemStates.ContainsKey(SelectedStarSystemId))
+                {
+                    StarSystemStates[SelectedStarSystemId].SavedCameraState = Camera.SaveState();
+                }
+
                 if(!StarSystemStates.ContainsKey(activeSysID)){
                     StarSystemStates[activeSysID] = new SystemState(Game.Systems.First(s => s.ID.Equals(activeSysID)), Faction.Id);
                 }
 
                 SelectedStarSystemId = activeSysID;
 
-                var SelectedSys = StarSystemStates[activeSysID].StarSystem;
+                var selectedSystemState = StarSystemStates[activeSysID];
+                var SelectedSys = selectedSystemState.StarSystem;
                 PrimarySystemDateTime = SelectedSys.ManagerSubpulses.StarSysDateTime;
                 LastClickedEntity = null;
                 PrimaryEntity = null;
 
-                Camera.PinToEntity(null); // clear the camera pin
+                // Restore camera state from the incoming system
+                if (selectedSystemState.SavedCameraState.HasValue)
+                {
+                    Camera.RestoreState(selectedSystemState.SavedCameraState.Value, SelectedSys);
+                }
+                else
+                {
+                    // First visit: center on primary star at default zoom
+                    Camera.PinToEntity(null);
+                    Camera.ZoomLevel = 200;
+                    var starEntity = SelectedSys.GetFirstEntityWithDataBlob<StarInfoDB>();
+                    if (starEntity != null)
+                        Camera.CenterOnEntity(starEntity);
+                    else
+                        Camera._camWorldPos_m = new Orbital.Vector3();
+                }
+
                 OnStarSystemChanged?.Invoke(this);
             }
 
