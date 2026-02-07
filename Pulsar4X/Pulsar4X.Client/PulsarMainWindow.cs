@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Diagnostics;
 using ImGuiNET;
 using SDL3;
 using Microsoft.Extensions.Configuration;
@@ -34,10 +35,14 @@ namespace Pulsar4X.Client
         public static string ResourcesPath = "Resources";
         private readonly GlobalUIState _state;
 
-        float mouseDownX;
-        float mouseDownY;
-        int mouseDownAltX;
-        int mouseDownAltY;
+        float mouseX;
+        float mouseY;
+
+        int _debugSDLFontHeight;
+
+        ulong _fpsFrames = 0;
+        ulong _fpsLastMeasurementTime = 0;
+        float _fpsLastMeasurement = 0;
 
         public PulsarMainWindow(string[] args)
             : base(AppName)
@@ -92,7 +97,14 @@ namespace Pulsar4X.Client
                 LoadUserOrbitSettings();
 
                 // Load fonts - texture will be created automatically by the new texture system
-                Styles.DefaultFont = PlatformBackend.LoadFont(ResourcesPath, "ProggyClean.ttf", 13f);
+                var defaultFont = "ProggyClean.ttf";
+                var defaultFontPath = Path.Combine(ResourcesPath, defaultFont);
+                var defaultFontSize = 13f;
+
+                Trace.WriteLine("loading font: " + defaultFontPath);
+                Styles.SDLDefaultFont = SDL3.TTF.OpenFont(defaultFontPath, 16f); // FIXME: set this and imgui font to same size. 13f looks terrible.
+                Styles.DefaultFont = PlatformBackend.LoadFont(ResourcesPath, defaultFont, defaultFontSize);
+
                 PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ", true);
                 Styles.MonospaceFont = PlatformBackend.LoadFont(ResourcesPath, "JetBrainsMono-Regular.ttf", 14f);
                 Styles.MediumFont = PlatformBackend.LoadFont(ResourcesPath, "Roboto-Medium.ttf", 14f);
@@ -101,11 +113,24 @@ namespace Pulsar4X.Client
             {
                 Console.WriteLine($"Error setting up game data: {e.Message}");
             }
+
+            _debugSDLFontHeight = SDL3.TTF.GetFontHeight(Styles.SDLDefaultFont);
         }
+
+        internal event EventHandler<SDL.Event> MouseMoveOccured;
+        internal event EventHandler<SDL.Event> MouseButtonDownOccured;
+        internal event EventHandler<SDL.Event> MouseButtonUpOccured;
+        internal event EventHandler<SDL.Event> MouseWheelOccured;
 
         public override void HandleEvent(SDL.Event e)
         {
-            (float mouseX, float mouseY, SDL.MouseButtonFlags mouseFlags) = GetMouseState();
+            (float mX, float mY, SDL.MouseButtonFlags mouseFlags) = GetMouseState();
+
+            if (mX != mouseX || mY != mouseY)
+                MouseMoveOccured?.Invoke(this, e);
+
+            mouseX = mX;
+            mouseY = mY;
 
             if(!_state.IsGameLoaded)
             {
@@ -120,71 +145,24 @@ namespace Pulsar4X.Client
                 return;
             }
 
-            if (e.Type == (uint)SDL.EventType.MouseButtonDown && e.Button.Button == 1 & !PlatformBackend.WantsMouseCapture())
+            if (!PlatformBackend.WantsMouseCapture() || _state.IsMouseOverMapOverlay)
             {
-                _state.OnFocusMoved();
-                _state.Camera.IsGrabbingMap = true;
-                _state.Camera.MouseFrameIncrementX = e.Motion.X;
-                _state.Camera.MouseFrameIncrementY = e.Motion.Y;
-                mouseDownX = mouseX;
-                mouseDownY = mouseY;
-            }
-
-            if (e.Type == (uint)SDL.EventType.MouseButtonUp && e.Button.Button == 1)
-            {
-                _state.Camera.IsGrabbingMap = false;
-
-                if (mouseDownX == mouseX && mouseDownY == mouseY) //click on map.
+                switch (e.Type)
                 {
-                    _state.MapClicked(_state.Camera.WorldCoordinate_m(mouseX, mouseY), MouseButtons.Primary); //sdl and imgu use different numbers for buttons.
+                    case (uint)SDL.EventType.MouseButtonDown:
+                        MouseButtonDownOccured?.Invoke(this, e);
+                        break;
+                    case (uint)SDL.EventType.MouseButtonUp:
+                        MouseButtonUpOccured?.Invoke(this, e);
+                        break;
+                    case (uint)SDL.EventType.MouseWheel:
+                        MouseWheelOccured?.Invoke(this, e);
+                        break;
                 }
-            }
-
-            if (e.Type == (uint)SDL.EventType.MouseButtonDown && e.Button.Button == 3 & !PlatformBackend.WantsMouseCapture())
-            {
-                _state.OnFocusMoved();
-                mouseDownAltX = (int)mouseX;
-                mouseDownAltY = (int)mouseY;
-            }
-
-            if (e.Type == (uint)SDL.EventType.MouseButtonUp && e.Button.Button == 3)
-            {
-                _state.OnFocusMoved();
-                _state.Camera.IsGrabbingMap = false;
-
-                if (mouseDownAltX == mouseX && mouseDownAltY == mouseY) //click on map.
-                {
-                    _state.MapClicked(_state.Camera.WorldCoordinate_m(mouseX, mouseY), MouseButtons.Alt);//sdl and imgu use different numbers for buttons.
-                }
-            }
-
-            if (_state.Camera.IsGrabbingMap && e.Type == (uint)SDL.EventType.MouseMotion)
-            {
-                int deltaX = (int)(_state.Camera.MouseFrameIncrementX - e.Motion.X);
-                int deltaY = (int)(_state.Camera.MouseFrameIncrementY - e.Motion.Y);
-                _state.Camera.WorldOffset_m(deltaX, deltaY);
-
-                _state.Camera.MouseFrameIncrementX = e.Motion.X;
-                _state.Camera.MouseFrameIncrementY = e.Motion.Y;
-
             }
 
             // The top of the hotkey stack should list for hotkeys
             _state.HotKeys.Peek().HandleEvent(e);
-
-            if (e.Type == (uint)SDL.EventType.MouseWheel && (!PlatformBackend.WantsMouseCapture() || _state.IsMouseOverMapOverlay))
-            {
-                _state.OnFocusMoved();
-                _state.LastZoomTime = DateTime.Now;
-                if (e.Wheel.Y > 0)
-                {
-                    _state.Camera.ZoomIn((int)mouseX, (int)mouseY);
-                }
-                else if (e.Wheel.Y < 0)
-                {
-                    _state.Camera.ZoomOut((int)mouseX, (int)mouseY);
-                }
-            }
         }
 
         public override void Update()
@@ -240,6 +218,31 @@ namespace Pulsar4X.Client
 
             // Render the UI
             RenderUI();
+
+            // If in DEBUG render the git hash as the version in the corner of the screen
+#if DEBUG
+            var version = "Version: " + AssemblyInfo.GetGitHash();
+            RenderDebugText(this.Renderer, version, 50);
+#endif
+
+            // Show FPS counter if enabled
+            if (_state.GameSettings.ShowFPS)
+            {
+                _fpsFrames += 1;
+
+                var currentTime = SDL.GetTicks();
+                var elapsedTime = currentTime - _fpsLastMeasurementTime;
+
+                if (elapsedTime >= 1000)
+                {
+                    _fpsLastMeasurement = _fpsFrames / (elapsedTime / 1000f);
+                    _fpsFrames = 0;
+                    _fpsLastMeasurementTime = currentTime;
+                }
+
+                var fps = "FPS: " + _fpsLastMeasurement.ToString();
+                RenderDebugText(this.Renderer, fps, 50 + _debugSDLFontHeight);
+            }
         }
 
         public override void PostFrameUpdate()
@@ -285,32 +288,6 @@ namespace Pulsar4X.Client
             {
                 item.Display();
             }
-
-            // Show FPS counter if enabled
-            if (_state.GameSettings.ShowFPS)
-            {
-                var fpsDispsize = ImGui.GetIO().DisplaySize;
-                var fpsPos = new Vector2(fpsDispsize.X - 120, 10);
-                ImGui.SetNextWindowPos(fpsPos, ImGuiCond.Always);
-                ImGui.SetNextWindowBgAlpha(0.7f);
-                if (Client.Interface.Widgets.Window.Begin("FPS", _gitHashFlags))
-                {
-                    ImGui.Text($"FPS: {ImGui.GetIO().Framerate:F1}");
-                    Client.Interface.Widgets.Window.End();
-                }
-            }
-
-            // If in DEBUG render the git hash as the version in the corner of the screen
-#if DEBUG
-            var dispsize = ImGui.GetIO().DisplaySize;
-            var pos = new Vector2(0, dispsize.Y - ImGui.GetFrameHeightWithSpacing());
-            ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-            if (Client.Interface.Widgets.Window.Begin("GitHash", _gitHashFlags))
-            {
-                ImGui.Text("Version: " + AssemblyInfo.GetGitHash());
-            }
-            Client.Interface.Widgets.Window.End();
-#endif
         }
 
         public override void Exit()
@@ -320,6 +297,9 @@ namespace Pulsar4X.Client
 
             // save the game settings on exit
             _state.GameSettings.Save();
+
+            // Cleanup SDL TTF
+            SDL3.TTF.CloseFont(Styles.SDLDefaultFont);
         }
 
         /// <summary>
@@ -482,6 +462,55 @@ namespace Pulsar4X.Client
                 string destSubDir = Path.Combine(destinationDir, subDirName);
                 DeleteThenCopyToDirectory(subDir, destSubDir);
             }
+        }
+
+        private static void RenderDebugText(IntPtr renderer, string text, int y)
+        {
+            if (renderer == IntPtr.Zero)
+                return;
+
+            SDL.Color white = new () {
+                R = 255,
+                G = 255,
+                B = 255,
+                A = 255
+            };
+
+            IntPtr surface = SDL3.TTF.RenderTextSolid(
+                    Styles.SDLDefaultFont,
+                    text,
+                    0,
+                    white);
+
+            if (surface == IntPtr.Zero) {
+                Trace.WriteLine("RenderDebugText: failed to create surface");
+                return;
+            }
+
+            IntPtr texture = SDL.CreateTextureFromSurface(renderer, surface);
+
+            if (texture == IntPtr.Zero) {
+                SDL.DestroySurface(surface);
+
+                Trace.WriteLine("RenderDebugText: failed to create texture from surface");
+                return;
+            }
+
+            int h;
+            int w;
+            SDL3.TTF.GetStringSize(Styles.SDLDefaultFont, text, 0, out w, out h);
+
+            SDL.FRect frect = new () {
+                X = 5,
+                Y = y,
+                W = w,
+                H = h
+            };
+
+            SDL.RenderTexture(renderer, texture, IntPtr.Zero, ref frect);
+
+            SDL.DestroyTexture(texture);
+            SDL.DestroySurface(surface);
         }
     }
 }

@@ -97,7 +97,6 @@ namespace Pulsar4X.Client
         public event EntityClickedEventHandler? EntityClickedEvent;
         internal EntityState? LastClickedEntity = null;
         internal EntityState? PrimaryEntity { get; private set; }
-        internal Orbital.Vector3 LastWorldPointClicked_m { get; set; }
         //internal SpaceMasterVM SpaceMasterVM;
         internal bool SMenabled = false;
         internal Dictionary<int, EntityWindow> EntityWindows { get; private set; } = new();
@@ -180,6 +179,50 @@ namespace Pulsar4X.Client
             this.Img_Select();
             this.Img_Tree();
             this.Img_Up();
+
+            var mainWin = (PulsarMainWindow)ViewPort;
+            mainWin.MouseButtonDownOccured += (object sender, SDL.Event e) => {
+                OnFocusMoved();
+
+                if (e.Button.Button == 1)
+                {
+                    Camera.IsGrabbingMap = true;
+                    Camera.MouseFrameIncrementX = e.Motion.X;
+                    Camera.MouseFrameIncrementY = e.Motion.Y;
+                }
+            };
+            mainWin.MouseButtonUpOccured += (object sender, SDL.Event e) => {
+                OnFocusMoved();
+
+                if (e.Button.Button == 1)
+                {
+                    Camera.IsGrabbingMap = false;
+                    MapClicked(Camera.WorldCoordinate_m(e.Motion.X, e.Motion.Y), MouseButtons.Primary);
+                }
+                else if (e.Button.Button == 3)
+                {
+                    MapClicked(Camera.WorldCoordinate_m(e.Motion.X, e.Motion.Y), MouseButtons.Alt);
+                }
+            };
+            mainWin.MouseWheelOccured += (object sender, SDL.Event e) => {
+                OnFocusMoved();
+                LastZoomTime = DateTime.Now;
+
+                if (e.Wheel.Y > 0)
+                    Camera.ZoomIn((int)e.Wheel.MouseX, (int)e.Wheel.MouseY);
+                else if (e.Wheel.Y < 0)
+                    Camera.ZoomOut((int)e.Wheel.MouseX, (int)e.Wheel.MouseY);
+            };
+            mainWin.MouseMoveOccured += (object sender, SDL.Event e) => {
+                if (Camera.IsGrabbingMap)
+                {
+                    Camera.WorldOffset_m(
+                            (int)(Camera.MouseFrameIncrementX - e.Motion.X),
+                            (int)(Camera.MouseFrameIncrementY - e.Motion.Y));
+                    Camera.MouseFrameIncrementX = e.Motion.X;
+                    Camera.MouseFrameIncrementY = e.Motion.Y;
+                }
+            };
         }
 
         private void DeactivateAllClosableWindows()
@@ -348,14 +391,6 @@ namespace Pulsar4X.Client
         //checks wether the planet icon is clicked
         internal void MapClicked(Orbital.Vector3 worldCoord, MouseButtons button)
         {
-            if (button == MouseButtons.Primary)
-                LastWorldPointClicked_m = worldCoord;
-
-            ActiveWindow?.MapClicked(worldCoord, button);
-
-            if (LoadedWindows.ContainsKey(typeof(DistanceRuler)))
-                LoadedWindows[typeof(DistanceRuler)].MapClicked(worldCoord, button);
-
             SafeDictionary<int, EntityState> allEntities = new ();
             if(StarSystemStates.ContainsKey(SelectedStarSystemId))
                 allEntities = StarSystemStates[SelectedStarSystemId].EntityStatesWithNames;
@@ -399,9 +434,6 @@ namespace Pulsar4X.Client
                     }
                 }
             }
-
-            if (LoadedWindows.ContainsKey(typeof(ToolBarWindow)))
-                LoadedWindows[typeof(ToolBarWindow)].MapClicked(worldCoord, button);
         }
 
         internal void EntitySelectedAsPrimary(int entityGuid, string starSys)
