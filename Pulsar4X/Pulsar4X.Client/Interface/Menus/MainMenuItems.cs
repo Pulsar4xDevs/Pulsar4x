@@ -31,7 +31,10 @@ namespace Pulsar4X.Client
             if(!IsActive) return;
 
             System.Numerics.Vector2 size = new System.Numerics.Vector2(412, 300);
-            System.Numerics.Vector2 pos = new System.Numerics.Vector2(_uiState.MainWinSize.X / 2 - size.X / 2, _uiState.MainWinSize.Y / 2 - size.Y / 2);
+            System.Numerics.Vector2 pos = new System.Numerics.Vector2(
+                    _uiState.ViewPort.Size.Width / 2 - size.X / 2,
+                    _uiState.ViewPort.Size.Height / 2 - size.Y / 2);
+
             ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(10, 10));

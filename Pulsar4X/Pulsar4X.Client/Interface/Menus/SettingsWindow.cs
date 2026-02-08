@@ -57,7 +57,9 @@ namespace Pulsar4X.Client
             if (IsActive)
             {
                 System.Numerics.Vector2 size = new System.Numerics.Vector2(600, 700);
-                System.Numerics.Vector2 pos = new System.Numerics.Vector2(_uiState.MainWinSize.X / 2 - size.X / 2, _uiState.MainWinSize.Y / 2 - size.Y / 2);
+                System.Numerics.Vector2 pos = new System.Numerics.Vector2(
+                        _uiState.ViewPort.Size.Width / 2 - size.X / 2,
+                        _uiState.ViewPort.Size.Height / 2 - size.Y / 2);
 
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
@@ -140,7 +142,7 @@ namespace Pulsar4X.Client
             
             // Debug info
             var currentWindowSize = _uiState.ViewPort.Size;
-            ImGui.Text($"Current Window Size: {(int)currentWindowSize.X}x{(int)currentWindowSize.Y}");
+            ImGui.Text($"Current Window Size: {(int)currentWindowSize.Width}x{(int)currentWindowSize.Height}");
             ImGui.Text($"GameSettings Size: {settings.WindowWidth}x{settings.WindowHeight}");
             ImGui.Separator();
             

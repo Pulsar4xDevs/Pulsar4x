@@ -139,16 +139,16 @@ namespace Pulsar4X.Client
 
         private Vector2 CalculateWindowPosition()
         {
-            var viewportSize = _uiState.MainWinSize;
+            var viewportSize = _uiState.ViewPort.Size;
 
             // Final position: bottom right corner
-            float finalX = viewportSize.X - WindowWidth - RightMargin;
-            float finalY = viewportSize.Y - WindowHeight - BottomMargin;
+            float finalX = viewportSize.Width - WindowWidth - RightMargin;
+            float finalY = viewportSize.Height - WindowHeight - BottomMargin;
 
             // Animate from right (offscreen beyond right edge) into final position
             // When progress is 0, window is offscreen to the right
             // When progress is 1, window is at its final position
-            float startX = viewportSize.X; // Start completely off-screen to the right
+            float startX = viewportSize.Width; // Start completely off-screen to the right
             float currentX = startX + (finalX - startX) * _animationProgress;
 
             return new Vector2(currentX, finalY);

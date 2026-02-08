@@ -105,7 +105,7 @@ namespace Pulsar4X.Client
             try
             {
                 // Apply resolution
-                window.Size = new System.Numerics.Vector2(WindowWidth, WindowHeight);
+                window.Size = new (WindowWidth, WindowHeight);
 
                 // Apply display mode
                 switch (DisplayMode)
@@ -126,7 +126,7 @@ namespace Pulsar4X.Client
                         var mode = SDL.GetCurrentDisplayMode(SDL.GetPrimaryDisplay());
                         if (mode != null)
                         {
-                            window.Size = new System.Numerics.Vector2(mode.Value.W, mode.Value.H);
+                            window.Size = new (mode.Value.W, mode.Value.H);
                             SDL.SetWindowPosition(window.Window, 0, 0);
                         }
                         break;

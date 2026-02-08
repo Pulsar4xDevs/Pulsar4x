@@ -58,12 +58,21 @@ namespace Pulsar4X.Client
 
         //public ImVec2 WorldPosition { get { return _cameraWorldPosition; } }
 
-        public Vector2 ViewPortCenter { get { return new Orbital.Vector2(_viewPort.Size.X * 0.5f, _viewPort.Size.Y * 0.5f); } }
+        public Vector2 ViewPortCenter {
+            get {
+                var s = _viewPort.Size;
+                return new Orbital.Vector2(s.Width * 0.5f, s.Height * 0.5f);
+            }
+        }
 
         public Vector2 ViewPortSize
         {
-            get { return new Orbital.Vector2(_viewPort.Size); }
+            get {
+                var s = _viewPort.Size;
+                return new Orbital.Vector2(s.Width, s.Height);
+            }
         }
+
         public float ZoomLevel { get; set; } = 200;
         public double ZoomLevel_m { get; set; } = 1.496e11 / 200;
         public float zoomSpeed { get; set; } = 1.25f;

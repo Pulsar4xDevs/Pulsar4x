@@ -87,7 +87,7 @@ namespace Pulsar4X.Client
             }
         }
 
-        public Vector2 Size
+        public System.Drawing.Size Size
         {
             get
             {
@@ -96,7 +96,7 @@ namespace Pulsar4X.Client
             }
             set
             {
-                SDL.SetWindowSize(Window, (int) Math.Round(value.X), (int) Math.Round(value.Y));
+                SDL.SetWindowSize(Window, value.Width, value.Height);
             }
         }
 

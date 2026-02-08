@@ -85,7 +85,6 @@ namespace Pulsar4X.Client
         internal SafeDictionary<string, SystemState> StarSystemStates = new ();
         internal Camera Camera;
         internal SDL3Window ViewPort { get; private set; }
-        internal System.Numerics.Vector2 MainWinSize { get {return ViewPort.Size;}}
 
         internal Dictionary<Type, PulsarGuiWindow> LoadedWindows = new ();
         internal Dictionary<String, NonUniquePulsarGuiWindow> LoadedNonUniqueWindows = new ();

@@ -44,8 +44,8 @@ namespace Pulsar4X.Client
 
             var size = window.Size;
             int cellSize = 16;
-            int gridwid = (int)size.X / cellSize;
-            int gridhig = (int)size.Y / cellSize;
+            int gridwid = (int)size.Width / cellSize;
+            int gridhig = (int)size.Height / cellSize;
             grid = new CollisionGrid(gridwid, gridhig, cellSize);
             _state.EntityClickedEvent += _state_EntityClickedEvent;
             _state.OnFactionChanged += SetFaction;
