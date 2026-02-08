@@ -122,9 +122,6 @@ namespace Pulsar4X.Client
             if(!SDL.CreateWindowAndRenderer(title, width, height, flags, out Window, out Renderer))
                 throw new Exception($"SDL_CreateWindowAndRenderer failed: {SDL.GetError()}");
 
-            // Enable VSync
-            SDL.SetRenderVSync(Renderer, 1);
-
             // Create ImGui context
             ImGuiContext = ImGui.CreateContext();
             ImGui.SetCurrentContext(ImGuiContext);
