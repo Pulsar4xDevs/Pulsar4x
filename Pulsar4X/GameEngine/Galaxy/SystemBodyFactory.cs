@@ -1028,6 +1028,12 @@ namespace Pulsar4X.Galaxy
                 return;
             }
 
+            // Non-comet, non-asteroid bodies are visible by default (stars, planets, moons, dwarf planets)
+            if (systemBodyDB.BodyType != BodyType.Comet && !body.HasDataBlob<VisibleByDefaultDB>())
+            {
+                body.SetDataBlob(new VisibleByDefaultDB());
+            }
+
             FinalizeSystemBodyDB(dataStore, system, body);
             FinalizeNameDB(body, bodyOrbit.Parent, bodyCount);
 
@@ -1153,6 +1159,7 @@ namespace Pulsar4X.Galaxy
                 FinalizeAsteroidOrbit(system, newBody, referenceOrbit);
                 FinalizeSystemBodyDB(dataStore, system, newBody);
                 FinalizeNameDB(newBody, referenceOrbit.Parent, bodyCount, "-A" + asteroidCount.ToString());
+                newBody.SetDataBlob(new VisibleByDefaultDB());
 
                 beltMVDB.MassDry -= mvDB.MassDry;
                 asteroidCount++;
