@@ -146,6 +146,19 @@ namespace Pulsar4X.Client
             ImGui.Text($"GameSettings Size: {settings.WindowWidth}x{settings.WindowHeight}");
             ImGui.Separator();
             
+            // Display Mode
+            ImGui.Text("Display Mode:");
+            int displayModeIndex = (int)settings.DisplayMode;
+            string[] displayModes = { "Windowed", "Fullscreen", "Borderless Fullscreen" };
+            if (ImGui.Combo("##DisplayMode", ref displayModeIndex, displayModes, displayModes.Length))
+            {
+                settings.DisplayMode = (Pulsar4X.Client.GameSettings.DisplayModeType)displayModeIndex;
+            }
+
+            var isWindowed = displayModeIndex == (int)GameSettings.DisplayModeType.Windowed;
+            if (!isWindowed)
+                ImGui.BeginDisabled();
+
             // Resolution
             ImGui.Text("Resolution:");
             int currentResolutionIndex = Pulsar4X.Client.GameSettings.CommonResolutions.FindIndex(r => r.width == settings.WindowWidth && r.height == settings.WindowHeight);
@@ -159,14 +172,8 @@ namespace Pulsar4X.Client
                 settings.WindowHeight = selectedRes.height;
             }
 
-            // Display Mode
-            ImGui.Text("Display Mode:");
-            int displayModeIndex = (int)settings.DisplayMode;
-            string[] displayModes = { "Windowed", "Fullscreen", "Borderless Fullscreen" };
-            if (ImGui.Combo("##DisplayMode", ref displayModeIndex, displayModes, displayModes.Length))
-            {
-                settings.DisplayMode = (Pulsar4X.Client.GameSettings.DisplayModeType)displayModeIndex;
-            }
+            if (!isWindowed)
+                ImGui.EndDisabled();
 
             // VSync
             bool vsync = settings.VSync;

@@ -104,32 +104,25 @@ namespace Pulsar4X.Client
         {
             try
             {
-                // Apply resolution
-                window.Size = new (WindowWidth, WindowHeight);
-
                 // Apply display mode
-                switch (DisplayMode)
+                SDL.SetWindowFullscreen(window.Window, DisplayMode == DisplayModeType.Fullscreen);
+                if (DisplayMode == DisplayModeType.Windowed)
                 {
-                    case DisplayModeType.Windowed:
-                        SDL.SetWindowFullscreen(window.Window, false);
-                        SDL.SetWindowBordered(window.Window, true);
-                        break;
+                    SDL.SetWindowBordered(window.Window, true);
+                    window.Size = new (WindowWidth, WindowHeight);
+                }
+                else if (DisplayMode == DisplayModeType.BorderlessFullscreen)
+                {
+                    SDL.SetWindowBordered(window.Window, false);
 
-                    case DisplayModeType.Fullscreen:
-                        SDL.SetWindowFullscreen(window.Window, true);
-                        break;
-
-                    case DisplayModeType.BorderlessFullscreen:
-                        SDL.SetWindowFullscreen(window.Window, false);
-                        SDL.SetWindowBordered(window.Window, false);
-                        // Get desktop resolution for borderless fullscreen
-                        var mode = SDL.GetCurrentDisplayMode(SDL.GetPrimaryDisplay());
-                        if (mode != null)
-                        {
-                            window.Size = new (mode.Value.W, mode.Value.H);
-                            SDL.SetWindowPosition(window.Window, 0, 0);
-                        }
-                        break;
+                    // This won't work with wayland: https://wiki.libsdl.org/SDL3/README-wayland
+                    // Get desktop resolution for borderless fullscreen
+                    var mode = SDL.GetCurrentDisplayMode(SDL.GetPrimaryDisplay());
+                    if (mode != null)
+                    {
+                        window.Size = new (mode.Value.W, mode.Value.H);
+                        SDL.SetWindowPosition(window.Window, 0, 0);
+                    }
                 }
 
                 // Apply VSync
