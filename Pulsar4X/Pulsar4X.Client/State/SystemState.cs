@@ -136,6 +136,10 @@ namespace Pulsar4X.Client
                 // Deal with removals
                 foreach (var entityToRemove in EntitiesToBin)
                 {
+                    if(AllEntities.TryGetValue(entityToRemove, out var entityState))
+                    {
+                        entityState.Unsubscribe();
+                    }
                     AllEntities.Remove(entityToRemove);
                     EntityStatesWithPosition.Remove(entityToRemove);
                     EntityStatesWithNames.Remove(entityToRemove);

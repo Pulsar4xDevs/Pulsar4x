@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using ImGuiNET;
 
@@ -9,6 +10,8 @@ namespace Pulsar4X.Client
         public static ImFontPtr DefaultFont;
         public static ImFontPtr MonospaceFont;
         public static ImFontPtr MediumFont;
+
+        public static IntPtr SDLDefaultFont;
 
         public static Vector4 StandardText = new Vector4(1f, 1f, 1f, 1f);
         public static Vector4 HighlightColor = new(0.25f, 1f, 0.25f, 0.9f);

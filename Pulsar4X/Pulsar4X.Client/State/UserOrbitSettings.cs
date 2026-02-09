@@ -53,4 +53,5 @@ public class UserOrbitSettings
     public byte Blu = 255;
     public byte MaxAlpha = 255;
     public byte MinAlpha = 0;
+    public byte GhostOrbitAlpha = 20;
 }

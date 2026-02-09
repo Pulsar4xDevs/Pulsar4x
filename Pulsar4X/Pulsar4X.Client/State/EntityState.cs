@@ -167,6 +167,18 @@ namespace Pulsar4X.Client
             MessagePublisher.Instance.Subscribe(MessageTypes.EntityHidden, OnEntityRemoved, filterById);
         }
 
+        /// <summary>
+        /// Unsubscribes from all message events. Must be called when this EntityState
+        /// is removed from a SystemState to prevent memory leaks and ghost updates.
+        /// </summary>
+        public void Unsubscribe()
+        {
+            MessagePublisher.Instance.Unsubscribe(MessageTypes.EntityRemoved, OnEntityRemoved);
+            MessagePublisher.Instance.Unsubscribe(MessageTypes.DBAdded, OnDBAdded);
+            MessagePublisher.Instance.Unsubscribe(MessageTypes.DBRemoved, OnDBRemoved);
+            MessagePublisher.Instance.Unsubscribe(MessageTypes.EntityHidden, OnEntityRemoved);
+        }
+
         Task OnEntityRemoved(Message message)
         {
             DataBlobs.Clear();

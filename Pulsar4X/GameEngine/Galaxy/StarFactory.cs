@@ -207,7 +207,8 @@ namespace Pulsar4X.Galaxy
                 var nameDB = new NameDB($"{system.ManagerID} {stars.Count + 1}");
                 var orbitDB = new OrbitDB();
 
-                var baseDataBlobs = new List<BaseDataBlob> { nameDB, starMVDB, starData, positionData, orbitDB };
+                var emmisionSignature = SensorTools.SetStarEmmisionSig(starData, starMVDB);
+                var baseDataBlobs = new List<BaseDataBlob> { nameDB, starMVDB, starData, positionData, orbitDB, emmisionSignature, new VisibleByDefaultDB() };
 
                 var entity = Entity.Create();
                 system.AddEntity(entity, baseDataBlobs);

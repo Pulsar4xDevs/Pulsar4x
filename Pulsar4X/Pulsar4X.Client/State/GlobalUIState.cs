@@ -97,7 +97,6 @@ namespace Pulsar4X.Client
         public event EntityClickedEventHandler? EntityClickedEvent;
         internal EntityState? LastClickedEntity = null;
         internal EntityState? PrimaryEntity { get; private set; }
-        internal Orbital.Vector3 LastWorldPointClicked_m { get; set; }
         //internal SpaceMasterVM SpaceMasterVM;
         internal bool SMenabled = false;
         internal Dictionary<int, EntityWindow> EntityWindows { get; private set; } = new();
@@ -113,7 +112,7 @@ namespace Pulsar4X.Client
         /// This is set during rendering and checked during the next frame's event handling.
         /// </summary>
         internal bool IsMouseOverMapOverlay = false;
-        
+
         // Game Settings
         internal GameSettings GameSettings { get; set; }
 
@@ -124,7 +123,7 @@ namespace Pulsar4X.Client
             var windowPtr = viewport.Window;
 
             SDLRendererPtr = SDL.CreateRenderer(windowPtr, "pulsar4x");
-            
+
             // Load game settings
             GameSettings = GameSettings.Load();
 
@@ -145,6 +144,55 @@ namespace Pulsar4X.Client
                 {
                     UserOrbitSettingsMtx[i].Add(new UserOrbitSettings());
                 }
+            }
+
+            // Stars: yellowish, ~120 degree tail
+            foreach (var settings in UserOrbitSettingsMtx[(int)UserOrbitSettings.OrbitBodyType.Star])
+            {
+                settings.Red = 255;
+                settings.Grn = 220;
+                settings.Blu = 80;
+                settings.EllipseSweepRadians = 2.09f; // ~120 degrees
+            }
+
+            // Planets/dwarf planets/moons: ~90 degree tail
+            foreach (int bodyIdx in new[] {
+                (int)UserOrbitSettings.OrbitBodyType.Planet,
+                (int)UserOrbitSettings.OrbitBodyType.DwarfPlanet,
+                (int)UserOrbitSettings.OrbitBodyType.Moon })
+            {
+                foreach (var settings in UserOrbitSettingsMtx[bodyIdx])
+                {
+                    settings.EllipseSweepRadians = 1.57f; // ~90 degrees
+                }
+            }
+
+            // Asteroids: subtle dark gray, very short tail
+            foreach (var settings in UserOrbitSettingsMtx[(int)UserOrbitSettings.OrbitBodyType.Asteroid])
+            {
+                settings.Red = 55;
+                settings.Grn = 55;
+                settings.Blu = 55;
+                settings.MaxAlpha = 160;
+                settings.GhostOrbitAlpha = 0;
+                settings.EllipseSweepRadians = 0.26f; // ~15 degrees
+            }
+
+            // Ships: short tail, no ghost orbit
+            foreach (var settings in UserOrbitSettingsMtx[(int)UserOrbitSettings.OrbitBodyType.Ship])
+            {
+                settings.EllipseSweepRadians = 0.26f; // ~15 degrees
+                settings.GhostOrbitAlpha = 0;
+            }
+
+            // Comets: white-ish, very short tail
+            foreach (var settings in UserOrbitSettingsMtx[(int)UserOrbitSettings.OrbitBodyType.Comet])
+            {
+                settings.Red = 200;
+                settings.Grn = 210;
+                settings.Blu = 220;
+                settings.MaxAlpha = 160;
+                settings.EllipseSweepRadians = 0.26f; // ~15 degrees
             }
 
             HotKeys.Push(HotKeyFactory.CreateDefault());
@@ -180,6 +228,50 @@ namespace Pulsar4X.Client
             this.Img_Select();
             this.Img_Tree();
             this.Img_Up();
+
+            var mainWin = (PulsarMainWindow)ViewPort;
+            mainWin.MouseButtonDownOccured += (object sender, SDL.Event e) => {
+                OnFocusMoved();
+
+                if (e.Button.Button == 1)
+                {
+                    Camera.IsGrabbingMap = true;
+                    Camera.MouseFrameIncrementX = e.Motion.X;
+                    Camera.MouseFrameIncrementY = e.Motion.Y;
+                }
+            };
+            mainWin.MouseButtonUpOccured += (object sender, SDL.Event e) => {
+                OnFocusMoved();
+
+                if (e.Button.Button == 1)
+                {
+                    Camera.IsGrabbingMap = false;
+                    MapClicked(Camera.WorldCoordinate_m(e.Motion.X, e.Motion.Y), MouseButtons.Primary);
+                }
+                else if (e.Button.Button == 3)
+                {
+                    MapClicked(Camera.WorldCoordinate_m(e.Motion.X, e.Motion.Y), MouseButtons.Alt);
+                }
+            };
+            mainWin.MouseWheelOccured += (object sender, SDL.Event e) => {
+                OnFocusMoved();
+                LastZoomTime = DateTime.Now;
+
+                if (e.Wheel.Y > 0)
+                    Camera.ZoomIn((int)e.Wheel.MouseX, (int)e.Wheel.MouseY);
+                else if (e.Wheel.Y < 0)
+                    Camera.ZoomOut((int)e.Wheel.MouseX, (int)e.Wheel.MouseY);
+            };
+            mainWin.MouseMoveOccured += (object sender, SDL.Event e) => {
+                if (Camera.IsGrabbingMap)
+                {
+                    Camera.WorldOffset_m(
+                            (int)(Camera.MouseFrameIncrementX - e.Motion.X),
+                            (int)(Camera.MouseFrameIncrementY - e.Motion.Y));
+                    Camera.MouseFrameIncrementX = e.Motion.X;
+                    Camera.MouseFrameIncrementY = e.Motion.Y;
+                }
+            };
         }
 
         private void DeactivateAllClosableWindows()
@@ -348,14 +440,6 @@ namespace Pulsar4X.Client
         //checks wether the planet icon is clicked
         internal void MapClicked(Orbital.Vector3 worldCoord, MouseButtons button)
         {
-            if (button == MouseButtons.Primary)
-                LastWorldPointClicked_m = worldCoord;
-
-            ActiveWindow?.MapClicked(worldCoord, button);
-
-            if (LoadedWindows.ContainsKey(typeof(DistanceRuler)))
-                LoadedWindows[typeof(DistanceRuler)].MapClicked(worldCoord, button);
-
             SafeDictionary<int, EntityState> allEntities = new ();
             if(StarSystemStates.ContainsKey(SelectedStarSystemId))
                 allEntities = StarSystemStates[SelectedStarSystemId].EntityStatesWithNames;
@@ -399,9 +483,6 @@ namespace Pulsar4X.Client
                     }
                 }
             }
-
-            if (LoadedWindows.ContainsKey(typeof(ToolBarWindow)))
-                LoadedWindows[typeof(ToolBarWindow)].MapClicked(worldCoord, button);
         }
 
         internal void EntitySelectedAsPrimary(int entityGuid, string starSys)

@@ -229,10 +229,12 @@ namespace Pulsar4X.Client
                                 ImGui.Text("Orbiting");
                                 ImGui.PopStyleColor();
                                 ImGui.NextColumn();
-                                if (ImGui.SmallButton(positionDB.Parent?.GetName(factionID) ?? "Unknown"))
+                                // Find the first visible parent (hidden entities like surveyed anomalies shouldn't show)
+                                var visibleParent = GetVisibleParent(positionDB, starSystem);
+                                if (ImGui.SmallButton(visibleParent?.GetName(factionID) ?? "Unknown"))
                                 {
-                                    if(positionDB.Parent != null && starSystem != null)
-                                        _uiState.EntityClicked(positionDB.Parent.Id, starSystem.ManagerID, MouseButtons.Primary);
+                                    if(visibleParent != null && starSystem != null)
+                                        _uiState.EntityClicked(visibleParent.Id, starSystem.ManagerID, MouseButtons.Primary);
                                 }
                             }
                             else
@@ -600,9 +602,6 @@ namespace Pulsar4X.Client
                             {
                                 if(jumpGateDB.OwningEntity != null)
                                 {
-                                    var order = WarpFleetTowardsTargetOrder.CreateCommand(SelectedFleet, jumpGateDB.OwningEntity);
-                                    _uiState.Game.OrderHandler.HandleOrder(order);
-
                                     JumpOrder.CreateAndExecute(_uiState.Game, _uiState.Faction, SelectedFleet, jumpGateDB);
                                 }
                             }
@@ -1043,6 +1042,37 @@ namespace Pulsar4X.Client
                 selectedOrder?.Actions.Remove(action);
             }
             ImGui.PopID();
+        }
+
+        /// <summary>
+        /// Finds the first visible parent entity in the hierarchy.
+        /// If the immediate parent is hidden (e.g., a surveyed anomaly), walks up the tree
+        /// to find the next visible ancestor.
+        /// </summary>
+        private Entity? GetVisibleParent(PositionDB positionDB, StarSystem? starSystem)
+        {
+            if (starSystem == null)
+                return positionDB.Parent;
+
+            if (!_uiState.StarSystemStates.TryGetValue(starSystem.ManagerID, out var systemState))
+                return positionDB.Parent;
+
+            var parent = positionDB.Parent;
+            while (parent != null)
+            {
+                // Check if this parent is visible to the faction
+                if (systemState.AllEntities.ContainsKey(parent.Id))
+                    return parent;
+
+                // Walk up to the next parent
+                if (parent.TryGetDataBlob<PositionDB>(out var parentPositionDB))
+                    parent = parentPositionDB.Parent;
+                else
+                    break;
+            }
+
+            // If no visible parent found, return the root or null
+            return positionDB.Root != positionDB.OwningEntity ? positionDB.Root : null;
         }
     }
 }
