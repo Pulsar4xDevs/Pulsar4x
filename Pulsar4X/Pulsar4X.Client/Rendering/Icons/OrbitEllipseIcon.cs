@@ -150,11 +150,10 @@ namespace Pulsar4X.Client
             _drawPoints[0] = new SDL.Point(){ X = (int)spos.X, Y = (int)spos.Y};
             for (int i = 1; i < _numberOfDrawSegments; i++)
             {
-                if (index < _numberOfArcSegments - 1)
-
-                    index++;
+                if (index > 0)
+                    index--;
                 else
-                    index = 0;
+                    index = _numberOfArcSegments - 1;
 
                 _drawPoints[i] = mtrx.TransformToSDL_Point(_points[index].X, _points[index].Y);
             }
