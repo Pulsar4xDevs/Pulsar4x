@@ -294,10 +294,20 @@ namespace Pulsar4X.Engine
         {
             foreach (var entity in _entitiesTaggedForRemoval)
             {
+                // If the entity was transferred to another manager via Transfer(),
+                // its Manager now points to the new manager. The datablob objects in
+                // our stores are the SAME objects now used by the new manager, so we
+                // must NOT call OnRemovedFromEntity() on them (that would destroy
+                // their tree hierarchy - PositionDB parent, FleetDB children, etc.).
+                bool wasTransferred = entity.Manager != null && entity.Manager != this;
+
                 foreach (var (type, dictionary) in _datablobStores)
                 {
                     if(dictionary.ContainsKey(entity.Id))
-                        dictionary[entity.Id].OnRemovedFromEntity();
+                    {
+                        if(!wasTransferred)
+                            dictionary[entity.Id].OnRemovedFromEntity();
+                    }
 
                     dictionary.Remove(entity.Id);
                 }
