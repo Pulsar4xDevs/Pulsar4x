@@ -703,7 +703,14 @@ namespace Pulsar4X.Galaxy
             var orbitalDistanceRange = _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType];
             double semiMajorAxis = Distance.AuToMt(GeneralMath.Lerp(orbitalDistanceRange, system.RNGNextDouble()));
             double eccentricity = GeneralMath.Lerp(_galaxyGen.Settings.BodyEccentricityByType[BodyType.Comet], system.RNGNextDouble());
-            double inclination = system.RNGNextDouble() * _galaxyGen.Settings.MaxBodyInclination;
+            double inclination = Angle.ToRadians(system.RNGNextDouble() * _galaxyGen.Settings.MaxBodyInclination);
+            //flatten the inclination, we're only using inclination to define prograde vs retrograde orbits.
+            inclination = Angle.NormaliseRadiansPositive(inclination);
+            if (inclination > 0.5 * Math.PI && inclination < 1.5 * Math.PI)
+                inclination = Math.PI;
+            else
+                inclination = 0;
+
             double longitudeOfAscendingNode = system.RNGNextDouble() * 2 * Math.PI;
             double argumentOfPeriapsis = system.RNGNextDouble() * 2 * Math.PI;
             double meanAnomaly = system.RNGNextDouble() * 2 * Math.PI;
@@ -1014,7 +1021,15 @@ namespace Pulsar4X.Galaxy
             // Now select a random eccentricity within the limits.
             double eccentricity = GeneralMath.Lerp(eccentricityMinMax, system.RNGNextDouble());
 
-            return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, system.RNGNextDouble() * _galaxyGen.Settings.MaxBodyInclination, system.RNGNextDouble() * 2 * Math.PI, system.RNGNextDouble() * 2 * Math.PI, system.RNGNextDouble() * 2 * Math.PI, currentDateTime);
+            double inclination = Angle.ToRadians(system.RNGNextDouble() * _galaxyGen.Settings.MaxBodyInclination);
+            //flatten the inclination, we're only using inclination to define prograde vs retrograde orbits.
+            inclination = Angle.NormaliseRadiansPositive(inclination);
+            if (inclination > 0.5 * Math.PI && inclination < 1.5 * Math.PI)
+                inclination = Math.PI;
+            else
+                inclination = 0;
+
+            return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, inclination, system.RNGNextDouble() * 2 * Math.PI, system.RNGNextDouble() * 2 * Math.PI, system.RNGNextDouble() * 2 * Math.PI, currentDateTime);
         }
 
         private void FinalizeBodies(ModDataStore dataStore, StarSystem system, Entity body, int bodyCount, DateTime currentDateTime)
