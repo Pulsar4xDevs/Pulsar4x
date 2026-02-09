@@ -112,7 +112,7 @@ namespace Pulsar4X.Client
         /// This is set during rendering and checked during the next frame's event handling.
         /// </summary>
         internal bool IsMouseOverMapOverlay = false;
-        
+
         // Game Settings
         internal GameSettings GameSettings { get; set; }
 
@@ -123,7 +123,7 @@ namespace Pulsar4X.Client
             var windowPtr = viewport.Window;
 
             SDLRendererPtr = SDL.CreateRenderer(windowPtr, "pulsar4x");
-            
+
             // Load game settings
             GameSettings = GameSettings.Load();
 
@@ -144,6 +144,55 @@ namespace Pulsar4X.Client
                 {
                     UserOrbitSettingsMtx[i].Add(new UserOrbitSettings());
                 }
+            }
+
+            // Stars: yellowish, ~120 degree tail
+            foreach (var settings in UserOrbitSettingsMtx[(int)UserOrbitSettings.OrbitBodyType.Star])
+            {
+                settings.Red = 255;
+                settings.Grn = 220;
+                settings.Blu = 80;
+                settings.EllipseSweepRadians = 2.09f; // ~120 degrees
+            }
+
+            // Planets/dwarf planets/moons: ~90 degree tail
+            foreach (int bodyIdx in new[] {
+                (int)UserOrbitSettings.OrbitBodyType.Planet,
+                (int)UserOrbitSettings.OrbitBodyType.DwarfPlanet,
+                (int)UserOrbitSettings.OrbitBodyType.Moon })
+            {
+                foreach (var settings in UserOrbitSettingsMtx[bodyIdx])
+                {
+                    settings.EllipseSweepRadians = 1.57f; // ~90 degrees
+                }
+            }
+
+            // Asteroids: subtle dark gray, very short tail
+            foreach (var settings in UserOrbitSettingsMtx[(int)UserOrbitSettings.OrbitBodyType.Asteroid])
+            {
+                settings.Red = 55;
+                settings.Grn = 55;
+                settings.Blu = 55;
+                settings.MaxAlpha = 160;
+                settings.GhostOrbitAlpha = 0;
+                settings.EllipseSweepRadians = 0.26f; // ~15 degrees
+            }
+
+            // Ships: short tail, no ghost orbit
+            foreach (var settings in UserOrbitSettingsMtx[(int)UserOrbitSettings.OrbitBodyType.Ship])
+            {
+                settings.EllipseSweepRadians = 0.26f; // ~15 degrees
+                settings.GhostOrbitAlpha = 0;
+            }
+
+            // Comets: white-ish, very short tail
+            foreach (var settings in UserOrbitSettingsMtx[(int)UserOrbitSettings.OrbitBodyType.Comet])
+            {
+                settings.Red = 200;
+                settings.Grn = 210;
+                settings.Blu = 220;
+                settings.MaxAlpha = 160;
+                settings.EllipseSweepRadians = 0.26f; // ~15 degrees
             }
 
             HotKeys.Push(HotKeyFactory.CreateDefault());
