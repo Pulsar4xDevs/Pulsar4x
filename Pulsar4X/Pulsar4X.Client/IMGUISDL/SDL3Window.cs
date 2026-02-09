@@ -87,7 +87,7 @@ namespace Pulsar4X.Client
             }
         }
 
-        public Vector2 Size
+        public System.Drawing.Size Size
         {
             get
             {
@@ -96,7 +96,7 @@ namespace Pulsar4X.Client
             }
             set
             {
-                SDL.SetWindowSize(Window, (int) Math.Round(value.X), (int) Math.Round(value.Y));
+                SDL.SetWindowSize(Window, value.Width, value.Height);
             }
         }
 
@@ -121,9 +121,6 @@ namespace Pulsar4X.Client
             // Create window & renderer
             if(!SDL.CreateWindowAndRenderer(title, width, height, flags, out Window, out Renderer))
                 throw new Exception($"SDL_CreateWindowAndRenderer failed: {SDL.GetError()}");
-
-            // Enable VSync
-            SDL.SetRenderVSync(Renderer, 1);
 
             // Create ImGui context
             ImGuiContext = ImGui.CreateContext();

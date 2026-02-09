@@ -376,7 +376,9 @@ namespace Pulsar4X.Client
                 return;
 
             var size = new System.Numerics.Vector2(200, 100);
-            var pos = new System.Numerics.Vector2(_uiState.MainWinSize.X / 2 - size.X / 2, _uiState.MainWinSize.Y / 2 - size.Y / 2);
+            var pos = new System.Numerics.Vector2(
+                    _uiState.ViewPort.Size.Width / 2 - size.X / 2,
+                    _uiState.ViewPort.Size.Height / 2 - size.Y / 2);
 
             ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowPos(pos, ImGuiCond.FirstUseEver);
