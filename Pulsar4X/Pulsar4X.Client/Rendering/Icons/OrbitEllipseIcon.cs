@@ -143,8 +143,19 @@ namespace Pulsar4X.Client
             var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
             var mtrx =  scAU * matrix * trns; //scale to au, scale for camera zoom, and move to camera position and zoom
 
+            // Transform full orbit points for ghost rendering
+            for (int i = 0; i < _numberOfArcSegments + 1 && i < _fullOrbitDrawPoints.Length; i++)
+            {
+                _fullOrbitDrawPoints[i] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
+            }
+
             int index = _index;
             var spos = camera.ViewCoordinateV2_m(_bodyAbsolutePos);
+
+            // Pin the ghost orbit point at the body's index to the actual body screen position
+            // so the ghost and tail meet at the same spot on large orbits
+            if (_index < _fullOrbitDrawPoints.Length)
+                _fullOrbitDrawPoints[_index] = new SDL.Point(){ X = (int)spos.X, Y = (int)spos.Y };
 
             //_drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
             _drawPoints[0] = new SDL.Point(){ X = (int)spos.X, Y = (int)spos.Y};
@@ -166,6 +177,19 @@ namespace Pulsar4X.Client
             //now we draw a line between each of the points in the translatedPoints[] array.
             if (_drawPoints.Count() < _numberOfDrawSegments - 1)
                 return;
+
+            // Draw faded full orbit ghost underneath
+            byte ghostAlpha = _userSettings.GhostOrbitAlpha;
+            if (ghostAlpha > 0 && _fullOrbitDrawPoints.Length > 1)
+            {
+                SDL.SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, ghostAlpha);
+                for (int i = 0; i < _numberOfArcSegments; i++)
+                {
+                    SDL.RenderLine(rendererPtr, _fullOrbitDrawPoints[i].X, _fullOrbitDrawPoints[i].Y, _fullOrbitDrawPoints[i + 1].X, _fullOrbitDrawPoints[i + 1].Y);
+                }
+            }
+
+            // Draw the bright tail on top
             float alpha = _userSettings.MaxAlpha;
             for (int i = 0; i < _numberOfDrawSegments - 1; i++)
             {
