@@ -37,6 +37,9 @@ namespace Pulsar4X.Client
                     Unknown();
                     break;
             }
+
+            if (_bodyType == BodyType.Moon)
+                _iconMinSize = 4;
         }
 
         void Terestrial()
@@ -126,10 +129,11 @@ namespace Pulsar4X.Client
 
                     if (radius > 0)
                     {
-                        // Brighter fill color derived from the body's base color
-                        byte fillR = (byte)Math.Min(255, shape.Color.R + 80);
-                        byte fillG = (byte)Math.Min(255, shape.Color.G + 80);
-                        byte fillB = (byte)Math.Min(255, shape.Color.B + 80);
+                        // Brighter fill color derived from the body's base color, dimmed for moons
+                        float brighten = _bodyType == BodyType.Moon ? 0.8f : 1.0f;
+                        byte fillR = (byte)Math.Min(255, (int)((shape.Color.R + 80) * brighten));
+                        byte fillG = (byte)Math.Min(255, (int)((shape.Color.G + 80) * brighten));
+                        byte fillB = (byte)Math.Min(255, (int)((shape.Color.B + 80) * brighten));
                         SDL.SetRenderDrawColor(rendererPtr, fillR, fillG, fillB, shape.Color.A);
                         for (int y = -radius; y <= radius; y++)
                         {
