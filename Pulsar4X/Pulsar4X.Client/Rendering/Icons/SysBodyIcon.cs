@@ -108,6 +108,42 @@ namespace Pulsar4X.Client
                 Scale = _viewRadius * 0.01f;
             base.OnFrameUpdate(matrix, camera);
         }
+
+        public override void Draw(IntPtr rendererPtr, Camera camera)
+        {
+            if (DrawShapes == null || DrawShapes.Length == 0)
+                return;
+
+            // Draw filled circle for non-asteroid body types
+            if (_bodyType != BodyType.Asteroid)
+            {
+                var shape = DrawShapes[0];
+                if (shape.Points != null && shape.Points.Length > 2)
+                {
+                    int cx = ViewScreenPos.X;
+                    int cy = ViewScreenPos.Y;
+                    int radius = (int)(Scale * 100);
+
+                    if (radius > 0)
+                    {
+                        // Brighter fill color derived from the body's base color
+                        byte fillR = (byte)Math.Min(255, shape.Color.R + 80);
+                        byte fillG = (byte)Math.Min(255, shape.Color.G + 80);
+                        byte fillB = (byte)Math.Min(255, shape.Color.B + 80);
+                        SDL.SetRenderDrawColor(rendererPtr, fillR, fillG, fillB, shape.Color.A);
+                        for (int y = -radius; y <= radius; y++)
+                        {
+                            int xSpan = (int)Math.Sqrt(radius * radius - y * y);
+                            SDL.RenderLine(rendererPtr, cx - xSpan, cy + y, cx + xSpan, cy + y);
+                        }
+                    }
+                }
+                return; // skip outline for filled bodies
+            }
+
+            // Draw outline for asteroids
+            base.Draw(rendererPtr, camera);
+        }
     }
 }
 
