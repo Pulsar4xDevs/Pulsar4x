@@ -82,6 +82,14 @@ public class SystemViewPreferences : PulsarGuiWindow
         return ViewIndexes.ContainsKey(key) ? Views[ViewIndexes[key]].FilterCheckmarks[orbitBodyType] : true;
     }
 
+    internal void ToggleFilter(string key, UserOrbitSettings.OrbitBodyType orbitBodyType)
+    {
+        int viewIndex = GetViewIndex(key);
+        var view = Views[viewIndex];
+        view.FilterCheckmarks[orbitBodyType] = !view.FilterCheckmarks[orbitBodyType];
+        SaveViewIni(view);
+    }
+
     internal static SystemViewPreferences GetInstance()
     {
         if (!_uiState.LoadedWindows.ContainsKey(typeof(SystemViewPreferences)))

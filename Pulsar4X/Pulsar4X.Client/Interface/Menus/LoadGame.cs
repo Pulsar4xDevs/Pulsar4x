@@ -61,6 +61,7 @@ public class LoadGame : PulsarGuiWindow
         TimeControl.GetInstance().SetActive();
         ToolBarWindow.GetInstance().SetActive();
         Selector.GetInstance().SetActive();
+        EntityFilterBar.GetInstance().SetActive();
     }
 
     internal override void Display()

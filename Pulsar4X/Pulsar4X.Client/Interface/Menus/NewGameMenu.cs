@@ -542,6 +542,7 @@ public class NewGameMenu : PulsarGuiWindow
         TimeControl.GetInstance().SetActive();
         ToolBarWindow.GetInstance().SetActive();
         Selector.GetInstance().SetActive();
+        EntityFilterBar.GetInstance().SetActive();
         //EntityUIWindowSelector.GetInstance().SetActive();
         //EntityInfoPanel.GetInstance().SetActive();
     }
@@ -760,6 +761,7 @@ public class NewGameMenu : PulsarGuiWindow
             TimeControl.GetInstance().SetActive();
             ToolBarWindow.GetInstance().SetActive();
             Selector.GetInstance().SetActive();
+            EntityFilterBar.GetInstance().SetActive();
         }
         catch (Exception ex)
         {
