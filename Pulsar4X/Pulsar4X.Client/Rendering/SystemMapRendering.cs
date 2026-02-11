@@ -13,6 +13,7 @@ using Pulsar4X.Ships;
 using Pulsar4X.Weapons;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using SDL3;
 
 namespace Pulsar4X.Client.Rendering
 {
@@ -26,9 +27,9 @@ namespace Pulsar4X.Client.Rendering
         SDL3Window _window;
         internal Dictionary<string, IDrawData> UIWidgets = new ();
         ConcurrentDictionary<int, Icon> _testIcons = new ();
-        ConcurrentDictionary<int, IDrawData> _entityIcons = new ();
-        ConcurrentDictionary<int, IDrawData> _orbitRings = new ();
-        ConcurrentDictionary<int, IDrawData> _moveIcons = new ();
+        ConcurrentDictionary<int, Icon> _entityIcons = new ();
+        ConcurrentDictionary<int, Icon> _orbitRings = new ();
+        ConcurrentDictionary<int, Icon> _moveIcons = new ();
         internal ConcurrentDictionary<int, NameIcon> _nameIcons = new ();
 
         internal List<IDrawData> SelectedEntityExtras = new List<IDrawData>();
@@ -54,6 +55,56 @@ namespace Pulsar4X.Client.Rendering
 
             //_state.OnStarSystemChanged += RespondToSystemChange;
             //_state.OnFactionChanged += RespondToSystemChange;
+
+            var mainWin = (PulsarMainWindow)window;
+            mainWin.MouseButtonDownOccured += (object sender, SDL.Event e) => {
+                foreach (var i in _entityIcons.Values)
+                {
+                    if (i.IsHovered)
+                    {
+
+                        i.OnPointerDown(e);
+                        return;
+                    }
+                }
+
+            };
+            mainWin.MouseButtonUpOccured += (object sender, SDL.Event e) => {
+                foreach (var i in _entityIcons)
+                {
+                    var k = i.Key;
+                    var v = i.Value;
+
+                    if (v.IsPressed && v.IsHovered)
+                    {
+                        if (e.Button.Button == 1)
+                            _state.EntityClicked(k, _sysState.StarSystem.ID, MouseButtons.Primary);
+                        else if (e.Button.Button == 3)
+                            _state.EntityClicked(k, _sysState.StarSystem.ID, MouseButtons.Alt);
+                        return;
+                    }
+                }
+            };
+            mainWin.MouseMoveOccured += (object sender, SDL.Event e) => {
+                foreach (var i in _entityIcons.Values)
+                {
+                    var c = i.Contains(new (e.Motion.X, e.Motion.Y));
+
+                    if (i.IsHovered)
+                    {
+                        if (c)
+                            i.OnPointerMove(e);
+                        else
+                            i.OnPointerExit(e);
+                        return;
+                    }
+                    else if (c)
+                    {
+                        i.OnPointerEnter(e);
+                        return;
+                    }
+                }
+            };
         }
 
 
@@ -455,7 +506,7 @@ namespace Pulsar4X.Client.Rendering
 
         }
 
-        void DrawFilteredIcons(ConcurrentDictionary<int, IDrawData> icons)
+        void DrawFilteredIcons(ConcurrentDictionary<int, Icon> icons)
         {
             if (_sysState == null)
             {

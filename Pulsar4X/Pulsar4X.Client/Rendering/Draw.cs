@@ -46,6 +46,13 @@ namespace Pulsar4X.Client
         }
     }
 
+    /*
+    TODO: Improve this.
+    I'm thinking that "Shape" could be an abstract class or an interface and
+    then a "Polygon" class for an arbitrary shape.
+    Maybe SDL_Vertex and SDL_RenderGeometry would be useful here?
+    https://wiki.libsdl.org/SDL3/SDL_RenderGeometry
+    */
     /// <summary>
     /// A collection of points and a single color.
     /// </summary>
