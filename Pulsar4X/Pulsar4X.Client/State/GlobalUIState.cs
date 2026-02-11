@@ -316,6 +316,8 @@ namespace Pulsar4X.Client
             {
                 var system = Game.Systems.FirstOrDefault(s => s.ID.Equals(guid));
                 if(system == null) continue;
+                if (system.ActivityState == SystemActivityState.Stasis)
+                    system.SetActivityState(SystemActivityState.Background);
                 StarSystemStates[guid] = new SystemState(system, factionEntity.Id);
             }
 
@@ -354,15 +356,23 @@ namespace Pulsar4X.Client
             if(Game == null || Faction == null) throw new NullReferenceException("Game or Faction is null");
 
             if(!activeSysID.Equals(SelectedStarSystemId) || refresh){
-                // Save camera state for the outgoing system
+                // Demote the old system from Foreground to Background
                 if(!string.IsNullOrEmpty(SelectedStarSystemId) && StarSystemStates.ContainsKey(SelectedStarSystemId))
                 {
+                    var oldSystem = StarSystemStates[SelectedStarSystemId].StarSystem;
+                    if (oldSystem.ActivityState == SystemActivityState.Foreground)
+                        oldSystem.SetActivityState(SystemActivityState.Background);
+
                     StarSystemStates[SelectedStarSystemId].SavedCameraState = Camera.SaveState();
                 }
 
                 if(!StarSystemStates.ContainsKey(activeSysID)){
                     StarSystemStates[activeSysID] = new SystemState(Game.Systems.First(s => s.ID.Equals(activeSysID)), Faction.Id);
                 }
+
+                // Promote the new system to Foreground
+                var newSystem = Game.Systems.First(s => s.ID.Equals(activeSysID));
+                newSystem.SetActivityState(SystemActivityState.Foreground);
 
                 SelectedStarSystemId = activeSysID;
 

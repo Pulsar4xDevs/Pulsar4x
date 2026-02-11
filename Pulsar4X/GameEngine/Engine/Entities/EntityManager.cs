@@ -246,6 +246,11 @@ namespace Pulsar4X.Engine
             }
 
             AddEntity(entity, dataBlobs);
+
+            if (this is StarSystem starSystem && starSystem.ActivityState == SystemActivityState.Stasis)
+            {
+                starSystem.SetActivityState(SystemActivityState.Background);
+            }
         }
 
 
@@ -332,6 +337,22 @@ namespace Pulsar4X.Engine
 
             }
             _entitiesTaggedForRemoval.Clear();
+
+            if (this is StarSystem starSys && starSys.ActivityState != SystemActivityState.Stasis)
+            {
+                if (!HasFactionEntities())
+                    starSys.SetActivityState(SystemActivityState.Stasis);
+            }
+        }
+
+        public bool HasFactionEntities()
+        {
+            foreach (var (id, entity) in _entities)
+            {
+                if (entity.FactionOwnerID != Game.NeutralFactionId && entity.FactionOwnerID != 0)
+                    return true;
+            }
+            return false;
         }
 
         public List<BaseDataBlob> GetAllDataBlobsForEntity(int entityID)

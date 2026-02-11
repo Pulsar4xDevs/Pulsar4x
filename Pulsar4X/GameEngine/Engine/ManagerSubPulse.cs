@@ -40,6 +40,13 @@ namespace Pulsar4X.Engine
         [JsonProperty]
         public SafeDictionary<Type , DateTime?> HotLoopProcessorsNextRun { get; private set;} = new();
 
+        /// <summary>
+        /// Multiplier applied to hotloop processor RunFrequency.
+        /// 1.0 = normal (Foreground), >1.0 = slower (Background).
+        /// </summary>
+        [JsonProperty]
+        public double FrequencyMultiplier { get; set; } = 1.0;
+
         //public readonly ConcurrentDictionary<Type, TimeSpan> ProcessTime = new ConcurrentDictionary<Type, TimeSpan>();
         public bool IsProcessing = false;
         public string CurrentProcess = "Waiting";
@@ -239,6 +246,27 @@ namespace Pulsar4X.Engine
             }
         }
 
+        internal void FastForwardTo(DateTime targetDateTime)
+        {
+            _systemLocalDateTime = targetDateTime;
+            _processToDateTime = targetDateTime;
+            _subStepDateTime = targetDateTime;
+
+            var types = HotLoopProcessorsNextRun.Keys.ToList();
+            foreach (var type in types)
+            {
+                if (HotLoopProcessorsNextRun[type] == null)
+                    continue;
+                var proc = _processManager.HotloopProcessors[type];
+                HotLoopProcessorsNextRun[type] = targetDateTime + proc.FirstRunOffset;
+            }
+
+            lock (_lock)
+            {
+                _instanceProcessorsQueue = new TimeQueue<(string, Entity)>();
+            }
+        }
+
         internal void ProcessSystem(DateTime targetDateTime)
         {
             if(targetDateTime < StarSysDateTime)
@@ -328,7 +356,11 @@ namespace Pulsar4X.Engine
                     if (count == 0)
                         HotLoopProcessorsNextRun[type] = null;
                     else
-                        HotLoopProcessorsNextRun[type] = _subStepDateTime + _processManager.HotloopProcessors[type].RunFrequency; //sets the next interupt for this hotloop process
+                    {
+                        var baseFrequency = _processManager.HotloopProcessors[type].RunFrequency;
+                        var scaledFrequency = TimeSpan.FromTicks((long)(baseFrequency.Ticks * FrequencyMultiplier));
+                        HotLoopProcessorsNextRun[type] = _subStepDateTime + scaledFrequency;
+                    }
                 }
 
                 TimeQueueItem<(string, Entity)>[] split;
