@@ -58,7 +58,7 @@ public class NewGameMenu : PulsarGuiWindow
     GameType _selectedGameType = GameType.Standalone;
     byte[] _netPortInputBuffer = new byte[8];
     string _netPortString { get { return System.Text.Encoding.UTF8.GetString(_netPortInputBuffer); } }
-    int _maxSystems = 5;
+    int _maxSystems = NewGameSettings.DEFAULT_NUM_SYSTEMS;
     int _startingFunds = 100_000_000;
 
     byte[] _corporationNameBuffer = Utils.BytesFromString(DEFAULT_NAME, NAME_BUFFER_SIZE);
@@ -458,7 +458,7 @@ public class NewGameMenu : PulsarGuiWindow
     {
         var gameSettings = new NewGameSettings
         {
-            MaxSystems = p.MaxSystems,
+            MaxSystems = Math.Min(p.MaxSystems, NewGameSettings.DEFAULT_MAX_SYSTEMS),
             SMPassword = p.SMPassword,
             CreatePlayerFaction = true,
             DefaultFactionName = p.FactionName,
@@ -665,7 +665,7 @@ public class NewGameMenu : PulsarGuiWindow
                 SystemId = selectedSystemId,
                 BodyId = selectedBodyId,
                 EnabledSystems = enabledSystems,
-                MaxSystems = 2,
+                MaxSystems = NewGameSettings.DEFAULT_NUM_SYSTEMS,
                 MasterSeed = RandomNumberGenerator.GetInt32(999999999),
                 StartingFunds = 100_000_000,
                 EleStart = true,
