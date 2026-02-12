@@ -379,7 +379,7 @@ namespace Pulsar4X.Client
             Entity? parent = positionDB.Parent;
             if (parent == null) return;
 
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##orbit-info", true);
             if (Entity.TryGetDataBlob<WarpMovingDB>(out var movedb))
             {
                 DisplayHelpers.PrintRow("Warping", Stringify.Velocity(movedb.CurrentNonNewtonionVectorMS.Length()));
@@ -445,7 +445,7 @@ namespace Pulsar4X.Client
             if (Entity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB)
                 && !geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id))
             {
-                ImGui.Columns(2);
+                ImGui.Columns(2, "##survey-info", true);
                 DisplayHelpers.PrintRow("Geo Survey", "Incomplete");
                 ImGui.Columns(1);
             }
@@ -849,7 +849,7 @@ namespace Pulsar4X.Client
             Entity.TryGetDataBlob<StarInfoDB>(out var starInfo);
             Entity.TryGetDataBlob<MassVolumeDB>(out var massVolumeDB);
 
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##star-info", true);
 
             if (starInfo != null)
             {
@@ -883,7 +883,7 @@ namespace Pulsar4X.Client
             bool isGeoSurveyed = Entity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB)
                 && geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id);
 
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##body-info", true);
 
             if (Entity.TryGetDataBlob<SystemBodyInfoDB>(out var bodyInfo))
             {
@@ -950,7 +950,7 @@ namespace Pulsar4X.Client
             bool isGeoSurveyed = Entity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB)
                 && geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id);
 
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##small-body-info", true);
 
             if (Entity.TryGetDataBlob<SystemBodyInfoDB>(out var bodyInfo))
             {
@@ -990,7 +990,7 @@ namespace Pulsar4X.Client
             // Environment section
             if (ImGui.CollapsingHeader("Environment"))
             {
-                ImGui.Columns(2);
+                ImGui.Columns(2, "##environment-info", true);
                 if (Entity.TryGetDataBlob<SystemBodyInfoDB>(out var bodyInfo))
                 {
                     DisplayHelpers.PrintRow("Body Type", bodyInfo.BodyType.ToDescription());
@@ -1042,7 +1042,7 @@ namespace Pulsar4X.Client
 
         private void DisplayGenericContent()
         {
-            ImGui.Columns(2);
+            ImGui.Columns(2, "##generic-info", true);
             if (Entity.TryGetDataBlob<MassVolumeDB>(out var massVolumeDB))
             {
                 DisplayHelpers.PrintRow("Mass", Stringify.Mass(massVolumeDB.MassTotal));
