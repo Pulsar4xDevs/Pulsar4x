@@ -8,6 +8,7 @@ using ImGuiNET;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Colonies;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
@@ -486,25 +487,46 @@ public class NewGameMenu : PulsarGuiWindow
             }
         }
 
-        if (p.SystemId.Equals("random"))
+        // Load in the pre-made systems
+        foreach (var id in p.EnabledSystems)
         {
-            // TODO: support starting in a random system
-            return null;
+            StarSystemFactory.LoadFromBlueprint(game, p.ModDataStore.Systems[id]);
         }
-
-        var startingBodyBlueprint = p.ModDataStore.SystemBodies[p.BodyId];
 
         StarSystem? startingSystem = null;
         Entity? startingBody = null;
 
-        // Load in the selected systems
-        foreach (var id in p.EnabledSystems)
+        if (p.SystemId.Equals("random"))
         {
-            var system = StarSystemFactory.LoadFromBlueprint(game, p.ModDataStore.Systems[id]);
-            if (id.Equals(p.SystemId))
+            // Pick a random system that has a terrestrial planet
+            var candidates = new List<(StarSystem system, Entity body)>();
+            foreach (var system in game.Systems)
             {
+                foreach (var bodyInfo in system.GetAllDataBlobsOfType<SystemBodyInfoDB>())
+                {
+                    if (bodyInfo.BodyType == BodyType.Terrestrial && bodyInfo.OwningEntity != null)
+                    {
+                        candidates.Add((system, bodyInfo.OwningEntity));
+                    }
+                }
+            }
+
+            if (candidates.Count == 0) return null;
+
+            var pick = candidates[RandomNumberGenerator.GetInt32(candidates.Count)];
+            startingSystem = pick.system;
+            startingBody = pick.body;
+        }
+        else
+        {
+            var startingBodyBlueprint = p.ModDataStore.SystemBodies[p.BodyId];
+
+            foreach (var system in game.Systems)
+            {
+                if (system.ManagerID != p.SystemId) continue;
+
                 startingSystem = system;
-                foreach (var systemBody in startingSystem.GetAllDataBlobsOfType<SystemBodyInfoDB>())
+                foreach (var systemBody in system.GetAllDataBlobsOfType<SystemBodyInfoDB>())
                 {
                     if (systemBody.OwningEntity?.GetDefaultName()?.Equals(startingBodyBlueprint.Name) == true)
                     {
@@ -534,7 +556,7 @@ public class NewGameMenu : PulsarGuiWindow
 
         // Setup the starting colony
         ColonyFactory.CreateFromBlueprint(game, playerFaction, playerSpecies, startingSystem, startingBody, p.ModDataStore.Colonies[p.ColonyId]);
-        if (p.EleStart)
+        if (p.EleStart && !p.SystemId.Equals("random"))
             AsteroidFactory.CreateAsteroid(startingSystem, startingBody, game.TimePulse.GameGlobalDateTime + TimeSpan.FromDays(365));
 
         // Create starting people
