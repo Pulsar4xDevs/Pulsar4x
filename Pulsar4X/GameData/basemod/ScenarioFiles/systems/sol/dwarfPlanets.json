@@ -88,7 +88,7 @@
         "Type": "dwarf-planet",
         "Albedo": 0.74,
         "Mass": 3.1E21,
-        "Rradius": 739,
+        "Radius": 739,
         "LengthOfDay": "0.22:50:00"
       },
       "Orbit": {
