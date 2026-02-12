@@ -265,41 +265,21 @@ namespace Pulsar4X.Client
                     new Vector4(accentColor.X, accentColor.Y, accentColor.Z, 0.4f)),
                 1f);
 
-            // Row 1: Title (left) + type label (right)
+            // Row 1: Title (left) + action buttons (right)
+            float framePadX = ImGui.GetStyle().FramePadding.X * 2;
+            float btnSpacing = 4f;
+            float closeBtnWidth = pinBtnSize + framePadX;
+            float pinBtnWidth = pinBtnSize + framePadX;
+            float totalBtnsWidth = pinBtnWidth + btnSpacing + closeBtnWidth;
+            float btnX = winSize.X - ImGui.GetStyle().WindowPadding.X - totalBtnsWidth;
+            float btnY = startLocalY + (titleLineHeight - btnTotalHeight) * 0.5f;
+
             ImGui.PushFont(Styles.MediumFont, 16f);
             ImGui.Text(Title.ToUpper());
             ImGui.PopFont();
 
-            ImGui.SameLine();
-            var typeLabel = EntityState.BodyType.ToDescription();
-            var typeLabelSize = ImGui.CalcTextSize(typeLabel);
-            float remaining = ImGui.GetContentRegionAvail().X;
-            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + remaining - typeLabelSize.X);
-            float titleBaseY = ImGui.GetCursorPosY();
-            float labelYOffset = (titleLineHeight - typeLabelSize.Y) / 2;
-            if (labelYOffset > 0) ImGui.SetCursorPosY(titleBaseY + labelYOffset);
-            ImGui.PushStyleColor(ImGuiCol.Text, accentColor);
-            ImGui.Text(typeLabel);
-            ImGui.PopStyleColor();
-
-            // Row 2: Subtitle (left) + action buttons (right)
-            float secondRowY = startLocalY + titleLineHeight;
-            ImGui.SetCursorPosY(secondRowY);
-
-            if (hasSubtitle)
-            {
-                ImGui.PushStyleColor(ImGuiCol.Text,
-                    new Vector4(accentColor.X * 0.8f, accentColor.Y * 0.8f, accentColor.Z * 0.8f, 0.6f));
-                ImGui.Text(subtitle);
-                ImGui.PopStyleColor();
-            }
-
-            // Action buttons (right-aligned on row 2)
-            float framePadX = ImGui.GetStyle().FramePadding.X * 2;
-            float btnX = winSize.X - ImGui.GetStyle().WindowPadding.X - pinBtnSize - framePadX;
-            float btnY = secondRowY + (secondRowHeight - 4f - btnTotalHeight) * 0.5f;
+            // Pin button (right-aligned on row 1)
             ImGui.SetCursorPos(new Vector2(btnX, btnY));
-
             ImGui.PushID(EntityState.Id);
             ImGui.PushStyleColor(ImGuiCol.Button, Styles.InvisibleColor);
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered,
@@ -313,7 +293,35 @@ namespace Pulsar4X.Client
             ImGui.PopStyleColor(3);
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(GlobalUIState.NamesForMenus[typeof(PinCameraBlankMenuHelper)]);
+
+            // Close button
+            ImGui.SameLine(0, btnSpacing);
+            ImGui.PushStyleColor(ImGuiCol.Button, Styles.InvisibleColor);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered,
+                new Vector4(0.8f, 0.2f, 0.2f, 0.5f));
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive,
+                new Vector4(0.9f, 0.1f, 0.1f, 0.7f));
+            if (ImGui.Button("X##headerclose", new Vector2(pinBtnSize + framePadX, pinBtnSize + ImGui.GetStyle().FramePadding.Y * 2)))
+            {
+                SetActive(false);
+            }
+            ImGui.PopStyleColor(3);
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Close");
             ImGui.PopID();
+
+            // Row 2: Subtitle (left) + type label (right)
+            float secondRowY = startLocalY + titleLineHeight;
+            ImGui.SetCursorPosY(secondRowY);
+
+            if (hasSubtitle)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text,
+                    new Vector4(accentColor.X * 0.8f, accentColor.Y * 0.8f, accentColor.Z * 0.8f, 0.6f));
+                ImGui.Text(subtitle);
+                ImGui.PopStyleColor();
+            }
+
 
             // Ensure cursor is past the header background
             float headerLocalBottom = startLocalY + headerContentHeight + headerPad * 2;
