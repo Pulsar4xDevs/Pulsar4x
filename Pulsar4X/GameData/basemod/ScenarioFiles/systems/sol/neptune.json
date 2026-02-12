@@ -13,7 +13,8 @@
         "Albedo": 0.29,
         "AxialTilt": 28.32,
         "Mass": 1.02413E26,
-        "Radius": 24764
+        "Radius": 24764,
+        "LengthOfDay": "0.16:06:00"
       },
       "Orbit": {
         "SemiMajorAxis": 4.5E9,

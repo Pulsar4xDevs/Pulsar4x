@@ -891,7 +891,7 @@ namespace Pulsar4X.Client
                 DisplayHelpers.PrintRow("Gravity", bodyInfo.Gravity.ToString("0.##") + " m/s²",
                     null, (bodyInfo.Gravity / 9.80665).ToString("0.###") + " G");
                 DisplayHelpers.PrintRow("Temperature", bodyInfo.BaseTemperature.ToString("##0.#") + " °C");
-                DisplayHelpers.PrintRow("Day Length", bodyInfo.LengthOfDay.ToString(@"d\.hh\:mm"));
+                DisplayHelpers.PrintRow("Day Length", bodyInfo.LengthOfDay.TotalDays.ToString("0.#") + " days");
                 DisplayHelpers.PrintRow("Axial Tilt", bodyInfo.AxialTilt.ToString("0.#") + "°");
                 DisplayHelpers.PrintRow("Tectonics", bodyInfo.Tectonics.ToString());
                 DisplayHelpers.PrintRow("Magnetic Field", bodyInfo.MagneticField.ToString("0.##") + " μT");

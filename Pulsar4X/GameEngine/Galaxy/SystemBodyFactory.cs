@@ -144,6 +144,16 @@ namespace Pulsar4X.Galaxy
 
             systemBodyInfoDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, orbitDB);
 
+            // Calculate day length from orbital period if not provided in the blueprint.
+            if (systemBodyInfoDB.LengthOfDay == TimeSpan.Zero)
+            {
+                double dayLengthDays = GeneralMath.Lerp(0, orbitDB.OrbitalPeriod.TotalDays, system.RNGNextDouble());
+                systemBodyInfoDB.LengthOfDay = new TimeSpan((int)Math.Round(dayLengthDays), system.RNGNext(0, 24), system.RNGNext(0, 60), 0);
+                double minDayHours = game.GalaxyGen.Settings.MiniumPossibleDayLength;
+                if (systemBodyInfoDB.LengthOfDay < TimeSpan.FromHours(minDayHours))
+                    systemBodyInfoDB.LengthOfDay += TimeSpan.FromHours(minDayHours);
+            }
+
             var positionDB = new PositionDB(
                 orbitDB.GetPosition(game.TimePulse.GameGlobalDateTime),
                 parentBody);
@@ -358,6 +368,16 @@ namespace Pulsar4X.Galaxy
             }
 
             systemBodyInfoDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, orbitDB);
+
+            // Calculate day length from orbital period if not provided in the JSON data.
+            if (systemBodyInfoDB.LengthOfDay == TimeSpan.Zero)
+            {
+                double dayLengthDays = GeneralMath.Lerp(0, orbitDB.OrbitalPeriod.TotalDays, system.RNGNextDouble());
+                systemBodyInfoDB.LengthOfDay = new TimeSpan((int)Math.Round(dayLengthDays), system.RNGNext(0, 24), system.RNGNext(0, 60), 0);
+                double minDayHours = game.GalaxyGen.Settings.MiniumPossibleDayLength;
+                if (systemBodyInfoDB.LengthOfDay < TimeSpan.FromHours(minDayHours))
+                    systemBodyInfoDB.LengthOfDay += TimeSpan.FromHours(minDayHours);
+            }
 
             var positionDB = new PositionDB(
                 orbitDB.GetPosition(game.TimePulse.GameGlobalDateTime),

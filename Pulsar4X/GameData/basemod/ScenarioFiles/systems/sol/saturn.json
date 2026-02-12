@@ -10,7 +10,8 @@
         "Type": "gas-giant",
         "Albedo": 0.342,
         "Mass": 5.6834E26,
-        "Radius": 60268
+        "Radius": 60268,
+        "LengthOfDay": "0.10:34:00"
       },
       "Orbit": {
         "SemiMajorAxis": 1.51450E9,
@@ -170,7 +171,8 @@
         "Type": "moon",
         "Albedo": 0.22,
         "Mass": 1.3452E23,
-        "Radius": 2574.73
+        "Radius": 2574.73,
+        "LengthOfDay": "15.22:41:00"
       },
       "Orbit": {
         "SemiMajorAxis": 1221870,

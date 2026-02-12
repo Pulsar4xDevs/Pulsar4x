@@ -10,7 +10,8 @@
         "Type": "gas-giant",
         "Albedo": 0.503,
         "Mass": 1.8982E27,
-        "Radius": 71492
+        "Radius": 71492,
+        "LengthOfDay": "0.09:55:30"
       },
       "Orbit": {
         "SemiMajorAxis": 778.479E6,
@@ -52,7 +53,8 @@
         "Type": "moon",
         "Albedo": 0.63,
         "Mass": 8.931938E22,
-        "Radius": 1821.6
+        "Radius": 1821.6,
+        "LengthOfDay": "1.18:28:00"
       },
       "Orbit": {
         "SemiMajorAxis": 421700,
@@ -88,7 +90,8 @@
         "Type": "moon",
         "Albedo": 0.67,
         "Mass": 4.799844E22,
-        "Radius": 1560.8
+        "Radius": 1560.8,
+        "LengthOfDay": "3.13:14:00"
       },
       "Orbit": {
         "SemiMajorAxis": 670900,
@@ -113,7 +116,8 @@
         "Type": "moon",
         "Albedo": 0.43,
         "Mass": 1.4819E23,
-        "Radius": 2634.1
+        "Radius": 2634.1,
+        "LengthOfDay": "7.03:43:00"
       },
       "Orbit": {
         "SemiMajorAxis": 1.0704E6,
@@ -149,7 +153,8 @@
         "Type": "moon",
         "Albedo": 0.22,
         "Mass": 1.075938E23,
-        "Radius": 2410.3
+        "Radius": 2410.3,
+        "LengthOfDay": "16.16:32:00"
       },
       "Orbit": {
         "SemiMajorAxis": 1882700,

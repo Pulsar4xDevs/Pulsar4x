@@ -11,7 +11,8 @@
         "Gravity": 1.625,
         "Type": "moon",
         "Mass": 7.34767309E22,
-        "Radius": 6378.1
+        "Radius": 6378.1,
+        "LengthOfDay": "27.07:43:00"
       },
       "Orbit": {
         "SemiMajorAxis_km": 384399,
