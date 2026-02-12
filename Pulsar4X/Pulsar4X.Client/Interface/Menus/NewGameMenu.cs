@@ -481,7 +481,8 @@ public class NewGameMenu : PulsarGuiWindow
             {
                 // TODO: add random system names
                 string systemName = $"Generated System #{i + 1}";
-                game.GalaxyGen.GenerateSystem(game, systemName, p.MasterSeed);
+                var seed = game.GlobalManager.RNG.Next();
+                game.GalaxyGen.GenerateSystem(game, systemName, seed);
             }
         }
 
