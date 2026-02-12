@@ -58,6 +58,10 @@ namespace Pulsar4X.Galaxy
             );
             blobsToAdd.Add(massVolumeDB);
 
+            // Calculate gravity from mass/radius if not provided in the blueprint.
+            if (systemBodyInfoDB.Gravity == 0)
+                systemBodyInfoDB.Gravity = massVolumeDB.SurfaceGravity;
+
             double semiMajorAxis_m = systemBodyBlueprint.Orbit.SemiMajorAxis * 1000.0 ??
                                     systemBodyBlueprint.Orbit.SemiMajorAxis_m ??
                                     systemBodyBlueprint.Orbit.SemiMajorAxis_km * 1000.0 ??
@@ -264,6 +268,10 @@ namespace Pulsar4X.Galaxy
                 Distance.KmToAU((double?)info["radius"] ?? 0)
             );
             blobsToAdd.Add(massVolumeDB);
+
+            // Calculate gravity from mass/radius if not provided in the JSON data.
+            if (systemBodyInfoDB.Gravity == 0)
+                systemBodyInfoDB.Gravity = massVolumeDB.SurfaceGravity;
 
             var orbit = rootJson["orbit"];
 
@@ -1296,6 +1304,10 @@ namespace Pulsar4X.Galaxy
 
             // Generate atmosphere:
             GenerateAtmosphere(system, body, dataStore);
+
+            // Calculate gravity from mass and radius if not already set.
+            if (bodyInfo.Gravity == 0)
+                bodyInfo.Gravity = bodyMVDB.SurfaceGravity;
 
             // No radiation by default.
             bodyInfo.RadiationLevel = 0;
