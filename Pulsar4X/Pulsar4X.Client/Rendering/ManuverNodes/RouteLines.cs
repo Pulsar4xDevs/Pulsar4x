@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
-using Pulsar4X.Client.Interface;
-using Pulsar4X.Client.Interface.Widgets;
 using SDL3;
 
 namespace Pulsar4X.Client;
@@ -328,24 +326,11 @@ public class ManuverLinesComplete : IDrawData
         // If the outward direction points up, bottom-align the text
         if (ny < 0) labelY -= textSize.Y;
 
-        var color = new System.Numerics.Vector4(r / 255f, g / 255f, b / 255f, 1f);
-
-        ImGui.PushStyleColor(ImGuiCol.WindowBg, Styles.InvisibleColor);
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(0, 0));
-        ImGui.SetNextWindowPos(new System.Numerics.Vector2(labelX, labelY), ImGuiCond.Always);
-
-        var flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize
-            | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBringToFrontOnFocus
-            | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoInputs;
-
-        bool open = true;
-        Window.Begin("##apsis_" + id, ref open, flags);
-        ImGui.TextColored(color, labelText);
-        Window.End();
-
-        ImGui.PopStyleVar(2);
-        ImGui.PopStyleColor();
+        // Draw directly to the foreground draw list to avoid creating ImGui windows,
+        // which would steal focus from active widgets (like DragFloat sliders).
+        uint color = ImGui.GetColorU32(new System.Numerics.Vector4(r / 255f, g / 255f, b / 255f, 1f));
+        var drawList = ImGui.GetForegroundDrawList();
+        drawList.AddText(new System.Numerics.Vector2(labelX, labelY), color, labelText);
     }
 
     private static string FormatDistance(double meters)

@@ -24,6 +24,7 @@ public class ManeuverNodePanel
     private float _progradeDV;
     private float _radialDV;
     private bool _isActive;
+    private bool _isInteracting;
 
     /// <summary>
     /// Screen position where the node marker is drawn. Updated each frame.
@@ -51,8 +52,10 @@ public class ManeuverNodePanel
         // Update screen position from node world position
         UpdateScreenPosition();
 
-        // Position the window near the node, offset slightly so it doesn't overlap the marker
-        ImGui.SetNextWindowPos(new Vector2(ScreenPosition.X + 15, ScreenPosition.Y - 30), ImGuiCond.Always);
+        // Position the window near the node, but freeze position while user is dragging a slider
+        // to prevent the window from moving out from under the mouse (which breaks the drag).
+        if (!_isInteracting)
+            ImGui.SetNextWindowPos(new Vector2(ScreenPosition.X + 15, ScreenPosition.Y - 30), ImGuiCond.Always);
         ImGui.SetNextWindowSize(new Vector2(280, 0)); // auto-height
 
         var flags = ImGuiWindowFlags.NoTitleBar
@@ -176,6 +179,9 @@ public class ManeuverNodePanel
             }
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Discard this maneuver node");
+
+            // Track whether a widget is being actively dragged/edited this frame
+            _isInteracting = ImGui.IsAnyItemActive();
         }
         ImGui.End();
         ImGui.PopStyleVar(2);
