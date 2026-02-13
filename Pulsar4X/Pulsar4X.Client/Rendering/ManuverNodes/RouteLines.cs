@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
+using Pulsar4X.Client.Interface;
+using Pulsar4X.Client.Interface.Widgets;
 using SDL3;
 
 namespace Pulsar4X.Client;
@@ -141,6 +144,14 @@ public class ManuverLinesComplete : IDrawData
     /// </summary>
     public SDL.FPoint[] CommittedNodeScreenPositions = new SDL.FPoint[0];
 
+    // Ap/Pe screen positions for editing nodes' predicted orbits
+    private SDL.FPoint _parentScreenPos;
+    private SDL.FPoint[] _editingPeScreenPositions = new SDL.FPoint[0];
+    private SDL.FPoint[] _editingApScreenPositions = new SDL.FPoint[0];
+    private double[] _editingPeDistances = new double[0];
+    private double[] _editingApDistances = new double[0];
+    private double[] _editingEccentricities = new double[0];
+
     public void OnFrameUpdate(Matrix matrix, Camera camera)
     {
         points = RenderManuverLines.CreatePointArray(RootSequence);
@@ -187,6 +198,44 @@ public class ManuverLinesComplete : IDrawData
             var result = mtrx.TransformToSDL_Point(nodePos.X, nodePos.Y);
             CommittedNodeScreenPositions[i] = new SDL.FPoint() { X = result.X, Y = result.Y };
         }
+
+        // Parent body is at the origin in the relative coordinate system
+        var parentResult = mtrx.TransformToSDL_Point(0, 0);
+        _parentScreenPos = new SDL.FPoint() { X = parentResult.X, Y = parentResult.Y };
+
+        // Compute Ap/Pe screen positions for editing nodes' predicted orbits
+        if (_editingPeScreenPositions.Length != EditingNodes.Length)
+        {
+            _editingPeScreenPositions = new SDL.FPoint[EditingNodes.Length];
+            _editingApScreenPositions = new SDL.FPoint[EditingNodes.Length];
+            _editingPeDistances = new double[EditingNodes.Length];
+            _editingApDistances = new double[EditingNodes.Length];
+            _editingEccentricities = new double[EditingNodes.Length];
+        }
+        for (int i = 0; i < EditingNodes.Length; i++)
+        {
+            var ke = EditingNodes[i].TargetOrbit;
+            _editingEccentricities[i] = ke.Eccentricity;
+            _editingPeDistances[i] = ke.Periapsis;
+            _editingApDistances[i] = ke.Apoapsis;
+
+            if (ke.Eccentricity < 0.001 || ke.Eccentricity >= 1.0)
+                continue;
+
+            // Periapsis: true anomaly = 0, at angle = lop from focus
+            // Apoapsis: true anomaly = pi, at angle = lop + pi from focus
+            double lop = ke.LoAN + ke.AoP;
+            double peR = ke.Periapsis;
+            double apR = ke.Apoapsis;
+
+            var peWorld = new Vector2(peR * Math.Cos(lop), peR * Math.Sin(lop));
+            var apWorld = new Vector2(-apR * Math.Cos(lop), -apR * Math.Sin(lop));
+
+            var peResult = mtrx.TransformToSDL_Point(peWorld.X, peWorld.Y);
+            var apResult = mtrx.TransformToSDL_Point(apWorld.X, apWorld.Y);
+            _editingPeScreenPositions[i] = new SDL.FPoint() { X = peResult.X, Y = peResult.Y };
+            _editingApScreenPositions[i] = new SDL.FPoint() { X = apResult.X, Y = apResult.Y };
+        }
     }
 
     public void OnPhysicsUpdate()
@@ -215,6 +264,97 @@ public class ManuverLinesComplete : IDrawData
         {
             DrawDiamond(rendererPtr, EditingNodeScreenPositions[i].X, EditingNodeScreenPositions[i].Y, 8);
         }
+
+        // Draw Ap/Pe diamond markers on editing nodes' predicted orbits
+        for (int i = 0; i < EditingNodes.Length; i++)
+        {
+            if (_editingEccentricities[i] < 0.001 || _editingEccentricities[i] >= 1.0)
+                continue;
+
+            // Periapsis - cyan
+            if (camera.IsOnScreen(_editingPeScreenPositions[i].X, _editingPeScreenPositions[i].Y))
+            {
+                SDL.SetRenderDrawColor(rendererPtr, 0, 200, 255, 255);
+                DrawDiamond(rendererPtr, _editingPeScreenPositions[i].X, _editingPeScreenPositions[i].Y, 6);
+            }
+
+            // Apoapsis - orange
+            if (camera.IsOnScreen(_editingApScreenPositions[i].X, _editingApScreenPositions[i].Y))
+            {
+                SDL.SetRenderDrawColor(rendererPtr, 255, 165, 0, 255);
+                DrawDiamond(rendererPtr, _editingApScreenPositions[i].X, _editingApScreenPositions[i].Y, 6);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Draws ImGui text labels at Ap/Pe positions for editing nodes.
+    /// Must be called during the ImGui render pass (not SDL Draw).
+    /// </summary>
+    public void DrawApsisLabels()
+    {
+        int labelId = 0;
+        for (int i = 0; i < EditingNodes.Length; i++)
+        {
+            if (_editingEccentricities[i] < 0.001 || _editingEccentricities[i] >= 1.0)
+                continue;
+
+            DrawApsisLabel(_editingPeScreenPositions[i], _parentScreenPos, FormatDistance(_editingPeDistances[i]), "Pe", 0, 200, 255, labelId++);
+            DrawApsisLabel(_editingApScreenPositions[i], _parentScreenPos, FormatDistance(_editingApDistances[i]), "Ap", 255, 165, 0, labelId++);
+        }
+    }
+
+    private static void DrawApsisLabel(SDL.FPoint pos, SDL.FPoint parentPos, string distText, string prefix, byte r, byte g, byte b, int id)
+    {
+        // Compute outward direction from parent body to apsis point
+        float dx = pos.X - parentPos.X;
+        float dy = pos.Y - parentPos.Y;
+        float len = MathF.Sqrt(dx * dx + dy * dy);
+        if (len < 1f) return;
+        float nx = dx / len;
+        float ny = dy / len;
+
+        string labelText = prefix + ": " + distText;
+        var textSize = ImGui.CalcTextSize(labelText);
+
+        // Offset from diamond center along the outward radial direction
+        const float offsetDist = 10f;
+        float labelX = pos.X + nx * offsetDist;
+        float labelY = pos.Y + ny * offsetDist;
+
+        // Anchor the text so it extends outward from the orbit line:
+        // If the outward direction points left, right-align the text
+        if (nx < 0) labelX -= textSize.X;
+        // If the outward direction points up, bottom-align the text
+        if (ny < 0) labelY -= textSize.Y;
+
+        var color = new System.Numerics.Vector4(r / 255f, g / 255f, b / 255f, 1f);
+
+        ImGui.PushStyleColor(ImGuiCol.WindowBg, Styles.InvisibleColor);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(0, 0));
+        ImGui.SetNextWindowPos(new System.Numerics.Vector2(labelX, labelY), ImGuiCond.Always);
+
+        var flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize
+            | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBringToFrontOnFocus
+            | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoInputs;
+
+        bool open = true;
+        Window.Begin("##apsis_" + id, ref open, flags);
+        ImGui.TextColored(color, labelText);
+        Window.End();
+
+        ImGui.PopStyleVar(2);
+        ImGui.PopStyleColor();
+    }
+
+    private static string FormatDistance(double meters)
+    {
+        double au = Distance.MToAU(meters);
+        if (au >= 0.01)
+            return au.ToString("F2") + " AU";
+        double km = Distance.MToKm(meters);
+        return km.ToString("N0") + " km";
     }
 
     private static void DrawDiamond(IntPtr rendererPtr, float cx, float cy, float size)

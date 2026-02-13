@@ -707,6 +707,7 @@ namespace Pulsar4X.Client
                 if (ManeuverNodePanel.IsActive)
                 {
                     ManeuverNodePanel.Display();
+                    _orbitClickManuverLines?.DrawApsisLabels();
                 }
                 else
                 {
