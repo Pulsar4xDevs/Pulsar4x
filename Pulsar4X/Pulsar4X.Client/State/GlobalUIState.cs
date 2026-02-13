@@ -190,11 +190,11 @@ namespace Pulsar4X.Client
                 settings.EllipseSweepRadians = 0.26f; // ~15 degrees
             }
 
-            // Ships: short tail, no ghost orbit
+            // Ships: short tail, ghost orbit enabled
             foreach (var settings in UserOrbitSettingsMtx[(int)UserOrbitSettings.OrbitBodyType.Ship])
             {
                 settings.EllipseSweepRadians = 0.26f; // ~15 degrees
-                settings.GhostOrbitAlpha = 0;
+                settings.GhostOrbitAlpha = 20;
             }
 
             // Comets: white-ish, very short tail
