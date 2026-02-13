@@ -501,7 +501,8 @@ namespace Pulsar4X.Client
 
         private void DrawRadialIndicator(
             ImDrawListPtr drawList, Vector2 center, float radius, float ringThickness,
-            float value, string label, string centerText, bool isPlaceholder)
+            float value, string label, string centerText, bool isPlaceholder,
+            string extraTooltip = null)
         {
             var dimColor = new Vector4(
                 _accentColor.X * 0.3f, _accentColor.Y * 0.3f, _accentColor.Z * 0.3f, 0.4f);
@@ -541,6 +542,8 @@ namespace Pulsar4X.Client
             {
                 ImGui.BeginTooltip();
                 ImGui.TextUnformatted(label + ": " + (isPlaceholder ? "N/A" : (value * 100f).ToString("0") + "%"));
+                if (extraTooltip != null)
+                    ImGui.TextUnformatted(extraTooltip);
                 ImGui.EndTooltip();
             }
         }
@@ -603,16 +606,71 @@ namespace Pulsar4X.Client
                 }
             }
 
-            // Draw four indicators left-aligned
+            // Compute delta V values
+            float dvValue = 0f;
+            string dvText = "N/A";
+            string dvTooltip = null;
+            bool dvPlaceholder = true;
+
+            Entity.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrustDB);
+            if (thrustDB != null && thrustDB.ExhaustVelocity > 0)
+            {
+                dvPlaceholder = false;
+                double dv = thrustDB.DeltaV;
+                dvTooltip = Stringify.Velocity(dv);
+
+                // Compact center text
+                if (dv >= 1e6)
+                    dvText = (dv / 1e6).ToString("0.#") + "M";
+                else if (dv >= 1e3)
+                    dvText = (dv / 1e3).ToString("0.#") + "k";
+                else
+                    dvText = dv.ToString("0");
+
+                // Compute percentage: current DV / max DV at full fuel
+                if (dv > 0 &&
+                    Entity.TryGetDataBlob<MassVolumeDB>(out var massDB) &&
+                    Entity.TryGetDataBlob<CargoStorageDB>(out var cargoStorage))
+                {
+                    // FuelType is a material UniqueID, not a cargo type key.
+                    // Look up the fuel ICargoable to find which TypeStore it lives in.
+                    var cargoLib = Entity.GetFactionCargoDefinitions();
+                    if (cargoLib != null && cargoLib.Contains(thrustDB.FuelType))
+                    {
+                        var fuelCargoable = cargoLib.GetAny(thrustDB.FuelType);
+                        if (fuelCargoable != null &&
+                            cargoStorage.TypeStores.ContainsKey(fuelCargoable.CargoTypeID) &&
+                            fuelCargoable.VolumePerUnit > 0)
+                        {
+                            var fuelStore = cargoStorage.TypeStores[fuelCargoable.CargoTypeID];
+                            double maxFuelUnits = fuelStore.MaxVolume / fuelCargoable.VolumePerUnit;
+                            double maxFuel_kg = maxFuelUnits * fuelCargoable.MassPerUnit;
+
+                            double dryMass = massDB.MassTotal - thrustDB.TotalFuel_kg;
+                            if (dryMass > 0 && maxFuel_kg > 0)
+                            {
+                                double maxWetMass = dryMass + maxFuel_kg;
+                                double maxDV = thrustDB.ExhaustVelocity * Math.Log(maxWetMass / dryMass);
+                                if (maxDV > 0)
+                                    dvValue = Math.Clamp((float)(dv / maxDV), 0f, 1f);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Draw five indicators left-aligned
             float x0 = cursorPos.X + radius;
 
             DrawRadialIndicator(drawList, new Vector2(x0, centerY),
-                radius, ringThickness, htkValue, "HTK", htkText, false);
+                radius, ringThickness, dvValue, "Δv", dvText, dvPlaceholder, dvTooltip);
             DrawRadialIndicator(drawList, new Vector2(x0 + indicatorWidth, centerY),
-                radius, ringThickness, compValue, "COMP", compText, false);
+                radius, ringThickness, htkValue, "HTK", htkText, false);
             DrawRadialIndicator(drawList, new Vector2(x0 + indicatorWidth * 2f, centerY),
-                radius, ringThickness, armorValue, "ARMOR", armorText, armorPlaceholder);
+                radius, ringThickness, compValue, "COMP", compText, false);
             DrawRadialIndicator(drawList, new Vector2(x0 + indicatorWidth * 3f, centerY),
+                radius, ringThickness, armorValue, "ARMOR", armorText, armorPlaceholder);
+            DrawRadialIndicator(drawList, new Vector2(x0 + indicatorWidth * 4f, centerY),
                 radius, ringThickness, 0f, "SHIELD", "N/A", true);
 
             // Current order (right-aligned on the same row)
@@ -684,7 +742,7 @@ namespace Pulsar4X.Client
 
             DisplayShipStatusRow();
 
-            // Crew row: captain + crew count
+            // Crew row
             SectionLabel("CREW");
 
             string captainName = "Unassigned";
@@ -695,20 +753,22 @@ namespace Pulsar4X.Client
                 captainName = cmdDB.Name;
             }
 
-            ImGui.PushStyleColor(ImGuiCol.Text, _accentColor);
-            ImGui.TextUnformatted("  " + captainName);
-            ImGui.PopStyleColor();
-
-            if (shipInfo != null)
+            ImGui.Indent();
+            int crewCols = shipInfo != null ? 2 : 1;
+            if (ImGui.BeginTable("##crew", crewCols, ImGuiTableFlags.SizingStretchSame))
             {
-                ImGui.SameLine();
-                float crewTextWidth = ImGui.CalcTextSize(shipInfo.Design.CrewReq + " crew").X;
-                float rightEdge = ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X;
-                ImGui.SetCursorPosX(rightEdge - crewTextWidth);
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.TextUnformatted(shipInfo.Design.CrewReq + " crew");
-                ImGui.PopStyleColor();
+                ImGui.TableNextColumn();
+                StatBlock("COMMANDER", captainName);
+
+                if (shipInfo != null)
+                {
+                    ImGui.TableNextColumn();
+                    StatBlock("CREW", shipInfo.Design.CrewReq.ToString());
+                }
+
+                ImGui.EndTable();
             }
+            ImGui.Unindent();
 
             // Propulsion stat grid
             Entity.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrustDB);
@@ -718,6 +778,7 @@ namespace Pulsar4X.Client
             {
                 SectionLabel("PROPULSION");
 
+                ImGui.Indent();
                 int propCols = (thrustDB != null ? 3 : 0) + (warpDB != null ? 1 : 0);
                 if (ImGui.BeginTable("##propulsion", propCols, ImGuiTableFlags.SizingStretchSame))
                 {
@@ -725,11 +786,9 @@ namespace Pulsar4X.Client
                     {
                         ImGui.TableNextColumn();
                         StatBlock("THRUST", Stringify.Thrust(thrustDB.ThrustInNewtons));
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip("Burn rate: " + Stringify.Mass(thrustDB.FuelBurnRate) + "/s");
 
                         ImGui.TableNextColumn();
-                        StatBlock("Δv", Stringify.Velocity(thrustDB.DeltaV));
+                        StatBlock("BURN", Stringify.Mass(thrustDB.FuelBurnRate) + "/s");
 
                         ImGui.TableNextColumn();
                         StatBlock("EXHAUST", Stringify.Velocity(thrustDB.ExhaustVelocity));
@@ -741,23 +800,25 @@ namespace Pulsar4X.Client
                     }
                     ImGui.EndTable();
                 }
+                ImGui.Unindent();
             }
 
             // Location
             if (Entity.TryGetDataBlob<PositionDB>(out var positionDB) && positionDB.Parent != null)
             {
                 SectionLabel("LOCATION");
+                ImGui.Indent();
                 ImGui.PushStyleColor(ImGuiCol.Text, _accentColor);
                 if (Entity.TryGetDataBlob<WarpMovingDB>(out var movedb))
                 {
-                    ImGui.TextUnformatted("  Warping");
+                    ImGui.TextUnformatted("Warping");
                     ImGui.PopStyleColor();
                     ImGui.SameLine();
                     ImGui.TextUnformatted(Stringify.Velocity(movedb.CurrentNonNewtonionVectorMS.Length()));
                 }
                 else
                 {
-                    ImGui.TextUnformatted("  Orbiting");
+                    ImGui.TextUnformatted("Orbiting");
                     ImGui.PopStyleColor();
                     ImGui.SameLine();
                     if (ImGui.SmallButton(positionDB.Parent.GetName(_uiState.Faction.Id)))
@@ -765,6 +826,7 @@ namespace Pulsar4X.Client
                         _uiState.EntityClicked(positionDB.Parent.Id, _uiState.SelectedStarSystemId, MouseButtons.Primary);
                     }
                 }
+                ImGui.Unindent();
             }
 
             // Orders (inline, no collapsing header)
@@ -777,6 +839,7 @@ namespace Pulsar4X.Client
 
                     SectionLabel("ORDERS (" + orderableDB.ActionList.Count + ")");
 
+                    ImGui.Indent();
                     if (ImGui.BeginTable("##orders", 3,
                         ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.NoPadOuterX))
                     {
@@ -807,6 +870,7 @@ namespace Pulsar4X.Client
                         }
                         ImGui.EndTable();
                     }
+                    ImGui.Unindent();
                     break;
                 }
             }
@@ -816,6 +880,7 @@ namespace Pulsar4X.Client
             {
                 SectionLabel("CARGO");
 
+                ImGui.Indent();
                 if (Entity.GetFactionOwner.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
                 {
                     foreach (var (sid, storageType) in storage.TypeStores)
@@ -839,8 +904,9 @@ namespace Pulsar4X.Client
                         ImGui.PushStyleColor(ImGuiCol.PlotHistogram, barColor);
                         ImGui.ProgressBar((float)percent, new Vector2(ImGui.GetContentRegionAvail().X, 16), barLabel);
                         ImGui.PopStyleColor(2);
-                    }   
+                    }
                 }
+                ImGui.Unindent();
             }
         }
 
