@@ -94,17 +94,23 @@ public class ManeuverNodePanel
                 _progradeDV -= 1;
                 changes = true;
             }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Decrease prograde by 1 m/s");
             ImGui.SameLine();
             if (ImGui.Button("+1##pg"))
             {
                 _progradeDV += 1;
                 changes = true;
             }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Increase prograde by 1 m/s");
             ImGui.SameLine();
             if (ImGui.DragFloat("Prograde", ref _progradeDV, 0.5f, -maxProgradeDV, maxProgradeDV, "%.1f m/s"))
             {
                 changes = true;
             }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Delta-v along the direction of travel.\nPositive = speed up, Negative = slow down.\nDrag or Ctrl+click to type a value.");
 
             // Radial controls
             if (ImGui.Button("-1##rd"))
@@ -112,17 +118,23 @@ public class ManeuverNodePanel
                 _radialDV -= 1;
                 changes = true;
             }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Decrease radial by 1 m/s");
             ImGui.SameLine();
             if (ImGui.Button("+1##rd"))
             {
                 _radialDV += 1;
                 changes = true;
             }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Increase radial by 1 m/s");
             ImGui.SameLine();
             if (ImGui.DragFloat("Radial", ref _radialDV, 0.5f, -maxRadialDV, maxRadialDV, "%.1f m/s"))
             {
                 changes = true;
             }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Delta-v perpendicular to the direction of travel.\nPositive = away from parent, Negative = toward parent.\nDrag or Ctrl+click to type a value.");
 
             if (changes)
             {
@@ -139,8 +151,14 @@ public class ManeuverNodePanel
             // Info display
             double dvCost = Math.Sqrt(_progradeDV * _progradeDV + _radialDV * _radialDV);
             ImGui.Text("Dv cost: " + Stringify.Velocity(dvCost));
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Total delta-v magnitude of this maneuver");
             ImGui.Text("Burn: " + Stringify.Quantity(_node.BurnTimeTotal, "0.#") + " s");
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Estimated burn duration at full thrust");
             ImGui.Text("Time: " + _node.NodeTime.ToString("yyyy-MM-dd HH:mm:ss"));
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("When the burn will be centered.\nDrag the node marker on the orbit to change.");
 
             ImGui.Separator();
 
@@ -149,11 +167,15 @@ public class ManeuverNodePanel
             {
                 CommitNode();
             }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Issue the thrust command to the ship");
             ImGui.SameLine();
             if (ImGui.Button("Delete"))
             {
                 ClosePanel();
             }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Discard this maneuver node");
         }
         ImGui.End();
         ImGui.PopStyleVar(2);
