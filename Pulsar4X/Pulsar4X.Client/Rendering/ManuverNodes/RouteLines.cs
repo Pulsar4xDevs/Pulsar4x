@@ -291,6 +291,9 @@ public class ManuverLinesComplete : IDrawData
     /// </summary>
     public void DrawApsisLabels()
     {
+        if (_editingEccentricities.Length < EditingNodes.Length)
+            return; // Not yet computed by OnFrameUpdate
+
         int labelId = 0;
         for (int i = 0; i < EditingNodes.Length; i++)
         {

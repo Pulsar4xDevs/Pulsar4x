@@ -1,7 +1,9 @@
 using System;
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
+using Pulsar4X.Engine.Orders;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Orbital;
 using Pulsar4X.Movement;
@@ -13,6 +15,7 @@ namespace Pulsar4X.Client;
 /// <summary>
 /// A compact ImGui overlay panel anchored to a maneuver node's screen position.
 /// Allows the player to adjust prograde/radial delta-v and commit the burn.
+/// Supports both creating new maneuvers and editing existing orders.
 /// </summary>
 public class ManeuverNodePanel
 {
@@ -27,11 +30,22 @@ public class ManeuverNodePanel
     private bool _isInteracting;
 
     /// <summary>
+    /// When editing an existing order, this holds the command being edited.
+    /// Null when creating a new maneuver.
+    /// </summary>
+    private NewtonThrustCommand? _editingCommand;
+
+    /// <summary>
     /// Screen position where the node marker is drawn. Updated each frame.
     /// </summary>
     public Vector2 ScreenPosition;
 
     public bool IsActive => _isActive;
+
+    /// <summary>
+    /// True when the panel is editing an existing order rather than creating a new one.
+    /// </summary>
+    public bool IsEditing => _editingCommand != null;
 
     public ManeuverNodePanel(GlobalUIState uiState, Entity orderEntity, ManuverLinesComplete manuverLines, ManuverNode node)
     {
@@ -42,6 +56,15 @@ public class ManeuverNodePanel
         _progradeDV = (float)node.Prograde;
         _radialDV = (float)node.Radial;
         _isActive = true;
+    }
+
+    /// <summary>
+    /// Creates the panel in edit mode for an existing NewtonThrustCommand.
+    /// </summary>
+    public ManeuverNodePanel(GlobalUIState uiState, Entity orderEntity, ManuverLinesComplete manuverLines, ManuverNode node, NewtonThrustCommand editingCommand)
+        : this(uiState, orderEntity, manuverLines, node)
+    {
+        _editingCommand = editingCommand;
     }
 
     public void Display()
@@ -165,20 +188,39 @@ public class ManeuverNodePanel
 
             ImGui.Separator();
 
-            // Action buttons
-            if (ImGui.Button("Commit"))
+            // Action buttons - different labels for edit mode vs new mode
+            if (_editingCommand != null)
             {
-                CommitNode();
+                if (ImGui.Button("Update"))
+                {
+                    CommitNode();
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Update the existing thrust order with new values");
+                ImGui.SameLine();
+                if (ImGui.Button("Delete Order"))
+                {
+                    DeleteOrder();
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Remove this thrust order from the ship's queue");
             }
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Issue the thrust command to the ship");
-            ImGui.SameLine();
-            if (ImGui.Button("Delete"))
+            else
             {
-                ClosePanel();
+                if (ImGui.Button("Commit"))
+                {
+                    CommitNode();
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Issue the thrust command to the ship");
+                ImGui.SameLine();
+                if (ImGui.Button("Delete"))
+                {
+                    ClosePanel();
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Discard this maneuver node");
             }
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Discard this maneuver node");
 
             // Track whether a widget is being actively dragged/edited this frame
             _isInteracting = ImGui.IsAnyItemActive();
@@ -228,6 +270,15 @@ public class ManeuverNodePanel
         if (!_orderEntity.TryGetDataBlob<MassVolumeDB>(out var massDB))
             return;
 
+        // If editing, remove the old order first
+        if (_editingCommand != null)
+        {
+            if (_orderEntity.TryGetDataBlob<OrderableDB>(out var orderableDB))
+            {
+                orderableDB.ActionList.Remove(_editingCommand);
+            }
+        }
+
         double totalMass = massDB.MassTotal;
         double exhaustVelocity = thrustDB.ExhaustVelocity;
         double burnRate = thrustDB.FuelBurnRate;
@@ -250,6 +301,21 @@ public class ManeuverNodePanel
         _node.NodeName = "Thrust";
         _manuverLines.AddSequence("Thrust Manuver");
 
+        ClosePanel();
+    }
+
+    /// <summary>
+    /// Removes the existing order from the ship's queue and closes the panel.
+    /// </summary>
+    private void DeleteOrder()
+    {
+        if (_editingCommand != null)
+        {
+            if (_orderEntity.TryGetDataBlob<OrderableDB>(out var orderableDB))
+            {
+                orderableDB.ActionList.Remove(_editingCommand);
+            }
+        }
         ClosePanel();
     }
 

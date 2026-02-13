@@ -855,14 +855,39 @@ namespace Pulsar4X.Client
                             ImGui.Text((i + 1).ToString());
                             ImGui.PopStyleColor();
                             ImGui.TableNextColumn();
-                            ImGui.Text(actions[i].Name);
-                            if (ImGui.IsItemHovered())
+
+                            // Make NewtonThrustCommand orders clickable for editing
+                            if (actions[i] is NewtonThrustCommand thrustCmd && !thrustCmd.IsRunning)
                             {
-                                ImGui.BeginTooltip();
-                                ImGui.Text("Running: " + actions[i].IsRunning);
-                                ImGui.Text("Finished: " + actions[i].GetIsFinished);
-                                ImGui.EndTooltip();
+                                ImGui.PushStyleColor(ImGuiCol.Header, Styles.InvisibleColor);
+                                ImGui.PushStyleColor(ImGuiCol.HeaderHovered,
+                                    new Vector4(_accentColor.X * 0.2f, _accentColor.Y * 0.2f, _accentColor.Z * 0.2f, 0.5f));
+                                ImGui.PushStyleColor(ImGuiCol.HeaderActive,
+                                    new Vector4(_accentColor.X * 0.3f, _accentColor.Y * 0.3f, _accentColor.Z * 0.3f, 0.7f));
+                                if (ImGui.Selectable(actions[i].Name + "##order" + i, false, ImGuiSelectableFlags.SpanAllColumns))
+                                {
+                                    _uiState.OpenManeuverPanelForOrder(Entity, thrustCmd);
+                                }
+                                ImGui.PopStyleColor(3);
+                                if (ImGui.IsItemHovered())
+                                {
+                                    ImGui.BeginTooltip();
+                                    ImGui.Text("Click to edit or delete this order");
+                                    ImGui.EndTooltip();
+                                }
                             }
+                            else
+                            {
+                                ImGui.Text(actions[i].Name);
+                                if (ImGui.IsItemHovered())
+                                {
+                                    ImGui.BeginTooltip();
+                                    ImGui.Text("Running: " + actions[i].IsRunning);
+                                    ImGui.Text("Finished: " + actions[i].GetIsFinished);
+                                    ImGui.EndTooltip();
+                                }
+                            }
+
                             ImGui.TableNextColumn();
                             ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                             ImGui.Text(actions[i].Details);

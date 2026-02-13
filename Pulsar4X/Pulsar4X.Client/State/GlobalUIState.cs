@@ -698,6 +698,57 @@ namespace Pulsar4X.Client
         }
 
         /// <summary>
+        /// Opens a ManeuverNodePanel for editing an existing NewtonThrustCommand.
+        /// Sets up the maneuver lines, node, and panel with the command's values.
+        /// </summary>
+        internal void OpenManeuverPanelForOrder(Entity entity, NewtonThrustCommand command)
+        {
+            // Don't open if the order is already running
+            if (command.IsRunning)
+                return;
+
+            // Need an orbit to place the node on
+            if (!entity.HasDataBlob<OrbitDB>())
+                return;
+
+            // Clean up any previous maneuver node UI
+            CleanupManeuverNode();
+
+            // Create maneuver lines and node at the command's burn center time
+            _orbitClickManuverLines = new ManuverLinesComplete();
+            var soiParentPosition = MoveMath.GetSOIParentPositionDB(entity);
+            if (soiParentPosition == null)
+                return;
+
+            _orbitClickManuverLines.RootSequence.ParentPosition = soiParentPosition;
+            _orbitClickManuverLines.AddNewEditNode(entity, command.NodeDateTime);
+
+            // Set the node's delta-v from the command (X=radial, Y=prograde)
+            var node = _orbitClickManuverLines.EditingNodes[0];
+            float prograde = (float)command.OrbitrelativeDeltaV.Y;
+            float radial = (float)command.OrbitrelativeDeltaV.X;
+            if (prograde != 0 || radial != 0)
+            {
+                node.SetNode(prograde, radial, 0, command.NodeDateTime);
+            }
+
+            // Add to render extras
+            if (SelectedSysMapRender != null)
+            {
+                if (!SelectedSysMapRender.SelectedEntityExtras.Contains(_orbitClickManuverLines))
+                    SelectedSysMapRender.SelectedEntityExtras.Add(_orbitClickManuverLines);
+            }
+
+            // Create panel in edit mode
+            ManeuverNodePanel = new ManeuverNodePanel(
+                this,
+                entity,
+                _orbitClickManuverLines,
+                node,
+                command);
+        }
+
+        /// <summary>
         /// Called during the ImGui render pass to display the active ManeuverNodePanel.
         /// </summary>
         internal void DisplayManeuverNodePanel()

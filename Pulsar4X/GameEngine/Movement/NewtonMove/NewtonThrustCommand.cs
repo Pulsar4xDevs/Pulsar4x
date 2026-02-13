@@ -18,7 +18,7 @@ namespace Pulsar4X.Movement
         public override bool IsBlocking => true;
         public override string Name { get {return _name;}}
 
-        string _name = "Newtonion thrust";
+        string _name = "Burn";
 
         public override string Details
         {
@@ -37,11 +37,15 @@ namespace Pulsar4X.Movement
         //private Vector3 _parentRalitiveDeltaV;
         NewtonMoveDB _db;
 
+        /// <summary>
+        /// The center time of the maneuver burn. Publicly readable for editing support.
+        /// </summary>
+        public DateTime NodeDateTime => _vectorDateTime;
         DateTime _vectorDateTime;
 
         public List<(string item, double value)> DebugDetails = new List<(string, double)>();
 
-        public static NewtonThrustCommand CreateCommand(int faction, Entity orderEntity, DateTime manuverNodeTime, Vector3 expendDeltaV_m, double burnTime, string name = "Newtonion thrust")
+        public static NewtonThrustCommand CreateCommand(int faction, Entity orderEntity, DateTime manuverNodeTime, Vector3 expendDeltaV_m, double burnTime, string name = null)
         {
             var cmd = new NewtonThrustCommand()
             {
@@ -51,11 +55,34 @@ namespace Pulsar4X.Movement
                 OrbitrelativeDeltaV = expendDeltaV_m,
                 _vectorDateTime = manuverNodeTime,
                 ActionOnDate = manuverNodeTime - TimeSpan.FromSeconds(burnTime * 0.5),
-                _name = name,
+                _name = name ?? GenerateName(expendDeltaV_m),
             };
 
             cmd.UpdateDetailString();
             return cmd;
+        }
+
+        /// <summary>
+        /// Generates a descriptive name from the delta-v vector components.
+        /// OrbitrelativeDeltaV: X = radial, Y = prograde, Z = normal.
+        /// </summary>
+        private static string GenerateName(Vector3 dv)
+        {
+            double dvMag = dv.Length();
+            string dvStr = Stringify.Velocity(dvMag);
+
+            // Build component breakdown
+            var parts = new System.Collections.Generic.List<string>();
+            if (Math.Abs(dv.Y) > 0.1)
+                parts.Add((dv.Y > 0 ? "+" : "") + Stringify.Velocity(dv.Y) + " pro");
+            if (Math.Abs(dv.X) > 0.1)
+                parts.Add((dv.X > 0 ? "+" : "") + Stringify.Velocity(dv.X) + " rad");
+            if (Math.Abs(dv.Z) > 0.1)
+                parts.Add((dv.Z > 0 ? "+" : "") + Stringify.Velocity(dv.Z) + " nrm");
+
+            if (parts.Count > 0)
+                return "Burn " + dvStr + " Δv (" + string.Join(", ", parts) + ")";
+            return "Burn " + dvStr + " Δv";
         }
 
         public static List<NewtonThrustCommand> CreateCommands(CargoDefinitionsLibrary cargoLibrary, Entity ship, (Vector3 dv, double t)[] manuvers)
