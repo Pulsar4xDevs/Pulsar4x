@@ -138,6 +138,78 @@ namespace Pulsar4X.Client
         }
         protected abstract void CreatePointArray();
 
+        /// <summary>
+        /// Tests if a screen-space mouse position is near the orbit line.
+        /// Returns the segment index of the closest point if within threshold, or -1.
+        /// Also outputs the interpolated true anomaly at the closest point.
+        /// </summary>
+        public (int segmentIndex, double trueAnomaly) HitTest(SDL.Point mousePos, float threshold = 10f)
+        {
+            if (_fullOrbitDrawPoints == null || _fullOrbitDrawPoints.Length < 2)
+                return (-1, 0);
+
+            float thresholdSq = threshold * threshold;
+            float bestDistSq = thresholdSq;
+            int bestIndex = -1;
+            float bestT = 0;
+
+            for (int i = 0; i < _numberOfArcSegments; i++)
+            {
+                var a = _fullOrbitDrawPoints[i];
+                var b = _fullOrbitDrawPoints[i + 1];
+
+                float distSq = PointToSegmentDistSq(mousePos.X, mousePos.Y, a.X, a.Y, b.X, b.Y, out float t);
+                if (distSq < bestDistSq)
+                {
+                    bestDistSq = distSq;
+                    bestIndex = i;
+                    bestT = t;
+                }
+            }
+
+            if (bestIndex < 0)
+                return (-1, 0);
+
+            // Interpolate the true anomaly between segment endpoints
+            double ta = bestIndex * _segmentArcSweepRadians + bestT * _segmentArcSweepRadians;
+            return (bestIndex, ta);
+        }
+
+        /// <summary>
+        /// Returns the screen position of a point on the orbit at a given index.
+        /// </summary>
+        public SDL.Point GetScreenPointAtIndex(int index)
+        {
+            if (index >= 0 && index < _fullOrbitDrawPoints.Length)
+                return _fullOrbitDrawPoints[index];
+            return new SDL.Point();
+        }
+
+        /// <summary>
+        /// Squared distance from point (px,py) to line segment (ax,ay)-(bx,by).
+        /// Outputs t in [0,1] for the closest interpolation parameter.
+        /// </summary>
+        private static float PointToSegmentDistSq(float px, float py, float ax, float ay, float bx, float by, out float t)
+        {
+            float dx = bx - ax;
+            float dy = by - ay;
+            float lenSq = dx * dx + dy * dy;
+            if (lenSq < 0.0001f)
+            {
+                t = 0;
+                float ex = px - ax;
+                float ey = py - ay;
+                return ex * ex + ey * ey;
+            }
+            t = ((px - ax) * dx + (py - ay) * dy) / lenSq;
+            t = Math.Clamp(t, 0f, 1f);
+            float cx = ax + t * dx;
+            float cy = ay + t * dy;
+            float fx = px - cx;
+            float fy = py - cy;
+            return fx * fx + fy * fy;
+        }
+
         IPosition IKepler.PositionDB => BodyPositionDB;
 
         IPosition IKepler.ParentPosDB => _positionDB;

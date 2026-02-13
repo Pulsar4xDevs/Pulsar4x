@@ -129,6 +129,18 @@ public class ManuverLinesComplete : IDrawData
     private Vector2[] points = new Vector2[0];
     private SDL.FPoint[] DrawPoints = new SDL.FPoint[0];
     private SDL.FPoint[] DrawPointsEditing = new SDL.FPoint[0];
+
+    /// <summary>
+    /// Screen positions of editing nodes, computed during OnFrameUpdate.
+    /// Used by ManeuverNodePanel to anchor the ImGui overlay.
+    /// </summary>
+    public SDL.FPoint[] EditingNodeScreenPositions = new SDL.FPoint[0];
+
+    /// <summary>
+    /// Screen positions of committed nodes in the root sequence.
+    /// </summary>
+    public SDL.FPoint[] CommittedNodeScreenPositions = new SDL.FPoint[0];
+
     public void OnFrameUpdate(Matrix matrix, Camera camera)
     {
         points = RenderManuverLines.CreatePointArray(RootSequence);
@@ -154,6 +166,27 @@ public class ManuverLinesComplete : IDrawData
             var result = mtrx.TransformToSDL_Point(points[i].X, points[i].Y);
             DrawPointsEditing[i] = new SDL.FPoint() { X = result.X, Y = result. Y };
         }
+
+        // Compute screen positions for editing node markers
+        if (EditingNodeScreenPositions.Length != EditingNodes.Length)
+            EditingNodeScreenPositions = new SDL.FPoint[EditingNodes.Length];
+        for (int i = 0; i < EditingNodes.Length; i++)
+        {
+            var nodePos = EditingNodes[i].NodePosition;
+            var result = mtrx.TransformToSDL_Point(nodePos.X, nodePos.Y);
+            EditingNodeScreenPositions[i] = new SDL.FPoint() { X = result.X, Y = result.Y };
+        }
+
+        // Compute screen positions for committed node markers
+        var committedNodes = RenderManuverLines.GetAllNodes(RootSequence);
+        if (CommittedNodeScreenPositions.Length != committedNodes.Count)
+            CommittedNodeScreenPositions = new SDL.FPoint[committedNodes.Count];
+        for (int i = 0; i < committedNodes.Count; i++)
+        {
+            var nodePos = committedNodes[i].NodePosition;
+            var result = mtrx.TransformToSDL_Point(nodePos.X, nodePos.Y);
+            CommittedNodeScreenPositions[i] = new SDL.FPoint() { X = result.X, Y = result.Y };
+        }
     }
 
     public void OnPhysicsUpdate()
@@ -168,6 +201,29 @@ public class ManuverLinesComplete : IDrawData
         SDL.RenderLines(rendererPtr, DrawPointsEditing, DrawPointsEditing.Length);
         if(DrawPoints.Length > 1)
             SDL.RenderLine(rendererPtr, DrawPoints[0].X, DrawPoints[0].Y, DrawPoints[1].X, DrawPoints[1].Y);
+
+        // Draw committed node markers (green diamonds)
+        SDL.SetRenderDrawColor(rendererPtr, obtClr.R, obtClr.G, obtClr.B, obtClr.A);
+        for (int i = 0; i < CommittedNodeScreenPositions.Length; i++)
+        {
+            DrawDiamond(rendererPtr, CommittedNodeScreenPositions[i].X, CommittedNodeScreenPositions[i].Y, 6);
+        }
+
+        // Draw editing node markers (yellow diamonds)
+        SDL.SetRenderDrawColor(rendererPtr, editClr.R, editClr.G, editClr.B, editClr.A);
+        for (int i = 0; i < EditingNodeScreenPositions.Length; i++)
+        {
+            DrawDiamond(rendererPtr, EditingNodeScreenPositions[i].X, EditingNodeScreenPositions[i].Y, 8);
+        }
+    }
+
+    private static void DrawDiamond(IntPtr rendererPtr, float cx, float cy, float size)
+    {
+        // Draw a diamond shape (rotated square)
+        SDL.RenderLine(rendererPtr, cx, cy - size, cx + size, cy);         // top to right
+        SDL.RenderLine(rendererPtr, cx + size, cy, cx, cy + size);         // right to bottom
+        SDL.RenderLine(rendererPtr, cx, cy + size, cx - size, cy);         // bottom to left
+        SDL.RenderLine(rendererPtr, cx - size, cy, cx, cy - size);         // left to top
     }
 }
 
@@ -240,7 +296,6 @@ public static class RenderManuverLines
         for (int index = 0; index < data.Count; index++)
         {
             (KeplerElements ke, Vector2 startPos) item = data[index];
-            double le = item.ke.LinearEccentricity;
             double e = item.ke.Eccentricity;
             double lop = item.ke.LoAN + item.ke.AoP;
             double a = item.ke.SemiMajorAxis;
@@ -250,7 +305,27 @@ public static class RenderManuverLines
             if (index < data.Count - 1)
                 endPos = data[index + 1].startPos;
 
-            var kp = CreatePrimitiveShapes.KeplerPoints(a, e, lop, startPos, endPos);
+            Vector2[] kp;
+            if (startPos.X == endPos.X && startPos.Y == endPos.Y)
+            {
+                // Single node with no next node: draw a full orbit.
+                // KeplerPoints returns degenerate (2-point) output when start==end
+                // because the sweep angle is 0, so generate the orbit directly.
+                int n = 128;
+                kp = new Vector2[n];
+                double startAng = Math.Atan2(startPos.Y, startPos.X);
+                double step = 2 * Math.PI / (n - 1);
+                for (int j = 0; j < n; j++)
+                {
+                    double theta = startAng + step * j;
+                    double r = EllipseMath.RadiusAtTrueAnomaly(a, e, lop, theta);
+                    kp[j] = new Vector2(r * Math.Cos(theta), r * Math.Sin(theta));
+                }
+            }
+            else
+            {
+                kp = CreatePrimitiveShapes.KeplerPoints(a, e, lop, startPos, endPos);
+            }
             arraylist.Add(kp);
             pointCount += kp.Length;
         }
@@ -265,6 +340,20 @@ public static class RenderManuverLines
         }
 
         return pointArray;
+    }
+
+    /// <summary>
+    /// Collects all ManuverNodes from a sequence tree (for marker rendering).
+    /// </summary>
+    public static List<ManuverNode> GetAllNodes(ManuverSequence manuverSequence)
+    {
+        var nodes = new List<ManuverNode>();
+        nodes.AddRange(manuverSequence.ManuverNodes);
+        foreach (var seq in manuverSequence.ManuverSequences)
+        {
+            nodes.AddRange(GetAllNodes(seq));
+        }
+        return nodes;
     }
 
     public static (ManuverSequence seq, int nodeIndex)[] FindNodeTime(ManuverSequence manuverSequence, DateTime nodeTime)
