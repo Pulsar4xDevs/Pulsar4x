@@ -13,6 +13,7 @@ using static Pulsar4X.Client.SystemViewPreferences;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using Pulsar4X.Orbits;
 using Pulsar4X.Client.Rendering;
 
 namespace Pulsar4X.Client
@@ -85,7 +86,6 @@ namespace Pulsar4X.Client
         internal SafeDictionary<string, SystemState> StarSystemStates = new ();
         internal Camera Camera;
         internal SDL3Window ViewPort { get; private set; }
-        internal System.Numerics.Vector2 MainWinSize { get {return ViewPort.Size;}}
 
         internal Dictionary<Type, PulsarGuiWindow> LoadedWindows = new ();
         internal Dictionary<String, NonUniquePulsarGuiWindow> LoadedNonUniqueWindows = new ();
@@ -103,6 +103,18 @@ namespace Pulsar4X.Client
         private string _previousSystemIdBeforeSM = "";
 
         internal Stack<IHotKeyHandler> HotKeys { get; private set; } = new ();
+
+        // Maneuver node panel for orbit-click placement
+        internal ManeuverNodePanel? ManeuverNodePanel { get; set; }
+        private ManuverLinesComplete? _orbitClickManuverLines;
+
+        // Click-vs-drag detection
+        private float _mouseDownX;
+        private float _mouseDownY;
+        private const float DragThreshold = 5f;
+
+        // Maneuver node dragging
+        private bool _isDraggingNode = false;
 
         internal View? SelectedMapView { get; set; } = null;
 
@@ -178,11 +190,11 @@ namespace Pulsar4X.Client
                 settings.EllipseSweepRadians = 0.26f; // ~15 degrees
             }
 
-            // Ships: short tail, no ghost orbit
+            // Ships: short tail, ghost orbit enabled
             foreach (var settings in UserOrbitSettingsMtx[(int)UserOrbitSettings.OrbitBodyType.Ship])
             {
                 settings.EllipseSweepRadians = 0.26f; // ~15 degrees
-                settings.GhostOrbitAlpha = 0;
+                settings.GhostOrbitAlpha = 20;
             }
 
             // Comets: white-ish, very short tail
@@ -235,9 +247,20 @@ namespace Pulsar4X.Client
 
                 if (e.Button.Button == 1)
                 {
-                    Camera.IsGrabbingMap = true;
-                    Camera.MouseFrameIncrementX = e.Motion.X;
-                    Camera.MouseFrameIncrementY = e.Motion.Y;
+                    _mouseDownX = e.Motion.X;
+                    _mouseDownY = e.Motion.Y;
+
+                    // Check if mouse is near a node marker — start dragging instead of panning
+                    if (IsMouseNearNodeMarker((int)e.Motion.X, (int)e.Motion.Y))
+                    {
+                        _isDraggingNode = true;
+                    }
+                    else
+                    {
+                        Camera.IsGrabbingMap = true;
+                        Camera.MouseFrameIncrementX = e.Motion.X;
+                        Camera.MouseFrameIncrementY = e.Motion.Y;
+                    }
                 }
             };
             mainWin.MouseButtonUpOccured += (object sender, SDL.Event e) => {
@@ -246,7 +269,28 @@ namespace Pulsar4X.Client
                 if (e.Button.Button == 1)
                 {
                     Camera.IsGrabbingMap = false;
-                    MapClicked(Camera.WorldCoordinate_m(e.Motion.X, e.Motion.Y), MouseButtons.Primary);
+                    bool wasDraggingNode = _isDraggingNode;
+                    _isDraggingNode = false;
+
+                    // Check if this was a drag (not a click)
+                    float dx = e.Motion.X - _mouseDownX;
+                    float dy = e.Motion.Y - _mouseDownY;
+                    bool wasDrag = (dx * dx + dy * dy) > DragThreshold * DragThreshold;
+
+                    if (wasDraggingNode)
+                    {
+                        // Node drag completed — final position was set in MouseMove
+                        return;
+                    }
+
+                    if (!wasDrag)
+                    {
+                        // Try orbit-line click first for maneuver node placement
+                        if (!TryOrbitClick((int)e.Motion.X, (int)e.Motion.Y))
+                        {
+                            MapClicked(Camera.WorldCoordinate_m(e.Motion.X, e.Motion.Y), MouseButtons.Primary);
+                        }
+                    }
                 }
                 else if (e.Button.Button == 3)
                 {
@@ -263,7 +307,12 @@ namespace Pulsar4X.Client
                     Camera.ZoomOut((int)e.Wheel.MouseX, (int)e.Wheel.MouseY);
             };
             mainWin.MouseMoveOccured += (object sender, SDL.Event e) => {
-                if (Camera.IsGrabbingMap)
+                if (_isDraggingNode)
+                {
+                    // Reposition the node along the orbit as the mouse moves
+                    DragNodeToScreenPos((int)e.Motion.X, (int)e.Motion.Y);
+                }
+                else if (Camera.IsGrabbingMap)
                 {
                     Camera.WorldOffset_m(
                             (int)(Camera.MouseFrameIncrementX - e.Motion.X),
@@ -317,6 +366,8 @@ namespace Pulsar4X.Client
             {
                 var system = Game.Systems.FirstOrDefault(s => s.ID.Equals(guid));
                 if(system == null) continue;
+                if (system.ActivityState == SystemActivityState.Stasis)
+                    system.SetActivityState(SystemActivityState.Background);
                 StarSystemStates[guid] = new SystemState(system, factionEntity.Id);
             }
 
@@ -355,15 +406,23 @@ namespace Pulsar4X.Client
             if(Game == null || Faction == null) throw new NullReferenceException("Game or Faction is null");
 
             if(!activeSysID.Equals(SelectedStarSystemId) || refresh){
-                // Save camera state for the outgoing system
+                // Demote the old system from Foreground to Background
                 if(!string.IsNullOrEmpty(SelectedStarSystemId) && StarSystemStates.ContainsKey(SelectedStarSystemId))
                 {
+                    var oldSystem = StarSystemStates[SelectedStarSystemId].StarSystem;
+                    if (oldSystem.ActivityState == SystemActivityState.Foreground)
+                        oldSystem.SetActivityState(SystemActivityState.Background);
+
                     StarSystemStates[SelectedStarSystemId].SavedCameraState = Camera.SaveState();
                 }
 
                 if(!StarSystemStates.ContainsKey(activeSysID)){
                     StarSystemStates[activeSysID] = new SystemState(Game.Systems.First(s => s.ID.Equals(activeSysID)), Faction.Id);
                 }
+
+                // Promote the new system to Foreground
+                var newSystem = Game.Systems.First(s => s.ID.Equals(activeSysID));
+                newSystem.SetActivityState(SystemActivityState.Foreground);
 
                 SelectedStarSystemId = activeSysID;
 
@@ -435,6 +494,277 @@ namespace Pulsar4X.Client
         internal void OnFocusMoved()
         {
             _lastContextMenuOpenedEntityGuid = -1;
+        }
+
+        /// <summary>
+        /// Attempts to place a maneuver node where the user clicked on a ship's orbit line.
+        /// Returns true if the click was consumed (a node was placed), false to fall through
+        /// to normal entity selection.
+        /// </summary>
+        private bool TryOrbitClick(int screenX, int screenY)
+        {
+            // Only works when a ship with thrust capability is selected
+            if (PrimaryEntity == null)
+                return false;
+
+            if (!PrimaryEntity.Entity.TryGetDataBlob<NewtonThrustAbilityDB>(out _))
+                return false;
+
+            if (!PrimaryEntity.Entity.HasDataBlob<OrbitDB>())
+                return false;
+
+            // Check if user clicked on the existing editing node marker (to re-select it)
+            if (_orbitClickManuverLines != null && _orbitClickManuverLines.EditingNodeScreenPositions.Length > 0)
+            {
+                for (int i = 0; i < _orbitClickManuverLines.EditingNodeScreenPositions.Length; i++)
+                {
+                    var np = _orbitClickManuverLines.EditingNodeScreenPositions[i];
+                    float dx = screenX - np.X;
+                    float dy = screenY - np.Y;
+                    if (dx * dx + dy * dy < 15 * 15)
+                    {
+                        // Re-open panel for this existing node
+                        if (ManeuverNodePanel == null || !ManeuverNodePanel.IsActive)
+                        {
+                            ManeuverNodePanel = new ManeuverNodePanel(
+                                this,
+                                PrimaryEntity.Entity,
+                                _orbitClickManuverLines,
+                                _orbitClickManuverLines.EditingNodes[i]);
+                        }
+                        return true;
+                    }
+                }
+            }
+
+            // If the panel is already open, clicking elsewhere on the orbit moves the node
+            if (ManeuverNodePanel != null && ManeuverNodePanel.IsActive)
+            {
+                var orbitIconForMove = PrimaryEntity.OrbitIcon as OrbitIconBase;
+                if (orbitIconForMove == null)
+                    return true; // consume click anyway
+
+                var mousePtForMove = new SDL.Point() { X = screenX, Y = screenY };
+                var (segIdx, ta) = orbitIconForMove.HitTest(mousePtForMove);
+                if (segIdx >= 0)
+                {
+                    // Clicked on orbit: reposition the node
+                    var nodeDateTime = TrueAnomalyToDateTime(ta);
+                    if (nodeDateTime.HasValue)
+                        ManeuverNodePanel.RepositionNode(nodeDateTime.Value);
+                    return true;
+                }
+                // Clicked off the orbit: close the panel
+                ManeuverNodePanel.ClosePanel();
+                return false; // let MapClicked handle it
+            }
+
+            // Get the orbit icon for the selected entity
+            var orbitIcon = PrimaryEntity.OrbitIcon as OrbitIconBase;
+            if (orbitIcon == null)
+                return false;
+
+            // Hit test the orbit line
+            var mousePoint = new SDL.Point() { X = screenX, Y = screenY };
+            var (segmentIndex, trueAnomaly) = orbitIcon.HitTest(mousePoint);
+            if (segmentIndex < 0)
+                return false;
+
+            // Calculate the DateTime at this orbit position
+            var nodeTime = TrueAnomalyToDateTime(trueAnomaly);
+            if (!nodeTime.HasValue)
+                return false;
+
+            // Clean up any previous maneuver lines
+            CleanupManeuverNode();
+
+            // Create maneuver lines and node
+            _orbitClickManuverLines = new ManuverLinesComplete();
+            var soiParentPosition = MoveMath.GetSOIParentPositionDB(PrimaryEntity.Entity);
+            if (soiParentPosition == null)
+                return false;
+
+            _orbitClickManuverLines.RootSequence.ParentPosition = soiParentPosition;
+            _orbitClickManuverLines.AddNewEditNode(PrimaryEntity.Entity, nodeTime.Value);
+
+            // Add to render extras
+            if (SelectedSysMapRender != null)
+            {
+                if (!SelectedSysMapRender.SelectedEntityExtras.Contains(_orbitClickManuverLines))
+                    SelectedSysMapRender.SelectedEntityExtras.Add(_orbitClickManuverLines);
+            }
+
+            // Create and show the panel
+            ManeuverNodePanel = new ManeuverNodePanel(
+                this,
+                PrimaryEntity.Entity,
+                _orbitClickManuverLines,
+                _orbitClickManuverLines.EditingNodes[0]);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Converts a true anomaly on the primary entity's orbit to a future DateTime.
+        /// Uses Kepler's equation (true anomaly → eccentric anomaly → mean anomaly)
+        /// for correct results on eccentric orbits.
+        /// </summary>
+        private DateTime? TrueAnomalyToDateTime(double trueAnomaly)
+        {
+            if (PrimaryEntity == null || !PrimaryEntity.Entity.HasDataBlob<OrbitDB>())
+                return null;
+
+            var orbitDB = PrimaryEntity.Entity.GetDataBlob<OrbitDB>();
+            var period = orbitDB.OrbitalPeriod.TotalSeconds;
+            var eccentricity = orbitDB.Eccentricity;
+            var currentTime = PrimaryEntity.Entity.StarSysDateTime;
+
+            // Convert both true anomalies to mean anomalies via eccentric anomaly (Kepler's equation)
+            var currentTrueAnomaly = OrbitMath.GetTrueAnomaly(orbitDB, currentTime);
+
+            var currentE = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(currentTrueAnomaly, eccentricity);
+            var currentM = currentE - eccentricity * Math.Sin(currentE);
+
+            var targetE = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
+            var targetM = targetE - eccentricity * Math.Sin(targetE);
+
+            // Mean anomaly progresses linearly with time
+            var meanAnomalyDiff = targetM - currentM;
+            if (meanAnomalyDiff < 0) meanAnomalyDiff += Math.PI * 2;
+
+            var timeFraction = meanAnomalyDiff / (Math.PI * 2);
+            var nodeDateTime = currentTime + TimeSpan.FromSeconds(period * timeFraction);
+
+            if (nodeDateTime <= currentTime)
+                nodeDateTime += TimeSpan.FromSeconds(period);
+
+            return nodeDateTime;
+        }
+
+        /// <summary>
+        /// Checks if a screen position is near an editing node marker.
+        /// Used to decide whether to start a node drag or a map pan.
+        /// </summary>
+        private bool IsMouseNearNodeMarker(int screenX, int screenY)
+        {
+            if (_orbitClickManuverLines == null)
+                return false;
+
+            for (int i = 0; i < _orbitClickManuverLines.EditingNodeScreenPositions.Length; i++)
+            {
+                var np = _orbitClickManuverLines.EditingNodeScreenPositions[i];
+                float dx = screenX - np.X;
+                float dy = screenY - np.Y;
+                if (dx * dx + dy * dy < 15 * 15)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Repositions the editing node to the closest point on the orbit to the given screen position.
+        /// Called during mouse drag.
+        /// </summary>
+        private void DragNodeToScreenPos(int screenX, int screenY)
+        {
+            if (PrimaryEntity == null || ManeuverNodePanel == null || !ManeuverNodePanel.IsActive)
+                return;
+
+            var orbitIcon = PrimaryEntity.OrbitIcon as OrbitIconBase;
+            if (orbitIcon == null)
+                return;
+
+            var mousePoint = new SDL.Point() { X = screenX, Y = screenY };
+            var (segmentIndex, trueAnomaly) = orbitIcon.HitTest(mousePoint, 50f); // wider threshold during drag
+            if (segmentIndex < 0)
+                return;
+
+            var nodeDateTime = TrueAnomalyToDateTime(trueAnomaly);
+            if (nodeDateTime.HasValue)
+                ManeuverNodePanel.RepositionNode(nodeDateTime.Value);
+        }
+
+        /// <summary>
+        /// Removes previous maneuver node visuals from the render list.
+        /// </summary>
+        private void CleanupManeuverNode()
+        {
+            if (_orbitClickManuverLines != null && SelectedSysMapRender != null)
+            {
+                SelectedSysMapRender.SelectedEntityExtras.Remove(_orbitClickManuverLines);
+            }
+            ManeuverNodePanel = null;
+            _orbitClickManuverLines = null;
+        }
+
+        /// <summary>
+        /// Opens a ManeuverNodePanel for editing an existing NewtonThrustCommand.
+        /// Sets up the maneuver lines, node, and panel with the command's values.
+        /// </summary>
+        internal void OpenManeuverPanelForOrder(Entity entity, NewtonThrustCommand command)
+        {
+            // Don't open if the order is already running
+            if (command.IsRunning)
+                return;
+
+            // Need an orbit to place the node on
+            if (!entity.HasDataBlob<OrbitDB>())
+                return;
+
+            // Clean up any previous maneuver node UI
+            CleanupManeuverNode();
+
+            // Create maneuver lines and node at the command's burn center time
+            _orbitClickManuverLines = new ManuverLinesComplete();
+            var soiParentPosition = MoveMath.GetSOIParentPositionDB(entity);
+            if (soiParentPosition == null)
+                return;
+
+            _orbitClickManuverLines.RootSequence.ParentPosition = soiParentPosition;
+            _orbitClickManuverLines.AddNewEditNode(entity, command.NodeDateTime);
+
+            // Set the node's delta-v from the command (X=radial, Y=prograde)
+            var node = _orbitClickManuverLines.EditingNodes[0];
+            float prograde = (float)command.OrbitrelativeDeltaV.Y;
+            float radial = (float)command.OrbitrelativeDeltaV.X;
+            if (prograde != 0 || radial != 0)
+            {
+                node.SetNode(prograde, radial, 0, command.NodeDateTime);
+            }
+
+            // Add to render extras
+            if (SelectedSysMapRender != null)
+            {
+                if (!SelectedSysMapRender.SelectedEntityExtras.Contains(_orbitClickManuverLines))
+                    SelectedSysMapRender.SelectedEntityExtras.Add(_orbitClickManuverLines);
+            }
+
+            // Create panel in edit mode
+            ManeuverNodePanel = new ManeuverNodePanel(
+                this,
+                entity,
+                _orbitClickManuverLines,
+                node,
+                command);
+        }
+
+        /// <summary>
+        /// Called during the ImGui render pass to display the active ManeuverNodePanel.
+        /// </summary>
+        internal void DisplayManeuverNodePanel()
+        {
+            if (ManeuverNodePanel != null)
+            {
+                if (ManeuverNodePanel.IsActive)
+                {
+                    ManeuverNodePanel.Display();
+                    _orbitClickManuverLines?.DrawApsisLabels();
+                }
+                else
+                {
+                    CleanupManeuverNode();
+                }
+            }
         }
 
         //checks wether the planet icon is clicked

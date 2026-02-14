@@ -288,6 +288,9 @@ namespace Pulsar4X.Client
             {
                 item.Display();
             }
+
+            // Render the maneuver node panel overlay (if active)
+            _state.DisplayManeuverNodePanel();
         }
 
         public override void Exit()

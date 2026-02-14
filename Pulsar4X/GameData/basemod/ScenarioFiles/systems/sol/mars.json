@@ -13,7 +13,8 @@
           "Albedo": 0.25,
           "Mass": 0.64174E24,
           "Radius": 3396.2,
-          "Tectonics": "earth-like"
+          "Tectonics": "earth-like",
+          "LengthOfDay": "1.00:37:00"
         },
         "Orbit": {
           "SemiMajorAxis_km": 227939366,

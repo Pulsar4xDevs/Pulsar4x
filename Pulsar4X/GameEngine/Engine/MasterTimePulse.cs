@@ -248,18 +248,19 @@ namespace Pulsar4X.Engine
                 _subpulseStopwatch.Start();
                 DateTime nextInterupt = ProcessNextInterupt(targetDateTime);
                 //do system processors
+                var activeSystems = _game.Systems.Where(s => s.ActivityState != SystemActivityState.Stasis);
 
                 if (_game.Settings.EnableMultiThreading == true)
                 {
                     //multi-threaded
-                    Parallel.ForEach<StarSystem>(_game.Systems, starSys => starSys.ManagerSubpulses.ProcessSystem(nextInterupt));
+                    Parallel.ForEach(activeSystems, starSys => starSys.ManagerSubpulses.ProcessSystem(nextInterupt));
 
                     //The above 'blocks' till all the tasks are done.
                 }
                 else
                 {
                     // single-threaded
-                    foreach (StarSystem starSys in _game.Systems)
+                    foreach (StarSystem starSys in activeSystems)
                     {
                         starSys.ManagerSubpulses.ProcessSystem(nextInterupt);
                     }

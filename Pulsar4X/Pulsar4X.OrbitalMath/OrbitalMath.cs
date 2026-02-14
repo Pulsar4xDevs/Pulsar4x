@@ -687,7 +687,7 @@ namespace Pulsar4X.Orbital
         public static Vector3 ProgradeToStateVector(Vector3 progradeVector, KeplerElements ke)
         {
             var mtxTruA = Matrix3d.IDRotateZ(-ke.TrueAnomalyAtEpoch);
-            var mtxaop = Matrix3d.IDRotateZ(-ke.Apoapsis);
+            var mtxaop = Matrix3d.IDRotateZ(-ke.AoP);
             var mtxLoAN = Matrix3d.IDRotateZ(-ke.LoAN);
             var mtxincl = Matrix3d.IDRotateX(ke.Inclination);
 

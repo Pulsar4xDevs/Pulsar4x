@@ -118,6 +118,9 @@ namespace Pulsar4X.Engine
     [Serializable]
     public class NewGameSettings : GameSettings
     {
+        public const int DEFAULT_MAX_SYSTEMS = 100;
+        public const int DEFAULT_NUM_SYSTEMS = 10;
+
         public string SMPassword { get; set; } = "";
 
         #region Player Generation

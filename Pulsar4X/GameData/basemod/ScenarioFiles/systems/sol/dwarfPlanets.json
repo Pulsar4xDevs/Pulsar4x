@@ -12,7 +12,8 @@
         "Albedo": 0.09,
         "AxialTilt": 4,
         "Mass": 9.3835E20,
-        "Radius": 469.73
+        "Radius": 469.73,
+        "LengthOfDay": "0.09:04:00"
       },
       "Orbit": {
         "SemiMajorAxis": 414E6,
@@ -36,7 +37,8 @@
         "Type": "dwarf-planet",
         "Albedo": 0.96,
         "Mass": 1.66E22,
-        "Radius": 1163
+        "Radius": 1163,
+        "LengthOfDay": "1.01:58:00"
       },
       "Orbit": {
         "SemiMajorAxis": 10.152E9,
@@ -61,7 +63,8 @@
         "Albedo": 0.33,
         "AxialTilt": 126,
         "Mass": 4.006E21,
-        "Radius": 798
+        "Radius": 798,
+        "LengthOfDay": "0.03:55:00"
       },
       "Orbit": {
         "SemiMajorAxis": 6.4501E9,
@@ -85,7 +88,8 @@
         "Type": "dwarf-planet",
         "Albedo": 0.74,
         "Mass": 3.1E21,
-        "Rradius": 739
+        "Radius": 739,
+        "LengthOfDay": "0.22:50:00"
       },
       "Orbit": {
         "SemiMajorAxis": 6.7962E9,
@@ -111,7 +115,8 @@
         "Albedo": 0.49,
         "AxialTilt": 122.53,
         "Mass": 1.303E22,
-        "Radius": 1188.3
+        "Radius": 1188.3,
+        "LengthOfDay": "6.09:18:00"
       },
       "Orbit": {
         "SemiMajorAxis": 5.90638E9,

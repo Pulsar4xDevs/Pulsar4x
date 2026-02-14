@@ -60,6 +60,7 @@ namespace Pulsar4X.Client
 
         private double _dv = 0;
         private KeplerElements _ke;
+        private Entity? _soiParent;
 
 
         public NewtonMoveIcon(KeplerElements ke, Vector3 position) : base(position)
@@ -82,6 +83,7 @@ namespace Pulsar4X.Client
             var _sgp1 = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
 
             _sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
+            _soiParent = _newtonMoveDB.SOIParent;
             _ke = _newtonMoveDB.GetElements();
 
             UpdateUserSettings();
@@ -137,8 +139,21 @@ namespace Pulsar4X.Client
         {
             if (_newtonMoveDB == null || _newtonMoveDB.OwningEntity == null) //There's a threaded race condition here which will cause a null...
                 return;
+
+            //check if the SOI parent has changed (SOI transition)
+            bool soiChanged = _newtonMoveDB.SOIParent != _soiParent;
+            if (soiChanged)
+            {
+                _soiParent = _newtonMoveDB.SOIParent;
+                _parentPosDB = _soiParent.GetDataBlob<PositionDB>();
+                _positionDB = _parentPosDB;
+                var parentMass = _newtonMoveDB.ParentMass;
+                var myMass = _newtonMoveDB.OwningEntity.GetDataBlob<MassVolumeDB>().MassDry;
+                _sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
+            }
+
             var ke = _newtonMoveDB.GetElements(); //...cause a null ref exception inside this call.
-            if (ke.Eccentricity != _ke.Eccentricity)
+            if (soiChanged || ke.Eccentricity != _ke.Eccentricity)
             {
                 _ke = ke;
                 CreatePointArray();

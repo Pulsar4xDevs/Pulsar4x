@@ -7,6 +7,13 @@ using Pulsar4X.Names;
 
 namespace Pulsar4X.Engine
 {
+    public enum SystemActivityState
+    {
+        Stasis,      // No processing — system time falls behind
+        Background,  // Throttled hotloop processors
+        Foreground   // Normal processing (current behavior)
+    }
+
     [DebuggerDisplay("{NameDB.DefaultName} - {ID.ToString()}")]
     [JsonObject(MemberSerialization.OptIn)]
     public class StarSystem : EntityManager
@@ -21,6 +28,9 @@ namespace Pulsar4X.Engine
                 return ManagerID;
             }
         }
+
+        [JsonProperty]
+        public SystemActivityState ActivityState { get; set; } = SystemActivityState.Stasis;
 
         [JsonProperty]
         internal int SystemIndex { get; set; }
@@ -90,6 +100,41 @@ namespace Pulsar4X.Engine
         //     Game.PostLoad += GameOnPostLoad;
 
         // }
+
+        public void SetActivityState(SystemActivityState newState)
+        {
+            var oldState = ActivityState;
+            ActivityState = newState;
+
+            if (oldState == SystemActivityState.Stasis && newState != SystemActivityState.Stasis)
+            {
+                CatchUpFromStasis(Game.TimePulse.GameGlobalDateTime);
+            }
+
+            switch (newState)
+            {
+                case SystemActivityState.Foreground:
+                    ManagerSubpulses.FrequencyMultiplier = 1.0;
+                    break;
+                case SystemActivityState.Background:
+                    ManagerSubpulses.FrequencyMultiplier = 10.0;
+                    break;
+                case SystemActivityState.Stasis:
+                    ManagerSubpulses.FrequencyMultiplier = 1.0;
+                    break;
+            }
+        }
+
+        internal void CatchUpFromStasis(DateTime targetDateTime)
+        {
+            if (ManagerSubpulses.StarSysDateTime >= targetDateTime)
+                return;
+
+            var orbitProcessor = Game.ProcessorManager.GetProcessor<Orbits.OrbitDB>();
+            orbitProcessor.ProcessManager(this, (int)(targetDateTime - ManagerSubpulses.StarSysDateTime).TotalSeconds);
+
+            ManagerSubpulses.FastForwardTo(targetDateTime);
+        }
 
         private void GameOnPostLoad(object sender, EventArgs eventArgs)
         {

@@ -427,9 +427,9 @@ namespace Pulsar4X.Client.Rendering
         internal void Draw()
         {
             DrawIcons(UIWidgets.Values.ToList());
-            DrawIcons(_orbitRings.Values.ToList());
-            DrawIcons(_moveIcons.Values.ToList());
-            DrawIcons(_entityIcons.Values.ToList());
+            DrawFilteredIcons(_orbitRings);
+            DrawFilteredIcons(_moveIcons);
+            DrawFilteredIcons(_entityIcons);
             DrawIcons(SelectedEntityExtras);
         }
 
@@ -453,6 +453,26 @@ namespace Pulsar4X.Client.Rendering
                 NameIcon.DrawAll(_state.SDLRendererPtr, _state.Camera, nameIcons);
             }
 
+        }
+
+        void DrawFilteredIcons(ConcurrentDictionary<int, IDrawData> icons)
+        {
+            if (_sysState == null)
+            {
+                foreach (var item in icons.Values)
+                    item.Draw(_window.Renderer, _camera);
+                return;
+            }
+
+            var prefs = SystemViewPreferences.GetInstance();
+            foreach (var (entityId, item) in icons)
+            {
+                if (_sysState.EntityStatesWithPosition.TryGetValue(entityId, out var entityState)
+                    && !prefs.ShouldDisplay("map", entityState.BodyType))
+                    continue;
+
+                item.Draw(_window.Renderer, _camera);
+            }
         }
 
         void DrawIcons(List<IDrawData> icons)

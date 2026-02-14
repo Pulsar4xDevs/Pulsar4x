@@ -79,7 +79,10 @@ namespace Pulsar4X.Client
             if(Window.Begin("Map Scale", ref IsActive, _flags))//Lets the user close the ruler
             {
                 //displays the size in meters of the current screen area account for zoom and window dimensions
-                var windowCornerInWorldCoordinate = _uiState.Camera.WorldCoordinate_m((int)_uiState.MainWinSize.X, (int)_uiState.MainWinSize.Y);
+                var windowCornerInWorldCoordinate = _uiState.Camera.WorldCoordinate_m(
+                        _uiState.ViewPort.Size.Width,
+                        _uiState.ViewPort.Size.Height);
+
                 ImGui.Text("Current screen is:");
                 ImGui.Text(Stringify.Distance(((windowCornerInWorldCoordinate.X - _uiState.Camera.CameraWorldPosition.X)*2))+" wide.");
                 ImGui.Text(Stringify.Distance((-(windowCornerInWorldCoordinate.Y - _uiState.Camera.CameraWorldPosition.Y)*2))+" tall.");

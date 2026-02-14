@@ -124,7 +124,7 @@ namespace Pulsar4X.Client
             if (SelectedEntity.HasDataBlob<EntityDamageProfileDB>())
             {
                 var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
-                Textures.CreateTexture(_uiState.ViewPort.Renderer, dmgdb.DamageProfile, ref _dmgTxtr, Client.Rendering.PixelFormat.ARGB8888);
+                Textures.CreateTexture(_uiState.ViewPort.Renderer, dmgdb.DamageProfile, ref _dmgTxtr, SDL.PixelFormat.ARGB8888);
             }
             else if(SelectedEntity.HasDataBlob<SensorInfoDB>())
             {
@@ -133,7 +133,7 @@ namespace Pulsar4X.Client
                 if (actualEntity.IsValid && actualEntity.HasDataBlob<EntityDamageProfileDB>())
                 {
                     var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
-                    Textures.CreateTexture(_uiState.ViewPort.Renderer, dmgdb.DamageProfile, ref _dmgTxtr, Client.Rendering.PixelFormat.ARGB8888);
+                    Textures.CreateTexture(_uiState.ViewPort.Renderer, dmgdb.DamageProfile, ref _dmgTxtr, SDL.PixelFormat.ARGB8888);
                 }
             }
             else
@@ -167,6 +167,7 @@ namespace Pulsar4X.Client
                 {
                     DisplayInfoTab();
                     DisplayEntitiesTab();
+                    DisplaySystemsTab();
                     DisplayInstanceProcessorsTab();
                     DisplayHotLoopProcessorsTab();
 
@@ -673,6 +674,56 @@ namespace Pulsar4X.Client
                     ImGui.EndChild();
                 }
 
+                ImGui.EndTabItem();
+            }
+        }
+
+        private void DisplaySystemsTab()
+        {
+            if (_uiState.Game == null) return;
+
+            if (ImGui.BeginTabItem("Systems"))
+            {
+                var game = _uiState.Game;
+                ImGui.Text($"Total Systems: {game.Systems.Count}");
+                ImGui.Text($"Global Time: {game.TimePulse.GameGlobalDateTime.ToString(_uiState.GameSettings.GetDateTimeFormat())}");
+
+                int stasisCount = game.Systems.Count(s => s.ActivityState == SystemActivityState.Stasis);
+                int bgCount = game.Systems.Count(s => s.ActivityState == SystemActivityState.Background);
+                int fgCount = game.Systems.Count(s => s.ActivityState == SystemActivityState.Foreground);
+                ImGui.Text($"Stasis: {stasisCount}  Background: {bgCount}  Foreground: {fgCount}");
+
+                ImGui.Separator();
+
+                if (ImGui.BeginTable("SystemsTable", 6, Styles.TableFlags))
+                {
+                    ImGui.TableSetupColumn("System Name");
+                    ImGui.TableSetupColumn("Activity State");
+                    ImGui.TableSetupColumn("System Time");
+                    ImGui.TableSetupColumn("Time Lag");
+                    ImGui.TableSetupColumn("Entities");
+                    ImGui.TableSetupColumn("Freq Multiplier");
+                    ImGui.TableHeadersRow();
+
+                    foreach (var system in game.Systems)
+                    {
+                        ImGui.TableNextRow();
+                        ImGui.TableSetColumnIndex(0);
+                        ImGui.Text(system.NameDB?.DefaultName ?? system.ID);
+                        ImGui.TableSetColumnIndex(1);
+                        ImGui.Text(system.ActivityState.ToString());
+                        ImGui.TableSetColumnIndex(2);
+                        ImGui.Text(system.StarSysDateTime.ToString(_uiState.GameSettings.GetDateTimeFormat()));
+                        ImGui.TableSetColumnIndex(3);
+                        var lag = game.TimePulse.GameGlobalDateTime - system.StarSysDateTime;
+                        ImGui.Text(lag.TotalSeconds > 0 ? lag.ToString() : "-");
+                        ImGui.TableSetColumnIndex(4);
+                        ImGui.Text(system.EntityCount.ToString());
+                        ImGui.TableSetColumnIndex(5);
+                        ImGui.Text(system.ManagerSubpulses.FrequencyMultiplier.ToString("F1"));
+                    }
+                    ImGui.EndTable();
+                }
                 ImGui.EndTabItem();
             }
         }

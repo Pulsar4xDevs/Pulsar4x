@@ -14,7 +14,8 @@
           "AxialTilt": 2.04,
           "Mass": 3.3022E23,
           "Radius": 2439.7,
-          "Tectonics": "earth-like"
+          "Tectonics": "earth-like",
+          "LengthOfDay": "58.15:31:00"
         },
         "Orbit": {
           "SemiMajorAxis_km": 57.91E6,

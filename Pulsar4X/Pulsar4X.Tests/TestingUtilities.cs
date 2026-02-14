@@ -82,6 +82,12 @@ namespace Pulsar4X.Tests
             greyAlienSpecies.GetDataBlob<NameDB>().SetName(humanFaction.Id, "Space bugs");
             //TODO Expand the "Test Universe" to cover more datablobs and entities. And ships. Etc.
 
+            // Set all test systems to Foreground so existing tests work without modification
+            foreach (var system in game.Systems)
+            {
+                system.SetActivityState(SystemActivityState.Foreground);
+            }
+
             if (generateDefaultHumans)
             {
                 DefaultStartFactory.DefaultHumans(game, "Humans");
@@ -150,6 +156,7 @@ namespace Pulsar4X.Tests
 
             StarSystemFactory starfac = new StarSystemFactory(Game);
             Sol = starfac.CreateSol(Game);
+            Sol.SetActivityState(SystemActivityState.Foreground);
             Earth = NameLookup.GetFirstEntityWithName(Sol, "Earth"); //Sol.Entities[3]; //should be fourth entity created
              EarthColony = ColonyFactory.CreateColony(HumanFaction, HumanSpecies, Earth);
              var humondatastore = HumanFaction.GetDataBlob<FactionInfoDB>().Data;

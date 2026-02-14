@@ -8,11 +8,13 @@ using ImGuiNET;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Colonies;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Modding;
+using Pulsar4X.Names;
 using Pulsar4X.People;
 
 namespace Pulsar4X.Client;
@@ -58,7 +60,7 @@ public class NewGameMenu : PulsarGuiWindow
     GameType _selectedGameType = GameType.Standalone;
     byte[] _netPortInputBuffer = new byte[8];
     string _netPortString { get { return System.Text.Encoding.UTF8.GetString(_netPortInputBuffer); } }
-    int _maxSystems = 5;
+    int _maxSystems = NewGameSettings.DEFAULT_NUM_SYSTEMS;
     int _startingFunds = 100_000_000;
 
     byte[] _corporationNameBuffer = Utils.BytesFromString(DEFAULT_NAME, NAME_BUFFER_SIZE);
@@ -87,8 +89,6 @@ public class NewGameMenu : PulsarGuiWindow
         }
         return (NewGameMenu)_uiState.LoadedWindows[typeof(NewGameMenu)];
     }
-
-    NewGameSettings gameSettings = new NewGameSettings();
 
     internal override void Display()
     {
@@ -411,67 +411,124 @@ public class NewGameMenu : PulsarGuiWindow
 
     void CreateNewGame()
     {
-        gameSettings = new NewGameSettings
+        var p = new GameCreationParams
         {
+            ModDataStore = _modDataStore,
+            FactionName = Utils.StringFromBytes(_corporationNameBuffer),
+            FactionAbbreviation = Utils.StringFromBytes(_corporationAbbreviationBuffer),
+            SpeciesId = _selectedSpeciesId,
+            ColonyId = _selectedColonyId,
+            SystemId = _selectedSystemId,
+            BodyId = _selectedBodyId,
+            EnabledSystems = _enabledSystems,
             MaxSystems = _maxSystems,
-            SMPassword = Utils.StringFromBytes(_smPassInputbuffer),
-            CreatePlayerFaction = true,
-            DefaultFactionName = Utils.StringFromBytes(_corporationNameBuffer),
-            DefaultPlayerPassword = Utils.StringFromBytes(_passInputBuffer),
-            DefaultSolStart = true,
             MasterSeed = _masterSeed,
-            EleStart = _eleStart
+            StartingFunds = _startingFunds,
+            EleStart = _eleStart,
+            SMPassword = Utils.StringFromBytes(_smPassInputbuffer),
+            PlayerPassword = Utils.StringFromBytes(_passInputBuffer)
         };
 
-        SpeciesBlueprint startingSpeciesBlueprint = _modDataStore.Species[_selectedSpeciesId];
-        ThemeBlueprint startingThemeBlueprint = _modDataStore.Themes[_selectedThemeId];
-        ColonyBlueprint startingColonyBlueprint = _modDataStore.Colonies[_selectedColonyId];
-        SystemBlueprint? startingSystemBlueprint = null;
-        SystemBodyBlueprint? startingBodyBlueprint = null;
+        var result = CreateGameCore(p);
+        if (result == null) return;
 
+        var (game, playerFaction, startingSystem, startingBody) = result.Value;
+        ActivateGameUI(game, playerFaction, startingSystem, startingBody);
+        IsActive = false;
+        _currentPage = Page.SelectMods;
+    }
 
-        Game game = GameFactory.CreateGame(_modDataStore, gameSettings);
-        game.CreatedOnGitHash = AssemblyInfo.GetGitHash(); // Save the git hash to the game
+    private struct GameCreationParams
+    {
+        public ModDataStore ModDataStore;
+        public string FactionName;
+        public string FactionAbbreviation;
+        public string SpeciesId;
+        public string ColonyId;
+        public string SystemId;
+        public string BodyId;
+        public List<string> EnabledSystems;
+        public int MaxSystems;
+        public int MasterSeed;
+        public int StartingFunds;
+        public bool EleStart;
+        public string SMPassword;
+        public string PlayerPassword;
+    }
+
+    private static (Game game, Entity faction, StarSystem system, Entity body)? CreateGameCore(GameCreationParams p)
+    {
+        var gameSettings = new NewGameSettings
+        {
+            MaxSystems = Math.Min(p.MaxSystems, NewGameSettings.DEFAULT_MAX_SYSTEMS),
+            SMPassword = p.SMPassword,
+            CreatePlayerFaction = true,
+            DefaultFactionName = p.FactionName,
+            DefaultPlayerPassword = p.PlayerPassword,
+            DefaultSolStart = true,
+            MasterSeed = p.MasterSeed,
+            EleStart = p.EleStart
+        };
+
+        Game game = GameFactory.CreateGame(p.ModDataStore, gameSettings);
+        game.CreatedOnGitHash = AssemblyInfo.GetGitHash();
         game.LastSaveGitHash = AssemblyInfo.GetGitHash();
+
+        // Generate random systems up to the number of "Galaxy Size" minus the
+        // number of included pre-made systems
+        int numberToGenerate = p.MaxSystems - p.EnabledSystems.Count;
+        if (numberToGenerate > 0)
+        {
+            for (int i = 0; i < numberToGenerate; i++)
+            {
+                string systemName = NameFactory.GetSystemName(game);
+                var seed = game.GlobalManager.RNG.Next();
+                game.GalaxyGen.GenerateSystem(game, systemName, seed);
+            }
+        }
+
+        // Load in the pre-made systems
+        foreach (var id in p.EnabledSystems)
+        {
+            StarSystemFactory.LoadFromBlueprint(game, p.ModDataStore.Systems[id]);
+        }
 
         StarSystem? startingSystem = null;
         Entity? startingBody = null;
 
-        // Generate random systems up to the number of "Galaxy Size" minus the
-        // number of included pre-made systems
-        int numberToGenerate = _maxSystems - _enabledSystems.Count;
-        if(numberToGenerate > 0)
+        if (p.SystemId.Equals("random"))
         {
-            for(int i = 0; i < numberToGenerate; i++)
+            // Pick a random system that has a terrestrial planet
+            var candidates = new List<(StarSystem system, Entity body)>();
+            foreach (var system in game.Systems)
             {
-                // TODO: add random system names
-                string systemName = $"Generated System #{i + 1}";
-                game.GalaxyGen.GenerateSystem(game, systemName, _masterSeed);
+                foreach (var bodyInfo in system.GetAllDataBlobsOfType<SystemBodyInfoDB>())
+                {
+                    if (bodyInfo.BodyType == BodyType.Terrestrial && bodyInfo.OwningEntity != null)
+                    {
+                        candidates.Add((system, bodyInfo.OwningEntity));
+                    }
+                }
             }
-        }
 
+            if (candidates.Count == 0) return null;
 
-        if(_selectedSystemId.Equals("random"))
-        {
-            // TODO: support starting in a random system
-            return;
+            var pick = candidates[RandomNumberGenerator.GetInt32(candidates.Count)];
+            startingSystem = pick.system;
+            startingBody = pick.body;
         }
         else
         {
-            startingSystemBlueprint = _modDataStore.Systems[_selectedSystemId];
-            startingBodyBlueprint = _modDataStore.SystemBodies[_selectedBodyId];
-        }
+            var startingBodyBlueprint = p.ModDataStore.SystemBodies[p.BodyId];
 
-        // Load in the selected systems
-        foreach(var id in _enabledSystems)
-        {
-            var system = StarSystemFactory.LoadFromBlueprint(game, _modDataStore.Systems[id]);
-            if(id.Equals(_selectedSystemId))
+            foreach (var system in game.Systems)
             {
+                if (system.ManagerID != p.SystemId) continue;
+
                 startingSystem = system;
-                foreach(var systemBody in startingSystem.GetAllDataBlobsOfType<SystemBodyInfoDB>())
+                foreach (var systemBody in system.GetAllDataBlobsOfType<SystemBodyInfoDB>())
                 {
-                    if(startingBodyBlueprint != null && systemBody.OwningEntity?.GetDefaultName()?.Equals(startingBodyBlueprint.Name) == true)
+                    if (systemBody.OwningEntity?.GetDefaultName()?.Equals(startingBodyBlueprint.Name) == true)
                     {
                         startingBody = systemBody.OwningEntity;
                     }
@@ -479,38 +536,37 @@ public class NewGameMenu : PulsarGuiWindow
             }
         }
 
-        if(startingSystem == null || startingBody == null) return;
+        if (startingSystem == null || startingBody == null) return null;
 
-        // Create the players faction
+        // Create the player's faction
         var playerFaction = FactionFactory.CreateBasicFaction(
-                                game,
-                                gameSettings.DefaultFactionName,
-                                Utils.StringFromBytes(_corporationAbbreviationBuffer),
-                                _startingFunds);
+            game,
+            p.FactionName,
+            p.FactionAbbreviation,
+            p.StartingFunds);
 
-        if(playerFaction == null) return;
+        if (playerFaction == null) return null;
 
         playerFaction.FactionOwnerID = playerFaction.Id;
         playerFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(startingSystem.ID);
 
-        var playerSpecies = SpeciesFactory.CreateFromBlueprint(startingSystem, _modDataStore.Species[_selectedSpeciesId]);
+        var playerSpecies = SpeciesFactory.CreateFromBlueprint(startingSystem, p.ModDataStore.Species[p.SpeciesId]);
         playerSpecies.FactionOwnerID = playerFaction.Id;
         playerFaction.GetDataBlob<FactionInfoDB>().Species.Add(playerSpecies);
 
         // Setup the starting colony
-        var playerColony = ColonyFactory.CreateFromBlueprint(game, playerFaction, playerSpecies, startingSystem, startingBody, _modDataStore.Colonies[_selectedColonyId]);
-        if(_eleStart)
+        ColonyFactory.CreateFromBlueprint(game, playerFaction, playerSpecies, startingSystem, startingBody, p.ModDataStore.Colonies[p.ColonyId]);
+        if (p.EleStart && !p.SystemId.Equals("random"))
             AsteroidFactory.CreateAsteroid(startingSystem, startingBody, game.TimePulse.GameGlobalDateTime + TimeSpan.FromDays(365));
 
         // Create starting people
         var scientistDB = CommanderFactory.CreateScientist(game);
         var scientist = CommanderFactory.Create(startingSystem, playerFaction.Id, scientistDB);
-        
-        var adminDB = CommanderFactory.CreateAdmin(game);
-        var admin = CommanderFactory.Create(startingSystem, playerFaction.Id, adminDB);
-        
 
-        if(scientist.TryGetDataBlob<BonusesDB>(out var bonusesDB))
+        var adminDB = CommanderFactory.CreateAdmin(game);
+        CommanderFactory.Create(startingSystem, playerFaction.Id, adminDB);
+
+        if (scientist.TryGetDataBlob<BonusesDB>(out var bonusesDB))
         {
             bonusesDB.Bonuses.Add(new Bonus(
                 "Research Points",
@@ -521,13 +577,13 @@ public class NewGameMenu : PulsarGuiWindow
             ));
         }
 
-        // TODO: need to add the implementation for a random start
-        // TODO: need to find a way to handle this via the mods instead of loading it here
-        //var (newGameFaction, systemId) = Pulsar4X.Engine.DefaultStartFactory.LoadFromJson(game, "Data/basemod/defaultStart.json");
-
-        // Call the game post new game initialization
         game.PostNewGameInitialization();
 
+        return (game, playerFaction, startingSystem, startingBody);
+    }
+
+    private static void ActivateGameUI(Game game, Entity playerFaction, StarSystem startingSystem, Entity startingBody)
+    {
         _uiState.ClearGameState();
         _uiState.Game = game;
         _uiState.SetFaction(playerFaction, true);
@@ -536,14 +592,10 @@ public class NewGameMenu : PulsarGuiWindow
         _uiState.Camera.ZoomLevel = 2_245_000f;
 
         DebugWindow.GetInstance().SetGameEvents();
-        IsActive = false;
-        _currentPage = Page.SelectMods; // reset the page
-        //we initialize window instances so that they get always displayed and automatically open after new game is created.
         TimeControl.GetInstance().SetActive();
         ToolBarWindow.GetInstance().SetActive();
         Selector.GetInstance().SetActive();
-        //EntityUIWindowSelector.GetInstance().SetActive();
-        //EntityInfoPanel.GetInstance().SetActive();
+        EntityFilterBar.GetInstance().SetActive();
     }
 
     private void ResetSelectedBodyId()
@@ -579,7 +631,6 @@ public class NewGameMenu : PulsarGuiWindow
             ModLoader modLoader = new ModLoader();
             ModDataStore modDataStore = new ModDataStore();
 
-            // Load all default-enabled mods
             foreach (var modMetadata in ModsState.AvailableMods)
             {
                 if (ModsState.IsModEnabled[modMetadata.Mod.ModName])
@@ -588,7 +639,6 @@ public class NewGameMenu : PulsarGuiWindow
                 }
             }
 
-            // Validate we have required data
             if (!modDataStore.Species.Any(kvp => kvp.Value.Playable))
             {
                 Console.WriteLine("Quickstart Error: No playable species found in loaded mods");
@@ -601,9 +651,8 @@ public class NewGameMenu : PulsarGuiWindow
                 return;
             }
 
-            // Select default values
+            // Select defaults
             string selectedSpeciesId = modDataStore.Species.First(kvp => kvp.Value.Playable).Key;
-            string selectedThemeId = modDataStore.Themes.First().Key;
             string selectedColonyId = modDataStore.Colonies.First().Key;
 
             // Find all systems with CanStartHere bodies
@@ -623,143 +672,39 @@ public class NewGameMenu : PulsarGuiWindow
                 return;
             }
 
-            // Select first available system and body
             string selectedSystemId = enabledSystems.First();
-            SystemBlueprint selectedSystemBlueprint = modDataStore.Systems[selectedSystemId];
-
+            var selectedSystemBlueprint = modDataStore.Systems[selectedSystemId];
             string selectedBodyId = modDataStore.SystemBodies
                 .Where(kvp => kvp.Value.CanStartHere && selectedSystemBlueprint.Bodies.Contains(kvp.Key))
                 .First().Key;
 
-            // Generate random seed
-            int masterSeed = RandomNumberGenerator.GetInt32(999999999);
-            int maxSystems = 2;
-            int startingFunds = 100_000_000;
-            bool eleStart = true;
-
-            // Create game settings
-            NewGameSettings gameSettings = new NewGameSettings
+            var p = new GameCreationParams
             {
-                MaxSystems = maxSystems,
+                ModDataStore = modDataStore,
+                FactionName = DEFAULT_NAME,
+                FactionAbbreviation = DEFAULT_ABBREVIATION,
+                SpeciesId = selectedSpeciesId,
+                ColonyId = selectedColonyId,
+                SystemId = selectedSystemId,
+                BodyId = selectedBodyId,
+                EnabledSystems = enabledSystems,
+                MaxSystems = NewGameSettings.DEFAULT_NUM_SYSTEMS,
+                MasterSeed = RandomNumberGenerator.GetInt32(999999999),
+                StartingFunds = 100_000_000,
+                EleStart = true,
                 SMPassword = "",
-                CreatePlayerFaction = true,
-                DefaultFactionName = DEFAULT_NAME,
-                DefaultPlayerPassword = "",
-                DefaultSolStart = true,
-                MasterSeed = masterSeed,
-                EleStart = eleStart
+                PlayerPassword = ""
             };
 
-            // Create game
-            SpeciesBlueprint startingSpeciesBlueprint = modDataStore.Species[selectedSpeciesId];
-            ThemeBlueprint startingThemeBlueprint = modDataStore.Themes[selectedThemeId];
-            ColonyBlueprint startingColonyBlueprint = modDataStore.Colonies[selectedColonyId];
-            SystemBlueprint? startingSystemBlueprint = null;
-            SystemBodyBlueprint? startingBodyBlueprint = null;
-
-            Game game = GameFactory.CreateGame(modDataStore, gameSettings);
-            game.CreatedOnGitHash = AssemblyInfo.GetGitHash();
-            game.LastSaveGitHash = AssemblyInfo.GetGitHash();
-
-            StarSystem? startingSystem = null;
-            Entity? startingBody = null;
-
-            // Generate random systems
-            int numberToGenerate = maxSystems - enabledSystems.Count;
-            if(numberToGenerate > 0)
+            var result = CreateGameCore(p);
+            if (result == null)
             {
-                for(int i = 0; i < numberToGenerate; i++)
-                {
-                    string systemName = $"Generated System #{i + 1}";
-                    game.GalaxyGen.GenerateSystem(game, systemName, masterSeed);
-                }
-            }
-
-            startingSystemBlueprint = modDataStore.Systems[selectedSystemId];
-            startingBodyBlueprint = modDataStore.SystemBodies[selectedBodyId];
-
-            // Load pre-made systems
-            foreach(var id in enabledSystems)
-            {
-                var system = StarSystemFactory.LoadFromBlueprint(game, modDataStore.Systems[id]);
-                if(id.Equals(selectedSystemId))
-                {
-                    startingSystem = system;
-                    foreach(var systemBody in startingSystem.GetAllDataBlobsOfType<SystemBodyInfoDB>())
-                    {
-                        if(startingBodyBlueprint != null && systemBody.OwningEntity?.GetDefaultName()?.Equals(startingBodyBlueprint.Name) == true)
-                        {
-                            startingBody = systemBody.OwningEntity;
-                        }
-                    }
-                }
-            }
-
-            if(startingSystem == null || startingBody == null)
-            {
-                Console.WriteLine("Quickstart Error: Could not create starting system or body");
+                Console.WriteLine("Quickstart Error: Could not create game");
                 return;
             }
 
-            // Create player faction
-            var playerFaction = FactionFactory.CreateBasicFaction(
-                game,
-                DEFAULT_NAME,
-                DEFAULT_ABBREVIATION,
-                startingFunds);
-
-            if(playerFaction == null)
-            {
-                Console.WriteLine("Quickstart Error: Could not create player faction");
-                return;
-            }
-
-            playerFaction.FactionOwnerID = playerFaction.Id;
-            playerFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(startingSystem.ID);
-
-            var playerSpecies = SpeciesFactory.CreateFromBlueprint(startingSystem, modDataStore.Species[selectedSpeciesId]);
-            playerSpecies.FactionOwnerID = playerFaction.Id;
-            playerFaction.GetDataBlob<FactionInfoDB>().Species.Add(playerSpecies);
-
-            // Setup starting colony
-            var playerColony = ColonyFactory.CreateFromBlueprint(game, playerFaction, playerSpecies, startingSystem, startingBody, modDataStore.Colonies[selectedColonyId]);
-            if(eleStart)
-                AsteroidFactory.CreateAsteroid(startingSystem, startingBody, game.TimePulse.GameGlobalDateTime + TimeSpan.FromDays(365));
-
-            // Create starting people
-            var scientistDB = CommanderFactory.CreateScientist(game);
-            var scientist = CommanderFactory.Create(startingSystem, playerFaction.Id, scientistDB);
-
-            var adminDB = CommanderFactory.CreateAdmin(game);
-            var admin = CommanderFactory.Create(startingSystem, playerFaction.Id, adminDB);
-
-            if(scientist.TryGetDataBlob<BonusesDB>(out var bonusesDB))
-            {
-                bonusesDB.Bonuses.Add(new Bonus(
-                    "Research Points",
-                    0.1,
-                    BonusType.Perentage,
-                    BonusCategory.ResearchPoints,
-                    "tech-category-power-propulsion"
-                ));
-            }
-
-            // Initialize game
-            game.PostNewGameInitialization();
-
-            _uiState.ClearGameState();
-            _uiState.Game = game;
-            _uiState.SetFaction(playerFaction, true);
-            _uiState.SetActiveSystem(startingSystem.ManagerID);
-            _uiState.Camera.CenterOnEntity(startingBody);
-            _uiState.Camera.ZoomLevel = 2_245_000f;
-
-            DebugWindow.GetInstance().SetGameEvents();
-
-            // Initialize game windows
-            TimeControl.GetInstance().SetActive();
-            ToolBarWindow.GetInstance().SetActive();
-            Selector.GetInstance().SetActive();
+            var (game, playerFaction, startingSystem, startingBody) = result.Value;
+            ActivateGameUI(game, playerFaction, startingSystem, startingBody);
         }
         catch (Exception ex)
         {

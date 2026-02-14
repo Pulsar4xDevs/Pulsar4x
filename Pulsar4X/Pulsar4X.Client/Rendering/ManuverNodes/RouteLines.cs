@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using SDL3;
@@ -129,6 +130,26 @@ public class ManuverLinesComplete : IDrawData
     private Vector2[] points = new Vector2[0];
     private SDL.FPoint[] DrawPoints = new SDL.FPoint[0];
     private SDL.FPoint[] DrawPointsEditing = new SDL.FPoint[0];
+
+    /// <summary>
+    /// Screen positions of editing nodes, computed during OnFrameUpdate.
+    /// Used by ManeuverNodePanel to anchor the ImGui overlay.
+    /// </summary>
+    public SDL.FPoint[] EditingNodeScreenPositions = new SDL.FPoint[0];
+
+    /// <summary>
+    /// Screen positions of committed nodes in the root sequence.
+    /// </summary>
+    public SDL.FPoint[] CommittedNodeScreenPositions = new SDL.FPoint[0];
+
+    // Ap/Pe screen positions for editing nodes' predicted orbits
+    private SDL.FPoint _parentScreenPos;
+    private SDL.FPoint[] _editingPeScreenPositions = new SDL.FPoint[0];
+    private SDL.FPoint[] _editingApScreenPositions = new SDL.FPoint[0];
+    private double[] _editingPeDistances = new double[0];
+    private double[] _editingApDistances = new double[0];
+    private double[] _editingEccentricities = new double[0];
+
     public void OnFrameUpdate(Matrix matrix, Camera camera)
     {
         points = RenderManuverLines.CreatePointArray(RootSequence);
@@ -154,6 +175,65 @@ public class ManuverLinesComplete : IDrawData
             var result = mtrx.TransformToSDL_Point(points[i].X, points[i].Y);
             DrawPointsEditing[i] = new SDL.FPoint() { X = result.X, Y = result. Y };
         }
+
+        // Compute screen positions for editing node markers
+        if (EditingNodeScreenPositions.Length != EditingNodes.Length)
+            EditingNodeScreenPositions = new SDL.FPoint[EditingNodes.Length];
+        for (int i = 0; i < EditingNodes.Length; i++)
+        {
+            var nodePos = EditingNodes[i].NodePosition;
+            var result = mtrx.TransformToSDL_Point(nodePos.X, nodePos.Y);
+            EditingNodeScreenPositions[i] = new SDL.FPoint() { X = result.X, Y = result.Y };
+        }
+
+        // Compute screen positions for committed node markers
+        var committedNodes = RenderManuverLines.GetAllNodes(RootSequence);
+        if (CommittedNodeScreenPositions.Length != committedNodes.Count)
+            CommittedNodeScreenPositions = new SDL.FPoint[committedNodes.Count];
+        for (int i = 0; i < committedNodes.Count; i++)
+        {
+            var nodePos = committedNodes[i].NodePosition;
+            var result = mtrx.TransformToSDL_Point(nodePos.X, nodePos.Y);
+            CommittedNodeScreenPositions[i] = new SDL.FPoint() { X = result.X, Y = result.Y };
+        }
+
+        // Parent body is at the origin in the relative coordinate system
+        var parentResult = mtrx.TransformToSDL_Point(0, 0);
+        _parentScreenPos = new SDL.FPoint() { X = parentResult.X, Y = parentResult.Y };
+
+        // Compute Ap/Pe screen positions for editing nodes' predicted orbits
+        if (_editingPeScreenPositions.Length != EditingNodes.Length)
+        {
+            _editingPeScreenPositions = new SDL.FPoint[EditingNodes.Length];
+            _editingApScreenPositions = new SDL.FPoint[EditingNodes.Length];
+            _editingPeDistances = new double[EditingNodes.Length];
+            _editingApDistances = new double[EditingNodes.Length];
+            _editingEccentricities = new double[EditingNodes.Length];
+        }
+        for (int i = 0; i < EditingNodes.Length; i++)
+        {
+            var ke = EditingNodes[i].TargetOrbit;
+            _editingEccentricities[i] = ke.Eccentricity;
+            _editingPeDistances[i] = ke.Periapsis;
+            _editingApDistances[i] = ke.Apoapsis;
+
+            if (ke.Eccentricity < 0.001 || ke.Eccentricity >= 1.0)
+                continue;
+
+            // Periapsis: true anomaly = 0, at angle = lop from focus
+            // Apoapsis: true anomaly = pi, at angle = lop + pi from focus
+            double lop = ke.LoAN + ke.AoP;
+            double peR = ke.Periapsis;
+            double apR = ke.Apoapsis;
+
+            var peWorld = new Vector2(peR * Math.Cos(lop), peR * Math.Sin(lop));
+            var apWorld = new Vector2(-apR * Math.Cos(lop), -apR * Math.Sin(lop));
+
+            var peResult = mtrx.TransformToSDL_Point(peWorld.X, peWorld.Y);
+            var apResult = mtrx.TransformToSDL_Point(apWorld.X, apWorld.Y);
+            _editingPeScreenPositions[i] = new SDL.FPoint() { X = peResult.X, Y = peResult.Y };
+            _editingApScreenPositions[i] = new SDL.FPoint() { X = apResult.X, Y = apResult.Y };
+        }
     }
 
     public void OnPhysicsUpdate()
@@ -168,6 +248,110 @@ public class ManuverLinesComplete : IDrawData
         SDL.RenderLines(rendererPtr, DrawPointsEditing, DrawPointsEditing.Length);
         if(DrawPoints.Length > 1)
             SDL.RenderLine(rendererPtr, DrawPoints[0].X, DrawPoints[0].Y, DrawPoints[1].X, DrawPoints[1].Y);
+
+        // Draw committed node markers (green diamonds)
+        SDL.SetRenderDrawColor(rendererPtr, obtClr.R, obtClr.G, obtClr.B, obtClr.A);
+        for (int i = 0; i < CommittedNodeScreenPositions.Length; i++)
+        {
+            DrawDiamond(rendererPtr, CommittedNodeScreenPositions[i].X, CommittedNodeScreenPositions[i].Y, 6);
+        }
+
+        // Draw editing node markers (yellow diamonds)
+        SDL.SetRenderDrawColor(rendererPtr, editClr.R, editClr.G, editClr.B, editClr.A);
+        for (int i = 0; i < EditingNodeScreenPositions.Length; i++)
+        {
+            DrawDiamond(rendererPtr, EditingNodeScreenPositions[i].X, EditingNodeScreenPositions[i].Y, 8);
+        }
+
+        // Draw Ap/Pe diamond markers on editing nodes' predicted orbits
+        for (int i = 0; i < EditingNodes.Length; i++)
+        {
+            if (_editingEccentricities[i] < 0.001 || _editingEccentricities[i] >= 1.0)
+                continue;
+
+            // Periapsis - cyan
+            if (camera.IsOnScreen(_editingPeScreenPositions[i].X, _editingPeScreenPositions[i].Y))
+            {
+                SDL.SetRenderDrawColor(rendererPtr, 0, 200, 255, 255);
+                DrawDiamond(rendererPtr, _editingPeScreenPositions[i].X, _editingPeScreenPositions[i].Y, 6);
+            }
+
+            // Apoapsis - orange
+            if (camera.IsOnScreen(_editingApScreenPositions[i].X, _editingApScreenPositions[i].Y))
+            {
+                SDL.SetRenderDrawColor(rendererPtr, 255, 165, 0, 255);
+                DrawDiamond(rendererPtr, _editingApScreenPositions[i].X, _editingApScreenPositions[i].Y, 6);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Draws ImGui text labels at Ap/Pe positions for editing nodes.
+    /// Must be called during the ImGui render pass (not SDL Draw).
+    /// </summary>
+    public void DrawApsisLabels()
+    {
+        if (_editingEccentricities.Length < EditingNodes.Length)
+            return; // Not yet computed by OnFrameUpdate
+
+        int labelId = 0;
+        for (int i = 0; i < EditingNodes.Length; i++)
+        {
+            if (_editingEccentricities[i] < 0.001 || _editingEccentricities[i] >= 1.0)
+                continue;
+
+            DrawApsisLabel(_editingPeScreenPositions[i], _parentScreenPos, FormatDistance(_editingPeDistances[i]), "Pe", 0, 200, 255, labelId++);
+            DrawApsisLabel(_editingApScreenPositions[i], _parentScreenPos, FormatDistance(_editingApDistances[i]), "Ap", 255, 165, 0, labelId++);
+        }
+    }
+
+    private static void DrawApsisLabel(SDL.FPoint pos, SDL.FPoint parentPos, string distText, string prefix, byte r, byte g, byte b, int id)
+    {
+        // Compute outward direction from parent body to apsis point
+        float dx = pos.X - parentPos.X;
+        float dy = pos.Y - parentPos.Y;
+        float len = MathF.Sqrt(dx * dx + dy * dy);
+        if (len < 1f) return;
+        float nx = dx / len;
+        float ny = dy / len;
+
+        string labelText = prefix + ": " + distText;
+        var textSize = ImGui.CalcTextSize(labelText);
+
+        // Offset from diamond center along the outward radial direction
+        const float offsetDist = 10f;
+        float labelX = pos.X + nx * offsetDist;
+        float labelY = pos.Y + ny * offsetDist;
+
+        // Anchor the text so it extends outward from the orbit line:
+        // If the outward direction points left, right-align the text
+        if (nx < 0) labelX -= textSize.X;
+        // If the outward direction points up, bottom-align the text
+        if (ny < 0) labelY -= textSize.Y;
+
+        // Draw directly to the foreground draw list to avoid creating ImGui windows,
+        // which would steal focus from active widgets (like DragFloat sliders).
+        uint color = ImGui.GetColorU32(new System.Numerics.Vector4(r / 255f, g / 255f, b / 255f, 1f));
+        var drawList = ImGui.GetForegroundDrawList();
+        drawList.AddText(new System.Numerics.Vector2(labelX, labelY), color, labelText);
+    }
+
+    private static string FormatDistance(double meters)
+    {
+        double au = Distance.MToAU(meters);
+        if (au >= 0.01)
+            return au.ToString("F2") + " AU";
+        double km = Distance.MToKm(meters);
+        return km.ToString("N0") + " km";
+    }
+
+    private static void DrawDiamond(IntPtr rendererPtr, float cx, float cy, float size)
+    {
+        // Draw a diamond shape (rotated square)
+        SDL.RenderLine(rendererPtr, cx, cy - size, cx + size, cy);         // top to right
+        SDL.RenderLine(rendererPtr, cx + size, cy, cx, cy + size);         // right to bottom
+        SDL.RenderLine(rendererPtr, cx, cy + size, cx - size, cy);         // bottom to left
+        SDL.RenderLine(rendererPtr, cx - size, cy, cx, cy - size);         // left to top
     }
 }
 
@@ -240,7 +424,6 @@ public static class RenderManuverLines
         for (int index = 0; index < data.Count; index++)
         {
             (KeplerElements ke, Vector2 startPos) item = data[index];
-            double le = item.ke.LinearEccentricity;
             double e = item.ke.Eccentricity;
             double lop = item.ke.LoAN + item.ke.AoP;
             double a = item.ke.SemiMajorAxis;
@@ -250,7 +433,27 @@ public static class RenderManuverLines
             if (index < data.Count - 1)
                 endPos = data[index + 1].startPos;
 
-            var kp = CreatePrimitiveShapes.KeplerPoints(a, e, lop, startPos, endPos);
+            Vector2[] kp;
+            if (startPos.X == endPos.X && startPos.Y == endPos.Y)
+            {
+                // Single node with no next node: draw a full orbit.
+                // KeplerPoints returns degenerate (2-point) output when start==end
+                // because the sweep angle is 0, so generate the orbit directly.
+                int n = 128;
+                kp = new Vector2[n];
+                double startAng = Math.Atan2(startPos.Y, startPos.X);
+                double step = 2 * Math.PI / (n - 1);
+                for (int j = 0; j < n; j++)
+                {
+                    double theta = startAng + step * j;
+                    double r = EllipseMath.RadiusAtTrueAnomaly(a, e, lop, theta);
+                    kp[j] = new Vector2(r * Math.Cos(theta), r * Math.Sin(theta));
+                }
+            }
+            else
+            {
+                kp = CreatePrimitiveShapes.KeplerPoints(a, e, lop, startPos, endPos);
+            }
             arraylist.Add(kp);
             pointCount += kp.Length;
         }
@@ -265,6 +468,20 @@ public static class RenderManuverLines
         }
 
         return pointArray;
+    }
+
+    /// <summary>
+    /// Collects all ManuverNodes from a sequence tree (for marker rendering).
+    /// </summary>
+    public static List<ManuverNode> GetAllNodes(ManuverSequence manuverSequence)
+    {
+        var nodes = new List<ManuverNode>();
+        nodes.AddRange(manuverSequence.ManuverNodes);
+        foreach (var seq in manuverSequence.ManuverSequences)
+        {
+            nodes.AddRange(GetAllNodes(seq));
+        }
+        return nodes;
     }
 
     public static (ManuverSequence seq, int nodeIndex)[] FindNodeTime(ManuverSequence manuverSequence, DateTime nodeTime)

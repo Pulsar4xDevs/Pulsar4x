@@ -267,6 +267,10 @@ namespace Pulsar4X.Engine
                 {
                     ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entity, TimePulse.GameGlobalDateTime);
                 }
+
+                // Systems with faction entities start as Background, others stay Stasis (default)
+                if (system.HasFactionEntities())
+                    system.SetActivityState(SystemActivityState.Background);
             }
         }
     }

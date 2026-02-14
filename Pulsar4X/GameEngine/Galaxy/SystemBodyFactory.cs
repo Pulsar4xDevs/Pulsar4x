@@ -58,6 +58,10 @@ namespace Pulsar4X.Galaxy
             );
             blobsToAdd.Add(massVolumeDB);
 
+            // Calculate gravity from mass/radius if not provided in the blueprint.
+            if (systemBodyInfoDB.Gravity == 0)
+                systemBodyInfoDB.Gravity = massVolumeDB.SurfaceGravity;
+
             double semiMajorAxis_m = systemBodyBlueprint.Orbit.SemiMajorAxis * 1000.0 ??
                                     systemBodyBlueprint.Orbit.SemiMajorAxis_m ??
                                     systemBodyBlueprint.Orbit.SemiMajorAxis_km * 1000.0 ??
@@ -139,6 +143,16 @@ namespace Pulsar4X.Galaxy
             }
 
             systemBodyInfoDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, orbitDB);
+
+            // Calculate day length from orbital period if not provided in the blueprint.
+            if (systemBodyInfoDB.LengthOfDay == TimeSpan.Zero)
+            {
+                double dayLengthDays = GeneralMath.Lerp(0, orbitDB.OrbitalPeriod.TotalDays, system.RNGNextDouble());
+                systemBodyInfoDB.LengthOfDay = new TimeSpan((int)Math.Round(dayLengthDays), system.RNGNext(0, 24), system.RNGNext(0, 60), 0);
+                double minDayHours = game.GalaxyGen.Settings.MiniumPossibleDayLength;
+                if (systemBodyInfoDB.LengthOfDay < TimeSpan.FromHours(minDayHours))
+                    systemBodyInfoDB.LengthOfDay += TimeSpan.FromHours(minDayHours);
+            }
 
             var positionDB = new PositionDB(
                 orbitDB.GetPosition(game.TimePulse.GameGlobalDateTime),
@@ -265,6 +279,10 @@ namespace Pulsar4X.Galaxy
             );
             blobsToAdd.Add(massVolumeDB);
 
+            // Calculate gravity from mass/radius if not provided in the JSON data.
+            if (systemBodyInfoDB.Gravity == 0)
+                systemBodyInfoDB.Gravity = massVolumeDB.SurfaceGravity;
+
             var orbit = rootJson["orbit"];
 
             //double semiMajorAxis_AU = Distance.KmToAU((double?)orbit["semiMajorAxis_km"] ?? 0);
@@ -350,6 +368,16 @@ namespace Pulsar4X.Galaxy
             }
 
             systemBodyInfoDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, orbitDB);
+
+            // Calculate day length from orbital period if not provided in the JSON data.
+            if (systemBodyInfoDB.LengthOfDay == TimeSpan.Zero)
+            {
+                double dayLengthDays = GeneralMath.Lerp(0, orbitDB.OrbitalPeriod.TotalDays, system.RNGNextDouble());
+                systemBodyInfoDB.LengthOfDay = new TimeSpan((int)Math.Round(dayLengthDays), system.RNGNext(0, 24), system.RNGNext(0, 60), 0);
+                double minDayHours = game.GalaxyGen.Settings.MiniumPossibleDayLength;
+                if (systemBodyInfoDB.LengthOfDay < TimeSpan.FromHours(minDayHours))
+                    systemBodyInfoDB.LengthOfDay += TimeSpan.FromHours(minDayHours);
+            }
 
             var positionDB = new PositionDB(
                 orbitDB.GetPosition(game.TimePulse.GameGlobalDateTime),
@@ -1296,6 +1324,10 @@ namespace Pulsar4X.Galaxy
 
             // Generate atmosphere:
             GenerateAtmosphere(system, body, dataStore);
+
+            // Calculate gravity from mass and radius if not already set.
+            if (bodyInfo.Gravity == 0)
+                bodyInfo.Gravity = bodyMVDB.SurfaceGravity;
 
             // No radiation by default.
             bodyInfo.RadiationLevel = 0;

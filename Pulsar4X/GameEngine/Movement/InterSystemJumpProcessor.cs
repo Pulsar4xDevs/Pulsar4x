@@ -13,6 +13,9 @@ namespace Pulsar4X.Movement
         }
         internal static void JumpIn(Game game, SystemEntityJumpPair jumpPair)
         {
+            if (jumpPair.JumpSystem.ActivityState == SystemActivityState.Stasis)
+                jumpPair.JumpSystem.SetActivityState(SystemActivityState.Background);
+
             jumpPair.JumpSystem.Transfer(jumpPair.JumpingEntity);
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Pulsar4X.Client.Rendering;
 using Pulsar4X.DataStructures;
@@ -8,44 +9,21 @@ namespace Pulsar4X.Client;
 
 public static class Textures
 {
-    public static void CreateTexture(IntPtr renderer, ref IntPtr texture, int width, int height, int depth, int stride, IntPtr pixels, PixelFormat pixelFormat = PixelFormat.RGBA8888, TextureFilter textureFilter = TextureFilter.Linear)
+    public static void CreateTexture(IntPtr renderer, ref IntPtr texture, int width, int height, int depth, int stride, IntPtr pixels,
+            SDL.PixelFormat pixelFormat = SDL.PixelFormat.RGBA8888)
     {
-        // Create the masks based on the requested pixel format
-        uint rmask, gmask, bmask, amask;
-
-        switch(pixelFormat)
+        IntPtr surface = SDL.CreateSurfaceFrom(width, height, pixelFormat, pixels, stride);
+        if (surface == IntPtr.Zero)
         {
-            case PixelFormat.ARGB8888:
-                amask = 0xff000000;
-                rmask = 0x00ff0000;
-                gmask = 0x0000ff00;
-                bmask = 0x000000ff;
-                break;
-            case PixelFormat.RGBA8888:
-            default:
-                rmask = 0xff000000;
-                gmask = 0x00ff0000;
-                bmask = 0x0000ff00;
-                amask = 0x000000ff;
-                break;
+            Trace.WriteLine("CreateTexture: failed to create surface");
+            return;
         }
-
-        // Create the surface
-        IntPtr surface = CreateRGBSurfaceFrom(
-                                pixels,
-                                width,
-                                height,
-                                depth,
-                                stride,
-                                rmask,
-                                gmask,
-                                bmask,
-                                amask);
-
         texture = SDL.CreateTextureFromSurface(renderer, surface);
         SDL.DestroySurface(surface);
     }
-    public static void CreateTexture(IntPtr renderer, RawBmp rawBmp, ref IntPtr texturePtr, PixelFormat pixelFormat = PixelFormat.RGBA8888, TextureFilter textureFilter = TextureFilter.Linear)
+
+    public static void CreateTexture(IntPtr renderer, RawBmp rawBmp, ref IntPtr texturePtr,
+            SDL.PixelFormat pixelFormat = SDL.PixelFormat.RGBA8888)
     {
         IntPtr pixels;
         unsafe
@@ -56,7 +34,7 @@ public static class Textures
             }
         }
 
-        CreateTexture(renderer, ref texturePtr, rawBmp.Width, rawBmp.Height, rawBmp.Depth * 8, rawBmp.Stride, pixels, pixelFormat, textureFilter);
+        CreateTexture(renderer, ref texturePtr, rawBmp.Width, rawBmp.Height, rawBmp.Depth * 8, rawBmp.Stride, pixels, pixelFormat);
     }
 
     public static IntPtr CreateTextureFromSurface(IntPtr renderer, IntPtr surface)
@@ -69,14 +47,14 @@ public static class Textures
         // If the texture doesn't exist, create it
         if(texture == IntPtr.Zero)
         {
-            CreateTexture(renderer, ref texture, width, height, 32, width * 4, pixels, PixelFormat.RGBA8888, TextureFilter.Nearest);
+            CreateTexture(renderer, ref texture, width, height, 32, width * 4, pixels, SDL.PixelFormat.RGBA8888);
             return;
         }
         // If the dimensions don't match, recreate the texture
         (int txWidth, int txHeight) = GetTextureSize(texture);
         if(width != txWidth || height != txHeight)
         {
-            CreateTexture(renderer, ref texture, width, height, 32, width * 4, pixels, PixelFormat.RGBA8888, TextureFilter.Nearest);
+            CreateTexture(renderer, ref texture, width, height, 32, width * 4, pixels, SDL.PixelFormat.RGBA8888);
             return;
         }
         else
@@ -91,18 +69,6 @@ public static class Textures
     public static void DeleteTexture(IntPtr texture)
     {
         SDL.DestroyTexture(texture);
-    }
-
-    public static nint CreateRGBSurfaceFrom(nint pixels, int width, int height, int depth, int pitch, uint rmask, uint gmask, uint bmask, uint amask)
-    {
-        var pixelFormat = SDL.GetPixelFormatForMasks(depth, rmask, gmask, bmask, amask);
-
-        return SDL.CreateSurfaceFrom(
-            width, height,
-            pixelFormat,
-            pixels,
-            pitch
-        );
     }
 
     public static (int, int) GetTextureSize(IntPtr texture)

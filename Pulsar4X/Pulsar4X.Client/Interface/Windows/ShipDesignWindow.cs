@@ -16,6 +16,7 @@ using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
+using SDL3;
 
 namespace Pulsar4X.Client
 {
@@ -597,7 +598,7 @@ namespace Pulsar4X.Client
             if(_profile == null)
                 throw new NullReferenceException();
 
-            Textures.CreateTexture(_uiState.ViewPort.Renderer, _profile.DamageProfile, ref _shipImgPtr, Rendering.PixelFormat.ARGB8888);
+            Textures.CreateTexture(_uiState.ViewPort.Renderer, _profile.DamageProfile, ref _shipImgPtr, SDL.PixelFormat.ARGB8888);
             rawimagewidth = _profile.DamageProfile.Width;
             rawimageheight = _profile.DamageProfile.Height;
             _imagecreated = true;
