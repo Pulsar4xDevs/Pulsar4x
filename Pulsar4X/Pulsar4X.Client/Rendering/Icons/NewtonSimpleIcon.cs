@@ -137,9 +137,10 @@ namespace Pulsar4X.Client
                 _ke = ke;
                 CreatePointArray();
             }
-
             else
             {
+                //update the true anomaly index so the trail follows the ship
+                SetTrueAnomalyIndex();
                 _thrustLinePoints[1] = Vector2.Zero;
             }
         }
