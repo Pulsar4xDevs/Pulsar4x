@@ -323,7 +323,7 @@ public class MoveStateProcessor : IInstanceProcessor
             movedb.OwningEntity.SetDataBlob(stateDB);
         }
 
-        stateDB.MoveType = PositionDB.MoveTypes.NewtonSimple;
+        stateDB.MoveType = PositionDB.MoveTypes.NewtonComplex;
         // Only update parent if it has changed to avoid expensive SetParent operation
         if (stateDB.Parent != movedb.SOIParent)
             stateDB.SetParent(movedb.SOIParent);

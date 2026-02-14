@@ -94,10 +94,23 @@
   <ItemGroup>
     <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
   </ItemGroup>
+  <!-- Copy cimgui native library from ImGui.NET submodule based on host platform -->
   <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
-    <Content Include="Libs\linux-x64\cimgui.so">
+    <Content Include="..\external\ImGui.NET\deps\cimgui\linux-x64\cimgui.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>%(Filename)%(Extension)</Link>
+      <Link>cimgui.so</Link>
+    </Content>
+  </ItemGroup>
+  <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' ">
+    <Content Include="..\external\ImGui.NET\deps\cimgui\win-x64\cimgui.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>cimgui.dll</Link>
+    </Content>
+  </ItemGroup>
+  <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">
+    <Content Include="..\external\ImGui.NET\deps\cimgui\osx\cimgui.dylib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>cimgui.dylib</Link>
     </Content>
   </ItemGroup>
 
