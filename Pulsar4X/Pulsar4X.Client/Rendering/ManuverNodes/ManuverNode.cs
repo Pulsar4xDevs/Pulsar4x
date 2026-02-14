@@ -9,6 +9,7 @@ using Pulsar4X.Orbits;
 using Pulsar4X.Storage;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using static Pulsar4X.Movement.NewtonionMovementProcessor;
 
 namespace Pulsar4X.Client;
 
@@ -75,6 +76,7 @@ public class ManuverNode
     private NewtonThrustAbilityDB _newtonThrust;
     private double _totalMass;
     private double _dryMass;
+    private double _parentMass;
     private double _sgp;
     private ICargoable _fuelType;
 
@@ -90,8 +92,8 @@ public class ManuverNode
         _newtonThrust = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>();
         _totalMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassTotal;
         _dryMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassDry;
-        var parentMass = _orderEntity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-        _sgp = GeneralMath.StandardGravitationalParameter(_totalMass + parentMass);
+        _parentMass = _orderEntity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
+        _sgp = GeneralMath.StandardGravitationalParameter(_totalMass + _parentMass);
         var fuelTypeID = _newtonThrust.FuelType;
         _fuelType = orderEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(fuelTypeID);
         _burnRate = _newtonThrust.FuelBurnRate;
@@ -116,25 +118,8 @@ public class ManuverNode
         Radial += radial;
         Normal += normal;
         NodeTime += TimeSpan.FromSeconds(time);
-        NodePosition = OrbitalMath.GetRelativePosition(PriorOrbit, NodeTime); //set the position for new time on current orbit
-        double dv = Math.Sqrt((normal * normal) + (prograde * prograde) + (radial * radial));
-        DeltaVCost += dv;
-
-        FuelCostTotal = OrbitalMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, DeltaVCost);
-        FuelCostRemaining = FuelCostTotal;
-
-        BurnTimeTotal = FuelCostTotal / _burnRate;
-        BurnTimeRemaining = BurnTimeTotal;
-
-        var firsthalfDvFuel = OrbitalMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, dv * 0.5);
-        var firsthalfBurnTime = firsthalfDvFuel / _burnRate;
-        TimeAtStartBurn = NodeTime - TimeSpan.FromSeconds(firsthalfBurnTime);
-        (Orbital.Vector3 position, Vector2 velocity) stateVectors = OrbitalMath.GetStateVectors(PriorOrbit, NodeTime);
-
-        Orbital.Vector3 velocity = new Orbital.Vector3(stateVectors.velocity.X, stateVectors.velocity.Y, 0);
-        velocity += OrbitalMath.ProgradeToStateVector(new(prograde, radial, normal), PriorOrbit);
-        TargetVelocity = new Vector2(velocity.X, velocity.Y);
-        TargetOrbit =  OrbitalMath.KeplerFromPositionAndVelocity(_sgp, NodePosition, velocity, NodeTime);
+        NodePosition = OrbitalMath.GetRelativePosition(PriorOrbit, NodeTime);
+        ComputeTargetOrbit();
     }
 
     /// <summary>
@@ -204,43 +189,74 @@ public class ManuverNode
         Radial = radial;
         Normal = normal;
         NodeTime = time;
-        NodePosition = OrbitalMath.GetRelativePosition(PriorOrbit, NodeTime); //set the position for new time on current orbit
-        double dv = Math.Sqrt((normal * normal) + (prograde * prograde) + (radial * radial));
-        DeltaVCost = dv;
-
-        FuelCostTotal = OrbitalMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, DeltaVCost);
-        FuelCostRemaining = FuelCostTotal;
-
-        BurnTimeTotal = FuelCostTotal / _burnRate;
-        BurnTimeRemaining = BurnTimeTotal;
-
-        var firsthalfDvFuel = OrbitalMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, dv * 0.5);
-        var firsthalfBurnTime = firsthalfDvFuel / _burnRate;
-        TimeAtStartBurn = NodeTime - TimeSpan.FromSeconds(firsthalfBurnTime);
-        (Orbital.Vector3 position, Vector2 velocity) stateVectors = OrbitalMath.GetStateVectors(PriorOrbit, NodeTime);
-        Console.Out.WriteLine(stateVectors.velocity);
-        var velocityOrig = new Orbital.Vector3(stateVectors.velocity.X, stateVectors.velocity.Y, 0);
-        Console.Out.WriteLine(Stringify.Velocity(velocityOrig.X) + ", " + Stringify.Velocity(velocityOrig.Y));
-
-        var velocityPgde = new Orbital.Vector3(prograde, radial, normal);
-        Console.Out.WriteLine(Stringify.Velocity(velocityPgde.X) + ", " + Stringify.Velocity(velocityPgde.Y));
-
-        var velocitystate = OrbitMath.ProgradeToStateVector(velocityPgde, PriorOrbit);
-        Console.Out.WriteLine(Stringify.Velocity(velocitystate.X) + ", " + Stringify.Velocity(velocitystate.Y));
-
-        var velocitynew = velocityOrig + velocitystate;
-        Console.Out.WriteLine(Stringify.Velocity(velocitynew.X) + ", " + Stringify.Velocity(velocitynew.Y));
-
-        TargetOrbit =  OrbitalMath.KeplerFromPositionAndVelocity(_sgp, NodePosition, velocitynew, NodeTime);
-
-        if (TargetOrbit.MeanAnomalyAtEpoch is double.NaN)
-            throw new Exception("wtf exception");
-
+        NodePosition = OrbitalMath.GetRelativePosition(PriorOrbit, NodeTime);
+        ComputeTargetOrbit();
     }
 
     public void SetNode(Orbital.Vector3 burn, DateTime time)
     {
         SetNode(burn.Y, burn.X, burn.Z, time);
+    }
+
+    private void ComputeTargetOrbit()
+    {
+        double totalDV = Math.Sqrt(Prograde * Prograde + Radial * Radial + Normal * Normal);
+        DeltaVCost = totalDV;
+
+        if (totalDV == 0)
+        {
+            TargetOrbit = PriorOrbit;
+            FuelCostTotal = 0;
+            FuelCostRemaining = 0;
+            BurnTimeTotal = 0;
+            BurnTimeRemaining = 0;
+            TargetVelocity = OrbitalMath.GetStateVectors(PriorOrbit, NodeTime).velocity;
+            return;
+        }
+
+        FuelCostTotal = OrbitalMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, totalDV);
+        FuelCostRemaining = FuelCostTotal;
+        BurnTimeTotal = FuelCostTotal / _burnRate;
+        BurnTimeRemaining = BurnTimeTotal;
+
+        // Burn is centered on NodeTime
+        TimeAtStartBurn = NodeTime - TimeSpan.FromSeconds(BurnTimeTotal / 2);
+
+        // State vectors at burn start
+        var burnStartState = OrbitalMath.GetStateVectors(PriorOrbit, TimeAtStartBurn);
+        Orbital.Vector3 position = burnStartState.position;
+        Orbital.Vector3 velocity = new Orbital.Vector3(burnStartState.velocity.X, burnStartState.velocity.Y, 0);
+
+        // Convert prograde/radial/normal to parent-relative delta-V direction at burn start
+        Orbital.Vector3 manuverDeltaV = OrbitalMath.ProgradeToStateVector(
+            _sgp, new Orbital.Vector3(Radial, Prograde, Normal), position, velocity);
+
+        double mass = _totalMass;
+        double dryMass = _totalMass - _newtonThrust.TotalFuel_kg;
+        double secondsRemaining = BurnTimeTotal;
+
+        while (secondsRemaining > 0)
+        {
+            double timeStep = Math.Min(1.0, secondsRemaining);
+
+            var result = IntegrateOneStep(
+                position, velocity, manuverDeltaV,
+                mass, _parentMass,
+                _exhaustVelocity, _burnRate, dryMass,
+                timeStep);
+
+            position = result.Position;
+            velocity = result.Velocity;
+            manuverDeltaV = result.ManuverDeltaV;
+            mass = result.Mass;
+
+            secondsRemaining -= timeStep;
+        }
+
+        DateTime endTime = TimeAtStartBurn + TimeSpan.FromSeconds(BurnTimeTotal);
+        double postBurnSgp = GeneralMath.StandardGravitationalParameter(mass + _parentMass);
+        TargetOrbit = OrbitalMath.KeplerFromPositionAndVelocity(postBurnSgp, position, velocity, endTime);
+        TargetVelocity = new Vector2(velocity.X, velocity.Y);
     }
 
 }

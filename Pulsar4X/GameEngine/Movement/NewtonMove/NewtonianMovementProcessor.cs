@@ -16,6 +16,15 @@ namespace Pulsar4X.Movement
 
     public class NewtonionMovementProcessor : IHotloopProcessor
     {
+        public struct IntegrationState
+        {
+            public Vector3 Position;
+            public Vector3 Velocity;
+            public Vector3 ManuverDeltaV;
+            public double Mass;
+            public double FuelBurned;
+        }
+
         public NewtonionMovementProcessor()
         {
         }
@@ -90,65 +99,30 @@ namespace Pulsar4X.Movement
             double sgp = GeneralMath.StandardGravitationalParameter(massTotal_Kg + parentMass_kg);
 
 
+            double dryMass_Kg = massTotal_Kg - newtonThrust.TotalFuel_kg;
+
             double secondsToItterate = deltaT;
             while (secondsToItterate > 0)
             {
-                //double timeStep = Math.Max(secondsToItterate / speed_kms, 1);
-                //timeStep = Math.Min(timeStep, secondsToItterate);
-                double timeStepInSeconds = 1;//because the above seems unstable and looses energy.
-                double distanceToParent_m = positionDB.GetDistanceTo_m(newtonMoveDB.SOIParent.GetDataBlob<PositionDB>());
+                double timeStepInSeconds = 1;
 
-                distanceToParent_m = Math.Max(distanceToParent_m, 0.1); //don't let the distance be 0 (once collision is in this will likely never happen anyway)
+                var result = IntegrateOneStep(
+                    positionDB.RelativePosition, newtonMoveDB.CurrentVector_ms, newtonMoveDB.ManuverDeltaV,
+                    massTotal_Kg, parentMass_kg,
+                    newtonThrust.ExhaustVelocity, newtonThrust.FuelBurnRate, dryMass_Kg,
+                    timeStepInSeconds);
 
-                double gravForce = UniversalConstants.Science.GravitationalConstant * (massTotal_Kg * parentMass_kg / Math.Pow(distanceToParent_m, 2));
-                Vector3 gravForceVector = gravForce * -Vector3.Normalise(positionDB.RelativePosition);
+                positionDB.RelativePosition = result.Position;
+                newtonMoveDB.CurrentVector_ms = result.Velocity;
+                newtonMoveDB.ManuverDeltaV = result.ManuverDeltaV;
 
-                Vector3 totalDVFromGrav = (gravForceVector / massTotal_Kg) * timeStepInSeconds;
-
-                //double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
-                //double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
-
-
-                Vector3 manuverDV = newtonMoveDB.ManuverDeltaV; //how much dv needed to complete the manuver.
-                Vector3 totalDVFromThrust = new Vector3(0,0,0);
-
-
-
-                if(manuverDV.Length() > 0)
+                if (result.FuelBurned > 0)
                 {
-                    double dryMass = massTotal_Kg - newtonThrust.FuelBurnRate * timeStepInSeconds; //how much our ship weighs after a timestep of fuel is used.
-                    //how much dv can we get in this timestep.
-                    double deltaVThisStep = OrbitMath.TsiolkovskyRocketEquation(massTotal_Kg, dryMass, newtonThrust.ExhaustVelocity);
-                    deltaVThisStep = Math.Min(manuverDV.Length(), deltaVThisStep); //don't use more Dv than what is called for.
-                    deltaVThisStep = Math.Min(newtonThrust.DeltaV, deltaVThisStep); //check we've got the deltaV to spend.
-
-                    totalDVFromThrust = Vector3.Normalise(manuverDV) * deltaVThisStep;
-
-                    //remove the fuel from the ship.
-                    double kgOfFuel = OrbitMath.TsiolkovskyFuelUse(massTotal_Kg, newtonThrust.ExhaustVelocity, deltaVThisStep);
                     var fuelTypeID = newtonThrust.FuelType;
                     var fuelType = entity.GetFactionCargoDefinitions().GetAny(fuelTypeID);
-                    var massRemoved = CargoTransferProcessor.AddRemoveCargoMass(entity, fuelType, -kgOfFuel);
-
-                    //convert prograde to global frame of reference for thrust direction
-                    //Vector3 globalCoordDVFromThrust = OrbitMath.ProgradeToStateVector(sgp, totalDVFromThrust,
-                    //    positionDB.RelativePosition_m,
-                    //    newtonMoveDB.CurrentVector_ms);
-
-                    //remove the vectorDV from the amount needed to fully complete the manuver.
-                    newtonMoveDB.ManuverDeltaV -= totalDVFromThrust;
+                    CargoTransferProcessor.AddRemoveCargoMass(entity, fuelType, -result.FuelBurned);
                     massTotal_Kg = entity.GetDataBlob<MassVolumeDB>().MassTotal;
-                    //newtonMoveDB.DeltaVForManuver_FoRO_m -= totalDVFromThrust;
                 }
-
-                Vector3 totalDV = totalDVFromGrav + totalDVFromThrust;
-                Vector3 oldVelocity = newtonMoveDB.CurrentVector_ms;
-                Vector3 newVelocity = totalDV + oldVelocity;
-
-                newtonMoveDB.CurrentVector_ms = newVelocity;
-                Vector3 deltaPos = (oldVelocity + newVelocity) / 2 * timeStepInSeconds;
-
-                positionDB.RelativePosition += deltaPos;
 
                 //update kepler elements from current state after velocity and position are updated
                 newtonMoveDB.UpdateKeplerElements();
@@ -242,48 +216,35 @@ namespace Pulsar4X.Movement
         {
             PositionDB positionDB = entity.GetDataBlob<PositionDB>();
             NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
-            DateTime dateTimeNow = entity.StarSysDateTime;
-            TimeSpan timeDelta = atDateTime - dateTimeNow;
-            double mass_Kg = entity.GetDataBlob<MassVolumeDB>().MassDry;
+            double massTotal_Kg = entity.GetDataBlob<MassVolumeDB>().MassTotal;
+            double dryMass_Kg = massTotal_Kg - newtonThrust.TotalFuel_kg;
             double parentMass_kg = newtonMoveDB.ParentMass;
 
-            Vector3 newrelative = positionDB.RelativePosition;
+            Vector3 position = positionDB.RelativePosition;
             Vector3 velocity = newtonMoveDB.CurrentVector_ms;
+            Vector3 manuverDeltaV = newtonMoveDB.ManuverDeltaV;
+            double mass = massTotal_Kg;
 
-            double secondsToItterate = timeDelta.TotalSeconds;
+            double secondsToItterate = (atDateTime - entity.StarSysDateTime).TotalSeconds;
             while (secondsToItterate > 0)
             {
-                //double timeStep = Math.Max(secondsToItterate / speed_kms, 1);
-                //timeStep = Math.Min(timeStep, secondsToItterate);
-                double timeStep = 1;//because the above seems unstable and looses energy.
-                double distanceToParent_m = newrelative.Length();
+                double timeStep = 1;
 
-                distanceToParent_m = Math.Max(distanceToParent_m, 0.1); //don't let the distance be 0 (once collision is in this will likely never happen anyway)
+                var result = IntegrateOneStep(
+                    position, velocity, manuverDeltaV,
+                    mass, parentMass_kg,
+                    newtonThrust.ExhaustVelocity, newtonThrust.FuelBurnRate, dryMass_Kg,
+                    timeStep);
 
-                double gravForce = UniversalConstants.Science.GravitationalConstant * (mass_Kg * parentMass_kg / Math.Pow(distanceToParent_m, 2));
-                Vector3 gravForceVector = gravForce * -Vector3.Normalise(newrelative);
-
-                Vector3 acceleratonFromGrav = gravForceVector / mass_Kg;
-
-                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
-                double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
-
-                //ohhh was this wrong before? which frame of reference should we be in here? parent ralitive or prograde ralitive?
-                Vector3 accelerationFromThrust = newtonMoveDB.ManuverDeltaV / maxAccelFromThrust; //per second
-
-                Vector3 accelerationTotal = acceleratonFromGrav + accelerationFromThrust;
-
-                Vector3 newVelocity = (accelerationTotal * timeStep) + velocity;
-
-                Vector3 deltaPos = (velocity + newVelocity) / 2 * timeStep; //we calculate the position using the average velocity between the start and end of the delta time.
-                velocity = newVelocity;
-
-                 newrelative += deltaPos;
+                position = result.Position;
+                velocity = result.Velocity;
+                manuverDeltaV = result.ManuverDeltaV;
+                mass = result.Mass;
 
                 secondsToItterate -= timeStep;
             }
 
-            return (newrelative, velocity);
+            return (position, velocity);
         }
 
         /// <summary>
@@ -297,48 +258,91 @@ namespace Pulsar4X.Movement
         {
             PositionDB positionDB = entity.GetDataBlob<PositionDB>();
             NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
-            DateTime dateTimeNow = entity.StarSysDateTime;
-            TimeSpan timeDelta = atDateTime - dateTimeNow;
-            double mass_Kg = entity.GetDataBlob<MassVolumeDB>().MassDry;
+            double massTotal_Kg = entity.GetDataBlob<MassVolumeDB>().MassTotal;
+            double dryMass_Kg = massTotal_Kg - newtonThrust.TotalFuel_kg;
             double parentMass_kg = newtonMoveDB.ParentMass;
 
             Vector3 newAbsolute = positionDB.AbsolutePosition;
-            Vector3 newRelative = positionDB.RelativePosition;
+            Vector3 position = positionDB.RelativePosition;
             Vector3 velocity = newtonMoveDB.CurrentVector_ms;
+            Vector3 manuverDeltaV = newtonMoveDB.ManuverDeltaV;
+            double mass = massTotal_Kg;
 
-            double secondsToItterate = timeDelta.TotalSeconds;
+            double secondsToItterate = (atDateTime - entity.StarSysDateTime).TotalSeconds;
             while (secondsToItterate > 0)
             {
-                //double timeStep = Math.Max(secondsToItterate / speed_kms, 1);
-                //timeStep = Math.Min(timeStep, secondsToItterate);
-                double timeStep = 1;//because the above seems unstable and looses energy.
-                double distanceToParent_m = newRelative.Length();
+                double timeStep = 1;
 
-                distanceToParent_m = Math.Max(distanceToParent_m, 0.1); //don't let the distance be 0 (once collision is in this will likely never happen anyway)
+                Vector3 oldPosition = position;
 
-                double gravForce = UniversalConstants.Science.GravitationalConstant * (mass_Kg * parentMass_kg / Math.Pow(distanceToParent_m, 2));
-                Vector3 gravForceVector = gravForce * -Vector3.Normalise(newRelative);
+                var result = IntegrateOneStep(
+                    position, velocity, manuverDeltaV,
+                    mass, parentMass_kg,
+                    newtonThrust.ExhaustVelocity, newtonThrust.FuelBurnRate, dryMass_Kg,
+                    timeStep);
 
-                Vector3 acceleratonFromGrav = gravForceVector / mass_Kg;
+                Vector3 deltaPos = result.Position - oldPosition;
+                newAbsolute += deltaPos;
 
-                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
-                double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
-                Vector3 accelerationFromThrust = newtonMoveDB.ManuverDeltaV / maxAccelFromThrust; //per second
-
-                Vector3 accelerationTotal = acceleratonFromGrav + accelerationFromThrust;
-
-                Vector3 newVelocity = (accelerationTotal * timeStep) + velocity;
-
-                Vector3 deltaPos = (velocity + newVelocity) / 2 * timeStep;
-                velocity = newVelocity;
-
-                 newAbsolute += deltaPos;
-                 newRelative += deltaPos;
+                position = result.Position;
+                velocity = result.Velocity;
+                manuverDeltaV = result.ManuverDeltaV;
+                mass = result.Mass;
 
                 secondsToItterate -= timeStep;
             }
 
             return (newAbsolute, velocity);
+        }
+
+        /// <summary>
+        /// Pure-function integration step shared by NewtonMove and prediction functions.
+        /// Computes gravity, thrust (with Tsiolkovsky fuel model), and trapezoidal position integration.
+        /// </summary>
+        public static IntegrationState IntegrateOneStep(
+            Vector3 position, Vector3 velocity, Vector3 manuverDeltaV,
+            double mass, double parentMass,
+            double exhaustVelocity, double fuelBurnRate, double dryMass,
+            double timeStep)
+        {
+            double distanceToParent_m = position.Length();
+            distanceToParent_m = Math.Max(distanceToParent_m, 0.1);
+
+            double gravForce = UniversalConstants.Science.GravitationalConstant * (mass * parentMass / Math.Pow(distanceToParent_m, 2));
+            Vector3 gravForceVector = gravForce * -Vector3.Normalise(position);
+            Vector3 totalDVFromGrav = (gravForceVector / mass) * timeStep;
+
+            Vector3 totalDVFromThrust = new Vector3(0, 0, 0);
+            double fuelBurned = 0;
+
+            if (manuverDeltaV.Length() > 0)
+            {
+                double afterBurnMass = mass - fuelBurnRate * timeStep;
+                double dvThisStep = OrbitMath.TsiolkovskyRocketEquation(mass, afterBurnMass, exhaustVelocity);
+                dvThisStep = Math.Min(manuverDeltaV.Length(), dvThisStep);
+
+                double availableDV = OrbitMath.TsiolkovskyRocketEquation(mass, dryMass, exhaustVelocity);
+                dvThisStep = Math.Min(availableDV, dvThisStep);
+
+                totalDVFromThrust = Vector3.Normalise(manuverDeltaV) * dvThisStep;
+
+                fuelBurned = OrbitMath.TsiolkovskyFuelUse(mass, exhaustVelocity, dvThisStep);
+                manuverDeltaV -= totalDVFromThrust;
+                mass -= fuelBurned;
+            }
+
+            Vector3 totalDV = totalDVFromGrav + totalDVFromThrust;
+            Vector3 newVelocity = totalDV + velocity;
+            Vector3 deltaPos = (velocity + newVelocity) / 2 * timeStep;
+
+            return new IntegrationState
+            {
+                Position = position + deltaPos,
+                Velocity = newVelocity,
+                ManuverDeltaV = manuverDeltaV,
+                Mass = mass,
+                FuelBurned = fuelBurned,
+            };
         }
 
         /// <summary>
