@@ -150,6 +150,12 @@ public class ManuverLinesComplete : IDrawData
     private double[] _editingApDistances = new double[0];
     private double[] _editingEccentricities = new double[0];
 
+    // Encounter rendering data
+    private EncounterPrediction[] _encounters = Array.Empty<EncounterPrediction>();
+    private SDL.FPoint[] _encounterBodyScreenPositions = new SDL.FPoint[0];
+    private float[] _encounterSOIScreenRadii = new float[0];
+    private SDL.FPoint[] _encounterShipScreenPositions = new SDL.FPoint[0];
+
     public void OnFrameUpdate(Matrix matrix, Camera camera)
     {
         points = RenderManuverLines.CreatePointArray(RootSequence);
@@ -234,6 +240,36 @@ public class ManuverLinesComplete : IDrawData
             _editingPeScreenPositions[i] = new SDL.FPoint() { X = peResult.X, Y = peResult.Y };
             _editingApScreenPositions[i] = new SDL.FPoint() { X = apResult.X, Y = apResult.Y };
         }
+
+        // Gather encounters from all editing nodes
+        var encounterList = new List<EncounterPrediction>();
+        for (int i = 0; i < EditingNodes.Length; i++)
+        {
+            if (EditingNodes[i].Encounters != null)
+                encounterList.AddRange(EditingNodes[i].Encounters);
+        }
+        _encounters = encounterList.ToArray();
+
+        if (_encounterBodyScreenPositions.Length != _encounters.Length)
+        {
+            _encounterBodyScreenPositions = new SDL.FPoint[_encounters.Length];
+            _encounterSOIScreenRadii = new float[_encounters.Length];
+            _encounterShipScreenPositions = new SDL.FPoint[_encounters.Length];
+        }
+        for (int i = 0; i < _encounters.Length; i++)
+        {
+            var bodyPos = _encounters[i].BodyPositionAtEncounter;
+            var bodyScreen = mtrx.TransformToSDL_Point(bodyPos.X, bodyPos.Y);
+            _encounterBodyScreenPositions[i] = new SDL.FPoint() { X = bodyScreen.X, Y = bodyScreen.Y };
+
+            var shipPos = _encounters[i].ShipPositionAtEncounter;
+            var shipScreen = mtrx.TransformToSDL_Point(shipPos.X, shipPos.Y);
+            _encounterShipScreenPositions[i] = new SDL.FPoint() { X = shipScreen.X, Y = shipScreen.Y };
+
+            // Compute SOI screen radius by transforming an offset point
+            var soiEdge = mtrx.TransformToSDL_Point(bodyPos.X + _encounters[i].SOIRadius_m, bodyPos.Y);
+            _encounterSOIScreenRadii[i] = MathF.Abs(soiEdge.X - bodyScreen.X);
+        }
     }
 
     public void OnPhysicsUpdate()
@@ -282,6 +318,35 @@ public class ManuverLinesComplete : IDrawData
                 SDL.SetRenderDrawColor(rendererPtr, 255, 165, 0, 255);
                 DrawDiamond(rendererPtr, _editingApScreenPositions[i].X, _editingApScreenPositions[i].Y, 6);
             }
+        }
+
+        // Draw encounter predictions
+        for (int i = 0; i < _encounters.Length; i++)
+        {
+            var bodyPt = _encounterBodyScreenPositions[i];
+            var shipPt = _encounterShipScreenPositions[i];
+            float soiR = _encounterSOIScreenRadii[i];
+
+            if (_encounters[i].EntersSOI)
+            {
+                // SOI entry - green
+                SDL.SetRenderDrawColor(rendererPtr, 100, 255, 100, 80);
+                DrawCircle(rendererPtr, bodyPt.X, bodyPt.Y, soiR, 64);
+                SDL.SetRenderDrawColor(rendererPtr, 100, 255, 100, 200);
+                DrawDiamond(rendererPtr, bodyPt.X, bodyPt.Y, 5);
+            }
+            else
+            {
+                // Near-miss - cyan
+                SDL.SetRenderDrawColor(rendererPtr, 100, 200, 255, 40);
+                DrawCircle(rendererPtr, bodyPt.X, bodyPt.Y, soiR, 64);
+                SDL.SetRenderDrawColor(rendererPtr, 100, 200, 255, 150);
+                DrawDiamond(rendererPtr, bodyPt.X, bodyPt.Y, 5);
+            }
+
+            // Closest approach line
+            SDL.SetRenderDrawColor(rendererPtr, 200, 200, 200, 100);
+            SDL.RenderLine(rendererPtr, shipPt.X, shipPt.Y, bodyPt.X, bodyPt.Y);
         }
     }
 
@@ -352,6 +417,54 @@ public class ManuverLinesComplete : IDrawData
         SDL.RenderLine(rendererPtr, cx + size, cy, cx, cy + size);         // right to bottom
         SDL.RenderLine(rendererPtr, cx, cy + size, cx - size, cy);         // bottom to left
         SDL.RenderLine(rendererPtr, cx - size, cy, cx, cy - size);         // left to top
+    }
+
+    private static void DrawCircle(IntPtr rendererPtr, float cx, float cy, float radius, int segments)
+    {
+        if (radius < 1f)
+            return;
+        double step = 2 * Math.PI / segments;
+        float prevX = cx + radius;
+        float prevY = cy;
+        for (int s = 1; s <= segments; s++)
+        {
+            float x = cx + radius * (float)Math.Cos(s * step);
+            float y = cy + radius * (float)Math.Sin(s * step);
+            SDL.RenderLine(rendererPtr, prevX, prevY, x, y);
+            prevX = x;
+            prevY = y;
+        }
+    }
+
+    public void DrawEncounterLabels()
+    {
+        if (_encounters.Length == 0)
+            return;
+
+        var drawList = ImGui.GetForegroundDrawList();
+        for (int i = 0; i < _encounters.Length; i++)
+        {
+            var enc = _encounters[i];
+            var bodyPt = _encounterBodyScreenPositions[i];
+
+            string prefix;
+            uint color;
+            if (enc.EntersSOI)
+            {
+                prefix = ">> SOI: " + enc.BodyName;
+                color = ImGui.GetColorU32(new System.Numerics.Vector4(0.4f, 1f, 0.4f, 1f));
+            }
+            else
+            {
+                prefix = "CA: " + enc.BodyName;
+                color = ImGui.GetColorU32(new System.Numerics.Vector4(0.4f, 0.8f, 1f, 1f));
+            }
+
+            string labelText = prefix + " " + FormatDistance(enc.ClosestApproach_m);
+            float labelX = bodyPt.X + 8;
+            float labelY = bodyPt.Y + 8;
+            drawList.AddText(new System.Numerics.Vector2(labelX, labelY), color, labelText);
+        }
     }
 }
 
