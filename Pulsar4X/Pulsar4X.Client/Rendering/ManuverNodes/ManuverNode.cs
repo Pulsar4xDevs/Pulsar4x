@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Extensions;
@@ -12,6 +13,18 @@ using Pulsar4X.Movement;
 using static Pulsar4X.Movement.NewtonionMovementProcessor;
 
 namespace Pulsar4X.Client;
+
+public struct EncounterPrediction
+{
+    public Entity Body;
+    public string BodyName;
+    public Orbital.Vector3 BodyPositionAtEncounter;
+    public double SOIRadius_m;
+    public double ClosestApproach_m;
+    public DateTime EncounterTime;
+    public Orbital.Vector3 ShipPositionAtEncounter;
+    public bool EntersSOI;
+}
 
 public class ManuverNode
 {
@@ -84,6 +97,7 @@ public class ManuverNode
     private double _exhaustVelocity;
     public KeplerElements PriorOrbit;
     public KeplerElements TargetOrbit;
+    public EncounterPrediction[] Encounters = Array.Empty<EncounterPrediction>();
 
     public ManuverNode(Entity orderEntity, DateTime nodeTime)
     {
@@ -222,14 +236,18 @@ public class ManuverNode
         // Burn is centered on NodeTime
         TimeAtStartBurn = NodeTime - TimeSpan.FromSeconds(BurnTimeTotal / 2);
 
-        // State vectors at burn start
+        // State vectors at burn start (integration starts here)
         var burnStartState = OrbitalMath.GetStateVectors(PriorOrbit, TimeAtStartBurn);
         Orbital.Vector3 position = burnStartState.position;
         Orbital.Vector3 velocity = new Orbital.Vector3(burnStartState.velocity.X, burnStartState.velocity.Y, 0);
 
-        // Convert prograde/radial/normal to parent-relative delta-V direction at burn start
+        // Convert prograde/radial/normal to parent-relative delta-V direction at burn center
+        // (NodeTime), matching NewtonThrustCommand.Execute which uses _vectorDateTime
+        var burnCenterState = OrbitalMath.GetStateVectors(PriorOrbit, NodeTime);
+        Orbital.Vector3 centerPos = burnCenterState.position;
+        Orbital.Vector3 centerVel = new Orbital.Vector3(burnCenterState.velocity.X, burnCenterState.velocity.Y, 0);
         Orbital.Vector3 manuverDeltaV = OrbitalMath.ProgradeToStateVector(
-            _sgp, new Orbital.Vector3(Radial, Prograde, Normal), position, velocity);
+            _sgp, new Orbital.Vector3(Radial, Prograde, Normal), centerPos, centerVel);
 
         double mass = _totalMass;
         double dryMass = _totalMass - _newtonThrust.TotalFuel_kg;
@@ -257,6 +275,83 @@ public class ManuverNode
         double postBurnSgp = GeneralMath.StandardGravitationalParameter(mass + _parentMass);
         TargetOrbit = OrbitalMath.KeplerFromPositionAndVelocity(postBurnSgp, position, velocity, endTime);
         TargetVelocity = new Vector2(velocity.X, velocity.Y);
+        DetectEncounters();
+    }
+
+    private void DetectEncounters()
+    {
+        var soiParent = _orderEntity.GetSOIParentEntity();
+        if (soiParent == null || !soiParent.TryGetDataBlob<PositionDB>(out var parentPosDB))
+        {
+            Encounters = Array.Empty<EncounterPrediction>();
+            return;
+        }
+
+        var children = parentPosDB.Children.ToArray();
+        var results = new List<EncounterPrediction>();
+
+        DateTime burnEnd = TimeAtStartBurn + TimeSpan.FromSeconds(BurnTimeTotal);
+
+        // Determine scan duration: one orbital period for elliptical, capped at 1 year for hyperbolic
+        double scanSeconds;
+        if (TargetOrbit.Eccentricity < 1.0 && TargetOrbit.Period > 0)
+            scanSeconds = TargetOrbit.Period;
+        else
+            scanSeconds = 365.25 * 24 * 3600;
+
+        int steps = 180;
+        double dt = scanSeconds / steps;
+
+        foreach (var child in children)
+        {
+            if (child == _orderEntity)
+                continue;
+            if (!child.TryGetDataBlob<OrbitDB>(out var childOrbitDB))
+                continue;
+
+            double soiRadius = child.GetSOI_m();
+            if (double.IsInfinity(soiRadius) || double.IsNaN(soiRadius))
+                continue;
+
+            var bodyKE = childOrbitDB.GetElements();
+            double minDist = double.MaxValue;
+            DateTime minTime = burnEnd;
+            Orbital.Vector3 minShipPos = Orbital.Vector3.Zero;
+            Orbital.Vector3 minBodyPos = Orbital.Vector3.Zero;
+
+            for (int s = 0; s <= steps; s++)
+            {
+                DateTime sampleTime = burnEnd + TimeSpan.FromSeconds(s * dt);
+                var shipPos = OrbitalMath.GetRelativePosition(TargetOrbit, sampleTime);
+                var bodyPos = OrbitalMath.GetRelativePosition(bodyKE, sampleTime);
+
+                double dist = (shipPos - bodyPos).Length();
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    minTime = sampleTime;
+                    minShipPos = shipPos;
+                    minBodyPos = bodyPos;
+                }
+            }
+
+            if (minDist < soiRadius * 5)
+            {
+                results.Add(new EncounterPrediction
+                {
+                    Body = child,
+                    BodyName = child.GetDefaultName(),
+                    BodyPositionAtEncounter = minBodyPos,
+                    SOIRadius_m = soiRadius,
+                    ClosestApproach_m = minDist,
+                    EncounterTime = minTime,
+                    ShipPositionAtEncounter = minShipPos,
+                    EntersSOI = minDist < soiRadius
+                });
+            }
+        }
+
+        Encounters = results.ToArray();
     }
 
 }

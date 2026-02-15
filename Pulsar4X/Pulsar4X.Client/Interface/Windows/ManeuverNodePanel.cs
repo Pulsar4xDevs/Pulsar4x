@@ -186,6 +186,32 @@ public class ManeuverNodePanel
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("When the burn will be centered.\nDrag the node marker on the orbit to change.");
 
+            // Encounter predictions
+            if (_node.Encounters != null && _node.Encounters.Length > 0)
+            {
+                ImGui.Separator();
+                ImGui.Text("Encounters:");
+                for (int i = 0; i < _node.Encounters.Length; i++)
+                {
+                    var enc = _node.Encounters[i];
+                    string distText = FormatEncounterDistance(enc.ClosestApproach_m);
+                    if (enc.EntersSOI)
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(0.4f, 1f, 0.4f, 1f));
+                        ImGui.Text(">> " + enc.BodyName + "  " + distText);
+                        ImGui.PopStyleColor();
+                    }
+                    else
+                    {
+                        ImGui.Text("   " + enc.BodyName + "  " + distText);
+                    }
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Closest approach: " + distText +
+                            "\nTime: " + enc.EncounterTime.ToString("yyyy-MM-dd HH:mm:ss") +
+                            (enc.EntersSOI ? "\nEnters sphere of influence" : "\nNear miss"));
+                }
+            }
+
             ImGui.Separator();
 
             // Action buttons - different labels for edit mode vs new mode
@@ -326,5 +352,14 @@ public class ManeuverNodePanel
     {
         _isActive = false;
         _manuverLines.EditingNodes = new ManuverNode[0];
+    }
+
+    private static string FormatEncounterDistance(double meters)
+    {
+        double au = Pulsar4X.Orbital.Distance.MToAU(meters);
+        if (au >= 0.01)
+            return au.ToString("F2") + " AU";
+        double km = Pulsar4X.Orbital.Distance.MToKm(meters);
+        return km.ToString("N0") + " km";
     }
 }
