@@ -176,28 +176,27 @@ namespace Pulsar4X.Movement
                     var parentEntity = positionDB.Parent;
                     if(parentEntity == null) throw new NullReferenceException("parentEntity cannot be null");
 
-                    if (kE.Eccentricity < 1) //if we're going to end up in a regular orbit around our new parent
+                    if (entity.HasDataBlob<ProjectileInfoDB>()) //this feels a bit hacky.
                     {
-                        if (entity.HasDataBlob<ProjectileInfoDB>()) //this feels a bit hacky.
-                        {
-                            var newOrbit = OrbitDB.FromKeplerElements(parentEntity, massTotal_Kg, kE, dateTime);
-                            var fastOrbit = new OrbitUpdateOftenDB(newOrbit);
-                            positionDB.SetParent(parentEntity);
-                            entity.SetDataBlob(fastOrbit);
-                            var newPos = fastOrbit.GetPosition(dateTime);
-                            positionDB.RelativePosition = newPos;
-                        }
-                        else
-                        {
-                            var newOrbit = OrbitDB.FromKeplerElements(parentEntity, massTotal_Kg, kE, dateTime);
-                            positionDB.SetParent(parentEntity);
-                            entity.SetDataBlob(newOrbit);
-                            var newPos = newOrbit.GetPosition(dateTime);
-                            positionDB.RelativePosition = newPos;
-                        }
-                        break; //OrbitDB now handles the trajectory
+                        var newOrbit = OrbitDB.FromKeplerElements(parentEntity, massTotal_Kg, kE, dateTime);
+                        var fastOrbit = new OrbitUpdateOftenDB(newOrbit);
+                        positionDB.SetParent(parentEntity);
+                        entity.SetDataBlob(fastOrbit);
+                        var newPos = fastOrbit.GetPosition(dateTime);
+                        positionDB.RelativePosition = newPos;
                     }
-                    //for hyperbolic trajectories (e >= 1), continue gravity integration
+                    else
+                    {
+                        var newOrbit = OrbitDB.FromKeplerElements(parentEntity, massTotal_Kg, kE, dateTime);
+                        positionDB.SetParent(parentEntity);
+                        entity.SetDataBlob(newOrbit);
+                        var newPos = newOrbit.GetPosition(dateTime);
+                        positionDB.RelativePosition = newPos;
+                    }
+                    // OrbitDB now handles the trajectory.
+                    // For hyperbolic orbits (e >= 1), OrbitDB.OnSetToEntity schedules
+                    // a ChangeSOIProcessor interrupt at the exact SOI exit time.
+                    break;
                 }
 
                 secondsToItterate -= timeStepInSeconds;

@@ -154,7 +154,13 @@ public class ManuverLinesComplete : IDrawData
     private EncounterPrediction[] _encounters = Array.Empty<EncounterPrediction>();
     private SDL.FPoint[] _encounterBodyScreenPositions = new SDL.FPoint[0];
     private float[] _encounterSOIScreenRadii = new float[0];
+    private float[] _encounterBodyScreenRadii = new float[0];
     private SDL.FPoint[] _encounterShipScreenPositions = new SDL.FPoint[0];
+
+    // Patched conics segment rendering data
+    private TrajectorySegment[] _segments = Array.Empty<TrajectorySegment>();
+    private List<SDL.FPoint[]> _segmentDrawPoints = new List<SDL.FPoint[]>();
+    private SDL.FPoint[] _segmentTransitionPoints = new SDL.FPoint[0];
 
     public void OnFrameUpdate(Matrix matrix, Camera camera)
     {
@@ -173,7 +179,34 @@ public class ManuverLinesComplete : IDrawData
             DrawPoints[i] = new SDL.FPoint() { X = result.X, Y = result. Y };
         }
 
-        points = RenderManuverLines.CreatePointArray(EditingNodes);
+        // If the editing node has patched conics segments and the first segment enters a SOI,
+        // time-sample the orbit arc from burn end to SOI boundary.
+        // We use time-sampling (not KeplerPoints) to guarantee the arc traces the
+        // correct direction of travel and the endpoint exactly matches segment 2's start.
+        if (EditingNodes.Length == 1
+            && EditingNodes[0].Segments != null
+            && EditingNodes[0].Segments.Length > 0
+            && EditingNodes[0].Segments[0].EntersSOI)
+        {
+            var node = EditingNodes[0];
+            var seg = node.Segments[0];
+            var ke = node.TargetOrbit;
+            int numSamples = 128;
+            double totalSeconds = (seg.EndTime - seg.StartTime).TotalSeconds;
+            if (totalSeconds <= 0) totalSeconds = 1;
+            double dtSample = totalSeconds / (numSamples - 1);
+            points = new Vector2[numSamples];
+            for (int j = 0; j < numSamples; j++)
+            {
+                DateTime sampleTime = seg.StartTime + TimeSpan.FromSeconds(j * dtSample);
+                var pos = OrbitalMath.GetRelativePosition(ke, sampleTime);
+                points[j] = new Vector2(pos.X, pos.Y);
+            }
+        }
+        else
+        {
+            points = RenderManuverLines.CreatePointArray(EditingNodes);
+        }
         if(DrawPointsEditing.Length != points.Length)
             DrawPointsEditing = new SDL.FPoint[points.Length];
         for (int i = 0; i < points.Length; i++)
@@ -254,6 +287,7 @@ public class ManuverLinesComplete : IDrawData
         {
             _encounterBodyScreenPositions = new SDL.FPoint[_encounters.Length];
             _encounterSOIScreenRadii = new float[_encounters.Length];
+            _encounterBodyScreenRadii = new float[_encounters.Length];
             _encounterShipScreenPositions = new SDL.FPoint[_encounters.Length];
         }
         for (int i = 0; i < _encounters.Length; i++)
@@ -269,7 +303,73 @@ public class ManuverLinesComplete : IDrawData
             // Compute SOI screen radius by transforming an offset point
             var soiEdge = mtrx.TransformToSDL_Point(bodyPos.X + _encounters[i].SOIRadius_m, bodyPos.Y);
             _encounterSOIScreenRadii[i] = MathF.Abs(soiEdge.X - bodyScreen.X);
+
+            // Compute body physical screen radius
+            var bodyEdge = mtrx.TransformToSDL_Point(bodyPos.X + _encounters[i].BodyRadius_m, bodyPos.Y);
+            _encounterBodyScreenRadii[i] = MathF.Abs(bodyEdge.X - bodyScreen.X);
         }
+
+        // Compute patched conics segment draw points (segments beyond the first).
+        // All points are converted to the original parent's frame so they use the main mtrx.
+        var allSegments = new List<TrajectorySegment>();
+        for (int i = 0; i < EditingNodes.Length; i++)
+        {
+            if (EditingNodes[i].Segments != null && EditingNodes[i].Segments.Length > 1)
+            {
+                // Skip the first segment (already drawn as the main editing orbit)
+                for (int s = 1; s < EditingNodes[i].Segments.Length; s++)
+                    allSegments.Add(EditingNodes[i].Segments[s]);
+            }
+        }
+        _segments = allSegments.ToArray();
+        _segmentDrawPoints.Clear();
+
+        var transitionPts = new List<SDL.FPoint>();
+        for (int i = 0; i < _segments.Length; i++)
+        {
+            var seg = _segments[i];
+            var ke = seg.Orbit;
+
+            // Time-sample all segments to avoid KeplerPoints angle-wrapping issues
+            // (return-to-parent arcs often span nearly a full orbit but have similar
+            // start/end angles, causing KeplerPoints to draw a tiny arc backwards).
+            int numSamples = 128;
+            double totalSeconds = (seg.EndTime - seg.StartTime).TotalSeconds;
+            if (totalSeconds <= 0) totalSeconds = 1;
+            double dtSample = totalSeconds / (numSamples - 1);
+            var sdlPts = new SDL.FPoint[numSamples];
+
+            for (int j = 0; j < numSamples; j++)
+            {
+                DateTime sampleTime = seg.StartTime + TimeSpan.FromSeconds(j * dtSample);
+                var shipPos = OrbitalMath.GetRelativePosition(ke, sampleTime);
+
+                double px, py;
+                if (seg.IsFlybySegment)
+                {
+                    // Add the flyby body's predicted position to convert to original parent frame
+                    var bodyPos = OrbitalMath.GetRelativePosition(seg.BodyOrbitKE, sampleTime);
+                    px = shipPos.X + bodyPos.X;
+                    py = shipPos.Y + bodyPos.Y;
+                }
+                else
+                {
+                    // Already in original parent frame
+                    px = shipPos.X;
+                    py = shipPos.Y;
+                }
+
+                var res = mtrx.TransformToSDL_Point(px, py);
+                sdlPts[j] = new SDL.FPoint() { X = res.X, Y = res.Y };
+            }
+
+            _segmentDrawPoints.Add(sdlPts);
+
+            // Transition point at start of segment (SOI boundary)
+            if (sdlPts.Length > 0)
+                transitionPts.Add(sdlPts[0]);
+        }
+        _segmentTransitionPoints = transitionPts.ToArray();
     }
 
     public void OnPhysicsUpdate()
@@ -305,6 +405,10 @@ public class ManuverLinesComplete : IDrawData
             if (_editingEccentricities[i] < 0.001 || _editingEccentricities[i] >= 1.0)
                 continue;
 
+            bool hasSOIChange = EditingNodes[i].Segments != null
+                && EditingNodes[i].Segments.Length > 0
+                && EditingNodes[i].Segments[0].EntersSOI;
+
             // Periapsis - cyan
             if (camera.IsOnScreen(_editingPeScreenPositions[i].X, _editingPeScreenPositions[i].Y))
             {
@@ -312,8 +416,8 @@ public class ManuverLinesComplete : IDrawData
                 DrawDiamond(rendererPtr, _editingPeScreenPositions[i].X, _editingPeScreenPositions[i].Y, 6);
             }
 
-            // Apoapsis - orange
-            if (camera.IsOnScreen(_editingApScreenPositions[i].X, _editingApScreenPositions[i].Y))
+            // Apoapsis - orange (skip if orbit is truncated by SOI change)
+            if (!hasSOIChange && camera.IsOnScreen(_editingApScreenPositions[i].X, _editingApScreenPositions[i].Y))
             {
                 SDL.SetRenderDrawColor(rendererPtr, 255, 165, 0, 255);
                 DrawDiamond(rendererPtr, _editingApScreenPositions[i].X, _editingApScreenPositions[i].Y, 6);
@@ -344,9 +448,43 @@ public class ManuverLinesComplete : IDrawData
                 DrawDiamond(rendererPtr, bodyPt.X, bodyPt.Y, 5);
             }
 
-            // Closest approach line
-            SDL.SetRenderDrawColor(rendererPtr, 200, 200, 200, 100);
-            SDL.RenderLine(rendererPtr, shipPt.X, shipPt.Y, bodyPt.X, bodyPt.Y);
+            // Draw body physical radius circle (white, with minimum size for visibility)
+            float bodyR = MathF.Max(_encounterBodyScreenRadii[i], 3f);
+            SDL.SetRenderDrawColor(rendererPtr, 220, 220, 220, 200);
+            DrawCircle(rendererPtr, bodyPt.X, bodyPt.Y, bodyR, 32);
+
+            // Closest approach line (only for near-misses; SOI entries are shown by patched conics)
+            if (!_encounters[i].EntersSOI)
+            {
+                SDL.SetRenderDrawColor(rendererPtr, 200, 200, 200, 100);
+                SDL.RenderLine(rendererPtr, shipPt.X, shipPt.Y, bodyPt.X, bodyPt.Y);
+            }
+        }
+
+        // Draw patched conics segments
+        for (int i = 0; i < _segmentDrawPoints.Count && i < _segments.Length; i++)
+        {
+            var pts = _segmentDrawPoints[i];
+            if (pts.Length < 2) continue;
+
+            if (_segments[i].ExitsSOI)
+            {
+                // Post-flyby segment: dimmer gold
+                SDL.SetRenderDrawColor(rendererPtr, 200, 170, 0, 180);
+            }
+            else
+            {
+                // SOI-interior segment: light blue
+                SDL.SetRenderDrawColor(rendererPtr, 100, 180, 255, 200);
+            }
+            SDL.RenderLines(rendererPtr, pts, pts.Length);
+        }
+
+        // Draw SOI transition markers (small circles at boundary crossings)
+        SDL.SetRenderDrawColor(rendererPtr, 100, 255, 100, 220);
+        for (int i = 0; i < _segmentTransitionPoints.Length; i++)
+        {
+            DrawCircle(rendererPtr, _segmentTransitionPoints[i].X, _segmentTransitionPoints[i].Y, 4, 12);
         }
     }
 
@@ -365,8 +503,13 @@ public class ManuverLinesComplete : IDrawData
             if (_editingEccentricities[i] < 0.001 || _editingEccentricities[i] >= 1.0)
                 continue;
 
+            bool hasSOIChange = EditingNodes[i].Segments != null
+                && EditingNodes[i].Segments.Length > 0
+                && EditingNodes[i].Segments[0].EntersSOI;
+
             DrawApsisLabel(_editingPeScreenPositions[i], _parentScreenPos, FormatDistance(_editingPeDistances[i]), "Pe", 0, 200, 255, labelId++);
-            DrawApsisLabel(_editingApScreenPositions[i], _parentScreenPos, FormatDistance(_editingApDistances[i]), "Ap", 255, 165, 0, labelId++);
+            if (!hasSOIChange)
+                DrawApsisLabel(_editingApScreenPositions[i], _parentScreenPos, FormatDistance(_editingApDistances[i]), "Ap", 255, 165, 0, labelId++);
         }
     }
 
@@ -464,6 +607,48 @@ public class ManuverLinesComplete : IDrawData
             float labelX = bodyPt.X + 8;
             float labelY = bodyPt.Y + 8;
             drawList.AddText(new System.Numerics.Vector2(labelX, labelY), color, labelText);
+        }
+
+        // Draw patched conics segment labels at transition points.
+        // The transition point is the START of each segment (= the SOI boundary crossing).
+        // For flyby segments: the transition is entering the body's SOI.
+        // For return-to-parent segments: the transition is exiting the previous body's SOI.
+        for (int i = 0; i < _segments.Length && i < _segmentTransitionPoints.Length; i++)
+        {
+            var seg = _segments[i];
+            var pt = _segmentTransitionPoints[i];
+            string segLabel;
+            uint segColor;
+
+            if (seg.IsFlybySegment)
+            {
+                // Transition point is SOI entry into this body
+                if (seg.Orbit.Eccentricity >= 1)
+                {
+                    segLabel = seg.ParentName + " flyby, Pe: " + FormatDistance(seg.Orbit.Periapsis);
+                    segColor = ImGui.GetColorU32(new System.Numerics.Vector4(0.4f, 0.7f, 1f, 1f));
+                }
+                else
+                {
+                    segLabel = seg.ParentName + " capture, Pe: " + FormatDistance(seg.Orbit.Periapsis);
+                    segColor = ImGui.GetColorU32(new System.Numerics.Vector4(0.4f, 1f, 0.4f, 1f));
+                }
+            }
+            else
+            {
+                // Transition point is SOI exit back to parent orbit
+                if (i > 0 && _segments[i - 1].IsFlybySegment)
+                {
+                    segLabel = "Exit " + _segments[i - 1].ParentName;
+                    segColor = ImGui.GetColorU32(new System.Numerics.Vector4(0.8f, 0.7f, 0f, 1f));
+                }
+                else
+                {
+                    continue; // no meaningful label for this transition
+                }
+            }
+
+            drawList.AddText(new System.Numerics.Vector2(pt.X + 8, pt.Y - 14), segColor, segLabel);
         }
     }
 }

@@ -212,6 +212,44 @@ public class ManeuverNodePanel
                 }
             }
 
+            // Trajectory segment summary
+            if (_node.Segments != null && _node.Segments.Length > 0)
+            {
+                ImGui.Separator();
+                ImGui.Text("Trajectory:");
+                for (int i = 0; i < _node.Segments.Length; i++)
+                {
+                    var seg = _node.Segments[i];
+                    TimeSpan duration = seg.EndTime - seg.StartTime;
+                    string durText = FormatDuration(duration);
+
+                    if (seg.EntersSOI)
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(0.4f, 1f, 0.4f, 1f));
+                        ImGui.Text("  > " + seg.ParentName + " orbit -> SOI (" + durText + ")");
+                        ImGui.PopStyleColor();
+                    }
+                    else if (seg.ExitsSOI)
+                    {
+                        string peText = FormatEncounterDistance(seg.Orbit.Periapsis);
+                        ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(0.4f, 0.7f, 1f, 1f));
+                        ImGui.Text("  > " + seg.ParentName + " flyby, Pe: " + peText);
+                        ImGui.PopStyleColor();
+                    }
+                    else if (i > 0 && seg.Orbit.Eccentricity < 1)
+                    {
+                        string peText = FormatEncounterDistance(seg.Orbit.Periapsis);
+                        ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(0.4f, 1f, 0.4f, 1f));
+                        ImGui.Text("  > " + seg.ParentName + " capture, Pe: " + peText);
+                        ImGui.PopStyleColor();
+                    }
+                    else
+                    {
+                        ImGui.Text("  > " + seg.ParentName + " orbit (" + durText + ")");
+                    }
+                }
+            }
+
             ImGui.Separator();
 
             // Action buttons - different labels for edit mode vs new mode
@@ -352,6 +390,15 @@ public class ManeuverNodePanel
     {
         _isActive = false;
         _manuverLines.EditingNodes = new ManuverNode[0];
+    }
+
+    private static string FormatDuration(TimeSpan ts)
+    {
+        if (ts.TotalDays >= 1)
+            return ((int)ts.TotalDays) + "d " + ts.Hours + "h";
+        if (ts.TotalHours >= 1)
+            return ((int)ts.TotalHours) + "h " + ts.Minutes + "m";
+        return ((int)ts.TotalMinutes) + "m";
     }
 
     private static string FormatEncounterDistance(double meters)
