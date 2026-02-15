@@ -299,6 +299,11 @@ public class ManuverNode
         else
             scanSeconds = 365.25 * 24 * 3600;
 
+        // Clamp so burnEnd + scanSeconds doesn't overflow DateTime.MaxValue
+        double maxSeconds = (DateTime.MaxValue - burnEnd).TotalSeconds - 1;
+        if (scanSeconds > maxSeconds)
+            scanSeconds = Math.Max(0, maxSeconds);
+
         int steps = 180;
         double dt = scanSeconds / steps;
 
