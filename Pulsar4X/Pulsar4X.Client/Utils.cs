@@ -4,6 +4,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Colonies;
 using Pulsar4X.Ships;
+using Pulsar4X.Names;
 
 namespace Pulsar4X.Client;
 
@@ -186,5 +187,14 @@ public static class Utils
             return UserOrbitSettings.OrbitBodyType.Ship;
 
         return UserOrbitSettings.OrbitBodyType.Unknown;
+    }
+
+    internal static string EntityName(Entity entity, int? faction = null)
+    {
+        var f = faction ?? Game.NeutralFactionId;
+        var s = "??";
+        if (entity.TryGetDataBlob<NameDB>(out NameDB nDB))
+            s = nDB.GetName(f);
+        return s;
     }
 }

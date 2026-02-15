@@ -4,11 +4,13 @@ namespace Pulsar4X.Input
 {
     public interface IPointerHandler
     {
-        void OnPointerEnter(SDL.Event sevent) {}
-        void OnPointerExit(SDL.Event sevent) {}
-        void OnPointerMove(SDL.Event sevent) {}
+        // Returning true means that the event was handled
 
-        void OnPointerDown(SDL.Event sevent) {}
-        void OnPointerUp(SDL.Event sevent) {}
+        bool OnPointerEnter(SDL.Event sevent) => false;
+        bool OnPointerExit(SDL.Event sevent) => false;
+        bool OnPointerMove(SDL.Event sevent) => false;
+
+        bool OnPointerDown(SDL.Event sevent) => false;
+        bool OnPointerUp(SDL.Event sevent) => false;
     }
 }

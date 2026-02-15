@@ -25,7 +25,6 @@ namespace Pulsar4X.Client
         public string Name { get; set; } = "Unknown";
 
         public IPosition? Position;
-        public NameIcon? NameIcon;
         public IKepler? OrbitIcon;
         public OrbitOrderIcon? DebugOrbitOrder;
         public bool IsDestroyed = false; //currently IsDestroyed = true if moved from one system to another, may need to revisit this.

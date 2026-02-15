@@ -24,7 +24,7 @@ namespace Pulsar4X.Client
     /// <summary>
     /// A Collection of Shapes which will make up an icon.
     /// </summary>
-    public class Icon : IDrawData, IPointerHandler
+    public class Icon : IDrawData
     {
         internal bool DebugShowCenter = false;
 
@@ -70,26 +70,10 @@ namespace Pulsar4X.Client
             positionByDB = false;
         }
 
-        private bool _hovered = false;
-        internal bool IsHovered { get { return _hovered; } }
-        private bool _pressed = false;
-        internal bool IsPressed { get { return _pressed; } }
-
-        public void OnPointerEnter(SDL.Event sevent) =>
-            _hovered = true;
-        public void OnPointerExit(SDL.Event sevent) =>
-            _hovered = false;
-        public void OnPointerDown(SDL.Event sevent) =>
-            _pressed = true;
-        public void OnPointerUp(SDL.Event sevent) =>
-            _pressed = false;
-        public void OnPointerMove(SDL.Event sevent) {}
-
-        // TODO: Currently every icon is just a 20px circle. This could be improved.
-        internal bool Contains(System.Drawing.PointF point)
+        protected GlobalUIState? _state = null;
+        public void AttachState(GlobalUIState state)
         {
-            System.Numerics.Vector2 v = new (ViewScreenPos.X, ViewScreenPos.Y);
-            return System.Numerics.Vector2.Distance(v, point.ToVector2()) <= 20;
+            _state = state;
         }
 
         public void ResetPositionDB(IPosition positionDB)
