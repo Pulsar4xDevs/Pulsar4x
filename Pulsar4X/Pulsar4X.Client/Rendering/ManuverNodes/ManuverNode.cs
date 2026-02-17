@@ -351,6 +351,12 @@ public class ManuverNode
             Orbital.Vector3 minShipPos = Orbital.Vector3.Zero;
             Orbital.Vector3 minBodyPos = Orbital.Vector3.Zero;
 
+            // Track first SOI entry (outside → inside transition)
+            bool prevOutside = true;
+            DateTime soiEntryTime = DateTime.MaxValue;
+            Orbital.Vector3 soiEntryShipPos = Orbital.Vector3.Zero;
+            Orbital.Vector3 soiEntryBodyPos = Orbital.Vector3.Zero;
+
             for (int s = 0; s <= steps; s++)
             {
                 DateTime sampleTime = burnEnd + TimeSpan.FromSeconds(s * dt);
@@ -358,6 +364,17 @@ public class ManuverNode
                 var bodyPos = OrbitalMath.GetRelativePosition(bodyKE, sampleTime);
 
                 double dist = (shipPos - bodyPos).Length();
+                bool isOutside = dist >= soiRadius;
+
+                // Detect first SOI boundary crossing
+                if (prevOutside && !isOutside && s > 0 && soiEntryTime == DateTime.MaxValue)
+                {
+                    soiEntryTime = sampleTime;
+                    soiEntryShipPos = shipPos;
+                    soiEntryBodyPos = bodyPos;
+                }
+                prevOutside = isOutside;
+
                 if (dist < minDist)
                 {
                     minDist = dist;
@@ -373,17 +390,25 @@ public class ManuverNode
                 if (child.TryGetDataBlob<MassVolumeDB>(out var childMVDB))
                     bodyRadius = childMVDB.RadiusInM;
 
+                bool entersSOI = minDist < soiRadius;
+
+                // For SOI entries, show the body at the SOI crossing time (not closest approach)
+                // so the encounter icon aligns with where the trajectory enters the SOI
+                var displayBodyPos = entersSOI && soiEntryTime != DateTime.MaxValue ? soiEntryBodyPos : minBodyPos;
+                var displayShipPos = entersSOI && soiEntryTime != DateTime.MaxValue ? soiEntryShipPos : minShipPos;
+                var displayTime = entersSOI && soiEntryTime != DateTime.MaxValue ? soiEntryTime : minTime;
+
                 results.Add(new EncounterPrediction
                 {
                     Body = child,
                     BodyName = child.GetDefaultName(),
-                    BodyPositionAtEncounter = minBodyPos,
+                    BodyPositionAtEncounter = displayBodyPos,
                     SOIRadius_m = soiRadius,
                     BodyRadius_m = bodyRadius,
                     ClosestApproach_m = minDist,
-                    EncounterTime = minTime,
-                    ShipPositionAtEncounter = minShipPos,
-                    EntersSOI = minDist < soiRadius
+                    EncounterTime = displayTime,
+                    ShipPositionAtEncounter = displayShipPos,
+                    EntersSOI = entersSOI
                 });
             }
         }

@@ -166,21 +166,138 @@ namespace Pulsar4X.Orbits
     {
         internal override void ProcessEntity(Entity entity, DateTime atDateTime)
         {
-
-            var parent = entity.GetSOIParentEntity();
+            var posDB = entity.GetDataBlob<PositionDB>();
+            var parent = posDB.Parent;
             if(parent == null) throw new NullReferenceException("parent cannot be null");
+
+            // Guard: verify entity is actually near the SOI boundary.
+            // If an EnterSOIProcessor fired first and changed the orbit, this interrupt is stale.
+            var oldOrbit = entity.GetDataBlob<OrbitDB>();
+            var shipRelPos = oldOrbit.GetPosition(atDateTime);
+            var soiRadius = parent.GetSOI_m();
+            if (shipRelPos.Length() < soiRadius * 0.9)
+                return;
+
             var grandparent = parent.GetSOIParentEntity();
             var newParent = grandparent == null ? parent : grandparent;
 
-            var vel = MoveMath.GetAbsoluteFutureVelocity(entity, atDateTime);
+            if (!parent.HasDataBlob<OrbitDB>())
+                return; // parent is the root star, can't exit further
 
-            entity.GetDataBlob<PositionDB>().SetParent(newParent);
-            var rpos = MoveMath.GetRelativeFuturePosition(entity, atDateTime);
+            // Compute position and velocity relative to newParent from orbit equations
+            // at atDateTime. GetRelativeFuturePosition/GetAbsoluteFutureVelocity return
+            // values in the orbit parent's frame (not the position parent's), so we must
+            // do the frame conversion manually.
+            var parentOrbit = parent.GetDataBlob<OrbitDB>();
+            var parentRelPos = parentOrbit.GetPosition(atDateTime);
+            var parentRelVel = OrbitMath.InstantaneousOrbitalVelocityVector_m(parentOrbit, atDateTime);
+
+            // Ship position/velocity relative to orbit parent (e.g., Moon)
+            var shipRelVel = OrbitMath.InstantaneousOrbitalVelocityVector_m(oldOrbit, atDateTime);
+
+            // Convert to newParent frame (e.g., Earth): add parent's state relative to newParent
+            var relPos = parentRelPos + shipRelPos;
+            var relVel = parentRelVel + shipRelVel;
+
             var myMass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
             var gpMass = newParent.GetDataBlob<MassVolumeDB>().MassTotal;
-            var neworbit = OrbitDB.FromVector(newParent, myMass, gpMass, (Vector3)rpos, vel, atDateTime);
+
+            posDB.SetParent(newParent);
+
+            var neworbit = OrbitDB.FromVector(newParent, myMass, gpMass, relPos, relVel, atDateTime);
             entity.SetDataBlob(neworbit);
-            var soievent = Event.Create(EventType.SOIChanged, atDateTime, "SOI changed", entity.FactionOwnerID, entity.Manager.ManagerID);
+
+            // SetDataBlob silently overwrites the old orbit without cleanup.
+            // Null OwningEntity so MoveStateProcessor won't re-process the stale orbit.
+            oldOrbit.OwningEntity = null;
+
+            // Override stale RelativePosition from SetParent with orbit-equation-derived value
+            posDB.RelativePosition = relPos;
+
+            var soievent = Event.Create(EventType.SOIChanged, atDateTime,
+                "Exited SOI of " + parent.GetDefaultName(),
+                entity.FactionOwnerID, entity.Manager.ManagerID);
+            EventManager.Instance.Publish(soievent);
+        }
+    }
+
+    public class EnterSOIProcessor : IInstanceProcessor
+    {
+        internal override void ProcessEntity(Entity entity, DateTime atDateTime)
+        {
+            if (!entity.HasDataBlob<OrbitDB>()) return;
+
+            var posDB = entity.GetDataBlob<PositionDB>();
+            var parent = posDB.Parent;
+            if (parent == null || !parent.HasDataBlob<OrbitDB>()) return;
+
+            var shipOrbit = entity.GetDataBlob<OrbitDB>();
+            var parentOrbit = parent.GetDataBlob<OrbitDB>();
+
+            // Compute ship position at atDateTime from orbit equations (not stale PositionDB)
+            // Both ship and children orbit the same parent, so positions are in the same frame
+            var shipRelPos = shipOrbit.GetPosition(atDateTime);
+
+            Entity? targetChild = null;
+            double closestDist = double.MaxValue;
+            Vector3 targetChildRelPos = Vector3.Zero;
+
+            foreach (var child in parentOrbit.Children)
+            {
+                if (child == entity) continue;
+                if (!child.HasDataBlob<OrbitDB>() || !child.HasDataBlob<MassVolumeDB>()) continue;
+
+                var childSOI = child.GetSOI_m();
+                if (childSOI <= 0 || double.IsInfinity(childSOI)) continue;
+
+                var childOrbit = child.GetDataBlob<OrbitDB>();
+                var childRelPos = childOrbit.GetPosition(atDateTime);
+                var dist = (shipRelPos - childRelPos).Length();
+
+                if (dist < childSOI && dist < closestDist)
+                {
+                    closestDist = dist;
+                    targetChild = child;
+                    targetChildRelPos = childRelPos;
+                }
+            }
+
+            if (targetChild == null) return;  // Stale interrupt or edge case
+
+            // Compute relative position and velocity from orbit equations at atDateTime
+            var relPos = shipRelPos - targetChildRelPos;
+
+            var shipVel = OrbitMath.InstantaneousOrbitalVelocityVector_m(shipOrbit, atDateTime);
+            var childVel = OrbitMath.InstantaneousOrbitalVelocityVector_m(targetChild.GetDataBlob<OrbitDB>(), atDateTime);
+            var relVel = shipVel - childVel;
+
+            var myMass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
+            var childMass = targetChild.GetDataBlob<MassVolumeDB>().MassTotal;
+
+            // Hold a reference to the old orbit before it gets overwritten
+            var oldOrbit = shipOrbit;
+
+            posDB.SetParent(targetChild);
+
+            var newOrbit = OrbitDB.FromVector(targetChild, myMass, childMass, relPos, relVel, atDateTime);
+            entity.SetDataBlob(newOrbit);  // Triggers OnSetToEntity → may schedule SOI exit or further entry
+
+            // EntityManager.SetDataBlob silently overwrites the old orbit in the store
+            // without calling OnRemovedFromEntity or nulling OwningEntity. The old orbit
+            // still points at our entity, so MoveStateProcessor would re-process it,
+            // see a parent mismatch (old orbit parent=Earth vs posDB parent=Moon), call
+            // SetParent(Earth), and overwrite RelativePosition with the old Earth-relative
+            // value — producing the "snap to old position" bug. Null OwningEntity so
+            // MoveStateProcessor skips the stale orbit.
+            oldOrbit.OwningEntity = null;
+
+            // Override stale RelativePosition (computed from stale AbsolutePosition in
+            // SetParent) with the correct orbit-equation-derived value
+            posDB.RelativePosition = relPos;
+
+            var soievent = Event.Create(EventType.SOIChanged, atDateTime,
+                "Entered SOI of " + targetChild.GetDefaultName(),
+                entity.FactionOwnerID, entity.Manager.ManagerID);
             EventManager.Instance.Publish(soievent);
         }
     }

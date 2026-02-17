@@ -168,6 +168,45 @@ namespace Pulsar4X.Movement
                     newtonMoveDB.UpdateKeplerElements(kE);
 
                 }
+                // Check child bodies for SOI entry
+                else if (newtonMoveDB.SOIParent.HasDataBlob<OrbitDB>())
+                {
+                    var currentTime = dateTimeNow + TimeSpan.FromSeconds(deltaT - secondsToItterate);
+                    var parentOrbit = newtonMoveDB.SOIParent.GetDataBlob<OrbitDB>();
+                    foreach (var child in parentOrbit.Children)
+                    {
+                        if (child == entity) continue;
+                        if (!child.HasDataBlob<OrbitDB>() || !child.HasDataBlob<MassVolumeDB>()) continue;
+
+                        var childSOI = child.GetSOI_m();
+                        if (childSOI <= 0 || double.IsInfinity(childSOI)) continue;
+
+                        var childOrbit = child.GetDataBlob<OrbitDB>();
+                        var childPos = childOrbit.GetPosition(currentTime);
+                        var dist = (positionDB.RelativePosition - childPos).Length();
+
+                        if (dist < childSOI)
+                        {
+                            // SOI Entry transition
+                            var childMass = child.GetDataBlob<MassVolumeDB>().MassDry;
+                            var childVel = OrbitMath.InstantaneousOrbitalVelocityVector_m(childOrbit, currentTime);
+                            var relPos = positionDB.RelativePosition - childPos;
+                            var relVel = newtonMoveDB.CurrentVector_ms - childVel;
+
+                            sgp = GeneralMath.StandardGravitationalParameter(massTotal_Kg + childMass);
+                            kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, relPos, relVel, currentTime);
+
+                            positionDB.SetParent(child);
+                            newtonMoveDB.SOIParent = child;
+                            newtonMoveDB.ParentMass = childMass;
+                            newtonMoveDB.CurrentVector_ms = relVel;
+                            positionDB.RelativePosition = relPos;
+                            newtonMoveDB.UpdateKeplerElements(kE);
+                            parentMass_kg = childMass;
+                            break;
+                        }
+                    }
+                }
 
                 if (newtonMoveDB.ManuverDeltaV.Length() <= 0) //if we've completed the manuver.
                 {
