@@ -31,27 +31,68 @@ namespace Pulsar4X.Client
         private PositionDB? _positionDB = null;
 
         protected virtual void DrawExt(IntPtr rendererPtr, Camera camera) {}
+        protected virtual void OnFrameUpdateExt(Matrix matrix, Camera camera) {}
 
         private SDL.Color _color;
         protected string _name = "??";
 
+        private IntPtr _nameTexture = IntPtr.Zero;
+        protected SDL.FRect _nameRect = new ();
+
         public RectangleF Rect = new ();
+
+        private uint _padding = 0;
+        public uint Padding {
+            set {
+                _padding = value;
+                OnPaddingUpdate();
+            }
+            get {
+                return _padding;
+            }
+        }
 
         private int _faction = Game.NeutralFactionId;
         public int Faction {
             set {
                 _faction = value;
-                _name = _nameDB.GetName(_faction);
+                OnEntityRenamed(null);
             }
             get {
                 return _faction;
             }
         }
 
+        private void OnPaddingUpdate()
+        {
+            Rect.Width = _nameRect.W + _padding * 2;
+            Rect.Height = _nameRect.H + _padding * 2;
+        }
+
         private Task OnEntityRenamed(Message message)
         {
             _name = _nameDB.GetName(_faction);
+
+            int h;
+            int w;
+            SDL3.TTF.GetStringSize(Styles.SDLDefaultFont, _name, 0, out w, out h);
+            _nameRect.W = w;
+
+            OnPaddingUpdate();
+
+            DestroyName();
+
             return Task.CompletedTask;
+        }
+
+        private void DestroyName()
+        {
+            if (_nameTexture == IntPtr.Zero)
+                return;
+
+            var p = _nameTexture;
+            _nameTexture = IntPtr.Zero;
+            SDL.DestroyTexture(p);
         }
 
         public EntityLabel(Entity entity)
@@ -75,11 +116,17 @@ namespace Pulsar4X.Client
                 _starSysGuid = starSys.ID;
             }
 
-            Rect.Height = SDL3.TTF.GetFontHeight(Styles.SDLDefaultFont);
+            _nameRect.H = SDL3.TTF.GetFontHeight(Styles.SDLDefaultFont);
+            OnEntityRenamed(null);
 
             // Subscribe to name changes
             Func<Message, bool> filterById = msg => msg.EntityId == _entity.Id;
             MessagePublisher.Instance.Subscribe(MessageTypes.EntityRenamed, OnEntityRenamed, filterById);
+        }
+
+        ~EntityLabel()
+        {
+            DestroyName();
         }
 
         protected GlobalUIState? _state = null;
@@ -135,16 +182,47 @@ namespace Pulsar4X.Client
             return Rect.Contains(point);
         }
 
+        private void UpdateRectLocation(int x, int y)
+        {
+            _nameRect.X = x;
+            _nameRect.Y = y;
+
+            Rect.Location = new (x - Padding, y - Padding);
+        }
+
         public void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            int h;
-            int w;
-            SDL3.TTF.GetStringSize(Styles.SDLDefaultFont, _name, 0, out w, out h);
-            Rect.Width = w;
-
             var point = camera.ViewCoordinate_m(_positionDB.AbsolutePosition);
-            Rect.X = point.X;
-            Rect.Y = point.Y;
+            UpdateRectLocation(point.X, point.Y);
+
+            OnFrameUpdateExt(matrix, camera);
+        }
+
+        private bool RenderName(IntPtr rendererPtr)
+        {
+            IntPtr textSurface = SDL3.TTF.RenderTextSolid(
+                    Styles.SDLDefaultFont,
+                    _name,
+                    0,
+                    _color);
+
+            if (textSurface == IntPtr.Zero) {
+                Trace.WriteLine("EntityLabel: failed to create surface");
+                return false;
+            }
+
+            _nameTexture = SDL.CreateTextureFromSurface(rendererPtr, textSurface);
+
+            if (_nameTexture == IntPtr.Zero) {
+                SDL.DestroySurface(textSurface);
+
+                Trace.WriteLine("EntityLabel: failed to create texture from surface");
+                return false;
+            }
+
+            SDL.DestroySurface(textSurface);
+
+            return true;
         }
 
         public void Draw(IntPtr rendererPtr, Camera camera)
@@ -153,66 +231,42 @@ namespace Pulsar4X.Client
                     ! camera.IsOnScreen(Rect.X, Rect.Y, Rect.Width, Rect.Height))
                 return;
 
-            // TODO: Move these somewhere else
-            SDL.Color tp = new () {
-                R = 0,
-                G = 0,
-                B = 0,
-                A = 0
-            };
-            SDL.Color pressclr = new () {
-                R = 128,
-                G = 255,
-                B = 0,
-                A = 255 / 2
-            };
-            SDL.Color hoverclr = new () {
-                R = 0,
-                G = 128,
-                B = 128,
-                A = 255 / 2
-            };
+            if (_pressed || _hovered)
+            {
+                byte r, g, b, a;
+                SDL.GetRenderDrawColor(rendererPtr, out r, out g, out b, out a);
 
-            IntPtr surface = SDL3.TTF.RenderTextShaded(
-                    Styles.SDLDefaultFont,
-                    _name,
-                    0,
-                    _color,
-                    (_pressed) ? pressclr : (_hovered) ? hoverclr : tp);
+                // TODO: Move these somewhere else
+                if (_pressed)
+                    SDL.SetRenderDrawColor(rendererPtr, 128, 255, 0, 127);
+                else
+                    SDL.SetRenderDrawColor(rendererPtr, 0, 128, 128, 127);
 
-            if (surface == IntPtr.Zero) {
-                Trace.WriteLine("EntityLabel: failed to create surface");
-                return;
+                SDL.FRect frect = new () {
+                    X = Rect.X,
+                    Y = Rect.Y,
+                    W = Rect.Width,
+                    H = Rect.Height
+                };
+
+                SDL.RenderFillRect(rendererPtr, frect);
+
+                SDL.SetRenderDrawColor(rendererPtr, r, g, b ,a);
             }
 
-            IntPtr texture = SDL.CreateTextureFromSurface(rendererPtr, surface);
+            if (_nameTexture == IntPtr.Zero && ! RenderName(rendererPtr))
+                return; // failure
 
-            if (texture == IntPtr.Zero) {
-                SDL.DestroySurface(surface);
-
-                Trace.WriteLine("EntityLabel: failed to create texture from surface");
-                return;
-            }
-
-            SDL.FRect frect = new () {
-                X = (int)Rect.X,
-                Y = (int)Rect.Y,
-                W = Rect.Width,
-                H = Rect.Height
-            };
-
-            SDL.RenderTexture(rendererPtr, texture, IntPtr.Zero, in frect);
-
-            SDL.DestroyTexture(texture);
-            SDL.DestroySurface(surface);
+            SDL.RenderTexture(rendererPtr, _nameTexture, IntPtr.Zero, in _nameRect);
 
             DrawExt(rendererPtr, camera);
         }
 
         // TODO: Calculate this based on icon size. Option for top, bottom, left, right maybe?
         public void ApplyIconOffset() {
-            var icon = new SizeF(-Rect.Width / 2, Rect.Height);
-            Rect.Location = PointF.Add(Rect.Location, icon);
+            UpdateRectLocation(
+                    (int)(_nameRect.X - _nameRect.W / 2),
+                    (int)(_nameRect.Y + _nameRect.H));
         }
     }
 }

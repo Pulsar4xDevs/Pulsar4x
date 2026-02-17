@@ -21,10 +21,15 @@ namespace Pulsar4X.Client
     {
         private bool _hoverOpen = false;
 
+        private SDL.FRect _dropDownRect = new ();
+
         private IOrderedEnumerable<IGrouping<UserOrbitSettings.OrbitBodyType, Entity>> _subEntities;
 
         public EntityLabelExtCombo(Entity entity, IEnumerable<Entity>? subEntities = null) : base(entity) {
             SetEntities(subEntities ?? []);
+
+            _dropDownRect.W = 5;
+            _dropDownRect.H = 5;
         }
 
         public void SetEntities(IEnumerable<Entity> subEntities)
@@ -80,56 +85,6 @@ namespace Pulsar4X.Client
                     && Entity.HasDataBlob<PositionDB>())
                 return () => Displays.SystemBody(state, Entity.GetDataBlob<SystemBodyInfoDB>(), Entity.GetDataBlob<MassVolumeDB>(), Entity.GetDataBlob<PositionDB>());
             return null;
-        }
-
-        // TODO: make this nicer
-        private void DrawDropDownIcon(IntPtr renderer, Camera camera)
-        {
-            if (renderer == IntPtr.Zero)
-                return;
-
-            SDL.Color white = new () {
-                R = 255,
-                G = 255,
-                B = 255,
-                A = 255
-            };
-
-            IntPtr surface = SDL3.TTF.RenderTextSolid(
-                    Styles.SDLDefaultFont,
-                    "*",
-                    0,
-                    white);
-
-            if (surface == IntPtr.Zero) {
-                Trace.WriteLine("DrawDropDownIcon: failed to create surface");
-                return;
-            }
-
-            IntPtr texture = SDL.CreateTextureFromSurface(renderer, surface);
-
-            if (texture == IntPtr.Zero) {
-                SDL.DestroySurface(surface);
-
-                Trace.WriteLine("DrawDropDownIcon: failed to create texture from surface");
-                return;
-            }
-
-            int h;
-            int w;
-            SDL3.TTF.GetStringSize(Styles.SDLDefaultFont, "*", 0, out w, out h);
-
-            SDL.FRect frect = new () {
-                X = (int)Rect.X + Rect.Width,
-                Y = (int)Rect.Y,
-                W = w,
-                H = h
-            };
-
-            SDL.RenderTexture(renderer, texture, IntPtr.Zero, ref frect);
-
-            SDL.DestroyTexture(texture);
-            SDL.DestroySurface(surface);
         }
 
         protected override void DrawExt(IntPtr rendererPtr, Camera camera)
@@ -210,9 +165,19 @@ namespace Pulsar4X.Client
 
                 ImGui.End();
             }
+            // TODO: make this nicer
             else if (_subEntities.Any()) // There are sub entities, but not hovered. Draw an icon to indicate that there's a menu that can be opened.
             {
-                DrawDropDownIcon(rendererPtr, camera);
+                _dropDownRect.X = _nameRect.X + _nameRect.W;
+                _dropDownRect.Y = _nameRect.Y;
+
+                byte r, g, b, a;
+                SDL.GetRenderDrawColor(rendererPtr, out r, out g, out b, out a);
+
+                SDL.SetRenderDrawColor(rendererPtr, 255, 255, 0, 255);
+                SDL.RenderFillRect(rendererPtr, _dropDownRect);
+
+                SDL.SetRenderDrawColor(rendererPtr, r, g, b ,a);
             }
             else if (_hovered) // We are hovered but don't have any sub entities. Display a tooltip.
             {

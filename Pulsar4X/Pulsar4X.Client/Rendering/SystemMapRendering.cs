@@ -215,6 +215,7 @@ namespace Pulsar4X.Client.Rendering
                 {
                     var l = new EntityLabelExtCombo(entityState.Entity);
 
+                    l.Padding = 3;
                     l.Faction = _state.Faction?.Id ?? Game.NeutralFactionId;
                     l.AttachState(_state);
 
