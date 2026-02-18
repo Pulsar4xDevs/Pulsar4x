@@ -168,6 +168,45 @@ namespace Pulsar4X.Movement
                     newtonMoveDB.UpdateKeplerElements(kE);
 
                 }
+                // Check child bodies for SOI entry
+                else if (newtonMoveDB.SOIParent.HasDataBlob<OrbitDB>())
+                {
+                    var currentTime = dateTimeNow + TimeSpan.FromSeconds(deltaT - secondsToItterate);
+                    var parentOrbit = newtonMoveDB.SOIParent.GetDataBlob<OrbitDB>();
+                    foreach (var child in parentOrbit.Children)
+                    {
+                        if (child == entity) continue;
+                        if (!child.HasDataBlob<OrbitDB>() || !child.HasDataBlob<MassVolumeDB>()) continue;
+
+                        var childSOI = child.GetSOI_m();
+                        if (childSOI <= 0 || double.IsInfinity(childSOI)) continue;
+
+                        var childOrbit = child.GetDataBlob<OrbitDB>();
+                        var childPos = childOrbit.GetPosition(currentTime);
+                        var dist = (positionDB.RelativePosition - childPos).Length();
+
+                        if (dist < childSOI)
+                        {
+                            // SOI Entry transition
+                            var childMass = child.GetDataBlob<MassVolumeDB>().MassDry;
+                            var childVel = OrbitMath.InstantaneousOrbitalVelocityVector_m(childOrbit, currentTime);
+                            var relPos = positionDB.RelativePosition - childPos;
+                            var relVel = newtonMoveDB.CurrentVector_ms - childVel;
+
+                            sgp = GeneralMath.StandardGravitationalParameter(massTotal_Kg + childMass);
+                            kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, relPos, relVel, currentTime);
+
+                            positionDB.SetParent(child);
+                            newtonMoveDB.SOIParent = child;
+                            newtonMoveDB.ParentMass = childMass;
+                            newtonMoveDB.CurrentVector_ms = relVel;
+                            positionDB.RelativePosition = relPos;
+                            newtonMoveDB.UpdateKeplerElements(kE);
+                            parentMass_kg = childMass;
+                            break;
+                        }
+                    }
+                }
 
                 if (newtonMoveDB.ManuverDeltaV.Length() <= 0) //if we've completed the manuver.
                 {
@@ -176,28 +215,27 @@ namespace Pulsar4X.Movement
                     var parentEntity = positionDB.Parent;
                     if(parentEntity == null) throw new NullReferenceException("parentEntity cannot be null");
 
-                    if (kE.Eccentricity < 1) //if we're going to end up in a regular orbit around our new parent
+                    if (entity.HasDataBlob<ProjectileInfoDB>()) //this feels a bit hacky.
                     {
-                        if (entity.HasDataBlob<ProjectileInfoDB>()) //this feels a bit hacky.
-                        {
-                            var newOrbit = OrbitDB.FromKeplerElements(parentEntity, massTotal_Kg, kE, dateTime);
-                            var fastOrbit = new OrbitUpdateOftenDB(newOrbit);
-                            positionDB.SetParent(parentEntity);
-                            entity.SetDataBlob(fastOrbit);
-                            var newPos = fastOrbit.GetPosition(dateTime);
-                            positionDB.RelativePosition = newPos;
-                        }
-                        else
-                        {
-                            var newOrbit = OrbitDB.FromKeplerElements(parentEntity, massTotal_Kg, kE, dateTime);
-                            positionDB.SetParent(parentEntity);
-                            entity.SetDataBlob(newOrbit);
-                            var newPos = newOrbit.GetPosition(dateTime);
-                            positionDB.RelativePosition = newPos;
-                        }
-                        break; //OrbitDB now handles the trajectory
+                        var newOrbit = OrbitDB.FromKeplerElements(parentEntity, massTotal_Kg, kE, dateTime);
+                        var fastOrbit = new OrbitUpdateOftenDB(newOrbit);
+                        positionDB.SetParent(parentEntity);
+                        entity.SetDataBlob(fastOrbit);
+                        var newPos = fastOrbit.GetPosition(dateTime);
+                        positionDB.RelativePosition = newPos;
                     }
-                    //for hyperbolic trajectories (e >= 1), continue gravity integration
+                    else
+                    {
+                        var newOrbit = OrbitDB.FromKeplerElements(parentEntity, massTotal_Kg, kE, dateTime);
+                        positionDB.SetParent(parentEntity);
+                        entity.SetDataBlob(newOrbit);
+                        var newPos = newOrbit.GetPosition(dateTime);
+                        positionDB.RelativePosition = newPos;
+                    }
+                    // OrbitDB now handles the trajectory.
+                    // For hyperbolic orbits (e >= 1), OrbitDB.OnSetToEntity schedules
+                    // a ChangeSOIProcessor interrupt at the exact SOI exit time.
+                    break;
                 }
 
                 secondsToItterate -= timeStepInSeconds;

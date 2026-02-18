@@ -81,7 +81,8 @@ namespace Pulsar4X.Orbital
                 ke.MeanAnomalyAtEpoch = GetEllipticMeanAnomaly(eccentricity, eccentricAnomaly);
             else
             {
-                ke.MeanAnomalyAtEpoch = 0;
+                var H = GetHyperbolicAnomalyFromTrueAnomaly(eccentricity, trueAnomaly);
+                ke.MeanAnomalyAtEpoch = GetHyperbolicMeanAnomaly(eccentricity, H);
             }
             ke.TrueAnomalyAtEpoch = trueAnomaly;
             ke.Period = 2 * Math.PI / ke.MeanMotion;
@@ -550,11 +551,11 @@ namespace Pulsar4X.Orbital
             }
             else
             {
-                var hyperbolicMeanAnomaly = GetHyperbolicMeanAnomalyFromTime(ke.StandardGravParameter, a, secondsFromEpoch);
+                var hyperbolicMeanAnomaly = ke.MeanAnomalyAtEpoch + GetHyperbolicMeanAnomalyFromTime(ke.StandardGravParameter, a, secondsFromEpoch);
                 TryGetHyperbolicAnomaly(e, hyperbolicMeanAnomaly, out double hyperbolicAnomalyF);
                 trueAnomaly = TrueAnomalyFromHyperbolicAnomaly(e, hyperbolicAnomalyF);
             }
-            
+
             double angle = trueAnomaly + ke.AoP;
 
             double x = Math.Cos(lofAN) * Math.Cos(angle) - Math.Sin(lofAN) * Math.Sin(angle) * Math.Cos(i);
@@ -844,7 +845,7 @@ namespace Pulsar4X.Orbital
             {
                 var quotient = sgp / Math.Pow(-a, 3);
                 var hyperbolcMeanMotion = Math.Sqrt(quotient);
-                var hyperbolicMeanAnomaly = secondsFromEpoch * hyperbolcMeanMotion;
+                var hyperbolicMeanAnomaly = ke.MeanAnomalyAtEpoch + secondsFromEpoch * hyperbolcMeanMotion;
                 TryGetHyperbolicAnomaly(e, hyperbolicMeanAnomaly, out double hyperbolicAnomalyF);
                 trueAnomaly = TrueAnomalyFromHyperbolicAnomaly(e, hyperbolicAnomalyF);
             }
@@ -858,10 +859,16 @@ namespace Pulsar4X.Orbital
             var position = new Vector3(x, y, z) * radius;
             
             (double speed, double headingAngle) = ObjectLocalVelocityPolar(sgp, position, a, e, trueAnomaly, ke.AoP);
+            // ObjectLocalVelocityPolar returns heading with AoP but not LoAN.
+            // Rotate by LoAN to match the position reference frame.
+            double vx_orbit = Math.Cos(headingAngle) * speed;
+            double vy_orbit = Math.Sin(headingAngle) * speed;
+            double cosLoAN = Math.Cos(lofAN);
+            double sinLoAN = Math.Sin(lofAN);
             var v = new Vector2()
             {
-                X = Math.Cos(headingAngle) * speed,
-                Y = Math.Sin(headingAngle) * speed
+                X = cosLoAN * vx_orbit - sinLoAN * vy_orbit,
+                Y = sinLoAN * vx_orbit + cosLoAN * vy_orbit
             };
 
             if (double.IsNaN(v.X) || double.IsNaN(v.Y))
