@@ -223,6 +223,12 @@ namespace Pulsar4X.Client
 #if DEBUG
             var version = "Version: " + AssemblyInfo.GetGitHash();
             RenderDebugText(this.Renderer, version, 50);
+
+            var iver = "ImGui version: " + ImGui.GetVersion();
+            RenderDebugText(this.Renderer, iver, 50 + _debugSDLFontHeight);
+
+            var sver = "SDL version: " + SDL.GetRevision();
+            RenderDebugText(this.Renderer, sver, 50 + _debugSDLFontHeight * 2);
 #endif
 
             // Show FPS counter if enabled
@@ -241,7 +247,7 @@ namespace Pulsar4X.Client
                 }
 
                 var fps = "FPS: " + _fpsLastMeasurement.ToString();
-                RenderDebugText(this.Renderer, fps, 50 + _debugSDLFontHeight);
+                RenderDebugText(this.Renderer, fps, 50 + _debugSDLFontHeight * 4);
             }
         }
 
