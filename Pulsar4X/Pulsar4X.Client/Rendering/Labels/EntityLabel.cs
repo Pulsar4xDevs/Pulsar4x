@@ -1,0 +1,272 @@
+﻿using Pulsar4X.Client.Interface.Widgets;
+using Pulsar4X.Engine;
+using Pulsar4X.Factions;
+using Pulsar4X.Interfaces;
+using Pulsar4X.Messaging;
+using Pulsar4X.Movement;
+using Pulsar4X.Names;
+using Pulsar4X.Input;
+using SDL3;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Numerics;
+using System.Threading.Tasks;
+using System;
+
+namespace Pulsar4X.Client
+{
+    public class EntityLabel : IPointerHandler, IShape, IInteractable
+    {
+        private Entity _entity;
+        public Entity Entity {
+            get { return _entity; }
+        }
+
+        public byte Priority { get { return 120; } }
+
+        protected string? _starSysGuid;
+
+        private NameDB? _nameDB = null;
+        private PositionDB? _positionDB = null;
+
+        protected virtual void DrawExt(IntPtr rendererPtr, Camera camera) {}
+        protected virtual void OnFrameUpdateExt(Matrix matrix, Camera camera) {}
+
+        private SDL.Color _color;
+        protected string _name = "??";
+
+        private IntPtr _nameTexture = IntPtr.Zero;
+        protected SDL.FRect _nameRect = new ();
+
+        public RectangleF Rect = new ();
+
+        private uint _padding = 0;
+        public uint Padding {
+            set {
+                _padding = value;
+                OnPaddingUpdate();
+            }
+            get {
+                return _padding;
+            }
+        }
+
+        private int _faction = Game.NeutralFactionId;
+        public int Faction {
+            set {
+                _faction = value;
+                OnEntityRenamed(null);
+            }
+            get {
+                return _faction;
+            }
+        }
+
+        private void OnPaddingUpdate()
+        {
+            Rect.Width = _nameRect.W + _padding * 2;
+            Rect.Height = _nameRect.H + _padding * 2;
+        }
+
+        private Task OnEntityRenamed(Message message)
+        {
+            _name = _nameDB.GetName(_faction);
+
+            int h;
+            int w;
+            SDL3.TTF.GetStringSize(Styles.SDLDefaultFont, _name, 0, out w, out h);
+            _nameRect.W = w;
+
+            OnPaddingUpdate();
+
+            DestroyName();
+
+            return Task.CompletedTask;
+        }
+
+        private void DestroyName()
+        {
+            if (_nameTexture == IntPtr.Zero)
+                return;
+
+            var p = _nameTexture;
+            _nameTexture = IntPtr.Zero;
+            SDL.DestroyTexture(p);
+        }
+
+        public EntityLabel(Entity entity)
+        {
+            _entity = entity;
+
+            if (entity.TryGetDataBlob<NameDB>(out NameDB i))
+                _nameDB = i;
+            if (entity.TryGetDataBlob<PositionDB>(out PositionDB j))
+                _positionDB = j;
+
+            // TODO: better colors
+            var clr = (_entity.FactionOwnerID == Game.NeutralFactionId) ?
+                Styles.NeutralColor :
+                Styles.StandardText;
+            _color = Helpers.Vector4ToSDLColor(clr);
+
+            if(entity.Manager != null)
+            {
+                StarSystem starSys = (StarSystem)entity.Manager;
+                _starSysGuid = starSys.ID;
+            }
+
+            _nameRect.H = SDL3.TTF.GetFontHeight(Styles.SDLDefaultFont);
+            OnEntityRenamed(null);
+
+            // Subscribe to name changes
+            Func<Message, bool> filterById = msg => msg.EntityId == _entity.Id;
+            MessagePublisher.Instance.Subscribe(MessageTypes.EntityRenamed, OnEntityRenamed, filterById);
+        }
+
+        ~EntityLabel()
+        {
+            DestroyName();
+        }
+
+        protected GlobalUIState? _state = null;
+        public void AttachState(GlobalUIState state)
+        {
+            _state = state;
+        }
+
+        private bool _hovered = false;
+        public virtual bool OnPointerEnter(SDL.Event sevent)
+        {
+            _hovered = true;
+            return true;
+        }
+        public virtual bool OnPointerExit(SDL.Event sevent)
+        {
+            /* If pointer moves moves out of a label and then comes back while
+             * the button is still pressed, then OnPointerUp does still fire
+             * even though _pressed is false. It's kinda difficult to do that,
+             * unless you're doing it on purpose. It doesn't break anything,
+             * but the label doesn't change to the correct color.
+             */
+            _pressed = false;
+
+            _hovered = false;
+            return true;
+        }
+
+        private bool _pressed = false;
+        public virtual bool OnPointerDown(SDL.Event sevent)
+        {
+            _pressed = true;
+            return true;
+        }
+        public virtual bool OnPointerUp(SDL.Event sevent)
+        {
+            _pressed = false;
+
+            if (_state == null || _starSysGuid == null)
+                return true; // Still mark handled
+            var state = _state!;
+            var starSys = _starSysGuid!;
+
+            if (sevent.Button.Button == 1)
+                state.EntityClicked(Entity.Id, starSys, MouseButtons.Primary);
+            else if (sevent.Button.Button == 3)
+                state.EntityClicked(Entity.Id, starSys, MouseButtons.Alt);
+            return true;
+        }
+
+        public virtual bool Contains(System.Drawing.PointF point)
+        {
+            return Rect.Contains(point);
+        }
+
+        private void UpdateRectLocation(int x, int y)
+        {
+            _nameRect.X = x;
+            _nameRect.Y = y;
+
+            Rect.Location = new (x - Padding, y - Padding);
+        }
+
+        public void OnFrameUpdate(Matrix matrix, Camera camera)
+        {
+            var point = camera.ViewCoordinate_m(_positionDB.AbsolutePosition);
+            UpdateRectLocation(point.X, point.Y);
+
+            OnFrameUpdateExt(matrix, camera);
+        }
+
+        private bool RenderName(IntPtr rendererPtr)
+        {
+            IntPtr textSurface = SDL3.TTF.RenderTextSolid(
+                    Styles.SDLDefaultFont,
+                    _name,
+                    0,
+                    _color);
+
+            if (textSurface == IntPtr.Zero) {
+                Trace.WriteLine("EntityLabel: failed to create surface");
+                return false;
+            }
+
+            _nameTexture = SDL.CreateTextureFromSurface(rendererPtr, textSurface);
+
+            if (_nameTexture == IntPtr.Zero) {
+                SDL.DestroySurface(textSurface);
+
+                Trace.WriteLine("EntityLabel: failed to create texture from surface");
+                return false;
+            }
+
+            SDL.DestroySurface(textSurface);
+
+            return true;
+        }
+
+        public void Draw(IntPtr rendererPtr, Camera camera)
+        {
+            if (rendererPtr == IntPtr.Zero ||
+                    ! camera.IsOnScreen(Rect.X, Rect.Y, Rect.Width, Rect.Height))
+                return;
+
+            if (_pressed || _hovered)
+            {
+                byte r, g, b, a;
+                SDL.GetRenderDrawColor(rendererPtr, out r, out g, out b, out a);
+
+                // TODO: Move these somewhere else
+                if (_pressed)
+                    SDL.SetRenderDrawColor(rendererPtr, 128, 255, 0, 127);
+                else
+                    SDL.SetRenderDrawColor(rendererPtr, 0, 128, 128, 127);
+
+                SDL.FRect frect = new () {
+                    X = Rect.X,
+                    Y = Rect.Y,
+                    W = Rect.Width,
+                    H = Rect.Height
+                };
+
+                SDL.RenderFillRect(rendererPtr, frect);
+
+                SDL.SetRenderDrawColor(rendererPtr, r, g, b ,a);
+            }
+
+            if (_nameTexture == IntPtr.Zero && ! RenderName(rendererPtr))
+                return; // failure
+
+            SDL.RenderTexture(rendererPtr, _nameTexture, IntPtr.Zero, in _nameRect);
+
+            DrawExt(rendererPtr, camera);
+        }
+
+        // TODO: Calculate this based on icon size. Option for top, bottom, left, right maybe?
+        public void ApplyIconOffset() {
+            UpdateRectLocation(
+                    (int)(_nameRect.X - _nameRect.W / 2),
+                    (int)(_nameRect.Y + _nameRect.H));
+        }
+    }
+}

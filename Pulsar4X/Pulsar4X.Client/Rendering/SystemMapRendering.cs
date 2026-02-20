@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
+using System.Drawing;
 using Pulsar4X.Orbital;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Sensors;
@@ -13,6 +14,7 @@ using Pulsar4X.Ships;
 using Pulsar4X.Weapons;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using SDL3;
 
 namespace Pulsar4X.Client.Rendering
 {
@@ -26,10 +28,16 @@ namespace Pulsar4X.Client.Rendering
         SDL3Window _window;
         internal Dictionary<string, IDrawData> UIWidgets = new ();
         ConcurrentDictionary<int, Icon> _testIcons = new ();
-        ConcurrentDictionary<int, IDrawData> _entityIcons = new ();
-        ConcurrentDictionary<int, IDrawData> _orbitRings = new ();
-        ConcurrentDictionary<int, IDrawData> _moveIcons = new ();
-        internal ConcurrentDictionary<int, NameIcon> _nameIcons = new ();
+        ConcurrentDictionary<int, Icon> _entityIcons = new ();
+        ConcurrentDictionary<int, Icon> _orbitRings = new ();
+        ConcurrentDictionary<int, Icon> _moveIcons = new ();
+
+        HashSet<EntityLabel> _allLabels = new ();
+        EntityLabel[] _labels = [];
+        SystemLabelDistributor _distributor;
+
+        HashSet<InteractableState> _interactable = new ();
+        IOrderedEnumerable<IGrouping<byte, InteractableState>> _interactableGrouped;
 
         internal List<IDrawData> SelectedEntityExtras = new List<IDrawData>();
         internal Vector2 GalacticMapPosition = new Vector2();
@@ -39,6 +47,8 @@ namespace Pulsar4X.Client.Rendering
         internal SystemMapRendering(SDL3Window window, GlobalUIState state)
         {
             _state = state;
+
+            _distributor = EntityLabelDistributor.Group;
 
             _camera = _state.Camera;
             _window = window;
@@ -54,8 +64,83 @@ namespace Pulsar4X.Client.Rendering
 
             //_state.OnStarSystemChanged += RespondToSystemChange;
             //_state.OnFactionChanged += RespondToSystemChange;
-        }
 
+            var mainWin = (PulsarMainWindow)window;
+            mainWin.MouseButtonDownOccured += (object sender, SDL.Event e) => {
+                foreach (var i in _interactableGrouped)
+                {
+                    var key = i.Key;
+
+                    foreach (var j in i)
+                    {
+                        var item = j.Item;
+
+                        var c = item.Contains(new (e.Motion.X, e.Motion.Y));
+
+                        if (c)
+                        {
+                            j.IsPressed = true;
+                            if (item.OnPointerDown(e))
+                                return;
+                        }
+                    }
+                }
+            };
+            mainWin.MouseButtonUpOccured += (object sender, SDL.Event e) => {
+                foreach (var i in _interactableGrouped)
+                {
+                    var key = i.Key;
+
+                    foreach (var j in i)
+                    {
+                        var item = j.Item;
+
+                        var c = item.Contains(new (e.Motion.X, e.Motion.Y));
+
+                        if (c)
+                        {
+                            j.IsPressed = false;
+                            if (item.OnPointerUp(e))
+                                return;
+                        }
+                    }
+                }
+            };
+            mainWin.MouseMoveOccured += (object sender, SDL.Event e) => {
+                foreach (var i in _interactableGrouped)
+                {
+                    var key = i.Key;
+
+                    foreach (var j in i)
+                    {
+                        var item = j.Item;
+
+                        var c = item.Contains(new (e.Motion.X, e.Motion.Y));
+
+                        if (j.IsHovered)
+                        {
+                            if (c)
+                            {
+                                if (item.OnPointerMove(e))
+                                    return;
+                            }
+                            else
+                            {
+                                j.IsHovered = false;
+                                if (item.OnPointerExit(e))
+                                    return;
+                            }
+                        }
+                        else if (c)
+                        {
+                            j.IsHovered = true;
+                            if (item.OnPointerEnter(e))
+                                return;
+                        }
+                    }
+                }
+            };
+        }
 
         internal void Initialize(StarSystem starSys)
         {
@@ -84,6 +169,10 @@ namespace Pulsar4X.Client.Rendering
             {
                 AddIconable(entityItem);
             }
+
+            _interactableGrouped = _interactable
+                .GroupBy(x => x.Item.Priority)
+                .OrderByDescending(x => x.Key);
         }
 
         public void UpdateSystemState(SystemState systemState)
@@ -92,7 +181,8 @@ namespace Pulsar4X.Client.Rendering
             _entityIcons.Clear();
             _orbitRings.Clear();
             _moveIcons.Clear();
-            _nameIcons.Clear();
+            _allLabels.Clear();
+            _interactable.Clear();
 
             _sysState = systemState;
             _state.StarSystemStates[_sysState.StarSystem.ID] = _sysState;
@@ -108,6 +198,10 @@ namespace Pulsar4X.Client.Rendering
             {
                 AddIconable(entityItem);
             }
+
+            _interactableGrouped = _interactable
+                .GroupBy(x => x.Item.Priority)
+                .OrderByDescending(x => x.Key);
         }
 
         void AddIconable(EntityState entityState)
@@ -117,7 +211,17 @@ namespace Pulsar4X.Client.Rendering
 
             if (entityState.TryGetDataBlob<NameDB>(out var nameDB) && positionDB != null)
             {
-                _nameIcons.TryAdd(entityState.Id, new NameIcon(entityState, nameDB, positionDB, _state));
+                lock (_allLabels)
+                {
+                    var l = new EntityLabelExtCombo(entityState.Entity);
+
+                    l.Padding = 3;
+                    l.Faction = _state.Faction?.Id ?? Game.NeutralFactionId;
+                    l.AttachState(_state);
+
+                    _allLabels.Add(l);
+                    _interactable.Add(new InteractableState(l));
+                }
             }
 
             if (entityState.TryGetDataBlob<OrbitDB>(out var orbitDB))
@@ -165,7 +269,11 @@ namespace Pulsar4X.Client.Rendering
                 && massVolumeDB != null
                 && positionDB != null)
             {
-                _entityIcons.TryAdd(entityState.Id, new SysBodyIcon(entityState, systemBodyInfoDB, positionDB, massVolumeDB));
+                var i = new SysBodyIcon(entityState, systemBodyInfoDB, positionDB, massVolumeDB);
+                i.AttachState(_state);
+
+                _entityIcons.TryAdd(entityState.Id, i);
+                _interactable.Add(new InteractableState(i));
             }
 
             if (entityState.TryGetDataBlob<ShipInfoDB>(out var shipInfoDB) && positionDB != null)
@@ -196,7 +304,11 @@ namespace Pulsar4X.Client.Rendering
             _entityIcons.TryRemove(entityGuid, out var entityIcon);
             _orbitRings.TryRemove(entityGuid, out var orbitIcon);
             _moveIcons.TryRemove(entityGuid, out var moveIcon);
-            _nameIcons.TryRemove(entityGuid, out var nameIcon);
+
+            lock (_allLabels)
+            {
+                _allLabels.RemoveWhere(x => x.Entity.Id == entityGuid);
+            }
         }
 
 
@@ -296,77 +408,6 @@ namespace Pulsar4X.Client.Rendering
             }
         }
 
-        void TextIconsDistribute()
-        {
-            if (_nameIcons.Count == 0)
-                return;
-            var occupiedPosition = new List<IRectangle>();
-            IComparer<IRectangle> byViewPos = new ByViewPosition();
-            var textIconList = new List<NameIcon>(_nameIcons.Values);
-
-
-            //Consolidate TextIcons that share the same position and name
-            textIconList.Sort();
-            int listLength = textIconList.Count;
-            int textIconQuantity = 1;
-            for (int i = 1; i < listLength; i++)
-            {
-                if (textIconList[i - 1].CompareTo(textIconList[i]) == 0)
-                {
-                    textIconQuantity++;
-                    textIconList.RemoveAt(i);
-                    i--;
-                    listLength--;
-                }
-                else if (textIconQuantity > 1)
-                {
-                    textIconList[i - 1].NameString += " x" + textIconQuantity;
-                    textIconQuantity = 1;
-                }
-            }
-
-            //Placement happens bottom to top, left to right
-            //Each newly placed Texticon is compared to only the Texticons that are placed above its position
-            //Therefore a sorted list of the occupied Positions is maintained
-            occupiedPosition.Add(textIconList[0]);
-
-
-
-            List<NameIcon> texiconsCopy = new List<NameIcon>();
-            texiconsCopy.AddRange(_nameIcons.Values);
-
-            int numTextIcons = texiconsCopy.Count;
-
-            for (int i = 1; i < numTextIcons; i++)
-            {
-                var item = texiconsCopy[i - 1];
-                Vector2 height = new Vector2() { X = 0, Y = item.Height };
-                int lowestPosIndex = occupiedPosition.BinarySearch(item.ViewDisplayRect + height, byViewPos);
-                int lpi = lowestPosIndex;
-                if (lowestPosIndex < 0)
-                    lpi = ~lowestPosIndex;
-
-                for (int j = lpi; j < occupiedPosition.Count; j++)
-                {
-                    if (item.ViewDisplayRect.Intersects(occupiedPosition[j]))
-                    {
-                        var newpoint = new System.Numerics.Vector2()
-                        {
-                            X = item.ViewOffset.X,
-                            Y = item.ViewOffset.Y - occupiedPosition[j].Height
-                        };
-                        item.ViewOffset = newpoint;
-                    }
-                }
-                //Inserts the new label sorted
-                int insertIndex = occupiedPosition.BinarySearch(item, byViewPos);
-                if (insertIndex < 0) insertIndex = ~insertIndex;
-                occupiedPosition.Insert(insertIndex, item);
-            }
-
-
-        }
-
         private void OnSystemStateEntityAdded(SystemState systemState, Entity entity)
         {
             if(systemState.EntityStatesWithPosition.ContainsKey(entity.Id))
@@ -416,12 +457,13 @@ namespace Pulsar4X.Client.Rendering
             foreach (var item in SelectedEntityExtras)
                 item.OnFrameUpdate(matrix, _camera);
 
-            lock (_nameIcons)
+            lock (_allLabels)
             {
-                foreach (var item in _nameIcons.Values)
-                    item.OnFrameUpdate(matrix, _camera);
+                foreach (var i in _allLabels)
+                    i.OnFrameUpdate(matrix, _camera);
+
+                _labels = _distributor(_allLabels).ToArray();
             }
-            TextIconsDistribute();
         }
 
         internal void Draw()
@@ -433,29 +475,16 @@ namespace Pulsar4X.Client.Rendering
             DrawIcons(SelectedEntityExtras);
         }
 
-        public void DrawNameIcons()
+        internal void DrawNameIcons()
         {
-
-            lock (_nameIcons)
+            lock (_labels)
             {
-                List<NameIcon> nameIcons = new List<NameIcon>();
-                foreach (var icon in _nameIcons.Values)
-                {
-                    if(!SystemViewPreferences.GetInstance().ShouldDisplay("map", icon.EntityState.BodyType))
-                        continue;
-
-                    // Skip icons that are off-screen for performance
-                    if(!_camera.IsOnScreen(icon.ViewScreenPos.X, icon.ViewScreenPos.Y, icon.Width, icon.Height))
-                        continue;
-
-                    nameIcons.Add(icon);
-                }
-                NameIcon.DrawAll(_state.SDLRendererPtr, _state.Camera, nameIcons);
+                foreach (var i in _labels)
+                    i.Draw(_window.Renderer, _camera);
             }
-
         }
 
-        void DrawFilteredIcons(ConcurrentDictionary<int, IDrawData> icons)
+        void DrawFilteredIcons(ConcurrentDictionary<int, Icon> icons)
         {
             if (_sysState == null)
             {
@@ -508,10 +537,6 @@ namespace Pulsar4X.Client.Rendering
                 icon.OnPhysicsUpdate();
             }
             foreach (var icon in _moveIcons.Values.ToArray())
-            {
-                icon.OnPhysicsUpdate();
-            }
-            foreach (var icon in _nameIcons.Values)
             {
                 icon.OnPhysicsUpdate();
             }

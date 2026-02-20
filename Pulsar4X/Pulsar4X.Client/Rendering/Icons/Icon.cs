@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulsar4X.Interfaces;
+using Pulsar4X.Input;
 using Pulsar4X.Orbital;
 using SDL3;
 
@@ -67,6 +68,12 @@ namespace Pulsar4X.Client
         {
             _worldPosition_m = position_m;
             positionByDB = false;
+        }
+
+        protected GlobalUIState? _state = null;
+        public void AttachState(GlobalUIState state)
+        {
+            _state = state;
         }
 
         public void ResetPositionDB(IPosition positionDB)

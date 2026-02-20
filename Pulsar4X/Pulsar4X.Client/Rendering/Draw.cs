@@ -46,22 +46,47 @@ namespace Pulsar4X.Client
         }
     }
 
+    /*
+    FIXME: Improve this.
+    Maybe SDL_Vertex and SDL_RenderGeometry would be useful here?
+    https://wiki.libsdl.org/SDL3/SDL_RenderGeometry
+    */
+    public interface IShape
+    {
+        bool Contains(System.Drawing.PointF point);
+    }
+
+    // TODO: Rename to "Polygon"
     /// <summary>
     /// A collection of points and a single color.
     /// </summary>
-    public struct Shape
+    public class Shape : IShape
     {
         public SDL.Color Color;    //could change due to entity changes.
         public Vector2[] Points; //relative to the IconPosition. could change with entity changes.
-    }
 
-    public class MutableShape
-    {
-        public SDL.Color Color;
-        public List<Vector2> Points = new List<Vector2>();
-        public bool Scales = true;
+        // https://stackoverflow.com/a/14998816
+        public bool Contains(System.Drawing.PointF point)
+        {
+            bool result = false;
+            int j = Points.Length - 1;
+            for (int i = 0; i < Points.Length; i++)
+            {
+                if (Points[i].Y < point.Y && Points[j].Y >= point.Y ||
+                        Points[j].Y < point.Y && Points[i].Y >= point.Y)
+                {
+                    if (Points[i].X + (point.Y - Points[i].Y) /
+                            (Points[j].Y - Points[i].Y) *
+                            (Points[j].X - Points[i].X) < point.X)
+                    {
+                        result = !result;
+                    }
+                }
+                j = i;
+            }
+            return result;
+        }
     }
-
 
     public class ComplexShape
     {

@@ -101,40 +101,43 @@ namespace Pulsar4X.Client
             DescriptiveTooltip(ship.GetName(factionId), shipInfo.Design.Name, description, () => ImGui.Text(meta));
         }
 
+        public static void DescriptiveTooltipRaw(string name, string type, string description, Action? callback = null, bool hideTypeIfSameAsName = false, bool hideDescriptionColor = false)
+        {
+            ImGui.SetNextWindowSize(Styles.ToolTipsize);
+            ImGui.BeginTooltip();
+            ImGui.Text(Utils.Truncate(name, 32));
+            if(type.IsNotNullOrEmpty() && (!hideTypeIfSameAsName || (hideTypeIfSameAsName && !type.Equals(name))))
+            {
+                var size = ImGui.GetContentRegionAvail();
+                var text = Utils.Truncate(type, 21);
+                var textSize = ImGui.CalcTextSize(text);
+                ImGui.SameLine();
+                ImGui.SetCursorPosX(size.X - textSize.X);
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+                ImGui.Text(text);
+                ImGui.PopStyleColor();
+            }
+            var showDescription = description.IsNotNullOrEmpty();
+
+            if(showDescription || callback != null)
+            {
+                ImGui.Separator();
+            }
+
+            if(!hideDescriptionColor) ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            if(showDescription)
+            {
+                ImGui.TextWrapped(description);
+            }
+            callback?.Invoke();
+            if(!hideDescriptionColor) ImGui.PopStyleColor();
+            ImGui.EndTooltip();
+        }
+
         public static void DescriptiveTooltip(string name, string type, string description, Action? callback = null, bool hideTypeIfSameAsName = false, bool hideDescriptionColor = false)
         {
             if(ImGui.IsItemHovered())
-            {
-                ImGui.SetNextWindowSize(Styles.ToolTipsize);
-                ImGui.BeginTooltip();
-                ImGui.Text(Utils.Truncate(name, 32));
-                if(type.IsNotNullOrEmpty() && (!hideTypeIfSameAsName || (hideTypeIfSameAsName && !type.Equals(name))))
-                {
-                    var size = ImGui.GetContentRegionAvail();
-                    var text = Utils.Truncate(type, 21);
-                    var textSize = ImGui.CalcTextSize(text);
-                    ImGui.SameLine();
-                    ImGui.SetCursorPosX(size.X - textSize.X);
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-                    ImGui.Text(text);
-                    ImGui.PopStyleColor();
-                }
-                var showDescription = description.IsNotNullOrEmpty();
-
-                if(showDescription || callback != null)
-                {
-                    ImGui.Separator();
-                }
-
-                if(!hideDescriptionColor) ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                if(showDescription)
-                {
-                    ImGui.TextWrapped(description);
-                }
-                callback?.Invoke();
-                if(!hideDescriptionColor) ImGui.PopStyleColor();
-                ImGui.EndTooltip();
-            }
+                DescriptiveTooltipRaw(name, type, description, callback, hideTypeIfSameAsName, hideDescriptionColor);
         }
 
         public static void Indent()

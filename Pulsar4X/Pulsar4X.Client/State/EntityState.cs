@@ -25,7 +25,6 @@ namespace Pulsar4X.Client
         public string Name { get; set; } = "Unknown";
 
         public IPosition? Position;
-        public NameIcon? NameIcon;
         public IKepler? OrbitIcon;
         public OrbitOrderIcon? DebugOrbitOrder;
         public bool IsDestroyed = false; //currently IsDestroyed = true if moved from one system to another, may need to revisit this.
@@ -112,49 +111,7 @@ namespace Pulsar4X.Client
 
         void SetBodyType()
         {
-            if (HasDataBlob<SystemBodyInfoDB>())
-            {
-                switch (GetDataBlob<SystemBodyInfoDB>().BodyType)
-                {
-                    case DataStructures.BodyType.Asteroid:
-                    {
-                            BodyType = UserOrbitSettings.OrbitBodyType.Asteroid;
-                            break;
-                    }
-                    case DataStructures.BodyType.Comet:
-                    {
-                            BodyType = UserOrbitSettings.OrbitBodyType.Comet;
-                            break;
-                    }
-                    case DataStructures.BodyType.DwarfPlanet:
-                    {
-                        BodyType = UserOrbitSettings.OrbitBodyType.DwarfPlanet;
-                        break;
-                    }
-                    case DataStructures.BodyType.GasDwarf:
-                    case DataStructures.BodyType.GasGiant:
-                    case DataStructures.BodyType.IceGiant:
-                    case DataStructures.BodyType.Terrestrial:
-                    {
-                            BodyType = UserOrbitSettings.OrbitBodyType.Planet;
-                            break;
-                    }
-                    case DataStructures.BodyType.Moon:
-                    {
-                            BodyType = UserOrbitSettings.OrbitBodyType.Moon;
-                            break;
-                    }
-                    default:
-                        break;
-                }
-
-            }
-            if (HasDataBlob<StarInfoDB>())
-                BodyType = UserOrbitSettings.OrbitBodyType.Star;
-            if (HasDataBlob<ColonyInfoDB>())
-                BodyType = UserOrbitSettings.OrbitBodyType.Colony;
-            if (HasDataBlob<ShipInfoDB>())
-                BodyType = UserOrbitSettings.OrbitBodyType.Ship;
+            BodyType = Utils.EntityBodyType(Entity);
         }
 
         private void SetupEventListeners()

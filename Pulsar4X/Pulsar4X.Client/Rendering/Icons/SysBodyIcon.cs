@@ -4,10 +4,11 @@ using Pulsar4X.Orbital;
 using SDL3;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using Pulsar4X.Input;
 
 namespace Pulsar4X.Client
 {
-    class SysBodyIcon : Icon
+    class SysBodyIcon : Icon, IPointerHandler, IShape, IInteractable
     {
         SystemBodyInfoDB _systemBodyInfoDB;
         BodyType _bodyType;
@@ -16,6 +17,11 @@ namespace Pulsar4X.Client
         float _viewRadius;
         Random _rng;
         float _iconMinSize = 8;
+        int _entityId;
+        string _sysId;
+
+        public byte Priority { get { return 100; } }
+
         public SysBodyIcon(EntityState entity, SystemBodyInfoDB systemBodyInfoDB, PositionDB positionDB, MassVolumeDB massVolumeDB) : base(positionDB)
         {
             _positionDB = positionDB;
@@ -23,7 +29,9 @@ namespace Pulsar4X.Client
             _bodyType = _systemBodyInfoDB.BodyType;
             _massVolDB = massVolumeDB;
             _bodyRadiusAU = _massVolDB.RadiusInAU;
-            _rng = new Random(entity.Id); //use entity guid as a seed for psudoRandomness.
+            _entityId = entity.Id;
+            _sysId = entity.StarSystemId;
+            _rng = new Random(_entityId); //use entity guid as a seed for psudoRandomness.
 
             switch (_bodyType)
             {
@@ -40,6 +48,25 @@ namespace Pulsar4X.Client
 
             if (_bodyType == BodyType.Moon)
                 _iconMinSize = 4;
+        }
+
+        public bool OnPointerUp(SDL.Event sevent)
+        {
+            if (_state == null)
+                return false;
+            var state = _state!;
+
+            if (sevent.Button.Button == 1)
+                state.EntityClicked(_entityId, _sysId, MouseButtons.Primary);
+            else if (sevent.Button.Button == 3)
+                state.EntityClicked(_entityId, _sysId, MouseButtons.Alt);
+            return true;
+        }
+
+        public bool Contains(System.Drawing.PointF point)
+        {
+            System.Numerics.Vector2 v = new (ViewScreenPos.X, ViewScreenPos.Y);
+            return System.Numerics.Vector2.Distance(v, point.ToVector2()) <= Scale * 100;
         }
 
         void Terestrial()

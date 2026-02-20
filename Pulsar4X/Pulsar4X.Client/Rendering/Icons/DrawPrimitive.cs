@@ -665,8 +665,6 @@ namespace Pulsar4X.Client
 
     }
 
-
-
     public static class DrawShapes
     {
         public static void Draw(IntPtr rendererPtr, Camera camera, Shape[] shapes)
@@ -697,99 +695,4 @@ namespace Pulsar4X.Client
             SDL.SetRenderDrawBlendMode(rendererPtr, blendMode);
         }
     }
-
-    /*
-    public struct Vector2
-    {
-        public Vector2(double x, double y)
-        {
-            X = x;
-            Y = y;
-        }
-
-        public double X;
-        public double Y;
-    }
-    public static class PointDFunctions
-    {
-        public static Vector2 NewFrom(Orbital.Vector3 vector3)
-        {
-            return new Vector2() { X = vector3.X, Y = vector3.Y };
-        }
-        public static Vector2 NewFrom(SDL.SDL_Point sDL_Point)
-        {
-            return new Vector2() { X = sDL_Point.x, Y = sDL_Point.y };
-        }
-        public static Vector2 Add(Vector2 p1, Vector2 p2)
-        {
-            return new Vector2() { X = p1.X + p2.X, Y = p1.Y + p2.Y };
-        }
-        public static Vector2 Sub(Vector2 p1, Vector2 p2)
-        {
-            return new Vector2() { X = p1.X - p2.X, Y = p1.Y - p2.Y };
-        }
-        public static double Length(Vector2 point)
-        {
-            return Math.Sqrt(LengthSquared(point));
-        }
-        public static double LengthSquared(Vector2 point)
-        {
-            return (point.X * point.X) + (point.Y * point.Y);
-        }
-
-    }
-*/
-
-
-    public interface IRectangle
-    {
-        float X { get;  }
-        float Y { get;  }
-        float Width { get;  }
-        float Height { get;  }
-
-
-    }
-
-    public class Rectangle : IRectangle
-    {
-        public float X { get; set; }
-
-        public float Y { get; set; }
-
-        public float Width { get; set; }
-
-        public float Height { get; set; }
-
-        public static Rectangle operator +(Rectangle rectangle, Orbital.Vector2 point)
-        {
-            Rectangle newRect = new Rectangle();
-
-            newRect.X = (float)(rectangle.X + point.X);
-            newRect.Y = (float)(rectangle.Y + point.Y);
-            return newRect;
-
-        }
-
-        public bool Intersects(IRectangle icon)
-        {
-            float myL = X;
-            float myR = X + Width;
-            float myT = Y;
-            float myB = Y + Height;
-
-
-            float iconL = icon.X;
-            float iconR = icon.X + icon.Width;
-            float iconT = icon.Y;
-            float iconB = icon.Y + icon.Height;
-
-
-            return (myL < iconR &&
-                    myR > iconL &&
-                    myT < iconB &&
-                    myB > iconT);
-        }
-    }
-
 }
