@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 using SDL3;
 
@@ -11,8 +12,8 @@ namespace Pulsar4X.Client
         public static string SettingsFileName = "game-settings.json";
 
         // Display Settings
-        public int WindowWidth { get; set; } = 1280;
-        public int WindowHeight { get; set; } = 720;
+        public int WindowWidth { get; set; } = -1;
+        public int WindowHeight { get; set; } = -1;
         public DisplayModeType DisplayMode { get; set; } = DisplayModeType.Windowed;
         public bool VSync { get; set; } = true;
 
@@ -40,20 +41,8 @@ namespace Pulsar4X.Client
             BorderlessFullscreen
         }
 
-        // Available resolutions (common ones)
-        public static readonly List<(int width, int height)> CommonResolutions = new List<(int, int)>
-        {
-            (1280, 720),
-            (1366, 768),
-            (1920, 1080),
-            (2560, 1440),
-            (3840, 2160),
-            (1680, 1050),
-            (1440, 900),
-            (1600, 900),
-            (2560, 1080),
-            (3440, 1440)
-        };
+        // Available display modes
+        public static readonly SDL.DisplayMode[] DisplayModes = Utils.GetDisplayModes().ToArray();
 
         public void Save()
         {
@@ -109,7 +98,9 @@ namespace Pulsar4X.Client
                 if (DisplayMode == DisplayModeType.Windowed)
                 {
                     SDL.SetWindowBordered(window.Window, true);
-                    window.Size = new (WindowWidth, WindowHeight);
+
+                    if (WindowWidth > 0 && WindowHeight > 0)
+                        window.Size = new (WindowWidth, WindowHeight);
                 }
                 else if (DisplayMode == DisplayModeType.BorderlessFullscreen)
                 {

@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using Pulsar4X.Engine;
 using Vector3 = System.Numerics.Vector3;
 using Pulsar4X.Orbits;
@@ -24,6 +25,8 @@ namespace Pulsar4X.Client
         private bool _showSelectorWindow = true;
         private OrbitalDebugWindow _orbitalDebugWindow;
         private GameLogWindow _logWindow;
+        private int _currentResolutionIndex = 0;
+
         private SettingsWindow()
         {
             _userOrbitSettingsMtx = _uiState.UserOrbitSettingsMtx;
@@ -42,6 +45,16 @@ namespace Pulsar4X.Client
             _orbitalDebugWindow = OrbitalDebugWindow.GetInstance();
             _logWindow = GameLogWindow.GetInstance();
 
+            var settings = _uiState.GameSettings;
+
+            if (settings != null)
+            {
+                var curRes = Array.FindIndex(
+                        GameSettings.DisplayModes,
+                        r => r.W == settings.WindowWidth && r.H == settings.WindowHeight);
+                if (curRes >= 0)
+                    _currentResolutionIndex = curRes + 1;
+            }
         }
         internal static SettingsWindow GetInstance()
         {
@@ -143,7 +156,9 @@ namespace Pulsar4X.Client
             // Debug info
             var currentWindowSize = _uiState.ViewPort.Size;
             ImGui.Text($"Current Window Size: {(int)currentWindowSize.Width}x{(int)currentWindowSize.Height}");
-            ImGui.Text($"GameSettings Size: {settings.WindowWidth}x{settings.WindowHeight}");
+            ImGui.Text("GameSettings Size: " + ((settings.WindowWidth > 0 && settings.WindowHeight > 0) ?
+                        $"{settings.WindowWidth}x{settings.WindowHeight}" :
+                        "Automatic"));
             ImGui.Separator();
             
             // Display Mode
@@ -155,21 +170,28 @@ namespace Pulsar4X.Client
                 settings.DisplayMode = (Pulsar4X.Client.GameSettings.DisplayModeType)displayModeIndex;
             }
 
+            // Resolution
+            string[] autoStr = { "Automatic" };
+            var dispModesStr = GameSettings.DisplayModes.Select(r => $"{r.W}x{r.H}");
+            var resolutionStr = autoStr.Union(dispModesStr).ToArray();
+
             var isWindowed = displayModeIndex == (int)GameSettings.DisplayModeType.Windowed;
             if (!isWindowed)
                 ImGui.BeginDisabled();
 
-            // Resolution
             ImGui.Text("Resolution:");
-            int currentResolutionIndex = Pulsar4X.Client.GameSettings.CommonResolutions.FindIndex(r => r.width == settings.WindowWidth && r.height == settings.WindowHeight);
-            if (currentResolutionIndex == -1) currentResolutionIndex = 0;
-            
-            string[] resolutionStrings = Pulsar4X.Client.GameSettings.CommonResolutions.Select(r => $"{r.width}x{r.height}").ToArray();
-            if (ImGui.Combo("##Resolution", ref currentResolutionIndex, resolutionStrings, resolutionStrings.Length))
+            if (ImGui.Combo("##Resolution", ref _currentResolutionIndex, resolutionStr, resolutionStr.Length))
             {
-                var selectedRes = Pulsar4X.Client.GameSettings.CommonResolutions[currentResolutionIndex];
-                settings.WindowWidth = selectedRes.width;
-                settings.WindowHeight = selectedRes.height;
+                if (_currentResolutionIndex > 0)
+                {
+                    var selectedRes = GameSettings.DisplayModes[_currentResolutionIndex - 1];
+                    settings.WindowWidth = selectedRes.W;
+                    settings.WindowHeight = selectedRes.H;
+                }
+                else
+                {
+                    settings.WindowWidth = settings.WindowHeight = -1;
+                }
             }
 
             if (!isWindowed)
