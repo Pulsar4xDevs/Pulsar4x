@@ -5,7 +5,10 @@ using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Orbital;
+using SDL3;
+
 using Vector3 = System.Numerics.Vector3;
+using Vector4 = System.Numerics.Vector4;
 
 namespace Pulsar4X.Client
 {
@@ -171,6 +174,19 @@ namespace Pulsar4X.Client
             var c = (CultureInfo)CultureInfo.CurrentCulture.Clone();
             c.DateTimeFormat = CultureInfo.GetCultureInfo(cultureName).DateTimeFormat;
             CultureInfo.CurrentCulture = c;
+        }
+
+        public static byte ColorFloatToByte(float f) =>
+            (byte)MathF.Floor(f >= 1 ? 255 : f * 256);
+
+        public static SDL.Color Vector4ToSDLColor(Vector4 vec)
+        {
+            return new () {
+                R = ColorFloatToByte(vec.W),
+                G = ColorFloatToByte(vec.X),
+                B = ColorFloatToByte(vec.Y),
+                A = ColorFloatToByte(vec.Z)
+            };
         }
     }
 
