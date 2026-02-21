@@ -69,7 +69,6 @@ namespace Pulsar4X.Client
         internal bool ShowDemoWindow;
         internal bool ShowDamageWindow;
         internal IntPtr SDLRendererPtr { get; private set; }
-        internal int _lastContextMenuOpenedEntityGuid = -1;
         internal GalacticMapRender? GalacticMap;
         internal SafeList<UpdateWindowState> UpdateableWindows = new ();
         internal DateTime LastGameUpdateTime = new ();
@@ -243,8 +242,6 @@ namespace Pulsar4X.Client
 
             var mainWin = (PulsarMainWindow)ViewPort;
             mainWin.MouseButtonDownOccured += (object sender, SDL.Event e) => {
-                OnFocusMoved();
-
                 if (e.Button.Button == 1)
                 {
                     _mouseDownX = e.Motion.X;
@@ -264,8 +261,6 @@ namespace Pulsar4X.Client
                 }
             };
             mainWin.MouseButtonUpOccured += (object sender, SDL.Event e) => {
-                OnFocusMoved();
-
                 if (e.Button.Button == 1)
                 {
                     Camera.IsGrabbingMap = false;
@@ -286,19 +281,11 @@ namespace Pulsar4X.Client
                     if (!wasDrag)
                     {
                         // Try orbit-line click first for maneuver node placement
-                        if (!TryOrbitClick((int)e.Motion.X, (int)e.Motion.Y))
-                        {
-                            MapClicked(Camera.WorldCoordinate_m(e.Motion.X, e.Motion.Y), MouseButtons.Primary);
-                        }
+                        TryOrbitClick((int)e.Motion.X, (int)e.Motion.Y);
                     }
-                }
-                else if (e.Button.Button == 3)
-                {
-                    MapClicked(Camera.WorldCoordinate_m(e.Motion.X, e.Motion.Y), MouseButtons.Alt);
                 }
             };
             mainWin.MouseWheelOccured += (object sender, SDL.Event e) => {
-                OnFocusMoved();
                 LastZoomTime = DateTime.Now;
 
                 if (e.Wheel.Y > 0)
@@ -347,7 +334,6 @@ namespace Pulsar4X.Client
             Faction = null;
             PlayerFaction = null;
             SelectedStarSystemId = "";
-            _lastContextMenuOpenedEntityGuid = -1;
             ContextMenu = null;
             ActiveWindow = null;
         }
@@ -488,12 +474,6 @@ namespace Pulsar4X.Client
                 EnableGameMaster();
             else
                 DisableGameMaster();
-        }
-
-        //checks wether any event changed the mouse position after a new mouse click, indicating the user is doing something else with the mouse as he was doing before.
-        internal void OnFocusMoved()
-        {
-            _lastContextMenuOpenedEntityGuid = -1;
         }
 
         /// <summary>
@@ -764,54 +744,6 @@ namespace Pulsar4X.Client
                 else
                 {
                     CleanupManeuverNode();
-                }
-            }
-        }
-
-        //checks wether the planet icon is clicked
-        internal void MapClicked(Orbital.Vector3 worldCoord, MouseButtons button)
-        {
-            SafeDictionary<int, EntityState> allEntities = new ();
-            if(StarSystemStates.ContainsKey(SelectedStarSystemId))
-                allEntities = StarSystemStates[SelectedStarSystemId].EntityStatesWithNames;
-
-            //gets all entities with a position on the map
-            double closestEntityDistInM = double.MaxValue;
-            EntityState? closestEntity = null;
-            //iterates over entities. Compares the next one with the previous closest-to-click one, if next one is closer, set that one as the closest, repeat for all entities.
-            if(allEntities != null)
-            {
-                foreach(var oneEntityState in allEntities)
-                {
-                    var oneEntity = oneEntityState.Value;
-                    if(oneEntity.HasDataBlob<PositionDB>()){
-                        var thisDistanceInM = Math.Sqrt(Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition.X-worldCoord.X, 2) + Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition.Y -worldCoord.Y,2));
-                        if(thisDistanceInM <= closestEntityDistInM)
-                        {
-                            closestEntityDistInM = thisDistanceInM;
-                            closestEntity = oneEntity;
-                        }
-                    }
-                }
-            }
-
-            //checks if there is a closest entity
-            if(closestEntity != null)
-            {
-                if(closestEntity.HasDataBlob<MassVolumeDB>())
-                {
-                    int minPixelRadius = 20;
-
-                    //var distanceBetweenMouseAndEntity = Math.Sqrt(Math.Pow(closestEntity.GetDataBlob<PositionDB>().AbsolutePosition_m - worldCoord,2) + Math.Pow(entityPositionInScreenPixels.Y- mousePosInPixels.Y,2));
-                    //int distComp = (int)Math.Sqrt(Math.Pow(50,2)/2);
-
-                    if(closestEntityDistInM <= closestEntity.GetDataBlob<MassVolumeDB>().RadiusInM || Camera.WorldDistance_AU(minPixelRadius) >=  Distance.MToAU(closestEntityDistInM)){
-                        EntityClicked(closestEntity.Id, SelectedStarSystemId, button);
-
-                        if(button == MouseButtons.Alt){
-                            _lastContextMenuOpenedEntityGuid = closestEntity.Id;
-                        }
-                    }
                 }
             }
         }

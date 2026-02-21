@@ -1,5 +1,12 @@
-using System;
+using Pulsar4X.Colonies;
+using Pulsar4X.Engine;
+using Pulsar4X.Galaxy;
+using Pulsar4X.Names;
+using Pulsar4X.Ships;
+using SDL3;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System;
 
 namespace Pulsar4X.Client;
 
@@ -148,5 +155,55 @@ public static class Utils
         else if(order == ColourOrder.ARGB)
             return (uint)((a << 24) | (r << 16) | (g << 8) | b);
         else throw new Exception("Invalid ColourOrder");
+    }
+
+    internal static UserOrbitSettings.OrbitBodyType EntityBodyType(Entity entity)
+    {
+        if (entity.HasDataBlob<SystemBodyInfoDB>())
+        {
+            switch (entity.GetDataBlob<SystemBodyInfoDB>().BodyType)
+            {
+                case DataStructures.BodyType.Asteroid:
+                    return UserOrbitSettings.OrbitBodyType.Asteroid;
+                case DataStructures.BodyType.Comet:
+                    return UserOrbitSettings.OrbitBodyType.Comet;
+                case DataStructures.BodyType.DwarfPlanet:
+                    return UserOrbitSettings.OrbitBodyType.DwarfPlanet;
+                case DataStructures.BodyType.GasDwarf:
+                case DataStructures.BodyType.GasGiant:
+                case DataStructures.BodyType.IceGiant:
+                case DataStructures.BodyType.Terrestrial:
+                    return UserOrbitSettings.OrbitBodyType.Planet;
+                case DataStructures.BodyType.Moon:
+                    return UserOrbitSettings.OrbitBodyType.Moon;
+                default:
+                    break;
+            }
+
+        }
+        if (entity.HasDataBlob<StarInfoDB>())
+            return UserOrbitSettings.OrbitBodyType.Star;
+        if (entity.HasDataBlob<ColonyInfoDB>())
+            return UserOrbitSettings.OrbitBodyType.Colony;
+        if (entity.HasDataBlob<ShipInfoDB>())
+            return UserOrbitSettings.OrbitBodyType.Ship;
+
+        return UserOrbitSettings.OrbitBodyType.Unknown;
+    }
+
+    internal static string EntityName(Entity entity, int? faction = null)
+    {
+        var f = faction ?? Game.NeutralFactionId;
+        var s = "??";
+        if (entity.TryGetDataBlob<NameDB>(out NameDB nDB))
+            s = nDB.GetName(f);
+        return s;
+    }
+
+    internal static IEnumerable<SDL.DisplayMode> GetDisplayModes()
+    {
+        foreach (var i in SDL.GetDisplays(out _))
+            foreach (var j in SDL.GetFullscreenDisplayModes(i, out _))
+                yield return j;
     }
 }
