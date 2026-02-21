@@ -182,10 +182,10 @@ namespace Pulsar4X.Client
         public static SDL.Color Vector4ToSDLColor(Vector4 vec)
         {
             return new () {
-                R = ColorFloatToByte(vec.W),
-                G = ColorFloatToByte(vec.X),
-                B = ColorFloatToByte(vec.Y),
-                A = ColorFloatToByte(vec.Z)
+                R = ColorFloatToByte(vec.X),
+                G = ColorFloatToByte(vec.Y),
+                B = ColorFloatToByte(vec.Z),
+                A = ColorFloatToByte(vec.W)
             };
         }
     }
