@@ -104,11 +104,7 @@ namespace Pulsar4X.Client
             if (entity.TryGetDataBlob<PositionDB>(out PositionDB j))
                 _positionDB = j;
 
-            // TODO: better colors
-            var clr = (_entity.FactionOwnerID == Game.NeutralFactionId) ?
-                Styles.NeutralColor :
-                Styles.StandardText;
-            _color = Helpers.Vector4ToSDLColor(clr);
+            SetColor();
 
             if(entity.Manager != null)
             {
@@ -129,10 +125,21 @@ namespace Pulsar4X.Client
             DestroyName();
         }
 
+        private void SetColor()
+        {
+            var clr = (_entity.FactionOwnerID == Game.NeutralFactionId) ?
+                Styles.NeutralColor :
+                (_state != null && _entity.FactionOwnerID != _state.Faction?.Id) ?
+                Styles.BadColor :
+                Styles.StandardText;
+            _color = Helpers.Vector4ToSDLColor(clr);
+        }
+
         protected GlobalUIState? _state = null;
         public void AttachState(GlobalUIState state)
         {
             _state = state;
+            SetColor();
         }
 
         private bool _hovered = false;

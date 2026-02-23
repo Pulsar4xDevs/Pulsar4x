@@ -457,12 +457,24 @@ namespace Pulsar4X.Client.Rendering
             foreach (var item in SelectedEntityExtras)
                 item.OnFrameUpdate(matrix, _camera);
 
+
+            var prefs = SystemViewPreferences.GetInstance();
+            HashSet<EntityLabel> visible = new ();
+
             lock (_allLabels)
             {
                 foreach (var i in _allLabels)
-                    i.OnFrameUpdate(matrix, _camera);
+                {
+                    var type = Utils.EntityBodyType(i.Entity);
+                    if (!prefs.ShouldDisplay("map", type))
+                        continue;
 
-                _labels = _distributor(_allLabels).ToArray();
+                    visible.Add(i);
+
+                    i.OnFrameUpdate(matrix, _camera);
+                }
+
+                _labels = _distributor(visible).ToArray();
             }
         }
 
