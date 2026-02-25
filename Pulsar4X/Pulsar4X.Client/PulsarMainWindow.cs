@@ -153,7 +153,7 @@ namespace Pulsar4X.Client
                 return;
             }
 
-            if (!PlatformBackend.WantsMouseCapture() || _state.IsMouseOverMapOverlay)
+            if (!PlatformBackend.WantsMouseCapture())
             {
                 switch (e.Type)
                 {
@@ -176,9 +176,6 @@ namespace Pulsar4X.Client
         public override void Update()
         {
             base.Update();
-
-            // Reset map overlay hover state at the start of each frame
-            _state.IsMouseOverMapOverlay = false;
 
             //update and refresh state for GameDateTimechange
             if(_state.Game != null)
