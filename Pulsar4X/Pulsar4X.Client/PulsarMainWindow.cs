@@ -25,15 +25,13 @@ namespace Pulsar4X.Client
 
     public class PulsarMainWindow : SDL3Window
     {
-#if DEBUG
-        private ImGuiWindowFlags _gitHashFlags = ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav;
-#endif
         public const string PreferencesFile = "preferences.ini";
         public const string UserOrbitSettingsFile = "orbit-settings.json";
         public const string SavesPath = "Saves";
         public static string ModsPath = "Mods";
         public static string ResourcesPath = "Resources";
         private readonly GlobalUIState _state;
+        private ITheme _theme;
 
         float mouseX;
         float mouseY;
@@ -96,18 +94,8 @@ namespace Pulsar4X.Client
                 // Apply any saved user orbit settings
                 LoadUserOrbitSettings();
 
-                // Load fonts - texture will be created automatically by the new texture system
-                var defaultFont = "ProggyClean.ttf";
-                var defaultFontPath = Path.Combine(ResourcesPath, defaultFont);
-                var defaultFontSize = 13f;
+                PopulateStyles();
 
-                Trace.WriteLine("loading font: " + defaultFontPath);
-                Styles.SDLDefaultFont = SDL3.TTF.OpenFont(defaultFontPath, 16f); // FIXME: set this and imgui font to same size. 13f looks terrible.
-                Styles.DefaultFont = PlatformBackend.LoadFont(ResourcesPath, defaultFont, defaultFontSize);
-
-                PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ", true);
-                Styles.MonospaceFont = PlatformBackend.LoadFont(ResourcesPath, "JetBrainsMono-Regular.ttf", 14f);
-                Styles.MediumFont = PlatformBackend.LoadFont(ResourcesPath, "Roboto-Medium.ttf", 14f);
             }
             catch(Exception e)
             {
@@ -115,6 +103,26 @@ namespace Pulsar4X.Client
             }
 
             _debugSDLFontHeight = SDL3.TTF.GetFontHeight(Styles.SDLDefaultFont);
+        }
+
+        private void PopulateStyles()
+        {
+            // Load fonts - texture will be created automatically by the new texture system
+            var defaultFont = "ProggyClean.ttf";
+            var defaultFontPath = Path.Combine(ResourcesPath, defaultFont);
+            var defaultFontSize = 13f;
+
+            Trace.WriteLine("loading font: " + defaultFontPath);
+            Styles.SDLDefaultFont = SDL3.TTF.OpenFont(defaultFontPath, 16f); // FIXME: set this and imgui font to same size. 13f looks terrible.
+            Styles.DefaultFont = PlatformBackend.LoadFont(ResourcesPath, defaultFont, defaultFontSize);
+
+            PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ", true);
+            Styles.MonospaceFont = PlatformBackend.LoadFont(ResourcesPath, "JetBrainsMono-Regular.ttf", 14f);
+            Styles.MediumFont = PlatformBackend.LoadFont(ResourcesPath, "Roboto-Medium.ttf", 14f);
+
+            // Theme
+            Styles.Theme = _theme;
+            _theme.Apply();
         }
 
         internal event EventHandler<SDL.Event> MouseMoveOccured;
@@ -395,13 +403,16 @@ namespace Pulsar4X.Client
                     Maximize();
             }
 
-            if(themeEnabled != null)
+            // TODO: more themes
+            switch (themeEnabled)
             {
-                if(bool.Parse(themeEnabled))
-                {
-                    var theme = new FuturisticTheme();
-                    theme.Apply();
-                }
+                case null:
+                case "Futuristic":
+                    // default theme is Futuristic
+                    _theme = Styles.Theme;
+                    break;
+                default:
+                    throw new Exception("Invalid theme: " + themeEnabled);
             }
         }
 

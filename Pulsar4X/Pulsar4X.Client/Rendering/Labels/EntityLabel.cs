@@ -127,12 +127,11 @@ namespace Pulsar4X.Client
 
         private void SetColor()
         {
-            var clr = (_entity.FactionOwnerID == Game.NeutralFactionId) ?
-                Styles.NeutralColor :
+            _color = (_entity.FactionOwnerID == Game.NeutralFactionId) ?
+                ColorUtils.ImVector4ToSDLColor(Styles.NeutralColor) :
                 (_state != null && _entity.FactionOwnerID != _state.Faction?.Id) ?
-                Styles.BadColor :
-                Styles.StandardText;
-            _color = Helpers.Vector4ToSDLColor(clr);
+                ColorUtils.ImVector4ToSDLColor(Styles.BadColor) :
+                ColorUtils.ColorToSDLColor(Styles.Theme.Text);
         }
 
         protected GlobalUIState? _state = null;
@@ -245,9 +244,15 @@ namespace Pulsar4X.Client
 
                 // TODO: Move these somewhere else
                 if (_pressed)
-                    SDL.SetRenderDrawColor(rendererPtr, 128, 255, 0, 127);
-                else
-                    SDL.SetRenderDrawColor(rendererPtr, 0, 128, 128, 127);
+                {
+                    var c = Styles.Theme.ButtonActive;
+                    SDL.SetRenderDrawColor(rendererPtr, c.R, c.G, c.B, c.A);
+                }
+                else if (_hovered)
+                {
+                    var c = Styles.Theme.ButtonHovered;
+                    SDL.SetRenderDrawColor(rendererPtr, c.R, c.G, c.B, c.A);
+                }
 
                 SDL.FRect frect = new () {
                     X = Rect.X,
