@@ -242,7 +242,6 @@ namespace Pulsar4X.Client
                 byte r, g, b, a;
                 SDL.GetRenderDrawColor(rendererPtr, out r, out g, out b, out a);
 
-                // TODO: Move these somewhere else
                 if (_pressed)
                 {
                     var c = Styles.Theme.ButtonActive;
