@@ -31,7 +31,11 @@ Pulsar4x is a fan-made 4X space simulation game developed in C#, inspired by Aur
    ```
    git checkout DevBranch
    ```
-3. Build the solution following our [Compilation Guide](https://github.com/Pulsar4xDevs/Pulsar4x/wiki/Compilation)
+3. Init submodules
+   ```
+   git submodule init
+   ```
+4. Build the solution following our [Compilation Guide](https://github.com/Pulsar4xDevs/Pulsar4x/wiki/Compilation)
 
 ## Documentation
 
