@@ -7,6 +7,7 @@ using SDL3;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System;
+using System.Drawing;
 
 namespace Pulsar4X.Client;
 
@@ -205,5 +206,75 @@ public static class Utils
         foreach (var i in SDL.GetDisplays(out _))
             foreach (var j in SDL.GetFullscreenDisplayModes(i, out _))
                 yield return j;
+    }
+
+}
+
+// extension methods would probably make this a bit neater
+public static class ColorUtils
+{
+    public static byte FloatToByte(float f) =>
+        (byte)MathF.Floor(f >= 1 ? 255 : f * 256);
+
+    public static float ByteToFloat(byte b) =>
+        (1.0f / 255) * b;
+
+    // ImVector4 convert
+    public static Color ImVector4ToColor(System.Numerics.Vector4 vec)
+    {
+        return Color.FromArgb(
+                ColorUtils.FloatToByte(vec.W),
+                ColorUtils.FloatToByte(vec.X),
+                ColorUtils.FloatToByte(vec.Y),
+                ColorUtils.FloatToByte(vec.Z));
+    }
+
+    public static SDL.Color ImVector4ToSDLColor(System.Numerics.Vector4 vec)
+    {
+        return new () {
+            R = ColorUtils.FloatToByte(vec.X),
+            G = ColorUtils.FloatToByte(vec.Y),
+            B = ColorUtils.FloatToByte(vec.Z),
+            A = ColorUtils.FloatToByte(vec.W)
+        };
+    }
+
+    // Color convert
+    public static SDL.Color ColorToSDLColor(Color color)
+    {
+        return new () {
+            R = color.R,
+            G = color.G,
+            B = color.B,
+            A = color.A
+        };
+    }
+
+    public static System.Numerics.Vector4 ColorToImVector4(Color color)
+    {
+        return new (
+                ColorUtils.ByteToFloat(color.R),
+                ColorUtils.ByteToFloat(color.G),
+                ColorUtils.ByteToFloat(color.B),
+                ColorUtils.ByteToFloat(color.A));
+    }
+
+    // SDL.Color convert
+    public static Color SDLColorToColor(SDL.Color color)
+    {
+        return Color.FromArgb(
+                color.A,
+                color.R,
+                color.G,
+                color.B);
+    }
+
+    public static System.Numerics.Vector4 SDLColorToImVector4(SDL.Color color)
+    {
+        return new (
+                ColorUtils.ByteToFloat(color.R),
+                ColorUtils.ByteToFloat(color.G),
+                ColorUtils.ByteToFloat(color.B),
+                ColorUtils.ByteToFloat(color.A));
     }
 }

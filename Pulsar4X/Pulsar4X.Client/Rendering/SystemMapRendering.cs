@@ -67,6 +67,9 @@ namespace Pulsar4X.Client.Rendering
 
             var mainWin = (PulsarMainWindow)window;
             mainWin.MouseButtonDownOccured += (object sender, SDL.Event e) => {
+                if (mainWin.PlatformBackend.WantsMouseCapture())
+                    return;
+
                 foreach (var i in _interactableGrouped)
                 {
                     var key = i.Key;
@@ -87,6 +90,9 @@ namespace Pulsar4X.Client.Rendering
                 }
             };
             mainWin.MouseButtonUpOccured += (object sender, SDL.Event e) => {
+                if (mainWin.PlatformBackend.WantsMouseCapture())
+                    return;
+
                 foreach (var i in _interactableGrouped)
                 {
                     var key = i.Key;
@@ -114,6 +120,17 @@ namespace Pulsar4X.Client.Rendering
                     foreach (var j in i)
                     {
                         var item = j.Item;
+
+                        if (mainWin.PlatformBackend.WantsMouseCapture())
+                        {
+                            if (j.IsHovered)
+                            {
+                                j.IsHovered = false;
+                                if (item.OnPointerExit(e))
+                                    return;
+                            }
+                            continue;
+                        }
 
                         var c = item.Contains(new (e.Motion.X, e.Motion.Y));
 
