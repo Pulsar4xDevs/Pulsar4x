@@ -47,6 +47,8 @@ namespace Pulsar4X.Client.Rendering
         //internal SystemMap_DrawableVM SysMap;
         Entity? _faction;
 
+        bool _panned = false;
+
         internal SystemMapRendering(SDL3Window window, GlobalUIState state)
         {
             _state = state;
@@ -169,6 +171,15 @@ namespace Pulsar4X.Client.Rendering
                     }
                 }
             };
+
+            _camera.PanOccured += (object sender, Orbital.Vector3 pos) => _panned = true;
+
+            // should be empty
+            _interactableGrouped = _interactable
+                .Values
+                .SelectMany(x => x)
+                .GroupBy(x => x.Item.Priority)
+                .OrderByDescending(x => x.Key);
         }
 
         internal void Initialize(StarSystem starSys)
@@ -199,11 +210,7 @@ namespace Pulsar4X.Client.Rendering
                 AddIconable(entityItem);
             }
 
-            _interactableGrouped = _interactable
-                .Values
-                .SelectMany(x => x)
-                .GroupBy(x => x.Item.Priority)
-                .OrderByDescending(x => x.Key);
+            _panned = true; // run HandlePan on first frame
         }
 
         public void UpdateSystemState(SystemState systemState)
@@ -501,36 +508,33 @@ namespace Pulsar4X.Client.Rendering
             foreach (var item in SelectedEntityExtras)
                 item.OnFrameUpdate(matrix, _camera);
 
-            foreach (var item in _interactable.Values)
-                foreach (var i in item)
-                    i.IsDisabled = true;
+            foreach (var item in _allLabels)
+                item.OnFrameUpdate(matrix, _camera);
 
-            var prefs = SystemViewPreferences.GetInstance();
-
-            _visibleLabels.Clear();
-            var vis = new HashSet<EntityLabel>();
-            foreach (var i in _allLabels)
+            if (_panned)
             {
-                var type = Utils.EntityBodyType(i.Entity);
-                if (!prefs.ShouldDisplay("map", type))
-                    continue;
+                _panned = false;
 
-                i.OnFrameUpdate(matrix, _camera);
-                vis.Add(i);
+                foreach (var item in _interactable.Values)
+                {
+                    foreach (var i in item)
+                        i.IsDisabled = true;
+                }
 
+                _visibleLabels.Clear();
+                foreach (var i in _distributor(_allLabels))
+                {
+                    foreach (var j in _interactable[i.Entity.Id])
+                        j.IsDisabled = false;
+                    _visibleLabels.Add(i);
+                }
+
+                _interactableGrouped = _interactable
+                    .Values
+                    .SelectMany(x => x)
+                    .GroupBy(x => x.Item.Priority)
+                    .OrderByDescending(x => x.Key);
             }
-            foreach (var i in _distributor(vis))
-            {
-                foreach (var j in _interactable[i.Entity.Id])
-                    j.IsDisabled = false;
-                _visibleLabels.Add(i);
-            }
-
-            _interactableGrouped = _interactable
-                .Values
-                .SelectMany(x => x)
-                .GroupBy(x => x.Item.Priority)
-                .OrderByDescending(x => x.Key);
         }
 
         internal void Draw()
@@ -542,8 +546,16 @@ namespace Pulsar4X.Client.Rendering
             DrawFilteredIcons(_bodyIcons);
             DrawIcons(SelectedEntityExtras);
 
+            var prefs = SystemViewPreferences.GetInstance();
+
             foreach (var i in _visibleLabels)
+            {
+                var type = Utils.EntityBodyType(i.Entity);
+                if (!prefs.ShouldDisplay("map", type))
+                    continue;
+
                 i.Draw(_window.Renderer, _camera);
+            }
         }
 
         void DrawFilteredIcons(ConcurrentDictionary<int, Icon> icons)
