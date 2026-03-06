@@ -71,12 +71,14 @@ namespace Pulsar4X.Client
 
         private Task OnEntityRenamed(Message message)
         {
-            _name = _nameDB.GetName(_faction);
+            if (_nameDB != null)
+                _name = _nameDB.GetName(_faction);
 
-            int h;
-            int w;
-            SDL3.TTF.GetStringSize(Styles.SDLDefaultFont, _name, 0, out w, out h);
-            _nameRect.W = w;
+            if (Styles.SDLDefaultFont != IntPtr.Zero && !string.IsNullOrEmpty(_name))
+            {
+                SDL3.TTF.GetStringSize(Styles.SDLDefaultFont, _name, 0, out int w, out _);
+                _nameRect.W = w;
+            }
 
             OnPaddingUpdate();
 
@@ -112,7 +114,8 @@ namespace Pulsar4X.Client
                 _starSysGuid = starSys.ID;
             }
 
-            _nameRect.H = SDL3.TTF.GetFontHeight(Styles.SDLDefaultFont);
+            if (Styles.SDLDefaultFont != IntPtr.Zero)
+                _nameRect.H = SDL3.TTF.GetFontHeight(Styles.SDLDefaultFont);
             OnEntityRenamed(null);
 
             // Subscribe to name changes
