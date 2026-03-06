@@ -416,7 +416,7 @@ namespace Pulsar4X.Client
             ImGui.Text("Map Settings");
             ImGui.Separator();
 
-            for (int i = 0; i < (int)UserOrbitSettings.OrbitBodyType.NumberOf; i++)
+            for (int i = 0; i < Enum.GetNames(typeof(UserOrbitSettings.OrbitBodyType)).Length; i++)
             {
                 UserOrbitSettings.OrbitBodyType otype = (UserOrbitSettings.OrbitBodyType)i;
                 string typeStr = otype.ToString();
@@ -426,7 +426,7 @@ namespace Pulsar4X.Client
                     ImGui.SliderFloat("Draw Names at Zoom: ", ref _nameZoomLevel, 0.01f, 10000f);
                     _uiState.DrawNameZoomLvl[otype] = _nameZoomLevel;
                     
-                    for (int j = 0; j < (int)UserOrbitSettings.OrbitTrajectoryType.NumberOf; j++)
+                    for (int j = 0; j < Enum.GetNames(typeof(UserOrbitSettings.OrbitTrajectoryType)).Length; j++)
                     {
                         UserOrbitSettings.OrbitTrajectoryType trtype = (UserOrbitSettings.OrbitTrajectoryType)j;
                         string trtypeStr = trtype.ToString();

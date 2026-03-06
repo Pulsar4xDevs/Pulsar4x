@@ -139,10 +139,10 @@ namespace Pulsar4X.Client
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Ship, 64f);
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Unknown, 16f);
 
-            for (int i = 0; i < (int)UserOrbitSettings.OrbitBodyType.NumberOf; i++)
+            for (int i = 0; i < Enum.GetNames(typeof(UserOrbitSettings.OrbitBodyType)).Length; i++)
             {
                 UserOrbitSettingsMtx.Add(new List<UserOrbitSettings>());
-                for (int j = 0; j < (int)UserOrbitSettings.OrbitTrajectoryType.NumberOf; j++)
+                for (int j = 0; j < Enum.GetNames(typeof(UserOrbitSettings.OrbitTrajectoryType)).Length; j++)
                 {
                     UserOrbitSettingsMtx[i].Add(new UserOrbitSettings());
                 }

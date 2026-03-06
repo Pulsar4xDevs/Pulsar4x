@@ -6,6 +6,7 @@ public class UserOrbitSettings
 {
     internal enum OrbitBodyType
     {
+        Unknown,
         Star,
         Planet,
         DwarfPlanet,
@@ -13,16 +14,13 @@ public class UserOrbitSettings
         Asteroid,
         Comet,
         Colony,
-        Ship,
-        Unknown,
-
-        [Description("Number Of")]
-        NumberOf
+        Ship
     }
 
     internal enum OrbitTrajectoryType
     {
         Unknown,
+
         [Description("An Elliptical Orbit")]
         Elliptical,
         Hyperbolic,
@@ -31,10 +29,7 @@ public class UserOrbitSettings
         NewtonionThrust,
 
         [Description("Non-Newtonian Translation")]
-        NonNewtonionTranslation,
-
-        [Description("Number Of")]
-        NumberOf
+        NonNewtonionTranslation
     }
     //the arc thats actualy drawn, ie we don't normaly draw a full 360 degree (6.28rad) orbit, but only
     //a section of it ie 3/4 of the orbit (4.71rad) and this is player adjustable.
