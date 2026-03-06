@@ -41,8 +41,8 @@ public class FuturisticTheme : ITheme
         colors[(int)ImGuiCol.BorderShadow] = new Vector4(0.00f, 0.00f, 0.00f, 0.00f);  // No shadow
 
         // Text
-        colors[(int)ImGuiCol.Text] = ColorUtils.ColorToImVector4(Text);
-        colors[(int)ImGuiCol.TextDisabled] = ColorUtils.ColorToImVector4(TextDisabled);
+        colors[(int)ImGuiCol.Text] = Text.ToImVector4();
+        colors[(int)ImGuiCol.TextDisabled] = TextDisabled.ToImVector4();
 
         // Headers and titlebars
         colors[(int)ImGuiCol.TitleBg] = new Vector4(0.04f, 0.04f, 0.08f, 1.00f);       // Dark background
@@ -50,9 +50,9 @@ public class FuturisticTheme : ITheme
         colors[(int)ImGuiCol.TitleBgCollapsed] = new Vector4(0.00f, 0.00f, 0.00f, 0.51f);
 
         // Buttons and interactive elements
-        colors[(int)ImGuiCol.Button] = ColorUtils.ColorToImVector4(Button);
-        colors[(int)ImGuiCol.ButtonHovered] = ColorUtils.ColorToImVector4(ButtonHovered);
-        colors[(int)ImGuiCol.ButtonActive] = ColorUtils.ColorToImVector4(ButtonActive);
+        colors[(int)ImGuiCol.Button] = Button.ToImVector4();
+        colors[(int)ImGuiCol.ButtonHovered] = ButtonHovered.ToImVector4();
+        colors[(int)ImGuiCol.ButtonActive] = ButtonActive.ToImVector4();
 
         // Frame backgrounds (for checkbox, radio button, plot, slider, text input)
         colors[(int)ImGuiCol.FrameBg] = new Vector4(0.15f, 0.15f, 0.22f, 0.54f);       // Subtle contrast

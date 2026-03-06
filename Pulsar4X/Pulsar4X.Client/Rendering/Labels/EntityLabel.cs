@@ -128,10 +128,10 @@ namespace Pulsar4X.Client
         private void SetColor()
         {
             _color = (_entity.FactionOwnerID == Game.NeutralFactionId) ?
-                ColorUtils.ImVector4ToSDLColor(Styles.NeutralColor) :
+                Styles.NeutralColor.ToSDLColor() :
                 (_state != null && _entity.FactionOwnerID != _state.Faction?.Id) ?
-                ColorUtils.ImVector4ToSDLColor(Styles.BadColor) :
-                ColorUtils.ColorToSDLColor(Styles.Theme.Text);
+                Styles.BadColor.ToSDLColor() :
+                Styles.Theme.Text.ToSDLColor();
         }
 
         protected GlobalUIState? _state = null;
