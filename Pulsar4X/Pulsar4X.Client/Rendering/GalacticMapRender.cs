@@ -154,14 +154,7 @@ namespace Pulsar4X.Client
         internal void DrawNameIcons()
         {
             var zoomlvl = _state.Camera.ZoomLevel;
-            if (zoomlvl >= 0.99)
-            {
-                if (!string.IsNullOrEmpty(_state.SelectedStarSystemId) && RenderedMaps.ContainsKey(_state.SelectedStarSystemId))
-                {
-                    RenderedMaps[_state.SelectedStarSystemId].DrawNameIcons();
-                }
-            }
-            else
+            if (zoomlvl < 0.99)
             {
                 // Draw galmap labels for all systems
                 foreach (var (systemId, label) in _galMapLabels)

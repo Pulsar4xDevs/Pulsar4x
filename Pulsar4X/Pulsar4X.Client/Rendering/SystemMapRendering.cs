@@ -26,23 +26,28 @@ namespace Pulsar4X.Client.Rendering
         SystemState? _sysState;
         Camera _camera;
         SDL3Window _window;
-        internal Dictionary<string, IDrawData> UIWidgets = new ();
-        ConcurrentDictionary<int, Icon> _testIcons = new ();
-        ConcurrentDictionary<int, Icon> _entityIcons = new ();
-        ConcurrentDictionary<int, Icon> _orbitRings = new ();
-        ConcurrentDictionary<int, Icon> _moveIcons = new ();
-
-        HashSet<EntityLabel> _allLabels = new ();
-        EntityLabel[] _labels = [];
         SystemLabelDistributor _distributor;
 
-        HashSet<InteractableState> _interactable = new ();
+        internal Dictionary<string, IDrawData> UIWidgets = new ();
+
+        ConcurrentDictionary<int, Icon> _testIcons = new ();
+        ConcurrentDictionary<int, Icon> _orbitRings = new ();
+        ConcurrentDictionary<int, Icon> _moveIcons = new ();
+        ConcurrentDictionary<int, Icon> _entityIcons = new ();
+        ConcurrentDictionary<int, Icon> _bodyIcons = new ();
+
+        HashSet<EntityLabel> _allLabels = new ();
+        HashSet<EntityLabel> _visibleLabels = new ();
+
+        ConcurrentDictionary<int, InteractableState[]> _interactable = new ();
         IOrderedEnumerable<IGrouping<byte, InteractableState>> _interactableGrouped;
 
         internal List<IDrawData> SelectedEntityExtras = new List<IDrawData>();
         internal Vector2 GalacticMapPosition = new Vector2();
         //internal SystemMap_DrawableVM SysMap;
         Entity? _faction;
+
+        bool _panned = false;
 
         internal SystemMapRendering(SDL3Window window, GlobalUIState state)
         {
@@ -76,6 +81,9 @@ namespace Pulsar4X.Client.Rendering
 
                     foreach (var j in i)
                     {
+                        if (j.IsDisabled)
+                            continue;
+
                         var item = j.Item;
 
                         var c = item.Contains(new (e.Motion.X, e.Motion.Y));
@@ -99,6 +107,9 @@ namespace Pulsar4X.Client.Rendering
 
                     foreach (var j in i)
                     {
+                        if (j.IsDisabled)
+                            continue;
+
                         var item = j.Item;
 
                         var c = item.Contains(new (e.Motion.X, e.Motion.Y));
@@ -119,6 +130,9 @@ namespace Pulsar4X.Client.Rendering
 
                     foreach (var j in i)
                     {
+                        if (j.IsDisabled)
+                            continue;
+
                         var item = j.Item;
 
                         if (mainWin.PlatformBackend.WantsMouseCapture())
@@ -157,6 +171,15 @@ namespace Pulsar4X.Client.Rendering
                     }
                 }
             };
+
+            _camera.PanOccured += (object sender, Orbital.Vector3 pos) => _panned = true;
+
+            // should be empty
+            _interactableGrouped = _interactable
+                .Values
+                .SelectMany(x => x)
+                .GroupBy(x => x.Item.Priority)
+                .OrderByDescending(x => x.Key);
         }
 
         internal void Initialize(StarSystem starSys)
@@ -187,9 +210,7 @@ namespace Pulsar4X.Client.Rendering
                 AddIconable(entityItem);
             }
 
-            _interactableGrouped = _interactable
-                .GroupBy(x => x.Item.Priority)
-                .OrderByDescending(x => x.Key);
+            _panned = true; // run HandlePan on first frame
         }
 
         public void UpdateSystemState(SystemState systemState)
@@ -199,6 +220,7 @@ namespace Pulsar4X.Client.Rendering
             _orbitRings.Clear();
             _moveIcons.Clear();
             _allLabels.Clear();
+            _bodyIcons.Clear();
             _interactable.Clear();
 
             _sysState = systemState;
@@ -215,31 +237,26 @@ namespace Pulsar4X.Client.Rendering
             {
                 AddIconable(entityItem);
             }
+        }
 
-            _interactableGrouped = _interactable
-                .GroupBy(x => x.Item.Priority)
-                .OrderByDescending(x => x.Key);
+        void AddEntityIcon(Entity entity, Icon icon)
+        {
+            var l = new EntityLabelExtCombo(entity);
+            l.Padding = 3;
+            l.Faction = _state.Faction?.Id ?? Game.NeutralFactionId;
+            l.AttachState(_state);
+
+            _interactable.TryAdd(
+                    entity.Id,
+                    new[] { new InteractableState(l) });
+            _entityIcons.TryAdd(entity.Id, icon);
+            _allLabels.Add(l);
         }
 
         void AddIconable(EntityState entityState)
         {
             entityState.TryGetDataBlob<PositionDB>(out var positionDB);
             entityState.TryGetDataBlob<MassVolumeDB>(out var massVolumeDB);
-
-            if (entityState.TryGetDataBlob<NameDB>(out var nameDB) && positionDB != null)
-            {
-                lock (_allLabels)
-                {
-                    var l = new EntityLabelExtCombo(entityState.Entity);
-
-                    l.Padding = 3;
-                    l.Faction = _state.Faction?.Id ?? Game.NeutralFactionId;
-                    l.AttachState(_state);
-
-                    _allLabels.Add(l);
-                    _interactable.Add(new InteractableState(l));
-                }
-            }
 
             if (entityState.TryGetDataBlob<OrbitDB>(out var orbitDB))
             {
@@ -279,7 +296,9 @@ namespace Pulsar4X.Client.Rendering
                 && massVolumeDB != null
                 && positionDB != null)
             {
-                _entityIcons.TryAdd(entityState.Id, new StarIcon(starInfoDB, positionDB, massVolumeDB));
+                AddEntityIcon(
+                        entityState.Entity,
+                        new StarIcon(starInfoDB, positionDB, massVolumeDB));
             }
 
             if (entityState.TryGetDataBlob<SystemBodyInfoDB>(out var systemBodyInfoDB)
@@ -289,30 +308,45 @@ namespace Pulsar4X.Client.Rendering
                 var i = new SysBodyIcon(entityState, systemBodyInfoDB, positionDB, massVolumeDB);
                 i.AttachState(_state);
 
-                _entityIcons.TryAdd(entityState.Id, i);
-                _interactable.Add(new InteractableState(i));
+                var l = new EntityLabelExtCombo(entityState.Entity);
+                l.Padding = 3;
+                l.Faction = _state.Faction?.Id ?? Game.NeutralFactionId;
+                l.AttachState(_state);
+
+                _interactable.TryAdd(
+                        entityState.Entity.Id,
+                        new[] { new InteractableState(i), new InteractableState(l) });
+                _bodyIcons.TryAdd(entityState.Id, i);
+                _allLabels.Add(l);
             }
 
             if (entityState.TryGetDataBlob<ShipInfoDB>(out var shipInfoDB) && positionDB != null)
             {
-                _entityIcons.TryAdd(entityState.Id, new ShipIcon(entityState, shipInfoDB, positionDB));
+                AddEntityIcon(
+                        entityState.Entity,
+                        new ShipIcon(entityState, shipInfoDB, positionDB));
             }
 
             if (entityState.TryGetDataBlob<ProjectileInfoDB>(out var projectileInfoDB) && positionDB != null)
             {
-                _entityIcons.TryAdd(entityState.Id, new ProjectileIcon(entityState, positionDB));
+                AddEntityIcon(
+                        entityState.Entity,
+                        new ProjectileIcon(entityState, positionDB));
             }
 
             if (entityState.TryGetDataBlob<BeamInfoDB>(out var beamInfoDB) && positionDB != null)
             {
-                _entityIcons.TryAdd(entityState.Id, new BeamIcon(beamInfoDB, positionDB));
+                AddEntityIcon(
+                        entityState.Entity,
+                        new BeamIcon(beamInfoDB, positionDB));
             }
 
             if(entityState.TryGetDataBlob<JPSurveyableDB>(out var jPSurveyableDB) && positionDB != null)
             {
-                _entityIcons.TryAdd(entityState.Id, new PointOfInterestIcon(positionDB));
+                AddEntityIcon(
+                        entityState.Entity,
+                        new PointOfInterestIcon(positionDB));
             }
-
         }
 
         void RemoveIconable(int entityGuid)
@@ -321,13 +355,10 @@ namespace Pulsar4X.Client.Rendering
             _entityIcons.TryRemove(entityGuid, out var entityIcon);
             _orbitRings.TryRemove(entityGuid, out var orbitIcon);
             _moveIcons.TryRemove(entityGuid, out var moveIcon);
-
-            lock (_allLabels)
-            {
-                _allLabels.RemoveWhere(x => x.Entity.Id == entityGuid);
-            }
+            _interactable.TryRemove(entityGuid, out _);
+            _bodyIcons.TryRemove(entityGuid, out _);
+            _allLabels.RemoveWhere(x => x.Entity.Id == entityGuid);
         }
-
 
         public void UpdateUserOrbitSettings()
         {
@@ -471,27 +502,38 @@ namespace Pulsar4X.Client.Rendering
             foreach (var (_, item) in _entityIcons)
                 item.OnFrameUpdate(matrix, _camera);
 
+            foreach (var (_, item) in _bodyIcons)
+                item.OnFrameUpdate(matrix, _camera);
+
             foreach (var item in SelectedEntityExtras)
                 item.OnFrameUpdate(matrix, _camera);
 
+            foreach (var item in _allLabels)
+                item.OnFrameUpdate(matrix, _camera);
 
-            var prefs = SystemViewPreferences.GetInstance();
-            HashSet<EntityLabel> visible = new ();
-
-            lock (_allLabels)
+            if (_panned)
             {
-                foreach (var i in _allLabels)
+                _panned = false;
+
+                foreach (var item in _interactable.Values)
                 {
-                    var type = Utils.EntityBodyType(i.Entity);
-                    if (!prefs.ShouldDisplay("map", type))
-                        continue;
-
-                    visible.Add(i);
-
-                    i.OnFrameUpdate(matrix, _camera);
+                    foreach (var i in item)
+                        i.IsDisabled = true;
                 }
 
-                _labels = _distributor(visible).ToArray();
+                _visibleLabels.Clear();
+                foreach (var i in _distributor(_allLabels))
+                {
+                    foreach (var j in _interactable[i.Entity.Id])
+                        j.IsDisabled = false;
+                    _visibleLabels.Add(i);
+                }
+
+                _interactableGrouped = _interactable
+                    .Values
+                    .SelectMany(x => x)
+                    .GroupBy(x => x.Item.Priority)
+                    .OrderByDescending(x => x.Key);
             }
         }
 
@@ -501,15 +543,18 @@ namespace Pulsar4X.Client.Rendering
             DrawFilteredIcons(_orbitRings);
             DrawFilteredIcons(_moveIcons);
             DrawFilteredIcons(_entityIcons);
+            DrawFilteredIcons(_bodyIcons);
             DrawIcons(SelectedEntityExtras);
-        }
 
-        internal void DrawNameIcons()
-        {
-            lock (_labels)
+            var prefs = SystemViewPreferences.GetInstance();
+
+            foreach (var i in _visibleLabels)
             {
-                foreach (var i in _labels)
-                    i.Draw(_window.Renderer, _camera);
+                var type = Utils.EntityBodyType(i.Entity);
+                if (!prefs.ShouldDisplay("map", type))
+                    continue;
+
+                i.Draw(_window.Renderer, _camera);
             }
         }
 

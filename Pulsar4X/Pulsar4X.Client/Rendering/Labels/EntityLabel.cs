@@ -188,18 +188,14 @@ namespace Pulsar4X.Client
             return Rect.Contains(point);
         }
 
-        private void UpdateRectLocation(int x, int y)
-        {
-            _nameRect.X = x;
-            _nameRect.Y = y;
-
-            Rect.Location = new (x - Padding, y - Padding);
-        }
-
         public void OnFrameUpdate(Matrix matrix, Camera camera)
         {
             var point = camera.ViewCoordinate_m(_positionDB.AbsolutePosition);
-            UpdateRectLocation(point.X, point.Y);
+
+            _nameRect.X = (int)(point.X - _nameRect.W / 2);
+            _nameRect.Y = (int)(point.Y + _nameRect.H);
+
+            Rect.Location = new (_nameRect.X - Padding, _nameRect.Y - Padding);
 
             OnFrameUpdateExt(matrix, camera);
         }
@@ -271,13 +267,6 @@ namespace Pulsar4X.Client
             SDL.RenderTexture(rendererPtr, _nameTexture, IntPtr.Zero, in _nameRect);
 
             DrawExt(rendererPtr, camera);
-        }
-
-        // TODO: Calculate this based on icon size. Option for top, bottom, left, right maybe?
-        public void ApplyIconOffset() {
-            UpdateRectLocation(
-                    (int)(_nameRect.X - _nameRect.W / 2),
-                    (int)(_nameRect.Y + _nameRect.H));
         }
     }
 }
