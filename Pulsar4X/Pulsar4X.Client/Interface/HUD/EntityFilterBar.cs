@@ -13,7 +13,7 @@ public class EntityFilterBar : PulsarGuiWindow
 {
     private const string ViewKey = "map";
 
-    private static readonly List<(UserOrbitSettings.OrbitBodyType type, string label, string tooltip)> Filters = new ()
+    private static readonly (UserOrbitSettings.OrbitBodyType type, string label, string tooltip)[] Filters = new []
     {
         (UserOrbitSettings.OrbitBodyType.Star,        "*", "Stars"),
         (UserOrbitSettings.OrbitBodyType.Planet,      "P", "Planets"),
@@ -59,7 +59,7 @@ public class EntityFilterBar : PulsarGuiWindow
 
         if (Window.Begin("###entity-filter-bar", _flags))
         {
-            for (int i = 0; i < Filters.Count; i++)
+            for (int i = 0; i < Filters.Length; i++)
             {
                 var (type, label, tooltip) = Filters[i];
                 bool isVisible = prefs.ShouldDisplay(ViewKey, type);
@@ -99,6 +99,6 @@ public class EntityFilterBar : PulsarGuiWindow
     private float EstimateWidth()
     {
         // Rough estimate: each small button is ~16px + 2px spacing
-        return Filters.Count * 18 + 8;
+        return Filters.Length * 18 + 8;
     }
 }
