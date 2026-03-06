@@ -100,6 +100,7 @@ namespace Pulsar4X.Client
             catch(Exception e)
             {
                 Console.WriteLine($"Error setting up game data: {e.Message}");
+                Trace.WriteLine($"Error setting up game data: {e}");
             }
 
             _debugSDLFontHeight = SDL3.TTF.GetFontHeight(Styles.SDLDefaultFont);
@@ -113,7 +114,11 @@ namespace Pulsar4X.Client
             var defaultFontSize = 13f;
 
             Trace.WriteLine("loading font: " + defaultFontPath);
+            if (!File.Exists(defaultFontPath))
+                Trace.WriteLine("WARNING: font file does not exist: " + defaultFontPath);
             Styles.SDLDefaultFont = SDL3.TTF.OpenFont(defaultFontPath, 16f); // FIXME: set this and imgui font to same size. 13f looks terrible.
+            if (Styles.SDLDefaultFont == IntPtr.Zero)
+                Trace.WriteLine("WARNING: TTF.OpenFont failed: " + SDL.GetError());
             Styles.DefaultFont = PlatformBackend.LoadFont(ResourcesPath, defaultFont, defaultFontSize);
 
             PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ", true);
@@ -409,7 +414,9 @@ namespace Pulsar4X.Client
                     _theme = Styles.Theme;
                     break;
                 default:
-                    throw new Exception("Invalid theme: " + themeEnabled);
+                    Trace.WriteLine("WARNING: Unrecognized theme '" + themeEnabled + "', falling back to default");
+                    _theme = Styles.Theme;
+                    break;
             }
         }
 
