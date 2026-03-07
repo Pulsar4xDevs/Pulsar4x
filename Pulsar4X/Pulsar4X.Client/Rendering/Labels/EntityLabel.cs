@@ -71,12 +71,14 @@ namespace Pulsar4X.Client
 
         private Task OnEntityRenamed(Message message)
         {
-            _name = _nameDB.GetName(_faction);
+            if (_nameDB != null)
+                _name = _nameDB.GetName(_faction);
 
-            int h;
-            int w;
-            SDL3.TTF.GetStringSize(Styles.SDLDefaultFont, _name, 0, out w, out h);
-            _nameRect.W = w;
+            if (Styles.SDLDefaultFont != IntPtr.Zero && !string.IsNullOrEmpty(_name))
+            {
+                SDL3.TTF.GetStringSize(Styles.SDLDefaultFont, _name, 0, out int w, out _);
+                _nameRect.W = w;
+            }
 
             OnPaddingUpdate();
 
@@ -104,11 +106,7 @@ namespace Pulsar4X.Client
             if (entity.TryGetDataBlob<PositionDB>(out PositionDB j))
                 _positionDB = j;
 
-            // TODO: better colors
-            var clr = (_entity.FactionOwnerID == Game.NeutralFactionId) ?
-                Styles.NeutralColor :
-                Styles.StandardText;
-            _color = Helpers.Vector4ToSDLColor(clr);
+            SetColor();
 
             if(entity.Manager != null)
             {
@@ -116,7 +114,8 @@ namespace Pulsar4X.Client
                 _starSysGuid = starSys.ID;
             }
 
-            _nameRect.H = SDL3.TTF.GetFontHeight(Styles.SDLDefaultFont);
+            if (Styles.SDLDefaultFont != IntPtr.Zero)
+                _nameRect.H = SDL3.TTF.GetFontHeight(Styles.SDLDefaultFont);
             OnEntityRenamed(null);
 
             // Subscribe to name changes
@@ -129,10 +128,20 @@ namespace Pulsar4X.Client
             DestroyName();
         }
 
+        private void SetColor()
+        {
+            _color = (_entity.FactionOwnerID == Game.NeutralFactionId) ?
+                Styles.NeutralColor.ToSDLColor() :
+                (_state != null && _entity.FactionOwnerID != _state.Faction?.Id) ?
+                Styles.BadColor.ToSDLColor() :
+                Styles.Theme.Text.ToSDLColor();
+        }
+
         protected GlobalUIState? _state = null;
         public void AttachState(GlobalUIState state)
         {
             _state = state;
+            SetColor();
         }
 
         private bool _hovered = false;
@@ -182,18 +191,14 @@ namespace Pulsar4X.Client
             return Rect.Contains(point);
         }
 
-        private void UpdateRectLocation(int x, int y)
-        {
-            _nameRect.X = x;
-            _nameRect.Y = y;
-
-            Rect.Location = new (x - Padding, y - Padding);
-        }
-
         public void OnFrameUpdate(Matrix matrix, Camera camera)
         {
             var point = camera.ViewCoordinate_m(_positionDB.AbsolutePosition);
-            UpdateRectLocation(point.X, point.Y);
+
+            _nameRect.X = (int)(point.X - _nameRect.W / 2);
+            _nameRect.Y = (int)(point.Y + _nameRect.H);
+
+            Rect.Location = new (_nameRect.X - Padding, _nameRect.Y - Padding);
 
             OnFrameUpdateExt(matrix, camera);
         }
@@ -236,11 +241,16 @@ namespace Pulsar4X.Client
                 byte r, g, b, a;
                 SDL.GetRenderDrawColor(rendererPtr, out r, out g, out b, out a);
 
-                // TODO: Move these somewhere else
                 if (_pressed)
-                    SDL.SetRenderDrawColor(rendererPtr, 128, 255, 0, 127);
-                else
-                    SDL.SetRenderDrawColor(rendererPtr, 0, 128, 128, 127);
+                {
+                    var c = Styles.Theme.ButtonActive;
+                    SDL.SetRenderDrawColor(rendererPtr, c.R, c.G, c.B, c.A);
+                }
+                else if (_hovered)
+                {
+                    var c = Styles.Theme.ButtonHovered;
+                    SDL.SetRenderDrawColor(rendererPtr, c.R, c.G, c.B, c.A);
+                }
 
                 SDL.FRect frect = new () {
                     X = Rect.X,
@@ -260,13 +270,6 @@ namespace Pulsar4X.Client
             SDL.RenderTexture(rendererPtr, _nameTexture, IntPtr.Zero, in _nameRect);
 
             DrawExt(rendererPtr, camera);
-        }
-
-        // TODO: Calculate this based on icon size. Option for top, bottom, left, right maybe?
-        public void ApplyIconOffset() {
-            UpdateRectLocation(
-                    (int)(_nameRect.X - _nameRect.W / 2),
-                    (int)(_nameRect.Y + _nameRect.H));
         }
     }
 }

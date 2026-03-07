@@ -72,8 +72,6 @@ namespace Pulsar4X.Client
         internal GalacticMapRender? GalacticMap;
         internal SafeList<UpdateWindowState> UpdateableWindows = new ();
         internal DateTime LastGameUpdateTime = new ();
-        internal DateTime LastZoomTime = DateTime.MinValue;
-        internal bool IsRecentlyZoomed => (DateTime.Now - LastZoomTime).TotalMilliseconds < 150;
         internal StarSystem SelectedSystem => StarSystemStates[SelectedStarSystemId].StarSystem;
         internal SystemState SelectedSystemState => StarSystemStates[SelectedStarSystemId];
         internal DateTime SelectedSystemTime => StarSystemStates[SelectedStarSystemId].StarSystem.StarSysDateTime;
@@ -116,13 +114,6 @@ namespace Pulsar4X.Client
         private bool _isDraggingNode = false;
 
         internal View? SelectedMapView { get; set; } = null;
-
-        /// <summary>
-        /// True when the mouse is hovering over a map overlay (like name icons) that should
-        /// allow scroll wheel input to pass through to the map for zooming.
-        /// This is set during rendering and checked during the next frame's event handling.
-        /// </summary>
-        internal bool IsMouseOverMapOverlay = false;
 
         // Game Settings
         internal GameSettings GameSettings { get; set; }
@@ -286,8 +277,6 @@ namespace Pulsar4X.Client
                 }
             };
             mainWin.MouseWheelOccured += (object sender, SDL.Event e) => {
-                LastZoomTime = DateTime.Now;
-
                 if (e.Wheel.Y > 0)
                     Camera.ZoomIn((int)e.Wheel.MouseX, (int)e.Wheel.MouseY);
                 else if (e.Wheel.Y < 0)

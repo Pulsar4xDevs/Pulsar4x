@@ -58,9 +58,6 @@ namespace Pulsar4X.Client
                     .OrderBy(x => x.Key);
                 var first = (EntityLabelExtCombo)grp.First().Take(1).First();
 
-                // Offset entity icon
-                first.ApplyIconOffset();
-
                 // FIXME: eww
                 var s = new HashSet<Entity>();
                 for (int i = 0; i < grp.Count(); i++)
@@ -96,9 +93,6 @@ namespace Pulsar4X.Client
 
             foreach (var item in labels)
             {
-                // Offset entity icon
-                item.ApplyIconOffset();
-
                 // Starting angle and search radius
                 float angle = 0;
                 float radius = 0;

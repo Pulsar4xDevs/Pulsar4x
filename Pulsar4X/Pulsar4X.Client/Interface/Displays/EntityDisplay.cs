@@ -92,9 +92,9 @@ namespace Pulsar4X.Client
                     if(entity.TryGetDataBlob<CargoStorageDB>(out var storage))
                     {
                         var size = ImGui.GetContentRegionAvail();
-                        ImGui.PushStyleColor(ImGuiCol.Button, Styles.SelectedColor);
-                        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Styles.SelectedColorHover);
-                        ImGui.PushStyleColor(ImGuiCol.ButtonActive, Styles.SelectedColorActive);
+                        ImGui.PushStyleColor(ImGuiCol.Button, Styles.Theme.Button.ToImVector4());
+                        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Styles.Theme.ButtonHovered.ToImVector4());
+                        ImGui.PushStyleColor(ImGuiCol.ButtonActive, Styles.Theme.ButtonActive.ToImVector4());
                         if(ImGui.Button("Initiate Transfer", new Vector2(size.X - 8, 18)))
                         {
                             CreateTransferWindow.GetInstance().SetLeft(entity);

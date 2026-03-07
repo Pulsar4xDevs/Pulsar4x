@@ -1,9 +1,11 @@
 ﻿using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using SDL3;
+using Pulsar4X.Movement;
+using System;
+
 using Point = SDL3.SDL.Point;
 using Vector2 = Pulsar4X.Orbital.Vector2;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
@@ -296,6 +298,8 @@ namespace Pulsar4X.Client
             return new Orbital.Vector2(viewSize.X / ZoomLevel, viewSize.Y / ZoomLevel);
         }
 
+        internal event EventHandler<float> ZoomOccured;
+        internal event EventHandler<Vector3> PanOccured;
 
         /// <summary>
         /// Offset the position of the camare i.e. Pan in world units.
@@ -304,9 +308,9 @@ namespace Pulsar4X.Client
         /// </summary>
         public void WorldOffset_m(double xOffset, double yOffset)
         {
-
             _camWorldPos_m.X += (float)(xOffset * UniversalConstants.Units.MetersPerAu / ZoomLevel);
             _camWorldPos_m.Y += (float)(-yOffset * UniversalConstants.Units.MetersPerAu / ZoomLevel);
+            PanOccured?.Invoke(this, _camWorldPos_m);
         }
 
 
@@ -323,6 +327,7 @@ namespace Pulsar4X.Client
                 double xOffset = mouseX - ViewPortCenter.X - (mouseX - ViewPortCenter.X) * zoomSpeed;
                 double yOffset = mouseY - ViewPortCenter.Y - (mouseY - ViewPortCenter.Y) * zoomSpeed;
                 WorldOffset_m(-xOffset, -yOffset);
+                ZoomOccured?.Invoke(this, ZoomLevel);
             }
         }
 
@@ -341,6 +346,7 @@ namespace Pulsar4X.Client
                 double xOffset = mouseX - ViewPortCenter.X - (mouseX - ViewPortCenter.X) / zoomSpeed;
                 double yOffset = mouseY - ViewPortCenter.Y - (mouseY - ViewPortCenter.Y) / zoomSpeed;
                 WorldOffset_m(-xOffset, -yOffset);
+                ZoomOccured?.Invoke(this, ZoomLevel);
             }
         }
 

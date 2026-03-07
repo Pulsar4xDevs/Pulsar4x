@@ -175,19 +175,6 @@ namespace Pulsar4X.Client
             c.DateTimeFormat = CultureInfo.GetCultureInfo(cultureName).DateTimeFormat;
             CultureInfo.CurrentCulture = c;
         }
-
-        public static byte ColorFloatToByte(float f) =>
-            (byte)MathF.Floor(f >= 1 ? 255 : f * 256);
-
-        public static SDL.Color Vector4ToSDLColor(Vector4 vec)
-        {
-            return new () {
-                R = ColorFloatToByte(vec.W),
-                G = ColorFloatToByte(vec.X),
-                B = ColorFloatToByte(vec.Y),
-                A = ColorFloatToByte(vec.Z)
-            };
-        }
     }
 
     public static class BorderListOptions

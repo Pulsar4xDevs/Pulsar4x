@@ -13,6 +13,7 @@ namespace Pulsar4X.Client
         public IInteractable Item;
         public bool IsHovered = false;
         public bool IsPressed = false;
+        public bool IsDisabled = false;
 
         public InteractableState(IInteractable item)
         {

@@ -1,10 +1,13 @@
-using System;
-using System.Runtime.InteropServices;
+using Pulsar4X.Colonies;
 using Pulsar4X.Engine;
 using Pulsar4X.Galaxy;
-using Pulsar4X.Colonies;
-using Pulsar4X.Ships;
 using Pulsar4X.Names;
+using Pulsar4X.Ships;
+using SDL3;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System;
+using System.Drawing;
 
 namespace Pulsar4X.Client;
 
@@ -196,5 +199,12 @@ public static class Utils
         if (entity.TryGetDataBlob<NameDB>(out NameDB nDB))
             s = nDB.GetName(f);
         return s;
+    }
+
+    internal static IEnumerable<SDL.DisplayMode> GetDisplayModes()
+    {
+        foreach (var i in SDL.GetDisplays(out _))
+            foreach (var j in SDL.GetFullscreenDisplayModes(i, out _))
+                yield return j;
     }
 }

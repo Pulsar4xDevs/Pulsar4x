@@ -1,10 +1,34 @@
 using System.Numerics;
+using System.Drawing;
 using ImGuiNET;
 
 namespace Pulsar4X.Client.Interface.Themes;
 
 public class FuturisticTheme : ITheme
 {
+    // Text
+    public Color Text {
+        // Bright but not pure white
+        get => Color.FromArgb(255, 217, 217, 217);
+    }
+    public Color TextDisabled {
+        get => Color.Gray;
+    }
+
+    // Buttons and interactive elements
+    public Color Button {
+        // Semi-transparent blue
+        get => Color.FromArgb(102, 38, 71, 120);
+    }
+    public Color ButtonHovered {
+        // Brighter blue glow
+        get => Color.FromArgb(161, 61, 117, 250);
+    }
+    public Color ButtonActive {
+        // Brightest when clicked
+        get => Color.FromArgb(242, 99, 156, 255);
+    }
+
     public void Apply()
     {
         var style = ImGui.GetStyle();
@@ -17,8 +41,8 @@ public class FuturisticTheme : ITheme
         colors[(int)ImGuiCol.BorderShadow] = new Vector4(0.00f, 0.00f, 0.00f, 0.00f);  // No shadow
 
         // Text
-        colors[(int)ImGuiCol.Text] = new Vector4(0.85f, 0.85f, 0.85f, 1.00f);          // Bright but not pure white
-        colors[(int)ImGuiCol.TextDisabled] = new Vector4(0.50f, 0.50f, 0.50f, 1.00f);  // Gray
+        colors[(int)ImGuiCol.Text] = Text.ToImVector4();
+        colors[(int)ImGuiCol.TextDisabled] = TextDisabled.ToImVector4();
 
         // Headers and titlebars
         colors[(int)ImGuiCol.TitleBg] = new Vector4(0.04f, 0.04f, 0.08f, 1.00f);       // Dark background
@@ -26,9 +50,9 @@ public class FuturisticTheme : ITheme
         colors[(int)ImGuiCol.TitleBgCollapsed] = new Vector4(0.00f, 0.00f, 0.00f, 0.51f);
 
         // Buttons and interactive elements
-        colors[(int)ImGuiCol.Button] = new Vector4(0.15f, 0.28f, 0.47f, 0.40f);        // Semi-transparent blue
-        colors[(int)ImGuiCol.ButtonHovered] = new Vector4(0.24f, 0.46f, 0.98f, 0.63f);  // Brighter blue glow
-        colors[(int)ImGuiCol.ButtonActive] = new Vector4(0.39f, 0.61f, 1.00f, 0.95f);   // Brightest when clicked
+        colors[(int)ImGuiCol.Button] = Button.ToImVector4();
+        colors[(int)ImGuiCol.ButtonHovered] = ButtonHovered.ToImVector4();
+        colors[(int)ImGuiCol.ButtonActive] = ButtonActive.ToImVector4();
 
         // Frame backgrounds (for checkbox, radio button, plot, slider, text input)
         colors[(int)ImGuiCol.FrameBg] = new Vector4(0.15f, 0.15f, 0.22f, 0.54f);       // Subtle contrast

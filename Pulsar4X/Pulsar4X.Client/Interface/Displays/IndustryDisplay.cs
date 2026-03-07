@@ -545,7 +545,14 @@ namespace Pulsar4X.Client
         {
             var invisButtonSize = new Vector2(15, 15);
             ImGui.PushID(jobID.ToString());
-            if(line.Jobs.IndexOf(line.Jobs.First(j => j.JobID == jobID)) > 0)
+            var matchingJob = line.Jobs.FirstOrDefault(j => j.JobID == jobID);
+            if (matchingJob == null)
+            {
+                ImGui.PopID();
+                return;
+            }
+            int jobIndex = line.Jobs.IndexOf(matchingJob);
+            if(jobIndex > 0)
             {
                 if (ImGui.SmallButton("^") && Entity != null)
                 {
@@ -561,7 +568,7 @@ namespace Pulsar4X.Client
             }
             ImGui.SameLine();
 
-            if(line.Jobs.IndexOf(line.Jobs.First(j => j.JobID == jobID)) < line.Jobs.Count - 1)
+            if(jobIndex < line.Jobs.Count - 1)
             {
                 if (ImGui.SmallButton("v") && Entity != null)
                 {
