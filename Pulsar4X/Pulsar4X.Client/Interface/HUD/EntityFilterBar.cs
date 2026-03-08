@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
+using System;
 
 namespace Pulsar4X.Client;
 
@@ -12,19 +13,6 @@ namespace Pulsar4X.Client;
 public class EntityFilterBar : PulsarGuiWindow
 {
     private const string ViewKey = "map";
-
-    private static readonly (UserOrbitSettings.OrbitBodyType type, string label, string tooltip)[] Filters = new []
-    {
-        (UserOrbitSettings.OrbitBodyType.Star,        "*", "Stars"),
-        (UserOrbitSettings.OrbitBodyType.Planet,      "P", "Planets"),
-        (UserOrbitSettings.OrbitBodyType.DwarfPlanet, "D", "Dwarf Planets"),
-        (UserOrbitSettings.OrbitBodyType.Moon,        "M", "Moons"),
-        (UserOrbitSettings.OrbitBodyType.Asteroid,    "A", "Asteroids"),
-        (UserOrbitSettings.OrbitBodyType.Comet,       "C", "Comets"),
-        (UserOrbitSettings.OrbitBodyType.Colony,      "H", "Colonies"),
-        (UserOrbitSettings.OrbitBodyType.Ship,        "S", "Ships"),
-        (UserOrbitSettings.OrbitBodyType.Unknown,     "?", "Unknown"),
-    };
 
     private EntityFilterBar()
     {
@@ -59,12 +47,12 @@ public class EntityFilterBar : PulsarGuiWindow
 
         if (Window.Begin("###entity-filter-bar", _flags))
         {
-            for (int i = 0; i < Filters.Length; i++)
+            foreach (UserOrbitSettings.OrbitBodyType type in Enum.GetValues(typeof(UserOrbitSettings.OrbitBodyType)))
             {
-                var (type, label, tooltip) = Filters[i];
                 bool isVisible = prefs.ShouldDisplay(ViewKey, type);
 
-                if (i > 0) ImGui.SameLine(0, 2);
+                var idx = (int)type;
+                if (idx > 0) ImGui.SameLine(0, 2);
 
                 // Style: bright when active, dim when filtered out
                 if (isVisible)
@@ -80,6 +68,8 @@ public class EntityFilterBar : PulsarGuiWindow
                     ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 0.8f));
                 }
 
+                var label = UserOrbitSettings.OrbitBodyTypeShortNames[idx];
+
                 if (ImGui.SmallButton($"{label}##filter-{type}"))
                 {
                     prefs.ToggleFilter(ViewKey, type);
@@ -89,7 +79,8 @@ public class EntityFilterBar : PulsarGuiWindow
 
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip(isVisible ? $"Hide {tooltip}" : $"Show {tooltip}");
+                    var tip = UserOrbitSettings.OrbitBodyTypeTooltips[idx];
+                    ImGui.SetTooltip(isVisible ? $"Hide {tip}" : $"Show {tip}");
                 }
             }
         }
@@ -99,6 +90,6 @@ public class EntityFilterBar : PulsarGuiWindow
     private float EstimateWidth()
     {
         // Rough estimate: each small button is ~16px + 2px spacing
-        return Filters.Length * 18 + 8;
+        return Utils.EnumEntries<UserOrbitSettings.OrbitBodyType>() * 18 + 8;
     }
 }

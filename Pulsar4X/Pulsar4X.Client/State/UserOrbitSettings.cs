@@ -17,6 +17,17 @@ public class UserOrbitSettings
         Ship
     }
 
+    public static readonly string[] OrbitBodyTypeTooltips = new []
+    {
+        "Unknown", "Stars", "Planets", "Dwarf Planets", "Moons", "Asteroids",
+        "Comets", "Colonies", "Ships"
+    };
+
+    public static readonly string[] OrbitBodyTypeShortNames = new []
+    {
+        "?", "*", "P", "D", "M", "A", "C", "H", "S"
+    };
+
     internal enum OrbitTrajectoryType
     {
         Unknown,
