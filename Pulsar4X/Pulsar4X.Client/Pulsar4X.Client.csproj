@@ -84,10 +84,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="SDL3-CS" Version="3.3.7" />
-    <PackageReference Include="SDL3-CS.Native" Version="3.3.7" />
-    <PackageReference Include="SDL3-CS.Native.Image" Version="3.3.2-preview.20260112-124645" />
-    <PackageReference Include="SDL3-CS.Native.TTF" Version="3.3.0-preview.20260112-124039" />
     <ProjectReference Include="..\external\ImGui.NET\src\ImGui.NET\ImGui.NET.csproj" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="7.0.0" />
   </ItemGroup>
@@ -124,6 +120,42 @@
     <None Update="imgui.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Libs\SDL3\libSDL3.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Libs\SDL3\libSDL3.so.0">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Libs\SDL3\libSDL3.so.0.5.0">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Libs\SDL3\libSDL3_image.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Libs\SDL3\libSDL3_image.so.0">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Libs\SDL3\libSDL3_image.so.0.5.0">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Libs\SDL3\libSDL3_ttf.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Libs\SDL3\libSDL3_ttf.so.0">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Libs\SDL3\libSDL3_ttf.so.0.3.0">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Libs\SDL3\SDL3-CS.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="SDL3-CS">
+      <HintPath>..\Libs\SDL3\Pulsar4x-SDL3_LinuxDeps\output\SDL3-CS.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <PropertyGroup>
