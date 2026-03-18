@@ -46,6 +46,8 @@ public class SystemViewPreferences : PulsarGuiWindow
 
     Dictionary<string, int> ViewIndexes { get; set; } = new ();
 
+    internal event EventHandler<View> ViewUpdateOccured;
+
     public int GetViewIndex(string key)
     {
         if(!ViewIndexes.ContainsKey(key))
@@ -75,6 +77,7 @@ public class SystemViewPreferences : PulsarGuiWindow
         var view = Views[viewIndex];
         view.FilterCheckmarks[orbitBodyType] = !view.FilterCheckmarks[orbitBodyType];
         SaveViewIni(view);
+        ViewUpdateOccured?.Invoke(this, view);
     }
 
     internal static SystemViewPreferences GetInstance()
@@ -337,6 +340,7 @@ public class SystemViewPreferences : PulsarGuiWindow
                     SaveViewIni(view);
                     LoadAllIni();
                     _showModal = false;
+                    ViewUpdateOccured?.Invoke(this, view);
                 }, delegate
                 {
                     // Cancel was clicked
@@ -357,6 +361,7 @@ public class SystemViewPreferences : PulsarGuiWindow
                 {
                     Views[_selectedEditorViewIndex].FilterCheckmarks[type] = isChecked;
                     SaveViewIni(Views[_selectedEditorViewIndex]);
+                    ViewUpdateOccured?.Invoke(this, Views[_selectedEditorViewIndex]);
                 }
             }
         }
