@@ -33,19 +33,6 @@ public class SystemViewPreferences : PulsarGuiWindow
 
     private const string DefaultFileName = "default.ini";
 
-    readonly Dictionary<UserOrbitSettings.OrbitBodyType, string> FilterDisplayOptions = new ()
-    {
-        { UserOrbitSettings.OrbitBodyType.Asteroid, "Asteroids" },
-        { UserOrbitSettings.OrbitBodyType.Colony, "Colonies" },
-        { UserOrbitSettings.OrbitBodyType.Comet, "Comets" },
-        { UserOrbitSettings.OrbitBodyType.Moon, "Moons" },
-        { UserOrbitSettings.OrbitBodyType.Planet, "Planets" },
-        { UserOrbitSettings.OrbitBodyType.DwarfPlanet, "Dwarf Planets" },
-        { UserOrbitSettings.OrbitBodyType.Ship, "Ships" },
-        { UserOrbitSettings.OrbitBodyType.Star, "Stars" },
-        { UserOrbitSettings.OrbitBodyType.Unknown, "Unknown Objects" }
-    };
-
     Dictionary<int, View> Views = new ();
     int _selectedEditorViewIndex = 0;
     string[]? _selectedEditorViewNames;
@@ -58,6 +45,8 @@ public class SystemViewPreferences : PulsarGuiWindow
     }
 
     Dictionary<string, int> ViewIndexes { get; set; } = new ();
+
+    internal event EventHandler<View> ViewUpdateOccured;
 
     public int GetViewIndex(string key)
     {
@@ -88,6 +77,7 @@ public class SystemViewPreferences : PulsarGuiWindow
         var view = Views[viewIndex];
         view.FilterCheckmarks[orbitBodyType] = !view.FilterCheckmarks[orbitBodyType];
         SaveViewIni(view);
+        ViewUpdateOccured?.Invoke(this, view);
     }
 
     internal static SystemViewPreferences GetInstance()
@@ -350,6 +340,7 @@ public class SystemViewPreferences : PulsarGuiWindow
                     SaveViewIni(view);
                     LoadAllIni();
                     _showModal = false;
+                    ViewUpdateOccured?.Invoke(this, view);
                 }, delegate
                 {
                     // Cancel was clicked
@@ -360,13 +351,17 @@ public class SystemViewPreferences : PulsarGuiWindow
 
             ImGui.Separator();
 
-            foreach((var bodyType, var displayName) in FilterDisplayOptions)
+            foreach (UserOrbitSettings.OrbitBodyType type in Enum.GetValues(typeof(UserOrbitSettings.OrbitBodyType)))
             {
-                bool isChecked = Views[_selectedEditorViewIndex].FilterCheckmarks[bodyType];
-                if(ImGui.Checkbox(displayName, ref isChecked))
+                var idx = (int)type;
+                var tip = UserOrbitSettings.OrbitBodyTypeTooltips[idx];
+
+                bool isChecked = Views[_selectedEditorViewIndex].FilterCheckmarks[type];
+                if(ImGui.Checkbox(tip, ref isChecked))
                 {
-                    Views[_selectedEditorViewIndex].FilterCheckmarks[bodyType] = isChecked;
+                    Views[_selectedEditorViewIndex].FilterCheckmarks[type] = isChecked;
                     SaveViewIni(Views[_selectedEditorViewIndex]);
+                    ViewUpdateOccured?.Invoke(this, Views[_selectedEditorViewIndex]);
                 }
             }
         }
