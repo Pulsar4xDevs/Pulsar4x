@@ -113,8 +113,6 @@ namespace Pulsar4X.Client
         // Maneuver node dragging
         private bool _isDraggingNode = false;
 
-        internal View? SelectedMapView { get; set; } = null;
-
         // Game Settings
         internal GameSettings GameSettings { get; set; }
 
@@ -139,10 +137,10 @@ namespace Pulsar4X.Client
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Ship, 64f);
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Unknown, 16f);
 
-            for (int i = 0; i < (int)UserOrbitSettings.OrbitBodyType.NumberOf; i++)
+            for (int i = 0; i < Utils.EnumEntries<UserOrbitSettings.OrbitBodyType>(); i++)
             {
                 UserOrbitSettingsMtx.Add(new List<UserOrbitSettings>());
-                for (int j = 0; j < (int)UserOrbitSettings.OrbitTrajectoryType.NumberOf; j++)
+                for (int j = 0; j < Utils.EnumEntries<UserOrbitSettings.OrbitTrajectoryType>(); j++)
                 {
                     UserOrbitSettingsMtx[i].Add(new UserOrbitSettings());
                 }

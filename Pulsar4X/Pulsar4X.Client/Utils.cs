@@ -13,6 +13,9 @@ namespace Pulsar4X.Client;
 
 public static class Utils
 {
+    public static int EnumEntries<T>() where T : struct, System.Enum =>
+        Enum.GetNames(typeof(T)).Length;
+
     public static byte[] BytesFromString(string str, int sizeMax = 128)
     {
         byte[] dstArray = new byte[sizeMax];
