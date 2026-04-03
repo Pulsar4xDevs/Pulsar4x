@@ -15,7 +15,7 @@ TARGET_FRAMEWORK="net8.0"
 LANG_VERSION="12"                     # .NET 8 SDK max = C# 12
 
 BUILD_DIR="$(pwd)/build-dir"
-OUTPUT_DIR="$(pwd)/../../Pulsar4X.Client/Libs/SDL3"
+OUTPUT_DIR="$(pwd)/../../Pulsar4X.Client/Libs/linux-x64/"
 
 IMAGE="registry.gitlab.steamos.cloud/steamrt/sniper/sdk:latest"
 

@@ -84,24 +84,11 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\external\ImGui.NET\src\ImGui.NET\ImGui.NET.csproj" />
+
     <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="7.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
-  </ItemGroup>
-  <!-- Copy cimgui native library from ImGui.NET submodule based on host platform -->
-  <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
-    <Content Include="..\external\ImGui.NET\deps\cimgui\linux-x64\cimgui.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>cimgui.so</Link>
-    </Content>
-  </ItemGroup>
-  <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' ">
-    <Content Include="..\external\ImGui.NET\deps\cimgui\win-x64\cimgui.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>cimgui.dll</Link>
-    </Content>
   </ItemGroup>
   <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">
     <Content Include="..\external\ImGui.NET\deps\cimgui\osx\cimgui.dylib">
@@ -120,39 +107,20 @@
     <None Update="imgui.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Libs\SDL3\libSDL3.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Libs\SDL3\libSDL3.so.0">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Libs\SDL3\libSDL3.so.0.5.0">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Libs\SDL3\libSDL3_image.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Libs\SDL3\libSDL3_image.so.0">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Libs\SDL3\libSDL3_image.so.0.5.0">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Libs\SDL3\libSDL3_ttf.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Libs\SDL3\libSDL3_ttf.so.0">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Libs\SDL3\libSDL3_ttf.so.0.3.0">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Libs\SDL3\SDL3-CS.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
+    <ItemGroup>
+        <!-- Linux dependancies -->
+        <Content Include="Libs/linux-x64/*.so">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <Link>%(Filename)%(Extension)</Link>
+        </Content>
+    </ItemGroup>    
+
   <ItemGroup>
+    <Reference Include="ImGui.NET">
+      <HintPath>Libs\ImGui\ImGui.NET.dll</HintPath>
+    </Reference>
     <Reference Include="SDL3-CS">
       <HintPath>..\Libs\SDL3\Pulsar4x-SDL3_LinuxDeps\output\SDL3-CS.dll</HintPath>
     </Reference>
