@@ -110,19 +110,26 @@
   </ItemGroup>
 
     <ItemGroup>
-        <!-- Linux dependancies -->
+        <!-- Linux dependencies -->
         <Content Include="Libs/linux-x64/*.so">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
             <Link>%(Filename)%(Extension)</Link>
         </Content>
-    </ItemGroup>    
+    </ItemGroup>
+    <ItemGroup>
+        <!-- Windows dependencies -->
+        <Content Include="Libs/win-x64/*.dll" Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' ">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <Link>%(Filename)%(Extension)</Link>
+        </Content>
+    </ItemGroup>
 
   <ItemGroup>
     <Reference Include="ImGui.NET">
       <HintPath>Libs\ImGui\ImGui.NET.dll</HintPath>
     </Reference>
     <Reference Include="SDL3-CS">
-      <HintPath>..\Libs\SDL3\Pulsar4x-SDL3_LinuxDeps\output\SDL3-CS.dll</HintPath>
+      <HintPath>Libs\linux-x64\SDL3-CS.dll</HintPath>
     </Reference>
   </ItemGroup>
 
