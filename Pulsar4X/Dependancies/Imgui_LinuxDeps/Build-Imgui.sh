@@ -7,11 +7,12 @@
 set -euo pipefail
 
 # ================== CONFIGURATION ==================
-CIMGUI_BRANCH="master"         # ImGui.NET-nativebuild branch
-IMGUI_NET_BRANCH="master"      # ImGui.NET branch
+CIMGUI_BRANCH="v1.92.7"        # ImGui.NET-nativebuild tag
+IMGUI_NET_BRANCH="v1.92.7"     # ImGui.NET tag
 
-BUILD_DIR="$(pwd)/build-dir"
-OUTPUT_DIR="$(pwd)/../../Pulsar4X.Client/Libs/linux-x64"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BUILD_DIR="$SCRIPT_DIR/build-dir"
+OUTPUT_DIR="$SCRIPT_DIR/../../Pulsar4X.Client/Libs/linux-x64"
 
 IMAGE="registry.gitlab.steamos.cloud/steamrt/sniper/sdk:latest"
 
@@ -63,10 +64,10 @@ docker run --rm \
     cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON \
              -DIMGUI_IMPL_SDL=ON -DIMGUI_IMPL_OPENGL3=ON
     make -j\$(nproc)
-    
+
     echo 'Looking for cimgui output files...'
         ls -la .  # feedback to see what's actually there
-    
+
     cp cimgui.so* /output/
 
     cd /work
