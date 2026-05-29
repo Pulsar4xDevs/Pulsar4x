@@ -727,38 +727,42 @@
         },
         {
           "Name": "Min Gravity",
-          "DescriptionFormula": "'Lowest surface gravity (m/s²) this infrastructure can operate in. Earth standard is 9.81 m/s². At max Low-Gravity Habitat Engineering this can reach 0 m/s² (asteroids, comets).'",
-          "GuiHint": "GuiSelectionMaxMin",
-          "MaxFormula": "9.81",
+          "DescriptionFormula": "'Surface gravity range (m/s²) this infrastructure can operate in. Earth standard is 9.81 m/s². Drag the left/right handles to set the bounds; drag the bar between them to shift the whole range.'",
+          "GuiHint": "GuiSelectionMinMaxRange",
+          "PairedPropertyName": "Max Gravity",
+          "MaxFormula": "Min(100, 9.81 * (1.0 + TechData('tech-infra-gravity-range') + TechData('tech-infra-gravity-max-extension')))",
           "MinFormula": "Max(0, 9.81 * (1.0 - TechData('tech-infra-gravity-range') - TechData('tech-infra-gravity-min-extension')))",
-          "StepFormula": "0.05",
-          "PropertyFormula": "8.829"
+          "MaxRangeFormula": "9.81 * 2.0 * TechData('tech-infra-gravity-range')",
+          "StepFormula": "0.1",
+          "PropertyFormula": "8.8"
         },
         {
           "Name": "Max Gravity",
-          "DescriptionFormula": "'Highest surface gravity (m/s²) this infrastructure can operate in. Earth standard is 9.81 m/s². At max High-Gravity Habitat Engineering this can reach 100 m/s² (super-Earth worlds).'",
-          "GuiHint": "GuiSelectionMaxMin",
+          "DescriptionFormula": "'Upper bound of the gravity operating range. Configured via the Min Gravity range slider.'",
+          "GuiHint": "None",
           "MaxFormula": "Min(100, 9.81 * (1.0 + TechData('tech-infra-gravity-range') + TechData('tech-infra-gravity-max-extension')))",
-          "MinFormula": "9.81",
-          "StepFormula": "0.05",
-          "PropertyFormula": "10.791"
+          "MinFormula": "Max(0, 9.81 * (1.0 - TechData('tech-infra-gravity-range') - TechData('tech-infra-gravity-min-extension')))",
+          "StepFormula": "0.1",
+          "PropertyFormula": "10.8"
         },
         {
           "Name": "Min Pressure",
-          "DescriptionFormula": "'Lowest atmospheric pressure (Earth atmospheres) this infrastructure can operate in.'",
-          "GuiHint": "GuiSelectionMaxMin",
-          "MaxFormula": "1.0",
-          "MinFormula": "1.0 - TechData('tech-infra-pressure-range') - TechData('tech-infra-pressure-min-extension')",
-          "StepFormula": "0.01",
+          "DescriptionFormula": "'Atmospheric pressure range (Earth atmospheres) this infrastructure can operate in. Drag the handles to set the bounds; drag the bar between them to shift the whole range.'",
+          "GuiHint": "GuiSelectionMinMaxRange",
+          "PairedPropertyName": "Max Pressure",
+          "MaxFormula": "1.0 + TechData('tech-infra-pressure-range') + TechData('tech-infra-pressure-max-extension')",
+          "MinFormula": "Max(0, 1.0 - TechData('tech-infra-pressure-range') - TechData('tech-infra-pressure-min-extension'))",
+          "MaxRangeFormula": "2.0 * TechData('tech-infra-pressure-range')",
+          "StepFormula": "0.1",
           "PropertyFormula": "0.9"
         },
         {
           "Name": "Max Pressure",
-          "DescriptionFormula": "'Highest atmospheric pressure (Earth atmospheres) this infrastructure can operate in.'",
-          "GuiHint": "GuiSelectionMaxMin",
+          "DescriptionFormula": "'Upper bound of the pressure operating range. Configured via the Min Pressure range slider.'",
+          "GuiHint": "None",
           "MaxFormula": "1.0 + TechData('tech-infra-pressure-range') + TechData('tech-infra-pressure-max-extension')",
-          "MinFormula": "1.0",
-          "StepFormula": "0.01",
+          "MinFormula": "Max(0, 1.0 - TechData('tech-infra-pressure-range') - TechData('tech-infra-pressure-min-extension'))",
+          "StepFormula": "0.1",
           "PropertyFormula": "1.1"
         },
         {

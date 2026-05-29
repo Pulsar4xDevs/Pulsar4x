@@ -188,8 +188,18 @@ namespace Pulsar4X.Client
 
             if (_componentDesigner != null) //Make sure comp is selected
             {
+                // Build the set of properties consumed as "partners" by a range slider — don't render them on their own.
+                var pairedPartners = new HashSet<string>();
+                foreach (var p in _componentDesigner.ComponentDesignProperties.Values)
+                {
+                    if (p.GuiHint == GuiHint.GuiSelectionMinMaxRange && !string.IsNullOrEmpty(p.PairedPropertyName))
+                        pairedPartners.Add(p.PairedPropertyName);
+                }
+
                 foreach (ComponentDesignProperty attribute in _componentDesigner.ComponentDesignProperties.Values) //For each property of the comp type
                 {
+                    if (pairedPartners.Contains(attribute.Name)) continue;
+
                     ImGui.PushID(attribute.Name);
 
                     if (attribute.IsEnabled)
@@ -208,6 +218,9 @@ namespace Pulsar4X.Client
                                 break;
                             case GuiHint.GuiSelectionMaxMinInt:
                                 GuiHintMaxMinInt(attribute);
+                                break;
+                            case GuiHint.GuiSelectionMinMaxRange:
+                                GuiHintMinMaxRange(attribute);
                                 break;
                             case GuiHint.GuiTextDisplay: //Display a stat
                                 //GuiHintText(attribute);
@@ -559,6 +572,229 @@ namespace Pulsar4X.Client
                 property.SetValueFromInput(val);
             }
             ImGui.NewLine();
+        }
+
+        private void GuiHintMinMaxRange(ComponentDesignProperty lowProperty)
+        {
+            // Resolve the paired (upper-bound) property.
+            if (string.IsNullOrEmpty(lowProperty.PairedPropertyName)
+                || !_componentDesigner.ComponentDesignProperties.TryGetValue(
+                    lowProperty.PairedPropertyName, out var highProperty))
+            {
+                ImGui.TextColored(new Vector4(1f, 0.4f, 0.4f, 1f),
+                    $"[range slider misconfigured: '{lowProperty.Name}' has no PairedPropertyName]");
+                return;
+            }
+
+            lowProperty.SetMin(); lowProperty.SetMax(); lowProperty.SetStep();
+            lowProperty.SetMaxRange();
+            highProperty.SetMin(); highProperty.SetMax();
+
+            // The two properties share the same allowed band — the wider of the two ends wins.
+            double axisMin = Math.Min(lowProperty.MinValue, highProperty.MinValue);
+            double axisMax = Math.Max(lowProperty.MaxValue, highProperty.MaxValue);
+            double maxGap = lowProperty.MaxRangeValue;
+            if (axisMax <= axisMin)
+            {
+                ImGui.Text(lowProperty.Name + " / " + highProperty.Name + ": no range available");
+                return;
+            }
+
+            double lowVal = lowProperty.Value;
+            double highVal = highProperty.Value;
+
+            // Anchor X / width come from window state, not the cursor — cursor-based reads
+            // can drift between two consecutive widgets when something upstream leaves the
+            // cursor at a slightly different X, producing visibly misaligned tracks between
+            // the paired gravity and pressure sliders. Window pos/size are frame-stable.
+            float padX = ImGui.GetStyle().WindowPadding.X;
+            float widgetLeftAnchorX = ImGui.GetWindowPos().X + padX;
+            float widgetAvailWidth = ImGui.GetWindowSize().X - padX * 2f;
+
+            Title(lowProperty.Name + " ↔ " + highProperty.Name, lowProperty.Description);
+
+            float width = widgetAvailWidth;
+            const float TrackHeight = 8f;
+            const float HandleRadius = 8f;
+            // Edge padding leaves room for the value label to stay centered under a handle
+            // when the handle sits at the very end of the track.
+            const float Padding = 28f;
+            float trackY = ImGui.GetCursorScreenPos().Y + HandleRadius + 4f;
+            float trackLeftX = widgetLeftAnchorX + Padding;
+            float trackRightX = widgetLeftAnchorX + width - Padding;
+            float trackWidth = trackRightX - trackLeftX;
+            if (trackWidth < 1f) { ImGui.Dummy(new Vector2(width, 1f)); return; }
+
+            double ValueToPx(double v) => trackLeftX + (v - axisMin) / (axisMax - axisMin) * trackWidth;
+            double PxToValue(float x) => axisMin + (x - trackLeftX) / trackWidth * (axisMax - axisMin);
+            double PxDeltaToValue(float dx) => dx / trackWidth * (axisMax - axisMin);
+
+            float lowPx = (float)ValueToPx(lowVal);
+            float highPx = (float)ValueToPx(highVal);
+
+            var drawList = ImGui.GetWindowDrawList();
+            uint colTrack = ImGui.ColorConvertFloat4ToU32(new Vector4(0.20f, 0.20f, 0.24f, 1.0f));
+            uint colFill = ImGui.ColorConvertFloat4ToU32(new Vector4(0.30f, 0.65f, 1.00f, 0.85f));
+            uint colHandle = ImGui.ColorConvertFloat4ToU32(new Vector4(0.85f, 0.90f, 1.00f, 1.00f));
+            uint colHandleHover = ImGui.ColorConvertFloat4ToU32(new Vector4(1.00f, 1.00f, 1.00f, 1.00f));
+            uint colHandleOutline = ImGui.ColorConvertFloat4ToU32(new Vector4(0.10f, 0.15f, 0.25f, 1.00f));
+
+            drawList.AddRectFilled(
+                new Vector2(trackLeftX, trackY - TrackHeight * 0.5f),
+                new Vector2(trackRightX, trackY + TrackHeight * 0.5f),
+                colTrack, 2f);
+
+            drawList.AddRectFilled(
+                new Vector2(lowPx, trackY - TrackHeight * 0.5f),
+                new Vector2(highPx, trackY + TrackHeight * 0.5f),
+                colFill, 2f);
+
+            // Three invisible buttons for the three drag zones. Middle button sits BEHIND the handles
+            // so handle clicks win when they overlap.
+            var startCursor = ImGui.GetCursorPos();
+
+            // Mid (fill) drag — full track region between handles.
+            float midLeft = lowPx + HandleRadius;
+            float midRight = highPx - HandleRadius;
+            if (midRight > midLeft)
+            {
+                ImGui.SetCursorScreenPos(new Vector2(midLeft, trackY - TrackHeight));
+                ImGui.InvisibleButton("##midDrag" + lowProperty.Name,
+                    new Vector2(midRight - midLeft, TrackHeight * 2f));
+                if (ImGui.IsItemActive())
+                {
+                    float dx = ImGui.GetIO().MouseDelta.X;
+                    if (dx != 0)
+                    {
+                        double delta = PxDeltaToValue(dx);
+                        // Clamp so neither bound crosses the shared axis limits.
+                        double maxUp = axisMax - highVal;
+                        double maxDown = axisMin - lowVal;
+                        delta = Math.Clamp(delta, maxDown, maxUp);
+                        if (Math.Abs(delta) > 0)
+                        {
+                            lowProperty.SetValueFromInput(lowVal + delta);
+                            highProperty.SetValueFromInput(highVal + delta);
+                        }
+                    }
+                }
+                else if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Drag to shift the whole range");
+                }
+            }
+
+            // Left handle drag
+            ImGui.SetCursorScreenPos(new Vector2(lowPx - HandleRadius, trackY - HandleRadius));
+            ImGui.InvisibleButton("##lowHandle" + lowProperty.Name,
+                new Vector2(HandleRadius * 2f, HandleRadius * 2f));
+            bool lowHover = ImGui.IsItemHovered();
+            if (ImGui.IsItemActive())
+            {
+                float dx = ImGui.GetIO().MouseDelta.X;
+                if (dx != 0)
+                {
+                    // low must stay >= highVal - maxGap (gap constraint) AND >= axisMin AND <= highVal
+                    double lowFloor = Math.Max(axisMin, highVal - maxGap);
+                    double newLow = Math.Clamp(lowVal + PxDeltaToValue(dx), lowFloor, highVal);
+                    lowProperty.SetValueFromInput(newLow);
+                }
+            }
+
+            // Right handle drag
+            ImGui.SetCursorScreenPos(new Vector2(highPx - HandleRadius, trackY - HandleRadius));
+            ImGui.InvisibleButton("##highHandle" + lowProperty.Name,
+                new Vector2(HandleRadius * 2f, HandleRadius * 2f));
+            bool highHover = ImGui.IsItemHovered();
+            if (ImGui.IsItemActive())
+            {
+                float dx = ImGui.GetIO().MouseDelta.X;
+                if (dx != 0)
+                {
+                    // high must stay <= lowVal + maxGap (gap constraint) AND >= lowVal AND <= axisMax
+                    double highCeil = Math.Min(axisMax, lowVal + maxGap);
+                    double newHigh = Math.Clamp(highVal + PxDeltaToValue(dx), lowVal, highCeil);
+                    highProperty.SetValueFromInput(newHigh);
+                }
+            }
+
+            // Draw handles last so they sit on top of the fill.
+            drawList.AddCircleFilled(new Vector2(lowPx, trackY), HandleRadius,
+                lowHover ? colHandleHover : colHandle);
+            drawList.AddCircle(new Vector2(lowPx, trackY), HandleRadius, colHandleOutline, 16, 1.5f);
+            drawList.AddCircleFilled(new Vector2(highPx, trackY), HandleRadius,
+                highHover ? colHandleHover : colHandle);
+            drawList.AddCircle(new Vector2(highPx, trackY), HandleRadius, colHandleOutline, 16, 1.5f);
+
+            // Peaked value labels under each handle.
+            uint colLabelBg = ImGui.ColorConvertFloat4ToU32(new Vector4(0.10f, 0.14f, 0.22f, 0.95f));
+            uint colLabelBorder = ImGui.ColorConvertFloat4ToU32(new Vector4(0.55f, 0.75f, 1.00f, 1.00f));
+            uint colLabelText = ImGui.ColorConvertFloat4ToU32(new Vector4(0.92f, 0.96f, 1.00f, 1.00f));
+            float labelGap = 6f;
+            float labelTopY = trackY + HandleRadius + labelGap;
+            float peakOverhang = 7f;
+            float labelPadX = 6f;
+            float labelPadY = 3f;
+
+            // Labels may extend into the edge padding (full content region), so the peak can
+            // stay centered under a handle that sits at the very end of the track.
+            float widgetLeftX = widgetLeftAnchorX;
+            float widgetRightX = widgetLeftAnchorX + width;
+            DrawPeakedLabel(drawList, lowPx, labelTopY, peakOverhang, labelPadX, labelPadY,
+                widgetLeftX, widgetRightX, lowVal.ToString("0.0"),
+                colLabelBg, colLabelBorder, colLabelText, out float lowLabelBottomY);
+            DrawPeakedLabel(drawList, highPx, labelTopY, peakOverhang, labelPadX, labelPadY,
+                widgetLeftX, widgetRightX, highVal.ToString("0.0"),
+                colLabelBg, colLabelBorder, colLabelText, out float highLabelBottomY);
+
+            float labelsBottomY = Math.Max(lowLabelBottomY, highLabelBottomY);
+            float widgetHeight = labelsBottomY - ImGui.GetCursorScreenPos().Y + 14f;
+            ImGui.SetCursorPos(startCursor);
+            ImGui.Dummy(new Vector2(width, widgetHeight));
+            ImGui.NewLine();
+        }
+
+        private static void DrawPeakedLabel(
+            ImDrawListPtr drawList, float peakX, float labelTopY,
+            float peakOverhang, float padX, float padY,
+            float clampLeftX, float clampRightX,
+            string text, uint colBg, uint colBorder, uint colText,
+            out float bottomY)
+        {
+            var textSize = ImGui.CalcTextSize(text);
+            float boxW = MathF.Max(textSize.X + padX * 2f, 26f);
+            float boxH = textSize.Y + padY * 2f;
+            float boxTopY = labelTopY;
+            float boxBottomY = boxTopY + boxH;
+            float peakY = boxTopY - peakOverhang;
+            float boxLeftX = MathF.Max(clampLeftX, MathF.Min(clampRightX - boxW, peakX - boxW * 0.5f));
+            float boxRightX = boxLeftX + boxW;
+            // Keep the peak inside the box (with a small inset so the slope reads).
+            float peakInset = MathF.Min(8f, boxW * 0.5f - 2f);
+            float clampedPeakX = MathF.Max(boxLeftX + peakInset, MathF.Min(boxRightX - peakInset, peakX));
+
+            // Fill: rectangle body + triangle pointer share the same color, so the seam is invisible.
+            drawList.AddRectFilled(new Vector2(boxLeftX, boxTopY), new Vector2(boxRightX, boxBottomY), colBg, 2f);
+            drawList.AddTriangleFilled(
+                new Vector2(clampedPeakX, peakY),
+                new Vector2(boxLeftX, boxTopY),
+                new Vector2(boxRightX, boxTopY),
+                colBg);
+
+            // Border: only the outer pentagon edges (no internal box-top line).
+            float t = 1.2f;
+            drawList.AddLine(new Vector2(boxLeftX, boxBottomY), new Vector2(boxLeftX, boxTopY), colBorder, t);
+            drawList.AddLine(new Vector2(boxLeftX, boxTopY), new Vector2(clampedPeakX, peakY), colBorder, t);
+            drawList.AddLine(new Vector2(clampedPeakX, peakY), new Vector2(boxRightX, boxTopY), colBorder, t);
+            drawList.AddLine(new Vector2(boxRightX, boxTopY), new Vector2(boxRightX, boxBottomY), colBorder, t);
+            drawList.AddLine(new Vector2(boxRightX, boxBottomY), new Vector2(boxLeftX, boxBottomY), colBorder, t);
+
+            // Centered text.
+            drawList.AddText(
+                new Vector2(boxLeftX + (boxW - textSize.X) * 0.5f, boxTopY + padY),
+                colText, text);
+
+            bottomY = boxBottomY;
         }
 
         private void GuiHintTechSelection(ComponentDesignProperty property, GlobalUIState uiState)

@@ -154,7 +154,8 @@ namespace Pulsar4X.DataStructures
         GuiTextSelectionFormula = 128,
         GuiSelectionMaxMinInt = 256,
         GuiFuelTypeSelection = 512,
-        GuiTechCategorySelection = 1024
+        GuiTechCategorySelection = 1024,
+        GuiSelectionMinMaxRange = 2048
     }
 
     public enum PulseActionEnum

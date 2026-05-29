@@ -165,6 +165,11 @@ namespace Pulsar4X.Components
                         _design.TemplatePropertyValues.Add((designAttribute.Name, typeof(int), designAttribute.Value));
                         break;
                     }
+                    case GuiHint.GuiSelectionMinMaxRange:
+                    {
+                        _design.TemplatePropertyValues.Add((designAttribute.Name, typeof(double), designAttribute.Value));
+                        break;
+                    }
                     case GuiHint.GuiFuelTypeSelection:
                     {
                         _design.TemplatePropertyValues.Add((designAttribute.Name, typeof(string), designAttribute.ValueString));

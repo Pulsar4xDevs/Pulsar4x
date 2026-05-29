@@ -20,6 +20,7 @@ namespace Pulsar4X.Components
 
         public string Unit { get { return _templateSD.Units; } }
         public GuiHint GuiHint { get { return _templateSD.GuiHint; } }
+        public string PairedPropertyName { get { return _templateSD.PairedPropertyName; } }
         public bool IsEnabled {
             get
             {
@@ -77,12 +78,26 @@ namespace Pulsar4X.Components
                     }
                 }
             }
-            if (GuiHint == GuiHint.GuiSelectionMaxMin || GuiHint == GuiHint.GuiSelectionMaxMinInt)
+            // Initialize bounds whenever the template declares them. The GuiHint controls how
+            // the property is *rendered*, not whether it has bounds — a property paired as the
+            // upper half of a range slider uses GuiHint.None but still needs Min/Max/Step so
+            // saved values can be loaded and clamped via SetValueFromInput.
+            bool needsBounds = GuiHint == GuiHint.GuiSelectionMaxMin
+                || GuiHint == GuiHint.GuiSelectionMaxMinInt
+                || GuiHint == GuiHint.GuiSelectionMinMaxRange
+                || !string.IsNullOrEmpty(_templateSD.MinFormula)
+                || !string.IsNullOrEmpty(_templateSD.MaxFormula);
+            if (needsBounds)
             {
-                MaxValueFormula = new ChainedExpression(_templateSD.MaxFormula, this, factionDataStore, factionTech);
-                MinValueFormula = new ChainedExpression(_templateSD.MinFormula, this, factionDataStore, factionTech);
-                StepValueFormula = new ChainedExpression(_templateSD.StepFormula, this, factionDataStore, factionTech);
+                if (!string.IsNullOrEmpty(_templateSD.MaxFormula))
+                    MaxValueFormula = new ChainedExpression(_templateSD.MaxFormula, this, factionDataStore, factionTech);
+                if (!string.IsNullOrEmpty(_templateSD.MinFormula))
+                    MinValueFormula = new ChainedExpression(_templateSD.MinFormula, this, factionDataStore, factionTech);
+                if (!string.IsNullOrEmpty(_templateSD.StepFormula))
+                    StepValueFormula = new ChainedExpression(_templateSD.StepFormula, this, factionDataStore, factionTech);
             }
+            if (!string.IsNullOrEmpty(_templateSD.MaxRangeFormula))
+                MaxRangeFormula = new ChainedExpression(_templateSD.MaxRangeFormula, this, factionDataStore, factionTech);
             if (_templateSD.AttributeType != null)
             {
                 AttributeType = Type.GetType(_templateSD.AttributeType);
@@ -199,17 +214,19 @@ namespace Pulsar4X.Components
         public double Value { get { return Formula.DResult; } }
         public string ValueString {get { return Formula.StrResult; } }
 
-        public double MinValue;
+        public double MinValue = double.MinValue;
         internal ChainedExpression MinValueFormula { get; set; }
         public void SetMin()
         {
+            if (MinValueFormula == null) return;
             MinValueFormula.Evaluate();
             MinValue = MinValueFormula.DResult;
         }
-        public double MaxValue;
+        public double MaxValue = double.MaxValue;
         internal ChainedExpression MaxValueFormula { get; set; }
         public void SetMax()
         {
+            if (MaxValueFormula == null) return;
             MaxValueFormula.Evaluate();
             MaxValue = MaxValueFormula.DResult;
         }
@@ -218,8 +235,22 @@ namespace Pulsar4X.Components
         internal ChainedExpression StepValueFormula { get; set; }
         public void SetStep()
         {
+            if (StepValueFormula == null) return;
             StepValueFormula.Evaluate();
             StepValue = StepValueFormula.DResult;
+        }
+
+        /// <summary>
+        /// For GuiSelectionMinMaxRange: the largest allowed difference between this property's
+        /// value and its paired partner. double.PositiveInfinity means no gap constraint.
+        /// </summary>
+        public double MaxRangeValue = double.PositiveInfinity;
+        internal ChainedExpression MaxRangeFormula { get; set; }
+        public void SetMaxRange()
+        {
+            if (MaxRangeFormula == null) return;
+            MaxRangeFormula.Evaluate();
+            MaxRangeValue = MaxRangeFormula.DResult;
         }
 
         internal object[] AtbConstrArgs { get; set; }

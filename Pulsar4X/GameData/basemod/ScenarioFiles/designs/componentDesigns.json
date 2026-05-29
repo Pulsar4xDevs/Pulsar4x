@@ -409,8 +409,8 @@
       "Name": "Earth-Standard Infrastructure",
       "TemplateId": "infrastructure",
       "Properties": [
-        { "Key": "Min Gravity", "Value": 8.829 },
-        { "Key": "Max Gravity", "Value": 10.791 },
+        { "Key": "Min Gravity", "Value": 8.8 },
+        { "Key": "Max Gravity", "Value": 10.8 },
         { "Key": "Min Pressure", "Value": 0.9 },
         { "Key": "Max Pressure", "Value": 1.1 }
       ]
