@@ -456,6 +456,73 @@ namespace Pulsar4X.Client
             }
         }
 
+        private void DisplayProgressIndicator()
+        {
+            bool hasGeoSurvey = Entity.HasDataBlob<GeoSurveyableDB>();
+            bool isColonizeable = Entity.HasDataBlob<ColonizeableDB>();
+            var (hasColony, _) = Entity.IsOrHasColony();
+
+            if (!hasGeoSurvey && !isColonizeable && !hasColony)
+                return;
+
+            int factionId = _uiState.Faction?.Id ?? Game.NeutralFactionId;
+            var stages = new System.Collections.Generic.List<SurveyProgressBar.Stage>(3);
+
+            stages.Add(new SurveyProgressBar.Stage(
+                "Discovered",
+                1f,
+                "Discovered\nThis body has been detected and is visible on the system map."));
+
+            if (hasGeoSurvey)
+            {
+                var geo = Entity.GetDataBlob<GeoSurveyableDB>();
+                const string rewardSummary =
+                    "Reveals:\n"
+                    + "  • Atmospheric composition\n"
+                    + "  • Mineral deposits and their accessibility\n"
+                    + "  • Surface conditions used to assess colonization";
+                float fill = 0f;
+                string tooltip;
+                if (geo.PointsRequired > 0 && geo.GeoSurveyStatus.ContainsKey(factionId))
+                {
+                    uint remaining = geo.GeoSurveyStatus[factionId];
+                    fill = 1f - (float)remaining / geo.PointsRequired;
+                    uint completed = geo.PointsRequired - remaining;
+                    if (remaining == 0)
+                    {
+                        tooltip = "Geological Survey\nComplete. Mineral and atmospheric data are available below.";
+                    }
+                    else
+                    {
+                        tooltip = "Geological Survey\nIn progress: " + (fill * 100f).ToString("0") + "%"
+                            + " (" + completed + " / " + geo.PointsRequired + " survey points)\n\n"
+                            + rewardSummary;
+                    }
+                }
+                else
+                {
+                    tooltip = "Geological Survey\nNot started. Send a ship with geo-survey ability to scan this body.\n\n"
+                        + rewardSummary;
+                }
+                stages.Add(new SurveyProgressBar.Stage("Geo Survey", fill, tooltip));
+            }
+
+            if (isColonizeable || hasColony)
+            {
+                string colonyTooltip = hasColony
+                    ? "Colonized\nThis body hosts an established colony."
+                    : "Colonized\nNot yet colonized. Send a colony ship to establish a presence here.";
+                stages.Add(new SurveyProgressBar.Stage("Colonized", hasColony ? 1f : 0f, colonyTooltip));
+            }
+
+            if (stages.Count == 0) return;
+
+            SectionLabel("PROGRESS");
+            ImGui.Indent();
+            SurveyProgressBar.Draw("##entity-progress", stages, _accentColor);
+            ImGui.Unindent();
+        }
+
         // --- Layout Helpers ---
 
         private void SectionLabel(string label)
@@ -974,6 +1041,8 @@ namespace Pulsar4X.Client
             bool isGeoSurveyed = Entity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB)
                 && geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id);
 
+            DisplayProgressIndicator();
+
             ImGui.Columns(2, "##body-info", true);
 
             if (Entity.TryGetDataBlob<SystemBodyInfoDB>(out var bodyInfo))
@@ -1041,6 +1110,8 @@ namespace Pulsar4X.Client
             bool isGeoSurveyed = Entity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB)
                 && geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id);
 
+            DisplayProgressIndicator();
+
             ImGui.Columns(2, "##small-body-info", true);
 
             if (Entity.TryGetDataBlob<SystemBodyInfoDB>(out var bodyInfo))
@@ -1071,6 +1142,8 @@ namespace Pulsar4X.Client
         {
             bool isGeoSurveyed = Entity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB)
                 && geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id);
+
+            DisplayProgressIndicator();
 
             // Population (prominent at top)
             if (Entity.TryGetDataBlob<ColonyInfoDB>(out var colonyInfoDB))

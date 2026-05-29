@@ -84,6 +84,8 @@ namespace Pulsar4X.Client
                     && Entity.HasDataBlob<MassVolumeDB>()
                     && Entity.HasDataBlob<PositionDB>())
                 return () => Displays.SystemBody(state, Entity.GetDataBlob<SystemBodyInfoDB>(), Entity.GetDataBlob<MassVolumeDB>(), Entity.GetDataBlob<PositionDB>());
+            else if(Entity.HasDataBlob<StarInfoDB>())
+                return () => Displays.Star(state, Entity.GetDataBlob<StarInfoDB>());
             return null;
         }
 
