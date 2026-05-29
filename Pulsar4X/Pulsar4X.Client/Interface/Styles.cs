@@ -14,7 +14,7 @@ namespace Pulsar4X.Client
 
         public static IntPtr SDLDefaultFont;
 
-        public static ITheme Theme = new FuturisticTheme();
+        public static ITheme Theme = new DefaultTheme();
 
         public static Vector4 HighlightColor = new(0.25f, 1f, 0.25f, 0.9f);
         public static Vector4 GoodColor = new (0.25f, 1f, 0.25f, 0.9f);

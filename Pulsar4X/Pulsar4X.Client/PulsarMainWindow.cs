@@ -409,13 +409,15 @@ namespace Pulsar4X.Client
             switch (themeEnabled)
             {
                 case null:
+                case "Default":
+                    _theme = new DefaultTheme();
+                    break;
                 case "Futuristic":
-                    // default theme is Futuristic
-                    _theme = Styles.Theme;
+                    _theme = new FuturisticTheme();
                     break;
                 default:
                     Trace.WriteLine("WARNING: Unrecognized theme '" + themeEnabled + "', falling back to default");
-                    _theme = Styles.Theme;
+                    _theme = new DefaultTheme();
                     break;
             }
         }
