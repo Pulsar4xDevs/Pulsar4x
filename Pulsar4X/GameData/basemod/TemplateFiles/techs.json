@@ -2,6 +2,78 @@
   {
     "Type": "Tech",
     "Payload": {
+      "UniqueID": "tech-infra-gravity-range",
+      "Name": "Habitat Gravity Tolerance",
+      "Description": "Reinforces structural and life-support systems so that infrastructure can be designed for a wider band of surface gravity around Earth-normal (9.81 m/s²). Each level extends the design's allowed half-width by ~0.49 m/s² (5% of Earth gravity), from ±0.98 m/s² at L0 to ±2.45 m/s² at L3.",
+      "Category": "tech-category-biology-genetics",
+      "MaxLevel": 3,
+      "DataFormula": "0.1 + [Level] * 0.05",
+      "CostFormula": "1500 + [Level] * 1500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-infra-gravity-min-extension",
+      "Name": "Low-Gravity Habitat Engineering",
+      "Description": "Permits infrastructure to function on low-gravity bodies — asteroids, comets, and small moons — far below the band general tolerance research alone allows. Each of the 5 levels lowers the achievable minimum by an additional ~1.96 m/s² (20% of Earth gravity), reaching 0 m/s² at the highest level.",
+      "Category": "tech-category-biology-genetics",
+      "MaxLevel": 5,
+      "DataFormula": "[Level] * 0.2",
+      "CostFormula": "1000 + [Level] * 1000"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-infra-gravity-max-extension",
+      "Name": "High-Gravity Habitat Engineering",
+      "Description": "Permits infrastructure to function on heavy worlds far beyond the band general tolerance research alone allows. The 5 levels follow a phased curve — early levels add modest headroom, later levels unlock dramatic gains, reaching ~100 m/s² at the highest level. Per-level deltas (m/s²): +3.5, +10.5, +17.6, +24.6, +31.6.",
+      "Category": "tech-category-biology-genetics",
+      "MaxLevel": 5,
+      "DataFormula": "[Level] * [Level] * 0.36",
+      "CostFormula": "2000 + [Level] * [Level] * 1500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-infra-pressure-range",
+      "Name": "Habitat Pressure Tolerance",
+      "Description": "Improves seal, regulator, and life-support engineering so that infrastructure can be designed for a wider band of atmospheric pressure around Earth-normal. Each level extends the design's allowed half-width by 0.05 (from 0.10 at L0 to 0.25 at L3).",
+      "Category": "tech-category-biology-genetics",
+      "MaxLevel": 3,
+      "DataFormula": "0.1 + [Level] * 0.05",
+      "CostFormula": "1500 + [Level] * 1500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-infra-pressure-min-extension",
+      "Name": "Thin-Atmosphere Habitat Engineering",
+      "Description": "Lets infrastructure operate in near-vacuum atmospheres below what general tolerance research alone allows. Each level lowers the achievable minimum by an additional 0.05 (up to 0.25 below the standard floor).",
+      "Category": "tech-category-biology-genetics",
+      "MaxLevel": 5,
+      "DataFormula": "[Level] * 0.05",
+      "CostFormula": "1000 + [Level] * 1000"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-infra-pressure-max-extension",
+      "Name": "Dense-Atmosphere Habitat Engineering",
+      "Description": "Lets infrastructure operate in high-pressure atmospheres above what general tolerance research alone allows. Each level raises the achievable maximum by an additional 0.05 (up to 0.25 above the standard ceiling).",
+      "Category": "tech-category-biology-genetics",
+      "MaxLevel": 5,
+      "DataFormula": "[Level] * 0.05",
+      "CostFormula": "1000 + [Level] * 1000"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
       "UniqueID": "tech-mining-production",
       "Name": "Mining Production Efficiency",
       "Description": "Annual production of accessibility 1.0 minerals for each mine or automated mine. Small amounts of lower accessibility minerals will be produced; half annual rate for 0.5 accesssibility, one tenth annual rate for 0.1 accessibility, etc.",
@@ -443,7 +515,13 @@
           "tech-factory-max-size",
           "tech-shipyard-slip-max-size",
           "tech-geo-surveyor",
-          "tech-administration-level"
+          "tech-administration-level",
+          "tech-infra-gravity-range",
+          "tech-infra-gravity-min-extension",
+          "tech-infra-gravity-max-extension",
+          "tech-infra-pressure-range",
+          "tech-infra-pressure-min-extension",
+          "tech-infra-pressure-max-extension"
         ]
       }
     }

@@ -23,7 +23,7 @@ namespace Pulsar4X.Colonies
             var colonyInfoDB = colony.GetDataBlob<ColonyInfoDB>();
             var currentPopulation = colonyInfoDB.Population;
             var instancesDB = colony.GetDataBlob<ComponentInstancesDB>();
-            long popSupportValue = instancesDB.GetPopulationSupportValue();
+            long popSupportValue = instancesDB.GetPopulationSupportValue(colonyInfoDB.PlanetEntity);
 
             long needsSupport = 0;
             foreach (var (id, value) in currentPopulation)
@@ -96,7 +96,7 @@ namespace Pulsar4X.Colonies
 
             //List<KeyValuePair<Entity, PrIwObsList<Entity>>> infrastructureEntities = instancesDB.ComponentsByDesign.GetInternalDictionary().Where(item => item.Key.HasDataBlob<PopulationSupportAtbDB>()).ToList();
 
-            long totalMaxPop = instancesDB.GetPopulationSupportValue();
+            long totalMaxPop = instancesDB.GetPopulationSupportValue(colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity);
 
             colonyEntity.GetDataBlob<ColonyLifeSupportDB>().MaxPopulation = totalMaxPop;
         }

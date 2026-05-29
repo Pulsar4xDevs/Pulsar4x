@@ -652,13 +652,16 @@ public class ComponentsWindow : PulsarGuiWindow
             ImGui.Separator();
             ImGui.Spacing();
 
-            foreach(var kvp in design.AttributesByType.OrderBy(kvp => kvp.Key.Name))
+            foreach(var kvp in design.AttributesByType.OrderBy(kvp => kvp.Value?.AtbName() ?? kvp.Key.Name))
             {
-                ImGui.Text($"⚡ {kvp.Key.Name}:");
+                string label = kvp.Value?.AtbName() ?? kvp.Key.Name;
+                string value = kvp.Value?.AtbDescription() ?? "";
+
+                ImGui.Text($"⚡ {label}:");
                 ImGui.SameLine();
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 10);
                 ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.9f, 0.8f, 0.6f, 1.0f));
-                ImGui.Text(kvp.Value?.ToString() ?? "null");
+                ImGui.TextWrapped(string.IsNullOrWhiteSpace(value) ? "—" : value);
                 ImGui.PopStyleColor();
             }
             ImGui.Spacing();

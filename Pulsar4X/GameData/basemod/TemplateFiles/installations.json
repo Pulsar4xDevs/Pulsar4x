@@ -715,7 +715,7 @@
       "Properties": [
         {
           "Name": "Support Colonists",
-          "DescriptionFormula": "'Keeps colonists alive on hostile worlds'",
+          "DescriptionFormula": "'Population supported when the body's gravity and atmosphere fall within tolerance. Out-of-tolerance bodies receive no support from this design.'",
           "GuiHint": "GuiTextDisplay",
           "PropertyFormula": "500"
         },
@@ -726,10 +726,64 @@
           "PropertyFormula": "500"
         },
         {
+          "Name": "Min Gravity",
+          "DescriptionFormula": "'Lowest surface gravity (m/s²) this infrastructure can operate in. Earth standard is 9.81 m/s². At max Low-Gravity Habitat Engineering this can reach 0 m/s² (asteroids, comets).'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "9.81",
+          "MinFormula": "Max(0, 9.81 * (1.0 - TechData('tech-infra-gravity-range') - TechData('tech-infra-gravity-min-extension')))",
+          "StepFormula": "0.05",
+          "PropertyFormula": "8.829"
+        },
+        {
+          "Name": "Max Gravity",
+          "DescriptionFormula": "'Highest surface gravity (m/s²) this infrastructure can operate in. Earth standard is 9.81 m/s². At max High-Gravity Habitat Engineering this can reach 100 m/s² (super-Earth worlds).'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "Min(100, 9.81 * (1.0 + TechData('tech-infra-gravity-range') + TechData('tech-infra-gravity-max-extension')))",
+          "MinFormula": "9.81",
+          "StepFormula": "0.05",
+          "PropertyFormula": "10.791"
+        },
+        {
+          "Name": "Min Pressure",
+          "DescriptionFormula": "'Lowest atmospheric pressure (Earth atmospheres) this infrastructure can operate in.'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "1.0",
+          "MinFormula": "1.0 - TechData('tech-infra-pressure-range') - TechData('tech-infra-pressure-min-extension')",
+          "StepFormula": "0.01",
+          "PropertyFormula": "0.9"
+        },
+        {
+          "Name": "Max Pressure",
+          "DescriptionFormula": "'Highest atmospheric pressure (Earth atmospheres) this infrastructure can operate in.'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "1.0 + TechData('tech-infra-pressure-range') + TechData('tech-infra-pressure-max-extension')",
+          "MinFormula": "1.0",
+          "StepFormula": "0.01",
+          "PropertyFormula": "1.1"
+        },
+        {
           "Name": "DBargs",
           "GuiHint": "None",
           "PropertyFormula": "AtbConstrArgs(UniqueID('general-storage'), PropertyValue('Storage Amount'))",
           "AttributeType": "Pulsar4X.Storage.CargoStorageAtb"
+        },
+        {
+          "Name": "DBargsPopSupport",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Support Colonists'))",
+          "AttributeType": "Pulsar4X.Galaxy.PopulationSupportAtbDB"
+        },
+        {
+          "Name": "DBargsGravity",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Min Gravity'), PropertyValue('Max Gravity'))",
+          "AttributeType": "Pulsar4X.Galaxy.GravityToleranceAtb"
+        },
+        {
+          "Name": "DBargsPressure",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Min Pressure'), PropertyValue('Max Pressure'))",
+          "AttributeType": "Pulsar4X.Galaxy.PressureToleranceAtb"
         }
       ]
     }
