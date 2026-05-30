@@ -39,6 +39,23 @@ namespace Pulsar4X.Client.Rendering
         HashSet<EntityLabel> _allLabels = new ();
         HashSet<EntityLabel> _visibleLabels = new ();
 
+        // Per-body-type minimum camera zoom for the label to render. Lower-tier
+        // bodies (moons, ships, asteroids, comets) only show labels once you've
+        // zoomed in enough that they aren't just visual clutter. Stars, planets,
+        // dwarf planets and colonies are always shown (subject to view prefs).
+        static readonly Dictionary<UserOrbitSettings.OrbitBodyType, float> _minZoomForLabel = new ()
+        {
+            { UserOrbitSettings.OrbitBodyType.Star,         0f },
+            { UserOrbitSettings.OrbitBodyType.Planet,       0f },
+            { UserOrbitSettings.OrbitBodyType.DwarfPlanet,  0f },
+            { UserOrbitSettings.OrbitBodyType.Colony,       0f },
+            { UserOrbitSettings.OrbitBodyType.Moon,        1e4f },
+            { UserOrbitSettings.OrbitBodyType.Ship,        2e4f },
+            { UserOrbitSettings.OrbitBodyType.Asteroid,    5e4f },
+            { UserOrbitSettings.OrbitBodyType.Comet,       2e4f },
+            { UserOrbitSettings.OrbitBodyType.Unknown,      0f },
+        };
+
         ConcurrentDictionary<int, InteractableState[]> _interactable = new ();
         IOrderedEnumerable<IGrouping<byte, InteractableState>> _interactableGrouped;
 
@@ -174,6 +191,9 @@ namespace Pulsar4X.Client.Rendering
 
             _camera.PanOccured +=
                 (object sender, Orbital.Vector3 pos) => _updateLabels = true;
+
+            _camera.ZoomOccured +=
+                (object sender, float zoom) => _updateLabels = true;
 
             SystemViewPreferences.GetInstance().ViewUpdateOccured +=
                 (object sender, SystemViewPreferences.View view) => _updateLabels = true;
@@ -527,8 +547,13 @@ namespace Pulsar4X.Client.Rendering
                         i.IsDisabled = true;
                 }
 
+                var zoom = _camera.ZoomLevel;
                 var lbl = _allLabels
-                    .Where(x => prefs.ShouldDisplay("map", Utils.EntityBodyType(x.Entity)));
+                    .Where(x => {
+                        var t = Utils.EntityBodyType(x.Entity);
+                        return prefs.ShouldDisplay("map", t)
+                            && zoom >= _minZoomForLabel[t];
+                    });
 
                 _visibleLabels.Clear();
                 foreach (var i in _distributor(lbl))

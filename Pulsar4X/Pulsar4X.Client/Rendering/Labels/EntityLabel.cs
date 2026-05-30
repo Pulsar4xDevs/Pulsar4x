@@ -1,6 +1,7 @@
 ﻿using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
+using Pulsar4X.Galaxy;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Messaging;
 using Pulsar4X.Movement;
@@ -29,6 +30,7 @@ namespace Pulsar4X.Client
 
         private NameDB? _nameDB = null;
         private PositionDB? _positionDB = null;
+        private MassVolumeDB? _massVolumeDB = null;
 
         protected virtual void DrawExt(IntPtr rendererPtr, Camera camera) {}
         protected virtual void OnFrameUpdateExt(Matrix matrix, Camera camera) {}
@@ -40,6 +42,21 @@ namespace Pulsar4X.Client
         protected SDL.FRect _nameRect = new ();
 
         public RectangleF Rect = new ();
+
+        // Start of the diagonal leader (just outside the body) and the elbow
+        // where the 45° leader meets the horizontal underline beneath the label.
+        private float _lineStartX;
+        private float _lineStartY;
+        private float _elbowX;
+        private float _elbowY;
+
+        // Minimum perpendicular offset (px) of the elbow from the body center,
+        // extra gap added on top of the on-screen body radius so the leader
+        // clears the body when zoomed in, and the small visible gap between
+        // the body edge and the start of the leader.
+        private const float MinLeaderOffset = 12f;
+        private const float BodyEdgeGap = 18f;
+        private const float BodyLineGap = 8f;
 
         private uint _padding = 0;
         public uint Padding {
@@ -105,6 +122,8 @@ namespace Pulsar4X.Client
                 _nameDB = i;
             if (entity.TryGetDataBlob<PositionDB>(out PositionDB j))
                 _positionDB = j;
+            if (entity.TryGetDataBlob<MassVolumeDB>(out MassVolumeDB k))
+                _massVolumeDB = k;
 
             SetColor();
 
@@ -195,8 +214,29 @@ namespace Pulsar4X.Client
         {
             var point = camera.ViewCoordinate_m(_positionDB.AbsolutePosition);
 
-            _nameRect.X = (int)(point.X - _nameRect.W / 2);
-            _nameRect.Y = (int)(point.Y + _nameRect.H);
+            float anchorX = (float)point.X;
+            float anchorY = (float)point.Y;
+
+            // Diagonal distance from body center to the elbow must clear the
+            // body's on-screen radius. The leader rises by `offset` in both X
+            // and Y, so its length along the diagonal is offset*sqrt(2).
+            float viewRadius = _massVolumeDB != null
+                ? camera.ViewDistance(_massVolumeDB.RadiusInAU)
+                : 0f;
+            const float invSqrt2 = 0.70710678f;
+            float offset = MathF.Max(MinLeaderOffset, (viewRadius + BodyEdgeGap) * invSqrt2);
+
+            // Start the leader a few pixels past the body edge so it doesn't touch.
+            float startOffset = (viewRadius + BodyLineGap) * invSqrt2;
+            _lineStartX = anchorX + startOffset;
+            _lineStartY = anchorY + startOffset;
+
+            // 45° leader down-right from the body, then horizontal under the label.
+            _elbowX = anchorX + offset;
+            _elbowY = anchorY + offset;
+
+            _nameRect.X = (int)_elbowX;
+            _nameRect.Y = (int)(_elbowY - _nameRect.H);
 
             Rect.Location = new (_nameRect.X - Padding, _nameRect.Y - Padding);
 
@@ -266,6 +306,14 @@ namespace Pulsar4X.Client
 
             if (_nameTexture == IntPtr.Zero && ! RenderName(rendererPtr))
                 return; // failure
+
+            // Leader line: diagonal from body at 45° down-right, then horizontal under the label.
+            byte lr, lg, lb, la;
+            SDL.GetRenderDrawColor(rendererPtr, out lr, out lg, out lb, out la);
+            SDL.SetRenderDrawColor(rendererPtr, _color.R, _color.G, _color.B, _color.A);
+            SDL.RenderLine(rendererPtr, _lineStartX, _lineStartY, _elbowX, _elbowY);
+            SDL.RenderLine(rendererPtr, _elbowX, _elbowY, _elbowX + _nameRect.W, _elbowY);
+            SDL.SetRenderDrawColor(rendererPtr, lr, lg, lb, la);
 
             SDL.RenderTexture(rendererPtr, _nameTexture, IntPtr.Zero, in _nameRect);
 
