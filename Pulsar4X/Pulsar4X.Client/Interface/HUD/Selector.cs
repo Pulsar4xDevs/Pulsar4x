@@ -12,6 +12,7 @@ using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Movement;
+using Pulsar4X.Orbits;
 using Pulsar4X.Ships;
 
 namespace Pulsar4X.Client
@@ -20,6 +21,21 @@ namespace Pulsar4X.Client
     {
         private List<string> _knownSystems = new ();
         private List<StarSystem> _filteredAndSortedSystems = new ();
+
+        // Indentation (in pixels) applied per level of the celestial body hierarchy.
+        private const float BodyIndentStep = 12f;
+
+        // The celestial body types listed in the "Celestial Bodies" section. Colonies and
+        // ships are intentionally excluded as they have their own sections above.
+        private static readonly UserOrbitSettings.OrbitBodyType[] _celestialBodyTypes = new []
+        {
+            UserOrbitSettings.OrbitBodyType.Star,
+            UserOrbitSettings.OrbitBodyType.Planet,
+            UserOrbitSettings.OrbitBodyType.DwarfPlanet,
+            UserOrbitSettings.OrbitBodyType.Moon,
+            UserOrbitSettings.OrbitBodyType.Asteroid,
+            UserOrbitSettings.OrbitBodyType.Comet,
+        };
 
         //constructs the toolbar with the given buttons
         private Selector()
@@ -57,6 +73,7 @@ namespace Pulsar4X.Client
                 // });
                 DisplayCorporation();
                 DisplaySystems();
+                DisplayBodies();
                 DisplayColonies();
                 DisplayFleets();
             }
@@ -138,6 +155,109 @@ namespace Pulsar4X.Client
                     {
                         _uiState.SetActiveSystem(system.ID);
                     }
+                }
+            }
+        }
+
+        private static void DisplayBodies()
+        {
+            if (ImGui.CollapsingHeader("Celestial Bodies", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                if (_uiState.Faction == null) return;
+                if (string.IsNullOrEmpty(_uiState.SelectedStarSystemId)
+                    || !_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId))
+                    return;
+
+                var systemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+
+                // Gather all celestial bodies in the system keyed by entity id so we can
+                // reconstruct the orbital hierarchy (stars -> planets -> moons etc).
+                var bodies = systemState.EntityStatesWithNames.Values
+                    .Where(e => Array.IndexOf(_celestialBodyTypes, e.BodyType) >= 0)
+                    .ToDictionary(e => e.Id);
+
+                // Build parent -> children lists. A body whose parent isn't another
+                // celestial body in this set is treated as a root (e.g. the primary star).
+                var children = new Dictionary<int, List<EntityState>>();
+                var roots = new List<EntityState>();
+                foreach (var body in bodies.Values)
+                {
+                    var parent = body.GetParent();
+                    if (parent != null && parent.Id != body.Id && bodies.ContainsKey(parent.Id))
+                    {
+                        if (!children.TryGetValue(parent.Id, out var list))
+                        {
+                            list = new List<EntityState>();
+                            children[parent.Id] = list;
+                        }
+                        list.Add(body);
+                    }
+                    else
+                    {
+                        roots.Add(body);
+                    }
+                }
+
+                var prefs = SystemViewPreferences.GetInstance();
+                foreach (var root in SortBodies(roots))
+                {
+                    DisplayBodyNode(root, children, prefs, 0);
+                }
+            }
+        }
+
+        private static IEnumerable<EntityState> SortBodies(List<EntityState> bodies)
+        {
+            // Within a level, order inner -> outer by orbital distance (semi-major axis),
+            // falling back to name for bodies that share a distance or lack an orbit.
+            return bodies.OrderBy(GetOrbitalDistance).ThenBy(e => e.Name);
+        }
+
+        private static double GetOrbitalDistance(EntityState body)
+        {
+            // Bodies without an orbit (e.g. a system's primary star) sort to the end of
+            // their level; in practice such bodies are roots on their own anyway.
+            if (body.Entity.TryGetDataBlob<OrbitDB>(out var orbit))
+                return orbit.SemiMajorAxis;
+            return double.MaxValue;
+        }
+
+        private static void DisplayBodyNode(EntityState body, Dictionary<int, List<EntityState>> children, SystemViewPreferences prefs, int visibleDepth)
+        {
+            // Respect the same view filters used by the system map. A filtered-out body
+            // is skipped but we still recurse so its children stay in the tree, sliding
+            // up to fill the gap rather than indenting under a hidden parent.
+            bool visible = prefs.ShouldDisplay("map", body.BodyType);
+            int childDepth = visibleDepth;
+
+            if (visible)
+            {
+                float indent = visibleDepth * BodyIndentStep;
+                if (indent > 0) ImGui.Indent(indent);
+
+                bool selected = _uiState.LastClickedEntity?.Id == body.Id;
+                var shortName = UserOrbitSettings.OrbitBodyTypeShortNames[(int)body.BodyType];
+                if (ImGui.Selectable($"{shortName}  {body.Name}", selected))
+                {
+                    _uiState.EntityClicked(body, MouseButtons.Primary);
+                    _uiState.Camera.CenterOnEntity(body.Entity);
+                }
+
+                if (ImGui.IsItemHovered())
+                {
+                    var tip = UserOrbitSettings.OrbitBodyTypeTooltips[(int)body.BodyType];
+                    ImGui.SetTooltip($"{body.Name} ({tip})");
+                }
+
+                if (indent > 0) ImGui.Unindent(indent);
+                childDepth = visibleDepth + 1;
+            }
+
+            if (children.TryGetValue(body.Id, out var childList))
+            {
+                foreach (var child in SortBodies(childList))
+                {
+                    DisplayBodyNode(child, children, prefs, childDepth);
                 }
             }
         }
