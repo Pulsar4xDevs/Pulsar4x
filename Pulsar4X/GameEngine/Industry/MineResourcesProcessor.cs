@@ -58,12 +58,15 @@ namespace Pulsar4X.Industry
             Dictionary<int, long> actualMiningRates = miningDB.ActualMiningRate;
             Dictionary<int, MineralDeposit> planetMinerals = mineralsDB.Minerals;
 
+            // Mines are buildings too: scale their output by the colony's infrastructure capacity.
+            double infraEfficiency = InfrastructureProcessor.GetEfficiency(colonyEntity);
+
             foreach (var kvp in actualMiningRates)
             {
                 ICargoable mineral = _minerals[kvp.Key];
                 string cargoTypeID = mineral.CargoTypeID;
 
-                var unitsMinableThisTick = (long)Math.Min(actualMiningRates[kvp.Key], planetMinerals[kvp.Key].Amount.Actual);
+                var unitsMinableThisTick = (long)Math.Min(actualMiningRates[kvp.Key] * infraEfficiency, planetMinerals[kvp.Key].Amount.Actual);
 
                 if(!stockpile.TypeStores.ContainsKey(cargoTypeID))
                 {

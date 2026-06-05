@@ -9,7 +9,7 @@
         "Mass": "PropertyValue('Mass')",
         "Volume": "PropertyValue('Mass')",
         "HTK": "0.5",
-        "CrewReq": "[Mass]",
+        "CrewReq": "Max(1, [Mass] * 0.01)",
         "ResearchCost": "[Mass] * 2",
         "CreditCost": "[Mass]",
         "BuildPointCost": "[Mass]"
@@ -105,7 +105,7 @@
           "Units": "kg",
           "DescriptionFormula": "'Mass Calculation'",
           "GuiHint": "None",
-          "PropertyFormula": "90 + 10 * PropertyValue('Antenna Size') * PropertyValue('Antenna Size')"
+          "PropertyFormula": "90 + 0.01 * PropertyValue('Antenna Size') * PropertyValue('Antenna Size')"
         },
         {
           "Name": "DatablobArguments",

@@ -74,6 +74,33 @@ namespace Pulsar4X.Client
                 entity.GetDataBlob<ColonyInfoDB>().Display(entityState, uiState);
                 ImGui.Columns(1);
 
+                if(entity.TryGetDataBlob<InfrastructureDB>(out var infrastructure)
+                    && ImGui.CollapsingHeader("Infrastructure", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    bool overCapacity = infrastructure.CapacityAvailable < 0;
+
+                    ImGui.Columns(2);
+                    DisplayHelpers.PrintRow("Provided", infrastructure.CapacityProvided.ToString("N0"));
+                    DisplayHelpers.PrintRow("Used", infrastructure.CapacityRequired.ToString("N0"));
+                    DisplayHelpers.PrintRow("Available", infrastructure.CapacityAvailable.ToString("N0"));
+                    ImGui.Columns(1);
+
+                    // Use TextUnformatted: ImGui.Text/TextColored treat the string as a printf
+                    // format, so a literal '%' would be parsed as a format specifier.
+                    if(overCapacity)
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0.4f, 0.4f, 1f));
+                        ImGui.TextUnformatted($"Over capacity - all output reduced to {infrastructure.Efficiency * 100:0}%");
+                        ImGui.PopStyleColor();
+                    }
+                    else
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                        ImGui.TextUnformatted($"Output at {infrastructure.Efficiency * 100:0}% of capacity");
+                        ImGui.PopStyleColor();
+                    }
+                }
+
                 if(ImGui.CollapsingHeader("Installations", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     if(entity.TryGetDataBlob<ComponentInstancesDB>(out var componentInstances))

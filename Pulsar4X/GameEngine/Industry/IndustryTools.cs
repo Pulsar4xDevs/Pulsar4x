@@ -110,11 +110,15 @@ namespace Pulsar4X.Industry
                 throw new Exception("Unable to find IndustryAbilityDB");
             }
 
-
+            // Infrastructure is the limiting factor on a colony's output: when the colony's
+            // buildings exceed its infrastructure capacity, every production rate is scaled down.
+            double infraEfficiency = InfrastructureProcessor.GetEfficiency(industryEntity);
 
             foreach (var (prodLineID, prodLine) in industryDB.ProductionLines.ToArray())
             {
-                var industryPointsRemaining = new Dictionary<string, int>(prodLine.IndustryTypeRates);
+                var industryPointsRemaining = new Dictionary<string, int>();
+                foreach (var rate in prodLine.IndustryTypeRates)
+                    industryPointsRemaining[rate.Key] = (int)(rate.Value * infraEfficiency);
 
                 foreach(var batchJob in prodLine.Jobs.ToArray())
                 {

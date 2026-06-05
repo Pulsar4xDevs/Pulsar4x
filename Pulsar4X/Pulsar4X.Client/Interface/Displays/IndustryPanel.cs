@@ -130,6 +130,7 @@ namespace Pulsar4X.Client
 
         public void Display()
         {
+            InfrastructureDisplay();
 
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 285);
@@ -151,6 +152,42 @@ namespace Pulsar4X.Client
 
 
 
+        }
+
+        /// <summary>
+        /// Shows the colony's infrastructure capacity: how much support its infrastructure
+        /// provides versus how much its installations consume. When demand exceeds supply the
+        /// colony is over capacity and all its output is scaled down by the shown efficiency.
+        /// </summary>
+        public void InfrastructureDisplay()
+        {
+            if (!_selectedEntity.TryGetDataBlob<InfrastructureDB>(out var infrastructure))
+                return;
+
+            bool overCapacity = infrastructure.CapacityAvailable < 0;
+
+            ImGui.Text("Infrastructure");
+            ImGui.SameLine();
+            // Use TextUnformatted: ImGui.Text/TextColored/TextDisabled treat the string as a
+            // printf format, so a literal '%' would be parsed as a format specifier.
+            if (overCapacity)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(1f, 0.4f, 0.4f, 1f));
+                ImGui.TextUnformatted($"OVER CAPACITY - output at {infrastructure.Efficiency * 100:0}%");
+                ImGui.PopStyleColor();
+            }
+            else
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled]);
+                ImGui.TextUnformatted($"output at {infrastructure.Efficiency * 100:0}%");
+                ImGui.PopStyleColor();
+            }
+
+            ImGui.Text($"Provided: {infrastructure.CapacityProvided:N0}    " +
+                       $"Used: {infrastructure.CapacityRequired:N0}    " +
+                       $"Available: {infrastructure.CapacityAvailable:N0}");
+
+            ImGui.Separator();
         }
 
         public void ProdLineDisplay()
@@ -274,22 +311,27 @@ namespace Pulsar4X.Client
                     {
                         var s = (ShipDesign)_lastClickedDesign;
                         var planet = _selectedEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
-                        var lowOrbit = planet.GetDataBlob<MassVolumeDB>().RadiusInM * 0.33333;
 
                         var mass = s.MassPerUnit;
-
                         var fuelCost = OrbitMath.FuelCostToLowOrbit(planet, mass);
 
-
-                        if (ImGui.Button("Launch to Low Orbit"))
+                        if (_selectedEntity.TryGetDataBlob<LaunchComplexDB>(out var launchDB))
                         {
-                            LaunchShipCommand.CreateCommand(_factionID, _selectedEntity, _selectedProdLine, _lastClickedJob.JobID);
+                            ImGui.Text("Ships route to launch queue on completion.");
+                            ImGui.Text("Queued: " + launchDB.LaunchQueue.Count);
+                            foreach (var kvp in launchDB.Pads)
+                            {
+                                var pad = kvp.Value;
+                                string padStatus = pad.ShipDesignId != null ? "Loaded: " + pad.ShipName : "Empty";
+                                ImGui.Text("Pad: " + padStatus);
+                                if (pad.ShipDesignId != null && ImGui.Button("Launch##" + kvp.Key))
+                                {
+                                    LaunchShipCommand.CreateCommand(_factionID, _selectedEntity, kvp.Key);
+                                }
+                            }
                         }
-                        //ImGui.SameLine();
 
-
-                        ImGui.Text("Fuel Cost: " + fuelCost);
-
+                        ImGui.Text("Fuel Cost to Low Orbit: " + fuelCost);
                     }
                 }
             }

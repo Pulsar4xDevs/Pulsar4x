@@ -51,6 +51,7 @@
       "Name": "Default Earth Start",
       "StartingPopulation": 8.2E9,
       "Installations": [
+        { "Id": "default-design-infrastructure", "Amount": 100 },
         { "Id": "default-design-mine", "Amount": 1 },
         { "Id": "default-design-warehouse", "Amount": 1 },
         { "Id": "default-design-fuel-farm-5000k", "Amount": 1 },
@@ -61,7 +62,8 @@
         { "Id": "default-design-spaceport", "Amount": 1 },
         { "Id": "default-design-research-lab", "Amount": 2 },
         { "id": "default-design-city-hall", "amount": 1 },
-        { "Id": "default-design-local-construction", "Amount": 1}
+        { "Id": "default-design-local-construction", "Amount": 1},
+        { "Id": "default-design-launch-complex", "Amount": 1 }
       ],
       "Cargo": [
         { "Id": "iron", "Amount": 500000 },
@@ -151,7 +153,8 @@
         "tech-panel-bandwidth",
         "tech-panel-density",
         "solarArray",
-        "local-construction"
+        "local-construction",
+        "launch-complex"
       ],
       "ComponentDesigns": [
         "default-design-alcubierre-2k",
@@ -188,7 +191,8 @@
         "default-design-city-hall",
         "default-design_solarpanel",
         "default-design-battery-25kg",
-        "default-design-local-construction"
+        "default-design-local-construction",
+        "default-design-launch-complex"
       ],
       "ShipDesigns": [
         "default-ship-design-courier",
@@ -198,6 +202,9 @@
         "default-ship-design-starship",
         "default-ship-design-surveyor",
         "default-ship-design-sensorsat"
+      ],
+      "LaunchQueue": [
+        { "DesignId": "default-ship-design-courier", "Name": "ISS Hermes" }
       ],
       "Fleets": [
         {

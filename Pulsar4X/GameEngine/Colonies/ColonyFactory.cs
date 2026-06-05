@@ -76,6 +76,7 @@ namespace Pulsar4X.Colonies
             blobs.Add(new PositionDB(pos, systemBody));
             blobs.Add(new TeamsHousedDB());
             blobs.Add(new ComponentInstancesDB()); //installations get added to the componentInstancesDB
+            blobs.Add(new InfrastructureDB()); //capacity gets summed from installations as they're added
 
             Entity colonyEntity = Entity.Create();
             colonyEntity.FactionOwnerID = faction.Id;
@@ -100,6 +101,20 @@ namespace Pulsar4X.Colonies
 
             // Add starting colony cargo
             LoadCargo(colonyEntity, factionInfo.Data, colonyBlueprint.Cargo);
+
+            // Add starting launch queue entries
+            if (colonyBlueprint.LaunchQueue != null && colonyEntity.TryGetDataBlob<LaunchComplexDB>(out var launchDB))
+            {
+                foreach (var entry in colonyBlueprint.LaunchQueue)
+                {
+                    string shipName = entry.Name ?? NameFactory.GetShipName(game);
+                    launchDB.LaunchQueue.Add(new LaunchQueueEntry
+                    {
+                        DesignId = entry.DesignId,
+                        ShipName = shipName
+                    });
+                }
+            }
 
             // Add a starting scientist
             // TODO: load people from blueprints
@@ -160,6 +175,7 @@ namespace Pulsar4X.Colonies
             blobs.Add(new PositionDB(pos, planetEntity));
             blobs.Add(new TeamsHousedDB());
             blobs.Add(new ComponentInstancesDB()); //installations get added to the componentInstancesDB
+            blobs.Add(new InfrastructureDB()); //capacity gets summed from installations as they're added
 
             Entity colonyEntity = Entity.Create();
             colonyEntity.FactionOwnerID = factionEntity.Id;

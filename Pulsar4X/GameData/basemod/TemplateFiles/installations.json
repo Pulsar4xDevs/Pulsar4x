@@ -692,7 +692,7 @@
       "UniqueID": "infrastructure",
       "Name": "Infrastructure",
       "Formulas": {
-        "Description": "Component and buildings needed to keep colonists alive on hostile worlds: currently non functional other than as cargospace",
+        "Description": "The underlying support a colony needs to function: power, roads, utilities and housing. Provides the support capacity that every other installation on the body draws on, and houses colonists on hostile worlds.",
         "Mass": "1000",
         "Volume": "[Mass]",
         "HTK": "0.5",
@@ -724,6 +724,12 @@
           "DescriptionFormula": "'The amount of space that is dedicated to storage space. '",
           "GuiHint": "GuiTextDisplay",
           "PropertyFormula": "500"
+        },
+        {
+          "Name": "Support Capacity",
+          "DescriptionFormula": "'Support capacity each unit of this infrastructure provides to the colony. Other installations consume this capacity; if demand exceeds supply all colony output is reduced. Only counts on bodies within the gravity and pressure tolerances below.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "1000"
         },
         {
           "Name": "Min Gravity",
@@ -776,6 +782,12 @@
           "GuiHint": "None",
           "PropertyFormula": "AtbConstrArgs(PropertyValue('Support Colonists'))",
           "AttributeType": "Pulsar4X.Galaxy.PopulationSupportAtbDB"
+        },
+        {
+          "Name": "DBargsCapacity",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Support Capacity'))",
+          "AttributeType": "Pulsar4X.Industry.InfrastructureCapacityAtb"
         },
         {
           "Name": "DBargsGravity",
@@ -944,6 +956,51 @@
           "GuiHint": "None",
           "PropertyFormula": "AtbConstrArgs(PropertyValue('Level'), 5)",
           "AttributeType": "Pulsar4X.Industry.LocalConstructionAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "launch-complex",
+      "Name": "Launch Complex",
+      "Formulas": {
+        "Description": "A launch facility for putting ships into orbit. Each installation provides one launch pad.",
+        "Mass": "PropertyValue('Max Tonnage') * 0.01",
+        "Volume": "[Mass] * 0.1",
+        "HTK": "1.0",
+        "CrewReq": "50",
+        "ResearchCost": "0",
+        "CreditCost": "500",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "iron": "[Mass] * 0.4",
+        "aluminium": "[Mass] * 0.2",
+        "stainless-steel": "[Mass] * 0.2",
+        "copper": "[Mass] * 0.1",
+        "space-crete": "[Mass] * 0.1"
+      },
+      "ComponentType": "Facility",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Max Tonnage",
+          "DescriptionFormula": "'Maximum ship mass this launch pad can handle (kg)'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "10000000",
+          "MinFormula": "10000",
+          "StepFormula": "10000",
+          "PropertyFormula": "100000"
+        },
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Max Tonnage'))",
+          "AttributeType": "Pulsar4X.Ships.LaunchComplexAtb"
         }
       ]
     }
