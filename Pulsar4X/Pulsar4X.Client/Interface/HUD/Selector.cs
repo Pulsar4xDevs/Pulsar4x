@@ -39,8 +39,8 @@ namespace Pulsar4X.Client
             { "Fleets", true },
         };
 
-        // Indentation (in pixels) applied per level of the celestial body hierarchy.
-        private const float BodyIndentStep = 12f;
+        // Indentation (in pixels) applied per level of a hierarchy (celestial bodies, fleets).
+        private const float IndentStep = 12f;
 
         // The celestial body types listed in the "Celestial Bodies" section. Colonies and
         // ships are intentionally excluded as they have their own sections above.
@@ -323,7 +323,7 @@ namespace Pulsar4X.Client
 
             if (visible)
             {
-                float indent = visibleDepth * BodyIndentStep;
+                float indent = visibleDepth * IndentStep;
                 if (indent > 0) ImGui.Indent(indent);
 
                 bool selected = _uiState.LastClickedEntity?.Id == body.Id;
@@ -381,46 +381,126 @@ namespace Pulsar4X.Client
 
             foreach (var fleet in fleets)
             {
-                // Check if the entity is actually a ship
+                // Check if the entity is actually a ship; ships only appear nested under a fleet.
                 if (fleet.HasDataBlob<ShipInfoDB>())
                     continue;
 
-                bool visible = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleet?.Id == fleet.Id;
-                string display = fleet.GetName(_uiState.Faction.Id);
-                if (ImGui.Selectable(display, visible))
+                DisplayFleetNode(fleet, 0);
+            }
+        }
+
+        private static void DisplayFleetNode(Entity fleet, int depth)
+        {
+            if (_uiState.Faction == null) return;
+
+            float indent = depth * IndentStep;
+            if (indent > 0) ImGui.Indent(indent);
+
+            bool selected = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleet?.Id == fleet.Id;
+            string display = fleet.GetName(_uiState.Faction.Id);
+            if (ImGui.Selectable(display, selected))
+            {
+                FleetWindow.GetInstance().SelectFleet(fleet);
+                FleetWindow.GetInstance().SetActive(true);
+            }
+
+            fleet.TryGetDataBlob<FleetDB>(out var fleetDB);
+
+            if (ImGui.IsItemHovered())
+            {
+                void Callback()
                 {
-                    FleetWindow.GetInstance().SelectFleet(fleet);
-                    FleetWindow.GetInstance().SetActive(true);
+                    if (fleet.TryGetDataBlob<OrderableDB>(out var orderableDb)
+                    && orderableDb.ActionList.Count > 0)
+                    {
+                        ImGui.Text("Orders:");
+                        for (int i = 0; i < orderableDb.ActionList.Count; i++)
+                        {
+                            ImGui.Text(orderableDb.ActionList[i].Name);
+                        }
+                    }
+                    else
+                    {
+                        ImGui.Text("No orders");
+                    }
                 }
 
-                if (ImGui.IsItemHovered())
+                var flagshipID = fleetDB?.FlagShipID ?? -9999;
+                if (fleet.Manager?.TryGetEntityById(flagshipID, out var flagship) ?? false)
                 {
-                    void Callback()
-                    {
-                        if (fleet.TryGetDataBlob<OrderableDB>(out var orderableDb)
-                        && orderableDb.ActionList.Count > 0)
-                        {
-                            ImGui.Text("Orders:");
-                            for (int i = 0; i < orderableDb.ActionList.Count; i++)
-                            {
-                                ImGui.Text(orderableDb.ActionList[i].Name);
-                            }
-                        }
-                        else
-                        {
-                            ImGui.Text("No orders");
-                        }
-                    }
-
-                    fleet.TryGetDataBlob<FleetDB>(out var fleetDB);
-                    var flagshipID = fleetDB?.FlagShipID ?? -9999;
-                    if (fleet.Manager?.TryGetEntityById(flagshipID, out var flagship) ?? false)
-                    {
-                        var positionDB = flagship.GetDataBlob<PositionDB>();
-                        DisplayHelpers.DescriptiveTooltip(display, positionDB.Parent?.GetName(_uiState.Faction.Id) ?? "Unknown", "", Callback);
-                    }
+                    var positionDB = flagship.GetDataBlob<PositionDB>();
+                    DisplayHelpers.DescriptiveTooltip(display, positionDB.Parent?.GetName(_uiState.Faction.Id) ?? "Unknown", "", Callback);
                 }
             }
+
+            if (indent > 0) ImGui.Unindent(indent);
+
+            if (fleetDB == null) return;
+
+            // Recurse into sub-fleets first, then list this fleet's ships, both indented
+            // one level deeper so the hierarchy reads top-down like the fleet window.
+            foreach (var child in fleetDB.GetChildren())
+            {
+                if (child.HasDataBlob<FleetDB>())
+                    DisplayFleetNode(child, depth + 1);
+            }
+
+            var ships = fleetDB.GetChildren().Where(c => !c.HasDataBlob<FleetDB>());
+            int flagshipID2 = fleetDB.FlagShipID;
+            // Flagship first, then alphabetical so the lead ship is easy to spot.
+            foreach (var ship in ships.OrderByDescending(s => s.Id == flagshipID2).ThenBy(s => s.GetName(_uiState.Faction.Id)))
+            {
+                DisplayShipNode(ship, depth + 1, ship.Id == flagshipID2);
+            }
+        }
+
+        private static void DisplayShipNode(Entity ship, int depth, bool isFlagship)
+        {
+            if (_uiState.Faction == null) return;
+
+            float indent = depth * IndentStep;
+            if (indent > 0) ImGui.Indent(indent);
+
+            string name = ship.GetName(_uiState.Faction.Id);
+            // A small marker distinguishes the fleet's flagship from the rest.
+            string label = isFlagship ? $"⚑ {name}" : name;
+
+            // Grey out ships that aren't in the system the player is currently viewing.
+            bool inViewedSystem = ship.Manager?.ManagerID == _uiState.SelectedStarSystemId;
+            if (!inViewedSystem)
+                ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled]);
+
+            bool selected = _uiState.LastClickedEntity?.Id == ship.Id;
+            if (ImGui.Selectable($"{label}###ship-{ship.Id}", selected))
+            {
+                ShipClicked(ship);
+            }
+
+            if (!inViewedSystem)
+                ImGui.PopStyleColor();
+
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip(isFlagship ? $"{name} (Flagship)" : name);
+
+            if (indent > 0) ImGui.Unindent(indent);
+        }
+
+        private static void ShipClicked(Entity ship)
+        {
+            // Ships live in their star system's manager; surface them the same way a
+            // map click would: focus the owning system, open the entity window, and
+            // center the camera. Bail quietly if the ship isn't in a known system.
+            var systemId = ship.Manager?.ManagerID;
+            if (systemId == null
+                || !_uiState.StarSystemStates.TryGetValue(systemId, out var systemState)
+                || !systemState.EntityStatesWithNames.TryGetValue(ship.Id, out var shipState))
+                return;
+
+            if (_uiState.SelectedStarSystemId != systemId)
+                _uiState.SetActiveSystem(systemId);
+
+            _uiState.EntityClicked(shipState, MouseButtons.Primary);
+            _uiState.Camera.CenterOnEntity(ship);
         }
     }
 }
