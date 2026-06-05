@@ -13,6 +13,7 @@ using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Damage;
 using Pulsar4X.Engine;
+using Pulsar4X.Names;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.Ships
@@ -68,14 +69,26 @@ namespace Pulsar4X.Ships
             batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
 
             var faction = industryEntity.GetFactionOwner;
-            var industryParent = industryEntity.GetSOIParentEntity();
 
-            if(industryParent == null) throw new NullReferenceException("industryParent cannot be null");
-
-            var ship = ShipFactory.CreateShip((ShipDesign)designInfo, faction, industryParent);
-            if(faction.TryGetDataBlob<FleetDB>(out var fleetDB))
+            if (industryEntity.TryGetDataBlob<LaunchComplexDB>(out var launchDB))
             {
-                fleetDB.AddChild(ship);
+                var shipName = NameFactory.GetShipName(industryEntity.Manager.Game);
+                launchDB.LaunchQueue.Add(new LaunchQueueEntry
+                {
+                    DesignId = designInfo.UniqueID,
+                    ShipName = shipName
+                });
+            }
+            else
+            {
+                var industryParent = industryEntity.GetSOIParentEntity();
+                if(industryParent == null) throw new NullReferenceException("industryParent cannot be null");
+
+                var ship = ShipFactory.CreateShip((ShipDesign)designInfo, faction, industryParent);
+                if(faction.TryGetDataBlob<FleetDB>(out var fleetDB))
+                {
+                    fleetDB.AddChild(ship);
+                }
             }
 
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)

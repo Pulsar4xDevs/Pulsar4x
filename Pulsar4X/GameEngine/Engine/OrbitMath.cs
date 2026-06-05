@@ -41,6 +41,32 @@ namespace Pulsar4X.Engine
         }
 
         /// <summary>
+        /// Fuel cost to reach a given orbit radius from the surface.
+        /// If targetOrbitRadius is &lt;= 0 or below low orbit, defaults to low orbit.
+        /// </summary>
+        /// <param name="planetEntity"></param>
+        /// <param name="payload">mass of the payload in kg</param>
+        /// <param name="targetOrbitRadius">orbit radius in meters from planet center</param>
+        /// <returns>mass of fuel required in kg</returns>
+        public static double FuelCostToOrbit(Entity planetEntity, double payload, double targetOrbitRadius)
+        {
+            var planetRadius = planetEntity.GetDataBlob<MassVolumeDB>().RadiusInM;
+            var planetMass = planetEntity.GetDataBlob<MassVolumeDB>().MassDry;
+            var lowOrbit = LowOrbitRadius(planetRadius);
+
+            if (targetOrbitRadius <= 0 || targetOrbitRadius < lowOrbit)
+                targetOrbitRadius = lowOrbit;
+
+            var exhaustVelocity = 3000;
+            var sgp = GeneralMath.StandardGravitationalParameter(payload + planetMass);
+            Vector3 pos = targetOrbitRadius * Vector3.UnitX;
+
+            var vel = OrbitalMath.ObjectLocalVelocityPolar(sgp, pos, targetOrbitRadius, 0, 0, 0);
+            var fuelCost = OrbitalMath.TsiolkovskyFuelCost(payload, exhaustVelocity, vel.speed);
+            return fuelCost;
+        }
+
+        /// <summary>
         /// Mass of fuel burned for a given DV change.
         /// </summary>
         /// <param name="ship"></param>

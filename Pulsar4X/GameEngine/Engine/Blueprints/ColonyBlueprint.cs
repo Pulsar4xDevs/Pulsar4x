@@ -13,6 +13,7 @@ public class ColonyBlueprint : Blueprint
     public List<string>? OrdnanceDesigns { get; set; }
     public List<string>? ShipDesigns { get; set; }
     public List<string>? StartingItems { get; set; }
+    public List<LaunchQueueBlueprint>? LaunchQueue { get; set; }
     public List<FleetBlueprint>? Fleets { get; set; }
 
     public struct StartingItemBlueprint
@@ -33,5 +34,11 @@ public class ColonyBlueprint : Blueprint
         public string DesignId { get; set; }
         public string Name { get; set; }
         public List<StartingItemBlueprint>? Cargo { get; set; }
+    }
+
+    public struct LaunchQueueBlueprint
+    {
+        public string DesignId { get; set; }
+        public string? Name { get; set; }
     }
 }

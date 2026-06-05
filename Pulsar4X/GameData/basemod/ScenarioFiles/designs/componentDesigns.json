@@ -450,5 +450,13 @@
         { "Key": "Level", "Value": 1 }
       ]
     }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-launch-complex",
+      "Name": "Launch Complex",
+      "TemplateId": "launch-complex"
+    }
   }
 ]

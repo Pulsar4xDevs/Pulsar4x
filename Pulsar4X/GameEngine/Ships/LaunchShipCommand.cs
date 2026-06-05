@@ -1,12 +1,6 @@
 using System;
-using Pulsar4X.Orbital;
-using Pulsar4X.Industry;
-using Pulsar4X.Extensions;
-using Pulsar4X.Colonies;
-using Pulsar4X.Factions;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Engine;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Ships;
 
@@ -14,94 +8,51 @@ public class LaunchShipCommand : EntityCommand
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf;
     public override bool IsBlocking => true;
-    public override string Name { get; } = "Launch Ship From Storage";
+    public override string Name { get; } = "Launch Ship";
     public override string Details { get; } = "";
 
     Entity _factionEntity;
     Entity _entityCommanding;
-    internal override Entity EntityCommanding { get { return _entityCommanding; } }
-    IndustryJob _yardJob;
-    private string _launchSlot;
-    private string _jobID;
-    public double FuelCost;
+    internal override Entity EntityCommanding => _entityCommanding;
 
-    private Vector3 targetPosition;
-    private Entity? orbitalParent = null;
+    private string _padId;
     private bool _hasLaunched = false;
 
-    public static void CreateCommand(int faction, Entity orderEntity, string lauchSlot, string jobID)
+    public static void CreateCommand(int factionId, Entity colonyEntity, string padId)
     {
         var cmd = new LaunchShipCommand()
         {
-            RequestingFactionGuid = faction,
-            EntityCommandingGuid = orderEntity.Id,
-            CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
-            _launchSlot = lauchSlot,
-            _jobID = jobID
-
+            RequestingFactionGuid = factionId,
+            EntityCommandingGuid = colonyEntity.Id,
+            CreatedDate = colonyEntity.Manager.ManagerSubpulses.StarSysDateTime,
+            _padId = padId
         };
 
-        var parent = orderEntity.GetSOIParentEntity();
-        orderEntity.Manager.Game.OrderHandler.HandleOrder(cmd);
+        colonyEntity.Manager.Game.OrderHandler.HandleOrder(cmd);
     }
 
     internal override void Execute(DateTime atDateTime)
     {
         if (!IsRunning)
         {
-            var portDB = _entityCommanding.GetDataBlob<IndustryAbilityDB>();
-
-            foreach (var job in portDB.ProductionLines[_launchSlot].Jobs)
-            {
-                if (job.ItemGuid == _jobID)
-                {
-                    _yardJob = job;
-                    ShipDesign design = (ShipDesign)_factionEntity.GetDataBlob<FactionInfoDB>().IndustryDesigns[job.ItemGuid];
-                    if(_entityCommanding.HasDataBlob<ColonyInfoDB>())
-                    {
-                        var planet = _entityCommanding.GetDataBlob<ColonyInfoDB>().PlanetEntity;
-
-                        FuelCost = OrbitMath.FuelCostToLowOrbit(planet, design.MassPerUnit);
-                        targetPosition = new Vector3(0, OrbitMath.LowOrbitRadius(planet), 0);
-                        IsRunning = true;
-                    }
-                    else
-                    {
-                        FuelCost = OrbitMath.TsiolkovskyFuelCost(design.MassPerUnit, 275, 1);
-                        //targetOrbit = (OrbitDB)_entityCommanding.GetDataBlob<OrbitDB>().Clone();
-                        targetPosition = _entityCommanding.GetDataBlob<PositionDB>().RelativePosition;
-                        IsRunning = true;
-                    }
-
-                }
-            }
+            IsRunning = true;
         }
-        else //IsRunning
-        {
-            if(orbitalParent == null) throw new NullReferenceException("orbitalParent cannot be null");
 
-            //_entityCommanding.GetDataBlob<CargoStorageDB>().StoredCargoTypes
-            ShipDesign design = (ShipDesign)_factionEntity.GetDataBlob<FactionInfoDB>().IndustryDesigns[_yardJob.ItemGuid];
-            ShipFactory.CreateShip(design, _factionEntity, targetPosition, orbitalParent);
+        if (LaunchComplexProcessor.TryLaunchShip(_entityCommanding, _padId))
+        {
             _hasLaunched = true;
         }
     }
 
     internal override bool IsFinished()
     {
-        if (_hasLaunched)
-            _isFinished = true;
-        else
-            _isFinished = false;
+        _isFinished = _hasLaunched;
         return _isFinished;
     }
 
     internal override bool IsValidCommand(Game game)
     {
-        if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
-            return true;
-        else
-            return false;
+        return CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding);
     }
 
     public override EntityCommand Clone()
