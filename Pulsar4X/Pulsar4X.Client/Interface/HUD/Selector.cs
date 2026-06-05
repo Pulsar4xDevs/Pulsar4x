@@ -22,6 +22,23 @@ namespace Pulsar4X.Client
         private List<string> _knownSystems = new ();
         private List<StarSystem> _filteredAndSortedSystems = new ();
 
+        // When true the window shows the section editor instead of its normal content.
+        private bool _editing = false;
+
+        // The sections of the selector, in display order, along with whether each is shown.
+        private static readonly string[] _sectionNames =
+        {
+            "Corporation", "Systems", "Celestial Bodies", "Colonies", "Fleets"
+        };
+        private readonly Dictionary<string, bool> _sectionVisible = new ()
+        {
+            { "Corporation", true },
+            { "Systems", true },
+            { "Celestial Bodies", true },
+            { "Colonies", true },
+            { "Fleets", true },
+        };
+
         // Indentation (in pixels) applied per level of the celestial body hierarchy.
         private const float BodyIndentStep = 12f;
 
@@ -71,13 +88,97 @@ namespace Pulsar4X.Client
                 // {
                 //     _uiState.SelectedMapView = SystemViewPreferences.GetInstance().GetViewByIndex(selectedIndex);
                 // });
-                DisplayCorporation();
-                DisplaySystems();
-                DisplayBodies();
-                DisplayColonies();
-                DisplayFleets();
+                if(_editing)
+                {
+                    DisplayEditor();
+                }
+                else
+                {
+                    DisplaySections();
+                }
             }
             Window.End();
+        }
+
+        private void DisplaySections()
+        {
+            // The gear button lives on the first visible section's header. If everything
+            // is hidden we still need a way back into the editor, so draw a lone gear.
+            string? firstVisible = Array.Find(_sectionNames, s => _sectionVisible[s]);
+            if(firstVisible == null)
+            {
+                DrawGearButton(sameLine: false);
+                return;
+            }
+
+            if(_sectionVisible["Corporation"])
+                Section("Corporation", CorporationHeaderLabel(), firstVisible == "Corporation", DisplayCorporation);
+            if(_sectionVisible["Systems"])
+                Section("Systems", "Systems", firstVisible == "Systems", DisplaySystems);
+            if(_sectionVisible["Celestial Bodies"])
+                Section("Celestial Bodies", "Celestial Bodies", firstVisible == "Celestial Bodies", DisplayBodies);
+            if(_sectionVisible["Colonies"])
+                Section("Colonies", "Colonies", firstVisible == "Colonies", DisplayColonies);
+            if(_sectionVisible["Fleets"])
+                Section("Fleets", "Fleets", firstVisible == "Fleets", DisplayFleets);
+        }
+
+        /// <summary>
+        /// Draws a collapsing header for a section, optionally with the settings gear
+        /// button on the right of the header line, then the section content when open.
+        /// </summary>
+        private void Section(string sectionId, string headerLabel, bool drawGear, Action content)
+        {
+            if(drawGear) ImGui.SetNextItemAllowOverlap();
+            bool open = ImGui.CollapsingHeader($"{headerLabel}###section-{sectionId}", ImGuiTreeNodeFlags.DefaultOpen);
+            if(drawGear) DrawGearButton(sameLine: true);
+            if(open) content();
+        }
+
+        private void DrawGearButton(bool sameLine)
+        {
+            var style = ImGui.GetStyle();
+            string gear = "⚙"; // U+2699, merged in from DejaVuSans
+            float btnWidth = ImGui.CalcTextSize(gear).X + style.FramePadding.X * 2f;
+
+            if(sameLine) ImGui.SameLine();
+            ImGui.SetCursorPosX(ImGui.GetWindowWidth() - btnWidth - style.WindowPadding.X);
+            if(ImGui.SmallButton($"{gear}##selector-gear"))
+            {
+                _editing = true;
+            }
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Configure sections");
+        }
+
+        private void DisplayEditor()
+        {
+            ImGui.TextDisabled("Sections");
+            ImGui.Separator();
+
+            foreach(var name in _sectionNames)
+            {
+                bool visible = _sectionVisible[name];
+                if(ImGui.Checkbox(name, ref visible))
+                    _sectionVisible[name] = visible;
+            }
+
+            ImGui.Separator();
+
+            // Save button, horizontally centered, exits editing mode.
+            const float buttonWidth = 80f;
+            float regionWidth = ImGui.GetContentRegionAvail().X;
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (regionWidth - buttonWidth) * 0.5f);
+            if(ImGui.Button("Save", new Vector2(buttonWidth, 0)))
+            {
+                _editing = false;
+            }
+        }
+
+        private static string CorporationHeaderLabel()
+        {
+            if(_uiState.Faction == null) return "Corporation";
+            return $"{_uiState.Faction.GetFactionName()} [{_uiState.Faction.GetFactionAbbreviation()}]";
         }
 
         private void RefreshSystems()
@@ -107,102 +208,92 @@ namespace Pulsar4X.Client
             FilterAndSortSystems();
         }
 
-        private void DisplayCorporation()
+        private static void DisplayCorporation()
         {
             if(_uiState.Faction == null) return;
+            if(!_uiState.Faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
+                return;
 
-            if(ImGui.CollapsingHeader($"{_uiState.Faction.GetFactionName()} [{_uiState.Faction.GetFactionAbbreviation()}]", ImGuiTreeNodeFlags.DefaultOpen))
+            string label = "Funds";
+            string value = factionInfoDB.Money.GetCurrentFunds().ToString("C0", CultureInfo.CurrentCulture);
+
+            // Get available width in current line
+            float availWidth = ImGui.GetContentRegionAvail().X;
+
+            // Calculate the width of the value text
+            Vector2 valueSize = ImGui.CalcTextSize(value);
+
+            // Calculate how many spaces we need to add
+            float textWidth = ImGui.CalcTextSize(label).X + valueSize.X;
+            float remainingWidth = availWidth - textWidth;
+
+
+            // Create a padding string
+            string padding = "";
+            if (remainingWidth > 0)
             {
-                if(!_uiState.Faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
-                    return;
-
-                string label = "Funds";
-                string value = factionInfoDB.Money.GetCurrentFunds().ToString("C0", CultureInfo.CurrentCulture);
-
-                // Get available width in current line
-                float availWidth = ImGui.GetContentRegionAvail().X;
-
-                // Calculate the width of the value text
-                Vector2 valueSize = ImGui.CalcTextSize(value);
-
-                // Calculate how many spaces we need to add
-                float textWidth = ImGui.CalcTextSize(label).X + valueSize.X;
-                float remainingWidth = availWidth - textWidth;
-
-
-                // Create a padding string
-                string padding = "";
-                if (remainingWidth > 0)
-                {
-                    // Estimate how many spaces we need based on space width
-                    float spaceWidth = ImGui.CalcTextSize(" ").X;
-                    int spacesNeeded = (int)(remainingWidth / spaceWidth);
-                    padding = new string(' ', Math.Max(0, spacesNeeded));
-                }
-
-                // Create the selectable with the label, padding, and value
-                ImGui.Selectable($"{label}{padding}{value}");
+                // Estimate how many spaces we need based on space width
+                float spaceWidth = ImGui.CalcTextSize(" ").X;
+                int spacesNeeded = (int)(remainingWidth / spaceWidth);
+                padding = new string(' ', Math.Max(0, spacesNeeded));
             }
+
+            // Create the selectable with the label, padding, and value
+            ImGui.Selectable($"{label}{padding}{value}");
         }
 
         private void DisplaySystems()
         {
-            if (ImGui.CollapsingHeader("Systems", ImGuiTreeNodeFlags.DefaultOpen))
+            foreach (var system in _filteredAndSortedSystems)
             {
-                foreach (var system in _filteredAndSortedSystems)
+                if (ImGui.Selectable(system.NameDB.OwnersName, _uiState.SelectedStarSystemId.Equals(system.ID)))
                 {
-                    if (ImGui.Selectable(system.NameDB.OwnersName, _uiState.SelectedStarSystemId.Equals(system.ID)))
-                    {
-                        _uiState.SetActiveSystem(system.ID);
-                    }
+                    _uiState.SetActiveSystem(system.ID);
                 }
             }
         }
 
         private static void DisplayBodies()
         {
-            if (ImGui.CollapsingHeader("Celestial Bodies", ImGuiTreeNodeFlags.DefaultOpen))
+            if (_uiState.Faction == null) return;
+            if (string.IsNullOrEmpty(_uiState.SelectedStarSystemId)
+                || !_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId))
+                return;
+
+            var systemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+
+            // Gather all celestial bodies in the system keyed by entity id so we can
+            // reconstruct the orbital hierarchy (stars -> planets -> moons etc).
+            var bodies = systemState.EntityStatesWithNames.Values
+                .Where(e => Array.IndexOf(_celestialBodyTypes, e.BodyType) >= 0)
+                .ToDictionary(e => e.Id);
+
+            // Build parent -> children lists. A body whose parent isn't another
+            // celestial body in this set is treated as a root (e.g. the primary star).
+            var children = new Dictionary<int, List<EntityState>>();
+            var roots = new List<EntityState>();
+            foreach (var body in bodies.Values)
             {
-                if (_uiState.Faction == null) return;
-                if (string.IsNullOrEmpty(_uiState.SelectedStarSystemId)
-                    || !_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId))
-                    return;
-
-                var systemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
-
-                // Gather all celestial bodies in the system keyed by entity id so we can
-                // reconstruct the orbital hierarchy (stars -> planets -> moons etc).
-                var bodies = systemState.EntityStatesWithNames.Values
-                    .Where(e => Array.IndexOf(_celestialBodyTypes, e.BodyType) >= 0)
-                    .ToDictionary(e => e.Id);
-
-                // Build parent -> children lists. A body whose parent isn't another
-                // celestial body in this set is treated as a root (e.g. the primary star).
-                var children = new Dictionary<int, List<EntityState>>();
-                var roots = new List<EntityState>();
-                foreach (var body in bodies.Values)
+                var parent = body.GetParent();
+                if (parent != null && parent.Id != body.Id && bodies.ContainsKey(parent.Id))
                 {
-                    var parent = body.GetParent();
-                    if (parent != null && parent.Id != body.Id && bodies.ContainsKey(parent.Id))
+                    if (!children.TryGetValue(parent.Id, out var list))
                     {
-                        if (!children.TryGetValue(parent.Id, out var list))
-                        {
-                            list = new List<EntityState>();
-                            children[parent.Id] = list;
-                        }
-                        list.Add(body);
+                        list = new List<EntityState>();
+                        children[parent.Id] = list;
                     }
-                    else
-                    {
-                        roots.Add(body);
-                    }
+                    list.Add(body);
                 }
-
-                var prefs = SystemViewPreferences.GetInstance();
-                foreach (var root in SortBodies(roots))
+                else
                 {
-                    DisplayBodyNode(root, children, prefs, 0);
+                    roots.Add(body);
                 }
+            }
+
+            var prefs = SystemViewPreferences.GetInstance();
+            foreach (var root in SortBodies(roots))
+            {
+                DisplayBodyNode(root, children, prefs, 0);
             }
         }
 
@@ -264,22 +355,19 @@ namespace Pulsar4X.Client
 
         private static void DisplayColonies()
         {
-            if (ImGui.CollapsingHeader("Colonies", ImGuiTreeNodeFlags.DefaultOpen))
+            if(_uiState.Faction == null) return;
+
+            var colonies = _uiState.Faction.GetDataBlob<FactionInfoDB>().Colonies;
+
+            foreach (var colony in colonies)
             {
-                if(_uiState.Faction == null) return;
-
-                var colonies = _uiState.Faction.GetDataBlob<FactionInfoDB>().Colonies;
-
-                foreach (var colony in colonies)
+                bool visible = ColonyManagementWindow.GetInstance().GetActive() && ColonyManagementWindow.GetInstance().SelectedEntity?.Entity.Id == colony.Id;
+                if (ImGui.Selectable(colony.GetName(_uiState.Faction.Id), visible))
                 {
-                    bool visible = ColonyManagementWindow.GetInstance().GetActive() && ColonyManagementWindow.GetInstance().SelectedEntity?.Entity.Id == colony.Id;
-                    if (ImGui.Selectable(colony.GetName(_uiState.Faction.Id), visible))
+                    if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId) && _uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies.ContainsKey(colony.Id))
                     {
-                        if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId) && _uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies.ContainsKey(colony.Id))
-                        {
-                            ColonyManagementWindow.GetInstance().SelectEntity(_uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies[colony.Id]);
-                            ColonyManagementWindow.GetInstance().SetActive(true);
-                        }
+                        ColonyManagementWindow.GetInstance().SelectEntity(_uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies[colony.Id]);
+                        ColonyManagementWindow.GetInstance().SetActive(true);
                     }
                 }
             }
@@ -287,52 +375,49 @@ namespace Pulsar4X.Client
 
         private static void DisplayFleets()
         {
-            if (ImGui.CollapsingHeader("Fleets", ImGuiTreeNodeFlags.DefaultOpen))
+            if(_uiState.Faction == null) return;
+
+            var fleets = _uiState.Faction.GetDataBlob<FleetDB>().RootDB?.Children ?? new SafeList<Entity>();
+
+            foreach (var fleet in fleets)
             {
-                if(_uiState.Faction == null) return;
+                // Check if the entity is actually a ship
+                if (fleet.HasDataBlob<ShipInfoDB>())
+                    continue;
 
-                var fleets = _uiState.Faction.GetDataBlob<FleetDB>().RootDB?.Children ?? new SafeList<Entity>();
-
-                foreach (var fleet in fleets)
+                bool visible = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleet?.Id == fleet.Id;
+                string display = fleet.GetName(_uiState.Faction.Id);
+                if (ImGui.Selectable(display, visible))
                 {
-                    // Check if the entity is actually a ship
-                    if (fleet.HasDataBlob<ShipInfoDB>())
-                        continue;
+                    FleetWindow.GetInstance().SelectFleet(fleet);
+                    FleetWindow.GetInstance().SetActive(true);
+                }
 
-                    bool visible = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleet?.Id == fleet.Id;
-                    string display = fleet.GetName(_uiState.Faction.Id);
-                    if (ImGui.Selectable(display, visible))
+                if (ImGui.IsItemHovered())
+                {
+                    void Callback()
                     {
-                        FleetWindow.GetInstance().SelectFleet(fleet);
-                        FleetWindow.GetInstance().SetActive(true);
+                        if (fleet.TryGetDataBlob<OrderableDB>(out var orderableDb)
+                        && orderableDb.ActionList.Count > 0)
+                        {
+                            ImGui.Text("Orders:");
+                            for (int i = 0; i < orderableDb.ActionList.Count; i++)
+                            {
+                                ImGui.Text(orderableDb.ActionList[i].Name);
+                            }
+                        }
+                        else
+                        {
+                            ImGui.Text("No orders");
+                        }
                     }
 
-                    if (ImGui.IsItemHovered())
+                    fleet.TryGetDataBlob<FleetDB>(out var fleetDB);
+                    var flagshipID = fleetDB?.FlagShipID ?? -9999;
+                    if (fleet.Manager?.TryGetEntityById(flagshipID, out var flagship) ?? false)
                     {
-                        void Callback()
-                        {
-                            if (fleet.TryGetDataBlob<OrderableDB>(out var orderableDb)
-                            && orderableDb.ActionList.Count > 0)
-                            {
-                                ImGui.Text("Orders:");
-                                for (int i = 0; i < orderableDb.ActionList.Count; i++)
-                                {
-                                    ImGui.Text(orderableDb.ActionList[i].Name);
-                                }
-                            }
-                            else
-                            {
-                                ImGui.Text("No orders");
-                            }
-                        }
-
-                        fleet.TryGetDataBlob<FleetDB>(out var fleetDB);
-                        var flagshipID = fleetDB?.FlagShipID ?? -9999;
-                        if (fleet.Manager?.TryGetEntityById(flagshipID, out var flagship) ?? false)
-                        {
-                            var positionDB = flagship.GetDataBlob<PositionDB>();
-                            DisplayHelpers.DescriptiveTooltip(display, positionDB.Parent?.GetName(_uiState.Faction.Id) ?? "Unknown", "", Callback);
-                        }
+                        var positionDB = flagship.GetDataBlob<PositionDB>();
+                        DisplayHelpers.DescriptiveTooltip(display, positionDB.Parent?.GetName(_uiState.Faction.Id) ?? "Unknown", "", Callback);
                     }
                 }
             }
