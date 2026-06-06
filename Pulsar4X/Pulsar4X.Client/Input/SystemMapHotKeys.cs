@@ -11,7 +11,20 @@ public class SystemMapHotKeys : IHotKeyHandler
     {
         if (!ImGui.IsAnyItemActive() && e.Type == (uint)SDL.EventType.KeyUp)
         {
-            if (e.Key.Key == SDL.Keycode.Escape)
+            if (e.Key.Key == SDL.Keycode.Space)
+            {
+                var tc = TimeControl.GetInstance();
+                if((e.Key.Mod & SDL.Keymod.Ctrl) != 0)
+                {
+                    // Ctrl + Space for single step.
+                    tc.OneStepPressed();
+                }
+                else
+                {
+                    tc.PausePlayPressed();
+                }
+            }
+            else if (e.Key.Key == SDL.Keycode.Escape)
             {
                 MainMenuItems.GetInstance().ToggleActive();
             }
