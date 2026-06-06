@@ -258,7 +258,7 @@ namespace Pulsar4X.Client
             }
         }
 
-        void PausePlayPressed()
+        internal void PausePlayPressed()
         {
             if (_timeloop == null)
                 return;
@@ -273,7 +273,7 @@ namespace Pulsar4X.Client
             }
         }
 
-        void OneStepPressed()
+        internal void OneStepPressed()
         {
             if (_timeloop == null)
                 return;
