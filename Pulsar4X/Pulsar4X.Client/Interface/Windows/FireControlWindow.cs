@@ -87,9 +87,8 @@ namespace Pulsar4X.Client
                 ImGui.NextColumn();
 
                 DisplayTargetColumn();
-
-                Window.End();
             }
+            Window.End();
         }
 
 
