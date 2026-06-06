@@ -26,11 +26,13 @@ public class CreateTransferWindow : PulsarGuiWindow
     public void SetLeft(Entity entity)
     {
         TransferLeft = entity;
+        TransferLeftGoods.Clear();
     }
 
     public void SetRight(Entity entity)
     {
         TransferRight = entity;
+        TransferRightGoods.Clear();
     }
 
     internal override void Display()
