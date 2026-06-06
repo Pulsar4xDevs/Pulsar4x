@@ -47,7 +47,7 @@ public class CreateTransferWindow : PulsarGuiWindow
             var thirdChildSize = new Vector2(Styles.LeftColumnWidthLg - (windowContentSize.X * 0.01f), windowContentSize.Y);
             if(ImGui.BeginChild(GetLeftTitle() + "###left", firstChildSize, ImGuiChildFlags.Borders))
             {
-                DisplayTransferTarget(TransferLeft, TransferRight /*, true */);
+                DisplayTransferTarget(TransferLeft, TransferRight);
             }
             ImGui.EndChild();
             ImGui.SameLine();
