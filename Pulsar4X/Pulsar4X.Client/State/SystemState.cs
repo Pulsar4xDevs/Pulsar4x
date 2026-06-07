@@ -42,6 +42,7 @@ namespace Pulsar4X.Client
         // Double buffering the changes to minimize critical section during events.
         private ChangeBuffer _clientSide = new();
         private ChangeBuffer _serverSide = new();
+        private readonly object _bufferSwapLock = new();
 
         // public List<Message> SystemChanges = new List<Message>();
 
@@ -73,8 +74,6 @@ namespace Pulsar4X.Client
         public IReadOnlyDictionary<int, EntityState> EntityStatesColonies => _entitiesWithColonies;
         
         public CameraState? SavedCameraState = null;
-
-        public readonly object Lock = new object();
 
         public SystemState(StarSystem system, int factionId)
         {
@@ -127,7 +126,7 @@ namespace Pulsar4X.Client
         {
             if(message.EntityId == null) return Task.CompletedTask;
 
-            lock(Lock)
+            lock (_bufferSwapLock)
             {
                 _serverSide.EntitiesToAdd.Enqueue(message.EntityId.Value);
             }
@@ -138,7 +137,7 @@ namespace Pulsar4X.Client
         {
             if(message.EntityId == null) return Task.CompletedTask;
 
-            lock(Lock)
+            lock (_bufferSwapLock)
             { 
                 _serverSide.EntitiesToBin.Enqueue(message.EntityId.Value);
             }
@@ -149,7 +148,7 @@ namespace Pulsar4X.Client
         {
             if(message.EntityId == null) return Task.CompletedTask;
 
-            lock(Lock)
+            lock (_bufferSwapLock)
             {
                 _serverSide.EntitiesToUpdate.Enqueue((message.EntityId.Value, message));
             }
@@ -158,7 +157,7 @@ namespace Pulsar4X.Client
 
         public void PreFrameSetup()
         {
-            lock(Lock)
+            lock (_bufferSwapLock)
             {
                 var temp = _serverSide;
                 _serverSide = _clientSide;
