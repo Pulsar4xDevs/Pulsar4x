@@ -39,8 +39,8 @@ namespace Pulsar4X.Client
             public ConcurrentQueue<int> EntitiesToBin = new();
         }
 
-        // Double buffering the changes to avoid locks during events.
-        private ChangeBuffer _clientSide = new(); // Should only be read/written to by the UI thread.
+        // Double buffering the changes to minimize critical section during events.
+        private ChangeBuffer _clientSide = new();
         private ChangeBuffer _serverSide = new();
 
         // public List<Message> SystemChanges = new List<Message>();
@@ -73,6 +73,8 @@ namespace Pulsar4X.Client
         public IReadOnlyDictionary<int, EntityState> EntityStatesColonies => _entitiesWithColonies;
         
         public CameraState? SavedCameraState = null;
+
+        public readonly object Lock = new object();
 
         public SystemState(StarSystem system, int factionId)
         {
@@ -125,7 +127,10 @@ namespace Pulsar4X.Client
         {
             if(message.EntityId == null) return Task.CompletedTask;
 
-            _serverSide.EntitiesToAdd.Enqueue(message.EntityId.Value);
+            lock(Lock)
+            {
+                _serverSide.EntitiesToAdd.Enqueue(message.EntityId.Value);
+            }
             return Task.CompletedTask;
         }
 
@@ -133,7 +138,10 @@ namespace Pulsar4X.Client
         {
             if(message.EntityId == null) return Task.CompletedTask;
 
-            _serverSide.EntitiesToBin.Enqueue(message.EntityId.Value);
+            lock(Lock)
+            { 
+                _serverSide.EntitiesToBin.Enqueue(message.EntityId.Value);
+            }
             return Task.CompletedTask;
         }
 
@@ -141,16 +149,21 @@ namespace Pulsar4X.Client
         {
             if(message.EntityId == null) return Task.CompletedTask;
 
-            _serverSide.EntitiesToUpdate.Enqueue((message.EntityId.Value, message));
+            lock(Lock)
+            {
+                _serverSide.EntitiesToUpdate.Enqueue((message.EntityId.Value, message));
+            }
             return Task.CompletedTask;
         }
 
         public void PreFrameSetup()
         {
-            // Atomically swap the buffers.
-            // NOTE: Only _serverSide is atomically read/written.
-            //   _clientSide is not atomically written to, but should be fine since it should only be accessed through the UI thread.
-            _clientSide = Interlocked.Exchange(ref _serverSide, _clientSide);
+            lock(Lock)
+            {
+                var temp = _serverSide;
+                _serverSide = _clientSide;
+                _clientSide = temp;
+            }
 
             // Deal with additions
             while(_clientSide.EntitiesToAdd.TryDequeue(out var entityToAdd))
