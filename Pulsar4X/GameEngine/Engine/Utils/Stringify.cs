@@ -325,33 +325,22 @@ namespace Pulsar4X.Engine
             return stringVolume;
         }
 
-        public static string Distance(double length_m,  string format = "0.###")
+        public static string Distance(double length_m,  string format = "#,0.###")
         {
 
             string stringDistance = "0 m";
             double abslen = Math.Abs(length_m);
             double len;
-            if (abslen > 1.0e12)
+            if (abslen > 149597870700.0 * 0.1)
             {
-                len = length_m * 1.0e-12;
-                stringDistance = len.ToString(format) + " GKm";
-            }
-            else if (abslen > 1.0e9)
-            {
-                len = length_m * 1.0e-9;
-                stringDistance = len.ToString(format) + " MKm";
-            }
-            else if (abslen > 1.0e6)
-            {
-                len = length_m * 1.0e-6;
-                stringDistance = len.ToString(format) + " KKm";
+                len = length_m / 149597870700.0;
+                stringDistance = len.ToString(format) + " AU";
             }
             else if (abslen > 1.0e3)
             {
                 len = length_m * 0.001;
                 stringDistance = len.ToString(format) + " Km";
             }
-
             else if (abslen > 0.1)
             {
                 stringDistance = length_m.ToString(format) + " m";
@@ -361,7 +350,6 @@ namespace Pulsar4X.Engine
                 len = length_m * 100;
                 stringDistance = len.ToString(format + "cm");
             }
-
             else
             {
                 len = length_m * 1000;
