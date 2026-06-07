@@ -30,14 +30,38 @@ namespace Pulsar4X.Client
         internal SystemSensorContacts? SystemContacts;
         ConcurrentQueue<Message> _sensorChanges = new ConcurrentQueue<Message>();
         internal List<Message> SensorChanges = new List<Message>();
-        public ConcurrentQueue<int> EntitiesToAdd = new ();
-        public ConcurrentQueue<(int, Message)> EntitiesToUpdate = new ();
-        public SafeList<int> EntitiesToBin = new ();
+        public ConcurrentQueue<int> EntitiesToAdd = new();
+        public ConcurrentQueue<(int, Message)> EntitiesToUpdate = new();
+        public SafeList<int> EntitiesToBin = new();
         public List<Message> SystemChanges = new List<Message>();
-        public SafeDictionary<int, EntityState> AllEntities = new ();
-        public SafeDictionary<int, EntityState> EntityStatesWithNames = new ();
-        public SafeDictionary<int, EntityState> EntityStatesWithPosition = new ();
-        public SafeDictionary<int, EntityState> EntityStatesColonies = new ();
+
+        // Backing fields for the entity dictionaries.
+        // Updated in PreFrameSetup based on queued changes.
+        private Dictionary<int, EntityState> _allEntities = [];
+        private Dictionary<int, EntityState> _entitiesWithNames = [];
+        private Dictionary<int, EntityState> _entitiesWithPosition = [];
+        private Dictionary<int, EntityState> _entitiesWithColonies = [];
+
+        /// <summary>
+        /// A snapshot of all entities in the system that the faction is currently aware of for the current frame.
+        /// </summary>
+        public IReadOnlyDictionary<int, EntityState> AllEntities => _allEntities;
+
+        /// <summary>
+        /// A snapshot of all entities with a name component in the system that the faction is currently aware of for the current frame.
+        /// </summary>
+        public IReadOnlyDictionary<int, EntityState> EntityStatesWithNames => _entitiesWithNames;
+
+        /// <summary>
+        /// A snapshot of all entities with a position component in the system that the faction is currently aware of for the current frame.
+        /// </summary>
+        public IReadOnlyDictionary<int, EntityState> EntityStatesWithPosition => _entitiesWithPosition;
+        
+        /// <summary>
+        /// A snapshot of all entities with a colony component in the system that the faction is currently aware of for the current frame.
+        /// </summary>
+        public IReadOnlyDictionary<int, EntityState> EntityStatesColonies => _entitiesWithColonies;
+        
         public CameraState? SavedCameraState = null;
 
         public readonly object Lock = new object();
@@ -70,22 +94,22 @@ namespace Pulsar4X.Client
         {
             var entityState = new EntityState(entity, entity.Id, factionId);
 
-            if(!AllEntities.ContainsKey(entity.Id))
-                AllEntities.Add(entity.Id, entityState);
+            if(!_allEntities.ContainsKey(entity.Id))
+                _allEntities.Add(entity.Id, entityState);
 
             if (!EntityStatesWithNames.ContainsKey(entity.Id) && entity.TryGetDataBlob<NameDB>(out var nameDB))
             {
                 entityState.Name = nameDB.GetName(factionId); // TODO: doesn't update when if/when the entity is renamed
-                EntityStatesWithNames.Add(entity.Id, entityState);
+                _entitiesWithNames.Add(entity.Id, entityState);
             }
             if (!EntityStatesWithPosition.ContainsKey(entity.Id) && entity.TryGetDataBlob<PositionDB>(out var positionDB))
             {
                 entityState.Position = positionDB;
-                EntityStatesWithPosition.Add(entity.Id, entityState);
+                _entitiesWithPosition.Add(entity.Id, entityState);
             }
             if (!EntityStatesColonies.ContainsKey(entity.Id) && entity.HasDataBlob<ColonyInfoDB>())
             {
-                EntityStatesColonies.Add(entity.Id, entityState);
+                _entitiesWithColonies.Add(entity.Id, entityState);
             }
         }
 
@@ -136,14 +160,14 @@ namespace Pulsar4X.Client
                 // Deal with removals
                 foreach (var entityToRemove in EntitiesToBin)
                 {
-                    if(AllEntities.TryGetValue(entityToRemove, out var entityState))
+                    if(_allEntities.TryGetValue(entityToRemove, out var entityState))
                     {
                         entityState.Unsubscribe();
                     }
-                    AllEntities.Remove(entityToRemove);
-                    EntityStatesWithPosition.Remove(entityToRemove);
-                    EntityStatesWithNames.Remove(entityToRemove);
-                    EntityStatesColonies.Remove(entityToRemove);
+                    _allEntities.Remove(entityToRemove);
+                    _entitiesWithPosition.Remove(entityToRemove);
+                    _entitiesWithNames.Remove(entityToRemove);
+                    _entitiesWithColonies.Remove(entityToRemove);
                     OnEntityRemoved?.Invoke(this, entityToRemove);
                 }
                 EntitiesToBin.Clear();
