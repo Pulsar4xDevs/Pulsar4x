@@ -10,7 +10,6 @@ using System.Linq;
 using Pulsar4X.Colonies;
 using Pulsar4X.Names;
 using Pulsar4X.Movement;
-using System.Threading;
 
 namespace Pulsar4X.Client
 {
@@ -75,12 +74,12 @@ namespace Pulsar4X.Client
         /// A snapshot of all entities with a position component in the system that the faction is currently aware of for the current frame.
         /// </summary>
         public IReadOnlyDictionary<int, EntityState> EntityStatesWithPosition => _entitiesWithPosition;
-        
+
         /// <summary>
         /// A snapshot of all entities with a colony component in the system that the faction is currently aware of for the current frame.
         /// </summary>
         public IReadOnlyDictionary<int, EntityState> EntityStatesColonies => _entitiesWithColonies;
-        
+
         public CameraState? SavedCameraState = null;
 
         public SystemState(StarSystem system, int factionId)
@@ -146,7 +145,7 @@ namespace Pulsar4X.Client
             if(message.EntityId == null) return Task.CompletedTask;
 
             lock (_bufferSwapLock)
-            { 
+            {
                 _serverSide.EntitiesToBin.Enqueue(message.EntityId.Value);
             }
             return Task.CompletedTask;
