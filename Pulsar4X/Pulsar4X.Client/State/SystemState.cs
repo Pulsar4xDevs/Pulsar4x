@@ -74,8 +74,6 @@ namespace Pulsar4X.Client
         
         public CameraState? SavedCameraState = null;
 
-        public readonly object Lock = new object();
-
         public SystemState(StarSystem system, int factionId)
         {
             StarSystem = system;
