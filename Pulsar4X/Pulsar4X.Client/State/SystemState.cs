@@ -27,8 +27,16 @@ namespace Pulsar4X.Client
         public event SystemStateEntityUpdateHandler? OnEntityUpdated;
 
         private int _factionId;
-        internal StarSystem StarSystem;
-        internal SystemSensorContacts? SystemContacts;
+
+        /// <summary>
+        /// The actual star system that SystemState proxies.
+        /// </summary>
+        /// <remarks>
+        /// Prefer using native SystemState methods instead of directly accessing the StarSystem.
+        /// </remarks>
+        internal StarSystem StarSystem { get; private set; }
+
+        internal SystemSensorContacts? SystemContacts { get; private set; }
         // ConcurrentQueue<Message> _sensorChanges = new ConcurrentQueue<Message>();
         // internal List<Message> SensorChanges = new List<Message>();
 
