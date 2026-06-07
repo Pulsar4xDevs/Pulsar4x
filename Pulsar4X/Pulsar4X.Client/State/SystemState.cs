@@ -29,8 +29,8 @@ namespace Pulsar4X.Client
         private int _factionId;
         internal StarSystem StarSystem;
         internal SystemSensorContacts? SystemContacts;
-        ConcurrentQueue<Message> _sensorChanges = new ConcurrentQueue<Message>();
-        internal List<Message> SensorChanges = new List<Message>();
+        // ConcurrentQueue<Message> _sensorChanges = new ConcurrentQueue<Message>();
+        // internal List<Message> SensorChanges = new List<Message>();
 
         private class ChangeBuffer
         {
@@ -43,7 +43,7 @@ namespace Pulsar4X.Client
         private ChangeBuffer _clientSide = new();
         private ChangeBuffer _serverSide = new();
 
-        public List<Message> SystemChanges = new List<Message>();
+        // public List<Message> SystemChanges = new List<Message>();
 
         // Backing fields for the entity dictionaries.
         // Updated in PreFrameSetup based on queued changes.
@@ -80,8 +80,8 @@ namespace Pulsar4X.Client
         {
             StarSystem = system;
             StarSystem.SetupDefaultNeutralEntitiesForFaction(factionId);
-            SystemContacts = system.GetSensorContacts(factionId);
-            _sensorChanges = SystemContacts.Changes.Subscribe();
+            // SystemContacts = system.GetSensorContacts(factionId);
+            // _sensorChanges = SystemContacts.Changes.Subscribe();
             _factionId = factionId;
 
             var entities = StarSystem.GetFilteredEntities(EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile, factionId);
@@ -177,8 +177,8 @@ namespace Pulsar4X.Client
                 OnEntityRemoved?.Invoke(this, entityToRemove);
             }
             _clientSide.EntitiesToBin.Clear();
-            SensorChanges.Clear();
-            SystemChanges.Clear();
+            // SensorChanges.Clear();
+            // SystemChanges.Clear();
 
             while(_clientSide.EntitiesToUpdate.TryDequeue(out var entityToUpdate))
             {
