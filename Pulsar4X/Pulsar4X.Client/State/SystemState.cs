@@ -40,7 +40,7 @@ namespace Pulsar4X.Client
         }
 
         // Double buffering the changes to avoid locks during events.
-        private ChangeBuffer _clientSide = new();
+        private ChangeBuffer _clientSide = new(); // Should only be read/written to by the UI thread.
         private ChangeBuffer _serverSide = new();
 
         // public List<Message> SystemChanges = new List<Message>();
@@ -148,6 +148,8 @@ namespace Pulsar4X.Client
         public void PreFrameSetup()
         {
             // Atomically swap the buffers.
+            // NOTE: Only _serverSide is atomically read/written.
+            //   _clientSide is not atomically written to, but should be fine since it should only be accessed through the UI thread.
             _clientSide = Interlocked.Exchange(ref _serverSide, _clientSide);
 
             // Deal with additions
