@@ -26,11 +26,13 @@ public class CreateTransferWindow : PulsarGuiWindow
     public void SetLeft(Entity entity)
     {
         TransferLeft = entity;
+        TransferLeftGoods.Clear();
     }
 
     public void SetRight(Entity entity)
     {
         TransferRight = entity;
+        TransferRightGoods.Clear();
     }
 
     internal override void Display()
@@ -45,8 +47,7 @@ public class CreateTransferWindow : PulsarGuiWindow
             var thirdChildSize = new Vector2(Styles.LeftColumnWidthLg - (windowContentSize.X * 0.01f), windowContentSize.Y);
             if(ImGui.BeginChild(GetLeftTitle() + "###left", firstChildSize, ImGuiChildFlags.Borders))
             {
-                if(TransferLeft != null)
-                    DisplayStorageList(TransferLeft);
+                DisplayTransferTarget(TransferLeft, TransferRight);
             }
             ImGui.EndChild();
             ImGui.SameLine();
@@ -105,12 +106,7 @@ public class CreateTransferWindow : PulsarGuiWindow
 
             if(ImGui.BeginChild(GetRightTitle() + "###right", thirdChildSize, ImGuiChildFlags.Borders))
             {
-                if(TransferRight != null)
-                    DisplayStorageList(TransferRight);
-                else
-                    DisplayTransferSelection();
-
-                
+                DisplayTransferTarget(TransferRight, TransferLeft);
             }
             ImGui.EndChild();
             
@@ -118,12 +114,65 @@ public class CreateTransferWindow : PulsarGuiWindow
         Window.End();
     }
 
+    private void DisplayTransferTarget(Entity? entity, Entity? other = null, bool readOnlySelector = false)
+    {
+        // At least one target needs to be set to allow selection of the other.
+        // If we don't have other, lock the current selector.
+        readOnlySelector |= other is null;
+
+        ImGui.SetNextItemWidth(-1.0f);
+        if (readOnlySelector)
+            ImGui.BeginDisabled();
+
+        if (ImGui.BeginCombo("###selector", entity?.GetName(_uiState.Faction.Id) ?? "Select transfer partner"))
+        {
+            // Find storages in range and populate list.
+            if(other is not null && other.Manager is not null)
+            {
+                var systemState = _uiState.StarSystemStates[other.Manager.ManagerID];
+                var allFriendlyStorageInSystem = systemState.GetFilteredEntities(DataStructures.EntityFilter.Friendly, _uiState.Faction.Id, typeof(CargoStorageDB));
+
+                foreach (var potentialTarget in allFriendlyStorageInSystem)
+                {
+                    if (potentialTarget.Id == other.Id) continue;
+
+                    // TODO: check the distance from other to potentialTarget
+                    // make sure it is within the transfer range
+                    if (ImGui.Selectable(potentialTarget.Name, entity is not null && potentialTarget.Id == entity.Id))
+                    {
+                        // Make the target the current entity.
+                        if (entity == TransferLeft)
+                        {
+                            SetLeft(potentialTarget.Entity);
+                        } 
+                        else if (entity == TransferRight)
+                        {
+                            SetRight(potentialTarget.Entity);
+                        }
+                        entity = potentialTarget.Entity;
+                    }
+                }
+            }
+
+            ImGui.EndCombo();
+        }
+
+        if (readOnlySelector)
+            ImGui.EndDisabled();
+
+        ImGui.Separator();
+
+        if (entity is null)
+            return;
+
+        DisplayStorageList(entity);
+        return;
+    }
+
     private void DisplayStorageList(Entity entity)
     {
         if(entity.TryGetDataBlob<CargoStorageDB>(out var leftVolumeStorageDB))
         {
-            ImGui.Text(entity.GetName(_uiState.Faction.Id));
-            ImGui.Separator();
             foreach(var (storageId, storageType) in leftVolumeStorageDB.TypeStores)
             {
                 string header = entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoTypes[storageId].Name + " Storage";
@@ -196,31 +245,6 @@ public class CreateTransferWindow : PulsarGuiWindow
         foreach(var item in toRemove)
         {
             list.Remove(item);
-        }
-    }
-
-    private void DisplayTransferSelection()
-    {
-        // We get the system from the TransferLeft so it needs to be set
-        if(TransferLeft == null || TransferLeft.Manager == null) return;
-
-        // Setup the target list
-        var systemState = _uiState.StarSystemStates[TransferLeft.Manager.ManagerID];
-        var allFriendlyStorageInSystem = systemState.GetFilteredEntities(DataStructures.EntityFilter.Friendly, _uiState.Faction.Id, typeof(CargoStorageDB));
-
-        ImGui.Text("Select a Transfer Partner");
-        ImGui.Separator();
-
-        foreach(var potentialTarget in allFriendlyStorageInSystem)
-        {
-            if(potentialTarget.Entity.Id == TransferLeft.Id)  continue;
-
-            // TODO: check the distance from TransferLeft to potentialTarget
-            // make sure it is within the transfer range
-            if(ImGui.Button(potentialTarget.Name))
-            {
-                SetRight(potentialTarget.Entity);
-            }
         }
     }
 
