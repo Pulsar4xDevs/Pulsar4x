@@ -78,7 +78,7 @@ namespace Pulsar4X.Client
         {
             StarSystem = system;
             StarSystem.SetupDefaultNeutralEntitiesForFaction(factionId);
-            // SystemContacts = system.GetSensorContacts(factionId);
+            SystemContacts = system.GetSensorContacts(factionId);
             // _sensorChanges = SystemContacts.Changes.Subscribe();
             _factionId = factionId;
 
