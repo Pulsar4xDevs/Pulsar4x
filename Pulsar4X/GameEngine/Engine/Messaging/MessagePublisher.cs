@@ -15,19 +15,20 @@ public class MessagePublisher
 
     public void Subscribe(MessageTypes messageType, MessageHandler handler, Func<Message, bool>? filter = null)
     {
-        if(!subscribers.ContainsKey(messageType))
+        if(subscribers.TryGetValue(messageType, out var subs))
         {
-            subscribers[messageType] = new ();
+            subs.Add((handler, filter));
+            return;
         }
 
-        subscribers[messageType].Add((handler, filter));
+        subscribers.Add(messageType, [(handler, filter)]);
     }
 
     public void Unsubscribe(MessageTypes messageType, MessageHandler handler)
     {
-        if(subscribers.ContainsKey(messageType))
+        if(subscribers.TryGetValue(messageType, out var subs))
         {
-            subscribers[messageType].RemoveAll(sub => sub.Handler == handler);
+            subs.RemoveAll(sub => sub.Handler == handler);
         }
     }
 
