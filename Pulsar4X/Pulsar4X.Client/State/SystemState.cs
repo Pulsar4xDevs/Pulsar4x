@@ -10,6 +10,7 @@ using System.Linq;
 using Pulsar4X.Colonies;
 using Pulsar4X.Names;
 using Pulsar4X.Movement;
+using System.Threading;
 
 namespace Pulsar4X.Client
 {
@@ -30,9 +31,18 @@ namespace Pulsar4X.Client
         internal SystemSensorContacts? SystemContacts;
         ConcurrentQueue<Message> _sensorChanges = new ConcurrentQueue<Message>();
         internal List<Message> SensorChanges = new List<Message>();
-        public ConcurrentQueue<int> EntitiesToAdd = new();
-        public ConcurrentQueue<(int, Message)> EntitiesToUpdate = new();
-        public SafeList<int> EntitiesToBin = new();
+
+        private class ChangeBuffer
+        {
+            public ConcurrentQueue<int> EntitiesToAdd = new();
+            public ConcurrentQueue<(int, Message)> EntitiesToUpdate = new();
+            public ConcurrentQueue<int> EntitiesToBin = new();
+        }
+
+        // Double buffering the changes to avoid locks during events.
+        private ChangeBuffer _clientSide = new();
+        private ChangeBuffer _serverSide = new();
+
         public List<Message> SystemChanges = new List<Message>();
 
         // Backing fields for the entity dictionaries.
@@ -115,67 +125,62 @@ namespace Pulsar4X.Client
 
         Task OnEntityAddedMessage(Message message)
         {
-            lock(Lock)
-            {
-                if(message.EntityId == null) return Task.CompletedTask;
-                EntitiesToAdd.Enqueue(message.EntityId.Value);
-                return Task.CompletedTask;
-            }
+            if(message.EntityId == null) return Task.CompletedTask;
+
+            _serverSide.EntitiesToAdd.Enqueue(message.EntityId.Value);
+            return Task.CompletedTask;
         }
 
         Task OnEntityRemovedMessage(Message message)
         {
-            lock(Lock)
-            {
-                if(message.EntityId == null) return Task.CompletedTask;
-                if(!EntitiesToBin.Contains(message.EntityId.Value))
-                    EntitiesToBin.Add(message.EntityId.Value);
+            if(message.EntityId == null) return Task.CompletedTask;
 
-                return Task.CompletedTask;
-            }
+            _serverSide.EntitiesToBin.Enqueue(message.EntityId.Value);
+            return Task.CompletedTask;
         }
 
         Task OnEntityUpdatedMessage(Message message)
         {
             if(message.EntityId == null) return Task.CompletedTask;
-            EntitiesToUpdate.Enqueue((message.EntityId.Value, message));
+
+            _serverSide.EntitiesToUpdate.Enqueue((message.EntityId.Value, message));
             return Task.CompletedTask;
         }
 
         public void PreFrameSetup()
         {
-            lock(Lock)
-            {
-                // Deal with additions
-                while(EntitiesToAdd.TryDequeue(out var entityToAdd))
-                {
-                    // FIXME: need to remove the call to the game engine internals
-                    if(StarSystem.TryGetEntityById(entityToAdd, out var entity))
-                    {
-                        SetupEntity(entity, entity.FactionOwnerID);
-                        OnEntityAdded?.Invoke(this, entity);
-                    }
-                }
+            // Atomically swap the buffers.
+            _clientSide = Interlocked.Exchange(ref _serverSide, _clientSide);
 
-                // Deal with removals
-                foreach (var entityToRemove in EntitiesToBin)
+            // Deal with additions
+            while(_clientSide.EntitiesToAdd.TryDequeue(out var entityToAdd))
+            {
+                // FIXME: need to remove the call to the game engine internals
+                if(StarSystem.TryGetEntityById(entityToAdd, out var entity))
                 {
-                    if(_allEntities.TryGetValue(entityToRemove, out var entityState))
-                    {
-                        entityState.Unsubscribe();
-                    }
-                    _allEntities.Remove(entityToRemove);
-                    _entitiesWithPosition.Remove(entityToRemove);
-                    _entitiesWithNames.Remove(entityToRemove);
-                    _entitiesWithColonies.Remove(entityToRemove);
-                    OnEntityRemoved?.Invoke(this, entityToRemove);
+                    SetupEntity(entity, entity.FactionOwnerID);
+                    OnEntityAdded?.Invoke(this, entity);
                 }
-                EntitiesToBin.Clear();
-                SensorChanges.Clear();
-                SystemChanges.Clear();
             }
 
-            while(EntitiesToUpdate.TryDequeue(out var entityToUpdate))
+            // Deal with removals
+            foreach (var entityToRemove in _clientSide.EntitiesToBin)
+            {
+                if(_allEntities.TryGetValue(entityToRemove, out var entityState))
+                {
+                    entityState.Unsubscribe();
+                }
+                _allEntities.Remove(entityToRemove);
+                _entitiesWithPosition.Remove(entityToRemove);
+                _entitiesWithNames.Remove(entityToRemove);
+                _entitiesWithColonies.Remove(entityToRemove);
+                OnEntityRemoved?.Invoke(this, entityToRemove);
+            }
+            _clientSide.EntitiesToBin.Clear();
+            SensorChanges.Clear();
+            SystemChanges.Clear();
+
+            while(_clientSide.EntitiesToUpdate.TryDequeue(out var entityToUpdate))
             {
                 OnEntityUpdated?.Invoke(this, entityToUpdate.Item1, entityToUpdate.Item2);
             }
