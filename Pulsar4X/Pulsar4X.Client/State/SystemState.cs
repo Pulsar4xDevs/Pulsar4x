@@ -164,7 +164,7 @@ namespace Pulsar4X.Client
             }
 
             // Deal with removals
-            foreach (var entityToRemove in _clientSide.EntitiesToBin)
+            while(_clientSide.EntitiesToBin.TryDequeue(out var entityToRemove))
             {
                 if(_allEntities.TryGetValue(entityToRemove, out var entityState))
                 {
@@ -176,7 +176,6 @@ namespace Pulsar4X.Client
                 _entitiesWithColonies.Remove(entityToRemove);
                 OnEntityRemoved?.Invoke(this, entityToRemove);
             }
-            _clientSide.EntitiesToBin.Clear();
             // SensorChanges.Clear();
             // SystemChanges.Clear();
 
