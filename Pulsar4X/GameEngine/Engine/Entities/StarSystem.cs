@@ -18,20 +18,13 @@ namespace Pulsar4X.Engine
     [JsonObject(MemberSerialization.OptIn)]
     public class StarSystem : EntityManager
     {
-
-
         [PublicAPI]
-        public string ID
-        {
-            get
-            {
-                return ManagerID;
-            }
-        }
+        public string ID => ManagerID;
 
         [JsonIgnore]
         public SystemActivityState ActivityState { get; private set; } = SystemActivityState.Stasis;
 
+        // TODO: Find better name for this.
         /// <summary>
         /// Number of external observers (e.g. clients) currently observing this system.
         /// 
@@ -61,11 +54,6 @@ namespace Pulsar4X.Engine
 
         //[PublicAPI]
         //public EntityManager SystemManager { get { return this; } }
-
-
-
-
-
 
         [JsonConstructor]
         public StarSystem()
