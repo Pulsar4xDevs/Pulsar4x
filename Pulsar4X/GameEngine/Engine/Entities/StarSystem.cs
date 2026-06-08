@@ -32,12 +32,32 @@ namespace Pulsar4X.Engine
         [JsonProperty]
         public SystemActivityState ActivityState { get; set; } = SystemActivityState.Stasis;
 
+        /// <summary>
+        /// Number of external observers (e.g. clients) currently observing this system.
+        /// 
+        /// If this value is greater than 0, the system needs to be simulated in at least <see cref="SystemActivityState.Background"/> mode.
+        /// </summary>
+        [JsonIgnore]
+        private int _externalObservers = 0;
+
+        /// <summary>
+        /// Number of external observers (e.g. clients) currently observing this system with priority.
+        /// 
+        /// If this value is greater than 0, the system needs to be simulated in <see cref="SystemActivityState.Foreground"/> mode.
+        /// </summary>
+        [JsonIgnore]
+        private int _externalPriorityObservers = 0;
+
+        // TODO: Possibly rework this to atomic if it causes perf issues.
+        [JsonIgnore]
+        private readonly object _observerLock = new();
+
         [JsonProperty]
         internal int SystemIndex { get; set; }
 
         [PublicAPI]
         [JsonProperty]
-        public NameDB NameDB { get;  set; }
+        public NameDB NameDB { get; set; }
 
         //[PublicAPI]
         //public EntityManager SystemManager { get { return this; } }
@@ -46,7 +66,7 @@ namespace Pulsar4X.Engine
 
 
 
- 
+
         [JsonConstructor]
         public StarSystem()
         {
@@ -57,8 +77,8 @@ namespace Pulsar4X.Engine
             base.Initialize(game, seed, postLoad);
 
             NameDB = new NameDB(name);
-            
-            if(systemID.IsNotNullOrEmpty())
+
+            if (systemID.IsNotNullOrEmpty())
                 ManagerID = systemID;
 
             game.Systems.Add(this);
@@ -122,6 +142,94 @@ namespace Pulsar4X.Engine
                 case SystemActivityState.Stasis:
                     ManagerSubpulses.FrequencyMultiplier = 1.0;
                     break;
+            }
+        }
+
+        // TODO: Introduce wrappers for these methods.
+        /// <summary>
+        /// Increments the count of external observers monitoring this system.
+        /// 
+        /// If priority is true, this observer requires the system to be in Foreground mode; otherwise, Background mode is sufficient.
+        /// </summary>
+        /// <param name="priority"></param>
+        public void IncrementExternalObserver(bool priority = false)
+        {
+            // TODO: Make thread safe.
+            _externalObservers++;
+
+            if (priority)
+                PromoteExternalObserverInternal(false);
+
+            // TODO: Defer update to the game engine thread.
+            UpdateActivityState();
+        }
+
+        /// <summary>
+        /// Decrements the count of external observers monitoring this system.
+        /// 
+        /// If priority is true, the observer is assumed to have required Foreground mode; otherwise, Background mode is assumed.
+        /// </summary>
+        /// <param name="priority"></param>
+        public void DecrementExternalObserver(bool priority = false)
+        {
+            // TODO: Make thread safe.
+            if (priority)
+                DemoteExternalObserverInternal(false);
+
+            Debug.Assert(_externalObservers > 0, "External observers cannot be negative.");
+            _externalObservers--;
+
+            // TODO: Defer update to the game engine thread.
+            UpdateActivityState();
+        }
+
+        public void PromoteExternalObserver() => PromoteExternalObserverInternal(true);
+
+        public void DemoteExternalObserver() => DemoteExternalObserverInternal(true);
+
+        internal void PromoteExternalObserverInternal(bool doUpdate)
+        {
+            // TODO: Make thread safe.
+            Debug.Assert(_externalPriorityObservers < _externalObservers, "Can not have more priority observers than total observers.");
+            _externalPriorityObservers++;
+            if (doUpdate)
+                UpdateActivityState();
+        }
+
+        internal void DemoteExternalObserverInternal(bool doUpdate)
+        {
+            // TODO: Make thread safe.
+            Debug.Assert(_externalPriorityObservers > 0, "External priority observers cannot be negative.");
+            _externalPriorityObservers--;
+            if(doUpdate)
+                UpdateActivityState();
+        }
+
+        /// <summary>
+        /// Updates the activity state of the system respecting observer rules.
+        /// </summary>
+        internal void UpdateActivityState()
+        {
+            var oldState = ActivityState;
+            var newState = SystemActivityState.Stasis;
+
+            // TODO: Sync.
+            if (_externalPriorityObservers > 0)
+            {
+                newState = SystemActivityState.Foreground;
+            }
+            else if (_externalObservers > 0)
+            {
+                newState = SystemActivityState.Background;
+            }
+            else if (HasFactionEntities())
+            {
+                newState = SystemActivityState.Background;
+            }
+
+            if (oldState != newState)
+            {
+                SetActivityState(newState);
             }
         }
 
