@@ -29,8 +29,8 @@ namespace Pulsar4X.Engine
             }
         }
 
-        [JsonProperty]
-        public SystemActivityState ActivityState { get; set; } = SystemActivityState.Stasis;
+        [JsonIgnore]
+        public SystemActivityState ActivityState { get; private set; } = SystemActivityState.Stasis;
 
         /// <summary>
         /// Number of external observers (e.g. clients) currently observing this system.
