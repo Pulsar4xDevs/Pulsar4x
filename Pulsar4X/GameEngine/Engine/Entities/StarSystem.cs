@@ -121,7 +121,10 @@ namespace Pulsar4X.Engine
 
         // }
 
-        public void SetActivityState(SystemActivityState newState)
+        [Obsolete("Avoid setting the state directly. Use external observers.")]
+        public void SetActivityState(SystemActivityState newState) => SetActivityStateInternal(newState);
+
+        internal void SetActivityStateInternal(SystemActivityState newState)
         {
             var oldState = ActivityState;
             ActivityState = newState;
@@ -229,7 +232,7 @@ namespace Pulsar4X.Engine
 
             if (oldState != newState)
             {
-                SetActivityState(newState);
+                SetActivityStateInternal(newState);
             }
         }
 
