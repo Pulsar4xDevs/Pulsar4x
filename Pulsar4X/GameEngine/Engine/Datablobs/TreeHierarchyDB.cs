@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -207,6 +206,7 @@ namespace Pulsar4X.Datablobs
         }
 
         /*
+        // Requires NUnit.Framework. Possibly move to tests project?
         [TestFixture]
         [Description("TreeHierarchyDB Tests")]
         internal class TreeHierarchyTests
