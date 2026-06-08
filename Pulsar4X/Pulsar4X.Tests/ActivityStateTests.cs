@@ -122,5 +122,94 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(SystemActivityState.Background, targetSystem.ActivityState,
                 "Target system should be promoted to Background after receiving an entity.");
         }
+
+        [Test]
+        public void ExternalObserverPromotesToBackground()
+        {
+            var system = _distinctSystems[0];
+            system.SetActivityStateInternal(SystemActivityState.Stasis);
+            Assert.AreEqual(SystemActivityState.Stasis, system.ActivityState,
+                "Pre-condition: system should be Stasis.");
+
+            system.IncrementExternalObserver(false);
+            Assert.AreEqual(SystemActivityState.Background, system.ActivityState,
+                "System should be promoted to Background after gaining an external observer.");
+
+            system.DecrementExternalObserver(false);
+            Assert.AreEqual(SystemActivityState.Stasis, system.ActivityState,
+                "System should return to Stasis after losing external observer.");
+        }
+
+        [Test]
+        public void PriorityExternalObserverPromotesToForeground()
+        {
+            var system = _distinctSystems[0];
+            system.SetActivityStateInternal(SystemActivityState.Stasis);
+            Assert.AreEqual(SystemActivityState.Stasis, system.ActivityState,
+                "Pre-condition: system should be Stasis.");
+
+            system.IncrementExternalObserver(true);
+            Assert.AreEqual(SystemActivityState.Foreground, system.ActivityState,
+                "System should be promoted to Foreground after gaining a priority external observer.");
+
+            system.DecrementExternalObserver(true);
+            Assert.AreEqual(SystemActivityState.Stasis, system.ActivityState,
+                "System should return to Stasis after losing priority external observer.");
+        }
+
+        [Test]
+        public void ExternalObserverPromotionPromotesToForeground()
+        {
+            var system = _distinctSystems[0];
+            system.SetActivityStateInternal(SystemActivityState.Stasis);
+            Assert.AreEqual(SystemActivityState.Stasis, system.ActivityState,
+                "Pre-condition: system should be Stasis.");
+
+            system.IncrementExternalObserver(false);
+            Assert.AreEqual(SystemActivityState.Background, system.ActivityState,
+                "System should be promoted to Background after gaining an external observer.");
+
+            system.PromoteExternalObserver();
+            Assert.AreEqual(SystemActivityState.Foreground, system.ActivityState,
+                "System should be promoted to Foreground after promoting an external observer.");
+
+            system.DemoteExternalObserver();
+            Assert.AreEqual(SystemActivityState.Background, system.ActivityState,
+                "System should return to Background after demoting an external observer.");
+
+            system.DecrementExternalObserver(false);
+            Assert.AreEqual(SystemActivityState.Stasis, system.ActivityState,
+                "System should return to Stasis after losing all external observers.");
+        }
+
+        [Test]
+        public void MultipleExternalObserversMaintainState()
+        {
+            var system = _distinctSystems[0];
+            system.SetActivityStateInternal(SystemActivityState.Stasis);
+            Assert.AreEqual(SystemActivityState.Stasis, system.ActivityState,
+                "Pre-condition: system should be Stasis.");
+
+            system.IncrementExternalObserver(false);
+            system.IncrementExternalObserver(false);
+            Assert.AreEqual(SystemActivityState.Background, system.ActivityState,
+                "System should be Background with multiple external observers.");
+
+            system.IncrementExternalObserver(true);
+            Assert.AreEqual(SystemActivityState.Foreground, system.ActivityState,
+                "System should be Foreground with a priority external observer.");
+
+            system.DecrementExternalObserver(true);
+            Assert.AreEqual(SystemActivityState.Background, system.ActivityState,
+                "System should return to Background after losing priority external observer.");
+
+            system.DecrementExternalObserver(false);
+            Assert.AreEqual(SystemActivityState.Background, system.ActivityState,
+                "System should remain Background with one remaining external observer.");
+
+            system.DecrementExternalObserver(false);
+            Assert.AreEqual(SystemActivityState.Stasis, system.ActivityState,
+                "System should return to Stasis after losing all external observers.");
+        }
     }
 }
