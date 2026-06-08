@@ -93,14 +93,7 @@ namespace Pulsar4X.Client
             factionID = uiState.Faction.Id;
             factionRoot = uiState.Faction.GetDataBlob<FleetDB>();
 
-            if(factionRoot.Children.Count > 0)
-            {
-                SelectFleet(factionRoot.Children.Where(c => c.HasDataBlob<FleetDB>()).First());
-            }
-            else
-            {
-                SelectFleet(null);
-            }
+            SelectFleet(factionRoot.Children.FirstOrDefault(c => c.HasDataBlob<FleetDB>()));
         }
 
         public void SelectFleet(Entity? fleet)
@@ -250,7 +243,7 @@ namespace Pulsar4X.Client
                             }
                             ImGui.NextColumn();
                             ImGui.Separator();
-                            DisplayHelpers.PrintRow("Ships", SelectedFleet.GetDataBlob<FleetDB>().GetChildren().Where(x => !x.HasDataBlob<FleetDB>()).Count().ToString());
+                            DisplayHelpers.PrintRow("Ships", SelectedFleet.GetDataBlob<FleetDB>().GetChildren().Count(x => !x.HasDataBlob<FleetDB>()).ToString());
                         }
                         ImGui.Columns(1);
                     }
@@ -759,7 +752,7 @@ namespace Pulsar4X.Client
                 ImGui.InvisibleButton("invis-droptarget", new Vector2(sizeLeft.X, 32f));
                 DisplayEmptyDropTarget();
 
-                if(factionRoot.GetChildren().Where(x => !x.HasDataBlob<FleetDB>()).Count() > 0)
+                if(factionRoot.GetChildren().Any(x => !x.HasDataBlob<FleetDB>()))
                 {
                     DisplayHelpers.Header("Unattached Ships");
 
@@ -805,7 +798,7 @@ namespace Pulsar4X.Client
             string name = fleet.GetName(factionID);
             var flags = ImGuiTreeNodeFlags.DefaultOpen;
 
-            if(fleetInfo.GetChildren().Where(x => x.HasDataBlob<FleetDB>()).Count() == 0)
+            if(!fleetInfo.GetChildren().Any(x => x.HasDataBlob<FleetDB>()))
             {
                 flags |= ImGuiTreeNodeFlags.Leaf;
             }
