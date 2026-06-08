@@ -20,7 +20,6 @@ using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 using Pulsar4X.Storage;
 using SDL3;
-using NUnit.Framework;
 
 namespace Pulsar4X.Client
 {
