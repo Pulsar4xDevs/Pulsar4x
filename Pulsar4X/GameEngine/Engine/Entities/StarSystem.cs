@@ -145,14 +145,16 @@ namespace Pulsar4X.Engine
         /// <param name="priority"></param>
         public void IncrementExternalObserver(bool priority = false)
         {
-            // TODO: Make thread safe.
-            _externalObservers++;
+            lock (_observerLock)
+            {
+                _externalObservers++;
 
-            if (priority)
-                PromoteExternalObserverInternal(false);
+                if (priority)
+                    PromoteExternalObserverInternal(false);
 
-            // TODO: Defer update to the game engine thread.
-            UpdateActivityState();
+                // TODO: Defer update to the game engine thread.
+                UpdateActivityState();
+            }
         }
 
         /// <summary>
@@ -163,15 +165,17 @@ namespace Pulsar4X.Engine
         /// <param name="priority"></param>
         public void DecrementExternalObserver(bool priority = false)
         {
-            // TODO: Make thread safe.
-            if (priority)
-                DemoteExternalObserverInternal(false);
+            lock (_observerLock)
+            {
+                if (priority)
+                    DemoteExternalObserverInternal(false);
 
-            Debug.Assert(_externalObservers > 0, "External observers cannot be negative.");
-            _externalObservers--;
+                Debug.Assert(_externalObservers > 0, "External observers cannot be negative.");
+                _externalObservers--;
 
-            // TODO: Defer update to the game engine thread.
-            UpdateActivityState();
+                // TODO: Defer update to the game engine thread.
+                UpdateActivityState();
+            }
         }
 
         public void PromoteExternalObserver() => PromoteExternalObserverInternal(true);
@@ -180,20 +184,24 @@ namespace Pulsar4X.Engine
 
         internal void PromoteExternalObserverInternal(bool doUpdate)
         {
-            // TODO: Make thread safe.
-            Debug.Assert(_externalPriorityObservers < _externalObservers, "Can not have more priority observers than total observers.");
-            _externalPriorityObservers++;
-            if (doUpdate)
-                UpdateActivityState();
+            lock (_observerLock)
+            {
+                Debug.Assert(_externalPriorityObservers < _externalObservers, "Can not have more priority observers than total observers.");
+                _externalPriorityObservers++;
+                if (doUpdate)
+                    UpdateActivityState();
+            }
         }
 
         internal void DemoteExternalObserverInternal(bool doUpdate)
         {
-            // TODO: Make thread safe.
-            Debug.Assert(_externalPriorityObservers > 0, "External priority observers cannot be negative.");
-            _externalPriorityObservers--;
-            if(doUpdate)
-                UpdateActivityState();
+            lock (_observerLock)
+            {
+                Debug.Assert(_externalPriorityObservers > 0, "External priority observers cannot be negative.");
+                _externalPriorityObservers--;
+                if (doUpdate)
+                    UpdateActivityState();
+            }
         }
 
         /// <summary>
@@ -204,23 +212,26 @@ namespace Pulsar4X.Engine
             var oldState = ActivityState;
             var newState = SystemActivityState.Stasis;
 
-            // TODO: Sync.
-            if (_externalPriorityObservers > 0)
+            // TODO: Optimize critical sections.
+            lock (_observerLock)
             {
-                newState = SystemActivityState.Foreground;
-            }
-            else if (_externalObservers > 0)
-            {
-                newState = SystemActivityState.Background;
-            }
-            else if (HasFactionEntities())
-            {
-                newState = SystemActivityState.Background;
-            }
+                if (_externalPriorityObservers > 0)
+                {
+                    newState = SystemActivityState.Foreground;
+                }
+                else if (_externalObservers > 0)
+                {
+                    newState = SystemActivityState.Background;
+                }
+                else if (HasFactionEntities())
+                {
+                    newState = SystemActivityState.Background;
+                }
 
-            if (oldState != newState)
-            {
-                SetActivityStateInternal(newState);
+                if (oldState != newState)
+                {
+                    SetActivityStateInternal(newState);
+                }
             }
         }
 
