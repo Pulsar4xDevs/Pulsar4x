@@ -357,20 +357,20 @@ namespace Pulsar4X.Client
         {
             if(Game == null || Faction == null) throw new NullReferenceException("Game or Faction is null");
 
+            if (message.SystemId is null)
+                return;
+
             await Task.Run(() => {
-                if(message.SystemId != null)
-                {
-                    if(!StarSystemStates.ContainsKey(message.SystemId)){
-                        var system = Game.Systems.FirstOrDefault(s => s.ID.Equals(message.SystemId));
-                        if(system == null)
-                        {
-                            Console.WriteLine($"ERROR: {message.SystemId} was revealed but not found in the game systems.");
-                            return;
-                        }
-                        StarSystemStates[message.SystemId] = new SystemState(system, Faction.Id);
+                if(!StarSystemStates.ContainsKey(message.SystemId)){
+                    var system = Game.Systems.FirstOrDefault(s => s.ID.Equals(message.SystemId));
+                    if(system == null)
+                    {
+                        Console.WriteLine($"ERROR: {message.SystemId} was revealed but not found in the game systems.");
+                        return;
                     }
-                    OnStarSystemAdded?.Invoke(this, message.SystemId);
+                    StarSystemStates[message.SystemId] = new SystemState(system, Faction.Id);
                 }
+                OnStarSystemAdded?.Invoke(this, message.SystemId);
             });
         }
 
