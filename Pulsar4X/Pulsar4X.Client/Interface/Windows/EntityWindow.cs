@@ -460,7 +460,16 @@ namespace Pulsar4X.Client
         {
             bool hasGeoSurvey = Entity.HasDataBlob<GeoSurveyableDB>();
             bool isColonizeable = Entity.HasDataBlob<ColonizeableDB>();
-            var (hasColony, _) = Entity.IsOrHasColony();
+            bool hasColony = TryGetColonyEntity(out var colony);
+
+            // Once a colony on this body has infrastructure installed it's an established,
+            // working colony — the survey/colonize progress is behind us, so show a live
+            // infrastructure overview in place of the progress bar.
+            if (hasColony && TryGetInstalledInfrastructure(colony, out var infrastructure))
+            {
+                DisplayInfrastructureOverview(colony, infrastructure);
+                return;
+            }
 
             if (!hasGeoSurvey && !isColonizeable && !hasColony)
                 return;
@@ -507,12 +516,19 @@ namespace Pulsar4X.Client
                 stages.Add(new SurveyProgressBar.Stage("Geo Survey", fill, tooltip));
             }
 
+            // A colony only counts as established once infrastructure is delivered, so the
+            // final stage tracks infrastructure rather than mere presence of a colony.
             if (isColonizeable || hasColony)
             {
-                string colonyTooltip = hasColony
-                    ? "Colonized\nThis body hosts an established colony."
-                    : "Colonized\nNot yet colonized. Send a colony ship to establish a presence here.";
-                stages.Add(new SurveyProgressBar.Stage("Colonized", hasColony ? 1f : 0f, colonyTooltip));
+                string infraTooltip = hasColony
+                    ? "Infrastructure\nThis body has a colony, but no infrastructure is installed yet. "
+                      + "Deliver infrastructure here — build it elsewhere and ship it in, or construct it "
+                      + "locally — to bring the colony online. Infrastructure provides the support capacity "
+                      + "every other installation on the body draws on."
+                    : "Infrastructure\nNo colony yet. Establish one by delivering infrastructure to this body: "
+                      + "load it onto a freighter and unload it here. Infrastructure provides the support "
+                      + "capacity every other installation draws on, so it must come first.";
+                stages.Add(new SurveyProgressBar.Stage("Infrastructure", 0f, infraTooltip));
             }
 
             if (stages.Count == 0) return;
@@ -521,6 +537,89 @@ namespace Pulsar4X.Client
             ImGui.Indent();
             SurveyProgressBar.Draw("##entity-progress", stages, _accentColor);
             ImGui.Unindent();
+        }
+
+        /// <summary>
+        /// Resolves the colony associated with this body — either this entity itself, or a
+        /// colony orbiting it as a direct child. Mirrors <see cref="EntityExtensions.IsOrHasColony"/>
+        /// but hands back the entity so callers can read its DataBlobs directly.
+        /// </summary>
+        private bool TryGetColonyEntity(out Entity colony)
+        {
+            if (Entity.HasDataBlob<ColonyInfoDB>())
+            {
+                colony = Entity;
+                return true;
+            }
+
+            if (Entity.TryGetDataBlob<PositionDB>(out var positionDB))
+            {
+                foreach (var child in positionDB.Children)
+                {
+                    if (child.HasDataBlob<ColonyInfoDB>())
+                    {
+                        colony = child;
+                        return true;
+                    }
+                }
+            }
+
+            colony = Entity.InvalidEntity;
+            return false;
+        }
+
+        /// <summary>
+        /// True when the colony has at least one infrastructure installation. Checks the
+        /// installations directly (not just <see cref="InfrastructureDB.CapacityProvided"/>),
+        /// so infrastructure that's present but disabled by gravity/pressure tolerance still counts.
+        /// </summary>
+        private bool TryGetInstalledInfrastructure(Entity colony, out InfrastructureDB infrastructure)
+        {
+            infrastructure = null!;
+            return colony.TryGetDataBlob<InfrastructureDB>(out infrastructure)
+                && colony.TryGetDataBlob<ComponentInstancesDB>(out var instances)
+                && instances.TryGetComponentsByAttribute<InfrastructureCapacityAtb>(out var components)
+                && components.Count > 0;
+        }
+
+        private void DisplayInfrastructureOverview(Entity colony, InfrastructureDB infrastructure)
+        {
+            bool overCapacity = infrastructure.CapacityAvailable < 0;
+
+            int factionId = _uiState.Faction?.Id ?? Game.NeutralFactionId;
+            string colonyName = colony.GetName(factionId);
+            SectionLabel(string.IsNullOrWhiteSpace(colonyName) ? "COLONY" : colonyName.ToUpperInvariant());
+
+            // Single-line overview: capacity used vs provided, and the resulting output.
+            // TextUnformatted: the literal '%' would be read as a printf specifier by ImGui.Text.
+            string summary = $"{infrastructure.CapacityRequired:N0} / {infrastructure.CapacityProvided:N0} capacity"
+                + $" · {infrastructure.Efficiency * 100:0}% output";
+
+            const float cardPadding = 8f;
+            float cardHeight = cardPadding * 2f + ImGui.GetTextLineHeightWithSpacing() * 2f;
+
+            ImGui.PushStyleColor(ImGuiCol.ChildBg,
+                new Vector4(_accentColor.X, _accentColor.Y, _accentColor.Z, 0.06f));
+            ImGui.PushStyleColor(ImGuiCol.Border,
+                new Vector4(_accentColor.X, _accentColor.Y, _accentColor.Z, 0.35f));
+            ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(cardPadding, cardPadding));
+
+            if (ImGui.BeginChild("##infra-card", new Vector2(0f, cardHeight),
+                ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.TextUnformatted("Infrastructure");
+                ImGui.PopStyleColor();
+
+                ImGui.PushStyleColor(ImGuiCol.Text, overCapacity ? Styles.BadColor : Styles.DescriptiveColor);
+                ImGui.TextUnformatted(summary);
+                ImGui.PopStyleColor();
+            }
+            ImGui.EndChild();
+
+            ImGui.PopStyleVar(2);
+            ImGui.PopStyleColor(2);
         }
 
         // --- Layout Helpers ---
