@@ -17,6 +17,13 @@ public sealed record ConnectRequest
     public string PlayerName { get; init; } = "Player";
 
     /// <summary>
+    /// Faction to bind to. Used by the in-process host (which already knows the player's faction) to
+    /// scope the session. Null lets the server choose per policy. Network play will gate this behind
+    /// <see cref="Credential"/>.
+    /// </summary>
+    public int? FactionId { get; init; }
+
+    /// <summary>
     /// Optional credential for controlling/rejoining a specific faction (e.g. an SM password or a
     /// saved session token). Null requests a default/observer binding per server policy.
     /// </summary>

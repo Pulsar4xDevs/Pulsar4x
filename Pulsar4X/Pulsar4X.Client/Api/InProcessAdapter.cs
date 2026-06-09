@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Pulsar4X.Api;
 
@@ -13,6 +14,10 @@ public sealed class InProcessAdapter : IGameClient
 {
     private readonly IGameServer _server;
     private readonly ClientGalaxy _galaxy = new();
+
+    // Server events arrive on engine/threadpool threads; we only enqueue here (thread-safe) and apply
+    // them to the galaxy on the UI thread in Update(), so the galaxy is never mutated mid-frame.
+    private readonly ConcurrentQueue<GameEventEnvelope> _inbound = new();
     private IDisposable? _subscription;
 
     public InProcessAdapter(IGameServer server) => _server = server;
@@ -61,16 +66,30 @@ public sealed class InProcessAdapter : IGameClient
         return Task.CompletedTask;
     }
 
-    private void OnServerEvent(GameEventEnvelope evt)
+    // Called on an engine/threadpool thread — just queue; do not touch the galaxy here.
+    private void OnServerEvent(GameEventEnvelope evt) => _inbound.Enqueue(evt);
+
+    public void Update()
     {
-        ApplyToGalaxy(evt);
-        EventReceived?.Invoke(evt);
+        // Drain everything received since last frame and apply it as one batch on the UI thread.
+        while (_inbound.TryDequeue(out var evt))
+        {
+            ApplyToGalaxy(evt);
+            EventReceived?.Invoke(evt);
+        }
     }
 
     // Minimal galaxy maintenance for the slice: structural changes re-fetch the affected entity.
     // As views/events are fully ported this grows into incremental snapshot patching.
     private void ApplyToGalaxy(GameEventEnvelope evt)
     {
+        // A newly revealed system changes the faction's known-system set; re-pull the summaries.
+        if (evt.Type == GameEventType.SystemRevealed)
+        {
+            _galaxy.SetKnownSystems(_server.GetKnownSystems(Session));
+            return;
+        }
+
         if (evt.SystemId is null) return;
         var system = _galaxy.GetMutableSystem(evt.SystemId);
         if (system is null || evt.EntityId is not { } entityId) return;

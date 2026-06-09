@@ -47,6 +47,13 @@ server event stream. Commands go out async, off the render path. Today's
 `GlobalUIState`/`SystemState`/`EntityState` already *are* this model (cache + `MessagePublisher`
 updates) — porting converts them to hold view DTOs instead of live engine objects.
 
+**Update timing (atomic, frame-aligned).** Server events arrive on engine/threadpool threads, so the
+adapter only *enqueues* them (thread-safe). The galaxy is mutated solely on the UI thread in
+`IGameClient.Update()`, which the main loop (`PulsarMainWindow.Update`) calls once per frame
+before any window reads `Galaxy`. The whole batch of pending updates is applied at that single frame
+boundary, so within a frame the galaxy is consistent and never torn by a background thread. UI-initiated
+pulls (`LoadSystemAsync`, time control) are already on the UI thread and stay synchronous.
+
 ## Current coupling (what we're replacing)
 
 | Dimension | Today | Surface |

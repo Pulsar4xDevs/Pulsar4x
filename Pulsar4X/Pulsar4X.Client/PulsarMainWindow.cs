@@ -182,6 +182,10 @@ namespace Pulsar4X.Client
         {
             base.Update();
 
+            // Apply any server updates received since last frame as one atomic batch on this (UI)
+            // thread, before any window reads the galaxy model this frame.
+            _state.GameClient?.Update();
+
             //update and refresh state for GameDateTimechange
             if(_state.Game != null)
             {

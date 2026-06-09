@@ -4,7 +4,9 @@ using SDL3;
 using System;
 using System.Collections.Generic;
 using Pulsar4X.Engine;
+using Pulsar4X.Engine.Api;
 using System.Linq;
+using Pulsar4X.Api;
 using Pulsar4X.Input;
 using Pulsar4X.Messaging;
 using System.Threading.Tasks;
@@ -54,6 +56,13 @@ namespace Pulsar4X.Client
         internal Engine.Game? Game { get; set; }
         internal bool IsGameLoaded { get { return Game != null; } }
         internal Entity? Faction { get; set; }
+
+        /// <summary>
+        /// The API client for the current faction. UI is being migrated to read game state through
+        /// this (its <see cref="IGameClient.Galaxy"/>) instead of touching engine objects directly.
+        /// Built by <see cref="SetFaction"/>; an in-process adapter over the loaded <see cref="Game"/>.
+        /// </summary>
+        internal IGameClient? GameClient { get; private set; }
 
         /// <summary>
         /// Gets the faction bit mask for the current faction.
@@ -329,6 +338,8 @@ namespace Pulsar4X.Client
         /// </summary>
         internal void ClearGameState()
         {
+            GameClient?.DisconnectAsync();
+            GameClient = null;
             LoadedWindows.Clear();
             LoadedNonUniqueWindows.Clear();
             EntityWindows.Clear();
@@ -420,6 +431,12 @@ namespace Pulsar4X.Client
 
             // Subscribe to new listeners with current faction
             MessagePublisher.Instance.Subscribe(MessageTypes.StarSystemRevealed, OnSystemRevealed, msg => msg.FactionId == Faction.Id);
+
+            // (Re)build the API client bound to this faction so UI can read the faction-scoped galaxy
+            // model. In-process for single-player; Connect populates KnownSystems and the time state.
+            GameClient?.DisconnectAsync();
+            GameClient = new InProcessAdapter(new EngineGameServer(Game));
+            GameClient.ConnectAsync(new ConnectRequest { PlayerName = "Player", FactionId = factionEntity.Id });
 
             OnFactionChanged?.Invoke(this);
         }

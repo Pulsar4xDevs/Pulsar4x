@@ -26,6 +26,14 @@ public interface IGameClient
     /// <summary>Ensure the given system is loaded into <see cref="Galaxy"/> (initial bulk fetch).</summary>
     Task LoadSystemAsync(string systemId);
 
-    /// <summary>Raised after an incoming server event has been applied to <see cref="Galaxy"/>.</summary>
+    /// <summary>
+    /// Applies all server updates received since the previous call to <see cref="Galaxy"/> as a single
+    /// batch, then raises <see cref="EventReceived"/> for each. Call exactly once per frame on the UI
+    /// thread, before any window reads <see cref="Galaxy"/>, so updates land atomically at a frame
+    /// boundary — the galaxy stays consistent (and untouched by other threads) for the whole frame.
+    /// </summary>
+    void Update();
+
+    /// <summary>Raised (during <see cref="Update"/>) after an incoming server event is applied to <see cref="Galaxy"/>.</summary>
     event Action<GameEventEnvelope>? EventReceived;
 }

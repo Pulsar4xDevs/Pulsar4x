@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Pulsar4X.Api;
+using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
+using Pulsar4X.Galaxy;
 using Pulsar4X.Messaging;
 using Pulsar4X.Names;
 using Pulsar4X.Orbits;
+using Pulsar4X.Ships;
 
 namespace Pulsar4X.Engine.Api
 {
@@ -46,9 +50,11 @@ namespace Pulsar4X.Engine.Api
             if (_game.Factions.Count == 0)
                 return ConnectResult.Fail("Game has no factions to bind to.");
 
-            // Slice behaviour: bind to the first player faction. Real faction selection / auth
-            // (via ConnectRequest.Credential) lands with the networking phase.
-            int factionId = _game.Factions.Keys.First();
+            // Bind to the requested faction when given (the in-process host knows the player's
+            // faction); otherwise fall back to the first. Credential-gated auth lands with networking.
+            int factionId = request.FactionId is { } requested && _game.Factions.ContainsKey(requested)
+                ? requested
+                : _game.Factions.Keys.First();
             var session = new PlayerSession(Guid.NewGuid(), factionId);
             return ConnectResult.Ok(session, new GameInfo(_game.Name ?? "Pulsar4X", _game.LastSaveGitHash ?? ""));
         }
@@ -175,7 +181,7 @@ namespace Pulsar4X.Engine.Api
 
         private static EntitySnapshot Project(Entity entity, int factionId)
         {
-            var views = new List<IComponentView>(3);
+            var views = new List<IComponentView>(6);
 
             if (entity.TryGetDataBlob<NameDB>(out var name))
                 views.Add(new NameView(name.GetName(factionId)));
@@ -192,6 +198,44 @@ namespace Pulsar4X.Engine.Api
                     orbit.Eccentricity,
                     orbit.OrbitalPeriod.TotalSeconds,
                     orbit.Parent?.Id));
+
+            if (entity.TryGetDataBlob<MassVolumeDB>(out var mass))
+                views.Add(new MassVolumeView(mass.MassTotal, mass.RadiusInM, mass.DensityDry_gcm));
+
+            if (entity.TryGetDataBlob<SystemBodyInfoDB>(out var body))
+                views.Add(new BodyView(
+                    body.BodyType.ToDescription(),
+                    body.Gravity,
+                    body.BaseTemperature,
+                    body.LengthOfDay,
+                    body.AxialTilt,
+                    body.Tectonics.ToDescription(),
+                    body.MagneticField,
+                    body.SupportsPopulations));
+
+            if (entity.TryGetDataBlob<StarInfoDB>(out var star))
+                views.Add(new StarView(
+                    star.SpectralType.ToDescription(),
+                    star.SpectralSubDivision,
+                    star.Class,
+                    star.LuminosityClass.ToString(),
+                    star.Temperature,
+                    star.Luminosity,
+                    star.Age,
+                    star.MinHabitableRadius_AU,
+                    star.MaxHabitableRadius_AU));
+
+            if (entity.TryGetDataBlob<ColonyInfoDB>(out var colony))
+            {
+                long population = 0;
+                foreach (var speciesPop in colony.Population.Values)
+                    population += speciesPop;
+                int? planetId = colony.PlanetEntity.IsValid ? colony.PlanetEntity.Id : null;
+                views.Add(new ColonyView(population, planetId));
+            }
+
+            if (entity.TryGetDataBlob<ShipInfoDB>(out var ship))
+                views.Add(new ShipView(ship.Design.Name));
 
             return new EntitySnapshot
             {

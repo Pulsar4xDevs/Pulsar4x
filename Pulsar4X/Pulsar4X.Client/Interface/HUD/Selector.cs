@@ -19,9 +19,6 @@ namespace Pulsar4X.Client
 {
     public class Selector : PulsarGuiWindow
     {
-        private List<string> _knownSystems = new ();
-        private List<StarSystem> _filteredAndSortedSystems = new ();
-
         // When true the window shows the section editor instead of its normal content.
         private bool _editing = false;
 
@@ -58,9 +55,6 @@ namespace Pulsar4X.Client
         private Selector()
         {
             _flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoBackground;
-
-            _uiState.OnStarSystemAdded += SystemAdded;
-            _uiState.OnFactionChanged += FactionChanged;
         }
 
         internal static Selector GetInstance()
@@ -76,7 +70,6 @@ namespace Pulsar4X.Client
         internal override void Display()
         {
             if(!IsActive || _uiState.Faction == null) return;
-            if(_knownSystems.Count == 0) RefreshSystems();
 
             ImGui.SetNextWindowSize(new Vector2(256, 0));
             ImGui.SetNextWindowPos(new Vector2(ImGui.GetMainViewport().WorkSize.X - 256, 0));
@@ -181,33 +174,6 @@ namespace Pulsar4X.Client
             return $"{_uiState.Faction.GetFactionName()} [{_uiState.Faction.GetFactionAbbreviation()}]";
         }
 
-        private void RefreshSystems()
-        {
-            _knownSystems = _uiState.Faction?.GetDataBlob<FactionInfoDB>().KnownSystems ?? new ();
-            FilterAndSortSystems();
-        }
-
-        private void FilterAndSortSystems()
-        {
-            _filteredAndSortedSystems = _uiState.Game?.Systems
-                                            .Where(s => _knownSystems.Contains(s.ID))
-                                            .OrderBy(s => s.NameDB.OwnersName)
-                                            .ToList() ?? new ();
-        }
-
-        private void FactionChanged(GlobalUIState state)
-        {
-            RefreshSystems();
-        }
-
-        private void SystemAdded(GlobalUIState state, string systemId)
-        {
-            if(!_knownSystems.Contains(systemId))
-                _knownSystems.Add(systemId);
-
-            FilterAndSortSystems();
-        }
-
         private static void DisplayCorporation()
         {
             if(_uiState.Faction == null) return;
@@ -244,11 +210,16 @@ namespace Pulsar4X.Client
 
         private void DisplaySystems()
         {
-            foreach (var system in _filteredAndSortedSystems)
+            // Read the faction-scoped system summaries from the client galaxy model rather than
+            // touching engine objects directly. KnownSystems stays current via the adapter's event stream.
+            var galaxy = _uiState.GameClient?.Galaxy;
+            if (galaxy == null) return;
+
+            foreach (var system in galaxy.KnownSystems.OrderBy(s => s.Name))
             {
-                if (ImGui.Selectable(system.NameDB.OwnersName, _uiState.SelectedStarSystemId.Equals(system.ID)))
+                if (ImGui.Selectable(system.Name, _uiState.SelectedStarSystemId.Equals(system.SystemId)))
                 {
-                    _uiState.SetActiveSystem(system.ID);
+                    _uiState.SetActiveSystem(system.SystemId);
                 }
             }
         }
