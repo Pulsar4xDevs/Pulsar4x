@@ -91,7 +91,7 @@ namespace Pulsar4X.Client
             _factionId = factionId;
 
             var entities = StarSystem.GetFilteredEntities(EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile, factionId);
-            foreach(var entity in entities)
+            foreach (var entity in entities)
             {
                 SetupEntity(entity, entity.FactionOwnerID);
             }
@@ -110,7 +110,7 @@ namespace Pulsar4X.Client
         {
             var entityState = new EntityState(entity, entity.Id, factionId);
 
-            if(!_allEntities.ContainsKey(entity.Id))
+            if (!_allEntities.ContainsKey(entity.Id))
                 _allEntities.Add(entity.Id, entityState);
 
             if (!EntityStatesWithNames.ContainsKey(entity.Id) && entity.TryGetDataBlob<NameDB>(out var nameDB))
@@ -131,7 +131,7 @@ namespace Pulsar4X.Client
 
         Task OnEntityAddedMessage(Message message)
         {
-            if(message.EntityId == null) return Task.CompletedTask;
+            if (message.EntityId == null) return Task.CompletedTask;
 
             lock (_bufferSwapLock)
             {
@@ -142,7 +142,7 @@ namespace Pulsar4X.Client
 
         Task OnEntityRemovedMessage(Message message)
         {
-            if(message.EntityId == null) return Task.CompletedTask;
+            if (message.EntityId == null) return Task.CompletedTask;
 
             lock (_bufferSwapLock)
             {
@@ -153,7 +153,7 @@ namespace Pulsar4X.Client
 
         Task OnEntityUpdatedMessage(Message message)
         {
-            if(message.EntityId == null) return Task.CompletedTask;
+            if (message.EntityId == null) return Task.CompletedTask;
 
             lock (_bufferSwapLock)
             {
@@ -172,20 +172,27 @@ namespace Pulsar4X.Client
             }
 
             // Deal with additions
-            while(_clientSide.EntitiesToAdd.TryDequeue(out var entityToAdd))
+            while (_clientSide.EntitiesToAdd.TryDequeue(out var entityToAdd))
             {
                 // FIXME: need to remove the call to the game engine internals
-                if(StarSystem.TryGetEntityById(entityToAdd, out var entity))
+                if (StarSystem.TryGetEntityById(entityToAdd, out var entity))
                 {
                     SetupEntity(entity, entity.FactionOwnerID);
                     OnEntityAdded?.Invoke(this, entity);
                 }
             }
 
-            // Deal with removals
-            while(_clientSide.EntitiesToBin.TryDequeue(out var entityToRemove))
+            // Run entity update before entity removals to ensure they process.
+            // Possibly not strictly necessary, but seems safer for now.
+            foreach (var entity in _allEntities.Values)
             {
-                if(_allEntities.TryGetValue(entityToRemove, out var entityState))
+                entity.Update();
+            }
+
+            // Deal with removals
+            while (_clientSide.EntitiesToBin.TryDequeue(out var entityToRemove))
+            {
+                if (_allEntities.TryGetValue(entityToRemove, out var entityState))
                 {
                     entityState.Unsubscribe();
                 }
@@ -198,7 +205,7 @@ namespace Pulsar4X.Client
             // SensorChanges.Clear();
             // SystemChanges.Clear();
 
-            while(_clientSide.EntitiesToUpdate.TryDequeue(out var entityToUpdate))
+            while (_clientSide.EntitiesToUpdate.TryDequeue(out var entityToUpdate))
             {
                 OnEntityUpdated?.Invoke(this, entityToUpdate.Item1, entityToUpdate.Item2);
             }
@@ -239,7 +246,7 @@ namespace Pulsar4X.Client
 
         public EntityState? GetEntityById(int id)
         {
-            if(!AllEntities.ContainsKey(id))
+            if (!AllEntities.ContainsKey(id))
                 return null;
 
             return AllEntities[id];
