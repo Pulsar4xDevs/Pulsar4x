@@ -103,18 +103,38 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public async Task SubmitCommand_routes_a_known_entity_to_the_engine()
+        public async Task SubmitCommand_rejects_an_unowned_entity()
         {
             var client = await ConnectedClient();
             string systemId = _game.Systems[0].ID;
             await client.LoadSystemAsync(systemId);
-            int targetId = client.World.GetSystem(systemId)!.Entities.First().Id;
+            // Default-visible bodies are neutral; the faction does not own them.
+            int neutralBodyId = client.World.GetSystem(systemId)!.Entities.First().Id;
 
-            // The DTO is resolved to a real entity and translated into an engine order. (Whether the
-            // engine ultimately applies it depends on ownership rules surfaced in a later phase.)
-            var result = await client.SubmitCommandAsync(new RenameCommand(targetId, "Renamed"));
+            var result = await client.SubmitCommandAsync(new RenameCommand(neutralBodyId, "Mine Now"));
 
+            Assert.That(result.Accepted, Is.False);
+            Assert.That(result.RejectionReason, Does.Contain("does not control"));
+        }
+
+        [Test]
+        public async Task SubmitCommand_renames_an_owned_entity_and_the_effect_is_visible()
+        {
+            var client = await ConnectedClient();
+            string systemId = _game.Systems[0].ID;
+            await client.LoadSystemAsync(systemId);
+            int bodyId = client.World.GetSystem(systemId)!.Entities.First().Id;
+
+            // Give the connected faction ownership so it may command the entity.
+            Assert.That(_game.GlobalManager.TryGetGlobalEntityById(bodyId, out var body), Is.True);
+            body.FactionOwnerID = client.Session.FactionId;
+
+            var result = await client.SubmitCommandAsync(new RenameCommand(bodyId, "Faction Renamed"));
             Assert.That(result.Accepted, Is.True, result.RejectionReason);
+
+            // The engine applied the faction-scoped rename and the projection reflects it.
+            var snapshot = _server.GetEntitySnapshot(client.Session, bodyId);
+            Assert.That(snapshot!.GetView<NameView>()!.Name, Is.EqualTo("Faction Renamed"));
         }
     }
 }

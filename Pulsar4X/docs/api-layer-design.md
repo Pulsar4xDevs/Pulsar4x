@@ -68,7 +68,13 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    mutable client world model, implementing connect, time control, the system-map read (with
    `Name`/`Position`/`Orbit` view projection), command routing, and a `MessagePublisher`→event
    bridge. Covered end-to-end by `Pulsar4X.Tests/ApiVerticalSliceTests.cs` (6 tests, no UI).
-3. **Commands:** port the ~45 `EntityCommand`s to `GameCommand` DTOs + server translation.
+3. **Commands (foundation done):** `IOrderHandler.HandleOrder` now returns a validity bool, so
+   `SubmitCommand` reports real results. `EngineGameServer` has an extensible translator registry
+   with a uniform ownership pre-check (a faction may only command entities it owns). `RenameCommand`
+   is the ported reference. **Porting recipe for each remaining command:** (a) add a `GameCommand`
+   DTO in Pulsar4X.Api; (b) make the engine's `CreateXxx` factory return the `HandleOrder` bool;
+   (c) add a translator method + one registry entry in `EngineGameServer`. Commands with a secondary
+   target carry it as a DTO field the translator resolves (only the commanded entity is ownership-checked).
 4. **Read surface:** port the ~55 views area by area; convert `EntityState`/`SystemState` to DTOs.
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Network adapter + server host:** transport + serialization for `MultiplayerAdapter` and
@@ -88,10 +94,8 @@ The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api`
 
 ## Known gaps (to address as porting proceeds)
 
-- **Command validation isn't surfaced.** The engine's `IOrderHandler.HandleOrder` silently drops
-  invalid orders, so `EngineGameServer.SubmitCommand` optimistically returns `Accepted` once the DTO
-  resolves to an entity. Threading real validation results back (ownership, preconditions) is part of
-  the commands phase.
+- ~~Command validation isn't surfaced.~~ **Resolved (phase 3):** `HandleOrder` returns a validity
+  bool; `SubmitCommand` does an ownership pre-check and returns the engine's real accept/reject.
 - **Faction selection on connect is naive** — binds to the first faction. Real selection/auth via
   `ConnectRequest.Credential` lands with networking.
 - **The in-process adapter currently lives in `Pulsar4X.Api`** as a reference implementation (it only

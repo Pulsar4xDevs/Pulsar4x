@@ -22,7 +22,22 @@ namespace Pulsar4X.Engine.Api
     {
         private readonly Game _game;
 
-        public EngineGameServer(Game game) => _game = game;
+        /// <summary>
+        /// Per-command-type translators: map an authorized API <see cref="GameCommand"/> to an engine
+        /// order and dispatch it. Adding a new command is one DTO (in Pulsar4X.Api) + one entry here.
+        /// Each translator runs only after <see cref="SubmitCommand"/> has resolved the commanded
+        /// entity and confirmed the faction owns it.
+        /// </summary>
+        private readonly Dictionary<Type, Func<Entity, Entity, GameCommand, CommandResult>> _translators;
+
+        public EngineGameServer(Game game)
+        {
+            _game = game;
+            _translators = new Dictionary<Type, Func<Entity, Entity, GameCommand, CommandResult>>
+            {
+                [typeof(Pulsar4X.Api.RenameCommand)] = TranslateRename,
+            };
+        }
 
         // ----- connection -----
 
@@ -73,21 +88,35 @@ namespace Pulsar4X.Engine.Api
 
         public CommandResult SubmitCommand(PlayerSession session, GameCommand command)
         {
+            if (command is null)
+                return CommandResult.Reject("Null command.");
+
             if (!_game.Factions.TryGetValue(session.FactionId, out var faction))
                 return CommandResult.Reject("Unknown faction for session.");
 
-            switch (command)
-            {
-                case Pulsar4X.Api.RenameCommand rename:
-                    if (!_game.GlobalManager.TryGetGlobalEntityById(rename.TargetEntityId, out var target))
-                        return CommandResult.Reject($"Entity {rename.TargetEntityId} not found.");
-                    // Fully qualified: the engine's order type shares the name with the API DTO.
-                    Pulsar4X.Names.RenameCommand.CreateRenameCommand(_game, faction, target, rename.NewName);
-                    return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+            if (!_game.GlobalManager.TryGetGlobalEntityById(command.TargetEntityId, out var commanded))
+                return CommandResult.Reject($"Entity {command.TargetEntityId} not found.");
 
-                default:
-                    return CommandResult.Reject($"Unsupported command: {command.GetType().Name}");
-            }
+            // Uniform authorization: a faction may only command entities it owns. (Commands with a
+            // secondary target — e.g. a move destination — carry that as a separate DTO field, which
+            // the translator resolves; only the commanded entity is ownership-checked here.)
+            if (commanded.FactionOwnerID != session.FactionId)
+                return CommandResult.Reject("Faction does not control the commanded entity.");
+
+            if (!_translators.TryGetValue(command.GetType(), out var translate))
+                return CommandResult.Reject($"Unsupported command: {command.GetType().Name}");
+
+            return translate(faction, commanded, command);
+        }
+
+        // Fully qualified engine order type: it shares its name with the API DTO.
+        private CommandResult TranslateRename(Entity faction, Entity commanded, GameCommand command)
+        {
+            var rename = (Pulsar4X.Api.RenameCommand)command;
+            bool accepted = Pulsar4X.Names.RenameCommand.CreateRenameCommand(_game, faction, commanded, rename.NewName);
+            return accepted
+                ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
+                : CommandResult.Reject("Command rejected by engine validation.");
         }
 
         // ----- queries -----

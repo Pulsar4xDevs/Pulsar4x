@@ -14,7 +14,7 @@ namespace Pulsar4X.Engine.Orders
 
         public Game Game { get; private set; }
 
-        public void HandleOrder(EntityCommand entityCommand)
+        public bool HandleOrder(EntityCommand entityCommand)
         {
             if (entityCommand.IsValidCommand(Game))
             {
@@ -41,7 +41,9 @@ namespace Pulsar4X.Engine.Orders
                         entityCommand.EntityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(entityCommand.ActionOnDate, nameof(OrderableProcessor), entityCommand.EntityCommanding);
                     }
                 }
+                return true;
             }
+            return false;
         }
     }
 }
