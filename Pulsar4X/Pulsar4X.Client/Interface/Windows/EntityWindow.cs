@@ -336,7 +336,14 @@ namespace Pulsar4X.Client
             if (Entity.TryGetDataBlob<StarInfoDB>(out var starInfo))
                 return starInfo.Class;
             if (Entity.TryGetDataBlob<SystemBodyInfoDB>(out var bodyInfo))
+            {
+                if (Entity.TryGetDataBlob<PositionDB>(out var positionDB) && positionDB.Parent != null)
+                {
+                    int factionId = _uiState.Faction?.Id ?? Game.NeutralFactionId;
+                    return "Orbiting: " + positionDB.Parent.GetName(factionId);
+                }
                 return bodyInfo.BodyType.ToDescription();
+            }
             return "";
         }
 
@@ -442,14 +449,6 @@ namespace Pulsar4X.Client
 
         private void DisplaySurveyInfo()
         {
-            if (Entity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB)
-                && !geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id))
-            {
-                ImGui.Columns(2, "##survey-info", true);
-                DisplayHelpers.PrintRow("Geo Survey", "Incomplete");
-                ImGui.Columns(1);
-            }
-
             if (Entity.TryGetDataBlob<JPSurveyableDB>(out var jPSurveyableDB))
             {
                 Displays.GravitationalAnomlay(_uiState, jPSurveyableDB);
@@ -655,6 +654,48 @@ namespace Pulsar4X.Client
             ImGui.TextUnformatted(value);
             if (valueColor.HasValue)
                 ImGui.PopStyleColor();
+        }
+
+        /// <summary>
+        /// Renders label/value stats as accent-tinted cards laid out three per row.
+        /// Each card matches the infrastructure overview card's styling.
+        /// </summary>
+        private void DisplayStatCards(string idPrefix, System.Collections.Generic.List<(string Label, string Value)> stats)
+        {
+            if (stats.Count == 0) return;
+
+            const int columns = 3;
+            const float cardPadding = 6f;
+            float spacing = ImGui.GetStyle().ItemSpacing.X;
+            float avail = ImGui.GetContentRegionAvail().X;
+            float cardWidth = MathF.Floor((avail - spacing * (columns - 1)) / columns);
+            float cardHeight = cardPadding * 2f + ImGui.GetTextLineHeightWithSpacing() * 2f;
+
+            ImGui.PushStyleColor(ImGuiCol.ChildBg,
+                new Vector4(_accentColor.X, _accentColor.Y, _accentColor.Z, 0.06f));
+            ImGui.PushStyleColor(ImGuiCol.Border,
+                new Vector4(_accentColor.X, _accentColor.Y, _accentColor.Z, 0.35f));
+            ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(cardPadding, cardPadding));
+
+            for (int i = 0; i < stats.Count; i++)
+            {
+                if (i % columns != 0)
+                    ImGui.SameLine();
+
+                if (ImGui.BeginChild(idPrefix + i, new Vector2(cardWidth, cardHeight),
+                    ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                    ImGui.TextUnformatted(stats[i].Label);
+                    ImGui.PopStyleColor();
+                    ImGui.TextUnformatted(stats[i].Value);
+                }
+                ImGui.EndChild();
+            }
+
+            ImGui.PopStyleVar(2);
+            ImGui.PopStyleColor(2);
         }
 
         private Vector4 GetHealthColor(float value)
@@ -1119,7 +1160,7 @@ namespace Pulsar4X.Client
 
             if (massVolumeDB != null)
             {
-                DisplayHelpers.PrintRow("Mass", Stringify.Mass(massVolumeDB.MassTotal));
+                DisplayHelpers.PrintRow("Mass", Stringify.CelestialMass(massVolumeDB.MassTotal));
                 DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolumeDB.RadiusInM));
                 DisplayHelpers.PrintRow("Density", massVolumeDB.DensityDry_gcm.ToString("##0.000") + " g/cm³");
             }
@@ -1142,30 +1183,53 @@ namespace Pulsar4X.Client
 
             DisplayProgressIndicator();
 
-            ImGui.Columns(2, "##body-info", true);
-
-            if (Entity.TryGetDataBlob<SystemBodyInfoDB>(out var bodyInfo))
+            var bodyStats = new System.Collections.Generic.List<(string Label, string Value)>(10);
+            bool hasBodyInfo = Entity.TryGetDataBlob<SystemBodyInfoDB>(out var bodyInfo);
+            if (hasBodyInfo)
             {
-                DisplayHelpers.PrintRow("Body Type", bodyInfo.BodyType.ToDescription());
-                DisplayHelpers.PrintRow("Gravity", bodyInfo.Gravity.ToString("0.##") + " m/s²",
-                    null, (bodyInfo.Gravity / 9.80665).ToString("0.###") + " G");
-                DisplayHelpers.PrintRow("Temperature", bodyInfo.BaseTemperature.ToString("##0.#") + " °C");
-                DisplayHelpers.PrintRow("Day Length", bodyInfo.LengthOfDay.TotalDays.ToString("0.#") + " days");
-                DisplayHelpers.PrintRow("Axial Tilt", bodyInfo.AxialTilt.ToString("0.#") + "°");
-                DisplayHelpers.PrintRow("Tectonics", bodyInfo.Tectonics.ToString());
-                DisplayHelpers.PrintRow("Magnetic Field", bodyInfo.MagneticField.ToString("0.##") + " μT");
-                DisplayHelpers.PrintRow("Colonizable", bodyInfo.SupportsPopulations ? "Yes" : "No");
+                bodyStats.Add(("Gravity",
+                    bodyInfo.Gravity.ToString("0.##") + " m/s² · "
+                    + (bodyInfo.Gravity / 9.80665).ToString("0.###") + " G"));
+                bodyStats.Add(("Temperature", bodyInfo.BaseTemperature.ToString("##0.#") + " °C"));
+                bodyStats.Add(("Day Length", bodyInfo.LengthOfDay.TotalDays.ToString("0.#") + " days"));
+                bodyStats.Add(("Axial Tilt", bodyInfo.AxialTilt.ToString("0.#") + "°"));
+                bodyStats.Add(("Tectonics", bodyInfo.Tectonics.ToString()));
+                bodyStats.Add(("Magnetic Field", bodyInfo.MagneticField.ToString("0.##") + " μT"));
+                // Every colony needs infrastructure now, so show what a body's infrastructure
+                // must be rated for. Earth-like worlds take the default Earth-Standard design;
+                // hostile worlds need one tuned to their gravity and atmospheric pressure.
+                string infraReq;
+                if (!Entity.HasDataBlob<ColonizeableDB>())
+                {
+                    infraReq = "Not colonizable";
+                }
+                else if (bodyInfo.SupportsPopulations)
+                {
+                    infraReq = "Earth-Standard";
+                }
+                else
+                {
+                    string grav = bodyInfo.Gravity.ToString("0.##") + " m/s²";
+                    string pressure;
+                    if (!isGeoSurveyed)
+                        pressure = "? atm"; // atmospheric pressure isn't known until surveyed
+                    else if (Entity.TryGetDataBlob<AtmosphereDB>(out var atmo) && atmo.Pressure > 0)
+                        pressure = atmo.Pressure.ToString("0.##") + " atm";
+                    else
+                        pressure = "vacuum";
+                    infraReq = grav + " · " + pressure;
+                }
+                bodyStats.Add(("Infrastructure", infraReq));
             }
 
             if (Entity.TryGetDataBlob<MassVolumeDB>(out var massVolumeDB))
             {
-                DisplayHelpers.PrintRow("Mass", Stringify.Mass(massVolumeDB.MassTotal));
-                DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolumeDB.RadiusInM));
+                bodyStats.Add(("Mass", Stringify.CelestialMass(massVolumeDB.MassTotal)));
+                bodyStats.Add(("Radius", Stringify.Distance(massVolumeDB.RadiusInM)));
             }
 
-            ImGui.Columns(1);
-
-            DisplayOrbitInfo();
+            SectionLabel(hasBodyInfo ? bodyInfo.BodyType.ToDescription().ToUpperInvariant() : "CELESTIAL BODY");
+            DisplayStatCards("##body-stat", bodyStats);
 
             if (isGeoSurveyed && Entity.TryGetDataBlob<AtmosphereDB>(out var atmosphereDB))
             {
@@ -1220,13 +1284,11 @@ namespace Pulsar4X.Client
 
             if (Entity.TryGetDataBlob<MassVolumeDB>(out var massVolumeDB))
             {
-                DisplayHelpers.PrintRow("Mass", Stringify.Mass(massVolumeDB.MassTotal));
+                DisplayHelpers.PrintRow("Mass", Stringify.CelestialMass(massVolumeDB.MassTotal));
                 DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolumeDB.RadiusInM));
             }
 
             ImGui.Columns(1);
-
-            DisplayOrbitInfo();
 
             if (isGeoSurveyed && Entity.TryGetDataBlob<MineralsDB>(out var mineralsDB)
                 && ImGui.CollapsingHeader("Minerals", ImGuiTreeNodeFlags.DefaultOpen))
