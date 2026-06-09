@@ -1,14 +1,16 @@
-﻿using System;
+using System;
 using ImGuiNET;
 using System.Numerics;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Engine;
+using Pulsar4X.Api;
 
 namespace Pulsar4X.Client
 {
     public class TimeControl : PulsarGuiWindow
     {
-        MasterTimePulse? _timeloop => _uiState.Game?.TimePulse;
+        // The client reads the clock from the galaxy model and submits changes as commands; it no
+        // longer touches the engine's MasterTimePulse directly.
+        private TimeState? Time => _uiState.GameClient?.Galaxy.Time;
 
         int _timeSpanValue = 1;
         int _timeSpanType = 3;
@@ -51,9 +53,12 @@ namespace Pulsar4X.Client
             return (TimeControl)_uiState.LoadedWindows[typeof(TimeControl)];
         }
 
+        private void Submit(TimeControlRequest request) => _uiState.GameClient?.SetTimeControlAsync(request);
+
         internal override void Display()
         {
-            bool isPaused = !(_timeloop?.IsRunning ?? false);
+            var time = Time;
+            bool isPaused = !(time?.IsRunning ?? false);
             var buttonTexture = isPaused ? _uiState.Img_Play() : _uiState.Img_Pause();
 
             ImGui.SetNextWindowSize(_windowSize, ImGuiCond.FirstUseEver);
@@ -62,7 +67,7 @@ namespace Pulsar4X.Client
             Window.Begin("TimeControl", ref IsActive, _flags);
             ImGui.PushItemWidth(100);
 
-            DateTime currenttime = _uiState.SelectedSystemTime;
+            DateTime currenttime = time?.GameDateTime ?? default;
 
             // Small arrow button for expanding time frequency menu
             if (ImGui.ArrowButton("##expand", _expanded ? ImGuiDir.Down : ImGuiDir.Right))
@@ -129,156 +134,76 @@ namespace Pulsar4X.Client
             Window.End();
         }
 
+        // Converts a (value, unit-index) pair from the combo boxes into a TimeSpan.
+        private static TimeSpan ToTimeSpan(double value, int unitType) => unitType switch
+        {
+            0 => TimeSpan.FromMilliseconds(value),
+            1 => TimeSpan.FromSeconds(value),
+            2 => TimeSpan.FromMinutes(value),
+            3 => TimeSpan.FromHours(value),
+            4 => TimeSpan.FromDays(value),
+            5 => TimeSpan.FromDays(value * 7),
+            6 => TimeSpan.FromDays(value * 30),
+            7 => TimeSpan.FromDays(value * 365),
+            _ => TimeSpan.FromHours(value),
+        };
+
         void AdjustTimeSpan()
         {
-            if(_timeloop == null) return;
-
-            switch (_timeSpanType)
-            {
-                case 0:
-                    _timeloop.Ticklength = TimeSpan.FromMilliseconds(_timeSpanValue);
-                    break;
-                case 1:
-                    _timeloop.Ticklength = TimeSpan.FromSeconds(_timeSpanValue);
-                    break;
-                case 2:
-                    _timeloop.Ticklength = TimeSpan.FromMinutes(_timeSpanValue);
-                    break;
-                case 3:
-                    _timeloop.Ticklength = TimeSpan.FromHours(_timeSpanValue);
-                    break;
-                case 4:
-                    _timeloop.Ticklength = TimeSpan.FromDays(_timeSpanValue);
-                    break;
-                case 5:
-                    _timeloop.Ticklength = TimeSpan.FromDays(_timeSpanValue * 7);
-                    break;
-                case 6:
-                    _timeloop.Ticklength = TimeSpan.FromDays(_timeSpanValue * 30);
-                    break;
-                case 7:
-                    _timeloop.Ticklength = TimeSpan.FromDays(_timeSpanValue * 365);
-                    break;
-            }
+            Submit(new TimeControlRequest(TimeControlAction.SetTickLength, TickLength: ToTimeSpan(_timeSpanValue, _timeSpanType)));
         }
+
         void ReadTimeSpan()
         {
-            if(_timeloop == null) return;
+            if (Time is not { } time) return;
 
-            switch (_timeSpanType)
+            _timeSpanValue = _timeSpanType switch
             {
-                case 0:
-                    _timeSpanValue = (int)_timeloop.Ticklength.TotalSeconds;
-                    break;
-                case 1:
-                    _timeSpanValue = (int)_timeloop.Ticklength.TotalSeconds;
-                    break;
-                case 2:
-                    _timeSpanValue = (int)_timeloop.Ticklength.TotalMinutes;
-                    break;
-                case 3:
-                    _timeSpanValue = (int)_timeloop.Ticklength.TotalHours;
-                    break;
-                case 4:
-                    _timeSpanValue = (int)_timeloop.Ticklength.TotalDays;
-                    break;
-                case 5:
-                    _timeSpanValue = (int)_timeloop.Ticklength.TotalDays / 7;
-                    break;
-                case 6:
-                    _timeSpanValue = (int)_timeloop.Ticklength.TotalDays / 30;
-                    break;
-                case 7:
-                    _timeSpanValue = (int)_timeloop.Ticklength.TotalDays / 365;
-                    break;
-            }
+                0 => (int)time.TickLength.TotalMilliseconds,
+                1 => (int)time.TickLength.TotalSeconds,
+                2 => (int)time.TickLength.TotalMinutes,
+                3 => (int)time.TickLength.TotalHours,
+                4 => (int)time.TickLength.TotalDays,
+                5 => (int)time.TickLength.TotalDays / 7,
+                6 => (int)time.TickLength.TotalDays / 30,
+                7 => (int)time.TickLength.TotalDays / 365,
+                _ => _timeSpanValue,
+            };
         }
+
         void AdjustFreqency()
         {
-            if(_timeloop == null) return;
-
-            switch (_freqSpanType)
-            {
-                case 0:
-                    _timeloop.TickFrequency = TimeSpan.FromMilliseconds(_freqTimeSpanValue);
-                    break;
-                case 1:
-                    _timeloop.TickFrequency = TimeSpan.FromSeconds(_freqTimeSpanValue);
-                    break;
-                case 2:
-                    _timeloop.TickFrequency = TimeSpan.FromMinutes(_freqTimeSpanValue);
-                    break;
-                case 3:
-                    _timeloop.TickFrequency = TimeSpan.FromHours(_freqTimeSpanValue);
-                    break;
-                case 4:
-                    _timeloop.TickFrequency = TimeSpan.FromDays(_freqTimeSpanValue);
-                    break;
-                case 5:
-                    _timeloop.TickFrequency = TimeSpan.FromDays(_freqTimeSpanValue * 7);
-                    break;
-                case 6:
-                    _timeloop.TickFrequency = TimeSpan.FromDays(_freqTimeSpanValue * 30);
-                    break;
-                case 7:
-                    _timeloop.TickFrequency = TimeSpan.FromDays(_freqTimeSpanValue * 365);
-                    break;
-            }
+            Submit(new TimeControlRequest(TimeControlAction.SetTickFrequency, TickFrequency: ToTimeSpan(_freqTimeSpanValue, _freqSpanType)));
         }
+
         void ReadFreqency()
         {
-            if(_timeloop == null) return;
+            if (Time is not { } time) return;
 
-            switch (_freqSpanType)
+            _freqTimeSpanValue = _freqSpanType switch
             {
-                case 0:
-                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalMilliseconds;
-                    break;
-                case 1:
-                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalSeconds;
-                    break;
-                case 2:
-                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalMinutes;
-                    break;
-                case 3:
-                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalHours;
-                    break;
-                case 4:
-                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalDays;
-                    break;
-                case 5:
-                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalDays / 7;
-                    break;
-                case 6:
-                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalDays / 30;
-                    break;
-                case 7:
-                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalDays / 365;
-                    break;
-            }
+                0 => (float)time.TickFrequency.TotalMilliseconds,
+                1 => (float)time.TickFrequency.TotalSeconds,
+                2 => (float)time.TickFrequency.TotalMinutes,
+                3 => (float)time.TickFrequency.TotalHours,
+                4 => (float)time.TickFrequency.TotalDays,
+                5 => (float)time.TickFrequency.TotalDays / 7,
+                6 => (float)time.TickFrequency.TotalDays / 30,
+                7 => (float)time.TickFrequency.TotalDays / 365,
+                _ => _freqTimeSpanValue,
+            };
         }
 
         internal void PausePlayPressed()
         {
-            if (_timeloop == null)
-                return;
-
-            if (_timeloop.IsRunning)
-            {
-                _timeloop.PauseTime();
-            }
-            else
-            {
-                _timeloop.StartTime();
-            }
+            bool isRunning = Time?.IsRunning ?? false;
+            Submit(new TimeControlRequest(isRunning ? TimeControlAction.Pause : TimeControlAction.Start));
         }
 
         internal void OneStepPressed()
         {
-            if (_timeloop == null)
-                return;
-
-            _timeloop.TimeStep();
+            // Advances by the current tick length (set via the time-span controls).
+            Submit(new TimeControlRequest(TimeControlAction.StepOnce));
         }
     }
 }

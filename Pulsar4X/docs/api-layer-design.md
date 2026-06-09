@@ -88,7 +88,10 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    (a) add an `IComponentView` DTO in Pulsar4X.Api; (b) add a `TryGetDataBlob`→view block in
    `EngineGameServer.Project`; (c) extend the snapshot test. Remaining: port the rest of the views, then
    the larger client-side step — rewire `EntityState`/`SystemState` (and the UI windows) to read these
-   views via `IClientGalaxy` instead of live engine `Entity`/`DataBlob` objects.
+   views via `IClientGalaxy` instead of live engine `Entity`/`DataBlob` objects. First UI ports done:
+   the **Selector**'s system list reads `Galaxy.KnownSystems`, and the **TimeControl** reads
+   `Galaxy.Time` and drives the clock via `IGameClient.SetTimeControlAsync` (pause/start/step/tick
+   length/frequency) — no longer touching `MasterTimePulse` directly.
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —

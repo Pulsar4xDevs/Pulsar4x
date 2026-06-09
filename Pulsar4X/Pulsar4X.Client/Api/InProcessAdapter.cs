@@ -77,6 +77,11 @@ public sealed class InProcessAdapter : IGameClient
             ApplyToGalaxy(evt);
             EventReceived?.Invoke(evt);
         }
+
+        // The clock advances continuously on the engine thread (no per-tick event), so refresh the
+        // time state once per frame here rather than push it through the event queue.
+        if (IsConnected)
+            _galaxy.Time = _server.GetTimeState(Session);
     }
 
     // Minimal galaxy maintenance for the slice: structural changes re-fetch the affected entity.

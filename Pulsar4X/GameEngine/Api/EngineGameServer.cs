@@ -66,7 +66,7 @@ namespace Pulsar4X.Engine.Api
         public TimeState GetTimeState(PlayerSession session)
         {
             var tp = _game.TimePulse;
-            return new TimeState(tp.GameGlobalDateTime, tp.IsRunning, tp.TimeMultiplier, tp.Ticklength);
+            return new TimeState(tp.GameGlobalDateTime, tp.IsRunning, tp.TimeMultiplier, tp.Ticklength, tp.TickFrequency);
         }
 
         public void SetTimeControl(PlayerSession session, TimeControlRequest request)
@@ -82,6 +82,12 @@ namespace Pulsar4X.Engine.Api
                     break;
                 case TimeControlAction.SetSpeed:
                     if (request.Multiplier is { } multiplier) tp.TimeMultiplier = multiplier;
+                    break;
+                case TimeControlAction.SetTickLength:
+                    if (request.TickLength is { } tickLength) tp.Ticklength = tickLength;
+                    break;
+                case TimeControlAction.SetTickFrequency:
+                    if (request.TickFrequency is { } tickFrequency) tp.TickFrequency = tickFrequency;
                     break;
                 case TimeControlAction.StepOnce:
                     if (request.StepLength is { } step) tp.TimeStep(tp.GameGlobalDateTime + step);
