@@ -211,12 +211,7 @@ namespace Pulsar4X.Client
                 }
             }
 
-            foreach (var (_, systemState) in _state.StarSystemStates)
-            {
-                systemState.PreFrameSetup();
-            }
-
-            _state.GalacticMap?.Update();
+            _state.Update();
         }
 
         public override void Render()

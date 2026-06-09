@@ -15,6 +15,8 @@ using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 using Pulsar4X.Orbits;
 using Pulsar4X.Client.Rendering;
+using System.Collections.Concurrent;
+using System.Threading;
 
 namespace Pulsar4X.Client
 {
@@ -49,7 +51,7 @@ namespace Pulsar4X.Client
             {typeof(OrdersListWindow), "Orders Window"},
             {typeof(OrderCreationWindow), "Order Creation"}
         };
-        internal Engine.Game? Game { get; set;}
+        internal Engine.Game? Game { get; set; }
         internal bool IsGameLoaded { get { return Game != null; } }
         internal Entity? Faction { get; set; }
 
@@ -70,27 +72,27 @@ namespace Pulsar4X.Client
         internal bool ShowDamageWindow;
         internal IntPtr SDLRendererPtr { get; private set; }
         internal GalacticMapRender? GalacticMap;
-        internal SafeList<UpdateWindowState> UpdateableWindows = new ();
-        internal DateTime LastGameUpdateTime = new ();
+        internal SafeList<UpdateWindowState> UpdateableWindows = new();
+        internal DateTime LastGameUpdateTime = new();
         internal StarSystem SelectedSystem => StarSystemStates[SelectedStarSystemId].StarSystem;
         internal SystemState SelectedSystemState => StarSystemStates[SelectedStarSystemId];
         internal DateTime SelectedSystemTime => StarSystemStates[SelectedStarSystemId].StarSystem.StarSysDateTime;
-        internal DateTime SelectedSysLastUpdateTime = new ();
+        internal DateTime SelectedSysLastUpdateTime = new();
         internal string SelectedStarSystemId { get; private set; }
         internal SystemMapRendering? SelectedSysMapRender => GalacticMap == null ? null : GalacticMap.SelectedSysMapRender;
         internal DateTime PrimarySystemDateTime;
         internal EntityContextMenu? ContextMenu { get; set; }
-        internal SafeDictionary<string, SystemState> StarSystemStates = new ();
+        internal SafeDictionary<string, SystemState> StarSystemStates = new();
         internal Camera Camera;
         internal SDL3Window ViewPort { get; private set; }
 
-        internal Dictionary<Type, PulsarGuiWindow> LoadedWindows = new ();
-        internal Dictionary<String, NonUniquePulsarGuiWindow> LoadedNonUniqueWindows = new ();
+        internal Dictionary<Type, PulsarGuiWindow> LoadedWindows = new();
+        internal Dictionary<String, NonUniquePulsarGuiWindow> LoadedNonUniqueWindows = new();
         internal PulsarGuiWindow? ActiveWindow { get; set; }
-        internal List<List<UserOrbitSettings>> UserOrbitSettingsMtx = new ();
-        internal Dictionary<UserOrbitSettings.OrbitBodyType, float> DrawNameZoomLvl = new ();
-        internal Dictionary<string, IntPtr> SDLImageDictionary = new ();
-        internal Dictionary<string, int> GLImageDictionary = new ();
+        internal List<List<UserOrbitSettings>> UserOrbitSettingsMtx = new();
+        internal Dictionary<UserOrbitSettings.OrbitBodyType, float> DrawNameZoomLvl = new();
+        internal Dictionary<string, IntPtr> SDLImageDictionary = new();
+        internal Dictionary<string, int> GLImageDictionary = new();
         public event EntityClickedEventHandler? EntityClickedEvent;
         internal EntityState? LastClickedEntity = null;
         internal EntityState? PrimaryEntity { get; private set; }
@@ -99,7 +101,7 @@ namespace Pulsar4X.Client
         internal Dictionary<int, EntityWindow> EntityWindows { get; private set; } = new();
         private string _previousSystemIdBeforeSM = "";
 
-        internal Stack<IHotKeyHandler> HotKeys { get; private set; } = new ();
+        internal Stack<IHotKeyHandler> HotKeys { get; private set; } = new();
 
         // Maneuver node panel for orbit-click placement
         internal ManeuverNodePanel? ManeuverNodePanel { get; set; }
@@ -115,6 +117,17 @@ namespace Pulsar4X.Client
 
         // Game Settings
         internal GameSettings GameSettings { get; set; }
+
+        // TODO: Extract this to a helper class, along with SystemState buffer.
+        // Double buffering events that are received from the engine.
+        private class ChangeBuffer
+        {
+            public ConcurrentQueue<Message> RevealedSystems = new();
+        }
+
+        private ChangeBuffer _clientSide = new();
+        private ChangeBuffer _serverSide = new();
+        private readonly object _bufferSwapLock = new object();
 
         internal GlobalUIState(SDL3Window viewport)
         {
@@ -230,7 +243,8 @@ namespace Pulsar4X.Client
             this.Img_Up();
 
             var mainWin = (PulsarMainWindow)ViewPort;
-            mainWin.MouseButtonDownOccured += (object sender, SDL.Event e) => {
+            mainWin.MouseButtonDownOccured += (object sender, SDL.Event e) =>
+            {
                 if (e.Button.Button == 1)
                 {
                     _mouseDownX = e.Motion.X;
@@ -249,7 +263,8 @@ namespace Pulsar4X.Client
                     }
                 }
             };
-            mainWin.MouseButtonUpOccured += (object sender, SDL.Event e) => {
+            mainWin.MouseButtonUpOccured += (object sender, SDL.Event e) =>
+            {
                 if (e.Button.Button == 1)
                 {
                     Camera.IsGrabbingMap = false;
@@ -274,13 +289,15 @@ namespace Pulsar4X.Client
                     }
                 }
             };
-            mainWin.MouseWheelOccured += (object sender, SDL.Event e) => {
+            mainWin.MouseWheelOccured += (object sender, SDL.Event e) =>
+            {
                 if (e.Wheel.Y > 0)
                     Camera.ZoomIn((int)e.Wheel.MouseX, (int)e.Wheel.MouseY);
                 else if (e.Wheel.Y < 0)
                     Camera.ZoomOut((int)e.Wheel.MouseX, (int)e.Wheel.MouseY);
             };
-            mainWin.MouseMoveOccured += (object sender, SDL.Event e) => {
+            mainWin.MouseMoveOccured += (object sender, SDL.Event e) =>
+            {
                 if (_isDraggingNode)
                 {
                     // Reposition the node along the orbit as the mouse moves
@@ -299,7 +316,7 @@ namespace Pulsar4X.Client
 
         private void DeactivateAllClosableWindows()
         {
-            foreach(var window in LoadedWindows)
+            foreach (var window in LoadedWindows)
             {
                 window.Value.SetActive(false);
             }
@@ -325,15 +342,58 @@ namespace Pulsar4X.Client
             ActiveWindow = null;
         }
 
+        /// <summary>
+        /// Called every frame to update the UI state with the changes from the server.
+        /// </summary>
+        internal void Update()
+        {
+            lock (_bufferSwapLock)
+            {
+                (_clientSide, _serverSide) = (_serverSide, _clientSide);
+            }
+
+            // Handle all buffered events.
+            while (_clientSide.RevealedSystems.TryDequeue(out var message))
+            {
+                if(Game is null || Faction is null)
+                    throw new InvalidOperationException("Revealed systems require a game and faction to be set.");
+
+                if (message.SystemId is null) continue;
+
+                if (!StarSystemStates.ContainsKey(message.SystemId))
+                {
+                    var system = Game?.Systems.FirstOrDefault(s => s.ID.Equals(message.SystemId));
+                    if (system == null)
+                    {
+                        Console.WriteLine($"ERROR: {message.SystemId} was revealed but not found in the game systems.");
+                        continue;
+                    }
+
+                    StarSystemStates[message.SystemId] = new SystemState(system, Faction.Id);
+                }
+
+                OnStarSystemAdded?.Invoke(this, message.SystemId);
+            }
+
+            // Update the individual system states.
+            foreach (var (_, systemState) in StarSystemStates)
+            {
+                systemState.PreFrameSetup();
+            }
+
+            // Update the galactic map.
+            GalacticMap?.Update();
+        }
+
         internal void SetFaction(Entity factionEntity, bool setAsPlayer = false)
         {
-            if(Game == null) throw new NullReferenceException("Game is null");
+            if (Game == null) throw new NullReferenceException("Game is null");
 
-            if(setAsPlayer)
+            if (setAsPlayer)
                 PlayerFaction = factionEntity;
 
             // Remove the old selected system's priority observer
-            if(!string.IsNullOrEmpty(SelectedStarSystemId))
+            if (!string.IsNullOrEmpty(SelectedStarSystemId))
             {
                 StarSystemStates[SelectedStarSystemId].StarSystem.DecrementExternalObserver(true);
             }
@@ -344,12 +404,12 @@ namespace Pulsar4X.Client
             foreach (var guid in factionInfo.KnownSystems)
             {
                 var system = Game.Systems.FirstOrDefault(s => s.ID.Equals(guid));
-                if(system == null) continue;
+                if (system == null) continue;
 
                 StarSystemStates[guid] = new SystemState(system, factionEntity.Id);
 
                 // Notify that the currently selected system is on focus.
-                if(!string.IsNullOrEmpty(SelectedStarSystemId) && SelectedStarSystemId.Equals(guid))
+                if (!string.IsNullOrEmpty(SelectedStarSystemId) && SelectedStarSystemId.Equals(guid))
                 {
                     system.IncrementExternalObserver(true);
                 }
@@ -364,34 +424,26 @@ namespace Pulsar4X.Client
             OnFactionChanged?.Invoke(this);
         }
 
-        internal async Task OnSystemRevealed(Message message)
+        internal Task OnSystemRevealed(Message message)
         {
-            if(Game == null || Faction == null) throw new NullReferenceException("Game or Faction is null");
-
             if (message.SystemId is null)
-                return;
+                return Task.CompletedTask;
 
-            await Task.Run(() => {
-                if(!StarSystemStates.ContainsKey(message.SystemId)){
-                    var system = Game.Systems.FirstOrDefault(s => s.ID.Equals(message.SystemId));
-                    if(system == null)
-                    {
-                        Console.WriteLine($"ERROR: {message.SystemId} was revealed but not found in the game systems.");
-                        return;
-                    }
-                    StarSystemStates[message.SystemId] = new SystemState(system, Faction.Id);
-                }
-                OnStarSystemAdded?.Invoke(this, message.SystemId);
-            });
+            lock (_bufferSwapLock)
+            {
+                _serverSide.RevealedSystems.Enqueue(message);
+            }
+            return Task.CompletedTask;
         }
 
         internal void SetActiveSystem(string activeSysID, bool refresh = false)
         {
-            if(Game == null || Faction == null) throw new NullReferenceException("Game or Faction is null");
+            if (Game == null || Faction == null) throw new NullReferenceException("Game or Faction is null");
 
-            if(!activeSysID.Equals(SelectedStarSystemId) || refresh){
+            if (!activeSysID.Equals(SelectedStarSystemId) || refresh)
+            {
                 // Demote the old system from Foreground to Background
-                if(!string.IsNullOrEmpty(SelectedStarSystemId) && StarSystemStates.ContainsKey(SelectedStarSystemId))
+                if (!string.IsNullOrEmpty(SelectedStarSystemId) && StarSystemStates.ContainsKey(SelectedStarSystemId))
                 {
                     var oldSystem = StarSystemStates[SelectedStarSystemId].StarSystem;
 
@@ -400,7 +452,8 @@ namespace Pulsar4X.Client
                     StarSystemStates[SelectedStarSystemId].SavedCameraState = Camera.SaveState();
                 }
 
-                if(!StarSystemStates.ContainsKey(activeSysID)){
+                if (!StarSystemStates.ContainsKey(activeSysID))
+                {
                     var newSys = new SystemState(Game.Systems.First(s => s.ID.Equals(activeSysID)), Faction.Id);
                     StarSystemStates[activeSysID] = newSys;
                 }
@@ -441,7 +494,7 @@ namespace Pulsar4X.Client
 
         internal void EnableGameMaster()
         {
-            if(Game == null) throw new NullReferenceException("Game is null");
+            if (Game == null) throw new NullReferenceException("Game is null");
             SMenabled = true;
             // Store the current system ID before switching to GameMaster
             _previousSystemIdBeforeSM = SelectedStarSystemId;
@@ -450,16 +503,16 @@ namespace Pulsar4X.Client
 
         internal void DisableGameMaster()
         {
-            if(PlayerFaction == null) throw new NullReferenceException("PlayerFaction is null");
+            if (PlayerFaction == null) throw new NullReferenceException("PlayerFaction is null");
             SMenabled = false;
             SetFaction(PlayerFaction);
 
             // Restore the previous system if the player has access to it
-            if(!string.IsNullOrEmpty(_previousSystemIdBeforeSM) && StarSystemStates.ContainsKey(_previousSystemIdBeforeSM))
+            if (!string.IsNullOrEmpty(_previousSystemIdBeforeSM) && StarSystemStates.ContainsKey(_previousSystemIdBeforeSM))
             {
                 SetActiveSystem(_previousSystemIdBeforeSM);
             }
-            else if(StarSystemStates.Count > 0)
+            else if (StarSystemStates.Count > 0)
             {
                 // If the previous system is not available, switch to the first known system
                 SetActiveSystem(StarSystemStates.Keys.First());
@@ -469,7 +522,7 @@ namespace Pulsar4X.Client
         internal void ToggleGameMaster()
         {
             SMenabled = !SMenabled;
-            if(SMenabled)
+            if (SMenabled)
                 EnableGameMaster();
             else
                 DisableGameMaster();
@@ -755,7 +808,7 @@ namespace Pulsar4X.Client
 
         internal void EntityClicked(int entityGuid, string starSys, MouseButtons button)
         {
-            if(SelectedSysMapRender == null) throw new NullReferenceException("SelectedSysMapRender is null");
+            if (SelectedSysMapRender == null) throw new NullReferenceException("SelectedSysMapRender is null");
 
             var entityState = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
             LastClickedEntity = entityState;
@@ -763,7 +816,7 @@ namespace Pulsar4X.Client
             ActiveWindow?.EntityClicked(entityState, button);
 
             SelectedSysMapRender.SelectedEntityExtras = new List<IDrawData>();
-            if(LastClickedEntity.DebugOrbitOrder != null)
+            if (LastClickedEntity.DebugOrbitOrder != null)
             {
                 SelectedSysMapRender.SelectedEntityExtras.Add(LastClickedEntity.DebugOrbitOrder);
             }
@@ -774,24 +827,24 @@ namespace Pulsar4X.Client
                 SelectedSysMapRender.SelectedEntityExtras.Add(nodeDraw);
             }
 
-            if(ActiveWindow == null || ActiveWindow.GetActive() == false || ActiveWindow.ClickedEntityIsPrimary)
+            if (ActiveWindow == null || ActiveWindow.GetActive() == false || ActiveWindow.ClickedEntityIsPrimary)
                 PrimaryEntity = LastClickedEntity;
 
             EntityClickedEvent?.Invoke(LastClickedEntity, button);
 
-            if(button == MouseButtons.Primary)
+            if (button == MouseButtons.Primary)
             {
-                if(!EntityWindows.ContainsKey(entityGuid))
+                if (!EntityWindows.ContainsKey(entityGuid))
                 {
                     EntityWindows.Add(entityGuid, new EntityWindow(entityState));
                 }
                 EntityWindows[entityGuid].ToggleActive();
 
-                if(!ViewPort.IsCtrlPressed)
+                if (!ViewPort.IsCtrlPressed)
                 {
-                    foreach(var (id, window) in EntityWindows)
+                    foreach (var (id, window) in EntityWindows)
                     {
-                        if(id == entityGuid) continue;
+                        if (id == entityGuid) continue;
 
                         window.SetActive(false);
                     }
@@ -801,7 +854,7 @@ namespace Pulsar4X.Client
 
         internal void EntityClicked(EntityState entityState, MouseButtons button)
         {
-            if(entityState.StarSystemId == null) throw new NullReferenceException("StarSystemId is null");
+            if (entityState.StarSystemId == null) throw new NullReferenceException("StarSystemId is null");
             EntityClicked(entityState.Id, entityState.StarSystemId, button);
         }
     }
