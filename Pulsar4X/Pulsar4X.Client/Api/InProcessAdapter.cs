@@ -1,4 +1,8 @@
-namespace Pulsar4X.Api;
+using System;
+using System.Threading.Tasks;
+using Pulsar4X.Api;
+
+namespace Pulsar4X.Client;
 
 /// <summary>
 /// Zero-copy in-process <see cref="IGameClient"/> for single-player / local games: forwards directly

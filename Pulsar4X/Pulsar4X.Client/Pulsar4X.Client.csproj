@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
+    <ProjectReference Include="..\Pulsar4X.Api\Pulsar4X.Api.csproj" />
   </ItemGroup>
   <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">
     <Content Include="..\external\ImGui.NET\deps\cimgui\osx\cimgui.dylib">
@@ -111,14 +112,14 @@
 
     <ItemGroup>
         <!-- Linux dependencies -->
-        <Content Include="Libs/linux-x64/*.so">
+        <Content Include="Libs/linux-x64/*" Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
             <Link>%(Filename)%(Extension)</Link>
         </Content>
     </ItemGroup>
     <ItemGroup>
         <!-- Windows dependencies -->
-        <Content Include="Libs/win-x64/*.dll" Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' ">
+        <Content Include="Libs/win-x64/*" Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' ">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
             <Link>%(Filename)%(Extension)</Link>
         </Content>
@@ -126,7 +127,7 @@
 
   <ItemGroup>
     <Reference Include="ImGui.NET">
-      <HintPath>Libs\ImGui\ImGui.NET.dll</HintPath>
+      <HintPath>Libs\linux-x64\ImGui.NET.dll</HintPath>
     </Reference>
     <Reference Include="SDL3-CS">
       <HintPath>Libs\linux-x64\SDL3-CS.dll</HintPath>

@@ -67,7 +67,8 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
 2. **Vertical slice (done):** `EngineGameServer` (in `GameEngine/Api/`) + `InProcessAdapter` +
    mutable client galaxy model, implementing connect, time control, the system-map read (with
    `Name`/`Position`/`Orbit` view projection), command routing, and a `MessagePublisher`→event
-   bridge. Covered end-to-end by `Pulsar4X.Tests/ApiVerticalSliceTests.cs` (6 tests, no UI).
+   bridge. The `InProcessAdapter` + galaxy model live in `Pulsar4X.Client/Api/`; the server contract is
+   covered by `Pulsar4X.Tests/ApiVerticalSliceTests.cs` (8 tests, no UI dependency).
 3. **Commands (foundation done):** `IOrderHandler.HandleOrder` now returns a validity bool, so
    `SubmitCommand` reports real results. `EngineGameServer` has an extensible translator registry
    with a uniform ownership pre-check (a faction may only command entities it owns). `RenameCommand`
@@ -75,17 +76,30 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    DTO in Pulsar4X.Api; (b) make the engine's `CreateXxx` factory return the `HandleOrder` bool;
    (c) add a translator method + one registry entry in `EngineGameServer`. Commands with a secondary
    target carry it as a DTO field the translator resolves (only the commanded entity is ownership-checked).
-4. **Read surface:** port the ~55 views area by area; convert `EntityState`/`SystemState` to DTOs.
+4. **Read surface (in progress):** the engine-side projection now covers `Name`, `Position`, `Orbit`,
+   `MassVolume`, `Body`, `Star`, `Colony`, and `Ship` views (8 of ~55). **Projection recipe per view:**
+   (a) add an `IComponentView` DTO in Pulsar4X.Api; (b) add a `TryGetDataBlob`→view block in
+   `EngineGameServer.Project`; (c) extend the snapshot test. Remaining: port the rest of the views, then
+   the larger client-side step — rewire `EntityState`/`SystemState` (and the UI windows) to read these
+   views via `IClientGalaxy` instead of live engine `Entity`/`DataBlob` objects.
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
-6. **Network adapter + server host:** transport + serialization for `MultiplayerAdapter` and
-   `Pulsar4X.Server.Host`.
+6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
+   event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
+   it references both `Pulsar4X.Client` and `GameEngine`, and wires single-player as
+   `new InProcessAdapter(new EngineGameServer(game))` (and, later, `MultiplayerAdapter` for remote
+   play). Then drop the `GameEngine` `ProjectReference` from `Pulsar4X.Client` so the UI library
+   depends only on `Pulsar4X.Api` — completing the "no engine references in the client" goal. (This is
+   also the point to relocate `InProcessAdapter` out of `Pulsar4X.Api` if desired.)
+7. **Network adapter + server host:** transport + serialization for `MultiplayerAdapter` and the
+   headless `Pulsar4X.Server.Host`.
 
 ## Contract surface (initial)
 
 - Identity: `PlayerSession`, `ConnectRequest`, `ConnectResult`, `GameInfo`.
 - Time: `TimeState`, `TimeControlRequest`.
 - Reads: `SystemSummary`, `SystemSnapshot`, `EntitySnapshot` + `IComponentView` (`NameView`,
-  `PositionView`, `OrbitView` so far), `OwnerRelation`, `Vec3`.
+  `PositionView`, `OrbitView`, `MassVolumeView`, `BodyView`, `StarView`, `ColonyView`, `ShipView`
+  so far), `OwnerRelation`, `Vec3`.
 - Writes: `GameCommand` (+ `RenameCommand`), `CommandResult`.
 - Events: `GameEventType`, `GameEventEnvelope`.
 - Interfaces: `IGameServer`, `IGameClient`, `IClientGalaxy`, `IClientSystem`.
@@ -98,7 +112,9 @@ The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api`
   bool; `SubmitCommand` does an ownership pre-check and returns the engine's real accept/reject.
 - **Faction selection on connect is naive** — binds to the first faction. Real selection/auth via
   `ConnectRequest.Credential` lands with networking.
-- **The in-process adapter currently lives in `Pulsar4X.Api`** as a reference implementation (it only
-  depends on the contracts). It can move into the client UI library later without API changes.
+- ~~The in-process adapter lives in `Pulsar4X.Api`.~~ **Resolved:** `InProcessAdapter` and the
+  `ClientGalaxy`/`ClientSystem` model now live in `Pulsar4X.Client/Api/` (namespace `Pulsar4X.Client`),
+  which references `Pulsar4X.Api` directly. The contracts assembly holds only interfaces + DTOs, and
+  `Pulsar4X.Tests` drives `EngineGameServer` through `IGameServer` directly (no UI dependency).
 - **Two `PositionDB` classes exist** (`Pulsar4X.Datablobs` legacy/excluded vs the live
   `Pulsar4X.Movement`); projection uses the live one. Worth cleaning up the dead copy separately.

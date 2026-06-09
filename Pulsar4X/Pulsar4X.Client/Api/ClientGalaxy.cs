@@ -1,4 +1,9 @@
-namespace Pulsar4X.Api;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Pulsar4X.Api;
+
+namespace Pulsar4X.Client;
 
 /// <summary>
 /// The default mutable <see cref="IClientGalaxy"/> maintained by an adapter. The UI reads it through
