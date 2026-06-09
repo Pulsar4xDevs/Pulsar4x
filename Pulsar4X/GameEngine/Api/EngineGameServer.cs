@@ -219,6 +219,27 @@ namespace Pulsar4X.Engine.Api
         public IDisposable Subscribe(PlayerSession session, Action<GameEventEnvelope> handler)
             => new ServerSubscription(this, session, handler);
 
+        // Pushed to a subscriber immediately on Subscribe so the client gets its starting state with no
+        // fetch: the current time, then every system this faction already knows (with its visible
+        // entities). Thereafter deltas keep it current.
+        private void PushInitialState(PlayerSession session, Action<GameEventEnvelope> sink)
+        {
+            sink(new GameEventEnvelope(GameEventType.TimeChanged, Time: ToTimeState(_game.TimePulse)));
+
+            if (!_game.Factions.TryGetValue(session.FactionId, out var faction))
+                return;
+
+            foreach (var systemId in faction.GetDataBlob<FactionInfoDB>().KnownSystems)
+            {
+                var system = FindSystem(systemId);
+                if (system == null) continue;
+                sink(new GameEventEnvelope(
+                    GameEventType.SystemRevealed,
+                    systemId,
+                    System: BuildSystemSnapshot(system, session.FactionId)));
+            }
+        }
+
         // ----- projection helpers -----
 
         private static EntitySnapshot Project(Entity entity, int factionId)
@@ -284,8 +305,33 @@ namespace Pulsar4X.Engine.Api
                 Id = entity.Id,
                 FactionId = entity.FactionOwnerID,
                 Relation = RelationOf(entity, factionId),
+                Kind = ClassifyKind(entity),
                 Views = views,
             };
+        }
+
+        // Mirrors the client's former Utils.EntityBodyType so the body classification is computed once,
+        // server-side, and travels in the snapshot.
+        private static BodyKind ClassifyKind(Entity entity)
+        {
+            if (entity.TryGetDataBlob<SystemBodyInfoDB>(out var body))
+            {
+                switch (body.BodyType)
+                {
+                    case BodyType.Asteroid: return BodyKind.Asteroid;
+                    case BodyType.Comet: return BodyKind.Comet;
+                    case BodyType.DwarfPlanet: return BodyKind.DwarfPlanet;
+                    case BodyType.Moon: return BodyKind.Moon;
+                    case BodyType.GasDwarf:
+                    case BodyType.GasGiant:
+                    case BodyType.IceGiant:
+                    case BodyType.Terrestrial: return BodyKind.Planet;
+                }
+            }
+            if (entity.HasDataBlob<StarInfoDB>()) return BodyKind.Star;
+            if (entity.HasDataBlob<ColonyInfoDB>()) return BodyKind.Colony;
+            if (entity.HasDataBlob<ShipInfoDB>()) return BodyKind.Ship;
+            return BodyKind.Unknown;
         }
 
         private static OwnerRelation RelationOf(Entity entity, int factionId)
@@ -338,6 +384,9 @@ namespace Pulsar4X.Engine.Api
                 }
 
                 lock (server._sinkLock) server._sinks.Add(sink);
+
+                // Prime the new subscriber with its starting state (time + known systems).
+                server.PushInitialState(session, sink);
             }
 
             // Broadcast messages (no faction) and messages for this faction pass through.

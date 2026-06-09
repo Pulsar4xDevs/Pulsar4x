@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Api;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
@@ -39,16 +40,16 @@ namespace Pulsar4X.Client
         // Indentation (in pixels) applied per level of a hierarchy (celestial bodies, fleets).
         private const float IndentStep = 12f;
 
-        // The celestial body types listed in the "Celestial Bodies" section. Colonies and
+        // The celestial body kinds listed in the "Celestial Bodies" section. Colonies and
         // ships are intentionally excluded as they have their own sections above.
-        private static readonly UserOrbitSettings.OrbitBodyType[] _celestialBodyTypes = new []
+        private static readonly BodyKind[] _celestialBodyKinds = new []
         {
-            UserOrbitSettings.OrbitBodyType.Star,
-            UserOrbitSettings.OrbitBodyType.Planet,
-            UserOrbitSettings.OrbitBodyType.DwarfPlanet,
-            UserOrbitSettings.OrbitBodyType.Moon,
-            UserOrbitSettings.OrbitBodyType.Asteroid,
-            UserOrbitSettings.OrbitBodyType.Comet,
+            BodyKind.Star,
+            BodyKind.Planet,
+            BodyKind.DwarfPlanet,
+            BodyKind.Moon,
+            BodyKind.Asteroid,
+            BodyKind.Comet,
         };
 
         //constructs the toolbar with the given buttons
@@ -227,31 +228,29 @@ namespace Pulsar4X.Client
         private static void DisplayBodies()
         {
             if (_uiState.Faction == null) return;
-            if (string.IsNullOrEmpty(_uiState.SelectedStarSystemId)
-                || !_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId))
-                return;
 
-            var systemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+            var system = _uiState.GameClient?.Galaxy.GetSystem(_uiState.SelectedStarSystemId);
+            if (system == null) return;
 
             // Gather all celestial bodies in the system keyed by entity id so we can
             // reconstruct the orbital hierarchy (stars -> planets -> moons etc).
-            var bodies = systemState.EntityStatesWithNames.Values
-                .Where(e => Array.IndexOf(_celestialBodyTypes, e.BodyType) >= 0)
+            var bodies = system.Entities
+                .Where(e => Array.IndexOf(_celestialBodyKinds, e.Kind) >= 0)
                 .ToDictionary(e => e.Id);
 
             // Build parent -> children lists. A body whose parent isn't another
             // celestial body in this set is treated as a root (e.g. the primary star).
-            var children = new Dictionary<int, List<EntityState>>();
-            var roots = new List<EntityState>();
+            var children = new Dictionary<int, List<EntitySnapshot>>();
+            var roots = new List<EntitySnapshot>();
             foreach (var body in bodies.Values)
             {
-                var parent = body.GetParent();
-                if (parent != null && parent.Id != body.Id && bodies.ContainsKey(parent.Id))
+                int? parentId = ParentIdOf(body);
+                if (parentId is { } pid && pid != body.Id && bodies.ContainsKey(pid))
                 {
-                    if (!children.TryGetValue(parent.Id, out var list))
+                    if (!children.TryGetValue(pid, out var list))
                     {
-                        list = new List<EntityState>();
-                        children[parent.Id] = list;
+                        list = new List<EntitySnapshot>();
+                        children[pid] = list;
                     }
                     list.Add(body);
                 }
@@ -268,28 +267,48 @@ namespace Pulsar4X.Client
             }
         }
 
-        private static IEnumerable<EntityState> SortBodies(List<EntityState> bodies)
+        private static int? ParentIdOf(EntitySnapshot body)
+            => body.GetView<OrbitView>()?.ParentId ?? body.GetView<PositionView>()?.ParentId;
+
+        private static IEnumerable<EntitySnapshot> SortBodies(List<EntitySnapshot> bodies)
         {
             // Within a level, order inner -> outer by orbital distance (semi-major axis),
             // falling back to name for bodies that share a distance or lack an orbit.
-            return bodies.OrderBy(GetOrbitalDistance).ThenBy(e => e.Name);
+            return bodies.OrderBy(GetOrbitalDistance).ThenBy(NameOf);
         }
 
-        private static double GetOrbitalDistance(EntityState body)
+        private static double GetOrbitalDistance(EntitySnapshot body)
         {
             // Bodies without an orbit (e.g. a system's primary star) sort to the end of
             // their level; in practice such bodies are roots on their own anyway.
-            if (body.Entity.TryGetDataBlob<OrbitDB>(out var orbit))
-                return orbit.SemiMajorAxis;
-            return double.MaxValue;
+            return body.GetView<OrbitView>()?.SemiMajorAxisKm ?? double.MaxValue;
         }
 
-        private static void DisplayBodyNode(EntityState body, Dictionary<int, List<EntityState>> children, SystemViewPreferences prefs, int visibleDepth)
+        private static string NameOf(EntitySnapshot body) => body.GetView<NameView>()?.Name ?? "";
+
+        // Map the API body classification to the client's display enum (used for icons/tooltips and the
+        // shared map view-filter).
+        private static UserOrbitSettings.OrbitBodyType ToOrbitBodyType(BodyKind kind) => kind switch
         {
+            BodyKind.Star => UserOrbitSettings.OrbitBodyType.Star,
+            BodyKind.Planet => UserOrbitSettings.OrbitBodyType.Planet,
+            BodyKind.DwarfPlanet => UserOrbitSettings.OrbitBodyType.DwarfPlanet,
+            BodyKind.Moon => UserOrbitSettings.OrbitBodyType.Moon,
+            BodyKind.Asteroid => UserOrbitSettings.OrbitBodyType.Asteroid,
+            BodyKind.Comet => UserOrbitSettings.OrbitBodyType.Comet,
+            BodyKind.Colony => UserOrbitSettings.OrbitBodyType.Colony,
+            BodyKind.Ship => UserOrbitSettings.OrbitBodyType.Ship,
+            _ => UserOrbitSettings.OrbitBodyType.Unknown,
+        };
+
+        private static void DisplayBodyNode(EntitySnapshot body, Dictionary<int, List<EntitySnapshot>> children, SystemViewPreferences prefs, int visibleDepth)
+        {
+            var orbitType = ToOrbitBodyType(body.Kind);
+
             // Respect the same view filters used by the system map. A filtered-out body
             // is skipped but we still recurse so its children stay in the tree, sliding
             // up to fill the gap rather than indenting under a hidden parent.
-            bool visible = prefs.ShouldDisplay("map", body.BodyType);
+            bool visible = prefs.ShouldDisplay("map", orbitType);
             int childDepth = visibleDepth;
 
             if (visible)
@@ -297,18 +316,20 @@ namespace Pulsar4X.Client
                 float indent = visibleDepth * IndentStep;
                 if (indent > 0) ImGui.Indent(indent);
 
+                string name = NameOf(body);
                 bool selected = _uiState.LastClickedEntity?.Id == body.Id;
-                var shortName = UserOrbitSettings.OrbitBodyTypeShortNames[(int)body.BodyType];
-                if (ImGui.Selectable($"{shortName}  {body.Name}", selected))
+                var shortName = UserOrbitSettings.OrbitBodyTypeShortNames[(int)orbitType];
+                if (ImGui.Selectable($"{shortName}  {name}", selected))
                 {
-                    _uiState.EntityClicked(body, MouseButtons.Primary);
-                    _uiState.Camera.CenterOnEntity(body.Entity);
+                    _uiState.EntityClicked(body.Id, _uiState.SelectedStarSystemId, MouseButtons.Primary);
+                    if (body.GetView<PositionView>() is { } pos)
+                        _uiState.Camera.CenterOnPosition(pos.AbsolutePosition.X, pos.AbsolutePosition.Y, pos.AbsolutePosition.Z);
                 }
 
                 if (ImGui.IsItemHovered())
                 {
-                    var tip = UserOrbitSettings.OrbitBodyTypeTooltips[(int)body.BodyType];
-                    ImGui.SetTooltip($"{body.Name} ({tip})");
+                    var tip = UserOrbitSettings.OrbitBodyTypeTooltips[(int)orbitType];
+                    ImGui.SetTooltip($"{name} ({tip})");
                 }
 
                 if (indent > 0) ImGui.Unindent(indent);

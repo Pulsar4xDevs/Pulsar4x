@@ -77,6 +77,19 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void SystemSnapshot_classifies_body_kinds()
+        {
+            var session = Connect();
+            var entities = _server.GetSystemSnapshot(session, _game.Systems[0].ID).Entities;
+
+            Assert.That(entities.Any(e => e.Kind == BodyKind.Star), Is.True, "expected a star");
+            Assert.That(
+                entities.Any(e => e.Kind is BodyKind.Planet or BodyKind.DwarfPlanet or BodyKind.Moon
+                                       or BodyKind.Asteroid or BodyKind.Comet),
+                Is.True, "expected at least one orbiting celestial body");
+        }
+
+        [Test]
         public void StepOnce_advances_the_clock()
         {
             var session = Connect();

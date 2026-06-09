@@ -34,9 +34,9 @@ public sealed class InProcessAdapter : IGameClient
         {
             Session = result.Session;
             IsConnected = true;
+            // Subscribing primes the inbound queue with the initial state (known systems + time)
+            // pushed by the server — no client-side fetch. It's applied on the next Update().
             _subscription = _server.Subscribe(Session, OnServerEvent);
-            _galaxy.SetKnownSystems(_server.GetKnownSystems(Session));
-            _galaxy.Time = _server.GetTimeState(Session);
         }
         return Task.FromResult(result);
     }
@@ -61,12 +61,6 @@ public sealed class InProcessAdapter : IGameClient
         // Time updates when we drain that in Update() — no local read-back (which would be a round-trip
         // over a network).
         _server.SetTimeControl(Session, request);
-        return Task.CompletedTask;
-    }
-
-    public Task LoadSystemAsync(string systemId)
-    {
-        _galaxy.UpsertSystem(_server.GetSystemSnapshot(Session, systemId));
         return Task.CompletedTask;
     }
 

@@ -154,6 +154,13 @@ namespace Pulsar4X.Client
             }
         }
 
+        /// <summary>Centres on an absolute world position (metres). Lets UI sourced from the API galaxy
+        /// model centre the camera without an engine entity reference.</summary>
+        public void CenterOnPosition(double xMetres, double yMetres, double zMetres)
+        {
+            _camWorldPos_m = new Vector3(xMetres, yMetres, zMetres);
+        }
+
         public CameraState SaveState()
         {
             return new CameraState

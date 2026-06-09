@@ -53,14 +53,17 @@ adapter only *enqueues* them (thread-safe). The galaxy is mutated solely on the 
 before any window reads `Galaxy`. The whole batch of pending updates is applied at that single frame
 boundary, so within a frame the galaxy is consistent and never torn by a background thread.
 
-**Replication is push-only on the hot path (network-ready).** The server pushes *self-contained* deltas
-— entity add/reveal/change/rename carry the new `EntitySnapshot`; the clock pushes `TimeChanged`
-(carrying `TimeState`) both when it advances (`MasterTimePulse.GameGlobalDateChangedEvent`) and when its
-controls change (inside `SetTimeControl`). A `SystemRevealed` push carries the whole new
-`SystemSnapshot` — the system plus every entity now visible to that faction — so the client adds it with
-no follow-up pull. The adapter applies every delta with no callback to the server, so nothing is polled
-and a network adapter just feeds the same inbound queue from a socket. Request/response is reserved for
-genuine bulk/cold pulls only: the initial connect snapshot and an explicit `LoadSystemAsync`.
+**Replication is fully push-based (network-ready); the client never fetches.** On `Subscribe` the server
+immediately pushes the subscriber's starting state — a `TimeChanged` and a `SystemRevealed`
+(carrying a full `SystemSnapshot`) for every system the faction already knows — so the client gets its
+world with no request. Thereafter the server pushes *self-contained* deltas: entity
+add/reveal/change/rename carry the new `EntitySnapshot`; the clock pushes `TimeChanged` both when it
+advances (`MasterTimePulse.GameGlobalDateChangedEvent`) and when its controls change (inside
+`SetTimeControl`); a newly revealed system pushes its whole `SystemSnapshot`. The adapter applies every
+delta with no callback to the server, so nothing is polled or fetched — its only server calls are
+`Connect`/`Subscribe`/`Disconnect` and the command writes (`SubmitCommand`, `SetTimeControl`). A network
+adapter just feeds the same inbound queue from a socket. (`IGameServer` still exposes read queries —
+used by tests and as the projection building blocks — but the client adapter never calls them.)
 
 ## Current coupling (what we're replacing)
 
@@ -99,7 +102,11 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    views via `IClientGalaxy` instead of live engine `Entity`/`DataBlob` objects. First UI ports done:
    the **Selector**'s system list reads `Galaxy.KnownSystems`, and the **TimeControl** reads
    `Galaxy.Time` and drives the clock via `IGameClient.SetTimeControlAsync` (pause/start/step/tick
-   length/frequency) — no longer touching `MasterTimePulse` directly.
+   length/frequency) — no longer touching `MasterTimePulse` directly. The **Selector's celestial-body
+   list** reads the active system's `EntitySnapshot`s (hierarchy from `OrbitView`/`PositionView`
+   `ParentId`, sorted by `OrbitView.SemiMajorAxisKm`, classified via `EntitySnapshot.Kind`/`BodyKind`),
+   selecting through the id-based `EntityClicked` + `Camera.CenterOnPosition`. Known systems (with their
+   entities) are pushed to the galaxy model on connect, so no per-system load is needed.
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —

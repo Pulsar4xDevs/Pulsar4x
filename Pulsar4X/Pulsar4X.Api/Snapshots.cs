@@ -16,6 +16,21 @@ public enum OwnerRelation
     Unknown,
 }
 
+/// <summary>Broad classification of an entity for list grouping and icons. The client maps this to its
+/// own display enum/short-names.</summary>
+public enum BodyKind
+{
+    Unknown,
+    Star,
+    Planet,
+    DwarfPlanet,
+    Moon,
+    Asteroid,
+    Comet,
+    Colony,
+    Ship,
+}
+
 /// <summary>
 /// Marker for a bespoke, serializable, faction-scoped projection of one aspect of an entity — the
 /// read-model counterpart of an engine DataBlob. The server only populates the views a faction is
@@ -34,6 +49,7 @@ public sealed class EntitySnapshot
     public int Id { get; init; }
     public int FactionId { get; init; }
     public OwnerRelation Relation { get; init; }
+    public BodyKind Kind { get; init; }
     public IReadOnlyList<IComponentView> Views { get; init; } = Array.Empty<IComponentView>();
 
     public T? GetView<T>() where T : class, IComponentView => Views.OfType<T>().FirstOrDefault();
@@ -66,3 +82,30 @@ public sealed record OrbitView(
     double Eccentricity,
     double OrbitalPeriodSeconds,
     int? ParentId) : IComponentView;
+
+public sealed record MassVolumeView(double MassKg, double RadiusMetres, double DensityGramsPerCm3) : IComponentView;
+
+public sealed record BodyView(
+    string BodyType,
+    double GravityMetresPerSec2,
+    double SurfaceTemperatureC,
+    TimeSpan DayLength,
+    double AxialTiltDegrees,
+    string Tectonics,
+    double MagneticFieldMicroTesla,
+    bool SupportsPopulations) : IComponentView;
+
+public sealed record StarView(
+    string SpectralType,
+    int SpectralSubDivision,
+    string SpectralClass,
+    string LuminosityClass,
+    double SurfaceTemperatureC,
+    double Luminosity,
+    double AgeYears,
+    double MinHabitableRadiusAu,
+    double MaxHabitableRadiusAu) : IComponentView;
+
+public sealed record ColonyView(long Population, int? PlanetEntityId) : IComponentView;
+
+public sealed record ShipView(string DesignName) : IComponentView;

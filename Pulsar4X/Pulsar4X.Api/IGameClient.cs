@@ -23,9 +23,6 @@ public interface IGameClient
     Task<CommandResult> SubmitCommandAsync(GameCommand command);
     Task SetTimeControlAsync(TimeControlRequest request);
 
-    /// <summary>Ensure the given system is loaded into <see cref="Galaxy"/> (initial bulk fetch).</summary>
-    Task LoadSystemAsync(string systemId);
-
     /// <summary>
     /// Applies all server updates received since the previous call to <see cref="Galaxy"/> as a single
     /// batch, then raises <see cref="EventReceived"/> for each. Call exactly once per frame on the UI
