@@ -10,6 +10,9 @@ public interface IClientGalaxy
     TimeState Time { get; }
     IReadOnlyCollection<SystemSummary> KnownSystems { get; }
     IClientSystem? GetSystem(string systemId);
+
+    /// <summary>The faction's fleet command hierarchy (root fleets).</summary>
+    IReadOnlyList<FleetSnapshot> Fleets { get; }
 }
 
 /// <summary>A single star system within the client galaxy model.</summary>

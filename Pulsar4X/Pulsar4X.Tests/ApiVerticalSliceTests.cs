@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Pulsar4X.Api;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Api;
+using Pulsar4X.Messaging;
 
 namespace Pulsar4X.Tests
 {
@@ -87,6 +90,41 @@ namespace Pulsar4X.Tests
                 entities.Any(e => e.Kind is BodyKind.Planet or BodyKind.DwarfPlanet or BodyKind.Moon
                                        or BodyKind.Asteroid or BodyKind.Comet),
                 Is.True, "expected at least one orbiting celestial body");
+        }
+
+        [Test]
+        public void Subscribe_pushes_initial_time_and_fleets()
+        {
+            var session = Connect();
+            var received = new System.Collections.Generic.List<GameEventEnvelope>();
+
+            // The initial state is pushed synchronously on Subscribe (no client fetch).
+            using (_server.Subscribe(session, received.Add))
+            {
+                Assert.That(received.Any(e => e.Type == GameEventType.TimeChanged && e.Time != null), Is.True,
+                    "expected an initial TimeChanged push");
+                Assert.That(received.Any(e => e.Type == GameEventType.FleetsChanged && e.Fleets != null), Is.True,
+                    "expected an initial FleetsChanged push");
+            }
+        }
+
+        [Test]
+        public async Task FleetReorganized_message_pushes_a_FleetsChanged_delta()
+        {
+            // Fleet ops (create fleet, assign/transfer ship, …) reshape the tree without an entity
+            // add/remove, so the engine signals them with a FleetReorganized message. Verify the server
+            // turns that into a FleetsChanged push (the bug: the list didn't update on those ops).
+            var session = Connect();
+            var received = new List<GameEventEnvelope>();
+            using (_server.Subscribe(session, received.Add))
+            {
+                received.Clear(); // discard the initial connect push
+
+                await MessagePublisher.Instance.Publish(
+                    Message.Create(MessageTypes.FleetReorganized, factionId: session.FactionId));
+
+                Assert.That(received.Any(e => e.Type == GameEventType.FleetsChanged && e.Fleets != null), Is.True);
+            }
         }
 
         [Test]

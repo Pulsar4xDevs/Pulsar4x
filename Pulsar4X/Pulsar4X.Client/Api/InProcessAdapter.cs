@@ -88,6 +88,10 @@ public sealed class InProcessAdapter : IGameClient
                 if (evt.Time != null) _galaxy.Time = evt.Time;
                 return;
 
+            case GameEventType.FleetsChanged:
+                _galaxy.SetFleets(evt.Fleets ?? System.Array.Empty<FleetSnapshot>());
+                return;
+
             case GameEventType.SystemRevealed:
                 // The reveal carries the whole system + its visible entities — apply it directly.
                 if (evt.System != null)

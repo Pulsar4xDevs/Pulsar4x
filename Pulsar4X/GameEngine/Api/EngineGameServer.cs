@@ -9,6 +9,7 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
+using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Messaging;
 using Pulsar4X.Names;
@@ -238,6 +239,8 @@ namespace Pulsar4X.Engine.Api
                     systemId,
                     System: BuildSystemSnapshot(system, session.FactionId)));
             }
+
+            sink(new GameEventEnvelope(GameEventType.FleetsChanged, Fleets: BuildFleetSnapshots(session.FactionId)));
         }
 
         // ----- projection helpers -----
@@ -344,6 +347,69 @@ namespace Pulsar4X.Engine.Api
         private StarSystem? FindSystem(string systemId)
             => _game.Systems.FirstOrDefault(s => s.ID == systemId);
 
+        // ----- fleet hierarchy projection -----
+
+        private List<FleetSnapshot> BuildFleetSnapshots(int factionId)
+        {
+            var result = new List<FleetSnapshot>();
+            if (!_game.Factions.TryGetValue(factionId, out var faction)) return result;
+            if (!faction.TryGetDataBlob<FleetDB>(out var factionFleet)) return result;
+
+            var roots = factionFleet.RootDB?.Children;
+            if (roots == null) return result;
+
+            foreach (var fleet in roots)
+            {
+                // Ships only appear nested under a fleet, never as roots.
+                if (fleet.HasDataBlob<ShipInfoDB>()) continue;
+                result.Add(ProjectFleet(fleet, factionId));
+            }
+            return result;
+        }
+
+        private static FleetSnapshot ProjectFleet(Entity fleet, int factionId)
+        {
+            fleet.TryGetDataBlob<FleetDB>(out var fleetDB);
+            int flagshipId = fleetDB?.FlagShipID ?? -1;
+
+            var subFleets = new List<FleetSnapshot>();
+            var ships = new List<ShipSnapshot>();
+            if (fleetDB != null)
+            {
+                foreach (var child in fleetDB.GetChildren())
+                {
+                    if (child.HasDataBlob<FleetDB>())
+                        subFleets.Add(ProjectFleet(child, factionId));
+                    else
+                        ships.Add(new ShipSnapshot(child.Id, child.GetName(factionId), child.Manager?.ManagerID ?? ""));
+                }
+            }
+
+            var orders = new List<string>();
+            if (fleet.TryGetDataBlob<OrderableDB>(out var orderable))
+                foreach (var action in orderable.ActionList)
+                    orders.Add(action.Name);
+
+            string? location = null;
+            if (flagshipId >= 0 && fleet.Manager != null
+                && fleet.Manager.TryGetEntityById(flagshipId, out var flagship)
+                && flagship.TryGetDataBlob<Pulsar4X.Movement.PositionDB>(out var pos))
+            {
+                location = pos.Parent?.GetName(factionId);
+            }
+
+            return new FleetSnapshot
+            {
+                Id = fleet.Id,
+                Name = fleet.GetName(factionId),
+                FlagshipId = flagshipId >= 0 ? flagshipId : null,
+                FlagshipLocationName = location,
+                Orders = orders,
+                SubFleets = subFleets,
+                Ships = ships,
+            };
+        }
+
         /// <summary>
         /// One subscriber's live feed. Bridges the engine's <see cref="MessagePublisher"/> (faction-
         /// filtered) into self-contained <see cref="GameEventEnvelope"/>s — projecting the affected
@@ -362,6 +428,7 @@ namespace Pulsar4X.Engine.Api
                 (MessageTypes.EntityRenamed, GameEventType.EntityRenamed),
                 (MessageTypes.DBAdded, GameEventType.EntityChanged),
                 (MessageTypes.DBRemoved, GameEventType.EntityChanged),
+                (MessageTypes.FleetReorganized, GameEventType.FleetsChanged),
             };
 
             private readonly EngineGameServer _server;
@@ -394,6 +461,13 @@ namespace Pulsar4X.Engine.Api
 
             private Task Forward(GameEventType type, Message m)
             {
+                // A fleet reorganisation just re-pushes the faction's whole fleet tree.
+                if (type == GameEventType.FleetsChanged)
+                {
+                    _sink(new GameEventEnvelope(GameEventType.FleetsChanged, Fleets: _server.BuildFleetSnapshots(_session.FactionId)));
+                    return Task.CompletedTask;
+                }
+
                 // Deltas carry their payload so the client never makes a follow-up request.
                 EntitySnapshot? entity = null;
                 SystemSnapshot? system = null;
@@ -415,6 +489,12 @@ namespace Pulsar4X.Engine.Api
                 }
 
                 _sink(new GameEventEnvelope(type, m.SystemId, m.EntityId, m.FactionId, Entity: entity, System: system));
+
+                // Entity creation/destruction/rename can reshape the fleet list (membership/names).
+                // Explicit fleet ops push via FleetReorganized; this backstops entity-level changes.
+                if (type is GameEventType.EntityAdded or GameEventType.EntityRemoved or GameEventType.EntityRenamed)
+                    _sink(new GameEventEnvelope(GameEventType.FleetsChanged, Fleets: _server.BuildFleetSnapshots(_session.FactionId)));
+
                 return Task.CompletedTask;
             }
 

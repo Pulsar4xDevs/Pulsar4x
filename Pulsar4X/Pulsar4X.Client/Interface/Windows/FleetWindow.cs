@@ -96,6 +96,14 @@ namespace Pulsar4X.Client
             SelectFleet(factionRoot.Children.FirstOrDefault(c => c.HasDataBlob<FleetDB>()));
         }
 
+        /// <summary>Selects a fleet by id, resolving the engine entity. Lets UI sourced from the API
+        /// galaxy model (which carries fleet ids, not entities) drive the still-engine-backed window.</summary>
+        public void SelectFleet(int fleetId)
+        {
+            if (_uiState.Game != null && _uiState.Game.GlobalManager.TryGetGlobalEntityById(fleetId, out var fleet))
+                SelectFleet(fleet);
+        }
+
         public void SelectFleet(Entity? fleet)
         {
             SelectedFleet = fleet;

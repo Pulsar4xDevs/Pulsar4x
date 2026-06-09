@@ -9,5 +9,6 @@ public enum MessageTypes
     DBAdded,
     DBRemoved,
     StarSystemRevealed,
-    EntityRenamed
+    EntityRenamed,
+    FleetReorganized
 }

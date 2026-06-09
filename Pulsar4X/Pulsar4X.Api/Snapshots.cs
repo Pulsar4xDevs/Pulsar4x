@@ -109,3 +109,24 @@ public sealed record StarView(
 public sealed record ColonyView(long Population, int? PlanetEntityId) : IComponentView;
 
 public sealed record ShipView(string DesignName) : IComponentView;
+
+// --------------------------------------------------------------------------------------------
+// Fleet command hierarchy (faction-scoped). The galaxy is otherwise organised by system, but a
+// faction's fleets form their own tree of sub-fleets and member ships, so they're modelled
+// separately. Per-entity details (position for centring, etc.) come from the system EntitySnapshots.
+// --------------------------------------------------------------------------------------------
+
+/// <summary>A ship as a fleet member: identity plus the system it currently resides in.</summary>
+public sealed record ShipSnapshot(int Id, string Name, string SystemId);
+
+/// <summary>A fleet node in the command hierarchy.</summary>
+public sealed class FleetSnapshot
+{
+    public int Id { get; init; }
+    public string Name { get; init; } = "";
+    public int? FlagshipId { get; init; }
+    public string? FlagshipLocationName { get; init; }
+    public IReadOnlyList<string> Orders { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<FleetSnapshot> SubFleets { get; init; } = Array.Empty<FleetSnapshot>();
+    public IReadOnlyList<ShipSnapshot> Ships { get; init; } = Array.Empty<ShipSnapshot>();
+}

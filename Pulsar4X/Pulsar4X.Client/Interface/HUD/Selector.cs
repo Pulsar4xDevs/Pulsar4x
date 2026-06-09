@@ -367,49 +367,36 @@ namespace Pulsar4X.Client
 
         private static void DisplayFleets()
         {
-            if(_uiState.Faction == null) return;
+            var galaxy = _uiState.GameClient?.Galaxy;
+            if (galaxy == null) return;
 
-            var fleets = _uiState.Faction.GetDataBlob<FleetDB>().RootDB?.Children ?? new SafeList<Entity>();
-
-            foreach (var fleet in fleets)
+            foreach (var fleet in galaxy.Fleets)
             {
-                // Check if the entity is actually a ship; ships only appear nested under a fleet.
-                if (fleet.HasDataBlob<ShipInfoDB>())
-                    continue;
-
                 DisplayFleetNode(fleet, 0);
             }
         }
 
-        private static void DisplayFleetNode(Entity fleet, int depth)
+        private static void DisplayFleetNode(FleetSnapshot fleet, int depth)
         {
-            if (_uiState.Faction == null) return;
-
             float indent = depth * IndentStep;
             if (indent > 0) ImGui.Indent(indent);
 
             bool selected = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleet?.Id == fleet.Id;
-            string display = fleet.GetName(_uiState.Faction.Id);
-            if (ImGui.Selectable(display, selected))
+            if (ImGui.Selectable($"{fleet.Name}###fleet-{fleet.Id}", selected))
             {
-                FleetWindow.GetInstance().SelectFleet(fleet);
+                FleetWindow.GetInstance().SelectFleet(fleet.Id);
                 FleetWindow.GetInstance().SetActive(true);
             }
-
-            fleet.TryGetDataBlob<FleetDB>(out var fleetDB);
 
             if (ImGui.IsItemHovered())
             {
                 void Callback()
                 {
-                    if (fleet.TryGetDataBlob<OrderableDB>(out var orderableDb)
-                    && orderableDb.ActionList.Count > 0)
+                    if (fleet.Orders.Count > 0)
                     {
                         ImGui.Text("Orders:");
-                        for (int i = 0; i < orderableDb.ActionList.Count; i++)
-                        {
-                            ImGui.Text(orderableDb.ActionList[i].Name);
-                        }
+                        foreach (var order in fleet.Orders)
+                            ImGui.Text(order);
                     }
                     else
                     {
@@ -417,48 +404,33 @@ namespace Pulsar4X.Client
                     }
                 }
 
-                var flagshipID = fleetDB?.FlagShipID ?? -9999;
-                if (fleet.Manager?.TryGetEntityById(flagshipID, out var flagship) ?? false)
-                {
-                    var positionDB = flagship.GetDataBlob<PositionDB>();
-                    DisplayHelpers.DescriptiveTooltip(display, positionDB.Parent?.GetName(_uiState.Faction.Id) ?? "Unknown", "", Callback);
-                }
+                DisplayHelpers.DescriptiveTooltip(fleet.Name, fleet.FlagshipLocationName ?? "Unknown", "", Callback);
             }
 
             if (indent > 0) ImGui.Unindent(indent);
 
-            if (fleetDB == null) return;
+            // Sub-fleets first, then this fleet's ships, both one level deeper so the
+            // hierarchy reads top-down like the fleet window.
+            foreach (var sub in fleet.SubFleets)
+                DisplayFleetNode(sub, depth + 1);
 
-            // Recurse into sub-fleets first, then list this fleet's ships, both indented
-            // one level deeper so the hierarchy reads top-down like the fleet window.
-            foreach (var child in fleetDB.GetChildren())
-            {
-                if (child.HasDataBlob<FleetDB>())
-                    DisplayFleetNode(child, depth + 1);
-            }
-
-            var ships = fleetDB.GetChildren().Where(c => !c.HasDataBlob<FleetDB>());
-            int flagshipID2 = fleetDB.FlagShipID;
             // Flagship first, then alphabetical so the lead ship is easy to spot.
-            foreach (var ship in ships.OrderByDescending(s => s.Id == flagshipID2).ThenBy(s => s.GetName(_uiState.Faction.Id)))
+            foreach (var ship in fleet.Ships.OrderByDescending(s => s.Id == fleet.FlagshipId).ThenBy(s => s.Name))
             {
-                DisplayShipNode(ship, depth + 1, ship.Id == flagshipID2);
+                DisplayShipNode(ship, depth + 1, ship.Id == fleet.FlagshipId);
             }
         }
 
-        private static void DisplayShipNode(Entity ship, int depth, bool isFlagship)
+        private static void DisplayShipNode(ShipSnapshot ship, int depth, bool isFlagship)
         {
-            if (_uiState.Faction == null) return;
-
             float indent = depth * IndentStep;
             if (indent > 0) ImGui.Indent(indent);
 
-            string name = ship.GetName(_uiState.Faction.Id);
             // A small marker distinguishes the fleet's flagship from the rest.
-            string label = isFlagship ? $"⚑ {name}" : name;
+            string label = isFlagship ? $"⚑ {ship.Name}" : ship.Name;
 
             // Grey out ships that aren't in the system the player is currently viewing.
-            bool inViewedSystem = ship.Manager?.ManagerID == _uiState.SelectedStarSystemId;
+            bool inViewedSystem = ship.SystemId == _uiState.SelectedStarSystemId;
             if (!inViewedSystem)
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled]);
 
@@ -472,27 +444,25 @@ namespace Pulsar4X.Client
                 ImGui.PopStyleColor();
 
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip(isFlagship ? $"{name} (Flagship)" : name);
+                ImGui.SetTooltip(isFlagship ? $"{ship.Name} (Flagship)" : ship.Name);
 
             if (indent > 0) ImGui.Unindent(indent);
         }
 
-        private static void ShipClicked(Entity ship)
+        private static void ShipClicked(ShipSnapshot ship)
         {
-            // Ships live in their star system's manager; surface them the same way a
-            // map click would: focus the owning system, open the entity window, and
-            // center the camera. Bail quietly if the ship isn't in a known system.
-            var systemId = ship.Manager?.ManagerID;
-            if (systemId == null
-                || !_uiState.StarSystemStates.TryGetValue(systemId, out var systemState)
-                || !systemState.EntityStatesWithNames.TryGetValue(ship.Id, out var shipState))
-                return;
+            // Surface the ship like a map click would: focus its system, open the entity window,
+            // and centre the camera (using the ship's position from the galaxy snapshot).
+            if (string.IsNullOrEmpty(ship.SystemId)) return;
 
-            if (_uiState.SelectedStarSystemId != systemId)
-                _uiState.SetActiveSystem(systemId);
+            if (_uiState.SelectedStarSystemId != ship.SystemId)
+                _uiState.SetActiveSystem(ship.SystemId);
 
-            _uiState.EntityClicked(shipState, MouseButtons.Primary);
-            _uiState.Camera.CenterOnEntity(ship);
+            _uiState.EntityClicked(ship.Id, ship.SystemId, MouseButtons.Primary);
+
+            var snapshot = _uiState.GameClient?.Galaxy.GetSystem(ship.SystemId)?.GetEntity(ship.Id);
+            if (snapshot?.GetView<PositionView>() is { } pos)
+                _uiState.Camera.CenterOnPosition(pos.AbsolutePosition.X, pos.AbsolutePosition.Y, pos.AbsolutePosition.Z);
         }
     }
 }

@@ -13,13 +13,22 @@ internal sealed class ClientGalaxy : IClientGalaxy
 {
     private readonly Dictionary<string, ClientSystem> _systems = new();
     private readonly List<SystemSummary> _knownSystems = new();
+    private readonly List<FleetSnapshot> _fleets = new();
 
     public TimeState Time { get; internal set; } = new(default, false, 1f, TimeSpan.FromHours(1), TimeSpan.FromSeconds(1));
 
     public IReadOnlyCollection<SystemSummary> KnownSystems => _knownSystems;
 
+    public IReadOnlyList<FleetSnapshot> Fleets => _fleets;
+
     public IClientSystem? GetSystem(string systemId)
         => _systems.TryGetValue(systemId, out var system) ? system : null;
+
+    internal void SetFleets(IEnumerable<FleetSnapshot> fleets)
+    {
+        _fleets.Clear();
+        _fleets.AddRange(fleets);
+    }
 
     internal void SetKnownSystems(IEnumerable<SystemSummary> summaries)
     {

@@ -106,7 +106,14 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    list** reads the active system's `EntitySnapshot`s (hierarchy from `OrbitView`/`PositionView`
    `ParentId`, sorted by `OrbitView.SemiMajorAxisKm`, classified via `EntitySnapshot.Kind`/`BodyKind`),
    selecting through the id-based `EntityClicked` + `Camera.CenterOnPosition`. Known systems (with their
-   entities) are pushed to the galaxy model on connect, so no per-system load is needed.
+   entities) are pushed to the galaxy model on connect, so no per-system load is needed. The
+   **Selector's fleet/ship list** reads `Galaxy.Fleets` — a faction-scoped `FleetSnapshot` tree
+   (sub-fleets, member `ShipSnapshot`s, flagship, orders, location) projected server-side and pushed via
+   a `FleetsChanged` delta on connect, when a fleet op runs (the engine raises a `FleetReorganized`
+   message from `FleetOrder.Execute` — create/disband/assign/transfer/etc., which reshape the
+   `TreeHierarchyDB` with no entity add/remove), and as a backstop on faction entity add/remove/rename;
+   ship clicks use `EntityClicked(id,…)` + the ship's `PositionView` for centring, fleet clicks
+   `FleetWindow.SelectFleet(id)`.
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
