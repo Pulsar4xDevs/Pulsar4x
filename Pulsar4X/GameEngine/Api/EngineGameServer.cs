@@ -35,10 +35,10 @@ namespace Pulsar4X.Engine.Api
         /// </summary>
         private readonly Dictionary<Type, Func<Entity, Entity, GameCommand, CommandResult>> _translators;
 
-        // Active subscriber sinks. Time is global, so clock changes are broadcast to all of them;
-        // entity events are faction-filtered inside each ServerSubscription.
+        // Active subscriptions. Time is global, but faction snapshots (funds) differ per subscriber, so
+        // we track the subscriptions (which know their faction), not bare sinks.
         private readonly object _sinkLock = new();
-        private readonly List<Action<GameEventEnvelope>> _sinks = new();
+        private readonly List<ServerSubscription> _subscriptions = new();
         private readonly DateChangedEventHandler _onDateChanged;
 
         public EngineGameServer(Game game)
@@ -50,15 +50,21 @@ namespace Pulsar4X.Engine.Api
             };
 
             // The clock advances on the engine thread with no per-tick request from clients; push a
-            // TimeChanged delta whenever it does, so clients never have to poll the time.
-            _onDateChanged = _ => BroadcastTimeChanged();
+            // TimeChanged delta (and a refreshed faction snapshot — funds track the economy) whenever it
+            // does, so clients never have to poll.
+            _onDateChanged = _ => OnGlobalDateChanged();
             _game.TimePulse.GameGlobalDateChangedEvent += _onDateChanged;
         }
 
         public void Dispose()
         {
             _game.TimePulse.GameGlobalDateChangedEvent -= _onDateChanged;
-            lock (_sinkLock) _sinks.Clear();
+            lock (_sinkLock) _subscriptions.Clear();
+        }
+
+        private ServerSubscription[] SnapshotSubscriptions()
+        {
+            lock (_sinkLock) return _subscriptions.ToArray();
         }
 
         // ----- connection -----
@@ -86,13 +92,33 @@ namespace Pulsar4X.Engine.Api
         private static TimeState ToTimeState(MasterTimePulse tp)
             => new TimeState(tp.GameGlobalDateTime, tp.IsRunning, tp.TimeMultiplier, tp.Ticklength, tp.TickFrequency);
 
+        // Control changes (pause/start/speed/tick) don't move the economy, so push only the clock.
         private void BroadcastTimeChanged()
         {
             var evt = new GameEventEnvelope(GameEventType.TimeChanged, Time: ToTimeState(_game.TimePulse));
-            Action<GameEventEnvelope>[] sinks;
-            lock (_sinkLock) sinks = _sinks.ToArray();
-            foreach (var sink in sinks)
-                sink(evt);
+            foreach (var sub in SnapshotSubscriptions())
+                sub.Send(evt);
+        }
+
+        // A clock advance refreshes both the time and each subscriber's (funds-bearing) faction snapshot.
+        private void OnGlobalDateChanged()
+        {
+            var time = new GameEventEnvelope(GameEventType.TimeChanged, Time: ToTimeState(_game.TimePulse));
+            foreach (var sub in SnapshotSubscriptions())
+            {
+                sub.Send(time);
+                var faction = BuildFactionSnapshot(sub.FactionId);
+                if (faction != null)
+                    sub.Send(new GameEventEnvelope(GameEventType.FactionChanged, Faction: faction));
+            }
+        }
+
+        private FactionSnapshot? BuildFactionSnapshot(int factionId)
+        {
+            if (!_game.Factions.TryGetValue(factionId, out var faction)) return null;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var info)) return null;
+            string name = faction.TryGetDataBlob<NameDB>(out var nameDB) ? nameDB.OwnersName : factionId.ToString();
+            return new FactionSnapshot(name, info.Abbreviation, info.Money.GetCurrentFunds());
         }
 
         public void SetTimeControl(PlayerSession session, TimeControlRequest request)
@@ -226,6 +252,10 @@ namespace Pulsar4X.Engine.Api
         private void PushInitialState(PlayerSession session, Action<GameEventEnvelope> sink)
         {
             sink(new GameEventEnvelope(GameEventType.TimeChanged, Time: ToTimeState(_game.TimePulse)));
+
+            var factionSnapshot = BuildFactionSnapshot(session.FactionId);
+            if (factionSnapshot != null)
+                sink(new GameEventEnvelope(GameEventType.FactionChanged, Faction: factionSnapshot));
 
             if (!_game.Factions.TryGetValue(session.FactionId, out var faction))
                 return;
@@ -450,11 +480,14 @@ namespace Pulsar4X.Engine.Api
                     _handlers.Add((msg, handler));
                 }
 
-                lock (server._sinkLock) server._sinks.Add(sink);
+                lock (server._sinkLock) server._subscriptions.Add(this);
 
-                // Prime the new subscriber with its starting state (time + known systems).
+                // Prime the new subscriber with its starting state (time + faction + known systems + fleets).
                 server.PushInitialState(session, sink);
             }
+
+            internal int FactionId => _session.FactionId;
+            internal void Send(GameEventEnvelope evt) => _sink(evt);
 
             // Broadcast messages (no faction) and messages for this faction pass through.
             private bool PassesFactionFilter(Message m) => m.FactionId is null || m.FactionId == _session.FactionId;
@@ -503,7 +536,7 @@ namespace Pulsar4X.Engine.Api
                 foreach (var (type, handler) in _handlers)
                     MessagePublisher.Instance.Unsubscribe(type, handler);
                 _handlers.Clear();
-                lock (_server._sinkLock) _server._sinks.Remove(_sink);
+                lock (_server._sinkLock) _server._subscriptions.Remove(this);
             }
         }
     }

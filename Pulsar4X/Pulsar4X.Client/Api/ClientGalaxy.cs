@@ -21,6 +21,8 @@ internal sealed class ClientGalaxy : IClientGalaxy
 
     public IReadOnlyList<FleetSnapshot> Fleets => _fleets;
 
+    public FactionSnapshot? Faction { get; internal set; }
+
     public IClientSystem? GetSystem(string systemId)
         => _systems.TryGetValue(systemId, out var system) ? system : null;
 

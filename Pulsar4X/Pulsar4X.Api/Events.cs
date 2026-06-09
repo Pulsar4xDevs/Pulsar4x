@@ -16,6 +16,7 @@ public enum GameEventType
     EntityRenamed,
     TimeChanged,     // the simulation clock advanced or its controls changed; payload carries Time
     FleetsChanged,   // the faction's fleet hierarchy changed; payload carries Fleets
+    FactionChanged,  // the faction's identity/funds changed; payload carries Faction
 }
 
 /// <summary>
@@ -34,4 +35,5 @@ public sealed record GameEventEnvelope(
     EntitySnapshot? Entity = null,
     TimeState? Time = null,
     SystemSnapshot? System = null,
-    IReadOnlyList<FleetSnapshot>? Fleets = null);
+    IReadOnlyList<FleetSnapshot>? Fleets = null,
+    FactionSnapshot? Faction = null);

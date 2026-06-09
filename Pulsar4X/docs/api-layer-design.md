@@ -113,7 +113,12 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    message from `FleetOrder.Execute` — create/disband/assign/transfer/etc., which reshape the
    `TreeHierarchyDB` with no entity add/remove), and as a backstop on faction entity add/remove/rename;
    ship clicks use `EntityClicked(id,…)` + the ship's `PositionView` for centring, fleet clicks
-   `FleetWindow.SelectFleet(id)`.
+   `FleetWindow.SelectFleet(id)`. The **Selector's colonies list** needs no new model — colonies are
+   already `Kind == Colony` entities in the per-system snapshots; it aggregates those with
+   `Relation == Owned` across known systems, selecting via `ColonyManagementWindow.SelectColony(id, systemId)`.
+   The **Selector's Corporation section** reads `Galaxy.Faction` (a `FactionSnapshot`: name, abbreviation,
+   funds) — pushed via `FactionChanged` on connect and on each clock advance (funds track the economy);
+   pushed per-subscription since funds are faction-specific.
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
@@ -142,6 +147,11 @@ The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api`
 
 - ~~Command validation isn't surfaced.~~ **Resolved (phase 3):** `HandleOrder` returns a validity
   bool; `SubmitCommand` does an ownership pre-check and returns the engine's real accept/reject.
+- **`EntityAdded` isn't visibility-filtered.** The engine's `EntityAdded` message carries no faction id,
+  so the server forwards it to every faction and the adapter upserts the projected entity into the
+  galaxy — even an entity the faction shouldn't yet see. Current consumers mask this (the colonies list
+  filters `Relation == Owned`; the body list filters celestial kinds), but it must be fixed before the
+  map is ported (which shows all visible entities) — the server should drop adds the faction can't see.
 - **Continuous state (positions) isn't streamed yet.** Position/orbit updates mutate existing
   DataBlobs without firing add/remove events, so galaxy entity snapshots don't yet receive per-tick
   position changes. The map still reads live engine state; when it's ported, positions will need either

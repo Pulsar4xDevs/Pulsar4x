@@ -34,6 +34,17 @@ namespace Pulsar4X.Client
             SelectedEntity = entityState;
         }
 
+        /// <summary>Selects a colony by id within a system, resolving the engine-backed state. Lets UI
+        /// sourced from the API galaxy model (ids, not entities) drive this still-engine-backed window.</summary>
+        public void SelectColony(int colonyId, string systemId)
+        {
+            if (_uiState.StarSystemStates.TryGetValue(systemId, out var system)
+                && system.EntityStatesColonies.TryGetValue(colonyId, out var colonyState))
+            {
+                SelectEntity(colonyState);
+            }
+        }
+
         internal override void Display()
         {
             if(!IsActive) return;

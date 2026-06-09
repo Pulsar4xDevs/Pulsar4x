@@ -93,16 +93,18 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void Subscribe_pushes_initial_time_and_fleets()
+        public void Subscribe_pushes_initial_state()
         {
             var session = Connect();
-            var received = new System.Collections.Generic.List<GameEventEnvelope>();
+            var received = new List<GameEventEnvelope>();
 
             // The initial state is pushed synchronously on Subscribe (no client fetch).
             using (_server.Subscribe(session, received.Add))
             {
                 Assert.That(received.Any(e => e.Type == GameEventType.TimeChanged && e.Time != null), Is.True,
                     "expected an initial TimeChanged push");
+                Assert.That(received.Any(e => e.Type == GameEventType.FactionChanged && e.Faction != null), Is.True,
+                    "expected an initial FactionChanged push");
                 Assert.That(received.Any(e => e.Type == GameEventType.FleetsChanged && e.Fleets != null), Is.True,
                     "expected an initial FleetsChanged push");
             }

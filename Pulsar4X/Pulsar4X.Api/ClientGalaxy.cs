@@ -13,6 +13,9 @@ public interface IClientGalaxy
 
     /// <summary>The faction's fleet command hierarchy (root fleets).</summary>
     IReadOnlyList<FleetSnapshot> Fleets { get; }
+
+    /// <summary>The player's faction/corporation (identity + funds). Null until the first push.</summary>
+    FactionSnapshot? Faction { get; }
 }
 
 /// <summary>A single star system within the client galaxy model.</summary>

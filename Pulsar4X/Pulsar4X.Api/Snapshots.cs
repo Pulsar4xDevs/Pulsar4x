@@ -59,6 +59,9 @@ public sealed class EntitySnapshot
 /// <summary>Minimal identity of a star system for lists/maps (cheap to enumerate).</summary>
 public sealed record SystemSummary(string SystemId, string Name);
 
+/// <summary>The player's faction/corporation: identity and current funds.</summary>
+public sealed record FactionSnapshot(string Name, string Abbreviation, decimal Funds);
+
 /// <summary>A bulk, faction-scoped snapshot of one star system at a point in time.</summary>
 public sealed class SystemSnapshot
 {

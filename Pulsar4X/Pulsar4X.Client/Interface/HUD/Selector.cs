@@ -171,18 +171,18 @@ namespace Pulsar4X.Client
 
         private static string CorporationHeaderLabel()
         {
-            if(_uiState.Faction == null) return "Corporation";
-            return $"{_uiState.Faction.GetFactionName()} [{_uiState.Faction.GetFactionAbbreviation()}]";
+            var faction = _uiState.GameClient?.Galaxy.Faction;
+            if(faction == null) return "Corporation";
+            return $"{faction.Name} [{faction.Abbreviation}]";
         }
 
         private static void DisplayCorporation()
         {
-            if(_uiState.Faction == null) return;
-            if(!_uiState.Faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
-                return;
+            var faction = _uiState.GameClient?.Galaxy.Faction;
+            if(faction == null) return;
 
             string label = "Funds";
-            string value = factionInfoDB.Money.GetCurrentFunds().ToString("C0", CultureInfo.CurrentCulture);
+            string value = faction.Funds.ToString("C0", CultureInfo.CurrentCulture);
 
             // Get available width in current line
             float availWidth = ImGui.GetContentRegionAvail().X;
@@ -347,20 +347,30 @@ namespace Pulsar4X.Client
 
         private static void DisplayColonies()
         {
-            if(_uiState.Faction == null) return;
+            var galaxy = _uiState.GameClient?.Galaxy;
+            if (galaxy == null) return;
 
-            var colonies = _uiState.Faction.GetDataBlob<FactionInfoDB>().Colonies;
-
-            foreach (var colony in colonies)
+            // The faction's colonies are owned colony entities sitting in its known (loaded) systems.
+            var colonies = new List<(IClientSystem System, EntitySnapshot Colony)>();
+            foreach (var summary in galaxy.KnownSystems)
             {
-                bool visible = ColonyManagementWindow.GetInstance().GetActive() && ColonyManagementWindow.GetInstance().SelectedEntity?.Entity.Id == colony.Id;
-                if (ImGui.Selectable(colony.GetName(_uiState.Faction.Id), visible))
+                var system = galaxy.GetSystem(summary.SystemId);
+                if (system == null) continue;
+                foreach (var colony in system.Entities.Where(e => e.Kind == BodyKind.Colony && e.Relation == OwnerRelation.Owned))
+                    colonies.Add((system, colony));
+            }
+
+            var window = ColonyManagementWindow.GetInstance();
+            int? selectedId = window.GetActive() ? window.SelectedEntity?.Id : null;
+
+            foreach (var (system, colony) in colonies.OrderBy(c => NameOf(c.Colony)))
+            {
+                bool selected = selectedId == colony.Id;
+                if (ImGui.Selectable($"{NameOf(colony)}###colony-{colony.Id}", selected))
                 {
-                    if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId) && _uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies.ContainsKey(colony.Id))
-                    {
-                        ColonyManagementWindow.GetInstance().SelectEntity(_uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies[colony.Id]);
-                        ColonyManagementWindow.GetInstance().SetActive(true);
-                    }
+                    _uiState.SetActiveSystem(system.SystemId);
+                    window.SelectColony(colony.Id, system.SystemId);
+                    window.SetActive(true);
                 }
             }
         }
