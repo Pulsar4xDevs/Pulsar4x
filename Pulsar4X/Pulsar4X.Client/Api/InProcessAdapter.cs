@@ -47,6 +47,8 @@ public sealed class InProcessAdapter : IGameClient
         _subscription = null;
         if (IsConnected) _server.Disconnect(Session);
         IsConnected = false;
+        // In-process the adapter owns this server instance; release its engine hooks.
+        (_server as IDisposable)?.Dispose();
         return Task.CompletedTask;
     }
 
@@ -55,8 +57,10 @@ public sealed class InProcessAdapter : IGameClient
 
     public Task SetTimeControlAsync(TimeControlRequest request)
     {
+        // The server applies the change and broadcasts a TimeChanged delta back to us; the galaxy's
+        // Time updates when we drain that in Update() — no local read-back (which would be a round-trip
+        // over a network).
         _server.SetTimeControl(Session, request);
-        _galaxy.Time = _server.GetTimeState(Session);
         return Task.CompletedTask;
     }
 
@@ -72,27 +76,32 @@ public sealed class InProcessAdapter : IGameClient
     public void Update()
     {
         // Drain everything received since last frame and apply it as one batch on the UI thread.
+        // The clock arrives the same way (pushed TimeChanged deltas) — no polling.
         while (_inbound.TryDequeue(out var evt))
         {
             ApplyToGalaxy(evt);
             EventReceived?.Invoke(evt);
         }
-
-        // The clock advances continuously on the engine thread (no per-tick event), so refresh the
-        // time state once per frame here rather than push it through the event queue.
-        if (IsConnected)
-            _galaxy.Time = _server.GetTimeState(Session);
     }
 
-    // Minimal galaxy maintenance for the slice: structural changes re-fetch the affected entity.
-    // As views/events are fully ported this grows into incremental snapshot patching.
+    // Applies a self-contained delta to the galaxy. Deltas carry their payload, so this never calls
+    // back to the server (which would be a round-trip over a network).
     private void ApplyToGalaxy(GameEventEnvelope evt)
     {
-        // A newly revealed system changes the faction's known-system set; re-pull the summaries.
-        if (evt.Type == GameEventType.SystemRevealed)
+        switch (evt.Type)
         {
-            _galaxy.SetKnownSystems(_server.GetKnownSystems(Session));
-            return;
+            case GameEventType.TimeChanged:
+                if (evt.Time != null) _galaxy.Time = evt.Time;
+                return;
+
+            case GameEventType.SystemRevealed:
+                // The reveal carries the whole system + its visible entities — apply it directly.
+                if (evt.System != null)
+                {
+                    _galaxy.AddKnownSystem(new SystemSummary(evt.System.SystemId, evt.System.Name));
+                    _galaxy.UpsertSystem(evt.System);
+                }
+                return;
         }
 
         if (evt.SystemId is null) return;
@@ -110,8 +119,7 @@ public sealed class InProcessAdapter : IGameClient
             case GameEventType.EntityRevealed:
             case GameEventType.EntityChanged:
             case GameEventType.EntityRenamed:
-                var snapshot = _server.GetEntitySnapshot(Session, entityId);
-                if (snapshot != null) system.Upsert(snapshot);
+                if (evt.Entity != null) system.Upsert(evt.Entity);
                 break;
         }
     }

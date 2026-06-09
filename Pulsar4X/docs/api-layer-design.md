@@ -51,8 +51,16 @@ updates) — porting converts them to hold view DTOs instead of live engine obje
 adapter only *enqueues* them (thread-safe). The galaxy is mutated solely on the UI thread in
 `IGameClient.Update()`, which the main loop (`PulsarMainWindow.Update`) calls once per frame
 before any window reads `Galaxy`. The whole batch of pending updates is applied at that single frame
-boundary, so within a frame the galaxy is consistent and never torn by a background thread. UI-initiated
-pulls (`LoadSystemAsync`, time control) are already on the UI thread and stay synchronous.
+boundary, so within a frame the galaxy is consistent and never torn by a background thread.
+
+**Replication is push-only on the hot path (network-ready).** The server pushes *self-contained* deltas
+— entity add/reveal/change/rename carry the new `EntitySnapshot`; the clock pushes `TimeChanged`
+(carrying `TimeState`) both when it advances (`MasterTimePulse.GameGlobalDateChangedEvent`) and when its
+controls change (inside `SetTimeControl`). A `SystemRevealed` push carries the whole new
+`SystemSnapshot` — the system plus every entity now visible to that faction — so the client adds it with
+no follow-up pull. The adapter applies every delta with no callback to the server, so nothing is polled
+and a network adapter just feeds the same inbound queue from a socket. Request/response is reserved for
+genuine bulk/cold pulls only: the initial connect snapshot and an explicit `LoadSystemAsync`.
 
 ## Current coupling (what we're replacing)
 
@@ -120,6 +128,10 @@ The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api`
 
 - ~~Command validation isn't surfaced.~~ **Resolved (phase 3):** `HandleOrder` returns a validity
   bool; `SubmitCommand` does an ownership pre-check and returns the engine's real accept/reject.
+- **Continuous state (positions) isn't streamed yet.** Position/orbit updates mutate existing
+  DataBlobs without firing add/remove events, so galaxy entity snapshots don't yet receive per-tick
+  position changes. The map still reads live engine state; when it's ported, positions will need either
+  a periodic position delta or client-side orbit propagation from `OrbitView`.
 - **Faction selection on connect is naive** — binds to the first faction. Real selection/auth via
   `ConnectRequest.Credential` lands with networking.
 - ~~The in-process adapter lives in `Pulsar4X.Api`.~~ **Resolved:** `InProcessAdapter` and the

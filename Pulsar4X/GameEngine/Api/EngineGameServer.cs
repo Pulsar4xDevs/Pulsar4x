@@ -22,7 +22,7 @@ namespace Pulsar4X.Engine.Api
     /// and projects it into the faction-scoped DTO contract defined in Pulsar4X.Api. It has no UI
     /// dependency, so the same class backs both the in-process adapter and a headless dedicated server.
     /// </summary>
-    public sealed class EngineGameServer : IGameServer
+    public sealed class EngineGameServer : IGameServer, IDisposable
     {
         private readonly Game _game;
 
@@ -34,6 +34,12 @@ namespace Pulsar4X.Engine.Api
         /// </summary>
         private readonly Dictionary<Type, Func<Entity, Entity, GameCommand, CommandResult>> _translators;
 
+        // Active subscriber sinks. Time is global, so clock changes are broadcast to all of them;
+        // entity events are faction-filtered inside each ServerSubscription.
+        private readonly object _sinkLock = new();
+        private readonly List<Action<GameEventEnvelope>> _sinks = new();
+        private readonly DateChangedEventHandler _onDateChanged;
+
         public EngineGameServer(Game game)
         {
             _game = game;
@@ -41,6 +47,17 @@ namespace Pulsar4X.Engine.Api
             {
                 [typeof(Pulsar4X.Api.RenameCommand)] = TranslateRename,
             };
+
+            // The clock advances on the engine thread with no per-tick request from clients; push a
+            // TimeChanged delta whenever it does, so clients never have to poll the time.
+            _onDateChanged = _ => BroadcastTimeChanged();
+            _game.TimePulse.GameGlobalDateChangedEvent += _onDateChanged;
+        }
+
+        public void Dispose()
+        {
+            _game.TimePulse.GameGlobalDateChangedEvent -= _onDateChanged;
+            lock (_sinkLock) _sinks.Clear();
         }
 
         // ----- connection -----
@@ -63,10 +80,18 @@ namespace Pulsar4X.Engine.Api
 
         // ----- time -----
 
-        public TimeState GetTimeState(PlayerSession session)
+        public TimeState GetTimeState(PlayerSession session) => ToTimeState(_game.TimePulse);
+
+        private static TimeState ToTimeState(MasterTimePulse tp)
+            => new TimeState(tp.GameGlobalDateTime, tp.IsRunning, tp.TimeMultiplier, tp.Ticklength, tp.TickFrequency);
+
+        private void BroadcastTimeChanged()
         {
-            var tp = _game.TimePulse;
-            return new TimeState(tp.GameGlobalDateTime, tp.IsRunning, tp.TimeMultiplier, tp.Ticklength, tp.TickFrequency);
+            var evt = new GameEventEnvelope(GameEventType.TimeChanged, Time: ToTimeState(_game.TimePulse));
+            Action<GameEventEnvelope>[] sinks;
+            lock (_sinkLock) sinks = _sinks.ToArray();
+            foreach (var sink in sinks)
+                sink(evt);
         }
 
         public void SetTimeControl(PlayerSession session, TimeControlRequest request)
@@ -94,6 +119,11 @@ namespace Pulsar4X.Engine.Api
                     else tp.TimeStep();
                     break;
             }
+
+            // Control changes (pause/start/speed/tick settings) don't advance the date, so push a
+            // TimeChanged delta here too. A step that does advance the date also fires the date event,
+            // which is fine — clients just apply the latest snapshot.
+            BroadcastTimeChanged();
         }
 
         // ----- commands -----
@@ -152,22 +182,28 @@ namespace Pulsar4X.Engine.Api
         {
             var system = FindSystem(systemId)
                 ?? throw new ArgumentException($"Unknown system '{systemId}'.", nameof(systemId));
+            return BuildSystemSnapshot(system, session.FactionId);
+        }
 
+        // Faction-scoped snapshot of a whole system. Shared by the bulk query and the SystemRevealed
+        // push so a reveal ships the system and its visible entities in one self-contained delta.
+        private SystemSnapshot BuildSystemSnapshot(StarSystem system, int factionId)
+        {
             // Mirror the client's SystemState: make this faction aware of the system's
             // default-visible neutral bodies (stars, planets, …) before filtering.
-            system.SetupDefaultNeutralEntitiesForFaction(session.FactionId);
+            system.SetupDefaultNeutralEntitiesForFaction(factionId);
 
             const EntityFilter all = EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile;
-            var visible = system.GetFilteredEntities(all, session.FactionId);
+            var visible = system.GetFilteredEntities(all, factionId);
 
             var entities = new List<EntitySnapshot>(visible.Count);
             foreach (var entity in visible)
-                entities.Add(Project(entity, session.FactionId));
+                entities.Add(Project(entity, factionId));
 
             return new SystemSnapshot
             {
                 SystemId = system.ID,
-                Name = system.NameDB.GetName(session.FactionId),
+                Name = system.NameDB.GetName(factionId),
                 DateTime = system.StarSysDateTime,
                 Entities = entities,
             };
@@ -181,7 +217,7 @@ namespace Pulsar4X.Engine.Api
         // ----- events -----
 
         public IDisposable Subscribe(PlayerSession session, Action<GameEventEnvelope> handler)
-            => new EngineEventBridge(session.FactionId, handler);
+            => new ServerSubscription(this, session, handler);
 
         // ----- projection helpers -----
 
@@ -261,58 +297,85 @@ namespace Pulsar4X.Engine.Api
 
         private StarSystem? FindSystem(string systemId)
             => _game.Systems.FirstOrDefault(s => s.ID == systemId);
-    }
 
-    /// <summary>
-    /// Bridges the engine's <see cref="MessagePublisher"/> to a single faction-scoped
-    /// <see cref="GameEventEnvelope"/> sink. Disposing unsubscribes from the publisher.
-    /// </summary>
-    internal sealed class EngineEventBridge : IDisposable
-    {
-        private static readonly (MessageTypes Msg, GameEventType Evt)[] Map =
+        /// <summary>
+        /// One subscriber's live feed. Bridges the engine's <see cref="MessagePublisher"/> (faction-
+        /// filtered) into self-contained <see cref="GameEventEnvelope"/>s — projecting the affected
+        /// entity so the client needs no follow-up request — and registers the sink for the global time
+        /// broadcast. Disposing unsubscribes and deregisters.
+        /// </summary>
+        private sealed class ServerSubscription : IDisposable
         {
-            (MessageTypes.EntityAdded, GameEventType.EntityAdded),
-            (MessageTypes.EntityRemoved, GameEventType.EntityRemoved),
-            (MessageTypes.EntityHidden, GameEventType.EntityHidden),
-            (MessageTypes.EntityRevealed, GameEventType.EntityRevealed),
-            (MessageTypes.StarSystemRevealed, GameEventType.SystemRevealed),
-            (MessageTypes.EntityRenamed, GameEventType.EntityRenamed),
-            (MessageTypes.DBAdded, GameEventType.EntityChanged),
-            (MessageTypes.DBRemoved, GameEventType.EntityChanged),
-        };
-
-        private readonly int _factionId;
-        private readonly Action<GameEventEnvelope> _sink;
-        private readonly List<(MessageTypes Type, MessagePublisher.MessageHandler Handler)> _handlers = new();
-
-        public EngineEventBridge(int factionId, Action<GameEventEnvelope> sink)
-        {
-            _factionId = factionId;
-            _sink = sink;
-
-            foreach (var (msg, evt) in Map)
+            private static readonly (MessageTypes Msg, GameEventType Evt)[] Map =
             {
-                GameEventType eventType = evt;
-                MessagePublisher.MessageHandler handler = m => Forward(eventType, m);
-                MessagePublisher.Instance.Subscribe(msg, handler, PassesFactionFilter);
-                _handlers.Add((msg, handler));
+                (MessageTypes.EntityAdded, GameEventType.EntityAdded),
+                (MessageTypes.EntityRemoved, GameEventType.EntityRemoved),
+                (MessageTypes.EntityHidden, GameEventType.EntityHidden),
+                (MessageTypes.EntityRevealed, GameEventType.EntityRevealed),
+                (MessageTypes.StarSystemRevealed, GameEventType.SystemRevealed),
+                (MessageTypes.EntityRenamed, GameEventType.EntityRenamed),
+                (MessageTypes.DBAdded, GameEventType.EntityChanged),
+                (MessageTypes.DBRemoved, GameEventType.EntityChanged),
+            };
+
+            private readonly EngineGameServer _server;
+            private readonly PlayerSession _session;
+            private readonly Action<GameEventEnvelope> _sink;
+            private readonly List<(MessageTypes Type, MessagePublisher.MessageHandler Handler)> _handlers = new();
+
+            public ServerSubscription(EngineGameServer server, PlayerSession session, Action<GameEventEnvelope> sink)
+            {
+                _server = server;
+                _session = session;
+                _sink = sink;
+
+                foreach (var (msg, evt) in Map)
+                {
+                    GameEventType eventType = evt;
+                    MessagePublisher.MessageHandler handler = m => Forward(eventType, m);
+                    MessagePublisher.Instance.Subscribe(msg, handler, PassesFactionFilter);
+                    _handlers.Add((msg, handler));
+                }
+
+                lock (server._sinkLock) server._sinks.Add(sink);
             }
-        }
 
-        // Broadcast messages (no faction) and messages for this faction pass through.
-        private bool PassesFactionFilter(Message m) => m.FactionId is null || m.FactionId == _factionId;
+            // Broadcast messages (no faction) and messages for this faction pass through.
+            private bool PassesFactionFilter(Message m) => m.FactionId is null || m.FactionId == _session.FactionId;
 
-        private Task Forward(GameEventType type, Message m)
-        {
-            _sink(new GameEventEnvelope(type, m.SystemId, m.EntityId, m.FactionId));
-            return Task.CompletedTask;
-        }
+            private Task Forward(GameEventType type, Message m)
+            {
+                // Deltas carry their payload so the client never makes a follow-up request.
+                EntitySnapshot? entity = null;
+                SystemSnapshot? system = null;
 
-        public void Dispose()
-        {
-            foreach (var (type, handler) in _handlers)
-                MessagePublisher.Instance.Unsubscribe(type, handler);
-            _handlers.Clear();
+                if ((type is GameEventType.EntityAdded or GameEventType.EntityRevealed
+                          or GameEventType.EntityChanged or GameEventType.EntityRenamed)
+                    && m.EntityId is { } id
+                    && _server._game.GlobalManager.TryGetGlobalEntityById(id, out var e))
+                {
+                    entity = Project(e, _session.FactionId);
+                }
+                else if (type == GameEventType.SystemRevealed
+                    && m.SystemId is { } sysId
+                    && _server.FindSystem(sysId) is { } revealed)
+                {
+                    // Ship the whole revealed system — including every entity now visible to this
+                    // faction — so the client adds it without pulling anything back.
+                    system = _server.BuildSystemSnapshot(revealed, _session.FactionId);
+                }
+
+                _sink(new GameEventEnvelope(type, m.SystemId, m.EntityId, m.FactionId, Entity: entity, System: system));
+                return Task.CompletedTask;
+            }
+
+            public void Dispose()
+            {
+                foreach (var (type, handler) in _handlers)
+                    MessagePublisher.Instance.Unsubscribe(type, handler);
+                _handlers.Clear();
+                lock (_server._sinkLock) _server._sinks.Remove(_sink);
+            }
         }
     }
 }

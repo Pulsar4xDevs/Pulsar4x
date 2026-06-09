@@ -11,18 +11,25 @@ public enum GameEventType
     EntityRemoved,
     EntityRevealed,
     EntityHidden,
-    EntityChanged,   // one or more views on an entity changed; payload carries the new view
+    EntityChanged,   // one or more views on an entity changed; payload carries the new snapshot
     SystemRevealed,
     EntityRenamed,
+    TimeChanged,     // the simulation clock advanced or its controls changed; payload carries Time
 }
 
 /// <summary>
-/// A single faction-scoped notification. Carries enough identity for the client to locate the
-/// affected entity/system in its galaxy model, plus an optional changed view as payload.
+/// A single faction-scoped notification. Deltas are <b>self-contained</b>: the payload carries the new
+/// state so the client applies it without a follow-up request (essential over a network — no per-event
+/// round-trip). <see cref="Entity"/> is set for entity add/reveal/change/rename; <see cref="Time"/> for
+/// <see cref="GameEventType.TimeChanged"/>; <see cref="System"/> for
+/// <see cref="GameEventType.SystemRevealed"/> (the new system with its faction-visible entities).
+/// Identity fields locate the target in the galaxy model.
 /// </summary>
 public sealed record GameEventEnvelope(
     GameEventType Type,
     string? SystemId = null,
     int? EntityId = null,
     int? FactionId = null,
-    IComponentView? Changed = null);
+    EntitySnapshot? Entity = null,
+    TimeState? Time = null,
+    SystemSnapshot? System = null);

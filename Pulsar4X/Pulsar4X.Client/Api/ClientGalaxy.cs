@@ -12,7 +12,7 @@ namespace Pulsar4X.Client;
 internal sealed class ClientGalaxy : IClientGalaxy
 {
     private readonly Dictionary<string, ClientSystem> _systems = new();
-    private IReadOnlyCollection<SystemSummary> _knownSystems = Array.Empty<SystemSummary>();
+    private readonly List<SystemSummary> _knownSystems = new();
 
     public TimeState Time { get; internal set; } = new(default, false, 1f, TimeSpan.FromHours(1), TimeSpan.FromSeconds(1));
 
@@ -22,7 +22,16 @@ internal sealed class ClientGalaxy : IClientGalaxy
         => _systems.TryGetValue(systemId, out var system) ? system : null;
 
     internal void SetKnownSystems(IEnumerable<SystemSummary> summaries)
-        => _knownSystems = summaries.ToList();
+    {
+        _knownSystems.Clear();
+        _knownSystems.AddRange(summaries);
+    }
+
+    internal void AddKnownSystem(SystemSummary summary)
+    {
+        if (!_knownSystems.Any(s => s.SystemId == summary.SystemId))
+            _knownSystems.Add(summary);
+    }
 
     internal void UpsertSystem(SystemSnapshot snapshot)
         => _systems[snapshot.SystemId] = new ClientSystem(snapshot);
