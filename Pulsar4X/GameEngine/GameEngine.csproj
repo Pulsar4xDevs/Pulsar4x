@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pulsar4X.OrbitalMath\Pulsar4X.Orbital.csproj" />
+    <ProjectReference Include="..\Pulsar4X.Api\Pulsar4X.Api.csproj" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DefineConstants>DEBUG</DefineConstants>

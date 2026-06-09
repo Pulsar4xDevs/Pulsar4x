@@ -64,8 +64,10 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
 
 1. **API layer scaffold (done):** `Pulsar4X.Api` project + `IGameServer`/`IGameClient`,
    session/time/snapshot/command/event contracts, example views & one example command.
-2. **Vertical slice:** `EngineGameServer` + `InProcessAdapter` implementing time control + the
-   system-map read end-to-end through the API, to validate the shape.
+2. **Vertical slice (done):** `EngineGameServer` (in `GameEngine/Api/`) + `InProcessAdapter` +
+   mutable client world model, implementing connect, time control, the system-map read (with
+   `Name`/`Position`/`Orbit` view projection), command routing, and a `MessagePublisher`→event
+   bridge. Covered end-to-end by `Pulsar4X.Tests/ApiVerticalSliceTests.cs` (6 tests, no UI).
 3. **Commands:** port the ~45 `EntityCommand`s to `GameCommand` DTOs + server translation.
 4. **Read surface:** port the ~55 views area by area; convert `EntityState`/`SystemState` to DTOs.
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
@@ -83,3 +85,16 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
 - Interfaces: `IGameServer`, `IGameClient`, `IClientWorld`, `IClientSystem`.
 
 The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api` and can be removed.
+
+## Known gaps (to address as porting proceeds)
+
+- **Command validation isn't surfaced.** The engine's `IOrderHandler.HandleOrder` silently drops
+  invalid orders, so `EngineGameServer.SubmitCommand` optimistically returns `Accepted` once the DTO
+  resolves to an entity. Threading real validation results back (ownership, preconditions) is part of
+  the commands phase.
+- **Faction selection on connect is naive** — binds to the first faction. Real selection/auth via
+  `ConnectRequest.Credential` lands with networking.
+- **The in-process adapter currently lives in `Pulsar4X.Api`** as a reference implementation (it only
+  depends on the contracts). It can move into the client UI library later without API changes.
+- **Two `PositionDB` classes exist** (`Pulsar4X.Datablobs` legacy/excluded vs the live
+  `Pulsar4X.Movement`); projection uses the live one. Worth cleaning up the dead copy separately.
