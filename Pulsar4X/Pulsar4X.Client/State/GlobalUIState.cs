@@ -332,6 +332,12 @@ namespace Pulsar4X.Client
             if(setAsPlayer)
                 PlayerFaction = factionEntity;
 
+            // Remove the old selected system's priority observer
+            if(!string.IsNullOrEmpty(SelectedStarSystemId))
+            {
+                StarSystemStates[SelectedStarSystemId].StarSystem.DecrementExternalObserver(true);
+            }
+
             Faction = factionEntity;
             FactionInfoDB factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
             StarSystemStates = new SafeDictionary<string, SystemState>();
@@ -339,9 +345,14 @@ namespace Pulsar4X.Client
             {
                 var system = Game.Systems.FirstOrDefault(s => s.ID.Equals(guid));
                 if(system == null) continue;
-                if (system.ActivityState == SystemActivityState.Stasis)
-                    system.SetActivityState(SystemActivityState.Background);
+
                 StarSystemStates[guid] = new SystemState(system, factionEntity.Id);
+
+                // Notify that the currently selected system is on focus.
+                if(!string.IsNullOrEmpty(SelectedStarSystemId) && SelectedStarSystemId.Equals(guid))
+                {
+                    system.IncrementExternalObserver(true);
+                }
             }
 
             // Unsubscribe to any previous message listeners
@@ -383,19 +394,20 @@ namespace Pulsar4X.Client
                 if(!string.IsNullOrEmpty(SelectedStarSystemId) && StarSystemStates.ContainsKey(SelectedStarSystemId))
                 {
                     var oldSystem = StarSystemStates[SelectedStarSystemId].StarSystem;
-                    if (oldSystem.ActivityState == SystemActivityState.Foreground)
-                        oldSystem.SetActivityState(SystemActivityState.Background);
+
+                    oldSystem.DecrementExternalObserver(true);
 
                     StarSystemStates[SelectedStarSystemId].SavedCameraState = Camera.SaveState();
                 }
 
                 if(!StarSystemStates.ContainsKey(activeSysID)){
-                    StarSystemStates[activeSysID] = new SystemState(Game.Systems.First(s => s.ID.Equals(activeSysID)), Faction.Id);
+                    var newSys = new SystemState(Game.Systems.First(s => s.ID.Equals(activeSysID)), Faction.Id);
+                    StarSystemStates[activeSysID] = newSys;
                 }
 
                 // Promote the new system to Foreground
                 var newSystem = Game.Systems.First(s => s.ID.Equals(activeSysID));
-                newSystem.SetActivityState(SystemActivityState.Foreground);
+                newSystem.IncrementExternalObserver(true);
 
                 SelectedStarSystemId = activeSysID;
 

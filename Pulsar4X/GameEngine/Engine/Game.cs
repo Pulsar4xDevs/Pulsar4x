@@ -269,8 +269,7 @@ namespace Pulsar4X.Engine
                 }
 
                 // Systems with faction entities start as Background, others stay Stasis (default)
-                if (system.HasFactionEntities())
-                    system.SetActivityState(SystemActivityState.Background);
+                system.UpdateActivityState();
             }
         }
     }
