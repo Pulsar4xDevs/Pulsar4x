@@ -14,6 +14,8 @@ using Pulsar4X.Ships;
 using Pulsar4X.Technology;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Pulsar4X.Client
 {
@@ -28,9 +30,20 @@ namespace Pulsar4X.Client
         public IKepler? OrbitIcon;
         public OrbitOrderIcon? DebugOrbitOrder;
         public bool IsDestroyed = false; //currently IsDestroyed = true if moved from one system to another, may need to revisit this.
-        private SafeDictionary<Type, BaseDataBlob> DataBlobs = new ();
-        public SafeList<Message> Changes = new ();
-        public SafeList<Message> _changesNextFrame = new ();
+        private SafeDictionary<Type, BaseDataBlob> DataBlobs = new();
+
+        private class ChangeBuffer
+        {
+            public ConcurrentQueue<Message> ChangeMessages = new();
+        }
+
+        private ChangeBuffer _clientSide = new();
+        private ChangeBuffer _serverSide = new();
+        private readonly object _bufferSwapLock = new();
+
+        private List<Message> _changesThisFrame = new();
+        public IReadOnlyList<Message> Changes => _changesThisFrame;
+
         public CommandReferences? CmdRef;
         internal string? StarSystemId;
         internal UserOrbitSettings.OrbitBodyType BodyType = UserOrbitSettings.OrbitBodyType.Unknown;
@@ -40,7 +53,7 @@ namespace Pulsar4X.Client
             Id = id;
             FactionId = factionId;
 
-            if(entity.Manager != null)
+            if (entity.Manager != null)
             {
                 foreach (var db in entity.Manager.GetAllDataBlobsForEntity(entity.Id))
                 {
@@ -57,7 +70,7 @@ namespace Pulsar4X.Client
 
         public Entity? GetParent()
         {
-            if(HasDataBlob(typeof(PositionDB)))
+            if (HasDataBlob(typeof(PositionDB)))
                 return ((PositionDB)DataBlobs[typeof(PositionDB)]).Parent;
 
             return null;
@@ -85,7 +98,7 @@ namespace Pulsar4X.Client
             Position = sensorContact.Position;
 
             //Name = sensorContact.GetDataBlob<NameDB>().GetName(_uiState.Faction);
-            if(Entity.Manager != null)
+            if (Entity.Manager != null)
             {
                 StarSystem starSys = (StarSystem)Entity.Manager;
                 StarSystemId = starSys.ID;
@@ -98,14 +111,14 @@ namespace Pulsar4X.Client
         {
             get
             {
-                return DataBlobs.ContainsKey(typeof(EntityResearchDB)) ;
+                return DataBlobs.ContainsKey(typeof(EntityResearchDB));
             }
         }
         public bool CanConstruct
         {
             get
             {
-                return DataBlobs.ContainsKey(typeof(IndustryAbilityDB)) ;
+                return DataBlobs.ContainsKey(typeof(IndustryAbilityDB));
             }
         }
 
@@ -118,10 +131,10 @@ namespace Pulsar4X.Client
         {
             Func<Message, bool> filterById = msg => msg.EntityId == Id;
 
-            MessagePublisher.Instance.Subscribe(MessageTypes.EntityRemoved, OnEntityRemoved, filterById);
-            MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, OnDBAdded, filterById);
-            MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, OnDBRemoved, filterById);
-            MessagePublisher.Instance.Subscribe(MessageTypes.EntityHidden, OnEntityRemoved, filterById);
+            MessagePublisher.Instance.Subscribe(MessageTypes.EntityRemoved, EnqueueToBuffer, filterById);
+            MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, EnqueueToBuffer, filterById);
+            MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, EnqueueToBuffer, filterById);
+            MessagePublisher.Instance.Subscribe(MessageTypes.EntityHidden, EnqueueToBuffer, filterById);
         }
 
         /// <summary>
@@ -130,44 +143,76 @@ namespace Pulsar4X.Client
         /// </summary>
         public void Unsubscribe()
         {
-            MessagePublisher.Instance.Unsubscribe(MessageTypes.EntityRemoved, OnEntityRemoved);
-            MessagePublisher.Instance.Unsubscribe(MessageTypes.DBAdded, OnDBAdded);
-            MessagePublisher.Instance.Unsubscribe(MessageTypes.DBRemoved, OnDBRemoved);
-            MessagePublisher.Instance.Unsubscribe(MessageTypes.EntityHidden, OnEntityRemoved);
+            MessagePublisher.Instance.Unsubscribe(MessageTypes.EntityRemoved, EnqueueToBuffer);
+            MessagePublisher.Instance.Unsubscribe(MessageTypes.DBAdded, EnqueueToBuffer);
+            MessagePublisher.Instance.Unsubscribe(MessageTypes.DBRemoved, EnqueueToBuffer);
+            MessagePublisher.Instance.Unsubscribe(MessageTypes.EntityHidden, EnqueueToBuffer);
         }
 
-        Task OnEntityRemoved(Message message)
+        // Enqueues the change messages to the server side buffer.
+        Task EnqueueToBuffer(Message message)
+        {
+            lock (_bufferSwapLock)
+            {
+                _serverSide.ChangeMessages.Enqueue(message);
+            }
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Called every frame.
+        /// </summary>
+        public void Update()
+        {
+            _changesThisFrame.Clear();
+
+            lock (_bufferSwapLock)
+            {
+                (_clientSide, _serverSide) = (_serverSide, _clientSide);
+            }
+
+            while (_clientSide.ChangeMessages.TryDequeue(out var message))
+            {
+                switch (message.MessageType)
+                {
+                    case MessageTypes.EntityRemoved:
+                    case MessageTypes.EntityHidden:
+                        HandleOnEntityRemoved(message);
+                        break;
+                    case MessageTypes.DBAdded:
+                        HandleOnDBAdded(message);
+                        break;
+                    case MessageTypes.DBRemoved:
+                        HandleOnDBRemoved(message);
+                        break;
+                }
+            }
+        }
+
+        private void HandleOnEntityRemoved(Message message)
         {
             DataBlobs.Clear();
             IsDestroyed = true;
-            return Task.CompletedTask;
         }
 
-        Task OnDBAdded(Message message)
+        private void HandleOnDBAdded(Message message)
         {
-            if(message.DataBlob != null)
-            {
-                DataBlobs[message.DataBlob.GetType()] = message.DataBlob;
-                _changesNextFrame.Add(message);
-            }
-            return Task.CompletedTask;
+            if (message.DataBlob is null) return;
+
+            DataBlobs[message.DataBlob.GetType()] = message.DataBlob;
+            _changesThisFrame.Add(message);
         }
 
-        Task OnDBRemoved(Message message)
+        private void HandleOnDBRemoved(Message message)
         {
-            if(message.DataBlob != null)
-            {
-                DataBlobs.Remove(message.DataBlob.GetType());
-                _changesNextFrame.Add(message);
-            }
-            return Task.CompletedTask;
+            if (message.DataBlob is null) return;
+
+            DataBlobs.Remove(message.DataBlob.GetType());
+            _changesThisFrame.Add(message);
         }
 
         public void PostFrameCleanup()
-        {
-            Changes = _changesNextFrame;
-            _changesNextFrame.Clear();
-        }
+        { }
 
         public bool HasDataBlob(Type? type)
         {
@@ -191,7 +236,7 @@ namespace Pulsar4X.Client
 
         public bool TryGetDataBlob<T>([NotNullWhen(true)] out T? value) where T : BaseDataBlob
         {
-            if(HasDataBlob<T>())
+            if (HasDataBlob<T>())
             {
                 value = GetDataBlob<T>();
                 return true;

@@ -26,32 +26,72 @@ namespace Pulsar4X.Client
         public event SystemStateEntityUpdateHandler? OnEntityUpdated;
 
         private int _factionId;
-        internal StarSystem StarSystem;
-        internal SystemSensorContacts? SystemContacts;
-        ConcurrentQueue<Message> _sensorChanges = new ConcurrentQueue<Message>();
-        internal List<Message> SensorChanges = new List<Message>();
-        public ConcurrentQueue<int> EntitiesToAdd = new ();
-        public ConcurrentQueue<(int, Message)> EntitiesToUpdate = new ();
-        public SafeList<int> EntitiesToBin = new ();
-        public List<Message> SystemChanges = new List<Message>();
-        public SafeDictionary<int, EntityState> AllEntities = new ();
-        public SafeDictionary<int, EntityState> EntityStatesWithNames = new ();
-        public SafeDictionary<int, EntityState> EntityStatesWithPosition = new ();
-        public SafeDictionary<int, EntityState> EntityStatesColonies = new ();
-        public CameraState? SavedCameraState = null;
 
-        public readonly object Lock = new object();
+        /// <summary>
+        /// The actual star system that SystemState proxies.
+        /// </summary>
+        /// <remarks>
+        /// Prefer using native SystemState methods instead of directly accessing the StarSystem.
+        /// </remarks>
+        internal StarSystem StarSystem { get; private set; }
+
+        internal SystemSensorContacts? SystemContacts { get; private set; }
+        // ConcurrentQueue<Message> _sensorChanges = new ConcurrentQueue<Message>();
+        // internal List<Message> SensorChanges = new List<Message>();
+
+        private class ChangeBuffer
+        {
+            public ConcurrentQueue<int> EntitiesToAdd = new();
+            public ConcurrentQueue<(int, Message)> EntitiesToUpdate = new();
+            public ConcurrentQueue<int> EntitiesToBin = new();
+        }
+
+        // Double buffering the changes to minimize critical section during events.
+        private ChangeBuffer _clientSide = new();
+        private ChangeBuffer _serverSide = new();
+        private readonly object _bufferSwapLock = new();
+
+        // public List<Message> SystemChanges = new List<Message>();
+
+        // Backing fields for the entity dictionaries.
+        // Updated in PreFrameSetup based on queued changes.
+        private Dictionary<int, EntityState> _allEntities = [];
+        private Dictionary<int, EntityState> _entitiesWithNames = [];
+        private Dictionary<int, EntityState> _entitiesWithPosition = [];
+        private Dictionary<int, EntityState> _entitiesWithColonies = [];
+
+        /// <summary>
+        /// A snapshot of all entities in the system that the faction is currently aware of for the current frame.
+        /// </summary>
+        public IReadOnlyDictionary<int, EntityState> AllEntities => _allEntities;
+
+        /// <summary>
+        /// A snapshot of all entities with a name component in the system that the faction is currently aware of for the current frame.
+        /// </summary>
+        public IReadOnlyDictionary<int, EntityState> EntityStatesWithNames => _entitiesWithNames;
+
+        /// <summary>
+        /// A snapshot of all entities with a position component in the system that the faction is currently aware of for the current frame.
+        /// </summary>
+        public IReadOnlyDictionary<int, EntityState> EntityStatesWithPosition => _entitiesWithPosition;
+
+        /// <summary>
+        /// A snapshot of all entities with a colony component in the system that the faction is currently aware of for the current frame.
+        /// </summary>
+        public IReadOnlyDictionary<int, EntityState> EntityStatesColonies => _entitiesWithColonies;
+
+        public CameraState? SavedCameraState = null;
 
         public SystemState(StarSystem system, int factionId)
         {
             StarSystem = system;
             StarSystem.SetupDefaultNeutralEntitiesForFaction(factionId);
             SystemContacts = system.GetSensorContacts(factionId);
-            _sensorChanges = SystemContacts.Changes.Subscribe();
+            // _sensorChanges = SystemContacts.Changes.Subscribe();
             _factionId = factionId;
 
             var entities = StarSystem.GetFilteredEntities(EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile, factionId);
-            foreach(var entity in entities)
+            foreach (var entity in entities)
             {
                 SetupEntity(entity, entity.FactionOwnerID);
             }
@@ -70,88 +110,105 @@ namespace Pulsar4X.Client
         {
             var entityState = new EntityState(entity, entity.Id, factionId);
 
-            if(!AllEntities.ContainsKey(entity.Id))
-                AllEntities.Add(entity.Id, entityState);
+            if (!_allEntities.ContainsKey(entity.Id))
+                _allEntities.Add(entity.Id, entityState);
 
             if (!EntityStatesWithNames.ContainsKey(entity.Id) && entity.TryGetDataBlob<NameDB>(out var nameDB))
             {
                 entityState.Name = nameDB.GetName(factionId); // TODO: doesn't update when if/when the entity is renamed
-                EntityStatesWithNames.Add(entity.Id, entityState);
+                _entitiesWithNames.Add(entity.Id, entityState);
             }
             if (!EntityStatesWithPosition.ContainsKey(entity.Id) && entity.TryGetDataBlob<PositionDB>(out var positionDB))
             {
                 entityState.Position = positionDB;
-                EntityStatesWithPosition.Add(entity.Id, entityState);
+                _entitiesWithPosition.Add(entity.Id, entityState);
             }
             if (!EntityStatesColonies.ContainsKey(entity.Id) && entity.HasDataBlob<ColonyInfoDB>())
             {
-                EntityStatesColonies.Add(entity.Id, entityState);
+                _entitiesWithColonies.Add(entity.Id, entityState);
             }
         }
 
         Task OnEntityAddedMessage(Message message)
         {
-            lock(Lock)
+            if (message.EntityId == null) return Task.CompletedTask;
+
+            lock (_bufferSwapLock)
             {
-                if(message.EntityId == null) return Task.CompletedTask;
-                EntitiesToAdd.Enqueue(message.EntityId.Value);
-                return Task.CompletedTask;
+                _serverSide.EntitiesToAdd.Enqueue(message.EntityId.Value);
             }
+            return Task.CompletedTask;
         }
 
         Task OnEntityRemovedMessage(Message message)
         {
-            lock(Lock)
-            {
-                if(message.EntityId == null) return Task.CompletedTask;
-                if(!EntitiesToBin.Contains(message.EntityId.Value))
-                    EntitiesToBin.Add(message.EntityId.Value);
+            if (message.EntityId == null) return Task.CompletedTask;
 
-                return Task.CompletedTask;
+            lock (_bufferSwapLock)
+            {
+                _serverSide.EntitiesToBin.Enqueue(message.EntityId.Value);
             }
+            return Task.CompletedTask;
         }
 
         Task OnEntityUpdatedMessage(Message message)
         {
-            if(message.EntityId == null) return Task.CompletedTask;
-            EntitiesToUpdate.Enqueue((message.EntityId.Value, message));
+            if (message.EntityId == null) return Task.CompletedTask;
+
+            lock (_bufferSwapLock)
+            {
+                _serverSide.EntitiesToUpdate.Enqueue((message.EntityId.Value, message));
+            }
             return Task.CompletedTask;
         }
 
-        public void PreFrameSetup()
+        /// <summary>
+        /// Called every frame.
+        /// </summary>
+        public void Update()
         {
-            lock(Lock)
+            lock (_bufferSwapLock)
             {
-                // Deal with additions
-                while(EntitiesToAdd.TryDequeue(out var entityToAdd))
-                {
-                    // FIXME: need to remove the call to the game engine internals
-                    if(StarSystem.TryGetEntityById(entityToAdd, out var entity))
-                    {
-                        SetupEntity(entity, entity.FactionOwnerID);
-                        OnEntityAdded?.Invoke(this, entity);
-                    }
-                }
-
-                // Deal with removals
-                foreach (var entityToRemove in EntitiesToBin)
-                {
-                    if(AllEntities.TryGetValue(entityToRemove, out var entityState))
-                    {
-                        entityState.Unsubscribe();
-                    }
-                    AllEntities.Remove(entityToRemove);
-                    EntityStatesWithPosition.Remove(entityToRemove);
-                    EntityStatesWithNames.Remove(entityToRemove);
-                    EntityStatesColonies.Remove(entityToRemove);
-                    OnEntityRemoved?.Invoke(this, entityToRemove);
-                }
-                EntitiesToBin.Clear();
-                SensorChanges.Clear();
-                SystemChanges.Clear();
+                var temp = _serverSide;
+                _serverSide = _clientSide;
+                _clientSide = temp;
             }
 
-            while(EntitiesToUpdate.TryDequeue(out var entityToUpdate))
+            // Deal with additions
+            while (_clientSide.EntitiesToAdd.TryDequeue(out var entityToAdd))
+            {
+                // FIXME: need to remove the call to the game engine internals
+                if (StarSystem.TryGetEntityById(entityToAdd, out var entity))
+                {
+                    SetupEntity(entity, entity.FactionOwnerID);
+                    OnEntityAdded?.Invoke(this, entity);
+                }
+            }
+
+            // Run entity update before entity removals to ensure they process.
+            // Possibly not strictly necessary, but seems safer for now.
+            foreach (var entity in _allEntities.Values)
+            {
+                entity.Update();
+            }
+
+            // Deal with removals
+            while (_clientSide.EntitiesToBin.TryDequeue(out var entityToRemove))
+            {
+                if (_allEntities.TryGetValue(entityToRemove, out var entityState))
+                {
+                    entityState.Unsubscribe();
+                }
+                _allEntities.Remove(entityToRemove);
+                _entitiesWithPosition.Remove(entityToRemove);
+                _entitiesWithNames.Remove(entityToRemove);
+                _entitiesWithColonies.Remove(entityToRemove);
+                OnEntityRemoved?.Invoke(this, entityToRemove);
+            }
+            // SensorChanges.Clear();
+            // SystemChanges.Clear();
+
+            while (_clientSide.EntitiesToUpdate.TryDequeue(out var entityToUpdate))
             {
                 OnEntityUpdated?.Invoke(this, entityToUpdate.Item1, entityToUpdate.Item2);
             }
@@ -192,7 +249,7 @@ namespace Pulsar4X.Client
 
         public EntityState? GetEntityById(int id)
         {
-            if(!AllEntities.ContainsKey(id))
+            if (!AllEntities.ContainsKey(id))
                 return null;
 
             return AllEntities[id];
