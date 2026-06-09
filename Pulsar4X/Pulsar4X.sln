@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameEngine", "GameEngine\Ga
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.Api", "Pulsar4X.Api\Pulsar4X.Api.csproj", "{351FBF29-17A4-4303-B0C8-78D3EB676DA9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,6 +106,22 @@ Global
 		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Release|Windows_x86.Build.0 = Release|Any CPU
 		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{74572252-CD85-4AA6-8CA2-EFC6DA2B75B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Debug|Linux_x64.ActiveCfg = Debug|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Debug|Linux_x64.Build.0 = Debug|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Debug|Windows_x64.ActiveCfg = Debug|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Debug|Windows_x64.Build.0 = Debug|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Debug|Windows_x86.ActiveCfg = Debug|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Debug|Windows_x86.Build.0 = Debug|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Release|Linux_x64.ActiveCfg = Release|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Release|Linux_x64.Build.0 = Release|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Release|Windows_x64.ActiveCfg = Release|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Release|Windows_x64.Build.0 = Release|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Release|Windows_x86.ActiveCfg = Release|Any CPU
+		{351FBF29-17A4-4303-B0C8-78D3EB676DA9}.Release|Windows_x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
