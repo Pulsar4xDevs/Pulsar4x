@@ -1,10 +1,10 @@
 namespace Pulsar4X.Api;
 
 /// <summary>
-/// The default mutable <see cref="IClientWorld"/> maintained by an adapter. The UI reads it through
+/// The default mutable <see cref="IClientGalaxy"/> maintained by an adapter. The UI reads it through
 /// the read-only interface; only the owning adapter mutates it (single-threaded with the UI loop).
 /// </summary>
-internal sealed class ClientWorld : IClientWorld
+internal sealed class ClientGalaxy : IClientGalaxy
 {
     private readonly Dictionary<string, ClientSystem> _systems = new();
     private IReadOnlyCollection<SystemSummary> _knownSystems = Array.Empty<SystemSummary>();

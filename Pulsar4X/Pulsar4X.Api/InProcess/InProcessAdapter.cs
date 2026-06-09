@@ -3,19 +3,19 @@ namespace Pulsar4X.Api;
 /// <summary>
 /// Zero-copy in-process <see cref="IGameClient"/> for single-player / local games: forwards directly
 /// to an <see cref="IGameServer"/> in the same process (no serialization), and keeps the replicated
-/// <see cref="IClientWorld"/> current from bulk snapshots and the server event stream.
+/// <see cref="IClientGalaxy"/> current from bulk snapshots and the server event stream.
 /// </summary>
 public sealed class InProcessAdapter : IGameClient
 {
     private readonly IGameServer _server;
-    private readonly ClientWorld _world = new();
+    private readonly ClientGalaxy _galaxy = new();
     private IDisposable? _subscription;
 
     public InProcessAdapter(IGameServer server) => _server = server;
 
     public PlayerSession Session { get; private set; } = PlayerSession.None;
     public bool IsConnected { get; private set; }
-    public IClientWorld World => _world;
+    public IClientGalaxy Galaxy => _galaxy;
     public event Action<GameEventEnvelope>? EventReceived;
 
     public Task<ConnectResult> ConnectAsync(ConnectRequest request)
@@ -26,8 +26,8 @@ public sealed class InProcessAdapter : IGameClient
             Session = result.Session;
             IsConnected = true;
             _subscription = _server.Subscribe(Session, OnServerEvent);
-            _world.SetKnownSystems(_server.GetKnownSystems(Session));
-            _world.Time = _server.GetTimeState(Session);
+            _galaxy.SetKnownSystems(_server.GetKnownSystems(Session));
+            _galaxy.Time = _server.GetTimeState(Session);
         }
         return Task.FromResult(result);
     }
@@ -47,28 +47,28 @@ public sealed class InProcessAdapter : IGameClient
     public Task SetTimeControlAsync(TimeControlRequest request)
     {
         _server.SetTimeControl(Session, request);
-        _world.Time = _server.GetTimeState(Session);
+        _galaxy.Time = _server.GetTimeState(Session);
         return Task.CompletedTask;
     }
 
     public Task LoadSystemAsync(string systemId)
     {
-        _world.UpsertSystem(_server.GetSystemSnapshot(Session, systemId));
+        _galaxy.UpsertSystem(_server.GetSystemSnapshot(Session, systemId));
         return Task.CompletedTask;
     }
 
     private void OnServerEvent(GameEventEnvelope evt)
     {
-        ApplyToWorld(evt);
+        ApplyToGalaxy(evt);
         EventReceived?.Invoke(evt);
     }
 
-    // Minimal world maintenance for the slice: structural changes re-fetch the affected entity.
+    // Minimal galaxy maintenance for the slice: structural changes re-fetch the affected entity.
     // As views/events are fully ported this grows into incremental snapshot patching.
-    private void ApplyToWorld(GameEventEnvelope evt)
+    private void ApplyToGalaxy(GameEventEnvelope evt)
     {
         if (evt.SystemId is null) return;
-        var system = _world.GetMutableSystem(evt.SystemId);
+        var system = _galaxy.GetMutableSystem(evt.SystemId);
         if (system is null || evt.EntityId is not { } entityId) return;
 
         switch (evt.Type)

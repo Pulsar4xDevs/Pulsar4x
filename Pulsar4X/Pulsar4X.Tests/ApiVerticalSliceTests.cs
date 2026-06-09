@@ -54,7 +54,7 @@ namespace Pulsar4X.Tests
 
             await client.LoadSystemAsync(systemId);
 
-            var system = client.World.GetSystem(systemId);
+            var system = client.Galaxy.GetSystem(systemId);
             Assert.That(system, Is.Not.Null);
             Assert.That(system!.Entities, Is.Not.Empty, "expected the system's default-visible bodies");
 
@@ -65,30 +65,30 @@ namespace Pulsar4X.Tests
 
             // Round-tripping a single entity yields the same identity.
             var first = system.Entities.First();
-            var single = client.World.GetSystem(systemId)!.GetEntity(first.Id);
+            var single = client.Galaxy.GetSystem(systemId)!.GetEntity(first.Id);
             Assert.That(single!.Id, Is.EqualTo(first.Id));
         }
 
         [Test]
-        public async Task StepOnce_advances_the_world_clock()
+        public async Task StepOnce_advances_the_galaxy_clock()
         {
             var client = await ConnectedClient();
-            var before = client.World.Time.GameDateTime;
+            var before = client.Galaxy.Time.GameDateTime;
             var step = TimeSpan.FromDays(1);
 
             await client.SetTimeControlAsync(new TimeControlRequest(TimeControlAction.StepOnce, StepLength: step));
 
-            Assert.That(client.World.Time.GameDateTime, Is.EqualTo(before + step));
+            Assert.That(client.Galaxy.Time.GameDateTime, Is.EqualTo(before + step));
         }
 
         [Test]
-        public async Task SetSpeed_is_reflected_in_world_time()
+        public async Task SetSpeed_is_reflected_in_galaxy_time()
         {
             var client = await ConnectedClient();
 
             await client.SetTimeControlAsync(new TimeControlRequest(TimeControlAction.SetSpeed, Multiplier: 4f));
 
-            Assert.That(client.World.Time.Multiplier, Is.EqualTo(4f));
+            Assert.That(client.Galaxy.Time.Multiplier, Is.EqualTo(4f));
         }
 
         [Test]
@@ -109,7 +109,7 @@ namespace Pulsar4X.Tests
             string systemId = _game.Systems[0].ID;
             await client.LoadSystemAsync(systemId);
             // Default-visible bodies are neutral; the faction does not own them.
-            int neutralBodyId = client.World.GetSystem(systemId)!.Entities.First().Id;
+            int neutralBodyId = client.Galaxy.GetSystem(systemId)!.Entities.First().Id;
 
             var result = await client.SubmitCommandAsync(new RenameCommand(neutralBodyId, "Mine Now"));
 
@@ -123,7 +123,7 @@ namespace Pulsar4X.Tests
             var client = await ConnectedClient();
             string systemId = _game.Systems[0].ID;
             await client.LoadSystemAsync(systemId);
-            int bodyId = client.World.GetSystem(systemId)!.Entities.First().Id;
+            int bodyId = client.Galaxy.GetSystem(systemId)!.Entities.First().Id;
 
             // Give the connected faction ownership so it may command the entity.
             Assert.That(_game.GlobalManager.TryGetGlobalEntityById(bodyId, out var body), Is.True);

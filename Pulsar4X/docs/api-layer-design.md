@@ -27,7 +27,7 @@ GameEngine   │        implements IGameServer (EngineGameServer) — pure sim, 
   ▲          │
 Pulsar4X.Server.Host  ◄─ headless dedicated-server EXE (engine + network host, no UI)
              │
-Pulsar4X.Client       UI library — references ONLY Pulsar4X.Api; owns the replicated world model
+Pulsar4X.Client       UI library — references ONLY Pulsar4X.Api; owns the replicated galaxy model
   ▲                     + InProcessAdapter + MultiplayerAdapter (both : IGameClient)
   │
 Pulsar4X.Client.Host  desktop EXE — composition root (SP: engine + InProcessAdapter; MP: adapter only)
@@ -38,10 +38,10 @@ Three run modes from the same components:
 - **Dedicated server:** `Pulsar4X.Server.Host`, headless, exposes `IGameServer` over the network.
 - **Network client:** `Client.Host` uses `MultiplayerAdapter` → remote server.
 
-## Why the replicated world model
+## Why the replicated galaxy model
 
 The client is **immediate-mode (ImGui)** — it reads state synchronously every frame, so the
-boundary cannot be `await`ed per-frame. Therefore `IGameClient` exposes `IClientWorld`: a
+boundary cannot be `await`ed per-frame. Therefore `IGameClient` exposes `IClientGalaxy`: a
 synchronously-readable cache the UI renders from, kept current by an initial snapshot plus the
 server event stream. Commands go out async, off the render path. Today's
 `GlobalUIState`/`SystemState`/`EntityState` already *are* this model (cache + `MessagePublisher`
@@ -65,7 +65,7 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
 1. **API layer scaffold (done):** `Pulsar4X.Api` project + `IGameServer`/`IGameClient`,
    session/time/snapshot/command/event contracts, example views & one example command.
 2. **Vertical slice (done):** `EngineGameServer` (in `GameEngine/Api/`) + `InProcessAdapter` +
-   mutable client world model, implementing connect, time control, the system-map read (with
+   mutable client galaxy model, implementing connect, time control, the system-map read (with
    `Name`/`Position`/`Orbit` view projection), command routing, and a `MessagePublisher`→event
    bridge. Covered end-to-end by `Pulsar4X.Tests/ApiVerticalSliceTests.cs` (6 tests, no UI).
 3. **Commands (foundation done):** `IOrderHandler.HandleOrder` now returns a validity bool, so
@@ -88,7 +88,7 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
   `PositionView`, `OrbitView` so far), `OwnerRelation`, `Vec3`.
 - Writes: `GameCommand` (+ `RenameCommand`), `CommandResult`.
 - Events: `GameEventType`, `GameEventEnvelope`.
-- Interfaces: `IGameServer`, `IGameClient`, `IClientWorld`, `IClientSystem`.
+- Interfaces: `IGameServer`, `IGameClient`, `IClientGalaxy`, `IClientSystem`.
 
 The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api` and can be removed.
 
