@@ -247,9 +247,9 @@ namespace Pulsar4X.Engine
 
             AddEntity(entity, dataBlobs);
 
-            if (this is StarSystem starSystem && starSystem.ActivityState == SystemActivityState.Stasis)
+            if (this is StarSystem starSystem)
             {
-                starSystem.SetActivityState(SystemActivityState.Background);
+                starSystem.UpdateActivityState();
             }
         }
 
@@ -338,10 +338,9 @@ namespace Pulsar4X.Engine
             }
             _entitiesTaggedForRemoval.Clear();
 
-            if (this is StarSystem starSys && starSys.ActivityState != SystemActivityState.Stasis)
+            if (this is StarSystem starSys)
             {
-                if (!HasFactionEntities())
-                    starSys.SetActivityState(SystemActivityState.Stasis);
+                starSys.UpdateActivityState();
             }
         }
 
