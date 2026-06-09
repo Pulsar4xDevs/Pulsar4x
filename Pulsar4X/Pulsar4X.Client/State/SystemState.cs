@@ -162,7 +162,10 @@ namespace Pulsar4X.Client
             return Task.CompletedTask;
         }
 
-        public void PreFrameSetup()
+        /// <summary>
+        /// Called every frame.
+        /// </summary>
+        public void Update()
         {
             lock (_bufferSwapLock)
             {

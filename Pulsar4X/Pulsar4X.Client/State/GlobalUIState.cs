@@ -378,7 +378,7 @@ namespace Pulsar4X.Client
             // Update the individual system states.
             foreach (var (_, systemState) in StarSystemStates)
             {
-                systemState.PreFrameSetup();
+                systemState.Update();
             }
 
             // Update the galactic map.
