@@ -41,7 +41,7 @@ namespace Pulsar4X.Engine
 
             return str;
         }
-        
+
         public static string Quantity(double number, string format = "0.###", bool fullSuffix = false)
         {
             string stringCount = "0";
@@ -173,33 +173,61 @@ namespace Pulsar4X.Engine
             return stringPower;
         }
 
+        // Tonne-based mass units, largest first. 1 tonne (T) = 1000 kg, then each step is
+        // x1000: KT, MT, GT, TT, PT, ET, ZT, YT — enough to cover ship parts up to stellar masses.
+        private static readonly (double ScaleInKg, string Unit)[] _massTiers =
+        {
+            (1e27, " YT"),
+            (1e24, " ZT"),
+            (1e21, " ET"),
+            (1e18, " PT"),
+            (1e15, " TT"),
+            (1e12, " GT"),
+            (1e9,  " MT"),
+            (1e6,  " KT"),
+            (1e3,  " T"),
+        };
+
+        /// <summary>
+        /// Formats a mass in kilograms into a human-readable string with an appropriate SI prefix
+        /// (e.g. "2.5 KT" for 2,500 kg, "4.1 MT" for 4,100,000 kg). For very small masses, it falls
+        /// back to kg with the specified number of decimal places (e.g. "0.75 Kg"). Note that this
+        /// method is not intended for formatting celestial body masses; use <see cref="CelestialMass"/> instead.
+        /// </summary>
+        /// <param name="amountInKg"> The mass in kilograms to format. </param>
+        /// <param name="format"> The format string for the numeric value. </param>
+        /// <returns> A human-readable string representing the mass with an appropriate SI prefix. </returns>
         public static string Mass(double amountInKg, string format = "0.###")
         {
-            string stringMass = "0 Kg";
-            if (amountInKg > 1000000000000)
+            double absKg = Math.Abs(amountInKg);
+            foreach (var (scaleInKg, unit) in _massTiers)
             {
-                amountInKg = amountInKg * 0.000000000001;
-                stringMass = amountInKg.ToString(format) + " GT";
+                if (absKg >= scaleInKg)
+                    return (amountInKg / scaleInKg).ToString(format) + unit;
             }
-            else if (amountInKg > 100000000)
-            {
-                amountInKg = amountInKg * 0.00000001;
-                stringMass = amountInKg.ToString(format) + " MT";
-            }
-            else if (amountInKg > 100000)
-            {
-                amountInKg = amountInKg * 0.00001;
-                stringMass = amountInKg.ToString(format) + " KT";
-            }
-            else if (amountInKg > 1000)
-            {
-                amountInKg = amountInKg * 0.001;
-                stringMass = amountInKg.ToString(format) + " T";
-            }
+            return amountInKg.ToString(format) + " Kg";
+        }
 
-            else { stringMass = amountInKg.ToString(format) + " Kg"; }
+        private const double LunarMassKg = 7.342e22;
+        private const double EarthMassKg = 5.972e24;
+        private const double SolarMassKg = 1.989e30;
 
-            return stringMass;
+        /// <summary>
+        /// Formats a celestial body's mass relative to a familiar reference body — Sol,
+        /// Earth, or Luna — so the numbers stay human-readable (e.g. "0.11× Earths",
+        /// "4.5× Lunas", "1× Sols") instead of astronomically large tonnages. Falls back to
+        /// <see cref="Mass"/> for bodies too small to sensibly relate to Luna.
+        /// </summary>
+        public static string CelestialMass(double amountInKg, string format = "0.##")
+        {
+            double absKg = Math.Abs(amountInKg);
+            if (absKg >= 0.1 * SolarMassKg)
+                return (amountInKg / SolarMassKg).ToString(format) + "× Sols";
+            if (absKg >= 0.1 * EarthMassKg)
+                return (amountInKg / EarthMassKg).ToString(format) + "× Earths";
+            if (absKg >= 0.001 * LunarMassKg)
+                return (amountInKg / LunarMassKg).ToString(format) + "× Lunas";
+            return Mass(amountInKg, format);
         }
 
         public static string Volume(double volume_m, string format = "0.###")
@@ -242,7 +270,7 @@ namespace Pulsar4X.Engine
 
             return stringVolume;
         }
-        
+
         public static string Area(double area_m2, string format = "0.###")
         {
             string stringArea = "0 m^2";
@@ -283,7 +311,7 @@ namespace Pulsar4X.Engine
 
             return stringArea;
         }
-        
+
         public static string VolumeLtr(double volume_m, string format = "0.###", bool fullSuffix = false)
         {
             string stringVolume = "0 Ltr";
