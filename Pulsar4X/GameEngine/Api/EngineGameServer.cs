@@ -111,7 +111,9 @@ namespace Pulsar4X.Engine.Api
                 sub.Send(evt);
         }
 
-        // A clock advance refreshes both the time and each subscriber's (funds-bearing) faction snapshot.
+        // A clock advance refreshes the time plus each subscriber's per-faction snapshots: the
+        // (funds-bearing) faction and the fleet hierarchy (order progress, locations, and ship
+        // membership all evolve as the simulation runs).
         private void OnGlobalDateChanged()
         {
             var time = new GameEventEnvelope(GameEventType.TimeChanged, Time: _projector.ProjectTime());
@@ -121,7 +123,16 @@ namespace Pulsar4X.Engine.Api
                 var faction = _projector.ProjectFaction(sub.FactionId);
                 if (faction != null)
                     sub.Send(new GameEventEnvelope(GameEventType.FactionChanged, Faction: faction));
+                sub.Send(FleetsEnvelope(sub.FactionId));
             }
+        }
+
+        // The fleet hierarchy is always pushed whole (root fleets + unattached ships) — it's small,
+        // and a self-contained replacement keeps the client's apply logic trivial.
+        private GameEventEnvelope FleetsEnvelope(int factionId)
+        {
+            var (fleets, unattached) = _projector.ProjectFleetHierarchy(factionId);
+            return new GameEventEnvelope(GameEventType.FleetsChanged, Fleets: fleets, UnattachedShips: unattached);
         }
 
         // ----- commands -----
@@ -137,10 +148,11 @@ namespace Pulsar4X.Engine.Api
             if (!_game.GlobalManager.TryGetGlobalEntityById(command.TargetEntityId, out var commanded))
                 return CommandResult.Reject($"Entity {command.TargetEntityId} not found.");
 
-            // Uniform authorization: a faction may only command entities it owns. (Commands with a
-            // secondary target — e.g. a move destination — carry that as a separate DTO field, which
-            // the translator resolves; only the commanded entity is ownership-checked here.)
-            if (commanded.FactionOwnerID != session.FactionId)
+            // Uniform authorization: a faction may only command entities it owns — or itself (e.g.
+            // CreateFleet targets the faction). (Commands with a secondary target — e.g. a move
+            // destination — carry that as a separate DTO field, which the translator resolves; only
+            // the commanded entity is ownership-checked here.)
+            if (commanded.Id != session.FactionId && commanded.FactionOwnerID != session.FactionId)
                 return CommandResult.Reject("Faction does not control the commanded entity.");
 
             return _commands.Translate(faction, commanded, command);
@@ -172,7 +184,7 @@ namespace Pulsar4X.Engine.Api
                 }
             }
 
-            sink(new GameEventEnvelope(GameEventType.FleetsChanged, Fleets: _projector.ProjectFleets(session.FactionId)));
+            sink(FleetsEnvelope(session.FactionId));
         }
 
         /// <summary>
@@ -234,7 +246,7 @@ namespace Pulsar4X.Engine.Api
                 // A fleet reorganisation just re-pushes the faction's whole fleet tree.
                 if (type == GameEventType.FleetsChanged)
                 {
-                    _sink(new GameEventEnvelope(GameEventType.FleetsChanged, Fleets: projector.ProjectFleets(_session.FactionId)));
+                    _sink(_server.FleetsEnvelope(_session.FactionId));
                     return Task.CompletedTask;
                 }
 
@@ -261,7 +273,7 @@ namespace Pulsar4X.Engine.Api
                 // Entity creation/destruction/rename can reshape the fleet list (membership/names).
                 // Explicit fleet ops push via FleetReorganized; this backstops entity-level changes.
                 if (type is GameEventType.EntityAdded or GameEventType.EntityRemoved or GameEventType.EntityRenamed)
-                    _sink(new GameEventEnvelope(GameEventType.FleetsChanged, Fleets: projector.ProjectFleets(_session.FactionId)));
+                    _sink(_server.FleetsEnvelope(_session.FactionId));
 
                 return Task.CompletedTask;
             }

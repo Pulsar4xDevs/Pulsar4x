@@ -90,11 +90,17 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    covered by `Pulsar4X.Tests/ApiVerticalSliceTests.cs` (8 tests, no UI dependency).
 3. **Commands (foundation done):** `IOrderHandler.HandleOrder` now returns a validity bool, so
    `SubmitCommand` reports real results. `EngineGameServer` has an extensible translator registry
-   with a uniform ownership pre-check (a faction may only command entities it owns). `RenameCommand`
-   is the ported reference. **Porting recipe for each remaining command:** (a) add a `GameCommand`
+   with a uniform ownership pre-check (a faction may only command entities it owns — or itself, for
+   faction-targeted commands like `CreateFleet`). `RenameCommand` is the ported reference.
+   **Porting recipe for each remaining command:** (a) add a `GameCommand`
    DTO in Pulsar4X.Api; (b) make the engine's `CreateXxx` factory return the `HandleOrder` bool;
    (c) add a `Translate*` method + one registry entry in `CommandTranslator`. Commands with a secondary
    target carry it as a DTO field the translator resolves (only the commanded entity is ownership-checked).
+   The fleet surface is ported (11 of ~45): `CreateFleet` (server generates the name), `DisbandFleet`,
+   `ChangeFleetParent` (faction id = re-parent to root), `ReassignShip` (the translator finds and
+   detaches from the current holder, so the client sends one command), `SetFlagship`, `MoveToBody`,
+   `GeoSurvey`/`GravSurvey` (warp + survey pair), `Jump` (rejected unless the faction has discovered
+   the jump point — visibility enforced at the boundary), and `RefuelAt` (warp + refuel transfer).
 4. **Read surface (in progress):** the engine-side projection now covers `Name`, `Position`, `Orbit`,
    `MassVolume`, `Body`, `Star`, `Colony`, and `Ship` views (8 of ~55). **Projection recipe per view:**
    (a) add an `IComponentView` DTO in Pulsar4X.Api; (b) add one entry to `GameProjector.ViewProjectors`
@@ -121,6 +127,18 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    The **Selector's Corporation section** reads `Galaxy.Faction` (a `FactionSnapshot`: name, abbreviation,
    funds) — pushed via `FactionChanged` on connect and on each clock advance (funds track the economy);
    pushed per-subscription since funds are faction-specific.
+   The **FleetWindow** is ported except its Standing Orders tab (see gaps): selection is by fleet id
+   against `Galaxy.Fleets`, re-resolved every frame since fleet pushes replace the whole tree.
+   `FleetSnapshot` carries what its Summary/list UI shows (flagship + commander names, current
+   system id/name, the nearest *faction-visible* orbit parent — resolved server-side so hidden
+   anomalies are skipped — `OrderSnapshot`s with run state, geo/grav survey ability flags) and
+   `ShipSnapshot` carries design/commander/orders for tooltips; the hierarchy push also includes the
+   faction root's `UnattachedShips`. The fleet tree (and order progress/locations within it) is
+   re-pushed on every clock advance in addition to `FleetReorganized` deltas. Its Issue Orders tab
+   reads the fleet's system snapshot, filtering on views: `BodyView`+`PositionView` (move),
+   `GeoSurveyView`/`GravSurveyView` (incomplete surveys, faction-scoped), `JumpPointView` (only
+   projected once discovered), `CargoStorageView` on colonies (refuel). The **RenameWindow** submits
+   the API `RenameCommand` by entity id (a `SetEntity` shim remains for unported callers).
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
@@ -137,9 +155,12 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
 - Identity: `PlayerSession`, `ConnectRequest`, `ConnectResult`, `GameInfo`.
 - Time: `TimeState`, `TimeControlRequest`.
 - Reads: `SystemSummary`, `SystemSnapshot`, `EntitySnapshot` + `IComponentView` (`NameView`,
-  `PositionView`, `OrbitView`, `MassVolumeView`, `BodyView`, `StarView`, `ColonyView`, `ShipView`
-  so far), `OwnerRelation`, `Vec3`.
-- Writes: `GameCommand` (+ `RenameCommand`), `CommandResult`.
+  `PositionView`, `OrbitView`, `MassVolumeView`, `BodyView`, `StarView`, `ColonyView`, `ShipView`,
+  `GeoSurveyView`, `GravSurveyView`, `JumpPointView`, `CargoStorageView` so far), `OwnerRelation`,
+  `Vec3`; fleet hierarchy: `FleetSnapshot`, `ShipSnapshot`, `OrderSnapshot`.
+- Writes: `GameCommand` (+ `RenameCommand`, `CreateFleetCommand`, `DisbandFleetCommand`,
+  `ChangeFleetParentCommand`, `ReassignShipCommand`, `SetFlagshipCommand`, `MoveToBodyCommand`,
+  `GeoSurveyCommand`, `GravSurveyCommand`, `JumpCommand`, `RefuelAtCommand`), `CommandResult`.
 - Events: `GameEventType`, `GameEventEnvelope`.
 - Interfaces: `IGameServer`, `IGameClient`, `IClientGalaxy`, `IClientSystem`.
 
@@ -166,3 +187,16 @@ The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api`
   `Pulsar4X.Tests` drives `EngineGameServer` through `IGameServer` directly (no UI dependency).
 - **Two `PositionDB` classes exist** (`Pulsar4X.Datablobs` legacy/excluded vs the live
   `Pulsar4X.Movement`); projection uses the live one. Worth cleaning up the dead copy separately.
+- **The FleetWindow's Standing Orders tab is still engine-backed.** The conditional-order editor
+  mutates `FleetDB.StandingOrders`/`ConditionalOrder` engine objects directly (it pre-dates the
+  command pipeline entirely), so it needs a serializable conditional-order contract plus
+  add/remove/reorder/update commands — deliberately deferred to its own pass. The tab resolves the
+  engine entity from the selected fleet id; everything else in the window is API-only.
+- **Survey-status views don't refresh on completion.** Finishing a geo/grav survey mutates the
+  survey DataBlob without raising a message, so `GeoSurveyView`/`GravSurveyView` in already-pushed
+  system snapshots go stale until some other event re-projects the entity (same family as the
+  positions gap: continuous/quiet state needs change signals). The per-clock-advance fleet re-push
+  covers fleet data but not per-entity system snapshots.
+- **Procedural body generation never attaches `GeoSurveyableDB`** (only the blueprint/JSON body
+  paths do), so procedurally generated systems currently offer nothing to geo-survey. Engine
+  inconsistency noted while porting; not an API-layer issue.

@@ -1,15 +1,13 @@
-﻿using System;
+using System;
 using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
-using Pulsar4X.Engine.Orders;
-using Pulsar4X.Names;
 
 namespace Pulsar4X.Client
 {
     public class RenameWindow : PulsarGuiWindow
     {
-        private Entity? _selectedEntity;
+        private int _targetEntityId = -1;
         private byte[]? _nameInputBuffer;
         string NameString
         {
@@ -17,7 +15,7 @@ namespace Pulsar4X.Client
             {
                 if(_nameInputBuffer == null)
                     return "";
-                return System.Text.Encoding.UTF8.GetString(_nameInputBuffer);
+                return System.Text.Encoding.UTF8.GetString(_nameInputBuffer).TrimEnd('\0');
             }
         }
         private bool _setFocus = true;
@@ -27,15 +25,23 @@ namespace Pulsar4X.Client
             _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse;
         }
 
+        /// <summary>Open the rename dialog for an entity by id; the rename is submitted as an API
+        /// command, so callers don't need a live engine entity.</summary>
+        public void SetTarget(int entityId, string currentName)
+        {
+            _targetEntityId = entityId;
+            _nameInputBuffer = System.Text.Encoding.UTF8.GetBytes(currentName);
+            IsActive = true;
+            _setFocus = true;
+        }
+
+        /// <summary>Engine-entity convenience for not-yet-ported callers.</summary>
         public void SetEntity(Entity entity)
         {
             if(_uiState.Faction == null)
                 throw new NullReferenceException("_uiState.Faction cannot be null");
 
-            _selectedEntity = entity;
-            _nameInputBuffer = System.Text.Encoding.UTF8.GetBytes(entity.GetName(_uiState.Faction.Id));
-            IsActive = true;
-            _setFocus = true;
+            SetTarget(entity.Id, entity.GetName(_uiState.Faction.Id));
         }
 
         internal static RenameWindow GetInstance()
@@ -70,10 +76,10 @@ namespace Pulsar4X.Client
                 if (ImGui.SmallButton("Save"))//Gives the user the option to set the name
                 {
                     //If the user has not entered an empty name
-                    if(_nameInputBuffer[0] != 0 && _selectedEntity != null
-                        && _uiState.Game != null && _uiState.Faction != null)
+                    if(_nameInputBuffer[0] != 0 && _targetEntityId != -1)
                     {
-                        RenameCommand.CreateRenameCommand(_uiState.Game, _uiState.Faction, _selectedEntity, NameString);
+                        _uiState.GameClient?.SubmitCommandAsync(
+                            new Pulsar4X.Api.RenameCommand(_targetEntityId, NameString));
                         ImGui.CloseCurrentPopup();
                         IsActive = false;
                     }

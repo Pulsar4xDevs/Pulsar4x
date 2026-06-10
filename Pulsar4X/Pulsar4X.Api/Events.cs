@@ -36,4 +36,5 @@ public sealed record GameEventEnvelope(
     TimeState? Time = null,
     SystemSnapshot? System = null,
     IReadOnlyList<FleetSnapshot>? Fleets = null,
+    IReadOnlyList<ShipSnapshot>? UnattachedShips = null,
     FactionSnapshot? Faction = null);

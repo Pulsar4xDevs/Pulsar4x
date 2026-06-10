@@ -70,6 +70,25 @@ namespace Pulsar4X.Client
             ImGui.NextColumn();
         }
 
+        /// <summary>Snapshot-based ship tooltip for UI ported to the API galaxy model.</summary>
+        public static void ShipTooltip(Pulsar4X.Api.ShipSnapshot ship)
+        {
+            var description = "No orders";
+            if(ship.Orders.Count > 0)
+            {
+                description = "Orders: ";
+                foreach(var order in ship.Orders)
+                {
+                    description += order.Name;
+                    description += order.IsRunning ? " (running)" : " (not running)";
+                }
+            }
+
+            var meta = ship.CommanderName == null ? "" : "Commanded by: " + ship.CommanderName;
+
+            DescriptiveTooltip(ship.Name, ship.DesignName, description, () => ImGui.Text(meta));
+        }
+
         public static void ShipTooltip(Entity ship, int factionId)
         {
             if(!ship.TryGetDataBlob<ShipInfoDB>(out var shipInfo))

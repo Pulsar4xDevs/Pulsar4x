@@ -89,7 +89,8 @@ public sealed class InProcessAdapter : IGameClient
                 return;
 
             case GameEventType.FleetsChanged:
-                _galaxy.SetFleets(evt.Fleets ?? System.Array.Empty<FleetSnapshot>());
+                _galaxy.SetFleets(evt.Fleets ?? System.Array.Empty<FleetSnapshot>(),
+                                  evt.UnattachedShips ?? System.Array.Empty<ShipSnapshot>());
                 return;
 
             case GameEventType.FactionChanged:

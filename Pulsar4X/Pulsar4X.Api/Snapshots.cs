@@ -113,14 +113,39 @@ public sealed record ColonyView(long Population, int? PlanetEntityId) : ICompone
 
 public sealed record ShipView(string DesignName) : IComponentView;
 
+/// <summary>Geological survey state of a body, scoped to the requesting faction.</summary>
+public sealed record GeoSurveyView(bool IsSurveyComplete) : IComponentView;
+
+/// <summary>Gravitational (jump-point) survey state of a location, scoped to the requesting faction.</summary>
+public sealed record GravSurveyView(bool IsSurveyComplete) : IComponentView;
+
+/// <summary>Marks an entity as a usable jump point. Only projected once the requesting faction has
+/// discovered it, so visibility is enforced at the boundary.</summary>
+public sealed record JumpPointView : IComponentView;
+
+/// <summary>Marks an entity as having cargo storage (e.g. a colony a fleet can refuel at).</summary>
+public sealed record CargoStorageView : IComponentView;
+
 // --------------------------------------------------------------------------------------------
 // Fleet command hierarchy (faction-scoped). The galaxy is otherwise organised by system, but a
 // faction's fleets form their own tree of sub-fleets and member ships, so they're modelled
 // separately. Per-entity details (position for centring, etc.) come from the system EntitySnapshots.
 // --------------------------------------------------------------------------------------------
 
-/// <summary>A ship as a fleet member: identity plus the system it currently resides in.</summary>
-public sealed record ShipSnapshot(int Id, string Name, string SystemId);
+/// <summary>One queued order on a fleet or ship, with its execution state (for lists/tooltips).</summary>
+public sealed record OrderSnapshot(string Name, bool IsRunning, bool IsFinished);
+
+/// <summary>A ship as a fleet member: identity, the system it currently resides in, and the
+/// display details the fleet UI shows (design, commander, queued orders).</summary>
+public sealed record ShipSnapshot(
+    int Id,
+    string Name,
+    string SystemId,
+    string DesignName = "",
+    string? CommanderName = null)
+{
+    public IReadOnlyList<OrderSnapshot> Orders { get; init; } = Array.Empty<OrderSnapshot>();
+}
 
 /// <summary>A fleet node in the command hierarchy.</summary>
 public sealed class FleetSnapshot
@@ -128,8 +153,22 @@ public sealed class FleetSnapshot
     public int Id { get; init; }
     public string Name { get; init; } = "";
     public int? FlagshipId { get; init; }
-    public string? FlagshipLocationName { get; init; }
-    public IReadOnlyList<string> Orders { get; init; } = Array.Empty<string>();
+    public string? FlagshipName { get; init; }
+    public string? CommanderName { get; init; }
+
+    /// <summary>The system the fleet currently resides in (null when unknown/in transit).</summary>
+    public string? SystemId { get; init; }
+    public string? SystemName { get; init; }
+
+    /// <summary>The nearest faction-visible body the flagship is orbiting (hidden ancestors such as
+    /// undiscovered anomalies are skipped server-side).</summary>
+    public int? OrbitingEntityId { get; init; }
+    public string? OrbitingName { get; init; }
+
+    public bool InheritOrders { get; init; }
+    public bool CanGeoSurvey { get; init; }
+    public bool CanGravSurvey { get; init; }
+    public IReadOnlyList<OrderSnapshot> Orders { get; init; } = Array.Empty<OrderSnapshot>();
     public IReadOnlyList<FleetSnapshot> SubFleets { get; init; } = Array.Empty<FleetSnapshot>();
     public IReadOnlyList<ShipSnapshot> Ships { get; init; } = Array.Empty<ShipSnapshot>();
 }

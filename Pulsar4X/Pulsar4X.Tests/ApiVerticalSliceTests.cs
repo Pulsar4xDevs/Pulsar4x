@@ -136,6 +136,85 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void GeoSurveyView_is_faction_scoped()
+        {
+            var session = Connect();
+            // The procedurally-generated test universe doesn't attach survey blobs (only the
+            // blueprint/JSON body paths do), so attach one to a visible body explicitly.
+            int bodyId = ProjectSystem(session).Entities.First(e => e.HasView<BodyView>()).Id;
+            Assert.That(_game.GlobalManager.TryGetGlobalEntityById(bodyId, out var body), Is.True);
+            body.SetDataBlob(new Pulsar4X.GeoSurveys.GeoSurveyableDB { PointsRequired = 100 });
+
+            var view = _projector.ProjectEntity(body, session.FactionId).GetView<GeoSurveyView>();
+            Assert.That(view, Is.Not.Null, "expected a GeoSurveyView once the body is surveyable");
+            Assert.That(view!.IsSurveyComplete, Is.False);
+
+            // Completing the survey for this faction flips its (faction-scoped) view.
+            body.GetDataBlob<Pulsar4X.GeoSurveys.GeoSurveyableDB>().GeoSurveyStatus[session.FactionId] = 0;
+            Assert.That(_projector.ProjectEntity(body, session.FactionId).GetView<GeoSurveyView>()!.IsSurveyComplete,
+                Is.True);
+        }
+
+        [Test]
+        public void CreateFleet_command_creates_and_pushes_the_fleet()
+        {
+            var session = Connect();
+            var received = new List<GameEventEnvelope>();
+            using (_server.Subscribe(session, received.Add))
+            {
+                received.Clear(); // discard the initial connect push
+
+                var result = _server.SubmitCommand(session,
+                    new CreateFleetCommand(session.FactionId, _game.Systems[0].ID));
+                Assert.That(result.Accepted, Is.True, result.RejectionReason);
+
+                var (fleets, unattached) = _projector.ProjectFleetHierarchy(session.FactionId);
+                Assert.That(fleets, Has.Count.EqualTo(1));
+                Assert.That(fleets[0].SystemId, Is.EqualTo(_game.Systems[0].ID));
+                Assert.That(unattached, Is.Empty);
+
+                // The fleet op raised FleetReorganized, which became a self-contained FleetsChanged push.
+                var push = received.LastOrDefault(e => e.Type == GameEventType.FleetsChanged);
+                Assert.That(push, Is.Not.Null, "expected a FleetsChanged push");
+                Assert.That(push!.Fleets, Has.Count.EqualTo(1));
+                Assert.That(push.UnattachedShips, Is.Not.Null);
+            }
+        }
+
+        [Test]
+        public void DisbandFleet_command_removes_the_fleet()
+        {
+            var session = Connect();
+            _server.SubmitCommand(session, new CreateFleetCommand(session.FactionId, _game.Systems[0].ID));
+            var (fleets, _) = _projector.ProjectFleetHierarchy(session.FactionId);
+            Assert.That(fleets, Has.Count.EqualTo(1));
+
+            var result = _server.SubmitCommand(session, new DisbandFleetCommand(fleets[0].Id));
+
+            Assert.That(result.Accepted, Is.True, result.RejectionReason);
+            Assert.That(_projector.ProjectFleetHierarchy(session.FactionId).Fleets, Is.Empty);
+        }
+
+        [Test]
+        public void ChangeFleetParent_command_nests_a_fleet()
+        {
+            var session = Connect();
+            _server.SubmitCommand(session, new CreateFleetCommand(session.FactionId, _game.Systems[0].ID));
+            _server.SubmitCommand(session, new CreateFleetCommand(session.FactionId, _game.Systems[0].ID));
+            var (fleets, _) = _projector.ProjectFleetHierarchy(session.FactionId);
+            Assert.That(fleets, Has.Count.EqualTo(2));
+
+            var result = _server.SubmitCommand(session,
+                new ChangeFleetParentCommand(fleets[1].Id, fleets[0].Id));
+
+            Assert.That(result.Accepted, Is.True, result.RejectionReason);
+            var (nested, _) = _projector.ProjectFleetHierarchy(session.FactionId);
+            Assert.That(nested, Has.Count.EqualTo(1));
+            Assert.That(nested[0].SubFleets, Has.Count.EqualTo(1));
+            Assert.That(nested[0].SubFleets[0].Id, Is.EqualTo(fleets[1].Id));
+        }
+
+        [Test]
         public void StepOnce_advances_the_clock()
         {
             var session = Connect();

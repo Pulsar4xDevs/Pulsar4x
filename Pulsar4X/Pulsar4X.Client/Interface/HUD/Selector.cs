@@ -391,7 +391,7 @@ namespace Pulsar4X.Client
             float indent = depth * IndentStep;
             if (indent > 0) ImGui.Indent(indent);
 
-            bool selected = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleet?.Id == fleet.Id;
+            bool selected = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleetId == fleet.Id;
             if (ImGui.Selectable($"{fleet.Name}###fleet-{fleet.Id}", selected))
             {
                 FleetWindow.GetInstance().SelectFleet(fleet.Id);
@@ -406,7 +406,7 @@ namespace Pulsar4X.Client
                     {
                         ImGui.Text("Orders:");
                         foreach (var order in fleet.Orders)
-                            ImGui.Text(order);
+                            ImGui.Text(order.Name);
                     }
                     else
                     {
@@ -414,7 +414,7 @@ namespace Pulsar4X.Client
                     }
                 }
 
-                DisplayHelpers.DescriptiveTooltip(fleet.Name, fleet.FlagshipLocationName ?? "Unknown", "", Callback);
+                DisplayHelpers.DescriptiveTooltip(fleet.Name, fleet.OrbitingName ?? "Unknown", "", Callback);
             }
 
             if (indent > 0) ImGui.Unindent(indent);

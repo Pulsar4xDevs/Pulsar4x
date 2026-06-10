@@ -133,10 +133,12 @@ public class CargoTransferOrder : EntityCommand
         secondaryEntity.Manager.Game.OrderHandler.HandleOrder(cmd2);
     }
 
-    public static void CreateRefuelFleetCommand(Entity cargoFromEntity, Entity fleet)
+    /// <returns>True if at least one of the fleet's ships was issued a refuel transfer.</returns>
+    public static bool CreateRefuelFleetCommand(Entity cargoFromEntity, Entity fleet)
     {
         var fleetOwner = fleet.GetFactionOwner;
         var cargoLibrary = fleetOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
+        bool anyIssued = false;
         if(fleet.TryGetDataBlob<FleetDB>(out var fleetDB))
         {
             var ships = fleetDB.Children.Where(c => c.HasDataBlob<ShipInfoDB>());
@@ -147,15 +149,13 @@ public class CargoTransferOrder : EntityCommand
                 {
                     var fuelInfo = ship.GetFuelInfo(cargoLibrary);
                     ICargoable fuel = fuelInfo.Item1;
-                    long amountToMove = cargoStorageDB.GetFreeUnitSpace(fuel);
-                    var fuelAndAmount = (fuel, amountToMove);
-                    var list = new List<(ICargoable, long)>();
-                    list.Add(fuelAndAmount);
 
                     CreateCommands(fleet.FactionOwnerID, ship, cargoFromEntity, fuel, Conditionals.WaitTillFull);
+                    anyIssued = true;
                 }
             }
         }
+        return anyIssued;
     }
 
 

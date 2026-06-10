@@ -14,6 +14,7 @@ internal sealed class ClientGalaxy : IClientGalaxy
     private readonly Dictionary<string, ClientSystem> _systems = new();
     private readonly List<SystemSummary> _knownSystems = new();
     private readonly List<FleetSnapshot> _fleets = new();
+    private readonly List<ShipSnapshot> _unattachedShips = new();
 
     public TimeState Time { get; internal set; } = new(default, false, 1f, TimeSpan.FromHours(1), TimeSpan.FromSeconds(1));
 
@@ -21,15 +22,19 @@ internal sealed class ClientGalaxy : IClientGalaxy
 
     public IReadOnlyList<FleetSnapshot> Fleets => _fleets;
 
+    public IReadOnlyList<ShipSnapshot> UnattachedShips => _unattachedShips;
+
     public FactionSnapshot? Faction { get; internal set; }
 
     public IClientSystem? GetSystem(string systemId)
         => _systems.TryGetValue(systemId, out var system) ? system : null;
 
-    internal void SetFleets(IEnumerable<FleetSnapshot> fleets)
+    internal void SetFleets(IEnumerable<FleetSnapshot> fleets, IEnumerable<ShipSnapshot> unattachedShips)
     {
         _fleets.Clear();
         _fleets.AddRange(fleets);
+        _unattachedShips.Clear();
+        _unattachedShips.AddRange(unattachedShips);
     }
 
     internal void SetKnownSystems(IEnumerable<SystemSummary> summaries)

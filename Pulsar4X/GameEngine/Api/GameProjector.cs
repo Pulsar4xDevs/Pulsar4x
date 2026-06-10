@@ -10,9 +10,12 @@ using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
+using Pulsar4X.GeoSurveys;
+using Pulsar4X.JumpPoints;
 using Pulsar4X.Names;
 using Pulsar4X.Orbits;
 using Pulsar4X.Ships;
+using Pulsar4X.Storage;
 
 namespace Pulsar4X.Engine.Api
 {
@@ -91,21 +94,30 @@ namespace Pulsar4X.Engine.Api
             };
         }
 
-        public IReadOnlyList<FleetSnapshot> ProjectFleets(int factionId)
+        /// <summary>The faction's whole command hierarchy: its root fleets (each with nested sub-fleets
+        /// and member ships) plus the ships sitting at the root outside any fleet.</summary>
+        public (IReadOnlyList<FleetSnapshot> Fleets, IReadOnlyList<ShipSnapshot> UnattachedShips) ProjectFleetHierarchy(int factionId)
         {
-            var result = new List<FleetSnapshot>();
-            if (!_game.Factions.TryGetValue(factionId, out var faction)) return result;
-            if (!faction.TryGetDataBlob<FleetDB>(out var factionFleet)) return result;
+            var fleets = new List<FleetSnapshot>();
+            var unattached = new List<ShipSnapshot>();
+            if (!_game.Factions.TryGetValue(factionId, out var faction)) return (fleets, unattached);
+            if (!faction.TryGetDataBlob<FleetDB>(out var factionFleet)) return (fleets, unattached);
 
             var roots = factionFleet.RootDB?.Children;
-            if (roots == null) return result;
+            if (roots == null) return (fleets, unattached);
 
-            foreach (var fleet in roots)
+            // The faction-visible entity set per system, computed at most once per hierarchy projection
+            // (used to resolve each fleet's "orbiting" body to an ancestor the faction can actually see).
+            var visibleCache = new Dictionary<string, HashSet<int>>();
+
+            foreach (var child in roots)
             {
-                if (fleet.HasDataBlob<ShipInfoDB>()) continue; // ships only appear nested under a fleet
-                result.Add(ProjectFleet(fleet, factionId));
+                if (child.HasDataBlob<FleetDB>())
+                    fleets.Add(ProjectFleet(child, factionId, visibleCache));
+                else
+                    unattached.Add(ProjectShip(child, factionId));
             }
-            return result;
+            return (fleets, unattached);
         }
 
         // ----- entity views: add a view by adding one entry here (+ a To*View helper if it needs logic) -----
@@ -120,6 +132,11 @@ namespace Pulsar4X.Engine.Api
             (e, _) => e.TryGetDataBlob<StarInfoDB>(out var s) ? ToStarView(s) : null,
             (e, _) => e.TryGetDataBlob<ColonyInfoDB>(out var c) ? ToColonyView(c) : null,
             (e, _) => e.TryGetDataBlob<ShipInfoDB>(out var sh) ? new ShipView(sh.Design.Name) : null,
+            (e, f) => e.TryGetDataBlob<GeoSurveyableDB>(out var g) ? new GeoSurveyView(g.IsSurveyComplete(f)) : null,
+            (e, f) => e.TryGetDataBlob<JPSurveyableDB>(out var j) ? new GravSurveyView(j.IsSurveyComplete(f)) : null,
+            // A jump point is only part of a faction's world once that faction has discovered it.
+            (e, f) => e.TryGetDataBlob<JumpPointDB>(out var jp) && jp.IsDiscovered.Contains(f) ? new JumpPointView() : null,
+            (e, _) => e.HasDataBlob<CargoStorageDB>() ? new CargoStorageView() : null,
         };
 
         private static PositionView ToPositionView(Pulsar4X.Movement.PositionDB p)
@@ -150,7 +167,7 @@ namespace Pulsar4X.Engine.Api
 
         // ----- fleet hierarchy -----
 
-        private static FleetSnapshot ProjectFleet(Entity fleet, int factionId)
+        private FleetSnapshot ProjectFleet(Entity fleet, int factionId, Dictionary<string, HashSet<int>> visibleCache)
         {
             fleet.TryGetDataBlob<FleetDB>(out var fleetDB);
             int flagshipId = fleetDB?.FlagShipID ?? -1;
@@ -162,23 +179,46 @@ namespace Pulsar4X.Engine.Api
                 foreach (var child in fleetDB.GetChildren())
                 {
                     if (child.HasDataBlob<FleetDB>())
-                        subFleets.Add(ProjectFleet(child, factionId));
+                        subFleets.Add(ProjectFleet(child, factionId, visibleCache));
                     else
-                        ships.Add(new ShipSnapshot(child.Id, child.GetName(factionId), child.Manager?.ManagerID ?? ""));
+                        ships.Add(ProjectShip(child, factionId));
                 }
             }
 
-            var orders = new List<string>();
-            if (fleet.TryGetDataBlob<OrderableDB>(out var orderable))
-                foreach (var action in orderable.ActionList)
-                    orders.Add(action.Name);
+            Entity? flagship = null;
+            if (flagshipId >= 0 && fleet.Manager != null)
+                fleet.Manager.TryGetEntityById(flagshipId, out flagship);
 
-            string? location = null;
-            if (flagshipId >= 0 && fleet.Manager != null
-                && fleet.Manager.TryGetEntityById(flagshipId, out var flagship)
+            // The fleet entity lives in its flagship's manager, so this is the fleet's current system.
+            var system = fleet.Manager as StarSystem;
+
+            // Resolve what the flagship is orbiting to the nearest ancestor this faction can see
+            // (skipping hidden entities such as un-surveyed anomalies).
+            (int Id, string Name)? orbiting = null;
+            if (flagship != null && system != null
                 && flagship.TryGetDataBlob<Pulsar4X.Movement.PositionDB>(out var pos))
             {
-                location = pos.Parent?.GetName(factionId);
+                var visible = VisibleIds(system, factionId, visibleCache);
+                var parent = pos.Parent;
+                while (parent != null)
+                {
+                    if (visible.Contains(parent.Id))
+                    {
+                        orbiting = (parent.Id, parent.GetName(factionId));
+                        break;
+                    }
+                    parent = parent.TryGetDataBlob<Pulsar4X.Movement.PositionDB>(out var parentPos)
+                        ? parentPos.Parent
+                        : null;
+                }
+            }
+
+            string? commander = null;
+            if (flagship != null && flagship.TryGetDataBlob<ShipInfoDB>(out var flagInfo)
+                && flagInfo.CommanderID != -1 && flagship.Manager != null
+                && flagship.Manager.TryGetEntityById(flagInfo.CommanderID, out var commanderEntity))
+            {
+                commander = commanderEntity.GetName(factionId);
             }
 
             return new FleetSnapshot
@@ -186,11 +226,59 @@ namespace Pulsar4X.Engine.Api
                 Id = fleet.Id,
                 Name = fleet.GetName(factionId),
                 FlagshipId = flagshipId >= 0 ? flagshipId : null,
-                FlagshipLocationName = location,
-                Orders = orders,
+                FlagshipName = flagship?.GetName(factionId),
+                CommanderName = commander,
+                SystemId = system?.ID,
+                SystemName = system?.NameDB.GetName(factionId),
+                OrbitingEntityId = orbiting?.Id,
+                OrbitingName = orbiting?.Name,
+                InheritOrders = fleetDB?.InheritOrders ?? false,
+                CanGeoSurvey = fleet.HasGeoSurveyAbility(),
+                CanGravSurvey = fleet.HasJPSurveyAbililty(),
+                Orders = ProjectOrders(fleet),
                 SubFleets = subFleets,
                 Ships = ships,
             };
+        }
+
+        private static ShipSnapshot ProjectShip(Entity ship, int factionId)
+        {
+            ship.TryGetDataBlob<ShipInfoDB>(out var shipInfo);
+
+            string? commander = null;
+            if (shipInfo != null && shipInfo.CommanderID != -1 && ship.Manager != null
+                && ship.Manager.TryGetEntityById(shipInfo.CommanderID, out var commanderEntity))
+            {
+                commander = commanderEntity.GetName(factionId);
+            }
+
+            return new ShipSnapshot(ship.Id, ship.GetName(factionId), ship.Manager?.ManagerID ?? "",
+                                    shipInfo?.Design.Name ?? "", commander)
+            {
+                Orders = ProjectOrders(ship),
+            };
+        }
+
+        private static IReadOnlyList<OrderSnapshot> ProjectOrders(Entity entity)
+        {
+            if (!entity.TryGetDataBlob<OrderableDB>(out var orderable) || orderable.ActionList.Count == 0)
+                return Array.Empty<OrderSnapshot>();
+
+            var orders = new List<OrderSnapshot>(orderable.ActionList.Count);
+            foreach (var action in orderable.ActionList)
+                orders.Add(new OrderSnapshot(action.Name, action.IsRunning, action.GetIsFinished));
+            return orders;
+        }
+
+        private static HashSet<int> VisibleIds(StarSystem system, int factionId, Dictionary<string, HashSet<int>> cache)
+        {
+            if (!cache.TryGetValue(system.ID, out var visible))
+            {
+                const EntityFilter all = EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile;
+                visible = system.GetFilteredEntities(all, factionId).Select(e => e.Id).ToHashSet();
+                cache[system.ID] = visible;
+            }
+            return visible;
         }
 
         // ----- classification -----
