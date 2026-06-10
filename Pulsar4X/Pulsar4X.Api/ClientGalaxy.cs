@@ -19,6 +19,9 @@ public interface IClientGalaxy
 
     /// <summary>The player's faction/corporation (identity + funds). Null until the first push.</summary>
     FactionSnapshot? Faction { get; }
+
+    /// <summary>The faction's research state (categories, techs, scientists). Null until the first push.</summary>
+    ResearchSnapshot? Research { get; }
 }
 
 /// <summary>A single star system within the client galaxy model.</summary>

@@ -4,6 +4,7 @@ using Pulsar4X.Factions;
 using Pulsar4X.Engine;
 using Pulsar4X.Events;
 using System.IO;
+using Pulsar4X.Messaging;
 using Pulsar4X.People;
 using Pulsar4X.Names;
 
@@ -80,6 +81,7 @@ namespace Pulsar4X.Technology
             {
                 // If it isn't, dequeue the tech and return
                 researcherDB.TechQueue.TryDequeue(out var result);
+                PublishQueueChanged(entity);
                 return;
             }
 
@@ -131,7 +133,20 @@ namespace Pulsar4X.Technology
                         entity.FactionOwnerID,
                         entity.Manager.ManagerID,
                         entity.Id));
+
+                PublishQueueChanged(entity);
             }
+        }
+
+        // The dequeue mutates the lab in place (no DataBlob add/remove), so signal the change
+        // explicitly for any observers (e.g. the API layer).
+        private static void PublishQueueChanged(Entity lab)
+        {
+            MessagePublisher.Instance.Publish(Message.Create(
+                MessageTypes.EntityChanged,
+                entityId: lab.Id,
+                systemId: lab.Manager.ManagerID,
+                factionId: lab.FactionOwnerID));
         }
 
         private void OnTechnologyChanged(Event e)

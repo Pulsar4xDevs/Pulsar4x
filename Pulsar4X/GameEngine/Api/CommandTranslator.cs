@@ -10,6 +10,7 @@ using Pulsar4X.JumpPoints;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using Pulsar4X.Storage;
+using Pulsar4X.Technology;
 
 namespace Pulsar4X.Engine.Api
 {
@@ -42,6 +43,12 @@ namespace Pulsar4X.Engine.Api
                 [typeof(GravSurveyCommand)] = TranslateGravSurvey,
                 [typeof(Pulsar4X.Api.JumpCommand)] = TranslateJump,
                 [typeof(RefuelAtCommand)] = TranslateRefuelAt,
+                [typeof(AssignScientistCommand)] = TranslateAssignScientist,
+                [typeof(UnassignScientistCommand)] = TranslateUnassignScientist,
+                [typeof(SetResearchFundingCommand)] = TranslateSetResearchFunding,
+                [typeof(AddTechToQueueCommand)] = TranslateAddTechToQueue,
+                [typeof(RemoveTechFromQueueCommand)] = TranslateRemoveTechFromQueue,
+                [typeof(MoveTechInQueueCommand)] = TranslateMoveTechInQueue,
             };
         }
 
@@ -208,6 +215,53 @@ namespace Pulsar4X.Engine.Api
             return CargoTransferOrder.CreateRefuelFleetCommand(colony, commanded)
                 ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
                 : CommandResult.Reject("No ship in the fleet could take on fuel.");
+        }
+
+        // ----- research (commanded entity: the lab) -----
+
+        private CommandResult TranslateAssignScientist(Entity faction, Entity commanded, GameCommand command)
+        {
+            var assign = (AssignScientistCommand)command;
+            if (!TryResolve(assign.ScientistId, out var scientist)
+                || scientist.FactionOwnerID != faction.Id)
+                return CommandResult.Reject($"Scientist {assign.ScientistId} not found.");
+
+            return Dispatch(AssignScientistOrder.Create(commanded, assign.ScientistId));
+        }
+
+        private CommandResult TranslateUnassignScientist(Entity faction, Entity commanded, GameCommand command)
+        {
+            var unassign = (UnassignScientistCommand)command;
+            return Dispatch(UnassignScientistOrder.Create(commanded, unassign.ScientistId));
+        }
+
+        private CommandResult TranslateSetResearchFunding(Entity faction, Entity commanded, GameCommand command)
+        {
+            var funding = (SetResearchFundingCommand)command;
+            if (funding.FundingLevel is < 0 or > 5)
+                return CommandResult.Reject("Funding level must be between 0 and 5.");
+
+            return Dispatch(FundingChangedOrder.Create(commanded, (byte)funding.FundingLevel));
+        }
+
+        private CommandResult TranslateAddTechToQueue(Entity faction, Entity commanded, GameCommand command)
+        {
+            var add = (AddTechToQueueCommand)command;
+            return Dispatch(AddTechToQueueOrder.Create(commanded, add.TechId));
+        }
+
+        private CommandResult TranslateRemoveTechFromQueue(Entity faction, Entity commanded, GameCommand command)
+        {
+            var remove = (RemoveTechFromQueueCommand)command;
+            return Dispatch(RemoveTechFromQueueOrder.Create(commanded, remove.TechId));
+        }
+
+        private CommandResult TranslateMoveTechInQueue(Entity faction, Entity commanded, GameCommand command)
+        {
+            var move = (MoveTechInQueueCommand)command;
+            return move.MoveUp
+                ? Dispatch(MoveUpInQueueOrder.Create(commanded, move.TechId))
+                : Dispatch(MoveDownInQueueOrder.Create(commanded, move.TechId));
         }
     }
 }

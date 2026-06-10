@@ -126,6 +126,87 @@ public sealed record JumpPointView : IComponentView;
 /// <summary>Marks an entity as having cargo storage (e.g. a colony a fleet can refuel at).</summary>
 public sealed record CargoStorageView : IComponentView;
 
+/// <summary>One named contribution to a modified stat (for breakdown tooltips).</summary>
+public sealed record ValueModifier(string Name, double Delta);
+
+/// <summary>A stat with its effective value, base value, and the modifiers between them.</summary>
+public sealed record ModifiedValue(double Value, double BaseValue, IReadOnlyList<ValueModifier> Modifiers);
+
+/// <summary>A research lab: its design, where it is, who runs it, its economics, and its tech queue
+/// (ids into <see cref="ResearchSnapshot.Techs"/>). Only projected for the owning faction.</summary>
+public sealed record ResearcherView(
+    string DesignName,
+    string DesignTemplateName,
+    string DesignDescription,
+    int LocationId,
+    string LocationName,
+    int? ScientistId,
+    string? ScientistName,
+    ModifiedValue CostPerDay,
+    ModifiedValue PointsPerDay,
+    int FundingLevel,
+    IReadOnlyList<string> TechQueue) : IComponentView;
+
+// --------------------------------------------------------------------------------------------
+// Faction research state. Tech progress lives in faction data (not on lab entities), so it's
+// pushed as its own faction-scoped snapshot rather than as entity views.
+// --------------------------------------------------------------------------------------------
+
+public sealed record TechCategorySnapshot(string Id, string Name);
+
+/// <summary>A technology as the faction sees it: identity, classification, progress, and what the
+/// next level unlocks (names pre-resolved server-side).</summary>
+public sealed record TechSnapshot(
+    string Id,
+    string Name,
+    string DisplayName,
+    string MaxLevelName,
+    string Description,
+    string CategoryId,
+    string CategoryName,
+    int Level,
+    int MaxLevel,
+    int ResearchCost,
+    int ResearchProgress,
+    bool IsResearchable)
+{
+    public IReadOnlyList<string> NextLevelUnlocks { get; init; } = Array.Empty<string>();
+}
+
+/// <summary>Mirrors the engine's commander classification.</summary>
+public enum CommanderKind
+{
+    Navy,
+    Ground,
+    Scientist,
+    Civilian,
+}
+
+/// <summary>A commander's bonus for chooser tooltips; the filter target is pre-resolved to a display name.</summary>
+public sealed record CommanderBonusSnapshot(string Name, double Value, bool IsPercentage, string? FilterName);
+
+/// <summary>A faction commander (scientist, officer, …) for assignment UIs.</summary>
+public sealed record CommanderSnapshot(
+    int Id,
+    string Name,
+    CommanderKind Kind,
+    bool IsAssigned,
+    int Experience,
+    int ExperienceCap,
+    DateTime CommissionedOn)
+{
+    public IReadOnlyList<CommanderBonusSnapshot> Bonuses { get; init; } = Array.Empty<CommanderBonusSnapshot>();
+}
+
+/// <summary>The faction's research state: tech categories (game-static), every unlocked tech with
+/// its progress, and the faction's scientists.</summary>
+public sealed class ResearchSnapshot
+{
+    public IReadOnlyList<TechCategorySnapshot> Categories { get; init; } = Array.Empty<TechCategorySnapshot>();
+    public IReadOnlyList<TechSnapshot> Techs { get; init; } = Array.Empty<TechSnapshot>();
+    public IReadOnlyList<CommanderSnapshot> Scientists { get; init; } = Array.Empty<CommanderSnapshot>();
+}
+
 // --------------------------------------------------------------------------------------------
 // Fleet command hierarchy (faction-scoped). The galaxy is otherwise organised by system, but a
 // faction's fleets form their own tree of sub-fleets and member ships, so they're modelled

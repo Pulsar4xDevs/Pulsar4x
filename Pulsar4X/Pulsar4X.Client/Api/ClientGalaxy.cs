@@ -26,6 +26,8 @@ internal sealed class ClientGalaxy : IClientGalaxy
 
     public FactionSnapshot? Faction { get; internal set; }
 
+    public ResearchSnapshot? Research { get; internal set; }
+
     public IClientSystem? GetSystem(string systemId)
         => _systems.TryGetValue(systemId, out var system) ? system : null;
 

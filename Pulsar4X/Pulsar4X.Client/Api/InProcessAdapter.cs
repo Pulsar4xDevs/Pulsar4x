@@ -97,6 +97,10 @@ public sealed class InProcessAdapter : IGameClient
                 if (evt.Faction != null) _galaxy.Faction = evt.Faction;
                 return;
 
+            case GameEventType.ResearchChanged:
+                if (evt.Research != null) _galaxy.Research = evt.Research;
+                return;
+
             case GameEventType.SystemRevealed:
                 // The reveal carries the whole system + its visible entities — apply it directly.
                 if (evt.System != null)

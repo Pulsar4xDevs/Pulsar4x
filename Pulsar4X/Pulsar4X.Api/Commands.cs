@@ -54,3 +54,19 @@ public sealed record JumpCommand(int TargetEntityId, int JumpPointId) : GameComm
 
 /// <summary>Warp to the colony and refuel the fleet's ships from its stores.</summary>
 public sealed record RefuelAtCommand(int TargetEntityId, int ColonyId) : GameCommand(TargetEntityId);
+
+// ----- research (commanded entity: the lab) -----
+
+public sealed record AssignScientistCommand(int TargetEntityId, int ScientistId) : GameCommand(TargetEntityId);
+
+public sealed record UnassignScientistCommand(int TargetEntityId, int ScientistId) : GameCommand(TargetEntityId);
+
+/// <summary>Set a lab's funding level (0–5; scales both output and cost).</summary>
+public sealed record SetResearchFundingCommand(int TargetEntityId, int FundingLevel) : GameCommand(TargetEntityId);
+
+public sealed record AddTechToQueueCommand(int TargetEntityId, string TechId) : GameCommand(TargetEntityId);
+
+public sealed record RemoveTechFromQueueCommand(int TargetEntityId, string TechId) : GameCommand(TargetEntityId);
+
+/// <summary>Move a queued tech one slot up (towards active) or down.</summary>
+public sealed record MoveTechInQueueCommand(int TargetEntityId, string TechId, bool MoveUp) : GameCommand(TargetEntityId);

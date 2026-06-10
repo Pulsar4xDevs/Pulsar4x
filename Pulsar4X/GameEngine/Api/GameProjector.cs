@@ -14,8 +14,10 @@ using Pulsar4X.GeoSurveys;
 using Pulsar4X.JumpPoints;
 using Pulsar4X.Names;
 using Pulsar4X.Orbits;
+using Pulsar4X.People;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
+using Pulsar4X.Technology;
 
 namespace Pulsar4X.Engine.Api
 {
@@ -137,6 +139,8 @@ namespace Pulsar4X.Engine.Api
             // A jump point is only part of a faction's world once that faction has discovered it.
             (e, f) => e.TryGetDataBlob<JumpPointDB>(out var jp) && jp.IsDiscovered.Contains(f) ? new JumpPointView() : null,
             (e, _) => e.HasDataBlob<CargoStorageDB>() ? new CargoStorageView() : null,
+            // A lab's queue/economics are internal to its owner; other factions just see the entity.
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ResearcherDB>(out var r) ? ToResearcherView(r, e, f) : null,
         };
 
         private static PositionView ToPositionView(Pulsar4X.Movement.PositionDB p)
@@ -164,6 +168,144 @@ namespace Pulsar4X.Engine.Api
             int? planetId = c.PlanetEntity.IsValid ? c.PlanetEntity.Id : null;
             return new ColonyView(population, planetId);
         }
+
+        private static ResearcherView ToResearcherView(ResearcherDB r, Entity lab, int factionId)
+        {
+            string templateName = "", description = "";
+            if (r.Design is Pulsar4X.Components.ComponentDesign design)
+            {
+                templateName = design.TemplateName;
+                description = design.Description;
+            }
+
+            string locationName = "";
+            if (lab.Manager != null && lab.Manager.TryGetEntityById(r.LocationId, out var location))
+                locationName = location.GetName(factionId);
+
+            string? scientistName = null;
+            if (r.ScientistId >= 0 && lab.Manager != null
+                && lab.Manager.TryGetGlobalEntityById(r.ScientistId, out var scientist))
+            {
+                scientistName = scientist.GetName(factionId);
+            }
+
+            return new ResearcherView(
+                r.Design.Name,
+                templateName,
+                description,
+                r.LocationId,
+                locationName,
+                r.ScientistId >= 0 ? r.ScientistId : null,
+                scientistName,
+                ToModifiedValue(r.CostPerDay),
+                ToModifiedValue(r.PointsPerDay),
+                r.FundingLevel,
+                new List<string>(r.TechQueue));
+        }
+
+        private static ModifiedValue ToModifiedValue<T>(ModifiableValue<T> value) where T : IConvertible
+        {
+            var modifiers = new List<ValueModifier>();
+            foreach (var modifier in value.GetModifiers())
+                modifiers.Add(new ValueModifier(modifier.Name,
+                    Convert.ToDouble(modifier.After) - Convert.ToDouble(modifier.Before)));
+
+            return new ModifiedValue(Convert.ToDouble(value.GetValue()), Convert.ToDouble(value.BaseValue), modifiers);
+        }
+
+        // ----- research -----
+
+        /// <summary>The faction's research state: tech categories, every unlocked tech with progress
+        /// and researchability, and the faction's scientists (for assignment UIs).</summary>
+        public ResearchSnapshot? ProjectResearch(int factionId)
+        {
+            if (!_game.Factions.TryGetValue(factionId, out var faction)) return null;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var info)) return null;
+            var data = info.Data;
+
+            var categories = _game.TechCategories.Values
+                .Select(c => new TechCategorySnapshot(c.UniqueID, c.Name))
+                .OrderBy(c => c.Name)
+                .ToList();
+
+            var techs = new List<TechSnapshot>(data.Techs.Count);
+            foreach (var tech in data.Techs.Values)
+            {
+                var unlocks = new List<string>();
+                if (tech.Unlocks.TryGetValue(tech.Level + 1, out var unlockIds))
+                    foreach (var unlockId in unlockIds)
+                        unlocks.Add(data.GetName(unlockId));
+
+                string categoryName = _game.TechCategories.TryGetValue(tech.Category, out var category)
+                    ? category.Name
+                    : "";
+
+                techs.Add(new TechSnapshot(
+                    tech.UniqueID, tech.Name, tech.DisplayName(), tech.MaxLevelName(), tech.Description,
+                    tech.Category, categoryName, tech.Level, tech.MaxLevel,
+                    tech.ResearchCost, tech.ResearchProgress, data.IsResearchable(tech.UniqueID))
+                {
+                    NextLevelUnlocks = unlocks,
+                });
+            }
+
+            var scientists = new List<CommanderSnapshot>();
+            foreach (var commander in info.Commanders)
+            {
+                if (!commander.TryGetDataBlob<CommanderDB>(out var commanderDB)
+                    || commanderDB.Type != DataStructures.CommanderTypes.Scientist)
+                    continue;
+                scientists.Add(ProjectCommander(commander, commanderDB, data, factionId));
+            }
+
+            return new ResearchSnapshot { Categories = categories, Techs = techs, Scientists = scientists };
+        }
+
+        private CommanderSnapshot ProjectCommander(Entity commander, CommanderDB commanderDB,
+            FactionDataStore data, int factionId)
+        {
+            var bonuses = new List<CommanderBonusSnapshot>();
+            if (commander.TryGetDataBlob<BonusesDB>(out var bonusesDB))
+            {
+                foreach (var bonus in bonusesDB.Bonuses)
+                {
+                    // Resolve the bonus's filter target to a display name: faction data first, then
+                    // tech categories, then the raw id as a last resort.
+                    string? filterName = null;
+                    if (!string.IsNullOrEmpty(bonus.FilterId))
+                    {
+                        filterName = data.GetName(bonus.FilterId);
+                        if (string.IsNullOrEmpty(filterName) && _game.TechCategories.TryGetValue(bonus.FilterId, out var category))
+                            filterName = category.Name;
+                        if (string.IsNullOrEmpty(filterName))
+                            filterName = bonus.FilterId;
+                    }
+
+                    bonuses.Add(new CommanderBonusSnapshot(
+                        bonus.Name, bonus.Value, bonus.Type == BonusType.Perentage, filterName));
+                }
+            }
+
+            return new CommanderSnapshot(
+                commander.Id,
+                commander.GetName(factionId),
+                ToCommanderKind(commanderDB.Type),
+                commanderDB.AssignedTo >= 0,
+                commanderDB.Experience,
+                commanderDB.ExperienceCap,
+                commanderDB.CommissionedOn)
+            {
+                Bonuses = bonuses,
+            };
+        }
+
+        private static CommanderKind ToCommanderKind(DataStructures.CommanderTypes type) => type switch
+        {
+            DataStructures.CommanderTypes.Navy => CommanderKind.Navy,
+            DataStructures.CommanderTypes.Ground => CommanderKind.Ground,
+            DataStructures.CommanderTypes.Scientist => CommanderKind.Scientist,
+            _ => CommanderKind.Civilian,
+        };
 
         // ----- fleet hierarchy -----
 

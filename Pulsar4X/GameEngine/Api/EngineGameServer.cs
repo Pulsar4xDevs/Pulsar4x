@@ -112,8 +112,8 @@ namespace Pulsar4X.Engine.Api
         }
 
         // A clock advance refreshes the time plus each subscriber's per-faction snapshots: the
-        // (funds-bearing) faction and the fleet hierarchy (order progress, locations, and ship
-        // membership all evolve as the simulation runs).
+        // (funds-bearing) faction, the fleet hierarchy (order progress, locations, and ship
+        // membership all evolve as the simulation runs), and research (progress accrues per tick).
         private void OnGlobalDateChanged()
         {
             var time = new GameEventEnvelope(GameEventType.TimeChanged, Time: _projector.ProjectTime());
@@ -124,6 +124,9 @@ namespace Pulsar4X.Engine.Api
                 if (faction != null)
                     sub.Send(new GameEventEnvelope(GameEventType.FactionChanged, Faction: faction));
                 sub.Send(FleetsEnvelope(sub.FactionId));
+                var research = _projector.ProjectResearch(sub.FactionId);
+                if (research != null)
+                    sub.Send(new GameEventEnvelope(GameEventType.ResearchChanged, Research: research));
             }
         }
 
@@ -155,7 +158,26 @@ namespace Pulsar4X.Engine.Api
             if (commanded.Id != session.FactionId && commanded.FactionOwnerID != session.FactionId)
                 return CommandResult.Reject("Faction does not control the commanded entity.");
 
-            return _commands.Translate(faction, commanded, command);
+            var result = _commands.Translate(faction, commanded, command);
+
+            // Many instant orders (assign scientist, change funding, queue ops, …) mutate DataBlobs
+            // without raising an engine message, so after any accepted command re-project the
+            // commanded entity and push it — the client sees the effect without waiting for a tick.
+            if (result.Accepted)
+                PushEntityRefresh(commanded, session.FactionId);
+
+            return result;
+        }
+
+        private void PushEntityRefresh(Entity commanded, int factionId)
+        {
+            if (commanded.Manager is not StarSystem system) return;
+
+            var evt = new GameEventEnvelope(GameEventType.EntityChanged, system.ID, commanded.Id, factionId,
+                Entity: _projector.ProjectEntity(commanded, factionId));
+            foreach (var sub in SnapshotSubscriptions())
+                if (sub.FactionId == factionId)
+                    sub.Send(evt);
         }
 
         // ----- events -----
@@ -185,6 +207,10 @@ namespace Pulsar4X.Engine.Api
             }
 
             sink(FleetsEnvelope(session.FactionId));
+
+            var research = _projector.ProjectResearch(session.FactionId);
+            if (research != null)
+                sink(new GameEventEnvelope(GameEventType.ResearchChanged, Research: research));
         }
 
         /// <summary>
@@ -205,6 +231,7 @@ namespace Pulsar4X.Engine.Api
                 (MessageTypes.EntityRenamed, GameEventType.EntityRenamed),
                 (MessageTypes.DBAdded, GameEventType.EntityChanged),
                 (MessageTypes.DBRemoved, GameEventType.EntityChanged),
+                (MessageTypes.EntityChanged, GameEventType.EntityChanged),
                 (MessageTypes.FleetReorganized, GameEventType.FleetsChanged),
             };
 

@@ -139,6 +139,17 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    `GeoSurveyView`/`GravSurveyView` (incomplete surveys, faction-scoped), `JumpPointView` (only
    projected once discovered), `CargoStorageView` on colonies (refuel). The **RenameWindow** submits
    the API `RenameCommand` by entity id (a `SetEntity` shim remains for unported callers).
+   The **ResearchWindow** is fully ported. Labs are entities with a `ResearcherView` (design,
+   location, scientist, cost/points-per-day as `ModifiedValue` breakdowns for tooltips, funding,
+   tech-queue ids) — projected only for the owning faction, so lab internals never leak. Faction
+   research state travels as a `ResearchSnapshot` (`ResearchChanged` push on connect + each clock
+   advance): tech categories, every unlocked tech (`TechSnapshot` with progress, researchability,
+   next-level unlock names pre-resolved server-side), and the faction's scientists
+   (`CommanderSnapshot` incl. bonuses with resolved filter names, consumed by a snapshot-based
+   `DisplayHelpers.PeopleChooser` overload; the engine overload remains for the unported
+   AdminWindow). Because the research instant orders mutate DataBlobs without raising messages,
+   `SubmitCommand` now re-projects and pushes the commanded entity (`EntityChanged`) after every
+   accepted command — a generic post-write refresh all windows benefit from.
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
@@ -156,11 +167,15 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
 - Time: `TimeState`, `TimeControlRequest`.
 - Reads: `SystemSummary`, `SystemSnapshot`, `EntitySnapshot` + `IComponentView` (`NameView`,
   `PositionView`, `OrbitView`, `MassVolumeView`, `BodyView`, `StarView`, `ColonyView`, `ShipView`,
-  `GeoSurveyView`, `GravSurveyView`, `JumpPointView`, `CargoStorageView` so far), `OwnerRelation`,
-  `Vec3`; fleet hierarchy: `FleetSnapshot`, `ShipSnapshot`, `OrderSnapshot`.
+  `GeoSurveyView`, `GravSurveyView`, `JumpPointView`, `CargoStorageView`, `ResearcherView` so far),
+  `OwnerRelation`, `Vec3`, `ModifiedValue`/`ValueModifier`; fleet hierarchy: `FleetSnapshot`,
+  `ShipSnapshot`, `OrderSnapshot`; research: `ResearchSnapshot` (`TechCategorySnapshot`,
+  `TechSnapshot`, `CommanderSnapshot`/`CommanderKind`/`CommanderBonusSnapshot`).
 - Writes: `GameCommand` (+ `RenameCommand`, `CreateFleetCommand`, `DisbandFleetCommand`,
   `ChangeFleetParentCommand`, `ReassignShipCommand`, `SetFlagshipCommand`, `MoveToBodyCommand`,
-  `GeoSurveyCommand`, `GravSurveyCommand`, `JumpCommand`, `RefuelAtCommand`), `CommandResult`.
+  `GeoSurveyCommand`, `GravSurveyCommand`, `JumpCommand`, `RefuelAtCommand`,
+  `AssignScientistCommand`, `UnassignScientistCommand`, `SetResearchFundingCommand`,
+  `AddTechToQueueCommand`, `RemoveTechFromQueueCommand`, `MoveTechInQueueCommand`), `CommandResult`.
 - Events: `GameEventType`, `GameEventEnvelope`.
 - Interfaces: `IGameServer`, `IGameClient`, `IClientGalaxy`, `IClientSystem`.
 
@@ -192,11 +207,15 @@ The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api`
   command pipeline entirely), so it needs a serializable conditional-order contract plus
   add/remove/reorder/update commands — deliberately deferred to its own pass. The tab resolves the
   engine entity from the selected fleet id; everything else in the window is API-only.
-- **Survey-status views don't refresh on completion.** Finishing a geo/grav survey mutates the
-  survey DataBlob without raising a message, so `GeoSurveyView`/`GravSurveyView` in already-pushed
-  system snapshots go stale until some other event re-projects the entity (same family as the
-  positions gap: continuous/quiet state needs change signals). The per-clock-advance fleet re-push
-  covers fleet data but not per-entity system snapshots.
+- **Quiet DataBlob mutations need an engine message.** Some engine code mutates DataBlobs without
+  raising a `MessagePublisher` message, leaving already-pushed entity views stale (same family as
+  the positions gap). The fix pattern (like `FleetReorganized`): the mutating engine code publishes
+  `MessageTypes.EntityChanged`, which the server's existing message map turns into a self-contained
+  `EntityChanged` push. `ResearchProcessor` does this when it dequeues a lab's tech mid-tick
+  (without it the lab's `ResearcherView` queue froze on the finished tech — fixed bug), and
+  `SubmitCommand` additionally re-pushes the commanded entity after every accepted command. Still
+  open: geo/grav survey completion (`GeoSurveyView`/`GravSurveyView` staleness — nothing is
+  published there today).
 - **Procedural body generation never attaches `GeoSurveyableDB`** (only the blueprint/JSON body
   paths do), so procedurally generated systems currently offer nothing to geo-survey. Engine
   inconsistency noted while porting; not an API-layer issue.
