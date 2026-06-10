@@ -71,8 +71,6 @@ namespace Pulsar4X.Engine.Api
 
         // ----- time -----
 
-        public TimeState GetTimeState(PlayerSession session) => _projector.ProjectTime();
-
         public void SetTimeControl(PlayerSession session, TimeControlRequest request)
         {
             var tp = _game.TimePulse;
@@ -147,20 +145,6 @@ namespace Pulsar4X.Engine.Api
 
             return _commands.Translate(faction, commanded, command);
         }
-
-        // ----- queries (faction-scoped reads, delegated to the projector) -----
-
-        public IReadOnlyList<SystemSummary> GetKnownSystems(PlayerSession session)
-            => _projector.ProjectKnownSystems(session.FactionId);
-
-        public SystemSnapshot GetSystemSnapshot(PlayerSession session, string systemId)
-            => _projector.ProjectSystem(systemId, session.FactionId)
-               ?? throw new ArgumentException($"Unknown system '{systemId}'.", nameof(systemId));
-
-        public EntitySnapshot? GetEntitySnapshot(PlayerSession session, int entityId)
-            => _game.GlobalManager.TryGetGlobalEntityById(entityId, out var entity)
-                ? _projector.ProjectEntity(entity, session.FactionId)
-                : null;
 
         // ----- events -----
 

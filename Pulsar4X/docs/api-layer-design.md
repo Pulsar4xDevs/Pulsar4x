@@ -62,8 +62,9 @@ advances (`MasterTimePulse.GameGlobalDateChangedEvent`) and when its controls ch
 `SetTimeControl`); a newly revealed system pushes its whole `SystemSnapshot`. The adapter applies every
 delta with no callback to the server, so nothing is polled or fetched — its only server calls are
 `Connect`/`Subscribe`/`Disconnect` and the command writes (`SubmitCommand`, `SetTimeControl`). A network
-adapter just feeds the same inbound queue from a socket. (`IGameServer` still exposes read queries —
-used by tests and as the projection building blocks — but the client adapter never calls them.)
+adapter just feeds the same inbound queue from a socket. `IGameServer` is therefore **push-only** — its
+whole surface is `Connect`/`Disconnect`, the two writes, and `Subscribe`; there are no read/query
+methods at all. (Projection is exercised in tests via the internal `GameProjector` directly.)
 
 ## Current coupling (what we're replacing)
 

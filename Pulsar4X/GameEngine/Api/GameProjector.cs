@@ -45,20 +45,6 @@ namespace Pulsar4X.Engine.Api
             return new FactionSnapshot(name, info.Abbreviation, info.Money.GetCurrentFunds());
         }
 
-        public IReadOnlyList<SystemSummary> ProjectKnownSystems(int factionId)
-        {
-            var result = new List<SystemSummary>();
-            if (!_game.Factions.TryGetValue(factionId, out var faction)) return result;
-
-            foreach (var systemId in faction.GetDataBlob<FactionInfoDB>().KnownSystems)
-            {
-                var system = FindSystem(systemId);
-                if (system != null)
-                    result.Add(new SystemSummary(system.ID, system.NameDB.GetName(factionId)));
-            }
-            return result;
-        }
-
         /// <summary>Projects a system by id, or null if this game has no such system.</summary>
         public SystemSnapshot? ProjectSystem(string systemId, int factionId)
         {

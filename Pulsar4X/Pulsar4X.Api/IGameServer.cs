@@ -1,8 +1,10 @@
 namespace Pulsar4X.Api;
 
 /// <summary>
-/// The server-authoritative surface the engine exposes. Every read and command is scoped to a
-/// <see cref="PlayerSession"/> (a faction), so the server enforces visibility and ownership.
+/// The server-authoritative surface the engine exposes, scoped to a <see cref="PlayerSession"/>
+/// (a faction). It is deliberately <b>push-only</b>: clients connect, subscribe, and issue writes —
+/// all state arrives through the event stream (initial snapshot on <see cref="Subscribe"/>, then
+/// self-contained deltas). There are no read/query methods, so nothing is ever polled or fetched.
 ///
 /// Implemented in the engine by <c>EngineGameServer</c>.
 /// </summary>
@@ -12,19 +14,15 @@ public interface IGameServer
     ConnectResult Connect(ConnectRequest request);
     void Disconnect(PlayerSession session);
 
-    // --- time (host / space-master authority) ---
-    TimeState GetTimeState(PlayerSession session);
+    // --- writes ---
     void SetTimeControl(PlayerSession session, TimeControlRequest request);
-
-    // --- commands (write) ---
     CommandResult SubmitCommand(PlayerSession session, GameCommand command);
 
-    // --- queries (faction-scoped reads) ---
-    IReadOnlyList<SystemSummary> GetKnownSystems(PlayerSession session);
-    SystemSnapshot GetSystemSnapshot(PlayerSession session, string systemId);
-    EntitySnapshot? GetEntitySnapshot(PlayerSession session, int entityId);
-
     // --- events (push) ---
-    /// <summary>Subscribe to this faction's event stream. Dispose the returned token to unsubscribe.</summary>
+    /// <summary>
+    /// Subscribe to this faction's event stream. The current state is pushed immediately (time,
+    /// faction, known systems, fleets); thereafter self-contained deltas keep it current. Dispose the
+    /// returned token to unsubscribe.
+    /// </summary>
     IDisposable Subscribe(PlayerSession session, Action<GameEventEnvelope> handler);
 }

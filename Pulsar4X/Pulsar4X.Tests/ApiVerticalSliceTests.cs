@@ -11,16 +11,17 @@ using Pulsar4X.Messaging;
 namespace Pulsar4X.Tests
 {
     /// <summary>
-    /// Exercises the engine side of the API layer — <see cref="EngineGameServer"/> through the
-    /// <see cref="IGameServer"/> contract: connect, faction-scoped snapshot projection, time control,
-    /// and command routing/validation. The client-side adapter and galaxy model live in
-    /// Pulsar4X.Client and are covered there; these tests deliberately stay free of any UI dependency.
+    /// Exercises the engine side of the API layer: <see cref="EngineGameServer"/> for the push-only
+    /// <see cref="IGameServer"/> contract (connect, time/command writes, the event stream) and
+    /// <see cref="GameProjector"/> for the engine→DTO projection. The client-side adapter and galaxy
+    /// model live in Pulsar4X.Client; these tests stay free of any UI dependency.
     /// </summary>
     [TestFixture]
     public class ApiVerticalSliceTests
     {
         private Game _game = null!;
         private IGameServer _server = null!;
+        private GameProjector _projector = null!;
 
         [SetUp]
         public void SetUp()
@@ -29,6 +30,7 @@ namespace Pulsar4X.Tests
             // Make TimeStep run synchronously on this thread so post-step reads are deterministic.
             _game.Settings.EnforceSingleThread = true;
             _server = new EngineGameServer(_game);
+            _projector = new GameProjector(_game);
         }
 
         private PlayerSession Connect()
@@ -37,6 +39,10 @@ namespace Pulsar4X.Tests
             Assert.That(result.Success, Is.True, result.FailureReason);
             return result.Session;
         }
+
+        // Projects the test universe's single system for the given session's faction.
+        private SystemSnapshot ProjectSystem(PlayerSession session)
+            => _projector.ProjectSystem(_game.Systems[0].ID, session.FactionId)!;
 
         [Test]
         public void Connect_binds_to_a_real_faction()
@@ -50,7 +56,7 @@ namespace Pulsar4X.Tests
         public void SystemSnapshot_projects_visible_bodies_with_views()
         {
             var session = Connect();
-            var snapshot = _server.GetSystemSnapshot(session, _game.Systems[0].ID);
+            var snapshot = ProjectSystem(session);
 
             Assert.That(snapshot.Entities, Is.Not.Empty, "expected the system's default-visible bodies");
             Assert.That(snapshot.Entities.All(e => e.GetView<NameView>() != null), Is.True);
@@ -59,15 +65,15 @@ namespace Pulsar4X.Tests
 
             // Round-tripping a single entity yields the same identity.
             var first = snapshot.Entities.First();
-            var single = _server.GetEntitySnapshot(session, first.Id);
-            Assert.That(single!.Id, Is.EqualTo(first.Id));
+            Assert.That(_game.GlobalManager.TryGetGlobalEntityById(first.Id, out var entity), Is.True);
+            Assert.That(_projector.ProjectEntity(entity, session.FactionId).Id, Is.EqualTo(first.Id));
         }
 
         [Test]
         public void SystemSnapshot_projects_body_star_and_mass_views()
         {
             var session = Connect();
-            var entities = _server.GetSystemSnapshot(session, _game.Systems[0].ID).Entities;
+            var entities = ProjectSystem(session).Entities;
 
             // A generated system always has a star and orbiting bodies with mass.
             Assert.That(entities.Any(e => e.HasView<StarView>()), Is.True, "expected a StarView");
@@ -83,7 +89,7 @@ namespace Pulsar4X.Tests
         public void SystemSnapshot_classifies_body_kinds()
         {
             var session = Connect();
-            var entities = _server.GetSystemSnapshot(session, _game.Systems[0].ID).Entities;
+            var entities = ProjectSystem(session).Entities;
 
             Assert.That(entities.Any(e => e.Kind == BodyKind.Star), Is.True, "expected a star");
             Assert.That(
@@ -133,22 +139,22 @@ namespace Pulsar4X.Tests
         public void StepOnce_advances_the_clock()
         {
             var session = Connect();
-            var before = _server.GetTimeState(session).GameDateTime;
+            var before = _game.TimePulse.GameGlobalDateTime;
             var step = TimeSpan.FromDays(1);
 
             _server.SetTimeControl(session, new TimeControlRequest(TimeControlAction.StepOnce, StepLength: step));
 
-            Assert.That(_server.GetTimeState(session).GameDateTime, Is.EqualTo(before + step));
+            Assert.That(_game.TimePulse.GameGlobalDateTime, Is.EqualTo(before + step));
         }
 
         [Test]
-        public void SetSpeed_is_reflected_in_time_state()
+        public void SetSpeed_changes_the_clock_multiplier()
         {
             var session = Connect();
 
             _server.SetTimeControl(session, new TimeControlRequest(TimeControlAction.SetSpeed, Multiplier: 4f));
 
-            Assert.That(_server.GetTimeState(session).Multiplier, Is.EqualTo(4f));
+            Assert.That(_game.TimePulse.TimeMultiplier, Is.EqualTo(4f));
         }
 
         [Test]
@@ -167,7 +173,7 @@ namespace Pulsar4X.Tests
         {
             var session = Connect();
             // Default-visible bodies are neutral; the faction does not own them.
-            int neutralBodyId = _server.GetSystemSnapshot(session, _game.Systems[0].ID).Entities.First().Id;
+            int neutralBodyId = ProjectSystem(session).Entities.First().Id;
 
             var result = _server.SubmitCommand(session, new RenameCommand(neutralBodyId, "Mine Now"));
 
@@ -179,7 +185,7 @@ namespace Pulsar4X.Tests
         public void SubmitCommand_renames_an_owned_entity_and_the_effect_is_visible()
         {
             var session = Connect();
-            int bodyId = _server.GetSystemSnapshot(session, _game.Systems[0].ID).Entities.First().Id;
+            int bodyId = ProjectSystem(session).Entities.First().Id;
 
             // Give the connected faction ownership so it may command the entity.
             Assert.That(_game.GlobalManager.TryGetGlobalEntityById(bodyId, out var body), Is.True);
@@ -189,8 +195,8 @@ namespace Pulsar4X.Tests
             Assert.That(result.Accepted, Is.True, result.RejectionReason);
 
             // The engine applied the faction-scoped rename and the projection reflects it.
-            var snapshot = _server.GetEntitySnapshot(session, bodyId);
-            Assert.That(snapshot!.GetView<NameView>()!.Name, Is.EqualTo("Faction Renamed"));
+            Assert.That(_projector.ProjectEntity(body, session.FactionId).GetView<NameView>()!.Name,
+                Is.EqualTo("Faction Renamed"));
         }
     }
 }
