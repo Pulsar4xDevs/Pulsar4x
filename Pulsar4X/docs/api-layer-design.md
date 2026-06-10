@@ -92,12 +92,13 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    with a uniform ownership pre-check (a faction may only command entities it owns). `RenameCommand`
    is the ported reference. **Porting recipe for each remaining command:** (a) add a `GameCommand`
    DTO in Pulsar4X.Api; (b) make the engine's `CreateXxx` factory return the `HandleOrder` bool;
-   (c) add a translator method + one registry entry in `EngineGameServer`. Commands with a secondary
+   (c) add a `Translate*` method + one registry entry in `CommandTranslator`. Commands with a secondary
    target carry it as a DTO field the translator resolves (only the commanded entity is ownership-checked).
 4. **Read surface (in progress):** the engine-side projection now covers `Name`, `Position`, `Orbit`,
    `MassVolume`, `Body`, `Star`, `Colony`, and `Ship` views (8 of ~55). **Projection recipe per view:**
-   (a) add an `IComponentView` DTO in Pulsar4X.Api; (b) add a `TryGetDataBlob`→view block in
-   `EngineGameServer.Project`; (c) extend the snapshot test. Remaining: port the rest of the views, then
+   (a) add an `IComponentView` DTO in Pulsar4X.Api; (b) add one entry to `GameProjector.ViewProjectors`
+   (plus a small `To*View` helper if it needs logic); (c) extend the snapshot test. Remaining: port the
+   rest of the views, then
    the larger client-side step — rewire `EntityState`/`SystemState` (and the UI windows) to read these
    views via `IClientGalaxy` instead of live engine `Entity`/`DataBlob` objects. First UI ports done:
    the **Selector**'s system list reads `Galaxy.KnownSystems`, and the **TimeControl** reads

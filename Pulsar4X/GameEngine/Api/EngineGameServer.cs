@@ -3,37 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Pulsar4X.Api;
-using Pulsar4X.Colonies;
-using Pulsar4X.Datablobs;
-using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
-using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
-using Pulsar4X.Fleets;
-using Pulsar4X.Galaxy;
 using Pulsar4X.Messaging;
-using Pulsar4X.Names;
-using Pulsar4X.Orbits;
-using Pulsar4X.Ships;
 
 namespace Pulsar4X.Engine.Api
 {
     /// <summary>
-    /// The engine-side implementation of <see cref="IGameServer"/>: wraps a live <see cref="Game"/>
-    /// and projects it into the faction-scoped DTO contract defined in Pulsar4X.Api. It has no UI
-    /// dependency, so the same class backs both the in-process adapter and a headless dedicated server.
+    /// The engine-side implementation of <see cref="IGameServer"/>: wraps a live <see cref="Game"/> and
+    /// orchestrates sessions, commands, and the event stream. All translation of engine state into the
+    /// Pulsar4X.Api DTOs is delegated to <see cref="GameProjector"/>. It has no UI dependency, so the same
+    /// class backs both the in-process adapter and a headless dedicated server.
     /// </summary>
     public sealed class EngineGameServer : IGameServer, IDisposable
     {
         private readonly Game _game;
-
-        /// <summary>
-        /// Per-command-type translators: map an authorized API <see cref="GameCommand"/> to an engine
-        /// order and dispatch it. Adding a new command is one DTO (in Pulsar4X.Api) + one entry here.
-        /// Each translator runs only after <see cref="SubmitCommand"/> has resolved the commanded
-        /// entity and confirmed the faction owns it.
-        /// </summary>
-        private readonly Dictionary<Type, Func<Entity, Entity, GameCommand, CommandResult>> _translators;
+        private readonly GameProjector _projector;
+        private readonly CommandTranslator _commands;
 
         // Active subscriptions. Time is global, but faction snapshots (funds) differ per subscriber, so
         // we track the subscriptions (which know their faction), not bare sinks.
@@ -44,10 +30,8 @@ namespace Pulsar4X.Engine.Api
         public EngineGameServer(Game game)
         {
             _game = game;
-            _translators = new Dictionary<Type, Func<Entity, Entity, GameCommand, CommandResult>>
-            {
-                [typeof(Pulsar4X.Api.RenameCommand)] = TranslateRename,
-            };
+            _projector = new GameProjector(game);
+            _commands = new CommandTranslator(game);
 
             // The clock advances on the engine thread with no per-tick request from clients; push a
             // TimeChanged delta (and a refreshed faction snapshot — funds track the economy) whenever it
@@ -87,39 +71,7 @@ namespace Pulsar4X.Engine.Api
 
         // ----- time -----
 
-        public TimeState GetTimeState(PlayerSession session) => ToTimeState(_game.TimePulse);
-
-        private static TimeState ToTimeState(MasterTimePulse tp)
-            => new TimeState(tp.GameGlobalDateTime, tp.IsRunning, tp.TimeMultiplier, tp.Ticklength, tp.TickFrequency);
-
-        // Control changes (pause/start/speed/tick) don't move the economy, so push only the clock.
-        private void BroadcastTimeChanged()
-        {
-            var evt = new GameEventEnvelope(GameEventType.TimeChanged, Time: ToTimeState(_game.TimePulse));
-            foreach (var sub in SnapshotSubscriptions())
-                sub.Send(evt);
-        }
-
-        // A clock advance refreshes both the time and each subscriber's (funds-bearing) faction snapshot.
-        private void OnGlobalDateChanged()
-        {
-            var time = new GameEventEnvelope(GameEventType.TimeChanged, Time: ToTimeState(_game.TimePulse));
-            foreach (var sub in SnapshotSubscriptions())
-            {
-                sub.Send(time);
-                var faction = BuildFactionSnapshot(sub.FactionId);
-                if (faction != null)
-                    sub.Send(new GameEventEnvelope(GameEventType.FactionChanged, Faction: faction));
-            }
-        }
-
-        private FactionSnapshot? BuildFactionSnapshot(int factionId)
-        {
-            if (!_game.Factions.TryGetValue(factionId, out var faction)) return null;
-            if (!faction.TryGetDataBlob<FactionInfoDB>(out var info)) return null;
-            string name = faction.TryGetDataBlob<NameDB>(out var nameDB) ? nameDB.OwnersName : factionId.ToString();
-            return new FactionSnapshot(name, info.Abbreviation, info.Money.GetCurrentFunds());
-        }
+        public TimeState GetTimeState(PlayerSession session) => _projector.ProjectTime();
 
         public void SetTimeControl(PlayerSession session, TimeControlRequest request)
         {
@@ -153,6 +105,27 @@ namespace Pulsar4X.Engine.Api
             BroadcastTimeChanged();
         }
 
+        // Control changes (pause/start/speed/tick) don't move the economy, so push only the clock.
+        private void BroadcastTimeChanged()
+        {
+            var evt = new GameEventEnvelope(GameEventType.TimeChanged, Time: _projector.ProjectTime());
+            foreach (var sub in SnapshotSubscriptions())
+                sub.Send(evt);
+        }
+
+        // A clock advance refreshes both the time and each subscriber's (funds-bearing) faction snapshot.
+        private void OnGlobalDateChanged()
+        {
+            var time = new GameEventEnvelope(GameEventType.TimeChanged, Time: _projector.ProjectTime());
+            foreach (var sub in SnapshotSubscriptions())
+            {
+                sub.Send(time);
+                var faction = _projector.ProjectFaction(sub.FactionId);
+                if (faction != null)
+                    sub.Send(new GameEventEnvelope(GameEventType.FactionChanged, Faction: faction));
+            }
+        }
+
         // ----- commands -----
 
         public CommandResult SubmitCommand(PlayerSession session, GameCommand command)
@@ -172,73 +145,21 @@ namespace Pulsar4X.Engine.Api
             if (commanded.FactionOwnerID != session.FactionId)
                 return CommandResult.Reject("Faction does not control the commanded entity.");
 
-            if (!_translators.TryGetValue(command.GetType(), out var translate))
-                return CommandResult.Reject($"Unsupported command: {command.GetType().Name}");
-
-            return translate(faction, commanded, command);
+            return _commands.Translate(faction, commanded, command);
         }
 
-        // Fully qualified engine order type: it shares its name with the API DTO.
-        private CommandResult TranslateRename(Entity faction, Entity commanded, GameCommand command)
-        {
-            var rename = (Pulsar4X.Api.RenameCommand)command;
-            bool accepted = Pulsar4X.Names.RenameCommand.CreateRenameCommand(_game, faction, commanded, rename.NewName);
-            return accepted
-                ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
-                : CommandResult.Reject("Command rejected by engine validation.");
-        }
-
-        // ----- queries -----
+        // ----- queries (faction-scoped reads, delegated to the projector) -----
 
         public IReadOnlyList<SystemSummary> GetKnownSystems(PlayerSession session)
-        {
-            var result = new List<SystemSummary>();
-            if (!_game.Factions.TryGetValue(session.FactionId, out var faction))
-                return result;
-
-            foreach (var systemId in faction.GetDataBlob<FactionInfoDB>().KnownSystems)
-            {
-                var system = FindSystem(systemId);
-                if (system != null)
-                    result.Add(new SystemSummary(system.ID, system.NameDB.GetName(session.FactionId)));
-            }
-            return result;
-        }
+            => _projector.ProjectKnownSystems(session.FactionId);
 
         public SystemSnapshot GetSystemSnapshot(PlayerSession session, string systemId)
-        {
-            var system = FindSystem(systemId)
-                ?? throw new ArgumentException($"Unknown system '{systemId}'.", nameof(systemId));
-            return BuildSystemSnapshot(system, session.FactionId);
-        }
-
-        // Faction-scoped snapshot of a whole system. Shared by the bulk query and the SystemRevealed
-        // push so a reveal ships the system and its visible entities in one self-contained delta.
-        private SystemSnapshot BuildSystemSnapshot(StarSystem system, int factionId)
-        {
-            // Mirror the client's SystemState: make this faction aware of the system's
-            // default-visible neutral bodies (stars, planets, …) before filtering.
-            system.SetupDefaultNeutralEntitiesForFaction(factionId);
-
-            const EntityFilter all = EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile;
-            var visible = system.GetFilteredEntities(all, factionId);
-
-            var entities = new List<EntitySnapshot>(visible.Count);
-            foreach (var entity in visible)
-                entities.Add(Project(entity, factionId));
-
-            return new SystemSnapshot
-            {
-                SystemId = system.ID,
-                Name = system.NameDB.GetName(factionId),
-                DateTime = system.StarSysDateTime,
-                Entities = entities,
-            };
-        }
+            => _projector.ProjectSystem(systemId, session.FactionId)
+               ?? throw new ArgumentException($"Unknown system '{systemId}'.", nameof(systemId));
 
         public EntitySnapshot? GetEntitySnapshot(PlayerSession session, int entityId)
             => _game.GlobalManager.TryGetGlobalEntityById(entityId, out var entity)
-                ? Project(entity, session.FactionId)
+                ? _projector.ProjectEntity(entity, session.FactionId)
                 : null;
 
         // ----- events -----
@@ -247,204 +168,34 @@ namespace Pulsar4X.Engine.Api
             => new ServerSubscription(this, session, handler);
 
         // Pushed to a subscriber immediately on Subscribe so the client gets its starting state with no
-        // fetch: the current time, then every system this faction already knows (with its visible
-        // entities). Thereafter deltas keep it current.
+        // fetch: time + faction, then every system this faction already knows (with its visible
+        // entities), then the fleet hierarchy. Thereafter deltas keep it current.
         private void PushInitialState(PlayerSession session, Action<GameEventEnvelope> sink)
         {
-            sink(new GameEventEnvelope(GameEventType.TimeChanged, Time: ToTimeState(_game.TimePulse)));
+            sink(new GameEventEnvelope(GameEventType.TimeChanged, Time: _projector.ProjectTime()));
 
-            var factionSnapshot = BuildFactionSnapshot(session.FactionId);
-            if (factionSnapshot != null)
-                sink(new GameEventEnvelope(GameEventType.FactionChanged, Faction: factionSnapshot));
+            var faction = _projector.ProjectFaction(session.FactionId);
+            if (faction != null)
+                sink(new GameEventEnvelope(GameEventType.FactionChanged, Faction: faction));
 
-            if (!_game.Factions.TryGetValue(session.FactionId, out var faction))
-                return;
-
-            foreach (var systemId in faction.GetDataBlob<FactionInfoDB>().KnownSystems)
+            if (_game.Factions.TryGetValue(session.FactionId, out var factionEntity))
             {
-                var system = FindSystem(systemId);
-                if (system == null) continue;
-                sink(new GameEventEnvelope(
-                    GameEventType.SystemRevealed,
-                    systemId,
-                    System: BuildSystemSnapshot(system, session.FactionId)));
-            }
-
-            sink(new GameEventEnvelope(GameEventType.FleetsChanged, Fleets: BuildFleetSnapshots(session.FactionId)));
-        }
-
-        // ----- projection helpers -----
-
-        private static EntitySnapshot Project(Entity entity, int factionId)
-        {
-            var views = new List<IComponentView>(6);
-
-            if (entity.TryGetDataBlob<NameDB>(out var name))
-                views.Add(new NameView(name.GetName(factionId)));
-
-            if (entity.TryGetDataBlob<Pulsar4X.Movement.PositionDB>(out var pos))
-                views.Add(new PositionView(
-                    new Vec3(pos.AbsolutePosition.X, pos.AbsolutePosition.Y, pos.AbsolutePosition.Z),
-                    new Vec3(pos.RelativePosition.X, pos.RelativePosition.Y, pos.RelativePosition.Z),
-                    pos.Parent?.Id));
-
-            if (entity.TryGetDataBlob<OrbitDB>(out var orbit))
-                views.Add(new OrbitView(
-                    orbit.SemiMajorAxis / 1000.0,       // engine stores SMA in metres
-                    orbit.Eccentricity,
-                    orbit.OrbitalPeriod.TotalSeconds,
-                    orbit.Parent?.Id));
-
-            if (entity.TryGetDataBlob<MassVolumeDB>(out var mass))
-                views.Add(new MassVolumeView(mass.MassTotal, mass.RadiusInM, mass.DensityDry_gcm));
-
-            if (entity.TryGetDataBlob<SystemBodyInfoDB>(out var body))
-                views.Add(new BodyView(
-                    body.BodyType.ToDescription(),
-                    body.Gravity,
-                    body.BaseTemperature,
-                    body.LengthOfDay,
-                    body.AxialTilt,
-                    body.Tectonics.ToDescription(),
-                    body.MagneticField,
-                    body.SupportsPopulations));
-
-            if (entity.TryGetDataBlob<StarInfoDB>(out var star))
-                views.Add(new StarView(
-                    star.SpectralType.ToDescription(),
-                    star.SpectralSubDivision,
-                    star.Class,
-                    star.LuminosityClass.ToString(),
-                    star.Temperature,
-                    star.Luminosity,
-                    star.Age,
-                    star.MinHabitableRadius_AU,
-                    star.MaxHabitableRadius_AU));
-
-            if (entity.TryGetDataBlob<ColonyInfoDB>(out var colony))
-            {
-                long population = 0;
-                foreach (var speciesPop in colony.Population.Values)
-                    population += speciesPop;
-                int? planetId = colony.PlanetEntity.IsValid ? colony.PlanetEntity.Id : null;
-                views.Add(new ColonyView(population, planetId));
-            }
-
-            if (entity.TryGetDataBlob<ShipInfoDB>(out var ship))
-                views.Add(new ShipView(ship.Design.Name));
-
-            return new EntitySnapshot
-            {
-                Id = entity.Id,
-                FactionId = entity.FactionOwnerID,
-                Relation = RelationOf(entity, factionId),
-                Kind = ClassifyKind(entity),
-                Views = views,
-            };
-        }
-
-        // Mirrors the client's former Utils.EntityBodyType so the body classification is computed once,
-        // server-side, and travels in the snapshot.
-        private static BodyKind ClassifyKind(Entity entity)
-        {
-            if (entity.TryGetDataBlob<SystemBodyInfoDB>(out var body))
-            {
-                switch (body.BodyType)
+                foreach (var systemId in factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems)
                 {
-                    case BodyType.Asteroid: return BodyKind.Asteroid;
-                    case BodyType.Comet: return BodyKind.Comet;
-                    case BodyType.DwarfPlanet: return BodyKind.DwarfPlanet;
-                    case BodyType.Moon: return BodyKind.Moon;
-                    case BodyType.GasDwarf:
-                    case BodyType.GasGiant:
-                    case BodyType.IceGiant:
-                    case BodyType.Terrestrial: return BodyKind.Planet;
-                }
-            }
-            if (entity.HasDataBlob<StarInfoDB>()) return BodyKind.Star;
-            if (entity.HasDataBlob<ColonyInfoDB>()) return BodyKind.Colony;
-            if (entity.HasDataBlob<ShipInfoDB>()) return BodyKind.Ship;
-            return BodyKind.Unknown;
-        }
-
-        private static OwnerRelation RelationOf(Entity entity, int factionId)
-        {
-            if (entity.FactionOwnerID == factionId) return OwnerRelation.Owned;
-            if (entity.FactionOwnerID == Game.NeutralFactionId) return OwnerRelation.Neutral;
-            return OwnerRelation.Hostile;
-        }
-
-        private StarSystem? FindSystem(string systemId)
-            => _game.Systems.FirstOrDefault(s => s.ID == systemId);
-
-        // ----- fleet hierarchy projection -----
-
-        private List<FleetSnapshot> BuildFleetSnapshots(int factionId)
-        {
-            var result = new List<FleetSnapshot>();
-            if (!_game.Factions.TryGetValue(factionId, out var faction)) return result;
-            if (!faction.TryGetDataBlob<FleetDB>(out var factionFleet)) return result;
-
-            var roots = factionFleet.RootDB?.Children;
-            if (roots == null) return result;
-
-            foreach (var fleet in roots)
-            {
-                // Ships only appear nested under a fleet, never as roots.
-                if (fleet.HasDataBlob<ShipInfoDB>()) continue;
-                result.Add(ProjectFleet(fleet, factionId));
-            }
-            return result;
-        }
-
-        private static FleetSnapshot ProjectFleet(Entity fleet, int factionId)
-        {
-            fleet.TryGetDataBlob<FleetDB>(out var fleetDB);
-            int flagshipId = fleetDB?.FlagShipID ?? -1;
-
-            var subFleets = new List<FleetSnapshot>();
-            var ships = new List<ShipSnapshot>();
-            if (fleetDB != null)
-            {
-                foreach (var child in fleetDB.GetChildren())
-                {
-                    if (child.HasDataBlob<FleetDB>())
-                        subFleets.Add(ProjectFleet(child, factionId));
-                    else
-                        ships.Add(new ShipSnapshot(child.Id, child.GetName(factionId), child.Manager?.ManagerID ?? ""));
+                    var system = _projector.ProjectSystem(systemId, session.FactionId);
+                    if (system != null)
+                        sink(new GameEventEnvelope(GameEventType.SystemRevealed, systemId, System: system));
                 }
             }
 
-            var orders = new List<string>();
-            if (fleet.TryGetDataBlob<OrderableDB>(out var orderable))
-                foreach (var action in orderable.ActionList)
-                    orders.Add(action.Name);
-
-            string? location = null;
-            if (flagshipId >= 0 && fleet.Manager != null
-                && fleet.Manager.TryGetEntityById(flagshipId, out var flagship)
-                && flagship.TryGetDataBlob<Pulsar4X.Movement.PositionDB>(out var pos))
-            {
-                location = pos.Parent?.GetName(factionId);
-            }
-
-            return new FleetSnapshot
-            {
-                Id = fleet.Id,
-                Name = fleet.GetName(factionId),
-                FlagshipId = flagshipId >= 0 ? flagshipId : null,
-                FlagshipLocationName = location,
-                Orders = orders,
-                SubFleets = subFleets,
-                Ships = ships,
-            };
+            sink(new GameEventEnvelope(GameEventType.FleetsChanged, Fleets: _projector.ProjectFleets(session.FactionId)));
         }
 
         /// <summary>
         /// One subscriber's live feed. Bridges the engine's <see cref="MessagePublisher"/> (faction-
-        /// filtered) into self-contained <see cref="GameEventEnvelope"/>s — projecting the affected
-        /// entity so the client needs no follow-up request — and registers the sink for the global time
-        /// broadcast. Disposing unsubscribes and deregisters.
+        /// filtered) into self-contained <see cref="GameEventEnvelope"/>s — delegating to the server's
+        /// <see cref="GameProjector"/> for payloads so the client needs no follow-up request — and
+        /// registers for the global time/faction broadcast. Disposing unsubscribes and deregisters.
         /// </summary>
         private sealed class ServerSubscription : IDisposable
         {
@@ -494,10 +245,12 @@ namespace Pulsar4X.Engine.Api
 
             private Task Forward(GameEventType type, Message m)
             {
+                var projector = _server._projector;
+
                 // A fleet reorganisation just re-pushes the faction's whole fleet tree.
                 if (type == GameEventType.FleetsChanged)
                 {
-                    _sink(new GameEventEnvelope(GameEventType.FleetsChanged, Fleets: _server.BuildFleetSnapshots(_session.FactionId)));
+                    _sink(new GameEventEnvelope(GameEventType.FleetsChanged, Fleets: projector.ProjectFleets(_session.FactionId)));
                     return Task.CompletedTask;
                 }
 
@@ -510,15 +263,13 @@ namespace Pulsar4X.Engine.Api
                     && m.EntityId is { } id
                     && _server._game.GlobalManager.TryGetGlobalEntityById(id, out var e))
                 {
-                    entity = Project(e, _session.FactionId);
+                    entity = projector.ProjectEntity(e, _session.FactionId);
                 }
-                else if (type == GameEventType.SystemRevealed
-                    && m.SystemId is { } sysId
-                    && _server.FindSystem(sysId) is { } revealed)
+                else if (type == GameEventType.SystemRevealed && m.SystemId is { } sysId)
                 {
                     // Ship the whole revealed system — including every entity now visible to this
                     // faction — so the client adds it without pulling anything back.
-                    system = _server.BuildSystemSnapshot(revealed, _session.FactionId);
+                    system = projector.ProjectSystem(sysId, _session.FactionId);
                 }
 
                 _sink(new GameEventEnvelope(type, m.SystemId, m.EntityId, m.FactionId, Entity: entity, System: system));
@@ -526,7 +277,7 @@ namespace Pulsar4X.Engine.Api
                 // Entity creation/destruction/rename can reshape the fleet list (membership/names).
                 // Explicit fleet ops push via FleetReorganized; this backstops entity-level changes.
                 if (type is GameEventType.EntityAdded or GameEventType.EntityRemoved or GameEventType.EntityRenamed)
-                    _sink(new GameEventEnvelope(GameEventType.FleetsChanged, Fleets: _server.BuildFleetSnapshots(_session.FactionId)));
+                    _sink(new GameEventEnvelope(GameEventType.FleetsChanged, Fleets: projector.ProjectFleets(_session.FactionId)));
 
                 return Task.CompletedTask;
             }
