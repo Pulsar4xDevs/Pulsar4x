@@ -35,7 +35,7 @@ public class ComponentsWindow : PulsarGuiWindow
         return instance;
     }
 
-    private void DisplayComponentCategory(string label, List<string> templateIds, List<string> designIds)
+    private void DisplayComponentCategory(string label, List<string> templateIds, List<string> designIds, FactionInfoDB factionInfoDB)
     {
         if(ImGui.CollapsingHeader(label, ImGuiTreeNodeFlags.DefaultOpen))
         {
@@ -48,7 +48,7 @@ public class ComponentsWindow : PulsarGuiWindow
                 ImGui.Indent();
                 foreach(var templateId in templateIds.OrderBy(k => k))
                 {
-                    var template = _uiState.Faction.GetDataBlob<Pulsar4X.Factions.FactionInfoDB>().Data.ComponentTemplates[templateId];
+                    var template = factionInfoDB.Data.ComponentTemplates[templateId];
 
                     if(string.IsNullOrEmpty(_searchFilter) || template.Name.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase))
                     {
@@ -79,7 +79,7 @@ public class ComponentsWindow : PulsarGuiWindow
                 ImGui.Indent();
                 foreach(var designId in designIds.OrderBy(k => k))
                 {
-                    var design = _uiState.Faction.GetDataBlob<Pulsar4X.Factions.FactionInfoDB>().ComponentDesigns[designId];
+                    var design = factionInfoDB.ComponentDesigns[designId];
 
                     if(string.IsNullOrEmpty(_searchFilter) || design.Name.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase))
                     {
@@ -130,7 +130,15 @@ public class ComponentsWindow : PulsarGuiWindow
                 ImGui.EndMenuBar();
             }
 
-            var factionInfoDB = _uiState.Faction.GetDataBlob<Pulsar4X.Factions.FactionInfoDB>();
+            if(_uiState.GameClient is not IDesignDataProvider provider
+                || !provider.TryGetDesignData(out var factionInfoDB, out var factionTechDB))
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1.0f));
+                ImGui.Text("Design data is not available.");
+                ImGui.PopStyleColor();
+                Window.End();
+                return;
+            }
 
             // Header with search
             //ImGui.PushFont(_uiState.Fonts.NotoSans20);
@@ -171,7 +179,7 @@ public class ComponentsWindow : PulsarGuiWindow
                     }
 
                     if(templates.Count > 0 || designs.Count > 0)
-                        DisplayComponentCategory(componentType, templates, designs);
+                        DisplayComponentCategory(componentType, templates, designs, factionInfoDB);
                 }
 
                 ImGui.EndChild();
@@ -186,9 +194,9 @@ public class ComponentsWindow : PulsarGuiWindow
                 if(_selectedItem != null)
                 {
                     if(_selectedItem is ComponentTemplateBlueprint template)
-                        DisplayComponentTemplate(template);
+                        DisplayComponentTemplate(template, factionInfoDB, factionTechDB);
                     else if(_selectedItem is ComponentDesign design)
-                        DisplayComponentDesign(design);
+                        DisplayComponentDesign(design, factionInfoDB);
                 }
                 else
                 {
@@ -301,7 +309,7 @@ public class ComponentsWindow : PulsarGuiWindow
         ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(cardSize.X - 6, 3));
     }
 
-    private void DisplayComponentTemplate(ComponentTemplateBlueprint template)
+    private void DisplayComponentTemplate(ComponentTemplateBlueprint template, FactionInfoDB factionInfoDB, FactionTechDB factionTechDB)
     {
         // Header
         ImGui.Text($"📋 {template.Name}");
@@ -313,8 +321,6 @@ public class ComponentsWindow : PulsarGuiWindow
         ImGui.Spacing();
 
         // Create a designer to get calculated values
-        var factionInfoDB = _uiState.Faction.GetDataBlob<FactionInfoDB>();
-        var factionTechDB = _uiState.Faction.GetDataBlob<FactionTechDB>();
         ComponentDesigner designer;
 
         try
@@ -493,7 +499,7 @@ public class ComponentsWindow : PulsarGuiWindow
         }
     }
 
-    private void DisplayComponentDesign(ComponentDesign design)
+    private void DisplayComponentDesign(ComponentDesign design, FactionInfoDB factionInfoDB)
     {
         string statusIcon = design.IsValid ? "✅" : "❌";
         Vector4 statusColor = design.IsValid ? new Vector4(0.3f, 0.8f, 0.3f, 1.0f) : new Vector4(0.8f, 0.3f, 0.3f, 1.0f);
@@ -595,8 +601,6 @@ public class ComponentsWindow : PulsarGuiWindow
             ImGui.PopStyleColor();
             ImGui.Separator();
             ImGui.Spacing();
-
-            var factionInfoDB = _uiState.Faction.GetDataBlob<FactionInfoDB>();
 
             foreach(var kvp in design.ResourceCosts.OrderBy(kvp => kvp.Key))
             {

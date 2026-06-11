@@ -250,6 +250,13 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    (which the toolbar's "Commanders" button actually opened) along with its colony-hex-map button
    and the `ColonyHexMapWindow` + the engine-backed `PeopleChooser` overload, all of which it was
    the last user of; the toolbar/hotkey now open the new window.
+   The **ComponentsWindow** (the read-only component-library browser) is ported with zero new API
+   surface: everything it shows — the faction's unlocked `ComponentTemplates`, its
+   `ComponentDesigns`, cargo-good names, and the `ComponentDesigner` it constructs to evaluate a
+   template's default stats — already travels through the designer windows' `IDesignDataProvider`
+   bridge, so the port just swaps the live-faction `GetDataBlob` reads for the provider (with a
+   graceful "design data is not available" bail). No commands; same network-play caveat as the
+   other provider-bridged windows.
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
