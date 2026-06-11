@@ -187,6 +187,7 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    The Colonize button submits `CreateColonyCommand` (faction-targeted like `CreateFleet`; the
    server settles the faction's first species). The `BodyKind`→display-enum mapping moved from
    `Selector` to `UserOrbitSettings.FromBodyKind` for shared use with the map view-filter.
+   The **GalaxyWindow** (galaxy browser) reads `Galaxy.KnownSystems` — no new surface needed.
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
