@@ -412,7 +412,7 @@ public enum CommanderKind
 /// <summary>A commander's bonus for chooser tooltips; the filter target is pre-resolved to a display name.</summary>
 public sealed record CommanderBonusSnapshot(string Name, double Value, bool IsPercentage, string? FilterName);
 
-/// <summary>A faction commander (scientist, officer, …) for assignment UIs.</summary>
+/// <summary>A faction commander (scientist, officer, …) for the personnel roster and assignment UIs.</summary>
 public sealed record CommanderSnapshot(
     int Id,
     string Name,
@@ -423,6 +423,20 @@ public sealed record CommanderSnapshot(
     DateTime CommissionedOn)
 {
     public IReadOnlyList<CommanderBonusSnapshot> Bonuses { get; init; } = Array.Empty<CommanderBonusSnapshot>();
+
+    /// <summary>Numeric rank within the commander's career track.</summary>
+    public int Rank { get; init; }
+
+    /// <summary>Rank title resolved server-side from the game theme (e.g. "Captain"); null when the
+    /// theme has no title for this rank/track.</summary>
+    public string? RankName { get; init; }
+
+    /// <summary>When the commander reached their current rank.</summary>
+    public DateTime RankedOn { get; init; }
+
+    /// <summary>Display name of the current posting (commanded ship, lab, admin post), pre-resolved
+    /// server-side; null when unassigned.</summary>
+    public string? AssignmentName { get; init; }
 }
 
 /// <summary>The faction's research state: tech categories (game-static), every unlocked tech with

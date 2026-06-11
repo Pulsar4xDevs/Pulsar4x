@@ -70,7 +70,7 @@ public class SystemMapHotKeys : IHotKeyHandler
             }
             else if(e.Key.Key == SDL.Keycode.Alpha6)
             {
-                AdminWindow.GetInstance().ToggleActive();
+                CommanderWindow.GetInstance().ToggleActive();
             }
         }
     }

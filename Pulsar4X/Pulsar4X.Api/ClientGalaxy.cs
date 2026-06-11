@@ -25,6 +25,9 @@ public interface IClientGalaxy
 
     /// <summary>The faction's component templates and existing designs. Null until the first push.</summary>
     ComponentDesignsSnapshot? ComponentDesigns { get; }
+
+    /// <summary>Everyone in the faction's service (officers, scientists, administrators).</summary>
+    IReadOnlyList<CommanderSnapshot> Commanders { get; }
 }
 
 /// <summary>A single star system within the client galaxy model.</summary>

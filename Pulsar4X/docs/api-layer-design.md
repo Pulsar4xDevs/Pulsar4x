@@ -148,8 +148,8 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    advance): tech categories, every unlocked tech (`TechSnapshot` with progress, researchability,
    next-level unlock names pre-resolved server-side), and the faction's scientists
    (`CommanderSnapshot` incl. bonuses with resolved filter names, consumed by a snapshot-based
-   `DisplayHelpers.PeopleChooser` overload; the engine overload remains for the unported
-   AdminWindow). Because the research instant orders mutate DataBlobs without raising messages,
+   `DisplayHelpers.PeopleChooser` overload — now the only one; the engine-backed overload left with
+   the AdminWindow). Because the research instant orders mutate DataBlobs without raising messages,
    `SubmitCommand` now re-projects and pushes the commanded entity (`EntityChanged`) after every
    accepted command — a generic post-write refresh all windows benefit from.
    The **ColonyManagementWindow** is fully ported. Colony selection is by entity id + system id
@@ -237,6 +237,19 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    also fixes pre-port quirks: the edit flow used `ShipDesign.Clone` (which generates a fresh id) and
    re-registered edits as *new* designs, leaving the selection highlight broken and the version-bump
    branch unreachable — selection now tracks the original id and saves update in place.
+   The **CommanderWindow** was redesigned as part of its port: it's now the corporation's personnel
+   roster (every commander in a sortable table, click a row for a details pane — type, rank,
+   commissioned/promoted dates, experience, posting, bonuses). It reads `Galaxy.Commanders` — the
+   existing `CommanderSnapshot` extended with `Rank`/`RankName` (theme rank titles resolved
+   server-side; navy track only today), `RankedOn`, and `AssignmentName` (the posting's display
+   name: `AssignedTo` covers labs/admin posts, while ship command lives on `ShipInfoDB.CommanderID`,
+   so the projector reverse-maps it from the faction's fleet tree). The roster is pushed via
+   `CommandersChanged` on connect, each clock advance (experience/service time accrue), and after
+   every accepted command (assignment orders mutate commanders with no engine message). Read-only —
+   assignment stays with the owning windows' choosers. This port retired the old `AdminWindow`
+   (which the toolbar's "Commanders" button actually opened) along with its colony-hex-map button
+   and the `ColonyHexMapWindow` + the engine-backed `PeopleChooser` overload, all of which it was
+   the last user of; the toolbar/hotkey now open the new window.
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
@@ -259,7 +272,8 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
   `NavalAcademyView`, `IndustryView`, `ConstructionView`, `ColonizableView`, `MineralDepositsView`
   so far), `OwnerRelation`, `Vec3`, `ModifiedValue`/`ValueModifier`; fleet
   hierarchy: `FleetSnapshot`, `ShipSnapshot`, `OrderSnapshot`; research: `ResearchSnapshot`
-  (`TechCategorySnapshot`, `TechSnapshot`, `CommanderSnapshot`/`CommanderKind`/`CommanderBonusSnapshot`);
+  (`TechCategorySnapshot`, `TechSnapshot`, `CommanderSnapshot`/`CommanderKind`/`CommanderBonusSnapshot`
+  — `CommanderSnapshot` doubles as the personnel roster, pushed faction-wide via `CommandersChanged`);
   component design: `ComponentDesignsSnapshot` (`ComponentTemplateSummary`, `ComponentDesignSummary`)
   and `DesignerInput` (the serializable form of a designer's player-set state).
 - Writes: `GameCommand` (+ `RenameCommand`, `CreateFleetCommand`, `CreateColonyCommand`, `DisbandFleetCommand`,

@@ -49,7 +49,7 @@ namespace Pulsar4X.Ships
         #region Constructors
 
         [JsonConstructor]
-        private ShipInfoDB()
+        internal ShipInfoDB()
         {
         }
 

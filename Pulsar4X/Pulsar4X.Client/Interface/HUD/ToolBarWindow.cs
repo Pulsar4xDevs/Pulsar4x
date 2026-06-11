@@ -94,8 +94,8 @@ namespace Pulsar4X.Client
             {
                 Picture = _uiState.Img_Select(),
                 TooltipText = "Commanders",
-                OnClick = new Action(AdminWindow.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(AdminWindow.GetInstance().GetActive)
+                OnClick = new Action(CommanderWindow.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(CommanderWindow.GetInstance().GetActive)
             };
             ToolButtons.Add(btn);
 

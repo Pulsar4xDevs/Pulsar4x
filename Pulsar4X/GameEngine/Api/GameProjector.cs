@@ -741,8 +741,48 @@ namespace Pulsar4X.Engine.Api
             return new ResearchSnapshot { Categories = categories, Techs = techs, Scientists = scientists };
         }
 
+        // ----- commanders -----
+
+        /// <summary>Everyone in the faction's service, for the personnel roster. Faction-scoped:
+        /// only the faction's own commanders are ever projected.</summary>
+        public IReadOnlyList<CommanderSnapshot>? ProjectCommanders(int factionId)
+        {
+            if (!_game.Factions.TryGetValue(factionId, out var faction)) return null;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var info)) return null;
+
+            var shipCommands = MapShipCommands(faction, factionId);
+            var commanders = new List<CommanderSnapshot>(info.Commanders.Count);
+            foreach (var commander in info.Commanders)
+            {
+                if (!commander.IsValid || !commander.TryGetDataBlob<CommanderDB>(out var commanderDB))
+                    continue;
+                commanders.Add(ProjectCommander(commander, commanderDB, info.Data, factionId, shipCommands));
+            }
+            return commanders;
+        }
+
+        // Ship command isn't recorded on the commander (only lab/post assignments set AssignedTo), so
+        // reverse-map it from the faction's fleet tree: commander id → commanded ship's name.
+        private static Dictionary<int, string> MapShipCommands(Entity faction, int factionId)
+        {
+            var map = new Dictionary<int, string>();
+            if (faction.TryGetDataBlob<FleetDB>(out var factionFleet) && factionFleet.RootDB?.Children is { } roots)
+                foreach (var child in roots)
+                    AddShipCommands(child, factionId, map);
+            return map;
+        }
+
+        private static void AddShipCommands(Entity node, int factionId, Dictionary<int, string> map)
+        {
+            if (node.TryGetDataBlob<ShipInfoDB>(out var shipInfo) && shipInfo.CommanderID >= 0)
+                map[shipInfo.CommanderID] = node.GetName(factionId);
+            if (node.TryGetDataBlob<FleetDB>(out var fleetDB))
+                foreach (var child in fleetDB.GetChildren())
+                    AddShipCommands(child, factionId, map);
+        }
+
         private CommanderSnapshot ProjectCommander(Entity commander, CommanderDB commanderDB,
-            FactionDataStore data, int factionId)
+            FactionDataStore data, int factionId, IReadOnlyDictionary<int, string>? shipCommands = null)
         {
             var bonuses = new List<CommanderBonusSnapshot>();
             if (commander.TryGetDataBlob<BonusesDB>(out var bonusesDB))
@@ -766,16 +806,44 @@ namespace Pulsar4X.Engine.Api
                 }
             }
 
+            // A lab/post assignment is recorded on the commander; a ship command comes from the
+            // reverse map (when the caller supplied one). Either way the name is resolved here so
+            // the client never has to look the posting up.
+            string? assignment = null;
+            if (commanderDB.AssignedTo >= 0 && commander.Manager != null
+                && commander.Manager.TryGetGlobalEntityById(commanderDB.AssignedTo, out var post))
+            {
+                assignment = post.GetName(factionId);
+            }
+            else if (shipCommands != null && shipCommands.TryGetValue(commander.Id, out var shipName))
+            {
+                assignment = shipName;
+            }
+
+            // Only the navy track has theme rank titles today.
+            string? rankName = null;
+            if (commanderDB.Type == DataStructures.CommanderTypes.Navy
+                && _game.Themes.TryGetValue(_game.Settings.CurrentTheme, out var theme)
+                && theme.NavyRanks != null
+                && theme.NavyRanks.TryGetValue(commanderDB.Rank, out var title))
+            {
+                rankName = title;
+            }
+
             return new CommanderSnapshot(
                 commander.Id,
                 commander.GetName(factionId),
                 ToCommanderKind(commanderDB.Type),
-                commanderDB.AssignedTo >= 0,
+                commanderDB.AssignedTo >= 0 || assignment != null,
                 commanderDB.Experience,
                 commanderDB.ExperienceCap,
                 commanderDB.CommissionedOn)
             {
                 Bonuses = bonuses,
+                Rank = commanderDB.Rank,
+                RankName = rankName,
+                RankedOn = commanderDB.RankedOn,
+                AssignmentName = assignment,
             };
         }
 

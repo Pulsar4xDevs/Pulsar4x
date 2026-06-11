@@ -127,6 +127,9 @@ namespace Pulsar4X.Engine.Api
                 var research = _projector.ProjectResearch(sub.FactionId);
                 if (research != null)
                     sub.Send(new GameEventEnvelope(GameEventType.ResearchChanged, Research: research));
+                var commanders = _projector.ProjectCommanders(sub.FactionId);
+                if (commanders != null)
+                    sub.Send(new GameEventEnvelope(GameEventType.CommandersChanged, Commanders: commanders));
                 RefreshColonies(sub);
             }
         }
@@ -187,6 +190,10 @@ namespace Pulsar4X.Engine.Api
             {
                 PushEntityRefresh(commanded, session.FactionId);
 
+                // Assignment commands re-post commanders with no engine message; the roster is tiny,
+                // so re-push it after every accepted command rather than special-casing them.
+                PushCommanders(session.FactionId);
+
                 // A new component design also registers a research project for itself.
                 if (command is CreateComponentDesignCommand)
                     PushComponentDesigns(session.FactionId);
@@ -221,6 +228,16 @@ namespace Pulsar4X.Engine.Api
                 if (research != null)
                     sub.Send(new GameEventEnvelope(GameEventType.ResearchChanged, Research: research));
             }
+        }
+
+        private void PushCommanders(int factionId)
+        {
+            var commanders = _projector.ProjectCommanders(factionId);
+            if (commanders == null) return;
+            var evt = new GameEventEnvelope(GameEventType.CommandersChanged, Commanders: commanders);
+            foreach (var sub in SnapshotSubscriptions())
+                if (sub.FactionId == factionId)
+                    sub.Send(evt);
         }
 
         private void PushEntityRefresh(Entity commanded, int factionId)
@@ -269,6 +286,10 @@ namespace Pulsar4X.Engine.Api
             var designs = _projector.ProjectComponentDesigns(session.FactionId);
             if (designs != null)
                 sink(new GameEventEnvelope(GameEventType.ComponentDesignsChanged, ComponentDesigns: designs));
+
+            var commanders = _projector.ProjectCommanders(session.FactionId);
+            if (commanders != null)
+                sink(new GameEventEnvelope(GameEventType.CommandersChanged, Commanders: commanders));
         }
 
         /// <summary>
