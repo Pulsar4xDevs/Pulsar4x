@@ -119,7 +119,7 @@ namespace Pulsar4X.Client
                     }
                     if(selectedColony.GetView<ColonyMiningView>() is { } mining && ImGui.BeginTabItem("Mining"))
                     {
-                        DisplayMining(mining);
+                        mining.Display();
                         ImGui.EndTabItem();
                     }
                     if(selectedColony.GetView<NavalAcademyView>() is { } academy && ImGui.BeginTabItem("Naval Academy"))
@@ -192,7 +192,7 @@ namespace Pulsar4X.Client
             ImGui.SameLine();
             if(ImGui.BeginChild("ColonySummary2", secondChildSize, ImGuiChildFlags.Borders))
             {
-                DisplayPopulation(colony.Id, colonyView);
+                colonyView?.Display(colony.Id);
                 ImGui.Columns(1);
 
                 if(colony.GetView<InfrastructureView>() is { } infrastructure
@@ -266,113 +266,6 @@ namespace Pulsar4X.Client
                 }
             }
             ImGui.EndChild();
-        }
-
-        private void DisplayPopulation(int colonyId, ColonyView? colonyView)
-        {
-            if(colonyView == null) return;
-
-            ImGui.PushID("###Population " + colonyId);
-            ImGui.Columns(1);
-            if(ImGui.CollapsingHeader("Population", ImGuiTreeNodeFlags.DefaultOpen))
-            {
-                ImGui.Columns(2);
-
-                foreach(var species in colonyView.SpeciesPopulations)
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                    ImGui.Text(species.SpeciesName);
-                    ImGui.PopStyleColor();
-                    ImGui.NextColumn();
-                    ImGui.Text(Stringify.Quantity(species.Population, "0.##", true));
-                    ImGui.NextColumn();
-                }
-
-                ImGui.Columns(1);
-            }
-            ImGui.PopID();
-        }
-
-        private void DisplayMining(ColonyMiningView mining)
-        {
-            Vector2 topSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("NumberOfMines", new Vector2(topSize.X, 28f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-            {
-                ImGui.Text("Number of Mines:");
-                if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip("You can build more mines on this colony using the Production tab.");
-                ImGui.SameLine();
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-                ImGui.Text(mining.NumberOfMines.ToString());
-                ImGui.PopStyleColor();
-            }
-            ImGui.EndChild();
-
-            if(ImGui.BeginTable("###MineralTable", 6, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
-            {
-                ImGui.TableSetupColumn("Mineral");
-                ImGui.TableSetupColumn("Stockpile");
-                ImGui.TableSetupColumn("Available to Mine");
-                ImGui.TableSetupColumn("Accessibility");
-                ImGui.TableSetupColumn("Annual Production");
-                ImGui.TableSetupColumn("Years to Depletion");
-                ImGui.TableHeadersRow();
-
-                foreach(var mineral in mining.Minerals)
-                {
-                    ImGui.TableNextRow();
-                    ImGui.TableNextColumn();
-                    ImGui.Text(mineral.Name);
-                    if(ImGui.IsItemHovered())
-                        DisplayHelpers.DescriptiveTooltip(mineral.Name, "Mineral", mineral.Description);
-                    ImGui.TableNextColumn();
-                    ImGui.Text(mineral.Stockpile?.ToString("#,###,###,###,###,###,##0") ?? "Unavailable");
-                    if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Amount of " + mineral.Name + " available for use in the colony stockpile.");
-
-                    ImGui.TableNextColumn();
-                    ImGui.Text(mineral.AvailableToMine?.ToString("#,###,###,###,###,###,##0") ?? "N/A");
-                    if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Amount of " + mineral.Name + " available that can be mined from this colony.");
-                    ImGui.TableNextColumn();
-                    ImGui.Text(mineral.Accessibility.ToString("0.00"));
-                    if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("How easy it is to mine " + mineral.Name + " from this colony.\n\n1.0 = easiest\n0.0 = hardest");
-                    ImGui.TableNextColumn();
-                    if(mineral.CanMine)
-                    {
-                        ImGui.Text(mineral.AnnualProduction.ToString("#,###,###"));
-                        if(ImGui.IsItemHovered())
-                            ImGui.SetTooltip("Annual production of " + mineral.Name + " from this colony.");
-                    }
-                    else
-                    {
-                        ImGui.Text("-");
-                        if(ImGui.IsItemHovered())
-                            ImGui.SetTooltip("This colony is currently unable to mine " + mineral.Name + ".");
-                    }
-                    ImGui.TableNextColumn();
-                    if(mineral.AnnualProduction > 0)
-                    {
-                        var amount = mineral.AvailableToMine ?? 0;
-                        string yearsToDepletion = System.Math.Round((double)amount / (double)mineral.AnnualProduction, 4).ToString("#.0");
-                        ImGui.Text(yearsToDepletion);
-                        if(ImGui.IsItemHovered())
-                            ImGui.SetTooltip("The colony will exhaust the available " + mineral.Name + " in " + yearsToDepletion + " years.");
-                    }
-                    else
-                    {
-                        ImGui.Text("-");
-                    }
-                }
-
-                ImGui.EndTable();
-
-                if(mining.Minerals.Count == 0)
-                {
-                    ImGui.Text("No minerals available.");
-                }
-            }
         }
 
         private void DisplayNavalAcademy(int colonyId, NavalAcademyView academy)

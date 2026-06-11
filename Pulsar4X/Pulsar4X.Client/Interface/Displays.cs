@@ -16,6 +16,34 @@ namespace Pulsar4X.Client.Interface;
 
 public class Displays
 {
+    /// <summary>Snapshot-based gravitational-anomaly display for UI ported to the API galaxy model.</summary>
+    public static void GravitationalAnomlay(Pulsar4X.Api.GravSurveyView gravSurvey)
+    {
+        ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+        ImGui.TextWrapped("Order a fleet equipped with a gravitational surveyor here. A successful survey may reveal a Jump Point to another system.");
+        ImGui.PopStyleColor();
+
+        ImGui.Columns(2, "##anomaly-tooltip", false);
+        ImGui.SetColumnWidth(0, 140);
+
+        TooltipLabel("Gravity Survey");
+        if(gravSurvey.IsSurveyComplete)
+        {
+            ImGui.TextColored(Styles.GoodColor, "Complete");
+        }
+        else if(gravSurvey.HasSurveyStarted)
+        {
+            ImGui.TextColored(Styles.OkColor, "In progress " + gravSurvey.PercentComplete.ToString("0.#") + "%");
+        }
+        else
+        {
+            ImGui.TextColored(Styles.BadColor, "Not started");
+        }
+        ImGui.NextColumn();
+
+        ImGui.Columns(1);
+    }
+
     /// <summary>
     /// Display tooltip for a gravitational anomaly.
     /// </summary>

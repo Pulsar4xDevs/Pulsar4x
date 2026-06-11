@@ -122,7 +122,8 @@ public sealed record StarView(
     double Luminosity,
     double AgeYears,
     double MinHabitableRadiusAu,
-    double MaxHabitableRadiusAu) : IComponentView;
+    double MaxHabitableRadiusAu,
+    string LuminosityClassDescription = "") : IComponentView;
 
 public sealed record ColonyView(long Population, int? PlanetEntityId) : IComponentView
 {
@@ -137,7 +138,10 @@ public sealed record InfrastructureView(
     long CapacityProvided,
     long CapacityRequired,
     long CapacityAvailable,
-    double Efficiency) : IComponentView;
+    double Efficiency,
+    /// <summary>True once at least one infrastructure installation is physically present (even if
+    /// disabled by environment tolerances) — the colony counts as established.</summary>
+    bool HasInstalledInfrastructure = false) : IComponentView;
 
 /// <summary>The installations on a colony (or components on a ship), grouped by design.</summary>
 public sealed record InstallationsView(IReadOnlyList<InstallationGroup> Installations) : IComponentView;
@@ -152,23 +156,68 @@ public sealed record InstallationGroup(
     /// <summary>Whether one of these can be uninstalled into the entity's cargo storage.</summary>
     bool CanStore);
 
-public sealed record ShipView(string DesignName) : IComponentView;
+public sealed record ShipView(
+    string DesignName,
+    int CrewRequired = 0,
+    string? CommanderName = null,
+    /// <summary>Average component health 0–1 across all installed components.</summary>
+    double AverageComponentHealth = 1,
+    int OperationalComponents = 0,
+    int TotalComponents = 0,
+    /// <summary>0 when the ship has no armor.</summary>
+    double ArmorThicknessMm = 0) : IComponentView;
+
+/// <summary>Newtonian propulsion stats; ΔV values are pre-computed server-side.</summary>
+public sealed record ThrustView(
+    double ThrustNewtons,
+    double FuelBurnRateKgPerSec,
+    double ExhaustVelocityMps,
+    double DeltaVMps,
+    /// <summary>ΔV at full fuel tanks; 0 when it can't be determined.</summary>
+    double MaxDeltaVMps) : IComponentView;
+
+public sealed record WarpAbilityView(double MaxSpeedMps) : IComponentView;
+
+/// <summary>Present while the entity is mid-warp; carries the current warp speed.</summary>
+public sealed record WarpMovingView(double SpeedMps) : IComponentView;
 
 /// <summary>Geological survey state of a body, scoped to the requesting faction.</summary>
 public sealed record GeoSurveyView(
     bool IsSurveyComplete,
     bool HasSurveyStarted = false,
     /// <summary>0–100, only meaningful once the survey has started.</summary>
-    double PercentComplete = 0) : IComponentView;
+    double PercentComplete = 0,
+    long PointsRequired = 0,
+    long PointsCompleted = 0) : IComponentView;
 
 /// <summary>Marks a body the faction could found a colony on (once geo-surveyed).</summary>
 public sealed record ColonizableView : IComponentView;
 
-/// <summary>Marks a body as having mineral deposits (amounts surface via <see cref="ColonyMiningView"/>).</summary>
-public sealed record MineralDepositsView : IComponentView;
+/// <summary>How much the requesting faction knows about a value behind survey masking.</summary>
+public enum DepositAccess
+{
+    None,
+    Partial,
+    Full,
+}
+
+/// <summary>A body's mineral deposits, masked to the requesting faction's survey knowledge
+/// (amounts are pre-obscured server-side at partial access).</summary>
+public sealed record MineralDepositsView(IReadOnlyList<MineralDepositRow> Deposits) : IComponentView;
+
+public sealed record MineralDepositRow(
+    int MineralId,
+    string Name,
+    DepositAccess Access,
+    long Amount,
+    double Accessibility);
 
 /// <summary>Gravitational (jump-point) survey state of a location, scoped to the requesting faction.</summary>
-public sealed record GravSurveyView(bool IsSurveyComplete) : IComponentView;
+public sealed record GravSurveyView(
+    bool IsSurveyComplete,
+    bool HasSurveyStarted = false,
+    /// <summary>0–100, only meaningful once the survey has started.</summary>
+    double PercentComplete = 0) : IComponentView;
 
 /// <summary>Marks an entity as a usable jump point. Only projected once the requesting faction has
 /// discovered it, so visibility is enforced at the boundary.</summary>
@@ -392,7 +441,17 @@ public sealed class ResearchSnapshot
 // --------------------------------------------------------------------------------------------
 
 /// <summary>One queued order on a fleet or ship, with its execution state (for lists/tooltips).</summary>
-public sealed record OrderSnapshot(string Name, bool IsRunning, bool IsFinished);
+public sealed record OrderSnapshot(
+    string Name,
+    bool IsRunning,
+    bool IsFinished,
+    string Details = "",
+    /// <summary>True for a not-yet-running thrust maneuver the player can still edit/delete.</summary>
+    bool IsEditableManeuver = false);
+
+/// <summary>The entity's own order queue (owner-only; fleets/ships also carry orders in the
+/// fleet-hierarchy snapshots, this view serves per-entity UI like the entity window).</summary>
+public sealed record OrdersView(IReadOnlyList<OrderSnapshot> Orders) : IComponentView;
 
 /// <summary>A ship as a fleet member: identity, the system it currently resides in, and the
 /// display details the fleet UI shows (design, commander, queued orders).</summary>

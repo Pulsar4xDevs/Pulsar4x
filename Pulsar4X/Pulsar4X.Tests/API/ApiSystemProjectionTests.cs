@@ -70,12 +70,14 @@ namespace Pulsar4X.Tests
             Assert.That(view!.IsSurveyComplete, Is.False);
             Assert.That(view.HasSurveyStarted, Is.False);
 
-            // Survey progress is faction-scoped and pre-computed as a percentage.
+            // Survey progress is faction-scoped and pre-computed as a percentage and point counts.
             body.GetDataBlob<GeoSurveyableDB>().GeoSurveyStatus[session.FactionId] = 75;
             view = _projector.ProjectEntity(body, session.FactionId).GetView<GeoSurveyView>();
             Assert.That(view!.HasSurveyStarted, Is.True);
             Assert.That(view.IsSurveyComplete, Is.False);
             Assert.That(view.PercentComplete, Is.EqualTo(25));
+            Assert.That(view.PointsRequired, Is.EqualTo(100));
+            Assert.That(view.PointsCompleted, Is.EqualTo(25));
 
             // Completing the survey for this faction flips its (faction-scoped) view.
             body.GetDataBlob<GeoSurveyableDB>().GeoSurveyStatus[session.FactionId] = 0;

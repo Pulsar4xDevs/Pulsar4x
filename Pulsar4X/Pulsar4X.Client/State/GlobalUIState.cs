@@ -853,7 +853,7 @@ namespace Pulsar4X.Client
             {
                 if (!EntityWindows.ContainsKey(entityGuid))
                 {
-                    EntityWindows.Add(entityGuid, new EntityWindow(entityState));
+                    EntityWindows.Add(entityGuid, new EntityWindow(entityGuid, starSys));
                 }
                 EntityWindows[entityGuid].ToggleActive();
 

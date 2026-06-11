@@ -133,22 +133,34 @@ namespace Pulsar4X.Engine.Api
             (e, _) => e.TryGetDataBlob<Pulsar4X.Movement.PositionDB>(out var p) ? ToPositionView(p) : null,
             (e, _) => e.TryGetDataBlob<OrbitDB>(out var o) ? ToOrbitView(o) : null,
             (e, _) => e.TryGetDataBlob<MassVolumeDB>(out var m) ? new MassVolumeView(m.MassTotal, m.RadiusInM, m.DensityDry_gcm) : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<OrderableDB>(out var ord) && ord.ActionList.Count > 0
+                ? new OrdersView(ProjectOrders(e)) : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Movement.NewtonThrustAbilityDB>(out var th)
+                ? ToThrustView(th, e, f) : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Movement.WarpAbilityDB>(out var wa)
+                ? new WarpAbilityView(wa.MaxSpeed) : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Movement.WarpMovingDB>(out var wm)
+                ? new WarpMovingView(wm.CurrentNonNewtonionVectorMS.Length()) : null,
             (e, _) => e.TryGetDataBlob<SystemBodyInfoDB>(out var b) ? ToBodyView(b) : null,
             (e, _) => e.TryGetDataBlob<StarInfoDB>(out var s) ? ToStarView(s) : null,
             (e, f) => e.TryGetDataBlob<ColonyInfoDB>(out var c) ? ToColonyView(c, e, f) : null,
             (e, _) => e.TryGetDataBlob<AtmosphereDB>(out var a) ? ToAtmosphereView(a, a.OwningEntity?.Manager?.Game) : null,
-            (e, _) => e.TryGetDataBlob<ShipInfoDB>(out var sh) ? new ShipView(sh.Design.Name) : null,
+            // Non-owners see a ship's class but not its internals (health, armor, crew).
+            (e, f) => e.TryGetDataBlob<ShipInfoDB>(out var sh)
+                ? (e.FactionOwnerID == f ? ToShipView(sh, e, f) : new ShipView(sh.Design.Name))
+                : null,
             (e, f) => e.TryGetDataBlob<GeoSurveyableDB>(out var g) ? ToGeoSurveyView(g, f) : null,
             (e, _) => e.HasDataBlob<ColonizeableDB>() ? new ColonizableView() : null,
-            (e, _) => e.HasDataBlob<MineralsDB>() ? new MineralDepositsView() : null,
-            (e, f) => e.TryGetDataBlob<JPSurveyableDB>(out var j) ? new GravSurveyView(j.IsSurveyComplete(f)) : null,
+            (e, f) => e.TryGetDataBlob<MineralsDB>(out var md) ? ToMineralDepositsView(md, e, f) : null,
+            (e, f) => e.TryGetDataBlob<JPSurveyableDB>(out var j) ? ToGravSurveyView(j, f) : null,
             // A jump point is only part of a faction's world once that faction has discovered it.
             (e, f) => e.TryGetDataBlob<JumpPointDB>(out var jp) && jp.IsDiscovered.Contains(f) ? new JumpPointView() : null,
             // The views below expose an entity's internals (cargo, installations, mining economics),
             // so they are only projected for the owning faction.
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<CargoStorageDB>(out var cs) ? ToCargoStorageView(cs, e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<InfrastructureDB>(out var inf)
-                ? new InfrastructureView(inf.CapacityProvided, inf.CapacityRequired, inf.CapacityAvailable, inf.Efficiency)
+                ? new InfrastructureView(inf.CapacityProvided, inf.CapacityRequired, inf.CapacityAvailable, inf.Efficiency,
+                    HasInstalledInfrastructure(e))
                 : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ComponentInstancesDB>(out var ci) ? ToInstallationsView(ci, e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ColonyInfoDB>(out var col) ? ToColonyMiningView(col, e, f) : null,
@@ -193,15 +205,148 @@ namespace Pulsar4X.Engine.Api
         {
             bool started = g.HasSurveyStarted(factionId);
             double percent = 0;
+            long completed = 0;
             if (started && g.PointsRequired > 0)
+            {
                 percent = (1.0 - (double)g.GeoSurveyStatus[factionId] / g.PointsRequired) * 100;
+                completed = g.PointsRequired - g.GeoSurveyStatus[factionId];
+            }
 
-            return new GeoSurveyView(g.IsSurveyComplete(factionId), started, percent);
+            return new GeoSurveyView(g.IsSurveyComplete(factionId), started, percent, g.PointsRequired, completed);
+        }
+
+        private static GravSurveyView ToGravSurveyView(JPSurveyableDB j, int factionId)
+        {
+            bool started = j.HasSurveyStarted(factionId);
+            double percent = 0;
+            if (started && j.PointsRequired > 0)
+                percent = (1.0 - (double)j.SurveyPointsRemaining[factionId] / j.PointsRequired) * 100;
+
+            return new GravSurveyView(j.IsSurveyComplete(factionId), started, percent);
+        }
+
+        private static MineralDepositsView? ToMineralDepositsView(MineralsDB minerals, Entity body, int factionId)
+        {
+            var game = body.Manager?.Game;
+            if (game == null || !game.Factions.TryGetValue(factionId, out var faction)) return null;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo)) return null;
+
+            int factionMask = factionInfo.FactionMask;
+            var mineralsById = factionInfo.Data.CargoGoods.GetMineralsList().ToDictionary(m => m.ID);
+
+            var rows = new List<MineralDepositRow>(minerals.Minerals.Count);
+            foreach (var (mineralId, deposit) in minerals.Minerals)
+            {
+                if (!mineralsById.TryGetValue(mineralId, out var mineral)) continue;
+
+                var amount = deposit.Amount.Resolve(factionMask, ObscureWithError);
+                rows.Add(new MineralDepositRow(
+                    mineralId,
+                    mineral.Name,
+                    amount.Access switch
+                    {
+                        AccessLevel.Full => DepositAccess.Full,
+                        AccessLevel.Partial => DepositAccess.Partial,
+                        _ => DepositAccess.None,
+                    },
+                    amount.Value,
+                    deposit.Accessibility));
+            }
+
+            return new MineralDepositsView(rows);
+        }
+
+        /// <summary>Obscures a value by a deterministic +/- 20% error margin (stable for the same input).</summary>
+        private static long ObscureWithError(long value)
+        {
+            var hash = value.GetHashCode();
+            var factor = (hash % 41 - 20) / 100.0;
+            return (long)(value * (1 + factor));
+        }
+
+        private static bool HasInstalledInfrastructure(Entity colony)
+        {
+            return colony.TryGetDataBlob<ComponentInstancesDB>(out var instances)
+                && instances.TryGetComponentsByAttribute<InfrastructureCapacityAtb>(out var components)
+                && components.Count > 0;
         }
 
         private static StarView ToStarView(StarInfoDB s)
             => new(s.SpectralType.ToDescription(), s.SpectralSubDivision, s.Class, s.LuminosityClass.ToString(),
-                   s.Temperature, s.Luminosity, s.Age, s.MinHabitableRadius_AU, s.MaxHabitableRadius_AU);
+                   s.Temperature, s.Luminosity, s.Age, s.MinHabitableRadius_AU, s.MaxHabitableRadius_AU,
+                   s.LuminosityClass.ToDescription());
+
+        private static ShipView ToShipView(ShipInfoDB shipInfo, Entity ship, int factionId)
+        {
+            string? commander = null;
+            if (shipInfo.CommanderID >= 0 && ship.Manager != null
+                && ship.Manager.TryGetEntityById(shipInfo.CommanderID, out var commanderEntity))
+            {
+                commander = commanderEntity.GetName(factionId);
+            }
+
+            double totalHealth = 0;
+            int totalCount = 0, operationalCount = 0;
+            if (ship.TryGetDataBlob<ComponentInstancesDB>(out var components))
+            {
+                foreach (var instances in components.ComponentsByDesign.Values)
+                {
+                    foreach (var instance in instances)
+                    {
+                        totalHealth += instance.HealthPercent;
+                        totalCount++;
+                        if (instance.HealthPercent > instance.StopWorkingAtPercent && instance.IsEnabled)
+                            operationalCount++;
+                    }
+                }
+            }
+
+            double armorThickness = 0;
+            if (ship.TryGetDataBlob<Pulsar4X.Damage.EntityDamageProfileDB>(out var damage)
+                && damage.Armor.thickness > 0)
+            {
+                armorThickness = damage.Armor.thickness;
+            }
+
+            return new ShipView(
+                shipInfo.Design.Name,
+                shipInfo.Design.CrewReq,
+                commander,
+                totalCount > 0 ? totalHealth / totalCount : 1,
+                operationalCount,
+                totalCount,
+                armorThickness);
+        }
+
+        private static ThrustView? ToThrustView(Pulsar4X.Movement.NewtonThrustAbilityDB thrust, Entity ship, int factionId)
+        {
+            // ΔV at full tanks: the dry mass pushed by however much fuel the tanks could hold.
+            double maxDeltaV = 0;
+            if (thrust.ExhaustVelocity > 0
+                && ship.TryGetDataBlob<MassVolumeDB>(out var massVolume)
+                && ship.TryGetDataBlob<CargoStorageDB>(out var storage)
+                && ship.Manager?.Game is { } game
+                && game.Factions.TryGetValue(factionId, out var faction)
+                && faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo))
+            {
+                var cargoLibrary = factionInfo.Data.CargoGoods;
+                if (thrust.FuelType != null && cargoLibrary.Contains(thrust.FuelType))
+                {
+                    var fuel = cargoLibrary.GetAny(thrust.FuelType);
+                    if (fuel != null && fuel.VolumePerUnit > 0
+                        && storage.TypeStores.TryGetValue(fuel.CargoTypeID, out var fuelStore))
+                    {
+                        double maxFuelKg = fuelStore.MaxVolume / fuel.VolumePerUnit * fuel.MassPerUnit;
+                        double dryMass = massVolume.MassTotal - thrust.TotalFuel_kg;
+                        if (dryMass > 0 && maxFuelKg > 0)
+                            maxDeltaV = thrust.ExhaustVelocity * Math.Log((dryMass + maxFuelKg) / dryMass);
+                    }
+                }
+            }
+
+            return new ThrustView(thrust.ThrustInNewtons, thrust.FuelBurnRate, thrust.ExhaustVelocity,
+                thrust.DeltaV, maxDeltaV);
+        }
 
         private static ColonyView ToColonyView(ColonyInfoDB c, Entity colony, int factionId)
         {
@@ -742,7 +887,10 @@ namespace Pulsar4X.Engine.Api
 
             var orders = new List<OrderSnapshot>(orderable.ActionList.Count);
             foreach (var action in orderable.ActionList)
-                orders.Add(new OrderSnapshot(action.Name, action.IsRunning, action.GetIsFinished));
+            {
+                orders.Add(new OrderSnapshot(action.Name, action.IsRunning, action.GetIsFinished, action.Details,
+                    action is Pulsar4X.Movement.NewtonThrustCommand && !action.IsRunning));
+            }
             return orders;
         }
 

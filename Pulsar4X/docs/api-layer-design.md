@@ -188,6 +188,19 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    server settles the faction's first species). The `BodyKind`→display-enum mapping moved from
    `Selector` to `UserOrbitSettings.FromBodyKind` for shared use with the map view-filter.
    The **GalaxyWindow** (galaxy browser) reads `Galaxy.KnownSystems` — no new surface needed.
+   The **EntityWindow** (the per-entity popup, previously the most engine-coupled window) is ported:
+   it's constructed from (entity id, system id) and re-resolves its `EntitySnapshot` each frame,
+   closing itself if the entity leaves the faction's view. New/extended views: `ShipView` carries
+   crew/commander plus component-health aggregates and armor (owner-only — non-owners get the
+   name-only view), `ThrustView` (with **max-ΔV pre-computed server-side**, removing the client's
+   rocket-equation math), `WarpAbilityView`, `WarpMovingView`, `OrdersView` (per-entity order queue
+   with `Details` and an `IsEditableManeuver` flag), `GeoSurveyView` point counts,
+   `GravSurveyView` progress, `MineralDepositsView` upgraded from marker to masked deposit rows
+   (amounts pre-obscured server-side at partial access), `InfrastructureView.HasInstalledInfrastructure`,
+   and `StarView.LuminosityClassDescription`. Shared snapshot displays now cover population, mineral
+   deposits, the mining table (`ColonyMiningDisplay`) and the gravitational-anomaly panel. Two
+   deferred engine bridges remain: the camera-pin button (rendering still tracks live entities) and
+   the maneuver-edit click (the maneuver panel still edits live `NewtonThrustCommand`s).
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
