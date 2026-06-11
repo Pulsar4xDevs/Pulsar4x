@@ -87,7 +87,9 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    mutable client galaxy model, implementing connect, time control, the system-map read (with
    `Name`/`Position`/`Orbit` view projection), command routing, and a `MessagePublisher`→event
    bridge. The `InProcessAdapter` + galaxy model live in `Pulsar4X.Client/Api/`; the server contract is
-   covered by `Pulsar4X.Tests/ApiVerticalSliceTests.cs` (8 tests, no UI dependency).
+   covered by the fixtures in `Pulsar4X.Tests/API/` (one file per area — connection, system
+   projection, time control, commands, fleets, research, colonies — sharing `ApiTestBase`; no UI
+   dependency).
 3. **Commands (foundation done):** `IOrderHandler.HandleOrder` now returns a validity bool, so
    `SubmitCommand` reports real results. `EngineGameServer` has an extensible translator registry
    with a uniform ownership pre-check (a faction may only command entities it owns — or itself, for
