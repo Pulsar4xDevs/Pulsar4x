@@ -94,6 +94,31 @@ public sealed record CreateComponentDesignCommand(
     string Name,
     IReadOnlyList<DesignerInput> Inputs) : GameCommand(TargetEntityId);
 
+// ----- ship design (commanded entity: the faction itself) -----
+
+/// <summary>One component stack in a ship design, in hull order (front to back).</summary>
+public sealed record ShipComponentCount(string ComponentDesignId, int Count);
+
+/// <summary>Create or update a ship design. The interactive designer (component layout, armor,
+/// live stats) runs client-side; this is the single authoritative write: the server resolves the
+/// referenced component/armor ids against the faction's own designs, recalculates the derived
+/// values, computes validity, and registers the design. <see cref="DesignId"/> null/empty creates a
+/// new design (server-generated id); otherwise the existing design is updated in place.</summary>
+public sealed record SaveShipDesignCommand(
+    int TargetEntityId,
+    string? DesignId,
+    string Name,
+    IReadOnlyList<ShipComponentCount> Components,
+    string ArmorId,
+    float ArmorThickness,
+    bool IsObsolete) : GameCommand(TargetEntityId);
+
+public sealed record DeleteShipDesignCommand(int TargetEntityId, string DesignId) : GameCommand(TargetEntityId);
+
+/// <summary>Mark a ship design obsolete: it disappears from the designer's list and can no longer
+/// be produced, but ships already built from it are unaffected.</summary>
+public sealed record SetShipDesignObsoleteCommand(int TargetEntityId, string DesignId) : GameCommand(TargetEntityId);
+
 // ----- industry / local construction (commanded entity: the colony) -----
 
 /// <summary>Queue a batch job on one of the entity's production lines. When <see cref="AutoInstall"/>

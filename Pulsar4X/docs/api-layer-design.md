@@ -224,6 +224,19 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    untouchable bookkeeping properties (attribute-constructor args), but *is* player-set — it's
    included by pairing, while other `None` properties are excluded (replaying them would overwrite
    their formulas with constants).
+   The **ShipDesignWindow** follows the same client-side-designer shape. All the live stat math
+   (damage profile, ΔV, warp, cargo/fuel aggregation) keeps running in the client against
+   `IDesignDataProvider` data (it also reads the component/ship-design and armor lists straight from
+   the provider's `FactionInfoDB` — no new read snapshot). The writes — previously direct faction-data
+   mutations — are now commands: `SaveShipDesignCommand` (create when `DesignId` is null, else
+   update **in place**, preserving the design id industry references; the server resolves
+   component/armor ids against the faction's own designs, recalculates via `Initialise`, and computes
+   `IsValid` server-side — mass + thrust + energy gen/store, false when obsolete),
+   `DeleteShipDesignCommand`, and `SetShipDesignObsoleteCommand`. A new design stays a local working
+   copy until first save (the server assigns the id; the client re-selects it by name). This port
+   also fixes pre-port quirks: the edit flow used `ShipDesign.Clone` (which generates a fresh id) and
+   re-registered edits as *new* designs, leaving the selection highlight broken and the version-bump
+   branch unreachable — selection now tracks the original id and saves update in place.
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
@@ -250,7 +263,8 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
   component design: `ComponentDesignsSnapshot` (`ComponentTemplateSummary`, `ComponentDesignSummary`)
   and `DesignerInput` (the serializable form of a designer's player-set state).
 - Writes: `GameCommand` (+ `RenameCommand`, `CreateFleetCommand`, `CreateColonyCommand`, `DisbandFleetCommand`,
-  `CreateComponentDesignCommand`,
+  `CreateComponentDesignCommand`, `SaveShipDesignCommand` (+ `ShipComponentCount`),
+  `DeleteShipDesignCommand`, `SetShipDesignObsoleteCommand`,
   `ChangeFleetParentCommand`, `ReassignShipCommand`, `SetFlagshipCommand`, `MoveToBodyCommand`,
   `GeoSurveyCommand`, `GravSurveyCommand`, `JumpCommand`, `RefuelAtCommand`,
   `AssignScientistCommand`, `UnassignScientistCommand`, `SetResearchFundingCommand`,

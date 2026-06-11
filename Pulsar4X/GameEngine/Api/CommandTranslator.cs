@@ -56,6 +56,9 @@ namespace Pulsar4X.Engine.Api
                 [typeof(RemoveTechFromQueueCommand)] = TranslateRemoveTechFromQueue,
                 [typeof(MoveTechInQueueCommand)] = TranslateMoveTechInQueue,
                 [typeof(CreateComponentDesignCommand)] = TranslateCreateComponentDesign,
+                [typeof(SaveShipDesignCommand)] = TranslateSaveShipDesign,
+                [typeof(DeleteShipDesignCommand)] = TranslateDeleteShipDesign,
+                [typeof(SetShipDesignObsoleteCommand)] = TranslateSetShipDesignObsolete,
                 [typeof(UninstallComponentCommand)] = TranslateUninstallComponent,
                 [typeof(InstallComponentCommand)] = TranslateInstallComponent,
                 [typeof(QueueIndustryJobCommand)] = TranslateQueueIndustryJob,
@@ -328,6 +331,106 @@ namespace Pulsar4X.Engine.Api
                 return CommandResult.Reject($"Design creation failed: {e.Message}");
             }
 
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        // ----- ship design (commanded entity: the faction itself) -----
+
+        private CommandResult TranslateSaveShipDesign(Entity faction, Entity commanded, GameCommand command)
+        {
+            var save = (SaveShipDesignCommand)command;
+            if (commanded != faction)
+                return CommandResult.Reject("A ship design can only be saved by commanding the faction itself.");
+
+            if (string.IsNullOrWhiteSpace(save.Name))
+                return CommandResult.Reject("The design needs a name.");
+
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo))
+                return CommandResult.Reject("The faction has no data store.");
+
+            if (!factionInfo.Data.Armor.TryGetValue(save.ArmorId, out var armor))
+                return CommandResult.Reject($"Armor {save.ArmorId} not found.");
+
+            if (save.ArmorThickness < 0)
+                return CommandResult.Reject("Armor thickness cannot be negative.");
+
+            // Resolve the component stacks against the faction's own designs — referencing another
+            // faction's (or an unknown) component rejects here at the boundary.
+            var components = new List<(ComponentDesign design, int count)>(save.Components?.Count ?? 0);
+            foreach (var entry in save.Components ?? Array.Empty<ShipComponentCount>())
+            {
+                if (!factionInfo.ComponentDesigns.TryGetValue(entry.ComponentDesignId, out var componentDesign))
+                    return CommandResult.Reject($"Component design {entry.ComponentDesignId} not found.");
+                if (entry.Count < 0)
+                    return CommandResult.Reject("Component counts cannot be negative.");
+                components.Add((componentDesign, entry.Count));
+            }
+
+            try
+            {
+                Pulsar4X.Ships.ShipDesign design;
+                if (!string.IsNullOrEmpty(save.DesignId))
+                {
+                    if (!factionInfo.ShipDesigns.TryGetValue(save.DesignId, out design!))
+                        return CommandResult.Reject($"Ship design {save.DesignId} not found.");
+
+                    design.Name = save.Name;
+                    design.Components = components;
+                    design.Armor = (armor, save.ArmorThickness);
+                }
+                else
+                {
+                    design = new Pulsar4X.Ships.ShipDesign(factionInfo, save.Name, components, (armor, save.ArmorThickness));
+                }
+
+                design.IsObsolete = save.IsObsolete;
+                // Recalculates the derived values and (re-)registers the design on the faction.
+                design.Initialise(factionInfo);
+                design.IsValid = !design.IsObsolete && IsShipDesignValid(design);
+            }
+            catch (Exception e)
+            {
+                // The damage-profile/armor math runs over moddable data; reject rather than crash.
+                return CommandResult.Reject($"Ship design save failed: {e.Message}");
+            }
+
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        // Mirrors the designer UI's validity rule: a producible ship needs mass, newtonian thrust,
+        // and energy generation + storage.
+        private static bool IsShipDesignValid(Pulsar4X.Ships.ShipDesign design)
+        {
+            bool hasThrust = false, hasEnergyGen = false, hasEnergyStore = false;
+            foreach (var (componentDesign, count) in design.Components)
+            {
+                if (count <= 0) continue;
+                hasThrust |= componentDesign.HasAttribute<NewtonionThrustAtb>();
+                hasEnergyGen |= componentDesign.HasAttribute<Pulsar4X.Energy.EnergyGenerationAtb>();
+                hasEnergyStore |= componentDesign.HasAttribute<Pulsar4X.Energy.EnergyStoreAtb>();
+            }
+
+            return design.MassPerUnit > 0 && hasThrust && hasEnergyGen && hasEnergyStore;
+        }
+
+        private CommandResult TranslateDeleteShipDesign(Entity faction, Entity commanded, GameCommand command)
+        {
+            var delete = (DeleteShipDesignCommand)command;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo)
+                || !factionInfo.ShipDesigns.Remove(delete.DesignId))
+                return CommandResult.Reject($"Ship design {delete.DesignId} not found.");
+
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateSetShipDesignObsolete(Entity faction, Entity commanded, GameCommand command)
+        {
+            var obsolete = (SetShipDesignObsoleteCommand)command;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo)
+                || !factionInfo.ShipDesigns.TryGetValue(obsolete.DesignId, out var design))
+                return CommandResult.Reject($"Ship design {obsolete.DesignId} not found.");
+
+            design.IsObsolete = true;
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 

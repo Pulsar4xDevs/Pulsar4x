@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Api;
 using Pulsar4X.Engine;
 using Pulsar4X.Components;
 using Pulsar4X.Blueprints;
@@ -85,20 +86,37 @@ namespace Pulsar4X.Client
         private EntityDamageProfileDB? _profile;
         private bool existingdesignsstatus = true;
         bool DesignChanged = false;
+        // Set when the server rejects a save; shown so a failed save isn't silent.
+        private string? _saveError;
+        // True while editing a not-yet-saved design (it has no server-side id), so the per-tick
+        // refresh doesn't clobber it by auto-selecting the first existing design.
+        private bool _editingNewDesign;
 
         private FactionInfoDB _factionInfoDB;
 
         private ShipDesignWindow()
         {
             //_flags = ImGuiWindowFlags.NoCollapse;
-            if(_uiState.Faction == null)
-                throw new NullReferenceException("_uiState.Faction cannot be null");
-
-            _factionInfoDB = _uiState.Faction.GetDataBlob<FactionInfoDB>();
+            // The interactive designer evaluates client-side against the faction's design-time data
+            // (components, ship designs, armor) exposed by the adapter; writes go through commands.
+            if (_uiState.GameClient is not IDesignDataProvider provider
+                || !provider.TryGetDesignData(out _factionInfoDB!, out _))
+                throw new NullReferenceException("The game client cannot provide design data");
 
             RefreshComponentDesigns();
             RefreshArmor();
             RefreshExistingClasses();
+        }
+
+        // ExecuteSynchronously: in-process the command completes inline, so the continuation (which
+        // touches UI state) runs on the UI thread before the next frame.
+        private void SubmitCommand(GameCommand command, Action<CommandResult>? onResult = null)
+        {
+            _uiState.GameClient?.SubmitCommandAsync(command).ContinueWith(task =>
+            {
+                if (task.IsCompletedSuccessfully && onResult != null)
+                    onResult(task.Result);
+            }, System.Threading.Tasks.TaskContinuationOptions.ExecuteSynchronously);
         }
 
         public override void OnSystemTickChange(DateTime newDateTime)
@@ -161,7 +179,7 @@ namespace Pulsar4X.Client
                 ShowNoDesigns = true;
                 return;
             }
-            if(SelectedExistingDesignID.IsNullOrEmpty() && _existingShipDesignNames.Count > 0)
+            if(SelectedExistingDesignID.IsNullOrEmpty() && !_editingNewDesign && _existingShipDesignNames.Count > 0)
                 Select(_factionInfoDB.ShipDesigns[_existingShipDesignIDs[0]]);
 
             ShowNoDesigns = false;
@@ -169,7 +187,7 @@ namespace Pulsar4X.Client
 
         void RefreshArmor()
         {
-            var factionData = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data;
+            var factionData = _factionInfoDB.Data;
             _armorNames = new string[factionData.Armor.Count];
             int i = 0;
             foreach (var kvp in factionData.Armor)
@@ -187,8 +205,11 @@ namespace Pulsar4X.Client
 
         void Select(ShipDesign design)
         {
+            // Edit a local clone; track the ORIGINAL id (the clone gets a fresh one) so the list
+            // highlight matches and a save updates the right design server-side.
             _workingDesign = design.Clone(_factionInfoDB);
-            SelectedExistingDesignID = _workingDesign.UniqueID;
+            SelectedExistingDesignID = design.UniqueID;
+            _editingNewDesign = false;
             SelectedDesignName = Utils.BytesFromString(_workingDesign.Name, 32);
             SelectedComponents = _workingDesign.Components;
             SelectedDesignObsolete = _workingDesign.IsObsolete;
@@ -205,11 +226,11 @@ namespace Pulsar4X.Client
 
             if (Window.Begin("Ship Design", ref IsActive, _flags))
             {
-                if(_existingShipDesignNames.Count != _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.Count)
+                if(_existingShipDesignNames.Count != _factionInfoDB.ShipDesigns.Values.Count(d => !d.IsObsolete))
                 {
                     RefreshExistingClasses();
                 }
-                if (AllShipComponents.Count != _uiState.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.Count)
+                if (AllShipComponents.Count != _factionInfoDB.ComponentDesigns.Values.Count)
                 {
                     RefreshComponentDesigns();
                 }
@@ -255,55 +276,48 @@ namespace Pulsar4X.Client
         {
             if (ImGui.Button("Save Design"))
             {
-                int version = 0;
                 var name = Utils.StringFromBytes(SelectedDesignName);
 
-                if(name.IsNotNullOrEmpty())
+                if(name.IsNotNullOrEmpty() && _armor != null)
                 {
+                    // The working design is a local edit buffer; the server resolves the referenced
+                    // component/armor ids, recalculates, validates and registers the design.
+                    _saveError = null;
+                    bool wasObsolete = SelectedDesignObsolete;
+                    string? designId = SelectedExistingDesignID.IsNullOrEmpty() ? null : SelectedExistingDesignID;
+                    var components = SelectedComponents
+                        .Select(c => new ShipComponentCount(c.design.UniqueID, c.count))
+                        .ToList();
 
-                    //we're using version 0 if the design is not built yet.
-                    if(_existingShipDesignNames.Contains(name) && _workingDesign.DesignVersion > 0)
-                    {
-                        _workingDesign.DesignVersion += 1;
-                    }
-                    else
-                    {
-                        _workingDesign.Name = name;
-                        if (_factionInfoDB.ShipDesigns.ContainsKey(_workingDesign.UniqueID))
+                    SubmitCommand(new SaveShipDesignCommand(
+                        _uiState.GameClient!.Session.FactionId,
+                        designId,
+                        name,
+                        components,
+                        _armor.UniqueID,
+                        _armorThickness,
+                        SelectedDesignObsolete),
+                        result =>
                         {
-                            _factionInfoDB.ShipDesigns.Remove(_workingDesign.UniqueID);
-                        }
-                    }
+                            if (!result.Accepted)
+                            {
+                                _saveError = result.RejectionReason ?? "The server rejected the design.";
+                                return;
+                            }
 
-                    if(_armor == null)
-                        throw new NullReferenceException();
-                    _workingDesign.Armor = (_armor, _armorThickness);
-                    _workingDesign.IsObsolete = SelectedDesignObsolete;
+                            _editingNewDesign = false;
+                            if (wasObsolete)
+                                SelectedExistingDesignID = String.Empty;
+                            else if (designId == null)
+                            {
+                                // A new design gets its id server-side; pick it up by name.
+                                var saved = _factionInfoDB.ShipDesigns.Values.FirstOrDefault(d => d.Name.Equals(name));
+                                if (saved != null)
+                                    SelectedExistingDesignID = saved.UniqueID;
+                            }
 
-
-                    _workingDesign.Initialise(_factionInfoDB);
-
-
-                    if(_workingDesign.IsObsolete)
-                    {
-                        // If the design is obsolete mark it is invalid so it can't be produced
-                        _workingDesign.IsValid = false;
-                    }
-                    else
-                    {
-                        _workingDesign.IsValid = IsDesignValid();
-                    }
-
-                    if(_workingDesign.IsObsolete)
-                    {
-                        SelectedExistingDesignID = String.Empty;
-                    }
-
-                    RefreshExistingClasses();
-                    // var shipDesign = new ShipDesign(_uiState.Faction.GetDataBlob<FactionInfoDB>(), name, SelectedComponents, (_armor, _armorThickness))
-                    // {
-                    //     DesignVersion = version
-                    // };
+                            RefreshExistingClasses();
+                        });
                 }
             }
         }
@@ -330,15 +344,21 @@ namespace Pulsar4X.Client
                     {
                         if (ImGui.MenuItem("Delete###delete-" + designID))
                         {
-                            _factionInfoDB.ShipDesigns.Remove(designID);
-                            SelectedExistingDesignID = String.Empty;
-                            RefreshExistingClasses();
+                            SubmitCommand(new DeleteShipDesignCommand(_uiState.GameClient!.Session.FactionId, designID),
+                                _ =>
+                                {
+                                    SelectedExistingDesignID = String.Empty;
+                                    RefreshExistingClasses();
+                                });
                         }
                         if (ImGui.MenuItem("Obsolete###obsolete-" + designID))
                         {
-                            _factionInfoDB.ShipDesigns[designID].IsObsolete = true;
-                            SelectedExistingDesignID = String.Empty;
-                            RefreshExistingClasses();
+                            SubmitCommand(new SetShipDesignObsoleteCommand(_uiState.GameClient!.Session.FactionId, designID),
+                                _ =>
+                                {
+                                    SelectedExistingDesignID = String.Empty;
+                                    RefreshExistingClasses();
+                                });
                         }
 
                         ImGui.EndPopup();
@@ -365,19 +385,23 @@ namespace Pulsar4X.Client
                 }
                 SelectedDesignName = Utils.BytesFromString(name);
                 SelectedComponents = new List<(ComponentDesign design, int count)>();
-                GenImage();
                 RefreshArmor();
                 DesignChanged = true;
 
                 if(_armor == null)
                     throw new NullReferenceException();
 
-                ShipDesign design = new(_factionInfoDB, name, SelectedComponents, (_armor, _armorThickness))
+                // A new design stays a local working copy until it's saved — the server assigns
+                // its real id then, so nothing is selected in the existing list yet.
+                _workingDesign = new ShipDesign(_factionInfoDB, name, SelectedComponents, (_armor, _armorThickness))
                 {
                     IsValid = false
                 };
-                RefreshExistingClasses();
-                SelectedExistingDesignID = design.UniqueID;
+                SelectedDesignObsolete = false;
+                SelectedExistingDesignID = String.Empty;
+                _editingNewDesign = true;
+                ShowNoDesigns = false;
+                _saveError = null;
             }
         }
 
@@ -740,6 +764,14 @@ namespace Pulsar4X.Client
                 ImGui.Text(warning);
             }
 
+            if (_saveError != null)
+            {
+                ImGui.NewLine();
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+                ImGui.TextWrapped("Save failed: " + _saveError);
+                ImGui.PopStyleColor();
+            }
+
             ImGui.NewLine();
             NewShipButton();
             ImGui.SameLine();
@@ -754,7 +786,7 @@ namespace Pulsar4X.Client
         {
             if(!DesignChanged) return;
 
-            if(_armor == null || _uiState.Faction == null)
+            if(_armor == null)
                 throw new NullReferenceException();
 
             _profile = new EntityDamageProfileDB(SelectedComponents, (_armor, _armorThickness));
@@ -841,7 +873,7 @@ namespace Pulsar4X.Client
 
 
 
-            _armorMass = ShipDesign.GetArmorMass(_profile, _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods);
+            _armorMass = ShipDesign.GetArmorMass(_profile, _factionInfoDB.Data.CargoGoods);
             mass += (long)Math.Round(_armorMass);
 
             var K = 0.2 + 0.02 * Math.Log10(volume);
@@ -864,7 +896,7 @@ namespace Pulsar4X.Client
             //double fuelMass = 0;
             if (thrusterFuel.IsNotNullOrEmpty())
             {
-                _fuelType = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(thrusterFuel);
+                _fuelType = _factionInfoDB.Data.CargoGoods.GetAny(thrusterFuel);
                 if (_fuelType != null && cstore.ContainsKey(_fuelType.CargoTypeID))
                 {
                     _fuelStoreVolume = cstore[_fuelType.CargoTypeID];
