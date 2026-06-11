@@ -435,6 +435,38 @@ public sealed class ResearchSnapshot
 }
 
 // --------------------------------------------------------------------------------------------
+// Component design (faction-scoped). The interactive designer runs CLIENT-side (formula evaluation
+// is too chatty for a per-input round-trip) against the mod data both sides already share plus the
+// faction's synced design-time state; the server only validates: CreateComponentDesignCommand
+// replays the submitted inputs onto a fresh engine designer and registers the result.
+// --------------------------------------------------------------------------------------------
+
+/// <summary>The faction's component-design surface: the templates it can design from and the
+/// designs it has already created.</summary>
+public sealed class ComponentDesignsSnapshot
+{
+    public IReadOnlyList<ComponentTemplateSummary> Templates { get; init; } = Array.Empty<ComponentTemplateSummary>();
+    public IReadOnlyList<ComponentDesignSummary> Designs { get; init; } = Array.Empty<ComponentDesignSummary>();
+}
+
+/// <summary>A component template the faction can design from.</summary>
+public sealed record ComponentTemplateSummary(string Id, string Name, string ComponentType, string Description);
+
+/// <summary>An existing component design; <see cref="PropertyValues"/> carries the inputs it was
+/// created with so the client can reload it into the designer.</summary>
+public sealed record ComponentDesignSummary(string Id, string Name, string TemplateId, string TemplateName)
+{
+    public IReadOnlyList<DesignerInput> PropertyValues { get; init; } = Array.Empty<DesignerInput>();
+}
+
+/// <summary>One player-set designer property value: numeric for sliders/ranges/enums, a string id
+/// (tech/fuel/ordnance/category id or formula key) for selection lists. The serializable form of a
+/// designer's player-settable state — sent with <c>CreateComponentDesignCommand</c> so the server
+/// can replay and validate the design, and carried on <see cref="ComponentDesignSummary"/> so the
+/// client can reload an existing design into its designer.</summary>
+public sealed record DesignerInput(string PropertyName, double? NumericValue = null, string? StringValue = null);
+
+// --------------------------------------------------------------------------------------------
 // Fleet command hierarchy (faction-scoped). The galaxy is otherwise organised by system, but a
 // faction's fleets form their own tree of sub-fleets and member ships, so they're modelled
 // separately. Per-entity details (position for centring, etc.) come from the system EntitySnapshots.

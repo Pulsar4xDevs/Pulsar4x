@@ -82,6 +82,18 @@ public sealed record UninstallComponentCommand(int TargetEntityId, string Design
 /// <summary>Install a component instance (<see cref="CargoItemView.Id"/>) out of cargo storage.</summary>
 public sealed record InstallComponentCommand(int TargetEntityId, int ComponentId) : GameCommand(TargetEntityId);
 
+// ----- component design (commanded entity: the faction itself) -----
+
+/// <summary>Create (save) a component design. The interactive designer runs client-side; this is
+/// the single authoritative write: the server replays <see cref="Inputs"/> onto a fresh designer
+/// (validating template, bounds and formulas) and registers the result, then re-pushes the
+/// faction's designs (and research — a new design adds a researchable tech).</summary>
+public sealed record CreateComponentDesignCommand(
+    int TargetEntityId,
+    string TemplateId,
+    string Name,
+    IReadOnlyList<DesignerInput> Inputs) : GameCommand(TargetEntityId);
+
 // ----- industry / local construction (commanded entity: the colony) -----
 
 /// <summary>Queue a batch job on one of the entity's production lines. When <see cref="AutoInstall"/>

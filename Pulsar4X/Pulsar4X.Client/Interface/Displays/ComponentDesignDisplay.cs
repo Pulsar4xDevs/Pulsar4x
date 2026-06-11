@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Api;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Engine;
+using Pulsar4X.Engine.Api;
 using Pulsar4X.Components;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Extensions;
@@ -26,6 +28,13 @@ namespace Pulsar4X.Client
         Created
     }
 
+    /// <summary>
+    /// The interactive designer runs CLIENT-side — per-input formula evaluation is far too chatty
+    /// for a server round-trip — against the design-time data exposed by
+    /// <see cref="IDesignDataProvider"/>. The server is only involved at the single write: Save
+    /// submits a <c>CreateComponentDesignCommand</c> carrying the designer's player-set inputs
+    /// (via <see cref="DesignerInputs.Extract"/>), which the server replays and validates.
+    /// </summary>
     public sealed class ComponentDesignDisplay
     {
         private static ComponentDesignDisplay? instance = null;
@@ -34,13 +43,12 @@ namespace Pulsar4X.Client
         private NoTemplateState NoTemplateState = NoTemplateState.PleaseSelect;
         private ComponentDesigner? _componentDesigner;
         public ComponentTemplateBlueprint? Template { get; private set;}
-        private string[]? _designTypes;
-        private ComponentTemplateBlueprint[]? _designables;
+        // Set when the server rejects a submitted design; shown so a failed save isn't silent.
+        private string? _saveError;
         private static byte[] _nameInputBuffer = new byte[128];
         private static Tech[]? _techSDs;
         private static string[]? _techNames;
         private static int _techSelectedIndex = -1;
-        //private TechSD[] _techSDs;
         private static string[]? _listNames;
 
 
@@ -58,50 +66,51 @@ namespace Pulsar4X.Client
             return instance;
         }
 
-        public void SetTemplate(ComponentTemplateBlueprint template, GlobalUIState state)
+        private static bool TryGetDesignData(GlobalUIState state, out FactionInfoDB info, out FactionTechDB techs)
         {
-            Template = template;
+            if (state.GameClient is IDesignDataProvider provider)
+                return provider.TryGetDesignData(out info, out techs);
 
-            var factionData = state.Faction.GetDataBlob<FactionInfoDB>().Data;
-            var factionTech = state.Faction.GetDataBlob<FactionTechDB>();
-            _componentDesigner = new ComponentDesigner(Template, factionData, factionTech);
+            info = null!;
+            techs = null!;
+            return false;
+        }
+
+        public void SetTemplate(ComponentTemplateSummary template, GlobalUIState state)
+        {
+            if (!TryGetDesignData(state, out var info, out var techs)
+                || !info.Data.ComponentTemplates.TryGetValue(template.Id, out var blueprint))
+                return;
+
+            Template = blueprint;
+            _saveError = null;
+            _componentDesigner = new ComponentDesigner(blueprint, info.Data, techs);
 
             NoTemplateState = NoTemplateState.Created;
         }
 
-        public void SetFromComponent(ComponentDesign component, GlobalUIState state)
+        public void SetFromComponent(ComponentDesignSummary component, GlobalUIState state)
         {
+            if (!TryGetDesignData(state, out var info, out var techs)
+                || !info.Data.ComponentTemplates.TryGetValue(component.TemplateId, out var blueprint))
+                return;
 
-
-            var factionData = state.Faction.GetDataBlob<FactionInfoDB>().Data;
-            var factionTech = state.Faction.GetDataBlob<FactionTechDB>();
-            Template = factionData.ComponentTemplates[component.TemplateID];
-            _componentDesigner = new ComponentDesigner(Template, factionData, factionTech);
+            Template = blueprint;
+            _saveError = null;
+            _componentDesigner = new ComponentDesigner(blueprint, info.Data, techs);
 
             NoTemplateState = NoTemplateState.Created;
 
-            var templateProperties = component.TemplatePropertyValues;
-            //_componentDesigner.Name = component.Name;
             _nameInputBuffer = Utils.BytesFromString(component.Name);
-            foreach (var ptup in templateProperties)
+
+            // Replay the design's saved inputs, then restore the fuel combos' selection state
+            // (the only list selection the designer doesn't recover from a value).
+            DesignerInputs.Apply(_componentDesigner, component.PropertyValues);
+            foreach (var property in _componentDesigner.ComponentDesignProperties.Values)
             {
-                var tprop = _componentDesigner.ComponentDesignProperties[ptup.propName];
-                if (tprop.GuiHint == GuiHint.GuiFuelTypeSelection)
-                {
-                    var cargoTypesToDisplay = GetFuelTypes(tprop, state);
-                    var strfuel = (string)ptup.propValue;
-                    var index = cargoTypesToDisplay.FindIndex(item => item.UniqueID == strfuel);
-                    tprop.SetValueFromString((string)ptup.propValue);
-                    tprop.ListSelection = index;
-                }
-                else if (ptup.propValue is string)
-                {
-                    tprop.SetValueFromString((string)ptup.propValue);
-                }
-                else if (ptup.propValue is Int32 || ptup.propValue is float || ptup.propValue is double )
-                {
-                    tprop.SetValueFromInput((double)ptup.propValue);
-                }
+                if (property.GuiHint != GuiHint.GuiFuelTypeSelection) continue;
+                var cargoTypesToDisplay = GetFuelTypes(property, info);
+                property.ListSelection = cargoTypesToDisplay.FindIndex(item => item.UniqueID == property.ValueString);
             }
         }
 
@@ -121,6 +130,9 @@ namespace Pulsar4X.Client
                 return;
             }
 
+            if (!TryGetDesignData(uiState, out var designInfo, out _))
+                return;
+
             var windowContentSize = ImGui.GetContentRegionAvail();
             if (ImGui.BeginChild("ComponentDesignChildWindow", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), ImGuiChildFlags.Borders))
             {
@@ -129,7 +141,7 @@ namespace Pulsar4X.Client
                     "Different settings will determine the statistics and capabilities\n" +
                     "of the component.");
 
-                GuiDesignUI(uiState); //Part design
+                GuiDesignUI(uiState, designInfo); //Part design
             }
             ImGui.EndChild();
             ImGui.SameLine();
@@ -138,7 +150,7 @@ namespace Pulsar4X.Client
             var position = ImGui.GetCursorPos();
             if (ImGui.BeginChild("ComponentDesignChildWindow2", new Vector2(windowContentSize.X * 0.49f, windowContentSize.Y * 0.65f), ImGuiChildFlags.Borders))
             {
-                GuiCostText(uiState); //Print cost
+                GuiCostText(designInfo); //Print cost
             }
             ImGui.EndChild();
 
@@ -150,25 +162,33 @@ namespace Pulsar4X.Client
                 DisplayHelpers.Header("Finalize the Design");
                 ImGui.Text("Name");
                 ImGui.InputText("###designname", _nameInputBuffer, 32);
+                if (_saveError != null)
+                    ImGui.TextColored(Styles.BadColor, _saveError);
                 ImGui.SetCursorPosY(sizeAvailable.Y - 12f);
                 if(ImGui.Button("Save", new Vector2(sizeAvailable.X, 0)))
                 {
-                    if(!_nameInputBuffer.All(b => b == 0))
+                    if(!_nameInputBuffer.All(b => b == 0)
+                       && _componentDesigner != null
+                       && uiState.GameClient != null)
                     {
-                        if(_componentDesigner != null)
-                        {
-                            string name = Utils.StringFromBytes(_nameInputBuffer);
-                            _componentDesigner.Name = name;
-                            _componentDesigner.CreateDesign(uiState.Faction);
-                        }
+                        // The design itself is created server-side: submit the designer's player-set
+                        // inputs and let the server replay and validate them.
+                        string name = Utils.StringFromBytes(_nameInputBuffer);
+                        uiState.GameClient.SubmitCommandAsync(new CreateComponentDesignCommand(
+                                uiState.GameClient.Session.FactionId,
+                                Template.UniqueID,
+                                name,
+                                DesignerInputs.Extract(_componentDesigner)))
+                            .ContinueWith(task =>
+                            {
+                                if (task.IsCompletedSuccessfully && !task.Result.Accepted)
+                                    _saveError = task.Result.RejectionReason ?? "The server rejected the design.";
+                            });
 
                         //we reset the designer here, so we don't end up trying to edit the previous design.
-                        var factionData = uiState.Faction.GetDataBlob<FactionInfoDB>().Data;
-                        var factionTech = uiState.Faction.GetDataBlob<FactionTechDB>();
-                        _componentDesigner = new ComponentDesigner(Template, factionData, factionTech);
-
                         NoTemplateState = NoTemplateState.Created;
                         Template = null;
+                        _componentDesigner = null;
                         _nameInputBuffer = new byte[128];
                     }
                 }
@@ -176,7 +196,7 @@ namespace Pulsar4X.Client
             ImGui.EndChild();
         }
 
-        internal void GuiDesignUI(GlobalUIState uiState) //Creates all UI elements need for designing the Component
+        internal void GuiDesignUI(GlobalUIState uiState, FactionInfoDB designInfo) //Creates all UI elements need for designing the Component
         {
             // FIXME: compact mode should be an option in the game settings?
             // if (ImGui.Button("Compact"))
@@ -211,7 +231,7 @@ namespace Pulsar4X.Client
                             case GuiHint.None:
                                 break;
                             case GuiHint.GuiTechSelectionList: //Let the user pick a type from a list
-                                GuiHintTechSelection(attribute, uiState);
+                                GuiHintTechSelection(attribute, designInfo);
                                 break;
                             case GuiHint.GuiSelectionMaxMin: //Set a value
                                 GuiHintMaxMin(attribute);
@@ -229,13 +249,13 @@ namespace Pulsar4X.Client
                                 GuiHintEnumSelection(attribute);
                                 break;
                             case GuiHint.GuiOrdnanceSelectionList:
-                                GuiHintOrdnanceSelection(attribute, uiState);
+                                GuiHintOrdnanceSelection(attribute, designInfo);
                                 break;
                             case GuiHint.GuiTextSelectionFormula:
                                 GuiHintTextSelectionFormula(attribute);
                                 break;
                             case GuiHint.GuiFuelTypeSelection:
-                                GuiHintFuelTypeSelection(attribute, uiState);
+                                GuiHintFuelTypeSelection(attribute, designInfo);
                                 break;
                             case GuiHint.GuiTechCategorySelection:
                                 GuiHintTechCategorySelection(attribute, uiState);
@@ -258,7 +278,7 @@ namespace Pulsar4X.Client
             }
         }
 
-        private void GuiCostText(GlobalUIState uiState) //Prints a 2 col table with the costs of the part
+        private void GuiCostText(FactionInfoDB designInfo) //Prints a 2 col table with the costs of the part
         {
             if (_componentDesigner != null) //If a part time is selected
             {
@@ -405,7 +425,7 @@ namespace Pulsar4X.Client
                         }
                         else if(attribute.IsEnabled && attribute.GuiHint == GuiHint.GuiFuelTypeSelection)
                         {
-                            var cargo = (ProcessedMaterial)uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(attribute.ValueString);
+                            var cargo = (ProcessedMaterial)designInfo.Data.CargoGoods.GetMaterial(attribute.ValueString);
                             ImGui.TableNextColumn();
                             ImGui.Text("");
                             ImGui.SameLine();
@@ -463,9 +483,9 @@ namespace Pulsar4X.Client
 
                     foreach (var kvp in _componentDesigner.ResourceCostValues)
                     {
-                        var resource = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(kvp.Key);
+                        var resource = designInfo.Data.CargoGoods.GetAny(kvp.Key);
                         if (resource == null)
-                            resource = (ICargoable)uiState.Faction.GetDataBlob<FactionInfoDB>().IndustryDesigns[kvp.Key];
+                            resource = (ICargoable)designInfo.IndustryDesigns[kvp.Key];
 
                         ImGui.TableNextColumn();
                         ImGui.Text("");
@@ -578,7 +598,7 @@ namespace Pulsar4X.Client
         {
             // Resolve the paired (upper-bound) property.
             if (string.IsNullOrEmpty(lowProperty.PairedPropertyName)
-                || !_componentDesigner.ComponentDesignProperties.TryGetValue(
+                || !_componentDesigner!.ComponentDesignProperties.TryGetValue(
                     lowProperty.PairedPropertyName, out var highProperty))
             {
                 ImGui.TextColored(new Vector4(1f, 0.4f, 0.4f, 1f),
@@ -797,7 +817,7 @@ namespace Pulsar4X.Client
             bottomY = boxBottomY;
         }
 
-        private void GuiHintTechSelection(ComponentDesignProperty property, GlobalUIState uiState)
+        private void GuiHintTechSelection(ComponentDesignProperty property, FactionInfoDB designInfo)
         {
             Title(property.Name, property.Description);
 
@@ -806,7 +826,7 @@ namespace Pulsar4X.Client
             _techNames = new string[property.GuidDictionary.Count];
             foreach (var kvp in property.GuidDictionary)
             {
-                Tech sd = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.Techs[(string)kvp.Key];
+                Tech sd = designInfo.Data.Techs[(string)kvp.Key];
                 _techSDs[i] = sd;
                 _techNames[i] = sd.Name;
                 i++;
@@ -849,9 +869,9 @@ namespace Pulsar4X.Client
             ImGui.NewLine();
         }
 
-        private void GuiHintOrdnanceSelection(ComponentDesignProperty property, GlobalUIState uiState)
+        private void GuiHintOrdnanceSelection(ComponentDesignProperty property, FactionInfoDB designInfo)
         {
-            var dict = uiState.Faction.GetDataBlob<FactionInfoDB>().MissileDesigns;
+            var dict = designInfo.MissileDesigns;
             _listNames = new string[dict.Count];
             OrdnanceDesign[] ordnances = new OrdnanceDesign[dict.Count];
             int i = 0;
@@ -875,10 +895,10 @@ namespace Pulsar4X.Client
             ImGui.NewLine();
         }
 
-        private void GuiHintFuelTypeSelection(ComponentDesignProperty property, GlobalUIState uiState)
+        private void GuiHintFuelTypeSelection(ComponentDesignProperty property, FactionInfoDB designInfo)
         {
 
-            var cargoTypesToDisplay = GetFuelTypes(property, uiState);
+            var cargoTypesToDisplay = GetFuelTypes(property, designInfo);
             var names = new List<string>();
             foreach (var cargoType in cargoTypesToDisplay)
             {
@@ -897,7 +917,7 @@ namespace Pulsar4X.Client
             }
         }
 
-        List<ICargoable> GetFuelTypes(ComponentDesignProperty property, GlobalUIState uiState)
+        List<ICargoable> GetFuelTypes(ComponentDesignProperty property, FactionInfoDB designInfo)
         {
             var cargoTypesToDisplay = new List<ICargoable>();
 
@@ -905,7 +925,7 @@ namespace Pulsar4X.Client
             {
                 var fuelType = property.GuidDictionary[cargoType].StrResult;
                 string cargoTypeID = cargoType.ToString();
-                var cargos = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAll().Where(c => c.Value.CargoTypeID.Equals(cargoTypeID));
+                var cargos = designInfo.Data.CargoGoods.GetAll().Where(c => c.Value.CargoTypeID.Equals(cargoTypeID));
                 foreach(var cargo in cargos)
                 {
                     if(cargo.Value is ProcessedMaterial
@@ -1010,5 +1030,3 @@ namespace Pulsar4X.Client
         }
     }
 }
-
-

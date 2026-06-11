@@ -22,6 +22,9 @@ public interface IClientGalaxy
 
     /// <summary>The faction's research state (categories, techs, scientists). Null until the first push.</summary>
     ResearchSnapshot? Research { get; }
+
+    /// <summary>The faction's component templates and existing designs. Null until the first push.</summary>
+    ComponentDesignsSnapshot? ComponentDesigns { get; }
 }
 
 /// <summary>A single star system within the client galaxy model.</summary>

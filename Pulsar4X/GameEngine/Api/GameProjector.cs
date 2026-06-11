@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Pulsar4X.Api;
+using Pulsar4X.Blueprints;
 using Pulsar4X.Colonies;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
@@ -785,6 +786,56 @@ namespace Pulsar4X.Engine.Api
             DataStructures.CommanderTypes.Scientist => CommanderKind.Scientist,
             _ => CommanderKind.Civilian,
         };
+
+        // ----- component design -----
+
+        /// <summary>The faction's component-design surface: its unlocked templates and the designs it
+        /// has created (each carrying the inputs it was built with, so the client can reload it).</summary>
+        public ComponentDesignsSnapshot? ProjectComponentDesigns(int factionId)
+        {
+            if (!_game.Factions.TryGetValue(factionId, out var faction)) return null;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var info)) return null;
+
+            var templates = info.Data.ComponentTemplates.Values
+                .Select(t => new ComponentTemplateSummary(t.UniqueID, t.Name, t.ComponentType ?? "", TemplateDescription(t)))
+                .OrderBy(t => t.Name)
+                .ToList();
+
+            var designs = new List<ComponentDesignSummary>(info.ComponentDesigns.Count);
+            foreach (var design in info.ComponentDesigns.Values)
+            {
+                var values = new List<DesignerInput>(design.TemplatePropertyValues.Count);
+                foreach (var (propName, _, propValue) in design.TemplatePropertyValues)
+                {
+                    values.Add(propValue switch
+                    {
+                        int i => new DesignerInput(propName, NumericValue: i),
+                        float f => new DesignerInput(propName, NumericValue: f),
+                        double d => new DesignerInput(propName, NumericValue: d),
+                        _ => new DesignerInput(propName, StringValue: propValue?.ToString() ?? ""),
+                    });
+                }
+
+                designs.Add(new ComponentDesignSummary(design.UniqueID, design.Name, design.TemplateID, design.TemplateName)
+                {
+                    PropertyValues = values,
+                });
+            }
+
+            return new ComponentDesignsSnapshot { Templates = templates, Designs = designs };
+        }
+
+        // The "Description" formula is usually a quoted string literal; unwrap it rather than
+        // evaluating (a full evaluation needs a designer instance per template).
+        private static string TemplateDescription(ComponentTemplateBlueprint template)
+        {
+            if (!template.Formulas.TryGetValue("Description", out var formula) || string.IsNullOrEmpty(formula))
+                return "";
+
+            return formula.Length > 1 && formula[0] == '\'' && formula[^1] == '\''
+                ? formula[1..^1]
+                : formula;
+        }
 
         // ----- fleet hierarchy -----
 

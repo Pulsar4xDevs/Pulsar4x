@@ -10,7 +10,7 @@ namespace Pulsar4X.Client;
 /// to an <see cref="IGameServer"/> in the same process (no serialization), and keeps the replicated
 /// <see cref="IClientGalaxy"/> current from bulk snapshots and the server event stream.
 /// </summary>
-public sealed class InProcessAdapter : IGameClient
+public sealed class InProcessAdapter : IGameClient, IDesignDataProvider
 {
     private readonly IGameServer _server;
     private readonly ClientGalaxy _galaxy = new();
@@ -64,6 +64,23 @@ public sealed class InProcessAdapter : IGameClient
         return Task.CompletedTask;
     }
 
+    // In-process the design-time data is the engine's own objects, zero-copy. The downcast is this
+    // adapter's prerogative: it always wraps an EngineGameServer; a network adapter implements the
+    // same interface from state synced on connect.
+    public bool TryGetDesignData(out Pulsar4X.Factions.FactionInfoDB info, out Pulsar4X.Factions.FactionTechDB techs)
+    {
+        if (_server is Pulsar4X.Engine.Api.EngineGameServer engine
+            && engine.GetFactionDesignData(Session) is { } data)
+        {
+            (info, techs) = data;
+            return true;
+        }
+
+        info = null!;
+        techs = null!;
+        return false;
+    }
+
     // Called on an engine/threadpool thread — just queue; do not touch the galaxy here.
     private void OnServerEvent(GameEventEnvelope evt) => _inbound.Enqueue(evt);
 
@@ -99,6 +116,10 @@ public sealed class InProcessAdapter : IGameClient
 
             case GameEventType.ResearchChanged:
                 if (evt.Research != null) _galaxy.Research = evt.Research;
+                return;
+
+            case GameEventType.ComponentDesignsChanged:
+                if (evt.ComponentDesigns != null) _galaxy.ComponentDesigns = evt.ComponentDesigns;
                 return;
 
             case GameEventType.SystemRevealed:

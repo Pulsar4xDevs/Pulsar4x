@@ -201,6 +201,29 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    deposits, the mining table (`ColonyMiningDisplay`) and the gravitational-anomaly panel. Two
    deferred engine bridges remain: the camera-pin button (rendering still tracks live entities) and
    the maneuver-edit click (the maneuver panel still edits live `NewtonThrustCommand`s).
+   The **ComponentDesignWindow** is ported with a *client-side designer, server-validated create*.
+   The interactive designer re-evaluates moddable formulas on every slider drag — far too chatty for
+   a per-input server round-trip (a server-evaluated variant was tried first and the echo latency was
+   unacceptable even in-process) — so the engine `ComponentDesigner` keeps running in the client,
+   exactly as before the port, with the server involved only at the boundary: (a) the
+   template/design *lists* travel as a `ComponentDesignsSnapshot` (`ComponentDesignsChanged`, pushed
+   on connect and after a create; each design carries the `DesignerInput`s it was created with so
+   "edit from existing" replays them); (b) the single write is `CreateComponentDesignCommand`
+   (faction-targeted) carrying the designer's player-set state as `DesignerInput`s — the shared
+   engine helper `DesignerInputs` (Extract/Apply/Build) converts between a live designer and that
+   serializable form on both ends, and the translator replays the inputs onto a fresh designer to
+   validate (bounds clamp, formulas evaluate, bad mod data rejects rather than crashes) before
+   calling `CreateDesign`, then re-pushes designs *and* research (a new design registers a research
+   project). The designer's *data* dependencies (the faction's unlocked `FactionDataStore`, tech
+   levels, missile designs) reach the UI through `IDesignDataProvider` on the adapter — in-process a
+   zero-copy handoff from `EngineGameServer.GetFactionDesignData` (deliberately not on `IGameServer`,
+   which stays engine-type-free); a network adapter implements the same interface from state synced
+   on connect (`FactionInfoDB`/`FactionTechDB` are already save-serializable, and the client holds
+   the same mod data by design — `ConnectRequest.ModManifestHash` enforces the match). One subtlety
+   `DesignerInputs.Extract` encodes: the upper bound of a range-slider pair is `GuiHint.None` like
+   untouchable bookkeeping properties (attribute-constructor args), but *is* player-set — it's
+   included by pairing, while other `None` properties are excluded (replaying them would overwrite
+   their formulas with constants).
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
@@ -223,8 +246,11 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
   `NavalAcademyView`, `IndustryView`, `ConstructionView`, `ColonizableView`, `MineralDepositsView`
   so far), `OwnerRelation`, `Vec3`, `ModifiedValue`/`ValueModifier`; fleet
   hierarchy: `FleetSnapshot`, `ShipSnapshot`, `OrderSnapshot`; research: `ResearchSnapshot`
-  (`TechCategorySnapshot`, `TechSnapshot`, `CommanderSnapshot`/`CommanderKind`/`CommanderBonusSnapshot`).
+  (`TechCategorySnapshot`, `TechSnapshot`, `CommanderSnapshot`/`CommanderKind`/`CommanderBonusSnapshot`);
+  component design: `ComponentDesignsSnapshot` (`ComponentTemplateSummary`, `ComponentDesignSummary`)
+  and `DesignerInput` (the serializable form of a designer's player-set state).
 - Writes: `GameCommand` (+ `RenameCommand`, `CreateFleetCommand`, `CreateColonyCommand`, `DisbandFleetCommand`,
+  `CreateComponentDesignCommand`,
   `ChangeFleetParentCommand`, `ReassignShipCommand`, `SetFlagshipCommand`, `MoveToBodyCommand`,
   `GeoSurveyCommand`, `GravSurveyCommand`, `JumpCommand`, `RefuelAtCommand`,
   `AssignScientistCommand`, `UnassignScientistCommand`, `SetResearchFundingCommand`,
@@ -272,6 +298,12 @@ The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api`
   `SubmitCommand` additionally re-pushes the commanded entity after every accepted command. Still
   open: geo/grav survey completion (`GeoSurveyView`/`GravSurveyView` staleness — nothing is
   published there today).
+- **The component designer's data is an in-process bridge.** The client-side designer evaluates
+  against the faction's live `FactionInfoDB`/`FactionTechDB`, handed over zero-copy via
+  `IDesignDataProvider` (the in-process adapter downcasts to `EngineGameServer`). For network play
+  the `MultiplayerAdapter` must implement the same interface from replicas synced on connect — both
+  DataBlobs are already save-serializable — and refresh them when techs level (the design-relevant
+  changes already arrive as `ResearchChanged`/`ComponentDesignsChanged` pushes to use as triggers).
 - **Procedural body generation never attaches `GeoSurveyableDB`** (only the blueprint/JSON body
   paths do), so procedurally generated systems currently offer nothing to geo-survey. Engine
   inconsistency noted while porting; not an API-layer issue.

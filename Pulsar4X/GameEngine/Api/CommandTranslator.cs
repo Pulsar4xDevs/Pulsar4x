@@ -55,6 +55,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(AddTechToQueueCommand)] = TranslateAddTechToQueue,
                 [typeof(RemoveTechFromQueueCommand)] = TranslateRemoveTechFromQueue,
                 [typeof(MoveTechInQueueCommand)] = TranslateMoveTechInQueue,
+                [typeof(CreateComponentDesignCommand)] = TranslateCreateComponentDesign,
                 [typeof(UninstallComponentCommand)] = TranslateUninstallComponent,
                 [typeof(InstallComponentCommand)] = TranslateInstallComponent,
                 [typeof(QueueIndustryJobCommand)] = TranslateQueueIndustryJob,
@@ -291,6 +292,43 @@ namespace Pulsar4X.Engine.Api
             return move.MoveUp
                 ? Dispatch(MoveUpInQueueOrder.Create(commanded, move.TechId))
                 : Dispatch(MoveDownInQueueOrder.Create(commanded, move.TechId));
+        }
+
+        // ----- component design (commanded entity: the faction itself) -----
+
+        private CommandResult TranslateCreateComponentDesign(Entity faction, Entity commanded, GameCommand command)
+        {
+            var create = (CreateComponentDesignCommand)command;
+            if (commanded != faction)
+                return CommandResult.Reject("A component design can only be created by commanding the faction itself.");
+
+            if (string.IsNullOrWhiteSpace(create.Name))
+                return CommandResult.Reject("The design needs a name.");
+
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo)
+                || !factionInfo.Data.ComponentTemplates.TryGetValue(create.TemplateId, out var template))
+                return CommandResult.Reject($"Component template {create.TemplateId} not found.");
+
+            if (!faction.TryGetDataBlob<FactionTechDB>(out var factionTech))
+                return CommandResult.Reject("The faction has no tech state.");
+
+            try
+            {
+                // Like the research instant orders, design creation is a direct faction-data write
+                // (no engine order exists): replay the inputs onto a fresh designer and finalise it,
+                // which also registers the design's research project.
+                var designer = DesignerInputs.Build(factionInfo.Data, factionTech, template,
+                    create.Inputs ?? Array.Empty<DesignerInput>());
+                designer.Name = create.Name;
+                designer.CreateDesign(faction);
+            }
+            catch (Exception e)
+            {
+                // Formula/attribute evaluation runs over moddable data; reject rather than crash.
+                return CommandResult.Reject($"Design creation failed: {e.Message}");
+            }
+
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 
         // ----- installations/components (commanded entity: the colony or ship holding them) -----

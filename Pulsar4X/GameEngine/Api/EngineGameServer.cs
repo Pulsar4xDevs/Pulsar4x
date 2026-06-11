@@ -184,9 +184,43 @@ namespace Pulsar4X.Engine.Api
             // without raising an engine message, so after any accepted command re-project the
             // commanded entity and push it — the client sees the effect without waiting for a tick.
             if (result.Accepted)
+            {
                 PushEntityRefresh(commanded, session.FactionId);
 
+                // A new component design also registers a research project for itself.
+                if (command is CreateComponentDesignCommand)
+                    PushComponentDesigns(session.FactionId);
+            }
+
             return result;
+        }
+
+        /// <summary>
+        /// In-process bridge for the client-side interactive component designer: the faction's
+        /// design-time state (unlocked data store, tech levels, missile designs). Deliberately NOT on
+        /// <see cref="IGameServer"/> — the contract stays engine-type-free; a network adapter instead
+        /// syncs this state to the client on connect (both DataBlobs are save-serializable).
+        /// </summary>
+        public (FactionInfoDB Info, FactionTechDB Techs)? GetFactionDesignData(PlayerSession session)
+        {
+            if (!_game.Factions.TryGetValue(session.FactionId, out var faction)) return null;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var info)) return null;
+            if (!faction.TryGetDataBlob<FactionTechDB>(out var techs)) return null;
+            return (info, techs);
+        }
+
+        private void PushComponentDesigns(int factionId)
+        {
+            var designs = _projector.ProjectComponentDesigns(factionId);
+            var research = _projector.ProjectResearch(factionId);
+            foreach (var sub in SnapshotSubscriptions())
+            {
+                if (sub.FactionId != factionId) continue;
+                if (designs != null)
+                    sub.Send(new GameEventEnvelope(GameEventType.ComponentDesignsChanged, ComponentDesigns: designs));
+                if (research != null)
+                    sub.Send(new GameEventEnvelope(GameEventType.ResearchChanged, Research: research));
+            }
         }
 
         private void PushEntityRefresh(Entity commanded, int factionId)
@@ -231,6 +265,10 @@ namespace Pulsar4X.Engine.Api
             var research = _projector.ProjectResearch(session.FactionId);
             if (research != null)
                 sink(new GameEventEnvelope(GameEventType.ResearchChanged, Research: research));
+
+            var designs = _projector.ProjectComponentDesigns(session.FactionId);
+            if (designs != null)
+                sink(new GameEventEnvelope(GameEventType.ComponentDesignsChanged, ComponentDesigns: designs));
         }
 
         /// <summary>

@@ -28,6 +28,8 @@ internal sealed class ClientGalaxy : IClientGalaxy
 
     public ResearchSnapshot? Research { get; internal set; }
 
+    public ComponentDesignsSnapshot? ComponentDesigns { get; internal set; }
+
     public IClientSystem? GetSystem(string systemId)
         => _systems.TryGetValue(systemId, out var system) ? system : null;
 

@@ -18,6 +18,7 @@ public enum GameEventType
     FleetsChanged,   // the faction's fleet hierarchy changed; payload carries Fleets
     FactionChanged,  // the faction's identity/funds changed; payload carries Faction
     ResearchChanged, // the faction's research state changed; payload carries Research
+    ComponentDesignsChanged,  // the faction's templates/designs changed; payload carries ComponentDesigns
 }
 
 /// <summary>
@@ -39,4 +40,5 @@ public sealed record GameEventEnvelope(
     IReadOnlyList<FleetSnapshot>? Fleets = null,
     IReadOnlyList<ShipSnapshot>? UnattachedShips = null,
     FactionSnapshot? Faction = null,
-    ResearchSnapshot? Research = null);
+    ResearchSnapshot? Research = null,
+    ComponentDesignsSnapshot? ComponentDesigns = null);
