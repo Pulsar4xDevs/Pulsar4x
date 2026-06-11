@@ -179,6 +179,14 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    Both tabs render via new snapshot-based `ColonyProductionDisplay`/`ColonyConstructionDisplay`
    singletons (the engine `IndustryDisplay`/`ConstructionDisplay` remain for the unported
    EntityWindow).
+   The **SystemWindow** is fully ported: it rebuilds the body tree from the snapshot hierarchy
+   (`OrbitView`/`PositionView` parent ids, stars at the root) and reads everything else from
+   existing views. Small additions: `GeoSurveyView` now carries `HasSurveyStarted`/`PercentComplete`
+   (survey progress is faction-scoped, computed server-side), `GasAmount` carries the gas id +
+   partial pressure (for the oxygen column), and `ColonizableView`/`MineralDepositsView` markers.
+   The Colonize button submits `CreateColonyCommand` (faction-targeted like `CreateFleet`; the
+   server settles the faction's first species). The `BodyKind`→display-enum mapping moved from
+   `Selector` to `UserOrbitSettings.FromBodyKind` for shared use with the map view-filter.
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
@@ -198,11 +206,11 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
   `PositionView`, `OrbitView`, `MassVolumeView`, `BodyView`, `StarView`, `ColonyView`, `ShipView`,
   `GeoSurveyView`, `GravSurveyView`, `JumpPointView`, `CargoStorageView`, `ResearcherView`,
   `AtmosphereView`, `InfrastructureView`, `InstallationsView`, `ColonyMiningView`,
-  `NavalAcademyView`, `IndustryView`, `ConstructionView` so far), `OwnerRelation`, `Vec3`,
-  `ModifiedValue`/`ValueModifier`; fleet
+  `NavalAcademyView`, `IndustryView`, `ConstructionView`, `ColonizableView`, `MineralDepositsView`
+  so far), `OwnerRelation`, `Vec3`, `ModifiedValue`/`ValueModifier`; fleet
   hierarchy: `FleetSnapshot`, `ShipSnapshot`, `OrderSnapshot`; research: `ResearchSnapshot`
   (`TechCategorySnapshot`, `TechSnapshot`, `CommanderSnapshot`/`CommanderKind`/`CommanderBonusSnapshot`).
-- Writes: `GameCommand` (+ `RenameCommand`, `CreateFleetCommand`, `DisbandFleetCommand`,
+- Writes: `GameCommand` (+ `RenameCommand`, `CreateFleetCommand`, `CreateColonyCommand`, `DisbandFleetCommand`,
   `ChangeFleetParentCommand`, `ReassignShipCommand`, `SetFlagshipCommand`, `MoveToBodyCommand`,
   `GeoSurveyCommand`, `GravSurveyCommand`, `JumpCommand`, `RefuelAtCommand`,
   `AssignScientistCommand`, `UnassignScientistCommand`, `SetResearchFundingCommand`,

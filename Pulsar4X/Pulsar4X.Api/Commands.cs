@@ -27,6 +27,9 @@ public sealed record RenameCommand(int TargetEntityId, string NewName) : GameCom
 /// <summary>Create a new (empty, server-named) fleet in the given system. Targets the faction itself.</summary>
 public sealed record CreateFleetCommand(int TargetEntityId, string SystemId) : GameCommand(TargetEntityId);
 
+/// <summary>Found a colony on a body (the faction's first species settles it). Targets the faction itself.</summary>
+public sealed record CreateColonyCommand(int TargetEntityId, int BodyId) : GameCommand(TargetEntityId);
+
 public sealed record DisbandFleetCommand(int TargetEntityId) : GameCommand(TargetEntityId);
 
 /// <summary>Re-parent a fleet under another fleet, or under the faction root when

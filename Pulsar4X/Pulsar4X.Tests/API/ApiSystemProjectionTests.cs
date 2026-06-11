@@ -68,6 +68,14 @@ namespace Pulsar4X.Tests
             var view = _projector.ProjectEntity(body, session.FactionId).GetView<GeoSurveyView>();
             Assert.That(view, Is.Not.Null, "expected a GeoSurveyView once the body is surveyable");
             Assert.That(view!.IsSurveyComplete, Is.False);
+            Assert.That(view.HasSurveyStarted, Is.False);
+
+            // Survey progress is faction-scoped and pre-computed as a percentage.
+            body.GetDataBlob<GeoSurveyableDB>().GeoSurveyStatus[session.FactionId] = 75;
+            view = _projector.ProjectEntity(body, session.FactionId).GetView<GeoSurveyView>();
+            Assert.That(view!.HasSurveyStarted, Is.True);
+            Assert.That(view.IsSurveyComplete, Is.False);
+            Assert.That(view.PercentComplete, Is.EqualTo(25));
 
             // Completing the survey for this faction flips its (faction-scoped) view.
             body.GetDataBlob<GeoSurveyableDB>().GeoSurveyStatus[session.FactionId] = 0;

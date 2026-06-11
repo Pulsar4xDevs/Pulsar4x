@@ -286,24 +286,9 @@ namespace Pulsar4X.Client
 
         private static string NameOf(EntitySnapshot body) => body.GetView<NameView>()?.Name ?? "";
 
-        // Map the API body classification to the client's display enum (used for icons/tooltips and the
-        // shared map view-filter).
-        private static UserOrbitSettings.OrbitBodyType ToOrbitBodyType(BodyKind kind) => kind switch
-        {
-            BodyKind.Star => UserOrbitSettings.OrbitBodyType.Star,
-            BodyKind.Planet => UserOrbitSettings.OrbitBodyType.Planet,
-            BodyKind.DwarfPlanet => UserOrbitSettings.OrbitBodyType.DwarfPlanet,
-            BodyKind.Moon => UserOrbitSettings.OrbitBodyType.Moon,
-            BodyKind.Asteroid => UserOrbitSettings.OrbitBodyType.Asteroid,
-            BodyKind.Comet => UserOrbitSettings.OrbitBodyType.Comet,
-            BodyKind.Colony => UserOrbitSettings.OrbitBodyType.Colony,
-            BodyKind.Ship => UserOrbitSettings.OrbitBodyType.Ship,
-            _ => UserOrbitSettings.OrbitBodyType.Unknown,
-        };
-
         private static void DisplayBodyNode(EntitySnapshot body, Dictionary<int, List<EntitySnapshot>> children, SystemViewPreferences prefs, int visibleDepth)
         {
-            var orbitType = ToOrbitBodyType(body.Kind);
+            var orbitType = UserOrbitSettings.FromBodyKind(body.Kind);
 
             // Respect the same view filters used by the system map. A filtered-out body
             // is skipped but we still recurse so its children stay in the tree, sliding

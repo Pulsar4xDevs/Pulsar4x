@@ -115,6 +115,26 @@ namespace Pulsar4X.Tests
             Assert.That(moveResult.RejectionReason, Does.Contain("queue position"));
         }
 
+        [Test]
+        public void CreateColony_command_founds_a_colony()
+        {
+            var session = Connect();
+            var faction = _game.Factions[session.FactionId];
+
+            // The faction needs a species to settle with; the command picks the first.
+            SpeciesFactory.CreateSpeciesHuman(faction, _game.GlobalManager);
+            var planet = _game.Systems[0].GetAllEntitiesWithDataBlob<SystemBodyInfoDB>()
+                .First(b => b.HasDataBlob<MassVolumeDB>() && b.HasDataBlob<NameDB>());
+
+            var result = _server.SubmitCommand(session, new CreateColonyCommand(session.FactionId, planet.Id));
+
+            Assert.That(result.Accepted, Is.True, result.RejectionReason);
+            var colonies = faction.GetDataBlob<Pulsar4X.Factions.FactionInfoDB>().Colonies;
+            Assert.That(colonies, Has.Count.EqualTo(1));
+            Assert.That(_projector.ProjectEntity(colonies[0], session.FactionId).GetView<ColonyView>()?.PlanetEntityId,
+                Is.EqualTo(planet.Id));
+        }
+
         /// <summary>Plants a bare colony for the session's faction on a body in the test system.</summary>
         private Entity MakeColony(PlayerSession session)
         {

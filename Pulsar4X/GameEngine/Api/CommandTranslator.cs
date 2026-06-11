@@ -39,6 +39,7 @@ namespace Pulsar4X.Engine.Api
             {
                 [typeof(Pulsar4X.Api.RenameCommand)] = TranslateRename,
                 [typeof(CreateFleetCommand)] = TranslateCreateFleet,
+                [typeof(CreateColonyCommand)] = TranslateCreateColony,
                 [typeof(DisbandFleetCommand)] = TranslateDisbandFleet,
                 [typeof(ChangeFleetParentCommand)] = TranslateChangeFleetParent,
                 [typeof(ReassignShipCommand)] = TranslateReassignShip,
@@ -125,6 +126,21 @@ namespace Pulsar4X.Engine.Api
 
             // The fleet's name is generated server-side; the client renames it afterwards if desired.
             return Dispatch(FleetOrder.CreateFleetOrder(NameFactory.GetFleetName(_game), faction, system));
+        }
+
+        private CommandResult TranslateCreateColony(Entity faction, Entity commanded, GameCommand command)
+        {
+            var create = (CreateColonyCommand)command;
+            if (commanded != faction)
+                return CommandResult.Reject("A colony can only be created by commanding the faction itself.");
+
+            if (!TryResolve(create.BodyId, out var body))
+                return CommandResult.Reject($"Entity {create.BodyId} not found.");
+
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo) || factionInfo.Species.Count == 0)
+                return CommandResult.Reject("The faction has no species to settle the colony with.");
+
+            return Dispatch(Pulsar4X.Colonies.CreateColonyOrder.CreateCommand(faction, factionInfo.Species[0], body));
         }
 
         private CommandResult TranslateDisbandFleet(Entity faction, Entity commanded, GameCommand command)

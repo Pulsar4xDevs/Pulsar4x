@@ -111,7 +111,7 @@ public sealed record AtmosphereView(
     public IReadOnlyList<GasAmount> Composition { get; init; } = Array.Empty<GasAmount>();
 }
 
-public sealed record GasAmount(string Name, double Percent);
+public sealed record GasAmount(string Name, double Percent, string Id = "", double PartialPressureAtm = 0);
 
 public sealed record StarView(
     string SpectralType,
@@ -155,7 +155,17 @@ public sealed record InstallationGroup(
 public sealed record ShipView(string DesignName) : IComponentView;
 
 /// <summary>Geological survey state of a body, scoped to the requesting faction.</summary>
-public sealed record GeoSurveyView(bool IsSurveyComplete) : IComponentView;
+public sealed record GeoSurveyView(
+    bool IsSurveyComplete,
+    bool HasSurveyStarted = false,
+    /// <summary>0–100, only meaningful once the survey has started.</summary>
+    double PercentComplete = 0) : IComponentView;
+
+/// <summary>Marks a body the faction could found a colony on (once geo-surveyed).</summary>
+public sealed record ColonizableView : IComponentView;
+
+/// <summary>Marks a body as having mineral deposits (amounts surface via <see cref="ColonyMiningView"/>).</summary>
+public sealed record MineralDepositsView : IComponentView;
 
 /// <summary>Gravitational (jump-point) survey state of a location, scoped to the requesting faction.</summary>
 public sealed record GravSurveyView(bool IsSurveyComplete) : IComponentView;

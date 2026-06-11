@@ -138,7 +138,9 @@ namespace Pulsar4X.Engine.Api
             (e, f) => e.TryGetDataBlob<ColonyInfoDB>(out var c) ? ToColonyView(c, e, f) : null,
             (e, _) => e.TryGetDataBlob<AtmosphereDB>(out var a) ? ToAtmosphereView(a, a.OwningEntity?.Manager?.Game) : null,
             (e, _) => e.TryGetDataBlob<ShipInfoDB>(out var sh) ? new ShipView(sh.Design.Name) : null,
-            (e, f) => e.TryGetDataBlob<GeoSurveyableDB>(out var g) ? new GeoSurveyView(g.IsSurveyComplete(f)) : null,
+            (e, f) => e.TryGetDataBlob<GeoSurveyableDB>(out var g) ? ToGeoSurveyView(g, f) : null,
+            (e, _) => e.HasDataBlob<ColonizeableDB>() ? new ColonizableView() : null,
+            (e, _) => e.HasDataBlob<MineralsDB>() ? new MineralDepositsView() : null,
             (e, f) => e.TryGetDataBlob<JPSurveyableDB>(out var j) ? new GravSurveyView(j.IsSurveyComplete(f)) : null,
             // A jump point is only part of a faction's world once that faction has discovered it.
             (e, f) => e.TryGetDataBlob<JumpPointDB>(out var jp) && jp.IsDiscovered.Contains(f) ? new JumpPointView() : null,
@@ -177,13 +179,24 @@ namespace Pulsar4X.Engine.Api
             foreach (var (gasId, percent) in a.CompositionByPercent)
             {
                 string name = game != null && game.AtmosphericGases.TryGetValue(gasId, out var gas) ? gas.Name : gasId;
-                composition.Add(new GasAmount(name, percent));
+                a.Composition.TryGetValue(gasId, out var partialPressure);
+                composition.Add(new GasAmount(name, percent, gasId, partialPressure));
             }
 
             return new AtmosphereView(a.SurfaceTemperature, a.Pressure, a.Hydrosphere, (double)a.HydrosphereExtent)
             {
                 Composition = composition,
             };
+        }
+
+        private static GeoSurveyView ToGeoSurveyView(GeoSurveyableDB g, int factionId)
+        {
+            bool started = g.HasSurveyStarted(factionId);
+            double percent = 0;
+            if (started && g.PointsRequired > 0)
+                percent = (1.0 - (double)g.GeoSurveyStatus[factionId] / g.PointsRequired) * 100;
+
+            return new GeoSurveyView(g.IsSurveyComplete(factionId), started, percent);
         }
 
         private static StarView ToStarView(StarInfoDB s)
