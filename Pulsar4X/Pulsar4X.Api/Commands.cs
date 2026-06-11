@@ -82,6 +82,52 @@ public sealed record UninstallComponentCommand(int TargetEntityId, string Design
 /// <summary>Install a component instance (<see cref="CargoItemView.Id"/>) out of cargo storage.</summary>
 public sealed record InstallComponentCommand(int TargetEntityId, int ComponentId) : GameCommand(TargetEntityId);
 
+// ----- cargo transfer (commanded entity: the source, which must hold the items) -----
+
+/// <summary>One line of a transfer: a cargo item (<see cref="CargoItemView.Id"/>) and how many
+/// units to move from the commanded entity to the partner.</summary>
+public sealed record CargoTransferItem(int CargoItemId, long Units);
+
+/// <summary>Order a cargo transfer from the commanded entity to a partner. Both need cargo storage
+/// and both must belong to the faction (the engine validates each side's order). The transfer
+/// itself runs over time, rate- and range-limited by the engine.</summary>
+public sealed record TransferCargoCommand(
+    int TargetEntityId,
+    int PartnerEntityId,
+    IReadOnlyList<CargoTransferItem> Items) : GameCommand(TargetEntityId);
+
+// ----- order queue (commanded entity: the entity holding the order) -----
+
+/// <summary>Set whether the simulation pauses when the given queued order actions
+/// (<see cref="OrderSnapshot.OrderId"/>).</summary>
+public sealed record SetOrderPauseCommand(int TargetEntityId, string OrderId, bool Pause) : GameCommand(TargetEntityId);
+
+// ----- fire control (commanded entity: the ship) -----
+
+/// <summary>Replace a fire control's assigned weapon set (ids from <see cref="WeaponSnapshot.Id"/>).</summary>
+public sealed record SetFireControlWeaponsCommand(
+    int TargetEntityId,
+    string FireControlId,
+    IReadOnlyList<string> WeaponIds) : GameCommand(TargetEntityId);
+
+/// <summary>Point a fire control at a target entity.</summary>
+public sealed record SetFireControlTargetCommand(
+    int TargetEntityId,
+    string FireControlId,
+    int TargetId) : GameCommand(TargetEntityId);
+
+/// <summary>Load an ordnance design (<see cref="OrdnanceStoreItem.Id"/>) into a weapon.</summary>
+public sealed record AssignOrdnanceCommand(
+    int TargetEntityId,
+    string WeaponId,
+    string OrdnanceDesignId) : GameCommand(TargetEntityId);
+
+/// <summary>Open or cease fire on a fire control's current target.</summary>
+public sealed record SetFireModeCommand(
+    int TargetEntityId,
+    string FireControlId,
+    bool OpenFire) : GameCommand(TargetEntityId);
+
 // ----- component design (commanded entity: the faction itself) -----
 
 /// <summary>Create (save) a component design. The interactive designer runs client-side; this is

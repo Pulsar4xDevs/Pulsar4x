@@ -35,7 +35,7 @@ namespace Pulsar4X.Weapons
         private List<WeaponState> _weaponsAssigned = new List<WeaponState>();
 
 
-        public static void CreateCommand(Game game, DateTime starSysDate, int factionGuid, int orderEntity, string fireControlGuid, List<string> weaponsAssigned)
+        public static bool CreateCommand(Game game, DateTime starSysDate, int factionGuid, int orderEntity, string fireControlGuid, List<string> weaponsAssigned)
         {
             var cmd = new SetWeaponsFireControlOrder()
             {
@@ -46,7 +46,7 @@ namespace Pulsar4X.Weapons
                 WeaponsAssigned = weaponsAssigned,
                 UseActionLanes = false
             };
-            game.OrderHandler.HandleOrder(cmd);
+            return game.OrderHandler.HandleOrder(cmd);
         }
 
 
@@ -138,7 +138,7 @@ namespace Pulsar4X.Weapons
         private ComponentInstance _fireControlComponent;
 
 
-        public static void CreateCommand(Game game, DateTime starSysDate, int factionGuid, int orderEntity, string fireControlGuid, int targetGuid)
+        public static bool CreateCommand(Game game, DateTime starSysDate, int factionGuid, int orderEntity, string fireControlGuid, int targetGuid)
         {
             var cmd = new SetTargetFireControlOrder()
             {
@@ -149,7 +149,7 @@ namespace Pulsar4X.Weapons
                 TargetSensorEntityGuid = targetGuid,
                 UseActionLanes = false,
             };
-            game.OrderHandler.HandleOrder(cmd);
+            return game.OrderHandler.HandleOrder(cmd);
         }
 
 
@@ -247,7 +247,7 @@ namespace Pulsar4X.Weapons
         public FireModes IsFiring;
         private Game _game;
 
-        public static void CreateCmd(Game game, int factionId, int shipEntityId, string fireControlGuid, FireModes isFiring)
+        public static bool CreateCmd(Game game, int factionId, int shipEntityId, string fireControlGuid, FireModes isFiring)
         {
             var cmd = new SetOpenFireControlOrder()
             {
@@ -258,8 +258,7 @@ namespace Pulsar4X.Weapons
                 IsFiring = isFiring,
                 _game = game
             };
-            game.OrderHandler.HandleOrder(cmd);
-
+            return game.OrderHandler.HandleOrder(cmd);
         }
 
         internal override void Execute(DateTime atDateTime)
@@ -352,17 +351,17 @@ namespace Pulsar4X.Weapons
         private OrdnanceDesign _ordnanceAssigned;
 
 
-        public static void CreateCommand(DateTime starSysDate, Entity faction, int orderEntityId, WeaponState weapon, string ordnanceAssigned)
+        public static bool CreateCommand(Game game, DateTime starSysDate, int factionId, int orderEntityId, string weaponId, string ordnanceAssigned)
         {
             var cmd = new SetOrdinanceToWpnOrder()
             {
-                RequestingFactionGuid = faction.Id,
+                RequestingFactionGuid = factionId,
                 EntityCommandingGuid = orderEntityId,
                 CreatedDate = starSysDate,
-                WeaponGuid = weapon.ID,
+                WeaponGuid = weaponId,
                 OrdnanceAssigned = ordnanceAssigned
             };
-            cmd.EntityCommanding.Manager.Game.OrderHandler.HandleOrder(cmd);
+            return game.OrderHandler.HandleOrder(cmd);
         }
 
 
@@ -394,7 +393,8 @@ namespace Pulsar4X.Weapons
 
                 if (instancesdb.AllComponents.TryGetValue(WeaponGuid, out ComponentInstance? wpn))
                 {
-                    _ordnanceAssigned = _factionEntity.GetDataBlob<FactionInfoDB>().MissileDesigns[OrdnanceAssigned];
+                    if (!_factionEntity.GetDataBlob<FactionInfoDB>().MissileDesigns.TryGetValue(OrdnanceAssigned, out _ordnanceAssigned))
+                        return false;
                     if(wpn.TryGetAbilityState(out WeaponState? wpnState))
                     {
                         _weaponInstance = wpn;

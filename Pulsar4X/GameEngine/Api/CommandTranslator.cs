@@ -59,6 +59,12 @@ namespace Pulsar4X.Engine.Api
                 [typeof(SaveShipDesignCommand)] = TranslateSaveShipDesign,
                 [typeof(DeleteShipDesignCommand)] = TranslateDeleteShipDesign,
                 [typeof(SetShipDesignObsoleteCommand)] = TranslateSetShipDesignObsolete,
+                [typeof(TransferCargoCommand)] = TranslateTransferCargo,
+                [typeof(SetOrderPauseCommand)] = TranslateSetOrderPause,
+                [typeof(SetFireControlWeaponsCommand)] = TranslateSetFireControlWeapons,
+                [typeof(SetFireControlTargetCommand)] = TranslateSetFireControlTarget,
+                [typeof(AssignOrdnanceCommand)] = TranslateAssignOrdnance,
+                [typeof(SetFireModeCommand)] = TranslateSetFireMode,
                 [typeof(UninstallComponentCommand)] = TranslateUninstallComponent,
                 [typeof(InstallComponentCommand)] = TranslateInstallComponent,
                 [typeof(QueueIndustryJobCommand)] = TranslateQueueIndustryJob,
@@ -248,6 +254,121 @@ namespace Pulsar4X.Engine.Api
             return CargoTransferOrder.CreateRefuelFleetCommand(colony, commanded)
                 ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
                 : CommandResult.Reject("No ship in the fleet could take on fuel.");
+        }
+
+        // ----- cargo transfer (commanded entity: the source) -----
+
+        private CommandResult TranslateTransferCargo(Entity faction, Entity commanded, GameCommand command)
+        {
+            var transfer = (TransferCargoCommand)command;
+            if (!TryResolve(transfer.PartnerEntityId, out var partner))
+                return CommandResult.Reject($"Entity {transfer.PartnerEntityId} not found.");
+            if (partner.FactionOwnerID != faction.Id)
+                return CommandResult.Reject("The transfer partner does not belong to the faction.");
+            if (!commanded.TryGetDataBlob<CargoStorageDB>(out var storage))
+                return CommandResult.Reject("The commanded entity has no cargo storage.");
+            if (!partner.HasDataBlob<CargoStorageDB>())
+                return CommandResult.Reject("The transfer partner has no cargo storage.");
+            if (transfer.Items is not { Count: > 0 })
+                return CommandResult.Reject("Nothing to transfer.");
+
+            // Items travel as cargo-item ids; resolve each against the source's stores (this also
+            // covers entity-specific cargoables like component instances, which aren't in the
+            // faction's goods library).
+            var items = new List<(ICargoable, long)>(transfer.Items.Count);
+            foreach (var (cargoItemId, units) in transfer.Items)
+            {
+                if (units <= 0)
+                    return CommandResult.Reject("Transfer amounts must be positive.");
+
+                ICargoable? cargoable = null;
+                foreach (var store in storage.TypeStores.Values)
+                {
+                    if (store.GetCargoables().TryGetValue(cargoItemId, out var found))
+                    {
+                        cargoable = found;
+                        break;
+                    }
+                }
+                if (cargoable == null)
+                    return CommandResult.Reject($"Cargo item {cargoItemId} is not in the source's storage.");
+
+                // Negative = out of the primary (commanded) entity, per the engine's convention.
+                items.Add((cargoable, -units));
+            }
+
+            return CargoTransferOrder.CreateCommands(faction.Id, commanded, partner, items)
+                ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
+                : CommandResult.Reject("Command rejected by engine validation.");
+        }
+
+        // ----- order queue (commanded entity: the holder) -----
+
+        // PauseOnAction is a plain flag on the queued order with no engine order of its own (the
+        // pre-port UI flipped it by reference), so the translator sets it directly.
+        private CommandResult TranslateSetOrderPause(Entity faction, Entity commanded, GameCommand command)
+        {
+            var pause = (SetOrderPauseCommand)command;
+            if (!commanded.TryGetDataBlob<OrderableDB>(out var orderable))
+                return CommandResult.Reject("The entity has no order queue.");
+
+            var order = orderable.ActionList.FirstOrDefault(o => o.CmdID == pause.OrderId);
+            if (order == null)
+                return CommandResult.Reject($"Order {pause.OrderId} is not in the queue.");
+
+            order.PauseOnAction = pause.Pause;
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        // ----- fire control (commanded entity: the ship) -----
+
+        private CommandResult TranslateSetFireControlWeapons(Entity faction, Entity commanded, GameCommand command)
+        {
+            var assign = (SetFireControlWeaponsCommand)command;
+            bool accepted = Pulsar4X.Weapons.SetWeaponsFireControlOrder.CreateCommand(
+                _game, commanded.StarSysDateTime, faction.Id, commanded.Id,
+                assign.FireControlId, assign.WeaponIds.ToList());
+            return accepted
+                ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
+                : CommandResult.Reject("Command rejected by engine validation.");
+        }
+
+        private CommandResult TranslateSetFireControlTarget(Entity faction, Entity commanded, GameCommand command)
+        {
+            var target = (SetFireControlTargetCommand)command;
+            if (!TryResolve(target.TargetId, out _))
+                return CommandResult.Reject($"Entity {target.TargetId} not found.");
+
+            bool accepted = Pulsar4X.Weapons.SetTargetFireControlOrder.CreateCommand(
+                _game, commanded.StarSysDateTime, faction.Id, commanded.Id,
+                target.FireControlId, target.TargetId);
+            return accepted
+                ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
+                : CommandResult.Reject("Command rejected by engine validation.");
+        }
+
+        private CommandResult TranslateAssignOrdnance(Entity faction, Entity commanded, GameCommand command)
+        {
+            var assign = (AssignOrdnanceCommand)command;
+            bool accepted = Pulsar4X.Weapons.SetOrdinanceToWpnOrder.CreateCommand(
+                _game, commanded.StarSysDateTime, faction.Id, commanded.Id,
+                assign.WeaponId, assign.OrdnanceDesignId);
+            return accepted
+                ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
+                : CommandResult.Reject("Command rejected by engine validation.");
+        }
+
+        private CommandResult TranslateSetFireMode(Entity faction, Entity commanded, GameCommand command)
+        {
+            var mode = (SetFireModeCommand)command;
+            bool accepted = Pulsar4X.Weapons.SetOpenFireControlOrder.CreateCmd(
+                _game, faction.Id, commanded.Id, mode.FireControlId,
+                mode.OpenFire
+                    ? Pulsar4X.Weapons.SetOpenFireControlOrder.FireModes.OpenFire
+                    : Pulsar4X.Weapons.SetOpenFireControlOrder.FireModes.CeaseFire);
+            return accepted
+                ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
+                : CommandResult.Reject("Command rejected by engine validation.");
         }
 
         // ----- research (commanded entity: the lab) -----

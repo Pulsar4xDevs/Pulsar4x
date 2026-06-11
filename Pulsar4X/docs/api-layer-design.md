@@ -251,6 +251,37 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    (which the toolbar's "Commanders" button actually opened) along with its colony-hex-map button
    and the `ColonyHexMapWindow` + the engine-backed `PeopleChooser` overload, all of which it was
    the last user of; the toolbar/hotkey now open the new window.
+   **Cargo transfer** is ported around the existing `CargoStorageView` read surface plus one write:
+   `TransferCargoCommand` (commanded entity = the source; items as `CargoItemView.Id` + units, which
+   the translator resolves against the source's stores — covering entity-specific cargoables like
+   component instances — and hands to the engine's paired two-sided `CargoTransferOrder`, now
+   returning the dispatch result). The `CreateTransferWindow` reads partner candidates from the
+   system snapshot (`CargoStorageView` presence, which is owner-only) and both sides' stores from
+   the snapshots, re-resolved per frame; selection state is just ids + chosen unit counts. It
+   replaces the old map-click `CargoTransferWindow` everywhere (context menu, selector, names map),
+   which is deleted along with its `CargoListPanelComplex` and the dead `EntityDisplay` helper.
+   Two old-window niceties did not carry over: the live ΔV-difference/transfer-rate readout and the
+   transfer-then-install-on-partner button (self-install remains via `InstallComponentCommand`).
+   The **FireControl window** is ported. New owner-only `FireControlView`: the entity's fire
+   controls (`FireControlSnapshot` — target, engagement state, assigned weapon ids), all its
+   weapons (`WeaponSnapshot` — fire-control assignment, magazine fill, loaded ordnance with the
+   cargo count resolved server-side), and the loadable ordnance in its cargo (`OrdnanceStoreItem`).
+   Commands: `SetFireControlWeaponsCommand` (replaces a fire control's whole weapon set — the
+   client computes add/remove against the snapshot), `SetFireControlTargetCommand`,
+   `AssignOrdnanceCommand`, `SetFireModeCommand` (open/cease). The engine's four fire-control order
+   factories now return the `HandleOrder` bool; `SetOrdinanceToWpnOrder.CreateCommand` also lost an
+   unconditional NRE (it dereferenced the not-yet-resolved `EntityCommanding` to find the order
+   handler) and a `KeyNotFound` on bad ordnance ids in validation. Target candidates come from the
+   system snapshot (`Relation == Hostile`, plus own/friendly behind the "show own" toggle); the
+   post-command `EntityChanged` push refreshes the view immediately.
+   The **OrdersListWindow** (per-entity order queue) is ported: `OrderSnapshot` now carries
+   `OrderId`, the action-lane flags + `IsBlocking`, and `PauseOnAction`; the pause checkbox submits
+   `SetOrderPauseCommand` (the flag has no engine order of its own — the pre-port UI flipped it by
+   reference — so the translator sets it directly on the queued order). The window resolves its
+   entity snapshot each frame and closes itself when the entity leaves the faction's view.
+   **Positions** are now client-propagated: `OrbitView` carries the full Keplerian element set and
+   the client `SnapshotOrbits` helper computes positions per frame from it (see the resolved gap
+   below) — the read foundation for the map and the movement-order windows.
    The **ComponentsWindow** (the read-only component-library browser) is ported with zero new API
    surface: everything it shows — the faction's unlocked `ComponentTemplates`, its
    `ComponentDesigns`, cargo-good names, and the `ComponentDesigner` it constructs to evaluate a
@@ -277,7 +308,8 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
   `PositionView`, `OrbitView`, `MassVolumeView`, `BodyView`, `StarView`, `ColonyView`, `ShipView`,
   `GeoSurveyView`, `GravSurveyView`, `JumpPointView`, `CargoStorageView`, `ResearcherView`,
   `AtmosphereView`, `InfrastructureView`, `InstallationsView`, `ColonyMiningView`,
-  `NavalAcademyView`, `IndustryView`, `ConstructionView`, `ColonizableView`, `MineralDepositsView`
+  `NavalAcademyView`, `IndustryView`, `ConstructionView`, `ColonizableView`, `MineralDepositsView`,
+  `FireControlView` (+ `FireControlSnapshot`, `WeaponSnapshot`, `OrdnanceStoreItem`)
   so far), `OwnerRelation`, `Vec3`, `ModifiedValue`/`ValueModifier`; fleet
   hierarchy: `FleetSnapshot`, `ShipSnapshot`, `OrderSnapshot`; research: `ResearchSnapshot`
   (`TechCategorySnapshot`, `TechSnapshot`, `CommanderSnapshot`/`CommanderKind`/`CommanderBonusSnapshot`
@@ -291,6 +323,9 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
   `GeoSurveyCommand`, `GravSurveyCommand`, `JumpCommand`, `RefuelAtCommand`,
   `AssignScientistCommand`, `UnassignScientistCommand`, `SetResearchFundingCommand`,
   `AddTechToQueueCommand`, `RemoveTechFromQueueCommand`, `MoveTechInQueueCommand`,
+  `TransferCargoCommand` (+ `CargoTransferItem`),
+  `SetFireControlWeaponsCommand`, `SetFireControlTargetCommand`, `AssignOrdnanceCommand`,
+  `SetFireModeCommand`, `SetOrderPauseCommand`,
   `UninstallComponentCommand`, `InstallComponentCommand`, `QueueIndustryJobCommand`,
   `ChangeIndustryJobPriorityCommand`, `CancelIndustryJobCommand`, `AddToConstructionQueueCommand`,
   `MoveConstructionJobCommand`, `RemoveConstructionJobCommand`), `CommandResult`.
@@ -308,10 +343,21 @@ The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api`
   galaxy — even an entity the faction shouldn't yet see. Current consumers mask this (the colonies list
   filters `Relation == Owned`; the body list filters celestial kinds), but it must be fixed before the
   map is ported (which shows all visible entities) — the server should drop adds the faction can't see.
-- **Continuous state (positions) isn't streamed yet.** Position/orbit updates mutate existing
-  DataBlobs without firing add/remove events, so galaxy entity snapshots don't yet receive per-tick
-  position changes. The map still reads live engine state; when it's ported, positions will need either
-  a periodic position delta or client-side orbit propagation from `OrbitView`.
+- **Continuous state (positions): client-side orbit propagation — foundation done.** Decision:
+  Keplerian movement is propagated client-side, not streamed. `OrbitView` carries the full element
+  set (metres/radians + epoch + μ), `SnapshotOrbits` (client) rebuilds `KeplerElements` and computes
+  relative/absolute positions per frame via the shared `Pulsar4X.OrbitalMath`, and the server
+  re-pushes only the *non-Keplerian* movers (entities with `WarpMovingDB`/`NewtonMoveDB`) each clock
+  advance so their `PositionView` is at most a tick old. The element round-trip is verified against
+  engine positions in `ApiOrbitPropagationTests`. Remaining: the map itself (and the map-coupled
+  order windows below) consume this when ported.
+- **The remaining movement-order windows are map work, not window work.** `WarpOrderWindow`,
+  `NavWindow`, `ChangeCurrentOrbitWindow` and `ManeuverNodePanel` take their input from map clicks
+  (world-coordinate picking) and render their output as map widgets (`OrbitOrderIcon`,
+  `WarpMoveOrderWidget`, `RouteLines`), with camera control in the loop — they can only be ported
+  together with the system-map renderer. The position foundation above plus the existing
+  command-translation recipe is what that effort builds on (`WarpMoveCommand`/`NewtonThrustCommand`
+  DTOs land then).
 - **Faction selection on connect is naive** — binds to the first faction. Real selection/auth via
   `ConnectRequest.Credential` lands with networking.
 - ~~The in-process adapter lives in `Pulsar4X.Api`.~~ **Resolved:** `InProcessAdapter` and the

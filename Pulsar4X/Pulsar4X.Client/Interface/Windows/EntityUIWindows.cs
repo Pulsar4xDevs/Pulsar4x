@@ -136,7 +136,7 @@ namespace Pulsar4X.Client
                 return true;
             }
             //if entity can target
-            else if (_entityState.Entity.HasDataBlob<CargoStorageDB>() && T == typeof(CargoTransferWindow))
+            else if (_entityState.Entity.HasDataBlob<CargoStorageDB>() && T == typeof(CreateTransferWindow))
             {
                 return true;
             }
@@ -229,9 +229,10 @@ namespace Pulsar4X.Client
 
                 }
                 //Menu is cargo menu
-                else if (T == typeof(CargoTransferWindow))
+                else if (T == typeof(CreateTransferWindow) && _entityState.StarSystemId != null)
                 {
-                    var instance = CargoTransferWindow.GetInstance(_state.Faction.GetDataBlob<FactionInfoDB>().Data, _entityState);
+                    var instance = CreateTransferWindow.GetInstance();
+                    instance.SetLeft(_entityState.Entity.Id, _entityState.StarSystemId);
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
@@ -297,7 +298,7 @@ namespace Pulsar4X.Client
             else if (T == typeof(FireControl)) returnval = FireControl.GetInstance(_entityState).GetActive();
             //else if (T == typeof(RenameWindow)) returnval = RenameWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(NavWindow)) returnval = NavWindow.GetInstance(_entityState).GetActive();
-            else if (T == typeof(CargoTransferWindow)) returnval = CargoTransferWindow.GetInstance(_state.Faction.GetDataBlob<FactionInfoDB>().Data, _entityState).GetActive();
+            else if (T == typeof(CreateTransferWindow)) returnval = CreateTransferWindow.GetInstance().GetActive();
             else if (T == typeof(ColonyPanel)) returnval = ColonyPanel.GetInstance(_state.Faction.GetDataBlob<FactionInfoDB>().Data, _entityState).GetActive();
             // Instance Windows
             else if (T == typeof(OrdersListWindow)) returnval = OrdersListWindow.GetInstance(_entityState, _state).GetActive();

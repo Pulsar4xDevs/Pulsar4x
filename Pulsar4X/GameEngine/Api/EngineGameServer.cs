@@ -131,6 +131,7 @@ namespace Pulsar4X.Engine.Api
                 if (commanders != null)
                     sub.Send(new GameEventEnvelope(GameEventType.CommandersChanged, Commanders: commanders));
                 RefreshColonies(sub);
+                RefreshMovers(sub);
             }
         }
 
@@ -150,6 +151,28 @@ namespace Pulsar4X.Engine.Api
                 var planet = colony.GetDataBlob<Pulsar4X.Colonies.ColonyInfoDB>()?.PlanetEntity;
                 if (planet != null && planet.IsValid)
                     PushEntityRefresh(planet, sub.FactionId);
+            }
+        }
+
+        // Keplerian movement is propagated client-side from OrbitView elements, but warp and
+        // newtonian thrust aren't predictable from a snapshot — re-push those movers each clock
+        // advance so their PositionView is at most a tick old.
+        private void RefreshMovers(ServerSubscription sub)
+        {
+            if (!_game.Factions.TryGetValue(sub.FactionId, out var faction)) return;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var info)) return;
+
+            foreach (var systemId in info.KnownSystems)
+            {
+                var system = _game.Systems.FirstOrDefault(s => s.ID == systemId);
+                if (system == null) continue;
+
+                foreach (var mover in system.GetAllEntitiesWithDataBlob<Pulsar4X.Movement.WarpMovingDB>())
+                    if (mover.FactionOwnerID == sub.FactionId)
+                        PushEntityRefresh(mover, sub.FactionId);
+                foreach (var mover in system.GetAllEntitiesWithDataBlob<Pulsar4X.Movement.NewtonMoveDB>())
+                    if (mover.FactionOwnerID == sub.FactionId)
+                        PushEntityRefresh(mover, sub.FactionId);
             }
         }
 

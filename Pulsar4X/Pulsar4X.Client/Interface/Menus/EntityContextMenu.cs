@@ -39,7 +39,7 @@ namespace Pulsar4X.Client
             ContextButton(typeof(PinCameraBlankMenuHelper));
             ContextButton(typeof(RenameWindow));
             ContextButton(typeof(FireControl));
-            ContextButton(typeof(CargoTransferWindow));
+            ContextButton(typeof(CreateTransferWindow));
             ContextButton(typeof(ColonyPanel));
             ContextButton(typeof(PlanetaryWindow));
             ContextButton(typeof(GotoSystemBlankMenuHelper));

@@ -243,16 +243,10 @@ namespace Pulsar4X.Client
                         ImGui.PushStyleColor(ImGuiCol.Button, Styles.Theme.Button.ToImVector4());
                         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Styles.Theme.ButtonHovered.ToImVector4());
                         ImGui.PushStyleColor(ImGuiCol.ButtonActive, Styles.Theme.ButtonActive.ToImVector4());
-                        if(ImGui.Button("Initiate Transfer", new Vector2(size.X - 8, 18)))
+                        if(ImGui.Button("Initiate Transfer", new Vector2(size.X - 8, 18)) && _selectedSystemId != null)
                         {
-                            // Deferred: CreateTransferWindow is still engine-backed, so resolve the
-                            // live entity from the selected id until that window is ported.
-                            if(_uiState.Game != null
-                                && _uiState.Game.GlobalManager.TryGetGlobalEntityById(colony.Id, out var colonyEntity))
-                            {
-                                CreateTransferWindow.GetInstance().SetLeft(colonyEntity);
-                                CreateTransferWindow.GetInstance().SetActive(true);
-                            }
+                            CreateTransferWindow.GetInstance().SetLeft(colony.Id, _selectedSystemId);
+                            CreateTransferWindow.GetInstance().SetActive(true);
                         }
                         ImGui.PopStyleColor(3);
 

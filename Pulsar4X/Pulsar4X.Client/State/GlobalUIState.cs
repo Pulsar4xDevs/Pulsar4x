@@ -42,7 +42,7 @@ namespace Pulsar4X.Client
             {typeof(ChangeCurrentOrbitWindow), "Change current orbit"},
             {typeof(FireControl), "Fire Control" },
             {typeof(RenameWindow), "Rename"},
-            {typeof(CargoTransferWindow), "Cargo"},
+            {typeof(CreateTransferWindow), "Cargo"},
             {typeof(ColonyLogisticsDisplay), "Logistics"},
             {typeof(LogiShipWindow), "Logistics"},
             {typeof(ColonyPanel), "Economy"},

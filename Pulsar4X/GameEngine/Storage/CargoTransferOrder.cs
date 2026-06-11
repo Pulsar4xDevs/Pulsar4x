@@ -69,7 +69,7 @@ public class CargoTransferOrder : EntityCommand
         TransferData = transferData;
     }
 
-    public static void CreateCommands(int faction, Entity primaryEntity, Entity secondaryEntity, List<(ICargoable item, long amount)> itemsToMove )
+    public static bool CreateCommands(int faction, Entity primaryEntity, Entity secondaryEntity, List<(ICargoable item, long amount)> itemsToMove )
     {
         CargoTransferDataDB cargoData = new(primaryEntity, secondaryEntity, itemsToMove);
         var cmd1 = new CargoTransferOrder(cargoData)
@@ -79,7 +79,7 @@ public class CargoTransferOrder : EntityCommand
             CreatedDate = primaryEntity.Manager.ManagerSubpulses.StarSysDateTime,
             IsPrimaryEntity = true,
         };
-        primaryEntity.Manager.Game.OrderHandler.HandleOrder(cmd1);
+        bool primaryAccepted = primaryEntity.Manager.Game.OrderHandler.HandleOrder(cmd1);
 
         var cmd2 = new CargoTransferOrder(cargoData)
         {
@@ -88,7 +88,7 @@ public class CargoTransferOrder : EntityCommand
             CreatedDate = primaryEntity.Manager.ManagerSubpulses.StarSysDateTime,
             IsPrimaryEntity = false
         };
-        secondaryEntity.Manager.Game.OrderHandler.HandleOrder(cmd2);
+        return secondaryEntity.Manager.Game.OrderHandler.HandleOrder(cmd2) && primaryAccepted;
     }
 
     /// <summary>

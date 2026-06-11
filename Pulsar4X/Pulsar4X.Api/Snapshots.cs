@@ -84,7 +84,20 @@ public sealed record OrbitView(
     double SemiMajorAxisKm,
     double Eccentricity,
     double OrbitalPeriodSeconds,
-    int? ParentId) : IComponentView;
+    int? ParentId) : IComponentView
+{
+    // The full Keplerian element set (engine units: metres, radians), so the client can propagate
+    // positions itself between pushes rather than the server streaming them every tick.
+    public double SemiMajorAxisM { get; init; }
+    public double InclinationRad { get; init; }
+    public double LongitudeOfAscendingNodeRad { get; init; }
+    public double ArgumentOfPeriapsisRad { get; init; }
+    public double MeanAnomalyAtEpochRad { get; init; }
+    public double MeanMotionRadPerSec { get; init; }
+    public DateTime Epoch { get; init; }
+    /// <summary>μ = G(M+m) in m³/s².</summary>
+    public double StandardGravParameter { get; init; }
+}
 
 public sealed record MassVolumeView(double MassKg, double RadiusMetres, double DensityGramsPerCm3) : IComponentView;
 
@@ -257,6 +270,41 @@ public sealed record CargoItemView(
     long FreeUnitSpace,
     /// <summary>Whether this item is a component instance that can be installed on the holding entity.</summary>
     bool CanInstall);
+
+/// <summary>An entity's weapons and fire controls. Owner-only.</summary>
+public sealed record FireControlView(IReadOnlyList<FireControlSnapshot> FireControls) : IComponentView
+{
+    /// <summary>Every weapon on the entity, assigned or not.</summary>
+    public IReadOnlyList<WeaponSnapshot> Weapons { get; init; } = Array.Empty<WeaponSnapshot>();
+
+    /// <summary>Faction ordnance designs held in this entity's cargo, available to load.</summary>
+    public IReadOnlyList<OrdnanceStoreItem> Ordnance { get; init; } = Array.Empty<OrdnanceStoreItem>();
+}
+
+/// <summary>One fire-control component: its current target, engagement state, and assigned weapons.</summary>
+public sealed record FireControlSnapshot(
+    string Id,
+    string Name,
+    int? TargetId,
+    string? TargetName,
+    bool IsEngaging)
+{
+    public IReadOnlyList<string> AssignedWeaponIds { get; init; } = Array.Empty<string>();
+}
+
+/// <summary>One weapon component: its fire-control assignment, magazine state and loaded ordnance.</summary>
+public sealed record WeaponSnapshot(
+    string Id,
+    string Name,
+    string? FireControlId,
+    int MagazineCurrent,
+    int MagazineSize,
+    string? OrdnanceId,
+    string? OrdnanceName,
+    long OrdnanceStored);
+
+/// <summary>An ordnance design with how many units the entity holds in cargo.</summary>
+public sealed record OrdnanceStoreItem(string Id, string Name, long Stored);
 
 /// <summary>A colony's mining operation joined with its planet's deposits and stockpile — one row per
 /// known mineral. Amounts are masked to what the requesting faction has surveyed.</summary>
@@ -493,7 +541,21 @@ public sealed record OrderSnapshot(
     bool IsFinished,
     string Details = "",
     /// <summary>True for a not-yet-running thrust maneuver the player can still edit/delete.</summary>
-    bool IsEditableManeuver = false);
+    bool IsEditableManeuver = false)
+{
+    /// <summary>The order's id, for order-addressed commands (e.g. pause).</summary>
+    public string OrderId { get; init; } = "";
+
+    public bool IsBlocking { get; init; }
+
+    /// <summary>Which action lanes the order occupies (movement / external / self).</summary>
+    public bool UsesMovementLane { get; init; }
+    public bool UsesExternalLane { get; init; }
+    public bool UsesSelfLane { get; init; }
+
+    /// <summary>Pause the simulation when this order actions.</summary>
+    public bool PauseOnAction { get; init; }
+}
 
 /// <summary>The entity's own order queue (owner-only; fleets/ships also carry orders in the
 /// fleet-hierarchy snapshots, this view serves per-entity UI like the entity window).</summary>

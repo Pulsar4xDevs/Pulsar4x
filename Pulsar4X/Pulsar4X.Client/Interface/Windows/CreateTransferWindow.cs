@@ -2,37 +2,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Api;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
-using Pulsar4X.Extensions;
-using Pulsar4X.Factions;
-using Pulsar4X.Storage;
 
 namespace Pulsar4X.Client;
 
 public class CreateTransferWindow : PulsarGuiWindow
 {
-    public Entity? TransferLeft { get; private set; }
-    public Entity? TransferRight { get; private set; }
+    private int? _leftId;
+    private int? _rightId;
+    private string? _systemId;
 
-    public Dictionary<ICargoable, (long, long)> TransferLeftGoods { get; private set; } = new ();
-    public Dictionary<ICargoable, (long, long)> TransferRightGoods { get; private set; } = new ();
+    // Units selected to move, keyed by cargo-item id; clamped against the live snapshot each frame.
+    private readonly Dictionary<int, long> _leftSelected = new();
+    private readonly Dictionary<int, long> _rightSelected = new();
 
     internal static CreateTransferWindow GetInstance()
     {
         return _uiState.LoadedWindows.ContainsKey(typeof(CreateTransferWindow)) ? (CreateTransferWindow)_uiState.LoadedWindows[typeof(CreateTransferWindow)] : new CreateTransferWindow();
     }
 
-    public void SetLeft(Entity entity)
+    public void SetLeft(int entityId, string systemId)
     {
-        TransferLeft = entity;
-        TransferLeftGoods.Clear();
+        _leftId = entityId;
+        _systemId = systemId;
+        _leftSelected.Clear();
     }
 
-    public void SetRight(Entity entity)
+    public void SetRight(int entityId)
     {
-        TransferRight = entity;
-        TransferRightGoods.Clear();
+        _rightId = entityId;
+        _rightSelected.Clear();
     }
 
     internal override void Display()
@@ -41,13 +42,17 @@ public class CreateTransferWindow : PulsarGuiWindow
 
         if(Window.Begin("Create Transfer Order", ref IsActive))
         {
+            var system = _systemId != null ? _uiState.GameClient?.Galaxy.GetSystem(_systemId) : null;
+            var left = _leftId is int leftId ? system?.GetEntity(leftId) : null;
+            var right = _rightId is int rightId ? system?.GetEntity(rightId) : null;
+
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
             var firstChildSize = new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y);
             var secondChildSize = new Vector2(windowContentSize.X - (Styles.LeftColumnWidthLg * 2) - (windowContentSize.X * 0.01f), windowContentSize.Y);
             var thirdChildSize = new Vector2(Styles.LeftColumnWidthLg - (windowContentSize.X * 0.01f), windowContentSize.Y);
-            if(ImGui.BeginChild(GetLeftTitle() + "###left", firstChildSize, ImGuiChildFlags.Borders))
+            if(ImGui.BeginChild(GetTitle(left) + "###left", firstChildSize, ImGuiChildFlags.Borders))
             {
-                DisplayTransferTarget(TransferLeft, TransferRight);
+                DisplayTransferTarget(system, left, right, isLeft: true);
             }
             ImGui.EndChild();
             ImGui.SameLine();
@@ -63,93 +68,80 @@ public class CreateTransferWindow : PulsarGuiWindow
                 ImGui.Separator();
                 ImGui.NextColumn();
 
-                if(TransferLeft != null)
-                    DisplayTradeList(TransferLeftGoods, TransferLeft);
+                if(left != null)
+                    DisplayTradeList(_leftSelected, left);
 
                 ImGui.NextColumn();
 
-                if(TransferRight != null)
-                    DisplayTradeList(TransferRightGoods, TransferRight);
+                if(right != null)
+                    DisplayTradeList(_rightSelected, right);
 
                 ImGui.Columns(1);
 
-                if(TransferLeftGoods.Count > 0 || TransferRightGoods.Count > 0)
+                if(_leftSelected.Count > 0 || _rightSelected.Count > 0)
                 {
                     ImGui.Separator();
-                    if(ImGui.Button("Create"))
+                    if(ImGui.Button("Create") && left != null && right != null)
                     {
-                        var tlNull = TransferLeft == null;
-                        var trNull = TransferRight == null;
-                        if(TransferLeft != null && TransferRight != null && TransferLeftGoods.Count > 0)
-                        {
-                            var itemsToTransfer = new List<(ICargoable, long)>();
-                            foreach(var item in TransferLeftGoods)
-                            {
-                                itemsToTransfer.Add((item.Key, -item.Value.Item1));
-                            }
-                            CargoTransferOrder.CreateCommands(_uiState.Faction.Id, TransferLeft, TransferRight, itemsToTransfer);
-                        }
-                        if(TransferLeft != null && TransferRight != null && TransferRightGoods.Count > 0)
-                        {
-                            var itemsToTransfer = new List<(ICargoable, long)>();
-                            foreach(var item in TransferRightGoods)
-                            {
-                                itemsToTransfer.Add((item.Key, -item.Value.Item1));
-                            }
-                            CargoTransferOrder.CreateCommands(_uiState.Faction.Id, TransferRight, TransferLeft, itemsToTransfer);
-                        }
+                        SubmitTransfer(left.Id, right.Id, _leftSelected);
+                        SubmitTransfer(right.Id, left.Id, _rightSelected);
+                        _leftSelected.Clear();
+                        _rightSelected.Clear();
                     }
                 }
             }
             ImGui.EndChild();
             ImGui.SameLine();
 
-            if(ImGui.BeginChild(GetRightTitle() + "###right", thirdChildSize, ImGuiChildFlags.Borders))
+            if(ImGui.BeginChild(GetTitle(right) + "###right", thirdChildSize, ImGuiChildFlags.Borders))
             {
-                DisplayTransferTarget(TransferRight, TransferLeft);
+                DisplayTransferTarget(system, right, left, isLeft: false);
             }
             ImGui.EndChild();
-            
+
         }
         Window.End();
     }
 
-    private void DisplayTransferTarget(Entity? entity, Entity? other = null, bool readOnlySelector = false)
+    private void SubmitTransfer(int fromId, int toId, Dictionary<int, long> selected)
+    {
+        var items = selected
+            .Where(kvp => kvp.Value > 0)
+            .Select(kvp => new CargoTransferItem(kvp.Key, kvp.Value))
+            .ToList();
+
+        if(items.Count > 0)
+            _uiState.GameClient?.SubmitCommandAsync(new TransferCargoCommand(fromId, toId, items));
+    }
+
+    private void DisplayTransferTarget(IClientSystem? system, EntitySnapshot? entity, EntitySnapshot? other, bool isLeft)
     {
         // At least one target needs to be set to allow selection of the other.
         // If we don't have other, lock the current selector.
-        readOnlySelector |= other is null;
+        bool readOnlySelector = other is null;
 
         ImGui.SetNextItemWidth(-1.0f);
         if (readOnlySelector)
             ImGui.BeginDisabled();
 
-        if (ImGui.BeginCombo("###selector", entity?.GetName(_uiState.Faction.Id) ?? "Select transfer partner"))
+        if (ImGui.BeginCombo("###selector", GetName(entity) ?? "Select transfer partner"))
         {
             // Find storages in range and populate list.
-            if(other is not null && other.Manager is not null)
+            if(other is not null && system is not null)
             {
-                var systemState = _uiState.StarSystemStates[other.Manager.ManagerID];
-                var allFriendlyStorageInSystem = systemState.GetFilteredEntities(DataStructures.EntityFilter.Friendly, _uiState.Faction.Id, typeof(CargoStorageDB));
-
-                foreach (var potentialTarget in allFriendlyStorageInSystem)
+                foreach (var potentialTarget in system.Entities)
                 {
                     if (potentialTarget.Id == other.Id) continue;
+                    if (!potentialTarget.HasView<CargoStorageView>()) continue;
 
                     // TODO: check the distance from other to potentialTarget
                     // make sure it is within the transfer range
-                    if (ImGui.Selectable(potentialTarget.Name, entity is not null && potentialTarget.Id == entity.Id))
+                    if (ImGui.Selectable(GetName(potentialTarget), entity is not null && potentialTarget.Id == entity.Id))
                     {
-                        // Make the target the current entity.
-                        if (entity == TransferLeft)
-                        {
-                            SetLeft(potentialTarget.Entity);
-                        } 
-                        else if (entity == TransferRight)
-                        {
-                            SetRight(potentialTarget.Entity);
-                        }
-                        entity = potentialTarget.Entity;
+                        if (isLeft)
+                            SetLeft(potentialTarget.Id, system.SystemId);
+                        else
+                            SetRight(potentialTarget.Id);
                     }
                 }
             }
@@ -165,89 +157,100 @@ public class CreateTransferWindow : PulsarGuiWindow
         if (entity is null)
             return;
 
-        DisplayStorageList(entity);
-        return;
+        DisplayStorageList(entity, isLeft ? _leftSelected : _rightSelected);
     }
 
-    private void DisplayStorageList(Entity entity)
+    private void DisplayStorageList(EntitySnapshot entity, Dictionary<int, long> selected)
     {
-        if(entity.TryGetDataBlob<CargoStorageDB>(out var leftVolumeStorageDB))
+        if(entity.GetView<CargoStorageView>() is not { } storage)
+            return;
+
+        foreach(var store in storage.Stores)
         {
-            foreach(var (storageId, storageType) in leftVolumeStorageDB.TypeStores)
+            string header = store.TypeName + " Storage";
+            if(ImGui.CollapsingHeader(header + "###" + store.TypeId, ImGuiTreeNodeFlags.DefaultOpen))
             {
-                string header = entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoTypes[storageId].Name + " Storage";
-                if(ImGui.CollapsingHeader(header + "###" + storageId, ImGuiTreeNodeFlags.DefaultOpen))
+                var contentSize = ImGui.GetContentRegionAvail();
+
+                foreach(var item in store.Items)
                 {
-                    var cargoables = storageType.GetCargoables();
-                    // Sort the display by the cargoables name
-                    var sortedUnitsByCargoablesName = storageType.CurrentStoreInUnits.OrderBy(e => cargoables[e.Key].Name);
-                    var contentSize = ImGui.GetContentRegionAvail();
-
-                    foreach(var (id, value) in sortedUnitsByCargoablesName)
+                    if(ImGui.SmallButton("+###add" + item.Name))
                     {
-
-                        if(ImGui.SmallButton("+###add" + cargoables[id].Name))
-                        {
-                            if(entity == TransferLeft && !TransferLeftGoods.ContainsKey(cargoables[id]))
-                            {
-                                TransferLeftGoods.Add(cargoables[id], (0, value));
-                            }
-                            else if(entity == TransferRight && !TransferRightGoods.ContainsKey(cargoables[id]))
-                            {
-                                TransferRightGoods.Add(cargoables[id], (0, value));
-                            }
-                        }
-                        ImGui.SameLine();
-                        ImGui.Text(cargoables[id].Name);
-                        cargoables[id].ShowTooltip();
-                        ImGui.SameLine();
-
-                        string amount = Stringify.Quantity(value);
-                        var amountSize = ImGui.CalcTextSize(amount);
-
-                        ImGui.SetCursorPosX(contentSize.X - amountSize.X);
-                        ImGui.Text(value.ToString());
-
+                        if(!selected.ContainsKey(item.Id))
+                            selected.Add(item.Id, 0);
                     }
+                    ImGui.SameLine();
+                    ImGui.Text(item.Name);
+                    if(ImGui.IsItemHovered() && item.Description.Length > 0)
+                        DisplayHelpers.DescriptiveTooltip(item.Name, item.ItemKind, item.Description);
+                    ImGui.SameLine();
+
+                    string amount = Stringify.Quantity(item.Units);
+                    var amountSize = ImGui.CalcTextSize(amount);
+
+                    ImGui.SetCursorPosX(contentSize.X - amountSize.X);
+                    ImGui.Text(item.Units.ToString());
+
                 }
             }
         }
     }
 
-    private void DisplayTradeList(Dictionary<ICargoable, (long, long)> list, Entity entity)
+    private void DisplayTradeList(Dictionary<int, long> selected, EntitySnapshot entity)
     {
+        var itemsById = ItemsById(entity);
+
         var contentSize = ImGui.GetContentRegionAvail();
         var currentX = ImGui.GetCursorPosX();
-        var toRemove = new List<ICargoable>();
-        foreach(var (cargoable, value) in list)
+        var toRemove = new List<int>();
+        foreach(var (itemId, units) in selected)
         {
-            var amount = (int)value.Item1;
-            if(ImGui.SmallButton("-###remove" + cargoable.Name))
+            // The item may have left storage since it was selected (transferred away, consumed).
+            if(!itemsById.TryGetValue(itemId, out var item))
             {
-                toRemove.Add(cargoable);
+                toRemove.Add(itemId);
+                continue;
+            }
+
+            var amount = (int)units;
+            if(ImGui.SmallButton("-###remove" + item.Name))
+            {
+                toRemove.Add(itemId);
             }
             ImGui.SameLine();
-            ImGui.Text(cargoable.Name);
+            ImGui.Text(item.Name);
             ImGui.SameLine();
             ImGui.SetNextItemWidth(96);
             ImGui.SetCursorPosX(currentX + contentSize.X - 96);
-            ImGui.InputInt("###input" + cargoable.Name, ref amount);
-            cargoable.ShowTooltip();
+            ImGui.InputInt("###input" + item.Name, ref amount);
+            if(ImGui.IsItemHovered() && item.Description.Length > 0)
+                DisplayHelpers.DescriptiveTooltip(item.Name, item.ItemKind, item.Description);
 
-            if(amount > value.Item2)
-                amount = (int)value.Item2;
+            if(amount > item.Units)
+                amount = (int)item.Units;
             if(amount < 0)
                 amount = 0;
 
-            list[cargoable] = ((long)amount, value.Item2);
+            selected[itemId] = amount;
         }
 
-        foreach(var item in toRemove)
+        foreach(var itemId in toRemove)
         {
-            list.Remove(item);
+            selected.Remove(itemId);
         }
     }
 
-    private string GetLeftTitle() => TransferLeft?.GetFactionName() ?? "Select Entity";
-    private string GetRightTitle() => TransferRight?.GetFactionName() ?? "Select Entity";
+    private static Dictionary<int, CargoItemView> ItemsById(EntitySnapshot entity)
+    {
+        var items = new Dictionary<int, CargoItemView>();
+        if(entity.GetView<CargoStorageView>() is { } storage)
+            foreach(var store in storage.Stores)
+                foreach(var item in store.Items)
+                    items[item.Id] = item;
+        return items;
+    }
+
+    private static string? GetName(EntitySnapshot? entity) => entity?.GetView<NameView>()?.Name;
+
+    private string GetTitle(EntitySnapshot? entity) => GetName(entity) ?? "Select Entity";
 }

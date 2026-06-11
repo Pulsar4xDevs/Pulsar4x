@@ -8,6 +8,7 @@ using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
+using Pulsar4X.Engine.Orders;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
@@ -170,6 +171,7 @@ namespace Pulsar4X.Engine.Api
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<LocalConstructionDB>(out var lc) ? ToConstructionView(lc, e, f) : null,
             // A lab's queue/economics are internal to its owner; other factions just see the entity.
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ResearcherDB>(out var r) ? ToResearcherView(r, e, f) : null,
+            (e, f) => e.FactionOwnerID == f && e.HasDataBlob<Pulsar4X.Weapons.FireControlAbilityDB>() ? ToFireControlView(e) : null,
         };
 
         private static PositionView ToPositionView(Pulsar4X.Movement.PositionDB p)
@@ -179,7 +181,17 @@ namespace Pulsar4X.Engine.Api
 
         private static OrbitView ToOrbitView(OrbitDB o)
             => new(o.SemiMajorAxis / 1000.0,   // engine stores SMA in metres
-                   o.Eccentricity, o.OrbitalPeriod.TotalSeconds, o.Parent?.Id);
+                   o.Eccentricity, o.OrbitalPeriod.TotalSeconds, o.Parent?.Id)
+            {
+                SemiMajorAxisM = o.SemiMajorAxis,
+                InclinationRad = o.Inclination,
+                LongitudeOfAscendingNodeRad = o.LongitudeOfAscendingNode,
+                ArgumentOfPeriapsisRad = o.ArgumentOfPeriapsis,
+                MeanAnomalyAtEpochRad = o.MeanAnomalyAtEpoch,
+                MeanMotionRadPerSec = o.MeanMotion,
+                Epoch = o.Epoch,
+                StandardGravParameter = o.GravitationalParameter_m3S2,
+            };
 
         private static BodyView ToBodyView(SystemBodyInfoDB b)
             => new(b.BodyType.ToDescription(), b.Gravity, b.BaseTemperature, b.LengthOfDay,
@@ -391,6 +403,73 @@ namespace Pulsar4X.Engine.Api
             }
 
             return new InstallationsView(groups.OrderBy(g => g.Name).ToList());
+        }
+
+        private static FireControlView? ToFireControlView(Entity entity)
+        {
+            if (!entity.TryGetDataBlob<ComponentInstancesDB>(out var instances)) return null;
+            if (!instances.TryGetStates<Pulsar4X.Weapons.FireControlAbilityState>(out List<Pulsar4X.Weapons.FireControlAbilityState> fcStates))
+                return null;
+
+            entity.TryGetDataBlob<CargoStorageDB>(out var cargo);
+            long StoredUnits(Weapons.OrdnanceDesign design)
+                => cargo != null
+                   && cargo.TypeStores.TryGetValue(design.CargoTypeID, out var store)
+                   && store.CurrentStoreInUnits.TryGetValue(design.ID, out var units)
+                    ? units : 0;
+
+            var fireControls = new List<FireControlSnapshot>(fcStates.Count);
+            foreach (var fc in fcStates)
+            {
+                fireControls.Add(new FireControlSnapshot(
+                    fc.ComponentInstance.UniqueID,
+                    fc.Name,
+                    fc.Target != null && fc.Target.IsValid ? fc.Target.Id : null,
+                    fc.Target != null && fc.Target.IsValid ? fc.TargetName : null,
+                    fc.IsEngaging)
+                {
+                    AssignedWeaponIds = fc.ChildrenStates.Select(w => w.ID).ToList(),
+                });
+            }
+
+            var weapons = new List<WeaponSnapshot>();
+            if (instances.TryGetStates<Pulsar4X.Weapons.WeaponState>(out List<Pulsar4X.Weapons.WeaponState> weaponStates))
+            {
+                foreach (var weapon in weaponStates)
+                {
+                    Weapons.OrdnanceDesign? ordnance = null;
+                    weapon.FireWeaponInstructions?.TryGetOrdnance(out ordnance);
+
+                    weapons.Add(new WeaponSnapshot(
+                        weapon.ID,
+                        weapon.Name,
+                        weapon.ParentState?.ID,
+                        weapon.InternalMagCurAmount,
+                        weapon.ComponentInstance.Design.GetAttribute<Pulsar4X.Weapons.GenericWeaponAtb>().InternalMagSize,
+                        ordnance?.UniqueID,
+                        ordnance?.Name,
+                        ordnance != null ? StoredUnits(ordnance) : 0));
+                }
+            }
+
+            // Loadable ordnance: the faction's missile designs this entity actually has in cargo.
+            var ordnanceItems = new List<OrdnanceStoreItem>();
+            if (entity.Manager?.Game.Factions.TryGetValue(entity.FactionOwnerID, out var faction) == true
+                && faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo))
+            {
+                foreach (var design in factionInfo.MissileDesigns.Values)
+                {
+                    long stored = StoredUnits(design);
+                    if (stored > 0)
+                        ordnanceItems.Add(new OrdnanceStoreItem(design.UniqueID, design.Name, stored));
+                }
+            }
+
+            return new FireControlView(fireControls)
+            {
+                Weapons = weapons,
+                Ordnance = ordnanceItems.OrderBy(o => o.Name).ToList(),
+            };
         }
 
         private static CargoStorageView ToCargoStorageView(CargoStorageDB storage, Entity holder)
@@ -1008,7 +1087,15 @@ namespace Pulsar4X.Engine.Api
             foreach (var action in orderable.ActionList)
             {
                 orders.Add(new OrderSnapshot(action.Name, action.IsRunning, action.GetIsFinished, action.Details,
-                    action is Pulsar4X.Movement.NewtonThrustCommand && !action.IsRunning));
+                    action is Pulsar4X.Movement.NewtonThrustCommand && !action.IsRunning)
+                {
+                    OrderId = action.CmdID,
+                    IsBlocking = action.IsBlocking,
+                    UsesMovementLane = action.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.Movement),
+                    UsesExternalLane = action.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.InteractWithExternalEntity),
+                    UsesSelfLane = action.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.IneteractWithSelf),
+                    PauseOnAction = action.PauseOnAction,
+                });
             }
             return orders;
         }
