@@ -105,7 +105,18 @@ namespace Pulsar4X.Client
                         DisplaySummary(selectedColony, selectedSystem);
                         ImGui.EndTabItem();
                     }
-                    DisplayDeferredTabs();
+                    if(ImGui.BeginTabItem("Production"))
+                    {
+                        ColonyProductionDisplay.GetInstance()
+                            .Display(selectedColony.Id, selectedColony.GetView<IndustryView>(), _uiState);
+                        ImGui.EndTabItem();
+                    }
+                    if(ImGui.BeginTabItem("Construction"))
+                    {
+                        ColonyConstructionDisplay.GetInstance()
+                            .Display(selectedColony.Id, selectedColony.GetView<ConstructionView>(), _uiState);
+                        ImGui.EndTabItem();
+                    }
                     if(selectedColony.GetView<ColonyMiningView>() is { } mining && ImGui.BeginTabItem("Mining"))
                     {
                         DisplayMining(mining);
@@ -405,32 +416,5 @@ namespace Pulsar4X.Client
             }
         }
 
-        #region Deferred: engine-backed Production and Construction tabs
-        // IndustryDisplay and ConstructionDisplay are large engine-backed components with their own
-        // command surfaces; they get their own porting passes. Until then these tabs resolve the
-        // engine-side EntityState from the selected colony id.
-
-        private void DisplayDeferredTabs()
-        {
-            if(_selectedSystemId == null || SelectedColonyId is not { } colonyId)
-                return;
-
-            if(!_uiState.StarSystemStates.TryGetValue(_selectedSystemId, out var systemState)
-                || !systemState.EntityStatesColonies.TryGetValue(colonyId, out var entityState))
-                return;
-
-            if(ImGui.BeginTabItem("Production"))
-            {
-                entityState.Entity.DisplayIndustry(entityState, _uiState);
-                ImGui.EndTabItem();
-            }
-            if(ImGui.BeginTabItem("Construction"))
-            {
-                entityState.Entity.DisplayConstruction(entityState, _uiState);
-                ImGui.EndTabItem();
-            }
-        }
-
-        #endregion
     }
 }

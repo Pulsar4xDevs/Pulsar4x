@@ -6,8 +6,11 @@ using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
+using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.GeoSurveys;
+using Pulsar4X.Industry;
+using Pulsar4X.Industry.Orders;
 using Pulsar4X.JumpPoints;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
@@ -53,6 +56,12 @@ namespace Pulsar4X.Engine.Api
                 [typeof(MoveTechInQueueCommand)] = TranslateMoveTechInQueue,
                 [typeof(UninstallComponentCommand)] = TranslateUninstallComponent,
                 [typeof(InstallComponentCommand)] = TranslateInstallComponent,
+                [typeof(QueueIndustryJobCommand)] = TranslateQueueIndustryJob,
+                [typeof(ChangeIndustryJobPriorityCommand)] = TranslateChangeIndustryJobPriority,
+                [typeof(CancelIndustryJobCommand)] = TranslateCancelIndustryJob,
+                [typeof(AddToConstructionQueueCommand)] = TranslateAddToConstructionQueue,
+                [typeof(MoveConstructionJobCommand)] = TranslateMoveConstructionJob,
+                [typeof(RemoveConstructionJobCommand)] = TranslateRemoveConstructionJob,
             };
         }
 
@@ -316,6 +325,89 @@ namespace Pulsar4X.Engine.Api
                 return CommandResult.Reject("Command rejected by engine validation.");
 
             return Dispatch(InstallComponentInstanceOrder.Create(commanded, instance));
+        }
+
+        // ----- industry / local construction (commanded entity: the colony) -----
+
+        private CommandResult TranslateQueueIndustryJob(Entity faction, Entity commanded, GameCommand command)
+        {
+            var queue = (QueueIndustryJobCommand)command;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo)
+                || !factionInfo.IndustryDesigns.TryGetValue(queue.DesignId, out var design))
+                return CommandResult.Reject($"Design {queue.DesignId} not found.");
+
+            if (queue.Quantity is < 1 or > ushort.MaxValue)
+                return CommandResult.Reject("Quantity must be between 1 and 65535.");
+
+            var job = new IndustryJob(factionInfo, queue.DesignId);
+
+            // Auto-install only applies to installations built by the colony for itself; ship
+            // components etc. need a target-selection flow that doesn't exist yet (engine TODO).
+            if (queue.AutoInstall
+                && design.GuiHints == DataStructures.ConstructableGuiHints.CanBeInstalled
+                && design is Pulsar4X.Components.ComponentDesign componentDesign
+                && componentDesign.ComponentMountType.HasFlag(DataStructures.ComponentMountType.PlanetInstallation))
+            {
+                job.InstallOn = commanded;
+            }
+
+            job.InitialiseJob((ushort)queue.Quantity, queue.Repeat);
+            return Dispatch(IndustryOrder2.CreateNewJobOrder(faction.Id, commanded, queue.ProductionLineId, job));
+        }
+
+        private CommandResult TranslateChangeIndustryJobPriority(Entity faction, Entity commanded, GameCommand command)
+        {
+            var move = (ChangeIndustryJobPriorityCommand)command;
+            return Dispatch(IndustryOrder2.CreateChangePriorityOrder(
+                faction.Id, commanded, move.ProductionLineId, move.JobId, (short)move.Delta));
+        }
+
+        private CommandResult TranslateCancelIndustryJob(Entity faction, Entity commanded, GameCommand command)
+        {
+            var cancel = (CancelIndustryJobCommand)command;
+            return Dispatch(IndustryOrder2.CreateCancelJobOrder(
+                faction.Id, commanded, cancel.ProductionLineId, cancel.JobId));
+        }
+
+        private CommandResult TranslateAddToConstructionQueue(Entity faction, Entity commanded, GameCommand command)
+        {
+            var add = (AddToConstructionQueueCommand)command;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo)
+                || !factionInfo.ComponentDesigns.TryGetValue(add.DesignId, out var design))
+                return CommandResult.Reject($"Design {add.DesignId} not found.");
+
+            return Dispatch(AddToConstructionQueueOrder.Create(commanded, design));
+        }
+
+        private CommandResult TranslateMoveConstructionJob(Entity faction, Entity commanded, GameCommand command)
+        {
+            var move = (MoveConstructionJobCommand)command;
+            if (!TryGetConstructionJob(commanded, move.QueueIndex, out var job))
+                return CommandResult.Reject($"No construction job at queue position {move.QueueIndex}.");
+
+            return move.MoveUp
+                ? Dispatch(MoveUpInConstructionQueueOrder.Create(commanded, job))
+                : Dispatch(MoveDownInConstructionQueueOrder.Create(commanded, job));
+        }
+
+        private CommandResult TranslateRemoveConstructionJob(Entity faction, Entity commanded, GameCommand command)
+        {
+            var remove = (RemoveConstructionJobCommand)command;
+            if (!TryGetConstructionJob(commanded, remove.QueueIndex, out var job))
+                return CommandResult.Reject($"No construction job at queue position {remove.QueueIndex}.");
+
+            return Dispatch(RemoveFromConstructionQueueOrder.Create(commanded, job));
+        }
+
+        // Local-construction jobs carry no id, so commands address them by queue position.
+        private static bool TryGetConstructionJob(Entity entity, int queueIndex, out LocalConstructionJob job)
+        {
+            job = null!;
+            if (!entity.TryGetDataBlob<LocalConstructionDB>(out var construction)) return false;
+            if (queueIndex < 0 || queueIndex >= construction.BuildQueue.Count) return false;
+
+            job = construction.BuildQueue.ElementAt(queueIndex);
+            return true;
         }
     }
 }

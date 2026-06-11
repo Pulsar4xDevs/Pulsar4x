@@ -151,6 +151,8 @@ namespace Pulsar4X.Engine.Api
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ComponentInstancesDB>(out var ci) ? ToInstallationsView(ci, e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ColonyInfoDB>(out var col) ? ToColonyMiningView(col, e, f) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<NavalAcademyDB>(out var na) ? ToNavalAcademyView(na) : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<IndustryAbilityDB>(out var ind) ? ToIndustryView(ind, e, f) : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<LocalConstructionDB>(out var lc) ? ToConstructionView(lc, e, f) : null,
             // A lab's queue/economics are internal to its owner; other factions just see the entity.
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ResearcherDB>(out var r) ? ToResearcherView(r, e, f) : null,
         };
@@ -355,6 +357,137 @@ namespace Pulsar4X.Engine.Api
             foreach (var academy in na.Academies)
                 academies.Add(new NavalAcademyClassView(academy.ClassSize, academy.TrainingPeriodInMonths, academy.GraduationDate));
             return new NavalAcademyView(academies);
+        }
+
+        // ----- industry / local construction -----
+
+        private static IndustryView? ToIndustryView(IndustryAbilityDB industry, Entity entity, int factionId)
+        {
+            var game = entity.Manager?.Game;
+            if (game == null || !game.Factions.TryGetValue(factionId, out var faction)) return null;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo)) return null;
+
+            entity.TryGetDataBlob<CargoStorageDB>(out var storage);
+
+            var sortedDesigns = factionInfo.IndustryDesigns.Values
+                .Where(d => d.IsValid)
+                .OrderBy(d => d.Name)
+                .ToList();
+
+            var lines = new List<ProductionLineView>(industry.ProductionLines.Count);
+            foreach (var (lineId, line) in industry.ProductionLines)
+            {
+                var jobs = new List<IndustryJobView>(line.Jobs.Count);
+                foreach (var job in line.Jobs)
+                {
+                    var requirements = new List<ResourceRequirement>(job.ResourcesRequiredRemaining.Count);
+                    foreach (var (resourceId, amount) in job.ResourcesRequiredRemaining)
+                        requirements.Add(new ResourceRequirement(ResolveItemName(factionInfo, resourceId), amount));
+
+                    double percent = (1 - (double)job.ProductionPointsLeft / job.ProductionPointsCost) * 100;
+                    jobs.Add(new IndustryJobView(
+                        job.JobID, job.Name, job.NumberCompleted, job.NumberOrdered, job.Auto,
+                        job.Status.ToString(), job.Status == IndustryJobStatus.MissingResources,
+                        percent, job.ProductionPointsLeft)
+                    {
+                        RemainingRequirements = requirements,
+                    });
+                }
+
+                // The line spends its output on the head job's industry type.
+                double currentRate = 0;
+                if (line.Jobs.Count > 0
+                    && factionInfo.IndustryDesigns.TryGetValue(line.Jobs[0].ItemGuid, out var headDesign)
+                    && line.IndustryTypeRates.TryGetValue(headDesign.IndustryTypeID, out var rate))
+                {
+                    currentRate = rate;
+                }
+
+                var constructibles = new List<ConstructibleItemView>();
+                foreach (var design in sortedDesigns)
+                {
+                    if (!line.IndustryTypeRates.ContainsKey(design.IndustryTypeID)) continue;
+
+                    var costs = new List<IndustryCostItem>(design.ResourceCosts.Count);
+                    foreach (var (resourceId, perUnit) in design.ResourceCosts)
+                    {
+                        long available = 0;
+                        if (storage != null && TryResolveCargoable(factionInfo, resourceId, out var cargoable))
+                            available = storage.GetUnitsStored(cargoable, false);
+
+                        bool canProduce = factionInfo.IndustryDesigns.ContainsKey(resourceId)
+                            || factionInfo.Data.CargoGoods.IsMineral(resourceId);
+
+                        costs.Add(new IndustryCostItem(ResolveItemName(factionInfo, resourceId), perUnit, available, canProduce));
+                    }
+
+                    constructibles.Add(new ConstructibleItemView(
+                        design.UniqueID, design.Name, design.IndustryPointCosts, design.OutputAmount,
+                        design.GuiHints == ConstructableGuiHints.CanBeInstalled)
+                    {
+                        Costs = costs,
+                    });
+                }
+
+                lines.Add(new ProductionLineView(lineId, line.Name, currentRate)
+                {
+                    Jobs = jobs,
+                    Constructibles = constructibles,
+                });
+            }
+
+            return new IndustryView(lines);
+        }
+
+        private static ConstructionView? ToConstructionView(LocalConstructionDB construction, Entity entity, int factionId)
+        {
+            var game = entity.Manager?.Game;
+            if (game == null || !game.Factions.TryGetValue(factionId, out var faction)) return null;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo)) return null;
+
+            var queue = new List<ConstructionJobView>(construction.BuildQueue.Count);
+            foreach (var job in construction.BuildQueue)
+            {
+                queue.Add(new ConstructionJobView(
+                    job.Design.Name, job.Design.ComponentType, job.Design.IndustryPointCosts,
+                    job.PointsAccumulated, job.CurrentItemProgress));
+            }
+
+            var designs = factionInfo.ComponentDesigns.Values
+                .Where(d => d.IsValid && d.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation))
+                .OrderBy(d => d.Name)
+                .Select(d => new ConstructibleDesignView(d.UniqueID, d.Name, d.ComponentType, d.IndustryPointCosts))
+                .ToList();
+
+            return new ConstructionView(construction.PointsPerDay)
+            {
+                BuildQueue = queue,
+                AvailableDesigns = designs,
+            };
+        }
+
+        /// <summary>Resolves an industry resource id (cargo good or component design) to a display name.</summary>
+        private static string ResolveItemName(FactionInfoDB factionInfo, string resourceId)
+        {
+            if (factionInfo.ComponentDesigns.TryGetValue(resourceId, out var design)) return design.Name;
+            string name = factionInfo.Data.GetName(resourceId);
+            return name.Length > 0 ? name : resourceId;
+        }
+
+        private static bool TryResolveCargoable(FactionInfoDB factionInfo, string resourceId, out ICargoable cargoable)
+        {
+            if (factionInfo.Data.CargoGoods.Contains(resourceId))
+            {
+                cargoable = factionInfo.Data.CargoGoods.GetAny(resourceId)!;
+                return true;
+            }
+            if (factionInfo.ComponentDesigns.TryGetValue(resourceId, out var design))
+            {
+                cargoable = design;
+                return true;
+            }
+            cargoable = null!;
+            return false;
         }
 
         private static ResearcherView ToResearcherView(ResearcherDB r, Entity lab, int factionId)

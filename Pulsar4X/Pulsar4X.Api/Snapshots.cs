@@ -221,6 +221,79 @@ public sealed record NavalAcademyView(IReadOnlyList<NavalAcademyClassView> Acade
 
 public sealed record NavalAcademyClassView(int ClassSize, int TrainingPeriodMonths, DateTime GraduationDate);
 
+// --------------------------------------------------------------------------------------------
+// Industry (production lines) and local construction. Owner-only.
+// --------------------------------------------------------------------------------------------
+
+/// <summary>An entity's industrial capability: its production lines, their job queues, and what
+/// each line can build (with cost previews against the local stockpile).</summary>
+public sealed record IndustryView(IReadOnlyList<ProductionLineView> ProductionLines) : IComponentView;
+
+public sealed record ProductionLineView(
+    string Id,
+    string Name,
+    /// <summary>Industry points the line applies per day to its current (head) job; 0 when idle.</summary>
+    double CurrentRatePerDay)
+{
+    public IReadOnlyList<IndustryJobView> Jobs { get; init; } = Array.Empty<IndustryJobView>();
+    public IReadOnlyList<ConstructibleItemView> Constructibles { get; init; } = Array.Empty<ConstructibleItemView>();
+}
+
+public sealed record IndustryJobView(
+    string JobId,
+    string Name,
+    int NumberCompleted,
+    int NumberOrdered,
+    bool Repeat,
+    string Status,
+    bool MissingResources,
+    double PercentComplete,
+    long ProductionPointsLeft)
+{
+    /// <summary>What the job still needs (names pre-resolved), for status tooltips.</summary>
+    public IReadOnlyList<ResourceRequirement> RemainingRequirements { get; init; } = Array.Empty<ResourceRequirement>();
+}
+
+public sealed record ResourceRequirement(string Name, long Amount);
+
+/// <summary>Something a production line can build, with per-unit costs and current local availability
+/// so the client can preview a job without engine math.</summary>
+public sealed record ConstructibleItemView(
+    string DesignId,
+    string Name,
+    long IndustryPointsPerUnit,
+    int OutputAmount,
+    bool CanAutoInstall)
+{
+    public IReadOnlyList<IndustryCostItem> Costs { get; init; } = Array.Empty<IndustryCostItem>();
+}
+
+public sealed record IndustryCostItem(
+    string Name,
+    long PerUnit,
+    /// <summary>Units currently in the entity's stockpile.</summary>
+    long Available,
+    /// <summary>Whether the faction could produce/mine more of this input itself.</summary>
+    bool CanProduce);
+
+/// <summary>An entity's local construction capability: build rate, FIFO queue, and the designs the
+/// faction can queue here.</summary>
+public sealed record ConstructionView(long PointsPerDay) : IComponentView
+{
+    public IReadOnlyList<ConstructionJobView> BuildQueue { get; init; } = Array.Empty<ConstructionJobView>();
+    public IReadOnlyList<ConstructibleDesignView> AvailableDesigns { get; init; } = Array.Empty<ConstructibleDesignView>();
+}
+
+public sealed record ConstructionJobView(
+    string Name,
+    string ComponentType,
+    long IndustryPointCosts,
+    long PointsAccumulated,
+    /// <summary>Progress on the current item, 0.0–1.0.</summary>
+    double Progress);
+
+public sealed record ConstructibleDesignView(string DesignId, string Name, string ComponentType, long IndustryPointCosts);
+
 /// <summary>One named contribution to a modified stat (for breakdown tooltips).</summary>
 public sealed record ValueModifier(string Name, double Delta);
 

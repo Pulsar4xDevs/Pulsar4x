@@ -78,3 +78,34 @@ public sealed record UninstallComponentCommand(int TargetEntityId, string Design
 
 /// <summary>Install a component instance (<see cref="CargoItemView.Id"/>) out of cargo storage.</summary>
 public sealed record InstallComponentCommand(int TargetEntityId, int ComponentId) : GameCommand(TargetEntityId);
+
+// ----- industry / local construction (commanded entity: the colony) -----
+
+/// <summary>Queue a batch job on one of the entity's production lines. When <see cref="AutoInstall"/>
+/// is set and the design is a colony installation, completed output installs on the entity itself.</summary>
+public sealed record QueueIndustryJobCommand(
+    int TargetEntityId,
+    string ProductionLineId,
+    string DesignId,
+    int Quantity,
+    bool Repeat,
+    bool AutoInstall) : GameCommand(TargetEntityId);
+
+/// <summary>Move a queued industry job up (negative delta) or down within its production line.</summary>
+public sealed record ChangeIndustryJobPriorityCommand(
+    int TargetEntityId,
+    string ProductionLineId,
+    string JobId,
+    int Delta) : GameCommand(TargetEntityId);
+
+public sealed record CancelIndustryJobCommand(
+    int TargetEntityId,
+    string ProductionLineId,
+    string JobId) : GameCommand(TargetEntityId);
+
+public sealed record AddToConstructionQueueCommand(int TargetEntityId, string DesignId) : GameCommand(TargetEntityId);
+
+/// <summary>Move a job in the local-construction queue by its current position.</summary>
+public sealed record MoveConstructionJobCommand(int TargetEntityId, int QueueIndex, bool MoveUp) : GameCommand(TargetEntityId);
+
+public sealed record RemoveConstructionJobCommand(int TargetEntityId, int QueueIndex) : GameCommand(TargetEntityId);

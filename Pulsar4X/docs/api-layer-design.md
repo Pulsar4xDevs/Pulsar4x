@@ -152,9 +152,7 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    AdminWindow). Because the research instant orders mutate DataBlobs without raising messages,
    `SubmitCommand` now re-projects and pushes the commanded entity (`EntityChanged`) after every
    accepted command — a generic post-write refresh all windows benefit from.
-   The **ColonyManagementWindow** shell and its Summary/Mining/Naval-Academy tabs are ported
-   (Production and Construction — `IndustryDisplay`/`ConstructionDisplay`, each with its own command
-   surface — stay engine-backed for their own passes). Colony selection is by entity id + system id
+   The **ColonyManagementWindow** is fully ported. Colony selection is by entity id + system id
    against the system snapshots. New views: `AtmosphereView` (on the planet, gas names pre-resolved),
    `InfrastructureView`, `InstallationsView` (grouped by design, with a server-computed `CanStore`),
    a full `CargoStorageView` replacing the old marker (stores → items with escrow/mass/volume and a
@@ -167,6 +165,20 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    + install). Colony economics mutate quietly every econ tick, so the server re-pushes each faction's
    colonies (and their planets) on every clock advance. The snapshot-based atmosphere/installations/
    cargo displays live alongside their engine overloads (still used by EntityWindow/ship UI).
+   Its **Production tab** reads an `IndustryView`: production lines with their job queues
+   (`IndustryJobView` incl. status/progress and pre-resolved remaining-resource names) and what each
+   line can build (`ConstructibleItemView` with per-unit industry points, outputs, auto-install
+   eligibility, and `IndustryCostItem` cost previews against the local stockpile — so the client
+   never constructs an engine `IndustryJob` for preview math the way the old display did). Commands:
+   `QueueIndustryJobCommand` (the translator builds and initialises the engine job, applying
+   auto-install only for colony installations), `ChangeIndustryJobPriorityCommand`,
+   `CancelIndustryJobCommand`. The **Construction tab** reads a `ConstructionView` (points/day, the
+   FIFO queue with progress, and the faction's queueable installation designs) with
+   `AddToConstructionQueueCommand` and, since local-construction jobs carry no id,
+   `MoveConstructionJobCommand`/`RemoveConstructionJobCommand` addressing jobs by queue position.
+   Both tabs render via new snapshot-based `ColonyProductionDisplay`/`ColonyConstructionDisplay`
+   singletons (the engine `IndustryDisplay`/`ConstructionDisplay` remain for the unported
+   EntityWindow).
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
@@ -186,7 +198,8 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
   `PositionView`, `OrbitView`, `MassVolumeView`, `BodyView`, `StarView`, `ColonyView`, `ShipView`,
   `GeoSurveyView`, `GravSurveyView`, `JumpPointView`, `CargoStorageView`, `ResearcherView`,
   `AtmosphereView`, `InfrastructureView`, `InstallationsView`, `ColonyMiningView`,
-  `NavalAcademyView` so far), `OwnerRelation`, `Vec3`, `ModifiedValue`/`ValueModifier`; fleet
+  `NavalAcademyView`, `IndustryView`, `ConstructionView` so far), `OwnerRelation`, `Vec3`,
+  `ModifiedValue`/`ValueModifier`; fleet
   hierarchy: `FleetSnapshot`, `ShipSnapshot`, `OrderSnapshot`; research: `ResearchSnapshot`
   (`TechCategorySnapshot`, `TechSnapshot`, `CommanderSnapshot`/`CommanderKind`/`CommanderBonusSnapshot`).
 - Writes: `GameCommand` (+ `RenameCommand`, `CreateFleetCommand`, `DisbandFleetCommand`,
@@ -194,7 +207,9 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
   `GeoSurveyCommand`, `GravSurveyCommand`, `JumpCommand`, `RefuelAtCommand`,
   `AssignScientistCommand`, `UnassignScientistCommand`, `SetResearchFundingCommand`,
   `AddTechToQueueCommand`, `RemoveTechFromQueueCommand`, `MoveTechInQueueCommand`,
-  `UninstallComponentCommand`, `InstallComponentCommand`), `CommandResult`.
+  `UninstallComponentCommand`, `InstallComponentCommand`, `QueueIndustryJobCommand`,
+  `ChangeIndustryJobPriorityCommand`, `CancelIndustryJobCommand`, `AddToConstructionQueueCommand`,
+  `MoveConstructionJobCommand`, `RemoveConstructionJobCommand`), `CommandResult`.
 - Events: `GameEventType`, `GameEventEnvelope`.
 - Interfaces: `IGameServer`, `IGameClient`, `IClientGalaxy`, `IClientSystem`.
 
