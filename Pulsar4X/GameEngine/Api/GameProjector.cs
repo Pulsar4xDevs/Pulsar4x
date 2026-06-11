@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Pulsar4X.Api;
 using Pulsar4X.Colonies;
+using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
@@ -11,6 +12,8 @@ using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
 using Pulsar4X.GeoSurveys;
+using Pulsar4X.Industry;
+using Pulsar4X.Interfaces;
 using Pulsar4X.JumpPoints;
 using Pulsar4X.Names;
 using Pulsar4X.Orbits;
@@ -132,13 +135,22 @@ namespace Pulsar4X.Engine.Api
             (e, _) => e.TryGetDataBlob<MassVolumeDB>(out var m) ? new MassVolumeView(m.MassTotal, m.RadiusInM, m.DensityDry_gcm) : null,
             (e, _) => e.TryGetDataBlob<SystemBodyInfoDB>(out var b) ? ToBodyView(b) : null,
             (e, _) => e.TryGetDataBlob<StarInfoDB>(out var s) ? ToStarView(s) : null,
-            (e, _) => e.TryGetDataBlob<ColonyInfoDB>(out var c) ? ToColonyView(c) : null,
+            (e, f) => e.TryGetDataBlob<ColonyInfoDB>(out var c) ? ToColonyView(c, e, f) : null,
+            (e, _) => e.TryGetDataBlob<AtmosphereDB>(out var a) ? ToAtmosphereView(a, a.OwningEntity?.Manager?.Game) : null,
             (e, _) => e.TryGetDataBlob<ShipInfoDB>(out var sh) ? new ShipView(sh.Design.Name) : null,
             (e, f) => e.TryGetDataBlob<GeoSurveyableDB>(out var g) ? new GeoSurveyView(g.IsSurveyComplete(f)) : null,
             (e, f) => e.TryGetDataBlob<JPSurveyableDB>(out var j) ? new GravSurveyView(j.IsSurveyComplete(f)) : null,
             // A jump point is only part of a faction's world once that faction has discovered it.
             (e, f) => e.TryGetDataBlob<JumpPointDB>(out var jp) && jp.IsDiscovered.Contains(f) ? new JumpPointView() : null,
-            (e, _) => e.HasDataBlob<CargoStorageDB>() ? new CargoStorageView() : null,
+            // The views below expose an entity's internals (cargo, installations, mining economics),
+            // so they are only projected for the owning faction.
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<CargoStorageDB>(out var cs) ? ToCargoStorageView(cs, e) : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<InfrastructureDB>(out var inf)
+                ? new InfrastructureView(inf.CapacityProvided, inf.CapacityRequired, inf.CapacityAvailable, inf.Efficiency)
+                : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ComponentInstancesDB>(out var ci) ? ToInstallationsView(ci, e) : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ColonyInfoDB>(out var col) ? ToColonyMiningView(col, e, f) : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<NavalAcademyDB>(out var na) ? ToNavalAcademyView(na) : null,
             // A lab's queue/economics are internal to its owner; other factions just see the entity.
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ResearcherDB>(out var r) ? ToResearcherView(r, e, f) : null,
         };
@@ -154,19 +166,195 @@ namespace Pulsar4X.Engine.Api
 
         private static BodyView ToBodyView(SystemBodyInfoDB b)
             => new(b.BodyType.ToDescription(), b.Gravity, b.BaseTemperature, b.LengthOfDay,
-                   b.AxialTilt, b.Tectonics.ToDescription(), b.MagneticField, b.SupportsPopulations);
+                   b.AxialTilt, b.Tectonics.ToDescription(), b.MagneticField, b.SupportsPopulations,
+                   b.RadiationLevel, b.AtmosphericDust);
+
+        private static AtmosphereView ToAtmosphereView(AtmosphereDB a, Game? game)
+        {
+            var composition = new List<GasAmount>(a.CompositionByPercent.Count);
+            foreach (var (gasId, percent) in a.CompositionByPercent)
+            {
+                string name = game != null && game.AtmosphericGases.TryGetValue(gasId, out var gas) ? gas.Name : gasId;
+                composition.Add(new GasAmount(name, percent));
+            }
+
+            return new AtmosphereView(a.SurfaceTemperature, a.Pressure, a.Hydrosphere, (double)a.HydrosphereExtent)
+            {
+                Composition = composition,
+            };
+        }
 
         private static StarView ToStarView(StarInfoDB s)
             => new(s.SpectralType.ToDescription(), s.SpectralSubDivision, s.Class, s.LuminosityClass.ToString(),
                    s.Temperature, s.Luminosity, s.Age, s.MinHabitableRadius_AU, s.MaxHabitableRadius_AU);
 
-        private static ColonyView ToColonyView(ColonyInfoDB c)
+        private static ColonyView ToColonyView(ColonyInfoDB c, Entity colony, int factionId)
         {
             long population = 0;
-            foreach (var speciesPop in c.Population.Values)
+            var species = new List<SpeciesPopulation>(c.Population.Count);
+            foreach (var (speciesId, speciesPop) in c.Population)
+            {
                 population += speciesPop;
+                string name = colony.Manager != null && colony.Manager.TryGetGlobalEntityById(speciesId, out var speciesEntity)
+                    ? speciesEntity.GetName(factionId)
+                    : "Unknown";
+                species.Add(new SpeciesPopulation(name, speciesPop));
+            }
+
             int? planetId = c.PlanetEntity.IsValid ? c.PlanetEntity.Id : null;
-            return new ColonyView(population, planetId);
+            return new ColonyView(population, planetId) { SpeciesPopulations = species };
+        }
+
+        private static InstallationsView ToInstallationsView(ComponentInstancesDB ci, Entity entity)
+        {
+            entity.TryGetDataBlob<CargoStorageDB>(out var storage);
+
+            var groups = new List<InstallationGroup>();
+            foreach (var (designId, instances) in ci.ComponentsByDesign)
+            {
+                if (instances.Count == 0) continue;
+
+                var first = instances[0];
+                bool canStore = first.Design.ComponentMountType.HasFlag(ComponentMountType.ShipCargo)
+                    && storage != null
+                    && storage.TypeStores.ContainsKey(first.CargoTypeID);
+
+                groups.Add(new InstallationGroup(
+                    designId,
+                    first.Name,
+                    first.Design.TemplateName,
+                    first.Design.Description,
+                    instances.Count,
+                    instances.Count(i => i.IsEnabled),
+                    canStore));
+            }
+
+            return new InstallationsView(groups.OrderBy(g => g.Name).ToList());
+        }
+
+        private static CargoStorageView ToCargoStorageView(CargoStorageDB storage, Entity holder)
+        {
+            bool holderIsColony = holder.HasDataBlob<ColonyInfoDB>();
+            bool holderIsShip = holder.HasDataBlob<ShipInfoDB>();
+            var factionData = holder.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data;
+
+            var stores = new List<CargoTypeStoreView>(storage.TypeStores.Count);
+            foreach (var (typeId, typeStore) in storage.TypeStores)
+            {
+                var cargoables = typeStore.GetCargoables();
+                var items = new List<CargoItemView>(typeStore.CurrentStoreInUnits.Count);
+                foreach (var (itemId, units) in typeStore.CurrentStoreInUnits)
+                {
+                    if (!cargoables.TryGetValue(itemId, out var cargoable)) continue;
+
+                    string kind = "", description = "";
+                    bool canInstall = false;
+                    switch (cargoable)
+                    {
+                        case Mineral mineral:
+                            kind = "Mineral";
+                            description = mineral.Description;
+                            break;
+                        case ProcessedMaterial material:
+                            kind = "Processed Material";
+                            description = material.Description;
+                            break;
+                        case ComponentInstance instance:
+                            kind = instance.Design.ComponentType;
+                            description = instance.Design.Description;
+                            canInstall = (holderIsColony && instance.Design.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation))
+                                      || (holderIsShip && instance.Design.ComponentMountType.HasFlag(ComponentMountType.ShipComponent));
+                            break;
+                        case Pulsar4X.Components.ComponentDesign design:
+                            kind = design.ComponentType;
+                            description = design.Description;
+                            break;
+                    }
+
+                    items.Add(new CargoItemView(
+                        cargoable.ID,
+                        cargoable.Name,
+                        kind,
+                        description,
+                        units,
+                        CargoMath.GetUnitCountInEscro(storage, cargoable),
+                        storage.GetMassStored(cargoable, true),
+                        cargoable.MassPerUnit,
+                        storage.GetVolumeStored(cargoable, true),
+                        cargoable.VolumePerUnit,
+                        storage.GetFreeUnitSpace(cargoable),
+                        canInstall));
+                }
+
+                string typeName = factionData.CargoTypes.TryGetValue(typeId, out var cargoType) ? cargoType.Name : typeId;
+                stores.Add(new CargoTypeStoreView(typeId, typeName, typeStore.MaxVolume, storage.GetFreeVolume(typeId))
+                {
+                    Items = items.OrderBy(i => i.Name).ToList(),
+                });
+            }
+
+            return new CargoStorageView(storage.TotalStoredMass, storage.TransferRate, storage.TransferRangeDv_mps)
+            {
+                Stores = stores,
+            };
+        }
+
+        private static ColonyMiningView? ToColonyMiningView(ColonyInfoDB colonyInfo, Entity colony, int factionId)
+        {
+            colony.TryGetDataBlob<MiningDB>(out var mining);
+
+            if (!colonyInfo.PlanetEntity.IsValid
+                || !colonyInfo.PlanetEntity.TryGetDataBlob<MineralsDB>(out var deposits))
+            {
+                return mining == null ? null : new ColonyMiningView(mining.NumberOfMines);
+            }
+
+            var game = colony.Manager?.Game;
+            if (game == null || !game.Factions.TryGetValue(factionId, out var faction)) return null;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo)) return null;
+
+            int factionMask = factionInfo.FactionMask;
+            var mineralsById = factionInfo.Data.CargoGoods.GetMineralsList().ToDictionary(m => m.ID);
+            colony.TryGetDataBlob<CargoStorageDB>(out var storage);
+
+            var rows = new List<MineralMiningRow>(deposits.Minerals.Count);
+            foreach (var (mineralId, deposit) in deposits.Minerals)
+            {
+                if (!mineralsById.TryGetValue(mineralId, out var mineral)) continue;
+
+                long? stockpile = null;
+                if (storage != null)
+                {
+                    var store = storage.TypeStores.Values.FirstOrDefault(s => s.CurrentStoreInUnits.ContainsKey(mineralId));
+                    stockpile = store?.CurrentStoreInUnits[mineralId] ?? 0;
+                }
+
+                bool canMine = mining != null && mining.ActualMiningRate.ContainsKey(mineralId);
+                long annualProduction = canMine ? 365 * mining!.ActualMiningRate[mineralId] : 0;
+
+                rows.Add(new MineralMiningRow(
+                    mineralId,
+                    mineral.Name,
+                    mineral.Description,
+                    stockpile,
+                    deposit.Amount.For(factionMask),
+                    deposit.Accessibility,
+                    annualProduction,
+                    canMine));
+            }
+
+            return new ColonyMiningView(mining?.NumberOfMines ?? 0)
+            {
+                Minerals = rows.OrderBy(r => r.Name).ToList(),
+            };
+        }
+
+        private static NavalAcademyView ToNavalAcademyView(NavalAcademyDB na)
+        {
+            var academies = new List<NavalAcademyClassView>(na.Academies.Count);
+            foreach (var academy in na.Academies)
+                academies.Add(new NavalAcademyClassView(academy.ClassSize, academy.TrainingPeriodInMonths, academy.GraduationDate));
+            return new NavalAcademyView(academies);
         }
 
         private static ResearcherView ToResearcherView(ResearcherDB r, Entity lab, int factionId)

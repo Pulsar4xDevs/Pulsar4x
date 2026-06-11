@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Pulsar4X.Api;
+using Pulsar4X.Components;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Fleets;
@@ -49,6 +51,8 @@ namespace Pulsar4X.Engine.Api
                 [typeof(AddTechToQueueCommand)] = TranslateAddTechToQueue,
                 [typeof(RemoveTechFromQueueCommand)] = TranslateRemoveTechFromQueue,
                 [typeof(MoveTechInQueueCommand)] = TranslateMoveTechInQueue,
+                [typeof(UninstallComponentCommand)] = TranslateUninstallComponent,
+                [typeof(InstallComponentCommand)] = TranslateInstallComponent,
             };
         }
 
@@ -262,6 +266,56 @@ namespace Pulsar4X.Engine.Api
             return move.MoveUp
                 ? Dispatch(MoveUpInQueueOrder.Create(commanded, move.TechId))
                 : Dispatch(MoveDownInQueueOrder.Create(commanded, move.TechId));
+        }
+
+        // ----- installations/components (commanded entity: the colony or ship holding them) -----
+
+        private CommandResult TranslateUninstallComponent(Entity faction, Entity commanded, GameCommand command)
+        {
+            var uninstall = (UninstallComponentCommand)command;
+            if (!commanded.TryGetDataBlob<ComponentInstancesDB>(out var instancesDB)
+                || !instancesDB.ComponentsByDesign.TryGetValue(uninstall.DesignId, out var instances)
+                || instances.Count == 0)
+                return CommandResult.Reject($"No installed component of design {uninstall.DesignId}.");
+
+            var instance = instances[0];
+            if (!commanded.TryGetDataBlob<Pulsar4X.Storage.CargoStorageDB>(out var storage)
+                || !storage.TypeStores.ContainsKey(instance.CargoTypeID))
+                return CommandResult.Reject("The entity has no cargo storage that can hold the component.");
+
+            if (!_game.OrderHandler.HandleOrder(UninstallComponentInstanceOrder.Create(commanded, instance)))
+                return CommandResult.Reject("Command rejected by engine validation.");
+
+            return Dispatch(AddComponentToStorageOrder.Create(commanded, instance));
+        }
+
+        private CommandResult TranslateInstallComponent(Entity faction, Entity commanded, GameCommand command)
+        {
+            var install = (InstallComponentCommand)command;
+
+            // The component travels as a cargo-item id; find the live instance in the holder's storage.
+            ComponentInstance? instance = null;
+            if (commanded.TryGetDataBlob<Pulsar4X.Storage.CargoStorageDB>(out var storage))
+            {
+                foreach (var typeStore in storage.TypeStores.Values)
+                {
+                    if (typeStore.CurrentStoreInUnits.ContainsKey(install.ComponentId)
+                        && typeStore.GetCargoables().TryGetValue(install.ComponentId, out var cargoable)
+                        && cargoable is ComponentInstance found)
+                    {
+                        instance = found;
+                        break;
+                    }
+                }
+            }
+
+            if (instance == null)
+                return CommandResult.Reject($"Component {install.ComponentId} is not in the entity's storage.");
+
+            if (!_game.OrderHandler.HandleOrder(RemoveComponentFromStorageOrder.Create(commanded, instance)))
+                return CommandResult.Reject("Command rejected by engine validation.");
+
+            return Dispatch(InstallComponentInstanceOrder.Create(commanded, instance));
         }
     }
 }

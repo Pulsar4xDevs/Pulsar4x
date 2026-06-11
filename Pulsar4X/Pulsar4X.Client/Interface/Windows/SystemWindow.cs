@@ -126,7 +126,7 @@ public class SystemWindow : PulsarGuiWindow
             if(colony.Entity.FactionOwnerID == _uiState.Faction.Id && ImGui.SmallButton(colony.Entity.GetOwnersName() + "###" + result.Item2))
             {
                 ColonyManagementWindow.GetInstance().SetActive(true);
-                ColonyManagementWindow.GetInstance().SelectEntity(colony);
+                ColonyManagementWindow.GetInstance().SelectColony(result.Item2, _uiState.SelectedStarSystemId);
             }
         }
         else

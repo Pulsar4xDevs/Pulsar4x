@@ -150,6 +150,21 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    AdminWindow). Because the research instant orders mutate DataBlobs without raising messages,
    `SubmitCommand` now re-projects and pushes the commanded entity (`EntityChanged`) after every
    accepted command — a generic post-write refresh all windows benefit from.
+   The **ColonyManagementWindow** shell and its Summary/Mining/Naval-Academy tabs are ported
+   (Production and Construction — `IndustryDisplay`/`ConstructionDisplay`, each with its own command
+   surface — stay engine-backed for their own passes). Colony selection is by entity id + system id
+   against the system snapshots. New views: `AtmosphereView` (on the planet, gas names pre-resolved),
+   `InfrastructureView`, `InstallationsView` (grouped by design, with a server-computed `CanStore`),
+   a full `CargoStorageView` replacing the old marker (stores → items with escrow/mass/volume and a
+   server-computed `CanInstall`; still owner-only, so its presence keeps marking refuel targets),
+   `ColonyMiningView` (a read-model joining colony mining rates, the planet's faction-masked deposits
+   and the stockpile into display rows), `NavalAcademyView`, plus `ColonyView.SpeciesPopulations` and
+   `BodyView` radiation/dust. All colony-internal views are owner-only — enforced and tested at the
+   boundary. Commands: `UninstallComponentCommand` (design id; the translator picks an instance and
+   chains uninstall + add-to-storage) and `InstallComponentCommand` (cargo-item id; remove-from-storage
+   + install). Colony economics mutate quietly every econ tick, so the server re-pushes each faction's
+   colonies (and their planets) on every clock advance. The snapshot-based atmosphere/installations/
+   cargo displays live alongside their engine overloads (still used by EntityWindow/ship UI).
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
@@ -167,15 +182,17 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
 - Time: `TimeState`, `TimeControlRequest`.
 - Reads: `SystemSummary`, `SystemSnapshot`, `EntitySnapshot` + `IComponentView` (`NameView`,
   `PositionView`, `OrbitView`, `MassVolumeView`, `BodyView`, `StarView`, `ColonyView`, `ShipView`,
-  `GeoSurveyView`, `GravSurveyView`, `JumpPointView`, `CargoStorageView`, `ResearcherView` so far),
-  `OwnerRelation`, `Vec3`, `ModifiedValue`/`ValueModifier`; fleet hierarchy: `FleetSnapshot`,
-  `ShipSnapshot`, `OrderSnapshot`; research: `ResearchSnapshot` (`TechCategorySnapshot`,
-  `TechSnapshot`, `CommanderSnapshot`/`CommanderKind`/`CommanderBonusSnapshot`).
+  `GeoSurveyView`, `GravSurveyView`, `JumpPointView`, `CargoStorageView`, `ResearcherView`,
+  `AtmosphereView`, `InfrastructureView`, `InstallationsView`, `ColonyMiningView`,
+  `NavalAcademyView` so far), `OwnerRelation`, `Vec3`, `ModifiedValue`/`ValueModifier`; fleet
+  hierarchy: `FleetSnapshot`, `ShipSnapshot`, `OrderSnapshot`; research: `ResearchSnapshot`
+  (`TechCategorySnapshot`, `TechSnapshot`, `CommanderSnapshot`/`CommanderKind`/`CommanderBonusSnapshot`).
 - Writes: `GameCommand` (+ `RenameCommand`, `CreateFleetCommand`, `DisbandFleetCommand`,
   `ChangeFleetParentCommand`, `ReassignShipCommand`, `SetFlagshipCommand`, `MoveToBodyCommand`,
   `GeoSurveyCommand`, `GravSurveyCommand`, `JumpCommand`, `RefuelAtCommand`,
   `AssignScientistCommand`, `UnassignScientistCommand`, `SetResearchFundingCommand`,
-  `AddTechToQueueCommand`, `RemoveTechFromQueueCommand`, `MoveTechInQueueCommand`), `CommandResult`.
+  `AddTechToQueueCommand`, `RemoveTechFromQueueCommand`, `MoveTechInQueueCommand`,
+  `UninstallComponentCommand`, `InstallComponentCommand`), `CommandResult`.
 - Events: `GameEventType`, `GameEventEnvelope`.
 - Interfaces: `IGameServer`, `IGameClient`, `IClientGalaxy`, `IClientSystem`.
 

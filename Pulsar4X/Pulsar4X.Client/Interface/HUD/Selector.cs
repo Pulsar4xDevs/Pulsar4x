@@ -361,7 +361,7 @@ namespace Pulsar4X.Client
             }
 
             var window = ColonyManagementWindow.GetInstance();
-            int? selectedId = window.GetActive() ? window.SelectedEntity?.Id : null;
+            int? selectedId = window.GetActive() ? window.SelectedColonyId : null;
 
             foreach (var (system, colony) in colonies.OrderBy(c => NameOf(c.Colony)))
             {

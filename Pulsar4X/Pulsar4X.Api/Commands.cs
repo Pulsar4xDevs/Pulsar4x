@@ -70,3 +70,11 @@ public sealed record RemoveTechFromQueueCommand(int TargetEntityId, string TechI
 
 /// <summary>Move a queued tech one slot up (towards active) or down.</summary>
 public sealed record MoveTechInQueueCommand(int TargetEntityId, string TechId, bool MoveUp) : GameCommand(TargetEntityId);
+
+// ----- installations/components (commanded entity: the colony or ship holding them) -----
+
+/// <summary>Uninstall one installed component of the given design and move it into cargo storage.</summary>
+public sealed record UninstallComponentCommand(int TargetEntityId, string DesignId) : GameCommand(TargetEntityId);
+
+/// <summary>Install a component instance (<see cref="CargoItemView.Id"/>) out of cargo storage.</summary>
+public sealed record InstallComponentCommand(int TargetEntityId, int ComponentId) : GameCommand(TargetEntityId);

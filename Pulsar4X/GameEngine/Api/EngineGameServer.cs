@@ -127,6 +127,26 @@ namespace Pulsar4X.Engine.Api
                 var research = _projector.ProjectResearch(sub.FactionId);
                 if (research != null)
                     sub.Send(new GameEventEnvelope(GameEventType.ResearchChanged, Research: research));
+                RefreshColonies(sub);
+            }
+        }
+
+        // Colony economics (population, stockpiles, mining, infrastructure) and the planet beneath
+        // (mineral depletion) mutate every econ tick without engine messages. Colonies are few, so
+        // re-push them (and their planets) whole each clock advance until generic change-tracking exists.
+        private void RefreshColonies(ServerSubscription sub)
+        {
+            if (!_game.Factions.TryGetValue(sub.FactionId, out var faction)) return;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var info)) return;
+
+            foreach (var colony in info.Colonies)
+            {
+                if (!colony.IsValid) continue;
+                PushEntityRefresh(colony, sub.FactionId);
+
+                var planet = colony.GetDataBlob<Pulsar4X.Colonies.ColonyInfoDB>()?.PlanetEntity;
+                if (planet != null && planet.IsValid)
+                    PushEntityRefresh(planet, sub.FactionId);
             }
         }
 

@@ -96,7 +96,22 @@ public sealed record BodyView(
     double AxialTiltDegrees,
     string Tectonics,
     double MagneticFieldMicroTesla,
-    bool SupportsPopulations) : IComponentView;
+    bool SupportsPopulations,
+    double RadiationLevel = 0,
+    double AtmosphericDust = 0) : IComponentView;
+
+/// <summary>A body's atmosphere; gas names are pre-resolved from game static data.</summary>
+public sealed record AtmosphereView(
+    double SurfaceTemperatureC,
+    double PressureAtm,
+    bool Hydrosphere,
+    double HydrosphereExtentPercent)
+    : IComponentView
+{
+    public IReadOnlyList<GasAmount> Composition { get; init; } = Array.Empty<GasAmount>();
+}
+
+public sealed record GasAmount(string Name, double Percent);
 
 public sealed record StarView(
     string SpectralType,
@@ -109,7 +124,33 @@ public sealed record StarView(
     double MinHabitableRadiusAu,
     double MaxHabitableRadiusAu) : IComponentView;
 
-public sealed record ColonyView(long Population, int? PlanetEntityId) : IComponentView;
+public sealed record ColonyView(long Population, int? PlanetEntityId) : IComponentView
+{
+    /// <summary>Per-species population breakdown (names resolved for the requesting faction).</summary>
+    public IReadOnlyList<SpeciesPopulation> SpeciesPopulations { get; init; } = Array.Empty<SpeciesPopulation>();
+}
+
+public sealed record SpeciesPopulation(string SpeciesName, long Population);
+
+/// <summary>A colony's infrastructure capacity (the limiter on its industrial output).</summary>
+public sealed record InfrastructureView(
+    long CapacityProvided,
+    long CapacityRequired,
+    long CapacityAvailable,
+    double Efficiency) : IComponentView;
+
+/// <summary>The installations on a colony (or components on a ship), grouped by design.</summary>
+public sealed record InstallationsView(IReadOnlyList<InstallationGroup> Installations) : IComponentView;
+
+public sealed record InstallationGroup(
+    string DesignId,
+    string Name,
+    string TemplateName,
+    string Description,
+    int Count,
+    int OperationalCount,
+    /// <summary>Whether one of these can be uninstalled into the entity's cargo storage.</summary>
+    bool CanStore);
 
 public sealed record ShipView(string DesignName) : IComponentView;
 
@@ -123,8 +164,62 @@ public sealed record GravSurveyView(bool IsSurveyComplete) : IComponentView;
 /// discovered it, so visibility is enforced at the boundary.</summary>
 public sealed record JumpPointView : IComponentView;
 
-/// <summary>Marks an entity as having cargo storage (e.g. a colony a fleet can refuel at).</summary>
-public sealed record CargoStorageView : IComponentView;
+/// <summary>An entity's cargo storage: capacity and contents per cargo type. Only projected for the
+/// owning faction (its presence also marks refuel targets for the fleet UI).</summary>
+public sealed record CargoStorageView(
+    double TotalStoredMassKg,
+    double TransferRateKgPerHour,
+    double TransferRangeDvMps)
+    : IComponentView
+{
+    public IReadOnlyList<CargoTypeStoreView> Stores { get; init; } = Array.Empty<CargoTypeStoreView>();
+}
+
+public sealed record CargoTypeStoreView(
+    string TypeId,
+    string TypeName,
+    double MaxVolume,
+    double FreeVolume)
+{
+    public IReadOnlyList<CargoItemView> Items { get; init; } = Array.Empty<CargoItemView>();
+}
+
+public sealed record CargoItemView(
+    int Id,
+    string Name,
+    string ItemKind,
+    string Description,
+    long Units,
+    long UnitsInEscrow,
+    double MassStoredKg,
+    double MassPerUnitKg,
+    double VolumeStored,
+    double VolumePerUnit,
+    long FreeUnitSpace,
+    /// <summary>Whether this item is a component instance that can be installed on the holding entity.</summary>
+    bool CanInstall);
+
+/// <summary>A colony's mining operation joined with its planet's deposits and stockpile — one row per
+/// known mineral. Amounts are masked to what the requesting faction has surveyed.</summary>
+public sealed record ColonyMiningView(int NumberOfMines)
+    : IComponentView
+{
+    public IReadOnlyList<MineralMiningRow> Minerals { get; init; } = Array.Empty<MineralMiningRow>();
+}
+
+public sealed record MineralMiningRow(
+    int MineralId,
+    string Name,
+    string Description,
+    long? Stockpile,           // null when the colony has no storage at all
+    long? AvailableToMine,     // null when the faction's survey data can't resolve the amount
+    double Accessibility,
+    long AnnualProduction,     // 0 when the colony can't mine this mineral
+    bool CanMine);
+
+public sealed record NavalAcademyView(IReadOnlyList<NavalAcademyClassView> Academies) : IComponentView;
+
+public sealed record NavalAcademyClassView(int ClassSize, int TrainingPeriodMonths, DateTime GraduationDate);
 
 /// <summary>One named contribution to a modified stat (for breakdown tooltips).</summary>
 public sealed record ValueModifier(string Name, double Delta);
