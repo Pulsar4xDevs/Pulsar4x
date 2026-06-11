@@ -220,7 +220,7 @@ namespace Pulsar4X.Client
                 else if (T == typeof(RenameWindow))
                 {
                     var renameWindow = RenameWindow.GetInstance();
-                    renameWindow.SetEntity(_entityState.Entity);
+                    renameWindow.SetTarget(_entityState.Entity.Id, _entityState.Name);
                     _state.ActiveWindow = renameWindow;
                     if (managesUIPopUps)
                     {

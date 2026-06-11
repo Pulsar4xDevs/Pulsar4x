@@ -140,7 +140,8 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    reads the fleet's system snapshot, filtering on views: `BodyView`+`PositionView` (move),
    `GeoSurveyView`/`GravSurveyView` (incomplete surveys, faction-scoped), `JumpPointView` (only
    projected once discovered), `CargoStorageView` on colonies (refuel). The **RenameWindow** submits
-   the API `RenameCommand` by entity id (a `SetEntity` shim remains for unported callers).
+   the API `RenameCommand` by entity id (fully id/name-based; the `SetEntity` engine shim is gone —
+   its last caller, the entity context menu, now passes id + name).
    The **ResearchWindow** is fully ported. Labs are entities with a `ResearcherView` (design,
    location, scientist, cost/points-per-day as `ModifiedValue` breakdowns for tooltips, funding,
    tech-queue ids) — projected only for the owning faction, so lab internals never leak. Faction

@@ -1,7 +1,5 @@
 using System;
 using ImGuiNET;
-using Pulsar4X.Engine;
-using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Client
 {
@@ -33,15 +31,6 @@ namespace Pulsar4X.Client
             _nameInputBuffer = System.Text.Encoding.UTF8.GetBytes(currentName);
             IsActive = true;
             _setFocus = true;
-        }
-
-        /// <summary>Engine-entity convenience for not-yet-ported callers.</summary>
-        public void SetEntity(Entity entity)
-        {
-            if(_uiState.Faction == null)
-                throw new NullReferenceException("_uiState.Faction cannot be null");
-
-            SetTarget(entity.Id, entity.GetName(_uiState.Faction.Id));
         }
 
         internal static RenameWindow GetInstance()
