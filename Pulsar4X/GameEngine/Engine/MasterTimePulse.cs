@@ -141,9 +141,6 @@ namespace Pulsar4X.Engine
         {
             // Requests a simulation halt if it is running.
             _timeSimulationCts?.Cancel();
-
-            // _timer.Stop();
-            // _timer.Enabled = false;
         }
         /// <summary>
         /// Starts the timeloop
