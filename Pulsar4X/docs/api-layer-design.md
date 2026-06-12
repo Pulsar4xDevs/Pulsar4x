@@ -365,7 +365,18 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    maps them back to engine conditions/actions and the projector the other way. Like research and
    cancel-order, replacing the list raises no engine message, so the server re-pushes the fleet
    tree after an accepted set.
-5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
+5. **Events (done):** the `MessagePublisher` sync-state messages were bridged in phase 2; this
+   phase bridged the `EventManager` game-log stream. A `LogEvent` is display-ready — the event
+   type travels as its engine name (a string, so the 200-value engine enum isn't mirrored into
+   the contract) and entity/faction names are resolved server-side with the subscriber's faction
+   scope. Each subscription bridges `EventManager` with the same faction filter as the engine's
+   own `FactionEventLog` (addressed-to or concerned); on subscribe the faction's persisted log is
+   pushed as a backlog envelope (the live bridge starts after, so nothing double-delivers), then
+   singles stream as they happen. The client galaxy accumulates them on
+   `IClientGalaxy.EventLog`, and the **GameLogWindow** is ported to read it — no engine usings
+   left; its per-type hide filter keys off the event-type string. Not carried over:
+   `FactionEventLog.HaltsOn` (pause-on-event) has no UI today; when one is built it should be a
+   small command + a flag on `LogEvent`.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
    it references both `Pulsar4X.Client` and `GameEngine`, and wires single-player as
@@ -407,7 +418,8 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
   `UninstallComponentCommand`, `InstallComponentCommand`, `QueueIndustryJobCommand`,
   `ChangeIndustryJobPriorityCommand`, `CancelIndustryJobCommand`, `AddToConstructionQueueCommand`,
   `MoveConstructionJobCommand`, `RemoveConstructionJobCommand`), `CommandResult`.
-- Events: `GameEventType`, `GameEventEnvelope`.
+- Events: `GameEventType`, `GameEventEnvelope`, `LogEvent` (the faction's game log, on
+  `IClientGalaxy.EventLog`).
 - Interfaces: `IGameServer`, `IGameClient`, `IClientGalaxy`, `IClientSystem`.
 
 The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api` and can be removed.

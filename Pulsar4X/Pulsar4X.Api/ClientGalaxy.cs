@@ -28,6 +28,10 @@ public interface IClientGalaxy
 
     /// <summary>Everyone in the faction's service (officers, scientists, administrators).</summary>
     IReadOnlyList<CommanderSnapshot> Commanders { get; }
+
+    /// <summary>The faction's game log, oldest first: the backlog pushed on connect plus every
+    /// event received since.</summary>
+    IReadOnlyList<LogEvent> EventLog { get; }
 }
 
 /// <summary>A single star system within the client galaxy model.</summary>

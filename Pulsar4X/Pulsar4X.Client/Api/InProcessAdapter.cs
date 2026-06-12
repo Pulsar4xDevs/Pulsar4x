@@ -126,6 +126,10 @@ public sealed class InProcessAdapter : IGameClient, IDesignDataProvider
                 if (evt.Commanders != null) _galaxy.SetCommanders(evt.Commanders);
                 return;
 
+            case GameEventType.LogEvent:
+                if (evt.Log != null) _galaxy.AddLogEvents(evt.Log);
+                return;
+
             case GameEventType.SystemRevealed:
                 // The reveal carries the whole system + its visible entities — apply it directly.
                 if (evt.System != null)

@@ -127,6 +127,22 @@ namespace Pulsar4X.Engine.Api
             return (fleets, unattached);
         }
 
+        /// <summary>A display-ready game-log entry: the event-type name plus entity/faction names
+        /// resolved with the subscriber's faction scope.</summary>
+        public LogEvent ProjectLogEvent(Pulsar4X.Events.Event e, int factionId)
+        {
+            string? entityName = null;
+            if (e.EntityId is { } entityId && _game.GlobalManager.TryGetGlobalEntityById(entityId, out var entity))
+                entityName = entity.GetName(factionId);
+
+            string? factionName = null;
+            if (e.FactionId is { } eventFactionId && _game.Factions.TryGetValue(eventFactionId, out var faction))
+                factionName = faction.GetName(factionId);
+
+            return new LogEvent(e.StarDate, e.EventType.ToString(), e.Message,
+                e.SystemId, e.EntityId, entityName, factionName);
+        }
+
         // ----- entity views: add a view by adding one entry here (+ a To*View helper if it needs logic) -----
 
         private static readonly Func<Entity, int, IComponentView?>[] ViewProjectors =

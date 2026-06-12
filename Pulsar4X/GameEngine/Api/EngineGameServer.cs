@@ -334,6 +334,20 @@ namespace Pulsar4X.Engine.Api
             var commanders = _projector.ProjectCommanders(session.FactionId);
             if (commanders != null)
                 sink(new GameEventEnvelope(GameEventType.CommandersChanged, Commanders: commanders));
+
+            // The faction's persisted event log is the starting backlog; live events follow as
+            // they happen (the subscription's EventManager bridge starts after this, so nothing
+            // is double-delivered).
+            if (_game.Factions.TryGetValue(session.FactionId, out var loggedFaction)
+                && loggedFaction.TryGetDataBlob<FactionInfoDB>(out var loggedInfo)
+                && loggedInfo.EventLog != null)
+            {
+                var backlog = loggedInfo.EventLog.GetEvents()
+                    .Select(e => _projector.ProjectLogEvent(e, session.FactionId))
+                    .ToList();
+                if (backlog.Count > 0)
+                    sink(new GameEventEnvelope(GameEventType.LogEvent, Log: backlog));
+            }
         }
 
         /// <summary>
@@ -362,6 +376,7 @@ namespace Pulsar4X.Engine.Api
             private readonly PlayerSession _session;
             private readonly Action<GameEventEnvelope> _sink;
             private readonly List<(MessageTypes Type, MessagePublisher.MessageHandler Handler)> _handlers = new();
+            private readonly Action<Pulsar4X.Events.Event> _onLogEvent;
 
             public ServerSubscription(EngineGameServer server, PlayerSession session, Action<GameEventEnvelope> sink)
             {
@@ -379,8 +394,27 @@ namespace Pulsar4X.Engine.Api
 
                 lock (server._sinkLock) server._subscriptions.Add(this);
 
-                // Prime the new subscriber with its starting state (time + faction + known systems + fleets).
+                // Prime the new subscriber with its starting state (time + faction + known systems +
+                // fleets + the game-log backlog).
                 server.PushInitialState(session, sink);
+
+                // Bridge the game-log stream (EventManager) after the backlog push, so an event
+                // can't land in both. The sync-state bridges above are upserts, so their
+                // overlap with the initial state is harmless; log entries append.
+                _onLogEvent = OnLogEvent;
+                Pulsar4X.Events.EventManager.Instance.Subscribe(
+                    Pulsar4X.Events.EventTypeHelper.GetAllEventTypes(), _onLogEvent);
+            }
+
+            // Mirrors FactionEventLog's filter: an event reaches a faction when addressed to it or
+            // when listed as concerned.
+            private void OnLogEvent(Pulsar4X.Events.Event e)
+            {
+                if (e.FactionId != _session.FactionId && !e.ConcernedFactions.Contains(_session.FactionId))
+                    return;
+
+                _sink(new GameEventEnvelope(GameEventType.LogEvent, e.SystemId, e.EntityId, e.FactionId,
+                    Log: new[] { _server._projector.ProjectLogEvent(e, _session.FactionId) }));
             }
 
             internal int FactionId => _session.FactionId;
@@ -440,6 +474,8 @@ namespace Pulsar4X.Engine.Api
                 foreach (var (type, handler) in _handlers)
                     MessagePublisher.Instance.Unsubscribe(type, handler);
                 _handlers.Clear();
+                Pulsar4X.Events.EventManager.Instance.Unsubscribe(
+                    Pulsar4X.Events.EventTypeHelper.GetAllEventTypes(), _onLogEvent);
                 lock (_server._sinkLock) _server._subscriptions.Remove(this);
             }
         }

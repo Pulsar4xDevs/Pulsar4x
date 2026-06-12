@@ -16,6 +16,7 @@ internal sealed class ClientGalaxy : IClientGalaxy
     private readonly List<FleetSnapshot> _fleets = new();
     private readonly List<ShipSnapshot> _unattachedShips = new();
     private readonly List<CommanderSnapshot> _commanders = new();
+    private readonly List<LogEvent> _eventLog = new();
 
     public TimeState Time { get; internal set; } = new(default, false, 1f, TimeSpan.FromHours(1), TimeSpan.FromSeconds(1));
 
@@ -33,6 +34,8 @@ internal sealed class ClientGalaxy : IClientGalaxy
 
     public IReadOnlyList<CommanderSnapshot> Commanders => _commanders;
 
+    public IReadOnlyList<LogEvent> EventLog => _eventLog;
+
     public IClientSystem? GetSystem(string systemId)
         => _systems.TryGetValue(systemId, out var system) ? system : null;
 
@@ -49,6 +52,9 @@ internal sealed class ClientGalaxy : IClientGalaxy
         _commanders.Clear();
         _commanders.AddRange(commanders);
     }
+
+    internal void AddLogEvents(IEnumerable<LogEvent> events)
+        => _eventLog.AddRange(events);
 
     internal void SetKnownSystems(IEnumerable<SystemSummary> summaries)
     {
