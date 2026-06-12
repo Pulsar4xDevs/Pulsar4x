@@ -140,24 +140,8 @@ namespace Pulsar4X.Client
             {
                 return true;
             }
-            //if entity can mine || refine || build
-            else if (_entityState.Entity.HasDataBlob<ColonyInfoDB>() && T == typeof(ColonyPanel))
-            {
-                return true;
-            }
-            else if (_entityState.BodyType != UserOrbitSettings.OrbitBodyType.Ship && T == typeof(PlanetaryWindow))
-            {
-                return true;
-            }
             // if entity can be given orders
             else if (_entityState.Entity.HasDataBlob<OrderableDB>() && T == typeof(OrdersListWindow))
-            {
-                return true;
-            }
-            else if (
-                _entityState.Entity.HasDataBlob<CargoStorageDB>() &&
-                _entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() &&
-                T == typeof(LogiShipWindow))
             {
                 return true;
             }
@@ -237,25 +221,6 @@ namespace Pulsar4X.Client
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
-                // else if (T == typeof(LogiBaseWindow))
-                // {
-                //     var instance = LogiBaseWindow.GetInstance(_state.Game.StaticData, _entityState);
-                //     instance.ToggleActive();
-                //     _state.ActiveWindow = instance;
-                // }
-                else if (T == typeof(LogiShipWindow))
-                {
-                    var instance = LogiShipWindow.GetInstance(_state.Faction.GetDataBlob<FactionInfoDB>().Data, _entityState);
-                    instance.ToggleActive();
-                    _state.ActiveWindow = instance;
-                }
-                //Menu is econ menu
-                else if (T == typeof(ColonyPanel))
-                {
-                    var instance = ColonyPanel.GetInstance(_state.Faction.GetDataBlob<FactionInfoDB>().Data, _entityState);
-                    instance.ToggleActive();
-                    _state.ActiveWindow = instance;
-                }
                 else if (T == typeof(NavWindow))
                 {
                     var instance = NavWindow.GetInstance(_entityState);
@@ -267,11 +232,6 @@ namespace Pulsar4X.Client
                     var instance = OrderCreationWindow.GetInstance();
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
-                }
-                else if (T == typeof(PlanetaryWindow))
-                {
-                    var instance = PlanetaryWindow.GetInstance(_entityState, _state);
-                    instance.ToggleActive();
                 }
                 else if (T == typeof(OrdersListWindow))
                 {
@@ -300,7 +260,6 @@ namespace Pulsar4X.Client
             //else if (T == typeof(RenameWindow)) returnval = RenameWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(NavWindow)) returnval = NavWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(CreateTransferWindow)) returnval = CreateTransferWindow.GetInstance().GetActive();
-            else if (T == typeof(ColonyPanel)) returnval = ColonyPanel.GetInstance(_state.Faction.GetDataBlob<FactionInfoDB>().Data, _entityState).GetActive();
             // Instance Windows
             else if (T == typeof(OrdersListWindow)) returnval = OrdersListWindow.GetInstance(_entityState, _state).GetActive();
             else returnval = false;

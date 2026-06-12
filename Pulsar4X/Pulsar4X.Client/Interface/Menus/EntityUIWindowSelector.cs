@@ -92,7 +92,6 @@ namespace Pulsar4X.Client
 
                     NewCondtionalButton(typeof(PowerGenWindow), _uiState.Img_Power(), "Shows power stats");
                     NewCondtionalButton(typeof(CreateTransferWindow), _uiState.Img_Cargo(), "Shows cargo");
-                    NewCondtionalButton(typeof(ColonyPanel), _uiState.Img_Industry(), "Opens Industry menu");
                     NewCondtionalButton(typeof(FireControl), _uiState.Img_Firecon(), "Opens firecontrol menu");
 
                     //Displays all buttons in a list
@@ -155,11 +154,9 @@ namespace Pulsar4X.Client
                     }
 
                     //Makes all small buttons
-                    ActionButton(typeof(PlanetaryWindow));
                     ActionButton(typeof(GotoSystemBlankMenuHelper));
                     ActionButton(typeof(WarpOrderWindow));
                     ActionButton(typeof(ChangeCurrentOrbitWindow));
-                    ActionButton(typeof(LogiShipWindow));
                 }
                 ImGui.End();
             }

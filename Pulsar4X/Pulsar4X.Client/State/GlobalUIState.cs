@@ -43,12 +43,8 @@ namespace Pulsar4X.Client
             {typeof(FireControl), "Fire Control" },
             {typeof(RenameWindow), "Rename"},
             {typeof(CreateTransferWindow), "Cargo"},
-            {typeof(ColonyLogisticsDisplay), "Logistics"},
-            {typeof(LogiShipWindow), "Logistics"},
-            {typeof(ColonyPanel), "Economy"},
             {typeof(GotoSystemBlankMenuHelper), "Go to system"},
             {typeof(SelectPrimaryBlankMenuHelper), "Select as primary"},
-            {typeof(PlanetaryWindow), "Planetary window"},
             {typeof(NavWindow), "Nav Window"},
             {typeof(OrdersListWindow), "Orders Window"},
             {typeof(OrderCreationWindow), "Order Creation"}

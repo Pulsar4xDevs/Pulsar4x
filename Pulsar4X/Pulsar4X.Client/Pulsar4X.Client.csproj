@@ -88,6 +88,12 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="7.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Parked pending their API-layer port: still engine-coupled, currently unreachable from the UI -->
+    <Compile Remove="Interface\Windows\OrdnanceDesignWindow.cs" />
+    <Compile Remove="Interface\Windows\LogisticsWindow.cs" />
+    <Compile Remove="Interface\Displays\ColonyLogisticsDisplay.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
     <ProjectReference Include="..\Pulsar4X.Api\Pulsar4X.Api.csproj" />
   </ItemGroup>
