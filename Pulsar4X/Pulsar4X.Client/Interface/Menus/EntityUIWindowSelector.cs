@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.Engine;
 
 namespace Pulsar4X.Client
 {
@@ -65,7 +64,7 @@ namespace Pulsar4X.Client
 
                     void NewButton(Type T, IntPtr imgPtr, string TooltipText, List<ToolbuttonData> ButtonList) {
                         //Creates a buttton if it is usuable in this situation
-                        if (EntityUIWindows.CheckIfCanOpenWindow(T, _entityState))
+                        if (EntityUIWindows.CheckIfCanOpenWindow(T, _entityState, _uiState))
                         {
                             btn = new ToolbuttonData()
                             {
@@ -144,7 +143,7 @@ namespace Pulsar4X.Client
                     void ActionButton(Type T)
                     {
                     //Makes a small button if it is usable in this situation
-                        if (EntityUIWindows.CheckIfCanOpenWindow(T,_entityState))
+                        if (EntityUIWindows.CheckIfCanOpenWindow(T, _entityState, _uiState))
                         {
                             bool buttonresult = ImGui.SmallButton(GlobalUIState.NamesForMenus[T]);
                             EntityUIWindows.OpenUIWindow(T, _entityState, _uiState, buttonresult);

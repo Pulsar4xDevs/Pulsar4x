@@ -152,12 +152,16 @@ namespace Pulsar4X.Engine.Api
             (e, _) => e.TryGetDataBlob<OrbitDB>(out var o) ? ToOrbitView(o) : null,
             (e, _) => e.TryGetDataBlob<MassVolumeDB>(out var m)
                 ? new MassVolumeView(m.MassTotal, m.RadiusInM, m.DensityDry_gcm) { DryMassKg = m.MassDry } : null,
-            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<OrderableDB>(out var ord) && ord.ActionList.Count > 0
+            // Projected even when the queue is empty: its presence marks the entity as orderable,
+            // which gates the order-queue UI.
+            (e, f) => e.FactionOwnerID == f && e.HasDataBlob<OrderableDB>()
                 ? new OrdersView(ProjectOrders(e)) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Movement.NewtonThrustAbilityDB>(out var th)
                 ? ToThrustView(th, e, f) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Movement.WarpAbilityDB>(out var wa)
                 ? new WarpAbilityView(wa.MaxSpeed) : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Energy.EnergyGenAbilityDB>(out var eg)
+                ? ToEnergyView(eg) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Movement.WarpMovingDB>(out var wm)
                 ? new WarpMovingView(wm.CurrentNonNewtonionVectorMS.Length())
                 {
@@ -239,6 +243,28 @@ namespace Pulsar4X.Engine.Api
                 StandardGravParameter = ke.StandardGravParameter,
             };
 
+        private static EnergyView? ToEnergyView(Pulsar4X.Energy.EnergyGenAbilityDB energy)
+        {
+            string? energyType = energy.EnergyType?.UniqueID;
+            if (energyType == null
+                || !energy.EnergyStored.TryGetValue(energyType, out double stored)
+                || !energy.EnergyStoreMax.TryGetValue(energyType, out double storeMax))
+                return null;
+
+            // Unroll the engine's ring buffer into chronological order for plotting.
+            var histogram = new List<EnergyHistogramPoint>(energy.Histogram.Count);
+            for (int i = 0; i < energy.Histogram.Count; i++)
+            {
+                var sample = energy.Histogram[(energy.HistogramIndex + i) % energy.Histogram.Count];
+                histogram.Add(new EnergyHistogramPoint(sample.seconds, sample.outputval, sample.demandval, sample.storval));
+            }
+
+            return new EnergyView(energy.Load, energy.Output, energy.TotalOutputMax, energy.Demand, stored, storeMax)
+            {
+                Histogram = histogram,
+            };
+        }
+
         private static NewtonMoveView ToNewtonMoveView(Pulsar4X.Movement.NewtonMoveDB n, Entity entity)
         {
             double thrust = entity.TryGetDataBlob<Pulsar4X.Movement.NewtonThrustAbilityDB>(out var thrustAbility)
@@ -300,7 +326,13 @@ namespace Pulsar4X.Engine.Api
             if (started && j.PointsRequired > 0)
                 percent = (1.0 - (double)j.SurveyPointsRemaining[factionId] / j.PointsRequired) * 100;
 
-            return new GravSurveyView(j.IsSurveyComplete(factionId), started, percent);
+            bool complete = j.IsSurveyComplete(factionId);
+            return new GravSurveyView(complete, started, percent)
+            {
+                JumpPointToSystemId = complete && j.JumpPointTo != null && !string.IsNullOrEmpty(j.SystemToGuid)
+                    ? j.SystemToGuid
+                    : null,
+            };
         }
 
         private static MineralDepositsView? ToMineralDepositsView(MineralsDB minerals, Entity body, int factionId)

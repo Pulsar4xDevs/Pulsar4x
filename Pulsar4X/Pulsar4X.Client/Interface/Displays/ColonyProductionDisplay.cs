@@ -7,7 +7,7 @@ using Pulsar4X.Engine;
 namespace Pulsar4X.Client
 {
     /// <summary>
-    /// Snapshot-based production-lines UI (the API-layer port of <see cref="IndustryDisplay"/>):
+    /// Snapshot-based production-lines UI (the API-layer port of the old engine-backed IndustryDisplay):
     /// renders an entity's <see cref="IndustryView"/> and submits industry commands.
     /// </summary>
     public sealed class ColonyProductionDisplay

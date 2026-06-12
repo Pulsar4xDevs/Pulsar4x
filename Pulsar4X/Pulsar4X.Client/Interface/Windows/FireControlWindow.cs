@@ -36,7 +36,7 @@ namespace Pulsar4X.Client
                 thisitem = (FireControl)_uiState.LoadedWindows[typeof(FireControl)];
             }
             if (orderEntity.StarSystemId != null)
-                thisitem.SetEntity(orderEntity.Entity.Id, orderEntity.StarSystemId);
+                thisitem.SetEntity(orderEntity.Id, orderEntity.StarSystemId);
 
             return thisitem;
         }

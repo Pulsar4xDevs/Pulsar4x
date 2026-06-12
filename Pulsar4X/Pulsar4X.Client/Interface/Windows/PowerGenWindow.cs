@@ -1,143 +1,112 @@
-using System;
 using ImGuiNET;
+using Pulsar4X.Api;
 using Pulsar4X.Client.Interface.Widgets;
 using Vector2 = System.Numerics.Vector2;
-using Pulsar4X.Energy;
 
 namespace Pulsar4X.Client
 {
     public class PowerGenWindow : PulsarGuiWindow
     {
-        private EntityState _entityState;
+        private int _entityId = -1;
+        private string? _systemId;
         Vector2 _plotSize = new Vector2(512, 64);
-        private EnergyGenAbilityDB? _energyGenDB;
-
 
         internal static PowerGenWindow GetInstance()
         {
             PowerGenWindow instance;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(PowerGenWindow)) && _uiState.LastClickedEntity != null)
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(PowerGenWindow)))
             {
-                instance = new PowerGenWindow(_uiState.LastClickedEntity);
+                instance = new PowerGenWindow();
             }
             else
             {
                 instance = (PowerGenWindow)_uiState.LoadedWindows[typeof(PowerGenWindow)];
             }
 
-            if(_uiState.LastClickedEntity != null && instance._entityState != _uiState.LastClickedEntity)
-                instance.SetEntity(_uiState.LastClickedEntity);
+            if (_uiState.LastClickedEntity is { } clicked && clicked.StarSystemId != null)
+                instance.SetEntity(clicked.Id, clicked.StarSystemId);
 
             return instance;
         }
 
-        private PowerGenWindow(EntityState entity)
+        private PowerGenWindow()
         {
-            _entityState = entity;
         }
 
-        public void SetEntity(EntityState entityState)
+        public void SetEntity(int entityId, string systemId)
         {
-            if (entityState.HasDataBlob(typeof(EnergyGenAbilityDB)))//If the entity has power data
-            {
-                _entityState = entityState;//Store it as the entity being show
-                _energyGenDB = (EnergyGenAbilityDB)entityState.GetDataBlob(typeof(EnergyGenAbilityDB));//Store it's power value
-                CanActive = true;//And note if that it can be displayed
-            }
-            else
-            {
-                //CanActive = false;
-                //_entityState = null;
-            }
+            _entityId = entityId;
+            _systemId = systemId;
         }
-
-        public override void OnSystemTickChange(DateTime newDateTime)
-        {
-            //if we are looking at this, then we should process it even if nothing has changed.
-            if (IsActive && CanActive)
-            {
-                if (_energyGenDB != null && _energyGenDB.dateTimeLastProcess != newDateTime)
-                    EnergyGenProcessor.EnergyGen(_entityState.Entity, newDateTime);
-            }
-        }
-
 
         internal override void Display()
         {
-            if(_uiState.LastClickedEntity != null && _entityState != _uiState.LastClickedEntity)//If the selected entity has changed
-                SetEntity(_uiState.LastClickedEntity);
-
-            if(!IsActive || !CanActive || _energyGenDB == null)
+            if (!IsActive || _systemId == null)
                 return;
 
-            //If the player has activated the menu and there is a body that can be displayed show the menu
-            if (Window.Begin("Power Display " + _entityState.Name, ref IsActive, _flags))
+            var entity = _uiState.GameClient?.Galaxy.GetSystem(_systemId)?.GetEntity(_entityId);
+            var energy = entity?.GetView<EnergyView>();
+            if (entity == null || energy == null)
+            {
+                IsActive = false;
+                return;
+            }
+
+            string entityName = entity.GetView<NameView>()?.Name ?? "Unknown";
+            if (Window.Begin("Power Display " + entityName, ref IsActive, _flags))
             {
                 ImGui.Text("Current Load: ");
                 ImGui.SameLine();
-                ImGui.Text(_energyGenDB.Load.ToString());
+                ImGui.Text(energy.Load.ToString());
 
                 ImGui.Text("Current Output: ");
                 ImGui.SameLine();
-
-                ImGui.Text(_energyGenDB.Output.ToString() + " / " + _energyGenDB.TotalOutputMax);
+                ImGui.Text(energy.Output.ToString() + " / " + energy.MaxOutput);
 
                 ImGui.Text("Current Demand: ");
                 ImGui.SameLine();
-                ImGui.Text(_energyGenDB.Demand.ToString());
+                ImGui.Text(energy.Demand.ToString());
 
                 ImGui.Text("Stored: ");
                 ImGui.SameLine();
-                string stor = _energyGenDB.EnergyStored[_energyGenDB.EnergyType.UniqueID].ToString();
-                string max = _energyGenDB.EnergyStoreMax[_energyGenDB.EnergyType.UniqueID].ToString();
-                ImGui.Text(stor + " / " + max);
+                ImGui.Text(energy.Stored + " / " + energy.StoreMax);
 
-                //
-
-                //ImGui.PlotLines()
-                var colour1 = ImGui.GetColorU32(ImGuiCol.Text);
-                var colour2 = ImGui.GetColorU32(ImGuiCol.PlotLines);
-                var colour3 = ImGui.GetColorU32(ImGuiCol.Button);
-                ImDrawListPtr draw_list = ImGui.GetWindowDrawList();
-
-                var plotPos = ImGui.GetCursorScreenPos();
-                ImGui.InvisibleButton("PowerPlot", _plotSize);
-
-                var hg = _energyGenDB.Histogram;
-                int hgFirstIdx = _energyGenDB.HistogramIndex;
-                int hgLastIdx = hgFirstIdx == 0 ? hg.Count - 1 : hgFirstIdx - 1;
-                var hgFirstObj = hg[hgFirstIdx];
-                var hgLastObj = hg[hgLastIdx];
-
-                float xstep = _plotSize.X / hgLastObj.seconds ;
-                float ystep = (float)(_plotSize.Y / _energyGenDB.EnergyStoreMax[_energyGenDB.EnergyType.UniqueID]);
-                float posX = 0;
-                float posYBase = plotPos.Y + _plotSize.Y;
-                int index = _energyGenDB.HistogramIndex;
-                var thisData = _energyGenDB.Histogram[index];
-                float posYO = ystep * (float)thisData.outputval;
-                float posYD = ystep * (float)thisData.demandval;
-                float posYS = ystep * (float)thisData.storval;
-                //float ypos = plotPos.Y + _plotSize.Y;
-
-                for (int i = 0; i < _energyGenDB.HistogramSize; i++)
+                var histogram = energy.Histogram;
+                if (histogram.Count > 1 && energy.StoreMax > 0)
                 {
-                    int idx = index + i;
-                    if (idx >= _energyGenDB.HistogramSize)
-                        idx -= _energyGenDB.HistogramSize;
-                    thisData = _energyGenDB.Histogram[idx];
+                    var colour1 = ImGui.GetColorU32(ImGuiCol.Text);
+                    var colour2 = ImGui.GetColorU32(ImGuiCol.PlotLines);
+                    var colour3 = ImGui.GetColorU32(ImGuiCol.Button);
+                    ImDrawListPtr draw_list = ImGui.GetWindowDrawList();
 
-                    float nextX = xstep * thisData.seconds;
-                    float nextYO = ystep * (float)thisData.outputval;
-                    float nextYD = ystep * (float)thisData.demandval;
-                    float nextYS = ystep * (float)thisData.storval;
-                    draw_list.AddLine(new Vector2(plotPos.X + posX, posYBase - posYO), new Vector2(plotPos.X + nextX, posYBase - nextYO), colour1);
-                    draw_list.AddLine(new Vector2(plotPos.X + posX, posYBase - posYD), new Vector2(plotPos.X + nextX, posYBase - nextYD), colour2);
-                    draw_list.AddLine(new Vector2(plotPos.X + posX, posYBase - posYS), new Vector2(plotPos.X + nextX, posYBase - nextYS), colour3);
-                    posX = nextX;
-                    posYO = nextYO;
-                    posYD = nextYD;
-                    posYS = nextYS;
+                    var plotPos = ImGui.GetCursorScreenPos();
+                    ImGui.InvisibleButton("PowerPlot", _plotSize);
+
+                    float xstep = _plotSize.X / histogram[histogram.Count - 1].Seconds;
+                    float ystep = (float)(_plotSize.Y / energy.StoreMax);
+                    float posYBase = plotPos.Y + _plotSize.Y;
+
+                    var first = histogram[0];
+                    float posX = 0;
+                    float posYO = ystep * (float)first.Output;
+                    float posYD = ystep * (float)first.Demand;
+                    float posYS = ystep * (float)first.Stored;
+
+                    for (int i = 1; i < histogram.Count; i++)
+                    {
+                        var sample = histogram[i];
+                        float nextX = xstep * sample.Seconds;
+                        float nextYO = ystep * (float)sample.Output;
+                        float nextYD = ystep * (float)sample.Demand;
+                        float nextYS = ystep * (float)sample.Stored;
+                        draw_list.AddLine(new Vector2(plotPos.X + posX, posYBase - posYO), new Vector2(plotPos.X + nextX, posYBase - nextYO), colour1);
+                        draw_list.AddLine(new Vector2(plotPos.X + posX, posYBase - posYD), new Vector2(plotPos.X + nextX, posYBase - nextYD), colour2);
+                        draw_list.AddLine(new Vector2(plotPos.X + posX, posYBase - posYS), new Vector2(plotPos.X + nextX, posYBase - nextYS), colour3);
+                        posX = nextX;
+                        posYO = nextYO;
+                        posYD = nextYD;
+                        posYS = nextYS;
+                    }
                 }
                 Window.End();
             }

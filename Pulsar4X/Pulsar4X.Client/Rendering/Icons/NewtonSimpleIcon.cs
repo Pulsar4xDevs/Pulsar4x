@@ -67,24 +67,6 @@ namespace Pulsar4X.Client
         {
         }
 
-        public NewtonSimpleIcon(EntityState entityState, NewtonSimpleMoveDB newtonSimpleMoveDB, List<List<UserOrbitSettings>> settings) : base(MoveMath.GetSOIParentPositionDB(entityState.Entity))
-        {
-            entityState.OrbitIcon = this;
-            BodyType = entityState.BodyType;
-            TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
-            //_mgr = entityState.Entity.Manager;
-            _newtonMoveDB = newtonSimpleMoveDB;
-            _parentPosDB = _newtonMoveDB.SOIParent.GetDataBlob<PositionDB>();
-            _positionDB = _parentPosDB;
-            _myPosDB = entityState.Entity.GetDataBlob<PositionDB>();
-            _userOrbitSettingsMtx = settings;
-            _sgp = OrbitMath.SGP(_newtonMoveDB.SOIParent, entityState.Entity);
-            _soiRadiusM = _newtonMoveDB.SOIParent.GetSOI_m();
-            _stateTime = entityState.Entity.StarSysDateTime;
-            _ke = _newtonMoveDB.CurrentTrajectory;
-            UpdateUserSettings();
-            OnPhysicsUpdate();
-        }
 
         /// <summary>Snapshot constructor: trajectory from the view's elements, positions read
         /// through the replicated galaxy; the map rebuilds the icon when the snapshot changes.</summary>

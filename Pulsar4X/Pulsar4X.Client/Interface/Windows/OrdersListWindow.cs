@@ -21,11 +21,11 @@ namespace Pulsar4X.Client
 
         internal static OrdersListWindow GetInstance(EntityState entity, GlobalUIState state)
         {
-            string name = "OrdersList|" + entity.Entity.Id.ToString();
+            string name = "OrdersList|" + entity.Id.ToString();
             OrdersListWindow thisItem;
             if (!_uiState.LoadedNonUniqueWindows.ContainsKey(name))
             {
-                thisItem = new OrdersListWindow(entity.Entity.Id, entity.StarSystemId!, state);
+                thisItem = new OrdersListWindow(entity.Id, entity.StarSystemId!, state);
                 thisItem.StartDisplay();
             }
             else

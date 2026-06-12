@@ -11,21 +11,6 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
 {
     private readonly double _parentSoiRadiusM;
 
-    internal OrbitHyperbolicIcon2(EntityState entityState, List<List<UserOrbitSettings>> settings): base(entityState, settings)
-    {
-
-        TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
-
-        if(_orbitDB!.ParentDB == null)
-            throw new NullReferenceException();
-        _parentSoiRadiusM = OrbitMath.GetSOIRadius((OrbitDB)_orbitDB.ParentDB);
-
-        UpdateUserSettings();
-        CreatePointArray();
-        OnPhysicsUpdate();
-
-    }
-
     internal OrbitHyperbolicIcon2(Pulsar4X.Api.OrbitView orbit, Pulsar4X.Interfaces.IPosition bodyPosition,
         Pulsar4X.Interfaces.IPosition parentPosition, UserOrbitSettings.OrbitBodyType bodyType,
         List<List<UserOrbitSettings>> settings)

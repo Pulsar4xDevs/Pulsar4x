@@ -1,15 +1,6 @@
-﻿using System;
+using System;
 using ImGuiNET;
-using Pulsar4X.Engine;
-using Pulsar4X.Datablobs;
-using Pulsar4X.Colonies;
-using Pulsar4X.Energy;
-using Pulsar4X.Factions;
-using Pulsar4X.JumpPoints;
-using Pulsar4X.Storage;
-using Pulsar4X.Weapons;
-using Pulsar4X.Movement;
-
+using Pulsar4X.Api;
 
 namespace Pulsar4X.Client
 {
@@ -40,121 +31,52 @@ namespace Pulsar4X.Client
         }
     }
 
-    public class JumpThroughJumpPointBlankMenuHelper : PulsarGuiWindow
-    {
-        internal override void Display()
-        {
-
-        }
-    }
-
     //has all initialization rutines for common entity management related UI windows, also has a function that checks if a window can be opened for a given EntityState
     public class EntityUIWindows
     {
+        /// <summary>The clicked entity's faction-scoped snapshot. The views the server projected
+        /// for this faction gate which actions make sense (and visibility/ownership rules are
+        /// thereby enforced at the boundary, not here).</summary>
+        private static EntitySnapshot? Resolve(EntityState entityState, GlobalUIState state)
+            => entityState.StarSystemId is { } systemId
+                ? state.GameClient?.Galaxy.GetSystem(systemId)?.GetEntity(entityState.Id)
+                : null;
+
         //checks if given menu can be opened for given entity
-        [PublicAPI]
-        internal static bool CheckIfCanOpenWindow(Type T, EntityState _entityState, GlobalUIState _state)
+        internal static bool CheckIfCanOpenWindow(Type T, EntityState entityState, GlobalUIState state)
         {
-            if (T != typeof(JumpThroughJumpPointBlankMenuHelper))
+            // Always-available actions that don't read the entity.
+            if (T == typeof(PinCameraBlankMenuHelper) || T == typeof(SelectPrimaryBlankMenuHelper)
+                || T == typeof(RenameWindow))
             {
+                return true;
+            }
+
+            var snapshot = Resolve(entityState, state);
+            if (snapshot == null)
                 return false;
-            }
 
-            if (!CheckIfCanOpenWindow(typeof(GotoSystemBlankMenuHelper), _entityState, _state))
-            {
-                return false;
-            }
+            if (T == typeof(PowerGenWindow))
+                return snapshot.HasView<EnergyView>();
+            if (T == typeof(GotoSystemBlankMenuHelper))
+                return snapshot.GetView<GravSurveyView>()?.JumpPointToSystemId != null;
+            if (T == typeof(WarpOrderWindow))
+                return snapshot.HasView<WarpAbilityView>();
+            if (T == typeof(ChangeCurrentOrbitWindow) || T == typeof(NavWindow))
+                return snapshot.HasView<ThrustView>();
+            if (T == typeof(FireControl))
+                return snapshot.HasView<FireControlView>();
+            if (T == typeof(CreateTransferWindow))
+                return snapshot.HasView<CargoStorageView>();
+            if (T == typeof(OrdersListWindow))
+                return snapshot.HasView<OrdersView>();
 
-            var primaryEntity = _state.PrimaryEntity;
-            if (primaryEntity == null || primaryEntity.Position == null || _entityState.Position == null)
-            {
-                return false;
-            }
-
-            if (primaryEntity.BodyType != UserOrbitSettings.OrbitBodyType.Ship)
-            {
-                return false;
-            }
-
-            var distance = Orbital.Distance.DistanceBetween(primaryEntity.Position.AbsolutePosition, _entityState.Position.AbsolutePosition);
-            var minDistance = _entityState.Entity.GetDataBlob<JPSurveyableDB>().MinimumDistanceToJump_m;
-
-            return distance < minDistance;
-        }
-
-        internal static bool CheckIfCanOpenWindow(Type T, EntityState _entityState)
-        {
-            //Checks if the power gen menu can be opened
-            if (_entityState.Entity.HasDataBlob<EnergyGenAbilityDB>() && T == typeof(PowerGenWindow))
-            {
-                return true;
-            }
-            //Check if the pin menu can be opened
-            else if (T == typeof(PinCameraBlankMenuHelper))
-            {
-                return true;
-            }
-            //if can be used to go to another system
-            else if (_entityState.Entity.HasDataBlob<JPSurveyableDB>() && T == typeof(GotoSystemBlankMenuHelper))
-            {
-                if (_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo != null)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            //if can be selected as primary
-            else if (T == typeof(SelectPrimaryBlankMenuHelper))
-            {
-                return true;
-            }
-            //if entity can warp
-            else if (_entityState.Entity.HasDataBlob<WarpAbilityDB>() && T == typeof(WarpOrderWindow))
-            {
-                return true;
-            }
-            //if entity can move
-            else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(ChangeCurrentOrbitWindow))
-            {
-                return true;
-            }
-            else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(NavWindow))
-            {
-                return true;
-            }
-            //if entity can fire?
-            else if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>() && T == typeof(FireControl))
-            {
-                return true;
-            }
-            //if entity can be renamed?
-            else if (T == typeof(RenameWindow))
-            {
-                return true;
-            }
-            //if entity can target
-            else if (_entityState.Entity.HasDataBlob<CargoStorageDB>() && T == typeof(CreateTransferWindow))
-            {
-                return true;
-            }
-            // if entity can be given orders
-            else if (_entityState.Entity.HasDataBlob<OrderableDB>() && T == typeof(OrdersListWindow))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return false;
         }
 
         // use type PinCameraBlankMenuHelper to pin camara, should use checkIfCanOpenWindow with type before trying to open a given window
         //type parameter is the type of window opened, first parameter indicates wether the window should be opened, second parameter is EntityState for the entity using the window
         //(or window using the entity?) third is the GlobalUIState and fourth indicates wether this function should manage closing preopened pop-ups(mostly utility for EntityContextMenu class[should be set to true when this is used in it])
-        [PublicAPI]
         internal static void OpenUIWindow(Type T, EntityState _entityState , GlobalUIState _state , bool open = true, bool managesUIPopUps = false)
         {
             if (open)
@@ -164,7 +86,7 @@ namespace Pulsar4X.Client
                 if (T == typeof(PinCameraBlankMenuHelper))
                 {
                     if (_entityState.StarSystemId != null)
-                        _state.Camera.PinToEntity(_entityState.Entity.Id, _entityState.StarSystemId, _state);
+                        _state.Camera.PinToEntity(_entityState.Id, _entityState.StarSystemId, _state);
                     if (managesUIPopUps)
                     {
                         ImGui.CloseCurrentPopup();
@@ -173,13 +95,13 @@ namespace Pulsar4X.Client
                 //Menu is goto system menu
                 else if (T == typeof(GotoSystemBlankMenuHelper))
                 {
-                    var jumpPointTo = _entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo;
-                    if(jumpPointTo != null)
-                        _state.SetActiveSystem(jumpPointTo.Manager.ManagerID);
+                    var destination = Resolve(_entityState, _state)?.GetView<GravSurveyView>()?.JumpPointToSystemId;
+                    if (destination != null)
+                        _state.SetActiveSystem(destination);
                 }
                 else if (T == typeof(SelectPrimaryBlankMenuHelper) && _entityState.StarSystemId != null)
                 {
-                    _state.EntitySelectedAsPrimary(_entityState.Entity.Id, _entityState.StarSystemId);
+                    _state.EntitySelectedAsPrimary(_entityState.Id, _entityState.StarSystemId);
                 }
                 //if entity can warp
                 else if (T == typeof(WarpOrderWindow))
@@ -197,7 +119,6 @@ namespace Pulsar4X.Client
                 else if (T == typeof(FireControl))
                 {
                     var instance = FireControl.GetInstance(_entityState);
-                    //instance.SetOrderEntity(_entityState);
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
@@ -205,7 +126,7 @@ namespace Pulsar4X.Client
                 else if (T == typeof(RenameWindow))
                 {
                     var renameWindow = RenameWindow.GetInstance();
-                    renameWindow.SetTarget(_entityState.Entity.Id, _entityState.Name);
+                    renameWindow.SetTarget(_entityState.Id, _entityState.Name);
                     _state.ActiveWindow = renameWindow;
                     if (managesUIPopUps)
                     {
@@ -217,7 +138,13 @@ namespace Pulsar4X.Client
                 else if (T == typeof(CreateTransferWindow) && _entityState.StarSystemId != null)
                 {
                     var instance = CreateTransferWindow.GetInstance();
-                    instance.SetLeft(_entityState.Entity.Id, _entityState.StarSystemId);
+                    instance.SetLeft(_entityState.Id, _entityState.StarSystemId);
+                    instance.ToggleActive();
+                    _state.ActiveWindow = instance;
+                }
+                else if (T == typeof(PowerGenWindow))
+                {
+                    var instance = PowerGenWindow.GetInstance();
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
@@ -232,12 +159,6 @@ namespace Pulsar4X.Client
                     var instance = OrdersListWindow.GetInstance(_entityState, _state);
                     instance.ToggleActive();
                 }
-
-                //TODO: implement this(moving a ship entity[_uiState.PrimaryEntity] from one system to another one and placing it at a given location[_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>(). etc...])
-                if (T == typeof(JumpThroughJumpPointBlankMenuHelper))
-                {
-
-                }
             }
         }
 
@@ -250,9 +171,9 @@ namespace Pulsar4X.Client
             if (T == typeof(WarpOrderWindow)) returnval = WarpOrderWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(ChangeCurrentOrbitWindow)) returnval = ChangeCurrentOrbitWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(FireControl)) returnval = FireControl.GetInstance(_entityState).GetActive();
-            //else if (T == typeof(RenameWindow)) returnval = RenameWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(NavWindow)) returnval = NavWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(CreateTransferWindow)) returnval = CreateTransferWindow.GetInstance().GetActive();
+            else if (T == typeof(PowerGenWindow)) returnval = PowerGenWindow.GetInstance().GetActive();
             // Instance Windows
             else if (T == typeof(OrdersListWindow)) returnval = OrdersListWindow.GetInstance(_entityState, _state).GetActive();
             else returnval = false;

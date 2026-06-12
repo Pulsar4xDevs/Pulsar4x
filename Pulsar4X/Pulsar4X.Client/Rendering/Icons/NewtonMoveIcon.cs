@@ -69,30 +69,6 @@ namespace Pulsar4X.Client
         {
         }
 
-        public NewtonMoveIcon(EntityState entityState, NewtonMoveDB newtonMoveDB, List<List<UserOrbitSettings>> settings) : base(newtonMoveDB.SOIParent.GetDataBlob<PositionDB>())
-        {
-            entityState.OrbitIcon = this;
-            BodyType = entityState.BodyType;
-            TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
-            //_mgr = entityState.Entity.Manager;
-            _newtonMoveDB = newtonMoveDB;
-            _parentPosDB = _newtonMoveDB.SOIParent.GetDataBlob<PositionDB>();
-            _positionDB = _parentPosDB;
-            _myPosDB = entityState.Entity.GetDataBlob<PositionDB>();
-            _userOrbitSettingsMtx = settings;
-            var parentMass = entityState.Entity.GetDataBlob<NewtonMoveDB>().ParentMass;
-            var myMass = entityState.Entity.GetDataBlob<MassVolumeDB>().MassDry;
-            var _sgp1 = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
-
-            _sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
-            _soiParent = _newtonMoveDB.SOIParent;
-            _soiRadiusM = _newtonMoveDB.SOIParent.GetSOI_m();
-            _currentVector_ms = _newtonMoveDB.CurrentVector_ms;
-            _ke = _newtonMoveDB.GetElements();
-
-            UpdateUserSettings();
-            OnPhysicsUpdate();
-        }
 
         /// <summary>Snapshot constructor: trajectory from the NewtonMoveView's elements, positions
         /// read through the replicated galaxy. The map rebuilds this icon when the entity's

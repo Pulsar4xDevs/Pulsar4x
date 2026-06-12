@@ -184,6 +184,11 @@ namespace Pulsar4X.Engine.Api
                 foreach (var beam in system.GetAllEntitiesWithDataBlob<Pulsar4X.Weapons.BeamInfoDB>())
                     if (beam.FactionOwnerID == sub.FactionId)
                         PushEntityRefresh(beam, sub.FactionId);
+                // Energy generation/storage evolves through engine-scheduled interrupts with no
+                // message; re-push so the power display's plot stays current.
+                foreach (var generator in system.GetAllEntitiesWithDataBlob<Pulsar4X.Energy.EnergyGenAbilityDB>())
+                    if (generator.FactionOwnerID == sub.FactionId)
+                        PushEntityRefresh(generator, sub.FactionId);
             }
         }
 

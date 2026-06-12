@@ -20,10 +20,6 @@ namespace Pulsar4X.Client
         private static int _textureHeight = 12;
         private static bool _textureInitialized = false;
 
-        OrbitDB? _orbitDB;
-        NewtonMoveDB? _newtonMoveDB;
-        float _lop;
-        Entity? _entity;
 
         /// <summary>
         /// Initialize the ship icon texture. Call this once during startup.
@@ -56,28 +52,6 @@ namespace Pulsar4X.Client
                 Console.WriteLine($"Ship icon texture not found: {path}");
             }
         }
-        public ShipIcon(EntityState entity, ShipInfoDB shipInfoDB, PositionDB positionDB) : base(positionDB)
-        {
-            _entity = entity.Entity;
-            if (entity.TryGetDataBlob<OrbitDB>(out _orbitDB))
-            {
-                var i = _orbitDB.Inclination;
-                var aop = _orbitDB.ArgumentOfPeriapsis;
-                var loan = _orbitDB.LongitudeOfAscendingNode;
-                _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
-            }
-            else if(entity.TryGetDataBlob<NewtonMoveDB>(out _newtonMoveDB))
-            {
-            }
-
-            Func<Message, bool> filterById = msg => msg.EntityId != null && msg.EntityId == entity.Id;
-
-            MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, OnDBAdded, filterById);
-            MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, OnDBRemoved, filterById);
-
-            BasicShape();
-            OnPhysicsUpdate();
-        }
 
         public ShipIcon(PositionDB position) : base(position)
         {
@@ -95,39 +69,7 @@ namespace Pulsar4X.Client
             BasicShape();
         }
 
-        async Task OnDBAdded(Message message)
-        {
-            await Task.Run(() =>
-            {
-                if (message.DataBlob is OrbitDB)
-                {
-                    _orbitDB = (OrbitDB)message.DataBlob;
-                    var i = _orbitDB.Inclination;
-                    var aop = _orbitDB.ArgumentOfPeriapsis;
-                    var loan = _orbitDB.LongitudeOfAscendingNode;
-                    _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
-                }
-                else if (message.DataBlob is NewtonMoveDB)
-                {
-                    _newtonMoveDB = (NewtonMoveDB)message.DataBlob;
-                    //NewtonVectors();
-                }
-            });
-        }
 
-        async Task OnDBRemoved(Message message)
-        {
-            await Task.Run(() =>
-            {
-                if (message.DataBlob is OrbitDB)
-                    _orbitDB = null;
-                else if (message.DataBlob is NewtonMoveDB)
-                {
-                    _newtonMoveDB = null;
-                    //Shapes.RemoveAt(Shapes.Count-1);
-                }
-            });
-        }
 
         void BasicShape()
         {
@@ -290,13 +232,6 @@ namespace Pulsar4X.Client
 
         public override void OnPhysicsUpdate()
         {
-            if(_entity is null || !_entity.IsValid) return;
-
-            // FIXME: remove call to engine
-            var headingVector = MoveMath.GetRelativeState(_entity).Velocity;
-            var heading = Angle.NormaliseRadians(Math.Atan2(headingVector.Y, headingVector.X));
-            var deg = Angle.ToDegrees(heading);
-            Heading = (float)heading;
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -364,35 +299,7 @@ namespace Pulsar4X.Client
 
     public class ProjectileIcon : Icon
     {
-        OrbitDB? _orbitDB;
-        float _lop;
-        EntityState? _entity;
         private Shape _flame;
-        public ProjectileIcon(EntityState entity, PositionDB positionDB) : base(positionDB)
-        {
-            _entity = entity;
-            BasicShape();
-            NewtonFlame();
-
-            if (entity.TryGetDataBlob<OrbitDB>(out _orbitDB))
-            {
-                var i = _orbitDB.Inclination;
-                var aop = _orbitDB.ArgumentOfPeriapsis;
-                var loan = _orbitDB.LongitudeOfAscendingNode;
-                _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
-            }
-            else if(entity.HasDataBlob<NewtonMoveDB>())
-            {
-                Shapes.Add(_flame);
-            }
-
-            Func<Message, bool> filterById = msg => msg.EntityId != null && msg.EntityId.Value == entity.Id;
-
-            MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, DBAdded, filterById);
-            MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, DBRemoved, filterById);
-
-            OnPhysicsUpdate();
-        }
 
         public ProjectileIcon(Vector3 position_m) : base(position_m)
         {
@@ -407,39 +314,7 @@ namespace Pulsar4X.Client
                 Shapes.Add(_flame);
         }
 
-        async Task DBAdded(Message message)
-        {
-            await Task.Run(() =>
-            {
-                if (message.DataBlob is OrbitDB)
-                {
-                    _orbitDB = (OrbitDB)message.DataBlob;
-                    var i = _orbitDB.Inclination;
-                    var aop = _orbitDB.ArgumentOfPeriapsis;
-                    var loan = _orbitDB.LongitudeOfAscendingNode;
-                    _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
-                }
-                else if (message.DataBlob is NewtonMoveDB)
-                {
-                    if(!Shapes.Contains(_flame))
-                        Shapes.Add(_flame);
-                }
-            });
-        }
 
-        async Task DBRemoved(Message message)
-        {
-            await Task.Run(() =>
-            {
-                if (message.DataBlob is OrbitDB)
-                    _orbitDB = null;
-                if (message.DataBlob is NewtonMoveDB)
-                {
-                    if (Shapes.Contains(_flame))
-                        Shapes.Remove(_flame);
-                }
-            });
-        }
 
         void BasicShape()
         {
@@ -479,12 +354,6 @@ namespace Pulsar4X.Client
 
         public override void OnPhysicsUpdate()
         {
-            if(_entity is null) return;
-
-            // FIXME: remove call to engine
-            // var headingVector = _entity.GetRelativeState().Velocity;//_orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
-            // var heading = Math.Atan2(headingVector.Y, headingVector.X);
-            // Heading = (float)heading;
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)

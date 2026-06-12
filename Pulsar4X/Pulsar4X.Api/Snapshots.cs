@@ -236,6 +236,23 @@ public sealed record ThrustView(
 
 public sealed record WarpAbilityView(double MaxSpeedMps) : IComponentView;
 
+/// <summary>Power generation/storage state (owner-only): the current load/output/demand and
+/// stored energy, plus a short chronological history for plotting.</summary>
+public sealed record EnergyView(
+    double Load,
+    double Output,
+    double MaxOutput,
+    double Demand,
+    double Stored,
+    double StoreMax) : IComponentView
+{
+    public IReadOnlyList<EnergyHistogramPoint> Histogram { get; init; } = Array.Empty<EnergyHistogramPoint>();
+}
+
+/// <summary>One sample of the energy history; <see cref="Seconds"/> is relative to the start of
+/// the sampling window.</summary>
+public sealed record EnergyHistogramPoint(int Seconds, double Output, double Demand, double Stored);
+
 /// <summary>Present while the entity is mid-warp; carries the current warp speed.</summary>
 public sealed record WarpMovingView(double SpeedMps) : IComponentView
 {
@@ -283,7 +300,12 @@ public sealed record GravSurveyView(
     bool IsSurveyComplete,
     bool HasSurveyStarted = false,
     /// <summary>0–100, only meaningful once the survey has started.</summary>
-    double PercentComplete = 0) : IComponentView;
+    double PercentComplete = 0) : IComponentView
+{
+    /// <summary>The system the location's jump point leads to; null until the faction has
+    /// completed the survey (revealing the destination is the survey's reward).</summary>
+    public string? JumpPointToSystemId { get; init; }
+}
 
 /// <summary>Marks an entity as a usable jump point. Only projected once the requesting faction has
 /// discovered it, so visibility is enforced at the boundary.</summary>

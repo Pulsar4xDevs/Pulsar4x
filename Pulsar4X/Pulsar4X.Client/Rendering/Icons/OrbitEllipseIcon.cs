@@ -27,17 +27,6 @@ namespace Pulsar4X.Client
     /// </summary>
     public class OrbitEllipseIcon : OrbitIconBase
     {
-        internal OrbitEllipseIcon(EntityState entityState, List<List<UserOrbitSettings>> settings): base(entityState, settings)
-        {
-
-            TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Elliptical;
-
-
-            UpdateUserSettings();
-            CreatePointArray();
-            OnPhysicsUpdate();
-
-        }
 
         internal OrbitEllipseIcon(Pulsar4X.Api.OrbitView orbit, IPosition bodyPosition, IPosition parentPosition,
             UserOrbitSettings.OrbitBodyType bodyType, List<List<UserOrbitSettings>> settings)

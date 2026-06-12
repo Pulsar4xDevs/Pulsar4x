@@ -28,8 +28,6 @@ namespace Pulsar4X.Client
     public abstract class OrbitIconBase : Icon, IUpdateUserSettings, IKepler
     {
         #region Static properties
-        protected EntityManager? _mgr;
-        protected OrbitDB? _orbitDB;
         internal IPosition BodyPositionDB;
         protected double _loAN;
         protected double _aoPRad;
@@ -70,56 +68,6 @@ namespace Pulsar4X.Client
 
 
         #endregion
-        public OrbitIconBase(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetDataBlob<PositionDB>())
-        {
-            BodyType = entityState.BodyType;
-
-            entityState.OrbitIcon = this;
-            _mgr = entityState.Entity.Manager;
-            _userOrbitSettingsMtx = settings;
-            _orbitDB = entityState.Entity.GetDataBlob<OrbitDB>();
-            if (entityState.Entity.HasDataBlob<OrbitUpdateOftenDB>())
-                _orbitDB = entityState.Entity.GetDataBlob<OrbitUpdateOftenDB>();
-            BodyPositionDB = entityState.Position; //entityState.Entity.GetDataBlob<PositionDB>();
-            if (_orbitDB.Parent == null) //primary star
-            {
-                _positionDB = BodyPositionDB;
-            }
-            else
-            {
-                _positionDB = _orbitDB.Parent.GetDataBlob<PositionDB>(); //orbit's position is parent's body position.
-            }
-
-            SemiMaj = (float)_orbitDB.SemiMajorAxis;
-
-            SemiMinor = (float)EllipseMath.SemiMinorAxis(_orbitDB.SemiMajorAxis, _orbitDB.Eccentricity);
-
-
-            _eccentricity = (float)_orbitDB.Eccentricity;
-            _linearEccentricity = (float)(_eccentricity * _orbitDB.SemiMajorAxis); //linear ecentricity
-
-            var inclination = Angle.NormaliseRadiansPositive(_orbitDB.Inclination);
-            if (inclination > 0.5 * Math.PI && inclination < 1.5 * Math.PI)
-            {
-                IsRetrogradeOrbit = true;
-                //_loP_Degrees = (float)(_orbitDB.LongitudeOfAscendingNode - _orbitDB.ArgumentOfPeriapsis);
-            }
-            /*
-            else
-            {
-
-                _loP_Degrees = (float)(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis);
-            }
-            _loP_radians = (float)(Angle.ToRadians(_loP_Degrees));
-            */
-            _inclination = _orbitDB.Inclination;
-            _aoPRad = _orbitDB.ArgumentOfPeriapsis;
-            _loAN = _orbitDB.LongitudeOfAscendingNode;
-            var lop = OrbitMath.GetLongditudeOfPeriapsis(_inclination, _aoPRad, _loAN);
-            _loP_radians = (float)lop;
-            _loP_Degrees = (float)Angle.ToDegrees(lop);
-
-        }
 
         /// <summary>Snapshot constructor: the same icon built from OrbitView elements, with both
         /// positions read through the replicated galaxy.</summary>

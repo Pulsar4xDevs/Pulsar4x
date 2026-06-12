@@ -365,6 +365,25 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    maps them back to engine conditions/actions and the projector the other way. Like research and
    cancel-order, replacing the list raises no engine message, so the server re-pushes the fleet
    tree after an accepted set.
+   The **launcher/cleanup sweep** closed out the read-surface phase: the entity-action gating
+   (`EntityUIWindows` + the Actions panel + the context menu) now gates on snapshot views instead
+   of `HasDataBlob<>` checks — which also makes the buttons faction-scoped for free, since
+   owner-only views simply aren't projected for entities the faction doesn't own. `OrdersView` is
+   now projected even when the queue is empty (its presence marks the entity orderable), and
+   `GravSurveyView` gained `JumpPointToSystemId` (revealed on survey completion) so the
+   "Go to system" action works from the snapshot. The **PowerGenWindow** — which turned out to
+   have been unreachable (its open-dispatch branch was missing) — was ported onto a new owner-only
+   `EnergyView` (load/output/demand, stored energy, and the plot histogram unrolled from the
+   engine's ring buffer; energy entities re-push each clock advance since generation runs on
+   engine-scheduled interrupts with no message) and re-wired, also dropping the old window's habit
+   of running the energy processor client-side to animate its plot. Dead weight deleted: the
+   engine-backed `IndustryDisplay`/`ConstructionDisplay`/`IndustryPanel`/`PowerDBDisplay`/
+   `StarInfoDBDisplay`/`CargoListPanelSimple`/`SmallBodyEntityInfoWindow` (orphaned by earlier
+   ports — the files holding both engine and snapshot display extensions stay, snapshot halves in
+   use), the icons' engine-entity constructors and their `MessagePublisher` subscriptions
+   (`OrbitIconBase`/`OrbitEllipseIcon`/`OrbitHyperbolicIcon2`/`ShipIcon`/`ProjectileIcon`/
+   `NewtonMoveIcon`/`NewtonSimpleIcon`; `OrbitHypobolicIcon` deleted outright), and the
+   never-implemented jump-through-jump-point launcher path.
 5. **Events (done):** the `MessagePublisher` sync-state messages were bridged in phase 2; this
    phase bridged the `EventManager` game-log stream. A `LogEvent` is display-ready — the event
    type travels as its engine name (a string, so the 200-value engine enum isn't mirrored into
@@ -396,7 +415,8 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
   `GeoSurveyView`, `GravSurveyView`, `JumpPointView`, `CargoStorageView`, `ResearcherView`,
   `AtmosphereView`, `InfrastructureView`, `InstallationsView`, `ColonyMiningView`,
   `NavalAcademyView`, `IndustryView`, `ConstructionView`, `ColonizableView`, `MineralDepositsView`,
-  `FireControlView` (+ `FireControlSnapshot`, `WeaponSnapshot`, `OrdnanceStoreItem`)
+  `FireControlView` (+ `FireControlSnapshot`, `WeaponSnapshot`, `OrdnanceStoreItem`),
+  `EnergyView` (+ `EnergyHistogramPoint`)
   so far), `OwnerRelation`, `Vec3`, `ModifiedValue`/`ValueModifier`; fleet
   hierarchy: `FleetSnapshot`, `ShipSnapshot`, `OrderSnapshot`; research: `ResearchSnapshot`
   (`TechCategorySnapshot`, `TechSnapshot`, `CommanderSnapshot`/`CommanderKind`/`CommanderBonusSnapshot`

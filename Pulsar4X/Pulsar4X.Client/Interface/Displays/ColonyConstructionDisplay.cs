@@ -5,7 +5,7 @@ using Pulsar4X.Api;
 namespace Pulsar4X.Client
 {
     /// <summary>
-    /// Snapshot-based local-construction UI (the API-layer port of <see cref="ConstructionDisplay"/>):
+    /// Snapshot-based local-construction UI (the API-layer port of the old engine-backed ConstructionDisplay):
     /// renders an entity's <see cref="ConstructionView"/> and submits construction-queue commands.
     /// </summary>
     public sealed class ColonyConstructionDisplay
