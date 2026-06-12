@@ -968,7 +968,7 @@ namespace Pulsar4X.Client
                         ImGui.PopStyleColor();
                         ImGui.TableNextColumn();
 
-                        // Make NewtonThrustCommand orders clickable for editing
+                        // Make thrust-maneuver orders clickable for editing
                         if (orders[i].IsEditableManeuver)
                         {
                             ImGui.PushStyleColor(ImGuiCol.Header, Styles.InvisibleColor);
@@ -978,7 +978,7 @@ namespace Pulsar4X.Client
                                 new Vector4(_accentColor.X * 0.3f, _accentColor.Y * 0.3f, _accentColor.Z * 0.3f, 0.7f));
                             if (ImGui.Selectable(orders[i].Name + "##order" + i, false, ImGuiSelectableFlags.SpanAllColumns))
                             {
-                                OpenManeuverPanel(i);
+                                _uiState.OpenManeuverPanelForOrder(EntityId, SystemId, orders[i]);
                             }
                             ImGui.PopStyleColor(3);
                             if (ImGui.IsItemHovered())
@@ -1038,22 +1038,6 @@ namespace Pulsar4X.Client
                     ImGui.PopStyleColor(2);
                 }
                 ImGui.Unindent();
-            }
-        }
-
-        /// <summary>Deferred: the maneuver panel still edits live engine orders, so resolve the engine
-        /// entity and the matching NewtonThrustCommand from the order's queue position.</summary>
-        private void OpenManeuverPanel(int orderIndex)
-        {
-            if (_uiState.Game == null
-                || !_uiState.Game.GlobalManager.TryGetGlobalEntityById(EntityId, out var entity)
-                || !entity.TryGetDataBlob<OrderableDB>(out var orderableDB))
-                return;
-
-            var actions = orderableDB.ActionList.ToArray();
-            if (orderIndex < actions.Length && actions[orderIndex] is NewtonThrustCommand thrustCmd && !thrustCmd.IsRunning)
-            {
-                _uiState.OpenManeuverPanelForOrder(entity, thrustCmd);
             }
         }
 

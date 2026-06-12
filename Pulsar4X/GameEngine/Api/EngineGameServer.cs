@@ -65,7 +65,11 @@ namespace Pulsar4X.Engine.Api
                 ? requested
                 : _game.Factions.Keys.FirstOrDefault(id => id != _game.GameMasterFaction.Id, _game.Factions.Keys.First());
             var session = new PlayerSession(Guid.NewGuid(), factionId);
-            return ConnectResult.Ok(session, new GameInfo(_game.Name ?? "Pulsar4X", _game.LastSaveGitHash ?? ""));
+            return ConnectResult.Ok(session, new GameInfo(_game.Name ?? "Pulsar4X", _game.LastSaveGitHash ?? "")
+            {
+                StrictNewtonian = _game.Settings.StrictNewtonion,
+                UseRelativeVelocity = _game.Settings.UseRelativeVelocity,
+            });
         }
 
         public void Disconnect(PlayerSession session) { /* no per-session server state yet */ }

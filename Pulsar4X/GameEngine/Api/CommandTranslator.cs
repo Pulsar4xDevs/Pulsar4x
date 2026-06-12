@@ -8,6 +8,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
+using Pulsar4X.Galaxy;
 using Pulsar4X.GeoSurveys;
 using Pulsar4X.Industry;
 using Pulsar4X.Industry.Orders;
@@ -61,6 +62,9 @@ namespace Pulsar4X.Engine.Api
                 [typeof(SetShipDesignObsoleteCommand)] = TranslateSetShipDesignObsolete,
                 [typeof(TransferCargoCommand)] = TranslateTransferCargo,
                 [typeof(SetOrderPauseCommand)] = TranslateSetOrderPause,
+                [typeof(Pulsar4X.Api.CancelOrderCommand)] = TranslateCancelOrder,
+                [typeof(Pulsar4X.Api.NewtonThrustCommand)] = TranslateNewtonThrust,
+                [typeof(Pulsar4X.Api.WarpMoveCommand)] = TranslateWarpMove,
                 [typeof(SetFireControlWeaponsCommand)] = TranslateSetFireControlWeapons,
                 [typeof(SetFireControlTargetCommand)] = TranslateSetFireControlTarget,
                 [typeof(AssignOrdnanceCommand)] = TranslateAssignOrdnance,
@@ -318,6 +322,78 @@ namespace Pulsar4X.Engine.Api
 
             order.PauseOnAction = pause.Pause;
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        // Like SetOrderPause: removing a queued order has no engine order of its own (the pre-port
+        // maneuver UI removed it from the queue by reference), so the translator does it directly.
+        private CommandResult TranslateCancelOrder(Entity faction, Entity commanded, GameCommand command)
+        {
+            var cancel = (Pulsar4X.Api.CancelOrderCommand)command;
+            if (!commanded.TryGetDataBlob<OrderableDB>(out var orderable))
+                return CommandResult.Reject("The entity has no order queue.");
+
+            var order = orderable.ActionList.FirstOrDefault(o => o.CmdID == cancel.OrderId);
+            if (order == null)
+                return CommandResult.Reject($"Order {cancel.OrderId} is not in the queue.");
+            if (order.IsRunning)
+                return CommandResult.Reject("A running order cannot be cancelled.");
+
+            orderable.ActionList.Remove(order);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        // ----- ship movement (commanded entity: the ship) -----
+
+        private CommandResult TranslateNewtonThrust(Entity faction, Entity commanded, GameCommand command)
+        {
+            var thrust = (Pulsar4X.Api.NewtonThrustCommand)command;
+            if (!commanded.TryGetDataBlob<Pulsar4X.Movement.NewtonThrustAbilityDB>(out var thrustAbility))
+                return CommandResult.Reject("The entity has no newtonian thrust ability.");
+            if (!commanded.TryGetDataBlob<MassVolumeDB>(out var massVolume))
+                return CommandResult.Reject("The entity has no mass data.");
+
+            var deltaV = new Pulsar4X.Orbital.Vector3(thrust.DeltaVMps.X, thrust.DeltaVMps.Y, thrust.DeltaVMps.Z);
+            if (deltaV.Length() <= 0)
+                return CommandResult.Reject("The burn has no ΔV.");
+            if (deltaV.Length() > thrustAbility.DeltaV)
+                return CommandResult.Reject("The burn exceeds the ship's available ΔV.");
+
+            double fuelBurned = Pulsar4X.Orbital.OrbitalMath.TsiolkovskyFuelUse(
+                massVolume.MassTotal, thrustAbility.ExhaustVelocity, deltaV.Length());
+            double burnSeconds = thrustAbility.FuelBurnRate > 0 ? fuelBurned / thrustAbility.FuelBurnRate : 0;
+
+            return Dispatch(Pulsar4X.Movement.NewtonThrustCommand.CreateCommand(
+                faction.Id, commanded, thrust.NodeTime, deltaV, burnSeconds));
+        }
+
+        private CommandResult TranslateWarpMove(Entity faction, Entity commanded, GameCommand command)
+        {
+            var warp = (Pulsar4X.Api.WarpMoveCommand)command;
+            if (!TryResolve(warp.DestinationId, out var destination))
+                return CommandResult.Reject($"Entity {warp.DestinationId} not found.");
+
+            // Visibility enforced at the boundary: a faction can only warp to what it can see.
+            if (destination.Manager == null
+                || !destination.Manager.IsEntityVisibleToFaction(destination, faction.Id))
+                return CommandResult.Reject($"Entity {warp.DestinationId} not found.");
+
+            DateTime now = commanded.StarSysDateTime;
+            try
+            {
+                if (warp.InsertionPointRelative is { } insertion)
+                    return Pulsar4X.Movement.WarpMoveCommand.CreateCommand(commanded, destination, now,
+                            new Pulsar4X.Orbital.Vector3(insertion.X, insertion.Y, insertion.Z))
+                        ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
+                        : CommandResult.Reject("Command rejected by engine validation.");
+
+                return Dispatch(Pulsar4X.Movement.WarpMoveCommand.CreateCommandEZ(commanded, destination, now));
+            }
+            catch (Exception e)
+            {
+                // The intercept/insertion math throws on movement states it can't predict
+                // (e.g. an entity with no velocity); reject rather than crash the server.
+                return CommandResult.Reject($"Warp could not be plotted: {e.Message}");
+            }
         }
 
         // ----- fire control (commanded entity: the ship) -----

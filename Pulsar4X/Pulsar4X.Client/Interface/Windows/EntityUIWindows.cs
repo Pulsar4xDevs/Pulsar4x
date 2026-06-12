@@ -227,12 +227,6 @@ namespace Pulsar4X.Client
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
-                else if (T == typeof(OrderCreationWindow))
-                {
-                    var instance = OrderCreationWindow.GetInstance();
-                    instance.ToggleActive();
-                    _state.ActiveWindow = instance;
-                }
                 else if (T == typeof(OrdersListWindow))
                 {
                     var instance = OrdersListWindow.GetInstance(_entityState, _state);
@@ -253,8 +247,7 @@ namespace Pulsar4X.Client
             bool returnval;
 
             // Global Windows
-            if (T == typeof(OrderCreationWindow)) returnval = OrderCreationWindow.GetInstance().GetActive();
-            else if (T == typeof(WarpOrderWindow)) returnval = WarpOrderWindow.GetInstance(_entityState).GetActive();
+            if (T == typeof(WarpOrderWindow)) returnval = WarpOrderWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(ChangeCurrentOrbitWindow)) returnval = ChangeCurrentOrbitWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(FireControl)) returnval = FireControl.GetInstance(_entityState).GetActive();
             //else if (T == typeof(RenameWindow)) returnval = RenameWindow.GetInstance(_entityState).GetActive();

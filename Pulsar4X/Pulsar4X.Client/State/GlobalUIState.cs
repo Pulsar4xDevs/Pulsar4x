@@ -46,8 +46,7 @@ namespace Pulsar4X.Client
             {typeof(GotoSystemBlankMenuHelper), "Go to system"},
             {typeof(SelectPrimaryBlankMenuHelper), "Select as primary"},
             {typeof(NavWindow), "Nav Window"},
-            {typeof(OrdersListWindow), "Orders Window"},
-            {typeof(OrderCreationWindow), "Order Creation"}
+            {typeof(OrdersListWindow), "Orders Window"}
         };
         internal Engine.Game? Game { get; set; }
         internal bool IsGameLoaded { get { return Game != null; } }
@@ -59,6 +58,10 @@ namespace Pulsar4X.Client
         /// Built by <see cref="SetFaction"/>; an in-process adapter over the loaded <see cref="Game"/>.
         /// </summary>
         internal IGameClient? GameClient { get; private set; }
+
+        /// <summary>Static facts about the connected game (name, movement-rule settings), from the
+        /// connect handshake.</summary>
+        internal GameInfo? GameInfo { get; private set; }
 
         /// <summary>
         /// Gets the faction bit mask for the current faction.
@@ -432,7 +435,8 @@ namespace Pulsar4X.Client
             // model. In-process for single-player; Connect populates KnownSystems and the time state.
             GameClient?.DisconnectAsync();
             GameClient = new InProcessAdapter(new EngineGameServer(Game));
-            GameClient.ConnectAsync(new ConnectRequest { PlayerName = "Player", FactionId = factionEntity.Id });
+            var connect = GameClient.ConnectAsync(new ConnectRequest { PlayerName = "Player", FactionId = factionEntity.Id });
+            GameInfo = connect.Result?.Game;
 
             OnFactionChanged?.Invoke(this);
         }
@@ -549,13 +553,11 @@ namespace Pulsar4X.Client
         private bool TryOrbitClick(int screenX, int screenY)
         {
             // Only works when a ship with thrust capability is selected
-            if (PrimaryEntity == null)
+            if (PrimaryEntity?.StarSystemId is not { } primarySystemId)
                 return false;
 
-            if (!PrimaryEntity.Entity.TryGetDataBlob<NewtonThrustAbilityDB>(out _))
-                return false;
-
-            if (!PrimaryEntity.Entity.HasDataBlob<OrbitDB>())
+            var primary = GameClient?.Galaxy.GetSystem(primarySystemId)?.GetEntity(PrimaryEntity.Id);
+            if (primary == null || !primary.HasView<ThrustView>() || !primary.HasView<OrbitView>())
                 return false;
 
             // Check if user clicked on the existing editing node marker (to re-select it)
@@ -573,7 +575,8 @@ namespace Pulsar4X.Client
                         {
                             ManeuverNodePanel = new ManeuverNodePanel(
                                 this,
-                                PrimaryEntity.Entity,
+                                PrimaryEntity.Id,
+                                primarySystemId,
                                 _orbitClickManuverLines,
                                 _orbitClickManuverLines.EditingNodes[i]);
                         }
@@ -585,7 +588,7 @@ namespace Pulsar4X.Client
             // If the panel is already open, clicking elsewhere on the orbit moves the node
             if (ManeuverNodePanel != null && ManeuverNodePanel.IsActive)
             {
-                var orbitIconForMove = PrimaryEntity.OrbitIcon as OrbitIconBase;
+                var orbitIconForMove = SelectedSysMapRender?.GetOrbitIcon(PrimaryEntity.Id);
                 if (orbitIconForMove == null)
                     return true; // consume click anyway
 
@@ -605,7 +608,7 @@ namespace Pulsar4X.Client
             }
 
             // Get the orbit icon for the selected entity
-            var orbitIcon = PrimaryEntity.OrbitIcon as OrbitIconBase;
+            var orbitIcon = SelectedSysMapRender?.GetOrbitIcon(PrimaryEntity.Id);
             if (orbitIcon == null)
                 return false;
 
@@ -624,13 +627,13 @@ namespace Pulsar4X.Client
             CleanupManeuverNode();
 
             // Create maneuver lines and node
-            _orbitClickManuverLines = new ManuverLinesComplete();
-            var soiParentPosition = MoveMath.GetSOIParentPositionDB(PrimaryEntity.Entity);
-            if (soiParentPosition == null)
+            var system = GameClient?.Galaxy.GetSystem(primarySystemId);
+            if (system == null || primary.GetSoiParent(system) is not { } soiParent)
                 return false;
 
-            _orbitClickManuverLines.RootSequence.ParentPosition = soiParentPosition;
-            _orbitClickManuverLines.AddNewEditNode(PrimaryEntity.Entity, nodeTime.Value);
+            _orbitClickManuverLines = new ManuverLinesComplete();
+            _orbitClickManuverLines.RootSequence.ParentPosition = new SnapshotPosition(this, primarySystemId, soiParent.Id);
+            _orbitClickManuverLines.AddNewEditNode(this, primarySystemId, PrimaryEntity.Id, nodeTime.Value);
 
             // Add to render extras
             if (SelectedSysMapRender != null)
@@ -642,7 +645,8 @@ namespace Pulsar4X.Client
             // Create and show the panel
             ManeuverNodePanel = new ManeuverNodePanel(
                 this,
-                PrimaryEntity.Entity,
+                PrimaryEntity.Id,
+                primarySystemId,
                 _orbitClickManuverLines,
                 _orbitClickManuverLines.EditingNodes[0]);
 
@@ -656,24 +660,25 @@ namespace Pulsar4X.Client
         /// </summary>
         private DateTime? TrueAnomalyToDateTime(double trueAnomaly)
         {
-            if (PrimaryEntity == null || !PrimaryEntity.Entity.HasDataBlob<OrbitDB>())
+            if (PrimaryEntity?.StarSystemId is not { } systemId)
                 return null;
 
-            var orbitDB = PrimaryEntity.Entity.GetDataBlob<OrbitDB>();
-            var period = orbitDB.OrbitalPeriod.TotalSeconds;
-            var eccentricity = orbitDB.Eccentricity;
-            var currentTime = PrimaryEntity.Entity.StarSysDateTime;
+            var orbit = GameClient?.Galaxy.GetSystem(systemId)?.GetEntity(PrimaryEntity.Id)?.GetView<OrbitView>();
+            if (orbit == null || orbit.OrbitalPeriodSeconds <= 0)
+                return null;
 
-            // Convert both true anomalies to mean anomalies via eccentric anomaly (Kepler's equation)
-            var currentTrueAnomaly = OrbitMath.GetTrueAnomaly(orbitDB, currentTime);
+            var period = orbit.OrbitalPeriodSeconds;
+            var eccentricity = orbit.Eccentricity;
+            var currentTime = PrimarySystemDateTime;
 
-            var currentE = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(currentTrueAnomaly, eccentricity);
-            var currentM = currentE - eccentricity * Math.Sin(currentE);
+            // Mean anomaly progresses linearly with time from the elements' epoch
+            var currentM = Angle.NormaliseRadiansPositive(
+                orbit.MeanAnomalyAtEpochRad + orbit.MeanMotionRadPerSec * (currentTime - orbit.Epoch).TotalSeconds);
 
-            var targetE = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
+            // Convert the target true anomaly to a mean anomaly via eccentric anomaly (Kepler's equation)
+            var targetE = OrbitalMath.GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
             var targetM = targetE - eccentricity * Math.Sin(targetE);
 
-            // Mean anomaly progresses linearly with time
             var meanAnomalyDiff = targetM - currentM;
             if (meanAnomalyDiff < 0) meanAnomalyDiff += Math.PI * 2;
 
@@ -715,7 +720,7 @@ namespace Pulsar4X.Client
             if (PrimaryEntity == null || ManeuverNodePanel == null || !ManeuverNodePanel.IsActive)
                 return;
 
-            var orbitIcon = PrimaryEntity.OrbitIcon as OrbitIconBase;
+            var orbitIcon = SelectedSysMapRender?.GetOrbitIcon(PrimaryEntity.Id);
             if (orbitIcon == null)
                 return;
 
@@ -743,38 +748,40 @@ namespace Pulsar4X.Client
         }
 
         /// <summary>
-        /// Opens a ManeuverNodePanel for editing an existing NewtonThrustCommand.
-        /// Sets up the maneuver lines, node, and panel with the command's values.
+        /// Opens a ManeuverNodePanel for editing an existing queued thrust maneuver
+        /// (<see cref="OrderSnapshot.IsEditableManeuver"/>). Sets up the maneuver lines, node, and
+        /// panel with the order's values.
         /// </summary>
-        internal void OpenManeuverPanelForOrder(Entity entity, NewtonThrustCommand command)
+        internal void OpenManeuverPanelForOrder(int entityId, string systemId, OrderSnapshot order)
         {
-            // Don't open if the order is already running
-            if (command.IsRunning)
+            if (!order.IsEditableManeuver
+                || order.ManeuverNodeTime is not { } nodeTime
+                || order.ManeuverDeltaVMps is not { } deltaV)
                 return;
 
             // Need an orbit to place the node on
-            if (!entity.HasDataBlob<OrbitDB>())
+            var system = GameClient?.Galaxy.GetSystem(systemId);
+            var entity = system?.GetEntity(entityId);
+            if (system == null || entity == null || !entity.HasView<OrbitView>())
+                return;
+            if (entity.GetSoiParent(system) is not { } soiParent)
                 return;
 
             // Clean up any previous maneuver node UI
             CleanupManeuverNode();
 
-            // Create maneuver lines and node at the command's burn center time
+            // Create maneuver lines and node at the order's burn center time
             _orbitClickManuverLines = new ManuverLinesComplete();
-            var soiParentPosition = MoveMath.GetSOIParentPositionDB(entity);
-            if (soiParentPosition == null)
-                return;
+            _orbitClickManuverLines.RootSequence.ParentPosition = new SnapshotPosition(this, systemId, soiParent.Id);
+            _orbitClickManuverLines.AddNewEditNode(this, systemId, entityId, nodeTime);
 
-            _orbitClickManuverLines.RootSequence.ParentPosition = soiParentPosition;
-            _orbitClickManuverLines.AddNewEditNode(entity, command.NodeDateTime);
-
-            // Set the node's delta-v from the command (X=radial, Y=prograde)
+            // Set the node's delta-v from the order (X=radial, Y=prograde)
             var node = _orbitClickManuverLines.EditingNodes[0];
-            float prograde = (float)command.OrbitrelativeDeltaV.Y;
-            float radial = (float)command.OrbitrelativeDeltaV.X;
+            float prograde = (float)deltaV.Y;
+            float radial = (float)deltaV.X;
             if (prograde != 0 || radial != 0)
             {
-                node.SetNode(prograde, radial, 0, command.NodeDateTime);
+                node.SetNode(prograde, radial, 0, nodeTime);
             }
 
             // Add to render extras
@@ -787,10 +794,11 @@ namespace Pulsar4X.Client
             // Create panel in edit mode
             ManeuverNodePanel = new ManeuverNodePanel(
                 this,
-                entity,
+                entityId,
+                systemId,
                 _orbitClickManuverLines,
                 node,
-                command);
+                order.OrderId);
         }
 
         /// <summary>
@@ -829,16 +837,6 @@ namespace Pulsar4X.Client
             ActiveWindow?.EntityClicked(entityState, button);
 
             SelectedSysMapRender.SelectedEntityExtras = new List<IDrawData>();
-            if (LastClickedEntity.DebugOrbitOrder != null)
-            {
-                SelectedSysMapRender.SelectedEntityExtras.Add(LastClickedEntity.DebugOrbitOrder);
-            }
-
-            if (LastClickedEntity.TryGetDataBlob(out NavSequenceDB? navDB))
-            {
-                ManuverNodesDraw2 nodeDraw = new ManuverNodesDraw2(LastClickedEntity);
-                SelectedSysMapRender.SelectedEntityExtras.Add(nodeDraw);
-            }
 
             if (ActiveWindow == null || ActiveWindow.GetActive() == false || ActiveWindow.ClickedEntityIsPrimary)
                 PrimaryEntity = LastClickedEntity;

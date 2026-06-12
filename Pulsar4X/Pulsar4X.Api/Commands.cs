@@ -102,6 +102,27 @@ public sealed record TransferCargoCommand(
 /// (<see cref="OrderSnapshot.OrderId"/>).</summary>
 public sealed record SetOrderPauseCommand(int TargetEntityId, string OrderId, bool Pause) : GameCommand(TargetEntityId);
 
+/// <summary>Remove a queued order (<see cref="OrderSnapshot.OrderId"/>) that has not started
+/// running yet.</summary>
+public sealed record CancelOrderCommand(int TargetEntityId, string OrderId) : GameCommand(TargetEntityId);
+
+// ----- ship movement orders (commanded entity: the ship) -----
+
+/// <summary>Queue a newtonian burn of <see cref="DeltaVMps"/> (orbit-relative: X = radial,
+/// Y = prograde, Z = normal) centred on <see cref="NodeTime"/>. The server computes the burn
+/// duration from the ship's thrust and fuel state.</summary>
+public sealed record NewtonThrustCommand(int TargetEntityId, DateTime NodeTime, Vec3 DeltaVMps) : GameCommand(TargetEntityId);
+
+/// <summary>Warp the ship to <see cref="DestinationId"/>. With an
+/// <see cref="InsertionPointRelative"/> (metres, relative to the destination) the ship exits warp
+/// there; otherwise the server picks a low circular orbit. Either way the server computes the
+/// intercept and the post-warp orbit — the interactive orbit shaping in the warp window is
+/// client-side preview only.</summary>
+public sealed record WarpMoveCommand(
+    int TargetEntityId,
+    int DestinationId,
+    Vec3? InsertionPointRelative = null) : GameCommand(TargetEntityId);
+
 // ----- fire control (commanded entity: the ship) -----
 
 /// <summary>Replace a fire control's assigned weapon set (ids from <see cref="WeaponSnapshot.Id"/>).</summary>

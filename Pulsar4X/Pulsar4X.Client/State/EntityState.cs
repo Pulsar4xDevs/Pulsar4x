@@ -28,7 +28,6 @@ namespace Pulsar4X.Client
 
         public IPosition? Position;
         public IKepler? OrbitIcon;
-        public OrbitOrderIcon? DebugOrbitOrder;
         public bool IsDestroyed = false; //currently IsDestroyed = true if moved from one system to another, may need to revisit this.
         private SafeDictionary<Type, BaseDataBlob> DataBlobs = new();
 

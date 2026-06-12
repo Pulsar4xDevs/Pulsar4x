@@ -1,14 +1,11 @@
-﻿using System;
+using System;
 using ImGuiNET;
-using Pulsar4X.Client.Interface.Widgets;
+using Pulsar4X.Api;
 using Pulsar4X.Engine;
+using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Orbital;
 using Vector3 = Pulsar4X.Orbital.Vector3;
 using Vector2 = Pulsar4X.Orbital.Vector2;
-using Pulsar4X.Extensions;
-using Pulsar4X.Orbits;
-using Pulsar4X.Galaxy;
-using Pulsar4X.Movement;
 using SDL3;
 
 namespace Pulsar4X.Client
@@ -18,30 +15,20 @@ namespace Pulsar4X.Client
     /// </summary>
     public class WarpOrderWindow : PulsarGuiWindow// IOrderWindow
     {
+        int _entityId;
+        string _systemId = "";
+        int? _targetId;
+        int? _orbitTargetId;
 
-        EntityState OrderingEntityState;
-        EntityState TargetEntity;
-        Entity _orbitTargetEntity;
-        //Vector4 _apoapsisPoint;
-        //Vector4 _periapsisPoint;
-        float _maxDV;
-        float _progradeDV;
-        float _radialDV;
         private bool _strictNewtonMode = true;
 
-
-        double _apoapsis_m { get { return _endpointTargetOrbit.Apoapsis; }
-        }
-        double _periapsis_m { get { return _endpointTargetOrbit.Periapsis; }
-        }
-        double _targetRadiusAU;
+        double _apoapsis_m { get { return _endpointTargetOrbit.Apoapsis; } }
+        double _periapsis_m { get { return _endpointTargetOrbit.Periapsis; } }
         double _targetRadius_m;
         double _peAlt { get { return _periapsis_m - _targetRadius_m; } }
         double _apAlt { get { return _apoapsis_m - _targetRadius_m; } }
 
         double _apMax;
-        double _peMin { get { return _targetRadius_m; } }
-
 
         DateTime _departureDateTime;
 
@@ -49,29 +36,24 @@ namespace Pulsar4X.Client
         double _departureOrbitalSpeed_m { get { return _departureState.vel.Length(); }}
         double _departureProgradeAngle {get{return Math.Atan2(_departureState.vel.Y, _departureState.vel.X);}}
 
-
         double _massOrderingEntity = double.NaN;
         double _massTargetBody = double.NaN;
         double _massCurrentBody = double.NaN;
         double _stdGravParamCurrentBody = double.NaN;
         double _stdGravParamTargetBody_m = double.NaN;
 
-
-        private NewtonionRadialOrderUI _newtonUI;
+        private NewtonionRadialOrderUI? _newtonUI;
 
         string _displayText;
         string _tooltipText = "";
 
-        WarpMoveOrderWidget _moveWidget;
-        bool _smMode;
+        WarpMoveOrderWidget? _moveWidget;
 
         enum States: byte { NeedsEntity, NeedsTarget, NeedsInsertionPoint, NeedsActioning }
         States CurrentState;
         enum Events: byte { SelectedEntity, SelectedPosition, ClickedAction, AltClicked}
         Action[,] fsm;
 
-
-        private OrbitDB _targetEntityOrbitDB;
         private (Vector3 position, DateTime eti) _targetIntercept;
         private Vector3 _perpVec;
         private Vector3 _endpointInsertionPoint_m { get; set; } = new Vector3();
@@ -83,46 +65,31 @@ namespace Pulsar4X.Client
         double _endpointTargetSpeed_m {get{return _endpointTargetVelocity_m.Length();}}
 
         double _endpointInitalAngle {get{return Math.Atan2(_endpointInitalVelocity_m.Y, _endpointInitalVelocity_m.X);}}
-        double _endpointTargetAngle {get{return Math.Atan2(_endpointTargetVelocity_m.Y, _endpointTargetVelocity_m.X);}}
         private KeplerElements _endpointInitialOrbit { get; set; }
         private KeplerElements _endpointTargetOrbit { get; set; }
 
+        OrbitOrderIcon? _endpointTargetOrbitWidget;
+        OrbitOrderIcon? _endpointInitalOrbitWidget;
 
-        OrbitOrderIcon _endpointTargetOrbitWidget;
-        OrbitOrderIcon _endpointInitalOrbitWidget;
+        private IClientSystem? System => _uiState.GameClient?.Galaxy.GetSystem(_systemId);
+        private EntitySnapshot? OrderingEntity => System?.GetEntity(_entityId);
+        private EntitySnapshot? TargetEntity => _targetId is int id ? System?.GetEntity(id) : null;
+        private EntitySnapshot? OrbitTarget => _orbitTargetId is int id ? System?.GetEntity(id) : null;
+        private bool UseRelativeVelocity => _uiState.GameInfo?.UseRelativeVelocity ?? true;
 
-        Vector3 _endpointDeltaVToSpend
-        {
-            get { return _endpointInitalVelocity_m - _endpointTargetVelocity_m; }
-        }
-
-
-        private WarpOrderWindow(EntityState entityState, bool smMode = false)
+        private WarpOrderWindow(int entityId, string systemId)
         {
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
 
-            OrderingEntityState = entityState;
-            _smMode = smMode;
-            _strictNewtonMode = entityState.Entity.Manager.Game.Settings.StrictNewtonion;
-            _displayText = "Warp Order: " + OrderingEntityState.Name;
+            _entityId = entityId;
+            _systemId = systemId;
+            _strictNewtonMode = _uiState.GameInfo?.StrictNewtonian ?? true;
+            _departureDateTime = _uiState.PrimarySystemDateTime;
+            _displayText = "Warp Order: " + (OrderingEntity?.GetView<NameView>()?.Name ?? "Unknown");
             _tooltipText = "Select target to orbit";
             CurrentState = States.NeedsTarget;
-            //TargetEntity = new EntityState(Entity.InvalidEntity) { Name = "" };
-            if (OrderingEntityState.Entity.HasDataBlob<OrbitDB>())
-            {
-                //_endpointTargetOrbitWidget = new OrbitOrderWiget(OrderingEntity.Entity.GetDataBlob<OrbitDB>());
-                //_uiState.MapRendering.UIWidgets.Add(_endpointTargetOrbitWidget);
-                if (_moveWidget == null)
-                {
-                    _moveWidget = new WarpMoveOrderWidget(_uiState, OrderingEntityState.Entity);
-                    _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(_moveWidget), _moveWidget);
 
-                }
-            }
-            if(OrderingEntityState.Entity.TryGetDataBlob<NewtonThrustAbilityDB>(out var newtDB))
-            {
-                _maxDV = (float)newtDB.DeltaV;
-            }
+            CreateMoveWidget();
 
             fsm = new Action[4, 4]
             {
@@ -130,7 +97,6 @@ namespace Pulsar4X.Client
                 {DoNothing,         DoNothing,              DoNothing,      AbortOrder,  },     //needsEntity
                 {TargetSelected,    DoNothing,              DoNothing,      GoBackState, },     //needsTarget
                 {DoNothing,         InsertionPntSelected,   DoNothing,      GoBackState, },     //needsApopapsis
-                //{DoNothing,         PeriapsisPntSelected,   DoNothing,      GoBackState, },   //needsPeriapsis
                 {DoNothing,         DoNothing,              ActionCmd,      GoBackState, }      //needsActoning
             };
 
@@ -147,15 +113,14 @@ namespace Pulsar4X.Client
         {
             if (!_uiState.LoadedWindows.ContainsKey(typeof(WarpOrderWindow)))
             {
-                return new WarpOrderWindow(entity, SMMode);
+                return new WarpOrderWindow(entity.Id, entity.StarSystemId!);
             }
             var instance = (WarpOrderWindow)_uiState.LoadedWindows[typeof(WarpOrderWindow)];
-            if (instance.OrderingEntityState != entity)
+            if (instance._entityId != entity.Id)
             {
-                return new WarpOrderWindow(entity);
+                return new WarpOrderWindow(entity.Id, entity.StarSystemId!);
             }
 
-            instance.OrderingEntityState = entity;
             instance.CurrentState = States.NeedsTarget;
             instance._departureDateTime = _uiState.PrimarySystemDateTime;
             instance.EntitySelected();
@@ -166,126 +131,125 @@ namespace Pulsar4X.Client
         void DoNothing() { return; }
         void EntitySelected()
         {
-            OrderingEntityState = _uiState.LastClickedEntity;
-            if (!OrderingEntityState.Entity.TryGetDataBlob<PositionDB>(out var pdb))
+            var clicked = _uiState.LastClickedEntity;
+            if (clicked == null || clicked.StarSystemId == null)
+                return;
+            _entityId = clicked.Id;
+            _systemId = clicked.StarSystemId;
+            _displayText = "Warp Order: " + (OrderingEntity?.GetView<NameView>()?.Name ?? "Unknown");
+
+            var ordering = OrderingEntity;
+            var system = System;
+            if (ordering == null || system == null)
                 return;
 
-            if (pdb.Parent != null && pdb.Parent.TryGetDataBlob<MassVolumeDB>(out var parentMassDB))
-                _massCurrentBody = parentMassDB.MassTotal;
+            _massOrderingEntity = ordering.GetView<MassVolumeView>()?.MassKg ?? double.NaN;
+            _massCurrentBody = ordering.GetSoiParent(system)?.GetView<MassVolumeView>()?.MassKg ?? double.NaN;
 
             CurrentState = States.NeedsTarget;
 
-            if (OrderingEntityState.Entity.TryGetDataBlob<MassVolumeDB>(out var orderingMassDB))
-                _massOrderingEntity = orderingMassDB.MassTotal;
-
             _stdGravParamCurrentBody = UniversalConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;
-            if (_moveWidget == null)
-            {
-                _moveWidget = new WarpMoveOrderWidget(_uiState, OrderingEntityState.Entity);
-                _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(_moveWidget), _moveWidget);
-            }
+            CreateMoveWidget();
             DepartureCalcs();
-
         }
 
+        void CreateMoveWidget()
+        {
+            var ordering = OrderingEntity;
+            var system = System;
+            if (_moveWidget != null || ordering == null || system == null)
+                return;
+            if (!ordering.HasView<OrbitView>())
+                return;
+            if (ordering.GetSoiParent(system) is not { } soiParent)
+                return;
+
+            _moveWidget = new WarpMoveOrderWidget(_uiState, _systemId, _entityId, soiParent.Id);
+            _uiState.SelectedSysMapRender?.UIWidgets.Add(nameof(_moveWidget), _moveWidget);
+        }
 
         void TargetSelected()
         {
-            TargetEntity = _uiState.LastClickedEntity;
+            var clicked = _uiState.LastClickedEntity;
+            var system = System;
+            var ordering = OrderingEntity;
+            if (clicked == null || system == null || ordering == null)
+                return;
 
-            // Determine the orbit target - if the selected entity doesn't have an OrbitDB,
-            // try to use its parent (e.g., for colonies on a planet)
-            Entity orbitTarget = TargetEntity.Entity;
-            if (!orbitTarget.TryGetDataBlob<OrbitDB>(out _targetEntityOrbitDB))
+            // Determine the orbit target - if the selected entity doesn't have an orbit,
+            // try to use its position parent (e.g., for colonies on a planet)
+            var target = system.GetEntity(clicked.Id);
+            if (target == null)
+                return;
+
+            var orbitTarget = target;
+            if (!orbitTarget.HasView<OrbitView>())
             {
-                if (orbitTarget.TryGetDataBlob<PositionDB>(out var posDB) && posDB.Parent != null)
+                if (target.GetView<PositionView>()?.ParentId is int posParentId
+                    && system.GetEntity(posParentId) is { } posParent
+                    && posParent.HasView<OrbitView>())
                 {
-                    if (posDB.Parent.TryGetDataBlob<OrbitDB>(out _targetEntityOrbitDB))
-                    {
-                        orbitTarget = posDB.Parent;
-                    }
-                    else
-                    {
-                        // No valid orbit target found, fail gracefully
-                        TargetEntity = null;
-                        return;
-                    }
+                    orbitTarget = posParent;
                 }
                 else
                 {
-                    // No position data, fail gracefully
-                    TargetEntity = null;
                     return;
                 }
             }
 
-            _orbitTargetEntity = orbitTarget;
-            _targetIntercept  = WarpMath.GetInterceptPosition(OrderingEntityState.Entity, _targetEntityOrbitDB, _departureDateTime);
-            _uiState.Camera.PinToEntity(_orbitTargetEntity);
-
-            if (!_orbitTargetEntity.TryGetDataBlob<MassVolumeDB>(out var massVolumeDB))
-            {
-                // No mass/volume data, fail gracefully
-                TargetEntity = null;
-                _orbitTargetEntity = null;
+            var massVolume = orbitTarget.GetView<MassVolumeView>();
+            var thrust = ordering.GetView<ThrustView>();
+            if (massVolume == null || thrust == null)
                 return;
-            }
-            _targetRadiusAU = massVolumeDB.RadiusInAU;
-            _targetRadius_m = massVolumeDB.RadiusInM;
-            Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(_departureState.vel, _targetEntityOrbitDB, _targetIntercept.eti);
-            _endpointInitalVelocity_m = insertionVector;
-            _apMax = _orbitTargetEntity.GetSOI_m();
-            var soiAU = _orbitTargetEntity.GetSOI_AU();
-            float soiViewUnits = _uiState.Camera.ViewDistance(soiAU);
 
+            _targetId = target.Id;
+            _orbitTargetId = orbitTarget.Id;
 
-            _massTargetBody = massVolumeDB.MassDry;
+            var moverAbsPos = ordering.GetAbsoluteState(system, _departureDateTime).pos;
+            double warpSpeed = ordering.GetView<WarpAbilityView>()?.MaxSpeedMps ?? 0;
+            _targetIntercept = SnapshotMoves.GetInterceptPosition(moverAbsPos, warpSpeed, orbitTarget, system, _departureDateTime);
+            _uiState.Camera.PinToEntity(orbitTarget.Id, _systemId, _uiState);
+
+            _targetRadius_m = massVolume.RadiusMetres;
+            _endpointInitalVelocity_m = SnapshotMoves.GetOrbitalInsertionVector(
+                _departureState.vel, orbitTarget, system, _targetIntercept.eti, UseRelativeVelocity);
+
+            double soi_m = orbitTarget.SoiRadiusM();
+            _apMax = double.IsInfinity(soi_m) ? float.MaxValue : soi_m;
+
+            _massTargetBody = massVolume.DryMassKg;
             _stdGravParamTargetBody_m = GeneralMath.StandardGravitationalParameter(_massOrderingEntity + _massTargetBody);
 
+            _newtonUI = new NewtonionRadialOrderUI((float)(_targetRadius_m), (float)_apMax);
+            _newtonUI.ProgradeAngle = _departureProgradeAngle;
 
-            if (OrderingEntityState.Entity.TryGetDataBlob<NewtonThrustAbilityDB>(out var newtonDB))
+            if (!double.IsInfinity(soi_m))
             {
-                _newtonUI = new NewtonionRadialOrderUI(newtonDB, _massOrderingEntity, (float)_peMin, (float)_apMax);
-                _newtonUI.ProgradeAngle = _departureProgradeAngle;
+                var soiAU = Distance.MToAU(soi_m);
+                float soiViewUnits = _uiState.Camera.ViewDistance(soiAU);
+                Vector2 viewPortSize = _uiState.Camera.ViewPortSize;
+                float windowLen = (float)Math.Min(viewPortSize.X, viewPortSize.Y);
+                if (soiViewUnits < windowLen * 0.5)
+                {
+                    //zoom so soi fills ~3/4 screen.
+                    var soilenwanted = windowLen * 0.375;
+                    _uiState.Camera.ZoomLevel = (float)(soilenwanted / soiAU);
+                }
             }
 
+            var orbitTargetPosition = new SnapshotPosition(_uiState, _systemId, orbitTarget.Id);
+            double widgetSoi = double.IsInfinity(soi_m) ? 0 : soi_m;
 
-            Vector2 viewPortSize = _uiState.Camera.ViewPortSize;
-            float windowLen = (float)Math.Min(viewPortSize.X, viewPortSize.Y);
-            if (soiViewUnits < windowLen * 0.5)
-            {
-                //zoom so soi fills ~3/4 screen.
-                var soilenwanted = windowLen * 0.375;
-                _uiState.Camera.ZoomLevel = (float)(soilenwanted / soiAU) ;
-            }
-
-
-            _endpointInitalOrbitWidget = new OrbitOrderIcon(_orbitTargetEntity);
-            if (_endpointInitalOrbitWidget != null)
-            {
-                _uiState.SelectedSysMapRender.UIWidgets[nameof(_endpointInitalOrbitWidget)+"initOrbit"] = _endpointInitalOrbitWidget;
-            }
-            else
-            {
-                _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(_endpointInitalOrbitWidget)+"initOrbit", _endpointInitalOrbitWidget);
-            }
-            //_endpointInitalOrbitWidget.SetParametersFromKeplerElements(_endpointInitialOrbit, _endpointInsertionPoint_m);
+            _endpointInitalOrbitWidget = new OrbitOrderIcon(orbitTargetPosition, widgetSoi, _targetRadius_m);
             _endpointInitalOrbitWidget.Red = 100;
+            if (_uiState.SelectedSysMapRender != null)
+                _uiState.SelectedSysMapRender.UIWidgets[nameof(_endpointInitalOrbitWidget)+"initOrbit"] = _endpointInitalOrbitWidget;
 
-            _endpointTargetOrbitWidget = new OrbitOrderIcon(_orbitTargetEntity);
-            if (_endpointTargetOrbitWidget != null)
-            {
+            _endpointTargetOrbitWidget = new OrbitOrderIcon(orbitTargetPosition, widgetSoi, _targetRadius_m);
+            if (_uiState.SelectedSysMapRender != null)
                 _uiState.SelectedSysMapRender.UIWidgets[nameof(_endpointTargetOrbitWidget)+"tgtOrbit"] = _endpointTargetOrbitWidget;
-            }
-            else
-            {
-                _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(_endpointTargetOrbitWidget)+"tgtOrbit", _endpointTargetOrbitWidget);
-            }
-            //_endpointTargetOrbitWidget.SetParametersFromKeplerElements(_endpointTargetOrbit, _endpointInsertionPoint_m);
 
-
-            OrderingEntityState.DebugOrbitOrder = _endpointTargetOrbitWidget;
-            _moveWidget.SetArrivalTarget(_orbitTargetEntity);
+            _moveWidget?.SetArrivalTarget(orbitTarget.Id);
             InitialPlacement();
             InsertionCalcs();
 
@@ -293,31 +257,21 @@ namespace Pulsar4X.Client
             CurrentState = States.NeedsInsertionPoint;
         }
         void InsertionPntSelected() {
-            _moveWidget.SetArrivalPosition(_endpointInsertionPoint_m);
+            _moveWidget?.SetArrivalPosition(_endpointInsertionPoint_m);
             _tooltipText = "Action to give order";
             CurrentState = States.NeedsActioning;
         }
 
         void ActionCmd()
         {
+            if (_orbitTargetId is int targetId)
+            {
+                _uiState.GameClient?.SubmitCommandAsync(new Pulsar4X.Api.WarpMoveCommand(
+                    _entityId,
+                    targetId,
+                    new Vec3(_endpointInsertionPoint_m.X, _endpointInsertionPoint_m.Y, _endpointInsertionPoint_m.Z)));
+            }
 
-            WarpMoveCommand.CreateCommand(
-                OrderingEntityState.Entity,
-                _orbitTargetEntity,
-                _departureDateTime,
-                _endpointTargetOrbit,
-                _endpointInsertionPoint_m);
-
-            CloseWindow();
-        }
-        void ActionAddDB()
-        {
-            // FIXME:
-            // _uiState.SpaceMasterVM.SMSetOrbitToEntity(
-            //     OrderingEntityState.Entity,
-            //     TargetEntity.Entity,
-            //     _endpointTargetOrbitWidget.Periapsis.Length(),
-            //     _uiState.PrimarySystemDateTime);
             CloseWindow();
         }
 
@@ -342,12 +296,7 @@ namespace Pulsar4X.Client
                     break;
                 case States.NeedsTarget:
                     {
-
                         DepartureCalcs();
-
-                        //var ralPosCBAU = OrderingEntityState.Entity.GetDataBlob<PositionDB>().RelativePosition_AU;
-                        //var smaCurrOrbtAU = _orderEntityOrbit.SemiMajorAxisAU;
-
                     }
 
                     break;
@@ -374,6 +323,12 @@ namespace Pulsar4X.Client
         {
             if (!IsActive)
                 return;
+
+            if (OrderingEntity == null)
+            {
+                CloseWindow();
+                return;
+            }
 
             var size = new System.Numerics.Vector2(200, 100);
             var pos = new System.Numerics.Vector2(
@@ -406,19 +361,25 @@ namespace Pulsar4X.Client
                                 {
                                     if (_newtonUI != null)
                                     {
-                                        if (_newtonUI.Display())
+                                        if (NewtonUIDisplay())
                                             InsertionCalcs();
                                     }
                                     CurrentState = States.NeedsActioning;
                                 }
                                 else
                                 {
-                                    var mouseWorldPos = _uiState.Camera.MouseWorldCoordinate_m();
-                                    _endpointInsertionPoint_m = mouseWorldPos - MoveMath.GetAbsolutePosition(_orbitTargetEntity); //relative to the target body
+                                    var system = System;
+                                    var orbitTarget = OrbitTarget;
+                                    if (system != null && orbitTarget != null)
+                                    {
+                                        var mouseWorldPos = _uiState.Camera.MouseWorldCoordinate_m();
+                                        var targetAbsPos = orbitTarget.AbsolutePositionM(system, _uiState.PrimarySystemDateTime);
+                                        _endpointInsertionPoint_m = mouseWorldPos - targetAbsPos; //relative to the target body
 
-                                    _moveWidget.SetArrivalPosition(_endpointInsertionPoint_m);
-                                    _endpointTargetOrbit = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody_m, _endpointInsertionPoint_m, _endpointInitalVelocity_m, _departureDateTime);
-                                    _endpointTargetOrbitWidget.SetParametersFromKeplerElements(_endpointTargetOrbit, _endpointInsertionPoint_m);
+                                        _moveWidget?.SetArrivalPosition(_endpointInsertionPoint_m);
+                                        _endpointTargetOrbit = OrbitalMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody_m, _endpointInsertionPoint_m, _endpointInitalVelocity_m, _departureDateTime);
+                                        _endpointTargetOrbitWidget.SetParametersFromKeplerElements(_endpointTargetOrbit, _endpointInsertionPoint_m);
+                                    }
                                 }
 
                                 break;
@@ -428,12 +389,12 @@ namespace Pulsar4X.Client
                             {
                                 if (_strictNewtonMode && _newtonUI != null)
                                 {
-                                    if (_newtonUI.Display())
+                                    if (NewtonUIDisplay())
                                         InsertionCalcs();
                                 }
                                 else
                                 {
-                                    _endpointTargetOrbit = OrbitMath.KeplerCircularFromPosition(_stdGravParamCurrentBody, _endpointInsertionPoint_m, _departureDateTime);
+                                    _endpointTargetOrbit = OrbitalMath.KeplerCircularFromPosition(_stdGravParamCurrentBody, _endpointInsertionPoint_m, _departureDateTime);
                                     _endpointTargetOrbitWidget.SetParametersFromKeplerElements(_endpointTargetOrbit, _endpointInsertionPoint_m);
                                 }
 
@@ -450,21 +411,17 @@ namespace Pulsar4X.Client
                 if (TargetEntity != null)
                 {
                     ImGui.SameLine();
-                    ImGui.Text(TargetEntity.Name);
+                    ImGui.Text(TargetEntity.GetView<NameView>()?.Name ?? "Unknown");
                 }
-
-                //ImGui.Text("Eccentricity: " + _eccentricity.ToString("g3"));
 
                 if (ImGui.CollapsingHeader("Orbit Data"))
                 {
 
                     ImGui.Text("InsertionSpeed: ");
-                    //ImGui.SameLine();
                     ImGui.Text("Initial: "+Stringify.Distance(_endpointInitalSpeed_m) + "/s");
                     ImGui.Text("Target: " + Stringify.Distance(_endpointTargetSpeed_m) + "/s");
 
                     ImGui.Text("Eccentricity: ");
-                    //ImGui.SameLine();
                     ImGui.Text("Initial: "+Stringify.Quantity(_endpointInitialOrbit.Eccentricity));
                     ImGui.Text("Target: "+Stringify.Quantity(_endpointTargetOrbit.Eccentricity));
 
@@ -478,26 +435,15 @@ namespace Pulsar4X.Client
                     ImGui.Text(Stringify.Distance(_endpointTargetOrbit.Periapsis) + " (Alt: " + Stringify.Distance(_peAlt) + ")");
 
                     ImGui.Text("DepartureSpeed: ");
-                    //ImGui.SameLine();
                     ImGui.Text( Stringify.Distance( _departureOrbitalSpeed_m) + "/s");
 
                     ImGui.Text("Departure Vector: ");
-                    //ImGui.SameLine();
                     ImGui.Text("X: " + Stringify.Distance(_departureState.vel.X)+ "/s");
                     ImGui.Text("Y: " + Stringify.Distance(_departureState.vel.Y)+ "/s");
 
                     ImGui.Text("Departure Angle: ");
                     ImGui.SameLine();
                     ImGui.Text(_departureProgradeAngle.ToString("g3") + " radians or " + Angle.ToDegrees(_departureProgradeAngle).ToString("F") + " deg ");
-
-                    /*
-                    var pc = OrbitProcessor.InstantaneousOrbitalVelocityPolarCoordinate(_orderEntityOrbit, _departureDateTime);
-
-                    ImGui.Text("Departure Polar Coordinates: ");
-                    ImGui.Text(pc.Item1.ToString() + " AU or " + Distance.AuToMt(pc.Item1).ToString("F") + " m/s");
-                    ImGui.Text(pc.Item2.ToString("g3") + " radians or " + Angle.ToDegrees(pc.Item2).ToString("F") + " deg ");
-                    ;
-*/
 
                     ImGui.Text("Insertion Vector: ");
                     ImGui.Text("X: " + Stringify.Distance(_endpointInitalVelocity_m.X)+ "/s");
@@ -526,26 +472,26 @@ namespace Pulsar4X.Client
 
                 }
 
-                //if (CurrentState != States.NeedsActioning) //use alpha on the button if it's not useable.
-                //ImGui.PushStyleVar(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * 0.5f);
                 if (ImGui.Button("Action Order") && CurrentState == States.NeedsActioning) //only do suff if clicked if it's usable.
                 {
                     fsm[(byte)CurrentState, (byte)Events.ClickedAction].Invoke();
-                    //ImGui.PopStyleVar();
-                }
-
-                if (_smMode)
-                {
-                    ImGui.SameLine();
-                    if (ImGui.Button("Add OrbitDB"))
-                    {
-                        ActionAddDB();
-                    }
                 }
 
                 Window.End();
             }
 
+        }
+
+        /// <summary>The radial-order sliders, fed fresh propulsion/mass data from the snapshot.</summary>
+        bool NewtonUIDisplay()
+        {
+            var ordering = OrderingEntity;
+            var thrust = ordering?.GetView<ThrustView>();
+            var massVolume = ordering?.GetView<MassVolumeView>();
+            if (_newtonUI == null || thrust == null || massVolume == null)
+                return false;
+
+            return _newtonUI.Display(thrust.DeltaVMps, thrust.ExhaustVelocityMps, thrust.FuelBurnRateKgPerSec, massVolume.MassKg);
         }
 
         #endregion
@@ -555,19 +501,17 @@ namespace Pulsar4X.Client
 
         void DepartureCalcs()
         {
+            var ordering = OrderingEntity;
+            var system = System;
+            if (ordering == null || system == null)
+                return;
 
-            //OrbitProcessor.InstantaneousOrbitalVelocityPolarCoordinate()
-
-
-            if(_uiState.Game.Settings.UseRelativeVelocity)
-            {
-                _departureState = MoveMath.GetRelativeFutureState(OrderingEntityState.Entity, _departureDateTime);
-            }
+            if (UseRelativeVelocity)
+                _departureState = ordering.GetRelativeState(_departureDateTime);
             else
-                _departureState = MoveMath.GetAbsoluteState(OrderingEntityState.Entity, _departureDateTime);
+                _departureState = ordering.GetAbsoluteState(system, _departureDateTime);
 
-            _moveWidget.SetDepartureProgradeAngle(_departureProgradeAngle);
-
+            _moveWidget?.SetDepartureProgradeAngle(_departureProgradeAngle);
 
             _perpVec = Vector3.Normalise(new Vector3(_departureState.vel.Y * -1, _departureState.vel.X, 0));
             var rangeToTarget = (_targetIntercept.position - _departureState.pos).Length();
@@ -578,37 +522,46 @@ namespace Pulsar4X.Client
 
         void InsertionCalcs()
         {
+            if (_newtonUI == null)
+                return;
 
-            _moveWidget.SetArivalProgradeAngle(_endpointInitalAngle);
-
+            _moveWidget?.SetArivalProgradeAngle(_endpointInitalAngle);
 
             _endpointInsertionPoint_m = (_perpVec * _newtonUI.Radius);
 
-            _moveWidget.SetArrivalPosition(_endpointInsertionPoint_m);
+            _moveWidget?.SetArrivalPosition(_endpointInsertionPoint_m);
             _endpointTargetVelocity_m = _endpointInitalVelocity_m + _newtonUI.DeltaV;
-            _endpointTargetOrbit = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody_m, _endpointInsertionPoint_m, _endpointTargetVelocity_m, _departureDateTime);
-            _endpointTargetOrbitWidget.SetParametersFromKeplerElements(_endpointTargetOrbit, _endpointInsertionPoint_m);
+            _endpointTargetOrbit = OrbitalMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody_m, _endpointInsertionPoint_m, _endpointTargetVelocity_m, _departureDateTime);
+            _endpointTargetOrbitWidget?.SetParametersFromKeplerElements(_endpointTargetOrbit, _endpointInsertionPoint_m);
             _newtonUI.Eccentricity = (float)_endpointTargetOrbit.Eccentricity;
         }
 
         void InitialPlacement()
         {
-            var lowOrbitRadius = OrbitMath.LowOrbitRadius(_orbitTargetEntity);
+            var ordering = OrderingEntity;
+            var orbitTarget = OrbitTarget;
+            var thrust = ordering?.GetView<ThrustView>();
+            var massVolume = ordering?.GetView<MassVolumeView>();
+            if (_newtonUI == null || orbitTarget == null || thrust == null || massVolume == null)
+                return;
+
+            var lowOrbitRadius = orbitTarget.LowOrbitRadiusM();
             var lowOrbitPos = _perpVec * lowOrbitRadius;
-            var lowOrbit = OrbitMath.KeplerCircularFromPosition(_stdGravParamTargetBody_m, lowOrbitPos, _targetIntercept.eti);
-            var lowOrbitState = OrbitMath.GetStateVectors(lowOrbit, _targetIntercept.eti);
+            var lowOrbit = OrbitalMath.KeplerCircularFromPosition(_stdGravParamTargetBody_m, lowOrbitPos, _targetIntercept.eti);
+            var lowOrbitState = OrbitalMath.GetStateVectors(lowOrbit, _targetIntercept.eti);
 
             _endpointTargetOrbit = lowOrbit;
             _endpointTargetVelocity_m = (Vector3)lowOrbitState.velocity;
             _newtonUI.Radius = (float)lowOrbitState.position.Length();
-            _newtonUI.SetDeltaV((Vector3)lowOrbitState.velocity - _endpointInitalVelocity_m);
+            _newtonUI.SetDeltaV((Vector3)lowOrbitState.velocity - _endpointInitalVelocity_m,
+                thrust.ExhaustVelocityMps, massVolume.MassKg);
             _newtonUI.Eccentricity = (float)_endpointTargetOrbit.Eccentricity;
 
             _endpointInsertionPoint_m = (_perpVec * _newtonUI.Radius); //relative to the target body
-            _endpointTargetOrbitWidget.SetParametersFromKeplerElements(_endpointTargetOrbit, _endpointInsertionPoint_m);
+            _endpointTargetOrbitWidget?.SetParametersFromKeplerElements(_endpointTargetOrbit, _endpointInsertionPoint_m);
 
-            _endpointInitialOrbit = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody_m, _endpointInsertionPoint_m, _endpointInitalVelocity_m, _targetIntercept.eti);
-            _endpointInitalOrbitWidget.SetParametersFromKeplerElements(_endpointInitialOrbit, _endpointInsertionPoint_m);
+            _endpointInitialOrbit = OrbitalMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody_m, _endpointInsertionPoint_m, _endpointInitalVelocity_m, _targetIntercept.eti);
+            _endpointInitalOrbitWidget?.SetParametersFromKeplerElements(_endpointInitialOrbit, _endpointInsertionPoint_m);
         }
 
 
@@ -617,19 +570,18 @@ namespace Pulsar4X.Client
 
         internal override void EntityClicked(EntityState entity, MouseButtons button)
         {
-            if (entity == OrderingEntityState)
+            if (entity.Id == _entityId)
                 return;
             ImGuiIOPtr io = ImGui.GetIO();
 
             if (button == MouseButtons.Primary && !io.KeyShift )
             {
-                var cmd = WarpMoveCommand.CreateCommandEZ(
-                    OrderingEntityState.Entity,
-                    _uiState.LastClickedEntity.Entity,
-                    _departureDateTime);
-                if (cmd.EndpointTargetExpendDeltaV.Length() < _maxDV)
+                // Quick path: estimate the ΔV the default low-orbit insertion would cost; if the
+                // ship can afford it, send the order (the server computes the actual orbit).
+                if (TryEstimateEzDeltaV(entity.Id, out double dvEstimate, out int targetId)
+                    && dvEstimate < (OrderingEntity?.GetView<ThrustView>()?.DeltaVMps ?? 0))
                 {
-                    _uiState.Game.OrderHandler.HandleOrder(cmd);
+                    _uiState.GameClient?.SubmitCommandAsync(new Pulsar4X.Api.WarpMoveCommand(_entityId, targetId));
                     CloseWindow();
                 }
                 else
@@ -644,12 +596,68 @@ namespace Pulsar4X.Client
             }
         }
 
+        /// <summary>The ΔV needed to circularise into low orbit after a default warp (the engine's
+        /// CreateCommandEZ math over snapshots). False when the maths can't be done client-side;
+        /// targets without an orbit (jump points) cost nothing.</summary>
+        bool TryEstimateEzDeltaV(int clickedId, out double deltaV, out int targetId)
+        {
+            deltaV = 0;
+            targetId = clickedId;
+
+            var system = System;
+            var ordering = OrderingEntity;
+            if (system == null || ordering == null)
+                return false;
+
+            var target = system.GetEntity(clickedId);
+            if (target == null)
+                return false;
+
+            //if target is a colony, just make the target the parent planet.
+            if (target.Kind == BodyKind.Colony
+                && target.GetView<ColonyView>()?.PlanetEntityId is int planetId
+                && system.GetEntity(planetId) is { } planet)
+            {
+                target = planet;
+                targetId = planet.Id;
+            }
+
+            var targetOrbit = target.ResolveOrbit();
+            if (targetOrbit == null || targetOrbit.StandardGravParameter <= 0)
+                return true; // static target (jump point, anomaly): no insertion burn needed
+
+            var targetMass = target.GetView<MassVolumeView>();
+            var orderingMass = ordering.GetView<MassVolumeView>();
+            double warpSpeed = ordering.GetView<WarpAbilityView>()?.MaxSpeedMps ?? 0;
+            if (targetMass == null || orderingMass == null || warpSpeed <= 0)
+                return false;
+
+            var departureState = UseRelativeVelocity
+                ? ordering.GetRelativeState(_departureDateTime)
+                : ordering.GetAbsoluteState(system, _departureDateTime);
+
+            var sgp = GeneralMath.StandardGravitationalParameter(targetMass.MassKg + orderingMass.MassKg);
+            var lowOrbitRadius = target.LowOrbitRadiusM();
+            var perpVec = Vector3.Normalise(new Vector3(departureState.vel.Y * -1, departureState.vel.X, 0));
+            var lowOrbitPos = perpVec * lowOrbitRadius;
+
+            var moverAbsPos = ordering.GetAbsoluteState(system, _departureDateTime).pos;
+            var targetIntercept = SnapshotMoves.GetInterceptPosition(moverAbsPos, warpSpeed, target, system, _departureDateTime, lowOrbitPos);
+            var lowOrbit = OrbitalMath.KeplerCircularFromPosition(sgp, lowOrbitPos, targetIntercept.eti);
+            var lowOrbitState = OrbitalMath.GetStateVectors(lowOrbit, targetIntercept.eti);
+            var insertionVector = SnapshotMoves.GetOrbitalInsertionVector(
+                departureState.vel, target, system, targetIntercept.eti, UseRelativeVelocity);
+
+            deltaV = (insertionVector - (Vector3)lowOrbitState.velocity).Length();
+            return true;
+        }
+
         void CloseWindow()
         {
             this.SetActive(false);
             CurrentState = States.NeedsEntity;
-            _progradeDV = 0;
-            _radialDV = 0;
+            _targetId = null;
+            _orbitTargetId = null;
             if (_endpointInitalOrbitWidget != null)
             {
                 _uiState.SelectedSysMapRender?.UIWidgets.Remove(nameof(_endpointInitalOrbitWidget)+"initOrbit");

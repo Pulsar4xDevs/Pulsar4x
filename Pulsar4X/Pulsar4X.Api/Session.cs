@@ -52,4 +52,11 @@ public sealed record ConnectResult
 }
 
 /// <summary>Static, faction-agnostic facts about the running game session.</summary>
-public sealed record GameInfo(string Name, string GitHash);
+public sealed record GameInfo(string Name, string GitHash)
+{
+    /// <summary>Movement-rule settings the movement-order UI adapts to (they change which
+    /// maneuver inputs make sense, not what the player may do).</summary>
+    public bool StrictNewtonian { get; init; }
+
+    public bool UseRelativeVelocity { get; init; }
+}

@@ -313,6 +313,11 @@ namespace Pulsar4X.Client.Rendering
             _allLabels.RemoveWhere(x => x.EntityId == entityGuid);
         }
 
+        /// <summary>The entity's orbit-ring icon, for screen-space hit testing (maneuver-node
+        /// placement); null when the entity has no orbit ring.</summary>
+        internal OrbitIconBase? GetOrbitIcon(int entityId)
+            => _orbitRings.TryGetValue(entityId, out var icon) ? icon as OrbitIconBase : null;
+
         public void UpdateUserOrbitSettings()
         {
             foreach (var item in _orbitRings.Values)

@@ -1,13 +1,8 @@
 using System;
 using ImGuiNET;
-using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Datablobs;
+using Pulsar4X.Api;
 using Pulsar4X.Engine;
-using Pulsar4X.Engine.Orders;
-using Pulsar4X.Galaxy;
 using Pulsar4X.Orbital;
-using Pulsar4X.Movement;
-using Pulsar4X.Orbits;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Pulsar4X.Client;
@@ -20,7 +15,8 @@ namespace Pulsar4X.Client;
 public class ManeuverNodePanel
 {
     private GlobalUIState _uiState;
-    private Entity _orderEntity;
+    private readonly int _entityId;
+    private readonly string _systemId;
     private ManuverLinesComplete _manuverLines;
     private ManuverNode _node;
 
@@ -30,10 +26,10 @@ public class ManeuverNodePanel
     private bool _isInteracting;
 
     /// <summary>
-    /// When editing an existing order, this holds the command being edited.
-    /// Null when creating a new maneuver.
+    /// When editing an existing order, the id of the queued order being edited (the commit
+    /// cancels it and submits a replacement). Null when creating a new maneuver.
     /// </summary>
-    private NewtonThrustCommand? _editingCommand;
+    private readonly string? _editingOrderId;
 
     /// <summary>
     /// Screen position where the node marker is drawn. Updated each frame.
@@ -45,26 +41,20 @@ public class ManeuverNodePanel
     /// <summary>
     /// True when the panel is editing an existing order rather than creating a new one.
     /// </summary>
-    public bool IsEditing => _editingCommand != null;
+    public bool IsEditing => _editingOrderId != null;
 
-    public ManeuverNodePanel(GlobalUIState uiState, Entity orderEntity, ManuverLinesComplete manuverLines, ManuverNode node)
+    public ManeuverNodePanel(GlobalUIState uiState, int entityId, string systemId,
+        ManuverLinesComplete manuverLines, ManuverNode node, string? editingOrderId = null)
     {
         _uiState = uiState;
-        _orderEntity = orderEntity;
+        _entityId = entityId;
+        _systemId = systemId;
         _manuverLines = manuverLines;
         _node = node;
         _progradeDV = (float)node.Prograde;
         _radialDV = (float)node.Radial;
+        _editingOrderId = editingOrderId;
         _isActive = true;
-    }
-
-    /// <summary>
-    /// Creates the panel in edit mode for an existing NewtonThrustCommand.
-    /// </summary>
-    public ManeuverNodePanel(GlobalUIState uiState, Entity orderEntity, ManuverLinesComplete manuverLines, ManuverNode node, NewtonThrustCommand editingCommand)
-        : this(uiState, orderEntity, manuverLines, node)
-    {
-        _editingCommand = editingCommand;
     }
 
     public void Display()
@@ -72,8 +62,16 @@ public class ManeuverNodePanel
         if (!_isActive)
             return;
 
+        var system = _uiState.GameClient?.Galaxy.GetSystem(_systemId);
+        var entity = system?.GetEntity(_entityId);
+        if (system == null || entity == null)
+        {
+            ClosePanel();
+            return;
+        }
+
         // Update screen position from node world position
-        UpdateScreenPosition();
+        UpdateScreenPosition(entity, system);
 
         // Position the window near the node, but freeze position while user is dragging a slider
         // to prevent the window from moving out from under the mouse (which breaks the drag).
@@ -106,8 +104,8 @@ public class ManeuverNodePanel
 
             // Get max DV from ship
             float maxDV = 100f;
-            if (_orderEntity.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrustDB))
-                maxDV = (float)thrustDB.DeltaV;
+            if (entity.GetView<ThrustView>() is { } thrust)
+                maxDV = (float)thrust.DeltaVMps;
 
             float maxProgradeDV = Math.Max(1f, maxDV - Math.Abs(_radialDV));
             float maxRadialDV = Math.Max(1f, maxDV - Math.Abs(_progradeDV));
@@ -253,11 +251,11 @@ public class ManeuverNodePanel
             ImGui.Separator();
 
             // Action buttons - different labels for edit mode vs new mode
-            if (_editingCommand != null)
+            if (_editingOrderId != null)
             {
                 if (ImGui.Button("Update"))
                 {
-                    CommitNode();
+                    CommitNode(entity);
                 }
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Update the existing thrust order with new values");
@@ -273,7 +271,7 @@ public class ManeuverNodePanel
             {
                 if (ImGui.Button("Commit"))
                 {
-                    CommitNode();
+                    CommitNode(entity);
                 }
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Issue the thrust command to the ship");
@@ -301,7 +299,7 @@ public class ManeuverNodePanel
     {
         // Re-create the node at the new time, keeping existing prograde/radial
         _manuverLines.EditingNodes = new ManuverNode[1];
-        _manuverLines.EditingNodes[0] = new ManuverNode(_orderEntity, newNodeTime);
+        _manuverLines.EditingNodes[0] = new ManuverNode(_uiState, _systemId, _entityId, newNodeTime);
         _node = _manuverLines.EditingNodes[0];
 
         // Re-apply any existing delta-v
@@ -311,14 +309,14 @@ public class ManeuverNodePanel
         }
     }
 
-    private void UpdateScreenPosition()
+    private void UpdateScreenPosition(EntitySnapshot entity, IClientSystem system)
     {
         // Convert node world position (relative to SOI parent) to absolute, then to screen
-        var soiParentPos = MoveMath.GetSOIParentPositionDB(_orderEntity);
-        if (soiParentPos == null)
+        var soiParent = entity.GetSoiParent(system);
+        if (soiParent == null)
             return;
 
-        var absPos = soiParentPos.AbsolutePosition;
+        var absPos = soiParent.AbsolutePositionM(system, _uiState.PrimarySystemDateTime);
         var nodeWorldPos = new Orbital.Vector2(
             absPos.X + _node.NodePosition.X,
             absPos.Y + _node.NodePosition.Y);
@@ -327,39 +325,19 @@ public class ManeuverNodePanel
         ScreenPosition = new Vector2((float)screenPos.X, (float)screenPos.Y);
     }
 
-    private void CommitNode()
+    private void CommitNode(EntitySnapshot entity)
     {
-        if (!_orderEntity.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrustDB))
-            return;
-        if (!_orderEntity.TryGetDataBlob<MassVolumeDB>(out var massDB))
+        if (entity.GetView<ThrustView>() == null)
             return;
 
         // If editing, remove the old order first
-        if (_editingCommand != null)
+        if (_editingOrderId != null)
         {
-            if (_orderEntity.TryGetDataBlob<OrderableDB>(out var orderableDB))
-            {
-                orderableDB.ActionList.Remove(_editingCommand);
-            }
+            _uiState.GameClient?.SubmitCommandAsync(new CancelOrderCommand(_entityId, _editingOrderId));
         }
 
-        double totalMass = massDB.MassTotal;
-        double exhaustVelocity = thrustDB.ExhaustVelocity;
-        double burnRate = thrustDB.FuelBurnRate;
-        double dvMag = Math.Sqrt(_progradeDV * _progradeDV + _radialDV * _radialDV);
-
-        double fuelBurned = OrbitMath.TsiolkovskyFuelUse(totalMass, exhaustVelocity, dvMag);
-        double secondsBurn = fuelBurned / burnRate;
-
-        var deltaV = new Orbital.Vector3(_radialDV, _progradeDV, 0);
-        var order = NewtonThrustCommand.CreateCommand(
-            _orderEntity.FactionOwnerID,
-            _orderEntity,
-            _node.NodeTime,
-            deltaV,
-            secondsBurn);
-
-        _uiState.Game?.OrderHandler.HandleOrder(order);
+        var deltaV = new Vec3(_radialDV, _progradeDV, 0);
+        _uiState.GameClient?.SubmitCommandAsync(new Pulsar4X.Api.NewtonThrustCommand(_entityId, _node.NodeTime, deltaV));
 
         // Add to the maneuver tree
         _node.NodeName = "Thrust";
@@ -373,12 +351,9 @@ public class ManeuverNodePanel
     /// </summary>
     private void DeleteOrder()
     {
-        if (_editingCommand != null)
+        if (_editingOrderId != null)
         {
-            if (_orderEntity.TryGetDataBlob<OrderableDB>(out var orderableDB))
-            {
-                orderableDB.ActionList.Remove(_editingCommand);
-            }
+            _uiState.GameClient?.SubmitCommandAsync(new CancelOrderCommand(_entityId, _editingOrderId));
         }
         ClosePanel();
     }

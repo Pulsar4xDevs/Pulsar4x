@@ -316,6 +316,35 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    bridge, so the port just swaps the live-faction `GetDataBlob` reads for the provider (with a
    graceful "design data is not available" bail). No commands; same network-play caveat as the
    other provider-bridged windows.
+   The **movement-order cluster** (the map-coupled windows the system-map port unblocked) is ported.
+   The principle throughout: the interactive maneuver math — intercepts, insertion orbits, transfer
+   previews, patched-conics prediction — runs client-side over snapshot elements (`SnapshotMoves`,
+   the movement counterpart of `SnapshotOrbits`, plus `OrbitalMath` gaining the pure functions
+   `IntegrateOneStep`/`OrbitPhasingManuvers` that used to live in the engine), while the submitted
+   command carries only the player's intent and the server recomputes what matters. Three commands
+   cover the whole cluster: `NewtonThrustCommand` (node time + orbit-relative ΔV; the server
+   computes burn duration from its own fuel state and rejects burns beyond the ship's ΔV),
+   `WarpMoveCommand` (destination + optional insertion point — destination visibility enforced at
+   the boundary; without an insertion point the server plots the default low-orbit arrival, and
+   either way it recomputes the intercept and post-warp orbit, so the window's elaborate orbit
+   shaping is preview-only), and `CancelOrderCommand` (remove a queued, not-yet-running order — like
+   `SetOrderPause`, a direct translator mutation since no engine order exists for it). Ported
+   windows: **ChangeCurrentOrbitWindow** and **WarpOrderWindow** (their `OrbitOrderIcon`/
+   `WarpMoveOrderWidget` map widgets now take `IPosition` + scalars / snapshot ids), and
+   **NavWindow**, keeping its five functional modes (manual thrust planning, Hohmann, interplanetary
+   Hohmann, phase change, escape SOI) and dropping the dead ones (Hohmann2/OE — their
+   `NewtonSimpleCommand`/`NavSequenceCommand` dispatch was already commented out in the engine —
+   plus the Phasing/High-ΔV/Porkchop stubs). The **maneuver-node UI** (`ManuverNode`, the maneuver
+   lines, `ManeuverNodePanel`, and the orbit-click orchestration in `GlobalUIState`) is snapshot-
+   based: nodes capture burn scalars from the snapshot, encounter/patched-conics prediction
+   enumerates the SOI parent's faction-visible children, orbit-line hit-testing resolves icons by
+   entity id from `SystemMapRendering` (this had silently broken in the map port, which stopped
+   populating `EntityState.OrbitIcon`), and editing an existing maneuver works from
+   `OrderSnapshot.ManeuverNodeTime`/`ManeuverDeltaVMps` with commit = cancel + resubmit — retiring
+   the EntityWindow's last engine bridge. `GameInfo` now carries the `StrictNewtonian`/
+   `UseRelativeVelocity` movement-rule settings the warp window adapts its inputs to. The
+   **OrderCreationWindow** (a non-functional prototype whose action button did nothing) was retired
+   rather than ported.
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
@@ -352,7 +381,8 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
   `AddTechToQueueCommand`, `RemoveTechFromQueueCommand`, `MoveTechInQueueCommand`,
   `TransferCargoCommand` (+ `CargoTransferItem`),
   `SetFireControlWeaponsCommand`, `SetFireControlTargetCommand`, `AssignOrdnanceCommand`,
-  `SetFireModeCommand`, `SetOrderPauseCommand`,
+  `SetFireModeCommand`, `SetOrderPauseCommand`, `CancelOrderCommand`,
+  `NewtonThrustCommand`, `WarpMoveCommand`,
   `UninstallComponentCommand`, `InstallComponentCommand`, `QueueIndustryJobCommand`,
   `ChangeIndustryJobPriorityCommand`, `CancelIndustryJobCommand`, `AddToConstructionQueueCommand`,
   `MoveConstructionJobCommand`, `RemoveConstructionJobCommand`), `CommandResult`.
@@ -380,13 +410,10 @@ The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api`
   advance so their `PositionView` is at most a tick old. The element round-trip is verified against
   engine positions in `ApiOrbitPropagationTests`. Remaining: the map itself (and the map-coupled
   order windows below) consume this when ported.
-- **The remaining movement-order windows are map work, not window work.** `WarpOrderWindow`,
-  `NavWindow`, `ChangeCurrentOrbitWindow` and `ManeuverNodePanel` take their input from map clicks
-  (world-coordinate picking) and render their output as map widgets (`OrbitOrderIcon`,
-  `WarpMoveOrderWidget`, `RouteLines`), with camera control in the loop — they can only be ported
-  together with the system-map renderer. The position foundation above plus the existing
-  command-translation recipe is what that effort builds on (`WarpMoveCommand`/`NewtonThrustCommand`
-  DTOs land then).
+- ~~The remaining movement-order windows are map work, not window work.~~ **Resolved (with the
+  movement-order port):** `WarpOrderWindow`, `NavWindow`, `ChangeCurrentOrbitWindow`,
+  `ManeuverNodePanel` and their map widgets are snapshot-based; the
+  `WarpMoveCommand`/`NewtonThrustCommand`/`CancelOrderCommand` DTOs landed (see phase 4).
 - **Faction selection on connect is naive** — binds to the first faction. Real selection/auth via
   `ConnectRequest.Credential` lands with networking.
 - ~~The in-process adapter lives in `Pulsar4X.Api`.~~ **Resolved:** `InProcessAdapter` and the

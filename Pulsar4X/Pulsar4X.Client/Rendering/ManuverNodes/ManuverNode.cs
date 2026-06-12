@@ -1,24 +1,15 @@
 using System;
 using System.Collections.Generic;
-using Pulsar4X.Datablobs;
-using Pulsar4X.Engine;
+using Pulsar4X.Api;
 using Pulsar4X.Interfaces;
-using Pulsar4X.Extensions;
 using Pulsar4X.Orbital;
-using Pulsar4X.Factions;
-using Pulsar4X.Orbits;
-using Pulsar4X.Storage;
-using Pulsar4X.Galaxy;
-using Pulsar4X.Movement;
-using static Pulsar4X.Movement.NewtonionMovementProcessor;
 
 namespace Pulsar4X.Client;
 
 public struct TrajectorySegment
 {
     public KeplerElements Orbit;
-    public Entity ParentBody;
-    public IPosition ParentPosition;
+    public int ParentId;
     public string ParentName;
     public DateTime StartTime;
     public DateTime EndTime;
@@ -32,7 +23,7 @@ public struct TrajectorySegment
     /// </summary>
     public bool IsFlybySegment;
     /// <summary>
-    /// For flyby segments: the orbit of ParentBody around the original SOI parent.
+    /// For flyby segments: the orbit of the segment's parent body around the original SOI parent.
     /// Used to compute the body's predicted position at each rendering sample time.
     /// </summary>
     public KeplerElements BodyOrbitKE;
@@ -40,7 +31,7 @@ public struct TrajectorySegment
 
 public struct EncounterPrediction
 {
-    public Entity Body;
+    public int BodyId;
     public string BodyName;
     public Orbital.Vector3 BodyPositionAtEncounter;
     public double SOIRadius_m;
@@ -110,36 +101,49 @@ public class ManuverNode
         get { return Angle.RadiansFromVector3(NodePosition); }
     }
 
-    internal Entity _orderEntity;
-    private NewtonThrustAbilityDB _newtonThrust;
-    private double _totalMass;
-    private double _dryMass;
-    private double _parentMass;
-    private double _sgp;
-    private ICargoable _fuelType;
+    internal readonly int EntityId;
+    private readonly GlobalUIState _state;
+    private readonly string _systemId;
+    private readonly int? _soiParentId;
 
-    private double _burnRate;
-    private double _exhaustVelocity;
+    // Burn-relevant scalars captured from the snapshot at node creation, like the pre-port node
+    // captured them from the live DataBlobs.
+    private readonly double _totalMass;
+    private readonly double _totalFuel;
+    private readonly double _parentMass;
+    private readonly double _sgp;
+    private readonly double _burnRate;
+    private readonly double _exhaustVelocity;
+
     public KeplerElements PriorOrbit;
     public KeplerElements TargetOrbit;
     public EncounterPrediction[] Encounters = Array.Empty<EncounterPrediction>();
     public TrajectorySegment[] Segments = Array.Empty<TrajectorySegment>();
 
-    public ManuverNode(Entity orderEntity, DateTime nodeTime)
+    public ManuverNode(GlobalUIState state, string systemId, int entityId, DateTime nodeTime)
     {
+        _state = state;
+        _systemId = systemId;
+        EntityId = entityId;
         NodeTime = nodeTime;
-        _orderEntity = orderEntity;
-        _newtonThrust = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>();
-        _totalMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassTotal;
-        _dryMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassDry;
-        _parentMass = _orderEntity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-        _sgp = GeneralMath.StandardGravitationalParameter(_totalMass + _parentMass);
-        var fuelTypeID = _newtonThrust.FuelType;
-        _fuelType = orderEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(fuelTypeID);
-        _burnRate = _newtonThrust.FuelBurnRate;
-        _exhaustVelocity = _newtonThrust.ExhaustVelocity;
 
-        PriorOrbit = orderEntity.GetDataBlob<OrbitDB>().GetElements();
+        var system = state.GameClient?.Galaxy.GetSystem(systemId);
+        var entity = system?.GetEntity(entityId);
+        var thrust = entity?.GetView<ThrustView>();
+        var massVolume = entity?.GetView<MassVolumeView>();
+        var orbit = entity?.GetView<OrbitView>();
+        var parent = system != null && entity != null ? entity.GetSoiParent(system) : null;
+
+        _totalMass = massVolume?.MassKg ?? 0;
+        _totalFuel = thrust?.TotalFuelKg ?? 0;
+        _burnRate = thrust?.FuelBurnRateKgPerSec ?? 0;
+        _exhaustVelocity = thrust?.ExhaustVelocityMps ?? 0;
+        _parentMass = parent?.GetView<MassVolumeView>()?.MassKg ?? 0;
+        _soiParentId = parent?.Id;
+        _sgp = orbit?.StandardGravParameter
+               ?? GeneralMath.StandardGravitationalParameter(_totalMass + _parentMass);
+
+        PriorOrbit = orbit?.ToKeplerElements() ?? default;
         TargetOrbit = PriorOrbit;
         NodePosition = OrbitalMath.GetRelativePosition(PriorOrbit, NodeTime);
         TargetVelocity = OrbitalMath.GetStateVectors(TargetOrbit, nodeTime).velocity;
@@ -256,7 +260,7 @@ public class ManuverNode
 
         FuelCostTotal = OrbitalMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, totalDV);
         FuelCostRemaining = FuelCostTotal;
-        BurnTimeTotal = FuelCostTotal / _burnRate;
+        BurnTimeTotal = _burnRate > 0 ? FuelCostTotal / _burnRate : 0;
         BurnTimeRemaining = BurnTimeTotal;
 
         // Burn is centered on NodeTime
@@ -276,14 +280,14 @@ public class ManuverNode
             _sgp, new Orbital.Vector3(Radial, Prograde, Normal), centerPos, centerVel);
 
         double mass = _totalMass;
-        double dryMass = _totalMass - _newtonThrust.TotalFuel_kg;
+        double dryMass = _totalMass - _totalFuel;
         double secondsRemaining = BurnTimeTotal;
 
         while (secondsRemaining > 0)
         {
             double timeStep = Math.Min(1.0, secondsRemaining);
 
-            var result = IntegrateOneStep(
+            var result = OrbitalMath.IntegrateOneStep(
                 position, velocity, manuverDeltaV,
                 mass, _parentMass,
                 _exhaustVelocity, _burnRate, dryMass,
@@ -305,16 +309,34 @@ public class ManuverNode
         PredictPatchedConics();
     }
 
+    /// <summary>The faction-visible bodies orbiting the node's SOI parent (encounter candidates).</summary>
+    private List<(EntitySnapshot Body, OrbitView Orbit)> GetSiblingBodies(IClientSystem system)
+    {
+        var siblings = new List<(EntitySnapshot, OrbitView)>();
+        if (_soiParentId is not int parentId)
+            return siblings;
+
+        foreach (var other in system.Entities)
+        {
+            if (other.Id == EntityId)
+                continue;
+            var orbit = other.GetView<OrbitView>();
+            if (orbit == null || orbit.ParentId != parentId || orbit.StandardGravParameter <= 0)
+                continue;
+            siblings.Add((other, orbit));
+        }
+        return siblings;
+    }
+
     private void DetectEncounters()
     {
-        var soiParent = _orderEntity.GetSOIParentEntity();
-        if (soiParent == null || !soiParent.TryGetDataBlob<PositionDB>(out var parentPosDB))
+        var system = _state.GameClient?.Galaxy.GetSystem(_systemId);
+        if (system == null)
         {
             Encounters = Array.Empty<EncounterPrediction>();
             return;
         }
 
-        var children = parentPosDB.Children.ToArray();
         var results = new List<EncounterPrediction>();
 
         DateTime burnEnd = TimeAtStartBurn + TimeSpan.FromSeconds(BurnTimeTotal);
@@ -334,18 +356,13 @@ public class ManuverNode
         int steps = 180;
         double dt = scanSeconds / steps;
 
-        foreach (var child in children)
+        foreach (var (child, childOrbit) in GetSiblingBodies(system))
         {
-            if (child == _orderEntity)
-                continue;
-            if (!child.TryGetDataBlob<OrbitDB>(out var childOrbitDB))
-                continue;
-
-            double soiRadius = child.GetSOI_m();
+            double soiRadius = child.SoiRadiusM();
             if (double.IsInfinity(soiRadius) || double.IsNaN(soiRadius))
                 continue;
 
-            var bodyKE = childOrbitDB.GetElements();
+            var bodyKE = childOrbit.ToKeplerElements();
             double minDist = double.MaxValue;
             DateTime minTime = burnEnd;
             Orbital.Vector3 minShipPos = Orbital.Vector3.Zero;
@@ -386,9 +403,7 @@ public class ManuverNode
 
             if (minDist < soiRadius * 5)
             {
-                double bodyRadius = 0;
-                if (child.TryGetDataBlob<MassVolumeDB>(out var childMVDB))
-                    bodyRadius = childMVDB.RadiusInM;
+                double bodyRadius = child.GetView<MassVolumeView>()?.RadiusMetres ?? 0;
 
                 bool entersSOI = minDist < soiRadius;
 
@@ -400,8 +415,8 @@ public class ManuverNode
 
                 results.Add(new EncounterPrediction
                 {
-                    Body = child,
-                    BodyName = child.GetDefaultName(),
+                    BodyId = child.Id,
+                    BodyName = child.GetView<NameView>()?.Name ?? "Unknown",
                     BodyPositionAtEncounter = displayBodyPos,
                     SOIRadius_m = soiRadius,
                     BodyRadius_m = bodyRadius,
@@ -418,8 +433,9 @@ public class ManuverNode
 
     private void PredictPatchedConics()
     {
-        var soiParent = _orderEntity.GetSOIParentEntity();
-        if (soiParent == null || !soiParent.TryGetDataBlob<PositionDB>(out var parentPosDB))
+        var system = _state.GameClient?.Galaxy.GetSystem(_systemId);
+        var soiParent = _soiParentId is int soiId ? system?.GetEntity(soiId) : null;
+        if (system == null || soiParent == null)
         {
             Segments = Array.Empty<TrajectorySegment>();
             return;
@@ -428,7 +444,6 @@ public class ManuverNode
         var segments = new List<TrajectorySegment>();
         var currentOrbit = TargetOrbit;
         var currentParent = soiParent;
-        var currentParentPosDB = parentPosDB;
         DateTime burnEnd = TimeAtStartBurn + TimeSpan.FromSeconds(BurnTimeTotal);
         DateTime currentTime = burnEnd;
         double currentShipMass = _totalMass - FuelCostTotal;
@@ -436,8 +451,9 @@ public class ManuverNode
 
         // Keep track of the original parent for return-from-flyby
         var originalParent = soiParent;
-        var originalParentPosDB = parentPosDB;
         double originalParentMass = _parentMass;
+
+        var siblings = GetSiblingBodies(system);
 
         for (int depth = 0; depth < maxSegments; depth++)
         {
@@ -453,29 +469,23 @@ public class ManuverNode
                 scanSeconds = Math.Max(0, maxSeconds);
 
             // 2. Find earliest SOI crossing among sibling bodies
-            var children = currentParentPosDB.Children.ToArray();
             int steps = 180;
             double dt = scanSeconds / steps;
 
-            Entity crossBody = null;
+            EntitySnapshot? crossBody = null;
             KeplerElements crossBodyKE = default;
             double crossSOIRadius = 0;
             int crossStepInside = -1;
             int crossStepOutside = -1;
             double crossEarliestTime = double.MaxValue;
 
-            foreach (var child in children)
+            foreach (var (child, childOrbit) in siblings)
             {
-                if (child == _orderEntity)
-                    continue;
-                if (!child.TryGetDataBlob<OrbitDB>(out var childOrbitDB))
-                    continue;
-
-                double soiRadius = child.GetSOI_m();
+                double soiRadius = child.SoiRadiusM();
                 if (double.IsInfinity(soiRadius) || double.IsNaN(soiRadius) || soiRadius <= 0)
                     continue;
 
-                var bodyKE = childOrbitDB.GetElements();
+                var bodyKE = childOrbit.ToKeplerElements();
                 bool wasInside = false;
 
                 for (int s = 0; s <= steps; s++)
@@ -510,9 +520,8 @@ public class ManuverNode
                 segments.Add(new TrajectorySegment
                 {
                     Orbit = currentOrbit,
-                    ParentBody = currentParent,
-                    ParentPosition = currentParentPosDB,
-                    ParentName = currentParent.GetDefaultName(),
+                    ParentId = currentParent.Id,
+                    ParentName = currentParent.GetView<NameView>()?.Name ?? "Unknown",
                     StartTime = currentTime,
                     EndTime = endTime,
                     StartPosition = startPos,
@@ -550,9 +559,8 @@ public class ManuverNode
             segments.Add(new TrajectorySegment
             {
                 Orbit = currentOrbit,
-                ParentBody = currentParent,
-                ParentPosition = currentParentPosDB,
-                ParentName = currentParent.GetDefaultName(),
+                ParentId = currentParent.Id,
+                ParentName = currentParent.GetView<NameView>()?.Name ?? "Unknown",
                 StartTime = currentTime,
                 EndTime = crossTime,
                 StartPosition = segStartPos,
@@ -577,16 +585,13 @@ public class ManuverNode
                     shipState.velocity.Y - bodyState.velocity.Y,
                     0);
 
-                bodyMass = crossBody.GetDataBlob<MassVolumeDB>().MassTotal;
+                bodyMass = crossBody.GetView<MassVolumeView>()?.MassKg ?? 0;
                 newSGP = GeneralMath.StandardGravitationalParameter(currentShipMass + bodyMass);
             }
             catch
             {
                 break; // Can't compute state vectors
             }
-
-            if (!crossBody.TryGetDataBlob<PositionDB>(out var crossBodyPosDB))
-                break;
 
             KeplerElements newOrbit;
             try
@@ -629,9 +634,8 @@ public class ManuverNode
                         segments.Add(new TrajectorySegment
                         {
                             Orbit = newOrbit,
-                            ParentBody = crossBody,
-                            ParentPosition = crossBodyPosDB,
-                            ParentName = crossBody.GetDefaultName(),
+                            ParentId = crossBody.Id,
+                            ParentName = crossBody.GetView<NameView>()?.Name ?? "Unknown",
                             StartTime = crossTime,
                             EndTime = exitTime,
                             StartPosition = flybyStartPos,
@@ -655,7 +659,6 @@ public class ManuverNode
                         double returnSGP = GeneralMath.StandardGravitationalParameter(currentShipMass + originalParentMass);
                         currentOrbit = OrbitalMath.KeplerFromPositionAndVelocity(returnSGP, returnPos, returnVel, exitTime);
                         currentParent = originalParent;
-                        currentParentPosDB = originalParentPosDB;
                         currentTime = exitTime;
                         flybyCompleted = true;
                     }
@@ -680,9 +683,8 @@ public class ManuverNode
             segments.Add(new TrajectorySegment
             {
                 Orbit = newOrbit,
-                ParentBody = crossBody,
-                ParentPosition = crossBodyPosDB,
-                ParentName = crossBody.GetDefaultName(),
+                ParentId = crossBody.Id,
+                ParentName = crossBody.GetView<NameView>()?.Name ?? "Unknown",
                 StartTime = crossTime,
                 EndTime = captureEnd,
                 StartPosition = captureStartPos,
@@ -703,8 +705,6 @@ public class ManuverNode
 public class ManuverSequence
 {
     public String SequenceName = "";
-    //public bool IsOpen = false;
-    //public ManuverSequence ParentSequence;
 
     /// <summary>
     /// the focal point of orbits in this sequence.

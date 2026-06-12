@@ -5,6 +5,16 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace Pulsar4X.Orbital
 {
+    /// <summary>One step of newtonian movement integration (see <see cref="OrbitalMath.IntegrateOneStep"/>).</summary>
+    public struct IntegrationState
+    {
+        public Vector3 Position;
+        public Vector3 Velocity;
+        public Vector3 ManuverDeltaV;
+        public double Mass;
+        public double FuelBurned;
+    }
+
     /// <summary>
     /// Orbit math.
     /// note multiple simular functions for doing the same thing, some of these are untested.
@@ -1554,9 +1564,112 @@ namespace Pulsar4X.Orbital
             return manuvers;
         }
 
+        /// <summary>
+        /// Pure-function integration step shared by newtonian movement and prediction functions.
+        /// Computes gravity, thrust (with Tsiolkovsky fuel model), and trapezoidal position integration.
+        /// </summary>
+        public static IntegrationState IntegrateOneStep(
+            Vector3 position, Vector3 velocity, Vector3 manuverDeltaV,
+            double mass, double parentMass,
+            double exhaustVelocity, double fuelBurnRate, double dryMass,
+            double timeStep)
+        {
+            double distanceToParent_m = position.Length();
+            distanceToParent_m = Math.Max(distanceToParent_m, 0.1);
+
+            double gravForce = UniversalConstants.Science.GravitationalConstant * (mass * parentMass / Math.Pow(distanceToParent_m, 2));
+            Vector3 gravForceVector = gravForce * -Vector3.Normalise(position);
+            Vector3 totalDVFromGrav = (gravForceVector / mass) * timeStep;
+
+            Vector3 totalDVFromThrust = new Vector3(0, 0, 0);
+            double fuelBurned = 0;
+
+            if (manuverDeltaV.Length() > 0)
+            {
+                double afterBurnMass = mass - fuelBurnRate * timeStep;
+                double dvThisStep = TsiolkovskyRocketEquation(mass, afterBurnMass, exhaustVelocity);
+                dvThisStep = Math.Min(manuverDeltaV.Length(), dvThisStep);
+
+                double availableDV = TsiolkovskyRocketEquation(mass, dryMass, exhaustVelocity);
+                dvThisStep = Math.Min(availableDV, dvThisStep);
+
+                totalDVFromThrust = Vector3.Normalise(manuverDeltaV) * dvThisStep;
+
+                fuelBurned = TsiolkovskyFuelUse(mass, exhaustVelocity, dvThisStep);
+                manuverDeltaV -= totalDVFromThrust;
+                mass -= fuelBurned;
+            }
+
+            Vector3 totalDV = totalDVFromGrav + totalDVFromThrust;
+            Vector3 newVelocity = totalDV + velocity;
+            Vector3 deltaPos = (velocity + newVelocity) / 2 * timeStep;
+
+            return new IntegrationState
+            {
+                Position = position + deltaPos,
+                Velocity = newVelocity,
+                ManuverDeltaV = manuverDeltaV,
+                Mass = mass,
+                FuelBurned = fuelBurned,
+            };
+        }
 
         /// <summary>
-        /// Hohmann transfer manuver, assumes a cicular orbit. 
+        /// Phasing manuver: temporarily change the orbital period to shift position along the same
+        /// orbit by the given phase angle, then circularise back.
+        /// https://en.wikipedia.org/wiki/Orbit_phasing
+        /// </summary>
+        /// <param name="orbit">current orbit</param>
+        /// <param name="sgp">standard gravitational parameter (m^3 s^-2)</param>
+        /// <param name="manuverTime">datetime the manuver should start (idealy at periapsis)</param>
+        /// <param name="phaseAngle">angle in radians between our position and the rendevous position</param>
+        /// <returns>an array of vector3(normal,prograde,radial) and seconds from first manuver. first seconds in array will be 0</returns>
+        public static (Vector3 deltaV, double timeInSeconds)[] OrbitPhasingManuvers(KeplerElements orbit, double sgp, DateTime manuverTime, double phaseAngle)
+        {
+            double orbitalPeriod = orbit.Period;
+            double e = orbit.Eccentricity;
+
+            var wc1 = Math.Sqrt((1 - e) / (1 + e));
+            var wc2 = Math.Tan(phaseAngle / 2);
+
+            double E = 2 * Math.Atan(wc1 * wc2);
+
+            double wc3 = orbitalPeriod / (Math.PI * 2);
+            double wc4 = E - e * Math.Sin(E);
+
+            double phaseTime = wc3 * wc4;
+
+            double phaseOrbitPeriod = orbitalPeriod - phaseTime;
+
+            //using the full Major axis here rather than semiMaj.
+            double phaseOrbitMA = 2 * Math.Cbrt((sgp * phaseOrbitPeriod * phaseOrbitPeriod) / (4 * Math.PI * Math.PI));
+
+            //one of these will be the periapsis, the other the appoapsis, depending on whether we're behind or ahead of the target.
+            double phaseOrbitApsis1 = GetPosition(orbit, manuverTime).Length();
+            double phaseOrbitApsis2 = phaseOrbitMA - phaseOrbitApsis1;
+
+            double wc7 = Math.Sqrt((phaseOrbitApsis1 * phaseOrbitApsis2) / (phaseOrbitMA));
+            double wc8 = Math.Sqrt(2 * sgp);
+            double phaseOrbitAngularMomentum = wc8 * wc7;
+
+            double wc9 = Math.Sqrt((orbit.Apoapsis * orbit.Periapsis) / (orbit.Apoapsis + orbit.Periapsis));
+            double wc10 = Math.Sqrt(2 * sgp);
+            double orbitAngularMomentum = wc9 * wc10;
+
+            double r = GetPosition(orbit, manuverTime).Length();
+
+            double dv = phaseOrbitAngularMomentum / r - orbitAngularMomentum / r;
+
+            (Vector3, double)[] manuvers = new (Vector3, double)[2];
+            manuvers[0] = (new Vector3(0, dv, 0), 0);
+            manuvers[1] = (new Vector3(0, -dv, 0), phaseOrbitPeriod);
+
+            return manuvers;
+        }
+
+
+        /// <summary>
+        /// Hohmann transfer manuver, assumes a cicular orbit.
         /// </summary>
         /// <param name="sgp">standard gravitational parameter (m^3 s^-2)</param>
         /// <param name="aInt">radius of interceptor orbit (meters)</param>

@@ -101,6 +101,10 @@ public sealed record OrbitView(
     /// <summary>The orbit parent's sphere-of-influence radius (metres), for clipping hyperbolic
     /// trajectories; 0 when the orbit has no parent.</summary>
     public double ParentSoiRadiusM { get; init; }
+
+    /// <summary>The orbiting entity's own sphere-of-influence radius (metres), for maneuver
+    /// targeting and encounter prediction; 0 when not computable.</summary>
+    public double SoiRadiusM { get; init; }
 }
 
 /// <summary>Newtonian-thrust movement: the current trajectory (as orbital elements around the
@@ -125,7 +129,11 @@ public sealed record ProjectileView : IComponentView;
 /// <summary>An in-flight beam: its current endpoints (metres), re-pushed each tick.</summary>
 public sealed record BeamView(Vec3 StartPosition, Vec3 EndPosition) : IComponentView;
 
-public sealed record MassVolumeView(double MassKg, double RadiusMetres, double DensityGramsPerCm3) : IComponentView;
+public sealed record MassVolumeView(double MassKg, double RadiusMetres, double DensityGramsPerCm3) : IComponentView
+{
+    /// <summary>Mass without fuel/cargo (kg).</summary>
+    public double DryMassKg { get; init; }
+}
 
 public sealed record BodyView(
     string BodyType,
@@ -217,7 +225,14 @@ public sealed record ThrustView(
     double ExhaustVelocityMps,
     double DeltaVMps,
     /// <summary>ΔV at full fuel tanks; 0 when it can't be determined.</summary>
-    double MaxDeltaVMps) : IComponentView;
+    double MaxDeltaVMps) : IComponentView
+{
+    /// <summary>Mass of fuel currently aboard (kg), for burn-time/fuel-cost previews.</summary>
+    public double TotalFuelKg { get; init; }
+
+    /// <summary>Display name of the fuel the drive burns.</summary>
+    public string FuelName { get; init; } = "";
+}
 
 public sealed record WarpAbilityView(double MaxSpeedMps) : IComponentView;
 
@@ -593,6 +608,14 @@ public sealed record OrderSnapshot(
 
     /// <summary>Pause the simulation when this order actions.</summary>
     public bool PauseOnAction { get; init; }
+
+    /// <summary>The burn-centre time of an editable maneuver (null otherwise), so the maneuver
+    /// panel can edit the order from the snapshot alone.</summary>
+    public DateTime? ManeuverNodeTime { get; init; }
+
+    /// <summary>The orbit-relative ΔV (X = radial, Y = prograde, Z = normal) of an editable
+    /// maneuver; null otherwise.</summary>
+    public Vec3? ManeuverDeltaVMps { get; init; }
 }
 
 /// <summary>The entity's own order queue (owner-only; fleets/ships also carry orders in the

@@ -129,16 +129,6 @@ namespace Pulsar4X.Client
             };
             ToolButtons.Add(btn);
 
-            btn = new ToolBarOption()
-            {
-                Picture = _uiState.Img_Tree(),
-                TooltipText = "Design orders and assign to entities",
-                OnClick = new Action(OrderCreationWindow.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(OrderCreationWindow.GetInstance().GetActive)
-                //Design orders for OrderableDB entities
-            };
-            ToolButtons.Add(btn);
-
             // btn = new ToolBarOption()
             // {
             //     Picture = _uiState.Img_Tree(),

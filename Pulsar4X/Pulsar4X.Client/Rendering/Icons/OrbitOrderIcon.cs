@@ -1,12 +1,8 @@
 ﻿using System;
-using Pulsar4X.Engine;
-using Pulsar4X.Extensions;
+using Pulsar4X.Interfaces;
 using Pulsar4X.Orbital;
 using SDL3;
 using System.Linq;
-using Pulsar4X.Orbits;
-using Pulsar4X.Galaxy;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
@@ -37,8 +33,6 @@ namespace Pulsar4X.Client
         }
 
         #region Static properties
-
-        PositionDB _bodyPositionDB;
 
         internal Vector2 Apoapsis;
         internal Vector2 Periapsis;
@@ -96,35 +90,18 @@ namespace Pulsar4X.Client
         double _trueAnomaly = 0;
         #endregion
 
-        internal OrbitOrderIcon(Entity targetEntity) : base(targetEntity.GetDataBlob<PositionDB>())
+        /// <summary>An order-preview orbit around the body at <paramref name="bodyPosition"/>;
+        /// the orbit's shape is set afterwards via <see cref="SetParametersFromKeplerElements"/>.</summary>
+        internal OrbitOrderIcon(IPosition bodyPosition, double soiRadiusM, double bodyRadiusM) : base(bodyPosition)
         {
-
-            _bodyPositionDB = targetEntity.GetDataBlob<PositionDB>();
-
             OrbitEllipseSemiMaj_m = 20000;
             OrbitEllipseSemiMinor_m = 20000;
 
             _linearEccentricity_m = 0;
 
-            _soiWorldRadius_m = targetEntity.GetSOI_m();
-            _soiWorldRadius_AU = targetEntity.GetSOI_AU();
-            _targetWorldRadius_AU = targetEntity.GetDataBlob<MassVolumeDB>().RadiusInAU;
-            Setup();
-
-        }
-
-        public OrbitOrderIcon(OrbitDB orbitDB): base(orbitDB.Parent.GetDataBlob<PositionDB>())
-        {
-            var targetEntity = orbitDB.Parent;
-            _bodyPositionDB = targetEntity.GetDataBlob<PositionDB>();
-
-            OrbitEllipseSemiMaj_m = (float)orbitDB.SemiMajorAxis;
-            _eccentricity = orbitDB.Eccentricity;
-            EllipseMath.SemiMinorAxis(OrbitEllipseSemiMaj_m, _eccentricity);
-            _linearEccentricity_m = (float)(orbitDB.Eccentricity * OrbitEllipseSemiMaj_m);
-
-            _soiWorldRadius_AU = targetEntity.GetSOI_AU();
-            _targetWorldRadius_AU = targetEntity.GetDataBlob<MassVolumeDB>().RadiusInAU;
+            _soiWorldRadius_m = soiRadiusM;
+            _soiWorldRadius_AU = Distance.MToAU(soiRadiusM);
+            _targetWorldRadius_AU = Distance.MToAU(bodyRadiusM);
             Setup();
         }
 

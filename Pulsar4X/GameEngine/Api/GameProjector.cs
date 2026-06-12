@@ -134,7 +134,8 @@ namespace Pulsar4X.Engine.Api
             (e, f) => e.TryGetDataBlob<NameDB>(out var n) ? new NameView(n.GetName(f)) : null,
             (e, _) => e.TryGetDataBlob<Pulsar4X.Movement.PositionDB>(out var p) ? ToPositionView(p) : null,
             (e, _) => e.TryGetDataBlob<OrbitDB>(out var o) ? ToOrbitView(o) : null,
-            (e, _) => e.TryGetDataBlob<MassVolumeDB>(out var m) ? new MassVolumeView(m.MassTotal, m.RadiusInM, m.DensityDry_gcm) : null,
+            (e, _) => e.TryGetDataBlob<MassVolumeDB>(out var m)
+                ? new MassVolumeView(m.MassTotal, m.RadiusInM, m.DensityDry_gcm) { DryMassKg = m.MassDry } : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<OrderableDB>(out var ord) && ord.ActionList.Count > 0
                 ? new OrdersView(ProjectOrders(e)) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Movement.NewtonThrustAbilityDB>(out var th)
@@ -206,6 +207,7 @@ namespace Pulsar4X.Engine.Api
                 Epoch = o.Epoch,
                 StandardGravParameter = o.GravitationalParameter_m3S2,
                 ParentSoiRadiusM = o.ParentDB is OrbitDB parentOrbit ? OrbitMath.GetSOIRadius(parentOrbit) : 0,
+                SoiRadiusM = o.Parent != null ? OrbitMath.GetSOIRadius(o) : 0,
             };
 
         private static OrbitView ToOrbitView(Pulsar4X.Orbital.KeplerElements ke, int? parentId)
@@ -385,30 +387,32 @@ namespace Pulsar4X.Engine.Api
         {
             // ΔV at full tanks: the dry mass pushed by however much fuel the tanks could hold.
             double maxDeltaV = 0;
-            if (thrust.ExhaustVelocity > 0
-                && ship.TryGetDataBlob<MassVolumeDB>(out var massVolume)
-                && ship.TryGetDataBlob<CargoStorageDB>(out var storage)
-                && ship.Manager?.Game is { } game
+            string fuelName = "";
+            if (ship.Manager?.Game is { } game
                 && game.Factions.TryGetValue(factionId, out var faction)
-                && faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo))
+                && faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo)
+                && thrust.FuelType != null && factionInfo.Data.CargoGoods.Contains(thrust.FuelType)
+                && factionInfo.Data.CargoGoods.GetAny(thrust.FuelType) is { } fuel)
             {
-                var cargoLibrary = factionInfo.Data.CargoGoods;
-                if (thrust.FuelType != null && cargoLibrary.Contains(thrust.FuelType))
+                fuelName = fuel.Name;
+                if (thrust.ExhaustVelocity > 0 && fuel.VolumePerUnit > 0
+                    && ship.TryGetDataBlob<MassVolumeDB>(out var massVolume)
+                    && ship.TryGetDataBlob<CargoStorageDB>(out var storage)
+                    && storage.TypeStores.TryGetValue(fuel.CargoTypeID, out var fuelStore))
                 {
-                    var fuel = cargoLibrary.GetAny(thrust.FuelType);
-                    if (fuel != null && fuel.VolumePerUnit > 0
-                        && storage.TypeStores.TryGetValue(fuel.CargoTypeID, out var fuelStore))
-                    {
-                        double maxFuelKg = fuelStore.MaxVolume / fuel.VolumePerUnit * fuel.MassPerUnit;
-                        double dryMass = massVolume.MassTotal - thrust.TotalFuel_kg;
-                        if (dryMass > 0 && maxFuelKg > 0)
-                            maxDeltaV = thrust.ExhaustVelocity * Math.Log((dryMass + maxFuelKg) / dryMass);
-                    }
+                    double maxFuelKg = fuelStore.MaxVolume / fuel.VolumePerUnit * fuel.MassPerUnit;
+                    double dryMass = massVolume.MassTotal - thrust.TotalFuel_kg;
+                    if (dryMass > 0 && maxFuelKg > 0)
+                        maxDeltaV = thrust.ExhaustVelocity * Math.Log((dryMass + maxFuelKg) / dryMass);
                 }
             }
 
             return new ThrustView(thrust.ThrustInNewtons, thrust.FuelBurnRate, thrust.ExhaustVelocity,
-                thrust.DeltaV, maxDeltaV);
+                thrust.DeltaV, maxDeltaV)
+            {
+                TotalFuelKg = thrust.TotalFuel_kg,
+                FuelName = fuelName,
+            };
         }
 
         private static ColonyView ToColonyView(ColonyInfoDB c, Entity colony, int factionId)
@@ -1136,8 +1140,9 @@ namespace Pulsar4X.Engine.Api
             var orders = new List<OrderSnapshot>(orderable.ActionList.Count);
             foreach (var action in orderable.ActionList)
             {
+                var maneuver = !action.IsRunning ? action as Pulsar4X.Movement.NewtonThrustCommand : null;
                 orders.Add(new OrderSnapshot(action.Name, action.IsRunning, action.GetIsFinished, action.Details,
-                    action is Pulsar4X.Movement.NewtonThrustCommand && !action.IsRunning)
+                    maneuver != null)
                 {
                     OrderId = action.CmdID,
                     IsBlocking = action.IsBlocking,
@@ -1145,6 +1150,8 @@ namespace Pulsar4X.Engine.Api
                     UsesExternalLane = action.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.InteractWithExternalEntity),
                     UsesSelfLane = action.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.IneteractWithSelf),
                     PauseOnAction = action.PauseOnAction,
+                    ManeuverNodeTime = maneuver?.NodeDateTime,
+                    ManeuverDeltaVMps = maneuver != null ? ToVec3(maneuver.OrbitrelativeDeltaV) : null,
                 });
             }
             return orders;
