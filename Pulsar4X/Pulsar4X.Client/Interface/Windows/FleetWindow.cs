@@ -5,13 +5,6 @@ using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Api;
 using Pulsar4X.Client.Interface.Widgets;
-// Engine references below are used ONLY by the deferred Standing Orders tab (see DisplayStandingOrdersTab):
-// the conditional-order editor has no API command surface yet and still mutates engine objects directly.
-using Pulsar4X.Engine;
-using Pulsar4X.Engine.Orders;
-using Pulsar4X.DataStructures;
-using Pulsar4X.Extensions;
-using Pulsar4X.Fleets;
 
 namespace Pulsar4X.Client
 {
@@ -42,26 +35,53 @@ namespace Pulsar4X.Client
         // pushes replace the whole tree, so cached FleetSnapshot references go stale).
         private FleetSnapshot? selectedFleet = null;
 
-        private ConditionalOrder? selectedOrder = null;
+        // ----- Standing Orders editor -----
+        // The editor works on a local copy of the fleet's StandingOrders snapshot; Save replaces
+        // the fleet's whole list with one SetStandingOrdersCommand.
 
-        private Dictionary<ConditionItem, int> orderConditionIndexes = new Dictionary<ConditionItem, int>();
+        private sealed class StandingOrderEdit
+        {
+            public byte[] NameBuffer = new byte[32];
+            public List<StandingOrderConditionEdit> Conditions = new();
+            public List<string> Actions = new();
+        }
+
+        private sealed class StandingOrderConditionEdit
+        {
+            public string ConditionType = "";
+            public StandingOrderComparison Comparison;
+            public float Threshold;
+            /// <summary>How this condition combines with the next one.</summary>
+            public StandingOrderLogic Logic = StandingOrderLogic.And;
+        }
+
+        // Display registry for the contract's StandingOrderTypes ids.
+        private static readonly (string Id, string Label)[] StandingOrderActionTypes =
+        {
+            (StandingOrderTypes.MoveToNearestColony, "Move to Nearest Colony"),
+            (StandingOrderTypes.MoveToNearestGeoSurvey, "Move to Nearest Geo Survey"),
+            (StandingOrderTypes.MoveToNearestAnomaly, "Move to Nearest Anomaly"),
+            (StandingOrderTypes.Refuel, "Refuel"),
+            (StandingOrderTypes.Resupply, "Resupply"),
+        };
+
+        private static readonly (string Id, string Label, string Description, float Min, float Max)[] StandingOrderConditionTypes =
+        {
+            (StandingOrderTypes.FuelCondition, "Fuel (Fleet Avg)", "percent", 0, 100),
+        };
+
+        private static readonly string[] orderComparisons = { "<", "<=", "=", ">", ">=" };
+
+        private List<StandingOrderEdit>? editedOrders;
+        private IReadOnlyList<StandingOrder>? editedOrdersSource;
+        private bool standingOrdersDirty;
+        private int selectedOrderIndex = -1;
         private int orderActionsIndex = 0;
         private int orderConditionsIndex = 0;
-        private string[] orderComparisons;
-        private string[] orderActionDescriptions = OrderRegistry.Actions.Keys.ToArray();
-        private string[] orderConditionDescriptions = OrderRegistry.Conditions.Keys.ToArray();
-        private byte[] orderNameBuffer = new byte[32];
 
         private FleetWindow()
         {
             _uiState.OnFactionChanged += FactionChanged;
-
-            orderComparisons = new string[5];
-            orderComparisons[0] = ComparisonType.LessThan.ToDescription();
-            orderComparisons[1] = ComparisonType.LessThanOrEqual.ToDescription();
-            orderComparisons[2] = ComparisonType.EqualTo.ToDescription();
-            orderComparisons[3] = ComparisonType.GreaterThan.ToDescription();
-            orderComparisons[4] = ComparisonType.GreaterThanOrEqual.ToDescription();
         }
         internal static FleetWindow GetInstance()
         {
@@ -83,17 +103,10 @@ namespace Pulsar4X.Client
             selectedFleetId = fleetId;
             selectedShips = new ();
             autoSelectFirstFleet = false;
-            SelectOrder(null);
-        }
-
-        private void SelectOrder(ConditionalOrder? order)
-        {
-            selectedOrder = order;
-
-            if(selectedOrder != null)
-            {
-                orderNameBuffer = selectedOrder.Name.IsNullOrEmpty() ? new byte[32] : Utils.BytesFromString(selectedOrder.Name, 32);
-            }
+            editedOrders = null;
+            editedOrdersSource = null;
+            standingOrdersDirty = false;
+            selectedOrderIndex = -1;
         }
 
         private static FleetSnapshot? FindFleet(IReadOnlyList<FleetSnapshot> fleets, int fleetId)
@@ -681,25 +694,77 @@ namespace Pulsar4X.Client
             }
         }
 
-        #region Deferred: engine-backed Standing Orders editor
-        // The conditional-order editor below still reads and mutates live engine objects
-        // (FleetDB.StandingOrders, ConditionalOrder, ConditionItem). It has no API command surface
-        // yet — porting it means a serializable conditional-order contract + edit commands, which
-        // gets its own pass. Until then this tab resolves the engine entity from the selected id.
+        #region Standing Orders editor
+
+        /// <summary>The local working copy, (re)loaded from the snapshot when nothing is being
+        /// edited; player edits are kept until saved or the fleet selection changes.</summary>
+        private List<StandingOrderEdit> EditedOrders(FleetSnapshot fleet)
+        {
+            if (editedOrders != null
+                && (standingOrdersDirty || ReferenceEquals(editedOrdersSource, fleet.StandingOrders)))
+                return editedOrders;
+
+            editedOrders = new List<StandingOrderEdit>(fleet.StandingOrders.Count);
+            foreach (var order in fleet.StandingOrders)
+            {
+                var edit = new StandingOrderEdit
+                {
+                    NameBuffer = string.IsNullOrEmpty(order.Name) ? new byte[32] : Utils.BytesFromString(order.Name, 32),
+                    Actions = order.Actions.ToList(),
+                };
+                foreach (var condition in order.Conditions)
+                {
+                    edit.Conditions.Add(new StandingOrderConditionEdit
+                    {
+                        ConditionType = condition.ConditionType,
+                        Comparison = condition.Comparison,
+                        Threshold = condition.Threshold,
+                        Logic = condition.Logic ?? StandingOrderLogic.And,
+                    });
+                }
+                editedOrders.Add(edit);
+            }
+
+            editedOrdersSource = fleet.StandingOrders;
+            standingOrdersDirty = false;
+            if (selectedOrderIndex >= editedOrders.Count)
+                selectedOrderIndex = -1;
+            return editedOrders;
+        }
+
+        private void SaveStandingOrders(int fleetId, List<StandingOrderEdit> orders)
+        {
+            var payload = new List<StandingOrder>(orders.Count);
+            foreach (var edit in orders)
+            {
+                var conditions = new List<StandingOrderCondition>(edit.Conditions.Count);
+                for (int i = 0; i < edit.Conditions.Count; i++)
+                {
+                    var condition = edit.Conditions[i];
+                    conditions.Add(new StandingOrderCondition(
+                        condition.ConditionType,
+                        condition.Comparison,
+                        condition.Threshold,
+                        i < edit.Conditions.Count - 1 ? condition.Logic : null));
+                }
+                payload.Add(new StandingOrder(Utils.StringFromBytes(edit.NameBuffer), conditions, edit.Actions.ToList()));
+            }
+
+            _uiState.GameClient?.SubmitCommandAsync(new SetStandingOrdersCommand(fleetId, payload));
+            // Keep the local copy on screen until the refreshed fleet snapshot is pushed back.
+            standingOrdersDirty = false;
+            editedOrdersSource = null;
+        }
 
         private void DisplayStandingOrdersTab()
         {
-            if(selectedFleetId is not { } fleetId || _uiState.Game == null)
+            if(selectedFleetId is not { } fleetId || selectedFleet == null)
                 return;
-
-            if(!_uiState.Game.GlobalManager.TryGetGlobalEntityById(fleetId, out var fleetEntity)
-                || !fleetEntity.TryGetDataBlob<FleetDB>(out var fleetDB))
-                return;
-
-            int factionId = _uiState.GameClient?.Session.FactionId ?? -1;
 
             if(ImGui.BeginTabItem("Standing Orders"))
             {
+                var orders = EditedOrders(selectedFleet);
+
                 var size = ImGui.GetContentRegionAvail();
                 var firstChildSize = new Vector2(size.X * 0.33f, size.Y);
                 var secondChildSize = new Vector2(size.X * 0.67f - (size.X * 0.01f), size.Y);
@@ -707,38 +772,40 @@ namespace Pulsar4X.Client
                 {
                     var sizeAvailable = ImGui.GetContentRegionAvail();
                     DisplayHelpers.Header("Order List");
-                    if(fleetDB.StandingOrders.Count > 0)
+                    if(orders.Count > 0)
                     {
-                        var count = fleetDB.StandingOrders.Count;
-                        var orders = fleetDB.StandingOrders.ToArray();
-                        for(int i = 0; i < count; i++)
+                        for(int i = 0; i < orders.Count; i++)
                         {
                             ImGui.PushID("###" + i);
-                            bool isSelected = selectedOrder == orders[i];
-                            var name = orders[i].Name.IsNullOrEmpty() ? "<un-named>" : orders[i].Name;
+                            bool isSelected = selectedOrderIndex == i;
+                            string name = Utils.StringFromBytes(orders[i].NameBuffer);
+                            if(string.IsNullOrEmpty(name)) name = "<un-named>";
                             if(ImGui.Selectable((i + 1) + ". " + name, ref isSelected))
                             {
-                                SelectOrder(orders[i]);
+                                selectedOrderIndex = i;
                             }
                             if(ImGui.BeginPopupContextItem())
                             {
                                 if(i > 0 && ImGui.MenuItem("Move Up"))
                                 {
-                                    var temp = fleetDB.StandingOrders[i - 1];
-                                    fleetDB.StandingOrders[i - 1] = fleetDB.StandingOrders[i];
-                                    fleetDB.StandingOrders[i] = temp;
+                                    (orders[i - 1], orders[i]) = (orders[i], orders[i - 1]);
+                                    if(selectedOrderIndex == i) selectedOrderIndex = i - 1;
+                                    else if(selectedOrderIndex == i - 1) selectedOrderIndex = i;
+                                    standingOrdersDirty = true;
                                 }
-                                if(i < count - 1 && ImGui.MenuItem("Move Down"))
+                                if(i < orders.Count - 1 && ImGui.MenuItem("Move Down"))
                                 {
-                                    var temp = fleetDB.StandingOrders[i + 1];
-                                    fleetDB.StandingOrders[i + 1] = fleetDB.StandingOrders[i];
-                                    fleetDB.StandingOrders[i] = temp;
+                                    (orders[i + 1], orders[i]) = (orders[i], orders[i + 1]);
+                                    if(selectedOrderIndex == i) selectedOrderIndex = i + 1;
+                                    else if(selectedOrderIndex == i + 1) selectedOrderIndex = i;
+                                    standingOrdersDirty = true;
                                 }
                                 if(ImGui.MenuItem("Delete Order"))
                                 {
-                                    fleetDB.StandingOrders.Remove(orders[i]);
-                                    if(isSelected)
-                                        SelectOrder(null);
+                                    orders.RemoveAt(i);
+                                    if(selectedOrderIndex == i) selectedOrderIndex = -1;
+                                    else if(selectedOrderIndex > i) selectedOrderIndex--;
+                                    standingOrdersDirty = true;
                                 }
                                 ImGui.EndPopup();
                             }
@@ -753,75 +820,70 @@ namespace Pulsar4X.Client
                     ImGui.SetCursorPosY(sizeAvailable.Y - 12f);
                     if(ImGui.Button("Create New Order", new Vector2(sizeAvailable.X, 0)))
                     {
-                        var order = new ConditionalOrder();
-                        fleetDB.StandingOrders.Add(order);
+                        orders.Add(new StandingOrderEdit());
+                        standingOrdersDirty = true;
 
                         // if this is the first order, select it
-                        if(fleetDB.StandingOrders.Count == 1)
-                            SelectOrder(order);
+                        if(orders.Count == 1)
+                            selectedOrderIndex = 0;
                     }
                 }
                 ImGui.EndChild();
                 ImGui.SameLine();
-                if(ImGui.BeginChild("StandingOrders-edit", secondChildSize, ImGuiChildFlags.Borders) && selectedOrder != null)
+                if(ImGui.BeginChild("StandingOrders-edit", secondChildSize, ImGuiChildFlags.Borders)
+                    && selectedOrderIndex >= 0 && selectedOrderIndex < orders.Count)
                 {
+                    var selectedOrder = orders[selectedOrderIndex];
                     var sizeAvailable = ImGui.GetContentRegionAvail();
                     DisplayHelpers.Header("Order Name");
-                    ImGui.InputText("###order-name-input", orderNameBuffer, 32);
+                    if(ImGui.InputText("###order-name-input", selectedOrder.NameBuffer, 32))
+                    {
+                        standingOrdersDirty = true;
+                    }
                     ImGui.NewLine();
                     DisplayHelpers.Header("Conditions", "If the conditions listed are true, the actions will execute.");
 
-                    var count = selectedOrder.Condition.ConditionItems.Count;
-                    var items = selectedOrder.Condition.ConditionItems.ToArray();
-                    for(int i = 0; i < count; i++)
+                    var conditions = selectedOrder.Conditions;
+                    for(int i = 0; i < conditions.Count; i++)
                     {
-                        var conditionItem = items[i];
-                        ImGui.PushID(conditionItem.UniqueID);
-                        if(!orderConditionIndexes.ContainsKey(conditionItem)) orderConditionIndexes.Add(conditionItem, 0);
-                        var condition = conditionItem.Condition;
-                        ImGui.Button(OrderRegistry.ConditionDescriptions[conditionItem.Condition.GetType()], new Vector2(Math.Max(sizeAvailable.X * 0.4f, 128f), 0f));
+                        var condition = conditions[i];
+                        var conditionType = StandingOrderConditionTypes.FirstOrDefault(t => t.Id == condition.ConditionType);
+                        ImGui.PushID(i);
+                        ImGui.Button(conditionType.Label ?? condition.ConditionType, new Vector2(Math.Max(sizeAvailable.X * 0.4f, 128f), 0f));
 
-                        switch(condition.DisplayType)
+                        int value = (int)condition.Threshold;
+                        int comparisonIndex = (int)condition.Comparison;
+                        ImGui.SameLine();
+                        ImGui.SetNextItemWidth(Math.Max(sizeAvailable.X * 0.075f, 16f));
+                        if(ImGui.Combo("###orderComparison", ref comparisonIndex, orderComparisons, orderComparisons.Length))
                         {
-                            case ConditionDisplayType.Comparison:
-                                ComparisonCondition comparisonCondition = (ComparisonCondition)condition;
-                                int value = (int)comparisonCondition.Threshold;
-                                int comparisonIndex = Array.IndexOf(orderComparisons, comparisonCondition.ComparisionType.ToDescription());
-                                ImGui.SameLine();
-                                ImGui.SetNextItemWidth(Math.Max(sizeAvailable.X * 0.075f, 16f));
-                                if(ImGui.Combo("###orderComparison", ref comparisonIndex, orderComparisons, orderComparisons.Length))
-                                {
-                                    ComparisonType? comparisonType = (ComparisonType?)Enum.GetValues(typeof(ComparisonType)).GetValue(comparisonIndex);
-                                    if(comparisonType != null)
-                                        comparisonCondition.ComparisionType = comparisonType.Value;
-                                }
-                                ImGui.SameLine();
-                                ImGui.SetNextItemWidth(Math.Max(sizeAvailable.X * 0.15f, 32f));
-                                if(ImGui.InputInt(comparisonCondition.Description + "###orderValue", ref value, 1, 5))
-                                {
-                                    if(value < comparisonCondition.MinValue) value = (int)comparisonCondition.MinValue;
-                                    if(value > comparisonCondition.MaxValue) value = (int)comparisonCondition.MaxValue;
+                            condition.Comparison = (StandingOrderComparison)comparisonIndex;
+                            standingOrdersDirty = true;
+                        }
+                        ImGui.SameLine();
+                        ImGui.SetNextItemWidth(Math.Max(sizeAvailable.X * 0.15f, 32f));
+                        if(ImGui.InputInt(conditionType.Description + "###orderValue", ref value, 1, 5))
+                        {
+                            if(value < conditionType.Min) value = (int)conditionType.Min;
+                            if(value > conditionType.Max) value = (int)conditionType.Max;
 
-                                    comparisonCondition.Threshold = value;
-                                }
-                                break;
+                            condition.Threshold = value;
+                            standingOrdersDirty = true;
                         }
 
                         // Show the logical operators UI on all but the last item
                         ImGui.SameLine();
                         var position = ImGui.GetCursorPos();
-                        if(i < count - 1)
+                        if(i < conditions.Count - 1)
                         {
-                            if(conditionItem.LogicalOperation == null)
-                                conditionItem.LogicalOperation = LogicalOperation.And;
-
                             ImGui.SetCursorPosY(position.Y + 12f);
-                            if(conditionItem.LogicalOperation == LogicalOperation.And)
+                            if(condition.Logic == StandingOrderLogic.And)
                             {
                                 ImGui.SetCursorPosX(sizeAvailable.X - 82f);
                                 if(ImGui.Button("AND"))
                                 {
-                                    conditionItem.LogicalOperation = LogicalOperation.Or;
+                                    condition.Logic = StandingOrderLogic.Or;
+                                    standingOrdersDirty = true;
                                 }
                             }
                             else
@@ -829,7 +891,8 @@ namespace Pulsar4X.Client
                                 ImGui.SetCursorPosX(sizeAvailable.X - 48f);
                                 if(ImGui.Button("OR"))
                                 {
-                                    conditionItem.LogicalOperation = LogicalOperation.And;
+                                    condition.Logic = StandingOrderLogic.And;
+                                    standingOrdersDirty = true;
                                 }
                             }
                         }
@@ -838,72 +901,78 @@ namespace Pulsar4X.Client
                         ImGui.SetCursorPosX(sizeAvailable.X - 12f);
                         if(ImGui.Button("x"))
                         {
-                            selectedOrder.Condition.ConditionItems.Remove(conditionItem);
+                            conditions.RemoveAt(i);
+                            standingOrdersDirty = true;
+                            ImGui.PopID();
+                            break;
                         }
                         ImGui.PopID();
                     }
 
                     if(ImGui.Button("Add Condition"))
                     {
-                        if(orderConditionsIndex >= 0 && orderConditionsIndex < orderConditionDescriptions.Length)
+                        if(orderConditionsIndex >= 0 && orderConditionsIndex < StandingOrderConditionTypes.Length)
                         {
-                            ConditionItem item = OrderRegistry.Conditions[orderConditionDescriptions[orderConditionsIndex]]();
-                            selectedOrder.Condition.ConditionItems.Add(item);
+                            var conditionType = StandingOrderConditionTypes[orderConditionsIndex];
+                            conditions.Add(new StandingOrderConditionEdit
+                            {
+                                ConditionType = conditionType.Id,
+                                Comparison = StandingOrderComparison.LessThan,
+                                Threshold = 30f,
+                            });
+                            standingOrdersDirty = true;
                         }
                     }
                     ImGui.SameLine();
-                    if(ImGui.Combo("###order-add-condition-list", ref orderConditionsIndex, orderConditionDescriptions, orderConditionDescriptions.Length))
+                    var conditionLabels = StandingOrderConditionTypes.Select(t => t.Label).ToArray();
+                    if(ImGui.Combo("###order-add-condition-list", ref orderConditionsIndex, conditionLabels, conditionLabels.Length))
                     {
                     }
 
                     ImGui.NewLine();
                     DisplayHelpers.Header("Actions", "The actions listed will execute in the order in which they are listed.");
 
-                    foreach(var action in selectedOrder.Actions.ToArray())
+                    for(int i = 0; i < selectedOrder.Actions.Count; i++)
                     {
-                        DisplayActionItem(action);
+                        ImGui.PushID("action" + i);
+                        var actionSize = ImGui.GetContentRegionAvail();
+                        var actionLabel = StandingOrderActionTypes.FirstOrDefault(t => t.Id == selectedOrder.Actions[i]).Label;
+                        ImGui.Text(actionLabel ?? selectedOrder.Actions[i]);
+                        ImGui.SameLine();
+                        ImGui.SetCursorPosX(actionSize.X - 12f);
+                        if(ImGui.Button("x"))
+                        {
+                            selectedOrder.Actions.RemoveAt(i);
+                            standingOrdersDirty = true;
+                            ImGui.PopID();
+                            break;
+                        }
+                        ImGui.PopID();
                     }
 
                     if(ImGui.Button("Add Action"))
                     {
-                        if(orderActionsIndex >= 0 && orderActionsIndex < orderActionDescriptions.Length)
+                        if(orderActionsIndex >= 0 && orderActionsIndex < StandingOrderActionTypes.Length)
                         {
-                            var selectedAction = OrderRegistry.Actions[orderActionDescriptions[orderActionsIndex]](factionId, fleetEntity);
-                            selectedOrder.Actions.Add(selectedAction);
+                            selectedOrder.Actions.Add(StandingOrderActionTypes[orderActionsIndex].Id);
+                            standingOrdersDirty = true;
                         }
                     }
                     ImGui.SameLine();
-                    if(ImGui.Combo("###order-add-action-list", ref orderActionsIndex, orderActionDescriptions, orderActionDescriptions.Length))
+                    var actionLabels = StandingOrderActionTypes.Select(t => t.Label).ToArray();
+                    if(ImGui.Combo("###order-add-action-list", ref orderActionsIndex, actionLabels, actionLabels.Length))
                     {
                     }
 
                     ImGui.SetCursorPosY(sizeAvailable.Y - 12f);
-                    if(ImGui.Button("Save", new Vector2(sizeAvailable.X, 0)))
+                    if(ImGui.Button(standingOrdersDirty ? "Save*" : "Save", new Vector2(sizeAvailable.X, 0)))
                     {
-                        string name = Utils.StringFromBytes(orderNameBuffer);
-                        if(name.IsNotNullOrEmpty())
-                        {
-                            selectedOrder.Name = name;
-                        }
+                        SaveStandingOrders(fleetId, orders);
                     }
                 }
                 ImGui.EndChild();
                 ImGui.EndTabItem();
             }
-        }
-
-        private void DisplayActionItem(EntityCommand action)
-        {
-            ImGui.PushID(action.GetHashCode());
-            var size = ImGui.GetContentRegionAvail();
-            ImGui.Text(OrderRegistry.ActionDescriptions[action.GetType()]);
-            ImGui.SameLine();
-            ImGui.SetCursorPosX(size.X - 12f);
-            if(ImGui.Button("x"))
-            {
-                selectedOrder?.Actions.Remove(action);
-            }
-            ImGui.PopID();
         }
 
         #endregion

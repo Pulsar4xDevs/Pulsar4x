@@ -129,7 +129,7 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    The **Selector's Corporation section** reads `Galaxy.Faction` (a `FactionSnapshot`: name, abbreviation,
    funds) — pushed via `FactionChanged` on connect and on each clock advance (funds track the economy);
    pushed per-subscription since funds are faction-specific.
-   The **FleetWindow** is ported except its Standing Orders tab (see gaps): selection is by fleet id
+   The **FleetWindow** is fully ported: selection is by fleet id
    against `Galaxy.Fleets`, re-resolved every frame since fleet pushes replace the whole tree.
    `FleetSnapshot` carries what its Summary/list UI shows (flagship + commander names, current
    system id/name, the nearest *faction-visible* orbit parent — resolved server-side so hidden
@@ -345,6 +345,18 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    `UseRelativeVelocity` movement-rule settings the warp window adapts its inputs to. The
    **OrderCreationWindow** (a non-functional prototype whose action button did nothing) was retired
    rather than ported.
+   The **FleetWindow's Standing Orders tab** (the conditional-order editor, the window's last
+   engine-backed piece) is ported. The contract: `StandingOrder` (name + `StandingOrderCondition`s
+   with comparison/threshold/And-Or chaining + action ids), serializable so it doubles as the read
+   model on `FleetSnapshot.StandingOrders` and the payload of the single write,
+   `SetStandingOrdersCommand` — the editor works on a client-side copy and Save replaces the
+   fleet's whole list in one validated command (validate-then-swap, so a rejected list leaves the
+   existing orders untouched). The condition/action registries are engine code rather than mod
+   data, so their ids are part of the contract (`StandingOrderTypes`): the client builds its
+   pick-lists from them (replacing the engine-typed `OrderRegistry`, now deleted), the translator
+   maps them back to engine conditions/actions and the projector the other way. Like research and
+   cancel-order, replacing the list raises no engine message, so the server re-pushes the fleet
+   tree after an accepted set.
 5. **Events:** map `MessagePublisher`/`EventManager` to the `GameEventEnvelope` stream.
 6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
    event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
@@ -373,6 +385,7 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
   component design: `ComponentDesignsSnapshot` (`ComponentTemplateSummary`, `ComponentDesignSummary`)
   and `DesignerInput` (the serializable form of a designer's player-set state).
 - Writes: `GameCommand` (+ `RenameCommand`, `CreateFleetCommand`, `CreateColonyCommand`, `DisbandFleetCommand`,
+  `SetStandingOrdersCommand` (+ `StandingOrder`, `StandingOrderCondition`, `StandingOrderTypes`),
   `CreateComponentDesignCommand`, `SaveShipDesignCommand` (+ `ShipComponentCount`),
   `DeleteShipDesignCommand`, `SetShipDesignObsoleteCommand`,
   `ChangeFleetParentCommand`, `ReassignShipCommand`, `SetFlagshipCommand`, `MoveToBodyCommand`,
@@ -422,11 +435,10 @@ The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api`
   `Pulsar4X.Tests` drives `EngineGameServer` through `IGameServer` directly (no UI dependency).
 - **Two `PositionDB` classes exist** (`Pulsar4X.Datablobs` legacy/excluded vs the live
   `Pulsar4X.Movement`); projection uses the live one. Worth cleaning up the dead copy separately.
-- **The FleetWindow's Standing Orders tab is still engine-backed.** The conditional-order editor
-  mutates `FleetDB.StandingOrders`/`ConditionalOrder` engine objects directly (it pre-dates the
-  command pipeline entirely), so it needs a serializable conditional-order contract plus
-  add/remove/reorder/update commands — deliberately deferred to its own pass. The tab resolves the
-  engine entity from the selected fleet id; everything else in the window is API-only.
+- ~~The FleetWindow's Standing Orders tab is still engine-backed.~~ **Resolved:** the
+  conditional-order contract (`StandingOrder`/`StandingOrderTypes`) and the whole-list
+  `SetStandingOrdersCommand` landed; the editor is client-side with a single validated write
+  (see phase 4).
 - **Quiet DataBlob mutations need an engine message.** Some engine code mutates DataBlobs without
   raising a `MessagePublisher` message, leaving already-pushed entity views stale (same family as
   the positions gap). The fix pattern (like `FleetReorganized`): the mutating engine code publishes

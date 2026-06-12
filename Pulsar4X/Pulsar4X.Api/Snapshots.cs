@@ -634,6 +634,58 @@ public sealed record ShipSnapshot(
     public IReadOnlyList<OrderSnapshot> Orders { get; init; } = Array.Empty<OrderSnapshot>();
 }
 
+/// <summary>
+/// Well-known ids for the standing-order condition and action types. The set is defined by engine
+/// code (not mod data), so the ids are part of the contract both sides compile against: the client
+/// builds its pick-lists from them, the server maps them back to engine conditions/actions.
+/// </summary>
+public static class StandingOrderTypes
+{
+    // conditions
+    public const string FuelCondition = "condition:fuel";
+
+    // actions
+    public const string MoveToNearestColony = "action:move-to-nearest-colony";
+    public const string MoveToNearestGeoSurvey = "action:move-to-nearest-geo-survey";
+    public const string MoveToNearestAnomaly = "action:move-to-nearest-anomaly";
+    public const string Refuel = "action:refuel";
+    public const string Resupply = "action:resupply";
+}
+
+public enum StandingOrderComparison
+{
+    LessThan,
+    LessThanOrEqual,
+    EqualTo,
+    GreaterThan,
+    GreaterThanOrEqual,
+}
+
+/// <summary>How a condition combines with the next condition in the list.</summary>
+public enum StandingOrderLogic
+{
+    And,
+    Or,
+}
+
+/// <summary>One threshold condition of a standing order (e.g. "fleet average fuel &lt; 30%").</summary>
+public sealed record StandingOrderCondition(
+    string ConditionType,
+    StandingOrderComparison Comparison,
+    float Threshold,
+    /// <summary>Combines this condition with the next one; null on the last condition.</summary>
+    StandingOrderLogic? Logic = null);
+
+/// <summary>
+/// One standing (conditional) order: when the conditions hold and the fleet is otherwise idle, the
+/// actions are queued in order. Serializable, so it doubles as the read model on
+/// <see cref="FleetSnapshot.StandingOrders"/> and the write payload of <c>SetStandingOrdersCommand</c>.
+/// </summary>
+public sealed record StandingOrder(
+    string Name,
+    IReadOnlyList<StandingOrderCondition> Conditions,
+    IReadOnlyList<string> Actions);
+
 /// <summary>A fleet node in the command hierarchy.</summary>
 public sealed class FleetSnapshot
 {
@@ -656,6 +708,7 @@ public sealed class FleetSnapshot
     public bool CanGeoSurvey { get; init; }
     public bool CanGravSurvey { get; init; }
     public IReadOnlyList<OrderSnapshot> Orders { get; init; } = Array.Empty<OrderSnapshot>();
+    public IReadOnlyList<StandingOrder> StandingOrders { get; init; } = Array.Empty<StandingOrder>();
     public IReadOnlyList<FleetSnapshot> SubFleets { get; init; } = Array.Empty<FleetSnapshot>();
     public IReadOnlyList<ShipSnapshot> Ships { get; init; } = Array.Empty<ShipSnapshot>();
 }

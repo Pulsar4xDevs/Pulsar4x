@@ -1109,10 +1109,79 @@ namespace Pulsar4X.Engine.Api
                 CanGeoSurvey = fleet.HasGeoSurveyAbility(),
                 CanGravSurvey = fleet.HasJPSurveyAbililty(),
                 Orders = ProjectOrders(fleet),
+                StandingOrders = ProjectStandingOrders(fleetDB),
                 SubFleets = subFleets,
                 Ships = ships,
             };
         }
+
+        // The condition/action registries are engine code, so the type ids are part of the API
+        // contract (StandingOrderTypes); only registry types can exist, the UI being their sole creator.
+        private static IReadOnlyList<Pulsar4X.Api.StandingOrder> ProjectStandingOrders(FleetDB? fleetDB)
+        {
+            if (fleetDB == null || fleetDB.StandingOrders.Count == 0)
+                return Array.Empty<Pulsar4X.Api.StandingOrder>();
+
+            var orders = new List<Pulsar4X.Api.StandingOrder>(fleetDB.StandingOrders.Count);
+            foreach (var order in fleetDB.StandingOrders)
+            {
+                var conditions = new List<StandingOrderCondition>();
+                var items = order.Condition?.ConditionItems;
+                for (int i = 0; items != null && i < items.Count; i++)
+                {
+                    if (items[i].Condition is not Engine.Orders.ComparisonCondition comparison)
+                        continue;
+
+                    string? conditionType = comparison switch
+                    {
+                        Engine.Orders.FuelCondition => StandingOrderTypes.FuelCondition,
+                        _ => null,
+                    };
+                    if (conditionType == null)
+                        continue;
+
+                    conditions.Add(new StandingOrderCondition(
+                        conditionType,
+                        ToStandingOrderComparison(comparison.ComparisionType),
+                        comparison.Threshold,
+                        items[i].LogicalOperation switch
+                        {
+                            DataStructures.LogicalOperation.And => StandingOrderLogic.And,
+                            DataStructures.LogicalOperation.Or => StandingOrderLogic.Or,
+                            _ => null,
+                        }));
+                }
+
+                var actions = new List<string>();
+                foreach (var action in order.Actions)
+                {
+                    string? actionType = action switch
+                    {
+                        Pulsar4X.Movement.MoveToNearestColonyAction => StandingOrderTypes.MoveToNearestColony,
+                        Pulsar4X.Movement.MoveToNearestGeoSurveyAction => StandingOrderTypes.MoveToNearestGeoSurvey,
+                        Pulsar4X.Movement.MoveToNearestAnomalyAction => StandingOrderTypes.MoveToNearestAnomaly,
+                        Pulsar4X.Fleets.RefuelAction => StandingOrderTypes.Refuel,
+                        Pulsar4X.Fleets.ResupplyAction => StandingOrderTypes.Resupply,
+                        _ => null,
+                    };
+                    if (actionType != null)
+                        actions.Add(actionType);
+                }
+
+                orders.Add(new Pulsar4X.Api.StandingOrder(order.Name ?? "", conditions, actions));
+            }
+            return orders;
+        }
+
+        private static StandingOrderComparison ToStandingOrderComparison(DataStructures.ComparisonType comparison)
+            => comparison switch
+            {
+                DataStructures.ComparisonType.LessThan => StandingOrderComparison.LessThan,
+                DataStructures.ComparisonType.LessThanOrEqual => StandingOrderComparison.LessThanOrEqual,
+                DataStructures.ComparisonType.EqualTo => StandingOrderComparison.EqualTo,
+                DataStructures.ComparisonType.GreaterThan => StandingOrderComparison.GreaterThan,
+                _ => StandingOrderComparison.GreaterThanOrEqual,
+            };
 
         private static ShipSnapshot ProjectShip(Entity ship, int factionId)
         {

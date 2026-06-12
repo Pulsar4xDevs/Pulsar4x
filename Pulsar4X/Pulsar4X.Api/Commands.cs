@@ -42,6 +42,13 @@ public sealed record ReassignShipCommand(int TargetEntityId, int ToFleetId) : Ga
 
 public sealed record SetFlagshipCommand(int TargetEntityId, int ShipId) : GameCommand(TargetEntityId);
 
+/// <summary>Replace a fleet's standing (conditional) orders with the given list. The editor runs
+/// client-side; this is the single authoritative write — the server rebuilds engine conditions and
+/// actions from the <see cref="StandingOrderTypes"/> ids, rejecting unknown ones.</summary>
+public sealed record SetStandingOrdersCommand(
+    int TargetEntityId,
+    IReadOnlyList<StandingOrder> Orders) : GameCommand(TargetEntityId);
+
 // ----- fleet movement/activity orders (commanded entity: the fleet) -----
 
 public sealed record MoveToBodyCommand(int TargetEntityId, int BodyId) : GameCommand(TargetEntityId);

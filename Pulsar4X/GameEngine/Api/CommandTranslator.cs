@@ -45,6 +45,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(ChangeFleetParentCommand)] = TranslateChangeFleetParent,
                 [typeof(ReassignShipCommand)] = TranslateReassignShip,
                 [typeof(SetFlagshipCommand)] = TranslateSetFlagship,
+                [typeof(SetStandingOrdersCommand)] = TranslateSetStandingOrders,
                 [typeof(MoveToBodyCommand)] = TranslateMoveToBody,
                 [typeof(Pulsar4X.Api.GeoSurveyCommand)] = TranslateGeoSurvey,
                 [typeof(GravSurveyCommand)] = TranslateGravSurvey,
@@ -194,6 +195,80 @@ namespace Pulsar4X.Engine.Api
 
             return Dispatch(FleetOrder.SetFlagShip(faction.Id, commanded, ship));
         }
+
+        // The standing-orders editor runs client-side; the whole list replaces in one validated
+        // write. Engine conditions/actions are rebuilt from their StandingOrderTypes ids — there is
+        // no engine order for this (the pre-port UI mutated FleetDB.StandingOrders by reference).
+        private CommandResult TranslateSetStandingOrders(Entity faction, Entity commanded, GameCommand command)
+        {
+            var set = (SetStandingOrdersCommand)command;
+            if (!commanded.TryGetDataBlob<FleetDB>(out var fleetDB))
+                return CommandResult.Reject("The commanded entity is not a fleet.");
+
+            var rebuilt = new List<ConditionalOrder>();
+            foreach (var order in set.Orders ?? Array.Empty<Pulsar4X.Api.StandingOrder>())
+            {
+                var compound = new CompoundCondition();
+                var conditions = order.Conditions ?? Array.Empty<StandingOrderCondition>();
+                for (int i = 0; i < conditions.Count; i++)
+                {
+                    var condition = conditions[i];
+                    Interfaces.ICondition? engineCondition = condition.ConditionType switch
+                    {
+                        StandingOrderTypes.FuelCondition => new FuelCondition(
+                            Math.Clamp(condition.Threshold, 0, 100), ToComparisonType(condition.Comparison)),
+                        _ => null,
+                    };
+                    if (engineCondition == null)
+                        return CommandResult.Reject($"Unknown standing-order condition: {condition.ConditionType}");
+
+                    // Operators link a condition to the next one; the last carries none.
+                    DataStructures.LogicalOperation? logic = i < conditions.Count - 1
+                        ? condition.Logic == StandingOrderLogic.Or
+                            ? DataStructures.LogicalOperation.Or
+                            : DataStructures.LogicalOperation.And
+                        : null;
+                    compound.ConditionItems.Add(new ConditionItem(engineCondition, logic));
+                }
+
+                var actions = new DataStructures.SafeList<EntityCommand>();
+                foreach (var actionType in order.Actions ?? Array.Empty<string>())
+                {
+                    EntityCommand? action = actionType switch
+                    {
+                        StandingOrderTypes.MoveToNearestColony => MoveToNearestColonyAction.CreateCommand(faction.Id, commanded),
+                        StandingOrderTypes.MoveToNearestGeoSurvey => MoveToNearestGeoSurveyAction.CreateCommand(faction.Id, commanded),
+                        StandingOrderTypes.MoveToNearestAnomaly => MoveToNearestAnomalyAction.CreateCommand(faction.Id, commanded),
+                        StandingOrderTypes.Refuel => new RefuelAction(),
+                        StandingOrderTypes.Resupply => new ResupplyAction(),
+                        _ => null,
+                    };
+                    if (action == null)
+                        return CommandResult.Reject($"Unknown standing-order action: {actionType}");
+                    actions.Add(action);
+                }
+
+                rebuilt.Add(new ConditionalOrder(compound, actions) { Name = order.Name ?? "" });
+            }
+
+            // Replace wholesale only after everything validated. Safe to swap live: the standing-
+            // orders processor clones actions out of this list rather than executing them in place.
+            fleetDB.StandingOrders.Clear();
+            foreach (var order in rebuilt)
+                fleetDB.StandingOrders.Add(order);
+
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private static DataStructures.ComparisonType ToComparisonType(StandingOrderComparison comparison)
+            => comparison switch
+            {
+                StandingOrderComparison.LessThan => DataStructures.ComparisonType.LessThan,
+                StandingOrderComparison.LessThanOrEqual => DataStructures.ComparisonType.LessThanOrEqual,
+                StandingOrderComparison.EqualTo => DataStructures.ComparisonType.EqualTo,
+                StandingOrderComparison.GreaterThan => DataStructures.ComparisonType.GreaterThan,
+                _ => DataStructures.ComparisonType.GreaterThanOrEqual,
+            };
 
         private CommandResult TranslateMoveToBody(Entity faction, Entity commanded, GameCommand command)
         {
