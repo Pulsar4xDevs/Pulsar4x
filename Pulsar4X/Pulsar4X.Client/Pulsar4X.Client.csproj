@@ -1,13 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <!-- UI library; the executable shell is Pulsar4X.Client.Host (the composition root). -->
+    <OutputType>Library</OutputType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <OldToolsVersion>Current</OldToolsVersion>
-    <ApplicationIcon>Resources\pulsaricon.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Pulsar4X.Client.Host" />
+  </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Linux_x64' ">
     <IntermediateOutputPath>obj\Linux_x64\Debug</IntermediateOutputPath>
@@ -109,11 +112,6 @@
     <Content Include="Resources\**\*.bmp;Resources\**\*.png;Resources\**\*.ico;Resources\**\*.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-
-    <!-- Copy imgui.ini -->
-    <None Update="imgui.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
     <ItemGroup>

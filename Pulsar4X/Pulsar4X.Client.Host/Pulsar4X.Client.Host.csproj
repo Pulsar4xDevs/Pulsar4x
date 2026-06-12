@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationIcon>..\Pulsar4X.Client\Resources\pulsaricon.ico</ApplicationIcon>
+    <RootNamespace>Pulsar4X.Client.Host</RootNamespace>
+  </PropertyGroup>
+
+  <!-- The composition root: the only project that may reference BOTH the UI library and the
+       engine. It wires single-player (engine + in-process adapter) and owns the engine-backed
+       development tooling (SM/debug windows). -->
+  <ItemGroup>
+    <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
+    <ProjectReference Include="..\Pulsar4X.Client\Pulsar4X.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ImGui.NET">
+      <HintPath>..\Pulsar4X.Client\Libs\ImGui.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="SDL3-CS">
+      <HintPath>..\Pulsar4X.Client\Libs\SDL3-CS.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

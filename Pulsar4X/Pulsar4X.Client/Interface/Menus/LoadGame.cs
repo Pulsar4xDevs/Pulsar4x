@@ -56,7 +56,7 @@ public class LoadGame : PulsarGuiWindow
         _uiState.SetFaction(faction, true);
         _uiState.SetActiveSystem(faction.GetDataBlob<FactionInfoDB>().KnownSystems[0]);
 
-        DebugWindow.GetInstance().SetGameEvents();
+        _uiState.RaiseGameLoaded();
         //we initialize window instances so that they get always displayed and automatically open after new game is created.
         TimeControl.GetInstance().SetActive();
         ToolBarWindow.GetInstance().SetActive();

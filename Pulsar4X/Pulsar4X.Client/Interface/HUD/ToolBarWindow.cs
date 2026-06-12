@@ -129,25 +129,21 @@ namespace Pulsar4X.Client
             };
             ToolButtons.Add(btn);
 
-            // btn = new ToolBarOption()
-            // {
-            //     Picture = _uiState.Img_Tree(),
-            //     TooltipText = "Spawn ships and planets",
-            //     OnClick = new Action(EntitySpawnWindow.GetInstance().ToggleActive),
-            //     GetActive = new Func<bool>(EntitySpawnWindow.GetInstance().GetActive),
-            //     //Display a tree with all objects in the system
-            // };
-            // SMToolButtons.Add(btn);
-
-            btn = new ToolBarOption()
+            // Host-registered dev tools that asked for a toolbar button (SM/debug windows live
+            // in the host executable, not this library).
+            foreach (var tool in _uiState.DevTools)
             {
-                Picture = _uiState.Img_Tree(),
-                TooltipText = "View SM debug info about a body",
-                OnClick = new Action(SMWindow.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(SMWindow.GetInstance().GetActive),
-                //Display a list of bodies with some info about them.
-            };
-            SMToolButtons.Add(btn);
+                if (tool.Placement != DevToolPlacement.Toolbar)
+                    continue;
+                btn = new ToolBarOption()
+                {
+                    Picture = _uiState.Img_Tree(),
+                    TooltipText = tool.Label,
+                    OnClick = new Action(tool.Toggle),
+                    GetActive = new Func<bool>(tool.IsActive),
+                };
+                SMToolButtons.Add(btn);
+            }
         }
 
         internal static ToolBarWindow GetInstance()

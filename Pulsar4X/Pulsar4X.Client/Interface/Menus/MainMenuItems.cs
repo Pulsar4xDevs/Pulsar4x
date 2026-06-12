@@ -92,13 +92,16 @@ namespace Pulsar4X.Client
                         this.SetActive(false);
                     }
 
-                    if (ImGui.Button("SM Mode", _buttonSize))
+                    // Host-registered dev tools that asked for a main-menu button (e.g. SM Mode).
+                    foreach (var tool in _uiState.DevTools)
                     {
-                        var pannel = SMWindow.GetInstance();
-                        _uiState.ActiveWindow = pannel;
-                        pannel.SetActive();
-                        _uiState.ToggleGameMaster();
-                        this.IsActive = false;
+                        if (tool.Placement != DevToolPlacement.MainMenu)
+                            continue;
+                        if (ImGui.Button(tool.Label, _buttonSize))
+                        {
+                            tool.Toggle();
+                            this.IsActive = false;
+                        }
                     }
                 }
 

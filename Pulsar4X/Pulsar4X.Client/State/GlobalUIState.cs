@@ -64,6 +64,22 @@ namespace Pulsar4X.Client
         internal GameInfo? GameInfo { get; private set; }
 
         /// <summary>
+        /// Development tools registered by the composition root. Engine-backed debug/SM windows
+        /// live in the host executable, not this UI library; the library's surfaces (settings
+        /// list, toolbar, main menu, hotkeys) render whatever was registered without knowing the
+        /// tools themselves.
+        /// </summary>
+        internal readonly List<DevToolRegistration> DevTools = new();
+
+        public void RegisterDevTool(DevToolRegistration tool) => DevTools.Add(tool);
+
+        public void ToggleDevTool(string key) => DevTools.FirstOrDefault(t => t.Key == key)?.Toggle();
+
+        /// <summary>Raised after a game is created or loaded; host dev tooling hooks game events here.</summary>
+        public event Action? OnGameLoaded;
+        internal void RaiseGameLoaded() => OnGameLoaded?.Invoke();
+
+        /// <summary>
         /// Gets the faction bit mask for the current faction.
         /// Use this with Masked&lt;T&gt;.For() to retrieve faction-visible data.
         /// Returns 0 if no faction is set.
@@ -77,7 +93,6 @@ namespace Pulsar4X.Client
         internal bool ShowMetrixWindow;
         internal bool ShowImgDbg;
         internal bool ShowDemoWindow;
-        internal bool ShowDamageWindow;
         internal IntPtr SDLRendererPtr { get; private set; }
         internal GalacticMapRender? GalacticMap;
         internal SafeList<UpdateWindowState> UpdateableWindows = new();

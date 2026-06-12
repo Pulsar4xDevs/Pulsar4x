@@ -33,6 +33,9 @@ namespace Pulsar4X.Client
         private readonly GlobalUIState _state;
         private ITheme _theme;
 
+        /// <summary>The UI state, exposed so the composition root can register its dev tools.</summary>
+        internal GlobalUIState State => _state;
+
         float mouseX;
         float mouseY;
 

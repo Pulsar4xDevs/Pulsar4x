@@ -22,7 +22,6 @@ namespace Pulsar4X.Client
         private bool _strictNewtonion;
         private bool _showSizesDemo = false;
         private bool _showSelectorWindow = true;
-        private OrbitalDebugWindow _orbitalDebugWindow;
         private GameLogWindow _logWindow;
         private int _currentResolutionIndex = 0;
 
@@ -41,7 +40,6 @@ namespace Pulsar4X.Client
             }
 
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
-            _orbitalDebugWindow = OrbitalDebugWindow.GetInstance();
             _logWindow = GameLogWindow.GetInstance();
 
             var settings = _uiState.GameSettings;
@@ -287,44 +285,20 @@ namespace Pulsar4X.Client
             ImGui.Text("Debug Settings");
             ImGui.Separator();
 
-            bool debugActive = DebugWindow.GetInstance().GetActive();
-            if (ImGui.Checkbox("Show Pulsar Debug Window", ref debugActive))
+            // The engine-backed debug/SM tools live in the host executable; render a toggle for
+            // whatever the composition root registered.
+            foreach (var tool in _uiState.DevTools)
             {
-                DebugWindow.GetInstance().ToggleActive();
-            }
+                if (tool.Placement != DevToolPlacement.SettingsList)
+                    continue;
+                if (tool.IsAvailable != null && !tool.IsAvailable())
+                    continue;
 
-            bool dataViewerActive = DataViewerWindow.GetInstance().GetActive();
-            if (ImGui.Checkbox("Show DataViewer Window", ref dataViewerActive))
-            {
-                DataViewerWindow.GetInstance().ToggleActive();
-            }
-
-            if (_uiState.LastClickedEntity != null)
-            {
-                var lastClickedEntity = _uiState.LastClickedEntity.Entity;
-                if(lastClickedEntity.HasDataBlob<OrbitDB>()
-                   || lastClickedEntity.HasDataBlob<OrbitUpdateOftenDB>()
-                   || lastClickedEntity.HasDataBlob<NewtonMoveDB>())
+                bool active = tool.IsActive();
+                if (ImGui.Checkbox(tool.Label, ref active))
                 {
-                    bool orbitDebugActive = _orbitalDebugWindow.GetActive();
-                    if (ImGui.Checkbox("Show Orbit Debug Lines", ref orbitDebugActive))
-                    {
-                        OrbitalDebugWindow.GetInstance().ToggleActive();
-                    }
+                    tool.Toggle();
                 }
-            }
-
-            bool sensorActive = SensorDraw.GetInstance().GetActive();
-            if (ImGui.Checkbox("Show Sensor Draw", ref sensorActive))
-            {
-                SensorDraw.GetInstance().ToggleActive();
-            }
-            
-
-            bool debugGUIActive = DebugGUIWindow.GetInstance().GetActive();
-            if (ImGui.Checkbox("Show Pulsar GUI Debug Window", ref debugGUIActive))
-            {
-                DebugGUIWindow.GetInstance().ToggleActive();
             }
 
             bool logActive = _logWindow.GetActive();
@@ -333,23 +307,9 @@ namespace Pulsar4X.Client
                 _logWindow.ToggleActive();
             }
 
-            bool perfActive = PerformanceWindow.GetInstance().GetActive();
-            if (ImGui.Checkbox("Show Pulsar Performance Window", ref perfActive))
-            {
-                PerformanceWindow.GetInstance().ToggleActive();
-            }
-
             ImGui.Checkbox("Show ImguiMetrix", ref _uiState.ShowMetrixWindow);
             ImGui.Checkbox("Show ImgDebug", ref _uiState.ShowImgDbg);
             ImGui.Checkbox("DemoWindow", ref _uiState.ShowDemoWindow);
-            
-            if (ImGui.Checkbox("DamageWindow", ref _uiState.ShowDamageWindow))
-            {
-                if (_uiState.ShowDamageWindow)
-                    DamageViewerWindow.GetInstance().SetActive();
-                else
-                    DamageViewerWindow.GetInstance().SetActive(false);
-            }
 
             ImGui.Checkbox("Show Sizes Demo", ref _showSizesDemo);
             if(_showSizesDemo)

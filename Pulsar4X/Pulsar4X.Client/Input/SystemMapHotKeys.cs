@@ -30,11 +30,11 @@ public class SystemMapHotKeys : IHotKeyHandler
             }
             else if(e.Key.Key == SDL.Keycode.F1)
             {
-                DebugWindow.GetInstance().ToggleActive();
+                PulsarGuiWindow._uiState.ToggleDevTool("debug-window");
             }
             else if(e.Key.Key == SDL.Keycode.F2)
             {
-                PerformanceWindow.GetInstance().ToggleActive();
+                PulsarGuiWindow._uiState.ToggleDevTool("performance-window");
             }
             else if(e.Key.Key == SDL.Keycode.F3)
             {
@@ -42,7 +42,7 @@ public class SystemMapHotKeys : IHotKeyHandler
             }
             else if(e.Key.Key == SDL.Keycode.F4)
             {
-                BlueprintsWindow.GetInstance().ToggleActive();
+                PulsarGuiWindow._uiState.ToggleDevTool("blueprints-window");
             }
             else if(e.Key.Key == SDL.Keycode.F5)
             {

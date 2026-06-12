@@ -396,13 +396,25 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    left; its per-type hide filter keys off the event-type string. Not carried over:
    `FactionEventLog.HaltsOn` (pause-on-event) has no UI today; when one is built it should be a
    small command + a flag on `LogEvent`.
-6. **Client composition (`Pulsar4X.Client.Host`):** once the UI consumes the galaxy model (4) and the
-   event stream (5), extract a thin desktop executable `Pulsar4X.Client.Host` as the composition root —
-   it references both `Pulsar4X.Client` and `GameEngine`, and wires single-player as
-   `new InProcessAdapter(new EngineGameServer(game))` (and, later, `MultiplayerAdapter` for remote
-   play). Then drop the `GameEngine` `ProjectReference` from `Pulsar4X.Client` so the UI library
-   depends only on `Pulsar4X.Api` — completing the "no engine references in the client" goal. (This is
-   also the point to relocate `InProcessAdapter` out of `Pulsar4X.Api` if desired.)
+6. **Client composition (`Pulsar4X.Client.Host`) — in progress.** The extraction is done:
+   `Pulsar4X.Client.Host` is the desktop executable (entry point, app icon) and `Pulsar4X.Client`
+   is a library. The host owns the engine-backed development tooling — the `Debug/` windows,
+   `SMWindow`, `EntitySpawnWindow` and `DamageViewerWindow` moved into its `DevTools/` — and wires
+   it through a registry on `GlobalUIState` (`DevToolRegistration`: key, label, toggle,
+   active-check, placement): the library's settings list, toolbar, main menu ("SM Mode") and
+   hotkeys render whatever the composition root registered without referencing the tools, and an
+   `OnGameLoaded` event replaces the direct `DebugWindow.SetGameEvents()` calls from the new/load
+   flows (the orbit-debug toggle's availability check became snapshot-based in the process). The
+   library is `InternalsVisibleTo` the host. Remaining before the `GameEngine` reference can be
+   dropped from `Pulsar4X.Client`:
+   (a) a game-lifecycle seam — `new Game`/`Game.Save`/`SetFaction` and `GlobalUIState.Game` move
+   behind an interface the host implements (the host then truly wires
+   `new InProcessAdapter(new EngineGameServer(game))`);
+   (b) the `IDesignDataProvider` bridge and the client-side designer evaluation
+   (`ComponentDesigner`/`ShipDesign` run in the designer windows by design) need an engine-free
+   shape or a relocation;
+   (c) the `EntityState`/`SystemState` click-pipeline plumbing the dev tools share;
+   (d) the parked ordnance/logistics windows.
 7. **Network adapter + server host:** transport + serialization for `MultiplayerAdapter` and the
    headless `Pulsar4X.Server.Host`.
 
@@ -496,12 +508,12 @@ The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api`
   changes already arrive as `ResearchChanged`/`ComponentDesignsChanged` pushes to use as triggers).
 - **SM/debug tooling stays engine-backed by design.** `SMWindow`, `EntitySpawnWindow`, the
   `Debug/` windows (DebugWindow, EntityInspector, OrbitalDebugWindow, SensorDraw, DataViewerWindow,
-  PerformanceWindow, GraphicDebugWidget) and `DamageViewerWindow` (a damage-sim test sandbox that
-  fires synthetic projectiles and pokes component health — moved into `Debug/` to make its role
-  explicit) are development tools, not player UI. They will not get a faction-scoped API surface;
-  they keep their engine access and move to `Pulsar4X.Client.Host` (which references the engine)
-  when the phase-6 reference cut happens. The player-facing slice of what DamageViewer shows —
-  component health, armor — already travels via `ShipView`/`InstallationsView`.
+  PerformanceWindow, GraphicDebugWidget, BlueprintsWindow, DebugGUIWindow) and `DamageViewerWindow`
+  (a damage-sim test sandbox that fires synthetic projectiles and pokes component health) are
+  development tools, not player UI. They will not get a faction-scoped API surface; **as of the
+  phase-6 extraction they live in `Pulsar4X.Client.Host/DevTools/`** (which references the engine)
+  and reach the UI through the dev-tool registry. The player-facing slice of what DamageViewer
+  shows — component health, armor — already travels via `ShipView`/`InstallationsView`.
 - **Procedural body generation never attaches `GeoSurveyableDB`** (only the blueprint/JSON body
   paths do), so procedurally generated systems currently offer nothing to geo-survey. Engine
   inconsistency noted while porting; not an API-layer issue.
