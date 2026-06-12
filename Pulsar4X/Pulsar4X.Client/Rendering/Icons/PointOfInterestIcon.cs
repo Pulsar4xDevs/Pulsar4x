@@ -6,7 +6,7 @@ using SDL3;
 namespace Pulsar4X.Client;
 public class PointOfInterestIcon : Icon
 {
-    public PointOfInterestIcon(PositionDB positionDB) : base(positionDB)
+    public PointOfInterestIcon(Pulsar4X.Interfaces.IPosition positionDB) : base(positionDB)
     {
         BasicShape();
         OnPhysicsUpdate();

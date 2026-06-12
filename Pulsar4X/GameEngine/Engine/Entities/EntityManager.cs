@@ -760,6 +760,17 @@ namespace Pulsar4X.Engine
                 .ToList();
         }
 
+        /// <summary>Whether the faction can see this entity, under the same rules as
+        /// <see cref="GetFilteredEntities(EntityFilter, int)"/> with all filters set.</summary>
+        public bool IsEntityVisibleToFaction(Entity entity, int factionId)
+        {
+            if (factionId == Game.GameMasterFaction.Id) return true;
+
+            return entity.FactionOwnerID == factionId
+                || (entity.FactionOwnerID == Game.NeutralFactionId && EvaluateNeutralEntity(entity, factionId))
+                || (entity.FactionOwnerID != factionId && entity.FactionOwnerID != Game.NeutralFactionId && EvaluateSensorContact(entity, factionId));
+        }
+
         private bool EvaluateNeutralEntity(Entity entity, int factionId)
         {
             return (_factionNeutralContacts.ContainsKey(factionId) && _factionNeutralContacts[factionId].Contains(entity.Id)) ||

@@ -10,9 +10,9 @@ namespace Pulsar4X.Client
 {
     class SysBodyIcon : Icon, IPointerHandler, IShape, IInteractable
     {
-        SystemBodyInfoDB _systemBodyInfoDB;
+        SystemBodyInfoDB? _systemBodyInfoDB;
         BodyType _bodyType;
-        MassVolumeDB _massVolDB;
+        MassVolumeDB? _massVolDB;
         double _bodyRadiusAU;
         float _viewRadius;
         Random _rng;
@@ -33,6 +33,31 @@ namespace Pulsar4X.Client
             _sysId = entity.StarSystemId;
             _rng = new Random(_entityId); //use entity guid as a seed for psudoRandomness.
 
+            BuildShape();
+        }
+
+        public SysBodyIcon(Pulsar4X.Api.EntitySnapshot entity, string systemId, Pulsar4X.Interfaces.IPosition position, double bodyRadiusAU)
+            : base(position)
+        {
+            _bodyType = entity.Kind switch
+            {
+                Pulsar4X.Api.BodyKind.Asteroid => BodyType.Asteroid,
+                Pulsar4X.Api.BodyKind.Comet => BodyType.Comet,
+                Pulsar4X.Api.BodyKind.Moon => BodyType.Moon,
+                Pulsar4X.Api.BodyKind.DwarfPlanet => BodyType.DwarfPlanet,
+                Pulsar4X.Api.BodyKind.Planet => BodyType.Terrestrial,
+                _ => BodyType.Unknown,
+            };
+            _bodyRadiusAU = bodyRadiusAU;
+            _entityId = entity.Id;
+            _sysId = systemId;
+            _rng = new Random(_entityId);
+
+            BuildShape();
+        }
+
+        void BuildShape()
+        {
             switch (_bodyType)
             {
                 case BodyType.Asteroid:

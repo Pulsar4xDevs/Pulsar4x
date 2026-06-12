@@ -28,9 +28,12 @@ namespace Pulsar4X.Client
     public abstract class OrbitIconBase : Icon, IUpdateUserSettings, IKepler
     {
         #region Static properties
-        protected EntityManager _mgr;
-        protected OrbitDB _orbitDB;
+        protected EntityManager? _mgr;
+        protected OrbitDB? _orbitDB;
         internal IPosition BodyPositionDB;
+        protected double _loAN;
+        protected double _aoPRad;
+        protected double _inclination;
         protected Vector2 _bodyrelativePos;
         protected Vector2 _bodyAbsolutePos;
         internal float SemiMaj;
@@ -109,13 +112,39 @@ namespace Pulsar4X.Client
             }
             _loP_radians = (float)(Angle.ToRadians(_loP_Degrees));
             */
-            var i = _orbitDB.Inclination;
-            var _aoP = _orbitDB.ArgumentOfPeriapsis;
-            var loan = _orbitDB.LongitudeOfAscendingNode;
-            var lop = OrbitMath.GetLongditudeOfPeriapsis(i, _aoP, loan);
+            _inclination = _orbitDB.Inclination;
+            _aoPRad = _orbitDB.ArgumentOfPeriapsis;
+            _loAN = _orbitDB.LongitudeOfAscendingNode;
+            var lop = OrbitMath.GetLongditudeOfPeriapsis(_inclination, _aoPRad, _loAN);
             _loP_radians = (float)lop;
             _loP_Degrees = (float)Angle.ToDegrees(lop);
 
+        }
+
+        /// <summary>Snapshot constructor: the same icon built from OrbitView elements, with both
+        /// positions read through the replicated galaxy.</summary>
+        internal OrbitIconBase(Pulsar4X.Api.OrbitView orbit, IPosition bodyPosition, IPosition parentPosition,
+            UserOrbitSettings.OrbitBodyType bodyType, List<List<UserOrbitSettings>> settings) : base(parentPosition)
+        {
+            BodyType = bodyType;
+            _userOrbitSettingsMtx = settings;
+            BodyPositionDB = bodyPosition;
+
+            SemiMaj = (float)orbit.SemiMajorAxisM;
+            SemiMinor = (float)EllipseMath.SemiMinorAxis(orbit.SemiMajorAxisM, orbit.Eccentricity);
+            _eccentricity = (float)orbit.Eccentricity;
+            _linearEccentricity = (float)(_eccentricity * orbit.SemiMajorAxisM);
+
+            var inclination = Angle.NormaliseRadiansPositive(orbit.InclinationRad);
+            if (inclination > 0.5 * Math.PI && inclination < 1.5 * Math.PI)
+                IsRetrogradeOrbit = true;
+
+            _inclination = orbit.InclinationRad;
+            _aoPRad = orbit.ArgumentOfPeriapsisRad;
+            _loAN = orbit.LongitudeOfAscendingNodeRad;
+            var lop = OrbitMath.GetLongditudeOfPeriapsis(_inclination, _aoPRad, _loAN);
+            _loP_radians = (float)lop;
+            _loP_Degrees = (float)Angle.ToDegrees(lop);
         }
         /// <summary>
         ///calculate anything that could have changed from the users input.

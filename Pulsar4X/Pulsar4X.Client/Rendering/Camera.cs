@@ -28,7 +28,7 @@ namespace Pulsar4X.Client
 
         internal bool IsPinnedToEntity { get; private set; }
         internal int PinnedEntityGuid;
-        PositionDB? _entityPosDB;
+        Pulsar4X.Interfaces.IPosition? _entityPosDB;
         internal Orbital.Vector3 _camWorldPos_m = new Orbital.Vector3();
         public Orbital.Vector3 CameraWorldPosition_AU
         {
@@ -144,6 +144,15 @@ namespace Pulsar4X.Client
                 IsPinnedToEntity = true;
                 PinnedEntityGuid = entity.Id;
             }
+        }
+
+        /// <summary>Pin to an entity by id, tracking its position through the replicated galaxy.</summary>
+        public void PinToEntity(int entityId, string systemId, GlobalUIState state)
+        {
+            _entityPosDB = new SnapshotPosition(state, systemId, entityId);
+            _camWorldPos_m = new Orbital.Vector3(); //zero on it.
+            IsPinnedToEntity = true;
+            PinnedEntityGuid = entityId;
         }
 
         public void CenterOnEntity(Entity entity)

@@ -88,6 +88,13 @@ namespace Pulsar4X.Client
             Engines(100, 60, 0, 130);
         }
 
+        /// <summary>Snapshot constructor: position read through the replicated galaxy; no engine
+        /// subscriptions (the icon is rebuilt when the entity's snapshot changes).</summary>
+        public ShipIcon(Pulsar4X.Interfaces.IPosition position) : base(position)
+        {
+            BasicShape();
+        }
+
         async Task OnDBAdded(Message message)
         {
             await Task.Run(() =>
@@ -391,6 +398,15 @@ namespace Pulsar4X.Client
         {
         }
 
+        /// <summary>Snapshot constructor: rebuilt on snapshot change, so no engine subscriptions.</summary>
+        public ProjectileIcon(Pulsar4X.Interfaces.IPosition position, bool underThrust) : base(position)
+        {
+            BasicShape();
+            NewtonFlame();
+            if (underThrust)
+                Shapes.Add(_flame);
+        }
+
         async Task DBAdded(Message message)
         {
             await Task.Run(() =>
@@ -504,10 +520,23 @@ namespace Pulsar4X.Client
     public class BeamIcon : Icon
     {
         BeamInfoDB? _beamInfo;
+        Vector3 _start;
+        Vector3 _end;
+        bool _hasEndpoints;
+
         public BeamIcon(BeamInfoDB beamInfoDB, PositionDB positionDB) : base(positionDB)
         {
             _beamInfo = beamInfoDB;
             OnPhysicsUpdate();
+        }
+
+        /// <summary>Snapshot constructor: the endpoints travel in the BeamView and the icon is
+        /// rebuilt on each per-tick push.</summary>
+        public BeamIcon(Pulsar4X.Api.BeamView beam, Pulsar4X.Interfaces.IPosition position) : base(position)
+        {
+            _start = new Vector3(beam.StartPosition.X, beam.StartPosition.Y, beam.StartPosition.Z);
+            _end = new Vector3(beam.EndPosition.X, beam.EndPosition.Y, beam.EndPosition.Z);
+            _hasEndpoints = true;
         }
 
         public BeamIcon(Vector3 position_m) : base(position_m)
@@ -520,10 +549,16 @@ namespace Pulsar4X.Client
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            if(_beamInfo is null) return;
+            if (_beamInfo != null)
+            {
+                _start = _beamInfo.Positions.Item1;
+                _end = _beamInfo.Positions.Item2;
+                _hasEndpoints = true;
+            }
+            if (!_hasEndpoints) return;
 
-            var p0 = camera.ViewCoordinate_m(_beamInfo.Positions.Item1);
-            var p1 = camera.ViewCoordinate_m(_beamInfo.Positions.Item2);
+            var p0 = camera.ViewCoordinate_m(_start);
+            var p1 = camera.ViewCoordinate_m(_end);
 
             DrawShapes = new Shape[1];
             var s1 = new Shape();

@@ -13,7 +13,7 @@ namespace Pulsar4X.Client
         Vector3 _currentPosition = new Vector3();
         Vector3 _relativeEndPoint = new Vector3();
         private Vector3 _currentRelativeEndPoint = new Vector3();
-        private PositionDB? _targetParentPos;
+        private Pulsar4X.Interfaces.IPosition? _targetParentPos;
 
         private Vector2 _bzsp;
         private Vector2 _bzsp2;
@@ -34,6 +34,17 @@ namespace Pulsar4X.Client
             _relativeEndPoint = warpMovingDB.ExitPointrelative;
             _targetParentPos = warpMovingDB.GetTargetPosDB;
             _positionDB = positionDB;
+            this.OnPhysicsUpdate();
+        }
+
+        public WarpMovingIcon(Pulsar4X.Api.WarpMovingView warp, Pulsar4X.Interfaces.IPosition position,
+            Pulsar4X.Interfaces.IPosition? targetParentPosition) : base(new Vector3())
+        {
+            _translateStartPoint = new Vector3(warp.EntryPointAbsolute.X, warp.EntryPointAbsolute.Y, warp.EntryPointAbsolute.Z);
+            _translateEndPoint = new Vector3(warp.ExitPointAbsolute.X, warp.ExitPointAbsolute.Y, warp.ExitPointAbsolute.Z);
+            _relativeEndPoint = new Vector3(warp.ExitPointRelative.X, warp.ExitPointRelative.Y, warp.ExitPointRelative.Z);
+            _targetParentPos = targetParentPosition;
+            _positionDB = position;
             this.OnPhysicsUpdate();
         }
 

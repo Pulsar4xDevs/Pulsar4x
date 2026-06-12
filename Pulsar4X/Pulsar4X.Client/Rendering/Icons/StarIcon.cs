@@ -15,8 +15,18 @@ namespace Pulsar4X.Client
         double _bodyRadiusAU;
         public StarIcon(StarInfoDB starInfoDB, PositionDB positionDB, MassVolumeDB massVolumeDB): base(positionDB)
         {
-            _tempK = starInfoDB.Temperature + 273.15;
-            _bodyRadiusAU = massVolumeDB.RadiusInAU;
+            BuildShape(starInfoDB.Temperature, (int)starInfoDB.SpectralType, massVolumeDB.RadiusInAU);
+        }
+
+        public StarIcon(Pulsar4X.Api.StarView star, Pulsar4X.Api.MassVolumeView massVolume, Pulsar4X.Interfaces.IPosition position) : base(position)
+        {
+            BuildShape(star.SurfaceTemperatureC, star.SpectralTypeIndex, Distance.MToAU(massVolume.RadiusMetres));
+        }
+
+        void BuildShape(double temperatureC, int spectralTypeIndex, double bodyRadiusAU)
+        {
+            _tempK = temperatureC + 273.15;
+            _bodyRadiusAU = bodyRadiusAU;
 
             double calcTemp = GeneralMath.Clamp(_tempK, 1000, 40000);
             calcTemp = calcTemp / 100;
@@ -51,7 +61,7 @@ namespace Pulsar4X.Client
             _color.A = 255;
 
 
-            byte spikes = (byte)(starInfoDB.SpectralType + 4);
+            byte spikes = (byte)(spectralTypeIndex + 4);
             float spikeheight = 100;
             float spikeDepth = 50;
             double arc = (2 * Math.PI) / spikes;

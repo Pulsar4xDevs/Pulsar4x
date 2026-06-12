@@ -142,7 +142,14 @@ namespace Pulsar4X.Engine.Api
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Movement.WarpAbilityDB>(out var wa)
                 ? new WarpAbilityView(wa.MaxSpeed) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Movement.WarpMovingDB>(out var wm)
-                ? new WarpMovingView(wm.CurrentNonNewtonionVectorMS.Length()) : null,
+                ? new WarpMovingView(wm.CurrentNonNewtonionVectorMS.Length())
+                {
+                    EntryPointAbsolute = ToVec3(wm.EntryPointAbsolute),
+                    ExitPointAbsolute = ToVec3(wm.ExitPointAbsolute),
+                    ExitPointRelative = ToVec3(wm.ExitPointrelative),
+                    TargetEntityId = wm.TargetEntity?.Id,
+                }
+                : null,
             (e, _) => e.TryGetDataBlob<SystemBodyInfoDB>(out var b) ? ToBodyView(b) : null,
             (e, _) => e.TryGetDataBlob<StarInfoDB>(out var s) ? ToStarView(s) : null,
             (e, f) => e.TryGetDataBlob<ColonyInfoDB>(out var c) ? ToColonyView(c, e, f) : null,
@@ -172,7 +179,14 @@ namespace Pulsar4X.Engine.Api
             // A lab's queue/economics are internal to its owner; other factions just see the entity.
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ResearcherDB>(out var r) ? ToResearcherView(r, e, f) : null,
             (e, f) => e.FactionOwnerID == f && e.HasDataBlob<Pulsar4X.Weapons.FireControlAbilityDB>() ? ToFireControlView(e) : null,
+            (e, _) => e.TryGetDataBlob<Pulsar4X.Movement.NewtonMoveDB>(out var nm) ? ToNewtonMoveView(nm, e) : null,
+            (e, _) => e.TryGetDataBlob<Pulsar4X.Movement.NewtonSimpleMoveDB>(out var ns) ? ToNewtonSimpleMoveView(ns) : null,
+            (e, _) => e.HasDataBlob<Pulsar4X.Weapons.ProjectileInfoDB>() ? new ProjectileView() : null,
+            (e, _) => e.TryGetDataBlob<Pulsar4X.Weapons.BeamInfoDB>(out var beam)
+                ? new BeamView(ToVec3(beam.Positions.Item1), ToVec3(beam.Positions.Item2)) : null,
         };
+
+        private static Vec3 ToVec3(Pulsar4X.Orbital.Vector3 v) => new(v.X, v.Y, v.Z);
 
         private static PositionView ToPositionView(Pulsar4X.Movement.PositionDB p)
             => new(new Vec3(p.AbsolutePosition.X, p.AbsolutePosition.Y, p.AbsolutePosition.Z),
@@ -191,7 +205,40 @@ namespace Pulsar4X.Engine.Api
                 MeanMotionRadPerSec = o.MeanMotion,
                 Epoch = o.Epoch,
                 StandardGravParameter = o.GravitationalParameter_m3S2,
+                ParentSoiRadiusM = o.ParentDB is OrbitDB parentOrbit ? OrbitMath.GetSOIRadius(parentOrbit) : 0,
             };
+
+        private static OrbitView ToOrbitView(Pulsar4X.Orbital.KeplerElements ke, int? parentId)
+            => new(ke.SemiMajorAxis / 1000.0, ke.Eccentricity, ke.Period, parentId)
+            {
+                SemiMajorAxisM = ke.SemiMajorAxis,
+                InclinationRad = ke.Inclination,
+                LongitudeOfAscendingNodeRad = ke.LoAN,
+                ArgumentOfPeriapsisRad = ke.AoP,
+                MeanAnomalyAtEpochRad = ke.MeanAnomalyAtEpoch,
+                MeanMotionRadPerSec = ke.MeanMotion,
+                Epoch = ke.Epoch,
+                StandardGravParameter = ke.StandardGravParameter,
+            };
+
+        private static NewtonMoveView ToNewtonMoveView(Pulsar4X.Movement.NewtonMoveDB n, Entity entity)
+        {
+            double thrust = entity.TryGetDataBlob<Pulsar4X.Movement.NewtonThrustAbilityDB>(out var thrustAbility)
+                ? thrustAbility.ThrustInNewtons
+                : 0;
+            return new NewtonMoveView(
+                n.SOIParent?.Id,
+                n.SOIParent?.GetSOI_m() ?? 0,
+                ToVec3(n.CurrentVector_ms),
+                ToVec3(n.ManuverDeltaV),
+                thrust,
+                ToOrbitView(n.GetElements(), n.SOIParent?.Id));
+        }
+
+        private static NewtonSimpleMoveView ToNewtonSimpleMoveView(Pulsar4X.Movement.NewtonSimpleMoveDB n)
+            => new(n.SOIParent?.Id,
+                   n.SOIParent?.GetSOI_m() ?? 0,
+                   ToOrbitView(n.CurrentTrajectory, n.SOIParent?.Id));
 
         private static BodyView ToBodyView(SystemBodyInfoDB b)
             => new(b.BodyType.ToDescription(), b.Gravity, b.BaseTemperature, b.LengthOfDay,
@@ -287,7 +334,10 @@ namespace Pulsar4X.Engine.Api
         private static StarView ToStarView(StarInfoDB s)
             => new(s.SpectralType.ToDescription(), s.SpectralSubDivision, s.Class, s.LuminosityClass.ToString(),
                    s.Temperature, s.Luminosity, s.Age, s.MinHabitableRadius_AU, s.MaxHabitableRadius_AU,
-                   s.LuminosityClass.ToDescription());
+                   s.LuminosityClass.ToDescription())
+            {
+                SpectralTypeIndex = (int)s.SpectralType,
+            };
 
         private static ShipView ToShipView(ShipInfoDB shipInfo, Entity ship, int factionId)
         {

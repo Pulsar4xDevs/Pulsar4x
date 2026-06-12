@@ -282,6 +282,33 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    **Positions** are now client-propagated: `OrbitView` carries the full Keplerian element set and
    the client `SnapshotOrbits` helper computes positions per frame from it (see the resolved gap
    below) — the read foundation for the map and the movement-order windows.
+   The **system-map and galaxy-map rendering** are ported. The pivot is `SnapshotPosition`, an
+   `IPosition` whose every read resolves the entity's current snapshot through `IClientGalaxy` and
+   propagates its orbit to the galaxy clock (with a same-snapshot/same-tick memo) — icons keep
+   consuming the `IPosition` seam they always had, so they hold no game data, only derived geometry
+   built from snapshot scalars at construction. `SystemMapRendering` holds a system *id* and
+   reconciles its icon set against the system's snapshots each frame: snapshots are immutable, so a
+   reference change is the rebuild signal (the only retained per-entity state is that sync key); all
+   `SystemState`/`EntityState`/`MessagePublisher`/sensor subscriptions are gone from the render
+   path. Ported icons take snapshot constructors: `OrbitEllipseIcon` (from `OrbitView` elements),
+   `StarIcon` (`StarView.SpectralTypeIndex` added), `SysBodyIcon` (by `BodyKind`), `ShipIcon`,
+   `WarpMovingIcon` (`WarpMovingView` extended with entry/exit points + target id),
+   `PointOfInterestIcon` (`GravSurveyView` marker). The label family (`EntityLabel`/ExtCombo/
+   distributor) is rewritten snapshot-based — name, relation colour and body kind from the views, no
+   rename subscriptions (rebuild covers it). `GalacticMapRender` lazily syncs per-system maps and
+   gal-map star icons from `Galaxy.KnownSystems` (unknown systems no longer appear as "??" markers —
+   the client simply doesn't have them). Camera pinning is id-based (`PinToEntity(id, systemId,
+   state)` via `SnapshotPosition`), retiring the EntityWindow/context-menu camera-pin engine bridge.
+   The initially deferred pieces are ported too: `NewtonMoveView` (SOI parent + radius, current
+   vector, maneuver ΔV, thrust, and the current trajectory as an embedded `OrbitView`) and
+   `NewtonSimpleMoveView` drive the newtonian-trajectory icons — those icons rebuild on each
+   per-tick mover push, so their snapshot constructors carry no engine state and their physics
+   pass just re-anchors the trail; `OrbitView.ParentSoiRadiusM` enables hyperbolic orbit rings
+   (`OrbitHyperbolicIcon2`); `ProjectileView`/`BeamView` (endpoints re-pushed per tick — beams and
+   simple movers joined the per-tick mover refresh) drive the combat icons; and the label hover
+   panels are snapshot-based (`Displays.Ship` from `ThrustView` ΔV/max-ΔV, `Displays.SystemBody`
+   from Body/Atmosphere/GeoSurvey/Colonizable/MineralDeposits views + colony lookup,
+   `Displays.Star` from `StarView`).
    The **ComponentsWindow** (the read-only component-library browser) is ported with zero new API
    surface: everything it shows — the faction's unlocked `ComponentTemplates`, its
    `ComponentDesigns`, cargo-good names, and the `ComponentDesigner` it constructs to evaluate a
@@ -338,11 +365,13 @@ The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api`
 
 - ~~Command validation isn't surfaced.~~ **Resolved (phase 3):** `HandleOrder` returns a validity
   bool; `SubmitCommand` does an ownership pre-check and returns the engine's real accept/reject.
-- **`EntityAdded` isn't visibility-filtered.** The engine's `EntityAdded` message carries no faction id,
-  so the server forwards it to every faction and the adapter upserts the projected entity into the
-  galaxy — even an entity the faction shouldn't yet see. Current consumers mask this (the colonies list
-  filters `Relation == Owned`; the body list filters celestial kinds), but it must be fixed before the
-  map is ported (which shows all visible entities) — the server should drop adds the faction can't see.
+- ~~`EntityAdded` isn't visibility-filtered.~~ **Resolved (with the map port):** the server's event
+  bridge now drops entity add/change/rename/reveal pushes for entities the subscribing faction can't
+  see (`EntityManager.IsEntityVisibleToFaction`, the per-entity form of `GetFilteredEntities`) — and
+  for entities that can't be resolved at all (mid-construction `DBAdded` messages used to leak
+  id-only envelopes). Fixing this surfaced a worse bug: `Connect()`'s naive first-faction fallback
+  was binding every session to the **GameMaster** faction (created first, sees everything); it now
+  binds to the first player faction.
 - **Continuous state (positions): client-side orbit propagation — foundation done.** Decision:
   Keplerian movement is propagated client-side, not streamed. `OrbitView` carries the full element
   set (metres/radians + epoch + μ), `SnapshotOrbits` (client) rebuilds `KeplerElements` and computes

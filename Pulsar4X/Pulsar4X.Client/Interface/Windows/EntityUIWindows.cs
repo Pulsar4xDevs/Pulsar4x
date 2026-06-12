@@ -179,7 +179,8 @@ namespace Pulsar4X.Client
                 //Menu is pin menu
                 if (T == typeof(PinCameraBlankMenuHelper))
                 {
-                    _state.Camera.PinToEntity(_entityState.Entity);
+                    if (_entityState.StarSystemId != null)
+                        _state.Camera.PinToEntity(_entityState.Entity.Id, _entityState.StarSystemId, _state);
                     if (managesUIPopUps)
                     {
                         ImGui.CloseCurrentPopup();

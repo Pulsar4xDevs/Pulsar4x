@@ -97,7 +97,33 @@ public sealed record OrbitView(
     public DateTime Epoch { get; init; }
     /// <summary>μ = G(M+m) in m³/s².</summary>
     public double StandardGravParameter { get; init; }
+
+    /// <summary>The orbit parent's sphere-of-influence radius (metres), for clipping hyperbolic
+    /// trajectories; 0 when the orbit has no parent.</summary>
+    public double ParentSoiRadiusM { get; init; }
 }
+
+/// <summary>Newtonian-thrust movement: the current trajectory (as orbital elements around the
+/// SOI parent) plus the maneuver state, for drawing the trajectory and thrust vector.</summary>
+public sealed record NewtonMoveView(
+    int? SoiParentId,
+    double SoiRadiusM,
+    Vec3 CurrentVectorMps,
+    Vec3 ManeuverDeltaVMps,
+    double ThrustNewtons,
+    OrbitView Trajectory) : IComponentView;
+
+/// <summary>Simplified newtonian movement: the current trajectory around the SOI parent.</summary>
+public sealed record NewtonSimpleMoveView(
+    int? SoiParentId,
+    double SoiRadiusM,
+    OrbitView CurrentTrajectory) : IComponentView;
+
+/// <summary>Marks an in-flight projectile (missile).</summary>
+public sealed record ProjectileView : IComponentView;
+
+/// <summary>An in-flight beam: its current endpoints (metres), re-pushed each tick.</summary>
+public sealed record BeamView(Vec3 StartPosition, Vec3 EndPosition) : IComponentView;
 
 public sealed record MassVolumeView(double MassKg, double RadiusMetres, double DensityGramsPerCm3) : IComponentView;
 
@@ -136,7 +162,11 @@ public sealed record StarView(
     double AgeYears,
     double MinHabitableRadiusAu,
     double MaxHabitableRadiusAu,
-    string LuminosityClassDescription = "") : IComponentView;
+    string LuminosityClassDescription = "") : IComponentView
+{
+    /// <summary>Ordinal of the spectral type (O,B,A,F,G,K,M,…), for icon styling.</summary>
+    public int SpectralTypeIndex { get; init; }
+}
 
 public sealed record ColonyView(long Population, int? PlanetEntityId) : IComponentView
 {
@@ -192,7 +222,15 @@ public sealed record ThrustView(
 public sealed record WarpAbilityView(double MaxSpeedMps) : IComponentView;
 
 /// <summary>Present while the entity is mid-warp; carries the current warp speed.</summary>
-public sealed record WarpMovingView(double SpeedMps) : IComponentView;
+public sealed record WarpMovingView(double SpeedMps) : IComponentView
+{
+    // The warp route's endpoints (metres), for drawing the travel line on the map.
+    public Vec3 EntryPointAbsolute { get; init; }
+    public Vec3 ExitPointAbsolute { get; init; }
+    /// <summary>Exit point relative to the warp target, which may itself be moving.</summary>
+    public Vec3 ExitPointRelative { get; init; }
+    public int? TargetEntityId { get; init; }
+}
 
 /// <summary>Geological survey state of a body, scoped to the requesting faction.</summary>
 public sealed record GeoSurveyView(

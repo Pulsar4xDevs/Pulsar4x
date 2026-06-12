@@ -19,9 +19,11 @@ namespace Pulsar4X.Client
     {
         //protected EntityManager _mgr;
         NewtonSimpleMoveDB? _newtonMoveDB;
-        PositionDB? _parentPosDB;
-        PositionDB? _myPosDB;
+        IPosition? _parentPosDB;
+        IPosition? _myPosDB;
         double _sgp;
+        double _soiRadiusM;
+        DateTime _stateTime;
         //_taIndex is the point closest to the orbiting object, it's used to
         int _taIndex;
         //_numberOfEllipsePoints is the total number of points around the ellipse, unadjusted for the percentage of the ellipse actualy drawn.
@@ -77,9 +79,30 @@ namespace Pulsar4X.Client
             _myPosDB = entityState.Entity.GetDataBlob<PositionDB>();
             _userOrbitSettingsMtx = settings;
             _sgp = OrbitMath.SGP(_newtonMoveDB.SOIParent, entityState.Entity);
+            _soiRadiusM = _newtonMoveDB.SOIParent.GetSOI_m();
+            _stateTime = entityState.Entity.StarSysDateTime;
             _ke = _newtonMoveDB.CurrentTrajectory;
             UpdateUserSettings();
             OnPhysicsUpdate();
+        }
+
+        /// <summary>Snapshot constructor: trajectory from the view's elements, positions read
+        /// through the replicated galaxy; the map rebuilds the icon when the snapshot changes.</summary>
+        internal NewtonSimpleIcon(Pulsar4X.Api.NewtonSimpleMoveView newton, IPosition myPosition, IPosition parentPosition,
+            UserOrbitSettings.OrbitBodyType bodyType, List<List<UserOrbitSettings>> settings, DateTime atTime) : base(parentPosition)
+        {
+            BodyType = bodyType;
+            TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
+            _parentPosDB = parentPosition;
+            _positionDB = parentPosition;
+            _myPosDB = myPosition;
+            _userOrbitSettingsMtx = settings;
+            _sgp = newton.CurrentTrajectory.StandardGravParameter;
+            _soiRadiusM = newton.SoiRadiusM;
+            _stateTime = atTime;
+            _ke = newton.CurrentTrajectory.ToKeplerElements();
+            UpdateUserSettings();
+            CreatePointArray();
         }
         public void UpdateUserSettings()
         {
@@ -113,6 +136,8 @@ namespace Pulsar4X.Client
         {
             if(_myPosDB == null)
                 throw new NullReferenceException();
+            if(_points.Length == 0)
+                return;
 
             Orbital.Vector2 pos = new Vector2(_myPosDB.RelativePosition.X, _myPosDB.RelativePosition.Y);
             double minDist = (pos - _points[_taIndex]).Length();
@@ -130,7 +155,12 @@ namespace Pulsar4X.Client
         public override void OnPhysicsUpdate()
         {
             if (_newtonMoveDB == null || _newtonMoveDB.OwningEntity == null) //There's a threaded race condition here which will cause a null...
+            {
+                //snapshot-backed icons get rebuilt on change; just keep the trail on the ship.
+                SetTrueAnomalyIndex();
                 return;
+            }
+            _stateTime = _newtonMoveDB.OwningEntity.StarSysDateTime;
             var ke = _newtonMoveDB.CurrentTrajectory; //...cause a null ref exception inside this call.
             if (ke.Eccentricity != _ke.Eccentricity)
             {
@@ -163,9 +193,9 @@ namespace Pulsar4X.Client
 
         private void CreateHyperbolicPoints()
         {
-            if(_newtonMoveDB == null || _myPosDB == null)
+            if(_myPosDB == null)
                 throw new NullReferenceException();
-            var stateVec = OrbitMath.GetStateVectors(_ke, _myPosDB.OwningEntity.StarSysDateTime);
+            var stateVec = OrbitMath.GetStateVectors(_ke, _stateTime);
             Vector3 vel = (Vector3)stateVec.velocity;
             Vector3 pos = _myPosDB.RelativePosition;
             //Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
@@ -182,7 +212,7 @@ namespace Pulsar4X.Client
             double e1 = eccentVector.Length();
 
             double linierEccentricity = e * a;
-            double soi = _newtonMoveDB.SOIParent.GetSOI_m();
+            double soi = _soiRadiusM;
 
             //longditudeOfPeriapsis;
             double _lop = _ke.AoP + _ke.LoAN;

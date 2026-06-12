@@ -1,19 +1,10 @@
 using ImGuiNET;
-using Pulsar4X.Client.Interface.Widgets;
+using Pulsar4X.Api;
 using Pulsar4X.Client.Interface;
-using Pulsar4X.Engine;
-using Pulsar4X.Factions;
-using Pulsar4X.Galaxy;
-using Pulsar4X.JumpPoints;
-using Pulsar4X.Messaging;
-using Pulsar4X.Movement;
-using Pulsar4X.Names;
-using Pulsar4X.Ships;
 using SDL3;
 using System.Collections.Generic;
 using System.Linq;
 using System;
-using System.Diagnostics;
 
 namespace Pulsar4X.Client
 {
@@ -23,19 +14,21 @@ namespace Pulsar4X.Client
 
         private SDL.FRect _dropDownRect = new ();
 
-        private IOrderedEnumerable<IGrouping<UserOrbitSettings.OrbitBodyType, Entity>> _subEntities;
+        private IOrderedEnumerable<IGrouping<UserOrbitSettings.OrbitBodyType, EntityLabel>> _subEntities;
 
-        public EntityLabelExtCombo(Entity entity, IEnumerable<Entity>? subEntities = null) : base(entity) {
+        public EntityLabelExtCombo(GlobalUIState state, EntitySnapshot entity, string systemId, IEnumerable<EntityLabel>? subEntities = null)
+            : base(state, entity, systemId)
+        {
             SetEntities(subEntities ?? []);
 
             _dropDownRect.W = 5;
             _dropDownRect.H = 5;
         }
 
-        public void SetEntities(IEnumerable<Entity> subEntities)
+        public void SetEntities(IEnumerable<EntityLabel> subEntities)
         {
             _subEntities = subEntities
-                .GroupBy(x => Utils.EntityBodyType(x))
+                .GroupBy(x => x.BodyType)
                 .OrderBy(x => x.Key);
         }
 
@@ -67,45 +60,36 @@ namespace Pulsar4X.Client
             return base.OnPointerUp(sevent);
         }
 
-        // TODO: this could be a static maybe?
-        private Action? TooltipCallback(Entity entity)
+        private Action? TooltipCallback(int entityId)
         {
-            if (_state == null)
+            var system = _state.GameClient?.Galaxy.GetSystem(SystemId);
+            var entity = system?.GetEntity(entityId);
+            if (system == null || entity == null)
                 return null;
-            var state = _state!;
 
-            if(Entity.HasDataBlob<JPSurveyableDB>())
-                return () => Displays.GravitationalAnomlay(state, Entity.GetDataBlob<JPSurveyableDB>());
-            else if(Entity.HasDataBlob<ShipInfoDB>()
-                    && Entity.HasDataBlob<MassVolumeDB>()
-                    && Entity.HasDataBlob<PositionDB>())
-                return () => Displays.Ship(state, Entity.GetDataBlob<ShipInfoDB>(), Entity.GetDataBlob<MassVolumeDB>(), Entity.GetDataBlob<PositionDB>(), state.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods);
-            else if(Entity.HasDataBlob<SystemBodyInfoDB>()
-                    && Entity.HasDataBlob<MassVolumeDB>()
-                    && Entity.HasDataBlob<PositionDB>())
-                return () => Displays.SystemBody(state, Entity.GetDataBlob<SystemBodyInfoDB>(), Entity.GetDataBlob<MassVolumeDB>(), Entity.GetDataBlob<PositionDB>());
-            else if(Entity.HasDataBlob<StarInfoDB>())
-                return () => Displays.Star(state, Entity.GetDataBlob<StarInfoDB>());
+            if (entity.GetView<GravSurveyView>() is { } gravSurvey && !entity.HasView<BodyView>())
+                return () => Displays.GravitationalAnomlay(gravSurvey);
+            if (entity.HasView<ShipView>() && entity.GetView<ThrustView>() is { } thrust)
+                return () => Displays.Ship(thrust);
+            if (entity.HasView<BodyView>() && entity.Kind != BodyKind.Star)
+                return () => Displays.SystemBody(entity, system);
+            if (entity.GetView<StarView>() is { } star)
+                return () => Displays.Star(star);
             return null;
         }
 
         protected override void DrawExt(IntPtr rendererPtr, Camera camera)
         {
-            if (_state == null || _starSysGuid == null)
-                return;
-            var state = _state!;
-            var starSys = _starSysGuid!;
-
             // Alt click
             if (_clickedAlt)
             {
-                state.ContextMenu = new EntityContextMenu(state, Entity.Id);
+                _state.ContextMenu = new EntityContextMenu(_state, EntityId);
                 ImGui.OpenPopup(_name + "##Alt");
                 _clickedAlt = false;
             }
             if(ImGui.BeginPopupContextItem(_name + "##Alt"))
             {
-                state.ContextMenu.Display();
+                _state.ContextMenu.Display();
                 ImGui.EndPopup();
             }
 
@@ -123,7 +107,7 @@ namespace Pulsar4X.Client
 
                 if(ImGui.MenuItem("View " + _name))
                 {
-                    state.EntityClicked(Entity.Id, starSys, MouseButtons.Primary);
+                    _state.EntityClicked(EntityId, SystemId, MouseButtons.Primary);
                 }
                 ImGui.Separator();
 
@@ -142,18 +126,17 @@ namespace Pulsar4X.Client
 
                     foreach(var s in itm)
                     {
-                        var nam = Utils.EntityName(s);
-                        if(ImGui.MenuItem(nam))
+                        if(ImGui.MenuItem(s.Name))
                         {
-                            state.EntityClicked(s.Id, starSys, MouseButtons.Primary);
+                            _state.EntityClicked(s.EntityId, SystemId, MouseButtons.Primary);
                         }
                         if (ImGui.IsItemHovered())
                         {
                             DisplayHelpers.DescriptiveTooltipRaw(
-                                    nam,
-                                    Utils.EntityBodyType(s).ToString(),
+                                    s.Name,
+                                    s.BodyType.ToString(),
                                     "",
-                                    TooltipCallback(s),
+                                    TooltipCallback(s.EntityId),
                                     hideDescriptionColor: true);
                         }
                     }
@@ -186,9 +169,9 @@ namespace Pulsar4X.Client
                 // Display the tooltip
                 DisplayHelpers.DescriptiveTooltipRaw(
                         _name,
-                        Utils.EntityBodyType(Entity).ToString(),
+                        BodyType.ToString(),
                         "",
-                        TooltipCallback(Entity),
+                        TooltipCallback(EntityId),
                         hideDescriptionColor: true);
             }
         }

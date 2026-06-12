@@ -290,13 +290,7 @@ namespace Pulsar4X.Client
                 new Vector4(accentColor.X * 0.4f, accentColor.Y * 0.4f, accentColor.Z * 0.4f, 0.7f));
             if (ImGui.ImageButton("##headerpin", _uiState.Img_Pin().ToTextureRef(), new Vector2(pinBtnSize, pinBtnSize)))
             {
-                // Deferred: the camera still pins to live engine entities (rendering/positions are
-                // engine-backed until the map is ported), so resolve the entity from the id.
-                if (_uiState.Game != null
-                    && _uiState.Game.GlobalManager.TryGetGlobalEntityById(EntityId, out var pinEntity))
-                {
-                    _uiState.Camera.PinToEntity(pinEntity);
-                }
+                _uiState.Camera.PinToEntity(EntityId, SystemId, _uiState);
             }
             ImGui.PopStyleColor(3);
             if (ImGui.IsItemHovered())

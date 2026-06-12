@@ -1,4 +1,5 @@
 ﻿using System;
+using Pulsar4X.Interfaces;
 using Pulsar4X.Orbital;
 using SDL3;
 using System.Collections.Generic;
@@ -38,6 +39,17 @@ namespace Pulsar4X.Client
 
         }
 
+        internal OrbitEllipseIcon(Pulsar4X.Api.OrbitView orbit, IPosition bodyPosition, IPosition parentPosition,
+            UserOrbitSettings.OrbitBodyType bodyType, List<List<UserOrbitSettings>> settings)
+            : base(orbit, bodyPosition, parentPosition, bodyType, settings)
+        {
+            TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Elliptical;
+
+            UpdateUserSettings();
+            CreatePointArray();
+            OnPhysicsUpdate();
+        }
+
         protected override void CreatePointArray()
         {
             _points = new Vector2[_numberOfArcSegments + 1];
@@ -46,9 +58,9 @@ namespace Pulsar4X.Client
             // orbit matches actual body positions. The old code used a simplified 2D
             // rotation by LoP which ignored inclination, causing orbit arcs to be offset
             // from body positions in generated systems with significant inclinations.
-            double loAN = _orbitDB.LongitudeOfAscendingNode;
-            double aoP = _orbitDB.ArgumentOfPeriapsis;
-            double incl = _orbitDB.Inclination;
+            double loAN = _loAN;
+            double aoP = _aoPRad;
+            double incl = _inclination;
             double e = _eccentricity;
             double a = SemiMaj;
             double semiLatusRectum = a * (1.0 - (double)e * e);

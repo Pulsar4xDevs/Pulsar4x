@@ -1,6 +1,11 @@
 using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using Pulsar4X.Api;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
+using Pulsar4X.Galaxy;
+using Pulsar4X.Names;
 using Pulsar4X.Orbital;
 using Pulsar4X.Orbits;
 
@@ -67,6 +72,31 @@ namespace Pulsar4X.Tests
             }
 
             Assert.That(verified, Is.GreaterThan(0), "expected at least one orbiting body to verify");
+        }
+
+        [Test]
+        public void NewtonMoveView_projects_the_trajectory_and_soi()
+        {
+            var session = Connect();
+            var star = _game.Systems[0].GetFirstEntityWithDataBlob<StarInfoDB>();
+
+            var ship = Entity.Create(session.FactionId);
+            _game.Systems[0].AddEntity(ship, new List<BaseDataBlob>
+            {
+                new Pulsar4X.Movement.PositionDB { AbsolutePosition = new Vector3(1.5e11, 0, 0) },
+                new MassVolumeDB { MassDry = 10000 },
+                new NameDB("Thruster", session.FactionId, "Thruster"),
+            });
+            ship.SetDataBlob(new Pulsar4X.Movement.NewtonMoveDB(star, new Vector3(0, 30000, 0)));
+
+            var view = _projector.ProjectEntity(ship, session.FactionId).GetView<NewtonMoveView>();
+
+            Assert.That(view, Is.Not.Null, "expected a NewtonMoveView for a newtonian mover");
+            Assert.That(view!.SoiParentId, Is.EqualTo(star.Id));
+            Assert.That(view.SoiRadiusM, Is.GreaterThan(0));
+            Assert.That(view.Trajectory.StandardGravParameter, Is.GreaterThan(0),
+                "the trajectory elements must be propagatable client-side");
+            Assert.That(view.CurrentVectorMps.Y, Is.EqualTo(30000));
         }
     }
 }

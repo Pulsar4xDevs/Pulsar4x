@@ -59,10 +59,11 @@ namespace Pulsar4X.Engine.Api
                 return ConnectResult.Fail("Game has no factions to bind to.");
 
             // Bind to the requested faction when given (the in-process host knows the player's
-            // faction); otherwise fall back to the first. Credential-gated auth lands with networking.
+            // faction); otherwise fall back to the first player faction — never the GameMaster,
+            // who sees everything. Credential-gated auth lands with networking.
             int factionId = request.FactionId is { } requested && _game.Factions.ContainsKey(requested)
                 ? requested
-                : _game.Factions.Keys.First();
+                : _game.Factions.Keys.FirstOrDefault(id => id != _game.GameMasterFaction.Id, _game.Factions.Keys.First());
             var session = new PlayerSession(Guid.NewGuid(), factionId);
             return ConnectResult.Ok(session, new GameInfo(_game.Name ?? "Pulsar4X", _game.LastSaveGitHash ?? ""));
         }
@@ -173,6 +174,12 @@ namespace Pulsar4X.Engine.Api
                 foreach (var mover in system.GetAllEntitiesWithDataBlob<Pulsar4X.Movement.NewtonMoveDB>())
                     if (mover.FactionOwnerID == sub.FactionId)
                         PushEntityRefresh(mover, sub.FactionId);
+                foreach (var mover in system.GetAllEntitiesWithDataBlob<Pulsar4X.Movement.NewtonSimpleMoveDB>())
+                    if (mover.FactionOwnerID == sub.FactionId)
+                        PushEntityRefresh(mover, sub.FactionId);
+                foreach (var beam in system.GetAllEntitiesWithDataBlob<Pulsar4X.Weapons.BeamInfoDB>())
+                    if (beam.FactionOwnerID == sub.FactionId)
+                        PushEntityRefresh(beam, sub.FactionId);
             }
         }
 
@@ -383,11 +390,18 @@ namespace Pulsar4X.Engine.Api
                 EntitySnapshot? entity = null;
                 SystemSnapshot? system = null;
 
-                if ((type is GameEventType.EntityAdded or GameEventType.EntityRevealed
-                          or GameEventType.EntityChanged or GameEventType.EntityRenamed)
-                    && m.EntityId is { } id
-                    && _server._game.GlobalManager.TryGetGlobalEntityById(id, out var e))
+                if (type is GameEventType.EntityAdded or GameEventType.EntityRevealed
+                         or GameEventType.EntityChanged or GameEventType.EntityRenamed)
                 {
+                    // The engine's add/change messages aren't visibility-scoped; drop pushes for
+                    // entities this faction can't see — or can't be resolved (mid-construction
+                    // DBAdded messages) — rather than leak them into its galaxy.
+                    if (m.EntityId is not { } id
+                        || !_server._game.GlobalManager.TryGetGlobalEntityById(id, out var e)
+                        || e.Manager == null
+                        || !e.Manager.IsEntityVisibleToFaction(e, _session.FactionId))
+                        return Task.CompletedTask;
+
                     entity = projector.ProjectEntity(e, _session.FactionId);
                 }
                 else if (type == GameEventType.SystemRevealed && m.SystemId is { } sysId)
