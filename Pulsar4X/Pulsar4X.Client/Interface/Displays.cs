@@ -12,6 +12,7 @@ using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Client.Interface;
 

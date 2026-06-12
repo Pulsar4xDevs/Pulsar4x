@@ -2,6 +2,7 @@ using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Energy;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Client;
 

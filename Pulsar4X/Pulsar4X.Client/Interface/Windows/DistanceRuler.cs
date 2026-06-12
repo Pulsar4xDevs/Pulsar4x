@@ -1,8 +1,8 @@
 ﻿using System;
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Engine;
 using SDL3;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Client
 {

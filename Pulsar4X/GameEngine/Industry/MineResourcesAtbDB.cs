@@ -3,6 +3,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Industry
 {

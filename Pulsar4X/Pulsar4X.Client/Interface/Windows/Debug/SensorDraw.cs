@@ -12,6 +12,7 @@ using Pulsar4X.Extensions;
 using Pulsar4X.Names;
 using Pulsar4X.Sensors;
 using Pulsar4X.Movement;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Client
 {

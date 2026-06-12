@@ -11,6 +11,7 @@ using Pulsar4X.Interfaces;
 using Pulsar4X.Modding;
 using Pulsar4X.Orbital;
 using Pulsar4X.Technology;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Client;
 

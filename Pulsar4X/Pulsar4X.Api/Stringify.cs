@@ -1,46 +1,9 @@
 using System;
-using Pulsar4X.DataStructures;
 
-namespace Pulsar4X.Engine
+namespace Pulsar4X.Api
 {
      public static class Stringify
     {
-
-        public static string Value(double amount, ValueTypeStruct valueType, string format = "0.###")
-        {
-            string str = "";
-            switch (valueType.ValueType)
-            {
-                case ValueTypeStruct.ValueTypes.Distance:
-                    str = Distance(amount * Math.Pow(10, (double)valueType.ValueSize), format);
-                    break;
-                case ValueTypeStruct.ValueTypes.Power:
-                    str = Power(amount * Math.Pow(10 * 0.01, (double)valueType.ValueSize), format);
-                    break;
-
-                case ValueTypeStruct.ValueTypes.Mass:
-                    str = Mass(amount * Math.Pow(10 * 0.01, (double)valueType.ValueSize), format);
-                    break;
-
-                case ValueTypeStruct.ValueTypes.Velocity:
-                    str = Velocity(amount * Math.Pow(10, (double)valueType.ValueSize), format);
-                    break;
-
-                case ValueTypeStruct.ValueTypes.Volume:
-                    str = Volume(amount * Math.Pow(10, (double)valueType.ValueSize), format);
-                    break;
-
-                case ValueTypeStruct.ValueTypes.Force:
-                    str = Thrust(amount * Math.Pow(10, (double)valueType.ValueSize), format);
-                    break;
-                case ValueTypeStruct.ValueTypes.Number:
-                    str = Quantity(amount * Math.Pow(10, (double)valueType.ValueSize), format);
-                    break;
-
-            }
-
-            return str;
-        }
 
         public static string Quantity(double number, string format = "0.###", bool fullSuffix = false)
         {

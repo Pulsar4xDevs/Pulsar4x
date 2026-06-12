@@ -16,6 +16,7 @@ using Pulsar4X.Weapons;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Ships;
 using SDL3;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Client.Combat
 {

@@ -10,6 +10,7 @@ using Pulsar4X.Factions;
 using Pulsar4X.Sensors;
 using Pulsar4X.Weapons;
 using Pulsar4X.Movement;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Client
 {

@@ -9,6 +9,7 @@ using SDL3;
 
 using Vector3 = System.Numerics.Vector3;
 using Vector4 = System.Numerics.Vector4;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Client
 {

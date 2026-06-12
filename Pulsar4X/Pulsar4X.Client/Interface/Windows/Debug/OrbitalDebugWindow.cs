@@ -10,6 +10,7 @@ using Pulsar4X.Orbits;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 using SDL3;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Client
 {

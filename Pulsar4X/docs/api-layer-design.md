@@ -345,6 +345,14 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    `UseRelativeVelocity` movement-rule settings the warp window adapts its inputs to. The
    **OrderCreationWindow** (a non-functional prototype whose action button did nothing) was retired
    rather than ported.
+   The **DistanceRuler** needed no API surface at all — it is pure camera/screen math; its only
+   engine dependency was `Stringify`, the unit-formatting helper every window uses. `Stringify`
+   moved into `Pulsar4X.Api` (dropping its one dead engine-typed method), since presenting
+   contract values as display strings is a client-facing concern both sides of the boundary share
+   (engine order `Details` strings use it too). That clears the most widespread transitional
+   `using Pulsar4X.Engine` ahead of the phase-6 reference cut; call sites that don't otherwise
+   import `Pulsar4X.Api` reach it through a `using Stringify = Pulsar4X.Api.Stringify;` alias,
+   which can't collide with same-named engine command types the way a namespace import could.
    The **FleetWindow's Standing Orders tab** (the conditional-order editor, the window's last
    engine-backed piece) is ported. The contract: `StandingOrder` (name + `StandingOrderCondition`s
    with comparison/threshold/And-Or chaining + action ids), serializable so it doubles as the read

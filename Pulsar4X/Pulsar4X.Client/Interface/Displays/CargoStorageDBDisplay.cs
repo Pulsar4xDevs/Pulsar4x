@@ -11,6 +11,7 @@ using Pulsar4X.Factions;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 using Pulsar4X.Weapons;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Client
 {

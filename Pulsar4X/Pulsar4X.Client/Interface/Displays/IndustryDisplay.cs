@@ -10,6 +10,7 @@ using Pulsar4X.Components;
 using Pulsar4X.Factions;
 using Pulsar4X.Storage;
 using static Pulsar4X.Industry.IndustryAbilityDB;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Client
 {

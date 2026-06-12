@@ -8,6 +8,7 @@ using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Factions;
 using Pulsar4X.Logistics;
 using Pulsar4X.Storage;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Client
 {

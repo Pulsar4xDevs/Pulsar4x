@@ -1,7 +1,6 @@
 using System;
 using ImGuiNET;
 using Pulsar4X.Api;
-using Pulsar4X.Engine;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Orbital;
 using Vector2 = Pulsar4X.Orbital.Vector2;

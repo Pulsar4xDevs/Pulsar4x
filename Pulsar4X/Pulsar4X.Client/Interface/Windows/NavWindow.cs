@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Api;
-using Pulsar4X.Engine;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Orbital;
 using Vector2 = System.Numerics.Vector2;

@@ -13,6 +13,7 @@ using Pulsar4X.Ships;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Engine;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Movement
 {
