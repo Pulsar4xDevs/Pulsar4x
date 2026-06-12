@@ -83,7 +83,6 @@ namespace Pulsar4X.Client
                 // DeleteThenCopyToDirectory(sourceData, modsDirectory);
 
                 // Load the available mods
-                ModsState.RefreshModsList(ModsPath);
 
                 // Read and apply any window preferences
                 LoadPreferences();
@@ -190,9 +189,9 @@ namespace Pulsar4X.Client
             _state.GameClient?.Update();
 
             //update and refresh state for GameDateTimechange
-            if(_state.Game != null)
+            if(_state.GameClient is { } gameClient)
             {
-                DateTime curTime = _state.Game.TimePulse.GameGlobalDateTime;
+                DateTime curTime = gameClient.Galaxy.Time.GameDateTime;
                 if (curTime != _state.LastGameUpdateTime)
                 {
                     foreach (var item in _state.UpdateableWindows)

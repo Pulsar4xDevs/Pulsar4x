@@ -405,16 +405,25 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    hotkeys render whatever the composition root registered without referencing the tools, and an
    `OnGameLoaded` event replaces the direct `DebugWindow.SetGameEvents()` calls from the new/load
    flows (the orbit-debug toggle's availability check became snapshot-based in the process). The
-   library is `InternalsVisibleTo` the host. Remaining before the `GameEngine` reference can be
-   dropped from `Pulsar4X.Client`:
-   (a) a game-lifecycle seam — `new Game`/`Game.Save`/`SetFaction` and `GlobalUIState.Game` move
-   behind an interface the host implements (the host then truly wires
-   `new InProcessAdapter(new EngineGameServer(game))`);
-   (b) the `IDesignDataProvider` bridge and the client-side designer evaluation
+   library is `InternalsVisibleTo` the host.
+   The **game-lifecycle seam** is in: `IGameLifecycle` (in the UI library, engine-free) is
+   implemented by the host's `GameLifecycle` and assigned to `GlobalUIState.Lifecycle` at startup.
+   It owns mod scanning (`ModsState` moved to the host), mod loading, and the whole
+   create/quickstart/load/save flows — factories, faction/species/colony setup — then binds the
+   game to the UI state (clear → `Game` → `SetFaction`, which builds the
+   `InProcessAdapter(new EngineGameServer(game))`) before returning an engine-free
+   `GameActivation` (system id + camera position/zoom). The UI side is data-driven: the new-game
+   wizard builds its pick-lists from `NewGameCatalog`/`ModOption` DTOs and submits a
+   `NewGameRequest`; `GlobalUIState.ActivateGameUI` finishes up (select system, point camera,
+   open default windows). `NewGameMenu`/`LoadGame`/`SaveGame` have no engine usings left, and the
+   main loop's game-tick detection reads the galaxy clock instead of `Game.TimePulse`.
+   Remaining before the `GameEngine` reference can be dropped from `Pulsar4X.Client`:
+   (a) the `IDesignDataProvider` bridge and the client-side designer evaluation
    (`ComponentDesigner`/`ShipDesign` run in the designer windows by design) need an engine-free
    shape or a relocation;
-   (c) the `EntityState`/`SystemState` click-pipeline plumbing the dev tools share;
-   (d) the parked ordnance/logistics windows.
+   (b) the `EntityState`/`SystemState` click-pipeline plumbing (and `GlobalUIState.Game`/`Faction`
+   themselves, which the host now assigns but the library still holds engine-typed);
+   (c) the parked ordnance/logistics windows.
 7. **Network adapter + server host:** transport + serialization for `MultiplayerAdapter` and the
    headless `Pulsar4X.Server.Host`.
 

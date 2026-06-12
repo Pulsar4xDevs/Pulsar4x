@@ -12,6 +12,7 @@ Trace.Listeners.Add(new ConsoleTraceListener());
 // Run the game
 using (var pulsar = new PulsarMainWindow(args))
 {
+    pulsar.State.Lifecycle = new GameLifecycle(pulsar.State);
     DevToolWindows.Register(pulsar.State);
     pulsar.Run();
 }

@@ -79,6 +79,29 @@ namespace Pulsar4X.Client
         public event Action? OnGameLoaded;
         internal void RaiseGameLoaded() => OnGameLoaded?.Invoke();
 
+        /// <summary>The game-lifecycle seam, implemented and assigned by the composition root.
+        /// The new/load/save menus drive game creation through it; the UI library never builds
+        /// an engine <c>Game</c> itself.</summary>
+        public IGameLifecycle? Lifecycle { get; set; }
+
+        /// <summary>The UI half of bringing a game on screen, after <see cref="Lifecycle"/> has
+        /// bound the faction and built the client: select the system, point the camera, open the
+        /// default windows.</summary>
+        internal void ActivateGameUI(GameActivation activation)
+        {
+            SetActiveSystem(activation.SystemId);
+            if (activation.CameraPositionM is { } cameraPos)
+                Camera.CenterOnPosition(cameraPos.X, cameraPos.Y, cameraPos.Z);
+            if (activation.CameraZoom is { } zoom)
+                Camera.ZoomLevel = zoom;
+
+            RaiseGameLoaded();
+            TimeControl.GetInstance().SetActive();
+            ToolBarWindow.GetInstance().SetActive();
+            Selector.GetInstance().SetActive();
+            EntityFilterBar.GetInstance().SetActive();
+        }
+
         /// <summary>
         /// Gets the faction bit mask for the current faction.
         /// Use this with Masked&lt;T&gt;.For() to retrieve faction-visible data.
