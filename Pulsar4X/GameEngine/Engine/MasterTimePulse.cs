@@ -29,7 +29,7 @@ namespace Pulsar4X.Engine
         /// </summary>
         [JsonIgnore]
         public bool IsRunning => _timeSimulationTask is not null && !_timeSimulationTask.IsCompleted;
-        
+
         /// <summary>
         /// Returns <see langword="true"/> if the time loop is running and has a pending stop request.
         /// </summary>
@@ -179,7 +179,7 @@ namespace Pulsar4X.Engine
 
             _timeSimulationCts?.Dispose();
             _timeSimulationCts = new CancellationTokenSource();
-            _timeSimulationTask = Task.Run(() => SimulateTimeUntil(toDate), _timeSimulationCts.Token);
+            _timeSimulationTask = Task.Run(() => SimulateTimeUntil(toDate, _timeSimulationCts.Token), _timeSimulationCts.Token);
 
             if (_game.Settings.EnforceSingleThread)
                 _timeSimulationTask.Wait();
@@ -248,7 +248,7 @@ namespace Pulsar4X.Engine
                 // Run the simulation as fast as possible, with no delay between ticks.
                 while (!ct.IsCancellationRequested)
                 {
-                    SimulateTimeUntil(GameGlobalDateTime + Ticklength);
+                    SimulateTimeUntil(GameGlobalDateTime + Ticklength, ct);
                 }
             }
             else
@@ -257,7 +257,7 @@ namespace Pulsar4X.Engine
                 // The call to WaitForNextTickAsync will return `true` if the timer fired, or 'false' if the timer was disposed.
                 while (await _tickSource.WaitForNextTickAsync(ct).ConfigureAwait(false))
                 {
-                    SimulateTimeUntil(GameGlobalDateTime + Ticklength);
+                    SimulateTimeUntil(GameGlobalDateTime + Ticklength, ct);
                 }
             }
         }
@@ -266,11 +266,13 @@ namespace Pulsar4X.Engine
         /// Runs the simulation until the specified target date time is reached.
         /// </summary>
         /// <param name="targetDateTime"></param>
-        private void SimulateTimeUntil(DateTime targetDateTime)
+        /// <param name="ct">Cancellation token to signal asynchronous stop request.</param>
+        private void SimulateTimeUntil(DateTime targetDateTime, CancellationToken ct = default)
         {
             _stopwatch.Start(); //start the processor loop stopwatch (performance counter)
 
-            while (GameGlobalDateTime < targetDateTime)
+            // If a cancellation is signalled, stop the time advance the next time an interrupt happens.
+            while (GameGlobalDateTime < targetDateTime && !ct.IsCancellationRequested)
             {
                 _subpulseStopwatch.Start();
                 DateTime nextInterupt = ProcessNextInterupt(targetDateTime);
