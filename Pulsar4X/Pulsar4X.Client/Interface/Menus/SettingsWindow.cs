@@ -6,7 +6,6 @@ using Pulsar4X.Engine;
 using Vector3 = System.Numerics.Vector3;
 using Pulsar4X.Orbits;
 using Pulsar4X.Movement;
-using Pulsar4X.Client.Combat;
 using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client

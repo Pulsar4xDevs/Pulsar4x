@@ -462,6 +462,14 @@ The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api`
   the `MultiplayerAdapter` must implement the same interface from replicas synced on connect — both
   DataBlobs are already save-serializable — and refresh them when techs level (the design-relevant
   changes already arrive as `ResearchChanged`/`ComponentDesignsChanged` pushes to use as triggers).
+- **SM/debug tooling stays engine-backed by design.** `SMWindow`, `EntitySpawnWindow`, the
+  `Debug/` windows (DebugWindow, EntityInspector, OrbitalDebugWindow, SensorDraw, DataViewerWindow,
+  PerformanceWindow, GraphicDebugWidget) and `DamageViewerWindow` (a damage-sim test sandbox that
+  fires synthetic projectiles and pokes component health — moved into `Debug/` to make its role
+  explicit) are development tools, not player UI. They will not get a faction-scoped API surface;
+  they keep their engine access and move to `Pulsar4X.Client.Host` (which references the engine)
+  when the phase-6 reference cut happens. The player-facing slice of what DamageViewer shows —
+  component health, armor — already travels via `ShipView`/`InstallationsView`.
 - **Procedural body generation never attaches `GeoSurveyableDB`** (only the blueprint/JSON body
   paths do), so procedurally generated systems currently offer nothing to geo-survey. Engine
   inconsistency noted while porting; not an API-layer issue.

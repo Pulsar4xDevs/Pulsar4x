@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using GameEngine.Damage;
 using ImGuiNET;
-using Pulsar4X.Client;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
@@ -18,7 +17,7 @@ using Pulsar4X.Ships;
 using SDL3;
 using Stringify = Pulsar4X.Api.Stringify;
 
-namespace Pulsar4X.Client.Combat
+namespace Pulsar4X.Client
 {
     public class DamageViewerWindow : PulsarGuiWindow
     {

@@ -5,7 +5,6 @@ using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using Pulsar4X.Extensions;
-using Pulsar4X.Client.Combat;
 using Vector3 = Pulsar4X.Orbital.Vector3;
 using System.Linq;
 using Pulsar4X.Client.Interface.Widgets;
