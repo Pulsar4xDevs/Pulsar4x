@@ -12,6 +12,8 @@ using Pulsar4X.Movement;
 using SDL3;
 using Stringify = Pulsar4X.Api.Stringify;
 
+using Pulsar4X.Client.Host;
+
 namespace Pulsar4X.Client
 {
 
@@ -33,7 +35,7 @@ namespace Pulsar4X.Client
             if(_uiState.LastClickedEntity != null)
             {
                 if (_orbitalDebugWindow._debugWidget == null ||
-                    _orbitalDebugWindow._debugWidget.EntityGuid != _uiState.LastClickedEntity.Entity.Id)
+                    _orbitalDebugWindow._debugWidget.EntityGuid != _uiState.LastClickedEntity.Id)
                 {
                     _orbitalDebugWindow.HardRefresh();
                 }
@@ -46,7 +48,7 @@ namespace Pulsar4X.Client
         {
             var entityState = _uiState.LastClickedEntity;
             bool wasActive = IsActive;
-            var entity = entityState.Entity;
+            var entity = entityState.GetEntity()!;
             var hasParent = entity.GetSOIParentEntity() != null;
             IsActive = wasActive;
             if(hasParent &&
@@ -66,7 +68,7 @@ namespace Pulsar4X.Client
         {
             if (_uiState.LastClickedEntity == null)
                 return;
-            var entityID = _uiState.LastClickedEntity.Entity.Id;
+            var entityID = _uiState.LastClickedEntity.Id;
             if (_debugWidget == null || entityID != _debugWidget.EntityGuid)
             {
                 HardRefresh();
@@ -210,18 +212,18 @@ namespace Pulsar4X.Client
 
         private Entity _entity;
 
-        public OrbitalDebugWidget(EntityState entityState) : base(MoveMath.GetSOIParentPositionDB(entityState.Entity))
+        public OrbitalDebugWidget(EntityState entityState) : base(new PositionDBAdapter(MoveMath.GetSOIParentPositionDB(entityState.GetEntity()!)))
         {
-            _entity = entityState.Entity;
-            _bodyPosition = _entity.GetDataBlob<PositionDB>();
-            _orbitIcon = entityState.OrbitIcon;
+            _entity = entityState.GetEntity()!;
+            _bodyPosition = new PositionDBAdapter(_entity.GetDataBlob<PositionDB>());
+            _orbitIcon = PulsarGuiWindow._uiState.SelectedSysMapRender?.GetOrbitIcon(entityState.Id);
 
             //NOTE! ParentPositionDB references the focal point (ie parent's position) *not* the orbiting object position.
 
             var parentEntity = _entity.GetSOIParentEntity();
             if(parentEntity != null)
             {
-                _positionDB = parentEntity.GetDataBlob<PositionDB>();
+                _positionDB = new PositionDBAdapter(parentEntity.GetDataBlob<PositionDB>());
 
                 var parentMass = parentEntity.GetDataBlob<MassVolumeDB>().MassDry;
                 var myMass = _entity.GetDataBlob<MassVolumeDB>().MassDry;
@@ -230,7 +232,7 @@ namespace Pulsar4X.Client
                 parentPos = _positionDB.AbsolutePosition;
             }
 
-            EntityGuid = entityState.Entity.Id;
+            EntityGuid = entityState.Id;
 
             RefreshEccentricity();
 

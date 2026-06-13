@@ -1,12 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
-using Pulsar4X.Extensions;
-using Pulsar4X.Interfaces;
 using SDL3;
-using Pulsar4X.Galaxy;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
@@ -18,8 +13,6 @@ namespace Pulsar4X.Client
     /// </summary>
     public class NewtonMoveIcon : Icon, IUpdateUserSettings, IKepler
     {
-        //protected EntityManager _mgr;
-        NewtonMoveDB? _newtonMoveDB;
         IPosition? _parentPosDB;
         IPosition? _myPosDB;
         double _sgp;
@@ -62,13 +55,7 @@ namespace Pulsar4X.Client
 
         private double _dv = 0;
         private KeplerElements _ke;
-        private Entity? _soiParent;
-
-
-        public NewtonMoveIcon(KeplerElements ke, Vector3 position) : base(position)
-        {
-        }
-
+        private bool _hasManeuverDv;
 
         /// <summary>Snapshot constructor: trajectory from the NewtonMoveView's elements, positions
         /// read through the replicated galaxy. The map rebuilds this icon when the entity's
@@ -88,6 +75,7 @@ namespace Pulsar4X.Client
             _ke = newton.Trajectory.ToKeplerElements();
 
             var deltaV = new Vector3(newton.ManeuverDeltaVMps.X, newton.ManeuverDeltaVMps.Y, newton.ManeuverDeltaVMps.Z);
+            _hasManeuverDv = deltaV.Length() > 0;
             SetThrustLine(deltaV, newton.ThrustNewtons);
 
             UpdateUserSettings();
@@ -145,44 +133,8 @@ namespace Pulsar4X.Client
         }
         public override void OnPhysicsUpdate()
         {
-            if (_newtonMoveDB == null || _newtonMoveDB.OwningEntity == null) //There's a threaded race condition here which will cause a null...
-            {
-                //snapshot-backed icons get rebuilt on change; just keep the trail on the ship.
-                SetTrueAnomalyIndex();
-                return;
-            }
-
-            //check if the SOI parent has changed (SOI transition)
-            bool soiChanged = _newtonMoveDB.SOIParent != _soiParent;
-            if (soiChanged)
-            {
-                _soiParent = _newtonMoveDB.SOIParent;
-                _parentPosDB = _soiParent.GetDataBlob<PositionDB>();
-                _positionDB = _parentPosDB;
-                var parentMass = _newtonMoveDB.ParentMass;
-                var myMass = _newtonMoveDB.OwningEntity.GetDataBlob<MassVolumeDB>().MassDry;
-                _sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
-                _soiRadiusM = _soiParent.GetSOI_m();
-            }
-
-            _currentVector_ms = _newtonMoveDB.CurrentVector_ms;
-
-            var ke = _newtonMoveDB.GetElements(); //...cause a null ref exception inside this call.
-            if (soiChanged || ke.Eccentricity != _ke.Eccentricity)
-            {
-                _ke = ke;
-                CreatePointArray();
-            }
-            else
-            {
-                //update the true anomaly index so the trail follows the ship
-                SetTrueAnomalyIndex();
-            }
-
-            double thrustNewtons = _newtonMoveDB.ManuverDeltaVLen > 0
-                ? _newtonMoveDB.OwningEntity.GetDataBlob<NewtonThrustAbilityDB>().ThrustInNewtons
-                : 0;
-            SetThrustLine(_newtonMoveDB.ManuverDeltaV, thrustNewtons);
+            //snapshot-backed icons get rebuilt on change; just keep the trail on the ship.
+            SetTrueAnomalyIndex();
         }
 
         void SetThrustLine(Vector3 deltaV, double thrustNewtons)
@@ -214,7 +166,7 @@ namespace Pulsar4X.Client
                 CreateHyperbolicPoints();
             }
 
-            if(_newtonMoveDB != null && _newtonMoveDB.ManuverDeltaV.Length() > 0)
+            if(_hasManeuverDv)
                 TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.NewtonionThrust;
             SetTrueAnomalyIndex();
         }
@@ -226,7 +178,7 @@ namespace Pulsar4X.Client
 
             Vector3 vel = _currentVector_ms;
             Vector3 pos = _myPosDB.RelativePosition;
-            //Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
+            //Vector3 eccentVector = OrbitalMath.EccentricityVector(_sgp, pos, vel);
 
             double e = _ke.Eccentricity;
             double r = pos.Length();
@@ -236,7 +188,7 @@ namespace Pulsar4X.Client
 
             double a1 = 1 / (2 / r - Math.Pow(v, 2) / _sgp);    //semiMajor Axis
             double b1 = -a * Math.Sqrt(Math.Pow(e, 2) - 1);     //semiMinor Axis
-            Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
+            Vector3 eccentVector = OrbitalMath.EccentricityVector(_sgp, pos, vel);
             double e1 = eccentVector.Length();
 
             double linierEccentricity = e * a;
@@ -434,7 +386,7 @@ namespace Pulsar4X.Client
 
         double IKepler.SemiMin => _ke.SemiMinorAxis;
 
-        double IKepler.LoP_radians => OrbitMath.GetLongditudeOfPeriapsis(_ke.Inclination, _ke.AoP, _ke.LoAN);
+        double IKepler.LoP_radians => OrbitalMath.GetLongditudeOfPeriapsis(_ke.Inclination, _ke.AoP, _ke.LoAN);
 
         double IKepler.Eccentricity => _ke.Eccentricity;
 
@@ -587,7 +539,7 @@ namespace Pulsar4X.Client
 
             double a1 = 1 / (2 / r - Math.Pow(v, 2) / _ke.StandardGravParameter);    //semiMajor Axis
             double b1 = -a * Math.Sqrt(Math.Pow(e, 2) - 1);     //semiMinor Axis
-            Vector3 eccentVector = OrbitMath.EccentricityVector(
+            Vector3 eccentVector = OrbitalMath.EccentricityVector(
                 _ke.StandardGravParameter,
                 _sv.Position,
                 new Vector3(_sv.Velocity.X, _sv.Velocity.Y, 0));

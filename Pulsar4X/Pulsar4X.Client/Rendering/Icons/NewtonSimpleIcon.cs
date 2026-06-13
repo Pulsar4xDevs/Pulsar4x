@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
-using Pulsar4X.Extensions;
-using Pulsar4X.Interfaces;
 using SDL3;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
@@ -17,8 +13,6 @@ namespace Pulsar4X.Client
     /// </summary>
     public class NewtonSimpleIcon : Icon, IUpdateUserSettings, IKepler
     {
-        //protected EntityManager _mgr;
-        NewtonSimpleMoveDB? _newtonMoveDB;
         IPosition? _parentPosDB;
         IPosition? _myPosDB;
         double _sgp;
@@ -61,11 +55,6 @@ namespace Pulsar4X.Client
 
         private double _dv = 0;
         private KeplerElements _ke;
-
-
-        public NewtonSimpleIcon(KeplerElements ke, Vector3 position) : base(position)
-        {
-        }
 
 
         /// <summary>Snapshot constructor: trajectory from the view's elements, positions read
@@ -136,25 +125,8 @@ namespace Pulsar4X.Client
         }
         public override void OnPhysicsUpdate()
         {
-            if (_newtonMoveDB == null || _newtonMoveDB.OwningEntity == null) //There's a threaded race condition here which will cause a null...
-            {
-                //snapshot-backed icons get rebuilt on change; just keep the trail on the ship.
-                SetTrueAnomalyIndex();
-                return;
-            }
-            _stateTime = _newtonMoveDB.OwningEntity.StarSysDateTime;
-            var ke = _newtonMoveDB.CurrentTrajectory; //...cause a null ref exception inside this call.
-            if (ke.Eccentricity != _ke.Eccentricity)
-            {
-                _ke = ke;
-                CreatePointArray();
-            }
-            else
-            {
-                //update the true anomaly index so the trail follows the ship
-                SetTrueAnomalyIndex();
-                _thrustLinePoints[1] = Vector2.Zero;
-            }
+            //snapshot-backed icons get rebuilt on change; just keep the trail on the ship.
+            SetTrueAnomalyIndex();
         }
 
         internal void CreatePointArray()
@@ -177,10 +149,10 @@ namespace Pulsar4X.Client
         {
             if(_myPosDB == null)
                 throw new NullReferenceException();
-            var stateVec = OrbitMath.GetStateVectors(_ke, _stateTime);
+            var stateVec = OrbitalMath.GetStateVectors(_ke, _stateTime);
             Vector3 vel = (Vector3)stateVec.velocity;
             Vector3 pos = _myPosDB.RelativePosition;
-            //Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
+            //Vector3 eccentVector = OrbitalMath.EccentricityVector(_sgp, pos, vel);
 
             double e = _ke.Eccentricity;
             double r = pos.Length();
@@ -190,7 +162,7 @@ namespace Pulsar4X.Client
 
             double a1 = 1 / (2 / r - Math.Pow(v, 2) / _sgp);    //semiMajor Axis
             double b1 = -a * Math.Sqrt(Math.Pow(e, 2) - 1);     //semiMinor Axis
-            Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
+            Vector3 eccentVector = OrbitalMath.EccentricityVector(_sgp, pos, vel);
             double e1 = eccentVector.Length();
 
             double linierEccentricity = e * a;
@@ -388,7 +360,7 @@ namespace Pulsar4X.Client
 
         double IKepler.SemiMin => _ke.SemiMinorAxis;
 
-        double IKepler.LoP_radians => OrbitMath.GetLongditudeOfPeriapsis(_ke.Inclination, _ke.AoP, _ke.LoAN);
+        double IKepler.LoP_radians => OrbitalMath.GetLongditudeOfPeriapsis(_ke.Inclination, _ke.AoP, _ke.LoAN);
 
         double IKepler.Eccentricity => _ke.Eccentricity;
 

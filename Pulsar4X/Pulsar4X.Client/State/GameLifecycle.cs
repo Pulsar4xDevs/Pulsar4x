@@ -31,7 +31,25 @@ public interface IGameLifecycle
 
     /// <summary>Save the running game to disk.</summary>
     void SaveGame(string filePath);
+
+    /// <summary>Switch this session between the player faction and the game-master faction.
+    /// The implementation rebinds the game client (via <c>GlobalUIState.OnGameClientBound</c>)
+    /// before returning.</summary>
+    void SetGameMasterMode(bool enabled);
+
+    /// <summary>The running game's engine processing rules, for the settings window's Game tab.
+    /// Null when no game is loaded.</summary>
+    GameRules? GetGameRules();
+
+    void ApplyGameRules(GameRules rules);
 }
+
+/// <summary>Engine processing rules a running game exposes for live tweaking.</summary>
+public sealed record GameRules(
+    bool EnableMultiThreading,
+    bool EnforceSingleThread,
+    bool UseRelativeVelocity,
+    bool StrictNewtonion);
 
 /// <summary>An installed mod, as listed on the new-game menu's mod-selection page.</summary>
 public sealed record ModOption(

@@ -1,6 +1,7 @@
 using Pulsar4X.Api;
 using Pulsar4X.Client;
 using Pulsar4X.Client.Interface.Windows;
+using Pulsar4X.Client.ModFileEditing;
 
 namespace Pulsar4X.Client.Host;
 
@@ -73,10 +74,42 @@ public static class DevToolWindows
             DevToolPlacement.SettingsList));
 
         state.RegisterDevTool(new DevToolRegistration(
+            "component-design", "Design a new component or facility",
+            () => ComponentDesignWindow.GetInstance().ToggleActive(),
+            () => ComponentDesignWindow.GetInstance().GetActive(),
+            DevToolPlacement.Toolbar)
+        {
+            ToolbarIcon = () => state.Img_DesComponent(),
+            Order = 100,
+        });
+
+        state.RegisterDevTool(new DevToolRegistration(
+            "ship-design", "Design a new Ship",
+            () => ShipDesignWindow.GetInstance().ToggleActive(),
+            () => ShipDesignWindow.GetInstance().GetActive(),
+            DevToolPlacement.Toolbar)
+        {
+            ToolbarIcon = () => state.Img_DesignShip(),
+            Order = 110,
+        });
+
+        state.RegisterDevTool(new DevToolRegistration(
+            "components-window", "Show Components Window",
+            () => ComponentsWindow.GetInstance().ToggleActive(),
+            () => ComponentsWindow.GetInstance().GetActive(),
+            DevToolPlacement.SettingsList));
+
+        state.RegisterDevTool(new DevToolRegistration(
+            "mod-editor", "Editor",
+            () => ModFileEditor.GetInstance().ToggleActive(),
+            () => ModFileEditor.GetInstance().GetActive(),
+            DevToolPlacement.MainMenu));
+
+        state.RegisterDevTool(new DevToolRegistration(
             "sm-window", "View SM debug info about a body",
             () => SMWindow.GetInstance().ToggleActive(),
             () => SMWindow.GetInstance().GetActive(),
-            DevToolPlacement.Toolbar));
+            DevToolPlacement.SMToolbar));
 
         state.RegisterDevTool(new DevToolRegistration(
             "sm-mode", "SM Mode",

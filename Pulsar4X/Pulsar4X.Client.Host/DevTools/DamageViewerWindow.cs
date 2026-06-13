@@ -17,6 +17,8 @@ using Pulsar4X.Ships;
 using SDL3;
 using Stringify = Pulsar4X.Api.Stringify;
 
+using Pulsar4X.Client.Host;
+
 namespace Pulsar4X.Client
 {
     public class DamageViewerWindow : PulsarGuiWindow
@@ -78,9 +80,9 @@ namespace Pulsar4X.Client
             if (!_uiState.LoadedWindows.ContainsKey(typeof(DamageViewerWindow)))
             {
                 var dv = new DamageViewerWindow();
-                if (_uiState.LastClickedEntity?.Entity != null)
+                if (_uiState.LastClickedEntity?.GetEntity() != null)
                 {
-                    dv.Init(_uiState.LastClickedEntity.Entity);
+                    dv.Init(_uiState.LastClickedEntity.GetEntity()!);
                 }
 
                 return dv;
@@ -88,8 +90,8 @@ namespace Pulsar4X.Client
             else
             {
                 var dv = (DamageViewerWindow)_uiState.LoadedWindows[typeof(DamageViewerWindow)];
-                if (_uiState.PrimaryEntity != null && _uiState.LastClickedEntity.Entity != dv._selectedEntity)
-                    dv.Init(_uiState.LastClickedEntity.Entity);
+                if (_uiState.PrimaryEntity != null && _uiState.LastClickedEntity.GetEntity()! != dv._selectedEntity)
+                    dv.Init(_uiState.LastClickedEntity.GetEntity()!);
                 return dv;
             }
 
@@ -124,7 +126,7 @@ namespace Pulsar4X.Client
                     _damageEventIndex = _profile.DamageEvents.Count - 1;
                     SetDamageEventFrames();
                 }
-                Textures.CreateTexture(_uiState.ViewPort.Renderer, _rawShipImage, ref _shipImgPtr, SDL.PixelFormat.ARGB8888);
+                RawBmpTextures.CreateTexture(_uiState.ViewPort.Renderer, _rawShipImage, ref _shipImgPtr, SDL.PixelFormat.ARGB8888);
             }
             if(damageableEntity.TryGetDataBlob<ComponentInstancesDB>(out var _componentInstances))
             {}
@@ -143,7 +145,7 @@ namespace Pulsar4X.Client
             _damageFrames = DamageTools.DealDamageSim(_profile, _profile.DamageEvents[_damageEventIndex]).damageFrames;
             _showFrameNum = 0;
             if (_damageFrames != null)
-                Textures.CreateTexture(_uiState.ViewPort.Renderer, _damageFrames[_showFrameNum], ref _showDmgFrametx, SDL.PixelFormat.ARGB8888);
+                RawBmpTextures.CreateTexture(_uiState.ViewPort.Renderer, _damageFrames[_showFrameNum], ref _showDmgFrametx, SDL.PixelFormat.ARGB8888);
         }
 
 
@@ -524,7 +526,7 @@ namespace Pulsar4X.Client
                             _showFrameNum--;
                             if (_showFrameNum < 0)
                                 _showFrameNum = _damageFrames.Count - 1;
-                            Textures.CreateTexture(_uiState.ViewPort.Renderer, _damageFrames[_showFrameNum], ref _showDmgFrametx, SDL.PixelFormat.ARGB8888);
+                            RawBmpTextures.CreateTexture(_uiState.ViewPort.Renderer, _damageFrames[_showFrameNum], ref _showDmgFrametx, SDL.PixelFormat.ARGB8888);
                         }
 
                         ImGui.SameLine();
@@ -533,7 +535,7 @@ namespace Pulsar4X.Client
                             _showFrameNum++;
                             if (_showFrameNum > _damageFrames.Count - 1)
                                 _showFrameNum = 0;
-                            Textures.CreateTexture(_uiState.ViewPort.Renderer, _damageFrames[_showFrameNum], ref _showDmgFrametx, SDL.PixelFormat.ARGB8888);
+                            RawBmpTextures.CreateTexture(_uiState.ViewPort.Renderer, _damageFrames[_showFrameNum], ref _showDmgFrametx, SDL.PixelFormat.ARGB8888);
                         }
 
                         ImGui.Text(_showFrameNum + 1 + " of " + _damageFrames.Count);

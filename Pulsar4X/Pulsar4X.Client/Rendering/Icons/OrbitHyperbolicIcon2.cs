@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
-using Pulsar4X.Orbits;
 using SDL3;
 
 namespace Pulsar4X.Client;
@@ -11,8 +9,8 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
 {
     private readonly double _parentSoiRadiusM;
 
-    internal OrbitHyperbolicIcon2(Pulsar4X.Api.OrbitView orbit, Pulsar4X.Interfaces.IPosition bodyPosition,
-        Pulsar4X.Interfaces.IPosition parentPosition, UserOrbitSettings.OrbitBodyType bodyType,
+    internal OrbitHyperbolicIcon2(Pulsar4X.Api.OrbitView orbit, IPosition bodyPosition,
+        IPosition parentPosition, UserOrbitSettings.OrbitBodyType bodyType,
         List<List<UserOrbitSettings>> settings)
         : base(orbit, bodyPosition, parentPosition, bodyType, settings)
     {

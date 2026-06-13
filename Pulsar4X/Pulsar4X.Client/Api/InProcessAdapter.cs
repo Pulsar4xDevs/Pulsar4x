@@ -10,9 +10,13 @@ namespace Pulsar4X.Client;
 /// to an <see cref="IGameServer"/> in the same process (no serialization), and keeps the replicated
 /// <see cref="IClientGalaxy"/> current from bulk snapshots and the server event stream.
 /// </summary>
-public sealed class InProcessAdapter : IGameClient, IDesignDataProvider
+public sealed class InProcessAdapter : IGameClient
 {
     private readonly IGameServer _server;
+
+    /// <summary>The wrapped server, for the composition root (which built it) to reach
+    /// engine-side bridges like the designer-data handoff. Not part of the UI contract.</summary>
+    public IGameServer Server => _server;
     private readonly ClientGalaxy _galaxy = new();
 
     // Server events arrive on engine/threadpool threads; we only enqueue here (thread-safe) and apply
@@ -55,6 +59,12 @@ public sealed class InProcessAdapter : IGameClient, IDesignDataProvider
     public Task<CommandResult> SubmitCommandAsync(GameCommand command)
         => Task.FromResult(_server.SubmitCommand(Session, command));
 
+    public Task SetSystemFocusAsync(string? systemId)
+    {
+        _server.SetSystemFocus(Session, systemId);
+        return Task.CompletedTask;
+    }
+
     public Task SetTimeControlAsync(TimeControlRequest request)
     {
         // The server applies the change and broadcasts a TimeChanged delta back to us; the galaxy's
@@ -62,23 +72,6 @@ public sealed class InProcessAdapter : IGameClient, IDesignDataProvider
         // over a network).
         _server.SetTimeControl(Session, request);
         return Task.CompletedTask;
-    }
-
-    // In-process the design-time data is the engine's own objects, zero-copy. The downcast is this
-    // adapter's prerogative: it always wraps an EngineGameServer; a network adapter implements the
-    // same interface from state synced on connect.
-    public bool TryGetDesignData(out Pulsar4X.Factions.FactionInfoDB info, out Pulsar4X.Factions.FactionTechDB techs)
-    {
-        if (_server is Pulsar4X.Engine.Api.EngineGameServer engine
-            && engine.GetFactionDesignData(Session) is { } data)
-        {
-            (info, techs) = data;
-            return true;
-        }
-
-        info = null!;
-        techs = null!;
-        return false;
     }
 
     // Called on an engine/threadpool thread — just queue; do not touch the galaxy here.

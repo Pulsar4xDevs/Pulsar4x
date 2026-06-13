@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using Pulsar4X.Api;
 using Pulsar4X.Client;
 using Pulsar4X.Colonies;
+using Pulsar4X.Engine.Api;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
@@ -24,7 +25,7 @@ namespace Pulsar4X.Client.Host;
 /// in the composition root. After bringing a game up it hands the UI an engine-free
 /// <see cref="GameActivation"/>.
 /// </summary>
-public sealed class GameLifecycle : IGameLifecycle
+public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
 {
     private const string DEFAULT_NAME = "United Earth Corp";
     private const string DEFAULT_ABBREVIATION = "UEC";
@@ -32,11 +33,35 @@ public sealed class GameLifecycle : IGameLifecycle
     private readonly GlobalUIState _state;
     private ModDataStore _modDataStore = new ();
 
+    private Game? _game;
+    private EngineGameServer? _server;
+    private Entity? _playerFaction;
+
+    /// <summary>The lifecycle instance the composition root built, for the host's dev tools —
+    /// their window into the live engine objects the UI library no longer exposes.</summary>
+    public static GameLifecycle? Instance { get; private set; }
+
     public GameLifecycle(GlobalUIState state)
     {
         _state = state;
+        Instance = this;
         ModsState.RefreshModsList(PulsarMainWindow.ModsPath);
     }
+
+    /// <summary>The running engine game; dev tooling only.</summary>
+    public Game? Game => _game;
+
+    /// <summary>The engine entity of the faction this session is bound to; dev tooling only.</summary>
+    public Entity? Faction
+        => _game != null && _game.Factions.TryGetValue(_state.FactionId, out var faction) ? faction : null;
+
+    /// <summary>The engine star system the UI is looking at; dev tooling only.</summary>
+    public StarSystem? SelectedSystem
+        => _game?.Systems.FirstOrDefault(s => s.ID.Equals(_state.SelectedStarSystemId));
+
+    /// <summary>The selected system wrapped for the dev-tool windows; dev tooling only.</summary>
+    public SystemState? SelectedSystemState
+        => SelectedSystem is { } system ? new SystemState(system) : null;
 
     public IReadOnlyList<ModOption> GetAvailableMods()
         => ModsState.AvailableMods
@@ -162,21 +187,82 @@ public sealed class GameLifecycle : IGameLifecycle
         (int id, Entity faction) = loadedGame.Factions.Last();
 
         _state.ClearGameState();
-        _state.Game = loadedGame;
-        _state.SetFaction(faction, true);
+        SetGame(loadedGame);
+        BindFaction(faction, setAsPlayer: true);
 
         return new GameActivation(faction.GetDataBlob<FactionInfoDB>().KnownSystems[0]);
     }
 
     public void SaveGame(string filePath)
     {
-        if (_state.Game == null) return;
+        if (_game == null) return;
 
         // Update the save git hash
-        _state.Game.LastSaveGitHash = AssemblyInfo.GetGitHash();
+        _game.LastSaveGitHash = AssemblyInfo.GetGitHash();
 
-        string gameJson = Game.Save(_state.Game);
+        string gameJson = Game.Save(_game);
         File.WriteAllText(filePath, gameJson);
+    }
+
+    public void SetGameMasterMode(bool enabled)
+    {
+        if (_game == null) return;
+
+        if (enabled)
+            BindFaction(_game.GameMasterFaction, setAsPlayer: false);
+        else if (_playerFaction != null)
+            BindFaction(_playerFaction, setAsPlayer: false);
+    }
+
+    public GameRules? GetGameRules()
+        => _game == null
+            ? null
+            : new GameRules(
+                _game.Settings.EnableMultiThreading,
+                _game.Settings.EnforceSingleThread,
+                _game.Settings.UseRelativeVelocity,
+                _game.Settings.StrictNewtonion);
+
+    public void ApplyGameRules(GameRules rules)
+    {
+        if (_game == null) return;
+
+        _game.Settings.EnableMultiThreading = rules.EnableMultiThreading;
+        _game.Settings.EnforceSingleThread = rules.EnforceSingleThread;
+        _game.Settings.UseRelativeVelocity = rules.UseRelativeVelocity;
+        _game.Settings.StrictNewtonion = rules.StrictNewtonion;
+    }
+
+    public bool TryGetDesignData(out FactionInfoDB info, out FactionTechDB techs)
+    {
+        info = null!;
+        techs = null!;
+        if (_server == null || _state.GameClient is not { } client) return false;
+        if (_server.GetFactionDesignData(client.Session) is not { } data) return false;
+
+        (info, techs) = data;
+        return true;
+    }
+
+    private void SetGame(Game game)
+    {
+        _server?.Dispose();
+        _game = game;
+        _server = new EngineGameServer(game);
+        _playerFaction = null;
+    }
+
+    /// <summary>Connects a session for the faction and hands the resulting client to the UI.</summary>
+    private void BindFaction(Entity faction, bool setAsPlayer)
+    {
+        if (_server == null) throw new InvalidOperationException("No game is loaded.");
+
+        if (setAsPlayer)
+            _playerFaction = faction;
+
+        var client = new InProcessAdapter(_server);
+        var connect = client.ConnectAsync(new ConnectRequest { PlayerName = "Player", FactionId = faction.Id }).Result;
+        _state.OnGameClientBound(client, connect?.Game);
     }
 
     /// <summary>Binds the freshly created game to the UI state (faction + game client) and
@@ -184,8 +270,8 @@ public sealed class GameLifecycle : IGameLifecycle
     private GameActivation Activate(Game game, Entity playerFaction, string systemId, Entity startingBody)
     {
         _state.ClearGameState();
-        _state.Game = game;
-        _state.SetFaction(playerFaction, true);
+        SetGame(game);
+        BindFaction(playerFaction, setAsPlayer: true);
 
         Vec3? cameraPos = null;
         if (startingBody.TryGetDataBlob<PositionDB>(out var position))

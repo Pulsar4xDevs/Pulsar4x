@@ -14,13 +14,15 @@ using Pulsar4X.Sensors;
 using Pulsar4X.Movement;
 using Stringify = Pulsar4X.Api.Stringify;
 
+using Pulsar4X.Client.Host;
+
 namespace Pulsar4X.Client
 {
     
     public class SensorDraw : PulsarGuiWindow
     {
         private EntityState? _selectedEntitySate;
-        private Entity? _selectedEntity => _selectedEntitySate?.Entity;
+        private Entity? _selectedEntity => _selectedEntitySate?.GetEntity();
         private SystemState? _selectedStarSysState;
 
         private SensorAbilityDB _sensorAbilityDB;
@@ -79,22 +81,22 @@ namespace Pulsar4X.Client
             else
             {
                 instance = (SensorDraw)_uiState.LoadedWindows[typeof(SensorDraw)];
-                if(_uiState.LastClickedEntity?.Entity != null)
+                if(_uiState.LastClickedEntity?.GetEntity() != null)
                     instance._selectedEntitySate = _uiState.LastClickedEntity;
             }
             if(instance._selectedEntitySate != null)
             {
-                if (_uiState.LastClickedEntity?.Entity != null && instance._selectedEntity != _uiState.LastClickedEntity.Entity)
+                if (_uiState.LastClickedEntity?.GetEntity() != null && instance._selectedEntity != _uiState.LastClickedEntity.GetEntity()!)
                     instance._selectedEntitySate = _uiState.LastClickedEntity;
             }
             else
             {
-                if(_uiState.LastClickedEntity?.Entity != null)
+                if(_uiState.LastClickedEntity?.GetEntity() != null)
                     instance._selectedEntitySate = _uiState.LastClickedEntity;
             }
 
             if (_uiState.IsGameLoaded && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
-                instance._selectedStarSysState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+                instance._selectedStarSysState = GameLifecycle.Instance?.SelectedSystemState;
             else
                 instance._selectedStarSysState = null;
             
@@ -235,7 +237,7 @@ namespace Pulsar4X.Client
             var i = 0;
             foreach (var target in tgts)
             {
-                string name = target.GetDataBlob<NameDB>().GetName(_uiState.Faction);
+                string name = target.GetDataBlob<NameDB>().GetName(GameLifecycle.Instance!.Faction!);
                 _potentialTargetNames[i] = name;
                 i++;
             }

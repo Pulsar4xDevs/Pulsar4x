@@ -4,7 +4,6 @@ using System.Linq;
 using SDL3;
 using ImGuiNET;
 using Pulsar4X.Api;
-using Pulsar4X.DataStructures;
 using Pulsar4X.Orbital;
 using Pulsar4X.Client.Rendering;
 using Pulsar4X.Client.Interface;
@@ -15,7 +14,7 @@ namespace Pulsar4X.Client
     public class GalacticMapRender
     {
         GlobalUIState _state;
-        SafeDictionary<string, SystemMapRendering> RenderedMaps = new ();
+        Dictionary<string, SystemMapRendering> RenderedMaps = new ();
         Dictionary<string, StarIcon> StarIcons = new ();
         Dictionary<string, string> _galMapLabels = new ();
         SDL3Window _window;

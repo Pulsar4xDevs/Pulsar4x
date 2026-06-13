@@ -4,7 +4,6 @@ using System.Linq;
 using Pulsar4X.Api;
 using Pulsar4X.Client.Interface.Widgets;
 // Engine using: Stringify formatting helpers only.
-using Pulsar4X.Engine;
 
 namespace Pulsar4X.Client;
 public class SystemWindow : PulsarGuiWindow

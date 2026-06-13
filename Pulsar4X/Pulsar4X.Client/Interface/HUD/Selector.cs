@@ -6,15 +6,6 @@ using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Api;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Datablobs;
-using Pulsar4X.DataStructures;
-using Pulsar4X.Engine;
-using Pulsar4X.Extensions;
-using Pulsar4X.Factions;
-using Pulsar4X.Fleets;
-using Pulsar4X.Movement;
-using Pulsar4X.Orbits;
-using Pulsar4X.Ships;
 
 namespace Pulsar4X.Client
 {
@@ -70,7 +61,7 @@ namespace Pulsar4X.Client
 
         internal override void Display()
         {
-            if(!IsActive || _uiState.Faction == null) return;
+            if(!IsActive || !_uiState.IsGameLoaded) return;
 
             ImGui.SetNextWindowSize(new Vector2(256, 0));
             ImGui.SetNextWindowPos(new Vector2(ImGui.GetMainViewport().WorkSize.X - 256, 0));
@@ -227,7 +218,7 @@ namespace Pulsar4X.Client
 
         private static void DisplayBodies()
         {
-            if (_uiState.Faction == null) return;
+            if (_uiState.GameClient == null) return;
 
             var system = _uiState.GameClient?.Galaxy.GetSystem(_uiState.SelectedStarSystemId);
             if (system == null) return;

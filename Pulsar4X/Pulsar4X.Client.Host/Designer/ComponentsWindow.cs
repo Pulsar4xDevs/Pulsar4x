@@ -130,7 +130,7 @@ public class ComponentsWindow : PulsarGuiWindow
                 ImGui.EndMenuBar();
             }
 
-            if(_uiState.GameClient is not IDesignDataProvider provider
+            if(_uiState.Lifecycle is not IDesignDataProvider provider
                 || !provider.TryGetDesignData(out var factionInfoDB, out var factionTechDB))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1.0f));

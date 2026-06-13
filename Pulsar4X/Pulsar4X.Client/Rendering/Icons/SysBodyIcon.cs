@@ -1,18 +1,14 @@
 ﻿using System;
-using Pulsar4X.DataStructures;
+using Pulsar4X.Api;
 using Pulsar4X.Orbital;
 using SDL3;
-using Pulsar4X.Galaxy;
-using Pulsar4X.Movement;
 using Pulsar4X.Input;
 
 namespace Pulsar4X.Client
 {
     class SysBodyIcon : Icon, IPointerHandler, IShape, IInteractable
     {
-        SystemBodyInfoDB? _systemBodyInfoDB;
-        BodyType _bodyType;
-        MassVolumeDB? _massVolDB;
+        BodyKind _bodyType;
         double _bodyRadiusAU;
         float _viewRadius;
         Random _rng;
@@ -22,36 +18,14 @@ namespace Pulsar4X.Client
 
         public byte Priority { get { return 100; } }
 
-        public SysBodyIcon(EntityState entity, SystemBodyInfoDB systemBodyInfoDB, PositionDB positionDB, MassVolumeDB massVolumeDB) : base(positionDB)
-        {
-            _positionDB = positionDB;
-            _systemBodyInfoDB = systemBodyInfoDB;
-            _bodyType = _systemBodyInfoDB.BodyType;
-            _massVolDB = massVolumeDB;
-            _bodyRadiusAU = _massVolDB.RadiusInAU;
-            _entityId = entity.Id;
-            _sysId = entity.StarSystemId;
-            _rng = new Random(_entityId); //use entity guid as a seed for psudoRandomness.
-
-            BuildShape();
-        }
-
-        public SysBodyIcon(Pulsar4X.Api.EntitySnapshot entity, string systemId, Pulsar4X.Interfaces.IPosition position, double bodyRadiusAU)
+        public SysBodyIcon(EntitySnapshot entity, string systemId, IPosition position, double bodyRadiusAU)
             : base(position)
         {
-            _bodyType = entity.Kind switch
-            {
-                Pulsar4X.Api.BodyKind.Asteroid => BodyType.Asteroid,
-                Pulsar4X.Api.BodyKind.Comet => BodyType.Comet,
-                Pulsar4X.Api.BodyKind.Moon => BodyType.Moon,
-                Pulsar4X.Api.BodyKind.DwarfPlanet => BodyType.DwarfPlanet,
-                Pulsar4X.Api.BodyKind.Planet => BodyType.Terrestrial,
-                _ => BodyType.Unknown,
-            };
+            _bodyType = entity.Kind;
             _bodyRadiusAU = bodyRadiusAU;
             _entityId = entity.Id;
             _sysId = systemId;
-            _rng = new Random(_entityId);
+            _rng = new Random(_entityId); //use entity id as a seed for psudoRandomness.
 
             BuildShape();
         }
@@ -60,10 +34,10 @@ namespace Pulsar4X.Client
         {
             switch (_bodyType)
             {
-                case BodyType.Asteroid:
+                case BodyKind.Asteroid:
                     Asteroid();
                     break;
-                case BodyType.Terrestrial:
+                case BodyKind.Planet:
                     Terestrial();
                     break;
                 default:
@@ -71,7 +45,7 @@ namespace Pulsar4X.Client
                     break;
             }
 
-            if (_bodyType == BodyType.Moon)
+            if (_bodyType == BodyKind.Moon)
                 _iconMinSize = 4;
         }
 
@@ -170,7 +144,7 @@ namespace Pulsar4X.Client
                 return;
 
             // Draw filled circle for non-asteroid body types
-            if (_bodyType != BodyType.Asteroid)
+            if (_bodyType != BodyKind.Asteroid)
             {
                 var shape = DrawShapes[0];
                 if (shape.Points != null && shape.Points.Length > 2)
@@ -182,7 +156,7 @@ namespace Pulsar4X.Client
                     if (radius > 0)
                     {
                         // Brighter fill color derived from the body's base color, dimmed for moons
-                        float brighten = _bodyType == BodyType.Moon ? 0.8f : 1.0f;
+                        float brighten = _bodyType == BodyKind.Moon ? 0.8f : 1.0f;
                         byte fillR = (byte)Math.Min(255, (int)((shape.Color.R + 80) * brighten));
                         byte fillG = (byte)Math.Min(255, (int)((shape.Color.G + 80) * brighten));
                         byte fillB = (byte)Math.Min(255, (int)((shape.Color.B + 80) * brighten));

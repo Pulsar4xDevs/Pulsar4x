@@ -9,6 +9,8 @@ public enum DevToolPlacement
     SettingsList,
     /// <summary>An image button on the main toolbar.</summary>
     Toolbar,
+    /// <summary>An image button on the SM toolbar, shown only while game-master mode is on.</summary>
+    SMToolbar,
     /// <summary>A button on the main menu (closes the menu when clicked).</summary>
     MainMenu,
 }
@@ -29,4 +31,12 @@ public sealed record DevToolRegistration(
     /// <summary>When set, the toggle is only offered while the predicate passes
     /// (e.g. orbit-debug needs a clicked orbiting entity).</summary>
     public Func<bool>? IsAvailable { get; init; }
+
+    /// <summary>The toolbar button image (for <see cref="DevToolPlacement.Toolbar"/> /
+    /// <see cref="DevToolPlacement.SMToolbar"/>); a generic icon is used when unset.</summary>
+    public Func<IntPtr>? ToolbarIcon { get; init; }
+
+    /// <summary>Sort position among toolbar buttons; the built-in buttons run 130–190, so
+    /// smaller puts a tool in front of them.</summary>
+    public int Order { get; init; } = 1000;
 }

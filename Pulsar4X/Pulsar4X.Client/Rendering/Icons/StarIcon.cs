@@ -2,8 +2,6 @@
 using Pulsar4X.Orbital;
 using SDL3;
 using System.Collections.Generic;
-using Pulsar4X.Galaxy;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
@@ -13,12 +11,7 @@ namespace Pulsar4X.Client
         SDL.Color _color;
         float _iconMinSize = 16;
         double _bodyRadiusAU;
-        public StarIcon(StarInfoDB starInfoDB, PositionDB positionDB, MassVolumeDB massVolumeDB): base(positionDB)
-        {
-            BuildShape(starInfoDB.Temperature, (int)starInfoDB.SpectralType, massVolumeDB.RadiusInAU);
-        }
-
-        public StarIcon(Pulsar4X.Api.StarView star, Pulsar4X.Api.MassVolumeView massVolume, Pulsar4X.Interfaces.IPosition position) : base(position)
+        public StarIcon(Pulsar4X.Api.StarView star, Pulsar4X.Api.MassVolumeView massVolume, IPosition position) : base(position)
         {
             BuildShape(star.SurfaceTemperatureC, star.SpectralTypeIndex, Distance.MToAU(massVolume.RadiusMetres));
         }

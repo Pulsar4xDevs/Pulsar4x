@@ -1,5 +1,4 @@
 ﻿using System;
-using Pulsar4X.Interfaces;
 using Pulsar4X.Orbital;
 using SDL3;
 using System.Collections.Generic;
@@ -43,7 +42,7 @@ namespace Pulsar4X.Client
         {
             _points = new Vector2[_numberOfArcSegments + 1];
 
-            // Use the same position formula as OrbitMath.GetPosition() so the rendered
+            // Use the same position formula as OrbitalMath.GetPosition() so the rendered
             // orbit matches actual body positions. The old code used a simplified 2D
             // rotation by LoP which ignored inclination, causing orbit arcs to be offset
             // from body positions in generated systems with significant inclinations.
@@ -67,7 +66,7 @@ namespace Pulsar4X.Client
                 double cosAngle = Math.Cos(angleFromLoAN);
                 double sinAngle = Math.Sin(angleFromLoAN);
 
-                // Full 3D rotation matching OrbitMath.GetPosition(), projected to 2D
+                // Full 3D rotation matching OrbitalMath.GetPosition(), projected to 2D
                 double x = (cosLoAN * cosAngle - sinLoAN * sinAngle * cosIncl) * r;
                 double y = (sinLoAN * cosAngle + cosLoAN * sinAngle * cosIncl) * r;
 

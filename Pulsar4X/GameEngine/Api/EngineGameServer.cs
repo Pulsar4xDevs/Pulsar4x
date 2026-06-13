@@ -72,7 +72,26 @@ namespace Pulsar4X.Engine.Api
             });
         }
 
-        public void Disconnect(PlayerSession session) { /* no per-session server state yet */ }
+        public void Disconnect(PlayerSession session)
+        {
+            SetSystemFocus(session, null);
+        }
+
+        // The focused system gets foreground-observer scheduling priority in the engine. One focus
+        // per server is enough for the in-process case; per-session focus lands with networking.
+        private string? _focusedSystemId;
+
+        public void SetSystemFocus(PlayerSession session, string? systemId)
+        {
+            if (systemId == _focusedSystemId) return;
+
+            if (_focusedSystemId != null)
+                _game.Systems.FirstOrDefault(s => s.ID == _focusedSystemId)?.DecrementExternalObserver(true);
+            if (systemId != null)
+                _game.Systems.FirstOrDefault(s => s.ID == systemId)?.IncrementExternalObserver(true);
+
+            _focusedSystemId = systemId;
+        }
 
         // ----- time -----
 

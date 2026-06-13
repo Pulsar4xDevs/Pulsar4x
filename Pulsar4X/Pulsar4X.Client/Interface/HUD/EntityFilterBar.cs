@@ -35,7 +35,7 @@ public class EntityFilterBar : PulsarGuiWindow
 
     internal override void Display()
     {
-        if (!IsActive || _uiState.Faction == null) return;
+        if (!IsActive || !_uiState.IsGameLoaded) return;
 
         var prefs = SystemViewPreferences.GetInstance();
 

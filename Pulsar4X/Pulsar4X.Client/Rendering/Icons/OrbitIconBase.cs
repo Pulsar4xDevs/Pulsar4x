@@ -1,11 +1,7 @@
 ﻿using System;
-using Pulsar4X.Engine;
-using Pulsar4X.Interfaces;
 using Pulsar4X.Orbital;
 using SDL3;
 using System.Collections.Generic;
-using Pulsar4X.Orbits;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
@@ -90,7 +86,7 @@ namespace Pulsar4X.Client
             _inclination = orbit.InclinationRad;
             _aoPRad = orbit.ArgumentOfPeriapsisRad;
             _loAN = orbit.LongitudeOfAscendingNodeRad;
-            var lop = OrbitMath.GetLongditudeOfPeriapsis(_inclination, _aoPRad, _loAN);
+            var lop = OrbitalMath.GetLongditudeOfPeriapsis(_inclination, _aoPRad, _loAN);
             _loP_radians = (float)lop;
             _loP_Degrees = (float)Angle.ToDegrees(lop);
         }

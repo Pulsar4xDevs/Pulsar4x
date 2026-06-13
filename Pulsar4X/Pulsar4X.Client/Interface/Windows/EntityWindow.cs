@@ -6,10 +6,6 @@ using Pulsar4X.Api;
 using Pulsar4X.Client.Interface;
 using Pulsar4X.Client.Interface.Widgets;
 // Engine usings: Stringify formatting, plus the deferred camera-pin / maneuver-panel bridges below.
-using Pulsar4X.Engine;
-using Pulsar4X.Datablobs;
-using Pulsar4X.Extensions;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {

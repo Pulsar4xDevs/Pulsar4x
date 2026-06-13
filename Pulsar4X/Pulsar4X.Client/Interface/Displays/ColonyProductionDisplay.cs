@@ -2,7 +2,6 @@ using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Api;
-using Pulsar4X.Engine;
 
 namespace Pulsar4X.Client
 {

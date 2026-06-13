@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Pulsar4X.Client.Rendering;
-using Pulsar4X.DataStructures;
 using SDL3;
 
 namespace Pulsar4X.Client;
@@ -20,21 +19,6 @@ public static class Textures
         }
         texture = SDL.CreateTextureFromSurface(renderer, surface);
         SDL.DestroySurface(surface);
-    }
-
-    public static void CreateTexture(IntPtr renderer, RawBmp rawBmp, ref IntPtr texturePtr,
-            SDL.PixelFormat pixelFormat = SDL.PixelFormat.RGBA8888)
-    {
-        IntPtr pixels;
-        unsafe
-        {
-            fixed (byte* ptr = rawBmp.ByteArray)
-            {
-                pixels = new IntPtr(ptr);
-            }
-        }
-
-        CreateTexture(renderer, ref texturePtr, rawBmp.Width, rawBmp.Height, rawBmp.Depth * 8, rawBmp.Stride, pixels, pixelFormat);
     }
 
     public static IntPtr CreateTextureFromSurface(IntPtr renderer, IntPtr surface)

@@ -1,6 +1,5 @@
 using ImGuiNET;
 using Pulsar4X.Client;
-using Pulsar4X.Client.Interface.Windows;
 using SDL3;
 
 namespace Pulsar4X.Input;
@@ -46,15 +45,15 @@ public class SystemMapHotKeys : IHotKeyHandler
             }
             else if(e.Key.Key == SDL.Keycode.F5)
             {
-                ComponentsWindow.GetInstance().ToggleActive();
+                PulsarGuiWindow._uiState.ToggleDevTool("components-window");
             }
             else if(e.Key.Key == SDL.Keycode.Alpha1)
             {
-                ComponentDesignWindow.GetInstance().ToggleActive();
+                PulsarGuiWindow._uiState.ToggleDevTool("component-design");
             }
             else if(e.Key.Key == SDL.Keycode.Alpha2)
             {
-                ShipDesignWindow.GetInstance().ToggleActive();
+                PulsarGuiWindow._uiState.ToggleDevTool("ship-design");
             }
             else if(e.Key.Key == SDL.Keycode.Alpha3)
             {

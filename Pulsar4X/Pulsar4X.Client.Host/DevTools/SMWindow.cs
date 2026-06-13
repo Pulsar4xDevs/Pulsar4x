@@ -8,6 +8,8 @@ using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Names;
 
+using Pulsar4X.Client.Host;
+
 namespace Pulsar4X.Client
 {
     public class SMWindow : PulsarGuiWindow
@@ -54,8 +56,8 @@ namespace Pulsar4X.Client
 
         void HardRefresh()
         {
-            _game = _uiState.Game;
-            _currentSystem = _uiState.SelectedSystem;
+            _game = GameLifecycle.Instance!.Game!;
+            _currentSystem = GameLifecycle.Instance!.SelectedSystem!;
             _systemEntities = _currentSystem.GetAllEntites().ToArray();
             _systemEntityNames = new string[_systemEntities.Length];
             for (int i = 0; i < _systemEntities.Length; i++)

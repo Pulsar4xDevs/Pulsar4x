@@ -16,6 +16,8 @@ using Pulsar4X.Storage;
 using Pulsar4X.Technology;
 using Pulsar4X.Weapons;
 
+using Pulsar4X.Client.Host;
+
 namespace Pulsar4X.Client
 {
 
@@ -68,7 +70,7 @@ namespace Pulsar4X.Client
 
         private static bool TryGetDesignData(GlobalUIState state, out FactionInfoDB info, out FactionTechDB techs)
         {
-            if (state.GameClient is IDesignDataProvider provider)
+            if (state.Lifecycle is IDesignDataProvider provider)
                 return provider.TryGetDesignData(out info, out techs);
 
             info = null!;
@@ -969,10 +971,10 @@ namespace Pulsar4X.Client
 
         private void GuiHintTechCategorySelection(ComponentDesignProperty property, GlobalUIState uiState)
         {
-            _listNames = new string[uiState.Game.TechCategories.Count];
+            _listNames = new string[GameLifecycle.Instance!.Game!.TechCategories.Count];
 
             int i = 0;
-            foreach (var kvp in uiState.Game.TechCategories)
+            foreach (var kvp in GameLifecycle.Instance!.Game!.TechCategories)
             {
                 _listNames[i] = (string)kvp.Value.Name;
                 i++;
@@ -984,7 +986,7 @@ namespace Pulsar4X.Client
             if (ImGui.Combo("###Select", ref property.ListSelection, _listNames, _listNames.Length))
             {
                 var name = _listNames[property.ListSelection];
-                var value = uiState.Game.TechCategories.Where(c => c.Value.Name.Equals(name)).First();
+                var value = GameLifecycle.Instance!.Game!.TechCategories.Where(c => c.Value.Name.Equals(name)).First();
                 property.SetValueFromString(value.Key);
             }
         }

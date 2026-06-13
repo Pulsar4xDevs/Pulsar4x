@@ -18,6 +18,10 @@ public interface IGameServer
     void SetTimeControl(PlayerSession session, TimeControlRequest request);
     CommandResult SubmitCommand(PlayerSession session, GameCommand command);
 
+    /// <summary>Tell the server which system this session is watching, so the engine can
+    /// prioritise its processing (foreground-observer scheduling). Null clears the focus.</summary>
+    void SetSystemFocus(PlayerSession session, string? systemId);
+
     // --- events (push) ---
     /// <summary>
     /// Subscribe to this faction's event stream. The current state is pushed immediately (time,

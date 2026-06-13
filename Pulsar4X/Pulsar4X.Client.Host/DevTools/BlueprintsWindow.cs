@@ -8,6 +8,8 @@ using System.Linq;
 using System.Numerics;
 using Pulsar4X.Client.ModFileEditing;
 
+using Pulsar4X.Client.Host;
+
 namespace Pulsar4X.Client.Interface.Windows;
 
 public class BlueprintsWindow : PulsarGuiWindow
@@ -59,21 +61,21 @@ public class BlueprintsWindow : PulsarGuiWindow
             {
                 DisplayHelpers.Header("Blueprints", "Select a blueprint to view details.");
 
-                DisplayBlueprintCategory("Armor", _uiState.Game.StartingGameData.Armor.Keys.ToList());
-                DisplayBlueprintCategory("Cargo Types", _uiState.Game.StartingGameData.CargoTypes.Keys.ToList());
-                DisplayBlueprintCategory("Colonies", _uiState.Game.StartingGameData.Colonies.Keys.ToList());
-                DisplayBlueprintCategory("Component Templates", _uiState.Game.StartingGameData.ComponentTemplates.Keys.ToList());
-                DisplayBlueprintCategory("Gas", _uiState.Game.StartingGameData.AtmosphericGas.Keys.ToList());
-                DisplayBlueprintCategory("Industry Types", _uiState.Game.StartingGameData.IndustryTypes.Keys.ToList());
-                DisplayBlueprintCategory("Minerals", _uiState.Game.StartingGameData.Minerals.Keys.ToList());
-                DisplayBlueprintCategory("Processed Materials", _uiState.Game.StartingGameData.ProcessedMaterials.Keys.ToList());
-                DisplayBlueprintCategory("Stars", _uiState.Game.StartingGameData.Stars.Keys.ToList());
-                DisplayBlueprintCategory("Systems", _uiState.Game.StartingGameData.Systems.Keys.ToList());
-                DisplayBlueprintCategory("System Bodies", _uiState.Game.StartingGameData.SystemBodies.Keys.ToList());
-                DisplayBlueprintCategory("System Gen Settings", _uiState.Game.StartingGameData.SystemGenSettings.Keys.ToList());
-                DisplayBlueprintCategory("Techs", _uiState.Game.StartingGameData.Techs.Keys.ToList());
-                DisplayBlueprintCategory("Tech Categories", _uiState.Game.StartingGameData.TechCategories.Keys.ToList());
-                DisplayBlueprintCategory("Themes", _uiState.Game.StartingGameData.Themes.Keys.ToList());
+                DisplayBlueprintCategory("Armor", GameLifecycle.Instance!.Game!.StartingGameData.Armor.Keys.ToList());
+                DisplayBlueprintCategory("Cargo Types", GameLifecycle.Instance!.Game!.StartingGameData.CargoTypes.Keys.ToList());
+                DisplayBlueprintCategory("Colonies", GameLifecycle.Instance!.Game!.StartingGameData.Colonies.Keys.ToList());
+                DisplayBlueprintCategory("Component Templates", GameLifecycle.Instance!.Game!.StartingGameData.ComponentTemplates.Keys.ToList());
+                DisplayBlueprintCategory("Gas", GameLifecycle.Instance!.Game!.StartingGameData.AtmosphericGas.Keys.ToList());
+                DisplayBlueprintCategory("Industry Types", GameLifecycle.Instance!.Game!.StartingGameData.IndustryTypes.Keys.ToList());
+                DisplayBlueprintCategory("Minerals", GameLifecycle.Instance!.Game!.StartingGameData.Minerals.Keys.ToList());
+                DisplayBlueprintCategory("Processed Materials", GameLifecycle.Instance!.Game!.StartingGameData.ProcessedMaterials.Keys.ToList());
+                DisplayBlueprintCategory("Stars", GameLifecycle.Instance!.Game!.StartingGameData.Stars.Keys.ToList());
+                DisplayBlueprintCategory("Systems", GameLifecycle.Instance!.Game!.StartingGameData.Systems.Keys.ToList());
+                DisplayBlueprintCategory("System Bodies", GameLifecycle.Instance!.Game!.StartingGameData.SystemBodies.Keys.ToList());
+                DisplayBlueprintCategory("System Gen Settings", GameLifecycle.Instance!.Game!.StartingGameData.SystemGenSettings.Keys.ToList());
+                DisplayBlueprintCategory("Techs", GameLifecycle.Instance!.Game!.StartingGameData.Techs.Keys.ToList());
+                DisplayBlueprintCategory("Tech Categories", GameLifecycle.Instance!.Game!.StartingGameData.TechCategories.Keys.ToList());
+                DisplayBlueprintCategory("Themes", GameLifecycle.Instance!.Game!.StartingGameData.Themes.Keys.ToList());
 
                 ImGui.EndChild();
             }
@@ -128,36 +130,36 @@ public class BlueprintsWindow : PulsarGuiWindow
 
     private Blueprint? FindBlueprint(string key)
     {
-        if(_uiState.Game.StartingGameData.Armor.ContainsKey(key))
-            return _uiState.Game.StartingGameData.Armor[key];
-        if(_uiState.Game.StartingGameData.CargoTypes.ContainsKey(key))
-            return _uiState.Game.StartingGameData.CargoTypes[key];
-        if(_uiState.Game.StartingGameData.Colonies.ContainsKey(key))
-            return _uiState.Game.StartingGameData.Colonies[key];
-        if(_uiState.Game.StartingGameData.ComponentTemplates.ContainsKey(key))
-            return _uiState.Game.StartingGameData.ComponentTemplates[key];
-        if(_uiState.Game.StartingGameData.AtmosphericGas.ContainsKey(key))
-            return _uiState.Game.StartingGameData.AtmosphericGas[key];
-        if(_uiState.Game.StartingGameData.IndustryTypes.ContainsKey(key))
-            return _uiState.Game.StartingGameData.IndustryTypes[key];
-        if(_uiState.Game.StartingGameData.Minerals.ContainsKey(key))
-            return _uiState.Game.StartingGameData.Minerals[key];
-        if(_uiState.Game.StartingGameData.ProcessedMaterials.ContainsKey(key))
-            return _uiState.Game.StartingGameData.ProcessedMaterials[key];
-        if(_uiState.Game.StartingGameData.Stars.ContainsKey(key))
-            return _uiState.Game.StartingGameData.Stars[key];
-        if(_uiState.Game.StartingGameData.Systems.ContainsKey(key))
-            return _uiState.Game.StartingGameData.Systems[key];
-        if(_uiState.Game.StartingGameData.SystemBodies.ContainsKey(key))
-            return _uiState.Game.StartingGameData.SystemBodies[key];
-        if(_uiState.Game.StartingGameData.SystemGenSettings.ContainsKey(key))
-            return _uiState.Game.StartingGameData.SystemGenSettings[key];
-        if(_uiState.Game.StartingGameData.Techs.ContainsKey(key))
-            return _uiState.Game.StartingGameData.Techs[key];
-        if(_uiState.Game.StartingGameData.TechCategories.ContainsKey(key))
-            return _uiState.Game.StartingGameData.TechCategories[key];
-        if(_uiState.Game.StartingGameData.Themes.ContainsKey(key))
-            return _uiState.Game.StartingGameData.Themes[key];
+        if(GameLifecycle.Instance!.Game!.StartingGameData.Armor.ContainsKey(key))
+            return GameLifecycle.Instance!.Game!.StartingGameData.Armor[key];
+        if(GameLifecycle.Instance!.Game!.StartingGameData.CargoTypes.ContainsKey(key))
+            return GameLifecycle.Instance!.Game!.StartingGameData.CargoTypes[key];
+        if(GameLifecycle.Instance!.Game!.StartingGameData.Colonies.ContainsKey(key))
+            return GameLifecycle.Instance!.Game!.StartingGameData.Colonies[key];
+        if(GameLifecycle.Instance!.Game!.StartingGameData.ComponentTemplates.ContainsKey(key))
+            return GameLifecycle.Instance!.Game!.StartingGameData.ComponentTemplates[key];
+        if(GameLifecycle.Instance!.Game!.StartingGameData.AtmosphericGas.ContainsKey(key))
+            return GameLifecycle.Instance!.Game!.StartingGameData.AtmosphericGas[key];
+        if(GameLifecycle.Instance!.Game!.StartingGameData.IndustryTypes.ContainsKey(key))
+            return GameLifecycle.Instance!.Game!.StartingGameData.IndustryTypes[key];
+        if(GameLifecycle.Instance!.Game!.StartingGameData.Minerals.ContainsKey(key))
+            return GameLifecycle.Instance!.Game!.StartingGameData.Minerals[key];
+        if(GameLifecycle.Instance!.Game!.StartingGameData.ProcessedMaterials.ContainsKey(key))
+            return GameLifecycle.Instance!.Game!.StartingGameData.ProcessedMaterials[key];
+        if(GameLifecycle.Instance!.Game!.StartingGameData.Stars.ContainsKey(key))
+            return GameLifecycle.Instance!.Game!.StartingGameData.Stars[key];
+        if(GameLifecycle.Instance!.Game!.StartingGameData.Systems.ContainsKey(key))
+            return GameLifecycle.Instance!.Game!.StartingGameData.Systems[key];
+        if(GameLifecycle.Instance!.Game!.StartingGameData.SystemBodies.ContainsKey(key))
+            return GameLifecycle.Instance!.Game!.StartingGameData.SystemBodies[key];
+        if(GameLifecycle.Instance!.Game!.StartingGameData.SystemGenSettings.ContainsKey(key))
+            return GameLifecycle.Instance!.Game!.StartingGameData.SystemGenSettings[key];
+        if(GameLifecycle.Instance!.Game!.StartingGameData.Techs.ContainsKey(key))
+            return GameLifecycle.Instance!.Game!.StartingGameData.Techs[key];
+        if(GameLifecycle.Instance!.Game!.StartingGameData.TechCategories.ContainsKey(key))
+            return GameLifecycle.Instance!.Game!.StartingGameData.TechCategories[key];
+        if(GameLifecycle.Instance!.Game!.StartingGameData.Themes.ContainsKey(key))
+            return GameLifecycle.Instance!.Game!.StartingGameData.Themes[key];
 
         return null;
     }

@@ -3,14 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.Engine;
-using Pulsar4X.Datablobs;
-using Pulsar4X.Extensions;
-using Pulsar4X.Ships;
-using Pulsar4X.Technology;
-using Pulsar4X.Factions;
-using Pulsar4X.People;
-using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.Client
 {
@@ -90,37 +82,6 @@ namespace Pulsar4X.Client
             DescriptiveTooltip(ship.Name, ship.DesignName, description, () => ImGui.Text(meta));
         }
 
-        public static void ShipTooltip(Entity ship, int factionId)
-        {
-            if(!ship.TryGetDataBlob<ShipInfoDB>(out var shipInfo))
-                return;
-
-            if(!ship.TryGetDataBlob<OrderableDB>(out var orderableDB))
-                return;
-
-            var description = "No orders";
-            if(orderableDB.ActionList.Count > 0)
-            {
-                description = "Orders: ";
-                foreach(var action in orderableDB.ActionList)
-                {
-                    description += action.Name;
-                    if(action.IsRunning)
-                        description += " (running)";
-                    else
-                        description += " (not running)";
-                }
-            }
-
-            var meta = "";
-            if(ship.Manager != null && ship.Manager.TryGetEntityById(shipInfo.CommanderID, out var commander))
-            {
-                meta = "Commanded by: " + commander.GetName(factionId);
-            }
-
-            DescriptiveTooltip(ship.GetName(factionId), shipInfo.Design.Name, description, () => ImGui.Text(meta));
-        }
-
         public static void DescriptiveTooltipRaw(string name, string type, string description, Action? callback = null, bool hideTypeIfSameAsName = false, bool hideDescriptionColor = false)
         {
             ImGui.SetNextWindowSize(Styles.ToolTipsize);
@@ -164,17 +125,6 @@ namespace Pulsar4X.Client
         {
             ImGui.InvisibleButton("", Styles.Indent);
             ImGui.SameLine();
-        }
-
-        public static void TechTooltip(Tech tech, GlobalUIState state)
-        {
-            if (ImGui.IsItemHovered())
-            {
-                DescriptiveTooltip(
-                    tech.Name,
-                    state.Game?.TechCategories[tech.Category].Name ?? "Unknown",
-                    $"{tech.Description}\n\nProgress: {tech.ResearchProgress}/{tech.ResearchCost}");
-            }
         }
 
         /// <summary>Snapshot-based tech tooltip for UI ported to the API galaxy model.</summary>

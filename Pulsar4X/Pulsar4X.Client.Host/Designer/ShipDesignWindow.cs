@@ -19,6 +19,8 @@ using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using SDL3;
 
+using Pulsar4X.Client.Host;
+
 namespace Pulsar4X.Client
 {
     public class ShipDesignWindow : PulsarGuiWindow
@@ -99,7 +101,7 @@ namespace Pulsar4X.Client
             //_flags = ImGuiWindowFlags.NoCollapse;
             // The interactive designer evaluates client-side against the faction's design-time data
             // (components, ship designs, armor) exposed by the adapter; writes go through commands.
-            if (_uiState.GameClient is not IDesignDataProvider provider
+            if (_uiState.Lifecycle is not IDesignDataProvider provider
                 || !provider.TryGetDesignData(out _factionInfoDB!, out _))
                 throw new NullReferenceException("The game client cannot provide design data");
 
@@ -376,7 +378,7 @@ namespace Pulsar4X.Client
 
             if(ImGui.Button("Create New Design", new Vector2(204f, 0f)))
             {
-                string originalName = NameFactory.GetShipName(_uiState.Game), name = originalName;
+                string originalName = NameFactory.GetShipName(GameLifecycle.Instance!.Game!), name = originalName;
                 int counter = 1;
                 while(_factionInfoDB.ShipDesigns.Values.Any(d => d.Name.Equals(name)))
                 {
@@ -622,7 +624,7 @@ namespace Pulsar4X.Client
             if(_profile == null)
                 throw new NullReferenceException();
 
-            Textures.CreateTexture(_uiState.ViewPort.Renderer, _profile.DamageProfile, ref _shipImgPtr, SDL.PixelFormat.ARGB8888);
+            RawBmpTextures.CreateTexture(_uiState.ViewPort.Renderer, _profile.DamageProfile, ref _shipImgPtr, SDL.PixelFormat.ARGB8888);
             rawimagewidth = _profile.DamageProfile.Width;
             rawimageheight = _profile.DamageProfile.Height;
             _imagecreated = true;

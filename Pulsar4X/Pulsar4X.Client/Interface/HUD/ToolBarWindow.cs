@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
@@ -40,35 +41,17 @@ namespace Pulsar4X.Client
                 ClickedColour = ImGui.ColorConvertFloat4ToU32(*clickedcolorv);
             }
 
+            var orderedButtons = new List<(int order, ToolBarOption button)>();
+
             ToolBarOption btn = new ToolBarOption()
-            {
-                Picture = _uiState.Img_DesComponent(),
-                TooltipText = "Design a new component or facility",
-                OnClick = new Action(ComponentDesignWindow.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(ComponentDesignWindow.GetInstance().GetActive)
-                //Opens up the component design menu
-            };
-            ToolButtons.Add(btn);
-
-            btn =  new ToolBarOption()
-            {
-                Picture = _uiState.Img_DesignShip(),
-                TooltipText = "Design a new Ship",
-                OnClick = new Action(ShipDesignWindow.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(ShipDesignWindow.GetInstance().GetActive)
-                //Opens up the ship design menu
-            };
-            ToolButtons.Add(btn);
-
-            btn =  new ToolBarOption()
             {
                 Picture = _uiState.Img_Industry(),
                 TooltipText = "Colony Management",
                 OnClick = new Action(ColonyManagementWindow.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(ColonyManagementWindow.GetInstance().GetActive)
-                //Opens up the ship design menu
+                //Opens up the colony management menu
             };
-            ToolButtons.Add(btn);
+            orderedButtons.Add((130, btn));
 
             btn =  new ToolBarOption()
             {
@@ -78,7 +61,7 @@ namespace Pulsar4X.Client
                 GetActive = new Func<bool>(ResearchWindow.GetInstance().GetActive)
                 //Opens up the research menu
             };
-            ToolButtons.Add(btn);
+            orderedButtons.Add((140, btn));
 
             btn =  new ToolBarOption()
             {
@@ -88,7 +71,7 @@ namespace Pulsar4X.Client
                 GetActive = new Func<bool>(FleetWindow.GetInstance().GetActive)
                 //Opens up the fleet menu
             };
-            ToolButtons.Add(btn);
+            orderedButtons.Add((150, btn));
 
             btn =  new ToolBarOption()
             {
@@ -97,7 +80,7 @@ namespace Pulsar4X.Client
                 OnClick = new Action(CommanderWindow.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(CommanderWindow.GetInstance().GetActive)
             };
-            ToolButtons.Add(btn);
+            orderedButtons.Add((160, btn));
 
             btn = new ToolBarOption()
             {
@@ -107,7 +90,7 @@ namespace Pulsar4X.Client
                 GetActive = new Func<bool>(GalaxyWindow.GetInstance().GetActive)
 
             };
-            ToolButtons.Add(btn);
+            orderedButtons.Add((170, btn));
 
             btn = new ToolBarOption()
             {
@@ -117,7 +100,7 @@ namespace Pulsar4X.Client
                 GetActive = new Func<bool>(DistanceRuler.GetInstance().GetActive)
                 //Opens the ruler menu
             };
-            ToolButtons.Add(btn);
+            orderedButtons.Add((180, btn));
 
             btn = new ToolBarOption()
             {
@@ -127,23 +110,29 @@ namespace Pulsar4X.Client
                 GetActive = new Func<bool>(SystemWindow.GetInstance().GetActive)
                 //Display a tree with all objects in the system
             };
-            ToolButtons.Add(btn);
+            orderedButtons.Add((190, btn));
 
-            // Host-registered dev tools that asked for a toolbar button (SM/debug windows live
-            // in the host executable, not this library).
+            // Host-registered tools that asked for a toolbar button (designer/SM/debug windows
+            // live in the host executable, not this library), merged by Order.
             foreach (var tool in _uiState.DevTools)
             {
-                if (tool.Placement != DevToolPlacement.Toolbar)
+                if (tool.Placement != DevToolPlacement.Toolbar && tool.Placement != DevToolPlacement.SMToolbar)
                     continue;
                 btn = new ToolBarOption()
                 {
-                    Picture = _uiState.Img_Tree(),
+                    Picture = tool.ToolbarIcon?.Invoke() ?? _uiState.Img_Tree(),
                     TooltipText = tool.Label,
                     OnClick = new Action(tool.Toggle),
                     GetActive = new Func<bool>(tool.IsActive),
                 };
-                SMToolButtons.Add(btn);
+                if (tool.Placement == DevToolPlacement.SMToolbar)
+                    SMToolButtons.Add(btn);
+                else
+                    orderedButtons.Add((tool.Order, btn));
             }
+
+            foreach (var (_, button) in orderedButtons.OrderBy(b => b.order))
+                ToolButtons.Add(button);
         }
 
         internal static ToolBarWindow GetInstance()

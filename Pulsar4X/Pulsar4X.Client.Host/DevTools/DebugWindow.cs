@@ -21,6 +21,8 @@ using Pulsar4X.Storage;
 using SDL3;
 using Stringify = Pulsar4X.Api.Stringify;
 
+using Pulsar4X.Client.Host;
+
 namespace Pulsar4X.Client
 {
     public class DebugWindow : PulsarGuiWindow
@@ -40,11 +42,11 @@ namespace Pulsar4X.Client
 
                     if(_selectedEntity != null)
                     {
-                        _selectedEntityName = _selectedEntity.HasDataBlob<NameDB>() ? _selectedEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction) : "Unknown";
-                        if(SystemState != null && SystemState.EntityStatesWithNames.ContainsKey(_selectedEntity.Id))
+                        _selectedEntityName = _selectedEntity.HasDataBlob<NameDB>() ? _selectedEntity.GetDataBlob<NameDB>().GetName(GameLifecycle.Instance!.Faction!) : "Unknown";
+                        if(SystemState != null && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
                         {
-                            _selectedEntityState = SystemState.EntityStatesWithNames[_selectedEntity.Id];
-                            _uiState.EntityClicked(_selectedEntityState, MouseButtons.Primary);
+                            _uiState.EntityClicked(_selectedEntity.Id, _uiState.SelectedStarSystemId, MouseButtons.Primary);
+                            _selectedEntityState = _uiState.LastClickedEntity;
                         }
                     }
                     else
@@ -102,7 +104,7 @@ namespace Pulsar4X.Client
             //if(_uiState.LastClickedEntity?.Entity != null && instance.SelectedEntity != _uiState.LastClickedEntity.Entity)
             //    instance.SelectedEntity = _uiState.LastClickedEntity.Entity;
             if (_uiState.IsGameLoaded && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
-                instance.SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+                instance.SystemState = GameLifecycle.Instance?.SelectedSystemState;
             else
                 instance.SystemState = null;
             return instance;
@@ -110,7 +112,7 @@ namespace Pulsar4X.Client
 
         internal void SetGameEvents()
         {
-            if (_uiState.Game != null)
+            if (GameLifecycle.Instance?.Game != null)
             {
                 //_uiState.EntityClickedEvent += UIStateEntityClicked;
             }
@@ -123,7 +125,7 @@ namespace Pulsar4X.Client
             if (SelectedEntity.HasDataBlob<EntityDamageProfileDB>())
             {
                 var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
-                Textures.CreateTexture(_uiState.ViewPort.Renderer, dmgdb.DamageProfile, ref _dmgTxtr, SDL.PixelFormat.ARGB8888);
+                RawBmpTextures.CreateTexture(_uiState.ViewPort.Renderer, dmgdb.DamageProfile, ref _dmgTxtr, SDL.PixelFormat.ARGB8888);
             }
             else if(SelectedEntity.HasDataBlob<SensorInfoDB>())
             {
@@ -132,7 +134,7 @@ namespace Pulsar4X.Client
                 if (actualEntity.IsValid && actualEntity.HasDataBlob<EntityDamageProfileDB>())
                 {
                     var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
-                    Textures.CreateTexture(_uiState.ViewPort.Renderer, dmgdb.DamageProfile, ref _dmgTxtr, SDL.PixelFormat.ARGB8888);
+                    RawBmpTextures.CreateTexture(_uiState.ViewPort.Renderer, dmgdb.DamageProfile, ref _dmgTxtr, SDL.PixelFormat.ARGB8888);
                 }
             }
             else
@@ -144,7 +146,7 @@ namespace Pulsar4X.Client
         {
             if(btn == MouseButtons.Primary)
             {
-                SelectedEntity = entityState.Entity;
+                SelectedEntity = entityState.GetEntity();
             }
         }
 
@@ -273,8 +275,8 @@ namespace Pulsar4X.Client
                             {
                                 ImGui.Indent();
 
-                                if(_selectedEntityState != null)
-                                    storeDB.Display(_selectedEntityState, _uiState);
+                                if(_selectedEntity != null)
+                                    storeDB.Display(_selectedEntity, _uiState);
 
                                 ImGui.Text("Total Stored Mass inc. escro: " + Stringify.Mass(storeDB.TotalStoredMass));
                                 ImGui.Text("Transfer Range: " + Stringify.Velocity(storeDB.TransferRangeDv_mps));
@@ -427,7 +429,7 @@ namespace Pulsar4X.Client
                                 {
                                     var soiradius = SelectedEntity.GetSOI_AU();
                                     var colour = new SDL.Color() { R = 0, G = 255, B = 0, A = 100 };
-                                    cir = new SimpleCircle(SelectedEntity.GetDataBlob<PositionDB>(), soiradius, colour);
+                                    cir = new SimpleCircle(new PositionDBAdapter(SelectedEntity.GetDataBlob<PositionDB>()), soiradius, colour);
 
                                     _uiState.SelectedSysMapRender?.UIWidgets.Add(nameof(cir), cir);
                                 }
@@ -679,11 +681,11 @@ namespace Pulsar4X.Client
 
         private void DisplaySystemsTab()
         {
-            if (_uiState.Game == null) return;
+            if (GameLifecycle.Instance?.Game == null) return;
 
             if (ImGui.BeginTabItem("Systems"))
             {
-                var game = _uiState.Game;
+                var game = GameLifecycle.Instance!.Game!;
                 ImGui.Text($"Total Systems: {game.Systems.Count}");
                 ImGui.Text($"Global Time: {game.TimePulse.GameGlobalDateTime.ToString(_uiState.GameSettings.GetDateTimeFormat())}");
 
@@ -743,7 +745,7 @@ namespace Pulsar4X.Client
                     var cam = _uiState.Camera;
                     if (cam.IsPinnedToEntity)
                     {
-                        var entyName = (SystemState == null) ? "<null>" : SystemState.EntityStatesWithNames[_uiState.Camera.PinnedEntityGuid].Name;
+                        var entyName = SystemState != null && SystemState.StarSystem.TryGetEntityById(_uiState.Camera.PinnedEntityGuid, out var pinnedEntity) ? pinnedEntity.GetDataBlob<NameDB>().GetName(GameLifecycle.Instance!.Faction!) : "<null>";
                         ImGui.Text("Camera is pinned to:");
                         ImGui.SameLine();
                         ImGui.Text(entyName);
@@ -834,7 +836,7 @@ namespace Pulsar4X.Client
                 // }
 
                 ImGui.Text("Selected Star System: " + _uiState.SelectedStarSystemId);
-                ImGui.Text("Number Of Entites: " + _uiState.SelectedSystem.EntityCount);
+                ImGui.Text("Number Of Entites: " + GameLifecycle.Instance!.SelectedSystem!.EntityCount);
                 if (ImGui.CollapsingHeader("Log"))
                 {
                     ImGui.BeginChild("LogChild", new System.Numerics.Vector2(800, 300), ImGuiChildFlags.Borders);
@@ -974,7 +976,7 @@ namespace Pulsar4X.Client
 
             var soiradius = parent.GetSOI_AU();
             var colour = new SDL.Color() { R = 0, G = 255, B = 0, A = 100 };
-            var psoi = new SimpleCircle(parent.GetDataBlob<PositionDB>(), soiradius, colour);
+            var psoi = new SimpleCircle(new PositionDBAdapter(parent.GetDataBlob<PositionDB>()), soiradius, colour);
             var pmass = parent.GetDataBlob<MassVolumeDB>().MassDry;
             var mymass = SelectedEntity.GetDataBlob<MassVolumeDB>().MassDry;
 
@@ -1001,7 +1003,7 @@ namespace Pulsar4X.Client
 
             var x = soiradius * Math.Cos(θ);
             var y = soiradius * Math.Sin(θ);
-            var psoilin = new SimpleLine(parent.GetDataBlob<PositionDB>(), new Orbital.Vector2() { X = x, Y = y }, colour);
+            var psoilin = new SimpleLine(new PositionDBAdapter(parent.GetDataBlob<PositionDB>()), new Orbital.Vector2() { X = x, Y = y }, colour);
 
             _uiState.SelectedSysMapRender?.UIWidgets.Add(nameof(psoi), psoi);
             _uiState.SelectedSysMapRender?.UIWidgets.Add(nameof(psoilin), psoilin);
@@ -1010,37 +1012,37 @@ namespace Pulsar4X.Client
 
         void RefreshFactionEntites(GlobalUIState uiState)
         {
-            if(_uiState.Faction == null || _uiState.Game == null)
+            if(GameLifecycle.Instance?.Faction == null || GameLifecycle.Instance?.Game == null)
                 throw new NullReferenceException();
 
-            SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+            SystemState = GameLifecycle.Instance?.SelectedSystemState;
             _factionOwnedEntites = new List<(string name, Entity entity)>();
-            var factionEntites = _uiState.SelectedSystem.GetFilteredEntities(DataStructures.EntityFilter.Friendly, _uiState.Faction.Id);
+            var factionEntites = GameLifecycle.Instance!.SelectedSystem!.GetFilteredEntities(DataStructures.EntityFilter.Friendly, GameLifecycle.Instance!.Faction!.Id);
             foreach (var entity in factionEntites.ToArray())
             {
                 string name = entity.Id.ToString();
                 if(entity.HasDataBlob<NameDB>())
                 {
-                    name = entity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
+                    name = entity.GetDataBlob<NameDB>().GetName(GameLifecycle.Instance!.Faction!);
                 }
                 _factionOwnedEntites.Add((name, entity));
             }
 
             _allEntites = new List<(string name, Entity entity, string faction)>();
 
-            foreach (var entity in _uiState.Game.Factions)
+            foreach (var entity in GameLifecycle.Instance!.Game!.Factions)
             {
                 addEntity(entity.Value);
             }
 
-            foreach (var entity in _uiState.SelectedSystem.GetAllEntites())
+            foreach (var entity in GameLifecycle.Instance!.SelectedSystem!.GetAllEntites())
             {
                 addEntity(entity);
             }
 
             void addEntity(Entity entity)
             {
-                if(entity == null || _uiState.Game == null)
+                if(entity == null || GameLifecycle.Instance?.Game == null)
                     return;
                 string name = entity.Id.ToString();
                 if(entity.HasDataBlob<NameDB>())
@@ -1051,9 +1053,9 @@ namespace Pulsar4X.Client
                 {
                     factionOwner = "Neutral";
                 }
-                else if(_uiState.Game.Factions.ContainsKey(entity.FactionOwnerID))
+                else if(GameLifecycle.Instance!.Game!.Factions.ContainsKey(entity.FactionOwnerID))
                 {
-                    factionOwner = _uiState.Game.Factions[entity.FactionOwnerID].GetDataBlob<NameDB>().OwnersName;
+                    factionOwner = GameLifecycle.Instance!.Game!.Factions[entity.FactionOwnerID].GetDataBlob<NameDB>().OwnersName;
                 }
                 _allEntites.Add((name, entity, factionOwner));
             }

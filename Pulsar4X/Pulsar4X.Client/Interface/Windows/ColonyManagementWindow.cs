@@ -5,7 +5,6 @@ using ImGuiNET;
 using Pulsar4X.Api;
 using Pulsar4X.Client.Interface.Widgets;
 // Engine using: Stringify formatting helpers, plus the deferred Production/Construction tabs below.
-using Pulsar4X.Engine;
 
 namespace Pulsar4X.Client
 {

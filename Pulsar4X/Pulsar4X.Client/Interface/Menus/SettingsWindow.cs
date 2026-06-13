@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System;
-using Pulsar4X.Engine;
 using Vector3 = System.Numerics.Vector3;
-using Pulsar4X.Orbits;
-using Pulsar4X.Movement;
 using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
@@ -15,11 +12,6 @@ namespace Pulsar4X.Client
         ImGuiTreeNodeFlags _xpanderFlags = ImGuiTreeNodeFlags.CollapsingHeader;
         List<List<UserOrbitSettings>> _userOrbitSettingsMtx;
         //UserOrbitSettings _userOrbitSettings;
-        private Pulsar4X.Engine.GameSettings _gameSettings;
-        private bool _isThreaded;
-        private bool _enforceSingleThread;
-        private bool _relativeOrbitVelocity;
-        private bool _strictNewtonion;
         private bool _showSizesDemo = false;
         private bool _showSelectorWindow = true;
         private GameLogWindow _logWindow;
@@ -28,16 +20,6 @@ namespace Pulsar4X.Client
         private SettingsWindow()
         {
             _userOrbitSettingsMtx = _uiState.UserOrbitSettingsMtx;
-            
-            // Only initialize game-specific settings if a game is loaded
-            if (_uiState.Game != null)
-            {
-                _gameSettings = _uiState.Game.Settings;
-                _isThreaded = _gameSettings.EnableMultiThreading;
-                _enforceSingleThread = _gameSettings.EnforceSingleThread;
-                _relativeOrbitVelocity = _gameSettings.UseRelativeVelocity;
-                _strictNewtonion = _gameSettings.StrictNewtonion;
-            }
 
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
             _logWindow = GameLogWindow.GetInstance();
@@ -325,45 +307,48 @@ namespace Pulsar4X.Client
 
         private void DisplayGameSettings()
         {
-            if (_uiState.Game == null || _gameSettings == null) return;
+            if (_uiState.Lifecycle?.GetGameRules() is not { } rules) return;
 
             ImGui.Text("Game Process Settings");
             ImGui.Separator();
 
-            if (ImGui.Checkbox("MultiThreaded", ref _isThreaded))
+            bool isThreaded = rules.EnableMultiThreading;
+            if (ImGui.Checkbox("MultiThreaded", ref isThreaded))
             {
-                _gameSettings.EnableMultiThreading = _isThreaded;
+                _uiState.Lifecycle.ApplyGameRules(rules with { EnableMultiThreading = isThreaded });
             }
 
-            if (ImGui.Checkbox("EnforceSingleThread", ref _enforceSingleThread))
+            bool enforceSingleThread = rules.EnforceSingleThread;
+            if (ImGui.Checkbox("EnforceSingleThread", ref enforceSingleThread))
             {
-                _gameSettings.EnforceSingleThread = _enforceSingleThread;
-                if (_enforceSingleThread)
+                _uiState.Lifecycle.ApplyGameRules(rules with
                 {
-                    _isThreaded = false;
-                    _gameSettings.EnableMultiThreading = false;
-                }
+                    EnforceSingleThread = enforceSingleThread,
+                    EnableMultiThreading = enforceSingleThread ? false : rules.EnableMultiThreading
+                });
             }
 
-            if (ImGui.Checkbox("Translate Uses relative Velocity", ref _relativeOrbitVelocity))
+            bool relativeOrbitVelocity = rules.UseRelativeVelocity;
+            if (ImGui.Checkbox("Translate Uses relative Velocity", ref relativeOrbitVelocity))
             {
-                _gameSettings.UseRelativeVelocity = _relativeOrbitVelocity;
+                _uiState.Lifecycle.ApplyGameRules(rules with { UseRelativeVelocity = relativeOrbitVelocity });
             }
             if (ImGui.IsItemHovered())
             {
-                if (_relativeOrbitVelocity)
+                if (relativeOrbitVelocity)
                     ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter an orbit: \n Using a vector relative to it's origin parent");
                 else
                     ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter an orbit: \n Using the absolute Vector (ie raltive to the root'sun'");
             }
 
-            if (ImGui.Checkbox("Translate Uses Strict Newtonion", ref _strictNewtonion))
+            bool strictNewtonion = rules.StrictNewtonion;
+            if (ImGui.Checkbox("Translate Uses Strict Newtonion", ref strictNewtonion))
             {
-                _gameSettings.StrictNewtonion = _strictNewtonion;
+                _uiState.Lifecycle.ApplyGameRules(rules with { StrictNewtonion = strictNewtonion });
             }
             if (ImGui.IsItemHovered())
             {
-                if (_strictNewtonion)
+                if (strictNewtonion)
                     ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter: \n An orbit using a vector relative to it's origin vector");
                 else
                     ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter: \n a Simple circular orbit ignoring its origin newton vector");

@@ -262,16 +262,6 @@ namespace Pulsar4X.Client
             }
         }
 
-        public override void PostFrameUpdate()
-        {
-            base.PostFrameUpdate();
-
-            foreach (var (_, systemState) in _state.StarSystemStates)
-            {
-                systemState.PostFrameCleanup();
-            }
-        }
-
         /// <summary>
         /// Render the UI
         /// </summary>

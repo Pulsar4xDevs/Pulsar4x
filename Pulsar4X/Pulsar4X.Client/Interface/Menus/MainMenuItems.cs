@@ -5,7 +5,6 @@ using Pulsar4X.Client.Interface.Menus;
 using System.Numerics;
 using Pulsar4X.Client.Interface.Widgets;
 using System.Diagnostics;
-using Pulsar4X.Client.ModFileEditing;
 
 namespace Pulsar4X.Client
 {
@@ -61,7 +60,7 @@ namespace Pulsar4X.Client
                         _saveGame = !_saveGame;
 
                         // Set the save name equal to the corporation name by default (player can change it in the dialog)
-                        string corpName = _uiState.Faction?.GetFactionName() ?? "Unknown";
+                        string corpName = _uiState.GameClient?.Galaxy.Faction?.Name ?? "Unknown";
                         string dateTime = _uiState.SelectedSystemTime.ToString("yyyy-MM-dd_HH-mm-ss");
                         string unsanitizedName = $"{corpName} - {dateTime}";
 
@@ -80,12 +79,6 @@ namespace Pulsar4X.Client
                         this.SetActive(false);
                     }
                     
-                    if (ImGui.Button("Editor", _buttonSize))
-                    {
-                        ModFileEditor.GetInstance().ToggleActive();
-                        this.SetActive(false);
-                    }
-
                     if(ImGui.Button("Preferences", _buttonSize))
                     {
                         SystemViewPreferences.GetInstance().ToggleActive();

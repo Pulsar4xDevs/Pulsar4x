@@ -57,8 +57,8 @@
 //                 StaticRefLib.Game.Factions.ToArray(),
 //                 EntityNameSelector.NameType.Owner );
 
-//             var bodies = _uiState.SelectedSystem.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>();
-//             var stars = _uiState.SelectedSystem.GetAllEntitiesWithDataBlob<StarInfoDB>();
+//             var bodies = GameLifecycle.Instance!.SelectedSystem!.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>();
+//             var stars = GameLifecycle.Instance!.SelectedSystem!.GetAllEntitiesWithDataBlob<StarInfoDB>();
 //             bodies.AddRange(stars);
 //             _sysBodies = new EntityNameSelector(bodies.ToArray(), EntityNameSelector.NameType.Owner);
 //             _parentObect = _sysBodies.GetSelectedEntity();
@@ -69,7 +69,7 @@
 //             MinMaxStruct hab = new MinMaxStruct(10000, 100000);
 //             MinMaxStruct outer = new MinMaxStruct(100000, 10000000);
 //             _bandinfo = (inner, hab, outer, true);
-//             var date = _uiState.SelectedSystem.StarSysDateTime;
+//             var date = GameLifecycle.Instance!.SelectedSystem!.StarSysDateTime;
 //             _parentMass = _parentObect.GetDataBlob<MassVolumeDB>().MassDry;
 //             _parentSOI = _parentObect.GetSOI_m();
 //             _sgp = GeneralMath.StandardGravitationalParameter(_objMass + _parentMass);
@@ -267,7 +267,7 @@
 //             if (ButtonED("Create Entity", enabled))
 //             {
 
-//                 var system = _uiState.SelectedSystem;
+//                 var system = GameLifecycle.Instance!.SelectedSystem!;
 //                 var newBody = SystemBodyFactory.GenerateSingleBody(_sysGensettings, system, _sysBodies.GetSelectedEntity(), btype, _rad);
 //                 MassVolumeDB massvol = MassVolumeDB.NewFromMassAndDensity(_massTon * 1000, _density);
 //                 newBody.SetDataBlob(massvol);
@@ -360,9 +360,9 @@
 
 //             if(ButtonED("Create Entity", createEnabled))
 //             {
-//                 var selectedSystem = _uiState.SelectedSystem;
+//                 var selectedSystem = GameLifecycle.Instance!.SelectedSystem!;
 //                 string shipName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
-//                 //var parent = OrbitProcessor.FindSOIForPosition(_uiState.SelectedSystem, _icon.WorldPosition_m);
+//                 //var parent = OrbitProcessor.FindSOIForPosition(GameLifecycle.Instance!.SelectedSystem!, _icon.WorldPosition_m);
 
 //                 ShipFactory.CreateShip(
 //                     _exsistingClasses[_selectedDesignIndex],
@@ -372,7 +372,7 @@
 //                     shipName);
 //                 //hacky force a refresh
 //                 _uiState.StarSystemStates[selectedSystem.Guid] = SystemState.GetMasterState(selectedSystem);
-//                 _uiState.SelectedSysMapRender.OnSelectedSystemChange(_uiState.SelectedSystem);
+//                 _uiState.SelectedSysMapRender.OnSelectedSystemChange(GameLifecycle.Instance!.SelectedSystem!);
 
 //                 _uiState.SelectedSysMapRender.UIWidgets.Remove("keIcon");
 //             }
@@ -396,14 +396,14 @@
 
 //             if(ButtonED("Create Entity", createEnabled))
 //             {
-//                 var selectedSystem = _uiState.SelectedSystem;
+//                 var selectedSystem = GameLifecycle.Instance!.SelectedSystem!;
 //                 string shipName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
-//                 //var parent = OrbitProcessor.FindSOIForPosition(_uiState.SelectedSystem, _icon.WorldPosition_m);
+//                 //var parent = OrbitProcessor.FindSOIForPosition(GameLifecycle.Instance!.SelectedSystem!, _icon.WorldPosition_m);
 //                 Vector3 ralitivePos = _icon.WorldPosition_m;
 //                 Entity colonyEnitity = ColonyFactory.CreateColony(_factionOwnerEntites.GetSelectedEntity(), _speciesEntites.GetSelectedEntity(), _sysBodies.GetSelectedEntity(), _popCount);
 //                 //hacky force a refresh
 //                 _uiState.StarSystemStates[selectedSystem.Guid] = SystemState.GetMasterState(selectedSystem);
-//                 _uiState.SelectedSysMapRender.OnSelectedSystemChange(_uiState.SelectedSystem);
+//                 _uiState.SelectedSysMapRender.OnSelectedSystemChange(GameLifecycle.Instance!.SelectedSystem!);
 
 //             }
 //         }

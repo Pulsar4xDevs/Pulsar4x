@@ -13,6 +13,8 @@ using Pulsar4X.Orbital;
 using Pulsar4X.Technology;
 using Stringify = Pulsar4X.Api.Stringify;
 
+using Pulsar4X.Client.Host;
+
 namespace Pulsar4X.Client;
 
 public class DataViewerWindow : PulsarGuiWindow
@@ -25,14 +27,14 @@ public class DataViewerWindow : PulsarGuiWindow
     {
         DataViewerWindow instance;
         if (!_uiState.LoadedWindows.ContainsKey(typeof(DataViewerWindow)))
-            instance = new DataViewerWindow(_uiState.Game?.StartingGameData);
+            instance = new DataViewerWindow(GameLifecycle.Instance?.Game?.StartingGameData);
         else
         {
             instance = (DataViewerWindow)_uiState.LoadedWindows[typeof(DataViewerWindow)];
         }
 
         if (_uiState.IsGameLoaded && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
-            instance._systemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+            instance._systemState = GameLifecycle.Instance?.SelectedSystemState;
         else
             instance._systemState = null;
         return instance;

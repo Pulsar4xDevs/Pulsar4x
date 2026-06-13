@@ -1,14 +1,7 @@
 ﻿using System;
 using System.IO;
-using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using SDL3;
-using Pulsar4X.Messaging;
-using System.Threading.Tasks;
-using Pulsar4X.Orbits;
-using Pulsar4X.Ships;
-using Pulsar4X.Weapons;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
@@ -53,7 +46,7 @@ namespace Pulsar4X.Client
             }
         }
 
-        public ShipIcon(PositionDB position) : base(position)
+        public ShipIcon(Vector3 position_m) : base(position_m)
         {
             Front(60, 100, 0, -110);
             Cargo(160, 160, 0, -120);
@@ -64,7 +57,7 @@ namespace Pulsar4X.Client
 
         /// <summary>Snapshot constructor: position read through the replicated galaxy; no engine
         /// subscriptions (the icon is rebuilt when the entity's snapshot changes).</summary>
-        public ShipIcon(Pulsar4X.Interfaces.IPosition position) : base(position)
+        public ShipIcon(IPosition position) : base(position)
         {
             BasicShape();
         }
@@ -306,7 +299,7 @@ namespace Pulsar4X.Client
         }
 
         /// <summary>Snapshot constructor: rebuilt on snapshot change, so no engine subscriptions.</summary>
-        public ProjectileIcon(Pulsar4X.Interfaces.IPosition position, bool underThrust) : base(position)
+        public ProjectileIcon(IPosition position, bool underThrust) : base(position)
         {
             BasicShape();
             NewtonFlame();
@@ -388,20 +381,13 @@ namespace Pulsar4X.Client
 
     public class BeamIcon : Icon
     {
-        BeamInfoDB? _beamInfo;
         Vector3 _start;
         Vector3 _end;
         bool _hasEndpoints;
 
-        public BeamIcon(BeamInfoDB beamInfoDB, PositionDB positionDB) : base(positionDB)
-        {
-            _beamInfo = beamInfoDB;
-            OnPhysicsUpdate();
-        }
-
         /// <summary>Snapshot constructor: the endpoints travel in the BeamView and the icon is
         /// rebuilt on each per-tick push.</summary>
-        public BeamIcon(Pulsar4X.Api.BeamView beam, Pulsar4X.Interfaces.IPosition position) : base(position)
+        public BeamIcon(Pulsar4X.Api.BeamView beam, IPosition position) : base(position)
         {
             _start = new Vector3(beam.StartPosition.X, beam.StartPosition.Y, beam.StartPosition.Z);
             _end = new Vector3(beam.EndPosition.X, beam.EndPosition.Y, beam.EndPosition.Z);
@@ -418,12 +404,6 @@ namespace Pulsar4X.Client
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            if (_beamInfo != null)
-            {
-                _start = _beamInfo.Positions.Item1;
-                _end = _beamInfo.Positions.Item2;
-                _hasEndpoints = true;
-            }
             if (!_hasEndpoints) return;
 
             var p0 = camera.ViewCoordinate_m(_start);

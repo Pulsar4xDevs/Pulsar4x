@@ -23,6 +23,9 @@ public interface IGameClient
     Task<CommandResult> SubmitCommandAsync(GameCommand command);
     Task SetTimeControlAsync(TimeControlRequest request);
 
+    /// <summary>Tell the server which system the player is watching (engine processing priority).</summary>
+    Task SetSystemFocusAsync(string? systemId);
+
     /// <summary>
     /// Applies all server updates received since the previous call to <see cref="Galaxy"/> as a single
     /// batch, then raises <see cref="EventReceived"/> for each. Call exactly once per frame on the UI

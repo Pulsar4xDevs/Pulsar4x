@@ -10,6 +10,8 @@ using Pulsar4X.Orbits;
 using Pulsar4X.Sensors;
 using Pulsar4X.Movement;
 
+using Pulsar4X.Client.Host;
+
 namespace Pulsar4X.Client
 {
 
@@ -61,7 +63,7 @@ namespace Pulsar4X.Client
                 instance = (PerformanceWindow)_uiState.LoadedWindows[typeof(PerformanceWindow)];
             }
             if (_uiState.IsGameLoaded && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
-                instance._systemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+                instance._systemState = GameLifecycle.Instance?.SelectedSystemState;
             else
                 instance._systemState = null;
             return instance;
@@ -81,17 +83,17 @@ namespace Pulsar4X.Client
 
         internal override void Display()
         {
-            if (!IsActive || _systemState == null || _uiState.Game == null) return;
+            if (!IsActive || _systemState == null || GameLifecycle.Instance?.Game == null) return;
 
             if(Window.Begin("Performance Display"))
             {
                 SetFrameRateArray();
                 ImGui.Text("Global Tick: "); ImGui.SameLine();
-                var t_lpt = _uiState.Game.TimePulse.LastProcessingTime.TotalMilliseconds;
-                var t_tf = _uiState.Game.TimePulse.TickFrequency.TotalMilliseconds;
+                var t_lpt = GameLifecycle.Instance!.Game!.TimePulse.LastProcessingTime.TotalMilliseconds;
+                var t_tf = GameLifecycle.Instance!.Game!.TimePulse.TickFrequency.TotalMilliseconds;
                 var txt_lpt = t_lpt.ToString();
                 var col = new Vector4(0, 1, 0, 1);
-                if (t_lpt > _uiState.Game.TimePulse.TickFrequency.TotalMilliseconds)
+                if (t_lpt > GameLifecycle.Instance!.Game!.TimePulse.TickFrequency.TotalMilliseconds)
                     col = new Vector4(1, 0, 0, 1);
                 ImGui.Text(txt_lpt); ImGui.SameLine();
                 var overtime = t_lpt - t_tf;
@@ -165,7 +167,7 @@ namespace Pulsar4X.Client
 
                 if(ImGui.CollapsingHeader("All Systems"))
                 {
-                    foreach (var starsys in _uiState.Game.Systems)
+                    foreach (var starsys in GameLifecycle.Instance!.Game!.Systems)
                     {
                         ImGui.Text(((StarSystem)starsys).ID.ToString());
                         ImGui.Text($"    IsProcecssing: {starsys.ManagerSubpulses.IsProcessing}");
@@ -303,8 +305,8 @@ namespace Pulsar4X.Client
         {
             if(_systemState == null) return;
 
-            var t_lpt = _uiState.Game.TimePulse.LastProcessingTime.TotalMilliseconds;
-            var t_tf = _uiState.Game.TimePulse.TickFrequency.TotalMilliseconds;
+            var t_lpt = GameLifecycle.Instance!.Game!.TimePulse.LastProcessingTime.TotalMilliseconds;
+            var t_tf = GameLifecycle.Instance!.Game!.TimePulse.TickFrequency.TotalMilliseconds;
             var overtime = t_lpt - t_tf;
             var starsysdata = _systemState.StarSystem.ManagerSubpulses.Performance.GetLatestEntry();
             var dirst = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -315,8 +317,8 @@ namespace Pulsar4X.Client
             string machine = Environment.MachineName;
             string gitver = AssemblyInfo.GetGitHash();
             string datetime = DateTime.Now.ToString();
-            string threaded = string.Format("{0,-28}{1,16}","Threaded:", _uiState.Game.Settings.EnableMultiThreading.ToString());
-            string timespan = string.Format("{0,-28}{1,16}","Time Span:" , _uiState.Game.TimePulse.Ticklength.ToString());
+            string threaded = string.Format("{0,-28}{1,16}","Threaded:", GameLifecycle.Instance!.Game!.Settings.EnableMultiThreading.ToString());
+            string timespan = string.Format("{0,-28}{1,16}","Time Span:" , GameLifecycle.Instance!.Game!.TimePulse.Ticklength.ToString());
             string txt_lpt =  string.Format("{0,-28}{1,16}","Full Process Time:", t_lpt.ToString());
 
             string sysname = _systemState.StarSystem.NameDB.OwnersName;
@@ -343,7 +345,7 @@ namespace Pulsar4X.Client
 
         public override void OnGameTickChange(DateTime newDate)
         {
-            _currentGFPS = (float)_uiState.Game.TimePulse.LastSubtickTime.TotalSeconds;
+            _currentGFPS = (float)GameLifecycle.Instance!.Game!.TimePulse.LastSubtickTime.TotalSeconds;
 
             if (_currentGFPS > largestGFPS)
             {

@@ -7,19 +7,21 @@ namespace Pulsar4X.Client
     public class EntityContextMenu
     {
         GlobalUIState _state;
-        EntityState _entityState;
+        EntityState? _entityState;
 
         public EntityContextMenu(GlobalUIState state, int entityGuid)
         {
             _state = state;
-            //_uiState.OpenWindows.Add(this);
-            //IsActive = true;
-            _entityState = state.StarSystemStates[state.SelectedStarSystemId].EntityStatesWithNames[entityGuid];
-
+            var systemId = state.SelectedStarSystemId;
+            var snapshot = state.GameClient?.Galaxy.GetSystem(systemId)?.GetEntity(entityGuid);
+            if (snapshot != null)
+                _entityState = new EntityState(snapshot, systemId);
         }
 
         internal void Display()
         {
+            if (_entityState == null) return;
+
             ImGui.BeginGroup();
 
             void ContextButton(Type T)

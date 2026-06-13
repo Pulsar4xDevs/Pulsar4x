@@ -396,7 +396,7 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    left; its per-type hide filter keys off the event-type string. Not carried over:
    `FactionEventLog.HaltsOn` (pause-on-event) has no UI today; when one is built it should be a
    small command + a flag on `LogEvent`.
-6. **Client composition (`Pulsar4X.Client.Host`) — in progress.** The extraction is done:
+6. **Client composition (`Pulsar4X.Client.Host`) — done.** The extraction is complete:
    `Pulsar4X.Client.Host` is the desktop executable (entry point, app icon) and `Pulsar4X.Client`
    is a library. The host owns the engine-backed development tooling — the `Debug/` windows,
    `SMWindow`, `EntitySpawnWindow` and `DamageViewerWindow` moved into its `DevTools/` — and wires
@@ -409,21 +409,53 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    The **game-lifecycle seam** is in: `IGameLifecycle` (in the UI library, engine-free) is
    implemented by the host's `GameLifecycle` and assigned to `GlobalUIState.Lifecycle` at startup.
    It owns mod scanning (`ModsState` moved to the host), mod loading, and the whole
-   create/quickstart/load/save flows — factories, faction/species/colony setup — then binds the
-   game to the UI state (clear → `Game` → `SetFaction`, which builds the
-   `InProcessAdapter(new EngineGameServer(game))`) before returning an engine-free
-   `GameActivation` (system id + camera position/zoom). The UI side is data-driven: the new-game
-   wizard builds its pick-lists from `NewGameCatalog`/`ModOption` DTOs and submits a
-   `NewGameRequest`; `GlobalUIState.ActivateGameUI` finishes up (select system, point camera,
-   open default windows). `NewGameMenu`/`LoadGame`/`SaveGame` have no engine usings left, and the
-   main loop's game-tick detection reads the galaxy clock instead of `Game.TimePulse`.
-   Remaining before the `GameEngine` reference can be dropped from `Pulsar4X.Client`:
-   (a) the `IDesignDataProvider` bridge and the client-side designer evaluation
-   (`ComponentDesigner`/`ShipDesign` run in the designer windows by design) need an engine-free
-   shape or a relocation;
-   (b) the `EntityState`/`SystemState` click-pipeline plumbing (and `GlobalUIState.Game`/`Faction`
-   themselves, which the host now assigns but the library still holds engine-typed);
-   (c) the parked ordnance/logistics windows.
+   create/quickstart/load/save flows — factories, faction/species/colony setup. The UI side is
+   data-driven: the new-game wizard builds its pick-lists from `NewGameCatalog`/`ModOption` DTOs
+   and submits a `NewGameRequest`; `GlobalUIState.ActivateGameUI` finishes up (select system,
+   point camera, open default windows). `NewGameMenu`/`LoadGame`/`SaveGame` have no engine usings
+   left, and the main loop's game-tick detection reads the galaxy clock instead of `Game.TimePulse`.
+   **The `GameEngine` reference is dropped from `Pulsar4X.Client`** — the library references only
+   `Pulsar4X.Api` and `Pulsar4X.Orbital`. What that took:
+   - **Session binding flipped.** `GlobalUIState.Game`/`Faction`/`PlayerFaction`/`SetFaction` are
+     gone. The host's `GameLifecycle` owns the engine `Game`, one `EngineGameServer` per game
+     (`SetGame`), and the player-faction entity; `BindFaction` connects an `InProcessAdapter`
+     session and hands it to `GlobalUIState.OnGameClientBound(client, gameInfo)` (which disconnects
+     the previous client, rewires `EventReceived`, and raises `OnFactionChanged`). The session's
+     faction is `GlobalUIState.FactionId` (from the connect handshake); game-master mode goes
+     through `IGameLifecycle.SetGameMasterMode` (the host rebinds to `Game.GameMasterFaction` or
+     the remembered player faction). The settings window's Game tab edits engine processing rules
+     through a `GameRules` record (`GetGameRules`/`ApplyGameRules` on the lifecycle).
+   - **`SystemState` deleted, `EntityState` slimmed.** The click pipeline is id-based end to end:
+     `EntityClicked(id, systemId, button)` resolves the `EntitySnapshot` from the galaxy and builds
+     a four-field `EntityState` (id, system id, name, display body-type). Per-system camera saves
+     live in a `GlobalUIState` dictionary keyed by system id; `SetActiveSystem` is engine-free and
+     tells the server which system to prioritise via the new `IGameServer.SetSystemFocus`
+     (replacing the engine `Increment/DecrementExternalObserver` calls; the server maps focus to
+     observer promotion, and clears it on disconnect).
+   - **Client-local `IPosition`.** The icons/camera/widgets seam (`Pulsar4X.Client.IPosition`,
+     implemented by `SnapshotPosition`/`StaticPosition`) replaced `Pulsar4X.Interfaces.IPosition`;
+     the icons' dead engine constructors (`PositionDB`/DataBlob overloads) were deleted, and the
+     engine's `OrbitMath` calls became base-class `OrbitalMath`.
+   - **`IDesignDataProvider` relocated.** The designer windows (`ComponentDesignWindow`,
+     `ShipDesignWindow`, `ComponentsWindow`, design displays) moved to the host's `Designer/` —
+     they evaluate engine `ComponentDesigner` client-side by design, so they're composition-root
+     code now. The provider moved off the adapter onto the host `GameLifecycle`
+     (`_server.GetFactionDesignData(session)`); resolution is `Lifecycle is IDesignDataProvider`.
+     `ModFileEditing/` and the parked ordnance/logistics windows moved to the host too.
+   - **Registry-driven designer surfaces.** `DevToolRegistration` gained `ToolbarIcon`, `Order`
+     and an `SMToolbar` placement; the toolbar merges host-registered buttons with the built-ins
+     by order (designer buttons first), the "Editor" main-menu button and the F5/1/2 hotkeys go
+     through `ToggleDevTool` keys, and SM-only buttons render on the SM toolbar.
+   - **Displays split.** The five DB display files and `Displays.cs` kept only their
+     snapshot halves; the one engine half still used (`CargoStorageDB.Display`, DebugWindow) moved
+     to the host with an `Entity` parameter. Engine-typed helpers left the library
+     (`EntityExtensions` → host; `EntityNameSelector`, `Utils.EntityBodyType` deleted as dead);
+     the library grew its own `StringExtensions`/`EnumExtensions.ToDescription`.
+   - **Host dev-tool bridge.** Dev tools reach the engine through `GameLifecycle.Instance`
+     (`Game`, `Faction`, `SelectedSystem`, `SelectedSystemState` — a thin host `SystemState`
+     wrapping the engine system) and `EngineUiBridge` (`EntityState.GetEntity()` resolves the
+     engine entity behind a click; `PositionDBAdapter` adapts engine positions to the UI seam;
+     `RawBmpTextures` uploads engine `RawBmp`s).
 7. **Network adapter + server host:** transport + serialization for `MultiplayerAdapter` and the
    headless `Pulsar4X.Server.Host`.
 

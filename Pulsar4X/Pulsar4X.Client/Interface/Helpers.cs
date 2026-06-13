@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using ImGuiNET;
-using Pulsar4X.Engine;
-using Pulsar4X.Extensions;
 using Pulsar4X.Orbital;
 using SDL3;
 
@@ -18,78 +16,6 @@ namespace Pulsar4X.Client
         Left,
         Center,
         Right
-    }
-
-    public class EntityNameSelector
-    {
-        public enum NameType
-        {
-            Owner,
-            Default,
-            Faction,
-            Guids
-        }
-        private Entity[] _entities;
-        private string[] _names;
-        private int _index = 0;
-
-        public EntityNameSelector(Entity[] entities, NameType nameType, int factionID)
-        {
-            _entities = entities;
-            _names = new string[_entities.Length];
-            if (nameType == NameType.Default)
-            {
-                for (int i = 0; i < entities.Length; i++)
-                {
-                    _names[i] = _entities[i].GetDefaultName();
-                }
-            }
-
-            if (nameType == NameType.Owner)
-            {
-                for (int i = 0; i < entities.Length; i++)
-                {
-                    _names[i] = _entities[i].GetOwnersName();
-                }
-            }
-
-            if (nameType == NameType.Faction)
-            {
-                for (int i = 0; i < entities.Length; i++)
-                {
-                    _names[i] = _entities[i].GetName(factionID);
-                }
-            }
-
-            if (nameType == NameType.Guids)
-            {
-                for (int i = 0; i < entities.Length; i++)
-                {
-                    _names[i] = _entities[i].Id.ToString();
-                }
-            }
-        }
-
-        public bool Combo(string label)
-        {
-            return ImGui.Combo(label, ref _index, _names, _names.Length);
-        }
-
-        public Entity GetSelectedEntity()
-        {
-            return _entities[_index];
-        }
-
-        public string GetSelectedName()
-        {
-            return _names[_index];
-        }
-
-        public bool IsItemSelected
-        {
-            get { return _index > -1; }
-        }
-
     }
 
     public static class Helpers
