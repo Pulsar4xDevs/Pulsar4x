@@ -54,21 +54,6 @@ namespace Pulsar4X.Engine
         [JsonIgnore]
         public bool IsStopping => IsRunning && (_timeSimulationCts?.IsCancellationRequested ?? false);
 
-        [JsonProperty]
-        //changes how often the tick happens
-        public float TimeMultiplier
-        {
-            get { return _timeMultiplier; }
-            set
-            {
-                _timeMultiplier = value;
-                _tickSource.Period = _tickInterval * _timeMultiplier;
-            }
-        }
-
-        [JsonIgnore]
-        private float _timeMultiplier = 1f;
-
         [JsonIgnore]
         private TimeSpan _tickInterval = TimeSpan.FromMilliseconds(100);
 
@@ -78,8 +63,19 @@ namespace Pulsar4X.Engine
             get { return _tickInterval; }
             set
             {
-                _tickInterval = value;
-                _tickSource.Period = _tickInterval * _timeMultiplier;
+                // Prevent values outside PeriodicTimer's supported range.
+                TimeSpan minTickInterval = TimeSpan.FromMilliseconds(1);
+                TimeSpan maxTickInterval = TimeSpan.FromMilliseconds(uint.MaxValue - 1d);
+
+                if (value < minTickInterval)
+                    _tickInterval = minTickInterval;
+                else if (value > maxTickInterval)
+                    _tickInterval = maxTickInterval;
+                else
+                    _tickInterval = value;
+
+                if (_tickSource is not null)
+                    _tickSource.Period = _tickInterval;
             }
         }
 
