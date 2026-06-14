@@ -54,6 +54,7 @@ namespace Pulsar4X.Client
         internal override void Display()
         {
             bool isPaused = !(_timeloop?.IsRunning ?? false);
+            bool isStopping = (_timeloop?.IsStopping ?? false);
             var buttonTexture = isPaused ? _uiState.Img_Play() : _uiState.Img_Pause();
 
             ImGui.SetNextWindowSize(_windowSize, ImGuiCond.FirstUseEver);
@@ -86,10 +87,15 @@ namespace Pulsar4X.Client
             ImGui.EndDisabled();
 
             ImGui.SameLine();
+
+            if (isStopping) ImGui.BeginDisabled();
+            
             if (ImGui.ImageButton("playpause", buttonTexture.ToTextureRef(), _iconSize))
             {
                 PausePlayPressed();
             }
+
+            if (isStopping) ImGui.EndDisabled();
 
             // Step button only shown when paused
             if (isPaused)
