@@ -11,6 +11,7 @@ using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using Pulsar4X.Orbital;
+using Pulsar4X.Sensors;
 using Pulsar4X.Weapons;
 
 namespace Pulsar4X.Tests
@@ -71,7 +72,7 @@ namespace Pulsar4X.Tests
             return ship;
         }
 
-        private Entity MakeTarget(int factionId)
+        private Entity MakeTarget(int factionId, int? visibleToFactionId = null)
         {
             var target = Entity.Create(factionId);
             _game.Systems[0].AddEntity(target, new List<BaseDataBlob>
@@ -79,6 +80,12 @@ namespace Pulsar4X.Tests
                 new PositionDB { AbsolutePosition = Vector3.Zero },
                 new NameDB("Target", factionId, "Target"),
             });
+
+            // A faction can only target what it detects; register a sensor contact for the observer.
+            if (visibleToFactionId is { } observerId)
+                _game.Systems[0].GetSensorContacts(observerId)
+                    .AddContact(new SensorContact(_game.Factions[observerId], target, target.StarSysDateTime));
+
             return target;
         }
 
@@ -111,7 +118,8 @@ namespace Pulsar4X.Tests
             var session = Connect();
             var (fcDesign, wpnDesign) = SetUpWeaponDesigns(session);
             var ship = MakeArmedShip(session, fcDesign, wpnDesign);
-            var target = MakeTarget(_game.Factions.Keys.First(id => id != session.FactionId));
+            var target = MakeTarget(_game.Factions.Keys.First(id => id != session.FactionId),
+                visibleToFactionId: session.FactionId);
 
             var view = _projector.ProjectEntity(ship, session.FactionId).GetView<FireControlView>()!;
             string fcId = view.FireControls[0].Id;

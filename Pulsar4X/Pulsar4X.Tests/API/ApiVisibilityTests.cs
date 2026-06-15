@@ -47,5 +47,26 @@ namespace Pulsar4X.Tests
             Assert.That(received.Any(e => e.Type == GameEventType.EntityAdded && e.EntityId == own.Id), Is.True,
                 "the faction's own entity add must be pushed");
         }
+
+        [Test]
+        public void Connect_will_not_bind_to_the_GameMaster_faction_without_the_SM_credential()
+        {
+            int gmId = _game.GameMasterFaction.Id;
+
+            // Requesting the GameMaster without the credential falls back to a player faction.
+            var sneaky = _server.Connect(new ConnectRequest { FactionId = gmId });
+            Assert.That(sneaky.Success, Is.True);
+            Assert.That(sneaky.Session.FactionId, Is.Not.EqualTo(gmId),
+                "binding to the GameMaster faction must require the SM credential");
+
+            var sm = _server.Connect(new ConnectRequest
+            {
+                FactionId = gmId,
+                Credential = ConnectRequest.SpaceMasterCredential,
+            });
+            Assert.That(sm.Success, Is.True);
+            Assert.That(sm.Session.FactionId, Is.EqualTo(gmId),
+                "the SM credential authorises binding to the GameMaster faction");
+        }
     }
 }

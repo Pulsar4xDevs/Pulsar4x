@@ -58,11 +58,15 @@ namespace Pulsar4X.Engine.Api
             if (_game.Factions.Count == 0)
                 return ConnectResult.Fail("Game has no factions to bind to.");
 
-            // Bind to the requested faction when given (the in-process host knows the player's
-            // faction); otherwise fall back to the first player faction — never the GameMaster,
-            // who sees everything. Credential-gated auth lands with networking.
-            int factionId = request.FactionId is { } requested && _game.Factions.ContainsKey(requested)
-                ? requested
+            // Bind to the requested faction, falling back to the first player faction. The
+            // all-seeing GameMaster is only bound when the SM credential is presented, so a client
+            // can't escalate to "see everything" just by requesting that faction id.
+            bool smAuthorised = request.Credential == ConnectRequest.SpaceMasterCredential;
+            bool requestedBindable = request.FactionId is { } requested
+                && _game.Factions.ContainsKey(requested)
+                && (requested != _game.GameMasterFaction.Id || smAuthorised);
+            int factionId = requestedBindable
+                ? request.FactionId!.Value
                 : _game.Factions.Keys.FirstOrDefault(id => id != _game.GameMasterFaction.Id, _game.Factions.Keys.First());
             var session = new PlayerSession(Guid.NewGuid(), factionId);
             return ConnectResult.Ok(session, new GameInfo(_game.Name ?? "Pulsar4X", _game.LastSaveGitHash ?? "")

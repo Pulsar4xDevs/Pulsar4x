@@ -261,7 +261,9 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
             _playerFaction = faction;
 
         var client = new InProcessAdapter(_server);
-        var connect = client.ConnectAsync(new ConnectRequest { PlayerName = "Player", FactionId = faction.Id }).Result;
+        // The trusted host presents the SM credential so it can bind to the GameMaster for SM mode.
+        string? credential = faction == _game?.GameMasterFaction ? ConnectRequest.SpaceMasterCredential : null;
+        var connect = client.ConnectAsync(new ConnectRequest { PlayerName = "Player", FactionId = faction.Id, Credential = credential }).Result;
         _state.OnGameClientBound(client, connect?.Game);
     }
 

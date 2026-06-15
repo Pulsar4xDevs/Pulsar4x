@@ -13,6 +13,10 @@ public readonly record struct PlayerSession(Guid SessionId, int FactionId)
 /// <summary>A request to join a running game and bind to a faction.</summary>
 public sealed record ConnectRequest
 {
+    /// <summary>Well-known <see cref="Credential"/> that authorises binding to the all-seeing
+    /// GameMaster faction. Placeholder until real auth lands with networking.</summary>
+    public const string SpaceMasterCredential = "sm:in-process-host";
+
     /// <summary>Display name of the connecting player.</summary>
     public string PlayerName { get; init; } = "Player";
 

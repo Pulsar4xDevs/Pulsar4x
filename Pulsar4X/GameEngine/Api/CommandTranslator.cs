@@ -166,6 +166,9 @@ namespace Pulsar4X.Engine.Api
             var change = (ChangeFleetParentCommand)command;
             if (!TryResolve(change.NewParentId, out var newParent))
                 return CommandResult.Reject($"Entity {change.NewParentId} not found.");
+            // The engine only validates the source fleet's owner, so check the new parent here.
+            if (newParent.FactionOwnerID != faction.Id || !newParent.HasDataBlob<FleetDB>())
+                return CommandResult.Reject("The new parent is not one of your fleets.");
 
             return Dispatch(FleetOrder.ChangeParent(faction.Id, commanded, newParent));
         }
@@ -192,6 +195,9 @@ namespace Pulsar4X.Engine.Api
             var setFlagship = (SetFlagshipCommand)command;
             if (!TryResolve(setFlagship.ShipId, out var ship))
                 return CommandResult.Reject($"Entity {setFlagship.ShipId} not found.");
+            // The engine only validates the fleet's owner, so check the flagship ship here.
+            if (ship.FactionOwnerID != faction.Id)
+                return CommandResult.Reject("The flagship must be one of your own ships.");
 
             return Dispatch(FleetOrder.SetFlagShip(faction.Id, commanded, ship));
         }
@@ -487,7 +493,11 @@ namespace Pulsar4X.Engine.Api
         private CommandResult TranslateSetFireControlTarget(Entity faction, Entity commanded, GameCommand command)
         {
             var target = (SetFireControlTargetCommand)command;
-            if (!TryResolve(target.TargetId, out _))
+            if (!TryResolve(target.TargetId, out var targetEntity))
+                return CommandResult.Reject($"Entity {target.TargetId} not found.");
+            // A faction can only target what it can see (no locking onto undetected entities).
+            if (targetEntity.Manager == null
+                || !targetEntity.Manager.IsEntityVisibleToFaction(targetEntity, faction.Id))
                 return CommandResult.Reject($"Entity {target.TargetId} not found.");
 
             bool accepted = Pulsar4X.Weapons.SetTargetFireControlOrder.CreateCommand(
@@ -758,6 +768,17 @@ namespace Pulsar4X.Engine.Api
 
         // ----- industry / local construction (commanded entity: the colony) -----
 
+        // IndustryTools index ProductionLines unguarded and IndustryOrder2 runs synchronously, so a
+        // bad/stale line id would throw out of SubmitCommand rather than reject. Validate it here.
+        private CommandResult? ValidateIndustryLine(Entity commanded, string productionLineId)
+        {
+            if (!commanded.TryGetDataBlob<IndustryAbilityDB>(out var industryDB))
+                return CommandResult.Reject("The commanded entity has no industry.");
+            if (!industryDB.ProductionLines.ContainsKey(productionLineId))
+                return CommandResult.Reject($"Production line {productionLineId} not found.");
+            return null;
+        }
+
         private CommandResult TranslateQueueIndustryJob(Entity faction, Entity commanded, GameCommand command)
         {
             var queue = (QueueIndustryJobCommand)command;
@@ -767,6 +788,9 @@ namespace Pulsar4X.Engine.Api
 
             if (queue.Quantity is < 1 or > ushort.MaxValue)
                 return CommandResult.Reject("Quantity must be between 1 and 65535.");
+
+            if (ValidateIndustryLine(commanded, queue.ProductionLineId) is { } lineError)
+                return lineError;
 
             var job = new IndustryJob(factionInfo, queue.DesignId);
 
@@ -787,6 +811,8 @@ namespace Pulsar4X.Engine.Api
         private CommandResult TranslateChangeIndustryJobPriority(Entity faction, Entity commanded, GameCommand command)
         {
             var move = (ChangeIndustryJobPriorityCommand)command;
+            if (ValidateIndustryLine(commanded, move.ProductionLineId) is { } lineError)
+                return lineError;
             return Dispatch(IndustryOrder2.CreateChangePriorityOrder(
                 faction.Id, commanded, move.ProductionLineId, move.JobId, (short)move.Delta));
         }
@@ -794,6 +820,8 @@ namespace Pulsar4X.Engine.Api
         private CommandResult TranslateCancelIndustryJob(Entity faction, Entity commanded, GameCommand command)
         {
             var cancel = (CancelIndustryJobCommand)command;
+            if (ValidateIndustryLine(commanded, cancel.ProductionLineId) is { } lineError)
+                return lineError;
             return Dispatch(IndustryOrder2.CreateCancelJobOrder(
                 faction.Id, commanded, cancel.ProductionLineId, cancel.JobId));
         }

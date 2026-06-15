@@ -350,6 +350,9 @@ namespace Pulsar4X.Engine.Api
                 if (!mineralsById.TryGetValue(mineralId, out var mineral)) continue;
 
                 var amount = deposit.Amount.Resolve(factionMask, ObscureWithError);
+                // Un-surveyed deposits must not leak their existence/accessibility to the faction.
+                if (amount.Access == AccessLevel.None) continue;
+
                 rows.Add(new MineralDepositRow(
                     mineralId,
                     mineral.Name,
