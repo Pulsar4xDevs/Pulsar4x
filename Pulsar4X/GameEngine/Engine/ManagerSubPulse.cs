@@ -87,13 +87,11 @@ namespace Pulsar4X.Engine
                 if (value < _systemLocalDateTime)
                     throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow.
                 _systemLocalDateTime = value;
-                // FIXME: needs to get rid of StaticRefLib references
-                // if (StaticRefLib.SyncContext != null)
-                //     StaticRefLib.SyncContext.Post(InvokeDateChange, value); //marshal to the main (UI) thread, so the event is invoked on that thread.
-                //NOTE: the above marshaling does not apear to work correctly, it's possible for it to work, the context needs to be in an await state or something.
-                //do not rely on the above being run on the main thread! (maybe we should remove the marshaling?)
-                // else //if context is null, we're probibly running tests or headless.
-                //     InvokeDateChange(value); //in this case we're not going to marshal this. (event will fire on *THIS* thread)
+                // Fire on the processing thread (no UI marshaling — the old SyncContext.Post path was
+                // unreliable). Subscribers must be thread-safe; the API server bridges this to push the
+                // focused system's sub-step clock, which is what keeps client rendering smooth during a
+                // long pulse. Cheap no-op when nothing is subscribed.
+                InvokeDateChange(value);
             }
         }
 

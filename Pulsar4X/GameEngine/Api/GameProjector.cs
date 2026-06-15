@@ -41,10 +41,15 @@ namespace Pulsar4X.Engine.Api
 
         // ----- top-level projections -----
 
-        public TimeState ProjectTime()
+        public TimeState ProjectTime() => ProjectTime(_game.TimePulse.GameGlobalDateTime);
+
+        // Overload taking an explicit clock value: the focused system advances its own sub-step clock
+        // (StarSysDateTime) far more finely than the global date during a long pulse, and the client
+        // renders from this clock — so we push it, not the coarse global date, for smooth motion.
+        public TimeState ProjectTime(DateTime gameDateTime)
         {
             var tp = _game.TimePulse;
-            return new TimeState(tp.GameGlobalDateTime, tp.IsRunning, tp.IsStopping, tp.Ticklength, tp.TickFrequency);
+            return new TimeState(gameDateTime, tp.IsRunning, tp.IsStopping, tp.Ticklength, tp.TickFrequency);
         }
 
         public FactionSnapshot? ProjectFaction(int factionId)

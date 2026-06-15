@@ -54,6 +54,19 @@ namespace Pulsar4X.Engine
         [JsonIgnore]
         public bool IsStopping => IsRunning && (_timeSimulationCts?.IsCancellationRequested ?? false);
 
+        /// <summary>
+        /// Fired when the simulation loop ends — pause/cancel, single-step completion, or natural end.
+        /// Lets push-based clients learn the clock has stopped (<see cref="IsRunning"/> is now false)
+        /// without polling; without it a paused client never sees the run-state clear.
+        /// </summary>
+        public event Action? SimulationStopped;
+
+        // Observes the (possibly cancelled) simulation task's exception and notifies listeners once it
+        // has fully stopped. ContinueWith fires after the task reaches a final state, so IsRunning is
+        // false by the time SimulationStopped is raised.
+        private void NotifyWhenStopped(Task simulationTask)
+            => simulationTask.ContinueWith(t => { _ = t.Exception; SimulationStopped?.Invoke(); }, TaskScheduler.Default);
+
         [JsonIgnore]
         private TimeSpan _tickInterval = TimeSpan.FromMilliseconds(100);
 
@@ -169,6 +182,7 @@ namespace Pulsar4X.Engine
             _timeSimulationCts?.Dispose();
             _timeSimulationCts = new CancellationTokenSource();
             _timeSimulationTask = Task.Run(() => SimulateTimeAsync(_timeSimulationCts.Token), _timeSimulationCts.Token);
+            NotifyWhenStopped(_timeSimulationTask);
         }
 
 
@@ -191,6 +205,7 @@ namespace Pulsar4X.Engine
             _timeSimulationCts?.Dispose();
             _timeSimulationCts = new CancellationTokenSource();
             _timeSimulationTask = Task.Run(() => SimulateTimeUntil(toDate, _timeSimulationCts.Token), _timeSimulationCts.Token);
+            NotifyWhenStopped(_timeSimulationTask);
 
             if (_game.Settings.EnforceSingleThread)
                 _timeSimulationTask.Wait();
