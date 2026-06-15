@@ -110,9 +110,6 @@ namespace Pulsar4X.Engine.Api
                 case TimeControlAction.Start:
                     tp.StartTime();
                     break;
-                case TimeControlAction.SetSpeed:
-                    if (request.Multiplier is { } multiplier) tp.TimeMultiplier = multiplier;
-                    break;
                 case TimeControlAction.SetTickLength:
                     if (request.TickLength is { } tickLength) tp.Ticklength = tickLength;
                     break;

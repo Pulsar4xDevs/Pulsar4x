@@ -18,7 +18,7 @@ internal sealed class ClientGalaxy : IClientGalaxy
     private readonly List<CommanderSnapshot> _commanders = new();
     private readonly List<LogEvent> _eventLog = new();
 
-    public TimeState Time { get; internal set; } = new(default, false, 1f, TimeSpan.FromHours(1), TimeSpan.FromSeconds(1));
+    public TimeState Time { get; internal set; } = new(default, false, false, TimeSpan.FromHours(1), TimeSpan.FromSeconds(1));
 
     public IReadOnlyCollection<SystemSummary> KnownSystems => _knownSystems;
 

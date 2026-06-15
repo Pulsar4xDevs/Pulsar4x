@@ -30,7 +30,7 @@ namespace Pulsar4X.Client
 
         bool _expanded;
 
-        float _freqTimeSpanValue = 0.1f;
+        float _freqTimeSpanValue = 1f;
         int _freqSpanType = 1;
 
         Vector2 _iconSize = new Vector2(16, 16);
@@ -59,6 +59,7 @@ namespace Pulsar4X.Client
         {
             var time = Time;
             bool isPaused = !(time?.IsRunning ?? false);
+            bool isStopping = time?.IsStopping ?? false;
             var buttonTexture = isPaused ? _uiState.Img_Play() : _uiState.Img_Pause();
 
             ImGui.SetNextWindowSize(_windowSize, ImGuiCond.FirstUseEver);
@@ -91,10 +92,15 @@ namespace Pulsar4X.Client
             ImGui.EndDisabled();
 
             ImGui.SameLine();
+
+            if (isStopping) ImGui.BeginDisabled();
+            
             if (ImGui.ImageButton("playpause", buttonTexture.ToTextureRef(), _iconSize))
             {
                 PausePlayPressed();
             }
+
+            if (isStopping) ImGui.EndDisabled();
 
             // Step button only shown when paused
             if (isPaused)
@@ -120,15 +126,25 @@ namespace Pulsar4X.Client
 
                 ImGui.BeginDisabled(!isPaused);
                 ImGui.SameLine();
-                if (ImGui.SliderFloat("##freqSldr", ref _freqTimeSpanValue, 0.1f, 1, _freqTimeSpanValue.ToString(), ImGuiSliderFlags.None))
+                float freqSliderMin = _freqSpanType == 0 ? 1 : 0.001f;
+                float freqSliderMax = _freqSpanType == 0 ? 1000 : 60;
+                if (_freqTimeSpanValue > freqSliderMax)
+                    freqSliderMax = _freqTimeSpanValue;
+                if (_freqTimeSpanValue > 0 && _freqTimeSpanValue < freqSliderMin)
+                    freqSliderMin = _freqTimeSpanValue;
+
+                string freqFormat = _freqSpanType == 0 ? "%.0f" : "%.3g";
+                if (ImGui.SliderFloat("##freqSldr", ref _freqTimeSpanValue, freqSliderMin, freqSliderMax, freqFormat, ImGuiSliderFlags.None))
                 {
-                    _freqTimeSpanValue = (float)Math.Round(_freqTimeSpanValue, 1);
+                    _freqTimeSpanValue = _freqSpanType == 0
+                        ? (float)Math.Round(_freqTimeSpanValue)
+                        : (float)Math.Round(_freqTimeSpanValue, 3);
                     AdjustFreqency();
                 }
 
                 ImGui.SameLine();
                 if (ImGui.Combo("##freqCmbo", ref _freqSpanType, _timespanTypeSelection, _timespanTypeSelection.Length))
-                    AdjustFreqency();
+                    ReadFreqency();
                 ImGui.EndDisabled();
             }
             Window.End();

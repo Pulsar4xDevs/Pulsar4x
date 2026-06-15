@@ -4,10 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Timers;
-using Timer = System.Timers.Timer;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Events;
+using System.Threading;
 
 namespace Pulsar4X.Engine
 {
@@ -25,35 +24,35 @@ namespace Pulsar4X.Engine
         [JsonIgnore]
         Stopwatch _subpulseStopwatch = new Stopwatch();
 
-        [JsonIgnore]
-        private Timer _timer = new Timer();
+        /// <summary>
+        /// A timer that generates a tick for the continious time simulation.
+        /// 
+        /// It is used to introduce a realtime delay between individual ticks.
+        /// </summary>
+        /// <remarks>
+        /// If set to <see langword="null"/> the time simulation will proceed as fast as possible, with no delay between ticks.
+        /// </remarks>
+        private PeriodicTimer? _tickSource = null;
+
+        /// <summary>
+        /// Stores the task that is running the active time simulation.
+        /// 
+        /// If <see langword="null"/>, no time simulation is active. 
+        /// </summary>
+        private Task? _timeSimulationTask = null;
+        private CancellationTokenSource? _timeSimulationCts = null;
 
         /// <summary>
         /// Returns true if the time loop is currently running (not paused)
         /// </summary>
         [JsonIgnore]
-        public bool IsRunning => _timer.Enabled;
+        public bool IsRunning => _timeSimulationTask is not null && !_timeSimulationTask.IsCompleted;
 
+        /// <summary>
+        /// Returns <see langword="true"/> if the time loop is running and has a pending stop request.
+        /// </summary>
         [JsonIgnore]
-        private Action<MasterTimePulse> runSystemProcesses = (MasterTimePulse obj) =>
-        {
-            obj.DoProcessing(obj.GameGlobalDateTime + obj.Ticklength);
-        };
-
-        [JsonProperty]
-        //changes how often the tick happens
-        public float TimeMultiplier
-        {
-            get {return _timeMultiplier;}
-            set
-            {
-                _timeMultiplier = value;
-                _timer.Interval = _tickInterval.TotalMilliseconds * value;
-            }
-        }
-
-        [JsonIgnore]
-        private float _timeMultiplier = 1f;
+        public bool IsStopping => IsRunning && (_timeSimulationCts?.IsCancellationRequested ?? false);
 
         [JsonIgnore]
         private TimeSpan _tickInterval = TimeSpan.FromMilliseconds(100);
@@ -64,22 +63,24 @@ namespace Pulsar4X.Engine
             get { return _tickInterval; }
             set
             {
-                _tickInterval = value;
-                _timer.Interval = _tickInterval.TotalMilliseconds * _timeMultiplier;
+                // Prevent values outside PeriodicTimer's supported range.
+                TimeSpan minTickInterval = TimeSpan.FromMilliseconds(1);
+                TimeSpan maxTickInterval = TimeSpan.FromMilliseconds(uint.MaxValue - 1d);
+
+                if (value < minTickInterval)
+                    _tickInterval = minTickInterval;
+                else if (value > maxTickInterval)
+                    _tickInterval = maxTickInterval;
+                else
+                    _tickInterval = value;
+
+                if (_tickSource is not null)
+                    _tickSource.Period = _tickInterval;
             }
         }
 
         [JsonProperty]
         public TimeSpan Ticklength { get; set; } = TimeSpan.FromSeconds(3600);
-
-        [JsonIgnore]
-        private bool _isProcessing = false;
-
-        [JsonIgnore]
-        private bool _isOvertime = false;
-
-        [JsonIgnore]
-        private object _lockObj = new object();
 
         [JsonIgnore]
         private Game _game;
@@ -142,9 +143,7 @@ namespace Pulsar4X.Engine
         public void Initialize(Game game)
         {
             _game = game;
-            _timer.Interval = _tickInterval.TotalMilliseconds;
-            _timer.Enabled = false;
-            _timer.Elapsed += Timer_Elapsed;
+            _tickSource = new PeriodicTimer(_tickInterval);
         }
 
         #region Public Time Methods. UI interacts with time here
@@ -154,16 +153,22 @@ namespace Pulsar4X.Engine
         /// </summary>
         public void PauseTime()
         {
-            _timer.Stop();
-            _timer.Enabled = false;
+            // Requests a simulation halt if it is running.
+            _timeSimulationCts?.Cancel();
         }
         /// <summary>
         /// Starts the timeloop
         /// </summary>
         public void StartTime()
         {
-            _timer.Enabled = true;
-            _timer.Start();
+            // Check if we already have an active time simulation task
+            if (IsRunning)
+                return;
+
+            // Start the continious time simulation task.
+            _timeSimulationCts?.Dispose();
+            _timeSimulationCts = new CancellationTokenSource();
+            _timeSimulationTask = Task.Run(() => SimulateTimeAsync(_timeSimulationCts.Token), _timeSimulationCts.Token);
         }
 
 
@@ -180,15 +185,15 @@ namespace Pulsar4X.Engine
         /// </summary>
         public void TimeStep(DateTime toDate)
         {
-            if (_isProcessing)
+            if (IsRunning)
                 return;
 
-            Task tsk = Task.Run(() => DoProcessing(toDate));
+            _timeSimulationCts?.Dispose();
+            _timeSimulationCts = new CancellationTokenSource();
+            _timeSimulationTask = Task.Run(() => SimulateTimeUntil(toDate, _timeSimulationCts.Token), _timeSimulationCts.Token);
 
             if (_game.Settings.EnforceSingleThread)
-                tsk.Wait();
-
-            _timer.Stop();
+                _timeSimulationTask.Wait();
         }
 
         #endregion
@@ -215,35 +220,52 @@ namespace Pulsar4X.Engine
             throw new NotImplementedException();
         }
 
-
-        private void Timer_Elapsed(object? sender, ElapsedEventArgs e)
+        /// <summary>
+        /// Performs a continious time simulation, where ticks are generated by the _tickSource timer.
+        /// 
+        /// </summary>
+        /// <param name="ct">Cancellation token to stop the simulation.</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// It is recommended to always call this method via <see cref="Task.Run"/> call, due to it being CPU bound.
+        /// </remarks>
+        private async Task SimulateTimeAsync(CancellationToken ct = default)
         {
-            if (!_isProcessing)
+            if (_tickSource is null)
             {
-                DoProcessing(GameGlobalDateTime + Ticklength); //run DoProcessing if we're not already processing
+                if (!ct.CanBeCanceled)
+                {
+                    throw new InvalidOperationException("Simulation without a tick source requires a cancellation token.");
+                }
+
+                // Run the simulation as fast as possible, with no delay between ticks.
+                while (!ct.IsCancellationRequested)
+                {
+                    SimulateTimeUntil(GameGlobalDateTime + Ticklength, ct);
+                }
             }
             else
             {
-                lock (_lockObj)
+                // If a tick source is set, use it to generate ticks.
+                // The call to WaitForNextTickAsync will return `true` if the timer fired, or 'false' if the timer was disposed.
+                while (await _tickSource.WaitForNextTickAsync(ct).ConfigureAwait(false))
                 {
-                   _isOvertime = true; //if we're processing, then processing it taking longer than the sim speed
+                    SimulateTimeUntil(GameGlobalDateTime + Ticklength, ct);
                 }
             }
         }
 
-
-
-        private void DoProcessing(DateTime targetDateTime)
+        /// <summary>
+        /// Runs the simulation until the specified target date time is reached.
+        /// </summary>
+        /// <param name="targetDateTime"></param>
+        /// <param name="ct">Cancellation token to signal asynchronous stop request.</param>
+        private void SimulateTimeUntil(DateTime targetDateTime, CancellationToken ct = default)
         {
-            lock (_lockObj)
-            {//would it be better to just put this whole function within this lock?
-                _isProcessing = true;
-                _isOvertime = false;
-            }
-
             _stopwatch.Start(); //start the processor loop stopwatch (performance counter)
 
-            while (GameGlobalDateTime < targetDateTime)
+            // If a cancellation is signalled, stop the time advance the next time an interrupt happens.
+            while (GameGlobalDateTime < targetDateTime && !ct.IsCancellationRequested)
             {
                 _subpulseStopwatch.Start();
                 DateTime nextInterupt = ProcessNextInterupt(targetDateTime);
@@ -273,20 +295,15 @@ namespace Pulsar4X.Engine
 
             LastProcessingTime = _stopwatch.Elapsed; //how long the processing took
             _stopwatch.Reset();
-
-            lock (_lockObj)
-            {
-                _isProcessing = false;
-            }
         }
 
         private DateTime ProcessNextInterupt(DateTime maxDateTime)
         {
-            if(EntityDictionary.Keys.Count == 0) return maxDateTime;
+            if (EntityDictionary.Keys.Count == 0) return maxDateTime;
 
             DateTime nextInteruptDateTime = EntityDictionary.Keys.Min();
 
-            if(nextInteruptDateTime > maxDateTime) return maxDateTime;
+            if (nextInteruptDateTime > maxDateTime) return maxDateTime;
 
             foreach (var delegateListPair in EntityDictionary[nextInteruptDateTime])
             {
@@ -300,11 +317,9 @@ namespace Pulsar4X.Engine
             return nextInteruptDateTime;
         }
 
-
-
         public bool Equals(MasterTimePulse? other)
         {
-            if(other is null) return false;
+            if (other is null) return false;
 
             bool equality = false;
             if (GameGlobalDateTime.Equals(other.GameGlobalDateTime))

@@ -21,13 +21,25 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void SetSpeed_changes_the_clock_multiplier()
+        public void SetTickFrequency_changes_the_real_time_tick_interval()
+        {
+            var session = Connect();
+            var frequency = TimeSpan.FromMilliseconds(250);
+
+            _server.SetTimeControl(session, new TimeControlRequest(TimeControlAction.SetTickFrequency, TickFrequency: frequency));
+
+            Assert.That(_game.TimePulse.TickFrequency, Is.EqualTo(frequency));
+        }
+
+        [Test]
+        public void SetTickFrequency_is_clamped_to_the_supported_range()
         {
             var session = Connect();
 
-            _server.SetTimeControl(session, new TimeControlRequest(TimeControlAction.SetSpeed, Multiplier: 4f));
+            // PeriodicTimer rejects intervals below 1ms; the engine clamps rather than crashing.
+            _server.SetTimeControl(session, new TimeControlRequest(TimeControlAction.SetTickFrequency, TickFrequency: TimeSpan.Zero));
 
-            Assert.That(_game.TimePulse.TimeMultiplier, Is.EqualTo(4f));
+            Assert.That(_game.TimePulse.TickFrequency, Is.GreaterThanOrEqualTo(TimeSpan.FromMilliseconds(1)));
         }
     }
 }
