@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -43,6 +44,9 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
 
     public GameLifecycle(GlobalUIState state)
     {
+        // Ensure the composition root only constructs one lifecycle, so Instance is well-defined for the dev tools.
+        Debug.Assert(Instance is null, "GameLifecycle constructed more than once; Instance would be overwritten.");
+
         _state = state;
         Instance = this;
         ModsState.RefreshModsList(PulsarMainWindow.ModsPath);
