@@ -81,6 +81,8 @@ public sealed class InProcessAdapter : IGameClient
     {
         // Drain everything received since last frame and apply it as one batch on the UI thread.
         // The clock arrives the same way (pushed TimeChanged deltas) — no polling.
+        // TODO: if this ever becomes a bottleneck, we could limit the number of events processed
+        // per frame and defer the rest to the next Update() to keep the UI responsive.
         while (_inbound.TryDequeue(out var evt))
         {
             ApplyToGalaxy(evt);
