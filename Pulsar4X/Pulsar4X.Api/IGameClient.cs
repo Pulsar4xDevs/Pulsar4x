@@ -17,14 +17,19 @@ public interface IGameClient
     /// <summary>The synchronously-readable replicated galaxy model the UI renders from.</summary>
     IClientGalaxy Galaxy { get; }
 
-    Task<ConnectResult> ConnectAsync(ConnectRequest request);
-    Task DisconnectAsync();
+    // The async writes carry a CancellationToken so a network adapter can abort an in-flight call
+    // (e.g. a player cancelling a hung ConnectAsync). The in-process adapter completes synchronously,
+    // so the token only short-circuits an already-cancelled call.
+    Task<ConnectResult> ConnectAsync(ConnectRequest request, CancellationToken cancellationToken = default);
+    Task DisconnectAsync(CancellationToken cancellationToken = default);
 
-    Task<CommandResult> SubmitCommandAsync(GameCommand command);
-    Task SetTimeControlAsync(TimeControlRequest request);
+    /// <summary>Submit a command. Over a network the token cancels the <i>wait</i> for the server's
+    /// result — not the command's effect, which the server may still apply once it arrives.</summary>
+    Task<CommandResult> SubmitCommandAsync(GameCommand command, CancellationToken cancellationToken = default);
+    Task SetTimeControlAsync(TimeControlRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>Tell the server which system the player is watching (engine processing priority).</summary>
-    Task SetSystemFocusAsync(string? systemId);
+    Task SetSystemFocusAsync(string? systemId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Applies all server updates received since the previous call to <see cref="Galaxy"/> as a single

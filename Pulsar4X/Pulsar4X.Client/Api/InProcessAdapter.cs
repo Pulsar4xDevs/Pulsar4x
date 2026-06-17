@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using Pulsar4X.Api;
 
@@ -31,8 +32,9 @@ public sealed class InProcessAdapter : IGameClient
     public IClientGalaxy Galaxy => _galaxy;
     public event Action<GameEventEnvelope>? EventReceived;
 
-    public Task<ConnectResult> ConnectAsync(ConnectRequest request)
+    public Task<ConnectResult> ConnectAsync(ConnectRequest request, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var result = _server.Connect(request);
         if (result.Success)
         {
@@ -45,7 +47,7 @@ public sealed class InProcessAdapter : IGameClient
         return Task.FromResult(result);
     }
 
-    public Task DisconnectAsync()
+    public Task DisconnectAsync(CancellationToken cancellationToken = default)
     {
         _subscription?.Dispose();
         _subscription = null;
@@ -56,17 +58,22 @@ public sealed class InProcessAdapter : IGameClient
         return Task.CompletedTask;
     }
 
-    public Task<CommandResult> SubmitCommandAsync(GameCommand command)
-        => Task.FromResult(_server.SubmitCommand(Session, command));
-
-    public Task SetSystemFocusAsync(string? systemId)
+    public Task<CommandResult> SubmitCommandAsync(GameCommand command, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(_server.SubmitCommand(Session, command));
+    }
+
+    public Task SetSystemFocusAsync(string? systemId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
         _server.SetSystemFocus(Session, systemId);
         return Task.CompletedTask;
     }
 
-    public Task SetTimeControlAsync(TimeControlRequest request)
+    public Task SetTimeControlAsync(TimeControlRequest request, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         // The server applies the change and broadcasts a TimeChanged delta back to us; the galaxy's
         // Time updates when we drain that in Update() — no local read-back (which would be a round-trip
         // over a network).
