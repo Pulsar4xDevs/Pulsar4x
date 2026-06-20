@@ -17,10 +17,24 @@ Pulsar4X is a fan recreation of **Aurora 4X** (Steve Walmsley's C# space sim). F
 | `SENSORS-AND-DETECTION.md` | Thermal/EM signatures, passive vs active sensors, EMCON/stealth | `Sensors/` — built |
 | `RESEARCH-AND-TECH.md` | Research labs, scientists, the 9-category tech tree (incl. Ground Combat), prototypes | `Tech/` — built |
 | `DIPLOMACY-AND-INTEL.md` | Relationship tiers, communication, treaties, ELINT intelligence | `Factions/` — minimal; **furthest from objective** |
+| `LOGISTICS.md` | Fuel, maintenance (MSP/clocks), supply ships, transfer facilities | `Logistics/`, `Storage/`, `Industry/` — partial |
+| `COMMANDERS-AND-OFFICERS.md` | Officer generation, ranks, **ground + naval skill bonuses** | `People/` — exists; bonuses maybe not applied |
+| `EXPLORATION-AND-SURVEY.md` | Geological survey (minerals), gravitational survey (jump points) | `GeoSurveys/`, `JumpPoints/`, `Industry/MineralsDB` — built |
+| `MISSILES-AND-FIRE-CONTROL.md` | Missile design, point defense, electronic warfare | `Weapons/` — built; missile guidance half-finished |
+| `FLEETS-AND-SHIPYARDS.md` | Shipyards (build), task groups (move), fleet orders | `Fleets/`, `Ships/`, `Movement/` — built |
 
-**Two tiers of doc:**
-- **Core to the objective** (new work needed): `GROUND-COMBAT.md`, `PLANETARY-INFRASTRUCTURE.md`.
-- **Benchmark / completeness** (Pulsar mostly already has these — read to calibrate "the same depth," not to build from scratch): `SPACE-COMBAT-BENCHMARK.md`, `SHIP-DESIGN.md`, `SENSORS-AND-DETECTION.md`, `RESEARCH-AND-TECH.md`, `DIPLOMACY-AND-INTEL.md`.
+**Three groups — read by what you're doing:**
+
+1. **Core — build new** (Pulsar doesn't have these; this is the objective):
+   `GROUND-COMBAT.md`, `PLANETARY-INFRASTRUCTURE.md`.
+
+2. **Direct support — Pulsar has the framework, ground combat plugs into it** (read when wiring the relevant hook):
+   `COMMANDERS-AND-OFFICERS.md` (ground bonuses feed combat), `LOGISTICS.md` (supply/GSP), `EXPLORATION-AND-SURVEY.md` (minerals feed economy), `RESEARCH-AND-TECH.md` (unlock ground tech), `SHIP-DESIGN.md` (the unit-design template), `FLEETS-AND-SHIPYARDS.md` (build + deliver forces).
+
+3. **Benchmark / calibration — already built in Pulsar, read to gauge "the same depth," little new work**:
+   `SPACE-COMBAT-BENCHMARK.md`, `SENSORS-AND-DETECTION.md`, `MISSILES-AND-FIRE-CONTROL.md`, `DIPLOMACY-AND-INTEL.md`.
+
+> Every doc ends with a **"Pulsar status & mapping"** section translating Aurora mechanics to the concrete Pulsar DataBlob/Processor/subsystem. The recurring rule across all of them: **reuse the existing framework, don't build a parallel one** (`CONVENTIONS.md` §6).
 
 ---
 
