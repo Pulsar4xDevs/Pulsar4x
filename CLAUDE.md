@@ -55,7 +55,9 @@ Solution file: `Pulsar4X/Pulsar4X.sln`
 
 ## Build / Run / Test Commands
 
-All commands run from the repo root (`/home/user/Pulsar4x/`).
+> **Cloud environment note:** `.NET SDK is NOT installed in the remote Claude Code execution environment.` Claude can read and edit C# files but cannot run `dotnet build` or `dotnet test` remotely. **Workflow:** Claude writes the change → user pulls branch to Windows machine → user builds/tests locally (.NET 8 SDK + SDL2 required) → user pastes any errors back → Claude fixes. See `SESSION_STATE.md` for current build/test baseline.
+
+All commands run from the repo root on the **user's local machine**:
 
 ```bash
 # Build entire solution
@@ -106,7 +108,7 @@ See `ARCHITECTURE.md` for the full data-flow diagram.
 | Sensors | `GameEngine/Sensors/` | *(not yet written — read source directly)* |
 | Orbits | `GameEngine/Orbits/` + `Pulsar4X.OrbitalMath/` | *(not yet written — read source directly)* |
 | Galaxy / System Gen | `GameEngine/Galaxy/` | *(not yet written — read source directly)* |
-| Fleets | `GameEngine/Fleets/` | *(not yet written — read source directly)* |
+| Fleets | `GameEngine/Fleets/` | `GameEngine/Fleets/CLAUDE.md` |
 | Logistics | `GameEngine/Logistics/` | *(not yet written — read source directly)* |
 | Research/Tech | `GameEngine/Tech/` | *(not yet written — read source directly)* |
 | UI Client | `Pulsar4X.Client/` | `Pulsar4X.Client/CLAUDE.md` |
