@@ -1,0 +1,23 @@
+#!/bin/bash
+# Session closing checklist for Pulsar4x. Runs when Claude stops generating.
+
+echo ""
+echo "════════════════════════════════════════════════════"
+echo "PULSAR4X SESSION CLOSING CHECKLIST"
+echo "════════════════════════════════════════════════════"
+echo ""
+echo "  1. dotnet build Pulsar4X/Pulsar4X.sln"
+echo "  2. dotnet test Pulsar4X/Pulsar4X.Tests/Pulsar4X.Tests.csproj"
+echo "  3. For each file in git diff --name-only:"
+echo "       → if it belongs to a subsystem with a CLAUDE.md,"
+echo "         that CLAUDE.md must also be in the diff"
+echo "  4. If phase progress was made, update PLAN.md"
+echo "  5. git commit with descriptive message"
+echo "  6. git push -u origin claude/amazing-clarke-7s118n"
+echo ""
+echo "  HARD STOPS:"
+echo "    • Failing build  → do not push"
+echo "    • Failing tests  → do not push (unless pre-existing failure,"
+echo "      confirm with git stash + retest)"
+echo "    • async void exception swallowing → add a test to catch it"
+echo "════════════════════════════════════════════════════"
