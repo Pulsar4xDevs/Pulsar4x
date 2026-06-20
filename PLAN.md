@@ -4,6 +4,8 @@
 
 Bring planetary/ground combat and planetary infrastructure to the same depth as space combat already has, and improve the UI. Space combat is the template; ground combat mirrors its architecture.
 
+> **Read `OBJECTIVE.md` first** — it translates this into plain language: what the end state looks like, what the combat model is (formation = fleet, element = squad/column, fire-control per element exactly like per ship), and what "same depth as space combat" means concretely. This PLAN covers the *how*; OBJECTIVE.md covers the *what and why*.
+
 ---
 
 ## Current State Assessment
@@ -141,15 +143,25 @@ Bring planetary/ground combat and planetary infrastructure to the same depth as 
 > **Read first:** `docs/aurora/GROUND-COMBAT.md` (Aurora is the design spec; it has a full Pulsar-mapping table) and `CONVENTIONS.md` §6 (units = component-bearing entities). Aurora designs ground units from researched components — model a `GroundUnitDesign` as an `IConstructableDesign` whose weapons/armor/HQ/logistics are `ComponentDesign`s with new `*Atb` attributes, installed into a `ComponentInstancesDB`, exactly like a ship. Prefer a dedicated `GameEngine/GroundForces/` subsystem dir over scattering files into `Colonies/`.
 
 ### 4a. Ground unit data model
+
+**The hierarchy (maps directly to space combat):**
+| Ground concept | Space combat equivalent | Notes |
+|----------------|------------------------|-------|
+| Formation | Fleet/task group | Player issues orders at this level |
+| Formation Element | Ship | Player assigns fire controls here — squad, tank column, artillery battery |
+| Unit equipment | Ship component | Weapons, armor, sensors, logistics as `*Atb` components |
+
 ```
+New directory: GameEngine/GroundForces/
 New files:
-  GameEngine/Colonies/GroundUnitDB.cs        ← unit type, strength, organization, equipment
-  GameEngine/Colonies/GroundUnitDesign.cs    ← design (mirrors ShipDesign/ComponentDesign)
-  GameEngine/Colonies/GroundUnitFactory.cs   ← entity creation (mirrors ShipFactory)
+  GroundForces/FormationDB.cs            ← owns a list of element entity IDs (mirrors FleetDB)
+  GroundForces/FormationElementDB.cs     ← single squad/column entity: strength, morale, supply (mirrors ShipInfoDB)
+  GroundForces/GroundUnitDesign.cs       ← design template (mirrors ShipDesign/ComponentDesign)
+  GroundForces/GroundUnitFactory.cs      ← creates element entities (mirrors ShipFactory)
 ```
-- Ground units live as entities in the same StarSystem as their planet (like ships in orbit).
-- Each ground unit has a `ColonyInfoDB`-linked home (their garrison planet).
-- Equipment slots mirror ship components (weapons, armor, sensors, logistics).
+- Each Formation Element is an entity in the same StarSystem as its planet (like a ship in orbit).
+- Equipment (weapons, armor, logistics) are `ComponentDesign` components with new `*Atb` types — exactly like ship components.
+- A Formation Element's fire control order targets an enemy element by entity ID — same `SetFireControlOrder` pattern as `FireControlWindow`.
 
 ### 4b. Ground combat processor
 ```
@@ -215,17 +227,25 @@ New file: Pulsar4X.Client/Interface/Windows/GroundCombatWindow.cs
 ## Sequence Dependency
 
 ```
-Phase 1 (Combat fix) → Phase 3 (Orbital bombardment) → Phase 4 (Ground combat)
-Phase 2 (Infrastructure) → Phase 4 (Ground combat — needs something to fight over)
-Phase 4 → Phase 5 (UI — needs systems to display)
+Phase 2 (Infrastructure) ─── START HERE ──────────────────────────────┐
+Phase 1 (Combat fix)     ─── parallel with Phase 2 ──────────────────┤
+                                                                        ▼
+Phase 3 (Orbital bombardment — needs Phase 1 first)      Phase 4 (Ground combat — needs 1+2+3)
+                                                                        │
+                                                                        ▼
+                                                          Phase 5 (UI polish — wraps everything)
 ```
 
-Phase 1 and Phase 2 can be worked in parallel. Phase 3 depends on Phase 1. Phase 4 depends on Phases 1, 2, and 3. Phase 5 wraps everything.
+**Priority, by user directive:** Infrastructure first (Phase 2) → Combat fix (Phase 1, can overlap) → Orbital bombardment (Phase 3) → Ground combat (Phase 4) → UI polish (Phase 5).
+
+Phase 1 and Phase 2 can be worked in parallel — they touch different parts of the codebase. Phase 3 depends on Phase 1 (needs real damage). Phase 4 depends on Phases 1+2+3. Phase 5 wraps everything.
 
 ---
 
 ## First Thing to Tackle
 
-**Phase 1a: Wire complex damage.** It is the single highest-leverage fix in the codebase. Once beam weapons apply real component-level damage, the full space combat loop is working, tests can be written, and the same damage path can be extended for ground units and colony bombardment. Everything downstream depends on this.
+**Phase 2a: Fix the Installations tab.** It is the most visible broken thing and the lowest-risk first step — no logic change, just fixing a bad gate condition in `PlanetaryWindow.cs`. Re-gate on `ComponentInstancesDB` (which every colony has) instead of `InstallationsDB` (which nothing has). This makes a real part of the game actually visible.
 
-Read `Damage/DamageComplex/DamageTools.cs` and `Damage/DamageComplex/EntityDamageProfileDB.cs` in full before touching `BeamWeaponProcessor.OnHit()`.
+After that, Phase 2c (population formula) and Phase 1a (wire complex damage) can proceed in parallel.
+
+Read `Damage/DamageComplex/DamageTools.cs` and `Damage/DamageComplex/EntityDamageProfileDB.cs` in full before touching `BeamWeaponProcessor.OnHit()` for Phase 1a.
