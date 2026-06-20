@@ -158,6 +158,24 @@ This tells us the Installations tab, once fixed, has real data to display — it
 
 ## Environment Notes
 
-- **Cloud execution environment:** `.NET SDK not installed.** Claude can read and edit C# files but cannot compile or run tests remotely.
-- **Workflow:** Claude writes code → user pulls branch → user builds/tests locally → user pastes errors back if any → Claude fixes → repeat.
-- **User machine:** Windows, RTX 3090, Ryzen 7 5800X3D (from AiD context). .NET 8 SDK needed + SDL2.
+### Claude's execution environment
+Remote Linux cloud container. **No .NET SDK installed.** Claude edits files here; the developer pulls and builds on their own machine.
+
+### Developer's machine
+| Item | Value |
+|------|-------|
+| OS | Windows |
+| Shell | **PowerShell** — all commands given to the developer must be PowerShell-compatible |
+| GPU | NVIDIA RTX 3090 FTW3 Ultra — 24 GB VRAM |
+| CPU | AMD Ryzen 7 5800X3D — 8 cores / 16 threads |
+| RAM | 32 GB |
+| PSU | 850 W |
+
+### Workflow for code changes
+Claude writes change → developer runs in PowerShell from repo root:
+```powershell
+git pull origin claude/amazing-clarke-7s118n
+dotnet build Pulsar4X/Pulsar4X.sln
+dotnet test Pulsar4X/Pulsar4X.Tests/Pulsar4X.Tests.csproj
+```
+If build/test fails → paste error output here → Claude fixes → repeat.

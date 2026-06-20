@@ -12,6 +12,14 @@ echo ""
 echo "  Objective: bring planetary/ground combat and infrastructure"
 echo "  to the same depth as existing space combat systems."
 echo ""
+echo "── ENVIRONMENT ─────────────────────────────────────"
+echo "  Claude: remote Linux cloud container — NO dotnet installed"
+echo "  Developer: Windows / PowerShell"
+echo "    GPU: RTX 3090 FTW3 Ultra (24 GB VRAM)"
+echo "    CPU: Ryzen 7 5800X3D  RAM: 32 GB"
+echo "  Build/test workflow: Claude edits → dev pulls → dev runs"
+echo "    dotnet build / dotnet test in PowerShell → pastes errors here"
+echo ""
 
 # Show phase summary from PLAN.md
 if [ -f "$PLAN_FILE" ]; then

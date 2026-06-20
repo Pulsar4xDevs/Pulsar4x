@@ -53,28 +53,47 @@ Solution file: `Pulsar4X/Pulsar4X.sln`
 
 ---
 
+## Developer Machine
+
+The developer runs **Windows** with **PowerShell** as their shell. All commands given to the developer must be PowerShell-compatible. `dotnet` CLI commands are identical on Windows and Linux — paths with forward slashes work fine in PowerShell.
+
+| Component | Spec |
+|-----------|------|
+| OS | Windows |
+| Shell | PowerShell |
+| GPU | NVIDIA RTX 3090 FTW3 Ultra (24 GB VRAM) |
+| CPU | AMD Ryzen 7 5800X3D (8 cores / 16 threads) |
+| RAM | 32 GB |
+| PSU | 850 W |
+
+**Claude's execution environment is a remote Linux cloud container** — separate from the developer's machine. Claude edits code in the cloud container; the developer pulls the branch and builds/runs on their Windows machine.
+
+---
+
 ## Build / Run / Test Commands
 
-> **Cloud environment note:** `.NET SDK is NOT installed in the remote Claude Code execution environment.` Claude can read and edit C# files but cannot run `dotnet build` or `dotnet test` remotely. **Workflow:** Claude writes the change → user pulls branch to Windows machine → user builds/tests locally (.NET 8 SDK + SDL2 required) → user pastes any errors back → Claude fixes. See `SESSION_STATE.md` for current build/test baseline.
+> **Cloud environment note:** `.NET SDK is NOT installed in the remote Claude Code execution environment.` Claude can read and edit C# files but cannot compile or run tests remotely. **Workflow:** Claude writes the change → developer pulls branch in PowerShell → builds/tests locally → pastes any errors back → Claude fixes. See `SESSION_STATE.md` for current build/test baseline.
 
-All commands run from the repo root on the **user's local machine**:
+All commands run from the repo root in **PowerShell on the developer's Windows machine**:
 
-```bash
+```powershell
 # Build entire solution
 dotnet build Pulsar4X/Pulsar4X.sln
 
-# Run the game (Linux)
+# Run the game
 dotnet run --project Pulsar4X/Pulsar4X.Client/Pulsar4X.Client.csproj
 
 # Run tests
 dotnet test Pulsar4X/Pulsar4X.Tests/Pulsar4X.Tests.csproj
 
-# Run tests with verbosity
+# Run tests with output
 dotnet test Pulsar4X/Pulsar4X.Tests/Pulsar4X.Tests.csproj --logger "console;verbosity=detailed"
 
 # Run benchmarks (Release mode required)
 dotnet run --project Pulsar4X/Benchmarks/Benchmarks.csproj -c Release
 ```
+
+**SDL2 on Windows:** The SDL2 native library must be available when running the client. NuGet should handle this automatically via the SDL2-CS package — if the game fails to start with a DLL error, download `SDL2.dll` from libsdl.org and place it next to the built executable.
 
 ---
 
