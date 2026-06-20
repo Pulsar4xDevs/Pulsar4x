@@ -14,7 +14,7 @@ Production, mining, and material processing. Lives in `GameEngine/Industry/`.
 | `IndustryOrder.cs` | Player order to add/remove/reprioritize production jobs. |
 | `IndustryProcessor.cs` | `IHotloopProcessor` (daily). Calls `IndustryTools.ConstructStuff()`. |
 | `IndustryTools.cs` | Static helpers: `ConstructStuff()`, `AddJob()`, `EditExsistingJob()`, `CancelExsistingJob()`, `ChangeJobPriority()`. |
-| `InstallationsDB.cs` | DataBlob: installation inventory on a colony (types + counts, on/off toggles). |
+| `InstallationsDB.cs` | **DEAD/vestigial DataBlob** — never attached to any colony, no `[JsonProperty]`. Installations are really components in `ComponentInstancesDB`. Do not build on this. |
 | `JobBase.cs` | Abstract base for job types. |
 | `MineResourcesAtbDB.cs` | Component attribute DataBlob: grants mining ability (which minerals, at what rate). |
 | `MineResourcesProcessor.cs` | `IHotloopProcessor` (daily). Runs `MiningHelper.CalculateActualMiningRates()` and transfers minerals. |
@@ -49,7 +49,7 @@ IndustryProcessor (daily)
                 - Ships → Entity launched into StarSystem
                 - Components → ColonyInfoDB.ComponentStockpile
                 - Ordnance → ColonyInfoDB.OrdinanceStockpile
-                - Installations → InstallationsDB.Installations
+                - Installations → added as components via Entity.AddComponent() (ComponentInstancesDB)
 ```
 
 ### Adding a Job (player action)
@@ -90,20 +90,11 @@ Mineral `Accessibility` ranges 0.0–1.0. Low accessibility deposits are harder 
 
 ## Installations
 
-`InstallationsDB` (on colony entities):
-```csharp
-Dictionary<string, float> Installations      // typeID → total count (float: partial = under construction)
-Dictionary<string, int> WorkingInstallations // typeID → fully-operational count
-List<InstallationEmployment> EmploymentList  // per-type on/off switch
-```
+**Installations are components.** A colony's installations are `ComponentInstance`s in its `ComponentInstancesDB`, added with `colonyEntity.AddComponent(design, count)` (see `DefaultStartFactory.cs:212-225`). Each installation type is a `ComponentDesign` carrying `*Atb` ability attributes (mining, industry, population support, etc.), and processors find them via `TryGetComponentsByAttribute<TAtb>()`. This is the **same** framework ships use for their components.
 
-Installations are distinct from physical `ComponentInstance` objects (which appear in `ComponentInstancesDB`). The relationship:
-- `ComponentInstancesDB` — the physical components that *provide* abilities (mining equipment, population support, power plants, etc.).
-- `InstallationsDB` — the high-level count of "building" types (e.g., "Construction Factory: 5").
+`InstallationsDB` (this directory) looks like an installation registry — `Dictionary<string,float> Installations`, `WorkingInstallations`, `EmploymentList`, plus commented-out `ConstructJob` lists — but it is **abandoned**: never attached to a colony, no `[JsonProperty]` fields. It is an earlier design superseded by the component approach. **Do not** use it, extend it, or render it.
 
-There is overlap and some inconsistency: some colony abilities are driven by components in `ComponentInstancesDB` (e.g., mining rate from `MineResourcesAtbDB`), while the `InstallationsDB` tracks the same items at a different level of abstraction. Read both when adding new infrastructure types.
-
-**The UI for `InstallationsDB` is a stub.** `PlanetaryWindow.RenderInstallations()` fetches the blob but renders nothing. Filling this in is Phase 2a work.
+**The installations UI gap:** `PlanetaryWindow.RenderInstallations()` is empty *and* its tab is gated on `HasDataBlob<InstallationsDB>()` (always false), so the tab never even shows. Phase 2a fix = render from `ComponentInstancesDB` (reuse `ComponentInstancesDBDisplay`). See `docs/aurora/PLANETARY-INFRASTRUCTURE.md` §6 and `CONVENTIONS.md` §6.
 
 ---
 
@@ -111,7 +102,7 @@ There is overlap and some inconsistency: some colony abilities are driven by com
 
 1. **New `IndustryJob` subtype** — add `GroundUnitConstructionJob` to allow colonies to build ground units through the existing production system.
 2. **New `IConstructableDesign`** — `GroundUnitDesign` must implement `IConstructableDesign` (the interface checked by `IndustryTools.ConstructStuff()`).
-3. **Installation specialization** — add a `SpecializationDB` or extend `InstallationsDB` with a production multiplier per installation type. Colonies with a "Military Installation" type would multiply ground unit construction throughput.
+3. **Installation specialization** — model a "military installation" / GFCC as a new `ComponentDesign` with a production-multiplier `*Atb` attribute (NOT by extending the dead `InstallationsDB`). The Ground Force Construction Complex in Aurora is just another installation = component. See `docs/aurora/GROUND-COMBAT.md` §7.
 
 ---
 
@@ -119,7 +110,7 @@ There is overlap and some inconsistency: some colony abilities are driven by com
 
 1. **`IndustryTools.ConstructStuff()` uses `lock` on the production line.** New job types must respect this lock or risk race conditions when orders arrive mid-tick.
 
-2. **Partial installations use `float` in `InstallationsDB.Installations`.** A value of 0.5 means 50% progress toward completing the next installation. The `WorkingInstallations` (int) count only fully completed ones. Production code must write to both fields correctly.
+2. **`InstallationsDB` is dead — don't confuse it for the installation store.** Its `float Installations` / `int WorkingInstallations` fields suggest partial-vs-complete tracking, but nothing writes to them and nothing attaches the blob. Construction delivers installations as components via `Entity.AddComponent()` into `ComponentInstancesDB`. Partial-construction progress (if needed) lives in the industry job, not here.
 
 3. **Mineral depletion is permanent.** `MineralsDB` is on the planet entity with `[JsonProperty]`. Once depleted, deposits do not regenerate. This is by design (mirrors Aurora 4x) but has save implications — mining a body to zero is irreversible.
 

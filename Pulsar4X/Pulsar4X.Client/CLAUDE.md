@@ -85,7 +85,7 @@ internal override void Display()
 | `SystemWindow` | `SystemWindow.cs` | ✅ Functional | Star system selector and planet list |
 | `FleetWindow` | `FleetWindow.cs` | ✅ Functional | Fleet listing, selection, basic orders |
 | `ColonyManagementWindow` | `ColonyManagementWindow.cs` | ✅ Partial | Colony list, tabs for panels |
-| `PlanetaryWindow` | `PlanetaryWindow.cs` | ⚠️ Partial | General info ✅ / Mineral deposits ✅ / **Installations ❌ EMPTY** |
+| `PlanetaryWindow` | `PlanetaryWindow.cs` | ⚠️ Partial | General info ✅ / Mineral deposits ✅ / **Installations ❌ (tab gated on dead `InstallationsDB`, never appears)** |
 | `ShipDesignWindow` | `ShipDesignWindow.cs` | ✅ Functional | Ship design and component assignment |
 | `ComponentDesignWindow` | `ComponentDesignWindow.cs` | ✅ Functional | Component designer with NCalc formulas |
 | `FireControlWindow` | `FireControlWindow.cs` | ✅ Functional | Weapon and fire control assignment |
@@ -174,7 +174,7 @@ Reusable panels embedded in windows (not standalone windows):
 
 ## Critical Gaps to Fill
 
-### PlanetaryWindow.RenderInstallations() — EMPTY
+### PlanetaryWindow installations — EMPTY *and* unreachable
 
 ```csharp
 private void RenderInstallations()
@@ -187,7 +187,11 @@ private void RenderInstallations()
 }
 ```
 
-`tempInstallations.Installations` (Dictionary<string, float>) and `.WorkingInstallations` (Dictionary<string, int>) are available. Render a table of `typeID → count / working count`. This is the first UI task in Phase 2.
+Two bugs, not one:
+1. The body is empty.
+2. **`InstallationsDB` is never attached to a colony** (it is dead/vestigial — see `Industry/CLAUDE.md`), so the gate above is always false. The tab button is also gated on `HasDataBlob<InstallationsDB>()` in `RenderTabOptions()` (`PlanetaryWindow.cs:107`), so **the Installations tab never even appears.**
+
+**Correct fix (Phase 2a):** gate on `ComponentInstancesDB` (which every colony has) and render the colony's installations from it — reuse the existing `ComponentInstancesDBDisplay` panel, or build a table from `ComponentInstancesDB.DesignsAndComponentCount`. Do **not** resurrect `InstallationsDB`. See `docs/aurora/PLANETARY-INFRASTRUCTURE.md` §6.
 
 ### GroundCombatWindow — MISSING ENTIRELY
 
