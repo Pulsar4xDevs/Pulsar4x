@@ -13,6 +13,14 @@ Pulsar4X is a fan recreation of **Aurora 4X** (Steve Walmsley's C# space sim). F
 | `GROUND-COMBAT.md` | Ground unit design, formations, combat resolution, transport, orbital drop, boarding, invasion/occupation | **All new** — no ground combat exists in Pulsar |
 | `PLANETARY-INFRASTRUCTURE.md` | Installations, construction, mining, population, economy, infrastructure-for-colony-cost | `Colonies/`, `Industry/`, `Energy/` — partially built |
 | `SPACE-COMBAT-BENCHMARK.md` | Aurora naval combat depth (the bar we are matching) + pointers to Pulsar's existing implementation | `Weapons/`, `Damage/`, `Sensors/` — built, see those CLAUDE.md |
+| `SHIP-DESIGN.md` | Hull/tonnage, layered armor, engines, shields — the template ground-unit design copies | `Ships/`, `Damage/` — built |
+| `SENSORS-AND-DETECTION.md` | Thermal/EM signatures, passive vs active sensors, EMCON/stealth | `Sensors/` — built |
+| `RESEARCH-AND-TECH.md` | Research labs, scientists, the 9-category tech tree (incl. Ground Combat), prototypes | `Tech/` — built |
+| `DIPLOMACY-AND-INTEL.md` | Relationship tiers, communication, treaties, ELINT intelligence | `Factions/` — minimal; **furthest from objective** |
+
+**Two tiers of doc:**
+- **Core to the objective** (new work needed): `GROUND-COMBAT.md`, `PLANETARY-INFRASTRUCTURE.md`.
+- **Benchmark / completeness** (Pulsar mostly already has these — read to calibrate "the same depth," not to build from scratch): `SPACE-COMBAT-BENCHMARK.md`, `SHIP-DESIGN.md`, `SENSORS-AND-DETECTION.md`, `RESEARCH-AND-TECH.md`, `DIPLOMACY-AND-INTEL.md`.
 
 ---
 

@@ -4,6 +4,19 @@
 
 ---
 
+## Communicating With the Developer (READ FIRST — applies every session)
+
+The developer is hands-on technical (US Navy nuclear-trained machinist's mate) but **not a professional software engineer**. Explain in **plain English**, not software jargon. This applies to chat replies *and* to docs you write.
+
+- **Lead with what it does and why it matters**, then how it works. The point before the plumbing.
+- **Spell out and define jargon on first use.** "DataBlob (a container that holds one kind of data for a game object)", not just "DataBlob". Avoid unexplained acronyms.
+- **Use analogies** — mechanical, electrical, thermodynamic, shipboard analogies land well (e.g. "a processor is like a watch station that does one job every shift").
+- **Don't dumb down the substance — simplify the language.** He can follow reactor physics; he just isn't fluent in code vocabulary. Keep the engineering honest; lose the CS lingo.
+- **Short sentences. Concrete examples. Name the file and what it's for**, not abstract patterns.
+- When something genuinely is complex, say so plainly and walk through it step by step rather than hiding it behind a term.
+
+---
+
 ## Developer Objective (this fork)
 
 Extend the fork so that **planetary/ground combat and planetary infrastructure eventually have the same depth that space combat already has**, and improve the UI. Survey priority: understand how space combat is built so it can be mirrored for ground systems, where ground/planetary systems currently live or would hook in, and how the UI layer is constructed.
