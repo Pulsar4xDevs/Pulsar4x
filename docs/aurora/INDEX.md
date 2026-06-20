@@ -11,7 +11,8 @@ Pulsar4X is a fan recreation of **Aurora 4X** (Steve Walmsley's C# space sim). F
 | Doc | Covers | Maps to Pulsar |
 |-----|--------|----------------|
 | `GROUND-COMBAT.md` | Ground unit design, formations, combat resolution, transport, orbital drop, boarding, invasion/occupation | **All new** — no ground combat exists in Pulsar |
-| `PLANETARY-INFRASTRUCTURE.md` | Installations, construction, mining, population, economy, infrastructure-for-colony-cost | `Colonies/`, `Industry/`, `Energy/` — partially built |
+| `PLANETARY-INFRASTRUCTURE.md` | Installations, construction, mining, the economic loop | `Colonies/`, `Industry/`, `Energy/` — partially built |
+| `COLONY-ENVIRONMENT-AND-POPULATION.md` | Colony cost/habitability, population & carrying capacity, workforce, terraforming, **unrest/occupation** | `Colonies/` — partial; supplies real formulas for the stubbed PopulationProcessor |
 | `SPACE-COMBAT-BENCHMARK.md` | Aurora naval combat depth (the bar we are matching) + pointers to Pulsar's existing implementation | `Weapons/`, `Damage/`, `Sensors/` — built, see those CLAUDE.md |
 | `SHIP-DESIGN.md` | Hull/tonnage, layered armor, engines, shields — the template ground-unit design copies | `Ships/`, `Damage/` — built |
 | `SENSORS-AND-DETECTION.md` | Thermal/EM signatures, passive vs active sensors, EMCON/stealth | `Sensors/` — built |
@@ -26,7 +27,7 @@ Pulsar4X is a fan recreation of **Aurora 4X** (Steve Walmsley's C# space sim). F
 **Three groups — read by what you're doing:**
 
 1. **Core — build new** (Pulsar doesn't have these; this is the objective):
-   `GROUND-COMBAT.md`, `PLANETARY-INFRASTRUCTURE.md`.
+   `GROUND-COMBAT.md`, `PLANETARY-INFRASTRUCTURE.md`, `COLONY-ENVIRONMENT-AND-POPULATION.md`.
 
 2. **Direct support — Pulsar has the framework, ground combat plugs into it** (read when wiring the relevant hook):
    `COMMANDERS-AND-OFFICERS.md` (ground bonuses feed combat), `LOGISTICS.md` (supply/GSP), `EXPLORATION-AND-SURVEY.md` (minerals feed economy), `RESEARCH-AND-TECH.md` (unlock ground tech), `SHIP-DESIGN.md` (the unit-design template), `FLEETS-AND-SHIPYARDS.md` (build + deliver forces).
@@ -35,6 +36,17 @@ Pulsar4X is a fan recreation of **Aurora 4X** (Steve Walmsley's C# space sim). F
    `SPACE-COMBAT-BENCHMARK.md`, `SENSORS-AND-DETECTION.md`, `MISSILES-AND-FIRE-CONTROL.md`, `DIPLOMACY-AND-INTEL.md`.
 
 > Every doc ends with a **"Pulsar status & mapping"** section translating Aurora mechanics to the concrete Pulsar DataBlob/Processor/subsystem. The recurring rule across all of them: **reuse the existing framework, don't build a parallel one** (`CONVENTIONS.md` §6).
+
+### Coverage — what's intentionally NOT mirrored
+
+The reference covers all the major *simulation* systems (13 docs). A few aurora-manual chapters are deliberately skipped because they describe **how to play Aurora**, not **how Aurora's simulation works**, or because **Pulsar already implements them**:
+
+- *Introduction, Game Setup, User Interface* (manual ch. 1–3): about operating the Aurora program itself — irrelevant to Pulsar's engine.
+- *Star Systems / Planets / Asteroids generation* (ch. 4): Pulsar already generates these — see `GameEngine/Galaxy/`.
+- *Navigation / jump transit* (ch. 10): Pulsar already implements — see `GameEngine/Movement/CLAUDE.md`.
+- *Advanced topics — spoiler races, SpaceMaster mode, late-game strategy* (ch. 18): player strategy / hidden content, not core mechanics. (Time-increment mechanics from 18.2 are already understood — see `GameEngine/CLAUDE.md` on `ManagerSubPulse`.)
+
+If a future need touches one of these, read the Pulsar subsystem first; only consult the Aurora manual chapter if Pulsar's behavior is unclear.
 
 ---
 
