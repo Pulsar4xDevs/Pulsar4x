@@ -22,17 +22,27 @@ Population, colony lifecycle, life support. Lives in `GameEngine/Colonies/`.
 
 A fully-formed colony entity typically holds:
 
-| DataBlob | Source | Purpose |
-|----------|--------|---------|
-| `ColonyInfoDB` | `ColonyFactory` | Core: population, stockpiles |
-| `ColonyLifeSupportDB` | `ColonyFactory` | Population cap |
-| `ColonyBonusesDB` | `ColonyFactory` | Modifier tracking |
-| `InstallationsDB` | `Industry/` | Installation list (types + counts) |
-| `ComponentInstancesDB` | `Engine/` | Physical components (same as ships) |
-| `IndustryAbilityDB` | `Industry/` | Production queue |
-| `CargoStorageDB` | `Storage/` | Mineral and goods storage |
-| `MiningDB` | `Industry/` | Mining setup |
-| `NameDB` | `Engine/` | Colony name |
+`ColonyFactory.CreateColony()` attaches these blobs **directly** (verified in `ColonyFactory.cs`):
+
+| DataBlob | Purpose |
+|----------|---------|
+| `NameDB` | Colony name |
+| `ColonyInfoDB` | Core: population, stockpiles, parent planet |
+| `ColonyBonusesDB` | Modifier tracking |
+| `MiningDB` | Mining setup |
+| `OrderableDB` | Marks the colony able to receive orders |
+| `MassVolumeDB` | Mass / volume |
+| `CargoStorageDB` | Mineral and goods storage |
+| `PositionDB` | Location (on the planet surface) |
+| `TeamsHousedDB` | Scientists / commanders housed here |
+| `ComponentInstancesDB` | **Installations live here** (added via `AddComponent()`) |
+
+> **NOT attached by `ColonyFactory`** (corrects the earlier recon):
+> - **`InstallationsDB` is never attached to a colony** — it is vestigial/abandoned (no `[JsonProperty]` fields; only dead-code references). Installations are **components** in `ComponentInstancesDB` (see `DefaultStartFactory.cs:212-225`: `AddComponent(mineDesign)`, `AddComponent(facEntity)`, …).
+> - Capability blobs such as `IndustryAbilityDB` are **granted by installed components** carrying the matching `*Atb` attribute, not added by the factory.
+> - `ColonyLifeSupportDB.MaxPopulation` is (re)computed by `PopulationProcessor`, not added at creation.
+>
+> Verify the exact grant path in code before assuming a specific blob is present. See `CONVENTIONS.md` §6 (components = abilities).
 
 ---
 
@@ -85,17 +95,11 @@ Dictionary<Entity, double> ColonyComponentDictionary // for bombardment targetin
 
 ## Installation System
 
-`InstallationsDB` (in `Industry/InstallationsDB.cs`) is a separate DataBlob that tracks installations by string type ID:
+**Installations are components, not a separate registry.** A colony's installations are `ComponentInstance`s in its `ComponentInstancesDB`, added via `colonyEntity.AddComponent(design, count)`. Query them by ability with `componentInstances.TryGetComponentsByAttribute<TAtb>(...)` or via `DesignsAndComponentCount`.
 
-```csharp
-Dictionary<string, float> Installations        // type ID → quantity (float for partial construction)
-Dictionary<string, int> WorkingInstallations   // type ID → operational count
-List<InstallationEmployment> EmploymentList    // per-installation on/off toggle
-```
+`InstallationsDB` (in `Industry/InstallationsDB.cs`) *looks* like the installation store — `Dictionary<string,float> Installations`, `WorkingInstallations`, `EmploymentList` — but it is **dead code**: never attached to any colony, no `[JsonProperty]` fields, its `ConstructJob` lists commented out. Treat it as abandoned. Do not build on it; do not "fill in" the UI against it.
 
-Installation construction jobs are enqueued in `IndustryAbilityDB` (see Industry CLAUDE.md).
-
-**The UI for installations (`PlanetaryWindow.RenderInstallations()`) is empty.** The DataBlob exists and is populated; the rendering code fetches the blob but does nothing with it. This is the primary UI gap for planetary infrastructure.
+**The installations UI is doubly broken.** `PlanetaryWindow.RenderInstallations()` not only has an empty body — its tab is gated on `HasDataBlob<InstallationsDB>()` (`PlanetaryWindow.cs:107`), which is always false, so the tab never appears. The correct fix renders from `ComponentInstancesDB` (reuse the existing `ComponentInstancesDBDisplay`). See `docs/aurora/PLANETARY-INFRASTRUCTURE.md` §6.
 
 ---
 

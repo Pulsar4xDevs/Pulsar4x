@@ -101,6 +101,18 @@ See `ARCHITECTURE.md` for the full data-flow diagram.
 
 ---
 
+## Design & Convention References
+
+| Doc | Read it when |
+|-----|--------------|
+| `CONVENTIONS.md` | **Before writing any new code.** Pulsar's actual coding idioms (DataBlob copy-ctor/`Clone()`, serialize-one-collection-rebuild-indexes, `TryGet`/sentinel defensiveness, components+`*Atb`, processor auto-discovery). Match these, don't impose your own style. |
+| `docs/aurora/INDEX.md` | Designing any ground-combat or infrastructure mechanic. Aurora 4X is the design spec for systems Pulsar lacks. |
+| `docs/aurora/GROUND-COMBAT.md` | Building ground forces, formations, invasion, bombardment-vs-ground. |
+| `docs/aurora/PLANETARY-INFRASTRUCTURE.md` | Adding installations, construction, economy depth. |
+| `docs/aurora/SPACE-COMBAT-BENCHMARK.md` | Calibrating "the same depth space combat has." |
+
+---
+
 ## Key Constants and Conventions
 
 ### Naming Conventions
@@ -143,7 +155,7 @@ Test utilities live in `TestHelper.cs` and `TestingUtilities.cs`.
 
 3. **MissileProcessor guidance is half-finished.** The `directAttack = false` branch (orbital phasing maneuvers) has commented-out parts; the `directAttack = true` branch (direct thrust to target) is the functional path but is never taken because `directAttack` is hardcoded `false`. Missile tracking currently uses phasing maneuvers which can fail for non-orbiting targets.
 
-4. **PlanetaryWindow.RenderInstallations() renders nothing.** The `InstallationsDB` is retrieved but the render body is empty. This is the primary UI entry point for planetary infrastructure — it needs to be implemented before ground infrastructure UI can start.
+4. **PlanetaryWindow.RenderInstallations() renders nothing — and the bug is worse than "empty body."** The method is gated on `HasDataBlob<InstallationsDB>()`, but **`InstallationsDB` is never attached to any colony** (verified: `ColonyFactory` and `DefaultStartFactory` only ever call `AddComponent(...)`). So the "Installations" tab button never even appears (`PlanetaryWindow.cs:107`). `InstallationsDB` is **vestigial/abandoned** (no `[JsonProperty]` fields, only dead-code references). Real installations are **components in `ComponentInstancesDB`** — the colony's `AddComponent(mineDesign)`, `AddComponent(facEntity)`, etc. The correct fix renders from `ComponentInstancesDB` (a `ComponentInstancesDBDisplay` panel already exists), not from `InstallationsDB`. See `docs/aurora/PLANETARY-INFRASTRUCTURE.md` and `CONVENTIONS.md` §6.
 
 5. **`async void` on EntityManager mutations swallows exceptions.** `AddEntity`, `TagEntityForRemoval`, `SetDataBlob`, `RemoveDatablob` are all `async void` (needed for `MessagePublisher.Publish`). Any exception inside propagates to the thread pool and is unobservable. Keep mutation code minimal and well-tested.
 
@@ -157,7 +169,7 @@ Test utilities live in `TestHelper.cs` and `TestingUtilities.cs`.
 
 ## How to Work in This Repo (Working Agreement)
 
-1. **Read the subsystem CLAUDE.md before working on any subsystem.** Only read source directly when the doc is insufficient, then update the doc after.
+1. **Read `CONVENTIONS.md` before writing any code; read the subsystem `CLAUDE.md` before working on that subsystem.** Only read source directly when the doc is insufficient, then update the doc after. For ground-combat/infrastructure design questions, consult `docs/aurora/`.
 2. **Keep all CLAUDE.md files current** whenever code changes — update the subsystem CLAUDE.md in the same commit as the code it describes. Stale docs are worse than no docs.
 3. **Build and run tests before and after every change.** Never leave the build broken. `dotnet build` + `dotnet test` before pushing.
 4. **Match existing conventions** (naming, `[JsonProperty]` discipline, `SafeDictionary`, processor auto-discovery pattern).

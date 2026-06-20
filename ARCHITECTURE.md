@@ -148,8 +148,13 @@ BeamWeaponProcessor (HotLoop, 1 sec) per BeamInfoDB entity:
 ```
 Player creates colony (CreateColonyOrder)
     → ColonyFactory.CreateColony()
-        → Entity with ColonyInfoDB, InstallationsDB, ComponentInstancesDB,
-          CargoStorageDB, IndustryAbilityDB, MiningDB (if applicable)
+        → Entity with ColonyInfoDB, ComponentInstancesDB, CargoStorageDB,
+          MiningDB, ColonyBonusesDB, OrderableDB, MassVolumeDB, PositionDB,
+          TeamsHousedDB, NameDB
+        → Installations added as COMPONENTS via colonyEntity.AddComponent(design, count)
+          (NOT a separate InstallationsDB — that blob is dead/vestigial)
+        → Ability blobs (e.g. IndustryAbilityDB) are granted by installed components
+          carrying the matching *Atb attribute
 
 IndustryProcessor (HotLoop, daily)
     → reads IndustryAbilityDB.Jobs queue
@@ -225,6 +230,8 @@ Program.cs
 | Ground unit DataBlob | *(new)* `Colonies/GroundUnitDB.cs` | Population, equipment, organization |
 | Ground combat processor | *(new)* `Colonies/GroundCombatProcessor.cs` | IHotloopProcessor, daily tick |
 | Colony damage from bombardment | `Damage/DamageComplex/DamageProcessor.cs` | Uncomment + complete lines ~101-181 |
-| Planetary window UI | `Pulsar4X.Client/Interface/Windows/PlanetaryWindow.cs` | `RenderInstallations()` is empty |
+| Planetary window UI | `Pulsar4X.Client/Interface/Windows/PlanetaryWindow.cs` | `RenderInstallations()` empty + tab gated on dead `InstallationsDB`; re-gate on `ComponentInstancesDB` |
 | New ground combat UI window | *(new)* `Pulsar4X.Client/Interface/Windows/GroundCombatWindow.cs` | |
 | Orders for ground invasion | *(new)* `Colonies/InvasionOrder.cs` | Follow `SetFireControlOrder` pattern |
+
+> **Full design reference:** `docs/aurora/GROUND-COMBAT.md` has the Aurora mechanics and a complete Aurora→Pulsar mapping table (unit design, formations, combat resolution, transport/drop/boarding, occupation). Build ground units as **component-bearing entities** (`ComponentInstancesDB` + new `*Atb` attributes), not a bespoke parallel system — see `CONVENTIONS.md` §6. Prefer a dedicated `GameEngine/GroundForces/` dir over `Colonies/`.

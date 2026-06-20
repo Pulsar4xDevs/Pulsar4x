@@ -29,7 +29,7 @@ Bring planetary/ground combat and planetary infrastructure to the same depth as 
 - Colony creation + population: ✅ functional
 - Mining: ✅ functional
 - Industrial production (ships/components): ✅ functional
-- Installation management (add/remove): ✅ data model only
+- Installation management: ✅ installations exist **as components** in `ComponentInstancesDB` (the `InstallationsDB` blob is dead — see `Industry/CLAUDE.md`)
 - Infrastructure levels / specialization: ❌ not implemented
 - Population happiness / growth sim: ❌ partial stub only
 - PlanetaryWindow installations display: ❌ empty
@@ -84,10 +84,11 @@ Bring planetary/ground combat and planetary infrastructure to the same depth as 
 
 **Goal:** Give colonies meaningful internal structure so ground combat has something to fight over.
 
-### 2a. Implement InstallationsDB display
-- `Pulsar4X.Client/Interface/Windows/PlanetaryWindow.cs`: Fill in `RenderInstallations()`.
-- Show installation list with name, count, condition (HTK remaining if damaged).
-- Add ability to queue construction of new installations via IndustryProcessor.
+### 2a. Installations display (corrected — do NOT use InstallationsDB)
+- `Pulsar4X.Client/Interface/Windows/PlanetaryWindow.cs`: `RenderInstallations()` is empty **and** its tab is gated on the dead `InstallationsDB` (`PlanetaryWindow.cs:107`), so the tab never appears.
+- Re-gate on `ComponentInstancesDB` (every colony has one) and render the colony's installations — they are components. Reuse the existing `ComponentInstancesDBDisplay` panel or build a table from `ComponentInstancesDB.DesignsAndComponentCount`.
+- Optionally add construction queueing of new installations through the existing industry/component pipeline.
+- See `docs/aurora/PLANETARY-INFRASTRUCTURE.md` §6 and `CONVENTIONS.md` §6.
 
 ### 2b. Infrastructure levels
 - Add `InfrastructureLevel` (int) to `ColonyInfoDB` or a new `InfrastructureDB`.
@@ -137,6 +138,8 @@ Bring planetary/ground combat and planetary infrastructure to the same depth as 
 
 **Goal:** Build ground combat at parity with space combat. Mirror the space combat architecture: DataBlobs → Processors → Orders → UI.
 
+> **Read first:** `docs/aurora/GROUND-COMBAT.md` (Aurora is the design spec; it has a full Pulsar-mapping table) and `CONVENTIONS.md` §6 (units = component-bearing entities). Aurora designs ground units from researched components — model a `GroundUnitDesign` as an `IConstructableDesign` whose weapons/armor/HQ/logistics are `ComponentDesign`s with new `*Atb` attributes, installed into a `ComponentInstancesDB`, exactly like a ship. Prefer a dedicated `GameEngine/GroundForces/` subsystem dir over scattering files into `Colonies/`.
+
 ### 4a. Ground unit data model
 ```
 New files:
@@ -157,7 +160,7 @@ New file: GameEngine/Colonies/GroundCombatProcessor.cs (IHotloopProcessor)
 Resolution loop (mirror of space combat turn):
 1. Attacker units fire at defender units (use `GenericFiringWeaponsProcessor` pattern).
 2. Defender units return fire.
-3. Apply casualties via `SimpleDamage` initially, then complex ground damage.
+3. Apply casualties via the **complex `DamageProcessor`** (penetration-vs-armor + component HTK), **not** `SimpleDamage`. Ground and naval combat share one damage core, so Phase 1 must land first. See `docs/aurora/GROUND-COMBAT.md` §4 for the to-hit → penetrate → destroy sequence.
 4. Check win conditions (all defenders destroyed, attacker retreats, siege timer).
 
 ### 4c. Invasion order
@@ -190,7 +193,7 @@ New file: Pulsar4X.Client/Interface/Windows/GroundCombatWindow.cs
 **Goal:** Make the existing UI more usable and add missing depth displays.
 
 ### 5a. PlanetaryWindow improvements
-- `RenderInstallations()`: render installation list with type, count, status.
+- `RenderInstallations()`: render the colony's installations from `ComponentInstancesDB` (type, count, status) — re-gate off the dead `InstallationsDB` first (see Phase 2a).
 - Add colony specialization display/setter.
 - Add population carrying capacity bar.
 - Add defense strength indicator.
