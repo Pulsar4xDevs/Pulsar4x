@@ -1,0 +1,44 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /home/user/Pulsar4x/.claude/hooks/session_start.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /home/user/Pulsar4x/.claude/hooks/session_stop.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /home/user/Pulsar4x/.claude/hooks/lint_csharp.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "deny": [
+      "Read(**/bin/**)",
+      "Read(**/obj/**)",
+      "Read(**/*.dll)",
+      "Read(**/*.pdb)",
+      "Read(**/*.exe)"
+    ]
+  }
+}
