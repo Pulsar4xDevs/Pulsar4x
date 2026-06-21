@@ -12,16 +12,26 @@ Session ending ~2026-06-20. Branch: `claude/amazing-clarke-7s118n` (not yet merg
 
 ## Build Status
 
-**UNKNOWN — .NET is not installed in the cloud execution environment.**
+**UNKNOWN — .NET is not installed in the cloud execution environment, and CANNOT be installed under the current network policy.**
 
-Cannot run `dotnet build` or `dotnet test` from Claude's remote session. The user must pull the branch to their local machine (Windows, .NET 8 SDK + SDL2 required) and build there to establish a baseline.
+Cannot run `dotnet build` or `dotnet test` from Claude's remote session. The developer must pull the branch to their Windows machine and build there to establish a baseline.
+
+**Verified 2026-06-21 — .NET SDK install is blocked by network egress allowlist.**
+A self-install was attempted (`dotnet-install.sh`). The install script downloads fine (GitHub is allowlisted), but every Microsoft .NET binary host returns **HTTP 403 (egress-blocked)**:
+- `builds.dotnet.microsoft.com` — 403 (SDK binaries)
+- `ci.dot.net` — 403 (version feed + fallback binaries)
+- `dotnetcli.azureedge.net`, `aka.ms` — 403
+
+Allowlisted/reachable: `github.com`, `raw.githubusercontent.com`, `api.nuget.org`, `www.nuget.org`, `dot.net` (redirect only).
+
+**To enable Claude to build/test itself**, the developer must add the dotnet hosts to the environment's network egress settings (see https://code.claude.com/docs/en/claude-code-on-the-web) — at minimum `builds.dotnet.microsoft.com` and `ci.dot.net`. Then a container setup script can `dotnet-install.sh --channel 8.0`. **Even then, running the GAME (UI) still needs the developer** — the container is headless (no display/GPU for SDL2+OpenGL). Do NOT re-test the network each session; this is the confirmed state until the policy changes.
 
 **What we know from reading source (not compiling):**
-- No code changes have been made this session — docs and infrastructure only.
-- The last code the original repo developers committed should compile (it was a working fork).
-- The branch is 6 commits ahead of the state we cloned from, all documentation and `.claude/` config — zero C# changes.
+- No code changes have been made — docs and infrastructure only.
+- The original repo was a working fork; baseline source should compile.
+- The branch is documentation and `.claude/` config only — zero C# changes.
 
-**Action for next session's first code change:** build locally first, capture pass/fail, add result here.
+**Action for next session's first code change:** developer builds locally first, captures pass/fail, adds result here.
 
 ---
 
