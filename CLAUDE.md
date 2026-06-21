@@ -124,12 +124,13 @@ See `ARCHITECTURE.md` for the full data-flow diagram.
 | Colonies / Population | `GameEngine/Colonies/` | `GameEngine/Colonies/CLAUDE.md` |
 | Industry / Production | `GameEngine/Industry/` | `GameEngine/Industry/CLAUDE.md` |
 | Movement / Navigation | `GameEngine/Movement/` | `GameEngine/Movement/CLAUDE.md` |
-| Sensors | `GameEngine/Sensors/` | *(not yet written — read source directly)* |
+| Sensors | `GameEngine/Sensors/` | `GameEngine/Sensors/CLAUDE.md` |
 | Orbits | `GameEngine/Orbits/` + `Pulsar4X.OrbitalMath/` | *(not yet written — read source directly)* |
-| Galaxy / System Gen | `GameEngine/Galaxy/` | *(not yet written — read source directly)* |
+| Galaxy / System Gen | `GameEngine/Galaxy/` | `GameEngine/Galaxy/CLAUDE.md` |
 | Fleets | `GameEngine/Fleets/` | `GameEngine/Fleets/CLAUDE.md` |
-| Logistics | `GameEngine/Logistics/` | *(not yet written — read source directly)* |
-| Research/Tech | `GameEngine/Tech/` | *(not yet written — read source directly)* |
+| Logistics | `GameEngine/Logistics/` | `GameEngine/Logistics/CLAUDE.md` |
+| Research/Tech | `GameEngine/Tech/` | `GameEngine/Tech/CLAUDE.md` |
+| People / Commanders | `GameEngine/People/` | `GameEngine/People/CLAUDE.md` |
 | UI Client | `Pulsar4X.Client/` | `Pulsar4X.Client/CLAUDE.md` |
 | Tests | `Pulsar4X.Tests/` | *(see Testing section below)* |
 
