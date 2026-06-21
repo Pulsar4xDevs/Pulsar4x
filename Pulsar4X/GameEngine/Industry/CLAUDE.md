@@ -15,6 +15,9 @@ Production, mining, and material processing. Lives in `GameEngine/Industry/`.
 | `IndustryProcessor.cs` | `IHotloopProcessor` (daily). Calls `IndustryTools.ConstructStuff()`. |
 | `IndustryTools.cs` | Static helpers: `ConstructStuff()`, `AddJob()`, `EditExsistingJob()`, `CancelExsistingJob()`, `ChangeJobPriority()`. |
 | `InstallationsDB.cs` | **DEAD/vestigial DataBlob** — never attached to any colony, no `[JsonProperty]`. Installations are really components in `ComponentInstancesDB`. Do not build on this. |
+| `InfrastructureDB.cs` | **NEW (DevBranch)** DataBlob on a colony. Tracks `CapacityProvided` (from infra installations) and `CapacityRequired` (from all other installations). `Efficiency` = Provided/Required, capped at 1.0. |
+| `InfrastructureCapacityAtb.cs` | **NEW (DevBranch)** Component design attribute. Marks a component as "infrastructure." `Capacity` = units of support provided per installed unit. Filtered by gravity/pressure tolerance. |
+| `InfrastructureProcessor.cs` | **NEW (DevBranch)** Static class. `RecalcCapacity(colony)` — sums provided vs required capacity and writes to `InfrastructureDB`. Called on `ComponentInstancesDB` recalc (whenever an installation changes). `GetEfficiency(colony)` — returns the output multiplier. |
 | `JobBase.cs` | Abstract base for job types. |
 | `MineResourcesAtbDB.cs` | Component attribute DataBlob: grants mining ability (which minerals, at what rate). |
 | `MineResourcesProcessor.cs` | `IHotloopProcessor` (daily). Runs `MiningHelper.CalculateActualMiningRates()` and transfers minerals. |
@@ -95,6 +98,30 @@ Mineral `Accessibility` ranges 0.0–1.0. Low accessibility deposits are harder 
 `InstallationsDB` (this directory) looks like an installation registry — `Dictionary<string,float> Installations`, `WorkingInstallations`, `EmploymentList`, plus commented-out `ConstructJob` lists — but it is **abandoned**: never attached to a colony, no `[JsonProperty]` fields. It is an earlier design superseded by the component approach. **Do not** use it, extend it, or render it.
 
 **The installations UI gap:** `PlanetaryWindow.RenderInstallations()` is empty *and* its tab is gated on `HasDataBlob<InstallationsDB>()` (always false), so the tab never even shows. Phase 2a fix = render from `ComponentInstancesDB` (reuse `ComponentInstancesDBDisplay`). See `docs/aurora/PLANETARY-INFRASTRUCTURE.md` §6 and `CONVENTIONS.md` §6.
+
+---
+
+## Infrastructure System (DevBranch — Active)
+
+Infrastructure is the **limiting factor on all colony production**. Think of it as the colony's utility grid: power, roads, comms, water. Every installation except infrastructure itself draws from the grid; infrastructure installations add to it. When demand exceeds supply, efficiency drops and all production scales down.
+
+### How capacity is calculated
+
+`InfrastructureProcessor.RecalcCapacity(colonyEntity)`:
+
+**Provided** — sum across all `InfrastructureCapacityAtb` components. Each installed unit contributes `Capacity` units of support, but only if the colony's body gravity and atmospheric pressure are within the component's `GravityToleranceAtb` / `PressureToleranceAtb` limits (out-of-tolerance infrastructure provides nothing — matches the population support model).
+
+**Required** — sum across every OTHER installed component:
+```
+capacity demanded = (design.MassPerUnit / 1000) + design.CrewReq
+```
+i.e., 1 unit per tonne of installation mass + 1 unit per crew member.
+
+**Efficiency** = min(1.0, Provided / Required). Written to `InfrastructureDB.Efficiency`. Production processors read this via `InfrastructureProcessor.GetEfficiency(colony)`.
+
+### Note on two parallel systems
+
+`InfrastructureCapacityAtb` (production efficiency) and `PopulationSupportAtbDB` (population cap) are **separate**. An infrastructure installation provides BOTH — it adds to the production efficiency grid AND supports population up to a tolerance-filtered cap. They are different attributes on the same component design, read by different processors.
 
 ---
 

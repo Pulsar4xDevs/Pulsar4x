@@ -15,6 +15,10 @@ Population, colony lifecycle, life support. Lives in `GameEngine/Colonies/`.
 | `ColonyFactory.cs` | `CreateColony()` — creates a colony entity and attaches all required DataBlobs. |
 | `CreateColonyOrder.cs` | Player order to found a colony on a planet. |
 | `PopulationProcessor.cs` | `IHotloopProcessor` (monthly). Runs `GrowPopulation()` for each colony. |
+| `ColonyHexMapDB.cs` | **NEW (DevBranch)** DataBlob: hex-grid layout for a colony. `MaxRadius` scales with admin building office space. `HexTiles` — dict of coordinate → tile. |
+| `ColonyHexMapProcessor.cs` | **NEW (DevBranch)** Processor that updates the hex map when colony state changes. |
+| `HexTile.cs` | **NEW (DevBranch)** One hex cell on the colony map. Holds terrain type, what's built there. |
+| `HexCoordinate.cs` | **NEW (DevBranch)** Cube-coordinate system for the hex grid. |
 
 ---
 
@@ -100,6 +104,23 @@ Dictionary<Entity, double> ColonyComponentDictionary // for bombardment targetin
 `InstallationsDB` (in `Industry/InstallationsDB.cs`) *looks* like the installation store — `Dictionary<string,float> Installations`, `WorkingInstallations`, `EmploymentList` — but it is **dead code**: never attached to any colony, no `[JsonProperty]` fields, its `ConstructJob` lists commented out. Treat it as abandoned. Do not build on it; do not "fill in" the UI against it.
 
 **The installations UI is doubly broken.** `PlanetaryWindow.RenderInstallations()` not only has an empty body — its tab is gated on `HasDataBlob<InstallationsDB>()` (`PlanetaryWindow.cs:107`), which is always false, so the tab never appears. The correct fix renders from `ComponentInstancesDB` (reuse the existing `ComponentInstancesDBDisplay`). See `docs/aurora/PLANETARY-INFRASTRUCTURE.md` §6.
+
+---
+
+## Colony Hex Map (DevBranch — New)
+
+`ColonyHexMapDB` gives each colony a hex-tile grid — the same spatial layout pattern used in games like Civilization. This is significant for ground combat: it establishes that the colony ALREADY has a spatial model. Ground units, fortifications, and terrain could all live on hex tiles.
+
+Key fields:
+```csharp
+MaxRadius     int  — how many rings of hexes are available (driven by admin building size)
+CurrentRadius int  — actively used radius
+HexTiles      Dictionary<HexCoordinate, HexTile>  — the actual map
+```
+
+`UpdateMaxRadius(officeSpace)` — formula: `sqrt(officeSpace / 100)` rings. So a larger administration center expands the colony's spatial footprint.
+
+**Phase 4 note:** Before designing a ground combat spatial model from scratch, study `ColonyHexMapDB` carefully. It may already be the right substrate for placing ground units and resolving combat by tile.
 
 ---
 

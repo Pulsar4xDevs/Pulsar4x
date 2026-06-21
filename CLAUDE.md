@@ -184,7 +184,7 @@ Test utilities live in `TestHelper.cs` and `TestingUtilities.cs`.
 
 ## Critical Gotchas
 
-1. **Complex damage is commented out.** `BeamWeaponProcessor.OnHit()` calls `SimpleDamage.OnTakingDamage(entity, 100, 500)` — a placeholder with hardcoded 100–500 random damage. The real component-level `DamageProcessor.OnTakingDamage()` call is commented out directly above it. Do not build ground combat on top of `SimpleDamage`; restore and complete the complex damage path first.
+1. **Three damage paths, no clear winner.** `BeamWeaponProcessor.OnHit()` still calls `SimpleDamage.OnTakingDamage(entity, 100, 500)` — a random 100–500 placeholder. DevBranch added a third path: `DamageVeryComplex/` — a 2D particle physics simulation (active for asteroid strikes). The original `DamageComplex/DamageProcessor` path (component HTK, Aurora-style) is still partially stubbed with the colony damage block commented out. Before building ground combat damage, choose which path is the forward direction. See `Damage/CLAUDE.md` decision table.
 
 2. **ProcessorManager auto-discovers via reflection.** Any class implementing `IHotloopProcessor` or `IInstanceProcessor` is automatically registered on startup by `ProcessorManager.CreateProcessors()`. You do not register processors manually. The trade-off: a broken processor crashes startup.
 

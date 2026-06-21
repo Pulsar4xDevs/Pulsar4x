@@ -1,6 +1,6 @@
 # Damage — Subsystem Reference
 
-Two implementations exist: `Simple/` (active) and `DamageComplex/` (stubbed). Lives in `GameEngine/Damage/`.
+Three implementations exist: `Simple/` (active placeholder for beam hits), `DamageComplex/` (partial component-level system), and `DamageVeryComplex/` (new particle physics simulation, active for asteroids). Lives in `GameEngine/Damage/`.
 
 ---
 
@@ -8,11 +8,19 @@ Two implementations exist: `Simple/` (active) and `DamageComplex/` (stubbed). Li
 
 | File | Purpose |
 |------|---------|
-| `Simple/SimpleDamage.cs` | Active damage path. Random component selection, random HTK damage, ship destruction check. |
-| `DamageComplex/DamageProcessor.cs` | Intended real damage path. Currently only `OnTakingDamage()` is wired (partially). Colony damage is commented out. |
-| `DamageComplex/DamageTools.cs` | `DealDamageEnergyBeamSim()` — spatial component damage simulation. Used by DamageProcessor. |
-| `DamageComplex/EntityDamageProfileDB.cs` | DataBlob: tracks HTK remaining per component instance on a ship or colony. Created from `ShipInfoDB.Design` on first hit. |
-| `DamageComplex/ComponentPlacement.cs` | Spatial placement data for components within a ship cross-section. Used by DamageTools. |
+| `Simple/SimpleDamage.cs` | Active placeholder for beam hits. Random component selection, random 100–500 HTK damage. |
+| `DamageComplex/DamageProcessor.cs` | Partial component-level damage path. `OnTakingDamage()` partially wired; colony damage block is commented out. |
+| `DamageComplex/DamageTools.cs` | `DealDamageEnergyBeamSim()` — spatial component damage kernel. |
+| `DamageComplex/EntityDamageProfileDB.cs` | DataBlob: HTK remaining per component instance on a ship. Created lazily on first hit. |
+| `DamageComplex/ComponentPlacement.cs` | Spatial placement data for components in a ship cross-section. |
+| `DamageVeryComplex/DamageMap.cs` | **NEW** — 2D particle grid representing a ship or object cross-section. The substrate the physics sim runs on. |
+| `DamageVeryComplex/DamagePhysicsSim.cs` | **NEW** — Physics loop: moves particles, detects collisions, resolves them, handles photon beams. Recursive — spawns sub-maps for high-velocity particles. |
+| `DamageVeryComplex/KineticMath.cs` | Kinetic particle math: collision detection, elastic/inelastic resolution, fastest-particle query. |
+| `DamageVeryComplex/PhotonMath.cs` | Photon/beam propagation through the DamageMap. |
+| `DamageVeryComplex/PressureMath.cs` | Pressure wave propagation (for explosions/detonations). |
+| `DamageVeryComplex/TempratureMath.cs` | Thermal effects on particles (heating from beams, ablation). |
+| `DamageVeryComplex/Particle.cs` | `PhysicalParticle` struct: position, velocity, material properties. The atom of the physics sim. |
+| `DamageVeryComplex/AsteroidDamage.cs` | **Active path for asteroid kinetic impacts.** Wires an asteroid strike into the particle physics sim. |
 
 ---
 
@@ -66,32 +74,48 @@ Fields used in the commented call:
 
 ---
 
-## Priority Fix (Phase 1)
+## DamageVeryComplex — The New Physics Sim
 
-To restore the real damage path:
+This is the active direction on DevBranch. It's a full 2D particle physics simulation:
 
-1. In `BeamWeaponProcessor.OnHit()`, replace:
-   ```csharp
-   var damageResult = SimpleDamage.OnTakingDamage(beamInfo.TargetEntity, 100, 500);
-   ```
-   with a real `DamageFragment` construction and call to `DamageProcessor.OnTakingDamage()`.
+- A `DamageMap` is a grid of `PhysicalParticle` objects representing a cross-section of the target.
+- When a weapon fires, particles (kinetic slugs) or photon beams enter the map at a given velocity.
+- `DamagePhysicsSim.PhysicsLoop()` runs until all particles stop moving:
+  - Updates particle positions each tick.
+  - Detects and resolves elastic/inelastic collisions between particles.
+  - Processes photon beams via `PhotonMath`.
+  - Recursively spawns sub-maps for very fast particles (multi-scale simulation).
+- `AsteroidDamage.cs` is the only fully-wired caller today — asteroid kinetic strikes use this path.
+- Beam weapon damage (lasers) is partially wired: `PhotonMath.BeamProcessing()` exists but the integration with `BeamWeaponProcessor` is not complete.
 
-2. Complete the empty `ComponentInstancesDB` handling block in `DamageProcessor.OnTakingDamage()` — this is where components should be marked as destroyed when HTK → 0.
-
-3. Ensure `EntityDamageProfileDB` is created at ship construction in `ShipFactory`, not lazily.
-
-4. Implement ship destruction check inside `DamageProcessor` (currently only in `SimpleDamage`).
+**This system is more ambitious than Aurora's armor-grid model.** It's also incomplete. Before building ground combat damage on this, confirm with the developer whether to:
+- Use this system for ground combat (scientifically accurate, high complexity)
+- Use a simplified version mirroring DamageComplex (closer to Aurora's per-component HTK model)
 
 ---
 
-## Ground Combat Extension Point
+## Decision Point: Which Damage Path Forward?
 
-To extend damage to ground units and colonies:
+| Path | Status | Pros | Cons |
+|------|--------|------|------|
+| `SimpleDamage` | Active for beam hits | Works | Random, not physics-based |
+| `DamageComplex` | Partially stubbed | Aurora-style component HTK | Incomplete, colony damage commented out |
+| `DamageVeryComplex` | Active for asteroids, partial for beams | Physically rigorous | Incomplete, complex to extend |
 
+**Do not start ground combat damage until this decision is made.** Ground combat damage (AP rounds, artillery, orbital strikes) should use whichever path becomes the official forward direction.
+
+---
+
+## Ground Combat Extension Point (After Path Decision)
+
+For DamageComplex path:
 1. Uncomment and update the colony damage block in `DamageProcessor.OnTakingDamage()` (~lines 101–181).
-2. Verify `MassVolumeDB.Volume_km3` vs `Volume_m3` (rename may have occurred).
+2. Verify `MassVolumeDB.Volume_km3` still exists (it does — verified in Galaxy/).
 3. Create `GroundUnitDamageProfileDB` mirroring `EntityDamageProfileDB` for ground units.
-4. Call `DamageProcessor.OnTakingDamage()` from the ground combat processor.
+
+For DamageVeryComplex path:
+1. Create a `DamageMap` for ground unit cross-sections.
+2. Wire `GroundCombatProcessor` to call `DamagePhysicsSim.PhysicsLoop()` with appropriate projectile particles.
 
 ---
 

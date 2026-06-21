@@ -1,7 +1,8 @@
 # Pulsar4X vs Aurora 4X — Gap Analysis
 
-**Written:** 2026-06-21  
-**Purpose:** Honest accounting of where Pulsar stands relative to Aurora's full simulation depth. Use this to set priorities and calibrate ambition. Does not cover the UI layer — see `Pulsar4X.Client/CLAUDE.md`.
+**Written:** 2026-06-21 (based on `Master` branch)  
+**Updated:** 2026-06-21 — migrated to `DevBranch` (638 commits ahead of Master). Several gaps closed or materially advanced. See "What Changed in DevBranch" at the end.  
+**Purpose:** Honest accounting of where Pulsar stands relative to Aurora's full simulation depth. Does not cover the UI layer — see `Pulsar4X.Client/CLAUDE.md`.
 
 ---
 
@@ -11,7 +12,9 @@ Pulsar is roughly **50–55% of Aurora's simulation depth overall.**
 
 The high end (~75–85%) is the space physics layer: movement, orbits, sensors, weapons fire control, system generation. This part was the original project focus and it shows — it's genuinely rigorous, in some ways more physically correct than Aurora.
 
-The low end is everything that touches the planet surface and the strategic/human layer: ground combat is zero, orbital bombardment is commented out, the population formula is a stub, the installations UI is broken, and commander skill bonuses don't apply to anything. That is the entire objective of this fork.
+The low end is everything that touches the planet surface and the strategic/human layer: ground combat is zero, orbital bombardment is not wired, the installations UI is broken, and commander skill bonuses don't apply to anything. That is the entire objective of this fork.
+
+**DevBranch update:** The population formula and infrastructure system have been substantially implemented in DevBranch (638 commits ahead of the Master this analysis was originally based on). The overall depth estimate is now closer to **55–60%**. See "What Changed in DevBranch" section at the bottom.
 
 ---
 
@@ -26,9 +29,9 @@ The low end is everything that touches the planet surface and the strategic/huma
 | Research / Tech | Labs → points → scientist multipliers → unlock | ✅ Works end-to-end | Small — "ground-combat" tech category not confirmed in JSON |
 | Logistics | Automated cargo routes, profit-based bidding | ✅ Bidding market functional | Medium — Maintenance Supply Points (MSP) completely absent |
 | Space Combat (Weapons) | Beam fire control, missiles, point defense | ⚠️ Beams work; missile guidance hardcoded to broken path | Medium — `directAttack = false` hardcoded; fix needed |
-| Damage | Component-level armor penetration, HTK | ❌ Placeholder active — random 100–500 HP damage | **Large — this is the blocker for all combat** |
+| Damage | Component-level armor penetration, HTK | ⚠️ Three paths exist: `SimpleDamage` (active for beams, placeholder), `DamageComplex` (partial component HTK, Aurora-style), `DamageVeryComplex` (particle physics sim, active for asteroids). Direction unclear — see `Damage/CLAUDE.md`. | **Large — path must be chosen before building ground combat damage** |
 | Fleets | Task groups, orders, flagship commander | ⚠️ FleetDB + orders work | Medium — commander bonuses don't reach any formula |
-| Colonies / Population | Colony cost, carrying capacity, growth | ⚠️ Colony cost formula exists; population growth is -50.0 stub | **Large — core loop is broken** |
+| Colonies / Population | Colony cost, carrying capacity, growth | ✅ **DevBranch: PopulationProcessor re-implemented.** Real growth formula (20/pop^(1/3), cap 10%), infrastructure cap via `GetPopulationSupportValue()`, `ColonyCost()` wired. Die-off rate still -50.0 placeholder. | Small — die-off rate and governor modifiers |
 | Industry / Production | Construction factories, mining, refineries | ⚠️ Partially built — see `Industry/CLAUDE.md` | Medium |
 | People / Commanders | Officers, skills, fleet bonuses, ground bonuses | ⚠️ NavalAcademy generates officers; experience is stored and never read; **NO bonus fields on CommanderDB** | Large — the whole "quality matters" mechanic doesn't exist |
 | Ground Combat | Formations, elements, combat resolution, invasion | ❌ Zero | **100% gap — the primary objective** |
@@ -100,6 +103,27 @@ The problem is that roughly half of Aurora's *simulation scope* simply hasn't be
 - The physics of things hitting planets
 
 None of those require redesigning what's already there. They require building new DataBlobs and Processors on top of the existing framework, with a few targeted fixes to the stubs and commented-out blocks. That is exactly what this fork's objective covers.
+
+---
+
+## What Changed in DevBranch (638 Commits Ahead of Master)
+
+This analysis was originally written against the `Master` branch. After migrating to `DevBranch`, three major gaps changed:
+
+### 1. Population formula — substantially done
+`PopulationProcessor` was re-implemented with real Aurora-style logic. Growth = `20 / pop^(1/3)`, capped at 10%. `ColonyCost()` is wired in. Infrastructure cap from `GetPopulationSupportValue()` is active. The only stub remaining is the die-off rate (-50.0) when population exceeds the cap.
+
+### 2. Infrastructure system — substantially built
+`InfrastructureDB` + `InfrastructureCapacityAtb` + `InfrastructureProcessor` in `Industry/` are new and active. Infrastructure efficiency scales ALL colony production. Gravity/pressure tolerance filtering is implemented. This is a more sophisticated model than the simple Aurora population-cap formula — it makes infrastructure a general production modifier, not just a headcount limit.
+
+### 3. Damage — changed direction, not finished
+DevBranch introduced `DamageVeryComplex/` — a full 2D particle physics simulation (particles with velocity, collision detection, photon beam processing). Asteroid kinetic impact is the only fully-wired caller. The old `DamageComplex` path is still there. `SimpleDamage` is still active for beam hits. The three paths need a decision before ground combat damage is built. See `Damage/CLAUDE.md` decision table.
+
+### 4. Colony hex map — new, potentially significant
+`ColonyHexMapDB` gives each colony a hex-tile grid. `MaxRadius` scales with admin building office space. This is a potential spatial model for ground combat (placing units on tiles). **Investigate before designing a separate ground combat spatial model.**
+
+### 5. MasterTimePulse refactored
+`.NET 8 PeriodicTimer` replaces the old `System.Timers.Timer`. Thread safety improved. External observer system added for UI to watch system state without holding locks.
 
 ---
 
