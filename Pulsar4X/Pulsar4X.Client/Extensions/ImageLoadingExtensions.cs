@@ -1,5 +1,4 @@
-﻿using Pulsar4X.Extensions;
-using SDL3;
+﻿using SDL3;
 using System;
 using System.IO;
 

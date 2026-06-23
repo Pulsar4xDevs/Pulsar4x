@@ -2,149 +2,78 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Api;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Engine;
-using Pulsar4X.Extensions;
 using Pulsar4X.Orbital;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = Pulsar4X.Orbital.Vector3;
-using Pulsar4X.Factions;
-using Pulsar4X.Names;
-using Pulsar4X.Orbits;
-using Pulsar4X.Storage;
-using Pulsar4X.Galaxy;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
     public class NavWindow : PulsarGuiWindow
     {
-        private Entity _orderEntity;
+        private int _entityId;
+        private string _systemId = "";
 
-        private string _orderEntityName = "";
-        //OrbitDB _ourOrbit;
-        private double _sgp;
-        private KeplerElements? _currentKE;
-        private NewtonThrustAbilityDB? _newtonThrust;
-        private double _totalMass;
-        private double _dryMass;
-        private double _cargoMass;
-        private double _fuelMass;
-        private ICargoable? _fuelType;
-        private double _totalDV => _newtonThrust?.DeltaV ?? 0;
-        double _burnRate;
-        double _exhaustVelocity;
-        private double _totalDVUsage = 0;
-        private (Vector3 deltaV, double tSec)[]? _manuvers;
-        private Manuver[]? _navManuvers;
         float _phaseAngleRadians = 0;
         private DateTime _minDateTime;
         DateTime _atDatetime;
-        Entity[] _siblingEntities = new Entity[0];
-        string[] _siblingNames = new string[0];
-        private int _selectedSibling = -1;
-
-        Entity[] _uncleEntites = new Entity[0];
-        string[] _uncleNames = new string[0];
-
-        int _selectedUncle = -1;
-
-        private double _truelongTgt; ///The true longitude of the target. Used for hohmann and phasing calcs
-        private double _truelongInt; ///The true longitude of the interceptor. Used for hohmann and phasing calcs
-        private int _kRevolutions;   ///Number of allowed revolutions of the traget when phasing
-
-        private NavWindow(Entity orderEntity)
-        {
-            _flags = ImGuiWindowFlags.None;
-            _orderEntity = orderEntity;
-        }
+        private int _selectedSiblingId = -1;
+        private int _selectedUncleId = -1;
+        private float _targetSMA = 0;
+        private (Vector3 deltaV, double tSec)[]? _manuvers;
 
         private ManuverLinesComplete _manuverLines = new ManuverLinesComplete();
+
+        private NavWindow(int entityId, string systemId)
+        {
+            _flags = ImGuiWindowFlags.None;
+            _entityId = entityId;
+            _systemId = systemId;
+        }
 
         public static NavWindow GetInstance(EntityState orderEntity)
         {
             NavWindow thisitem;
             if (!_uiState.LoadedWindows.ContainsKey(typeof(NavWindow)))
             {
-                thisitem = new NavWindow(orderEntity.Entity);
-                thisitem.HardRefresh(orderEntity);
-                thisitem.OnSystemTickChange(_uiState.SelectedSystemTime);
+                thisitem = new NavWindow(orderEntity.Id, orderEntity.StarSystemId!);
+                thisitem.HardRefresh();
             }
             else
             {
                 thisitem = (NavWindow)_uiState.LoadedWindows[typeof(NavWindow)];
-                if (thisitem._orderEntity != orderEntity.Entity)
+                if (thisitem._entityId != orderEntity.Id)
                 {
-                    thisitem._orderEntity = orderEntity.Entity;
-                    thisitem.HardRefresh(orderEntity);
-                    thisitem.OnSystemTickChange(_uiState.SelectedSystemTime);
+                    thisitem._entityId = orderEntity.Id;
+                    thisitem._systemId = orderEntity.StarSystemId!;
+                    thisitem.HardRefresh();
                 }
             }
 
             return thisitem;
         }
 
-        private void HardRefresh(EntityState orderEntity)
+        private void HardRefresh()
         {
-            _orderEntity = orderEntity.Entity;
-            _orderEntityName = _orderEntity.GetName(_uiState.Faction.Id);
-
             // Reset maneuver data when switching to a different entity
             _manuverLines = new ManuverLinesComplete();
             _navMode = NavMode.None;
-            _selectedSibling = -1;
-            _selectedUncle = -1;
+            _selectedSiblingId = -1;
+            _selectedUncleId = -1;
+            _targetSMA = 0;
+            _manuvers = null;
+            _atDatetime = _uiState.PrimarySystemDateTime;
 
-            _newtonThrust = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>();
-            _totalMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassTotal;
-            _dryMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassDry;
-            var soiParent = _orderEntity.GetSOIParentEntity();
-            if(soiParent == null)
-                throw new NullReferenceException();
-            var parentMass = soiParent.GetDataBlob<MassVolumeDB>().MassTotal;
-            _sgp = GeneralMath.StandardGravitationalParameter(_totalMass + parentMass);
-            var fuelTypeID = _newtonThrust.FuelType;
-            _fuelType = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(fuelTypeID);
+            var system = _uiState.GameClient?.Galaxy.GetSystem(_systemId);
+            var entity = system?.GetEntity(_entityId);
+            if (system == null || entity == null)
+                return;
 
-            _burnRate = _newtonThrust.FuelBurnRate;
-            _exhaustVelocity = _newtonThrust.ExhaustVelocity;
-
-
-            _siblingEntities = soiParent.GetDataBlob<PositionDB>().Children.ToArray();
-            List<string> names = new List<string>();
-            foreach (var entity in _siblingEntities)
-            {
-                //TODO: this is going to show *all* entities, not just the ones this faction can see.
-                //going to need to come up with a way to get this data. (filtering for this should be done in the engine not ui)
-                string name = entity.GetDataBlob<NameDB>().GetName(_orderEntity.FactionOwnerID);
-                names.Add(name);
-            }
-            _siblingNames = names.ToArray();
-
-            var soiGrandparent = soiParent.GetSOIParentEntity();
-            if(soiParent == _orderEntity.GetDataBlob<PositionDB>().Root || soiGrandparent == null)
-                _uncleEntites = new Entity[0];
-            else
-            {
-                _uncleEntites = soiGrandparent.GetDataBlob<PositionDB>().Children.ToArray();
-            }
-            names = new List<string>();
-            foreach (var entity in _uncleEntites)
-            {
-                string name = entity.GetDataBlob<NameDB>().GetName(_orderEntity.FactionOwnerID);
-                names.Add(name);
-            }
-            _uncleNames = names.ToArray();
-
-            OnSystemTickChange(orderEntity.Entity.StarSysDateTime);
+            if (entity.GetSoiParent(system) is { } soiParent)
+                _manuverLines.RootSequence.ParentPosition = new SnapshotPosition(_uiState, _systemId, soiParent.Id);
 
             _uiState.SelectedSysMapRender?.SelectedEntityExtras.Add(_manuverLines);
-
-            var soiParentPosition = MoveMath.GetSOIParentPositionDB(_orderEntity);
-            if(soiParentPosition == null)
-                throw new NullReferenceException();
-            _manuverLines.RootSequence.ParentPosition = soiParentPosition;
-
         }
 
         public override void OnSystemTickChange(DateTime newDate)
@@ -152,30 +81,6 @@ namespace Pulsar4X.Client
             _minDateTime = newDate;
             if (_atDatetime < _minDateTime)
                 _atDatetime = _minDateTime;
-
-            if (_orderEntity.HasDataBlob<OrbitDB>())
-                _currentKE = _orderEntity.GetDataBlob<OrbitDB>().GetElements();
-            else if (_orderEntity.HasDataBlob<OrbitUpdateOftenDB>())
-                _currentKE = _orderEntity.GetDataBlob<OrbitUpdateOftenDB>().GetElements();
-            else if (_orderEntity.HasDataBlob<OrbitDB>())
-                _currentKE = _orderEntity.GetDataBlob<NewtonMoveDB>().GetElements();
-
-            if (_targetSMA == 0 && _currentKE != null)
-                _targetSMA = (float)_currentKE.Value.SemiMajorAxis;
-
-            _totalMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassTotal;
-            var soiParent = _orderEntity.GetSOIParentEntity();
-            if(soiParent == null)
-                throw new NullReferenceException();
-
-            var parentMass = soiParent.GetDataBlob<MassVolumeDB>().MassTotal;
-            _sgp = GeneralMath.StandardGravitationalParameter(_totalMass + parentMass);
-            _cargoMass = _orderEntity.GetDataBlob<CargoStorageDB>().TotalStoredMass;
-
-            if(_fuelType == null)
-                throw new NullReferenceException();
-
-            _fuelMass = _orderEntity.GetDataBlob<CargoStorageDB>().GetMassStored(_fuelType, false);
         }
 
 
@@ -185,19 +90,12 @@ namespace Pulsar4X.Client
             Edit,
             Thrust,
             HohmannTransfer,
-            HohmannTransfer2,
-            HohmannTransferOE,
             InterplanetaryTransfer,
             PhaseChange,
-            Phasing,
-            HighDVIntercept,
-            PorkChopPlot,
             EscapeSOI
         }
 
         private NavMode _navMode = NavMode.None;
-        private string[] nodenames = new string[0];
-        private int _selectedNode = 0;
 
         private float _radialDV;
         private float _progradeDV;
@@ -243,13 +141,69 @@ namespace Pulsar4X.Client
             ImGui.Unindent(indent);
         }
 
+        /// <summary>The faction-visible bodies orbiting the given parent (transfer targets),
+        /// excluding the ordering ship itself.</summary>
+        private List<(EntitySnapshot Body, OrbitView Orbit)> ChildrenOf(IClientSystem system, int parentId)
+        {
+            var children = new List<(EntitySnapshot, OrbitView)>();
+            foreach (var other in system.Entities)
+            {
+                if (other.Id == _entityId)
+                    continue;
+                var orbit = other.GetView<OrbitView>();
+                if (orbit == null || orbit.ParentId != parentId || orbit.StandardGravParameter <= 0)
+                    continue;
+                children.Add((other, orbit));
+            }
+            return children;
+        }
+
+        /// <summary>An ImGui combo over candidate bodies; tracks selection by entity id.</summary>
+        private EntitySnapshot? TargetBodyCombo(List<(EntitySnapshot Body, OrbitView Orbit)> candidates, ref int selectedId)
+        {
+            string[] names = new string[candidates.Count];
+            int selectedIndex = -1;
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                names[i] = candidates[i].Body.GetView<NameView>()?.Name ?? "Unknown";
+                if (candidates[i].Body.Id == selectedId)
+                    selectedIndex = i;
+            }
+
+            if (ImGui.Combo("Target Object", ref selectedIndex, names, names.Length)
+                && selectedIndex >= 0 && selectedIndex < candidates.Count)
+            {
+                selectedId = candidates[selectedIndex].Body.Id;
+                _targetSMA = (float)candidates[selectedIndex].Orbit.SemiMajorAxisM;
+            }
+
+            return selectedIndex >= 0 && selectedIndex < candidates.Count ? candidates[selectedIndex].Body : null;
+        }
+
         internal override void Display()
         {
-            var soiParentPosition = MoveMath.GetSOIParentPositionDB(_orderEntity);
-            if (!IsActive || soiParentPosition == null)
+            if (!IsActive)
                 return;
+
+            var system = _uiState.GameClient?.Galaxy.GetSystem(_systemId);
+            var entity = system?.GetEntity(_entityId);
+            var thrust = entity?.GetView<ThrustView>();
+            var massVolume = entity?.GetView<MassVolumeView>();
+            var orbit = entity?.ResolveOrbit();
+            var soiParent = entity?.GetSoiParent(system!);
+            if (system == null || entity == null || thrust == null || massVolume == null || orbit == null || soiParent == null)
+            {
+                IsActive = false;
+                return;
+            }
+
+            var currentKE = orbit.ToKeplerElements();
+            if (_targetSMA == 0)
+                _targetSMA = (float)currentKE.SemiMajorAxis;
+
+            string entityName = entity.GetView<NameView>()?.Name ?? "Unknown";
             ImGui.SetNextWindowSize(new Vector2(600f, 400f), ImGuiCond.FirstUseEver);
-            if (Window.Begin("Nav Control: " + _orderEntityName, ref IsActive, _flags))
+            if (Window.Begin("Nav Control: " + entityName, ref IsActive, _flags))
             {
                 ImGui.Columns(2);
                 ManuverTree(_manuverLines.RootSequence);
@@ -258,39 +212,18 @@ namespace Pulsar4X.Client
                 {
                     if (ImGui.Button("Manual Thrust"))
                     {
-                        _manuverLines.AddNewEditNode(_orderEntity, _atDatetime);
+                        _manuverLines.AddNewEditNode(_uiState, _systemId, _entityId, _atDatetime);
                         _navMode = NavMode.Thrust;
                     }
 
                     if (ImGui.Button("Hohmann Transfer"))
                     {
                         _manuverLines.EditingNodes = new ManuverNode[2];
-                        _manuverLines.EditingNodes[0] = new ManuverNode(_orderEntity, _atDatetime);
+                        _manuverLines.EditingNodes[0] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime);
                         var halfOrbit = _manuverLines.EditingNodes[0].TargetOrbit.Period * 0.5;
-                        _manuverLines.EditingNodes[1] = new ManuverNode(_orderEntity, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
-                        _manuverLines.RootSequence.ParentPosition = soiParentPosition;
+                        _manuverLines.EditingNodes[1] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
                         _navMode = NavMode.HohmannTransfer;
                     }
-                    if (ImGui.Button("Hohmann Transfer2"))
-                    {
-                        _manuverLines.EditingNodes = new ManuverNode[2];
-                        _manuverLines.EditingNodes[0] = new ManuverNode(_orderEntity, _atDatetime);
-                        var halfOrbit = _manuverLines.EditingNodes[0].TargetOrbit.Period * 0.5;
-                        _manuverLines.EditingNodes[1] = new ManuverNode(_orderEntity, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
-                        _manuverLines.RootSequence.ParentPosition = soiParentPosition;
-                        _navMode = NavMode.HohmannTransfer2;
-                    }
-
-                    if (ImGui.Button("Hohmann TransferOE"))
-                    {
-                        _manuverLines.EditingNodes = new ManuverNode[2];
-                        _manuverLines.EditingNodes[0] = new ManuverNode(_orderEntity, _atDatetime);
-                        var halfOrbit = _manuverLines.EditingNodes[0].TargetOrbit.Period * 0.5;
-                        _manuverLines.EditingNodes[1] = new ManuverNode(_orderEntity, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
-                        _manuverLines.RootSequence.ParentPosition = soiParentPosition;
-                        _navMode = NavMode.HohmannTransferOE;
-                    }
-
 
                     if (ImGui.Button("Interplanetary Transfer"))
                     {
@@ -300,35 +233,16 @@ namespace Pulsar4X.Client
                     if (ImGui.Button("Phase Change"))
                     {
                         _manuverLines.EditingNodes = new ManuverNode[2];
-                        _manuverLines.EditingNodes[0] = new ManuverNode(_orderEntity, _atDatetime);
+                        _manuverLines.EditingNodes[0] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime);
                         var halfOrbit = _manuverLines.EditingNodes[0].TargetOrbit.Period * 0.5;
-                        _manuverLines.EditingNodes[1] = new ManuverNode(_orderEntity, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
+                        _manuverLines.EditingNodes[1] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
                         _navMode = NavMode.PhaseChange;
-                    }
-
-                    if (ImGui.Button("Phase Change 2"))
-                    {
-                        _manuverLines.EditingNodes = new ManuverNode[2];
-                        _manuverLines.EditingNodes[0] = new ManuverNode(_orderEntity, _atDatetime);
-                        var halfOrbit = _manuverLines.EditingNodes[0].TargetOrbit.Period * 0.5;
-                        _manuverLines.EditingNodes[1] = new ManuverNode(_orderEntity, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
-                        _navMode = NavMode.Phasing;
-                    }
-
-                    if (ImGui.Button("High Δv Intercept"))
-                    {
-                        _navMode = NavMode.HighDVIntercept;
-                    }
-
-                    if (ImGui.Button("Porkchop Plot"))
-                    {
-                        _navMode = NavMode.PorkChopPlot;
                     }
 
                     if (ImGui.Button("Escape SOI"))
                     {
                         _manuverLines.EditingNodes = new ManuverNode[1];
-                        _manuverLines.EditingNodes[0] = new ManuverNode(_orderEntity, _atDatetime);
+                        _manuverLines.EditingNodes[0] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime);
                         _navMode = NavMode.EscapeSOI;
                     }
                 }
@@ -336,31 +250,22 @@ namespace Pulsar4X.Client
                 switch (_navMode)
                 {
                     case NavMode.Edit:
-                        DisplayEditMode();
+                        DisplayEditMode(thrust);
                         break;
                     case NavMode.Thrust:
-                        DisplayThrustMode();
+                        DisplayThrustMode(thrust);
                         break;
                     case NavMode.PhaseChange:
-                        DisplayPhaseChangeMode();
-                        break;
-                    case NavMode.Phasing:
-                        DisplayPhasing();
+                        DisplayPhaseChangeMode(system, entity, thrust, massVolume, currentKE);
                         break;
                     case NavMode.HohmannTransfer:
-                        DisplayHohmannMode();
-                        break;
-                    case NavMode.HohmannTransfer2:
-                        DisplayHohmannMode2();
-                        break;
-                    case NavMode.HohmannTransferOE:
-                        DisplayHohmannModeOE();
+                        DisplayHohmannMode(system, entity, soiParent, thrust, massVolume, currentKE);
                         break;
                     case NavMode.InterplanetaryTransfer:
-                        DisplayInterPlanetaryHohmannMode();
+                        DisplayInterPlanetaryHohmannMode(system, entity, soiParent, thrust, massVolume);
                         break;
                     case NavMode.EscapeSOI:
-                        DisplayEscapeSOI();
+                        DisplayEscapeSOI(system, entity, soiParent, thrust, massVolume, currentKE, orbit);
                         break;
                     case NavMode.None:
                         break;
@@ -369,23 +274,48 @@ namespace Pulsar4X.Client
                 }
                 ImGui.Columns(1);
                 ImGui.NewLine();
-                ImGui.Text("Availible Δv: " + Stringify.Velocity(_totalDV));
-                ImGui.Text("Dry Mass:" + Stringify.Mass(_dryMass, "0.######"));
-                ImGui.Text("Total Mass: " + Stringify.Mass(_totalMass));
-                ImGui.Text("Non Fuel Cargo: " + Stringify.Mass(_cargoMass - _fuelMass));
-                var fuelName = _fuelType?.Name ?? "Unknown";
-                ImGui.Text(fuelName + " Fuel: " + Stringify.Mass(_fuelMass));
-                var thrust = _newtonThrust?.ThrustInNewtons ?? 0;
-                ImGui.Text("Total Thrust: " + Stringify.Thrust(thrust));
+                double fuelMass = thrust.TotalFuelKg;
+                double cargoMass = entity.GetView<CargoStorageView>()?.TotalStoredMassKg ?? 0;
+                ImGui.Text("Availible Δv: " + Stringify.Velocity(thrust.DeltaVMps));
+                ImGui.Text("Dry Mass:" + Stringify.Mass(massVolume.DryMassKg, "0.######"));
+                ImGui.Text("Total Mass: " + Stringify.Mass(massVolume.MassKg));
+                ImGui.Text("Non Fuel Cargo: " + Stringify.Mass(cargoMass - fuelMass));
+                var fuelName = string.IsNullOrEmpty(thrust.FuelName) ? "Unknown" : thrust.FuelName;
+                ImGui.Text(fuelName + " Fuel: " + Stringify.Mass(fuelMass));
+                ImGui.Text("Total Thrust: " + Stringify.Thrust(thrust.ThrustNewtons));
             }
             Window.End();
         }
 
-        void DisplayEditMode()
+        /// <summary>Submits one queued burn; the node time centres the burn like the engine does.</summary>
+        void SubmitBurn(Vector3 deltaV, DateTime nodeTime)
         {
+            _uiState.GameClient?.SubmitCommandAsync(new Pulsar4X.Api.NewtonThrustCommand(
+                _entityId, nodeTime, new Vec3(deltaV.X, deltaV.Y, deltaV.Z)));
+        }
+
+        /// <summary>The classic two-burn dispatch shared by the phase-change and Hohmann modes:
+        /// first burn centred half its duration after now, second a fixed delay later.</summary>
+        void SubmitTwoBurns((Vector3 deltaV, double tSec)[] manuvers, ThrustView thrust, MassVolumeView massVolume)
+        {
+            double fuelBurned1 = OrbitalMath.TsiolkovskyFuelUse(massVolume.MassKg, thrust.ExhaustVelocityMps, manuvers[0].deltaV.Length());
+            double secondsBurn1 = thrust.FuelBurnRateKgPerSec > 0 ? fuelBurned1 / thrust.FuelBurnRateKgPerSec : 0;
+            var manuverNodeTime1 = _atDatetime + TimeSpan.FromSeconds(secondsBurn1 * 0.5);
+
+            SubmitBurn(manuvers[0].deltaV, manuverNodeTime1);
+
+            var manuverNodeTime2 = manuverNodeTime1 + TimeSpan.FromSeconds(manuvers[1].tSec);
+            SubmitBurn(manuvers[1].deltaV, manuverNodeTime2);
+        }
+
+        void DisplayEditMode(ThrustView thrust)
+        {
+            if (_manuverLines.EditingNodes.Length == 0)
+                return;
+
             bool changes = false;
-            float maxprogradeDV = (float)(_totalDV - Math.Abs(_radialDV));
-            float maxradialDV = (float)(_totalDV - Math.Abs(_progradeDV));
+            float maxprogradeDV = (float)(thrust.DeltaVMps - Math.Abs(_radialDV));
+            float maxradialDV = (float)(thrust.DeltaVMps - Math.Abs(_progradeDV));
             double tseconds = 0;
             if (ImGui.Button("-1##pg"))
             {
@@ -399,7 +329,6 @@ namespace Pulsar4X.Client
             }ImGui.SameLine();
             if (ImGui.SliderFloat("Prograde Δv", ref _progradeDV, -maxprogradeDV, maxprogradeDV))
             {
-                //Calcs();
                 changes = true;
             }
 
@@ -454,20 +383,19 @@ namespace Pulsar4X.Client
             if (_uiState.SelectedSysMapRender != null && !_uiState.SelectedSysMapRender.SelectedEntityExtras.Contains(_manuverLines))
                 _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_manuverLines);
 
-            if(_orderEntity.Manager == null)
-                throw new NullReferenceException();
-
-            var deltat = _manuverLines.EditingNodes[0].NodeTime - _orderEntity.Manager.StarSysDateTime;
+            var deltat = _manuverLines.EditingNodes[0].NodeTime - _uiState.PrimarySystemDateTime;
             ImGui.Text("node in: " + deltat);
-            //if (ImGui.Button("Make it so")) { }
         }
 
 
-        void DisplayThrustMode()
+        void DisplayThrustMode(ThrustView thrust)
         {
+            if (_manuverLines.EditingNodes.Length == 0)
+                return;
+
             bool changes = false;
-            float maxprogradeDV = (float)(_totalDV - Math.Abs(_radialDV));
-            float maxradialDV = (float)(_totalDV - Math.Abs(_progradeDV));
+            float maxprogradeDV = (float)(thrust.DeltaVMps - Math.Abs(_radialDV));
+            float maxradialDV = (float)(thrust.DeltaVMps - Math.Abs(_progradeDV));
             double tseconds = 0;
 
             if (ImGui.Button("-1##pg"))
@@ -546,29 +474,25 @@ namespace Pulsar4X.Client
             if (_uiState.SelectedSysMapRender != null && !_uiState.SelectedSysMapRender.SelectedEntityExtras.Contains(_manuverLines))
                 _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_manuverLines);
 
-            if(_orderEntity.Manager == null)
-                throw new NullReferenceException();
-
-            var deltat = _manuverLines.EditingNodes[0].NodeTime - _orderEntity.Manager.StarSysDateTime;
+            var deltat = _manuverLines.EditingNodes[0].NodeTime - _uiState.PrimarySystemDateTime;
             ImGui.Text("node in: " + deltat);
 
             if (ImGui.Button("Make it so"))
             {
-                _manuverLines.EditingNodes[0].NodeName = "Thrust";
+                var node = _manuverLines.EditingNodes[0];
+                node.NodeName = "Thrust";
+                SubmitBurn(new Vector3(node.Radial, node.Prograde, node.Normal), node.NodeTime);
                 _manuverLines.AddSequence("Thrust Manuver");
                 _navMode = NavMode.None;
             }
         }
 
 
-        void DisplayPhaseChangeMode()
+        void DisplayPhaseChangeMode(IClientSystem system, EntitySnapshot entity, ThrustView thrust, MassVolumeView massVolume, KeplerElements currentKE)
         {
             ImGui.SliderAngle("PhaseAngle", ref _phaseAngleRadians);
 
-            if(_currentKE == null)
-                throw new NullReferenceException();
-
-            _manuvers = InterceptCalcs.OrbitPhasingManuvers(_currentKE.Value, _sgp, _atDatetime, _phaseAngleRadians);
+            _manuvers = OrbitalMath.OrbitPhasingManuvers(currentKE, currentKE.StandardGravParameter, _atDatetime, _phaseAngleRadians);
 
             double totalManuverDV = 0;
             foreach (var manuver in _manuvers)
@@ -584,123 +508,42 @@ namespace Pulsar4X.Client
 
             if (ImGui.Button("Make it so"))
             {
-
-                double fuelBurned1 = OrbitMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, _manuvers[0].deltaV.Length());
-                double secondsBurn1 = fuelBurned1 / _burnRate;
-                var manuverNodeTime1 = _atDatetime + TimeSpan.FromSeconds(secondsBurn1 * 0.5);
-
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, _manuvers[0].deltaV, secondsBurn1);
-
-                if(_fuelType == null)
-                    throw new NullReferenceException();
-
-                double mass2 = _totalMass - (fuelBurned1 * _fuelType.MassPerUnit);
-                double fuelBurned2 = OrbitMath.TsiolkovskyFuelUse(mass2, _exhaustVelocity, _manuvers[1].deltaV.Length());
-                double secondsBurn2 = fuelBurned2 / _burnRate;
-                var manuverNodeTime2 = manuverNodeTime1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
-
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, _manuvers[1].deltaV, secondsBurn2);
+                SubmitTwoBurns(_manuvers, thrust, massVolume);
             }
         }
 
-        void DisplayPhasing()
+        void DisplayHohmannMode(IClientSystem system, EntitySnapshot entity, EntitySnapshot soiParent, ThrustView thrust, MassVolumeView massVolume, KeplerElements currentKE)
         {
-            var soiParent = _orderEntity.GetSOIParentEntity();
-            if (soiParent == null || _currentKE == null)
-                throw new NullReferenceException();
-
-            double mySMA = _currentKE.Value.SemiMajorAxis;
-            ImGui.SliderAngle("PhaseAngle", ref _phaseAngleRadians);
-            ImGui.SliderInt("Revolutions", ref _kRevolutions, 1, 10);
-
-            if (_currentKE == null)
-                throw new NullReferenceException();
-
-            // _manuvers = OrbitalMath.Phasing(_sgp, lowestOrbit, _phaseAngleRadians, _currentKE.Value, 0, _kRevolutions);
-
-            double totalManuverDV = 0;
-            if(_manuvers != null)
-            {
-                foreach (var manuver in _manuvers)
-                {
-                    ImGui.Text(manuver.deltaV.Length() + "Δv");
-                    totalManuverDV += manuver.deltaV.Length();
-                    ImGui.Text("Seconds: " + manuver.tSec);
-                }
-            }
-
-            ImGui.Text("Total Δv");
-            ImGui.SameLine();
-            ImGui.Text("for all manuvers: " + Stringify.Velocity(totalManuverDV));
-
-            if (ImGui.Button("Make it so"))
-            {
-
-                double fuelBurned1 = OrbitMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, _manuvers[0].deltaV.Length());
-                double secondsBurn1 = fuelBurned1 / _burnRate;
-                var manuverNodeTime1 = _atDatetime + TimeSpan.FromSeconds(secondsBurn1 * 0.5);
-
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, _manuvers[0].deltaV, secondsBurn1);
-
-                if (_fuelType == null)
-                    throw new NullReferenceException();
-
-                double mass2 = _totalMass - (fuelBurned1 * _fuelType.MassPerUnit);
-                double fuelBurned2 = OrbitMath.TsiolkovskyFuelUse(mass2, _exhaustVelocity, _manuvers[1].deltaV.Length());
-                double secondsBurn2 = fuelBurned2 / _burnRate;
-                var manuverNodeTime2 = manuverNodeTime1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
-
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, _manuvers[1].deltaV, secondsBurn2);
-            }
-        }
-
-        private float _targetSMA = 0;
-
-        void DisplayHohmannMode()
-        {
-            var soiParent = _orderEntity.GetSOIParentEntity();
-            if(soiParent == null || _currentKE == null)
-                throw new NullReferenceException();
-
-            double mySMA = _currentKE.Value.SemiMajorAxis;
+            double mySMA = currentKE.SemiMajorAxis;
             float smaMin = 1;
-            float smaMax = (float)soiParent.GetSOI_m();
+            float smaMax = (float)Math.Min(soiParent.SoiRadiusM(), 1e13);
 
-            if(ImGui.Combo("Target Object", ref _selectedSibling, _siblingNames, _siblingNames.Length  ))
-            {
-                Entity selectedSib = _siblingEntities[_selectedSibling];
-                if(selectedSib.HasDataBlob<OrbitDB>())
-                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitDB>().SemiMajorAxis;
-                if(selectedSib.HasDataBlob<OrbitUpdateOftenDB>())
-                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-                if(selectedSib.HasDataBlob<NewtonMoveDB>())
-                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonMoveDB >().GetElements().SemiMajorAxis;
-            }
+            TargetBodyCombo(ChildrenOf(system, soiParent.Id), ref _selectedSiblingId);
 
             //TODO this should be radius from orbiting body not major axies.
             ImGui.SliderFloat("Target SemiMajorAxis", ref _targetSMA, smaMin, smaMax);
-            _manuvers = OrbitalMath.Hohmann2(_sgp, mySMA, _targetSMA);
+            _manuvers = OrbitalMath.Hohmann2(currentKE.StandardGravParameter, mySMA, _targetSMA);
 
             double totalManuverDV = 0;
             foreach (var manuver in _manuvers)
             {
                 var dv = manuver.deltaV.Length();
                 totalManuverDV += dv;
-                double fuelBurned = OrbitMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, dv);
-                double secondsBurn = fuelBurned / _burnRate;
+                double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(massVolume.MassKg, thrust.ExhaustVelocityMps, dv);
+                double secondsBurn = thrust.FuelBurnRateKgPerSec > 0 ? fuelBurned / thrust.FuelBurnRateKgPerSec : 0;
                 ImGui.Text(dv + "Δv");
                 ImGui.Text(fuelBurned + " fuel");
                 ImGui.Text(Stringify.Quantity(secondsBurn, "0.###") + " Second Burn");
 
             }
 
-            if(totalManuverDV > _totalDV)
+            if(totalManuverDV > thrust.DeltaVMps)
                 ImGui.TextColored(new Vector4(0.9f, 0, 0, 1), "Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
             else
                 ImGui.Text("Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
-            if(totalManuverDV > 0)
+            if(totalManuverDV > 0 && _manuverLines.EditingNodes.Length >= 2)
             {
-                DateTime t1 = _orderEntity.StarSysDateTime + TimeSpan.FromSeconds(_manuvers[0].tSec);
+                DateTime t1 = _uiState.PrimarySystemDateTime + TimeSpan.FromSeconds(_manuvers[0].tSec);
                 DateTime t2 = t1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
                 _manuverLines.EditingNodes[0].SetNode(_manuvers[0].deltaV, t1 );
                 _manuverLines.EditingNodes[1].PriorOrbit = _manuverLines.EditingNodes[0].TargetOrbit;
@@ -709,21 +552,7 @@ namespace Pulsar4X.Client
 
             if (ImGui.Button("Make it so"))
             {
-                double fuelBurned1 = OrbitMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, _manuvers[0].deltaV.Length());
-                double secondsBurn1 = fuelBurned1 / _burnRate;
-                var manuverNodeTime1 = _atDatetime + TimeSpan.FromSeconds(secondsBurn1 * 0.5);
-
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, _manuvers[0].deltaV, secondsBurn1);
-
-                if(_fuelType == null)
-                    throw new NullReferenceException();
-
-                double mass2 = _totalMass - (fuelBurned1 * _fuelType.MassPerUnit);
-                double fuelBurned2 = OrbitMath.TsiolkovskyFuelUse(mass2, _exhaustVelocity, _manuvers[1].deltaV.Length());
-                double secondsBurn2 = fuelBurned2 / _burnRate;
-                var manuverNodeTime2 = manuverNodeTime1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
-
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, _manuvers[1].deltaV, secondsBurn2);
+                SubmitTwoBurns(_manuvers, thrust, massVolume);
 
                 var newseq = new ManuverSequence();
                 newseq.SequenceName = "Hohmann Transfer";
@@ -735,271 +564,35 @@ namespace Pulsar4X.Client
             }
         }
 
-        void DisplayHohmannMode2()
+        void DisplayInterPlanetaryHohmannMode(IClientSystem system, EntitySnapshot entity, EntitySnapshot soiParent, ThrustView thrust, MassVolumeView massVolume)
         {
-            var soiParent = _orderEntity.GetSOIParentEntity();
-            if(soiParent == null || _currentKE == null)
-                throw new NullReferenceException();
+            // Bodies orbiting the grandparent (e.g. other planets when orbiting a planet's moonspace)
+            var grandParent = soiParent.GetSoiParent(system);
+            var uncles = grandParent != null
+                ? ChildrenOf(system, grandParent.Id)
+                : new List<(EntitySnapshot Body, OrbitView Orbit)>();
+            uncles.RemoveAll(u => u.Body.Id == soiParent.Id);
 
-            double mySMA = _currentKE.Value.SemiMajorAxis;
-            float smaMin = 1;
-            float smaMax = (float)soiParent.GetSOI_m();
+            var selectedUncle = TargetBodyCombo(uncles, ref _selectedUncleId);
 
-            if(ImGui.Combo("Target Object", ref _selectedSibling, _siblingNames, _siblingNames.Length  ))
+            if (selectedUncle != null)
             {
-                Entity selectedSib = _siblingEntities[_selectedSibling];
-                if(selectedSib.HasDataBlob<OrbitDB>())
-                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitDB>().SemiMajorAxis;
-                if(selectedSib.HasDataBlob<OrbitUpdateOftenDB>())
-                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-                if(selectedSib.HasDataBlob<NewtonMoveDB>())
-                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonMoveDB >().GetElements().SemiMajorAxis;
-
-            }
-
-            //TODO this should be radius from orbiting body not major axies.
-            ImGui.SliderFloat("Target SemiMajorAxis", ref _targetSMA, smaMin, smaMax);
-            _manuvers = OrbitalMath.Hohmann2(_sgp, mySMA, _targetSMA);
-
-            double totalManuverDV = 0;
-            int i = 0;
-            foreach (var manuver in _manuvers)
-            {
-                var time = manuver.tSec;
-                var dv = manuver.deltaV.Length();
-                totalManuverDV += dv;
-                double fuelBurned = OrbitMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, dv);
-                double burnTime = fuelBurned / _burnRate;
-                ImGui.Text("Burn # " + i);
-                ImGui.Text(time + "time");
-                ImGui.Text(dv + "Δv");
-                ImGui.Text(fuelBurned + " fuel");
-                ImGui.Text(Stringify.Quantity(burnTime, "0.###") + " Seconds of Burn");
-                i++;
-            }
-
-            if(totalManuverDV > _totalDV)
-                ImGui.TextColored(new Vector4(0.9f, 0, 0, 1), "Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
-            else
-                ImGui.Text("Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
-            if(totalManuverDV > 0)
-            {
-                DateTime t1 = _orderEntity.StarSysDateTime + TimeSpan.FromSeconds(_manuvers[0].tSec);
-                DateTime t2 = t1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
-                _manuverLines.EditingNodes[0].SetNode(_manuvers[0].deltaV, t1 );
-                _manuverLines.EditingNodes[1].PriorOrbit = _manuverLines.EditingNodes[0].TargetOrbit;
-                _manuverLines.EditingNodes[1].SetNode(_manuvers[1].deltaV, t2);
-            }
-
-            if (ImGui.Button("Make it so"))
-            {
-                double fuelBurned1 = OrbitMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, _manuvers[0].deltaV.Length());
-                double secondsBurn1 = fuelBurned1 / _burnRate;
-                var manuverNodeTime1 = _atDatetime + TimeSpan.FromSeconds(secondsBurn1 * 0.5);
-
-                var startObt = _manuverLines.EditingNodes[0].PriorOrbit;
-                var tgtObt = _manuverLines.EditingNodes[0].TargetOrbit;
-                NewtonSimpleCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, startObt, tgtObt );
-
-                if(_fuelType == null)
-                    throw new NullReferenceException();
-
-                double mass2 = _totalMass - (fuelBurned1 * _fuelType.MassPerUnit);
-                double fuelBurned2 = OrbitMath.TsiolkovskyFuelUse(mass2, _exhaustVelocity, _manuvers[1].deltaV.Length());
-                double secondsBurn2 = fuelBurned2 / _burnRate;
-                var manuverNodeTime2 = manuverNodeTime1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
-
-                startObt = _manuverLines.EditingNodes[1].PriorOrbit;
-                tgtObt = _manuverLines.EditingNodes[1].TargetOrbit;
-                NewtonSimpleCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, startObt, tgtObt );
-
-                var newseq = new ManuverSequence();
-                newseq.SequenceName = "Hohmann Transfer";
-                _manuverLines.EditingNodes[0].NodeName = "Raise Periapsis";
-                newseq.ManuverNodes.Add(_manuverLines.EditingNodes[0]);
-                _manuverLines.EditingNodes[1].NodeName = "Circularise";
-                newseq.ManuverNodes.Add(_manuverLines.EditingNodes[1]);
-                _manuverLines.SelectedSequence.ManuverSequences.Add(newseq);
-            }
-        }
-
-        void DisplayHohmannModeOE()
-        {
-            var soiParent = _orderEntity.GetSOIParentEntity();
-            if(soiParent == null || _currentKE == null)
-                throw new NullReferenceException();
-
-            double intSMA = _currentKE.Value.SemiMajorAxis;
-            double trueanomInt =0.0;
-            double trueanomTgt =0.0;
-            double lopInt =0.0;
-            double lopTgt =0.0;
-            float smaMin = 1;
-            float smaMax = (float)soiParent.GetSOI_m();
-
-            if(ImGui.Combo("Target Object", ref _selectedSibling, _siblingNames, _siblingNames.Length  ))
-            {
-                Entity selectedSib = _siblingEntities[_selectedSibling];
-                var TgtOrbitDB = _siblingEntities[_selectedSibling].GetDataBlob<OrbitDB>();
-                var IntOrbitDB = _orderEntity.GetDataBlob<OrbitDB>();
-
-                if(selectedSib.HasDataBlob<OrbitDB>())
-                    _targetSMA = (float)TgtOrbitDB.SemiMajorAxis;
-                if(selectedSib.HasDataBlob<OrbitUpdateOftenDB>())
-                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-                if(selectedSib.HasDataBlob<NewtonMoveDB>())
-                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonMoveDB >().GetElements().SemiMajorAxis;
-
-                trueanomTgt = OrbitMath.GetTrueAnomaly(TgtOrbitDB,_atDatetime);
-                trueanomInt = OrbitMath.GetTrueAnomaly(IntOrbitDB,_atDatetime);
-
-                lopTgt = OrbitMath.GetLongditudeOfPeriapsis(TgtOrbitDB.Inclination, TgtOrbitDB.ArgumentOfPeriapsis, TgtOrbitDB.LongitudeOfAscendingNode);
-                lopInt = OrbitMath.GetLongditudeOfPeriapsis(IntOrbitDB.Inclination, IntOrbitDB.ArgumentOfPeriapsis, IntOrbitDB.LongitudeOfAscendingNode);
-
-                _truelongTgt = trueanomTgt + lopTgt;
-                _truelongInt = trueanomInt + lopInt;
-            }
-
-            //TODO this should be radius from orbiting body not major axies.
-            ImGui.SliderFloat("Target SemiMajorAxis", ref _targetSMA, smaMin, smaMax);
-
-            _manuvers = OrbitalMath.HohmannOE(_sgp, intSMA, _truelongInt, _targetSMA, _truelongTgt);
-
-            double totalManuverTime = 0;
-            double totalManuverDV = 0;
-            int i = 0;
-            foreach (var manuver in _manuvers)
-            {
-                var time = manuver.tSec;
-                var dv = manuver.deltaV.Length();
-                totalManuverTime += time;
-                totalManuverDV += dv;
-                double fuelBurned = OrbitMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, dv);
-                double burnTime = fuelBurned / _burnRate;
-                ImGui.Text("Burn # " + i);
-                ImGui.Text(time + "time");
-                ImGui.Text(dv + "Δv");
-                ImGui.Text(fuelBurned + " fuel");
-                ImGui.Text(Stringify.Quantity(burnTime, "0.###") + " Seconds of Burn");
-                i++;
-            }
-
-            if(totalManuverDV > _totalDV)
-                ImGui.TextColored(new Vector4(0.9f, 0, 0, 1), "Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
-            else
-                ImGui.Text("Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
-            if(totalManuverDV > 0)
-            {
-                DateTime t1 = _orderEntity.StarSysDateTime + TimeSpan.FromSeconds(_manuvers[0].tSec);
-                DateTime t2 = t1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
-                _manuverLines.EditingNodes[0].SetNode(_manuvers[0].deltaV, t1 );
-                _manuverLines.EditingNodes[1].PriorOrbit = _manuverLines.EditingNodes[0].TargetOrbit;
-                _manuverLines.EditingNodes[1].SetNode(_manuvers[1].deltaV, t2);
-            }
-
-            if (ImGui.Button("Make it so"))
-            {
-                var mvr = OrbitalMath.HohmannOE2(_sgp, intSMA, _truelongInt, _targetSMA, _truelongTgt);
-
-                var timeAtFirstManuver = _atDatetime + TimeSpan.FromSeconds(mvr[0, 1]);
-                var timeAtSecondManuver = _atDatetime + TimeSpan.FromSeconds(mvr[0, 3]);
-                KeplerElements transferOrbit = new KeplerElements()
-                {
-                    SemiMajorAxis = mvr[1,0],
-                    Eccentricity = mvr[1,1],
-                    LoAN = mvr[1,2],
-                    AoP = 0,
-                    Inclination = 0,
-                    StandardGravParameter = _sgp
-
-                };
-                Manuver navManuver = new Manuver()
-                {
-                    TypeOfManuver = Manuver.ManuverType.NewtonSimple,
-                    StartDateTime = timeAtFirstManuver,
-                    StartSOIParent = soiParent,
-                    StartKepler = (KeplerElements)_currentKE,
-                    EndSOIParent = _siblingEntities[_selectedSibling],
-                    EndKepler = transferOrbit,
-                    EndDateTime = timeAtSecondManuver
-                };
-                NavSequenceCommand.CreateNewCommand(_orderEntity, navManuver);
-
-
-
-
-                /*
-                double fuelBurned1 = OrbitMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, _manuvers[0].deltaV.Length());
-                double secondsBurn1 = fuelBurned1 / _burnRate;
-                var manuverNodeTime1 = _atDatetime + TimeSpan.FromSeconds(secondsBurn1 * 0.5);
-
-                var startObt = _manuverLines.EditingNodes[0].PriorOrbit;
-                var tgtObt = _manuverLines.EditingNodes[0].TargetOrbit;
-                NewtonSimpleCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, startObt, tgtObt );
-
-                if(_fuelType == null)
-                    throw new NullReferenceException();
-
-                double mass2 = _totalMass - (fuelBurned1 * _fuelType.MassPerUnit);
-                double fuelBurned2 = OrbitMath.TsiolkovskyFuelUse(mass2, _exhaustVelocity, _manuvers[1].deltaV.Length());
-                double secondsBurn2 = fuelBurned2 / _burnRate;
-                var manuverNodeTime2 = manuverNodeTime1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
-
-                startObt = _manuverLines.EditingNodes[1].PriorOrbit;
-                tgtObt = _manuverLines.EditingNodes[1].TargetOrbit;
-                NewtonSimpleCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, startObt, tgtObt );
-
-                var newseq = new ManuverSequence();
-                newseq.SequenceName = "Hohmann Transfer";
-                _manuverLines.EditingNodes[0].NodeName = "Raise Periapsis";
-                newseq.ManuverNodes.Add(_manuverLines.EditingNodes[0]);
-                _manuverLines.EditingNodes[1].NodeName = "Circularise";
-                newseq.ManuverNodes.Add(_manuverLines.EditingNodes[1]);
-                _manuverLines.SelectedSequence.ManuverSequences.Add(newseq);
-                */
-            }
-        }
-
-        void DisplayInterPlanetaryHohmannMode()
-        {
-            var soiParent = _orderEntity.GetSOIParentEntity();
-            if(soiParent == null || _currentKE == null)
-                throw new NullReferenceException();
-
-            double mySMA = _currentKE.Value.SemiMajorAxis;
-            float smaMax = (float)soiParent.GetSOI_m();
-
-            if (ImGui.Combo("Target Object", ref _selectedUncle, _uncleNames, _uncleNames.Length))
-            {
-                Entity selectedUnc = _uncleEntites[_selectedUncle];
-                if (selectedUnc.HasDataBlob<OrbitDB>())
-                    _targetSMA = (float)_uncleEntites[_selectedUncle].GetDataBlob<OrbitDB>().SemiMajorAxis;
-                if (selectedUnc.HasDataBlob<OrbitUpdateOftenDB>())
-                    _targetSMA = (float)_uncleEntites[_selectedUncle].GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-                if (selectedUnc.HasDataBlob<NewtonMoveDB>())
-                    _targetSMA = (float)_uncleEntites[_selectedUncle].GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
-            }
-
-            //TODO this should be radius from orbiting body not major axies.
-            //ImGui.SliderFloat("Target SemiMajorAxis", ref _targetSMA, smaMin, smaMax);
-            if(_selectedUncle > -1)
-            {
-                _manuvers = InterceptCalcs.InterPlanetaryHohmann(soiParent, _uncleEntites[_selectedUncle], _orderEntity);
+                _manuvers = SnapshotMoves.InterPlanetaryHohmann(soiParent, selectedUncle, entity, system, _atDatetime);
 
                 double totalManuverDV = 0;
                 foreach (var manuver in _manuvers)
                 {
                     var dv = manuver.deltaV.Length();
                     totalManuverDV += dv;
-                    double fuelBurned = OrbitMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, dv);
-                    double secondsBurn = fuelBurned / _burnRate;
+                    double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(massVolume.MassKg, thrust.ExhaustVelocityMps, dv);
+                    double secondsBurn = thrust.FuelBurnRateKgPerSec > 0 ? fuelBurned / thrust.FuelBurnRateKgPerSec : 0;
                     ImGui.Text(dv + "Δv");
                     ImGui.Text(fuelBurned + " fuel");
                     ImGui.Text(Stringify.Quantity(secondsBurn, "0.###") + " Second Burn");
 
                 }
 
-                if (totalManuverDV > _totalDV)
+                if (totalManuverDV > thrust.DeltaVMps)
                     ImGui.TextColored(new Vector4(0.9f, 0, 0, 1), "Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
                 else
                     ImGui.Text("Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
@@ -1007,51 +600,29 @@ namespace Pulsar4X.Client
                 if (ImGui.Button("Make it so"))
                 {
                     var date = _atDatetime;
-                    var mass = _totalMass;
+                    var mass = massVolume.MassKg;
                     foreach (var manuver in _manuvers)
                     {
-
-                        double fuelBurned = OrbitMath.TsiolkovskyFuelUse(mass, _exhaustVelocity, manuver.deltaV.Length());
-                        double secondsBurn = fuelBurned / _burnRate;
+                        double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(mass, thrust.ExhaustVelocityMps, manuver.deltaV.Length());
+                        double secondsBurn = thrust.FuelBurnRateKgPerSec > 0 ? fuelBurned / thrust.FuelBurnRateKgPerSec : 0;
                         date += TimeSpan.FromSeconds(manuver.tSec);
                         var manuverNodeTime = date + TimeSpan.FromSeconds(secondsBurn * 0.5);
                         mass -= fuelBurned;
 
-                        NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime, manuver.deltaV, secondsBurn);
+                        SubmitBurn(manuver.deltaV, manuverNodeTime);
                     }
                 }
             }
         }
 
-        void DisplayHighDVIntercept()
-        {
-            if(ImGui.Combo("Target Object", ref _selectedSibling, _siblingNames, _siblingNames.Length  ))
-            {
-                Entity selectedSib = _siblingEntities[_selectedSibling];
-                if(selectedSib.HasDataBlob<OrbitDB>())
-                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitDB>().SemiMajorAxis;
-                if(selectedSib.HasDataBlob<OrbitUpdateOftenDB>())
-                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-                if(selectedSib.HasDataBlob<NewtonMoveDB>())
-                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonMoveDB >().GetElements().SemiMajorAxis;
-            }
-        }
-
         private bool _EscapeVelocityHigh = true;
-        void DisplayEscapeSOI()
+        void DisplayEscapeSOI(IClientSystem system, EntitySnapshot entity, EntitySnapshot soiParent, ThrustView thrust, MassVolumeView massVolume, KeplerElements currentKE, OrbitView orbit)
         {
-            var period = _orderEntity.GetDataBlob<OrbitDB>().OrbitalPeriod.TotalSeconds;
-            var orbitDB = _orderEntity.GetDataBlob<OrbitDB>();
-            var soiParent = _orderEntity.GetSOIParentEntity();
-
-            if(soiParent == null || _currentKE == null)
-                throw new NullReferenceException();
-
-            var parentState = MoveMath.GetRelativeState(soiParent);
+            var parentState = soiParent.GetRelativeState(_uiState.PrimarySystemDateTime);
             var parentAngle = Math.Atan2(parentState.pos.Y, parentState.pos.X);
 
-            double orbitalPeriod = orbitDB.OrbitalPeriod.TotalSeconds;
-            double e = orbitDB.Eccentricity;
+            double orbitalPeriod = currentKE.Period;
+            double e = currentKE.Eccentricity;
 
             var wc1 = Math.Sqrt((1 - e) / (1 + e));
             var wc2 = Math.Tan(parentAngle / 2);
@@ -1064,32 +635,28 @@ namespace Pulsar4X.Client
 
             double secondsToManuver = phaseTime;
             if (!_EscapeVelocityHigh)
-                secondsToManuver += period * 0.5;
+                secondsToManuver += orbitalPeriod * 0.5;
 
-            double mySMA = _currentKE.Value.SemiMajorAxis;
-            //double escapeSMA =
             var manuverDateTime = _atDatetime + TimeSpan.FromSeconds(secondsToManuver);
-            var manuverPos = MoveMath.GetRelativeFuturePosition(_orderEntity,manuverDateTime);
-            var manuverVel = MoveMath.GetRelativeFutureVelocity(_orderEntity, manuverDateTime);
-            var soi = soiParent.GetDataBlob<OrbitDB>().SOI_m;
-            var manuver = OrbitalMath.Hohmann2(_sgp, manuverPos.Length(), soi)[0];
-
+            var manuverPos = entity.GetRelativeState(manuverDateTime).pos;
+            var soi = soiParent.SoiRadiusM();
+            if (double.IsInfinity(soi))
+            {
+                ImGui.Text("Already orbiting the system primary — there is no SOI to escape.");
+                return;
+            }
+            var manuver = OrbitalMath.Hohmann2(currentKE.StandardGravParameter, manuverPos.Length(), soi)[0];
 
             manuver.deltaV.Y += 1;
             var totalManuverDV = manuver.deltaV.Length();
-            if(totalManuverDV > _totalDV)
+            if(totalManuverDV > thrust.DeltaVMps)
                 ImGui.TextColored(new Vector4(0.9f, 0, 0, 1), "Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
             else
                 ImGui.Text("Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
 
             if (ImGui.Button("Make it so"))
             {
-
-                double fuelBurned = OrbitMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, manuver.deltaV.Length());
-                double secondsBurn = fuelBurned / _burnRate;
-                //var manuverNodeTime = _atDatetime + TimeSpan.FromSeconds(secondsBurn * 0.5);
-
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverDateTime, manuver.deltaV, secondsBurn);
+                SubmitBurn(manuver.deltaV, manuverDateTime);
             }
 
         }

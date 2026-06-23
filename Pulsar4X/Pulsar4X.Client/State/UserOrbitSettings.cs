@@ -17,6 +17,21 @@ public class UserOrbitSettings
         Ship
     }
 
+    /// <summary>Maps the API body classification to the client's display enum (used for icons,
+    /// tooltips and the shared map view-filter).</summary>
+    internal static OrbitBodyType FromBodyKind(Pulsar4X.Api.BodyKind kind) => kind switch
+    {
+        Pulsar4X.Api.BodyKind.Star => OrbitBodyType.Star,
+        Pulsar4X.Api.BodyKind.Planet => OrbitBodyType.Planet,
+        Pulsar4X.Api.BodyKind.DwarfPlanet => OrbitBodyType.DwarfPlanet,
+        Pulsar4X.Api.BodyKind.Moon => OrbitBodyType.Moon,
+        Pulsar4X.Api.BodyKind.Asteroid => OrbitBodyType.Asteroid,
+        Pulsar4X.Api.BodyKind.Comet => OrbitBodyType.Comet,
+        Pulsar4X.Api.BodyKind.Colony => OrbitBodyType.Colony,
+        Pulsar4X.Api.BodyKind.Ship => OrbitBodyType.Ship,
+        _ => OrbitBodyType.Unknown,
+    };
+
     public static readonly string[] OrbitBodyTypeTooltips = new []
     {
         "Unknown", "Stars", "Planets", "Dwarf Planets", "Moons", "Asteroids",

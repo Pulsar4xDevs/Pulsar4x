@@ -1,118 +1,51 @@
 using System;
-using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Api;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using Vector2 = Pulsar4X.Orbital.Vector2;
 using Vector3 = Pulsar4X.Orbital.Vector3;
-using Pulsar4X.Orbits;
-using Pulsar4X.Galaxy;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
     public class ChangeCurrentOrbitWindow : PulsarGuiWindow
     {
-        EntityState OrderingEntity;
-        OrbitDB? _orderEntityOrbit;
-
-        float _maxDV;
-
-        Vector3 _deltaV_MS;
+        int _entityId;
+        string _systemId = "";
 
         DateTime _actionDateTime;
-
-        Vector3 _orbitalVelocityAtChange_m = Orbital.Vector3.NaN;
-        double _originalAngle = double.NaN;
-
-        double _newOrbitalSpeed_m = double.NaN;
-        Vector3 _newOrbitalVelocity_m = Orbital.Vector3.NaN;
-        double _newAngle = double.NaN;
-
-        double _massOrderingEntity = double.NaN;
-        double _massParentBody = double.NaN;
-        double _stdGravParam_m = double.NaN;
-
-        Vector3 _positionAtChange_m;
-
+        Vector3 _deltaV_MS;
         KeplerElements _ke_m;
-
-        string _displayText;
-        string _tooltipText = "";
         OrbitOrderIcon? _orbitWidget;
-        private NewtonionOrderUI? _newtonUI;
-        private double _eccentricity;
-        private double Eccentricity
-        {
-            get { return _eccentricity; }
-            set
-            {
-                if (_newtonUI != null)
-                    _newtonUI.Eccentricity = value;
-                _eccentricity = value;
-            }
-        }
+        NewtonionOrderUI _newtonUI = new();
+        bool _recalc;
 
-        private ChangeCurrentOrbitWindow(EntityState entityState)
+        private ChangeCurrentOrbitWindow(int entityId, string systemId)
         {
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
-
-            OrderingEntity = entityState;
-            OnEntityChange(entityState);
-
-            _displayText = "Change Orbit: " + OrderingEntity.Name;
-            _tooltipText = "Expend Dv to change orbit";
-
-            if (OrderingEntity.Entity.TryGetDataBlob<NewtonThrustAbilityDB>(out var propDB))
-            {
-                _maxDV = (float)propDB.DeltaV;
-            }
+            OnEntityChange(entityId, systemId);
         }
 
         internal static ChangeCurrentOrbitWindow GetInstance(EntityState entity)
         {
             if (!_uiState.LoadedWindows.ContainsKey(typeof(ChangeCurrentOrbitWindow)))
             {
-                return new ChangeCurrentOrbitWindow(entity);
+                return new ChangeCurrentOrbitWindow(entity.Id, entity.StarSystemId!);
             }
             var instance = (ChangeCurrentOrbitWindow)_uiState.LoadedWindows[typeof(ChangeCurrentOrbitWindow)];
-            if (instance.OrderingEntity != entity || !instance.IsActive)
-                instance.OnEntityChange(entity);
+            if (instance._entityId != entity.Id || !instance.IsActive)
+                instance.OnEntityChange(entity.Id, entity.StarSystemId!);
             return instance;
         }
 
-        void OnEntityChange(EntityState entity)
+        void OnEntityChange(int entityId, string systemId)
         {
-            OrderingEntity = entity;
+            _entityId = entityId;
+            _systemId = systemId;
             _actionDateTime = _uiState.PrimarySystemDateTime;
-
-            if (!entity.Entity.TryGetDataBlob<OrbitDB>(out _orderEntityOrbit))
-                return;
-
-            if (_orderEntityOrbit.Parent == null)
-                throw new NullReferenceException("Orbit parent cannot be null");
-
-            if (!_orderEntityOrbit.Parent.TryGetDataBlob<MassVolumeDB>(out var parentMassDB))
-                throw new NullReferenceException("Parent must have MassVolumeDB");
-
-            if (!OrderingEntity.Entity.TryGetDataBlob<MassVolumeDB>(out var entityMassDB))
-                throw new NullReferenceException("Entity must have MassVolumeDB");
-
-            if (!entity.Entity.TryGetDataBlob<NewtonThrustAbilityDB>(out var newtonDB))
-                throw new NullReferenceException("Entity must have NewtonThrustAbilityDB");
-
-            _massParentBody = parentMassDB.MassDry;
-            _massOrderingEntity = entityMassDB.MassDry;
-            _stdGravParam_m = GeneralMath.StandardGravitationalParameter(_massOrderingEntity + _massParentBody);
-
-            _positionAtChange_m = _orderEntityOrbit.GetPosition(_actionDateTime);
-            var velAtChange2d = OrbitProcessor.GetOrbitalVector(_orderEntityOrbit, _actionDateTime);
-            _orbitalVelocityAtChange_m = new Vector3(velAtChange2d.X, velAtChange2d.Y, 0);
-            _originalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
-
-            _newtonUI = new NewtonionOrderUI(newtonDB, _massOrderingEntity);
-
+            _newtonUI = new NewtonionOrderUI();
+            _deltaV_MS = Vector3.Zero;
+            RemoveWidget();
             IsActive = true;
         }
 
@@ -121,87 +54,97 @@ namespace Pulsar4X.Client
             if (!IsActive)
                 return;
 
-            if (Window.Begin(_displayText, ref IsActive, _flags))
+            var system = _uiState.GameClient?.Galaxy.GetSystem(_systemId);
+            var entity = system?.GetEntity(_entityId);
+            var orbit = entity?.GetView<OrbitView>();
+            var thrust = entity?.GetView<ThrustView>();
+            var massVolume = entity?.GetView<MassVolumeView>();
+            if (system == null || entity == null || orbit == null || thrust == null || massVolume == null)
             {
-                if (_orbitWidget == null && _orderEntityOrbit != null && _orderEntityOrbit.Parent != null)
+                CloseWindow();
+                return;
+            }
+
+            string entityName = entity.GetView<NameView>()?.Name ?? "Unknown";
+            if (Window.Begin("Change Orbit: " + entityName, ref IsActive, _flags))
+            {
+                if (_orbitWidget == null && orbit.ParentId is int parentId
+                    && system.GetEntity(parentId) is { } parent)
                 {
-                    _orbitWidget = new OrbitOrderIcon(_orderEntityOrbit.Parent);
-                    _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(OrbitOrderIcon), _orbitWidget);
+                    double soi = parent.SoiRadiusM();
+                    _orbitWidget = new OrbitOrderIcon(
+                        new SnapshotPosition(_uiState, _systemId, parentId),
+                        double.IsInfinity(soi) ? 0 : soi,
+                        parent.GetView<MassVolumeView>()?.RadiusMetres ?? 0);
+                    _uiState.SelectedSysMapRender?.UIWidgets.Add(nameof(OrbitOrderIcon), _orbitWidget);
                 }
 
-                if (_newtonUI != null && _newtonUI.Display())
-                    Calcs();
+                if (_newtonUI.Display(thrust.DeltaVMps, thrust.ExhaustVelocityMps, thrust.FuelBurnRateKgPerSec, massVolume.MassKg) || _recalc)
+                    Calcs(orbit);
 
                 if (ImGui.Button("Action Command"))
-                    ActionCmd();
+                    ActionCmd(thrust, massVolume);
             }
             Window.End();
         }
 
         public override void OnSystemTickChange(DateTime newDate)
         {
-            if (_actionDateTime < newDate && _orderEntityOrbit != null)
+            if (_actionDateTime < newDate)
             {
                 _actionDateTime = newDate;
-                _positionAtChange_m = _orderEntityOrbit.GetPosition(_actionDateTime);
-                var vector2 = OrbitProcessor.GetOrbitalVector(_orderEntityOrbit, _actionDateTime);
-                _orbitalVelocityAtChange_m = new Vector3(vector2.X, vector2.Y, 0);
-                _originalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
+                _recalc = true;
             }
         }
 
-        void ActionCmd()
+        void ActionCmd(ThrustView thrust, MassVolumeView massVolume)
         {
-            if (!OrderingEntity.Entity.TryGetDataBlob<NewtonThrustAbilityDB>(out var newtonDB))
+            double dvLen = _deltaV_MS.Length();
+            if (dvLen <= 0)
                 return;
 
-            if (!OrderingEntity.Entity.TryGetDataBlob<MassVolumeDB>(out var massDB))
-                return;
-
-            double totalMass = massDB.MassTotal;
-            double exhaustVelocity = newtonDB.ExhaustVelocity;
-            double burnRate = newtonDB.FuelBurnRate;
-
-            double fuelBurned = OrbitMath.TsiolkovskyFuelUse(totalMass, exhaustVelocity, _deltaV_MS.Length());
-            double secondsBurn = fuelBurned / burnRate;
+            double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(massVolume.MassKg, thrust.ExhaustVelocityMps, dvLen);
+            double secondsBurn = thrust.FuelBurnRateKgPerSec > 0 ? fuelBurned / thrust.FuelBurnRateKgPerSec : 0;
             var manuverNodeTime = _actionDateTime + TimeSpan.FromSeconds(secondsBurn * 0.5);
 
-            var order = NewtonThrustCommand.CreateCommand(
-                OrderingEntity.Entity.FactionOwnerID,
-                OrderingEntity.Entity,
-                manuverNodeTime,
-                _deltaV_MS,
-                secondsBurn);
-
-            _uiState.Game?.OrderHandler.HandleOrder(order);
+            _uiState.GameClient?.SubmitCommandAsync(new Pulsar4X.Api.NewtonThrustCommand(
+                _entityId, manuverNodeTime, new Vec3(_deltaV_MS.X, _deltaV_MS.Y, _deltaV_MS.Z)));
 
             CloseWindow();
         }
 
-        void Calcs()
+        void Calcs(OrbitView orbit)
         {
-            if (_newtonUI == null || _orbitWidget == null)
-                throw new NullReferenceException();
+            _recalc = false;
+            if (_orbitWidget == null)
+                return;
 
             _deltaV_MS = _newtonUI.DeltaV;
 
-            _newOrbitalVelocity_m = _orbitalVelocityAtChange_m + _deltaV_MS;
-            _newOrbitalSpeed_m = _newOrbitalVelocity_m.Length();
-            _newAngle = Math.Atan2(_newOrbitalVelocity_m.X, _newOrbitalVelocity_m.Y);
+            var stateAtChange = OrbitalMath.GetStateVectors(orbit.ToKeplerElements(), _actionDateTime);
+            var positionAtChange = stateAtChange.position;
+            var velocityAtChange = new Vector3(stateAtChange.velocity.X, stateAtChange.velocity.Y, 0);
+            var newOrbitalVelocity = velocityAtChange + _deltaV_MS;
 
-            _ke_m = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParam_m, _positionAtChange_m, _newOrbitalVelocity_m, _actionDateTime);
+            _ke_m = OrbitalMath.KeplerFromPositionAndVelocity(orbit.StandardGravParameter, positionAtChange, newOrbitalVelocity, _actionDateTime);
 
-            _orbitWidget.SetParametersFromKeplerElements(_ke_m, _positionAtChange_m);
+            _newtonUI.Eccentricity = _ke_m.Eccentricity;
+            _orbitWidget.SetParametersFromKeplerElements(_ke_m, positionAtChange);
+        }
+
+        void RemoveWidget()
+        {
+            if (_orbitWidget != null)
+            {
+                _uiState.SelectedSysMapRender?.UIWidgets.Remove(nameof(OrbitOrderIcon));
+                _orbitWidget = null;
+            }
         }
 
         internal void CloseWindow()
         {
             IsActive = false;
-            if (_orbitWidget != null)
-            {
-                _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(OrbitOrderIcon));
-                _orbitWidget = null;
-            }
+            RemoveWidget();
         }
     }
 
@@ -214,52 +157,39 @@ namespace Pulsar4X.Client
         float _progradeDV;
         float _radialDV;
 
-        double _maxDV;
-        private double _exhaustVelocity = double.NaN;
-        private double _fuelRate = double.NaN;
-        private double _currentMass;
-
         public double DepartureAngle { get; set; }
         public double Eccentricity { get; set; }
 
-        public NewtonionOrderUI(NewtonThrustAbilityDB newtonAbility, double currentMass)
-        {
-            _exhaustVelocity = newtonAbility.ExhaustVelocity;
-            _fuelRate = newtonAbility.FuelBurnRate;
-            _maxDV = newtonAbility.DeltaV;
-            _currentMass = currentMass;
-        }
-
-        public bool Display()
+        public bool Display(double maxDV, double exhaustVelocity, double fuelRate, double currentMass)
         {
             bool changes = false;
-            float maxprogradeDV = (float)(_maxDV - Math.Abs(_radialDV));
-            float maxradialDV = (float)(_maxDV - Math.Abs(_progradeDV));
+            float maxprogradeDV = (float)(maxDV - Math.Abs(_radialDV));
+            float maxradialDV = (float)(maxDV - Math.Abs(_progradeDV));
 
             if (ImGui.SliderFloat("Prograde DV", ref _progradeDV, -maxprogradeDV, maxprogradeDV))
             {
-                Calcs();
+                Calcs(exhaustVelocity, currentMass);
                 changes = true;
             }
             if (ImGui.SliderFloat("Radial DV", ref _radialDV, -maxradialDV, maxradialDV))
             {
-                Calcs();
+                Calcs(exhaustVelocity, currentMass);
                 changes = true;
             }
 
             ImGui.Text("Fuel to burn:" + Stringify.Mass(_fuelToBurn));
-            ImGui.Text("Burn time: " + (int)(_fuelToBurn / _fuelRate) + " s");
-            ImGui.Text("DeltaV: " + Stringify.Distance(DeltaV.Length()) + "/s of " + Stringify.Distance(_maxDV) + "/s");
+            ImGui.Text("Burn time: " + (int)(fuelRate > 0 ? _fuelToBurn / fuelRate : 0) + " s");
+            ImGui.Text("DeltaV: " + Stringify.Distance(DeltaV.Length()) + "/s of " + Stringify.Distance(maxDV) + "/s");
             ImGui.Text("Eccentricity: " + Eccentricity.ToString("g3"));
             return changes;
         }
 
-        private void Calcs()
+        private void Calcs(double exhaustVelocity, double currentMass)
         {
             var rmtx = Matrix.IDRotate(DepartureAngle);
             Vector2 dv = rmtx.TransformD(_radialDV, _progradeDV);
             DeltaV = new Vector3(dv.X, dv.Y, 0);
-            _fuelToBurn = OrbitMath.TsiolkovskyFuelUse(_currentMass, _exhaustVelocity, DeltaV.Length());
+            _fuelToBurn = OrbitalMath.TsiolkovskyFuelUse(currentMass, exhaustVelocity, DeltaV.Length());
         }
     }
 
@@ -272,11 +202,6 @@ namespace Pulsar4X.Client
         float _progradeDV;
         float _radialDV;
 
-        double _maxDV;
-        private double _exhaustVelocity = double.NaN;
-        private double _fuelRate = double.NaN;
-        private double _currentMass;
-
         private float _minRad;
         private float _rad;
         public float Radius
@@ -285,7 +210,6 @@ namespace Pulsar4X.Client
             set { _rad = value; }
         }
         private float _maxRad;
-        private Vector2 _vector = new Vector2(0, 1);
 
         public double ProgradeAngle { get; set; }
 
@@ -296,58 +220,54 @@ namespace Pulsar4X.Client
             set => _eccentricity = value;
         }
 
-        public NewtonionRadialOrderUI(NewtonThrustAbilityDB newtonAbility, double currentMass, float minRad, float maxRad)
+        public NewtonionRadialOrderUI(float minRad, float maxRad)
         {
-            _exhaustVelocity = newtonAbility.ExhaustVelocity;
-            _fuelRate = newtonAbility.FuelBurnRate;
-            _maxDV = newtonAbility.DeltaV;
-            _currentMass = currentMass;
             _minRad = minRad;
             _maxRad = maxRad;
             _rad = _minRad;
         }
 
-        public bool Display()
+        public bool Display(double maxDV, double exhaustVelocity, double fuelRate, double currentMass)
         {
             bool changes = false;
-            float maxprogradeDV = (float)(_maxDV - Math.Abs(_radialDV));
+            float maxprogradeDV = (float)(maxDV - Math.Abs(_radialDV));
 
             if (ImGui.SliderFloat("Prograde DV", ref _progradeDV, -maxprogradeDV, maxprogradeDV))
             {
-                Calcs();
+                Calcs(exhaustVelocity, currentMass);
                 changes = true;
             }
             if (ImGui.SliderFloat("Radius", ref _rad, _minRad, _maxRad))
             {
-                Calcs();
+                Calcs(exhaustVelocity, currentMass);
                 changes = true;
             }
 
-            ImGui.Text("Burn time: " + (int)(_fuelToBurn / _fuelRate) + " s");
-            if (DeltaV.Length() > _maxDV)
-                ImGui.TextColored(new System.Numerics.Vector4(0.9f, 0, 0, 1), "DeltaV: " + Stringify.Distance(DeltaV.Length()) + "/s of " + Stringify.Distance(_maxDV) + "/s");
+            ImGui.Text("Burn time: " + (int)(fuelRate > 0 ? _fuelToBurn / fuelRate : 0) + " s");
+            if (DeltaV.Length() > maxDV)
+                ImGui.TextColored(new System.Numerics.Vector4(0.9f, 0, 0, 1), "DeltaV: " + Stringify.Distance(DeltaV.Length()) + "/s of " + Stringify.Distance(maxDV) + "/s");
             else
-                ImGui.Text("DeltaV: " + Stringify.Distance(DeltaV.Length()) + "/s of " + Stringify.Distance(_maxDV) + "/s");
+                ImGui.Text("DeltaV: " + Stringify.Distance(DeltaV.Length()) + "/s of " + Stringify.Distance(maxDV) + "/s");
             ImGui.Text("Eccentricity: " + Eccentricity.ToString("g3"));
             return changes;
         }
 
-        public void SetDeltaV(Vector3 deltaV)
+        public void SetDeltaV(Vector3 deltaV, double exhaustVelocity, double currentMass)
         {
             DeltaV = deltaV;
             var rmtx = Matrix.IDRotate(-ProgradeAngle);
             Vector2 dv = rmtx.TransformD(deltaV.Y, deltaV.X);
             _radialDV = (float)dv.X;
             _progradeDV = (float)dv.Y;
-            _fuelToBurn = OrbitMath.TsiolkovskyFuelUse(_currentMass, _exhaustVelocity, DeltaV.Length());
+            _fuelToBurn = OrbitalMath.TsiolkovskyFuelUse(currentMass, exhaustVelocity, DeltaV.Length());
         }
 
-        private void Calcs()
+        private void Calcs(double exhaustVelocity, double currentMass)
         {
             var rmtx = Matrix.IDRotate(-ProgradeAngle);
             Vector2 dv = rmtx.TransformD(_progradeDV, _radialDV);
             DeltaV = new Vector3(dv.X, dv.Y, 0);
-            _fuelToBurn = OrbitMath.TsiolkovskyFuelUse(_currentMass, _exhaustVelocity, DeltaV.Length());
+            _fuelToBurn = OrbitalMath.TsiolkovskyFuelUse(currentMass, exhaustVelocity, DeltaV.Length());
         }
     }
 }

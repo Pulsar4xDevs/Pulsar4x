@@ -1,14 +1,7 @@
 ﻿using System;
 using System.IO;
-using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using SDL3;
-using Pulsar4X.Messaging;
-using System.Threading.Tasks;
-using Pulsar4X.Orbits;
-using Pulsar4X.Ships;
-using Pulsar4X.Weapons;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
@@ -20,10 +13,6 @@ namespace Pulsar4X.Client
         private static int _textureHeight = 12;
         private static bool _textureInitialized = false;
 
-        OrbitDB? _orbitDB;
-        NewtonMoveDB? _newtonMoveDB;
-        float _lop;
-        Entity? _entity;
 
         /// <summary>
         /// Initialize the ship icon texture. Call this once during startup.
@@ -56,30 +45,8 @@ namespace Pulsar4X.Client
                 Console.WriteLine($"Ship icon texture not found: {path}");
             }
         }
-        public ShipIcon(EntityState entity, ShipInfoDB shipInfoDB, PositionDB positionDB) : base(positionDB)
-        {
-            _entity = entity.Entity;
-            if (entity.TryGetDataBlob<OrbitDB>(out _orbitDB))
-            {
-                var i = _orbitDB.Inclination;
-                var aop = _orbitDB.ArgumentOfPeriapsis;
-                var loan = _orbitDB.LongitudeOfAscendingNode;
-                _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
-            }
-            else if(entity.TryGetDataBlob<NewtonMoveDB>(out _newtonMoveDB))
-            {
-            }
 
-            Func<Message, bool> filterById = msg => msg.EntityId != null && msg.EntityId == entity.Id;
-
-            MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, OnDBAdded, filterById);
-            MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, OnDBRemoved, filterById);
-
-            BasicShape();
-            OnPhysicsUpdate();
-        }
-
-        public ShipIcon(PositionDB position) : base(position)
+        public ShipIcon(Vector3 position_m) : base(position_m)
         {
             Front(60, 100, 0, -110);
             Cargo(160, 160, 0, -120);
@@ -88,39 +55,14 @@ namespace Pulsar4X.Client
             Engines(100, 60, 0, 130);
         }
 
-        async Task OnDBAdded(Message message)
+        /// <summary>Snapshot constructor: position read through the replicated galaxy; no engine
+        /// subscriptions (the icon is rebuilt when the entity's snapshot changes).</summary>
+        public ShipIcon(IPosition position) : base(position)
         {
-            await Task.Run(() =>
-            {
-                if (message.DataBlob is OrbitDB)
-                {
-                    _orbitDB = (OrbitDB)message.DataBlob;
-                    var i = _orbitDB.Inclination;
-                    var aop = _orbitDB.ArgumentOfPeriapsis;
-                    var loan = _orbitDB.LongitudeOfAscendingNode;
-                    _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
-                }
-                else if (message.DataBlob is NewtonMoveDB)
-                {
-                    _newtonMoveDB = (NewtonMoveDB)message.DataBlob;
-                    //NewtonVectors();
-                }
-            });
+            BasicShape();
         }
 
-        async Task OnDBRemoved(Message message)
-        {
-            await Task.Run(() =>
-            {
-                if (message.DataBlob is OrbitDB)
-                    _orbitDB = null;
-                else if (message.DataBlob is NewtonMoveDB)
-                {
-                    _newtonMoveDB = null;
-                    //Shapes.RemoveAt(Shapes.Count-1);
-                }
-            });
-        }
+
 
         void BasicShape()
         {
@@ -283,13 +225,6 @@ namespace Pulsar4X.Client
 
         public override void OnPhysicsUpdate()
         {
-            if(_entity is null || !_entity.IsValid) return;
-
-            // FIXME: remove call to engine
-            var headingVector = MoveMath.GetRelativeState(_entity).Velocity;
-            var heading = Angle.NormaliseRadians(Math.Atan2(headingVector.Y, headingVector.X));
-            var deg = Angle.ToDegrees(heading);
-            Heading = (float)heading;
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -357,73 +292,22 @@ namespace Pulsar4X.Client
 
     public class ProjectileIcon : Icon
     {
-        OrbitDB? _orbitDB;
-        float _lop;
-        EntityState? _entity;
         private Shape _flame;
-        public ProjectileIcon(EntityState entity, PositionDB positionDB) : base(positionDB)
-        {
-            _entity = entity;
-            BasicShape();
-            NewtonFlame();
-
-            if (entity.TryGetDataBlob<OrbitDB>(out _orbitDB))
-            {
-                var i = _orbitDB.Inclination;
-                var aop = _orbitDB.ArgumentOfPeriapsis;
-                var loan = _orbitDB.LongitudeOfAscendingNode;
-                _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
-            }
-            else if(entity.HasDataBlob<NewtonMoveDB>())
-            {
-                Shapes.Add(_flame);
-            }
-
-            Func<Message, bool> filterById = msg => msg.EntityId != null && msg.EntityId.Value == entity.Id;
-
-            MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, DBAdded, filterById);
-            MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, DBRemoved, filterById);
-
-            OnPhysicsUpdate();
-        }
 
         public ProjectileIcon(Vector3 position_m) : base(position_m)
         {
         }
 
-        async Task DBAdded(Message message)
+        /// <summary>Snapshot constructor: rebuilt on snapshot change, so no engine subscriptions.</summary>
+        public ProjectileIcon(IPosition position, bool underThrust) : base(position)
         {
-            await Task.Run(() =>
-            {
-                if (message.DataBlob is OrbitDB)
-                {
-                    _orbitDB = (OrbitDB)message.DataBlob;
-                    var i = _orbitDB.Inclination;
-                    var aop = _orbitDB.ArgumentOfPeriapsis;
-                    var loan = _orbitDB.LongitudeOfAscendingNode;
-                    _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
-                }
-                else if (message.DataBlob is NewtonMoveDB)
-                {
-                    if(!Shapes.Contains(_flame))
-                        Shapes.Add(_flame);
-                }
-            });
+            BasicShape();
+            NewtonFlame();
+            if (underThrust)
+                Shapes.Add(_flame);
         }
 
-        async Task DBRemoved(Message message)
-        {
-            await Task.Run(() =>
-            {
-                if (message.DataBlob is OrbitDB)
-                    _orbitDB = null;
-                if (message.DataBlob is NewtonMoveDB)
-                {
-                    if (Shapes.Contains(_flame))
-                        Shapes.Remove(_flame);
-                }
-            });
-        }
+
 
         void BasicShape()
         {
@@ -463,12 +347,6 @@ namespace Pulsar4X.Client
 
         public override void OnPhysicsUpdate()
         {
-            if(_entity is null) return;
-
-            // FIXME: remove call to engine
-            // var headingVector = _entity.GetRelativeState().Velocity;//_orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
-            // var heading = Math.Atan2(headingVector.Y, headingVector.X);
-            // Heading = (float)heading;
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -503,11 +381,17 @@ namespace Pulsar4X.Client
 
     public class BeamIcon : Icon
     {
-        BeamInfoDB? _beamInfo;
-        public BeamIcon(BeamInfoDB beamInfoDB, PositionDB positionDB) : base(positionDB)
+        Vector3 _start;
+        Vector3 _end;
+        bool _hasEndpoints;
+
+        /// <summary>Snapshot constructor: the endpoints travel in the BeamView and the icon is
+        /// rebuilt on each per-tick push.</summary>
+        public BeamIcon(Pulsar4X.Api.BeamView beam, IPosition position) : base(position)
         {
-            _beamInfo = beamInfoDB;
-            OnPhysicsUpdate();
+            _start = new Vector3(beam.StartPosition.X, beam.StartPosition.Y, beam.StartPosition.Z);
+            _end = new Vector3(beam.EndPosition.X, beam.EndPosition.Y, beam.EndPosition.Z);
+            _hasEndpoints = true;
         }
 
         public BeamIcon(Vector3 position_m) : base(position_m)
@@ -520,10 +404,10 @@ namespace Pulsar4X.Client
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            if(_beamInfo is null) return;
+            if (!_hasEndpoints) return;
 
-            var p0 = camera.ViewCoordinate_m(_beamInfo.Positions.Item1);
-            var p1 = camera.ViewCoordinate_m(_beamInfo.Positions.Item2);
+            var p0 = camera.ViewCoordinate_m(_start);
+            var p1 = camera.ViewCoordinate_m(_end);
 
             DrawShapes = new Shape[1];
             var s1 = new Shape();

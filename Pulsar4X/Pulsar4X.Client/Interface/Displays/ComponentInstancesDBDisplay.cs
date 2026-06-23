@@ -1,16 +1,13 @@
 using System.Linq;
 using ImGuiNET;
-using Pulsar4X.Datablobs;
-using Pulsar4X.DataStructures;
-using Pulsar4X.Components;
-using Pulsar4X.Engine.Orders;
-using Pulsar4X.Storage;
 
 namespace Pulsar4X.Client
 {
     public static class ComponentInstancesDBDisplay
     {
-        public static void Display(this ComponentInstancesDB db, EntityState entityState, GlobalUIState uiState)
+        /// <summary>Snapshot-based installations display for UI ported to the API galaxy model.
+        /// <paramref name="holderId"/> is the colony/ship the installations belong to (the command target).</summary>
+        public static void Display(this Pulsar4X.Api.InstallationsView view, int holderId, GlobalUIState uiState)
         {
             if(ImGui.BeginTable("InstallationTable", 3, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
             {
@@ -19,32 +16,23 @@ namespace Pulsar4X.Client
                 ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 0.45f);
                 ImGui.TableHeadersRow();
 
-                // FIXME: we should probably not do this every frame
-                var sortedData = db.ComponentsByDesign.Where(entry => entry.Value.Count > 0).OrderBy(entry => entry.Value.First().Name).ToDictionary(entry => entry.Key, entry => entry.Value);
-                foreach(var (designID, listPerDesign) in sortedData)
+                foreach(var group in view.Installations)
                 {
-                    if(listPerDesign.Count == 0) continue;
-
-                    var instance = listPerDesign[0];
-
                     ImGui.TableNextColumn();
-                    ImGui.Text(instance.Name);
-                    AddContextMenu(instance, uiState);
-                    DisplayHelpers.DescriptiveTooltip(instance.Name, instance.Design.TemplateName, instance.Design.Description, null, true);
+                    ImGui.Text(group.Name);
+                    AddContextMenu(group, holderId, uiState);
+                    DisplayHelpers.DescriptiveTooltip(group.Name, group.TemplateName, group.Description, null, true);
                     ImGui.TableNextColumn();
-                    ImGui.Text(listPerDesign.Count.ToString());
+                    ImGui.Text(group.Count.ToString());
                     ImGui.TableNextColumn();
 
-                    var onCount = listPerDesign.Where(x => x.IsEnabled).Count();
-                    var offCount = listPerDesign.Where(x => !x.IsEnabled).Count();
-
-                    if(onCount > 0 && offCount > 0)
+                    if(group.OperationalCount > 0 && group.OperationalCount < group.Count)
                     {
                         ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
                         ImGui.Text("Degraded");
                         ImGui.PopStyleColor();
                     }
-                    else if(onCount == 0)
+                    else if(group.OperationalCount == 0)
                     {
                         ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
                         ImGui.Text("Disabled");
@@ -61,25 +49,17 @@ namespace Pulsar4X.Client
             }
         }
 
-        private static void AddContextMenu(ComponentInstance component, GlobalUIState uiState)
+        private static void AddContextMenu(Pulsar4X.Api.InstallationGroup group, int holderId, GlobalUIState uiState)
         {
-            ImGui.PushID(component.Design.UniqueID.ToString());
-            if(ImGui.BeginPopupContextItem("###" + component.Design.UniqueID))
+            ImGui.PushID(group.DesignId);
+            if(ImGui.BeginPopupContextItem("###" + group.DesignId))
             {
-                ImGui.Text(component.Name);
+                ImGui.Text(group.Name);
                 ImGui.Separator();
-                if(component.Design.ComponentMountType.HasFlag(ComponentMountType.ShipCargo) && ImGui.MenuItem("Move to Storage"))
+                if(group.CanStore && ImGui.MenuItem("Move to Storage"))
                 {
-                    // Check if the components parent has storage
-                    if(component.ParentEntity.TryGetDataBlob<CargoStorageDB>(out var volumeStorageDB)
-                        && volumeStorageDB.TypeStores.ContainsKey(component.CargoTypeID))
-                    {
-                        var uninstallOrder = UninstallComponentInstanceOrder.Create(component.ParentEntity, component, 1);
-                        uiState.Game.OrderHandler.HandleOrder(uninstallOrder);
-
-                        var storageOrder = AddComponentToStorageOrder.Create(component.ParentEntity, component, 1);
-                        uiState.Game.OrderHandler.HandleOrder(storageOrder);
-                    }
+                    uiState.GameClient?.SubmitCommandAsync(
+                        new Pulsar4X.Api.UninstallComponentCommand(holderId, group.DesignId));
                 }
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
                 if(ImGui.MenuItem("Destroy"))
@@ -91,5 +71,6 @@ namespace Pulsar4X.Client
             }
             ImGui.PopID();
         }
+
     }
 }

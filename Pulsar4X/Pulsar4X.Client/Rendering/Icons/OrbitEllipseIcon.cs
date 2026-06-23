@@ -26,29 +26,29 @@ namespace Pulsar4X.Client
     /// </summary>
     public class OrbitEllipseIcon : OrbitIconBase
     {
-        internal OrbitEllipseIcon(EntityState entityState, List<List<UserOrbitSettings>> settings): base(entityState, settings)
+
+        internal OrbitEllipseIcon(Pulsar4X.Api.OrbitView orbit, IPosition bodyPosition, IPosition parentPosition,
+            UserOrbitSettings.OrbitBodyType bodyType, List<List<UserOrbitSettings>> settings)
+            : base(orbit, bodyPosition, parentPosition, bodyType, settings)
         {
-
             TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Elliptical;
-
 
             UpdateUserSettings();
             CreatePointArray();
             OnPhysicsUpdate();
-
         }
 
         protected override void CreatePointArray()
         {
             _points = new Vector2[_numberOfArcSegments + 1];
 
-            // Use the same position formula as OrbitMath.GetPosition() so the rendered
+            // Use the same position formula as OrbitalMath.GetPosition() so the rendered
             // orbit matches actual body positions. The old code used a simplified 2D
             // rotation by LoP which ignored inclination, causing orbit arcs to be offset
             // from body positions in generated systems with significant inclinations.
-            double loAN = _orbitDB.LongitudeOfAscendingNode;
-            double aoP = _orbitDB.ArgumentOfPeriapsis;
-            double incl = _orbitDB.Inclination;
+            double loAN = _loAN;
+            double aoP = _aoPRad;
+            double incl = _inclination;
             double e = _eccentricity;
             double a = SemiMaj;
             double semiLatusRectum = a * (1.0 - (double)e * e);
@@ -66,7 +66,7 @@ namespace Pulsar4X.Client
                 double cosAngle = Math.Cos(angleFromLoAN);
                 double sinAngle = Math.Sin(angleFromLoAN);
 
-                // Full 3D rotation matching OrbitMath.GetPosition(), projected to 2D
+                // Full 3D rotation matching OrbitalMath.GetPosition(), projected to 2D
                 double x = (cosLoAN * cosAngle - sinLoAN * sinAngle * cosIncl) * r;
                 double y = (sinLoAN * cosAngle + cosLoAN * sinAngle * cosIncl) * r;
 

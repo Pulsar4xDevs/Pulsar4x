@@ -16,15 +16,6 @@ namespace Pulsar4X.Movement
 
     public class NewtonionMovementProcessor : IHotloopProcessor
     {
-        public struct IntegrationState
-        {
-            public Vector3 Position;
-            public Vector3 Velocity;
-            public Vector3 ManuverDeltaV;
-            public double Mass;
-            public double FuelBurned;
-        }
-
         public NewtonionMovementProcessor()
         {
         }
@@ -106,7 +97,7 @@ namespace Pulsar4X.Movement
             {
                 double timeStepInSeconds = 1;
 
-                var result = IntegrateOneStep(
+                var result = OrbitalMath.IntegrateOneStep(
                     positionDB.RelativePosition, newtonMoveDB.CurrentVector_ms, newtonMoveDB.ManuverDeltaV,
                     massTotal_Kg, parentMass_kg,
                     newtonThrust.ExhaustVelocity, newtonThrust.FuelBurnRate, dryMass_Kg,
@@ -268,7 +259,7 @@ namespace Pulsar4X.Movement
             {
                 double timeStep = 1;
 
-                var result = IntegrateOneStep(
+                var result = OrbitalMath.IntegrateOneStep(
                     position, velocity, manuverDeltaV,
                     mass, parentMass_kg,
                     newtonThrust.ExhaustVelocity, newtonThrust.FuelBurnRate, dryMass_Kg,
@@ -313,7 +304,7 @@ namespace Pulsar4X.Movement
 
                 Vector3 oldPosition = position;
 
-                var result = IntegrateOneStep(
+                var result = OrbitalMath.IntegrateOneStep(
                     position, velocity, manuverDeltaV,
                     mass, parentMass_kg,
                     newtonThrust.ExhaustVelocity, newtonThrust.FuelBurnRate, dryMass_Kg,
@@ -331,56 +322,6 @@ namespace Pulsar4X.Movement
             }
 
             return (newAbsolute, velocity);
-        }
-
-        /// <summary>
-        /// Pure-function integration step shared by NewtonMove and prediction functions.
-        /// Computes gravity, thrust (with Tsiolkovsky fuel model), and trapezoidal position integration.
-        /// </summary>
-        public static IntegrationState IntegrateOneStep(
-            Vector3 position, Vector3 velocity, Vector3 manuverDeltaV,
-            double mass, double parentMass,
-            double exhaustVelocity, double fuelBurnRate, double dryMass,
-            double timeStep)
-        {
-            double distanceToParent_m = position.Length();
-            distanceToParent_m = Math.Max(distanceToParent_m, 0.1);
-
-            double gravForce = UniversalConstants.Science.GravitationalConstant * (mass * parentMass / Math.Pow(distanceToParent_m, 2));
-            Vector3 gravForceVector = gravForce * -Vector3.Normalise(position);
-            Vector3 totalDVFromGrav = (gravForceVector / mass) * timeStep;
-
-            Vector3 totalDVFromThrust = new Vector3(0, 0, 0);
-            double fuelBurned = 0;
-
-            if (manuverDeltaV.Length() > 0)
-            {
-                double afterBurnMass = mass - fuelBurnRate * timeStep;
-                double dvThisStep = OrbitMath.TsiolkovskyRocketEquation(mass, afterBurnMass, exhaustVelocity);
-                dvThisStep = Math.Min(manuverDeltaV.Length(), dvThisStep);
-
-                double availableDV = OrbitMath.TsiolkovskyRocketEquation(mass, dryMass, exhaustVelocity);
-                dvThisStep = Math.Min(availableDV, dvThisStep);
-
-                totalDVFromThrust = Vector3.Normalise(manuverDeltaV) * dvThisStep;
-
-                fuelBurned = OrbitMath.TsiolkovskyFuelUse(mass, exhaustVelocity, dvThisStep);
-                manuverDeltaV -= totalDVFromThrust;
-                mass -= fuelBurned;
-            }
-
-            Vector3 totalDV = totalDVFromGrav + totalDVFromThrust;
-            Vector3 newVelocity = totalDV + velocity;
-            Vector3 deltaPos = (velocity + newVelocity) / 2 * timeStep;
-
-            return new IntegrationState
-            {
-                Position = position + deltaPos,
-                Velocity = newVelocity,
-                ManuverDeltaV = manuverDeltaV,
-                Mass = mass,
-                FuelBurned = fuelBurned,
-            };
         }
 
         /// <summary>

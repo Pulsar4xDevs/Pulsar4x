@@ -1,44 +1,34 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
-using System.Linq;
+using Pulsar4X.Api;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Factions;
-using Pulsar4X.Technology;
-using System.Globalization;
-using Pulsar4X.Extensions;
-using Pulsar4X.People;
-using Pulsar4X.Components;
 
 namespace Pulsar4X.Client
 {
     public class ResearchWindow : PulsarGuiWindow
     {
         private readonly Vector2 invisButtonSize = new (15, 15);
-        private FactionDataStore? _factionData;
-        private List<Tech> _researchableTechs = new();
-        private Dictionary<string, Tech>? _researchableTechsByGuid;
-        private EntityState? _selectedLab = null;
 
-        private string[]? techCategoryNames;
-        private string[]? techCategoryIds;
+        // The lab is selected by entity id and re-resolved each frame: labs are entities in the
+        // active system's snapshot, which is replaced wholesale by server pushes.
+        private int? _selectedLabId = null;
+
         private int selectCategoryFilterIndex = 0;
-        int _showAssignmentModal = -1;
+        private int _showAssignmentModal = -1;
+
+        // Derived lookups, rebuilt only when a new ResearchSnapshot is pushed (reference change).
+        private ResearchSnapshot? _research;
+        private string[] _categoryNames = Array.Empty<string>();
+        private string[] _categoryIds = Array.Empty<string>();
+        private Dictionary<string, TechSnapshot> _techsById = new ();
+        private List<TechSnapshot> _researchableTechs = new ();
 
         private ResearchWindow()
         {
-            OnFactionChange();
-            if(_uiState.Game != null)
-                _uiState.Game.TimePulse.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent;
-        }
-
-        private void GameLoopOnGameGlobalDateChangedEvent(DateTime newdate)
-        {
-            if (IsActive)
-            {
-                RefreshTechs();
-            }
         }
 
         internal static ResearchWindow GetInstance()
@@ -53,78 +43,69 @@ namespace Pulsar4X.Client
             return thisitem;
         }
 
-        private void OnFactionChange()
+        private void RefreshDerivedData(ResearchSnapshot research)
         {
-            if(_uiState.Faction == null || _uiState.Game == null)
-                return;
+            _research = research;
 
-            _factionData = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data;
+            _categoryNames = new string[research.Categories.Count + 1];
+            _categoryIds = new string[research.Categories.Count + 1];
+            _categoryNames[0] = "All";
+            _categoryIds[0] = "";
+            for (int i = 0; i < research.Categories.Count; i++)
+            {
+                _categoryNames[i + 1] = research.Categories[i].Name;
+                _categoryIds[i + 1] = research.Categories[i].Id;
+            }
 
-            selectCategoryFilterIndex = 0;
+            if (selectCategoryFilterIndex >= _categoryIds.Length)
+                selectCategoryFilterIndex = 0;
 
-            var categories = _uiState.Game.TechCategories.Select(g => g.Value).ToList();
-            categories.Sort((a, b) => a.Name.CompareTo(b.Name));
-
-            var categoryNamesArray = categories.Select(c => c.Name).ToArray();
-            var categoryIdsArray = categories.Select(c => c.UniqueID).ToArray();
-
-            techCategoryNames = new string[_uiState.Game.TechCategories.Count + 1];
-            techCategoryNames[0] = "All";
-            Array.Copy(categoryNamesArray, 0, techCategoryNames, 1, categoryNamesArray.Length);
-
-            techCategoryIds = new string[techCategoryNames.Length];
-            techCategoryIds[0] = "";
-            Array.Copy(categoryIdsArray, 0, techCategoryIds, 1, categoryIdsArray.Length);
-
+            _techsById = research.Techs.ToDictionary(t => t.Id);
             RefreshTechs();
         }
 
         private void RefreshTechs()
         {
-            if(_factionData == null || techCategoryIds == null)
+            if (_research == null)
                 return;
 
-            if(selectCategoryFilterIndex == 0)
-            {
-                _researchableTechs = _factionData.Techs.Select(kvp => kvp.Value).Where(t => _factionData.IsResearchable(t.UniqueID)).ToList();
-                _researchableTechs.Sort((a,b) => a.Name.CompareTo(b.Name));
-            }
-            else
-            {
-                var id = techCategoryIds[selectCategoryFilterIndex];
-                _researchableTechs = _factionData.Techs.Select(kvp => kvp.Value).Where(t => _factionData.IsResearchable(t.UniqueID) && t.Category.Equals(id)).ToList();
-                _researchableTechs.Sort((a,b) => a.Name.CompareTo(b.Name));
-            }
-
-            _researchableTechsByGuid = new (_factionData.Techs);
+            string categoryId = _categoryIds[selectCategoryFilterIndex];
+            _researchableTechs = _research.Techs
+                .Where(t => t.IsResearchable && (categoryId.Length == 0 || t.CategoryId.Equals(categoryId)))
+                .OrderBy(t => t.Name)
+                .ToList();
         }
 
         internal override void Display()
         {
-            if(!IsActive
-                || techCategoryNames == null)
+            if(!IsActive)
                 return;
+
+            var galaxy = _uiState.GameClient?.Galaxy;
+            var research = galaxy?.Research;
 
             if (Window.Begin("Research and Development", ref IsActive, _flags))
             {
-                if(_factionData != null
-                    && _researchableTechsByGuid != null
-                    && _uiState.Faction != null
-                    && _uiState.Game != null)
+                if(galaxy != null && research != null)
                 {
-                    var labs = _uiState.SelectedSystemState.GetFilteredEntities(
-                                    DataStructures.EntityFilter.Friendly,
-                                    _uiState.Faction.Id,
-                                    typeof(ResearcherDB));
+                    if (!ReferenceEquals(research, _research))
+                        RefreshDerivedData(research);
+
+                    // Labs are the faction's researcher entities in the viewed system (the server only
+                    // projects ResearcherView for the owning faction).
+                    var system = galaxy.GetSystem(_uiState.SelectedStarSystemId);
+                    var labs = system == null
+                        ? new List<EntitySnapshot>()
+                        : system.Entities.Where(e => e.HasView<ResearcherView>()).ToList();
 
                     // Keep the selection valid, defaulting to the first lab so the
                     // window is immediately usable without an extra click.
-                    if(labs.Count == 0)
-                        _selectedLab = null;
-                    else if(_selectedLab == null)
-                        _selectedLab = labs[0];
-                    else
-                        _selectedLab = labs.FirstOrDefault(l => l.Id == _selectedLab.Id) ?? labs[0];
+                    EntitySnapshot? selectedLab = null;
+                    if(labs.Count > 0)
+                    {
+                        selectedLab = labs.FirstOrDefault(l => l.Id == _selectedLabId) ?? labs[0];
+                    }
+                    _selectedLabId = selectedLab?.Id;
 
                     Vector2 windowContentSize = ImGui.GetContentRegionAvail();
                     var labListSize = new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y);
@@ -140,8 +121,8 @@ namespace Pulsar4X.Client
                     ImGui.SameLine();
                     if(ImGui.BeginChild("LabDetail", detailSize, ImGuiChildFlags.Borders))
                     {
-                        if(_selectedLab != null)
-                            DisplayLabDetail();
+                        if(selectedLab != null)
+                            DisplayLabDetail(selectedLab, research);
                         else
                             ImGui.TextColored(Styles.DescriptiveColor, "No research labs in this system.");
                     }
@@ -151,40 +132,36 @@ namespace Pulsar4X.Client
             Window.End();
         }
 
-        private void DisplayLabList(List<EntityState> labs)
+        private void DisplayLabList(List<EntitySnapshot> labs)
         {
-            if(_factionData == null || _researchableTechsByGuid == null)
-                return;
-
             foreach(var lab in labs)
             {
-                if(!lab.TryGetDataBlob<ResearcherDB>(out var researcherDB))
+                var researcher = lab.GetView<ResearcherView>();
+                if(researcher == null)
                     continue;
 
                 ImGui.PushID(lab.Id);
 
-                if(ImGui.Selectable(researcherDB.Design.Name + $"###{lab.Id}", _selectedLab?.Id == lab.Id))
+                if(ImGui.Selectable(researcher.DesignName + $"###{lab.Id}", _selectedLabId == lab.Id))
                 {
-                    _selectedLab = lab;
+                    _selectedLabId = lab.Id;
                 }
-                if(ImGui.IsItemHovered() && researcherDB.Design is ComponentDesign design)
+                if(ImGui.IsItemHovered() && researcher.DesignTemplateName.Length > 0)
                 {
                     DisplayHelpers.DescriptiveTooltip(
-                        researcherDB.Design.Name,
-                        design.TemplateName,
-                        design.Description);
+                        researcher.DesignName,
+                        researcher.DesignTemplateName,
+                        researcher.DesignDescription);
                 }
 
-                var location = _uiState.SelectedSystemState.GetEntityById(researcherDB.LocationId);
-                ImGui.TextColored(Styles.DescriptiveColor, location?.Name ?? "Unknown");
+                ImGui.TextColored(Styles.DescriptiveColor, researcher.LocationName.Length > 0 ? researcher.LocationName : "Unknown");
 
-                researcherDB.TechQueue.TryPeek(out var techId);
-                if(techId != null && _factionData.IsResearchable(techId))
+                var currentTechId = researcher.TechQueue.FirstOrDefault();
+                if(currentTechId != null && _techsById.TryGetValue(currentTechId, out var tech) && tech.IsResearchable)
                 {
-                    var tech = _researchableTechsByGuid[techId];
                     float frac = (float)tech.ResearchProgress / tech.ResearchCost;
                     ImGui.ProgressBar(frac, new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetTextLineHeight()), tech.Name);
-                    DisplayHelpers.TechTooltip(tech, _uiState);
+                    DisplayHelpers.TechTooltip(tech);
                 }
                 else
                 {
@@ -196,20 +173,13 @@ namespace Pulsar4X.Client
             }
         }
 
-        private void DisplayLabDetail()
+        private void DisplayLabDetail(EntitySnapshot lab, ResearchSnapshot research)
         {
-            if(_selectedLab == null
-                || _factionData == null
-                || _researchableTechsByGuid == null
-                || _uiState.Faction == null
-                || _uiState.Game == null
-                || techCategoryNames == null
-                || !_selectedLab.TryGetDataBlob<ResearcherDB>(out var researcherDB))
+            var researcher = lab.GetView<ResearcherView>();
+            if(researcher == null)
                 return;
 
-            DisplayHelpers.Header(researcherDB.Design.Name);
-
-            var location = _uiState.SelectedSystemState.GetEntityById(researcherDB.LocationId);
+            DisplayHelpers.Header(researcher.DesignName);
 
             // Lab stats in an aligned label/value grid, two pairs per row
             if(ImGui.BeginTable("LabSummary", 4, ImGuiTableFlags.SizingStretchProp))
@@ -224,50 +194,44 @@ namespace Pulsar4X.Client
                 ImGui.TextColored(Styles.DescriptiveColor, "Location");
                 ImGui.TableNextColumn();
                 ImGui.AlignTextToFramePadding();
-                ImGui.Text(location?.Name ?? "Unknown");
+                ImGui.Text(researcher.LocationName.Length > 0 ? researcher.LocationName : "Unknown");
 
                 ImGui.TableNextColumn();
                 ImGui.AlignTextToFramePadding();
                 ImGui.TextColored(Styles.DescriptiveColor, "Scientist");
                 ImGui.TableNextColumn();
-                var nameDisplay = "Assign Scientist###assignbtn" + _selectedLab.Id;
-                if(researcherDB.ScientistId >= 0)
-                {
-                    var commander = _uiState.Game.GlobalManager.GetGlobalEntityById(researcherDB.ScientistId);
-                    nameDisplay = commander.GetName(_uiState.Faction.Id);
-                }
+                var nameDisplay = researcher.ScientistName ?? "Assign Scientist###assignbtn" + lab.Id;
                 if(ImGui.Button(nameDisplay))
                 {
-                    _showAssignmentModal = _selectedLab.Id;
+                    _showAssignmentModal = lab.Id;
                 }
 
-                if(_showAssignmentModal > 0 && _showAssignmentModal == _selectedLab.Id)
+                if(_showAssignmentModal > 0 && _showAssignmentModal == lab.Id)
                 {
                     ResultModal.GetInstance().DisplayCustomButtons(
                         "Assign Scientist",
                         () => _showAssignmentModal = -1, // onClose
                         (closeModal) => // Custom render with close action
                         {
+                            int currentScientistId = researcher.ScientistId ?? -1;
                             int selectedId = DisplayHelpers.PeopleChooser(
                                 _uiState,
-                                researcherDB.ScientistId,
-                                DataStructures.CommanderTypes.Scientist,
-                                $"lab_{_selectedLab.Id}",
+                                research.Scientists,
+                                currentScientistId,
+                                $"lab_{lab.Id}",
                                 closeModal); // Pass close action as cancel
 
-                            if (selectedId != researcherDB.ScientistId)
+                            if (selectedId != currentScientistId)
                             {
                                 if (selectedId == -1)
                                 {
                                     // Unassign the scientist, the player selected "None"
-                                    var unassignOrder = UnassignScientistOrder.Create(_selectedLab.Entity, researcherDB.ScientistId);
-                                    _uiState.Game.OrderHandler.HandleOrder(unassignOrder);
+                                    SubmitCommand(new UnassignScientistCommand(lab.Id, currentScientistId));
                                 }
                                 else if (selectedId > 0)
                                 {
                                     // Assign the new scientist
-                                    var assignmentOrder = AssignScientistOrder.Create(_selectedLab.Entity, selectedId);
-                                    _uiState.Game.OrderHandler.HandleOrder(assignmentOrder);
+                                    SubmitCommand(new AssignScientistCommand(lab.Id, selectedId));
                                 }
                                 closeModal();
                             }
@@ -277,17 +241,17 @@ namespace Pulsar4X.Client
                 ImGui.TableNextColumn();
                 ImGui.TextColored(Styles.DescriptiveColor, "Cost per Day");
                 ImGui.TableNextColumn();
-                ImGui.TextUnformatted(researcherDB.CostPerDay.GetValue().ToString("C0", CultureInfo.CurrentCulture));
+                ImGui.TextUnformatted(researcher.CostPerDay.Value.ToString("C0", CultureInfo.CurrentCulture));
                 if(ImGui.IsItemHovered())
                 {
                     DisplayHelpers.DescriptiveTooltip(
                         "Cost per Day",
                         "",
-                        $"{researcherDB.CostPerDay.BaseValue.ToString("C0", CultureInfo.CurrentCulture)} Base Value",
+                        $"{researcher.CostPerDay.BaseValue.ToString("C0", CultureInfo.CurrentCulture)} Base Value",
                         delegate {
-                            foreach(var modifier in researcherDB.CostPerDay.GetModifiers())
+                            foreach(var modifier in researcher.CostPerDay.Modifiers)
                             {
-                                ImGui.TextUnformatted($"{(modifier.After - modifier.Before).ToString("C0", CultureInfo.CurrentCulture)} {modifier.Name}");
+                                ImGui.TextUnformatted($"{modifier.Delta.ToString("C0", CultureInfo.CurrentCulture)} {modifier.Name}");
                             }
                         });
                 }
@@ -295,17 +259,17 @@ namespace Pulsar4X.Client
                 ImGui.TableNextColumn();
                 ImGui.TextColored(Styles.DescriptiveColor, "Progress per Day");
                 ImGui.TableNextColumn();
-                ImGui.Text(researcherDB.PointsPerDay.GetValue().ToString());
+                ImGui.Text(researcher.PointsPerDay.Value.ToString());
                 if(ImGui.IsItemHovered())
                 {
                     DisplayHelpers.DescriptiveTooltip(
                         "Progress per Day",
                         "",
-                        $"{researcherDB.PointsPerDay.BaseValue} Base Value",
+                        $"{researcher.PointsPerDay.BaseValue} Base Value",
                         delegate {
-                            foreach(var modifier in researcherDB.PointsPerDay.GetModifiers())
+                            foreach(var modifier in researcher.PointsPerDay.Modifiers)
                             {
-                                ImGui.TextUnformatted($"{modifier.After - modifier.Before} {modifier.Name}");
+                                ImGui.TextUnformatted($"{modifier.Delta} {modifier.Name}");
                             }
                         });
                 }
@@ -314,8 +278,8 @@ namespace Pulsar4X.Client
                 ImGui.AlignTextToFramePadding();
                 ImGui.TextColored(Styles.DescriptiveColor, "Funding");
                 ImGui.TableNextColumn();
-                int funding = researcherDB.FundingLevel;
-                string label = researcherDB.FundingLevel switch
+                int funding = researcher.FundingLevel;
+                string label = researcher.FundingLevel switch
                 {
                     0 => "No Funding",
                     1 => "Standard",
@@ -326,10 +290,9 @@ namespace Pulsar4X.Client
                     _ => ""
                 };
                 ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                if(ImGui.SliderInt($"###{_selectedLab.Id}-funding", ref funding, 0, 5, label))
+                if(ImGui.SliderInt($"###{lab.Id}-funding", ref funding, 0, 5, label))
                 {
-                    var changeOrder = FundingChangedOrder.Create(_selectedLab.Entity, (byte)funding);
-                    _uiState.Game.OrderHandler.HandleOrder(changeOrder);
+                    SubmitCommand(new SetResearchFundingCommand(lab.Id, funding));
                 }
                 ImGui.TableNextColumn();
                 ImGui.TableNextColumn();
@@ -339,15 +302,13 @@ namespace Pulsar4X.Client
 
             // Current research as a prominent full-width bar
             ImGui.Spacing();
-            researcherDB.TechQueue.TryPeek(out var currentTechId);
+            var currentTechId = researcher.TechQueue.FirstOrDefault();
             var barSize = new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetTextLineHeight() + 10);
-            if(currentTechId != null && _factionData.IsResearchable(currentTechId))
+            if(currentTechId != null && _techsById.TryGetValue(currentTechId, out var currentTech) && currentTech.IsResearchable)
             {
-                var tech = _researchableTechsByGuid[currentTechId];
-
-                float frac = (float)tech.ResearchProgress / tech.ResearchCost;
-                ImGui.ProgressBar(frac, barSize, $"{tech.Name}  {tech.ResearchProgress}/{tech.ResearchCost}  ({frac:P0})");
-                DisplayHelpers.TechTooltip(tech, _uiState);
+                float frac = (float)currentTech.ResearchProgress / currentTech.ResearchCost;
+                ImGui.ProgressBar(frac, barSize, $"{currentTech.Name}  {currentTech.ResearchProgress}/{currentTech.ResearchCost}  ({frac:P0})");
+                DisplayHelpers.TechTooltip(currentTech);
             }
             else
             {
@@ -362,7 +323,7 @@ namespace Pulsar4X.Client
             if(ImGui.BeginChild("TechQueue", queueSize, ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Tech Queue");
-                DisplayQueue(researcherDB);
+                DisplayQueue(lab.Id, researcher);
             }
             ImGui.EndChild();
 
@@ -373,21 +334,18 @@ namespace Pulsar4X.Client
 
                 var availableSize = ImGui.GetContentRegionAvail();
                 ImGui.SetNextItemWidth(availableSize.X);
-                if(ImGui.Combo("###template-filter", ref selectCategoryFilterIndex, techCategoryNames, techCategoryNames.Length))
+                if(ImGui.Combo("###template-filter", ref selectCategoryFilterIndex, _categoryNames, _categoryNames.Length))
                 {
                     RefreshTechs();
                 }
-                DisplayTechs();
+                DisplayTechs(lab.Id);
             }
             ImGui.EndChild();
         }
 
-        private void DisplayQueue(ResearcherDB researcherDB)
+        private void DisplayQueue(int labId, ResearcherView researcher)
         {
-            if(_researchableTechsByGuid == null)
-                return;
-
-            if(researcherDB.TechQueue.Count == 0)
+            if(researcher.TechQueue.Count == 0)
             {
                 ImGui.TextColored(Styles.DescriptiveColor, "Queue is empty. Double click a tech on the right to add it.");
                 return;
@@ -401,16 +359,18 @@ namespace Pulsar4X.Client
                 ImGui.TableHeadersRow();
 
                 int index = 0;
-                foreach(var techId in researcherDB.TechQueue.ToList())
+                foreach(var techId in researcher.TechQueue)
                 {
-                    Tech tech = _researchableTechsByGuid[techId];
+                    if(!_techsById.TryGetValue(techId, out var tech))
+                        continue;
+
                     ImGui.TableNextColumn();
                     ImGui.Text($"{index + 1}");
                     ImGui.TableNextColumn();
                     ImGui.Text(tech.Name);
-                    DisplayHelpers.TechTooltip(tech, _uiState);
+                    DisplayHelpers.TechTooltip(tech);
                     ImGui.TableNextColumn();
-                    Buttons(researcherDB, techId, ref index);
+                    Buttons(labId, researcher, techId, ref index);
                     index++;
                 }
 
@@ -418,20 +378,18 @@ namespace Pulsar4X.Client
             }
         }
 
-        private void DisplayTechs()
+        private void DisplayTechs(int labId)
         {
-            if(_factionData == null || _uiState.Game == null)
-                return;
-
             if(ImGui.BeginTable("ResearchableTechs", 1, ImGuiTableFlags.BordersInnerV))
             {
                 for (int i = 0; i < _researchableTechs.Count; i++)
                 {
-                    if (_researchableTechs[i].ResearchCost > 0) //could happen if bad json data?
+                    var tech = _researchableTechs[i];
+                    if (tech.ResearchCost > 0) //could happen if bad json data?
                     {
                         ImGui.TableNextColumn();
 
-                        float frac = (float)_researchableTechs[i].ResearchProgress / _researchableTechs[i].ResearchCost;
+                        float frac = (float)tech.ResearchProgress / tech.ResearchCost;
                         var size = ImGui.GetContentRegionAvail();
                         var height = ImGui.GetTextLineHeight();
                         var pos = ImGui.GetCursorPos();
@@ -439,35 +397,31 @@ namespace Pulsar4X.Client
                         if (ImGui.IsItemHovered())
                         {
                             string metaInfo = "";
-                            if(_researchableTechs[i].Unlocks.ContainsKey(_researchableTechs[i].Level + 1))
+                            if(tech.NextLevelUnlocks.Count > 0)
                             {
                                 metaInfo += "Unlocks:\n";
-                                foreach(var item in _researchableTechs[i].Unlocks[_researchableTechs[i].Level + 1])
+                                foreach(var unlockName in tech.NextLevelUnlocks)
                                 {
-                                    metaInfo += _factionData.GetName(item) + "\n";
+                                    metaInfo += unlockName + "\n";
                                 }
                             }
-                            if(_researchableTechs[i].MaxLevel > 1)
+                            if(tech.MaxLevel > 1)
                             {
-                                metaInfo += "\nMaximum: " + _researchableTechs[i].MaxLevelName();
+                                metaInfo += "\nMaximum: " + tech.MaxLevelName;
                             }
 
                             DisplayHelpers.DescriptiveTooltip(
-                                _researchableTechs[i].DisplayName(),
-                                _uiState.Game.TechCategories[_researchableTechs[i].Category].Name,
-                                _researchableTechs[i].Description,
+                                tech.DisplayName,
+                                tech.CategoryName,
+                                tech.Description,
                                 () => ImGui.Text(metaInfo));
                         }
                         ImGui.SetCursorPos(new Vector2(pos.X + 2f, pos.Y));
-                        ImGui.Text(_researchableTechs[i].DisplayName());
+                        ImGui.Text(tech.DisplayName);
 
                         if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(0))
                         {
-                            if(_selectedLab != null && _selectedLab.TryGetDataBlob<ResearcherDB>(out var researcherDB))
-                            {
-                                var addOrder = AddTechToQueueOrder.Create(_selectedLab.Entity, _researchableTechs[i].UniqueID);
-                                _uiState.Game.OrderHandler.HandleOrder(addOrder);
-                            }
+                            SubmitCommand(new AddTechToQueueCommand(labId, tech.Id));
                         }
                     }
                 }
@@ -476,19 +430,15 @@ namespace Pulsar4X.Client
             }
         }
 
-        void Buttons(ResearcherDB researcherDB, string techID, ref int i)
+        void Buttons(int labId, ResearcherView researcher, string techID, ref int i)
         {
-            if(researcherDB.OwningEntity == null || _uiState.Game == null)
-                return;
-
             ImGui.BeginGroup();
 
             if (i > 0)
             {
                 if(ImGui.SmallButton("^" + "##" + i))
                 {
-                    var moveOrder = MoveUpInQueueOrder.Create(researcherDB.OwningEntity, techID);
-                    _uiState.Game.OrderHandler.HandleOrder(moveOrder);
+                    SubmitCommand(new MoveTechInQueueCommand(labId, techID, MoveUp: true));
                 }
             }
             else
@@ -497,12 +447,11 @@ namespace Pulsar4X.Client
             }
             ImGui.SameLine();
 
-            if (i < researcherDB.TechQueue.Count - 1)
+            if (i < researcher.TechQueue.Count - 1)
             {
                 if(ImGui.SmallButton("v" + "##" + i))
                 {
-                    var moveOrder = MoveDownInQueueOrder.Create(researcherDB.OwningEntity, techID);
-                    _uiState.Game.OrderHandler.HandleOrder(moveOrder);
+                    SubmitCommand(new MoveTechInQueueCommand(labId, techID, MoveUp: false));
                 }
             }
             else
@@ -513,13 +462,13 @@ namespace Pulsar4X.Client
 
             if (ImGui.SmallButton("x" + "##" + i))
             {
-
-                var removeOrder = RemoveTechFromQueueOrder.Create(researcherDB.OwningEntity, techID);
-                _uiState.Game.OrderHandler.HandleOrder(removeOrder);
+                SubmitCommand(new RemoveTechFromQueueCommand(labId, techID));
                 i--;
             }
 
             ImGui.EndGroup();
         }
+
+        private void SubmitCommand(GameCommand command) => _uiState.GameClient?.SubmitCommandAsync(command);
     }
 }

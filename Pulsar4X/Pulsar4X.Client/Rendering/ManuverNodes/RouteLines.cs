@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using ImGuiNET;
-using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using SDL3;
 
@@ -39,9 +38,9 @@ public class ManuverLinesComplete : IDrawData
         A = 255
     };
 
-    public void AddNewNode(Entity orderEntity, DateTime nodeTime)
+    public void AddNewNode(GlobalUIState state, string systemId, int entityId, DateTime nodeTime)
     {
-        ManuverNode newNode = new ManuverNode(orderEntity, nodeTime);
+        ManuverNode newNode = new ManuverNode(state, systemId, entityId, nodeTime);
         AddNewNode(newNode);
     }
 
@@ -67,9 +66,9 @@ public class ManuverLinesComplete : IDrawData
         }
     }
 
-    public void AddNewEditNode(Entity orderEntity, DateTime nodeTime)
+    public void AddNewEditNode(GlobalUIState state, string systemId, int entityId, DateTime nodeTime)
     {
-        ManuverNode newNode = new ManuverNode(orderEntity, nodeTime);
+        ManuverNode newNode = new ManuverNode(state, systemId, entityId, nodeTime);
         var val = RenderManuverLines.FindNodeTime(RootSequence, nodeTime);
 
         if (val[0].nodeIndex != -1) //if has priorNode

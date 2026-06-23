@@ -1,15 +1,9 @@
-﻿using ImGuiNET;
-using Pulsar4X.Engine;
+using ImGuiNET;
 using System.Collections.Generic;
 using System.Linq;
+using Pulsar4X.Api;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Extensions;
-using Pulsar4X.Colonies;
-using Pulsar4X.Factions;
-using Pulsar4X.GeoSurveys;
-using Pulsar4X.Industry;
-using Pulsar4X.Galaxy;
-using Pulsar4X.Movement;
+// Engine using: Stringify formatting helpers only.
 
 namespace Pulsar4X.Client;
 public class SystemWindow : PulsarGuiWindow
@@ -37,19 +31,42 @@ public class SystemWindow : PulsarGuiWindow
 
         if (Window.Begin("System Viewer", ref IsActive, _flags))
         {
-            if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId))
+            var system = _uiState.GameClient?.Galaxy.GetSystem(_uiState.SelectedStarSystemId);
+            if (system != null)
             {
-                var systemViewPreferences = SystemViewPreferences.GetInstance();
-                int viewIndex = systemViewPreferences.GetViewIndex(SystemViewPreferencesKey);
-
                 ImGui.Text("View Options: ");
                 ImGui.SameLine();
                 SystemViewPreferences.GetInstance().DisplayCombo(SystemViewPreferencesKey, selectedIndex => {});
 
-                SystemState starSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
-                List<EntityState> stars = starSystemState.EntityStatesWithPosition.Values
-                    .Where(e => e.IsStar())
-                    .OrderBy(x => x.Position?.AbsolutePosition ?? Orbital.Vector3.Zero)
+                // The celestial bodies, their orbital hierarchy, and the faction's colonies keyed by
+                // the body they sit on — rebuilt each frame from the (faction-filtered) snapshot.
+                var bodies = system.Entities
+                    .Where(e => e.HasView<StarView>() || e.HasView<BodyView>())
+                    .ToDictionary(e => e.Id);
+
+                var children = new Dictionary<int, List<EntitySnapshot>>();
+                foreach (var body in bodies.Values)
+                {
+                    if (ParentIdOf(body) is { } parentId && parentId != body.Id && bodies.ContainsKey(parentId))
+                    {
+                        if (!children.TryGetValue(parentId, out var list))
+                        {
+                            list = new List<EntitySnapshot>();
+                            children[parentId] = list;
+                        }
+                        list.Add(body);
+                    }
+                }
+
+                var coloniesByBody = system.Entities
+                    .Where(e => e.Kind == BodyKind.Colony && e.Relation == OwnerRelation.Owned)
+                    .Select(e => (Colony: e, PlanetId: e.GetView<ColonyView>()?.PlanetEntityId))
+                    .Where(c => c.PlanetId != null)
+                    .ToDictionary(c => c.PlanetId!.Value, c => c.Colony);
+
+                var stars = bodies.Values
+                    .Where(e => e.HasView<StarView>())
+                    .OrderBy(DistanceFromRoot)
                     .ToList();
 
                 if(ImGui.BeginTable("DesignStatsTables", 9, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
@@ -65,9 +82,9 @@ public class SystemWindow : PulsarGuiWindow
                     ImGui.TableSetupColumn("Minerals", ImGuiTableColumnFlags.None, 0.1f);
                     ImGui.TableHeadersRow();
 
-                    foreach (var body in stars)
+                    foreach (var star in stars)
                     {
-                        TreeGen(body.Entity, _uiState.LastClickedEntity?.Entity ?? body.Entity);
+                        TreeGen(star, children, coloniesByBody);
                     }
 
                     ImGui.EndTable();
@@ -77,67 +94,67 @@ public class SystemWindow : PulsarGuiWindow
         Window.End();
     }
 
-    void TreeGen(Entity currentBody, Entity selectedBody, int depth = 0)
+    private static int? ParentIdOf(EntitySnapshot body)
+        => body.GetView<OrbitView>()?.ParentId ?? body.GetView<PositionView>()?.ParentId;
+
+    private static double DistanceFromRoot(EntitySnapshot body)
     {
-        SystemState starSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
-        var entityStates = starSystemState.EntityStatesWithPosition;
+        var position = body.GetView<PositionView>()?.AbsolutePosition ?? new Vec3(0, 0, 0);
+        return position.X * position.X + position.Y * position.Y + position.Z * position.Z;
+    }
 
-        if (entityStates.ContainsKey(currentBody.Id) && (currentBody.HasDataBlob<StarInfoDB>() || currentBody.HasDataBlob<SystemBodyInfoDB>()))
+    // Within a level, order inner -> outer by orbital distance, falling back to name.
+    private static IEnumerable<EntitySnapshot> SortBodies(IEnumerable<EntitySnapshot> bodies)
+        => bodies.OrderBy(b => b.GetView<OrbitView>()?.SemiMajorAxisKm ?? double.MaxValue)
+                 .ThenBy(b => b.GetView<NameView>()?.Name ?? "");
+
+    void TreeGen(EntitySnapshot currentBody, Dictionary<int, List<EntitySnapshot>> children,
+        Dictionary<int, EntitySnapshot> coloniesByBody, int depth = 0)
+    {
+        if(SystemViewPreferences.GetInstance().ShouldDisplay(SystemViewPreferencesKey, UserOrbitSettings.FromBodyKind(currentBody.Kind)))
+            PrintEntity(currentBody, coloniesByBody, depth);
+
+        if (children.TryGetValue(currentBody.Id, out var childList))
         {
-            if(!currentBody.TryGetDataBlob<PositionDB>(out var positionDB))
-                return;
-
-            if(SystemViewPreferences.GetInstance().ShouldDisplay(SystemViewPreferencesKey, entityStates[currentBody.Id].BodyType))
-                PrintEntity(currentBody, depth);
-
-            var children = positionDB.Children;
-            if (children.Count > 0)
+            foreach (var child in SortBodies(childList))
             {
-                children = new(children.OrderBy(x => x.GetDataBlob<PositionDB>().AbsolutePosition).ToList());
-                foreach (var child in children)
-                {
-                    TreeGen(child, selectedBody, depth + 1);
-                }
+                TreeGen(child, children, coloniesByBody, depth + 1);
             }
         }
     }
 
-    private void PrintEntity(Entity entity, int depth = 0)
+    private void PrintEntity(EntitySnapshot entity, Dictionary<int, EntitySnapshot> coloniesByBody, int depth = 0)
     {
-        var bodyType = entity.HasDataBlob<SystemBodyInfoDB>() ?
-            entity.GetDataBlob<SystemBodyInfoDB>().BodyType.ToDescription() :
-            "Star";
+        var bodyType = entity.HasView<StarView>() ? "Star" : entity.GetView<BodyView>()?.BodyType ?? "";
 
-        entity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB);
-        bool isSurveyComplete = geoSurveyableDB == null ? false : geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id);
+        var geoSurvey = entity.GetView<GeoSurveyView>();
+        bool isSurveyComplete = geoSurvey?.IsSurveyComplete ?? false;
 
         ImGui.TableNextColumn();
         if(depth > 0) ImGui.Indent(16 * depth);
-        ImGui.Text(entity.GetName(_uiState.Faction.Id));
+        ImGui.Text(entity.GetView<NameView>()?.Name ?? "Unknown");
         if(depth > 0) ImGui.Unindent(16 * depth);
         ImGui.TableNextColumn();
         ImGui.Text(bodyType);
         ImGui.TableNextColumn();
 
-        var result = entity.IsOrHasColony();
-        if(result.Item1 && _uiState.SelectedSystemState.EntityStatesColonies.ContainsKey(result.Item2))
+        if(coloniesByBody.TryGetValue(entity.Id, out var colony))
         {
-            var colony = _uiState.SelectedSystemState.EntityStatesColonies[result.Item2];
-            if(colony.Entity.FactionOwnerID == _uiState.Faction.Id && ImGui.SmallButton(colony.Entity.GetOwnersName() + "###" + result.Item2))
+            var colonyName = colony.GetView<NameView>()?.Name ?? "Colony";
+            if(ImGui.SmallButton(colonyName + "###" + colony.Id))
             {
                 ColonyManagementWindow.GetInstance().SetActive(true);
-                ColonyManagementWindow.GetInstance().SelectEntity(colony);
+                ColonyManagementWindow.GetInstance().SelectColony(colony.Id, _uiState.SelectedStarSystemId);
             }
         }
         else
         {
-            if(isSurveyComplete && entity.HasDataBlob<ColonizeableDB>())
+            if(isSurveyComplete && entity.HasView<ColonizableView>())
             {
-                if(ImGui.SmallButton("Colonize"))
+                if(ImGui.SmallButton("Colonize") && _uiState.GameClient != null)
                 {
-                    var species = _uiState.Faction.GetDataBlob<FactionInfoDB>().Species[0];
-                    var command = CreateColonyOrder.CreateCommand(_uiState.Faction, species, entity);
-                    _uiState.Game.OrderHandler.HandleOrder(command);
+                    _uiState.GameClient.SubmitCommandAsync(
+                        new CreateColonyCommand(_uiState.GameClient.Session.FactionId, entity.Id));
                 }
             }
             else
@@ -146,9 +163,9 @@ public class SystemWindow : PulsarGuiWindow
             }
         }
         ImGui.TableNextColumn();
-        if(geoSurveyableDB != null)
+        if(geoSurvey != null)
         {
-            if(geoSurveyableDB.HasSurveyStarted(_uiState.Faction.Id))
+            if(geoSurvey.HasSurveyStarted)
             {
                 if(isSurveyComplete)
                 {
@@ -156,8 +173,7 @@ public class SystemWindow : PulsarGuiWindow
                 }
                 else
                 {
-                    float percent = (1f - (float)geoSurveyableDB.GeoSurveyStatus[_uiState.Faction.Id] / (float)geoSurveyableDB.PointsRequired) * 100;
-                    ImGui.Text(percent.ToString("#.##") + "%%");
+                    ImGui.Text(geoSurvey.PercentComplete.ToString("#.##") + "%%");
                 }
             }
             else
@@ -172,20 +188,21 @@ public class SystemWindow : PulsarGuiWindow
 
         if(isSurveyComplete)
         {
-            var bodyInfoDb = entity.GetDataBlob<SystemBodyInfoDB>();
+            var body = entity.GetView<BodyView>();
             ImGui.TableNextColumn();
-            ImGui.Text(Stringify.Velocity(bodyInfoDb.Gravity));
+            ImGui.Text(Stringify.Velocity(body?.GravityMetresPerSec2 ?? 0));
             ImGui.TableNextColumn();
-            ImGui.Text(bodyInfoDb.BaseTemperature.ToString("#.#") + " C");
+            ImGui.Text((body?.SurfaceTemperatureC ?? 0).ToString("#.#") + " C");
 
-            if(entity.TryGetDataBlob<AtmosphereDB>(out var atmosphereDB))
+            if(entity.GetView<AtmosphereView>() is { } atmosphere)
             {
                 ImGui.TableNextColumn();
-                ImGui.Text(Stringify.Quantity(atmosphereDB.Pressure));
+                ImGui.Text(Stringify.Quantity(atmosphere.PressureAtm));
                 ImGui.TableNextColumn();
-                if(atmosphereDB.Composition.ContainsKey("oxygen"))
+                var oxygen = atmosphere.Composition.FirstOrDefault(g => g.Id == "oxygen");
+                if(oxygen != null)
                 {
-                    ImGui.Text(atmosphereDB.Composition["oxygen"] > 0.001 ? atmosphereDB.Composition["oxygen"].ToString("0.0#") : "trace");
+                    ImGui.Text(oxygen.PartialPressureAtm > 0.001 ? oxygen.PartialPressureAtm.ToString("0.0#") : "trace");
                 }
                 else
                 {
@@ -198,7 +215,7 @@ public class SystemWindow : PulsarGuiWindow
                 ImGui.TableNextColumn();
             }
 
-            if(entity.TryGetDataBlob<MineralsDB>(out var mineralsDB))
+            if(entity.HasView<MineralDepositsView>())
             {
                 ImGui.TableNextColumn();
                 ImGui.Text("Yes");

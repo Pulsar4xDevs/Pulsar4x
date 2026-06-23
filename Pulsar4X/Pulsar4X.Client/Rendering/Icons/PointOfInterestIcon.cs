@@ -1,12 +1,11 @@
 using System;
-using Pulsar4X.Movement;
 using Pulsar4X.Orbital;
 using SDL3;
 
 namespace Pulsar4X.Client;
 public class PointOfInterestIcon : Icon
 {
-    public PointOfInterestIcon(PositionDB positionDB) : base(positionDB)
+    public PointOfInterestIcon(IPosition positionDB) : base(positionDB)
     {
         BasicShape();
         OnPhysicsUpdate();

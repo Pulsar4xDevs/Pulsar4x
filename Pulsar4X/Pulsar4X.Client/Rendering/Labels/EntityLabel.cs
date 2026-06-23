@@ -1,36 +1,26 @@
-﻿using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Engine;
-using Pulsar4X.Factions;
-using Pulsar4X.Galaxy;
-using Pulsar4X.Interfaces;
-using Pulsar4X.Messaging;
-using Pulsar4X.Movement;
-using Pulsar4X.Names;
+using Pulsar4X.Api;
+using Pulsar4X.Client.Interface;
 using Pulsar4X.Input;
+using Pulsar4X.Orbital;
 using SDL3;
-using System.Collections.Generic;
+using System;
 using System.Diagnostics;
 using System.Drawing;
-using System.Numerics;
-using System.Threading.Tasks;
-using System;
 
 namespace Pulsar4X.Client
 {
     public class EntityLabel : IPointerHandler, IShape, IInteractable
     {
-        private Entity _entity;
-        public Entity Entity {
-            get { return _entity; }
-        }
+        public int EntityId { get; }
+        public string SystemId { get; }
+        internal UserOrbitSettings.OrbitBodyType BodyType { get; }
+        public string Name => _name;
 
         public byte Priority { get { return 120; } }
 
-        protected string? _starSysGuid;
-
-        private NameDB? _nameDB = null;
-        private PositionDB? _positionDB = null;
-        private MassVolumeDB? _massVolumeDB = null;
+        protected readonly GlobalUIState _state;
+        private readonly IPosition _position;
+        private readonly double _radiusAU;
 
         protected virtual void DrawExt(IntPtr rendererPtr, Camera camera) {}
         protected virtual void OnFrameUpdateExt(Matrix matrix, Camera camera) {}
@@ -69,39 +59,47 @@ namespace Pulsar4X.Client
             }
         }
 
-        private int _faction = Game.NeutralFactionId;
-        public int Faction {
-            set {
-                _faction = value;
-                OnEntityRenamed(null);
-            }
-            get {
-                return _faction;
-            }
-        }
-
         private void OnPaddingUpdate()
         {
             Rect.Width = _nameRect.W + _padding * 2;
             Rect.Height = _nameRect.H + _padding * 2;
         }
 
-        private Task OnEntityRenamed(Message message)
+        public EntityLabel(GlobalUIState state, EntitySnapshot entity, string systemId)
         {
-            if (_nameDB != null)
-                _name = _nameDB.GetName(_faction);
+            _state = state;
+            EntityId = entity.Id;
+            SystemId = systemId;
+            BodyType = UserOrbitSettings.FromBodyKind(entity.Kind);
+            _name = entity.GetView<NameView>()?.Name ?? "Unknown";
+            _position = new SnapshotPosition(state, systemId, entity.Id);
+            _radiusAU = entity.GetView<MassVolumeView>() is { } massVolume
+                ? Distance.MToAU(massVolume.RadiusMetres)
+                : 0;
 
-            if (Styles.SDLDefaultFont != IntPtr.Zero && !string.IsNullOrEmpty(_name))
+            _color = entity.Relation switch
             {
-                SDL3.TTF.GetStringSize(Styles.SDLDefaultFont, _name, 0, out int w, out _);
-                _nameRect.W = w;
+                OwnerRelation.Neutral => Styles.NeutralColor.ToSDLColor(),
+                OwnerRelation.Owned or OwnerRelation.Friendly => Styles.Theme.Text.ToSDLColor(),
+                _ => Styles.BadColor.ToSDLColor(),
+            };
+
+            if (Styles.SDLDefaultFont != IntPtr.Zero)
+            {
+                _nameRect.H = SDL3.TTF.GetFontHeight(Styles.SDLDefaultFont);
+                if (!string.IsNullOrEmpty(_name))
+                {
+                    SDL3.TTF.GetStringSize(Styles.SDLDefaultFont, _name, 0, out int w, out _);
+                    _nameRect.W = w;
+                }
             }
 
             OnPaddingUpdate();
+        }
 
+        ~EntityLabel()
+        {
             DestroyName();
-
-            return Task.CompletedTask;
         }
 
         private void DestroyName()
@@ -112,55 +110,6 @@ namespace Pulsar4X.Client
             var p = _nameTexture;
             _nameTexture = IntPtr.Zero;
             SDL.DestroyTexture(p);
-        }
-
-        public EntityLabel(Entity entity)
-        {
-            _entity = entity;
-
-            if (entity.TryGetDataBlob<NameDB>(out NameDB i))
-                _nameDB = i;
-            if (entity.TryGetDataBlob<PositionDB>(out PositionDB j))
-                _positionDB = j;
-            if (entity.TryGetDataBlob<MassVolumeDB>(out MassVolumeDB k))
-                _massVolumeDB = k;
-
-            SetColor();
-
-            if(entity.Manager != null)
-            {
-                StarSystem starSys = (StarSystem)entity.Manager;
-                _starSysGuid = starSys.ID;
-            }
-
-            if (Styles.SDLDefaultFont != IntPtr.Zero)
-                _nameRect.H = SDL3.TTF.GetFontHeight(Styles.SDLDefaultFont);
-            OnEntityRenamed(null);
-
-            // Subscribe to name changes
-            Func<Message, bool> filterById = msg => msg.EntityId == _entity.Id;
-            MessagePublisher.Instance.Subscribe(MessageTypes.EntityRenamed, OnEntityRenamed, filterById);
-        }
-
-        ~EntityLabel()
-        {
-            DestroyName();
-        }
-
-        private void SetColor()
-        {
-            _color = (_entity.FactionOwnerID == Game.NeutralFactionId) ?
-                Styles.NeutralColor.ToSDLColor() :
-                (_state != null && _entity.FactionOwnerID != _state.Faction?.Id) ?
-                Styles.BadColor.ToSDLColor() :
-                Styles.Theme.Text.ToSDLColor();
-        }
-
-        protected GlobalUIState? _state = null;
-        public void AttachState(GlobalUIState state)
-        {
-            _state = state;
-            SetColor();
         }
 
         private bool _hovered = false;
@@ -193,15 +142,10 @@ namespace Pulsar4X.Client
         {
             _pressed = false;
 
-            if (_state == null || _starSysGuid == null)
-                return true; // Still mark handled
-            var state = _state!;
-            var starSys = _starSysGuid!;
-
             if (sevent.Button.Button == 1)
-                state.EntityClicked(Entity.Id, starSys, MouseButtons.Primary);
+                _state.EntityClicked(EntityId, SystemId, MouseButtons.Primary);
             else if (sevent.Button.Button == 3)
-                state.EntityClicked(Entity.Id, starSys, MouseButtons.Alt);
+                _state.EntityClicked(EntityId, SystemId, MouseButtons.Alt);
             return true;
         }
 
@@ -212,7 +156,7 @@ namespace Pulsar4X.Client
 
         public void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            var point = camera.ViewCoordinate_m(_positionDB.AbsolutePosition);
+            var point = camera.ViewCoordinate_m(_position.AbsolutePosition);
 
             float anchorX = (float)point.X;
             float anchorY = (float)point.Y;
@@ -220,9 +164,7 @@ namespace Pulsar4X.Client
             // Diagonal distance from body center to the elbow must clear the
             // body's on-screen radius. The leader rises by `offset` in both X
             // and Y, so its length along the diagonal is offset*sqrt(2).
-            float viewRadius = _massVolumeDB != null
-                ? camera.ViewDistance(_massVolumeDB.RadiusInAU)
-                : 0f;
+            float viewRadius = camera.ViewDistance(_radiusAU);
             const float invSqrt2 = 0.70710678f;
             float offset = MathF.Max(MinLeaderOffset, (viewRadius + BodyEdgeGap) * invSqrt2);
 
@@ -319,5 +261,7 @@ namespace Pulsar4X.Client
 
             DrawExt(rendererPtr, camera);
         }
+
+        protected bool IsHovered => _hovered;
     }
 }

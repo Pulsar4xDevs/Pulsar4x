@@ -4,24 +4,13 @@ using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Api;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Datablobs;
-using Pulsar4X.DataStructures;
-using Pulsar4X.Engine;
-using Pulsar4X.Extensions;
-using Pulsar4X.Factions;
-using Pulsar4X.Fleets;
-using Pulsar4X.Movement;
-using Pulsar4X.Orbits;
-using Pulsar4X.Ships;
 
 namespace Pulsar4X.Client
 {
     public class Selector : PulsarGuiWindow
     {
-        private List<string> _knownSystems = new ();
-        private List<StarSystem> _filteredAndSortedSystems = new ();
-
         // When true the window shows the section editor instead of its normal content.
         private bool _editing = false;
 
@@ -42,25 +31,22 @@ namespace Pulsar4X.Client
         // Indentation (in pixels) applied per level of a hierarchy (celestial bodies, fleets).
         private const float IndentStep = 12f;
 
-        // The celestial body types listed in the "Celestial Bodies" section. Colonies and
+        // The celestial body kinds listed in the "Celestial Bodies" section. Colonies and
         // ships are intentionally excluded as they have their own sections above.
-        private static readonly UserOrbitSettings.OrbitBodyType[] _celestialBodyTypes = new []
+        private static readonly BodyKind[] _celestialBodyKinds = new []
         {
-            UserOrbitSettings.OrbitBodyType.Star,
-            UserOrbitSettings.OrbitBodyType.Planet,
-            UserOrbitSettings.OrbitBodyType.DwarfPlanet,
-            UserOrbitSettings.OrbitBodyType.Moon,
-            UserOrbitSettings.OrbitBodyType.Asteroid,
-            UserOrbitSettings.OrbitBodyType.Comet,
+            BodyKind.Star,
+            BodyKind.Planet,
+            BodyKind.DwarfPlanet,
+            BodyKind.Moon,
+            BodyKind.Asteroid,
+            BodyKind.Comet,
         };
 
         //constructs the toolbar with the given buttons
         private Selector()
         {
             _flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoBackground;
-
-            _uiState.OnStarSystemAdded += SystemAdded;
-            _uiState.OnFactionChanged += FactionChanged;
         }
 
         internal static Selector GetInstance()
@@ -75,8 +61,7 @@ namespace Pulsar4X.Client
 
         internal override void Display()
         {
-            if(!IsActive || _uiState.Faction == null) return;
-            if(_knownSystems.Count == 0) RefreshSystems();
+            if(!IsActive || !_uiState.IsGameLoaded) return;
 
             ImGui.SetNextWindowSize(new Vector2(256, 0));
             ImGui.SetNextWindowPos(new Vector2(ImGui.GetMainViewport().WorkSize.X - 256, 0));
@@ -177,45 +162,18 @@ namespace Pulsar4X.Client
 
         private static string CorporationHeaderLabel()
         {
-            if(_uiState.Faction == null) return "Corporation";
-            return $"{_uiState.Faction.GetFactionName()} [{_uiState.Faction.GetFactionAbbreviation()}]";
-        }
-
-        private void RefreshSystems()
-        {
-            _knownSystems = _uiState.Faction?.GetDataBlob<FactionInfoDB>().KnownSystems ?? new ();
-            FilterAndSortSystems();
-        }
-
-        private void FilterAndSortSystems()
-        {
-            _filteredAndSortedSystems = _uiState.Game?.Systems
-                                            .Where(s => _knownSystems.Contains(s.ID))
-                                            .OrderBy(s => s.NameDB.OwnersName)
-                                            .ToList() ?? new ();
-        }
-
-        private void FactionChanged(GlobalUIState state)
-        {
-            RefreshSystems();
-        }
-
-        private void SystemAdded(GlobalUIState state, string systemId)
-        {
-            if(!_knownSystems.Contains(systemId))
-                _knownSystems.Add(systemId);
-
-            FilterAndSortSystems();
+            var faction = _uiState.GameClient?.Galaxy.Faction;
+            if(faction == null) return "Corporation";
+            return $"{faction.Name} [{faction.Abbreviation}]";
         }
 
         private static void DisplayCorporation()
         {
-            if(_uiState.Faction == null) return;
-            if(!_uiState.Faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
-                return;
+            var faction = _uiState.GameClient?.Galaxy.Faction;
+            if(faction == null) return;
 
             string label = "Funds";
-            string value = factionInfoDB.Money.GetCurrentFunds().ToString("C0", CultureInfo.CurrentCulture);
+            string value = faction.Funds.ToString("C0", CultureInfo.CurrentCulture);
 
             // Get available width in current line
             float availWidth = ImGui.GetContentRegionAvail().X;
@@ -244,43 +202,46 @@ namespace Pulsar4X.Client
 
         private void DisplaySystems()
         {
-            foreach (var system in _filteredAndSortedSystems)
+            // Read the faction-scoped system summaries from the client galaxy model rather than
+            // touching engine objects directly. KnownSystems stays current via the adapter's event stream.
+            var galaxy = _uiState.GameClient?.Galaxy;
+            if (galaxy == null) return;
+
+            foreach (var system in galaxy.KnownSystems.OrderBy(s => s.Name))
             {
-                if (ImGui.Selectable(system.NameDB.OwnersName, _uiState.SelectedStarSystemId.Equals(system.ID)))
+                if (ImGui.Selectable(system.Name, _uiState.SelectedStarSystemId.Equals(system.SystemId)))
                 {
-                    _uiState.SetActiveSystem(system.ID);
+                    _uiState.SetActiveSystem(system.SystemId);
                 }
             }
         }
 
         private static void DisplayBodies()
         {
-            if (_uiState.Faction == null) return;
-            if (string.IsNullOrEmpty(_uiState.SelectedStarSystemId)
-                || !_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId))
-                return;
+            if (_uiState.GameClient == null) return;
 
-            var systemState = _uiState.StarSystemStates[_uiState.SelectedStarSystemId];
+            var system = _uiState.GameClient?.Galaxy.GetSystem(_uiState.SelectedStarSystemId);
+            if (system == null) return;
 
             // Gather all celestial bodies in the system keyed by entity id so we can
             // reconstruct the orbital hierarchy (stars -> planets -> moons etc).
-            var bodies = systemState.EntityStatesWithNames.Values
-                .Where(e => Array.IndexOf(_celestialBodyTypes, e.BodyType) >= 0)
+            var bodies = system.Entities
+                .Where(e => Array.IndexOf(_celestialBodyKinds, e.Kind) >= 0)
                 .ToDictionary(e => e.Id);
 
             // Build parent -> children lists. A body whose parent isn't another
             // celestial body in this set is treated as a root (e.g. the primary star).
-            var children = new Dictionary<int, List<EntityState>>();
-            var roots = new List<EntityState>();
+            var children = new Dictionary<int, List<EntitySnapshot>>();
+            var roots = new List<EntitySnapshot>();
             foreach (var body in bodies.Values)
             {
-                var parent = body.GetParent();
-                if (parent != null && parent.Id != body.Id && bodies.ContainsKey(parent.Id))
+                int? parentId = ParentIdOf(body);
+                if (parentId is { } pid && pid != body.Id && bodies.ContainsKey(pid))
                 {
-                    if (!children.TryGetValue(parent.Id, out var list))
+                    if (!children.TryGetValue(pid, out var list))
                     {
-                        list = new List<EntityState>();
-                        children[parent.Id] = list;
+                        list = new List<EntitySnapshot>();
+                        children[pid] = list;
                     }
                     list.Add(body);
                 }
@@ -297,28 +258,33 @@ namespace Pulsar4X.Client
             }
         }
 
-        private static IEnumerable<EntityState> SortBodies(List<EntityState> bodies)
+        private static int? ParentIdOf(EntitySnapshot body)
+            => body.GetView<OrbitView>()?.ParentId ?? body.GetView<PositionView>()?.ParentId;
+
+        private static IEnumerable<EntitySnapshot> SortBodies(List<EntitySnapshot> bodies)
         {
             // Within a level, order inner -> outer by orbital distance (semi-major axis),
             // falling back to name for bodies that share a distance or lack an orbit.
-            return bodies.OrderBy(GetOrbitalDistance).ThenBy(e => e.Name);
+            return bodies.OrderBy(GetOrbitalDistance).ThenBy(NameOf);
         }
 
-        private static double GetOrbitalDistance(EntityState body)
+        private static double GetOrbitalDistance(EntitySnapshot body)
         {
             // Bodies without an orbit (e.g. a system's primary star) sort to the end of
             // their level; in practice such bodies are roots on their own anyway.
-            if (body.Entity.TryGetDataBlob<OrbitDB>(out var orbit))
-                return orbit.SemiMajorAxis;
-            return double.MaxValue;
+            return body.GetView<OrbitView>()?.SemiMajorAxisKm ?? double.MaxValue;
         }
 
-        private static void DisplayBodyNode(EntityState body, Dictionary<int, List<EntityState>> children, SystemViewPreferences prefs, int visibleDepth)
+        private static string NameOf(EntitySnapshot body) => body.GetView<NameView>()?.Name ?? "";
+
+        private static void DisplayBodyNode(EntitySnapshot body, Dictionary<int, List<EntitySnapshot>> children, SystemViewPreferences prefs, int visibleDepth)
         {
+            var orbitType = UserOrbitSettings.FromBodyKind(body.Kind);
+
             // Respect the same view filters used by the system map. A filtered-out body
             // is skipped but we still recurse so its children stay in the tree, sliding
             // up to fill the gap rather than indenting under a hidden parent.
-            bool visible = prefs.ShouldDisplay("map", body.BodyType);
+            bool visible = prefs.ShouldDisplay("map", orbitType);
             int childDepth = visibleDepth;
 
             if (visible)
@@ -326,18 +292,20 @@ namespace Pulsar4X.Client
                 float indent = visibleDepth * IndentStep;
                 if (indent > 0) ImGui.Indent(indent);
 
+                string name = NameOf(body);
                 bool selected = _uiState.LastClickedEntity?.Id == body.Id;
-                var shortName = UserOrbitSettings.OrbitBodyTypeShortNames[(int)body.BodyType];
-                if (ImGui.Selectable($"{shortName}  {body.Name}", selected))
+                var shortName = UserOrbitSettings.OrbitBodyTypeShortNames[(int)orbitType];
+                if (ImGui.Selectable($"{shortName}  {name}", selected))
                 {
-                    _uiState.EntityClicked(body, MouseButtons.Primary);
-                    _uiState.Camera.CenterOnEntity(body.Entity);
+                    _uiState.EntityClicked(body.Id, _uiState.SelectedStarSystemId, MouseButtons.Primary);
+                    if (body.GetView<PositionView>() is { } pos)
+                        _uiState.Camera.CenterOnPosition(pos.AbsolutePosition.X, pos.AbsolutePosition.Y, pos.AbsolutePosition.Z);
                 }
 
                 if (ImGui.IsItemHovered())
                 {
-                    var tip = UserOrbitSettings.OrbitBodyTypeTooltips[(int)body.BodyType];
-                    ImGui.SetTooltip($"{body.Name} ({tip})");
+                    var tip = UserOrbitSettings.OrbitBodyTypeTooltips[(int)orbitType];
+                    ImGui.SetTooltip($"{name} ({tip})");
                 }
 
                 if (indent > 0) ImGui.Unindent(indent);
@@ -355,69 +323,66 @@ namespace Pulsar4X.Client
 
         private static void DisplayColonies()
         {
-            if(_uiState.Faction == null) return;
+            var galaxy = _uiState.GameClient?.Galaxy;
+            if (galaxy == null) return;
 
-            var colonies = _uiState.Faction.GetDataBlob<FactionInfoDB>().Colonies;
-
-            foreach (var colony in colonies)
+            // The faction's colonies are owned colony entities sitting in its known (loaded) systems.
+            var colonies = new List<(IClientSystem System, EntitySnapshot Colony)>();
+            foreach (var summary in galaxy.KnownSystems)
             {
-                bool visible = ColonyManagementWindow.GetInstance().GetActive() && ColonyManagementWindow.GetInstance().SelectedEntity?.Entity.Id == colony.Id;
-                if (ImGui.Selectable(colony.GetName(_uiState.Faction.Id), visible))
+                var system = galaxy.GetSystem(summary.SystemId);
+                if (system == null) continue;
+                foreach (var colony in system.Entities.Where(e => e.Kind == BodyKind.Colony && e.Relation == OwnerRelation.Owned))
+                    colonies.Add((system, colony));
+            }
+
+            var window = ColonyManagementWindow.GetInstance();
+            int? selectedId = window.GetActive() ? window.SelectedColonyId : null;
+
+            foreach (var (system, colony) in colonies.OrderBy(c => NameOf(c.Colony)))
+            {
+                bool selected = selectedId == colony.Id;
+                if (ImGui.Selectable($"{NameOf(colony)}###colony-{colony.Id}", selected))
                 {
-                    if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSystemId) && _uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies.ContainsKey(colony.Id))
-                    {
-                        ColonyManagementWindow.GetInstance().SelectEntity(_uiState.StarSystemStates[_uiState.SelectedStarSystemId].EntityStatesColonies[colony.Id]);
-                        ColonyManagementWindow.GetInstance().SetActive(true);
-                    }
+                    _uiState.SetActiveSystem(system.SystemId);
+                    window.SelectColony(colony.Id, system.SystemId);
+                    window.SetActive(true);
                 }
             }
         }
 
         private static void DisplayFleets()
         {
-            if(_uiState.Faction == null) return;
+            var galaxy = _uiState.GameClient?.Galaxy;
+            if (galaxy == null) return;
 
-            var fleets = _uiState.Faction.GetDataBlob<FleetDB>().RootDB?.Children ?? new SafeList<Entity>();
-
-            foreach (var fleet in fleets)
+            foreach (var fleet in galaxy.Fleets)
             {
-                // Check if the entity is actually a ship; ships only appear nested under a fleet.
-                if (fleet.HasDataBlob<ShipInfoDB>())
-                    continue;
-
                 DisplayFleetNode(fleet, 0);
             }
         }
 
-        private static void DisplayFleetNode(Entity fleet, int depth)
+        private static void DisplayFleetNode(FleetSnapshot fleet, int depth)
         {
-            if (_uiState.Faction == null) return;
-
             float indent = depth * IndentStep;
             if (indent > 0) ImGui.Indent(indent);
 
-            bool selected = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleet?.Id == fleet.Id;
-            string display = fleet.GetName(_uiState.Faction.Id);
-            if (ImGui.Selectable(display, selected))
+            bool selected = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleetId == fleet.Id;
+            if (ImGui.Selectable($"{fleet.Name}###fleet-{fleet.Id}", selected))
             {
-                FleetWindow.GetInstance().SelectFleet(fleet);
+                FleetWindow.GetInstance().SelectFleet(fleet.Id);
                 FleetWindow.GetInstance().SetActive(true);
             }
-
-            fleet.TryGetDataBlob<FleetDB>(out var fleetDB);
 
             if (ImGui.IsItemHovered())
             {
                 void Callback()
                 {
-                    if (fleet.TryGetDataBlob<OrderableDB>(out var orderableDb)
-                    && orderableDb.ActionList.Count > 0)
+                    if (fleet.Orders.Count > 0)
                     {
                         ImGui.Text("Orders:");
-                        for (int i = 0; i < orderableDb.ActionList.Count; i++)
-                        {
-                            ImGui.Text(orderableDb.ActionList[i].Name);
-                        }
+                        foreach (var order in fleet.Orders)
+                            ImGui.Text(order.Name);
                     }
                     else
                     {
@@ -425,48 +390,33 @@ namespace Pulsar4X.Client
                     }
                 }
 
-                var flagshipID = fleetDB?.FlagShipID ?? -9999;
-                if (fleet.Manager?.TryGetEntityById(flagshipID, out var flagship) ?? false)
-                {
-                    var positionDB = flagship.GetDataBlob<PositionDB>();
-                    DisplayHelpers.DescriptiveTooltip(display, positionDB.Parent?.GetName(_uiState.Faction.Id) ?? "Unknown", "", Callback);
-                }
+                DisplayHelpers.DescriptiveTooltip(fleet.Name, fleet.OrbitingName ?? "Unknown", "", Callback);
             }
 
             if (indent > 0) ImGui.Unindent(indent);
 
-            if (fleetDB == null) return;
+            // Sub-fleets first, then this fleet's ships, both one level deeper so the
+            // hierarchy reads top-down like the fleet window.
+            foreach (var sub in fleet.SubFleets)
+                DisplayFleetNode(sub, depth + 1);
 
-            // Recurse into sub-fleets first, then list this fleet's ships, both indented
-            // one level deeper so the hierarchy reads top-down like the fleet window.
-            foreach (var child in fleetDB.GetChildren())
-            {
-                if (child.HasDataBlob<FleetDB>())
-                    DisplayFleetNode(child, depth + 1);
-            }
-
-            var ships = fleetDB.GetChildren().Where(c => !c.HasDataBlob<FleetDB>());
-            int flagshipID2 = fleetDB.FlagShipID;
             // Flagship first, then alphabetical so the lead ship is easy to spot.
-            foreach (var ship in ships.OrderByDescending(s => s.Id == flagshipID2).ThenBy(s => s.GetName(_uiState.Faction.Id)))
+            foreach (var ship in fleet.Ships.OrderByDescending(s => s.Id == fleet.FlagshipId).ThenBy(s => s.Name))
             {
-                DisplayShipNode(ship, depth + 1, ship.Id == flagshipID2);
+                DisplayShipNode(ship, depth + 1, ship.Id == fleet.FlagshipId);
             }
         }
 
-        private static void DisplayShipNode(Entity ship, int depth, bool isFlagship)
+        private static void DisplayShipNode(ShipSnapshot ship, int depth, bool isFlagship)
         {
-            if (_uiState.Faction == null) return;
-
             float indent = depth * IndentStep;
             if (indent > 0) ImGui.Indent(indent);
 
-            string name = ship.GetName(_uiState.Faction.Id);
             // A small marker distinguishes the fleet's flagship from the rest.
-            string label = isFlagship ? $"⚑ {name}" : name;
+            string label = isFlagship ? $"⚑ {ship.Name}" : ship.Name;
 
             // Grey out ships that aren't in the system the player is currently viewing.
-            bool inViewedSystem = ship.Manager?.ManagerID == _uiState.SelectedStarSystemId;
+            bool inViewedSystem = ship.SystemId == _uiState.SelectedStarSystemId;
             if (!inViewedSystem)
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled]);
 
@@ -480,27 +430,25 @@ namespace Pulsar4X.Client
                 ImGui.PopStyleColor();
 
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip(isFlagship ? $"{name} (Flagship)" : name);
+                ImGui.SetTooltip(isFlagship ? $"{ship.Name} (Flagship)" : ship.Name);
 
             if (indent > 0) ImGui.Unindent(indent);
         }
 
-        private static void ShipClicked(Entity ship)
+        private static void ShipClicked(ShipSnapshot ship)
         {
-            // Ships live in their star system's manager; surface them the same way a
-            // map click would: focus the owning system, open the entity window, and
-            // center the camera. Bail quietly if the ship isn't in a known system.
-            var systemId = ship.Manager?.ManagerID;
-            if (systemId == null
-                || !_uiState.StarSystemStates.TryGetValue(systemId, out var systemState)
-                || !systemState.EntityStatesWithNames.TryGetValue(ship.Id, out var shipState))
-                return;
+            // Surface the ship like a map click would: focus its system, open the entity window,
+            // and centre the camera (using the ship's position from the galaxy snapshot).
+            if (string.IsNullOrEmpty(ship.SystemId)) return;
 
-            if (_uiState.SelectedStarSystemId != systemId)
-                _uiState.SetActiveSystem(systemId);
+            if (_uiState.SelectedStarSystemId != ship.SystemId)
+                _uiState.SetActiveSystem(ship.SystemId);
 
-            _uiState.EntityClicked(shipState, MouseButtons.Primary);
-            _uiState.Camera.CenterOnEntity(ship);
+            _uiState.EntityClicked(ship.Id, ship.SystemId, MouseButtons.Primary);
+
+            var snapshot = _uiState.GameClient?.Galaxy.GetSystem(ship.SystemId)?.GetEntity(ship.Id);
+            if (snapshot?.GetView<PositionView>() is { } pos)
+                _uiState.Camera.CenterOnPosition(pos.AbsolutePosition.X, pos.AbsolutePosition.Y, pos.AbsolutePosition.Z);
         }
     }
 }

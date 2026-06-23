@@ -1,31 +1,24 @@
 using System;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Engine;
-using Pulsar4X.Datablobs;
-using Pulsar4X.Extensions;
-using Pulsar4X.Colonies;
-using Pulsar4X.Factions;
-using Pulsar4X.GeoSurveys;
-using Pulsar4X.Industry;
-using Pulsar4X.JumpPoints;
-using Pulsar4X.Names;
-using Pulsar4X.Ships;
-using Pulsar4X.Storage;
-using Pulsar4X.Galaxy;
-using Pulsar4X.Movement;
+using Pulsar4X.Api;
 using Pulsar4X.Client.Interface;
-using Pulsar4X.Damage;
-using Pulsar4X.People;
+using Pulsar4X.Client.Interface.Widgets;
+// Engine usings: Stringify formatting, plus the deferred camera-pin / maneuver-panel bridges below.
 
 namespace Pulsar4X.Client
 {
     public class EntityWindow : NonUniquePulsarGuiWindow
     {
-        public Entity Entity { get; private set; }
-        public EntityState EntityState { get; private set; }
-        public string Title { get; private set; }
+        public int EntityId { get; }
+        public string SystemId { get; }
+        public string Title { get; private set; } = "Unknown";
+
+        // Re-resolved each frame: system snapshots are replaced wholesale by server pushes.
+        private EntitySnapshot? _entity;
+        private IClientSystem? _system;
+        private UserOrbitSettings.OrbitBodyType _bodyType;
 
         private Vector4 _accentColor;
 
@@ -42,20 +35,11 @@ namespace Pulsar4X.Client
         private float _animationProgress = 0f;
         private DateTime _animationStartTime;
 
-        public EntityWindow(EntityState entityState)
+        public EntityWindow(int entityId, string systemId)
         {
-            Entity = entityState.Entity;
-            EntityState = entityState;
+            EntityId = entityId;
+            SystemId = systemId;
             _flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar;
-
-            if(_uiState.Faction != null && Entity.TryGetDataBlob<NameDB>(out var nameDB))
-            {
-                Title = nameDB.GetName(_uiState.Faction);
-            }
-            else
-            {
-                Title = "Unknown";
-            }
         }
 
         public new void SetActive(bool activeVal = true)
@@ -94,7 +78,7 @@ namespace Pulsar4X.Client
 
         private Vector4 GetAccentColor()
         {
-            return EntityState.BodyType switch
+            return _bodyType switch
             {
                 UserOrbitSettings.OrbitBodyType.Star => new Vector4(1.0f, 0.8f, 0.3f, 1.0f),
                 UserOrbitSettings.OrbitBodyType.Planet => new Vector4(0.3f, 0.6f, 1.0f, 1.0f),
@@ -163,6 +147,20 @@ namespace Pulsar4X.Client
             // Don't render if fully closed
             if (_animationState == AnimationState.Closed) return;
 
+            _system = _uiState.GameClient?.Galaxy.GetSystem(SystemId);
+            _entity = _system?.GetEntity(EntityId);
+
+            // The entity left the faction's view (destroyed/hidden) — drop the window.
+            if (_entity == null)
+            {
+                IsActive = false;
+                _animationState = AnimationState.Closed;
+                return;
+            }
+
+            _bodyType = UserOrbitSettings.FromBodyKind(_entity.Kind);
+            Title = _entity.GetView<NameView>()?.Name ?? "Unknown";
+
             var windowPos = CalculateWindowPosition();
             ImGui.SetNextWindowPos(windowPos, ImGuiCond.Always);
             ImGui.SetNextWindowSize(new Vector2(WindowWidth, WindowHeight), ImGuiCond.Always);
@@ -183,7 +181,7 @@ namespace Pulsar4X.Client
 
             // Track if window is closed via the X button
             bool windowOpen = true;
-            if (Window.Begin(Title + " (" + EntityState.BodyType.ToDescription() + ")" + "###" + Entity.Id, ref windowOpen, _flags))
+            if (Window.Begin(Title + " (" + _bodyType.ToDescription() + ")" + "###" + EntityId, ref windowOpen, _flags))
             {
                 _accentColor = accentColor;
                 DrawWindowAccents(accentColor);
@@ -280,7 +278,7 @@ namespace Pulsar4X.Client
 
             // Pin button (right-aligned on row 1)
             ImGui.SetCursorPos(new Vector2(btnX, btnY));
-            ImGui.PushID(EntityState.Id);
+            ImGui.PushID(EntityId);
             ImGui.PushStyleColor(ImGuiCol.Button, Styles.InvisibleColor);
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered,
                 new Vector4(accentColor.X * 0.3f, accentColor.Y * 0.3f, accentColor.Z * 0.3f, 0.5f));
@@ -288,7 +286,7 @@ namespace Pulsar4X.Client
                 new Vector4(accentColor.X * 0.4f, accentColor.Y * 0.4f, accentColor.Z * 0.4f, 0.7f));
             if (ImGui.ImageButton("##headerpin", _uiState.Img_Pin().ToTextureRef(), new Vector2(pinBtnSize, pinBtnSize)))
             {
-                _uiState.Camera.PinToEntity(Entity);
+                _uiState.Camera.PinToEntity(EntityId, SystemId, _uiState);
             }
             ImGui.PopStyleColor(3);
             if (ImGui.IsItemHovered())
@@ -331,28 +329,47 @@ namespace Pulsar4X.Client
 
         private string GetEntitySubtitle()
         {
-            if (Entity.TryGetDataBlob<ShipInfoDB>(out var shipInfo))
-                return shipInfo.Design.Name;
-            if (Entity.TryGetDataBlob<StarInfoDB>(out var starInfo))
-                return starInfo.Class;
-            if (Entity.TryGetDataBlob<SystemBodyInfoDB>(out var bodyInfo))
+            if (_entity == null) return "";
+
+            if (_entity.GetView<ShipView>() is { } ship)
+                return ship.DesignName;
+            if (_entity.GetView<StarView>() is { } star)
+                return star.SpectralClass;
+            if (_entity.GetView<BodyView>() is { } body)
             {
-                if (Entity.TryGetDataBlob<PositionDB>(out var positionDB) && positionDB.Parent != null)
-                {
-                    int factionId = _uiState.Faction?.Id ?? Game.NeutralFactionId;
-                    return "Orbiting: " + positionDB.Parent.GetName(factionId);
-                }
-                return bodyInfo.BodyType.ToDescription();
+                if (GetParent() is { } parent)
+                    return "Orbiting: " + (parent.GetView<NameView>()?.Name ?? "Unknown");
+                return body.BodyType;
             }
             return "";
         }
 
+        private EntitySnapshot? GetParent()
+        {
+            return _entity?.GetView<PositionView>()?.ParentId is { } parentId
+                ? _system?.GetEntity(parentId)
+                : null;
+        }
+
+        /// <summary>
+        /// Resolves the colony associated with this body — either this entity itself, or the
+        /// owned colony sitting on it.
+        /// </summary>
+        private EntitySnapshot? GetColony()
+        {
+            if (_entity == null || _system == null) return null;
+            if (_entity.Kind == BodyKind.Colony) return _entity;
+
+            return _system.Entities.FirstOrDefault(e => e.Kind == BodyKind.Colony
+                && e.Relation == OwnerRelation.Owned
+                && e.GetView<ColonyView>()?.PlanetEntityId == _entity.Id);
+        }
+
         private void DisplayContent()
         {
-            if (_uiState.Game == null || _uiState.Faction == null || Entity.Manager == null)
-                return;
+            if (_entity == null) return;
 
-            switch (EntityState.BodyType)
+            switch (_bodyType)
             {
                 case UserOrbitSettings.OrbitBodyType.Ship:
                     DisplayShipContent();
@@ -382,19 +399,18 @@ namespace Pulsar4X.Client
 
         private void DisplayOrbitInfo()
         {
-            if (!Entity.TryGetDataBlob<PositionDB>(out var positionDB)) return;
-            Entity? parent = positionDB.Parent;
+            var parent = GetParent();
             if (parent == null) return;
 
             ImGui.Columns(2, "##orbit-info", true);
-            if (Entity.TryGetDataBlob<WarpMovingDB>(out var movedb))
+            if (_entity!.GetView<WarpMovingView>() is { } warping)
             {
-                DisplayHelpers.PrintRow("Warping", Stringify.Velocity(movedb.CurrentNonNewtonionVectorMS.Length()));
+                DisplayHelpers.PrintRow("Warping", Stringify.Velocity(warping.SpeedMps));
             }
             else
             {
                 DisplayHelpers.PrintFormattedCell("Orbiting");
-                if (ImGui.SmallButton(parent.GetName(_uiState.Faction.Id)))
+                if (ImGui.SmallButton(parent.GetView<NameView>()?.Name ?? "Unknown"))
                 {
                     _uiState.EntityClicked(parent.Id, _uiState.SelectedStarSystemId, MouseButtons.Primary);
                 }
@@ -406,74 +422,69 @@ namespace Pulsar4X.Client
 
         private void DisplayOrders()
         {
-            if (Entity.Manager == null) return;
+            var orders = _entity?.GetView<OrdersView>()?.Orders;
+            if (orders == null || orders.Count == 0) return;
 
-            foreach (var db in Entity.Manager.GetAllDataBlobsForEntity(Entity.Id))
+            if (ImGui.CollapsingHeader("Orders", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                if (db is not OrderableDB orderableDB) continue;
-                if (orderableDB.ActionList.Count == 0) continue;
-
-                if (ImGui.CollapsingHeader("Orders", ImGuiTreeNodeFlags.DefaultOpen))
+                if (ImGui.BeginTable("OrdersTable", 3, Styles.TableFlags))
                 {
-                    if (ImGui.BeginTable("OrdersTable", 3, Styles.TableFlags))
+                    ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.WidthStretch, 0.1f);
+                    ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.WidthStretch, 0.2f);
+                    ImGui.TableSetupColumn("Details", ImGuiTableColumnFlags.WidthStretch, 0.7f);
+                    ImGui.TableHeadersRow();
+
+                    for (int i = 0; i < orders.Count; i++)
                     {
-                        ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.WidthStretch, 0.1f);
-                        ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.WidthStretch, 0.2f);
-                        ImGui.TableSetupColumn("Details", ImGuiTableColumnFlags.WidthStretch, 0.7f);
-                        ImGui.TableHeadersRow();
-
-                        var actions = orderableDB.ActionList.ToArray();
-                        for (int i = 0; i < actions.Length; i++)
+                        ImGui.TableNextColumn();
+                        ImGui.Text((i + 1).ToString());
+                        ImGui.TableNextColumn();
+                        ImGui.Text(orders[i].Name);
+                        if (ImGui.IsItemHovered())
                         {
-                            ImGui.TableNextColumn();
-                            ImGui.Text((i + 1).ToString());
-                            ImGui.TableNextColumn();
-                            ImGui.Text(actions[i].Name);
-                            if (ImGui.IsItemHovered())
-                            {
-                                ImGui.BeginTooltip();
-                                ImGui.Text("IsRunning: " + actions[i].IsRunning);
-                                ImGui.Text("IsFinished: " + actions[i].GetIsFinished);
-                                ImGui.EndTooltip();
-                            }
-                            ImGui.TableNextColumn();
-                            ImGui.Text(actions[i].Details);
+                            ImGui.BeginTooltip();
+                            ImGui.Text("IsRunning: " + orders[i].IsRunning);
+                            ImGui.Text("IsFinished: " + orders[i].IsFinished);
+                            ImGui.EndTooltip();
                         }
-
-                        ImGui.EndTable();
+                        ImGui.TableNextColumn();
+                        ImGui.Text(orders[i].Details);
                     }
+
+                    ImGui.EndTable();
                 }
-                return;
             }
         }
 
         private void DisplaySurveyInfo()
         {
-            if (Entity.TryGetDataBlob<JPSurveyableDB>(out var jPSurveyableDB))
+            if (_entity?.GetView<GravSurveyView>() is { } gravSurvey)
             {
-                Displays.GravitationalAnomlay(_uiState, jPSurveyableDB);
+                Displays.GravitationalAnomlay(gravSurvey);
             }
         }
 
         private void DisplayProgressIndicator()
         {
-            bool hasGeoSurvey = Entity.HasDataBlob<GeoSurveyableDB>();
-            bool isColonizeable = Entity.HasDataBlob<ColonizeableDB>();
-            bool hasColony = TryGetColonyEntity(out var colony);
+            if (_entity == null) return;
+
+            var geoSurvey = _entity.GetView<GeoSurveyView>();
+            bool isColonizeable = _entity.HasView<ColonizableView>();
+            var colony = GetColony();
 
             // Once a colony on this body has infrastructure installed it's an established,
             // working colony — the survey/colonize progress is behind us, so show a live
             // infrastructure overview in place of the progress bar.
-            if (hasColony && TryGetInstalledInfrastructure(colony, out var infrastructure))
+            var infrastructure = colony?.GetView<InfrastructureView>();
+            if (colony != null && infrastructure is { HasInstalledInfrastructure: true })
             {
                 DisplayInfrastructureOverview(colony, infrastructure);
                 return;
             }
 
-            if (!hasGeoSurvey && !isColonizeable && !hasColony)
+            if (geoSurvey == null && !isColonizeable && colony == null)
                 return;
 
-            int factionId = _uiState.Faction?.Id ?? Game.NeutralFactionId;
             var stages = new System.Collections.Generic.List<SurveyProgressBar.Stage>(3);
 
             stages.Add(new SurveyProgressBar.Stage(
@@ -481,9 +492,8 @@ namespace Pulsar4X.Client
                 1f,
                 "Discovered\nThis body has been detected and is visible on the system map."));
 
-            if (hasGeoSurvey)
+            if (geoSurvey != null)
             {
-                var geo = Entity.GetDataBlob<GeoSurveyableDB>();
                 const string rewardSummary =
                     "Reveals:\n"
                     + "  • Atmospheric composition\n"
@@ -491,19 +501,17 @@ namespace Pulsar4X.Client
                     + "  • Surface conditions used to assess colonization";
                 float fill = 0f;
                 string tooltip;
-                if (geo.PointsRequired > 0 && geo.GeoSurveyStatus.ContainsKey(factionId))
+                if (geoSurvey.HasSurveyStarted && geoSurvey.PointsRequired > 0)
                 {
-                    uint remaining = geo.GeoSurveyStatus[factionId];
-                    fill = 1f - (float)remaining / geo.PointsRequired;
-                    uint completed = geo.PointsRequired - remaining;
-                    if (remaining == 0)
+                    fill = (float)(geoSurvey.PercentComplete / 100.0);
+                    if (geoSurvey.IsSurveyComplete)
                     {
                         tooltip = "Geological Survey\nComplete. Mineral and atmospheric data are available below.";
                     }
                     else
                     {
-                        tooltip = "Geological Survey\nIn progress: " + (fill * 100f).ToString("0") + "%"
-                            + " (" + completed + " / " + geo.PointsRequired + " survey points)\n\n"
+                        tooltip = "Geological Survey\nIn progress: " + geoSurvey.PercentComplete.ToString("0") + "%"
+                            + " (" + geoSurvey.PointsCompleted + " / " + geoSurvey.PointsRequired + " survey points)\n\n"
                             + rewardSummary;
                     }
                 }
@@ -517,9 +525,9 @@ namespace Pulsar4X.Client
 
             // A colony only counts as established once infrastructure is delivered, so the
             // final stage tracks infrastructure rather than mere presence of a colony.
-            if (isColonizeable || hasColony)
+            if (isColonizeable || colony != null)
             {
-                string infraTooltip = hasColony
+                string infraTooltip = colony != null
                     ? "Infrastructure\nThis body has a colony, but no infrastructure is installed yet. "
                       + "Deliver infrastructure here — build it elsewhere and ship it in, or construct it "
                       + "locally — to bring the colony online. Infrastructure provides the support capacity "
@@ -538,55 +546,11 @@ namespace Pulsar4X.Client
             ImGui.Unindent();
         }
 
-        /// <summary>
-        /// Resolves the colony associated with this body — either this entity itself, or a
-        /// colony orbiting it as a direct child. Mirrors <see cref="EntityExtensions.IsOrHasColony"/>
-        /// but hands back the entity so callers can read its DataBlobs directly.
-        /// </summary>
-        private bool TryGetColonyEntity(out Entity colony)
-        {
-            if (Entity.HasDataBlob<ColonyInfoDB>())
-            {
-                colony = Entity;
-                return true;
-            }
-
-            if (Entity.TryGetDataBlob<PositionDB>(out var positionDB))
-            {
-                foreach (var child in positionDB.Children)
-                {
-                    if (child.HasDataBlob<ColonyInfoDB>())
-                    {
-                        colony = child;
-                        return true;
-                    }
-                }
-            }
-
-            colony = Entity.InvalidEntity;
-            return false;
-        }
-
-        /// <summary>
-        /// True when the colony has at least one infrastructure installation. Checks the
-        /// installations directly (not just <see cref="InfrastructureDB.CapacityProvided"/>),
-        /// so infrastructure that's present but disabled by gravity/pressure tolerance still counts.
-        /// </summary>
-        private bool TryGetInstalledInfrastructure(Entity colony, out InfrastructureDB infrastructure)
-        {
-            infrastructure = null!;
-            return colony.TryGetDataBlob<InfrastructureDB>(out infrastructure)
-                && colony.TryGetDataBlob<ComponentInstancesDB>(out var instances)
-                && instances.TryGetComponentsByAttribute<InfrastructureCapacityAtb>(out var components)
-                && components.Count > 0;
-        }
-
-        private void DisplayInfrastructureOverview(Entity colony, InfrastructureDB infrastructure)
+        private void DisplayInfrastructureOverview(EntitySnapshot colony, InfrastructureView infrastructure)
         {
             bool overCapacity = infrastructure.CapacityAvailable < 0;
 
-            int factionId = _uiState.Faction?.Id ?? Game.NeutralFactionId;
-            string colonyName = colony.GetName(factionId);
+            string colonyName = colony.GetView<NameView>()?.Name ?? "";
             SectionLabel(string.IsNullOrWhiteSpace(colonyName) ? "COLONY" : colonyName.ToUpperInvariant());
 
             // Single-line overview: capacity used vs provided, and the resulting output.
@@ -768,6 +732,9 @@ namespace Pulsar4X.Client
 
             var drawList = ImGui.GetWindowDrawList();
 
+            var ship = _entity!.GetView<ShipView>();
+            var thrust = _entity.GetView<ThrustView>();
+
             // Compute values
             float htkValue = 0f;
             string htkText = "-";
@@ -777,40 +744,19 @@ namespace Pulsar4X.Client
             string armorText = "N/A";
             bool armorPlaceholder = true;
 
-            if (Entity.TryGetDataBlob<ComponentInstancesDB>(out var compDB))
+            if (ship != null && ship.TotalComponents > 0)
             {
-                float totalHealth = 0f;
-                int totalCount = 0;
-                int operationalCount = 0;
-
-                foreach (var (designId, instances) in compDB.ComponentsByDesign)
-                {
-                    foreach (var instance in instances)
-                    {
-                        totalHealth += instance.HealthPercent;
-                        totalCount++;
-                        if (instance.HealthPercent > instance.StopWorkingAtPercent && instance.IsEnabled)
-                            operationalCount++;
-                    }
-                }
-
-                if (totalCount > 0)
-                {
-                    htkValue = totalHealth / totalCount;
-                    htkText = (htkValue * 100f).ToString("0") + "%";
-                    compValue = (float)operationalCount / totalCount;
-                    compText = operationalCount + "/" + totalCount;
-                }
+                htkValue = (float)ship.AverageComponentHealth;
+                htkText = (htkValue * 100f).ToString("0") + "%";
+                compValue = (float)ship.OperationalComponents / ship.TotalComponents;
+                compText = ship.OperationalComponents + "/" + ship.TotalComponents;
             }
 
-            if (Entity.TryGetDataBlob<EntityDamageProfileDB>(out var damageDB))
+            if (ship != null && ship.ArmorThicknessMm > 0)
             {
-                if (damageDB.Armor.thickness > 0)
-                {
-                    armorPlaceholder = false;
-                    armorValue = 1.0f;
-                    armorText = damageDB.Armor.thickness.ToString("0.#") + "mm";
-                }
+                armorPlaceholder = false;
+                armorValue = 1.0f;
+                armorText = ship.ArmorThicknessMm.ToString("0.#") + "mm";
             }
 
             // Compute delta V values
@@ -819,11 +765,10 @@ namespace Pulsar4X.Client
             string dvTooltip = null;
             bool dvPlaceholder = true;
 
-            Entity.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrustDB);
-            if (thrustDB != null && thrustDB.ExhaustVelocity > 0)
+            if (thrust != null && thrust.ExhaustVelocityMps > 0)
             {
                 dvPlaceholder = false;
-                double dv = thrustDB.DeltaV;
+                double dv = thrust.DeltaVMps;
                 dvTooltip = Stringify.Velocity(dv);
 
                 // Compact center text
@@ -834,36 +779,9 @@ namespace Pulsar4X.Client
                 else
                     dvText = dv.ToString("0");
 
-                // Compute percentage: current DV / max DV at full fuel
-                if (dv > 0 &&
-                    Entity.TryGetDataBlob<MassVolumeDB>(out var massDB) &&
-                    Entity.TryGetDataBlob<CargoStorageDB>(out var cargoStorage))
-                {
-                    // FuelType is a material UniqueID, not a cargo type key.
-                    // Look up the fuel ICargoable to find which TypeStore it lives in.
-                    var cargoLib = Entity.GetFactionCargoDefinitions();
-                    if (cargoLib != null && cargoLib.Contains(thrustDB.FuelType))
-                    {
-                        var fuelCargoable = cargoLib.GetAny(thrustDB.FuelType);
-                        if (fuelCargoable != null &&
-                            cargoStorage.TypeStores.ContainsKey(fuelCargoable.CargoTypeID) &&
-                            fuelCargoable.VolumePerUnit > 0)
-                        {
-                            var fuelStore = cargoStorage.TypeStores[fuelCargoable.CargoTypeID];
-                            double maxFuelUnits = fuelStore.MaxVolume / fuelCargoable.VolumePerUnit;
-                            double maxFuel_kg = maxFuelUnits * fuelCargoable.MassPerUnit;
-
-                            double dryMass = massDB.MassTotal - thrustDB.TotalFuel_kg;
-                            if (dryMass > 0 && maxFuel_kg > 0)
-                            {
-                                double maxWetMass = dryMass + maxFuel_kg;
-                                double maxDV = thrustDB.ExhaustVelocity * Math.Log(maxWetMass / dryMass);
-                                if (maxDV > 0)
-                                    dvValue = Math.Clamp((float)(dv / maxDV), 0f, 1f);
-                            }
-                        }
-                    }
-                }
+                // Percentage: current DV / max DV at full fuel (pre-computed server-side)
+                if (dv > 0 && thrust.MaxDeltaVMps > 0)
+                    dvValue = Math.Clamp((float)(dv / thrust.MaxDeltaVMps), 0f, 1f);
             }
 
             // Draw five indicators left-aligned
@@ -885,18 +803,11 @@ namespace Pulsar4X.Client
             string orderName = "Idle";
             string orderDetails = "";
 
-            if (Entity.Manager != null)
+            var orders = _entity.GetView<OrdersView>()?.Orders;
+            if (orders is { Count: > 0 })
             {
-                foreach (var db in Entity.Manager.GetAllDataBlobsForEntity(Entity.Id))
-                {
-                    if (db is not OrderableDB orderableDB) continue;
-                    if (orderableDB.ActionList.Count == 0) continue;
-
-                    var current = orderableDB.ActionList.ToArray()[0];
-                    orderName = current.Name;
-                    orderDetails = current.Details;
-                    break;
-                }
+                orderName = orders[0].Name;
+                orderDetails = orders[0].Details;
             }
 
             float rightEdge = cursorPos.X + availWidth;
@@ -945,32 +856,26 @@ namespace Pulsar4X.Client
 
         private void DisplayShipContent()
         {
-            Entity.TryGetDataBlob<ShipInfoDB>(out var shipInfo);
+            var ship = _entity!.GetView<ShipView>();
 
             DisplayShipStatusRow();
 
             // Crew row
             SectionLabel("CREW");
 
-            string captainName = "Unassigned";
-            if (shipInfo != null && shipInfo.CommanderID >= 0 && Entity.Manager != null
-                && Entity.Manager.TryGetEntityById(shipInfo.CommanderID, out var cmdEntity)
-                && cmdEntity.TryGetDataBlob<CommanderDB>(out var cmdDB))
-            {
-                captainName = cmdDB.Name;
-            }
+            string captainName = ship?.CommanderName ?? "Unassigned";
 
             ImGui.Indent();
-            int crewCols = shipInfo != null ? 2 : 1;
+            int crewCols = ship != null ? 2 : 1;
             if (ImGui.BeginTable("##crew", crewCols, ImGuiTableFlags.SizingStretchSame))
             {
                 ImGui.TableNextColumn();
                 StatBlock("COMMANDER", captainName);
 
-                if (shipInfo != null)
+                if (ship != null)
                 {
                     ImGui.TableNextColumn();
-                    StatBlock("CREW", shipInfo.Design.CrewReq.ToString());
+                    StatBlock("CREW", ship.CrewRequired.ToString());
                 }
 
                 ImGui.EndTable();
@@ -978,32 +883,32 @@ namespace Pulsar4X.Client
             ImGui.Unindent();
 
             // Propulsion stat grid
-            Entity.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrustDB);
-            Entity.TryGetDataBlob<WarpAbilityDB>(out var warpDB);
+            var thrust = _entity.GetView<ThrustView>();
+            var warp = _entity.GetView<WarpAbilityView>();
 
-            if (thrustDB != null || warpDB != null)
+            if (thrust != null || warp != null)
             {
                 SectionLabel("PROPULSION");
 
                 ImGui.Indent();
-                int propCols = (thrustDB != null ? 3 : 0) + (warpDB != null ? 1 : 0);
+                int propCols = (thrust != null ? 3 : 0) + (warp != null ? 1 : 0);
                 if (ImGui.BeginTable("##propulsion", propCols, ImGuiTableFlags.SizingStretchSame))
                 {
-                    if (thrustDB != null)
+                    if (thrust != null)
                     {
                         ImGui.TableNextColumn();
-                        StatBlock("THRUST", Stringify.Thrust(thrustDB.ThrustInNewtons));
+                        StatBlock("THRUST", Stringify.Thrust(thrust.ThrustNewtons));
 
                         ImGui.TableNextColumn();
-                        StatBlock("BURN", Stringify.Mass(thrustDB.FuelBurnRate) + "/s");
+                        StatBlock("BURN", Stringify.Mass(thrust.FuelBurnRateKgPerSec) + "/s");
 
                         ImGui.TableNextColumn();
-                        StatBlock("EXHAUST", Stringify.Velocity(thrustDB.ExhaustVelocity));
+                        StatBlock("EXHAUST", Stringify.Velocity(thrust.ExhaustVelocityMps));
                     }
-                    if (warpDB != null)
+                    if (warp != null)
                     {
                         ImGui.TableNextColumn();
-                        StatBlock("WARP", Stringify.Velocity(warpDB.MaxSpeed));
+                        StatBlock("WARP", Stringify.Velocity(warp.MaxSpeedMps));
                     }
                     ImGui.EndTable();
                 }
@@ -1011,132 +916,122 @@ namespace Pulsar4X.Client
             }
 
             // Location
-            if (Entity.TryGetDataBlob<PositionDB>(out var positionDB) && positionDB.Parent != null)
+            var parent = GetParent();
+            if (parent != null)
             {
                 SectionLabel("LOCATION");
                 ImGui.Indent();
                 ImGui.PushStyleColor(ImGuiCol.Text, _accentColor);
-                if (Entity.TryGetDataBlob<WarpMovingDB>(out var movedb))
+                if (_entity.GetView<WarpMovingView>() is { } warping)
                 {
                     ImGui.TextUnformatted("Warping");
                     ImGui.PopStyleColor();
                     ImGui.SameLine();
-                    ImGui.TextUnformatted(Stringify.Velocity(movedb.CurrentNonNewtonionVectorMS.Length()));
+                    ImGui.TextUnformatted(Stringify.Velocity(warping.SpeedMps));
                 }
                 else
                 {
                     ImGui.TextUnformatted("Orbiting");
                     ImGui.PopStyleColor();
                     ImGui.SameLine();
-                    if (ImGui.SmallButton(positionDB.Parent.GetName(_uiState.Faction.Id)))
+                    if (ImGui.SmallButton(parent.GetView<NameView>()?.Name ?? "Unknown"))
                     {
-                        _uiState.EntityClicked(positionDB.Parent.Id, _uiState.SelectedStarSystemId, MouseButtons.Primary);
+                        _uiState.EntityClicked(parent.Id, _uiState.SelectedStarSystemId, MouseButtons.Primary);
                     }
                 }
                 ImGui.Unindent();
             }
 
             // Orders (inline, no collapsing header)
-            if (Entity.Manager != null)
+            var orders = _entity.GetView<OrdersView>()?.Orders;
+            if (orders is { Count: > 0 })
             {
-                foreach (var db in Entity.Manager.GetAllDataBlobsForEntity(Entity.Id))
+                SectionLabel("ORDERS (" + orders.Count + ")");
+
+                ImGui.Indent();
+                if (ImGui.BeginTable("##orders", 3,
+                    ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.NoPadOuterX))
                 {
-                    if (db is not OrderableDB orderableDB) continue;
-                    if (orderableDB.ActionList.Count == 0) continue;
+                    ImGui.TableSetupColumn("##n", ImGuiTableColumnFlags.WidthFixed, 20f);
+                    ImGui.TableSetupColumn("##cmd", ImGuiTableColumnFlags.WidthFixed, 100f);
+                    ImGui.TableSetupColumn("##det", ImGuiTableColumnFlags.WidthStretch);
 
-                    SectionLabel("ORDERS (" + orderableDB.ActionList.Count + ")");
-
-                    ImGui.Indent();
-                    if (ImGui.BeginTable("##orders", 3,
-                        ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.NoPadOuterX))
+                    for (int i = 0; i < orders.Count; i++)
                     {
-                        ImGui.TableSetupColumn("##n", ImGuiTableColumnFlags.WidthFixed, 20f);
-                        ImGui.TableSetupColumn("##cmd", ImGuiTableColumnFlags.WidthFixed, 100f);
-                        ImGui.TableSetupColumn("##det", ImGuiTableColumnFlags.WidthStretch);
+                        ImGui.TableNextColumn();
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                        ImGui.Text((i + 1).ToString());
+                        ImGui.PopStyleColor();
+                        ImGui.TableNextColumn();
 
-                        var actions = orderableDB.ActionList.ToArray();
-                        for (int i = 0; i < actions.Length; i++)
+                        // Make thrust-maneuver orders clickable for editing
+                        if (orders[i].IsEditableManeuver)
                         {
-                            ImGui.TableNextColumn();
-                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                            ImGui.Text((i + 1).ToString());
-                            ImGui.PopStyleColor();
-                            ImGui.TableNextColumn();
-
-                            // Make NewtonThrustCommand orders clickable for editing
-                            if (actions[i] is NewtonThrustCommand thrustCmd && !thrustCmd.IsRunning)
+                            ImGui.PushStyleColor(ImGuiCol.Header, Styles.InvisibleColor);
+                            ImGui.PushStyleColor(ImGuiCol.HeaderHovered,
+                                new Vector4(_accentColor.X * 0.2f, _accentColor.Y * 0.2f, _accentColor.Z * 0.2f, 0.5f));
+                            ImGui.PushStyleColor(ImGuiCol.HeaderActive,
+                                new Vector4(_accentColor.X * 0.3f, _accentColor.Y * 0.3f, _accentColor.Z * 0.3f, 0.7f));
+                            if (ImGui.Selectable(orders[i].Name + "##order" + i, false, ImGuiSelectableFlags.SpanAllColumns))
                             {
-                                ImGui.PushStyleColor(ImGuiCol.Header, Styles.InvisibleColor);
-                                ImGui.PushStyleColor(ImGuiCol.HeaderHovered,
-                                    new Vector4(_accentColor.X * 0.2f, _accentColor.Y * 0.2f, _accentColor.Z * 0.2f, 0.5f));
-                                ImGui.PushStyleColor(ImGuiCol.HeaderActive,
-                                    new Vector4(_accentColor.X * 0.3f, _accentColor.Y * 0.3f, _accentColor.Z * 0.3f, 0.7f));
-                                if (ImGui.Selectable(actions[i].Name + "##order" + i, false, ImGuiSelectableFlags.SpanAllColumns))
-                                {
-                                    _uiState.OpenManeuverPanelForOrder(Entity, thrustCmd);
-                                }
-                                ImGui.PopStyleColor(3);
-                                if (ImGui.IsItemHovered())
-                                {
-                                    ImGui.BeginTooltip();
-                                    ImGui.Text("Click to edit or delete this order");
-                                    ImGui.EndTooltip();
-                                }
+                                _uiState.OpenManeuverPanelForOrder(EntityId, SystemId, orders[i]);
                             }
-                            else
+                            ImGui.PopStyleColor(3);
+                            if (ImGui.IsItemHovered())
                             {
-                                ImGui.Text(actions[i].Name);
-                                if (ImGui.IsItemHovered())
-                                {
-                                    ImGui.BeginTooltip();
-                                    ImGui.Text("Running: " + actions[i].IsRunning);
-                                    ImGui.Text("Finished: " + actions[i].GetIsFinished);
-                                    ImGui.EndTooltip();
-                                }
+                                ImGui.BeginTooltip();
+                                ImGui.Text("Click to edit or delete this order");
+                                ImGui.EndTooltip();
                             }
-
-                            ImGui.TableNextColumn();
-                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                            ImGui.Text(actions[i].Details);
-                            ImGui.PopStyleColor();
                         }
-                        ImGui.EndTable();
+                        else
+                        {
+                            ImGui.Text(orders[i].Name);
+                            if (ImGui.IsItemHovered())
+                            {
+                                ImGui.BeginTooltip();
+                                ImGui.Text("Running: " + orders[i].IsRunning);
+                                ImGui.Text("Finished: " + orders[i].IsFinished);
+                                ImGui.EndTooltip();
+                            }
+                        }
+
+                        ImGui.TableNextColumn();
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                        ImGui.Text(orders[i].Details);
+                        ImGui.PopStyleColor();
                     }
-                    ImGui.Unindent();
-                    break;
+                    ImGui.EndTable();
                 }
+                ImGui.Unindent();
             }
 
             // Cargo summary bars
-            if (Entity.TryGetDataBlob<CargoStorageDB>(out var storage) && storage.TypeStores.Count > 0)
+            var storage = _entity.GetView<CargoStorageView>();
+            if (storage != null && storage.Stores.Count > 0)
             {
                 SectionLabel("CARGO");
 
                 ImGui.Indent();
-                if (Entity.GetFactionOwner.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
+                foreach (var store in storage.Stores)
                 {
-                    foreach (var (sid, storageType) in storage.TypeStores)
-                    {
-                        string name = factionInfoDB.Data.CargoTypes[sid].Name;
-                        double freeVolume = storage.GetFreeVolume(sid);
-                        double usedVolume = storageType.MaxVolume - freeVolume;
-                        double percent = storageType.MaxVolume > 0 ? usedVolume / storageType.MaxVolume : 0;
+                    double usedVolume = store.MaxVolume - store.FreeVolume;
+                    double percent = store.MaxVolume > 0 ? usedVolume / store.MaxVolume : 0;
 
-                        string barLabel = name + "  " + (percent * 100).ToString("0") + "%  ·  " +
-                            Stringify.VolumeLtr(usedVolume) + " / " + Stringify.VolumeLtr(storageType.MaxVolume);
+                    string barLabel = store.TypeName + "  " + (percent * 100).ToString("0") + "%  ·  " +
+                        Stringify.VolumeLtr(usedVolume) + " / " + Stringify.VolumeLtr(store.MaxVolume);
 
-                        Vector4 barColor = new Vector4(
-                            _accentColor.X * 0.4f, _accentColor.Y * 0.4f, _accentColor.Z * 0.4f, 0.8f);
-                        if (percent > 0.9)
-                            barColor = Styles.BadColor;
-                        else if (percent > 0.75)
-                            barColor = Styles.OkColor;
+                    Vector4 barColor = new Vector4(
+                        _accentColor.X * 0.4f, _accentColor.Y * 0.4f, _accentColor.Z * 0.4f, 0.8f);
+                    if (percent > 0.9)
+                        barColor = Styles.BadColor;
+                    else if (percent > 0.75)
+                        barColor = Styles.OkColor;
 
-                        ImGui.PushStyleColor(ImGuiCol.FrameBg, new Vector4(0.08f, 0.08f, 0.1f, 0.5f));
-                        ImGui.PushStyleColor(ImGuiCol.PlotHistogram, barColor);
-                        ImGui.ProgressBar((float)percent, new Vector2(ImGui.GetContentRegionAvail().X, 16), barLabel);
-                        ImGui.PopStyleColor(2);
-                    }
+                    ImGui.PushStyleColor(ImGuiCol.FrameBg, new Vector4(0.08f, 0.08f, 0.1f, 0.5f));
+                    ImGui.PushStyleColor(ImGuiCol.PlotHistogram, barColor);
+                    ImGui.ProgressBar((float)percent, new Vector2(ImGui.GetContentRegionAvail().X, 16), barLabel);
+                    ImGui.PopStyleColor(2);
                 }
                 ImGui.Unindent();
             }
@@ -1144,30 +1039,30 @@ namespace Pulsar4X.Client
 
         private void DisplayStarContent()
         {
-            Entity.TryGetDataBlob<StarInfoDB>(out var starInfo);
-            Entity.TryGetDataBlob<MassVolumeDB>(out var massVolumeDB);
+            var star = _entity!.GetView<StarView>();
+            var massVolume = _entity.GetView<MassVolumeView>();
 
             ImGui.Columns(2, "##star-info", true);
 
-            if (starInfo != null)
+            if (star != null)
             {
-                DisplayHelpers.PrintRow("Spectral Type", starInfo.SpectralType.ToDescription() + starInfo.SpectralSubDivision);
-                DisplayHelpers.PrintRow("Class", starInfo.Class);
-                DisplayHelpers.PrintRow("Temperature", starInfo.Temperature.ToString("#,##0") + " °C");
-                DisplayHelpers.PrintRow("Luminosity", starInfo.Luminosity + " " + starInfo.LuminosityClass.ToString() + " (" + starInfo.LuminosityClass.ToDescription() + ")");
-                DisplayHelpers.PrintRow("Age", Stringify.Quantity(starInfo.Age));
+                DisplayHelpers.PrintRow("Spectral Type", star.SpectralType + star.SpectralSubDivision);
+                DisplayHelpers.PrintRow("Class", star.SpectralClass);
+                DisplayHelpers.PrintRow("Temperature", star.SurfaceTemperatureC.ToString("#,##0") + " °C");
+                DisplayHelpers.PrintRow("Luminosity", star.Luminosity + " " + star.LuminosityClass + " (" + star.LuminosityClassDescription + ")");
+                DisplayHelpers.PrintRow("Age", Stringify.Quantity(star.AgeYears));
             }
 
-            if (massVolumeDB != null)
+            if (massVolume != null)
             {
-                DisplayHelpers.PrintRow("Mass", Stringify.CelestialMass(massVolumeDB.MassTotal));
-                DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolumeDB.RadiusInM));
-                DisplayHelpers.PrintRow("Density", massVolumeDB.DensityDry_gcm.ToString("##0.000") + " g/cm³");
+                DisplayHelpers.PrintRow("Mass", Stringify.CelestialMass(massVolume.MassKg));
+                DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolume.RadiusMetres));
+                DisplayHelpers.PrintRow("Density", massVolume.DensityGramsPerCm3.ToString("##0.000") + " g/cm³");
             }
 
-            if (starInfo != null)
+            if (star != null)
             {
-                DisplayHelpers.PrintRow("Habitable Zone", starInfo.MinHabitableRadius_AU.ToString("0.##") + " - " + starInfo.MaxHabitableRadius_AU.ToString("0.##") + " AU");
+                DisplayHelpers.PrintRow("Habitable Zone", star.MinHabitableRadiusAu.ToString("0.##") + " - " + star.MaxHabitableRadiusAu.ToString("0.##") + " AU");
             }
 
             ImGui.Columns(1);
@@ -1178,43 +1073,43 @@ namespace Pulsar4X.Client
 
         private void DisplaySystemBodyContent()
         {
-            bool isGeoSurveyed = Entity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB)
-                && geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id);
+            bool isGeoSurveyed = _entity!.GetView<GeoSurveyView>()?.IsSurveyComplete ?? false;
 
             DisplayProgressIndicator();
 
             var bodyStats = new System.Collections.Generic.List<(string Label, string Value)>(10);
-            bool hasBodyInfo = Entity.TryGetDataBlob<SystemBodyInfoDB>(out var bodyInfo);
-            if (hasBodyInfo)
+            var body = _entity.GetView<BodyView>();
+            if (body != null)
             {
                 bodyStats.Add(("Gravity",
-                    bodyInfo.Gravity.ToString("0.##") + " m/s² · "
-                    + (bodyInfo.Gravity / 9.80665).ToString("0.###") + " G"));
-                bodyStats.Add(("Temperature", bodyInfo.BaseTemperature.ToString("##0.#") + " °C"));
-                bodyStats.Add(("Day Length", bodyInfo.LengthOfDay.TotalDays.ToString("0.#") + " days"));
-                bodyStats.Add(("Axial Tilt", bodyInfo.AxialTilt.ToString("0.#") + "°"));
-                bodyStats.Add(("Tectonics", bodyInfo.Tectonics.ToString()));
-                bodyStats.Add(("Magnetic Field", bodyInfo.MagneticField.ToString("0.##") + " μT"));
+                    body.GravityMetresPerSec2.ToString("0.##") + " m/s² · "
+                    + (body.GravityMetresPerSec2 / 9.80665).ToString("0.###") + " G"));
+                bodyStats.Add(("Temperature", body.SurfaceTemperatureC.ToString("##0.#") + " °C"));
+                bodyStats.Add(("Day Length", body.DayLength.TotalDays.ToString("0.#") + " days"));
+                bodyStats.Add(("Axial Tilt", body.AxialTiltDegrees.ToString("0.#") + "°"));
+                bodyStats.Add(("Tectonics", body.Tectonics));
+                bodyStats.Add(("Magnetic Field", body.MagneticFieldMicroTesla.ToString("0.##") + " μT"));
                 // Every colony needs infrastructure now, so show what a body's infrastructure
                 // must be rated for. Earth-like worlds take the default Earth-Standard design;
                 // hostile worlds need one tuned to their gravity and atmospheric pressure.
                 string infraReq;
-                if (!Entity.HasDataBlob<ColonizeableDB>())
+                if (!_entity.HasView<ColonizableView>())
                 {
                     infraReq = "Not colonizable";
                 }
-                else if (bodyInfo.SupportsPopulations)
+                else if (body.SupportsPopulations)
                 {
                     infraReq = "Earth-Standard";
                 }
                 else
                 {
-                    string grav = bodyInfo.Gravity.ToString("0.##") + " m/s²";
+                    string grav = body.GravityMetresPerSec2.ToString("0.##") + " m/s²";
                     string pressure;
+                    var atmosphere = _entity.GetView<AtmosphereView>();
                     if (!isGeoSurveyed)
                         pressure = "? atm"; // atmospheric pressure isn't known until surveyed
-                    else if (Entity.TryGetDataBlob<AtmosphereDB>(out var atmo) && atmo.Pressure > 0)
-                        pressure = atmo.Pressure.ToString("0.##") + " atm";
+                    else if (atmosphere != null && atmosphere.PressureAtm > 0)
+                        pressure = atmosphere.PressureAtm.ToString("0.##") + " atm";
                     else
                         pressure = "vacuum";
                     infraReq = grav + " · " + pressure;
@@ -1222,78 +1117,79 @@ namespace Pulsar4X.Client
                 bodyStats.Add(("Infrastructure", infraReq));
             }
 
-            if (Entity.TryGetDataBlob<MassVolumeDB>(out var massVolumeDB))
+            if (_entity.GetView<MassVolumeView>() is { } massVolume)
             {
-                bodyStats.Add(("Mass", Stringify.CelestialMass(massVolumeDB.MassTotal)));
-                bodyStats.Add(("Radius", Stringify.Distance(massVolumeDB.RadiusInM)));
+                bodyStats.Add(("Mass", Stringify.CelestialMass(massVolume.MassKg)));
+                bodyStats.Add(("Radius", Stringify.Distance(massVolume.RadiusMetres)));
             }
 
-            SectionLabel(hasBodyInfo ? bodyInfo.BodyType.ToDescription().ToUpperInvariant() : "CELESTIAL BODY");
+            SectionLabel(body != null ? body.BodyType.ToUpperInvariant() : "CELESTIAL BODY");
             DisplayStatCards("##body-stat", bodyStats);
 
-            if (isGeoSurveyed && Entity.TryGetDataBlob<AtmosphereDB>(out var atmosphereDB))
+            if (isGeoSurveyed && _entity.GetView<AtmosphereView>() is { } atmosphereView)
             {
-                atmosphereDB.Display(EntityState, _uiState);
+                atmosphereView.Display();
             }
 
-            if (Entity.TryGetDataBlob<ColonyInfoDB>(out var colonyInfoDB))
+            if (_entity.GetView<ColonyView>() is { } colonyView)
             {
-                colonyInfoDB.Display(EntityState, _uiState);
+                colonyView.Display(_entity.Id);
             }
 
-            if (isGeoSurveyed && Entity.TryGetDataBlob<MineralsDB>(out var mineralsDB)
+            if (isGeoSurveyed && _entity.GetView<MineralDepositsView>() is { } deposits
                 && ImGui.CollapsingHeader("Minerals", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                mineralsDB.Display(EntityState, _uiState);
+                deposits.Display(_entity.Id);
             }
 
             DisplaySurveyInfo();
 
-            if (Entity.CanShowMiningTab() && ImGui.CollapsingHeader("Mining", ImGuiTreeNodeFlags.DefaultOpen))
+            var colony = GetColony();
+            if (colony?.GetView<ColonyMiningView>() is { Minerals.Count: > 0 } mining
+                && ImGui.CollapsingHeader("Mining", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                Entity.DisplayMining(_uiState);
+                mining.Display();
             }
 
             // Installations (collapsed by default)
-            if (Entity.TryGetDataBlob<ComponentInstancesDB>(out var compDB)
+            if (_entity.GetView<InstallationsView>() is { } installations
                 && ImGui.CollapsingHeader("Installations"))
             {
-                compDB.Display(EntityState, _uiState);
+                installations.Display(_entity.Id, _uiState);
             }
 
             // Cargo (collapsed by default)
-            if (Entity.TryGetDataBlob<CargoStorageDB>(out var cargoDB))
+            if (_entity.GetView<CargoStorageView>() is { } cargo)
             {
-                cargoDB.Display(EntityState, _uiState, ImGuiTreeNodeFlags.None);
+                cargo.Display(_entity.Id, _uiState, ImGuiTreeNodeFlags.None);
             }
         }
 
         private void DisplaySmallBodyContent()
         {
-            bool isGeoSurveyed = Entity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB)
-                && geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id);
+            bool isGeoSurveyed = _entity!.GetView<GeoSurveyView>()?.IsSurveyComplete ?? false;
 
             DisplayProgressIndicator();
 
             ImGui.Columns(2, "##small-body-info", true);
 
-            if (Entity.TryGetDataBlob<SystemBodyInfoDB>(out var bodyInfo))
+            if (_entity.GetView<BodyView>() is { } body)
             {
-                DisplayHelpers.PrintRow("Body Type", bodyInfo.BodyType.ToDescription());
+                DisplayHelpers.PrintRow("Body Type", body.BodyType);
             }
 
-            if (Entity.TryGetDataBlob<MassVolumeDB>(out var massVolumeDB))
+            if (_entity.GetView<MassVolumeView>() is { } massVolume)
             {
-                DisplayHelpers.PrintRow("Mass", Stringify.CelestialMass(massVolumeDB.MassTotal));
-                DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolumeDB.RadiusInM));
+                DisplayHelpers.PrintRow("Mass", Stringify.CelestialMass(massVolume.MassKg));
+                DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolume.RadiusMetres));
             }
 
             ImGui.Columns(1);
 
-            if (isGeoSurveyed && Entity.TryGetDataBlob<MineralsDB>(out var mineralsDB)
+            if (isGeoSurveyed && _entity.GetView<MineralDepositsView>() is { } deposits
                 && ImGui.CollapsingHeader("Minerals", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                mineralsDB.Display(EntityState, _uiState);
+                deposits.Display(_entity.Id);
             }
 
             DisplaySurveyInfo();
@@ -1301,65 +1197,65 @@ namespace Pulsar4X.Client
 
         private void DisplayColonyContent()
         {
-            bool isGeoSurveyed = Entity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB)
-                && geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id);
+            bool isGeoSurveyed = _entity!.GetView<GeoSurveyView>()?.IsSurveyComplete ?? false;
 
             DisplayProgressIndicator();
 
             // Population (prominent at top)
-            if (Entity.TryGetDataBlob<ColonyInfoDB>(out var colonyInfoDB))
+            if (_entity.GetView<ColonyView>() is { } colonyView)
             {
-                colonyInfoDB.Display(EntityState, _uiState);
+                colonyView.Display(_entity.Id);
             }
 
             // Environment section
             if (ImGui.CollapsingHeader("Environment"))
             {
                 ImGui.Columns(2, "##environment-info", true);
-                if (Entity.TryGetDataBlob<SystemBodyInfoDB>(out var bodyInfo))
+                if (_entity.GetView<BodyView>() is { } body)
                 {
-                    DisplayHelpers.PrintRow("Body Type", bodyInfo.BodyType.ToDescription());
-                    DisplayHelpers.PrintRow("Gravity", bodyInfo.Gravity.ToString("0.##") + " m/s²",
-                        null, (bodyInfo.Gravity / 9.80665).ToString("0.###") + " G");
-                    DisplayHelpers.PrintRow("Temperature", bodyInfo.BaseTemperature.ToString("##0.#") + " °C");
+                    DisplayHelpers.PrintRow("Body Type", body.BodyType);
+                    DisplayHelpers.PrintRow("Gravity", body.GravityMetresPerSec2.ToString("0.##") + " m/s²",
+                        null, (body.GravityMetresPerSec2 / 9.80665).ToString("0.###") + " G");
+                    DisplayHelpers.PrintRow("Temperature", body.SurfaceTemperatureC.ToString("##0.#") + " °C");
                 }
-                if (Entity.TryGetDataBlob<MassVolumeDB>(out var massVolumeDB))
+                if (_entity.GetView<MassVolumeView>() is { } massVolume)
                 {
-                    DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolumeDB.RadiusInM));
+                    DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolume.RadiusMetres));
                 }
                 ImGui.Columns(1);
             }
 
             // Atmosphere
-            if (isGeoSurveyed && Entity.TryGetDataBlob<AtmosphereDB>(out var atmosphereDB))
+            if (isGeoSurveyed && _entity.GetView<AtmosphereView>() is { } atmosphere)
             {
-                atmosphereDB.Display(EntityState, _uiState);
+                atmosphere.Display();
             }
 
             // Minerals (collapsed by default)
-            if (isGeoSurveyed && Entity.TryGetDataBlob<MineralsDB>(out var mineralsDB)
+            if (isGeoSurveyed && _entity.GetView<MineralDepositsView>() is { } deposits
                 && ImGui.CollapsingHeader("Minerals"))
             {
-                mineralsDB.Display(EntityState, _uiState);
+                deposits.Display(_entity.Id);
             }
 
             // Mining
-            if (Entity.CanShowMiningTab() && ImGui.CollapsingHeader("Mining", ImGuiTreeNodeFlags.DefaultOpen))
+            if (_entity.GetView<ColonyMiningView>() is { Minerals.Count: > 0 } mining
+                && ImGui.CollapsingHeader("Mining", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                Entity.DisplayMining(_uiState);
+                mining.Display();
             }
 
             // Installations
-            if (Entity.TryGetDataBlob<ComponentInstancesDB>(out var compDB)
+            if (_entity.GetView<InstallationsView>() is { } installations
                 && ImGui.CollapsingHeader("Installations", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                compDB.Display(EntityState, _uiState);
+                installations.Display(_entity.Id, _uiState);
             }
 
             // Cargo
-            if (Entity.TryGetDataBlob<CargoStorageDB>(out var cargoDB))
+            if (_entity.GetView<CargoStorageView>() is { } cargo)
             {
-                cargoDB.Display(EntityState, _uiState);
+                cargo.Display(_entity.Id, _uiState);
             }
 
             DisplayOrbitInfo();
@@ -1368,34 +1264,33 @@ namespace Pulsar4X.Client
         private void DisplayGenericContent()
         {
             ImGui.Columns(2, "##generic-info", true);
-            if (Entity.TryGetDataBlob<MassVolumeDB>(out var massVolumeDB))
+            if (_entity!.GetView<MassVolumeView>() is { } massVolume)
             {
-                DisplayHelpers.PrintRow("Mass", Stringify.Mass(massVolumeDB.MassTotal));
-                DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolumeDB.RadiusInM));
+                DisplayHelpers.PrintRow("Mass", Stringify.Mass(massVolume.MassKg));
+                DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolume.RadiusMetres));
             }
             ImGui.Columns(1);
 
             DisplayOrbitInfo();
             DisplayOrders();
 
-            if (Entity.TryGetDataBlob<ComponentInstancesDB>(out var compDB)
+            if (_entity.GetView<InstallationsView>() is { } installations
                 && ImGui.CollapsingHeader("Components", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                compDB.Display(EntityState, _uiState);
+                installations.Display(_entity.Id, _uiState);
             }
 
-            if (Entity.TryGetDataBlob<CargoStorageDB>(out var cargoDB))
+            if (_entity.GetView<CargoStorageView>() is { } cargo)
             {
-                cargoDB.Display(EntityState, _uiState);
+                cargo.Display(_entity.Id, _uiState);
             }
 
-            bool isGeoSurveyed = Entity.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB)
-                && geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id);
+            bool isGeoSurveyed = _entity.GetView<GeoSurveyView>()?.IsSurveyComplete ?? false;
 
-            if (isGeoSurveyed && Entity.TryGetDataBlob<MineralsDB>(out var mineralsDB)
+            if (isGeoSurveyed && _entity.GetView<MineralDepositsView>() is { } deposits
                 && ImGui.CollapsingHeader("Minerals", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                mineralsDB.Display(EntityState, _uiState);
+                deposits.Display(_entity.Id);
             }
 
             DisplaySurveyInfo();

@@ -1,15 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.Engine;
-using Pulsar4X.Datablobs;
-using Pulsar4X.Extensions;
-using Pulsar4X.Ships;
-using Pulsar4X.Technology;
-using Pulsar4X.Factions;
-using Pulsar4X.People;
-using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.Client
 {
@@ -70,35 +63,23 @@ namespace Pulsar4X.Client
             ImGui.NextColumn();
         }
 
-        public static void ShipTooltip(Entity ship, int factionId)
+        /// <summary>Snapshot-based ship tooltip for UI ported to the API galaxy model.</summary>
+        public static void ShipTooltip(Pulsar4X.Api.ShipSnapshot ship)
         {
-            if(!ship.TryGetDataBlob<ShipInfoDB>(out var shipInfo))
-                return;
-
-            if(!ship.TryGetDataBlob<OrderableDB>(out var orderableDB))
-                return;
-
             var description = "No orders";
-            if(orderableDB.ActionList.Count > 0)
+            if(ship.Orders.Count > 0)
             {
                 description = "Orders: ";
-                foreach(var action in orderableDB.ActionList)
+                foreach(var order in ship.Orders)
                 {
-                    description += action.Name;
-                    if(action.IsRunning)
-                        description += " (running)";
-                    else
-                        description += " (not running)";
+                    description += order.Name;
+                    description += order.IsRunning ? " (running)" : " (not running)";
                 }
             }
 
-            var meta = "";
-            if(ship.Manager != null && ship.Manager.TryGetEntityById(shipInfo.CommanderID, out var commander))
-            {
-                meta = "Commanded by: " + commander.GetName(factionId);
-            }
+            var meta = ship.CommanderName == null ? "" : "Commanded by: " + ship.CommanderName;
 
-            DescriptiveTooltip(ship.GetName(factionId), shipInfo.Design.Name, description, () => ImGui.Text(meta));
+            DescriptiveTooltip(ship.Name, ship.DesignName, description, () => ImGui.Text(meta));
         }
 
         public static void DescriptiveTooltipRaw(string name, string type, string description, Action? callback = null, bool hideTypeIfSameAsName = false, bool hideDescriptionColor = false)
@@ -146,48 +127,36 @@ namespace Pulsar4X.Client
             ImGui.SameLine();
         }
 
-        public static void TechTooltip(Tech tech, GlobalUIState state)
+        /// <summary>Snapshot-based tech tooltip for UI ported to the API galaxy model.</summary>
+        public static void TechTooltip(Pulsar4X.Api.TechSnapshot tech)
         {
             if (ImGui.IsItemHovered())
             {
                 DescriptiveTooltip(
                     tech.Name,
-                    state.Game?.TechCategories[tech.Category].Name ?? "Unknown",
+                    tech.CategoryName,
                     $"{tech.Description}\n\nProgress: {tech.ResearchProgress}/{tech.ResearchCost}");
             }
         }
 
-        public static int PeopleChooser(GlobalUIState state, int currentlySelectedId, CommanderTypes defaultFilterTypes, string instanceKey = "default", Action? onCancel = null)
+        /// <summary>
+        /// Snapshot-based people chooser for UI ported to the API galaxy model: pass the candidate
+        /// commanders (already filtered by kind, e.g. <c>Galaxy.Research.Scientists</c>). Returns the
+        /// chosen commander's id when Assign is pressed (-1 for "None"), otherwise
+        /// <paramref name="currentlySelectedId"/> unchanged.
+        /// </summary>
+        public static int PeopleChooser(GlobalUIState state, IReadOnlyList<Pulsar4X.Api.CommanderSnapshot> people,
+            int currentlySelectedId, string instanceKey = "default", Action? onCancel = null)
         {
-            if(state.Faction == null
-                || state.Game == null
-                || !state.Faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
-                return currentlySelectedId;
-
             // Track which person is selected in the UI (not yet assigned)
-            string selectionKey = $"{instanceKey}_{defaultFilterTypes}";
+            string selectionKey = $"{instanceKey}_snapshot";
             if(!_peopleChooserSelections.ContainsKey(selectionKey))
             {
                 _peopleChooserSelections[selectionKey] = -1;
             }
             int uiSelectedId = _peopleChooserSelections[selectionKey];
 
-            // Build the list of available commanders
-            var availableCommanders = new List<Entity>();
-            foreach(var commander in factionInfoDB.Commanders)
-            {
-                if(!commander.TryGetDataBlob<CommanderDB>(out var cmdDB))
-                    continue;
-
-                if(cmdDB.Type != defaultFilterTypes)
-                    continue;
-
-                // Don't show the currently assigned person in the list
-                if(commander.Id == currentlySelectedId)
-                    continue;
-
-                availableCommanders.Add(commander);
-            }
+            var available = people.Where(p => p.Id != currentlySelectedId).ToList();
 
             Vector2 contentSize = ImGui.GetContentRegionAvail();
             float leftWidth = 200f;
@@ -211,27 +180,19 @@ namespace Pulsar4X.Client
                     }
                 }
 
-                foreach(var commander in availableCommanders)
+                foreach(var person in available)
                 {
-                    if(!commander.TryGetDataBlob<CommanderDB>(out var commanderDB))
-                        continue;
-
-                    bool isSelected = uiSelectedId == commander.Id;
-                    string name = commander.GetName(state.Faction.Id);
+                    bool isSelected = uiSelectedId == person.Id;
 
                     // Show assignment status
-                    string displayName = name;
-                    if(commanderDB.AssignedTo >= 0)
+                    string displayName = person.IsAssigned ? person.Name + " *" : person.Name;
+
+                    if(ImGui.Selectable(displayName + $"###{person.Id}", isSelected))
                     {
-                        displayName += " *";
+                        _peopleChooserSelections[selectionKey] = person.Id;
                     }
 
-                    if(ImGui.Selectable(displayName + $"###{commander.Id}", isSelected))
-                    {
-                        _peopleChooserSelections[selectionKey] = commander.Id;
-                    }
-
-                    if(ImGui.IsItemHovered() && commanderDB.AssignedTo >= 0)
+                    if(ImGui.IsItemHovered() && person.IsAssigned)
                     {
                         ImGui.SetTooltip("Currently assigned elsewhere");
                     }
@@ -244,151 +205,99 @@ namespace Pulsar4X.Client
             // Right side - details of selected person with buttons at bottom
             if(ImGui.BeginChild("PersonDetails", new Vector2(rightWidth, panelHeight), ImGuiChildFlags.Borders))
             {
-                // Calculate space for buttons at bottom
                 float buttonHeight = 30f;
                 float buttonSpacing = 8f;
                 float availableHeight = ImGui.GetContentRegionAvail().Y;
                 float detailsHeight = availableHeight - buttonHeight - buttonSpacing;
 
-                // Details section
                 if(ImGui.BeginChild("PersonDetailsContent", new Vector2(0, detailsHeight)))
                 {
+                    var selectedPerson = available.FirstOrDefault(p => p.Id == uiSelectedId);
                     if(uiSelectedId == 0)
                     {
-                        // "None" selected
                         Header("Unassign");
                         ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                         ImGui.TextWrapped("Select this to remove the current assignment.");
                         ImGui.PopStyleColor();
                     }
-                    else if(uiSelectedId > 0)
+                    else if(selectedPerson != null)
                     {
-                        // Show details about selected commander
-                        Entity? selectedCommander = null;
-                        foreach(var commander in availableCommanders)
+                        // Portrait and name header with background
+                        float portraitSize = 32f;
+                        float headerPadding = 4f;
+                        float headerHeight = portraitSize + headerPadding * 2;
+
+                        var drawList = ImGui.GetWindowDrawList();
+                        Vector2 headerMin = ImGui.GetCursorScreenPos();
+                        Vector2 headerMax = new Vector2(
+                            headerMin.X + ImGui.GetContentRegionAvail().X,
+                            headerMin.Y + headerHeight);
+                        uint headerBgColor = ImGui.ColorConvertFloat4ToU32(new Vector4(0.2f, 0.2f, 0.25f, 1.0f));
+                        drawList.AddRectFilled(headerMin, headerMax, headerBgColor, 4.0f);
+
+                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + headerPadding);
+                        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + headerPadding);
+
+                        IntPtr portraitTexture = state.Img_Character();
+                        if(portraitTexture != IntPtr.Zero)
                         {
-                            if(commander.Id == uiSelectedId)
-                            {
-                                selectedCommander = commander;
-                                break;
-                            }
+                            ImGui.Image(portraitTexture.ToTextureRef(), new Vector2(portraitSize, portraitSize));
+                            ImGui.SameLine();
                         }
 
-                        if(selectedCommander != null && selectedCommander.TryGetDataBlob<CommanderDB>(out var commanderDB))
+                        float textHeight = ImGui.GetTextLineHeight();
+                        float verticalOffset = (portraitSize - textHeight) / 2;
+                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + verticalOffset);
+                        ImGui.Text(selectedPerson.Name);
+
+                        ImGui.SetCursorPosY(headerMin.Y - ImGui.GetWindowPos().Y + headerHeight + headerPadding);
+
+                        ImGui.Columns(2, "PersonDetailsColumns", false);
+                        ImGui.SetColumnWidth(0, 120);
+
+                        PrintFormattedCell("Type:");
+                        PrintCell(selectedPerson.Kind.ToString());
+
+                        PrintFormattedCell("Experience:");
+                        PrintCell($"{selectedPerson.Experience} / {selectedPerson.ExperienceCap}");
+
+                        PrintFormattedCell("Commissioned:");
+                        PrintCell(selectedPerson.CommissionedOn.ToString("yyyy-MM-dd"));
+
+                        PrintFormattedCell("Status:");
+                        ImGui.PushStyleColor(ImGuiCol.Text, selectedPerson.IsAssigned ? Styles.OkColor : Styles.GoodColor);
+                        PrintCell(selectedPerson.IsAssigned ? "Assigned" : "Available");
+                        ImGui.PopStyleColor();
+
+                        ImGui.Columns(1);
+
+                        if(selectedPerson.Bonuses.Count > 0)
                         {
-                            string name = selectedCommander.GetName(state.Faction.Id);
+                            ImGui.NewLine();
+                            Header("Bonuses");
 
-                            // Portrait and name header with background
-                            float portraitSize = 32f;
-                            float headerPadding = 4f;
-                            float headerHeight = portraitSize + headerPadding * 2;
-
-                            // Draw background rectangle
-                            var drawList = ImGui.GetWindowDrawList();
-                            Vector2 headerMin = ImGui.GetCursorScreenPos();
-                            Vector2 headerMax = new Vector2(
-                                headerMin.X + ImGui.GetContentRegionAvail().X,
-                                headerMin.Y + headerHeight);
-                            uint headerBgColor = ImGui.ColorConvertFloat4ToU32(new Vector4(0.2f, 0.2f, 0.25f, 1.0f));
-                            drawList.AddRectFilled(headerMin, headerMax, headerBgColor, 4.0f);
-
-                            // Add padding before content
-                            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + headerPadding);
-                            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + headerPadding);
-
-                            IntPtr portraitTexture = state.Img_Character();
-                            if(portraitTexture != IntPtr.Zero)
+                            foreach(var bonus in selectedPerson.Bonuses)
                             {
-                                ImGui.Image(portraitTexture.ToTextureRef(), new Vector2(portraitSize, portraitSize));
-                                ImGui.SameLine();
-                            }
+                                string valueStr = bonus.IsPercentage
+                                    ? $"{bonus.Value * 100:+0.#;-0.#}%"
+                                    : $"{bonus.Value:+0.#;-0.#}";
 
-                            // Name to the right of portrait, vertically centered
-                            float textHeight = ImGui.GetTextLineHeight();
-                            float verticalOffset = (portraitSize - textHeight) / 2;
-                            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + verticalOffset);
-                            ImGui.Text(name);
-
-                            // Move cursor past the header area
-                            ImGui.SetCursorPosY(headerMin.Y - ImGui.GetWindowPos().Y + headerHeight + headerPadding);
-
-                            ImGui.Columns(2, "PersonDetailsColumns", false);
-                            ImGui.SetColumnWidth(0, 120);
-
-                            PrintFormattedCell("Type:");
-                            PrintCell(commanderDB.Type.ToString());
-
-                            PrintFormattedCell("Experience:");
-                            PrintCell($"{commanderDB.Experience} / {commanderDB.ExperienceCap}");
-
-                            PrintFormattedCell("Commissioned:");
-                            PrintCell(commanderDB.CommissionedOn.ToString("yyyy-MM-dd"));
-
-                            if(commanderDB.AssignedTo >= 0)
-                            {
-                                PrintFormattedCell("Status:");
-                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
-                                PrintCell("Assigned elsewhere");
-                                ImGui.PopStyleColor();
-                            }
-                            else
-                            {
-                                PrintFormattedCell("Status:");
-                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.GoodColor);
-                                PrintCell("Available");
-                                ImGui.PopStyleColor();
-                            }
-
-                            ImGui.Columns(1);
-
-                            // Display bonuses if available
-                            if(selectedCommander.TryGetDataBlob<BonusesDB>(out var bonusesDB) && bonusesDB.Bonuses.Count > 0)
-                            {
-                                ImGui.NewLine();
-                                Header("Bonuses");
-
-                                var factionData = state.Faction.GetDataBlob<FactionInfoDB>().Data;
-
-                                foreach(var bonus in bonusesDB.Bonuses)
+                                string bonusText = bonus.Name;
+                                if(!string.IsNullOrEmpty(bonus.FilterName))
                                 {
-                                    string valueStr = bonus.Type == BonusType.Perentage
-                                        ? $"{bonus.Value * 100:+0.#;-0.#}%"
-                                        : $"{bonus.Value:+0.#;-0.#}";
-
-                                    // Build the bonus display text
-                                    string bonusText = bonus.Name;
-                                    if(!string.IsNullOrEmpty(bonus.FilterId))
-                                    {
-                                        // Try to resolve the FilterId to a readable name
-                                        string filterName = factionData.GetName(bonus.FilterId);
-
-                                        // If not found in faction data, check tech categories
-                                        if(string.IsNullOrEmpty(filterName) && state.Game.TechCategories.ContainsKey(bonus.FilterId))
-                                        {
-                                            filterName = state.Game.TechCategories[bonus.FilterId].Name;
-                                        }
-
-                                        // Fall back to the raw ID if nothing resolved
-                                        if(string.IsNullOrEmpty(filterName))
-                                        {
-                                            filterName = bonus.FilterId;
-                                        }
-
-                                        bonusText += $" ({filterName})";
-                                    }
-
-                                    ImGui.PushStyleColor(ImGuiCol.Text, bonus.Value >= 0 ? Styles.GoodColor : Styles.BadColor);
-                                    ImGui.TextUnformatted(valueStr);
-                                    ImGui.PopStyleColor();
-                                    ImGui.SameLine();
-                                    ImGui.Text(bonusText);
+                                    bonusText += $" ({bonus.FilterName})";
                                 }
+
+                                ImGui.PushStyleColor(ImGuiCol.Text, bonus.Value >= 0 ? Styles.GoodColor : Styles.BadColor);
+                                ImGui.TextUnformatted(valueStr);
+                                ImGui.PopStyleColor();
+                                ImGui.SameLine();
+                                ImGui.Text(bonusText);
                             }
                         }
                     }
                     else
                     {
-                        // No selection yet
                         ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                         ImGui.TextWrapped("Select a person from the list to view their details.");
                         ImGui.PopStyleColor();
@@ -432,5 +341,6 @@ namespace Pulsar4X.Client
 
             return returnValue;
         }
+
     }
 }

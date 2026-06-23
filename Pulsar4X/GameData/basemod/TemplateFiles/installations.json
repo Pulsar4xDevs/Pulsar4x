@@ -715,7 +715,7 @@
       "Properties": [
         {
           "Name": "Support Colonists",
-          "DescriptionFormula": "'Population supported when the body's gravity and atmosphere fall within tolerance. Out-of-tolerance bodies receive no support from this design.'",
+          "DescriptionFormula": "'Population supported when the gravity and atmosphere of the body fall within tolerance. Out-of-tolerance bodies receive no support from this design.'",
           "GuiHint": "GuiTextDisplay",
           "PropertyFormula": "500"
         },

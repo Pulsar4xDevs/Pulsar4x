@@ -1,6 +1,3 @@
-using Pulsar4X.Engine;
-using Pulsar4X.Movement;
-using Pulsar4X.Names;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -54,12 +51,12 @@ namespace Pulsar4X.Client
             foreach(var nameIconGrouping in nameIconGroupings)
             {
                 var grp = nameIconGrouping
-                    .GroupBy(x => Utils.EntityBodyType(x.Entity))
+                    .GroupBy(x => x.BodyType)
                     .OrderBy(x => x.Key);
                 var first = (EntityLabelExtCombo)grp.First().Take(1).First();
 
                 // FIXME: eww
-                var s = new HashSet<Entity>();
+                var s = new HashSet<EntityLabel>();
                 for (int i = 0; i < grp.Count(); i++)
                 {
                     var itm = grp.ElementAt(i);
@@ -67,12 +64,12 @@ namespace Pulsar4X.Client
                     {
                         var o = itm.Skip(1);
                         foreach (var j in o)
-                            s.Add(j.Entity);
+                            s.Add(j);
                     }
                     else
                     {
                         foreach (var j in itm)
-                            s.Add(j.Entity);
+                            s.Add(j);
                     }
                 }
                 first.SetEntities(s);

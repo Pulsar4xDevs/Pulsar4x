@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
-using Pulsar4X.Extensions;
-using Pulsar4X.Interfaces;
 using SDL3;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
@@ -17,11 +13,11 @@ namespace Pulsar4X.Client
     /// </summary>
     public class NewtonSimpleIcon : Icon, IUpdateUserSettings, IKepler
     {
-        //protected EntityManager _mgr;
-        NewtonSimpleMoveDB? _newtonMoveDB;
-        PositionDB? _parentPosDB;
-        PositionDB? _myPosDB;
+        IPosition? _parentPosDB;
+        IPosition? _myPosDB;
         double _sgp;
+        double _soiRadiusM;
+        DateTime _stateTime;
         //_taIndex is the point closest to the orbiting object, it's used to
         int _taIndex;
         //_numberOfEllipsePoints is the total number of points around the ellipse, unadjusted for the percentage of the ellipse actualy drawn.
@@ -61,25 +57,23 @@ namespace Pulsar4X.Client
         private KeplerElements _ke;
 
 
-        public NewtonSimpleIcon(KeplerElements ke, Vector3 position) : base(position)
+        /// <summary>Snapshot constructor: trajectory from the view's elements, positions read
+        /// through the replicated galaxy; the map rebuilds the icon when the snapshot changes.</summary>
+        internal NewtonSimpleIcon(Pulsar4X.Api.NewtonSimpleMoveView newton, IPosition myPosition, IPosition parentPosition,
+            UserOrbitSettings.OrbitBodyType bodyType, List<List<UserOrbitSettings>> settings, DateTime atTime) : base(parentPosition)
         {
-        }
-
-        public NewtonSimpleIcon(EntityState entityState, NewtonSimpleMoveDB newtonSimpleMoveDB, List<List<UserOrbitSettings>> settings) : base(MoveMath.GetSOIParentPositionDB(entityState.Entity))
-        {
-            entityState.OrbitIcon = this;
-            BodyType = entityState.BodyType;
+            BodyType = bodyType;
             TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
-            //_mgr = entityState.Entity.Manager;
-            _newtonMoveDB = newtonSimpleMoveDB;
-            _parentPosDB = _newtonMoveDB.SOIParent.GetDataBlob<PositionDB>();
-            _positionDB = _parentPosDB;
-            _myPosDB = entityState.Entity.GetDataBlob<PositionDB>();
+            _parentPosDB = parentPosition;
+            _positionDB = parentPosition;
+            _myPosDB = myPosition;
             _userOrbitSettingsMtx = settings;
-            _sgp = OrbitMath.SGP(_newtonMoveDB.SOIParent, entityState.Entity);
-            _ke = _newtonMoveDB.CurrentTrajectory;
+            _sgp = newton.CurrentTrajectory.StandardGravParameter;
+            _soiRadiusM = newton.SoiRadiusM;
+            _stateTime = atTime;
+            _ke = newton.CurrentTrajectory.ToKeplerElements();
             UpdateUserSettings();
-            OnPhysicsUpdate();
+            CreatePointArray();
         }
         public void UpdateUserSettings()
         {
@@ -113,6 +107,8 @@ namespace Pulsar4X.Client
         {
             if(_myPosDB == null)
                 throw new NullReferenceException();
+            if(_points.Length == 0)
+                return;
 
             Orbital.Vector2 pos = new Vector2(_myPosDB.RelativePosition.X, _myPosDB.RelativePosition.Y);
             double minDist = (pos - _points[_taIndex]).Length();
@@ -129,20 +125,8 @@ namespace Pulsar4X.Client
         }
         public override void OnPhysicsUpdate()
         {
-            if (_newtonMoveDB == null || _newtonMoveDB.OwningEntity == null) //There's a threaded race condition here which will cause a null...
-                return;
-            var ke = _newtonMoveDB.CurrentTrajectory; //...cause a null ref exception inside this call.
-            if (ke.Eccentricity != _ke.Eccentricity)
-            {
-                _ke = ke;
-                CreatePointArray();
-            }
-            else
-            {
-                //update the true anomaly index so the trail follows the ship
-                SetTrueAnomalyIndex();
-                _thrustLinePoints[1] = Vector2.Zero;
-            }
+            //snapshot-backed icons get rebuilt on change; just keep the trail on the ship.
+            SetTrueAnomalyIndex();
         }
 
         internal void CreatePointArray()
@@ -163,12 +147,12 @@ namespace Pulsar4X.Client
 
         private void CreateHyperbolicPoints()
         {
-            if(_newtonMoveDB == null || _myPosDB == null)
+            if(_myPosDB == null)
                 throw new NullReferenceException();
-            var stateVec = OrbitMath.GetStateVectors(_ke, _myPosDB.OwningEntity.StarSysDateTime);
+            var stateVec = OrbitalMath.GetStateVectors(_ke, _stateTime);
             Vector3 vel = (Vector3)stateVec.velocity;
             Vector3 pos = _myPosDB.RelativePosition;
-            //Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
+            //Vector3 eccentVector = OrbitalMath.EccentricityVector(_sgp, pos, vel);
 
             double e = _ke.Eccentricity;
             double r = pos.Length();
@@ -178,11 +162,11 @@ namespace Pulsar4X.Client
 
             double a1 = 1 / (2 / r - Math.Pow(v, 2) / _sgp);    //semiMajor Axis
             double b1 = -a * Math.Sqrt(Math.Pow(e, 2) - 1);     //semiMinor Axis
-            Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
+            Vector3 eccentVector = OrbitalMath.EccentricityVector(_sgp, pos, vel);
             double e1 = eccentVector.Length();
 
             double linierEccentricity = e * a;
-            double soi = _newtonMoveDB.SOIParent.GetSOI_m();
+            double soi = _soiRadiusM;
 
             //longditudeOfPeriapsis;
             double _lop = _ke.AoP + _ke.LoAN;
@@ -376,7 +360,7 @@ namespace Pulsar4X.Client
 
         double IKepler.SemiMin => _ke.SemiMinorAxis;
 
-        double IKepler.LoP_radians => OrbitMath.GetLongditudeOfPeriapsis(_ke.Inclination, _ke.AoP, _ke.LoAN);
+        double IKepler.LoP_radians => OrbitalMath.GetLongditudeOfPeriapsis(_ke.Inclination, _ke.AoP, _ke.LoAN);
 
         double IKepler.Eccentricity => _ke.Eccentricity;
 

@@ -1,11 +1,7 @@
 ﻿using System;
-using Pulsar4X.Engine;
-using Pulsar4X.Interfaces;
 using Pulsar4X.Orbital;
 using SDL3;
 using System.Collections.Generic;
-using Pulsar4X.Orbits;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
@@ -28,9 +24,10 @@ namespace Pulsar4X.Client
     public abstract class OrbitIconBase : Icon, IUpdateUserSettings, IKepler
     {
         #region Static properties
-        protected EntityManager _mgr;
-        protected OrbitDB _orbitDB;
         internal IPosition BodyPositionDB;
+        protected double _loAN;
+        protected double _aoPRad;
+        protected double _inclination;
         protected Vector2 _bodyrelativePos;
         protected Vector2 _bodyAbsolutePos;
         internal float SemiMaj;
@@ -67,55 +64,31 @@ namespace Pulsar4X.Client
 
 
         #endregion
-        public OrbitIconBase(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetDataBlob<PositionDB>())
+
+        /// <summary>Snapshot constructor: the same icon built from OrbitView elements, with both
+        /// positions read through the replicated galaxy.</summary>
+        internal OrbitIconBase(Pulsar4X.Api.OrbitView orbit, IPosition bodyPosition, IPosition parentPosition,
+            UserOrbitSettings.OrbitBodyType bodyType, List<List<UserOrbitSettings>> settings) : base(parentPosition)
         {
-            BodyType = entityState.BodyType;
-
-            entityState.OrbitIcon = this;
-            _mgr = entityState.Entity.Manager;
+            BodyType = bodyType;
             _userOrbitSettingsMtx = settings;
-            _orbitDB = entityState.Entity.GetDataBlob<OrbitDB>();
-            if (entityState.Entity.HasDataBlob<OrbitUpdateOftenDB>())
-                _orbitDB = entityState.Entity.GetDataBlob<OrbitUpdateOftenDB>();
-            BodyPositionDB = entityState.Position; //entityState.Entity.GetDataBlob<PositionDB>();
-            if (_orbitDB.Parent == null) //primary star
-            {
-                _positionDB = BodyPositionDB;
-            }
-            else
-            {
-                _positionDB = _orbitDB.Parent.GetDataBlob<PositionDB>(); //orbit's position is parent's body position.
-            }
+            BodyPositionDB = bodyPosition;
 
-            SemiMaj = (float)_orbitDB.SemiMajorAxis;
+            SemiMaj = (float)orbit.SemiMajorAxisM;
+            SemiMinor = (float)EllipseMath.SemiMinorAxis(orbit.SemiMajorAxisM, orbit.Eccentricity);
+            _eccentricity = (float)orbit.Eccentricity;
+            _linearEccentricity = (float)(_eccentricity * orbit.SemiMajorAxisM);
 
-            SemiMinor = (float)EllipseMath.SemiMinorAxis(_orbitDB.SemiMajorAxis, _orbitDB.Eccentricity);
-
-
-            _eccentricity = (float)_orbitDB.Eccentricity;
-            _linearEccentricity = (float)(_eccentricity * _orbitDB.SemiMajorAxis); //linear ecentricity
-
-            var inclination = Angle.NormaliseRadiansPositive(_orbitDB.Inclination);
+            var inclination = Angle.NormaliseRadiansPositive(orbit.InclinationRad);
             if (inclination > 0.5 * Math.PI && inclination < 1.5 * Math.PI)
-            {
                 IsRetrogradeOrbit = true;
-                //_loP_Degrees = (float)(_orbitDB.LongitudeOfAscendingNode - _orbitDB.ArgumentOfPeriapsis);
-            }
-            /*
-            else
-            {
 
-                _loP_Degrees = (float)(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis);
-            }
-            _loP_radians = (float)(Angle.ToRadians(_loP_Degrees));
-            */
-            var i = _orbitDB.Inclination;
-            var _aoP = _orbitDB.ArgumentOfPeriapsis;
-            var loan = _orbitDB.LongitudeOfAscendingNode;
-            var lop = OrbitMath.GetLongditudeOfPeriapsis(i, _aoP, loan);
+            _inclination = orbit.InclinationRad;
+            _aoPRad = orbit.ArgumentOfPeriapsisRad;
+            _loAN = orbit.LongitudeOfAscendingNodeRad;
+            var lop = OrbitalMath.GetLongditudeOfPeriapsis(_inclination, _aoPRad, _loAN);
             _loP_radians = (float)lop;
             _loP_Degrees = (float)Angle.ToDegrees(lop);
-
         }
         /// <summary>
         ///calculate anything that could have changed from the users input.

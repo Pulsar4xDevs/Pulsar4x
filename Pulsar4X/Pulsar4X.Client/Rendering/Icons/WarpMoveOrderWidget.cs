@@ -1,10 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using SDL3;
-using Pulsar4X.Orbits;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
@@ -12,47 +9,33 @@ namespace Pulsar4X.Client
     {
         public SDL.Color TransitLineColor = new SDL.Color() { R = 0, G = 255, B = 255, A = 100 };
 
-        Entity _movingEntity;
-        OrbitDB _movingEntityCurrentOrbit;
+        readonly GlobalUIState _state;
+        readonly string _systemId;
+        readonly int _movingEntityId;
+
         DateTime _currentDateTime;
         DateTime _transitLeaveDateTime;
 
-        PositionDB _parentPositionDB;
-
-        Entity _targetEntity;
-
-        //List<Icon> _icons = new List<Icon>();
-
-        GlobalUIState _state;
+        int? _targetEntityId;
+        IPosition? _targetPosition;
 
         TransitIcon _departIcon;
-        TransitIcon _arriveIcon;
-
-        PositionDB _targetPositionDB;
+        TransitIcon? _arriveIcon;
 
         Vector3 _transitLeavePositionrelative_m; //relative to the parentBody
         private Vector3 _transitArriverelativePos_m { get; set; }
-        private Vector3 _transitArriveAbsolutePos_m { get; set; }
 
-        SDL.Point[] _linePoints;
+        SDL.Point[] _linePoints = new SDL.Point[2];
 
-        public WarpMoveOrderWidget(GlobalUIState state, Entity orderingEntity)
+        public WarpMoveOrderWidget(GlobalUIState state, string systemId, int movingEntityId, int soiParentId)
         {
             _state = state;
+            _systemId = systemId;
+            _movingEntityId = movingEntityId;
             _currentDateTime = _state.PrimarySystemDateTime;
-
-            _movingEntity = orderingEntity;
-
-            Setup();
-        }
-
-        void Setup()
-        {
-            _movingEntityCurrentOrbit = _movingEntity.GetDataBlob<OrbitDB>();
             _transitLeaveDateTime = _currentDateTime;
 
-            _parentPositionDB = MoveMath.GetSOIParentPositionDB(_movingEntity);
-            _departIcon = TransitIcon.CreateDepartIcon(_parentPositionDB);
+            _departIcon = TransitIcon.CreateDepartIcon(new SnapshotPosition(state, systemId, soiParentId));
             OnPhysicsUpdate();
         }
 
@@ -65,14 +48,12 @@ namespace Pulsar4X.Client
             OnPhysicsUpdate();
         }
 
-
-
-        public void SetArrivalTarget(Entity targetEntity)
+        public void SetArrivalTarget(int targetEntityId)
         {
-            _targetEntity = targetEntity;
-            _targetPositionDB = _targetEntity.GetDataBlob<PositionDB>();
+            _targetEntityId = targetEntityId;
+            _targetPosition = new SnapshotPosition(_state, _systemId, targetEntityId);
 
-            _arriveIcon = TransitIcon.CreateArriveIcon(_targetPositionDB);
+            _arriveIcon = TransitIcon.CreateArriveIcon(_targetPosition);
             //these are relative to thier respective bodies, for the initial default, copying the position shoul be fine.
             //however a better default would djust the distance from the target to get a circular orbit and
             //check if it's above minimum and that the resulting orbit is within soi
@@ -83,18 +64,15 @@ namespace Pulsar4X.Client
         public void SetArrivalPosition(Vector3 relativeWorldPosition_m)
         {
             _transitArriverelativePos_m = relativeWorldPosition_m;
-            _transitArriveAbsolutePos_m = _targetPositionDB.AbsolutePosition + _transitArriverelativePos_m;
-            _arriveIcon.SetTransitPositon(_transitArriverelativePos_m);
+            _arriveIcon?.SetTransitPositon(_transitArriverelativePos_m);
         }
-
-
 
         public void SetDepartureProgradeAngle(double angle)
         {
             _departIcon.ProgradeAngle = angle;
             _departIcon.SetTransitPositon(_transitLeavePositionrelative_m);
-
         }
+
         public void SetArivalProgradeAngle(double angle)
         {
             if (_arriveIcon != null)
@@ -110,7 +88,10 @@ namespace Pulsar4X.Client
             if (_transitLeaveDateTime < _currentDateTime)
                 _transitLeaveDateTime = _currentDateTime;
 
-            _transitLeavePositionrelative_m = (Vector3)MoveMath.GetRelativeFuturePosition(_movingEntity, _transitLeaveDateTime);
+            var system = _state.GameClient?.Galaxy.GetSystem(_systemId);
+            var mover = system?.GetEntity(_movingEntityId);
+            if (mover != null)
+                _transitLeavePositionrelative_m = mover.GetRelativeState(_transitLeaveDateTime).pos;
         }
 
         public void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -119,16 +100,12 @@ namespace Pulsar4X.Client
             if (_arriveIcon != null)
             {
                 _arriveIcon.OnFrameUpdate(matrix, camera);
-                _linePoints = new SDL.Point[2];
 
                 var dvsp = camera.ViewCoordinate_m(_departIcon.WorldPosition_m);
                 var avsp = camera.ViewCoordinate_m(_arriveIcon.WorldPosition_m);
                 _linePoints[0] = dvsp;
-
-                //SDL_Point arrive = matrix.Transform(_arriveIcon.WorldPosition_m.X, _arriveIcon.WorldPosition_m.Y);
                 _linePoints[1] = avsp;
             }
-
         }
 
         public void Draw(IntPtr rendererPtr, Camera camera)
@@ -146,12 +123,9 @@ namespace Pulsar4X.Client
 
                 SDL.SetRenderDrawColor(rendererPtr, TransitLineColor.R, TransitLineColor.G, TransitLineColor.B, TransitLineColor.A);
                 SDL.RenderLine(rendererPtr, x1, y1, x2, y2);
-
             }
         }
     }
-
-
 
     public class TransitIcon : Icon
     {
@@ -159,31 +133,27 @@ namespace Pulsar4X.Client
         public SDL.Color VectorColour = new SDL.Color() { R = 255, G = 0, B = 255, A = 255 };
 
         public double ProgradeAngle = 0;
-        double _arrivePntRadius;
-        PositionDB _parentPosition;
-        //PositionDB /;
 
         //DateTime TransitDateTime;
         //Vector4 _transitPosition;
         Shape _progradeArrow;
         Orbital.Vector2[] _arrow;
 
-        private TransitIcon(PositionDB parentPos) : base(parentPos)
+        private TransitIcon(IPosition parentPos) : base(parentPos)
         {
-            _parentPosition = parentPos;
             positionByDB = true;
             //InMeters = true;
             Setup();
         }
 
-        public static TransitIcon CreateArriveIcon(PositionDB targetPosition)
+        public static TransitIcon CreateArriveIcon(IPosition targetPosition)
         {
             var icon = new TransitIcon(targetPosition);
             icon.CreateCheverons(0, -13);
             return icon;
         }
 
-        public static TransitIcon CreateDepartIcon(PositionDB targetPosition)
+        public static TransitIcon CreateDepartIcon(IPosition targetPosition)
         {
             var icon = new TransitIcon(targetPosition);
             icon.CreateCheverons(0, 11);
@@ -207,11 +177,6 @@ namespace Pulsar4X.Client
                 Color = PrimaryColour
             };
 
-            //Shapes[0] = vectorArrow;
-            //Shapes[1] = dot;
-            //Shapes[2] = circle;
-            //Shapes[3] = chevron;
-            //Shapes[4] = chevron2;
             Shapes.Add(dot);
             Shapes.Add(circle);
 
@@ -245,15 +210,7 @@ namespace Pulsar4X.Client
         void CreateProgradeArrow()
         {
             Orbital.Vector2[] arrowPoints = CreatePrimitiveShapes.CreateArrow(24);
-            /*
-            List<PointD> arrowPoints = new List<PointD>(pnts.Length);
-            foreach (var point in pnts)
-            {
-                double x = point.X * Math.Cos(ProgradeAngle) - point.Y * Math.Sin(ProgradeAngle);
-                double y = point.X * Math.Sin(ProgradeAngle) + point.Y * Math.Cos(ProgradeAngle);
-                arrowPoints.Add(new PointD() { X = x, Y = y });
-            }
-            */
+
             var rotate270 = Matrix.IDRotate270Deg();
             _arrow = new Orbital.Vector2[arrowPoints.Length];
             for (int i = 0; i < _arrow.Length; i++)
@@ -274,8 +231,6 @@ namespace Pulsar4X.Client
 
         }
 
-
-
         /// <summary>
         /// Sets the transit postion.
         /// </summary>
@@ -287,22 +242,6 @@ namespace Pulsar4X.Client
             OnPhysicsUpdate();
         }
 
-        /// <summary>
-        /// Sets the transit position from the prograde Angle and distance from the body.
-        /// </summary>
-        /// <param name="progradeAngle">Prograde angle.</param>
-        /// <param name="radius_AU">Radius au.</param>
-        /*
-        public void SetTransitPostion(double progradeAngle, double radius_AU)
-        {
-            ProgradeAngle = progradeAngle;
-            _arrivePntRadius = radius_AU;
-            var theta = progradeAngle;// + Math.PI * 0.5;
-            _worldPosition.X = Math.Sin(theta) * radius_AU;
-            _worldPosition.Y = Math.Cos(theta) * radius_AU;
-            OnPhysicsUpdate();
-        }
-        */
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
             //rotate the progradeArrow.

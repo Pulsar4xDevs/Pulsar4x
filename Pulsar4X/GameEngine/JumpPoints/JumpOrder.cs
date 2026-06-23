@@ -32,7 +32,7 @@ public class JumpOrder : EntityCommand
 
     List<ShipJumpCommand> _shipJumpCommands = new List<ShipJumpCommand>();
 
-    public static void CreateAndExecute(Game game, Entity faction, Entity fleetEntity, JumpPointDB jumpGate)
+    public static bool CreateAndExecute(Game game, Entity faction, Entity fleetEntity, JumpPointDB jumpGate)
     {
         var cmd = new JumpOrder()
         {
@@ -42,7 +42,7 @@ public class JumpOrder : EntityCommand
             JumpGate = jumpGate
         };
 
-        game.OrderHandler.HandleOrder(cmd);
+        return game.OrderHandler.HandleOrder(cmd);
     }
 
     internal override void Execute(DateTime atDateTime)

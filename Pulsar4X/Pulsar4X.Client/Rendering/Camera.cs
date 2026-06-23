@@ -1,7 +1,5 @@
-﻿using Pulsar4X.Engine;
-using Pulsar4X.Orbital;
+﻿using Pulsar4X.Orbital;
 using SDL3;
-using Pulsar4X.Movement;
 using System;
 
 using Point = SDL3.SDL.Point;
@@ -28,7 +26,7 @@ namespace Pulsar4X.Client
 
         internal bool IsPinnedToEntity { get; private set; }
         internal int PinnedEntityGuid;
-        PositionDB? _entityPosDB;
+        IPosition? _entityPosDB;
         internal Orbital.Vector3 _camWorldPos_m = new Orbital.Vector3();
         public Orbital.Vector3 CameraWorldPosition_AU
         {
@@ -130,28 +128,26 @@ namespace Pulsar4X.Client
                    screenY < ViewPortSize.Y + margin;
         }
 
-        public void PinToEntity(Entity? entity)
+        public void Unpin()
         {
-            if(entity == null)
-            {
-                IsPinnedToEntity = false;
-                PinnedEntityGuid = -1;
-            }
-            else if (entity.HasDataBlob<PositionDB>())
-            {
-                _entityPosDB = entity.GetDataBlob<PositionDB>();
-                _camWorldPos_m = new Orbital.Vector3(); //zero on it.
-                IsPinnedToEntity = true;
-                PinnedEntityGuid = entity.Id;
-            }
+            IsPinnedToEntity = false;
+            PinnedEntityGuid = -1;
         }
 
-        public void CenterOnEntity(Entity entity)
+        /// <summary>Pin to an entity by id, tracking its position through the replicated galaxy.</summary>
+        public void PinToEntity(int entityId, string systemId, GlobalUIState state)
         {
-            if (entity.HasDataBlob<PositionDB>())
-            {
-                _camWorldPos_m = entity.GetDataBlob<PositionDB>().AbsolutePosition;
-            }
+            _entityPosDB = new SnapshotPosition(state, systemId, entityId);
+            _camWorldPos_m = new Orbital.Vector3(); //zero on it.
+            IsPinnedToEntity = true;
+            PinnedEntityGuid = entityId;
+        }
+
+        /// <summary>Centres on an absolute world position (metres). Lets UI sourced from the API galaxy
+        /// model centre the camera without an engine entity reference.</summary>
+        public void CenterOnPosition(double xMetres, double yMetres, double zMetres)
+        {
+            _camWorldPos_m = new Vector3(xMetres, yMetres, zMetres);
         }
 
         public CameraState SaveState()
@@ -165,18 +161,19 @@ namespace Pulsar4X.Client
             };
         }
 
-        public void RestoreState(CameraState state, StarSystem system)
+        public void RestoreState(CameraState state, string systemId, GlobalUIState uiState)
         {
             _camWorldPos_m = state.Position;
             ZoomLevel = state.ZoomLevel;
 
-            if (state.IsPinnedToEntity && system.TryGetEntityById(state.PinnedEntityGuid, out var entity))
+            if (state.IsPinnedToEntity
+                && uiState.GameClient?.Galaxy.GetSystem(systemId)?.GetEntity(state.PinnedEntityGuid) != null)
             {
-                PinToEntity(entity);
+                PinToEntity(state.PinnedEntityGuid, systemId, uiState);
             }
             else
             {
-                PinToEntity(null);
+                Unpin();
             }
         }
 

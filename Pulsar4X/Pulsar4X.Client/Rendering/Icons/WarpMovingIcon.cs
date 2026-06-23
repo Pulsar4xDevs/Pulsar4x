@@ -1,7 +1,6 @@
 ﻿using System;
 using Pulsar4X.Orbital;
 using SDL3;
-using Pulsar4X.Movement;
 
 namespace Pulsar4X.Client
 {
@@ -13,7 +12,7 @@ namespace Pulsar4X.Client
         Vector3 _currentPosition = new Vector3();
         Vector3 _relativeEndPoint = new Vector3();
         private Vector3 _currentRelativeEndPoint = new Vector3();
-        private PositionDB? _targetParentPos;
+        private IPosition? _targetParentPos;
 
         private Vector2 _bzsp;
         private Vector2 _bzsp2;
@@ -27,13 +26,14 @@ namespace Pulsar4X.Client
         //SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[2];
         private Vector2[] _bezierCurve;
         SDL.FPoint[] _bezierDrawPoints = new SDL.FPoint[10];
-        public WarpMovingIcon(WarpMovingDB warpMovingDB, PositionDB positionDB): base(new Vector3())
+        public WarpMovingIcon(Pulsar4X.Api.WarpMovingView warp, IPosition position,
+            IPosition? targetParentPosition) : base(new Vector3())
         {
-            _translateStartPoint = warpMovingDB.EntryPointAbsolute;
-            _translateEndPoint = warpMovingDB.ExitPointAbsolute;
-            _relativeEndPoint = warpMovingDB.ExitPointrelative;
-            _targetParentPos = warpMovingDB.GetTargetPosDB;
-            _positionDB = positionDB;
+            _translateStartPoint = new Vector3(warp.EntryPointAbsolute.X, warp.EntryPointAbsolute.Y, warp.EntryPointAbsolute.Z);
+            _translateEndPoint = new Vector3(warp.ExitPointAbsolute.X, warp.ExitPointAbsolute.Y, warp.ExitPointAbsolute.Z);
+            _relativeEndPoint = new Vector3(warp.ExitPointRelative.X, warp.ExitPointRelative.Y, warp.ExitPointRelative.Z);
+            _targetParentPos = targetParentPosition;
+            _positionDB = position;
             this.OnPhysicsUpdate();
         }
 

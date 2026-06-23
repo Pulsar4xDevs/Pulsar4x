@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+using System.Linq;
+using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
@@ -34,16 +35,19 @@ namespace Pulsar4X.Client
             //ImGui.SetNextWindowSize();
             if (Window.Begin("Galaxy Browser", ref IsActive, _flags))
             {
-                uint iterations = 0;
-                foreach (var starSystem in _uiState.StarSystemStates)
+                // The faction's known systems, kept current by the adapter's event stream.
+                var galaxy = _uiState.GameClient?.Galaxy;
+                if (galaxy != null)
                 {
-                    ImGui.PushID(iterations.ToString());
-                    if (ImGui.SmallButton(starSystem.Value.StarSystem.NameDB.DefaultName))
+                    foreach (var system in galaxy.KnownSystems.OrderBy(s => s.Name))
                     {
-                        _uiState.SetActiveSystem(starSystem.Key);
+                        ImGui.PushID(system.SystemId);
+                        if (ImGui.SmallButton(system.Name))
+                        {
+                            _uiState.SetActiveSystem(system.SystemId);
+                        }
+                        ImGui.PopID();
                     }
-                    ImGui.PopID();
-                    iterations++;
                 }
             }
             Window.End();

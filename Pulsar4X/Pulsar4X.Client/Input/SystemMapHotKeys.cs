@@ -1,6 +1,5 @@
 using ImGuiNET;
 using Pulsar4X.Client;
-using Pulsar4X.Client.Interface.Windows;
 using SDL3;
 
 namespace Pulsar4X.Input;
@@ -30,11 +29,11 @@ public class SystemMapHotKeys : IHotKeyHandler
             }
             else if(e.Key.Key == SDL.Keycode.F1)
             {
-                DebugWindow.GetInstance().ToggleActive();
+                PulsarGuiWindow._uiState.ToggleDevTool("debug-window");
             }
             else if(e.Key.Key == SDL.Keycode.F2)
             {
-                PerformanceWindow.GetInstance().ToggleActive();
+                PulsarGuiWindow._uiState.ToggleDevTool("performance-window");
             }
             else if(e.Key.Key == SDL.Keycode.F3)
             {
@@ -42,19 +41,19 @@ public class SystemMapHotKeys : IHotKeyHandler
             }
             else if(e.Key.Key == SDL.Keycode.F4)
             {
-                BlueprintsWindow.GetInstance().ToggleActive();
+                PulsarGuiWindow._uiState.ToggleDevTool("blueprints-window");
             }
             else if(e.Key.Key == SDL.Keycode.F5)
             {
-                ComponentsWindow.GetInstance().ToggleActive();
+                PulsarGuiWindow._uiState.ToggleDevTool("components-window");
             }
             else if(e.Key.Key == SDL.Keycode.Alpha1)
             {
-                ComponentDesignWindow.GetInstance().ToggleActive();
+                PulsarGuiWindow._uiState.ToggleDevTool("component-design");
             }
             else if(e.Key.Key == SDL.Keycode.Alpha2)
             {
-                ShipDesignWindow.GetInstance().ToggleActive();
+                PulsarGuiWindow._uiState.ToggleDevTool("ship-design");
             }
             else if(e.Key.Key == SDL.Keycode.Alpha3)
             {
@@ -70,7 +69,7 @@ public class SystemMapHotKeys : IHotKeyHandler
             }
             else if(e.Key.Key == SDL.Keycode.Alpha6)
             {
-                AdminWindow.GetInstance().ToggleActive();
+                CommanderWindow.GetInstance().ToggleActive();
             }
         }
     }

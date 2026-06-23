@@ -13,6 +13,7 @@ using Pulsar4X.Ships;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Engine;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Movement
 {
@@ -64,7 +65,7 @@ namespace Pulsar4X.Movement
         /// </summary>
         public KeplerElements EndpointTargetOrbit;
 
-        public static WarpMoveCommand CreateCommand(
+        public static bool CreateCommand(
             Entity orderEntity,
             Entity targetEntity,
             DateTime transitStartDatetime,
@@ -86,40 +87,7 @@ namespace Pulsar4X.Movement
                 var sgp = GeneralMath.StandardGravitationalParameter(targetEntity.GetDataBlob<MassVolumeDB>().MassTotal + orderEntity.GetDataBlob<MassVolumeDB>().MassTotal);
                 cmd.EndpointTargetOrbit = OrbitMath.KeplerCircularFromPosition(sgp, endpointRelativePos, datetimeArrive.Item2);;
             }
-            orderEntity.Manager.Game.OrderHandler.HandleOrder(cmd);
-            return cmd;
-        }
-
-        public static WarpMoveCommand CreateCommand(
-            Entity orderEntity,
-            Entity targetEntity,
-            DateTime transitStartDatetime,
-            KeplerElements insertonTargetOrbit,
-            Vector3 exitPointRelative)
-        {
-            var targetOffsetPos_m = exitPointRelative;
-            var datetimeArrive = WarpMath.GetInterceptPosition(orderEntity, targetEntity, transitStartDatetime, targetOffsetPos_m);
-
-            var cmd = new WarpMoveCommand()
-            {
-                RequestingFactionGuid = orderEntity.FactionOwnerID,
-                EntityCommandingGuid = orderEntity.Id,
-                CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
-                TargetEntityGuid = targetEntity.Id,
-                EndpointRelitivePosition = targetOffsetPos_m,
-                EndpointTargetOrbit = insertonTargetOrbit,
-                TransitStartDateTime = transitStartDatetime,
-            };
-            if (targetEntity.GetDataBlob<PositionDB>().MoveType != PositionDB.MoveTypes.None)
-            {
-                var sgp = GeneralMath.StandardGravitationalParameter(targetEntity.GetDataBlob<MassVolumeDB>().MassTotal + orderEntity.GetDataBlob<MassVolumeDB>().MassTotal);
-                cmd.EndpointTargetOrbit = OrbitMath.KeplerCircularFromPosition(sgp, targetOffsetPos_m, datetimeArrive.Item2);;
-            }
-
-            orderEntity.Manager.Game.OrderHandler.HandleOrder(cmd);
-
-
-            return cmd;
+            return orderEntity.Manager.Game.OrderHandler.HandleOrder(cmd);
         }
 
         /// <summary>

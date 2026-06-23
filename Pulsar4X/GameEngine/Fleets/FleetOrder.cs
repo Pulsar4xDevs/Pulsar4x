@@ -2,6 +2,7 @@ using System;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
+using Pulsar4X.Messaging;
 
 namespace Pulsar4X.Fleets
 {
@@ -230,6 +231,10 @@ namespace Pulsar4X.Fleets
                     navyDB.InheritOrders = !navyDB.InheritOrders;
                     break;
             }
+
+            // Fleet operations reshape the faction's fleet tree via TreeHierarchyDB (no entity add/
+            // remove), so signal the change explicitly for any observers (e.g. the API layer).
+            MessagePublisher.Instance.Publish(Message.Create(MessageTypes.FleetReorganized, factionId: RequestingFactionGuid));
 
             _isFinished = true;
         }

@@ -19,7 +19,7 @@ namespace Pulsar4X.Names
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
         string NewName;
 
-        public static void CreateRenameCommand(Game game, Entity faction, Entity orderEntity, string newName)
+        public static bool CreateRenameCommand(Game game, Entity faction, Entity orderEntity, string newName)
         {
             var cmd = new RenameCommand()
             {
@@ -30,7 +30,7 @@ namespace Pulsar4X.Names
                 UseActionLanes = false
             };
 
-            game.OrderHandler.HandleOrder(cmd);
+            return game.OrderHandler.HandleOrder(cmd);
         }
 
         internal override void Execute(DateTime atDateTime)

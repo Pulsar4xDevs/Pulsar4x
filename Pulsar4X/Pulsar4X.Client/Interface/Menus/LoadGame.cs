@@ -1,10 +1,6 @@
 using System;
 using System.IO;
-using System.Linq;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Engine;
-using Pulsar4X.Extensions;
-using Pulsar4X.Factions;
 
 namespace Pulsar4X.Client.Interface.Menus;
 
@@ -45,23 +41,10 @@ public class LoadGame : PulsarGuiWindow
 
     internal void LoadFile(string filenamepath)
     {
-        string contents = File.ReadAllText(filenamepath);
-        var loadedGame = Game.Load(contents);
+        var activation = _uiState.Lifecycle?.LoadGame(filenamepath);
+        if (activation == null) return;
 
-        _uiState.ClearGameState();
-        _uiState.Game = loadedGame;
-
-        // TODO: need to figure out a way to properly handle this
-        (int id, Entity faction) = loadedGame.Factions.Last();
-        _uiState.SetFaction(faction, true);
-        _uiState.SetActiveSystem(faction.GetDataBlob<FactionInfoDB>().KnownSystems[0]);
-
-        DebugWindow.GetInstance().SetGameEvents();
-        //we initialize window instances so that they get always displayed and automatically open after new game is created.
-        TimeControl.GetInstance().SetActive();
-        ToolBarWindow.GetInstance().SetActive();
-        Selector.GetInstance().SetActive();
-        EntityFilterBar.GetInstance().SetActive();
+        _uiState.ActivateGameUI(activation);
     }
 
     internal override void Display()

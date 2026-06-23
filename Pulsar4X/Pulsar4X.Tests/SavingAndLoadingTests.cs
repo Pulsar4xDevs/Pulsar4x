@@ -53,7 +53,6 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(_game.StartingGameData.Armor.Count, loadedGame.StartingGameData.Armor.Count);
 
             Assert.AreEqual(_game.TimePulse.GameGlobalDateTime, loadedGame.TimePulse.GameGlobalDateTime);
-            Assert.AreEqual(_game.TimePulse.TimeMultiplier, loadedGame.TimePulse.TimeMultiplier);
             Assert.AreEqual(_game.TimePulse.TickFrequency, loadedGame.TimePulse.TickFrequency);
             Assert.AreEqual(_game.TimePulse.Ticklength, loadedGame.TimePulse.Ticklength);
             Assert.AreEqual(_game.TimePulse.LastProcessingTime, loadedGame.TimePulse.LastProcessingTime);

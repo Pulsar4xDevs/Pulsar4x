@@ -33,6 +33,9 @@ namespace Pulsar4X.Client
         private readonly GlobalUIState _state;
         private ITheme _theme;
 
+        /// <summary>The UI state, exposed so the composition root can register its dev tools.</summary>
+        internal GlobalUIState State => _state;
+
         float mouseX;
         float mouseY;
 
@@ -80,7 +83,6 @@ namespace Pulsar4X.Client
                 // DeleteThenCopyToDirectory(sourceData, modsDirectory);
 
                 // Load the available mods
-                ModsState.RefreshModsList(ModsPath);
 
                 // Read and apply any window preferences
                 LoadPreferences();
@@ -121,7 +123,7 @@ namespace Pulsar4X.Client
                 Trace.WriteLine("WARNING: TTF.OpenFont failed: " + SDL.GetError());
             Styles.DefaultFont = PlatformBackend.LoadFont(ResourcesPath, defaultFont, defaultFontSize);
 
-            PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ⚙", true);
+            PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ⚙⚖⚡•️", true);
             Styles.MonospaceFont = PlatformBackend.LoadFont(ResourcesPath, "JetBrainsMono-Regular.ttf", 14f);
             Styles.MediumFont = PlatformBackend.LoadFont(ResourcesPath, "Roboto-Medium.ttf", 14f);
 
@@ -182,10 +184,14 @@ namespace Pulsar4X.Client
         {
             base.Update();
 
+            // Apply any server updates received since last frame as one atomic batch on this (UI)
+            // thread, before any window reads the galaxy model this frame.
+            _state.GameClient?.Update();
+
             //update and refresh state for GameDateTimechange
-            if(_state.Game != null)
+            if(_state.GameClient is { } gameClient)
             {
-                DateTime curTime = _state.Game.TimePulse.GameGlobalDateTime;
+                DateTime curTime = gameClient.Galaxy.Time.GameDateTime;
                 if (curTime != _state.LastGameUpdateTime)
                 {
                     foreach (var item in _state.UpdateableWindows)
@@ -253,16 +259,6 @@ namespace Pulsar4X.Client
 
                 var fps = "FPS: " + _fpsLastMeasurement.ToString();
                 RenderDebugText(this.Renderer, fps, 50 + _debugSDLFontHeight * 4);
-            }
-        }
-
-        public override void PostFrameUpdate()
-        {
-            base.PostFrameUpdate();
-
-            foreach (var (_, systemState) in _state.StarSystemStates)
-            {
-                systemState.PostFrameCleanup();
             }
         }
 

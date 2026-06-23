@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.Engine;
 
 namespace Pulsar4X.Client
 {
@@ -65,7 +64,7 @@ namespace Pulsar4X.Client
 
                     void NewButton(Type T, IntPtr imgPtr, string TooltipText, List<ToolbuttonData> ButtonList) {
                         //Creates a buttton if it is usuable in this situation
-                        if (EntityUIWindows.CheckIfCanOpenWindow(T, _entityState))
+                        if (EntityUIWindows.CheckIfCanOpenWindow(T, _entityState, _uiState))
                         {
                             btn = new ToolbuttonData()
                             {
@@ -91,8 +90,7 @@ namespace Pulsar4X.Client
                     NewStandardButton(typeof(RenameWindow), _uiState.Img_Rename(), "Renames the entity");
 
                     NewCondtionalButton(typeof(PowerGenWindow), _uiState.Img_Power(), "Shows power stats");
-                    NewCondtionalButton(typeof(CargoTransferWindow), _uiState.Img_Cargo(), "Shows cargo");
-                    NewCondtionalButton(typeof(ColonyPanel), _uiState.Img_Industry(), "Opens Industry menu");
+                    NewCondtionalButton(typeof(CreateTransferWindow), _uiState.Img_Cargo(), "Shows cargo");
                     NewCondtionalButton(typeof(FireControl), _uiState.Img_Firecon(), "Opens firecontrol menu");
 
                     //Displays all buttons in a list
@@ -145,7 +143,7 @@ namespace Pulsar4X.Client
                     void ActionButton(Type T)
                     {
                     //Makes a small button if it is usable in this situation
-                        if (EntityUIWindows.CheckIfCanOpenWindow(T,_entityState))
+                        if (EntityUIWindows.CheckIfCanOpenWindow(T, _entityState, _uiState))
                         {
                             bool buttonresult = ImGui.SmallButton(GlobalUIState.NamesForMenus[T]);
                             EntityUIWindows.OpenUIWindow(T, _entityState, _uiState, buttonresult);
@@ -155,11 +153,9 @@ namespace Pulsar4X.Client
                     }
 
                     //Makes all small buttons
-                    ActionButton(typeof(PlanetaryWindow));
                     ActionButton(typeof(GotoSystemBlankMenuHelper));
                     ActionButton(typeof(WarpOrderWindow));
                     ActionButton(typeof(ChangeCurrentOrbitWindow));
-                    ActionButton(typeof(LogiShipWindow));
                 }
                 ImGui.End();
             }

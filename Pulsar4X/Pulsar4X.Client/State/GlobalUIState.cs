@@ -3,20 +3,10 @@ using Pulsar4X.Orbital;
 using SDL3;
 using System;
 using System.Collections.Generic;
-using Pulsar4X.Engine;
 using System.Linq;
+using Pulsar4X.Api;
 using Pulsar4X.Input;
-using Pulsar4X.Messaging;
-using System.Threading.Tasks;
-using Pulsar4X.DataStructures;
-using static Pulsar4X.Client.SystemViewPreferences;
-using Pulsar4X.Factions;
-using Pulsar4X.Galaxy;
-using Pulsar4X.Movement;
-using Pulsar4X.Orbits;
 using Pulsar4X.Client.Rendering;
-using System.Collections.Concurrent;
-using System.Threading;
 
 namespace Pulsar4X.Client
 {
@@ -40,49 +30,80 @@ namespace Pulsar4X.Client
             {typeof(ChangeCurrentOrbitWindow), "Change current orbit"},
             {typeof(FireControl), "Fire Control" },
             {typeof(RenameWindow), "Rename"},
-            {typeof(CargoTransferWindow), "Cargo"},
-            {typeof(ColonyLogisticsDisplay), "Logistics"},
-            {typeof(LogiShipWindow), "Logistics"},
-            {typeof(ColonyPanel), "Economy"},
+            {typeof(CreateTransferWindow), "Cargo"},
             {typeof(GotoSystemBlankMenuHelper), "Go to system"},
             {typeof(SelectPrimaryBlankMenuHelper), "Select as primary"},
-            {typeof(PlanetaryWindow), "Planetary window"},
             {typeof(NavWindow), "Nav Window"},
-            {typeof(OrdersListWindow), "Orders Window"},
-            {typeof(OrderCreationWindow), "Order Creation"}
+            {typeof(OrdersListWindow), "Orders Window"}
         };
-        internal Engine.Game? Game { get; set; }
-        internal bool IsGameLoaded { get { return Game != null; } }
-        internal Entity? Faction { get; set; }
+        internal bool IsGameLoaded => GameClient != null;
 
         /// <summary>
-        /// Gets the faction bit mask for the current faction.
-        /// Use this with Masked&lt;T&gt;.For() to retrieve faction-visible data.
-        /// Returns 0 if no faction is set.
+        /// The API client for the current faction: the UI's only window into game state, read
+        /// synchronously through <see cref="IGameClient.Galaxy"/>. Bound by the composition root
+        /// via <see cref="OnGameClientBound"/>.
         /// </summary>
-        internal int FactionMask => Faction?.GetDataBlob<FactionInfoDB>().FactionMask ?? 0;
+        internal IGameClient? GameClient { get; private set; }
+
+        /// <summary>The id of the faction this session is bound to, from the connect handshake.</summary>
+        internal int FactionId => GameClient?.Session.FactionId ?? -1;
+
+        /// <summary>Static facts about the connected game (name, movement-rule settings), from the
+        /// connect handshake.</summary>
+        internal GameInfo? GameInfo { get; private set; }
 
         /// <summary>
-        /// The player running this clients faction
+        /// Development tools registered by the composition root. Engine-backed debug/SM windows
+        /// live in the host executable, not this UI library; the library's surfaces (settings
+        /// list, toolbar, main menu, hotkeys) render whatever was registered without knowing the
+        /// tools themselves.
         /// </summary>
-        internal Entity? PlayerFaction { get; set; }
+        internal readonly List<DevToolRegistration> DevTools = new();
+
+        public void RegisterDevTool(DevToolRegistration tool) => DevTools.Add(tool);
+
+        public void ToggleDevTool(string key) => DevTools.FirstOrDefault(t => t.Key == key)?.Toggle();
+
+        /// <summary>Raised after a game is created or loaded; host dev tooling hooks game events here.</summary>
+        public event Action? OnGameLoaded;
+        internal void RaiseGameLoaded() => OnGameLoaded?.Invoke();
+
+        /// <summary>The game-lifecycle seam, implemented and assigned by the composition root.
+        /// The new/load/save menus drive game creation through it; the UI library never builds
+        /// an engine <c>Game</c> itself.</summary>
+        public IGameLifecycle? Lifecycle { get; set; }
+
+        /// <summary>The UI half of bringing a game on screen, after <see cref="Lifecycle"/> has
+        /// bound the faction and built the client: select the system, point the camera, open the
+        /// default windows.</summary>
+        internal void ActivateGameUI(GameActivation activation)
+        {
+            SetActiveSystem(activation.SystemId);
+            if (activation.CameraPositionM is { } cameraPos)
+                Camera.CenterOnPosition(cameraPos.X, cameraPos.Y, cameraPos.Z);
+            if (activation.CameraZoom is { } zoom)
+                Camera.ZoomLevel = zoom;
+
+            RaiseGameLoaded();
+            TimeControl.GetInstance().SetActive();
+            ToolBarWindow.GetInstance().SetActive();
+            Selector.GetInstance().SetActive();
+            EntityFilterBar.GetInstance().SetActive();
+        }
+
         internal bool ShowMetrixWindow;
         internal bool ShowImgDbg;
         internal bool ShowDemoWindow;
-        internal bool ShowDamageWindow;
         internal IntPtr SDLRendererPtr { get; private set; }
         internal GalacticMapRender? GalacticMap;
-        internal SafeList<UpdateWindowState> UpdateableWindows = new();
+        internal List<UpdateWindowState> UpdateableWindows = new();
         internal DateTime LastGameUpdateTime = new();
-        internal StarSystem SelectedSystem => StarSystemStates[SelectedStarSystemId].StarSystem;
-        internal SystemState SelectedSystemState => StarSystemStates[SelectedStarSystemId];
-        internal DateTime SelectedSystemTime => StarSystemStates[SelectedStarSystemId].StarSystem.StarSysDateTime;
+        internal DateTime SelectedSystemTime => GameClient?.Galaxy.GetSystem(SelectedStarSystemId)?.DateTime ?? default;
         internal DateTime SelectedSysLastUpdateTime = new();
         internal string SelectedStarSystemId { get; private set; }
         internal SystemMapRendering? SelectedSysMapRender => GalacticMap == null ? null : GalacticMap.SelectedSysMapRender;
         internal DateTime PrimarySystemDateTime;
         internal EntityContextMenu? ContextMenu { get; set; }
-        internal SafeDictionary<string, SystemState> StarSystemStates = new();
         internal Camera Camera;
         internal SDL3Window ViewPort { get; private set; }
 
@@ -118,16 +139,8 @@ namespace Pulsar4X.Client
         // Game Settings
         internal GameSettings GameSettings { get; set; }
 
-        // TODO: Extract this to a helper class, along with SystemState buffer.
-        // Double buffering events that are received from the engine.
-        private class ChangeBuffer
-        {
-            public ConcurrentQueue<Message> RevealedSystems = new();
-        }
-
-        private ChangeBuffer _clientSide = new();
-        private ChangeBuffer _serverSide = new();
-        private readonly object _bufferSwapLock = new object();
+        // Per-system camera positions, restored when the player returns to a system.
+        private readonly Dictionary<string, CameraState> _savedCameraStates = new();
 
         internal GlobalUIState(SDL3Window viewport)
         {
@@ -329,162 +342,93 @@ namespace Pulsar4X.Client
         /// </summary>
         internal void ClearGameState()
         {
+            GameClient?.DisconnectAsync();
+            GameClient = null;
+            GameInfo = null;
             LoadedWindows.Clear();
             LoadedNonUniqueWindows.Clear();
             EntityWindows.Clear();
-            StarSystemStates.Clear();
+            _savedCameraStates.Clear();
             LastClickedEntity = null;
             PrimaryEntity = null;
-            Faction = null;
-            PlayerFaction = null;
             SelectedStarSystemId = "";
             ContextMenu = null;
             ActiveWindow = null;
+            SMenabled = false;
         }
 
         /// <summary>
-        /// Called every frame to update the UI state with the changes from the server.
+        /// Called every frame, after <see cref="IGameClient.Update"/> has applied the server's
+        /// updates to the galaxy model.
         /// </summary>
         internal void Update()
         {
-            lock (_bufferSwapLock)
-            {
-                (_clientSide, _serverSide) = (_serverSide, _clientSide);
-            }
-
-            // Handle all buffered events.
-            while (_clientSide.RevealedSystems.TryDequeue(out var message))
-            {
-                if(Game is null || Faction is null)
-                    throw new InvalidOperationException("Revealed systems require a game and faction to be set.");
-
-                if (message.SystemId is null) continue;
-
-                if (!StarSystemStates.ContainsKey(message.SystemId))
-                {
-                    var system = Game?.Systems.FirstOrDefault(s => s.ID.Equals(message.SystemId));
-                    if (system == null)
-                    {
-                        Console.WriteLine($"ERROR: {message.SystemId} was revealed but not found in the game systems.");
-                        continue;
-                    }
-
-                    StarSystemStates[message.SystemId] = new SystemState(system, Faction.Id);
-                }
-
-                OnStarSystemAdded?.Invoke(this, message.SystemId);
-            }
-
-            // Update the individual system states.
-            foreach (var (_, systemState) in StarSystemStates)
-            {
-                systemState.Update();
-            }
-
-            // Update the galactic map.
             GalacticMap?.Update();
         }
 
-        internal void SetFaction(Entity factionEntity, bool setAsPlayer = false)
+        /// <summary>
+        /// Binds the UI to a connected game client. Called by the composition root whenever it
+        /// builds or rebinds the session (new game, load, game-master toggle); everything the UI
+        /// reads flows from this client's galaxy model from here on.
+        /// </summary>
+        internal void OnGameClientBound(IGameClient gameClient, GameInfo? gameInfo)
         {
-            if (Game == null) throw new NullReferenceException("Game is null");
-
-            if (setAsPlayer)
-                PlayerFaction = factionEntity;
-
-            // Remove the old selected system's priority observer
-            if (!string.IsNullOrEmpty(SelectedStarSystemId))
+            if (GameClient != null)
             {
-                StarSystemStates[SelectedStarSystemId].StarSystem.DecrementExternalObserver(true);
+                GameClient.EventReceived -= OnGameEvent;
+                GameClient.DisconnectAsync();
             }
 
-            Faction = factionEntity;
-            FactionInfoDB factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
-            StarSystemStates = new SafeDictionary<string, SystemState>();
-            foreach (var guid in factionInfo.KnownSystems)
-            {
-                var system = Game.Systems.FirstOrDefault(s => s.ID.Equals(guid));
-                if (system == null) continue;
-
-                StarSystemStates[guid] = new SystemState(system, factionEntity.Id);
-
-                // Notify that the currently selected system is on focus.
-                if (!string.IsNullOrEmpty(SelectedStarSystemId) && SelectedStarSystemId.Equals(guid))
-                {
-                    system.IncrementExternalObserver(true);
-                }
-            }
-
-            // Unsubscribe to any previous message listeners
-            MessagePublisher.Instance.Unsubscribe(MessageTypes.StarSystemRevealed, OnSystemRevealed);
-
-            // Subscribe to new listeners with current faction
-            MessagePublisher.Instance.Subscribe(MessageTypes.StarSystemRevealed, OnSystemRevealed, msg => msg.FactionId == Faction.Id);
+            GameClient = gameClient;
+            GameInfo = gameInfo;
+            gameClient.EventReceived += OnGameEvent;
 
             OnFactionChanged?.Invoke(this);
         }
 
-        internal Task OnSystemRevealed(Message message)
+        private void OnGameEvent(GameEventEnvelope envelope)
         {
-            if (message.SystemId is null)
-                return Task.CompletedTask;
-
-            lock (_bufferSwapLock)
-            {
-                _serverSide.RevealedSystems.Enqueue(message);
-            }
-            return Task.CompletedTask;
+            if (envelope.Type == GameEventType.SystemRevealed && envelope.SystemId is { } systemId)
+                OnStarSystemAdded?.Invoke(this, systemId);
         }
 
         internal void SetActiveSystem(string activeSysID, bool refresh = false)
         {
-            if (Game == null || Faction == null) throw new NullReferenceException("Game or Faction is null");
-
             if (!activeSysID.Equals(SelectedStarSystemId) || refresh)
             {
-                // Demote the old system from Foreground to Background
-                if (!string.IsNullOrEmpty(SelectedStarSystemId) && StarSystemStates.ContainsKey(SelectedStarSystemId))
-                {
-                    var oldSystem = StarSystemStates[SelectedStarSystemId].StarSystem;
-
-                    oldSystem.DecrementExternalObserver(true);
-
-                    StarSystemStates[SelectedStarSystemId].SavedCameraState = Camera.SaveState();
-                }
-
-                if (!StarSystemStates.ContainsKey(activeSysID))
-                {
-                    var newSys = new SystemState(Game.Systems.First(s => s.ID.Equals(activeSysID)), Faction.Id);
-                    StarSystemStates[activeSysID] = newSys;
-                }
-
-                // Promote the new system to Foreground
-                var newSystem = Game.Systems.First(s => s.ID.Equals(activeSysID));
-                newSystem.IncrementExternalObserver(true);
+                if (!string.IsNullOrEmpty(SelectedStarSystemId))
+                    _savedCameraStates[SelectedStarSystemId] = Camera.SaveState();
 
                 SelectedStarSystemId = activeSysID;
 
-                var selectedSystemState = StarSystemStates[activeSysID];
-                var SelectedSys = selectedSystemState.StarSystem;
-                PrimarySystemDateTime = SelectedSys.ManagerSubpulses.StarSysDateTime;
+                // Tell the server we're watching this system so the engine prioritises it.
+                GameClient?.SetSystemFocusAsync(activeSysID);
+
+                var system = GameClient?.Galaxy.GetSystem(activeSysID);
+                if (system != null)
+                    PrimarySystemDateTime = system.DateTime;
                 LastClickedEntity = null;
                 PrimaryEntity = null;
 
-                // Restore camera state from the incoming system
-                if (selectedSystemState.SavedCameraState.HasValue)
+                if (_savedCameraStates.TryGetValue(activeSysID, out var savedCamera))
                 {
-                    Camera.RestoreState(selectedSystemState.SavedCameraState.Value, SelectedSys);
+                    Camera.RestoreState(savedCamera, activeSysID, this);
                 }
                 else
                 {
-                    // First visit: center on primary star at default zoom
-                    Camera.PinToEntity(null);
+                    // First visit: center on the primary star at default zoom
+                    Camera.Unpin();
                     Camera.ZoomLevel = 200;
-                    var starEntity = SelectedSys.GetFirstEntityWithDataBlob<StarInfoDB>();
-                    if (starEntity != null)
-                        Camera.CenterOnEntity(starEntity);
+                    var star = system?.Entities.FirstOrDefault(e => e.Kind == BodyKind.Star);
+                    if (star != null)
+                    {
+                        var starPos = new SnapshotPosition(this, activeSysID, star.Id).AbsolutePosition;
+                        Camera.CenterOnPosition(starPos.X, starPos.Y, starPos.Z);
+                    }
                     else
-                        Camera._camWorldPos_m = new Orbital.Vector3();
+                    {
+                        Camera.CenterOnPosition(0, 0, 0);
+                    }
                 }
 
                 OnStarSystemChanged?.Invoke(this);
@@ -492,40 +436,34 @@ namespace Pulsar4X.Client
 
         }
 
-        internal void EnableGameMaster()
-        {
-            if (Game == null) throw new NullReferenceException("Game is null");
-            SMenabled = true;
-            // Store the current system ID before switching to GameMaster
-            _previousSystemIdBeforeSM = SelectedStarSystemId;
-            SetFaction(Game.GameMasterFaction);
-        }
-
-        internal void DisableGameMaster()
-        {
-            if (PlayerFaction == null) throw new NullReferenceException("PlayerFaction is null");
-            SMenabled = false;
-            SetFaction(PlayerFaction);
-
-            // Restore the previous system if the player has access to it
-            if (!string.IsNullOrEmpty(_previousSystemIdBeforeSM) && StarSystemStates.ContainsKey(_previousSystemIdBeforeSM))
-            {
-                SetActiveSystem(_previousSystemIdBeforeSM);
-            }
-            else if (StarSystemStates.Count > 0)
-            {
-                // If the previous system is not available, switch to the first known system
-                SetActiveSystem(StarSystemStates.Keys.First());
-            }
-        }
-
         internal void ToggleGameMaster()
         {
-            SMenabled = !SMenabled;
-            if (SMenabled)
-                EnableGameMaster();
+            if (Lifecycle == null) return;
+
+            if (!SMenabled)
+            {
+                // Remember where the player was so we can come back on toggle-off.
+                _previousSystemIdBeforeSM = SelectedStarSystemId;
+                SMenabled = true;
+                Lifecycle.SetGameMasterMode(true);
+                if (!string.IsNullOrEmpty(SelectedStarSystemId))
+                    SetActiveSystem(SelectedStarSystemId, refresh: true);
+            }
             else
-                DisableGameMaster();
+            {
+                SMenabled = false;
+                Lifecycle.SetGameMasterMode(false);
+
+                if (!string.IsNullOrEmpty(_previousSystemIdBeforeSM)
+                    && GameClient?.Galaxy.GetSystem(_previousSystemIdBeforeSM) != null)
+                {
+                    SetActiveSystem(_previousSystemIdBeforeSM, refresh: true);
+                }
+                else if (GameClient?.Galaxy.KnownSystems.FirstOrDefault() is { } firstKnown)
+                {
+                    SetActiveSystem(firstKnown.SystemId, refresh: true);
+                }
+            }
         }
 
         /// <summary>
@@ -536,13 +474,11 @@ namespace Pulsar4X.Client
         private bool TryOrbitClick(int screenX, int screenY)
         {
             // Only works when a ship with thrust capability is selected
-            if (PrimaryEntity == null)
+            if (PrimaryEntity?.StarSystemId is not { } primarySystemId)
                 return false;
 
-            if (!PrimaryEntity.Entity.TryGetDataBlob<NewtonThrustAbilityDB>(out _))
-                return false;
-
-            if (!PrimaryEntity.Entity.HasDataBlob<OrbitDB>())
+            var primary = GameClient?.Galaxy.GetSystem(primarySystemId)?.GetEntity(PrimaryEntity.Id);
+            if (primary == null || !primary.HasView<ThrustView>() || !primary.HasView<OrbitView>())
                 return false;
 
             // Check if user clicked on the existing editing node marker (to re-select it)
@@ -560,7 +496,8 @@ namespace Pulsar4X.Client
                         {
                             ManeuverNodePanel = new ManeuverNodePanel(
                                 this,
-                                PrimaryEntity.Entity,
+                                PrimaryEntity.Id,
+                                primarySystemId,
                                 _orbitClickManuverLines,
                                 _orbitClickManuverLines.EditingNodes[i]);
                         }
@@ -572,7 +509,7 @@ namespace Pulsar4X.Client
             // If the panel is already open, clicking elsewhere on the orbit moves the node
             if (ManeuverNodePanel != null && ManeuverNodePanel.IsActive)
             {
-                var orbitIconForMove = PrimaryEntity.OrbitIcon as OrbitIconBase;
+                var orbitIconForMove = SelectedSysMapRender?.GetOrbitIcon(PrimaryEntity.Id);
                 if (orbitIconForMove == null)
                     return true; // consume click anyway
 
@@ -592,7 +529,7 @@ namespace Pulsar4X.Client
             }
 
             // Get the orbit icon for the selected entity
-            var orbitIcon = PrimaryEntity.OrbitIcon as OrbitIconBase;
+            var orbitIcon = SelectedSysMapRender?.GetOrbitIcon(PrimaryEntity.Id);
             if (orbitIcon == null)
                 return false;
 
@@ -611,13 +548,13 @@ namespace Pulsar4X.Client
             CleanupManeuverNode();
 
             // Create maneuver lines and node
-            _orbitClickManuverLines = new ManuverLinesComplete();
-            var soiParentPosition = MoveMath.GetSOIParentPositionDB(PrimaryEntity.Entity);
-            if (soiParentPosition == null)
+            var system = GameClient?.Galaxy.GetSystem(primarySystemId);
+            if (system == null || primary.GetSoiParent(system) is not { } soiParent)
                 return false;
 
-            _orbitClickManuverLines.RootSequence.ParentPosition = soiParentPosition;
-            _orbitClickManuverLines.AddNewEditNode(PrimaryEntity.Entity, nodeTime.Value);
+            _orbitClickManuverLines = new ManuverLinesComplete();
+            _orbitClickManuverLines.RootSequence.ParentPosition = new SnapshotPosition(this, primarySystemId, soiParent.Id);
+            _orbitClickManuverLines.AddNewEditNode(this, primarySystemId, PrimaryEntity.Id, nodeTime.Value);
 
             // Add to render extras
             if (SelectedSysMapRender != null)
@@ -629,7 +566,8 @@ namespace Pulsar4X.Client
             // Create and show the panel
             ManeuverNodePanel = new ManeuverNodePanel(
                 this,
-                PrimaryEntity.Entity,
+                PrimaryEntity.Id,
+                primarySystemId,
                 _orbitClickManuverLines,
                 _orbitClickManuverLines.EditingNodes[0]);
 
@@ -643,24 +581,25 @@ namespace Pulsar4X.Client
         /// </summary>
         private DateTime? TrueAnomalyToDateTime(double trueAnomaly)
         {
-            if (PrimaryEntity == null || !PrimaryEntity.Entity.HasDataBlob<OrbitDB>())
+            if (PrimaryEntity?.StarSystemId is not { } systemId)
                 return null;
 
-            var orbitDB = PrimaryEntity.Entity.GetDataBlob<OrbitDB>();
-            var period = orbitDB.OrbitalPeriod.TotalSeconds;
-            var eccentricity = orbitDB.Eccentricity;
-            var currentTime = PrimaryEntity.Entity.StarSysDateTime;
+            var orbit = GameClient?.Galaxy.GetSystem(systemId)?.GetEntity(PrimaryEntity.Id)?.GetView<OrbitView>();
+            if (orbit == null || orbit.OrbitalPeriodSeconds <= 0)
+                return null;
 
-            // Convert both true anomalies to mean anomalies via eccentric anomaly (Kepler's equation)
-            var currentTrueAnomaly = OrbitMath.GetTrueAnomaly(orbitDB, currentTime);
+            var period = orbit.OrbitalPeriodSeconds;
+            var eccentricity = orbit.Eccentricity;
+            var currentTime = PrimarySystemDateTime;
 
-            var currentE = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(currentTrueAnomaly, eccentricity);
-            var currentM = currentE - eccentricity * Math.Sin(currentE);
+            // Mean anomaly progresses linearly with time from the elements' epoch
+            var currentM = Angle.NormaliseRadiansPositive(
+                orbit.MeanAnomalyAtEpochRad + orbit.MeanMotionRadPerSec * (currentTime - orbit.Epoch).TotalSeconds);
 
-            var targetE = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
+            // Convert the target true anomaly to a mean anomaly via eccentric anomaly (Kepler's equation)
+            var targetE = OrbitalMath.GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
             var targetM = targetE - eccentricity * Math.Sin(targetE);
 
-            // Mean anomaly progresses linearly with time
             var meanAnomalyDiff = targetM - currentM;
             if (meanAnomalyDiff < 0) meanAnomalyDiff += Math.PI * 2;
 
@@ -702,7 +641,7 @@ namespace Pulsar4X.Client
             if (PrimaryEntity == null || ManeuverNodePanel == null || !ManeuverNodePanel.IsActive)
                 return;
 
-            var orbitIcon = PrimaryEntity.OrbitIcon as OrbitIconBase;
+            var orbitIcon = SelectedSysMapRender?.GetOrbitIcon(PrimaryEntity.Id);
             if (orbitIcon == null)
                 return;
 
@@ -730,38 +669,40 @@ namespace Pulsar4X.Client
         }
 
         /// <summary>
-        /// Opens a ManeuverNodePanel for editing an existing NewtonThrustCommand.
-        /// Sets up the maneuver lines, node, and panel with the command's values.
+        /// Opens a ManeuverNodePanel for editing an existing queued thrust maneuver
+        /// (<see cref="OrderSnapshot.IsEditableManeuver"/>). Sets up the maneuver lines, node, and
+        /// panel with the order's values.
         /// </summary>
-        internal void OpenManeuverPanelForOrder(Entity entity, NewtonThrustCommand command)
+        internal void OpenManeuverPanelForOrder(int entityId, string systemId, OrderSnapshot order)
         {
-            // Don't open if the order is already running
-            if (command.IsRunning)
+            if (!order.IsEditableManeuver
+                || order.ManeuverNodeTime is not { } nodeTime
+                || order.ManeuverDeltaVMps is not { } deltaV)
                 return;
 
             // Need an orbit to place the node on
-            if (!entity.HasDataBlob<OrbitDB>())
+            var system = GameClient?.Galaxy.GetSystem(systemId);
+            var entity = system?.GetEntity(entityId);
+            if (system == null || entity == null || !entity.HasView<OrbitView>())
+                return;
+            if (entity.GetSoiParent(system) is not { } soiParent)
                 return;
 
             // Clean up any previous maneuver node UI
             CleanupManeuverNode();
 
-            // Create maneuver lines and node at the command's burn center time
+            // Create maneuver lines and node at the order's burn center time
             _orbitClickManuverLines = new ManuverLinesComplete();
-            var soiParentPosition = MoveMath.GetSOIParentPositionDB(entity);
-            if (soiParentPosition == null)
-                return;
+            _orbitClickManuverLines.RootSequence.ParentPosition = new SnapshotPosition(this, systemId, soiParent.Id);
+            _orbitClickManuverLines.AddNewEditNode(this, systemId, entityId, nodeTime);
 
-            _orbitClickManuverLines.RootSequence.ParentPosition = soiParentPosition;
-            _orbitClickManuverLines.AddNewEditNode(entity, command.NodeDateTime);
-
-            // Set the node's delta-v from the command (X=radial, Y=prograde)
+            // Set the node's delta-v from the order (X=radial, Y=prograde)
             var node = _orbitClickManuverLines.EditingNodes[0];
-            float prograde = (float)command.OrbitrelativeDeltaV.Y;
-            float radial = (float)command.OrbitrelativeDeltaV.X;
+            float prograde = (float)deltaV.Y;
+            float radial = (float)deltaV.X;
             if (prograde != 0 || radial != 0)
             {
-                node.SetNode(prograde, radial, 0, command.NodeDateTime);
+                node.SetNode(prograde, radial, 0, nodeTime);
             }
 
             // Add to render extras
@@ -774,10 +715,11 @@ namespace Pulsar4X.Client
             // Create panel in edit mode
             ManeuverNodePanel = new ManeuverNodePanel(
                 this,
-                entity,
+                entityId,
+                systemId,
                 _orbitClickManuverLines,
                 node,
-                command);
+                order.OrderId);
         }
 
         /// <summary>
@@ -802,7 +744,10 @@ namespace Pulsar4X.Client
 
         internal void EntitySelectedAsPrimary(int entityGuid, string starSys)
         {
-            PrimaryEntity = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
+            var snapshot = GameClient?.Galaxy.GetSystem(starSys)?.GetEntity(entityGuid);
+            if (snapshot == null) return;
+
+            PrimaryEntity = new EntityState(snapshot, starSys);
             ActiveWindow?.EntitySelectedAsPrimary(PrimaryEntity);
         }
 
@@ -810,22 +755,15 @@ namespace Pulsar4X.Client
         {
             if (SelectedSysMapRender == null) throw new NullReferenceException("SelectedSysMapRender is null");
 
-            var entityState = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
+            var snapshot = GameClient?.Galaxy.GetSystem(starSys)?.GetEntity(entityGuid);
+            if (snapshot == null) return;
+
+            var entityState = new EntityState(snapshot, starSys);
             LastClickedEntity = entityState;
 
             ActiveWindow?.EntityClicked(entityState, button);
 
             SelectedSysMapRender.SelectedEntityExtras = new List<IDrawData>();
-            if (LastClickedEntity.DebugOrbitOrder != null)
-            {
-                SelectedSysMapRender.SelectedEntityExtras.Add(LastClickedEntity.DebugOrbitOrder);
-            }
-
-            if (LastClickedEntity.TryGetDataBlob(out NavSequenceDB? navDB))
-            {
-                ManuverNodesDraw2 nodeDraw = new ManuverNodesDraw2(LastClickedEntity);
-                SelectedSysMapRender.SelectedEntityExtras.Add(nodeDraw);
-            }
 
             if (ActiveWindow == null || ActiveWindow.GetActive() == false || ActiveWindow.ClickedEntityIsPrimary)
                 PrimaryEntity = LastClickedEntity;
@@ -836,7 +774,7 @@ namespace Pulsar4X.Client
             {
                 if (!EntityWindows.ContainsKey(entityGuid))
                 {
-                    EntityWindows.Add(entityGuid, new EntityWindow(entityState));
+                    EntityWindows.Add(entityGuid, new EntityWindow(entityGuid, starSys));
                 }
                 EntityWindows[entityGuid].ToggleActive();
 

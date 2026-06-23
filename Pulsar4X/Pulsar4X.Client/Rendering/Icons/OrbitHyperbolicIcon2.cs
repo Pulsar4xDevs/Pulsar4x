@@ -1,33 +1,31 @@
 using System;
 using System.Collections.Generic;
-using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
-using Pulsar4X.Orbits;
 using SDL3;
 
 namespace Pulsar4X.Client;
 
 public class OrbitHyperbolicIcon2 : OrbitIconBase
 {
-    internal OrbitHyperbolicIcon2(EntityState entityState, List<List<UserOrbitSettings>> settings): base(entityState, settings)
-    {
+    private readonly double _parentSoiRadiusM;
 
+    internal OrbitHyperbolicIcon2(Pulsar4X.Api.OrbitView orbit, IPosition bodyPosition,
+        IPosition parentPosition, UserOrbitSettings.OrbitBodyType bodyType,
+        List<List<UserOrbitSettings>> settings)
+        : base(orbit, bodyPosition, parentPosition, bodyType, settings)
+    {
         TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
+        _parentSoiRadiusM = orbit.ParentSoiRadiusM;
 
         UpdateUserSettings();
         CreatePointArray();
         OnPhysicsUpdate();
-
     }
 
     protected override void CreatePointArray()
     {
-        if(_orbitDB.ParentDB == null)
-            throw new NullReferenceException();
-
-        var _soi = OrbitMath.GetSOIRadius((OrbitDB)_orbitDB.ParentDB);
-        double p = EllipseMath.SemiLatusRectum(_orbitDB.SemiMajorAxis, _orbitDB.Eccentricity);
-        double angleToSOIPoint = EllipseMath.TrueAnomalyAtRadus(_soi, p, _orbitDB.Eccentricity);
+        double p = EllipseMath.SemiLatusRectum(SemiMaj, _eccentricity);
+        double angleToSOIPoint = EllipseMath.TrueAnomalyAtRadus(_parentSoiRadiusM, p, _eccentricity);
 
         _points = CreatePrimitiveShapes.HyperbolicPoints(SemiMaj, _eccentricity, _loP_radians, angleToSOIPoint, _numberOfArcSegments + 1);
     }

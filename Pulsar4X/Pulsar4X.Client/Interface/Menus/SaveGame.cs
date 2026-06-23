@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Engine;
 
 namespace Pulsar4X.Client.Interface.Menus;
 
@@ -30,11 +29,8 @@ public class SaveGame : PulsarGuiWindow
                 IsActive = false;
                 return;
             }
-            // Update the save git hash
-            _uiState.Game.LastSaveGitHash = AssemblyInfo.GetGitHash();
 
-            string gameJson = Game.Save(_uiState.Game);
-            File.WriteAllText(Path.Combine(_filePath, _fileName), gameJson);
+            _uiState.Lifecycle?.SaveGame(Path.Combine(_filePath, _fileName));
         }
     }
 
