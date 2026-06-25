@@ -96,7 +96,7 @@ namespace Pulsar4X.Client
         internal bool ShowDemoWindow;
         internal IntPtr SDLRendererPtr { get; private set; }
         internal GalacticMapRender? GalacticMap;
-        internal List<UpdateWindowState> UpdateableWindows = new();
+        internal List<UpdateWindowState> UpdateableWindows { get; init; } = new();
         internal DateTime LastGameUpdateTime = new();
         internal DateTime SelectedSystemTime => GameClient?.Galaxy.GetSystem(SelectedStarSystemId)?.DateTime ?? default;
         internal DateTime SelectedSysLastUpdateTime = new();
@@ -107,9 +107,10 @@ namespace Pulsar4X.Client
         internal Camera Camera;
         internal SDL3Window ViewPort { get; private set; }
 
-        internal Dictionary<Type, PulsarGuiWindow> LoadedWindows = new();
-        internal Dictionary<String, NonUniquePulsarGuiWindow> LoadedNonUniqueWindows = new();
-        internal PulsarGuiWindow? ActiveWindow { get; set; }
+        internal Dictionary<Type, UniquePulsarGuiWindow> LoadedWindows { get; init; } = new();
+        internal Dictionary<string, NamedPulsarGuiWindow> LoadedNonUniqueWindows { get; init; } = new();
+
+        internal UniquePulsarGuiWindow? ActiveWindow { get; set; }
         internal List<List<UserOrbitSettings>> UserOrbitSettingsMtx = new();
         internal Dictionary<UserOrbitSettings.OrbitBodyType, float> DrawNameZoomLvl = new();
         internal Dictionary<string, IntPtr> SDLImageDictionary = new();
@@ -145,7 +146,7 @@ namespace Pulsar4X.Client
         internal GlobalUIState(SDL3Window viewport)
         {
             ViewPort = viewport;
-            PulsarGuiWindow._uiState = this;
+            UniquePulsarGuiWindow._uiState = this;
             var windowPtr = viewport.Window;
 
             SDLRendererPtr = SDL.CreateRenderer(windowPtr, "pulsar4x");
