@@ -8,7 +8,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
-    public class ColonyManagementWindow : PulsarGuiWindow
+    public class ColonyManagementWindow : UniquePulsarGuiWindow<ColonyManagementWindow>
     {
         private Dictionary<string, bool> isExpanded = new();
 

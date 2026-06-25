@@ -3,7 +3,7 @@ using ImGuiNET;
 
 namespace Pulsar4X.Client
 {
-    public class RenameWindow : PulsarGuiWindow
+    public class RenameWindow : UniquePulsarGuiWindow<RenameWindow>
     {
         private int _targetEntityId = -1;
         private byte[]? _nameInputBuffer;

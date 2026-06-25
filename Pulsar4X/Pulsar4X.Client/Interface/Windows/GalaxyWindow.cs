@@ -4,7 +4,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
-    public class  GalaxyWindow : PulsarGuiWindow
+    public class  GalaxyWindow : UniquePulsarGuiWindow<GalaxyWindow>
     {
 
         private GalaxyWindow()

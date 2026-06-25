@@ -6,7 +6,7 @@ using Pulsar4X.Client.Interface.Widgets;
 // Engine using: Stringify formatting helpers only.
 
 namespace Pulsar4X.Client;
-public class SystemWindow : PulsarGuiWindow
+public class SystemWindow : UniquePulsarGuiWindow<SystemWindow>
 {
     private const string SystemViewPreferencesKey = "system-viewer";
 

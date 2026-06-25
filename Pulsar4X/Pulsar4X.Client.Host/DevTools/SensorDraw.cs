@@ -19,7 +19,7 @@ using Pulsar4X.Client.Host;
 namespace Pulsar4X.Client
 {
     
-    public class SensorDraw : PulsarGuiWindow
+    public class SensorDraw : UniquePulsarGuiWindow<SensorDraw>
     {
         private EntityState? _selectedEntitySate;
         private Entity? _selectedEntity => _selectedEntitySate?.GetEntity();

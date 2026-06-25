@@ -17,7 +17,7 @@ using Pulsar4X.Client.Host;
 
 namespace Pulsar4X.Client;
 
-public class DataViewerWindow : PulsarGuiWindow
+public class DataViewerWindow : UniquePulsarGuiWindow<DataViewerWindow>
 {
 
     SystemState? _systemState;

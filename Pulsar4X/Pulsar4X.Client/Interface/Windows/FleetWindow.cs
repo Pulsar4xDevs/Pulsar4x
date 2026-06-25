@@ -8,7 +8,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
-    public class FleetWindow : PulsarGuiWindow
+    public class FleetWindow : UniquePulsarGuiWindow<FleetWindow>
     {
         private enum IssueOrderType
         {

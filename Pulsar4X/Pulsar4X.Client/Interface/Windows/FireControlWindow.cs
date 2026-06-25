@@ -9,7 +9,7 @@ using Vector2 = System.Numerics.Vector2;
 namespace Pulsar4X.Client
 {
 
-    public class FireControl : PulsarGuiWindow
+    public class FireControl : UniquePulsarGuiWindow<FireControl>
     {
         private int? _entityId;
         private string? _systemId;

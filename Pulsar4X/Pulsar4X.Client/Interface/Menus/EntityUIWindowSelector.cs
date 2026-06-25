@@ -6,7 +6,7 @@ using ImGuiNET;
 namespace Pulsar4X.Client
 {
     //basically an always open context menu for the currently selected entity.
-    public class EntityUIWindowSelector : PulsarGuiWindow
+    public class EntityUIWindowSelector : UniquePulsarGuiWindow<EntityUIWindowSelector>
     {
         public System.Numerics.Vector2 BtnSizes = new System.Numerics.Vector2(32, 32);
         private List<ToolbuttonData> StandardButtons = new List<ToolbuttonData>();

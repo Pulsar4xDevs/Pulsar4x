@@ -3,7 +3,7 @@ using System;
 
 namespace Pulsar4X.Client
 {
-    public abstract class PulsarGuiWindow : UpdateWindowState
+    public abstract class UniquePulsarGuiWindow : UpdateWindowState
     {
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.None;
         //internal bool IsLoaded;
@@ -12,6 +12,11 @@ namespace Pulsar4X.Client
         //internal int StateIndex = -1;
         //protected bool _IsOpen;
         public bool ClickedEntityIsPrimary = true;
+
+        protected UniquePulsarGuiWindow(string name)
+        {
+            _uiState.LoadedWindows[this.GetType()] = this;
+        }
 
         public void SetActive(bool ActiveVal = true)
         {
@@ -34,12 +39,6 @@ namespace Pulsar4X.Client
         {
             return IsActive;
         }
-
-        protected PulsarGuiWindow()
-        {
-            _uiState.LoadedWindows[this.GetType()] = this;
-        }
-
 
         /*An example of how the constructor should be for a derived class.
          *
@@ -70,5 +69,15 @@ namespace Pulsar4X.Client
         public override void OnSystemTickChange(DateTime newDate)
         {
         }
+    }
+
+    /// <summary>
+    /// A generic version of <see cref="UniquePulsarGuiWindow"/> that automatically generates a unique name based on the type parameter <see cref="T"/>.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public abstract class UniquePulsarGuiWindow<T> : UniquePulsarGuiWindow
+    {
+        protected UniquePulsarGuiWindow() : base(typeof(T).FullName ?? typeof(T).Name)
+        {}
     }
 }

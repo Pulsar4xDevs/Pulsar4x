@@ -12,7 +12,7 @@ using Pulsar4X.Client.Host;
 
 namespace Pulsar4X.Client.Interface.Windows;
 
-public class BlueprintsWindow : PulsarGuiWindow
+public class BlueprintsWindow : UniquePulsarGuiWindow<BlueprintsWindow>
 {
 
     List<object> _editStack = new List<object>();

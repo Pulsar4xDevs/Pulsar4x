@@ -29,11 +29,11 @@ public class SystemMapHotKeys : IHotKeyHandler
             }
             else if(e.Key.Key == SDL.Keycode.F1)
             {
-                PulsarGuiWindow._uiState.ToggleDevTool("debug-window");
+                UniquePulsarGuiWindow._uiState.ToggleDevTool("debug-window");
             }
             else if(e.Key.Key == SDL.Keycode.F2)
             {
-                PulsarGuiWindow._uiState.ToggleDevTool("performance-window");
+                UniquePulsarGuiWindow._uiState.ToggleDevTool("performance-window");
             }
             else if(e.Key.Key == SDL.Keycode.F3)
             {
@@ -41,19 +41,19 @@ public class SystemMapHotKeys : IHotKeyHandler
             }
             else if(e.Key.Key == SDL.Keycode.F4)
             {
-                PulsarGuiWindow._uiState.ToggleDevTool("blueprints-window");
+                UniquePulsarGuiWindow._uiState.ToggleDevTool("blueprints-window");
             }
             else if(e.Key.Key == SDL.Keycode.F5)
             {
-                PulsarGuiWindow._uiState.ToggleDevTool("components-window");
+                UniquePulsarGuiWindow._uiState.ToggleDevTool("components-window");
             }
             else if(e.Key.Key == SDL.Keycode.Alpha1)
             {
-                PulsarGuiWindow._uiState.ToggleDevTool("component-design");
+                UniquePulsarGuiWindow._uiState.ToggleDevTool("component-design");
             }
             else if(e.Key.Key == SDL.Keycode.Alpha2)
             {
-                PulsarGuiWindow._uiState.ToggleDevTool("ship-design");
+                UniquePulsarGuiWindow._uiState.ToggleDevTool("ship-design");
             }
             else if(e.Key.Key == SDL.Keycode.Alpha3)
             {

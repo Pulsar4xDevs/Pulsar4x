@@ -12,7 +12,7 @@ using Pulsar4X.Client.Host;
 
 namespace Pulsar4X.Client
 {
-    public class SMWindow : PulsarGuiWindow
+    public class SMWindow : UniquePulsarGuiWindow<SMWindow>
     {
         private Game? _game;
         private StarSystem? _currentSystem;

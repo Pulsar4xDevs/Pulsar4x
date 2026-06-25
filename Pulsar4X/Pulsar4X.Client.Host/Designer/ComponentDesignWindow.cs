@@ -8,7 +8,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
-    public class ComponentDesignWindow : PulsarGuiWindow
+    public class ComponentDesignWindow : UniquePulsarGuiWindow<ComponentDesignWindow>
     {
         // Derived lookups, rebuilt only when a new ComponentDesignsSnapshot is pushed (reference
         // change) — the server pushes one on connect and whenever a design is created.

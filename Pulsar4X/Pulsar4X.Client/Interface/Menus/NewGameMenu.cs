@@ -24,7 +24,7 @@ static class Helper
     }
 }
 
-public class NewGameMenu : PulsarGuiWindow
+public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
 {
     private const int NAME_BUFFER_SIZE = 32;
     private const int SHORTNAME_BUFFER_SIZE = 5;

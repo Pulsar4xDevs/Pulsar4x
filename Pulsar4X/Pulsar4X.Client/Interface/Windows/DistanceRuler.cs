@@ -6,7 +6,7 @@ using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Client
 {
-    class DistanceRuler : PulsarGuiWindow
+    class DistanceRuler : UniquePulsarGuiWindow<DistanceRuler>
     {
         //measuring variables
         //measuring booleans

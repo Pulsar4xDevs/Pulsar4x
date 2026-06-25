@@ -7,7 +7,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
-    public class SettingsWindow : PulsarGuiWindow
+    public class SettingsWindow : UniquePulsarGuiWindow<SettingsWindow>
     {
         ImGuiTreeNodeFlags _xpanderFlags = ImGuiTreeNodeFlags.CollapsingHeader;
         List<List<UserOrbitSettings>> _userOrbitSettingsMtx;

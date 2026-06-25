@@ -14,7 +14,7 @@ namespace Pulsar4X.Client;
 /// but also loads and saves the preferences and holds the
 /// currently selected views for various parts of the game.
 /// </summary>
-public class SystemViewPreferences : PulsarGuiWindow
+public class SystemViewPreferences : UniquePulsarGuiWindow<SystemViewPreferences>
 {
     internal record View
     {

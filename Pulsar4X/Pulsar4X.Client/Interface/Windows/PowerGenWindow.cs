@@ -5,7 +5,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Pulsar4X.Client
 {
-    public class PowerGenWindow : PulsarGuiWindow
+    public class PowerGenWindow : UniquePulsarGuiWindow<PowerGenWindow>
     {
         private int _entityId = -1;
         private string? _systemId;

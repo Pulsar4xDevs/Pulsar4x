@@ -12,7 +12,7 @@ namespace Pulsar4X.Client
     /// <summary>
     /// Orbit order window - this whole thing is a somewhat horrible state machine
     /// </summary>
-    public class WarpOrderWindow : PulsarGuiWindow// IOrderWindow
+    public class WarpOrderWindow : UniquePulsarGuiWindow<WarpOrderWindow> // IOrderWindow
     {
         int _entityId;
         string _systemId = "";

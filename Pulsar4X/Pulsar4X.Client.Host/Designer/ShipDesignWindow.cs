@@ -23,7 +23,7 @@ using Pulsar4X.Client.Host;
 
 namespace Pulsar4X.Client
 {
-    public class ShipDesignWindow : PulsarGuiWindow
+    public class ShipDesignWindow : UniquePulsarGuiWindow<ShipDesignWindow>
     {
         private bool ShowNoDesigns = false;
         private byte[] SelectedDesignName =  Utils.BytesFromString("foo", 32);

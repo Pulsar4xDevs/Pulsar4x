@@ -21,7 +21,7 @@ using Pulsar4X.Client.Host;
 
 namespace Pulsar4X.Client
 {
-    public class DamageViewerWindow : PulsarGuiWindow
+    public class DamageViewerWindow : UniquePulsarGuiWindow<DamageViewerWindow>
     {
         //private ComponentDesign _componentDesign;
         private Entity? _selectedEntity;

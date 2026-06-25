@@ -25,7 +25,7 @@ using Pulsar4X.Client.Host;
 
 namespace Pulsar4X.Client
 {
-    public class DebugWindow : PulsarGuiWindow
+    public class DebugWindow : UniquePulsarGuiWindow<DebugWindow>
     {
         EntityState? _selectedEntityState;
 

@@ -15,7 +15,7 @@ using Pulsar4X.Client.Host;
 namespace Pulsar4X.Client
 {
 
-    public class PerformanceWindow : PulsarGuiWindow
+    public class PerformanceWindow : UniquePulsarGuiWindow<PerformanceWindow>
     {
         Stopwatch _sw = new Stopwatch();
 

@@ -6,7 +6,7 @@ using Pulsar4X.Api;
 
 namespace Pulsar4X.Client
 {
-    public class TimeControl : PulsarGuiWindow
+    public class TimeControl : UniquePulsarGuiWindow<TimeControl>
     {
         // The client reads the clock from the galaxy model and submits changes as commands; it no
         // longer touches the engine's MasterTimePulse directly.

@@ -8,7 +8,7 @@ using System.Diagnostics;
 
 namespace Pulsar4X.Client
 {
-    public class MainMenuItems : PulsarGuiWindow
+    public class MainMenuItems : UniquePulsarGuiWindow<MainMenuItems>
     {
 
         bool _saveGame = false;

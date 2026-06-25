@@ -8,7 +8,7 @@ using Vector3 = Pulsar4X.Orbital.Vector3;
 
 namespace Pulsar4X.Client
 {
-    public class ChangeCurrentOrbitWindow : PulsarGuiWindow
+    public class ChangeCurrentOrbitWindow : UniquePulsarGuiWindow<ChangeCurrentOrbitWindow>
     {
         int _entityId;
         string _systemId = "";

@@ -3,7 +3,7 @@ using ImGuiNET;
 
 namespace Pulsar4X.Client
 {
-    public class DebugGUIWindow : PulsarGuiWindow
+    public class DebugGUIWindow : UniquePulsarGuiWindow<DebugGUIWindow>
     {
 
         private DebugGUIWindow()

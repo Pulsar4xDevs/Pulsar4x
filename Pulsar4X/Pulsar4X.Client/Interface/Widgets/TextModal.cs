@@ -3,7 +3,7 @@ using ImGuiNET;
 
 namespace Pulsar4X.Client.Interface.Widgets;
 
-public class TextModal : PulsarGuiWindow
+public class TextModal : UniquePulsarGuiWindow<TextModal>
 {
     private byte[]? _inputBuffer = null;
     uint _bufferMaxSize = 64;

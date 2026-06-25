@@ -12,7 +12,7 @@ using System.Numerics;
 
 namespace Pulsar4X.Client.Interface.Windows;
 
-public class ComponentsWindow : PulsarGuiWindow
+public class ComponentsWindow : UniquePulsarGuiWindow<ComponentsWindow>
 {
     private string _selectedItemId = "";
     private object? _selectedItem = null;

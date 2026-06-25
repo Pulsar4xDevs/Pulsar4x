@@ -5,7 +5,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
-    public class GameLogWindow : PulsarGuiWindow
+    public class GameLogWindow : UniquePulsarGuiWindow<GameLogWindow>
     {
         public HashSet<string> HidenEvents = new HashSet<string>();
 

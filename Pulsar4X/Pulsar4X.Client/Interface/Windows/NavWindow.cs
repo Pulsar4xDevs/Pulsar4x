@@ -10,7 +10,7 @@ using Vector3 = Pulsar4X.Orbital.Vector3;
 
 namespace Pulsar4X.Client
 {
-    public class NavWindow : PulsarGuiWindow
+    public class NavWindow : UniquePulsarGuiWindow<NavWindow>
     {
         private int _entityId;
         private string _systemId = "";

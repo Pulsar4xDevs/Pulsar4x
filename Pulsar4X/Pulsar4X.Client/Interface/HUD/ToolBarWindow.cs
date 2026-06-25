@@ -7,7 +7,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
-    public class ToolBarWindow : PulsarGuiWindow
+    public class ToolBarWindow : UniquePulsarGuiWindow<ToolBarWindow>
     {
         public Vector2 ButtonSize = new Vector2(32, 32);
         private uint UnClickedColour;
@@ -137,12 +137,12 @@ namespace Pulsar4X.Client
 
         internal static ToolBarWindow GetInstance()
         {
-            if (!PulsarGuiWindow._uiState.LoadedWindows.ContainsKey(typeof(ToolBarWindow)))
+            if (!UniquePulsarGuiWindow._uiState.LoadedWindows.ContainsKey(typeof(ToolBarWindow)))
             {
                 return new ToolBarWindow();
             }
 
-            return (ToolBarWindow)PulsarGuiWindow._uiState.LoadedWindows[typeof(ToolBarWindow)];
+            return (ToolBarWindow)UniquePulsarGuiWindow._uiState.LoadedWindows[typeof(ToolBarWindow)];
         }
 
         internal void SetButtons(List<ToolBarOption> buttons)

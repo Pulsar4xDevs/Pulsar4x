@@ -7,7 +7,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client;
 
-public class CreateTransferWindow : PulsarGuiWindow
+public class CreateTransferWindow : UniquePulsarGuiWindow<CreateTransferWindow>
 {
     private int? _leftId;
     private int? _rightId;

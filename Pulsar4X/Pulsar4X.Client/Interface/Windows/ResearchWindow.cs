@@ -9,7 +9,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
-    public class ResearchWindow : PulsarGuiWindow
+    public class ResearchWindow : UniquePulsarGuiWindow<ResearchWindow>
     {
         private readonly Vector2 invisButtonSize = new (15, 15);
 

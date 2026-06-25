@@ -18,7 +18,7 @@ namespace Pulsar4X.Client
 {
 
 
-    public class OrbitalDebugWindow : PulsarGuiWindow
+    public class OrbitalDebugWindow : UniquePulsarGuiWindow<OrbitalDebugWindow>
     {
         public static OrbitalDebugWindow? _orbitalDebugWindow;
         OrbitalDebugWidget? _debugWidget;
@@ -216,7 +216,7 @@ namespace Pulsar4X.Client
         {
             _entity = entityState.GetEntity()!;
             _bodyPosition = new PositionDBAdapter(_entity.GetDataBlob<PositionDB>());
-            _orbitIcon = PulsarGuiWindow._uiState.SelectedSysMapRender?.GetOrbitIcon(entityState.Id);
+            _orbitIcon = UniquePulsarGuiWindow._uiState.SelectedSysMapRender?.GetOrbitIcon(entityState.Id);
 
             //NOTE! ParentPositionDB references the focal point (ie parent's position) *not* the orbiting object position.
 

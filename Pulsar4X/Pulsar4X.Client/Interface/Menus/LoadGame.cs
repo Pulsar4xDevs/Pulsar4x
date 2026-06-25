@@ -4,7 +4,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client.Interface.Menus;
 
-public class LoadGame : PulsarGuiWindow
+public class LoadGame : UniquePulsarGuiWindow<LoadGame>
 {
     private string _filePath = Path.Combine(PulsarMainWindow.GetAppDataPath(), PulsarMainWindow.SavesPath);
     private string _fileName = "savegame";
