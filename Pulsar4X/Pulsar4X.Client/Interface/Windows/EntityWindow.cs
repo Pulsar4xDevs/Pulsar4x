@@ -9,7 +9,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
-    public class EntityWindow : NonUniquePulsarGuiWindow
+    public class EntityWindow : NamedPulsarGuiWindow
     {
         public int EntityId { get; }
         public string SystemId { get; }
@@ -35,7 +35,7 @@ namespace Pulsar4X.Client
         private float _animationProgress = 0f;
         private DateTime _animationStartTime;
 
-        public EntityWindow(int entityId, string systemId)
+        public EntityWindow(int entityId, string systemId) : base("EntityWindow|" + entityId)
         {
             EntityId = entityId;
             SystemId = systemId;
