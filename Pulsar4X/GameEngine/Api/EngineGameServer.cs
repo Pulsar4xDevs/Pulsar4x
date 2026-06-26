@@ -333,16 +333,6 @@ namespace Pulsar4X.Engine.Api
                 // A new component design also registers a research project for itself.
                 if (command is CreateComponentDesignCommand)
                     PushComponentDesigns(session.FactionId);
-
-                // Standing orders live on the fleet-tree snapshot, and replacing them raises no
-                // engine message (no entity is added/removed/reshaped).
-                if (command is SetStandingOrdersCommand)
-                {
-                    var fleets = FleetsEnvelope(session.FactionId);
-                    foreach (var sub in SnapshotSubscriptions())
-                        if (sub.FactionId == session.FactionId)
-                            sub.Send(fleets);
-                }
             }
 
             return result;
@@ -472,6 +462,9 @@ namespace Pulsar4X.Engine.Api
                 (MessageTypes.DBRemoved, GameEventType.EntityChanged),
                 (MessageTypes.EntityChanged, GameEventType.EntityChanged),
                 (MessageTypes.FleetReorganized, GameEventType.FleetsChanged),
+                // Order-queue changes are carried on the fleet snapshot's order lists, so a queue
+                // mutation re-pushes the whole fleet tree (same handling as a reorganisation).
+                (MessageTypes.OrdersChanged, GameEventType.FleetsChanged),
             };
 
             private readonly EngineGameServer _server;

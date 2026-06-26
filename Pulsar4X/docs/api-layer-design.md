@@ -538,7 +538,14 @@ The pre-existing empty `Pulsar4X.Contracts` stub is superseded by `Pulsar4X.Api`
   `MessageTypes.EntityChanged`, which the server's existing message map turns into a self-contained
   `EntityChanged` push. `ResearchProcessor` does this when it dequeues a lab's tech mid-tick
   (without it the lab's `ResearcherView` queue froze on the finished tech — fixed bug), and
-  `SubmitCommand` additionally re-pushes the commanded entity after every accepted command. Still
+  `SubmitCommand` additionally re-pushes the commanded entity after every accepted command.
+  **Order-queue changes use the same pattern with a dedicated message:** queuing an order
+  (`StandAloneOrderHandler.HandleOrder`) or a direct cancel/pause/standing-order swap
+  (`CommandTranslator`) publishes `MessageTypes.OrdersChanged`, which the server map turns into a
+  `FleetsChanged` re-push — because the order lists live on the `FleetSnapshot`/`ShipSnapshot`, not
+  the entity view (fixed bug: a fleet order queued while *paused* never reached the UI, since the
+  fleet tree otherwise only re-pushes on a clock advance). Publishing from the order handler covers
+  every order source — player command, AI, standing orders — at the right layer. Still
   open: geo/grav survey completion (`GeoSurveyView`/`GravSurveyView` staleness — nothing is
   published there today).
 - **The component designer's data is an in-process bridge.** The client-side designer evaluates

@@ -13,6 +13,7 @@ using Pulsar4X.GeoSurveys;
 using Pulsar4X.Industry;
 using Pulsar4X.Industry.Orders;
 using Pulsar4X.JumpPoints;
+using Pulsar4X.Messaging;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using Pulsar4X.Storage;
@@ -99,6 +100,16 @@ namespace Pulsar4X.Engine.Api
             => _game.OrderHandler.HandleOrder(order)
                 ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
                 : CommandResult.Reject("Command rejected by engine validation.");
+
+        // The cancel/pause/standing-order paths mutate the order or standing-order list directly
+        // (they have no engine order of their own), so unlike HandleOrder they must signal the
+        // change themselves — otherwise the fleet UI wouldn't refresh while paused.
+        private static void PublishOrdersChanged(Entity holder)
+            => MessagePublisher.Instance.Publish(Message.Create(
+                MessageTypes.OrdersChanged,
+                entityId: holder.Id,
+                systemId: holder.Manager.ManagerID,
+                factionId: holder.FactionOwnerID));
 
         private bool TryResolve(int entityId, out Entity entity)
             => _game.GlobalManager.TryGetGlobalEntityById(entityId, out entity);
@@ -263,6 +274,7 @@ namespace Pulsar4X.Engine.Api
             foreach (var order in rebuilt)
                 fleetDB.StandingOrders.Add(order);
 
+            PublishOrdersChanged(commanded);
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 
@@ -402,6 +414,7 @@ namespace Pulsar4X.Engine.Api
                 return CommandResult.Reject($"Order {pause.OrderId} is not in the queue.");
 
             order.PauseOnAction = pause.Pause;
+            PublishOrdersChanged(commanded);
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 
@@ -420,6 +433,7 @@ namespace Pulsar4X.Engine.Api
                 return CommandResult.Reject("A running order cannot be cancelled.");
 
             orderable.ActionList.Remove(order);
+            PublishOrdersChanged(commanded);
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 
