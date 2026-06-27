@@ -375,10 +375,5 @@ namespace Pulsar4X.Client
             else
                 _gameRateIndex++;
         }
-
-        public override void OnSystemTickChange(DateTime newDate)
-        {
-
-        }
     }
 }

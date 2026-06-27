@@ -64,13 +64,5 @@ namespace Pulsar4X.Client
         internal void Destroy()
         {
         }
-
-        public override void OnGameTickChange(DateTime newDate)
-        {
-        }
-
-        public override void OnSystemTickChange(DateTime newDate)
-        {
-        }
     }
 }

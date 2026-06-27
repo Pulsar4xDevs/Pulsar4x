@@ -144,14 +144,6 @@ namespace Pulsar4X.Client
             ImGui.PopStyleVar();
         }
 
-        public override void OnGameTickChange(DateTime newDate)
-        {
-        }
-
-        public override void OnSystemTickChange(DateTime newDate)
-        {
-        }
-
         private bool DoAnySavesExist()
         {
             var appDataDirectory = PulsarMainWindow.GetAppDataPath();

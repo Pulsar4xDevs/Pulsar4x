@@ -63,14 +63,6 @@ namespace Pulsar4X.Client
         internal virtual void EntityClicked(EntityState entity, MouseButtons button) { }
 
         internal virtual void EntitySelectedAsPrimary(EntityState entity) { }
-
-        public override void OnGameTickChange(DateTime newDate)
-        {
-        }
-
-        public override void OnSystemTickChange(DateTime newDate)
-        {
-        }
     }
 
     /// <summary>

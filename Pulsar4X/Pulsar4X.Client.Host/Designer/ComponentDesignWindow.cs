@@ -152,9 +152,5 @@ namespace Pulsar4X.Client
             ImGui.EndDisabled();
 
         }
-
-        public override void OnGameTickChange(DateTime newDate)
-        {
-        }
     }
 }

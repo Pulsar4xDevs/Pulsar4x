@@ -119,13 +119,5 @@ namespace Pulsar4X.Client
             Window.End();
 
         }
-
-        public override void OnGameTickChange(DateTime newDate)
-        {
-        }
-
-        public override void OnSystemTickChange(DateTime newDate)
-        {
-        }
     }
 }

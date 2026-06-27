@@ -39,14 +39,5 @@ namespace Pulsar4X.Client
                 ImGui.End();
             }
         }
-
-
-        public override void OnGameTickChange(DateTime newDate)
-        {
-        }
-
-        public override void OnSystemTickChange(DateTime newDate)
-        {
-        }
     }
 }

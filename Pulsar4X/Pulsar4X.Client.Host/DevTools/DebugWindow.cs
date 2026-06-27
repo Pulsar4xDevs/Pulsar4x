@@ -1399,9 +1399,5 @@ namespace Pulsar4X.Client
 
             if(SystemState == null) return;
         }
-
-        public override void OnGameTickChange(DateTime newDate)
-        {
-        }
     }
 }
