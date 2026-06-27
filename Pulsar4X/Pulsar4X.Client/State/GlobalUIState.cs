@@ -389,15 +389,13 @@ namespace Pulsar4X.Client
 
         internal T AddNamedWindow<T>(string name, T window) where T : NamedPulsarGuiWindow
         {
-            throw new NotImplementedException();
+            LoadedNonUniqueWindows.Add(name, window);
+            return window;
         }
 
         internal T AddUniqueWindow<T>(T window) where T : UniquePulsarGuiWindow
         {
-            if(!LoadedWindows.TryAdd(typeof(T), window))
-            {
-                throw new InvalidOperationException("Duplicate key in LoadedWindows: " + typeof(T).FullName);
-            }
+            LoadedWindows.Add(typeof(T), window);
             return window;
         }
 
