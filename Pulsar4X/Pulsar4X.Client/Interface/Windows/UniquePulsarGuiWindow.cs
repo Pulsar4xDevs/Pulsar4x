@@ -8,6 +8,7 @@ namespace Pulsar4X.Client
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.None;
         //internal bool IsLoaded;
         internal bool CanActive = true;
+
         protected bool IsActive = false;
         //internal int StateIndex = -1;
         //protected bool _IsOpen;
@@ -15,7 +16,8 @@ namespace Pulsar4X.Client
 
         protected UniquePulsarGuiWindow(string name)
         {
-            _uiState.LoadedWindows[this.GetType()] = this;
+            int x = 1;
+            // _uiState.LoadedWindows[this.GetType()] = this;
         }
 
         public void SetActive(bool ActiveVal = true)

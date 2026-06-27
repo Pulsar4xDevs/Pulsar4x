@@ -29,20 +29,11 @@ namespace Pulsar4X.Client
 
         internal static EntityUIWindowSelector GetInstance()
         {
-            EntityUIWindowSelector thisItem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(EntityUIWindowSelector)))
+            if(_uiState.TryGetUniqueWindow<EntityUIWindowSelector>(out var window))
             {
-                thisItem = new EntityUIWindowSelector();
+                return window;
             }
-            else
-            {
-                thisItem = (EntityUIWindowSelector)_uiState.LoadedWindows[typeof(EntityUIWindowSelector)];
-            }
-
-
-            return thisItem;
-
-
+            return _uiState.AddUniqueWindow(new EntityUIWindowSelector());
         }
         //displays selected entity info
 

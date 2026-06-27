@@ -17,11 +17,12 @@ public class ResultModal : UniquePulsarGuiWindow<ResultModal>
 
     internal static ResultModal GetInstance()
     {
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(ResultModal)))
+        if(_uiState.TryGetUniqueWindow<ResultModal>(out var window))
         {
-            return new ResultModal();
+            return window;
         }
-        return (ResultModal)_uiState.LoadedWindows[typeof(ResultModal)];
+
+        return _uiState.AddUniqueWindow(new ResultModal());
     }
 
     internal override void Display()

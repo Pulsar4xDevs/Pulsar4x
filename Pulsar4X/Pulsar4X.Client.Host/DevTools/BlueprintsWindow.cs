@@ -22,17 +22,12 @@ public class BlueprintsWindow : UniquePulsarGuiWindow<BlueprintsWindow>
 
     public static BlueprintsWindow GetInstance()
     {
-        BlueprintsWindow instance;
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(BlueprintsWindow)))
+        if(_uiState.TryGetUniqueWindow<BlueprintsWindow>(out var window))
         {
-            instance = new BlueprintsWindow();
-        }
-        else
-        {
-            instance = (BlueprintsWindow)_uiState.LoadedWindows[typeof(BlueprintsWindow)];
+            return window;
         }
 
-        return instance;
+        return _uiState.AddUniqueWindow(new BlueprintsWindow());
     }
 
     private void DisplayBlueprintCategory(string label, List<string> items)

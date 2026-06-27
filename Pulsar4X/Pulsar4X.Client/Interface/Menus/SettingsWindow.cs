@@ -37,11 +37,12 @@ namespace Pulsar4X.Client
         }
         internal static SettingsWindow GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(SettingsWindow)))
+            if(_uiState.TryGetUniqueWindow<SettingsWindow>(out var window))
             {
-                return new SettingsWindow();
+                return window;
             }
-            return (SettingsWindow)_uiState.LoadedWindows[typeof(SettingsWindow)];
+
+            return _uiState.AddUniqueWindow(new SettingsWindow());
         }
 
         internal override void Display()

@@ -51,21 +51,12 @@ namespace Pulsar4X.Client
         }
 
         internal static DistanceRuler GetInstance() {
-
-            DistanceRuler thisItem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(DistanceRuler)))
+            if(_uiState.TryGetUniqueWindow<DistanceRuler>(out var window))
             {
-                thisItem = new DistanceRuler();
-            }
-            else
-            {
-                thisItem = (DistanceRuler)_uiState.LoadedWindows[typeof(DistanceRuler)];
+                return window;
             }
 
-
-            return thisItem;
-
-
+            return _uiState.AddUniqueWindow(new DistanceRuler());
         }
 
         internal override void Display()

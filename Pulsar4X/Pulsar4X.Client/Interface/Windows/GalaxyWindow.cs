@@ -17,16 +17,12 @@ namespace Pulsar4X.Client
 
         internal static GalaxyWindow GetInstance()
         {
-
-            GalaxyWindow thisItem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(GalaxyWindow)))
+            if(_uiState.TryGetUniqueWindow<GalaxyWindow>(out var window))
             {
-                thisItem = new GalaxyWindow();
+                return window;
             }
-            thisItem = (GalaxyWindow)_uiState.LoadedWindows[typeof(GalaxyWindow)];
 
-            return thisItem;
-
+            return _uiState.AddUniqueWindow(new GalaxyWindow());
         }
 
         internal override void Display()

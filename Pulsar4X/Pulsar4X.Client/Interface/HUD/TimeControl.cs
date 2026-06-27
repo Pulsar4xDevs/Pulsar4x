@@ -46,11 +46,12 @@ namespace Pulsar4X.Client
 
         internal static TimeControl GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(TimeControl)))
+            if(_uiState.TryGetUniqueWindow<TimeControl>(out var window))
             {
-                return new TimeControl();
+                return window;
             }
-            return (TimeControl)_uiState.LoadedWindows[typeof(TimeControl)];
+
+            return _uiState.AddUniqueWindow(new TimeControl());
         }
 
         private void Submit(TimeControlRequest request) => _uiState.GameClient?.SetTimeControlAsync(request);

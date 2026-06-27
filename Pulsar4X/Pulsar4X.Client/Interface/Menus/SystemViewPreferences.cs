@@ -82,12 +82,12 @@ public class SystemViewPreferences : UniquePulsarGuiWindow<SystemViewPreferences
 
     internal static SystemViewPreferences GetInstance()
     {
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(SystemViewPreferences)))
+        if(_uiState.TryGetUniqueWindow<SystemViewPreferences>(out var window))
         {
-            return new SystemViewPreferences();
+            return window;
         }
 
-        return (SystemViewPreferences)_uiState.LoadedWindows[typeof(SystemViewPreferences)];
+        return _uiState.AddUniqueWindow(new SystemViewPreferences());
     }
 
     internal SystemViewPreferences()

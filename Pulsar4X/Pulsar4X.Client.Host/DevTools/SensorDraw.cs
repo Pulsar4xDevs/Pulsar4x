@@ -75,36 +75,31 @@ namespace Pulsar4X.Client
         
         internal static SensorDraw GetInstance()
         {
-            SensorDraw instance;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(SensorDraw)))
-                instance = new SensorDraw();
-            else
+            if(!_uiState.TryGetUniqueWindow<SensorDraw>(out var window))
             {
-                instance = (SensorDraw)_uiState.LoadedWindows[typeof(SensorDraw)];
-                if(_uiState.LastClickedEntity?.GetEntity() != null)
-                    instance._selectedEntitySate = _uiState.LastClickedEntity;
-            }
-            if(instance._selectedEntitySate != null)
-            {
-                if (_uiState.LastClickedEntity?.GetEntity() != null && instance._selectedEntity != _uiState.LastClickedEntity.GetEntity()!)
-                    instance._selectedEntitySate = _uiState.LastClickedEntity;
-            }
-            else
-            {
-                if(_uiState.LastClickedEntity?.GetEntity() != null)
-                    instance._selectedEntitySate = _uiState.LastClickedEntity;
+                window = _uiState.AddUniqueWindow(new SensorDraw());
             }
 
-            if (_uiState.IsGameLoaded && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
-                instance._selectedStarSysState = GameLifecycle.Instance?.SelectedSystemState;
-            else
-                instance._selectedStarSysState = null;
-            
-            if (instance._emitSensorProfile == null || instance._emitSensorProfile.OwningEntity != instance._selectedEntity)
+            if(_uiState.LastClickedEntity?.GetEntity() != null)
             {
-                instance.Setup();
+                window._selectedEntitySate = _uiState.LastClickedEntity;
             }
-            return instance;
+
+            if(_uiState.IsGameLoaded && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
+            {
+                // TODO: Stop depending on GameLifecycle singleton.
+                window._selectedStarSysState = GameLifecycle.Instance?.SelectedSystemState;
+            }
+            else
+            {
+                window._selectedStarSysState = null;
+            }
+
+            if (window._emitSensorProfile == null || window._emitSensorProfile.OwningEntity != window._selectedEntity)
+            {
+                window.Setup();
+            }
+            return window;
         }
         internal override void Display()
         {

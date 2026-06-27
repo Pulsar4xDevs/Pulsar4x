@@ -85,11 +85,12 @@ namespace Pulsar4X.Client
         }
         internal static FleetWindow GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(FleetWindow)))
+            if(_uiState.TryGetUniqueWindow<FleetWindow>(out var window))
             {
-                return new FleetWindow();
+                return window;
             }
-            return (FleetWindow)_uiState.LoadedWindows[typeof(FleetWindow)];
+
+            return _uiState.AddUniqueWindow(new FleetWindow());
         }
 
         private void FactionChanged(GlobalUIState uiState)

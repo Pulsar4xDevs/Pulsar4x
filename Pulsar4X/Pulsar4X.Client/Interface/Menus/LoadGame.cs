@@ -13,11 +13,11 @@ public class LoadGame : UniquePulsarGuiWindow<LoadGame>
 
     internal static LoadGame GetInstance()
     {
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(LoadGame)))
+        if(_uiState.TryGetUniqueWindow<LoadGame>(out var window))
         {
-            return new LoadGame();
+            return window;
         }
-        return (LoadGame)_uiState.LoadedWindows[typeof(LoadGame)];
+        return _uiState.AddUniqueWindow(new LoadGame());
     }
 
     internal void LoadLatest()

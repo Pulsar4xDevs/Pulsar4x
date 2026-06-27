@@ -51,12 +51,12 @@ namespace Pulsar4X.Client
 
         internal static Selector GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(Selector)))
+            if(_uiState.TryGetUniqueWindow<Selector>(out var window))
             {
-                return new Selector();
+                return window;
             }
 
-            return (Selector)_uiState.LoadedWindows[typeof(Selector)];
+            return _uiState.AddUniqueWindow(new Selector());
         }
 
         internal override void Display()

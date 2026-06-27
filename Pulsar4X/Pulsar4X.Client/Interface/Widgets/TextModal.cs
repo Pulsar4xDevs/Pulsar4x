@@ -16,12 +16,12 @@ public class TextModal : UniquePulsarGuiWindow<TextModal>
 
     internal static TextModal GetInstance()
     {
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(TextModal)))
+        if(_uiState.TryGetUniqueWindow<TextModal>(out var window))
         {
-            return new TextModal();
+            return window;
         }
 
-        return (TextModal)_uiState.LoadedWindows[typeof(TextModal)];
+        return _uiState.AddUniqueWindow(new TextModal());
     }
 
     internal override void Display()

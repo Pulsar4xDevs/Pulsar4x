@@ -7,6 +7,7 @@ using System.Linq;
 using Pulsar4X.Api;
 using Pulsar4X.Input;
 using Pulsar4X.Client.Rendering;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Pulsar4X.Client
 {
@@ -326,6 +327,78 @@ namespace Pulsar4X.Client
                     Camera.MouseFrameIncrementY = e.Motion.Y;
                 }
             };
+        }
+
+        internal NamedPulsarGuiWindow? GetNamedWindow(string name)
+        {
+            if (TryGetNamedWindow(name, out var window))
+            {
+                return window;
+            }
+            return null;
+        }
+
+        internal bool TryGetNamedWindow(string name, [NotNullWhen(true)] out NamedPulsarGuiWindow? window)
+        {
+            if (LoadedNonUniqueWindows.TryGetValue(name, out var foundWindow))
+            {
+                window = foundWindow;
+                return true;
+            }
+
+            window = null;
+            return false;
+        }
+
+        internal bool TryGetNamedWindow<T>(string name, [NotNullWhen(true)] out T? window) where T : NamedPulsarGuiWindow
+        {
+            if (TryGetNamedWindow(name, out var foundWindow))
+            {
+                window = (T)foundWindow;
+                return true;
+            }
+            window = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets a unique window of type T. Only one instance of a unique window can exist at a time. 
+        /// </summary>
+        /// <typeparam name="T">The type of window.</typeparam>
+        /// <returns>The unique window instance, or <see langword="null"/> if no instance exists.</returns>
+        internal T? GetUniqueWindow<T>() where T : UniquePulsarGuiWindow
+        {
+            if(TryGetUniqueWindow<T>(out var window))
+            {
+                return window;
+            }
+            return null;
+        }
+
+        internal bool TryGetUniqueWindow<T>([NotNullWhen(true)]out T? window) where T : UniquePulsarGuiWindow
+        {
+            if (LoadedWindows.TryGetValue(typeof(T), out var foundWindow))
+            {
+                window = (T)foundWindow;
+                return true;
+            }
+
+            window = null;
+            return false;
+        }
+
+        internal T AddNamedWindow<T>(string name, T window) where T : NamedPulsarGuiWindow
+        {
+            throw new NotImplementedException();
+        }
+
+        internal T AddUniqueWindow<T>(T window) where T : UniquePulsarGuiWindow
+        {
+            if(!LoadedWindows.TryAdd(typeof(T), window))
+            {
+                throw new InvalidOperationException("Duplicate key in LoadedWindows: " + typeof(T).FullName);
+            }
+            return window;
         }
 
         private void DeactivateAllClosableWindows()

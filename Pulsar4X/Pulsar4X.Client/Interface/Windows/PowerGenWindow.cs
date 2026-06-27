@@ -13,20 +13,17 @@ namespace Pulsar4X.Client
 
         internal static PowerGenWindow GetInstance()
         {
-            PowerGenWindow instance;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(PowerGenWindow)))
+            if(!_uiState.TryGetUniqueWindow<PowerGenWindow>(out var window))
             {
-                instance = new PowerGenWindow();
-            }
-            else
-            {
-                instance = (PowerGenWindow)_uiState.LoadedWindows[typeof(PowerGenWindow)];
+                window = _uiState.AddUniqueWindow(new PowerGenWindow());
             }
 
             if (_uiState.LastClickedEntity is { } clicked && clicked.StarSystemId != null)
-                instance.SetEntity(clicked.Id, clicked.StarSystemId);
+            {
+                window.SetEntity(clicked.Id, clicked.StarSystemId);
+            }
 
-            return instance;
+            return window;
         }
 
         private PowerGenWindow()

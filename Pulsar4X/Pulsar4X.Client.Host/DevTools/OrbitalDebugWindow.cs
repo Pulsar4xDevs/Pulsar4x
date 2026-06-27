@@ -29,18 +29,17 @@ namespace Pulsar4X.Client
 
         public static OrbitalDebugWindow GetInstance()
         {
-            if(_orbitalDebugWindow == null)
-                _orbitalDebugWindow = new OrbitalDebugWindow();
-
-            if(_uiState.LastClickedEntity != null)
+            if(!_uiState.TryGetUniqueWindow<OrbitalDebugWindow>(out var window))
             {
-                if (_orbitalDebugWindow._debugWidget == null ||
-                    _orbitalDebugWindow._debugWidget.EntityGuid != _uiState.LastClickedEntity.Id)
-                {
-                    _orbitalDebugWindow.HardRefresh();
-                }
+                window = _uiState.AddUniqueWindow(new OrbitalDebugWindow());
             }
-            return _orbitalDebugWindow;
+
+            if (_uiState.LastClickedEntity != null && (window._debugWidget == null ||
+                    window._debugWidget.EntityGuid != _uiState.LastClickedEntity.Id))
+            {
+                window.HardRefresh();
+            }
+            return window;
         }
 
 

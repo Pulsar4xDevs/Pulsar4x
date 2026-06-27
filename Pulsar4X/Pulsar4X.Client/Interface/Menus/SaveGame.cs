@@ -13,11 +13,11 @@ public class SaveGame : UniquePulsarGuiWindow<SaveGame>
 
     internal static SaveGame GetInstance()
     {
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(SaveGame)))
+        if(_uiState.TryGetUniqueWindow<SaveGame>(out var window))
         {
-            return new SaveGame();
+            return window;
         }
-        return (SaveGame)_uiState.LoadedWindows[typeof(SaveGame)];
+        return _uiState.AddUniqueWindow(new SaveGame());
     }
 
     internal override void Display()

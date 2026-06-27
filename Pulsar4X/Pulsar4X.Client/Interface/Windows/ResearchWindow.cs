@@ -33,14 +33,12 @@ namespace Pulsar4X.Client
 
         internal static ResearchWindow GetInstance()
         {
-            ResearchWindow thisitem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(ResearchWindow)))
+            if(_uiState.TryGetUniqueWindow<ResearchWindow>(out var window))
             {
-                thisitem = new ResearchWindow();
+                return window;
             }
-            thisitem = (ResearchWindow)_uiState.LoadedWindows[typeof(ResearchWindow)];
 
-            return thisitem;
+            return _uiState.AddUniqueWindow<ResearchWindow>(new ResearchWindow());
         }
 
         private void RefreshDerivedData(ResearchSnapshot research)

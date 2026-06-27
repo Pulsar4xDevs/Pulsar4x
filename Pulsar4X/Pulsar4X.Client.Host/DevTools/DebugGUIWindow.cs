@@ -12,20 +12,13 @@ namespace Pulsar4X.Client
         }
         internal static DebugGUIWindow GetInstance()
         {
-            DebugGUIWindow instance;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(DebugGUIWindow)))
-                instance = new DebugGUIWindow();
-            else
+            if(_uiState.TryGetUniqueWindow<DebugGUIWindow>(out var window))
             {
-                instance = (DebugGUIWindow)_uiState.LoadedWindows[typeof(DebugGUIWindow)];
-
+                return window;
             }
 
-            return instance;
+            return _uiState.AddUniqueWindow(new DebugGUIWindow());
         }
-
-
-
 
         internal override void Display()
         {

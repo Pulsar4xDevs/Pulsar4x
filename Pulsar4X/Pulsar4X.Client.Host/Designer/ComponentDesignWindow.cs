@@ -22,14 +22,12 @@ namespace Pulsar4X.Client
 
         internal static ComponentDesignWindow GetInstance()
         {
-            ComponentDesignWindow thisitem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(ComponentDesignWindow)))
+            if(_uiState.TryGetUniqueWindow<ComponentDesignWindow>(out var window))
             {
-                thisitem = new ComponentDesignWindow();
+                return window;
             }
-            thisitem = (ComponentDesignWindow)_uiState.LoadedWindows[typeof(ComponentDesignWindow)];
 
-            return thisitem;
+            return _uiState.AddUniqueWindow(new ComponentDesignWindow());
         }
 
         private static void RefreshDerivedData(ComponentDesignsSnapshot snapshot)

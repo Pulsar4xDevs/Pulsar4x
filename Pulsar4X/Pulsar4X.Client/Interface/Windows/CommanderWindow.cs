@@ -25,11 +25,12 @@ namespace Pulsar4X.Client
 
         internal static CommanderWindow GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(CommanderWindow)))
+            if(_uiState.TryGetUniqueWindow<CommanderWindow>(out var window))
             {
-                return new CommanderWindow();
+                return window;
             }
-            return (CommanderWindow)_uiState.LoadedWindows[typeof(CommanderWindow)];
+
+            return _uiState.AddUniqueWindow(new CommanderWindow());
         }
 
         internal override void Display()

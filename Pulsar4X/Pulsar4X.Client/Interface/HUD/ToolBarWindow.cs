@@ -137,12 +137,12 @@ namespace Pulsar4X.Client
 
         internal static ToolBarWindow GetInstance()
         {
-            if (!UniquePulsarGuiWindow._uiState.LoadedWindows.ContainsKey(typeof(ToolBarWindow)))
+            if(_uiState.TryGetUniqueWindow<ToolBarWindow>(out var window))
             {
-                return new ToolBarWindow();
+                return window;
             }
 
-            return (ToolBarWindow)UniquePulsarGuiWindow._uiState.LoadedWindows[typeof(ToolBarWindow)];
+            return _uiState.AddUniqueWindow(new ToolBarWindow());
         }
 
         internal void SetButtons(List<ToolBarOption> buttons)

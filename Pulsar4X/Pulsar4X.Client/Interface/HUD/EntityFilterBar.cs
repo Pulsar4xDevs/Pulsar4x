@@ -26,11 +26,12 @@ public class EntityFilterBar : UniquePulsarGuiWindow<EntityFilterBar>
 
     internal static EntityFilterBar GetInstance()
     {
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(EntityFilterBar)))
+        if(_uiState.TryGetUniqueWindow<EntityFilterBar>(out var window))
         {
-            return new EntityFilterBar();
+            return window;
         }
-        return (EntityFilterBar)_uiState.LoadedWindows[typeof(EntityFilterBar)];
+
+        return _uiState.AddUniqueWindow(new EntityFilterBar());
     }
 
     internal override void Display()

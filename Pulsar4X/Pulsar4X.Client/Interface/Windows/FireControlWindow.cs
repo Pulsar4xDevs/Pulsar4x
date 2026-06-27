@@ -26,19 +26,15 @@ namespace Pulsar4X.Client
 
         public static FireControl GetInstance(EntityState orderEntity)
         {
-            FireControl thisitem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(FireControl)))
+            if(!_uiState.TryGetUniqueWindow<FireControl>(out var window))
             {
-                thisitem = new FireControl();
+                window = _uiState.AddUniqueWindow(new FireControl());
             }
-            else
-            {
-                thisitem = (FireControl)_uiState.LoadedWindows[typeof(FireControl)];
-            }
-            if (orderEntity.StarSystemId != null)
-                thisitem.SetEntity(orderEntity.Id, orderEntity.StarSystemId);
 
-            return thisitem;
+            if (orderEntity.StarSystemId != null)
+                window.SetEntity(orderEntity.Id, orderEntity.StarSystemId);
+
+            return window;
         }
 
         public void SetEntity(int entityId, string systemId)

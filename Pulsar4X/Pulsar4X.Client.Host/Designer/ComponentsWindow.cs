@@ -22,17 +22,12 @@ public class ComponentsWindow : UniquePulsarGuiWindow<ComponentsWindow>
 
     public static ComponentsWindow GetInstance()
     {
-        ComponentsWindow instance;
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(ComponentsWindow)))
+        if(_uiState.TryGetUniqueWindow<ComponentsWindow>(out var window))
         {
-            instance = new ComponentsWindow();
-        }
-        else
-        {
-            instance = (ComponentsWindow)_uiState.LoadedWindows[typeof(ComponentsWindow)];
+            return window;
         }
 
-        return instance;
+        return _uiState.AddUniqueWindow(new ComponentsWindow());
     }
 
     private void DisplayComponentCategory(string label, List<string> templateIds, List<string> designIds, FactionInfoDB factionInfoDB)

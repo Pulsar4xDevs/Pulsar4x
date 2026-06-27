@@ -17,11 +17,12 @@ namespace Pulsar4X.Client
         private MainMenuItems(){}
         internal static MainMenuItems GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(MainMenuItems)))
+            if(_uiState.TryGetUniqueWindow<MainMenuItems>(out var window))
             {
-                return new MainMenuItems();
+                return window;
             }
-            return (MainMenuItems)_uiState.LoadedWindows[typeof(MainMenuItems)];
+
+            return _uiState.AddUniqueWindow(new MainMenuItems());
         }
 
 

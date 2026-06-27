@@ -11,17 +11,12 @@ public class SystemWindow : UniquePulsarGuiWindow<SystemWindow>
     private const string SystemViewPreferencesKey = "system-viewer";
 
     internal static SystemWindow GetInstance() {
-        SystemWindow thisItem;
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(SystemWindow)))
+        if(_uiState.TryGetUniqueWindow<SystemWindow>(out var window))
         {
-            thisItem = new SystemWindow();
-        }
-        else
-        {
-            thisItem = (SystemWindow)_uiState.LoadedWindows[typeof(SystemWindow)];
+            return window;
         }
 
-        return thisItem;
+        return _uiState.AddUniqueWindow(new SystemWindow());
     }
 
     //displays selected entity info

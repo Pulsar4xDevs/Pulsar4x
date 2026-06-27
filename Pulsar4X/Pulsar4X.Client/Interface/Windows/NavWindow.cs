@@ -34,24 +34,21 @@ namespace Pulsar4X.Client
 
         public static NavWindow GetInstance(EntityState orderEntity)
         {
-            NavWindow thisitem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(NavWindow)))
+            if(!_uiState.TryGetUniqueWindow<NavWindow>(out var window))
             {
-                thisitem = new NavWindow(orderEntity.Id, orderEntity.StarSystemId!);
-                thisitem.HardRefresh();
-            }
-            else
-            {
-                thisitem = (NavWindow)_uiState.LoadedWindows[typeof(NavWindow)];
-                if (thisitem._entityId != orderEntity.Id)
-                {
-                    thisitem._entityId = orderEntity.Id;
-                    thisitem._systemId = orderEntity.StarSystemId!;
-                    thisitem.HardRefresh();
-                }
+                window = _uiState.AddUniqueWindow(new NavWindow(orderEntity.Id, orderEntity.StarSystemId!));
+                window.HardRefresh();
+                return window;
             }
 
-            return thisitem;
+            if (window._entityId != orderEntity.Id)
+            {
+                window._entityId = orderEntity.Id;
+                window._systemId = orderEntity.StarSystemId!;
+                window.HardRefresh();
+            }
+
+            return window;
         }
 
         private void HardRefresh()

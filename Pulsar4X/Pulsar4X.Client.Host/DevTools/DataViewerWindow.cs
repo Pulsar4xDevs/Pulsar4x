@@ -25,19 +25,20 @@ public class DataViewerWindow : UniquePulsarGuiWindow<DataViewerWindow>
 
     internal static DataViewerWindow GetInstance()
     {
-        DataViewerWindow instance;
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(DataViewerWindow)))
-            instance = new DataViewerWindow(GameLifecycle.Instance?.Game?.StartingGameData);
-        else
+        if(!_uiState.TryGetUniqueWindow<DataViewerWindow>(out var window))
         {
-            instance = (DataViewerWindow)_uiState.LoadedWindows[typeof(DataViewerWindow)];
+            window = _uiState.AddUniqueWindow(new DataViewerWindow(GameLifecycle.Instance?.Game?.StartingGameData));
         }
 
         if (_uiState.IsGameLoaded && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
-            instance._systemState = GameLifecycle.Instance?.SelectedSystemState;
+        {
+            window._systemState = GameLifecycle.Instance?.SelectedSystemState;
+        }
         else
-            instance._systemState = null;
-        return instance;
+        {
+            window._systemState = null;
+        }
+        return window;
     }
 
     private DataViewerWindow(ModDataStore modDataStore)

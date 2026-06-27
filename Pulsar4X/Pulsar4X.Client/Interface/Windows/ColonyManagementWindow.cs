@@ -19,14 +19,12 @@ namespace Pulsar4X.Client
 
         internal static ColonyManagementWindow GetInstance()
         {
-            ColonyManagementWindow thisitem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(ColonyManagementWindow)))
+            if(_uiState.TryGetUniqueWindow<ColonyManagementWindow>(out var window))
             {
-                thisitem = new ColonyManagementWindow();
+                return window;
             }
-            thisitem = (ColonyManagementWindow)_uiState.LoadedWindows[typeof(ColonyManagementWindow)];
 
-            return thisitem;
+            return _uiState.AddUniqueWindow(new ColonyManagementWindow());
         }
 
         public void SelectColony(int colonyId, string systemId)
