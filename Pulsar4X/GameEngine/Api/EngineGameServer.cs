@@ -139,7 +139,7 @@ namespace Pulsar4X.Engine.Api
             var subs = SnapshotSubscriptions();
             if (subs.Length == 0) return;
 
-            var time = new GameEventEnvelope(GameEventType.TimeChanged, Time: _projector.ProjectTime(systemDate));
+            var time = new GameEventEnvelope(GameEventType.TimeChanged, Time: _projector.ProjectTime(systemDate), SystemId: system.ID);
             foreach (var sub in subs)
             {
                 sub.Send(time);

@@ -104,7 +104,19 @@ public sealed class InProcessAdapter : IGameClient
         switch (evt.Type)
         {
             case GameEventType.TimeChanged:
-                if (evt.Time != null) _galaxy.Time = evt.Time;
+                if (evt.Time is null) return;
+
+                // The server pushes TimeChanged deltas with a SystemId if the change was to a system's clock
+                if (evt.SystemId is not null)
+                {
+                    var systemToUpdate = _galaxy.GetMutableSystem(evt.SystemId);
+                    if (systemToUpdate is not null) systemToUpdate.DateTime = evt.Time.GameDateTime;
+                }
+                // Otherwise it's a global clock change
+                else if (evt.Time is not null)
+                {
+                    _galaxy.Time = evt.Time;
+                }
                 return;
 
             case GameEventType.FleetsChanged:
