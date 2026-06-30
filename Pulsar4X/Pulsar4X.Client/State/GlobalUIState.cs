@@ -7,6 +7,7 @@ using System.Linq;
 using Pulsar4X.Api;
 using Pulsar4X.Input;
 using Pulsar4X.Client.Rendering;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Pulsar4X.Client
 {
@@ -96,7 +97,7 @@ namespace Pulsar4X.Client
         internal bool ShowDemoWindow;
         internal IntPtr SDLRendererPtr { get; private set; }
         internal GalacticMapRender? GalacticMap;
-        internal List<UpdateWindowState> UpdateableWindows = new();
+        internal List<UpdateWindowState> UpdateableWindows { get; init; } = new();
         internal DateTime LastGameUpdateTime = new();
         internal DateTime SelectedSystemTime => GameClient?.Galaxy.GetSystem(SelectedStarSystemId)?.DateTime ?? default;
         internal DateTime SelectedSysLastUpdateTime = new();
@@ -107,9 +108,10 @@ namespace Pulsar4X.Client
         internal Camera Camera;
         internal SDL3Window ViewPort { get; private set; }
 
-        internal Dictionary<Type, PulsarGuiWindow> LoadedWindows = new();
-        internal Dictionary<String, NonUniquePulsarGuiWindow> LoadedNonUniqueWindows = new();
-        internal PulsarGuiWindow? ActiveWindow { get; set; }
+        internal Dictionary<Type, UniquePulsarGuiWindow> LoadedWindows { get; init; } = new();
+        internal Dictionary<string, NamedPulsarGuiWindow> LoadedNonUniqueWindows { get; init; } = new();
+
+        internal UniquePulsarGuiWindow? ActiveWindow { get; set; }
         internal List<List<UserOrbitSettings>> UserOrbitSettingsMtx = new();
         internal Dictionary<UserOrbitSettings.OrbitBodyType, float> DrawNameZoomLvl = new();
         internal Dictionary<string, IntPtr> SDLImageDictionary = new();
@@ -145,7 +147,7 @@ namespace Pulsar4X.Client
         internal GlobalUIState(SDL3Window viewport)
         {
             ViewPort = viewport;
-            PulsarGuiWindow._uiState = this;
+            UniquePulsarGuiWindow._uiState = this;
             var windowPtr = viewport.Window;
 
             SDLRendererPtr = SDL.CreateRenderer(windowPtr, "pulsar4x");
@@ -325,6 +327,76 @@ namespace Pulsar4X.Client
                     Camera.MouseFrameIncrementY = e.Motion.Y;
                 }
             };
+        }
+
+        internal NamedPulsarGuiWindow? GetNamedWindow(string name)
+        {
+            if (TryGetNamedWindow(name, out var window))
+            {
+                return window;
+            }
+            return null;
+        }
+
+        internal bool TryGetNamedWindow(string name, [NotNullWhen(true)] out NamedPulsarGuiWindow? window)
+        {
+            if (LoadedNonUniqueWindows.TryGetValue(name, out var foundWindow))
+            {
+                window = foundWindow;
+                return true;
+            }
+
+            window = null;
+            return false;
+        }
+
+        internal bool TryGetNamedWindow<T>(string name, [NotNullWhen(true)] out T? window) where T : NamedPulsarGuiWindow
+        {
+            if (TryGetNamedWindow(name, out var foundWindow))
+            {
+                window = (T)foundWindow;
+                return true;
+            }
+            window = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets a unique window of type T. Only one instance of a unique window can exist at a time. 
+        /// </summary>
+        /// <typeparam name="T">The type of window.</typeparam>
+        /// <returns>The unique window instance, or <see langword="null"/> if no instance exists.</returns>
+        internal T? GetUniqueWindow<T>() where T : UniquePulsarGuiWindow
+        {
+            if(TryGetUniqueWindow<T>(out var window))
+            {
+                return window;
+            }
+            return null;
+        }
+
+        internal bool TryGetUniqueWindow<T>([NotNullWhen(true)]out T? window) where T : UniquePulsarGuiWindow
+        {
+            if (LoadedWindows.TryGetValue(typeof(T), out var foundWindow))
+            {
+                window = (T)foundWindow;
+                return true;
+            }
+
+            window = null;
+            return false;
+        }
+
+        internal T AddNamedWindow<T>(string name, T window) where T : NamedPulsarGuiWindow
+        {
+            LoadedNonUniqueWindows.Add(name, window);
+            return window;
+        }
+
+        internal T AddUniqueWindow<T>(T window) where T : UniquePulsarGuiWindow
+        {
+            LoadedWindows.Add(typeof(T), window);
+            return window;
         }
 
         private void DeactivateAllClosableWindows()

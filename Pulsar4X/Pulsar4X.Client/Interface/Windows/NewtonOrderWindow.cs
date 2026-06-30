@@ -8,7 +8,7 @@ using Vector3 = Pulsar4X.Orbital.Vector3;
 
 namespace Pulsar4X.Client
 {
-    public class ChangeCurrentOrbitWindow : PulsarGuiWindow
+    public class ChangeCurrentOrbitWindow : UniquePulsarGuiWindow<ChangeCurrentOrbitWindow>
     {
         int _entityId;
         string _systemId = "";
@@ -28,14 +28,17 @@ namespace Pulsar4X.Client
 
         internal static ChangeCurrentOrbitWindow GetInstance(EntityState entity)
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(ChangeCurrentOrbitWindow)))
+            if(!_uiState.TryGetUniqueWindow<ChangeCurrentOrbitWindow>(out var window))
             {
-                return new ChangeCurrentOrbitWindow(entity.Id, entity.StarSystemId!);
+                window = _uiState.AddUniqueWindow(new ChangeCurrentOrbitWindow(entity.Id, entity.StarSystemId!));
+                return window; // Entity is already set from ctor.
             }
-            var instance = (ChangeCurrentOrbitWindow)_uiState.LoadedWindows[typeof(ChangeCurrentOrbitWindow)];
-            if (instance._entityId != entity.Id || !instance.IsActive)
-                instance.OnEntityChange(entity.Id, entity.StarSystemId!);
-            return instance;
+
+            if (window._entityId != entity.Id || !window.IsActive)
+            {
+                window.OnEntityChange(entity.Id, entity.StarSystemId!);
+            }
+            return window;
         }
 
         void OnEntityChange(int entityId, string systemId)

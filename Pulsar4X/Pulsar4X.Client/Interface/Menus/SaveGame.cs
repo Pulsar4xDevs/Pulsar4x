@@ -4,7 +4,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client.Interface.Menus;
 
-public class SaveGame : PulsarGuiWindow
+public class SaveGame : UniquePulsarGuiWindow<SaveGame>
 {
     private string _filePath = Path.Combine(PulsarMainWindow.GetAppDataPath(), PulsarMainWindow.SavesPath);
     private string _fileName = "savegame.sav";
@@ -13,11 +13,11 @@ public class SaveGame : PulsarGuiWindow
 
     internal static SaveGame GetInstance()
     {
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(SaveGame)))
+        if(_uiState.TryGetUniqueWindow<SaveGame>(out var window))
         {
-            return new SaveGame();
+            return window;
         }
-        return (SaveGame)_uiState.LoadedWindows[typeof(SaveGame)];
+        return _uiState.AddUniqueWindow(new SaveGame());
     }
 
     internal override void Display()

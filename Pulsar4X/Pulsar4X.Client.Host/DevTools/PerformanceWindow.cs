@@ -15,7 +15,7 @@ using Pulsar4X.Client.Host;
 namespace Pulsar4X.Client
 {
 
-    public class PerformanceWindow : PulsarGuiWindow
+    public class PerformanceWindow : UniquePulsarGuiWindow<PerformanceWindow>
     {
         Stopwatch _sw = new Stopwatch();
 
@@ -55,18 +55,21 @@ namespace Pulsar4X.Client
         }
         internal static PerformanceWindow GetInstance()
         {
-            PerformanceWindow instance;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(PerformanceWindow)))
-                instance = new PerformanceWindow();
+            if(!_uiState.TryGetUniqueWindow<PerformanceWindow>(out var window))
+            {
+                window = _uiState.AddUniqueWindow(new PerformanceWindow());
+            }
+
+            if (_uiState.IsGameLoaded && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
+            {
+                // TODO: Remove dependency on GameLifecycle singleton.
+                window._systemState = GameLifecycle.Instance?.SelectedSystemState;
+            }
             else
             {
-                instance = (PerformanceWindow)_uiState.LoadedWindows[typeof(PerformanceWindow)];
+                window._systemState = null;
             }
-            if (_uiState.IsGameLoaded && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
-                instance._systemState = GameLifecycle.Instance?.SelectedSystemState;
-            else
-                instance._systemState = null;
-            return instance;
+            return window;
         }
 
 
@@ -371,11 +374,6 @@ namespace Pulsar4X.Client
                 _gameRateIndex = 0;
             else
                 _gameRateIndex++;
-        }
-
-        public override void OnSystemTickChange(DateTime newDate)
-        {
-
         }
     }
 }

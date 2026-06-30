@@ -25,7 +25,7 @@ using Pulsar4X.Client.Host;
 
 namespace Pulsar4X.Client
 {
-    public class DebugWindow : PulsarGuiWindow
+    public class DebugWindow : UniquePulsarGuiWindow<DebugWindow>
     {
         EntityState? _selectedEntityState;
 
@@ -90,24 +90,26 @@ namespace Pulsar4X.Client
         }
         internal static DebugWindow GetInstance()
         {
-            DebugWindow instance;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(DebugWindow)))
-                instance = new DebugWindow();
-            else
+            if(!_uiState.TryGetUniqueWindow<DebugWindow>(out var window))
             {
-                instance = (DebugWindow)_uiState.LoadedWindows[typeof(DebugWindow)];
-                if (_uiState.IsGameLoaded)
-                    instance.RefreshFactionEntites(_uiState);
-                //if(_uiState.LastClickedEntity?.Entity != null)
-                //    instance.SelectedEntity = _uiState.LastClickedEntity.Entity;
+                window = new DebugWindow();
             }
-            //if(_uiState.LastClickedEntity?.Entity != null && instance.SelectedEntity != _uiState.LastClickedEntity.Entity)
-            //    instance.SelectedEntity = _uiState.LastClickedEntity.Entity;
-            if (_uiState.IsGameLoaded && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
-                instance.SystemState = GameLifecycle.Instance?.SelectedSystemState;
-            else
-                instance.SystemState = null;
-            return instance;
+
+            if(_uiState.IsGameLoaded)
+            {
+                window.RefreshFactionEntites(_uiState);
+
+                if(!string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
+                {
+                    // TODO: Remove dependency on GameLifecycle Sinleton.
+                    window.SystemState = GameLifecycle.Instance?.SelectedSystemState;
+                }
+                else
+                {
+                    window.SystemState = null;
+                }
+            }
+            return window;
         }
 
         internal void SetGameEvents()
@@ -1396,10 +1398,6 @@ namespace Pulsar4X.Client
             _dateChangeSinceLastFrame = true;
 
             if(SystemState == null) return;
-        }
-
-        public override void OnGameTickChange(DateTime newDate)
-        {
         }
     }
 }

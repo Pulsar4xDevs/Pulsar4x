@@ -4,7 +4,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client.Interface.Menus;
 
-public class LoadGame : PulsarGuiWindow
+public class LoadGame : UniquePulsarGuiWindow<LoadGame>
 {
     private string _filePath = Path.Combine(PulsarMainWindow.GetAppDataPath(), PulsarMainWindow.SavesPath);
     private string _fileName = "savegame";
@@ -13,11 +13,11 @@ public class LoadGame : PulsarGuiWindow
 
     internal static LoadGame GetInstance()
     {
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(LoadGame)))
+        if(_uiState.TryGetUniqueWindow<LoadGame>(out var window))
         {
-            return new LoadGame();
+            return window;
         }
-        return (LoadGame)_uiState.LoadedWindows[typeof(LoadGame)];
+        return _uiState.AddUniqueWindow(new LoadGame());
     }
 
     internal void LoadLatest()

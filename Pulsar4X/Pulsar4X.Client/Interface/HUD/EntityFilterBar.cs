@@ -10,7 +10,7 @@ namespace Pulsar4X.Client;
 /// A small borderless toolbar in the upper right that provides toggle buttons
 /// for showing/hiding different entity types on the system map.
 /// </summary>
-public class EntityFilterBar : PulsarGuiWindow
+public class EntityFilterBar : UniquePulsarGuiWindow<EntityFilterBar>
 {
     private const string ViewKey = "map";
 
@@ -26,11 +26,12 @@ public class EntityFilterBar : PulsarGuiWindow
 
     internal static EntityFilterBar GetInstance()
     {
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(EntityFilterBar)))
+        if(_uiState.TryGetUniqueWindow<EntityFilterBar>(out var window))
         {
-            return new EntityFilterBar();
+            return window;
         }
-        return (EntityFilterBar)_uiState.LoadedWindows[typeof(EntityFilterBar)];
+
+        return _uiState.AddUniqueWindow(new EntityFilterBar());
     }
 
     internal override void Display()

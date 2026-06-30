@@ -484,11 +484,6 @@ namespace Pulsar4X.Client.Rendering
             return true;
         }
 
-        public override void OnGameTickChange(DateTime newDate)
-        {
-
-        }
-
         public override void OnSystemTickChange(DateTime newDate)
         {
             _state.PrimarySystemDateTime = newDate;

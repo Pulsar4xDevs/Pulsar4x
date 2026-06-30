@@ -14,7 +14,7 @@ namespace Pulsar4X.Client;
 /// but also loads and saves the preferences and holds the
 /// currently selected views for various parts of the game.
 /// </summary>
-public class SystemViewPreferences : PulsarGuiWindow
+public class SystemViewPreferences : UniquePulsarGuiWindow<SystemViewPreferences>
 {
     internal record View
     {
@@ -82,12 +82,12 @@ public class SystemViewPreferences : PulsarGuiWindow
 
     internal static SystemViewPreferences GetInstance()
     {
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(SystemViewPreferences)))
+        if(_uiState.TryGetUniqueWindow<SystemViewPreferences>(out var window))
         {
-            return new SystemViewPreferences();
+            return window;
         }
 
-        return (SystemViewPreferences)_uiState.LoadedWindows[typeof(SystemViewPreferences)];
+        return _uiState.AddUniqueWindow(new SystemViewPreferences());
     }
 
     internal SystemViewPreferences()

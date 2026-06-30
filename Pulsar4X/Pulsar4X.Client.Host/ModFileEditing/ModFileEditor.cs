@@ -5,7 +5,7 @@ using Pulsar4X.Modding;
 
 namespace Pulsar4X.Client.ModFileEditing;
 
-public class ModFileEditor : PulsarGuiWindow
+public class ModFileEditor : UniquePulsarGuiWindow<ModFileEditor>
 {
     private ModInfoUI _modInfoUI;
     private TechBlueprintUI _techBlueprintUI;

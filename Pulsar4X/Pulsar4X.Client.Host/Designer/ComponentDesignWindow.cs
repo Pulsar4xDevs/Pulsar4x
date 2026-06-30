@@ -8,7 +8,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
-    public class ComponentDesignWindow : PulsarGuiWindow
+    public class ComponentDesignWindow : UniquePulsarGuiWindow<ComponentDesignWindow>
     {
         // Derived lookups, rebuilt only when a new ComponentDesignsSnapshot is pushed (reference
         // change) — the server pushes one on connect and whenever a design is created.
@@ -22,14 +22,12 @@ namespace Pulsar4X.Client
 
         internal static ComponentDesignWindow GetInstance()
         {
-            ComponentDesignWindow thisitem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(ComponentDesignWindow)))
+            if(_uiState.TryGetUniqueWindow<ComponentDesignWindow>(out var window))
             {
-                thisitem = new ComponentDesignWindow();
+                return window;
             }
-            thisitem = (ComponentDesignWindow)_uiState.LoadedWindows[typeof(ComponentDesignWindow)];
 
-            return thisitem;
+            return _uiState.AddUniqueWindow(new ComponentDesignWindow());
         }
 
         private static void RefreshDerivedData(ComponentDesignsSnapshot snapshot)
@@ -153,10 +151,6 @@ namespace Pulsar4X.Client
             }
             ImGui.EndDisabled();
 
-        }
-
-        public override void OnGameTickChange(DateTime newDate)
-        {
         }
     }
 }

@@ -24,7 +24,7 @@ static class Helper
     }
 }
 
-public class NewGameMenu : PulsarGuiWindow
+public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
 {
     private const int NAME_BUFFER_SIZE = 32;
     private const int SHORTNAME_BUFFER_SIZE = 5;
@@ -72,13 +72,15 @@ public class NewGameMenu : PulsarGuiWindow
     {
         _masterSeed = RandomNumberGenerator.GetInt32(999999999);
     }
+
     internal static NewGameMenu GetInstance()
     {
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(NewGameMenu)))
+        if(_uiState.TryGetUniqueWindow<NewGameMenu>(out var window))
         {
-            return new NewGameMenu();
+            return window;
         }
-        return (NewGameMenu)_uiState.LoadedWindows[typeof(NewGameMenu)];
+
+        return _uiState.AddUniqueWindow(new NewGameMenu());
     }
 
     internal override void Display()

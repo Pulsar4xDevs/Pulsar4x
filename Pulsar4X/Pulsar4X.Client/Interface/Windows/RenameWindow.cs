@@ -3,7 +3,7 @@ using ImGuiNET;
 
 namespace Pulsar4X.Client
 {
-    public class RenameWindow : PulsarGuiWindow
+    public class RenameWindow : UniquePulsarGuiWindow<RenameWindow>
     {
         private int _targetEntityId = -1;
         private byte[]? _nameInputBuffer;
@@ -35,11 +35,12 @@ namespace Pulsar4X.Client
 
         internal static RenameWindow GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(RenameWindow)))
+            if(_uiState.TryGetUniqueWindow<RenameWindow>(out var window))
             {
-                return new RenameWindow();
+                return window;
             }
-            return (RenameWindow)_uiState.LoadedWindows[typeof(RenameWindow)];
+
+            return _uiState.AddUniqueWindow(new RenameWindow());
         }
 
         internal override void Display()

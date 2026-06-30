@@ -23,7 +23,7 @@ using Pulsar4X.Client.Host;
 
 namespace Pulsar4X.Client
 {
-    public class ShipDesignWindow : PulsarGuiWindow
+    public class ShipDesignWindow : UniquePulsarGuiWindow<ShipDesignWindow>
     {
         private bool ShowNoDesigns = false;
         private byte[] SelectedDesignName =  Utils.BytesFromString("foo", 32);
@@ -129,17 +129,15 @@ namespace Pulsar4X.Client
 
         internal static ShipDesignWindow GetInstance()
         {
-            ShipDesignWindow thisitem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(ShipDesignWindow)))
+            if(_uiState.TryGetUniqueWindow<ShipDesignWindow>(out var window))
             {
-                thisitem = new ShipDesignWindow();
-                thisitem.RefreshComponentDesigns();
-                thisitem.RefreshExistingClasses();
+                return window;
             }
-            else
-                thisitem = (ShipDesignWindow)_uiState.LoadedWindows[typeof(ShipDesignWindow)];
 
-            return thisitem;
+            window = _uiState.AddUniqueWindow(new ShipDesignWindow());
+            window.RefreshComponentDesigns();
+            window.RefreshExistingClasses();
+            return window;
         }
 
         void RefreshComponentDesigns()

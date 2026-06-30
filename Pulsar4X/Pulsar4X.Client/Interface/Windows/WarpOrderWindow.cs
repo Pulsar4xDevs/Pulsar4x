@@ -12,7 +12,7 @@ namespace Pulsar4X.Client
     /// <summary>
     /// Orbit order window - this whole thing is a somewhat horrible state machine
     /// </summary>
-    public class WarpOrderWindow : PulsarGuiWindow// IOrderWindow
+    public class WarpOrderWindow : UniquePulsarGuiWindow<WarpOrderWindow> // IOrderWindow
     {
         int _entityId;
         string _systemId = "";
@@ -80,15 +80,9 @@ namespace Pulsar4X.Client
         {
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
 
-            _entityId = entityId;
-            _systemId = systemId;
             _strictNewtonMode = _uiState.GameInfo?.StrictNewtonian ?? true;
             _departureDateTime = _uiState.PrimarySystemDateTime;
-            _displayText = "Warp Order: " + (OrderingEntity?.GetView<NameView>()?.Name ?? "Unknown");
-            _tooltipText = "Select target to orbit";
-            CurrentState = States.NeedsTarget;
-
-            CreateMoveWidget();
+            SetEntity(entityId, systemId);
 
             fsm = new Action[4, 4]
             {
@@ -108,22 +102,34 @@ namespace Pulsar4X.Client
             };
         }
 
+        internal void SetEntity(int entityId, string systemId)
+        {
+            _entityId = entityId;
+            _systemId = systemId;
+            _displayText = "Warp Order: " + (OrderingEntity?.GetView<NameView>()?.Name ?? "Unknown");
+            _tooltipText = "Select target to orbit";
+            CurrentState = States.NeedsTarget;
+            CreateMoveWidget();
+        }
+
         internal static WarpOrderWindow GetInstance(EntityState entity, bool SMMode = false)
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(WarpOrderWindow)))
+            if(!_uiState.TryGetUniqueWindow<WarpOrderWindow>(out var window))
             {
-                return new WarpOrderWindow(entity.Id, entity.StarSystemId!);
-            }
-            var instance = (WarpOrderWindow)_uiState.LoadedWindows[typeof(WarpOrderWindow)];
-            if (instance._entityId != entity.Id)
-            {
-                return new WarpOrderWindow(entity.Id, entity.StarSystemId!);
+                window = _uiState.AddUniqueWindow(new WarpOrderWindow(entity.Id, entity.StarSystemId!));
+                return window;  // Entity is set from ctor.
             }
 
-            instance.CurrentState = States.NeedsTarget;
-            instance._departureDateTime = _uiState.PrimarySystemDateTime;
-            instance.EntitySelected();
-            return instance;
+            // TODO: Probably needs more testing.
+            if(window._entityId != entity.Id)
+            {
+                window.SetEntity(entity.Id, entity.StarSystemId!);
+            }
+
+            window.CurrentState = States.NeedsTarget;
+            window._departureDateTime = _uiState.PrimarySystemDateTime;
+            window.EntitySelected();
+            return window;
         }
 
         #region Stuff that gets calculated when the state changes.

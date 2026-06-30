@@ -12,7 +12,7 @@ using Pulsar4X.Client.Host;
 
 namespace Pulsar4X.Client
 {
-    public class SMWindow : PulsarGuiWindow
+    public class SMWindow : UniquePulsarGuiWindow<SMWindow>
     {
         private Game? _game;
         private StarSystem? _currentSystem;
@@ -47,11 +47,12 @@ namespace Pulsar4X.Client
         //TODO auth of some kind.
         public static SMWindow GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(SMWindow)))
+            if(_uiState.TryGetUniqueWindow<SMWindow>(out var window))
             {
-                return new SMWindow();
+                return window;
             }
-            return (SMWindow)_uiState.LoadedWindows[typeof(SMWindow)];
+
+            return _uiState.AddUniqueWindow(new SMWindow());
         }
 
         void HardRefresh()

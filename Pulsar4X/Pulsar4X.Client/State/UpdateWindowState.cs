@@ -8,8 +8,8 @@ namespace Pulsar4X.Client
 
         public abstract bool GetActive();
 
-        public abstract void OnGameTickChange(DateTime newDate);
-        public abstract void OnSystemTickChange(DateTime newDate);
+        public virtual void OnGameTickChange(DateTime newDate) { }
+        public virtual void OnSystemTickChange(DateTime newDate) { }
 
         protected UpdateWindowState()
         {

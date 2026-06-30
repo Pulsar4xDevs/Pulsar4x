@@ -5,15 +5,14 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
-    public class OrdersListWindow : NonUniquePulsarGuiWindow
+    public class OrdersListWindow : NamedPulsarGuiWindow
     {
         private readonly int _entityId;
         private readonly string _systemId;
 
-        private OrdersListWindow(int entityId, string systemId, GlobalUIState state)
+        private OrdersListWindow(int entityId, string systemId, GlobalUIState state) : base("OrdersList|" + entityId)
         {
             _uiState = state;
-            SetName("OrdersList|" + entityId);
             _flags = ImGuiWindowFlags.None;
             _entityId = entityId;
             _systemId = systemId;
@@ -51,7 +50,7 @@ namespace Pulsar4X.Client
             string entityName = entity.GetView<NameView>()?.Name ?? "Unknown";
 
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(550, 325), ImGuiCond.Once);
-            if (Window.Begin("Orders: " + entityName + "###" + UniqueName, ref IsActive, _flags))
+            if (Window.Begin("Orders: " + entityName + "###" + UniqueName, ref IsActiveRef, _flags))
             {
                 var tableFlags = ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingFixedFit;
                 if (ImGui.BeginTable("OrdersTable", 6, tableFlags))

@@ -6,7 +6,7 @@ using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Client
 {
-    class DistanceRuler : PulsarGuiWindow
+    class DistanceRuler : UniquePulsarGuiWindow<DistanceRuler>
     {
         //measuring variables
         //measuring booleans
@@ -51,21 +51,12 @@ namespace Pulsar4X.Client
         }
 
         internal static DistanceRuler GetInstance() {
-
-            DistanceRuler thisItem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(DistanceRuler)))
+            if(_uiState.TryGetUniqueWindow<DistanceRuler>(out var window))
             {
-                thisItem = new DistanceRuler();
-            }
-            else
-            {
-                thisItem = (DistanceRuler)_uiState.LoadedWindows[typeof(DistanceRuler)];
+                return window;
             }
 
-
-            return thisItem;
-
-
+            return _uiState.AddUniqueWindow(new DistanceRuler());
         }
 
         internal override void Display()
@@ -127,14 +118,6 @@ namespace Pulsar4X.Client
             }
             Window.End();
 
-        }
-
-        public override void OnGameTickChange(DateTime newDate)
-        {
-        }
-
-        public override void OnSystemTickChange(DateTime newDate)
-        {
         }
     }
 }

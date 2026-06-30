@@ -7,7 +7,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
-    public class SettingsWindow : PulsarGuiWindow
+    public class SettingsWindow : UniquePulsarGuiWindow<SettingsWindow>
     {
         ImGuiTreeNodeFlags _xpanderFlags = ImGuiTreeNodeFlags.CollapsingHeader;
         List<List<UserOrbitSettings>> _userOrbitSettingsMtx;
@@ -37,11 +37,12 @@ namespace Pulsar4X.Client
         }
         internal static SettingsWindow GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(SettingsWindow)))
+            if(_uiState.TryGetUniqueWindow<SettingsWindow>(out var window))
             {
-                return new SettingsWindow();
+                return window;
             }
-            return (SettingsWindow)_uiState.LoadedWindows[typeof(SettingsWindow)];
+
+            return _uiState.AddUniqueWindow(new SettingsWindow());
         }
 
         internal override void Display()

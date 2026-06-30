@@ -21,7 +21,7 @@ using Pulsar4X.Client.Host;
 
 namespace Pulsar4X.Client
 {
-    public class DamageViewerWindow : PulsarGuiWindow
+    public class DamageViewerWindow : UniquePulsarGuiWindow<DamageViewerWindow>
     {
         //private ComponentDesign _componentDesign;
         private Entity? _selectedEntity;
@@ -77,24 +77,23 @@ namespace Pulsar4X.Client
 
         public static DamageViewerWindow GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(DamageViewerWindow)))
+            if(_uiState.TryGetUniqueWindow<DamageViewerWindow>(out var window))
             {
-                var dv = new DamageViewerWindow();
-                if (_uiState.LastClickedEntity?.GetEntity() != null)
+                if (_uiState.PrimaryEntity != null && _uiState.LastClickedEntity.GetEntity()! != window._selectedEntity)
                 {
-                    dv.Init(_uiState.LastClickedEntity.GetEntity()!);
+                    window.Init(_uiState.LastClickedEntity.GetEntity()!);
                 }
-
-                return dv;
+                return window;
             }
-            else
+
+            window = _uiState.AddUniqueWindow(new DamageViewerWindow());
+
+            if (_uiState.LastClickedEntity?.GetEntity() != null)
             {
-                var dv = (DamageViewerWindow)_uiState.LoadedWindows[typeof(DamageViewerWindow)];
-                if (_uiState.PrimaryEntity != null && _uiState.LastClickedEntity.GetEntity()! != dv._selectedEntity)
-                    dv.Init(_uiState.LastClickedEntity.GetEntity()!);
-                return dv;
+                window.Init(_uiState.LastClickedEntity.GetEntity()!);
             }
 
+            return window;
         }
 
         private void Init(Entity damageableEntity)

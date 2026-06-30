@@ -12,7 +12,7 @@ using Pulsar4X.Client.Host;
 
 namespace Pulsar4X.Client.Interface.Windows;
 
-public class BlueprintsWindow : PulsarGuiWindow
+public class BlueprintsWindow : UniquePulsarGuiWindow<BlueprintsWindow>
 {
 
     List<object> _editStack = new List<object>();
@@ -22,17 +22,12 @@ public class BlueprintsWindow : PulsarGuiWindow
 
     public static BlueprintsWindow GetInstance()
     {
-        BlueprintsWindow instance;
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(BlueprintsWindow)))
+        if(_uiState.TryGetUniqueWindow<BlueprintsWindow>(out var window))
         {
-            instance = new BlueprintsWindow();
-        }
-        else
-        {
-            instance = (BlueprintsWindow)_uiState.LoadedWindows[typeof(BlueprintsWindow)];
+            return window;
         }
 
-        return instance;
+        return _uiState.AddUniqueWindow(new BlueprintsWindow());
     }
 
     private void DisplayBlueprintCategory(string label, List<string> items)

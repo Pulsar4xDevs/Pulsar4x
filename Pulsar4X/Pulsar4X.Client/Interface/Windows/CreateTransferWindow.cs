@@ -7,7 +7,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client;
 
-public class CreateTransferWindow : PulsarGuiWindow
+public class CreateTransferWindow : UniquePulsarGuiWindow<CreateTransferWindow>
 {
     private int? _leftId;
     private int? _rightId;
@@ -19,7 +19,12 @@ public class CreateTransferWindow : PulsarGuiWindow
 
     internal static CreateTransferWindow GetInstance()
     {
-        return _uiState.LoadedWindows.ContainsKey(typeof(CreateTransferWindow)) ? (CreateTransferWindow)_uiState.LoadedWindows[typeof(CreateTransferWindow)] : new CreateTransferWindow();
+        if(_uiState.TryGetUniqueWindow<CreateTransferWindow>(out var window))
+        {
+            return window;
+        }
+
+        return _uiState.AddUniqueWindow(new CreateTransferWindow());
     }
 
     public void SetLeft(int entityId, string systemId)

@@ -3,7 +3,7 @@ using ImGuiNET;
 
 namespace Pulsar4X.Client.Interface.Widgets;
 
-public class ResultModal : PulsarGuiWindow
+public class ResultModal : UniquePulsarGuiWindow<ResultModal>
 {
     private byte[]? _inputBuffer = null;
     uint _bufferMaxSize = 64;
@@ -17,11 +17,12 @@ public class ResultModal : PulsarGuiWindow
 
     internal static ResultModal GetInstance()
     {
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(ResultModal)))
+        if(_uiState.TryGetUniqueWindow<ResultModal>(out var window))
         {
-            return new ResultModal();
+            return window;
         }
-        return (ResultModal)_uiState.LoadedWindows[typeof(ResultModal)];
+
+        return _uiState.AddUniqueWindow(new ResultModal());
     }
 
     internal override void Display()

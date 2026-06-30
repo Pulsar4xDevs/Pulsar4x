@@ -9,7 +9,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
-    public class Selector : PulsarGuiWindow
+    public class Selector : UniquePulsarGuiWindow<Selector>
     {
         // When true the window shows the section editor instead of its normal content.
         private bool _editing = false;
@@ -51,12 +51,12 @@ namespace Pulsar4X.Client
 
         internal static Selector GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(Selector)))
+            if(_uiState.TryGetUniqueWindow<Selector>(out var window))
             {
-                return new Selector();
+                return window;
             }
 
-            return (Selector)_uiState.LoadedWindows[typeof(Selector)];
+            return _uiState.AddUniqueWindow(new Selector());
         }
 
         internal override void Display()

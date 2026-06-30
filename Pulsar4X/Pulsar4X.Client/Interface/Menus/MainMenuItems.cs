@@ -8,7 +8,7 @@ using System.Diagnostics;
 
 namespace Pulsar4X.Client
 {
-    public class MainMenuItems : PulsarGuiWindow
+    public class MainMenuItems : UniquePulsarGuiWindow<MainMenuItems>
     {
 
         bool _saveGame = false;
@@ -17,11 +17,12 @@ namespace Pulsar4X.Client
         private MainMenuItems(){}
         internal static MainMenuItems GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(MainMenuItems)))
+            if(_uiState.TryGetUniqueWindow<MainMenuItems>(out var window))
             {
-                return new MainMenuItems();
+                return window;
             }
-            return (MainMenuItems)_uiState.LoadedWindows[typeof(MainMenuItems)];
+
+            return _uiState.AddUniqueWindow(new MainMenuItems());
         }
 
 
@@ -141,14 +142,6 @@ namespace Pulsar4X.Client
 
             Window.End();
             ImGui.PopStyleVar();
-        }
-
-        public override void OnGameTickChange(DateTime newDate)
-        {
-        }
-
-        public override void OnSystemTickChange(DateTime newDate)
-        {
         }
 
         private bool DoAnySavesExist()

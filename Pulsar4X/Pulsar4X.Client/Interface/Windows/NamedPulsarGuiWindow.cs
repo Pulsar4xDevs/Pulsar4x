@@ -3,14 +3,32 @@ using System;
 
 namespace Pulsar4X.Client
 {
-    public abstract class NonUniquePulsarGuiWindow : UpdateWindowState
+    /// <summary>
+    /// A base class for GUI windows that have a unique name.
+    /// </summary>
+    public abstract class NamedPulsarGuiWindow : UpdateWindowState
     {
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.None;
-        internal bool CanActive = false;
-        internal bool IsActive = false;
-        internal string UniqueName = "test";
+        
+        internal bool CanActive { get; set; } = false;
+
+        private bool _isActive = false;
+        
+        public bool IsActive
+        {
+            get { return _isActive; }
+            set {  _isActive = value; }
+        }
+        protected ref bool IsActiveRef => ref _isActive;
+
+        internal string UniqueName { get; init; }
 
         protected EntityState? _lookedAtEntity;
+
+        protected NamedPulsarGuiWindow(string name)
+        {
+            UniqueName = name;
+        }
 
         public void SetActive(bool ActiveVal = true)
         {
@@ -27,11 +45,6 @@ namespace Pulsar4X.Client
             return IsActive;
         }
 
-        public void SetName(string Newname)
-        {
-            UniqueName = Newname;
-        }
-
         public virtual string GetName()
         {
             return UniqueName;
@@ -42,10 +55,6 @@ namespace Pulsar4X.Client
             _uiState.LoadedNonUniqueWindows[this.UniqueName] = this;
         }
 
-        protected NonUniquePulsarGuiWindow()
-        {
-        }
-
         internal abstract void Display();
 
         internal virtual void EntityClicked(EntityState entity, MouseButtons button) { }
@@ -53,14 +62,6 @@ namespace Pulsar4X.Client
         internal virtual void EntitySelectedAsPrimary(EntityState entity) { }
 
         internal void Destroy()
-        {
-        }
-
-        public override void OnGameTickChange(DateTime newDate)
-        {
-        }
-
-        public override void OnSystemTickChange(DateTime newDate)
         {
         }
     }

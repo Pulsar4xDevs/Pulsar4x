@@ -5,7 +5,7 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
-    public class GameLogWindow : PulsarGuiWindow
+    public class GameLogWindow : UniquePulsarGuiWindow<GameLogWindow>
     {
         public HashSet<string> HidenEvents = new HashSet<string>();
 
@@ -15,11 +15,12 @@ namespace Pulsar4X.Client
 
         internal static GameLogWindow GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(GameLogWindow)))
+            if(_uiState.TryGetUniqueWindow<GameLogWindow>(out var window))
             {
-                return new GameLogWindow();
+                return window;
             }
-            return (GameLogWindow)_uiState.LoadedWindows[typeof(GameLogWindow)];
+
+            return _uiState.AddUniqueWindow(new GameLogWindow());
         }
 
         internal override void Display()

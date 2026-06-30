@@ -13,7 +13,7 @@ namespace Pulsar4X.Client
     /// with a details pane for the selected person on the right. Reads the API galaxy model
     /// (Galaxy.Commanders, pushed on connect, clock advances, and after accepted commands).
     /// </summary>
-    public class CommanderWindow : PulsarGuiWindow
+    public class CommanderWindow : UniquePulsarGuiWindow<CommanderWindow>
     {
         // Selection is by commander id, re-resolved each frame: the roster is replaced wholesale
         // by server pushes.
@@ -25,11 +25,12 @@ namespace Pulsar4X.Client
 
         internal static CommanderWindow GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(CommanderWindow)))
+            if(_uiState.TryGetUniqueWindow<CommanderWindow>(out var window))
             {
-                return new CommanderWindow();
+                return window;
             }
-            return (CommanderWindow)_uiState.LoadedWindows[typeof(CommanderWindow)];
+
+            return _uiState.AddUniqueWindow(new CommanderWindow());
         }
 
         internal override void Display()
