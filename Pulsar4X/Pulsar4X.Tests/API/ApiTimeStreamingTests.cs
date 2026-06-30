@@ -23,7 +23,7 @@ namespace Pulsar4X.Tests
             var times = new ConcurrentQueue<DateTime>();
             using var sub = _server.Subscribe(session, e =>
             {
-                if (e.Type == GameEventType.TimeChanged && e.Time != null) times.Enqueue(e.Time.GameDateTime);
+                if (e.Type == GameEventType.TimeChanged && e.Time != null && e.SystemId != null) times.Enqueue(e.Time.GameDateTime);
             });
 
             var start = _game.TimePulse.GameGlobalDateTime;
