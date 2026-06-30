@@ -113,7 +113,7 @@ public sealed class InProcessAdapter : IGameClient
                     if (systemToUpdate is not null) systemToUpdate.DateTime = evt.Time.GameDateTime;
                 }
                 // Otherwise it's a global clock change
-                else if (evt.Time is not null)
+                else
                 {
                     _galaxy.Time = evt.Time;
                 }
