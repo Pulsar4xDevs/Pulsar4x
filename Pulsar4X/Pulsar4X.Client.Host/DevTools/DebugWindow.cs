@@ -92,7 +92,7 @@ namespace Pulsar4X.Client
         {
             if(!_uiState.TryGetUniqueWindow<DebugWindow>(out var window))
             {
-                window = new DebugWindow();
+                window = _uiState.AddUniqueWindow(new DebugWindow());
             }
 
             if(_uiState.IsGameLoaded)
