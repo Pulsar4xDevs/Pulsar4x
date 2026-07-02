@@ -36,6 +36,9 @@ namespace Pulsar4X.Client
         float _currentSFPS;
         int _systemRateIndex = 0;
         float[] _systemRates = new float[80];
+        DateTime _lastSampledSystemTime;
+        float largestSFPS = 0;
+        int largestSysIndex = 0;
 
         private List<(string txt, double time, double count)> _callData = new List<(string txt, double time, double count)>();
 
@@ -93,6 +96,7 @@ namespace Pulsar4X.Client
             {
                 SetFrameRateArray();
                 SampleGameTickRate();
+                SampleSystemTickRate();
                 ImGui.Text("Global Tick: "); ImGui.SameLine();
                 var t_lpt = GameLifecycle.Instance!.Game!.TimePulse.LastProcessingTime.TotalMilliseconds;
                 var t_tf = GameLifecycle.Instance!.Game!.TimePulse.TickFrequency.TotalMilliseconds;
@@ -121,8 +125,8 @@ namespace Pulsar4X.Client
                 ImGui.PlotHistogram("Game Tick ##GTHistogram", ref _gameRates[0], _gameRates.Length, _gameRateIndex, _currentGFPS.ToString(), 0f, largestGFPS, new System.Numerics.Vector2(248, 60), sizeof(float));
                 ImGui.PlotLines("Game Tick ##GTPlotlines", ref _gameRates[0], _gameRates.Length, _gameRateIndex, _currentGFPS.ToString(), 0, largestGFPS, new System.Numerics.Vector2(248, 60), sizeof(float));
                 //current star system processing rate.
-                ImGui.PlotHistogram("System Tick ##STHistogram", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0f, 1f, new System.Numerics.Vector2(248, 60), sizeof(float));
-                ImGui.PlotLines("System Tick ##STPlotlines", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0, 1, new System.Numerics.Vector2(248, 60), sizeof(float));
+                ImGui.PlotHistogram("System Tick ##STHistogram", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0f, largestSFPS, new System.Numerics.Vector2(248, 60), sizeof(float));
+                ImGui.PlotLines("System Tick ##STPlotlines", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0, largestSFPS, new System.Numerics.Vector2(248, 60), sizeof(float));
                 //ui framerate
                 ImGui.PlotHistogram("Frame Rate ##FPSHistogram", ref _frameRates[0], _frameRates.Length, _frameRateIndex, _currentFPS.ToString(), 0f, 10000, new System.Numerics.Vector2(248, 60), sizeof(float));
 
@@ -356,31 +360,49 @@ namespace Pulsar4X.Client
             _lastSampledGameTime = gameTime;
 
             _currentGFPS = (float)GameLifecycle.Instance!.Game!.TimePulse.LastSubtickTime.TotalSeconds;
+            PushRate(_currentGFPS, _gameRates, ref _gameRateIndex, ref largestGFPS, ref largestIndex);
+        }
 
-            if (_currentGFPS > largestGFPS)
+        void SampleSystemTickRate()
+        {
+            if (_systemState == null)
+                return;
+
+            DateTime systemTime = _systemState.StarSystem.ManagerSubpulses.StarSysDateTime;
+            if (systemTime == _lastSampledSystemTime)
+                return;
+            _lastSampledSystemTime = systemTime;
+
+            _currentSFPS = (float)(_systemState.StarSystem.ManagerSubpulses.Performance.GetLatestEntry().FullIntervalTime / 1000.0);
+            PushRate(_currentSFPS, _systemRates, ref _systemRateIndex, ref largestSFPS, ref largestSysIndex);
+        }
+
+        static void PushRate(float value, float[] rates, ref int rateIndex, ref float largest, ref int largestAge)
+        {
+            if (value > largest)
             {
-                largestGFPS = _currentGFPS;
-                largestIndex = 0;
+                largest = value;
+                largestAge = 0;
             }
-            else if (largestIndex == _gameRates.Length)
+            else if (largestAge == rates.Length)
             {
-                largestGFPS = _currentGFPS;
-                foreach (var item in _gameRates)
+                largest = value;
+                foreach (var item in rates)
                 {
-                    if (item > largestGFPS)
-                        largestGFPS = item;
+                    if (item > largest)
+                        largest = item;
                 }
             }
             else
             {
-                largestIndex++;
+                largestAge++;
             }
 
-            _gameRates[_gameRateIndex] = _currentGFPS;
-            if (_gameRateIndex >= _gameRates.Length - 1)
-                _gameRateIndex = 0;
+            rates[rateIndex] = value;
+            if (rateIndex >= rates.Length - 1)
+                rateIndex = 0;
             else
-                _gameRateIndex++;
+                rateIndex++;
         }
     }
 }
