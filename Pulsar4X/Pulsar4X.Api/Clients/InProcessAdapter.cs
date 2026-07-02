@@ -1,10 +1,6 @@
-using System;
 using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
-using Pulsar4X.Api;
 
-namespace Pulsar4X.Client;
+namespace Pulsar4X.Api.Clients;
 
 /// <summary>
 /// Zero-copy in-process <see cref="IGameClient"/> for single-player / local games: forwards directly
@@ -25,7 +21,7 @@ public sealed class InProcessAdapter : IGameClient
     private readonly ConcurrentQueue<GameEventEnvelope> _inbound = new();
     private IDisposable? _subscription;
 
-    public InProcessAdapter(IGameServer server) => _server = server;
+    internal InProcessAdapter(IGameServer server) => _server = server;
 
     public PlayerSession Session { get; private set; } = PlayerSession.None;
     public bool IsConnected { get; private set; }
