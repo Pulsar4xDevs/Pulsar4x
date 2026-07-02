@@ -150,9 +150,9 @@ public sealed class InProcessAdapter : IGameClient
                 return;
         }
 
-        if (evt.SystemId is null) return;
+        if (evt.SystemId is null || evt.EntityId is not { } entityId) return;
         var system = _galaxy.GetMutableSystem(evt.SystemId);
-        if (system is null || evt.EntityId is not { } entityId) return;
+        if (system is null) return;
 
         switch (evt.Type)
         {
