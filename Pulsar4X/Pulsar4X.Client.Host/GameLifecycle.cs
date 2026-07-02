@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using Pulsar4X.Api;
-using Pulsar4X.Client;
 using Pulsar4X.Colonies;
 using Pulsar4X.Engine.Api;
 using Pulsar4X.DataStructures;
@@ -264,7 +263,7 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
         if (setAsPlayer)
             _playerFaction = faction;
 
-        var client = new InProcessAdapter(_server);
+        var client = ClientFactory.CreateLocalClient(_server);
         // The trusted host presents the SM credential so it can bind to the GameMaster for SM mode.
         string? credential = faction == _game?.GameMasterFaction ? ConnectRequest.SpaceMasterCredential : null;
         var connect = client.ConnectAsync(new ConnectRequest { PlayerName = "Player", FactionId = faction.Id, Credential = credential }).Result;
