@@ -445,15 +445,21 @@ namespace Pulsar4X.Client
         /// </summary>
         internal void OnGameClientBound(IGameClient gameClient, GameInfo? gameInfo)
         {
-            if (GameClient != null)
+            // A rebind may reuse the same client (reconnected to another faction) — only a
+            // different instance means there's an old connection to tear down.
+            if (!ReferenceEquals(GameClient, gameClient))
             {
-                GameClient.EventReceived -= OnGameEvent;
-                GameClient.DisconnectAsync();
+                if (GameClient != null)
+                {
+                    GameClient.EventReceived -= OnGameEvent;
+                    GameClient.DisconnectAsync();
+                }
+
+                GameClient = gameClient;
+                gameClient.EventReceived += OnGameEvent;
             }
 
-            GameClient = gameClient;
             GameInfo = gameInfo;
-            gameClient.EventReceived += OnGameEvent;
 
             OnFactionChanged?.Invoke(this);
         }

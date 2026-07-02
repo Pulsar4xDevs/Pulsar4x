@@ -31,6 +31,20 @@ public sealed class InProcessAdapter : IGameClient
     public Task<ConnectResult> ConnectAsync(ConnectRequest request, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
+
+        // Rebinding to another faction: drop the old session and its replicated state; the new
+        // subscription re-primes the galaxy from the server's initial-state push.
+        if (IsConnected)
+        {
+            _subscription?.Dispose();
+            _subscription = null;
+            _server.Disconnect(Session);
+            Session = PlayerSession.None;
+            IsConnected = false;
+            _galaxy.Reset();
+            while (_inbound.TryDequeue(out _)) { }
+        }
+
         var result = _server.Connect(request);
         if (result.Success)
         {

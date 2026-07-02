@@ -35,6 +35,7 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
 
     private Game? _game;
     private EngineGameServer? _server;
+    private IGameClient? _client;
     private Entity? _playerFaction;
 
     /// <summary>The lifecycle instance the composition root built, for the host's dev tools —
@@ -254,22 +255,23 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
         _server?.Dispose();
         _game = game;
         _server = new EngineGameServer(game);
+        _client = ClientFactory.CreateLocalClient(_server);
         _playerFaction = null;
     }
 
-    /// <summary>Connects a session for the faction and hands the resulting client to the UI.</summary>
+    /// <summary>Connects the game's client session to the faction and hands it to the UI.
+    /// Rebinding (e.g. game-master toggle) reconnects the same client.</summary>
     private void BindFaction(Entity faction, bool setAsPlayer)
     {
-        if (_server == null) throw new InvalidOperationException("No game is loaded.");
+        if (_client == null) throw new InvalidOperationException("No game is loaded.");
 
         if (setAsPlayer)
             _playerFaction = faction;
 
-        var client = ClientFactory.CreateLocalClient(_server);
         // The trusted host presents the SM credential so it can bind to the GameMaster for SM mode.
         string? credential = faction == _game?.GameMasterFaction ? ConnectRequest.SpaceMasterCredential : null;
-        var connect = client.ConnectAsync(new ConnectRequest { PlayerName = "Player", FactionId = faction.Id, Credential = credential }).Result;
-        _state.OnGameClientBound(client, connect?.Game);
+        var connect = _client.ConnectAsync(new ConnectRequest { PlayerName = "Player", FactionId = faction.Id, Credential = credential }).Result;
+        _state.OnGameClientBound(_client, connect?.Game);
     }
 
     /// <summary>Binds the freshly created game to the UI state (faction + game client) and

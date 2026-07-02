@@ -417,10 +417,13 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
    **The `GameEngine` reference is dropped from `Pulsar4X.Client`** — the library references only
    `Pulsar4X.Api` and `Pulsar4X.Orbital`. What that took:
    - **Session binding flipped.** `GlobalUIState.Game`/`Faction`/`PlayerFaction`/`SetFaction` are
-     gone. The host's `GameLifecycle` owns the engine `Game`, one `EngineGameServer` per game
-     (`SetGame`), and the player-faction entity; `BindFaction` connects an `InProcessAdapter`
-     session and hands it to `GlobalUIState.OnGameClientBound(client, gameInfo)` (which disconnects
-     the previous client, rewires `EventReceived`, and raises `OnFactionChanged`). The session's
+     gone. The host's `GameLifecycle` owns the engine `Game`, one `EngineGameServer` and one
+     `InProcessAdapter` per game (`SetGame`), and the player-faction entity; `BindFaction`
+     (re)connects that client's session and hands it to
+     `GlobalUIState.OnGameClientBound(client, gameInfo)` (which disconnects the previous client
+     only when the instance changed — a faction rebind reuses the client, whose `ConnectAsync`
+     drops the old session and resets the replicated galaxy before the new subscription re-primes
+     it — rewires `EventReceived`, and raises `OnFactionChanged`). The session's
      faction is `GlobalUIState.FactionId` (from the connect handshake); game-master mode goes
      through `IGameLifecycle.SetGameMasterMode` (the host rebinds to `Game.GameMasterFaction` or
      the remembered player faction). The settings window's Game tab edits engine processing rules

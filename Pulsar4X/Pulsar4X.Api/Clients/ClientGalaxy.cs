@@ -68,6 +68,20 @@ internal sealed class ClientGalaxy : IClientGalaxy
 
     internal ClientSystem? GetMutableSystem(string systemId)
         => _systems.TryGetValue(systemId, out var system) ? system : null;
+
+    /// <summary>Drops all replicated state, for rebinding the owning adapter to a different faction.</summary>
+    internal void Reset()
+    {
+        _systems.Clear();
+        _knownSystems.Clear();
+        _fleets.Clear();
+        _unattachedShips.Clear();
+        _commanders.Clear();
+        _eventLog.Clear();
+        Faction = null;
+        Research = null;
+        ComponentDesigns = null;
+    }
 }
 
 internal sealed class ClientSystem : IClientSystem
