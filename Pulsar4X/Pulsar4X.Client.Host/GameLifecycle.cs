@@ -193,7 +193,9 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
         SetGame(loadedGame);
         BindFaction(faction, setAsPlayer: true);
 
-        return new GameActivation(faction.GetDataBlob<FactionInfoDB>().KnownSystems[0]);
+        return faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB)
+            ? new GameActivation(factionInfoDB.KnownSystems[0])
+            : null;
     }
 
     public void SaveGame(string filePath)
@@ -383,13 +385,17 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
             request.StartingFunds);
 
         if (playerFaction == null) return null;
+        if (!playerFaction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
+        {
+            throw new Exception("Missing FactionInfoDB on the players faction");
+        }
 
         playerFaction.FactionOwnerID = playerFaction.Id;
-        playerFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(startingSystem.ID);
+        factionInfoDB.KnownSystems.Add(startingSystem.ID);
 
         var playerSpecies = SpeciesFactory.CreateFromBlueprint(startingSystem, modDataStore.Species[request.SpeciesId]);
         playerSpecies.FactionOwnerID = playerFaction.Id;
-        playerFaction.GetDataBlob<FactionInfoDB>().Species.Add(playerSpecies);
+        factionInfoDB.Species.Add(playerSpecies);
 
         // Setup the starting colony
         ColonyFactory.CreateFromBlueprint(game, playerFaction, playerSpecies, startingSystem, startingBody, modDataStore.Colonies[request.ColonyId]);
