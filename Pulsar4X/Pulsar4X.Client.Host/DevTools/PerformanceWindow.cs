@@ -27,6 +27,7 @@ namespace Pulsar4X.Client
         float _currentGFPS;
         int _gameRateIndex = 0;
         float[] _gameRates = new float[80];
+        DateTime _lastSampledGameTime;
 
         float _currentFPS;
         int _frameRateIndex = 0;
@@ -91,6 +92,7 @@ namespace Pulsar4X.Client
             if(Window.Begin("Performance Display"))
             {
                 SetFrameRateArray();
+                SampleGameTickRate();
                 ImGui.Text("Global Tick: "); ImGui.SameLine();
                 var t_lpt = GameLifecycle.Instance!.Game!.TimePulse.LastProcessingTime.TotalMilliseconds;
                 var t_tf = GameLifecycle.Instance!.Game!.TimePulse.TickFrequency.TotalMilliseconds;
@@ -346,8 +348,13 @@ namespace Pulsar4X.Client
             System.IO.File.AppendAllText(fpath, dataString);
         }
 
-        public override void OnGameTickChange(DateTime newDate)
+        void SampleGameTickRate()
         {
+            DateTime gameTime = GameLifecycle.Instance!.Game!.TimePulse.GameGlobalDateTime;
+            if (gameTime == _lastSampledGameTime)
+                return;
+            _lastSampledGameTime = gameTime;
+
             _currentGFPS = (float)GameLifecycle.Instance!.Game!.TimePulse.LastSubtickTime.TotalSeconds;
 
             if (_currentGFPS > largestGFPS)

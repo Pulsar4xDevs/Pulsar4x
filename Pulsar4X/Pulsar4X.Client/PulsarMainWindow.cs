@@ -191,20 +191,8 @@ namespace Pulsar4X.Client
             //update and refresh state for GameDateTimechange
             if(_state.GameClient is { } gameClient)
             {
-                DateTime curTime = gameClient.Galaxy.Time.GameDateTime;
-                if (curTime != _state.LastGameUpdateTime)
-                {
-                    foreach (var item in _state.UpdateableWindows)
-                    {
-                        if (item.GetActive() == true)
-                            item.OnGameTickChange(curTime);
-                    }
-
-                    _state.LastGameUpdateTime = curTime;
-                }
-
                 //update and refresh state for SystemDateTimechage
-                curTime = _state.SelectedSystemTime;
+                var curTime = _state.SelectedSystemTime;
                 if (curTime != _state.SelectedSysLastUpdateTime)
                 {
                     foreach (var item in _state.UpdateableWindows)
