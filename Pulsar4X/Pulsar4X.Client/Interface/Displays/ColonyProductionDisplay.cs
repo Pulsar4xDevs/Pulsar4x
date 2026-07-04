@@ -86,10 +86,13 @@ namespace Pulsar4X.Client
                         }
 
                         ImGui.SameLine();
+
+                        ImGui.BeginDisabled();
                         if (ImGui.Button("Upgrade " + line.Name))
                         {
                             // TODO: add upgrade functionality
                         }
+                        ImGui.EndDisabled();
 
                         if (line.Jobs.Count > 0)
                         {
