@@ -11,20 +11,13 @@ namespace Pulsar4X.Client
     /// </summary>
     public sealed class ColonyProductionDisplay
     {
-        private static ColonyProductionDisplay? instance = null;
-
         private string? _selectedProdLine;
         private int _newJobDesignIndex = 0;
         private int _newJobBatchCount = 1;
         private bool _newJobRepeat = false;
         private bool _newJobAutoInstall = true;
 
-        private ColonyProductionDisplay() { }
-
-        internal static ColonyProductionDisplay GetInstance()
-        {
-            return instance ??= new ColonyProductionDisplay();
-        }
+        internal ColonyProductionDisplay() { }
 
         public void Display(int entityId, IndustryView? industry, GlobalUIState uiState)
         {
