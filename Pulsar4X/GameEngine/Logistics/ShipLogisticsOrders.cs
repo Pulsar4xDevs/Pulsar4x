@@ -6,7 +6,7 @@ namespace Pulsar4X.Logistics;
 
 public class ShipLogisticsOrders : EntityCommand
 {
-    public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf;
+    public override ActionLaneTypes ActionLanes => ActionLaneTypes.InteractWithSelf;
 
     public override bool IsBlocking => false;
 

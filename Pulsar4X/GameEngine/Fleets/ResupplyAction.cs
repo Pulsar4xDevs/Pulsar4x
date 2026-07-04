@@ -7,7 +7,7 @@ public class ResupplyAction : EntityCommand
 {
     public override string Name => "Resupply";
     public override string Details => "Resupply the fleet, must be at a location where supplies are availablle.";
-        public override ActionLaneTypes ActionLanes { get; } = ActionLaneTypes.IneteractWithSelf | ActionLaneTypes.InteractWithEntitySameFleet;
+        public override ActionLaneTypes ActionLanes { get; } = ActionLaneTypes.InteractWithSelf | ActionLaneTypes.InteractWithEntitySameFleet;
 
     public override bool IsBlocking => true;
 

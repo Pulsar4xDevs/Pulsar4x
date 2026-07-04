@@ -36,7 +36,7 @@ namespace Pulsar4X.Industry
         public bool AutoAddSubJobs { get; set; } = true;
         public short Delta { get; set; }
 
-        public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf;
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.InteractWithSelf;
         public override bool IsBlocking => true; //?why block?
 
 

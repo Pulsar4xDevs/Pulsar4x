@@ -7,7 +7,7 @@ namespace Pulsar4X.Storage
 {
     public class RemoveComponentFromStorageOrder : EntityCommand
     {
-        public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf | ActionLaneTypes.InteractWithExternalEntity | ActionLaneTypes.InstantOrder;
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.InteractWithSelf | ActionLaneTypes.InteractWithExternalEntity | ActionLaneTypes.InstantOrder;
 
         public override bool IsBlocking => true;
 

@@ -16,7 +16,7 @@ namespace Pulsar4X.Movement
     {
         public override string Name => $"Move to {Target.GetOwnersName()}";
         public override string Details => "Moves the fleet to the specified system body.";
-        public override ActionLaneTypes ActionLanes { get; } = ActionLaneTypes.IneteractWithSelf | ActionLaneTypes.InteractWithEntitySameFleet | ActionLaneTypes.Movement;
+        public override ActionLaneTypes ActionLanes { get; } = ActionLaneTypes.InteractWithSelf | ActionLaneTypes.InteractWithEntitySameFleet | ActionLaneTypes.Movement;
         public override bool IsBlocking => true;
 
         public Entity Target { get; internal set; }

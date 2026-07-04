@@ -1273,7 +1273,7 @@ namespace Pulsar4X.Engine.Api
                     IsBlocking = action.IsBlocking,
                     UsesMovementLane = action.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.Movement),
                     UsesExternalLane = action.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.InteractWithExternalEntity),
-                    UsesSelfLane = action.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.IneteractWithSelf),
+                    UsesSelfLane = action.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.InteractWithSelf),
                     PauseOnAction = action.PauseOnAction,
                     ManeuverNodeTime = maneuver?.NodeDateTime,
                     ManeuverDeltaVMps = maneuver != null ? ToVec3(maneuver.OrbitrelativeDeltaV) : null,

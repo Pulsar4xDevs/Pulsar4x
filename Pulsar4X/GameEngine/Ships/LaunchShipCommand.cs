@@ -6,7 +6,7 @@ namespace Pulsar4X.Ships;
 
 public class LaunchShipCommand : EntityCommand
 {
-    public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf;
+    public override ActionLaneTypes ActionLanes => ActionLaneTypes.InteractWithSelf;
     public override bool IsBlocking => true;
     public override string Name { get; } = "Launch Ship";
     public override string Details { get; } = "";

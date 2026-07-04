@@ -14,7 +14,7 @@ namespace Pulsar4X.Engine.Orders
             Movement = 1,
             InteractWithExternalEntity = 2,
             InteractWithEntitySameFleet = 4,
-            IneteractWithSelf = 8,
+            InteractWithSelf = 8,
         }
 
         [JsonProperty]

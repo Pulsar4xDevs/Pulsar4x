@@ -5,7 +5,7 @@ namespace Pulsar4X.Engine.Orders
 {
     public class UninstallComponentInstanceOrder : EntityCommand
     {
-        public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf | ActionLaneTypes.InteractWithExternalEntity | ActionLaneTypes.InstantOrder;
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.InteractWithSelf | ActionLaneTypes.InteractWithExternalEntity | ActionLaneTypes.InstantOrder;
 
         public override bool IsBlocking => true;
 
