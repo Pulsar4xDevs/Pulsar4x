@@ -1,10 +1,11 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.Names
 {
-    public class RenameCommand : EntityCommand
+    public class RenameAction : EntityAction
     {
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
@@ -21,7 +22,7 @@ namespace Pulsar4X.Names
 
         public static bool CreateRenameCommand(Game game, Entity faction, Entity orderEntity, string newName)
         {
-            var cmd = new RenameCommand()
+            var cmd = new RenameAction()
             {
                 RequestingFactionGuid = faction.Id,
                 EntityCommandingGuid = orderEntity.Id,
@@ -54,7 +55,7 @@ namespace Pulsar4X.Names
             return false;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }

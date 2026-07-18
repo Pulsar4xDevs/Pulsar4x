@@ -1,4 +1,5 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Events;
@@ -6,7 +7,7 @@ using Pulsar4X.People;
 
 namespace Pulsar4X.Technology;
 
-public class AssignScientistOrder : EntityCommand
+public class AssignScientistOrder : EntityAction
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
@@ -32,7 +33,7 @@ public class AssignScientistOrder : EntityCommand
         return new AssignScientistOrder(labEntity, scientistId);
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }

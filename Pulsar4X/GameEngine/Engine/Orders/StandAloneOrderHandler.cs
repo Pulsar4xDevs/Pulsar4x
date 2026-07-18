@@ -1,11 +1,9 @@
-using Pulsar4X.Datablobs;
-using Pulsar4X.Interfaces;
-using Pulsar4X.Engine;
-using Pulsar4X.Messaging;
 using System;
-using System.Threading.Tasks;
+using Pulsar4X.Engine;
+using Pulsar4X.Interfaces;
+using Pulsar4X.Messaging;
 
-namespace Pulsar4X.Engine.Orders
+namespace GameEngine.Engine.Orders
 {
     internal class StandAloneOrderHandler : IOrderHandler
     {
@@ -16,39 +14,39 @@ namespace Pulsar4X.Engine.Orders
 
         public Game Game { get; private set; }
 
-        public bool HandleOrder(EntityCommand entityCommand)
+        public bool HandleOrder(EntityAction entityAction)
         {
-            if (entityCommand.IsValidCommand(Game))
+            if (entityAction.IsValidCommand(Game))
             {
-                if (entityCommand.UseActionLanes)
+                if (entityAction.UseActionLanes)
                 {
-                    if (entityCommand.ActionOnDate > entityCommand.EntityCommanding.StarSysDateTime)
+                    if (entityAction.ActionOnDate > entityAction.EntityCommanding.StarSysDateTime)
                     {
-                        entityCommand.EntityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(entityCommand.ActionOnDate, nameof(OrderableProcessor), entityCommand.EntityCommanding);
+                        entityAction.EntityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(entityAction.ActionOnDate, nameof(ActionQueueProcessor), entityAction.EntityCommanding);
                     }
 
-                    if(entityCommand.EntityCommanding.TryGetDataBlob<OrderableDB>(out var orderableDB))
+                    if(entityAction.EntityCommanding.TryGetDataBlob<ActionQueueDB>(out var orderableDB))
                     {
                         if(orderableDB.OwningEntity == null) throw new NullReferenceException("orderableDB.OwningEntity cannot be null");
                         
-                        orderableDB.ActionList.Add(entityCommand);
+                        orderableDB.ActionList.Add(entityAction);
 
                         MessagePublisher.Instance.Publish(Message.Create(
                             MessageTypes.OrdersChanged,
-                            entityId: entityCommand.EntityCommanding.Id,
-                            systemId: entityCommand.EntityCommanding.Manager.ManagerID,
-                            factionId: entityCommand.EntityCommanding.FactionOwnerID));
+                            entityId: entityAction.EntityCommanding.Id,
+                            systemId: entityAction.EntityCommanding.Manager.ManagerID,
+                            factionId: entityAction.EntityCommanding.FactionOwnerID));
 
-                        Game.ProcessorManager.GetInstanceProcessor(nameof(OrderableProcessor)).ProcessEntity(orderableDB.OwningEntity, Game.TimePulse.GameGlobalDateTime);
+                        Game.ProcessorManager.GetInstanceProcessor(nameof(ActionQueueProcessor)).ProcessEntity(orderableDB.OwningEntity, Game.TimePulse.GameGlobalDateTime);
                     }
                 }
                 else
                 {
-                    if(entityCommand.EntityCommanding.StarSysDateTime >= entityCommand.ActionOnDate)
-                        entityCommand.Execute(entityCommand.EntityCommanding.StarSysDateTime);
+                    if(entityAction.EntityCommanding.StarSysDateTime >= entityAction.ActionOnDate)
+                        entityAction.Execute(entityAction.EntityCommanding.StarSysDateTime);
                     else
                     {
-                        entityCommand.EntityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(entityCommand.ActionOnDate, nameof(OrderableProcessor), entityCommand.EntityCommanding);
+                        entityAction.EntityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(entityAction.ActionOnDate, nameof(ActionQueueProcessor), entityAction.EntityCommanding);
                     }
                 }
                 return true;

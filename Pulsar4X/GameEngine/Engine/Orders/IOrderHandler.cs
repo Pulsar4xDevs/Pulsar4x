@@ -1,3 +1,4 @@
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 
@@ -11,6 +12,6 @@ namespace Pulsar4X.Interfaces
         /// Validates and dispatches a command. Returns true if it passed validation and was
         /// queued/executed; false if it was rejected (e.g. failed <c>IsValidCommand</c>).
         /// </summary>
-        bool HandleOrder(EntityCommand entityCommand);
+        bool HandleOrder(EntityAction entityAction);
     }
 }

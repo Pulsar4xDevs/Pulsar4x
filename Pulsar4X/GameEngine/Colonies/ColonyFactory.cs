@@ -16,6 +16,7 @@ using Pulsar4X.Components;
 using Pulsar4X.Fleets;
 using Pulsar4X.Ships;
 using System;
+using GameEngine.Engine.Orders;
 
 namespace Pulsar4X.Colonies
 {
@@ -70,7 +71,7 @@ namespace Pulsar4X.Colonies
             blobs.Add(new ColonyInfoDB(species, (long)(colonyBlueprint.StartingPopulation ?? 1000), systemBody));
             blobs.Add(new ColonyBonusesDB());
             blobs.Add(new MiningDB());
-            blobs.Add(new OrderableDB());
+            blobs.Add(new ActionQueueDB());
             blobs.Add(new MassVolumeDB());
             blobs.Add(new CargoStorageDB());
             blobs.Add(new PositionDB(pos, systemBody));
@@ -169,7 +170,7 @@ namespace Pulsar4X.Colonies
             blobs.Add(new ColonyInfoDB(speciesEntity, initialPopulation, planetEntity));
             blobs.Add(new ColonyBonusesDB());
             blobs.Add(new MiningDB());
-            blobs.Add(new OrderableDB());
+            blobs.Add(new ActionQueueDB());
             blobs.Add(new MassVolumeDB());
             blobs.Add(new CargoStorageDB());
             blobs.Add(new PositionDB(pos, planetEntity));

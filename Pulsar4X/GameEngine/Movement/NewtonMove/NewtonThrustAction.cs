@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Orbital;
 using Pulsar4X.Extensions;
 using Pulsar4X.Names;
@@ -13,7 +14,7 @@ using Stringify = Pulsar4X.Api.Stringify;
 namespace Pulsar4X.Movement
 {
 
-    public class NewtonThrustCommand : EntityCommand
+    public class NewtonThrustAction : EntityAction
     {
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
         public override bool IsBlocking => true;
@@ -46,9 +47,9 @@ namespace Pulsar4X.Movement
 
         public List<(string item, double value)> DebugDetails = new List<(string, double)>();
 
-        public static NewtonThrustCommand CreateCommand(int faction, Entity orderEntity, DateTime manuverNodeTime, Vector3 expendDeltaV_m, double burnTime, string name = null)
+        public static NewtonThrustAction CreateCommand(int faction, Entity orderEntity, DateTime manuverNodeTime, Vector3 expendDeltaV_m, double burnTime, string name = null)
         {
-            var cmd = new NewtonThrustCommand()
+            var cmd = new NewtonThrustAction()
             {
                 RequestingFactionGuid = faction,
                 EntityCommandingGuid = orderEntity.Id,
@@ -86,9 +87,9 @@ namespace Pulsar4X.Movement
             return "Burn " + dvStr + " Δv";
         }
 
-        public static List<NewtonThrustCommand> CreateCommands(CargoDefinitionsLibrary cargoLibrary, Entity ship, (Vector3 dv, double t)[] manuvers)
+        public static List<NewtonThrustAction> CreateCommands(CargoDefinitionsLibrary cargoLibrary, Entity ship, (Vector3 dv, double t)[] manuvers)
         {
-            var commands = new List<NewtonThrustCommand>();
+            var commands = new List<NewtonThrustAction>();
 
             if (!ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrustDB))
                 return commands;
@@ -108,7 +109,7 @@ namespace Pulsar4X.Movement
                 double tburn = fuelBurned / burnRate;
                 mass -= fuelBurned;
 
-                var cmd = new NewtonThrustCommand()
+                var cmd = new NewtonThrustAction()
                 {
                     RequestingFactionGuid = ship.FactionOwnerID,
                     EntityCommandingGuid = ship.Id,
@@ -125,7 +126,7 @@ namespace Pulsar4X.Movement
             return commands;
         }
 
-        public static NewtonThrustCommand? CreateCommand(CargoDefinitionsLibrary cargoLibrary, Entity ship, (Vector3 dv, double t) manuver)
+        public static NewtonThrustAction? CreateCommand(CargoDefinitionsLibrary cargoLibrary, Entity ship, (Vector3 dv, double t) manuver)
         {
             if (!ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrustDB))
                 return null;
@@ -142,7 +143,7 @@ namespace Pulsar4X.Movement
             double fuelBurned = OrbitMath.TsiolkovskyFuelUse(mass, exhaustVelocity, manuver.dv.Length());
             double tburn = fuelBurned / burnRate;
 
-            var cmd = new NewtonThrustCommand()
+            var cmd = new NewtonThrustAction()
             {
                 RequestingFactionGuid = ship.FactionOwnerID,
                 EntityCommandingGuid = ship.Id,
@@ -156,7 +157,7 @@ namespace Pulsar4X.Movement
             return cmd;
         }
 
-        public static NewtonThrustCommand? CreateCommand(CargoDefinitionsLibrary cargoLibrary, Entity ship, Vector3 dv, DateTime tmanuver)
+        public static NewtonThrustAction? CreateCommand(CargoDefinitionsLibrary cargoLibrary, Entity ship, Vector3 dv, DateTime tmanuver)
         {
             if (!ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrustDB))
                 return null;
@@ -171,7 +172,7 @@ namespace Pulsar4X.Movement
             double fuelBurned = OrbitMath.TsiolkovskyFuelUse(mass, exhaustVelocity, dv.Length());
             double tburn = fuelBurned / burnRate;
 
-            var cmd = new NewtonThrustCommand()
+            var cmd = new NewtonThrustAction()
             {
                 RequestingFactionGuid = ship.FactionOwnerID,
                 EntityCommandingGuid = ship.Id,
@@ -241,7 +242,7 @@ namespace Pulsar4X.Movement
                 return false;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }
@@ -250,7 +251,7 @@ namespace Pulsar4X.Movement
 
 
 
-    public class ThrustToTargetCmd : EntityCommand
+    public class ThrustToTargetCmd : EntityAction
     {
 
         public override string Name { get; } = "Nav: Intercept/Collide with target";
@@ -352,7 +353,7 @@ namespace Pulsar4X.Movement
                 var manuverVector = ManuverVector(dvToUse, burnTime, curOurRalState, curTgtRalState, atDateTime);
 
                 _newtonMovedb.ManuverDeltaV = manuverVector; //TODO: this is going to be even more broken now. it used to be using the prograde vector reference and now is using parent/
-                _entityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(5), nameof(OrderableProcessor), _entityCommanding);
+                _entityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(5), nameof(ActionQueueProcessor), _entityCommanding);
 
             }
             else
@@ -462,7 +463,7 @@ namespace Pulsar4X.Movement
                 return false;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }
@@ -474,7 +475,7 @@ namespace Pulsar4X.Movement
     /// This was an alternate attempt to intecept by aplying thrust 90 degrees to the current direction of travel...
     /// or something. never fully completed. Delete?
     /// </summary>
-    public class Thrust90ToTargetCmd : EntityCommand
+    public class Thrust90ToTargetCmd : EntityAction
     {
         public override string Name { get; } = "Nav: Intercept/Collide with target";
 
@@ -669,7 +670,7 @@ namespace Pulsar4X.Movement
                 return false;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }

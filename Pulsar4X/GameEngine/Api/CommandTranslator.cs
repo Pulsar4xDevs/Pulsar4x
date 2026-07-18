@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Api;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
@@ -96,7 +97,7 @@ namespace Pulsar4X.Engine.Api
 
         // ----- helpers -----
 
-        private CommandResult Dispatch(EntityCommand order)
+        private CommandResult Dispatch(EntityAction order)
             => _game.OrderHandler.HandleOrder(order)
                 ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
                 : CommandResult.Reject("Command rejected by engine validation.");
@@ -134,7 +135,7 @@ namespace Pulsar4X.Engine.Api
         private CommandResult TranslateRename(Entity faction, Entity commanded, GameCommand command)
         {
             var rename = (Pulsar4X.Api.RenameCommand)command;
-            bool accepted = Pulsar4X.Names.RenameCommand.CreateRenameCommand(_game, faction, commanded, rename.NewName);
+            bool accepted = Pulsar4X.Names.RenameAction.CreateRenameCommand(_game, faction, commanded, rename.NewName);
             return accepted
                 ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
                 : CommandResult.Reject("Command rejected by engine validation.");
@@ -248,10 +249,10 @@ namespace Pulsar4X.Engine.Api
                     compound.ConditionItems.Add(new ConditionItem(engineCondition, logic));
                 }
 
-                var actions = new DataStructures.SafeList<EntityCommand>();
+                var actions = new DataStructures.SafeList<EntityAction>();
                 foreach (var actionType in order.Actions ?? Array.Empty<string>())
                 {
-                    EntityCommand? action = actionType switch
+                    EntityAction? action = actionType switch
                     {
                         StandingOrderTypes.MoveToNearestColony => MoveToNearestColonyAction.CreateCommand(faction.Id, commanded),
                         StandingOrderTypes.MoveToNearestGeoSurvey => MoveToNearestGeoSurveyAction.CreateCommand(faction.Id, commanded),
@@ -406,7 +407,7 @@ namespace Pulsar4X.Engine.Api
         private CommandResult TranslateSetOrderPause(Entity faction, Entity commanded, GameCommand command)
         {
             var pause = (SetOrderPauseCommand)command;
-            if (!commanded.TryGetDataBlob<OrderableDB>(out var orderable))
+            if (!commanded.TryGetDataBlob<ActionQueueDB>(out var orderable))
                 return CommandResult.Reject("The entity has no order queue.");
 
             var order = orderable.ActionList.FirstOrDefault(o => o.CmdID == pause.OrderId);
@@ -423,7 +424,7 @@ namespace Pulsar4X.Engine.Api
         private CommandResult TranslateCancelOrder(Entity faction, Entity commanded, GameCommand command)
         {
             var cancel = (Pulsar4X.Api.CancelOrderCommand)command;
-            if (!commanded.TryGetDataBlob<OrderableDB>(out var orderable))
+            if (!commanded.TryGetDataBlob<ActionQueueDB>(out var orderable))
                 return CommandResult.Reject("The entity has no order queue.");
 
             var order = orderable.ActionList.FirstOrDefault(o => o.CmdID == cancel.OrderId);
@@ -457,7 +458,7 @@ namespace Pulsar4X.Engine.Api
                 massVolume.MassTotal, thrustAbility.ExhaustVelocity, deltaV.Length());
             double burnSeconds = thrustAbility.FuelBurnRate > 0 ? fuelBurned / thrustAbility.FuelBurnRate : 0;
 
-            return Dispatch(Pulsar4X.Movement.NewtonThrustCommand.CreateCommand(
+            return Dispatch(Pulsar4X.Movement.NewtonThrustAction.CreateCommand(
                 faction.Id, commanded, thrust.NodeTime, deltaV, burnSeconds));
         }
 
@@ -476,12 +477,12 @@ namespace Pulsar4X.Engine.Api
             try
             {
                 if (warp.InsertionPointRelative is { } insertion)
-                    return Pulsar4X.Movement.WarpMoveCommand.CreateCommand(commanded, destination, now,
+                    return Pulsar4X.Movement.WarpMoveAction.CreateCommand(commanded, destination, now,
                             new Pulsar4X.Orbital.Vector3(insertion.X, insertion.Y, insertion.Z))
                         ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
                         : CommandResult.Reject("Command rejected by engine validation.");
 
-                return Dispatch(Pulsar4X.Movement.WarpMoveCommand.CreateCommandEZ(commanded, destination, now));
+                return Dispatch(Pulsar4X.Movement.WarpMoveAction.CreateCommandEZ(commanded, destination, now));
             }
             catch (Exception e)
             {

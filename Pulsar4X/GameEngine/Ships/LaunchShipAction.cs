@@ -1,10 +1,11 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Engine;
 
 namespace Pulsar4X.Ships;
 
-public class LaunchShipCommand : EntityCommand
+public class LaunchShipAction : EntityAction
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf;
     public override bool IsBlocking => true;
@@ -20,7 +21,7 @@ public class LaunchShipCommand : EntityCommand
 
     public static void CreateCommand(int factionId, Entity colonyEntity, string padId)
     {
-        var cmd = new LaunchShipCommand()
+        var cmd = new LaunchShipAction()
         {
             RequestingFactionGuid = factionId,
             EntityCommandingGuid = colonyEntity.Id,
@@ -55,7 +56,7 @@ public class LaunchShipCommand : EntityCommand
         return CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding);
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }

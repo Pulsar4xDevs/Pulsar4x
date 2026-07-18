@@ -1,11 +1,12 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.Industry.Orders;
 
-public class AddToConstructionQueueOrder : EntityCommand
+public class AddToConstructionQueueOrder : EntityAction
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
@@ -31,7 +32,7 @@ public class AddToConstructionQueueOrder : EntityCommand
         return new AddToConstructionQueueOrder(colonyEntity, design);
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }

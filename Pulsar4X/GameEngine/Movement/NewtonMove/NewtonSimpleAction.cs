@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Extensions;
@@ -9,7 +10,7 @@ using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Movement;
 
-public class NewtonSimpleCommand : EntityCommand
+public class NewtonSimpleAction : EntityAction
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
     public override bool IsBlocking => true;
@@ -58,7 +59,7 @@ public class NewtonSimpleCommand : EntityCommand
         var manuverVector = tgtVec.velocity - startVec.velocity;
         var manuverDV = manuverVector.Length();
 
-        var cmd = new NewtonSimpleCommand()
+        var cmd = new NewtonSimpleAction()
         {
             RequestingFactionGuid = faction,
             EntityCommandingGuid = orderEntity.Id,
@@ -129,7 +130,7 @@ public class NewtonSimpleCommand : EntityCommand
             return false;
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }

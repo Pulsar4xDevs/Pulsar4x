@@ -1,4 +1,5 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
@@ -16,7 +17,7 @@ namespace Pulsar4X.Fleets
         SetFlagShip,
         ToggleInheritOrders,
     }
-    public class FleetOrder : EntityCommand
+    public class FleetOrder : EntityAction
     {
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
@@ -266,7 +267,7 @@ namespace Pulsar4X.Fleets
             return false;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }

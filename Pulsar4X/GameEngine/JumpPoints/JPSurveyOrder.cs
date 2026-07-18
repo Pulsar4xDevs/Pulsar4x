@@ -1,4 +1,5 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
@@ -8,7 +9,7 @@ using Pulsar4X.Ships;
 
 namespace Pulsar4X.JumpPoints;
 
-public class JPSurveyOrder : EntityCommand
+public class JPSurveyOrder : EntityAction
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement | ActionLaneTypes.InteractWithExternalEntity;
 
@@ -40,7 +41,7 @@ public class JPSurveyOrder : EntityCommand
         }
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         var command = new JPSurveyOrder(EntityCommanding, Target)
         {

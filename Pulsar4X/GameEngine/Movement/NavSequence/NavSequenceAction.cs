@@ -1,4 +1,5 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
@@ -7,7 +8,7 @@ namespace Pulsar4X.Movement
 {
     //This is the interface between the UI and the NavSequenceDB.
     //We use this to add, remove, edit etc movement manuvers to the ship.
-    public class NavSequenceCommand : EntityCommand
+    public class NavSequenceAction : EntityAction
     {
         public override string Name { get; } = "";
 
@@ -31,7 +32,7 @@ namespace Pulsar4X.Movement
 
         public static void CreateNewCommand(Entity entity, Manuver manuver)
         {
-            var navCommand = new NavSequenceCommand();
+            var navCommand = new NavSequenceAction();
             navCommand._entityCommanding = entity;
             navCommand._manuvers.Add(manuver);
             navCommand.Execute(entity.StarSysDateTime);
@@ -57,7 +58,7 @@ namespace Pulsar4X.Movement
             return _isFinished = true;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }

@@ -1,21 +1,19 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Pulsar4X.Datablobs;
-using Pulsar4X.Interfaces;
-using Pulsar4X.Engine.Orders;
+using Pulsar4X.Engine;
 using Pulsar4X.Events;
+using Pulsar4X.Interfaces;
 
-namespace Pulsar4X.Engine
+namespace GameEngine.Engine.Orders
 {
 
-    public class OrderableProcessor : IInstanceProcessor, IHotloopProcessor
+    public class ActionQueueProcessor : IInstanceProcessor, IHotloopProcessor
     {
         public TimeSpan RunFrequency => TimeSpan.FromMinutes(10);
 
         public TimeSpan FirstRunOffset => TimeSpan.FromMinutes(5);
 
-        public Type GetParameterType => typeof(OrderableDB);
+        public Type GetParameterType => typeof(ActionQueueDB);
 
         private Game _game;
 
@@ -32,7 +30,7 @@ namespace Pulsar4X.Engine
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            List<Entity> entitysWithCargoTransfers = manager.GetAllEntitiesWithDataBlob<OrderableDB>();
+            List<Entity> entitysWithCargoTransfers = manager.GetAllEntitiesWithDataBlob<ActionQueueDB>();
 
             foreach (var entity in entitysWithCargoTransfers)
             {
@@ -44,7 +42,7 @@ namespace Pulsar4X.Engine
 
         internal override void ProcessEntity(Entity entity, DateTime atDateTime)
         {
-            if(entity.TryGetDataBlob<OrderableDB>(out var orderableDB))
+            if(entity.TryGetDataBlob<ActionQueueDB>(out var orderableDB))
             {
                 int mask = 0;
 

@@ -1,11 +1,12 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Extensions;
 
 namespace Pulsar4X.GeoSurveys;
 
-public class GeoSurveyOrder : EntityCommand
+public class GeoSurveyOrder : EntityAction
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement | ActionLaneTypes.InteractWithExternalEntity;
 
@@ -37,7 +38,7 @@ public class GeoSurveyOrder : EntityCommand
         }
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         var command = new GeoSurveyOrder(EntityCommanding, Target)
         {

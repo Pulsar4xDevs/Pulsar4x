@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Orbital;
 using Pulsar4X.Extensions;
 using Pulsar4X.Fleets;
@@ -12,7 +13,7 @@ using Pulsar4X.Engine;
 
 namespace Pulsar4X.Movement
 {
-    public class MoveToSystemBodyOrder : EntityCommand
+    public class MoveToSystemBodyOrder : EntityAction
     {
         public override string Name => $"Move to {Target.GetOwnersName()}";
         public override string Details => "Moves the fleet to the specified system body.";
@@ -27,7 +28,7 @@ namespace Pulsar4X.Movement
             get { return _entityCommanding; }
         }
 
-        private List<EntityCommand> _shipCommands = new List<EntityCommand>();
+        private List<EntityAction> _shipCommands = new List<EntityAction>();
 
         internal override bool IsFinished()
         {
@@ -67,7 +68,7 @@ namespace Pulsar4X.Movement
 
                 if(targetOrbitDB == null)
                 {
-                    var cmd = WarpMoveCommand.CreateCommandEZ(
+                    var cmd = WarpMoveAction.CreateCommandEZ(
                         ship,
                         Target,
                         EntityCommanding.StarSysDateTime);
@@ -87,7 +88,7 @@ namespace Pulsar4X.Movement
 
                     // Create the movement order
 
-                    var cmd = WarpMoveCommand.CreateCommandEZ(
+                    var cmd = WarpMoveAction.CreateCommandEZ(
                         ship,
                         Target,
                         EntityCommanding.StarSysDateTime);
@@ -135,7 +136,7 @@ namespace Pulsar4X.Movement
             return command;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             var command = new MoveToSystemBodyOrder(EntityCommanding, Target)
             {

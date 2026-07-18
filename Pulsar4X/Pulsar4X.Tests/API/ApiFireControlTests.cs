@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using NUnit.Framework;
 using Pulsar4X.Api;
 using Pulsar4X.Components;
@@ -65,7 +66,7 @@ namespace Pulsar4X.Tests
                 new PositionDB { AbsolutePosition = Vector3.Zero },
                 new MassVolumeDB { MassDry = 10000 },
                 new NameDB("Gunship", session.FactionId, "Gunship"),
-                new OrderableDB(),
+                new ActionQueueDB(),
             });
             ship.AddComponent(fireControl);
             ship.AddComponent(weapon);

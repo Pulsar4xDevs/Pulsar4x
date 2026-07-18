@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using Newtonsoft.Json;
 using Pulsar4X.Engine;
 using Pulsar4X.Names;
@@ -15,7 +16,7 @@ using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Storage;
 
-public class CargoTransferOrder : EntityCommand
+public class CargoTransferOrder : EntityAction
 {
     public enum Conditionals
     {
@@ -253,7 +254,7 @@ public class CargoTransferOrder : EntityCommand
         return amount;
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }

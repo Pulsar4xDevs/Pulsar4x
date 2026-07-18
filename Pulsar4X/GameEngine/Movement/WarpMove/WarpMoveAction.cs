@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using Newtonsoft.Json;
 using Pulsar4X.Orbital;
 using Pulsar4X.Extensions;
@@ -17,7 +18,7 @@ using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Movement
 {
-    public class WarpMoveCommand : EntityCommand
+    public class WarpMoveAction : EntityAction
     {
 
         public override string Name
@@ -73,7 +74,7 @@ namespace Pulsar4X.Movement
         {
             var datetimeArrive = WarpMath.GetInterceptPosition(orderEntity, targetEntity, transitStartDatetime, endpointRelativePos);
 
-            var cmd = new WarpMoveCommand()
+            var cmd = new WarpMoveAction()
             {
                 RequestingFactionGuid = orderEntity.FactionOwnerID,
                 EntityCommandingGuid = orderEntity.Id,
@@ -98,7 +99,7 @@ namespace Pulsar4X.Movement
         /// <param name="targetEntity"></param>
         /// <param name="transitStartDatetime"></param>
         /// <returns></returns>
-        public static WarpMoveCommand CreateCommandEZ(
+        public static WarpMoveAction CreateCommandEZ(
             Entity orderEntity,
             Entity targetEntity,
             DateTime transitStartDatetime)
@@ -115,7 +116,7 @@ namespace Pulsar4X.Movement
             else
                 departureState = MoveMath.GetAbsoluteState(orderEntity, transitStartDatetime);
 
-            var cmd = new WarpMoveCommand()
+            var cmd = new WarpMoveAction()
             {
                 RequestingFactionGuid = orderEntity.FactionOwnerID,
                 EntityCommandingGuid = orderEntity.Id,
@@ -247,13 +248,13 @@ namespace Pulsar4X.Movement
             return _isFinished;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }
     }
 
-    public class WarpFleetTowardsTargetOrder : EntityCommand
+    public class WarpFleetTowardsTargetOrder : EntityAction
     {
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
 
@@ -269,9 +270,9 @@ namespace Pulsar4X.Movement
 
         public Entity Target { get; set; }
 
-        List<EntityCommand> _shipCommands = new List<EntityCommand>();
+        List<EntityAction> _shipCommands = new List<EntityAction>();
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }
@@ -310,7 +311,7 @@ namespace Pulsar4X.Movement
                     continue;
                 if(!ship.HasDataBlob<WarpAbilityDB>()) continue;
                 
-                var shipCommand = WarpMoveCommand.CreateCommandEZ(ship, Target, atDateTime);
+                var shipCommand = WarpMoveAction.CreateCommandEZ(ship, Target, atDateTime);
 
                 _shipCommands.Add(shipCommand);
                 ship.Manager.Game.OrderHandler.HandleOrder(shipCommand);

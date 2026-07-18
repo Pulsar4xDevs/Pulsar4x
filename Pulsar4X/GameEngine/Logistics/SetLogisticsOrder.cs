@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.Logistics;
 
-public class SetLogisticsOrder : EntityCommand
+public class SetLogisticsOrder : EntityAction
 {
     public enum OrderTypes
     {
@@ -167,7 +168,7 @@ public class SetLogisticsOrder : EntityCommand
         return _isFinished = true;
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }

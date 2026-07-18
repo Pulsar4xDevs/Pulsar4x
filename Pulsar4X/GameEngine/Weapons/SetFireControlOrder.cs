@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Components;
@@ -10,7 +11,7 @@ using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.Weapons
 {
-    public class SetWeaponsFireControlOrder : EntityCommand
+    public class SetWeaponsFireControlOrder : EntityAction
     {
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
@@ -104,13 +105,13 @@ namespace Pulsar4X.Weapons
             return false;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }
     }
 
-    public class SetTargetFireControlOrder : EntityCommand
+    public class SetTargetFireControlOrder : EntityAction
     {
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
@@ -204,13 +205,13 @@ namespace Pulsar4X.Weapons
             return false;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }
     }
 
-    public class SetOpenFireControlOrder : EntityCommand
+    public class SetOpenFireControlOrder : EntityAction
     {
         public enum FireModes:byte //this could be made more complex, rapid/overdrive, staggered, alphastrike,
         {
@@ -318,13 +319,13 @@ namespace Pulsar4X.Weapons
             return false;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }
     }
 
-    public class SetOrdinanceToWpnOrder : EntityCommand
+    public class SetOrdinanceToWpnOrder : EntityAction
     {
 
         public override string Name { get; } = "Fire Control Set Ordnance";
@@ -405,7 +406,7 @@ namespace Pulsar4X.Weapons
             return false;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }

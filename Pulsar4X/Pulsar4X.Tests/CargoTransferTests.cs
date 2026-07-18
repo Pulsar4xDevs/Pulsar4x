@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameEngine.Engine.Orders;
 using NUnit.Framework;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
@@ -90,7 +91,7 @@ namespace Pulsar4X.Tests
                 new MassVolumeDB { MassDry = 100000 },
                 stationOrbit,
                 new NameDB("Test Station"),
-                new OrderableDB()
+                new ActionQueueDB()
             };
             _station = Entity.Create();
             _manager.AddEntity(_station, stationBlobs);
@@ -108,7 +109,7 @@ namespace Pulsar4X.Tests
                 new MassVolumeDB { MassDry = 10000 },
                 shipOrbit,
                 new NameDB("Test Ship"),
-                new OrderableDB()
+                new ActionQueueDB()
             };
             _ship = Entity.Create();
             _manager.AddEntity(_ship, shipBlobs);
@@ -132,7 +133,7 @@ namespace Pulsar4X.Tests
         {
             foreach (var entity in entities)
             {
-                if (entity.TryGetDataBlob<OrderableDB>(out var orderable))
+                if (entity.TryGetDataBlob<ActionQueueDB>(out var orderable))
                 {
                     foreach (var order in orderable.ActionList)
                     {
@@ -350,7 +351,7 @@ namespace Pulsar4X.Tests
                 new MassVolumeDB { MassDry = 5000 },
                 smallShipOrbit,
                 new NameDB("Small Ship"),
-                new OrderableDB()
+                new ActionQueueDB()
             };
             var smallShip = Entity.Create();
             _manager.AddEntity(smallShip, smallShipBlobs);

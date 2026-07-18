@@ -1,11 +1,11 @@
 using System;
 using Newtonsoft.Json;
-using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
 
-namespace Pulsar4X.Engine.Orders
+namespace GameEngine.Engine.Orders
 {
-    public abstract class EntityCommand
+    public abstract class EntityAction
     {
         [Flags]
         public enum ActionLaneTypes
@@ -27,25 +27,27 @@ namespace Pulsar4X.Engine.Orders
 
         public virtual void UpdateDetailString()
         {}
-
-        [JsonProperty]
+        
         /// <summary>
         /// This is the faction that has requested the command.
         /// </summary>
         /// <value>The requesting faction GUID.</value>
-        internal int RequestingFactionGuid { get; set; }
         [JsonProperty]
+        internal int RequestingFactionGuid { get; set; }
+        
         /// <summary>
         /// The Entity this command is targeted at
         /// </summary>
         /// <value>The entity GUID.</value>
+        [JsonProperty]
         internal int EntityCommandingGuid { get; set; }
 
-        [JsonProperty]
+        
         /// <summary>
         /// Gets or sets the datetime this command was created by the player/client.
         /// </summary>
         /// <value>The created date.</value>
+        [JsonProperty]
         public DateTime CreatedDate{ get; set; }
 
         /// <summary>
@@ -54,13 +56,13 @@ namespace Pulsar4X.Engine.Orders
         /// </summary>
         [JsonProperty]
         public DateTime ActionOnDate { get; set; }
-
-        [JsonProperty]
+        
         /// <summary>
         /// Gets or sets the datetime this command was actioned/processed by the server.
         /// this may be needed by the client to ensure it stays in synch with the server.
         /// </summary>
         /// <value>The actioned on date.</value>
+        [JsonProperty]
         public DateTime ActionedOnDate { get; set; }
 
 
@@ -79,13 +81,21 @@ namespace Pulsar4X.Engine.Orders
 
         public bool PauseOnAction = false;
 
+        [Obsolete]
         public bool IsRunning { get; protected set; } = false;
+        [Obsolete]
         internal abstract bool IsFinished();
-        [JsonProperty]
+        [JsonProperty][Obsolete]
         protected bool _isFinished = false;
+        [Obsolete]
         public bool GetIsFinished { get { return _isFinished; }}
 
-        public abstract EntityCommand Clone();
+        public GoalStatus GetStatus
+        { get { return _goalStatus; } }
+        [JsonProperty]
+        protected GoalStatus _goalStatus = GoalStatus.Pending;
+        
+        public abstract EntityAction Clone();
     }
 
     public static class CommandHelpers

@@ -1,3 +1,4 @@
+using GameEngine.Engine.Orders;
 using Newtonsoft.Json;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
@@ -78,7 +79,7 @@ namespace Pulsar4X.Technology
 
             // Finally add the db to the entity
             entity.SetDataBlob(researcherDB);
-            entity.SetDataBlob(new OrderableDB());
+            entity.SetDataBlob(new ActionQueueDB());
 
             // Calculate the initial modifiers
             ResearchProcessor.RefreshCostModifiers(researcherDB);

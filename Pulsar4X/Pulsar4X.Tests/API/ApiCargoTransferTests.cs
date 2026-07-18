@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using NUnit.Framework;
 using Pulsar4X.Api;
 using Pulsar4X.Datablobs;
@@ -48,7 +49,7 @@ namespace Pulsar4X.Tests
                 new MassVolumeDB { MassDry = 10000 },
                 new OrbitDB(star),
                 new NameDB(name, session.FactionId, name),
-                new OrderableDB(),
+                new ActionQueueDB(),
             });
             return entity;
         }

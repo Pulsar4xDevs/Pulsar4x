@@ -1,4 +1,5 @@
 using System;
+using GameEngine.Engine.Orders;
 using GameEngine.People;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
@@ -7,7 +8,7 @@ using Pulsar4X.People;
 
 namespace Pulsar4X.People.Orders;
 
-public class UnassignAdministratorOrder : EntityCommand
+public class UnassignAdministratorOrder : EntityAction
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
@@ -35,7 +36,7 @@ public class UnassignAdministratorOrder : EntityCommand
         return new UnassignAdministratorOrder(adminEntity, administratorId, postComponentName);
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }

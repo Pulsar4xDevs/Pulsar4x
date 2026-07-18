@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Fleets;
@@ -105,7 +106,7 @@ namespace Pulsar4X.Ships
             dataBlobs.Add(damagedb);
             ComponentInstancesDB compInstances = new ComponentInstancesDB();
             dataBlobs.Add(compInstances);
-            OrderableDB ordable = new OrderableDB();
+            ActionQueueDB ordable = new ActionQueueDB();
             dataBlobs.Add(ordable);
             var ship = Entity.Create();
             ship.FactionOwnerID = ownerFaction.Id;

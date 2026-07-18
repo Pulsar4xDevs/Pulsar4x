@@ -64,7 +64,7 @@ namespace Pulsar4X.Logistics
 
             var cargoLibrary = ship.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
 
-            var cmd = WarpMoveCommand.CreateCommandEZ(
+            var cmd = WarpMoveAction.CreateCommandEZ(
                 ship,
                 targetBody,
                 startState.At);
@@ -126,7 +126,7 @@ namespace Pulsar4X.Logistics
             Vector3 targetPos = Vector3.Normalise(pos) * targetSMA;
 
             var cargoLibrary = ship.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
-            var cmd = WarpMoveCommand.CreateCommandEZ(
+            var cmd = WarpMoveAction.CreateCommandEZ(
                 ship,
                 targetBody,
                 startState.At);
@@ -201,7 +201,7 @@ namespace Pulsar4X.Logistics
             var thrustV2 = OrbitalMath.ProgradeToStateVector(sgpTgtBdy, thrustVector, targetInsertionPosition, insertionVector);
 
             /*
-            var cmd = WarpMoveCommand.CreateCommand(
+            var cmd = WarpMoveAction.CreateCommand(
                 ship.FactionOwnerID,
                 ship,
                 targetBody,
