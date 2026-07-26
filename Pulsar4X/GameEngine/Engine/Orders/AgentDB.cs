@@ -15,4 +15,16 @@ public class AgentDB : BaseDataBlob
     public float Curiosity { get; set; } = 1f;       // boosts ExploreJP, ScanAnomalies
     public float Greed { get; set; } = 1f;           // boosts MakeProfit, Trade
     public float Loyalty { get; set; } = 1f;         // how strictly they follow superior orders
+
+    public override object Clone()
+    {
+        return new AgentDB
+        {
+            Aggression = Aggression,
+            Caution = Caution,
+            Curiosity = Curiosity,
+            Greed = Greed,
+            Loyalty = Loyalty,
+        };
+    }
 }

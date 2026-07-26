@@ -1,10 +1,19 @@
 using System;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
 
 namespace GameEngine.Engine.Orders
 {
+    public enum ActionStatus
+    {
+        Queued,
+        Running,
+        Succeeded,
+        Failed,
+    }
+
     public abstract class EntityAction
     {
         [Flags]
@@ -19,6 +28,18 @@ namespace GameEngine.Engine.Orders
 
         [JsonProperty]
         public string CmdID { get; internal set; } = Guid.NewGuid().ToString();
+
+        /// <summary>
+        /// Id of the Goal that spawned this action ("" if issued directly / manually by a player).
+        /// Lets the owning agent roll up completion/failure and cancel-propagate.
+        /// </summary>
+        [JsonProperty]
+        public string ParentGoalId { get; set; } = "";
+
+        /// <summary>Observable outcome the agent layer reads; maintained by the ActionQueueProcessor.</summary>
+        [JsonProperty]
+        public ActionStatus Status { get; set; } = ActionStatus.Queued;
+
         public bool UseActionLanes = true;
         public abstract ActionLaneTypes ActionLanes { get; }
         public abstract bool IsBlocking { get; }
@@ -42,6 +63,8 @@ namespace GameEngine.Engine.Orders
         [JsonProperty]
         internal int EntityCommandingGuid { get; set; }
 
+        [JsonProperty]
+        public Goal Goal { get;  internal set; } = new Goal();
         
         /// <summary>
         /// Gets or sets the datetime this command was created by the player/client.

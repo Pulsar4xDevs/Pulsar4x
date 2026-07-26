@@ -71,7 +71,18 @@ namespace GameEngine.Engine.Orders
                     }
                 }
 
-                orderableDB.ActionList.RemoveAll(e => e.IsFinished());
+                // Reflect each action's lifecycle into the observable Status the agent layer
+                // reads, then auto-clean only *unlinked* (manual/legacy) finished actions.
+                // Goal-linked finished actions are kept (as Succeeded) until their owning
+                // agent rolls them up and calls ClearFor.
+                foreach (var action in orderableDB.ActionList)
+                {
+                    if (action.Status == ActionStatus.Failed) continue;
+                    if (action.IsFinished()) action.Status = ActionStatus.Succeeded;
+                    else if (action.IsRunning) action.Status = ActionStatus.Running;
+                }
+
+                orderableDB.ActionList.RemoveAll(e => e.IsFinished() && string.IsNullOrEmpty(e.ParentGoalId));
             }
         }
     }

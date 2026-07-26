@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
@@ -9,6 +10,7 @@ using Pulsar4X.GeoSurveys;
 using Pulsar4X.Industry;
 using Pulsar4X.Interfaces;
 using Pulsar4X.JumpPoints;
+using Pulsar4X.Movement;
 using Pulsar4X.People;
 using Pulsar4X.Sensors;
 using Pulsar4X.Ships;
@@ -17,69 +19,220 @@ namespace GameEngine.Engine.Orders;
 
 public class AgentProcessor : IInstanceProcessor
 {
+    // How often an agent with an active goal wakes to re-check progress / re-plan.
+    private static readonly TimeSpan RecheckInterval = TimeSpan.FromMinutes(30);
+
+    // One planner per goal type: adding a goal type == adding an IGoalPlanner, no switch.
+    private static readonly Dictionary<GoalType, IGoalPlanner> _planners;
+
+    static AgentProcessor()
+    {
+        _planners = new Dictionary<GoalType, IGoalPlanner>();
+        foreach (var planner in new IGoalPlanner[]
+                 {
+                     new MoveToPlan(),
+                     new ScanBodiesPlan(),
+                 })
+        {
+            _planners[planner.Type] = planner;
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // Entry point: task a unit (fleet or ship) with a MoveTo goal and wake
+    // its agent. This is the seam a player command / the UI calls into.
+    // -----------------------------------------------------------------
+    public static void AssignMoveTo(Entity unit, Entity target)
+    {
+        var goals = GetOrCreateGoals(unit);
+        goals.GivenGoal = new Goal
+        {
+            Type = GoalType.MoveTo,
+            TargetEntityID = target.Id,
+            Status = GoalStatus.Pending,
+        };
+        ScheduleAgent(unit, unit.StarSysDateTime);
+    }
+
     internal override void ProcessEntity(Entity entity, DateTime atDateTime)
     {
-        var hasAgent = entity.TryGetDataBlob<AgentDB>(out AgentDB? oAgentDB);
-        var isCommander = entity.TryGetDataBlob(out CommanderDB? oCommanderDB);
-        int assignedToID = oCommanderDB.AssignedTo;
-        Entity assignedTo = entity.Manager.GetGlobalEntityById(assignedToID);
-        var hasGoals = assignedTo.TryGetDataBlob<GoalsDB>(out GoalsDB? oGoalsDB);
-        
-        if (assignedTo.TryGetDataBlob<FleetDB>(out FleetDB? oFleetDB))
+        // The agent may be invoked directly on a unit (self-piloting) or on a
+        // commander entity that is assigned to a unit. Resolve the unit either way.
+        Entity unit = entity;
+        if (entity.TryGetDataBlob<CommanderDB>(out var commanderDB) && commanderDB.AssignedTo != -1)
         {
-            var children = oFleetDB.Children.ToArray();
-            GoalsProcessor(oAgentDB, oGoalsDB, oFleetDB.OwningEntity, children);
+            if (!entity.Manager.TryGetGlobalEntityById(commanderDB.AssignedTo, out unit))
+                return;
         }
-        if(assignedTo.TryGetDataBlob<ShipInfoDB>(out ShipInfoDB? oShipInfoDB))
-        {
-            var entityCommanding = oShipInfoDB.OwningEntity;
-            ActionsProcessor(oAgentDB, oGoalsDB, entityCommanding);
-        }
-    }
-    
-    static void GoalsProcessor(AgentDB agentDB, GoalsDB myGoalsDB, Entity assigned, Entity[] children)
-    {
 
-        //todo, probabily only need to pruneImpossibleGoals rarely, eg on new assignment, taken damage, etc.
-        PruneImpossibleGoals(myGoalsDB, assigned);
-        RecalculateEffectiveGoals(myGoalsDB, agentDB);
-        
-        
-        foreach (var subordinateEntity in children)
+        if (!unit.TryGetDataBlob<GoalsDB>(out var goalsDB))
+            return; // nothing tasked
+
+        entity.TryGetDataBlob<AgentDB>(out var agentDB); // optional; null == neutral personality
+
+        if (unit.HasDataBlob<FleetDB>())
+            GoalsProcessor(entity, agentDB, goalsDB, unit, atDateTime);
+        else if (unit.HasDataBlob<ShipInfoDB>())
+            ActionsProcessor(entity, agentDB, goalsDB, unit, atDateTime);
+    }
+
+    // -----------------------------------------------------------------
+    // BRANCH: a fleet's concrete goal is handed down as a sub-goal to each
+    // capable child; each child is itself an agent that plans on its own wake.
+    //
+    // We decompose the *concrete* GivenGoal (it carries a target). The abstract
+    // weighted EffectiveGoals are NOT used here: they carry no target and are
+    // regenerated with fresh ids every pass, so they can't anchor queued work.
+    // Autonomous goal *selection* layers on top of this later.
+    // -----------------------------------------------------------------
+    static void GoalsProcessor(Entity agentHost, AgentDB? agentDB, GoalsDB goalsDB, Entity fleet, DateTime atDateTime)
+    {
+        var goal = goalsDB.GivenGoal;
+        if (goal == null || goal.Type != GoalType.MoveTo) return;
+        if (goal.Status is GoalStatus.Completed or GoalStatus.Failed) return;
+
+        goal.Status = GoalStatus.Active;
+
+        if (!fleet.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var target))
         {
-            var hasGoals = subordinateEntity.TryGetDataBlob<GoalsDB>(out GoalsDB? oGoalsDB);
-            
-            if (!hasGoals)
+            goal.Status = GoalStatus.Failed;
+            goal.Message = "MoveTo target not found";
+            return;
+        }
+
+        var fleetDB = fleet.GetDataBlob<FleetDB>();
+        bool anyAssigned = false;
+        bool allDone = true;
+
+        foreach (var child in fleetDB.Children.ToArray())
+        {
+            // A ship must be able to warp; sub-fleets decompose themselves.
+            if (child.HasDataBlob<ShipInfoDB>() && !child.HasDataBlob<WarpAbilityDB>())
+                continue;
+
+            var childGoals = GetOrCreateGoals(child);
+            var childGoal = childGoals.GivenGoal;
+
+            // Assign once, then leave it alone (idempotent across re-checks).
+            if (childGoal == null || childGoal.ParentGoalId != goal.Id)
             {
-                oGoalsDB = new GoalsDB();
-                subordinateEntity.SetDataBlob(oGoalsDB);
+                childGoal = new Goal
+                {
+                    Type = GoalType.MoveTo,
+                    TargetEntityID = target.Id,
+                    ParentGoalId = goal.Id,
+                    Status = GoalStatus.Pending,
+                };
+                childGoals.GivenGoal = childGoal;
+                ScheduleAgent(child, atDateTime + TimeSpan.FromSeconds(1));
             }
 
-
+            anyAssigned = true;
+            if (childGoal.Status != GoalStatus.Completed)
+                allDone = false;
         }
-        
-    }
-    
-    static void ActionsProcessor(AgentDB agentDB, GoalsDB myGoalsDB, Entity entityCommanding)
-    {
-        if(entityCommanding.TryGetDataBlob<ActionQueueDB>(out ActionQueueDB? oActionQueueDB))
-        {
-            var primaryGoal = myGoalsDB.GivenGoal;
-            
-            
 
-            
-            var currentActionList = oActionQueueDB.ActionList;
-            foreach(var action in currentActionList)
+        if (anyAssigned && allDone)
+            goal.Status = GoalStatus.Completed;
+        else
+            ScheduleAgent(agentHost, atDateTime + RecheckInterval);
+    }
+
+    // -----------------------------------------------------------------
+    // LEAF: a ship's concrete goal is turned into actions by the planner for
+    // that goal type, submitted to the ship's ActionQueue, then monitored.
+    // -----------------------------------------------------------------
+    static void ActionsProcessor(Entity agentHost, AgentDB? agentDB, GoalsDB goalsDB, Entity ship, DateTime atDateTime)
+    {
+        var goal = goalsDB.GivenGoal;
+        if (goal == null) return; // no concrete tasking (autonomous mode not wired yet)
+        if (goal.Status is GoalStatus.Completed or GoalStatus.Failed) return;
+        if (!ship.TryGetDataBlob<ActionQueueDB>(out var queue)) return;
+
+        goalsDB.ActiveGoal = goal;
+
+        switch (goal.Status)
+        {
+            case GoalStatus.Pending:
             {
-            
+                if (!_planners.TryGetValue(goal.Type, out var planner))
+                {
+                    goal.Status = GoalStatus.Failed;
+                    goal.Message = $"no planner for {goal.Type}";
+                    return;
+                }
+
+                try
+                {
+                    foreach (var action in planner.Plan(goal, ship))
+                    {
+                        action.ParentGoalId = goal.Id;
+                        // HandleOrder validates (resolves acting/target entities),
+                        // enqueues on the ActionQueue, and schedules the executor.
+                        ship.Manager.Game.OrderHandler.HandleOrder(action);
+                    }
+                }
+                catch (Exception e)
+                {
+                    // Movement plotting can throw on states it can't predict; fail the
+                    // goal rather than crash the pulse.
+                    goal.Status = GoalStatus.Failed;
+                    goal.Message = e.Message;
+                    return;
+                }
+
+                // A planner may have failed the goal itself (e.g. target not found).
+                if (goal.Status != GoalStatus.Failed)
+                    goal.Status = GoalStatus.Active;
+
+                ScheduleAgent(agentHost, atDateTime + RecheckInterval);
+                break;
+            }
+            case GoalStatus.Active:
+            {
+                var mine = queue.ActionsFor(goal);
+                if (mine.Count > 0 && mine.All(a => a.Status == ActionStatus.Succeeded))
+                {
+                    goal.Status = GoalStatus.Completed;
+                    queue.ClearFor(goal);
+                }
+                else if (mine.Any(a => a.Status == ActionStatus.Failed))
+                {
+                    goal.Status = GoalStatus.Failed;
+                    goal.Message = "an action failed";
+                    queue.ClearFor(goal);
+                }
+                else
+                {
+                    ScheduleAgent(agentHost, atDateTime + RecheckInterval); // still running
+                }
+                break;
             }
         }
     }
-    
-    
+
+    // -----------------------------------------------------------------
+    // helpers
+    // -----------------------------------------------------------------
+    static GoalsDB GetOrCreateGoals(Entity entity)
+    {
+        if (!entity.TryGetDataBlob<GoalsDB>(out var goals))
+        {
+            goals = new GoalsDB();
+            entity.SetDataBlob(goals);
+        }
+        return goals;
+    }
+
+    static void ScheduleAgent(Entity unit, DateTime when)
+    {
+        unit.Manager.ManagerSubpulses.AddEntityInterupt(when, nameof(AgentProcessor), unit);
+    }
+
     // ===================================================================
-    // Static helper methods
+    // Weighting helpers (kept from the utility-AI sketch; not yet used by the
+    // concrete MoveTo path — they drive autonomous goal *selection*, which is
+    // the next layer to wire in).
     // ===================================================================
 
     public static void PruneImpossibleGoals(GoalsDB goalsDB, Entity entity)
@@ -107,7 +260,7 @@ public class AgentProcessor : IInstanceProcessor
                 goalsDB.CapabilityModifiers[type] = -1f;
         }
     }
-    
+
     public static void RecalculateEffectiveGoals(GoalsDB goalsDB, AgentDB? agentDB)
     {
         goalsDB.EffectiveGoals.Clear();
@@ -155,7 +308,6 @@ public class AgentProcessor : IInstanceProcessor
             _ => 1.0f
         };
     }
-    
 
     // Example commander assignment
     public static void AssignGoalFromSuperior(GoalsDB superiorGoals, GoalsDB subordinateGoals, GoalType goalType, float strength = 2.0f)
@@ -163,5 +315,4 @@ public class AgentProcessor : IInstanceProcessor
         subordinateGoals.OrdersModifiers[goalType] = strength;
         // Optionally propagate alignment to related goals...
     }
-    
 }

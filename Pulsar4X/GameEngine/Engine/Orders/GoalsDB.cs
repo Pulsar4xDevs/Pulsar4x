@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Pulsar4X.Datablobs;
 
@@ -42,6 +43,18 @@ public class GoalsDB : BaseDataBlob
 
     // Computed effective goals
     public Dictionary<GoalType, Goal> EffectiveGoals { get; } = new();
+
+    public override object Clone()
+    {
+        // Shallow copy of the concrete goals is enough for now; the modifier
+        // dictionaries are rebuilt each pass by the AgentProcessor.
+        return new GoalsDB
+        {
+            ParentGoal = ParentGoal,
+            GivenGoal  = GivenGoal,
+            ActiveGoal = ActiveGoal,
+        };
+    }
 }
 
 public enum GoalType
@@ -80,6 +93,10 @@ public enum GoalType
 
 public class Goal
 {
+    /// <summary>Stable id so spawned actions / child goals can reference this one.</summary>
+    public string Id = Guid.NewGuid().ToString();
+    /// <summary>Id of the goal (one level up) that produced this one ("" if top-level).</summary>
+    public string ParentGoalId = "";
     public GoalType Type;
     public int TargetEntityID = -1;
     public float Weight = 0.5f;

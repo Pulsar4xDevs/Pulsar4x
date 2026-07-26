@@ -294,7 +294,7 @@ namespace Pulsar4X.Engine.Api
             var move = (MoveToBodyCommand)command;
             if (!TryResolve(move.BodyId, out var body))
                 return CommandResult.Reject($"Entity {move.BodyId} not found.");
-
+            AgentProcessor.AssignMoveTo(commanded, body);
             return Dispatch(MoveToSystemBodyOrder.CreateCommand(faction.Id, commanded, body));
         }
 
