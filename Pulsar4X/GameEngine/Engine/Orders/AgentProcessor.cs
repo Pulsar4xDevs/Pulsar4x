@@ -51,7 +51,7 @@ public class AgentProcessor : IInstanceProcessor
             TargetEntityID = target.Id,
             Status = GoalStatus.Pending,
         };
-        ScheduleAgent(unit, unit.StarSysDateTime);
+        RunAgentNow(unit);
     }
 
     internal override void ProcessEntity(Entity entity, DateTime atDateTime)
@@ -227,6 +227,11 @@ public class AgentProcessor : IInstanceProcessor
     static void ScheduleAgent(Entity unit, DateTime when)
     {
         unit.Manager.ManagerSubpulses.AddEntityInterupt(when, nameof(AgentProcessor), unit);
+    }
+    static void RunAgentNow(Entity unit)
+    {
+        var timenow = unit.StarSysDateTime;
+        unit.Manager.Game.ProcessorManager.RunInstanceProcessOnEntity(nameof(AgentProcessor), unit, timenow);
     }
 
     // ===================================================================

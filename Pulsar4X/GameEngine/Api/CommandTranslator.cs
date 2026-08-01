@@ -295,7 +295,8 @@ namespace Pulsar4X.Engine.Api
             if (!TryResolve(move.BodyId, out var body))
                 return CommandResult.Reject($"Entity {move.BodyId} not found.");
             AgentProcessor.AssignMoveTo(commanded, body);
-            return Dispatch(MoveToSystemBodyOrder.CreateCommand(faction.Id, commanded, body));
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+            //return Dispatch(MoveToSystemBodyOrder.CreateCommand(faction.Id, commanded, body));
         }
 
         private CommandResult TranslateGeoSurvey(Entity faction, Entity commanded, GameCommand command)
