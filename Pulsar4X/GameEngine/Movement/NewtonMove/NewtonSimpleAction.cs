@@ -40,15 +40,20 @@ public class NewtonSimpleAction : EntityAction
 
     public List<(string item, double value)> DebugDetails = new List<(string, double)>();
 
-    public static void CreateCommand(int faction, Entity orderEntity, Vector3 position, Vector3 startvelocity, Vector3 endvelocity, DateTime manuverNodeTime, string name="Newtonion thrust")
+    public static NewtonSimpleAction CreateCommand(int faction, Entity orderEntity, Vector3 position, Vector3 startvelocity, Vector3 endvelocity, DateTime manuverNodeTime, string name="Newtonion thrust")
     {
         var sgp = orderEntity.GetDataBlob<OrbitDB>().GravitationalParameter_m3S2;
         KeplerElements startKE = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, startvelocity, manuverNodeTime);
         KeplerElements tgtKE = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, endvelocity, manuverNodeTime);
-        CreateCommand(faction, orderEntity, manuverNodeTime, startKE, tgtKE);
+        return CreateCommand(faction, orderEntity, manuverNodeTime, startKE, tgtKE, name);
     }
 
-    public static void CreateCommand(int faction, Entity orderEntity, DateTime manuverNodeTime, KeplerElements startKE, KeplerElements finKE, string name="Newtonion Simple thrust")
+    /// <summary>
+    /// Builds the action but does NOT queue it — the caller (usually an IGoalPlanner) submits it
+    /// so that it can be tagged with the goal it belongs to. Same convention as
+    /// WarpMoveAction.CreateCommandEZ.
+    /// </summary>
+    public static NewtonSimpleAction CreateCommand(int faction, Entity orderEntity, DateTime manuverNodeTime, KeplerElements startKE, KeplerElements finKE, string name="Newtonion Simple thrust")
     {
 
         var startVec = OrbitalMath.GetStateVectors(startKE, manuverNodeTime);
@@ -74,9 +79,8 @@ public class NewtonSimpleAction : EntityAction
 
         };
 
-        // FIXME:
-        //StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
         cmd.UpdateDetailString();
+        return cmd;
     }
 
     internal override void Execute(DateTime atDateTime)

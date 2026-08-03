@@ -38,42 +38,29 @@ public class AgentProcessor : IInstanceProcessor
         }
     }
 
-    // -----------------------------------------------------------------
-    // Entry point: task a unit (fleet or ship) with a MoveTo goal and wake
-    // its agent. This is the seam a player command / the UI calls into.
-    // -----------------------------------------------------------------
-    public static void AssignMoveTo(Entity unit, Entity target)
-    {
-        var goals = GetOrCreateGoals(unit);
-        goals.GivenGoal = new Goal
-        {
-            Type = GoalType.MoveTo,
-            TargetEntityID = target.Id,
-            Status = GoalStatus.Pending,
-        };
-        RunAgentNow(unit);
-    }
 
     internal override void ProcessEntity(Entity entity, DateTime atDateTime)
     {
-        // The agent may be invoked directly on a unit (self-piloting) or on a
-        // commander entity that is assigned to a unit. Resolve the unit either way.
-        Entity unit = entity;
+        ProcessEntityStatic(entity, atDateTime);
+    }
+
+    public static void ProcessEntityStatic(Entity entity, DateTime atDateTime)
+    {
+        //check if the entity given is a commander, or if it's an entity a commander is... commanding. 
+        Entity managedEntity = entity;
         if (entity.TryGetDataBlob<CommanderDB>(out var commanderDB) && commanderDB.AssignedTo != -1)
         {
-            if (!entity.Manager.TryGetGlobalEntityById(commanderDB.AssignedTo, out unit))
+            if (!entity.Manager.TryGetGlobalEntityById(commanderDB.AssignedTo, out managedEntity))
                 return;
         }
 
-        if (!unit.TryGetDataBlob<GoalsDB>(out var goalsDB))
+        if (!managedEntity.TryGetDataBlob<GoalsDB>(out var goalsDB))
             return; // nothing tasked
-
-        entity.TryGetDataBlob<AgentDB>(out var agentDB); // optional; null == neutral personality
-
-        if (unit.HasDataBlob<FleetDB>())
-            GoalsProcessor(entity, agentDB, goalsDB, unit, atDateTime);
-        else if (unit.HasDataBlob<ShipInfoDB>())
-            ActionsProcessor(entity, agentDB, goalsDB, unit, atDateTime);
+        
+        if (managedEntity.HasDataBlob<FleetDB>())
+            GoalsProcessor(entity, goalsDB, managedEntity, atDateTime);
+        else if (managedEntity.HasDataBlob<ShipInfoDB>())
+            ActionsProcessor(entity, goalsDB, managedEntity, atDateTime);
     }
 
     // -----------------------------------------------------------------
@@ -85,7 +72,7 @@ public class AgentProcessor : IInstanceProcessor
     // regenerated with fresh ids every pass, so they can't anchor queued work.
     // Autonomous goal *selection* layers on top of this later.
     // -----------------------------------------------------------------
-    static void GoalsProcessor(Entity agentHost, AgentDB? agentDB, GoalsDB goalsDB, Entity fleet, DateTime atDateTime)
+    static void GoalsProcessor(Entity agentHost, GoalsDB goalsDB, Entity fleet, DateTime atDateTime)
     {
         var goal = goalsDB.GivenGoal;
         if (goal == null || goal.Type != GoalType.MoveTo) return;
@@ -106,8 +93,9 @@ public class AgentProcessor : IInstanceProcessor
 
         foreach (var child in fleetDB.Children.ToArray())
         {
-            // A ship must be able to warp; sub-fleets decompose themselves.
-            if (child.HasDataBlob<ShipInfoDB>() && !child.HasDataBlob<WarpAbilityDB>())
+            // A ship must be able to move itself somehow; sub-fleets decompose themselves.
+            // Which *kind* of move is MovePlanner's call, not ours.
+            if (child.HasDataBlob<ShipInfoDB>() && !MovePlanner.CanMove(child, out _))
                 continue;
 
             var childGoals = GetOrCreateGoals(child);
@@ -142,7 +130,7 @@ public class AgentProcessor : IInstanceProcessor
     // LEAF: a ship's concrete goal is turned into actions by the planner for
     // that goal type, submitted to the ship's ActionQueue, then monitored.
     // -----------------------------------------------------------------
-    static void ActionsProcessor(Entity agentHost, AgentDB? agentDB, GoalsDB goalsDB, Entity ship, DateTime atDateTime)
+    static void ActionsProcessor(Entity agentHost, GoalsDB goalsDB, Entity ship, DateTime atDateTime)
     {
         var goal = goalsDB.GivenGoal;
         if (goal == null) return; // no concrete tasking (autonomous mode not wired yet)
@@ -181,9 +169,14 @@ public class AgentProcessor : IInstanceProcessor
                     return;
                 }
 
-                // A planner may have failed the goal itself (e.g. target not found).
-                if (goal.Status != GoalStatus.Failed)
+                // A planner may have resolved the goal itself: Failed (target not found, no drive)
+                // or Completed (already at the target, so it emitted no actions). Only advance a
+                // goal that is still Pending — otherwise a zero-action plan gets set back to
+                // Active and, having no actions to roll up, reschedules forever.
+                if (goal.Status == GoalStatus.Pending)
                     goal.Status = GoalStatus.Active;
+                else
+                    break;
 
                 ScheduleAgent(agentHost, atDateTime + RecheckInterval);
                 break;
@@ -214,7 +207,7 @@ public class AgentProcessor : IInstanceProcessor
     // -----------------------------------------------------------------
     // helpers
     // -----------------------------------------------------------------
-    static GoalsDB GetOrCreateGoals(Entity entity)
+    internal static GoalsDB GetOrCreateGoals(Entity entity)
     {
         if (!entity.TryGetDataBlob<GoalsDB>(out var goals))
         {
@@ -228,10 +221,10 @@ public class AgentProcessor : IInstanceProcessor
     {
         unit.Manager.ManagerSubpulses.AddEntityInterupt(when, nameof(AgentProcessor), unit);
     }
-    static void RunAgentNow(Entity unit)
+    static internal void RunAgentNow(Entity unit)
     {
         var timenow = unit.StarSysDateTime;
-        unit.Manager.Game.ProcessorManager.RunInstanceProcessOnEntity(nameof(AgentProcessor), unit, timenow);
+        ProcessEntityStatic( unit, timenow);
     }
 
     // ===================================================================

@@ -42,6 +42,17 @@ monitor and abandon its own work.
 
 An agent may run on the unit itself or on a commander assigned to it (`CommanderDB.AssignedTo`).
 
+### Current flow:
+- UI orders MoveToEntity
+- InProcessAdapter.SubmitCommandAsynch
+- EngineGameServer.SubmitCommand
+- CommandTranslater.Translate
+- MovementGoalsAndActions.AssignMoveTo Creates Goal
+- static AgentProcessor.RunAgentNow(fleetEntity)
+- AgentProcessor.ProcessEntity checks if entity is an agent or gets assigned agent from entity.
+- 
+- 
+
 ## Decisions
 
 ### 1. Tiers are gated by span of command, not planner sophistication
@@ -219,13 +230,54 @@ abstraction", and `Trade`/`DontRunOutOfFuel` show those come apart.
       uses it — one seat per component regardless. Needed by decision 5.
 - [ ] `TranslateMoveToBody` has no visibility check on the target; `TranslateWarpMove` does
       (`IsEntityVisibleToFaction`). A faction can currently order a move to a body it hasn't seen.
+- [ ] `NavSequenceProcessor` appears to `RemoveAt(0)` twice on the same sequence — one manoeuvre in
+      every pair gets dropped.
 
 **Refactor (decision 6)**
 - [ ] Auto-discover `IGoalPlanner` by reflection, as `ProcessManager.CreateProcessors` does.
-- [ ] Move `MoveToPlan` → `Movement/`, `ScanBodiesPlan` → `GeoSurveys/`.
-- [ ] Move `AssignMoveTo` out of `AgentProcessor` into `Movement/`.
+- [x] Move `MoveToPlan` → `Movement/`, `ScanBodiesPlan` → `GeoSurveys/`. *(`MoveToPlan` done —
+      `Movement/MovementGoalsAndActions.cs`. `ScanBodiesPlan` still in `GoalProcessor.cs`.)*
+- [x] Move `AssignMoveTo` out of `AgentProcessor` into `Movement/`.
 - [ ] Replace the `PruneImpossibleGoals` switch with `IGoalPlanner.CanPerform`.
+      `MovePlanner.CanMove` is the shape it wants; `GoalsProcessor` already calls it in place of
+      the old hardcoded `HasDataBlob<WarpAbilityDB>` check.
 - [ ] Replace `GoalsProcessor`'s hardcoded `!= GoalType.MoveTo` with `SelectSubordinates`.
+
+**Movement maths**
+
+These gate the `MovePlanner` decision tree (`Movement/MovementGoalsAndActions.cs`). Each one is
+currently a "reject with a reason" branch rather than a wrong answer; the comments in
+`EvaluateNewtonian` mark the exact spots.
+
+- [ ] **Check and fix `NewtonComplex`.** It is the older of the two newtonian paths
+      (`NewtonMoveDB` + `NewtonianMovementProcessor`, reached via `NewtonThrustAction`) and tries to
+      fully integrate the thrust manoeuvre. The maths was never got right and the whole approach is
+      probably overkill next to `NewtonSimple`, which derives fuel use from the *desired outcome*
+      instead of simulating the burn. Decide: fix it, or fold what only it can do into
+      `NewtonSimple`. It is the only path that currently handles SOI transitions
+      (`NewtonianMovementProcessor:121-192`) — `NewtonSimpleProcessor` has none — so that capability
+      has to land somewhere before newtonian moves can leave an SOI.
+      `MovePlanner` deliberately emits `NewtonSimpleAction` only, until this is resolved.
+- [ ] **Interplanetary transfer.** Escape burn → transfer about the grandparent → capture burn.
+      `InterceptCalcs.InterPlanetaryHohmann` is an untested sketch with ad-hoc phasing and no SOI
+      awareness; it is not wired up. Warp covers this case for now.
+- [ ] **Orbital capture / insertion burn.** Arriving co-located with a body means falling into its
+      SOI. Warp has an insertion vector (`OrbitProcessor.GetOrbitalInsertionVector`); the newtonian
+      path has nothing, so "hop to the next moon over" currently still warps.
+- [ ] **Eccentric orbits.** `Hohmann2`, `HohmannOE` and `OrbitPhasingManuvers` all assume circular.
+      Wants a Lambert solver, or an explicit circularise-first leg.
+- [ ] **Replan from an arbitrary state vector.** A ship mid-burn has no `OrbitDB`, so it can't plan a
+      newtonian move at all until it coasts.
+- [ ] Verify `OrbitalMath.OrbitPhasingManuvers`' sign convention for `phaseAngle` against both
+      target-ahead and target-behind. `MovePlanner` passes `Atan2(target) - Atan2(ship)` on trust.
+- [ ] `NewtonSimpleProcessor` silently no-ops forever when Δv is short of `TargetTrajectory`
+      instead of failing the action. `MovePlanner` checks the budget up front, but a mid-flight
+      mass change can still strand it.
+
+**Dead code**
+- [x] `Movement/MoveToSystemBodyOrder.cs` — deleted; superseded by `MoveToPlan`.
+- [ ] `NewtonThrustAction.Thrust90ToTargetCmd` — its own comment says "never fully completed".
+- [ ] `InterceptCalcs.FTLIntercept` — no callers.
 
 **Feedback / projection**
 - [ ] Project `GoalsDB.GivenGoal` (type, target, status, issued-at, effective-at) on
@@ -245,6 +297,14 @@ abstraction", and `Trade`/`DontRunOutOfFuel` show those come apart.
 - [ ] Wire the weighting layer — `PruneImpossibleGoals`/`RecalculateEffectiveGoals`/`EffectiveGoals`
       are an unused utility-AI sketch and the intended basis for the Sector/Empire tier.
 - [ ] Planners beyond `MoveTo`. `ScanBodiesPlan` is registered but stubbed; nothing else exists.
+- [ ] **Mode selection should be a utility comparison, not an ordering.** `MovePlanner.Select`
+      currently prefers newtonian unless it is more than 3× the warp ETA. The right answer weighs
+      (eta, Δv, energy) *by the owning goal* — a `Trade` run values fuel, an `Attack` values time,
+      and a ship holding `DontRunOutOfFuel` should refuse an expensive option outright. That needs
+      the goal layer to express a preference, which it currently can't.
+- [ ] `MoveTargeting.TryResolve` reads a warping target's destination straight out of
+      `WarpMovingDB`, regardless of whether we can see it. Should be gated on intel, and guessed
+      from observed heading when we have none.
 - [ ] Confirm the time source: `StandAloneOrderHandler:40` and the `Game.cs`/`DefaultStartFactory`
       call sites pass `Game.TimePulse.GameGlobalDateTime`, while the agent path uses
       `unit.StarSysDateTime`. Systems can diverge; actions may execute early relative to their own

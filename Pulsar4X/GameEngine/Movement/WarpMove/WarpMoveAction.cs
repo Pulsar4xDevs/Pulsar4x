@@ -91,6 +91,10 @@ namespace Pulsar4X.Movement
         /// <summary>
         /// Creates a warp order with an attempted simplenewt circular orbit post warp.
         /// DOES NOT QUEUE THE COMMAND. Game.OrderHandler.HandleOrder(cmd) should be called
+        ///
+        /// This assumes the caller has already decided that warp is the right way to get there.
+        /// MovePlanner is where that decision belongs — it resolves the target, checks the ship
+        /// actually has a drive, and rejects targets we can't plot an intercept against.
         /// </summary>
         /// <param name="orderEntity"></param>
         /// <param name="targetEntity"></param>
@@ -101,9 +105,10 @@ namespace Pulsar4X.Movement
             Entity targetEntity,
             DateTime transitStartDatetime)
         {
-            //if target is a colony, just make the target the parent planet.
-            if(targetEntity.TryGetDataBlob<ColonyInfoDB>(out ColonyInfoDB info))
-                targetEntity = info.PlanetEntity;
+            // Resolve colonies to their body and warping ships to their destination.
+            // Idempotent, so it's harmless for callers that came via MovePlanner.
+            if (!MoveTargeting.TryResolve(targetEntity, out targetEntity, out string resolveFailure))
+                throw new InvalidOperationException($"Cannot plot a warp to {targetEntity.Id}: {resolveFailure}");
 
             (Vector3 pos, Vector3 vel) departureState;
             if(orderEntity.Manager.Game.Settings.UseRelativeVelocity)
@@ -148,35 +153,18 @@ namespace Pulsar4X.Movement
                     break;
                 }
                 case PositionDB.MoveTypes.NewtonSimple:
-                {
-                    //recursive call here, if the target we're trying to go to is manuvering somewhere,
-                    //then just target that targets target...
-                    //TODO we should check if the target is another empire, in such case we probilby shouldn't know the target?
-                    //but maybe we can guess it. idk.
-                    var wp = targetEntity.GetDataBlob<WarpMovingDB>();
-                    cmd = CreateCommandEZ(orderEntity, wp.TargetEntity, transitStartDatetime);
-                    break;
-                }
                 case PositionDB.MoveTypes.NewtonComplex:
-                {
-                    //recursive call here, if the target we're trying to go to is manuvering somewhere,
-                    //then just target that targets target...
-                    //TODO we should check if the target is another empire, in such case we probilby shouldn't know the target?
-                    //but maybe we can guess it. idk.
-                    var wp = targetEntity.GetDataBlob<WarpMovingDB>();
-                    cmd = CreateCommandEZ(orderEntity, wp.TargetEntity, transitStartDatetime);
-                    break;
-                }
+                    // A target under thrust has no closed-form future position, so WarpMath can't
+                    // solve the intercept. MovePlanner rejects these before we get here; if we're
+                    // reached anyway it's a bug in the caller, not a case to guess at.
+                    throw new NotImplementedException(
+                        $"No warp intercept solution against a {targetEntity.GetDataBlob<PositionDB>().MoveType} target.");
+
                 case PositionDB.MoveTypes.Warp:
-                {
-                    //recursive call here, if the target we're trying to go to is warping somewhere,
-                    //then just target that targets target...
-                    //TODO we should check if the target is another empire, in such case we probilby shouldn't know the target?
-                    //but maybe we can guess it. idk.
-                    var wp = targetEntity.GetDataBlob<WarpMovingDB>();
-                    cmd = CreateCommandEZ(orderEntity, wp.TargetEntity, transitStartDatetime);
-                    break;
-                }
+                    // MoveTargeting.TryResolve chases warping targets to their destination, so a
+                    // warping target should be impossible by this point.
+                    throw new InvalidOperationException("Warp target was not resolved to its destination.");
+
                 default:
                     throw new NotImplementedException();
             }
@@ -203,8 +191,20 @@ namespace Pulsar4X.Movement
         {
             if (!IsRunning)
             {
-                var warpDB = _entityCommanding.GetDataBlob<WarpAbilityDB>();
-                var powerDB = _entityCommanding.GetDataBlob<EnergyGenAbilityDB>();
+                // Should have been caught at plan time by MovePlanner, but an action can outlive
+                // the components that made it possible (battle damage, refit).
+                if (!_entityCommanding.TryGetDataBlob<WarpAbilityDB>(out var warpDB)
+                    || !_entityCommanding.TryGetDataBlob<EnergyGenAbilityDB>(out var powerDB))
+                {
+                    if (Goal != null)
+                    {
+                        Goal.Status = GoalStatus.Failed;
+                        Goal.Message = "No working warp drive";
+                    }
+                    Status = ActionStatus.Failed;
+                    return;
+                }
+
                 string eType = warpDB.EnergyType;
                 double estored = powerDB.EnergyStored[eType];
                 double creationCost = warpDB.BubbleCreationCost;

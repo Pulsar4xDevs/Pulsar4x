@@ -30,24 +30,3 @@ public class ScanBodiesPlan : IGoalPlanner
     }
 }
 
-public class MoveToPlan : IGoalPlanner
-{
-    public GoalType Type => GoalType.MoveTo;
-
-    public IEnumerable<EntityAction> Plan(Goal goal, Entity ship)
-    {
-        List<EntityAction> plan = new List<EntityAction>();
-        if(ship.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out Entity target))
-        {
-            DateTime now = ship.StarSysDateTime;
-            EntityAction moveTo = WarpMoveAction.CreateCommandEZ(ship, target, now);
-            plan.Add(moveTo);
-        }
-        else
-        {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "Target not found";
-        }
-        return plan;
-    }
-}
