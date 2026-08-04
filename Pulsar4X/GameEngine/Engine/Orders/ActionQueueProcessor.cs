@@ -48,6 +48,8 @@ namespace GameEngine.Engine.Orders
 
                 foreach(var entityCommand in orderableDB.ActionList)
                 {
+                    if(entityCommand.Status == ActionStatus.Succeeded)
+                        continue;
                     if ((mask & ((int)entityCommand.ActionLanes)) == 0) //bitwise and
                     {
                         if (entityCommand.IsBlocking)

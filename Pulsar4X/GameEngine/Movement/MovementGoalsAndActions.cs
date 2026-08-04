@@ -4,31 +4,101 @@ using GameEngine.Engine.Orders;
 using Pulsar4X.Colonies;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
+using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Orbital;
 using Pulsar4X.Orbits;
 
 namespace Pulsar4X.Movement;
 
-public static class MovementGoalsAndActions
-{
 
-    // -----------------------------------------------------------------
-    // Entry point: task a unit (fleet or ship) with a MoveTo goal and wake
-    // its agent. This is the seam a player command / the UI calls into.
-    // -----------------------------------------------------------------
-    public static void AssignMoveTo(Entity unit, Entity target)
+public enum MoveMode
+{
+    /// <summary>Close enough already; the plan is no actions at all.</summary>
+    AlreadyThere,
+
+    /// <summary>Reaction-drive transfer within the current SOI — phasing or Hohmann rendezvous.</summary>
+    NewtonianTransfer,
+
+    /// <summary>Alcubierre bubble.</summary>
+    Warp,
+}
+
+
+
+public class MoveSubordinatesTo : IGoalToGoalsPlanner
+{
+    public GoalType Type => GoalType.MoveTo;
+
+    /// <summary>
+    /// Everyone goes to the same place, so this is a straight hand-down: the sub-goal is the goal.
+    /// Which *kind* of move each subunit makes is its own planner's call.
+    /// </summary>
+    public IEnumerable<(Entity subordinate, Goal goal)> Plan(Goal goal, Entity fleet)
     {
-        var goals = AgentProcessor.GetOrCreateGoals(unit);
-        goals.GivenGoal = new Goal
+        if (!fleet.TryGetDataBlob<FleetDB>(out FleetDB? db))
         {
-            Type = GoalType.MoveTo,
-            TargetEntityID = target.Id,
-            Status = GoalStatus.Pending,
-        };
-        AgentProcessor.RunAgentNow(unit);
+            goal.Status = GoalStatus.Failed;
+            goal.Message = "We have no subordinates to manage";
+            yield break;
+        }
+
+        foreach (var subunit in db.Children)
+        {
+            yield return (subunit, new Goal
+                             {
+                                 Type = GoalType.MoveTo,
+                                 TargetEntityID = goal.TargetEntityID,
+                             });
+        }
     }
 }
+
+
+
+public class MoveToPlan : IGoalToActionsPlanner
+{
+    public GoalType Type => GoalType.MoveTo;
+
+    public IEnumerable<EntityAction> Plan(Goal goal, Entity ship)
+    {
+        var empty = new List<EntityAction>();
+
+        if (!ship.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out Entity requested))
+            return Fail(goal, "Target not found");
+
+        if (!MoveTargeting.TryResolve(requested, out var target, out var resolveFailure))
+            return Fail(goal, resolveFailure);
+
+        if (!MovePlanner.CanMove(ship, out var immobile))
+            return Fail(goal, immobile);
+
+        DateTime now = ship.StarSysDateTime;
+        var chosen = MovePlanner.Select(MovePlanner.Evaluate(ship, target, now));
+
+        if (!chosen.Feasible)
+            return Fail(goal, chosen.Reason);
+
+        if (chosen.Mode == MoveMode.AlreadyThere)
+        {
+            // No actions to monitor, so nothing would ever roll this up. Complete it here.
+            goal.Status = GoalStatus.Completed;
+            goal.Message = "Already at target";
+            return empty;
+        }
+
+        return MovePlanner.BuildActions(ship, target, now, chosen);
+    }
+
+    static List<EntityAction> Fail(Goal goal, string message)
+    {
+        goal.Status = GoalStatus.Failed;
+        goal.Message = message;
+        return new List<EntityAction>();
+    }
+}
+
+
 
 /// <summary>
 /// Turns "what the player clicked on" into "what we can actually plot a course to".
@@ -97,17 +167,7 @@ public static class MoveTargeting
     }
 }
 
-public enum MoveMode
-{
-    /// <summary>Close enough already; the plan is no actions at all.</summary>
-    AlreadyThere,
 
-    /// <summary>Reaction-drive transfer within the current SOI — phasing or Hohmann rendezvous.</summary>
-    NewtonianTransfer,
-
-    /// <summary>Alcubierre bubble.</summary>
-    Warp,
-}
 
 /// <summary>
 /// One candidate way of getting there, with what it would cost. Infeasible options carry the
@@ -496,44 +556,6 @@ public static class MovePlanner
     }
 }
 
-public class MoveToPlan : IGoalPlanner
-{
-    public GoalType Type => GoalType.MoveTo;
 
-    public IEnumerable<EntityAction> Plan(Goal goal, Entity ship)
-    {
-        var empty = new List<EntityAction>();
 
-        if (!ship.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out Entity requested))
-            return Fail(goal, "Target not found");
 
-        if (!MoveTargeting.TryResolve(requested, out var target, out var resolveFailure))
-            return Fail(goal, resolveFailure);
-
-        if (!MovePlanner.CanMove(ship, out var immobile))
-            return Fail(goal, immobile);
-
-        DateTime now = ship.StarSysDateTime;
-        var chosen = MovePlanner.Select(MovePlanner.Evaluate(ship, target, now));
-
-        if (!chosen.Feasible)
-            return Fail(goal, chosen.Reason);
-
-        if (chosen.Mode == MoveMode.AlreadyThere)
-        {
-            // No actions to monitor, so nothing would ever roll this up. Complete it here.
-            goal.Status = GoalStatus.Completed;
-            goal.Message = "Already at target";
-            return empty;
-        }
-
-        return MovePlanner.BuildActions(ship, target, now, chosen);
-    }
-
-    static List<EntityAction> Fail(Goal goal, string message)
-    {
-        goal.Status = GoalStatus.Failed;
-        goal.Message = message;
-        return new List<EntityAction>();
-    }
-}

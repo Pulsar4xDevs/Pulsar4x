@@ -294,7 +294,12 @@ namespace Pulsar4X.Engine.Api
             var move = (MoveToBodyCommand)command;
             if (!TryResolve(move.BodyId, out var body))
                 return CommandResult.Reject($"Entity {move.BodyId} not found.");
-            MovementGoalsAndActions.AssignMoveTo(commanded, body);
+            var goal = new Goal()
+            {
+                Type = GoalType.MoveTo,
+                TargetEntityID = body.Id,
+            };
+            AgentProcessor.AssignGoal(commanded, goal);
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 
@@ -304,10 +309,13 @@ namespace Pulsar4X.Engine.Api
             if (!TryResolve(survey.BodyId, out var body))
                 return CommandResult.Reject($"Entity {survey.BodyId} not found.");
 
-            if (!_game.OrderHandler.HandleOrder(WarpFleetTowardsTargetOrder.CreateCommand(commanded, body)))
-                return CommandResult.Reject("Command rejected by engine validation.");
-
-            return Dispatch(GeoSurveyOrder.CreateCommand(faction.Id, commanded, body));
+            var goal = new Goal()
+            {
+                Type = GoalType.ServeyBodies,
+                TargetEntityID = body.Id,
+            };
+            AgentProcessor.AssignGoal(commanded, goal);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 
         private CommandResult TranslateGravSurvey(Entity faction, Entity commanded, GameCommand command)

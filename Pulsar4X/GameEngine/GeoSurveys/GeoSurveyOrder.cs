@@ -1,10 +1,61 @@
 using System;
+using System.Collections.Generic;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Extensions;
+using Pulsar4X.Fleets;
+using Pulsar4X.Movement;
 
 namespace Pulsar4X.GeoSurveys;
+
+public class ScanBodyPlan : IGoalToActionsPlanner
+{
+    public GoalType Type => GoalType.ServeyBodies;
+
+    public IEnumerable<EntityAction> Plan(Goal goal, Entity ship)
+    {
+        // Scan == get there, then survey. Reuse the MoveTo plan for the "get there" part.
+        var plan = new List<EntityAction>();
+        plan.AddRange(new MoveToPlan().Plan(goal, ship));
+        
+        plan.Add(new GeoSurveyOrder(ship, goal.TargetEntityID));
+        return plan;
+    }
+}
+
+public class ScanSystemBodiesPlan : IGoalToGoalsPlanner
+{
+    public GoalType Type => GoalType.ServeyBodies;
+
+    /// <summary>
+    /// TODO: should scan everything within the target's SOI — target the sun and we survey the whole
+    /// system, target earth and we survey earth and luna — by walking the target's PositionDB
+    /// children for anything with a GeoSurveyableDB the faction hasn't finished, then giving each
+    /// subunit a *different* body (nearest first) and topping up as ships come free.
+    ///
+    /// Two things are missing before that can work: this only gets one pass (AgentProcessor plans on
+    /// Pending and monitors thereafter), so there is nowhere to hand out the next body from; 
+    /// </summary>
+    public IEnumerable<(Entity subordinate, Goal goal)> Plan(Goal goal, Entity fleet)
+    {
+        if (!fleet.TryGetDataBlob<FleetDB>(out FleetDB? db))
+        {
+            goal.Status = GoalStatus.Failed;
+            goal.Message = "We have no subordinates to manage";
+            yield break;
+        }
+
+        foreach (var subunit in db.Children)
+        {
+            yield return (subunit, new Goal
+            {
+                Type = GoalType.ServeyBodies,
+                TargetEntityID = goal.TargetEntityID,
+            });
+        }
+    }
+}
 
 public class GeoSurveyOrder : EntityAction
 {
@@ -28,6 +79,12 @@ public class GeoSurveyOrder : EntityAction
     }
 
     public GeoSurveyOrder() { }
+    
+    public GeoSurveyOrder(Entity commandingEntity, int target) : 
+        this(commandingEntity, commandingEntity.Manager.GetGlobalEntityById(target))
+    {
+    }
+    
     public GeoSurveyOrder(Entity commandingEntity, Entity target)
     {
         _entityCommanding = commandingEntity;

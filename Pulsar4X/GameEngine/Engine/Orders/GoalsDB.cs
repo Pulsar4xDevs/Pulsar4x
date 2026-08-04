@@ -17,7 +17,7 @@ public class GoalsDB : BaseDataBlob
         [GoalType.MakeProfit]       = 0.7f,
         [GoalType.ExploreJP]        = 0.5f,
         [GoalType.SurveySystem]     = 0.5f,
-        [GoalType.ScanBodies]       = 0.5f,
+        [GoalType.ServeyBodies]       = 0.5f,
         [GoalType.ScanAnomalies]    = 0.5f,
         [GoalType.Mine]             = 0.5f,
         [GoalType.Colonise]         = 0.5f,
@@ -66,7 +66,7 @@ public enum GoalType
     // Explorative
     ExploreJP,
     SurveySystem,
-    ScanBodies,
+    ServeyBodies,
     ScanAnomalies,
 
     // Exploitative

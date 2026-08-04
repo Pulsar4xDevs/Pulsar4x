@@ -49,7 +49,7 @@ public class NewtonSimpleAction : EntityAction
     }
 
     /// <summary>
-    /// Builds the action but does NOT queue it — the caller (usually an IGoalPlanner) submits it
+    /// Builds the action but does NOT queue it — the caller (usually an IGoalToActionsPlanner) submits it
     /// so that it can be tagged with the goal it belongs to. Same convention as
     /// WarpMoveAction.CreateCommandEZ.
     /// </summary>

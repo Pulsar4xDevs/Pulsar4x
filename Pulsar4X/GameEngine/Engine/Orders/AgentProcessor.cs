@@ -17,25 +17,59 @@ using Pulsar4X.Ships;
 
 namespace GameEngine.Engine.Orders;
 
+interface IGoalToActionsPlanner
+{
+    GoalType Type { get; } 
+    IEnumerable<EntityAction> Plan(Goal goal, Entity ship);
+}
+
+interface IGoalToGoalsPlanner
+{
+    GoalType Type { get; }
+
+    /// <summary>
+    /// Sub-goals to hand down to subordinates. Yield only: AgentProcessor tags each one with its
+    /// parent goal, records it against the subordinate and wakes that subordinate's agent. A planner
+    /// with nothing to hand out should resolve <paramref name="goal"/> itself (Completed/Failed).
+    /// </summary>
+    IEnumerable<(Entity subordinate, Goal goal)> Plan(Goal goal, Entity fleet);
+}
+
 public class AgentProcessor : IInstanceProcessor
 {
     // How often an agent with an active goal wakes to re-check progress / re-plan.
     private static readonly TimeSpan RecheckInterval = TimeSpan.FromMinutes(30);
 
-    // One planner per goal type: adding a goal type == adding an IGoalPlanner, no switch.
-    private static readonly Dictionary<GoalType, IGoalPlanner> _planners;
+    // Time to hand a goal down one echelon. Placeholder: should scale with administrator skill,
+    // staff size (AdminSpaceAtb.ConsoleSpace) and subordinate count.
+    private static readonly TimeSpan RelayDelay = TimeSpan.FromSeconds(1);
+
+    // One planner per goal type: adding a goal type == adding an IGoalToActionsPlanner, no switch.
+    private static readonly Dictionary<GoalType, IGoalToActionsPlanner> _actionPlanners;
+    private static readonly Dictionary<GoalType, IGoalToGoalsPlanner> _goalPlanners;
 
     static AgentProcessor()
     {
-        _planners = new Dictionary<GoalType, IGoalPlanner>();
-        foreach (var planner in new IGoalPlanner[]
+        _actionPlanners = new Dictionary<GoalType, IGoalToActionsPlanner>();
+        foreach (var planner in new IGoalToActionsPlanner[]
                  {
                      new MoveToPlan(),
-                     new ScanBodiesPlan(),
+                     new ScanBodyPlan(),
                  })
         {
-            _planners[planner.Type] = planner;
+            _actionPlanners[planner.Type] = planner;
         }
+        
+        _goalPlanners = new Dictionary<GoalType, IGoalToGoalsPlanner>();
+        foreach (var planner in new IGoalToGoalsPlanner[]
+                 {
+                     new MoveSubordinatesTo(),
+                     new ScanSystemBodiesPlan(),
+                 })
+        {
+            _goalPlanners[planner.Type] = planner;
+        }
+        
     }
 
 
@@ -57,15 +91,22 @@ public class AgentProcessor : IInstanceProcessor
         if (!managedEntity.TryGetDataBlob<GoalsDB>(out var goalsDB))
             return; // nothing tasked
         
+        //if we have subordinates, we create goals for them 
         if (managedEntity.HasDataBlob<FleetDB>())
             GoalsProcessor(entity, goalsDB, managedEntity, atDateTime);
+        //else if we are a single ship (or eventialy a colony) we create actions.
         else if (managedEntity.HasDataBlob<ShipInfoDB>())
             ActionsProcessor(entity, goalsDB, managedEntity, atDateTime);
     }
 
     // -----------------------------------------------------------------
-    // BRANCH: a fleet's concrete goal is handed down as a sub-goal to each
-    // capable child; each child is itself an agent that plans on its own wake.
+    // BRANCH: a fleet's concrete goal is decomposed into sub-goals by the planner for that goal
+    // type, handed to its subordinates, then monitored. Each subordinate is itself an agent that
+    // plans on its own wake.
+    //
+    // Deliberately the same shape as ActionsProcessor below — plan, submit, roll up — over this
+    // agent's kind of work item. A fleet's work items are its subordinates' goals, where a ship's
+    // are the actions in its queue.
     //
     // We decompose the *concrete* GivenGoal (it carries a target). The abstract
     // weighted EffectiveGoals are NOT used here: they carry no target and are
@@ -75,55 +116,65 @@ public class AgentProcessor : IInstanceProcessor
     static void GoalsProcessor(Entity agentHost, GoalsDB goalsDB, Entity fleet, DateTime atDateTime)
     {
         var goal = goalsDB.GivenGoal;
-        if (goal == null || goal.Type != GoalType.MoveTo) return;
+        if (goal == null) return; // no concrete tasking (autonomous mode not wired yet)
         if (goal.Status is GoalStatus.Completed or GoalStatus.Failed) return;
 
-        goal.Status = GoalStatus.Active;
+        goalsDB.ActiveGoal = goal;
 
-        if (!fleet.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var target))
+        switch (goal.Status)
         {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "MoveTo target not found";
-            return;
-        }
-
-        var fleetDB = fleet.GetDataBlob<FleetDB>();
-        bool anyAssigned = false;
-        bool allDone = true;
-
-        foreach (var child in fleetDB.Children.ToArray())
-        {
-            // A ship must be able to move itself somehow; sub-fleets decompose themselves.
-            // Which *kind* of move is MovePlanner's call, not ours.
-            if (child.HasDataBlob<ShipInfoDB>() && !MovePlanner.CanMove(child, out _))
-                continue;
-
-            var childGoals = GetOrCreateGoals(child);
-            var childGoal = childGoals.GivenGoal;
-
-            // Assign once, then leave it alone (idempotent across re-checks).
-            if (childGoal == null || childGoal.ParentGoalId != goal.Id)
+            case GoalStatus.Pending:
             {
-                childGoal = new Goal
+                if (!_goalPlanners.TryGetValue(goal.Type, out var planner))
                 {
-                    Type = GoalType.MoveTo,
-                    TargetEntityID = target.Id,
-                    ParentGoalId = goal.Id,
-                    Status = GoalStatus.Pending,
-                };
-                childGoals.GivenGoal = childGoal;
-                ScheduleAgent(child, atDateTime + TimeSpan.FromSeconds(1));
+                    Fail(goal, $"no planner for {goal.Type}");
+                    return;
+                }
+
+                try
+                {
+                    foreach (var (subordinate, subGoal) in planner.Plan(goal, fleet))
+                    {
+                        subGoal.ParentGoalId = goal.Id;
+                        // Handing a goal down an echelon costs game time, so the subordinate plans
+                        // on its own wake rather than synchronously inside our pass.
+                        AssignGoal(subordinate, subGoal, atDateTime + RelayDelay);
+                    }
+                }
+                catch (Exception e)
+                {
+                    // Fail the goal rather than crash the pulse.
+                    Fail(goal, e.Message);
+                    return;
+                }
+
+                // A planner may have resolved the goal itself: Failed (no subordinates, nothing
+                // capable) or Completed (nothing to do, so it handed nothing down). Only advance a
+                // goal that is still Pending — otherwise a zero-subgoal plan gets set to Active
+                // and, having nothing to roll up, reschedules forever.
+                if (goal.Status != GoalStatus.Pending)
+                    break;
+
+                goal.Status = GoalStatus.Active;
+                ScheduleAgent(agentHost, atDateTime + RecheckInterval);
+                break;
             }
-
-            anyAssigned = true;
-            if (childGoal.Status != GoalStatus.Completed)
-                allDone = false;
+            case GoalStatus.Active:
+            {
+                // TODO: no cancel-propagation yet. ActionsProcessor calls queue.ClearFor(goal) when
+                // it resolves; the equivalent here is standing subordinates down, which means
+                // clearing their GivenGoal *and* the actions it spawned. Until then a failed sibling
+                // keeps flying.
+                var mine = SubGoalsOf(fleet, goal);
+                if (mine.Count > 0 && mine.All(g => g.Status == GoalStatus.Completed))
+                    goal.Status = GoalStatus.Completed;
+                else if (mine.Any(g => g.Status == GoalStatus.Failed))
+                    Fail(goal, "a subordinate's goal failed");
+                else
+                    ScheduleAgent(agentHost, atDateTime + RecheckInterval); // still running
+                break;
+            }
         }
-
-        if (anyAssigned && allDone)
-            goal.Status = GoalStatus.Completed;
-        else
-            ScheduleAgent(agentHost, atDateTime + RecheckInterval);
     }
 
     // -----------------------------------------------------------------
@@ -143,10 +194,9 @@ public class AgentProcessor : IInstanceProcessor
         {
             case GoalStatus.Pending:
             {
-                if (!_planners.TryGetValue(goal.Type, out var planner))
+                if (!_actionPlanners.TryGetValue(goal.Type, out var planner))
                 {
-                    goal.Status = GoalStatus.Failed;
-                    goal.Message = $"no planner for {goal.Type}";
+                    Fail(goal, $"no planner for {goal.Type}");
                     return;
                 }
 
@@ -164,8 +214,7 @@ public class AgentProcessor : IInstanceProcessor
                 {
                     // Movement plotting can throw on states it can't predict; fail the
                     // goal rather than crash the pulse.
-                    goal.Status = GoalStatus.Failed;
-                    goal.Message = e.Message;
+                    Fail(goal, e.Message);
                     return;
                 }
 
@@ -191,8 +240,7 @@ public class AgentProcessor : IInstanceProcessor
                 }
                 else if (mine.Any(a => a.Status == ActionStatus.Failed))
                 {
-                    goal.Status = GoalStatus.Failed;
-                    goal.Message = "an action failed";
+                    Fail(goal, "an action failed");
                     queue.ClearFor(goal);
                 }
                 else
@@ -215,6 +263,57 @@ public class AgentProcessor : IInstanceProcessor
             entity.SetDataBlob(goals);
         }
         return goals;
+    }
+
+    /// <summary>
+    /// The one place a goal is given to a unit: records it and wakes that unit's agent. Planners
+    /// yield sub-goals and let this do the handing over, so the assignment rules live here rather
+    /// than being re-implemented per planner.
+    /// </summary>
+    /// <param name="when">
+    /// When the unit should start planning. Null means "now, synchronously" — only the player/AI
+    /// command seam should do that, so a new order is acknowledged immediately. Goals handed down an
+    /// echelon pass a time and pay <see cref="RelayDelay"/>.
+    /// </param>
+    internal static void AssignGoal(Entity unit, Goal goal, DateTime? when = null)
+    {
+        GetOrCreateGoals(unit).GivenGoal = goal;
+
+        if (when == null)
+            RunAgentNow(unit);
+        else
+            ScheduleAgent(unit, when.Value);
+    }
+
+    /// <summary>
+    /// This agent's work items: the sub-goals its subordinates are currently holding on behalf of
+    /// <paramref name="goal"/>. Counterpart to <see cref="ActionQueueDB.ActionsFor(Goal)"/>.
+    ///
+    /// A subordinate's GivenGoal is the same Goal instance we handed it, so its status changes are
+    /// visible here with no further plumbing.
+    /// </summary>
+    static List<Goal> SubGoalsOf(Entity fleet, Goal goal)
+    {
+        var subGoals = new List<Goal>();
+        if (!fleet.TryGetDataBlob<FleetDB>(out var fleetDB)) return subGoals;
+
+        foreach (var child in fleetDB.Children)
+        {
+            if (child.TryGetDataBlob<GoalsDB>(out var childGoals)
+                && childGoals.GivenGoal != null
+                && childGoals.GivenGoal.ParentGoalId == goal.Id)
+            {
+                subGoals.Add(childGoals.GivenGoal);
+            }
+        }
+
+        return subGoals;
+    }
+
+    static void Fail(Goal goal, string message)
+    {
+        goal.Status = GoalStatus.Failed;
+        goal.Message = message;
     }
 
     static void ScheduleAgent(Entity unit, DateTime when)
@@ -244,7 +343,7 @@ public class AgentProcessor : IInstanceProcessor
             {
                 GoalType.StayAlive or GoalType.DontRunOutOfFuel => true,
                 GoalType.ExploreJP => entity.HasOrChildHasAbility<SensorAbilityDB>(),
-                GoalType.SurveySystem or GoalType.ScanBodies => entity.HasOrChildHasAbility<GeoSurveyAbilityDB>(),
+                GoalType.SurveySystem or GoalType.ServeyBodies => entity.HasOrChildHasAbility<GeoSurveyAbilityDB>(),
                 GoalType.ScanAnomalies => entity.HasOrChildHasAbility<JPSurveyAbilityDB>(),
                 GoalType.Mine => entity.HasOrChildHasAbility<MiningDB>(),
                 GoalType.ListeningPost => entity.HasOrChildHasAbility<SensorAbilityDB>(),

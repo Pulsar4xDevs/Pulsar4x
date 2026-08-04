@@ -290,6 +290,28 @@ currently a "reject with a reason" branch rather than a wrong answer; the commen
       02:14") — makes the cost of a deep chain of command visible.
 
 **Design — open**
+- [ ] **Wake the agent when its actions resolve, instead of only polling.** Goal rollup happens on
+      `RecheckInterval` (30 min), so a goal is resolved up to that late and the latency **compounds
+      per echelon** — ship finishes, up to 30 min for its own agent to mark `Completed`, up to 30 min
+      more for the fleet to see it in `SubGoalsOf`. The failure path is worse than late: a `Failed`
+      action deliberately keeps holding its `ActionLane` (see below), so the unit is *frozen* until
+      the agent runs `ClearFor`. Fix is for `ActionQueueProcessor` to `ScheduleAgent` when an action
+      of a goal-linked plan transitions to `Succeeded`/`Failed` — detect the *transition*, not the
+      state, or the retention window turns the 30 min poll into a 10 min one. Schedule rather than
+      `RunAgentNow`: re-entering the planner inside the queue's own pass has it mutate the
+      `ActionList` being processed, and decision 5 says agent work costs game time anyway.
+      Not urgent for correctness — the queue drives a multi-action plan forward on its own without
+      the agent — but it is global to every goal type, and it's the hook mid-flight **replanning**
+      wants later: `BuildActions` commits every `ActionOnDate` at plan time, so action boundaries are
+      the natural place to re-evaluate. That needs a replan path in the `Active` branch plus the
+      "replan from an arbitrary state vector" item above; don't build it until those land.
+- [ ] **`Failed` actions hold their lane on purpose; `Succeeded` ones must not.** The lane mask in
+      `ActionQueueProcessor` has no un-mask step — it is rebuilt each pass from whatever is in
+      `ActionList`, which was self-cleaning while finished actions were removed unconditionally.
+      Retaining goal-linked actions for rollup broke that, hence the `Status == Succeeded` skip at
+      the top of the loop. `Failed` is excluded from that skip deliberately: unblocking the lane
+      before the agent tears the plan down would fire burn 2 of a transfer whose burn 1 failed.
+      Any future lane/queue work needs to preserve both halves of that.
 - [ ] **Re-examine `GoalType`** (decision 6): string id vs enum, `BaseWeights` as data, and the
       implicit player-issued / autonomously-selected split.
 - [ ] Implement `CanAccept` (decision 2) including the up-tree seat walk.
