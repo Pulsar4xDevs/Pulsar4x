@@ -291,11 +291,19 @@ namespace Pulsar4X.Movement
 
         static void SetOrbitHereSimpleNewt(Entity entity, WarpMovingDB moveDB, DateTime atDateTime)
         {
-            var newOrbit = moveDB.EndpointTargetOrbit;
+            
             var mass = moveDB.TargetEntity.GetDataBlob<MassVolumeDB>().MassTotal;
             mass += entity.GetDataBlob<MassVolumeDB>().MassTotal;
             var sgp = GeneralMath.StandardGravitationalParameter(mass);
+            
+            var newOrbit = moveDB.EndpointTargetOrbit;
+            //check if the orbit is actualy valid and not just default values
+            if (newOrbit.StandardGravParameter == 0) //if it is default values, then we just drop it in a trajectory from it's position and velocity.
+            {
+                newOrbit = OrbitMath.KeplerFromPositionAndVelocity(sgp, moveDB.ExitPointrelative, moveDB.SavedNewtonionVector, atDateTime);
+            }
 
+            
             var currentOrbit = OrbitMath.KeplerFromPositionAndVelocity(sgp, moveDB.ExitPointrelative, moveDB.SavedNewtonionVector, atDateTime);
 
             var target = moveDB.TargetEntity;

@@ -87,6 +87,30 @@ namespace Pulsar4X.Movement
             return orderEntity.Manager.Game.OrderHandler.HandleOrder(cmd);
         }
 
+        /// <summary>
+        /// Warp transit only. No circularisation / insertion planning.
+        /// Caller (MovePlanner) is responsible for any follow-on Newton action.
+        /// </summary>
+        public static WarpMoveAction CreateWarpOnly(
+            Entity orderEntity,
+            Entity targetEntity,
+            DateTime transitStartDatetime,
+            Vector3 endpointRelativePos = default)
+        {
+            if (!MoveTargeting.TryResolve(targetEntity, out targetEntity, out var resolveFailure))
+                throw new InvalidOperationException($"Cannot plot a warp to {targetEntity.Id}: {resolveFailure}");
+
+            return new WarpMoveAction
+            {
+                RequestingFactionGuid = orderEntity.FactionOwnerID,
+                EntityCommandingGuid = orderEntity.Id,
+                CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
+                TargetEntityGuid = targetEntity.Id,
+                TransitStartDateTime = transitStartDatetime,
+                EndpointRelitivePosition = endpointRelativePos,
+                // EndpointTargetOrbit left default — no circularisation planned by this action
+            };
+        }
         
         /// <summary>
         /// Creates a warp order with an attempted simplenewt circular orbit post warp.

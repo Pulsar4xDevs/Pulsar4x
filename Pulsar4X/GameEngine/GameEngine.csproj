@@ -30,7 +30,4 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Movement\NavSequence\" />
-  </ItemGroup>
 </Project>

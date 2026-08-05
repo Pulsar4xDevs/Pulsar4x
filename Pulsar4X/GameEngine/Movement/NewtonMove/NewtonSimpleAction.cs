@@ -16,7 +16,7 @@ public class NewtonSimpleAction : EntityAction
     public override bool IsBlocking => true;
     public override string Name { get {return _name;}}
 
-    string _name = "Newtonion Simple thrust";
+    string _name = "Newtonion Manuver";
 
     public override string Details
     {

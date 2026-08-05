@@ -520,11 +520,13 @@ public static class MovePlanner
         {
             case MoveMode.AlreadyThere:
                 break;
-
+            
             case MoveMode.Warp:
-                actions.Add(WarpMoveAction.CreateCommandEZ(ship, target, now));
+            {
+                actions.AddRange(BuildWarpAndCircularise(ship, target, now));
                 break;
-
+            }
+            
             case MoveMode.NewtonianTransfer:
                 actions.AddRange(BuildBurns(ship, now, chosen.Manuvers));
                 break;
@@ -533,6 +535,70 @@ public static class MovePlanner
         return actions;
     }
 
+    internal static List<EntityAction> BuildWarpAndCircularise(Entity orderEntity, Entity targetEntity, DateTime now)
+    {
+        var actions = new List<EntityAction>();
+        // 1. pure transit
+        var lowOrbitRadius = OrbitMath.LowOrbitRadius(targetEntity);
+        (Vector3 pos, Vector3 vel) departureState;
+        if(orderEntity.Manager.Game.Settings.UseRelativeVelocity)
+        {
+            departureState = MoveMath.GetRelativeFutureState(orderEntity, now);
+        }
+        else
+            departureState = MoveMath.GetAbsoluteState(orderEntity, now);        
+        var perpVec = Vector3.Normalise(new Vector3(departureState.vel.Y * -1, departureState.vel.X, 0));
+        var endWarpPos = perpVec * lowOrbitRadius;
+        
+        
+        actions.Add(WarpMoveAction.CreateWarpOnly(orderEntity, targetEntity, now, endWarpPos));
+        
+        switch (targetEntity.GetDataBlob<PositionDB>().MoveType) //if the targetEntity's movetype is this:
+        {
+            case PositionDB.MoveTypes.None: //this means it's a grav anomaly, jump point
+            {
+                break;
+            }
+            case PositionDB.MoveTypes.Orbit:
+            {
+                var sgp = OrbitMath.SGP(targetEntity, orderEntity);
+
+                (Vector3 pos, DateTime eti) targetIntercept  = WarpMath.GetInterceptPosition(orderEntity, targetEntity, now, endWarpPos);
+                var targetOrbit = OrbitMath.KeplerCircularFromPosition(sgp, endWarpPos, targetIntercept.eti);
+                var lowOrbitState = OrbitMath.GetStateVectors(targetOrbit, targetIntercept.eti);
+                var targetEntityOrbitDb = targetEntity.GetDataBlob<OrbitDB>();
+                Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(departureState.vel, targetEntityOrbitDb, targetIntercept.eti);
+                var deltaVRequired = insertionVector - (Vector3)lowOrbitState.velocity;
+                var endWarpOrbit = OrbitMath.KeplerFromPositionAndVelocity(sgp, endWarpPos, insertionVector, targetIntercept.eti);
+
+                actions.Add(NewtonSimpleAction.CreateCommand(orderEntity.FactionOwnerID, orderEntity, targetIntercept.eti, endWarpOrbit, targetOrbit));
+                
+                break;
+            }
+            case PositionDB.MoveTypes.NewtonSimple:
+            case PositionDB.MoveTypes.NewtonComplex:
+                // A targetEntity under thrust has no closed-form future position, so WarpMath can't
+                // solve the intercept. MovePlanner rejects these before we get here; if we're
+                // reached anyway it's a bug in the caller, not a case to guess at.
+                throw new NotImplementedException(
+                    $"No warp intercept solution against a {targetEntity.GetDataBlob<PositionDB>().MoveType} targetEntity.");
+
+            case PositionDB.MoveTypes.Warp:
+                // MoveTargeting.TryResolve chases warping targets to their destination, so a
+                // warping targetEntity should be impossible by this point.
+                throw new InvalidOperationException("Warp targetEntity was not resolved to its destination.");
+
+            default:
+                throw new NotImplementedException();
+        }
+    
+        
+        
+        
+        return actions;
+
+    }
+    
     /// <summary>
     /// Prograde-frame burns become NewtonSimpleActions: each carries the orbit it starts from and
     /// the orbit it should end in, and NewtonSimpleProcessor charges the fuel for the difference.
