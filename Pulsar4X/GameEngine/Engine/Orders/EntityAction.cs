@@ -112,11 +112,7 @@ namespace GameEngine.Engine.Orders
         protected bool _isFinished = false;
         [Obsolete]
         public bool GetIsFinished { get { return _isFinished; }}
-
-        public GoalStatus GetStatus
-        { get { return _goalStatus; } }
-        [JsonProperty]
-        protected GoalStatus _goalStatus = GoalStatus.Pending;
+        
         
         public abstract EntityAction Clone();
     }

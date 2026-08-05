@@ -15,12 +15,23 @@ public class ScanBodyPlan : IGoalToActionsPlanner
 
     public IEnumerable<EntityAction> Plan(Goal goal, Entity ship)
     {
-        // Scan == get there, then survey. Reuse the MoveTo plan for the "get there" part.
-        var plan = new List<EntityAction>();
-        plan.AddRange(new MoveToPlan().Plan(goal, ship));
-        
+        // Capability gate first (mirrors what PruneImpossibleGoals will eventually do via CanPerform)
+        if (!ship.HasOrChildHasAbility<GeoSurveyAbilityDB>())
+            return Fail(goal, "no geo-survey capability");
+
+        if (!MovePlanner.TryBuildMoveActions(ship, goal.TargetEntityID, out var moveActions, out var moveReason))
+            return Fail(goal, moveReason);
+
+        var plan = new List<EntityAction>(moveActions);
         plan.Add(new GeoSurveyOrder(ship, goal.TargetEntityID));
         return plan;
+    }
+
+    static IEnumerable<EntityAction> Fail(Goal goal, string message)
+    {
+        goal.Status = GoalStatus.Failed;
+        goal.Message = message;
+        return Array.Empty<EntityAction>();
     }
 }
 
@@ -39,20 +50,41 @@ public class ScanSystemBodiesPlan : IGoalToGoalsPlanner
     /// </summary>
     public IEnumerable<(Entity subordinate, Goal goal)> Plan(Goal goal, Entity fleet)
     {
-        if (!fleet.TryGetDataBlob<FleetDB>(out FleetDB? db))
+        if (!fleet.TryGetDataBlob<FleetDB>(out var db))
         {
             goal.Status = GoalStatus.Failed;
             goal.Message = "We have no subordinates to manage";
             yield break;
         }
 
+        bool any = false;
         foreach (var subunit in db.Children)
         {
+            // 1. Can it survey?
+            if (!subunit.HasOrChildHasAbility<GeoSurveyAbilityDB>())
+                continue;
+
+            // 2. Can it physically get there? (cheap gate; strengthen later if needed)
+            if (!MovePlanner.CanMove(subunit, out _))
+                continue;
+
+            // 3. Future: weighting / CapabilityModifiers
+            // var childGoals = AgentProcessor.GetOrCreateGoals(subunit);
+            // if (childGoals.CapabilityModifiers.TryGetValue(GoalType.ServeyBodies, out var w) && w < 0)
+            //     continue;
+
+            any = true;
             yield return (subunit, new Goal
-            {
-                Type = GoalType.ServeyBodies,
-                TargetEntityID = goal.TargetEntityID,
-            });
+                             {
+                                 Type = GoalType.ServeyBodies,
+                                 TargetEntityID = goal.TargetEntityID,
+                             });
+        }
+
+        if (!any)
+        {
+            goal.Status = GoalStatus.Failed;
+            goal.Message = "no capable subordinates can reach or survey the target";
         }
     }
 }

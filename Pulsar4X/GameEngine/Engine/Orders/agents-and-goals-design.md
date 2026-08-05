@@ -224,14 +224,19 @@ abstraction", and `Trade`/`DontRunOutOfFuel` show those come apart.
 ## TODO
 
 **Bugs**
+- [x] ~~`ActionQueueProcessor` line 80 to 87 is broken, actions from goals never get cleaned up. 
+    We need to figure out how this is suposed to happen. I guess the agent needs to run, re-evaluate, and clean up as soon as an action gets marked as Finished.
+    currently anything queued never runs if it's being blocked by the movement.~~ 
+- fixed, agent now gets run as soon as the action is complete, and removes finished actions from the list.     
 - [ ] `AdminSpaceAtb.OnComponentUninstallation` throws `NotImplementedException` — uninstalling a
       bridge crashes, and `CommandTranslator.TranslateUninstallComponent` can reach it.
 - [ ] `AdminSpaceProcessor.CalcEntityAdminSpace:33` accumulates `seats += atb.ConsoleSpace` and never
       uses it — one seat per component regardless. Needed by decision 5.
 - [ ] `TranslateMoveToBody` has no visibility check on the target; `TranslateWarpMove` does
       (`IsEntityVisibleToFaction`). A faction can currently order a move to a body it hasn't seen.
-- [ ] `NavSequenceProcessor` appears to `RemoveAt(0)` twice on the same sequence — one manoeuvre in
-      every pair gets dropped.
+- [x] ~~`NavSequenceProcessor` appears to `RemoveAt(0)` twice on the same sequence — one manoeuvre in
+      every pair gets dropped.~~ 
+- NavSquence has been removed.
 
 **Refactor (decision 6)**
 - [ ] Auto-discover `IGoalPlanner` by reflection, as `ProcessManager.CreateProcessors` does.

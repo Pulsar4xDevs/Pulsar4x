@@ -235,7 +235,7 @@ namespace Pulsar4X.Logistics
             var postManuverState = OrbitMath.GetStateVectors(startKE, dateTime);
             pos = postManuverState.position;
             vel = new Vector3(postManuverState.velocity.X, postManuverState.velocity.Y, 0);
-
+/*
             if(!ship.TryGetDataBlob<NavSequenceDB>(out NavSequenceDB? navDB))
             {
                 navDB = new NavSequenceDB();
@@ -264,6 +264,7 @@ namespace Pulsar4X.Logistics
                 targetBody,
                 endKE
             );
+            */
 
 
             ManuverState mstate = new ManuverState()

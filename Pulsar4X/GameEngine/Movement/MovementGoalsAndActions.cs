@@ -474,11 +474,45 @@ public static class MovePlanner
     // ---------------------------------------------------------------------
     // Action construction
     // ---------------------------------------------------------------------
+    // MovementGoalsAndActions / MovePlanner
+    
+    /// <summary>
+    /// Build the movement actions only. Never touches goal.Status.
+    /// Returns false (with reason) when the move is impossible.
+    /// AlreadyThere yields an empty list and true.
+    /// </summary>
+    public static bool TryBuildMoveActions(Entity ship, int targetId,
+                                           out List<EntityAction> actions, out string reason)
+    {
+        actions = new List<EntityAction>();
+        reason = string.Empty;
 
+        if (!ship.Manager.TryGetGlobalEntityById(targetId, out var requested))
+        {
+            reason = "Target not found";
+            return false;
+        }
+        if (!MoveTargeting.TryResolve(requested, out var target, out reason))
+            return false;
+        if (!CanMove(ship, out reason))
+            return false;
+
+        var chosen = Select(Evaluate(ship, target, ship.StarSysDateTime));
+        if (!chosen.Feasible)
+        {
+            reason = chosen.Reason;
+            return false;
+        }
+        if (chosen.Mode == MoveMode.AlreadyThere)
+            return true;                       // empty actions, success
+
+        actions = BuildActions(ship, target, ship.StarSysDateTime, chosen);
+        return true;
+    }
     /// <summary>
     /// Turn the chosen option into queued actions. Returns an empty list for AlreadyThere.
     /// </summary>
-    public static List<EntityAction> BuildActions(Entity ship, Entity target, DateTime now, MoveOption chosen)
+    internal static List<EntityAction> BuildActions(Entity ship, Entity target, DateTime now, MoveOption chosen)
     {
         var actions = new List<EntityAction>();
 

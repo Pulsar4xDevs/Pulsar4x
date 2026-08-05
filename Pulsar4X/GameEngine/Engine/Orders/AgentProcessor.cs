@@ -232,20 +232,24 @@ public class AgentProcessor : IInstanceProcessor
             }
             case GoalStatus.Active:
             {
-                var mine = queue.ActionsFor(goal);
-                if (mine.Count > 0 && mine.All(a => a.Status == ActionStatus.Succeeded))
-                {
-                    goal.Status = GoalStatus.Completed;
-                    queue.ClearFor(goal);
-                }
-                else if (mine.Any(a => a.Status == ActionStatus.Failed))
+                var actions = queue.ActionsFor(goal);
+
+                if (actions.Any(a => a.Status == ActionStatus.Failed))
                 {
                     Fail(goal, "an action failed");
-                    queue.ClearFor(goal);
+                    queue.ClearFor(goal);          // removes everything, including the Failed that was holding the lane
                 }
                 else
                 {
-                    ScheduleAgent(agentHost, atDateTime + RecheckInterval); // still running
+                    // prune the ones that are already done; leave Running / Queued alone
+                    queue.ActionList.RemoveAll(a =>
+                                                   a.ParentGoalId == goal.Id && a.Status == ActionStatus.Succeeded);
+
+                    // if nothing left for this goal, we are finished
+                    if (!queue.ActionsFor(goal).Any())
+                        goal.Status = GoalStatus.Completed;
+                    else
+                        ScheduleAgent(agentHost, atDateTime + RecheckInterval); // safety-net only
                 }
                 break;
             }
@@ -316,11 +320,11 @@ public class AgentProcessor : IInstanceProcessor
         goal.Message = message;
     }
 
-    static void ScheduleAgent(Entity unit, DateTime when)
+    internal static void ScheduleAgent(Entity unit, DateTime when)
     {
         unit.Manager.ManagerSubpulses.AddEntityInterupt(when, nameof(AgentProcessor), unit);
     }
-    static internal void RunAgentNow(Entity unit)
+    internal static void RunAgentNow(Entity unit)
     {
         var timenow = unit.StarSysDateTime;
         ProcessEntityStatic( unit, timenow);

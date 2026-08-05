@@ -15,9 +15,13 @@ public class GoalsDB : BaseDataBlob
         [GoalType.StayAlive]        = 1.0f,
         [GoalType.DontRunOutOfFuel] = 0.9f,
         [GoalType.MakeProfit]       = 0.7f,
+        [GoalType.HelpOwn]          = 0.8f,
+        [GoalType.HelpAllied]       = 0.75f,
+        [GoalType.HelpFrendly]      = 0.74f,
+        [GoalType.HelpNeutral]      = 0.73f,
         [GoalType.ExploreJP]        = 0.5f,
         [GoalType.SurveySystem]     = 0.5f,
-        [GoalType.ServeyBodies]       = 0.5f,
+        [GoalType.ServeyBodies]     = 0.5f,
         [GoalType.ScanAnomalies]    = 0.5f,
         [GoalType.Mine]             = 0.5f,
         [GoalType.Colonise]         = 0.5f,
@@ -30,6 +34,7 @@ public class GoalsDB : BaseDataBlob
         [GoalType.Defend]           = 0.5f,
         [GoalType.Intercept]        = 0.5f,
         [GoalType.Blockade]         = 0.5f,
+        [GoalType.Stealth]           = 0.0f,
     };
 
     public Goal? ParentGoal { get; set; }
@@ -62,6 +67,10 @@ public enum GoalType
     StayAlive,
     DontRunOutOfFuel,
     MakeProfit,
+    HelpOwn,
+    HelpAllied,
+    HelpFrendly,
+    HelpNeutral,
 
     // Explorative
     ExploreJP,
@@ -83,6 +92,7 @@ public enum GoalType
     Defend,
     Intercept,
     Blockade,
+    Stealth,
 
     // Generic
     MoveTo,
