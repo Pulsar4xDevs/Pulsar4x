@@ -326,11 +326,11 @@ namespace Pulsar4X.Logistics
                 targetBody,
                 startState.At);
             ship.Manager.Game.OrderHandler.HandleOrder(cmd);
-
-            var dv = cmd.EndpointTargetExpendDeltaV.Length();
+            
+    
             double ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
-            double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(shipMass, ve, dv);
-            tsec += OrbitMath.BurnTime(ship, dv, shipMass);
+            double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(shipMass, ve, deltaV);
+            tsec += OrbitMath.BurnTime(ship, deltaV, shipMass);
             dateTime = dateTime + TimeSpan.FromSeconds(tsec);
             fuelUse += fuelBurned;
             shipMass -= fuelBurned;
