@@ -118,9 +118,7 @@ public class AgentProcessor : IInstanceProcessor
         var goal = goalsDB.GivenGoal;
         if (goal == null) return; // no concrete tasking (autonomous mode not wired yet)
         if (goal.Status is GoalStatus.Completed or GoalStatus.Failed) return;
-
-        goalsDB.ActiveGoal = goal;
-
+        
         switch (goal.Status)
         {
             case GoalStatus.Pending:
@@ -187,9 +185,7 @@ public class AgentProcessor : IInstanceProcessor
         if (goal == null) return; // no concrete tasking (autonomous mode not wired yet)
         if (goal.Status is GoalStatus.Completed or GoalStatus.Failed) return;
         if (!ship.TryGetDataBlob<ActionQueueDB>(out var queue)) return;
-
-        goalsDB.ActiveGoal = goal;
-
+        
         switch (goal.Status)
         {
             case GoalStatus.Pending:
@@ -200,23 +196,16 @@ public class AgentProcessor : IInstanceProcessor
                     return;
                 }
 
-                try
+
+                foreach (var action in planner.Plan(goal, ship))
                 {
-                    foreach (var action in planner.Plan(goal, ship))
-                    {
-                        action.ParentGoalId = goal.Id;
-                        // HandleOrder validates (resolves acting/target entities),
-                        // enqueues on the ActionQueue, and schedules the executor.
-                        ship.Manager.Game.OrderHandler.HandleOrder(action);
-                    }
+                    action.ParentGoalId = goal.Id;
+                    // HandleOrder validates (resolves acting/target entities),
+                    // enqueues on the ActionQueue, and schedules the executor.
+                    ship.Manager.Game.OrderHandler.HandleOrder(action);
                 }
-                catch (Exception e)
-                {
-                    // Movement plotting can throw on states it can't predict; fail the
-                    // goal rather than crash the pulse.
-                    Fail(goal, e.Message);
-                    return;
-                }
+            
+
 
                 // A planner may have resolved the goal itself: Failed (target not found, no drive)
                 // or Completed (already at the target, so it emitted no actions). Only advance a

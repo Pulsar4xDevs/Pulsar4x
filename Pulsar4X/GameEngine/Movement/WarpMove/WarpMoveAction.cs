@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using GameEngine.Engine.Orders;
 using Newtonsoft.Json;
 using Pulsar4X.Orbital;
@@ -28,13 +29,42 @@ namespace Pulsar4X.Movement
             }
         }
 
+        private string _details = "Warp Move";
+
         public override string Details
         {
             get
             {
-                string targetName = _targetEntity.GetDataBlob<NameDB>().GetName(_factionEntity);
-                return "Warp to + " + Stringify.Distance(EndpointRelitivePosition.Length()) + " from " + targetName;
+                return _details;
             }
+        }
+
+        public override void UpdateDetailString()
+        {
+            if (_entityCommanding == null)
+                _details = "";
+
+            // Not started yet — charge wait lives here (Execute keeps retrying)
+            if (Status == ActionStatus.Queued)
+            {
+                if (_entityCommanding.TryGetDataBlob<WarpAbilityDB>(out var warp) && _entityCommanding.TryGetDataBlob<EnergyGenAbilityDB>(out var power))
+                {
+                    double need = warp.BubbleCreationCost;
+                    double have = power.EnergyStored[warp.EnergyType];
+                    if (have < need)
+                        _details = $"Charging batteries ({Stringify.Power(have)} / {Stringify.Power(need)})";
+                }
+                else 
+                    _details =  "Waiting to start warp";
+            }
+            // In transit — processor owns motion; action only reports
+            else if (_warpingDB != null && !_warpingDB.IsAtTarget)
+            {
+                // optional: distance / ETA from _warpingDB positions + MaxSpeed
+                _details =  "Warping";
+            }
+            else
+                _details =  "Arriving";
         }
 
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
@@ -56,7 +86,7 @@ namespace Pulsar4X.Movement
 
         public DateTime TransitStartDateTime;
         public Vector3 EndpointRelitivePosition { get; set; }
-        public Vector3 EndpointTargetExpendDeltaV;
+
         /// <summary>
         /// the orbit we want to be in at the target.
         /// </summary>
@@ -100,7 +130,7 @@ namespace Pulsar4X.Movement
             if (!MoveTargeting.TryResolve(targetEntity, out targetEntity, out var resolveFailure))
                 throw new InvalidOperationException($"Cannot plot a warp to {targetEntity.Id}: {resolveFailure}");
 
-            return new WarpMoveAction
+            var action = new WarpMoveAction
             {
                 RequestingFactionGuid = orderEntity.FactionOwnerID,
                 EntityCommandingGuid = orderEntity.Id,
@@ -110,6 +140,8 @@ namespace Pulsar4X.Movement
                 EndpointRelitivePosition = endpointRelativePos,
                 // EndpointTargetOrbit left default — no circularisation planned by this action
             };
+            action.UpdateDetailString();
+            return action;
         }
         
         /// <summary>
@@ -124,6 +156,7 @@ namespace Pulsar4X.Movement
         /// <param name="targetEntity"></param>
         /// <param name="transitStartDatetime"></param>
         /// <returns></returns>
+        [Obsolete("this still uses the circularise, we want to enqueue that seperately")]
         public static WarpMoveAction CreateCommandEZ(
             Entity orderEntity,
             Entity targetEntity,
@@ -173,7 +206,7 @@ namespace Pulsar4X.Movement
 
                     cmd.EndpointRelitivePosition = lowOrbitPos;
                     cmd.EndpointTargetOrbit = lowOrbit;
-                    cmd.EndpointTargetExpendDeltaV = deltaV;
+                    cmd.UpdateDetailString();
                     break;
                 }
                 case PositionDB.MoveTypes.NewtonSimple:
@@ -213,18 +246,14 @@ namespace Pulsar4X.Movement
 
         internal override void Execute(DateTime atDateTime)
         {
-            if (!IsRunning)
+            UpdateDetailString();
+            if (Status != ActionStatus.Running)
             {
                 // Should have been caught at plan time by MovePlanner, but an action can outlive
                 // the components that made it possible (battle damage, refit).
                 if (!_entityCommanding.TryGetDataBlob<WarpAbilityDB>(out var warpDB)
                     || !_entityCommanding.TryGetDataBlob<EnergyGenAbilityDB>(out var powerDB))
                 {
-                    if (Goal != null)
-                    {
-                        Goal.Status = GoalStatus.Failed;
-                        Goal.Message = "No working warp drive";
-                    }
                     Status = ActionStatus.Failed;
                     return;
                 }
@@ -235,8 +264,7 @@ namespace Pulsar4X.Movement
 
                 if (creationCost > estored)
                 {
-                    Goal.Status = GoalStatus.Holding;
-                    Goal.Message = "Charging batteries";
+                    Status = ActionStatus.Queued;
                     return;
                 }
                 
@@ -253,15 +281,18 @@ namespace Pulsar4X.Movement
                 EntityCommanding.SetDataBlob(_warpingDB);
 
                 WarpMoveProcessor.StartNonNewtTranslation(EntityCommanding);
+                Status = ActionStatus.Running;
                 IsRunning = true;
-
                 //debug code:
                 double distance = (_warpingDB.EntryPointAbsolute - _warpingDB.ExitPointAbsolute).Length();
                 double time = distance / _entityCommanding.GetDataBlob<WarpAbilityDB>().MaxSpeed;
                 //Assert.AreEqual((_warpingDB.PredictedExitTime - _warpingDB.EntryDateTime).TotalSeconds, time, 1.0e-10);
+                
 
             }
         }
+
+        
 
         internal override bool IsFinished()
         {

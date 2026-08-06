@@ -62,9 +62,6 @@ namespace GameEngine.Engine.Orders
         /// <value>The entity GUID.</value>
         [JsonProperty]
         internal int EntityCommandingGuid { get; set; }
-
-        [JsonProperty]
-        public Goal Goal { get;  internal set; } = new Goal();
         
         /// <summary>
         /// Gets or sets the datetime this command was created by the player/client.

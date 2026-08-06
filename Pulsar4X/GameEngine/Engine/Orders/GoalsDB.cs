@@ -37,10 +37,8 @@ public class GoalsDB : BaseDataBlob
         [GoalType.Stealth]           = 0.0f,
     };
 
-    public Goal? ParentGoal { get; set; }
     public Goal? GivenGoal { get; set; }        // Order received from superior
-    public Goal? ActiveGoal { get; set; }       // Currently pursuing
-
+    
     // Modifier layers (multiplied together)
     public Dictionary<GoalType, float> PersonalityModifiers { get; } = new();
     public Dictionary<GoalType, float> CapabilityModifiers { get; } = new();   // -1 = impossible
@@ -55,9 +53,7 @@ public class GoalsDB : BaseDataBlob
         // dictionaries are rebuilt each pass by the AgentProcessor.
         return new GoalsDB
         {
-            ParentGoal = ParentGoal,
             GivenGoal  = GivenGoal,
-            ActiveGoal = ActiveGoal,
         };
     }
 }
