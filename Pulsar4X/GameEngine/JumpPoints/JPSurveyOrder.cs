@@ -64,27 +64,11 @@ public class JPSurveyOrder : EntityAction
 
     internal override void Execute(DateTime atDateTime)
     {
-        if(!IsRunning)
+        if(Status != ActionStatus.Running)
         {
-            IsRunning = true;
+            Status = ActionStatus.Running;
             PreviousUpdate = atDateTime;
-
-            // Get any ships in the fleet that can survey and add the JPSurveyDB to them
-            if (_entityCommanding.TryGetDataBlob<FleetDB>(out var fleetDB))
-            {
-                foreach (var child in fleetDB.Children)
-                {
-                    if (child.HasJPSurveyAbililty())
-                    {
-                        var order = JPSurveyOrder.CreateCommand(RequestingFactionGuid, child, Target);
-                        child.Manager.Game.OrderHandler.HandleOrder(order);
-                    }
-                }
-            }
-            else if (_entityCommanding.TryGetDataBlob<ShipInfoDB>(out var shipInfoDB))
-            {
-                _entityCommanding.SetDataBlob(new JPSurveyDB() { TargetId = Target.Id });
-            }
+            _entityCommanding.SetDataBlob(new JPSurveyDB() { TargetId = Target.Id });
         }
     }
 
@@ -92,7 +76,9 @@ public class JPSurveyOrder : EntityAction
     {
         return TargetSurveyDB != null;
     }
+    
 
+    
     public static JPSurveyOrder CreateCommand(int requestingFactionId, Entity fleet, Entity target)
     {
         var command = new JPSurveyOrder(fleet, target)

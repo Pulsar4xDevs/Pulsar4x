@@ -26,7 +26,7 @@ public enum MoveMode
 
 
 
-public class MoveSubordinatesTo : IGoalToGoalsPlanner
+public class MoveSubordinatesTo : IGoalPlanner
 {
     public GoalType Type => GoalType.MoveTo;
 
@@ -34,7 +34,7 @@ public class MoveSubordinatesTo : IGoalToGoalsPlanner
     /// Everyone goes to the same place, so this is a straight hand-down: the sub-goal is the goal.
     /// Which *kind* of move each subunit makes is its own planner's call.
     /// </summary>
-    public IEnumerable<(Entity subordinate, Goal goal)> Plan(Goal goal, Entity fleet)
+    public IEnumerable<(Entity subordinate, Goal goal)> PlanSubGoals(Goal goal, Entity fleet)
     {
         if (!fleet.TryGetDataBlob<FleetDB>(out FleetDB? db))
         {
@@ -52,15 +52,7 @@ public class MoveSubordinatesTo : IGoalToGoalsPlanner
                              });
         }
     }
-}
-
-
-
-public class MoveToPlan : IGoalToActionsPlanner
-{
-    public GoalType Type => GoalType.MoveTo;
-
-    public IEnumerable<EntityAction> Plan(Goal goal, Entity ship)
+    public IEnumerable<EntityAction> PlanActions(Goal goal, Entity ship)
     {
         var empty = new List<EntityAction>();
 
@@ -89,6 +81,7 @@ public class MoveToPlan : IGoalToActionsPlanner
 
         return MovePlanner.BuildActions(ship, target, now, chosen);
     }
+    
 
     static List<EntityAction> Fail(Goal goal, string message)
     {

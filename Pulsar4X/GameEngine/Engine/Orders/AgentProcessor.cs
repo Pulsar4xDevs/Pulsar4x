@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
@@ -17,23 +18,20 @@ using Pulsar4X.Ships;
 
 namespace GameEngine.Engine.Orders;
 
-interface IGoalToActionsPlanner
+interface IGoalPlanner
 {
     GoalType Type { get; } 
-    IEnumerable<EntityAction> Plan(Goal goal, Entity ship);
-}
-
-interface IGoalToGoalsPlanner
-{
-    GoalType Type { get; }
-
+    IEnumerable<EntityAction> PlanActions(Goal goal, Entity ship);
+    
     /// <summary>
     /// Sub-goals to hand down to subordinates. Yield only: AgentProcessor tags each one with its
     /// parent goal, records it against the subordinate and wakes that subordinate's agent. A planner
     /// with nothing to hand out should resolve <paramref name="goal"/> itself (Completed/Failed).
     /// </summary>
-    IEnumerable<(Entity subordinate, Goal goal)> Plan(Goal goal, Entity fleet);
+    IEnumerable<(Entity subordinate, Goal goal)> PlanSubGoals(Goal goal, Entity fleet);
 }
+
+
 
 public class AgentProcessor : IInstanceProcessor
 {
@@ -45,31 +43,11 @@ public class AgentProcessor : IInstanceProcessor
     private static readonly TimeSpan RelayDelay = TimeSpan.FromSeconds(1);
 
     // One planner per goal type: adding a goal type == adding an IGoalToActionsPlanner, no switch.
-    private static readonly Dictionary<GoalType, IGoalToActionsPlanner> _actionPlanners;
-    private static readonly Dictionary<GoalType, IGoalToGoalsPlanner> _goalPlanners;
+    private static readonly Dictionary<GoalType, IGoalPlanner> _planners;
 
     static AgentProcessor()
     {
-        _actionPlanners = new Dictionary<GoalType, IGoalToActionsPlanner>();
-        foreach (var planner in new IGoalToActionsPlanner[]
-                 {
-                     new MoveToPlan(),
-                     new ScanBodyPlan(),
-                 })
-        {
-            _actionPlanners[planner.Type] = planner;
-        }
-        
-        _goalPlanners = new Dictionary<GoalType, IGoalToGoalsPlanner>();
-        foreach (var planner in new IGoalToGoalsPlanner[]
-                 {
-                     new MoveSubordinatesTo(),
-                     new ScanSystemBodiesPlan(),
-                 })
-        {
-            _goalPlanners[planner.Type] = planner;
-        }
-        
+        _planners = FindPlanners();
     }
 
 
@@ -82,6 +60,7 @@ public class AgentProcessor : IInstanceProcessor
     {
         //check if the entity given is a commander, or if it's an entity a commander is... commanding. 
         Entity managedEntity = entity;
+        Entity agentHost = entity;
         if (entity.TryGetDataBlob<CommanderDB>(out var commanderDB) && commanderDB.AssignedTo != -1)
         {
             if (!entity.Manager.TryGetGlobalEntityById(commanderDB.AssignedTo, out managedEntity))
@@ -91,47 +70,24 @@ public class AgentProcessor : IInstanceProcessor
         if (!managedEntity.TryGetDataBlob<GoalsDB>(out var goalsDB))
             return; // nothing tasked
         
-        //if we have subordinates, we create goals for them 
-        if (managedEntity.HasDataBlob<FleetDB>())
-            GoalsProcessor(entity, goalsDB, managedEntity, atDateTime);
-        //else if we are a single ship (or eventialy a colony) we create actions.
-        else if (managedEntity.HasDataBlob<ShipInfoDB>())
-            ActionsProcessor(entity, goalsDB, managedEntity, atDateTime);
-    }
-
-    // -----------------------------------------------------------------
-    // BRANCH: a fleet's concrete goal is decomposed into sub-goals by the planner for that goal
-    // type, handed to its subordinates, then monitored. Each subordinate is itself an agent that
-    // plans on its own wake.
-    //
-    // Deliberately the same shape as ActionsProcessor below — plan, submit, roll up — over this
-    // agent's kind of work item. A fleet's work items are its subordinates' goals, where a ship's
-    // are the actions in its queue.
-    //
-    // We decompose the *concrete* GivenGoal (it carries a target). The abstract
-    // weighted EffectiveGoals are NOT used here: they carry no target and are
-    // regenerated with fresh ids every pass, so they can't anchor queued work.
-    // Autonomous goal *selection* layers on top of this later.
-    // -----------------------------------------------------------------
-    static void GoalsProcessor(Entity agentHost, GoalsDB goalsDB, Entity fleet, DateTime atDateTime)
-    {
         var goal = goalsDB.GivenGoal;
         if (goal == null) return; // no concrete tasking (autonomous mode not wired yet)
         if (goal.Status is GoalStatus.Completed or GoalStatus.Failed) return;
-        
+        bool isFleet = managedEntity.TryGetDataBlob<FleetDB>(out var fleetDB);
+        bool isShip = managedEntity.TryGetDataBlob<ShipInfoDB>(out var shipDB);
         switch (goal.Status)
         {
             case GoalStatus.Pending:
             {
-                if (!_goalPlanners.TryGetValue(goal.Type, out var planner))
+                if (!_planners.TryGetValue(goal.Type, out var planner))
                 {
                     Fail(goal, $"no planner for {goal.Type}");
                     return;
                 }
-
-                try
+                
+                if(isFleet)
                 {
-                    foreach (var (subordinate, subGoal) in planner.Plan(goal, fleet))
+                    foreach (var (subordinate, subGoal) in planner.PlanSubGoals(goal, managedEntity))
                     {
                         subGoal.ParentGoalId = goal.Id;
                         // Handing a goal down an echelon costs game time, so the subordinate plans
@@ -139,112 +95,82 @@ public class AgentProcessor : IInstanceProcessor
                         AssignGoal(subordinate, subGoal, atDateTime + RelayDelay);
                     }
                 }
-                catch (Exception e)
+                if(isShip)
                 {
-                    // Fail the goal rather than crash the pulse.
-                    Fail(goal, e.Message);
-                    return;
+                    foreach (var action in planner.PlanActions(goal, managedEntity))
+                    {
+                        action.ParentGoalId = goal.Id;
+                        // HandleOrder validates (resolves acting/target entities),
+                        // enqueues on the ActionQueue, and schedules the executor.
+                        managedEntity.Manager.Game.OrderHandler.HandleOrder(action);
+                    }
                 }
-
                 // A planner may have resolved the goal itself: Failed (no subordinates, nothing
                 // capable) or Completed (nothing to do, so it handed nothing down). Only advance a
                 // goal that is still Pending — otherwise a zero-subgoal plan gets set to Active
                 // and, having nothing to roll up, reschedules forever.
                 if (goal.Status != GoalStatus.Pending)
                     break;
-
-                goal.Status = GoalStatus.Active;
+                
                 ScheduleAgent(agentHost, atDateTime + RecheckInterval);
                 break;
             }
             case GoalStatus.Active:
             {
-                // TODO: no cancel-propagation yet. ActionsProcessor calls queue.ClearFor(goal) when
-                // it resolves; the equivalent here is standing subordinates down, which means
-                // clearing their GivenGoal *and* the actions it spawned. Until then a failed sibling
-                // keeps flying.
-                var mine = SubGoalsOf(fleet, goal);
-                if (mine.Count > 0 && mine.All(g => g.Status == GoalStatus.Completed))
-                    goal.Status = GoalStatus.Completed;
-                else if (mine.Any(g => g.Status == GoalStatus.Failed))
-                    Fail(goal, "a subordinate's goal failed");
-                else
-                    ScheduleAgent(agentHost, atDateTime + RecheckInterval); // still running
-                break;
-            }
-        }
-    }
 
-    // -----------------------------------------------------------------
-    // LEAF: a ship's concrete goal is turned into actions by the planner for
-    // that goal type, submitted to the ship's ActionQueue, then monitored.
-    // -----------------------------------------------------------------
-    static void ActionsProcessor(Entity agentHost, GoalsDB goalsDB, Entity ship, DateTime atDateTime)
-    {
-        var goal = goalsDB.GivenGoal;
-        if (goal == null) return; // no concrete tasking (autonomous mode not wired yet)
-        if (goal.Status is GoalStatus.Completed or GoalStatus.Failed) return;
-        if (!ship.TryGetDataBlob<ActionQueueDB>(out var queue)) return;
-        
-        switch (goal.Status)
-        {
-            case GoalStatus.Pending:
-            {
-                if (!_actionPlanners.TryGetValue(goal.Type, out var planner))
+
+                if (isFleet)
                 {
-                    Fail(goal, $"no planner for {goal.Type}");
-                    return;
-                }
-
-
-                foreach (var action in planner.Plan(goal, ship))
-                {
-                    action.ParentGoalId = goal.Id;
-                    // HandleOrder validates (resolves acting/target entities),
-                    // enqueues on the ActionQueue, and schedules the executor.
-                    ship.Manager.Game.OrderHandler.HandleOrder(action);
-                }
-            
-
-
-                // A planner may have resolved the goal itself: Failed (target not found, no drive)
-                // or Completed (already at the target, so it emitted no actions). Only advance a
-                // goal that is still Pending — otherwise a zero-action plan gets set back to
-                // Active and, having no actions to roll up, reschedules forever.
-                if (goal.Status == GoalStatus.Pending)
-                    goal.Status = GoalStatus.Active;
-                else
-                    break;
-
-                ScheduleAgent(agentHost, atDateTime + RecheckInterval);
-                break;
-            }
-            case GoalStatus.Active:
-            {
-                var actions = queue.ActionsFor(goal);
-
-                if (actions.Any(a => a.Status == ActionStatus.Failed))
-                {
-                    Fail(goal, "an action failed");
-                    queue.ClearFor(goal);          // removes everything, including the Failed that was holding the lane
-                }
-                else
-                {
-                    // prune the ones that are already done; leave Running / Queued alone
-                    queue.ActionList.RemoveAll(a =>
-                                                   a.ParentGoalId == goal.Id && a.Status == ActionStatus.Succeeded);
-
-                    // if nothing left for this goal, we are finished
-                    if (!queue.ActionsFor(goal).Any())
+                    // TODO: no cancel-propagation yet. ActionsProcessor calls queue.ClearFor(goal) when
+                    // it resolves; the equivalent here is standing subordinates down, which means
+                    // clearing their GivenGoal *and* the actions it spawned. Until then a failed sibling
+                    // keeps flying.
+                    var mine = SubGoalsOf(managedEntity, goal);
+                    if (mine.Count > 0 && mine.All(g => g.Status == GoalStatus.Completed))
                         goal.Status = GoalStatus.Completed;
+                    else if (mine.Any(g => g.Status == GoalStatus.Failed))
+                        Fail(goal, "a subordinate's goal failed");
                     else
-                        ScheduleAgent(agentHost, atDateTime + RecheckInterval); // safety-net only
+                        ScheduleAgent(agentHost, atDateTime + RecheckInterval); // still running
+                    break;
                 }
+
+                if (isShip)
+                {
+                    if (!managedEntity.TryGetDataBlob<ActionQueueDB>(out var queue))
+                    {
+                        break;
+                    }
+                    var actions = queue.ActionsFor(goal);
+
+                    if (actions.Any(a => a.Status == ActionStatus.Failed))
+                    {
+                        Fail(goal, "an action failed");
+                        queue.ClearFor(goal);          // removes everything, including the Failed that was holding the lane
+                    }
+                    else
+                    {
+                        // prune the ones that are already done; leave Running / Queued alone
+                        queue.ActionList.RemoveAll(a =>
+                                                       a.ParentGoalId == goal.Id && a.Status == ActionStatus.Succeeded);
+
+                        // if nothing left for this goal, we are finished
+                        if (!queue.ActionsFor(goal).Any())
+                            goal.Status = GoalStatus.Completed;
+                        else
+                            ScheduleAgent(agentHost, atDateTime + RecheckInterval); // safety-net only
+                    }
+                    break;
+                }
+
+                
+                Fail(goal, "managed entity is not a ship or a fleet");
                 break;
+
             }
         }
     }
-
+    
     // -----------------------------------------------------------------
     // helpers
     // -----------------------------------------------------------------
@@ -257,6 +183,43 @@ public class AgentProcessor : IInstanceProcessor
         }
         return goals;
     }
+    
+    /// <summary>
+    /// finds planners via reflection so we don't have to manualy add them.
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    static Dictionary<GoalType, IGoalPlanner> FindPlanners()
+    {
+        var planners = new Dictionary<GoalType, IGoalPlanner>();
+
+        var plannerTypes = AppDomain.CurrentDomain.GetAssemblies()
+                                    .SelectMany(a =>
+                                    {
+                                        try { return a.GetTypes(); }
+                                        catch (ReflectionTypeLoadException ex) { return ex.Types.Where(t => t != null)!; }
+                                    })
+                                    .Where(t => t is { IsClass: true, IsAbstract: false })
+                                    .Where(t => typeof(IGoalPlanner).IsAssignableFrom(t))
+                                    .Where(t => t.GetConstructor(Type.EmptyTypes) != null);
+
+        foreach (var type in plannerTypes)
+        {
+            var planner = (IGoalPlanner)Activator.CreateInstance(type)!;
+
+            if (planners.TryGetValue(planner.Type, out var existing))
+            {
+                throw new InvalidOperationException(
+                    $"Duplicate IGoalPlanner for {planner.Type}: {existing.GetType().Name} and {type.Name}. " +
+                    "One planner per GoalType (fleet+ship in the same class), or split GoalTypes.");
+            }
+
+            planners[planner.Type] = planner;
+        }
+
+        return planners;
+    }
+    
 
     /// <summary>
     /// The one place a goal is given to a unit: records it and wakes that unit's agent. Planners
@@ -405,4 +368,6 @@ public class AgentProcessor : IInstanceProcessor
         subordinateGoals.OrdersModifiers[goalType] = strength;
         // Optionally propagate alignment to related goals...
     }
+    
+    
 }
