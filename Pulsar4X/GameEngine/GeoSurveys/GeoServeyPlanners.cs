@@ -59,16 +59,13 @@ public class ServeyBodyPlanner : IGoalPlanner
         }
         
         List<Entity> pointsOfInterest = new List<Entity>();
+        if(CanScan(targetEntity, fleet.FactionOwnerID))
+            pointsOfInterest.Add(targetEntity);
         targetEntity.TryGetDataBlob<PositionDB>(out var position);
         foreach (var childEntity in position.Children)
         {
-            if (childEntity.TryGetDataBlob<GeoSurveyableDB>(out var serveyTarget))
-            {
-                if (!serveyTarget.IsSurveyComplete(fleet.FactionOwnerID))
-                {
-                    pointsOfInterest.Add(childEntity);
-                }
-            }
+            if (CanScan(childEntity, fleet.FactionOwnerID))
+                pointsOfInterest.Add(childEntity);
         }
         
         List<Entity> fleetChildren = new List<Entity>();
@@ -119,5 +116,17 @@ public class ServeyBodyPlanner : IGoalPlanner
                 TargetEntityID = best.Id,   // distinct body, not parent system id
             });
         }
+    }
+
+    bool CanScan(Entity targetEntity, int factionID)
+    {
+        if (targetEntity.TryGetDataBlob<GeoSurveyableDB>(out var serveyTarget))
+        {
+            if (!serveyTarget.IsSurveyComplete(factionID))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

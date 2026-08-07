@@ -1,8 +1,8 @@
 # Agents, Goals and Actions
 
-Status: **working vertical slice** for `MoveTo` and `ServeyBodies`. Hierarchy tiers, weighting, and
-`GoalType` as an enum are still placeholders. This records load-bearing decisions and current
-pipeline shape.
+Status: **working vertical slice** for `MoveTo` and `ServeyBodies` (leaf + fleet survey dispatch).
+Hierarchy tiers, autonomous weighting, and `GoalType` as an enum are still placeholders. This
+records load-bearing decisions and the current pipeline.
 
 ## Purpose
 
@@ -14,117 +14,136 @@ pipeline shape.
 
 ```
 UI / AI command
-  → CommandTranslator → AssignXxx (creates Goal, AgentProcessor.AssignGoal)
-  → GoalsDB.GivenGoal
-  → AgentProcessor
-       FleetDB  → GoalsProcessor  → IGoalToGoalsPlanner  → sub-goals + RelayDelay
-       ShipInfo → ActionsProcessor → IGoalToActionsPlanner → actions via OrderHandler
+  → EngineGameServer (auth: faction owns commanded unit)
+  → CommandTranslator (DTO → Goal { Type, TargetEntityID }; optional cheap checks)
+  → AgentProcessor.AssignGoal → GoalsDB.GivenGoal
+  → AgentProcessor (thin loop)
+       resolve host (unit or CommanderDB.AssignedTo)
+       fleet?  planner.PlanSubGoals → AssignGoal(child, RelayDelay)
+       ship?   planner.PlanActions  → OrderHandler.HandleOrder
   → ActionQueueDB
   → ActionQueueProcessor (lanes, Execute, Status)
-  → feature processors (WarpMoveProcessor, NewtonSimpleProcessor, …)
-  → on action Succeeded/Failed: RunAgentNow → agent prunes / ClearFor / rollup
+  → feature processors (WarpMove, NewtonSimple, GeoSurvey, …)
+  → action Succeeded/Failed → RunAgentNow → prune / ClearFor / rollup
 ```
 
 - Actions link to goals via `ParentGoalId` (`ActionsFor` / `ClearFor`).
-- Agent may run on the unit or on its assigned commander (`CommanderDB.AssignedTo`).
-- Leaf work uses `RunAgentNow` (no delay). Handing a goal down an echelon uses `RelayDelay`
-  (decision 5). `RecheckInterval` is a safety net only while work is still Active.
+- Leaf / player inject: `RunAgentNow` (no delay). Echelon hand-down: `ScheduleAgent` + `RelayDelay`.
+- `RecheckInterval` is a safety net while Active; preferred wake is action/sub-goal completion.
 
-### Status model
+### Agent vs planner
 
-| Layer | Values | Notes |
-|---|---|---|
-| `GoalStatus` | Pending → Active → Completed \| Failed | Planner may set Failed/Completed on Pending (e.g. already there) |
-| `ActionStatus` | Queued, Running, Succeeded, Failed | Single source of truth going forward |
-| `IsRunning` / `IsFinished()` | legacy | Still dual-written with `Status`; ~69 call sites — do not delete yet |
+| **AgentProcessor** | **IGoalPlanner** (feature folder) |
+|---|---|
+| Host binding, schedule/wake | Domain feasibility and work product |
+| `AssignGoal` / `HandleOrder` | `PlanActions` (ship) / `PlanSubGoals` (fleet) |
+| Pending → Active; rollup Complete/Fail | Plan-time Failed/Completed + `Message` |
+| One planner per `GoalType` (dictionary) | Stateless: re-read world + child goals each call |
 
-**Non-terminal waits** (e.g. warp bubble charging) stay **`Queued`** with a useful `Details` string.
-Do not `Failed` the goal for “not enough energy this tick.” Fail only when impossible (no drive,
-capacitor can never hold creation cost).
+Planners are **not** subclasses of the agent. The agent is a thin loop; feature behaviour lives in
+planners. Prefer **re-calling `Plan*` while Active** (idempotent: skip busy units, only emit new work)
+over a separate “top-up” API — same Decide step, OODA-style re-entry.
 
-**Feedback:** action `Name` / `Details` for the player; goal `Message` only on real terminal fail.
-There is no `EntityAction.Goal` shadow object.
+```csharp
+interface IGoalPlanner
+{
+    GoalType Type { get; }
+    IEnumerable<EntityAction> PlanActions(Goal goal, Entity ship);
+    IEnumerable<(Entity subordinate, Goal goal)> PlanSubGoals(Goal goal, Entity fleet);
+}
+```
 
-### Movement composition
+Register via **reflection** (concrete, parameterless ctor, implement `IGoalPlanner`). **One planner
+instance per `GoalType`** — fleet and leaf roles share a class; duplicate types must throw, not
+overwrite. Default empty `PlanActions` / `PlanSubGoals` (or no-op base) so a move-only planner need
+not implement fleet.
 
-- `MovePlanner.TryBuildMoveActions` — pure; never mutates goal status.
-- Warp path: `CreateWarpOnly` + optional `NewtonSimpleAction` circularise from the planner
-  (`BuildWarpAndCircularise`). Warp arrival parks from exit position + `SavedNewtonionVector` when
-  no planned capture orbit is set.
-- Legacy `CreateCommandEZ` still bundles circularise for old callers; goals path does not use it.
-- Composers (e.g. `ScanBodyPlan`) call `TryBuildMoveActions`, then append feature actions.
+### Goal status ownership
+
+| Writer | When |
+|---|---|
+| **Planner** | Plan-time terminal: impossible, nothing to do |
+| **Agent** | `Pending` → `Active` after a plan that left status Pending; rollup `Completed` / `Failed` from actions or sub-goals |
+| **Everyone else** | Read only (`Message`, UI, parent `SubGoalsOf`) |
+
+Actions never write `GoalsDB.GivenGoal`. Non-terminal waits (warp charging) stay action **`Queued`**
+with `Details` — not goal `Failed`.
+
+### Validation layers
+
+| Layer | Checks |
+|---|---|
+| **Server / translator** | Auth: owns **commanded** unit. Secondary ownership only if the target must be yours. Goals may pass **ids through** without resolving; existence can be a cheap Reject for UX. |
+| **Planner** | `TargetEntityID` → entity; domain (ability, surveyable, `CanMove`, parceling). |
+| **Action** | Resolve entities needed to execute; **no** faction-ownership gate on the commanded unit (auth already did that). |
+
+`Goal` stores **ids**, not live `Entity` refs (serialize, survive despawn, re-resolve each plan).
+
+### Action status
+
+| `ActionStatus` | Meaning |
+|---|---|
+| Queued | Accepted, not started (includes charge-wait) |
+| Running | In progress (e.g. bubble up / transit) |
+| Succeeded / Failed | Terminal |
+
+`IsRunning` / `IsFinished()` are **legacy** — dual-write with `Status` until call sites migrate (~69).
+Do not add extra enum values for charge-wait.
+
+### Movement / survey notes
+
+- `MovePlanner.TryBuildMoveActions` — pure; does not mutate goal status.
+- Warp: `CreateWarpOnly` + planner-emitted circularise (`NewtonSimpleAction`). Arrival parks from exit
+  state when no planned capture orbit; legacy `CreateCommandEZ` still circularises for old callers.
+- Fleet survey: greedy nearest POI → free capable ship; one body per sub-goal. Leftovers need Active
+  re-plan (re-call `PlanSubGoals`), not planner-local memory.
 
 ## Decisions (load-bearing)
 
-1. **Tier = span of command**, not “how smart the planner is.” Ship-scoped goals need any occupied
-   ship seat; multi-unit decomposition needs a seat at that echelon. `(GoalType, does this unit
-   decompose?)` — not a static GoalType→tier table.
-
-2. **One engine-side `CanAccept` at injection**, walking **up** the command tree. Client is not a
-   gate. AI hits the same check.
-
-3. **Officers are plentiful; skill is never a gate.** Skill affects quality (replan cadence, relay
-   time, recovery), not whether a goal is allowed.
-
-4. **AI gets free admin tech, not free seats.** They still build and crew bridges so losses hurt and
-   code paths stay shared.
-
-5. **Relay costs game time per hop; leaf planning does not.** `RelayDelay` on sub-goal assign;
-   `RunAgentNow` for leaf actions and player/AI injection acknowledgment. Magnitude should bite on
-   intercepts, not on “go to Mars.”
-
-6. **Feature code in feature folders; planners are the extension point.** `AgentProcessor` should
-   not hardcode movement/survey. Target shape:
-
-   ```csharp
-   interface IGoalPlanner {
-       GoalType Type { get; }
-       bool CanPerform(Entity entity);
-       IEnumerable<EntityAction> PlanActions(Goal goal, Entity ship);
-       IEnumerable<(Entity sub, Goal g)> PlanSubGoals(Goal goal, Entity fleet);
-   }
-   ```
-
-   Auto-discover like processors. Today registration is still a static list in `AgentProcessor`.
-   `GoalType` as a C# enum cannot be mod-extended — likely becomes a string id later.
-
-7. **Reuse `GameEngine/People/` admin infrastructure** (`AdminSpaceAtb`, seats, tech-gated offices).
+1. **Tier = span of command**, not planner sophistication. `(GoalType, does this unit decompose?)`.
+2. **One engine-side `CanAccept` at injection**, walk **up** the tree. Client is not a gate.
+3. **Officers plentiful; skill never a gate** — quality only (replan, relay, recovery).
+4. **AI: free admin tech, not free seats** — still build and crew.
+5. **Relay costs game time per hop; leaf plan does not.** `RunAgentNow` at inject; `RelayDelay` on
+   sub-goal assign.
+6. **Feature folders + `IGoalPlanner` as the extension point**; auto-discover; agent has no feature
+   switches. `GoalType` enum is central for now (likely string id later for mods).
+7. **Reuse `GameEngine/People/` admin infrastructure.**
 
 ## Adding a capability
 
 | Piece | Where |
 |---|---|
-| Ability DB / Atb / Action / Processor | feature folder (processor auto-discovered) |
-| Planner + `AssignXxx` | feature folder (registration central until reflection) |
-| `GoalType` (+ `BaseWeights` if autonomous) | `GoalsDB.cs` — central for now |
-| API command DTO + `CommandTranslator` | central by design (auth boundary) |
+| Ability / Action / Processor | Feature folder (processors already auto-discovered) |
+| `IGoalPlanner` | Feature folder (reflection-registered; **one** class per `GoalType`) |
+| `GoalType` (+ `BaseWeights` if autonomous) | `GoalsDB.cs` |
+| API DTO + `CommandTranslator` entry | Central by design (auth boundary) |
 
 ## TODO
 
 **Done**
-- [x] Agent wakes on goal-linked action Succeeded/Failed; agent prunes Succeeded; `ClearFor` on Failed
-- [x] `MoveToPlan` / `AssignMoveTo` in `Movement/`; `ScanBodyPlan` / `ScanSystemBodiesPlan` in GeoSurvey
-- [x] Pure warp + planner circularise; charge-wait via `Queued` + `Details`
+- [x] Goal-linked action completion wakes agent; prune Succeeded; `ClearFor` on Failed
+- [x] Planners in feature folders; pure warp + planner circularise; charge-wait via Queued + Details
+- [x] Single `IGoalPlanner` interface; reflection registration
 - [x] NavSequence removed
 
-**Pipeline / structure**
-- [ ] Unify `IGoalToActionsPlanner` / `IGoalToGoalsPlanner` → one `IGoalPlanner`; auto-discover
-- [ ] `IGoalPlanner.CanPerform` replaces `PruneImpossibleGoals` switch
-- [ ] Transition-only agent wake on Failed (avoid re-waking every pass while Failed sits)
+**Pipeline**
+- [ ] Ensure Pending sets `Active` after a successful plan (planner left status Pending)
+- [ ] Fleet vs ship: `else if` (flagships must not run both PlanSubGoals and PlanActions)
+- [ ] Active re-call `PlanSubGoals` for survey (and similar) so leftover POIs get assigned
+- [ ] `CanPerform` on planner; retire `PruneImpossibleGoals` switch
+- [ ] Transition-only wake on Failed actions (no re-wake every pass)
 - [ ] Migrate off `IsRunning` → `ActionStatus` only
-- [ ] Implement `CanAccept` (decision 2) + real `RelayDelay` formula (decision 5)
-- [ ] Project `GivenGoal` on fleet/ship snapshots; surface `goal.Message` on failure
-- [ ] Wire or quarantine weighting helpers (`EffectiveGoals` unused by the concrete path)
+- [ ] `CanAccept` (decision 2) + real `RelayDelay` formula (decision 5)
+- [ ] Project `GivenGoal` + `Message` on fleet/ship snapshots
+- [ ] Wire or quarantine unused weighting helpers
 
-**Movement**
-- [ ] NewtonComplex vs NewtonSimple (SOI transitions only on Complex today)
-- [ ] Interplanetary transfer; eccentric orbits; replan from arbitrary state vector
-- [ ] `NewtonSimpleProcessor` should Fail the action when Δv is insufficient, not spin forever
-- [ ] Retire `CreateCommandEZ` circularise once legacy callers move to the planner
-- [ ] Mode selection as utility vs goal preference (fuel vs time), not a fixed 3× ETA rule
+**Movement / survey**
+- [ ] NewtonComplex vs Simple (SOI transitions); interplanetary; eccentric orbits
+- [ ] Fail NewtonSimple when Δv short (don’t spin forever)
+- [ ] Retire `CreateCommandEZ` circularise when legacy callers move
+- [ ] Mode selection by goal preference (fuel vs time), not fixed 3× ETA
 
 **Other**
-- [ ] `AdminSpaceAtb.OnComponentUninstallation` NotImplementedException
-- [ ] `TranslateMoveToBody` visibility check (parity with warp)
-- [ ] Re-examine `GoalType` (enum vs string id; player-issued vs autonomous)
-- [ ] Time source consistency (`GameGlobalDateTime` vs `StarSysDateTime`); submit vs pulse re-entrancy
+- [ ] Admin uninstall NotImplemented; move visibility parity with warp
+- [ ] `GoalType` enum vs string id; time-source / submit-thread re-entrancy (shared with HandleOrder)

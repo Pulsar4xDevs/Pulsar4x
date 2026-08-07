@@ -132,6 +132,7 @@ namespace Pulsar4X.Movement
 
             var action = new WarpMoveAction
             {
+                _entityCommanding = orderEntity,
                 RequestingFactionGuid = orderEntity.FactionOwnerID,
                 EntityCommandingGuid = orderEntity.Id,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,

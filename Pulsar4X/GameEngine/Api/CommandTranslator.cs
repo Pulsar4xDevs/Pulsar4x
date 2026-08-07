@@ -298,6 +298,8 @@ namespace Pulsar4X.Engine.Api
                 TargetEntityID = cmd.BodyId,
             };
             AgentProcessor.AssignGoal(commanded, goal);
+            if(goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 
@@ -310,6 +312,8 @@ namespace Pulsar4X.Engine.Api
                 TargetEntityID = cmd.BodyId,
             };
             AgentProcessor.AssignGoal(commanded, goal);
+            if(goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 
@@ -322,19 +326,9 @@ namespace Pulsar4X.Engine.Api
                 TargetEntityID = cmd.LocationId,
             };
             AgentProcessor.AssignGoal(commanded, goal);
+            if(goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
-            
-            
-            
-            /*
-            var survey = (GravSurveyCommand)command;
-            if (!TryResolve(survey.LocationId, out var location))
-                return CommandResult.Reject($"Entity {survey.LocationId} not found.");
-
-            if (!_game.OrderHandler.HandleOrder(WarpFleetTowardsTargetOrder.CreateCommand(commanded, location)))
-                return CommandResult.Reject("Command rejected by engine validation.");
-
-            return Dispatch(JPSurveyOrder.CreateCommand(faction.Id, commanded, location));*/
         }
 
         private CommandResult TranslateJump(Entity faction, Entity commanded, GameCommand command)
