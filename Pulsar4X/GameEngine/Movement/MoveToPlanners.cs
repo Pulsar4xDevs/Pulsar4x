@@ -24,34 +24,14 @@ public enum MoveMode
     Warp,
 }
 
+/// <summary>
+/// This whole thing was written by AI, and needs checking/rewrite.
+/// I'm suspicious for example that the BuildBurns is taking DeltaV instead of KeplerElements.
+/// </summary>
 
-
-public class MoveSubordinatesTo : IGoalPlanner
+public class MoveToPlan : IGoalPlanner
 {
-    public GoalType Type => GoalType.MoveTo;
-
-    /// <summary>
-    /// Everyone goes to the same place, so this is a straight hand-down: the sub-goal is the goal.
-    /// Which *kind* of move each subunit makes is its own planner's call.
-    /// </summary>
-    public IEnumerable<(Entity subordinate, Goal goal)> PlanSubGoals(Goal goal, Entity fleet)
-    {
-        if (!fleet.TryGetDataBlob<FleetDB>(out FleetDB? db))
-        {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "We have no subordinates to manage";
-            yield break;
-        }
-
-        foreach (var subunit in db.Children)
-        {
-            yield return (subunit, new Goal
-                             {
-                                 Type = GoalType.MoveTo,
-                                 TargetEntityID = goal.TargetEntityID,
-                             });
-        }
-    }
+    
     public IEnumerable<EntityAction> PlanActions(Goal goal, Entity ship)
     {
         var empty = new List<EntityAction>();
@@ -82,7 +62,32 @@ public class MoveSubordinatesTo : IGoalPlanner
         return MovePlanner.BuildActions(ship, target, now, chosen);
     }
     
+    public GoalType Type => GoalType.MoveTo;
 
+    /// <summary>
+    /// Everyone goes to the same place, so this is a straight hand-down: the sub-goal is the goal.
+    /// Which *kind* of move each subunit makes is its own planner's call.
+    /// </summary>
+    public IEnumerable<(Entity subordinate, Goal goal)> PlanSubGoals(Goal goal, Entity fleet)
+    {
+        if (!fleet.TryGetDataBlob<FleetDB>(out FleetDB? db))
+        {
+            goal.Status = GoalStatus.Failed;
+            goal.Message = "We have no subordinates to manage";
+            yield break;
+        }
+
+        foreach (var subunit in db.Children)
+        {
+            yield return (subunit, new Goal(GoalType.MoveTo)
+             {
+                 TargetEntityID = goal.TargetEntityID,
+                 ParentGoalId = goal.Id,
+             });
+        }
+    }
+    
+    
     static List<EntityAction> Fail(Goal goal, string message)
     {
         goal.Status = GoalStatus.Failed;

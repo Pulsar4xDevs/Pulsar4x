@@ -292,9 +292,8 @@ namespace Pulsar4X.Engine.Api
         private CommandResult TranslateMoveToBody(Entity faction, Entity commanded, GameCommand command)
         {
             var cmd = (MoveToBodyCommand)command;
-            var goal = new Goal()
+            var goal = new Goal(GoalType.MoveTo)
             {
-                Type = GoalType.MoveTo,
                 TargetEntityID = cmd.BodyId,
             };
             AgentProcessor.AssignGoal(commanded, goal);
@@ -306,9 +305,9 @@ namespace Pulsar4X.Engine.Api
         private CommandResult TranslateGeoSurvey(Entity faction, Entity commanded, GameCommand command)
         {
             var cmd = (GeoSurveyCommand)command;
-            var goal = new Goal()
+            var goal = new Goal(GoalType.ServeyBodies)
             {
-                Type = GoalType.ServeyBodies,
+                
                 TargetEntityID = cmd.BodyId,
             };
             AgentProcessor.AssignGoal(commanded, goal);
@@ -320,9 +319,8 @@ namespace Pulsar4X.Engine.Api
         private CommandResult TranslateGravSurvey(Entity faction, Entity commanded, GameCommand command)
         {
             var  cmd = (GravSurveyCommand)command;
-            var goal = new Goal()
+            var goal = new Goal(GoalType.ScanAnomalies)
             {
-                Type = GoalType.ScanAnomalies,
                 TargetEntityID = cmd.LocationId,
             };
             AgentProcessor.AssignGoal(commanded, goal);

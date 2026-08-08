@@ -14,37 +14,53 @@ public class ServeyBodyPlanner : IGoalPlanner
 
     public IEnumerable<EntityAction> PlanActions(Goal goal, Entity ship)
     {
-        // Capability gate first (mirrors what PruneImpossibleGoals will eventually do via CanPerform)
+        List<EntityAction> actions = new List<EntityAction>();
+
         if (!ship.HasOrChildHasAbility<GeoSurveyAbilityDB>())
-            return Fail(goal, "no geo-survey capability");
-
-        if (!MovePlanner.TryBuildMoveActions(ship, goal.TargetEntityID, out var moveActions, out var moveReason))
-            return Fail(goal, moveReason);
-        if (ship.TryGetDataBlob<ActionQueueDB>(out var actionQueueDB))
         {
-            var actionsforgoal = actionQueueDB.ActionsFor(goal);
-            if (actionsforgoal.Count == 0)
-            {
-                var plan = new List<EntityAction>(moveActions);
-                plan.Add(new GeoSurveyOrder(ship, goal.TargetEntityID));
-                return plan;
-            }
-            else if (actionsforgoal.TrueForAll(x => x.Status == ActionStatus.Succeeded))
-            {
-                goal.Status = GoalStatus.Completed;
-            }
-            
+            goal.Status = GoalStatus.Failed;
+            goal.Message = "No geo-survey capability";
         }
-        return Fail(goal, "no action queue??");
-        
-    }
+        else if (!ship.TryGetDataBlob<ActionQueueDB>(out var actionQueue))
+        {
+            //need to check, it might be safe to just give a ship an action queue if it doesn't have one.
+            goal.Status = GoalStatus.Failed;
+            goal.Message = "No action queue";
+        }
+        else if (!ship.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var targetEntity) ||
+                 !targetEntity.TryGetDataBlob<GeoSurveyableDB>(out var serveyable))
+        {
+            goal.Status = GoalStatus.Failed;
+            goal.Message = "Not a valid target";
+        }
+        else
+        {
+            var actionsForGoal = actionQueue.ActionsFor(goal);
 
-    static IEnumerable<EntityAction> Fail(Goal goal, string message)
-    {
-        goal.Status = GoalStatus.Failed;
-        goal.Message = message;
-        return Array.Empty<EntityAction>();
+            if (actionsForGoal.Count > 0)
+            {
+                if (actionsForGoal.TrueForAll(x => x.Status == ActionStatus.Succeeded))
+                    goal.Status = GoalStatus.Completed;
+            }
+            else if (MovePlanner.TryBuildMoveActions(
+                         ship,
+                         goal.TargetEntityID,
+                         out var moveActions,
+                         out var moveReason))
+            {
+                actions.AddRange(moveActions);
+                actions.Add(new GeoSurveyOrder(ship, targetEntity));
+            }
+            else
+            {
+                goal.Status = GoalStatus.Failed;
+                goal.Message = moveReason;
+            }
+        }
+
+        return actions;
     }
+    
 
     /// <summary>
     /// TODO: should scan everything within the target's SOI — target the sun and we survey the whole
@@ -133,10 +149,9 @@ public class ServeyBodyPlanner : IGoalPlanner
 
             remaining.Remove(best);
 
-            yield return (ship, new Goal
+            yield return (ship, new Goal(GoalType.ServeyBodies)
             {
                 ParentGoalId = goal.Id,
-                Type = GoalType.ServeyBodies,
                 TargetEntityID = best.Id,   // distinct body, not parent system id
             });
         }

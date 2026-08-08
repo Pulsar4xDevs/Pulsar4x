@@ -337,9 +337,8 @@ public class AgentProcessor : IInstanceProcessor
 
             float finalWeight = baseWeight * multiplier;
 
-            goalsDB.EffectiveGoals[type] = new Goal
+            goalsDB.EffectiveGoals[type] = new Goal(type)
             {
-                Type = type,
                 Weight = finalWeight
             };
         }

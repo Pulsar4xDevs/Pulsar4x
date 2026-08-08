@@ -33,10 +33,6 @@ public class GeoSurveyOrder : EntityAction
 
     public GeoSurveyOrder() { }
     
-    public GeoSurveyOrder(Entity commandingEntity, int target) : 
-        this(commandingEntity, commandingEntity.Manager.GetGlobalEntityById(target))
-    {
-    }
     
     public GeoSurveyOrder(Entity commandingEntity, Entity target)
     {

@@ -106,9 +106,15 @@ public class Goal
     public GoalType Type;
     public int TargetEntityID = -1;
     public float Weight = 0.5f;
-    
+    public string Name = "";
     public GoalStatus Status = GoalStatus.Pending;
     public string Message = "";
+    
+    public Goal(GoalType type)
+    {
+        Type = type;
+    }
+    
 }
 
 public enum GoalStatus

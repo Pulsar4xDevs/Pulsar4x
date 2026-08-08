@@ -18,36 +18,49 @@ public class ScanAnomalyPlan : IGoalPlanner
 
     public IEnumerable<EntityAction> PlanActions(Goal goal, Entity ship)
     {
-        
+        List<EntityAction> actions = new List<EntityAction>();
+
         if (!ship.HasOrChildHasAbility<JPSurveyAbilityDB>())
-            return Fail(goal, "no grav-survey capability");
-
-        if (!MovePlanner.TryBuildMoveActions(ship, goal.TargetEntityID, out var moveActions, out var moveReason))
-            return Fail(goal, moveReason);
-
-        if(!ship.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var targetEntity))
-            return Fail(goal, "Target not found");
-        
-        if (targetEntity.TryGetDataBlob<JPSurveyableDB>(out var anomalyDB))
         {
-            if(!anomalyDB.IsSurveyComplete(ship.FactionOwnerID))
+            goal.Status = GoalStatus.Failed;
+            goal.Message = "no geo-survey capability";
+        }
+        else if (!ship.TryGetDataBlob<ActionQueueDB>(out var actionQueue))
+        {
+            goal.Status = GoalStatus.Failed;
+            goal.Message = "no action queue";
+        }
+        else if (!ship.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var targetEntity) ||
+                 targetEntity.TryGetDataBlob<JPSurveyableDB>(out var serveyable))
+        {
+            goal.Status = GoalStatus.Failed;
+            goal.Message = "Not a valid target";
+        }
+        else
+        {
+            var actionsForGoal = actionQueue.ActionsFor(goal);
+
+            if (actionsForGoal.Count > 0)
             {
-                var plan = new List<EntityAction>(moveActions);
-                
-                
-                plan.Add(JPSurveyOrder.CreateCommand(ship.FactionOwnerID, ship, targetEntity));
-                return plan;
+                if (actionsForGoal.TrueForAll(x => x.Status == ActionStatus.Succeeded))
+                    goal.Status = GoalStatus.Completed;
+            }
+            else if (MovePlanner.TryBuildMoveActions(
+                         ship,
+                         goal.TargetEntityID,
+                         out var moveActions,
+                         out var moveReason))
+            {
+                actions.Add(new JPSurveyOrder(ship, targetEntity));
+            }
+            else
+            {
+                goal.Status = GoalStatus.Failed;
+                goal.Message = moveReason;
             }
         }
-        return Fail(goal, "target not serveyable");
-    }
-    
 
-    static IEnumerable<EntityAction> Fail(Goal goal, string message)
-    {
-        goal.Status = GoalStatus.Failed;
-        goal.Message = message;
-        return Array.Empty<EntityAction>();
+        return actions;
     }
     
     /// <summary>
@@ -139,9 +152,8 @@ public class ScanAnomalyPlan : IGoalPlanner
 
             remaining.Remove(best);
 
-            yield return (ship, new Goal
+            yield return (ship, new Goal(GoalType.ServeyBodies)
              {
-                 Type = GoalType.ServeyBodies,
                  TargetEntityID = best.Id,   // distinct body, not parent system id
              });
         }
