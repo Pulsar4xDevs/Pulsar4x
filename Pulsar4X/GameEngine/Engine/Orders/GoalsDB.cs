@@ -106,6 +106,7 @@ public class Goal
     public GoalType Type;
     public int TargetEntityID = -1;
     public float Weight = 0.5f;
+    
     public GoalStatus Status = GoalStatus.Pending;
     public string Message = "";
 }

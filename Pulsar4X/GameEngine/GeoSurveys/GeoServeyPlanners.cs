@@ -20,10 +20,23 @@ public class ServeyBodyPlanner : IGoalPlanner
 
         if (!MovePlanner.TryBuildMoveActions(ship, goal.TargetEntityID, out var moveActions, out var moveReason))
             return Fail(goal, moveReason);
-
-        var plan = new List<EntityAction>(moveActions);
-        plan.Add(new GeoSurveyOrder(ship, goal.TargetEntityID));
-        return plan;
+        if (ship.TryGetDataBlob<ActionQueueDB>(out var actionQueueDB))
+        {
+            var actionsforgoal = actionQueueDB.ActionsFor(goal);
+            if (actionsforgoal.Count == 0)
+            {
+                var plan = new List<EntityAction>(moveActions);
+                plan.Add(new GeoSurveyOrder(ship, goal.TargetEntityID));
+                return plan;
+            }
+            else if (actionsforgoal.TrueForAll(x => x.Status == ActionStatus.Succeeded))
+            {
+                goal.Status = GoalStatus.Completed;
+            }
+            
+        }
+        return Fail(goal, "no action queue??");
+        
     }
 
     static IEnumerable<EntityAction> Fail(Goal goal, string message)
@@ -78,8 +91,18 @@ public class ServeyBodyPlanner : IGoalPlanner
             // 2. Can it physically get there? (cheap gate; strengthen later if needed)
             if (!MovePlanner.CanMove(subunit, out _))
                 continue;
-
-            fleetChildren.Add(subunit);
+            if (subunit.TryGetDataBlob<GoalsDB>(out var goalsDB))
+            {
+                if (goalsDB.GivenGoal.ParentGoalId != goal.Id)
+                {
+                    fleetChildren.Add(subunit);
+                }
+            }
+            else
+            {
+                fleetChildren.Add(subunit);
+            }
+            
         }
         
         if (fleetChildren.Count == 0 || pointsOfInterest.Count == 0)
@@ -112,6 +135,7 @@ public class ServeyBodyPlanner : IGoalPlanner
 
             yield return (ship, new Goal
             {
+                ParentGoalId = goal.Id,
                 Type = GoalType.ServeyBodies,
                 TargetEntityID = best.Id,   // distinct body, not parent system id
             });
