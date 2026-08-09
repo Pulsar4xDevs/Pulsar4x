@@ -822,6 +822,7 @@ namespace Pulsar4X.Client
                 if (!EntityWindows.TryGetValue(entityGuid, out EntityWindow? value))
                 {
                     value = new EntityWindow(entityGuid, starSys);
+                    WindowManager.AddWindow(value);
                     EntityWindows.Add(entityGuid, value);
                 }
 
