@@ -609,6 +609,16 @@ public sealed record DesignerInput(string PropertyName, double? NumericValue = n
 // separately. Per-entity details (position for centring, etc.) come from the system EntitySnapshots.
 // --------------------------------------------------------------------------------------------
 
+public sealed record GoalSnapshot(
+    string Name,
+    string Status,
+    string Message = "")
+
+{
+    
+}
+
+
 /// <summary>One queued order on a fleet or ship, with its execution state (for lists/tooltips).</summary>
 public sealed record OrderSnapshot(
     string Name,
@@ -618,6 +628,7 @@ public sealed record OrderSnapshot(
     /// <summary>True for a not-yet-running thrust maneuver the player can still edit/delete.</summary>
     bool IsEditableManeuver = false)
 {
+    public string Status = "";
     /// <summary>The order's id, for order-addressed commands (e.g. pause).</summary>
     public string OrderId { get; init; } = "";
 
@@ -642,7 +653,8 @@ public sealed record OrderSnapshot(
 
 /// <summary>The entity's own order queue (owner-only; fleets/ships also carry orders in the
 /// fleet-hierarchy snapshots, this view serves per-entity UI like the entity window).</summary>
-public sealed record OrdersView(IReadOnlyList<OrderSnapshot> Orders) : IComponentView;
+public sealed record OrdersView(GoalSnapshot goal, IReadOnlyList<OrderSnapshot> Orders) : IComponentView;
+
 
 /// <summary>A ship as a fleet member: identity, the system it currently resides in, and the
 /// display details the fleet UI shows (design, commander, queued orders).</summary>
@@ -653,6 +665,7 @@ public sealed record ShipSnapshot(
     string DesignName = "",
     string? CommanderName = null)
 {
+    public GoalSnapshot? Goal { get; init; }
     public IReadOnlyList<OrderSnapshot> Orders { get; init; } = Array.Empty<OrderSnapshot>();
 }
 
@@ -729,6 +742,7 @@ public sealed class FleetSnapshot
     public bool InheritOrders { get; init; }
     public bool CanGeoSurvey { get; init; }
     public bool CanGravSurvey { get; init; }
+    public GoalSnapshot? Goal { get; init; }
     public IReadOnlyList<OrderSnapshot> Orders { get; init; } = Array.Empty<OrderSnapshot>();
     public IReadOnlyList<StandingOrder> StandingOrders { get; init; } = Array.Empty<StandingOrder>();
     public IReadOnlyList<FleetSnapshot> SubFleets { get; init; } = Array.Empty<FleetSnapshot>();

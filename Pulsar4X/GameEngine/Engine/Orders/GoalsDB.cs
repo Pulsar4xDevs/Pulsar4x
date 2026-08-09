@@ -113,6 +113,7 @@ public class Goal
     public Goal(GoalType type)
     {
         Type = type;
+        Name = Enum.GetName(typeof(GoalType), type);
     }
     
 }

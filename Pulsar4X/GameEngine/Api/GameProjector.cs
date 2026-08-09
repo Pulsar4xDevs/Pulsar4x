@@ -160,8 +160,8 @@ namespace Pulsar4X.Engine.Api
                 ? new MassVolumeView(m.MassTotal, m.RadiusInM, m.DensityDry_gcm) { DryMassKg = m.MassDry } : null,
             // Projected even when the queue is empty: its presence marks the entity as orderable,
             // which gates the order-queue UI.
-            (e, f) => e.FactionOwnerID == f && e.HasDataBlob<ActionQueueDB>()
-                ? new OrdersView(ProjectOrders(e)) : null,
+            (e, f) => e.FactionOwnerID == f && e.HasDataBlob<ActionQueueDB>() || e.HasDataBlob<GoalsDB>()
+                ? new OrdersView(ProjectGoals(e), ProjectOrders(e)) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Movement.NewtonThrustAbilityDB>(out var th)
                 ? ToThrustView(th, e, f) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Movement.WarpAbilityDB>(out var wa)
@@ -1165,6 +1165,7 @@ namespace Pulsar4X.Engine.Api
                 InheritOrders = fleetDB?.InheritOrders ?? false,
                 CanGeoSurvey = fleet.HasGeoSurveyAbility(),
                 CanGravSurvey = fleet.HasJPSurveyAbililty(),
+                Goal = ProjectGoals(fleet),
                 Orders = ProjectOrders(fleet),
                 StandingOrders = ProjectStandingOrders(fleetDB),
                 SubFleets = subFleets,
@@ -1254,8 +1255,25 @@ namespace Pulsar4X.Engine.Api
             return new ShipSnapshot(ship.Id, ship.GetName(factionId), ship.Manager?.ManagerID ?? "",
                                     shipInfo?.Design.Name ?? "", commander)
             {
+                Goal = ProjectGoals(ship),
                 Orders = ProjectOrders(ship),
             };
+        }
+
+        private static GoalSnapshot ProjectGoals(Entity entity)
+        {
+            GoalSnapshot goalSnapshot;
+            if (!entity.TryGetDataBlob<GoalsDB>(out var goals) || goals.GivenGoal == null)
+            {
+                goalSnapshot = new GoalSnapshot("", "", "");
+            }
+            else
+            {
+                var goal = goals.GivenGoal;
+                string strStatus = Enum.GetName(typeof(GoalStatus), goal.Status) ?? "";
+                goalSnapshot = new GoalSnapshot(goals.GivenGoal.Name, strStatus, goal.Message);
+            }
+            return goalSnapshot;
         }
 
         private static IReadOnlyList<OrderSnapshot> ProjectOrders(Entity entity)
@@ -1267,6 +1285,24 @@ namespace Pulsar4X.Engine.Api
             foreach (var action in orderable.ActionList)
             {
                 var maneuver = !action.IsRunning ? action as Pulsar4X.Movement.NewtonThrustAction : null;
+
+                string statusSymbol = "";
+                switch (action.Status)
+                {
+                    case ActionStatus.Queued:
+                        statusSymbol = ".";
+                        break;
+                    case ActionStatus.Running:
+                        statusSymbol = ">";
+                        break;
+                    case ActionStatus.Succeeded:
+                        statusSymbol = "-";
+                        break;
+                    case ActionStatus.Failed:
+                        statusSymbol = "x";
+                        break;
+                }
+                
                 orders.Add(new OrderSnapshot(action.Name, action.IsRunning, action.GetIsFinished, action.Details,
                     maneuver != null)
                 {
@@ -1278,6 +1314,7 @@ namespace Pulsar4X.Engine.Api
                     PauseOnAction = action.PauseOnAction,
                     ManeuverNodeTime = maneuver?.NodeDateTime,
                     ManeuverDeltaVMps = maneuver != null ? ToVec3(maneuver.OrbitrelativeDeltaV) : null,
+                    Status = statusSymbol,
                 });
             }
             return orders;

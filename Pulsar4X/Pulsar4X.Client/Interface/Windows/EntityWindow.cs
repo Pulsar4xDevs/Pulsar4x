@@ -425,13 +425,13 @@ namespace Pulsar4X.Client
             var orders = _entity?.GetView<OrdersView>()?.Orders;
             if (orders == null || orders.Count == 0) return;
 
-            if (ImGui.CollapsingHeader("Orders", ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader("Actions", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 if (ImGui.BeginTable("OrdersTable", 3, Styles.TableFlags))
                 {
                     ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.WidthStretch, 0.1f);
-                    ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.WidthStretch, 0.2f);
-                    ImGui.TableSetupColumn("Details", ImGuiTableColumnFlags.WidthStretch, 0.7f);
+                    ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.WidthStretch, 0.3f);
+                    ImGui.TableSetupColumn("Details", ImGuiTableColumnFlags.WidthStretch, 0.6f);
                     ImGui.TableHeadersRow();
 
                     for (int i = 0; i < orders.Count; i++)
@@ -799,27 +799,33 @@ namespace Pulsar4X.Client
                 radius, ringThickness, 0f, "SHIELD", "N/A", true);
 
             // Current order (right-aligned on the same row)
-            string orderLabel = "CURRENT ORDER";
-            string orderName = "Idle";
-            string orderDetails = "";
-
-            var orders = _entity.GetView<OrdersView>()?.Orders;
-            if (orders is { Count: > 0 })
+            string goalLabel = "CURRENT Goal";
+            string goalName = "Idle";
+            string goalDetails = "";
+            string goalMessage = "";
+            var goal = _entity.GetView<OrdersView>().goal;
+            if (goal.Name != "")
             {
-                orderName = orders[0].Name;
-                orderDetails = orders[0].Details;
-            }
-
+                goalName = goal.Name;
+                goalDetails = goal.Status;
+                goalMessage = goal.Message;
+            }          
             float rightEdge = cursorPos.X + availWidth;
-            var labelSize = ImGui.CalcTextSize(orderLabel);
-            var nameSize = ImGui.CalcTextSize(orderName);
+            var labelSize = ImGui.CalcTextSize(goalLabel);
+            var nameSize = ImGui.CalcTextSize(goalName);
+
 
             // Right-align: find the widest text to anchor from
             float maxTextWidth = Math.Max(labelSize.X, nameSize.X);
-            if (orderDetails.Length > 0)
+            if (goalDetails.Length > 0)
             {
-                var detailSize = ImGui.CalcTextSize(orderDetails);
+                var detailSize = ImGui.CalcTextSize(goalDetails);
                 maxTextWidth = Math.Max(maxTextWidth, detailSize.X);
+            }
+            if (goalMessage.Length > 0)
+            {
+                var messageSize = ImGui.CalcTextSize(goalMessage);
+                maxTextWidth = Math.Max(maxTextWidth, messageSize.X);
             }
             float textX = rightEdge - maxTextWidth;
 
@@ -828,24 +834,33 @@ namespace Pulsar4X.Client
             drawList.AddText(
                 new Vector2(textX, textY),
                 ImGui.ColorConvertFloat4ToU32(Styles.DescriptiveColor),
-                orderLabel);
+                goalLabel);
 
             // Order name
             float nameY = textY + labelSize.Y + 2f;
-            var nameColor = orderDetails.Length > 0 ? _accentColor : Styles.NeutralColor;
+            var nameColor = goalDetails.Length > 0 ? _accentColor : Styles.NeutralColor;
             drawList.AddText(
                 new Vector2(textX, nameY),
                 ImGui.ColorConvertFloat4ToU32(nameColor),
-                orderName);
+                goalName);
 
             // Order details (if any)
-            if (orderDetails.Length > 0)
+            if (goalDetails.Length > 0)
             {
                 float detailY = nameY + nameSize.Y + 1f;
                 drawList.AddText(
                     new Vector2(textX, detailY),
                     ImGui.ColorConvertFloat4ToU32(Styles.DescriptiveColor),
-                    orderDetails);
+                    goalDetails);
+            }
+            
+            if (goalMessage.Length > 0)
+            {
+                float detailY = nameY + nameSize.Y + 1f;
+                drawList.AddText(
+                    new Vector2(textX, detailY),
+                    ImGui.ColorConvertFloat4ToU32(Styles.DescriptiveColor),
+                    goalMessage);
             }
 
             // Reserve vertical space for the indicator row
@@ -946,14 +961,15 @@ namespace Pulsar4X.Client
             var orders = _entity.GetView<OrdersView>()?.Orders;
             if (orders is { Count: > 0 })
             {
-                SectionLabel("ORDERS (" + orders.Count + ")");
+                SectionLabel("ACTIONS (" + orders.Count + ")");
 
                 ImGui.Indent();
-                if (ImGui.BeginTable("##orders", 3,
+                if (ImGui.BeginTable("##orders", 4,
                     ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.NoPadOuterX))
                 {
                     ImGui.TableSetupColumn("##n", ImGuiTableColumnFlags.WidthFixed, 20f);
-                    ImGui.TableSetupColumn("##cmd", ImGuiTableColumnFlags.WidthFixed, 100f);
+                    ImGui.TableSetupColumn("##status", ImGuiTableColumnFlags.WidthFixed, 20f);
+                    ImGui.TableSetupColumn("##cmd", ImGuiTableColumnFlags.WidthFixed, 200f);
                     ImGui.TableSetupColumn("##det", ImGuiTableColumnFlags.WidthStretch);
 
                     for (int i = 0; i < orders.Count; i++)
@@ -963,7 +979,26 @@ namespace Pulsar4X.Client
                         ImGui.Text((i + 1).ToString());
                         ImGui.PopStyleColor();
                         ImGui.TableNextColumn();
-
+                        var status = orders[i].Status;
+                        switch (status)
+                        {
+                            case ".":
+                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                                break;
+                            case ">":
+                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                                break;
+                            case "-":
+                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.GoodColor);
+                                break;
+                            case "x":
+                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+                                break;
+                        }
+                        ImGui.Text(status);
+                        ImGui.PopStyleColor();
+                        ImGui.TableNextColumn();
+                        
                         // Make thrust-maneuver orders clickable for editing
                         if (orders[i].IsEditableManeuver)
                         {

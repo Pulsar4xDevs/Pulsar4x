@@ -109,10 +109,7 @@ public class ServeyBodyPlanner : IGoalPlanner
                 continue;
             if (subunit.TryGetDataBlob<GoalsDB>(out var goalsDB))
             {
-                if (goalsDB.GivenGoal.ParentGoalId != goal.Id)
-                {
-                    fleetChildren.Add(subunit);
-                }
+                fleetChildren.Add(subunit);
             }
             else
             {
@@ -132,6 +129,10 @@ public class ServeyBodyPlanner : IGoalPlanner
 
         foreach (var ship in fleetChildren)
         {
+            if(ship.TryGetDataBlob<GoalsDB>(out var goalsDB) && goalsDB.GivenGoal.ParentGoalId == goal.Id)
+            {
+                continue;//this ship is already doing this goal. 
+            }
             if (remaining.Count == 0)
                 yield break;
 
