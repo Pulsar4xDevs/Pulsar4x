@@ -69,7 +69,7 @@ namespace Pulsar4X.Client
 
                 if (!RenderedMaps.ContainsKey(systemId))
                 {
-                    SystemMapRendering map = new SystemMapRendering(_window, _state);
+                    var map = _state.WindowManager.AddWindow(new SystemMapRendering(_window, _state));
                     map.Initialize(systemId);
                     RenderedMaps[systemId] = map;
                     map.GalacticMapPosition.X = x;

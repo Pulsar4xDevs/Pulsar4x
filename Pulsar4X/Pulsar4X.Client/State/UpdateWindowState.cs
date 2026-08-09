@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.Client
 {
-    public abstract class UpdateWindowState
+    public abstract class UpdateWindowState : IDisposable
     {
         internal static GlobalUIState _uiState;
 
@@ -11,14 +11,9 @@ namespace Pulsar4X.Client
         public virtual void OnSystemTickChange(DateTime newDate) { }
 
         protected UpdateWindowState()
-        {
-            _uiState.UpdateableWindows.Add(this);
-        }
+        {}
 
-        public void Deconstructor()
-        {
-            _uiState.UpdateableWindows.Remove(this);
-        }
-
+        public void Dispose()
+        {}
     }
 }

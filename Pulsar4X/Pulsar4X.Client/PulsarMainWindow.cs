@@ -183,28 +183,6 @@ namespace Pulsar4X.Client
         public override void Update()
         {
             base.Update();
-
-            // Apply any server updates received since last frame as one atomic batch on this (UI)
-            // thread, before any window reads the galaxy model this frame.
-            _state.GameClient?.Update();
-
-            //update and refresh state for GameDateTimechange
-            if(_state.GameClient is { } gameClient)
-            {
-                //update and refresh state for SystemDateTimechage
-                var curTime = _state.SelectedSystemTime;
-                if (curTime != _state.SelectedSysLastUpdateTime)
-                {
-                    foreach (var item in _state.UpdateableWindows)
-                    {
-                        if (item.GetActive() == true)
-                            item.OnSystemTickChange(curTime);
-                    }
-
-                    _state.SelectedSysLastUpdateTime = curTime;
-                }
-            }
-
             _state.Update();
         }
 
