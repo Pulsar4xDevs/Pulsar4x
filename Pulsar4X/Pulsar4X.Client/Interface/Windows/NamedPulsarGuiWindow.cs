@@ -50,11 +50,6 @@ namespace Pulsar4X.Client
             return UniqueName;
         }
 
-        public void StartDisplay()
-        {
-            _uiState.LoadedNonUniqueWindows[this.UniqueName] = this;
-        }
-
         internal abstract void Display();
 
         internal virtual void EntityClicked(EntityState entity, MouseButtons button) { }
