@@ -112,11 +112,11 @@ namespace Pulsar4X.Client
         [Obsolete("Use WindowManager.AllWindows instead", DiagnosticId = "P4X0001")]
         internal List<UpdateWindowState> UpdateableWindows => WindowManager.AllWindows;
         
-        [Obsolete("Use WindowManager.LoadedWindows instead", DiagnosticId = "P4X0001")]
-        internal Dictionary<Type, UniquePulsarGuiWindow> LoadedWindows => WindowManager.LoadedWindows;
+        [Obsolete("Use WindowManager.UniqueWindows instead", DiagnosticId = "P4X0001")]
+        internal Dictionary<Type, UniquePulsarGuiWindow> LoadedWindows => WindowManager.UniqueWindows;
         
-        [Obsolete("Use WindowManager.LoadedNonUniqueWindows instead", DiagnosticId = "P4X0001")]
-        internal Dictionary<string, NamedPulsarGuiWindow> LoadedNonUniqueWindows => WindowManager.LoadedNonUniqueWindows;
+        [Obsolete("Use WindowManager.NamedWindows instead", DiagnosticId = "P4X0001")]
+        internal Dictionary<string, NamedPulsarGuiWindow> LoadedNonUniqueWindows => WindowManager.NamedWindows;
 
         internal UniquePulsarGuiWindow? ActiveWindow { get; set; }
         internal List<List<UserOrbitSettings>> UserOrbitSettingsMtx = new();
@@ -356,14 +356,6 @@ namespace Pulsar4X.Client
         internal T AddNamedWindow<T>(string name, T window) where T : NamedPulsarGuiWindow => WindowManager.AddNamedWindow(name, window);
         [Obsolete("Use WindowManager directly", DiagnosticId = "P4X0001")]
         internal T AddUniqueWindow<T>(T window) where T : UniquePulsarGuiWindow => WindowManager.AddUniqueWindow(window);
-
-        private void DeactivateAllClosableWindows()
-        {
-            foreach (var window in LoadedWindows)
-            {
-                window.Value.SetActive(false);
-            }
-        }
 
         /// <summary>
         /// Clears all cached UI state to prepare for a new game.

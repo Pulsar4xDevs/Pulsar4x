@@ -8,8 +8,8 @@ namespace Pulsar4X.Client
     internal sealed class WindowManager
     {
         internal List<UpdateWindowState> AllWindows { get; init; } = [];
-        internal Dictionary<Type, UniquePulsarGuiWindow> LoadedWindows { get; init; } = [];
-        internal Dictionary<string, NamedPulsarGuiWindow> LoadedNonUniqueWindows { get; init; } = [];
+        internal Dictionary<Type, UniquePulsarGuiWindow> UniqueWindows { get; init; } = [];
+        internal Dictionary<string, NamedPulsarGuiWindow> NamedWindows { get; init; } = [];
 
         internal NamedPulsarGuiWindow? GetNamedWindow(string name)
         {
@@ -22,7 +22,7 @@ namespace Pulsar4X.Client
 
         internal bool TryGetNamedWindow(string name, [NotNullWhen(true)] out NamedPulsarGuiWindow? window)
         {
-            if (LoadedNonUniqueWindows.TryGetValue(name, out var foundWindow))
+            if (NamedWindows.TryGetValue(name, out var foundWindow))
             {
                 window = foundWindow;
                 return true;
@@ -59,7 +59,7 @@ namespace Pulsar4X.Client
 
         internal bool TryGetUniqueWindow<T>([NotNullWhen(true)] out T? window) where T : UniquePulsarGuiWindow
         {
-            if (LoadedWindows.TryGetValue(typeof(T), out var foundWindow))
+            if (UniqueWindows.TryGetValue(typeof(T), out var foundWindow))
             {
                 window = (T)foundWindow;
                 return true;
@@ -72,14 +72,14 @@ namespace Pulsar4X.Client
         internal T AddNamedWindow<T>(string name, T window) where T : NamedPulsarGuiWindow
         {
             AddWindow(window);
-            LoadedNonUniqueWindows.Add(name, window);
+            NamedWindows.Add(name, window);
             return window;
         }
 
         internal T AddUniqueWindow<T>(T window) where T : UniquePulsarGuiWindow
         {
             AddWindow(window);
-            LoadedWindows.Add(typeof(T), window);
+            UniqueWindows.Add(typeof(T), window);
             return window;
         }
 
@@ -91,9 +91,17 @@ namespace Pulsar4X.Client
 
         internal void UnloadAllWindows()
         {
-            LoadedWindows.Clear();
-            LoadedNonUniqueWindows.Clear();
+            UniqueWindows.Clear();
+            NamedWindows.Clear();
             AllWindows.Clear();
+        }
+
+        internal void CloseAllWindows()
+        {
+            foreach (var window in UniqueWindows.Values)
+            {
+                window.SetActive(false);
+            }
         }
 
         public IEnumerable<UpdateWindowState> GetActiveWindows() => AllWindows.Where(x => x.GetActive());
