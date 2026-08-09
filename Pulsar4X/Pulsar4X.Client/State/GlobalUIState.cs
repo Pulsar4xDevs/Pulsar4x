@@ -819,11 +819,13 @@ namespace Pulsar4X.Client
 
             if (button == MouseButtons.Primary)
             {
-                if (!EntityWindows.ContainsKey(entityGuid))
+                if (!EntityWindows.TryGetValue(entityGuid, out EntityWindow? value))
                 {
-                    EntityWindows.Add(entityGuid, new EntityWindow(entityGuid, starSys));
+                    value = new EntityWindow(entityGuid, starSys);
+                    EntityWindows.Add(entityGuid, value);
                 }
-                EntityWindows[entityGuid].ToggleActive();
+
+                value.ToggleActive();
 
                 if (!ViewPort.IsCtrlPressed)
                 {
