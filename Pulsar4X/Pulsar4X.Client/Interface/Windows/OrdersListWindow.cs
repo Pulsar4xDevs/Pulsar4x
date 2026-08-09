@@ -20,19 +20,15 @@ namespace Pulsar4X.Client
 
         internal static OrdersListWindow GetInstance(EntityState entity, GlobalUIState state)
         {
+            var winManager = _uiState.WindowManager;
             string name = "OrdersList|" + entity.Id.ToString();
-            OrdersListWindow thisItem;
-            if (!_uiState.LoadedNonUniqueWindows.ContainsKey(name))
+            if (!winManager.TryGetNamedWindow(name, out OrdersListWindow? orderList))
             {
-                thisItem = new OrdersListWindow(entity.Id, entity.StarSystemId!, state);
-                thisItem.StartDisplay();
-            }
-            else
-            {
-                thisItem = (OrdersListWindow)_uiState.LoadedNonUniqueWindows[name];
+                orderList = new OrdersListWindow(entity.Id, entity.StarSystemId!, state);
+                winManager.AddNamedWindow(name, orderList);
             }
 
-            return thisItem;
+            return orderList;
         }
 
         internal override void Display()
