@@ -54,6 +54,7 @@ public class JPSurveyProcessor : IHotloopProcessor
                 else
                 {
                     jpSurveyableDB.SurveyPointsRemaining[entity.FactionOwnerID] -= jpSurveyAbilityDB.Speed;
+                    
                 }
             }
         }

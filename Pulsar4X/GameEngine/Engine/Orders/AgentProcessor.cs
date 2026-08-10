@@ -11,6 +11,7 @@ using Pulsar4X.GeoSurveys;
 using Pulsar4X.Industry;
 using Pulsar4X.Interfaces;
 using Pulsar4X.JumpPoints;
+using Pulsar4X.Messaging;
 using Pulsar4X.Movement;
 using Pulsar4X.People;
 using Pulsar4X.Sensors;
@@ -58,7 +59,7 @@ public class AgentProcessor : IInstanceProcessor
 
     public static void ProcessEntityStatic(Entity entity, DateTime atDateTime)
     {
-        //check if the entity given is a commander, or if it's an entity a commander is... commanding. 
+        //check if the entity given is a commander, or if it's an entity a commander is managing. 
         Entity managedEntity = entity;
         Entity agentHost = entity;
         if (entity.TryGetDataBlob<CommanderDB>(out var commanderDB) && commanderDB.AssignedTo != -1)
@@ -77,7 +78,7 @@ public class AgentProcessor : IInstanceProcessor
         bool isShip = managedEntity.TryGetDataBlob<ShipInfoDB>(out var shipDB);
         switch (goal.Status)
         {
-            case GoalStatus.Pending:
+            case GoalStatus.Planning:
             {
                 if (!_planners.TryGetValue(goal.Type, out var planner))
                 {
@@ -94,6 +95,8 @@ public class AgentProcessor : IInstanceProcessor
                         // on its own wake rather than synchronously inside our pass.
                         AssignGoal(subordinate, subGoal, atDateTime + RelayDelay);
                     }
+                    if(goal.Status == GoalStatus.Planning)
+                        goal.Status = GoalStatus.Active;
                 }
                 if(isShip)
                 {
@@ -109,7 +112,7 @@ public class AgentProcessor : IInstanceProcessor
                 // capable) or Completed (nothing to do, so it handed nothing down). Only advance a
                 // goal that is still Pending — otherwise a zero-subgoal plan gets set to Active
                 // and, having nothing to roll up, reschedules forever.
-                if (goal.Status != GoalStatus.Pending)
+                if (goal.Status != GoalStatus.Planning)
                     break;
                 
                 ScheduleAgent(agentHost, atDateTime + RecheckInterval);
@@ -169,20 +172,18 @@ public class AgentProcessor : IInstanceProcessor
 
             }
         }
+        MessagePublisher.Instance.Publish(
+            Message.Create(
+                MessageTypes.OrdersChanged,
+                entity.Id,
+                entity.Manager.ManagerID,
+                entity.FactionOwnerID));
     }
     
     // -----------------------------------------------------------------
     // helpers
     // -----------------------------------------------------------------
-    internal static GoalsDB GetOrCreateGoals(Entity entity)
-    {
-        if (!entity.TryGetDataBlob<GoalsDB>(out var goals))
-        {
-            goals = new GoalsDB();
-            entity.SetDataBlob(goals);
-        }
-        return goals;
-    }
+
     
     /// <summary>
     /// finds planners via reflection so we don't have to manualy add them.
@@ -233,7 +234,12 @@ public class AgentProcessor : IInstanceProcessor
     /// </param>
     internal static void AssignGoal(Entity unit, Goal goal, DateTime? when = null)
     {
-        GetOrCreateGoals(unit).GivenGoal = goal;
+        if (!unit.TryGetDataBlob<GoalsDB>(out var goals))
+        {
+            goals = new GoalsDB();
+            unit.SetDataBlob(goals);
+        }
+        goals.GivenGoal = goal;
 
         if (when == null)
             RunAgentNow(unit);

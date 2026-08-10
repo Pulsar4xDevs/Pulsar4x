@@ -845,9 +845,9 @@ namespace Pulsar4X.Client
                 goalName);
 
             // Order details (if any)
+            float detailY = nameY + nameSize.Y + 1f;
             if (goalDetails.Length > 0)
             {
-                float detailY = nameY + nameSize.Y + 1f;
                 drawList.AddText(
                     new Vector2(textX, detailY),
                     ImGui.ColorConvertFloat4ToU32(Styles.DescriptiveColor),
@@ -856,9 +856,9 @@ namespace Pulsar4X.Client
             
             if (goalMessage.Length > 0)
             {
-                float detailY = nameY + nameSize.Y + 1f;
+                float messageY = detailY + nameSize.Y + 1;
                 drawList.AddText(
-                    new Vector2(textX, detailY),
+                    new Vector2(textX, messageY),
                     ImGui.ColorConvertFloat4ToU32(Styles.DescriptiveColor),
                     goalMessage);
             }

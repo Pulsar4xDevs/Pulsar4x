@@ -23,7 +23,7 @@ public class ScanAnomalyPlan : IGoalPlanner
         if (!ship.HasOrChildHasAbility<JPSurveyAbilityDB>())
         {
             goal.Status = GoalStatus.Failed;
-            goal.Message = "no geo-survey capability";
+            goal.Message = "no Grav-survey capability";
         }
         else if (!ship.TryGetDataBlob<ActionQueueDB>(out var actionQueue))
         {
@@ -31,7 +31,7 @@ public class ScanAnomalyPlan : IGoalPlanner
             goal.Message = "no action queue";
         }
         else if (!ship.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var targetEntity) ||
-                 targetEntity.TryGetDataBlob<JPSurveyableDB>(out var serveyable))
+                 !targetEntity.TryGetDataBlob<JPSurveyableDB>(out var serveyable))
         {
             goal.Status = GoalStatus.Failed;
             goal.Message = "Not a valid target";
@@ -51,6 +51,7 @@ public class ScanAnomalyPlan : IGoalPlanner
                          out var moveActions,
                          out var moveReason))
             {
+                actions.AddRange(moveActions);
                 actions.Add(new JPSurveyOrder(ship, targetEntity));
             }
             else
@@ -90,16 +91,15 @@ public class ScanAnomalyPlan : IGoalPlanner
 
         //if we're given a star as a target, build a list of anomalies. 
         List<Entity> pointsOfInterest = new List<Entity>();
+        if(CanScan(targetEntity, fleet.FactionOwnerID))
+            pointsOfInterest.Add(targetEntity);
         if (targetEntity.HasDataBlob<StarInfoDB>())
         {
             targetEntity.TryGetDataBlob<PositionDB>(out var position);
             foreach (var childEntity in position.Children)
             {
-                if (childEntity.TryGetDataBlob<JPSurveyableDB>(out var anomalyDB))
-                {
-                    if(!anomalyDB.IsSurveyComplete(fleet.FactionOwnerID))
-                    {pointsOfInterest.Add(childEntity);}
-                }
+                if(CanScan(childEntity, fleet.FactionOwnerID))
+                    pointsOfInterest.Add(childEntity);
             }
         }
         
@@ -123,14 +123,7 @@ public class ScanAnomalyPlan : IGoalPlanner
             goal.Message = "no capable subordinates or nothing left to survey";
             yield break;
         }
-
-        if (fleetChildren.Count == 0 || pointsOfInterest.Count == 0)
-        {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "no capable subordinates or nothing left to survey";
-            yield break;
-        }
-
+        
         var remaining = new List<Entity>(pointsOfInterest);
 
         foreach (var ship in fleetChildren)
@@ -152,11 +145,21 @@ public class ScanAnomalyPlan : IGoalPlanner
 
             remaining.Remove(best);
 
-            yield return (ship, new Goal(GoalType.ServeyBodies)
+            yield return (ship, new Goal(GoalType.ScanAnomalies)
              {
                  TargetEntityID = best.Id,   // distinct body, not parent system id
              });
         }
+    }
+    
+    bool CanScan(Entity targetEntity, int factionID)
+    {
+        if (targetEntity.TryGetDataBlob<JPSurveyableDB>(out var anomalyDB))
+        {
+            if (!anomalyDB.IsSurveyComplete(factionID))
+                return true;
+        }
+        return false;
     }
 }
 

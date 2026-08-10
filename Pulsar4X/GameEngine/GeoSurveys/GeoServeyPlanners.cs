@@ -129,7 +129,11 @@ public class ServeyBodyPlanner : IGoalPlanner
 
         foreach (var ship in fleetChildren)
         {
-            if(ship.TryGetDataBlob<GoalsDB>(out var goalsDB) && goalsDB.GivenGoal.ParentGoalId == goal.Id)
+            if(ship.TryGetDataBlob<GoalsDB>(out var goalsDB) 
+               && (goalsDB.GivenGoal.ParentGoalId == goal.Id
+               && goalsDB.GivenGoal.Status  != GoalStatus.Completed 
+               || goalsDB.GivenGoal.Status != GoalStatus.Failed)
+               )
             {
                 continue;//this ship is already doing this goal. 
             }
@@ -155,6 +159,7 @@ public class ServeyBodyPlanner : IGoalPlanner
                 ParentGoalId = goal.Id,
                 TargetEntityID = best.Id,   // distinct body, not parent system id
             });
+
         }
     }
 
