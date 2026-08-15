@@ -94,6 +94,45 @@ public class CargoTransferOrder : EntityAction
     }
 
     /// <summary>
+    /// Build a bilateral refuel transfer without enqueueing. Receiver is primary (WaitTillFull).
+    /// Planner returns <paramref name="primary"/> in its action list and submits secondary separately
+    /// so the supplier participates while move actions stay ordered ahead of the receiver's transfer.
+    /// </summary>
+    public static (CargoTransferOrder primary, CargoTransferOrder secondary) CreateRefuelPair(
+        int faction,
+        Entity receiver,
+        Entity supplier,
+        ICargoable fuel,
+        Conditionals condition)
+    {
+        long amount = 0;
+        if (condition == Conditionals.WaitTillFull)
+            amount = CargoMath.GetFreeUnitSpace(receiver.GetDataBlob<CargoStorageDB>(), fuel);
+
+        var itemList = new List<(ICargoable item, long amount)> { (fuel, amount) };
+        var cargoData = new CargoTransferDataDB(receiver, supplier, itemList);
+        var now = receiver.Manager.ManagerSubpulses.StarSysDateTime;
+
+        var primary = new CargoTransferOrder(cargoData)
+        {
+            RequestingFactionGuid = faction,
+            EntityCommandingGuid = receiver.Id,
+            CreatedDate = now,
+            IsPrimaryEntity = true,
+            Condition = condition,
+        };
+        var secondary = new CargoTransferOrder(cargoData)
+        {
+            RequestingFactionGuid = faction,
+            EntityCommandingGuid = supplier.Id,
+            CreatedDate = now,
+            IsPrimaryEntity = false,
+            Condition = condition,
+        };
+        return (primary, secondary);
+    }
+
+    /// <summary>
     /// Single item conditional order.
     /// Assumes transfer from secondary to primary
     /// </summary>

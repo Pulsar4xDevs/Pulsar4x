@@ -7,34 +7,44 @@ using Pulsar4X.Extensions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
 using Pulsar4X.GeoSurveys;
+using Pulsar4X.Messaging;
 using Pulsar4X.Movement;
+using Pulsar4X.Ships;
 
 namespace Pulsar4X.JumpPoints;
 
     
 public class ScanAnomalyPlan : IGoalPlanner
 {
+    public PlanResult Plan(Entity managedEntity, Goal goal)
+    {
+        bool isFleet = managedEntity.TryGetDataBlob<FleetDB>(out var fleetDB);
+        bool isShip = managedEntity.TryGetDataBlob<ShipInfoDB>(out var shipDB);
+        if(isFleet)
+            return PlanSubGoals(managedEntity, goal );
+        if (isShip)
+            return PlanActions(managedEntity, goal);
+        
+        return PlanResult.Fail("Non supported entity");
+    }
+    
     public GoalType Type => GoalType.ScanAnomalies;
 
-    public IEnumerable<EntityAction> PlanActions(Goal goal, Entity ship)
+    public PlanResult PlanActions(Entity ship, Goal goal)
     {
-        List<EntityAction> actions = new List<EntityAction>();
-
+        PlanResult plan = PlanResult.Fail("unknown fail");
         if (!ship.HasOrChildHasAbility<JPSurveyAbilityDB>())
         {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "no Grav-survey capability";
+            plan = PlanResult.Fail("no Grav-survey capability");
         }
         else if (!ship.TryGetDataBlob<ActionQueueDB>(out var actionQueue))
         {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "no action queue";
+            plan = PlanResult.Fail("no action queue");
         }
         else if (!ship.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var targetEntity) ||
                  !targetEntity.TryGetDataBlob<JPSurveyableDB>(out var serveyable))
         {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "Not a valid target";
+            plan = PlanResult.Fail("Not a valid target");
         }
         else
         {
@@ -42,8 +52,12 @@ public class ScanAnomalyPlan : IGoalPlanner
 
             if (actionsForGoal.Count > 0)
             {
-                if (actionsForGoal.TrueForAll(x => x.Status == ActionStatus.Succeeded))
-                    goal.Status = GoalStatus.Completed;
+                if (actionsForGoal.Exists(a => a.Status == ActionStatus.Failed))
+                    plan = PlanResult.Fail("a survey action failed");
+                else if (actionsForGoal.TrueForAll(a => a.Status == ActionStatus.Succeeded))
+                    plan = PlanResult.Done();
+                else
+                    plan = PlanResult.Continue(new List<EntityAction>()); // still running
             }
             else if (MovePlanner.TryBuildMoveActions(
                          ship,
@@ -51,91 +65,102 @@ public class ScanAnomalyPlan : IGoalPlanner
                          out var moveActions,
                          out var moveReason))
             {
-                actions.AddRange(moveActions);
-                actions.Add(new JPSurveyOrder(ship, targetEntity));
+                moveActions.Add(new JPSurveyOrder(ship, targetEntity));
+                plan = PlanResult.Continue(moveActions);
             }
             else
             {
-                goal.Status = GoalStatus.Failed;
-                goal.Message = moveReason;
+                plan = PlanResult.Fail(moveReason);
             }
         }
-
-        return actions;
+        
+        return plan;
     }
     
     /// <summary>
-    /// TODO: should scan everything within the target's SOI — target the sun and we survey the whole
-    /// system, target earth and we survey earth and luna — by walking the target's PositionDB
-    /// children for anything with a GeoSurveyableDB the faction hasn't finished, then giving each
-    /// subunit a *different* body (nearest first) and topping up as ships come free.
-    ///
-    /// Two things are missing before that can work: this only gets one pass (AgentProcessor plans on
-    /// Pending and monitors thereafter), so there is nowhere to hand out the next body from; 
+    /// Hand each capable free ship a different unfinished anomaly (nearest first).
+    /// Target a star to collect anomalies under it; target a single anomaly for that site only.
+    /// Does not mutate <paramref name="goal"/> — agent applies the returned status.
+    /// Re-entrant: skips ships already working this parent goal; skips POIs already assigned.
     /// </summary>
-    public IEnumerable<(Entity subordinate, Goal goal)> PlanSubGoals(Goal goal, Entity fleet)
+    public PlanResult PlanSubGoals(Entity fleet, Goal goal)
     {
         if (!fleet.TryGetDataBlob<FleetDB>(out var fleetDB))
-        {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "We have no subordinates to manage";
-            yield break;
-        }
+            return PlanResult.Fail("We have no subordinates to manage");
 
         if (!fleet.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var targetEntity))
-        {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "We have no target";
-            yield break;
-        }
+            return PlanResult.Fail("We have no target");
 
-        //if we're given a star as a target, build a list of anomalies. 
-        List<Entity> pointsOfInterest = new List<Entity>();
-        if(CanScan(targetEntity, fleet.FactionOwnerID))
+        // POIs: the target itself if surveyable, plus children when the target is a star.
+        var pointsOfInterest = new List<Entity>();
+        if (CanScan(targetEntity, fleet.FactionOwnerID))
             pointsOfInterest.Add(targetEntity);
-        if (targetEntity.HasDataBlob<StarInfoDB>())
+
+        if (targetEntity.HasDataBlob<StarInfoDB>()
+            && targetEntity.TryGetDataBlob<PositionDB>(out var position))
         {
-            targetEntity.TryGetDataBlob<PositionDB>(out var position);
             foreach (var childEntity in position.Children)
             {
-                if(CanScan(childEntity, fleet.FactionOwnerID))
+                if (CanScan(childEntity, fleet.FactionOwnerID))
                     pointsOfInterest.Add(childEntity);
             }
         }
-        
-        List<Entity> fleetChildren = new List<Entity>();
+
+        if (pointsOfInterest.Count == 0)
+            return PlanResult.Done("nothing left to survey");
+
+        // POIs already claimed by a live child of this goal — don't double-assign.
+        var claimedPoiIds = new HashSet<int>();
+        var freeShips = new List<Entity>();
+
         foreach (var subunit in fleetDB.Children)
         {
-            // 1. Can it survey?
             if (!subunit.HasOrChildHasAbility<JPSurveyAbilityDB>())
                 continue;
-
-            // 2. Can it physically get there? (cheap gate; strengthen later if needed)
             if (!MovePlanner.CanMove(subunit, out _))
                 continue;
 
-            fleetChildren.Add(subunit);
-        }
-        
-        if (fleetChildren.Count == 0 || pointsOfInterest.Count == 0)
-        {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "no capable subordinates or nothing left to survey";
-            yield break;
-        }
-        
-        var remaining = new List<Entity>(pointsOfInterest);
+            if (subunit.TryGetDataBlob<GoalsDB>(out var childGoals)
+                && childGoals.ActiveGoal != null
+                && childGoals.ActiveGoal.ParentGoalId == goal.Id
+                && childGoals.ActiveGoal.Status is not (GoalStatus.Completed or GoalStatus.Failed))
+            {
+                claimedPoiIds.Add(childGoals.ActiveGoal.TargetEntityID);
+                continue; // already working this parent goal
+            }
 
-        foreach (var ship in fleetChildren)
+            freeShips.Add(subunit);
+        }
+
+        var remaining = new List<Entity>();
+        foreach (var poi in pointsOfInterest)
+        {
+            if (!claimedPoiIds.Contains(poi.Id))
+                remaining.Add(poi);
+        }
+
+        if (remaining.Count == 0)
+            return PlanResult.Done("all anomalies already assigned or complete");
+
+        if (freeShips.Count == 0)
+        {
+            // Work remains but everyone is busy — stay Active so agent rechecks / top-ups later.
+            return PlanResult.Continue(new List<(Entity subordinate, Goal goal)>());
+        }
+
+        var subGoals = new List<(Entity subordinate, Goal goal)>();
+
+        foreach (var ship in freeShips)
         {
             if (remaining.Count == 0)
-                yield break;
+                break;
 
             Entity best = remaining[0];
             double bestDist = double.MaxValue;
             foreach (var poi in remaining)
             {
-                double d = ship.GetDataBlob<PositionDB>().GetDistanceTo_m(poi.GetDataBlob<PositionDB>());
+                double d = ship.GetDataBlob<PositionDB>()
+                    .GetDistanceTo_m(poi.GetDataBlob<PositionDB>());
                 if (d < bestDist)
                 {
                     bestDist = d;
@@ -144,12 +169,14 @@ public class ScanAnomalyPlan : IGoalPlanner
             }
 
             remaining.Remove(best);
-
-            yield return (ship, new Goal(GoalType.ScanAnomalies)
-             {
-                 TargetEntityID = best.Id,   // distinct body, not parent system id
-             });
+            subGoals.Add((ship, new Goal(GoalType.ScanAnomalies)
+            {
+                ParentGoalId = goal.Id,
+                TargetEntityID = best.Id,
+            }));
         }
+
+        return PlanResult.Continue(subGoals);
     }
     
     bool CanScan(Entity targetEntity, int factionID)

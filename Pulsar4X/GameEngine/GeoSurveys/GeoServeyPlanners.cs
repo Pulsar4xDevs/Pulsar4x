@@ -5,6 +5,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Movement;
+using Pulsar4X.Ships;
 
 namespace Pulsar4X.GeoSurveys;
 
@@ -12,26 +13,32 @@ public class ServeyBodyPlanner : IGoalPlanner
 {
     public GoalType Type => GoalType.ServeyBodies;
 
-    public IEnumerable<EntityAction> PlanActions(Goal goal, Entity ship)
+    public PlanResult Plan(Entity managedEntity, Goal goal)
     {
-        List<EntityAction> actions = new List<EntityAction>();
+        if (managedEntity.HasDataBlob<FleetDB>())
+            return PlanSubGoals(managedEntity, goal);
+        if (managedEntity.HasDataBlob<ShipInfoDB>())
+            return PlanActions(managedEntity, goal);
+
+        return PlanResult.Fail("Non supported entity");
+    }
+
+    public PlanResult PlanActions(Entity ship, Goal goal)
+    {
+        PlanResult plan = PlanResult.Fail("unknown fail");
 
         if (!ship.HasOrChildHasAbility<GeoSurveyAbilityDB>())
         {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "No geo-survey capability";
+            plan = PlanResult.Fail("no geo-survey capability");
         }
         else if (!ship.TryGetDataBlob<ActionQueueDB>(out var actionQueue))
         {
-            //need to check, it might be safe to just give a ship an action queue if it doesn't have one.
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "No action queue";
+            plan = PlanResult.Fail("no action queue");
         }
         else if (!ship.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var targetEntity) ||
-                 !targetEntity.TryGetDataBlob<GeoSurveyableDB>(out var serveyable))
+                 !targetEntity.TryGetDataBlob<GeoSurveyableDB>(out _))
         {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "Not a valid target";
+            plan = PlanResult.Fail("Not a valid target");
         }
         else
         {
@@ -39,8 +46,12 @@ public class ServeyBodyPlanner : IGoalPlanner
 
             if (actionsForGoal.Count > 0)
             {
-                if (actionsForGoal.TrueForAll(x => x.Status == ActionStatus.Succeeded))
-                    goal.Status = GoalStatus.Completed;
+                if (actionsForGoal.Exists(a => a.Status == ActionStatus.Failed))
+                    plan = PlanResult.Fail("a survey action failed");
+                else if (actionsForGoal.TrueForAll(a => a.Status == ActionStatus.Succeeded))
+                    plan = PlanResult.Done();
+                else
+                    plan = PlanResult.Continue(new List<EntityAction>()); // still running
             }
             else if (MovePlanner.TryBuildMoveActions(
                          ship,
@@ -48,103 +59,97 @@ public class ServeyBodyPlanner : IGoalPlanner
                          out var moveActions,
                          out var moveReason))
             {
-                actions.AddRange(moveActions);
-                actions.Add(new GeoSurveyOrder(ship, targetEntity));
+                moveActions.Add(new GeoSurveyOrder(ship, targetEntity));
+                plan = PlanResult.Continue(moveActions);
             }
             else
             {
-                goal.Status = GoalStatus.Failed;
-                goal.Message = moveReason;
+                plan = PlanResult.Fail(moveReason);
             }
         }
 
-        return actions;
+        return plan;
     }
-    
 
     /// <summary>
-    /// TODO: should scan everything within the target's SOI — target the sun and we survey the whole
-    /// system, target earth and we survey earth and luna — by walking the target's PositionDB
-    /// children for anything with a GeoSurveyableDB the faction hasn't finished, then giving each
-    /// subunit a *different* body (nearest first) and topping up as ships come free.
-    ///
-    /// Two things are missing before that can work: this only gets one pass (AgentProcessor plans on
-    /// Pending and monitors thereafter), so there is nowhere to hand out the next body from; 
+    /// Hand each capable free ship a different unfinished surveyable body (nearest first).
+    /// Includes the target if surveyable, plus <see cref="PositionDB.Children"/> (e.g. Earth + Luna).
+    /// Does not mutate <paramref name="goal"/> — agent applies the returned status.
+    /// Re-entrant: skips ships already working this parent goal; skips POIs already assigned.
     /// </summary>
-    public IEnumerable<(Entity subordinate, Goal goal)> PlanSubGoals(Goal goal, Entity fleet)
+    public PlanResult PlanSubGoals(Entity fleet, Goal goal)
     {
         if (!fleet.TryGetDataBlob<FleetDB>(out var fleetDB))
-        {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "We have no subordinates to manage";
-            yield break;
-        }
-        
+            return PlanResult.Fail("We have no subordinates to manage");
+
         if (!fleet.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var targetEntity))
-        {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "invalid target";
-            yield break;
-        }
-        
-        List<Entity> pointsOfInterest = new List<Entity>();
-        if(CanScan(targetEntity, fleet.FactionOwnerID))
+            return PlanResult.Fail("invalid target");
+
+        // POIs: target itself if surveyable, plus direct children (moons, etc.).
+        var pointsOfInterest = new List<Entity>();
+        if (CanScan(targetEntity, fleet.FactionOwnerID))
             pointsOfInterest.Add(targetEntity);
-        targetEntity.TryGetDataBlob<PositionDB>(out var position);
-        foreach (var childEntity in position.Children)
+
+        if (targetEntity.TryGetDataBlob<PositionDB>(out var position))
         {
-            if (CanScan(childEntity, fleet.FactionOwnerID))
-                pointsOfInterest.Add(childEntity);
+            foreach (var childEntity in position.Children)
+            {
+                if (CanScan(childEntity, fleet.FactionOwnerID))
+                    pointsOfInterest.Add(childEntity);
+            }
         }
-        
-        List<Entity> fleetChildren = new List<Entity>();
+
+        if (pointsOfInterest.Count == 0)
+            return PlanResult.Done("nothing left to survey");
+
+        var claimedPoiIds = new HashSet<int>();
+        var freeShips = new List<Entity>();
+
         foreach (var subunit in fleetDB.Children)
         {
-            // 1. Can it survey?
             if (!subunit.HasOrChildHasAbility<GeoSurveyAbilityDB>())
                 continue;
-
-            // 2. Can it physically get there? (cheap gate; strengthen later if needed)
             if (!MovePlanner.CanMove(subunit, out _))
                 continue;
-            if (subunit.TryGetDataBlob<GoalsDB>(out var goalsDB))
+
+            if (subunit.TryGetDataBlob<GoalsDB>(out var childGoals)
+                && childGoals.ActiveGoal != null
+                && childGoals.ActiveGoal.ParentGoalId == goal.Id
+                && childGoals.ActiveGoal.Status is not (GoalStatus.Completed or GoalStatus.Failed))
             {
-                fleetChildren.Add(subunit);
+                claimedPoiIds.Add(childGoals.ActiveGoal.TargetEntityID);
+                continue;
             }
-            else
-            {
-                fleetChildren.Add(subunit);
-            }
-            
-        }
-        
-        if (fleetChildren.Count == 0 || pointsOfInterest.Count == 0)
-        {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "no capable subordinates or nothing left to survey";
-            yield break;
+
+            freeShips.Add(subunit);
         }
 
-        var remaining = new List<Entity>(pointsOfInterest);
-
-        foreach (var ship in fleetChildren)
+        var remaining = new List<Entity>();
+        foreach (var poi in pointsOfInterest)
         {
-            if(ship.TryGetDataBlob<GoalsDB>(out var goalsDB) 
-               && (goalsDB.GivenGoal.ParentGoalId == goal.Id
-               && goalsDB.GivenGoal.Status  != GoalStatus.Completed 
-               || goalsDB.GivenGoal.Status != GoalStatus.Failed)
-               )
-            {
-                continue;//this ship is already doing this goal. 
-            }
+            if (!claimedPoiIds.Contains(poi.Id))
+                remaining.Add(poi);
+        }
+
+        if (remaining.Count == 0)
+            return PlanResult.Done("all bodies already assigned or complete");
+
+        if (freeShips.Count == 0)
+            return PlanResult.Continue(new List<(Entity subordinate, Goal goal)>());
+
+        var subGoals = new List<(Entity subordinate, Goal goal)>();
+
+        foreach (var ship in freeShips)
+        {
             if (remaining.Count == 0)
-                yield break;
+                break;
 
             Entity best = remaining[0];
             double bestDist = double.MaxValue;
             foreach (var poi in remaining)
             {
-                double d = ship.GetDataBlob<PositionDB>().GetDistanceTo_m(poi.GetDataBlob<PositionDB>());
+                double d = ship.GetDataBlob<PositionDB>()
+                    .GetDistanceTo_m(poi.GetDataBlob<PositionDB>());
                 if (d < bestDist)
                 {
                     bestDist = d;
@@ -153,24 +158,22 @@ public class ServeyBodyPlanner : IGoalPlanner
             }
 
             remaining.Remove(best);
-
-            yield return (ship, new Goal(GoalType.ServeyBodies)
+            subGoals.Add((ship, new Goal(GoalType.ServeyBodies)
             {
                 ParentGoalId = goal.Id,
-                TargetEntityID = best.Id,   // distinct body, not parent system id
-            });
-
+                TargetEntityID = best.Id,
+            }));
         }
+
+        return PlanResult.Continue(subGoals);
     }
 
     bool CanScan(Entity targetEntity, int factionID)
     {
-        if (targetEntity.TryGetDataBlob<GeoSurveyableDB>(out var serveyTarget))
+        if (targetEntity.TryGetDataBlob<GeoSurveyableDB>(out var surveyable))
         {
-            if (!serveyTarget.IsSurveyComplete(factionID))
-            {
+            if (!surveyable.IsSurveyComplete(factionID))
                 return true;
-            }
         }
         return false;
     }

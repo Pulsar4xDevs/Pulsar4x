@@ -8,6 +8,7 @@ using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Orbital;
 using Pulsar4X.Orbits;
+using Pulsar4X.Ships;
 
 namespace Pulsar4X.Movement;
 
@@ -31,68 +32,110 @@ public enum MoveMode
 
 public class MoveToPlan : IGoalPlanner
 {
-    
-    public IEnumerable<EntityAction> PlanActions(Goal goal, Entity ship)
-    {
-        var empty = new List<EntityAction>();
+    public GoalType Type => GoalType.MoveTo;
 
+    public PlanResult Plan(Entity managedEntity, Goal goal)
+    {
+        if (managedEntity.HasDataBlob<FleetDB>())
+            return PlanSubGoals(managedEntity, goal);
+        if (managedEntity.HasDataBlob<ShipInfoDB>())
+            return PlanActions(managedEntity, goal);
+
+        return PlanResult.Fail("Non supported entity");
+    }
+
+    /// <summary>
+    /// Leaf: resolve target, pick move mode, emit actions. Does not mutate <paramref name="goal"/>.
+    /// </summary>
+    public PlanResult PlanActions(Entity ship, Goal goal)
+    {
         if (!ship.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out Entity requested))
-            return Fail(goal, "Target not found");
+            return PlanResult.Fail("Target not found");
 
         if (!MoveTargeting.TryResolve(requested, out var target, out var resolveFailure))
-            return Fail(goal, resolveFailure);
+            return PlanResult.Fail(resolveFailure);
 
         if (!MovePlanner.CanMove(ship, out var immobile))
-            return Fail(goal, immobile);
+            return PlanResult.Fail(immobile);
+
+        // Already queued for this goal — roll up or wait.
+        if (ship.TryGetDataBlob<ActionQueueDB>(out var actionQueue))
+        {
+            var actionsForGoal = actionQueue.ActionsFor(goal);
+            if (actionsForGoal.Count > 0)
+            {
+                if (actionsForGoal.Exists(a => a.Status == ActionStatus.Failed))
+                    return PlanResult.Fail("a move action failed");
+                if (actionsForGoal.TrueForAll(a => a.Status == ActionStatus.Succeeded))
+                    return PlanResult.Done();
+                return PlanResult.Continue(new List<EntityAction>());
+            }
+        }
 
         DateTime now = ship.StarSysDateTime;
         var chosen = MovePlanner.Select(MovePlanner.Evaluate(ship, target, now));
 
         if (!chosen.Feasible)
-            return Fail(goal, chosen.Reason);
+            return PlanResult.Fail(chosen.Reason);
 
         if (chosen.Mode == MoveMode.AlreadyThere)
-        {
-            // No actions to monitor, so nothing would ever roll this up. Complete it here.
-            goal.Status = GoalStatus.Completed;
-            goal.Message = "Already at target";
-            return empty;
-        }
+            return PlanResult.Done("Already at target");
 
-        return MovePlanner.BuildActions(ship, target, now, chosen);
+        var actions = MovePlanner.BuildActions(ship, target, now, chosen);
+        return PlanResult.Continue(actions);
     }
-    
-    public GoalType Type => GoalType.MoveTo;
 
     /// <summary>
-    /// Everyone goes to the same place, so this is a straight hand-down: the sub-goal is the goal.
-    /// Which *kind* of move each subunit makes is its own planner's call.
+    /// Fleet: every capable free subunit gets the same destination.
+    /// Mode (warp vs newton) is chosen by each ship's own PlanActions.
+    /// Re-entrant: skips children already working this parent goal.
     /// </summary>
-    public IEnumerable<(Entity subordinate, Goal goal)> PlanSubGoals(Goal goal, Entity fleet)
+    public PlanResult PlanSubGoals(Entity fleet, Goal goal)
     {
         if (!fleet.TryGetDataBlob<FleetDB>(out FleetDB? db))
-        {
-            goal.Status = GoalStatus.Failed;
-            goal.Message = "We have no subordinates to manage";
-            yield break;
-        }
+            return PlanResult.Fail("We have no subordinates to manage");
+
+        if (!fleet.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out _))
+            return PlanResult.Fail("Target not found");
+
+        var subGoals = new List<(Entity subordinate, Goal goal)>();
+        int capable = 0;
+        int alreadyWorking = 0;
 
         foreach (var subunit in db.Children)
         {
-            yield return (subunit, new Goal(GoalType.MoveTo)
-             {
-                 TargetEntityID = goal.TargetEntityID,
-                 ParentGoalId = goal.Id,
-             });
+            if (!MovePlanner.CanMove(subunit, out _))
+                continue;
+            capable++;
+
+            if (subunit.TryGetDataBlob<GoalsDB>(out var childGoals)
+                && childGoals.ActiveGoal != null
+                && childGoals.ActiveGoal.ParentGoalId == goal.Id
+                && childGoals.ActiveGoal.Status is not (GoalStatus.Completed or GoalStatus.Failed))
+            {
+                alreadyWorking++;
+                continue;
+            }
+
+            subGoals.Add((subunit, new Goal(GoalType.MoveTo)
+            {
+                TargetEntityID = goal.TargetEntityID,
+                ParentGoalId = goal.Id,
+            }));
         }
-    }
-    
-    
-    static List<EntityAction> Fail(Goal goal, string message)
-    {
-        goal.Status = GoalStatus.Failed;
-        goal.Message = message;
-        return new List<EntityAction>();
+
+        if (capable == 0)
+            return PlanResult.Fail("no subordinates can move");
+
+        if (subGoals.Count == 0)
+        {
+            // Everyone who can move is already assigned (or finished — agent rollup handles complete).
+            return alreadyWorking > 0
+                ? PlanResult.Continue(new List<(Entity subordinate, Goal goal)>())
+                : PlanResult.Done("all subordinates already at target or idle");
+        }
+
+        return PlanResult.Continue(subGoals);
     }
 }
 

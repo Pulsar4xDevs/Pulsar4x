@@ -1263,15 +1263,15 @@ namespace Pulsar4X.Engine.Api
         private static GoalSnapshot ProjectGoals(Entity entity)
         {
             GoalSnapshot goalSnapshot;
-            if (!entity.TryGetDataBlob<GoalsDB>(out var goals) || goals.GivenGoal == null)
+            if (!entity.TryGetDataBlob<GoalsDB>(out var goals) || goals.ActiveGoal == null)
             {
                 goalSnapshot = new GoalSnapshot("", "", "");
             }
             else
             {
-                var goal = goals.GivenGoal;
+                var goal = goals.ActiveGoal;
                 string strStatus = Enum.GetName(typeof(GoalStatus), goal.Status) ?? "";
-                goalSnapshot = new GoalSnapshot(goals.GivenGoal.Name, strStatus, goal.Message);
+                goalSnapshot = new GoalSnapshot(goals.ActiveGoal.Name, strStatus, goal.Message);
             }
             return goalSnapshot;
         }

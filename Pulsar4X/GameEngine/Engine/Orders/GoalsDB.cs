@@ -37,6 +37,7 @@ public class GoalsDB : BaseDataBlob
         [GoalType.Stealth]           = 0.0f,
     };
 
+    public Goal? ActiveGoal { get; set; }        // The goal we're trying to acheve right now.
     public Goal? GivenGoal { get; set; }        // Order received from superior
     
     // Modifier layers (multiplied together)
@@ -53,7 +54,7 @@ public class GoalsDB : BaseDataBlob
         // dictionaries are rebuilt each pass by the AgentProcessor.
         return new GoalsDB
         {
-            GivenGoal  = GivenGoal,
+            ActiveGoal  = ActiveGoal,
         };
     }
 }
