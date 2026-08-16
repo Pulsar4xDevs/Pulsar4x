@@ -197,6 +197,7 @@
       "ShipDesigns": [
         "default-ship-design-courier",
         "default-ship-design-freighter",
+        "default-ship-design-tanker",
         "default-ship-design-gunship",
         "default-ship-design-dropship",
         "default-ship-design-starship",
@@ -246,7 +247,14 @@
               "DesignId": "default-ship-design-surveyor",
               "Name": "Surveyor I",
               "Cargo": [
-                { "Id": "rp-1", "Amount": 20000000, "Type": "byVolume" }
+                { "Id": "methalox", "Amount": 20000000, "Type": "byVolume" }
+              ]
+            },
+            {
+              "DesignId": "default-ship-design-tanker",
+              "Name": "Tanker I",
+              "Cargo": [
+                { "Id": "methalox", "Amount": 20000000, "Type": "byVolume" }
               ]
             },
             {
