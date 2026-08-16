@@ -117,7 +117,7 @@ public static class WarpMath
         var pl = new Orbit()
         {
             position = moverAbsolutePos,
-            T = targetOrbit.OrbitalPeriod.TotalSeconds,
+            T = GetSearchPeriod(targetOrbit)
         };
 
         double a = targetOrbit.SemiMajorAxis * 2;
@@ -142,7 +142,7 @@ public static class WarpMath
             if ((a0 < a1) || (a1 < 0.0))
             {
                 a1 = a0;
-                tim = tt;
+                tim = t;
             }   // remember best option
         }
         // find orbital position with min error (fine)
@@ -167,6 +167,18 @@ public static class WarpMath
         p += offsetPosition;
         //dir = normalize(p - pos);
         return (p, atDateTime + TimeSpan.FromSeconds(tim));
+    }
+    static double GetSearchPeriod(OrbitDB orbit)
+    {
+        double period = orbit.OrbitalPeriod.TotalSeconds;
+        var current = orbit;
+        while (current.ParentDB is OrbitDB parent)
+        {
+            period = Math.Max(period, parent.OrbitalPeriod.TotalSeconds);
+            current = parent;
+        }
+        // Optional safety floor so we never search a ridiculously small window
+        return Math.Max(period, 3600.0);
     }
 
 }
