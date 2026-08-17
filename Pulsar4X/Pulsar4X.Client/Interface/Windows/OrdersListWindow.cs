@@ -10,21 +10,20 @@ namespace Pulsar4X.Client
         private readonly int _entityId;
         private readonly string _systemId;
 
-        private OrdersListWindow(int entityId, string systemId, GlobalUIState state) : base("OrdersList|" + entityId)
+        private OrdersListWindow(int entityId, string systemId) : base("OrdersList|" + entityId)
         {
-            _uiState = state;
             _flags = ImGuiWindowFlags.None;
             _entityId = entityId;
             _systemId = systemId;
         }
 
-        internal static OrdersListWindow GetInstance(EntityState entity, GlobalUIState state)
+        internal static OrdersListWindow GetInstance(EntityState entity)
         {
             var winManager = _uiState.WindowManager;
             string name = "OrdersList|" + entity.Id.ToString();
             if (!winManager.TryGetNamedWindow(name, out OrdersListWindow? orderList))
             {
-                orderList = new OrdersListWindow(entity.Id, entity.StarSystemId!, state);
+                orderList = new OrdersListWindow(entity.Id, entity.StarSystemId!);
                 winManager.AddNamedWindow(name, orderList);
             }
 

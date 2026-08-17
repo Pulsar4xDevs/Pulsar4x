@@ -32,7 +32,7 @@ namespace Pulsar4X.Client
     }
 
     //has all initialization rutines for common entity management related UI windows, also has a function that checks if a window can be opened for a given EntityState
-    public class EntityUIWindows
+    public static class EntityUIWindows
     {
         /// <summary>The clicked entity's faction-scoped snapshot. The views the server projected
         /// for this faction gate which actions make sense (and visibility/ownership rules are
@@ -156,7 +156,7 @@ namespace Pulsar4X.Client
                 }
                 else if (T == typeof(OrdersListWindow))
                 {
-                    var instance = OrdersListWindow.GetInstance(_entityState, _state);
+                    var instance = OrdersListWindow.GetInstance(_entityState);
                     instance.ToggleActive();
                 }
             }
@@ -164,22 +164,37 @@ namespace Pulsar4X.Client
 
         public static bool CheckOpenUIWindow(Type T, EntityState _entityState, GlobalUIState _state)
         {
-            //If the user has requested a menu be opened and if
-            bool returnval;
-
             // Global Windows
-            if (T == typeof(WarpOrderWindow)) returnval = WarpOrderWindow.GetInstance(_entityState).GetActive();
-            else if (T == typeof(ChangeCurrentOrbitWindow)) returnval = ChangeCurrentOrbitWindow.GetInstance(_entityState).GetActive();
-            else if (T == typeof(FireControl)) returnval = FireControl.GetInstance(_entityState).GetActive();
-            else if (T == typeof(NavWindow)) returnval = NavWindow.GetInstance(_entityState).GetActive();
-            else if (T == typeof(CreateTransferWindow)) returnval = CreateTransferWindow.GetInstance().GetActive();
-            else if (T == typeof(PowerGenWindow)) returnval = PowerGenWindow.GetInstance().GetActive();
+            if (T == typeof(WarpOrderWindow))
+            {
+                return WarpOrderWindow.GetInstance(_entityState).GetActive();
+            }
+            else if (T == typeof(ChangeCurrentOrbitWindow))
+            {
+                return ChangeCurrentOrbitWindow.GetInstance(_entityState).GetActive();
+            }
+            else if (T == typeof(FireControl))
+            {
+                return FireControl.GetInstance(_entityState).GetActive();
+            }
+            else if (T == typeof(NavWindow))
+            {
+                return NavWindow.GetInstance(_entityState).GetActive();
+            }
+            else if (T == typeof(CreateTransferWindow))
+            {
+                return CreateTransferWindow.GetInstance().GetActive();
+            }
+            else if (T == typeof(PowerGenWindow))
+            {
+                return PowerGenWindow.GetInstance().GetActive();
+            }
             // Instance Windows
-            else if (T == typeof(OrdersListWindow)) returnval = OrdersListWindow.GetInstance(_entityState, _state).GetActive();
-            else returnval = false;
-            return returnval;
-
-
+            else if (T == typeof(OrdersListWindow))
+            {
+                return OrdersListWindow.GetInstance(_entityState).GetActive();
+            }
+            else return false;
         }
     }
 
