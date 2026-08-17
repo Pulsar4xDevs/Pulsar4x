@@ -115,7 +115,7 @@ namespace Pulsar4X.Client
                     ChangeCurrentOrbitWindow.GetInstance(_entityState).ToggleActive();
                     _state.ActiveWindow = ChangeCurrentOrbitWindow.GetInstance(_entityState);
                 }
-                //Menu is ficrecontrol menu
+                //Menu is fire control menu
                 else if (T == typeof(FireControl))
                 {
                     var instance = FireControl.GetInstance(_entityState);
