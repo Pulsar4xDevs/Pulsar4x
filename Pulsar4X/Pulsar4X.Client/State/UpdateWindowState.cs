@@ -6,6 +6,8 @@ namespace Pulsar4X.Client
     {
         internal static GlobalUIState _uiState;
 
+        internal WindowManager? WindowManager => _uiState.WindowManager;
+
         public abstract bool GetActive();
 
         public virtual void OnSystemTickChange(DateTime newDate) { }

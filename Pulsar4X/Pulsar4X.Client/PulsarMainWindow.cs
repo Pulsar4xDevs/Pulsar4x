@@ -247,19 +247,11 @@ namespace Pulsar4X.Client
             _state.GalacticMap?.DrawNameIcons();
 
             // Render any windows that have registered themselves
-            foreach (var item in _state.LoadedWindows.Values.ToArray())
-            {
-                item.Display();
-            }
+            _state.WindowManager.RenderActiveWindows();
 
             foreach (var entityWindow in _state.EntityWindows.Values.ToArray())
             {
                 entityWindow.Display();
-            }
-
-            foreach (var item in _state.LoadedNonUniqueWindows.Values.ToArray())
-            {
-                item.Display();
             }
 
             // Render the maneuver node panel overlay (if active)

@@ -7,9 +7,33 @@ namespace Pulsar4X.Client
 {
     internal sealed class WindowManager
     {
+        // Do not modify these collections directly. Use the provided methods to add/remove windows.
         internal List<UpdateWindowState> AllWindows { get; init; } = [];
         internal Dictionary<Type, UniquePulsarGuiWindow> UniqueWindows { get; init; } = [];
         internal Dictionary<string, NamedPulsarGuiWindow> NamedWindows { get; init; } = [];
+
+        // This is a map of window type to all named windows of that type.
+        internal Dictionary<Type, List<NamedPulsarGuiWindow>> NamedWindowsByType { get; init; } = [];
+
+        internal void RenderActiveWindows()
+        {
+            foreach (var item in UniqueWindows.Values.ToArray())
+            {
+                item.Display();
+            }
+
+            /*
+            foreach (var entityWindow in _state.EntityWindows.Values.ToArray())
+            {
+                entityWindow.Display();
+            }
+            */
+
+            foreach (var item in NamedWindows.Values.ToArray())
+            {
+                item.Display();
+            }
+        }
 
         internal NamedPulsarGuiWindow? GetNamedWindow(string name)
         {
@@ -71,8 +95,18 @@ namespace Pulsar4X.Client
 
         internal T AddNamedWindow<T>(string name, T window) where T : NamedPulsarGuiWindow
         {
-            AddWindow(window);
+            // Add to the dictionary first, so if it throws an exception it is not added to the main list.
             NamedWindows.Add(name, window);
+            AddWindow(window);
+
+            if(!NamedWindowsByType.TryGetValue(typeof(T), out var windowList))
+            {
+                NamedWindowsByType.Add(typeof(T), [window]);
+            }
+            else
+            {
+                windowList.Add(window);
+            }
             return window;
         }
 
@@ -93,6 +127,7 @@ namespace Pulsar4X.Client
         {
             UniqueWindows.Clear();
             NamedWindows.Clear();
+            NamedWindowsByType.Clear();
             AllWindows.Clear();
         }
 

@@ -156,8 +156,7 @@ namespace Pulsar4X.Client
                 }
                 else if (T == typeof(OrdersListWindow))
                 {
-                    var instance = OrdersListWindow.GetInstance(_entityState);
-                    instance.ToggleActive();
+                    _state.WindowManager.ActivateOrderListWindow(_entityState);
                 }
             }
         }
