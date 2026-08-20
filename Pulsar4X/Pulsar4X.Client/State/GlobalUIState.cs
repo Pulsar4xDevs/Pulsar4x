@@ -128,7 +128,6 @@ namespace Pulsar4X.Client
         internal EntityState? PrimaryEntity { get; private set; }
         //internal SpaceMasterVM SpaceMasterVM;
         internal bool SMenabled = false;
-        internal Dictionary<int, EntityWindow> EntityWindows { get; private set; } = new();
         private string _previousSystemIdBeforeSM = "";
 
         internal Stack<IHotKeyHandler> HotKeys { get; private set; } = new();
@@ -368,7 +367,6 @@ namespace Pulsar4X.Client
             GameClient = null;
             GameInfo = null;
             WindowManager.UnloadAllWindows();
-            EntityWindows.Clear();
             _savedCameraStates.Clear();
             LastClickedEntity = null;
             PrimaryEntity = null;
@@ -819,24 +817,7 @@ namespace Pulsar4X.Client
 
             if (button == MouseButtons.Primary)
             {
-                if (!EntityWindows.TryGetValue(entityGuid, out EntityWindow? value))
-                {
-                    value = new EntityWindow(entityGuid, starSys);
-                    WindowManager.AddWindow(value);
-                    EntityWindows.Add(entityGuid, value);
-                }
-
-                value.ToggleActive();
-
-                if (!ViewPort.IsCtrlPressed)
-                {
-                    foreach (var (id, window) in EntityWindows)
-                    {
-                        if (id == entityGuid) continue;
-
-                        window.SetActive(false);
-                    }
-                }
+                WindowManager.ActivateEntityWindow(new EntityWindowEntity(entityGuid, starSys));
             }
         }
 
