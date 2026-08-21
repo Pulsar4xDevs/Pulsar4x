@@ -291,23 +291,43 @@ namespace Pulsar4X.Movement
 
         static void SetOrbitHereSimpleNewt(Entity entity, WarpMovingDB moveDB, DateTime atDateTime)
         {
-            
-            var mass = moveDB.TargetEntity.GetDataBlob<MassVolumeDB>().MassTotal;
-            mass += entity.GetDataBlob<MassVolumeDB>().MassTotal;
-            var sgp = GeneralMath.StandardGravitationalParameter(mass);
-            
-            var newOrbit = moveDB.EndpointTargetOrbit;
-            //check if the orbit is actualy valid and not just default values
-            if (newOrbit.StandardGravParameter == 0) //if it is default values, then we just drop it in a trajectory from it's position and velocity.
+            entity.TryGetDataBlob<PositionDB>(out var posdb);
+            var pos1 = posdb.RelativePosition;
+            var combinedMass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
+            combinedMass += moveDB.TargetEntity.GetDataBlob<MassVolumeDB>().MassTotal;
+            var sgp = GeneralMath.StandardGravitationalParameter(combinedMass);
+            var targetOrbit = moveDB.TargetEntity.GetDataBlob<OrbitDB>();
+            var soi = OrbitMath.GetSOIRadius(targetOrbit);
+            KeplerElements currentOrbit;
+            Entity orbitalParent = moveDB.TargetEntity;
+            if(soi > moveDB.ExitPointrelative.Length())
+                currentOrbit = OrbitMath.KeplerFromPositionAndVelocity(sgp, moveDB.ExitPointrelative, moveDB.SavedNewtonionVector, atDateTime);
+            else//if we're outside the soi, then we create an orbit around the parent instead. 
             {
-                newOrbit = OrbitMath.KeplerFromPositionAndVelocity(sgp, moveDB.ExitPointrelative, moveDB.SavedNewtonionVector, atDateTime);
+                orbitalParent = moveDB.TargetEntity.GetSOIParentEntity();
+                combinedMass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
+                combinedMass += orbitalParent.GetDataBlob<MassVolumeDB>().MassTotal;
+                sgp = GeneralMath.StandardGravitationalParameter(combinedMass);
+                Vector3 parentRelitivePos = MoveMath.GetRalitivePosition(orbitalParent, moveDB.ExitPointAbsolute);
+                currentOrbit = OrbitMath.KeplerFromPositionAndVelocity(sgp, parentRelitivePos, moveDB.SavedNewtonionVector, atDateTime);
             }
+            //todo: check current orbit is valid. (eg within soi)
 
+            //check if the orbit is actualy valid and not just default values
+            //if it is default values, then we just drop it in a trajectory from it's position and velocity.
+            //this should be the correct we will remove EndPointTargetOrbit from WarpMovingDB and let it be handled seperatly
+            if (moveDB.EndpointTargetOrbit.StandardGravParameter == 0)
+            {
+                
+                OrbitDB newOrbitdb = OrbitDB.FromKeplerElements(orbitalParent, combinedMass, currentOrbit, atDateTime);
+                entity.SetDataBlob(newOrbitdb);
+                OrbitProcessor.ProcessEntity(entity, atDateTime);
+                var pos2 = posdb.RelativePosition;
+                
+                return;
+            }
             
-            var currentOrbit = OrbitMath.KeplerFromPositionAndVelocity(sgp, moveDB.ExitPointrelative, moveDB.SavedNewtonionVector, atDateTime);
-
-            var target = moveDB.TargetEntity;
-            NewtonSimpleMoveDB newtMove = new NewtonSimpleMoveDB(target, currentOrbit, newOrbit, atDateTime);
+            NewtonSimpleMoveDB newtMove = new NewtonSimpleMoveDB(orbitalParent, currentOrbit, moveDB.EndpointTargetOrbit, atDateTime);
             entity.SetDataBlob(newtMove);
             NewtonSimpleProcessor.ProcessEntity(entity, atDateTime);
 

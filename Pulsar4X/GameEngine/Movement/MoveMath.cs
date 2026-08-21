@@ -358,4 +358,21 @@ public static class MoveMath
         var dbb = b.GetDataBlob<PositionDB>();
         return (dba.AbsolutePosition - dbb.AbsolutePosition).Length();
     }
+    public static double GetDistanceBetween(Entity a, Vector3 absolutePositon)
+    {
+        var dba = a.GetDataBlob<PositionDB>();
+        return (dba.AbsolutePosition - absolutePositon).Length();
+    }
+
+    public static Vector3 GetRalitivePosition(Entity a, Entity b)
+    {
+        var dba = a.GetDataBlob<PositionDB>();
+        var dbb = b.GetDataBlob<PositionDB>();
+        return (dba.AbsolutePosition - dbb.AbsolutePosition);
+    }
+    public static Vector3 GetRalitivePosition(Entity a, Vector3 absolutePositon)
+    {
+        var dba = a.GetDataBlob<PositionDB>();
+        return (dba.AbsolutePosition - absolutePositon);
+    }
 }

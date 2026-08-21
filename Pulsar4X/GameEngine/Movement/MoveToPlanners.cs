@@ -581,6 +581,9 @@ public static class MovePlanner
         var actions = new List<EntityAction>();
         // 1. pure transit
         var lowOrbitRadius = OrbitMath.LowOrbitRadius(targetEntity);
+        targetEntity.TryGetDataBlob<OrbitDB>(out var orbitDB);
+        var soi = OrbitMath.GetSOIRadius(orbitDB);
+        
         (Vector3 pos, Vector3 vel) departureState;
         if(orderEntity.Manager.Game.Settings.UseRelativeVelocity)
         {

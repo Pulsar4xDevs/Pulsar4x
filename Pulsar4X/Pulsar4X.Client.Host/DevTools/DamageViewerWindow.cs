@@ -119,6 +119,7 @@ namespace Pulsar4X.Client
             _dmProjectileSliderRhs = (int)(_dmHeight * 0.25);
             if(damageableEntity.TryGetDataBlob<EntityDamageProfileDB>(out var _profile))
             {
+                /*
                 _rawShipImage = _profile.DamageProfile;
                 if (_profile.DamageEvents.Count > 0)
                 {
@@ -126,6 +127,7 @@ namespace Pulsar4X.Client
                     SetDamageEventFrames();
                 }
                 RawBmpTextures.CreateTexture(_uiState.ViewPort.Renderer, _rawShipImage, ref _shipImgPtr, SDL.PixelFormat.ARGB8888);
+                */
             }
             if(damageableEntity.TryGetDataBlob<ComponentInstancesDB>(out var _componentInstances))
             {}
