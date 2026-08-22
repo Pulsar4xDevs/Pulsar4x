@@ -10,6 +10,8 @@ namespace Pulsar4X.Client.Rendering
 {
     internal class SystemMapRendering : UpdateWindowState
     {
+        static readonly PerformanceMarker s_DrawUpdatePerfMark = new("DrawUpdate");
+
         GlobalUIState _state;
         string? _systemId;
         Camera _camera;
@@ -462,6 +464,8 @@ namespace Pulsar4X.Client.Rendering
 
         internal void Draw()
         {
+            s_DrawUpdatePerfMark.Begin();
+
             DrawIcons(UIWidgets.Values);
             DrawIcons(_orbitRings.Values);
             DrawIcons(_moveIcons.Values);
@@ -471,6 +475,8 @@ namespace Pulsar4X.Client.Rendering
 
             foreach (var i in _visibleLabels)
                 i.Draw(_window.Renderer, _camera);
+
+            s_DrawUpdatePerfMark.End();
         }
 
         void DrawIcons(IEnumerable<IDrawData> icons)
