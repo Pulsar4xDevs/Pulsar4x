@@ -332,6 +332,8 @@ namespace Pulsar4X.Engine
         /// <returns>datetime processed to</returns>
         private void ProcessToNextInterupt()
         {
+            Debug.Assert(_game.ProcessorManager == _processManager, "ProcessorManager mismatch");
+
             while (StarSysDateTime <= _processToDateTime)
             {
                 TimeSpan span = (_subStepDateTime - _systemLocalDateTime);
@@ -342,20 +344,22 @@ namespace Pulsar4X.Engine
                     if (runAt == null || runAt > _subStepDateTime)
                         continue;
 
-                    Trace.WriteLine(String.Format("[{0:u}|{1:u}] running hotloop processor: {2} with entity manager: {3}",
-                                StarSysDateTime, _subStepDateTime, type.Name, _entityManager.ManagerID));
+                    Trace.WriteLine($"[{StarSysDateTime:u}|{_subStepDateTime:u}] running hotloop processor: {type.Name} with entity manager: {_entityManager.ManagerID}");
 
                     Performance.Start(_entityManager.ManagerID + "-" + type.Name);
                     CurrentProcess = type.ToString();
-                    var proc = _game.ProcessorManager.HotloopProcessors[type];
+
+                    var proc = _processManager.HotloopProcessors[type];
                     int count = proc.ProcessManager(_entityManager, deltaSeconds);
                     Performance.Stop(_entityManager.ManagerID + "-" + type.Name);
 
                     if (count == 0)
+                    {
                         HotLoopProcessorsNextRun[type] = null;
+                    }
                     else
                     {
-                        var baseFrequency = _processManager.HotloopProcessors[type].RunFrequency;
+                        var baseFrequency = proc.RunFrequency;
                         var scaledFrequency = TimeSpan.FromTicks((long)(baseFrequency.Ticks * FrequencyMultiplier));
                         HotLoopProcessorsNextRun[type] = _subStepDateTime + scaledFrequency;
                     }
@@ -376,8 +380,7 @@ namespace Pulsar4X.Engine
                     var processor = _processManager.GetInstanceProcessor(s);
                     var pn = processor.GetType().Name;
 
-                    Trace.WriteLine(String.Format("[{0:u}|{1:u}] running instance processor: {2} with entity: {3}",
-                                StarSysDateTime, _subStepDateTime, pn, e.DebuggerDisplay));
+                    Trace.WriteLine($"[{StarSysDateTime:u}|{_subStepDateTime:u}] running instance processor: {pn} with entity: {e.DebuggerDisplay}");
 
                     Performance.Start(pn);
                     CurrentProcess = s;
