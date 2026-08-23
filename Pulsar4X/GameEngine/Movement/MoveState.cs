@@ -198,8 +198,7 @@ public class MoveStateProcessor : IInstanceProcessor
             stateDB.SetParent(orbitDB.Parent);
         stateDB.SGP = orbitDB.GravitationalParameter_m3S2;
         stateDB.GetKeplerElements = orbitDB.GetElements();
-        stateDB.RelativePosition2 = orbitDB._position; //(Vector2)orbitDB.OwningEntity.GetDataBlob<PositionDB>().RelativePosition;
-        orbitDB.OwningEntity.GetDataBlob<PositionDB>().RelativePosition = (Vector3)orbitDB._position;
+        stateDB.RelativePosition2 = orbitDB._position; 
         stateDB.Velocity = (Vector2)orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
     }
 

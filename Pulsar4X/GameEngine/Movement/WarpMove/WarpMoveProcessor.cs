@@ -292,7 +292,7 @@ namespace Pulsar4X.Movement
         static void SetOrbitHereSimpleNewt(Entity entity, WarpMovingDB moveDB, DateTime atDateTime)
         {
             entity.TryGetDataBlob<PositionDB>(out var posdb);
-            var pos1 = posdb.RelativePosition;
+            Vector3 pos1 = posdb.RelativePosition;
             var combinedMass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
             combinedMass += moveDB.TargetEntity.GetDataBlob<MassVolumeDB>().MassTotal;
             var sgp = GeneralMath.StandardGravitationalParameter(combinedMass);
@@ -300,6 +300,9 @@ namespace Pulsar4X.Movement
             var soi = OrbitMath.GetSOIRadius(targetOrbit);
             KeplerElements currentOrbit;
             Entity orbitalParent = moveDB.TargetEntity;
+
+            Vector3 pos2a = moveDB.ExitPointrelative;
+            
             if(soi > moveDB.ExitPointrelative.Length())
                 currentOrbit = OrbitMath.KeplerFromPositionAndVelocity(sgp, moveDB.ExitPointrelative, moveDB.SavedNewtonionVector, atDateTime);
             else//if we're outside the soi, then we create an orbit around the parent instead. 
@@ -308,7 +311,8 @@ namespace Pulsar4X.Movement
                 combinedMass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
                 combinedMass += orbitalParent.GetDataBlob<MassVolumeDB>().MassTotal;
                 sgp = GeneralMath.StandardGravitationalParameter(combinedMass);
-                Vector3 parentRelitivePos = MoveMath.GetRalitivePosition(orbitalParent, moveDB.ExitPointAbsolute);
+                var parentAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(orbitalParent, atDateTime);
+                var parentRelitivePos = moveDB.ExitPointAbsolute - parentAbs;
                 currentOrbit = OrbitMath.KeplerFromPositionAndVelocity(sgp, parentRelitivePos, moveDB.SavedNewtonionVector, atDateTime);
             }
             //todo: check current orbit is valid. (eg within soi)
@@ -322,8 +326,8 @@ namespace Pulsar4X.Movement
                 OrbitDB newOrbitdb = OrbitDB.FromKeplerElements(orbitalParent, combinedMass, currentOrbit, atDateTime);
                 entity.SetDataBlob(newOrbitdb);
                 OrbitProcessor.ProcessEntity(entity, atDateTime);
-                var pos2 = posdb.RelativePosition;
-                
+                Vector3 pos2 = posdb.RelativePosition;
+                entity.Manager.Game.TimePulse.PauseTime();
                 return;
             }
             

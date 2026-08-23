@@ -88,6 +88,7 @@ namespace Pulsar4X.Orbits
             // Get our Parent-Relative coordinates.
             Vector3 newPosition = entityOrbitDB.GetPosition(toDate);
             // Get our Absolute coordinates.
+            entityOrbitDB._position = (Vector2)newPosition;
             entityPosition.AbsolutePosition = parentPositionDB.AbsolutePosition + newPosition;
 
             // Update our children.

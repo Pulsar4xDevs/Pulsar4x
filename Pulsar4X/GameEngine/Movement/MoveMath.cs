@@ -375,4 +375,9 @@ public static class MoveMath
         var dba = a.GetDataBlob<PositionDB>();
         return (dba.AbsolutePosition - absolutePositon);
     }
+    public static Vector3 GetRalitivePosition(Vector3 absolutePositon, Entity b)
+    {
+        var dbb = b.GetDataBlob<PositionDB>();
+        return (absolutePositon - dbb.AbsolutePosition);
+    }
 }

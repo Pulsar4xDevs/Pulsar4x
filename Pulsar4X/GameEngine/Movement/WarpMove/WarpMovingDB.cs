@@ -120,7 +120,7 @@ namespace Pulsar4X.Movement
             var targetIntercept = WarpMath.GetInterceptPosition(thisEntity, targetEntity, EntryDateTime, offsetPosition);
 
             var startState = MoveMath.GetAbsoluteState(thisEntity);
-            ExitPointAbsolute = targetIntercept.position + offsetPosition;
+            ExitPointAbsolute = targetIntercept.position;
             EntryPointAbsolute = startState.pos;
             ExitPointrelative = offsetPosition;
             PredictedExitTime = targetIntercept.etiDateTime;
