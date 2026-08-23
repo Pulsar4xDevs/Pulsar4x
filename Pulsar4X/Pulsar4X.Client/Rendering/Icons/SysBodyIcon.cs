@@ -176,8 +176,18 @@ namespace Pulsar4X.Client
                         SDL.SetRenderDrawColor(rendererPtr, fillR, fillG, fillB, shape.Color.A);
                         for (int y = -radius; y <= radius; y++)
                         {
+                            // Skip draw call if the y-level is outside the viewport
+                            int yLevel = cy + y;
+                            if(yLevel < 0 || yLevel > (int)camera.ViewPortSize.Y)
+                            {
+                                continue;
+                            }
+
                             int xSpan = (int)Math.Sqrt(radius * radius - y * y);
-                            SDL.RenderLine(rendererPtr, cx - xSpan, cy + y, cx + xSpan, cy + y);
+                            int xStart = Math.Max(0, cx - xSpan);
+                            int xEnd = Math.Min((int)camera.ViewPortSize.X, cx + xSpan);
+
+                            SDL.RenderLine(rendererPtr, xStart, yLevel, xEnd, yLevel);
                         }
                     }
                 }
