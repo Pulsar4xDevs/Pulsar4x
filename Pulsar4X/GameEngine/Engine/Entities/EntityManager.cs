@@ -10,6 +10,7 @@ using Pulsar4X.Extensions;
 using System.Reflection;
 using Pulsar4X.Messaging;
 using Pulsar4X.Galaxy;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Pulsar4X.Engine
 {
@@ -400,17 +401,23 @@ namespace Pulsar4X.Engine
         internal T GetDataBlob<T>(int entityID) where T : BaseDataBlob
         {
             Type blobType = typeof(T);
+            if(TryGetDataBlob<T>(entityID, out var dataBlob))
+            {
+                return dataBlob;
+            }
 
-            if(!_datablobStores.ContainsKey(blobType) || !_datablobStores[blobType].ContainsKey(entityID))
-                throw new KeyNotFoundException($"BlobType {blobType} not found in Manager: {ManagerID}");
-
-            return (T)_datablobStores[blobType][entityID];
+            throw new KeyNotFoundException($"BlobType {blobType} not found in Manager: {ManagerID}");
         }
 
         [Obsolete("Use TryGetDataBlob<T>() instead.")]
         internal BaseDataBlob GetDataBlob(int entityID, Type type)
         {
-            return _datablobStores[type][entityID];
+            if(TryGetDataBlob(entityID, type, out var dataBlob))
+            {
+                return (BaseDataBlob)dataBlob;
+            }
+
+            throw new KeyNotFoundException($"BlobType {type} not found in Manager: {ManagerID}");
         }
 
         internal bool HasDataBlob<T>(int entityID) where T: BaseDataBlob
@@ -424,7 +431,7 @@ namespace Pulsar4X.Engine
             return _datablobStores.ContainsKey(type) && _datablobStores[type].ContainsKey(entityID);
         }
 
-        internal bool TryGetDataBlob(int entityID, Type blobType, out object? value)
+        internal bool TryGetDataBlob(int entityID, Type blobType, [NotNullWhen(true)] out object? value)
         {
             if(_datablobStores.TryGetValue(blobType, out var dataStore))
             {
@@ -441,7 +448,7 @@ namespace Pulsar4X.Engine
             return false;
         }
 
-        internal bool TryGetDataBlob<T>(int entityID, out T? value) where T : BaseDataBlob
+        internal bool TryGetDataBlob<T>(int entityID, [NotNullWhen(true)] out T? value) where T : BaseDataBlob
         {
             Type blobType = typeof(T);
             if (TryGetDataBlob(entityID, blobType, out object? objValue))
