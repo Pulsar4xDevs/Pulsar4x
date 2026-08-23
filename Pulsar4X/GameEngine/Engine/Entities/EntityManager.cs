@@ -472,17 +472,20 @@ namespace Pulsar4X.Engine
 
         internal async void SetDataBlob<T>(int entityId, T dataBlob, bool updateListeners = true) where T : BaseDataBlob
         {
-            if (dataBlob is null)
-                throw new ArgumentNullException(nameof(dataBlob));
-            if(!_entities.ContainsKey(entityId))
+            ArgumentNullException.ThrowIfNull(dataBlob);
+
+            if(!_entities.TryGetValue(entityId, out Entity? entity))
                 throw new ArgumentException("Entity ID does not exist");
 
             Type type = dataBlob.GetType();
-            if (!_datablobStores.ContainsKey(type))
-                _datablobStores[type] = new SafeDictionary<int, BaseDataBlob>();
+            if(!_datablobStores.TryGetValue(type, out var dataStore))
+            {
+                dataStore = new SafeDictionary<int, BaseDataBlob>();
+                _datablobStores[type] = dataStore;
+            }
 
-            _datablobStores[type][entityId] = dataBlob;
-            dataBlob.OwningEntity = _entities[entityId];
+            dataStore[entityId] = dataBlob;
+            dataBlob.OwningEntity = entity;
             dataBlob.OnSetToEntity();
             ManagerSubpulses.AddSystemInterupt(dataBlob);
 
@@ -502,9 +505,9 @@ namespace Pulsar4X.Engine
         public async void RemoveDatablob<T>(int entityId) where T : BaseDataBlob
         {
             var type = typeof(T);
-            if (_datablobStores.ContainsKey(type))
+            if(_datablobStores.TryGetValue(type, out var dataStore))
             {
-                var blob = _datablobStores[type][entityId];
+                var blob = dataStore[entityId];
                 blob.OnRemovedFromEntity();
                 blob.OwningEntity = null;
                 _datablobStores[type].Remove(entityId);
