@@ -307,24 +307,24 @@ namespace Pulsar4X.Engine
                 // their tree hierarchy - PositionDB parent, FleetDB children, etc.).
                 bool wasTransferred = entity.Manager != null && entity.Manager != this;
 
-                foreach (var (type, dictionary) in _datablobStores)
+                foreach (var dataStore in _datablobStores.Values)
                 {
-                    if(dictionary.ContainsKey(entity.Id))
+                    if(!wasTransferred && dataStore.TryGetValue(entity.Id, out var value))
                     {
-                        if(!wasTransferred)
-                            dictionary[entity.Id].OnRemovedFromEntity();
+                        value.OnRemovedFromEntity();
                     }
 
-                    dictionary.Remove(entity.Id);
+                    dataStore.Remove(entity.Id);
                 }
-                foreach (var (key, value) in _factionSensorContacts)
+
+                foreach (var value in _factionSensorContacts.Values)
                 {
                     value.RemoveContact(entity.Id);
                 }
 
                 if(entity.FactionOwnerID == Game.NeutralFactionId)
                 {
-                    foreach(var (factionId, factionContactList) in _factionNeutralContacts)
+                    foreach(var factionContactList in _factionNeutralContacts.Values)
                     {
                         factionContactList.Remove(entity.Id);
                     }
