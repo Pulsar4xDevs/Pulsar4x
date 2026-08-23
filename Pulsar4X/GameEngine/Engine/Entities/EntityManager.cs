@@ -423,12 +423,22 @@ namespace Pulsar4X.Engine
         internal bool HasDataBlob<T>(int entityID) where T: BaseDataBlob
         {
             Type blobType = typeof(T);
-            return _datablobStores.ContainsKey(blobType) && _datablobStores[blobType].ContainsKey(entityID);
+            if (_datablobStores.TryGetValue(blobType, out var dataStore))
+            {
+                return dataStore.ContainsKey(entityID);
+            }
+
+            return false;
         }
 
         internal bool HasDataBlob(int entityID, Type type)
         {
-            return _datablobStores.ContainsKey(type) && _datablobStores[type].ContainsKey(entityID);
+            if(_datablobStores.TryGetValue(type, out var dataStore))
+            {
+                return dataStore.ContainsKey(entityID);
+            }
+
+            return false;
         }
 
         internal bool TryGetDataBlob(int entityID, Type blobType, [NotNullWhen(true)] out object? value)
