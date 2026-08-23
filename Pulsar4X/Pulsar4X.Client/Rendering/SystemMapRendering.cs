@@ -10,7 +10,7 @@ namespace Pulsar4X.Client.Rendering
 {
     internal class SystemMapRendering : UpdateWindowState
     {
-        static readonly PerformanceMarker s_DrawUpdatePerfMark = new("DrawUpdate");
+        static readonly ProfileMarker s_DrawUpdatePerfMark = new("DrawUpdate");
 
         GlobalUIState _state;
         string? _systemId;
@@ -462,13 +462,13 @@ namespace Pulsar4X.Client.Rendering
             }
         }
 
-        static readonly PerformanceMarker s_PerfMarkDrawUI = new("DrawUI");
-        static readonly PerformanceMarker s_PerfMarkDrawOrbit = new("DrawOrbit");
-        static readonly PerformanceMarker s_PerfMarkDrawMoveIcons = new("DrawMovabbles");
-        static readonly PerformanceMarker s_PerfMarkDrawEntity = new("DrawEntity");
-        static readonly PerformanceMarker s_PerfMarkDrawBody = new("DrawBody");
-        static readonly PerformanceMarker s_PerfMarkDrawExtra = new("DrawExtras");
-        static readonly PerformanceMarker s_PerfMarkDrawLabels = new("DrawLabels");
+        static readonly ProfileMarker s_PerfMarkDrawUI = new("DrawUI");
+        static readonly ProfileMarker s_PerfMarkDrawOrbit = new("DrawOrbit");
+        static readonly ProfileMarker s_PerfMarkDrawMoveIcons = new("DrawMovabbles");
+        static readonly ProfileMarker s_PerfMarkDrawEntity = new("DrawEntity");
+        static readonly ProfileMarker s_PerfMarkDrawBody = new("DrawBody");
+        static readonly ProfileMarker s_PerfMarkDrawExtra = new("DrawExtras");
+        static readonly ProfileMarker s_PerfMarkDrawLabels = new("DrawLabels");
 
         internal void Draw()
         {

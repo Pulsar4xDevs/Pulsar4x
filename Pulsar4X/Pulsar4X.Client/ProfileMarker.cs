@@ -4,9 +4,11 @@ using System.Diagnostics;
 
 namespace Pulsar4X.Client;
 
-public static class PerformanceMetrics
+public static class Profiler
 {
     private readonly static Dictionary<string, PerformanceData> s_Metrics = [];
+
+    public static IReadOnlyDictionary<string, PerformanceData> Metrics => s_Metrics;
 
     internal static PerformanceData RegisterMarker(string markerName)
     {
@@ -23,7 +25,7 @@ public static class PerformanceMetrics
     }
 }
 
-internal class PerformanceData
+public class PerformanceData
 {
     public long BeginTicks { get; internal set; }
     public long EndTicks { get; internal set; }
@@ -31,9 +33,9 @@ internal class PerformanceData
     public TimeSpan Last => TimeSpan.FromTicks(EndTicks - BeginTicks);
 }
 
-public readonly struct PerformanceMarker(string name)
+public readonly struct ProfileMarker(string name)
 {
-    private readonly PerformanceData _data = PerformanceMetrics.RegisterMarker(name);
+    private readonly PerformanceData _data = Profiler.RegisterMarker(name);
 
     public TimeSpan Last => _data.Last;
 
