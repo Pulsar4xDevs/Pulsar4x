@@ -23,6 +23,7 @@ public sealed record CommandResult(bool Accepted, string? CommandId = null, stri
 public sealed record RenameCommand(int TargetEntityId, string NewName) : GameCommand(TargetEntityId);
 
 // ----- fleet organisation (commanded entity: the faction for create, otherwise the fleet/ship) -----
+#region Fleet Organization Commands
 
 /// <summary>Create a new (empty, server-named) fleet in the given system. Targets the faction itself.</summary>
 public sealed record CreateFleetCommand(int TargetEntityId, string SystemId) : GameCommand(TargetEntityId);
@@ -49,7 +50,10 @@ public sealed record SetStandingOrdersCommand(
     int TargetEntityId,
     IReadOnlyList<StandingOrder> Orders) : GameCommand(TargetEntityId);
 
+#endregion
+
 // ----- fleet movement/activity orders (commanded entity: the fleet) -----
+#region Fleet Movement Commands
 
 public sealed record MoveToBodyCommand(int TargetEntityId, int BodyId) : GameCommand(TargetEntityId);
 
@@ -65,7 +69,10 @@ public sealed record JumpCommand(int TargetEntityId, int JumpPointId) : GameComm
 /// <summary>Warp to the colony and refuel the fleet's ships from its stores.</summary>
 public sealed record RefuelAtCommand(int TargetEntityId, int ColonyId) : GameCommand(TargetEntityId);
 
+#endregion
+
 // ----- research (commanded entity: the lab) -----
+#region Faction Research Commands
 
 public sealed record AssignScientistCommand(int TargetEntityId, int ScientistId) : GameCommand(TargetEntityId);
 
@@ -81,7 +88,10 @@ public sealed record RemoveTechFromQueueCommand(int TargetEntityId, string TechI
 /// <summary>Move a queued tech one slot up (towards active) or down.</summary>
 public sealed record MoveTechInQueueCommand(int TargetEntityId, string TechId, bool MoveUp) : GameCommand(TargetEntityId);
 
+#endregion
+
 // ----- installations/components (commanded entity: the colony or ship holding them) -----
+#region Faction Installation / Component Commands
 
 /// <summary>Uninstall one installed component of the given design and move it into cargo storage.</summary>
 public sealed record UninstallComponentCommand(int TargetEntityId, string DesignId) : GameCommand(TargetEntityId);
@@ -103,7 +113,10 @@ public sealed record TransferCargoCommand(
     int PartnerEntityId,
     IReadOnlyList<CargoTransferItem> Items) : GameCommand(TargetEntityId);
 
+#endregion
+
 // ----- order queue (commanded entity: the entity holding the order) -----
+#region Entity Order Queue Commands
 
 /// <summary>Set whether the simulation pauses when the given queued order actions
 /// (<see cref="OrderSnapshot.OrderId"/>).</summary>
@@ -112,6 +125,10 @@ public sealed record SetOrderPauseCommand(int TargetEntityId, string OrderId, bo
 /// <summary>Remove a queued order (<see cref="OrderSnapshot.OrderId"/>) that has not started
 /// running yet.</summary>
 public sealed record CancelOrderCommand(int TargetEntityId, string OrderId) : GameCommand(TargetEntityId);
+
+#endregion
+
+#region Ship Commands
 
 // ----- ship movement orders (commanded entity: the ship) -----
 
@@ -156,6 +173,10 @@ public sealed record SetFireModeCommand(
     string FireControlId,
     bool OpenFire) : GameCommand(TargetEntityId);
 
+#endregion
+
+#region Faction Design Commands
+
 // ----- component design (commanded entity: the faction itself) -----
 
 /// <summary>Create (save) a component design. The interactive designer runs client-side; this is
@@ -193,7 +214,10 @@ public sealed record DeleteShipDesignCommand(int TargetEntityId, string DesignId
 /// be produced, but ships already built from it are unaffected.</summary>
 public sealed record SetShipDesignObsoleteCommand(int TargetEntityId, string DesignId) : GameCommand(TargetEntityId);
 
+#endregion
+
 // ----- industry / local construction (commanded entity: the colony) -----
+#region Colony Development Commands
 
 /// <summary>Queue a batch job on one of the entity's production lines. When <see cref="AutoInstall"/>
 /// is set and the design is a colony installation, completed output installs on the entity itself.</summary>
@@ -223,3 +247,5 @@ public sealed record AddToConstructionQueueCommand(int TargetEntityId, string De
 public sealed record MoveConstructionJobCommand(int TargetEntityId, int QueueIndex, bool MoveUp) : GameCommand(TargetEntityId);
 
 public sealed record RemoveConstructionJobCommand(int TargetEntityId, int QueueIndex) : GameCommand(TargetEntityId);
+
+#endregion
