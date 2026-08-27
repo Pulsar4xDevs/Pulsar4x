@@ -116,6 +116,8 @@ namespace Pulsar4X.Client
                 ImGui.Text("Paged mem size:"); ImGui.SameLine();
                 ImGui.Text((p.PagedMemorySize64 / 1048576).ToString() + "MiB");
 
+                ImGui.BeginGroup();
+
                 //plot vars: (label, values, valueOffset, overlayText, scaleMin, scaleMax, graphSize, Stride)
                 //core game processing rate.
                 //ImGui.PlotHistogram("##GRHistogram", _gameRatesDisplay, 10, _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
@@ -129,6 +131,24 @@ namespace Pulsar4X.Client
                 ImGui.PlotLines("System Tick ##STPlotlines", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0, largestSFPS, new System.Numerics.Vector2(248, 60), sizeof(float));
                 //ui framerate
                 ImGui.PlotHistogram("Frame Rate ##FPSHistogram", ref _frameRates[0], _frameRates.Length, _frameRateIndex, _currentFPS.ToString(), 0f, 10000, new System.Numerics.Vector2(248, 60), sizeof(float));
+
+                ImGui.EndGroup();
+
+                ImGui.SameLine();
+
+                ImGui.BeginGroup();
+
+                if (ImGui.CollapsingHeader("Profile Markers"))
+                {
+                    foreach(var (key, value) in Profiler.Metrics)
+                    {
+                        ImGui.Text(key);
+                        ImGui.SameLine();
+                        ImGui.Text(value.Last.TotalMilliseconds.ToString("0.00ms"));
+                    }
+                }
+
+                ImGui.EndGroup();
 
                 var data = _systemState.StarSystem.ManagerSubpulses.Performance.GetLatestEntry();
                 ImGui.Text($"StarSystemID: {_systemState.StarSystem.ID}");

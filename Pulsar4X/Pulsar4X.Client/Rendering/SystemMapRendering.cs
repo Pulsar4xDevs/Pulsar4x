@@ -10,6 +10,8 @@ namespace Pulsar4X.Client.Rendering
 {
     internal class SystemMapRendering : UpdateWindowState
     {
+        static readonly ProfileMarker s_DrawUpdatePerfMark = new("DrawUpdate");
+
         GlobalUIState _state;
         string? _systemId;
         Camera _camera;
@@ -460,17 +462,48 @@ namespace Pulsar4X.Client.Rendering
             }
         }
 
+        static readonly ProfileMarker s_PerfMarkDrawUI = new("DrawUI");
+        static readonly ProfileMarker s_PerfMarkDrawOrbit = new("DrawOrbit");
+        static readonly ProfileMarker s_PerfMarkDrawMoveIcons = new("DrawMovabbles");
+        static readonly ProfileMarker s_PerfMarkDrawEntity = new("DrawEntity");
+        static readonly ProfileMarker s_PerfMarkDrawBody = new("DrawBody");
+        static readonly ProfileMarker s_PerfMarkDrawExtra = new("DrawExtras");
+        static readonly ProfileMarker s_PerfMarkDrawLabels = new("DrawLabels");
+
         internal void Draw()
         {
-            DrawIcons(UIWidgets.Values);
-            DrawIcons(_orbitRings.Values);
-            DrawIcons(_moveIcons.Values);
-            DrawIcons(_entityIcons.Values);
-            DrawIcons(_bodyIcons.Values);
-            DrawIcons(SelectedEntityExtras);
+            s_DrawUpdatePerfMark.Begin();
 
+            s_PerfMarkDrawUI.Begin();
+            DrawIcons(UIWidgets.Values);
+            s_PerfMarkDrawUI.End();
+
+            s_PerfMarkDrawOrbit.Begin();
+            DrawIcons(_orbitRings.Values);
+            s_PerfMarkDrawOrbit.End();
+
+            s_PerfMarkDrawMoveIcons.Begin();
+            DrawIcons(_moveIcons.Values);
+            s_PerfMarkDrawMoveIcons.End();
+
+            s_PerfMarkDrawEntity.Begin();
+            DrawIcons(_entityIcons.Values);
+            s_PerfMarkDrawEntity.End();
+
+            s_PerfMarkDrawBody.Begin();
+            DrawIcons(_bodyIcons.Values);
+            s_PerfMarkDrawBody.End();
+
+            s_PerfMarkDrawExtra.Begin();
+            DrawIcons(SelectedEntityExtras);
+            s_PerfMarkDrawExtra.End();
+
+            s_PerfMarkDrawLabels.Begin();
             foreach (var i in _visibleLabels)
                 i.Draw(_window.Renderer, _camera);
+            s_PerfMarkDrawLabels.End();
+
+            s_DrawUpdatePerfMark.End();
         }
 
         void DrawIcons(IEnumerable<IDrawData> icons)

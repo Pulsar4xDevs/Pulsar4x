@@ -3,6 +3,7 @@ using Pulsar4X.Api;
 using Pulsar4X.Orbital;
 using SDL3;
 using Pulsar4X.Input;
+using System.Drawing;
 
 namespace Pulsar4X.Client
 {
@@ -64,7 +65,7 @@ namespace Pulsar4X.Client
 
         public bool Contains(System.Drawing.PointF point)
         {
-            System.Numerics.Vector2 v = new (ViewScreenPos.X, ViewScreenPos.Y);
+            System.Numerics.Vector2 v = new(ViewScreenPos.X, ViewScreenPos.Y);
             return System.Numerics.Vector2.Distance(v, point.ToVector2()) <= Scale * 100;
         }
 
@@ -153,6 +154,18 @@ namespace Pulsar4X.Client
                     int cy = ViewScreenPos.Y;
                     int radius = (int)(Scale * 100);
 
+
+                    // Implements basic frustum culling for the icon.
+                    // Drop icons that are fully out of viewbox.
+                    var aabb = new Rectangle(cx - radius, cy - radius, radius * 2, radius * 2);
+                    if (aabb.Right < 0 || aabb.Bottom < 0)
+                        return;
+
+                    var vps = camera.ViewPortSize;
+                    if (aabb.Left > vps.X || aabb.Top > vps.Y)
+                        return;
+
+
                     if (radius > 0)
                     {
                         // Brighter fill color derived from the body's base color, dimmed for moons
@@ -163,8 +176,18 @@ namespace Pulsar4X.Client
                         SDL.SetRenderDrawColor(rendererPtr, fillR, fillG, fillB, shape.Color.A);
                         for (int y = -radius; y <= radius; y++)
                         {
+                            // Skip draw call if the y-level is outside the viewport
+                            int yLevel = cy + y;
+                            if(yLevel < 0 || yLevel > (int)camera.ViewPortSize.Y)
+                            {
+                                continue;
+                            }
+
                             int xSpan = (int)Math.Sqrt(radius * radius - y * y);
-                            SDL.RenderLine(rendererPtr, cx - xSpan, cy + y, cx + xSpan, cy + y);
+                            int xStart = Math.Max(0, cx - xSpan);
+                            int xEnd = Math.Min((int)camera.ViewPortSize.X, cx + xSpan);
+
+                            SDL.RenderLine(rendererPtr, xStart, yLevel, xEnd, yLevel);
                         }
                     }
                 }
