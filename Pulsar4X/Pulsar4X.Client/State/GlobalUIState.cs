@@ -1,13 +1,13 @@
 ﻿using ImGuiNET;
+using Pulsar4X.Api;
+using Pulsar4X.Client.Rendering;
+using Pulsar4X.Input;
 using Pulsar4X.Orbital;
 using SDL3;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Pulsar4X.Api;
-using Pulsar4X.Input;
-using Pulsar4X.Client.Rendering;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Pulsar4X.Client
 {
@@ -97,7 +97,6 @@ namespace Pulsar4X.Client
         internal bool ShowDemoWindow;
         internal IntPtr SDLRendererPtr { get; private set; }
         internal GalacticMapRender? GalacticMap;
-        internal List<UpdateWindowState> UpdateableWindows { get; init; } = new();
         internal DateTime LastGameUpdateTime = new();
         internal DateTime SelectedSystemTime => GameClient?.Galaxy.GetSystem(SelectedStarSystemId)?.DateTime ?? default;
         internal DateTime SelectedSysLastUpdateTime = new();
@@ -108,8 +107,16 @@ namespace Pulsar4X.Client
         internal Camera Camera;
         internal SDL3Window ViewPort { get; private set; }
 
-        internal Dictionary<Type, UniquePulsarGuiWindow> LoadedWindows { get; init; } = new();
-        internal Dictionary<string, NamedPulsarGuiWindow> LoadedNonUniqueWindows { get; init; } = new();
+        internal WindowManager WindowManager { get; init; } = new();
+
+        [Obsolete("Use WindowManager.AllWindows instead", DiagnosticId = "P4X0001")]
+        internal List<UpdateWindowState> UpdateableWindows => WindowManager.AllWindows;
+        
+        [Obsolete("Use WindowManager.UniqueWindows instead", DiagnosticId = "P4X0001")]
+        internal Dictionary<Type, UniquePulsarGuiWindow> LoadedWindows => WindowManager.UniqueWindows;
+        
+        [Obsolete("Use WindowManager.NamedWindows instead", DiagnosticId = "P4X0001")]
+        internal Dictionary<string, NamedPulsarGuiWindow> LoadedNonUniqueWindows => WindowManager.NamedWindows;
 
         internal UniquePulsarGuiWindow? ActiveWindow { get; set; }
         internal List<List<UserOrbitSettings>> UserOrbitSettingsMtx = new();
@@ -329,83 +336,26 @@ namespace Pulsar4X.Client
             };
         }
 
-        internal NamedPulsarGuiWindow? GetNamedWindow(string name)
-        {
-            if (TryGetNamedWindow(name, out var window))
-            {
-                return window;
-            }
-            return null;
-        }
-
-        internal bool TryGetNamedWindow(string name, [NotNullWhen(true)] out NamedPulsarGuiWindow? window)
-        {
-            if (LoadedNonUniqueWindows.TryGetValue(name, out var foundWindow))
-            {
-                window = foundWindow;
-                return true;
-            }
-
-            window = null;
-            return false;
-        }
-
-        internal bool TryGetNamedWindow<T>(string name, [NotNullWhen(true)] out T? window) where T : NamedPulsarGuiWindow
-        {
-            if (TryGetNamedWindow(name, out var foundWindow))
-            {
-                window = (T)foundWindow;
-                return true;
-            }
-            window = null;
-            return false;
-        }
+        [Obsolete("Use WindowManager directly", DiagnosticId = "P4X0001")]
+        internal NamedPulsarGuiWindow? GetNamedWindow(string name) => GetNamedWindow(name);
+        [Obsolete("Use WindowManager directly", DiagnosticId = "P4X0001")]
+        internal bool TryGetNamedWindow(string name, [NotNullWhen(true)] out NamedPulsarGuiWindow? window) => TryGetNamedWindow(name, out window);
+        [Obsolete("Use WindowManager directly", DiagnosticId = "P4X0001")]
+        internal bool TryGetNamedWindow<T>(string name, [NotNullWhen(true)] out T? window) where T : NamedPulsarGuiWindow => TryGetNamedWindow(name, out window);
 
         /// <summary>
         /// Gets a unique window of type T. Only one instance of a unique window can exist at a time. 
         /// </summary>
         /// <typeparam name="T">The type of window.</typeparam>
         /// <returns>The unique window instance, or <see langword="null"/> if no instance exists.</returns>
-        internal T? GetUniqueWindow<T>() where T : UniquePulsarGuiWindow
-        {
-            if(TryGetUniqueWindow<T>(out var window))
-            {
-                return window;
-            }
-            return null;
-        }
-
-        internal bool TryGetUniqueWindow<T>([NotNullWhen(true)]out T? window) where T : UniquePulsarGuiWindow
-        {
-            if (LoadedWindows.TryGetValue(typeof(T), out var foundWindow))
-            {
-                window = (T)foundWindow;
-                return true;
-            }
-
-            window = null;
-            return false;
-        }
-
-        internal T AddNamedWindow<T>(string name, T window) where T : NamedPulsarGuiWindow
-        {
-            LoadedNonUniqueWindows.Add(name, window);
-            return window;
-        }
-
-        internal T AddUniqueWindow<T>(T window) where T : UniquePulsarGuiWindow
-        {
-            LoadedWindows.Add(typeof(T), window);
-            return window;
-        }
-
-        private void DeactivateAllClosableWindows()
-        {
-            foreach (var window in LoadedWindows)
-            {
-                window.Value.SetActive(false);
-            }
-        }
+        [Obsolete("Use WindowManager directly", DiagnosticId = "P4X0001")]
+        internal T? GetUniqueWindow<T>() where T : UniquePulsarGuiWindow => WindowManager.GetUniqueWindow<T>();
+        [Obsolete("Use WindowManager directly", DiagnosticId = "P4X0001")]
+        internal bool TryGetUniqueWindow<T>([NotNullWhen(true)]out T? window) where T : UniquePulsarGuiWindow => WindowManager.TryGetUniqueWindow<T>(out window);
+        [Obsolete("Use WindowManager directly", DiagnosticId = "P4X0001")]
+        internal T AddNamedWindow<T>(string name, T window) where T : NamedPulsarGuiWindow => WindowManager.AddNamedWindow(name, window);
+        [Obsolete("Use WindowManager directly", DiagnosticId = "P4X0001")]
+        internal T AddUniqueWindow<T>(T window) where T : UniquePulsarGuiWindow => WindowManager.AddUniqueWindow(window);
 
         /// <summary>
         /// Clears all cached UI state to prepare for a new game.
@@ -417,8 +367,7 @@ namespace Pulsar4X.Client
             GameClient?.DisconnectAsync();
             GameClient = null;
             GameInfo = null;
-            LoadedWindows.Clear();
-            LoadedNonUniqueWindows.Clear();
+            WindowManager.UnloadAllWindows();
             EntityWindows.Clear();
             _savedCameraStates.Clear();
             LastClickedEntity = null;
@@ -435,6 +384,26 @@ namespace Pulsar4X.Client
         /// </summary>
         internal void Update()
         {
+            // Apply any server updates received since last frame as one atomic batch on this (UI)
+            // thread, before any window reads the galaxy model this frame.
+            GameClient?.Update();
+
+            //update and refresh state for GameDateTimechange
+            if (GameClient is not null)
+            {
+                //update and refresh state for SystemDateTimechage
+                var curTime = SelectedSystemTime;
+                if (curTime != SelectedSysLastUpdateTime)
+                {
+                    foreach (var item in WindowManager.GetActiveWindows())
+                    {
+                        item.OnSystemTickChange(curTime);
+                    }
+
+                    SelectedSysLastUpdateTime = curTime;
+                }
+            }
+
             GalacticMap?.Update();
         }
 
@@ -850,11 +819,14 @@ namespace Pulsar4X.Client
 
             if (button == MouseButtons.Primary)
             {
-                if (!EntityWindows.ContainsKey(entityGuid))
+                if (!EntityWindows.TryGetValue(entityGuid, out EntityWindow? value))
                 {
-                    EntityWindows.Add(entityGuid, new EntityWindow(entityGuid, starSys));
+                    value = new EntityWindow(entityGuid, starSys);
+                    WindowManager.AddWindow(value);
+                    EntityWindows.Add(entityGuid, value);
                 }
-                EntityWindows[entityGuid].ToggleActive();
+
+                value.ToggleActive();
 
                 if (!ViewPort.IsCtrlPressed)
                 {

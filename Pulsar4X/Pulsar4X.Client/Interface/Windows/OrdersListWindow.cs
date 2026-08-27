@@ -5,34 +5,96 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
+    internal static class OrderWindowExtensions
+    {
+        private static int _idCounter = 0;
+
+        /// <summary>
+        /// Activates a window displaying the orders for a given entity.
+        /// </summary>
+        /// <param name="manager">The window manager instance.</param>
+        /// <param name="entity">The entity requested for display.</param>
+        public static OrdersListWindow ActivateOrderListWindow(this WindowManager manager, EntityState entity)
+        {
+            if(manager.NamedWindowsByType.TryGetValue(typeof(OrdersListWindow), out var windowList))
+            {
+                // Reuse an existing inactive window if available
+                foreach (var window in windowList.Cast<OrdersListWindow>().Where(w => !w.GetActive()))
+                {
+                    window.SetEntity(entity);
+                    window.SetActive(true);
+                    return window;
+                }
+            }
+
+            string name = MakeName();
+            var orderList = new OrdersListWindow(name, entity.Id, entity.StarSystemId!);
+            manager.AddNamedWindow(name, orderList);
+            orderList.SetActive(true);
+
+            return orderList;
+        }
+
+        /// <summary>
+        /// Checks if there is an active orders window for a given entity.
+        /// </summary>
+        /// <param name="manager">The window manager instance.</param>
+        /// <param name="entity">The entity to check for an active orders window.</param>
+        /// <returns>True if there is an active orders window for the given entity; otherwise, false.</returns>
+        public static bool HasActiveOrdersWindow(this WindowManager manager, EntityState entity)
+        {
+            if(manager.NamedWindowsByType.TryGetValue(typeof(OrdersListWindow), out var windowList))
+            {
+                foreach (var window in windowList.Cast<OrdersListWindow>())
+                {
+                    if (window.GetActive() && window.EntityId == entity.Id && window.SystemId == entity.StarSystemId)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static string MakeName()
+        {
+            return "OrdersList|" + _idCounter++;
+        }
+    }
+
     public class OrdersListWindow : NamedPulsarGuiWindow
     {
-        private readonly int _entityId;
-        private readonly string _systemId;
+        private int _entityId;
+        private string _systemId;
 
-        private OrdersListWindow(int entityId, string systemId, GlobalUIState state) : base("OrdersList|" + entityId)
+        internal int EntityId => _entityId;
+        internal string SystemId => _systemId;
+
+        internal OrdersListWindow(string windowName, int entityId, string systemId) : base(windowName)
         {
-            _uiState = state;
             _flags = ImGuiWindowFlags.None;
             _entityId = entityId;
             _systemId = systemId;
         }
 
-        internal static OrdersListWindow GetInstance(EntityState entity, GlobalUIState state)
+        internal void SetEntity(EntityState entity)
         {
+            _entityId = entity.Id;
+            _systemId = entity.StarSystemId!;
+        }
+
+        internal static OrdersListWindow GetInstance(EntityState entity)
+        {
+            var winManager = _uiState.WindowManager;
             string name = "OrdersList|" + entity.Id.ToString();
-            OrdersListWindow thisItem;
-            if (!_uiState.LoadedNonUniqueWindows.ContainsKey(name))
+            if (!winManager.TryGetNamedWindow(name, out OrdersListWindow? orderList))
             {
-                thisItem = new OrdersListWindow(entity.Id, entity.StarSystemId!, state);
-                thisItem.StartDisplay();
-            }
-            else
-            {
-                thisItem = (OrdersListWindow)_uiState.LoadedNonUniqueWindows[name];
+                orderList = new OrdersListWindow(name, entity.Id, entity.StarSystemId!);
+                winManager.AddNamedWindow(name, orderList);
             }
 
-            return thisItem;
+            return orderList;
         }
 
         internal override void Display()
