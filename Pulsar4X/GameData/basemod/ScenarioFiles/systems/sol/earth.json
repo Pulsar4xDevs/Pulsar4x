@@ -45,6 +45,32 @@
     }
   },
   {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "moon-earth-hyperbola",
+      "Name": "Hyperbolic Test Moon",
+      "Parent": "Earth",
+      "Colonizable": false,
+      "GeoSurveyPointsRequired": 50,
+      "Info": {
+        "Type": "moon",
+        "Albedo": 0.1,
+        "Mass": 1.0E12,
+        "Radius": 5,
+        "LengthOfDay": "0.10:00:00"
+      },
+      "Orbit": {
+        "SemiMajorAxis": -25000,
+        "Eccentricity": 1.5,
+        "EclipticInclination": 15,
+        "LoAN": 0,
+        "AoP": 90,
+        "MeanAnomaly": 0,
+        "Epoch": "2100-01-01T00:00:00"
+      }
+    }
+  },
+  {
     "Type": "Colony",
     "Payload": {
       "UniqueID": "colony-earth",
@@ -236,7 +262,15 @@
               "Name": "Prevailing Stillness",
               "Cargo": [
                 { "Id": "ntp", "Amount": 20000000, "Type": "byVolume" }
-              ]
+              ],
+              "Orbit": {
+                "SemiMajorAxis_km": 12000,
+                "Eccentricity": 0.4,
+                "EclipticInclination_d": 28.5,
+                "LoAN_d": 45,
+                "AoP_d": 90,
+                "MeanAnomaly_d": 0
+              }
             }
           ]
         },

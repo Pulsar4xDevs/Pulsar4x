@@ -29,7 +29,7 @@ namespace Pulsar4X.Galaxy
             _galaxyGen = galaxyGen;
         }
 
-        public static Entity CreateFromBlueprint(Game game, StarSystem system, Entity sun, DateTime epoch, SensorProfileDB sensorProfileDB, SystemBodyBlueprint systemBodyBlueprint)
+        public static Entity CreateFromBlueprint(Game game, StarSystem system, Entity sun, SensorProfileDB sensorProfileDB, SystemBodyBlueprint systemBodyBlueprint)
         {
             var blobsToAdd = new List<BaseDataBlob>();
             var sunMassVolumeDB = sun.GetDataBlob<MassVolumeDB>();
@@ -100,6 +100,8 @@ namespace Pulsar4X.Galaxy
                                 systemBodyBlueprint.Orbit.MeanAnomaly * Math.PI/180 ??
                                 0;
 
+            DateTime orbitEpoch = systemBodyBlueprint.Orbit.Epoch ?? game.GalaxyGen.Settings.J2000;
+
             OrbitDB orbitDB;
             var parentBody = sun;
             var parentMassVolumeDB = sunMassVolumeDB;
@@ -125,7 +127,7 @@ namespace Pulsar4X.Galaxy
                         loAN,
                         AoP,
                         meanAnomaly,
-                        epoch);
+                        orbitEpoch);
                     break;
                 default:
                     orbitDB = OrbitDB.FromMajorPlanetFormat_r(
@@ -138,7 +140,7 @@ namespace Pulsar4X.Galaxy
                         loAN,
                         AoP,
                         meanAnomaly,
-                        epoch);
+                        orbitEpoch);
                 break;
             }
 
