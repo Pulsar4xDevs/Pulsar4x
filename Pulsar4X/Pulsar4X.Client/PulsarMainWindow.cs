@@ -249,11 +249,6 @@ namespace Pulsar4X.Client
             // Render any windows that have registered themselves
             _state.WindowManager.RenderActiveWindows();
 
-            foreach (var entityWindow in _state.EntityWindows.Values.ToArray())
-            {
-                entityWindow.Display();
-            }
-
             // Render the maneuver node panel overlay (if active)
             _state.DisplayManeuverNodePanel();
         }

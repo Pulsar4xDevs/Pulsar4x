@@ -9,10 +9,54 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
+    public record EntityWindowEntity(int EntityId, string SystemId);
+
+    internal static class EntityWindowExtensions
+    {
+        private static int _idCounter = 0;
+
+        /// <summary>
+        /// Activates a window displaying the orders for a given entity.
+        /// </summary>
+        /// <param name="manager">The window manager instance.</param>
+        /// <param name="entity">The entity requested for display.</param>
+        public static EntityWindow ActivateEntityWindow(this WindowManager manager, EntityWindowEntity entity)
+        {
+            void DeactivateAllOtherWindows(EntityWindow keepActive)
+            {
+                if (manager.NamedWindowsByType.TryGetValue(typeof(EntityWindow), out var windows))
+                {
+                    foreach (var window in windows.Cast<EntityWindow>().Where(w => !ReferenceEquals(w, keepActive)))
+                    {
+                        window.SetActive(false);
+                    }
+                }
+            }
+
+            if (manager.NamedWindowsByType.TryGetValue(typeof(EntityWindow), out var windowList))
+            {
+                // Reuse an existing inactive window if available
+                foreach (var window in windowList.Cast<EntityWindow>().Where(w => !w.GetActive()))
+                {
+                    window.SetEntity(entity.EntityId, entity.SystemId);
+                    window.SetActive(true);
+                    DeactivateAllOtherWindows(window);
+                    return window;
+                }
+            }
+            string name = "EntityWindow|" + _idCounter++;
+            var entityWindow = new EntityWindow(name, entity.EntityId, entity.SystemId);
+            manager.AddNamedWindow(name, entityWindow);
+            entityWindow.SetActive(true);
+            DeactivateAllOtherWindows(entityWindow);
+            return entityWindow;
+        }
+    }
+
     public class EntityWindow : NamedPulsarGuiWindow
     {
-        public int EntityId { get; }
-        public string SystemId { get; }
+        public int EntityId { get; private set; }
+        public string SystemId { get; private set; }
         public string Title { get; private set; } = "Unknown";
 
         // Re-resolved each frame: system snapshots are replaced wholesale by server pushes.
@@ -35,11 +79,17 @@ namespace Pulsar4X.Client
         private float _animationProgress = 0f;
         private DateTime _animationStartTime;
 
-        public EntityWindow(int entityId, string systemId) : base("EntityWindow|" + entityId)
+        internal EntityWindow(string name, int entityId, string systemId) : base(name)
         {
             EntityId = entityId;
             SystemId = systemId;
             _flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar;
+        }
+
+        public void SetEntity(int entityId, string systemId)
+        {
+            EntityId = entityId;
+            SystemId = systemId;
         }
 
         public new void SetActive(bool activeVal = true)
@@ -140,7 +190,7 @@ namespace Pulsar4X.Client
 
         internal override void Display()
         {
-            if(!IsActive && _animationState == AnimationState.Closed) return;
+            if (!IsActive && _animationState == AnimationState.Closed) return;
 
             UpdateAnimation();
 

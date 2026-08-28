@@ -22,13 +22,6 @@ namespace Pulsar4X.Client
                 item.Display();
             }
 
-            /*
-            foreach (var entityWindow in _state.EntityWindows.Values.ToArray())
-            {
-                entityWindow.Display();
-            }
-            */
-
             foreach (var item in NamedWindows.Values.ToArray())
             {
                 item.Display();
