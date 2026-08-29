@@ -373,14 +373,8 @@ namespace Pulsar4X.Orbital
         public static double TrueAnomalyFromElements(KeplerElements ke, DateTime time)
         {
             // Get seconds since last time we passed the epoch point in the orbit
-            double timeSinceEpoch = (time - ke.Epoch).TotalSeconds % ke.Period;
-
-            double currentMeanAnomaly = GetMeanAnomalyFromTime(
-                ke.MeanAnomalyAtEpoch, ke.MeanMotion, timeSinceEpoch
-            );
-
-            TryGetEccentricAnomaly(ke.Eccentricity, currentMeanAnomaly, out var eccentricAnomaly);
-            return TrueAnomalyFromEccentricAnomaly(ke.Eccentricity, eccentricAnomaly);
+            double timeSinceEpoch = (time - ke.Epoch).TotalSeconds;
+            return TrueAnomalyFromTime(ke.StandardGravParameter, ke.SemiMajorAxis, ke.Eccentricity, ke.MeanAnomalyAtEpoch,  timeSinceEpoch);
         }
         
         
@@ -449,7 +443,7 @@ namespace Pulsar4X.Orbital
             }
             else
             {
-                var m1 = GetHyperbolicMeanAnomalyFromTime(meanMotion, s);
+                var m1 = m0 + GetHyperbolicMeanAnomalyFromTime(meanMotion, s);
                 TryGetHyperbolicAnomaly(e, m1, out double F);
                 return TrueAnomalyFromHyperbolicAnomaly(e, F);
             }

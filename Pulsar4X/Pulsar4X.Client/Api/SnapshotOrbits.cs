@@ -37,7 +37,10 @@ public static class SnapshotOrbits
 
     /// <summary>The position relative to the orbit parent at the given time, in metres.</summary>
     public static Vector3 RelativePositionM(this OrbitView orbit, DateTime atTime)
-        => OrbitalMath.GetPosition(orbit.ToKeplerElements(), atTime);
+    {
+        return OrbitalMath.GetPosition(orbit.ToKeplerElements(), atTime);
+    }
+        
 
     /// <summary>The entity's absolute position at the given time, propagated up the orbit-parent
     /// chain; entities without an orbit use their last pushed position.</summary>

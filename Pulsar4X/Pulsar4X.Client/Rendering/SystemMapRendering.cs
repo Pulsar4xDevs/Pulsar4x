@@ -218,13 +218,13 @@ namespace Pulsar4X.Client.Rendering
         {
             if (_systemId == null)
                 return;
-
+            var name = entity.Views[0];
             var position = new SnapshotPosition(_state, _systemId, entity.Id);
             var bodyType = UserOrbitSettings.FromBodyKind(entity.Kind);
             var massVolume = entity.GetView<MassVolumeView>();
 
             var orbit = entity.GetView<OrbitView>();
-            if (orbit != null && orbit.SemiMajorAxisM > 0 && orbit.StandardGravParameter > 0)
+            if (orbit != null && orbit.SemiMajorAxisM != 0 && orbit.StandardGravParameter > 0)
             {
                 IPosition parentPosition = orbit.ParentId is int parentId
                     ? new SnapshotPosition(_state, _systemId, parentId)
