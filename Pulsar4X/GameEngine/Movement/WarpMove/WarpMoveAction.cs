@@ -133,11 +133,13 @@ namespace Pulsar4X.Movement
             var action = new WarpMoveAction
             {
                 _entityCommanding = orderEntity,
+                _targetEntity = targetEntity,
                 RequestingFactionGuid = orderEntity.FactionOwnerID,
                 EntityCommandingGuid = orderEntity.Id,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 TargetEntityGuid = targetEntity.Id,
                 TransitStartDateTime = transitStartDatetime,
+                ActionOnDate = transitStartDatetime,
                 EndpointRelitivePosition = endpointRelativePos,
                 // EndpointTargetOrbit left default — no circularisation planned by this action
             };
@@ -281,7 +283,7 @@ namespace Pulsar4X.Movement
 
                 EntityCommanding.SetDataBlob(_warpingDB);
 
-                WarpMoveProcessor.StartNonNewtTranslation(EntityCommanding);
+                WarpMoveProcessor.TryStartWarp(EntityCommanding, _warpingDB, atDateTime);
                 Status = ActionStatus.Running;
                 IsRunning = true;
                 //debug code:
@@ -297,11 +299,13 @@ namespace Pulsar4X.Movement
 
         internal override bool IsFinished()
         {
-            if(_warpingDB != null)
-                _isFinished = _warpingDB.IsAtTarget;
-            else
-                _isFinished = false;
-            return _isFinished;
+            if (_warpingDB != null && _warpingDB.IsAtTarget)
+                return _isFinished = true;
+            // EndWarpMove removes the blob; a running warp with no blob has arrived.
+            if (IsRunning && _entityCommanding != null && !_entityCommanding.HasDataBlob<WarpMovingDB>())
+                return _isFinished = true;
+            _isFinished = false;
+            return false;
         }
 
         public override EntityAction Clone()

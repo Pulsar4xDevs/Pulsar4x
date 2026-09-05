@@ -102,6 +102,9 @@ public class NewtonSimpleAction : EntityAction
 
             _db = new NewtonSimpleMoveDB(parent, StartKE, TargetKE, ActionOnDate);
             _entityCommanding.SetDataBlob(_db);
+            // Apply at this action's datetime. The 30s hotloop is for burns that span ticks;
+            // an instantaneous circularise must not wait for the next NewtonSimple cadence.
+            NewtonSimpleProcessor.ProcessEntity(_entityCommanding, atDateTime);
 
             UpdateDetailString();
             IsRunning = true;

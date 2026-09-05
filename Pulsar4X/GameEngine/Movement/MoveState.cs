@@ -415,7 +415,7 @@ public class MoveStateProcessor : IInstanceProcessor
             }
             case PositionDB.MoveTypes.Warp:
             {
-                WarpMoveProcessor.ProcessEntity(entity, toDateTime);
+                WarpMoveProcessor.ProcessToDate(entity, toDateTime);
                 break;
             }
             default:

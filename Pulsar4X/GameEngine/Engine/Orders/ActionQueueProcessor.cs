@@ -45,11 +45,24 @@ namespace GameEngine.Engine.Orders
             if(entity.TryGetDataBlob<ActionQueueDB>(out var orderableDB))
             {
                 int mask = 0;
+                bool wakeAgent = false;
 
                 foreach(var entityCommand in orderableDB.ActionList)
                 {
                     if(entityCommand.Status == ActionStatus.Succeeded)
                         continue;
+
+                    // Processor-side truth can lead Status: warp drop-in sets IsAtTarget
+                    // before this pass. A finished blocking action must not keep the lane
+                    // or the next movement action waits for another queue tick.
+                    if (entityCommand.IsFinished())
+                    {
+                        entityCommand.Status = ActionStatus.Succeeded;
+                        if (!string.IsNullOrEmpty(entityCommand.ParentGoalId))
+                            wakeAgent = true;
+                        continue;
+                    }
+
                     if ((mask & ((int)entityCommand.ActionLanes)) == 0) //bitwise and
                     {
                         if (entityCommand.IsBlocking)
@@ -73,7 +86,6 @@ namespace GameEngine.Engine.Orders
                     }
                 }
                 
-                bool wakeAgent = false;
                 foreach (var action in orderableDB.ActionList)
                 {
                     if (action.Status == ActionStatus.Failed)
