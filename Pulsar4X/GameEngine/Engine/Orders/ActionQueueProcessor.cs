@@ -53,13 +53,18 @@ namespace GameEngine.Engine.Orders
                         continue;
 
                     // Processor-side truth can lead Status: warp drop-in sets IsAtTarget
-                    // before this pass. A finished blocking action must not keep the lane
-                    // or the next movement action waits for another queue tick.
+                    // before this pass. Goal-less scripts still free the lane so a
+                    // hand-queued follow-on can Execute now. Goal-tagged work holds the
+                    // lane until the agent drops unstarted follow-ons and Plan()s.
                     if (entityCommand.IsFinished())
                     {
                         entityCommand.Status = ActionStatus.Succeeded;
                         if (!string.IsNullOrEmpty(entityCommand.ParentGoalId))
+                        {
                             wakeAgent = true;
+                            if (entityCommand.IsBlocking)
+                                mask = mask | ((int)entityCommand.ActionLanes);
+                        }
                         continue;
                     }
 

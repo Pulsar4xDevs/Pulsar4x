@@ -5,6 +5,7 @@ using System.Linq;
 using GameEngine.Engine.Orders;
 using NUnit.Framework;
 using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Energy;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
@@ -503,11 +504,9 @@ namespace Pulsar4X.Tests
         }
 
         /// <summary>
-        /// Fleet MoveTo fans out to this ship planner. Unlike CreateWarpOnly, the live
-        /// plan queues NewtonSimple circularise after warp. Those Kepler elements are
-        /// Phobos-frame (~low-orbit radius) while drop-in parents to Mars. Evaluating
-        /// them as Mars-relative (or at a time other than the planner epoch) is how
-        /// in-game distance-to-parent became ~1.64e8 AU with NewtonSimpleMoveDB attached.
+        /// Preview circularise after warp-to-Phobos must use the drop-in parent (Mars) µ.
+        /// Phobos SOI is smaller than low-orbit offset, so SetOrbitHereSimpleNewt parents
+        /// to Mars; a Phobos-frame Kepler here is how distance-to-parent became ~1.64e8 AU.
         /// </summary>
         [Test]
         public void MoveToPlan_EarthToPhobos_NewtonSimpleDistanceToParentIsNotInterstellar()
@@ -524,9 +523,9 @@ namespace Pulsar4X.Tests
             ApplyEarthStartOrbit(EarthStartOrbit.CircularPrograde, ship, earth, mars, phobos, epoch,
                 new Vector3(OrbitMath.LowOrbitRadius(phobos), 0, 0));
 
-            Assert.IsTrue(MovePlanner.TryBuildMoveActions(ship, phobos.Id, out var actions, out var reason),
+            Assert.IsTrue(MovePlanner.TryBuildMoveActions(ship, phobos, out var actions, out var reason),
                 reason);
-            Assert.AreEqual(2, actions.Count, "MoveTo warp plan is transit then circularise");
+            Assert.GreaterOrEqual(actions.Count, 2, "MoveTo warp plan is transit then a Mars-frame follow-on");
             Assert.IsInstanceOf<WarpMoveAction>(actions[0]);
             Assert.IsInstanceOf<NewtonSimpleAction>(actions[1]);
             var newt = (NewtonSimpleAction)actions[1];
@@ -551,19 +550,105 @@ namespace Pulsar4X.Tests
                 Assert.AreSame(mars, parent, "drop-in parents to Mars");
                 var marsSgp = GeneralMath.StandardGravitationalParameter(
                     mars.GetDataBlob<MassVolumeDB>().MassTotal);
-                Assert.Less(newt.StartKE.StandardGravParameter / marsSgp, 0.1,
-                    "precondition: planner StartKE is Phobos-µ, not Mars-µ");
+                double startRatio = newt.StartKE.StandardGravParameter / marsSgp;
+                double targetRatio = newt.TargetKE.StandardGravParameter / marsSgp;
+                Assert.Greater(startRatio, 0.9, "preview StartKE is Mars-µ, not Phobos-µ");
+                Assert.Less(startRatio, 1.1, "preview StartKE is Mars-µ, not Phobos-µ");
+                Assert.Greater(targetRatio, 0.9, "preview TargetKE is Mars-µ, not Phobos-µ");
+                Assert.Less(targetRatio, 1.1, "preview TargetKE is Mars-µ, not Phobos-µ");
 
-                // Same construction as NewtonSimpleAction.Execute after warp-end WakeActionQueue.
-                // Physics must refuse this combo instead of writing 1e8 AU into PositionDB.
-                var ex = Assert.Throws<ArgumentException>(
+                var r = OrbitMath.GetStateVectors(newt.StartKE, newt.ActionOnDate).position;
+                Assert.Greater(r.Length(), 1e6,
+                    "StartKE r is Mars-relative (Phobos SMA scale), not Phobos low-orbit ~13 km");
+                Assert.Less(r.Length(), 5e7, "StartKE r is still in the Mars system");
+
+                Assert.DoesNotThrow(
                     () => new NewtonSimpleMoveDB(parent, newt.StartKE, newt.TargetKE, newt.ActionOnDate));
-                Assert.That(ex.Message, Does.Contain("gravity wells"));
             }
             finally
             {
                 WarpMoveProcessor.TestDropIn = null;
             }
+        }
+
+        [Test]
+        public void MoveToPlan_HyperbolicAroundMarsNearPhobos_MatchesPhobosOrbit()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
+            var phobos = AddMoon(mars, 1.06e16, 11_266, sma_m: 9_376_000, epoch);
+            phobos.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Moon });
+
+            var phobosAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(phobos, epoch);
+            var ship = AddPhobosWarpShip(mars, phobosAbs);
+            AttachThrust(ship);
+            var r = ship.GetDataBlob<PositionDB>().RelativePosition;
+            double mu = OrbitMath.SGP(mars, ship);
+            double vCirc = Math.Sqrt(mu / r.Length());
+            var perp = Vector3.Normalise(new Vector3(-r.Y, r.X, 0));
+            ship.SetDataBlob(OrbitDB.FromVelocity(mars, ship, perp * vCirc * 1.5, epoch));
+            OrbitProcessor.ProcessEntity(ship, epoch);
+
+            Assert.IsTrue(MovePlanner.TryBuildMoveActions(ship, phobos, out var actions, out var reason),
+                reason);
+            Assert.AreEqual(1, actions.Count, "in Phobos's orbit with leftover e: circularise to match, do not warp");
+            Assert.IsInstanceOf<NewtonSimpleAction>(actions[0]);
+            var newt = (NewtonSimpleAction)actions[0];
+
+            var marsSgp = GeneralMath.StandardGravitationalParameter(
+                mars.GetDataBlob<MassVolumeDB>().MassTotal);
+            Assert.Greater(newt.StartKE.StandardGravParameter / marsSgp, 0.9);
+            Assert.Less(newt.StartKE.StandardGravParameter / marsSgp, 1.1);
+            Assert.Less(newt.TargetKE.Eccentricity, 0.05, "match is a circular Mars orbit");
+            Assert.AreEqual(r.Length(), newt.TargetKE.SemiMajorAxis, r.Length() * 0.01,
+                "circularise at current r, which is already Phobos SMA");
+            Assert.DoesNotThrow(
+                () => new NewtonSimpleMoveDB(mars, newt.StartKE, newt.TargetKE, newt.ActionOnDate));
+        }
+
+        [Test]
+        public void MoveToPlan_CircularAroundMarsNearPhobos_IsAlreadyThere()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
+            var phobos = AddMoon(mars, 1.06e16, 11_266, sma_m: 9_376_000, epoch);
+            phobos.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Moon });
+
+            var phobosAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(phobos, epoch);
+            var offset = new Vector3(OrbitMath.LowOrbitRadius(phobos), 0, 0);
+            var ship = AddPhobosWarpShip(mars, phobosAbs + offset);
+            ship.SetDataBlob(OrbitDB.FromPosition(mars, ship, epoch));
+            OrbitProcessor.ProcessEntity(ship, epoch);
+
+            Assert.IsTrue(MovePlanner.TryBuildMoveActions(ship, phobos, out var actions, out var reason),
+                reason);
+            Assert.IsEmpty(actions, "matching Phobos's orbit around Mars and alongside is arrived");
+        }
+
+        [Test]
+        public void MoveToPlan_CircularAroundMarsOppositePhobos_PhasesToMatch()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
+            var phobos = AddMoon(mars, 1.06e16, 11_266, sma_m: 9_376_000, epoch);
+            phobos.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Moon });
+
+            var marsAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(mars, epoch);
+            var phobosAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(phobos, epoch);
+            var rPhobos = phobosAbs - marsAbs;
+            var ship = AddPhobosWarpShip(mars, marsAbs - rPhobos);
+            AttachThrust(ship);
+            ship.SetDataBlob(OrbitDB.FromPosition(mars, ship, epoch));
+            OrbitProcessor.ProcessEntity(ship, epoch);
+
+            Assert.IsTrue(MovePlanner.TryBuildMoveActions(ship, phobos, out var actions, out var reason),
+                reason);
+            Assert.IsNotEmpty(actions, "same orbit, wrong place: phase, do not call it arrived");
+            Assert.IsFalse(actions.Exists(a => a is WarpMoveAction), "do not warp; match Phobos's orbit");
+            Assert.IsTrue(actions.TrueForAll(a => a is NewtonSimpleAction));
         }
 
         #endregion
@@ -855,6 +940,20 @@ namespace Pulsar4X.Tests
             energy.EnergyStored["electricity"] = 1e12;
             energy.EnergyStoreMax["electricity"] = 1e12;
             ship.SetDataBlob(energy);
+        }
+
+        private static void AttachThrust(Entity ship, double deltaVBudget = 20_000)
+        {
+            var thrust = new NewtonThrustAbilityDB("test-fuel")
+            {
+                ThrustInNewtons = 1e9,
+                ExhaustVelocity = 10_000,
+                FuelBurnRate = 1
+            };
+            double wet = ship.GetDataBlob<MassVolumeDB>().MassTotal;
+            double dry = wet / Math.Exp(deltaVBudget / thrust.ExhaustVelocity);
+            thrust.SetFuel(wet - dry, wet);
+            ship.SetDataBlob(thrust);
         }
 
         private static Entity AddPhobosWarpShip(Entity parent, Vector3 absolutePos)

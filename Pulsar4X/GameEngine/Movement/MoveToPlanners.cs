@@ -52,12 +52,6 @@ public class MoveToPlan : IGoalPlanner
         if (!ship.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out Entity requested))
             return PlanResult.Fail("Target not found");
 
-        if (!MoveTargeting.TryResolve(requested, out var target, out var resolveFailure))
-            return PlanResult.Fail(resolveFailure);
-
-        if (!MovePlanner.CanMove(ship, out var immobile))
-            return PlanResult.Fail(immobile);
-
         // Already queued for this goal — roll up or wait.
         if (ship.TryGetDataBlob<ActionQueueDB>(out var actionQueue))
         {
@@ -72,17 +66,13 @@ public class MoveToPlan : IGoalPlanner
             }
         }
 
-        DateTime now = ship.StarSysDateTime;
-        var chosen = MovePlanner.Select(MovePlanner.Evaluate(ship, target, now));
+        if (!MovePlanner.TryBuildMoveActions(ship, requested, out var actions, out string reason))
+            return PlanResult.Fail(reason);
 
-        if (!chosen.Feasible)
-            return PlanResult.Fail(chosen.Reason);
+        if (actions.Count == 0)
+            return PlanResult.Done(reason);
 
-        if (chosen.Mode == MoveMode.AlreadyThere)
-            return PlanResult.Done("Already at target");
-
-        var actions = MovePlanner.BuildActions(ship, target, now, chosen);
-        return PlanResult.Continue(actions);
+        return PlanResult.Continue(actions, reason);
     }
 
     /// <summary>
@@ -246,8 +236,8 @@ public readonly struct MoveOption
         => new MoveOption(mode, false, reason, double.PositiveInfinity, 0, 0, null);
 
     public static MoveOption Yes(MoveMode mode, double etaSeconds, double deltaV = 0, double energyCost = 0,
-        (Vector3 deltaV, double timeInSeconds)[] manuvers = null)
-        => new MoveOption(mode, true, string.Empty, etaSeconds, deltaV, energyCost, manuvers);
+        (Vector3 deltaV, double timeInSeconds)[] manuvers = null, string message = "")
+        => new MoveOption(mode, true, message, etaSeconds, deltaV, energyCost, manuvers);
 }
 
 /// <summary>
@@ -271,6 +261,18 @@ public static class MovePlanner
     const double ArrivedWithin_m = 10_000;
 
     /// <summary>
+    /// Euclidean-near is not "there" on a leftover hyperbola. Bound and this circular
+    /// around the drop-in parent (or the target, if we made it into its SOI).
+    /// </summary>
+    const double ArrivedMaxEccentricity = 0.05;
+
+    /// <summary>
+    /// When we cannot enter the target's SOI (Phobos), "alongside" is this fraction of the
+    /// target's SMA around the parent — 3× Phobos low-orbit is only ~37 km.
+    /// </summary>
+    const double ArrivedAlongOrbitFraction = 0.01;
+
+    /// <summary>
     /// Two orbits are "the same orbit" (so: phase, don't transfer) when their radii are within
     /// this fraction of each other.
     /// </summary>
@@ -278,13 +280,6 @@ public static class MovePlanner
 
     /// <summary>The transfer maths we have all assume circular orbits.</summary>
     const double MaxEccentricityForTransfer = 0.01;
-
-    /// <summary>
-    /// Take the newtonian option unless it's more than this multiple of the warp ETA. A phasing
-    /// manoeuvre can easily cost most of an orbital period, which is fine for a freighter and
-    /// absurd for an intercept.
-    /// </summary>
-    const double NewtonianEtaTolerance = 3.0;
 
     // ---------------------------------------------------------------------
 
@@ -319,9 +314,9 @@ public static class MovePlanner
     /// outright. Until the goal layer can express that, the ordering is:
     ///
     ///   1. already there — do nothing
-    ///   2. newtonian — no bubble energy, no warp tech needed, and it is the sane answer for the
-    ///      same-orbit and next-moon-over cases
-    ///   3. warp — unless newtonian would be dramatically slower, in which case warp wins
+    ///   2. newtonian — match orbits in the current well (phase/Hohmann; circularise first
+    ///      if leftover e is high). Same-orbit and next-moon-over; do not lose to warp on ETA
+    ///   3. warp — when the target is under a different parent (interplanetary)
     /// </summary>
     public static MoveOption Select(IReadOnlyList<MoveOption> options)
     {
@@ -334,11 +329,10 @@ public static class MovePlanner
         bool newtOk = newt.HasValue && newt.Value.Feasible;
         bool warpOk = warp.HasValue && warp.Value.Feasible;
 
-        if (newtOk && warpOk)
-            return newt.Value.EtaSeconds > warp.Value.EtaSeconds * NewtonianEtaTolerance
-                ? warp.Value
-                : newt.Value;
-
+        // Newtonian is only feasible in the current well (match the moon's orbit around
+        // the parent, or phase/Hohmann with a co-orbital). Warp is seconds; a Phobos
+        // phasing burn is hours and would always lose a 3× ETA comparison — which is
+        // how MoveTo Phobos kept warping and never completed.
         if (newtOk) return newt.Value;
         if (warpOk) return warp.Value;
 
@@ -368,15 +362,47 @@ public static class MovePlanner
         if (!ship.TryGetDataBlob<PositionDB>(out var shipPos) || !target.TryGetDataBlob<PositionDB>(out var tgtPos))
             return MoveOption.No(MoveMode.AlreadyThere, "no position");
 
+        var parent = ship.GetSOIParentEntity();
+        var dropInParent = PredictDropInParent(target, PlannedWarpExitOffsetLength(target));
+        if (parent == null || (parent != dropInParent && parent != target))
+            return MoveOption.No(MoveMode.AlreadyThere, "not in the destination gravity well");
+
+        if (!TryCurrentRelativeState(ship, ship.StarSysDateTime, out var state))
+            return MoveOption.No(MoveMode.AlreadyThere, "no state vector");
+
+        double sgp = OrbitMath.SGP(parent, ship);
+        var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, state.pos, state.vel, ship.StarSysDateTime);
+        if (!double.IsFinite(ke.Eccentricity) || ke.Eccentricity >= ArrivedMaxEccentricity)
+            return MoveOption.No(MoveMode.AlreadyThere, "not in a circular orbit");
+
         double separation = (shipPos.AbsolutePosition - tgtPos.AbsolutePosition).Length();
 
-        double tolerance = target.HasDataBlob<MassVolumeDB>()
-            ? OrbitMath.LowOrbitRadius(target) * ArrivedWithinLowOrbits
-            : ArrivedWithin_m;
+        // In the body's own SOI: close to the body in a circular orbit around it.
+        if (dropInParent == target || parent == target)
+        {
+            double tolerance = target.HasDataBlob<MassVolumeDB>()
+                ? OrbitMath.LowOrbitRadius(target) * ArrivedWithinLowOrbits
+                : ArrivedWithin_m;
+            return separation <= tolerance
+                ? MoveOption.Yes(MoveMode.AlreadyThere, 0, message: $"Already at {NameOf(target, ship)}")
+                : MoveOption.No(MoveMode.AlreadyThere, "not there yet");
+        }
 
-        return separation <= tolerance
-            ? MoveOption.Yes(MoveMode.AlreadyThere, 0)
-            : MoveOption.No(MoveMode.AlreadyThere, "not there yet");
+        // Cannot enter the target's SOI (Phobos): arrived when we match its orbit around
+        // the parent and are alongside it, not when we merely parked circular at leftover r.
+        if (!target.TryGetDataBlob<OrbitDB>(out var targetOrbit) || targetOrbit.Parent != parent)
+            return MoveOption.No(MoveMode.AlreadyThere, "target orbit is not around this parent");
+
+        double targetRadius = targetOrbit.SemiMajorAxis;
+        double shipRadius = ke.SemiMajorAxis;
+        if (!IsCoOrbital(shipRadius, targetRadius, target)
+            && !IsCoOrbital(state.pos.Length(), targetRadius, target))
+            return MoveOption.No(MoveMode.AlreadyThere, "not in the target's orbit");
+
+        double along = AlongTrackArrivedSeparation(target, targetRadius);
+        return separation <= along
+            ? MoveOption.Yes(MoveMode.AlreadyThere, 0, message: $"Matching {NameOf(target, ship)}'s orbit")
+            : MoveOption.No(MoveMode.AlreadyThere, "in the orbit but not with the target yet");
     }
 
     /// <summary>
@@ -400,36 +426,45 @@ public static class MovePlanner
             return MoveOption.No(mode, "target is not in a stable orbit; cannot predict where it will be");
 
         var parent = shipOrbit.Parent;
-        if (parent == null || targetOrbit.Parent != parent)
+        var dropInParent = PredictDropInParent(target, PlannedWarpExitOffsetLength(target));
+        if (parent == null)
+            return MoveOption.No(mode, "no SOI parent");
+
+        // Match the target's orbit around the shared drop-in parent (Phobos around Mars).
+        // Do not Hohmann-match a planet's solar orbit — that is a warp into the planet's SOI.
+        if (dropInParent == target)
+            return MoveOption.No(mode, "target body has a usable SOI; warp");
+        if (parent != dropInParent || targetOrbit.Parent != dropInParent)
         {
-            // MISSING MATHS: leaving one SOI for another needs an escape burn, a transfer around
-            // the grandparent, and a capture burn at the far end.
-            // InterceptCalcs.InterPlanetaryHohmann is a sketch of this — it is untested, its
-            // phasing is ad-hoc, and NewtonSimpleMoveDB does not do SOI transitions — so we do
-            // not use it. Warp handles interplanetary for now.
             return MoveOption.No(mode, "target is under a different SOI parent; no interplanetary transfer maths yet");
         }
 
-        if (shipOrbit.Eccentricity > MaxEccentricityForTransfer || targetOrbit.Eccentricity > MaxEccentricityForTransfer)
-        {
-            // MISSING MATHS: Hohmann2/HohmannOE/OrbitPhasingManuvers all assume circular orbits.
-            // A general solution wants a Lambert solver, or a circularise-first leg.
+        if (targetOrbit.Eccentricity > MaxEccentricityForTransfer)
             return MoveOption.No(mode, "transfer maths assume circular orbits");
-        }
 
-        if (target.HasDataBlob<SystemBodyInfoDB>())
+        if (!TryCurrentRelativeState(ship, now, out var state))
+            return MoveOption.No(mode, "no state vector");
+
+        double r = state.pos.Length();
+        if (!double.IsFinite(r) || r < 1)
+            return MoveOption.No(mode, "no usable radius");
+        if (parent.TryGetDataBlob<MassVolumeDB>(out var parentMass) && r <= parentMass.RadiusInM)
+            return MoveOption.No(mode, "inside the parent body");
+
+        double sgp = OrbitMath.SGP(parent, ship);
+        bool needsCircularise = shipOrbit.Eccentricity > MaxEccentricityForTransfer;
+        double circulariseDV = 0;
+        if (needsCircularise)
         {
-            // MISSING MATHS: arriving co-located with a body means falling into its SOI, and we
-            // have no capture/insertion burn. NewtonSimpleProcessor does not transition SOI
-            // parents either (NewtonianMovementProcessor does, but that is the NewtonComplex path
-            // — see the TODO in agents-and-goals-design.md).
-            // Warp already plots a low orbit and its insertion ΔV, so bodies go to warp for now.
-            // Once there is a capture burn this restriction lifts and moon hops go newtonian.
-            return MoveOption.No(mode, "no orbital capture maths for arriving at a body");
+            var circKE = OrbitMath.KeplerCircularFromPosition(sgp, state.pos, now);
+            var circV = OrbitMath.GetStateVectors(circKE, now).velocity;
+            circulariseDV = (state.vel - (Vector3)circV).Length();
+            if (!double.IsFinite(circulariseDV))
+                return MoveOption.No(mode, "circularise Δv is not finite");
         }
 
-        double sgp = shipOrbit.GravitationalParameter_m3S2;
-        double shipRadius = shipOrbit.SemiMajorAxis;
+        // Hyperbolic SMA is negative; Hohmann/phasing run from the circular radius we'll have.
+        double shipRadius = needsCircularise ? r : shipOrbit.SemiMajorAxis;
         double targetRadius = targetOrbit.SemiMajorAxis;
 
         // True longitude in the reference plane. The sim is effectively 2D for these transfers,
@@ -438,16 +473,34 @@ public static class MovePlanner
         double targetAngle = AngleOf(target, now);
 
         (Vector3 deltaV, double timeInSeconds)[] manuvers;
+        double phaseAngle = NormaliseAngle(targetAngle - shipAngle);
+        double along = AlongTrackArrivedSeparation(target, targetRadius);
+        double phaseTol = targetRadius > 0 ? along / targetRadius : 0;
 
-        if (Math.Abs(shipRadius - targetRadius) <= targetRadius * CoOrbitalRadiusTolerance)
+        if (IsCoOrbital(shipRadius, targetRadius, target) && Math.Abs(phaseAngle) <= phaseTol)
+        {
+            if (!needsCircularise)
+                return MoveOption.No(mode, "co-orbital and co-located");
+            // Leftover hyperbola at the moon: circularise to match its orbit, then replan.
+            if (circulariseDV > thrust.DeltaV)
+                return MoveOption.No(mode, $"needs {circulariseDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
+            return MoveOption.Yes(mode, 0, circulariseDV,
+                message: $"Circularise to match {NameOf(target, ship)}");
+        }
+
+        if (needsCircularise)
+        {
+            // Hohmann/phasing assume circular. Circularise at current r first; the agent
+            // replans the match-orbit burns from that circular orbit.
+            if (circulariseDV > thrust.DeltaV)
+                return MoveOption.No(mode, $"needs {circulariseDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
+            return MoveOption.Yes(mode, 0, circulariseDV,
+                message: $"Circularise to match {NameOf(target, ship)}");
+        }
+
+        if (IsCoOrbital(shipRadius, targetRadius, target))
         {
             // Same orbit, wrong place in it: drop into a phasing orbit and come back.
-            // This is the case that should never have been a warp — matching orbits with
-            // something we're already flying alongside.
-            double phaseAngle = NormaliseAngle(targetAngle - shipAngle);
-            if (phaseAngle == 0)
-                return MoveOption.No(mode, "co-orbital and co-located");
-
             // NOTE: OrbitPhasingManuvers' sign convention for phaseAngle is unverified against
             // the target-ahead/target-behind cases. Worth a test before this is trusted.
             manuvers = OrbitalMath.OrbitPhasingManuvers(shipOrbit.GetElements(), sgp, now, phaseAngle);
@@ -480,7 +533,11 @@ public static class MovePlanner
         if (totalDV > thrust.DeltaV)
             return MoveOption.No(mode, $"needs {totalDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
 
-        return MoveOption.Yes(mode, eta, totalDV, 0, manuvers);
+        string match = IsCoOrbital(shipRadius, targetRadius, target)
+            ? $"Phasing to {NameOf(target, ship)}"
+            : $"Hohmann to {NameOf(target, ship)}";
+        return MoveOption.Yes(mode, eta, totalDV, 0, manuvers,
+            $"{match}, {FormatArrival(now.AddSeconds(eta))}");
     }
 
     static MoveOption EvaluateWarp(Entity ship, Entity target, DateTime now)
@@ -509,7 +566,8 @@ public static class MovePlanner
         // Sustain and collapse costs are charged by WarpMoveProcessor as the bubble runs; only
         // the up-front cost is knowable here. WarpMoveAction holds the goal on "Charging
         // batteries" if we can't afford even that, so it isn't a feasibility gate.
-        return MoveOption.Yes(mode, eta, 0, warpDB.BubbleCreationCost);
+        return MoveOption.Yes(mode, eta, 0, warpDB.BubbleCreationCost,
+            message: $"Warp to {NameOf(target, ship)}, {FormatArrival(intercept.etiDateTime)}");
     }
 
     // ---------------------------------------------------------------------
@@ -522,67 +580,42 @@ public static class MovePlanner
     /// Returns false (with reason) when the move is impossible.
     /// AlreadyThere yields an empty list and true.
     /// </summary>
-    public static bool TryBuildMoveActions(Entity ship, int targetId,
+    public static bool TryBuildMoveActions(Entity ship, Entity targetEntity,
                                            out List<EntityAction> actions, out string reason)
     {
         actions = new List<EntityAction>();
         reason = string.Empty;
-
-        if (!ship.Manager.TryGetGlobalEntityById(targetId, out var requested))
-        {
-            reason = "Target not found";
-            return false;
-        }
-        if (!MoveTargeting.TryResolve(requested, out var target, out reason))
+        
+        if (!MoveTargeting.TryResolve(targetEntity, out var target, out reason))
             return false;
         if (!CanMove(ship, out reason))
             return false;
 
-        var chosen = Select(Evaluate(ship, target, ship.StarSysDateTime));
+        var moveOptions = Evaluate(ship, target, ship.StarSysDateTime);
+        var chosen = Select(moveOptions);
         if (!chosen.Feasible)
         {
             reason = chosen.Reason;
             return false;
         }
+        reason = chosen.Reason;
         if (chosen.Mode == MoveMode.AlreadyThere)
-            return true;                       // empty actions, success
+            return true;
 
-        actions = BuildActions(ship, target, ship.StarSysDateTime, chosen);
+        if (chosen.Mode == MoveMode.Warp)
+            actions.AddRange(BuildWarpAndCircularise(ship, target, ship.StarSysDateTime));
+        else if (chosen.Manuvers.Length == 0)
+            actions.Add(BuildCirculariseFromCurrent(ship, ship.StarSysDateTime));
+        else
+            actions.AddRange(BuildBurns(ship, ship.StarSysDateTime, chosen.Manuvers));
+
         return true;
     }
-    /// <summary>
-    /// Turn the chosen option into queued actions. Returns an empty list for AlreadyThere.
-    /// </summary>
-    internal static List<EntityAction> BuildActions(Entity ship, Entity target, DateTime now, MoveOption chosen)
+
+    private static List<EntityAction> BuildWarpAndCircularise(Entity orderEntity, Entity targetEntity, DateTime now)
     {
         var actions = new List<EntityAction>();
-
-        switch (chosen.Mode)
-        {
-            case MoveMode.AlreadyThere:
-                break;
-            
-            case MoveMode.Warp:
-            {
-                actions.AddRange(BuildWarpAndCircularise(ship, target, now));
-                break;
-            }
-            
-            case MoveMode.NewtonianTransfer:
-                actions.AddRange(BuildBurns(ship, now, chosen.Manuvers));
-                break;
-        }
-
-        return actions;
-    }
-
-    internal static List<EntityAction> BuildWarpAndCircularise(Entity orderEntity, Entity targetEntity, DateTime now)
-    {
-        var actions = new List<EntityAction>();
-        // 1. pure transit
         var lowOrbitRadius = OrbitMath.LowOrbitRadius(targetEntity);
-        targetEntity.TryGetDataBlob<OrbitDB>(out var orbitDB);
-        var soi = OrbitMath.GetSOIRadius(orbitDB);
         
         (Vector3 pos, Vector3 vel) departureState;
         if(orderEntity.Manager.Game.Settings.UseRelativeVelocity)
@@ -605,18 +638,24 @@ public static class MovePlanner
             }
             case PositionDB.MoveTypes.Orbit:
             {
-                var sgp = OrbitMath.SGP(targetEntity, orderEntity);
+                (Vector3 pos, DateTime eti) targetIntercept = WarpMath.GetInterceptPosition(orderEntity, targetEntity, now, endWarpPos);
+                var parent = PredictDropInParent(targetEntity, endWarpPos.Length());
+                Vector3 rParent;
+                if (parent == targetEntity)
+                {
+                    rParent = endWarpPos;
+                }
+                else
+                {
+                    var parentAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(parent, targetIntercept.eti);
+                    rParent = targetIntercept.pos - parentAbs;
+                }
 
-                (Vector3 pos, DateTime eti) targetIntercept  = WarpMath.GetInterceptPosition(orderEntity, targetEntity, now, endWarpPos);
-                var targetOrbit = OrbitMath.KeplerCircularFromPosition(sgp, endWarpPos, targetIntercept.eti);
-                var lowOrbitState = OrbitMath.GetStateVectors(targetOrbit, targetIntercept.eti);
-                var targetEntityOrbitDb = targetEntity.GetDataBlob<OrbitDB>();
-                Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(departureState.vel, targetEntityOrbitDb, targetIntercept.eti);
-                var deltaVRequired = insertionVector - (Vector3)lowOrbitState.velocity;
-                var endWarpOrbit = OrbitMath.KeplerFromPositionAndVelocity(sgp, endWarpPos, insertionVector, targetIntercept.eti);
-
-                actions.Add(NewtonSimpleAction.CreateCommand(orderEntity.FactionOwnerID, orderEntity, targetIntercept.eti, endWarpOrbit, targetOrbit));
-                
+                // Same leftover as WarpMovingDB.SavedNewtonionVector / SetOrbitHereSimpleNewt.
+                var leftoverV = departureState.vel;
+                var circularise = TryBuildCircularise(orderEntity, parent, rParent, leftoverV, targetIntercept.eti);
+                if (circularise != null)
+                    actions.Add(circularise);
                 break;
             }
             case PositionDB.MoveTypes.NewtonSimple:
@@ -640,9 +679,95 @@ public static class MovePlanner
         
         
         return actions;
-
     }
-    
+
+    /// <summary>
+    /// Parent the ship will have after warp drop-in: the target if the exit offset is inside
+    /// its SOI, otherwise the target's SOI parent. Matches SetOrbitHereSimpleNewt.
+    /// </summary>
+    static Entity PredictDropInParent(Entity target, double exitOffsetLength)
+    {
+        if (!target.TryGetDataBlob<OrbitDB>(out var targetOrbit) || targetOrbit.Parent == null)
+            return target;
+
+        double soi = OrbitMath.GetSOIRadius(targetOrbit);
+        if (soi > exitOffsetLength)
+            return target;
+
+        return target.GetSOIParentEntity() ?? target;
+    }
+
+    static double PlannedWarpExitOffsetLength(Entity target)
+    {
+        return target.HasDataBlob<MassVolumeDB>()
+            ? OrbitMath.LowOrbitRadius(target)
+            : ArrivedWithin_m;
+    }
+
+    static bool IsCoOrbital(double shipRadius, double targetRadius, Entity target)
+    {
+        if (!double.IsFinite(shipRadius) || !double.IsFinite(targetRadius) || targetRadius <= 0)
+            return false;
+        double tol = Math.Max(targetRadius * CoOrbitalRadiusTolerance, PlannedWarpExitOffsetLength(target) * 2);
+        return Math.Abs(shipRadius - targetRadius) <= tol;
+    }
+
+    static double AlongTrackArrivedSeparation(Entity target, double targetRadius)
+    {
+        double close = target.HasDataBlob<MassVolumeDB>()
+            ? OrbitMath.LowOrbitRadius(target) * ArrivedWithinLowOrbits
+            : ArrivedWithin_m;
+        if (!double.IsFinite(targetRadius) || targetRadius <= 0)
+            return close;
+        return Math.Max(close, targetRadius * ArrivedAlongOrbitFraction);
+    }
+
+    static bool TryCurrentRelativeState(Entity ship, DateTime at, out (Vector3 pos, Vector3 vel) state)
+    {
+        state = default;
+        if (!ship.HasDataBlob<PositionDB>())
+            return false;
+        if (!ship.HasDataBlob<OrbitDB>()
+            && !ship.HasDataBlob<OrbitUpdateOftenDB>()
+            && !ship.HasDataBlob<NewtonSimpleMoveDB>()
+            && !ship.HasDataBlob<NewtonMoveDB>()
+            && !ship.HasDataBlob<WarpMovingDB>())
+            return false;
+
+        var raw = MoveMath.GetRelativeFutureState(ship, at);
+        state = (raw.pos, raw.Velocity);
+        return double.IsFinite(state.pos.X) && double.IsFinite(state.vel.X);
+    }
+
+    static EntityAction BuildCirculariseFromCurrent(Entity ship, DateTime now)
+    {
+        var parent = ship.GetSOIParentEntity();
+        if (parent == null)
+            throw new InvalidOperationException("Circularise requires an SOI parent.");
+        if (!TryCurrentRelativeState(ship, now, out var state))
+            throw new InvalidOperationException("Circularise requires a state vector.");
+        var action = TryBuildCircularise(ship, parent, state.pos, state.vel, now);
+        if (action == null)
+            throw new InvalidOperationException("Circularise Kepler was not usable.");
+        return action;
+    }
+
+    static NewtonSimpleAction? TryBuildCircularise(Entity ship, Entity parent, Vector3 rParent, Vector3 vel, DateTime at)
+    {
+        double r = rParent.Length();
+        if (!double.IsFinite(r) || r < 1)
+            return null;
+
+        double sgp = OrbitMath.SGP(parent, ship);
+        var startKE = OrbitMath.KeplerFromPositionAndVelocity(sgp, rParent, vel, at);
+        var targetKE = OrbitMath.KeplerCircularFromPosition(sgp, rParent, at);
+        var rAtEpoch = OrbitMath.GetStateVectors(startKE, at).position;
+        if (!double.IsFinite(rAtEpoch.X) || rAtEpoch.Length() > 1e14)
+            return null;
+
+        return NewtonSimpleAction.CreateCommand(ship.FactionOwnerID, ship, at, startKE, targetKE);
+    }
+
     /// <summary>
     /// Prograde-frame burns become NewtonSimpleActions: each carries the orbit it starts from and
     /// the orbit it should end in, and NewtonSimpleProcessor charges the fuel for the difference.
@@ -683,6 +808,12 @@ public static class MovePlanner
     }
 
     // ---------------------------------------------------------------------
+
+    static string NameOf(Entity target, Entity ship)
+        => target.GetName(ship.FactionOwnerID);
+
+    static string FormatArrival(DateTime at)
+        => at.ToString("yyyy-MM-dd HH:mm:ss");
 
     /// <summary>True longitude of an entity about its SOI parent, in the reference plane.</summary>
     static double AngleOf(Entity entity, DateTime atDateTime)

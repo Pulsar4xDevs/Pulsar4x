@@ -41,12 +41,12 @@ public readonly struct PlanResult
         SubGoals = Array.Empty<(Entity, Goal)>(),
         Message = "",
     };
-    public static PlanResult Continue(List<EntityAction> actions) => new()
+    public static PlanResult Continue(List<EntityAction> actions, string message = "") => new()
     {
         Status = GoalStatus.Active,
         Actions = actions,
         SubGoals = Array.Empty<(Entity, Goal)>(),
-        Message = "",
+        Message = message,
     };
     
     public static PlanResult Continue(List<(Entity subordinate, Goal goal)> subgoals) => new()
@@ -97,9 +97,15 @@ public class AgentProcessor : IInstanceProcessor
     internal override void ProcessEntity(Entity entity, DateTime atDateTime)
     {
         ProcessEntityStatic(entity, atDateTime);
+        MessagePublisher.Instance.Publish(
+            Message.Create(
+                MessageTypes.OrdersChanged,
+                entity.Id,
+                entity.Manager.ManagerID,
+                entity.FactionOwnerID));
     }
 
-    public static void ProcessEntityStatic(Entity entity, DateTime atDateTime)
+    internal static void ProcessEntityStatic(Entity entity, DateTime atDateTime)
     {
         //check if the entity given is a commander, or if it's an entity a commander is managing. 
         Entity managedEntity = entity;
@@ -117,9 +123,11 @@ public class AgentProcessor : IInstanceProcessor
         agentHost.TryGetDataBlob<AgentDB>(out var agentDB);
         GoalWeighting.Recalculate(goalsDB, managedEntity, agentDB);
 
-        var goal = goalsDB.ActiveGoal;
-        if (goal == null) return; // autonomous pick not wired yet
-        if (goal.Status is GoalStatus.Completed or GoalStatus.Failed) return;
+        Goal? goal = goalsDB.ActiveGoal;
+        if (goal == null) 
+            return; // autonomous pick not wired yet
+        if (goal.Status is GoalStatus.Completed or GoalStatus.Failed) 
+            return;
 
         bool isFleet = managedEntity.HasDataBlob<FleetDB>();
         bool isShip = managedEntity.HasDataBlob<ShipInfoDB>();
@@ -136,8 +144,8 @@ public class AgentProcessor : IInstanceProcessor
 
                 // Planners return data only; agent commits status and side effects.
                 // PlanResult.Continue → Status.Active; Done → Completed; Fail → Failed.
-                var plan = planner.Plan(managedEntity, goal);
-                goal.Message = plan.Message ?? "";
+                PlanResult plan = planner.Plan(managedEntity, goal);
+                ApplyPlanMessage(goal, plan);
 
                 if (plan.Status is GoalStatus.Failed or GoalStatus.Completed)
                 {
@@ -172,7 +180,7 @@ public class AgentProcessor : IInstanceProcessor
                     if (_planners.TryGetValue(goal.Type, out var planner))
                     {
                         var plan = planner.Plan(managedEntity, goal);
-                        goal.Message = plan.Message ?? goal.Message;
+                        ApplyPlanMessage(goal, plan);
                         if (plan.Status is GoalStatus.Failed or GoalStatus.Completed)
                         {
                             goal.Status = plan.Status;
@@ -211,10 +219,48 @@ public class AgentProcessor : IInstanceProcessor
                     }
                     else
                     {
+                        bool boundary = actions.Any(a => a.Status == ActionStatus.Succeeded);
                         queue.ActionList.RemoveAll(a =>
                             a.ParentGoalId == goal.Id && a.Status == ActionStatus.Succeeded);
 
-                        if (!queue.ActionsFor(goal).Any())
+                        if (boundary)
+                        {
+                            // Preview follow-ons (e.g. circularise queued at Planning) are
+                            // stale once the world has changed. Drop unstarted ones and Plan()
+                            // from the world as it is now. Don't mark Completed in the gap.
+                            queue.ActionList.RemoveAll(a =>
+                                a.ParentGoalId == goal.Id && a.Status == ActionStatus.Queued);
+
+                            if (!_planners.TryGetValue(goal.Type, out var planner))
+                            {
+                                Fail(goal, $"no planner for {goal.Type}");
+                                break;
+                            }
+
+                            var plan = planner.Plan(managedEntity, goal);
+                            ApplyPlanMessage(goal, plan);
+                            if (plan.Status is GoalStatus.Failed or GoalStatus.Completed)
+                            {
+                                goal.Status = plan.Status;
+                                if (plan.Status == GoalStatus.Failed)
+                                    queue.ClearFor(goal);
+                                break;
+                            }
+
+                            foreach (var (subordinate, subGoal) in plan.SubGoals)
+                            {
+                                if (string.IsNullOrEmpty(subGoal.ParentGoalId))
+                                    subGoal.ParentGoalId = goal.Id;
+                                AssignGoal(subordinate, subGoal, atDateTime + RelayDelay);
+                            }
+                            foreach (var action in plan.Actions)
+                            {
+                                action.ParentGoalId = goal.Id;
+                                managedEntity.Manager.Game.OrderHandler.HandleOrder(action);
+                            }
+                            ScheduleAgent(agentHost, atDateTime + RecheckInterval);
+                        }
+                        else if (!queue.ActionsFor(goal).Any())
                             goal.Status = GoalStatus.Completed;
                         else
                             ScheduleAgent(agentHost, atDateTime + RecheckInterval);
@@ -226,12 +272,7 @@ public class AgentProcessor : IInstanceProcessor
                 break;
             }
         }
-        MessagePublisher.Instance.Publish(
-            Message.Create(
-                MessageTypes.OrdersChanged,
-                entity.Id,
-                entity.Manager.ManagerID,
-                entity.FactionOwnerID));
+
     }
     
     // -----------------------------------------------------------------
@@ -338,6 +379,16 @@ public class AgentProcessor : IInstanceProcessor
         goal.Message = message;
     }
 
+    /// <summary>
+    /// Planners often Continue with an empty message (work still in flight). Don't wipe a
+    /// previous Warp/Hohmann line the UI is showing on the status row.
+    /// </summary>
+    static void ApplyPlanMessage(Goal goal, PlanResult plan)
+    {
+        if (!string.IsNullOrEmpty(plan.Message))
+            goal.Message = plan.Message;
+    }
+
     internal static void ScheduleAgent(Entity unit, DateTime when)
     {
         unit.Manager.ManagerSubpulses.AddEntityInterupt(when, nameof(AgentProcessor), unit);
@@ -346,6 +397,12 @@ public class AgentProcessor : IInstanceProcessor
     {
         var timenow = unit.StarSysDateTime;
         ProcessEntityStatic( unit, timenow);
+        MessagePublisher.Instance.Publish(
+            Message.Create(
+                MessageTypes.OrdersChanged,
+                unit.Id,
+                unit.Manager.ManagerID,
+                unit.FactionOwnerID));
     }
 
     // ===================================================================

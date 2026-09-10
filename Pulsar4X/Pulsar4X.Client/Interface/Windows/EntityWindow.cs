@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
@@ -958,7 +959,7 @@ namespace Pulsar4X.Client
             }
 
             // Orders (inline, no collapsing header)
-            var orders = _entity.GetView<OrdersView>()?.Orders;
+            IReadOnlyList<OrderSnapshot>? orders = _entity.GetView<OrdersView>()?.Orders;
             if (orders is { Count: > 0 })
             {
                 SectionLabel("ACTIONS (" + orders.Count + ")");

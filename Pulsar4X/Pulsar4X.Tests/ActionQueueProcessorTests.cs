@@ -9,9 +9,9 @@ using Pulsar4X.Modding;
 namespace Pulsar4X.Tests
 {
     /// <summary>
-    /// Timing contract: a finished blocking action must not hold the lane for the rest of
-    /// this queue pass. Warp-end wakes the queue in the same substep; the follow-on burn
-    /// has to be allowed to Execute on that pass.
+    /// Lane contract: a finished blocking action with no ParentGoalId frees the lane so a
+    /// hand-queued follow-on can Execute this pass. A goal-tagged finished blocker holds
+    /// the lane until the agent drops unstarted follow-ons and Plan()s.
     /// </summary>
     public class ActionQueueProcessorTests
     {
@@ -49,6 +49,28 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(ActionStatus.Succeeded, first.Status);
             Assert.IsTrue(second.Executed, "follow-on movement action must Execute on the same pass once the previous one is finished");
             Assert.IsTrue(second.IsRunning);
+        }
+
+        [Test]
+        public void GoalTaggedFinishedBlockingAction_DoesNotStartNextSameLaneThisPass()
+        {
+            var entity = Entity.Create();
+            var queue = new ActionQueueDB();
+            _starSys.AddEntity(entity, new BaseDataBlob[] { queue });
+
+            const string goalId = "move-goal";
+            var first = new StubMoveAction(entity) { Finished = true, ParentGoalId = goalId };
+            var second = new StubMoveAction(entity) { ParentGoalId = goalId };
+            queue.Enqueue(first);
+            queue.Enqueue(second);
+
+            var now = _starSys.StarSysDateTime;
+            _game.ProcessorManager.GetInstanceProcessor(nameof(ActionQueueProcessor))
+                .ProcessEntity(entity, now);
+
+            Assert.AreEqual(ActionStatus.Succeeded, first.Status);
+            Assert.IsFalse(second.Executed,
+                "goal-tagged follow-on must wait for the agent to drop unstarted work and Plan()");
         }
 
         [Test]

@@ -55,7 +55,7 @@ public class ServeyBodyPlanner : IGoalPlanner
             }
             else if (MovePlanner.TryBuildMoveActions(
                          ship,
-                         goal.TargetEntityID,
+                         targetEntity,
                          out var moveActions,
                          out var moveReason))
             {
