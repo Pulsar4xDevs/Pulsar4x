@@ -122,7 +122,7 @@ namespace GameEngine.Engine.Orders
                 orderableDB.ActionList.RemoveAll(e => e.IsFinished() && string.IsNullOrEmpty(e.ParentGoalId));
 
                 if (wakeAgent)//run the agent to check off goal progression.
-                    AgentProcessor.RunAgentNow(entity);
+                    AgentProcessor.RunAgentNow(entity, atDateTime);
             }
         }
     }

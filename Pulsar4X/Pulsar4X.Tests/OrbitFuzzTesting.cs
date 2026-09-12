@@ -268,6 +268,13 @@ namespace Pulsar4X.Tests
         }
 
         /// <summary>
+        /// Same convention as <see cref="OrbitalMath.TrueAnomalyFromTime"/>:
+        /// hyperbolic mean anomaly is M0 + n·t, not n·t with epoch as periapsis.
+        /// </summary>
+        static double HyperbolicMeanAnomalyFromEpoch(double meanAnomalyAtEpoch, double meanMotion, double secondsFromEpoch)
+            => meanAnomalyAtEpoch + OrbitMath.GetHyperbolicMeanAnomalyFromTime(meanMotion, secondsFromEpoch);
+
+        /// <summary>
         /// Tests: Time ⟶ EllipticMeanAnomaly  ⟶ EccentricAnomaly
         ///        Time ⟵ EllipticMeanAnomaly  ⟵        ↲
         /// Tests: Time ⟶ HyperblicMeanAnomaly ⟶ HyperbolicAnomaly
@@ -308,14 +315,17 @@ namespace Pulsar4X.Tests
                 }
                 else
                 {
-                    //calculate meanAnomaly the easy way
-                    var o_Mh = OrbitMath.GetHyperbolicMeanAnomalyFromTime(o_n, timeSinceEpoch.TotalSeconds);
+                    //calculate meanAnomaly the easy way (M0 + n·t, same as TrueAnomalyFromTime)
+                    var o_Mh = HyperbolicMeanAnomalyFromEpoch(o_M0, o_n, timeSinceEpoch.TotalSeconds);
 
                     //calculate back to HyperbolicAnomaly H
                     OrbitMath.TryGetHyperbolicAnomaly(o_e, o_Mh, out var H);
 
                     M1 = OrbitMath.GetHyperbolicMeanAnomaly(o_e, H);
-                    double t1 = OrbitMath.TimeFromHyperbolicMeanAnomaly(sgp, o_a, M1);
+                    // TimeFromHyperbolicMeanAnomaly is seconds from periapsis (M=0). Subtract
+                    // the epoch offset so we recover seconds from epoch, like the elliptic path.
+                    double t1 = OrbitMath.TimeFromHyperbolicMeanAnomaly(sgp, o_a, M1)
+                                - OrbitMath.TimeFromHyperbolicMeanAnomaly(sgp, o_a, o_M0);
                     Assert.AreEqual(o_Mh, M1, epsilonRads, "MeanAnomaly Mh expected: " + Angle.ToDegrees(o_Mh) + " was: " + Angle.ToDegrees(M1));
                     Assert.AreEqual(timeSinceEpoch.TotalSeconds, t1, epsilont, "TimeFromMeanAnomaly t1 expected " + timeSinceEpoch.TotalSeconds + " was: " + t1);
                 }
@@ -343,7 +353,7 @@ namespace Pulsar4X.Tests
                 TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
                 DateTime segmentDatetime = o_epoch + timeSinceEpoch;
                 double o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
-                double o_Mh = OrbitMath.GetHyperbolicMeanAnomalyFromTime(o_n, timeSinceEpoch.TotalSeconds);
+                double o_Mh = HyperbolicMeanAnomalyFromEpoch(o_M0, o_n, timeSinceEpoch.TotalSeconds);
                 double o_loAN = orbitDB.LongitudeOfAscendingNode;
                 double o_aoP = orbitDB.ArgumentOfPeriapsis;
                 double o_i = orbitDB.Inclination;
@@ -414,7 +424,7 @@ namespace Pulsar4X.Tests
                 TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
                 DateTime segmentDatetime = o_epoch + timeSinceEpoch;
                 double o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
-                double o_Mh = OrbitMath.GetHyperbolicMeanAnomalyFromTime(o_n, timeSinceEpoch.TotalSeconds);
+                double o_Mh = HyperbolicMeanAnomalyFromEpoch(o_M0, o_n, timeSinceEpoch.TotalSeconds);
                 double o_loAN = orbitDB.LongitudeOfAscendingNode;
                 double o_aoP = orbitDB.ArgumentOfPeriapsis;
                 double o_i = orbitDB.Inclination;
@@ -668,7 +678,7 @@ namespace Pulsar4X.Tests
 
                 double o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
                 double o_E = OrbitMath.GetEccentricAnomaly(orbitDB, o_M);
-                double o_Mh = OrbitMath.GetHyperbolicMeanAnomalyFromTime(o_n, timeSinceEpoch.TotalSeconds);
+                double o_Mh = HyperbolicMeanAnomalyFromEpoch(o_M0, o_n, timeSinceEpoch.TotalSeconds);
                 double o_H = OrbitMath.GetHyperbolicAnomaly(orbitDB, o_Mh);
                 double o_ν = OrbitMath.GetTrueAnomaly(orbitDB, segmentDatetime);
 
@@ -713,7 +723,7 @@ namespace Pulsar4X.Tests
                     Assert.Multiple(() =>
                     {
 
-                        Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_H, ke_H), epsilonRads, "HyperbolicAnomaly H expected: " + Angle.ToDegrees(o_E) + " was: " + Angle.ToDegrees(ke_E));
+                        Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_H, ke_H), epsilonRads, "HyperbolicAnomaly H expected: " + Angle.ToDegrees(o_H) + " was: " + Angle.ToDegrees(ke_H));
                         //we're testing ke_M0 here because epoch for ke is *now*.
                         //Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_Mh, ke_M0), epsilonRads, "i: "+i+", HyperbolicMeanAnomaly Mh expected: " + Angle.ToDegrees(o_M) + " was: " + Angle.ToDegrees(ke_M0));
 

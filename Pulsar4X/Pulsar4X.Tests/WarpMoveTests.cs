@@ -9,12 +9,14 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Energy;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
+using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Modding;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using Pulsar4X.Orbital;
 using Pulsar4X.Orbits;
+using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.Tests
@@ -35,7 +37,11 @@ namespace Pulsar4X.Tests
             var modLoader = new ModLoader();
             var modDataStore = new ModDataStore();
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
-            return new Game(new NewGameSettings(), modDataStore);
+            var game = new Game(new NewGameSettings(), modDataStore);
+            // TimeStep is otherwise Task.Run and the test would race it.
+            game.Settings.EnforceSingleThread = true;
+            game.Settings.StrictNewtonion = true;
+            return game;
         }
 
         [SetUp]
@@ -43,8 +49,15 @@ namespace Pulsar4X.Tests
         {
             // A fresh system each test: Initialize() does not clear entities, and leftover
             // WarpMovingDBs from other tests get processed by ProcessSystem.
+            // TimePulse skips Stasis systems. A faction ship would otherwise promote
+            // the new system to Background (10× slower orbit hotloops) via
+            // HasFactionEntities — same as an unfocused system in-game. Pin it
+            // Foreground like the player's focused map.
+            foreach (var sys in _game.Systems)
+                sys.SetActivityState(SystemActivityState.Stasis);
             _starSys = new StarSystem();
             _starSys.Initialize(_game, "Sol", -1);
+            _starSys.IncrementExternalObserver(priority: true);
         }
 
         #region GetRalitivePosition
@@ -247,21 +260,7 @@ namespace Pulsar4X.Tests
 
         #region SOI parent switch
 
-        [Test]
-        public void SmallMoonSoi_SmallerThanOffset_MeansOrbitTheParent()
-        {
-            var sol = TestingUtilities.BasicSol(_starSys);
-            var epoch = new DateTime(2000, 1, 1);
-            var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
-            // Phobos-ish: sma ~9376 km, mass ~1.06e16 kg, radius ~11 km
-            var phobos = AddMoon(mars, 1.06e16, 11_266, sma_m: 9_376_000, epoch);
 
-            var soi = OrbitMath.GetSOIRadius(phobos.GetDataBlob<OrbitDB>());
-            var offset = new Vector3(13_000, 0, 0); // just above the surface
-
-            Assert.Less(soi, offset.Length(),
-                "Phobos-class body: SOI is smaller than a surface-offset stop, so drop-in must parent to Mars");
-        }
 
         /// <summary>
         /// Phobos SOI is smaller than a surface offset, so drop-in parents to Mars.
@@ -384,118 +383,163 @@ namespace Pulsar4X.Tests
             LeftoverCircularAtMarsRetrograde,
         }
 
-        public static IEnumerable EarthToPhobosStartOrbits()
+        public static IEnumerable EarthToBodyStartOrbits()
         {
             foreach (EarthStartOrbit kind in Enum.GetValues(typeof(EarthStartOrbit)))
-                yield return new TestCaseData(kind).SetName(kind.ToString());
+            {
+                yield return new TestCaseData(kind, true).SetName($"{kind}-Phobos");
+                yield return new TestCaseData(kind, false).SetName($"{kind}-Mars");
+            }
         }
 
         /// <summary>
-        /// Top to bottom: ship in Earth orbit, WarpMoveAction to Phobos, step time
-        /// through the bubble, drop-in. Arrival time/place and the resulting Mars
-        /// orbit must be well-formed (NaN / Inf / MaxValue / MinValue are not).
-        /// Phobos SOI is smaller than a low-orbit offset, so the parent is Mars.
+        /// In-game MoveTo codeflow: CommandTranslator → AssignGoal → warp → drop-in
+        /// (WakeActionQueue → agent Plan from the world as it is) → next TimePulse
+        /// (circularise Execute) → keep pulsing until the MoveTo goal itself completes.
+        /// Must not start a second warp. Phobos SOI is smaller than a low-orbit offset,
+        /// so drop-in parents to Mars; Mars is the destination well for both cases.
         /// </summary>
-        [Test, TestCaseSource(nameof(EarthToPhobosStartOrbits))]
-        public void WarpOrder_EarthToPhobos_ArrivesOnTimeInPlaceWithWellFormedOrbit(EarthStartOrbit startOrbit)
+        [Test, TestCaseSource(nameof(EarthToBodyStartOrbits))]
+        public void WarpOrder_EarthToPhobos_ArrivesOnTimeInPlaceWithWellFormedOrbit(
+            EarthStartOrbit startOrbit, bool destIsPhobos)
         {
             var epoch = _starSys.StarSysDateTime;
             var sol = TestingUtilities.BasicSol(_starSys);
             var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
             var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
             var phobos = AddMoon(mars, 1.06e16, 11_266, sma_m: 9_376_000, epoch);
+            mars.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Terrestrial });
+            phobos.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Moon });
 
+            Entity dest = destIsPhobos ? phobos : mars;
+            Entity expectedParent = mars;
+
+            var faction = FactionFactory.CreateFaction(_game, "move-to-" + Guid.NewGuid().ToString("N"));
             var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
             var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
-            var ship = AddPhobosWarpShip(earth, earthAbs + new Vector3(leoR, 0, 0));
+            var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
 
-            var offsetGuess = new Vector3(OrbitMath.LowOrbitRadius(phobos), 0, 0);
-            ApplyEarthStartOrbit(startOrbit, ship, earth, mars, phobos, epoch, offsetGuess);
-            var offset = PhobosWarpOffset(ship, phobos);
-            // Leftover-circular cases aimed at offsetGuess; rebuild against the planner offset.
+            var offsetGuess = new Vector3(OrbitMath.LowOrbitRadius(dest), 0, 0);
+            ApplyEarthStartOrbit(startOrbit, ship, earth, mars, dest, epoch, offsetGuess);
+            var offset = PhobosWarpOffset(ship, dest);
             if (startOrbit is EarthStartOrbit.LeftoverCircularAtMars
                 or EarthStartOrbit.LeftoverCircularAtMarsRetrograde)
             {
-                ApplyEarthStartOrbit(startOrbit, ship, earth, mars, phobos, epoch, offset);
-                offset = PhobosWarpOffset(ship, phobos);
+                ApplyEarthStartOrbit(startOrbit, ship, earth, mars, dest, epoch, offset);
+                offset = PhobosWarpOffset(ship, dest);
             }
 
-            var phobosSoi = OrbitMath.GetSOIRadius(phobos.GetDataBlob<OrbitDB>());
-            Assert.Less(phobosSoi, offset.Length(), "precondition: drop-in parents to Mars");
+            if (destIsPhobos)
+            {
+                var phobosSoi = OrbitMath.GetSOIRadius(phobos.GetDataBlob<OrbitDB>());
+                Assert.Less(phobosSoi, offset.Length(), "precondition: drop-in parents to Mars");
+            }
 
             var dropIns = new List<(int entityId, DateTime at)>();
             WarpMoveProcessor.TestDropIn = (entity, at) => dropIns.Add((entity.Id, at));
             try
             {
-                var action = WarpMoveAction.CreateWarpOnly(ship, phobos, epoch, offset);
-                ship.GetDataBlob<ActionQueueDB>().Enqueue(action);
-                _game.ProcessorManager.GetInstanceProcessor(nameof(ActionQueueProcessor))
-                    .ProcessEntity(ship, epoch);
-
+                // Same seam as CommandTranslator.TranslateMoveToBody.
+                var goal = new Goal(GoalType.MoveTo) { TargetEntityID = dest.Id };
+                AgentProcessor.AssignGoal(ship, goal);
+                Assert.AreNotEqual(GoalStatus.Failed, goal.Status, DescribeMove(ship, goal));
                 Assert.IsTrue(ship.HasDataBlob<WarpMovingDB>(),
-                    "queue Execute should have created the warp blob");
+                    "AssignGoal should have planned and started warp. " + DescribeMove(ship, goal));
+
                 var moveDB = ship.GetDataBlob<WarpMovingDB>();
-                Assert.IsTrue(moveDB.HasStarted,
-                    $"TryStartWarp should have started the bubble (action.Status={action.Status})");
+                Assert.IsTrue(moveDB.HasStarted, "bubble should have started. " + DescribeMove(ship, goal));
                 var eti = moveDB.PredictedExitTime;
                 var exitAbs = moveDB.ExitPointAbsolute;
                 Assert.Greater(eti, epoch, "intercept is in the future");
                 AssertFiniteVec(exitAbs, "ExitPointAbsolute at warp start");
-                AssertFiniteVec((Vector3)moveDB._position, "bubble start _position");
 
-                _starSys.ManagerSubpulses.ProcessSystem(eti);
+                AdvanceTo(eti);
 
-                Assert.AreEqual(1, dropIns.Count, "drop-in must run once at PredictedExitTime");
+                Assert.AreEqual(1, dropIns.Count,
+                    "drop-in must run once at PredictedExitTime. " + DescribeMove(ship, goal));
                 Assert.IsTrue(ship.HasDataBlob<OrbitDB>(), "drop-in attached an orbit");
+                Assert.IsFalse(ship.HasDataBlob<WarpMovingDB>(),
+                    "bubble is gone after arrival; a second warp must not have started. "
+                    + DescribeMove(ship, goal));
 
                 var dropAt = dropIns[0].at;
                 var orbit = ship.GetDataBlob<OrbitDB>();
                 var pos = ship.GetDataBlob<PositionDB>();
                 var posFromOrbit = OrbitMath.GetPosition(orbit, dropAt);
-                var abs = pos.AbsolutePosition;
                 var rel = pos.RelativePosition;
-                var phobosAbs = OrbitMath.GetAbsolutePosition(phobos.GetDataBlob<OrbitDB>(), dropAt);
+                var destAbs = OrbitMath.GetAbsolutePosition(dest.GetDataBlob<OrbitDB>(), dropAt);
                 var marsRadius = mars.GetDataBlob<MassVolumeDB>().RadiusInM;
-                var phobosR = OrbitMath.GetPosition(phobos.GetDataBlob<OrbitDB>(), dropAt).Length();
 
                 Assert.Multiple(() =>
                 {
                     Assert.AreEqual(ship.Id, dropIns[0].entityId);
                     Assert.AreEqual(eti, dropAt,
                         "drop-in datetime is PredictedExitTime, not a later hotloop");
-                    Assert.IsFalse(ship.HasDataBlob<WarpMovingDB>(), "bubble is gone after arrival");
 
                     AssertOrbitWellFormed(orbit, $"{startOrbit} drop-in orbit");
-                    Assert.AreSame(mars, orbit.Parent, "Phobos SOI is too small; parent must be Mars");
-                    Assert.AreSame(mars, pos.Parent, "PositionDB.Parent must be Mars");
+                    Assert.AreSame(expectedParent, orbit.Parent, "drop-in SOI parent");
+                    Assert.AreSame(expectedParent, pos.Parent, "PositionDB.Parent");
 
                     AssertFiniteVec(rel, "PositionDB.RelativePosition");
-                    AssertFiniteVec(abs, "PositionDB.AbsolutePosition");
+                    AssertFiniteVec(pos.AbsolutePosition, "PositionDB.AbsolutePosition");
                     AssertFiniteVec(posFromOrbit, "OrbitMath.GetPosition at drop-in");
                     AssertFiniteVec(pos.Velocity, "PositionDB.Velocity");
 
-                    Assert.Less((abs - exitAbs).Length(), 1e6,
-                        "ship absolute pos at drop-in should be the intercept exit, not a mixed-time or origin vector");
-                    Assert.Less((abs - (phobosAbs + offset)).Length(), 1e6,
-                        "ship should be one offset from Phobos at drop-in");
-                    Assert.Greater(rel.Length(), marsRadius,
-                        "Mars-relative r is inside Mars");
-                    Assert.Greater(rel.Length(), offset.Length() * 10,
-                        "r is still the Phobos-relative offset; parent switch did not change frame");
-                    Assert.Greater(rel.Length(), phobosR * 0.5, "|r| much closer than Phobos");
-                    Assert.Less(rel.Length(), phobosR * 2.0, "|r| much farther than Phobos");
+                    // PositionDB.AbsolutePosition is hotloop-quantized to the parent's last
+                    // orbit tick. The drop-in contract is the Kepler state at eti.
+                    var absAtDrop = (Vector3)MoveMath.GetAbsoluteFuturePosition(ship, dropAt);
+                    Assert.Less((absAtDrop - exitAbs).Length(), 1e6,
+                        "ship absolute pos at drop-in should be the intercept exit");
+                    Assert.Less((absAtDrop - (destAbs + offset)).Length(), 1e6,
+                        "ship should be one offset from the destination body at drop-in");
+                    Assert.Greater(rel.Length(), marsRadius, "Mars-relative r is inside Mars");
                     Assert.Less((rel - posFromOrbit).Length(), 1e3,
                         "PositionDB.RelativePosition must match the orbit equations at drop-in");
-
-                    if (startOrbit is EarthStartOrbit.LeftoverCircularAtMars
-                        or EarthStartOrbit.LeftoverCircularAtMarsRetrograde)
-                    {
-                        Assert.Less(orbit.Eccentricity, 0.25,
-                            $"{startOrbit}: leftover v was set to circularise around Mars at drop-in r");
-                        Assert.Less(orbit.Eccentricity, 1,
-                            $"{startOrbit}: expected an ellipse around Mars, not a hyperbola");
-                    }
                 });
+
+                var queue = ship.GetDataBlob<ActionQueueDB>();
+                Assert.IsFalse(queue.ActionList.Any(a => a is WarpMoveAction && a.IsRunning),
+                    "warp action must have finished at drop-in. " + DescribeMove(ship, goal));
+
+                // In-game: next TimePulse after drop-in. Same-time follow-on after Split()
+                // plus HandleOrder's GameGlobalDateTime lag both need this extra step.
+                AdvanceTo(eti + TimeSpan.FromMinutes(1));
+                Assert.AreEqual(1, dropIns.Count,
+                    "must not warp again after drop-in. " + DescribeMove(ship, goal));
+                Assert.IsFalse(ship.HasDataBlob<WarpMovingDB>(),
+                    "must not start another warp after drop-in. " + DescribeMove(ship, goal));
+                Assert.IsFalse(queue.ActionList.Any(a => a is WarpMoveAction
+                                                         && a.Status is ActionStatus.Queued or ActionStatus.Running),
+                    "must not have queued another warp. " + DescribeMove(ship, goal));
+
+                bool circulariseStarted = ship.HasDataBlob<NewtonSimpleMoveDB>()
+                    || queue.ActionList.Any(a => a is NewtonSimpleAction
+                                                 && a.Status is ActionStatus.Running or ActionStatus.Succeeded);
+                bool alreadyParked = ship.TryGetDataBlob<OrbitDB>(out var afterOrbit)
+                    && afterOrbit.Eccentricity < 0.05
+                    && afterOrbit.Parent == expectedParent;
+                Assert.IsTrue(circulariseStarted || alreadyParked || goal.Status == GoalStatus.Completed,
+                    "expected circularise / parked orbit / completed goal after the next timestep. "
+                    + DescribeMove(ship, goal));
+
+                // Run until the MoveTo goal itself should have completed — not just drop-in.
+                var deadline = eti + TimeSpan.FromDays(2);
+                while (goal.Status is not (GoalStatus.Completed or GoalStatus.Failed)
+                       && _starSys.StarSysDateTime < deadline)
+                {
+                    AdvanceTo(_starSys.StarSysDateTime + TimeSpan.FromMinutes(30));
+                    Assert.AreEqual(1, dropIns.Count,
+                        "MoveTo must not warp again while working the goal. " + DescribeMove(ship, goal));
+                    Assert.IsFalse(ship.HasDataBlob<WarpMovingDB>(),
+                        "MoveTo must not start another warp. " + DescribeMove(ship, goal));
+                }
+
+                Assert.AreEqual(GoalStatus.Completed, goal.Status,
+                    "MoveTo should complete. " + DescribeMove(ship, goal));
+                Assert.IsTrue(ship.TryGetDataBlob<OrbitDB>(out var finalOrbit), "finished on an orbit");
+                AssertOrbitWellFormed(finalOrbit, "final orbit");
+                Assert.AreSame(expectedParent, finalOrbit.Parent);
+                Assert.Greater(ship.GetDataBlob<PositionDB>().RelativePosition.Length(), marsRadius);
             }
             finally
             {
@@ -989,8 +1033,61 @@ namespace Pulsar4X.Tests
             return Vector3.Normalise(new Vector3(-vel.Y, vel.X, 0)) * r;
         }
 
+        /// <summary>
+        /// In-game time: TimePulse.TimeStep, which ProcessSystem's the focused system
+        /// then advances GameGlobalDateTime. Tests that only ProcessSystem never
+        /// move the global clock, so HandleOrder (which uses GameGlobalDateTime)
+        /// would execute follow-on actions at the warp-start instant.
+        /// </summary>
+        private void AdvanceTo(DateTime when)
+        {
+            if (when <= _game.TimePulse.GameGlobalDateTime)
+            {
+                if (when > _starSys.StarSysDateTime)
+                    _starSys.ManagerSubpulses.ProcessSystem(when);
+                return;
+            }
+
+            _game.TimePulse.TimeStep(when);
+        }
+
+        private static string DescribeMove(Entity ship, Goal goal)
+        {
+            string orbit = ship.TryGetDataBlob<OrbitDB>(out var o)
+                ? $"e={o.Eccentricity:G4} sma={o.SemiMajorAxis:G4} parent={o.Parent?.Id}"
+                : "no-orbit";
+            string blobs = (ship.HasDataBlob<WarpMovingDB>() ? " WarpMovingDB" : "")
+                           + (ship.HasDataBlob<NewtonSimpleMoveDB>() ? " NewtonSimpleMoveDB" : "");
+            string queue = "";
+            if (ship.TryGetDataBlob<ActionQueueDB>(out var q))
+            {
+                queue = string.Join(", ", q.ActionList.Select(a =>
+                    $"{a.GetType().Name}:{a.Status}{(a.IsRunning ? "/run" : "")}"));
+            }
+
+            return $"t={ship.StarSysDateTime:u} goal={goal.Status} '{goal.Message}' {orbit}{blobs} queue=[{queue}]";
+        }
+
+        private static Entity MakeMoveToShip(Entity parent, Vector3 absolutePos, Entity faction)
+        {
+            var ship = AddPhobosWarpShip(parent, absolutePos);
+            ship.FactionOwnerID = faction.Id;
+            ship.SetDataBlob(new ShipInfoDB());
+            AttachThrust(ship);
+
+            var data = faction.GetDataBlob<FactionInfoDB>().Data;
+            data.Unlock("methalox");
+            var fuel = data.CargoGoods.GetAny("methalox");
+            Assert.IsNotNull(fuel, "basemod should have methalox");
+            ship.GetDataBlob<NewtonThrustAbilityDB>().FuelType = fuel.UniqueID;
+            var storage = new CargoStorageDB(fuel.CargoTypeID, 1e12);
+            storage.AddCargoByUnit(fuel, 1_000_000);
+            ship.SetDataBlob(storage);
+            return ship;
+        }
+
         private static void ApplyEarthStartOrbit(
-            EarthStartOrbit kind, Entity ship, Entity earth, Entity mars, Entity phobos,
+            EarthStartOrbit kind, Entity ship, Entity earth, Entity mars, Entity dest,
             DateTime epoch, Vector3 interceptOffset)
         {
             var earthMass = earth.GetDataBlob<MassVolumeDB>().MassDry;
@@ -1014,7 +1111,7 @@ namespace Pulsar4X.Tests
                 case EarthStartOrbit.LeftoverCircularAtMars:
                 case EarthStartOrbit.LeftoverCircularAtMarsRetrograde:
                 {
-                    var intercept = WarpMath.GetInterceptPosition(ship, phobos, epoch, interceptOffset);
+                    var intercept = WarpMath.GetInterceptPosition(ship, dest, epoch, interceptOffset);
                     var marsAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(mars, intercept.etiDateTime);
                     var rMars = intercept.position - marsAbs;
                     var mu = GeneralMath.StandardGravitationalParameter(

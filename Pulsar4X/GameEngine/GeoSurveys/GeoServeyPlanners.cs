@@ -13,7 +13,7 @@ public class ServeyBodyPlanner : IGoalPlanner
 {
     public GoalType Type => GoalType.ServeyBodies;
 
-    public PlanResult Plan(Entity managedEntity, Goal goal)
+    public PlanResult Plan(Entity managedEntity, Goal goal, DateTime atDateTime)
     {
         if (managedEntity.HasDataBlob<FleetDB>())
             return PlanSubGoals(managedEntity, goal);

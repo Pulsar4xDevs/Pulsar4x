@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
@@ -18,7 +19,7 @@ public class RefuelShipPlanner : IGoalPlanner
 {
     public GoalType Type => GoalType.RefuelAt;
 
-    public PlanResult Plan(Entity managedEntity, Goal goal)
+    public PlanResult Plan(Entity managedEntity, Goal goal, DateTime atDateTime)
     {
         if (managedEntity.HasDataBlob<FleetDB>())
             return PlanSubGoals(managedEntity, goal);

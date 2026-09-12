@@ -34,12 +34,12 @@ public class MoveToPlan : IGoalPlanner
 {
     public GoalType Type => GoalType.MoveTo;
 
-    public PlanResult Plan(Entity managedEntity, Goal goal)
+    public PlanResult Plan(Entity managedEntity, Goal goal, DateTime atDateTime)
     {
         if (managedEntity.HasDataBlob<FleetDB>())
             return PlanSubGoals(managedEntity, goal);
         if (managedEntity.HasDataBlob<ShipInfoDB>())
-            return PlanActions(managedEntity, goal);
+            return PlanActions(managedEntity, goal, atDateTime);
 
         return PlanResult.Fail("Non supported entity");
     }
@@ -47,7 +47,7 @@ public class MoveToPlan : IGoalPlanner
     /// <summary>
     /// Leaf: resolve target, pick move mode, emit actions. Does not mutate <paramref name="goal"/>.
     /// </summary>
-    public PlanResult PlanActions(Entity ship, Goal goal)
+    public PlanResult PlanActions(Entity ship, Goal goal, DateTime atDateTime)
     {
         if (!ship.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out Entity requested))
             return PlanResult.Fail("Target not found");
@@ -66,7 +66,7 @@ public class MoveToPlan : IGoalPlanner
             }
         }
 
-        if (!MovePlanner.TryBuildMoveActions(ship, requested, out var actions, out string reason))
+        if (!MovePlanner.TryBuildMoveActions(ship, requested, out var actions, out string reason, atDateTime))
             return PlanResult.Fail(reason);
 
         if (actions.Count == 0)
@@ -301,7 +301,7 @@ public static class MovePlanner
     {
         return new List<MoveOption>
         {
-            EvaluateAlreadyThere(ship, target),
+            EvaluateAlreadyThere(ship, target, now),
             EvaluateNewtonian(ship, target, now),
             EvaluateWarp(ship, target, now),
         };
@@ -357,7 +357,7 @@ public static class MovePlanner
     // Candidates
     // ---------------------------------------------------------------------
 
-    static MoveOption EvaluateAlreadyThere(Entity ship, Entity target)
+    static MoveOption EvaluateAlreadyThere(Entity ship, Entity target, DateTime now)
     {
         if (!ship.TryGetDataBlob<PositionDB>(out var shipPos) || !target.TryGetDataBlob<PositionDB>(out var tgtPos))
             return MoveOption.No(MoveMode.AlreadyThere, "no position");
@@ -367,15 +367,35 @@ public static class MovePlanner
         if (parent == null || (parent != dropInParent && parent != target))
             return MoveOption.No(MoveMode.AlreadyThere, "not in the destination gravity well");
 
-        if (!TryCurrentRelativeState(ship, ship.StarSysDateTime, out var state))
-            return MoveOption.No(MoveMode.AlreadyThere, "no state vector");
+        // Prefer the attached OrbitDB: reconstructing Kepler from a state vector
+        // can disagree with the orbit we just wrote (mixed frames / blob velocity).
+        // Fall back to the state vector when there is no stable orbit yet.
+        double eccentricity;
+        double shipRadius;
+        Vector3 posRel;
+        if (ship.TryGetDataBlob<OrbitDB>(out var shipOrbit) && shipOrbit.Parent == parent)
+        {
+            eccentricity = shipOrbit.Eccentricity;
+            shipRadius = shipOrbit.SemiMajorAxis;
+            posRel = (Vector3)MoveMath.GetRelativeFuturePosition(ship, now);
+        }
+        else
+        {
+            if (!TryCurrentRelativeState(ship, now, out var state))
+                return MoveOption.No(MoveMode.AlreadyThere, "no state vector");
+            double sgp = OrbitMath.SGP(parent, ship);
+            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, state.pos, state.vel, now);
+            eccentricity = ke.Eccentricity;
+            shipRadius = ke.SemiMajorAxis;
+            posRel = state.pos;
+        }
 
-        double sgp = OrbitMath.SGP(parent, ship);
-        var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, state.pos, state.vel, ship.StarSysDateTime);
-        if (!double.IsFinite(ke.Eccentricity) || ke.Eccentricity >= ArrivedMaxEccentricity)
+        if (!double.IsFinite(eccentricity) || eccentricity >= ArrivedMaxEccentricity)
             return MoveOption.No(MoveMode.AlreadyThere, "not in a circular orbit");
 
-        double separation = (shipPos.AbsolutePosition - tgtPos.AbsolutePosition).Length();
+        // Blobs lag the orbit hotloop. Evaluate where we actually are at the plan instant.
+        double separation = ((Vector3)MoveMath.GetAbsoluteFuturePosition(ship, now)
+                             - (Vector3)MoveMath.GetAbsoluteFuturePosition(target, now)).Length();
 
         // In the body's own SOI: close to the body in a circular orbit around it.
         if (dropInParent == target || parent == target)
@@ -394,9 +414,8 @@ public static class MovePlanner
             return MoveOption.No(MoveMode.AlreadyThere, "target orbit is not around this parent");
 
         double targetRadius = targetOrbit.SemiMajorAxis;
-        double shipRadius = ke.SemiMajorAxis;
         if (!IsCoOrbital(shipRadius, targetRadius, target)
-            && !IsCoOrbital(state.pos.Length(), targetRadius, target))
+            && !IsCoOrbital(posRel.Length(), targetRadius, target))
             return MoveOption.No(MoveMode.AlreadyThere, "not in the target's orbit");
 
         double along = AlongTrackArrivedSeparation(target, targetRadius);
@@ -430,18 +449,6 @@ public static class MovePlanner
         if (parent == null)
             return MoveOption.No(mode, "no SOI parent");
 
-        // Match the target's orbit around the shared drop-in parent (Phobos around Mars).
-        // Do not Hohmann-match a planet's solar orbit — that is a warp into the planet's SOI.
-        if (dropInParent == target)
-            return MoveOption.No(mode, "target body has a usable SOI; warp");
-        if (parent != dropInParent || targetOrbit.Parent != dropInParent)
-        {
-            return MoveOption.No(mode, "target is under a different SOI parent; no interplanetary transfer maths yet");
-        }
-
-        if (targetOrbit.Eccentricity > MaxEccentricityForTransfer)
-            return MoveOption.No(mode, "transfer maths assume circular orbits");
-
         if (!TryCurrentRelativeState(ship, now, out var state))
             return MoveOption.No(mode, "no state vector");
 
@@ -462,6 +469,29 @@ public static class MovePlanner
             if (!double.IsFinite(circulariseDV))
                 return MoveOption.No(mode, "circularise Δv is not finite");
         }
+
+        // Already in the destination body's SOI (warp-to-Mars drop-in). Circularise leftover;
+        // do not Hohmann-match the planet's solar orbit and do not warp again.
+        if (parent == target)
+        {
+            if (!needsCircularise)
+                return MoveOption.No(mode, "already circular in destination SOI");
+            if (circulariseDV > thrust.DeltaV)
+                return MoveOption.No(mode, $"needs {circulariseDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
+            return MoveOption.Yes(mode, 0, circulariseDV,
+                message: $"Circularise at {NameOf(target, ship)}");
+        }
+
+        // Match the target's orbit around the shared drop-in parent (Phobos around Mars).
+        if (dropInParent == target)
+            return MoveOption.No(mode, "target body has a usable SOI; warp");
+        if (parent != dropInParent || targetOrbit.Parent != dropInParent)
+        {
+            return MoveOption.No(mode, "target is under a different SOI parent; no interplanetary transfer maths yet");
+        }
+
+        if (targetOrbit.Eccentricity > MaxEccentricityForTransfer)
+            return MoveOption.No(mode, "transfer maths assume circular orbits");
 
         // Hyperbolic SMA is negative; Hohmann/phasing run from the circular radius we'll have.
         double shipRadius = needsCircularise ? r : shipOrbit.SemiMajorAxis;
@@ -549,6 +579,14 @@ public static class MovePlanner
         if (warpDB.MaxSpeed <= 0)
             return MoveOption.No(mode, "warp drive produces no speed");
 
+        // Already in the well we would drop into (Earth→Mars leftover, or Phobos
+        // around Mars). Warping again is a short hop to the same offset and the
+        // leftover-v dump repeats forever. Circularise / match-orbit instead.
+        var parent = ship.GetSOIParentEntity();
+        var dropInParent = PredictDropInParent(target, PlannedWarpExitOffsetLength(target));
+        if (parent != null && (parent == target || parent == dropInParent))
+            return MoveOption.No(mode, "already in destination gravity well");
+
         // WarpMath.GetInterceptPosition only solves against a fixed point or a keplerian orbit.
         var moveType = target.GetDataBlob<PositionDB>().MoveType;
         if (moveType != PositionDB.MoveTypes.None && moveType != PositionDB.MoveTypes.Orbit)
@@ -582,6 +620,10 @@ public static class MovePlanner
     /// </summary>
     public static bool TryBuildMoveActions(Entity ship, Entity targetEntity,
                                            out List<EntityAction> actions, out string reason)
+        => TryBuildMoveActions(ship, targetEntity, out actions, out reason, ship.StarSysDateTime);
+
+    public static bool TryBuildMoveActions(Entity ship, Entity targetEntity,
+                                           out List<EntityAction> actions, out string reason, DateTime now)
     {
         actions = new List<EntityAction>();
         reason = string.Empty;
@@ -591,7 +633,7 @@ public static class MovePlanner
         if (!CanMove(ship, out reason))
             return false;
 
-        var moveOptions = Evaluate(ship, target, ship.StarSysDateTime);
+        var moveOptions = Evaluate(ship, target, now);
         var chosen = Select(moveOptions);
         if (!chosen.Feasible)
         {
@@ -603,11 +645,11 @@ public static class MovePlanner
             return true;
 
         if (chosen.Mode == MoveMode.Warp)
-            actions.AddRange(BuildWarpAndCircularise(ship, target, ship.StarSysDateTime));
+            actions.AddRange(BuildWarpAndCircularise(ship, target, now));
         else if (chosen.Manuvers.Length == 0)
-            actions.Add(BuildCirculariseFromCurrent(ship, ship.StarSysDateTime));
+            actions.Add(BuildCirculariseFromCurrent(ship, now));
         else
-            actions.AddRange(BuildBurns(ship, ship.StarSysDateTime, chosen.Manuvers));
+            actions.AddRange(BuildBurns(ship, now, chosen.Manuvers));
 
         return true;
     }

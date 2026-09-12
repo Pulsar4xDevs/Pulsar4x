@@ -16,7 +16,7 @@ namespace Pulsar4X.JumpPoints;
     
 public class ScanAnomalyPlan : IGoalPlanner
 {
-    public PlanResult Plan(Entity managedEntity, Goal goal)
+    public PlanResult Plan(Entity managedEntity, Goal goal, DateTime atDateTime)
     {
         bool isFleet = managedEntity.TryGetDataBlob<FleetDB>(out var fleetDB);
         bool isShip = managedEntity.TryGetDataBlob<ShipInfoDB>(out var shipDB);

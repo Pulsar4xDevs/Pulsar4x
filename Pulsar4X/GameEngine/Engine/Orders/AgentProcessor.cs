@@ -21,10 +21,9 @@ namespace GameEngine.Engine.Orders;
 
 interface IGoalPlanner
 {
-    GoalType Type { get; } 
-    
-    PlanResult Plan (Entity managedEntity, Goal goal);
-    
+    GoalType Type { get; }
+
+    PlanResult Plan(Entity managedEntity, Goal goal, DateTime atDateTime);
 }
 
 public readonly struct PlanResult
@@ -144,7 +143,7 @@ public class AgentProcessor : IInstanceProcessor
 
                 // Planners return data only; agent commits status and side effects.
                 // PlanResult.Continue → Status.Active; Done → Completed; Fail → Failed.
-                PlanResult plan = planner.Plan(managedEntity, goal);
+                PlanResult plan = planner.Plan(managedEntity, goal, atDateTime);
                 ApplyPlanMessage(goal, plan);
 
                 if (plan.Status is GoalStatus.Failed or GoalStatus.Completed)
@@ -161,11 +160,7 @@ public class AgentProcessor : IInstanceProcessor
                     AssignGoal(subordinate, subGoal, atDateTime + RelayDelay);
                 }
 
-                foreach (var action in plan.Actions)
-                {
-                    action.ParentGoalId = goal.Id;
-                    managedEntity.Manager.Game.OrderHandler.HandleOrder(action);
-                }
+                SubmitActions(managedEntity, goal, plan.Actions, atDateTime);
 
                 goal.Status = GoalStatus.Active;
                 ScheduleAgent(agentHost, atDateTime + RecheckInterval);
@@ -179,7 +174,7 @@ public class AgentProcessor : IInstanceProcessor
                     // Optional top-up: re-plan so free ships get remaining POIs (survey, etc.).
                     if (_planners.TryGetValue(goal.Type, out var planner))
                     {
-                        var plan = planner.Plan(managedEntity, goal);
+                        var plan = planner.Plan(managedEntity, goal, atDateTime);
                         ApplyPlanMessage(goal, plan);
                         if (plan.Status is GoalStatus.Failed or GoalStatus.Completed)
                         {
@@ -237,7 +232,7 @@ public class AgentProcessor : IInstanceProcessor
                                 break;
                             }
 
-                            var plan = planner.Plan(managedEntity, goal);
+                            var plan = planner.Plan(managedEntity, goal, atDateTime);
                             ApplyPlanMessage(goal, plan);
                             if (plan.Status is GoalStatus.Failed or GoalStatus.Completed)
                             {
@@ -253,11 +248,7 @@ public class AgentProcessor : IInstanceProcessor
                                     subGoal.ParentGoalId = goal.Id;
                                 AssignGoal(subordinate, subGoal, atDateTime + RelayDelay);
                             }
-                            foreach (var action in plan.Actions)
-                            {
-                                action.ParentGoalId = goal.Id;
-                                managedEntity.Manager.Game.OrderHandler.HandleOrder(action);
-                            }
+                            SubmitActions(managedEntity, goal, plan.Actions, atDateTime);
                             ScheduleAgent(agentHost, atDateTime + RecheckInterval);
                         }
                         else if (!queue.ActionsFor(goal).Any())
@@ -389,14 +380,40 @@ public class AgentProcessor : IInstanceProcessor
             goal.Message = plan.Message;
     }
 
+    /// <summary>
+    /// Enqueue via HandleOrder (same as the player command seam), then run the
+    /// queue at the plan instant. HandleOrder itself processes at
+    /// GameGlobalDateTime, which lags StarSysDateTime / the instance sub-step
+    /// during ProcessSystem — so a circularise planned at warp drop-in would
+    /// otherwise sit unexecuted until a later pulse, and the next Plan() would
+    /// see a leftover hyperbola and warp again.
+    /// </summary>
+    static void SubmitActions(Entity managedEntity, Goal goal, IReadOnlyList<EntityAction> actions, DateTime atDateTime)
+    {
+        if (actions == null || actions.Count == 0)
+            return;
+
+        foreach (var action in actions)
+        {
+            action.ParentGoalId = goal.Id;
+            managedEntity.Manager.Game.OrderHandler.HandleOrder(action);
+        }
+
+        managedEntity.Manager.Game.ProcessorManager
+            .GetInstanceProcessor(nameof(ActionQueueProcessor))
+            .ProcessEntity(managedEntity, atDateTime);
+    }
+
     internal static void ScheduleAgent(Entity unit, DateTime when)
     {
         unit.Manager.ManagerSubpulses.AddEntityInterupt(when, nameof(AgentProcessor), unit);
     }
     internal static void RunAgentNow(Entity unit)
+        => RunAgentNow(unit, unit.StarSysDateTime);
+
+    internal static void RunAgentNow(Entity unit, DateTime atDateTime)
     {
-        var timenow = unit.StarSysDateTime;
-        ProcessEntityStatic( unit, timenow);
+        ProcessEntityStatic(unit, atDateTime);
         MessagePublisher.Instance.Publish(
             Message.Create(
                 MessageTypes.OrdersChanged,
