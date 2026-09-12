@@ -31,4 +31,15 @@
       <HintPath>..\Pulsar4X.Client\Libs\SDL3-CS.dll</HintPath>
     </Reference>
   </ItemGroup>
+
+  <PropertyGroup>
+    <AppDataPath Condition="'$(OS)' == 'Windows_NT'">$(APPDATA)\Pulsar4X\Pulsar4X</AppDataPath>
+    <AppDataPath Condition="'$(OS)' != 'Windows_NT'">$(HOME)/.local/share/Pulsar4X/Pulsar4X</AppDataPath>
+  </PropertyGroup>
+  <Target Name="CopyJsonData" AfterTargets="Build">
+    <ItemGroup>
+      <JsonDataFiles Include="..\GameData\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(JsonDataFiles)" DestinationFolder="$(AppDataPath)\Mods\%(RecursiveDir)" />
+  </Target>
 </Project>

@@ -1,0 +1,34 @@
+[
+  {
+    "Type": "Armor",
+    "Payload": {
+      "UniqueID": "stainless-steel-armor",
+      "ResourceID": "stainless-steel",
+      "Density": "7900"
+    }
+  },
+  {
+    "Type": "Armor",
+    "Payload": {
+      "UniqueID": "plastic-armor",
+      "ResourceID": "plastic",
+      "Density": "1175"
+    }
+  },
+  {
+    "Type": "Armor",
+    "Payload": {
+      "UniqueID": "aluminium-armor",
+      "ResourceID": "aluminium",
+      "Density": "2700"
+    }
+  },
+  {
+    "Type": "Armor",
+    "Payload": {
+      "UniqueID": "titanium-armor",
+      "ResourceID": "titanium",
+      "Density": "4540"
+    }
+  }
+]
