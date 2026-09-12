@@ -25,11 +25,6 @@ public enum MoveMode
     Warp,
 }
 
-/// <summary>
-/// This whole thing was written by AI, and needs checking/rewrite.
-/// I'm suspicious for example that the BuildBurns is taking DeltaV instead of KeplerElements.
-/// </summary>
-
 public class MoveToPlan : IGoalPlanner
 {
     public GoalType Type => GoalType.MoveTo;
@@ -470,16 +465,38 @@ public static class MovePlanner
                 return MoveOption.No(mode, "circularise Δv is not finite");
         }
 
-        // Already in the destination body's SOI (warp-to-Mars drop-in). Circularise leftover;
-        // do not Hohmann-match the planet's solar orbit and do not warp again.
+        // Already in the destination body's SOI (warp-to-Mars drop-in). Circularise leftover,
+        // then Hohmann to low orbit — do not match the planet's solar orbit and do not warp again.
         if (parent == target)
         {
-            if (!needsCircularise)
-                return MoveOption.No(mode, "already circular in destination SOI");
-            if (circulariseDV > thrust.DeltaV)
-                return MoveOption.No(mode, $"needs {circulariseDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
-            return MoveOption.Yes(mode, 0, circulariseDV,
-                message: $"Circularise at {NameOf(target, ship)}");
+            if (needsCircularise)
+            {
+                if (circulariseDV > thrust.DeltaV)
+                    return MoveOption.No(mode, $"needs {circulariseDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
+                return MoveOption.Yes(mode, 0, circulariseDV,
+                    message: $"Circularise at {NameOf(target, ship)}");
+            }
+
+            double parkingR = OrbitMath.LowOrbitRadius(target);
+            if (!ChangeOrbitalAltitudeAction.TryPlanBurns(ship, parkingR, now, out var parkingBurns, out var parkingReason))
+                return MoveOption.No(mode, parkingReason);
+            if (parkingBurns.Count == 0)
+                return MoveOption.No(mode, "already at parking altitude");
+
+            double parkDv = 0;
+            double parkEta = 0;
+            foreach (var b in parkingBurns)
+            {
+                var v0 = OrbitMath.GetStateVectors(b.start, b.at).velocity;
+                var v1 = OrbitMath.GetStateVectors(b.end, b.at).velocity;
+                parkDv += ((Vector3)v1 - (Vector3)v0).Length();
+                parkEta = Math.Max(parkEta, (b.at - now).TotalSeconds);
+            }
+            if (parkDv > thrust.DeltaV)
+                return MoveOption.No(mode, $"needs {parkDv:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
+            return MoveOption.Yes(mode, parkEta, parkDv,
+                message: $"Change altitude at {NameOf(target, ship)}, {FormatArrival(now.AddSeconds(parkEta))}",
+                manuvers: new (Vector3, double)[parkingBurns.Count]);
         }
 
         // Match the target's orbit around the shared drop-in parent (Phobos around Mars).
@@ -647,9 +664,11 @@ public static class MovePlanner
         if (chosen.Mode == MoveMode.Warp)
             actions.AddRange(BuildWarpAndCircularise(ship, target, now));
         else if (chosen.Manuvers.Length == 0)
-            actions.Add(BuildCirculariseFromCurrent(ship, now));
+            actions.Add(CirculariseAction.CreateCommand(ship, now));
+        else if (ship.GetSOIParentEntity() == target)
+            actions.Add(ChangeOrbitalAltitudeAction.CreateCommand(ship, OrbitMath.LowOrbitRadius(target), now));
         else
-            actions.AddRange(BuildBurns(ship, now, chosen.Manuvers));
+            actions.Add(MatchOrbitAction.CreateCommand(ship, target, now));
 
         return true;
     }
@@ -671,55 +690,8 @@ public static class MovePlanner
         
         
         actions.Add(WarpMoveAction.CreateWarpOnly(orderEntity, targetEntity, now, endWarpPos));
-        
-        switch (targetEntity.GetDataBlob<PositionDB>().MoveType) //if the targetEntity's movetype is this:
-        {
-            case PositionDB.MoveTypes.None: //this means it's a grav anomaly, jump point
-            {
-                break;
-            }
-            case PositionDB.MoveTypes.Orbit:
-            {
-                (Vector3 pos, DateTime eti) targetIntercept = WarpMath.GetInterceptPosition(orderEntity, targetEntity, now, endWarpPos);
-                var parent = PredictDropInParent(targetEntity, endWarpPos.Length());
-                Vector3 rParent;
-                if (parent == targetEntity)
-                {
-                    rParent = endWarpPos;
-                }
-                else
-                {
-                    var parentAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(parent, targetIntercept.eti);
-                    rParent = targetIntercept.pos - parentAbs;
-                }
-
-                // Same leftover as WarpMovingDB.SavedNewtonionVector / SetOrbitHereSimpleNewt.
-                var leftoverV = departureState.vel;
-                var circularise = TryBuildCircularise(orderEntity, parent, rParent, leftoverV, targetIntercept.eti);
-                if (circularise != null)
-                    actions.Add(circularise);
-                break;
-            }
-            case PositionDB.MoveTypes.NewtonSimple:
-            case PositionDB.MoveTypes.NewtonComplex:
-                // A targetEntity under thrust has no closed-form future position, so WarpMath can't
-                // solve the intercept. MovePlanner rejects these before we get here; if we're
-                // reached anyway it's a bug in the caller, not a case to guess at.
-                throw new NotImplementedException(
-                    $"No warp intercept solution against a {targetEntity.GetDataBlob<PositionDB>().MoveType} targetEntity.");
-
-            case PositionDB.MoveTypes.Warp:
-                // MoveTargeting.TryResolve chases warping targets to their destination, so a
-                // warping targetEntity should be impossible by this point.
-                throw new InvalidOperationException("Warp targetEntity was not resolved to its destination.");
-
-            default:
-                throw new NotImplementedException();
-        }
-    
-        
-        
-        
+        if (targetEntity.GetDataBlob<PositionDB>().MoveType == PositionDB.MoveTypes.Orbit)
+            actions.Add(CirculariseAction.CreateCommand(orderEntity));
         return actions;
     }
 
@@ -779,74 +751,6 @@ public static class MovePlanner
         var raw = MoveMath.GetRelativeFutureState(ship, at);
         state = (raw.pos, raw.Velocity);
         return double.IsFinite(state.pos.X) && double.IsFinite(state.vel.X);
-    }
-
-    static EntityAction BuildCirculariseFromCurrent(Entity ship, DateTime now)
-    {
-        var parent = ship.GetSOIParentEntity();
-        if (parent == null)
-            throw new InvalidOperationException("Circularise requires an SOI parent.");
-        if (!TryCurrentRelativeState(ship, now, out var state))
-            throw new InvalidOperationException("Circularise requires a state vector.");
-        var action = TryBuildCircularise(ship, parent, state.pos, state.vel, now);
-        if (action == null)
-            throw new InvalidOperationException("Circularise Kepler was not usable.");
-        return action;
-    }
-
-    static NewtonSimpleAction? TryBuildCircularise(Entity ship, Entity parent, Vector3 rParent, Vector3 vel, DateTime at)
-    {
-        double r = rParent.Length();
-        if (!double.IsFinite(r) || r < 1)
-            return null;
-
-        double sgp = OrbitMath.SGP(parent, ship);
-        var startKE = OrbitMath.KeplerFromPositionAndVelocity(sgp, rParent, vel, at);
-        var targetKE = OrbitMath.KeplerCircularFromPosition(sgp, rParent, at);
-        var rAtEpoch = OrbitMath.GetStateVectors(startKE, at).position;
-        if (!double.IsFinite(rAtEpoch.X) || rAtEpoch.Length() > 1e14)
-            return null;
-
-        return NewtonSimpleAction.CreateCommand(ship.FactionOwnerID, ship, at, startKE, targetKE);
-    }
-
-    /// <summary>
-    /// Prograde-frame burns become NewtonSimpleActions: each carries the orbit it starts from and
-    /// the orbit it should end in, and NewtonSimpleProcessor charges the fuel for the difference.
-    ///
-    /// We use the Simple path rather than NewtonThrustAction deliberately — NewtonThrustAction
-    /// goes through NewtonMoveDB / the NewtonComplex integrator, which is the older
-    /// full-thrust-simulation code and is not currently trusted.
-    /// </summary>
-    static List<EntityAction> BuildBurns(Entity ship, DateTime now, (Vector3 deltaV, double timeInSeconds)[] manuvers)
-    {
-        var actions = new List<EntityAction>();
-        if (manuvers.Length == 0) return actions;
-
-        var orbit = ship.GetDataBlob<OrbitDB>();
-        double sgp = orbit.GravitationalParameter_m3S2;
-
-        // Each burn starts from the orbit the previous burn put us in.
-        KeplerElements startKE = orbit.GetElements();
-
-        foreach (var manuver in manuvers)
-        {
-            DateTime nodeTime = now + TimeSpan.FromSeconds(manuver.timeInSeconds);
-
-            var state = OrbitalMath.GetStateVectors(startKE, nodeTime);
-            var position = state.position;
-            var velocity = (Vector3)state.velocity;
-
-            // Manoeuvres come out of the orbital maths in the prograde/radial/normal frame.
-            var deltaV = OrbitalMath.ProgradeToStateVector(sgp, manuver.deltaV, position, velocity);
-            var endKE = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, velocity + deltaV, nodeTime);
-
-            actions.Add(NewtonSimpleAction.CreateCommand(ship.FactionOwnerID, ship, nodeTime, startKE, endKE));
-
-            startKE = endKE;
-        }
-
-        return actions;
     }
 
     // ---------------------------------------------------------------------

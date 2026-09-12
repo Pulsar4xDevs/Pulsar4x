@@ -422,6 +422,20 @@ namespace Pulsar4X.Movement
         {
             TestDropIn?.Invoke(entity, atDateTime);
 
+            var (orbitalParent, leftover) = LeftoverKeplerAtExit(entity, moveDB, atDateTime);
+            double combinedMass = entity.GetDataBlob<MassVolumeDB>().MassTotal
+                                  + orbitalParent.GetDataBlob<MassVolumeDB>().MassTotal;
+            entity.SetDataBlob(OrbitDB.FromKeplerElements(orbitalParent, combinedMass, leftover, atDateTime));
+            OrbitProcessor.ProcessEntity(entity, atDateTime);
+        }
+
+        /// <summary>
+        /// Leftover r,v around the SOI the exit is actually in. Used by drop-in and by
+        /// WarpMoveAction when older orders enqueue a follow-on circularise.
+        /// </summary>
+        internal static (Entity parent, KeplerElements leftover) LeftoverKeplerAtExit(
+            Entity entity, WarpMovingDB moveDB, DateTime atDateTime)
+        {
             if (moveDB.TargetEntity == null)
                 throw new NullReferenceException("moveDB.TargetEntity cannot be null");
 
@@ -442,22 +456,12 @@ namespace Pulsar4X.Movement
             var rParent = exitAbs - parentAbs;
             double combinedMass = entity.GetDataBlob<MassVolumeDB>().MassTotal
                                   + orbitalParent.GetDataBlob<MassVolumeDB>().MassTotal;
-            var currentOrbit = OrbitMath.KeplerFromPositionAndVelocity(
+            var leftover = OrbitMath.KeplerFromPositionAndVelocity(
                 GeneralMath.StandardGravitationalParameter(combinedMass),
                 rParent,
                 moveDB.SavedNewtonionVector,
                 atDateTime);
-
-            if (moveDB.EndpointTargetOrbit.StandardGravParameter == 0)
-            {
-                entity.SetDataBlob(OrbitDB.FromKeplerElements(orbitalParent, combinedMass, currentOrbit, atDateTime));
-                OrbitProcessor.ProcessEntity(entity, atDateTime);
-                entity.Manager.Game.TimePulse.PauseTime();
-                return;
-            }
-
-            entity.SetDataBlob(new NewtonSimpleMoveDB(orbitalParent, currentOrbit, moveDB.EndpointTargetOrbit, atDateTime));
-            NewtonSimpleProcessor.ProcessEntity(entity, atDateTime);
+            return (orbitalParent, leftover);
         }
 
         /// <summary>

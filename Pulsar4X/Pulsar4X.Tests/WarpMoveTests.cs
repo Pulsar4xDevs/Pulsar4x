@@ -513,8 +513,9 @@ namespace Pulsar4X.Tests
                     "must not have queued another warp. " + DescribeMove(ship, goal));
 
                 bool circulariseStarted = ship.HasDataBlob<NewtonSimpleMoveDB>()
-                    || queue.ActionList.Any(a => a is NewtonSimpleAction
-                                                 && a.Status is ActionStatus.Running or ActionStatus.Succeeded);
+                    || queue.ActionList.Any(a =>
+                        (a is CirculariseAction or NewtonSimpleAction)
+                        && a.Status is ActionStatus.Running or ActionStatus.Succeeded);
                 bool alreadyParked = ship.TryGetDataBlob<OrbitDB>(out var afterOrbit)
                     && afterOrbit.Eccentricity < 0.05
                     && afterOrbit.Parent == expectedParent;
@@ -569,14 +570,11 @@ namespace Pulsar4X.Tests
 
             Assert.IsTrue(MovePlanner.TryBuildMoveActions(ship, phobos, out var actions, out var reason),
                 reason);
-            Assert.GreaterOrEqual(actions.Count, 2, "MoveTo warp plan is transit then a Mars-frame follow-on");
+            Assert.GreaterOrEqual(actions.Count, 2, "MoveTo warp plan is transit then circularise");
             Assert.IsInstanceOf<WarpMoveAction>(actions[0]);
-            Assert.IsInstanceOf<NewtonSimpleAction>(actions[1]);
-            var newt = (NewtonSimpleAction)actions[1];
+            Assert.IsInstanceOf<CirculariseAction>(actions[1]);
 
             var queue = ship.GetDataBlob<ActionQueueDB>();
-            // Warp only on the queue: NewtonSimple.Execute calls NewtonMove which NREs on
-            // empty cargo. The Kepler elements below are still the live planner's.
             queue.Enqueue(actions[0]);
 
             var dropIns = new List<(int entityId, DateTime at)>();
@@ -592,22 +590,23 @@ namespace Pulsar4X.Tests
 
                 var parent = ship.GetSOIParentEntity();
                 Assert.AreSame(mars, parent, "drop-in parents to Mars");
+                Assert.IsTrue(CirculariseAction.TryCompute(ship, eti, out var circParent, out var startKE, out var targetKE),
+                    "circularise reads leftover state after drop-in");
+                Assert.AreSame(mars, circParent);
                 var marsSgp = GeneralMath.StandardGravitationalParameter(
                     mars.GetDataBlob<MassVolumeDB>().MassTotal);
-                double startRatio = newt.StartKE.StandardGravParameter / marsSgp;
-                double targetRatio = newt.TargetKE.StandardGravParameter / marsSgp;
-                Assert.Greater(startRatio, 0.9, "preview StartKE is Mars-µ, not Phobos-µ");
-                Assert.Less(startRatio, 1.1, "preview StartKE is Mars-µ, not Phobos-µ");
-                Assert.Greater(targetRatio, 0.9, "preview TargetKE is Mars-µ, not Phobos-µ");
-                Assert.Less(targetRatio, 1.1, "preview TargetKE is Mars-µ, not Phobos-µ");
+                Assert.Greater(startKE.StandardGravParameter / marsSgp, 0.9, "leftover µ is Mars, not Phobos");
+                Assert.Less(startKE.StandardGravParameter / marsSgp, 1.1);
+                Assert.Greater(targetKE.StandardGravParameter / marsSgp, 0.9);
+                Assert.Less(targetKE.StandardGravParameter / marsSgp, 1.1);
 
-                var r = OrbitMath.GetStateVectors(newt.StartKE, newt.ActionOnDate).position;
+                var r = OrbitMath.GetStateVectors(startKE, eti).position;
                 Assert.Greater(r.Length(), 1e6,
-                    "StartKE r is Mars-relative (Phobos SMA scale), not Phobos low-orbit ~13 km");
-                Assert.Less(r.Length(), 5e7, "StartKE r is still in the Mars system");
+                    "leftover r is Mars-relative (Phobos SMA scale), not Phobos low-orbit ~13 km");
+                Assert.Less(r.Length(), 5e7, "leftover r is still in the Mars system");
 
                 Assert.DoesNotThrow(
-                    () => new NewtonSimpleMoveDB(parent, newt.StartKE, newt.TargetKE, newt.ActionOnDate));
+                    () => new NewtonSimpleMoveDB(parent, startKE, targetKE, eti));
             }
             finally
             {
@@ -637,18 +636,18 @@ namespace Pulsar4X.Tests
             Assert.IsTrue(MovePlanner.TryBuildMoveActions(ship, phobos, out var actions, out var reason),
                 reason);
             Assert.AreEqual(1, actions.Count, "in Phobos's orbit with leftover e: circularise to match, do not warp");
-            Assert.IsInstanceOf<NewtonSimpleAction>(actions[0]);
-            var newt = (NewtonSimpleAction)actions[0];
-
+            Assert.IsInstanceOf<CirculariseAction>(actions[0]);
+            Assert.IsTrue(CirculariseAction.TryCompute(ship, epoch, out var parent, out var startKE, out var targetKE));
+            Assert.AreSame(mars, parent);
             var marsSgp = GeneralMath.StandardGravitationalParameter(
                 mars.GetDataBlob<MassVolumeDB>().MassTotal);
-            Assert.Greater(newt.StartKE.StandardGravParameter / marsSgp, 0.9);
-            Assert.Less(newt.StartKE.StandardGravParameter / marsSgp, 1.1);
-            Assert.Less(newt.TargetKE.Eccentricity, 0.05, "match is a circular Mars orbit");
-            Assert.AreEqual(r.Length(), newt.TargetKE.SemiMajorAxis, r.Length() * 0.01,
+            Assert.Greater(startKE.StandardGravParameter / marsSgp, 0.9);
+            Assert.Less(startKE.StandardGravParameter / marsSgp, 1.1);
+            Assert.Less(targetKE.Eccentricity, 0.05, "match is a circular Mars orbit");
+            Assert.AreEqual(r.Length(), targetKE.SemiMajorAxis, r.Length() * 0.01,
                 "circularise at current r, which is already Phobos SMA");
             Assert.DoesNotThrow(
-                () => new NewtonSimpleMoveDB(mars, newt.StartKE, newt.TargetKE, newt.ActionOnDate));
+                () => new NewtonSimpleMoveDB(mars, startKE, targetKE, epoch));
         }
 
         [Test]
@@ -692,7 +691,44 @@ namespace Pulsar4X.Tests
                 reason);
             Assert.IsNotEmpty(actions, "same orbit, wrong place: phase, do not call it arrived");
             Assert.IsFalse(actions.Exists(a => a is WarpMoveAction), "do not warp; match Phobos's orbit");
-            Assert.IsTrue(actions.TrueForAll(a => a is NewtonSimpleAction));
+            Assert.AreEqual(1, actions.Count);
+            Assert.IsInstanceOf<MatchOrbitAction>(actions[0]);
+            Assert.IsTrue(MatchOrbitAction.TryPlanBurns(ship, phobos, epoch, out var burns, out var planReason),
+                planReason);
+            Assert.GreaterOrEqual(burns.Count, 1, "phasing produces at least one burn");
+        }
+
+        [Test]
+        public void MoveToPlan_CircularHighAroundMars_ChangesAltitudeToLowOrbit()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
+
+            var lor = OrbitMath.LowOrbitRadius(mars);
+            var high = lor * 5;
+            var marsAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(mars, epoch);
+            var ship = AddPhobosWarpShip(mars, marsAbs + new Vector3(high, 0, 0));
+            AttachThrust(ship);
+            ship.SetDataBlob(OrbitDB.FromPosition(mars, ship, epoch));
+            OrbitProcessor.ProcessEntity(ship, epoch);
+
+            Assert.Greater(ship.GetDataBlob<OrbitDB>().SemiMajorAxis, lor * 3,
+                "precondition: high enough that AlreadyThere does not fire");
+
+            Assert.IsTrue(MovePlanner.TryBuildMoveActions(ship, mars, out var actions, out var reason),
+                reason);
+            Assert.AreEqual(1, actions.Count, reason);
+            Assert.IsInstanceOf<ChangeOrbitalAltitudeAction>(actions[0], reason);
+            var alt = (ChangeOrbitalAltitudeAction)actions[0];
+            Assert.AreEqual(lor, alt.TargetRadius_m, lor * 0.01);
+
+            Assert.IsTrue(ChangeOrbitalAltitudeAction.TryPlanBurns(ship, lor, epoch, out var burns, out var planReason),
+                planReason);
+            Assert.AreEqual(2, burns.Count, "Hohmann is two burns");
+            var end = burns[burns.Count - 1].end;
+            Assert.Less(end.Eccentricity, 0.05, "end orbit is circular");
+            Assert.AreEqual(lor, end.SemiMajorAxis, lor * 0.05);
         }
 
         #endregion

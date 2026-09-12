@@ -286,12 +286,16 @@ namespace Pulsar4X.Movement
                 WarpMoveProcessor.TryStartWarp(EntityCommanding, _warpingDB, atDateTime);
                 Status = ActionStatus.Running;
                 IsRunning = true;
-                //debug code:
-                double distance = (_warpingDB.EntryPointAbsolute - _warpingDB.ExitPointAbsolute).Length();
-                double time = distance / _entityCommanding.GetDataBlob<WarpAbilityDB>().MaxSpeed;
-                //Assert.AreEqual((_warpingDB.PredictedExitTime - _warpingDB.EntryDateTime).TotalSeconds, time, 1.0e-10);
-                
 
+                // CreateCommand / CreateCommandEZ used to circularise inside drop-in.
+                // Queue a CirculariseAction so leftover r,v is read at exit, not predicted here.
+                // CreateWarpOnly leaves SGP=0; MoveTo queues CirculariseAction itself.
+                if (EndpointTargetOrbit.StandardGravParameter != 0)
+                {
+                    var circ = CirculariseAction.CreateCommand(_entityCommanding);
+                    circ.ParentGoalId = ParentGoalId;
+                    _entityCommanding.Manager.Game.OrderHandler.HandleOrder(circ);
+                }
             }
         }
 
