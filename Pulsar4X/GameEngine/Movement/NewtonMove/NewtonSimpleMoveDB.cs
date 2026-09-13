@@ -14,12 +14,19 @@ namespace Pulsar4X.Movement
         [JsonProperty]
         public DateTime ActionOnDateTime { get; internal set; }
         [JsonProperty]
+        public KeplerElements StartTrajectory { get; internal set; }
+        [JsonProperty]
         public KeplerElements CurrentTrajectory { get; internal set; }
         [JsonProperty]
         public KeplerElements TargetTrajectory { get; internal set; }
         [JsonProperty]
-
         public bool IsComplete = false;
+        [JsonProperty]
+        public bool IsFailed = false;
+        [JsonProperty]
+        internal double FuelTotal = -1;
+        [JsonProperty]
+        internal double FuelBurned;
         [JsonProperty]
         public Entity SOIParent { get; internal set; }
         [JsonProperty]
@@ -32,6 +39,7 @@ namespace Pulsar4X.Movement
         {
             LastProcessDateTime = onDateTime;
             ActionOnDateTime = onDateTime;
+            StartTrajectory = start;
             CurrentTrajectory = start;
             TargetTrajectory = end;
             SOIParent = soiParent;

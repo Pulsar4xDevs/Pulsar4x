@@ -122,7 +122,12 @@ public class NewtonSimpleAction : EntityAction
 
     internal override bool IsFinished()
     {
-        if (IsRunning && _db.IsComplete)
+        if (IsRunning && _db != null && _db.IsFailed)
+        {
+            Status = ActionStatus.Failed;
+            return _isFinished = true;
+        }
+        if (IsRunning && _db != null && _db.IsComplete)
             _isFinished = true;
         else
             _isFinished = false;

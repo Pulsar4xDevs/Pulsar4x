@@ -1074,7 +1074,7 @@ namespace Pulsar4X.Tests
             {
                 ThrustInNewtons = 1e9,
                 ExhaustVelocity = 10_000,
-                FuelBurnRate = 1
+                FuelBurnRate = 1e9 / 10_000
             };
             double wet = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             double dry = wet / Math.Exp(deltaVBudget / thrust.ExhaustVelocity);

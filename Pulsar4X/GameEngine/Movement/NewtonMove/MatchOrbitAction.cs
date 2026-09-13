@@ -254,6 +254,11 @@ public class MatchOrbitAction : EntityAction
     {
         if (_isFinished)
             return true;
+        if (IsRunning && _db != null && _db.IsFailed)
+        {
+            Status = ActionStatus.Failed;
+            return _isFinished = true;
+        }
         if (IsRunning && _next >= _burns.Count && (_db == null || _db.IsComplete))
             return _isFinished = true;
         return false;

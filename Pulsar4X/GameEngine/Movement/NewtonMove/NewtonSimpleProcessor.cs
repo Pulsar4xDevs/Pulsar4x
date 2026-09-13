@@ -22,17 +22,16 @@ public class NewtonSimpleProcessor : IHotloopProcessor
 
     public void ProcessEntity(Entity entity, int deltaSeconds)
     {
-        var nmdb = entity.GetDataBlob<NewtonSimpleMoveDB>();
         DateTime todateTime = entity.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
-        NewtonMove(nmdb, todateTime);
-        MoveStateProcessor.ProcessForType(nmdb, todateTime);
+        ProcessEntity(entity, todateTime);
     }
 
     public static void ProcessEntity(Entity entity, DateTime toDateTime)
     {
-        var db = entity.GetDataBlob<NewtonSimpleMoveDB>();
+        if (!entity.TryGetDataBlob<NewtonSimpleMoveDB>(out var db))
+            return;
         NewtonMove(db, toDateTime);
-        MoveStateProcessor.ProcessForType(db, toDateTime);
+        RefreshMoveState(entity, db, toDateTime);
     }
 
     public int ProcessManager(EntityManager manager, int deltaSeconds)
@@ -42,76 +41,131 @@ public class NewtonSimpleProcessor : IHotloopProcessor
         foreach (var db in nmdb)
         {
             NewtonMove(db, toDate);
+            if (db.OwningEntity != null)
+                RefreshMoveState(db.OwningEntity, db, toDate);
         }
-        MoveStateProcessor.ProcessForType(nmdb, toDate);
         return nmdb.Count;
     }
 
-
-    public static void NewtonMove(NewtonSimpleMoveDB newtonSimplelMoveDB, DateTime toDateTime)
+    static void RefreshMoveState(Entity entity, NewtonSimpleMoveDB db, DateTime at)
     {
-        Entity entity = newtonSimplelMoveDB.OwningEntity;
+        if (entity.TryGetDataBlob<NewtonSimpleMoveDB>(out var still) && !still.IsComplete && !still.IsFailed)
+            MoveStateProcessor.ProcessForType(still, at);
+        else if (entity.TryGetDataBlob<OrbitDB>(out var orbit))
+            MoveStateProcessor.ProcessForType(orbit, at);
+    }
+
+
+    public static void NewtonMove(NewtonSimpleMoveDB db, DateTime toDateTime)
+    {
+        if (db.IsComplete || db.IsFailed)
+            return;
+
+        Entity entity = db.OwningEntity;
         var thrustdb = entity.GetDataBlob<NewtonThrustAbilityDB>();
-        var posdb = entity.GetDataBlob<PositionDB>();
         var massdb = entity.GetDataBlob<MassVolumeDB>();
-
-
-        //update deltav
         CargoDefinitionsLibrary cargoLib = entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
-        var fuelTypeID = thrustdb.FuelType;
-        var fuelType = cargoLib.GetAny(fuelTypeID);
+        var fuelType = cargoLib.GetAny(thrustdb.FuelType);
         var storage = entity.GetDataBlob<CargoStorageDB>();
-        var fuelMass = storage.GetMassStored(fuelType, false);
+        double fuelOnBoard = storage.GetMassStored(fuelType, false);
+        double mass = massdb.MassTotal;
+        double ve = thrustdb.ExhaustVelocity;
+        double sgp = GeneralMath.StandardGravitationalParameter(mass + db.ParentMass);
 
-        var currentOrbit = newtonSimplelMoveDB.CurrentTrajectory;
-        var targetOrbit = newtonSimplelMoveDB.TargetTrajectory;
-
-        var thrust = thrustdb.ThrustInNewtons;
-        var fuelRate = thrustdb.FuelBurnRate;
-
-        var currentState = OrbitalMath.GetStateVectors(currentOrbit, toDateTime);
-        var targetState = OrbitalMath.GetStateVectors(targetOrbit, toDateTime);
-
-        var moveVector = targetState.velocity - currentState.velocity;
-        var moveDeltaV = moveVector.Length();
-
-        //if ship has enough fuel to make the manuver:
-        if (thrustdb.DeltaV > moveDeltaV)
+        if (db.FuelTotal < 0)
         {
-            //TODO: handle longer "burns" over several turns.
+            var startState = OrbitalMath.GetStateVectors(db.StartTrajectory, db.ActionOnDateTime);
+            var targetState = OrbitalMath.GetStateVectors(db.TargetTrajectory, db.ActionOnDateTime);
+            double dvTotal = ((Vector3)targetState.velocity - (Vector3)startState.velocity).Length();
+            if (!double.IsFinite(dvTotal) || dvTotal < 0.01)
+            {
+                Complete(db, entity, mass, toDateTime);
+                return;
+            }
 
-            //set entity to new orbit.
-
-            OrbitDB newOrbit = OrbitDB.FromKeplerElements(newtonSimplelMoveDB.SOIParent, massdb.MassTotal, targetOrbit, toDateTime);
-            entity.SetDataBlob(newOrbit);
-
-            //remove fuel
-            double fuelBurned = OrbitMath.TsiolkovskyFuelUse(massdb.MassTotal, thrustdb.ExhaustVelocity, moveDeltaV);
-            CargoTransferProcessor.AddRemoveCargoMass(entity, fuelType, -fuelBurned);
-
-            //tag as complete
-            newtonSimplelMoveDB.IsComplete = true;
+            db.FuelTotal = OrbitMath.TsiolkovskyFuelUse(mass, ve, dvTotal);
         }
+
+        double fuelFromTank = thrustdb.DeltaV > 0
+            ? OrbitMath.TsiolkovskyFuelUse(mass, ve, thrustdb.DeltaV)
+            : 0;
+        double fuelAvailable = Math.Min(fuelOnBoard, fuelFromTank);
+        double fuelRemaining = db.FuelTotal - db.FuelBurned;
+        if (fuelAvailable + 1e-6 < fuelRemaining)
+        {
+            Fail(db, entity, mass, toDateTime);
+            return;
+        }
+
+        double dt = (toDateTime - db.LastProcessDateTime).TotalSeconds;
+        if (dt < 0)
+            dt = 0;
+        double fuelThisTick = Math.Min(thrustdb.FuelBurnRate * dt, Math.Min(fuelAvailable, fuelRemaining));
+        if (fuelThisTick <= 0)
+        {
+            db.LastProcessDateTime = toDateTime;
+            return;
+        }
+
+        db.FuelBurned += fuelThisTick;
+        CargoTransferProcessor.AddRemoveCargoMass(entity, fuelType, -fuelThisTick);
+        db.LastProcessDateTime = toDateTime;
+
+        double f = db.FuelBurned / db.FuelTotal;
+        if (f >= 1 - 1e-6)
+        {
+            Complete(db, entity, mass, toDateTime);
+            return;
+        }
+
+        db.CurrentTrajectory = InterpolateOrbit(db.StartTrajectory, db.TargetTrajectory, toDateTime, f, sgp);
+    }
+
+    static void Complete(NewtonSimpleMoveDB db, Entity entity, double mass, DateTime at)
+    {
+        entity.SetDataBlob(OrbitDB.FromKeplerElements(db.SOIParent, mass, db.TargetTrajectory, at));
+        db.CurrentTrajectory = db.TargetTrajectory;
+        db.IsComplete = true;
+        db.LastProcessDateTime = at;
+    }
+
+    static void Fail(NewtonSimpleMoveDB db, Entity entity, double mass, DateTime at)
+    {
+        entity.SetDataBlob(OrbitDB.FromKeplerElements(db.SOIParent, mass, db.CurrentTrajectory, at));
+        db.IsFailed = true;
+        db.LastProcessDateTime = at;
+    }
+
+    static KeplerElements InterpolateOrbit(
+        KeplerElements start, KeplerElements target, DateTime at, double f, double sgp)
+    {
+        var a = OrbitalMath.GetStateVectors(start, at);
+        var b = OrbitalMath.GetStateVectors(target, at);
+        var r = a.position + f * (b.position - a.position);
+        var v = (Vector3)a.velocity + f * ((Vector3)b.velocity - (Vector3)a.velocity);
+        return OrbitMath.KeplerFromPositionAndVelocity(sgp, r, v, at);
     }
 
     public static (Vector3 pos, Vector3 vel) GetRelativeState(Entity entity, DateTime atDateTime)
     {
-        NewtonSimpleMoveDB db = entity.GetDataBlob<NewtonSimpleMoveDB>();
+        if (!entity.TryGetDataBlob<NewtonSimpleMoveDB>(out var db))
+        {
+            if (entity.TryGetDataBlob<OrbitDB>(out var orbit))
+            {
+                var os = OrbitMath.GetStateVectors(orbit.GetElements(), atDateTime);
+                return (os.position, (Vector3)os.velocity);
+            }
+            return (Vector3.Zero, Vector3.Zero);
+        }
         var state = OrbitMath.GetStateVectors(db.CurrentTrajectory, atDateTime);
         return (state.position, (Vector3)state.velocity);
     }
     public static (Vector3 pos, Vector3 vel) GetAbsoluteState(Entity entity, DateTime atDateTime)
     {
-        NewtonSimpleMoveDB db = entity.GetDataBlob<NewtonSimpleMoveDB>();
-        var posdb = entity.GetDataBlob<PositionDB>();
-
-        var state = OrbitMath.GetStateVectors(db.CurrentTrajectory, atDateTime);
-        var pos = state.position;
-        var vel = (Vector3)state.velocity;
-
-        if (posdb.Parent != null)
+        var (pos, vel) = GetRelativeState(entity, atDateTime);
+        if (entity.TryGetDataBlob<PositionDB>(out var posdb) && posdb.Parent != null)
         {
-            pos += MoveMath.GetAbsoluteFuturePosition(posdb.Parent,atDateTime);
+            pos += MoveMath.GetAbsoluteFuturePosition(posdb.Parent, atDateTime);
             vel += MoveMath.GetAbsoluteFutureVelocity(posdb.Parent, atDateTime);
         }
         return (pos, vel);
