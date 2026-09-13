@@ -403,20 +403,22 @@ public static class MovePlanner
                 : MoveOption.No(MoveMode.AlreadyThere, "not there yet");
         }
 
-        // Cannot enter the target's SOI (Phobos): arrived when we match its orbit around
-        // the parent and are alongside it, not when we merely parked circular at leftover r.
+        // Cannot enter the target's SOI (Phobos, ship, station). Warp drop-in is
+        // dest+offset, so we are already next to them; leftover circular SMA can
+        // differ from their a by a*e. Don't Hohmann to SMA from 13 km away.
         if (!target.TryGetDataBlob<OrbitDB>(out var targetOrbit) || targetOrbit.Parent != parent)
             return MoveOption.No(MoveMode.AlreadyThere, "target orbit is not around this parent");
 
         double targetRadius = targetOrbit.SemiMajorAxis;
+        double along = AlongTrackArrivedSeparation(target, targetRadius);
+        if (separation <= along)
+            return MoveOption.Yes(MoveMode.AlreadyThere, 0, message: $"Matching {NameOf(target, ship)}'s orbit");
+
         if (!IsCoOrbital(shipRadius, targetRadius, target)
             && !IsCoOrbital(posRel.Length(), targetRadius, target))
             return MoveOption.No(MoveMode.AlreadyThere, "not in the target's orbit");
 
-        double along = AlongTrackArrivedSeparation(target, targetRadius);
-        return separation <= along
-            ? MoveOption.Yes(MoveMode.AlreadyThere, 0, message: $"Matching {NameOf(target, ship)}'s orbit")
-            : MoveOption.No(MoveMode.AlreadyThere, "in the orbit but not with the target yet");
+        return MoveOption.No(MoveMode.AlreadyThere, "in the orbit but not with the target yet");
     }
 
     /// <summary>
@@ -507,11 +509,19 @@ public static class MovePlanner
             return MoveOption.No(mode, "target is under a different SOI parent; no interplanetary transfer maths yet");
         }
 
-        if (targetOrbit.Eccentricity > MaxEccentricityForTransfer)
-            return MoveOption.No(mode, "transfer maths assume circular orbits");
+        // Leftover dump is a hyperbola. Circularise at current r before Hohmann/phase,
+        // including when the target (Phobos e=0.015) is slightly eccentric — that used
+        // to reject here and Fail the goal with warp also blocked in-well.
+        if (needsCircularise)
+        {
+            if (circulariseDV > thrust.DeltaV)
+                return MoveOption.No(mode, $"needs {circulariseDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
+            return MoveOption.Yes(mode, 0, circulariseDV,
+                message: $"Circularise to match {NameOf(target, ship)}");
+        }
 
         // Hyperbolic SMA is negative; Hohmann/phasing run from the circular radius we'll have.
-        double shipRadius = needsCircularise ? r : shipOrbit.SemiMajorAxis;
+        double shipRadius = shipOrbit.SemiMajorAxis;
         double targetRadius = targetOrbit.SemiMajorAxis;
 
         // True longitude in the reference plane. The sim is effectively 2D for these transfers,
@@ -525,25 +535,7 @@ public static class MovePlanner
         double phaseTol = targetRadius > 0 ? along / targetRadius : 0;
 
         if (IsCoOrbital(shipRadius, targetRadius, target) && Math.Abs(phaseAngle) <= phaseTol)
-        {
-            if (!needsCircularise)
-                return MoveOption.No(mode, "co-orbital and co-located");
-            // Leftover hyperbola at the moon: circularise to match its orbit, then replan.
-            if (circulariseDV > thrust.DeltaV)
-                return MoveOption.No(mode, $"needs {circulariseDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
-            return MoveOption.Yes(mode, 0, circulariseDV,
-                message: $"Circularise to match {NameOf(target, ship)}");
-        }
-
-        if (needsCircularise)
-        {
-            // Hohmann/phasing assume circular. Circularise at current r first; the agent
-            // replans the match-orbit burns from that circular orbit.
-            if (circulariseDV > thrust.DeltaV)
-                return MoveOption.No(mode, $"needs {circulariseDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
-            return MoveOption.Yes(mode, 0, circulariseDV,
-                message: $"Circularise to match {NameOf(target, ship)}");
-        }
+            return MoveOption.No(mode, "co-orbital and co-located");
 
         if (IsCoOrbital(shipRadius, targetRadius, target))
         {

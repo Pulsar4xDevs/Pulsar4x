@@ -407,7 +407,8 @@ namespace Pulsar4X.Tests
             var sol = TestingUtilities.BasicSol(_starSys);
             var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
             var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
-            var phobos = AddMoon(mars, 1.06e16, 11_266, sma_m: 9_376_000, epoch);
+            // Real Phobos e=0.0151; tests used e=0 and missed the in-game Fail.
+            var phobos = AddMoon(mars, 1.06e16, 11_266, sma_m: 9_376_000, epoch, eccentricity: 0.0151);
             mars.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Terrestrial });
             phobos.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Moon });
 
@@ -546,6 +547,50 @@ namespace Pulsar4X.Tests
             {
                 WarpMoveProcessor.TestDropIn = null;
             }
+        }
+
+        /// <summary>
+        /// In-game "play" is one TimePulse tick (often 1h–1d), not hour-by-hour. A leftover
+        /// hyperbola integrated for the rest of that tick flies off the Phobos camera.
+        /// Circularise must run in that same jump, and the ship must stay near Mars.
+        /// </summary>
+        [Test]
+        public void WarpOrder_EarthToPhobos_SurvivesOneLongTickPastArrival()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
+            var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
+            var phobos = AddMoon(mars, 1.06e16, 11_266, sma_m: 9_376_000, epoch, eccentricity: 0.0151);
+            phobos.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Moon });
+
+            var faction = FactionFactory.CreateFaction(_game, "long-tick-" + Guid.NewGuid().ToString("N"));
+            var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
+            var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
+            var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+            ApplyEarthStartOrbit(EarthStartOrbit.CircularPrograde, ship, earth, mars, phobos, epoch,
+                new Vector3(OrbitMath.LowOrbitRadius(phobos), 0, 0));
+
+            var goal = new Goal(GoalType.MoveTo) { TargetEntityID = phobos.Id };
+            AgentProcessor.AssignGoal(ship, goal);
+            Assert.IsTrue(ship.HasDataBlob<WarpMovingDB>(), DescribeMove(ship, goal));
+            var eti = ship.GetDataBlob<WarpMovingDB>().PredictedExitTime;
+
+            AdvanceTo(eti + TimeSpan.FromDays(1));
+
+            Assert.IsFalse(ship.HasDataBlob<WarpMovingDB>(), "must not still be warping. " + DescribeMove(ship, goal));
+            Assert.IsTrue(ship.TryGetDataBlob<OrbitDB>(out var orbit), DescribeMove(ship, goal));
+            AssertOrbitWellFormed(orbit, "orbit after long tick");
+            Assert.AreSame(mars, orbit.Parent, "still parented to Mars, not escaped to Sol");
+            Assert.Less(orbit.Eccentricity, 0.05, "leftover hyperbola must have circularised in the same tick. " + DescribeMove(ship, goal));
+
+            var abs = (Vector3)MoveMath.GetAbsoluteFuturePosition(ship, _starSys.StarSysDateTime);
+            var marsAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(mars, _starSys.StarSysDateTime);
+            var marsSoi = mars.GetSOI_m();
+            Assert.Less((abs - marsAbs).Length(), marsSoi,
+                "ship flew out of Mars SOI (leftover hyperbola integrated instead of circularise). "
+                + DescribeMove(ship, goal));
+            AssertFiniteVec(abs, "absolute position after long tick");
         }
 
         /// <summary>
@@ -961,12 +1006,13 @@ namespace Pulsar4X.Tests
             return ent;
         }
 
-        private static Entity AddMoon(Entity parent, double mass, double radius_m, double sma_m, DateTime epoch)
+        private static Entity AddMoon(Entity parent, double mass, double radius_m, double sma_m, DateTime epoch,
+            double eccentricity = 0)
         {
             var parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
             // FromAsteroidFormat takes sma in AU
             double smaAu = Distance.MToAU(sma_m);
-            var orbit = OrbitDB.FromAsteroidFormat(parent, parentMass, mass, smaAu, 0, 0, 0, 0, 0, epoch);
+            var orbit = OrbitDB.FromAsteroidFormat(parent, parentMass, mass, smaAu, eccentricity, 0, 0, 0, 0, epoch);
             var ent = Entity.Create();
             var pos = new PositionDB();
             _starSys.AddEntity(ent, new BaseDataBlob[]

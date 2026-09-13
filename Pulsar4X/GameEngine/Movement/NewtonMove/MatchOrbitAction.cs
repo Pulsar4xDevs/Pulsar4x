@@ -155,11 +155,6 @@ public class MatchOrbitAction : EntityAction
             reason = "circularise first";
             return false;
         }
-        if (targetOrbit.Eccentricity > MaxEccentricityForTransfer)
-        {
-            reason = "transfer maths assume circular orbits";
-            return false;
-        }
 
         var parent = shipOrbit.Parent;
         double sgp = OrbitMath.SGP(parent, ship);
@@ -170,6 +165,12 @@ public class MatchOrbitAction : EntityAction
         double phaseAngle = NormaliseAngle(targetAngle - shipAngle);
         double along = AlongTrack(target, targetRadius);
         double phaseTol = targetRadius > 0 ? along / targetRadius : 0;
+        double separation = ((Vector3)MoveMath.GetAbsoluteFuturePosition(ship, now)
+                             - (Vector3)MoveMath.GetAbsoluteFuturePosition(target, now)).Length();
+
+        // Warp drop-in leaves us dest+offset; that is arrived even if leftover SMA ≠ a.
+        if (separation <= along)
+            return true;
 
         if (IsCoOrbital(shipRadius, targetRadius, target) && Math.Abs(phaseAngle) <= phaseTol)
             return true;
