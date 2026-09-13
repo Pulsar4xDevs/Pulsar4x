@@ -90,7 +90,7 @@ namespace Pulsar4X.Client
 
             if (_uiState.LastClickedEntity?.GetEntity() != null)
             {
-                window.Init(_uiState.LastClickedEntity.GetEntity()!);
+                //window.Init(_uiState.LastClickedEntity.GetEntity()!);
             }
 
             return window;

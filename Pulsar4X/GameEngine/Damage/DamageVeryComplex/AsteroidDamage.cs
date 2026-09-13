@@ -34,7 +34,7 @@ public partial class DamageMap
         
         // Generate the asteroid shape
         List<Vector2> vertices = AsteroidHelpers.GenerateAsteroidShape(radius, jitter, numPoints);
-        AsteroidHelpers.AsteroidDamageProfile(this, radius, 30, entity.Manager.RNG);
+        //AsteroidHelpers.AsteroidDamageProfile(this, radius, 30, entity.Manager.RNG);
         //AsteroidHelpers.FillAsteroidShape(this, vertices, radius, AsteroidHelpers.GetMats(seed));
     }
 }
