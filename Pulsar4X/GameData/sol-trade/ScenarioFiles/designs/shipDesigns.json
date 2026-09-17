@@ -45,6 +45,7 @@
     "Payload": {
       "UniqueID": "default-ship-design-tanker",
       "Name": "Tanker",
+      "Tanker": true,
       "Armor": {
         "Id": "plastic-armor",
         "Thickness": 1

@@ -28,6 +28,9 @@ namespace Pulsar4X.Ships
         public string CargoTypeID { get; }
         public int DesignVersion { get; set; }= 0;
         public bool IsObsolete { get; set; } = false;
+        /// <summary>Fleet role: park at a survey parent, do not take survey jobs. Copied to
+        /// <see cref="ShipInfoDB.Tanker"/> at spawn.</summary>
+        public bool Tanker { get; set; } = false;
         public bool IsValid { get; set; } = true; // Used by ship designer & production
         public long MassPerUnit { get; private set; }
         public double VolumePerUnit { get; private set; }
@@ -253,6 +256,7 @@ namespace Pulsar4X.Ships
             info.AddValue(nameof(_factionId), _factionId);
             info.AddValue(nameof(Armor), Armor);
             info.AddValue(nameof(Components), Components);
+            info.AddValue(nameof(Tanker), Tanker);
         }
 
         /// <summary>
@@ -263,7 +267,11 @@ namespace Pulsar4X.Ships
         {
             var components = new List<(ComponentDesign design, int count)>(Components);
             var armor = Armor;
-            var newDesign = new ShipDesign(faction, Name, components, armor);
+            var newDesign = new ShipDesign(faction, Name, components, armor)
+            {
+                Tanker = Tanker,
+                IsObsolete = IsObsolete,
+            };
 
             return newDesign;
 

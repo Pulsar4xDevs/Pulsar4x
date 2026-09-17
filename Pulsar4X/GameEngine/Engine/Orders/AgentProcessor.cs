@@ -95,13 +95,11 @@ public class AgentProcessor : IInstanceProcessor
 
     internal override void ProcessEntity(Entity entity, DateTime atDateTime)
     {
-        ProcessEntityStatic(entity, atDateTime);
-        MessagePublisher.Instance.Publish(
-            Message.Create(
-                MessageTypes.OrdersChanged,
-                entity.Id,
-                entity.Manager.ManagerID,
-                entity.FactionOwnerID));
+        // Interrupt path must share RunAgentNow's re-entry gate: SubmitActions →
+        // HandleOrder → ActionQueueProcessor can wake us while this call is still
+        // inside Planning/Active. Nested Planning overflows; a lagged
+        // GameGlobalDateTime RecheckInterval lands in the past.
+        RunAgentNow(entity, atDateTime);
     }
 
     internal static void ProcessEntityStatic(Entity entity, DateTime atDateTime)
@@ -406,20 +404,48 @@ public class AgentProcessor : IInstanceProcessor
 
     internal static void ScheduleAgent(Entity unit, DateTime when)
     {
+        DateTime now = unit.Manager.ManagerSubpulses.NextSafeInterruptTime;
+        // HandleOrder / ProcessSystem clocks lag the current sub-step. A
+        // RecheckInterval added to a lagged instant can land in the past, or
+        // equal the Split() instant and 0-span. Always schedule strictly later.
+        if (when <= now)
+            when = now + RecheckInterval;
         unit.Manager.ManagerSubpulses.AddEntityInterupt(when, nameof(AgentProcessor), unit);
     }
     internal static void RunAgentNow(Entity unit)
         => RunAgentNow(unit, unit.StarSysDateTime);
 
+    static readonly HashSet<int> _agentReentry = new();
+
     internal static void RunAgentNow(Entity unit, DateTime atDateTime)
     {
-        ProcessEntityStatic(unit, atDateTime);
-        MessagePublisher.Instance.Publish(
-            Message.Create(
-                MessageTypes.OrdersChanged,
-                unit.Id,
-                unit.Manager.ManagerID,
-                unit.FactionOwnerID));
+        DateTime now = unit.Manager.ManagerSubpulses.NextSafeInterruptTime;
+        if (atDateTime < now)
+            atDateTime = now;
+
+        // HandleOrder → ActionQueueProcessor can wake the agent while SubmitActions
+        // is still inside Planning (instant Circularise on an already-circular ship).
+        // Re-enter Planning would enqueue another full plan and overflow the stack.
+        if (!_agentReentry.Add(unit.Id))
+        {
+            ScheduleAgent(unit, unit.StarSysDateTime + RecheckInterval);
+            return;
+        }
+
+        try
+        {
+            ProcessEntityStatic(unit, atDateTime);
+            MessagePublisher.Instance.Publish(
+                Message.Create(
+                    MessageTypes.OrdersChanged,
+                    unit.Id,
+                    unit.Manager.ManagerID,
+                    unit.FactionOwnerID));
+        }
+        finally
+        {
+            _agentReentry.Remove(unit.Id);
+        }
     }
 
     // ===================================================================

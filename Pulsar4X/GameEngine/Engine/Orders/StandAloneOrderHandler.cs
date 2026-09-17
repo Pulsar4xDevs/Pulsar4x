@@ -20,9 +20,14 @@ namespace GameEngine.Engine.Orders
             {
                 if (entityAction.UseActionLanes)
                 {
-                    if (entityAction.ActionOnDate > entityAction.EntityCommanding.StarSysDateTime)
+                    var pulses = entityAction.EntityCommanding.Manager.ManagerSubpulses;
+                    DateTime now = pulses.NextSafeInterruptTime;
+                    // GameGlobalDateTime lags StarSysDateTime during ProcessSystem;
+                    // StarSysDateTime itself lags the current sub-step. An interrupt
+                    // at either lagged clock re-queues the same Split() instant.
+                    if (entityAction.ActionOnDate > now)
                     {
-                        entityAction.EntityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(entityAction.ActionOnDate, nameof(ActionQueueProcessor), entityAction.EntityCommanding);
+                        pulses.AddEntityInterupt(entityAction.ActionOnDate, nameof(ActionQueueProcessor), entityAction.EntityCommanding);
                     }
 
                     if(entityAction.EntityCommanding.TryGetDataBlob<ActionQueueDB>(out var orderableDB))
@@ -37,7 +42,7 @@ namespace GameEngine.Engine.Orders
                             systemId: entityAction.EntityCommanding.Manager.ManagerID,
                             factionId: entityAction.EntityCommanding.FactionOwnerID));
 
-                        Game.ProcessorManager.GetInstanceProcessor(nameof(ActionQueueProcessor)).ProcessEntity(orderableDB.OwningEntity, Game.TimePulse.GameGlobalDateTime);
+                        Game.ProcessorManager.GetInstanceProcessor(nameof(ActionQueueProcessor)).ProcessEntity(orderableDB.OwningEntity, now);
                     }
                 }
                 else

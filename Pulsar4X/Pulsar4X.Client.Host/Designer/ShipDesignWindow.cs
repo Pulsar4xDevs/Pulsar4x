@@ -32,6 +32,7 @@ namespace Pulsar4X.Client
         private string SelectedExistingDesignID = String.Empty;
         private ShipDesign _workingDesign;
         private bool SelectedDesignObsolete;
+        private bool SelectedDesignTanker;
         bool _imagecreated = false;
 
         private List<ComponentDesign> AvailableShipComponents = new();
@@ -213,6 +214,7 @@ namespace Pulsar4X.Client
             SelectedDesignName = Utils.BytesFromString(_workingDesign.Name, 32);
             SelectedComponents = _workingDesign.Components;
             SelectedDesignObsolete = _workingDesign.IsObsolete;
+            SelectedDesignTanker = _workingDesign.Tanker;
             _armor = _workingDesign.Armor.type;
             _armorIndex = _armorSelection.IndexOf(_armor);
             _armorThickness = _workingDesign.Armor.thickness;
@@ -296,7 +298,8 @@ namespace Pulsar4X.Client
                         components,
                         _armor.UniqueID,
                         _armorThickness,
-                        SelectedDesignObsolete),
+                        SelectedDesignObsolete,
+                        SelectedDesignTanker),
                         result =>
                         {
                             if (!result.Accepted)
@@ -398,6 +401,7 @@ namespace Pulsar4X.Client
                     IsValid = false
                 };
                 SelectedDesignObsolete = false;
+                SelectedDesignTanker = false;
                 SelectedExistingDesignID = String.Empty;
                 _editingNewDesign = true;
                 ShowNoDesigns = false;
@@ -747,6 +751,16 @@ namespace Pulsar4X.Client
             ImGui.NewLine();
             ImGui.Text("Is Obsolete?");
             ImGui.Checkbox("###IsObsolete", ref SelectedDesignObsolete);
+            ImGui.Text("Tanker");
+            ImGui.Checkbox("###Tanker", ref SelectedDesignTanker);
+            if (ImGui.IsItemHovered())
+            {
+                string hint = "Fleet role: park at a survey parent, do not take survey jobs.";
+                double hullVol = _workingDesign?.VolumePerUnit ?? 0;
+                if (hullVol > 0 && _fuelStoreVolume > 0)
+                    hint += $" Fuel tanks are {_fuelStoreVolume / hullVol:P0} of hull volume.";
+                ImGui.SetTooltip(hint);
+            }
 
             if(!IsDesignValid())
             {

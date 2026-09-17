@@ -688,6 +688,7 @@ namespace Pulsar4X.Engine.Api
                 }
 
                 design.IsObsolete = save.IsObsolete;
+                design.Tanker = save.Tanker;
                 // Recalculates the derived values and (re-)registers the design on the faction.
                 design.Initialise(factionInfo);
                 design.IsValid = !design.IsObsolete && IsShipDesignValid(design);

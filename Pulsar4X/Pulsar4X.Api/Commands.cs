@@ -185,7 +185,8 @@ public sealed record SaveShipDesignCommand(
     IReadOnlyList<ShipComponentCount> Components,
     string ArmorId,
     float ArmorThickness,
-    bool IsObsolete) : GameCommand(TargetEntityId);
+    bool IsObsolete,
+    bool Tanker = false) : GameCommand(TargetEntityId);
 
 public sealed record DeleteShipDesignCommand(int TargetEntityId, string DesignId) : GameCommand(TargetEntityId);
 

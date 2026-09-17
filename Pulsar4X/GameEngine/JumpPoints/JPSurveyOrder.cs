@@ -17,7 +17,7 @@ public class JPSurveyOrder : EntityAction
 
     public override string Name => $"Jump Point Survey {Target.GetOwnersName()} ({GetProgressPercent()}%)";
 
-    public override string Details => "";
+    public override string Details => $"{GetProgressPercent():0}%";
 
     public Entity Target { get; private set; }
     public JPSurveyableDB? TargetSurveyDB { get; private set; } = null;
@@ -35,6 +35,8 @@ public class JPSurveyOrder : EntityAction
     {
         _entityCommanding = commandingEntity;
         Target = target;
+        RequestingFactionGuid = commandingEntity.FactionOwnerID;
+        EntityCommandingGuid = commandingEntity.Id;
         if(Target.TryGetDataBlob<JPSurveyableDB>(out var jpSurveyableDB))
         {
             TargetSurveyDB = jpSurveyableDB;
@@ -92,10 +94,13 @@ public class JPSurveyOrder : EntityAction
     private float GetProgressPercent()
     {
         if(TargetSurveyDB == null) return 0f;
-        if(!TargetSurveyDB.HasSurveyStarted(RequestingFactionGuid)) return 0f;
+        int factionId = EntityCommanding != null
+            ? EntityCommanding.FactionOwnerID
+            : RequestingFactionGuid;
+        if(!TargetSurveyDB.HasSurveyStarted(factionId)) return 0f;
 
         uint pointsRequired = TargetSurveyDB.PointsRequired;
-        uint currentValue = TargetSurveyDB.SurveyPointsRemaining[RequestingFactionGuid];
+        uint currentValue = TargetSurveyDB.SurveyPointsRemaining[factionId];
 
         return (1f - ((float)currentValue / (float)pointsRequired)) * 100f;
     }

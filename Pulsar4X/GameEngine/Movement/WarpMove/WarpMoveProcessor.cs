@@ -120,7 +120,7 @@ namespace Pulsar4X.Movement
             if (!moveDB.HasStarted)
                 return;
             DateTime when = moveDB.PredictedExitTime;
-            if (when > entity.StarSysDateTime)
+            if (when > entity.Manager.ManagerSubpulses.NextSafeInterruptTime)
                 entity.Manager.ManagerSubpulses.AddEntityInterupt(when, nameof(WarpMoveProcessor), entity);
         }
 
@@ -298,7 +298,7 @@ namespace Pulsar4X.Movement
         /// interpolation left a residual; hotloop calls it only after an overshoot
         /// that is already due.
         /// </summary>
-        static void FinishArrival(Entity entity, WarpMovingDB moveDB, DateTime atDateTime)
+        static void FinishArrival(Entity entity, WarpMovingDB moveDB, DateTime toDateTime)
         {
             if (moveDB.IsAtTarget)
                 return;
@@ -316,68 +316,60 @@ namespace Pulsar4X.Movement
             else
             {
                 moveDB.IsAtTarget = true;
-                EndWarpMove(entity, warpDB, moveDB, atDateTime);
+                if (!entity.HasDataBlob<WarpMovingDB>())
+                    return;
+
+                var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
+                EnergyGenProcessor.EnergyGen(entity, toDateTime - TimeSpan.FromSeconds(1));
+                powerDB.AddDemand(warpDB.BubbleCollapseCost, toDateTime - TimeSpan.FromSeconds(1));
+                EnergyGenProcessor.EnergyGen(entity, toDateTime);
+                powerDB.AddDemand(-warpDB.BubbleSustainCost, toDateTime);
+                powerDB.AddDemand(-warpDB.BubbleCollapseCost, toDateTime);
+
+                switch (destinationMoveType)
+                {
+                    case PositionDB.MoveTypes.None:
+                    {
+                        //if our destination is a non moving object eg a grav anomaly or jump point.
+                        //this case should be handled prior to this.
+                        throw new Exception("shouldn't get here");
+                        break;
+                    }
+                    case PositionDB.MoveTypes.Orbit:
+                    {
+                        entity.RemoveDataBlob<WarpMovingDB>();
+                        if (_gameSettings.StrictNewtonion)
+                            SetOrbitHereSimpleNewt(entity, moveDB, toDateTime);
+                        else
+                            SetOrbitHereNoNewt(entity, moveDB, toDateTime);
+                        WakeActionQueue(entity, toDateTime);
+                        break;
+                    }
+                    case PositionDB.MoveTypes.NewtonSimple:
+                    {
+                        throw new NotImplementedException();
+                        break;
+                    }
+                    case PositionDB.MoveTypes.NewtonComplex:
+                    {
+                        throw new NotImplementedException();
+                        break;
+                    }
+                    case PositionDB.MoveTypes.Warp:
+                    {
+                        var targetSpeed = moveDB.TargetEntity.GetDataBlob<WarpMovingDB>().CurrentNonNewtonionVectorMS;
+                        var newspeed = Math.Min(targetSpeed.Length(), warpDB.MaxSpeed);
+                        moveDB.CurrentNonNewtonionVectorMS = Vector3.Normalise(targetSpeed) * newspeed;
+                        break;
+                    }
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                entity.Manager.Game.TimePulse.PauseTime();
             }
         }
-
-        static void EndWarpMove(Entity entity, WarpAbilityDB warpDB, WarpMovingDB moveDB,  DateTime toDateTime)
-        {
-            if (!entity.HasDataBlob<WarpMovingDB>())
-                return;
-
-            var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
-
-
-            EnergyGenProcessor.EnergyGen(entity, toDateTime - TimeSpan.FromSeconds(1));
-            powerDB.AddDemand(warpDB.BubbleCollapseCost, toDateTime - TimeSpan.FromSeconds(1));
-            EnergyGenProcessor.EnergyGen(entity, toDateTime);
-            powerDB.AddDemand(-warpDB.BubbleSustainCost, toDateTime);
-            powerDB.AddDemand(-warpDB.BubbleCollapseCost, toDateTime);
-
-            var destinationMoveType = moveDB.TargetEntity.GetDataBlob<PositionDB>().MoveType;
-
-            switch (destinationMoveType)
-            {
-                case PositionDB.MoveTypes.None:
-                {
-                    //if our destination is a non moving object eg a grav anomaly or jump point.
-                    //this case should be handled prior to this.
-                    throw new Exception("shouldn't get here");
-                    break;
-                }
-                case PositionDB.MoveTypes.Orbit:
-                {
-                    entity.RemoveDataBlob<WarpMovingDB>();
-                    if (_gameSettings.StrictNewtonion)
-                        SetOrbitHereSimpleNewt(entity, moveDB, toDateTime);
-                    else
-                        SetOrbitHereNoNewt(entity, moveDB, toDateTime);
-                    WakeActionQueue(entity, toDateTime);
-                    break;
-                }
-                case PositionDB.MoveTypes.NewtonSimple:
-                {
-                    throw new NotImplementedException();
-                    break;
-                }
-                case PositionDB.MoveTypes.NewtonComplex:
-                {
-                    throw new NotImplementedException();
-                    break;
-                }
-                case PositionDB.MoveTypes.Warp:
-                {
-                    var targetSpeed = moveDB.TargetEntity.GetDataBlob<WarpMovingDB>().CurrentNonNewtonionVectorMS;
-                    var newspeed = Math.Min(targetSpeed.Length(), warpDB.MaxSpeed);
-                    moveDB.CurrentNonNewtonionVectorMS = Vector3.Normalise(targetSpeed) * newspeed;
-                    break;
-                }
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-            entity.Manager.Game.TimePulse.PauseTime();
-
-        }
+    
 
 
         /// <summary>

@@ -5,6 +5,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Movement;
+using Pulsar4X.Orbits;
 using Pulsar4X.Ships;
 
 namespace Pulsar4X.GeoSurveys;
@@ -72,8 +73,10 @@ public class ServeyBodyPlanner : IGoalPlanner
     }
 
     /// <summary>
-    /// Hand each capable free ship a different unfinished surveyable body (nearest first).
-    /// Includes the target if surveyable, plus <see cref="PositionDB.Children"/> (e.g. Earth + Luna).
+    /// Hand each capable free ship a different unfinished surveyable body.
+    /// Work order is the targeted parent first, then moons inner-to-outer
+    /// (SMA around the parent). Closest free ship takes the current POI.
+    /// A flagged fleet tanker is sent to orbit the parent (<see cref="GoalType.MoveTo"/>).
     /// Does not mutate <paramref name="goal"/> — agent applies the returned status.
     /// Re-entrant: skips ships already working this parent goal; skips POIs already assigned.
     /// </summary>
@@ -85,28 +88,23 @@ public class ServeyBodyPlanner : IGoalPlanner
         if (!fleet.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var targetEntity))
             return PlanResult.Fail("invalid target");
 
-        // POIs: target itself if surveyable, plus direct children (moons, etc.).
-        var pointsOfInterest = new List<Entity>();
-        if (CanScan(targetEntity, fleet.FactionOwnerID))
-            pointsOfInterest.Add(targetEntity);
-
-        if (targetEntity.TryGetDataBlob<PositionDB>(out var position))
-        {
-            foreach (var childEntity in position.Children)
-            {
-                if (CanScan(childEntity, fleet.FactionOwnerID))
-                    pointsOfInterest.Add(childEntity);
-            }
-        }
-
-        if (pointsOfInterest.Count == 0)
-            return PlanResult.Done("nothing left to survey");
+        var pointsOfInterest = CollectSurveyPois(targetEntity, fleet.FactionOwnerID);
 
         var claimedPoiIds = new HashSet<int>();
         var freeShips = new List<Entity>();
+        bool tankerInFlight = false;
+
+        TryGetFleetTanker(fleetDB, out var tanker);
 
         foreach (var subunit in fleetDB.Children)
         {
+            if (tanker != null && subunit.Id == tanker.Id)
+            {
+                tankerInFlight = TankerAlreadyTasked(subunit, goal, targetEntity.Id)
+                                 && HasOpenSubgoal(subunit, goal);
+                continue;
+            }
+
             if (!subunit.HasOrChildHasAbility<GeoSurveyAbilityDB>())
                 continue;
             if (!MovePlanner.CanMove(subunit, out _))
@@ -131,44 +129,128 @@ public class ServeyBodyPlanner : IGoalPlanner
                 remaining.Add(poi);
         }
 
-        if (remaining.Count == 0)
-            return PlanResult.Done("all bodies already assigned or complete");
-
-        if (freeShips.Count == 0)
-            return PlanResult.Continue(new List<(Entity subordinate, Goal goal)>());
-
         var subGoals = new List<(Entity subordinate, Goal goal)>();
 
-        foreach (var ship in freeShips)
+        foreach (var poi in remaining)
         {
-            if (remaining.Count == 0)
+            if (freeShips.Count == 0)
                 break;
 
-            Entity best = remaining[0];
+            Entity bestShip = freeShips[0];
             double bestDist = double.MaxValue;
-            foreach (var poi in remaining)
+            foreach (var ship in freeShips)
             {
                 double d = ship.GetDataBlob<PositionDB>()
                     .GetDistanceTo_m(poi.GetDataBlob<PositionDB>());
                 if (d < bestDist)
                 {
                     bestDist = d;
-                    best = poi;
+                    bestShip = ship;
                 }
             }
 
-            remaining.Remove(best);
-            subGoals.Add((ship, new Goal(GoalType.ServeyBodies)
+            freeShips.Remove(bestShip);
+            subGoals.Add((bestShip, new Goal(GoalType.ServeyBodies)
             {
                 ParentGoalId = goal.Id,
-                TargetEntityID = best.Id,
+                TargetEntityID = poi.Id,
             }));
         }
 
-        return PlanResult.Continue(subGoals);
+        if (tanker != null
+            && !TankerAlreadyTasked(tanker, goal, targetEntity.Id)
+            && MovePlanner.CanMove(tanker, out _))
+        {
+            subGoals.Add((tanker, new Goal(GoalType.MoveTo)
+            {
+                ParentGoalId = goal.Id,
+                TargetEntityID = targetEntity.Id,
+            }));
+        }
+
+        if (subGoals.Count > 0)
+            return PlanResult.Continue(subGoals);
+
+        if (claimedPoiIds.Count > 0 || tankerInFlight || remaining.Count > 0)
+            return PlanResult.Continue(new List<(Entity subordinate, Goal goal)>());
+
+        return PlanResult.Done(pointsOfInterest.Count == 0
+            ? "nothing left to survey"
+            : "all bodies already assigned or complete");
     }
 
-    bool CanScan(Entity targetEntity, int factionID)
+    static bool TryGetFleetTanker(FleetDB fleetDB, out Entity tanker)
+    {
+        tanker = null!;
+        foreach (var child in fleetDB.Children)
+        {
+            if (!child.TryGetDataBlob<ShipInfoDB>(out var info) || !info.Tanker)
+                continue;
+            tanker = child;
+            return true;
+        }
+        return false;
+    }
+
+    static bool HasOpenSubgoal(Entity unit, Goal parent)
+    {
+        return unit.TryGetDataBlob<GoalsDB>(out var goals)
+               && goals.ActiveGoal != null
+               && goals.ActiveGoal.ParentGoalId == parent.Id
+               && goals.ActiveGoal.Status is not (GoalStatus.Completed or GoalStatus.Failed);
+    }
+
+    /// <summary>
+    /// Already sent to the parent (in flight or arrived). Do not re-issue MoveTo.
+    /// </summary>
+    static bool TankerAlreadyTasked(Entity tanker, Goal parent, int parentBodyId)
+    {
+        if (!tanker.TryGetDataBlob<GoalsDB>(out var goals) || goals.ActiveGoal == null)
+            return false;
+        var active = goals.ActiveGoal;
+        if (active.ParentGoalId != parent.Id)
+            return false;
+        return active.Type == GoalType.MoveTo && active.TargetEntityID == parentBodyId;
+    }
+
+    /// <summary>
+    /// Target body first if still surveyable, then direct children inner-to-outer.
+    /// </summary>
+    static List<Entity> CollectSurveyPois(Entity targetEntity, int factionId)
+    {
+        var pointsOfInterest = new List<Entity>();
+        if (CanScan(targetEntity, factionId))
+            pointsOfInterest.Add(targetEntity);
+
+        if (!targetEntity.TryGetDataBlob<PositionDB>(out var position))
+            return pointsOfInterest;
+
+        var moons = new List<(Entity body, double radius_m)>();
+        foreach (var childEntity in position.Children)
+        {
+            if (!CanScan(childEntity, factionId))
+                continue;
+            moons.Add((childEntity, SemiMajorOrDistance_m(childEntity, targetEntity)));
+        }
+
+        moons.Sort((a, b) => a.radius_m.CompareTo(b.radius_m));
+        foreach (var (body, _) in moons)
+            pointsOfInterest.Add(body);
+
+        return pointsOfInterest;
+    }
+
+    static double SemiMajorOrDistance_m(Entity body, Entity parent)
+    {
+        if (body.TryGetDataBlob<OrbitDB>(out var orbit) && orbit.Parent == parent)
+            return orbit.SemiMajorAxis;
+        if (body.TryGetDataBlob<PositionDB>(out var bodyPos)
+            && parent.TryGetDataBlob<PositionDB>(out var parentPos))
+            return bodyPos.GetDistanceTo_m(parentPos);
+        return double.MaxValue;
+    }
+
+    static bool CanScan(Entity targetEntity, int factionID)
     {
         if (targetEntity.TryGetDataBlob<GeoSurveyableDB>(out var surveyable))
         {
