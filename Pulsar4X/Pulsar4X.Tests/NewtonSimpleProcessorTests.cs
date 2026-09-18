@@ -71,6 +71,8 @@ namespace Pulsar4X.Tests
 
             Assert.IsFalse(db.IsComplete, "30s is only a slice of the burn");
             Assert.IsFalse(db.IsFailed);
+            Assert.IsFalse(ship.HasDataBlob<OrbitDB>(),
+                "mid-burn OrbitDB would freeze the map ellipse at the pre-burn orbit");
             Assert.Less(db.CurrentTrajectory.Eccentricity, startKE.Eccentricity,
                 "slice should move eccentricity toward the circular target");
             Assert.Greater(db.CurrentTrajectory.Eccentricity, targetKE.Eccentricity + 0.01,

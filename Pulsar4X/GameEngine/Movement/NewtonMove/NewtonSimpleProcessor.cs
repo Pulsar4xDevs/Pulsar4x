@@ -12,7 +12,7 @@ namespace Pulsar4X.Movement;
 
 public class NewtonSimpleProcessor : IHotloopProcessor
 {
-    public TimeSpan RunFrequency => TimeSpan.FromSeconds(30);
+    public TimeSpan RunFrequency => TimeSpan.FromSeconds(1);
     public TimeSpan FirstRunOffset => TimeSpan.FromSeconds(0);
     public Type GetParameterType => typeof(NewtonSimpleMoveDB);
 
@@ -118,7 +118,8 @@ public class NewtonSimpleProcessor : IHotloopProcessor
             return;
         }
 
-        db.CurrentTrajectory = InterpolateOrbit(db.StartTrajectory, db.TargetTrajectory, toDateTime, f, sgp);
+        db.CurrentTrajectory = InterpolateOrbit(
+            db.StartTrajectory, db.TargetTrajectory, db.ActionOnDateTime, f, sgp);
     }
 
     static void Complete(NewtonSimpleMoveDB db, Entity entity, double mass, DateTime at)
@@ -136,14 +137,20 @@ public class NewtonSimpleProcessor : IHotloopProcessor
         db.LastProcessDateTime = at;
     }
 
+    /// <summary>
+    /// Blend start→target at the burn node, not at "now". Evaluating both Kepler
+    /// states at the current time then lerping r,v is a chord between two drifted
+    /// orbits and goes hyperbolic even when both ends are elliptical.
+    /// Epoch stays the node so GetStateVectors(ke, now) coasts the intermediate orbit.
+    /// </summary>
     static KeplerElements InterpolateOrbit(
-        KeplerElements start, KeplerElements target, DateTime at, double f, double sgp)
+        KeplerElements start, KeplerElements target, DateTime nodeTime, double f, double sgp)
     {
-        var a = OrbitalMath.GetStateVectors(start, at);
-        var b = OrbitalMath.GetStateVectors(target, at);
+        var a = OrbitalMath.GetStateVectors(start, nodeTime);
+        var b = OrbitalMath.GetStateVectors(target, nodeTime);
         var r = a.position + f * (b.position - a.position);
         var v = (Vector3)a.velocity + f * ((Vector3)b.velocity - (Vector3)a.velocity);
-        return OrbitMath.KeplerFromPositionAndVelocity(sgp, r, v, at);
+        return OrbitMath.KeplerFromPositionAndVelocity(sgp, r, v, nodeTime);
     }
 
     public static (Vector3 pos, Vector3 vel) GetRelativeState(Entity entity, DateTime atDateTime)

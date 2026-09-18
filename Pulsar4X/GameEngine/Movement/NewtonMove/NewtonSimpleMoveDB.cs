@@ -4,6 +4,7 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Orbital;
+using Pulsar4X.Orbits;
 
 namespace Pulsar4X.Movement
 {
@@ -85,6 +86,19 @@ namespace Pulsar4X.Movement
                 throw new ArgumentException(
                     $"{which} |r|={r.Length():G6} m from parent is not a solar-system trajectory.");
             }
+        }
+
+        internal override void OnSetToEntity()
+        {
+            // Same as NewtonMoveDB: the interpolating CurrentTrajectory is the live orbit.
+            // Leaving OrbitDB attached makes the map draw the pre-burn ellipse forever
+            // (AddIconable prefers OrbitView, and TryAdd will not replace it).
+            if (OwningEntity.HasDataBlob<OrbitDB>())
+                OwningEntity.RemoveDataBlob<OrbitDB>();
+            if (OwningEntity.HasDataBlob<OrbitUpdateOftenDB>())
+                OwningEntity.RemoveDataBlob<OrbitUpdateOftenDB>();
+            if (OwningEntity.HasDataBlob<WarpMovingDB>())
+                OwningEntity.RemoveDataBlob<WarpMovingDB>();
         }
 
         public override object Clone()

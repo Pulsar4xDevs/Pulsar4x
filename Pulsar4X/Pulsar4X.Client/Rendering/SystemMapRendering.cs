@@ -223,8 +223,14 @@ namespace Pulsar4X.Client.Rendering
             var bodyType = UserOrbitSettings.FromBodyKind(entity.Kind);
             var massVolume = entity.GetView<MassVolumeView>();
 
+            // Thrust/warp trajectories own the ring while they are active. OrbitView is the
+            // leftover Kepler from before the burn; TryAdd would keep that ellipse forever.
+            bool thrusting = entity.HasView<NewtonMoveView>()
+                || entity.HasView<NewtonSimpleMoveView>()
+                || entity.HasView<WarpMovingView>();
+
             var orbit = entity.GetView<OrbitView>();
-            if (orbit != null && orbit.SemiMajorAxisM != 0 && orbit.StandardGravParameter > 0)
+            if (!thrusting && orbit != null && orbit.SemiMajorAxisM != 0 && orbit.StandardGravParameter > 0)
             {
                 IPosition parentPosition = orbit.ParentId is int parentId
                     ? new SnapshotPosition(_state, _systemId, parentId)

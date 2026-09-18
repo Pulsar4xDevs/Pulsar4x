@@ -59,7 +59,7 @@ public class SnapshotPosition : IPosition
             return _memo;
 
         Vector3 relative;
-        var orbit = entity.GetView<OrbitView>();
+        var orbit = entity.ResolveOrbit();
         if (orbit != null && orbit.StandardGravParameter > 0)
         {
             relative = orbit.RelativePositionM(now);

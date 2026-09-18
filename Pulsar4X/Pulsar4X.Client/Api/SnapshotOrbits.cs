@@ -20,11 +20,11 @@ public static class SnapshotOrbits
         {
             StandardGravParameter = orbit.StandardGravParameter,
             SemiMajorAxis = a,
-            SemiMinorAxis = a * Math.Sqrt(1 - e * e),
+            SemiMinorAxis = EllipseMath.SemiMinorAxis(a, e),
             Eccentricity = e,
-            LinearEccentricity = e * a,
-            Periapsis = (1 - e) * a,
-            Apoapsis = (1 + e) * a,
+            LinearEccentricity = EllipseMath.LinearEccentricityFromEccentricity(a, e),
+            Periapsis = EllipseMath.Periapsis(e, a),
+            Apoapsis = EllipseMath.Apoapsis(e, a),
             LoAN = orbit.LongitudeOfAscendingNodeRad,
             AoP = orbit.ArgumentOfPeriapsisRad,
             Inclination = orbit.InclinationRad,
@@ -46,7 +46,7 @@ public static class SnapshotOrbits
     /// chain; entities without an orbit use their last pushed position.</summary>
     public static Vector3 AbsolutePositionM(this EntitySnapshot entity, IClientSystem system, DateTime atTime)
     {
-        var orbit = entity.GetView<OrbitView>();
+        var orbit = entity.ResolveOrbit();
         if (orbit != null && orbit.StandardGravParameter > 0)
         {
             var relative = orbit.RelativePositionM(atTime);

@@ -257,26 +257,7 @@ public class MoveStateProcessor : IInstanceProcessor
     {
         foreach (var movedb in moves)
         {
-            if(movedb.OwningEntity is null)
-                continue;
-            if(!movedb.OwningEntity.TryGetDataBlob(out PositionDB stateDB))
-            {
-                stateDB = new PositionDB(movedb.SOIParent);
-                movedb.OwningEntity.SetDataBlob(stateDB);
-            }
-
-            stateDB.MoveType = PositionDB.MoveTypes.NewtonSimple;
-            // Only update parent if it has changed to avoid expensive SetParent operation
-            if (stateDB.Parent != movedb.SOIParent)
-                stateDB.SetParent(movedb.SOIParent);
-            var myMass = movedb.OwningEntity.GetDataBlob<MassVolumeDB>().MassTotal;
-            var pMass = movedb.SOIParent.GetDataBlob<MassVolumeDB>().MassTotal;
-            stateDB.SGP = GeneralMath.StandardGravitationalParameter(myMass + pMass);
-            var state = OrbitMath.GetStateVectors(movedb.CurrentTrajectory, atDateTime);
-            stateDB.RelativePosition = state.position;
-            stateDB.Velocity = state.velocity;
-            var ke = OrbitMath.KeplerFromPositionAndVelocity(stateDB.SGP, state.position, (Vector3)state.velocity, atDateTime);
-            stateDB.GetKeplerElements = ke;
+            ProcessForType(movedb, atDateTime);
         }
     }
     public static void ProcessForType(NewtonSimpleMoveDB movedb, DateTime atDateTime)
@@ -294,13 +275,14 @@ public class MoveStateProcessor : IInstanceProcessor
         if (stateDB.Parent != movedb.SOIParent)
             stateDB.SetParent(movedb.SOIParent);
         var myMass = movedb.OwningEntity.GetDataBlob<MassVolumeDB>().MassTotal;
-        var pMass = movedb.SOIParent.GetDataBlob<MassVolumeDB>().MassTotal;
+        var pMass = movedb.ParentMass;
         stateDB.SGP = GeneralMath.StandardGravitationalParameter(myMass + pMass);
         var state = OrbitMath.GetStateVectors(movedb.CurrentTrajectory, atDateTime);
         stateDB.RelativePosition = state.position;
         stateDB.Velocity = state.velocity;
-        var ke = OrbitMath.KeplerFromPositionAndVelocity(stateDB.SGP, state.position, (Vector3)state.velocity, atDateTime);
-        stateDB.GetKeplerElements = ke;
+        // Live Kepler for debug/clients that read PositionDB. Do not SetDataBlob(OrbitDB):
+        // OrbitDB.OnSetToEntity strips NewtonSimpleMoveDB and aborts the burn.
+        stateDB.GetKeplerElements = movedb.CurrentTrajectory;
     }
 
     public static void ProcessForType(List<NewtonMoveDB> moves, DateTime atDateTime)

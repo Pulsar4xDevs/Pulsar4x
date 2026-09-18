@@ -6,6 +6,8 @@ using Pulsar4X.Extensions;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Orbital;
 using Pulsar4X.Orbits;
+using Stringify = Pulsar4X.Api.Stringify;
+
 namespace Pulsar4X.Movement;
 
 /// <summary>
@@ -20,13 +22,14 @@ public class CirculariseAction : EntityAction
     public override string Name => "Circularise";
 
     string _details = "Circularise";
-    public override string Details => _details;
+    public override string Details => LiveDetails();
 
     Entity _factionEntity;
     Entity _entityCommanding;
     internal override Entity EntityCommanding => _entityCommanding;
 
     NewtonSimpleMoveDB? _db;
+    double _totalDv;
 
     public static CirculariseAction CreateCommand(Entity ship, DateTime? actionOnDate = null)
     {
@@ -92,23 +95,62 @@ public class CirculariseAction : EntityAction
             return;
         }
 
+        _totalDv = DvBetween(startKE, targetKE, atDateTime);
         _db = new NewtonSimpleMoveDB(parent, startKE, targetKE, atDateTime);
         _entityCommanding.SetDataBlob(_db);
         NewtonSimpleProcessor.ProcessEntity(_entityCommanding, atDateTime);
         IsRunning = true;
-        UpdateDetailString();
     }
 
     public override void UpdateDetailString()
     {
+        _details = LiveDetails();
+    }
+
+    string LiveDetails()
+    {
         if (_entityCommanding == null)
-            _details = "Circularise";
-        else if (ActionOnDate > _entityCommanding.StarSysDateTime)
-            _details = "Waiting to circularise";
-        else if (IsRunning)
-            _details = "Circularising";
-        else
-            _details = "Circularise";
+            return "Circularise";
+        if (_isFinished && _db == null)
+            return _details;
+        DateTime now = _entityCommanding.StarSysDateTime;
+        if (ActionOnDate > now)
+        {
+            if (TryCompute(_entityCommanding, ActionOnDate, out _, out var startKE, out var targetKE))
+            {
+                double dv = DvBetween(startKE, targetKE, ActionOnDate);
+                return "Waiting to circularise, " + Stringify.Velocity(dv) + " Δv";
+            }
+            return "Waiting to circularise";
+        }
+        if (IsRunning && _db != null)
+        {
+            if (_db.IsComplete)
+                return "Circularised";
+            if (_db.IsFailed)
+                return "Circularise failed";
+            return "Circularising, " + Stringify.Velocity(RemainingDv()) + " Δv left";
+        }
+        return "Circularise";
+    }
+
+    double RemainingDv()
+    {
+        if (_db == null)
+            return 0;
+        if (_db.FuelTotal > 0)
+        {
+            double f = Math.Clamp(_db.FuelBurned / _db.FuelTotal, 0, 1);
+            return (1 - f) * _totalDv;
+        }
+        return _totalDv;
+    }
+
+    static double DvBetween(KeplerElements start, KeplerElements target, DateTime at)
+    {
+        var v0 = (Vector3)OrbitMath.GetStateVectors(start, at).velocity;
+        var v1 = (Vector3)OrbitMath.GetStateVectors(target, at).velocity;
+        return (v1 - v0).Length();
     }
 
     internal override bool IsFinished()
