@@ -37,9 +37,13 @@ public class ServeyBodyPlanner : IGoalPlanner
             plan = PlanResult.Fail("no action queue");
         }
         else if (!ship.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var targetEntity) ||
-                 !targetEntity.TryGetDataBlob<GeoSurveyableDB>(out _))
+                 !targetEntity.TryGetDataBlob<GeoSurveyableDB>(out var surveyable))
         {
             plan = PlanResult.Fail("Not a valid target");
+        }
+        else if (surveyable.IsSurveyComplete(ship.FactionOwnerID))
+        {
+            plan = PlanResult.Done();
         }
         else
         {

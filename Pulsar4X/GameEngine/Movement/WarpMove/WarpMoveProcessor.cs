@@ -366,7 +366,7 @@ namespace Pulsar4X.Movement
                         throw new ArgumentOutOfRangeException();
                 }
 
-                entity.Manager.Game.TimePulse.PauseTime();
+                //entity.Manager.Game.TimePulse.PauseTime();
             }
         }
     

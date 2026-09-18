@@ -357,6 +357,17 @@ public static class MovePlanner
         if (!ship.TryGetDataBlob<PositionDB>(out var shipPos) || !target.TryGetDataBlob<PositionDB>(out var tgtPos))
             return MoveOption.No(MoveMode.AlreadyThere, "no position");
 
+        // Static sites (grav anomalies, jump points) have no circular orbit to match.
+        // Close enough is the same 100 km JPSurveyProcessor uses to apply points.
+        if (tgtPos.MoveType == PositionDB.MoveTypes.None)
+        {
+            double siteSep = ((Vector3)MoveMath.GetAbsoluteFuturePosition(ship, now)
+                              - (Vector3)MoveMath.GetAbsoluteFuturePosition(target, now)).Length();
+            return siteSep <= 100_000
+                ? MoveOption.Yes(MoveMode.AlreadyThere, 0, message: $"Already at {NameOf(target, ship)}")
+                : MoveOption.No(MoveMode.AlreadyThere, "not there yet");
+        }
+
         var parent = ship.GetSOIParentEntity();
         var dropInParent = PredictDropInParent(target, PlannedWarpExitOffsetLength(target));
         if (parent == null || (parent != dropInParent && parent != target))

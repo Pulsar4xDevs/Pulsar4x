@@ -46,6 +46,12 @@ public class ScanAnomalyPlan : IGoalPlanner
         {
             plan = PlanResult.Fail("Not a valid target");
         }
+        else if (serveyable.IsSurveyComplete(ship.FactionOwnerID))
+        {
+            // Agent drops Succeeded actions before Plan(); without this we'd enqueue
+            // another JPSurveyOrder on the same finished site (100% forever, AgentProcessor flood).
+            plan = PlanResult.Done();
+        }
         else
         {
             var actionsForGoal = actionQueue.ActionsFor(goal);

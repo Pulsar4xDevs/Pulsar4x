@@ -66,6 +66,12 @@ public class JPSurveyOrder : EntityAction
 
     internal override void Execute(DateTime atDateTime)
     {
+        if (IsFinished())
+        {
+            Status = ActionStatus.Succeeded;
+            return;
+        }
+
         if(Status != ActionStatus.Running)
         {
             Status = ActionStatus.Running;
