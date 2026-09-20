@@ -1,9 +1,10 @@
-﻿using ImGuiNET;
+using System.Linq;
+using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
-    public class  GalaxyWindow : PulsarGuiWindow
+    public class  GalaxyWindow : UniquePulsarGuiWindow<GalaxyWindow>
     {
 
         private GalaxyWindow()
@@ -16,38 +17,36 @@ namespace Pulsar4X.SDL2UI
 
         internal static GalaxyWindow GetInstance()
         {
-
-            GalaxyWindow thisItem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(GalaxyWindow)))
+            if(_uiState.TryGetUniqueWindow<GalaxyWindow>(out var window))
             {
-                thisItem = new GalaxyWindow();
+                return window;
             }
-            thisItem = (GalaxyWindow)_uiState.LoadedWindows[typeof(GalaxyWindow)];
 
-            return thisItem;
-
+            return _uiState.AddUniqueWindow(new GalaxyWindow());
         }
 
         internal override void Display()
         {
-
+            if (!IsActive) return;
             //ImGui.SetNextWindowSize();
-            if (IsActive && Window.Begin("Galaxy Browser", ref IsActive, _flags))
+            if (Window.Begin("Galaxy Browser", ref IsActive, _flags))
             {
-
-                uint iterations = 0;
-                foreach (var starSystem in _uiState.StarSystemStates)
+                // The faction's known systems, kept current by the adapter's event stream.
+                var galaxy = _uiState.GameClient?.Galaxy;
+                if (galaxy != null)
                 {
-                    ImGui.PushID(iterations.ToString());
-                    if (ImGui.SmallButton(starSystem.Value.StarSystem.NameDB.DefaultName))
+                    foreach (var system in galaxy.KnownSystems.OrderBy(s => s.Name))
                     {
-                        _uiState.SetActiveSystem(starSystem.Key);
+                        ImGui.PushID(system.SystemId);
+                        if (ImGui.SmallButton(system.Name))
+                        {
+                            _uiState.SetActiveSystem(system.SystemId);
+                        }
+                        ImGui.PopID();
                     }
-                    ImGui.PopID();
-                    iterations++;
                 }
-                Window.End();
             }
+            Window.End();
         }
     }
 }

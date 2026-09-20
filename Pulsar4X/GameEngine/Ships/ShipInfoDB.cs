@@ -49,14 +49,14 @@ namespace Pulsar4X.Ships
         #region Constructors
 
         [JsonConstructor]
-        private ShipInfoDB()
+        internal ShipInfoDB()
         {
         }
 
         public ShipInfoDB(ShipDesign design)
         {
             Design = design;
-            //design.ID
+            Tanker = design.Tanker;
         }
 
         public ShipInfoDB(ShipInfoDB shipInfoDB)

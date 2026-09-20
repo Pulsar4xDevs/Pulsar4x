@@ -1,57 +1,73 @@
 using ImGuiNET;
-using Pulsar4X.Client.Interface.Windows;
-using Pulsar4X.SDL2UI;
-using SDL2;
+using Pulsar4X.Client;
+using SDL3;
 
 namespace Pulsar4X.Input;
 
 public class SystemMapHotKeys : IHotKeyHandler
 {
-    public void HandleEvent(SDL.SDL_Event e)
+    public void HandleEvent(SDL.Event e)
     {
-        if (!ImGui.IsAnyItemActive() && e.type == SDL.SDL_EventType.SDL_KEYUP)
+        if (!ImGui.IsAnyItemActive() && e.Type == (uint)SDL.EventType.KeyUp)
         {
-            if (e.key.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE)
+            if (e.Key.Key == SDL.Keycode.Space)
+            {
+                var tc = TimeControl.GetInstance();
+                if((e.Key.Mod & SDL.Keymod.Ctrl) != 0)
+                {
+                    // Ctrl + Space for single step.
+                    tc.OneStepPressed();
+                }
+                else
+                {
+                    tc.PausePlayPressed();
+                }
+            }
+            else if (e.Key.Key == SDL.Keycode.Escape)
             {
                 MainMenuItems.GetInstance().ToggleActive();
             }
-            else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_F1)
+            else if(e.Key.Key == SDL.Keycode.F1)
             {
-                DebugWindow.GetInstance().ToggleActive();
+                UniquePulsarGuiWindow._uiState.ToggleDevTool("debug-window");
             }
-            else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_F2)
+            else if(e.Key.Key == SDL.Keycode.F2)
             {
-                PerformanceWindow.GetInstance().ToggleActive();
+                UniquePulsarGuiWindow._uiState.ToggleDevTool("performance-window");
             }
-            else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_F3)
+            else if(e.Key.Key == SDL.Keycode.F3)
             {
                 GameLogWindow.GetInstance().ToggleActive();
             }
-            else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_F4)
+            else if(e.Key.Key == SDL.Keycode.F4)
             {
-                BlueprintsWindow.GetInstance().ToggleActive();
+                UniquePulsarGuiWindow._uiState.ToggleDevTool("blueprints-window");
             }
-            else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_1)
+            else if(e.Key.Key == SDL.Keycode.F5)
             {
-                ComponentDesignWindow.GetInstance().ToggleActive();
+                UniquePulsarGuiWindow._uiState.ToggleDevTool("components-window");
             }
-            else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_2)
+            else if(e.Key.Key == SDL.Keycode.Alpha1)
             {
-                ShipDesignWindow.GetInstance().ToggleActive();
+                UniquePulsarGuiWindow._uiState.ToggleDevTool("component-design");
             }
-            else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_3)
+            else if(e.Key.Key == SDL.Keycode.Alpha2)
+            {
+                UniquePulsarGuiWindow._uiState.ToggleDevTool("ship-design");
+            }
+            else if(e.Key.Key == SDL.Keycode.Alpha3)
             {
                 ColonyManagementWindow.GetInstance().ToggleActive();
             }
-            else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_4)
+            else if(e.Key.Key == SDL.Keycode.Alpha4)
             {
                 ResearchWindow.GetInstance().ToggleActive();
             }
-            else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_5)
+            else if(e.Key.Key == SDL.Keycode.Alpha5)
             {
                 FleetWindow.GetInstance().ToggleActive();
             }
-            else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_6)
+            else if(e.Key.Key == SDL.Keycode.Alpha6)
             {
                 CommanderWindow.GetInstance().ToggleActive();
             }

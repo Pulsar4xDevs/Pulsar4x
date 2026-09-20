@@ -1,0 +1,331 @@
+[
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "jupiter",
+      "Name": "Jupiter",
+      "Colonizable": false,
+      "GeoSurveyPointsRequired": 2500,
+      "Info": {
+        "Type": "gas-giant",
+        "Albedo": 0.503,
+        "Mass": 1.8982E27,
+        "Radius": 71492,
+        "LengthOfDay": "0.09:55:30"
+      },
+      "Orbit": {
+        "SemiMajorAxis": 778.479E6,
+        "Eccentricity": 0.0489,
+        "EclipticInclination": 1.303,
+        "LoAN": 100.464,
+        "AoP": 273.867,
+        "MeanAnomaly": 20.02
+      },
+      "Atmosphere": {
+        "Pressure": 1.97384653,
+        "Hydrosphere": false,
+        "HyrdoExtent": 0,
+        "GreenhouseFactor": 0,
+        "GreenhousePressure": 0,
+        "SurfaceTemperature": -108,
+        "Gases": [
+          { "Symbol": "H2", "Percent": 0.89 },
+          { "Symbol": "He", "Percent": 0.1 },
+          { "Symbol": "CH4", "Percent": 0.003 },
+          { "Symbol": "NH3", "Percent": 0.00026 },
+          { "Symbol": "HD", "Percent": 0.000028 },
+          { "Symbol": "C2H6", "Percent": 0.000006 },
+          { "Symbol": "H2O", "Percent": 0.000004 }
+        ]
+      }
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "moon-io",
+      "Name": "Io",
+      "Parent": "Jupiter",
+      "Colonizable": true,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 500,
+      "Info": {
+        "Type": "moon",
+        "Albedo": 0.63,
+        "Mass": 8.931938E22,
+        "Radius": 1821.6,
+        "LengthOfDay": "1.18:28:00"
+      },
+      "Orbit": {
+        "SemiMajorAxis": 421700,
+        "Eccentricity": 0.0041,
+        "EclipticInclination": 2.213,
+        "LoAN": 0,
+        "AoP": 0,
+        "MeanAnomaly": 0
+      },
+      "Atmosphere": {
+        "Pressure": 1.9738E-08,
+        "Hydrosphere": false,
+        "HyrdoExtent": 0,
+        "GreenhouseFactor": 0,
+        "GreenhousePressure": 0,
+        "SurfaceTemperature": -108,
+        "Gases": [
+          { "Symbol": "SO2", "Percent": 0.9 }
+        ]
+      }
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "moon-europa",
+      "Name": "Europa",
+      "Parent": "Jupiter",
+      "Colonizable": true,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 500,
+      "Info": {
+        "Type": "moon",
+        "Albedo": 0.67,
+        "Mass": 4.799844E22,
+        "Radius": 1560.8,
+        "LengthOfDay": "3.13:14:00"
+      },
+      "Orbit": {
+        "SemiMajorAxis": 670900,
+        "Eccentricity": 0.009,
+        "EclipticInclination": 1.791,
+        "LoAN": 0,
+        "AoP": 0,
+        "MeanAnomaly": 0
+      }
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "moon-ganymede",
+      "Name": "Ganymede",
+      "Parent": "Jupiter",
+      "Colonizable": true,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 500,
+      "Info": {
+        "Type": "moon",
+        "Albedo": 0.43,
+        "Mass": 1.4819E23,
+        "Radius": 2634.1,
+        "LengthOfDay": "7.03:43:00"
+      },
+      "Orbit": {
+        "SemiMajorAxis": 1.0704E6,
+        "Eccentricity": 0.0013,
+        "EclipticInclination": 0.2,
+        "LoAN": 0,
+        "AoP": 0,
+        "MeanAnomaly": 0
+      },
+      "Atmosphere": {
+        "Pressure": 1.18E-11,
+        "Hydrosphere": false,
+        "HyrdoExtent": 0,
+        "GreenhouseFactor": 0,
+        "GreenhousePressure": 0,
+        "SurfaceTemperature": -163,
+        "Gases": [
+          { "Symbol": "O2", "Percent": 0.55 }
+        ]
+      }
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "moon-callisto",
+      "Name": "Callisto",
+      "Parent": "Jupiter",
+      "Colonizable": true,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 500,
+      "Info": {
+        "Type": "moon",
+        "Albedo": 0.22,
+        "Mass": 1.075938E23,
+        "Radius": 2410.3,
+        "LengthOfDay": "16.16:32:00"
+      },
+      "Orbit": {
+        "SemiMajorAxis": 1882700,
+        "Eccentricity": 0.0074,
+        "EclipticInclination": 2.017,
+        "LoAN": 0,
+        "AoP": 0,
+        "MeanAnomaly": 0
+      },
+      "Atmosphere": {
+        "Pressure": 7.4E-12,
+        "Hydrosphere": false,
+        "HyrdoExtent": 0,
+        "GreenhouseFactor": 0,
+        "GreenhousePressure": 0,
+        "SurfaceTemperature": -139.15,
+        "Gases": [
+          { "Symbol": "CO2", "Percent": 0.1 },
+          { "Symbol": "O2", "Percent": 0.05 }
+        ]
+      }
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "moon-amalthea",
+      "Name": "Amalthea",
+      "Parent": "Jupiter",
+      "Colonizable": true,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 500,
+      "Info": {
+        "Type": "moon",
+        "Albedo": 0.09,
+        "Mass": 2.08E18,
+        "Radius": 83.5
+      },
+      "Orbit": {
+        "SemiMajorAxis": 181365.84,
+        "Eccentricity": 0.00319,
+        "EclipticInclination": 0,
+        "LoAN": 0,
+        "AoP": 0,
+        "MeanAnomaly": 0
+      }
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "moon-elara",
+      "Name": "Elara",
+      "Parent": "Jupiter",
+      "Colonizable": true,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 500,
+      "Info": {
+        "Type": "moon",
+        "Albedo": 0.046,
+        "Mass": 48.7E17,
+        "Radius": 39.95
+      },
+      "Orbit": {
+        "SemiMajorAxis": 11741000,
+        "Eccentricity": 0.217,
+        "EclipticInclination": 0,
+        "LoAN": 109.4,
+        "AoP": 143.6,
+        "MeanAnomaly": 333
+      }
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "moon-himalia",
+      "Name": "Himalia",
+      "Parent": "Jupiter",
+      "Colonizable": true,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 500,
+      "Info": {
+        "Type": "moon",
+        "Albedo": 0.057,
+        "Mass": 4.2E18,
+        "Radius": 85
+      },
+      "Orbit": {
+        "SemiMajorAxis": 11388690,
+        "Eccentricity": 0.1537860,
+        "EclipticInclination": 29.90917,
+        "LoAN": 44.99935,
+        "AoP": 21.60643,
+        "MeanAnomaly": 94.30785
+      }
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "moon-lysithea",
+      "Name": "Lysithea",
+      "Parent": "Jupiter",
+      "Colonizable": true,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 500,
+      "Info": {
+        "Type": "moon",
+        "Albedo": 0.036,
+        "Mass": 6.3E16,
+        "Radius": 21.1
+      },
+      "Orbit": {
+        "SemiMajorAxis": 11717000,
+        "Eccentricity": 0.112,
+        "EclipticInclination": 0,
+        "LoAN": 5.5,
+        "AoP": 49.5,
+        "MeanAnomaly": 329.1
+      }
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "moon-pasiphae",
+      "Name": "Pasiphae",
+      "Parent": "Jupiter",
+      "Colonizable": true,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 500,
+      "Info": {
+        "Type": "moon",
+        "Albedo": 0.044,
+        "Mass": 3E17,
+        "Radius": 28.9
+      },
+      "Orbit": {
+        "SemiMajorAxis": 23624000,
+        "Eccentricity": 0.409,
+        "EclipticInclination": 0,
+        "LoAN": 0,
+        "AoP": 0,
+        "MeanAnomaly": 0
+      }
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "moon-sinope",
+      "Name": "Sinope",
+      "Parent": "Jupiter",
+      "Colonizable": true,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 500,
+      "Info": {
+        "Type": "moon",
+        "Albedo": 0.042,
+        "Mass": 7.5E16,
+        "Radius": 17.5
+      },
+      "Orbit": {
+        "SemiMajorAxis": 23939000,
+        "Eccentricity": 0.25,
+        "EclipticInclination": 0,
+        "LoAN": 0,
+        "AoP": 0,
+        "MeanAnomaly": 0
+      }
+    }
+  }
+]

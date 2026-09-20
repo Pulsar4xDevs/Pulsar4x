@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json.Linq;
+using Pulsar4X.Blueprints;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
@@ -12,6 +13,30 @@ namespace Pulsar4X.People
 {
     public static class SpeciesFactory
     {
+        public static Entity CreateFromBlueprint(StarSystem system, SpeciesBlueprint speciesBlueprint)
+        {
+            var species = Entity.Create();
+
+            system.AddEntity(species, new List<BaseDataBlob>() {
+                new NameDB(speciesBlueprint.Name),
+                new SpeciesDB()
+                {
+                    BaseGravity = speciesBlueprint.Gravity.Ideal ?? 0,
+                    MinimumGravityConstraint = speciesBlueprint.Gravity.Minimum ?? 0,
+                    MaximumGravityConstraint = speciesBlueprint.Gravity.Maximum ?? 0,
+                    BasePressure = speciesBlueprint.Pressure.Ideal ?? 0,
+                    MinimumPressureConstraint = speciesBlueprint.Pressure.Minimum ?? 0,
+                    MaximumPressureConstraint = speciesBlueprint.Pressure.Maximum ?? 0,
+                    BaseTemperature = speciesBlueprint.Temperature.Ideal ?? 0,
+                    MinimumTemperatureConstraint = speciesBlueprint.Temperature.Minimum ?? 0,
+                    MaximumTemperatureConstraint = speciesBlueprint.Temperature.Maximum ?? 0,
+                    BreathableGasSymbol = speciesBlueprint.BreathableGasSymbol ?? "O2",
+                }
+            });
+
+            return species;
+        }
+
         public static Entity CreateFromJson(Entity faction, EntityManager system, string filePath)
         {
             string fileContents = File.ReadAllText(filePath);
@@ -106,7 +131,7 @@ namespace Pulsar4X.People
 
         private static SpeciesDB CreateSpeciesDB_FromPlanet(Entity planetEntity, Random rng)
         {
-            
+
             MassVolumeDB masvolinfo = planetEntity.GetDataBlob<MassVolumeDB>();
             SystemBodyInfoDB sysbodyinfo = planetEntity.GetDataBlob<SystemBodyInfoDB>();
             AtmosphereDB atmoinfo = planetEntity.GetDataBlob<AtmosphereDB>();

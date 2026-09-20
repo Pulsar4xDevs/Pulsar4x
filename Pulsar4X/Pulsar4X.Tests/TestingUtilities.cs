@@ -49,7 +49,7 @@ namespace Pulsar4X.Tests
 
         internal static Game CreateTestUniverse(int numSystems, DateTime testTime, bool generateDefaultHumans = false)
         {
-            var gamesettings = new NewGameSettings { GameName = "Unit Test Game", StartDateTime = testTime, MaxSystems = numSystems, DefaultSolStart = generateDefaultHumans, CreatePlayerFaction = false };
+            var gamesettings = new NewGameSettings { StartDateTime = testTime, MaxSystems = numSystems, DefaultSolStart = generateDefaultHumans, CreatePlayerFaction = false };
             ModLoader modLoader = new ModLoader();
             ModDataStore modDataStore = new ModDataStore();
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
@@ -81,6 +81,12 @@ namespace Pulsar4X.Tests
             // Humans name the Greys.
             greyAlienSpecies.GetDataBlob<NameDB>().SetName(humanFaction.Id, "Space bugs");
             //TODO Expand the "Test Universe" to cover more datablobs and entities. And ships. Etc.
+
+            // Set all test systems to Foreground so existing tests work without modification
+            foreach (var system in game.Systems)
+            {
+                system.SetActivityState(SystemActivityState.Foreground);
+            }
 
             if (generateDefaultHumans)
             {
@@ -125,7 +131,7 @@ namespace Pulsar4X.Tests
         internal TestGame(int numSystems = 10)
         {
 
-            GameSettings = new  NewGameSettings { GameName = "Unit Test Game", MaxSystems = numSystems, CreatePlayerFaction = false };
+            GameSettings = new  NewGameSettings { MaxSystems = numSystems, CreatePlayerFaction = false };
             ModLoader modLoader = new ModLoader();
             ModDataStore modDataStore = new ModDataStore();
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
@@ -150,6 +156,7 @@ namespace Pulsar4X.Tests
 
             StarSystemFactory starfac = new StarSystemFactory(Game);
             Sol = starfac.CreateSol(Game);
+            Sol.SetActivityState(SystemActivityState.Foreground);
             Earth = NameLookup.GetFirstEntityWithName(Sol, "Earth"); //Sol.Entities[3]; //should be fourth entity created
              EarthColony = ColonyFactory.CreateColony(HumanFaction, HumanSpecies, Earth);
              var humondatastore = HumanFaction.GetDataBlob<FactionInfoDB>().Data;

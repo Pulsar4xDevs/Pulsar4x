@@ -1,13 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <!-- UI library; the executable shell is Pulsar4X.Client.Host (the composition root). -->
+    <OutputType>Library</OutputType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <OldToolsVersion>Current</OldToolsVersion>
-    <ApplicationIcon>Resources\pulsaricon.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Pulsar4X.Client.Host" />
+  </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Linux_x64' ">
     <IntermediateOutputPath>obj\Linux_x64\Debug</IntermediateOutputPath>
@@ -15,13 +18,13 @@
     <DebugType>
     </DebugType>
     <OutputPath>bin\Linux_x64\Debug</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <NoWarn>
     </NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DefineConstants>DEBUG</DefineConstants>
     <NoWarn>0414;0649;0169</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Linux_x64' ">
@@ -43,8 +46,7 @@
     <DebugType>
     </DebugType>
     <OutputPath>bin\Windows_x64\Debug</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <NoWarn>
     </NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -67,8 +69,7 @@
     <DebugType>
     </DebugType>
     <OutputPath>bin\Windows_x86\Debug</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <NoWarn>
     </NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -86,192 +87,57 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ImGui.NET" Version="1.88.0" />
+
     <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="7.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="SDL2-CS">
-      <HintPath>Libs\SDL2-CS.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Resources\CargoIco.bmp" />
-    <None Remove="Resources\FireconIco.bmp" />
-    <None Remove="Resources\IndustryIco.bmp" />
-    <None Remove="Resources\OneStep.bmp" />
-    <None Remove="Resources\Pause.bmp" />
-    <None Remove="Resources\PinIco.bmp" />
-    <None Remove="Resources\Play.bmp" />
-    <None Remove="Resources\PowerIco.bmp" />
-    <None Remove="Resources\PulsarLogo.bmp" />
-    <None Remove="Resources\PulsarLogo.png" />
-    <None Remove="Libs\libcimgui.so" />
-    <None Remove="Resources\CancelIco.bmp" />
-    <None Remove="Resources\DnArrow.bmp" />
-    <None Remove="Resources\RenameIco.bmp" />
-    <None Remove="Resources\RepeatIco.bmp" />
-    <None Remove="Resources\RulerIco.bmp" />
-    <None Remove="Resources\SelectIco.bmp" />
-    <None Remove="Resources\TreeIco.bmp" />
-    <None Remove="Resources\UpArrow.bmp" />
-    <None Update="imgui.ini">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\ProggyClean.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\DejaVuSans.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Remove="Libs\SDL2-CS.dll" />
-    <None Remove="Libs\SDL2-CS.dll.config" />
-    <None Remove="Libs\SDL2-CS.pdb" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
-    <None Include="Libs\cimgui\linux-x64\cimgui.so">
-      <Link>libcimgui.so</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\sdl2\linux-x64\libSDL2.so">
-      <Link>libSDL2.so</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\sdl2\linux-x64\libSDL2_image.so">
-      <Link>libSDL2_image.so</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\sdl2\linux-x64\libSDL2_mixer.so">
-      <Link>libSDL2_mixer.so</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\sdl2\linux-x64\libSDL2_ttf.so">
-      <Link>libSDL2_ttf.so</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup Condition=" '$(OS)' == 'Windows_NT' ">
-    <None Include="Libs\cimgui\win-x64\cimgui.dll">
-      <Link>cimgui.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\sdl2\win-x64\SDL2.dll">
-      <Link>SDL2.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <ProjectReference Include="..\Pulsar4X.Api\Pulsar4X.Api.csproj" />
+    <ProjectReference Include="..\Pulsar4X.OrbitalMath\Pulsar4X.Orbital.csproj" />
   </ItemGroup>
   <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">
-    <None Include="Libs\cimgui\osx-x64\cimgui.dylib">
-      <Link>libcimgui</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\sdl2\win-x86\SDL2.dll">
-      <Link>SDL2.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <Content Include="..\external\ImGui.NET\deps\cimgui\osx\cimgui.dylib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>cimgui.dylib</Link>
+    </Content>
   </ItemGroup>
+
   <ItemGroup>
-    <Content Include="Resources\CargoIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\FireconIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\IndustryIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\OneStep.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Pause.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\PinIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Play.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\PulsarLogo.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\PulsarLogo.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\CancelIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\DnArrow.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\RenameIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\RepeatIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\RulerIco.bmp">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\SelectIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\TreeIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\UpArrow.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Remove="Resources\DesignShipIco.bmp" />
-    <Content Include="Resources\DesignShipIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\GalaxyMapIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Remove="Resources\DesignComponentIco.bmp" />
-    <Content Include="Resources\DesignComponentIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Remove="Resources\ResearchIco.bmp" />
-    <Content Include="Resources\ResearchIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Remove="Resources\RulerIco.bmp" />
-    <Content Include="Resources\RulerIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Remove="Resources\DesignOrdnanceIco.bmp" />
-    <Content Include="Resources\DesignOrdnanceIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Remove="Resources\ImgTest.bmp" />
-    <Content Include="Resources\ImgTest.bmp">
+    <!-- Copy all resource files with PreserveNewest -->
+    <Content Include="Resources\**\*.bmp;Resources\**\*.png;Resources\**\*.ico;Resources\**\*.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
+    <ItemGroup>
+        <!-- Linux dependencies -->
+        <Content Include="Libs/linux-x64/*" Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <Link>%(Filename)%(Extension)</Link>
+        </Content>
+    </ItemGroup>
+    <ItemGroup>
+        <!-- Windows dependencies -->
+        <Content Include="Libs/win-x64/*" Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' ">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <Link>%(Filename)%(Extension)</Link>
+        </Content>
+    </ItemGroup>
+
   <ItemGroup>
-    <None Update="Resources\CancelIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\pulsaricon.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\UpArrow.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Reference Include="ImGui.NET">
+      <HintPath>Libs\linux-x64\ImGui.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="SDL3-CS">
+      <HintPath>Libs\linux-x64\SDL3-CS.dll</HintPath>
+    </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="MapRendering\GalaxyMap.cs" />
-    <Compile Remove="PlanetaryManagement\PlanetaryWindow.old.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\PowerIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- Define a custom property for the data path -->
+    <AppDataPath Condition="'$(OS)' == 'Windows_NT'">$(APPDATA)\Pulsar4X\Pulsar4X</AppDataPath>
+    <AppDataPath Condition="'$(OS)' != 'Windows_NT'">$(HOME)/.local/share/Pulsar4X/Pulsar4X</AppDataPath>
+  </PropertyGroup>
 
   <Target Name="WriteGitHash" BeforeTargets="CoreCompile">
     <!-- names the obj/.../CustomAssemblyInfo.cs file -->
@@ -293,13 +159,13 @@
     <WriteCodeFragment Language="C#" OutputFile="$(CustomAssemblyInfoFile)" AssemblyAttributes="@(AssemblyAttributes)" />
   </Target>
   <Target Name="CleanDataDirectory" BeforeTargets="PreBuildEvent">
-    <RemoveDir Directories="$(OutputPath)Data" />
+    <!--<RemoveDir Directories="$(OutputPath)Data" />-->
   </Target>
   <Target Name="CopyJsonData" AfterTargets="Build">
     <ItemGroup>
-      <JsonDataFiles Include="..\GameEngine\Data\**\*" />
+      <JsonDataFiles Include="..\GameData\**\*" />
     </ItemGroup>
-    <Copy SourceFiles="@(JsonDataFiles)" DestinationFolder="$(OutputPath)Data\%(RecursiveDir)" />
+    <Copy SourceFiles="@(JsonDataFiles)" DestinationFolder="$(AppDataPath)\Mods\%(RecursiveDir)" />
   </Target>
 
 </Project>

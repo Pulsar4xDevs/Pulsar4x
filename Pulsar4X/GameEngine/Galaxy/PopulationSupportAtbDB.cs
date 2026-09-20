@@ -34,7 +34,8 @@ namespace Pulsar4X.Galaxy
 
         public void OnComponentInstallation(Entity ship, ComponentInstance component)
         {
-            throw new System.NotImplementedException();
+            // Population support is summed on demand by ComponentInstancesDBExtensions
+            // .GetPopulationSupportValue (tolerance-gated), not accumulated here.
         }
 
         public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)

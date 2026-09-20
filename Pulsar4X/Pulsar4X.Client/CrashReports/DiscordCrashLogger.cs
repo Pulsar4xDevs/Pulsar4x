@@ -12,30 +12,30 @@ public class DiscordCrashLogger
     private readonly HttpClient _httpClient;
 
     // Define the structure for Discord webhook fields
-    private class DiscordField
+    private struct DiscordField
     {
-        public string name { get; set; }
-        public string value { get; set; }
-        public bool? inline { get; set; }
+        public string Name { get; set; }
+        public string Value { get; set; }
+        public bool? Inline { get; set; }
     }
 
     // Define the structure for Discord webhook embeds
-    private class DiscordEmbed
+    private struct DiscordEmbed
     {
-        public string title { get; set; }
-        public int color { get; set; }
-        public DiscordField[] fields { get; set; }
-        public DiscordFooter footer { get; set; }
+        public string Title { get; set; }
+        public int Color { get; set; }
+        public DiscordField[] Fields { get; set; }
+        public DiscordFooter Footer { get; set; }
     }
 
-    private class DiscordFooter
+    private struct DiscordFooter
     {
-        public string text { get; set; }
+        public string Text { get; set; }
     }
 
-    private class DiscordWebhookPayload
+    private struct DiscordWebhookPayload
     {
-        public DiscordEmbed[] embeds { get; set; }
+        public DiscordEmbed[] Embeds { get; set; }
     }
 
     public DiscordCrashLogger(string webhookUrl)
@@ -44,31 +44,31 @@ public class DiscordCrashLogger
         _httpClient = new HttpClient();
     }
 
-    public async Task LogCrashAsync(Exception exception, string userInfo = null)
+    public async Task LogCrashAsync(Exception exception, string? userInfo = null)
     {
         try
         {
             var fields = new DiscordField[]
             {
-                new DiscordField { name = "Exception Type", value = exception.GetType().FullName, inline = true },
-                new DiscordField { name = "Timestamp", value = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss UTC"), inline = true },
-                new DiscordField { name = "Message", value = exception.Message },
-                new DiscordField { name = "Stack Trace", value = $"```\n{exception.StackTrace?.Substring(0, Math.Min(1000, exception.StackTrace?.Length ?? 0))}\n```" },
-                new DiscordField { name = "User Info", value = string.IsNullOrEmpty(userInfo) ? "No user info provided" : userInfo }
+                new DiscordField { Name = "Exception Type", Value = exception.GetType().FullName ?? "Unknown", Inline = true },
+                new DiscordField { Name = "Timestamp", Value = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss UTC"), Inline = true },
+                new DiscordField { Name = "Message", Value = exception.Message },
+                new DiscordField { Name = "Stack Trace", Value = $"```\n{exception.StackTrace?.Substring(0, Math.Min(1000, exception.StackTrace?.Length ?? 0))}\n```" },
+                new DiscordField { Name = "User Info", Value = string.IsNullOrEmpty(userInfo) ? "No user info provided" : userInfo }
             };
 
             var payload = new DiscordWebhookPayload
             {
-                embeds = new DiscordEmbed[]
+                Embeds = new DiscordEmbed[]
                 {
                     new DiscordEmbed
                     {
-                        title = "❌ Application Crash Report",
-                        color = 15158332, // Red color
-                        fields = fields,
-                        footer = new DiscordFooter
+                        Title = "❌ Application Crash Report",
+                        Color = 15158332, // Red color
+                        Fields = fields,
+                        Footer = new DiscordFooter
                         {
-                            text = "Application Crash Logger"
+                            Text = "Application Crash Logger"
                         }
                     }
                 }

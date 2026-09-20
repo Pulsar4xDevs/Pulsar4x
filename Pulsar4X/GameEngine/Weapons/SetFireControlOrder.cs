@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Components;
@@ -10,7 +11,7 @@ using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.Weapons
 {
-    public class SetWeaponsFireControlOrder : EntityCommand
+    public class SetWeaponsFireControlOrder : EntityAction
     {
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
@@ -35,7 +36,7 @@ namespace Pulsar4X.Weapons
         private List<WeaponState> _weaponsAssigned = new List<WeaponState>();
 
 
-        public static void CreateCommand(Game game, DateTime starSysDate, int factionGuid, int orderEntity, string fireControlGuid, List<string> weaponsAssigned)
+        public static bool CreateCommand(Game game, DateTime starSysDate, int factionGuid, int orderEntity, string fireControlGuid, List<string> weaponsAssigned)
         {
             var cmd = new SetWeaponsFireControlOrder()
             {
@@ -46,7 +47,7 @@ namespace Pulsar4X.Weapons
                 WeaponsAssigned = weaponsAssigned,
                 UseActionLanes = false
             };
-            game.OrderHandler.HandleOrder(cmd);
+            return game.OrderHandler.HandleOrder(cmd);
         }
 
 
@@ -66,7 +67,7 @@ namespace Pulsar4X.Weapons
         {
             if (IsRunning)
                 _isFinished = true;
-            else 
+            else
                 _isFinished = false;
             return _isFinished;
         }
@@ -104,13 +105,13 @@ namespace Pulsar4X.Weapons
             return false;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }
     }
 
-    public class SetTargetFireControlOrder : EntityCommand
+    public class SetTargetFireControlOrder : EntityAction
     {
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
@@ -138,7 +139,7 @@ namespace Pulsar4X.Weapons
         private ComponentInstance _fireControlComponent;
 
 
-        public static void CreateCommand(Game game, DateTime starSysDate, int factionGuid, int orderEntity, string fireControlGuid, int targetGuid)
+        public static bool CreateCommand(Game game, DateTime starSysDate, int factionGuid, int orderEntity, string fireControlGuid, int targetGuid)
         {
             var cmd = new SetTargetFireControlOrder()
             {
@@ -149,7 +150,7 @@ namespace Pulsar4X.Weapons
                 TargetSensorEntityGuid = targetGuid,
                 UseActionLanes = false,
             };
-            game.OrderHandler.HandleOrder(cmd);
+            return game.OrderHandler.HandleOrder(cmd);
         }
 
 
@@ -167,7 +168,7 @@ namespace Pulsar4X.Weapons
         {
             if (IsRunning)
                 _isFinished = true;
-            else 
+            else
                 _isFinished = false;
             return _isFinished;
             //if target is dead? or not seen for x amount of time?
@@ -204,13 +205,13 @@ namespace Pulsar4X.Weapons
             return false;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }
     }
 
-    public class SetOpenFireControlOrder : EntityCommand
+    public class SetOpenFireControlOrder : EntityAction
     {
         public enum FireModes:byte //this could be made more complex, rapid/overdrive, staggered, alphastrike,
         {
@@ -247,7 +248,7 @@ namespace Pulsar4X.Weapons
         public FireModes IsFiring;
         private Game _game;
 
-        public static void CreateCmd(Game game, int factionId, int shipEntityId, string fireControlGuid, FireModes isFiring)
+        public static bool CreateCmd(Game game, int factionId, int shipEntityId, string fireControlGuid, FireModes isFiring)
         {
             var cmd = new SetOpenFireControlOrder()
             {
@@ -258,8 +259,7 @@ namespace Pulsar4X.Weapons
                 IsFiring = isFiring,
                 _game = game
             };
-            game.OrderHandler.HandleOrder(cmd);
-
+            return game.OrderHandler.HandleOrder(cmd);
         }
 
         internal override void Execute(DateTime atDateTime)
@@ -271,7 +271,7 @@ namespace Pulsar4X.Weapons
                 {
                     fcState.IsEngaging = true;
                     DateTime dateTimeNow = _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime;
-                    if(!_entityCommanding.TryGetDatablob<GenericFiringWeaponsDB>(out var blob))
+                    if(!_entityCommanding.TryGetDataBlob<GenericFiringWeaponsDB>(out var blob))
                     {
                         blob = new GenericFiringWeaponsDB(fcState.GetChildrenInstances());
                         _entityCommanding.SetDataBlob(blob);
@@ -296,7 +296,7 @@ namespace Pulsar4X.Weapons
         {
             if (IsRunning)
                 _isFinished = true;
-            else 
+            else
                 _isFinished = false;
             return _isFinished;
         }
@@ -319,13 +319,13 @@ namespace Pulsar4X.Weapons
             return false;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }
     }
 
-    public class SetOrdinanceToWpnOrder : EntityCommand
+    public class SetOrdinanceToWpnOrder : EntityAction
     {
 
         public override string Name { get; } = "Fire Control Set Ordnance";
@@ -352,17 +352,17 @@ namespace Pulsar4X.Weapons
         private OrdnanceDesign _ordnanceAssigned;
 
 
-        public static void CreateCommand(DateTime starSysDate, Entity faction, int orderEntityId, WeaponState weapon, string ordnanceAssigned)
+        public static bool CreateCommand(Game game, DateTime starSysDate, int factionId, int orderEntityId, string weaponId, string ordnanceAssigned)
         {
             var cmd = new SetOrdinanceToWpnOrder()
             {
-                RequestingFactionGuid = faction.Id,
+                RequestingFactionGuid = factionId,
                 EntityCommandingGuid = orderEntityId,
                 CreatedDate = starSysDate,
-                WeaponGuid = weapon.ID,
+                WeaponGuid = weaponId,
                 OrdnanceAssigned = ordnanceAssigned
             };
-            cmd.EntityCommanding.Manager.Game.OrderHandler.HandleOrder(cmd);
+            return game.OrderHandler.HandleOrder(cmd);
         }
 
 
@@ -381,7 +381,7 @@ namespace Pulsar4X.Weapons
         {
             if (IsRunning)
                 _isFinished = true;
-            else 
+            else
                 _isFinished = false;
             return _isFinished;
         }
@@ -394,7 +394,8 @@ namespace Pulsar4X.Weapons
 
                 if (instancesdb.AllComponents.TryGetValue(WeaponGuid, out ComponentInstance? wpn))
                 {
-                    _ordnanceAssigned = _factionEntity.GetDataBlob<FactionInfoDB>().MissileDesigns[OrdnanceAssigned];
+                    if (!_factionEntity.GetDataBlob<FactionInfoDB>().MissileDesigns.TryGetValue(OrdnanceAssigned, out _ordnanceAssigned))
+                        return false;
                     if(wpn.TryGetAbilityState(out WeaponState? wpnState))
                     {
                         _weaponInstance = wpn;
@@ -405,7 +406,7 @@ namespace Pulsar4X.Weapons
             return false;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }

@@ -9,9 +9,15 @@ using Pulsar4X.Blueprints;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Engine.Orders;
 using System.Runtime.CompilerServices;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Events;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
+using Pulsar4X.Energy;
+using Pulsar4X.JumpPoints;
+using Pulsar4X.Sensors;
+using Pulsar4X.Logistics;
+using Pulsar4X.Messaging;
 [assembly: InternalsVisibleTo("Pulsar4X.Tests")]
 
 namespace Pulsar4X.Engine
@@ -23,6 +29,15 @@ namespace Pulsar4X.Engine
         /// and should have their FactionOwnerID set equal to NeutralFactionID
         /// </summary>
         public static readonly int NeutralFactionId = -99;
+
+        [JsonProperty]
+        public string Name { get; set; }
+
+        [JsonProperty]
+        public string CreatedOnGitHash { get; set; }
+
+        [JsonProperty]
+        public string LastSaveGitHash { get; set; }
 
         [JsonProperty]
         public MasterTimePulse TimePulse { get; internal set; }
@@ -72,10 +87,22 @@ namespace Pulsar4X.Engine
         public ModDataStore StartingGameData { get; private set; }
 
         [JsonProperty]
-        internal GalaxyFactory GalaxyGen { get; private set; }
+        public GalaxyFactory GalaxyGen { get; private set; }
 
         [JsonProperty]
         public Dictionary<int, Entity> Factions { get; } = new ();
+
+        /// <summary>
+        /// Tracks the next available faction mask index (0-31).
+        /// Used by FactionFactory when creating new factions.
+        /// </summary>
+        [JsonProperty]
+        internal int NextFactionMaskIndex { get; set; } = 0;
+
+        /// <summary>
+        /// Maximum number of factions supported by the mask system (32 bits in an int).
+        /// </summary>
+        public const int MaxFactions = 32;
 
         // This is horribly named, it generates the ID's for the ICargoables NOT Entities
         [JsonProperty]
@@ -92,8 +119,21 @@ namespace Pulsar4X.Engine
 
         public Game() { }
 
+        /// <summary>
+        /// Clears all static/singleton state to prepare for a new game session.
+        /// This must be called before creating a new game to prevent state leakage
+        /// from a previous game session.
+        /// </summary>
+        internal static void ClearGlobalState()
+        {
+            EventManager.Instance.Clear();
+            MessagePublisher.Instance.Clear();
+            LogisticsCycle.Clear();
+        }
+
         public Game(NewGameSettings settings, ModDataStore modDataStore)
         {
+            ClearGlobalState();
             ApplyModData(modDataStore);
             ApplySettings(settings);
 
@@ -143,6 +183,18 @@ namespace Pulsar4X.Engine
 
         public static int GetEntityID() => EntityIDCounter++;
 
+        /// <summary>
+        /// Allocates and returns the next available faction mask index.
+        /// </summary>
+        /// <returns>A unique index (0-31) for use in faction bit masks.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if all 32 faction slots are used.</exception>
+        internal int AllocateFactionMaskIndex()
+        {
+            if (NextFactionMaskIndex >= MaxFactions)
+                throw new InvalidOperationException($"Cannot create more than {MaxFactions} factions.");
+            return NextFactionMaskIndex++;
+        }
+
         public static string Save(Game game)
         {
             JsonSerializerSettings settings = new JsonSerializerSettings() {
@@ -165,6 +217,7 @@ namespace Pulsar4X.Engine
             };
             var loadedGame = JsonConvert.DeserializeObject<Game>(json, settings);
 
+            ClearGlobalState();
             loadedGame.TimePulse.Initialize(loadedGame);
             loadedGame.ProcessorManager = new ProcessorManager(loadedGame);
             loadedGame.OrderHandler = new StandAloneOrderHandler(loadedGame);
@@ -177,7 +230,6 @@ namespace Pulsar4X.Engine
             }
 
             // Hook up the event logs
-            EventManager.Instance.Clear();
             foreach(var (id, faction) in loadedGame.Factions)
             {
                 faction.GetDataBlob<FactionInfoDB>().EventLog.Subscribe();
@@ -195,6 +247,31 @@ namespace Pulsar4X.Engine
             // loadedGame.OrderHandler = JsonConvert.DeserializeObject<StandAloneOrderHandler>(JObject.Parse(json)["OrderHandler"].ToString(), settings);
 
             return loadedGame;
+        }
+
+        public void PostNewGameInitialization()
+        {
+            // Link all JumpPoints between systems
+            JPFactory.LinkAllJumpPoints(this);
+
+            // There are few DB's that need to run the processor when the game begins
+            foreach(var system in Systems)
+            {
+                var entitiesWithEnergyGen = system.GetAllEntitiesWithDataBlob<EnergyGenAbilityDB>();
+                foreach (var entity in entitiesWithEnergyGen)
+                {
+                    ProcessorManager.GetInstanceProcessor(nameof(EnergyGenProcessor)).ProcessEntity(entity, TimePulse.GameGlobalDateTime);
+                }
+
+                var entitiesWithSensors = system.GetAllEntitiesWithDataBlob<SensorAbilityDB>();
+                foreach (var entity in entitiesWithSensors)
+                {
+                    ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entity, TimePulse.GameGlobalDateTime);
+                }
+
+                // Systems with faction entities start as Background, others stay Stasis (default)
+                system.UpdateActivityState();
+            }
         }
     }
 

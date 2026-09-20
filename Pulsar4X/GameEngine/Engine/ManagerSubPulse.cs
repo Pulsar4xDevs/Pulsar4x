@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Diagnostics;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
 using Pulsar4X.DataStructures;
@@ -23,56 +24,37 @@ namespace Pulsar4X.Engine
 
         public PerformanceStopwatch Performance { get; private set; } = new PerformanceStopwatch();
 
+        private readonly object _lock = new();
         [JsonProperty]
-        public SortedDictionary<DateTime, Dictionary<string, List<Entity>>> InstanceProcessorsQueue { get; set; } = new ();
+        private TimeQueue<(string, Entity)> _instanceProcessorsQueue = new();
+        public TimeQueue<(string, Entity)> InstanceProcessorsQueue {
+            get {
+                lock (_lock)
+                {
+                    return new TimeQueue<(string, Entity)>(_instanceProcessorsQueue);
+                }
+            }
+            private set {}
+        }
 
         [JsonProperty]
-        public SafeDictionary<Type , DateTime?> HotLoopProcessorsNextRun { get; private set;} = new ();
+        public SafeDictionary<Type , DateTime?> HotLoopProcessorsNextRun { get; private set;} = new();
+
+        /// <summary>
+        /// Multiplier applied to hotloop processor RunFrequency.
+        /// 1.0 = normal (Foreground), >1.0 = slower (Background).
+        /// </summary>
+        [JsonProperty]
+        public double FrequencyMultiplier { get; set; } = 1.0;
 
         //public readonly ConcurrentDictionary<Type, TimeSpan> ProcessTime = new ConcurrentDictionary<Type, TimeSpan>();
         public bool IsProcessing = false;
+        bool _instanceProcessorsRunning = false;
         public string CurrentProcess = "Waiting";
 
         private ProcessorManager _processManager;
 
         private EntityManager _entityManager;
-
-        internal Dictionary<DateTime, List<String>> GetInstanceProcForEntity(Entity entity)
-        {
-            var procDict = new Dictionary<DateTime, List<string>>();
-            foreach (var (key, queue) in InstanceProcessorsQueue)
-            {
-                foreach(var (name, list) in queue)
-                {
-                    if(list.Contains(entity))
-                    {
-                        if(!procDict.ContainsKey(key))
-                            procDict.Add(key, new List<string>());
-                    }
-                    procDict[key].Add(name);
-                }
-            }
-
-            return procDict;
-        }
-
-        internal void ImportProcDictForEntity(Entity entity, Dictionary<DateTime, List<string>> procDict)
-        {
-            foreach (var kvp in procDict)
-            {
-                if(kvp.Key < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
-
-                if (!InstanceProcessorsQueue.ContainsKey(kvp.Key))
-                    InstanceProcessorsQueue.Add(kvp.Key, new Dictionary<string, List<Entity>>());
-                foreach (var procName in kvp.Value)
-                {
-                    if (!InstanceProcessorsQueue[kvp.Key].ContainsKey(procName))
-                        InstanceProcessorsQueue[kvp.Key].Add(procName, new List<Entity>());
-                    if (!InstanceProcessorsQueue[kvp.Key][procName].Contains(entity))
-                        InstanceProcessorsQueue[kvp.Key][procName].Add(entity);
-                }
-            }
-        }
 
         /// <summary>
         /// Fires when the system date is updated,
@@ -106,13 +88,27 @@ namespace Pulsar4X.Engine
                 if (value < _systemLocalDateTime)
                     throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow.
                 _systemLocalDateTime = value;
-                // FIXME: needs to get rid of StaticRefLib references
-                // if (StaticRefLib.SyncContext != null)
-                //     StaticRefLib.SyncContext.Post(InvokeDateChange, value); //marshal to the main (UI) thread, so the event is invoked on that thread.
-                //NOTE: the above marshaling does not apear to work correctly, it's possible for it to work, the context needs to be in an await state or something.
-                //do not rely on the above being run on the main thread! (maybe we should remove the marshaling?)
-                // else //if context is null, we're probibly running tests or headless.
-                //     InvokeDateChange(value); //in this case we're not going to marshal this. (event will fire on *THIS* thread)
+                // Fire on the processing thread (no UI marshaling — the old SyncContext.Post path was
+                // unreliable). Subscribers must be thread-safe; the API server bridges this to push the
+                // focused system's sub-step clock, which is what keeps client rendering smooth during a
+                // long pulse. Cheap no-op when nothing is subscribed.
+                InvokeDateChange(value);
+            }
+        }
+
+        /// <summary>
+        /// Clock for "schedule this after the current sub-step". During ProcessToNextInterupt
+        /// StarSysDateTime still lags <see cref="_subStepDateTime"/> (hotloops need the delta).
+        /// AddEntityInterupt at that lagged now, or at the current sub-step after Split(),
+        /// re-queues the same instant and 0-spans the outer ProcessSystem loop.
+        /// </summary>
+        internal DateTime NextSafeInterruptTime
+        {
+            get
+            {
+                if (IsProcessing && _subStepDateTime > _systemLocalDateTime)
+                    return _subStepDateTime;
+                return _systemLocalDateTime;
             }
         }
 
@@ -122,6 +118,7 @@ namespace Pulsar4X.Engine
         [JsonConstructor]
         internal ManagerSubPulse()
         {
+            InstanceProcessorsQueue = _instanceProcessorsQueue;
         }
 
         internal void Initialize(EntityManager entityManager, ProcessorManager processorManager)
@@ -160,20 +157,25 @@ namespace Pulsar4X.Engine
         /// <param name="nextDateTime"></param>
         /// <param name="action"></param>
         /// <param name="entity"></param>
-        internal void AddEntityInterupt(DateTime nextDateTime, string actionProcessor, Entity? entity)
+        internal void AddEntityInterupt(DateTime nextDateTime, string actionProcessor, Entity entity)
         {
-            if(entity == null) throw new ArgumentNullException("Entity cannot be null");
-            if(nextDateTime < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
+            if(nextDateTime < StarSysDateTime)
+                throw new Exception("Trying to add an interrupt in the past");
+            // After Split() of this sub-step, a same-instant re-queue 0-spans
+            // the outer ProcessSystem loop. Callers that mean "now" should
+            // ProcessEntity. Hotloops run before Split and may still pin now.
+            if (_instanceProcessorsRunning && nextDateTime <= _subStepDateTime)
+                return;
+
             if (nextDateTime < _subStepDateTime)
                 _subStepDateTime = nextDateTime;
-            if (!InstanceProcessorsQueue.ContainsKey(nextDateTime))
-                InstanceProcessorsQueue.Add(nextDateTime, new Dictionary<string, List<Entity>>());
-            if (!InstanceProcessorsQueue[nextDateTime].ContainsKey(actionProcessor))
-                InstanceProcessorsQueue[nextDateTime].Add(actionProcessor, new List<Entity>());
-            if (!InstanceProcessorsQueue[nextDateTime][actionProcessor].Contains(entity))
-                InstanceProcessorsQueue[nextDateTime][actionProcessor].Add(entity);
+
+            lock (_lock)
+            {
+                _instanceProcessorsQueue.Add(nextDateTime, (actionProcessor, entity));
+            }
         }
-        
+
         /// <summary>
         /// this type of interupt will attempt to run the action processor on all entities within the system
         /// </summary>
@@ -197,7 +199,19 @@ namespace Pulsar4X.Engine
                     HotLoopProcessorsNextRun[(dbType)] = nextDateTime;
             }
         }
-        
+
+        /// <summary>
+        /// Gets the run frequency for a hotloop processor by its datablob type.
+        /// </summary>
+        /// <param name="dbType">The datablob type associated with the processor</param>
+        /// <returns>The run frequency TimeSpan, or null if the processor is not found</returns>
+        public TimeSpan? GetProcessorRunFrequency(Type dbType)
+        {
+            if (_processManager != null && _processManager.HotloopProcessors.TryGetValue(dbType, out var processor))
+                return processor.RunFrequency;
+            return null;
+        }
+
 
         internal void AddSystemInterupt(BaseDataBlob db)
         {
@@ -221,7 +235,7 @@ namespace Pulsar4X.Engine
             DateTime nextDT = _processToDateTime + next;
 
             if(nextDT < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
-            
+
             Type dbType = db.GetType();
             AddSystemInterupt(nextDT, dbType);
 
@@ -234,46 +248,44 @@ namespace Pulsar4X.Engine
         internal void RemoveEntity(Entity entity)
         {
             //possibly need to implement a reverse dictionary so entities can be looked up backwards, rather than itterating through?
-            //MUST remove empty entries in the dictionary as an empty entitylist will be seen as a systemInterupt.
-            //throw new NotImplementedException();
 
-            List<DateTime> removekeys = new List<DateTime>();
-            foreach (var (dateTime, dict) in InstanceProcessorsQueue)
+            List<int> removekeys = new();
+            var idx = 0;
+
+            lock (_lock)
             {
-                foreach(var (key, list) in dict)
+                foreach (var qi in _instanceProcessorsQueue)
                 {
-                    list.Remove(entity);
+                    if (qi.Item.Item2 == entity)
+                        removekeys.Add(idx);
+                    idx += 1;
                 }
 
-                if(dict.Values.Count == 0)
-                    removekeys.Add(dateTime);
+                foreach (var i in removekeys)
+                    _instanceProcessorsQueue.RemoveAt(i);
             }
-
-            foreach (var item in removekeys)
-            {
-                InstanceProcessorsQueue.Remove(item);
-            }
-
         }
 
-        /// <summary>
-        /// transfers all references from this starSystem to the new one
-        /// Note that doing this could cause a temporal anomaly if the system we're moving to is ahead of this one.
-        /// This should only be done from the MasterTimePulse when it has synched the systems.
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="starsys"></param>
-        internal void TransferEntity(Entity entity, StarSystem starsys)
+        internal void FastForwardTo(DateTime targetDateTime)
         {
+            _systemLocalDateTime = targetDateTime;
+            _processToDateTime = targetDateTime;
+            _subStepDateTime = targetDateTime;
 
-            Dictionary<DateTime, List<string>> procDict = GetInstanceProcForEntity(entity);
+            var types = HotLoopProcessorsNextRun.Keys.ToList();
+            foreach (var type in types)
+            {
+                if (HotLoopProcessorsNextRun[type] == null)
+                    continue;
+                var proc = _processManager.HotloopProcessors[type];
+                HotLoopProcessorsNextRun[type] = targetDateTime + proc.FirstRunOffset;
+            }
 
-            RemoveEntity(entity);
-
-            //add the processors to the new system
-            starsys.ManagerSubpulses.ImportProcDictForEntity(entity, procDict);
+            lock (_lock)
+            {
+                _instanceProcessorsQueue = new TimeQueue<(string, Entity)>();
+            }
         }
-
 
         internal void ProcessSystem(DateTime targetDateTime)
         {
@@ -323,10 +335,12 @@ namespace Pulsar4X.Engine
                 nextInteruptDateTime = HotLoopProcessorsNextRun.Values.Min() ?? nextInteruptDateTime;
             }
 
-            if (InstanceProcessorsQueue.Keys.Count != 0 && nextInteruptDateTime >= InstanceProcessorsQueue.Keys.Min())
+            lock (_lock)
             {
-                nextInteruptDateTime = InstanceProcessorsQueue.Keys.Min();
+                if (_instanceProcessorsQueue.Any() && nextInteruptDateTime >= _instanceProcessorsQueue.First().Time)
+                    nextInteruptDateTime = _instanceProcessorsQueue.First().Time;
             }
+
             if (nextInteruptDateTime < StarSysDateTime)
                 throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow.
             return nextInteruptDateTime;
@@ -350,38 +364,57 @@ namespace Pulsar4X.Engine
                     if (runAt == null || runAt > _subStepDateTime)
                         continue;
 
-                    Performance.Start(type.Name);
+                    Trace.WriteLine(String.Format("[{0:u}|{1:u}] running hotloop processor: {2} with entity manager: {3}",
+                                StarSysDateTime, _subStepDateTime, type.Name, _entityManager.ManagerID));
+
+                    Performance.Start(_entityManager.ManagerID + "-" + type.Name);
                     CurrentProcess = type.ToString();
                     var proc = _game.ProcessorManager.HotloopProcessors[type];
                     int count = proc.ProcessManager(_entityManager, deltaSeconds);
-                    Performance.Stop(type.Name);
+                    Performance.Stop(_entityManager.ManagerID + "-" + type.Name);
 
                     if (count == 0)
                         HotLoopProcessorsNextRun[type] = null;
                     else
-                        HotLoopProcessorsNextRun[type] = _subStepDateTime + _processManager.HotloopProcessors[type].RunFrequency; //sets the next interupt for this hotloop process
-                }
-
-                if (InstanceProcessorsQueue.ContainsKey(_subStepDateTime))
-                {
-                    var qp = InstanceProcessorsQueue[_subStepDateTime];
-
-                    foreach (var instanceProcessSet in qp)
                     {
-                        var processor = _processManager.GetInstanceProcessor(instanceProcessSet.Key);
-                        Performance.Start(processor.GetType().Name);
-                        CurrentProcess = instanceProcessSet.Key;
-                        foreach (var entity in instanceProcessSet.Value)
-                        {
-
-                            processor.ProcessEntity(entity, _subStepDateTime);
-                        }
-
-                        Performance.Stop(processor.GetType().Name);
+                        var baseFrequency = _processManager.HotloopProcessors[type].RunFrequency;
+                        var scaledFrequency = TimeSpan.FromTicks((long)(baseFrequency.Ticks * FrequencyMultiplier));
+                        HotLoopProcessorsNextRun[type] = _subStepDateTime + scaledFrequency;
                     }
-
-                    InstanceProcessorsQueue.Remove(_subStepDateTime); //once all the processes have been run for that datetime, remove it from the dictionary.
                 }
+
+                TimeQueueItem<(string, Entity)>[] split;
+                lock (_lock)
+                {
+                    split = _instanceProcessorsQueue.Split(_subStepDateTime);
+                }
+
+                _instanceProcessorsRunning = true;
+                try
+                {
+                    foreach (var qi in split)
+                    {
+                        var itm = qi.Item;
+                        var s = itm.Item1;
+                        var e = itm.Item2;
+
+                        var processor = _processManager.GetInstanceProcessor(s);
+                        var pn = processor.GetType().Name;
+
+                        Trace.WriteLine(String.Format("[{0:u}|{1:u}] running instance processor: {2} with entity: {3}",
+                                    StarSysDateTime, _subStepDateTime, pn, e.DebuggerDisplay));
+
+                        Performance.Start(pn);
+                        CurrentProcess = s;
+                        processor.ProcessEntity(e, qi.Time);
+                        Performance.Stop(pn);
+                    }
+                }
+                finally
+                {
+                    _instanceProcessorsRunning = false;
+                }
+
                 StarSysDateTime = _subStepDateTime; //update the localDateTime and invoke the SystemDateChangedEvent
                 _subStepDateTime = GetNextInterupt(_processToDateTime - _subStepDateTime);
 
@@ -393,29 +426,5 @@ namespace Pulsar4X.Engine
                     break;
             }
         }
-
-        public int GetTotalNumberOfProceses()
-        {
-            int i = 0;
-            foreach (var processSet in InstanceProcessorsQueue)
-            {
-                i += processSet.Value.Count;
-            }
-
-            return i;
-        }
-
-        public List<DateTime> GetInteruptDateTimes()
-        {
-            List<DateTime> dates = new List<DateTime>();
-            foreach (var item in InstanceProcessorsQueue)
-            {
-                dates.Add(item.Key);
-            }
-            return dates;
-        }
-
     }
 }
-
-

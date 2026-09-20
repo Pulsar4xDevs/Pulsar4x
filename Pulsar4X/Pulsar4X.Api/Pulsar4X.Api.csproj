@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>Pulsar4X.Api</RootNamespace>
+    <AssemblyName>Pulsar4X.Api</AssemblyName>
+  </PropertyGroup>
+
+  <!--
+    Contracts assembly: the shared boundary between client and engine.
+    It MUST NOT reference GameEngine, Pulsar4X.Client, or any UI/engine assembly.
+    Keep dependencies to a minimum so both sides (and a future network transport) can share it.
+  -->
+
+</Project>

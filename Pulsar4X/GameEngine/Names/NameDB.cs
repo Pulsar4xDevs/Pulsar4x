@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Messaging;
 using Pulsar4X.Sensors;
 
 namespace Pulsar4X.Names
@@ -79,6 +80,12 @@ namespace Pulsar4X.Names
         public void SetName(int requestingFaction, string specifiedName)
         {
             _names[requestingFaction] = specifiedName;
+
+            MessagePublisher.Instance.Publish(
+                Message.Create(
+                    MessageTypes.EntityRenamed,
+                    OwningEntity?.Id,
+                    factionId: requestingFaction));
         }
 
         public BaseDataBlob SensorClone(SensorInfoDB sensorInfo)
@@ -89,6 +96,16 @@ namespace Pulsar4X.Names
         public void SensorUpdate(SensorInfoDB sensorInfo)
         {
             //do nothing for this.
+        }
+
+        internal void SetDefaultName(string name)
+        {
+            _names[-1] = name;
+
+            MessagePublisher.Instance.Publish(
+                Message.Create(
+                    MessageTypes.EntityRenamed,
+                    OwningEntity?.Id));
         }
 
         NameDB(NameDB db, SensorInfoDB sensorInfo)

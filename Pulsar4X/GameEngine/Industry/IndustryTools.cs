@@ -89,7 +89,7 @@ namespace Pulsar4X.Industry
 
         internal static void ConstructStuff(Entity industryEntity)
         {
-            if(!industryEntity.TryGetDatablob<CargoStorageDB>(out var stockpile))
+            if(!industryEntity.TryGetDataBlob<CargoStorageDB>(out var stockpile))
             {
                 throw new Exception("Tried to ConstructStuff on an entity with no CargoStorageDB");
             }
@@ -100,21 +100,25 @@ namespace Pulsar4X.Industry
             }
             var faction = industryEntity.Manager.Game.Factions[industryEntity.FactionOwnerID];
 
-            if(!faction.TryGetDatablob<FactionInfoDB>(out var factionInfo))
+            if(!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo))
             {
                 throw new Exception("Unable to find FactionInfoDB");
             }
 
-            if(!industryEntity.TryGetDatablob<IndustryAbilityDB>(out var industryDB))
+            if(!industryEntity.TryGetDataBlob<IndustryAbilityDB>(out var industryDB))
             {
                 throw new Exception("Unable to find IndustryAbilityDB");
             }
 
-
+            // Infrastructure is the limiting factor on a colony's output: when the colony's
+            // buildings exceed its infrastructure capacity, every production rate is scaled down.
+            double infraEfficiency = InfrastructureProcessor.GetEfficiency(industryEntity);
 
             foreach (var (prodLineID, prodLine) in industryDB.ProductionLines.ToArray())
             {
-                var industryPointsRemaining = new Dictionary<string, int>(prodLine.IndustryTypeRates);
+                var industryPointsRemaining = new Dictionary<string, int>();
+                foreach (var rate in prodLine.IndustryTypeRates)
+                    industryPointsRemaining[rate.Key] = (int)(rate.Value * infraEfficiency);
 
                 foreach(var batchJob in prodLine.Jobs.ToArray())
                 {
@@ -235,11 +239,11 @@ namespace Pulsar4X.Industry
 
         public static void AutoAddSubJobs(Entity industryEntity, IndustryJob job)
         {
-            if(!industryEntity.TryGetDatablob<CargoStorageDB>(out var stockpile))
+            if(!industryEntity.TryGetDataBlob<CargoStorageDB>(out var stockpile))
             {
                 throw new Exception("Tried to ConstructStuff on an entity with no CargoStorageDB");
             }
-            if(!industryEntity.TryGetDatablob<IndustryAbilityDB>(out var industryDB))
+            if(!industryEntity.TryGetDataBlob<IndustryAbilityDB>(out var industryDB))
             {
                 throw new Exception("Unable to find IndustryAbilityDB");
             }

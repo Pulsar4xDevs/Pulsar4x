@@ -13,21 +13,21 @@ namespace Pulsar4X.People
 
         [JsonProperty]
         public string Name { get; internal set; }
-
         [JsonProperty]
         public int Rank { get; internal set; }
-
         [JsonProperty]
         public CommanderTypes Type { get; internal set; }
-
         [JsonProperty]
         public int Experience { get; internal set; } = 0;
-
         [JsonProperty]
         public int ExperienceCap { get; internal set; } = 0;
-
+        [JsonProperty]
         public DateTime CommissionedOn { get; internal set; }
-        public DateTime RankedOn {get; internal set; }
+        [JsonProperty]
+        public DateTime RankedOn { get; internal set; }
+        [JsonProperty]
+        public int AssignedTo { get; internal set; } = -1;
+
 
         public CommanderDB() { }
 

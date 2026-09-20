@@ -113,7 +113,7 @@
   </ItemGroup>
   <Target Name="CopyJsonData" AfterTargets="Build">
     <ItemGroup>
-      <JsonDataFiles Include="..\GameEngine\Data\**\*" />
+      <JsonDataFiles Include="..\GameData\**\*" />
     </ItemGroup>
     <Copy SourceFiles="@(JsonDataFiles)" DestinationFolder="$(OutputPath)\Data\%(RecursiveDir)" />
   </Target>

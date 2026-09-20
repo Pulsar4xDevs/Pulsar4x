@@ -12,7 +12,7 @@ public class EventManager
 
     public static EventManager Instance => instance;
 
-    public void Clear()
+    internal void Clear()
     {
         _subscribers.Clear();
     }

@@ -1,27 +1,52 @@
 using System.ComponentModel;
 
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.Client;
 
 public class UserOrbitSettings
 {
     internal enum OrbitBodyType
     {
+        Unknown,
         Star,
         Planet,
+        DwarfPlanet,
         Moon,
         Asteroid,
         Comet,
         Colony,
-        Ship,
-        Unknown,
-
-        [Description("Number Of")]
-        NumberOf
+        Ship
     }
+
+    /// <summary>Maps the API body classification to the client's display enum (used for icons,
+    /// tooltips and the shared map view-filter).</summary>
+    internal static OrbitBodyType FromBodyKind(Pulsar4X.Api.BodyKind kind) => kind switch
+    {
+        Pulsar4X.Api.BodyKind.Star => OrbitBodyType.Star,
+        Pulsar4X.Api.BodyKind.Planet => OrbitBodyType.Planet,
+        Pulsar4X.Api.BodyKind.DwarfPlanet => OrbitBodyType.DwarfPlanet,
+        Pulsar4X.Api.BodyKind.Moon => OrbitBodyType.Moon,
+        Pulsar4X.Api.BodyKind.Asteroid => OrbitBodyType.Asteroid,
+        Pulsar4X.Api.BodyKind.Comet => OrbitBodyType.Comet,
+        Pulsar4X.Api.BodyKind.Colony => OrbitBodyType.Colony,
+        Pulsar4X.Api.BodyKind.Ship => OrbitBodyType.Ship,
+        _ => OrbitBodyType.Unknown,
+    };
+
+    public static readonly string[] OrbitBodyTypeTooltips = new []
+    {
+        "Unknown", "Stars", "Planets", "Dwarf Planets", "Moons", "Asteroids",
+        "Comets", "Colonies", "Ships"
+    };
+
+    public static readonly string[] OrbitBodyTypeShortNames = new []
+    {
+        "?", "*", "P", "D", "M", "A", "C", "H", "S"
+    };
 
     internal enum OrbitTrajectoryType
     {
         Unknown,
+
         [Description("An Elliptical Orbit")]
         Elliptical,
         Hyperbolic,
@@ -30,10 +55,7 @@ public class UserOrbitSettings
         NewtonionThrust,
 
         [Description("Non-Newtonian Translation")]
-        NonNewtonionTranslation,
-
-        [Description("Number Of")]
-        NumberOf
+        NonNewtonionTranslation
     }
     //the arc thats actualy drawn, ie we don't normaly draw a full 360 degree (6.28rad) orbit, but only
     //a section of it ie 3/4 of the orbit (4.71rad) and this is player adjustable.
@@ -52,4 +74,5 @@ public class UserOrbitSettings
     public byte Blu = 255;
     public byte MaxAlpha = 255;
     public byte MinAlpha = 0;
+    public byte GhostOrbitAlpha = 20;
 }

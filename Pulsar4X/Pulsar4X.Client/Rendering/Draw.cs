@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulsar4X.Orbital;
-using SDL2;
+using SDL3;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     /// <summary>
     /// Drawing helpers class, inverts Y on drawcalls
@@ -46,28 +46,53 @@ namespace Pulsar4X.SDL2UI
         }
     }
 
+    /*
+    FIXME: Improve this.
+    Maybe SDL_Vertex and SDL_RenderGeometry would be useful here?
+    https://wiki.libsdl.org/SDL3/SDL_RenderGeometry
+    */
+    public interface IShape
+    {
+        bool Contains(System.Drawing.PointF point);
+    }
+
+    // TODO: Rename to "Polygon"
     /// <summary>
     /// A collection of points and a single color.
     /// </summary>
-    public struct Shape
+    public class Shape : IShape
     {
-        public SDL.SDL_Color Color;    //could change due to entity changes.
+        public SDL.Color Color;    //could change due to entity changes.
         public Vector2[] Points; //relative to the IconPosition. could change with entity changes.
-    }
 
-    public class MutableShape
-    {
-        public SDL.SDL_Color Color;
-        public List<Vector2> Points = new List<Vector2>();
-        public bool Scales = true;
+        // https://stackoverflow.com/a/14998816
+        public bool Contains(System.Drawing.PointF point)
+        {
+            bool result = false;
+            int j = Points.Length - 1;
+            for (int i = 0; i < Points.Length; i++)
+            {
+                if (Points[i].Y < point.Y && Points[j].Y >= point.Y ||
+                        Points[j].Y < point.Y && Points[i].Y >= point.Y)
+                {
+                    if (Points[i].X + (point.Y - Points[i].Y) /
+                            (Points[j].Y - Points[i].Y) *
+                            (Points[j].X - Points[i].X) < point.X)
+                    {
+                        result = !result;
+                    }
+                }
+                j = i;
+            }
+            return result;
+        }
     }
-
 
     public class ComplexShape
     {
         public Vector2 StartPoint;
         public Vector2[]? Points;
-        public SDL.SDL_Color[]? Colors;
+        public SDL.Color[]? Colors;
         public (int pointIndex, int colourIndex)[]? ColourChanges; //at Points[item1] we change to Colors[item2]
         public bool Scales;
 
@@ -79,8 +104,8 @@ namespace Pulsar4X.SDL2UI
         internal double DataItem;
         internal string DataString = "";
         internal ComplexShape? Shape;
-        internal SDL.SDL_Color[]? Colour;
-        internal SDL.SDL_Color[]? HighlightColour;
+        internal SDL.Color[]? Colour;
+        internal SDL.Color[]? HighlightColour;
         internal bool IsEnabled = false;
         internal bool ShowLines = false;
 

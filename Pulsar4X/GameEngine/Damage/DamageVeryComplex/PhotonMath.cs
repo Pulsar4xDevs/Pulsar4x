@@ -8,48 +8,136 @@ namespace GameEngine.Damage;
 
 public static class PhotonMath
 {
-    public static void ResolveCollision(PhotonParticle laser, PhysicalParticle target, DamageMap map)
+    internal const float minPower = 1e-6f;
+    public static List<BeamPoint> BeamProcessing(DamageMap map, float ticklen)
     {
-        var material = target.MatType;
-        // 1. Calculate photon's energy transfer to the target
-        var photonInteraction = CalculatePhotonInteraction(laser.WaveLength, material);    
-        
-        // 2. Add absorbed energy to the target's temperature
-        // Energy absorbed converted to temperature using the material's thermal capacity
-        //* 10e6 because laser power is in MW.
-        float tempIncrease = (float)(laser.Power * 10e6 * photonInteraction.absorbed) / (target.Mass * material.ThermalCapacity);
-        target.Temperature += tempIncrease;
-        
-        
-        // 3. Handle the photon based on interaction results
-        if (photonInteraction.absorbed == 1.0f) // Fully absorbed
+        List<BeamPoint> beamPoints = new List<BeamPoint>();
+
+        for (int index = 0; index < map.BeamStarts.Count; index++)
         {
-            // Absorb photon completely (remove it from the map)
-            laser.IsDeleted = true;
-            map.PhMap[laser.mapIndex] = null; // Remove photon from PhMap
-            laser.IsDeleted = true;
-        }
-        else
-        {
-            // Partial absorption; handle reflection and transmission
-            if(photonInteraction.transmitted > 0.0f)
+            BeamPoint? beamStart = map.BeamStarts[index];
+            if(beamStart == null)
+                continue;
+            if (beamStart.LifeTime >= 0)
             {
-                laser.Power *= photonInteraction.transmitted;
-                if (photonInteraction.reflected > 0.0f)
-                {
-                    var newVector = Vector2.Reflect(laser.Velocity, target.Position - laser.Position);
-                    PhotonParticle.CloneWithNewVelocityAndPower(laser, newVector, laser.Power * photonInteraction.reflected);
-                }
+                ProcessBeam(beamStart, map, beamPoints);
+                beamStart.LifeTime -= ticklen;
             }
             else
             {
-                laser.Power *= photonInteraction.reflected;
-                laser.Velocity = Vector2.Reflect(laser.Velocity, target.Position - laser.Position);
+                map.BeamStarts.RemoveAt(index);
+                index--;
+            }
+        }
+
+        return beamPoints;
+    }
+
+    private static void ProcessBeam(BeamPoint current, DamageMap map, List<BeamPoint> beamPoints)
+    {
+        
+        beamPoints.Add(current); // Add the current point to the list
+
+        // Process reflection
+        if (current.ReflectPercentage > 0)
+        {
+            if (BeamCollision(current, current.ReflectDirection, map, out PhysicalParticle collisionParticle, out Vector2 position))
+            {
+                BeamPoint reflectedPoint = new BeamPoint(current, position, current.ReflectDirection, current.Power * current.ReflectPercentage, collisionParticle);
+                ProcessBeam(reflectedPoint, map, beamPoints); // Recursively process the reflection
+            }
+        }
+
+        // Process transmission
+        if (current.TransmitPercentage > 0)
+        {
+            if (BeamCollision(current, current.TransmitDirection, map, out PhysicalParticle collisionParticle, out Vector2 position))
+            {
+                BeamPoint transmittedPoint = new BeamPoint(current, position, current.TransmitDirection, current.Power * current.TransmitPercentage, collisionParticle);
+                ProcessBeam(transmittedPoint, map, beamPoints); // Recursively process the transmission
             }
         }
     }
 
-    private static (float reflected, float transmitted, float absorbed) CalculatePhotonInteraction(
+    
+    public static bool BeamCollision(BeamPoint beamPoint, Vector2 direction, DamageMap map, out PhysicalParticle collisionParticle, out Vector2 position)
+    {
+        collisionParticle = null; // Default to no intersection
+        position = Vector2.Zero;
+        Vector2 start = beamPoint.Position;
+        
+        // Initial setup
+        int x0 = (int)Math.Floor(start.X);
+        int y0 = (int)Math.Floor(start.Y);
+        int x1 = x0;
+        int y1 = y0;
+    
+        // Determine step direction
+        int stepX = (direction.X >= 0) ? 1 : -1;
+        int stepY = (direction.Y >= 0) ? 1 : -1;
+
+        // Calculate initial error terms
+        float tMaxX = (x0 + (stepX > 0 ? 1 : 0) - start.X) / direction.X;
+        float tMaxY = (y0 + (stepY > 0 ? 1 : 0) - start.Y) / direction.Y;
+        float tDeltaX = 1.0f / Math.Abs(direction.X);
+        float tDeltaY = 1.0f / Math.Abs(direction.Y);
+
+        while (true)
+        {
+            // Check if the current position is within bounds
+            if (x1 < 0 || x1 >= map.Width || y1 < 0 || y1 >= map.Height)
+            {
+                return false; // Ray is out of bounds
+            }
+
+            // Calculate index in 1D array
+            int currentIndex = map.GetIndex(x1, y1);
+            collisionParticle = map.PMap[currentIndex];
+            // Check for intersection
+            if (collisionParticle != null)
+            {
+                position = new Vector2(x1, y1);
+                return true; // Intersection detected
+            }
+
+            // Move to the next cell
+            if (tMaxX < tMaxY)
+            {
+                x1 += stepX;
+                tMaxX += tDeltaX;
+            }
+            else
+            {
+                y1 += stepY;
+                tMaxY += tDeltaY;
+            }
+
+        }
+
+        return false;
+    }
+
+    public static void ApplyTemperatureChanges(DamageMap map, float tickLength)
+    {
+        if (map.BeamPoints == null) return; // Ensure beam points exist
+
+        foreach (var point in map.BeamPoints)
+        {
+            if (point.AbsorbPercentage > 0)
+            {
+                int particleIndex = map.GetIndex(point.Position);
+                PhysicalParticle particle = map.PMap[particleIndex];
+                if (particle != null)
+                {
+                    float absorbedPower =  point.Power * point.AbsorbPercentage * 10e6f;//* 10e6 because laser power is in MW.
+                    particle.Temperature += (absorbedPower / particle.Mass) * particle.MatType.ThermalCapacity * tickLength;
+                }
+            }
+        }
+    }
+    
+
+    public static (float reflected, float transmitted, float absorbed) CalculatePhotonInteraction(
         float wavelength,
         ParticleMaterial material
     )
@@ -85,6 +173,7 @@ public static class PhotonMath
         return reflectivity;
     }
 
+    /*
     public static void HandleSpawners(List<PhotonParticle> spawners, DamageMap damageMap, ref List<IDamageParticle> movingParticles, float timesstep)
     {
         foreach (var spawner in spawners)
@@ -108,5 +197,5 @@ public static class PhotonMath
             }
             
         }
-    }
+    }*/
 }

@@ -242,14 +242,11 @@ namespace Pulsar4X.Damage
             {
                 //Draws the bottom line
                 var bottomcoordEnd = linePoints[i];
-
-
-
+                
                 bottomcoordEnd = (bottomcoordEnd.x, halfwidth + bottomcoordEnd.y);
 
                 DrawLine(shipBmp, bottomcoordStart, bottomcoordEnd, thickness, armorcolor, 255, 255, 255, shipbmpMargins);
                 bottomcoordStart = bottomcoordEnd;
-
                 //Draws the top line
                 var topcoordEnd = linePoints[i];
                 topcoordEnd = (topcoordEnd.x, halfwidth - topcoordEnd.y);
@@ -268,8 +265,6 @@ namespace Pulsar4X.Damage
 
         static void DrawLine(RawBmp bmp, (int x, int y) coordStart, (int x, int y) coordEnd, float width, byte r, byte g, byte b, byte a, Vector2 margins)
         {
-
-
             var x0 = coordStart.x;
             var y0 = coordStart.y;
             var x1 = coordEnd.x;
@@ -285,8 +280,7 @@ namespace Pulsar4X.Damage
 
             int vmargin = (int)(width / 2);
             double dwidth = (double)(width) / Math.Sin(Math.Atan(1/slope));
-
-
+            
             for (int yoffset = -(int)(dwidth / 2); yoffset < (int)(dwidth / 2); yoffset++)
             {
 

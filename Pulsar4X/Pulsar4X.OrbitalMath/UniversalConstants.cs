@@ -14,7 +14,8 @@ namespace Pulsar4X.Orbital
         public static class Science
         {
             // Gravitation Constant
-            public const double GravitationalConstant = 6.67408E-11;
+            // https://physics.nist.gov/cgi-bin/cuu/Value?bg
+            public const double GravitationalConstant = 6.67430E-11;
 
             //h in m2 kg/s (or j/s)
             public const double PlankConstant = 6.62607015E-34;

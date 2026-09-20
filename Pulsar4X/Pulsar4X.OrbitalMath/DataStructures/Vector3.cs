@@ -342,7 +342,18 @@ namespace Pulsar4X.Orbital
         {
             return left - right;
         }
+        
+        /// <summary>Computes the Euclidean distance between the two given points.</summary>
+        /// <param name="value1">The first point.</param>
+        /// <param name="value2">The second point.</param>
+        /// <returns>The distance.</returns>
+        public static double Distance(Vector3 value1, Vector3 value2) => double.Sqrt(DistanceSquared(value1, value2));
 
+        /// <summary>Returns the Euclidean distance squared between two specified points.</summary>
+        /// <param name="value1">The first point.</param>
+        /// <param name="value2">The second point.</param>
+        /// <returns>The distance squared.</returns>
+        public static double DistanceSquared(Vector3 value1, Vector3 value2) => (value1 - value2).LengthSquared();
         /// <summary>
         /// Returns the string representation of the current instance using default formatting.  (Overrides ValueType.ToString().)
         /// </summary>
@@ -471,14 +482,14 @@ namespace Pulsar4X.Orbital
         {
             get
             {
-                string strx = Distance(X);
-                string stry = Distance(Y);
-                string strz = Distance(Z);
-                string strmag = Distance(Length());
+                string strx = ToReadableDistance(X);
+                string stry = ToReadableDistance(Y);
+                string strz = ToReadableDistance(Z);
+                string strmag = ToReadableDistance(Length());
                 return $"(X:{strx},Y:{stry},Z:{strz}), Magnitude: {strmag})";
             }
         }
-        private static string Distance(double length_m,  string format = "0.###")
+        private static string ToReadableDistance(double length_m,  string format = "0.###")
         {
 
             string stringDistance = "0 m";

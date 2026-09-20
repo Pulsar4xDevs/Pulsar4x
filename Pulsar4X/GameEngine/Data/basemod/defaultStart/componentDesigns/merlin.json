@@ -1,9 +1,0 @@
-{
-  "id": "default-design-merlin",
-  "name": "Merlin",
-  "templateId": "conventional-engine",
-  "Properties": [
-    { "key": "Mass", "value": 470 },
-    { "key": "Fuel Type", "value": "rp-1" }
-  ]
-}

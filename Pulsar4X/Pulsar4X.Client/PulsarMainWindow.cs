@@ -1,15 +1,20 @@
+#if TRACE
+#define DEBUG
+#endif
+
 using System;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Diagnostics;
 using ImGuiNET;
-using ImGuiSDL2CS;
-using SDL2;
+using SDL3;
 using Microsoft.Extensions.Configuration;
-using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Client.State;
+using Pulsar4X.Client.Interface.Themes;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public enum MouseButtons
     {
@@ -18,250 +23,176 @@ namespace Pulsar4X.SDL2UI
         Middle
     }
 
-    public class PulsarMainWindow : ImGuiSDL2CSWindow
+    public class PulsarMainWindow : SDL3Window
     {
-#if DEBUG
-        private ImGuiWindowFlags _gitHashFlags = ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav;
-#endif
-        public const string OrgName = "Pulsar4X";
-        public const string AppName = "Pulsar4X";
         public const string PreferencesFile = "preferences.ini";
+        public const string UserOrbitSettingsFile = "orbit-settings.json";
         public const string SavesPath = "Saves";
-        public const string ModsPath = "Mods";
+        public static string ModsPath = "Mods";
+        public static string ResourcesPath = "Resources";
         private readonly GlobalUIState _state;
+        private ITheme _theme;
 
-        Vector3 backColor;
-        int mouseDownX;
-        int mouseDownY;
-        int mouseDownAltX;
-        int mouseDownAltY;
+        /// <summary>The UI state, exposed so the composition root can register its dev tools.</summary>
+        internal GlobalUIState State => _state;
 
-        public PulsarMainWindow()
+        float mouseX;
+        float mouseY;
+
+        int _debugSDLFontHeight;
+
+        ulong _fpsFrames = 0;
+        ulong _fpsLastMeasurementTime = 0;
+        float _fpsLastMeasurement = 0;
+
+        public PulsarMainWindow(string[] args)
             : base(AppName)
         {
             _state = new GlobalUIState(this);
             _state.GalacticMap = new GalacticMapRender(this, _state);
-            backColor = new Vector3(0 / 255f, 0 / 255f, 28 / 255f);
-            OnEvent = MyEventHandler;
 
             try
             {
-                string appDataDirectory = SDL.SDL_GetPrefPath(OrgName, AppName);
+                string? appDataDirectory = GetAppDataPath();
 
-                // Check for Saves directory and create it if it doesn't exist
-                string savesDirectory = Path.Combine(appDataDirectory, SavesPath);
-                if (!Directory.Exists(savesDirectory))
+                if(string.IsNullOrEmpty(appDataDirectory)) throw new NullReferenceException("App data directory cannot be null");
+
+                // Set the deafault mods path
+                ModsPath = Path.Combine(appDataDirectory, ModsPath);
+
+                // Set the default resources path
                 {
-                    Directory.CreateDirectory(savesDirectory);
+                    var exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    var exeDiretory = Path.GetDirectoryName(exePath);
+
+                    if(string.IsNullOrEmpty(exeDiretory)) throw new NullReferenceException("exe path cannot be null");
+
+                    ResourcesPath = Path.Combine(exeDiretory, ResourcesPath);
                 }
 
-                // Check for Mods directory and create it if it doesn't exist
-                string modsDirectory = Path.Combine(appDataDirectory, ModsPath);
-                if(!Directory.Exists(modsDirectory))
-                {
-                    Directory.CreateDirectory(modsDirectory);
-                }
+                // Parse optional command line arguments
+                ParseCommandLineArguments(args);
+
+                // Create directories we need if they don't exist
+                TryCreateDirectory(appDataDirectory, SavesPath);
+                TryCreateDirectory(appDataDirectory, ModsPath);
 
                 // Make sure the base game mod is copied over to the mod directory
-                string sourceData = "Data";
-                DeleteThenCopyToDirectory(sourceData, modsDirectory);
+                // string sourceData = "Data";
+                // string modsDirectory = Path.Combine(appDataDirectory, ModsPath);
+                // DeleteThenCopyToDirectory(sourceData, modsDirectory);
 
                 // Load the available mods
-                ModsState.RefreshModListFromModsDirectory();
-
 
                 // Read and apply any window preferences
-                string preferencesPath = Path.Combine(appDataDirectory, PreferencesFile);
-                if(!File.Exists(preferencesPath))
-                {
-                    File.Create(preferencesPath).Close();
-                }
+                LoadPreferences();
 
-                IConfiguration preferences = new ConfigurationBuilder().AddIniFile(preferencesPath).Build();
-                IConfigurationSection windowSection = preferences.GetSection("Window Settings");
-                string? xPosition = windowSection["X"];
-                string? yPosition = windowSection["Y"];
-                string? width = windowSection["Width"];
-                string? height = windowSection["Height"];
-                string? maximized = windowSection["Maximized"];
+                // Apply game settings (resolution, display mode, etc.) - this should override old preferences
+                _state.GameSettings.ApplyDisplaySettings(this);
 
-                if(xPosition != null) X = int.Parse(xPosition);
-                if(yPosition != null) Y = int.Parse(yPosition);
-                if(width != null) Width = int.Parse(width);
-                if(height != null) Height = int.Parse(height);
+                // Apply UI scaling
+                ImGui.GetStyle().FontScaleMain = _state.GameSettings.UIScale;
 
-                // if maximized is set to true it will override the other preferences
-                if(maximized != null)
-                {
-                    bool isMaximized = bool.Parse(maximized);
-                    if(isMaximized)
-                        SDL.SDL_MaximizeWindow(_Handle);
-                }
+                // Apply any saved user orbit settings
+                LoadUserOrbitSettings();
+
+                PopulateStyles();
+
             }
-            catch(Exception)
+            catch(Exception e)
             {
-                // It's just a preferences file, continue on
+                Console.WriteLine($"Error setting up game data: {e.Message}");
+                Trace.WriteLine($"Error setting up game data: {e}");
             }
+
+            _debugSDLFontHeight = SDL3.TTF.GetFontHeight(Styles.SDLDefaultFont);
         }
 
-        private bool MyEventHandler(SDL2Window window, SDL.SDL_Event e)
+        private void PopulateStyles()
         {
-            SDL.SDL_GetMouseState(out int mouseX, out int mouseY);
+            // Load fonts - texture will be created automatically by the new texture system
+            var defaultFont = "ProggyClean.ttf";
+            var defaultFontPath = Path.Combine(ResourcesPath, defaultFont);
+            var defaultFontSize = 13f;
 
-            if (!ImGuiSDL2CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed))
-                return false;
+            Trace.WriteLine("loading font: " + defaultFontPath);
+            if (!File.Exists(defaultFontPath))
+                Trace.WriteLine("WARNING: font file does not exist: " + defaultFontPath);
+            Styles.SDLDefaultFont = SDL3.TTF.OpenFont(defaultFontPath, 16f); // FIXME: set this and imgui font to same size. 13f looks terrible.
+            if (Styles.SDLDefaultFont == IntPtr.Zero)
+                Trace.WriteLine("WARNING: TTF.OpenFont failed: " + SDL.GetError());
+            Styles.DefaultFont = PlatformBackend.LoadFont(ResourcesPath, defaultFont, defaultFontSize);
 
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 1 & !ImGui.GetIO().WantCaptureMouse)
+            PlatformBackend.LoadFont(ResourcesPath, "DejaVuSans.ttf", 13f, "ΩωΝνΔδθΘϖ⚙⚖⚡•️", true);
+            Styles.MonospaceFont = PlatformBackend.LoadFont(ResourcesPath, "JetBrainsMono-Regular.ttf", 14f);
+            Styles.MediumFont = PlatformBackend.LoadFont(ResourcesPath, "Roboto-Medium.ttf", 14f);
+
+            // Theme
+            Styles.Theme = _theme;
+            _theme.Apply();
+        }
+
+        internal event EventHandler<SDL.Event> MouseMoveOccured;
+        internal event EventHandler<SDL.Event> MouseButtonDownOccured;
+        internal event EventHandler<SDL.Event> MouseButtonUpOccured;
+        internal event EventHandler<SDL.Event> MouseWheelOccured;
+
+        public override void HandleEvent(SDL.Event e)
+        {
+            (float mX, float mY, SDL.MouseButtonFlags mouseFlags) = GetMouseState();
+
+            if (mX != mouseX || mY != mouseY)
+                MouseMoveOccured?.Invoke(this, e);
+
+            mouseX = mX;
+            mouseY = mY;
+
+            if(!_state.IsGameLoaded)
             {
-                _state.OnFocusMoved();
-                _state.Camera.IsGrabbingMap = true;
-                _state.Camera.MouseFrameIncrementX = e.motion.x;
-                _state.Camera.MouseFrameIncrementY = e.motion.y;
-                mouseDownX = mouseX;
-                mouseDownY = mouseY;
+                var compare = 0;
+#if DEBUG
+                // Debug builds have the git hash displayed in the bottom left corner
+                compare = 1;
+#endif
+                // Open the main menu if no other windows are open
+                if(ImGui.GetIO().MetricsRenderWindows == compare)
+                    MainMenuItems.GetInstance().SetActive(true);
+                return;
             }
 
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP && e.button.button == 1)
+            if (!PlatformBackend.WantsMouseCapture())
             {
-                _state.Camera.IsGrabbingMap = false;
-
-                if (mouseDownX == mouseX && mouseDownY == mouseY) //click on map.
+                switch (e.Type)
                 {
-                    _state.MapClicked(_state.Camera.WorldCoordinate_m(mouseX, mouseY), MouseButtons.Primary); //sdl and imgu use different numbers for buttons.
+                    case (uint)SDL.EventType.MouseButtonDown:
+                        MouseButtonDownOccured?.Invoke(this, e);
+                        break;
+                    case (uint)SDL.EventType.MouseButtonUp:
+                        MouseButtonUpOccured?.Invoke(this, e);
+                        break;
+                    case (uint)SDL.EventType.MouseWheel:
+                        MouseWheelOccured?.Invoke(this, e);
+                        break;
                 }
-            }
-
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 3 & !ImGui.GetIO().WantCaptureMouse)
-            {
-                _state.OnFocusMoved();
-                mouseDownAltX = mouseX;
-                mouseDownAltY = mouseY;
-            }
-
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP && e.button.button == 3)
-            {
-                _state.OnFocusMoved();
-                _state.Camera.IsGrabbingMap = false;
-
-                if (mouseDownAltX == mouseX && mouseDownAltY == mouseY) //click on map.
-                {
-                    _state.MapClicked(_state.Camera.WorldCoordinate_m(mouseX, mouseY), MouseButtons.Alt);//sdl and imgu use different numbers for buttons.
-                }
-            }
-
-            if (_state.Camera.IsGrabbingMap && e.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
-            {
-                int deltaX = _state.Camera.MouseFrameIncrementX - e.motion.x;
-                int deltaY = _state.Camera.MouseFrameIncrementY - e.motion.y;
-                _state.Camera.WorldOffset_m(deltaX, deltaY);
-
-                _state.Camera.MouseFrameIncrementX = e.motion.x;
-                _state.Camera.MouseFrameIncrementY = e.motion.y;
-
             }
 
             // The top of the hotkey stack should list for hotkeys
             _state.HotKeys.Peek().HandleEvent(e);
-
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEWHEEL &! ImGui.GetIO().WantCaptureMouse)
-            {
-                _state.OnFocusMoved();
-                if (e.wheel.y > 0)
-                {
-                    _state.Camera.ZoomIn(mouseX, mouseY);
-                }
-                else if (e.wheel.y < 0)
-                {
-                    _state.Camera.ZoomOut(mouseX, mouseY);
-                }
-            }
-            return true;
         }
 
-        public override void ImGuiRender()
+        public override void Update()
         {
-            foreach (var (_, systemState) in _state.StarSystemStates)
-            {
-                systemState.PreFrameSetup();
-            }
+            base.Update();
 
-            GL.ClearColor(backColor.X, backColor.Y, backColor.Z, 1f);
-            GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
-
-            _state.GalacticMap.Draw();
-
-            // Render ImGui on top of the rest. this eventualy calls overide void ImGuiLayout();
-            base.ImGuiRender();
-
-            foreach (var (_, systemState) in _state.StarSystemStates)
-            {
-                systemState.PostFrameCleanup();
-            }
-        }
-
-        public unsafe override void ImGuiLayout()
-        {
-            //because the nameIcons are IMGUI not SDL we draw them here.
-            _state.GalacticMap.DrawNameIcons();
-
-            if (_state.ShowImgDbg)
-            {
-                ImGui.NewLine();
-                SDL.SDL_GetRendererInfo(_state.rendererPtr, out var renderInfo);
-                ImGui.Text("SDL RenderInfo:");
-                ImGui.Text("Name : " + renderInfo.name.ToString());
-                ImGui.Text("Flags: " +renderInfo.flags.ToString());
-                ImGui.Text("MaxTexH: " +renderInfo.max_texture_height.ToString());
-                ImGui.Text("MaxTexW: " +renderInfo.max_texture_width.ToString());
-                ImGui.Text("NumTxtFormats: " +renderInfo.num_texture_formats.ToString());
-
-                SDL.SDL_GetRenderDriverInfo(0, out renderInfo);
-                ImGui.Text("SDL RenderDriverInfo:");
-                ImGui.Text("Name : " + renderInfo.name.ToString());
-                ImGui.Text("Flags: " +renderInfo.flags.ToString());
-                ImGui.Text("MaxTexH: " +renderInfo.max_texture_height.ToString());
-                ImGui.Text("MaxTexW: " +renderInfo.max_texture_width.ToString());
-                ImGui.Text("NumTxtFormats: " +renderInfo.num_texture_formats.ToString());
-                ImGui.NewLine();
-
-                foreach (var kvp in _state.SDLImageDictionary)
-                {
-                    int q = SDL.SDL_QueryTexture(kvp.Value, out uint f, out int a, out int w, out int h);
-                    if (q != 0)
-                    {
-                        ImGui.Text("QueryResult: " + q);
-                        ImGui.Text(SDL.SDL_GetError());
-                    }
-                    ImGui.Image(kvp.Value, new System.Numerics.Vector2(w, h));
-                }
-            }
-
-            if (_state.ShowMetrixWindow)
-                ImGui.ShowMetricsWindow(ref _state.ShowMetrixWindow);
-
-            if (_state.ShowDemoWindow)
-            {
-                ImGui.ShowDemoWindow();
-                ImGui.ShowUserGuide();
-            }
+            // Apply any server updates received since last frame as one atomic batch on this (UI)
+            // thread, before any window reads the galaxy model this frame.
+            _state.GameClient?.Update();
 
             //update and refresh state for GameDateTimechange
-            if(_state.Game != null)
+            if(_state.GameClient is { } gameClient)
             {
-                DateTime curTime = _state.Game.TimePulse.GameGlobalDateTime;
-                if (curTime != _state.LastGameUpdateTime)
-                {
-                    foreach (var item in _state.UpdateableWindows)
-                    {
-                        if (item.GetActive() == true)
-                            item.OnGameTickChange(curTime);
-                    }
-
-                    _state.LastGameUpdateTime = curTime;
-                }
-
                 //update and refresh state for SystemDateTimechage
-                curTime = _state.SelectedSystemTime;
+                var curTime = _state.SelectedSystemTime;
                 if (curTime != _state.SelectedSysLastUpdateTime)
                 {
                     foreach (var item in _state.UpdateableWindows)
@@ -274,6 +205,70 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
+            _state.Update();
+        }
+
+        public override void Render()
+        {
+            base.Render();
+
+            // Render the game
+            _state.GalacticMap?.Draw();
+
+            // Render the UI
+            RenderUI();
+
+            // If in DEBUG render the git hash as the version in the corner of the screen
+#if DEBUG
+            var version = "Version: " + AssemblyInfo.GetGitHash();
+            RenderDebugText(this.Renderer, version, 50);
+
+            var iver = "ImGui version: " + ImGui.GetVersion();
+            RenderDebugText(this.Renderer, iver, 50 + _debugSDLFontHeight);
+
+            var sver = "SDL version: " + SDL.GetRevision();
+            RenderDebugText(this.Renderer, sver, 50 + _debugSDLFontHeight * 2);
+#endif
+
+            // Show FPS counter if enabled
+            if (_state.GameSettings.ShowFPS)
+            {
+                _fpsFrames += 1;
+
+                var currentTime = SDL.GetTicks();
+                var elapsedTime = currentTime - _fpsLastMeasurementTime;
+
+                if (elapsedTime >= 1000)
+                {
+                    _fpsLastMeasurement = _fpsFrames / (elapsedTime / 1000f);
+                    _fpsFrames = 0;
+                    _fpsLastMeasurementTime = currentTime;
+                }
+
+                var fps = "FPS: " + _fpsLastMeasurement.ToString();
+                RenderDebugText(this.Renderer, fps, 50 + _debugSDLFontHeight * 4);
+            }
+        }
+
+        /// <summary>
+        /// Render the UI
+        /// </summary>
+        public void RenderUI()
+        {
+            // ImGui helper windows
+            if (_state.ShowMetrixWindow)
+                ImGui.ShowMetricsWindow(ref _state.ShowMetrixWindow);
+
+            if (_state.ShowDemoWindow)
+            {
+                ImGui.ShowDemoWindow();
+                ImGui.ShowUserGuide();
+            }
+
+            // Render name icons
+            _state.GalacticMap?.DrawNameIcons();
+
+            // Render any windows that have registered themselves
             foreach (var item in _state.LoadedWindows.Values.ToArray())
             {
                 item.Display();
@@ -289,23 +284,163 @@ namespace Pulsar4X.SDL2UI
                 item.Display();
             }
 
-#if DEBUG
-            var dispsize = ImGui.GetIO().DisplaySize;
-            var pos = new System.Numerics.Vector2(0, dispsize.Y - ImGui.GetFrameHeightWithSpacing());
-            ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-            if (Window.Begin("GitHash", _gitHashFlags))
-            {
-                ImGui.Text("Version: " + AssemblyInfo.GetGitHash());
-                Window.End();
-            }
-#endif
+            // Render the maneuver node panel overlay (if active)
+            _state.DisplayManeuverNodePanel();
         }
 
-        public static string GetAppDataPath()
+        public override void Exit()
         {
-            return SDL.SDL_GetPrefPath(OrgName, AppName);
+            // save the user orbit settings on exit
+            SaveOrbitSettings();
+
+            // save the game settings on exit
+            _state.GameSettings.Save();
+
+            // Cleanup SDL TTF
+            SDL3.TTF.CloseFont(Styles.SDLDefaultFont);
         }
 
+        /// <summary>
+        /// If the given path & name don't exist create it
+        /// </summary>
+        /// <param name="path">A path to where to create the given name folder</param>
+        /// <param name="name">The name of the folder to create</param>
+        private void TryCreateDirectory(string path, string name)
+        {
+            string directory = Path.Combine(path, name);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+        }
+
+        /// <summary>
+        /// Parse command line arguments to setup the data and
+        /// resource paths
+        /// </summary>
+        /// <param name="args"></param>
+        private void ParseCommandLineArguments(string[] args)
+        {
+            for(int i = 0; i < args.Length; i++)
+            {
+                switch(args[i].ToLower())
+                {
+                    case "--data":
+                    case "-d":
+                        if(i + 1 < args.Length)
+                        {
+                            Console.WriteLine($"Using {args[i].ToLower()} = {ModsPath}");
+                            ModsPath = args[i + 1];
+                            i++;
+                        }
+                        break;
+                    case "--resources":
+                    case "-r":
+                        if(i + 1 < args.Length)
+                        {
+                            Console.WriteLine($"Using {args[i].ToLower()} = {ResourcesPath}");
+                            ResourcesPath = args[i + 1];
+                            i++;
+                        }
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Load the players preferences
+        /// </summary>
+        private void LoadPreferences()
+        {
+            string? appDataDirectory = GetAppDataPath();
+
+            // If the app data path is bad here, just return its only the preferences
+            if(string.IsNullOrEmpty(appDataDirectory)) return;
+
+            string preferencesPath = Path.Combine(appDataDirectory, PreferencesFile);
+            if(!File.Exists(preferencesPath))
+            {
+                File.Create(preferencesPath).Close();
+            }
+
+            IConfiguration preferences = new ConfigurationBuilder().AddIniFile(preferencesPath).Build();
+            IConfigurationSection windowSection = preferences.GetSection("Window Settings");
+            string? xPosition = windowSection["X"];
+            string? yPosition = windowSection["Y"];
+            string? width = windowSection["Width"];
+            string? height = windowSection["Height"];
+            string? maximized = windowSection["Maximized"];
+            string? themeEnabled = windowSection["Theme"];
+
+            if(xPosition != null) X = int.Parse(xPosition);
+            if(yPosition != null) Y = int.Parse(yPosition);
+            if(width != null) Width = int.Parse(width);
+            if(height != null) Height = int.Parse(height);
+
+            // if maximized is set to true it will override the other preferences
+            if(maximized != null)
+            {
+                if(bool.Parse(maximized))
+                    Maximize();
+            }
+
+            // TODO: more themes
+            switch (themeEnabled)
+            {
+                case null:
+                case "Default":
+                    _theme = new DefaultTheme();
+                    break;
+                case "Futuristic":
+                    _theme = new FuturisticTheme();
+                    break;
+                default:
+                    Trace.WriteLine("WARNING: Unrecognized theme '" + themeEnabled + "', falling back to default");
+                    _theme = new DefaultTheme();
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Load the UserOrbitSettingsFile
+        /// </summary>
+        private void LoadUserOrbitSettings()
+        {
+            string? appDataDirectory = GetAppDataPath();
+
+            if(string.IsNullOrEmpty(appDataDirectory))
+                return;
+
+            // Give up if the file doesn't exist
+            string filePath = Path.Combine(appDataDirectory, UserOrbitSettingsFile);
+            if(!File.Exists(filePath))
+                return;
+
+            string text = File.ReadAllText(filePath);
+            var result = JsonConvert.DeserializeObject<List<List<UserOrbitSettings>>>(text);
+
+            if(result != null)
+                _state.UserOrbitSettingsMtx = result;
+        }
+
+        public void SaveOrbitSettings()
+        {
+            string? appDataDirectory = GetAppDataPath();
+            if(appDataDirectory == null)
+                return;
+
+            string filePath = Path.Combine(appDataDirectory, UserOrbitSettingsFile);
+            string output = JsonConvert.SerializeObject(_state.UserOrbitSettingsMtx);
+
+            File.WriteAllText(filePath, output);
+        }
+
+        /// <summary>
+        /// Deletes the contents of the destination directory and then copies the
+        /// contents of the source directory to the destination directory.
+        /// </summary>
+        /// <param name="sourceDir">The directory to copy from</param>
+        /// <param name="destinationDir">The directory to delete and then receive a copy of the source directory</param>
         public static void DeleteThenCopyToDirectory(string sourceDir, string destinationDir)
         {
             // Check if destination exists, if so delete it and all its contents
@@ -332,6 +467,55 @@ namespace Pulsar4X.SDL2UI
                 string destSubDir = Path.Combine(destinationDir, subDirName);
                 DeleteThenCopyToDirectory(subDir, destSubDir);
             }
+        }
+
+        private static void RenderDebugText(IntPtr renderer, string text, int y)
+        {
+            if (renderer == IntPtr.Zero)
+                return;
+
+            SDL.Color white = new () {
+                R = 255,
+                G = 255,
+                B = 255,
+                A = 255
+            };
+
+            IntPtr surface = SDL3.TTF.RenderTextSolid(
+                    Styles.SDLDefaultFont,
+                    text,
+                    0,
+                    white);
+
+            if (surface == IntPtr.Zero) {
+                Trace.WriteLine("RenderDebugText: failed to create surface");
+                return;
+            }
+
+            IntPtr texture = SDL.CreateTextureFromSurface(renderer, surface);
+
+            if (texture == IntPtr.Zero) {
+                SDL.DestroySurface(surface);
+
+                Trace.WriteLine("RenderDebugText: failed to create texture from surface");
+                return;
+            }
+
+            int h;
+            int w;
+            SDL3.TTF.GetStringSize(Styles.SDLDefaultFont, text, 0, out w, out h);
+
+            SDL.FRect frect = new () {
+                X = 5,
+                Y = y,
+                W = w,
+                H = h
+            };
+
+            SDL.RenderTexture(renderer, texture, IntPtr.Zero, ref frect);
+
+            SDL.DestroyTexture(texture);
+            SDL.DestroySurface(surface);
         }
     }
 }

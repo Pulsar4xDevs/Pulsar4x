@@ -1,9 +1,0 @@
-{
-  "id": "default-design-shuttlebay",
-  "name": "Cargo Shuttlebay",
-  "templateId": "cargo-Shuttlebay",
-  "Properties": [
-    { "key": "Size", "value": 5000 },
-    { "key": "Rate vs Range", "value": 2 }
-  ]
-}

@@ -21,14 +21,15 @@ namespace Pulsar4X.People
             var nameDB = new NameDB(commanderDB.ToString(), factionID, commanderDB.ToString());
             blobs.Add(nameDB);
             blobs.Add(commanderDB);
+            blobs.Add(new BonusesDB());
             var entity = Entity.Create();
             entity.FactionOwnerID = factionID;
             manager.AddEntity(entity, blobs);
 
             var faction = manager.Game.Factions[factionID];
-            if(faction.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+            if(faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
             {
-                factionInfoDB.Commanders.Add(entity.Id);
+                factionInfoDB.Commanders.Add(entity);
             }
 
             return entity;
@@ -58,6 +59,29 @@ namespace Pulsar4X.People
             return commander;
         }
 
+        public static CommanderDB CreateScientist(Game game)
+        {
+            var scientist = new CommanderDB()
+            {
+                Name = NameFactory.GetCommanderName(game),
+                Rank = 1,
+                Type = CommanderTypes.Scientist
+            };
+
+            return scientist;
+        }
+
+        public static CommanderDB CreateAdmin(Game game)
+        {
+            var db = new CommanderDB()
+            {
+                Name = NameFactory.GetCommanderName(game),
+                Rank = 1,
+                Type = CommanderTypes.Civilian
+            };
+            return db;
+        }
+
         public static Scientist CreateScientist(Entity faction, Entity location)
         {
             //all this stuff needs a proper bit of code to get names from a file or something
@@ -83,9 +107,9 @@ namespace Pulsar4X.People
             var game = commanderToDestroy.Manager.Game;
             var faction = game.Factions[commanderToDestroy.FactionOwnerID];
 
-            if(faction.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+            if(faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
             {
-                factionInfoDB.Commanders.Remove(commanderToDestroy.Id);
+                factionInfoDB.Commanders.Remove(commanderToDestroy);
             }
 
             EventManager.Instance.Publish(

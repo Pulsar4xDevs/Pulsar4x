@@ -9,6 +9,9 @@ using Pulsar4X.Orbits;
 using Pulsar4X.Sensors;
 using Pulsar4X.Engine;
 using Pulsar4X.Movement;
+using Pulsar4X.Blueprints;
+using Newtonsoft.Json.Linq;
+using System.IO;
 
 namespace Pulsar4X.Galaxy
 {
@@ -19,6 +22,102 @@ namespace Pulsar4X.Galaxy
         public StarFactory(GalaxyFactory galaxyGen)
         {
             _galaxyGen = galaxyGen;
+        }
+
+        public static Entity CreateFromBlueprint(StarSystem system, SystemGenSettingsBlueprint genSettings, StarBlueprint starBlueprint)
+        {
+            var blobsToAdd = new List<BaseDataBlob>();
+
+            var spectralType = starBlueprint.Info.SpectralType != null ? (SpectralType)Enum.Parse(typeof(SpectralType), starBlueprint.Info.SpectralType, true) : SpectralType.G;
+            var luminosityClass = starBlueprint.Info.LuminosityClass != null ? (LuminosityClass)Enum.Parse(typeof(LuminosityClass), starBlueprint.Info.LuminosityClass, true) : LuminosityClass.O;
+            var luminosity = starBlueprint.Info.Luminosity ?? 0;
+            var temperature = starBlueprint.Info.Temperature ?? 0;
+            var mass = starBlueprint.Info.Mass ?? 0;
+            var radius = starBlueprint.Info.Radius ?? 1;
+            var age = starBlueprint.Info.Age ?? 0;
+            var starClass = starBlueprint.Info.Class ?? "";
+
+            var tempRange = temperature / genSettings.StarTemperatureBySpectralType[spectralType].Max;
+            ushort subDivision = (ushort)Math.Round((1 - tempRange) * 10);
+            int starIndex = system.GetAllEntitiesWithDataBlob<StarInfoDB>().Count;
+            // Setup the name
+            var starName = starBlueprint.Name + " " + (char)('A' + starIndex) + " " + spectralType + subDivision + luminosityClass;
+
+            var massVolumeDb = MassVolumeDB.NewFromMassAndRadius_m(mass, radius * 1000);
+            var starInfoDb = new StarInfoDB()
+            {
+                Age = age,
+                Class = starClass,
+                Luminosity = luminosity,
+                LuminosityClass = luminosityClass,
+                SpectralType = spectralType,
+                SpectralSubDivision = subDivision,
+                Temperature = temperature
+            };
+
+            blobsToAdd.Add(new NameDB(starName));
+            blobsToAdd.Add(massVolumeDb);
+            blobsToAdd.Add(starInfoDb);
+            blobsToAdd.Add(new PositionDB(Orbital.Vector3.Zero));
+            blobsToAdd.Add(new OrbitDB());
+            blobsToAdd.Add(SensorTools.SetStarEmmisionSig(starInfoDb, massVolumeDb));
+            blobsToAdd.Add(new VisibleByDefaultDB());
+
+
+            var star = Entity.Create();
+            system.AddEntity(star, blobsToAdd);
+            return star;
+        }
+
+        public static Entity Create(StarSystem system, SystemGenSettingsBlueprint genSettings, string filePath)
+        {
+            string fileContents = File.ReadAllText(filePath);
+            var rootJson = JObject.Parse(fileContents);
+            var info = rootJson["info"];
+
+            var blobsToAdd = new List<BaseDataBlob>();
+
+            var starName = rootJson["name"].ToString();
+            var spectralType = (SpectralType)Enum.Parse(typeof(SpectralType), info["spectralType"].ToString(), true);
+            var luminosityClass = (LuminosityClass)Enum.Parse(typeof(LuminosityClass), info["luminosityClass"].ToString(), true);
+            var luminosity = (double?)info["luminosity"] ?? 0;
+            var temperature = (double?)info["temperature"] ?? 0;
+            var mass = (double?)info["mass"] ?? 0;
+            var radius = (double?)info["radius"] ?? 1;
+            var age = (double?)info["age"] ?? 0;
+            var starClass = (string?)info["class"] ?? "";
+
+            var tempRange = temperature / genSettings.StarTemperatureBySpectralType[spectralType].Max;
+            ushort subDivision = (ushort)Math.Round((1 - tempRange) * 10);
+            int starIndex = system.GetAllEntitiesWithDataBlob<StarInfoDB>().Count;
+
+            // Setup the name
+            starName += " " + (char)('A' + starIndex) + " " + spectralType + subDivision + luminosityClass;
+
+            var massVolumeDb = MassVolumeDB.NewFromMassAndRadius_m(mass, radius * 1000);
+            var starInfoDb = new StarInfoDB()
+            {
+                Age = age,
+                Class = starClass,
+                Luminosity = luminosity,
+                LuminosityClass = luminosityClass,
+                SpectralType = spectralType,
+                SpectralSubDivision = subDivision,
+                Temperature = temperature
+            };
+
+            blobsToAdd.Add(new NameDB(starName));
+            blobsToAdd.Add(massVolumeDb);
+            blobsToAdd.Add(starInfoDb);
+            blobsToAdd.Add(new PositionDB(Orbital.Vector3.Zero));
+            blobsToAdd.Add(new OrbitDB());
+            blobsToAdd.Add(SensorTools.SetStarEmmisionSig(starInfoDb, massVolumeDb));
+            blobsToAdd.Add(new VisibleByDefaultDB());
+
+
+            var star = Entity.Create();
+            system.AddEntity(star, blobsToAdd);
+            return star;
         }
 
         /// <summary>
@@ -105,8 +204,11 @@ namespace Pulsar4X.Galaxy
 
                 // Initialize RelativePosition as 0,0,0. It will be updated when the star's orbit is calculated.
                 PositionDB positionData = new PositionDB(Vector3.Zero);
+                var nameDB = new NameDB($"{system.ManagerID} {stars.Count + 1}");
+                var orbitDB = new OrbitDB();
 
-                var baseDataBlobs = new List<BaseDataBlob> {starMVDB, starData, positionData};
+                var emmisionSignature = SensorTools.SetStarEmmisionSig(starData, starMVDB);
+                var baseDataBlobs = new List<BaseDataBlob> { nameDB, starMVDB, starData, positionData, orbitDB, emmisionSignature, new VisibleByDefaultDB() };
 
                 var entity = Entity.Create();
                 system.AddEntity(entity, baseDataBlobs);
@@ -121,14 +223,13 @@ namespace Pulsar4X.Galaxy
             Entity anchorStar = stars[0];
             MassVolumeDB anchorMVDB = anchorStar.GetDataBlob<MassVolumeDB>();
             Entity previousStar = stars[0];
-            previousStar.SetDataBlob(new OrbitDB());
 
             int starIndex = 0;
             foreach (Entity currentStar in stars)
             {
                 StarInfoDB currentStarInfo = currentStar.GetDataBlob<StarInfoDB>();
-                NameDB currentStarNameDB = new NameDB(system.NameDB.DefaultName + " " + (char)('A' + starIndex) + " " + currentStarInfo.SpectralType + currentStarInfo.SpectralSubDivision + currentStarInfo.LuminosityClass);
-                currentStar.SetDataBlob(currentStarNameDB);
+                var currentStarNameDB = currentStar.GetDataBlob<NameDB>();
+                currentStarNameDB.SetDefaultName(system.NameDB.DefaultName + " " + (char)('A' + starIndex) + " " + currentStarInfo.SpectralType + currentStarInfo.SpectralSubDivision + currentStarInfo.LuminosityClass);
 
                 if (previousStar == currentStar)
                 {
@@ -139,7 +240,7 @@ namespace Pulsar4X.Galaxy
                 OrbitDB previousOrbit = previousStar.GetDataBlob<OrbitDB>();
                 StarInfoDB previousStarInfo = previousStar.GetDataBlob<StarInfoDB>();
 
-                double minDistance = _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[previousStarInfo.SpectralType].Max + _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[currentStarInfo.SpectralType].Max + previousOrbit.SemiMajorAxis;
+                double minDistance = Distance.AuToMt(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType[previousStarInfo.SpectralType].Max) + Distance.AuToMt(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType[currentStarInfo.SpectralType].Max) + previousOrbit.SemiMajorAxis;
 
                 double sma = minDistance * Math.Pow(system.RNGNextDouble(), 3);
                 double eccentricity = Math.Pow(system.RNGNextDouble() * 0.8, 3);

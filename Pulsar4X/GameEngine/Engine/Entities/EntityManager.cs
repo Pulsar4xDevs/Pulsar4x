@@ -74,7 +74,7 @@ namespace Pulsar4X.Engine
         /// <param name="entity"></param>
         /// <returns></returns>
         public delegate bool FilterEntities(Entity entity);
-        
+
         #region PsudoRNG
 
         [JsonProperty] private int _rngSeed = -1;
@@ -89,7 +89,7 @@ namespace Pulsar4X.Engine
         {
             return RNG.Next(maxValue);
         }
-        
+
         internal int RNGNext(int min, int max)
         {
             var next = RNG.Next(min, max);
@@ -136,7 +136,7 @@ namespace Pulsar4X.Engine
             }
 
             RNG = new Random(seed);
-            
+
             SetEntities();
             InitializeManagerSubPulse(game, postLoad);
 
@@ -246,6 +246,11 @@ namespace Pulsar4X.Engine
             }
 
             AddEntity(entity, dataBlobs);
+
+            if (this is StarSystem starSystem)
+            {
+                starSystem.UpdateActivityState();
+            }
         }
 
 
@@ -294,10 +299,20 @@ namespace Pulsar4X.Engine
         {
             foreach (var entity in _entitiesTaggedForRemoval)
             {
+                // If the entity was transferred to another manager via Transfer(),
+                // its Manager now points to the new manager. The datablob objects in
+                // our stores are the SAME objects now used by the new manager, so we
+                // must NOT call OnRemovedFromEntity() on them (that would destroy
+                // their tree hierarchy - PositionDB parent, FleetDB children, etc.).
+                bool wasTransferred = entity.Manager != null && entity.Manager != this;
+
                 foreach (var (type, dictionary) in _datablobStores)
                 {
                     if(dictionary.ContainsKey(entity.Id))
-                        dictionary[entity.Id].OnRemovedFromEntity();
+                    {
+                        if(!wasTransferred)
+                            dictionary[entity.Id].OnRemovedFromEntity();
+                    }
 
                     dictionary.Remove(entity.Id);
                 }
@@ -322,6 +337,21 @@ namespace Pulsar4X.Engine
 
             }
             _entitiesTaggedForRemoval.Clear();
+
+            if (this is StarSystem starSys)
+            {
+                starSys.UpdateActivityState();
+            }
+        }
+
+        public bool HasFactionEntities()
+        {
+            foreach (var (id, entity) in _entities)
+            {
+                if (entity.FactionOwnerID != Game.NeutralFactionId && entity.FactionOwnerID != 0)
+                    return true;
+            }
+            return false;
         }
 
         public List<BaseDataBlob> GetAllDataBlobsForEntity(int entityID)
@@ -366,6 +396,7 @@ namespace Pulsar4X.Engine
             return new List<T>();  // Return an empty list if no datablobs of the specified type exist
         }
 
+        [Obsolete("Use TryGetDataBlob<T>() instead.")]
         internal T GetDataBlob<T>(int entityID) where T : BaseDataBlob
         {
             Type blobType = typeof(T);
@@ -376,6 +407,7 @@ namespace Pulsar4X.Engine
             return (T)_datablobStores[blobType][entityID];
         }
 
+        [Obsolete("Use TryGetDataBlob<T>() instead.")]
         internal BaseDataBlob GetDataBlob(int entityID, Type type)
         {
             return _datablobStores[type][entityID];
@@ -726,6 +758,17 @@ namespace Pulsar4X.Engine
                 (datablobFilter == null || datablobFilter.Count == 0 || EvaluateDataBlobs(entity, datablobFilter, filterLogic)) &&
                 (filter == null || filter(entity)))
                 .ToList();
+        }
+
+        /// <summary>Whether the faction can see this entity, under the same rules as
+        /// <see cref="GetFilteredEntities(EntityFilter, int)"/> with all filters set.</summary>
+        public bool IsEntityVisibleToFaction(Entity entity, int factionId)
+        {
+            if (factionId == Game.GameMasterFaction.Id) return true;
+
+            return entity.FactionOwnerID == factionId
+                || (entity.FactionOwnerID == Game.NeutralFactionId && EvaluateNeutralEntity(entity, factionId))
+                || (entity.FactionOwnerID != factionId && entity.FactionOwnerID != Game.NeutralFactionId && EvaluateSensorContact(entity, factionId));
         }
 
         private bool EvaluateNeutralEntity(Entity entity, int factionId)

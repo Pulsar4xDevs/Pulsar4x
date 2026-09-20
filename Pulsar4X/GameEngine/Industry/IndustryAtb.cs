@@ -52,7 +52,7 @@ namespace Pulsar4X.Industry
                 Name = componentInstance.Name
             };
 
-            if (!parentEntity.TryGetDatablob<IndustryAbilityDB>(out var db))
+            if (!parentEntity.TryGetDataBlob<IndustryAbilityDB>(out var db))
             {
                 db = new IndustryAbilityDB(componentInstance.UniqueID, _productionLine);
                 parentEntity.SetDataBlob(db);

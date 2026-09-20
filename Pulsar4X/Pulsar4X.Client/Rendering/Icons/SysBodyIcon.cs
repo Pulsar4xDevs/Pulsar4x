@@ -1,42 +1,71 @@
 ﻿using System;
-using Pulsar4X.DataStructures;
+using Pulsar4X.Api;
 using Pulsar4X.Orbital;
-using SDL2;
-using Pulsar4X.Galaxy;
-using Pulsar4X.Movement;
+using SDL3;
+using Pulsar4X.Input;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
-    class SysBodyIcon : Icon
+    class SysBodyIcon : Icon, IPointerHandler, IShape, IInteractable
     {
-        SystemBodyInfoDB _systemBodyInfoDB;
-        BodyType _bodyType;
-        MassVolumeDB _massVolDB;
+        BodyKind _bodyType;
         double _bodyRadiusAU;
         float _viewRadius;
         Random _rng;
         float _iconMinSize = 8;
-        public SysBodyIcon(EntityState entity, SystemBodyInfoDB systemBodyInfoDB, PositionDB positionDB, MassVolumeDB massVolumeDB) : base(positionDB)
-        {
-            _positionDB = positionDB;
-            _systemBodyInfoDB = systemBodyInfoDB;
-            _bodyType = _systemBodyInfoDB.BodyType;
-            _massVolDB = massVolumeDB;
-            _bodyRadiusAU = _massVolDB.RadiusInAU;
-            _rng = new Random(entity.Id); //use entity guid as a seed for psudoRandomness.
+        int _entityId;
+        string _sysId;
 
+        public byte Priority { get { return 100; } }
+
+        public SysBodyIcon(EntitySnapshot entity, string systemId, IPosition position, double bodyRadiusAU)
+            : base(position)
+        {
+            _bodyType = entity.Kind;
+            _bodyRadiusAU = bodyRadiusAU;
+            _entityId = entity.Id;
+            _sysId = systemId;
+            _rng = new Random(_entityId); //use entity id as a seed for psudoRandomness.
+
+            BuildShape();
+        }
+
+        void BuildShape()
+        {
             switch (_bodyType)
             {
-                case BodyType.Asteroid:
+                case BodyKind.Asteroid:
                     Asteroid();
                     break;
-                case BodyType.Terrestrial:
+                case BodyKind.Planet:
                     Terestrial();
                     break;
                 default:
                     Unknown();
                     break;
             }
+
+            if (_bodyType == BodyKind.Moon)
+                _iconMinSize = 4;
+        }
+
+        public bool OnPointerUp(SDL.Event sevent)
+        {
+            if (_state == null)
+                return false;
+            var state = _state!;
+
+            if (sevent.Button.Button == 1)
+                state.EntityClicked(_entityId, _sysId, MouseButtons.Primary);
+            else if (sevent.Button.Button == 3)
+                state.EntityClicked(_entityId, _sysId, MouseButtons.Alt);
+            return true;
+        }
+
+        public bool Contains(System.Drawing.PointF point)
+        {
+            System.Numerics.Vector2 v = new (ViewScreenPos.X, ViewScreenPos.Y);
+            return System.Numerics.Vector2.Distance(v, point.ToVector2()) <= Scale * 100;
         }
 
         void Terestrial()
@@ -52,7 +81,7 @@ namespace Pulsar4X.SDL2UI
             byte g = 100;
             byte b = 100;
             byte a = 255;
-            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
             Shapes.Add(new Shape() { Color = colour, Points = points });
         }
 
@@ -79,7 +108,7 @@ namespace Pulsar4X.SDL2UI
             byte g = 100;
             byte b = 50;
             byte a = 255;
-            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
             Shapes.Add(new Shape() { Color = colour, Points = points });
         }
 
@@ -94,7 +123,7 @@ namespace Pulsar4X.SDL2UI
             byte g = 100;
             byte b = 100;
             byte a = 255;
-            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
             Shapes.Add(new Shape() { Color = colour, Points = points });
         }
 
@@ -107,6 +136,43 @@ namespace Pulsar4X.SDL2UI
             else
                 Scale = _viewRadius * 0.01f;
             base.OnFrameUpdate(matrix, camera);
+        }
+
+        public override void Draw(IntPtr rendererPtr, Camera camera)
+        {
+            if (DrawShapes == null || DrawShapes.Length == 0)
+                return;
+
+            // Draw filled circle for non-asteroid body types
+            if (_bodyType != BodyKind.Asteroid)
+            {
+                var shape = DrawShapes[0];
+                if (shape.Points != null && shape.Points.Length > 2)
+                {
+                    int cx = ViewScreenPos.X;
+                    int cy = ViewScreenPos.Y;
+                    int radius = (int)(Scale * 100);
+
+                    if (radius > 0)
+                    {
+                        // Brighter fill color derived from the body's base color, dimmed for moons
+                        float brighten = _bodyType == BodyKind.Moon ? 0.8f : 1.0f;
+                        byte fillR = (byte)Math.Min(255, (int)((shape.Color.R + 80) * brighten));
+                        byte fillG = (byte)Math.Min(255, (int)((shape.Color.G + 80) * brighten));
+                        byte fillB = (byte)Math.Min(255, (int)((shape.Color.B + 80) * brighten));
+                        SDL.SetRenderDrawColor(rendererPtr, fillR, fillG, fillB, shape.Color.A);
+                        for (int y = -radius; y <= radius; y++)
+                        {
+                            int xSpan = (int)Math.Sqrt(radius * radius - y * y);
+                            SDL.RenderLine(rendererPtr, cx - xSpan, cy + y, cx + xSpan, cy + y);
+                        }
+                    }
+                }
+                return; // skip outline for filled bodies
+            }
+
+            // Draw outline for asteroids
+            base.Draw(rendererPtr, camera);
         }
     }
 }

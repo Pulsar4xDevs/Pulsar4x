@@ -1,19 +1,33 @@
 using System;
+using System.Collections.Generic;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Extensions;
+using Pulsar4X.Fleets;
+using Pulsar4X.Messaging;
+using Pulsar4X.Movement;
 
 namespace Pulsar4X.GeoSurveys;
 
-public class GeoSurveyOrder : EntityCommand
+
+public class GeoSurveyOrder : EntityAction
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement | ActionLaneTypes.InteractWithExternalEntity;
 
     public override bool IsBlocking => true;
 
-    public override string Name => $"Geo Survey {Target.GetOwnersName()} ({GetProgressPercent()}%)";
+    public override string Name
+    {
+        get
+        {
+            if (Target == null)
+                return "Geo Survey";
+            return $"Geo Survey {Target.GetOwnersName()} ({GetProgressPercent():0}%)";
+        }
+    }
 
-    public override string Details => "";
+    public override string Details => $"{GetProgressPercent():0}%";
 
     public Entity Target { get; private set; }
     public GeoSurveyableDB? TargetGeoSurveyDB { get; private set; } = null;
@@ -27,17 +41,21 @@ public class GeoSurveyOrder : EntityCommand
     }
 
     public GeoSurveyOrder() { }
+    
+    
     public GeoSurveyOrder(Entity commandingEntity, Entity target)
     {
         _entityCommanding = commandingEntity;
         Target = target;
-        if(Target.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB))
+        RequestingFactionGuid = commandingEntity.FactionOwnerID;
+        EntityCommandingGuid = commandingEntity.Id;
+        if(Target.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB))
         {
             TargetGeoSurveyDB = geoSurveyableDB;
         }
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         var command = new GeoSurveyOrder(EntityCommanding, Target)
         {
@@ -65,15 +83,28 @@ public class GeoSurveyOrder : EntityCommand
             IsRunning = true;
             PreviousUpdate = atDateTime;
             Processor = new GeoSurveyProcessor(EntityCommanding, Target);
+            PublishShipChanged();
         }
-        else
+        else if (PreviousUpdate != null && atDateTime - PreviousUpdate >= TimeSpan.FromDays(1))
         {
-            if(PreviousUpdate != null && atDateTime - PreviousUpdate >= TimeSpan.FromDays(1))
-            {
-                Processor?.ProcessEntity(EntityCommanding, atDateTime);
-                PreviousUpdate = atDateTime;
-            }
+            Processor?.ProcessEntity(EntityCommanding, atDateTime);
+            PreviousUpdate = atDateTime;
+            PublishShipChanged();
         }
+    }
+
+    void PublishShipChanged()
+    {
+        // Progress lives on the target body; EntityWindow reads a baked OrderSnapshot
+        // on the ship. Without this, the percent never updates while the window is open.
+        var ship = EntityCommanding;
+        if (ship?.Manager == null)
+            return;
+        MessagePublisher.Instance.Publish(Message.Create(
+            MessageTypes.EntityChanged,
+            entityId: ship.Id,
+            systemId: ship.Manager.ManagerID,
+            factionId: ship.FactionOwnerID));
     }
 
     internal override bool IsValidCommand(Game game)
@@ -93,11 +124,17 @@ public class GeoSurveyOrder : EntityCommand
 
     private float GetProgressPercent()
     {
-        if(TargetGeoSurveyDB == null) return 0f;
-        if(!TargetGeoSurveyDB.HasSurveyStarted(RequestingFactionGuid)) return 0f;
+        if (TargetGeoSurveyDB == null) return 0f;
+
+        // Planner constructs this without going through CreateCommand; faction is the ship owner.
+        int factionId = EntityCommanding != null
+            ? EntityCommanding.FactionOwnerID
+            : RequestingFactionGuid;
+        if (!TargetGeoSurveyDB.HasSurveyStarted(factionId)) return 0f;
 
         uint pointsRequired = TargetGeoSurveyDB.PointsRequired;
-        uint currentValue = TargetGeoSurveyDB.GeoSurveyStatus[RequestingFactionGuid];
+        if (pointsRequired == 0) return 100f;
+        uint currentValue = TargetGeoSurveyDB.GeoSurveyStatus[factionId];
 
         return (1f - ((float)currentValue / (float)pointsRequired)) * 100f;
     }

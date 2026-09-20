@@ -12,26 +12,37 @@ namespace Pulsar4X.Energy
         public DateTime dateTimeLastProcess;
         [JsonProperty]
         public ICargoable EnergyType;
+        
+        [JsonIgnore]
+        public double TotalOutputMax 
+        {
+            get =>  MaxOutputFromReactor + MaxOutputFromSolar;
+        }  
         [JsonProperty]
-        public double TotalOutputMax = 0;
+        public double MaxOutputFromReactor = 0;
         [JsonProperty]
-        public (string type, double maxUse) TotalFuelUseAtMax;
+        public double MaxOutputFromSolar = 0;
+        
+        [JsonProperty]
+        public (string type, double maxUse) TotalFuelUseAtMax = ("", 0.0);
         [JsonProperty]
         public double Demand { get; private set; }
 
+        [JsonProperty]
+        public List<EnergySolarGenerationAtb> SolarPanels { get; internal set; } = new();
 
         /// <summary>
         /// as a percentage of max output.
         /// </summary>
-        /// [JsonProperty]
+        [JsonProperty]
         public double Load { get; internal set; }
 
         /// <summary>
         /// In Kw
         /// </summary>
-        /// [JsonProperty]
+        [JsonProperty]
         public double Output { get; internal set; }
-        public void AddDemand(double demand, DateTime atDateTime)
+        internal void AddDemand(double demand, DateTime atDateTime)
         {
             if(OwningEntity != null)
                 EnergyGenProcessor.EnergyGen(OwningEntity, atDateTime);
@@ -102,7 +113,8 @@ namespace Pulsar4X.Energy
             EnergyType = db.EnergyType;
             EnergyStored = new Dictionary<string, double>(db.EnergyStored);
             EnergyStoreMax = new Dictionary<string, double>(db.EnergyStoreMax);
-            TotalOutputMax = db.TotalOutputMax;
+            MaxOutputFromReactor = db.MaxOutputFromReactor;
+            MaxOutputFromSolar = db.MaxOutputFromSolar;
             TotalFuelUseAtMax = db.TotalFuelUseAtMax;
             Demand = db.Demand;
             Load = db.Load;

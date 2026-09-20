@@ -104,13 +104,21 @@ public static class MoveMath
             }
             case PositionDB.MoveTypes.Orbit:
             {
-                if(entity.TryGetDatablob<OrbitDB>(out var orbitDB))
+                if(entity.TryGetDataBlob<OrbitDB>(out var orbitDB))
                 {
                     pos = (Vector2)OrbitMath.GetAbsolutePosition(orbitDB, atDateTime);
                 }
-                else if (entity.TryGetDatablob<OrbitUpdateOftenDB>(out var orbitDB2))
+                else if (entity.TryGetDataBlob<OrbitUpdateOftenDB>(out var orbitDB2))
                 {
                     pos = (Vector2)OrbitMath.GetAbsolutePosition(orbitDB2, atDateTime);
+                }
+                else
+                {
+                    // WarpMovingDB.OnSetToEntity strips OrbitDB before TryStartWarp
+                    // recomputes the intercept, and MoveType is still Orbit until
+                    // MoveStateProcessor runs. Leaving pos at (0,0) aims the warp
+                    // from the system origin.
+                    pos = position.AbsolutePosition2;
                 }
             }
                 break;
@@ -165,11 +173,11 @@ public static class MoveMath
             }
             case PositionDB.MoveTypes.Orbit:
             {
-                if(entity.TryGetDatablob<OrbitDB>(out var orbitDB))
+                if(entity.TryGetDataBlob<OrbitDB>(out var orbitDB))
                 {
                     pos = (Vector2)OrbitMath.GetPosition(orbitDB, OrbitMath.GetTrueAnomaly(orbitDB, atDateTime));
                 }
-                else if (entity.TryGetDatablob<OrbitUpdateOftenDB>(out var orbitDB2))
+                else if (entity.TryGetDataBlob<OrbitUpdateOftenDB>(out var orbitDB2))
                 {
                     pos = (Vector2)OrbitMath.GetPosition(orbitDB2, OrbitMath.GetTrueAnomaly(orbitDB2, atDateTime));
                 }
@@ -357,5 +365,27 @@ public static class MoveMath
         var dba = a.GetDataBlob<PositionDB>();
         var dbb = b.GetDataBlob<PositionDB>();
         return (dba.AbsolutePosition - dbb.AbsolutePosition).Length();
+    }
+    public static double GetDistanceBetween(Entity a, Vector3 absolutePositon)
+    {
+        var dba = a.GetDataBlob<PositionDB>();
+        return (dba.AbsolutePosition - absolutePositon).Length();
+    }
+
+    public static Vector3 GetRalitivePosition(Entity a, Entity b)
+    {
+        var dba = a.GetDataBlob<PositionDB>();
+        var dbb = b.GetDataBlob<PositionDB>();
+        return (dba.AbsolutePosition - dbb.AbsolutePosition);
+    }
+    public static Vector3 GetRalitivePosition(Entity a, Vector3 absolutePositon)
+    {
+        var dba = a.GetDataBlob<PositionDB>();
+        return (dba.AbsolutePosition - absolutePositon);
+    }
+    public static Vector3 GetRalitivePosition(Vector3 absolutePositon, Entity b)
+    {
+        var dbb = b.GetDataBlob<PositionDB>();
+        return (absolutePositon - dbb.AbsolutePosition);
     }
 }

@@ -1,37 +1,62 @@
-﻿using Pulsar4X.Engine;
-using Pulsar4X.Extensions;
-using SDL2;
+﻿using SDL3;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public static class ImageLoadingExtensions
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="_uiState">Global UI State Instance</param>
         /// <param name="imgName">Name you wish to refer to the image as</param>
         /// <param name="differentFilename">Different name of .bmp file in Resources</param>
         /// <returns></returns>
-        public static IntPtr ImgByName(this GlobalUIState _uiState, string imgName, string differentFilename = "")
+        public static IntPtr ImgByName(this GlobalUIState _uiState, string imgName, string differentFilename = "", string extension = ".bmp")
         {
             if (!_uiState.SDLImageDictionary.ContainsKey(imgName))
             {
                 // Load the image
                 var filename = differentFilename.IsNotNullOrEmpty() ? differentFilename : imgName;
-                var path = Path.Combine("Resources", filename + ".bmp");
+                var path = Path.Combine(PulsarMainWindow.ResourcesPath, filename + extension);
 
-                IntPtr sdlSurface = SDL.SDL_LoadBMP(path);
-                IntPtr sdltexture = SDL.SDL_CreateTextureFromSurface(_uiState.rendererPtr, sdlSurface);
+                // Check if file exists
+                if (!File.Exists(path))
+                {
+                    Console.WriteLine($"File not found: {path}");
+                    return IntPtr.Zero;
+                }
+#if DEBUG
+                Console.WriteLine($"Loading image: {path}");
+#endif
+                IntPtr texture = Image.LoadTexture(_uiState.ViewPort.Renderer, path);
+                if (texture == IntPtr.Zero)
+                {
+                    Console.WriteLine($"Failed to load image: {SDL.GetError()}");
+                    return IntPtr.Zero;
+                }
 
-                // Add to collection of loaded images
-                _uiState.SDLImageDictionary.Add(imgName, sdltexture);
+#if DEBUG
+                // Debug surface info
+                //var surface = Marshal.PtrToStructure<SDL.Surface>(sdlSurface);
+                //var format = Marshal.PtrToStructure<SDL.PixelFormat>(surface.Format);
+                SDL.GetTextureSize(texture, out var w, out var h);
+
+                Console.WriteLine($"Successfully loaded: {imgName}");
+                Console.WriteLine($"Format: {extension}");
+                Console.WriteLine($"Texture pointer: {texture:X}");
+                //Console.WriteLine($"Pixel pointer: {surface.Pixels:X}");
+                Console.WriteLine($"Dimensions: {w}x{h}");
+                //Console.WriteLine($"BPP: {format.BitsPerPixel}");
+                //Console.WriteLine($"BytesPerPixel: {format.BytesPerPixel}");
+                //Console.WriteLine($"Pitch: {surface.Pitch}");
+                Console.WriteLine(new string('-', 50));
+#endif
+
+                _uiState.SDLImageDictionary.Add(imgName, texture);
+                return texture;
             }
-
             return _uiState.SDLImageDictionary[imgName];
         }
 
@@ -166,6 +191,21 @@ namespace Pulsar4X.SDL2UI
         {
             //LoadImg("Tree", Path.Combine(rf, "TreeIco.bmp"));
             return _uiState.ImgByName("Tree", "TreeIco");
+        }
+
+        public static IntPtr Img_MainMenuLogo(this GlobalUIState _uiState)
+        {
+            return _uiState.ImgByName("pulsar4x-menu", "pulsar4x-menu", ".png");
+        }
+
+        public static IntPtr Img_Discord(this GlobalUIState _uiState)
+        {
+            return _uiState.ImgByName("discord", "discord-mark-white", ".png");
+        }
+
+        public static IntPtr Img_Character(this GlobalUIState _uiState)
+        {
+            return _uiState.ImgByName("character", "character", ".png");
         }
         #endregion
     }

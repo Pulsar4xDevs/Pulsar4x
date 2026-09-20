@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using ImGuiNET;
 
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.Client;
 
 public static class SizesDemo
 {
@@ -15,7 +15,7 @@ public static class SizesDemo
     static Vector2 _windowPos = new Vector2();
     static UInt32 _lineColour = ImGui.GetColorU32(new Vector4(1, 0, 0, 1));
     static UInt32 _pointColour = ImGui.GetColorU32(new Vector4(1, 1, 0, 1));
-        
+
     public static void Display()
     {
         _wdl = ImGui.GetForegroundDrawList();
@@ -25,18 +25,18 @@ public static class SizesDemo
             var getCursorScreenPos1st = ImGui.GetCursorScreenPos();
             var getCursorPos1st = ImGui.GetCursorPos();
             ImGui.Columns(2, "", true);
-            
+
             var getCursorStartPos = ImGui.GetCursorStartPos();
             _windowPos = ImGui.GetWindowPos();
-            
-            var getContentRegionMax = ImGui.GetContentRegionMax();
+
+            var getContentRegionMax = ImGui.GetContentRegionAvail();
             var getContentRegionAvail = ImGui.GetContentRegionAvail();
-                
+
             var getWindowSize = ImGui.GetWindowSize();
-            var getWindowContentRegionMax = ImGui.GetWindowContentRegionMax();
-            var getWindowContentRegionMin = ImGui.GetWindowContentRegionMin();
-            var getWindowContentRegionWidth = ImGui.GetWindowContentRegionMax().X - getWindowContentRegionMin.X;
-                
+            var getWindowContentRegionMax = ImGui.GetContentRegionAvail();
+            var getWindowContentRegionMin = ImGui.GetContentRegionAvail();
+            var getWindowContentRegionWidth = ImGui.GetContentRegionAvail().X - getWindowContentRegionMin.X;
+
             var getFontSize = ImGui.GetFontSize();
 
             var getFrameHeight = ImGui.GetFrameHeight();
@@ -48,57 +48,57 @@ public static class SizesDemo
             var getColomnWidth = ImGui.GetColumnWidth();
 
             var getColomnOffset = ImGui.GetColumnOffset(1);
-                
+
             var itemStartPos = new System.Numerics.Vector2();
 
             var cursorScreenStartPos = _windowPos + getCursorStartPos;
-                
+
             DoPoint("GetCursorStartPos", getCursorStartPos, FrameOfReference.Window);
             DoPoint("GetCursorPos (1st call in window)", getCursorPos1st, FrameOfReference.Window);
-                
+
             DoPoint("GetWindowPos", _windowPos, FrameOfReference.Screen);
             DoPoint("GetCursorScreenPos (1st call in window)", getCursorScreenPos1st, FrameOfReference.Screen);
-                
+
             DoPoint("WindowPos + CursorStartPos", _windowPos + getCursorStartPos, FrameOfReference.Screen);
-                
+
             var getCursorScreenPos = ImGui.GetCursorScreenPos();
             DoPoint("GetCursorScreenPos (before this item)", getCursorScreenPos, FrameOfReference.Screen);
-                
+
             var getCursorPos = ImGui.GetCursorPos();
             DoPoint("GetCursorPos (before this item)", getCursorPos, FrameOfReference.Window);
-                
+
             DoRectangle("GetWindowSize", _windowPos, getWindowSize);
 
             var windowContentRegionStart = new Vector2(cursorScreenStartPos.X, _windowPos.Y);//this seems a bit obtuse
             DoRectangle("GetWindowContentRegionMax", windowContentRegionStart, getWindowContentRegionMax);
-            DoRectangle("GetWindowContentRegionMin", cursorScreenStartPos, getWindowContentRegionMin);               
-                
+            DoRectangle("GetWindowContentRegionMin", cursorScreenStartPos, getWindowContentRegionMin);
+
             DoRectangle("GetContentRegionMax", _windowPos ,getContentRegionMax);
             DoRectangle("GetContentRegionAvail", cursorScreenStartPos, getContentRegionAvail);
-                
+
             itemStartPos = ImGui.GetCursorScreenPos();
             DoHLine("GetWindowContentRegionWidth", cursorScreenStartPos, getWindowContentRegionWidth);
-                
+
             var colomnWidthstart = new Vector2(_windowPos.X, cursorScreenStartPos.Y);
             DoHLine("GetColomnWidth", colomnWidthstart, getColomnWidth);
 
             DoHLine("GetColomnOffset (colomn[1])", colomnWidthstart, getColomnOffset);
-                
+
             itemStartPos = ImGui.GetCursorScreenPos();
             DoVLine("GetFontSize", itemStartPos, getFontSize);
 
             itemStartPos = ImGui.GetCursorScreenPos();
             DoVLine("GetTextLineHeight", itemStartPos, getTextLineHeight);
-                
+
             itemStartPos = ImGui.GetCursorScreenPos();
             DoVLine("GetTextLineHeightWithSpacing", itemStartPos, getTextLineHeightWithSpacing);
-                
+
             itemStartPos = ImGui.GetCursorScreenPos();
             DoVLine("GetFrameHeight", itemStartPos, getFrameHeight);
-                
+
             itemStartPos = ImGui.GetCursorScreenPos();
             DoVLine("GetFrameHeightWithSpacing", itemStartPos, getFrameHeightWithSpacing);
-            
+
             //we have to code the following one in full because we need to call GetItemRectSize after Imgui.Text()
             //so we can't just send it off to DoRectangle();
             itemStartPos = ImGui.GetCursorScreenPos();
@@ -113,7 +113,7 @@ public static class SizesDemo
             ImGui.NextColumn();
             ImGui.Text(getItemRectSize.ToString());
             ImGui.NextColumn();
-            
+
             //we have to code the following one in full because we need to call GetItemRectSize after Imgui.Text()
             //so we can't just send it off to DoRectangle();
             itemStartPos = ImGui.GetCursorScreenPos();
@@ -129,16 +129,16 @@ public static class SizesDemo
             ImGui.NextColumn();
             ImGui.Text(height.ToString());
             ImGui.NextColumn();
-                
+
             ImGui.Columns(0);
             ImGui.NewLine();
             ImGui.NewLine();
-            
+
             ImGui.Text("Note: DrawList.AddRect takes two positions, not position and size");
         }
         ImGui.End();
     }
-    
+
     static void DoPoint(string name, Vector2 point, FrameOfReference foR)
     {
         ImGui.Text(name);
@@ -188,7 +188,7 @@ public static class SizesDemo
         ImGui.Text(width.ToString());
         ImGui.NextColumn();
     }
-            
+
     static void DoVLine(string name, Vector2 start, float height)
     {
         ImGui.Text(name);
@@ -214,5 +214,5 @@ public static class SizesDemo
         _wdl.AddLine(p1, p2, _pointColour);
         _wdl.AddLine(p3, p4, _pointColour);
     }
-    
+
 }

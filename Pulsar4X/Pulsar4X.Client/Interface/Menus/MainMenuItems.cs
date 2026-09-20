@@ -1,137 +1,159 @@
 ﻿using System;
 using ImGuiNET;
-using System.Numerics;
-using Pulsar4X.Engine;
-using Vector2 = System.Numerics.Vector2;
-using Newtonsoft.Json;
 using System.IO;
-using System.Linq;
 using Pulsar4X.Client.Interface.Menus;
-using Pulsar4X.Extensions;
-using Pulsar4X.Datablobs;
-using Pulsar4X.SDL2UI.ModFileEditing;
-using Pulsar4X.Factions;
+using System.Numerics;
+using Pulsar4X.Client.Interface.Widgets;
+using System.Diagnostics;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
-    public class MainMenuItems : PulsarGuiWindow
+    public class MainMenuItems : UniquePulsarGuiWindow<MainMenuItems>
     {
 
         bool _saveGame = false;
-        System.Numerics.Vector2 buttonSize = new System.Numerics.Vector2(184, 24);
+        System.Numerics.Vector2 _buttonSize = new System.Numerics.Vector2(400, 24);
         new ImGuiWindowFlags _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar;
         private MainMenuItems(){}
         internal static MainMenuItems GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(MainMenuItems)))
+            if(_uiState.TryGetUniqueWindow<MainMenuItems>(out var window))
             {
-                return new MainMenuItems();
+                return window;
             }
-            return (MainMenuItems)_uiState.LoadedWindows[typeof(MainMenuItems)];
+
+            return _uiState.AddUniqueWindow(new MainMenuItems());
         }
 
 
         internal override void Display()
         {
-            if (IsActive)
+            if(!IsActive) return;
+
+            System.Numerics.Vector2 size = new System.Numerics.Vector2(412, 300);
+            System.Numerics.Vector2 pos = new System.Numerics.Vector2(
+                    _uiState.ViewPort.Size.Width / 2 - size.X / 2,
+                    _uiState.ViewPort.Size.Height / 2 - size.Y / 2);
+
+            ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(10, 10));
+            if (Window.Begin("Pulsar4X Main Menu", ref IsActive, _flags))
             {
-                System.Numerics.Vector2 size = new System.Numerics.Vector2(200, 100);
-                System.Numerics.Vector2 pos = new System.Numerics.Vector2(_uiState.MainWinSize.X / 2 - size.X / 2, _uiState.MainWinSize.Y / 2 - size.Y / 2);
-                ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
-                ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-                ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(10, 10));
-                if (ImGui.Begin("Pulsar4X Main Menu", ref IsActive, _flags))
+                ImGui.Image(_uiState.Img_MainMenuLogo().ToTextureRef(), new System.Numerics.Vector2(400, 200));
+
+                if (ImGui.Button("New Game...", _buttonSize) || _uiState.debugnewgame)
                 {
-
-                    if (ImGui.Button("Start a New Game", buttonSize) || _uiState.debugnewgame)
-                    {
-                        //_uiState.NewGameOptions.IsActive = true;
-                        var newgameoptions = NewGameMenu.GetInstance();
-                        newgameoptions.SetActive(true);
-                        this.IsActive = false;
-                    }
-                    if (_uiState.IsGameLoaded)
-                    {
-                        if (ImGui.Button("Save Game...", buttonSize))
-                        {
-                            _saveGame = !_saveGame;
-
-                            SaveGame.GetInstance().ToggleActive();
-                            // string gameJson = Game.Save(_uiState.Game);
-                            //
-                            // File.WriteAllText("save.json", gameJson);
-
-                            // FIXME:
-                            //SerializationManager.Export(_uiState.Game, "SaveGame");
-                            SetActive(false);
-                        }
-
-                        if (ImGui.Button("Options", buttonSize))
-                        {
-                            SettingsWindow.GetInstance().ToggleActive();
-                            this.SetActive(false);
-                        }
-                        if (ImGui.Button("Editor", buttonSize))
-                        {
-                            ModFileEditor.GetInstance().ToggleActive();
-                            this.SetActive(false);
-                        }
-
-                        if(ImGui.Button("Preferences", buttonSize))
-                        {
-                            SystemViewPreferences.GetInstance().ToggleActive();
-                            this.SetActive(false);
-                        }
-                    }
-
-                    var disabled = !DoAnySavesExist();
-                    if(disabled)
-                        ImGui.BeginDisabled();
-                    if (ImGui.Button("Resume a Current Game", buttonSize))
-                    {
-                        LoadGame.GetInstance().LoadLatest();
-                        SetActive(false);
-                    }
-                    if(disabled)
-                        ImGui.EndDisabled();
-                    if (ImGui.Button("Load Game...", buttonSize))
-                    {
-                        LoadGame.GetInstance().ToggleActive();
-                        SetActive(false);
-                    }
-                    ImGui.Button("Connect to a Network Game", buttonSize);
-                }
-
-                if (ImGui.Button("SM Mode", buttonSize))
-                {
-                    var pannel = SMWindow.GetInstance();
-                    _uiState.ActiveWindow = pannel;
-                    pannel.SetActive();
-                    _uiState.ToggleGameMaster();
+                    //_uiState.NewGameOptions.IsActive = true;
+                    var newgameoptions = NewGameMenu.GetInstance();
+                    newgameoptions.SetActive(true);
                     this.IsActive = false;
                 }
+                if (ImGui.Button("Quickstart", _buttonSize))
+                {
+                    NewGameMenu.QuickstartGame();
+                    this.IsActive = false;
+                }
+                if (_uiState.IsGameLoaded)
+                {
+                    if (ImGui.Button("Save Game...", _buttonSize))
+                    {
+                        _saveGame = !_saveGame;
 
-                if(ImGui.Button("Exit to Desktop", buttonSize))
+                        // Set the save name equal to the corporation name by default (player can change it in the dialog)
+                        string corpName = _uiState.GameClient?.Galaxy.Faction?.Name ?? "Unknown";
+                        string dateTime = _uiState.SelectedSystemTime.ToString("yyyy-MM-dd_HH-mm-ss");
+                        string unsanitizedName = $"{corpName} - {dateTime}";
+
+                        // Remove any invalid filename characters
+                        char[] invalidChars = Path.GetInvalidFileNameChars();
+                        string saveName = string.Join("_", unsanitizedName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries));
+
+                        SaveGame.GetInstance().UpdateSaveName(saveName);
+                        SaveGame.GetInstance().ToggleActive();
+                        SetActive(false);
+                    }
+
+                    if (ImGui.Button("Settings", _buttonSize))
+                    {
+                        SettingsWindow.GetInstance().ToggleActive();
+                        this.SetActive(false);
+                    }
+                    
+                    if(ImGui.Button("Preferences", _buttonSize))
+                    {
+                        SystemViewPreferences.GetInstance().ToggleActive();
+                        this.SetActive(false);
+                    }
+
+                    // Host-registered dev tools that asked for a main-menu button (e.g. SM Mode).
+                    foreach (var tool in _uiState.DevTools)
+                    {
+                        if (tool.Placement != DevToolPlacement.MainMenu)
+                            continue;
+                        if (ImGui.Button(tool.Label, _buttonSize))
+                        {
+                            tool.Toggle();
+                            this.IsActive = false;
+                        }
+                    }
+                }
+
+                var disabled = !DoAnySavesExist();
+                if(disabled)
+                    ImGui.BeginDisabled();
+                if (ImGui.Button("Resume Last Save", _buttonSize))
+                {
+                    LoadGame.GetInstance().LoadLatest();
+                    SetActive(false);
+                }
+                if(disabled)
+                    ImGui.EndDisabled();
+                if (ImGui.Button("Load Game...", _buttonSize))
+                {
+                    LoadGame.GetInstance().ToggleActive();
+                    SetActive(false);
+                }
+                
+
+                if(ImageButton.Begin(_uiState.Img_Discord(), "Discord", new Vector2(16, 12), _buttonSize))
+                {
+                    try
+                    {
+                        ProcessStartInfo psi = new ProcessStartInfo
+                        {
+                            FileName = "https://discord.gg/3uwCQSn",
+                            UseShellExecute = true
+                        };
+                        Process.Start(psi);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Handle any errors
+                        Console.WriteLine($"Error opening URL: {ex.Message}");
+                    }
+                }
+
+                if(ImGui.Button("Exit to Desktop", _buttonSize))
                 {
                     _uiState.ViewPort.IsAlive = false;
                 }
-
-                ImGui.End();
-                ImGui.PopStyleVar();
             }
-        }
 
-        public override void OnGameTickChange(DateTime newDate)
-        {
-        }
-
-        public override void OnSystemTickChange(DateTime newDate)
-        {
+            Window.End();
+            ImGui.PopStyleVar();
         }
 
         private bool DoAnySavesExist()
         {
-            var path = Path.Combine(PulsarMainWindow.GetAppDataPath(), PulsarMainWindow.SavesPath);
+            var appDataDirectory = PulsarMainWindow.GetAppDataPath();
+
+            if(string.IsNullOrEmpty(appDataDirectory))
+            {
+                return false;
+            }
+
+            var path = Path.Combine(appDataDirectory, PulsarMainWindow.SavesPath);
             var saveFiles = Directory.GetFiles(path, "*.sav");
 
             return saveFiles.Length > 0;

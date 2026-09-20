@@ -1,8 +1,0 @@
-{
-  "id": "default-design-battery-2t",
-  "name": "Battery 2t",
-  "templateId": "battery-bank",
-  "Properties": [
-    { "key": "Mass", "value": 2000 }
-  ]
-}

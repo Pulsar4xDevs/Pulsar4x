@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Fleets;
@@ -105,7 +106,7 @@ namespace Pulsar4X.Ships
             dataBlobs.Add(damagedb);
             ComponentInstancesDB compInstances = new ComponentInstancesDB();
             dataBlobs.Add(compInstances);
-            OrderableDB ordable = new OrderableDB();
+            ActionQueueDB ordable = new ActionQueueDB();
             dataBlobs.Add(ordable);
             var ship = Entity.Create();
             ship.FactionOwnerID = ownerFaction.Id;
@@ -150,7 +151,7 @@ namespace Pulsar4X.Ships
             var faction = game.Factions[shipToDestroy.FactionOwnerID];
 
             // Remove the ship from its fleet
-            if(faction.TryGetDatablob<FleetDB>(out var fleetDB))
+            if(faction.TryGetDataBlob<FleetDB>(out var fleetDB))
             {
                 // Recursively try to get the fleet the ship belongs to
                 var belongsToFleet = fleetDB.TryGetChild<FleetDB>(shipToDestroy);
@@ -172,7 +173,7 @@ namespace Pulsar4X.Ships
             // Kill any officers on board
             // (currently just the commander)
             // TODO: check for additional people on board (passengers, officers, scientists etc)
-            if(shipToDestroy.TryGetDatablob<ShipInfoDB>(out var shipInfoDB)
+            if(shipToDestroy.TryGetDataBlob<ShipInfoDB>(out var shipInfoDB)
                 && shipToDestroy.Manager.TryGetEntityById(shipInfoDB.CommanderID, out var commanderEntity))
             {
                 CommanderFactory.DestroyCommander(commanderEntity);

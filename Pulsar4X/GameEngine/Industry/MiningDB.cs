@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Industry
 {

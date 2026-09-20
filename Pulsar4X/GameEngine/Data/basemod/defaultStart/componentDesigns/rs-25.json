@@ -1,9 +1,0 @@
-{
-  "id": "default-design-rs-25",
-  "name": "RS-25",
-  "templateId": "conventional-engine",
-  "Properties": [
-    { "key": "Mass", "value": 3200 },
-    { "key": "Fuel Type", "value": "hydrolox" }
-  ]
-}

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using Newtonsoft.Json;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
@@ -15,7 +16,7 @@ using Pulsar4X.Ships;
 
 namespace Pulsar4X.Storage;
 
-public class CargoInstallOrder : EntityCommand
+public class CargoInstallOrder : EntityAction
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement | ActionLaneTypes.InteractWithExternalEntity;
 
@@ -97,7 +98,7 @@ public class CargoInstallOrder : EntityCommand
     }
     
     
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }

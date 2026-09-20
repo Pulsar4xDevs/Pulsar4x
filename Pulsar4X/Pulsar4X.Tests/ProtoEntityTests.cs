@@ -24,7 +24,7 @@ public class ProtoEntityTests
     {
         var protoEntity = new ProtoEntity(new List<BaseDataBlob> { new MockDataBlob1() });
 
-        bool result = protoEntity.TryGetDatablob<MockDataBlob1>(out var value);
+        bool result = protoEntity.TryGetDataBlob<MockDataBlob1>(out var value);
 
         Assert.IsTrue(result);
         Assert.IsNotNull(value);
@@ -35,7 +35,7 @@ public class ProtoEntityTests
     {
         var protoEntity = new ProtoEntity();
 
-        bool result = protoEntity.TryGetDatablob<MockDataBlob1>(out var value);
+        bool result = protoEntity.TryGetDataBlob<MockDataBlob1>(out var value);
 
         Assert.IsFalse(result);
         Assert.IsNull(value);

@@ -1,0 +1,462 @@
+[
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-alcubierre-2k",
+      "Name": "Alcuberi-White 2k",
+      "TemplateId": "alcubierre-warp-drive",
+      "Properties": [
+        { "Key": "Mass", "Value": 2000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-alcubierre-500",
+      "Name": "Alcuberi-White 500",
+      "TemplateId": "alcubierre-warp-drive",
+      "Properties": [
+        { "Key": "Mass", "Value": 500 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-auto-mine",
+      "Name": "Auto Mine",
+      "TemplateId": "automine"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-factory",
+      "Name": "Factory",
+      "TemplateId": "factory"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-battery-2t",
+      "Name": "Battery 2t",
+      "TemplateId": "battery-bank",
+      "Properties": [
+        { "Key": "Mass", "Value": 2000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-battery-25kg",
+      "Name": "Battery 25kg",
+      "TemplateId": "battery-bank",
+      "Properties": [
+        { "Key": "Mass", "Value": 25 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-beam-fire-control",
+      "Name": "Beam Fire Control",
+      "TemplateId": "beam-fire-control",
+      "Properties": [
+        { "Key": "Range", "Value": 100 },
+        { "Key": "Tracking Speed", "Value": 5000 },
+        { "Key": "Size vs Range", "Value": 1 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-cargo-hold-1t",
+      "Name": "Cargo Hold 1t",
+      "TemplateId": "general-cargo-hold",
+      "Properties": [
+        { "Key": "Storage Volume", "Value": 1000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-cargo-hold-5t",
+      "Name": "Cargo Hold 5t",
+      "TemplateId": "general-cargo-hold",
+      "Properties": [
+        { "Key": "Storage Volume", "Value": 5000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-shuttlebay",
+      "Name": "Cargo Shuttlebay",
+      "TemplateId": "cargo-Shuttlebay",
+      "Properties": [
+        { "Key": "Size", "Value": 5000 },
+        { "Key": "Rate vs Range", "Value": 2 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-spaceport",
+      "Name": "Spaceport Facility",
+      "TemplateId": "spaceport"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-f1",
+      "Name": "F1",
+      "TemplateId": "conventional-engine",
+      "Properties": [
+        { "Key": "Mass", "Value": 8400 },
+        { "Key": "Fuel Type", "Value": "rp-1" }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-fuel-farm-5000k",
+      "Name": "Fuel Farm 5000km^3",
+      "TemplateId": "stainless-steel-fuel-tank",
+      "Properties": [
+        { "key": "Tank Volume", "value": 5000000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-fuel-tank-1000",
+      "Name": "Fuel Tank 1000m^3",
+      "TemplateId": "stainless-steel-fuel-tank",
+      "Properties": [
+        { "Key": "Tank Volume", "Value": 1000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-fuel-tank-1500",
+      "Name": "Fuel Tank 1500m^3",
+      "TemplateId": "stainless-steel-fuel-tank",
+      "Properties": [
+        { "Key": "Tank Volume", "Value": 1500 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-fuel-tank-3000",
+      "Name": "Fuel Tank 3000m^3",
+      "TemplateId": "stainless-steel-fuel-tank",
+      "Properties": [
+        { "Key": "Tank Volume", "Value": 3000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-geo-surveyor",
+      "Name": "Geo Surveyor Mk1",
+      "TemplateId": "geo-surveyor",
+      "Properties": [
+        { "Key": "Survey Speed", "Value": 1 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-gravitational-surveyor",
+      "Name": "Gravitational Surveyor Mk1",
+      "TemplateId": "gravitational-surveyor",
+      "Properties": [
+        { "Key": "Survey Speed", "Value": 10 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-laser-weapon",
+      "Name": "Laser Weapon",
+      "TemplateId": "laser-weapon"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-logistics-office",
+      "Name": "Logistics Office",
+      "TemplateId": "logistics-office"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-merlin",
+      "Name": "Merlin",
+      "TemplateId": "conventional-engine",
+      "Properties": [
+        { "Key": "Mass", "Value": 470 },
+        { "Key": "Fuel Type", "Value": "rp-1" }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-mine",
+      "Name": "Mine",
+      "TemplateId": "mine"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-missle-tube-500",
+      "Name": "Missile Tube 500",
+      "TemplateId": "missile-launcher"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-ordnance-rack-2.5t",
+      "Name": "Ordnance Rack 2.5t",
+      "TemplateId": "ordnance-cargo-hold",
+      "Properties": [
+        { "Key": "Rack Size", "Value": 2627 },
+        { "Key": "Cargo Transfer Rate", "Value": 100 },
+        { "Key": "Transfer Range", "Value": 100 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-passive-sensor",
+      "Name": "Passive Scanner",
+      "TemplateId": "passive-sensor",
+      "Properties": [
+        { "Key": "Antenna Size", "Value": 5000 },
+        { "Key": "Ideal Detection Wavelength", "Value": 470 },
+        { "Key": "Detection Bandwidth", "Value": 250 },
+        { "Key": "Resolution", "Value": 100 },
+        { "Key": "Scan Time", "Value": 3600 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-passive-sensor-s50",
+      "Name": "Passive Sensor S50",
+      "TemplateId": "passive-sensor",
+      "Properties": [
+        { "Key": "Antenna Size", "Value": 5.5 },
+        { "Key": "Ideal Detection Wavelength", "Value": 479 },
+        { "Key": "Detection Bandwidth", "Value": 200 },
+        { "Key": "Resolution", "Value": 1 },
+        { "Key": "Scan Time", "Value": 3600 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-missle-sensors",
+      "Name": "Passive Yellow Sensor 1MP",
+      "TemplateId": "missle-electronics-suite",
+      "Properties": [
+        { "Key": "Antenna Size", "Value": 10 },
+        { "Key": "Ideal Detection Wavelength", "Value": 470 },
+        { "Key": "Detection Bandwidth", "Value": 2 },
+        { "Key": "Resolution", "Value": 1 },
+        { "Key": "Guidance Type", "Value": 2 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-prox-frag-5kg",
+      "Name": "Prox Frag 5kg",
+      "TemplateId": "missle-payload",
+      "Properties": [
+        { "Key": "Trigger Type", "Value": 2 },
+        { "Key": "Payload Type", "Value": 0 },
+        { "Key": "Explosive Mass", "Value": 2 },
+        { "Key": "Frag Mass", "Value": 0.1 },
+        { "Key": "Frag Count", "Value": 30 },
+        { "Key": "Frag Cone Angle", "Value": 180 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-raptor",
+      "Name": "Raptor (Vac)",
+      "TemplateId": "conventional-engine",
+      "Properties": [
+        { "Key": "Mass", "Value": 2000 },
+        { "Key": "Fuel Type", "Value": "methalox" }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-reactor-2t",
+      "Name": "48MW Steam Turbine Reactor",
+      "TemplateId": "steam-turbine-reactor",
+      "Properties": [
+        { "Key": "Mass", "Value": 2000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-refinery",
+      "Name": "Refinery",
+      "TemplateId": "refinery"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-rs-25",
+      "Name": "RS-25",
+      "TemplateId": "conventional-engine",
+      "Properties": [
+        { "Key": "Mass", "Value": 3200 },
+        { "Key": "Fuel Type", "Value": "hydrolox" }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-shipyard",
+      "Name": "Ship Yard",
+      "TemplateId": "shipyard"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-NTR1.8",
+      "Name": "NERVA",
+      "TemplateId": "scntr-engine",
+      "Properties": [
+        { "Key": "Mass", "Value": 1800 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-missile-srb",
+      "Name": "SRB 235",
+      "TemplateId": "missile-srb",
+      "Properties": [
+        { "Key": "Engine Mass", "Value": 10 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-research-lab",
+      "Name": "Power & Propulsion Lab",
+      "TemplateId": "research-lab"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-warehouse",
+      "Name": "Warehouse",
+      "TemplateId": "warehouse-facility",
+      "Properties": [
+        { "Key": "Storage Volume", "Value": 1000000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-infrastructure",
+      "Name": "Earth-Standard Infrastructure",
+      "TemplateId": "infrastructure",
+      "Properties": [
+        { "Key": "Min Gravity", "Value": 8.8 },
+        { "Key": "Max Gravity", "Value": 10.8 },
+        { "Key": "Min Pressure", "Value": 0.9 },
+        { "Key": "Max Pressure", "Value": 1.1 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-city-hall",
+      "Name": "City Hall",
+      "TemplateId": "admin-complex",
+      "Properties": [
+        { "Key": "Office Space", "Value": 1000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design_solarpanel",
+      "Name": "solar panel",
+      "TemplateId": "solarArray",
+      "Properties": [
+        { "Key": "Area", "Value": 100 },
+        { "Key": "Ideal Absorption Wavelength", "Value": 479 },
+        { "Key": "Bandwidth", "Value": 150 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-local-construction",
+      "Name": "Construction Office",
+      "TemplateId": "local-construction",
+      "Properties": [
+        { "Key": "Level", "Value": 1 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-launch-complex",
+      "Name": "Launch Complex",
+      "TemplateId": "launch-complex"
+    }
+  }
+]

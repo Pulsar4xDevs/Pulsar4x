@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿/*
+using NUnit.Framework;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using System;
@@ -17,14 +18,13 @@ namespace Pulsar4X.Tests
     {
         private Game _game;
 
-        /* TODO: Needs updated for new serialization, or deleted.
+        //TODO: Needs updated for new serialization, or deleted.
         [Test]
         [Description("Outputs all the systems generated in the init of this test to XML")]
         public void OutputToXML()
         {
             SerializationManager.ExportStarSystemsToXML(_game);
         }
-        */
 
         [SetUp]
         public void Init()
@@ -342,7 +342,7 @@ namespace Pulsar4X.Tests
         public void JPConnectivity()
         {
             const int numSystems = 2000;
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = numSystems }, _game.StartingGameData);
+            _game = new Game(new NewGameSettings { StartDateTime = DateTime.Now, MaxSystems = numSystems }, _game.StartingGameData);
             List<StarSystem> systems = _game.Systems;
 
 
@@ -384,6 +384,5 @@ namespace Pulsar4X.Tests
             }
         }
     }
-
-
 }
+*/

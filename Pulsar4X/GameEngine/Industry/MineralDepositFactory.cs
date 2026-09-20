@@ -35,8 +35,8 @@ public class MineralDepositFactory
             if (genChance >= genChanceThreshold)
             {
                 mdi.Accessibility = GeneralMath.Clamp(settings.MinMineralAccessibility + genChance, 0, 1);
-                mdi.Amount = (long)Math.Round(settings.MaxMineralAmmountByBodyType[bodyInfoDB.BodyType] * genChance);
-                mdi.HalfOriginalAmount = mdi.Amount / 2;
+                mdi.Amount = new Masked<long>((long)Math.Round(settings.MaxMineralAmmountByBodyType[bodyInfoDB.BodyType] * genChance), AccessLevel.None);
+                mdi.HalfOriginalAmount = mdi.Amount.Actual / 2;
 
                 if (!mineralInfo.Minerals.ContainsKey(min.ID))
                 {
@@ -56,8 +56,8 @@ public class MineralDepositFactory
             // create a MineralDepositInfo
             MineralDeposit mdi = new MineralDeposit();
             mdi.Accessibility = GeneralMath.Clamp(settings.MinHomeworldMineralAccessibility + system.RNGNextDouble() * min.Abundance[bodyInfoDB.BodyType], 0, 1);
-            mdi.Amount = (long)Math.Round(settings.MinHomeworldMineralAmmount + settings.HomeworldMineralAmmount * system.RNGNextDouble() * min.Abundance[bodyInfoDB.BodyType]);
-            mdi.HalfOriginalAmount = mdi.Amount / 2;
+            mdi.Amount = new Masked<long>((long)Math.Round(settings.MinHomeworldMineralAmmount + settings.HomeworldMineralAmmount * system.RNGNextDouble() * min.Abundance[bodyInfoDB.BodyType]), AccessLevel.None);
+            mdi.HalfOriginalAmount = mdi.Amount.Actual / 2;
             if (!mineralInfo.Minerals.ContainsKey(min.ID))
             {
                 mineralInfo.Minerals.Add(min.ID, mdi);
@@ -75,9 +75,9 @@ public class MineralDepositFactory
             var mdi = new MineralDeposit()
             {
                 Accessibility = GeneralMath.Clamp(accessibility, 0, 1),
-                Amount = (long)Math.Round(game.GalaxyGen.Settings.MaxMineralAmmountByBodyType[bodyType] * abundance),
+                Amount = new Masked<long>((long)Math.Round(game.GalaxyGen.Settings.MaxMineralAmmountByBodyType[bodyType] * abundance), AccessLevel.None),
             };
-            mdi.HalfOriginalAmount = mdi.Amount / 2;
+            mdi.HalfOriginalAmount = mdi.Amount.Actual / 2;
             mineralsDb.Minerals.Add(id, mdi);
         }
 

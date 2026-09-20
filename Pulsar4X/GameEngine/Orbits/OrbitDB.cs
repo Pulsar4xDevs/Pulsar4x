@@ -10,6 +10,7 @@ using Pulsar4X.Events;
 using Pulsar4X.Sensors;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Orbits
 {
@@ -125,6 +126,13 @@ namespace Pulsar4X.Orbits
         internal double _myMass;
 
         internal Vector2 _position;
+
+        // Cached trigonometric values for performance
+        private double _cachedCosLoAN;
+        private double _cachedSinLoAN;
+        private double _cachedCosIncl;
+        private double _cachedSinIncl;
+        private bool _trigCacheValid = false;
 
         #region Construction Interface
 
@@ -517,6 +525,30 @@ namespace Pulsar4X.Orbits
 
             SOI_m = OrbitMath.GetSOI(SemiMajorAxis, _myMass, _parentMass);
 
+            // Cache trigonometric values for performance
+            UpdateTrigCache();
+        }
+
+        /// <summary>
+        /// Updates cached trigonometric values
+        /// </summary>
+        internal void UpdateTrigCache()
+        {
+            _cachedCosLoAN = Math.Cos(LongitudeOfAscendingNode);
+            _cachedSinLoAN = Math.Sin(LongitudeOfAscendingNode);
+            _cachedCosIncl = Math.Cos(Inclination);
+            _cachedSinIncl = Math.Sin(Inclination);
+            _trigCacheValid = true;
+        }
+
+        /// <summary>
+        /// Gets cached trigonometric values for position calculations
+        /// </summary>
+        internal (double cosLoAN, double sinLoAN, double cosIncl, double sinIncl) GetCachedTrigValues()
+        {
+            if (!_trigCacheValid)
+                UpdateTrigCache();
+            return (_cachedCosLoAN, _cachedSinLoAN, _cachedCosIncl, _cachedSinIncl);
         }
 
         [OnDeserialized]
@@ -543,6 +575,27 @@ namespace Pulsar4X.Orbits
             ke.Period = OrbitalPeriod.TotalSeconds;
 			ke.StandardGravParameter = GravitationalParameter_m3S2;
             ke.TrueAnomalyAtEpoch = OrbitMath.TrueAnomalyFromTime(GravitationalParameter_m3S2, SemiMajorAxis ,Eccentricity, MeanAnomalyAtEpoch, 0) ;   //ν or f or  θ
+			return ke;
+        }
+
+        public KeplerElements GetElements(double preCalculatedTrueAnomaly)
+        {
+            KeplerElements ke = new KeplerElements();
+            ke.SemiMajorAxis = SemiMajorAxis;                                            //a
+            ke.SemiMinorAxis = SemiMajorAxis * Math.Sqrt(1 - Eccentricity * Eccentricity);//b
+            ke.Eccentricity = Eccentricity;                                              //e
+            ke.Periapsis = Periapsis;                                                    //q
+            ke.Apoapsis = Apoapsis;                                                      //Q
+            ke.LoAN = LongitudeOfAscendingNode;                                          //Ω (upper case Omega)
+            ke.AoP = ArgumentOfPeriapsis;                                                //ω (lower case omega)
+            ke.Inclination = Inclination;                                                //i
+            ke.MeanMotion = MeanMotion;                                                  //n
+            ke.MeanAnomalyAtEpoch = MeanAnomalyAtEpoch;                                  //M0
+            ke.Epoch = Epoch;
+            ke.LinearEccentricity = Eccentricity * SemiMajorAxis;                        //ae
+            ke.Period = OrbitalPeriod.TotalSeconds;
+			ke.StandardGravParameter = GravitationalParameter_m3S2;
+            ke.TrueAnomalyAtEpoch = preCalculatedTrueAnomaly;                            //ν or f or  θ (use pre-calculated value)
 			return ke;
         }
 
@@ -587,6 +640,137 @@ namespace Pulsar4X.Orbits
                 {
 
                 }
+            }
+
+            // SOI entry prediction for ships/projectiles (not system bodies)
+            if (!OwningEntity.HasDataBlob<SystemBodyInfoDB>())
+            {
+                ScheduleSOIEntry();
+            }
+        }
+
+        /// <summary>
+        /// Scans the orbit for encounters with sibling child bodies and schedules
+        /// an EnterSOIProcessor interrupt at the predicted SOI crossing time.
+        /// </summary>
+        private void ScheduleSOIEntry()
+        {
+            if (Parent == null || !Parent.HasDataBlob<OrbitDB>()) return;
+            var parentOrbit = Parent.GetDataBlob<OrbitDB>();
+            var siblings = parentOrbit.Children;
+            if (siblings.Count == 0) return;
+
+            // Determine scan window
+            double scanSeconds;
+            if (Eccentricity < 1)
+            {
+                // Elliptical: scan one orbital period, capped at 1 year
+                scanSeconds = Math.Min(OrbitalPeriod.TotalSeconds, 365.25 * 24 * 3600);
+            }
+            else
+            {
+                // Hyperbolic: scan until SOI exit (already scheduled above), capped at 1 year
+                var soiParent = OwningEntity.GetSOIParentEntity();
+                if (soiParent != null && soiParent.HasDataBlob<OrbitDB>())
+                {
+                    var soiRadius = OrbitMath.GetSOIRadius(soiParent.GetDataBlob<OrbitDB>());
+                    if (!double.IsNaN(soiRadius))
+                    {
+                        var soiExitTime = OrbitMath.TimeToRadius(this, soiRadius);
+                        scanSeconds = Math.Min((soiExitTime - Epoch).TotalSeconds, 365.25 * 24 * 3600);
+                    }
+                    else
+                    {
+                        scanSeconds = 365.25 * 24 * 3600;
+                    }
+                }
+                else
+                {
+                    scanSeconds = 365.25 * 24 * 3600;
+                }
+            }
+
+            if (scanSeconds <= 0) return;
+
+            int numSamples = 180;
+            double stepSeconds = scanSeconds / numSamples;
+
+            DateTime earliestCrossTime = DateTime.MaxValue;
+            DateTime tOutside = DateTime.MinValue;
+            DateTime tInside = DateTime.MinValue;
+            Entity? crossChild = null;
+
+            foreach (var child in siblings)
+            {
+                if (child == OwningEntity) continue;
+                if (!child.HasDataBlob<OrbitDB>() || !child.HasDataBlob<MassVolumeDB>()) continue;
+
+                var childSOI = child.GetSOI_m();
+                if (childSOI <= 0 || double.IsInfinity(childSOI)) continue;
+
+                var childOrbit = child.GetDataBlob<OrbitDB>();
+
+                // Determine initial state: if we're already inside this child's SOI at Epoch
+                // (e.g., we just exited it), don't treat it as an outside→inside transition.
+                var initShipPos = this.GetPosition(Epoch);
+                var initChildPos = childOrbit.GetPosition(Epoch);
+                bool wasOutside = (initShipPos - initChildPos).Length() >= childSOI;
+
+                for (int i = 1; i <= numSamples; i++)
+                {
+                    var sampleTime = Epoch + TimeSpan.FromSeconds(i * stepSeconds);
+                    var shipPos = this.GetPosition(sampleTime);
+                    var childPos = childOrbit.GetPosition(sampleTime);
+                    var dist = (shipPos - childPos).Length();
+
+                    if (dist < childSOI)
+                    {
+                        if (wasOutside)
+                        {
+                            // Genuine outside → inside transition
+                            tInside = sampleTime;
+                            tOutside = Epoch + TimeSpan.FromSeconds((i - 1) * stepSeconds);
+
+                            if (tInside < earliestCrossTime)
+                            {
+                                earliestCrossTime = tInside;
+                                crossChild = child;
+                            }
+                        }
+                        break;  // Found first crossing for this child, stop sampling
+                    }
+                    wasOutside = true;
+                }
+            }
+
+            if (crossChild == null) return;
+
+            // Binary search to refine the crossing time
+            var childOrbitRef = crossChild.GetDataBlob<OrbitDB>();
+            var childSOIRef = crossChild.GetSOI_m();
+            DateTime lo = tOutside;
+            DateTime hi = tInside;
+
+            for (int iter = 0; iter < 20; iter++)
+            {
+                var midTicks = lo.Ticks / 2 + hi.Ticks / 2;
+                var mid = new DateTime(midTicks);
+                var shipPos = this.GetPosition(mid);
+                var childPos = childOrbitRef.GetPosition(mid);
+                var dist = (shipPos - childPos).Length();
+
+                if (dist < childSOIRef)
+                    hi = mid;
+                else
+                    lo = mid;
+            }
+
+            // Schedule slightly after the crossing so the entity is inside the SOI
+            var crossTime = hi;
+            var manager = OwningEntity.Manager;
+            if (crossTime > manager.ManagerSubpulses.StarSysDateTime)
+            {
+                manager.ManagerSubpulses.AddEntityInterupt(crossTime, nameof(EnterSOIProcessor), OwningEntity);
             }
         }
 

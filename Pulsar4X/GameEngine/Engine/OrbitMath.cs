@@ -41,6 +41,32 @@ namespace Pulsar4X.Engine
         }
 
         /// <summary>
+        /// Fuel cost to reach a given orbit radius from the surface.
+        /// If targetOrbitRadius is &lt;= 0 or below low orbit, defaults to low orbit.
+        /// </summary>
+        /// <param name="planetEntity"></param>
+        /// <param name="payload">mass of the payload in kg</param>
+        /// <param name="targetOrbitRadius">orbit radius in meters from planet center</param>
+        /// <returns>mass of fuel required in kg</returns>
+        public static double FuelCostToOrbit(Entity planetEntity, double payload, double targetOrbitRadius)
+        {
+            var planetRadius = planetEntity.GetDataBlob<MassVolumeDB>().RadiusInM;
+            var planetMass = planetEntity.GetDataBlob<MassVolumeDB>().MassDry;
+            var lowOrbit = LowOrbitRadius(planetRadius);
+
+            if (targetOrbitRadius <= 0 || targetOrbitRadius < lowOrbit)
+                targetOrbitRadius = lowOrbit;
+
+            var exhaustVelocity = 3000;
+            var sgp = GeneralMath.StandardGravitationalParameter(payload + planetMass);
+            Vector3 pos = targetOrbitRadius * Vector3.UnitX;
+
+            var vel = OrbitalMath.ObjectLocalVelocityPolar(sgp, pos, targetOrbitRadius, 0, 0, 0);
+            var fuelCost = OrbitalMath.TsiolkovskyFuelCost(payload, exhaustVelocity, vel.speed);
+            return fuelCost;
+        }
+
+        /// <summary>
         /// Mass of fuel burned for a given DV change.
         /// </summary>
         /// <param name="ship"></param>
@@ -223,7 +249,10 @@ namespace Pulsar4X.Engine
             {
                 return Vector3.Zero;
             }
-            return OrbitalMath.GetPosition(orbit.SemiMajorAxis, orbit.Eccentricity, orbit.LongitudeOfAscendingNode, orbit.ArgumentOfPeriapsis, orbit.Inclination, trueAnomaly);
+            // Use cached trigonometric values for performance
+            var (cosLoAN, sinLoAN, cosIncl, sinIncl) = orbit.GetCachedTrigValues();
+            return OrbitalMath.GetPosition(orbit.SemiMajorAxis, orbit.Eccentricity, orbit.ArgumentOfPeriapsis, trueAnomaly,
+                cosLoAN, sinLoAN, cosIncl, sinIncl);
         }
 
         public static Vector3 GetAbsolutePosition(OrbitDB orbit, DateTime atDateTime)
@@ -274,6 +303,29 @@ namespace Pulsar4X.Engine
         }
 
         /// <summary>
+        /// Parent relative velocity vector.
+        /// </summary>
+        /// <returns>The orbital vector relative to the parent</returns>
+        /// <param name="orbit">Orbit.</param>
+        /// <param name="atDateTime">At date time.</param>
+        /// <param name="preCalculatedTrueAnomaly">Pre-calculated true anomaly to avoid redundant calculation.</param>
+        public static Vector3 InstantaneousOrbitalVelocityVector_m(OrbitDB orbit, DateTime atDateTime, double preCalculatedTrueAnomaly)
+        {
+            var position = GetPosition(orbit, preCalculatedTrueAnomaly);
+            var sma = orbit.SemiMajorAxis;
+            if (orbit.GravitationalParameter_m3S2 == 0 || sma == 0)
+                return new Vector3(); //so we're not returning NaN;
+            var sgp = orbit.GravitationalParameter_m3S2;
+
+            double e = orbit.Eccentricity;
+            double trueAnomaly = preCalculatedTrueAnomaly;
+            double aoP = orbit.ArgumentOfPeriapsis;
+            double i = orbit.Inclination;
+            double loAN = orbit.LongitudeOfAscendingNode;
+            return ParentLocalVeclocityVector(sgp, position, sma, e, trueAnomaly, aoP, i, loAN);
+        }
+
+        /// <summary>
         /// basicaly the radius of the planet * 1.1
         /// in future we may have this dependant on atmosphere (thickness and or gravity?)
         /// maybe we should return a lower and an upper bound? ie 1.05 to 1.333 which would allow some flexability with eccentricity,
@@ -298,18 +350,17 @@ namespace Pulsar4X.Engine
         public static double GetTrueAnomaly(OrbitDB orbit, DateTime time)
         {
             TimeSpan timeSinceEpoch = time - orbit.Epoch;
-
-            // Don't attempt to calculate large timeframes.
-            while (timeSinceEpoch > orbit.OrbitalPeriod && orbit.OrbitalPeriod.Ticks != 0)
-            {
-                long years = timeSinceEpoch.Ticks / orbit.OrbitalPeriod.Ticks;
-                timeSinceEpoch -= TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
-                orbit.Epoch += TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
-            }
-
             var secondsFromEpoch = timeSinceEpoch.TotalSeconds;
+
             if (orbit.Eccentricity < 1) //elliptical orbit
             {
+                // For elliptical orbits, normalize time using modulo to avoid large numbers
+                // GetMeanAnomalyFromTime already normalizes the angle, so we just need to handle the time
+                if (orbit.OrbitalPeriod.Ticks != 0 && Math.Abs(secondsFromEpoch) > orbit.OrbitalPeriod.TotalSeconds)
+                {
+                    secondsFromEpoch = secondsFromEpoch % orbit.OrbitalPeriod.TotalSeconds;
+                }
+
                 double o_M0 = orbit.MeanAnomalyAtEpoch;
                 double o_M1 = GetMeanAnomalyFromTime(o_M0, orbit.MeanMotion, secondsFromEpoch);
                 double o_E = GetEccentricAnomaly(orbit, o_M1);
@@ -317,9 +368,8 @@ namespace Pulsar4X.Engine
             }
             else //hyperbolic orbit
             {
-                double o_Mh = GetHyperbolicMeanAnomalyFromTime(orbit.MeanMotion, secondsFromEpoch);
-                double o_F =  GetHyperbolicAnomaly(orbit, o_Mh);
-                return TrueAnomalyFromHyperbolicAnomaly(orbit.Eccentricity, o_F);
+                // Hyperbolic orbits don't have a period, so no normalization needed
+                return TrueAnomalyFromTime(orbit.GravitationalParameter_m3S2, orbit.SemiMajorAxis, orbit.Eccentricity, orbit.MeanAnomalyAtEpoch, secondsFromEpoch);
             }
         }
 
@@ -407,13 +457,10 @@ namespace Pulsar4X.Engine
         /// <param name="parent">Parent Entity</param>
         /// <param name="child">Child Entity</param>
         /// <returns></returns>
-        public static double SGP(Entity parent, Entity child)
-        {
-            var mass = parent.GetDataBlob<MassVolumeDB>().MassTotal;
-            mass += child.GetDataBlob<MassVolumeDB>().MassTotal;
-            return mass * UniversalConstants.Science.GravitationalConstant;
-
-        }
+        public static double SGP(Entity parent, Entity child) =>
+            GeneralMath.StandardGravitationalParameter(
+                    parent.GetDataBlob<MassVolumeDB>().MassTotal,
+                    child.GetDataBlob<MassVolumeDB>().MassTotal);
 
         /// <summary>
         /// returns the SOI radius of *this* orbital body,

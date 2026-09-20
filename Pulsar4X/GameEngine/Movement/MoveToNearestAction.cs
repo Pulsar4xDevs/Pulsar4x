@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Orbital;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Extensions;
@@ -13,7 +14,7 @@ using Pulsar4X.Engine;
 
 namespace Pulsar4X.Movement
 {
-    public class MoveToNearestAction : EntityCommand
+    public class MoveToNearestAction : EntityAction
     {
         public override string Name => "Move to Nearest";
         public override string Details => "Moves the fleet to the nearest X by filter.";
@@ -37,7 +38,7 @@ namespace Pulsar4X.Movement
         public EntitySelector? TargetSelector { get; protected set; }
         public EntityFilter EntityFactionFilter { get; protected set; } = EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile;
 
-        private List<EntityCommand> _shipCommands = new List<EntityCommand>();
+        private List<EntityAction> _shipCommands = new List<EntityAction>();
 
         internal override bool IsFinished()
         {
@@ -51,10 +52,10 @@ namespace Pulsar4X.Movement
 
         private void FindNearestAndSetupWarpCommands()
         {
-            if(!EntityCommanding.TryGetDatablob<FleetDB>(out var fleetDB)) return;
+            if(!EntityCommanding.TryGetDataBlob<FleetDB>(out var fleetDB)) return;
             if(fleetDB.FlagShipID == -1) return;
             if(!EntityCommanding.Manager.TryGetEntityById(fleetDB.FlagShipID, out var flagship)) return;
-            if(!flagship.TryGetDatablob<PositionDB>(out var flagshipPositionDB)) return;
+            if(!flagship.TryGetDataBlob<PositionDB>(out var flagshipPositionDB)) return;
 
             // Get all entites based on the filter
             List<Entity> filteredEntities = EntityCommanding.Manager.GetFilteredEntities(
@@ -68,7 +69,7 @@ namespace Pulsar4X.Movement
             // Find the closest colony
             foreach(var entity in filteredEntities)
             {
-                if(!entity.TryGetDatablob<PositionDB>(out var positionDB))
+                if(!entity.TryGetDataBlob<PositionDB>(out var positionDB))
                 {
                     continue;
                 }
@@ -85,7 +86,7 @@ namespace Pulsar4X.Movement
 
             var targetEntity = TargetSelector == null ? closestValidEntity : TargetSelector(closestValidEntity);
 
-            if(!targetEntity.TryGetDatablob<PositionDB>(out var targetEntityPositionDB))
+            if(!targetEntity.TryGetDataBlob<PositionDB>(out var targetEntityPositionDB))
             {
                 return;
             }
@@ -100,7 +101,7 @@ namespace Pulsar4X.Movement
             foreach(var ship in ships)
             {
                 if(!ship.HasDataBlob<WarpAbilityDB>()) continue;
-                if(!ship.TryGetDatablob<PositionDB>(out var shipPositionDB)) continue;
+                if(!ship.TryGetDataBlob<PositionDB>(out var shipPositionDB)) continue;
                 if(shipPositionDB.Parent == targetEntityPositionDB.OwningEntity) continue;
 
                 var shipMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
@@ -115,7 +116,7 @@ namespace Pulsar4X.Movement
                 //var maxRangeRate = CargoTransferProcessor.GetMaxRangeRate(targetEntity, ship);
 
                 // Create the movement order
-                var cmd = WarpMoveCommand.CreateCommandEZ(
+                var cmd = WarpMoveAction.CreateCommandEZ(
                     ship,
                     targetEntity,
                     EntityCommanding.StarSysDateTime);
@@ -158,7 +159,7 @@ namespace Pulsar4X.Movement
             return command;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             var command = new MoveToNearestAction()
             {

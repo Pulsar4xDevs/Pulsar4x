@@ -17,5 +17,18 @@ namespace Pulsar4X.Blueprints
         public string StepFormula { get; set; }
         public string PropertyFormula { get; set; }
         public string AttributeType { get; set; }
+
+        /// <summary>
+        /// For GuiSelectionMinMaxRange: the Name of the partner property
+        /// (the upper bound when this property is the lower bound).
+        /// </summary>
+        public string PairedPropertyName { get; set; }
+
+        /// <summary>
+        /// For GuiSelectionMinMaxRange: maximum allowed gap between this property's
+        /// value and its partner's value (e.g. "TechData('tech-infra-gravity-range') * 2 * 9.81").
+        /// If omitted, no gap constraint is applied.
+        /// </summary>
+        public string MaxRangeFormula { get; set; }
     }
 }

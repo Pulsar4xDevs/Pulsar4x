@@ -1,10 +1,11 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.Logistics;
 
-public class ShipLogisticsOrders : EntityCommand
+public class ShipLogisticsOrders : EntityAction
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf;
 
@@ -94,7 +95,7 @@ public class ShipLogisticsOrders : EntityCommand
         return false;
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }

@@ -1,0 +1,473 @@
+[
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "reactor",
+      "Name": "Reactor",
+      "Formulas": {
+        "Description": "A non refuelable reactor, Generates power for a ship",
+        "Mass": "PropertyValue('Mass')",
+        "Volume": "PropertyValue('Mass')",
+        "HTK": "0.5",
+        "CrewReq": "[Mass]",
+        "ResearchCost": "[Mass] * 0.5",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "stainless-steel": "[Mass] * 0.5",
+        "plastic": "[Mass] * 0.4",
+        "copper": "[Mass] * 0.1",
+        "fissile-fuels": "PropertyValue('Fuel Consumption') * 3600 * PropertyValue('Lifetime')"
+      },
+      "ComponentType": "Facility",
+      "MountType": "ShipComponent, ShipCargo, Fighter",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "component-construction",
+      "Properties": [
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass of the reactor'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "25000",
+          "MinFormula": "1000",
+          "StepFormula": "1",
+          "PropertyFormula": "1500"
+        },
+        {
+          "Name": "Power Output",
+          "Units": "Kw",
+          "DescriptionFormula": "'in Kw'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "50 * [Mass]"
+        },
+        {
+          "Name": "Fuel Consumption",
+          "Units": "kg/s",
+          "DescriptionFormula": "'Fuel Consumption kg per second at Max Output'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Power Output') * 0.0000001"
+        },
+        {
+          "Name": "Lifetime",
+          "Units": "s",
+          "DescriptionFormula": "'How long this reactor will be useful for'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "87600",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "8760"
+        },
+        {
+          "Name": "DB",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs('fissile-fuels', PropertyValue('Fuel Consumption'), 'electricity', PropertyValue('Power Output'), PropertyValue('Lifetime'))",
+          "AttributeType": "Pulsar4X.Energy.EnergyGenerationAtb"
+        },
+        {
+          "Name": "Sensor Signature",
+          "Units": "unknown",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(1700, PropertyValue('Power Output') * 0.1 * [Mass])",
+          "AttributeType": "Pulsar4X.Sensors.SensorSignatureAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "battery-bank",
+      "Name": "Battery Bank",
+      "Formulas": {
+        "Description": "Stores power for a ship",
+        "Mass": "PropertyValue('Mass')",
+        "Volume": "[Mass] / 2896.6",
+        "HTK": "0.5",
+        "CrewReq": "0",
+        "ResearchCost": "[Mass] * 0.25",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "plastic": "[Mass] * 0.2",
+        "copper": "[Mass] * 0.2",
+        "lithium": "[Mass] * 0.4",
+        "graphite": "[Mass] * 0.1",
+        "aluminium": "[Mass] * 0.05",
+        "rare-earth-elements": "[Mass] * 0.05"
+      },
+      "ComponentType": "Energy Storage",
+      "MountType": "ShipComponent, ShipCargo, Fighter",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "component-construction",
+      "Properties": [
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass of the bank'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "25000",
+          "MinFormula": "1000",
+          "StepFormula": "250",
+          "PropertyFormula": "1500"
+        },
+        {
+          "Name": "Energy Storage",
+          "Units": "KJ",
+          "DescriptionFormula": "'Energy capacity of this part'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Mass') * 500 * TechData('tech-battery-capacity')"
+        },
+        {
+          "Name": "DB",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs('electricity', PropertyValue('Energy Storage'))",
+          "AttributeType": "Pulsar4X.Energy.EnergyStoreAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "rtg",
+      "Name": "RTG",
+      "Formulas": {
+        "Description": "A non refuelable reactor, Generates power for a ship",
+        "Mass": "PropertyValue('Mass')",
+        "Volume": "PropertyValue('Mass')",
+        "HTK": "0.5",
+        "CrewReq": "1",
+        "ResearchCost": "[Mass] * 0.5",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "aluminium": "PropertyValue('Structural Material')",
+        "fissile-fuels": "PropertyValue('Fuel')",
+        "silicon": "PropertyValue('Thermoelectric Materials')",
+        "copper": "PropertyValue('Electrics and wiring')"
+      },
+      "ComponentType": "Energy Generator",
+      "MountType": "ShipComponent, ShipCargo, Fighter",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "component-construction",
+      "Properties": [
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass of the reactor'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "25000",
+          "MinFormula": "25",
+          "StepFormula": "1",
+          "PropertyFormula": "1000"
+        },
+        {
+          "Name": "Power Output",
+          "Units": "Kw",
+          "DescriptionFormula": "'Max output of this unit when new, output will degrade over lifetime of the unit'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Fuel') * PropertyValue('Efficiency') * PropertyValue('Fuel Consumption')"
+        },
+        {
+          "Name": "Fuel Consumption",
+          "Units": "kg/s",
+          "DescriptionFormula": "'Fuel Consumption kg per second at Max Output'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.001 / PropertyValue('Operational Lifetime')"
+        },
+        {
+          "Name": "Operational Lifetime",
+          "Units": "years",
+          "DescriptionFormula": "'Output vs lifetime'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "25",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "5"
+        },
+        {
+          "Name": "Efficiency",
+          "Units": "percent",
+          "DescriptionFormula": "'The efficiency of this RTG to turn heat into electrical power, increased by research'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "TechData('tech-conductors') + 10"
+        },
+        {
+          "Name": "Watt per kg",
+          "Units": "Watt",
+          "DescriptionFormula": "''",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "(1000 * PropertyValue('Power Output')) / [Mass]"
+        },
+        {
+          "Name": "Structural Material",
+          "Units": "kg",
+          "DescriptionFormula": "'Structural material amount'",
+          "GuiHint": "None",
+          "PropertyFormula": "[Mass] * 0.3"
+        },
+        {
+          "Name": "Fuel",
+          "Units": "kg",
+          "DescriptionFormula": "'Fuel Amount'",
+          "GuiHint": "None",
+          "PropertyFormula": "[Mass] * 0.5"
+        },
+        {
+          "Name": "Thermoelectric Materials",
+          "Units": "kg",
+          "DescriptionFormula": "'Amount of Material used for energy conversion'",
+          "GuiHint": "None",
+          "PropertyFormula": "[Mass] * 0.1"
+        },
+        {
+          "Name": "Electrics and wiring",
+          "Units": "kg",
+          "DescriptionFormula": "'Structural material amount'",
+          "GuiHint": "None",
+          "PropertyFormula": "[Mass] * 0.1"
+        },
+        {
+          "Name": "DB",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(UniqueID('fissile-fuels'), PropertyValue('Fuel Consumption'), UniqueID('electricity'), PropertyValue('Power Output'), PropertyValue('Operational Lifetime'))",
+          "AttributeType": "Pulsar4X.Energy.EnergyGenerationAtb"
+        },
+        {
+          "Name": "Sensor Signature",
+          "Units": "unknown",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(1700, PropertyValue('Power Output') * 0.1 * [Mass])",
+          "AttributeType": "Pulsar4X.Sensors.SensorSignatureAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "steam-turbine-reactor",
+      "Name": "Steam Turbine Reactor",
+      "Formulas": {
+        "Description": "A more powerful reactor that heats water to steam and passes it through a turbine",
+        "Mass": "PropertyValue('Mass')",
+        "Volume": "PropertyValue('Mass') / 1000",
+        "HTK": "0.5",
+        "CrewReq": "3",
+        "ResearchCost": "[Mass] * 0.5",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "stainless-steel": "PropertyValue('CoreMass') * 0.5 + PropertyValue('GennyMass') * 0.2",
+        "fissile-fuels": "PropertyValue('FuelMass')",
+        "copper": "PropertyValue('CoreMass') * 0.05 + PropertyValue('GennyMass') * 0.2",
+        "aluminium": "PropertyValue('CoreMass') * 0.05 + PropertyValue('GennyMass') * 0.2",
+        "graphite": "PropertyValue('CoreMass') * 0.15",
+        "nickel": "PropertyValue('CoreMass') * 0.005 + PropertyValue('GennyMass') * 0.1",
+        "titanium": "PropertyValue('CoreMass') * 0.005",
+        "tungsten": "PropertyValue('GennyMass') * 0.05"
+        
+      },
+      "ComponentType": "Energy Generator",
+      "MountType": "ShipComponent, ShipCargo, Fighter",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "component-construction",
+      "Properties": [
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass of the reactor'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "500000",
+          "MinFormula": "2000",
+          "StepFormula": "1",
+          "PropertyFormula": "2000"
+        },
+        {
+          "Name": "Output vs Efficency",
+          "Units": "percent",
+          "DescriptionFormula": "'Percent of mass taken up by the generator vs the core, larger generator is more efficent but less output'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "70",
+          "MinFormula": "30",
+          "StepFormula": "10",
+          "PropertyFormula": "50"
+        },
+        {
+          "Name": "CoreMass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass of the Core including fuel and shielding'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "[Mass] * PropertyValue('Output vs Efficency') * 0.01"
+        },
+        {
+          "Name": "GennyMass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass of the Turbine and generator'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "[Mass] - PropertyValue('CoreMass')"
+        },
+        {
+          "Name": "FuelMass",
+          "Units": "kg",
+          "DescriptionFormula": "'As a percentage of core mass'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('CoreMass') * 0.6"
+        },
+        {
+          "Name": "Heat per kg",
+          "Units": "KW/kg",
+          "DescriptionFormula": "'Heat output per kg of fuel'",
+          "PropertyFormula": "100"
+        },
+        {
+          "Name": "Core Efficiency",
+          "DescriptionFormula": "'Efficiency turning fuel into heat'",
+          "PropertyFormula": "1.0"
+        },
+        {
+          "Name": "Generator Efficiency",
+          "DescriptionFormula": "'The efficiency of the turbine and generator - TODO this needs linking to tech'",
+          "PropertyFormula": "0.8"
+        },
+        {
+          "Name": "Fuel Burn Rate",
+          "Units": "",
+          "DescriptionFormula": "'Fuel Consumption kg per second at Max Output'",
+          "PropertyFormula": "PropertyValue('CoreOutput') / 40e9"
+        },
+        {
+          "Name": "CoreOutput",
+          "Units": "KW",
+          "DescriptionFormula": "'Heat output of the reactor'",
+          "PropertyFormula": "PropertyValue('FuelMass') * PropertyValue('Heat per kg') * PropertyValue('Core Efficiency')"
+        },
+        {
+          "Name": "GeneratorOutput",
+          "Units": "KW",
+          "DescriptionFormula": "'Electricy output of the generator'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('CoreOutput') * PropertyValue('Generator Efficiency')"
+        },
+        {
+          "Name": "FuelDuration",
+          "Units": "s",
+          "DescriptionFormula": "''",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('FuelMass') / PropertyValue('Fuel Burn Rate')"
+        },
+        {
+          "Name": "DB",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(UniqueID('fissile-fuels'), PropertyValue('Fuel Burn Rate'), UniqueID('electricity'), PropertyValue('GeneratorOutput'), PropertyValue('FuelDuration'))",
+          "AttributeType": "Pulsar4X.Energy.EnergyGenerationAtb"
+        },
+        {
+          "Name": "Sensor Signature",
+          "Units": "unknown",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(1700, PropertyValue('CoreOutput'))",
+          "AttributeType": "Pulsar4X.Sensors.SensorSignatureAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "Name": "Solar Array",
+      "UniqueID": "solarArray",
+      "Formulas": {
+        "Description": "'Generates power from sunlight, effiency tuned to specific wavelengths'",
+        "Mass": "PropertyValue('Area') * TechData('tech-panel-density')",
+        "Volume": "[Mass] / 2000",
+        "HTK": "[Mass] * 0.5",
+        "CrewReq": "0",
+        "ResearchCost": "[Mass] * 0.5",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "plastic": "[Mass] * 0.3",
+        "copper": "[Mass] * 0.05",
+        "aluminium": "[Mass] * 0.2",
+        "silicon": "[Mass] * 0.4",
+        "rare-earth-elements": "[Mass] * 0.05"
+      },
+      "ComponentType": "Energy Generation",
+      "MountType": 1,
+      "IndustryTypeID": "component-construction",
+      "CargoTypeID": "general-storage",
+      "Properties": [
+        {
+          "Name": "Area",
+          "Units": "m^2",
+          "DescriptionFormula": "'Panel surface area, scales power output'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "10000",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "100"
+        },
+        {
+          "Name": "Ideal Absorption Wavelength",
+          "Units": "nm",
+          "DescriptionFormula": "'Peak wavelength for optimal absorption'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "2000",
+          "MinFormula": "300",
+          "StepFormula": "1",
+          "PropertyFormula": "550"
+        },
+        {
+          "Name": "Bandwidth",
+          "Units": "nm",
+          "DescriptionFormula": "'Range around peak; wider reduces peak efficiency but increases versatility'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "TechData('tech-panel-bandwidth')",
+          "MinFormula": "TechData('tech-panel-bandwidth') * 0.5",
+          "StepFormula": "50",
+          "PropertyFormula": "300"
+        },
+        {
+          "Name": "Best Efficiency",
+          "Units": "%",
+          "DescriptionFormula": "'Absorption efficiency at peak wavelength'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "TechData('tech-panel-efficiency') * ((TechData('tech-panel-bandwidth') * 0.5) / PropertyValue('Bandwidth'))"
+        },
+        {
+          "Name": "Worst Efficiency",
+          "Units": "%",
+          "DescriptionFormula": "'Absorption efficiency at bandwidth edges'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Best Efficiency') * 0.5"
+        },
+        {
+          "Name": "Area ",
+          "Units": "m^2",
+          "DescriptionFormula": "'Panel surface area'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Area')"
+        },
+        {
+          "Name": "DB",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Ideal Absorption Wavelength'), PropertyValue('Bandwidth'), PropertyValue('Best Efficiency'), PropertyValue('Worst Efficiency'), PropertyValue('Area'))",
+          "AttributeType": "Pulsar4X.Energy.EnergySolarGenerationAtb"
+        }
+      ]
+    }
+  }
+]

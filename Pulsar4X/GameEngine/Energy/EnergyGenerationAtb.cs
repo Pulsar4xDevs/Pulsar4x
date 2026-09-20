@@ -54,7 +54,7 @@ namespace Pulsar4X.Energy
                     throw new Exception("PrimeEntity cannot have power plants that use different fuel types");
             }
 
-            genDB.TotalOutputMax += PowerOutputMax;
+            genDB.MaxOutputFromReactor += PowerOutputMax;
             double maxUse = genDB.TotalFuelUseAtMax.maxUse + FuelUsedAtMax;
             genDB.TotalFuelUseAtMax = (FuelType, maxUse);
             genDB.LocalFuel = maxUse * Lifetime;

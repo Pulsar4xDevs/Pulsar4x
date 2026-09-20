@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using ImGuiNET;
-using ImGuiSDL2CS;
 
 namespace Pulsar4X.Client.Interface.Widgets;
 
@@ -47,13 +46,13 @@ public static class FileDialog
             _pathString = _curDir;
         else
             _pathString = path;
-        _strInputBuffer = ImGuiSDL2CSHelper.BytesFromString(fileName);
+        _strInputBuffer = Utils.BytesFromString(fileName);
         ImGui.Begin("File Dialog", ref IsActive);
         ImGui.Text("Name:");
         ImGui.SameLine();
         if (ImGui.InputText("##Name", _strInputBuffer, 128))
         {
-            fileName = ImGuiSDL2CSHelper.StringFromBytes(_strInputBuffer);
+            fileName = Utils.StringFromBytes(_strInputBuffer);
         }
 
         ImGui.Columns(2);
@@ -76,17 +75,19 @@ public static class FileDialog
         {
             _pathString = "Data/basemod";
         }
-
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Save to Binary location");
+        
         //this is Editor specific TODO: add a way to add specific dir to the LH colomn
-        if (ImGui.Button("GameEngine/Data/basemod"))
+        if (ImGui.Button("GameData/basemod"))
         {
             var dir = new DirectoryInfo(_curDir);
             while (dir.Name != "Pulsar4X")
             {
                 dir = Directory.GetParent(dir.FullName);
             }
-            _pathString = Path.Combine(dir.FullName, "GameEngine/Data/basemod");
+            _pathString = Path.Combine(dir.FullName, "GameData/basemod");
         }
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Save to Source location");
 
 
         ImGui.NextColumn();
@@ -151,7 +152,7 @@ public static class FileDialog
             if (ImGui.Selectable(fi.Name, _b, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowDoubleClick))
             {
                 _selectedIndex = _i;
-                _strInputBuffer = ImGuiSDL2CSHelper.BytesFromString(fi.Name);
+                _strInputBuffer = Utils.BytesFromString(fi.Name);
                 fileName = fi.Name;
 
                 if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))

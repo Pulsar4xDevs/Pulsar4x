@@ -96,11 +96,11 @@ namespace Pulsar4X.Extensions
                 {
                     if (!minerals.ContainsKey(kvp.Key))
                     {
-                        minerals.Add(kvp.Key, kvp.Value.Amount * 1.0);
+                        minerals.Add(kvp.Key, (double)kvp.Value.Amount.Actual);
                     }
                     else
                     {
-                        minerals[kvp.Key] += kvp.Value.Amount * 1.0;
+                        minerals[kvp.Key] += (double)kvp.Value.Amount.Actual;
                     }
                 }
             }

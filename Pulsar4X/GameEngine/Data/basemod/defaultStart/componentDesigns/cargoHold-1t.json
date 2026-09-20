@@ -1,8 +1,0 @@
-{
-  "id": "default-design-cargo-hold-1t",
-  "name": "Cargo Hold 1t",
-  "templateId": "general-cargo-hold",
-  "Properties": [
-    { "key": "Storage Volume", "value": 1000 }
-  ]
-}

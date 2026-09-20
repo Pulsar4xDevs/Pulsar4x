@@ -5,9 +5,11 @@ using System.Linq;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Components;
 using Pulsar4X.Extensions;
+using Pulsar4X.Helpers;
 using Pulsar4X.Modding;
 using Pulsar4X.Sensors;
 using Pulsar4X.Storage;
+using Pulsar4X.Weapons;
 
 namespace GameEngine.Damage;
 
@@ -68,58 +70,71 @@ public enum PhaseState
     Plasma
 }
 
-public interface IDamageParticle
+public class BeamPoint
 {
-    public int mapIndex { get; set; }
-    public Vector2 Position{ get; set; }
-    public Vector2 Velocity { get; set; }
-    public bool IsDeleted  { get; set; } 
-
-}
-
-public class PhotonParticle : IDamageParticle
-{
-    public int mapIndex{ get; set; }
-    public Vector2 Position{ get; set; }
-    public Vector2 Velocity{ get; set; }
-    public float WaveLength;
-    public float Power;
-    public bool IsSpawner = false;
-    public double SpawnerLifetime = 30.0;
-    public bool IsDeleted { get; set; } = false;
-
-    public static PhotonParticle SpawnNew(PhotonParticle spawner)
+    public int BeamID { get; set; }
+    public Vector2 Position { get; set; }
+    
+    public float Wavelength { get; set; }
+    public float Power { get; set; }
+    public float AbsorbPercentage { get; set; } = 1.0f;
+    
+    public Vector2 ReflectDirection { get; set; }
+    public float ReflectPercentage { get; set; } = 0.0f;
+    public int ReflectChildIndex { get; set; } = -1;
+    
+    public Vector2 TransmitDirection { get; set; }
+    public float TransmitPercentage { get; set; } = 0.0f;
+    public int TransmitChildIndex { get; set; } = -1;
+    public float LifeTime { get; set; }
+    public BeamPoint(int beamID, Vector2 position, Vector2 transmitDirection, float wavelength, float power)
     {
-        if (!spawner.IsSpawner || spawner.IsDeleted)
-            throw new Exception("Spawner is not valid");
-        Vector2 pos = spawner.Position + Vector2.Normalize(spawner.Velocity);
-        return new PhotonParticle()
-        {
-            Position = pos,
-            Velocity = spawner.Velocity,
-            WaveLength = spawner.WaveLength,
-            Power = spawner.Power,
-            IsSpawner = false,
-            IsDeleted = false
-        };
-    }
-    public static PhotonParticle CloneWithNewVelocityAndPower(PhotonParticle orig, Vector2 velocity, float power)
-    {
-        return new PhotonParticle()
-        {
-            Position = orig.Position,
-            Velocity = velocity,
-            WaveLength = orig.WaveLength,
-            Power = power,
-            IsSpawner = orig.IsSpawner,
-            IsDeleted = orig.IsDeleted
-        };
+        BeamID = beamID;
+        Position = position;
+        TransmitDirection = transmitDirection;
+        Wavelength = wavelength;
+        Power = power;
+        AbsorbPercentage = ReflectPercentage = TransmitPercentage = 0;
+        
     }
 
+    public BeamPoint(BeamInfoDB beamInfo, Vector2 particlePosition, float lifetime)
+    {
+        Position = particlePosition;
+        TransmitDirection = Vector2.Normalize(beamInfo.VelocityVector.ToNumericsVector2());
+        Wavelength = (float)beamInfo.Frequency;
+        Power = (float)beamInfo.Energy;
+        TransmitPercentage = 1.0f;
+        AbsorbPercentage = 0.0f;
+        ReflectPercentage = 0.0f;
+        LifeTime = lifetime;
+    }
+
+    public BeamPoint(BeamPoint parent, Vector2 position, Vector2 direction, float power, PhysicalParticle collisionParticle)
+    {
+        
+        var reflectVector = Vector2.Reflect(direction, collisionParticle.Position - position);
+        BeamID = parent.BeamID;
+        Position = position;
+        TransmitDirection = parent.Position - position;
+        Wavelength = parent.Wavelength;
+
+        Power = power;
+        ReflectDirection = reflectVector;
+        
+        if( power > PhotonMath.minPower)
+        {
+            (float reflected, float transmitted, float absorbed) = PhotonMath.CalculatePhotonInteraction(parent.Wavelength, collisionParticle.MatType);
+            AbsorbPercentage = absorbed;
+            ReflectPercentage = reflected;
+            TransmitPercentage = transmitted;
+        }
+    }
 }
 
-public class PhysicalParticle : IDamageParticle
+public class PhysicalParticle
 {
+    public int compID { get; set; }
     public int mapIndex{ get; set; }
     public Vector2 Position{ get; set; }
     public Vector2 Velocity{ get; set; }
@@ -128,9 +143,9 @@ public class PhysicalParticle : IDamageParticle
     
     public ParticleMaterial MatType;
     public PhaseState StateOfPhase = PhaseState.Solid;
-    public byte Life;
+    public bool IsComponentPartDestroyed = false;
     public float Mass;
-    public DamageMap _pMap;
+    public DamageMap DMap;
     public bool IsDeleted  { get; set; } = false;
     public float Temperature
     {
@@ -148,13 +163,13 @@ public class PhysicalParticle : IDamageParticle
     }
     private float _temperature;
 
-    public PhysicalParticle(ParticleMaterial matType, Vector2 position, Vector2 velocity, int scale)
+    public PhysicalParticle(int id, ParticleMaterial matType, Vector2 position, Vector2 velocity, int scale)
     {
+        compID = id;
         MatType = matType;
         Position = position;
         Velocity = velocity;
         Temperature = 293.15f; // Room temperature in Kelvin
-        Life = 100; // Arbitrary starting life
         Mass = matType.Density * 1 / scale;
         if(Mass <= 0)
             throw new Exception("mass canot be zero or negative");

@@ -2,14 +2,11 @@
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.Engine;
-using Pulsar4X.ImGuiNetUI;
-using Pulsar4X.ImGuiNetUI.EntityManagement;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     //basically an always open context menu for the currently selected entity.
-    public class EntityUIWindowSelector : PulsarGuiWindow
+    public class EntityUIWindowSelector : UniquePulsarGuiWindow<EntityUIWindowSelector>
     {
         public System.Numerics.Vector2 BtnSizes = new System.Numerics.Vector2(32, 32);
         private List<ToolbuttonData> StandardButtons = new List<ToolbuttonData>();
@@ -32,20 +29,11 @@ namespace Pulsar4X.SDL2UI
 
         internal static EntityUIWindowSelector GetInstance()
         {
-            EntityUIWindowSelector thisItem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(EntityUIWindowSelector)))
+            if(_uiState.TryGetUniqueWindow<EntityUIWindowSelector>(out var window))
             {
-                thisItem = new EntityUIWindowSelector();
+                return window;
             }
-            else
-            {
-                thisItem = (EntityUIWindowSelector)_uiState.LoadedWindows[typeof(EntityUIWindowSelector)];
-            }
-
-
-            return thisItem;
-
-
+            return _uiState.AddUniqueWindow(new EntityUIWindowSelector());
         }
         //displays selected entity info
 
@@ -67,7 +55,7 @@ namespace Pulsar4X.SDL2UI
 
                     void NewButton(Type T, IntPtr imgPtr, string TooltipText, List<ToolbuttonData> ButtonList) {
                         //Creates a buttton if it is usuable in this situation
-                        if (EntityUIWindows.CheckIfCanOpenWindow(T, _entityState))
+                        if (EntityUIWindows.CheckIfCanOpenWindow(T, _entityState, _uiState))
                         {
                             btn = new ToolbuttonData()
                             {
@@ -93,8 +81,7 @@ namespace Pulsar4X.SDL2UI
                     NewStandardButton(typeof(RenameWindow), _uiState.Img_Rename(), "Renames the entity");
 
                     NewCondtionalButton(typeof(PowerGenWindow), _uiState.Img_Power(), "Shows power stats");
-                    NewCondtionalButton(typeof(CargoTransferWindow), _uiState.Img_Cargo(), "Shows cargo");
-                    NewCondtionalButton(typeof(ColonyPanel), _uiState.Img_Industry(), "Opens Industry menu");
+                    NewCondtionalButton(typeof(CreateTransferWindow), _uiState.Img_Cargo(), "Shows cargo");
                     NewCondtionalButton(typeof(FireControl), _uiState.Img_Firecon(), "Opens firecontrol menu");
 
                     //Displays all buttons in a list
@@ -123,7 +110,7 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.PushStyleColor(buttonidx, unclickedcolor);                                //Have the button be colored normally
                             }
 
-                            if (ImGui.ImageButton(button.Picture, BtnSizes))
+                            if (ImGui.ImageButton("btnimage", button.Picture.ToTextureRef(), BtnSizes))
                             {
                                 EntityUIWindows.OpenUIWindow(button.ClickType, _entityState, _uiState);
                             }
@@ -147,7 +134,7 @@ namespace Pulsar4X.SDL2UI
                     void ActionButton(Type T)
                     {
                     //Makes a small button if it is usable in this situation
-                        if (EntityUIWindows.CheckIfCanOpenWindow(T,_entityState))
+                        if (EntityUIWindows.CheckIfCanOpenWindow(T, _entityState, _uiState))
                         {
                             bool buttonresult = ImGui.SmallButton(GlobalUIState.NamesForMenus[T]);
                             EntityUIWindows.OpenUIWindow(T, _entityState, _uiState, buttonresult);
@@ -157,11 +144,9 @@ namespace Pulsar4X.SDL2UI
                     }
 
                     //Makes all small buttons
-                    ActionButton(typeof(PlanetaryWindow));
                     ActionButton(typeof(GotoSystemBlankMenuHelper));
                     ActionButton(typeof(WarpOrderWindow));
                     ActionButton(typeof(ChangeCurrentOrbitWindow));
-                    ActionButton(typeof(LogiShipWindow));
                 }
                 ImGui.End();
             }

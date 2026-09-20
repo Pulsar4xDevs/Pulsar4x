@@ -5,6 +5,12 @@ namespace Pulsar4X.Names
 {
     public class NameFactory
     {
+        public static string GetSystemName(Game game)
+        {
+            var theme = GetTheme(game);
+            return theme.SystemNames[game.RNG.Next(0, theme.SystemNames.Count)];
+        }
+
         public static string GetShipName(Game game)
         {
             var theme = GetTheme(game);

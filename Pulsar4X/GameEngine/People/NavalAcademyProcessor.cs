@@ -10,7 +10,7 @@ namespace Pulsar4X.People
     {
         internal override void ProcessEntity(Entity entity, DateTime atDateTime)
         {
-            if(!entity.TryGetDatablob<NavalAcademyDB>(out var academyDB)) return;
+            if(!entity.TryGetDataBlob<NavalAcademyDB>(out var academyDB)) return;
 
             var academy = academyDB.Academies.Where(a => a.GraduationDate.Date == atDateTime.Date).First();
             var generator = new GaussianRandom();

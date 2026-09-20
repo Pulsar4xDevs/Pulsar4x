@@ -1,11 +1,12 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.Storage
 {
-    public class RemoveComponentFromStorageOrder : EntityCommand
+    public class RemoveComponentFromStorageOrder : EntityAction
     {
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf | ActionLaneTypes.InteractWithExternalEntity | ActionLaneTypes.InstantOrder;
 
@@ -40,7 +41,7 @@ namespace Pulsar4X.Storage
             return cmd;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }

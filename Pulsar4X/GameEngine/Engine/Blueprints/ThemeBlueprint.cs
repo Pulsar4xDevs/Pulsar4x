@@ -5,6 +5,7 @@ namespace Pulsar4X.Blueprints
     public class ThemeBlueprint : Blueprint
     {
         public string Name { get; set; }
+        public List<string> SystemNames { get; set; }
         public List<string> FleetNames { get; set; }
         public List<string> ShipNames { get; set; }
         public List<string> FirstNames { get; set; }

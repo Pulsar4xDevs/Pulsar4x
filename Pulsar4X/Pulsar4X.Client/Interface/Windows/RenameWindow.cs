@@ -1,15 +1,11 @@
-﻿using System;
+using System;
 using ImGuiNET;
-using Pulsar4X.Engine;
-using Pulsar4X.Extensions;
-using Pulsar4X.Engine.Orders;
-using Pulsar4X.Names;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
-    public class RenameWindow : PulsarGuiWindow
+    public class RenameWindow : UniquePulsarGuiWindow<RenameWindow>
     {
-        private Entity? _selectedEntity;
+        private int _targetEntityId = -1;
         private byte[]? _nameInputBuffer;
         string NameString
         {
@@ -17,7 +13,7 @@ namespace Pulsar4X.SDL2UI
             {
                 if(_nameInputBuffer == null)
                     return "";
-                return System.Text.Encoding.UTF8.GetString(_nameInputBuffer);
+                return System.Text.Encoding.UTF8.GetString(_nameInputBuffer).TrimEnd('\0');
             }
         }
         private bool _setFocus = true;
@@ -27,21 +23,24 @@ namespace Pulsar4X.SDL2UI
             _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse;
         }
 
-        public void SetEntity(Entity entity)
+        /// <summary>Open the rename dialog for an entity by id; the rename is submitted as an API
+        /// command, so callers don't need a live engine entity.</summary>
+        public void SetTarget(int entityId, string currentName)
         {
-            _selectedEntity = entity;
-            _nameInputBuffer = System.Text.Encoding.UTF8.GetBytes(entity.GetName(_uiState.Faction.Id));
+            _targetEntityId = entityId;
+            _nameInputBuffer = System.Text.Encoding.UTF8.GetBytes(currentName);
             IsActive = true;
             _setFocus = true;
         }
 
         internal static RenameWindow GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(RenameWindow)))
+            if(_uiState.TryGetUniqueWindow<RenameWindow>(out var window))
             {
-                return new RenameWindow();
+                return window;
             }
-            return (RenameWindow)_uiState.LoadedWindows[typeof(RenameWindow)];
+
+            return _uiState.AddUniqueWindow(new RenameWindow());
         }
 
         internal override void Display()
@@ -66,9 +65,11 @@ namespace Pulsar4X.SDL2UI
                 ImGui.SameLine();
                 if (ImGui.SmallButton("Save"))//Gives the user the option to set the name
                 {
-                    if(_nameInputBuffer[0] != 0 && _selectedEntity != null)//If the user has not entered an empty name
+                    //If the user has not entered an empty name
+                    if(_nameInputBuffer[0] != 0 && _targetEntityId != -1)
                     {
-                        RenameCommand.CreateRenameCommand(_uiState.Game, _uiState.Faction, _selectedEntity, NameString);
+                        _uiState.GameClient?.SubmitCommandAsync(
+                            new Pulsar4X.Api.RenameCommand(_targetEntityId, NameString));
                         ImGui.CloseCurrentPopup();
                         IsActive = false;
                     }

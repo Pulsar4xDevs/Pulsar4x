@@ -159,7 +159,7 @@ namespace Pulsar4X.Logistics
             var manuvers = OrbitalMath.Hohmann2(sgpTgtBdy, mySMA, targetSMA);
 
             var cargoLibary = ship.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
-            NewtonThrustCommand.CreateCommands(cargoLibary, ship, manuvers);
+            NewtonThrustAction.CreateCommands(cargoLibary, ship, manuvers);
 
             foreach (var manvr in manuvers)
             {
@@ -231,7 +231,7 @@ namespace Pulsar4X.Logistics
             var manuvers = OrbitalMath.Hohmann2(sgpTgtBdy, mySMA, targetSMA);
 
             var cargoLibary = ship.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
-            NewtonThrustCommand.CreateCommands(cargoLibary, ship, manuvers);
+            NewtonThrustAction.CreateCommands(cargoLibary, ship, manuvers);
 
             foreach (var manvr in manuvers)
             {
@@ -321,16 +321,16 @@ namespace Pulsar4X.Logistics
             //should we expend deltaV now or when we get there?
 
 
-            var cmd = WarpMoveCommand.CreateCommandEZ(
+            var cmd = WarpMoveAction.CreateCommandEZ(
                 ship,
                 targetBody,
                 startState.At);
             ship.Manager.Game.OrderHandler.HandleOrder(cmd);
-
-            var dv = cmd.EndpointTargetExpendDeltaV.Length();
+            
+    
             double ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
-            double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(shipMass, ve, dv);
-            tsec += OrbitMath.BurnTime(ship, dv, shipMass);
+            double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(shipMass, ve, deltaV);
+            tsec += OrbitMath.BurnTime(ship, deltaV, shipMass);
             dateTime = dateTime + TimeSpan.FromSeconds(tsec);
             fuelUse += fuelBurned;
             shipMass -= fuelBurned;
@@ -346,9 +346,9 @@ namespace Pulsar4X.Logistics
             pos = postManuverState.position;
             vel = new Vector3(postManuverState.velocity.X, postManuverState.velocity.Y, 0);
 
-            //NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, targetIntercept.eti, thrustVector, "Thrust: Circularize");
+            //NewtonThrustActionAction.CreateCommand(ship.FactionOwner, ship, targetIntercept.eti, thrustVector, "Thrust: Circularize");
             //var secFromNow = targetIntercept.eti - ship.StarSysDateTime;
-            //var circ = NewtonThrustCommand.CreateCommand(ship, (thrustVector, secFromNow.TotalSeconds));
+            //var circ = NewtonThrustAction.CreateCommand(ship, (thrustVector, secFromNow.TotalSeconds));
             //circ.DebugDetails.Add(("Insertion speed", insertionSpeed));
             //circ.DebugDetails.Add(("Ideal speed", idealSpeed));
             //circ.DebugDetails.Add(("ThrustVector x", thrustVector.X));

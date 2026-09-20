@@ -1,9 +1,10 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Components;
 
 namespace Pulsar4X.Engine.Orders
 {
-    public class InstallComponentInstanceOrder : EntityCommand
+    public class InstallComponentInstanceOrder : EntityAction
     {
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf | ActionLaneTypes.InteractWithExternalEntity | ActionLaneTypes.InstantOrder;
 
@@ -36,7 +37,7 @@ namespace Pulsar4X.Engine.Orders
             return cmd;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }

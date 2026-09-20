@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.Blueprints
 {

@@ -2,7 +2,9 @@ using System;
 using Pulsar4X.Engine;
 using Pulsar4X.Events;
 using Pulsar4X.Extensions;
+using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
+using Pulsar4X.Industry;
 using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.GeoSurveys;
@@ -25,7 +27,7 @@ public class GeoSurveyProcessor : IInstanceProcessor
         // TODO: need to only get the survey points from ships that are at the survey location
         uint totalSurveyPoints = GetSurveyPoints(Fleet);
 
-        if(Target.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB))
+        if(Target.TryGetDataBlob<GeoSurveyableDB>(out var geoSurveyableDB))
         {
             if(!geoSurveyableDB.GeoSurveyStatus.ContainsKey(Fleet.FactionOwnerID))
                 geoSurveyableDB.GeoSurveyStatus[Fleet.FactionOwnerID] = geoSurveyableDB.PointsRequired;
@@ -34,6 +36,13 @@ public class GeoSurveyProcessor : IInstanceProcessor
             {
                 // Survey is complete
                 geoSurveyableDB.GeoSurveyStatus[Fleet.FactionOwnerID] = 0;
+
+                // Grant partial access to mineral data
+                if (Target.TryGetDataBlob<MineralsDB>(out var mineralsDB))
+                {
+                    var factionMask = Fleet.GetFactionOwner.GetDataBlob<FactionInfoDB>().FactionMask;
+                    mineralsDB.GrantFactionPartialAccess(factionMask);
+                }
 
                 EventManager.Instance.Publish(
                     Event.Create(
@@ -55,12 +64,12 @@ public class GeoSurveyProcessor : IInstanceProcessor
     {
         uint totalSurveyPoints = 0;
 
-        if(entity.TryGetDatablob<GeoSurveyAbilityDB>(out var geoSurveyAbilityDB))
+        if(entity.TryGetDataBlob<GeoSurveyAbilityDB>(out var geoSurveyAbilityDB))
         {
             totalSurveyPoints += geoSurveyAbilityDB.Speed;
         }
 
-        if(entity.TryGetDatablob<FleetDB>(out var fleetDB))
+        if(entity.TryGetDataBlob<FleetDB>(out var fleetDB))
         {
             foreach(var child in fleetDB.Children)
             {

@@ -1,201 +1,327 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
-using ImGuiSDL2CS;
-using SDL2;
+using Pulsar4X.Api;
 using Pulsar4X.Orbital;
-using Pulsar4X.Engine;
-using Pulsar4X.Engine.Sensors;
-using Pulsar4X.Messaging;
-using Pulsar4X.JumpPoints;
-using Pulsar4X.Names;
-using Pulsar4X.Orbits;
-using Pulsar4X.Ships;
-using Pulsar4X.Weapons;
-using Pulsar4X.Galaxy;
-using Pulsar4X.Movement;
+using SDL3;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client.Rendering
 {
     internal class SystemMapRendering : UpdateWindowState
     {
         GlobalUIState _state;
-        SystemSensorContacts? _sensorMgr;
-        ConcurrentQueue<Message>? _sensorChanges;
-        SystemState? _sysState;
+        string? _systemId;
         Camera _camera;
-        internal IntPtr windowPtr;
-        internal IntPtr surfacePtr;
-        internal IntPtr rendererPtr;
-        ImGuiSDL2CSWindow _window;
+        SDL3Window _window;
+        SystemLabelDistributor _distributor;
+
         internal Dictionary<string, IDrawData> UIWidgets = new ();
+
         ConcurrentDictionary<int, Icon> _testIcons = new ();
-        ConcurrentDictionary<int, IDrawData> _entityIcons = new ();
-        ConcurrentDictionary<int, IDrawData> _orbitRings = new ();
-        ConcurrentDictionary<int, IDrawData> _moveIcons = new ();
-        internal ConcurrentDictionary<int, NameIcon> _nameIcons = new ();
+        ConcurrentDictionary<int, Icon> _orbitRings = new ();
+        ConcurrentDictionary<int, Icon> _moveIcons = new ();
+        ConcurrentDictionary<int, Icon> _entityIcons = new ();
+        ConcurrentDictionary<int, Icon> _bodyIcons = new ();
+
+        HashSet<EntityLabel> _allLabels = new ();
+        HashSet<EntityLabel> _visibleLabels = new ();
+
+        // The last snapshot reference each entity's icons were built from. Snapshots are immutable,
+        // so a reference change means the entity changed and its icons need rebuilding. This is
+        // sync bookkeeping only — nothing reads game data from it.
+        Dictionary<int, EntitySnapshot> _iconedSnapshots = new ();
+
+        DateTime _lastPhysicsTime;
+
+        // Per-body-type minimum camera zoom for the label to render. Lower-tier
+        // bodies (moons, ships, asteroids, comets) only show labels once you've
+        // zoomed in enough that they aren't just visual clutter. Stars, planets,
+        // dwarf planets and colonies are always shown (subject to view prefs).
+        static readonly Dictionary<UserOrbitSettings.OrbitBodyType, float> _minZoomForLabel = new ()
+        {
+            { UserOrbitSettings.OrbitBodyType.Star,         0f },
+            { UserOrbitSettings.OrbitBodyType.Planet,       0f },
+            { UserOrbitSettings.OrbitBodyType.DwarfPlanet,  0f },
+            { UserOrbitSettings.OrbitBodyType.Colony,       0f },
+            { UserOrbitSettings.OrbitBodyType.Moon,        1e4f },
+            { UserOrbitSettings.OrbitBodyType.Ship,        2e4f },
+            { UserOrbitSettings.OrbitBodyType.Asteroid,    5e4f },
+            { UserOrbitSettings.OrbitBodyType.Comet,       2e4f },
+            { UserOrbitSettings.OrbitBodyType.Unknown,      0f },
+        };
+
+        ConcurrentDictionary<int, InteractableState[]> _interactable = new ();
+        IOrderedEnumerable<IGrouping<byte, InteractableState>> _interactableGrouped;
 
         internal List<IDrawData> SelectedEntityExtras = new List<IDrawData>();
         internal Vector2 GalacticMapPosition = new Vector2();
-        //internal SystemMap_DrawableVM SysMap;
-        Entity? _faction;
 
-        internal SystemMapRendering(ImGuiSDL2CSWindow window, GlobalUIState state)
+        bool _updateLabels = false;
+
+        internal SystemMapRendering(SDL3Window window, GlobalUIState state)
         {
             _state = state;
 
+            _distributor = EntityLabelDistributor.Group;
+
             _camera = _state.Camera;
             _window = window;
-            windowPtr = window.Handle;
-            surfacePtr = SDL.SDL_GetWindowSurface(windowPtr);
-            rendererPtr = SDL.SDL_GetRenderer(windowPtr);
-            //UIWidgets.Add(new CursorCrosshair(new Vector4())); //used for debugging the cursor world position.
+
+            // Initialize ship icon texture
+            ShipIcon.InitializeTexture(window.Renderer);
+
             foreach (var item in TestDrawIconData.GetTestIcons())
             {
                 _testIcons.TryAdd(-1, item);
             }
 
-            //_state.OnStarSystemChanged += RespondToSystemChange;
-            //_state.OnFactionChanged += RespondToSystemChange;
-        }
+            var mainWin = (PulsarMainWindow)window;
+            mainWin.MouseButtonDownOccured += (object sender, SDL.Event e) => {
+                if (mainWin.PlatformBackend.WantsMouseCapture())
+                    return;
 
-
-        internal void Initialize(StarSystem starSys)
-        {
-            if (_state.StarSystemStates.ContainsKey(starSys.ID))
-            {
-                _sysState = _state.StarSystemStates[starSys.ID];
-            }
-            else
-            {
-                _sysState = new SystemState(starSys, _state.Faction.Id);
-                _state.StarSystemStates[_sysState.StarSystem.ID] = _sysState;
-            }
-
-            _faction = _state.Faction;
-            _sensorMgr = starSys.GetSensorContacts(_faction.Id);
-            _sensorChanges = _sensorMgr.Changes.Subscribe();
-            _sysState.OnEntityAdded += OnSystemStateEntityAdded;
-            _sysState.OnEntityUpdated += OnSystemStateEntityUpdated;
-            _sysState.OnEntityRemoved += OnSystemStateEntityRemoved;
-
-            foreach (var entityItem in _sysState.EntityStatesWithPosition.Values)
-            {
-                AddIconable(entityItem);
-            }
-        }
-
-        public void UpdateSystemState(SystemState systemState)
-        {
-            _testIcons.Clear();
-            _entityIcons.Clear();
-            _orbitRings.Clear();
-            _moveIcons.Clear();
-            _nameIcons.Clear();
-
-            _sysState = systemState;
-            _state.StarSystemStates[_sysState.StarSystem.ID] = _sysState;
-
-            _faction = _state.Faction;
-            _sensorMgr = systemState.StarSystem.GetSensorContacts(_faction.Id);
-            _sensorChanges = _sensorMgr.Changes.Subscribe();
-
-            foreach (var entityItem in _sysState.EntityStatesWithPosition.Values)
-            {
-                AddIconable(entityItem);
-            }
-        }
-
-        void AddIconable(EntityState entityState)
-        {
-            entityState.TryGetDataBlob<PositionDB>(out var positionDB);
-            entityState.TryGetDataBlob<MassVolumeDB>(out var massVolumeDB);
-
-            if (entityState.TryGetDataBlob<NameDB>(out var nameDB) && positionDB != null)
-            {
-                _nameIcons.TryAdd(entityState.Id, new NameIcon(entityState, nameDB, positionDB, _state));
-            }
-
-            if (entityState.TryGetDataBlob<OrbitDB>(out var orbitDB))
-            {
-                if (!orbitDB.IsStationary)
+                foreach (var i in _interactableGrouped)
                 {
-                    OrbitIconBase orbit;
-                    if (orbitDB.Eccentricity < 1)
+                    var key = i.Key;
+
+                    foreach (var j in i)
                     {
-                        orbit = new OrbitEllipseIcon(entityState, _state.UserOrbitSettingsMtx);
-                        _orbitRings.TryAdd(entityState.Id, orbit);
-                    }
-                    else
-                    {
-                        orbit = new OrbitHyperbolicIcon2(entityState, _state.UserOrbitSettingsMtx);
-                        _orbitRings.TryAdd(entityState.Id, orbit);
+                        if (j.IsDisabled)
+                            continue;
+
+                        var item = j.Item;
+
+                        var c = item.Contains(new (e.Motion.X, e.Motion.Y));
+
+                        if (c)
+                        {
+                            j.IsPressed = true;
+                            if (item.OnPointerDown(e))
+                                return;
+                        }
                     }
                 }
-            }
+            };
+            mainWin.MouseButtonUpOccured += (object sender, SDL.Event e) => {
+                if (mainWin.PlatformBackend.WantsMouseCapture())
+                    return;
 
-            if (entityState.TryGetDataBlob<NewtonMoveDB>(out var newtonMoveDB))
+                foreach (var i in _interactableGrouped)
+                {
+                    var key = i.Key;
+
+                    foreach (var j in i)
+                    {
+                        if (j.IsDisabled)
+                            continue;
+
+                        var item = j.Item;
+
+                        var c = item.Contains(new (e.Motion.X, e.Motion.Y));
+
+                        if (c)
+                        {
+                            j.IsPressed = false;
+                            if (item.OnPointerUp(e))
+                                return;
+                        }
+                    }
+                }
+            };
+            mainWin.MouseMoveOccured += (object sender, SDL.Event e) => {
+                foreach (var i in _interactableGrouped)
+                {
+                    var key = i.Key;
+
+                    foreach (var j in i)
+                    {
+                        if (j.IsDisabled)
+                            continue;
+
+                        var item = j.Item;
+
+                        if (mainWin.PlatformBackend.WantsMouseCapture())
+                        {
+                            if (j.IsHovered)
+                            {
+                                j.IsHovered = false;
+                                if (item.OnPointerExit(e))
+                                    return;
+                            }
+                            continue;
+                        }
+
+                        var c = item.Contains(new (e.Motion.X, e.Motion.Y));
+
+                        if (j.IsHovered)
+                        {
+                            if (c)
+                            {
+                                if (item.OnPointerMove(e))
+                                    return;
+                            }
+                            else
+                            {
+                                j.IsHovered = false;
+                                if (item.OnPointerExit(e))
+                                    return;
+                            }
+                        }
+                        else if (c)
+                        {
+                            j.IsHovered = true;
+                            if (item.OnPointerEnter(e))
+                                return;
+                        }
+                    }
+                }
+            };
+
+            _camera.PanOccured +=
+                (object sender, Orbital.Vector3 pos) => _updateLabels = true;
+
+            _camera.ZoomOccured +=
+                (object sender, float zoom) => _updateLabels = true;
+
+            SystemViewPreferences.GetInstance().ViewUpdateOccured +=
+                (object sender, SystemViewPreferences.View view) => _updateLabels = true;
+
+            // should be empty
+            _interactableGrouped = _interactable
+                .Values
+                .SelectMany(x => x)
+                .GroupBy(x => x.Item.Priority)
+                .OrderByDescending(x => x.Key);
+        }
+
+        internal void Initialize(string systemId)
+        {
+            _systemId = systemId;
+            SyncIcons();
+            _updateLabels = true; // update labels on first frame
+        }
+
+        void AddEntityIcon(EntitySnapshot entity, Icon icon)
+        {
+            var l = new EntityLabelExtCombo(_state, entity, _systemId!);
+            l.Padding = 3;
+
+            _interactable.TryAdd(
+                    entity.Id,
+                    new[] { new InteractableState(l) });
+            _entityIcons.TryAdd(entity.Id, icon);
+            _allLabels.Add(l);
+        }
+
+        void AddIconable(EntitySnapshot entity)
+        {
+            if (_systemId == null)
+                return;
+            var name = entity.Views[0];
+            var position = new SnapshotPosition(_state, _systemId, entity.Id);
+            var bodyType = UserOrbitSettings.FromBodyKind(entity.Kind);
+            var massVolume = entity.GetView<MassVolumeView>();
+
+            // Thrust/warp trajectories own the ring while they are active. OrbitView is the
+            // leftover Kepler from before the burn; TryAdd would keep that ellipse forever.
+            bool thrusting = entity.HasView<NewtonMoveView>()
+                || entity.HasView<NewtonSimpleMoveView>()
+                || entity.HasView<WarpMovingView>();
+
+            var orbit = entity.GetView<OrbitView>();
+            if (!thrusting && orbit != null && orbit.SemiMajorAxisM != 0 && orbit.StandardGravParameter > 0)
             {
-                _orbitRings.TryAdd(entityState.Id, new NewtonMoveIcon(entityState, newtonMoveDB, _state.UserOrbitSettingsMtx));
+                IPosition parentPosition = orbit.ParentId is int parentId
+                    ? new SnapshotPosition(_state, _systemId, parentId)
+                    : position;
+                if (orbit.Eccentricity < 1)
+                    _orbitRings.TryAdd(entity.Id,
+                        new OrbitEllipseIcon(orbit, position, parentPosition, bodyType, _state.UserOrbitSettingsMtx));
+                else if (orbit.ParentSoiRadiusM > 0)
+                    _orbitRings.TryAdd(entity.Id,
+                        new OrbitHyperbolicIcon2(orbit, position, parentPosition, bodyType, _state.UserOrbitSettingsMtx));
             }
 
-            if (entityState.TryGetDataBlob<NewtonSimpleMoveDB>(out var newtonSimpleMoveDB))
+            if (entity.GetView<NewtonMoveView>() is { } newton && newton.SoiParentId is int newtonParentId)
             {
-                _orbitRings.TryAdd(entityState.Id, new NewtonSimpleIcon(entityState, newtonSimpleMoveDB, _state.UserOrbitSettingsMtx));
+                _orbitRings.TryAdd(entity.Id, new NewtonMoveIcon(
+                    newton, position, new SnapshotPosition(_state, _systemId, newtonParentId),
+                    bodyType, _state.UserOrbitSettingsMtx));
             }
 
-            if (entityState.TryGetDataBlob<WarpMovingDB>(out var warpMovingDB) && positionDB != null)
+            if (entity.GetView<NewtonSimpleMoveView>() is { } newtonSimple && newtonSimple.SoiParentId is int simpleParentId)
             {
-                _orbitRings.TryAdd(entityState.Id, new WarpMovingIcon(warpMovingDB, positionDB));
+                var time = _state.GameClient?.Galaxy.Time.GameDateTime ?? default;
+                _orbitRings.TryAdd(entity.Id, new NewtonSimpleIcon(
+                    newtonSimple, position, new SnapshotPosition(_state, _systemId, simpleParentId),
+                    bodyType, _state.UserOrbitSettingsMtx, time));
             }
 
-
-            if (entityState.TryGetDataBlob<StarInfoDB>(out var starInfoDB)
-                && massVolumeDB != null
-                && positionDB != null)
+            if (entity.GetView<WarpMovingView>() is { } warp)
             {
-                _entityIcons.TryAdd(entityState.Id, new StarIcon(starInfoDB, positionDB, massVolumeDB));
+                IPosition? targetPosition = warp.TargetEntityId is int targetId
+                    ? new SnapshotPosition(_state, _systemId, targetId)
+                    : null;
+                _orbitRings.TryAdd(entity.Id, new WarpMovingIcon(warp, position, targetPosition));
             }
 
-            if (entityState.TryGetDataBlob<SystemBodyInfoDB>(out var systemBodyInfoDB)
-                && massVolumeDB != null
-                && positionDB != null)
+            if (entity.GetView<StarView>() is { } star && massVolume != null)
             {
-                _entityIcons.TryAdd(entityState.Id, new SysBodyIcon(entityState, systemBodyInfoDB, positionDB, massVolumeDB));
+                AddEntityIcon(entity, new StarIcon(star, massVolume, position));
             }
 
-            if (entityState.TryGetDataBlob<ShipInfoDB>(out var shipInfoDB) && positionDB != null)
+            if (entity.HasView<BodyView>() && entity.Kind != BodyKind.Star && massVolume != null)
             {
-                _entityIcons.TryAdd(entityState.Id, new ShipIcon(entityState, shipInfoDB, positionDB));
+                var i = new SysBodyIcon(entity, _systemId, position, Distance.MToAU(massVolume.RadiusMetres));
+                i.AttachState(_state);
+
+                var l = new EntityLabelExtCombo(_state, entity, _systemId);
+                l.Padding = 3;
+
+                _interactable.TryAdd(
+                        entity.Id,
+                        new[] { new InteractableState(i), new InteractableState(l) });
+                _bodyIcons.TryAdd(entity.Id, i);
+                _allLabels.Add(l);
             }
 
-            if (entityState.TryGetDataBlob<ProjectileInfoDB>(out var projectileInfoDB) && positionDB != null)
+            if (entity.HasView<ShipView>() && entity.HasView<PositionView>())
             {
-                _entityIcons.TryAdd(entityState.Id, new ProjectileIcon(entityState, positionDB));
+                AddEntityIcon(entity, new ShipIcon(position));
             }
 
-            if (entityState.TryGetDataBlob<BeamInfoDB>(out var beamInfoDB) && positionDB != null)
+            if (entity.HasView<ProjectileView>() && entity.HasView<PositionView>())
             {
-                _entityIcons.TryAdd(entityState.Id, new BeamIcon(beamInfoDB, positionDB));
+                AddEntityIcon(entity, new ProjectileIcon(position, underThrust: entity.HasView<NewtonMoveView>()));
             }
 
-            if(entityState.TryGetDataBlob<JPSurveyableDB>(out var jPSurveyableDB) && positionDB != null)
+            if (entity.GetView<BeamView>() is { } beam)
             {
-                _entityIcons.TryAdd(entityState.Id, new PointOfInterestIcon(positionDB));
+                _entityIcons.TryAdd(entity.Id, new BeamIcon(beam, position));
             }
 
+            if (entity.HasView<GravSurveyView>() && entity.HasView<PositionView>())
+            {
+                AddEntityIcon(entity, new PointOfInterestIcon(position));
+            }
         }
 
         void RemoveIconable(int entityGuid)
         {
-            _testIcons.TryRemove(entityGuid, out var testIcon);
-            _entityIcons.TryRemove(entityGuid, out var entityIcon);
-            _orbitRings.TryRemove(entityGuid, out var orbitIcon);
-            _moveIcons.TryRemove(entityGuid, out var moveIcon);
-            _nameIcons.TryRemove(entityGuid, out var nameIcon);
+            _testIcons.TryRemove(entityGuid, out _);
+            _entityIcons.TryRemove(entityGuid, out _);
+            _orbitRings.TryRemove(entityGuid, out _);
+            _moveIcons.TryRemove(entityGuid, out _);
+            _interactable.TryRemove(entityGuid, out _);
+            _bodyIcons.TryRemove(entityGuid, out _);
+            _allLabels.RemoveWhere(x => x.EntityId == entityGuid);
         }
 
+        /// <summary>The entity's orbit-ring icon, for screen-space hit testing (maneuver-node
+        /// placement); null when the entity has no orbit ring.</summary>
+        internal OrbitIconBase? GetOrbitIcon(int entityId)
+            => _orbitRings.TryGetValue(entityId, out var icon) ? icon as OrbitIconBase : null;
 
         public void UpdateUserOrbitSettings()
         {
@@ -208,288 +334,116 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        void HandleChanges(EntityState entityState)
+        /// <summary>Reconciles the icon set against the system's current snapshots: new entities
+        /// gain icons, changed snapshots rebuild them, departed entities lose them.</summary>
+        void SyncIcons()
         {
-
-            foreach (var message in entityState.Changes)
-            {
-                if(message.EntityId == null) continue;
-
-                if (message.MessageType == MessageTypes.DBAdded)
-                {
-                    if (message.DataBlob is OrbitDB)
-                    {
-                        OrbitDB orbitDB = (OrbitDB)message.DataBlob;
-                        if (orbitDB.Parent == null)
-                            continue;
-
-
-                        if (!orbitDB.IsStationary)
-                        {
-                            if (_sysState != null && _sysState.EntityStatesWithPosition.ContainsKey(message.EntityId.Value))
-                            {
-                                entityState = _sysState.EntityStatesWithPosition[message.EntityId.Value];
-                            }
-                            else if(_sysState != null && message.FactionId != null && _sysState.StarSystem.TryGetEntityById(message.EntityId.Value, out var retrievedEntity))
-                            {
-                                entityState = new EntityState(retrievedEntity, message.EntityId.Value, message.FactionId.Value);
-                            }
-
-                            OrbitIconBase orbit;
-                            if (orbitDB.Eccentricity < 1)
-                            {
-                               orbit = new OrbitEllipseIcon(entityState, _state.UserOrbitSettingsMtx);
-                            }
-                            else
-                            {
-                                orbit = new OrbitHyperbolicIcon2(entityState, _state.UserOrbitSettingsMtx);
-                            }
-                            _orbitRings[message.EntityId.Value] = orbit;
-
-                        }
-                    }
-                    if (message.DataBlob is WarpMovingDB
-                        && _sysState != null
-                        && _sysState.StarSystem.TryGetEntityById(message.EntityId.Value, out var entity)
-                        && entity.TryGetDatablob<PositionDB>(out var positionDB))
-                    {
-                        var widget = new WarpMovingIcon((WarpMovingDB)message.DataBlob, positionDB);
-                        widget.OnPhysicsUpdate();
-                        //Matrix matrix = new Matrix();
-                        //matrix.Scale(_camera.ZoomLevel);
-                        //widget.OnFrameUpdate(matrix, _camera);
-                        _moveIcons[message.EntityId.Value] = widget;
-                        //_moveIcons.Add(changeData.Entity.ID, widget);
-                    }
-
-                    if (message.DataBlob is NewtonMoveDB)
-                    {
-
-                        Icon orb = new NewtonMoveIcon(entityState, (NewtonMoveDB)message.DataBlob, _state.UserOrbitSettingsMtx);
-                        _orbitRings.AddOrUpdate(message.EntityId.Value, orb, ((guid, data) => data = orb));
-                    }
-                    //if (changeData.Datablob is NameDB)
-                    //TextIconList[changeData.Entity.ID] = new TextIcon(changeData.Entity, _camera);
-
-                    //_entityIcons[changeData.Entity.ID] = new EntityIcon(changeData.Entity, _camera);
-                }
-                if (message.MessageType == MessageTypes.DBRemoved)
-                {
-                    if (message.DataBlob is OrbitDB)
-                    {
-
-                        _orbitRings.TryRemove(message.EntityId.Value, out var foo);
-                    }
-                    if (message.DataBlob is WarpMovingDB)
-                    {
-                        _moveIcons.TryRemove(message.EntityId.Value, out var foo);
-                    }
-
-                    if (message.DataBlob is NewtonMoveDB)
-                    {
-                        _orbitRings.TryRemove(message.EntityId.Value, out var foo);
-                    }
-                }
-            }
-        }
-
-        void TextIconsDistribute()
-        {
-            if (_nameIcons.Count == 0)
+            var system = _systemId != null ? _state.GameClient?.Galaxy.GetSystem(_systemId) : null;
+            if (system == null)
                 return;
-            var occupiedPosition = new List<IRectangle>();
-            IComparer<IRectangle> byViewPos = new ByViewPosition();
-            var textIconList = new List<NameIcon>(_nameIcons.Values);
 
-
-            //Consolidate TextIcons that share the same position and name
-            textIconList.Sort();
-            int listLength = textIconList.Count;
-            int textIconQuantity = 1;
-            for (int i = 1; i < listLength; i++)
+            bool changed = false;
+            var seen = new HashSet<int>();
+            foreach (var entity in system.Entities)
             {
-                if (textIconList[i - 1].CompareTo(textIconList[i]) == 0)
+                seen.Add(entity.Id);
+                if (_iconedSnapshots.TryGetValue(entity.Id, out var iconed))
                 {
-                    textIconQuantity++;
-                    textIconList.RemoveAt(i);
-                    i--;
-                    listLength--;
+                    if (ReferenceEquals(iconed, entity))
+                        continue;
+                    RemoveIconable(entity.Id);
                 }
-                else if (textIconQuantity > 1)
-                {
-                    textIconList[i - 1].NameString += " x" + textIconQuantity;
-                    textIconQuantity = 1;
-                }
+
+                _iconedSnapshots[entity.Id] = entity;
+                AddIconable(entity);
+                changed = true;
             }
 
-            //Placement happens bottom to top, left to right
-            //Each newly placed Texticon is compared to only the Texticons that are placed above its position
-            //Therefore a sorted list of the occupied Positions is maintained
-            occupiedPosition.Add(textIconList[0]);
-
-
-
-            List<NameIcon> texiconsCopy = new List<NameIcon>();
-            texiconsCopy.AddRange(_nameIcons.Values);
-
-            int numTextIcons = texiconsCopy.Count;
-
-            for (int i = 1; i < numTextIcons; i++)
-            {
-                var item = texiconsCopy[i - 1];
-                Vector2 height = new Vector2() { X = 0, Y = item.Height };
-                int lowestPosIndex = occupiedPosition.BinarySearch(item.ViewDisplayRect + height, byViewPos);
-                int lpi = lowestPosIndex;
-                if (lowestPosIndex < 0)
-                    lpi = ~lowestPosIndex;
-
-                for (int j = lpi; j < occupiedPosition.Count; j++)
-                {
-                    if (item.ViewDisplayRect.Intersects(occupiedPosition[j]))
-                    {
-                        var newpoint = new System.Numerics.Vector2()
-                        {
-                            X = item.ViewOffset.X,
-                            Y = item.ViewOffset.Y - occupiedPosition[j].Height
-                        };
-                        item.ViewOffset = newpoint;
-                    }
-                }
-                //Inserts the new label sorted
-                int insertIndex = occupiedPosition.BinarySearch(item, byViewPos);
-                if (insertIndex < 0) insertIndex = ~insertIndex;
-                occupiedPosition.Insert(insertIndex, item);
-            }
-
-
-        }
-
-        private void OnSystemStateEntityAdded(SystemState systemState, Entity entity)
-        {
-            if(systemState.EntityStatesWithPosition.ContainsKey(entity.Id))
-                AddIconable(systemState.EntityStatesWithPosition[entity.Id]);
-        }
-
-        private void OnSystemStateEntityUpdated(SystemState systemState, int entityId, Message message)
-        {
-            // Refreseh the icons for the updated entity
-            if(systemState.EntityStatesWithPosition.ContainsKey(entityId))
+            foreach (var entityId in _iconedSnapshots.Keys.Where(id => !seen.Contains(id)).ToList())
             {
                 RemoveIconable(entityId);
-                AddIconable(systemState.EntityStatesWithPosition[entityId]);
+                _iconedSnapshots.Remove(entityId);
+                changed = true;
             }
+
+            if (changed)
+                _updateLabels = true;
         }
 
-        private void OnSystemStateEntityRemoved(SystemState systemState, int entityId)
+        internal void Update()
         {
-            RemoveIconable(entityId);
-        }
+            if (_systemId == null) return;
 
-        internal void Draw()
-        {
+            SyncIcons();
 
-            if (_sysState != null)
+            // The galaxy clock only moves on server pushes; re-run the physics pass (orbit tail
+            // indexes, warp curves) when it does.
+            var galaxyTime = _state.GameClient?.Galaxy.Time.GameDateTime;
+            if (galaxyTime is { } time && time != _lastPhysicsTime)
             {
-                foreach (var item in _sysState.EntityStatesWithPosition.Values)
-                {
-                    if (item.Changes.Count > 0)
-                    {
-                        HandleChanges(item);
-                    }
-                }
+                _lastPhysicsTime = time;
+                RunPhysicsUpdate();
             }
-
-            byte oR, oG, oB, oA;
-            SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
-            SDL.SDL_BlendMode blendMode;
-            SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
-            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
             var matrix = _camera.GetZoomMatrix();
+            foreach (var (_, item) in UIWidgets)
+                item.OnFrameUpdate(matrix, _camera);
 
-            UpdateAndDraw(UIWidgets.Values.ToList(), matrix);
+            foreach (var (_, item) in _orbitRings)
+                item.OnFrameUpdate(matrix, _camera);
 
-            UpdateAndDraw(_orbitRings.Values.ToList(), matrix);
+            foreach (var (_, item) in _moveIcons)
+                item.OnFrameUpdate(matrix, _camera);
 
-            UpdateAndDraw(_moveIcons.Values.ToList(), matrix);
+            foreach (var (_, item) in _entityIcons)
+                item.OnFrameUpdate(matrix, _camera);
 
-            UpdateAndDraw(_entityIcons.Values.ToList(), matrix);
+            foreach (var (_, item) in _bodyIcons)
+                item.OnFrameUpdate(matrix, _camera);
 
-            UpdateAndDraw(SelectedEntityExtras, matrix);
+            foreach (var item in SelectedEntityExtras)
+                item.OnFrameUpdate(matrix, _camera);
 
+            foreach (var item in _allLabels)
+                item.OnFrameUpdate(matrix, _camera);
 
-            //because _nameIcons are imgui not sdl, we don't draw them here.
-            //we draw them in PulsarMainWindow.ImGuiLayout
-            lock (_nameIcons)
+            if (_updateLabels)
             {
-                foreach (var item in _nameIcons.Values)
-                    item.OnFrameUpdate(matrix, _camera);
-            }
-            TextIconsDistribute();
+                _updateLabels = false;
 
-            //ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
+                var prefs = SystemViewPreferences.GetInstance();
 
-            SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
-            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
-        }
-
-        public void DrawNameIcons()
-        {
-
-            lock (_nameIcons)
-            {
-                List<NameIcon> nameIcons = new List<NameIcon>();
-                foreach (var icon in _nameIcons.Values)
+                foreach (var item in _interactable.Values)
                 {
-                    if(SystemViewPreferences.GetInstance().ShouldDisplay("map", icon.EntityState.BodyType))
-                        nameIcons.Add(icon);
-                    //item.Draw(_uiState.rendererPtr, _uiState.Camera);
+                    foreach (var i in item)
+                        i.IsDisabled = true;
                 }
-                NameIcon.DrawAll(_state.rendererPtr, _state.Camera, nameIcons);
+
+                var zoom = _camera.ZoomLevel;
+                var lbl = _allLabels
+                    .Where(x => prefs.ShouldDisplay("map", x.BodyType)
+                        && zoom >= _minZoomForLabel[x.BodyType]);
+
+                _visibleLabels.Clear();
+                foreach (var i in _distributor(lbl))
+                {
+                    if (!_interactable.TryGetValue(i.EntityId, out var states))
+                        continue;
+                    foreach (var j in states)
+                        j.IsDisabled = false;
+                    _visibleLabels.Add(i);
+                }
+
+                _interactableGrouped = _interactable
+                    .Values
+                    .SelectMany(x => x)
+                    .GroupBy(x => x.Item.Priority)
+                    .OrderByDescending(x => x.Key);
             }
-
         }
 
-        void UpdateAndDraw(List<IDrawData> icons, Matrix matrix)
+        void RunPhysicsUpdate()
         {
-            foreach (var item in icons)
-                item.OnFrameUpdate(matrix, _camera);
-            foreach (var item in icons)
-                item.Draw(rendererPtr, _camera);
-        }
-
-        void UpdateAndDraw(IList<IDrawData> icons, Matrix matrix)
-        {
-            foreach (var item in icons)
-                item.OnFrameUpdate(matrix, _camera);
-            foreach (var item in icons)
-                item.Draw(rendererPtr, _camera);
-        }
-        // void UpdateAndDraw(Dictionary<string, IDrawData> icons, Matrix matrix)
-        // {
-        //     lock (icons)
-        //     {
-        //         foreach (var item in icons.Values)
-        //             item.OnFrameUpdate(matrix, _camera);
-        //         foreach (var item in icons.Values)
-        //             item.Draw(rendererPtr, _camera);
-        //     }
-        // }
-
-        public override bool GetActive()
-        {
-            return true;
-        }
-
-        public override void OnGameTickChange(DateTime newDate)
-        {
-
-        }
-
-        public override void OnSystemTickChange(DateTime newDate)
-        {
-            _state.PrimarySystemDateTime = newDate;
-
             foreach (var icon in UIWidgets.Values)
             {
                 icon.OnPhysicsUpdate();
@@ -506,14 +460,39 @@ namespace Pulsar4X.SDL2UI
             {
                 icon.OnPhysicsUpdate();
             }
-            foreach (var icon in _nameIcons.Values)
+            foreach (var icon in SelectedEntityExtras)
             {
                 icon.OnPhysicsUpdate();
             }
-            foreach(var icon in SelectedEntityExtras)
-            {
-                icon.OnPhysicsUpdate();
-            }
+        }
+
+        internal void Draw()
+        {
+            DrawIcons(UIWidgets.Values);
+            DrawIcons(_orbitRings.Values);
+            DrawIcons(_moveIcons.Values);
+            DrawIcons(_entityIcons.Values);
+            DrawIcons(_bodyIcons.Values);
+            DrawIcons(SelectedEntityExtras);
+
+            foreach (var i in _visibleLabels)
+                i.Draw(_window.Renderer, _camera);
+        }
+
+        void DrawIcons(IEnumerable<IDrawData> icons)
+        {
+            foreach (var item in icons)
+                item.Draw(_window.Renderer, _camera);
+        }
+
+        public override bool GetActive()
+        {
+            return true;
+        }
+
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+            _state.PrimarySystemDateTime = newDate;
         }
     }
 }

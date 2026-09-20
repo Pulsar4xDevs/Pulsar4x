@@ -37,8 +37,12 @@ namespace Pulsar4X.Technology
         {
             Expression expression = new Expression(CostFormula);
             expression.Parameters.Add("Level", Level);
-            int result = (int)expression.Evaluate();
-            return result;
+            object result = expression.Evaluate();
+
+            if (result is double)
+                return (int)(double)result;
+
+            return (int)result;
         }
 
         public double TechDataFormula()

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using Newtonsoft.Json;
 using Pulsar4X.Engine;
 using Pulsar4X.Names;
@@ -10,11 +11,12 @@ using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Ships;
+using Stringify = Pulsar4X.Api.Stringify;
 
 
 namespace Pulsar4X.Storage;
 
-public class CargoTransferOrder : EntityCommand
+public class CargoTransferOrder : EntityAction
 {
     public enum Conditionals
     {
@@ -22,7 +24,7 @@ public class CargoTransferOrder : EntityCommand
         WaitTillFull,
         WailTillEmpty,
         TakeAvailible
-        
+
     }
     [JsonProperty]
     public Conditionals Condition {get; private set;} = Conditionals.TakeAvailibleAtOrder;
@@ -62,14 +64,14 @@ public class CargoTransferOrder : EntityCommand
     private CargoTransferDataDB TransferData { get; }
 
 
-    
+
 
     private CargoTransferOrder(CargoTransferDataDB transferData)
     {
         TransferData = transferData;
     }
-    
-    public static void CreateCommands(int faction, Entity primaryEntity, Entity secondaryEntity, List<(ICargoable item, long amount)> itemsToMove )
+
+    public static bool CreateCommands(int faction, Entity primaryEntity, Entity secondaryEntity, List<(ICargoable item, long amount)> itemsToMove )
     {
         CargoTransferDataDB cargoData = new(primaryEntity, secondaryEntity, itemsToMove);
         var cmd1 = new CargoTransferOrder(cargoData)
@@ -79,8 +81,8 @@ public class CargoTransferOrder : EntityCommand
             CreatedDate = primaryEntity.Manager.ManagerSubpulses.StarSysDateTime,
             IsPrimaryEntity = true,
         };
-        primaryEntity.Manager.Game.OrderHandler.HandleOrder(cmd1);
-        
+        bool primaryAccepted = primaryEntity.Manager.Game.OrderHandler.HandleOrder(cmd1);
+
         var cmd2 = new CargoTransferOrder(cargoData)
         {
             RequestingFactionGuid = faction,
@@ -88,9 +90,48 @@ public class CargoTransferOrder : EntityCommand
             CreatedDate = primaryEntity.Manager.ManagerSubpulses.StarSysDateTime,
             IsPrimaryEntity = false
         };
-        secondaryEntity.Manager.Game.OrderHandler.HandleOrder(cmd2);
+        return secondaryEntity.Manager.Game.OrderHandler.HandleOrder(cmd2) && primaryAccepted;
     }
-    
+
+    /// <summary>
+    /// Build a bilateral refuel transfer without enqueueing. Receiver is primary (WaitTillFull).
+    /// Planner returns <paramref name="primary"/> in its action list and submits secondary separately
+    /// so the supplier participates while move actions stay ordered ahead of the receiver's transfer.
+    /// </summary>
+    public static (CargoTransferOrder primary, CargoTransferOrder secondary) CreateRefuelPair(
+        int faction,
+        Entity receiver,
+        Entity supplier,
+        ICargoable fuel,
+        Conditionals condition)
+    {
+        long amount = 0;
+        if (condition == Conditionals.WaitTillFull)
+            amount = CargoMath.GetFreeUnitSpace(receiver.GetDataBlob<CargoStorageDB>(), fuel);
+
+        var itemList = new List<(ICargoable item, long amount)> { (fuel, amount) };
+        var cargoData = new CargoTransferDataDB(receiver, supplier, itemList);
+        var now = receiver.Manager.ManagerSubpulses.StarSysDateTime;
+
+        var primary = new CargoTransferOrder(cargoData)
+        {
+            RequestingFactionGuid = faction,
+            EntityCommandingGuid = receiver.Id,
+            CreatedDate = now,
+            IsPrimaryEntity = true,
+            Condition = condition,
+        };
+        var secondary = new CargoTransferOrder(cargoData)
+        {
+            RequestingFactionGuid = faction,
+            EntityCommandingGuid = supplier.Id,
+            CreatedDate = now,
+            IsPrimaryEntity = false,
+            Condition = condition,
+        };
+        return (primary, secondary);
+    }
+
     /// <summary>
     /// Single item conditional order.
     /// Assumes transfer from secondary to primary
@@ -111,7 +152,7 @@ public class CargoTransferOrder : EntityCommand
         List<(ICargoable item, long amount)> itemList = new List<(ICargoable item, long amount)>();
         itemList.Add((item, amount));
         CargoTransferDataDB cargoData = new(primaryEntity, secondaryEntity, itemList);
-        
+
         var cmd1 = new CargoTransferOrder(cargoData)
         {
             RequestingFactionGuid = faction,
@@ -121,7 +162,7 @@ public class CargoTransferOrder : EntityCommand
             Condition = condition
         };
         primaryEntity.Manager.Game.OrderHandler.HandleOrder(cmd1);
-        
+
         var cmd2 = new CargoTransferOrder(cargoData)
         {
             RequestingFactionGuid = faction,
@@ -133,29 +174,32 @@ public class CargoTransferOrder : EntityCommand
         secondaryEntity.Manager.Game.OrderHandler.HandleOrder(cmd2);
     }
 
-    public static void CreateRefuelFleetCommand(Entity cargoFromEntity, Entity fleet)
+    /// <returns>True if at least one of the fleet's ships was issued a refuel transfer.</returns>
+    public static bool CreateRefuelFleetCommand(Entity cargoFromEntity, Entity fleet)
     {
         var fleetOwner = fleet.GetFactionOwner;
         var cargoLibrary = fleetOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
-        if(fleet.TryGetDatablob<FleetDB>(out var fleetDB))
+        bool anyIssued = false;
+        if(fleet.TryGetDataBlob<FleetDB>(out var fleetDB))
         {
             var ships = fleetDB.Children.Where(c => c.HasDataBlob<ShipInfoDB>());
 
             foreach (var ship in ships)
             {
-                var fuelInfo = ship.GetFuelInfo(cargoLibrary);
-                ICargoable fuel = fuelInfo.Item1;
-                long amountToMove = ship.GetDataBlob<CargoStorageDB>().GetFreeUnitSpace(fuel);
-                var fuelAndAmount =(fuel, amountToMove);
-                var list = new List<(ICargoable, long)>();
-                list.Add(fuelAndAmount);
+                if(ship.TryGetDataBlob<CargoStorageDB>(out var cargoStorageDB))
+                {
+                    var fuelInfo = ship.GetFuelInfo(cargoLibrary);
+                    ICargoable fuel = fuelInfo.Item1;
 
-                CreateCommands(fleet.FactionOwnerID, ship, cargoFromEntity,  fuel, Conditionals.WaitTillFull);
+                    CreateCommands(fleet.FactionOwnerID, ship, cargoFromEntity, fuel, Conditionals.WaitTillFull);
+                    anyIssued = true;
+                }
             }
         }
+        return anyIssued;
     }
-    
-    
+
+
     /// <summary>
     /// Validates and actions the command.
     /// may eventualy need to return a responce instead of void.
@@ -186,7 +230,7 @@ public class CargoTransferOrder : EntityCommand
     {
         if(!IsRunning)
             return _isFinished = false;
-        
+
         switch (Condition)
         {
             case Conditionals.TakeAvailibleAtOrder:
@@ -248,10 +292,10 @@ public class CargoTransferOrder : EntityCommand
         }
         return amount;
     }
-    
-    public override EntityCommand Clone()
+
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }
-    
+
 }

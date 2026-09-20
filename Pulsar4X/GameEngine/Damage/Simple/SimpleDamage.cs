@@ -22,7 +22,7 @@ public class SimpleDamage
     /// <returns>Returns true if the entity was destroyed.</returns>
     public static DamageResult OnTakingDamage(Entity entityToDamage, int damageMin, int damageMax)
     {
-        if(entityToDamage.TryGetDatablob<ComponentInstancesDB>(out var componentInstancesDB)
+        if(entityToDamage.TryGetDataBlob<ComponentInstancesDB>(out var componentInstancesDB)
             && componentInstancesDB.AllComponents.Count > 0)
         {
             var mgr = entityToDamage.Manager;
@@ -30,9 +30,9 @@ public class SimpleDamage
             var damagedIndex = mgr.RNGNext(components.Count);
             var damage = mgr.RNGNext(damageMin, damageMax);
 
-            components[damagedIndex].HTKRemaining -= damage;
+            components[damagedIndex].HealthPercent -= damage;
 
-            if(components[damagedIndex].HTKRemaining <= 0)
+            if(components[damagedIndex].HealthPercent <= 0)
             {
                 componentInstancesDB.RemoveComponentInstance(components[damagedIndex]);
             }

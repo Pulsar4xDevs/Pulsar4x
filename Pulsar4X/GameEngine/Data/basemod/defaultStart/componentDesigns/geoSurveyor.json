@@ -1,8 +1,0 @@
-{
-  "id": "default-design-geo-surveyor",
-  "name": "Geo Surveyor Mk1",
-  "templateId": "geo-surveyor",
-  "Properties": [
-    { "key": "Survey Speed", "value": 1 }
-  ]
-}

@@ -1,0 +1,27 @@
+[
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "comet-halleys",
+      "Name": "Halleys Comet",
+      "Colonizable": false,
+      "MineralGeneration": "random",
+      "GeoSurveyPointsRequired": 575,
+      "Info": {
+        "Gravity": 0,
+        "Type": "comet",
+        "Albedo": 0.04,
+        "Mass": 2.2E14,
+        "Radius": 11
+      },
+      "Orbit": {
+        "SemiMajorAxis": 2.6679E9,
+        "Eccentricity": 0.96714,
+        "EclipticInclination": 180,
+        "LoAN": 58.42,
+        "AoP": 111.33,
+        "MeanAnomaly": 38.38
+      }
+    }
+  }
+]

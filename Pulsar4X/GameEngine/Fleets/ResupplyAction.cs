@@ -1,9 +1,10 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.Fleets;
-public class ResupplyAction : EntityCommand
+public class ResupplyAction : EntityAction
 {
     public override string Name => "Resupply";
     public override string Details => "Resupply the fleet, must be at a location where supplies are availablle.";
@@ -37,7 +38,7 @@ public class ResupplyAction : EntityCommand
         _entityCommanding = commandingEntity;
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         var command = new ResupplyAction(EntityCommanding)
         {

@@ -1,11 +1,12 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
 using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.Industry
 {
-    public class IndustryOrder2 : EntityCommand
+    public class IndustryOrder2 : EntityAction
     {
 
         public override string Name
@@ -185,7 +186,7 @@ namespace Pulsar4X.Industry
             return _isFinished;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             throw new NotImplementedException();
         }

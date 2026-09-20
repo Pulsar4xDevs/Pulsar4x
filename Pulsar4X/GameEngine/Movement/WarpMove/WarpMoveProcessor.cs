@@ -1,4 +1,5 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
@@ -56,10 +57,20 @@ namespace Pulsar4X.Movement
     /// **
     ///NB I've alowed ships to come to zero speed warp when serveying a jump point grav anomaly, since these are still in space.
     /// this may cause some problems we will have to see how it plays out.
+    ///
+    /// In-transit interpolation is a hotloop (regular position updates while warping).
+    /// Arrival is an instance interrupt at <see cref="WarpMovingDB.PredictedExitTime"/> —
+    /// same pattern as SOI enter/exit — so drop-in is not quantized to <see cref="RunFrequency"/>.
     /// </summary>
-    public class WarpMoveProcessor : IHotloopProcessor
+    public class WarpMoveProcessor : IInstanceProcessor, IHotloopProcessor
     {
         private static GameSettings _gameSettings;
+
+        /// <summary>
+        /// Test observation point for drop-in. Production does not subscribe.
+        /// Fired once per <see cref="SetOrbitHereSimpleNewt"/> / NoNewt call.
+        /// </summary>
+        internal static Action<Entity, DateTime>? TestDropIn;
 
         public TimeSpan RunFrequency => TimeSpan.FromMinutes(5);
 
@@ -72,14 +83,77 @@ namespace Pulsar4X.Movement
             _gameSettings = game.Settings;
         }
 
+        /// <summary>
+        /// Arrival interrupt at <see cref="WarpMovingDB.PredictedExitTime"/>.
+        /// Interpolate this tick first (covers the fractional second the hotloop
+        /// truncated), then drop in even if overshoot missed by a FP residual.
+        /// No-ops if the hotloop overshoot-fallback already ended the bubble.
+        /// </summary>
+        internal override void ProcessEntity(Entity entity, DateTime atDateTime)
+        {
+            if (!entity.TryGetDataBlob<WarpMovingDB>(out var db) || db.IsAtTarget)
+                return;
+
+            WarpMove(entity, db, atDateTime);
+
+            if (!entity.TryGetDataBlob(out db) || db.IsAtTarget)
+                return;
+
+            if (db.HasStarted
+                && db.PredictedExitTime != DateTime.MinValue
+                && atDateTime >= db.PredictedExitTime)
+            {
+                FinishArrival(entity, db, atDateTime);
+                return;
+            }
+
+            if (db.OwningEntity != null)
+                MoveStateProcessor.ProcessForType(db, atDateTime);
+        }
+
+        /// <summary>
+        /// Pin arrival to <paramref name="moveDB"/>.PredictedExitTime so ManagerSubPulse
+        /// subdivides the pulse to that instant instead of the next 5-minute hotloop.
+        /// </summary>
+        internal static void ScheduleArrival(Entity entity, WarpMovingDB moveDB)
+        {
+            if (!moveDB.HasStarted)
+                return;
+            DateTime when = moveDB.PredictedExitTime;
+            if (when > entity.Manager.ManagerSubpulses.NextSafeInterruptTime)
+                entity.Manager.ManagerSubpulses.AddEntityInterupt(when, nameof(WarpMoveProcessor), entity);
+        }
+
+        /// <summary>
+        /// Run the action queue at this exact instant. AddEntityInterupt(now) is not safe
+        /// here: ProcessToNextInterupt has already Split() the instance queue, and it
+        /// breaks when StarSysDateTime == _processToDateTime, so a same-time interrupt
+        /// would wait until the next master pulse. Same "run now" pattern as HandleOrder.
+        /// </summary>
+        static void WakeActionQueue(Entity entity, DateTime atDateTime)
+        {
+            if (entity.Manager?.Game == null)
+                return;
+            entity.Manager.Game.ProcessorManager
+                .GetInstanceProcessor(nameof(ActionQueueProcessor))
+                .ProcessEntity(entity, atDateTime);
+        }
 
 
+        /// <summary>
+        /// Efficent processes all entities in the system for the hotloop process. 
+        /// </summary>
+        /// <param name="manager"></param>
+        /// <param name="deltaSeconds"></param>
+        /// <returns></returns>
         public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             var datablobs = manager.GetAllDataBlobsOfType<WarpMovingDB>();
             DateTime todateTime = manager.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
             foreach (var db in datablobs)
             {
+                if (db.OwningEntity is null || db.IsAtTarget)
+                    continue;
                 WarpMove(db.OwningEntity, db, todateTime);
             }
             MoveStateProcessor.ProcessForType(datablobs, todateTime);
@@ -101,19 +175,26 @@ namespace Pulsar4X.Movement
             MoveStateProcessor.ProcessForType(db, toDateTime);
         }
 
-        public static void ProcessEntity(Entity entity, DateTime toDateTime)
+        /// <summary>
+        /// Hotloop-style advance to an explicit datetime. Named apart from the instance
+        /// <see cref="ProcessEntity(Entity, DateTime)"/> override (arrival interrupt).
+        /// </summary>
+        public static void ProcessToDate(Entity entity, DateTime toDateTime)
         {
-            var db = entity.GetDataBlob<WarpMovingDB>();
+            if (!entity.TryGetDataBlob<WarpMovingDB>(out var db) || db.IsAtTarget)
+                return;
             WarpMove(entity, db, toDateTime);
-            MoveStateProcessor.ProcessForType(db, toDateTime);
+            if (db.OwningEntity != null)
+                MoveStateProcessor.ProcessForType(db, toDateTime);
         }
 
         public static void WarpMove(Entity entity, WarpMovingDB moveDB,  DateTime toDateTime)
         {
-            if (moveDB.HasStarted || StartNonNewtTranslation(entity))
-            {
-                var warpDB = entity.GetDataBlob<WarpAbilityDB>();
+            if (moveDB.IsAtTarget)
+                return;
 
+            if (moveDB.HasStarted || TryStartWarp(entity, moveDB, toDateTime))
+            {
                 var currentVelocityMS = moveDB.CurrentNonNewtonionVectorMS;
                 DateTime dateTimeFrom = moveDB.LastProcessDateTime;
 
@@ -128,15 +209,14 @@ namespace Pulsar4X.Movement
 
                 if (distanceToTargetMt <= distanceToMove) // moving would overtake target, just go directly to target
                 {
-                    moveDB._parentEnitity = moveDB.TargetEntity;
-                    moveDB._position = (Vector2)moveDB.ExitPointrelative;
-                    var destinationMoveType = moveDB.TargetEntity.GetDataBlob<PositionDB>().MoveType;
-                    moveDB.IsAtTarget = true;
-                    //if our destination is a non moving object eg a grav anomaly or jump point.
-                    if(destinationMoveType == PositionDB.MoveTypes.None)
-                        moveDB.CurrentNonNewtonionVectorMS = Vector3.Zero;
-                    else
-                        EndWarpMove(entity, warpDB, moveDB, toDateTime);
+                    SnapBubbleToExit(moveDB);
+                    // Hotloop ticks can overshoot PredictedExitTime; snap the bubble here but
+                    // only drop in once the arrival interrupt is due. Otherwise the 5-minute
+                    // hotloop and the instance interrupt both call EndWarpMove.
+                    // The instance processor still FinishArrival if this tick undershoots
+                    // by a FP residual.
+                    if (ArrivalDue(moveDB, toDateTime))
+                        FinishArrival(entity, moveDB, toDateTime);
                 }
                 else
                 {
@@ -148,108 +228,148 @@ namespace Pulsar4X.Movement
             }
         }
 
-        public static bool StartNonNewtTranslation(Entity entity)
+        public static bool TryStartWarp(Entity entity, WarpMovingDB moveDB, DateTime toDateTime)
         {
-
-            var warpDB = entity.GetDataBlob<WarpAbilityDB>();
-            var positionDB = entity.GetDataBlob<PositionDB>();
-            var maxSpeedMS = warpDB.MaxSpeed;
             var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
-            EnergyGenProcessor.EnergyGen(entity, entity.StarSysDateTime);
+            var warpDB = entity.GetDataBlob<WarpAbilityDB>();
             
-            // Check to make sure we don't set the position parent to itself
-            if(positionDB.Parent != positionDB.Root)
-                positionDB.SetParent(positionDB.Root);
-
-            Vector3 currentPositionMt = positionDB.AbsolutePosition;
-
-
-            var moveDB = entity.GetDataBlob<WarpMovingDB>();
-            var tgt = moveDB.TargetEntity.GetDataBlob<PositionDB>();
-            var tgtpos = tgt.AbsolutePosition;
-            moveDB._position = (Vector2)positionDB.AbsolutePosition;
-            Vector3 targetPosMt = moveDB.ExitPointAbsolute;
-            Vector3 postionDelta = currentPositionMt - targetPosMt;
-            double totalDistance = postionDelta.Length();
-
-            var creationCost = warpDB.BubbleCreationCost;
-            var t = totalDistance / warpDB.MaxSpeed;
-            var tcost = t * warpDB.BubbleSustainCost;
             double estored = powerDB.EnergyStored[warpDB.EnergyType];
             bool canStart = false;
+            var creationCost = warpDB.BubbleCreationCost;
             if (creationCost <= estored)
             {
+                var positionDB = entity.GetDataBlob<PositionDB>();
+                var maxSpeedMS = warpDB.MaxSpeed;
+
+                EnergyGenProcessor.EnergyGen(entity, toDateTime);
+
+                // Check to make sure we don't set the position parent to itself
+                if(positionDB.Parent != positionDB.Root)
+                    positionDB.SetParent(positionDB.Root);
+
+                // Intercept from the same inertial start the bubble will fly from.
+                // GetInterceptPosition(entity, ...) uses GetAbsoluteFuturePosition, which
+                // is the origin once OnSetToEntity has stripped OrbitDB.
+                Vector3 currentPositionMt = positionDB.AbsolutePosition;
+                var intercept = WarpMath.GetInterceptPosition(
+                    currentPositionMt, maxSpeedMS, moveDB.TargetEntity, toDateTime, moveDB.ExitPointrelative);
+                moveDB.ExitPointAbsolute = intercept.position;
+                moveDB.PredictedExitTime = intercept.etiDateTime;
+                moveDB.EntryPointAbsolute = currentPositionMt;
+                moveDB.EntryDateTime = toDateTime;
+
+                moveDB._position = (Vector2)currentPositionMt;
+                Vector3 targetPosMt = moveDB.ExitPointAbsolute;
 
                 var currentVelocityMS = Vector3.Normalise(targetPosMt - currentPositionMt) * maxSpeedMS;
-                var speed = currentVelocityMS.Length();
-                moveDB.CurrentNonNewtonionVectorMS = currentVelocityMS;
-                moveDB.LastProcessDateTime = entity.StarSysDateTime;
 
-                //estore = (estore.stored - creationCost, estore.maxStore);
-                powerDB.AddDemand(creationCost, entity.StarSysDateTime);
-                powerDB.AddDemand(-creationCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
-                powerDB.AddDemand(warpDB.BubbleSustainCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
-                //powerDB.EnergyStore[warpDB.EnergyType] = estore;
+                moveDB.CurrentNonNewtonionVectorMS = currentVelocityMS;
+                moveDB.LastProcessDateTime = toDateTime;
+                
+                EnergyGenProcessor.EnergyGen(entity, toDateTime - TimeSpan.FromSeconds(1));
+                powerDB.AddDemand(creationCost, toDateTime - TimeSpan.FromSeconds(1));
+                EnergyGenProcessor.EnergyGen(entity, toDateTime);
+                powerDB.AddDemand(-creationCost, toDateTime);
+                powerDB.AddDemand(warpDB.BubbleSustainCost, toDateTime);
+
                 moveDB.HasStarted = true;
                 canStart = true;
+                ScheduleArrival(entity, moveDB);
             }
 
             return canStart;
         }
 
 
-        static void EndWarpMove(Entity entity, WarpAbilityDB warpDB, WarpMovingDB moveDB,  DateTime toDateTime)
+        static bool ArrivalDue(WarpMovingDB moveDB, DateTime atDateTime)
         {
-            var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
-
-
-
-            powerDB.AddDemand(warpDB.BubbleCollapseCost, entity.StarSysDateTime);
-            powerDB.AddDemand(-warpDB.BubbleSustainCost, entity.StarSysDateTime);
-            powerDB.AddDemand(-warpDB.BubbleCollapseCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
-
-            var destinationMoveType = moveDB.TargetEntity.GetDataBlob<PositionDB>().MoveType;
-
-            switch (destinationMoveType)
-            {
-                case PositionDB.MoveTypes.None:
-                {
-                    //if our destination is a non moving object eg a grav anomaly or jump point.
-                    //this case should be handled prior to this.
-                    throw new Exception("shouldn't get here");
-                    break;
-                }
-                case PositionDB.MoveTypes.Orbit:
-                {
-                    entity.RemoveDataBlob<WarpMovingDB>();
-                    if (_gameSettings.StrictNewtonion)
-                        SetOrbitHereSimpleNewt(entity, moveDB, toDateTime);
-                    else
-                        SetOrbitHereNoNewt(entity, moveDB, toDateTime);
-                    break;
-                }
-                case PositionDB.MoveTypes.NewtonSimple:
-                {
-                    throw new NotImplementedException();
-                    break;
-                }
-                case PositionDB.MoveTypes.NewtonComplex:
-                {
-                    throw new NotImplementedException();
-                    break;
-                }
-                case PositionDB.MoveTypes.Warp:
-                {
-                    var targetSpeed = moveDB.TargetEntity.GetDataBlob<WarpMovingDB>().CurrentNonNewtonionVectorMS;
-                    var newspeed = Math.Min(targetSpeed.Length(), warpDB.MaxSpeed);
-                    moveDB.CurrentNonNewtonionVectorMS = Vector3.Normalise(targetSpeed) * newspeed;
-                    break;
-                }
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
+            return moveDB.PredictedExitTime == DateTime.MinValue
+                   || atDateTime >= moveDB.PredictedExitTime;
         }
+
+        static void SnapBubbleToExit(WarpMovingDB moveDB)
+        {
+            moveDB._parentEnitity = moveDB.TargetEntity;
+            moveDB._position = (Vector2)moveDB.ExitPointrelative;
+        }
+
+        /// <summary>
+        /// Snap to the planned exit and drop in. Instance interrupt calls this when
+        /// interpolation left a residual; hotloop calls it only after an overshoot
+        /// that is already due.
+        /// </summary>
+        static void FinishArrival(Entity entity, WarpMovingDB moveDB, DateTime toDateTime)
+        {
+            if (moveDB.IsAtTarget)
+                return;
+            if (moveDB.TargetEntity == null)
+                return;
+
+            var warpDB = entity.GetDataBlob<WarpAbilityDB>();
+            SnapBubbleToExit(moveDB);
+            var destinationMoveType = moveDB.TargetEntity.GetDataBlob<PositionDB>().MoveType;
+            if (destinationMoveType == PositionDB.MoveTypes.None)
+            {
+                moveDB.CurrentNonNewtonionVectorMS = Vector3.Zero;
+                moveDB.IsAtTarget = true;
+            }
+            else
+            {
+                moveDB.IsAtTarget = true;
+                if (!entity.HasDataBlob<WarpMovingDB>())
+                    return;
+
+                var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
+                EnergyGenProcessor.EnergyGen(entity, toDateTime - TimeSpan.FromSeconds(1));
+                powerDB.AddDemand(warpDB.BubbleCollapseCost, toDateTime - TimeSpan.FromSeconds(1));
+                EnergyGenProcessor.EnergyGen(entity, toDateTime);
+                powerDB.AddDemand(-warpDB.BubbleSustainCost, toDateTime);
+                powerDB.AddDemand(-warpDB.BubbleCollapseCost, toDateTime);
+
+                switch (destinationMoveType)
+                {
+                    case PositionDB.MoveTypes.None:
+                    {
+                        //if our destination is a non moving object eg a grav anomaly or jump point.
+                        //this case should be handled prior to this.
+                        throw new Exception("shouldn't get here");
+                        break;
+                    }
+                    case PositionDB.MoveTypes.Orbit:
+                    {
+                        entity.RemoveDataBlob<WarpMovingDB>();
+                        if (_gameSettings.StrictNewtonion)
+                            SetOrbitHereSimpleNewt(entity, moveDB, toDateTime);
+                        else
+                            SetOrbitHereNoNewt(entity, moveDB, toDateTime);
+                        WakeActionQueue(entity, toDateTime);
+                        break;
+                    }
+                    case PositionDB.MoveTypes.NewtonSimple:
+                    {
+                        throw new NotImplementedException();
+                        break;
+                    }
+                    case PositionDB.MoveTypes.NewtonComplex:
+                    {
+                        throw new NotImplementedException();
+                        break;
+                    }
+                    case PositionDB.MoveTypes.Warp:
+                    {
+                        var targetSpeed = moveDB.TargetEntity.GetDataBlob<WarpMovingDB>().CurrentNonNewtonionVectorMS;
+                        var newspeed = Math.Min(targetSpeed.Length(), warpDB.MaxSpeed);
+                        moveDB.CurrentNonNewtonionVectorMS = Vector3.Normalise(targetSpeed) * newspeed;
+                        break;
+                    }
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                //entity.Manager.Game.TimePulse.PauseTime();
+            }
+        }
+    
 
 
         /// <summary>
@@ -281,6 +401,8 @@ namespace Pulsar4X.Movement
 
             if(targetEntity == null) throw new NullReferenceException("targetEntity cannot be null");
 
+            TestDropIn?.Invoke(entity, atDateTime);
+
             //just chuck it in a circular orbit.
             OrbitDB newOrbit = OrbitDB.FromPosition(targetEntity, entity, atDateTime);
             entity.SetDataBlob(newOrbit);
@@ -291,18 +413,48 @@ namespace Pulsar4X.Movement
 
         static void SetOrbitHereSimpleNewt(Entity entity, WarpMovingDB moveDB, DateTime atDateTime)
         {
-            var newOrbit = moveDB.EndpointTargetOrbit;
-            var mass = moveDB.TargetEntity.GetDataBlob<MassVolumeDB>().MassTotal;
-            mass += entity.GetDataBlob<MassVolumeDB>().MassTotal;
-            var sgp = GeneralMath.StandardGravitationalParameter(mass);
+            TestDropIn?.Invoke(entity, atDateTime);
 
-            var currentOrbit = OrbitMath.KeplerFromPositionAndVelocity(sgp, moveDB.ExitPointrelative, moveDB.SavedNewtonionVector, atDateTime);
+            var (orbitalParent, leftover) = LeftoverKeplerAtExit(entity, moveDB, atDateTime);
+            double combinedMass = entity.GetDataBlob<MassVolumeDB>().MassTotal
+                                  + orbitalParent.GetDataBlob<MassVolumeDB>().MassTotal;
+            entity.SetDataBlob(OrbitDB.FromKeplerElements(orbitalParent, combinedMass, leftover, atDateTime));
+            OrbitProcessor.ProcessEntity(entity, atDateTime);
+        }
 
-            var target = moveDB.TargetEntity;
-            NewtonSimpleMoveDB newtMove = new NewtonSimpleMoveDB(target, currentOrbit, newOrbit, atDateTime);
-            entity.SetDataBlob(newtMove);
-            NewtonSimpleProcessor.ProcessEntity(entity, atDateTime);
+        /// <summary>
+        /// Leftover r,v around the SOI the exit is actually in. Used by drop-in and by
+        /// WarpMoveAction when older orders enqueue a follow-on circularise.
+        /// </summary>
+        internal static (Entity parent, KeplerElements leftover) LeftoverKeplerAtExit(
+            Entity entity, WarpMovingDB moveDB, DateTime atDateTime)
+        {
+            if (moveDB.TargetEntity == null)
+                throw new NullReferenceException("moveDB.TargetEntity cannot be null");
 
+            Vector3 exitAbs = moveDB.ExitPointAbsolute;
+            Entity orbitalParent = moveDB.TargetEntity;
+            while (true)
+            {
+                var candidateAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(orbitalParent, atDateTime);
+                if ((exitAbs - candidateAbs).Length() < orbitalParent.GetSOI_m())
+                    break;
+                var next = orbitalParent.GetSOIParentEntity();
+                if (next == null || next == orbitalParent)
+                    break;
+                orbitalParent = next;
+            }
+
+            var parentAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(orbitalParent, atDateTime);
+            var rParent = exitAbs - parentAbs;
+            double combinedMass = entity.GetDataBlob<MassVolumeDB>().MassTotal
+                                  + orbitalParent.GetDataBlob<MassVolumeDB>().MassTotal;
+            var leftover = OrbitMath.KeplerFromPositionAndVelocity(
+                GeneralMath.StandardGravitationalParameter(combinedMass),
+                rParent,
+                moveDB.SavedNewtonionVector,
+                atDateTime);
+            return (orbitalParent, leftover);
         }
 
         /// <summary>
@@ -351,7 +503,7 @@ namespace Pulsar4X.Movement
                 double secondsBurn = fuelBurned / burnRate;
                 var manuverNodeTime = entity.StarSysDateTime + TimeSpan.FromSeconds(secondsBurn * 0.5);
 
-                NewtonThrustCommand.CreateCommand(entity.FactionOwnerID, entity, manuverNodeTime, moveDB.EndpointTargetExpendDeltaV, secondsBurn);
+                NewtonThrustAction.CreateCommand(entity.FactionOwnerID, entity, manuverNodeTime, moveDB.EndpointTargetExpendDeltaV, secondsBurn);
             }
             else if (moveDB.AutoCirculariseAfterWarp)
             {
@@ -366,7 +518,7 @@ namespace Pulsar4X.Movement
                 double secondsBurn = fuelBurned / burnRate;
                 var manuverNodeTime = entity.StarSysDateTime + TimeSpan.FromSeconds(secondsBurn * 0.5);
 
-                NewtonThrustCommand.CreateCommand(entity.FactionOwnerID, entity, manuverNodeTime, circularizationBurn, secondsBurn);
+                NewtonThrustAction.CreateCommand(entity.FactionOwnerID, entity, manuverNodeTime, circularizationBurn, secondsBurn);
             }
 */
         }

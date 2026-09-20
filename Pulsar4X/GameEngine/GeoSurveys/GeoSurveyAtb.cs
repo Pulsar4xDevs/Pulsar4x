@@ -17,7 +17,7 @@ public class GeoSurveyAtb : IComponentDesignAttribute
 
     public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
-        if(parentEntity.TryGetDatablob<GeoSurveyAbilityDB>(out var geoSurveyAbilityDB))
+        if(parentEntity.TryGetDataBlob<GeoSurveyAbilityDB>(out var geoSurveyAbilityDB))
         {
             geoSurveyAbilityDB.Speed += Speed;
         }
@@ -29,7 +29,7 @@ public class GeoSurveyAtb : IComponentDesignAttribute
 
     public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
-        if(parentEntity.TryGetDatablob<GeoSurveyAbilityDB>(out var geoSurveyAbilityDB))
+        if(parentEntity.TryGetDataBlob<GeoSurveyAbilityDB>(out var geoSurveyAbilityDB))
         {
             if(Speed >= geoSurveyAbilityDB.Speed)
             {

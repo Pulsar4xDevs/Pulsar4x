@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public abstract class UpdateWindowState
     {
@@ -8,8 +8,7 @@ namespace Pulsar4X.SDL2UI
 
         public abstract bool GetActive();
 
-        public abstract void OnGameTickChange(DateTime newDate);
-        public abstract void OnSystemTickChange(DateTime newDate);
+        public virtual void OnSystemTickChange(DateTime newDate) { }
 
         protected UpdateWindowState()
         {

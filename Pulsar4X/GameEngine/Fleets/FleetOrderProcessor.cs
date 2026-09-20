@@ -1,4 +1,5 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
@@ -20,7 +21,7 @@ namespace Pulsar4X.Fleets
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            if(entity.TryGetDatablob<FleetDB>(out var fleetDB))
+            if(entity.TryGetDataBlob<FleetDB>(out var fleetDB))
             {
                 Process(fleetDB, deltaSeconds);
             }
@@ -45,7 +46,7 @@ namespace Pulsar4X.Fleets
             if(fleetDB.FlagShipID == -1) return;
 
             // Make sure the fleet entity is orderable
-            if(!fleetDB.OwningEntity.TryGetDatablob<OrderableDB>(out var orderableDB)) return;
+            if(!fleetDB.OwningEntity.TryGetDataBlob<ActionQueueDB>(out var orderableDB)) return;
 
             // Standing orders only process when the fleet has no existing orders
             if(orderableDB.ActionList.Count > 0) return;

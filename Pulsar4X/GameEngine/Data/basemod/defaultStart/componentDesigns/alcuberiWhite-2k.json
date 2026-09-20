@@ -1,8 +1,0 @@
-{
-  "id": "default-design-alcubierre-2k",
-  "name": "Alcuberi-White 2k",
-  "templateId": "alcubierre-warp-drive",
-  "Properties": [
-    { "key": "Mass", "value": 2000 }
-  ]
-}

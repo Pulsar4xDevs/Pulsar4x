@@ -1,10 +1,9 @@
 using System;
 using ImGuiNET;
-using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.Client.Interface.Widgets;
 
-public class TextModal : PulsarGuiWindow
+public class TextModal : UniquePulsarGuiWindow<TextModal>
 {
     private byte[]? _inputBuffer = null;
     uint _bufferMaxSize = 64;
@@ -12,17 +11,17 @@ public class TextModal : PulsarGuiWindow
     internal TextModal()
     {
         Array.Resize(ref _inputBuffer, checked((int)_bufferMaxSize));//Resize the text buffer
-        _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking;
+        _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse;
     }
 
     internal static TextModal GetInstance()
     {
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(TextModal)))
+        if(_uiState.TryGetUniqueWindow<TextModal>(out var window))
         {
-            return new TextModal();
+            return window;
         }
 
-        return (TextModal)_uiState.LoadedWindows[typeof(TextModal)];
+        return _uiState.AddUniqueWindow(new TextModal());
     }
 
     internal override void Display()

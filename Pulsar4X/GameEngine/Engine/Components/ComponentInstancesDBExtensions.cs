@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Components;
+using Pulsar4X.Engine;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 
@@ -9,40 +10,37 @@ namespace Pulsar4X.Extensions
 {
     public static class ComponentInstancesDBExtensions
     {
-        public static long GetPopulationSupportValue(this ComponentInstancesDB componentInstances)
+        public static long GetPopulationSupportValue(this ComponentInstancesDB componentInstances, Entity bodyEntity)
         {
             var infrustructureDesigns = componentInstances.GetDesignsByType(typeof(PopulationSupportAtbDB));
 
-            //List<KeyValuePair<Entity, PrIwObsList<Entity>>> infrastructure = instancesDB.ComponentsByDesign.GetInternalDictionary().Where(item => item.Key.HasDataBlob<PopulationSupportAtbDB>()).ToList();
+            double bodyGravityMps2 = 0;
+            if (bodyEntity.TryGetDataBlob<SystemBodyInfoDB>(out var bodyInfo))
+                bodyGravityMps2 = bodyInfo.Gravity;
+
+            double bodyPressureAtm = 0;
+            if (bodyEntity.TryGetDataBlob<AtmosphereDB>(out var atmosphere))
+                bodyPressureAtm = atmosphere.Pressure;
+
             long popSupportValue = 0;
-
-            //  Pop Cap = Total Population Support Value / Colony Cost
-            // Get total popSupport
-            popSupportValue = 0;
-
-
             foreach (var design in infrustructureDesigns)
             {
+                if (design.TryGetAttribute<GravityToleranceAtb>(out var gravTol)
+                    && !gravTol.SupportsBodyGravity(bodyGravityMps2))
+                    continue;
+
+                if (design.TryGetAttribute<PressureToleranceAtb>(out var pressTol)
+                    && !pressTol.SupportsBodyPressure(bodyPressureAtm))
+                    continue;
+
                 var componentCapacity = design.GetAttribute<PopulationSupportAtbDB>().PopulationCapacity;
                 foreach (var component in componentInstances.GetComponentsBySpecificDesign(design.UniqueID).Where(c => c.IsEnabled))
                 {
-                    popSupportValue += (long)(componentCapacity * component.HealthPercent());
+                    popSupportValue += (long)(componentCapacity * component.HealthPercent);
                 }
             }
 
             return popSupportValue;
-        }
-
-        public static int GetTotalHTK(this ComponentInstancesDB componentInstances)
-        {
-            int totalHTK = 0;
-
-            foreach (KeyValuePair<string, List<ComponentInstance>> instance in componentInstances.GetComponentsByDesigns())
-            {
-                instance.Value.ForEach(x => totalHTK += x.HTKRemaining);
-            }
-
-            return totalHTK;
         }
 
         public static long GetTotalDryMass(this ComponentInstancesDB componentInstances)
@@ -88,7 +86,7 @@ namespace Pulsar4X.Extensions
                     //var fuelUsage = (ResourceConsumptionAtbDB)instanceInfo.Design.AttributesByType[typeof(ResourceConsumptionAtbDB)];
                     if (instanceInfo.IsEnabled)
                     {
-                        totalEnginePower += (int)(warpAtb.WarpPower * instanceInfo.HealthPercent());
+                        totalEnginePower += (int)(warpAtb.WarpPower * instanceInfo.HealthPercent);
                         //foreach (var item in fuelUsage.MaxUsage)
                         //{
                         //    totalFuelUsage.SafeValueAdd(item.Key, item.Value);

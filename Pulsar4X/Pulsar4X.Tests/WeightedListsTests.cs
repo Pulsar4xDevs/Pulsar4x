@@ -26,7 +26,7 @@ namespace Pulsar4X.Tests
 
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
 
-            var settings = new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false };
+            var settings = new NewGameSettings { StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false };
             var game  = new Game(settings, modDataStore);
             return game.GalaxyGen.Settings;
         }

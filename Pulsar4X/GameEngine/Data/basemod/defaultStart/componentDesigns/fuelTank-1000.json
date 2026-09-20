@@ -1,8 +1,0 @@
-{
-  "id": "default-design-fuel-tank-1000",
-  "name": "Fuel Tank 1000m^3",
-  "templateId": "stainless-steel-fuel-tank",
-  "Properties": [
-    { "key": "Tank Volume", "value": 1000 }
-  ]
-}

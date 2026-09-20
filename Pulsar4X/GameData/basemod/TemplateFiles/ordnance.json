@@ -1,0 +1,518 @@
+[
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "missile-payload",
+      "Name": "Missile Payload",
+      "Formulas": {
+        "Description": "Payload of a missile",
+        "Mass": "PropertyValue('Mass')",
+        "Volume": "PropertyValue('Mass')",
+        "HTK": "0.5",
+        "CrewReq": "0",
+        "ResearchCost": "0",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "stainless-steel": "[Mass] * 8"
+      },
+      "ComponentType": "Weapon",
+      "MountType": "Missile",
+      "CargoTypeID": "ordnance-storage",
+      "IndustryTypeID": "component-construction",
+      "Properties": [
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Total Mass of the payload'",
+          "GuiHint": "None",
+          "PropertyFormula": "PropertyValue('Mass0') + PropertyValue('Mass1') + PropertyValue('Mass2')"
+        },
+        {
+          "Name": "Trigger Type",
+          "GuiHint": "GuiEnumSelectionList",
+          "EnumTypeName" : "Pulsar4X.DataStructures.TriggerTypes",
+          "MaxFormula": "TechLevel('tech-triggers') + 3",
+          "MinFormula": "0",
+          "StepFormula": "1",
+          "PropertyFormula": "0"
+        },
+        {
+          "Name": "Payload Type",
+          "DescriptionFormula": "''",
+          "GuiHint": "GuiEnumSelectionList",
+          "EnumTypeName" : "Pulsar4X.DataStructures.PayloadTypes",
+          "MaxFormula": "3",
+          "MinFormula": "0",
+          "StepFormula": "1",
+          "PropertyFormula": "0"
+        },
+        {
+          "Name": "Explosive Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass of explosive'",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Payload Type') = 0 || PropertyValue('Payload Type') = 1, true, false)",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "500",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "10"
+        },
+        {
+          "Name": "TNT Equivalent",
+          "Units": "kg",
+          "DescriptionFormula": "'TNT eq of explosive mass'",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Payload Type') = 0 || PropertyValue('Payload Type') = 1, true, false)",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Explosive Mass') * TechData('tech-high-explosives')"
+        },
+        {
+          "Name": "Frag Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass of individual fragments'",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Payload Type') = 0, true, false)",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "500",
+          "MinFormula": "0",
+          "StepFormula": "0.01",
+          "PropertyFormula": "0.1"
+        },
+        {
+          "Name": "Frag Count",
+          "DescriptionFormula": "'Number of individual fragments'",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Payload Type') = 0, true, false)",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "500",
+          "MinFormula": "0",
+          "StepFormula": "1",
+          "PropertyFormula": "10"
+        },
+        {
+          "Name": "Frag Cone Angle",
+          "Units": "kg",
+          "DescriptionFormula": "'Cone angle, larger is more efficent per fragment'",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Payload Type') = 0, true, false)",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "360",
+          "MinFormula": "45",
+          "StepFormula": "1",
+          "PropertyFormula": "180"
+        },
+        {
+          "Name": "Mass0",
+          "Units": "kg",
+          "DescriptionFormula": "'Total Mass of the payload'",
+          "GuiHint": "None",
+          "PropertyFormula": "if(PropertyValue('Payload Type') = 0, PropertyValue('Explosive Mass') + PropertyValue('Frag Mass') * PropertyValue('Frag Count'), 0)"
+        },
+        {
+          "Name": "ExplDataBlob",
+          "DescriptionFormula": "''",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Payload Type') = 0, true, false)",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Trigger Type'), PropertyValue('Mass0'), PropertyValue('TNT Equivalent'), PropertyValue('Frag Mass'), PropertyValue('Frag Count'), PropertyValue('Frag Cone Angle'))",
+          "AttributeType": "Pulsar4X.Atb.OrdnanceExplosivePayload"
+        },
+        {
+          "Name": "Liner Radius",
+          "Units": "mm",
+          "DescriptionFormula": "'Affects the shape and velocity of the slug'",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Payload Type') = 1, true, false)",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "500",
+          "MinFormula": "0.01",
+          "StepFormula": "1",
+          "PropertyFormula": "10"
+        },
+        {
+          "Name": "Liner Cone Height",
+          "Units": "mm",
+          "DescriptionFormula": "'Affects the shape and velocity of the slug'",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Payload Type') = 1, true, false)",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "180",
+          "MinFormula": "25",
+          "StepFormula": "1",
+          "PropertyFormula": "10"
+        },
+        {
+          "Name": "Liner Thickness",
+          "Units": "mm",
+          "DescriptionFormula": "'Affects the shape and velocity of the slug'",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Payload Type') = 1, true, false)",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "10",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "3"
+        },
+        {
+          "Name": "LinerDensity",
+          "Units": "kg/m^3",
+          "DescriptionFormula": "'Density of copper'",
+          "GuiHint": "None",
+          "PropertyFormula": "8940"
+        },
+        {
+          "Name": "LinerVolume",
+          "Units": "mm^3",
+          "DescriptionFormula": "'volume of the cone liner'",
+          "GuiHint": "None",
+          "PropertyFormula": "PropertyValue('Liner Thickness') * 3.14159265359 * PropertyValue('Liner Radius') * PropertyValue('Liner Radius') + Sqrt( Pow(PropertyValue('Liner Cone Height'),2) + Pow(PropertyValue('Liner Radius'),2) ) "
+        },
+        {
+          "Name": "Mass1",
+          "Units": "kg",
+          "DescriptionFormula": "'Total Mass of the payload'",
+          "GuiHint": "None",
+          "PropertyFormula": "if(PropertyValue('Payload Type') = 1, PropertyValue('Explosive Mass') + PropertyValue('LinerVolume') * 1000 / PropertyValue('LinerDensity') , 0)"
+        },
+        {
+          "Name": "ShapeDataBlob",
+          "DescriptionFormula": "''",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Payload Type') = 1, true, false)",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Trigger Type'), PropertyValue('Mass1'), PropertyValue('TNT Equivalent'), PropertyValue('Liner Radius'), PropertyValue('Liner Cone Height'))",
+          "AttributeType": "Pulsar4X.Atb.OrdnanceShapedPayload"
+        },
+        {
+          "Name": "Submunition Type",
+          "Units": "Degrees",
+          "DescriptionFormula": "'Pre-Designed missile to use as a submunition'",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Payload Type') = 2, true, false)",
+          "GuiHint": "GuiOrdnanceSelectionList",
+          "PropertyFormula": "0"
+        },
+        {
+          "Name": "Submunition Count",
+          "DescriptionFormula": "'Number of submunitions in this payload'",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Payload Type') = 2, true, false)",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "180",
+          "MinFormula": "25",
+          "StepFormula": "1",
+          "PropertyFormula": "10"
+        },
+        {
+          "Name": "SubMunitionWeight",
+          "Units": "kg",
+          "DescriptionFormula": "'How the hell am I going to get this'",
+          "GuiHint": "None",
+          "PropertyFormula": "10"
+        },
+        {
+          "Name": "Mass2",
+          "Units": "kg",
+          "DescriptionFormula": "'Total Mass of the payload'",
+          "GuiHint": "None",
+          "PropertyFormula": "if(PropertyValue('Payload Type') = 2, PropertyValue('Submunition Count') * PropertyValue('SubMunitionWeight'), 0)"
+        },
+        {
+          "Name": "SubmDataBlob",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Payload Type') = 2, true, false)",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Trigger Type'), PropertyValue('Mass2'), PropertyValue('Submunition Type'), PropertyValue('Submunition Count'))",
+          "AttributeType": "Pulsar4X.Atb.OrdnanceSubmunitionsPayload"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "missile-srb",
+      "Name": "Missile SRB",
+      "Formulas": {
+        "Description": "A Newtonian Thruster",
+        "Mass": "PropertyValue('Engine Mass')",
+        "Volume": "[Mass]",
+        "HTK": "0.5",
+        "CrewReq": "0",
+        "ResearchCost": "[Mass] * 0.5",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "stainless-steel": "[Mass] * 8"
+      },
+      "ComponentType": "Engine",
+      "MountType": "Missile",
+      "CargoTypeID": "ordnance-storage",
+      "IndustryTypeID": "component-construction",
+      "Properties": [
+        {
+          "Name": "Engine Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass of the engine'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "10",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "5"
+        },
+        {
+          "Name": "Exhaust Velocity",
+          "Units": "m/s",
+          "DescriptionFormula": "'Specific Impulse in m/s, can be increased by research (todo)'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "4000"
+        },
+        {
+          "Name": "Fuel Consumption",
+          "Units": "kg/s",
+          "DescriptionFormula": "'Fuel Consumption per second'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Engine Mass') * 0.3 * TechData('tech-conventional-engine-fuel-consumption')"
+        },
+        {
+          "Name": "Thrust",
+          "Units": "N",
+          "DescriptionFormula": "'The maximum thrust output of this engine in N'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Exhaust Velocity') * PropertyValue('Fuel Consumption')"
+        },
+        {
+          "Name": "DataBlob",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Exhaust Velocity'), 'rp-1', PropertyValue('Fuel Consumption'))",
+          "AttributeType": "Pulsar4X.Movement.NewtonionThrustAtb"
+        },
+        {
+          "Name": "Sensor Signature",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Thrust'), 811 , 400, 1400)",
+          "AttributeType": "Pulsar4X.Sensors.SensorSignatureAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "missile-electronics-suite",
+      "Name": "Missile Electronics Suite",
+      "Formulas": {
+        "Description": "Sensor components for missiles",
+        "Mass": "10",
+        "Volume": "[Mass]",
+        "HTK": "0.5",
+        "CrewReq": "[Mass]",
+        "ResearchCost": "[Mass] * 2",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "gallicite": "[Mass] * 8"
+      },
+      "ComponentType": "Sensor",
+      "MountType": "Missile",
+      "CargoTypeID": "ordnance-storage",
+      "IndustryTypeID": "component-construction",
+      "Properties": [
+        {
+          "Name": "Guidance Type",
+          "DescriptionFormula": "''",
+          "GuiHint": "GuiEnumSelectionList",
+          "EnumTypeName" : "Pulsar4X.DataStructures.GuidanceTypes",
+          "MaxFormula": "TechLevel('tech-guidance') + 3",
+          "MinFormula": "0",
+          "StepFormula": "1",
+          "PropertyFormula": "0"
+        },
+        {
+          "Name": "Antenna Size",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Guidance Type') = 2 || PropertyValue('Guidance Type') = 3, true, false)",
+          "Units": "m^2",
+          "DescriptionFormula": "'Gives an effective area of:  '",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "2500",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "0.1"
+        },
+        {
+          "Name": "Effective Size",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Guidance Type') = 2 || PropertyValue('Guidance Type') = 3, true, false)",
+          "Units": "m^2",
+          "GuiHint": "None",
+          "PropertyFormula": "PropertyValue('Antenna Size') * TechData('tech-antenna-efficiency')"
+        },
+
+        {
+          "Name": "Ideal Detection Wavelength",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Guidance Type') = 2 || PropertyValue('Guidance Type') = 3, true, false)",
+          "Units": "nm",
+          "DescriptionFormula": "'The wavelength this sensor is most efficient at detecting'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "1e12",
+          "MinFormula": "0.01",
+          "StepFormula": "1",
+          "PropertyFormula": "470"
+        },
+        {
+          "Name": "Detection Bandwidth",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Guidance Type') = 2 || PropertyValue('Guidance Type') = 3, true, false)",
+          "Units": "nm",
+          "DescriptionFormula": "'How far from the ideal wavelength will this still detect a signal'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "TechData('tech-antenna-bandwidth')",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "1"
+        },
+        {
+          "Name": "Efficiency",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Guidance Type') = 2 || PropertyValue('Guidance Type') = 3, true, false)",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "1 / (PropertyValue('Detection Bandwidth') / TechData('tech-antenna-bandwidth') )"
+        },
+        {
+          "Name": "Sensitivity at Ideal Wavelength",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Guidance Type') = 2 || PropertyValue('Guidance Type') = 3, true, false)",
+          "Units": "W",
+          "DescriptionFormula": "'Smallest signal this can detect at the ideal wavelength, lower is better.",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "TechData('tech-antenna-sensitivity') / (PropertyValue('Effective Size') * PropertyValue('Effective Size') * PropertyValue('Efficiency'))"
+        },
+        {
+          "Name": "Sensitivity at Worst Wavelength",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Guidance Type') = 2 || PropertyValue('Guidance Type') = 3, true, false)",
+          "Units": "W",
+          "DescriptionFormula": "'Smallest signal this can detect at the worst wavelength, lower is better.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "TechData('tech-antenna-sensitivity') / (PropertyValue('Effective Size') * PropertyValue('Effective Size') * PropertyValue('Efficiency') * 0.1)"
+        },
+        {
+          "Name": "Resolution",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Guidance Type') = 2 || PropertyValue('Guidance Type') = 3, true, false)",
+          "Units": "MegaPixel",
+          "DescriptionFormula": "'How much detail it can get from a detection. affects likelyhood of component detection etc. '",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "1000",
+          "MinFormula": "0.1",
+          "StepFormula": "1",
+          "PropertyFormula": "1"
+        },
+        {
+          "Name": "Scan Time",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Guidance Type') = 2 || PropertyValue('Guidance Type') = 3, true, false)",
+          "Units": "s",
+          "DescriptionFormula": "'how long it takes to complete a full scan'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "86400",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "3600"
+        },
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass Calculation'",
+          "GuiHint": "None",
+          "PropertyFormula": "90 + 10 * PropertyValue('Antenna Size') * PropertyValue('Antenna Size')"
+        },
+        {
+          "Name": "DatablobArguments",
+          "DescriptionFormula": "'(int GuidanceTypeEnumValue, int TriggerType)'",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Guidance Type'))",
+          "AttributeType": "Pulsar4X.Atb.ElectronicsSuite"
+        },
+        {
+          "Name": "SensorDatablobArguments",
+          "GuiIsEnabledFormula" : "if(PropertyValue('Guidance Type') = 2 || PropertyValue('Guidance Type') = 3, true, false)",
+          "DescriptionFormula": "'(double peakWaveLength, double bandwidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)'",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Ideal Detection Wavelength'), PropertyValue('Detection Bandwidth'), PropertyValue('Sensitivity at Ideal Wavelength'), PropertyValue('Sensitivity at Worst Wavelength'), PropertyValue('Resolution'), PropertyValue('Scan Time'))",
+          "AttributeType": "Pulsar4X.Sensors.SensorReceiverAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "ordnance-cargo-hold",
+      "Name": "Ordnance Storage",
+      "Formulas": {
+        "Description": "Stores Ordinance",
+        "Mass": "PropertyValue('Rack Size')",
+        "Volume": "[Mass]",
+        "HTK": "0.5",
+        "CrewReq": "PropertyValue('Size Efficiency') * 0.1",
+        "ResearchCost": "0",
+        "CreditCost": "120",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "duranium": "60",
+        "mercassium": "60"
+      },
+      "ComponentType": "Cargo Hold",
+      "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "component-construction",
+      "Properties": [
+        {
+          "Name": "Rack Size",
+          "DescriptionFormula": "''",
+          "GuiHint": "GuiSelectionMaxMin",
+          "DataDict": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "PropertyFormula": "50000"
+        },
+        {
+          "Name": "Size Efficiency",
+          "DescriptionFormula": "'The amount of tonnage taken up by racking, office space etc.'",
+          "GuiHint": "GuiTextDisplay",
+          "DataDict": {},
+          "PropertyFormula": "PropertyValue('Rack Size') * 0.01"
+        },
+        {
+          "Name": "Cargo Transfer Rate",
+          "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "DataDict": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "PropertyFormula": "50000"
+        },
+        {
+          "Name": "Transfer Range",
+          "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "DataDict": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "PropertyFormula": "50000"
+        },
+        {
+          "Name": "Total Cargo Stored",
+          "DescriptionFormula": "'The amount of cargo this can store.'",
+          "GuiHint": "GuiTextDisplay",
+          "DataDict": {},
+          "PropertyFormula": "PropertyValue('Rack Size') - PropertyValue('Size Efficiency') - PropertyValue('Cargo Transfer Rate')"
+        },
+        {
+          "Name": "DBargsStor",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs('ordnance-storage', PropertyValue('Total Cargo Stored'))",
+          "AttributeType": "Pulsar4X.Storage.VolumeStorageAtb"
+        },
+        {
+          "Name": "DBArgsXfer",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Cargo Transfer Rate'), PropertyValue('Transfer Range'))",
+          "AttributeType": "Pulsar4X.Datablobs.StorageTransferRateAtbDB"
+        }
+      ]
+    }
+  }
+]

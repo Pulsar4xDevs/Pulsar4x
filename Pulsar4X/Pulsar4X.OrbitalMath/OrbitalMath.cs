@@ -5,6 +5,16 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace Pulsar4X.Orbital
 {
+    /// <summary>One step of newtonian movement integration (see <see cref="OrbitalMath.IntegrateOneStep"/>).</summary>
+    public struct IntegrationState
+    {
+        public Vector3 Position;
+        public Vector3 Velocity;
+        public Vector3 ManuverDeltaV;
+        public double Mass;
+        public double FuelBurned;
+    }
+
     /// <summary>
     /// Orbit math.
     /// note multiple simular functions for doing the same thing, some of these are untested.
@@ -14,6 +24,17 @@ namespace Pulsar4X.Orbital
     public class OrbitalMath
     {
         private const double Epsilon = 1.0e-15; //TODO: test how low we can go
+
+        // Returns the orbital inclination
+        // https://en.wikipedia.org/wiki/Orbital_inclination#Calculation
+        public static double Inclination(Vector3 angularMomentum)
+        {
+            var mag = angularMomentum.Length();
+            if (mag == 0) // should this check be here?
+                return 0;
+
+            return Math.Acos(angularMomentum.Z / mag);
+        }
 
         /// <summary>
         /// Kepler elements from velocity and position.
@@ -26,36 +47,22 @@ namespace Pulsar4X.Orbital
         public static KeplerElements KeplerFromPositionAndVelocity(double standardGravParam, Vector3 position, Vector3 velocity, DateTime epoch)
         {
             KeplerElements ke = new KeplerElements();
-            Vector3 angularVelocity = Vector3.Cross(position, velocity);
-            Vector3 nodeVector = Vector3.Cross(Vector3.UnitZ, angularVelocity);
+
+            var angularMomentum = AngularMomentum(position, velocity);
+            var nodeVector = Node(angularMomentum);
 
             Vector3 eccentVector = EccentricityVector(standardGravParam, position, velocity);
 
             double eccentricity = eccentVector.Length();
-            double angularSpeed = angularVelocity.Length();
 
             double specificOrbitalEnergy = GetSpecificOrbitalEnergy(standardGravParam, position, velocity);
 
-            double semiMajorAxis;
-            double p; //p is where the ellipse or hypobola crosses a line from the focal point 90 degrees from the sma
-
-			// If we run into negative eccentricity we have big problems
-			if(eccentricity < 0)
-                throw new Exception("Negative eccentricity, this is physically impossible");
-            
             //note that a hyperbolic orbit will have a negitive semiMajorAxis
-            semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
-            if (eccentricity > 1) //hypobola
+            double semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
+
+            //parabola, currently forcing this to be a hyperbola. TODO: look at handling parabola properly. will likely need tests written.
+            if (eccentricity == 1)
             {
-                p = semiMajorAxis * (1 - eccentricity * eccentricity);
-            }
-            else if (eccentricity < 1) //ellipse
-            {
-                p = semiMajorAxis * (1 - eccentricity * eccentricity);
-            }
-            else //parabola, currently forcing this to be a hyperbola. TODO: look at handling parabola properly. will likely need tests written.
-            {
-                p = angularSpeed * angularSpeed / standardGravParam;
                 eccentricity += 1.0E-15;
                 if (semiMajorAxis > 0)
                     semiMajorAxis *= -1;//ensure semimajor axis is negative.
@@ -63,10 +70,7 @@ namespace Pulsar4X.Orbital
 
             double semiMinorAxis = EllipseMath.SemiMinorAxis(semiMajorAxis, eccentricity);
 
-            double inclination = Math.Acos(angularVelocity.Z / angularSpeed); //should be 0 in 2d. or pi if counter clockwise orbit. 
-
-            if (double.IsNaN(inclination))
-                inclination = 0;
+            var inclination = Inclination(angularMomentum);
 
             double trueAnomaly = TrueAnomaly(eccentVector, position, velocity);
             double eccentricAnomaly = GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
@@ -79,15 +83,16 @@ namespace Pulsar4X.Orbital
             ke.Apoapsis = EllipseMath.Apoapsis(eccentricity, semiMajorAxis);
             ke.Periapsis = EllipseMath.Periapsis(eccentricity, semiMajorAxis);
             ke.LinearEccentricity = EllipseMath.LinearEccentricity(ke.Apoapsis, semiMajorAxis);
-            ke.LoAN = CalculateLongitudeOfAscendingNode(nodeVector); ;
-            ke.AoP = GetArgumentOfPeriapsis(position, inclination, ke.LoAN, trueAnomaly); ;
+            ke.LoAN = LongitudeOfAscendingNode(nodeVector);
+            ke.AoP = GetArgumentOfPeriapsis(position, inclination, ke.LoAN, trueAnomaly);
             ke.Inclination = inclination;
             ke.MeanMotion = GetMeanMotion(standardGravParam, semiMajorAxis);
             if(eccentricity < 1)
                 ke.MeanAnomalyAtEpoch = GetEllipticMeanAnomaly(eccentricity, eccentricAnomaly);
             else
             {
-                ke.MeanAnomalyAtEpoch = 0;
+                var H = GetHyperbolicAnomalyFromTrueAnomaly(eccentricity, trueAnomaly);
+                ke.MeanAnomalyAtEpoch = GetHyperbolicMeanAnomaly(eccentricity, H);
             }
             ke.TrueAnomalyAtEpoch = trueAnomaly;
             ke.Period = 2 * Math.PI / ke.MeanMotion;
@@ -174,21 +179,19 @@ namespace Pulsar4X.Orbital
 
         #region Vector Calculations
 
-        public static Vector3 CalculateAngularMomentum(Vector3 position, Vector3 velocity)
-        {
-            /*
-            * position vector       m
-            * velocity              m/sec
-            */
-            var (X, Y, Z) = Vector3.CrossPrecise(position, velocity);
-            return new Vector3((double)X, (double)Y, (double)Z);
-        }
+        // Returns the specific relative angular momentum.
+        // https://en.wikipedia.org/wiki/Specific_relative_angular_momentum#Definition
+        /*
+        * position vector       m
+        * velocity              m/sec
+        */
+        public static Vector3 AngularMomentum(Vector3 position, Vector3 velocity) =>
+            Vector3.Cross(position, velocity);
 
-        public static Vector3 CalculateNode(Vector3 angularVelocity)
-        {
-            var (X, Y, Z) = Vector3.CrossPrecise(Vector3.UnitZ, angularVelocity);
-            return new Vector3((double)X, (double)Y, (double)Z);
-        }
+        // https://en.wikipedia.org/wiki/Longitude_of_the_ascending_node#Calculation_from_state_vectors
+        // Returns a vector pointing towards an orbital node.
+        public static Vector3 Node(Vector3 angularMomentum) =>
+            new Vector3(-angularMomentum.Y, angularMomentum.X, 0);
 
         public static double GetSpecificOrbitalEnergy(double sgp, Vector3 position, Vector3 velocity)
         {
@@ -199,22 +202,18 @@ namespace Pulsar4X.Orbital
         
         /// <summary>
         /// In calculation this is referred to as RAAN or LoAN or Ω
+        /// https://en.wikipedia.org/wiki/Longitude_of_the_ascending_node#Calculation_from_state_vectors
         /// </summary>
         /// <param name="nodeVector">The node vector of the Kepler elements</param>
         /// <returns>Radians as a double</returns>
-        public static double CalculateLongitudeOfAscendingNode(Vector3 nodeVector)
+        public static double LongitudeOfAscendingNode(Vector3 nodeVector)
         {
-            double longitudeOfAscendingNodeLength = nodeVector.X / nodeVector.Length();
-            if (double.IsNaN(longitudeOfAscendingNodeLength))
-                longitudeOfAscendingNodeLength = 0;
-            else
-                longitudeOfAscendingNodeLength = GeneralMath.Clamp(longitudeOfAscendingNodeLength, -1, 1);
+            var mag = nodeVector.Length();
+            if (mag == 0) // should this check be here?
+                return 0;
 
-            double longitudeOfAscendingNode = 0;
-            if (longitudeOfAscendingNodeLength != 0)
-                longitudeOfAscendingNode = Math.Acos(longitudeOfAscendingNodeLength);
-
-            return longitudeOfAscendingNode;
+            var o = Math.Acos(nodeVector.X / mag);
+            return (nodeVector.Y < 0) ? 2 * Math.PI - o : o;
         }
 
         #endregion
@@ -374,14 +373,8 @@ namespace Pulsar4X.Orbital
         public static double TrueAnomalyFromElements(KeplerElements ke, DateTime time)
         {
             // Get seconds since last time we passed the epoch point in the orbit
-            double timeSinceEpoch = (time - ke.Epoch).TotalSeconds % ke.Period;
-
-            double currentMeanAnomaly = GetMeanAnomalyFromTime(
-                ke.MeanAnomalyAtEpoch, ke.MeanMotion, timeSinceEpoch
-            );
-
-            TryGetEccentricAnomaly(ke.Eccentricity, currentMeanAnomaly, out var eccentricAnomaly);
-            return TrueAnomalyFromEccentricAnomaly(ke.Eccentricity, eccentricAnomaly);
+            double timeSinceEpoch = (time - ke.Epoch).TotalSeconds;
+            return TrueAnomalyFromTime(ke.StandardGravParameter, ke.SemiMajorAxis, ke.Eccentricity, ke.MeanAnomalyAtEpoch,  timeSinceEpoch);
         }
         
         
@@ -450,7 +443,7 @@ namespace Pulsar4X.Orbital
             }
             else
             {
-                var m1 = GetHyperbolicMeanAnomalyFromTime(meanMotion, s);
+                var m1 = m0 + GetHyperbolicMeanAnomalyFromTime(meanMotion, s);
                 TryGetHyperbolicAnomaly(e, m1, out double F);
                 return TrueAnomalyFromHyperbolicAnomaly(e, F);
             }
@@ -508,6 +501,26 @@ namespace Pulsar4X.Orbital
 
             return new Vector3(x, y, z) * r;
         }
+
+        /// <summary>
+        /// Optimized position calculation using pre-cached trigonometric values
+        /// </summary>
+        public static Vector3 GetPosition(double a, double e, double aoP, double trueAnomaly,
+            double cosLoAN, double sinLoAN, double cosIncl, double sinIncl)
+        {
+            var p = EllipseMath.SemiLatusRectum(a, e);
+            var r = EllipseMath.RadiusAtTrueAnomaly(trueAnomaly, p, e);
+
+            double angleFromLoAN = trueAnomaly + aoP;
+            double cosAngle = Math.Cos(angleFromLoAN);
+            double sinAngle = Math.Sin(angleFromLoAN);
+
+            double x = cosLoAN * cosAngle - sinLoAN * sinAngle * cosIncl;
+            double y = sinLoAN * cosAngle + cosLoAN * sinAngle * cosIncl;
+            double z = sinIncl * sinAngle;
+
+            return new Vector3(x, y, z) * r;
+        }
         
         public static Vector3 GetRelativePosition(double lofAN, double aoP, double incl, double trueAnomaly, double radius)
         {
@@ -542,11 +555,11 @@ namespace Pulsar4X.Orbital
             }
             else
             {
-                var hyperbolicMeanAnomaly = GetHyperbolicMeanAnomalyFromTime(ke.StandardGravParameter, a, secondsFromEpoch);
+                var hyperbolicMeanAnomaly = ke.MeanAnomalyAtEpoch + GetHyperbolicMeanAnomalyFromTime(ke.StandardGravParameter, a, secondsFromEpoch);
                 TryGetHyperbolicAnomaly(e, hyperbolicMeanAnomaly, out double hyperbolicAnomalyF);
                 trueAnomaly = TrueAnomalyFromHyperbolicAnomaly(e, hyperbolicAnomalyF);
             }
-            
+
             double angle = trueAnomaly + ke.AoP;
 
             double x = Math.Cos(lofAN) * Math.Cos(angle) - Math.Sin(lofAN) * Math.Sin(angle) * Math.Cos(i);
@@ -679,7 +692,7 @@ namespace Pulsar4X.Orbital
         public static Vector3 ProgradeToStateVector(Vector3 progradeVector, KeplerElements ke)
         {
             var mtxTruA = Matrix3d.IDRotateZ(-ke.TrueAnomalyAtEpoch);
-            var mtxaop = Matrix3d.IDRotateZ(-ke.Apoapsis);
+            var mtxaop = Matrix3d.IDRotateZ(-ke.AoP);
             var mtxLoAN = Matrix3d.IDRotateZ(-ke.LoAN);
             var mtxincl = Matrix3d.IDRotateX(ke.Inclination);
 
@@ -700,14 +713,13 @@ namespace Pulsar4X.Orbital
         /// <returns></returns>
         public static Vector3 ProgradeToStateVector(double sgp, Vector3 progradeVector, Vector3 position, Vector3 currentVelocityVector)
         {
-            Vector3 angularVelocity = Vector3.Cross(position, currentVelocityVector);
-            Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
-            var loAN = CalculateLongitudeOfAscendingNode(nodeVector);
+            var angularMomentum = AngularMomentum(position, currentVelocityVector);
+            var nodeVector = Node(angularMomentum);
+
+            var loAN = LongitudeOfAscendingNode(nodeVector);
             var trueAnomaly = OrbitalMath.TrueAnomaly(sgp, position, currentVelocityVector);
 
-            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
-            if (double.IsNaN(inclination))
-                inclination = 0;
+            var inclination = Inclination(angularMomentum);
             var aop = OrbitalMath.GetArgumentOfPeriapsis(position, inclination, loAN, trueAnomaly);
 
             return ProgradeToStateVector(progradeVector, trueAnomaly, aop, loAN, inclination);
@@ -771,14 +783,13 @@ namespace Pulsar4X.Orbital
         /// <returns></returns>
         public static Vector3 StateToProgradeVector(double sgp, Vector3 orbitLocalVec, Vector3 position, Vector3 currentVelocityVector)
         {
-            Vector3 angularVelocity = Vector3.Cross(position, currentVelocityVector);
-            Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
-            var loAN = CalculateLongitudeOfAscendingNode(nodeVector);
+            var angularMomentum = AngularMomentum(position, currentVelocityVector);
+            var nodeVector = Node(angularMomentum);
+
+            var loAN = LongitudeOfAscendingNode(nodeVector);
             var trueAnomaly = OrbitalMath.TrueAnomaly(sgp, position, currentVelocityVector);
 
-            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
-            if (double.IsNaN(inclination))
-                inclination = 0;
+            var inclination = Inclination(angularMomentum);
             var aop = OrbitalMath.GetArgumentOfPeriapsis(position, inclination, loAN, trueAnomaly);
 
             return StateToProgradeVector(orbitLocalVec, trueAnomaly, aop, loAN, inclination);
@@ -838,7 +849,7 @@ namespace Pulsar4X.Orbital
             {
                 var quotient = sgp / Math.Pow(-a, 3);
                 var hyperbolcMeanMotion = Math.Sqrt(quotient);
-                var hyperbolicMeanAnomaly = secondsFromEpoch * hyperbolcMeanMotion;
+                var hyperbolicMeanAnomaly = ke.MeanAnomalyAtEpoch + secondsFromEpoch * hyperbolcMeanMotion;
                 TryGetHyperbolicAnomaly(e, hyperbolicMeanAnomaly, out double hyperbolicAnomalyF);
                 trueAnomaly = TrueAnomalyFromHyperbolicAnomaly(e, hyperbolicAnomalyF);
             }
@@ -852,10 +863,16 @@ namespace Pulsar4X.Orbital
             var position = new Vector3(x, y, z) * radius;
             
             (double speed, double headingAngle) = ObjectLocalVelocityPolar(sgp, position, a, e, trueAnomaly, ke.AoP);
+            // ObjectLocalVelocityPolar returns heading with AoP but not LoAN.
+            // Rotate by LoAN to match the position reference frame.
+            double vx_orbit = Math.Cos(headingAngle) * speed;
+            double vy_orbit = Math.Sin(headingAngle) * speed;
+            double cosLoAN = Math.Cos(lofAN);
+            double sinLoAN = Math.Sin(lofAN);
             var v = new Vector2()
             {
-                X = Math.Cos(headingAngle) * speed,
-                Y = Math.Sin(headingAngle) * speed
+                X = cosLoAN * vx_orbit - sinLoAN * vy_orbit,
+                Y = sinLoAN * vx_orbit + cosLoAN * vy_orbit
             };
 
             if (double.IsNaN(v.X) || double.IsNaN(v.Y))
@@ -1541,9 +1558,112 @@ namespace Pulsar4X.Orbital
             return manuvers;
         }
 
+        /// <summary>
+        /// Pure-function integration step shared by newtonian movement and prediction functions.
+        /// Computes gravity, thrust (with Tsiolkovsky fuel model), and trapezoidal position integration.
+        /// </summary>
+        public static IntegrationState IntegrateOneStep(
+            Vector3 position, Vector3 velocity, Vector3 manuverDeltaV,
+            double mass, double parentMass,
+            double exhaustVelocity, double fuelBurnRate, double dryMass,
+            double timeStep)
+        {
+            double distanceToParent_m = position.Length();
+            distanceToParent_m = Math.Max(distanceToParent_m, 0.1);
+
+            double gravForce = UniversalConstants.Science.GravitationalConstant * (mass * parentMass / Math.Pow(distanceToParent_m, 2));
+            Vector3 gravForceVector = gravForce * -Vector3.Normalise(position);
+            Vector3 totalDVFromGrav = (gravForceVector / mass) * timeStep;
+
+            Vector3 totalDVFromThrust = new Vector3(0, 0, 0);
+            double fuelBurned = 0;
+
+            if (manuverDeltaV.Length() > 0)
+            {
+                double afterBurnMass = mass - fuelBurnRate * timeStep;
+                double dvThisStep = TsiolkovskyRocketEquation(mass, afterBurnMass, exhaustVelocity);
+                dvThisStep = Math.Min(manuverDeltaV.Length(), dvThisStep);
+
+                double availableDV = TsiolkovskyRocketEquation(mass, dryMass, exhaustVelocity);
+                dvThisStep = Math.Min(availableDV, dvThisStep);
+
+                totalDVFromThrust = Vector3.Normalise(manuverDeltaV) * dvThisStep;
+
+                fuelBurned = TsiolkovskyFuelUse(mass, exhaustVelocity, dvThisStep);
+                manuverDeltaV -= totalDVFromThrust;
+                mass -= fuelBurned;
+            }
+
+            Vector3 totalDV = totalDVFromGrav + totalDVFromThrust;
+            Vector3 newVelocity = totalDV + velocity;
+            Vector3 deltaPos = (velocity + newVelocity) / 2 * timeStep;
+
+            return new IntegrationState
+            {
+                Position = position + deltaPos,
+                Velocity = newVelocity,
+                ManuverDeltaV = manuverDeltaV,
+                Mass = mass,
+                FuelBurned = fuelBurned,
+            };
+        }
 
         /// <summary>
-        /// Hohmann transfer manuver, assumes a cicular orbit. 
+        /// Phasing manuver: temporarily change the orbital period to shift position along the same
+        /// orbit by the given phase angle, then circularise back.
+        /// https://en.wikipedia.org/wiki/Orbit_phasing
+        /// </summary>
+        /// <param name="orbit">current orbit</param>
+        /// <param name="sgp">standard gravitational parameter (m^3 s^-2)</param>
+        /// <param name="manuverTime">datetime the manuver should start (idealy at periapsis)</param>
+        /// <param name="phaseAngle">angle in radians between our position and the rendevous position</param>
+        /// <returns>an array of vector3(normal,prograde,radial) and seconds from first manuver. first seconds in array will be 0</returns>
+        public static (Vector3 deltaV, double timeInSeconds)[] OrbitPhasingManuvers(KeplerElements orbit, double sgp, DateTime manuverTime, double phaseAngle)
+        {
+            double orbitalPeriod = orbit.Period;
+            double e = orbit.Eccentricity;
+
+            var wc1 = Math.Sqrt((1 - e) / (1 + e));
+            var wc2 = Math.Tan(phaseAngle / 2);
+
+            double E = 2 * Math.Atan(wc1 * wc2);
+
+            double wc3 = orbitalPeriod / (Math.PI * 2);
+            double wc4 = E - e * Math.Sin(E);
+
+            double phaseTime = wc3 * wc4;
+
+            double phaseOrbitPeriod = orbitalPeriod - phaseTime;
+
+            //using the full Major axis here rather than semiMaj.
+            double phaseOrbitMA = 2 * Math.Cbrt((sgp * phaseOrbitPeriod * phaseOrbitPeriod) / (4 * Math.PI * Math.PI));
+
+            //one of these will be the periapsis, the other the appoapsis, depending on whether we're behind or ahead of the target.
+            double phaseOrbitApsis1 = GetPosition(orbit, manuverTime).Length();
+            double phaseOrbitApsis2 = phaseOrbitMA - phaseOrbitApsis1;
+
+            double wc7 = Math.Sqrt((phaseOrbitApsis1 * phaseOrbitApsis2) / (phaseOrbitMA));
+            double wc8 = Math.Sqrt(2 * sgp);
+            double phaseOrbitAngularMomentum = wc8 * wc7;
+
+            double wc9 = Math.Sqrt((orbit.Apoapsis * orbit.Periapsis) / (orbit.Apoapsis + orbit.Periapsis));
+            double wc10 = Math.Sqrt(2 * sgp);
+            double orbitAngularMomentum = wc9 * wc10;
+
+            double r = GetPosition(orbit, manuverTime).Length();
+
+            double dv = phaseOrbitAngularMomentum / r - orbitAngularMomentum / r;
+
+            (Vector3, double)[] manuvers = new (Vector3, double)[2];
+            manuvers[0] = (new Vector3(0, dv, 0), 0);
+            manuvers[1] = (new Vector3(0, -dv, 0), phaseOrbitPeriod);
+
+            return manuvers;
+        }
+
+
+        /// <summary>
+        /// Hohmann transfer manuver, assumes a cicular orbit.
         /// </summary>
         /// <param name="sgp">standard gravitational parameter (m^3 s^-2)</param>
         /// <param name="aInt">radius of interceptor orbit (meters)</param>

@@ -3,6 +3,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Industry
 {
@@ -37,14 +38,20 @@ namespace Pulsar4X.Industry
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            if (!parentEntity.HasDataBlob<MiningDB>())
-                parentEntity.SetDataBlob(new MiningDB());
+            if (!parentEntity.TryGetDataBlob<MiningDB>(out var miningDB))
+            {
+                parentEntity.SetDataBlob(new MiningDB() { NumberOfMines = 1 });
+            }
+            else
+            {
+                miningDB.NumberOfMines++;
+            }
             MineResourcesProcessor.CalcMaxRate(parentEntity);
         }
 
         public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            if(parentEntity.TryGetDatablob<MiningDB>(out var miningDB))
+            if(parentEntity.TryGetDataBlob<MiningDB>(out var miningDB))
             {
                 miningDB.NumberOfMines--;
 

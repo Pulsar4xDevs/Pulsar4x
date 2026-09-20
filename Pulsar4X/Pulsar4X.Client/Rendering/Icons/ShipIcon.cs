@@ -1,46 +1,52 @@
 ﻿using System;
-using Pulsar4X.Engine;
+using System.IO;
 using Pulsar4X.Orbital;
-using SDL2;
-using Pulsar4X.Messaging;
-using System.Threading.Tasks;
-using Pulsar4X.Orbits;
-using Pulsar4X.Ships;
-using Pulsar4X.Weapons;
-using Pulsar4X.Movement;
+using SDL3;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
     public class ShipIcon : Icon
     {
-        OrbitDB? _orbitDB;
-        NewtonMoveDB? _newtonMoveDB;
-        float _lop;
-        Entity? _entity;
-        public ShipIcon(EntityState entity, ShipInfoDB shipInfoDB, PositionDB positionDB) : base(positionDB)
+        // Static texture for all ship icons
+        private static IntPtr _shipTexture = IntPtr.Zero;
+        private static int _textureWidth = 24;
+        private static int _textureHeight = 12;
+        private static bool _textureInitialized = false;
+
+
+        /// <summary>
+        /// Initialize the ship icon texture. Call this once during startup.
+        /// </summary>
+        public static void InitializeTexture(IntPtr renderer)
         {
-            _entity = entity.Entity;
-            if (entity.TryGetDataBlob<OrbitDB>(out _orbitDB))
+            if (_textureInitialized) return;
+
+            var path = Path.Combine(PulsarMainWindow.ResourcesPath, "ship-icons", "01.png");
+            if (File.Exists(path))
             {
-                var i = _orbitDB.Inclination;
-                var aop = _orbitDB.ArgumentOfPeriapsis;
-                var loan = _orbitDB.LongitudeOfAscendingNode;
-                _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
+                _shipTexture = Image.LoadTexture(renderer, path);
+                if (_shipTexture != IntPtr.Zero)
+                {
+                    SDL.GetTextureSize(_shipTexture, out float w, out float h);
+                    _textureWidth = (int)w;
+                    _textureHeight = (int)h;
+                    _textureInitialized = true;
+#if DEBUG
+                    Console.WriteLine($"Ship icon texture loaded: {_textureWidth}x{_textureHeight}");
+#endif
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to load ship icon texture: {SDL.GetError()}");
+                }
             }
-            else if(entity.TryGetDataBlob<NewtonMoveDB>(out _newtonMoveDB))
+            else
             {
+                Console.WriteLine($"Ship icon texture not found: {path}");
             }
-
-            Func<Message, bool> filterById = msg => msg.EntityId != null && msg.EntityId == entity.Id;
-
-            MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, OnDBAdded, filterById);
-            MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, OnDBRemoved, filterById);
-
-            BasicShape();
-            OnPhysicsUpdate();
         }
 
-        public ShipIcon(PositionDB position) : base(position)
+        public ShipIcon(Vector3 position_m) : base(position_m)
         {
             Front(60, 100, 0, -110);
             Cargo(160, 160, 0, -120);
@@ -49,39 +55,14 @@ namespace Pulsar4X.SDL2UI
             Engines(100, 60, 0, 130);
         }
 
-        async Task OnDBAdded(Message message)
+        /// <summary>Snapshot constructor: position read through the replicated galaxy; no engine
+        /// subscriptions (the icon is rebuilt when the entity's snapshot changes).</summary>
+        public ShipIcon(IPosition position) : base(position)
         {
-            await Task.Run(() =>
-            {
-                if (message.DataBlob is OrbitDB)
-                {
-                    _orbitDB = (OrbitDB)message.DataBlob;
-                    var i = _orbitDB.Inclination;
-                    var aop = _orbitDB.ArgumentOfPeriapsis;
-                    var loan = _orbitDB.LongitudeOfAscendingNode;
-                    _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
-                }
-                else if (message.DataBlob is NewtonMoveDB)
-                {
-                    _newtonMoveDB = (NewtonMoveDB)message.DataBlob;
-                    //NewtonVectors();
-                }
-            });
+            BasicShape();
         }
 
-        async Task OnDBRemoved(Message message)
-        {
-            await Task.Run(() =>
-            {
-                if (message.DataBlob is OrbitDB)
-                    _orbitDB = null;
-                else if (message.DataBlob is NewtonMoveDB)
-                {
-                    _newtonMoveDB = null;
-                    //Shapes.RemoveAt(Shapes.Count-1);
-                }
-            });
-        }
+
 
         void BasicShape()
         {
@@ -106,7 +87,7 @@ namespace Pulsar4X.SDL2UI
             new Orbital.Vector2() { X = 0, Y = 5 }
             };
 
-            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
             Shapes.Add(new Shape() { Points = points, Color = colour });
         }
         void Front(int width, int height, int offsetX, int offsetY) //crew
@@ -117,7 +98,7 @@ namespace Pulsar4X.SDL2UI
             byte g = 100;
             byte b = 100;
             byte a = 255;
-            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
             Shapes.Add(new Shape() { Points = points, Color = colour });
 
         }
@@ -128,7 +109,7 @@ namespace Pulsar4X.SDL2UI
             byte g = 0;
             byte b = 200;
             byte a = 255;
-            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
 
             //TODO: change numbers depending on number of cargo containing components.
             int numberofPodsX = 4;
@@ -161,7 +142,7 @@ namespace Pulsar4X.SDL2UI
             byte g = 84;
             byte b = 84;
             byte a = 255;
-            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
 
 
             Vector2 p0 = new Orbital.Vector2() { X = offsetX, Y = (int)(offsetY - height * 0.5) };
@@ -186,7 +167,7 @@ namespace Pulsar4X.SDL2UI
             byte g = 0;
             byte b = 0;
             byte a = 255;
-            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
 
             var shape = new Shape() { Color = colour, Points = CreatePrimitiveShapes.CreateArc(offsetX, offsetY, (int)(width * 0.5), (int)(height * 0.5), 0, CreatePrimitiveShapes.PI2, 12) };
 
@@ -199,13 +180,13 @@ namespace Pulsar4X.SDL2UI
             byte g1 = 200;
             byte b1 = 200;
             byte a1 = 255;
-            SDL.SDL_Color colourbox = new SDL.SDL_Color() { r = r1, g = g1, b = b1, a = a1 };
+            SDL.Color colourbox = new SDL.Color() { R = r1, G = g1, B = b1, A = a1 };
 
             byte r2 = 100;
             byte g2 = 150;
             byte b2 = 0;
             byte a2 = 255;
-            SDL.SDL_Color colourCone = new SDL.SDL_Color() { r = r2, g = g2, b = b2, a = a2 };
+            SDL.Color colourCone = new SDL.Color() { R = r2, G = g2, B = b2, A = a2 };
 
             int thrusterCount = 3;
             int twidth = width / thrusterCount;
@@ -228,7 +209,7 @@ namespace Pulsar4X.SDL2UI
         //     byte g = 50;
         //     byte b = 200;
         //     byte a = 255;
-        //     SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+        //     SDL.Color colour = new SDL.Color() { r = r, g = g, b = b, a = a };
         //     var len = 0.00001 * _newtonMoveDB.OwningEntity.GetDataBlob<NewtonThrustAbilityDB>().ThrustInNewtons;
         //     var dv = _newtonMoveDB.ManuverDeltaV;
         //     var line = Vector3.Normalise(dv) * len ;
@@ -244,13 +225,6 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-            if(_entity is null || !_entity.IsValid) return;
-
-            // FIXME: remove call to engine
-            var headingVector = MoveMath.GetRelativeState(_entity).Velocity;
-            var heading = Angle.NormaliseRadians(Math.Atan2(headingVector.Y, headingVector.X));
-            var deg = Angle.ToDegrees(heading);
-            Heading = (float)heading;
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -272,84 +246,68 @@ namespace Pulsar4X.SDL2UI
                 for (int i2 = 0; i2 < shape.Points.Length; i2++)
                 {
                     var tranlsatedPoint = shipMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
-                    int x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
-                    int y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
+                    int x = (int)(ViewScreenPos.X + tranlsatedPoint.X );
+                    int y = (int)(ViewScreenPos.Y + tranlsatedPoint.Y );
                     drawPoints[i2] = new Vector2() { X = x, Y = y };
                 }
                 DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
+            }
+        }
+
+        public override void Draw(IntPtr rendererPtr, Camera camera)
+        {
+            if (_textureInitialized && _shipTexture != IntPtr.Zero)
+            {
+                // Calculate destination rectangle centered on the ship's position
+                var dstRect = new SDL.FRect
+                {
+                    X = ViewScreenPos.X - (_textureWidth * Scale) / 2f,
+                    Y = ViewScreenPos.Y - (_textureHeight * Scale) / 2f,
+                    W = _textureWidth * Scale,
+                    H = _textureHeight * Scale
+                };
+
+                // Can add rotation if needed in future
+                // double angleDegrees = Angle.ToDegrees(Heading);
+                double angleDegrees = 0;
+
+                // Render the texture with rotation
+                SDL.RenderTextureRotated(
+                    rendererPtr,
+                    _shipTexture,
+                    IntPtr.Zero,      // Source rect (null = entire texture)
+                    ref dstRect,
+                    angleDegrees,
+                    IntPtr.Zero,      // Center point (null = center of dstRect)
+                    SDL.FlipMode.None
+                );
+            }
+            else
+            {
+                // Fall back to the base line drawing if texture not available
+                base.Draw(rendererPtr, camera);
             }
         }
     }
 
     public class ProjectileIcon : Icon
     {
-        OrbitDB? _orbitDB;
-        float _lop;
-        EntityState? _entity;
         private Shape _flame;
-        public ProjectileIcon(EntityState entity, PositionDB positionDB) : base(positionDB)
-        {
-            _entity = entity;
-            BasicShape();
-            NewtonFlame();
-
-            if (entity.TryGetDataBlob<OrbitDB>(out _orbitDB))
-            {
-                var i = _orbitDB.Inclination;
-                var aop = _orbitDB.ArgumentOfPeriapsis;
-                var loan = _orbitDB.LongitudeOfAscendingNode;
-                _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
-            }
-            else if(entity.HasDataBlob<NewtonMoveDB>())
-            {
-                Shapes.Add(_flame);
-            }
-
-            Func<Message, bool> filterById = msg => msg.EntityId != null && msg.EntityId.Value == entity.Id;
-
-            MessagePublisher.Instance.Subscribe(MessageTypes.DBAdded, DBAdded, filterById);
-            MessagePublisher.Instance.Subscribe(MessageTypes.DBRemoved, DBRemoved, filterById);
-
-            OnPhysicsUpdate();
-        }
 
         public ProjectileIcon(Vector3 position_m) : base(position_m)
         {
         }
 
-        async Task DBAdded(Message message)
+        /// <summary>Snapshot constructor: rebuilt on snapshot change, so no engine subscriptions.</summary>
+        public ProjectileIcon(IPosition position, bool underThrust) : base(position)
         {
-            await Task.Run(() =>
-            {
-                if (message.DataBlob is OrbitDB)
-                {
-                    _orbitDB = (OrbitDB)message.DataBlob;
-                    var i = _orbitDB.Inclination;
-                    var aop = _orbitDB.ArgumentOfPeriapsis;
-                    var loan = _orbitDB.LongitudeOfAscendingNode;
-                    _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
-                }
-                else if (message.DataBlob is NewtonMoveDB)
-                {
-                    if(!Shapes.Contains(_flame))
-                        Shapes.Add(_flame);
-                }
-            });
+            BasicShape();
+            NewtonFlame();
+            if (underThrust)
+                Shapes.Add(_flame);
         }
 
-        async Task DBRemoved(Message message)
-        {
-            await Task.Run(() =>
-            {
-                if (message.DataBlob is OrbitDB)
-                    _orbitDB = null;
-                if (message.DataBlob is NewtonMoveDB)
-                {
-                    if (Shapes.Contains(_flame))
-                        Shapes.Remove(_flame);
-                }
-            });
-        }
+
 
         void BasicShape()
         {
@@ -365,7 +323,7 @@ namespace Pulsar4X.SDL2UI
                 new Vector2 { X = 0, Y = 4 }
             };
 
-            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
             Shapes.Add(new Shape() {Points = points, Color = colour});
         }
 
@@ -383,18 +341,12 @@ namespace Pulsar4X.SDL2UI
                 new Vector2 { X = 0, Y = 0 }
             };
 
-            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
             _flame = new Shape() {Points = points, Color = colour};
         }
 
         public override void OnPhysicsUpdate()
         {
-            if(_entity is null) return;
-
-            // FIXME: remove call to engine
-            // var headingVector = _entity.GetRelativeState().Velocity;//_orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
-            // var heading = Math.Atan2(headingVector.Y, headingVector.X);
-            // Heading = (float)heading;
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -416,8 +368,8 @@ namespace Pulsar4X.SDL2UI
                 for (int i2 = 0; i2 < shape.Points.Length; i2++)
                 {
                     var tranlsatedPoint = shipMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
-                    int x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
-                    int y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
+                    int x = (int)(ViewScreenPos.X + tranlsatedPoint.X );
+                    int y = (int)(ViewScreenPos.Y + tranlsatedPoint.Y );
                     drawPoints[i2] = new Vector2() { X = x, Y = y };
                 }
                 DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
@@ -429,11 +381,17 @@ namespace Pulsar4X.SDL2UI
 
     public class BeamIcon : Icon
     {
-        BeamInfoDB? _beamInfo;
-        public BeamIcon(BeamInfoDB beamInfoDB, PositionDB positionDB) : base(positionDB)
+        Vector3 _start;
+        Vector3 _end;
+        bool _hasEndpoints;
+
+        /// <summary>Snapshot constructor: the endpoints travel in the BeamView and the icon is
+        /// rebuilt on each per-tick push.</summary>
+        public BeamIcon(Pulsar4X.Api.BeamView beam, IPosition position) : base(position)
         {
-            _beamInfo = beamInfoDB;
-            OnPhysicsUpdate();
+            _start = new Vector3(beam.StartPosition.X, beam.StartPosition.Y, beam.StartPosition.Z);
+            _end = new Vector3(beam.EndPosition.X, beam.EndPosition.Y, beam.EndPosition.Z);
+            _hasEndpoints = true;
         }
 
         public BeamIcon(Vector3 position_m) : base(position_m)
@@ -446,22 +404,22 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            if(_beamInfo is null) return;
+            if (!_hasEndpoints) return;
 
-            var p0 = camera.ViewCoordinate_m(_beamInfo.Positions.Item1);
-            var p1 = camera.ViewCoordinate_m(_beamInfo.Positions.Item2);
+            var p0 = camera.ViewCoordinate_m(_start);
+            var p1 = camera.ViewCoordinate_m(_end);
 
             DrawShapes = new Shape[1];
             var s1 = new Shape();
             s1.Points = new Vector2[2];
-            s1.Points[0] = new Vector2() {X = p0.x, Y = p0.y};
-            s1.Points[1] = new Vector2() {X = p1.x, Y = p1.y};
-            var clr = new SDL.SDL_Color()
+            s1.Points[0] = new Vector2() {X = p0.X, Y = p0.Y};
+            s1.Points[1] = new Vector2() {X = p1.X, Y = p1.Y};
+            var clr = new SDL.Color()
             {
-                r = 200,
-                g = 0,
-                b = 0,
-                a = 255
+                R = 200,
+                G = 0,
+                B = 0,
+                A = 255
             };
             s1.Color = clr;
             DrawShapes[0] = s1;

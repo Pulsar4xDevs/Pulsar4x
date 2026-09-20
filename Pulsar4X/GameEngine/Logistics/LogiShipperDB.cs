@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Movement;
 using Pulsar4X.Storage;
@@ -47,7 +48,7 @@ namespace Pulsar4X.Logistics
             }
             if(!OwningEntity.HasDataBlob<NewtonThrustAbilityDB>())
                 throw new Exception("Non moving entites can't be shippers");
-            if(OwningEntity.HasDataBlob<OrderableDB>())
+            if(OwningEntity.HasDataBlob<ActionQueueDB>())
             {
                 var order = new ShipLogisticsOrders()
                 {

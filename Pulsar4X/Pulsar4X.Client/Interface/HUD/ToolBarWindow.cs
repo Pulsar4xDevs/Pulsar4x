@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.ImGuiNetUI.EntityManagement;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
-    public class ToolBarWindow : PulsarGuiWindow
+    public class ToolBarWindow : UniquePulsarGuiWindow<ToolBarWindow>
     {
         public Vector2 ButtonSize = new Vector2(32, 32);
         private uint UnClickedColour;
@@ -41,35 +41,17 @@ namespace Pulsar4X.SDL2UI
                 ClickedColour = ImGui.ColorConvertFloat4ToU32(*clickedcolorv);
             }
 
+            var orderedButtons = new List<(int order, ToolBarOption button)>();
+
             ToolBarOption btn = new ToolBarOption()
-            {
-                Picture = _uiState.Img_DesComponent(),
-                TooltipText = "Design a new component or facility",
-                OnClick = new Action(ComponentDesignWindow.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(ComponentDesignWindow.GetInstance().GetActive)
-                //Opens up the component design menu
-            };
-            ToolButtons.Add(btn);
-
-            btn =  new ToolBarOption()
-            {
-                Picture = _uiState.Img_DesignShip(),
-                TooltipText = "Design a new Ship",
-                OnClick = new Action(ShipDesignWindow.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(ShipDesignWindow.GetInstance().GetActive)
-                //Opens up the ship design menu
-            };
-            ToolButtons.Add(btn);
-
-            btn =  new ToolBarOption()
             {
                 Picture = _uiState.Img_Industry(),
                 TooltipText = "Colony Management",
                 OnClick = new Action(ColonyManagementWindow.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(ColonyManagementWindow.GetInstance().GetActive)
-                //Opens up the ship design menu
+                //Opens up the colony management menu
             };
-            ToolButtons.Add(btn);
+            orderedButtons.Add((130, btn));
 
             btn =  new ToolBarOption()
             {
@@ -79,7 +61,7 @@ namespace Pulsar4X.SDL2UI
                 GetActive = new Func<bool>(ResearchWindow.GetInstance().GetActive)
                 //Opens up the research menu
             };
-            ToolButtons.Add(btn);
+            orderedButtons.Add((140, btn));
 
             btn =  new ToolBarOption()
             {
@@ -89,7 +71,7 @@ namespace Pulsar4X.SDL2UI
                 GetActive = new Func<bool>(FleetWindow.GetInstance().GetActive)
                 //Opens up the fleet menu
             };
-            ToolButtons.Add(btn);
+            orderedButtons.Add((150, btn));
 
             btn =  new ToolBarOption()
             {
@@ -98,7 +80,7 @@ namespace Pulsar4X.SDL2UI
                 OnClick = new Action(CommanderWindow.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(CommanderWindow.GetInstance().GetActive)
             };
-            ToolButtons.Add(btn);
+            orderedButtons.Add((160, btn));
 
             btn = new ToolBarOption()
             {
@@ -108,7 +90,7 @@ namespace Pulsar4X.SDL2UI
                 GetActive = new Func<bool>(GalaxyWindow.GetInstance().GetActive)
 
             };
-            ToolButtons.Add(btn);
+            orderedButtons.Add((170, btn));
 
             btn = new ToolBarOption()
             {
@@ -118,7 +100,7 @@ namespace Pulsar4X.SDL2UI
                 GetActive = new Func<bool>(DistanceRuler.GetInstance().GetActive)
                 //Opens the ruler menu
             };
-            ToolButtons.Add(btn);
+            orderedButtons.Add((180, btn));
 
             btn = new ToolBarOption()
             {
@@ -128,47 +110,39 @@ namespace Pulsar4X.SDL2UI
                 GetActive = new Func<bool>(SystemWindow.GetInstance().GetActive)
                 //Display a tree with all objects in the system
             };
-            ToolButtons.Add(btn);
+            orderedButtons.Add((190, btn));
 
-            btn = new ToolBarOption()
+            // Host-registered tools that asked for a toolbar button (designer/SM/debug windows
+            // live in the host executable, not this library), merged by Order.
+            foreach (var tool in _uiState.DevTools)
             {
-                Picture = _uiState.Img_Tree(),
-                TooltipText = "Design orders and assign to entities",
-                OnClick = new Action(OrderCreationWindow.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(OrderCreationWindow.GetInstance().GetActive)
-                //Design orders for OrderableDB entities
-            };
-            ToolButtons.Add(btn);
+                if (tool.Placement != DevToolPlacement.Toolbar && tool.Placement != DevToolPlacement.SMToolbar)
+                    continue;
+                btn = new ToolBarOption()
+                {
+                    Picture = tool.ToolbarIcon?.Invoke() ?? _uiState.Img_Tree(),
+                    TooltipText = tool.Label,
+                    OnClick = new Action(tool.Toggle),
+                    GetActive = new Func<bool>(tool.IsActive),
+                };
+                if (tool.Placement == DevToolPlacement.SMToolbar)
+                    SMToolButtons.Add(btn);
+                else
+                    orderedButtons.Add((tool.Order, btn));
+            }
 
-            // btn = new ToolBarOption()
-            // {
-            //     Picture = _uiState.Img_Tree(),
-            //     TooltipText = "Spawn ships and planets",
-            //     OnClick = new Action(EntitySpawnWindow.GetInstance().ToggleActive),
-            //     GetActive = new Func<bool>(EntitySpawnWindow.GetInstance().GetActive),
-            //     //Display a tree with all objects in the system
-            // };
-            // SMToolButtons.Add(btn);
-
-            btn = new ToolBarOption()
-            {
-                Picture = _uiState.Img_Tree(),
-                TooltipText = "View SM debug info about a body",
-                OnClick = new Action(SMWindow.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(SMWindow.GetInstance().GetActive),
-                //Display a list of bodies with some info about them.
-            };
-            SMToolButtons.Add(btn);
+            foreach (var (_, button) in orderedButtons.OrderBy(b => b.order))
+                ToolButtons.Add(button);
         }
 
         internal static ToolBarWindow GetInstance()
         {
-            if (!PulsarGuiWindow._uiState.LoadedWindows.ContainsKey(typeof(ToolBarWindow)))
+            if(_uiState.TryGetUniqueWindow<ToolBarWindow>(out var window))
             {
-                return new ToolBarWindow();
+                return window;
             }
 
-            return (ToolBarWindow)PulsarGuiWindow._uiState.LoadedWindows[typeof(ToolBarWindow)];
+            return _uiState.AddUniqueWindow(new ToolBarWindow());
         }
 
         internal void SetButtons(List<ToolBarOption> buttons)
@@ -209,7 +183,7 @@ namespace Pulsar4X.SDL2UI
                         }
                     }
 
-                    if (button.OnClick != null && ImGui.ImageButton(button.Picture, ButtonSize))//Make the button
+                    if (button.OnClick != null && ImGui.ImageButton($"###{name}-nonblank", button.Picture.ToTextureRef(), ButtonSize))//Make the button
                     {
                         button.OnClick();
                     }
@@ -217,11 +191,14 @@ namespace Pulsar4X.SDL2UI
                     if (ImGui.IsItemHovered())
                         ImGui.SetTooltip(button.TooltipText);
 
+                    if (button.GetActive != null)//If the windows state can be checked
+                    {
+                        ImGui.PopStyleColor();
+                    }
 
                     ImGui.PopID();
                     iterations++;
                 }
-                ImGui.PushStyleColor(buttonidx, UnClickedColour);
 
                 Window.End();
             }

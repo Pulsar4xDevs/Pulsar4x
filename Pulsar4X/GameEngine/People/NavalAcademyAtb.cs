@@ -51,7 +51,7 @@ namespace Pulsar4X.People
                 TrainingPeriodInMonths = this.TrainingPeriodInMonths
             };
 
-            if (parentEntity.TryGetDatablob<NavalAcademyDB>(out var academyDB))
+            if (parentEntity.TryGetDataBlob<NavalAcademyDB>(out var academyDB))
             {
                 academyDB.Academies.Add(_academy);
             }
@@ -66,7 +66,7 @@ namespace Pulsar4X.People
 
         public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            if(parentEntity.TryGetDatablob<NavalAcademyDB>(out var academyDB))
+            if(parentEntity.TryGetDataBlob<NavalAcademyDB>(out var academyDB))
             {
                 academyDB.Academies.Remove(_academy);
 

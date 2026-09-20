@@ -1,0 +1,16 @@
+This script attempts to create the SDL3 dependancies for linux distrubutions
+The goal is to build to the steam sniper SKD,
+This avoids versioning conflicts with eg glibc
+run the script `./Build-SDL3.sh` it will: 
+create a docker with the steam sniper SDK.
+
+We should only need to run this script when we want to update to a newer version of SDL3 andor SDL3-cs
+
+Build SDL3
+Build SDL3 image
+Build ttf
+Build SDL3CS 
+
+note that we are forcing sdl3cs to use .net8 and langversion 12.
+.net 10 will have versioning issues with steam sniper. 
+

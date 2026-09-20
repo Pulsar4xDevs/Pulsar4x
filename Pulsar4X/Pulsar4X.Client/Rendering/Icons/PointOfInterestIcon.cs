@@ -1,12 +1,11 @@
 using System;
-using Pulsar4X.Movement;
 using Pulsar4X.Orbital;
-using SDL2;
+using SDL3;
 
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.Client;
 public class PointOfInterestIcon : Icon
 {
-    public PointOfInterestIcon(PositionDB positionDB) : base(positionDB)
+    public PointOfInterestIcon(IPosition positionDB) : base(positionDB)
     {
         BasicShape();
         OnPhysicsUpdate();
@@ -28,7 +27,7 @@ public class PointOfInterestIcon : Icon
             new Vector2() { X = 0, Y = 5 }
         };
 
-        SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+        SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
         Shapes.Add(new Shape() { Points = points, Color = colour });
     }
 
@@ -51,8 +50,8 @@ public class PointOfInterestIcon : Icon
             for (int i2 = 0; i2 < shape.Points.Length; i2++)
             {
                 var tranlsatedPoint = shipMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
-                int x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
-                int y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
+                int x = (int)(ViewScreenPos.X + tranlsatedPoint.X );
+                int y = (int)(ViewScreenPos.Y + tranlsatedPoint.Y );
                 drawPoints[i2] = new Vector2() { X = x, Y = y };
             }
             DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };

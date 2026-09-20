@@ -16,4 +16,9 @@ public static class GameFactory
 
         return new Game(newGameSettings, modDataStore);
     }
+
+    public static Game CreateGame(ModDataStore modDataStore, NewGameSettings newGameSettings)
+    {
+        return new Game(newGameSettings, modDataStore);
+    }
 }

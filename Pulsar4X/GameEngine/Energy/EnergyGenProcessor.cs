@@ -26,15 +26,15 @@ namespace Pulsar4X.Energy
             output = GeneralMath.Clamp(output, -stored, freestore);
             _energyGenDB.EnergyStored[energyType] += output;
 
-            if (output > 0)
+            if (output > 0 && freestore > 0)
             {
-                double timeToFill = Math.Ceiling( freestore / output);
+                double timeToFill = Math.Max(1, Math.Ceiling(freestore / output));
                 DateTime interuptTime = atDateTime + TimeSpan.FromSeconds(timeToFill);
                 entity.Manager.ManagerSubpulses.AddEntityInterupt(interuptTime, nameof(EnergyGenProcessor), entity);
             }
-            else if (output < 0)
+            else if (output < 0 && stored > 0)
             {
-                double timeToEmpty = Math.Ceiling( Math.Abs(stored / output));
+                double timeToEmpty = Math.Max(1, Math.Ceiling(Math.Abs(stored / output)));
                 DateTime interuptTime = atDateTime + TimeSpan.FromSeconds(timeToEmpty);
                 entity.Manager.ManagerSubpulses.AddEntityInterupt(interuptTime, nameof(EnergyGenProcessor), entity);
             }

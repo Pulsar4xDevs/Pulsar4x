@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace Pulsar4X.SDL2UI;
+namespace Pulsar4X.Client;
 public static class AssemblyInfo
 {
     private static bool _hasRun = false;

@@ -1,12 +1,12 @@
 ﻿using System;
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Engine;
-using SDL2;
+using SDL3;
+using Stringify = Pulsar4X.Api.Stringify;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Client
 {
-    class DistanceRuler : PulsarGuiWindow
+    class DistanceRuler : UniquePulsarGuiWindow<DistanceRuler>
     {
         //measuring variables
         //measuring booleans
@@ -26,42 +26,18 @@ namespace Pulsar4X.SDL2UI
 
         private DistanceRuler() {
             //_flags = ImGuiWindowFlags.NoCollapse;
-        }
 
-
-
-        internal static DistanceRuler GetInstance() {
-
-            DistanceRuler thisItem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(DistanceRuler)))
-            {
-                thisItem = new DistanceRuler();
-            }
-            else
-            {
-                thisItem = (DistanceRuler)_uiState.LoadedWindows[typeof(DistanceRuler)];
-            }
-
-
-            return thisItem;
-
-
-        }
-
-
-        internal override void MapClicked(Orbital.Vector3 worldPos_m, MouseButtons button)
-        {
-            base.MapClicked(worldPos_m, button);
-            if (true)//button == MouseButtons::Primary)
-            {
-                //first checks if measuting
-                if (_measuring)
+            var mainWin = (PulsarMainWindow)_uiState.ViewPort;
+            mainWin.MouseButtonUpOccured += (object sender, SDL.Event e) => {
+                if (_uiState.LoadedWindows.ContainsKey(typeof(DistanceRuler)) &&
+                        e.Button.Button == 1 &&
+                        _measuring)
                 {
                     //if measuring register first click
                     if (!_firstClickDone)
                     {
                         _zoomLevelAtFirstClick = _uiState.Camera.ZoomLevel;
-                        _firstClick = worldPos_m;
+                        _firstClick = _uiState.Camera.WorldCoordinate_m(e.Motion.X, e.Motion.Y);
                         _firstClickInViewCoord = ImGui.GetMousePos();
                         _firstClickDone = true;
                     }
@@ -71,15 +47,33 @@ namespace Pulsar4X.SDL2UI
                         _stopMeasuring();
                     }
                 }
+            };
+        }
+
+        internal static DistanceRuler GetInstance() {
+            if(_uiState.TryGetUniqueWindow<DistanceRuler>(out var window))
+            {
+                return window;
             }
 
+            return _uiState.AddUniqueWindow(new DistanceRuler());
         }
+
         internal override void Display()
         {
-            if(IsActive == true && Window.Begin("Map Scale", ref IsActive, _flags))//Lets the user close the ruler
+            if (!IsActive)
+            {
+                _stopMeasuring();
+                return;
+            }
+
+            if(Window.Begin("Map Scale", ref IsActive, _flags))//Lets the user close the ruler
             {
                 //displays the size in meters of the current screen area account for zoom and window dimensions
-                var windowCornerInWorldCoordinate = _uiState.Camera.WorldCoordinate_m((int)_uiState.MainWinSize.X, (int)_uiState.MainWinSize.Y);
+                var windowCornerInWorldCoordinate = _uiState.Camera.WorldCoordinate_m(
+                        _uiState.ViewPort.Size.Width,
+                        _uiState.ViewPort.Size.Height);
+
                 ImGui.Text("Current screen is:");
                 ImGui.Text(Stringify.Distance(((windowCornerInWorldCoordinate.X - _uiState.Camera.CameraWorldPosition.X)*2))+" wide.");
                 ImGui.Text(Stringify.Distance((-(windowCornerInWorldCoordinate.Y - _uiState.Camera.CameraWorldPosition.Y)*2))+" tall.");
@@ -113,30 +107,17 @@ namespace Pulsar4X.SDL2UI
                         Orbital.Vector3 lastMousePos = _uiState.Camera.MouseWorldCoordinate_m();
                         System.Numerics.Vector2 lastMousePosInViewCoord = ImGui.GetMousePos();
 
-                        SDL.SDL_SetRenderDrawColor(_uiState.rendererPtr, 255,255,255,255);
-                        SDL.SDL_RenderDrawLine(_uiState.rendererPtr, (int)_firstClickInViewCoord.X, (int)_firstClickInViewCoord.Y, (int)lastMousePosInViewCoord.X, (int)lastMousePosInViewCoord.Y);
+                        SDL.SetRenderDrawColor(_uiState.SDLRendererPtr, 255,255,255,255);
+                        SDL.RenderLine(_uiState.SDLRendererPtr, (int)_firstClickInViewCoord.X, (int)_firstClickInViewCoord.Y, (int)lastMousePosInViewCoord.X, (int)lastMousePosInViewCoord.Y);
                         double metricDistance = Math.Sqrt(Math.Pow(_firstClick.X - lastMousePos.X, 2) + Math.Pow(_firstClick.Y - lastMousePos.Y, 2));
                         double lightseconds = metricDistance / 299792458;
                         string tooltipString = Stringify.Distance(metricDistance) + "\r\n" + lightseconds + "ls";
                         ImGui.SetTooltip(tooltipString);
                     }
                 }
-
-                Window.End();
             }
-            else
-            {
-                _stopMeasuring();
-            }
+            Window.End();
 
-        }
-
-        public override void OnGameTickChange(DateTime newDate)
-        {
-        }
-
-        public override void OnSystemTickChange(DateTime newDate)
-        {
         }
     }
 }

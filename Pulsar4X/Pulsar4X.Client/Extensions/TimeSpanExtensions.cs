@@ -1,6 +1,6 @@
 using System;
 
-namespace Pulsar4X.ImGuiNetUI
+namespace Pulsar4X.Client
 {
     public static class TimeSpanExtensions
     {

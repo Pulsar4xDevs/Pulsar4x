@@ -52,11 +52,13 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
         }
     }*/
 
+    [Obsolete("Use TryGetDataBlob<T>() instead.")]
     public T GetDataBlob<T>() where T : BaseDataBlob
     {
         return Manager.GetDataBlob<T>(Id);
     }
 
+    [Obsolete("Use TryGetDataBlob<T>() instead.")]
     public BaseDataBlob GetDataBlob(Type type)
     {
         return Manager.GetDataBlob(Id, type);
@@ -83,7 +85,7 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
         return false;
     }
 
-    public bool TryGetDatablob<T>([NotNullWhen(true)] out T? value) where T : BaseDataBlob
+    public bool TryGetDataBlob<T>([NotNullWhen(true)] out T? value) where T : BaseDataBlob
     {
         if (Manager.TryGetDataBlob<T>(Id, out value))
         {
@@ -188,14 +190,14 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
     }
 
     [JsonIgnore]
-    private string DebuggerDisplay
+    public string DebuggerDisplay
     {
         get
         {
-            string value = $"({Id})";
-            if(HasDataBlob<NameDB>()) value += " " + GetDataBlob<NameDB>().OwnersName;
-
-            return value;
+            var v = $"({Id})";
+            if (HasDataBlob<NameDB>())
+                v += " " + GetDataBlob<NameDB>().OwnersName;
+            return v;
         }
     }
 }

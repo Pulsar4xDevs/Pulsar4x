@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Industry;
 
 namespace Pulsar4X.Engine
 {
@@ -12,6 +14,11 @@ namespace Pulsar4X.Engine
         private static Entity CurrentEntity;
         internal static Dictionary<Type, Delegate> TypeProcessorMap = new Dictionary<Type, Delegate>
             {
+                // Every colony carries a ComponentInstancesDB, so use it to re-sum infrastructure
+                // capacity whenever an installation is added or removed. RecalcCapacity ignores
+                // non-colony entities (e.g. ships).
+                { typeof(ComponentInstancesDB), new Action<ComponentInstancesDB>(processor => { InfrastructureProcessor.RecalcCapacity(CurrentEntity); }) },
+
                 // { typeof(ShipInfoDB), new Action<ShipInfoDB>(processor => {ShipAndColonyInfoProcessor.ReCalculateShipTonnaageAndHTK(CurrentEntity); }) },
                 // { typeof(MiningDB), new Action<MiningDB>(processor => { MineResourcesProcessor.CalcMaxRate(CurrentEntity);}) },
                 // { typeof(ColonyLifeSupportDB), new Action<ColonyLifeSupportDB>(processor => {PopulationProcessor.ReCalcMaxPopulation(CurrentEntity); }) },

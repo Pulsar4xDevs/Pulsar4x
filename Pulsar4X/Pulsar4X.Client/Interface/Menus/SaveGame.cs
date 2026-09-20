@@ -1,13 +1,10 @@
 using System;
 using System.IO;
 using Pulsar4X.Client.Interface.Widgets;
-using Pulsar4X.Engine;
-using Pulsar4X.SDL2UI;
-using Pulsar4X.SDL2UI.ModFileEditing;
 
 namespace Pulsar4X.Client.Interface.Menus;
 
-public class SaveGame : PulsarGuiWindow
+public class SaveGame : UniquePulsarGuiWindow<SaveGame>
 {
     private string _filePath = Path.Combine(PulsarMainWindow.GetAppDataPath(), PulsarMainWindow.SavesPath);
     private string _fileName = "savegame.sav";
@@ -16,11 +13,11 @@ public class SaveGame : PulsarGuiWindow
 
     internal static SaveGame GetInstance()
     {
-        if (!_uiState.LoadedWindows.ContainsKey(typeof(SaveGame)))
+        if(_uiState.TryGetUniqueWindow<SaveGame>(out var window))
         {
-            return new SaveGame();
+            return window;
         }
-        return (SaveGame)_uiState.LoadedWindows[typeof(SaveGame)];
+        return _uiState.AddUniqueWindow(new SaveGame());
     }
 
     internal override void Display()
@@ -32,8 +29,13 @@ public class SaveGame : PulsarGuiWindow
                 IsActive = false;
                 return;
             }
-            string gameJson = Game.Save(_uiState.Game);
-            File.WriteAllText(Path.Combine(_filePath, _fileName), gameJson);
+
+            _uiState.Lifecycle?.SaveGame(Path.Combine(_filePath, _fileName));
         }
+    }
+
+    public void UpdateSaveName(string name)
+    {
+        _fileName = name + ".sav";
     }
 }

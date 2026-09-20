@@ -14,7 +14,6 @@ namespace Pulsar4X.Modding
             Armor,
             CargoType,
             ComponentTemplate,
-            DefaultItems,
             Gas,
             IndustryType,
             Mineral,
@@ -26,6 +25,12 @@ namespace Pulsar4X.Modding
             DamageResistance,
             PartMat,
             Species,
+            System,
+            Star,
+            SystemBody,
+            Colony,
+            ComponentDesign,
+            ShipDesign,
         }
         public enum OperationType { Default, Remove }
         public enum CollectionOperationType { Add, Remove, Overwrite }
@@ -73,9 +78,6 @@ namespace Pulsar4X.Modding
                 case ModInstruction.DataType.ComponentTemplate:
                     instruction.Data = jObject["Payload"].ToObject<ComponentTemplateBlueprint>();
                     break;
-                case ModInstruction.DataType.DefaultItems:
-                    instruction.Data = jObject["Payload"].ToObject<DefaultItemsBlueprint>();
-                    break;
                 case ModInstruction.DataType.Gas:
                     instruction.Data = jObject["Payload"].ToObject<GasBlueprint>();
                     break;
@@ -108,6 +110,24 @@ namespace Pulsar4X.Modding
                     break;
                 case ModInstruction.DataType.Species:
                     instruction.Data = jObject["Payload"].ToObject<SpeciesBlueprint>();
+                    break;
+                case ModInstruction.DataType.System:
+                    instruction.Data = jObject["Payload"].ToObject<SystemBlueprint>();
+                    break;
+                case ModInstruction.DataType.Star:
+                    instruction.Data = jObject["Payload"].ToObject<StarBlueprint>();
+                    break;
+                case ModInstruction.DataType.SystemBody:
+                    instruction.Data = jObject["Payload"].ToObject<SystemBodyBlueprint>();
+                    break;
+                case ModInstruction.DataType.Colony:
+                    instruction.Data = jObject["Payload"].ToObject<ColonyBlueprint>();
+                    break;
+                case ModInstruction.DataType.ComponentDesign:
+                    instruction.Data = jObject["Payload"].ToObject<ComponentDesignBlueprint>();
+                    break;
+                case ModInstruction.DataType.ShipDesign:
+                    instruction.Data = jObject["Payload"].ToObject<ShipDesignBlueprint>();
                     break;
             }
 
