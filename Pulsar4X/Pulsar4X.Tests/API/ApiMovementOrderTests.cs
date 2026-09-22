@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using NUnit.Framework;
 using Pulsar4X.Api;
 using Pulsar4X.Datablobs;
@@ -13,7 +14,7 @@ using Pulsar4X.Orbits;
 namespace Pulsar4X.Tests
 {
     /// <summary>The ship movement-order write surface: queued newtonian burns
-    /// (NewtonThrustCommand), warp moves (WarpMoveCommand) and order cancellation
+    /// (NewtonThrustAction), warp moves (WarpMoveAction) and order cancellation
     /// (CancelOrderCommand), plus the editable-maneuver order projection the maneuver
     /// panel edits from.</summary>
     [TestFixture]
@@ -38,7 +39,7 @@ namespace Pulsar4X.Tests
                 new Pulsar4X.Movement.PositionDB { AbsolutePosition = new Vector3(1.5e11, 0, 0) },
                 new MassVolumeDB { MassDry = 10000 },
                 new NameDB("Maneuver Ship", session.FactionId, "Maneuver Ship"),
-                new OrderableDB(),
+                new ActionQueueDB(),
                 new Pulsar4X.Movement.WarpAbilityDB { MaxSpeed = 100000, EnergyType = energyGood.UniqueID },
                 new Pulsar4X.Energy.EnergyGenAbilityDB(_game.TimePulse.GameGlobalDateTime)
                 {

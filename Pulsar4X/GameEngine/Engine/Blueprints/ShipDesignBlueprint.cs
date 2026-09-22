@@ -17,6 +17,7 @@ public class ShipDesignBlueprint : Blueprint
     }
 
     public string Name { get; set; }
+    public bool Tanker { get; set; }
     public ShipArmorBlueprint Armor { get; set; }
     public List<ShipComponentBlueprint> Components { get; set; }
 

@@ -102,7 +102,7 @@ namespace Pulsar4X.Engine
             AddHotloopProcessor<PropulsionDB>(new ShipMovement());
             AddHotloopProcessor<OrbitDB>(new OrbitProcessor());
             AddHotloopProcessor<NewtonBalisticDB>(new NewtonBalisticProcessor());
-            AddHotloopProcessor<OrderableDB>(new OrderableProcessor(game));
+            AddHotloopProcessor<ActionQueueDBActionQueueDB>(new ActionQueueProcessor(game));
             AddHotloopProcessor<TranslateMoveDB>(new TranslateMoveProcessor());
             //AddHotloopProcessor<SensorProfileDB>(new SetReflectedEMProfile());
             */

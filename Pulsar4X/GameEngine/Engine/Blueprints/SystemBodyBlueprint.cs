@@ -48,6 +48,13 @@ public class SystemBodyBlueprint : Blueprint
         public double? MeanAnomaly_r { get; set; }
         public double? MeanAnomaly_d { get; set; }
 
+        /// <summary>
+        /// Epoch the mean anomaly is measured from.
+        /// If omitted, CreateFromBlueprint uses J2000 so published planet elements stay correct.
+        /// Set this to game start when MeanAnomaly is "now" (e.g. a hyperbolic body).
+        /// </summary>
+        public DateTime? Epoch { get; set; }
+
     }
 
     public struct AtmosphericGasValue

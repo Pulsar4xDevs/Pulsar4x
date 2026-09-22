@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Orbital;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Extensions;
@@ -13,7 +14,7 @@ using Pulsar4X.Engine;
 
 namespace Pulsar4X.Movement
 {
-    public class MoveToNearestAction : EntityCommand
+    public class MoveToNearestAction : EntityAction
     {
         public override string Name => "Move to Nearest";
         public override string Details => "Moves the fleet to the nearest X by filter.";
@@ -37,7 +38,7 @@ namespace Pulsar4X.Movement
         public EntitySelector? TargetSelector { get; protected set; }
         public EntityFilter EntityFactionFilter { get; protected set; } = EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile;
 
-        private List<EntityCommand> _shipCommands = new List<EntityCommand>();
+        private List<EntityAction> _shipCommands = new List<EntityAction>();
 
         internal override bool IsFinished()
         {
@@ -115,7 +116,7 @@ namespace Pulsar4X.Movement
                 //var maxRangeRate = CargoTransferProcessor.GetMaxRangeRate(targetEntity, ship);
 
                 // Create the movement order
-                var cmd = WarpMoveCommand.CreateCommandEZ(
+                var cmd = WarpMoveAction.CreateCommandEZ(
                     ship,
                     targetEntity,
                     EntityCommanding.StarSysDateTime);
@@ -158,7 +159,7 @@ namespace Pulsar4X.Movement
             return command;
         }
 
-        public override EntityCommand Clone()
+        public override EntityAction Clone()
         {
             var command = new MoveToNearestAction()
             {

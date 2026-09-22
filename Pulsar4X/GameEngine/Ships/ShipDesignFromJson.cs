@@ -27,7 +27,8 @@ public static class ShipDesignFromJson
         var armor = factionDataStore.Armor[shipDesignBlueprint.Armor.Id];
         var design = new ShipDesign(factionInfoDB, shipDesignBlueprint.Name, shipComponents, (armor, shipDesignBlueprint.Armor.Thickness), shipDesignBlueprint.UniqueID)
         {
-            DamageProfileDB = new EntityDamageProfileDB(shipComponents, (armor, shipDesignBlueprint.Armor.Thickness))
+            DamageProfileDB = new EntityDamageProfileDB(shipComponents, (armor, shipDesignBlueprint.Armor.Thickness)),
+            Tanker = shipDesignBlueprint.Tanker,
         };
         design.Initialise(factionInfoDB);
         return design;
@@ -65,7 +66,8 @@ public static class ShipDesignFromJson
         var armor = factionDataStore.Armor[armorId];
         var design = new ShipDesign(factionInfoDB, designName, shipComponents, (armor, armorThickness), id)
         {
-          DamageProfileDB = new EntityDamageProfileDB(shipComponents, (armor, armorThickness))
+          DamageProfileDB = new EntityDamageProfileDB(shipComponents, (armor, armorThickness)),
+          Tanker = (bool?)rootJson["tanker"] ?? false,
         };
         design.Initialise(factionInfoDB);
         return design;

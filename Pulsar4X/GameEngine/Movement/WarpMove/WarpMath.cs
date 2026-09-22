@@ -53,25 +53,31 @@ public static class WarpMath
     public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition(Entity mover, Entity target, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
     {
         var moverPos = (Vector3)MoveMath.GetAbsoluteFuturePosition(mover, atDateTime);
+        double spd_m = mover.GetDataBlob<WarpAbilityDB>().MaxSpeed;
+        return GetInterceptPosition(moverPos, spd_m, target, atDateTime, offsetPosition);
+    }
+
+    /// <summary>
+    /// Intercept from an explicit inertial start. Use this when the mover's orbit
+    /// blob is already gone (WarpMovingDB.OnSetToEntity) so the search is not
+    /// computed as if the ship sat at the system origin.
+    /// </summary>
+    public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition(Vector3 moverAbsolutePos, double speed, Entity target, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
+    {
         var tgtPos = (Vector3)MoveMath.GetAbsoluteFuturePosition(target, atDateTime);
         var exitPos = tgtPos + offsetPosition;
-        double spd_m = mover.GetDataBlob<WarpAbilityDB>().MaxSpeed;
 
         var tgtMoveType = target.GetDataBlob<PositionDB>().MoveType;
         switch (tgtMoveType)
         {
             case PositionDB.MoveTypes.None:
             {
-                var distance = (exitPos - moverPos).Length();
-                var intercept = ((Vector3)exitPos, atDateTime + TimeSpan.FromSeconds(distance / spd_m));
-                return intercept;
-                break;
+                var distance = (exitPos - moverAbsolutePos).Length();
+                return (exitPos, atDateTime + TimeSpan.FromSeconds(distance / speed));
             }
             case PositionDB.MoveTypes.Orbit:
             {
-                var intercept = WarpMath.GetInterceptPosition_m(moverPos, spd_m, target.GetDataBlob<OrbitDB>(), atDateTime, offsetPosition);
-                return intercept;
-                break;
+                return GetInterceptPosition_m(moverAbsolutePos, speed, target.GetDataBlob<OrbitDB>(), atDateTime, offsetPosition);
             }
             //For the following cases, we need to know if the target is an object which is owned by the same empire and we know what it's doing,
             //or if that info is unknown and how do we try predict?
@@ -117,7 +123,7 @@ public static class WarpMath
         var pl = new Orbit()
         {
             position = moverAbsolutePos,
-            T = targetOrbit.OrbitalPeriod.TotalSeconds,
+            T = GetSearchPeriod(targetOrbit)
         };
 
         double a = targetOrbit.SemiMajorAxis * 2;
@@ -142,7 +148,7 @@ public static class WarpMath
             if ((a0 < a1) || (a1 < 0.0))
             {
                 a1 = a0;
-                tim = tt;
+                tim = t;
             }   // remember best option
         }
         // find orbital position with min error (fine)
@@ -167,6 +173,18 @@ public static class WarpMath
         p += offsetPosition;
         //dir = normalize(p - pos);
         return (p, atDateTime + TimeSpan.FromSeconds(tim));
+    }
+    static double GetSearchPeriod(OrbitDB orbit)
+    {
+        double period = orbit.OrbitalPeriod.TotalSeconds;
+        var current = orbit;
+        while (current.ParentDB is OrbitDB parent)
+        {
+            period = Math.Max(period, parent.OrbitalPeriod.TotalSeconds);
+            current = parent;
+        }
+        // Optional safety floor so we never search a ridiculously small window
+        return Math.Max(period, 3600.0);
     }
 
 }

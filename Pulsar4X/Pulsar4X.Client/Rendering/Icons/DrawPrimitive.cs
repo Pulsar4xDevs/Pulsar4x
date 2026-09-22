@@ -250,7 +250,7 @@ namespace Pulsar4X.Client
             double y = 0;
             double r = 0;
 
-            Vector2[] points = new Vector2[numPoints + 1];
+            Vector2[] points = new Vector2[numPoints];
             for (int i = 0; i < numPoints; i++)
             {
                 θ = Angle.NormaliseRadians((loP + startAng) - Δθ * i);

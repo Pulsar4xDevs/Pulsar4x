@@ -526,6 +526,18 @@ namespace Pulsar4X.Engine.Api
                 if (type == GameEventType.FleetsChanged)
                 {
                     _sink(_server.FleetsEnvelope(_session.FactionId));
+                    // EntityWindow reads OrdersView on the per-entity system snapshot,
+                    // not the fleet tree. OrdersChanged is mapped to FleetsChanged, so
+                    // also upsert the commanded entity when we have its id.
+                    if (m.EntityId is { } orderEntityId
+                        && _server._game.GlobalManager.TryGetGlobalEntityById(orderEntityId, out var orderEntity)
+                        && orderEntity.Manager != null
+                        && orderEntity.Manager.IsEntityVisibleToFaction(orderEntity, _session.FactionId))
+                    {
+                        _sink(new GameEventEnvelope(GameEventType.EntityChanged,
+                            orderEntity.Manager.ManagerID, orderEntity.Id, _session.FactionId,
+                            Entity: projector.ProjectEntity(orderEntity, _session.FactionId)));
+                    }
                     return Task.CompletedTask;
                 }
 

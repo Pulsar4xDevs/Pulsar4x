@@ -343,13 +343,54 @@ namespace Pulsar4X.Client
             if (ImGui.BeginChild("Fleet Orders", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y), ImGuiChildFlags.Borders))
             {
                 DisplayHelpers.Header("Fleet Orders");
-                if (selectedFleet.Orders.Count == 0)
+                if (selectedFleet.Goal is null)
                 {
                     ImGui.Text("None");
                 }
                 else
                 {
                     if (ImGui.BeginTable("FleetOrdersTable", 2, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
+                    {
+                        ImGui.TableSetupColumn("Goal", ImGuiTableColumnFlags.None, 0.4f);
+                        ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 0.6f);
+                        ImGui.TableHeadersRow();
+                        var goal = selectedFleet.Goal;
+                        ImGui.TableNextColumn();
+                        
+                        ImGui.Text(goal.Name);
+                        ImGui.TableNextColumn();
+                        ImGui.Text(goal.Status);
+                        if (ImGui.IsItemHovered())
+                        {
+                            ImGui.BeginTooltip();
+                            ImGui.Text(goal.Message);
+                            ImGui.EndTooltip();
+                        }
+                        for (int i = 0; i < selectedFleet.Orders.Count; i++)
+                        {
+                            var order = selectedFleet.Orders[i];
+                            ImGui.TableNextColumn();
+                            ImGui.Text((i + 1).ToString());
+                            ImGui.TableNextColumn();
+                            ImGui.Text(order.Name);
+                            if (ImGui.IsItemHovered())
+                            {
+                                ImGui.BeginTooltip();
+                                ImGui.Text("IsRunning: " + order.IsRunning);
+                                ImGui.Text("IsFinished: " + order.IsFinished);
+                                ImGui.EndTooltip();
+                            }
+                        }
+
+                        ImGui.EndTable();
+                    }
+                    
+                    
+                    if (selectedFleet.Orders.Count == 0)
+                    {
+                        ImGui.Text("None");
+                    }
+                    else if (ImGui.BeginTable("FleetOrdersTable", 2, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
                     {
                         ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.1f);
                         ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.None, 0.9f);

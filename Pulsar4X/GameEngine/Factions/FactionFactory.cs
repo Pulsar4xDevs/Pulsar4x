@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using GameEngine.Engine.Orders;
 using Newtonsoft.Json.Linq;
 using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
@@ -281,7 +282,7 @@ namespace Pulsar4X.Factions
                 factionTechDB,
                 new FactionOwnerDB(),
                 new FleetDB(),
-                new OrderableDB(),
+                new ActionQueueDB(),
             };
             var factionEntity = Entity.Create();
             game.GlobalManager.AddEntity(factionEntity, blobs);
@@ -339,7 +340,7 @@ namespace Pulsar4X.Factions
                 factionTechDB,
                 new FactionOwnerDB(),
                 new FleetDB(),
-                new OrderableDB(),
+                new ActionQueueDB(),
             };
             var factionEntity = Entity.Create();
             game.GlobalManager.AddEntity(factionEntity, blobs);

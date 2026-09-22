@@ -369,9 +369,7 @@ namespace Pulsar4X.Engine
             else //hyperbolic orbit
             {
                 // Hyperbolic orbits don't have a period, so no normalization needed
-                double o_Mh = GetHyperbolicMeanAnomalyFromTime(orbit.MeanMotion, secondsFromEpoch);
-                double o_F =  GetHyperbolicAnomaly(orbit, o_Mh);
-                return TrueAnomalyFromHyperbolicAnomaly(orbit.Eccentricity, o_F);
+                return TrueAnomalyFromTime(orbit.GravitationalParameter_m3S2, orbit.SemiMajorAxis, orbit.Eccentricity, orbit.MeanAnomalyAtEpoch, secondsFromEpoch);
             }
         }
 

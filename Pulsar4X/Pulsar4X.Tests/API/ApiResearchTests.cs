@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using NUnit.Framework;
 using Pulsar4X.Api;
 using Pulsar4X.Datablobs;
@@ -32,7 +33,7 @@ namespace Pulsar4X.Tests
             _game.Systems[0].AddEntity(lab, new List<BaseDataBlob>
             {
                 researcherDB,
-                new OrderableDB(),
+                new ActionQueueDB(),
             });
             return lab;
         }

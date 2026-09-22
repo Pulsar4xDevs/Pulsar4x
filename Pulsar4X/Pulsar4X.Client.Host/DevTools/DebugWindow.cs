@@ -662,15 +662,14 @@ namespace Pulsar4X.Client
 
                         if (SelectedEntity.HasDataBlob<EntityDamageProfileDB>())
                         {
-                            var dv = DamageViewerWindow.GetInstance();
                             if (ImGui.Checkbox("Show Damage", ref _showDamageWindow))
                             {
+                                var dv = DamageViewerWindow.GetInstance();
                                 if (dv.CanActive)
-                                    DamageViewerWindow.GetInstance().SetActive(_showDamageWindow);
+                                    dv.SetActive(_showDamageWindow);
                                 else
                                     _showDamageWindow = false;
                             }
-
                         }
                     }
 

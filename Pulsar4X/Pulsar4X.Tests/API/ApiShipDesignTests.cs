@@ -5,6 +5,7 @@ using NUnit.Framework;
 using Pulsar4X.Api;
 using Pulsar4X.Engine.Api;
 using Pulsar4X.Factions;
+using Pulsar4X.Ships;
 
 namespace Pulsar4X.Tests
 {
@@ -129,6 +130,32 @@ namespace Pulsar4X.Tests
             var badDesignId = _server.SubmitCommand(session, new SaveShipDesignCommand(
                 session.FactionId, "no-such-design", "Name", new[] { new ShipComponentCount(componentId, 1) }, armorId, 3, false));
             Assert.That(badDesignId.Accepted, Is.False);
+        }
+
+        [Test]
+        public void SaveShipDesign_persists_tanker_role_onto_spawned_hull()
+        {
+            var session = Connect();
+            var (componentId, armorId) = SetUpDesignData(session);
+            var info = Info(session);
+
+            var create = _server.SubmitCommand(session, new SaveShipDesignCommand(
+                session.FactionId, null, "Tank Class",
+                new[] { new ShipComponentCount(componentId, 1) }, armorId, 3,
+                IsObsolete: false, Tanker: true));
+            Assert.That(create.Accepted, Is.True, create.RejectionReason);
+
+            var design = info.ShipDesigns.Values.First(d => d.Name == "Tank Class");
+            Assert.That(design.Tanker, Is.True);
+            Assert.That(new ShipInfoDB(design).Tanker, Is.True,
+                "spawn copies the class Tanker flag onto ShipInfoDB");
+
+            var update = _server.SubmitCommand(session, new SaveShipDesignCommand(
+                session.FactionId, design.UniqueID, "Tank Class",
+                new[] { new ShipComponentCount(componentId, 1) }, armorId, 3,
+                IsObsolete: false, Tanker: false));
+            Assert.That(update.Accepted, Is.True, update.RejectionReason);
+            Assert.That(info.ShipDesigns[design.UniqueID].Tanker, Is.False);
         }
     }
 }

@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Names;
@@ -20,7 +21,7 @@ namespace Pulsar4X.Fleets
             var fleetDB = new FleetDB();
             dataBlobs.Add(fleetDB);
 
-            var orderableDB = new OrderableDB();
+            var orderableDB = new ActionQueueDB();
             dataBlobs.Add(orderableDB);
 
             var entity = Entity.Create();

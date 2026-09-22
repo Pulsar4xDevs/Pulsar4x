@@ -63,19 +63,17 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
         var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
         var mtrx =  scAU * matrix * trns; //scale to au, scale for camera zoom, and move to camera position and zoom
         var spos = camera.ViewCoordinateV2_m(_bodyAbsolutePos);
-        //_drawPoints = new SDL.SDL_Point[_points.Length];
+
+        int remaining = RemainingPointCount();
+        if (_drawPoints.Length != remaining + 1)
+            _drawPoints = new SDL.Point[remaining + 1];
+
         _drawPoints[0] = new SDL.Point(){ X = (int)spos.X, Y = (int)spos.Y};
 
-        /*
-        for (int i = 0; i < _points.Length; i++)
-        {
-            _drawPoints[i] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
-        }*/
-
         int i2 = 1;
-        if(IsRetrogradeOrbit)
+        if (IsRetrogradeOrbit)
         {
-            for (int i = _index-1; i > -1; i--)
+            for (int i = _index - 1; i >= 0 && i2 < _drawPoints.Length; i--)
             {
                 _drawPoints[i2] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
                 i2++;
@@ -83,7 +81,7 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
         }
         else
         {
-            for (int i = _index+1; i < _index + _drawPoints.Length - 1; i++)
+            for (int i = _index + 1; i < _points.Length && i2 < _drawPoints.Length; i++)
             {
                 _drawPoints[i2] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
                 i2++;
@@ -91,21 +89,24 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
         }
     }
 
+    /// <summary>
+    /// Hyperbola is an open arc (SOI → periapsis → SOI). Do not wrap like an ellipse.
+    /// Remaining trail is toward array start (retrograde) or array end (prograde).
+    /// </summary>
+    int RemainingPointCount()
+    {
+        if (_points == null || _points.Length == 0)
+            return 0;
+        if (IsRetrogradeOrbit)
+            return Math.Max(0, _index);
+        return Math.Max(0, _points.Length - _index - 1);
+    }
+
     public override void UpdateUserSettings()
     {
-        /*
-        if (_userSettings.NumberOfArcSegments != _numberOfArcSegments)
-        {
-            _numberOfArcSegments = _userSettings.NumberOfArcSegments;
-            CreatePointArray();
-        }
-
-        _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
-        _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
-
-        */
-        _drawPoints = new SDL.Point[_index + 2];
-        _numberOfDrawSegments = _drawPoints.Length - 1;
+        int remaining = RemainingPointCount();
+        _drawPoints = new SDL.Point[remaining + 1];
+        _numberOfDrawSegments = Math.Max(1, _drawPoints.Length - 1);
         _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
     }
 

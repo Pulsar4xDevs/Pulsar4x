@@ -1,11 +1,12 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Events;
 
 namespace Pulsar4X.Technology;
 
-public class MoveDownInQueueOrder : EntityCommand
+public class MoveDownInQueueOrder : EntityAction
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
@@ -31,7 +32,7 @@ public class MoveDownInQueueOrder : EntityCommand
         return new MoveDownInQueueOrder(labEntity, techId);
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }

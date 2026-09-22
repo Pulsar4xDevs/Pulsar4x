@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Fleets;
@@ -13,7 +14,7 @@ namespace Pulsar4X.JumpPoints;
 /// Fleet-level jump order. Creates per-ship warp + jump commands so each ship
 /// independently warps to the gate and jumps through when it arrives.
 /// </summary>
-public class JumpOrder : EntityCommand
+public class JumpOrder : EntityAction
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
 
@@ -30,7 +31,7 @@ public class JumpOrder : EntityCommand
 
     internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
-    List<ShipJumpCommand> _shipJumpCommands = new List<ShipJumpCommand>();
+    List<ShipJumpAction> _shipJumpCommands = new List<ShipJumpAction>();
 
     public static bool CreateAndExecute(Game game, Entity faction, Entity fleetEntity, JumpPointDB jumpGate)
     {
@@ -62,12 +63,12 @@ public class JumpOrder : EntityCommand
             {
                 if (!ship.HasDataBlob<WarpAbilityDB>()) continue;
 
-                var warpCmd = WarpMoveCommand.CreateCommandEZ(ship, gateEntity, atDateTime);
+                var warpCmd = WarpMoveAction.CreateCommandEZ(ship, gateEntity, atDateTime);
                 ship.Manager.Game.OrderHandler.HandleOrder(warpCmd);
             }
 
             // Queue a per-ship jump command (will execute after warp completes)
-            var jumpCmd = ShipJumpCommand.Create(ship, JumpGate);
+            var jumpCmd = ShipJumpAction.Create(ship, JumpGate);
             ship.Manager.Game.OrderHandler.HandleOrder(jumpCmd);
             _shipJumpCommands.Add(jumpCmd);
         }
@@ -108,7 +109,7 @@ public class JumpOrder : EntityCommand
         return false;
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }
@@ -118,7 +119,7 @@ public class JumpOrder : EntityCommand
 /// Per-ship jump command. Transfers a single ship through a jump gate
 /// when executed (typically after a warp command completes).
 /// </summary>
-public class ShipJumpCommand : EntityCommand
+public class ShipJumpAction : EntityAction
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
 
@@ -134,9 +135,9 @@ public class ShipJumpCommand : EntityCommand
 
     internal override Entity EntityCommanding => _entityCommanding;
 
-    public static ShipJumpCommand Create(Entity ship, JumpPointDB jumpGate)
+    public static ShipJumpAction Create(Entity ship, JumpPointDB jumpGate)
     {
-        return new ShipJumpCommand()
+        return new ShipJumpAction()
         {
             RequestingFactionGuid = ship.FactionOwnerID,
             EntityCommandingGuid = ship.Id,
@@ -179,7 +180,7 @@ public class ShipJumpCommand : EntityCommand
         return false;
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }

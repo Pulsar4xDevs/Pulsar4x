@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.Industry.Orders;
 
-public class RemoveFromConstructionQueueOrder : EntityCommand
+public class RemoveFromConstructionQueueOrder : EntityAction
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
@@ -32,7 +33,7 @@ public class RemoveFromConstructionQueueOrder : EntityCommand
         return new RemoveFromConstructionQueueOrder(colonyEntity, job);
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }

@@ -79,9 +79,14 @@ namespace Pulsar4X.Client
         {
             if(_uiState.TryGetUniqueWindow<DamageViewerWindow>(out var window))
             {
-                if (_uiState.PrimaryEntity != null && _uiState.LastClickedEntity.GetEntity()! != window._selectedEntity)
+                // GetInstance is polled every frame from Settings and DebugWindow.
+                // Only rebuild the particle map while the viewer is actually open —
+                // otherwise selecting a planet allocates a planet-sized grid and freezes.
+                if (window.GetActive()
+                    && _uiState.LastClickedEntity?.GetEntity() is Entity clicked
+                    && clicked != window._selectedEntity)
                 {
-                    window.Init(_uiState.LastClickedEntity.GetEntity()!);
+                    window.Init(clicked);
                 }
                 return window;
             }
@@ -90,7 +95,7 @@ namespace Pulsar4X.Client
 
             if (_uiState.LastClickedEntity?.GetEntity() != null)
             {
-                window.Init(_uiState.LastClickedEntity.GetEntity()!);
+                //window.Init(_uiState.LastClickedEntity.GetEntity()!);
             }
 
             return window;
@@ -119,6 +124,7 @@ namespace Pulsar4X.Client
             _dmProjectileSliderRhs = (int)(_dmHeight * 0.25);
             if(damageableEntity.TryGetDataBlob<EntityDamageProfileDB>(out var _profile))
             {
+                /*
                 _rawShipImage = _profile.DamageProfile;
                 if (_profile.DamageEvents.Count > 0)
                 {
@@ -126,6 +132,7 @@ namespace Pulsar4X.Client
                     SetDamageEventFrames();
                 }
                 RawBmpTextures.CreateTexture(_uiState.ViewPort.Renderer, _rawShipImage, ref _shipImgPtr, SDL.PixelFormat.ARGB8888);
+                */
             }
             if(damageableEntity.TryGetDataBlob<ComponentInstancesDB>(out var _componentInstances))
             {}

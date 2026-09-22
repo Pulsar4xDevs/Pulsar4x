@@ -1,0 +1,116 @@
+[
+  {
+    "Type": "Colony",
+    "Payload": {
+      "UniqueID": "colony-luna",
+      "Name": "Lunar Mining Outpost",
+      "StartingPopulation": 50000,
+      "Installations": [
+        { "Id": "default-design-infrastructure", "Amount": 20 },
+        { "Id": "default-design-mine", "Amount": 2 },
+        { "Id": "default-design-warehouse", "Amount": 1 },
+        { "Id": "default-design-spaceport", "Amount": 1 },
+        { "Id": "default-design-fuel-farm-5000k", "Amount": 1 },
+        { "Id": "default-design-passive-sensor", "Amount": 1 },
+        { "Id": "default-design-local-construction", "Amount": 1 }
+      ],
+      "Cargo": [
+        { "Id": "iron", "Amount": 200000 },
+        { "Id": "rare-earth-elements", "Amount": 25000 },
+        { "Id": "regolith", "Amount": 100000 },
+        { "Id": "titanium", "Amount": 20000 },
+        { "Id": "silicon", "Amount": 15000 },
+        { "Id": "methalox", "Amount": 500, "Type": "byCount" }
+      ]
+    }
+  },
+  {
+    "Type": "Colony",
+    "Payload": {
+      "UniqueID": "colony-mars",
+      "Name": "Martian Settlement",
+      "StartingPopulation": 200000,
+      "Installations": [
+        { "Id": "default-design-infrastructure", "Amount": 40 },
+        { "Id": "default-design-mine", "Amount": 1 },
+        { "Id": "default-design-warehouse", "Amount": 1 },
+        { "Id": "default-design-spaceport", "Amount": 1 },
+        { "Id": "default-design-fuel-farm-5000k", "Amount": 1 },
+        { "Id": "default-design-refinery", "Amount": 1 },
+        { "Id": "default-design-factory", "Amount": 1 },
+        { "Id": "default-design-research-lab", "Amount": 1 },
+        { "Id": "default-design-passive-sensor", "Amount": 1 },
+        { "Id": "default-design-local-construction", "Amount": 1 }
+      ],
+      "Cargo": [
+        { "Id": "iron", "Amount": 120000 },
+        { "Id": "copper", "Amount": 80000 },
+        { "Id": "aluminium", "Amount": 80000 },
+        { "Id": "water", "Amount": 40000 },
+        { "Id": "stainless-steel", "Amount": 4000 },
+        { "Id": "methalox", "Amount": 2000, "Type": "byCount" }
+      ]
+    }
+  },
+  {
+    "Type": "Colony",
+    "Payload": {
+      "UniqueID": "npc-colony-traders",
+      "Name": "Sol Traders Warehouse",
+      "StartingPopulation": 800,
+      "Installations": [
+        { "Id": "default-design-infrastructure", "Amount": 5 },
+        { "Id": "default-design-warehouse", "Amount": 1 },
+        { "Id": "default-design-spaceport", "Amount": 1 },
+        { "Id": "default-design-fuel-farm-5000k", "Amount": 1 },
+        { "Id": "default-design-passive-sensor", "Amount": 1 }
+      ],
+      "Cargo": [
+        { "Id": "stainless-steel", "Amount": 10000 },
+        { "Id": "iron", "Amount": 10000 },
+        { "Id": "methalox", "Amount": 5000, "Type": "byCount" },
+        { "Id": "rp-1", "Amount": 5000, "Type": "byCount" }
+      ],
+      "Fleets": [
+        {
+          "Name": "Sol Haulers",
+          "Ships": [
+            {
+              "DesignId": "default-ship-design-freighter",
+              "Name": "Hauler Alpha",
+              "Cargo": [
+                { "Id": "stainless-steel", "Amount": 40000 },
+                { "Id": "methalox", "Amount": 2000, "Type": "byCount" }
+              ]
+            },
+            {
+              "DesignId": "default-ship-design-freighter",
+              "Name": "Hauler Beta",
+              "Cargo": [
+                { "Id": "iron", "Amount": 40000 },
+                { "Id": "copper", "Amount": 15000 },
+                { "Id": "methalox", "Amount": 2000, "Type": "byCount" }
+              ]
+            },
+            {
+              "DesignId": "default-ship-design-courier",
+              "Name": "Packet Luna",
+              "Cargo": [
+                { "Id": "rare-earth-elements", "Amount": 5000 },
+                { "Id": "methalox", "Amount": 500, "Type": "byCount" }
+              ]
+            },
+            {
+              "DesignId": "default-ship-design-tanker",
+              "Name": "Fill-Up",
+              "Cargo": [
+                { "Id": "methalox", "Amount": 20000, "Type": "byCount" },
+                { "Id": "rp-1", "Amount": 10000, "Type": "byCount" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

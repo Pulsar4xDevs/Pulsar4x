@@ -49,6 +49,7 @@ namespace Pulsar4X.Engine
 
         //public readonly ConcurrentDictionary<Type, TimeSpan> ProcessTime = new ConcurrentDictionary<Type, TimeSpan>();
         public bool IsProcessing = false;
+        bool _instanceProcessorsRunning = false;
         public string CurrentProcess = "Waiting";
 
         private ProcessorManager _processManager;
@@ -92,6 +93,22 @@ namespace Pulsar4X.Engine
                 // focused system's sub-step clock, which is what keeps client rendering smooth during a
                 // long pulse. Cheap no-op when nothing is subscribed.
                 InvokeDateChange(value);
+            }
+        }
+
+        /// <summary>
+        /// Clock for "schedule this after the current sub-step". During ProcessToNextInterupt
+        /// StarSysDateTime still lags <see cref="_subStepDateTime"/> (hotloops need the delta).
+        /// AddEntityInterupt at that lagged now, or at the current sub-step after Split(),
+        /// re-queues the same instant and 0-spans the outer ProcessSystem loop.
+        /// </summary>
+        internal DateTime NextSafeInterruptTime
+        {
+            get
+            {
+                if (IsProcessing && _subStepDateTime > _systemLocalDateTime)
+                    return _subStepDateTime;
+                return _systemLocalDateTime;
             }
         }
 
@@ -144,6 +161,11 @@ namespace Pulsar4X.Engine
         {
             if(nextDateTime < StarSysDateTime)
                 throw new Exception("Trying to add an interrupt in the past");
+            // After Split() of this sub-step, a same-instant re-queue 0-spans
+            // the outer ProcessSystem loop. Callers that mean "now" should
+            // ProcessEntity. Hotloops run before Split and may still pin now.
+            if (_instanceProcessorsRunning && nextDateTime <= _subStepDateTime)
+                return;
 
             if (nextDateTime < _subStepDateTime)
                 _subStepDateTime = nextDateTime;
@@ -371,21 +393,29 @@ namespace Pulsar4X.Engine
                     split = _instanceProcessorsQueue.Split(_subStepDateTime);
                 }
 
-                foreach (var qi in split)
+                _instanceProcessorsRunning = true;
+                try
                 {
-                    var itm = qi.Item;
-                    var s = itm.Item1;
-                    var e = itm.Item2;
+                    foreach (var qi in split)
+                    {
+                        var itm = qi.Item;
+                        var s = itm.Item1;
+                        var e = itm.Item2;
 
-                    var processor = _processManager.GetInstanceProcessor(s);
-                    var pn = processor.GetType().Name;
+                        var processor = _processManager.GetInstanceProcessor(s);
+                        var pn = processor.GetType().Name;
 
                     Trace.WriteLine($"[{StarSysDateTime:u}|{_subStepDateTime:u}] running instance processor: {pn} with entity: {e.DebuggerDisplay}");
 
-                    Performance.Start(pn);
-                    CurrentProcess = s;
-                    processor.ProcessEntity(e, qi.Time);
-                    Performance.Stop(pn);
+                        Performance.Start(pn);
+                        CurrentProcess = s;
+                        processor.ProcessEntity(e, qi.Time);
+                        Performance.Stop(pn);
+                    }
+                }
+                finally
+                {
+                    _instanceProcessorsRunning = false;
                 }
 
                 StarSysDateTime = _subStepDateTime; //update the localDateTime and invoke the SystemDateChangedEvent

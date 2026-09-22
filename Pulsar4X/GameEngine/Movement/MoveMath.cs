@@ -112,6 +112,14 @@ public static class MoveMath
                 {
                     pos = (Vector2)OrbitMath.GetAbsolutePosition(orbitDB2, atDateTime);
                 }
+                else
+                {
+                    // WarpMovingDB.OnSetToEntity strips OrbitDB before TryStartWarp
+                    // recomputes the intercept, and MoveType is still Orbit until
+                    // MoveStateProcessor runs. Leaving pos at (0,0) aims the warp
+                    // from the system origin.
+                    pos = position.AbsolutePosition2;
+                }
             }
                 break;
             case PositionDB.MoveTypes.NewtonSimple:
@@ -357,5 +365,27 @@ public static class MoveMath
         var dba = a.GetDataBlob<PositionDB>();
         var dbb = b.GetDataBlob<PositionDB>();
         return (dba.AbsolutePosition - dbb.AbsolutePosition).Length();
+    }
+    public static double GetDistanceBetween(Entity a, Vector3 absolutePositon)
+    {
+        var dba = a.GetDataBlob<PositionDB>();
+        return (dba.AbsolutePosition - absolutePositon).Length();
+    }
+
+    public static Vector3 GetRalitivePosition(Entity a, Entity b)
+    {
+        var dba = a.GetDataBlob<PositionDB>();
+        var dbb = b.GetDataBlob<PositionDB>();
+        return (dba.AbsolutePosition - dbb.AbsolutePosition);
+    }
+    public static Vector3 GetRalitivePosition(Entity a, Vector3 absolutePositon)
+    {
+        var dba = a.GetDataBlob<PositionDB>();
+        return (dba.AbsolutePosition - absolutePositon);
+    }
+    public static Vector3 GetRalitivePosition(Vector3 absolutePositon, Entity b)
+    {
+        var dbb = b.GetDataBlob<PositionDB>();
+        return (absolutePositon - dbb.AbsolutePosition);
     }
 }

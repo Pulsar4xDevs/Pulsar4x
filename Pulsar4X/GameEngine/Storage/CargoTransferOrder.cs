@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using Newtonsoft.Json;
 using Pulsar4X.Engine;
 using Pulsar4X.Names;
@@ -15,7 +16,7 @@ using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Storage;
 
-public class CargoTransferOrder : EntityCommand
+public class CargoTransferOrder : EntityAction
 {
     public enum Conditionals
     {
@@ -90,6 +91,45 @@ public class CargoTransferOrder : EntityCommand
             IsPrimaryEntity = false
         };
         return secondaryEntity.Manager.Game.OrderHandler.HandleOrder(cmd2) && primaryAccepted;
+    }
+
+    /// <summary>
+    /// Build a bilateral refuel transfer without enqueueing. Receiver is primary (WaitTillFull).
+    /// Planner returns <paramref name="primary"/> in its action list and submits secondary separately
+    /// so the supplier participates while move actions stay ordered ahead of the receiver's transfer.
+    /// </summary>
+    public static (CargoTransferOrder primary, CargoTransferOrder secondary) CreateRefuelPair(
+        int faction,
+        Entity receiver,
+        Entity supplier,
+        ICargoable fuel,
+        Conditionals condition)
+    {
+        long amount = 0;
+        if (condition == Conditionals.WaitTillFull)
+            amount = CargoMath.GetFreeUnitSpace(receiver.GetDataBlob<CargoStorageDB>(), fuel);
+
+        var itemList = new List<(ICargoable item, long amount)> { (fuel, amount) };
+        var cargoData = new CargoTransferDataDB(receiver, supplier, itemList);
+        var now = receiver.Manager.ManagerSubpulses.StarSysDateTime;
+
+        var primary = new CargoTransferOrder(cargoData)
+        {
+            RequestingFactionGuid = faction,
+            EntityCommandingGuid = receiver.Id,
+            CreatedDate = now,
+            IsPrimaryEntity = true,
+            Condition = condition,
+        };
+        var secondary = new CargoTransferOrder(cargoData)
+        {
+            RequestingFactionGuid = faction,
+            EntityCommandingGuid = supplier.Id,
+            CreatedDate = now,
+            IsPrimaryEntity = false,
+            Condition = condition,
+        };
+        return (primary, secondary);
     }
 
     /// <summary>
@@ -253,7 +293,7 @@ public class CargoTransferOrder : EntityCommand
         return amount;
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }

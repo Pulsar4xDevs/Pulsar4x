@@ -1,4 +1,5 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
@@ -8,7 +9,7 @@ using Pulsar4X.Ships;
 
 namespace Pulsar4X.JumpPoints;
 
-public class JPSurveyOrder : EntityCommand
+public class JPSurveyOrder : EntityAction
 {
     public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement | ActionLaneTypes.InteractWithExternalEntity;
 
@@ -16,7 +17,7 @@ public class JPSurveyOrder : EntityCommand
 
     public override string Name => $"Jump Point Survey {Target.GetOwnersName()} ({GetProgressPercent()}%)";
 
-    public override string Details => "";
+    public override string Details => $"{GetProgressPercent():0}%";
 
     public Entity Target { get; private set; }
     public JPSurveyableDB? TargetSurveyDB { get; private set; } = null;
@@ -34,13 +35,15 @@ public class JPSurveyOrder : EntityCommand
     {
         _entityCommanding = commandingEntity;
         Target = target;
+        RequestingFactionGuid = commandingEntity.FactionOwnerID;
+        EntityCommandingGuid = commandingEntity.Id;
         if(Target.TryGetDataBlob<JPSurveyableDB>(out var jpSurveyableDB))
         {
             TargetSurveyDB = jpSurveyableDB;
         }
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         var command = new JPSurveyOrder(EntityCommanding, Target)
         {
@@ -63,27 +66,17 @@ public class JPSurveyOrder : EntityCommand
 
     internal override void Execute(DateTime atDateTime)
     {
-        if(!IsRunning)
+        if (IsFinished())
         {
-            IsRunning = true;
-            PreviousUpdate = atDateTime;
+            Status = ActionStatus.Succeeded;
+            return;
+        }
 
-            // Get any ships in the fleet that can survey and add the JPSurveyDB to them
-            if (_entityCommanding.TryGetDataBlob<FleetDB>(out var fleetDB))
-            {
-                foreach (var child in fleetDB.Children)
-                {
-                    if (child.HasJPSurveyAbililty())
-                    {
-                        var order = JPSurveyOrder.CreateCommand(RequestingFactionGuid, child, Target);
-                        child.Manager.Game.OrderHandler.HandleOrder(order);
-                    }
-                }
-            }
-            else if (_entityCommanding.TryGetDataBlob<ShipInfoDB>(out var shipInfoDB))
-            {
-                _entityCommanding.SetDataBlob(new JPSurveyDB() { TargetId = Target.Id });
-            }
+        if(Status != ActionStatus.Running)
+        {
+            Status = ActionStatus.Running;
+            PreviousUpdate = atDateTime;
+            _entityCommanding.SetDataBlob(new JPSurveyDB() { TargetId = Target.Id });
         }
     }
 
@@ -91,7 +84,9 @@ public class JPSurveyOrder : EntityCommand
     {
         return TargetSurveyDB != null;
     }
+    
 
+    
     public static JPSurveyOrder CreateCommand(int requestingFactionId, Entity fleet, Entity target)
     {
         var command = new JPSurveyOrder(fleet, target)
@@ -105,10 +100,13 @@ public class JPSurveyOrder : EntityCommand
     private float GetProgressPercent()
     {
         if(TargetSurveyDB == null) return 0f;
-        if(!TargetSurveyDB.HasSurveyStarted(RequestingFactionGuid)) return 0f;
+        int factionId = EntityCommanding != null
+            ? EntityCommanding.FactionOwnerID
+            : RequestingFactionGuid;
+        if(!TargetSurveyDB.HasSurveyStarted(factionId)) return 0f;
 
         uint pointsRequired = TargetSurveyDB.PointsRequired;
-        uint currentValue = TargetSurveyDB.SurveyPointsRemaining[RequestingFactionGuid];
+        uint currentValue = TargetSurveyDB.SurveyPointsRemaining[factionId];
 
         return (1f - ((float)currentValue / (float)pointsRequired)) * 100f;
     }

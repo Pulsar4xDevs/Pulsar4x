@@ -1,10 +1,11 @@
 using System;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.Fleets;
 
-public class ServeyAnomalyAction : EntityCommand
+public class ServeyAnomalyAction : EntityAction
 {
     public override ActionLaneTypes ActionLanes { get; }
     public override bool IsBlocking { get; }
@@ -26,7 +27,7 @@ public class ServeyAnomalyAction : EntityCommand
         return _isFinished;
     }
 
-    public override EntityCommand Clone()
+    public override EntityAction Clone()
     {
         throw new NotImplementedException();
     }
