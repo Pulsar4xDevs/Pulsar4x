@@ -6,7 +6,7 @@ namespace Pulsar4X.Engine.Orders
 {
     public class InstallComponentInstanceOrder : EntityAction
     {
-        public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf | ActionLaneTypes.InteractWithExternalEntity | ActionLaneTypes.InstantOrder;
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.InteractWithSelf | ActionLaneTypes.InteractWithExternalEntity | ActionLaneTypes.InstantOrder;
 
         public override bool IsBlocking => true;
 

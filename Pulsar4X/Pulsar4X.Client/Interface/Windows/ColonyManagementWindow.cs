@@ -17,6 +17,9 @@ namespace Pulsar4X.Client
         public int? SelectedColonyId { get; private set; } = null;
         private string? _selectedSystemId = null;
 
+        private ColonyProductionDisplay? _productionDisplay;
+        private ColonyConstructionDisplay? _constructionDisplay;
+
         internal static ColonyManagementWindow GetInstance()
         {
             if(_uiState.TryGetUniqueWindow<ColonyManagementWindow>(out var window))
@@ -85,50 +88,51 @@ namespace Pulsar4X.Client
                 var selectedSystem = _selectedSystemId == null ? null : galaxy.GetSystem(_selectedSystemId);
                 var selectedColony = SelectedColonyId is { } id ? selectedSystem?.GetEntity(id) : null;
 
-                if (selectedColony == null || selectedSystem == null)
+                if (selectedColony != null && selectedSystem != null)
                 {
-                    Window.End();
-                    return;
+                    ImGui.SameLine();
+                    DisplaySelectedColony(selectedSystem, selectedColony);
                 }
-
-                ImGui.SameLine();
-
-                if(ImGui.BeginChild("ColoniesTabs"))
-                {
-                    ImGui.BeginTabBar("EconomicsTabBar", ImGuiTabBarFlags.None);
-
-                    if(ImGui.BeginTabItem("Summary"))
-                    {
-                        DisplaySummary(selectedColony, selectedSystem);
-                        ImGui.EndTabItem();
-                    }
-                    if(ImGui.BeginTabItem("Production"))
-                    {
-                        ColonyProductionDisplay.GetInstance()
-                            .Display(selectedColony.Id, selectedColony.GetView<IndustryView>(), _uiState);
-                        ImGui.EndTabItem();
-                    }
-                    if(ImGui.BeginTabItem("Construction"))
-                    {
-                        ColonyConstructionDisplay.GetInstance()
-                            .Display(selectedColony.Id, selectedColony.GetView<ConstructionView>(), _uiState);
-                        ImGui.EndTabItem();
-                    }
-                    if(selectedColony.GetView<ColonyMiningView>() is { } mining && ImGui.BeginTabItem("Mining"))
-                    {
-                        mining.Display();
-                        ImGui.EndTabItem();
-                    }
-                    if(selectedColony.GetView<NavalAcademyView>() is { } academy && ImGui.BeginTabItem("Naval Academy"))
-                    {
-                        DisplayNavalAcademy(selectedColony.Id, academy);
-                        ImGui.EndTabItem();
-                    }
-                    ImGui.EndTabBar();
-                }
-                ImGui.EndChild();
             }
             Window.End();
+        }
+
+        private void DisplaySelectedColony(IClientSystem selectedSystem, EntitySnapshot selectedColony)
+        {
+            if (ImGui.BeginChild("ColoniesTabs"))
+            {
+                ImGui.BeginTabBar("EconomicsTabBar", ImGuiTabBarFlags.None);
+
+                if (ImGui.BeginTabItem("Summary"))
+                {
+                    DisplaySummary(selectedColony, selectedSystem);
+                    ImGui.EndTabItem();
+                }
+                if (ImGui.BeginTabItem("Production"))
+                {
+                    _productionDisplay ??= new ColonyProductionDisplay();
+                    _productionDisplay.Display(selectedColony.Id, selectedColony.GetView<IndustryView>(), _uiState);
+                    ImGui.EndTabItem();
+                }
+                if (ImGui.BeginTabItem("Construction"))
+                {
+                    _constructionDisplay ??= new ColonyConstructionDisplay();
+                    _constructionDisplay.Display(selectedColony.Id, selectedColony.GetView<ConstructionView>(), _uiState);
+                    ImGui.EndTabItem();
+                }
+                if (selectedColony.GetView<ColonyMiningView>() is { } mining && ImGui.BeginTabItem("Mining"))
+                {
+                    mining.Display();
+                    ImGui.EndTabItem();
+                }
+                if (selectedColony.GetView<NavalAcademyView>() is { } academy && ImGui.BeginTabItem("Naval Academy"))
+                {
+                    DisplayNavalAcademy(selectedColony.Id, academy);
+                    ImGui.EndTabItem();
+                }
+                ImGui.EndTabBar();
+            }
+            ImGui.EndChild();
         }
 
         private void DisplaySummary(EntitySnapshot colony, IClientSystem system)

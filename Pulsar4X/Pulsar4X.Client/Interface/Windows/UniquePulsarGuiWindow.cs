@@ -3,6 +3,9 @@ using System;
 
 namespace Pulsar4X.Client
 {
+    /// <summary>
+    /// A base class for GUI windows that are unique to the application client.
+    /// </summary>
     public abstract class UniquePulsarGuiWindow : UpdateWindowState
     {
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.None;
@@ -15,10 +18,7 @@ namespace Pulsar4X.Client
         public bool ClickedEntityIsPrimary = true;
 
         protected UniquePulsarGuiWindow(string name)
-        {
-            int x = 1;
-            // _uiState.LoadedWindows[this.GetType()] = this;
-        }
+        {}
 
         public void SetActive(bool ActiveVal = true)
         {

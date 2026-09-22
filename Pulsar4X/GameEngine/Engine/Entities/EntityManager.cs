@@ -10,6 +10,7 @@ using Pulsar4X.Extensions;
 using System.Reflection;
 using Pulsar4X.Messaging;
 using Pulsar4X.Galaxy;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Pulsar4X.Engine
 {
@@ -306,24 +307,24 @@ namespace Pulsar4X.Engine
                 // their tree hierarchy - PositionDB parent, FleetDB children, etc.).
                 bool wasTransferred = entity.Manager != null && entity.Manager != this;
 
-                foreach (var (type, dictionary) in _datablobStores)
+                foreach (var dataStore in _datablobStores.Values)
                 {
-                    if(dictionary.ContainsKey(entity.Id))
+                    if(!wasTransferred && dataStore.TryGetValue(entity.Id, out var value))
                     {
-                        if(!wasTransferred)
-                            dictionary[entity.Id].OnRemovedFromEntity();
+                        value.OnRemovedFromEntity();
                     }
 
-                    dictionary.Remove(entity.Id);
+                    dataStore.Remove(entity.Id);
                 }
-                foreach (var (key, value) in _factionSensorContacts)
+
+                foreach (var value in _factionSensorContacts.Values)
                 {
                     value.RemoveContact(entity.Id);
                 }
 
                 if(entity.FactionOwnerID == Game.NeutralFactionId)
                 {
-                    foreach(var (factionId, factionContactList) in _factionNeutralContacts)
+                    foreach(var factionContactList in _factionNeutralContacts.Values)
                     {
                         factionContactList.Remove(entity.Id);
                     }
@@ -400,31 +401,47 @@ namespace Pulsar4X.Engine
         internal T GetDataBlob<T>(int entityID) where T : BaseDataBlob
         {
             Type blobType = typeof(T);
+            if(TryGetDataBlob<T>(entityID, out var dataBlob))
+            {
+                return dataBlob;
+            }
 
-            if(!_datablobStores.ContainsKey(blobType) || !_datablobStores[blobType].ContainsKey(entityID))
-                throw new KeyNotFoundException($"BlobType {blobType} not found in Manager: {ManagerID}");
-
-            return (T)_datablobStores[blobType][entityID];
+            throw new KeyNotFoundException($"BlobType {blobType} not found in Manager: {ManagerID}");
         }
 
         [Obsolete("Use TryGetDataBlob<T>() instead.")]
         internal BaseDataBlob GetDataBlob(int entityID, Type type)
         {
-            return _datablobStores[type][entityID];
+            if(TryGetDataBlob(entityID, type, out var dataBlob))
+            {
+                return (BaseDataBlob)dataBlob;
+            }
+
+            throw new KeyNotFoundException($"BlobType {type} not found in Manager: {ManagerID}");
         }
 
         internal bool HasDataBlob<T>(int entityID) where T: BaseDataBlob
         {
             Type blobType = typeof(T);
-            return _datablobStores.ContainsKey(blobType) && _datablobStores[blobType].ContainsKey(entityID);
+            if (_datablobStores.TryGetValue(blobType, out var dataStore))
+            {
+                return dataStore.ContainsKey(entityID);
+            }
+
+            return false;
         }
 
         internal bool HasDataBlob(int entityID, Type type)
         {
-            return _datablobStores.ContainsKey(type) && _datablobStores[type].ContainsKey(entityID);
+            if(_datablobStores.TryGetValue(type, out var dataStore))
+            {
+                return dataStore.ContainsKey(entityID);
+            }
+
+            return false;
         }
 
-        internal bool TryGetDataBlob(int entityID, Type blobType, out object? value)
+        internal bool TryGetDataBlob(int entityID, Type blobType, [NotNullWhen(true)] out object? value)
         {
             if(_datablobStores.TryGetValue(blobType, out var dataStore))
             {
@@ -441,7 +458,7 @@ namespace Pulsar4X.Engine
             return false;
         }
 
-        internal bool TryGetDataBlob<T>(int entityID, out T? value) where T : BaseDataBlob
+        internal bool TryGetDataBlob<T>(int entityID, [NotNullWhen(true)] out T? value) where T : BaseDataBlob
         {
             Type blobType = typeof(T);
             if (TryGetDataBlob(entityID, blobType, out object? objValue))
@@ -455,17 +472,20 @@ namespace Pulsar4X.Engine
 
         internal async void SetDataBlob<T>(int entityId, T dataBlob, bool updateListeners = true) where T : BaseDataBlob
         {
-            if (dataBlob is null)
-                throw new ArgumentNullException(nameof(dataBlob));
-            if(!_entities.ContainsKey(entityId))
+            ArgumentNullException.ThrowIfNull(dataBlob);
+
+            if(!_entities.TryGetValue(entityId, out Entity? entity))
                 throw new ArgumentException("Entity ID does not exist");
 
             Type type = dataBlob.GetType();
-            if (!_datablobStores.ContainsKey(type))
-                _datablobStores[type] = new SafeDictionary<int, BaseDataBlob>();
+            if(!_datablobStores.TryGetValue(type, out var dataStore))
+            {
+                dataStore = new SafeDictionary<int, BaseDataBlob>();
+                _datablobStores[type] = dataStore;
+            }
 
-            _datablobStores[type][entityId] = dataBlob;
-            dataBlob.OwningEntity = _entities[entityId];
+            dataStore[entityId] = dataBlob;
+            dataBlob.OwningEntity = entity;
             dataBlob.OnSetToEntity();
             ManagerSubpulses.AddSystemInterupt(dataBlob);
 
@@ -485,9 +505,9 @@ namespace Pulsar4X.Engine
         public async void RemoveDatablob<T>(int entityId) where T : BaseDataBlob
         {
             var type = typeof(T);
-            if (_datablobStores.ContainsKey(type))
+            if(_datablobStores.TryGetValue(type, out var dataStore))
             {
-                var blob = _datablobStores[type][entityId];
+                var blob = dataStore[entityId];
                 blob.OnRemovedFromEntity();
                 blob.OwningEntity = null;
                 _datablobStores[type].Remove(entityId);

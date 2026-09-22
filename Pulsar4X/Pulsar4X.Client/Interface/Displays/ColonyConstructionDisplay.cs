@@ -10,16 +10,9 @@ namespace Pulsar4X.Client
     /// </summary>
     public sealed class ColonyConstructionDisplay
     {
-        private static ColonyConstructionDisplay? instance = null;
-
         private int _selectedDesignIndex = -1;
 
-        private ColonyConstructionDisplay() { }
-
-        internal static ColonyConstructionDisplay GetInstance()
-        {
-            return instance ??= new ColonyConstructionDisplay();
-        }
+        internal ColonyConstructionDisplay() { }
 
         public void Display(int entityId, ConstructionView? construction, GlobalUIState uiState)
         {
