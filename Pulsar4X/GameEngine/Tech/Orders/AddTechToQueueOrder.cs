@@ -39,6 +39,9 @@ public class AddTechToQueueOrder : EntityAction
 
     internal override void Execute(DateTime atDateTime)
     {
+        // Finished only after this runs. IsFinished is queried before Execute, so a
+        // constant true skips the order and the queue never changes.
+        _isFinished = true;
         if(!_labEntity.TryGetDataBlob<ResearcherDB>(out var researcherDB))
             return;
 
@@ -59,7 +62,7 @@ public class AddTechToQueueOrder : EntityAction
 
     internal override bool IsFinished()
     {
-        return true;
+        return _isFinished;
     }
 
     internal override bool IsValidCommand(Game game)

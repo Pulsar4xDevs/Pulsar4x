@@ -39,6 +39,7 @@ public class FundingChangedOrder : EntityAction
 
     internal override void Execute(DateTime atDateTime)
     {
+        _isFinished = true;
         if(!_labEntity.TryGetDataBlob<ResearcherDB>(out var researcherDB))
             return;
 
@@ -59,7 +60,7 @@ public class FundingChangedOrder : EntityAction
 
     internal override bool IsFinished()
     {
-        return true;
+        return _isFinished;
     }
 
     internal override bool IsValidCommand(Game game)

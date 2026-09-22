@@ -141,7 +141,12 @@ namespace Pulsar4X.Tests
                 new Pulsar4X.Api.WarpMoveCommand(ship.Id, destinationId));
 
             Assert.That(result.Accepted, Is.True, result.RejectionReason);
-            Assert.That(ProjectOrders(session, ship), Has.Count.EqualTo(1));
+            // The warp starts on submit (transit time is now) and queues a circularise
+            // behind it so arrival burns from the real exit state.
+            var orders = ProjectOrders(session, ship);
+            Assert.That(orders.Select(o => o.Name), Has.Some.StartsWith("Warp Move"));
+            Assert.That(orders.Select(o => o.Name), Has.Some.EqualTo("Circularise"));
+            Assert.That(orders, Has.Count.EqualTo(2));
         }
 
         [Test]

@@ -42,7 +42,10 @@ namespace Pulsar4X.Movement
         public override void UpdateDetailString()
         {
             if (_entityCommanding == null)
+            {
                 _details = "";
+                return;
+            }
 
             // Not started yet — charge wait lives here (Execute keeps retrying)
             if (Status == ActionStatus.Queued)
@@ -180,6 +183,8 @@ namespace Pulsar4X.Movement
 
             var cmd = new WarpMoveAction()
             {
+                _entityCommanding = orderEntity,
+                _targetEntity = targetEntity,
                 RequestingFactionGuid = orderEntity.FactionOwnerID,
                 EntityCommandingGuid = orderEntity.Id,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,

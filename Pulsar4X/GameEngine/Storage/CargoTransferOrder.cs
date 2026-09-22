@@ -269,7 +269,10 @@ public class CargoTransferOrder : EntityAction
             default:
                 throw new ArgumentOutOfRangeException();
         }
-        if(_isFinished)
+        // ActionQueueProcessor queries IsFinished more than once per pass (status, then
+        // queue removal). The first true result detaches the transfer; later queries must
+        // not look the blob up again.
+        if(_isFinished && _entityCommanding.HasDataBlob<CargoTransferDB>())
         {
             //TransferData.PrimaryStorageDB.EscroItems.Remove(TransferData);
             //TransferData.SecondaryStorageDB.EscroItems.Remove(TransferData);
