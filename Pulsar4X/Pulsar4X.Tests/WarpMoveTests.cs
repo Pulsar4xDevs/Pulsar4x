@@ -458,18 +458,19 @@ namespace Pulsar4X.Tests
 
                 Assert.AreEqual(1, dropIns.Count,
                     "drop-in must run once at PredictedExitTime. " + DescribeMove(ship, goal));
-                Assert.IsTrue(ship.HasDataBlob<OrbitDB>(), "drop-in attached an orbit");
                 Assert.IsFalse(ship.HasDataBlob<WarpMovingDB>(),
                     "bubble is gone after arrival; a second warp must not have started. "
                     + DescribeMove(ship, goal));
+                Assert.IsTrue(
+                    ship.HasDataBlob<OrbitDB>() || ship.HasDataBlob<NewtonSimpleMoveDB>(),
+                    "drop-in leftover Kepler or circularise SimpleNewt. " + DescribeMove(ship, goal));
 
                 var dropAt = dropIns[0].at;
-                var orbit = ship.GetDataBlob<OrbitDB>();
                 var pos = ship.GetDataBlob<PositionDB>();
-                var posFromOrbit = OrbitMath.GetPosition(orbit, dropAt);
                 var rel = pos.RelativePosition;
-                var destAbs = OrbitMath.GetAbsolutePosition(dest.GetDataBlob<OrbitDB>(), dropAt);
+                var destAbsAtDrop = OrbitMath.GetAbsolutePosition(dest.GetDataBlob<OrbitDB>(), dropAt);
                 var marsRadius = mars.GetDataBlob<MassVolumeDB>().RadiusInM;
+                var absAtDrop = (Vector3)MoveMath.GetAbsoluteFuturePosition(ship, dropAt);
 
                 Assert.Multiple(() =>
                 {
@@ -477,25 +478,41 @@ namespace Pulsar4X.Tests
                     Assert.AreEqual(eti, dropAt,
                         "drop-in datetime is PredictedExitTime, not a later hotloop");
 
-                    AssertOrbitWellFormed(orbit, $"{startOrbit} drop-in orbit");
-                    Assert.AreSame(expectedParent, orbit.Parent, "drop-in SOI parent");
                     Assert.AreSame(expectedParent, pos.Parent, "PositionDB.Parent");
-
                     AssertFiniteVec(rel, "PositionDB.RelativePosition");
                     AssertFiniteVec(pos.AbsolutePosition, "PositionDB.AbsolutePosition");
-                    AssertFiniteVec(posFromOrbit, "OrbitMath.GetPosition at drop-in");
-                    AssertFiniteVec(pos.Velocity, "PositionDB.Velocity");
-
-                    // PositionDB.AbsolutePosition is hotloop-quantized to the parent's last
-                    // orbit tick. The drop-in contract is the Kepler state at eti.
-                    var absAtDrop = (Vector3)MoveMath.GetAbsoluteFuturePosition(ship, dropAt);
                     Assert.Less((absAtDrop - exitAbs).Length(), 1e6,
                         "ship absolute pos at drop-in should be the intercept exit");
-                    Assert.Less((absAtDrop - (destAbs + offset)).Length(), 1e6,
+                    Assert.Less((absAtDrop - (destAbsAtDrop + offset)).Length(), 1e6,
                         "ship should be one offset from the destination body at drop-in");
                     Assert.Greater(rel.Length(), marsRadius, "Mars-relative r is inside Mars");
+                });
+
+                // Hyperbolic leftover starts CirculariseAction, which strips OrbitDB until
+                // SimpleNewt completes. Wait for that before asserting a settled Kepler.
+                var circDeadline = eti + TimeSpan.FromDays(2);
+                while (ship.HasDataBlob<NewtonSimpleMoveDB>()
+                       && _starSys.StarSysDateTime < circDeadline)
+                    AdvanceTo(_starSys.StarSysDateTime + TimeSpan.FromMinutes(1));
+
+                Assert.IsFalse(ship.HasDataBlob<NewtonSimpleMoveDB>(),
+                    "circularise should have finished. " + DescribeMove(ship, goal));
+                Assert.IsTrue(ship.TryGetDataBlob<OrbitDB>(out var orbit),
+                    "circularise / drop-in left an orbit. " + DescribeMove(ship, goal));
+
+                var now = _starSys.StarSysDateTime;
+                OrbitProcessor.ProcessEntity(ship, now);
+                var posFromOrbit = OrbitMath.GetPosition(orbit, now);
+                rel = ship.GetDataBlob<PositionDB>().RelativePosition;
+
+                Assert.Multiple(() =>
+                {
+                    AssertOrbitWellFormed(orbit, $"{startOrbit} orbit after circularise");
+                    Assert.AreSame(expectedParent, orbit.Parent, "SOI parent after circularise");
+                    Assert.Less(orbit.Eccentricity, 0.05, "circularise left a near-circular orbit");
+                    AssertFiniteVec(posFromOrbit, "OrbitMath.GetPosition after circularise");
                     Assert.Less((rel - posFromOrbit).Length(), 1e3,
-                        "PositionDB.RelativePosition must match the orbit equations at drop-in");
+                        "PositionDB.RelativePosition must match the orbit equations after circularise");
                 });
 
                 var queue = ship.GetDataBlob<ActionQueueDB>();
