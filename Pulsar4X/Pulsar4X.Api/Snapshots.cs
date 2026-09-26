@@ -16,6 +16,18 @@ public enum OwnerRelation
     Unknown,
 }
 
+/// <summary>
+/// How one faction treats another. Stored per viewer; a missing entry means Hostile.
+/// Allied and Friendly both project as <see cref="OwnerRelation.Friendly"/>.
+/// </summary>
+public enum FactionStance
+{
+    Hostile,
+    Neutral,
+    Friendly,
+    Allied,
+}
+
 /// <summary>Broad classification of an entity for list grouping and icons. The client maps this to its
 /// own display enum/short-names.</summary>
 public enum BodyKind
@@ -61,6 +73,9 @@ public sealed record SystemSummary(string SystemId, string Name);
 
 /// <summary>The player's faction/corporation: identity and current funds.</summary>
 public sealed record FactionSnapshot(string Name, string Abbreviation, decimal Funds);
+
+/// <summary>One other faction as the viewer currently treats them. A missing stored stance arrives as Hostile.</summary>
+public sealed record FactionStanceRow(int FactionId, string Name, FactionStance Stance);
 
 /// <summary>A bulk, faction-scoped snapshot of one star system at a point in time.</summary>
 public sealed class SystemSnapshot

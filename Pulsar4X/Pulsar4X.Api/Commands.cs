@@ -22,6 +22,13 @@ public sealed record CommandResult(bool Accepted, string? CommandId = null, stri
 
 public sealed record RenameCommand(int TargetEntityId, string NewName) : GameCommand(TargetEntityId);
 
+/// <summary>
+/// Set how the commanded faction treats <see cref="OtherFactionId"/>. Targets the faction entity.
+/// Writes only that faction's stance table.
+/// </summary>
+public sealed record SetFactionStanceCommand(int TargetEntityId, int OtherFactionId, FactionStance Stance)
+    : GameCommand(TargetEntityId);
+
 // ----- fleet organisation (commanded entity: the faction for create, otherwise the fleet/ship) -----
 #region Fleet Organization Commands
 

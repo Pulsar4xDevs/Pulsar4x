@@ -84,6 +84,15 @@ namespace Pulsar4X.Client
 
             btn = new ToolBarOption()
             {
+                Picture = _uiState.Img_Select(),
+                TooltipText = "Factions",
+                OnClick = new Action(FactionStanceWindow.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(FactionStanceWindow.GetInstance().GetActive)
+            };
+            orderedButtons.Add((165, btn));
+
+            btn = new ToolBarOption()
+            {
                 Picture = _uiState.Img_GalaxyMap(),
                 TooltipText = "Galaxy Browser",
                 OnClick = new Action(GalaxyWindow.GetInstance().ToggleActive),

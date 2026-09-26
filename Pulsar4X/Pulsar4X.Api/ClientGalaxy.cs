@@ -29,6 +29,9 @@ public interface IClientGalaxy
     /// <summary>Everyone in the faction's service (officers, scientists, administrators).</summary>
     IReadOnlyList<CommanderSnapshot> Commanders { get; }
 
+    /// <summary>Other factions and the stance this faction has stored toward each of them.</summary>
+    IReadOnlyList<FactionStanceRow> Stances { get; }
+
     /// <summary>The faction's game log, oldest first: the backlog pushed on connect plus every
     /// event received since.</summary>
     IReadOnlyList<LogEvent> EventLog { get; }

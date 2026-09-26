@@ -429,7 +429,7 @@
           "Name": "db",
           "GuiHint": "None",
           "PropertyFormula": "AtbConstrArgs(PropertyValue('Logistic Capacity'))",
-          "AttributeType": "Pulsar4X.Atb.LogiBaseAtb"
+          "AttributeType": "Pulsar4X.Logistics.LogiBaseAtb"
         }
       ]
     }

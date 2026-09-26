@@ -61,6 +61,34 @@ namespace Pulsar4X.Engine.Api
             return new FactionSnapshot(name, info.Abbreviation, info.Money.GetCurrentFunds());
         }
 
+        /// <summary>
+        /// Other factions this viewer can set a stance toward. Skips the viewer, the game master,
+        /// and <see cref="Game.NeutralFactionId"/>. A missing dictionary entry is Hostile.
+        /// </summary>
+        public IReadOnlyList<FactionStanceRow> ProjectStances(int viewerFactionId)
+        {
+            var rows = new List<FactionStanceRow>();
+            FactionInfoDB? info = null;
+            if (_game.Factions.TryGetValue(viewerFactionId, out var viewer))
+                viewer.TryGetDataBlob(out info);
+
+            foreach (var (id, faction) in _game.Factions)
+            {
+                if (id == viewerFactionId || id == _game.GameMasterFaction.Id || id == Game.NeutralFactionId)
+                    continue;
+
+                string name = faction.TryGetDataBlob<NameDB>(out var nameDB)
+                    ? nameDB.GetName(viewerFactionId)
+                    : id.ToString();
+                var stance = FactionStance.Hostile;
+                if (info != null && info.Stances.TryGetValue(id, out var stored))
+                    stance = stored;
+                rows.Add(new FactionStanceRow(id, name, stance));
+            }
+
+            return rows;
+        }
+
         /// <summary>Projects a system by id, or null if this game has no such system.</summary>
         public SystemSnapshot? ProjectSystem(string systemId, int factionId)
         {
@@ -1357,11 +1385,22 @@ namespace Pulsar4X.Engine.Api
             return BodyKind.Unknown;
         }
 
-        private static OwnerRelation RelationOf(Entity entity, int factionId)
+        private OwnerRelation RelationOf(Entity entity, int factionId)
         {
             if (entity.FactionOwnerID == factionId) return OwnerRelation.Owned;
             if (entity.FactionOwnerID == Game.NeutralFactionId) return OwnerRelation.Neutral;
-            return OwnerRelation.Hostile;
+
+            if (!_game.Factions.TryGetValue(factionId, out var viewer)
+                || !viewer.TryGetDataBlob<FactionInfoDB>(out var info)
+                || !info.Stances.TryGetValue(entity.FactionOwnerID, out var stance))
+                return OwnerRelation.Hostile;
+
+            return stance switch
+            {
+                FactionStance.Friendly or FactionStance.Allied => OwnerRelation.Friendly,
+                FactionStance.Neutral => OwnerRelation.Neutral,
+                _ => OwnerRelation.Hostile,
+            };
         }
 
         private StarSystem? FindSystem(string systemId)

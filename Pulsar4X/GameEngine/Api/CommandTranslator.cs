@@ -41,6 +41,7 @@ namespace Pulsar4X.Engine.Api
             _translators = new Dictionary<Type, Func<Entity, Entity, GameCommand, CommandResult>>
             {
                 [typeof(Pulsar4X.Api.RenameCommand)] = TranslateRename,
+                [typeof(SetFactionStanceCommand)] = TranslateSetFactionStance,
                 [typeof(CreateFleetCommand)] = TranslateCreateFleet,
                 [typeof(CreateColonyCommand)] = TranslateCreateColony,
                 [typeof(DisbandFleetCommand)] = TranslateDisbandFleet,
@@ -132,6 +133,24 @@ namespace Pulsar4X.Engine.Api
         // ----- translators -----
 
         // Fully qualified engine order type: it shares its name with the API DTO.
+        private CommandResult TranslateSetFactionStance(Entity faction, Entity commanded, GameCommand command)
+        {
+            var set = (SetFactionStanceCommand)command;
+            if (commanded.Id != faction.Id)
+                return CommandResult.Reject("Stance is set on the faction itself.");
+            if (set.OtherFactionId == faction.Id)
+                return CommandResult.Reject("A faction cannot set a stance toward itself.");
+            if (set.OtherFactionId == Game.NeutralFactionId)
+                return CommandResult.Reject("The neutral faction cannot be a stance target.");
+            if (!_game.Factions.ContainsKey(set.OtherFactionId))
+                return CommandResult.Reject($"Faction {set.OtherFactionId} not found.");
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var info))
+                return CommandResult.Reject("Faction has no info.");
+
+            info.Stances[set.OtherFactionId] = set.Stance;
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
         private CommandResult TranslateRename(Entity faction, Entity commanded, GameCommand command)
         {
             var rename = (Pulsar4X.Api.RenameCommand)command;

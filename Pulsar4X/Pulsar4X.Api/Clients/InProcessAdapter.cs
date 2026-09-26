@@ -150,6 +150,10 @@ public sealed class InProcessAdapter : IGameClient
                 if (evt.Commanders != null) _galaxy.SetCommanders(evt.Commanders);
                 return;
 
+            case GameEventType.StancesChanged:
+                if (evt.Stances != null) _galaxy.SetStances(evt.Stances);
+                return;
+
             case GameEventType.LogEvent:
                 if (evt.Log != null) _galaxy.AddLogEvents(evt.Log);
                 return;
