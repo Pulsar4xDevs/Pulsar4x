@@ -1,6 +1,6 @@
 # Plan 2 — Market book
 
-Status: not started. Spec: `GameEngine/Logistics/market-and-stance.md` section 2.
+Status: implemented on `TradeAndTransport`. Spec: `GameEngine/Logistics/market-and-stance.md` section 2. Tests: `Pulsar4X.Tests/MarketBookTests.cs`.
 
 ## Outcome
 

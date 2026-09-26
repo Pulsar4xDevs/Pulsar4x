@@ -8,7 +8,8 @@ namespace Pulsar4X.Factions;
 public enum TransactionCategory
 {
     InitialInvestment,
-    Research
+    Research,
+    Trade
 }
 
 public class Transaction

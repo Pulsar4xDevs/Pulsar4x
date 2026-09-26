@@ -248,13 +248,24 @@ namespace Pulsar4X.Engine
 
             CargoTransferProcessor.AddCargoItems(colonyEntity, _missile, 100);
             CargoTransferProcessor.AddCargoItems(colonyEntity, _merlin, 5);
-            LogiBaseDB earthlogiBase = colonyEntity.GetDataBlob<LogiBaseDB>();
-            earthlogiBase.ListedItems.Add(iron, (1000, 1));
-            colonyEntity.SetDataBlob(earthlogiBase);
-
-            LogiBaseDB marslogiBase = marsColony.GetDataBlob<LogiBaseDB>();
-            marslogiBase.ListedItems.Add(iron, (-1000, 1));
-            marsColony.SetDataBlob(marslogiBase);
+            MarketBook.SetListing(colonyEntity, new MarketListing
+            {
+                CargoId = iron.UniqueID,
+                SellQuantity = 1000,
+                Ask = 10,
+                BuyQuantity = 0,
+                Bid = 0,
+                Reserve = 0,
+            });
+            MarketBook.SetListing(marsColony, new MarketListing
+            {
+                CargoId = iron.UniqueID,
+                SellQuantity = 0,
+                Ask = 0,
+                BuyQuantity = 1000,
+                Bid = 12,
+                Reserve = 0,
+            });
 
             var fleetName = NameFactory.GetFleetName(game);
             Entity defaultFleet = FleetFactory.Create(earth.Manager, factionEntity.Id, fleetName);
