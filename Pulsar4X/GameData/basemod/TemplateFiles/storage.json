@@ -272,7 +272,7 @@
           "DescriptionFormula": "'Command level of this office'",
           "GuiHint": "GuiEnumSelectionList",
           "EnumTypeName" : "GameEngine.People.AdminLevel",
-          "MaxFormula": "5",
+          "MaxFormula": "8",
           "MinFormula": "0",
           "StepFormula": "1",
           "PropertyFormula": "0"

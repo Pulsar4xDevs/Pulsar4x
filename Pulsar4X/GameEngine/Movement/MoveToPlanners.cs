@@ -8,6 +8,7 @@ using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Orbital;
 using Pulsar4X.Orbits;
+using Pulsar4X.People;
 using Pulsar4X.Ships;
 
 namespace Pulsar4X.Movement;
@@ -679,19 +680,16 @@ public static class MovePlanner
     private static List<EntityAction> BuildWarpAndCircularise(Entity orderEntity, Entity targetEntity, DateTime now)
     {
         var actions = new List<EntityAction>();
-        var lowOrbitRadius = OrbitMath.LowOrbitRadius(targetEntity);
-        
         (Vector3 pos, Vector3 vel) departureState;
         if(orderEntity.Manager.Game.Settings.UseRelativeVelocity)
         {
             departureState = MoveMath.GetRelativeFutureState(orderEntity, now);
         }
         else
-            departureState = MoveMath.GetAbsoluteState(orderEntity, now);        
-        var perpVec = Vector3.Normalise(new Vector3(departureState.vel.Y * -1, departureState.vel.X, 0));
-        var endWarpPos = perpVec * lowOrbitRadius;
-        
-        
+            departureState = MoveMath.GetAbsoluteState(orderEntity, now);
+
+        var endWarpPos = PlannedWarpExitOffset(orderEntity, targetEntity, departureState.vel);
+
         actions.Add(WarpMoveAction.CreateWarpOnly(orderEntity, targetEntity, now, endWarpPos));
         if (targetEntity.GetDataBlob<PositionDB>().MoveType == PositionDB.MoveTypes.Orbit)
             actions.Add(CirculariseAction.CreateCommand(orderEntity));
@@ -712,6 +710,62 @@ public static class MovePlanner
             return target;
 
         return target.GetSOIParentEntity() ?? target;
+    }
+
+    /// <summary>
+    /// Low-orbit drop-in, 90° to departure velocity. Nav quality above 1.0 leads
+    /// along-track by a fraction of v_circ·t_burn so a finite circularise finishes
+    /// nearer circular. Quality 1.0 (no commander) is today's 90° offset.
+    /// </summary>
+    public static Vector3 PlannedWarpExitOffset(
+        Entity ship, Entity target, Vector3 departureVel, float? navQuality = null)
+    {
+        double r = OrbitMath.LowOrbitRadius(target);
+        if (!(r > 0) || !double.IsFinite(r))
+            return Vector3.Zero;
+
+        var velXy = new Vector3(departureVel.X, departureVel.Y, 0);
+        if (velXy.Length() < 1)
+            return new Vector3(r, 0, 0);
+
+        var radial = Vector3.Normalise(new Vector3(-velXy.Y, velXy.X, 0)) * r;
+        float q = navQuality
+                  ?? (CommanderSkills.TryGetCommander(ship, out _, out var db)
+                      ? CommanderSkills.Quality(db, SkillDomain.Nav)
+                      : 1f);
+        double lead = Math.Clamp(q - 1f, 0, 1);
+        if (lead <= 0)
+            return radial;
+
+        double tBurn = EstimateCirculariseBurnSeconds(ship, target, r, velXy.Length());
+        if (tBurn <= 0)
+            return radial;
+
+        double sgp = OrbitMath.SGP(target, ship);
+        double vCirc = Math.Sqrt(sgp / r);
+        if (!double.IsFinite(vCirc) || vCirc <= 0)
+            return radial;
+
+        double theta = Math.Min(vCirc * tBurn * lead / r, 0.2);
+        double c = Math.Cos(-theta);
+        double s = Math.Sin(-theta);
+        return new Vector3(radial.X * c - radial.Y * s, radial.X * s + radial.Y * c, radial.Z);
+    }
+
+    static double EstimateCirculariseBurnSeconds(Entity ship, Entity target, double r, double vIn)
+    {
+        if (!ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrust) || thrust.ThrustInNewtons < 1)
+            return 0;
+        if (!ship.TryGetDataBlob<MassVolumeDB>(out var mv) || mv.MassTotal < 1)
+            return 0;
+        double sgp = OrbitMath.SGP(target, ship);
+        double vCirc = Math.Sqrt(sgp / r);
+        if (!double.IsFinite(vCirc))
+            return 0;
+        double dv = Math.Abs(vIn - vCirc);
+        if (!double.IsFinite(dv) || dv < 0.01)
+            return 0;
+        return Math.Min(dv * mv.MassTotal / thrust.ThrustInNewtons, 600);
     }
 
     static double PlannedWarpExitOffsetLength(Entity target)

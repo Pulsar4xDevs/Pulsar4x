@@ -10,6 +10,7 @@
       },
       "Components": [
         { "Id": "default-design-passive-sensor-s50", "Amount": 1 },
+        { "Id": "default-design-bridge-ship", "Amount": 1 },
         { "Id": "default-design-fuel-tank-3000", "Amount": 1 },
         { "Id": "default-design-cargo-hold-1t", "Amount": 1 },
         { "Id": "default-design-alcubierre-2k", "Amount": 1 },
@@ -30,6 +31,7 @@
       },
       "Components": [
         { "Id": "default-design-passive-sensor-s50", "Amount": 1 },
+        { "Id": "default-design-bridge-ship", "Amount": 1 },
         { "Id": "default-design-fuel-tank-1500", "Amount": 1 },
         { "Id": "default-design-shuttlebay", "Amount": 1 },
         { "Id": "default-design-cargo-hold-5t", "Amount": 1 },
@@ -52,6 +54,7 @@
       },
       "Components": [
         { "Id": "default-design-passive-sensor-s50", "Amount": 1 },
+        { "Id": "default-design-bridge-ship", "Amount": 1 },
         { "Id": "default-design-fuel-tank-1500", "Amount": 1 },
         { "Id": "default-design-shuttlebay", "Amount": 1 },
         { "Id": "default-design-fuel-tank-3000", "Amount": 1 },
@@ -73,6 +76,7 @@
       },
       "Components": [
         { "Id": "default-design-passive-sensor-s50", "Amount": 1 },
+        { "Id": "default-design-bridge-ship", "Amount": 1 },
         { "Id": "default-design-laser-weapon", "Amount": 2 },
         { "Id": "default-design-beam-fire-control", "Amount": 1 },
         { "Id": "default-design-cargo-hold-1t", "Amount": 1 },
@@ -96,6 +100,7 @@
       },
       "Components": [
         { "Id": "default-design-passive-sensor-s50", "Amount": 1 },
+        { "Id": "default-design-bridge-system", "Amount": 1 },
         { "Id": "default-design-laser-weapon", "Amount": 2 },
         { "Id": "default-design-beam-fire-control", "Amount": 1 },
         { "Id": "default-design-cargo-hold-1t", "Amount": 1 },
@@ -121,6 +126,7 @@
       },
       "Components": [
         { "Id": "default-design-passive-sensor-s50", "Amount": 1 },
+        { "Id": "default-design-bridge-well", "Amount": 1 },
         { "Id": "default-design-fuel-tank-1500", "Amount": 1 },
         { "Id": "default-design-cargo-hold-1t", "Amount": 1 },
         { "Id": "default-design-raptor", "Amount": 3 }
@@ -138,6 +144,7 @@
       },
       "Components": [
         { "Id": "default-design-passive-sensor-s50", "Amount": 1 },
+        { "Id": "default-design-bridge-system", "Amount": 1 },
         { "Id": "default-design-geo-surveyor", "Amount": 1 },
         { "Id": "default-design-gravitational-surveyor", "Amount": 1 },
         { "Id": "default-design-fuel-tank-1000", "Amount": 2 },

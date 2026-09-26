@@ -85,7 +85,7 @@ public class ScanAnomalyPlan : IGoalPlanner
     
     /// <summary>
     /// Hand each capable free ship a different unfinished anomaly (nearest first).
-    /// Target a star to collect anomalies under it; target a single anomaly for that site only.
+    /// Fan-out is <see cref="CommandSpan"/> of the flagship bridge (Body / Well / System).
     /// Does not mutate <paramref name="goal"/> — agent applies the returned status.
     /// Re-entrant: skips ships already working this parent goal; skips POIs already assigned.
     /// </summary>
@@ -97,20 +97,8 @@ public class ScanAnomalyPlan : IGoalPlanner
         if (!fleet.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var targetEntity))
             return PlanResult.Fail("We have no target");
 
-        // POIs: the target itself if surveyable, plus children when the target is a star.
-        var pointsOfInterest = new List<Entity>();
-        if (CanScan(targetEntity, fleet.FactionOwnerID))
-            pointsOfInterest.Add(targetEntity);
-
-        if (targetEntity.HasDataBlob<StarInfoDB>()
-            && targetEntity.TryGetDataBlob<PositionDB>(out var position))
-        {
-            foreach (var childEntity in position.Children)
-            {
-                if (CanScan(childEntity, fleet.FactionOwnerID))
-                    pointsOfInterest.Add(childEntity);
-            }
-        }
+        var pointsOfInterest = CommandSpan.Expand(
+            targetEntity, CommandSpan.Of(fleet), e => CanScan(e, fleet.FactionOwnerID));
 
         if (pointsOfInterest.Count == 0)
             return PlanResult.Done("nothing left to survey");

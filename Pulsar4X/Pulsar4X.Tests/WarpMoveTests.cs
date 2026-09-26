@@ -610,6 +610,49 @@ namespace Pulsar4X.Tests
             AssertFiniteVec(abs, "absolute position after long tick");
         }
 
+        [Test]
+        public void PlannedWarpExitOffset_Quality1_IsPerpendicularToVelocity()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
+            var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
+            var faction = FactionFactory.CreateFaction(_game, "nav-off-" + Guid.NewGuid().ToString("N"));
+            var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
+            var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
+            var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+            var vel = new Vector3(0, 29780, 0);
+
+            var offset = MovePlanner.PlannedWarpExitOffset(ship, mars, vel, navQuality: 1f);
+            double r = OrbitMath.LowOrbitRadius(mars);
+            Assert.AreEqual(r, offset.Length(), 1.0, "still at low-orbit radius");
+            double along = Vector3.Dot(Vector3.Normalise(offset), Vector3.Normalise(vel));
+            Assert.AreEqual(0, along, 1e-6, "quality 1 is 90° to departure velocity");
+        }
+
+        [Test]
+        public void PlannedWarpExitOffset_Quality2_LeadsAlongTrack()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
+            var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
+            var faction = FactionFactory.CreateFaction(_game, "nav-on-" + Guid.NewGuid().ToString("N"));
+            var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
+            var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
+            var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+            var vel = new Vector3(0, 29780, 0);
+
+            var q1 = MovePlanner.PlannedWarpExitOffset(ship, mars, vel, navQuality: 1f);
+            var q2 = MovePlanner.PlannedWarpExitOffset(ship, mars, vel, navQuality: 2f);
+            double r = OrbitMath.LowOrbitRadius(mars);
+            Assert.AreEqual(r, q2.Length(), 1.0, "lead stays on the low-orbit circle");
+            Assert.Greater((q2 - q1).Length(), 1.0, "quality 2 rotates the exit along-track");
+            double along1 = Math.Abs(Vector3.Dot(Vector3.Normalise(q1), Vector3.Normalise(vel)));
+            double along2 = Math.Abs(Vector3.Dot(Vector3.Normalise(q2), Vector3.Normalise(vel)));
+            Assert.Greater(along2, along1, "along-track component grows with Nav quality");
+        }
+
         /// <summary>
         /// Preview circularise after warp-to-Phobos must use the drop-in parent (Mars) µ.
         /// Phobos SOI is smaller than low-orbit offset, so SetOrbitHereSimpleNewt parents
@@ -1126,10 +1169,7 @@ namespace Pulsar4X.Tests
         private static Vector3 PhobosWarpOffset(Entity ship, Entity phobos)
         {
             var vel = MoveMath.GetRelativeState(ship).Velocity;
-            double r = OrbitMath.LowOrbitRadius(phobos);
-            if (vel.Length() < 1)
-                return new Vector3(r, 0, 0);
-            return Vector3.Normalise(new Vector3(-vel.Y, vel.X, 0)) * r;
+            return MovePlanner.PlannedWarpExitOffset(ship, phobos, vel, navQuality: 1f);
         }
 
         /// <summary>

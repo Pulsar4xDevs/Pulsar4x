@@ -92,7 +92,7 @@ public class ServeyBodyPlanner : IGoalPlanner
         if (!fleet.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var targetEntity))
             return PlanResult.Fail("invalid target");
 
-        var pointsOfInterest = CollectSurveyPois(targetEntity, fleet.FactionOwnerID);
+        var pointsOfInterest = CollectSurveyPois(targetEntity, CommandSpan.Of(fleet), fleet.FactionOwnerID);
 
         var claimedPoiIds = new HashSet<int>();
         var freeShips = new List<Entity>();
@@ -218,30 +218,25 @@ public class ServeyBodyPlanner : IGoalPlanner
     }
 
     /// <summary>
-    /// Target body first if still surveyable, then direct children inner-to-outer.
+    /// Target body first if still surveyable, then extras allowed by command span
+    /// (Well: moons inner-to-outer; System: all unfinished in the star system).
     /// </summary>
-    static List<Entity> CollectSurveyPois(Entity targetEntity, int factionId)
+    static List<Entity> CollectSurveyPois(Entity targetEntity, CommandSpanKind span, int factionId)
     {
-        var pointsOfInterest = new List<Entity>();
-        if (CanScan(targetEntity, factionId))
-            pointsOfInterest.Add(targetEntity);
-
-        if (!targetEntity.TryGetDataBlob<PositionDB>(out var position))
+        var pointsOfInterest = CommandSpan.Expand(targetEntity, span, e => CanScan(e, factionId));
+        if (span != CommandSpanKind.Well || pointsOfInterest.Count <= 1
+            || pointsOfInterest[0] != targetEntity)
             return pointsOfInterest;
 
+        var root = pointsOfInterest[0];
         var moons = new List<(Entity body, double radius_m)>();
-        foreach (var childEntity in position.Children)
-        {
-            if (!CanScan(childEntity, factionId))
-                continue;
-            moons.Add((childEntity, SemiMajorOrDistance_m(childEntity, targetEntity)));
-        }
-
+        for (int i = 1; i < pointsOfInterest.Count; i++)
+            moons.Add((pointsOfInterest[i], SemiMajorOrDistance_m(pointsOfInterest[i], root)));
         moons.Sort((a, b) => a.radius_m.CompareTo(b.radius_m));
+        var ordered = new List<Entity> { root };
         foreach (var (body, _) in moons)
-            pointsOfInterest.Add(body);
-
-        return pointsOfInterest;
+            ordered.Add(body);
+        return ordered;
     }
 
     static double SemiMajorOrDistance_m(Entity body, Entity parent)

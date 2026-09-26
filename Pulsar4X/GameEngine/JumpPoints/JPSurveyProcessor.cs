@@ -9,6 +9,7 @@ using Pulsar4X.Fleets;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Messaging;
 using Pulsar4X.Movement;
+using Pulsar4X.People;
 
 namespace Pulsar4X.JumpPoints;
 
@@ -46,15 +47,15 @@ public class JPSurveyProcessor : IHotloopProcessor
             var distance =  MoveMath.GetDistanceBetween(entity, jpSurveyableDB.OwningEntity);
             if (distance < 100000) // FIXME: needs to be an attribute of the JPSurveyAbilityDB
             {
-                if (jpSurveyAbilityDB.Speed >= jpSurveyableDB.SurveyPointsRemaining[entity.FactionOwnerID])
+                uint rate = CommanderSkills.SurveyRate(jpSurveyAbilityDB.Speed, entity);
+                if (rate >= jpSurveyableDB.SurveyPointsRemaining[entity.FactionOwnerID])
                 {
                     RollToDiscoverJumpPoint(entity.StarSysDateTime, entity, jpSurveyableDB.OwningEntity);
                     MarkSurveyAsComplete(jpSurveyableDB, entity, entity.StarSysDateTime);
                 }
                 else
                 {
-                    jpSurveyableDB.SurveyPointsRemaining[entity.FactionOwnerID] -= jpSurveyAbilityDB.Speed;
-                    
+                    jpSurveyableDB.SurveyPointsRemaining[entity.FactionOwnerID] -= rate;
                 }
             }
         }

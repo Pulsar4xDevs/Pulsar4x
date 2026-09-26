@@ -202,9 +202,8 @@ namespace Pulsar4X.Movement
                 case PositionDB.MoveTypes.Orbit:
                 {
                     var sgp = OrbitMath.SGP(targetEntity, orderEntity);
-                    var lowOrbitRadius = OrbitMath.LowOrbitRadius(targetEntity);
-                    var perpVec = Vector3.Normalise(new Vector3(departureState.vel.Y * -1, departureState.vel.X, 0));
-                    var lowOrbitPos = perpVec * lowOrbitRadius;
+                    var lowOrbitPos = MovePlanner.PlannedWarpExitOffset(
+                        orderEntity, targetEntity, departureState.vel);
                     (Vector3 pos, DateTime eti) targetIntercept  = WarpMath.GetInterceptPosition(orderEntity, targetEntity, transitStartDatetime, lowOrbitPos);
                     var lowOrbit = OrbitMath.KeplerCircularFromPosition(sgp, lowOrbitPos, targetIntercept.eti);
                     var lowOrbitState = OrbitMath.GetStateVectors(lowOrbit, targetIntercept.eti);

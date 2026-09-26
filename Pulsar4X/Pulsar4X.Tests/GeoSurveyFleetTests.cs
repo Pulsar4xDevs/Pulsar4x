@@ -7,6 +7,7 @@ using NUnit.Framework;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Energy;
 using Pulsar4X.Engine;
+using GameEngine.People;
 using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
@@ -100,6 +101,18 @@ namespace Pulsar4X.Tests
                 "tanker orbits the targeted parent, not a moon");
         }
 
+        [Test]
+        public void ServeyBodyPlanner_BodySpan_AssignsParentOnly()
+        {
+            var scene = BuildMarsSurveyFleet();
+            AttachBridge(scene.SurveyorA, AdminLevel.Ship);
+
+            var plan = new ServeyBodyPlanner().Plan(scene.Fleet, scene.Goal, _epoch);
+            var surveyGoals = plan.SubGoals.Where(s => s.Goal.Type == GoalType.ServeyBodies).ToList();
+            Assert.AreEqual(1, surveyGoals.Count, plan.Message);
+            Assert.AreEqual(scene.Mars.Id, surveyGoals[0].Goal.TargetEntityID);
+        }
+
         [Test, Timeout(15000)]
         public void FleetSurvey_MarsAndMoons_ShipsSurvey_TankerMovesToParent()
         {
@@ -165,6 +178,8 @@ namespace Pulsar4X.Tests
             fleet.GetDataBlob<FleetDB>().AddChild(surveyorA);
             fleet.GetDataBlob<FleetDB>().AddChild(surveyorB);
             fleet.GetDataBlob<FleetDB>().AddChild(tanker);
+            fleet.GetDataBlob<FleetDB>().FlagShipID = surveyorA.Id;
+            AttachBridge(surveyorA, AdminLevel.Planet);
 
             var fuel = faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny("methalox");
             Assert.IsTrue(FuelSituation.TryFindFleetTanker(surveyorA, fuel, out var tankerId, out var tankerReason),
@@ -220,6 +235,13 @@ namespace Pulsar4X.Tests
             });
             OrbitProcessor.ProcessEntity(ent, _epoch);
             return ent;
+        }
+
+        static void AttachBridge(Entity ship, AdminLevel level)
+        {
+            var admin = new AdminSpaceDB();
+            admin.CommanderSeats.Add(new AdminSpaceAbilityState(level, "command-bridge"));
+            ship.SetDataBlob(admin);
         }
 
         Entity MakeSurveyShip(Entity parent, Vector3 abs, Entity faction, string name)

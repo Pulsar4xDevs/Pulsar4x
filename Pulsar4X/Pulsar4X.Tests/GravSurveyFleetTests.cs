@@ -8,6 +8,7 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Energy;
 using Pulsar4X.Engine;
+using GameEngine.People;
 using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
@@ -102,6 +103,16 @@ namespace Pulsar4X.Tests
                 "outer anomaly waits");
         }
 
+        [Test]
+        public void ScanAnomalyPlan_BodySpan_DoesNotFanOutToAnomalies()
+        {
+            var scene = BuildSolGravSurveyFleet();
+            AttachBridge(scene.SurveyorA, AdminLevel.Ship);
+
+            var plan = new ScanAnomalyPlan().Plan(scene.Fleet, scene.Goal, _epoch);
+            Assert.AreEqual(0, plan.SubGoals.Count, plan.Message);
+        }
+
         [Test, Timeout(15000)]
         public void FleetGravSurvey_OnSite_CompletesAssignedAnomalies()
         {
@@ -184,6 +195,8 @@ namespace Pulsar4X.Tests
             fleet.GetDataBlob<FleetDB>().AddChild(surveyorA);
             fleet.GetDataBlob<FleetDB>().AddChild(surveyorB);
             fleet.GetDataBlob<FleetDB>().AddChild(tanker);
+            fleet.GetDataBlob<FleetDB>().FlagShipID = surveyorA.Id;
+            AttachBridge(surveyorA, AdminLevel.System);
 
             return new Scene
             {
@@ -305,6 +318,13 @@ namespace Pulsar4X.Tests
                 return false;
             return goals.ActiveGoal.ParentGoalId == parent.Id
                    && goals.ActiveGoal.Type == GoalType.ScanAnomalies;
+        }
+
+        static void AttachBridge(Entity ship, AdminLevel level)
+        {
+            var admin = new AdminSpaceDB();
+            admin.CommanderSeats.Add(new AdminSpaceAbilityState(level, "command-bridge"));
+            ship.SetDataBlob(admin);
         }
 
         static void ParkAtSite(Entity ship, Entity site)

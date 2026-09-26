@@ -218,7 +218,10 @@
         "default-design_solarpanel",
         "default-design-battery-25kg",
         "default-design-local-construction",
-        "default-design-launch-complex"
+        "default-design-launch-complex",
+        "default-design-bridge-ship",
+        "default-design-bridge-well",
+        "default-design-bridge-system"
       ],
       "ShipDesigns": [
         "default-ship-design-courier",

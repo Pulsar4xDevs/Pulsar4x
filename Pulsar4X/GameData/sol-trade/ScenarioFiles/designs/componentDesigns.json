@@ -458,5 +458,41 @@
       "Name": "Launch Complex",
       "TemplateId": "launch-complex"
     }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-bridge-ship",
+      "Name": "Ship Bridge",
+      "TemplateId": "ship-command",
+      "Properties": [
+        { "Key": "Admin Level", "Value": 0 },
+        { "Key": "Console Space", "Value": 5 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-bridge-well",
+      "Name": "Planetary Command Bridge",
+      "TemplateId": "ship-command",
+      "Properties": [
+        { "Key": "Admin Level", "Value": 6 },
+        { "Key": "Console Space", "Value": 8 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-bridge-system",
+      "Name": "System Command Bridge",
+      "TemplateId": "ship-command",
+      "Properties": [
+        { "Key": "Admin Level", "Value": 8 },
+        { "Key": "Console Space", "Value": 12 }
+      ]
+    }
   }
 ]

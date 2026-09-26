@@ -6,6 +6,7 @@ using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Industry;
 using Pulsar4X.Interfaces;
+using Pulsar4X.People;
 
 namespace Pulsar4X.GeoSurveys;
 
@@ -66,7 +67,7 @@ public class GeoSurveyProcessor : IInstanceProcessor
 
         if(entity.TryGetDataBlob<GeoSurveyAbilityDB>(out var geoSurveyAbilityDB))
         {
-            totalSurveyPoints += geoSurveyAbilityDB.Speed;
+            totalSurveyPoints += CommanderSkills.SurveyRate(geoSurveyAbilityDB.Speed, entity);
         }
 
         if(entity.TryGetDataBlob<FleetDB>(out var fleetDB))

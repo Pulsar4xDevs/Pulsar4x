@@ -77,12 +77,7 @@ public readonly struct PlanResult
 
 public class AgentProcessor : IInstanceProcessor
 {
-    // How often an agent with an active goal wakes to re-check progress / re-plan.
-    private static readonly TimeSpan RecheckInterval = TimeSpan.FromMinutes(30);
-
-    // Time to hand a goal down one echelon. Placeholder: should scale with administrator skill,
-    // staff size (AdminSpaceAtb.ConsoleSpace) and subordinate count.
-    private static readonly TimeSpan RelayDelay = TimeSpan.FromSeconds(1);
+    // RecheckInterval / RelayDelay: CommanderSkills (Command/Nav). Default if no commander.
 
     // One planner per goal type: adding a goal type == adding an IGoalToActionsPlanner, no switch.
     private static readonly Dictionary<GoalType, IGoalPlanner> _planners;
@@ -155,13 +150,13 @@ public class AgentProcessor : IInstanceProcessor
                 {
                     if (string.IsNullOrEmpty(subGoal.ParentGoalId))
                         subGoal.ParentGoalId = goal.Id;
-                    AssignGoal(subordinate, subGoal, atDateTime + RelayDelay);
+                    AssignGoal(subordinate, subGoal, atDateTime + CommanderSkills.RelayDelay(managedEntity));
                 }
 
                 SubmitActions(managedEntity, goal, plan.Actions, atDateTime);
 
                 goal.Status = GoalStatus.Active;
-                ScheduleAgent(agentHost, atDateTime + RecheckInterval);
+                ScheduleAgent(agentHost, atDateTime + CommanderSkills.RecheckInterval(managedEntity));
                 break;
             }
 
@@ -183,7 +178,7 @@ public class AgentProcessor : IInstanceProcessor
                         {
                             if (string.IsNullOrEmpty(subGoal.ParentGoalId))
                                 subGoal.ParentGoalId = goal.Id;
-                            AssignGoal(subordinate, subGoal, atDateTime + RelayDelay);
+                            AssignGoal(subordinate, subGoal, atDateTime + CommanderSkills.RelayDelay(managedEntity));
                         }
                     }
 
@@ -194,7 +189,7 @@ public class AgentProcessor : IInstanceProcessor
                     else if (mine.Any(g => g.Status == GoalStatus.Failed))
                         Fail(goal, "a subordinate's goal failed");
                     else
-                        ScheduleAgent(agentHost, atDateTime + RecheckInterval);
+                        ScheduleAgent(agentHost, atDateTime + CommanderSkills.RecheckInterval(managedEntity));
                     break;
                 }
 
@@ -244,15 +239,15 @@ public class AgentProcessor : IInstanceProcessor
                             {
                                 if (string.IsNullOrEmpty(subGoal.ParentGoalId))
                                     subGoal.ParentGoalId = goal.Id;
-                                AssignGoal(subordinate, subGoal, atDateTime + RelayDelay);
+                                AssignGoal(subordinate, subGoal, atDateTime + CommanderSkills.RelayDelay(managedEntity));
                             }
                             SubmitActions(managedEntity, goal, plan.Actions, atDateTime);
-                            ScheduleAgent(agentHost, atDateTime + RecheckInterval);
+                            ScheduleAgent(agentHost, atDateTime + CommanderSkills.RecheckInterval(managedEntity));
                         }
                         else if (!queue.ActionsFor(goal).Any())
                             goal.Status = GoalStatus.Completed;
                         else
-                            ScheduleAgent(agentHost, atDateTime + RecheckInterval);
+                            ScheduleAgent(agentHost, atDateTime + CommanderSkills.RecheckInterval(managedEntity));
                     }
                     break;
                 }
@@ -262,6 +257,8 @@ public class AgentProcessor : IInstanceProcessor
             }
         }
 
+        if (goal.Status == GoalStatus.Completed)
+            CommanderSkills.GrantForCompleted(managedEntity, goal);
     }
     
     // -----------------------------------------------------------------
@@ -314,7 +311,7 @@ public class AgentProcessor : IInstanceProcessor
     /// <param name="when">
     /// When the unit should start planning. Null means "now, synchronously" — only the player/AI
     /// command seam should do that, so a new order is acknowledged immediately. Goals handed down an
-    /// echelon pass a time and pay <see cref="RelayDelay"/>.
+    /// echelon pass a time and pay <see cref="CommanderSkills.RelayDelay"/>.
     /// </param>
     internal static void AssignGoal(Entity unit, Goal goal, DateTime? when = null)
     {
@@ -409,7 +406,7 @@ public class AgentProcessor : IInstanceProcessor
         // RecheckInterval added to a lagged instant can land in the past, or
         // equal the Split() instant and 0-span. Always schedule strictly later.
         if (when <= now)
-            when = now + RecheckInterval;
+            when = now + CommanderSkills.RecheckInterval(unit);
         unit.Manager.ManagerSubpulses.AddEntityInterupt(when, nameof(AgentProcessor), unit);
     }
     internal static void RunAgentNow(Entity unit)
@@ -428,7 +425,7 @@ public class AgentProcessor : IInstanceProcessor
         // Re-enter Planning would enqueue another full plan and overflow the stack.
         if (!_agentReentry.Add(unit.Id))
         {
-            ScheduleAgent(unit, unit.StarSysDateTime + RecheckInterval);
+            ScheduleAgent(unit, unit.StarSysDateTime + CommanderSkills.RecheckInterval(unit));
             return;
         }
 

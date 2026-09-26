@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Names;
@@ -21,6 +22,9 @@ namespace Pulsar4X.People
         public int Experience { get; internal set; } = 0;
         [JsonProperty]
         public int ExperienceCap { get; internal set; } = 0;
+        /// <summary>Per-domain XP (Command / Nav / Survey). <see cref="Experience"/> is the sum.</summary>
+        [JsonProperty]
+        public Dictionary<SkillDomain, int> Skills { get; internal set; } = new();
         [JsonProperty]
         public DateTime CommissionedOn { get; internal set; }
         [JsonProperty]
@@ -46,6 +50,7 @@ namespace Pulsar4X.People
             Type = commanderDB.Type;
             Experience = commanderDB.Experience;
             ExperienceCap = commanderDB.ExperienceCap;
+            Skills = new Dictionary<SkillDomain, int>(commanderDB.Skills);
             CommissionedOn = commanderDB.CommissionedOn;
             RankedOn = commanderDB.RankedOn;
         }
