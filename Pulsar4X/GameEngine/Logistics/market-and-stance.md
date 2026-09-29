@@ -1,6 +1,6 @@
 # Market and stance
 
-Status: **design for plans 1–3** of the trade roadmap. Not implemented.
+Status: plans 1–3 are implemented on `TradeAndTransport`. This note is the design for those three.
 Implementation steps for those three are `GameEngine/Logistics/plans/01-faction-stance.md`, `02-market-book.md`, and `03-settlement.md`. The index of all nine plans is `GameEngine/Logistics/plans/README.md`.
 Later plans (colony orders, bar graph, trader, freighter) use the words defined here.
 

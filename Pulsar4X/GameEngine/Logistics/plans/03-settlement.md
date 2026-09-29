@@ -1,6 +1,6 @@
 # Plan 3 — Settlement
 
-Status: not started. Spec: `GameEngine/Logistics/market-and-stance.md` section 3.
+Status: implemented on `TradeAndTransport`. Spec: `GameEngine/Logistics/market-and-stance.md` section 3. Tests: `Pulsar4X.Tests/MarketExchangeTests.cs`.
 
 ## Outcome
 

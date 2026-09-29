@@ -444,6 +444,26 @@ namespace Pulsar4X.Client
                     DisplayGenericContent();
                     break;
             }
+
+            if (_entity.GetView<MarketView>() is { } market
+                && ImGui.CollapsingHeader("Market", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                MarketBarsDisplay.Display(_entity.Id, market, _uiState);
+            }
+
+            if (_system != null && _entity.Kind != BodyKind.Colony)
+            {
+                foreach (var colony in _system.Entities)
+                {
+                    if (colony.GetView<ColonyView>()?.PlanetEntityId != _entity.Id)
+                        continue;
+                    if (colony.GetView<MarketView>() is not { } colonyMarket)
+                        continue;
+                    string colonyName = colony.GetView<NameView>()?.Name ?? "Colony";
+                    if (ImGui.CollapsingHeader(colonyName + "###market-" + colony.Id, ImGuiTreeNodeFlags.DefaultOpen))
+                        MarketBarsDisplay.Display(colony.Id, colonyMarket, _uiState);
+                }
+            }
         }
 
         // --- Shared Helpers ---

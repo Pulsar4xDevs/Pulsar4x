@@ -1,6 +1,6 @@
 # Plan 6 — Independent trader
 
-Status: not started.
+Status: implemented on `TradeAndTransport`. Tests: `Pulsar4X.Tests/TradePlannerTests.cs`.
 
 ## Outcome
 

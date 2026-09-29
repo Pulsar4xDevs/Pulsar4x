@@ -28,6 +28,7 @@ public class GoalsDB : BaseDataBlob
         [GoalType.ListeningPost]    = 0.5f,
         [GoalType.Freighter]        = 0.5f,
         [GoalType.Trade]            = 0.5f,
+        [GoalType.RunMarket]        = 0.5f,
         [GoalType.Scout]            = 0.5f,
         [GoalType.Patrol]           = 0.5f,
         [GoalType.Attack]           = 0.5f,
@@ -96,6 +97,9 @@ public enum GoalType
     RefuelAt,
     RearmAt,
     RepairAt,
+
+    // Colony logistics office. Appended so existing saved enum values stay put.
+    RunMarket,
 }
 
 public class Goal
@@ -106,6 +110,12 @@ public class Goal
     public string ParentGoalId = "";
     public GoalType Type;
     public int TargetEntityID = -1;
+    /// <summary>Trade and freight cargo id. Empty until a planner commits a route.</summary>
+    public string CargoId = "";
+    /// <summary>Where to buy, or the freight source. -1 until a route is committed.</summary>
+    public int SourceEntityId = -1;
+    /// <summary>Where to sell, or the freight destination. -1 until a route is committed.</summary>
+    public int DestEntityId = -1;
     public float Weight = 0.5f;
     public string Name = "";
     public GoalStatus Status = GoalStatus.Planning;

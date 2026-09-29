@@ -54,10 +54,12 @@ public class SystemWindow : UniquePulsarGuiWindow<SystemWindow>
                 }
 
                 var coloniesByBody = system.Entities
-                    .Where(e => e.Kind == BodyKind.Colony && e.Relation == OwnerRelation.Owned)
+                    .Where(e => e.Kind == BodyKind.Colony
+                        && (e.Relation == OwnerRelation.Owned || e.Relation == OwnerRelation.Friendly))
                     .Select(e => (Colony: e, PlanetId: e.GetView<ColonyView>()?.PlanetEntityId))
                     .Where(c => c.PlanetId != null)
-                    .ToDictionary(c => c.PlanetId!.Value, c => c.Colony);
+                    .GroupBy(c => c.PlanetId!.Value)
+                    .ToDictionary(g => g.Key, g => g.Select(c => c.Colony).ToList());
 
                 var stars = bodies.Values
                     .Where(e => e.HasView<StarView>())
@@ -104,7 +106,7 @@ public class SystemWindow : UniquePulsarGuiWindow<SystemWindow>
                  .ThenBy(b => b.GetView<NameView>()?.Name ?? "");
 
     void TreeGen(EntitySnapshot currentBody, Dictionary<int, List<EntitySnapshot>> children,
-        Dictionary<int, EntitySnapshot> coloniesByBody, int depth = 0)
+        Dictionary<int, List<EntitySnapshot>> coloniesByBody, int depth = 0)
     {
         if(SystemViewPreferences.GetInstance().ShouldDisplay(SystemViewPreferencesKey, UserOrbitSettings.FromBodyKind(currentBody.Kind)))
             PrintEntity(currentBody, coloniesByBody, depth);
@@ -118,7 +120,7 @@ public class SystemWindow : UniquePulsarGuiWindow<SystemWindow>
         }
     }
 
-    private void PrintEntity(EntitySnapshot entity, Dictionary<int, EntitySnapshot> coloniesByBody, int depth = 0)
+    private void PrintEntity(EntitySnapshot entity, Dictionary<int, List<EntitySnapshot>> coloniesByBody, int depth = 0)
     {
         var bodyType = entity.HasView<StarView>() ? "Star" : entity.GetView<BodyView>()?.BodyType ?? "";
 
@@ -133,13 +135,24 @@ public class SystemWindow : UniquePulsarGuiWindow<SystemWindow>
         ImGui.Text(bodyType);
         ImGui.TableNextColumn();
 
-        if(coloniesByBody.TryGetValue(entity.Id, out var colony))
+        if(coloniesByBody.TryGetValue(entity.Id, out var colonies))
         {
-            var colonyName = colony.GetView<NameView>()?.Name ?? "Colony";
-            if(ImGui.SmallButton(colonyName + "###" + colony.Id))
+            foreach (var colony in colonies)
             {
-                ColonyManagementWindow.GetInstance().SetActive(true);
-                ColonyManagementWindow.GetInstance().SelectColony(colony.Id, _uiState.SelectedStarSystemId);
+                var colonyName = colony.GetView<NameView>()?.Name ?? "Colony";
+                if(ImGui.SmallButton(colonyName + "###" + colony.Id))
+                {
+                    if (colony.Relation == OwnerRelation.Owned)
+                    {
+                        ColonyManagementWindow.GetInstance().SetActive(true);
+                        ColonyManagementWindow.GetInstance().SelectColony(colony.Id, _uiState.SelectedStarSystemId);
+                    }
+                    else
+                    {
+                        _uiState.WindowManager.ActivateEntityWindow(
+                            new EntityWindowEntity(colony.Id, _uiState.SelectedStarSystemId));
+                    }
+                }
             }
         }
         else

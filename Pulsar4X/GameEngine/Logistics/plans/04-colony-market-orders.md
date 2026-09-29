@@ -1,6 +1,6 @@
 # Plan 4 — Colony market orders
 
-Status: not started.
+Status: implemented on `TradeAndTransport`. Tests: `Pulsar4X.Tests/ColonyMarketOrderTests.cs`.
 
 ## Outcome
 

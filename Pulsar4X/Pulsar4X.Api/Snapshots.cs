@@ -199,6 +199,27 @@ public sealed record ColonyView(long Population, int? PlanetEntityId) : ICompone
 
 public sealed record SpeciesPopulation(string SpeciesName, long Population);
 
+/// <summary>One listed good at a logistics office. Stock is the office's cargo hold.</summary>
+public sealed record MarketGoodView(
+    string CargoId, string Name,
+    long Stock, long Reserve,
+    long BuyQuantity, decimal Bid,
+    long SellQuantity, decimal Ask) : IComponentView;
+
+/// <summary>The book a faction is allowed to see. Owned and Friendly only.</summary>
+public sealed record MarketView(
+    int Capacity, IReadOnlyList<MarketGoodView> Goods) : IComponentView
+{
+    /// <summary>True when this faction owns the office and may post listings.</summary>
+    public bool CanEdit { get; init; }
+
+    /// <summary>Unlocked cargo the owner can add. Empty for a friendly viewer.</summary>
+    public IReadOnlyList<MarketGoodChoice> Addable { get; init; } = Array.Empty<MarketGoodChoice>();
+}
+
+/// <summary>A cargo id the owner may add to their book.</summary>
+public sealed record MarketGoodChoice(string CargoId, string Name);
+
 /// <summary>A colony's infrastructure capacity (the limiter on its industrial output).</summary>
 public sealed record InfrastructureView(
     long CapacityProvided,

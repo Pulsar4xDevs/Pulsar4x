@@ -67,6 +67,15 @@ public static class MarketBook
         return true;
     }
 
+    /// <summary>Drop one cargo id from the book. Missing ids are a no-op.</summary>
+    public static void RemoveListing(Entity entity, string cargoId)
+    {
+        if (string.IsNullOrEmpty(cargoId))
+            return;
+        if (entity.TryGetDataBlob<LogiBaseDB>(out var book))
+            book.Listings.Remove(cargoId);
+    }
+
     public static long Stock(Entity entity, ICargoable cargo)
     {
         if (cargo == null || !entity.TryGetDataBlob<CargoStorageDB>(out var storage))

@@ -1,4 +1,3 @@
-using GameEngine.Engine.Orders;
 using NUnit.Framework;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Engine;
@@ -6,7 +5,6 @@ using Pulsar4X.Galaxy;
 using Pulsar4X.Industry;
 using Pulsar4X.Logistics;
 using Pulsar4X.Modding;
-using Pulsar4X.Movement;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.Tests;
@@ -70,20 +68,6 @@ public class MarketBookTests
         copy.Listings["iron"].SellQuantity = 1;
 
         Assert.That(colony.GetDataBlob<LogiBaseDB>().Listings["iron"].SellQuantity, Is.EqualTo(8));
-    }
-
-    [Test]
-    public void LogisticsTick_DoesNotEnqueueAWarpOrder()
-    {
-        var ship = Office(capacity: 1);
-        ship.SetDataBlob(new NewtonThrustAbilityDB("methalox"));
-        ship.SetDataBlob(new ActionQueueDB());
-        ship.SetDataBlob(new LogiShipperDB());
-
-        new LogiBaseProcessor().ProcessEntity(ship, 0);
-        new LogiShipProcessor().ProcessEntity(ship, 0);
-
-        Assert.That(ship.GetDataBlob<ActionQueueDB>().ActionList, Is.Empty);
     }
 
     static MarketListing Listing(string id, long sell, decimal ask) => new()

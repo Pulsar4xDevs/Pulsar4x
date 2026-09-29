@@ -29,6 +29,44 @@ public sealed record RenameCommand(int TargetEntityId, string NewName) : GameCom
 public sealed record SetFactionStanceCommand(int TargetEntityId, int OtherFactionId, FactionStance Stance)
     : GameCommand(TargetEntityId);
 
+/// <summary>
+/// Set one cargo row of a colony's market policy. Targets the colony.
+/// The book is posted later by <see cref="RunMarketCommand"/>.
+/// </summary>
+public sealed record SetMarketPolicyCommand(
+    int TargetEntityId,
+    string CargoId,
+    long Min,
+    long Max,
+    bool AutoProduce,
+    decimal Ask,
+    decimal Bid) : GameCommand(TargetEntityId);
+
+/// <summary>Remove one cargo row from a colony's market policy. Targets the colony.</summary>
+public sealed record ClearMarketPolicyCommand(int TargetEntityId, string CargoId) : GameCommand(TargetEntityId);
+
+/// <summary>Tell a colony to keep its market book posted. Targets the colony.</summary>
+public sealed record RunMarketCommand(int TargetEntityId) : GameCommand(TargetEntityId);
+
+/// <summary>Tell one cargo ship to buy in this system and sell where the bid covers the trip. Targets the ship.</summary>
+public sealed record TradeCommand(int TargetEntityId) : GameCommand(TargetEntityId);
+
+/// <summary>
+/// Post or replace one cargo row on a colony's market book, and keep the matching policy row
+/// in step so a running market wake uses these prices and reserve. Targets the colony.
+/// </summary>
+public sealed record SetMarketListingCommand(
+    int TargetEntityId,
+    string CargoId,
+    long SellQuantity,
+    decimal Ask,
+    long BuyQuantity,
+    decimal Bid,
+    long Reserve) : GameCommand(TargetEntityId);
+
+/// <summary>Remove one cargo row from the book and from market policy. Targets the colony.</summary>
+public sealed record ClearMarketListingCommand(int TargetEntityId, string CargoId) : GameCommand(TargetEntityId);
+
 // ----- fleet organisation (commanded entity: the faction for create, otherwise the fleet/ship) -----
 #region Fleet Organization Commands
 

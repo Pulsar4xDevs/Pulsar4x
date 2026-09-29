@@ -800,6 +800,14 @@
           "GuiHint": "None",
           "PropertyFormula": "AtbConstrArgs(PropertyValue('Min Pressure'), PropertyValue('Max Pressure'))",
           "AttributeType": "Pulsar4X.Galaxy.PressureToleranceAtb"
+        },
+        {
+          "Name": "Sensor Signature",
+          "Units": "unknown",
+          "DescriptionFormula": "'Placeholder emission so a colony can be picked up by the starting passive sensor. Not balanced.'",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(1e9, 470, 345, 725)",
+          "AttributeType": "Pulsar4X.Sensors.SensorSignatureAtb"
         }
       ]
     }

@@ -1,6 +1,6 @@
 # Plan 5 — Market bars
 
-Status: not started.
+Status: implemented on `TradeAndTransport`. Tests: `Pulsar4X.Tests/API/ApiMarketViewTests.cs` (4 passed). The client library built with 0 errors. The bars were not opened in a running game.
 
 ## Outcome
 

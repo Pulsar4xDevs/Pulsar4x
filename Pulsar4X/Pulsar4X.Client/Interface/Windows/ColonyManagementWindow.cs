@@ -120,6 +120,11 @@ namespace Pulsar4X.Client
                     _constructionDisplay.Display(selectedColony.Id, selectedColony.GetView<ConstructionView>(), _uiState);
                     ImGui.EndTabItem();
                 }
+                if (ImGui.BeginTabItem("Market"))
+                {
+                    MarketBarsDisplay.Display(selectedColony.Id, selectedColony.GetView<MarketView>(), _uiState);
+                    ImGui.EndTabItem();
+                }
                 if (selectedColony.GetView<ColonyMiningView>() is { } mining && ImGui.BeginTabItem("Mining"))
                 {
                     mining.Display();

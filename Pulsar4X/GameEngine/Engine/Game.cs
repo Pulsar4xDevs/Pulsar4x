@@ -16,7 +16,6 @@ using Pulsar4X.Galaxy;
 using Pulsar4X.Energy;
 using Pulsar4X.JumpPoints;
 using Pulsar4X.Sensors;
-using Pulsar4X.Logistics;
 using Pulsar4X.Messaging;
 [assembly: InternalsVisibleTo("Pulsar4X.Tests")]
 
@@ -128,7 +127,6 @@ namespace Pulsar4X.Engine
         {
             EventManager.Instance.Clear();
             MessagePublisher.Instance.Clear();
-            LogisticsCycle.Clear();
         }
 
         public Game(NewGameSettings settings, ModDataStore modDataStore)
