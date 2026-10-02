@@ -1,6 +1,6 @@
 # Plan 9 — Autonomous pick
 
-Status: not started. Do not fold this into plans 4, 6, or 7.
+Status: implemented on `TradeAndTransport`. Tests: `Pulsar4X.Tests/AutonomousTradeTests.cs`. Kept separate from plans 4, 6, and 7.
 
 ## Outcome
 

@@ -47,6 +47,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(ClearMarketPolicyCommand)] = TranslateClearMarketPolicy,
                 [typeof(RunMarketCommand)] = TranslateRunMarket,
                 [typeof(TradeCommand)] = TranslateTrade,
+                [typeof(FreighterCommand)] = TranslateFreighter,
                 [typeof(SetMarketListingCommand)] = TranslateSetMarketListing,
                 [typeof(ClearMarketListingCommand)] = TranslateClearMarketListing,
                 [typeof(CreateFleetCommand)] = TranslateCreateFleet,
@@ -223,6 +224,18 @@ namespace Pulsar4X.Engine.Api
                 return CommandResult.Reject("The ship has no cargo storage.");
 
             var goal = new Goal(GoalType.Trade);
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        private CommandResult TranslateFreighter(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (!commanded.HasDataBlob<CargoStorageDB>())
+                return CommandResult.Reject("The ship has no cargo storage.");
+
+            var goal = new Goal(GoalType.Freighter);
             AgentProcessor.AssignGoal(commanded, goal);
             if (goal.Status == GoalStatus.Failed)
                 return CommandResult.Reject(goal.Message);

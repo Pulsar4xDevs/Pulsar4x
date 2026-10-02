@@ -308,66 +308,67 @@ namespace Pulsar4X.Movement
             var warpDB = entity.GetDataBlob<WarpAbilityDB>();
             SnapBubbleToExit(moveDB);
             var destinationMoveType = moveDB.TargetEntity.GetDataBlob<PositionDB>().MoveType;
-            if (destinationMoveType == PositionDB.MoveTypes.None)
-            {
-                moveDB.CurrentNonNewtonionVectorMS = Vector3.Zero;
-                moveDB.IsAtTarget = true;
-            }
-            else
-            {
-                moveDB.IsAtTarget = true;
-                if (!entity.HasDataBlob<WarpMovingDB>())
-                    return;
+            moveDB.IsAtTarget = true;
+            if (!entity.HasDataBlob<WarpMovingDB>())
+                return;
 
-                var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
+            if (entity.TryGetDataBlob<EnergyGenAbilityDB>(out var powerDB)
+                && !string.IsNullOrEmpty(warpDB.EnergyType)
+                && powerDB.EnergyStored.ContainsKey(warpDB.EnergyType))
+            {
                 EnergyGenProcessor.EnergyGen(entity, toDateTime - TimeSpan.FromSeconds(1));
                 powerDB.AddDemand(warpDB.BubbleCollapseCost, toDateTime - TimeSpan.FromSeconds(1));
                 EnergyGenProcessor.EnergyGen(entity, toDateTime);
                 powerDB.AddDemand(-warpDB.BubbleSustainCost, toDateTime);
                 powerDB.AddDemand(-warpDB.BubbleCollapseCost, toDateTime);
-
-                switch (destinationMoveType)
-                {
-                    case PositionDB.MoveTypes.None:
-                    {
-                        //if our destination is a non moving object eg a grav anomaly or jump point.
-                        //this case should be handled prior to this.
-                        throw new Exception("shouldn't get here");
-                        break;
-                    }
-                    case PositionDB.MoveTypes.Orbit:
-                    {
-                        entity.RemoveDataBlob<WarpMovingDB>();
-                        if (_gameSettings.StrictNewtonion)
-                            SetOrbitHereSimpleNewt(entity, moveDB, toDateTime);
-                        else
-                            SetOrbitHereNoNewt(entity, moveDB, toDateTime);
-                        WakeActionQueue(entity, toDateTime);
-                        break;
-                    }
-                    case PositionDB.MoveTypes.NewtonSimple:
-                    {
-                        throw new NotImplementedException();
-                        break;
-                    }
-                    case PositionDB.MoveTypes.NewtonComplex:
-                    {
-                        throw new NotImplementedException();
-                        break;
-                    }
-                    case PositionDB.MoveTypes.Warp:
-                    {
-                        var targetSpeed = moveDB.TargetEntity.GetDataBlob<WarpMovingDB>().CurrentNonNewtonionVectorMS;
-                        var newspeed = Math.Min(targetSpeed.Length(), warpDB.MaxSpeed);
-                        moveDB.CurrentNonNewtonionVectorMS = Vector3.Normalise(targetSpeed) * newspeed;
-                        break;
-                    }
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                //entity.Manager.Game.TimePulse.PauseTime();
             }
+
+            switch (destinationMoveType)
+            {
+                case PositionDB.MoveTypes.Orbit:
+                {
+                    entity.RemoveDataBlob<WarpMovingDB>();
+                    if (_gameSettings.StrictNewtonion)
+                        SetOrbitHereSimpleNewt(entity, moveDB, toDateTime);
+                    else
+                        SetOrbitHereNoNewt(entity, moveDB, toDateTime);
+                    WakeActionQueue(entity, toDateTime);
+                    break;
+                }
+                case PositionDB.MoveTypes.Warp:
+                {
+                    var targetSpeed = moveDB.TargetEntity.GetDataBlob<WarpMovingDB>().CurrentNonNewtonionVectorMS;
+                    var newspeed = Math.Min(targetSpeed.Length(), warpDB.MaxSpeed);
+                    moveDB.CurrentNonNewtonionVectorMS = Vector3.Normalise(targetSpeed) * newspeed;
+                    break;
+                }
+                // A jump point, grav anomaly, or a target that started thrusting has no orbit to
+                // capture into. Park on it and let the next plan decide. Arrival must not throw.
+                case PositionDB.MoveTypes.None:
+                case PositionDB.MoveTypes.NewtonSimple:
+                case PositionDB.MoveTypes.NewtonComplex:
+                default:
+                {
+                    ParkOnTarget(entity, moveDB);
+                    WakeActionQueue(entity, toDateTime);
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Leave warp sitting on the target at the planned exit offset.
+        /// </summary>
+        static void ParkOnTarget(Entity entity, WarpMovingDB moveDB)
+        {
+            var pos = entity.GetDataBlob<PositionDB>();
+            pos.SetParent(moveDB.TargetEntity);
+            pos.RelativePosition = moveDB.ExitPointrelative;
+            pos.MoveType = PositionDB.MoveTypes.None;
+            pos.Velocity = Vector2.Zero;
+            moveDB.CurrentNonNewtonionVectorMS = Vector3.Zero;
+            moveDB.IsAtTarget = true;
+            entity.RemoveDataBlob<WarpMovingDB>();
         }
     
 

@@ -1,6 +1,6 @@
 # Plan 8 — Inter-system routes
 
-Status: not started. Do not fold this into plans 6 or 7.
+Status: implemented on `TradeAndTransport`. Tests: `Pulsar4X.Tests/InterSystemRouteTests.cs`. Kept separate from plans 6 and 7.
 
 ## Outcome
 

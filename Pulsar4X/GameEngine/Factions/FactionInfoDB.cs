@@ -53,6 +53,25 @@ namespace Pulsar4X.Factions
         [JsonProperty]
         internal Dictionary<string, List<Entity>> InternalKnownJumpPoints = new ();
 
+        /// <summary>
+        /// Record a jump point the faction has actually found. Unknown points stay out of the dictionary.
+        /// </summary>
+        internal void RememberJumpPoint(Entity jumpPoint)
+        {
+            if (jumpPoint?.Manager == null)
+                return;
+
+            string systemId = jumpPoint.Manager.ManagerID;
+            if (!InternalKnownJumpPoints.TryGetValue(systemId, out var list))
+            {
+                list = new List<Entity>();
+                InternalKnownJumpPoints[systemId] = list;
+            }
+
+            if (!list.Contains(jumpPoint))
+                list.Add(jumpPoint);
+        }
+
 
         [JsonProperty]
         public List<Entity> KnownFactions { get; internal set; } = new ();

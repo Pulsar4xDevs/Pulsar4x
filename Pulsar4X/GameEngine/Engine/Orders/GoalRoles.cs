@@ -20,7 +20,7 @@ public static class GoalRoles
 {
     public static GoalRole RoleOf(GoalType type) => type switch
     {
-        GoalType.StayAlive or GoalType.DontRunOutOfFuel => GoalRole.Drive,
+        GoalType.StayAlive or GoalType.DontRunOutOfFuel or GoalType.MakeProfit => GoalRole.Drive,
 
         GoalType.HelpOwn or GoalType.HelpAllied or GoalType.HelpFrendly
             or GoalType.HelpNeutral or GoalType.Stealth => GoalRole.Stance,

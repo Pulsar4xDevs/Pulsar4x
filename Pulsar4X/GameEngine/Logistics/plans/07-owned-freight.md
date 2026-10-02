@@ -1,6 +1,6 @@
 # Plan 7 — Owned freight
 
-Status: not started.
+Status: implemented on `TradeAndTransport`. Tests: `Pulsar4X.Tests/FreighterPlannerTests.cs`.
 
 ## Outcome
 
@@ -51,4 +51,4 @@ Command: `FreighterCommand(TargetEntityId)` assigns `GoalType.Freighter` with an
 
 ## Later
 
-Hauling for a friendly faction (that is `Trade`), multi-stop loops, fleet fan-out, and command-span limits. A freighter is one ship.
+Hauling for a friendly faction (that is `Trade`), multi-stop loops, and command-span limits on the leaf. Fleet fan-out is plan 10. A freighter leaf is one ship.

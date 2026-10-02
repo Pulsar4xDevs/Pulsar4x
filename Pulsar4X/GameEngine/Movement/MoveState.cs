@@ -15,7 +15,7 @@ public class PositionDB : TreeHierarchyDB, IPosition
 {
     /// <summary>
     /// Most objects should have a movetype. none should be used in rare occasions eg anomalies/jump points.
-    /// ships at None type objects should remain warping with a speed of zero, but be using warp resources.
+    /// A ship that drops out of warp at one of these is parked on it until the next order.
     /// </summary>
     public enum MoveTypes
     {

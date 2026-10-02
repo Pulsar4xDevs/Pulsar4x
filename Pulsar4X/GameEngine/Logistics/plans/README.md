@@ -2,7 +2,7 @@
 
 Implementation plans for the trade roadmap. Design vocabulary for the first three is `GameEngine/Logistics/market-and-stance.md`. Goal and action rules are `GameEngine/Engine/Orders/agents-and-goals-design.md`.
 
-Plans 1–6 and 5b are implemented on `TradeAndTransport`. Do not start a later plan before the ones it lists under Depends on.
+Plans 1–9 and 5b are implemented on `TradeAndTransport`. Plans 10 and 11 are written and not started. Do not start a later plan before the ones it lists under Depends on.
 
 | # | Plan | Depends on |
 |---|---|---|
@@ -16,5 +16,7 @@ Plans 1–6 and 5b are implemented on `TradeAndTransport`. Do not start a later 
 | 7 | [Owned freight](07-owned-freight.md) | 3, 4. Parallel with 6 after those. |
 | 8 | [Inter-system routes](08-inter-system-routes.md) | 6 or 7 in one system, and jump actions that finish |
 | 9 | [Autonomous pick](09-autonomous-pick.md) | Issued 4, 6, and 7 playable |
+| 10 | [Fleet trade and freight](10-fleet-trade.md) | 6 and 7. Parallel with 11. |
+| 11 | [Colony supply](11-colony-supply.md) | 4 and 5b. Parallel with 10. |
 
 Tests for these plans run from outside the repo (for example `/tmp`) with `DOTNET_ROLL_FORWARD=LatestMajor`, project `Pulsar4X/Pulsar4X.Tests/Pulsar4X.Tests.csproj`. `global.json` pins SDK 8.0.122; the local SDK may be newer.

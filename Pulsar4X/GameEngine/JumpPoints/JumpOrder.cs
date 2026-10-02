@@ -6,6 +6,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Fleets;
 using Pulsar4X.Movement;
+using Pulsar4X.Orbital;
 using Pulsar4X.Ships;
 
 namespace Pulsar4X.JumpPoints;
@@ -157,8 +158,13 @@ public class ShipJumpAction : EntityAction
             // Transfer this ship to the destination system
             destinationEntity.Manager.Transfer(_entityCommanding);
 
-            // Update position to the destination gate
+            // Drop any warp bubble. The next plan in the new system moves on from the gate.
+            if (_entityCommanding.HasDataBlob<WarpMovingDB>())
+                _entityCommanding.RemoveDataBlob<WarpMovingDB>();
+
             var positionDB = _entityCommanding.GetDataBlob<PositionDB>();
+            positionDB.MoveType = PositionDB.MoveTypes.None;
+            positionDB.Velocity = Vector2.Zero;
             positionDB.AbsolutePosition = destinationPositionDB.AbsolutePosition;
             positionDB.SetParent(destinationEntity);
         }

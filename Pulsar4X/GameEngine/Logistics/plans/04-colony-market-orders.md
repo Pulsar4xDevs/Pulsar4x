@@ -80,4 +80,4 @@ Industry jobs go through `IndustryOrder2.CreateNewJobOrder`, the same order the 
 
 ## Later
 
-Sector-wide orders, population consumption, an administrator skill curve, XP for admins, and a policy editor in the UI (plan 5 is read-only).
+Sector-wide orders, population consumption, an administrator skill curve, XP for admins, and a policy editor in the UI (plan 5 is read-only). Well and system supply is plan 11.

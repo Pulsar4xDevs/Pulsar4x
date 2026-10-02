@@ -141,10 +141,22 @@ public class AgentProcessor : IInstanceProcessor
         GoalWeighting.Recalculate(goalsDB, managedEntity, agentDB);
 
         Goal? goal = goalsDB.ActiveGoal;
-        if (goal == null) 
-            return; // autonomous pick not wired yet
-        if (goal.Status is GoalStatus.Completed or GoalStatus.Failed) 
-            return;
+        bool idle = goal == null || goal.Status is GoalStatus.Completed or GoalStatus.Failed;
+        if (idle)
+        {
+            // A player order stays, including one that already finished.
+            if (goalsDB.GivenGoal != null)
+                return;
+
+            var picked = GoalWeighting.PickAutonomousTask(goalsDB);
+            if (picked == null)
+                return;
+
+            // AssignGoal would re-enter RunAgentNow and defer the plan. This wake keeps the goal.
+            goal = new Goal(picked.Type);
+            goalsDB.GivenGoal = goal;
+            goalsDB.ActiveGoal = goal;
+        }
 
         bool isFleet = managedEntity.HasDataBlob<FleetDB>();
         bool isShip = managedEntity.HasDataBlob<ShipInfoDB>();
@@ -548,10 +560,14 @@ public class AgentProcessor : IInstanceProcessor
                 GoalType.Mine => entity.HasOrChildHasAbility<MiningDB>(),
                 GoalType.ListeningPost => entity.HasOrChildHasAbility<SensorAbilityDB>(),
                 GoalType.Scout => entity.HasOrChildHasAbility<SensorAbilityDB>(),
-                GoalType.Trade => entity.HasDataBlob<CargoStorageDB>()
+                GoalType.Trade or GoalType.Freighter => entity.HasDataBlob<ShipInfoDB>()
+                    && entity.HasDataBlob<CargoStorageDB>()
                     && (entity.HasDataBlob<WarpAbilityDB>() || entity.HasDataBlob<NewtonThrustAbilityDB>()),
-                GoalType.MakeProfit or GoalType.Freighter => false,
-                GoalType.RunMarket => entity.HasDataBlob<LogiBaseDB>(),
+                GoalType.MakeProfit or GoalType.HelpOwn => true,
+                GoalType.RunMarket => entity.HasDataBlob<ColonyInfoDB>()
+                    && entity.HasDataBlob<LogiBaseDB>()
+                    && entity.TryGetDataBlob<ColonyMarketPolicyDB>(out var policy)
+                    && policy.Rows.Count > 0,
                 GoalType.Colonise => false,
                 _ => false
             };

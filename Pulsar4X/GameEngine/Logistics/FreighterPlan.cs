@@ -1,9 +1,8 @@
 using System;
 using System.Linq;
 using GameEngine.Engine.Orders;
+using Pulsar4X.Colonies;
 using Pulsar4X.Engine;
-using Pulsar4X.Extensions;
-using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Movement;
 using Pulsar4X.Ships;
@@ -12,20 +11,17 @@ using Pulsar4X.Storage;
 namespace Pulsar4X.Logistics;
 
 /// <summary>
-/// One ship, one good, one buy market and one sell market in a known system.
+/// One ship hauls one posted good between owned colonies in systems the faction knows.
 /// The route is returned on <see cref="PlanResult"/>; the agent stores it on the goal.
 /// </summary>
-public class TradePlan : IGoalPlanner
+public class FreighterPlan : IGoalPlanner
 {
-    /// <summary>Hours charged when the ship cannot warp. Large enough that no bid clears it.</summary>
-    const double NoWarpHours = 1e12;
-
-    public GoalType Type => GoalType.Trade;
+    public GoalType Type => GoalType.Freighter;
 
     public PlanResult Plan(Entity managedEntity, Goal goal, DateTime atDateTime)
     {
         if (managedEntity.HasDataBlob<FleetDB>())
-            return PlanResult.Fail("Trade is one ship");
+            return PlanResult.Fail("Freighter is one ship");
         if (!managedEntity.HasDataBlob<ShipInfoDB>())
             return PlanResult.Fail("Non supported entity");
 
@@ -37,9 +33,9 @@ public class TradePlan : IGoalPlanner
             return FollowRoute(managedEntity, goal);
 
         if (!TryChooseRoute(managedEntity, out var route, out var source, out var dest, out var good))
-            return PlanResult.Fail("no route");
+            return PlanResult.Fail("no haul");
 
-        var leg = MarketRun.NextLeg(managedEntity, source, dest, route.CargoId, good);
+        var leg = MarketRun.NextLeg(managedEntity, source, dest, route.CargoId, good, capBuyAtRequest: true);
         if (leg.Status != GoalStatus.Active)
             return leg;
         return leg.WithRoute(route);
@@ -51,9 +47,8 @@ public class TradePlan : IGoalPlanner
             || !MarketRun.TryMarket(ship, goal.DestEntityId, out var dest))
             return PlanResult.Fail("listing gone");
 
-        if (!FactionStanceRules.CanTrade(ship.Manager.Game, ship.FactionOwnerID, source.FactionOwnerID)
-            || !FactionStanceRules.CanTrade(ship.Manager.Game, ship.FactionOwnerID, dest.FactionOwnerID))
-            return PlanResult.Fail("Cannot trade");
+        if (source.FactionOwnerID != ship.FactionOwnerID || dest.FactionOwnerID != ship.FactionOwnerID)
+            return PlanResult.Fail("listing gone");
 
         if (!MarketBook.TryGet(source, goal.CargoId, out _)
             || !MarketBook.TryGet(dest, goal.CargoId, out _))
@@ -62,7 +57,7 @@ public class TradePlan : IGoalPlanner
         if (!MarketRun.TryShipGood(ship, goal.CargoId, out var good))
             return PlanResult.Fail("listing gone");
 
-        return MarketRun.NextLeg(ship, source, dest, goal.CargoId, good);
+        return MarketRun.NextLeg(ship, source, dest, goal.CargoId, good, capBuyAtRequest: true);
     }
 
     static bool TryChooseRoute(Entity ship, out PlannedRoute route, out Entity source, out Entity dest, out ICargoable good)
@@ -72,10 +67,10 @@ public class TradePlan : IGoalPlanner
         dest = null!;
         good = null!;
 
-        double bestScore = 0;
-        var game = ship.Manager.Game;
+        long bestUnits = 0;
+        double bestDistance = double.MaxValue;
         var markets = MarketRun.Markets(ship)
-            .Where(market => FactionStanceRules.CanTrade(game, ship.FactionOwnerID, market.FactionOwnerID))
+            .Where(market => market.FactionOwnerID == ship.FactionOwnerID && market.HasDataBlob<ColonyInfoDB>())
             .ToList();
 
         foreach (var from in markets)
@@ -89,6 +84,10 @@ public class TradePlan : IGoalPlanner
                 if (!MarketRun.TryShipGood(ship, sell.CargoId, out var cargo))
                     continue;
 
+                long available = Math.Min(sell.SellQuantity, MarketBook.Sellable(from, sell, cargo));
+                if (available <= 0)
+                    continue;
+
                 foreach (var to in markets)
                 {
                     if (to.Id == from.Id)
@@ -96,14 +95,20 @@ public class TradePlan : IGoalPlanner
                     if (!MarketBook.TryGet(to, sell.CargoId, out var buy) || buy.BuyQuantity <= 0)
                         continue;
 
-                    if (!TryHours(ship, from, to, out var hours))
+                    long free = Math.Max(0, ship.GetDataBlob<CargoStorageDB>().GetFreeUnitSpace(cargo));
+                    long units = Math.Min(buy.BuyQuantity, Math.Min(available, free));
+                    if (units <= 0)
                         continue;
 
-                    double score = (double)(buy.Bid - sell.Ask) - hours;
-                    if (score <= bestScore)
+                    if (!TryDistance(ship, from, to, out var distance))
+                        continue;
+                    if (units < bestUnits)
+                        continue;
+                    if (units == bestUnits && distance >= bestDistance)
                         continue;
 
-                    bestScore = score;
+                    bestUnits = units;
+                    bestDistance = distance;
                     route = new PlannedRoute
                     {
                         CargoId = sell.CargoId,
@@ -117,42 +122,34 @@ public class TradePlan : IGoalPlanner
             }
         }
 
-        return bestScore > 0;
+        return bestUnits > 0;
     }
 
     /// <summary>
-    /// Same-system hours stay the straight-line warp time.
-    /// A market the ship cannot reach is skipped, even when both ends share that system.
-    /// Another system adds the known-jump path between the two markets.
+    /// Same system keeps the straight-line distance. A colony the ship cannot reach is skipped.
+    /// Another system uses the jump path plus one hour of warp per hop.
     /// </summary>
-    static bool TryHours(Entity ship, Entity source, Entity dest, out double hours)
+    static bool TryDistance(Entity ship, Entity from, Entity to, out double distance)
     {
-        if (!JumpRoute.CanReach(ship, source) || !JumpRoute.CanReach(ship, dest))
+        if (!JumpRoute.CanReach(ship, from) || !JumpRoute.CanReach(ship, to))
         {
-            hours = 0;
+            distance = double.MaxValue;
             return false;
         }
 
-        if (source.Manager == dest.Manager)
+        if (from.Manager == to.Manager)
         {
-            hours = Hours(ship, source, dest);
-            return true;
+            distance = MarketRun.DistanceMeters(from, to);
+            return double.IsFinite(distance);
         }
 
-        return JumpRoute.TryTravelHours(ship, source, dest, out hours);
-    }
-
-    /// <summary>Travel time in hours at warp max speed. No warp drive prices the trip out of every route.</summary>
-    static double Hours(Entity ship, Entity source, Entity dest)
-    {
+        distance = double.MaxValue;
         if (!ship.TryGetDataBlob<WarpAbilityDB>(out var warp) || warp.MaxSpeed <= 0)
-            return NoWarpHours;
-        if (!source.TryGetDataBlob<PositionDB>(out var from) || !dest.TryGetDataBlob<PositionDB>(out var to))
-            return NoWarpHours;
+            return false;
+        if (!JumpRoute.TryConnect(ship, from, to, out var hops, out var meters, out _))
+            return false;
 
-        double meters = from.GetDistanceTo_m(to);
-        if (!double.IsFinite(meters) || meters < 0)
-            return NoWarpHours;
-        return meters / warp.MaxSpeed / 3600.0;
+        distance = meters + hops * warp.MaxSpeed * 3600.0 * JumpRoute.HopHours;
+        return double.IsFinite(distance);
     }
 }

@@ -51,6 +51,9 @@ public sealed record RunMarketCommand(int TargetEntityId) : GameCommand(TargetEn
 /// <summary>Tell one cargo ship to buy in this system and sell where the bid covers the trip. Targets the ship.</summary>
 public sealed record TradeCommand(int TargetEntityId) : GameCommand(TargetEntityId);
 
+/// <summary>Tell one cargo ship to haul a posted good between this faction's colonies. Targets the ship.</summary>
+public sealed record FreighterCommand(int TargetEntityId) : GameCommand(TargetEntityId);
+
 /// <summary>
 /// Post or replace one cargo row on a colony's market book, and keep the matching policy row
 /// in step so a running market wake uses these prices and reserve. Targets the colony.

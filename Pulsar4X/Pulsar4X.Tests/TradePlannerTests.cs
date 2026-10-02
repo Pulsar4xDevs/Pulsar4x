@@ -148,10 +148,12 @@ public class TradePlannerTests
         var goals = new GoalsDB();
         AgentProcessor.PruneImpossibleGoals(goals, scene.Ship);
         Assert.That(goals.CapabilityModifiers.ContainsKey(GoalType.Trade), Is.False);
+        Assert.That(goals.CapabilityModifiers.ContainsKey(GoalType.Freighter), Is.False);
 
         scene.Ship.RemoveDataBlob<WarpAbilityDB>();
         AgentProcessor.PruneImpossibleGoals(goals, scene.Ship);
         Assert.That(goals.CapabilityModifiers.ContainsKey(GoalType.Trade), Is.False);
+        Assert.That(goals.CapabilityModifiers.ContainsKey(GoalType.Freighter), Is.False);
 
         scene.Ship.RemoveDataBlob<NewtonThrustAbilityDB>();
         AgentProcessor.PruneImpossibleGoals(goals, scene.Ship);
