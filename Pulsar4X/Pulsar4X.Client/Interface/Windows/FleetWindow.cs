@@ -17,9 +17,14 @@ namespace Pulsar4X.Client
             GravSurvey,
             Jump,
             RefuelAt,
+            Trade,
+            Haul,
+            HaulContract,
         }
 
         private IssueOrderType selectedIssueOrderType = IssueOrderType.MoveTo;
+        private int haulSourceId = -1;
+        private int haulDestId = -1;
 
         private int? selectedFleetId = null;
         // Re-selects the first root fleet after connect/faction change, mirroring the old default selection.
@@ -104,6 +109,8 @@ namespace Pulsar4X.Client
             selectedFleetId = fleetId;
             selectedShips = new ();
             autoSelectFirstFleet = false;
+            haulSourceId = -1;
+            haulDestId = -1;
             editedOrders = null;
             editedOrdersSource = null;
             standingOrdersDirty = false;
@@ -242,6 +249,18 @@ namespace Pulsar4X.Client
                         {
                             selectedIssueOrderType = IssueOrderType.Jump;
                         }
+                        if(ImGui.Selectable("Trade ...", selectedIssueOrderType == IssueOrderType.Trade))
+                        {
+                            selectedIssueOrderType = IssueOrderType.Trade;
+                        }
+                        if(ImGui.Selectable("Haul ...", selectedIssueOrderType == IssueOrderType.Haul))
+                        {
+                            selectedIssueOrderType = IssueOrderType.Haul;
+                        }
+                        if(ImGui.Selectable("Haul contract ...", selectedIssueOrderType == IssueOrderType.HaulContract))
+                        {
+                            selectedIssueOrderType = IssueOrderType.HaulContract;
+                        }
                     }
                     ImGui.EndChild();
                     ImGui.SameLine();
@@ -323,12 +342,108 @@ namespace Pulsar4X.Client
                             }
                         }
                         break;
+                    case IssueOrderType.Trade:
+                        ImGui.TextWrapped("Ships buy and sell around this body. The flagship's bridge sets how far they look.");
+                        foreach(var body in candidates.Where(e => e.HasView<BodyView>() && e.HasView<PositionView>()))
+                        {
+                            var name = NameOf(body);
+                            if(ImGui.Button($"{name}###trade-button-{body.Id}"))
+                            {
+                                SubmitFleetCommand(new FleetTradeCommand(selectedFleet.Id, body.Id));
+                            }
+                        }
+                        break;
+                    case IssueOrderType.Haul:
+                        ImGui.TextWrapped("Ships move posted goods between our colonies around this body. The flagship's bridge sets how far they look.");
+                        foreach(var body in candidates.Where(e => e.HasView<BodyView>() && e.HasView<PositionView>()))
+                        {
+                            var name = NameOf(body);
+                            if(ImGui.Button($"{name}###haul-button-{body.Id}"))
+                            {
+                                SubmitFleetCommand(new FleetFreighterCommand(selectedFleet.Id, body.Id));
+                            }
+                        }
+                        break;
+                    case IssueOrderType.HaulContract:
+                        DisplayHaulContract(candidates);
+                        break;
                 }
             }
             ImGui.EndChild();
         }
 
         private static string NameOf(EntitySnapshot entity) => entity.GetView<NameView>()?.Name ?? "";
+
+        private void DisplayHaulContract(IEnumerable<EntitySnapshot> candidates)
+        {
+            if(selectedFleet == null)
+                return;
+
+            ImGui.TextWrapped("One posted good, from one of our colonies to another. The fleet splits that load across its holds.");
+
+            var colonies = candidates
+                .Where(e => e.Relation == OwnerRelation.Owned && e.Kind == BodyKind.Colony && e.HasView<MarketView>())
+                .OrderBy(e => NameOf(e), StringComparer.Ordinal)
+                .ToList();
+            if(colonies.Count == 0)
+            {
+                ImGui.Text("No owned colonies with a market in this system.");
+                return;
+            }
+
+            if(colonies.All(colony => colony.Id != haulSourceId))
+                haulSourceId = -1;
+            if(haulDestId == haulSourceId || colonies.All(colony => colony.Id != haulDestId))
+                haulDestId = -1;
+
+            DisplayHelpers.Header("From");
+            foreach(var colony in colonies)
+            {
+                if(ImGui.Selectable($"{NameOf(colony)}###haul-from-{colony.Id}", haulSourceId == colony.Id))
+                {
+                    haulSourceId = colony.Id;
+                    if(haulDestId == colony.Id)
+                        haulDestId = -1;
+                }
+            }
+
+            DisplayHelpers.Header("To");
+            foreach(var colony in colonies)
+            {
+                if(colony.Id == haulSourceId)
+                    continue;
+                if(ImGui.Selectable($"{NameOf(colony)}###haul-to-{colony.Id}", haulDestId == colony.Id))
+                    haulDestId = colony.Id;
+            }
+
+            var source = colonies.FirstOrDefault(colony => colony.Id == haulSourceId);
+            var dest = colonies.FirstOrDefault(colony => colony.Id == haulDestId);
+            if(source == null || dest == null)
+                return;
+
+            var sourceBook = source.GetView<MarketView>();
+            var destBook = dest.GetView<MarketView>();
+            DisplayHelpers.Header("Cargo");
+            bool any = false;
+            if(sourceBook != null && destBook != null)
+            {
+                foreach(var sell in sourceBook.Goods.Where(good => good.SellQuantity > 0).OrderBy(good => good.Name, StringComparer.Ordinal))
+                {
+                    var buy = destBook.Goods.FirstOrDefault(good => good.CargoId == sell.CargoId && good.BuyQuantity > 0);
+                    if(buy == null)
+                        continue;
+                    any = true;
+                    long units = Math.Min(sell.SellQuantity, buy.BuyQuantity);
+                    if(ImGui.Button($"{sell.Name} ({units})###haul-cargo-{sell.CargoId}"))
+                    {
+                        SubmitFleetCommand(new FleetHaulContractCommand(selectedFleet.Id, source.Id, dest.Id, sell.CargoId));
+                    }
+                }
+            }
+
+            if(!any)
+                ImGui.Text("No posted haul between these colonies.");
+        }
 
         private void SubmitFleetCommand(GameCommand command) => _uiState.GameClient?.SubmitCommandAsync(command);
 

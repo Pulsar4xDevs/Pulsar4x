@@ -1,6 +1,6 @@
 # Plan 10 — Fleet trade and freight
 
-Status: not started. Leaf `Trade` and `Freighter` stay one ship. Do not fold this into plans 6, 7, or 8.
+Status: implemented on `TradeAndTransport`. Tests: `Pulsar4X.Tests/FleetLogisticsTests.cs`. Leaf `Trade` and `Freighter` stay one ship.
 
 ## Outcome
 
@@ -34,6 +34,8 @@ Leave both out of `GoalsDB.BaseWeights` and out of `PickAutonomousTask`. This pl
 `FleetHaulContractCommand(fleetId, sourceId, destId, cargoId)` assigns `FleetFreighter` with `CargoId`, `SourceEntityId`, and `DestEntityId` set. `TargetEntityID` is the destination colony's planet when it has one, so the tanker has a body to orbit.
 
 The translator rejects a commanded entity that is not a fleet, a body or colony outside the fleet's system, a contract colony the faction does not own, and an empty cargo id.
+
+The Fleet Management window's Issue Orders tab sends these three. Trade and Haul list bodies in the fleet's system. Haul contract lists the faction's colonies that have a market, then the goods that colony is selling and the other is buying. There is no toolbar button.
 
 ## What the fleet planner does
 

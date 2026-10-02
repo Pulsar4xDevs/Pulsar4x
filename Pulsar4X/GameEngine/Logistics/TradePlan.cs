@@ -47,22 +47,19 @@ public class TradePlan : IGoalPlanner
 
     static PlanResult FollowRoute(Entity ship, Goal goal)
     {
+        bool handed = !string.IsNullOrEmpty(goal.ParentGoalId);
         if (!MarketRun.TryMarket(ship, goal.SourceEntityId, out var source)
             || !MarketRun.TryMarket(ship, goal.DestEntityId, out var dest))
-            return PlanResult.Fail("listing gone");
+            return handed ? PlanResult.Done("share closed") : PlanResult.Fail("listing gone");
 
         if (!FactionStanceRules.CanTrade(ship.Manager.Game, ship.FactionOwnerID, source.FactionOwnerID)
             || !FactionStanceRules.CanTrade(ship.Manager.Game, ship.FactionOwnerID, dest.FactionOwnerID))
             return PlanResult.Fail("Cannot trade");
 
-        if (!MarketBook.TryGet(source, goal.CargoId, out _)
-            || !MarketBook.TryGet(dest, goal.CargoId, out _))
-            return PlanResult.Fail("listing gone");
-
         if (!MarketRun.TryShipGood(ship, goal.CargoId, out var good))
-            return PlanResult.Fail("listing gone");
+            return handed ? PlanResult.Done("share closed") : PlanResult.Fail("listing gone");
 
-        return MarketRun.NextLeg(ship, source, dest, goal.CargoId, good);
+        return MarketRun.HandedLeg(ship, goal, source, dest, goal.CargoId, good, capBuyAtRequest: false);
     }
 
     static bool TryChooseRoute(Entity ship, out PlannedRoute route, out Entity source, out Entity dest, out ICargoable good)

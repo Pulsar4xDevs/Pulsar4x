@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Api;
+using Pulsar4X.Colonies;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
@@ -48,6 +49,9 @@ namespace Pulsar4X.Engine.Api
                 [typeof(RunMarketCommand)] = TranslateRunMarket,
                 [typeof(TradeCommand)] = TranslateTrade,
                 [typeof(FreighterCommand)] = TranslateFreighter,
+                [typeof(FleetTradeCommand)] = TranslateFleetTrade,
+                [typeof(FleetFreighterCommand)] = TranslateFleetFreighter,
+                [typeof(FleetHaulContractCommand)] = TranslateFleetHaulContract,
                 [typeof(SetMarketListingCommand)] = TranslateSetMarketListing,
                 [typeof(ClearMarketListingCommand)] = TranslateClearMarketListing,
                 [typeof(CreateFleetCommand)] = TranslateCreateFleet,
@@ -241,6 +245,80 @@ namespace Pulsar4X.Engine.Api
                 return CommandResult.Reject(goal.Message);
             return CommandResult.Ok(goal.Id);
         }
+
+        private CommandResult TranslateFleetTrade(Entity faction, Entity commanded, GameCommand command)
+        {
+            var trade = (FleetTradeCommand)command;
+            if (RejectUnlessFleet(commanded) is { } notFleet)
+                return notFleet;
+            if (!InFleetSystem(commanded, trade.BodyId))
+                return CommandResult.Reject("The target is not in the fleet's system.");
+
+            var goal = new Goal(GoalType.FleetTrade) { TargetEntityID = trade.BodyId };
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        private CommandResult TranslateFleetFreighter(Entity faction, Entity commanded, GameCommand command)
+        {
+            var haul = (FleetFreighterCommand)command;
+            if (RejectUnlessFleet(commanded) is { } notFleet)
+                return notFleet;
+            if (!InFleetSystem(commanded, haul.BodyId))
+                return CommandResult.Reject("The target is not in the fleet's system.");
+
+            var goal = new Goal(GoalType.FleetFreighter) { TargetEntityID = haul.BodyId };
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        private CommandResult TranslateFleetHaulContract(Entity faction, Entity commanded, GameCommand command)
+        {
+            var haul = (FleetHaulContractCommand)command;
+            if (RejectUnlessFleet(commanded) is { } notFleet)
+                return notFleet;
+            if (string.IsNullOrEmpty(haul.CargoId))
+                return CommandResult.Reject("Cargo id is required.");
+            if (!TryResolve(haul.SourceId, out var source) || !TryResolve(haul.DestId, out var dest)
+                || source.Manager != commanded.Manager || dest.Manager != commanded.Manager)
+                return CommandResult.Reject("The target is not in the fleet's system.");
+            if (source.Id == dest.Id
+                || !source.HasDataBlob<ColonyInfoDB>()
+                || !dest.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject("The contract needs two colonies.");
+            if (source.FactionOwnerID != commanded.FactionOwnerID || dest.FactionOwnerID != commanded.FactionOwnerID)
+                return CommandResult.Reject("The colony is not yours.");
+
+            int anchor = dest.Id;
+            if (dest.TryGetDataBlob<ColonyInfoDB>(out var colony)
+                && colony.PlanetEntity != null
+                && colony.PlanetEntity.IsValid)
+                anchor = colony.PlanetEntity.Id;
+
+            var goal = new Goal(GoalType.FleetFreighter)
+            {
+                CargoId = haul.CargoId,
+                SourceEntityId = source.Id,
+                DestEntityId = dest.Id,
+                TargetEntityID = anchor,
+            };
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        private static CommandResult RejectUnlessFleet(Entity commanded)
+            => commanded.HasDataBlob<FleetDB>()
+                ? null
+                : CommandResult.Reject("The commanded entity is not a fleet.");
+
+        private bool InFleetSystem(Entity fleet, int entityId)
+            => TryResolve(entityId, out var entity) && entity.Manager == fleet.Manager;
 
         private CommandResult TranslateSetMarketListing(Entity faction, Entity commanded, GameCommand command)
         {

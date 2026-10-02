@@ -54,6 +54,16 @@ public sealed record TradeCommand(int TargetEntityId) : GameCommand(TargetEntity
 /// <summary>Tell one cargo ship to haul a posted good between this faction's colonies. Targets the ship.</summary>
 public sealed record FreighterCommand(int TargetEntityId) : GameCommand(TargetEntityId);
 
+/// <summary>Parcel trade pairs across a fleet. Targets the fleet. <see cref="BodyId"/> is the anchor body.</summary>
+public sealed record FleetTradeCommand(int TargetEntityId, int BodyId) : GameCommand(TargetEntityId);
+
+/// <summary>Parcel owned hauls across a fleet. Targets the fleet. <see cref="BodyId"/> is the anchor body.</summary>
+public sealed record FleetFreighterCommand(int TargetEntityId, int BodyId) : GameCommand(TargetEntityId);
+
+/// <summary>Split one owned haul across a fleet. Targets the fleet. The two colonies do not grow with command span.</summary>
+public sealed record FleetHaulContractCommand(int TargetEntityId, int SourceId, int DestId, string CargoId)
+    : GameCommand(TargetEntityId);
+
 /// <summary>
 /// Post or replace one cargo row on a colony's market book, and keep the matching policy row
 /// in step so a running market wake uses these prices and reserve. Targets the colony.

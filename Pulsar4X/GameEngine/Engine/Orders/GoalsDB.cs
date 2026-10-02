@@ -100,6 +100,10 @@ public enum GoalType
 
     // Colony logistics office. Appended so existing saved enum values stay put.
     RunMarket,
+
+    // Fleet parcel of the one-ship trade and freight goals. Appended so saved values stay put.
+    FleetTrade,
+    FleetFreighter,
 }
 
 public class Goal
@@ -116,6 +120,8 @@ public class Goal
     public int SourceEntityId = -1;
     /// <summary>Where to sell, or the freight destination. -1 until a route is committed.</summary>
     public int DestEntityId = -1;
+    /// <summary>Fleet load cap for one child trip. 0 means the ship decides the size.</summary>
+    public long UnitShare = 0;
     public float Weight = 0.5f;
     public string Name = "";
     public GoalStatus Status = GoalStatus.Planning;

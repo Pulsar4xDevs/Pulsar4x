@@ -2,7 +2,7 @@
 
 Implementation plans for the trade roadmap. Design vocabulary for the first three is `GameEngine/Logistics/market-and-stance.md`. Goal and action rules are `GameEngine/Engine/Orders/agents-and-goals-design.md`.
 
-Plans 1–9 and 5b are implemented on `TradeAndTransport`. Plans 10 and 11 are written and not started. Do not start a later plan before the ones it lists under Depends on.
+Plans 1–10 and 5b are implemented on `TradeAndTransport`. Plan 11 is written and not started. Do not start a later plan before the ones it lists under Depends on.
 
 | # | Plan | Depends on |
 |---|---|---|

@@ -72,7 +72,38 @@ static class MarketRun
         return true;
     }
 
-    public static PlanResult NextLeg(Entity ship, Entity source, Entity dest, string cargoId, ICargoable good, bool capBuyAtRequest = false)
+    /// <summary>Copied onto a fleet child's goal while its one load is aboard, so the next wake can complete.</summary>
+    public const string ShareInFlight = "share in flight";
+
+    /// <summary>
+    /// One load for a fleet-handed child. A player-issued goal (no parent) keeps the leaf fail messages.
+    /// </summary>
+    public static PlanResult HandedLeg(Entity ship, Goal goal, Entity source, Entity dest, string cargoId, ICargoable good, bool capBuyAtRequest)
+    {
+        bool handed = !string.IsNullOrEmpty(goal.ParentGoalId);
+        long share = goal.UnitShare;
+        long held = 0;
+        if (ship.TryGetDataBlob<CargoStorageDB>(out var store))
+            held = store.GetUnitsStored(good, includeEscro: false);
+
+        if (handed && share > 0 && held == 0 && goal.Message == ShareInFlight)
+            return PlanResult.Done("share delivered");
+
+        if (!MarketBook.TryGet(source, cargoId, out var sell) || !MarketBook.TryGet(dest, cargoId, out var buy))
+            return handed ? PlanResult.Done("share closed") : PlanResult.Fail("listing gone");
+
+        if (handed && held == 0 && (sell.SellQuantity <= 0 || buy.BuyQuantity <= 0))
+            return PlanResult.Done("share closed");
+        if (handed && held > 0 && buy.BuyQuantity <= 0)
+            return PlanResult.Done("share closed");
+
+        var leg = NextLeg(ship, source, dest, cargoId, good, capBuyAtRequest, handed ? share : 0);
+        if (handed && share > 0 && held > 0 && leg.Status == GoalStatus.Active)
+            return leg.WithMessage(ShareInFlight);
+        return leg;
+    }
+
+    public static PlanResult NextLeg(Entity ship, Entity source, Entity dest, string cargoId, ICargoable good, bool capBuyAtRequest = false, long unitShare = 0)
     {
         if (!MarketBook.TryGet(source, cargoId, out var sell) || !MarketBook.TryGet(dest, cargoId, out var buy))
             return PlanResult.Fail("listing gone");
@@ -89,6 +120,8 @@ static class MarketRun
         long buyUnits = Math.Min(sell.SellQuantity, Math.Max(0, free));
         if (capBuyAtRequest)
             buyUnits = Math.Min(buyUnits, Math.Max(0, buy.BuyQuantity));
+        if (unitShare > 0)
+            buyUnits = Math.Min(buyUnits, unitShare);
         return ExchangeOrMove(ship, source, cargoId, MarketSide.BuyFromMarket, buyUnits);
     }
 

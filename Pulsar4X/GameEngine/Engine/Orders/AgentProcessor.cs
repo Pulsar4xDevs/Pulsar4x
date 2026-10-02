@@ -58,6 +58,15 @@ public readonly struct PlanResult
         Route = route,
     };
 
+    public PlanResult WithMessage(string message) => new()
+    {
+        Status = Status,
+        Message = message,
+        Actions = Actions,
+        SubGoals = SubGoals,
+        Route = Route,
+    };
+
     public static PlanResult Continue(params EntityAction[] actions) => new()
     {
         Status = GoalStatus.Active,
