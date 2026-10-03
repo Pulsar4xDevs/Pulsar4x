@@ -48,6 +48,17 @@ public sealed record ClearMarketPolicyCommand(int TargetEntityId, string CargoId
 /// <summary>Tell a colony to keep its market book posted. Targets the colony.</summary>
 public sealed record RunMarketCommand(int TargetEntityId) : GameCommand(TargetEntityId);
 
+/// <summary>How a colony supply order treats the offices its command bridge can see.</summary>
+public enum SupplyMode
+{
+    Run,
+    Balance,
+    Stockpile,
+}
+
+/// <summary>Hand market work to owned colonies around this one. Targets the colony.</summary>
+public sealed record SupplyLocalCommand(int TargetEntityId, SupplyMode Mode) : GameCommand(TargetEntityId);
+
 /// <summary>Tell one cargo ship to buy in this system and sell where the bid covers the trip. Targets the ship.</summary>
 public sealed record TradeCommand(int TargetEntityId) : GameCommand(TargetEntityId);
 

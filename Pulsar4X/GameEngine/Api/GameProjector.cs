@@ -516,8 +516,19 @@ namespace Pulsar4X.Engine.Api
             }
 
             int? planetId = c.PlanetEntity.IsValid ? c.PlanetEntity.Id : null;
-            return new ColonyView(population, planetId) { SpeciesPopulations = species };
+            return new ColonyView(population, planetId)
+            {
+                SpeciesPopulations = species,
+                CommandSpan = colony.FactionOwnerID == factionId ? SpanLabel(CommandSpan.Of(colony)) : "",
+            };
         }
+
+        static string SpanLabel(CommandSpanKind span) => span switch
+        {
+            CommandSpanKind.Well => "Covers this well",
+            CommandSpanKind.System => "Covers this system",
+            _ => "Covers this body",
+        };
 
         private static InstallationsView ToInstallationsView(ComponentInstancesDB ci, Entity entity)
         {

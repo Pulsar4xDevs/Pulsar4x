@@ -17,6 +17,7 @@ using Pulsar4X.Interfaces;
 using Pulsar4X.Engine.Factories;
 using Pulsar4X.Components;
 using Pulsar4X.Fleets;
+using Pulsar4X.Logistics;
 using Pulsar4X.Ships;
 using System;
 using GameEngine.Engine.Orders;
@@ -155,6 +156,10 @@ namespace Pulsar4X.Colonies
                     LoadCargo(shipEntity, factionInfo.Data, ship.Cargo);
                 }
             }
+
+            // Cargo is already in the warehouse. A logistics office keeps listing that stock.
+            if (colonyEntity.HasDataBlob<LogiBaseDB>())
+                AgentProcessor.AssignGoal(colonyEntity, new Goal(GoalType.OfferStock) { Name = "Offer stock" });
 
             return colonyEntity;
         }

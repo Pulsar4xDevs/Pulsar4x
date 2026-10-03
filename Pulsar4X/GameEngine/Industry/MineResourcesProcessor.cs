@@ -63,10 +63,14 @@ namespace Pulsar4X.Industry
 
             foreach (var kvp in actualMiningRates)
             {
-                ICargoable mineral = _minerals[kvp.Key];
+                // Saved rates can still name a mineral this body does not have.
+                if (!planetMinerals.TryGetValue(kvp.Key, out var mineralDeposit))
+                    continue;
+                if (!_minerals.TryGetValue(kvp.Key, out var mineral))
+                    continue;
                 string cargoTypeID = mineral.CargoTypeID;
 
-                var unitsMinableThisTick = (long)Math.Min(actualMiningRates[kvp.Key] * infraEfficiency, planetMinerals[kvp.Key].Amount.Actual);
+                var unitsMinableThisTick = (long)Math.Min(kvp.Value * infraEfficiency, mineralDeposit.Amount.Actual);
 
                 if(!stockpile.TypeStores.ContainsKey(cargoTypeID))
                 {
@@ -86,7 +90,6 @@ namespace Pulsar4X.Industry
                     // StaticRefLib.EventLog.AddPlayerEntityErrorEvent(colonyEntity,EventType.Storage, erstr);
                 }
 
-                MineralDeposit mineralDeposit = planetMinerals[kvp.Key];
                 long newAmount = mineralDeposit.Amount.Actual - unitsMinedThisTick;
 
                 var amount = mineralDeposit.Amount;

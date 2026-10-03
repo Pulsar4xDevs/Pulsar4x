@@ -195,6 +195,9 @@ public sealed record ColonyView(long Population, int? PlanetEntityId) : ICompone
 {
     /// <summary>Per-species population breakdown (names resolved for the requesting faction).</summary>
     public IReadOnlyList<SpeciesPopulation> SpeciesPopulations { get; init; } = Array.Empty<SpeciesPopulation>();
+
+    /// <summary>Owning faction only. "Covers this body", "Covers this well", or "Covers this system".</summary>
+    public string CommandSpan { get; init; } = "";
 }
 
 public sealed record SpeciesPopulation(string SpeciesName, long Population);

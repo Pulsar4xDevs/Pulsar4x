@@ -1,10 +1,13 @@
 using System.Linq;
+using GameEngine.Engine.Orders;
 using NUnit.Framework;
 using Pulsar4X.Api;
 using Pulsar4X.Colonies;
 using Pulsar4X.Engine;
+using Pulsar4X.Engine.Api;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
+using Pulsar4X.Logistics;
 using Pulsar4X.Modding;
 using Pulsar4X.Names;
 using Pulsar4X.People;
@@ -82,5 +85,42 @@ public class LunaConcordTests
 
         Assert.That(sol.IsEntityVisibleToFaction(colony, player.Id), Is.True);
         Assert.That(sol.GetSensorContacts(player.Id).SensorContactExists(colony.Id), Is.True);
+    }
+
+    [Test]
+    public void PlacedColony_ListsItsWarehouse()
+    {
+        var modLoader = new ModLoader();
+        var store = new ModDataStore();
+        modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
+
+        var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
+        game.Settings.EnforceSingleThread = true;
+        StarSystemFactory.LoadFromBlueprint(game, store.Systems["system-sol"]);
+
+        var player = FactionFactory.CreateBasicFaction(game, "United Earth Corp", "UEC", 0);
+        player.FactionOwnerID = player.Id;
+        ColonyFactory.PlaceOwnedColonies(game, store, player, store.Species["species-human"]);
+
+        var sol = game.Systems.Single(s => s.ID == "system-sol");
+        var luna = NameLookup.GetFirstEntityWithName(sol, "Luna");
+        var colony = sol.GetAllEntitiesWithDataBlob<ColonyInfoDB>()
+            .Single(c => c.GetDataBlob<ColonyInfoDB>().PlanetEntity == luna);
+
+        Assert.That(colony.GetDataBlob<GoalsDB>().ActiveGoal!.Type, Is.EqualTo(GoalType.OfferStock));
+        Assert.That(colony.TryGetDataBlob<LogiBaseDB>(out var book), Is.True);
+        Assert.That(book!.Listings.Keys, Is.EquivalentTo(new[] { "iron", "titanium", "silicon", "methalox" }));
+        foreach (var listing in book.Listings.Values)
+        {
+            Assert.That(listing.SellQuantity, Is.GreaterThan(0), listing.CargoId);
+            Assert.That(listing.BuyQuantity, Is.EqualTo(0));
+            Assert.That(listing.Ask, Is.EqualTo(0));
+        }
+
+        var view = new GameProjector(game).ProjectEntity(colony, player.Id).GetView<MarketView>();
+        Assert.That(view, Is.Not.Null);
+        Assert.That(view!.CanEdit, Is.False);
+        Assert.That(view.Goods.Select(good => good.CargoId), Is.EquivalentTo(book.Listings.Keys));
+        Assert.That(view.Goods.All(good => good.SellQuantity > 0));
     }
 }

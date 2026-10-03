@@ -448,7 +448,7 @@ namespace Pulsar4X.Client
             if (_entity.GetView<MarketView>() is { } market
                 && ImGui.CollapsingHeader("Market", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                MarketBarsDisplay.Display(_entity.Id, market, _uiState);
+                MarketBarsDisplay.Display(_entity, market, _uiState);
             }
 
             if (_system != null && _entity.Kind != BodyKind.Colony)
@@ -461,7 +461,7 @@ namespace Pulsar4X.Client
                         continue;
                     string colonyName = colony.GetView<NameView>()?.Name ?? "Colony";
                     if (ImGui.CollapsingHeader(colonyName + "###market-" + colony.Id, ImGuiTreeNodeFlags.DefaultOpen))
-                        MarketBarsDisplay.Display(colony.Id, colonyMarket, _uiState);
+                        MarketBarsDisplay.Display(colony, colonyMarket, _uiState);
                 }
             }
         }

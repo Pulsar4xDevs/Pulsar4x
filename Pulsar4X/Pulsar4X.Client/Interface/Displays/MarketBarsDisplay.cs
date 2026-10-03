@@ -15,7 +15,7 @@ namespace Pulsar4X.Client
         static readonly Vector4 BuyColor = new(0.85f, 0.65f, 0.25f, 0.9f);
         static readonly Vector4 SellColor = new(0.35f, 0.75f, 0.40f, 0.9f);
 
-        public static void Display(int entityId, MarketView? market, GlobalUIState uiState)
+        public static void Display(EntitySnapshot entity, MarketView? market, GlobalUIState uiState)
         {
             if (market == null)
             {
@@ -69,7 +69,36 @@ namespace Pulsar4X.Client
             }
 
             if (market.CanEdit)
-                DisplayEditor(entityId, market, uiState);
+            {
+                DisplayEditor(entity.Id, market, uiState);
+                if (entity.Kind == BodyKind.Colony)
+                    DisplaySupply(entity, uiState);
+            }
+        }
+
+        static void DisplaySupply(EntitySnapshot entity, GlobalUIState uiState)
+        {
+            ImGui.Separator();
+            string span = entity.GetView<ColonyView>()?.CommandSpan ?? "";
+            if (!string.IsNullOrEmpty(span))
+                ImGui.Text(span);
+
+            if (ImGui.Button("Run markets"))
+                uiState.GameClient?.SubmitCommandAsync(new SupplyLocalCommand(entity.Id, SupplyMode.Run));
+            if (ImGui.Button("Balance"))
+                uiState.GameClient?.SubmitCommandAsync(new SupplyLocalCommand(entity.Id, SupplyMode.Balance));
+            if (ImGui.Button("Stockpile"))
+                uiState.GameClient?.SubmitCommandAsync(new SupplyLocalCommand(entity.Id, SupplyMode.Stockpile));
+
+            ImGui.TextWrapped("Stockpile raises this colony's reserve, and that reserve stays after the order is replaced.");
+
+            if (entity.GetView<OrdersView>() is { } orders
+                && orders.goal.Name is "Run markets" or "Balance" or "Stockpile")
+            {
+                ImGui.Text($"{orders.goal.Name}: {orders.goal.Status}");
+                if (!string.IsNullOrEmpty(orders.goal.Message))
+                    ImGui.TextWrapped(orders.goal.Message);
+            }
         }
 
         static void DisplayEditor(int entityId, MarketView market, GlobalUIState uiState)

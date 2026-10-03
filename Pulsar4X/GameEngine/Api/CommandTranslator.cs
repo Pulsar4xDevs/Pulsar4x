@@ -47,6 +47,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(SetMarketPolicyCommand)] = TranslateSetMarketPolicy,
                 [typeof(ClearMarketPolicyCommand)] = TranslateClearMarketPolicy,
                 [typeof(RunMarketCommand)] = TranslateRunMarket,
+                [typeof(SupplyLocalCommand)] = TranslateSupplyLocal,
                 [typeof(TradeCommand)] = TranslateTrade,
                 [typeof(FreighterCommand)] = TranslateFreighter,
                 [typeof(FleetTradeCommand)] = TranslateFleetTrade,
@@ -220,6 +221,30 @@ namespace Pulsar4X.Engine.Api
 
             AgentProcessor.AssignGoal(commanded, new Goal(GoalType.RunMarket));
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateSupplyLocal(Entity faction, Entity commanded, GameCommand command)
+        {
+            var supply = (SupplyLocalCommand)command;
+            if (!commanded.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject("The target is not a colony.");
+            if (commanded.FactionOwnerID != faction.Id)
+                return CommandResult.Reject("The colony is not yours.");
+            if (RejectWithoutLogisticsOffice(commanded) is { } missing)
+                return missing;
+
+            var goal = new Goal(GoalType.SupplyLocal)
+            {
+                SupplyMode = supply.Mode,
+                Name = supply.Mode switch
+                {
+                    SupplyMode.Balance => "Balance",
+                    SupplyMode.Stockpile => "Stockpile",
+                    _ => "Run markets",
+                },
+            };
+            AgentProcessor.AssignGoal(commanded, goal);
+            return CommandResult.Ok(goal.Id);
         }
 
         private CommandResult TranslateTrade(Entity faction, Entity commanded, GameCommand command)

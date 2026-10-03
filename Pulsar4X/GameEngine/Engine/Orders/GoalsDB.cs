@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Pulsar4X.Api;
 using Pulsar4X.Datablobs;
 
 namespace GameEngine.Engine.Orders;
@@ -104,6 +105,12 @@ public enum GoalType
     // Fleet parcel of the one-ship trade and freight goals. Appended so saved values stay put.
     FleetTrade,
     FleetFreighter,
+
+    // One colony handing RunMarket to offices its bridge can see. Appended so saved values stay put.
+    SupplyLocal,
+
+    // Standing colony job: list warehouse stock. Appended so saved values stay put.
+    OfferStock,
 }
 
 public class Goal
@@ -122,6 +129,8 @@ public class Goal
     public int DestEntityId = -1;
     /// <summary>Fleet load cap for one child trip. 0 means the ship decides the size.</summary>
     public long UnitShare = 0;
+    /// <summary>Colony supply. Run hands out markets. Balance and Stockpile also edit policy.</summary>
+    public SupplyMode SupplyMode = SupplyMode.Run;
     public float Weight = 0.5f;
     public string Name = "";
     public GoalStatus Status = GoalStatus.Planning;
