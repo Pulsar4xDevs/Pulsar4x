@@ -720,6 +720,10 @@ public static class MovePlanner
     public static Vector3 PlannedWarpExitOffset(
         Entity ship, Entity target, Vector3 departureVel, float? navQuality = null)
     {
+        // Jump points and grav anomalies have no body radius. Arrive on the point.
+        if (!target.HasDataBlob<MassVolumeDB>())
+            return Vector3.Zero;
+
         double r = OrbitMath.LowOrbitRadius(target);
         if (!(r > 0) || !double.IsFinite(r))
             return Vector3.Zero;

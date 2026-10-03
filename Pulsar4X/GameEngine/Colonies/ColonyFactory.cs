@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
+using Pulsar4X.Api;
+using Pulsar4X.Modding;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
@@ -14,6 +17,7 @@ using Pulsar4X.Interfaces;
 using Pulsar4X.Engine.Factories;
 using Pulsar4X.Components;
 using Pulsar4X.Fleets;
+using Pulsar4X.Logistics;
 using Pulsar4X.Ships;
 using System;
 using GameEngine.Engine.Orders;
@@ -29,7 +33,7 @@ namespace Pulsar4X.Colonies
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
 
             // Unlock the starting items
-            foreach(var id in colonyBlueprint.StartingItems)
+            foreach(var id in colonyBlueprint.StartingItems ?? new List<string>())
             {
                 factionInfo.Data.Unlock(id);
 
@@ -47,14 +51,14 @@ namespace Pulsar4X.Colonies
 
             // Add component designs
             ComponentDesigner.StartResearched = true;
-            foreach(var id in colonyBlueprint.ComponentDesigns)
+            foreach(var id in colonyBlueprint.ComponentDesigns ?? new List<string>())
             {
                 ComponentDesignFromJson.Create(faction, factionInfo.Data, game.StartingGameData.ComponentDesigns[id]);
             }
             ComponentDesigner.StartResearched = false;
 
             // Add ship designs
-            foreach(var id in colonyBlueprint.ShipDesigns)
+            foreach(var id in colonyBlueprint.ShipDesigns ?? new List<string>())
             {
                 ShipDesignFromJson.Create(faction, factionInfo.Data, game.StartingGameData.ShipDesigns[id]);
             }
@@ -62,7 +66,11 @@ namespace Pulsar4X.Colonies
             var blobs = new List<BaseDataBlob>();
 
             string planetName = systemBody.GetDataBlob<NameDB>().GetName(faction.Id);
-            NameDB name = new NameDB($"{planetName} {DEFAULT_SUFFIX}"); // TODO: Review default name.
+            // Player starts keep the "Planet HQ" name. A placed faction colony uses the blueprint name.
+            string colonyName = !string.IsNullOrEmpty(colonyBlueprint.OwnerFaction) && !string.IsNullOrEmpty(colonyBlueprint.Name)
+                ? colonyBlueprint.Name
+                : $"{planetName} {DEFAULT_SUFFIX}";
+            NameDB name = new NameDB(colonyName);
             name.SetName(faction.Id, name.DefaultName);
 
             var pos = new Vector3(systemBody.GetDataBlob<MassVolumeDB>().RadiusInM, 0, 0);
@@ -92,7 +100,7 @@ namespace Pulsar4X.Colonies
             }
 
             // Add starting installations
-            foreach(var installation in colonyBlueprint.Installations)
+            foreach(var installation in colonyBlueprint.Installations ?? new List<ColonyBlueprint.StartingItemBlueprint>())
             {
                 colonyEntity.AddComponent(
                     factionInfo.InternalComponentDesigns[installation.Id],
@@ -123,7 +131,7 @@ namespace Pulsar4X.Colonies
             colonyEntity.GetDataBlob<TeamsHousedDB>().AddTeam(scientistEntity);
 
             // Add starting fleets
-            foreach(var fleet in colonyBlueprint.Fleets)
+            foreach(var fleet in colonyBlueprint.Fleets ?? new List<ColonyBlueprint.FleetBlueprint>())
             {
                 var fleetEntity = FleetFactory.Create(startingSystem, faction.Id, fleet.Name);
                 var fleetDB = fleetEntity.GetDataBlob<FleetDB>();
@@ -149,9 +157,97 @@ namespace Pulsar4X.Colonies
                 }
             }
 
+            // Cargo is already in the warehouse. A logistics office keeps listing that stock.
+            if (colonyEntity.HasDataBlob<LogiBaseDB>())
+                AgentProcessor.AssignGoal(colonyEntity, new Goal(GoalType.OfferStock) { Name = "Offer stock" });
+
             return colonyEntity;
         }
 
+        /// <summary>
+        /// Places colony blueprints that name an <see cref="ColonyBlueprint.OwnerFaction"/> and a body.
+        /// Those are not player start options. The named faction is created if needed, and the stance
+        /// string is stored both ways (Friendly or Allied is what makes them a trade partner).
+        /// </summary>
+        public static void PlaceOwnedColonies(Game game, ModDataStore data, Entity playerFaction, SpeciesBlueprint speciesBlueprint)
+        {
+            var created = new Dictionary<string, Entity>();
+            var playerInfo = playerFaction.GetDataBlob<FactionInfoDB>();
+
+            foreach (var colony in data.Colonies.Values)
+            {
+                if (string.IsNullOrEmpty(colony.OwnerFaction) || string.IsNullOrEmpty(colony.Body))
+                    continue;
+                if (!TryFindBody(game, colony.System, colony.Body, out var system, out var body))
+                    continue;
+
+                if (!created.TryGetValue(colony.OwnerFaction, out var faction))
+                {
+                    faction = FactionFactory.CreateBasicFaction(
+                        game,
+                        colony.OwnerFaction,
+                        string.IsNullOrEmpty(colony.OwnerAbbreviation) ? colony.OwnerFaction : colony.OwnerAbbreviation,
+                        0);
+                    faction.FactionOwnerID = faction.Id;
+                    created[colony.OwnerFaction] = faction;
+                }
+
+                var info = faction.GetDataBlob<FactionInfoDB>();
+                if (!info.KnownSystems.Contains(system.ID))
+                    info.KnownSystems.Add(system.ID);
+
+                var species = SpeciesFactory.CreateFromBlueprint(system, speciesBlueprint);
+                species.FactionOwnerID = faction.Id;
+                info.Species.Add(species);
+
+                // Installation designs look up resources, templates, and tech levels. A placed
+                // faction does not run the player's long StartingItems list, so open those libraries.
+                UnlockAll(info.Data.LockedCargoGoods.GetAll().Values.Select(c => c.UniqueID), info);
+                UnlockAll(info.Data.LockedComponentTemplates.Keys, info);
+                UnlockAll(info.Data.LockedIndustryTypes.Keys, info);
+                UnlockAll(info.Data.LockedCargoTypes.Keys, info);
+                UnlockAll(info.Data.LockedArmor.Keys, info);
+                var lockedTechs = info.Data.LockedTechs.Keys.ToList();
+                UnlockAll(lockedTechs, info);
+                foreach (var id in lockedTechs)
+                    info.Data.IncrementTechLevel(id);
+
+                CreateFromBlueprint(game, faction, species, system, body, colony);
+
+                if (Enum.TryParse<FactionStance>(colony.Stance, ignoreCase: true, out var stance))
+                {
+                    playerInfo.Stances[faction.Id] = stance;
+                    info.Stances[playerFaction.Id] = stance;
+                }
+            }
+        }
+
+        static void UnlockAll(IEnumerable<string> ids, FactionInfoDB info)
+        {
+            foreach (var id in ids.ToList())
+                info.Data.Unlock(id);
+        }
+
+        static bool TryFindBody(Game game, string? systemId, string bodyName, out StarSystem system, out Entity body)
+        {
+            IEnumerable<StarSystem> systems = string.IsNullOrEmpty(systemId)
+                ? game.Systems
+                : game.Systems.Where(s => s.ID == systemId);
+
+            foreach (var candidate in systems)
+            {
+                if (NameLookup.TryGetFirstEntityWithName(candidate, bodyName, out var found))
+                {
+                    system = candidate;
+                    body = found;
+                    return true;
+                }
+            }
+
+            system = null!;
+            body = null!;
+            return false;
+        }
 
         /// <summary>
         /// Creates a new colony with zero population unless specified.

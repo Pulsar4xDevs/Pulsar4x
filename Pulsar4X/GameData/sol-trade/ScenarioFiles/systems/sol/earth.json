@@ -89,7 +89,8 @@
         { "Id": "default-design-research-lab", "Amount": 2 },
         { "id": "default-design-city-hall", "amount": 1 },
         { "Id": "default-design-local-construction", "Amount": 1},
-        { "Id": "default-design-launch-complex", "Amount": 1 }
+        { "Id": "default-design-launch-complex", "Amount": 1 },
+        { "Id": "default-design-logistics-office", "Amount": 1 }
       ],
       "Cargo": [
         { "Id": "iron", "Amount": 500000 },
@@ -180,7 +181,8 @@
         "tech-panel-density",
         "solarArray",
         "local-construction",
-        "launch-complex"
+        "launch-complex",
+        "logistics-office"
       ],
       "ComponentDesigns": [
         "default-design-alcubierre-2k",
@@ -221,7 +223,8 @@
         "default-design-launch-complex",
         "default-design-bridge-ship",
         "default-design-bridge-well",
-        "default-design-bridge-system"
+        "default-design-bridge-system",
+        "default-design-logistics-office"
       ],
       "ShipDesigns": [
         "default-ship-design-courier",

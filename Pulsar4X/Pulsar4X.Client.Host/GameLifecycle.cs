@@ -101,7 +101,9 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
             data.Species.Where(kvp => kvp.Value.Playable)
                 .Select(kvp => new CatalogOption(kvp.Key, kvp.Value.Name)).ToList(),
             data.Themes.Select(kvp => new CatalogOption(kvp.Key, kvp.Value.Name)).ToList(),
-            data.Colonies.Select(kvp => new CatalogOption(kvp.Key, kvp.Value.Name)).ToList(),
+            data.Colonies
+                .Where(kvp => string.IsNullOrEmpty(kvp.Value.OwnerFaction))
+                .Select(kvp => new CatalogOption(kvp.Key, kvp.Value.Name)).ToList(),
             systems);
     }
 
@@ -401,6 +403,8 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
 
         // Setup the starting colony
         ColonyFactory.CreateFromBlueprint(game, playerFaction, playerSpecies, startingSystem, startingBody, modDataStore.Colonies[request.ColonyId]);
+        if (modDataStore.Species.TryGetValue(request.SpeciesId, out var speciesBlueprint))
+            ColonyFactory.PlaceOwnedColonies(game, modDataStore, playerFaction, speciesBlueprint);
         if (request.EleStart && !request.SystemId.Equals("random"))
             AsteroidFactory.CreateAsteroid(startingSystem, startingBody, game.TimePulse.GameGlobalDateTime + TimeSpan.FromDays(365));
 

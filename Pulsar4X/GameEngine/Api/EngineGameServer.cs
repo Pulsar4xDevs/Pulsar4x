@@ -232,6 +232,7 @@ namespace Pulsar4X.Engine.Api
                 var commanders = _projector.ProjectCommanders(sub.FactionId);
                 if (commanders != null)
                     sub.Send(new GameEventEnvelope(GameEventType.CommandersChanged, Commanders: commanders));
+                sub.Send(StancesEnvelope(sub.FactionId));
                 RefreshColonies(sub);
                 RefreshMovers(sub);
             }
@@ -330,6 +331,9 @@ namespace Pulsar4X.Engine.Api
                 // so re-push it after every accepted command rather than special-casing them.
                 PushCommanders(session.FactionId);
 
+                if (command is SetFactionStanceCommand)
+                    PushStances(session.FactionId);
+
                 // A new component design also registers a research project for itself.
                 if (command is CreateComponentDesignCommand)
                     PushComponentDesigns(session.FactionId);
@@ -364,6 +368,17 @@ namespace Pulsar4X.Engine.Api
                 if (research != null)
                     sub.Send(new GameEventEnvelope(GameEventType.ResearchChanged, Research: research));
             }
+        }
+
+        private GameEventEnvelope StancesEnvelope(int factionId)
+            => new(GameEventType.StancesChanged, Stances: _projector.ProjectStances(factionId));
+
+        private void PushStances(int factionId)
+        {
+            var evt = StancesEnvelope(factionId);
+            foreach (var sub in SnapshotSubscriptions())
+                if (sub.FactionId == factionId)
+                    sub.Send(evt);
         }
 
         private void PushCommanders(int factionId)
@@ -426,6 +441,8 @@ namespace Pulsar4X.Engine.Api
             var commanders = _projector.ProjectCommanders(session.FactionId);
             if (commanders != null)
                 sink(new GameEventEnvelope(GameEventType.CommandersChanged, Commanders: commanders));
+
+            sink(StancesEnvelope(session.FactionId));
 
             // The faction's persisted event log is the starting backlog; live events follow as
             // they happen (the subscription's EventManager bridge starts after this, so nothing

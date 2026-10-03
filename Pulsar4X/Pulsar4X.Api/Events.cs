@@ -20,6 +20,7 @@ public enum GameEventType
     ResearchChanged, // the faction's research state changed; payload carries Research
     ComponentDesignsChanged,  // the faction's templates/designs changed; payload carries ComponentDesigns
     CommandersChanged, // the faction's personnel roster changed; payload carries Commanders
+    StancesChanged,  // the viewer's stance toward other factions changed; payload carries Stances
     LogEvent,        // one or more game-log entries for the faction; payload carries Log
 }
 
@@ -61,4 +62,5 @@ public sealed record GameEventEnvelope(
     ResearchSnapshot? Research = null,
     ComponentDesignsSnapshot? ComponentDesigns = null,
     IReadOnlyList<CommanderSnapshot>? Commanders = null,
-    IReadOnlyList<LogEvent>? Log = null);
+    IReadOnlyList<LogEvent>? Log = null,
+    IReadOnlyList<FactionStanceRow>? Stances = null);

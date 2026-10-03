@@ -24,6 +24,10 @@ public static class GoalWeighting
             ctx[GoalType.RefuelAt] = refuelMul;
 
         // Drive DontRunOutOfFuel is represented by the RefuelAt context score, not a separate plan.
+        // MakeProfit and HelpOwn are the same kind of push onto Trade and Freighter.
+        float greed = agent?.Greed ?? 1f;
+        ctx[GoalType.Trade] = GoalsDB.BaseWeights[GoalType.MakeProfit] * greed;
+        ctx[GoalType.Freighter] = GoalsDB.BaseWeights[GoalType.HelpOwn];
 
         return ctx;
     }

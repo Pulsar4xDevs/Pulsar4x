@@ -22,6 +22,7 @@ public static class SkillDomains
         if (isFleet)
         {
             return type is GoalType.MoveTo or GoalType.ServeyBodies or GoalType.ScanAnomalies
+                or GoalType.FleetTrade or GoalType.FleetFreighter
                 ? SkillDomain.Command
                 : null;
         }

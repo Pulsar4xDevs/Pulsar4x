@@ -45,20 +45,40 @@ namespace Pulsar4X.Movement
 
         /// <summary>
         /// Gets a pathfinding graph for objects/systems known by the provided faction.
+        /// A known system with no recorded jump points is skipped.
         /// </summary>
         public Graph GetPathfindingGraph(Entity faction)
+            => GetPathfindingGraph(faction, null);
+
+        /// <summary>
+        /// Same graph, also including jump points recorded for <paramref name="alsoSystemId"/>
+        /// when the ship is sitting in a system that is not yet on <see cref="FactionInfoDB.KnownSystems"/>.
+        /// </summary>
+        public Graph GetPathfindingGraph(Entity faction, string alsoSystemId)
         {
             var factionDB = faction.GetDataBlob<FactionInfoDB>();
             var pathfindingGraph = new Graph();
+            var systems = new HashSet<string>(factionDB.KnownSystems);
+            if (!string.IsNullOrEmpty(alsoSystemId))
+                systems.Add(alsoSystemId);
 
-            foreach (var starSystemGuid in factionDB.KnownSystems)
+            foreach (var starSystemGuid in systems)
             {
-                List<Entity> jumpPoints = factionDB.KnownJumpPoints[starSystemGuid];
+                if (!factionDB.KnownJumpPoints.TryGetValue(starSystemGuid, out var jumpPoints))
+                    continue;
 
                 foreach (Entity jumpPoint in jumpPoints)
                 {
-                    var thisTransitableDB = jumpPoint.GetDataBlob<JumpPointDB>();
-                    Entity destinationJP = faction.Manager.GetGlobalEntityById(thisTransitableDB.DestinationId);
+                    if (jumpPoint == null || jumpPoint.Manager == null)
+                        continue;
+                    if (!jumpPoint.TryGetDataBlob<JumpPointDB>(out var thisTransitableDB))
+                        continue;
+                    if (!jumpPoint.HasDataBlob<PositionDB>())
+                        continue;
+                    if (!faction.Manager.TryGetGlobalEntityById(thisTransitableDB.DestinationId, out var destinationJP))
+                        continue;
+                    if (!destinationJP.HasDataBlob<PositionDB>())
+                        continue;
 
                     var node = new JPNode(jumpPoint, destinationJP, new List<EdgeToNeighbor>());
                     pathfindingGraph.AddNode(node);

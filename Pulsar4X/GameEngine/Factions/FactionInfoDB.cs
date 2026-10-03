@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Pulsar4X.Api;
 using Pulsar4X.Components;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
@@ -52,9 +53,35 @@ namespace Pulsar4X.Factions
         [JsonProperty]
         internal Dictionary<string, List<Entity>> InternalKnownJumpPoints = new ();
 
+        /// <summary>
+        /// Record a jump point the faction has actually found. Unknown points stay out of the dictionary.
+        /// </summary>
+        internal void RememberJumpPoint(Entity jumpPoint)
+        {
+            if (jumpPoint?.Manager == null)
+                return;
+
+            string systemId = jumpPoint.Manager.ManagerID;
+            if (!InternalKnownJumpPoints.TryGetValue(systemId, out var list))
+            {
+                list = new List<Entity>();
+                InternalKnownJumpPoints[systemId] = list;
+            }
+
+            if (!list.Contains(jumpPoint))
+                list.Add(jumpPoint);
+        }
+
 
         [JsonProperty]
         public List<Entity> KnownFactions { get; internal set; } = new ();
+
+        /// <summary>
+        /// This faction's stance toward another faction, keyed by that faction's entity id.
+        /// A missing key means <see cref="FactionStance.Hostile"/>.
+        /// </summary>
+        [JsonProperty]
+        public Dictionary<int, FactionStance> Stances { get; internal set; } = new ();
 
 
         [PublicAPI]
@@ -138,6 +165,7 @@ namespace Pulsar4X.Factions
             Species = new List<Entity>(factionDB.Species);
             KnownSystems = new List<string>(factionDB.KnownSystems);
             KnownFactions = new List<Entity>(factionDB.KnownFactions);
+            Stances = new Dictionary<int, FactionStance>(factionDB.Stances ?? new Dictionary<int, FactionStance>());
             Colonies = new List<Entity>(factionDB.Colonies);
             InternalKnownJumpPoints = new Dictionary<string, List<Entity>>(factionDB.KnownJumpPoints);
 

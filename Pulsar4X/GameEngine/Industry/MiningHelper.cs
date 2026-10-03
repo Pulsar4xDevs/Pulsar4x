@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Pulsar4X.Engine;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Colonies;
@@ -24,14 +23,15 @@ namespace Pulsar4X.Industry
                 miningBonuses = colonyBonusesDB.GetBonus(AbilityType.Mine);
             }
 
-            var mineRates = miningDB.BaseMiningRate.ToDictionary(k => k.Key, v => v.Value);
             var planetMinerals = mineralsDB.Minerals;
+            var mineRates = new Dictionary<int, long>();
 
-            foreach (var (key, value) in mineRates)
+            // A mine design lists every mineral it can extract. A body only has some of them.
+            foreach (var (key, baseRate) in miningDB.BaseMiningRate)
             {
-                long baseRateFromMiningInstallations = mineRates[key];
-                double accessibility = planetMinerals.ContainsKey(key) ? planetMinerals[key].Accessibility : 0;
-                double actualRate = baseRateFromMiningInstallations * miningBonuses * accessibility;
+                if (!planetMinerals.TryGetValue(key, out var deposit))
+                    continue;
+                double actualRate = baseRate * miningBonuses * deposit.Accessibility;
                 mineRates[key] = Convert.ToInt64(actualRate);
             }
 

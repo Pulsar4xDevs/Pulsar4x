@@ -108,6 +108,9 @@ public class JPSurveyProcessor : IHotloopProcessor
         {
             var jp = jpRemaining.First(); // TODO: pick randomly from remaining
             jp.IsDiscovered.Add(discoveringEntity.FactionOwnerID);
+            discoveringEntity.Manager.Game.Factions[discoveringEntity.FactionOwnerID]
+                .GetDataBlob<FactionInfoDB>()
+                .RememberJumpPoint(jp.OwningEntity);
 
             // Show the jump point to the faction that just completed the survey
             jp.OwningEntity.Manager.ShowNeutralEntityToFaction(discoveringEntity.FactionOwnerID, jp.OwningEntity.Id);
@@ -173,6 +176,7 @@ public class JPSurveyProcessor : IHotloopProcessor
             if(destinationEntity.TryGetDataBlob<JumpPointDB>(out var destinationDB))
             {
                 destinationDB.IsDiscovered.Add(discoveringEntity.FactionOwnerID);
+                factionInfoDB.RememberJumpPoint(destinationEntity);
                 destinationEntity.Manager.ShowNeutralEntityToFaction(discoveringEntity.FactionOwnerID, destinationEntity.Id);
 
                 EventManager.Instance.Publish(

@@ -26,7 +26,7 @@ namespace Pulsar4X.Sensors
 
         public SensorSignatureAtb(double _PartWaveFormMag_w = 0, double _WavelengthAverage_nm = 0, double _WavelengthMin_nm = 0, double _WavelengthMax_nm = 0)
         {
-            PartWaveForm = new EMWaveForm(_WavelengthAverage_nm, _WavelengthMin_nm, _WavelengthMax_nm);
+            PartWaveForm = new EMWaveForm(_WavelengthMin_nm, _WavelengthAverage_nm, _WavelengthMax_nm);
             PartWaveFormMag = _PartWaveFormMag_w;
         }
 

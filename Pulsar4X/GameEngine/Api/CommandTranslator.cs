@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Api;
+using Pulsar4X.Colonies;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
@@ -14,6 +15,7 @@ using Pulsar4X.GeoSurveys;
 using Pulsar4X.Industry;
 using Pulsar4X.Industry.Orders;
 using Pulsar4X.JumpPoints;
+using Pulsar4X.Logistics;
 using Pulsar4X.Messaging;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
@@ -41,6 +43,18 @@ namespace Pulsar4X.Engine.Api
             _translators = new Dictionary<Type, Func<Entity, Entity, GameCommand, CommandResult>>
             {
                 [typeof(Pulsar4X.Api.RenameCommand)] = TranslateRename,
+                [typeof(SetFactionStanceCommand)] = TranslateSetFactionStance,
+                [typeof(SetMarketPolicyCommand)] = TranslateSetMarketPolicy,
+                [typeof(ClearMarketPolicyCommand)] = TranslateClearMarketPolicy,
+                [typeof(RunMarketCommand)] = TranslateRunMarket,
+                [typeof(SupplyLocalCommand)] = TranslateSupplyLocal,
+                [typeof(TradeCommand)] = TranslateTrade,
+                [typeof(FreighterCommand)] = TranslateFreighter,
+                [typeof(FleetTradeCommand)] = TranslateFleetTrade,
+                [typeof(FleetFreighterCommand)] = TranslateFleetFreighter,
+                [typeof(FleetHaulContractCommand)] = TranslateFleetHaulContract,
+                [typeof(SetMarketListingCommand)] = TranslateSetMarketListing,
+                [typeof(ClearMarketListingCommand)] = TranslateClearMarketListing,
                 [typeof(CreateFleetCommand)] = TranslateCreateFleet,
                 [typeof(CreateColonyCommand)] = TranslateCreateColony,
                 [typeof(DisbandFleetCommand)] = TranslateDisbandFleet,
@@ -132,6 +146,287 @@ namespace Pulsar4X.Engine.Api
         // ----- translators -----
 
         // Fully qualified engine order type: it shares its name with the API DTO.
+        private CommandResult TranslateSetFactionStance(Entity faction, Entity commanded, GameCommand command)
+        {
+            var set = (SetFactionStanceCommand)command;
+            if (commanded.Id != faction.Id)
+                return CommandResult.Reject("Stance is set on the faction itself.");
+            if (set.OtherFactionId == faction.Id)
+                return CommandResult.Reject("A faction cannot set a stance toward itself.");
+            if (set.OtherFactionId == Game.NeutralFactionId)
+                return CommandResult.Reject("The neutral faction cannot be a stance target.");
+            if (!_game.Factions.ContainsKey(set.OtherFactionId))
+                return CommandResult.Reject($"Faction {set.OtherFactionId} not found.");
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var info))
+                return CommandResult.Reject("Faction has no info.");
+
+            info.Stances[set.OtherFactionId] = set.Stance;
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private static CommandResult? RejectWithoutLogisticsOffice(Entity commanded)
+        {
+            if (!commanded.HasDataBlob<LogiBaseDB>())
+                return CommandResult.Reject("The colony has no logistics office.");
+            return null;
+        }
+
+        private CommandResult TranslateSetMarketPolicy(Entity faction, Entity commanded, GameCommand command)
+        {
+            var set = (SetMarketPolicyCommand)command;
+            if (RejectWithoutLogisticsOffice(commanded) is { } missing)
+                return missing;
+            if (string.IsNullOrEmpty(set.CargoId))
+                return CommandResult.Reject("Cargo id is required.");
+            if (set.Min < 0 || set.Max < 0 || set.Ask < 0 || set.Bid < 0)
+                return CommandResult.Reject("Min, max, and prices cannot be negative.");
+            if (set.Max < set.Min)
+                return CommandResult.Reject("Max cannot be below min.");
+
+            if (!commanded.TryGetDataBlob<ColonyMarketPolicyDB>(out var policy))
+            {
+                policy = new ColonyMarketPolicyDB();
+                commanded.SetDataBlob(policy);
+            }
+
+            policy.Rows[set.CargoId] = new MarketPolicyRow
+            {
+                CargoId = set.CargoId,
+                Min = set.Min,
+                Max = set.Max,
+                AutoProduce = set.AutoProduce,
+                Ask = set.Ask,
+                Bid = set.Bid,
+            };
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateClearMarketPolicy(Entity faction, Entity commanded, GameCommand command)
+        {
+            var clear = (ClearMarketPolicyCommand)command;
+            if (RejectWithoutLogisticsOffice(commanded) is { } missing)
+                return missing;
+            if (string.IsNullOrEmpty(clear.CargoId))
+                return CommandResult.Reject("Cargo id is required.");
+
+            if (commanded.TryGetDataBlob<ColonyMarketPolicyDB>(out var policy))
+                policy.Rows.Remove(clear.CargoId);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateRunMarket(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectWithoutLogisticsOffice(commanded) is { } missing)
+                return missing;
+
+            AgentProcessor.AssignGoal(commanded, new Goal(GoalType.RunMarket));
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateSupplyLocal(Entity faction, Entity commanded, GameCommand command)
+        {
+            var supply = (SupplyLocalCommand)command;
+            if (!commanded.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject("The target is not a colony.");
+            if (commanded.FactionOwnerID != faction.Id)
+                return CommandResult.Reject("The colony is not yours.");
+            if (RejectWithoutLogisticsOffice(commanded) is { } missing)
+                return missing;
+
+            var goal = new Goal(GoalType.SupplyLocal)
+            {
+                SupplyMode = supply.Mode,
+                Name = supply.Mode switch
+                {
+                    SupplyMode.Balance => "Balance",
+                    SupplyMode.Stockpile => "Stockpile",
+                    _ => "Run markets",
+                },
+            };
+            AgentProcessor.AssignGoal(commanded, goal);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        private CommandResult TranslateTrade(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (!commanded.HasDataBlob<CargoStorageDB>())
+                return CommandResult.Reject("The ship has no cargo storage.");
+
+            var goal = new Goal(GoalType.Trade);
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        private CommandResult TranslateFreighter(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (!commanded.HasDataBlob<CargoStorageDB>())
+                return CommandResult.Reject("The ship has no cargo storage.");
+
+            var goal = new Goal(GoalType.Freighter);
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        private CommandResult TranslateFleetTrade(Entity faction, Entity commanded, GameCommand command)
+        {
+            var trade = (FleetTradeCommand)command;
+            if (RejectUnlessFleet(commanded) is { } notFleet)
+                return notFleet;
+            if (!InFleetSystem(commanded, trade.BodyId))
+                return CommandResult.Reject("The target is not in the fleet's system.");
+
+            var goal = new Goal(GoalType.FleetTrade) { TargetEntityID = trade.BodyId };
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        private CommandResult TranslateFleetFreighter(Entity faction, Entity commanded, GameCommand command)
+        {
+            var haul = (FleetFreighterCommand)command;
+            if (RejectUnlessFleet(commanded) is { } notFleet)
+                return notFleet;
+            if (!InFleetSystem(commanded, haul.BodyId))
+                return CommandResult.Reject("The target is not in the fleet's system.");
+
+            var goal = new Goal(GoalType.FleetFreighter) { TargetEntityID = haul.BodyId };
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        private CommandResult TranslateFleetHaulContract(Entity faction, Entity commanded, GameCommand command)
+        {
+            var haul = (FleetHaulContractCommand)command;
+            if (RejectUnlessFleet(commanded) is { } notFleet)
+                return notFleet;
+            if (string.IsNullOrEmpty(haul.CargoId))
+                return CommandResult.Reject("Cargo id is required.");
+            if (!TryResolve(haul.SourceId, out var source) || !TryResolve(haul.DestId, out var dest)
+                || source.Manager != commanded.Manager || dest.Manager != commanded.Manager)
+                return CommandResult.Reject("The target is not in the fleet's system.");
+            if (source.Id == dest.Id
+                || !source.HasDataBlob<ColonyInfoDB>()
+                || !dest.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject("The contract needs two colonies.");
+            if (source.FactionOwnerID != commanded.FactionOwnerID || dest.FactionOwnerID != commanded.FactionOwnerID)
+                return CommandResult.Reject("The colony is not yours.");
+
+            int anchor = dest.Id;
+            if (dest.TryGetDataBlob<ColonyInfoDB>(out var colony)
+                && colony.PlanetEntity != null
+                && colony.PlanetEntity.IsValid)
+                anchor = colony.PlanetEntity.Id;
+
+            var goal = new Goal(GoalType.FleetFreighter)
+            {
+                CargoId = haul.CargoId,
+                SourceEntityId = source.Id,
+                DestEntityId = dest.Id,
+                TargetEntityID = anchor,
+            };
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        private static CommandResult RejectUnlessFleet(Entity commanded)
+            => commanded.HasDataBlob<FleetDB>()
+                ? null
+                : CommandResult.Reject("The commanded entity is not a fleet.");
+
+        private bool InFleetSystem(Entity fleet, int entityId)
+            => TryResolve(entityId, out var entity) && entity.Manager == fleet.Manager;
+
+        private CommandResult TranslateSetMarketListing(Entity faction, Entity commanded, GameCommand command)
+        {
+            var set = (SetMarketListingCommand)command;
+            if (RejectWithoutLogisticsOffice(commanded) is { } missing)
+                return missing;
+            if (string.IsNullOrEmpty(set.CargoId))
+                return CommandResult.Reject("Cargo id is required.");
+            if (set.SellQuantity < 0 || set.BuyQuantity < 0 || set.Reserve < 0 || set.Ask < 0 || set.Bid < 0)
+                return CommandResult.Reject("Prices and quantities cannot be negative.");
+            if (!OwnerCargo(commanded, set.CargoId))
+                return CommandResult.Reject("Unknown cargo id.");
+
+            var posted = MarketBook.SetListing(commanded, new MarketListing
+            {
+                CargoId = set.CargoId,
+                SellQuantity = set.SellQuantity,
+                Ask = set.Ask,
+                BuyQuantity = set.BuyQuantity,
+                Bid = set.Bid,
+                Reserve = set.Reserve,
+            });
+            if (!posted)
+                return CommandResult.Reject("The logistics office is at capacity.");
+
+            UpsertListingPolicy(commanded, set.CargoId, set.Reserve, set.Ask, set.Bid);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateClearMarketListing(Entity faction, Entity commanded, GameCommand command)
+        {
+            var clear = (ClearMarketListingCommand)command;
+            if (RejectWithoutLogisticsOffice(commanded) is { } missing)
+                return missing;
+            if (string.IsNullOrEmpty(clear.CargoId))
+                return CommandResult.Reject("Cargo id is required.");
+
+            MarketBook.RemoveListing(commanded, clear.CargoId);
+            if (commanded.TryGetDataBlob<ColonyMarketPolicyDB>(out var policy))
+                policy.Rows.Remove(clear.CargoId);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private static bool OwnerCargo(Entity colony, string cargoId)
+        {
+            var game = colony.Manager?.Game;
+            if (game == null || !game.Factions.TryGetValue(colony.FactionOwnerID, out var owner))
+                return false;
+            if (!owner.TryGetDataBlob<FactionInfoDB>(out var info))
+                return false;
+            return info.Data.CargoGoods.Contains(cargoId);
+        }
+
+        private static void UpsertListingPolicy(Entity colony, string cargoId, long reserve, decimal ask, decimal bid)
+        {
+            if (!colony.TryGetDataBlob<ColonyMarketPolicyDB>(out var policy))
+            {
+                policy = new ColonyMarketPolicyDB();
+                colony.SetDataBlob(policy);
+            }
+
+            if (policy.Rows.TryGetValue(cargoId, out var row))
+            {
+                row.CargoId = cargoId;
+                row.Min = reserve;
+                row.Ask = ask;
+                row.Bid = bid;
+                if (row.Max < reserve)
+                    row.Max = reserve;
+                return;
+            }
+
+            policy.Rows[cargoId] = new MarketPolicyRow
+            {
+                CargoId = cargoId,
+                Min = reserve,
+                Max = reserve,
+                AutoProduce = false,
+                Ask = ask,
+                Bid = bid,
+            };
+        }
+
         private CommandResult TranslateRename(Entity faction, Entity commanded, GameCommand command)
         {
             var rename = (Pulsar4X.Api.RenameCommand)command;

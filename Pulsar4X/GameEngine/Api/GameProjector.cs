@@ -18,6 +18,7 @@ using Pulsar4X.GeoSurveys;
 using Pulsar4X.Industry;
 using Pulsar4X.Interfaces;
 using Pulsar4X.JumpPoints;
+using Pulsar4X.Logistics;
 using Pulsar4X.Names;
 using Pulsar4X.Orbits;
 using Pulsar4X.People;
@@ -59,6 +60,34 @@ namespace Pulsar4X.Engine.Api
             if (!faction.TryGetDataBlob<FactionInfoDB>(out var info)) return null;
             string name = faction.TryGetDataBlob<NameDB>(out var nameDB) ? nameDB.OwnersName : factionId.ToString();
             return new FactionSnapshot(name, info.Abbreviation, info.Money.GetCurrentFunds());
+        }
+
+        /// <summary>
+        /// Other factions this viewer can set a stance toward. Skips the viewer, the game master,
+        /// and <see cref="Game.NeutralFactionId"/>. A missing dictionary entry is Hostile.
+        /// </summary>
+        public IReadOnlyList<FactionStanceRow> ProjectStances(int viewerFactionId)
+        {
+            var rows = new List<FactionStanceRow>();
+            FactionInfoDB? info = null;
+            if (_game.Factions.TryGetValue(viewerFactionId, out var viewer))
+                viewer.TryGetDataBlob(out info);
+
+            foreach (var (id, faction) in _game.Factions)
+            {
+                if (id == viewerFactionId || id == _game.GameMasterFaction.Id || id == Game.NeutralFactionId)
+                    continue;
+
+                string name = faction.TryGetDataBlob<NameDB>(out var nameDB)
+                    ? nameDB.GetName(viewerFactionId)
+                    : id.ToString();
+                var stance = FactionStance.Hostile;
+                if (info != null && info.Stances.TryGetValue(id, out var stored))
+                    stance = stored;
+                rows.Add(new FactionStanceRow(id, name, stance));
+            }
+
+            return rows;
         }
 
         /// <summary>Projects a system by id, or null if this game has no such system.</summary>
@@ -194,6 +223,7 @@ namespace Pulsar4X.Engine.Api
             // The views below expose an entity's internals (cargo, installations, mining economics),
             // so they are only projected for the owning faction.
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<CargoStorageDB>(out var cs) ? ToCargoStorageView(cs, e) : null,
+            (e, f) => ToMarketView(e, f),
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<InfrastructureDB>(out var inf)
                 ? new InfrastructureView(inf.CapacityProvided, inf.CapacityRequired, inf.CapacityAvailable, inf.Efficiency,
                     HasInstalledInfrastructure(e))
@@ -486,8 +516,19 @@ namespace Pulsar4X.Engine.Api
             }
 
             int? planetId = c.PlanetEntity.IsValid ? c.PlanetEntity.Id : null;
-            return new ColonyView(population, planetId) { SpeciesPopulations = species };
+            return new ColonyView(population, planetId)
+            {
+                SpeciesPopulations = species,
+                CommandSpan = colony.FactionOwnerID == factionId ? SpanLabel(CommandSpan.Of(colony)) : "",
+            };
         }
+
+        static string SpanLabel(CommandSpanKind span) => span switch
+        {
+            CommandSpanKind.Well => "Covers this well",
+            CommandSpanKind.System => "Covers this system",
+            _ => "Covers this body",
+        };
 
         private static InstallationsView ToInstallationsView(ComponentInstancesDB ci, Entity entity)
         {
@@ -581,6 +622,87 @@ namespace Pulsar4X.Engine.Api
                 Weapons = weapons,
                 Ordnance = ordnanceItems.OrderBy(o => o.Name).ToList(),
             };
+        }
+
+        /// <summary>
+        /// The office book for the owner and for factions that project as Friendly (including Allied).
+        /// Names come from the viewer's cargo list. Stock is resolved with the owner's cargo definition.
+        /// </summary>
+        private static MarketView? ToMarketView(Entity entity, int factionId)
+        {
+            if (!entity.TryGetDataBlob<LogiBaseDB>(out var book))
+                return null;
+            var relation = RelationOf(entity, factionId);
+            if (relation != OwnerRelation.Owned && relation != OwnerRelation.Friendly)
+                return null;
+
+            var game = entity.Manager?.Game;
+            FactionInfoDB? viewer = null;
+            FactionInfoDB? owner = null;
+            if (game != null)
+            {
+                if (game.Factions.TryGetValue(factionId, out var viewerEntity))
+                    viewerEntity.TryGetDataBlob(out viewer);
+                if (game.Factions.TryGetValue(entity.FactionOwnerID, out var ownerEntity))
+                    ownerEntity.TryGetDataBlob(out owner);
+            }
+
+            var goods = new List<MarketGoodView>(book.Listings.Count);
+            foreach (var listing in book.Listings.Values.OrderBy(l => l.CargoId, StringComparer.Ordinal))
+            {
+                goods.Add(new MarketGoodView(
+                    listing.CargoId,
+                    CargoName(viewer, listing.CargoId),
+                    StockOf(entity, owner, listing.CargoId),
+                    listing.Reserve,
+                    listing.BuyQuantity,
+                    listing.Bid,
+                    listing.SellQuantity,
+                    listing.Ask));
+            }
+
+            bool canEdit = relation == OwnerRelation.Owned;
+            return new MarketView(book.Capacity, goods)
+            {
+                CanEdit = canEdit,
+                Addable = canEdit ? AddableCargo(owner, book) : Array.Empty<MarketGoodChoice>(),
+            };
+        }
+
+        private static IReadOnlyList<MarketGoodChoice> AddableCargo(FactionInfoDB? owner, LogiBaseDB book)
+        {
+            if (owner == null)
+                return Array.Empty<MarketGoodChoice>();
+
+            var listed = new HashSet<string>(book.Listings.Keys, StringComparer.Ordinal);
+            return owner.Data.CargoGoods.GetAll().Values
+                .Where(cargo => !string.IsNullOrEmpty(cargo.UniqueID) && !listed.Contains(cargo.UniqueID))
+                .Select(cargo => new MarketGoodChoice(
+                    cargo.UniqueID,
+                    string.IsNullOrEmpty(cargo.Name) ? cargo.UniqueID : cargo.Name))
+                .OrderBy(cargo => cargo.Name, StringComparer.Ordinal)
+                .ToList();
+        }
+
+        private static string CargoName(FactionInfoDB? viewer, string cargoId)
+        {
+            if (viewer != null && viewer.Data.CargoGoods.Contains(cargoId))
+            {
+                var cargo = viewer.Data.CargoGoods.GetAny(cargoId);
+                if (cargo != null && !string.IsNullOrEmpty(cargo.Name))
+                    return cargo.Name;
+            }
+            return cargoId;
+        }
+
+        private static long StockOf(Entity entity, FactionInfoDB? owner, string cargoId)
+        {
+            if (owner == null || !owner.Data.CargoGoods.Contains(cargoId))
+                return 0;
+            var cargo = owner.Data.CargoGoods.GetAny(cargoId);
+            if (cargo == null)
+                return 0;
+            return MarketBook.Stock(entity, cargo);
         }
 
         private static CargoStorageView ToCargoStorageView(CargoStorageDB storage, Entity holder)
@@ -1361,7 +1483,20 @@ namespace Pulsar4X.Engine.Api
         {
             if (entity.FactionOwnerID == factionId) return OwnerRelation.Owned;
             if (entity.FactionOwnerID == Game.NeutralFactionId) return OwnerRelation.Neutral;
-            return OwnerRelation.Hostile;
+
+            var game = entity.Manager?.Game;
+            if (game == null
+                || !game.Factions.TryGetValue(factionId, out var viewer)
+                || !viewer.TryGetDataBlob<FactionInfoDB>(out var info)
+                || !info.Stances.TryGetValue(entity.FactionOwnerID, out var stance))
+                return OwnerRelation.Hostile;
+
+            return stance switch
+            {
+                FactionStance.Friendly or FactionStance.Allied => OwnerRelation.Friendly,
+                FactionStance.Neutral => OwnerRelation.Neutral,
+                _ => OwnerRelation.Hostile,
+            };
         }
 
         private StarSystem? FindSystem(string systemId)

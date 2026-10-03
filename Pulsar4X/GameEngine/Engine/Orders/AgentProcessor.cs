@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
@@ -11,11 +12,13 @@ using Pulsar4X.GeoSurveys;
 using Pulsar4X.Industry;
 using Pulsar4X.Interfaces;
 using Pulsar4X.JumpPoints;
+using Pulsar4X.Logistics;
 using Pulsar4X.Messaging;
 using Pulsar4X.Movement;
 using Pulsar4X.People;
 using Pulsar4X.Sensors;
 using Pulsar4X.Ships;
+using Pulsar4X.Storage;
 
 namespace GameEngine.Engine.Orders;
 
@@ -26,12 +29,43 @@ interface IGoalPlanner
     PlanResult Plan(Entity managedEntity, Goal goal, DateTime atDateTime);
 }
 
+/// <summary>
+/// Buy-then-sell pair a planner chose. The agent copies it onto the goal.
+/// Planners do not write the goal themselves.
+/// </summary>
+public sealed class PlannedRoute
+{
+    public string CargoId = "";
+    public int SourceEntityId = -1;
+    public int DestEntityId = -1;
+}
+
 public readonly struct PlanResult
 {
     public GoalStatus Status { get; init; }  // Active = “go ahead”, Completed/Failed = terminal
     public string Message { get; init; }
     public IReadOnlyList<EntityAction> Actions { get; init; }
     public IReadOnlyList<(Entity Sub, Goal Goal)> SubGoals { get; init; }
+    /// <summary>Set when this plan commits a trade or freight pair. Null leaves the goal's route alone.</summary>
+    public PlannedRoute? Route { get; init; }
+
+    public PlanResult WithRoute(PlannedRoute route) => new()
+    {
+        Status = Status,
+        Message = Message,
+        Actions = Actions,
+        SubGoals = SubGoals,
+        Route = route,
+    };
+
+    public PlanResult WithMessage(string message) => new()
+    {
+        Status = Status,
+        Message = message,
+        Actions = Actions,
+        SubGoals = SubGoals,
+        Route = Route,
+    };
 
     public static PlanResult Continue(params EntityAction[] actions) => new()
     {
@@ -116,10 +150,22 @@ public class AgentProcessor : IInstanceProcessor
         GoalWeighting.Recalculate(goalsDB, managedEntity, agentDB);
 
         Goal? goal = goalsDB.ActiveGoal;
-        if (goal == null) 
-            return; // autonomous pick not wired yet
-        if (goal.Status is GoalStatus.Completed or GoalStatus.Failed) 
-            return;
+        bool idle = goal == null || goal.Status is GoalStatus.Completed or GoalStatus.Failed;
+        if (idle)
+        {
+            // A player order stays, including one that already finished.
+            if (goalsDB.GivenGoal != null)
+                return;
+
+            var picked = GoalWeighting.PickAutonomousTask(goalsDB);
+            if (picked == null)
+                return;
+
+            // AssignGoal would re-enter RunAgentNow and defer the plan. This wake keeps the goal.
+            goal = new Goal(picked.Type);
+            goalsDB.GivenGoal = goal;
+            goalsDB.ActiveGoal = goal;
+        }
 
         bool isFleet = managedEntity.HasDataBlob<FleetDB>();
         bool isShip = managedEntity.HasDataBlob<ShipInfoDB>();
@@ -190,6 +236,56 @@ public class AgentProcessor : IInstanceProcessor
                         Fail(goal, "a subordinate's goal failed");
                     else
                         ScheduleAgent(agentHost, atDateTime + CommanderSkills.RecheckInterval(managedEntity));
+                    break;
+                }
+
+                if (managedEntity.HasDataBlob<ColonyInfoDB>())
+                {
+                    // Standing colony work plans again when the queue for this goal is empty.
+                    // An empty queue leaves the goal Active.
+                    managedEntity.TryGetDataBlob<ActionQueueDB>(out var queue);
+                    if (queue != null && queue.ActionsFor(goal).Any(a => a.Status == ActionStatus.Failed))
+                    {
+                        Fail(goal, "an action failed");
+                        queue.ClearFor(goal);
+                        break;
+                    }
+
+                    if (queue != null)
+                    {
+                        queue.ActionList.RemoveAll(a =>
+                            a.ParentGoalId == goal.Id && a.Status == ActionStatus.Succeeded);
+                    }
+
+                    bool stillQueued = queue != null && queue.ActionsFor(goal).Any();
+                    if (!stillQueued)
+                    {
+                        if (!_planners.TryGetValue(goal.Type, out var planner))
+                        {
+                            Fail(goal, $"no planner for {goal.Type}");
+                            break;
+                        }
+
+                        var plan = planner.Plan(managedEntity, goal, atDateTime);
+                        ApplyPlanMessage(goal, plan);
+                        if (plan.Status is GoalStatus.Failed or GoalStatus.Completed)
+                        {
+                            goal.Status = plan.Status;
+                            if (plan.Status == GoalStatus.Failed && queue != null)
+                                queue.ClearFor(goal);
+                            break;
+                        }
+
+                        foreach (var (subordinate, subGoal) in plan.SubGoals)
+                        {
+                            if (string.IsNullOrEmpty(subGoal.ParentGoalId))
+                                subGoal.ParentGoalId = goal.Id;
+                            AssignGoal(subordinate, subGoal, atDateTime + CommanderSkills.RelayDelay(managedEntity));
+                        }
+                        SubmitActions(managedEntity, goal, plan.Actions, atDateTime);
+                    }
+
+                    ScheduleAgent(agentHost, atDateTime + CommanderSkills.RecheckInterval(managedEntity));
                     break;
                 }
 
@@ -373,6 +469,12 @@ public class AgentProcessor : IInstanceProcessor
     {
         if (!string.IsNullOrEmpty(plan.Message))
             goal.Message = plan.Message;
+        if (plan.Route != null)
+        {
+            goal.CargoId = plan.Route.CargoId;
+            goal.SourceEntityId = plan.Route.SourceEntityId;
+            goal.DestEntityId = plan.Route.DestEntityId;
+        }
     }
 
     /// <summary>
@@ -467,7 +569,14 @@ public class AgentProcessor : IInstanceProcessor
                 GoalType.Mine => entity.HasOrChildHasAbility<MiningDB>(),
                 GoalType.ListeningPost => entity.HasOrChildHasAbility<SensorAbilityDB>(),
                 GoalType.Scout => entity.HasOrChildHasAbility<SensorAbilityDB>(),
-                GoalType.MakeProfit or GoalType.Freighter or GoalType.Trade => false, // TODO
+                GoalType.Trade or GoalType.Freighter => entity.HasDataBlob<ShipInfoDB>()
+                    && entity.HasDataBlob<CargoStorageDB>()
+                    && (entity.HasDataBlob<WarpAbilityDB>() || entity.HasDataBlob<NewtonThrustAbilityDB>()),
+                GoalType.MakeProfit or GoalType.HelpOwn => true,
+                GoalType.RunMarket => entity.HasDataBlob<ColonyInfoDB>()
+                    && entity.HasDataBlob<LogiBaseDB>()
+                    && entity.TryGetDataBlob<ColonyMarketPolicyDB>(out var policy)
+                    && policy.Rows.Count > 0,
                 GoalType.Colonise => false,
                 _ => false
             };

@@ -16,6 +16,18 @@ public enum OwnerRelation
     Unknown,
 }
 
+/// <summary>
+/// How one faction treats another. Stored per viewer; a missing entry means Hostile.
+/// Allied and Friendly both project as <see cref="OwnerRelation.Friendly"/>.
+/// </summary>
+public enum FactionStance
+{
+    Hostile,
+    Neutral,
+    Friendly,
+    Allied,
+}
+
 /// <summary>Broad classification of an entity for list grouping and icons. The client maps this to its
 /// own display enum/short-names.</summary>
 public enum BodyKind
@@ -61,6 +73,9 @@ public sealed record SystemSummary(string SystemId, string Name);
 
 /// <summary>The player's faction/corporation: identity and current funds.</summary>
 public sealed record FactionSnapshot(string Name, string Abbreviation, decimal Funds);
+
+/// <summary>One other faction as the viewer currently treats them. A missing stored stance arrives as Hostile.</summary>
+public sealed record FactionStanceRow(int FactionId, string Name, FactionStance Stance);
 
 /// <summary>A bulk, faction-scoped snapshot of one star system at a point in time.</summary>
 public sealed class SystemSnapshot
@@ -180,9 +195,33 @@ public sealed record ColonyView(long Population, int? PlanetEntityId) : ICompone
 {
     /// <summary>Per-species population breakdown (names resolved for the requesting faction).</summary>
     public IReadOnlyList<SpeciesPopulation> SpeciesPopulations { get; init; } = Array.Empty<SpeciesPopulation>();
+
+    /// <summary>Owning faction only. "Covers this body", "Covers this well", or "Covers this system".</summary>
+    public string CommandSpan { get; init; } = "";
 }
 
 public sealed record SpeciesPopulation(string SpeciesName, long Population);
+
+/// <summary>One listed good at a logistics office. Stock is the office's cargo hold.</summary>
+public sealed record MarketGoodView(
+    string CargoId, string Name,
+    long Stock, long Reserve,
+    long BuyQuantity, decimal Bid,
+    long SellQuantity, decimal Ask) : IComponentView;
+
+/// <summary>The book a faction is allowed to see. Owned and Friendly only.</summary>
+public sealed record MarketView(
+    int Capacity, IReadOnlyList<MarketGoodView> Goods) : IComponentView
+{
+    /// <summary>True when this faction owns the office and may post listings.</summary>
+    public bool CanEdit { get; init; }
+
+    /// <summary>Unlocked cargo the owner can add. Empty for a friendly viewer.</summary>
+    public IReadOnlyList<MarketGoodChoice> Addable { get; init; } = Array.Empty<MarketGoodChoice>();
+}
+
+/// <summary>A cargo id the owner may add to their book.</summary>
+public sealed record MarketGoodChoice(string CargoId, string Name);
 
 /// <summary>A colony's infrastructure capacity (the limiter on its industrial output).</summary>
 public sealed record InfrastructureView(
