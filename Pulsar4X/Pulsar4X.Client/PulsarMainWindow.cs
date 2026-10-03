@@ -385,7 +385,10 @@ namespace Pulsar4X.Client
             var result = JsonConvert.DeserializeObject<List<List<UserOrbitSettings>>>(text);
 
             if(result != null)
+            {
+                UserOrbitSettings.ApplyMissingIconSizes(result);
                 _state.UserOrbitSettingsMtx = result;
+            }
         }
 
         public void SaveOrbitSettings()

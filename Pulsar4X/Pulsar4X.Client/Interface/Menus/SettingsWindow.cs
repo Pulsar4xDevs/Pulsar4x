@@ -370,7 +370,16 @@ namespace Pulsar4X.Client
                     float _nameZoomLevel = _uiState.DrawNameZoomLvl[otype];
                     ImGui.SliderFloat("Draw Names at Zoom: ", ref _nameZoomLevel, 0.01f, 10000f);
                     _uiState.DrawNameZoomLvl[otype] = _nameZoomLevel;
-                    
+
+                    float iconSize = _userOrbitSettingsMtx[i][0].IconMinPixels;
+                    if (ImGui.SliderFloat("Icon Size ##" + i, ref iconSize, 1f, 32f, "%.0f px"))
+                    {
+                        foreach (var settings in _userOrbitSettingsMtx[i])
+                            settings.IconMinPixels = iconSize;
+                    }
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Minimum on-screen size of this body's icon, in pixels.\nZooming in still grows the icon up to the body's real radius.");
+
                     for (int j = 0; j < Utils.EnumEntries<UserOrbitSettings.OrbitTrajectoryType>(); j++)
                     {
                         UserOrbitSettings.OrbitTrajectoryType trtype = (UserOrbitSettings.OrbitTrajectoryType)j;

@@ -270,7 +270,9 @@ namespace Pulsar4X.Client.Rendering
 
             if (entity.GetView<StarView>() is { } star && massVolume != null)
             {
-                AddEntityIcon(entity, new StarIcon(star, massVolume, position));
+                var starIcon = new StarIcon(star, massVolume, position);
+                starIcon.AttachState(_state);
+                AddEntityIcon(entity, starIcon);
             }
 
             if (entity.HasView<BodyView>() && entity.Kind != BodyKind.Star && massVolume != null)

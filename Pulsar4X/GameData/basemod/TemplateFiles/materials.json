@@ -193,7 +193,7 @@
       "Description": "A composite material for extraterrestrial construction, utilizing local regolith and minerals.",
       "CargoTypeID": "general-storage",
       "PartMatUniqueID": "concrete",
-      "MassPerUnit": 2.4,
+      "MassPerUnit": 1,
       "VolumePerUnit": 0.000417,
       "ResourceCosts": {
         "regolith": 70, 

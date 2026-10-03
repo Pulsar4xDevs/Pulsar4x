@@ -13,7 +13,6 @@ namespace Pulsar4X.Client
         double _bodyRadiusAU;
         float _viewRadius;
         Random _rng;
-        float _iconMinSize = 8;
         int _entityId;
         string _sysId;
 
@@ -46,8 +45,6 @@ namespace Pulsar4X.Client
                     break;
             }
 
-            if (_bodyType == BodyKind.Moon)
-                _iconMinSize = 4;
         }
 
         public bool OnPointerUp(SDL.Event sevent)
@@ -71,7 +68,6 @@ namespace Pulsar4X.Client
 
         void Terestrial()
         {
-            _iconMinSize = 8;
             short segments = 32;
             var points = CreatePrimitiveShapes.Circle(0, 0, 100, segments);
 
@@ -88,7 +84,6 @@ namespace Pulsar4X.Client
 
         void Asteroid()
         {
-            _iconMinSize = 8;
             double vertDiameter = _rng.Next(50, 100);
             double horDiameter = _rng.Next(50, 100);
             int segments = _rng.Next(8, 32);
@@ -132,10 +127,11 @@ namespace Pulsar4X.Client
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
             _viewRadius = camera.ViewDistance(_bodyRadiusAU);
-            if (_viewRadius < _iconMinSize)
-                Scale = _iconMinSize * 0.01f;
-            else
-                Scale = _viewRadius * 0.01f;
+            var bodyType = UserOrbitSettings.FromBodyKind(_bodyType);
+            float minPixels = _state == null
+                ? UserOrbitSettings.DefaultIconMinPixels(bodyType)
+                : UserOrbitSettings.IconMinPixelsFor(_state.UserOrbitSettingsMtx, bodyType);
+            Scale = Math.Max(_viewRadius, minPixels) * 0.01f;
             base.OnFrameUpdate(matrix, camera);
         }
 

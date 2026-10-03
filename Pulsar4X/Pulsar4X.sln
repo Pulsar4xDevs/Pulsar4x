@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.Api", "Pulsar4X.Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.Client.Host", "Pulsar4X.Client.Host\Pulsar4X.Client.Host.csproj", "{8ED8A39F-2A25-4712-94A5-97F6EF6EFEF9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolBodies", "SolBodies\SolBodies.csproj", "{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -201,6 +203,30 @@ Global
 		{8ED8A39F-2A25-4712-94A5-97F6EF6EFEF9}.Release|x64.Build.0 = Release|Any CPU
 		{8ED8A39F-2A25-4712-94A5-97F6EF6EFEF9}.Release|x86.ActiveCfg = Release|Any CPU
 		{8ED8A39F-2A25-4712-94A5-97F6EF6EFEF9}.Release|x86.Build.0 = Release|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Debug|Linux_x64.ActiveCfg = Debug|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Debug|Linux_x64.Build.0 = Debug|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Debug|Windows_x64.ActiveCfg = Debug|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Debug|Windows_x64.Build.0 = Debug|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Debug|Windows_x86.ActiveCfg = Debug|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Debug|Windows_x86.Build.0 = Debug|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Debug|x64.Build.0 = Debug|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Debug|x86.Build.0 = Debug|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Release|Linux_x64.ActiveCfg = Release|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Release|Linux_x64.Build.0 = Release|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Release|Windows_x64.ActiveCfg = Release|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Release|Windows_x64.Build.0 = Release|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Release|Windows_x86.ActiveCfg = Release|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Release|Windows_x86.Build.0 = Release|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Release|x64.ActiveCfg = Release|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Release|x64.Build.0 = Release|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Release|x86.ActiveCfg = Release|Any CPU
+		{E6FE323F-9AD2-42A2-8B24-C8AAA76D8064}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -4,7 +4,7 @@
     "Payload": {
       "UniqueID": "hydrocarbons",
       "Name": "Hydrocarbons",
-      "Description": "Cruid Oil, Coal and Natural Gas",
+      "Description": "Crude Oil, Coal and Natural Gas",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
       "VolumePerUnit": 0.0011111,
@@ -218,7 +218,7 @@
       "Description": "A naturally-occurring mineral.",
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
-      "VolumePerUnit": 0.052,
+      "VolumePerUnit": 0.000052,
       "Abundance": {
         "Terrestrial": 0.00001,
         "GasGiant": 0.0,
@@ -259,7 +259,6 @@
       "Name": "Water",
       "Description": "Essential for life, found in various forms across celestial bodies.",
       "CargoTypeID": "general-storage",
-      "UniqueID": "water",
       "MassPerUnit": 1.0,
       "VolumePerUnit": 0.001,
       "Abundance": {

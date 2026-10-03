@@ -9,7 +9,6 @@ namespace Pulsar4X.Client
     {
         double _tempK;
         SDL.Color _color;
-        float _iconMinSize = 16;
         double _bodyRadiusAU;
         public StarIcon(Pulsar4X.Api.StarView star, Pulsar4X.Api.MassVolumeView massVolume, IPosition position) : base(position)
         {
@@ -101,10 +100,10 @@ namespace Pulsar4X.Client
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
             var viewRadius = camera.ViewDistance(_bodyRadiusAU);
-            if (viewRadius < _iconMinSize)
-                Scale = _iconMinSize * 0.01f;
-            else
-                Scale = viewRadius * 0.01f;
+            float minPixels = _state == null
+                ? UserOrbitSettings.DefaultIconMinPixels(UserOrbitSettings.OrbitBodyType.Star)
+                : UserOrbitSettings.IconMinPixelsFor(_state.UserOrbitSettingsMtx, UserOrbitSettings.OrbitBodyType.Star);
+            Scale = Math.Max(viewRadius, minPixels) * 0.01f;
             base.OnFrameUpdate(matrix, camera);
         }
     }

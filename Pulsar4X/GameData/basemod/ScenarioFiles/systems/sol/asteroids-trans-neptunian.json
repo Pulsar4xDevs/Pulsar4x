@@ -1,0 +1,135 @@
+[
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "Name": "Varuna",
+      "CanStartHere": false,
+      "Colonizable": false,
+      "GeoSurveyPointsRequired": 750,
+      "Info": {
+        "Type": "asteroid",
+        "Albedo": 0.07,
+        "LengthOfDay": "06:20:36.9600000",
+        "Mass": 3.817035074111598E+20,
+        "Radius": 450.0
+      },
+      "Orbit": {
+        "SemiMajorAxis": 6462631417.650425,
+        "Eccentricity": 0.05161543734827757,
+        "EclipticInclination": 17.14054429876356,
+        "LoAN": 97.21583412147274,
+        "AoP": 273.3589746671601,
+        "MeanAnomaly": 115.6679071685554,
+        "Epoch": "2026-06-09T00:00:00"
+      },
+      "GenerateMinerals": "random",
+      "UniqueID": "asteroid-20000"
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "Name": "15789",
+      "CanStartHere": false,
+      "Colonizable": false,
+      "GeoSurveyPointsRequired": 328,
+      "Info": {
+        "Type": "asteroid",
+        "Albedo": 0.022,
+        "Mass": 1.84765190210613E+19,
+        "Radius": 164.0
+      },
+      "Orbit": {
+        "SemiMajorAxis": 5936534162.623077,
+        "Eccentricity": 0.1835286651099575,
+        "EclipticInclination": 5.159874843339515,
+        "LoAN": 354.7265728778696,
+        "AoP": 318.200319852755,
+        "MeanAnomaly": 79.34412839501447,
+        "Epoch": "2026-06-09T00:00:00"
+      },
+      "GenerateMinerals": "random",
+      "UniqueID": "asteroid-15789"
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "Name": "Typhon",
+      "CanStartHere": false,
+      "Colonizable": false,
+      "GeoSurveyPointsRequired": 192,
+      "Info": {
+        "Type": "asteroid",
+        "Albedo": 0.05,
+        "LengthOfDay": "05:00:00",
+        "Mass": 3.7059734906218926E+18,
+        "Radius": 96.0
+      },
+      "Orbit": {
+        "SemiMajorAxis": 5651760624.635599,
+        "Eccentricity": 0.5373369633806973,
+        "EclipticInclination": 2.427633039713239,
+        "LoAN": 351.8312522173027,
+        "AoP": 158.8743984031273,
+        "MeanAnomaly": 31.1374810998466,
+        "Epoch": "2026-06-09T00:00:00"
+      },
+      "GenerateMinerals": "random",
+      "UniqueID": "asteroid-42355"
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "Name": "127546",
+      "CanStartHere": false,
+      "Colonizable": false,
+      "GeoSurveyPointsRequired": 170,
+      "Info": {
+        "Type": "asteroid",
+        "Albedo": 0.04,
+        "Mass": 2.572440784514442E+18,
+        "Radius": 85.0
+      },
+      "Orbit": {
+        "SemiMajorAxis": 10039592351.90109,
+        "Eccentricity": 0.6870254111529746,
+        "EclipticInclination": 77.94684459534035,
+        "LoAN": 90.21604416382473,
+        "AoP": 28.10818069704306,
+        "MeanAnomaly": 11.58891589355119,
+        "Epoch": "2026-06-09T00:00:00"
+      },
+      "GenerateMinerals": "random",
+      "UniqueID": "asteroid-127546"
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "Name": "762135",
+      "CanStartHere": false,
+      "Colonizable": false,
+      "GeoSurveyPointsRequired": 113,
+      "Info": {
+        "Type": "asteroid",
+        "Albedo": 0.074,
+        "LengthOfDay": "10.23:48:00",
+        "Mass": 7.49497813886882E+17,
+        "Radius": 56.35
+      },
+      "Orbit": {
+        "SemiMajorAxis": 7997604234.304238,
+        "Eccentricity": 0.6482847617724374,
+        "EclipticInclination": 70.16352211654925,
+        "LoAN": 92.03218919379762,
+        "AoP": 293.2412089482999,
+        "MeanAnomaly": 18.68797058842426,
+        "Epoch": "2026-06-09T00:00:00"
+      },
+      "GenerateMinerals": "random",
+      "UniqueID": "asteroid-762135"
+    }
+  }
+]

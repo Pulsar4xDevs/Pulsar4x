@@ -92,6 +92,7 @@ namespace Pulsar4X.Client
                     {
                         var posAU = new Orbital.Vector3(x, y, 0);
                         var starIcon = new StarIcon(starView, massVolume, new StaticPosition(Distance.AuToMt(posAU)));
+                        starIcon.AttachState(_state);
                         StarIcons[systemId] = starIcon;
                     }
                 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace Pulsar4X.Client;
@@ -75,4 +76,42 @@ public class UserOrbitSettings
     public byte MaxAlpha = 255;
     public byte MinAlpha = 0;
     public byte GhostOrbitAlpha = 20;
+
+    /// <summary>
+    /// Minimum on-screen radius of the body icon, in pixels. Zooming in still grows
+    /// the icon up to the body's real radius. 0 means a saved file predates this field.
+    /// </summary>
+    public float IconMinPixels = 0;
+
+    /// <summary>Built-in minimum icon radius. Asteroids are half the old 8px default.</summary>
+    internal static float DefaultIconMinPixels(OrbitBodyType type) => type switch
+    {
+        OrbitBodyType.Star => 16f,
+        OrbitBodyType.Moon => 4f,
+        OrbitBodyType.Asteroid => 4f,
+        _ => 8f,
+    };
+
+    /// <summary>Fills icon sizes that a saved settings file left at 0.</summary>
+    internal static void ApplyMissingIconSizes(List<List<UserOrbitSettings>> mtx)
+    {
+        for (int i = 0; i < mtx.Count; i++)
+        {
+            float fallback = DefaultIconMinPixels((OrbitBodyType)i);
+            foreach (var settings in mtx[i])
+            {
+                if (settings.IconMinPixels <= 0)
+                    settings.IconMinPixels = fallback;
+            }
+        }
+    }
+
+    internal static float IconMinPixelsFor(List<List<UserOrbitSettings>> mtx, OrbitBodyType type)
+    {
+        int i = (int)type;
+        if ((uint)i >= (uint)mtx.Count || mtx[i].Count == 0)
+            return DefaultIconMinPixels(type);
+        float value = mtx[i][0].IconMinPixels;
+        return value > 0 ? value : DefaultIconMinPixels(type);
+    }
 }

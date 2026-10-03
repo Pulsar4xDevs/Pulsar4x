@@ -179,6 +179,7 @@ namespace Pulsar4X.Client
                     UserOrbitSettingsMtx[i].Add(new UserOrbitSettings());
                 }
             }
+            UserOrbitSettings.ApplyMissingIconSizes(UserOrbitSettingsMtx);
 
             // Stars: yellowish, ~120 degree tail
             foreach (var settings in UserOrbitSettingsMtx[(int)UserOrbitSettings.OrbitBodyType.Star])
@@ -201,15 +202,16 @@ namespace Pulsar4X.Client
                 }
             }
 
-            // Asteroids: subtle dark gray, very short tail
+            // Asteroids: subtle dark gray, half-orbit trail at 25% opacity.
+            // The other half stays undrawn (ghost alpha 0) so a field does not fill the map.
             foreach (var settings in UserOrbitSettingsMtx[(int)UserOrbitSettings.OrbitBodyType.Asteroid])
             {
                 settings.Red = 55;
                 settings.Grn = 55;
                 settings.Blu = 55;
-                settings.MaxAlpha = 160;
+                settings.MaxAlpha = 64; // 25% of 255
                 settings.GhostOrbitAlpha = 0;
-                settings.EllipseSweepRadians = 0.26f; // ~15 degrees
+                settings.EllipseSweepRadians = MathF.PI; // 180 degrees
             }
 
             // Ships: short tail, ghost orbit enabled
