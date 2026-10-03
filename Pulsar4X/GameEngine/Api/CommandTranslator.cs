@@ -19,6 +19,7 @@ using Pulsar4X.Logistics;
 using Pulsar4X.Messaging;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
+using Pulsar4X.People;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 using Pulsar4X.Technology;
@@ -63,6 +64,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(ReassignShipCommand)] = TranslateReassignShip,
                 [typeof(DetachShipCommand)] = TranslateDetachShip,
                 [typeof(SetFlagshipCommand)] = TranslateSetFlagship,
+                [typeof(AssignCaptainCommand)] = TranslateAssignCaptain,
                 [typeof(SetStandingOrdersCommand)] = TranslateSetStandingOrders,
                 [typeof(MoveToBodyCommand)] = TranslateMoveToBody,
                 [typeof(Pulsar4X.Api.GeoSurveyCommand)] = TranslateGeoSurvey,
@@ -127,6 +129,15 @@ namespace Pulsar4X.Engine.Api
                 entityId: holder.Id,
                 systemId: holder.Manager.ManagerID,
                 factionId: holder.FactionOwnerID));
+
+        // Captain changes are a direct write, same as standing orders: publish so the fleet tree
+        // and the personnel roster refresh while the sim is paused.
+        private static void PublishPersonnelChanged(Entity ship)
+            => MessagePublisher.Instance.Publish(Message.Create(
+                MessageTypes.PersonnelChanged,
+                entityId: ship.Id,
+                systemId: ship.Manager.ManagerID,
+                factionId: ship.FactionOwnerID));
 
         private bool TryResolve(int entityId, out Entity entity)
             => _game.GlobalManager.TryGetGlobalEntityById(entityId, out entity);
@@ -623,8 +634,23 @@ namespace Pulsar4X.Engine.Api
                 _ => DataStructures.ComparisonType.GreaterThanOrEqual,
             };
 
+        /// <summary>
+        /// A ship with no captain has no one to turn a goal into a plot. The player queues actions.
+        /// A fleet is still a valid goal target: the flagship's commander owns that order.
+        /// </summary>
+        private static CommandResult? RejectGoalWithoutCaptain(Entity commanded)
+        {
+            if (commanded.HasDataBlob<FleetDB>())
+                return null;
+            if (!commanded.TryGetDataBlob<ShipInfoDB>(out var info) || info.CommanderID >= 0)
+                return null;
+            return CommandResult.Reject("This ship has no captain. Plot an action instead.");
+        }
+
         private CommandResult TranslateMoveToBody(Entity faction, Entity commanded, GameCommand command)
         {
+            if (RejectGoalWithoutCaptain(commanded) is { } rejected)
+                return rejected;
             var cmd = (MoveToBodyCommand)command;
             var goal = new Goal(GoalType.MoveTo)
             {
@@ -638,6 +664,8 @@ namespace Pulsar4X.Engine.Api
 
         private CommandResult TranslateGeoSurvey(Entity faction, Entity commanded, GameCommand command)
         {
+            if (RejectGoalWithoutCaptain(commanded) is { } rejected)
+                return rejected;
             var cmd = (GeoSurveyCommand)command;
             var goal = new Goal(GoalType.ServeyBodies)
             {
@@ -652,6 +680,8 @@ namespace Pulsar4X.Engine.Api
 
         private CommandResult TranslateGravSurvey(Entity faction, Entity commanded, GameCommand command)
         {
+            if (RejectGoalWithoutCaptain(commanded) is { } rejected)
+                return rejected;
             var  cmd = (GravSurveyCommand)command;
             var goal = new Goal(GoalType.ScanAnomalies)
             {
@@ -665,6 +695,8 @@ namespace Pulsar4X.Engine.Api
 
         private CommandResult TranslateJump(Entity faction, Entity commanded, GameCommand command)
         {
+            if (RejectGoalWithoutCaptain(commanded) is { } rejected)
+                return rejected;
             var jump = (Pulsar4X.Api.JumpCommand)command;
             if (!TryResolve(jump.JumpPointId, out var jumpPoint)
                 || !jumpPoint.TryGetDataBlob<JumpPointDB>(out var jumpPointDB))
@@ -886,6 +918,104 @@ namespace Pulsar4X.Engine.Api
             return accepted
                 ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
                 : CommandResult.Reject("Command rejected by engine validation.");
+        }
+
+        // ----- captain (commanded entity: the ship). The fleet commander is the flagship's captain. -----
+
+        private CommandResult TranslateAssignCaptain(Entity faction, Entity commanded, GameCommand command)
+        {
+            var assign = (AssignCaptainCommand)command;
+            if (!commanded.TryGetDataBlob<ShipInfoDB>(out var shipInfo))
+                return CommandResult.Reject("A captain sits a ship.");
+
+            if (assign.CommanderId < 0)
+            {
+                ClearChair(commanded, shipInfo);
+                PublishPersonnelChanged(commanded);
+                return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+            }
+
+            if (!TryResolve(assign.CommanderId, out var officer)
+                || officer.FactionOwnerID != faction.Id
+                || !officer.TryGetDataBlob<CommanderDB>(out var commanderDB))
+                return CommandResult.Reject($"Officer {assign.CommanderId} not found.");
+
+            if (commanderDB.Type != DataStructures.CommanderTypes.Navy)
+                return CommandResult.Reject("Only a navy officer can captain a ship.");
+
+            // A lab or admin post is not a ship. Leave that seat alone.
+            if (commanderDB.AssignedTo >= 0 && commanderDB.AssignedTo != commanded.Id)
+            {
+                if (!TryResolve(commanderDB.AssignedTo, out var post) || !post.HasDataBlob<ShipInfoDB>())
+                    return CommandResult.Reject("This officer already holds a post.");
+            }
+
+            var vacated = new List<Entity>();
+            if (commanderDB.AssignedTo >= 0 && commanderDB.AssignedTo != commanded.Id
+                && TryResolve(commanderDB.AssignedTo, out var previousShip))
+            {
+                ClearOfficer(previousShip, officer.Id, commanded.Id, vacated);
+            }
+            ClearOfficerFromFleet(faction, officer.Id, commanded.Id, vacated);
+
+            int leaving = shipInfo.CommanderID;
+            if (leaving >= 0 && leaving != officer.Id
+                && TryResolve(leaving, out var leavingOfficer)
+                && leavingOfficer.TryGetDataBlob<CommanderDB>(out var leavingDB)
+                && leavingDB.AssignedTo == commanded.Id)
+            {
+                leavingDB.AssignedTo = -1;
+            }
+
+            shipInfo.CommanderID = officer.Id;
+            commanderDB.AssignedTo = commanded.Id;
+
+            PublishPersonnelChanged(commanded);
+            foreach (var ship in vacated)
+                PublishPersonnelChanged(ship);
+
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private void ClearChair(Entity ship, ShipInfoDB shipInfo)
+        {
+            int leaving = shipInfo.CommanderID;
+            shipInfo.CommanderID = -1;
+            if (leaving >= 0
+                && TryResolve(leaving, out var officer)
+                && officer.TryGetDataBlob<CommanderDB>(out var commanderDB)
+                && commanderDB.AssignedTo == ship.Id)
+            {
+                commanderDB.AssignedTo = -1;
+            }
+        }
+
+        // Factory captains record the person only on the ship. Walk the fleet tree so moving
+        // an officer clears the chair they actually sit, even when AssignedTo was never set.
+        private static void ClearOfficerFromFleet(Entity faction, int commanderId, int exceptShipId, List<Entity> vacated)
+        {
+            if (!faction.TryGetDataBlob<FleetDB>(out var factionFleet) || factionFleet.RootDB == null)
+                return;
+            foreach (var child in factionFleet.RootDB.GetChildren())
+                ClearOfficer(child, commanderId, exceptShipId, vacated);
+        }
+
+        private static void ClearOfficer(Entity node, int commanderId, int exceptShipId, List<Entity> vacated)
+        {
+            if (node.Id != exceptShipId
+                && node.TryGetDataBlob<ShipInfoDB>(out var info)
+                && info.CommanderID == commanderId)
+            {
+                info.CommanderID = -1;
+                if (!vacated.Contains(node))
+                    vacated.Add(node);
+            }
+
+            if (node.TryGetDataBlob<FleetDB>(out var fleetDB))
+            {
+                foreach (var child in fleetDB.GetChildren())
+                    ClearOfficer(child, commanderId, exceptShipId, vacated);
+            }
         }
 
         // ----- research (commanded entity: the lab) -----

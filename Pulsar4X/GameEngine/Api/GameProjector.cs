@@ -1265,12 +1265,17 @@ namespace Pulsar4X.Engine.Api
                 }
             }
 
+            int? commanderId = null;
             string? commander = null;
             if (flagship != null && flagship.TryGetDataBlob<ShipInfoDB>(out var flagInfo)
-                && flagInfo.CommanderID != -1 && flagship.Manager != null
-                && flagship.Manager.TryGetEntityById(flagInfo.CommanderID, out var commanderEntity))
+                && flagInfo.CommanderID >= 0)
             {
-                commander = commanderEntity.GetName(factionId);
+                commanderId = flagInfo.CommanderID;
+                if (flagship.Manager != null
+                    && flagship.Manager.TryGetEntityById(flagInfo.CommanderID, out var commanderEntity))
+                {
+                    commander = commanderEntity.GetName(factionId);
+                }
             }
 
             return new FleetSnapshot
@@ -1280,6 +1285,7 @@ namespace Pulsar4X.Engine.Api
                 FlagshipId = flagshipId >= 0 ? flagshipId : null,
                 FlagshipName = flagship?.GetName(factionId),
                 CommanderName = commander,
+                CommanderId = commanderId,
                 SystemId = system?.ID,
                 SystemName = system?.NameDB.GetName(factionId),
                 OrbitingEntityId = orbiting?.Id,
@@ -1368,11 +1374,16 @@ namespace Pulsar4X.Engine.Api
         {
             ship.TryGetDataBlob<ShipInfoDB>(out var shipInfo);
 
+            int? commanderId = null;
             string? commander = null;
-            if (shipInfo != null && shipInfo.CommanderID != -1 && ship.Manager != null
-                && ship.Manager.TryGetEntityById(shipInfo.CommanderID, out var commanderEntity))
+            if (shipInfo != null && shipInfo.CommanderID >= 0)
             {
-                commander = commanderEntity.GetName(factionId);
+                commanderId = shipInfo.CommanderID;
+                if (ship.Manager != null
+                    && ship.Manager.TryGetEntityById(shipInfo.CommanderID, out var commanderEntity))
+                {
+                    commander = commanderEntity.GetName(factionId);
+                }
             }
 
             return new ShipSnapshot(ship.Id, ship.GetName(factionId), ship.Manager?.ManagerID ?? "",
@@ -1380,6 +1391,9 @@ namespace Pulsar4X.Engine.Api
             {
                 Goal = ProjectGoals(ship),
                 Orders = ProjectOrders(ship),
+                CanGeoSurvey = ship.HasGeoSurveyAbility(),
+                CanGravSurvey = ship.HasJPSurveyAbililty(),
+                CommanderId = commanderId,
             };
         }
 

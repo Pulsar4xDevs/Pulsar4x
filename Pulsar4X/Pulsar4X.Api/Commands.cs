@@ -116,6 +116,14 @@ public sealed record DetachShipCommand(int TargetEntityId) : GameCommand(TargetE
 
 public sealed record SetFlagshipCommand(int TargetEntityId, int ShipId) : GameCommand(TargetEntityId);
 
+/// <summary>
+/// Seat a navy officer as this ship's captain, or clear the chair when <see cref="CommanderId"/>
+/// is negative. Targets the ship. The fleet commander is the flagship's captain, so the fleet
+/// UI sends this against the flagship. One officer, one ship: a person already captaining
+/// another ship leaves that chair.
+/// </summary>
+public sealed record AssignCaptainCommand(int TargetEntityId, int CommanderId) : GameCommand(TargetEntityId);
+
 /// <summary>Replace a fleet's standing (conditional) orders with the given list. The editor runs
 /// client-side; this is the single authoritative write — the server rebuilds engine conditions and
 /// actions from the <see cref="StandingOrderTypes"/> ids, rejecting unknown ones.</summary>

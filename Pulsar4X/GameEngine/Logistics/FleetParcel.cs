@@ -440,6 +440,8 @@ static class FleetParcel
 
     static bool IsFree(Entity ship, Goal parent)
     {
+        if (FleetChildDuty.HasPlayerPlottedActions(ship, parent))
+            return false;
         var active = ship.TryGetDataBlob<GoalsDB>(out var goals) ? goals.ActiveGoal : null;
         if (active == null || active.Status == GoalStatus.Completed)
             return true;

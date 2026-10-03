@@ -47,6 +47,12 @@ namespace Pulsar4X.Client
             ContextButton(typeof(ChangeCurrentOrbitWindow));
             ContextButton(typeof(NavWindow));
             ContextButton(typeof(OrdersListWindow));
+            if (_entityState.BodyType == UserOrbitSettings.OrbitBodyType.Ship
+                && ImGui.SmallButton("Give orders"))
+            {
+                FleetWindow.GetInstance().OrderShip(_entityState.Id);
+                ImGui.CloseCurrentPopup();
+            }
             ImGui.EndGroup();
 
         }

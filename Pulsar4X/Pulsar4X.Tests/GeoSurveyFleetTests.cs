@@ -20,6 +20,9 @@ using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using Pulsar4X.Orbital;
 using Pulsar4X.Orbits;
+using Pulsar4X.Api;
+using Pulsar4X.Engine.Api;
+using Pulsar4X.People;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
@@ -310,6 +313,96 @@ namespace Pulsar4X.Tests
                           && tankerGoals.ActiveGoal.Type == GoalType.MoveTo
                           && tankerGoals.ActiveGoal.TargetEntityID == scene.Mars.Id,
                 "tanker should MoveTo the parent body. " + dump);
+        }
+
+        [Test]
+        public void ServeyBodyPlanner_LeavesAShipOnItsOwnGoal_AndTasksTheSibling()
+        {
+            var scene = BuildMarsSurveyFleet();
+            GiveOwnGoal(scene.SurveyorA, GoalType.MoveTo, scene.Mars.Id);
+            var plan = new ServeyBodyPlanner().Plan(scene.Fleet, scene.Goal, _epoch);
+
+            Assert.AreEqual(GoalStatus.Active, plan.Status, plan.Message);
+            Assert.IsFalse(plan.SubGoals.Any(s => s.Sub.Id == scene.SurveyorA.Id),
+                "a ship with its own order is not given a survey");
+            Assert.IsTrue(plan.SubGoals.Any(s => s.Sub.Id == scene.SurveyorB.Id));
+        }
+
+        [Test]
+        public void ServeyBodyPlanner_DoesNotRetaskATankerOnItsOwnGoal()
+        {
+            var scene = BuildMarsSurveyFleet();
+            GiveOwnGoal(scene.Tanker, GoalType.MoveTo, scene.Mars.Id);
+            var plan = new ServeyBodyPlanner().Plan(scene.Fleet, scene.Goal, _epoch);
+
+            Assert.IsFalse(plan.SubGoals.Any(s => s.Sub.Id == scene.Tanker.Id));
+            Assert.IsTrue(plan.SubGoals.Any(s => s.Goal.Type == GoalType.ServeyBodies));
+        }
+
+        [Test]
+        public void ServeyBodyPlanner_TasksAShipOnceItsOwnGoalHasFinished()
+        {
+            var scene = BuildMarsSurveyFleet();
+            var done = new Goal(GoalType.MoveTo)
+            {
+                TargetEntityID = scene.Mars.Id,
+                Status = GoalStatus.Completed,
+            };
+            scene.SurveyorA.SetDataBlob(new GoalsDB { ActiveGoal = done, GivenGoal = done });
+            var plan = new ServeyBodyPlanner().Plan(scene.Fleet, scene.Goal, _epoch);
+
+            Assert.IsTrue(plan.SubGoals.Any(s => s.Sub.Id == scene.SurveyorA.Id));
+        }
+
+        [Test]
+        public void MoveToPlan_LeavesOwnGoalAndPlayerPlot_AndStaysActive()
+        {
+            var scene = BuildMarsSurveyFleet();
+            GiveOwnGoal(scene.SurveyorA, GoalType.MoveTo, scene.Mars.Id);
+            scene.SurveyorB.GetDataBlob<ActionQueueDB>().Enqueue(new RenameAction());
+            var fleetGoal = new Goal(GoalType.MoveTo) { TargetEntityID = scene.Mars.Id };
+            var plan = new MoveToPlan().Plan(scene.Fleet, fleetGoal, _epoch);
+
+            Assert.AreEqual(GoalStatus.Active, plan.Status, plan.Message);
+            Assert.IsFalse(plan.SubGoals.Any(s => s.Sub.Id == scene.SurveyorA.Id));
+            Assert.IsFalse(plan.SubGoals.Any(s => s.Sub.Id == scene.SurveyorB.Id));
+            Assert.IsTrue(plan.SubGoals.Any(s => s.Sub.Id == scene.Tanker.Id),
+                "a ship with no order of its own is still tasked");
+        }
+
+        [Test]
+        public void MoveToBody_RequiresACaptain_WarpDoesNot()
+        {
+            var scene = BuildMarsSurveyFleet();
+            var translator = new CommandTranslator(Game);
+
+            var blocked = translator.Translate(scene.Faction, scene.SurveyorA,
+                new MoveToBodyCommand(scene.SurveyorA.Id, scene.Mars.Id));
+            Assert.IsFalse(blocked.Accepted);
+            Assert.That(blocked.RejectionReason, Does.Contain("captain"));
+
+            // Warp rejects a body this faction has not seen. Test planets are unowned until marked neutral.
+            scene.Mars.FactionOwnerID = Pulsar4X.Engine.Game.NeutralFactionId;
+            _sys.ShowNeutralEntityToFaction(scene.Faction.Id, scene.Mars.Id);
+            var warp = translator.Translate(scene.Faction, scene.SurveyorA,
+                new WarpMoveCommand(scene.SurveyorA.Id, scene.Mars.Id));
+            Assert.IsTrue(warp.Accepted, warp.RejectionReason);
+            Assert.IsTrue(scene.SurveyorA.GetDataBlob<ActionQueueDB>().ActionList.Count > 0);
+
+            var captain = CommanderFactory.Create(_sys, scene.Faction.Id, CommanderFactory.CreateShipCaptain(Game));
+            scene.SurveyorB.GetDataBlob<ShipInfoDB>().CommanderID = captain.Id;
+            var allowed = translator.Translate(scene.Faction, scene.SurveyorB,
+                new MoveToBodyCommand(scene.SurveyorB.Id, scene.Mars.Id));
+            Assert.IsTrue(allowed.Accepted, allowed.RejectionReason);
+            Assert.IsTrue(scene.SurveyorB.TryGetDataBlob<GoalsDB>(out var goals)
+                          && goals.ActiveGoal != null
+                          && goals.ActiveGoal.Type == GoalType.MoveTo);
+        }
+
+        static void GiveOwnGoal(Entity ship, GoalType type, int targetId)
+        {
+            var goal = new Goal(type) { TargetEntityID = targetId, Status = GoalStatus.Active };
+            ship.SetDataBlob(new GoalsDB { ActiveGoal = goal, GivenGoal = goal });
         }
 
         Scene BuildMarsSurveyFleet()

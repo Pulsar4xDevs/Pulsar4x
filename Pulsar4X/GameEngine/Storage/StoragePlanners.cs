@@ -109,6 +109,7 @@ public class RefuelShipPlanner : IGoalPlanner
 
         var subGoals = new List<(Entity subordinate, Goal goal)>();
         int alreadyWorking = 0;
+        int deferred = 0;
 
         foreach (var subunit in fleetDB.Children)
         {
@@ -119,12 +120,15 @@ public class RefuelShipPlanner : IGoalPlanner
             if (!FuelSituation.TryGetFuelMass(subunit, out _, out _, out _))
                 continue;
 
-            if (subunit.TryGetDataBlob<GoalsDB>(out var childGoals)
-                && childGoals.ActiveGoal != null
-                && childGoals.ActiveGoal.ParentGoalId == goal.Id
-                && childGoals.ActiveGoal.Status is not (GoalStatus.Completed or GoalStatus.Failed))
+            if (FleetChildDuty.WorkingThisGoal(subunit, goal))
             {
                 alreadyWorking++;
+                continue;
+            }
+
+            if (FleetChildDuty.BusyWithOwnWork(subunit, goal))
+            {
+                deferred++;
                 continue;
             }
 
@@ -141,7 +145,7 @@ public class RefuelShipPlanner : IGoalPlanner
 
         if (subGoals.Count == 0)
         {
-            if (alreadyWorking > 0)
+            if (alreadyWorking > 0 || deferred > 0)
                 return PlanResult.Continue(new List<(Entity subordinate, Goal goal)>());
             return PlanResult.Done("no ships need fuel");
         }

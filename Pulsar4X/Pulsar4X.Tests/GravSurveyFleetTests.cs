@@ -104,6 +104,24 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void ScanAnomalyPlan_LeavesAShipOnItsOwnGoal_AndTasksTheSibling()
+        {
+            var scene = BuildSolGravSurveyFleet();
+            var own = new Goal(GoalType.MoveTo)
+            {
+                TargetEntityID = scene.Sol.Id,
+                Status = GoalStatus.Active,
+            };
+            scene.SurveyorA.SetDataBlob(new GoalsDB { ActiveGoal = own, GivenGoal = own });
+
+            var plan = new ScanAnomalyPlan().Plan(scene.Fleet, scene.Goal, _epoch);
+
+            Assert.AreEqual(GoalStatus.Active, plan.Status, plan.Message);
+            Assert.IsFalse(plan.SubGoals.Any(s => s.Sub.Id == scene.SurveyorA.Id));
+            Assert.IsTrue(plan.SubGoals.Any(s => s.Sub.Id == scene.SurveyorB.Id));
+        }
+
+        [Test]
         public void ScanAnomalyPlan_SystemSpan_Star_IncludesLooseAnomaly_NotTheStar()
         {
             var scene = BuildSolGravSurveyFleet(includeOuter: false);

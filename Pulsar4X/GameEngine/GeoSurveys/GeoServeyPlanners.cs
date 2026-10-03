@@ -126,14 +126,14 @@ public class ServeyBodyPlanner : IGoalPlanner
             if (!MovePlanner.CanMove(subunit, out _))
                 continue;
 
-            if (subunit.TryGetDataBlob<GoalsDB>(out var childGoals)
-                && childGoals.ActiveGoal != null
-                && childGoals.ActiveGoal.ParentGoalId == goal.Id
-                && childGoals.ActiveGoal.Status is not (GoalStatus.Completed or GoalStatus.Failed))
+            if (FleetChildDuty.WorkingThisGoal(subunit, goal))
             {
-                claimedPoiIds.Add(childGoals.ActiveGoal.TargetEntityID);
+                claimedPoiIds.Add(subunit.GetDataBlob<GoalsDB>().ActiveGoal!.TargetEntityID);
                 continue;
             }
+
+            if (FleetChildDuty.BusyWithOwnWork(subunit, goal))
+                continue;
 
             freeShips.Add(subunit);
         }
@@ -177,6 +177,7 @@ public class ServeyBodyPlanner : IGoalPlanner
         if (tanker != null
             && !IsStar(targetEntity)
             && !TankerAlreadyTasked(tanker, goal, targetEntity.Id)
+            && !FleetChildDuty.BusyWithOwnWork(tanker, goal)
             && MovePlanner.CanMove(tanker, out _))
         {
             subGoals.Add((tanker, new Goal(GoalType.MoveTo)

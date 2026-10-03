@@ -146,7 +146,8 @@ namespace Pulsar4X.Client
         /// <paramref name="currentlySelectedId"/> unchanged.
         /// </summary>
         public static int PeopleChooser(GlobalUIState state, IReadOnlyList<Pulsar4X.Api.CommanderSnapshot> people,
-            int currentlySelectedId, string instanceKey = "default", Action? onCancel = null)
+            int currentlySelectedId, string instanceKey = "default", Action? onCancel = null,
+            Func<Pulsar4X.Api.CommanderSnapshot, string>? rowLabel = null, float listWidth = 200f)
         {
             // Track which person is selected in the UI (not yet assigned)
             string selectionKey = $"{instanceKey}_snapshot";
@@ -159,7 +160,7 @@ namespace Pulsar4X.Client
             var available = people.Where(p => p.Id != currentlySelectedId).ToList();
 
             Vector2 contentSize = ImGui.GetContentRegionAvail();
-            float leftWidth = 200f;
+            float leftWidth = listWidth;
             float rightWidth = Math.Max(contentSize.X - leftWidth - 8, 400f);
             float panelHeight = Math.Max(300f, contentSize.Y);
 
@@ -184,8 +185,10 @@ namespace Pulsar4X.Client
                 {
                     bool isSelected = uiSelectedId == person.Id;
 
-                    // Show assignment status
-                    string displayName = person.IsAssigned ? person.Name + " *" : person.Name;
+                    // Show assignment status. A custom row already names the posting.
+                    string displayName = rowLabel != null
+                        ? rowLabel(person)
+                        : person.IsAssigned ? person.Name + " *" : person.Name;
 
                     if(ImGui.Selectable(displayName + $"###{person.Id}", isSelected))
                     {
@@ -194,7 +197,9 @@ namespace Pulsar4X.Client
 
                     if(ImGui.IsItemHovered() && person.IsAssigned)
                     {
-                        ImGui.SetTooltip("Currently assigned elsewhere");
+                        ImGui.SetTooltip(rowLabel != null && !string.IsNullOrEmpty(person.AssignmentName)
+                            ? "Currently aboard " + person.AssignmentName + ". Choosing them moves them."
+                            : "Currently assigned elsewhere");
                     }
                 }
             }
@@ -257,6 +262,18 @@ namespace Pulsar4X.Client
 
                         PrintFormattedCell("Type:");
                         PrintCell(selectedPerson.Kind.ToString());
+
+                        if(rowLabel != null && !string.IsNullOrEmpty(selectedPerson.RankName))
+                        {
+                            PrintFormattedCell("Rank:");
+                            PrintCell(selectedPerson.RankName);
+                        }
+
+                        if(rowLabel != null && !string.IsNullOrEmpty(selectedPerson.AssignmentName))
+                        {
+                            PrintFormattedCell("Post:");
+                            PrintCell(selectedPerson.AssignmentName);
+                        }
 
                         PrintFormattedCell("Experience:");
                         PrintCell($"{selectedPerson.Experience} / {selectedPerson.ExperienceCap}");

@@ -172,8 +172,13 @@ namespace Pulsar4X.Client
                         ImGui.Text("No Orders");
 
                         ImGui.TableNextColumn();
-                        if (ImGui.Selectable("* Double Click to add some now *"))
+                        if (entity.Kind == BodyKind.Ship && ImGui.Selectable("Give orders"))
                         {
+                            FleetWindow.GetInstance().OrderShip(entity.Id);
+                        }
+                        else if (entity.Kind != BodyKind.Ship)
+                        {
+                            ImGui.Text("No Orders");
                         }
                     }
 

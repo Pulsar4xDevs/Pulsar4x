@@ -65,8 +65,8 @@ namespace Pulsar4X.Client
 
             btn =  new ToolBarOption()
             {
-                Picture = _uiState.Img_Select(),
-                TooltipText = "Fleet Management",
+                Picture = _uiState.Img_FleetShips(),
+                TooltipText = "Fleet & Ship Management",
                 OnClick = new Action(FleetWindow.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(FleetWindow.GetInstance().GetActive)
                 //Opens up the fleet menu
@@ -75,7 +75,7 @@ namespace Pulsar4X.Client
 
             btn =  new ToolBarOption()
             {
-                Picture = _uiState.Img_Select(),
+                Picture = _uiState.Img_Commanders(),
                 TooltipText = "Commanders",
                 OnClick = new Action(CommanderWindow.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(CommanderWindow.GetInstance().GetActive)
@@ -84,7 +84,7 @@ namespace Pulsar4X.Client
 
             btn = new ToolBarOption()
             {
-                Picture = _uiState.Img_Select(),
+                Picture = _uiState.Img_Factions(),
                 TooltipText = "Factions",
                 OnClick = new Action(FactionStanceWindow.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(FactionStanceWindow.GetInstance().GetActive)

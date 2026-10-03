@@ -27,6 +27,8 @@ namespace Pulsar4X.Client
         private int haulDestId = -1;
 
         private int? selectedFleetId = null;
+        // The ship whose orders the right-hand pane is editing. Null means the selected fleet.
+        private int? orderShipId = null;
         // Re-selects the first root fleet after connect/faction change, mirroring the old default selection.
         private bool autoSelectFirstFleet = true;
         private int dragFleetId = -1;
@@ -40,6 +42,9 @@ namespace Pulsar4X.Client
         // The snapshot of the selected fleet, re-resolved each frame from the galaxy model (fleet
         // pushes replace the whole tree, so cached FleetSnapshot references go stale).
         private FleetSnapshot? selectedFleet = null;
+        private ShipSnapshot? orderShip = null;
+        // The ship whose captain chair the assign modal is editing. A fleet commander is the flagship's captain.
+        private int? captainChooserShipId = null;
 
         // ----- Standing Orders editor -----
         // The editor works on a local copy of the fleet's StandingOrders snapshot; Save replaces
@@ -109,6 +114,7 @@ namespace Pulsar4X.Client
         {
             selectedFleetId = fleetId;
             selectedShips = new ();
+            orderShipId = null;
             autoSelectFirstFleet = false;
             haulSourceId = -1;
             haulDestId = -1;
@@ -116,6 +122,7 @@ namespace Pulsar4X.Client
             editedOrdersSource = null;
             standingOrdersDirty = false;
             selectedOrderIndex = -1;
+            captainChooserShipId = null;
         }
 
         private static FleetSnapshot? FindFleet(IReadOnlyList<FleetSnapshot> fleets, int fleetId)
@@ -128,6 +135,60 @@ namespace Pulsar4X.Client
             return null;
         }
 
+        /// <summary>
+        /// The pane follows this ship. The fleet row is no longer the selection, so an unassigned
+        /// ship is not shown beside a fleet that is also selected.
+        /// </summary>
+        internal void OrderShip(int shipId)
+        {
+            orderShipId = shipId;
+            selectedFleetId = null;
+            autoSelectFirstFleet = false;
+            captainChooserShipId = null;
+            SetActive(true);
+        }
+
+        private static ShipSnapshot? FindShip(IClientGalaxy galaxy, int shipId)
+        {
+            foreach (var ship in galaxy.UnattachedShips)
+            {
+                if (ship.Id == shipId)
+                    return ship;
+            }
+            return FindShip(galaxy.Fleets, shipId);
+        }
+
+        private static ShipSnapshot? FindShip(IReadOnlyList<FleetSnapshot> fleets, int shipId)
+        {
+            foreach (var fleet in fleets)
+            {
+                foreach (var ship in fleet.Ships)
+                {
+                    if (ship.Id == shipId)
+                        return ship;
+                }
+                if (FindShip(fleet.SubFleets, shipId) is { } nested)
+                    return nested;
+            }
+            return null;
+        }
+
+        static bool ShipHasCaptain(ShipSnapshot ship) => ship.CommanderId != null;
+
+        static string CaptainLabel(ShipSnapshot ship)
+        {
+            if (!ShipHasCaptain(ship))
+                return "None";
+            return string.IsNullOrEmpty(ship.CommanderName) ? "Unknown" : ship.CommanderName!;
+        }
+
+        static string CaptainTooltip(ShipSnapshot ship)
+            => ShipHasCaptain(ship)
+                ? "Replace this captain, or choose None and plot the ship's actions yourself."
+                : "No captain. Choose an officer, or leave None and plot this ship's actions yourself.";
+
+        static bool HasGoal(GoalSnapshot? goal) => goal != null && goal.Name.Length > 0;
+
         internal override void Display()
         {
             if(!IsActive) return;
@@ -135,7 +196,11 @@ namespace Pulsar4X.Client
             var galaxy = _uiState.GameClient?.Galaxy;
             if(galaxy == null) return;
 
-            if(autoSelectFirstFleet && galaxy.Fleets.Count > 0)
+            orderShip = orderShipId is { } shipId ? FindShip(galaxy, shipId) : null;
+            if (orderShipId != null && orderShip == null)
+                orderShipId = null;
+
+            if(autoSelectFirstFleet && orderShip == null && galaxy.Fleets.Count > 0)
             {
                 SelectFleet(galaxy.Fleets[0].Id);
             }
@@ -143,17 +208,14 @@ namespace Pulsar4X.Client
             // Resolve the selection against the current push; a disbanded fleet drops the selection.
             selectedFleet = selectedFleetId is { } id ? FindFleet(galaxy.Fleets, id) : null;
 
-            if(Window.Begin("Fleet Management", ref IsActive, _flags))
+            if(Window.Begin("Fleets and Ships", ref IsActive, _flags))
             {
                 DisplayFleetList(galaxy);
 
-                if(selectedFleet != null)
+                if(selectedFleet != null || orderShip != null)
                 {
                     ImGui.SameLine();
                     ImGui.SetCursorPosY(27f);
-                    var ysize = ImGui.GetContentRegionAvail().Y;
-                    DisplayShips();
-                    ImGui.SetCursorPosY(ysize * 0.5f);
                     DisplayOrders();
 
                     ImGui.SameLine();
@@ -161,13 +223,15 @@ namespace Pulsar4X.Client
 
                     DisplayTabs(galaxy);
                 }
+
+                DisplayCaptainChooser(galaxy);
             }
             Window.End();
         }
 
         private void DisplayTabs(IClientGalaxy galaxy)
         {
-            if(selectedFleet == null) return;
+            if(selectedFleet == null && orderShip == null) return;
 
             if(ImGui.BeginChild("FleetTabs"))
             {
@@ -179,12 +243,14 @@ namespace Pulsar4X.Client
                     var firstChildSize = new Vector2(windowContentSize.X * 0.99f, windowContentSize.Y);
                     if (ImGui.BeginChild("FleetSummary1", firstChildSize, ImGuiChildFlags.Borders))
                     {
-                        if (ImGui.CollapsingHeader("Fleet Information", ImGuiTreeNodeFlags.DefaultOpen))
+                        if (orderShip != null)
+                            DisplayShipSummary(galaxy);
+                        else if (selectedFleet != null && ImGui.CollapsingHeader("Fleet Information", ImGuiTreeNodeFlags.DefaultOpen))
                         {
                             ImGui.Columns(2);
                             DisplayHelpers.PrintRow("Name", selectedFleet.Name);
                             DisplayHelpers.PrintRow("Flagship", selectedFleet.FlagshipName ?? "-");
-                            DisplayHelpers.PrintRow("Fleet commander", FleetCommanderLabel());
+                            DisplayFleetCommanderRow();
                             DisplayHelpers.PrintRow("Command span", FleetSpanLabel(),
                                 tooltipTwo: "How far this fleet's orders reach. It comes from the flagship's bridge.");
 
@@ -230,40 +296,7 @@ namespace Pulsar4X.Client
                     var secondChildSize = new Vector2(size.X * 0.73f - (size.X * 0.01f), size.Y);
                     if(ImGui.BeginChild("IssueOrders-List", firstChildSize, ImGuiChildFlags.Borders))
                     {
-                        DisplayHelpers.Header("Available Orders");
-
-                        if(ImGui.Selectable("Move to ...", selectedIssueOrderType == IssueOrderType.MoveTo))
-                        {
-                            selectedIssueOrderType = IssueOrderType.MoveTo;
-                        }
-                        if(ImGui.Selectable("Refuel at ...", selectedIssueOrderType == IssueOrderType.RefuelAt))
-                        {
-                            selectedIssueOrderType = IssueOrderType.RefuelAt;
-                        }
-                        if(selectedFleet.CanGeoSurvey && ImGui.Selectable("Geo Survey ...", selectedIssueOrderType == IssueOrderType.GeoSurvey))
-                        {
-                            selectedIssueOrderType = IssueOrderType.GeoSurvey;
-                        }
-                        if(selectedFleet.CanGravSurvey && ImGui.Selectable("Grav Survey ...", selectedIssueOrderType == IssueOrderType.GravSurvey))
-                        {
-                            selectedIssueOrderType = IssueOrderType.GravSurvey;
-                        }
-                        if(ImGui.Selectable("Jump...", selectedIssueOrderType == IssueOrderType.Jump))
-                        {
-                            selectedIssueOrderType = IssueOrderType.Jump;
-                        }
-                        if(ImGui.Selectable("Trade ...", selectedIssueOrderType == IssueOrderType.Trade))
-                        {
-                            selectedIssueOrderType = IssueOrderType.Trade;
-                        }
-                        if(ImGui.Selectable("Haul ...", selectedIssueOrderType == IssueOrderType.Haul))
-                        {
-                            selectedIssueOrderType = IssueOrderType.Haul;
-                        }
-                        if(ImGui.Selectable("Haul contract ...", selectedIssueOrderType == IssueOrderType.HaulContract))
-                        {
-                            selectedIssueOrderType = IssueOrderType.HaulContract;
-                        }
+                        DisplayOrderChoices(galaxy);
                     }
                     ImGui.EndChild();
                     ImGui.SameLine();
@@ -271,25 +304,162 @@ namespace Pulsar4X.Client
                     ImGui.EndTabItem();
                 }
 
-                DisplayStandingOrdersTab();
+                if (orderShip == null)
+                    DisplayStandingOrdersTab();
 
                 ImGui.EndTabBar();
             }
             ImGui.EndChild();
         }
 
+        private void DisplayShipSummary(IClientGalaxy galaxy)
+        {
+            if (orderShip == null) return;
+            var ship = orderShip;
+            string systemId = string.IsNullOrEmpty(ship.SystemId) ? _uiState.SelectedStarSystemId : ship.SystemId;
+            string systemName = string.IsNullOrEmpty(systemId) ? "Unknown" : galaxy.GetSystem(systemId)?.Name ?? "Unknown";
+
+            if (!ImGui.CollapsingHeader("Ship", ImGuiTreeNodeFlags.DefaultOpen))
+                return;
+
+            ImGui.Columns(2);
+            DisplayHelpers.PrintRow("Name", ship.Name);
+            DisplayHelpers.PrintRow("Design", string.IsNullOrEmpty(ship.DesignName) ? "-" : ship.DesignName);
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.Text("Captain");
+            ImGui.PopStyleColor();
+            ImGui.NextColumn();
+            DisplayCaptainButton(ship.Id, CaptainLabel(ship), CaptainTooltip(ship));
+            ImGui.NextColumn();
+            ImGui.Separator();
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.Text("Current System");
+            ImGui.PopStyleColor();
+            ImGui.NextColumn();
+            if (ImGui.SmallButton(systemName))
+            {
+                if (!string.IsNullOrEmpty(systemId))
+                    _uiState.SetActiveSystem(systemId);
+            }
+            ImGui.NextColumn();
+            ImGui.Columns(1);
+        }
+
+        private void DisplayOrderChoices(IClientGalaxy galaxy)
+        {
+            if (orderShip != null && !ShipHasCaptain(orderShip))
+            {
+                DisplayHelpers.Header("Actions");
+                ImGui.TextWrapped("No captain. You plot this ship's actions.");
+                var entity = SubjectEntity(galaxy);
+                if (entity != null && entity.HasView<WarpAbilityView>() && ImGui.Selectable("Warp..."))
+                    OpenPlotter(orderShip, warp: true);
+                if (entity != null && entity.HasView<ThrustView>() && ImGui.Selectable("Nav..."))
+                    OpenPlotter(orderShip, warp: false);
+                return;
+            }
+
+            DisplayHelpers.Header(orderShip != null ? "Goals" : "Available Orders");
+            if (orderShip != null)
+            {
+                string captain = string.IsNullOrEmpty(orderShip.CommanderName) ? "The captain" : orderShip.CommanderName;
+                ImGui.TextWrapped("Captain " + captain + " turns a goal into a plot.");
+            }
+
+            bool geo = orderShip != null ? orderShip.CanGeoSurvey : selectedFleet?.CanGeoSurvey == true;
+            bool grav = orderShip != null ? orderShip.CanGravSurvey : selectedFleet?.CanGravSurvey == true;
+            bool fleetOrders = orderShip == null;
+
+            if (ImGui.Selectable("Move to ...", selectedIssueOrderType == IssueOrderType.MoveTo))
+                selectedIssueOrderType = IssueOrderType.MoveTo;
+            if (fleetOrders && ImGui.Selectable("Refuel at ...", selectedIssueOrderType == IssueOrderType.RefuelAt))
+                selectedIssueOrderType = IssueOrderType.RefuelAt;
+            if (geo && ImGui.Selectable("Geo Survey ...", selectedIssueOrderType == IssueOrderType.GeoSurvey))
+                selectedIssueOrderType = IssueOrderType.GeoSurvey;
+            if (grav && ImGui.Selectable("Grav Survey ...", selectedIssueOrderType == IssueOrderType.GravSurvey))
+                selectedIssueOrderType = IssueOrderType.GravSurvey;
+            if (ImGui.Selectable("Jump...", selectedIssueOrderType == IssueOrderType.Jump))
+                selectedIssueOrderType = IssueOrderType.Jump;
+            if (fleetOrders && ImGui.Selectable("Trade ...", selectedIssueOrderType == IssueOrderType.Trade))
+                selectedIssueOrderType = IssueOrderType.Trade;
+            if (fleetOrders && ImGui.Selectable("Haul ...", selectedIssueOrderType == IssueOrderType.Haul))
+                selectedIssueOrderType = IssueOrderType.Haul;
+            if (fleetOrders && ImGui.Selectable("Haul contract ...", selectedIssueOrderType == IssueOrderType.HaulContract))
+                selectedIssueOrderType = IssueOrderType.HaulContract;
+        }
+
+        private EntitySnapshot? SubjectEntity(IClientGalaxy galaxy)
+        {
+            string? systemId = SubjectSystemId();
+            if (string.IsNullOrEmpty(systemId)) return null;
+            int? id = orderShip?.Id ?? selectedFleet?.Id;
+            // The fleet entity is not what warp and nav plot. A ship subject resolves the hull.
+            if (orderShip == null) return null;
+            return galaxy.GetSystem(systemId)?.GetEntity(id!.Value);
+        }
+
+        private string? SubjectSystemId()
+        {
+            if (orderShip != null)
+                return string.IsNullOrEmpty(orderShip.SystemId) ? _uiState.SelectedStarSystemId : orderShip.SystemId;
+            return selectedFleet?.SystemId;
+        }
+
+        private void OpenPlotter(ShipSnapshot ship, bool warp)
+        {
+            string systemId = string.IsNullOrEmpty(ship.SystemId) ? _uiState.SelectedStarSystemId : ship.SystemId;
+            var snapshot = _uiState.GameClient?.Galaxy.GetSystem(systemId)?.GetEntity(ship.Id);
+            if (snapshot == null || string.IsNullOrEmpty(systemId)) return;
+            var state = new EntityState(snapshot, systemId);
+            if (warp)
+            {
+                var window = WarpOrderWindow.GetInstance(state);
+                window.SetActive(true);
+                _uiState.ActiveWindow = window;
+            }
+            else
+            {
+                var window = NavWindow.GetInstance(state);
+                window.SetActive(true);
+                _uiState.ActiveWindow = window;
+            }
+        }
+
         private void IssueOrdersDisplay(IClientGalaxy galaxy, Vector2 size)
         {
             if(ImGui.BeginChild("IssueOrders", size, ImGuiChildFlags.Borders))
             {
-                var system = selectedFleet?.SystemId == null ? null : galaxy.GetSystem(selectedFleet.SystemId);
-                if(selectedFleet == null || system == null || _uiState.GameClient == null)
+                int? commanded = orderShip?.Id ?? selectedFleet?.Id;
+                var systemId = SubjectSystemId();
+                var system = string.IsNullOrEmpty(systemId) ? null : galaxy.GetSystem(systemId);
+                if(commanded == null || system == null || _uiState.GameClient == null)
                 {
                     ImGui.EndChild();
                     return;
                 }
 
                 DisplayCommandLine();
+
+                if (orderShip != null)
+                {
+                    bool shipGeo = orderShip.CanGeoSurvey && selectedIssueOrderType == IssueOrderType.GeoSurvey;
+                    bool shipGrav = orderShip.CanGravSurvey && selectedIssueOrderType == IssueOrderType.GravSurvey;
+                    bool shipGoal = selectedIssueOrderType == IssueOrderType.MoveTo
+                        || selectedIssueOrderType == IssueOrderType.Jump
+                        || shipGeo || shipGrav;
+                    if (!shipGoal)
+                        selectedIssueOrderType = IssueOrderType.MoveTo;
+                }
+
+                if (orderShip != null && !ShipHasCaptain(orderShip))
+                {
+                    ImGui.TextWrapped("Open Warp or Nav to queue one action. The list beside this pane is what is already queued.");
+                    ImGui.EndChild();
+                    return;
+                }
+
+                // A ship order is that one body. Command span widens a fleet order.
+                bool fleetSpan = orderShip == null;
 
                 // Mirror the old EntityFilter.Friendly | EntityFilter.Neutral read: hostiles aren't targets.
                 var candidates = system.Entities.Where(e => e.Relation != OwnerRelation.Hostile);
@@ -300,25 +470,25 @@ namespace Pulsar4X.Client
                         DisplayTargetTree(candidates,
                             e => e.HasView<BodyView>() && e.HasView<PositionView>(),
                             "movement-button",
-                            id => SubmitFleetCommand(new MoveToBodyCommand(selectedFleet.Id, id)),
+                            id => SubmitFleetCommand(new MoveToBodyCommand(commanded.Value, id)),
                             starTargetsSystem: false);
                         break;
                     case IssueOrderType.GeoSurvey:
                         DisplayTargetTree(candidates,
                             e => e.GetView<GeoSurveyView>() is { IsSurveyComplete: false },
                             "geosurvey-button",
-                            id => SubmitFleetCommand(new GeoSurveyCommand(selectedFleet.Id, id)),
-                            starTargetsSystem: true,
-                            keepParentWhenChildrenRemain: true,
+                            id => SubmitFleetCommand(new GeoSurveyCommand(commanded.Value, id)),
+                            starTargetsSystem: fleetSpan,
+                            keepParentWhenChildrenRemain: fleetSpan,
                             markDone: e => e.GetView<GeoSurveyView>()?.IsSurveyComplete == true);
                         break;
                     case IssueOrderType.GravSurvey:
                         DisplayTargetTree(candidates,
                             e => e.GetView<GravSurveyView>() is { IsSurveyComplete: false },
                             "gravsurvey-button",
-                            id => SubmitFleetCommand(new GravSurveyCommand(selectedFleet.Id, id)),
-                            starTargetsSystem: true,
-                            keepParentWhenChildrenRemain: true,
+                            id => SubmitFleetCommand(new GravSurveyCommand(commanded.Value, id)),
+                            starTargetsSystem: fleetSpan,
+                            keepParentWhenChildrenRemain: fleetSpan,
                             markDone: e => e.GetView<GravSurveyView>()?.IsSurveyComplete == true);
                         break;
                     case IssueOrderType.Jump:
@@ -326,31 +496,46 @@ namespace Pulsar4X.Client
                         DisplayTargetTree(candidates,
                             e => e.HasView<JumpPointView>(),
                             "jump-gate-button",
-                            id => SubmitFleetCommand(new JumpCommand(selectedFleet.Id, id)),
+                            id => SubmitFleetCommand(new JumpCommand(commanded.Value, id)),
                             starTargetsSystem: false);
                         break;
                     case IssueOrderType.RefuelAt:
-                        DisplayTargetTree(candidates,
-                            e => e.Kind == BodyKind.Colony && e.HasView<CargoStorageView>(),
-                            "refuelAt-button",
-                            id => SubmitFleetCommand(new RefuelAtCommand(selectedFleet.Id, id)),
-                            starTargetsSystem: false);
+                        if (selectedFleet == null)
+                            break;
+                        {
+                            int fleetId = selectedFleet.Id;
+                            DisplayTargetTree(candidates,
+                                e => e.Kind == BodyKind.Colony && e.HasView<CargoStorageView>(),
+                                "refuelAt-button",
+                                id => SubmitFleetCommand(new RefuelAtCommand(fleetId, id)),
+                                starTargetsSystem: false);
+                        }
                         break;
                     case IssueOrderType.Trade:
-                        ImGui.TextWrapped("Ships buy and sell around this body. The flagship's bridge sets how far they look.");
-                        DisplayTargetTree(candidates,
-                            e => e.HasView<BodyView>() && e.HasView<PositionView>(),
-                            "trade-button",
-                            id => SubmitFleetCommand(new FleetTradeCommand(selectedFleet.Id, id)),
-                            starTargetsSystem: true);
+                        if (selectedFleet == null)
+                            break;
+                        {
+                            int fleetId = selectedFleet.Id;
+                            ImGui.TextWrapped("Ships buy and sell around this body. The flagship's bridge sets how far they look.");
+                            DisplayTargetTree(candidates,
+                                e => e.HasView<BodyView>() && e.HasView<PositionView>(),
+                                "trade-button",
+                                id => SubmitFleetCommand(new FleetTradeCommand(fleetId, id)),
+                                starTargetsSystem: true);
+                        }
                         break;
                     case IssueOrderType.Haul:
-                        ImGui.TextWrapped("Ships move posted goods between our colonies around this body. The flagship's bridge sets how far they look.");
-                        DisplayTargetTree(candidates,
-                            e => e.HasView<BodyView>() && e.HasView<PositionView>(),
-                            "haul-button",
-                            id => SubmitFleetCommand(new FleetFreighterCommand(selectedFleet.Id, id)),
-                            starTargetsSystem: true);
+                        if (selectedFleet == null)
+                            break;
+                        {
+                            int fleetId = selectedFleet.Id;
+                            ImGui.TextWrapped("Ships move posted goods between our colonies around this body. The flagship's bridge sets how far they look.");
+                            DisplayTargetTree(candidates,
+                                e => e.HasView<BodyView>() && e.HasView<PositionView>(),
+                                "haul-button",
+                                id => SubmitFleetCommand(new FleetFreighterCommand(fleetId, id)),
+                                starTargetsSystem: true);
+                        }
                         break;
                     case IssueOrderType.HaulContract:
                         DisplayHaulContract(candidates);
@@ -367,6 +552,85 @@ namespace Pulsar4X.Client
             return string.IsNullOrEmpty(selectedFleet.CommanderName) ? "None" : selectedFleet.CommanderName;
         }
 
+        private void DisplayFleetCommanderRow()
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.Text("Fleet commander");
+            ImGui.PopStyleColor();
+            ImGui.NextColumn();
+            DisplayFleetCommanderValue();
+            ImGui.NextColumn();
+            ImGui.Separator();
+        }
+
+        private void DisplayFleetCommanderValue()
+        {
+            if (selectedFleet?.FlagshipId is not int flagshipId)
+            {
+                ImGui.Text("-");
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("A fleet commander is the flagship's captain. This fleet has no flagship.");
+                return;
+            }
+
+            string name = selectedFleet.FlagshipName ?? "the flagship";
+            DisplayCaptainButton(flagshipId, FleetCommanderLabel(),
+                "Seats a navy officer on " + name + ". That captain commands this fleet.");
+        }
+
+        private void DisplayCaptainButton(int shipId, string label, string tooltip)
+        {
+            if (ImGui.SmallButton(label + "###captain-" + shipId))
+                captainChooserShipId = shipId;
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip(tooltip);
+        }
+
+        private void DisplayCaptainChooser(IClientGalaxy galaxy)
+        {
+            if (captainChooserShipId is not int shipId)
+                return;
+
+            var ship = FindShip(galaxy, shipId);
+            if (ship == null)
+            {
+                captainChooserShipId = null;
+                return;
+            }
+
+            var navy = galaxy.Commanders
+                .Where(commander => commander.Kind == CommanderKind.Navy)
+                .OrderBy(commander => commander.Name, StringComparer.Ordinal)
+                .ToList();
+            int current = ship.CommanderId ?? -1;
+            ResultModal.GetInstance().DisplayCustomButtons(
+                "Assign Captain",
+                () => captainChooserShipId = null,
+                close =>
+                {
+                    int selected = DisplayHelpers.PeopleChooser(
+                        _uiState,
+                        navy,
+                        current,
+                        "captain_" + shipId,
+                        close,
+                        OfficerRow,
+                        320f);
+                    if (selected != current)
+                    {
+                        SubmitFleetCommand(new AssignCaptainCommand(shipId, selected));
+                        close();
+                    }
+                });
+        }
+
+        private static string OfficerRow(CommanderSnapshot person)
+        {
+            string rank = string.IsNullOrEmpty(person.RankName) ? "" : person.RankName + " ";
+            string post = string.IsNullOrEmpty(person.AssignmentName) ? "" : ", " + person.AssignmentName;
+            return rank + person.Name + post;
+        }
+
         private string FleetSpanLabel()
         {
             if(selectedFleet == null || string.IsNullOrEmpty(selectedFleet.CommandSpan))
@@ -376,11 +640,24 @@ namespace Pulsar4X.Client
 
         private void DisplayCommandLine()
         {
+            if (orderShip != null)
+            {
+                ImGui.AlignTextToFramePadding();
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.Text("Captain");
+                ImGui.PopStyleColor();
+                ImGui.SameLine();
+                DisplayCaptainButton(orderShip.Id, CaptainLabel(orderShip), CaptainTooltip(orderShip));
+                ImGui.Separator();
+                return;
+            }
+
+            ImGui.AlignTextToFramePadding();
             ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
             ImGui.Text("Fleet commander");
             ImGui.PopStyleColor();
             ImGui.SameLine();
-            ImGui.Text(FleetCommanderLabel());
+            DisplayFleetCommanderValue();
             ImGui.SameLine(0, 28f);
             ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
             ImGui.Text("Command span");
@@ -790,8 +1067,9 @@ namespace Pulsar4X.Client
             // A finished body stays in the tree while work remains under it. It is a button only
             // when this bridge includes those bodies: Well is the body's own children, System is
             // everything under it. Body span surveys the clicked body alone, which is already done.
-            bool systemSpan = selectedFleet?.CommandSpan == CommandSpanLabels.System;
-            bool reachesChildren = systemSpan || selectedFleet?.CommandSpan == CommandSpanLabels.Well;
+            string span = orderShip != null ? CommandSpanLabels.Body : FleetSpanLabel();
+            bool systemSpan = span == CommandSpanLabels.System;
+            bool reachesChildren = systemSpan || span == CommandSpanLabels.Well;
             bool starClickable = entity.Kind == BodyKind.Star && starTargetsSystem && systemSpan;
             bool childWork = coversWork.Contains(entity.Id);
             bool showDone = childWork && !isTarget(entity) && markDone != null && markDone(entity);
@@ -944,137 +1222,72 @@ namespace Pulsar4X.Client
 
         private void DisplayOrders()
         {
-            if(selectedFleet == null)
+            if(selectedFleet == null && orderShip == null)
                 return;
+
+            bool shipActionsOnly = orderShip != null && !ShipHasCaptain(orderShip);
+            string header = orderShip != null ? orderShip.Name : "Fleet orders";
+            GoalSnapshot? goal = orderShip != null ? orderShip.Goal : selectedFleet?.Goal;
+            IReadOnlyList<OrderSnapshot> orders = orderShip != null
+                ? orderShip.Orders
+                : selectedFleet?.Orders ?? Array.Empty<OrderSnapshot>();
+            int holderId = orderShip?.Id ?? selectedFleet!.Id;
 
             var xPosition = ImGui.GetCursorPosX();
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
 
             if (ImGui.BeginChild("Fleet Orders", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y), ImGuiChildFlags.Borders))
             {
-                DisplayHelpers.Header("Fleet Orders");
-                if (selectedFleet.Goal is null)
+                DisplayHelpers.Header(header);
+                if (!shipActionsOnly && HasGoal(goal))
                 {
-                    ImGui.Text("None");
-                }
-                else
-                {
-                    if (ImGui.BeginTable("FleetOrdersTable", 2, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
+                    if (ImGui.BeginTable("SubjectGoal", 2, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
                     {
                         ImGui.TableSetupColumn("Goal", ImGuiTableColumnFlags.None, 0.4f);
                         ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 0.6f);
                         ImGui.TableHeadersRow();
-                        var goal = selectedFleet.Goal;
                         ImGui.TableNextColumn();
-                        
-                        ImGui.Text(goal.Name);
+                        ImGui.Text(goal!.Name);
                         ImGui.TableNextColumn();
                         ImGui.Text(goal.Status);
                         if (ImGui.IsItemHovered())
-                        {
-                            ImGui.BeginTooltip();
-                            ImGui.Text(goal.Message);
-                            ImGui.EndTooltip();
-                        }
-                        for (int i = 0; i < selectedFleet.Orders.Count; i++)
-                        {
-                            var order = selectedFleet.Orders[i];
-                            ImGui.TableNextColumn();
-                            ImGui.Text((i + 1).ToString());
-                            ImGui.TableNextColumn();
-                            ImGui.Text(order.Name);
-                            if (ImGui.IsItemHovered())
-                            {
-                                ImGui.BeginTooltip();
-                                ImGui.Text("IsRunning: " + order.IsRunning);
-                                ImGui.Text("IsFinished: " + order.IsFinished);
-                                ImGui.EndTooltip();
-                            }
-                        }
-
-                        ImGui.EndTable();
-                    }
-                    
-                    
-                    if (selectedFleet.Orders.Count == 0)
-                    {
-                        ImGui.Text("None");
-                    }
-                    else if (ImGui.BeginTable("FleetOrdersTable", 2, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
-                    {
-                        ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.1f);
-                        ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.None, 0.9f);
-                        ImGui.TableHeadersRow();
-
-                        for (int i = 0; i < selectedFleet.Orders.Count; i++)
-                        {
-                            var order = selectedFleet.Orders[i];
-                            ImGui.TableNextColumn();
-                            ImGui.Text((i + 1).ToString());
-                            ImGui.TableNextColumn();
-                            ImGui.Text(order.Name);
-                            if (ImGui.IsItemHovered())
-                            {
-                                ImGui.BeginTooltip();
-                                ImGui.Text("IsRunning: " + order.IsRunning);
-                                ImGui.Text("IsFinished: " + order.IsFinished);
-                                ImGui.EndTooltip();
-                            }
-                        }
-
+                            ImGui.SetTooltip(goal.Message);
                         ImGui.EndTable();
                     }
                 }
-            }
-            ImGui.EndChild();
-            ImGui.SetCursorPosX(xPosition);
-        }
 
-        private void DisplayShips()
-        {
-            if(selectedFleet == null) return;
-
-            var xPosition = ImGui.GetCursorPosX();
-            Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            if (ImGui.BeginChild("FleetSummary2", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y * 0.5f - 24f), ImGuiChildFlags.Borders))
-            {
-                DisplayHelpers.Header("Assigned Ships");
-
-                ImGui.PushStyleColor(ImGuiCol.FrameBg, Styles.InvisibleColor);
-                var contentSizeAvail = ImGui.GetContentRegionAvail();
-                if (ImGui.BeginListBox("###assigned-ships", new Vector2(contentSizeAvail.X, contentSizeAvail.Y - Styles.ButtonVerticalOffset)))
+                if (orders.Count == 0)
                 {
-                    foreach (var ship in selectedFleet.Ships)
-                    {
-                        if (!selectedShips.ContainsKey(ship.Id))
-                        {
-                            selectedShips.Add(ship.Id, false);
-                        }
-
-                        string name = ship.Name;
-                        if (selectedFleet.FlagshipId == ship.Id)
-                        {
-                            name = "(F) " + name;
-                        }
-                        if (ImGui.Selectable($"{name}###ship-{ship.Id}", selectedShips[ship.Id], ImGuiSelectableFlags.SpanAllColumns))
-                        {
-                            selectedShips[ship.Id] = !selectedShips[ship.Id];
-                        }
-                        DisplayHelpers.ShipTooltip(ship);
-                        DisplayShipContextMenu(selectedShips, ship, selectedFleet);
-                        DisplayShipDropSource(ship, selectedShips);
-                    }
-                    ImGui.EndListBox();
+                    ImGui.Text("None");
                 }
-                ImGui.PopStyleColor();
-
-                if(ImGui.Button("Select All/None", new Vector2(contentSizeAvail.X, 0)))
+                else if (ImGui.BeginTable("SubjectOrders", 3, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
                 {
-                    bool selectAll = !selectedShips.Values.Any(v => v == true);
-                    foreach(var shipId in selectedShips.Keys.ToArray())
+                    ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.1f);
+                    ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.None, 0.7f);
+                    ImGui.TableSetupColumn("Pause", ImGuiTableColumnFlags.None, 0.2f);
+                    ImGui.TableHeadersRow();
+
+                    for (int i = 0; i < orders.Count; i++)
                     {
-                        selectedShips[shipId] = selectAll;
+                        var order = orders[i];
+                        ImGui.TableNextColumn();
+                        ImGui.Text((i + 1).ToString());
+                        ImGui.TableNextColumn();
+                        ImGui.Text(order.Name);
+                        if (ImGui.IsItemHovered())
+                            ImGui.SetTooltip(order.IsRunning ? "Running" : order.IsFinished ? "Finished" : order.Details);
+                        ImGui.TableNextColumn();
+                        if (order.OrderId.Length > 0)
+                        {
+                            bool pause = order.PauseOnAction;
+                            if (ImGui.Checkbox("##pause-" + order.OrderId, ref pause))
+                            {
+                                SubmitFleetCommand(new SetOrderPauseCommand(holderId, order.OrderId, pause));
+                            }
+                        }
                     }
+
+                    ImGui.EndTable();
                 }
             }
             ImGui.EndChild();
@@ -1123,7 +1336,8 @@ namespace Pulsar4X.Client
             if(!hasChildren)
                 flags |= ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
 
-            if(selectedFleetId == fleet.Id)
+            // A ship subject owns the pane. The fleet row stays unselected until it is clicked again.
+            if(selectedFleetId == fleet.Id && orderShipId == null)
             {
                 flags |= ImGuiTreeNodeFlags.Selected;
             }
@@ -1167,7 +1381,8 @@ namespace Pulsar4X.Client
         {
             ImGui.PushID("ship-" + ship.Id);
             var flags = ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
-            if(selectedFleetId == fleet.Id && selectedShips.TryGetValue(ship.Id, out var selected) && selected)
+            bool checkedForDrag = selectedFleetId == fleet.Id && selectedShips.TryGetValue(ship.Id, out var selected) && selected;
+            if(checkedForDrag || orderShipId == ship.Id)
                 flags |= ImGuiTreeNodeFlags.Selected;
 
             string name = ship.Id == fleet.FlagshipId ? "(F) " + ship.Name : ship.Name;
@@ -1179,6 +1394,9 @@ namespace Pulsar4X.Client
                 if(!selectedShips.ContainsKey(ship.Id))
                     selectedShips[ship.Id] = false;
                 selectedShips[ship.Id] = !selectedShips[ship.Id];
+                // SelectFleet clears the ship subject. Put it back: the pane follows the ship.
+                orderShipId = ship.Id;
+                autoSelectFirstFleet = false;
             }
             DisplayHelpers.ShipTooltip(ship);
             DisplayShipContextMenu(selectedShips, ship, fleet);
@@ -1211,12 +1429,15 @@ namespace Pulsar4X.Client
                 selectedUnattachedShips[ship.Id] = false;
 
             var flags = ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
-            if(selectedUnattachedShips[ship.Id])
+            if(selectedUnattachedShips[ship.Id] || orderShipId == ship.Id)
                 flags |= ImGuiTreeNodeFlags.Selected;
 
             ImGui.TreeNodeEx($"{ship.Name}###loose-ship-{ship.Id}", flags);
             if(ImGui.IsItemClicked(ImGuiMouseButton.Left) && !ImGui.IsMouseDragging(ImGuiMouseButton.Left))
+            {
                 selectedUnattachedShips[ship.Id] = !selectedUnattachedShips[ship.Id];
+                OrderShip(ship.Id);
+            }
             DisplayHelpers.ShipTooltip(ship);
             DisplayShipContextMenu(selectedUnattachedShips, ship, owner: null);
             DisplayShipDropSource(ship, selectedUnattachedShips);
@@ -1252,6 +1473,8 @@ namespace Pulsar4X.Client
 
             if(ImGui.BeginPopupContextItem())
             {
+                if(ImGui.MenuItem("Give orders"))
+                    OrderShip(ship.Id);
                 if(ImGui.MenuItem("View Ship"))
                 {
                     var systemId = string.IsNullOrEmpty(ship.SystemId) ? _uiState.SelectedStarSystemId : ship.SystemId;
@@ -1402,6 +1625,7 @@ namespace Pulsar4X.Client
                     foreach(var ship in galaxy.UnattachedShips)
                         loose.Add(ship.Id);
                 }
+                int focusId = dragShipIds[dragShipIds.Count - 1];
                 foreach(var shipId in dragShipIds)
                 {
                     if(!loose.Contains(shipId))
@@ -1410,6 +1634,8 @@ namespace Pulsar4X.Client
                 dragShipIds.Clear();
                 selectedShips.Clear();
                 selectedUnattachedShips.Clear();
+                // The ship that just left the fleet is what the pane should show.
+                OrderShip(focusId);
             }
             ImGui.EndDragDropTarget();
         }

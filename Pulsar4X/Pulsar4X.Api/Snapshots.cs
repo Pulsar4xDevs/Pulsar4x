@@ -714,6 +714,15 @@ public sealed record ShipSnapshot(
 {
     public GoalSnapshot? Goal { get; init; }
     public IReadOnlyList<OrderSnapshot> Orders { get; init; } = Array.Empty<OrderSnapshot>();
+
+    /// <summary>This hull's own geo-survey kit. A fleet flag is "any child can".</summary>
+    public bool CanGeoSurvey { get; init; }
+
+    /// <summary>This hull's own grav-survey kit. A fleet flag is "any child can".</summary>
+    public bool CanGravSurvey { get; init; }
+
+    /// <summary>The seated captain, or null when the chair is empty and the player plots actions.</summary>
+    public int? CommanderId { get; init; }
 }
 
 /// <summary>
@@ -776,6 +785,12 @@ public sealed class FleetSnapshot
     public int? FlagshipId { get; init; }
     public string? FlagshipName { get; init; }
     public string? CommanderName { get; init; }
+
+    /// <summary>
+    /// The flagship's captain. Null when the fleet has no flagship or that chair is empty.
+    /// Seating the fleet commander writes this person onto the flagship.
+    /// </summary>
+    public int? CommanderId { get; init; }
 
     /// <summary>The system the fleet currently resides in (null when unknown/in transit).</summary>
     public string? SystemId { get; init; }

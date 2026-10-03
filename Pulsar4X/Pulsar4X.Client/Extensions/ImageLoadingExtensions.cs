@@ -187,6 +187,21 @@ namespace Pulsar4X.Client
             return _uiState.ImgByName("Select", "SelectIco");
         }
 
+        public static IntPtr Img_FleetShips(this GlobalUIState _uiState)
+        {
+            return _uiState.ImgByName("FleetShips", "FleetShipsIco");
+        }
+
+        public static IntPtr Img_Commanders(this GlobalUIState _uiState)
+        {
+            return _uiState.ImgByName("Commanders", "CommandersIco");
+        }
+
+        public static IntPtr Img_Factions(this GlobalUIState _uiState)
+        {
+            return _uiState.ImgByName("Factions", "FactionsIco");
+        }
+
         public static IntPtr Img_Tree(this GlobalUIState _uiState)
         {
             //LoadImg("Tree", Path.Combine(rf, "TreeIco.bmp"));

@@ -482,6 +482,9 @@ namespace Pulsar4X.Engine.Api
                 // Order-queue changes are carried on the fleet snapshot's order lists, so a queue
                 // mutation re-pushes the whole fleet tree (same handling as a reorganisation).
                 (MessageTypes.OrdersChanged, GameEventType.FleetsChanged),
+                // A new captain is on the ship snapshot and on the roster. Map onto the fleet
+                // refresh, and Forward also re-pushes commanders when it sees this type.
+                (MessageTypes.PersonnelChanged, GameEventType.FleetsChanged),
             };
 
             private readonly EngineGameServer _server;
@@ -543,6 +546,12 @@ namespace Pulsar4X.Engine.Api
                 if (type == GameEventType.FleetsChanged)
                 {
                     _sink(_server.FleetsEnvelope(_session.FactionId));
+                    if (m.MessageType == MessageTypes.PersonnelChanged)
+                    {
+                        var commanders = projector.ProjectCommanders(_session.FactionId);
+                        if (commanders != null)
+                            _sink(new GameEventEnvelope(GameEventType.CommandersChanged, Commanders: commanders));
+                    }
                     // EntityWindow reads OrdersView on the per-entity system snapshot,
                     // not the fleet tree. OrdersChanged is mapped to FleetsChanged, so
                     // also upsert the commanded entity when we have its id.

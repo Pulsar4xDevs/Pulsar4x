@@ -21,4 +21,10 @@ public enum MessageTypes
     /// paused, or wholesale-replaced. Published wherever the queue mutates outside a clock advance so
     /// observers refresh even while the sim is paused. Carries the holder's entity/system/faction.</summary>
     OrdersChanged,
+
+    /// <summary>
+    /// A captain's chair changed. The fleet tree carries the ship's commander name and the roster
+    /// carries the posting, so observers refresh both while the sim is paused. Carries the ship.
+    /// </summary>
+    PersonnelChanged,
 }

@@ -113,14 +113,14 @@ public class ScanAnomalyPlan : IGoalPlanner
             if (!MovePlanner.CanMove(subunit, out _))
                 continue;
 
-            if (subunit.TryGetDataBlob<GoalsDB>(out var childGoals)
-                && childGoals.ActiveGoal != null
-                && childGoals.ActiveGoal.ParentGoalId == goal.Id
-                && childGoals.ActiveGoal.Status is not (GoalStatus.Completed or GoalStatus.Failed))
+            if (FleetChildDuty.WorkingThisGoal(subunit, goal))
             {
-                claimedPoiIds.Add(childGoals.ActiveGoal.TargetEntityID);
-                continue; // already working this parent goal
+                claimedPoiIds.Add(subunit.GetDataBlob<GoalsDB>().ActiveGoal!.TargetEntityID);
+                continue;
             }
+
+            if (FleetChildDuty.BusyWithOwnWork(subunit, goal))
+                continue;
 
             freeShips.Add(subunit);
         }

@@ -87,6 +87,7 @@ public class MoveToPlan : IGoalPlanner
         var subGoals = new List<(Entity subordinate, Goal goal)>();
         int capable = 0;
         int alreadyWorking = 0;
+        int deferred = 0;
 
         foreach (var subunit in db.Children)
         {
@@ -94,12 +95,16 @@ public class MoveToPlan : IGoalPlanner
                 continue;
             capable++;
 
-            if (subunit.TryGetDataBlob<GoalsDB>(out var childGoals)
-                && childGoals.ActiveGoal != null
-                && childGoals.ActiveGoal.ParentGoalId == goal.Id
-                && childGoals.ActiveGoal.Status is not (GoalStatus.Completed or GoalStatus.Failed))
+            if (FleetChildDuty.WorkingThisGoal(subunit, goal))
             {
                 alreadyWorking++;
+                continue;
+            }
+
+            // Own order, or a plot the player queued on an empty chair. Retry later.
+            if (FleetChildDuty.BusyWithOwnWork(subunit, goal))
+            {
+                deferred++;
                 continue;
             }
 
@@ -115,8 +120,8 @@ public class MoveToPlan : IGoalPlanner
 
         if (subGoals.Count == 0)
         {
-            // Everyone who can move is already assigned (or finished — agent rollup handles complete).
-            return alreadyWorking > 0
+            // Already on this order, or away on their own work. Stay active and retry.
+            return alreadyWorking > 0 || deferred > 0
                 ? PlanResult.Continue(new List<(Entity subordinate, Goal goal)>())
                 : PlanResult.Done("all subordinates already at target or idle");
         }

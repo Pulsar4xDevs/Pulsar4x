@@ -262,6 +262,9 @@ namespace Pulsar4X.Client
             this.Img_Research();
             this.Img_Ruler();
             this.Img_Select();
+            this.Img_FleetShips();
+            this.Img_Commanders();
+            this.Img_Factions();
             this.Img_Tree();
             this.Img_Up();
 
