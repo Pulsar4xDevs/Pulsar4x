@@ -256,6 +256,12 @@ namespace Pulsar4X.Client
                             ImGui.NewLine();
                         }
 
+                        if (AgentDebugDisplay.Applies(SelectedEntity)
+                            && ImGui.CollapsingHeader("Agent###AgentHeader", ImGuiTreeNodeFlags.DefaultOpen))
+                        {
+                            AgentDebugDisplay.Display(SelectedEntity, _uiState.GameSettings.GetDateTimeFormat());
+                        }
+
 
 
 

@@ -64,6 +64,7 @@ namespace Pulsar4X.Client
         private EntitySnapshot? _entity;
         private IClientSystem? _system;
         private UserOrbitSettings.OrbitBodyType _bodyType;
+        private CommanderSnapshot? _commander;
 
         private Vector4 _accentColor;
 
@@ -210,6 +211,7 @@ namespace Pulsar4X.Client
             }
 
             _bodyType = UserOrbitSettings.FromBodyKind(_entity.Kind);
+            _commander = FindCommander();
             Title = _entity.GetView<NameView>()?.Name ?? "Unknown";
 
             var windowPos = CalculateWindowPosition();
@@ -232,7 +234,8 @@ namespace Pulsar4X.Client
 
             // Track if window is closed via the X button
             bool windowOpen = true;
-            if (Window.Begin(Title + " (" + _bodyType.ToDescription() + ")" + "###" + EntityId, ref windowOpen, _flags))
+            string kindLabel = _commander != null ? _commander.Kind.ToString() : _bodyType.ToDescription();
+            if (Window.Begin(Title + " (" + kindLabel + ")" + "###" + EntityId, ref windowOpen, _flags))
             {
                 _accentColor = accentColor;
                 DrawWindowAccents(accentColor);
@@ -372,16 +375,24 @@ namespace Pulsar4X.Client
             }
 
 
-            // Ensure cursor is past the header background
+            // Ensure cursor is past the header background. SetCursorPos past the last
+            // submitted item asserts unless a later item grows the window. A person, or
+            // any other sparse entity, may submit nothing after this header.
             float headerLocalBottom = startLocalY + headerContentHeight + headerPad * 2;
             if (ImGui.GetCursorPosY() < headerLocalBottom)
                 ImGui.SetCursorPosY(headerLocalBottom);
+            ImGui.Dummy(Vector2.Zero);
         }
 
         private string GetEntitySubtitle()
         {
             if (_entity == null) return "";
 
+            if (_commander != null)
+            {
+                string rank = _commander.RankName ?? "Rank " + _commander.Rank;
+                return rank;
+            }
             if (_entity.GetView<ShipView>() is { } ship)
                 return ship.DesignName;
             if (_entity.GetView<StarView>() is { } star)
@@ -416,9 +427,83 @@ namespace Pulsar4X.Client
                 && e.GetView<ColonyView>()?.PlanetEntityId == _entity.Id);
         }
 
+        private CommanderSnapshot? FindCommander()
+        {
+            if (_entity == null)
+                return null;
+            var people = _uiState.GameClient?.Galaxy?.Commanders;
+            if (people == null)
+                return null;
+            foreach (var person in people)
+            {
+                if (person.Id == _entity.Id)
+                    return person;
+            }
+            return null;
+        }
+
+        private void DisplayCommander(CommanderSnapshot person)
+        {
+            var now = _uiState.GameClient?.Galaxy?.Time.GameDateTime ?? DateTime.UtcNow;
+
+            ImGui.Columns(2, "##commander-info", false);
+            ImGui.SetColumnWidth(0, 120);
+
+            DisplayHelpers.PrintRow("Type", person.Kind.ToString());
+            DisplayHelpers.PrintRow("Rank", person.RankName ?? "Rank " + person.Rank);
+            DisplayHelpers.PrintRow(
+                "Commissioned",
+                person.CommissionedOn.ToShortDateString(),
+                null,
+                YearsBetween(person.CommissionedOn, now).ToString("0.0") + " years of service");
+            DisplayHelpers.PrintRow(
+                "Promoted",
+                person.RankedOn.ToShortDateString(),
+                null,
+                YearsBetween(person.RankedOn, now).ToString("0.0") + " years in rank");
+            DisplayHelpers.PrintRow("Experience", person.Experience + " / " + person.ExperienceCap);
+            DisplayHelpers.PrintRow("Status", person.IsAssigned ? "Assigned" : "Available");
+            if (person.AssignmentName != null)
+                DisplayHelpers.PrintRow("Assignment", person.AssignmentName);
+
+            ImGui.Columns(1);
+
+            if (person.Bonuses.Count > 0)
+            {
+                ImGui.NewLine();
+                DisplayHelpers.Header("Bonuses");
+                foreach (var bonus in person.Bonuses)
+                {
+                    string valueStr = bonus.IsPercentage
+                        ? (bonus.Value * 100).ToString("+0.#;-0.#") + "%"
+                        : bonus.Value.ToString("+0.#;-0.#");
+                    string bonusText = bonus.Name;
+                    if (!string.IsNullOrEmpty(bonus.FilterName))
+                        bonusText += " (" + bonus.FilterName + ")";
+
+                    ImGui.PushStyleColor(ImGuiCol.Text, bonus.Value >= 0 ? Styles.GoodColor : Styles.BadColor);
+                    ImGui.TextUnformatted(valueStr);
+                    ImGui.PopStyleColor();
+                    ImGui.SameLine();
+                    ImGui.Text(bonusText);
+                }
+            }
+
+            DisplayOrders();
+        }
+
+        private static double YearsBetween(DateTime from, DateTime to)
+            => (to - from).TotalDays / 365.25;
+
         private void DisplayContent()
         {
             if (_entity == null) return;
+
+            if (_commander != null)
+            {
+                DisplayCommander(_commander);
+                return;
+            }
 
             switch (_bodyType)
             {
