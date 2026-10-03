@@ -46,6 +46,7 @@ namespace Pulsar4X.Tests
                 var (fleets, unattached) = _projector.ProjectFleetHierarchy(session.FactionId);
                 Assert.That(fleets, Has.Count.EqualTo(1));
                 Assert.That(fleets[0].SystemId, Is.EqualTo(_game.Systems[0].ID));
+                Assert.That(fleets[0].CommandSpan, Is.EqualTo(CommandSpanLabels.Body));
                 Assert.That(unattached, Is.Empty);
 
                 // The fleet op raised FleetReorganized, which became a self-contained FleetsChanged push.

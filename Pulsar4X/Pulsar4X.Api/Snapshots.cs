@@ -196,8 +196,16 @@ public sealed record ColonyView(long Population, int? PlanetEntityId) : ICompone
     /// <summary>Per-species population breakdown (names resolved for the requesting faction).</summary>
     public IReadOnlyList<SpeciesPopulation> SpeciesPopulations { get; init; } = Array.Empty<SpeciesPopulation>();
 
-    /// <summary>Owning faction only. "Covers this body", "Covers this well", or "Covers this system".</summary>
+    /// <summary>Owning faction only. One of <see cref="CommandSpanLabels"/>.</summary>
     public string CommandSpan { get; init; } = "";
+}
+
+/// <summary>Flagship or colony bridge span, as shown to the owning faction.</summary>
+public static class CommandSpanLabels
+{
+    public const string Body = "Covers this body";
+    public const string Well = "Covers this well";
+    public const string System = "Covers this system";
 }
 
 public sealed record SpeciesPopulation(string SpeciesName, long Population);
@@ -781,6 +789,9 @@ public sealed class FleetSnapshot
     public bool InheritOrders { get; init; }
     public bool CanGeoSurvey { get; init; }
     public bool CanGravSurvey { get; init; }
+
+    /// <summary>Flagship command bridge. One of <see cref="CommandSpanLabels"/>.</summary>
+    public string CommandSpan { get; init; } = "";
     public GoalSnapshot? Goal { get; init; }
     public IReadOnlyList<OrderSnapshot> Orders { get; init; } = Array.Empty<OrderSnapshot>();
     public IReadOnlyList<StandingOrder> StandingOrders { get; init; } = Array.Empty<StandingOrder>();

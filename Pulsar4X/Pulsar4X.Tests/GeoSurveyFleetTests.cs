@@ -166,6 +166,27 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void ServeyBodyPlanner_SystemSpan_Star_SurveysBodies_NotTheStar()
+        {
+            var scene = BuildEarthMoonSurveyFleet(AdminLevel.System, targetEarth: true);
+            var sol = scene.Earth.GetDataBlob<PositionDB>().Parent;
+            Assert.That(sol, Is.Not.Null);
+            sol.SetDataBlob(new StarInfoDB());
+            sol.SetDataBlob(new GeoSurveyableDB { PointsRequired = 50 });
+            scene.Goal.TargetEntityID = sol.Id;
+
+            var plan = new ServeyBodyPlanner().Plan(scene.Fleet, scene.Goal, _epoch);
+
+            Assert.AreNotEqual(GoalStatus.Failed, plan.Status, plan.Message);
+            var ids = SurveyTargets(plan);
+            Assert.That(ids, Does.Not.Contain(sol.Id));
+            Assert.That(ids.Count, Is.EqualTo(2));
+            Assert.That(ids.All(id => id == scene.Mercury.Id || id == scene.Earth.Id || id == scene.Luna.Id), Is.True);
+            Assert.That(plan.SubGoals.Any(s => s.Sub.Id == scene.Tanker.Id), Is.False,
+                "tanker must not be sent to the star");
+        }
+
+        [Test]
         public void ServeyBodyPlanner_SystemSpan_Planet_IncludesMoonNotMercury()
         {
             var scene = BuildEarthMoonSurveyFleet(AdminLevel.System, targetEarth: true);

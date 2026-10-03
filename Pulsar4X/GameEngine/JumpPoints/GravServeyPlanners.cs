@@ -97,8 +97,7 @@ public class ScanAnomalyPlan : IGoalPlanner
         if (!fleet.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var targetEntity))
             return PlanResult.Fail("We have no target");
 
-        var pointsOfInterest = CommandSpan.Expand(
-            targetEntity, CommandSpan.Of(fleet), e => CanScan(e, fleet.FactionOwnerID));
+        var pointsOfInterest = CollectAnomalies(targetEntity, CommandSpan.Of(fleet), fleet.FactionOwnerID);
 
         if (pointsOfInterest.Count == 0)
             return PlanResult.Done("nothing left to survey");
@@ -173,8 +172,31 @@ public class ScanAnomalyPlan : IGoalPlanner
         return PlanResult.Continue(subGoals);
     }
     
-    bool CanScan(Entity targetEntity, int factionID)
+    /// <summary>
+    /// A system-span order on a star covers every unfinished anomaly in that system.
+    /// Factory rings are not parented to the star, so <see cref="CommandSpan.Expand"/>
+    /// would miss them. The star itself is never a destination.
+    /// </summary>
+    static List<Entity> CollectAnomalies(Entity target, CommandSpanKind span, int factionId)
     {
+        if (span == CommandSpanKind.System && target.HasDataBlob<StarInfoDB>() && target.Manager != null)
+        {
+            var list = new List<Entity>();
+            foreach (var anomaly in target.Manager.GetAllEntitiesWithDataBlob<JPSurveyableDB>())
+            {
+                if (CanScan(anomaly, factionId))
+                    list.Add(anomaly);
+            }
+            return list;
+        }
+
+        return CommandSpan.Expand(target, span, e => CanScan(e, factionId));
+    }
+
+    static bool CanScan(Entity targetEntity, int factionID)
+    {
+        if (targetEntity.HasDataBlob<StarInfoDB>())
+            return false;
         if (targetEntity.TryGetDataBlob<JPSurveyableDB>(out var anomalyDB))
         {
             if (!anomalyDB.IsSurveyComplete(factionID))

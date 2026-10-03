@@ -525,9 +525,9 @@ namespace Pulsar4X.Engine.Api
 
         static string SpanLabel(CommandSpanKind span) => span switch
         {
-            CommandSpanKind.Well => "Covers this well",
-            CommandSpanKind.System => "Covers this system",
-            _ => "Covers this body",
+            CommandSpanKind.Well => CommandSpanLabels.Well,
+            CommandSpanKind.System => CommandSpanLabels.System,
+            _ => CommandSpanLabels.Body,
         };
 
         private static InstallationsView ToInstallationsView(ComponentInstancesDB ci, Entity entity)
@@ -1287,6 +1287,7 @@ namespace Pulsar4X.Engine.Api
                 InheritOrders = fleetDB?.InheritOrders ?? false,
                 CanGeoSurvey = fleet.HasGeoSurveyAbility(),
                 CanGravSurvey = fleet.HasJPSurveyAbililty(),
+                CommandSpan = SpanLabel(CommandSpan.Of(fleet)),
                 Goal = ProjectGoals(fleet),
                 Orders = ProjectOrders(fleet),
                 StandingOrders = ProjectStandingOrders(fleetDB),

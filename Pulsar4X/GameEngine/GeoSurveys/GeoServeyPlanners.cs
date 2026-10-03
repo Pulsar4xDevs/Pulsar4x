@@ -173,7 +173,9 @@ public class ServeyBodyPlanner : IGoalPlanner
             }));
         }
 
+        // The sun is only the root of a system-wide order. Do not park the tanker on it.
         if (tanker != null
+            && !IsStar(targetEntity)
             && !TankerAlreadyTasked(tanker, goal, targetEntity.Id)
             && MovePlanner.CanMove(tanker, out _))
         {
@@ -234,6 +236,8 @@ public class ServeyBodyPlanner : IGoalPlanner
         return entity.TryGetDataBlob<SystemBodyInfoDB>(out var info)
                && info.BodyType == BodyType.Asteroid;
     }
+
+    static bool IsStar(Entity entity) => entity.HasDataBlob<StarInfoDB>();
 
     static double AsteroidRadiusFor(Entity? tanker)
     {
@@ -326,6 +330,8 @@ public class ServeyBodyPlanner : IGoalPlanner
 
     static bool CanScan(Entity targetEntity, int factionID)
     {
+        if (IsStar(targetEntity))
+            return false;
         if (targetEntity.TryGetDataBlob<GeoSurveyableDB>(out var surveyable))
         {
             if (!surveyable.IsSurveyComplete(factionID))

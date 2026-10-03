@@ -26,10 +26,10 @@ namespace Pulsar4X.Tests
     /// <summary>
     /// Fleet <see cref="GoalType.ScanAnomalies"/> on Sol: two grav-surveyors + a tanker.
     /// In-game the player clicks a gravitational anomaly (<see cref="GravSurveyCommand"/>);
-    /// targeting the star is the planner's fleet-wide path (anomalies as
-    /// <see cref="PositionDB"/> children). Factory rings are not parented; this fixture
-    /// parents them so that path runs. Tanker is not tasked (no JP-survey ability;
-    /// grav planner does not emit MoveTo).
+    /// targeting the star is the planner's fleet-wide path. A system-span order on a
+    /// star includes every unfinished anomaly in the system, parented or not, and never
+    /// the star. Factory rings are not parented. Tanker is not tasked (no JP-survey
+    /// ability; grav planner does not emit MoveTo).
     /// </summary>
     public class GravSurveyFleetTests
     {
@@ -101,6 +101,24 @@ namespace Pulsar4X.Tests
                 "next-nearest (4 AU) goes to the second ship");
             Assert.IsFalse(assignedPois.Contains(scene.AnomalyOuter.Id),
                 "outer anomaly waits");
+        }
+
+        [Test]
+        public void ScanAnomalyPlan_SystemSpan_Star_IncludesLooseAnomaly_NotTheStar()
+        {
+            var scene = BuildSolGravSurveyFleet(includeOuter: false);
+            scene.AnomalyInner.GetDataBlob<JPSurveyableDB>().SurveyPointsRemaining[scene.Faction.Id] = 0;
+            scene.AnomalyMid.GetDataBlob<JPSurveyableDB>().SurveyPointsRemaining[scene.Faction.Id] = 0;
+            scene.Sol.SetDataBlob(new JPSurveyableDB(400, new SafeDictionary<int, uint>(), 10_000_000));
+
+            var atShip = scene.SurveyorA.GetDataBlob<PositionDB>().AbsolutePosition;
+            var loose = AddLooseAnomaly("Anomaly Loose", atShip);
+
+            var plan = new ScanAnomalyPlan().Plan(scene.Fleet, scene.Goal, _epoch);
+
+            Assert.AreNotEqual(GoalStatus.Failed, plan.Status, plan.Message);
+            Assert.That(plan.SubGoals.Select(s => s.Goal.TargetEntityID), Is.EquivalentTo(new[] { loose.Id }));
+            Assert.That(plan.SubGoals.Select(s => s.Sub.Id), Does.Not.Contain(scene.Tanker.Id));
         }
 
         [Test]
@@ -227,6 +245,22 @@ namespace Pulsar4X.Tests
                 new NameDB(name),
             });
             OrbitProcessor.ProcessEntity(ent, _epoch);
+            return ent;
+        }
+
+        Entity AddLooseAnomaly(string name, Vector3 absolute)
+        {
+            var pos = new PositionDB(absolute.X, absolute.Y, absolute.Z);
+            pos.MoveType = PositionDB.MoveTypes.None;
+            var ent = Entity.Create();
+            _sys.AddEntity(ent, new BaseDataBlob[]
+            {
+                pos,
+                MassVolumeDB.NewFromMassAndRadius_m(1, 1),
+                new NameDB(name),
+                new JPSurveyableDB(400, new SafeDictionary<int, uint>(), 10_000_000),
+                new VisibleByDefaultDB(),
+            });
             return ent;
         }
 

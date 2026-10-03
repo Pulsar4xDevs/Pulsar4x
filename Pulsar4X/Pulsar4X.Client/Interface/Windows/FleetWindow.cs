@@ -302,7 +302,7 @@ namespace Pulsar4X.Client
                         }
                         break;
                     case IssueOrderType.GeoSurvey:
-                        foreach(var body in candidates.Where(e => e.GetView<GeoSurveyView>() is { IsSurveyComplete: false }))
+                        foreach(var body in SurveyOrderTargets(candidates, e => e.GetView<GeoSurveyView>() is { IsSurveyComplete: false }))
                         {
                             var name = NameOf(body);
                             if(ImGui.Button($"{name}###geosurvey-button-{body.Id}"))
@@ -312,7 +312,7 @@ namespace Pulsar4X.Client
                         }
                         break;
                     case IssueOrderType.GravSurvey:
-                        foreach(var location in candidates.Where(e => e.GetView<GravSurveyView>() is { IsSurveyComplete: false }))
+                        foreach(var location in SurveyOrderTargets(candidates, e => e.GetView<GravSurveyView>() is { IsSurveyComplete: false }))
                         {
                             var name = NameOf(location);
                             if(ImGui.Button($"{name}###gravsurvey-button-{location.Id}"))
@@ -373,6 +373,27 @@ namespace Pulsar4X.Client
         }
 
         private static string NameOf(EntitySnapshot entity) => entity.GetView<NameView>()?.Name ?? "";
+
+        /// <summary>
+        /// Unfinished survey sites. A flagship bridge that covers the whole system also lists each
+        /// star, as the root of that order. Planners do not fly ships to the star.
+        /// </summary>
+        private IEnumerable<EntitySnapshot> SurveyOrderTargets(IEnumerable<EntitySnapshot> candidates, Func<EntitySnapshot, bool> isSite)
+        {
+            var sites = candidates.Where(isSite).ToList();
+            if(selectedFleet?.CommandSpan != CommandSpanLabels.System)
+                return sites;
+
+            var seen = new HashSet<int>(sites.Select(e => e.Id));
+            var ordered = new List<EntitySnapshot>();
+            foreach(var star in candidates)
+            {
+                if(star.Kind == BodyKind.Star && seen.Add(star.Id))
+                    ordered.Add(star);
+            }
+            ordered.AddRange(sites);
+            return ordered;
+        }
 
         private void DisplayHaulContract(IEnumerable<EntitySnapshot> candidates)
         {
