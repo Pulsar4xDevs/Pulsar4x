@@ -5,6 +5,7 @@ using System.Linq;
 using GameEngine.Engine.Orders;
 using NUnit.Framework;
 using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Energy;
 using Pulsar4X.Engine;
 using GameEngine.People;
@@ -113,6 +114,109 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(scene.Mars.Id, surveyGoals[0].Goal.TargetEntityID);
         }
 
+        [Test]
+        public void ServeyBodyPlanner_SystemSpan_MoonTarget_AssignsMoonNotMercury()
+        {
+            var scene = BuildEarthMoonSurveyFleet(AdminLevel.System, targetEarth: false);
+
+            var plan = new ServeyBodyPlanner().Plan(scene.Fleet, scene.Goal, _epoch);
+
+            Assert.AreNotEqual(GoalStatus.Failed, plan.Status, plan.Message);
+            var ids = SurveyTargets(plan);
+            Assert.That(ids, Is.EquivalentTo(new[] { scene.Luna.Id }),
+                "Luna has no children; System span must not take Earth or Mercury");
+
+            var tankerGoal = plan.SubGoals.Single(s => s.Sub.Id == scene.Tanker.Id);
+            Assert.AreEqual(GoalType.MoveTo, tankerGoal.Goal.Type);
+            Assert.AreEqual(scene.Luna.Id, tankerGoal.Goal.TargetEntityID);
+        }
+
+        [Test]
+        public void ServeyBodyPlanner_SystemSpan_Planet_IncludesMoonNotMercury()
+        {
+            var scene = BuildEarthMoonSurveyFleet(AdminLevel.System, targetEarth: true);
+
+            var plan = new ServeyBodyPlanner().Plan(scene.Fleet, scene.Goal, _epoch);
+            var ids = SurveyTargets(plan);
+
+            Assert.That(ids, Is.EquivalentTo(new[] { scene.Earth.Id, scene.Luna.Id }),
+                "Earth plus its moon; Mercury is a sibling and stays out");
+        }
+
+        [Test]
+        public void ServeyBodyPlanner_Asteroid_AssignsNeighborsInsideBaseRadius()
+        {
+            var scene = BuildAsteroidSurveyFleet(tanker: false, surveyors: 3);
+
+            var plan = new ServeyBodyPlanner().Plan(scene.Fleet, scene.Goal, _epoch);
+            var ids = SurveyTargets(plan);
+
+            Assert.AreNotEqual(GoalStatus.Failed, plan.Status, plan.Message);
+            Assert.That(ids, Is.EquivalentTo(new[] { scene.Anchor.Id, scene.Near.Id }));
+        }
+
+        [Test]
+        public void ServeyBodyPlanner_Asteroid_TankerWidensTheRadius()
+        {
+            var scene = BuildAsteroidSurveyFleet(tanker: true, surveyors: 3);
+
+            var plan = new ServeyBodyPlanner().Plan(scene.Fleet, scene.Goal, _epoch);
+            var ids = SurveyTargets(plan);
+
+            Assert.That(ids, Is.EquivalentTo(new[] { scene.Anchor.Id, scene.Near.Id, scene.Mid.Id }));
+            var tankerGoal = plan.SubGoals.Single(s => s.Sub.Id == scene.Tanker.Id);
+            Assert.AreEqual(GoalType.MoveTo, tankerGoal.Goal.Type);
+            Assert.AreEqual(scene.Anchor.Id, tankerGoal.Goal.TargetEntityID);
+        }
+
+        [Test]
+        public void ServeyBodyPlanner_Asteroid_StuckTankerKeepsTheBaseRadius()
+        {
+            var scene = BuildAsteroidSurveyFleet(tanker: true, surveyors: 3);
+            scene.Tanker.RemoveDataBlob<WarpAbilityDB>();
+            scene.Tanker.RemoveDataBlob<NewtonThrustAbilityDB>();
+
+            var plan = new ServeyBodyPlanner().Plan(scene.Fleet, scene.Goal, _epoch);
+            var ids = SurveyTargets(plan);
+
+            Assert.That(ids, Is.EquivalentTo(new[] { scene.Anchor.Id, scene.Near.Id }));
+            Assert.IsFalse(plan.SubGoals.Any(s => s.Sub.Id == scene.Tanker.Id));
+        }
+
+        [Test]
+        public void ServeyBodyPlanner_Asteroid_ShipSpanStillIncludesTheNearRock()
+        {
+            var scene = BuildAsteroidSurveyFleet(tanker: false, surveyors: 2);
+            AttachBridge(scene.SurveyorA, AdminLevel.Ship);
+            scene.Fleet.GetDataBlob<FleetDB>().FlagShipID = scene.SurveyorA.Id;
+
+            var plan = new ServeyBodyPlanner().Plan(scene.Fleet, scene.Goal, _epoch);
+            var ids = SurveyTargets(plan);
+
+            Assert.That(ids, Is.EquivalentTo(new[] { scene.Anchor.Id, scene.Near.Id }));
+        }
+
+        [Test]
+        public void ServeyBodyPlanner_PlanetTarget_IgnoresNearbyAsteroid()
+        {
+            var scene = BuildMarsSurveyFleet();
+            var sol = scene.Mars.GetDataBlob<PositionDB>().Parent!;
+            var marsPos = scene.Mars.GetDataBlob<PositionDB>().AbsolutePosition;
+            var rock = AddPlacedBody(sol, "Nearby rock", marsPos + new Vector3(0.1 * AuMetres, 0, 0), BodyType.Asteroid);
+            var earth = scene.SurveyorA.GetDataBlob<PositionDB>().Parent!;
+            var earthAbs = earth.GetDataBlob<PositionDB>().AbsolutePosition;
+            var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
+            var fleet = scene.Fleet.GetDataBlob<FleetDB>();
+            fleet.AddChild(MakeSurveyShip(earth, earthAbs + new Vector3(leoR, leoR, 0), scene.Faction, "Surveyor C"));
+            fleet.AddChild(MakeSurveyShip(earth, earthAbs + new Vector3(-leoR, leoR, 0), scene.Faction, "Surveyor D"));
+
+            var plan = new ServeyBodyPlanner().Plan(scene.Fleet, scene.Goal, _epoch);
+            var ids = SurveyTargets(plan);
+
+            Assert.That(ids, Is.EquivalentTo(new[] { scene.Mars.Id, scene.Phobos.Id, scene.Deimos.Id }));
+            Assert.IsFalse(ids.Contains(rock.Id));
+        }
+
         [Test, Timeout(15000)]
         public void FleetSurvey_MarsAndMoons_ShipsSurvey_TankerMovesToParent()
         {
@@ -198,6 +302,114 @@ namespace Pulsar4X.Tests
                 Phobos = phobos,
                 Deimos = deimos,
             };
+        }
+
+        Scene BuildEarthMoonSurveyFleet(AdminLevel flagshipLevel, bool targetEarth)
+        {
+            var sol = TestingUtilities.BasicSol(_sys);
+            var mercury = AddBody(sol, "Mercury", 0.330e24, 2_440_000, smaAu: 0.387, geoPoints: 50);
+            var earth = AddBody(sol, "Earth", 5.972e24, 6_371_000, smaAu: 1.0, geoPoints: 50);
+            var luna = AddMoon(earth, "Luna", 7.346e22, 1_737_400, sma_m: 384_400_000, geoPoints: 50, e: 0.055);
+
+            var faction = FactionFactory.CreateFaction(Game, "luna-" + Guid.NewGuid().ToString("N"));
+            var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
+            var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, _epoch);
+            var surveyorA = MakeSurveyShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction, "Surveyor A");
+            var surveyorB = MakeSurveyShip(earth, earthAbs + new Vector3(0, leoR, 0), faction, "Surveyor B");
+            var tanker = MakeTanker(earth, earthAbs + new Vector3(-leoR, 0, 0), faction, "Tanker");
+
+            var fleet = FleetFactory.Create(_sys, faction.Id, "Earth Moon Survey");
+            var fleetDB = fleet.GetDataBlob<FleetDB>();
+            fleetDB.AddChild(surveyorA);
+            fleetDB.AddChild(surveyorB);
+            fleetDB.AddChild(tanker);
+            fleetDB.FlagShipID = surveyorA.Id;
+            AttachBridge(surveyorA, flagshipLevel);
+
+            return new Scene
+            {
+                Faction = faction,
+                Fleet = fleet,
+                Goal = new Goal(GoalType.ServeyBodies)
+                {
+                    TargetEntityID = targetEarth ? earth.Id : luna.Id,
+                },
+                SurveyorA = surveyorA,
+                SurveyorB = surveyorB,
+                Tanker = tanker,
+                Mercury = mercury,
+                Earth = earth,
+                Luna = luna,
+            };
+        }
+
+        static double AuMetres => SbdbSmallBodyImporter.AuInKm * 1000.0;
+
+        static HashSet<int> SurveyTargets(PlanResult plan)
+        {
+            return plan.SubGoals
+                .Where(s => s.Goal.Type == GoalType.ServeyBodies)
+                .Select(s => s.Goal.TargetEntityID)
+                .ToHashSet();
+        }
+
+        AsteroidScene BuildAsteroidSurveyFleet(bool tanker, int surveyors)
+        {
+            var sol = TestingUtilities.BasicSol(_sys);
+            var origin = sol.GetDataBlob<PositionDB>().AbsolutePosition;
+            var anchor = AddPlacedBody(sol, "Anchor", origin + new Vector3(3 * AuMetres, 0, 0), BodyType.Asteroid);
+            var near = AddPlacedBody(sol, "Near", origin + new Vector3(3.1 * AuMetres, 0, 0), BodyType.Asteroid);
+            var mid = AddPlacedBody(sol, "Mid", origin + new Vector3(3.35 * AuMetres, 0, 0), BodyType.Asteroid);
+            var far = AddPlacedBody(sol, "Far", origin + new Vector3(3.8 * AuMetres, 0, 0), BodyType.Asteroid);
+
+            var faction = FactionFactory.CreateFaction(Game, "rocks-" + Guid.NewGuid().ToString("N"));
+            var fleet = FleetFactory.Create(_sys, faction.Id, "Rock Survey");
+            var fleetDB = fleet.GetDataBlob<FleetDB>();
+            Entity first = null!;
+            for (int i = 0; i < surveyors; i++)
+            {
+                var ship = MakeSurveyShip(sol, origin + new Vector3(3 * AuMetres, 10_000 * (i + 1), 0), faction, "Surveyor " + i);
+                fleetDB.AddChild(ship);
+                if (i == 0)
+                    first = ship;
+            }
+            fleetDB.FlagShipID = first.Id;
+
+            Entity tankerEntity = null!;
+            if (tanker)
+            {
+                tankerEntity = MakeTanker(sol, origin + new Vector3(3 * AuMetres, -10_000, 0), faction, "Tanker");
+                fleetDB.AddChild(tankerEntity);
+            }
+
+            return new AsteroidScene
+            {
+                Fleet = fleet,
+                Goal = new Goal(GoalType.ServeyBodies) { TargetEntityID = anchor.Id },
+                SurveyorA = first,
+                Tanker = tankerEntity,
+                Anchor = anchor,
+                Near = near,
+                Mid = mid,
+                Far = far,
+            };
+        }
+
+        Entity AddPlacedBody(Entity parent, string name, Vector3 absolute, BodyType kind)
+        {
+            var ent = Entity.Create();
+            var pos = new PositionDB();
+            _sys.AddEntity(ent, new BaseDataBlob[]
+            {
+                pos,
+                MassVolumeDB.NewFromMassAndRadius_m(1e18, 100_000),
+                new NameDB(name),
+                new GeoSurveyableDB { PointsRequired = 100 },
+            });
+            ent.SetDataBlob(new SystemBodyInfoDB { BodyType = kind });
+            pos.SetParent(parent);
+            pos.AbsolutePosition = absolute;
+            return ent;
         }
 
         Entity AddBody(Entity parent, string name, double mass, double radius_m, double smaAu, uint geoPoints)
@@ -352,6 +564,18 @@ namespace Pulsar4X.Tests
                    + $"{Ship(scene.SurveyorA)}; {Ship(scene.SurveyorB)}; {Ship(scene.Tanker)}";
         }
 
+        class AsteroidScene
+        {
+            public Entity Fleet = null!;
+            public Goal Goal = null!;
+            public Entity SurveyorA = null!;
+            public Entity Tanker = null!;
+            public Entity Anchor = null!;
+            public Entity Near = null!;
+            public Entity Mid = null!;
+            public Entity Far = null!;
+        }
+
         class Scene
         {
             public Entity Faction = null!;
@@ -363,6 +587,9 @@ namespace Pulsar4X.Tests
             public Entity Mars = null!;
             public Entity Phobos = null!;
             public Entity Deimos = null!;
+            public Entity Mercury = null!;
+            public Entity Earth = null!;
+            public Entity Luna = null!;
         }
 
         class TestEnergyType : ICargoable

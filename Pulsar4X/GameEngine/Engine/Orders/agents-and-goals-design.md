@@ -137,7 +137,7 @@ Skill does not decide **how wide** an order is. Span comes from the **flagship /
 |---|---|---|
 | **Body** | `Ship` … `Fleet`, or none | root only |
 | **Well** | `Colony` / `Planet` / `SOI` | root + direct `PositionDB.Children` |
-| **System** | `System`+ | all matching POIs in that star system |
+| **System** | `System`+ | root + all `PositionDB` descendants. Never parent or siblings. Click the star to cover a star system. |
 
 `MoveTo` does not fan out. Geo/grav `PlanSubGoals` call `CommandSpan.Expand`. Leaf `PlanActions` stays one body. Processors unchanged.
 

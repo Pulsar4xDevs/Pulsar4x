@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using GameEngine.Engine.Orders;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Fleets;
+using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
 using Pulsar4X.Orbits;
 using Pulsar4X.Ships;
@@ -13,6 +15,12 @@ namespace Pulsar4X.GeoSurveys;
 public class ServeyBodyPlanner : IGoalPlanner
 {
     public GoalType Type => GoalType.ServeyBodies;
+
+    /// <summary>0.2 AU. Asteroids this close to the one the fleet was sent to.</summary>
+    internal const double AsteroidSurveyRadius_m = 0.2 * SbdbSmallBodyImporter.AuInKm * 1000.0;
+
+    /// <summary>0.5 AU. The same neighborhood when the fleet has a tanker that can move.</summary>
+    internal const double AsteroidSurveyRadiusWithTanker_m = 0.5 * SbdbSmallBodyImporter.AuInKm * 1000.0;
 
     public PlanResult Plan(Entity managedEntity, Goal goal, DateTime atDateTime)
     {
@@ -78,8 +86,11 @@ public class ServeyBodyPlanner : IGoalPlanner
 
     /// <summary>
     /// Hand each capable free ship a different unfinished surveyable body.
-    /// Work order is the targeted parent first, then moons inner-to-outer
-    /// (SMA around the parent). Closest free ship takes the current POI.
+    /// A planet or moon: the targeted body first, then moons inner-to-outer.
+    /// An asteroid: that rock, then other asteroids within
+    /// <see cref="AsteroidSurveyRadius_m"/> (or <see cref="AsteroidSurveyRadiusWithTanker_m"/>
+    /// when a tanker can move), nearest first. Command span does not clip that sphere.
+    /// Closest free ship takes the current POI.
     /// A flagged fleet tanker is sent to orbit the parent (<see cref="GoalType.MoveTo"/>).
     /// Does not mutate <paramref name="goal"/> — agent applies the returned status.
     /// Re-entrant: skips ships already working this parent goal; skips POIs already assigned.
@@ -92,13 +103,14 @@ public class ServeyBodyPlanner : IGoalPlanner
         if (!fleet.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var targetEntity))
             return PlanResult.Fail("invalid target");
 
-        var pointsOfInterest = CollectSurveyPois(targetEntity, CommandSpan.Of(fleet), fleet.FactionOwnerID);
+        TryGetFleetTanker(fleetDB, out var tanker);
+        var pointsOfInterest = IsAsteroid(targetEntity)
+            ? CollectAsteroidNeighborhood(targetEntity, AsteroidRadiusFor(tanker), fleet.FactionOwnerID)
+            : CollectSurveyPois(targetEntity, CommandSpan.Of(fleet), fleet.FactionOwnerID);
 
         var claimedPoiIds = new HashSet<int>();
         var freeShips = new List<Entity>();
         bool tankerInFlight = false;
-
-        TryGetFleetTanker(fleetDB, out var tanker);
 
         foreach (var subunit in fleetDB.Children)
         {
@@ -217,26 +229,89 @@ public class ServeyBodyPlanner : IGoalPlanner
         return active.Type == GoalType.MoveTo && active.TargetEntityID == parentBodyId;
     }
 
+    static bool IsAsteroid(Entity entity)
+    {
+        return entity.TryGetDataBlob<SystemBodyInfoDB>(out var info)
+               && info.BodyType == BodyType.Asteroid;
+    }
+
+    static double AsteroidRadiusFor(Entity? tanker)
+    {
+        if (tanker != null && MovePlanner.CanMove(tanker, out _))
+            return AsteroidSurveyRadiusWithTanker_m;
+        return AsteroidSurveyRadius_m;
+    }
+
     /// <summary>
-    /// Target body first if still surveyable, then extras allowed by command span
-    /// (Well: moons inner-to-outer; System: all unfinished in the star system).
+    /// The anchor first, then other unfinished asteroids in its system whose
+    /// current distance from the anchor is within <paramref name="radius_m"/>.
+    /// </summary>
+    static List<Entity> CollectAsteroidNeighborhood(Entity anchor, double radius_m, int factionId)
+    {
+        var found = new List<(Entity body, double distance_m)>();
+        if (anchor.Manager == null || !anchor.TryGetDataBlob<PositionDB>(out var anchorPos))
+        {
+            if (CanScan(anchor, factionId))
+                return new List<Entity> { anchor };
+            return new List<Entity>();
+        }
+
+        foreach (var entity in anchor.Manager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>())
+        {
+            if (!IsAsteroid(entity) || !CanScan(entity, factionId))
+                continue;
+            if (!entity.TryGetDataBlob<PositionDB>(out var pos))
+                continue;
+
+            double distance = entity.Id == anchor.Id ? -1 : pos.GetDistanceTo_m(anchorPos);
+            if (distance > radius_m)
+                continue;
+            found.Add((entity, distance));
+        }
+
+        found.Sort((a, b) => a.distance_m.CompareTo(b.distance_m));
+        var ordered = new List<Entity>(found.Count);
+        foreach (var item in found)
+            ordered.Add(item.body);
+        return ordered;
+    }
+
+    /// <summary>
+    /// Target body first if still surveyable, then descendant extras allowed by
+    /// command span (Well: direct moons inner-to-outer; System: all descendants).
+    /// Parents and siblings of the target are never included.
     /// </summary>
     static List<Entity> CollectSurveyPois(Entity targetEntity, CommandSpanKind span, int factionId)
     {
-        var pointsOfInterest = CommandSpan.Expand(targetEntity, span, e => CanScan(e, factionId));
-        if (span != CommandSpanKind.Well || pointsOfInterest.Count <= 1
-            || pointsOfInterest[0] != targetEntity)
-            return pointsOfInterest;
+        var expanded = CommandSpan.Expand(targetEntity, span, e => CanScan(e, factionId));
+        var extras = new List<Entity>();
+        Entity target = null!;
+        bool hasTarget = false;
+        foreach (var e in expanded)
+        {
+            if (e.Id == targetEntity.Id)
+            {
+                target = e;
+                hasTarget = true;
+            }
+            else
+            {
+                extras.Add(e);
+            }
+        }
 
-        var root = pointsOfInterest[0];
-        var moons = new List<(Entity body, double radius_m)>();
-        for (int i = 1; i < pointsOfInterest.Count; i++)
-            moons.Add((pointsOfInterest[i], SemiMajorOrDistance_m(pointsOfInterest[i], root)));
-        moons.Sort((a, b) => a.radius_m.CompareTo(b.radius_m));
-        var ordered = new List<Entity> { root };
-        foreach (var (body, _) in moons)
-            ordered.Add(body);
-        return ordered;
+        if (extras.Count > 1)
+        {
+            extras.Sort((a, b) => SemiMajorOrDistance_m(a, targetEntity)
+                .CompareTo(SemiMajorOrDistance_m(b, targetEntity)));
+        }
+
+        var pointsOfInterest = new List<Entity>(extras.Count + (hasTarget ? 1 : 0));
+        if (hasTarget)
+            pointsOfInterest.Add(target);
+        foreach (var extra in extras)
+            pointsOfInterest.Add(extra);
+        return pointsOfInterest;
     }
 
     static double SemiMajorOrDistance_m(Entity body, Entity parent)

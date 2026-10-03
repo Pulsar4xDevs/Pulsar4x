@@ -58,33 +58,42 @@ public static class CommandSpan
     }
 
     /// <summary>
-    /// Root first, then extra POIs allowed by <paramref name="span"/>.
+    /// Root first, then children of <paramref name="root"/> allowed by <paramref name="span"/>.
+    /// Body: root only. Well: direct <see cref="PositionDB.Children"/>.
+    /// System: all descendants. Never a parent or sibling of <paramref name="root"/>.
     /// Geo/grav pass their own <paramref name="canInclude"/>.
     /// </summary>
     public static List<Entity> Expand(Entity root, CommandSpanKind span, Func<Entity, bool> canInclude)
     {
         var list = new List<Entity>();
-        if (span == CommandSpanKind.System && root.Manager != null)
-        {
-            foreach (var e in root.Manager.GetAllEntitiesWithDataBlob<PositionDB>())
-            {
-                if (canInclude(e))
-                    list.Add(e);
-            }
-            return list;
-        }
-
         if (canInclude(root))
             list.Add(root);
 
-        if (span == CommandSpanKind.Well
-            && root.TryGetDataBlob<PositionDB>(out var pos))
+        int maxDepth = span switch
         {
-            foreach (var child in pos.Children)
-            {
-                if (canInclude(child))
-                    list.Add(child);
-            }
+            CommandSpanKind.Well => 1,
+            CommandSpanKind.System => int.MaxValue,
+            _ => 0,
+        };
+        if (maxDepth == 0 || !root.TryGetDataBlob<PositionDB>(out var rootPos))
+            return list;
+
+        var pending = new Queue<(Entity entity, int depth)>();
+        foreach (var child in rootPos.Children)
+            pending.Enqueue((child, 1));
+
+        var seen = new HashSet<int> { root.Id };
+        while (pending.Count > 0)
+        {
+            var (entity, depth) = pending.Dequeue();
+            if (!seen.Add(entity.Id))
+                continue;
+            if (canInclude(entity))
+                list.Add(entity);
+            if (depth >= maxDepth || !entity.TryGetDataBlob<PositionDB>(out var childPos))
+                continue;
+            foreach (var grandchild in childPos.Children)
+                pending.Enqueue((grandchild, depth + 1));
         }
 
         return list;

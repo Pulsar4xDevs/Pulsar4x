@@ -129,8 +129,44 @@ namespace Pulsar4X.Tests
             Assert.That(well.Select(e => e.Id), Does.Not.Contain(sol.Id));
 
             var system = CommandSpan.Expand(mars, CommandSpanKind.System, yes);
-            Assert.That(system.Count, Is.GreaterThan(well.Count));
-            Assert.That(system.Select(e => e.Id), Does.Contain(sol.Id));
+            Assert.AreEqual(mars.Id, system[0].Id);
+            Assert.That(system.Select(e => e.Id), Does.Contain(phobos.Id));
+            Assert.That(system.Select(e => e.Id), Does.Not.Contain(sol.Id));
+        }
+
+        [Test]
+        public void Expand_System_Moon_ExcludesParentAndSiblings()
+        {
+            var sol = TestingUtilities.BasicSol(_sys);
+            var mercury = AddBody(sol, "Mercury", 0.330e24, 2_440_000, 0.387);
+            var earth = AddBody(sol, "Earth", 5.972e24, 6_371_000, 1.0);
+            var luna = AddMoon(earth, "Luna", 7.346e22, 1_737_000, 384_400_000);
+            bool yes(Entity _) => true;
+
+            var system = CommandSpan.Expand(luna, CommandSpanKind.System, yes);
+            Assert.AreEqual(1, system.Count);
+            Assert.AreEqual(luna.Id, system[0].Id);
+            Assert.That(system.Select(e => e.Id), Does.Not.Contain(mercury.Id));
+            Assert.That(system.Select(e => e.Id), Does.Not.Contain(earth.Id));
+            Assert.That(system.Select(e => e.Id), Does.Not.Contain(sol.Id));
+        }
+
+        [Test]
+        public void Expand_System_Star_IncludesNestedMoons_WellDoesNot()
+        {
+            var sol = TestingUtilities.BasicSol(_sys);
+            var earth = AddBody(sol, "Earth", 5.972e24, 6_371_000, 1.0);
+            var luna = AddMoon(earth, "Luna", 7.346e22, 1_737_000, 384_400_000);
+            bool yes(Entity _) => true;
+
+            var well = CommandSpan.Expand(sol, CommandSpanKind.Well, yes);
+            Assert.That(well.Select(e => e.Id), Does.Contain(earth.Id));
+            Assert.That(well.Select(e => e.Id), Does.Not.Contain(luna.Id));
+
+            var system = CommandSpan.Expand(sol, CommandSpanKind.System, yes);
+            Assert.AreEqual(sol.Id, system[0].Id);
+            Assert.That(system.Select(e => e.Id), Does.Contain(earth.Id));
+            Assert.That(system.Select(e => e.Id), Does.Contain(luna.Id));
         }
 
         static ComponentDesignBlueprint BridgeBlueprint(string id, string name, int adminLevel, int consoles)
