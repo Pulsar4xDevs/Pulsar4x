@@ -30,6 +30,7 @@ namespace Pulsar4X.Client
         // Re-selects the first root fleet after connect/faction change, mirroring the old default selection.
         private bool autoSelectFirstFleet = true;
         private int dragFleetId = -1;
+        private readonly List<int> dragShipIds = new();
         private Dictionary<int, bool> selectedShips = new ();
         private Dictionary<int, bool> selectedUnattachedShips = new ();
 
@@ -183,7 +184,9 @@ namespace Pulsar4X.Client
                             ImGui.Columns(2);
                             DisplayHelpers.PrintRow("Name", selectedFleet.Name);
                             DisplayHelpers.PrintRow("Flagship", selectedFleet.FlagshipName ?? "-");
-                            DisplayHelpers.PrintRow("Commander", selectedFleet.FlagshipName == null ? "-" : selectedFleet.CommanderName ?? "None");
+                            DisplayHelpers.PrintRow("Fleet commander", FleetCommanderLabel());
+                            DisplayHelpers.PrintRow("Command span", FleetSpanLabel(),
+                                tooltipTwo: "How far this fleet's orders reach. It comes from the flagship's bridge.");
 
                             // Current system
                             ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
@@ -286,83 +289,68 @@ namespace Pulsar4X.Client
                     return;
                 }
 
+                DisplayCommandLine();
+
                 // Mirror the old EntityFilter.Friendly | EntityFilter.Neutral read: hostiles aren't targets.
                 var candidates = system.Entities.Where(e => e.Relation != OwnerRelation.Hostile);
 
                 switch(selectedIssueOrderType)
                 {
                     case IssueOrderType.MoveTo:
-                        foreach(var body in candidates.Where(e => e.HasView<BodyView>() && e.HasView<PositionView>()))
-                        {
-                            var name = NameOf(body);
-                            if(ImGui.Button($"{name}###movement-button-{body.Id}"))
-                            {
-                                SubmitFleetCommand(new MoveToBodyCommand(selectedFleet.Id, body.Id));
-                            }
-                        }
+                        DisplayTargetTree(candidates,
+                            e => e.HasView<BodyView>() && e.HasView<PositionView>(),
+                            "movement-button",
+                            id => SubmitFleetCommand(new MoveToBodyCommand(selectedFleet.Id, id)),
+                            starTargetsSystem: false);
                         break;
                     case IssueOrderType.GeoSurvey:
-                        foreach(var body in SurveyOrderTargets(candidates, e => e.GetView<GeoSurveyView>() is { IsSurveyComplete: false }))
-                        {
-                            var name = NameOf(body);
-                            if(ImGui.Button($"{name}###geosurvey-button-{body.Id}"))
-                            {
-                                SubmitFleetCommand(new GeoSurveyCommand(selectedFleet.Id, body.Id));
-                            }
-                        }
+                        DisplayTargetTree(candidates,
+                            e => e.GetView<GeoSurveyView>() is { IsSurveyComplete: false },
+                            "geosurvey-button",
+                            id => SubmitFleetCommand(new GeoSurveyCommand(selectedFleet.Id, id)),
+                            starTargetsSystem: true,
+                            keepParentWhenChildrenRemain: true,
+                            markDone: e => e.GetView<GeoSurveyView>()?.IsSurveyComplete == true);
                         break;
                     case IssueOrderType.GravSurvey:
-                        foreach(var location in SurveyOrderTargets(candidates, e => e.GetView<GravSurveyView>() is { IsSurveyComplete: false }))
-                        {
-                            var name = NameOf(location);
-                            if(ImGui.Button($"{name}###gravsurvey-button-{location.Id}"))
-                            {
-                                SubmitFleetCommand(new GravSurveyCommand(selectedFleet.Id, location.Id));
-                            }
-                        }
+                        DisplayTargetTree(candidates,
+                            e => e.GetView<GravSurveyView>() is { IsSurveyComplete: false },
+                            "gravsurvey-button",
+                            id => SubmitFleetCommand(new GravSurveyCommand(selectedFleet.Id, id)),
+                            starTargetsSystem: true,
+                            keepParentWhenChildrenRemain: true,
+                            markDone: e => e.GetView<GravSurveyView>()?.IsSurveyComplete == true);
                         break;
                     case IssueOrderType.Jump:
                         // The server only projects a JumpPointView once this faction has discovered it.
-                        foreach(var jumpPoint in candidates.Where(e => e.HasView<JumpPointView>()))
-                        {
-                            var name = NameOf(jumpPoint);
-                            if(ImGui.Button($"{name}###jump-gate-button-{jumpPoint.Id}"))
-                            {
-                                SubmitFleetCommand(new JumpCommand(selectedFleet.Id, jumpPoint.Id));
-                            }
-                        }
+                        DisplayTargetTree(candidates,
+                            e => e.HasView<JumpPointView>(),
+                            "jump-gate-button",
+                            id => SubmitFleetCommand(new JumpCommand(selectedFleet.Id, id)),
+                            starTargetsSystem: false);
                         break;
                     case IssueOrderType.RefuelAt:
-                        foreach(var colony in candidates.Where(e => e.Kind == BodyKind.Colony && e.HasView<CargoStorageView>()))
-                        {
-                            var name = NameOf(colony);
-                            if(ImGui.Button($"{name}###refuelAt-button-{colony.Id}"))
-                            {
-                                SubmitFleetCommand(new RefuelAtCommand(selectedFleet.Id, colony.Id));
-                            }
-                        }
+                        DisplayTargetTree(candidates,
+                            e => e.Kind == BodyKind.Colony && e.HasView<CargoStorageView>(),
+                            "refuelAt-button",
+                            id => SubmitFleetCommand(new RefuelAtCommand(selectedFleet.Id, id)),
+                            starTargetsSystem: false);
                         break;
                     case IssueOrderType.Trade:
                         ImGui.TextWrapped("Ships buy and sell around this body. The flagship's bridge sets how far they look.");
-                        foreach(var body in candidates.Where(e => e.HasView<BodyView>() && e.HasView<PositionView>()))
-                        {
-                            var name = NameOf(body);
-                            if(ImGui.Button($"{name}###trade-button-{body.Id}"))
-                            {
-                                SubmitFleetCommand(new FleetTradeCommand(selectedFleet.Id, body.Id));
-                            }
-                        }
+                        DisplayTargetTree(candidates,
+                            e => e.HasView<BodyView>() && e.HasView<PositionView>(),
+                            "trade-button",
+                            id => SubmitFleetCommand(new FleetTradeCommand(selectedFleet.Id, id)),
+                            starTargetsSystem: true);
                         break;
                     case IssueOrderType.Haul:
                         ImGui.TextWrapped("Ships move posted goods between our colonies around this body. The flagship's bridge sets how far they look.");
-                        foreach(var body in candidates.Where(e => e.HasView<BodyView>() && e.HasView<PositionView>()))
-                        {
-                            var name = NameOf(body);
-                            if(ImGui.Button($"{name}###haul-button-{body.Id}"))
-                            {
-                                SubmitFleetCommand(new FleetFreighterCommand(selectedFleet.Id, body.Id));
-                            }
-                        }
+                        DisplayTargetTree(candidates,
+                            e => e.HasView<BodyView>() && e.HasView<PositionView>(),
+                            "haul-button",
+                            id => SubmitFleetCommand(new FleetFreighterCommand(selectedFleet.Id, id)),
+                            starTargetsSystem: true);
                         break;
                     case IssueOrderType.HaulContract:
                         DisplayHaulContract(candidates);
@@ -372,27 +360,512 @@ namespace Pulsar4X.Client
             ImGui.EndChild();
         }
 
+        private string FleetCommanderLabel()
+        {
+            if(selectedFleet == null || selectedFleet.FlagshipName == null)
+                return "-";
+            return string.IsNullOrEmpty(selectedFleet.CommanderName) ? "None" : selectedFleet.CommanderName;
+        }
+
+        private string FleetSpanLabel()
+        {
+            if(selectedFleet == null || string.IsNullOrEmpty(selectedFleet.CommandSpan))
+                return CommandSpanLabels.Body;
+            return selectedFleet.CommandSpan;
+        }
+
+        private void DisplayCommandLine()
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.Text("Fleet commander");
+            ImGui.PopStyleColor();
+            ImGui.SameLine();
+            ImGui.Text(FleetCommanderLabel());
+            ImGui.SameLine(0, 28f);
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.Text("Command span");
+            ImGui.PopStyleColor();
+            ImGui.SameLine();
+            ImGui.Text(FleetSpanLabel());
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("How far this fleet's orders reach. It comes from the flagship's bridge.");
+            ImGui.Separator();
+        }
+
         private static string NameOf(EntitySnapshot entity) => entity.GetView<NameView>()?.Name ?? "";
 
-        /// <summary>
-        /// Unfinished survey sites. A flagship bridge that covers the whole system also lists each
-        /// star, as the root of that order. Planners do not fly ships to the star.
-        /// </summary>
-        private IEnumerable<EntitySnapshot> SurveyOrderTargets(IEnumerable<EntitySnapshot> candidates, Func<EntitySnapshot, bool> isSite)
+        private static int? ParentIdOf(EntitySnapshot body)
         {
-            var sites = candidates.Where(isSite).ToList();
-            if(selectedFleet?.CommandSpan != CommandSpanLabels.System)
-                return sites;
+            if(body.GetView<OrbitView>()?.ParentId is int orbitParent && orbitParent != body.Id)
+                return orbitParent;
+            if(body.GetView<PositionView>()?.ParentId is int positionParent && positionParent != body.Id)
+                return positionParent;
+            if(body.GetView<ColonyView>()?.PlanetEntityId is int planetId && planetId != body.Id)
+                return planetId;
+            return null;
+        }
 
-            var seen = new HashSet<int>(sites.Select(e => e.Id));
-            var ordered = new List<EntitySnapshot>();
-            foreach(var star in candidates)
+        /// <summary>
+        /// One row in the order tree. Bands are not entities: they only fold asteroids that orbit a star.
+        /// </summary>
+        private sealed class OrderTreeNode
+        {
+            public EntitySnapshot? Entity;
+            public int Id;
+            public int StarId;
+            public bool IsBand;
+            public string Label = "";
+            /// <summary>Orbital slot in km for a band. Entity rows compute their slot when sorted.</summary>
+            public double SortKey;
+        }
+
+        /// <summary>
+        /// Star at the root, then targets nested by orbit. Siblings are ordered by distance from
+        /// their sun. Asteroids that orbit a star fold into one branch per gap between that star's
+        /// planets. The star is a button only for orders that use it as a whole-system anchor,
+        /// and only when the flagship bridge covers the system. Parentless targets (grav rings,
+        /// jump points) hang under the nearest star. When <paramref name="keepParentWhenChildrenRemain"/>
+        /// is set, a finished body stays in the tree while anything under it is still a target,
+        /// and stays a button when the flagship bridge covers that well or the whole system.
+        /// </summary>
+        private void DisplayTargetTree(
+            IEnumerable<EntitySnapshot> candidates,
+            Func<EntitySnapshot, bool> isTarget,
+            string buttonPrefix,
+            Action<int> submit,
+            bool starTargetsSystem,
+            bool keepParentWhenChildrenRemain = false,
+            Func<EntitySnapshot, bool>? markDone = null,
+            int? selectedId = null)
+        {
+            var byId = new Dictionary<int, EntitySnapshot>();
+            foreach(var entity in candidates)
+                byId[entity.Id] = entity;
+
+            var included = new Dictionary<int, EntitySnapshot>();
+            foreach(var entity in byId.Values)
             {
-                if(star.Kind == BodyKind.Star && seen.Add(star.Id))
-                    ordered.Add(star);
+                if(entity.Kind == BodyKind.Star || isTarget(entity))
+                    IncludeWithAncestors(entity, byId, included);
             }
-            ordered.AddRange(sites);
-            return ordered;
+
+            var stars = new List<EntitySnapshot>();
+            foreach(var entity in included.Values)
+            {
+                if(entity.Kind == BodyKind.Star)
+                    stars.Add(entity);
+            }
+
+            var entityChildren = new Dictionary<int, List<EntitySnapshot>>();
+            var parentOf = new Dictionary<int, int>();
+            var rootEntities = new List<EntitySnapshot>();
+            foreach(var entity in included.Values)
+            {
+                int? parentId = ParentIdOf(entity);
+                if(parentId is int pid && pid != entity.Id && included.ContainsKey(pid))
+                {
+                    AddTreeChild(entityChildren, parentOf, pid, entity);
+                }
+                else if(parentId is null && entity.Kind != BodyKind.Star && stars.Count > 0)
+                {
+                    var star = NearestStar(entity, stars);
+                    AddTreeChild(entityChildren, parentOf, star.Id, entity);
+                }
+                else
+                {
+                    rootEntities.Add(entity);
+                }
+            }
+
+            var children = new Dictionary<int, List<OrderTreeNode>>();
+            foreach(var pair in entityChildren)
+            {
+                var nodes = new List<OrderTreeNode>(pair.Value.Count);
+                foreach(var entity in pair.Value)
+                    nodes.Add(new OrderTreeNode { Entity = entity, Id = entity.Id });
+                children[pair.Key] = nodes;
+            }
+
+            var roots = new List<OrderTreeNode>(rootEntities.Count);
+            foreach(var entity in rootEntities)
+                roots.Add(new OrderTreeNode { Entity = entity, Id = entity.Id });
+
+            FoldAsteroidBands(children, parentOf, stars);
+
+            var coversWork = new HashSet<int>();
+            if(keepParentWhenChildrenRemain)
+            {
+                foreach(var entity in included.Values)
+                {
+                    if(!isTarget(entity))
+                        continue;
+                    var current = entity.Id;
+                    while(parentOf.TryGetValue(current, out var parent))
+                    {
+                        if(!coversWork.Add(parent))
+                            break;
+                        current = parent;
+                    }
+                }
+            }
+
+            foreach(var root in SortNodes(roots, stars, null))
+                DisplayTargetNode(root, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId);
+        }
+
+        private static void AddTreeChild(Dictionary<int, List<EntitySnapshot>> children, Dictionary<int, int> parentOf, int parentId, EntitySnapshot child)
+        {
+            if(!children.TryGetValue(parentId, out var list))
+            {
+                list = new List<EntitySnapshot>();
+                children[parentId] = list;
+            }
+            list.Add(child);
+            parentOf[child.Id] = parentId;
+        }
+
+        /// <summary>
+        /// Pull asteroids that orbit a star out of that star's child list and into one closed
+        /// branch per gap between its planets. A gap with a single asteroid stays a normal row.
+        /// Membership uses semi-major axis, so a rock does not change branch as it orbits.
+        /// </summary>
+        private static void FoldAsteroidBands(
+            Dictionary<int, List<OrderTreeNode>> children,
+            Dictionary<int, int> parentOf,
+            List<EntitySnapshot> stars)
+        {
+            foreach(var star in stars)
+            {
+                if(!children.TryGetValue(star.Id, out var kids) || kids.Count == 0)
+                    continue;
+
+                var asteroids = new List<OrderTreeNode>();
+                var rest = new List<OrderTreeNode>();
+                foreach(var kid in kids)
+                {
+                    if(kid.Entity?.Kind == BodyKind.Asteroid)
+                        asteroids.Add(kid);
+                    else
+                        rest.Add(kid);
+                }
+                if(asteroids.Count < 2)
+                    continue;
+
+                var planets = new List<(OrderTreeNode node, double slot)>();
+                foreach(var kid in rest)
+                {
+                    if(kid.Entity?.Kind == BodyKind.Planet)
+                        planets.Add((kid, OrbitSlotKm(kid.Entity, star)));
+                }
+                planets.Sort((a, b) => a.slot.CompareTo(b.slot));
+
+                var groups = new Dictionary<int, List<OrderTreeNode>>();
+                foreach(var rock in asteroids)
+                {
+                    int gap = GapIndex(OrbitSlotKm(rock.Entity!, star), planets);
+                    if(!groups.TryGetValue(gap, out var group))
+                    {
+                        group = new List<OrderTreeNode>();
+                        groups[gap] = group;
+                    }
+                    group.Add(rock);
+                }
+
+                var folded = new List<OrderTreeNode>(rest);
+                foreach(var pair in groups)
+                {
+                    var members = pair.Value;
+                    if(members.Count < 2)
+                    {
+                        folded.AddRange(members);
+                        continue;
+                    }
+
+                    var band = new OrderTreeNode
+                    {
+                        Id = BandId(star.Id, pair.Key),
+                        IsBand = true,
+                        StarId = star.Id,
+                        Label = BandLabel(pair.Key, planets, members.Count),
+                        SortKey = MedianSlotKm(members, star),
+                    };
+                    folded.Add(band);
+                    children[band.Id] = members;
+                    parentOf[band.Id] = star.Id;
+                    foreach(var member in members)
+                        parentOf[member.Id] = band.Id;
+                }
+                children[star.Id] = folded;
+            }
+        }
+
+        private static int GapIndex(double slotKm, List<(OrderTreeNode node, double slot)> planets)
+        {
+            for(int i = 0; i < planets.Count; i++)
+            {
+                if(slotKm < planets[i].slot)
+                    return i;
+            }
+            return planets.Count;
+        }
+
+        private static string BandLabel(int gap, List<(OrderTreeNode node, double slot)> planets, int count)
+        {
+            string name;
+            if(planets.Count == 0)
+                name = "Asteroids";
+            else if(gap <= 0)
+                name = "Inside " + DisplayName(planets[0].node.Entity!);
+            else if(gap >= planets.Count)
+                name = "Beyond " + DisplayName(planets[planets.Count - 1].node.Entity!);
+            else
+                name = DisplayName(planets[gap - 1].node.Entity!) + " – " + DisplayName(planets[gap].node.Entity!);
+            return name + " (" + count + ")";
+        }
+
+        private static string DisplayName(EntitySnapshot entity)
+        {
+            string name = NameOf(entity);
+            return name.Length == 0 ? "Unknown" : name;
+        }
+
+        private static double MedianSlotKm(List<OrderTreeNode> members, EntitySnapshot star)
+        {
+            var slots = new List<double>(members.Count);
+            foreach(var member in members)
+                slots.Add(OrbitSlotKm(member.Entity!, star));
+            slots.Sort();
+            return slots[slots.Count / 2];
+        }
+
+        /// <summary>Negative, stable for a star and gap. Entity ids start at 0.</summary>
+        private static int BandId(int starId, int gap)
+        {
+            long packed = ((long)starId + 1L) * 1024L + gap + 1L;
+            if(packed > int.MaxValue)
+                packed = packed % int.MaxValue + 1L;
+            return (int)-packed;
+        }
+
+        /// <summary>
+        /// Semi-major axis when the body orbits this star. Otherwise its current distance.
+        /// </summary>
+        private static double OrbitSlotKm(EntitySnapshot entity, EntitySnapshot star)
+        {
+            if(entity.GetView<OrbitView>() is { } orbit
+                && orbit.ParentId == star.Id
+                && orbit.SemiMajorAxisKm > 0)
+                return orbit.SemiMajorAxisKm;
+
+            if(entity.GetView<PositionView>() is { } pos
+                && star.GetView<PositionView>() is { } starPos)
+                return Math.Sqrt(DistanceSquared(pos.AbsolutePosition, starPos.AbsolutePosition)) / 1000.0;
+
+            return double.MaxValue;
+        }
+
+        private static void IncludeWithAncestors(EntitySnapshot entity, Dictionary<int, EntitySnapshot> byId, Dictionary<int, EntitySnapshot> included)
+        {
+            var current = entity;
+            for(int guard = 0; guard < 32 && included.TryAdd(current.Id, current); guard++)
+            {
+                if(ParentIdOf(current) is not int parentId || parentId == current.Id)
+                    break;
+                if(!byId.TryGetValue(parentId, out var parent) || !IsOrbitalBody(parent))
+                    break;
+                current = parent;
+            }
+        }
+
+        private static bool IsOrbitalBody(EntitySnapshot entity)
+            => entity.Kind is BodyKind.Star or BodyKind.Planet or BodyKind.DwarfPlanet
+                or BodyKind.Moon or BodyKind.Asteroid or BodyKind.Comet;
+
+        private static EntitySnapshot NearestStar(EntitySnapshot entity, List<EntitySnapshot> stars)
+        {
+            if(stars.Count == 1 || entity.GetView<PositionView>() is not { } pos)
+                return stars[0];
+
+            var best = stars[0];
+            double bestDistance = double.MaxValue;
+            foreach(var star in stars)
+            {
+                if(star.Id == entity.Id || star.GetView<PositionView>() is not { } starPos)
+                    continue;
+                double distance = DistanceSquared(pos.AbsolutePosition, starPos.AbsolutePosition);
+                if(distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    best = star;
+                }
+            }
+            return best;
+        }
+
+        private static double DistanceFromSun(EntitySnapshot entity, List<EntitySnapshot> stars)
+        {
+            if(entity.GetView<PositionView>() is not { } pos)
+                return entity.Kind == BodyKind.Star ? 0 : double.MaxValue;
+
+            double best = double.MaxValue;
+            bool found = false;
+            foreach(var star in stars)
+            {
+                if(star.Id == entity.Id || star.GetView<PositionView>() is not { } starPos)
+                    continue;
+                double distance = DistanceSquared(pos.AbsolutePosition, starPos.AbsolutePosition);
+                if(distance < best)
+                {
+                    best = distance;
+                    found = true;
+                }
+            }
+            if(found)
+                return best;
+            return entity.Kind == BodyKind.Star
+                ? 0
+                : DistanceSquared(pos.AbsolutePosition, default);
+        }
+
+        private static double DistanceSquared(Vec3 a, Vec3 b)
+        {
+            double dx = a.X - b.X;
+            double dy = a.Y - b.Y;
+            double dz = a.Z - b.Z;
+            return dx * dx + dy * dy + dz * dz;
+        }
+
+        private static List<OrderTreeNode> SortNodes(List<OrderTreeNode> nodes, List<EntitySnapshot> stars, EntitySnapshot? aroundStar)
+            => nodes
+                .OrderBy(n => n.Entity?.Kind == BodyKind.Star ? 0 : 1)
+                .ThenBy(n => n.IsBand
+                    ? n.SortKey
+                    : aroundStar != null
+                        ? OrbitSlotKm(n.Entity!, aroundStar)
+                        : DistanceFromSun(n.Entity!, stars))
+                .ThenBy(n => n.IsBand ? n.Label : NameOf(n.Entity!), StringComparer.Ordinal)
+                .ToList();
+
+        private void DisplayTargetNode(
+            OrderTreeNode node,
+            Dictionary<int, List<OrderTreeNode>> children,
+            List<EntitySnapshot> stars,
+            Func<EntitySnapshot, bool> isTarget,
+            HashSet<int> coversWork,
+            string buttonPrefix,
+            Action<int> submit,
+            bool starTargetsSystem,
+            Func<EntitySnapshot, bool>? markDone,
+            int? selectedId)
+        {
+            if(node.IsBand)
+            {
+                bool bandOpen = ImGui.TreeNodeEx($"{node.Label}###{buttonPrefix}-band-{node.Id}");
+                if(bandOpen)
+                {
+                    if(children.TryGetValue(node.Id, out var bandKids))
+                    {
+                        EntitySnapshot? star = null;
+                        foreach(var candidate in stars)
+                        {
+                            if(candidate.Id == node.StarId)
+                            {
+                                star = candidate;
+                                break;
+                            }
+                        }
+                        foreach(var child in SortNodes(bandKids, stars, star))
+                            DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId);
+                    }
+                    ImGui.TreePop();
+                }
+                return;
+            }
+
+            EntitySnapshot entity = node.Entity!;
+            List<OrderTreeNode>? childList = null;
+            if(children.TryGetValue(node.Id, out var found) && found.Count > 0)
+                childList = found;
+
+            // A finished body stays in the tree while work remains under it. It is a button only
+            // when this bridge includes those bodies: Well is the body's own children, System is
+            // everything under it. Body span surveys the clicked body alone, which is already done.
+            bool systemSpan = selectedFleet?.CommandSpan == CommandSpanLabels.System;
+            bool reachesChildren = systemSpan || selectedFleet?.CommandSpan == CommandSpanLabels.Well;
+            bool starClickable = entity.Kind == BodyKind.Star && starTargetsSystem && systemSpan;
+            bool childWork = coversWork.Contains(entity.Id);
+            bool showDone = childWork && !isTarget(entity) && markDone != null && markDone(entity);
+            bool clickable = starClickable || (entity.Kind != BodyKind.Star && (isTarget(entity) || (showDone && reachesChildren)));
+
+            var flags = ImGuiTreeNodeFlags.OpenOnArrow;
+            if(entity.Kind == BodyKind.Star || showDone)
+                flags |= ImGuiTreeNodeFlags.DefaultOpen;
+            if(childList == null)
+                flags |= ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
+
+            bool open = ImGui.TreeNodeEx($"##{buttonPrefix}-node-{entity.Id}", flags);
+            ImGui.SameLine();
+            string name = DisplayName(entity);
+            string doneTooltip = systemSpan
+                ? "This body is surveyed. Unsurveyed bodies under it are still included."
+                : "This body is surveyed. Unsurveyed bodies in its well are still included.";
+            if(clickable)
+            {
+                int colors = 0;
+                if(showDone)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.22f, 0.28f, 0.34f, 1f));
+                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.30f, 0.40f, 0.48f, 1f));
+                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.18f, 0.32f, 0.42f, 1f));
+                    colors = 3;
+                }
+                else if(selectedId == node.Id)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Button, Styles.HighlightColor);
+                    colors = 1;
+                }
+                if(ImGui.SmallButton($"{name}###{buttonPrefix}-{node.Id}"))
+                    submit(node.Id);
+                if(showDone && ImGui.IsItemHovered())
+                    ImGui.SetTooltip(doneTooltip);
+                if(colors > 0)
+                    ImGui.PopStyleColor(colors);
+                if(showDone)
+                {
+                    ImGui.SameLine();
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                    ImGui.Text("surveyed");
+                    ImGui.PopStyleColor();
+                    if(ImGui.IsItemHovered())
+                        ImGui.SetTooltip(doneTooltip);
+                }
+            }
+            else
+            {
+                ImGui.TextDisabled(name);
+                bool nameHovered = ImGui.IsItemHovered();
+                if(showDone)
+                {
+                    ImGui.SameLine();
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                    ImGui.Text("surveyed");
+                    ImGui.PopStyleColor();
+                    if(nameHovered || ImGui.IsItemHovered())
+                        ImGui.SetTooltip("This body is surveyed. This bridge only covers the body you click, so pick an unsurveyed body under it.");
+                }
+                else if(nameHovered && entity.Kind == BodyKind.Star && starTargetsSystem && !systemSpan)
+                {
+                    ImGui.SetTooltip("The flagship's bridge does not cover the whole system.");
+                }
+            }
+
+            if(childList != null && open)
+            {
+                EntitySnapshot? around = entity.Kind == BodyKind.Star ? entity : null;
+                foreach(var child in SortNodes(childList, stars, around))
+                    DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId);
+                ImGui.TreePop();
+            }
         }
 
         private void DisplayHaulContract(IEnumerable<EntitySnapshot> candidates)
@@ -418,24 +891,25 @@ namespace Pulsar4X.Client
                 haulDestId = -1;
 
             DisplayHelpers.Header("From");
-            foreach(var colony in colonies)
-            {
-                if(ImGui.Selectable($"{NameOf(colony)}###haul-from-{colony.Id}", haulSourceId == colony.Id))
+            DisplayTargetTree(candidates,
+                e => e.Relation == OwnerRelation.Owned && e.Kind == BodyKind.Colony && e.HasView<MarketView>(),
+                "haul-from",
+                id =>
                 {
-                    haulSourceId = colony.Id;
-                    if(haulDestId == colony.Id)
+                    haulSourceId = id;
+                    if(haulDestId == id)
                         haulDestId = -1;
-                }
-            }
+                },
+                starTargetsSystem: false,
+                selectedId: haulSourceId);
 
             DisplayHelpers.Header("To");
-            foreach(var colony in colonies)
-            {
-                if(colony.Id == haulSourceId)
-                    continue;
-                if(ImGui.Selectable($"{NameOf(colony)}###haul-to-{colony.Id}", haulDestId == colony.Id))
-                    haulDestId = colony.Id;
-            }
+            DisplayTargetTree(candidates,
+                e => e.Id != haulSourceId && e.Relation == OwnerRelation.Owned && e.Kind == BodyKind.Colony && e.HasView<MarketView>(),
+                "haul-to",
+                id => haulDestId = id,
+                starTargetsSystem: false,
+                selectedId: haulDestId);
 
             var source = colonies.FirstOrDefault(colony => colony.Id == haulSourceId);
             var dest = colonies.FirstOrDefault(colony => colony.Id == haulDestId);
@@ -587,7 +1061,8 @@ namespace Pulsar4X.Client
                             selectedShips[ship.Id] = !selectedShips[ship.Id];
                         }
                         DisplayHelpers.ShipTooltip(ship);
-                        DisplayShipContextMenu(selectedShips, ship);
+                        DisplayShipContextMenu(selectedShips, ship, selectedFleet);
+                        DisplayShipDropSource(ship, selectedShips);
                     }
                     ImGui.EndListBox();
                 }
@@ -621,29 +1096,11 @@ namespace Pulsar4X.Client
                     DisplayFleetItem(fleet);
                 }
 
+                DisplayUnassignedBranch(galaxy.UnattachedShips);
+
                 var sizeLeft = ImGui.GetContentRegionAvail();
                 ImGui.InvisibleButton("invis-droptarget", new Vector2(sizeLeft.X, 32f));
                 DisplayEmptyDropTarget();
-
-                if(galaxy.UnattachedShips.Count > 0)
-                {
-                    DisplayHelpers.Header("Unattached Ships");
-
-                    foreach(var ship in galaxy.UnattachedShips)
-                    {
-                        if(!selectedUnattachedShips.ContainsKey(ship.Id))
-                        {
-                            selectedUnattachedShips.Add(ship.Id, false);
-                        }
-
-                        if(ImGui.Selectable($"{ship.Name}###unattached-{ship.Id}", selectedUnattachedShips[ship.Id]))
-                        {
-                            selectedUnattachedShips[ship.Id] = !selectedUnattachedShips[ship.Id];
-                        }
-                        DisplayHelpers.ShipTooltip(ship);
-                        DisplayShipContextMenu(selectedUnattachedShips, ship, isUnattached: true);
-                    }
-                }
             }
             ImGui.EndChild();
 
@@ -661,12 +1118,10 @@ namespace Pulsar4X.Client
         {
             ImGui.PushID(fleet.Id.ToString());
             string name = fleet.Name;
+            bool hasChildren = fleet.SubFleets.Count > 0 || fleet.Ships.Count > 0;
             var flags = ImGuiTreeNodeFlags.DefaultOpen;
-
-            if(fleet.SubFleets.Count == 0)
-            {
-                flags |= ImGuiTreeNodeFlags.Leaf;
-            }
+            if(!hasChildren)
+                flags |= ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
 
             if(selectedFleetId == fleet.Id)
             {
@@ -691,28 +1146,81 @@ namespace Pulsar4X.Client
             if(ImGui.IsItemHovered())
                 DisplayHelpers.DescriptiveTooltip(name, "Fleet", description);
 
-            if(isTreeOpen)
+            if(ImGui.IsItemClicked())
+                SelectFleet(fleet.Id);
+            DisplayContextMenu(fleet);
+            DisplayDropSource(fleet.Id, name);
+            DisplayFleetDropTarget(fleet);
+
+            if(hasChildren && isTreeOpen)
             {
-                if(ImGui.IsItemClicked())
-                {
-                    SelectFleet(fleet.Id);
-                }
-                DisplayContextMenu(fleet);
-                DisplayDropSource(fleet.Id, name);
-                DisplayDropTarget(fleet.Id);
+                foreach(var ship in fleet.Ships)
+                    DisplayFleetShip(fleet, ship);
                 foreach(var subFleet in fleet.SubFleets)
-                {
                     DisplayFleetItem(subFleet);
-                }
                 ImGui.TreePop();
             }
+            ImGui.PopID();
+        }
 
-            if(!isTreeOpen)
+        private void DisplayFleetShip(FleetSnapshot fleet, ShipSnapshot ship)
+        {
+            ImGui.PushID("ship-" + ship.Id);
+            var flags = ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
+            if(selectedFleetId == fleet.Id && selectedShips.TryGetValue(ship.Id, out var selected) && selected)
+                flags |= ImGuiTreeNodeFlags.Selected;
+
+            string name = ship.Id == fleet.FlagshipId ? "(F) " + ship.Name : ship.Name;
+            ImGui.TreeNodeEx($"{name}###fleet-ship-{ship.Id}", flags);
+            if(ImGui.IsItemClicked(ImGuiMouseButton.Left) && !ImGui.IsMouseDragging(ImGuiMouseButton.Left))
             {
-                DisplayContextMenu(fleet);
-                DisplayDropSource(fleet.Id, name);
-                DisplayDropTarget(fleet.Id);
+                if(selectedFleetId != fleet.Id)
+                    SelectFleet(fleet.Id);
+                if(!selectedShips.ContainsKey(ship.Id))
+                    selectedShips[ship.Id] = false;
+                selectedShips[ship.Id] = !selectedShips[ship.Id];
             }
+            DisplayHelpers.ShipTooltip(ship);
+            DisplayShipContextMenu(selectedShips, ship, fleet);
+            DisplayShipDropSource(ship, selectedFleetId == fleet.Id ? selectedShips : null);
+            // A ship row accepts ships only. A fleet dropped here must not nest under this fleet.
+            DisplayShipDropTarget(fleet);
+            ImGui.PopID();
+        }
+
+        private void DisplayUnassignedBranch(IReadOnlyList<ShipSnapshot> ships)
+        {
+            var flags = ImGuiTreeNodeFlags.DefaultOpen;
+            if(ships.Count == 0)
+                flags |= ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
+
+            bool open = ImGui.TreeNodeEx("Unassigned###unassigned-ships", flags);
+            DisplayUnassignedDropTarget();
+            if(ships.Count > 0 && open)
+            {
+                foreach(var ship in ships)
+                    DisplayUnassignedShip(ship);
+                ImGui.TreePop();
+            }
+        }
+
+        private void DisplayUnassignedShip(ShipSnapshot ship)
+        {
+            ImGui.PushID("loose-" + ship.Id);
+            if(!selectedUnattachedShips.ContainsKey(ship.Id))
+                selectedUnattachedShips[ship.Id] = false;
+
+            var flags = ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
+            if(selectedUnattachedShips[ship.Id])
+                flags |= ImGuiTreeNodeFlags.Selected;
+
+            ImGui.TreeNodeEx($"{ship.Name}###loose-ship-{ship.Id}", flags);
+            if(ImGui.IsItemClicked(ImGuiMouseButton.Left) && !ImGui.IsMouseDragging(ImGuiMouseButton.Left))
+                selectedUnattachedShips[ship.Id] = !selectedUnattachedShips[ship.Id];
+            DisplayHelpers.ShipTooltip(ship);
+            DisplayShipContextMenu(selectedUnattachedShips, ship, owner: null);
+            DisplayShipDropSource(ship, selectedUnattachedShips);
+            DisplayUnassignedDropTarget();
             ImGui.PopID();
         }
 
@@ -737,7 +1245,7 @@ namespace Pulsar4X.Client
             }
         }
 
-        private void DisplayShipContextMenu(Dictionary<int, bool> selected, ShipSnapshot ship, bool isUnattached = false)
+        private void DisplayShipContextMenu(Dictionary<int, bool> selected, ShipSnapshot ship, FleetSnapshot? owner)
         {
             var galaxy = _uiState.GameClient?.Galaxy;
             if(galaxy == null) return;
@@ -749,21 +1257,23 @@ namespace Pulsar4X.Client
                     var systemId = string.IsNullOrEmpty(ship.SystemId) ? _uiState.SelectedStarSystemId : ship.SystemId;
                     _uiState.EntityClicked(ship.Id, systemId, MouseButtons.Primary);
                 }
-                if(!isUnattached && selectedFleet != null)
+                if(owner != null)
                 {
-                    bool isFlagship = ship.Id == selectedFleet.FlagshipId;
+                    bool isFlagship = ship.Id == owner.FlagshipId;
                     if(isFlagship)
                     {
                         ImGui.BeginDisabled();
                     }
                     if(ImGui.MenuItem("Promote to Flagship"))
                     {
-                        SubmitFleetCommand(new SetFlagshipCommand(selectedFleet.Id, ship.Id));
+                        SubmitFleetCommand(new SetFlagshipCommand(owner.Id, ship.Id));
                     }
                     if(isFlagship)
                     {
                         ImGui.EndDisabled();
                     }
+                    if(ImGui.MenuItem("Remove from fleet"))
+                        SubmitFleetCommand(new DetachShipCommand(ship.Id));
                 }
                 ImGui.Separator();
 
@@ -773,7 +1283,7 @@ namespace Pulsar4X.Client
                     ImGui.Separator();
                     foreach(var fleet in galaxy.Fleets)
                     {
-                        DisplayShipAssignmentOption(selected, ship, fleet, isUnattached: isUnattached);
+                        DisplayShipAssignmentOption(selected, ship, fleet, currentFleetId: owner?.Id);
                     }
                     ImGui.EndMenu();
                 }
@@ -781,7 +1291,7 @@ namespace Pulsar4X.Client
             }
         }
 
-        private void DisplayShipAssignmentOption(Dictionary<int, bool> selected, ShipSnapshot ship, FleetSnapshot fleet, int depth = 0, bool isUnattached = false)
+        private void DisplayShipAssignmentOption(Dictionary<int, bool> selected, ShipSnapshot ship, FleetSnapshot fleet, int depth = 0, int? currentFleetId = null)
         {
             for(int i = 0; i < depth; i++)
             {
@@ -789,7 +1299,7 @@ namespace Pulsar4X.Client
                 ImGui.SameLine();
             }
 
-            if(fleet.Id == selectedFleetId && !isUnattached)
+            if(fleet.Id == currentFleetId)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                 ImGui.Text(fleet.Name);
@@ -822,7 +1332,7 @@ namespace Pulsar4X.Client
 
             foreach(var subFleet in fleet.SubFleets)
             {
-                DisplayShipAssignmentOption(selected, ship, subFleet, depth + 1, isUnattached);
+                DisplayShipAssignmentOption(selected, ship, subFleet, depth + 1, currentFleetId);
             }
         }
 
@@ -844,19 +1354,102 @@ namespace Pulsar4X.Client
             }
         }
 
-        private void DisplayDropTarget(int fleetId)
+        private void DisplayFleetDropTarget(FleetSnapshot fleet)
         {
-            // Begin Drag Target
-            if (ImGui.BeginDragDropTarget())
+            if(!ImGui.BeginDragDropTarget())
+                return;
+
+            ImGui.AcceptDragDropPayload("FLEET", ImGuiDragDropFlags.None);
+            ImGui.AcceptDragDropPayload("SHIP", ImGuiDragDropFlags.None);
+            if(ImGui.IsMouseReleased(ImGuiMouseButton.Left))
             {
-                ImGui.AcceptDragDropPayload("FLEET", ImGuiDragDropFlags.None);
-                if(ImGui.IsMouseReleased(ImGuiMouseButton.Left) && dragFleetId != -1)
+                if(dragFleetId != -1 && dragFleetId != fleet.Id)
                 {
-                    SubmitFleetCommand(new ChangeFleetParentCommand(dragFleetId, fleetId));
+                    SubmitFleetCommand(new ChangeFleetParentCommand(dragFleetId, fleet.Id));
                     dragFleetId = -1;
                 }
-                ImGui.EndDragDropTarget();
+                else if(dragShipIds.Count > 0)
+                {
+                    DropShipsOnFleet(fleet);
+                }
             }
+            ImGui.EndDragDropTarget();
+        }
+
+        private void DisplayShipDropTarget(FleetSnapshot fleet)
+        {
+            if(!ImGui.BeginDragDropTarget())
+                return;
+
+            ImGui.AcceptDragDropPayload("SHIP", ImGuiDragDropFlags.None);
+            if(ImGui.IsMouseReleased(ImGuiMouseButton.Left) && dragShipIds.Count > 0)
+                DropShipsOnFleet(fleet);
+            ImGui.EndDragDropTarget();
+        }
+
+        private void DisplayUnassignedDropTarget()
+        {
+            if(!ImGui.BeginDragDropTarget())
+                return;
+
+            ImGui.AcceptDragDropPayload("SHIP", ImGuiDragDropFlags.None);
+            if(ImGui.IsMouseReleased(ImGuiMouseButton.Left) && dragShipIds.Count > 0)
+            {
+                var loose = new HashSet<int>();
+                var galaxy = _uiState.GameClient?.Galaxy;
+                if(galaxy != null)
+                {
+                    foreach(var ship in galaxy.UnattachedShips)
+                        loose.Add(ship.Id);
+                }
+                foreach(var shipId in dragShipIds)
+                {
+                    if(!loose.Contains(shipId))
+                        SubmitFleetCommand(new DetachShipCommand(shipId));
+                }
+                dragShipIds.Clear();
+                selectedShips.Clear();
+                selectedUnattachedShips.Clear();
+            }
+            ImGui.EndDragDropTarget();
+        }
+
+        private void DropShipsOnFleet(FleetSnapshot fleet)
+        {
+            var already = new HashSet<int>();
+            foreach(var ship in fleet.Ships)
+                already.Add(ship.Id);
+            foreach(var shipId in dragShipIds)
+            {
+                if(!already.Contains(shipId))
+                    SubmitFleetCommand(new ReassignShipCommand(shipId, fleet.Id));
+            }
+            dragShipIds.Clear();
+            selectedShips.Clear();
+            selectedUnattachedShips.Clear();
+        }
+
+        private void DisplayShipDropSource(ShipSnapshot ship, Dictionary<int, bool>? selected)
+        {
+            if(!ImGui.BeginDragDropSource(ImGuiDragDropFlags.SourceNoDisableHover))
+                return;
+
+            dragFleetId = -1;
+            dragShipIds.Clear();
+            if(selected != null && selected.TryGetValue(ship.Id, out var on) && on)
+            {
+                foreach(var (id, isSelected) in selected)
+                {
+                    if(isSelected)
+                        dragShipIds.Add(id);
+                }
+            }
+            if(!dragShipIds.Contains(ship.Id))
+                dragShipIds.Add(ship.Id);
+
+            ImGui.SetDragDropPayload("SHIP", IntPtr.Zero, 0);
+            ImGui.Text(dragShipIds.Count == 1 ? ship.Name : dragShipIds.Count + " ships");
+            ImGui.EndDragDropSource();
         }
 
         private void DisplayDropSource(int fleetId, string name)
@@ -865,6 +1458,7 @@ namespace Pulsar4X.Client
             if(ImGui.BeginDragDropSource(ImGuiDragDropFlags.SourceNoDisableHover))
             {
                 dragFleetId = fleetId;
+                dragShipIds.Clear();
 
                 ImGui.SetDragDropPayload("FLEET", IntPtr.Zero, 0);
                 ImGui.Text(name);

@@ -110,6 +110,10 @@ public sealed record ChangeFleetParentCommand(int TargetEntityId, int NewParentI
 /// from whichever fleet (or the faction root) currently holds it.</summary>
 public sealed record ReassignShipCommand(int TargetEntityId, int ToFleetId) : GameCommand(TargetEntityId);
 
+/// <summary>Take a ship out of its fleet. It stays owned, and shows with the unassigned ships.
+/// Targets the ship.</summary>
+public sealed record DetachShipCommand(int TargetEntityId) : GameCommand(TargetEntityId);
+
 public sealed record SetFlagshipCommand(int TargetEntityId, int ShipId) : GameCommand(TargetEntityId);
 
 /// <summary>Replace a fleet's standing (conditional) orders with the given list. The editor runs

@@ -19,6 +19,7 @@ using Pulsar4X.Logistics;
 using Pulsar4X.Messaging;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
+using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 using Pulsar4X.Technology;
 
@@ -60,6 +61,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(DisbandFleetCommand)] = TranslateDisbandFleet,
                 [typeof(ChangeFleetParentCommand)] = TranslateChangeFleetParent,
                 [typeof(ReassignShipCommand)] = TranslateReassignShip,
+                [typeof(DetachShipCommand)] = TranslateDetachShip,
                 [typeof(SetFlagshipCommand)] = TranslateSetFlagship,
                 [typeof(SetStandingOrdersCommand)] = TranslateSetStandingOrders,
                 [typeof(MoveToBodyCommand)] = TranslateMoveToBody,
@@ -129,8 +131,9 @@ namespace Pulsar4X.Engine.Api
         private bool TryResolve(int entityId, out Entity entity)
             => _game.GlobalManager.TryGetGlobalEntityById(entityId, out entity);
 
-        /// <summary>Finds the fleet in the faction's command tree whose direct children include
-        /// <paramref name="ship"/>, or null when the ship sits at the faction root (or isn't in the tree).</summary>
+        /// <summary>Finds the node in the faction's command tree whose direct children include
+        /// <paramref name="ship"/>. That node is the faction itself when the ship sits on the
+        /// faction root, and null when the ship is not in the tree.</summary>
         private static Entity? FindHoldingFleet(Entity fleet, Entity ship)
         {
             if (!fleet.TryGetDataBlob<FleetDB>(out var fleetDB)) return null;
@@ -487,14 +490,50 @@ namespace Pulsar4X.Engine.Api
                 return CommandResult.Reject($"Entity {reassign.ToFleetId} not found.");
             if (!toFleet.HasDataBlob<FleetDB>())
                 return CommandResult.Reject("Reassignment target is not a fleet.");
+            if (toFleet.FactionOwnerID != faction.Id)
+                return CommandResult.Reject("Reassignment target is not one of your fleets.");
+            if (!faction.TryGetDataBlob<FleetDB>(out var root))
+                return CommandResult.Reject("Faction has no fleet root.");
 
-            // Detach the ship from wherever it currently sits: a fleet in the tree, or the faction root.
-            var holder = FindHoldingFleet(faction, commanded) ?? faction;
-            var unassign = FleetOrder.UnassignShip(faction.Id, holder, commanded);
-            if (!_game.OrderHandler.HandleOrder(unassign))
-                return CommandResult.Reject("Command rejected by engine validation.");
+            // A ship in a fleet is removed by UnassignShip. That order rejects the faction
+            // entity as the commander, so a ship sitting on the faction root is lifted off
+            // directly. A ship that is in neither place is only added.
+            var holder = FindHoldingFleet(faction, commanded);
+            if (holder != null && holder.Id != faction.Id)
+            {
+                var unassign = FleetOrder.UnassignShip(faction.Id, holder, commanded);
+                if (!_game.OrderHandler.HandleOrder(unassign))
+                    return CommandResult.Reject("Command rejected by engine validation.");
+            }
+            else if (root.Children.Contains(commanded))
+                root.RemoveChild(commanded);
 
             return Dispatch(FleetOrder.AssignShip(faction.Id, toFleet, commanded));
+        }
+
+        private CommandResult TranslateDetachShip(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (!commanded.HasDataBlob<ShipInfoDB>())
+                return CommandResult.Reject("Detach target is not a ship.");
+            if (!faction.TryGetDataBlob<FleetDB>(out var root))
+                return CommandResult.Reject("Faction has no fleet root.");
+
+            var holder = FindHoldingFleet(faction, commanded);
+            if (holder != null && holder.Id != faction.Id)
+            {
+                // Unassign removes the ship from that fleet. It does not hang the ship on the
+                // faction root, which is what the unassigned list is.
+                var unassign = FleetOrder.UnassignShip(faction.Id, holder, commanded);
+                if (!_game.OrderHandler.HandleOrder(unassign))
+                    return CommandResult.Reject("Command rejected by engine validation.");
+            }
+
+            if (!root.Children.Contains(commanded))
+                root.AddChild(commanded);
+
+            MessagePublisher.Instance.Publish(Message.Create(
+                MessageTypes.FleetReorganized, factionId: faction.Id));
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 
         private CommandResult TranslateSetFlagship(Entity faction, Entity commanded, GameCommand command)

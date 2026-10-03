@@ -461,8 +461,8 @@ namespace Pulsar4X.Engine.Api
             }
 
             return new ShipView(
-                shipInfo.Design.Name,
-                shipInfo.Design.CrewReq,
+                shipInfo.Design?.Name ?? "",
+                shipInfo.Design?.CrewReq ?? 0,
                 commander,
                 totalCount > 0 ? totalHealth / totalCount : 1,
                 operationalCount,
@@ -1376,7 +1376,7 @@ namespace Pulsar4X.Engine.Api
             }
 
             return new ShipSnapshot(ship.Id, ship.GetName(factionId), ship.Manager?.ManagerID ?? "",
-                                    shipInfo?.Design.Name ?? "", commander)
+                                    shipInfo?.Design?.Name ?? "", commander)
             {
                 Goal = ProjectGoals(ship),
                 Orders = ProjectOrders(ship),

@@ -3,7 +3,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Pulsar4X.Api;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
 using Pulsar4X.Messaging;
+using Pulsar4X.Names;
+using Pulsar4X.Ships;
 
 namespace Pulsar4X.Tests
 {
@@ -134,6 +138,64 @@ namespace Pulsar4X.Tests
             Assert.That(nested, Has.Count.EqualTo(1));
             Assert.That(nested[0].SubFleets, Has.Count.EqualTo(1));
             Assert.That(nested[0].SubFleets[0].Id, Is.EqualTo(fleets[1].Id));
+        }
+
+        [Test]
+        public void Reassign_and_detach_move_a_ship_between_fleets_and_the_unassigned_list()
+        {
+            var session = Connect();
+            _server.SubmitCommand(session, new CreateFleetCommand(session.FactionId, _game.Systems[0].ID));
+            _server.SubmitCommand(session, new CreateFleetCommand(session.FactionId, _game.Systems[0].ID));
+            var (fleets, looseAtStart) = _projector.ProjectFleetHierarchy(session.FactionId);
+            Assert.That(fleets, Has.Count.EqualTo(2));
+            Assert.That(looseAtStart, Is.Empty);
+
+            var ship = Entity.Create(session.FactionId);
+            _game.Systems[0].AddEntity(ship, new List<BaseDataBlob>
+            {
+                new ShipInfoDB(),
+                new NameDB("Courier"),
+            });
+
+            var assign = _server.SubmitCommand(session, new ReassignShipCommand(ship.Id, fleets[0].Id));
+            Assert.That(assign.Accepted, Is.True, assign.RejectionReason);
+
+            var (afterAssign, looseAfterAssign) = _projector.ProjectFleetHierarchy(session.FactionId);
+            var home = afterAssign.Single(f => f.Id == fleets[0].Id);
+            var other = afterAssign.Single(f => f.Id == fleets[1].Id);
+            Assert.That(home.Ships.Select(s => s.Id), Is.EqualTo(new[] { ship.Id }));
+            Assert.That(home.Ships[0].Name, Is.EqualTo("Courier"));
+            Assert.That(home.FlagshipId, Is.EqualTo(ship.Id));
+            Assert.That(other.Ships, Is.Empty);
+            Assert.That(looseAfterAssign, Is.Empty);
+
+            var received = new List<GameEventEnvelope>();
+            using (_server.Subscribe(session, received.Add))
+            {
+                received.Clear();
+                var detach = _server.SubmitCommand(session, new DetachShipCommand(ship.Id));
+                Assert.That(detach.Accepted, Is.True, detach.RejectionReason);
+
+                var push = received.LastOrDefault(e => e.Type == GameEventType.FleetsChanged);
+                Assert.That(push, Is.Not.Null, "expected a FleetsChanged push");
+                Assert.That(push!.UnattachedShips.Select(s => s.Id), Does.Contain(ship.Id));
+            }
+
+            var (afterDetach, loose) = _projector.ProjectFleetHierarchy(session.FactionId);
+            Assert.That(afterDetach.Single(f => f.Id == fleets[0].Id).Ships, Is.Empty);
+            Assert.That(afterDetach.Single(f => f.Id == fleets[0].Id).FlagshipId, Is.Null);
+            Assert.That(loose.Select(s => s.Id), Is.EqualTo(new[] { ship.Id }));
+            Assert.That(loose[0].Name, Is.EqualTo("Courier"));
+
+            var move = _server.SubmitCommand(session, new ReassignShipCommand(ship.Id, fleets[1].Id));
+            Assert.That(move.Accepted, Is.True, move.RejectionReason);
+
+            var (afterMove, looseAfterMove) = _projector.ProjectFleetHierarchy(session.FactionId);
+            var destination = afterMove.Single(f => f.Id == fleets[1].Id);
+            Assert.That(destination.Ships.Select(s => s.Id), Is.EqualTo(new[] { ship.Id }));
+            Assert.That(destination.FlagshipId, Is.EqualTo(ship.Id));
+            Assert.That(afterMove.Single(f => f.Id == fleets[0].Id).Ships, Is.Empty);
+            Assert.That(looseAfterMove, Is.Empty);
         }
     }
 }
