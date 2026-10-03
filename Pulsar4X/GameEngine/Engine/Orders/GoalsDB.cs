@@ -111,6 +111,9 @@ public enum GoalType
 
     // Standing colony job: list warehouse stock. Appended so saved values stay put.
     OfferStock,
+
+    // One refining batch, called by Offer stock. Appended so saved values stay put.
+    RunIndustry,
 }
 
 public class Goal

@@ -241,8 +241,9 @@ public class AgentProcessor : IInstanceProcessor
 
                 if (managedEntity.HasDataBlob<ColonyInfoDB>())
                 {
-                    // Standing colony work plans again when the queue for this goal is empty.
-                    // An empty queue leaves the goal Active.
+                    // Standing colony work plans again when this goal has nothing left but a
+                    // refining batch. That order stays until the batch completes. The industry
+                    // planner will not add another while the line still has the job.
                     managedEntity.TryGetDataBlob<ActionQueueDB>(out var queue);
                     if (queue != null && queue.ActionsFor(goal).Any(a => a.Status == ActionStatus.Failed))
                     {
@@ -257,7 +258,8 @@ public class AgentProcessor : IInstanceProcessor
                             a.ParentGoalId == goal.Id && a.Status == ActionStatus.Succeeded);
                     }
 
-                    bool stillQueued = queue != null && queue.ActionsFor(goal).Any();
+                    bool stillQueued = queue != null
+                        && queue.ActionsFor(goal).Any(action => action is not IndustryOrder2);
                     if (!stillQueued)
                     {
                         if (!_planners.TryGetValue(goal.Type, out var planner))

@@ -6,6 +6,7 @@ using Pulsar4X.Colonies;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Api;
 using Pulsar4X.Factions;
+using Pulsar4X.Industry;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Logistics;
 using Pulsar4X.Modding;
@@ -122,5 +123,7 @@ public class LunaConcordTests
         Assert.That(view!.CanEdit, Is.False);
         Assert.That(view.Goods.Select(good => good.CargoId), Is.EquivalentTo(book.Listings.Keys));
         Assert.That(view.Goods.All(good => good.SellQuantity > 0));
+        if (colony.TryGetDataBlob<IndustryAbilityDB>(out var industry))
+            Assert.That(industry.ProductionLines.Values.All(line => line.Jobs.Count == 0), Is.True);
     }
 }

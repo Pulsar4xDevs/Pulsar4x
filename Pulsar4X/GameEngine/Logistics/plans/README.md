@@ -2,7 +2,7 @@
 
 Implementation plans for the trade roadmap. Design vocabulary for the first three is `GameEngine/Logistics/market-and-stance.md`. Goal and action rules are `GameEngine/Engine/Orders/agents-and-goals-design.md`.
 
-Plans 1–12 and 5b are implemented on `TradeAndTransport`. Do not start a later plan before the ones it lists under Depends on.
+Plans 1–12 and 5b are implemented on `TradeAndTransport`. Do not start a later plan before the ones it lists under Depends on. Colony industry goals are not in this sequence. They live in `GameEngine/Industry/plans/`.
 
 | # | Plan | Depends on |
 |---|---|---|

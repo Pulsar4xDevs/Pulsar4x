@@ -18,15 +18,23 @@ public class OfferStockPlan : IGoalPlanner
     public PlanResult Plan(Entity managedEntity, Goal goal, DateTime atDateTime)
     {
         var notes = new List<string>();
+        var actions = new List<EntityAction>();
+
+        var industry = new RunIndustryPlan().Plan(managedEntity, goal, atDateTime);
+        actions.AddRange(industry.Actions);
+        if (!string.IsNullOrEmpty(industry.Message))
+            notes.Add(industry.Message);
+
         if (managedEntity.HasDataBlob<LogiBaseDB>())
             Offer(managedEntity, notes);
 
         var market = new RunMarketPlan().Plan(managedEntity, goal, atDateTime);
+        actions.AddRange(market.Actions);
         return new PlanResult
         {
             Status = GoalStatus.Active,
             Message = Join(market.Message, notes),
-            Actions = market.Actions,
+            Actions = actions,
             SubGoals = Array.Empty<(Entity, Goal)>(),
         };
     }

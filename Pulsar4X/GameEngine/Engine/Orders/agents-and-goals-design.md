@@ -11,6 +11,8 @@ Commander Command/Nav/Survey XP is quality on relay, recheck, and plan/action *r
 2. **One command surface** — humans and AI use the same goals, gates, and queue.
 3. **Command hierarchy has mechanical cost** — seats, rank, and relay delay matter.
 
+Colony growth through a seated administrator is `colony-administrator.md`. Those are notes, not an implementation plan.
+
 ## Pipeline
 
 ```

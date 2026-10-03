@@ -7,6 +7,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
+using Pulsar4X.Industry;
 using Pulsar4X.Logistics;
 using Pulsar4X.Modding;
 using Pulsar4X.Names;
@@ -54,6 +55,18 @@ public class EarthStartTests
             Assert.That(book.Listings[cargoId].BuyQuantity, Is.EqualTo(0));
             Assert.That(book.Listings[cargoId].Ask, Is.EqualTo(0));
         }
+
+        long steel = StockOf(colony, "stainless-steel");
+        var steelRow = colony.GetDataBlob<ColonyMarketPolicyDB>().Rows["stainless-steel"];
+        Assert.That(steelRow.Max, Is.EqualTo(steel + 100));
+        Assert.That(steelRow.AutoProduce, Is.False);
+        Assert.That(steelRow.Bid, Is.EqualTo(0));
+        var jobs = colony.GetDataBlob<IndustryAbilityDB>().ProductionLines.Values
+            .SelectMany(line => line.Jobs)
+            .ToList();
+        Assert.That(jobs, Has.Count.EqualTo(1));
+        Assert.That(jobs[0].ItemGuid, Is.EqualTo("stainless-steel"));
+        Assert.That(jobs[0].NumberOrdered, Is.EqualTo(1));
     }
 
     static List<string> LargestPiles(Entity colony, int capacity)
