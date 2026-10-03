@@ -83,28 +83,36 @@ public class GeoSurveyOrder : EntityAction
             IsRunning = true;
             PreviousUpdate = atDateTime;
             Processor = new GeoSurveyProcessor(EntityCommanding, Target);
-            PublishShipChanged();
+            PublishSurveyChanged();
         }
         else if (PreviousUpdate != null && atDateTime - PreviousUpdate >= TimeSpan.FromDays(1))
         {
             Processor?.ProcessEntity(EntityCommanding, atDateTime);
             PreviousUpdate = atDateTime;
-            PublishShipChanged();
+            PublishSurveyChanged();
         }
     }
 
-    void PublishShipChanged()
+    void PublishSurveyChanged()
     {
-        // Progress lives on the target body; EntityWindow reads a baked OrderSnapshot
-        // on the ship. Without this, the percent never updates while the window is open.
-        var ship = EntityCommanding;
-        if (ship?.Manager == null)
+        // EntityWindow re-reads the open entity's snapshot each frame. The ship snapshot
+        // carries the order line; the body snapshot carries GeoSurveyView and the mineral
+        // reveal. Push both, addressed to the surveying faction, or the body window stays stale.
+        int? factionId = EntityCommanding?.FactionOwnerID;
+        PublishChanged(EntityCommanding, factionId);
+        if (Target != null && !ReferenceEquals(Target, EntityCommanding))
+            PublishChanged(Target, factionId);
+    }
+
+    static void PublishChanged(Entity? entity, int? factionId)
+    {
+        if (entity?.Manager == null)
             return;
         MessagePublisher.Instance.Publish(Message.Create(
             MessageTypes.EntityChanged,
-            entityId: ship.Id,
-            systemId: ship.Manager.ManagerID,
-            factionId: ship.FactionOwnerID));
+            entityId: entity.Id,
+            systemId: entity.Manager.ManagerID,
+            factionId: factionId));
     }
 
     internal override bool IsValidCommand(Game game)

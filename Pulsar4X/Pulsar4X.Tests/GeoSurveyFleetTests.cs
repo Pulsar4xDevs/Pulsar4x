@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using GameEngine.Engine.Orders;
 using NUnit.Framework;
 using Pulsar4X.Datablobs;
@@ -13,6 +14,7 @@ using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
 using Pulsar4X.GeoSurveys;
+using Pulsar4X.Messaging;
 using Pulsar4X.Modding;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
@@ -70,6 +72,38 @@ namespace Pulsar4X.Tests
 
             Assert.That(order.Details, Is.EqualTo("50%"));
             Assert.That(order.Name, Does.Contain("(50%)"));
+        }
+
+        [Test]
+        public void GeoSurveyOrder_publishes_the_body_when_the_survey_completes()
+        {
+            var scene = BuildMarsSurveyFleet();
+            var body = scene.Mars;
+            var geo = body.GetDataBlob<GeoSurveyableDB>();
+            geo.PointsRequired = 1;
+
+            var messages = new List<Message>();
+            MessagePublisher.MessageHandler handler = m =>
+            {
+                messages.Add(m);
+                return Task.CompletedTask;
+            };
+            MessagePublisher.Instance.Subscribe(MessageTypes.EntityChanged, handler);
+            try
+            {
+                var order = new GeoSurveyOrder(scene.SurveyorA, body);
+                order.Execute(_epoch);
+                messages.Clear();
+                order.Execute(_epoch.AddDays(1));
+            }
+            finally
+            {
+                MessagePublisher.Instance.Unsubscribe(MessageTypes.EntityChanged, handler);
+            }
+
+            Assert.That(geo.IsSurveyComplete(scene.Faction.Id), Is.True);
+            Assert.That(messages.Any(m => m.EntityId == body.Id && m.FactionId == scene.Faction.Id),
+                Is.True, "the body window reads GeoSurveyView from the body's snapshot");
         }
 
         [Test]
