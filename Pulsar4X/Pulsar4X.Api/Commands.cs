@@ -228,6 +228,24 @@ public sealed record WarpMoveCommand(
     int DestinationId,
     Vec3? InsertionPointRelative = null) : GameCommand(TargetEntityId);
 
+/// <summary>Empty chair: queue the same plot <c>MovePlanner</c> would build for this body.
+/// No goal, no replan. A seated captain uses <see cref="MoveToBodyCommand"/> instead.</summary>
+public sealed record GoToBodyCommand(int TargetEntityId, int BodyId) : GameCommand(TargetEntityId);
+
+/// <summary>Empty chair: warp to the body with the planner drop-in and circularise.
+/// Forces warp even when a newtonian transfer would also work.</summary>
+public sealed record WarpToBodyCommand(int TargetEntityId, int BodyId) : GameCommand(TargetEntityId);
+
+/// <summary>Empty chair: circularise around the current SOI parent at current radius.</summary>
+public sealed record CirculariseCommand(int TargetEntityId) : GameCommand(TargetEntityId);
+
+/// <summary>Empty chair: Hohmann to a circular orbit of <see cref="RadiusMetres"/>
+/// around the current SOI parent. Circularise first if leftover is eccentric.</summary>
+public sealed record ChangeAltitudeCommand(int TargetEntityId, double RadiusMetres) : GameCommand(TargetEntityId);
+
+/// <summary>Empty chair: rendezvous onto <see cref="BodyId"/>'s orbit around the shared parent.</summary>
+public sealed record MatchOrbitCommand(int TargetEntityId, int BodyId) : GameCommand(TargetEntityId);
+
 // ----- fire control (commanded entity: the ship) -----
 
 /// <summary>Replace a fire control's assigned weapon set (ids from <see cref="WeaponSnapshot.Id"/>).</summary>

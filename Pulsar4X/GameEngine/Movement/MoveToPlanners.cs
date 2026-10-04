@@ -682,7 +682,7 @@ public static class MovePlanner
         return true;
     }
 
-    private static List<EntityAction> BuildWarpAndCircularise(Entity orderEntity, Entity targetEntity, DateTime now)
+    public static List<EntityAction> BuildWarpAndCircularise(Entity orderEntity, Entity targetEntity, DateTime now)
     {
         var actions = new List<EntityAction>();
         (Vector3 pos, Vector3 vel) departureState;

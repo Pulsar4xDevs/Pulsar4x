@@ -8,6 +8,7 @@ using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
+using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
@@ -86,6 +87,11 @@ namespace Pulsar4X.Engine.Api
                 [typeof(Pulsar4X.Api.CancelOrderCommand)] = TranslateCancelOrder,
                 [typeof(Pulsar4X.Api.NewtonThrustCommand)] = TranslateNewtonThrust,
                 [typeof(Pulsar4X.Api.WarpMoveCommand)] = TranslateWarpMove,
+                [typeof(GoToBodyCommand)] = TranslateGoToBody,
+                [typeof(WarpToBodyCommand)] = TranslateWarpToBody,
+                [typeof(CirculariseCommand)] = TranslateCircularise,
+                [typeof(ChangeAltitudeCommand)] = TranslateChangeAltitude,
+                [typeof(MatchOrbitCommand)] = TranslateMatchOrbit,
                 [typeof(SetFireControlWeaponsCommand)] = TranslateSetFireControlWeapons,
                 [typeof(SetFireControlTargetCommand)] = TranslateSetFireControlTarget,
                 [typeof(AssignOrdnanceCommand)] = TranslateAssignOrdnance,
@@ -664,12 +670,18 @@ namespace Pulsar4X.Engine.Api
 
         private CommandResult TranslateGeoSurvey(Entity faction, Entity commanded, GameCommand command)
         {
+            var cmd = (GeoSurveyCommand)command;
+            if (!commanded.HasDataBlob<FleetDB>() && IsEmptyChairShip(commanded))
+            {
+                if (!TryResolve(cmd.BodyId, out var body))
+                    return CommandResult.Reject($"Entity {cmd.BodyId} not found.");
+                return PlotGeoSurvey(commanded, body);
+            }
+
             if (RejectGoalWithoutCaptain(commanded) is { } rejected)
                 return rejected;
-            var cmd = (GeoSurveyCommand)command;
             var goal = new Goal(GoalType.ServeyBodies)
             {
-                
                 TargetEntityID = cmd.BodyId,
             };
             AgentProcessor.AssignGoal(commanded, goal);
@@ -680,9 +692,16 @@ namespace Pulsar4X.Engine.Api
 
         private CommandResult TranslateGravSurvey(Entity faction, Entity commanded, GameCommand command)
         {
+            var cmd = (GravSurveyCommand)command;
+            if (!commanded.HasDataBlob<FleetDB>() && IsEmptyChairShip(commanded))
+            {
+                if (!TryResolve(cmd.LocationId, out var site))
+                    return CommandResult.Reject($"Entity {cmd.LocationId} not found.");
+                return PlotGravSurvey(commanded, site);
+            }
+
             if (RejectGoalWithoutCaptain(commanded) is { } rejected)
                 return rejected;
-            var  cmd = (GravSurveyCommand)command;
             var goal = new Goal(GoalType.ScanAnomalies)
             {
                 TargetEntityID = cmd.LocationId,
@@ -695,8 +714,6 @@ namespace Pulsar4X.Engine.Api
 
         private CommandResult TranslateJump(Entity faction, Entity commanded, GameCommand command)
         {
-            if (RejectGoalWithoutCaptain(commanded) is { } rejected)
-                return rejected;
             var jump = (Pulsar4X.Api.JumpCommand)command;
             if (!TryResolve(jump.JumpPointId, out var jumpPoint)
                 || !jumpPoint.TryGetDataBlob<JumpPointDB>(out var jumpPointDB))
@@ -706,6 +723,11 @@ namespace Pulsar4X.Engine.Api
             if (!jumpPointDB.IsDiscovered.Contains(faction.Id))
                 return CommandResult.Reject("Jump point has not been discovered by the faction.");
 
+            if (!commanded.HasDataBlob<FleetDB>() && IsEmptyChairShip(commanded))
+                return PlotShipJump(commanded, jumpPoint, jumpPointDB);
+
+            if (RejectGoalWithoutCaptain(commanded) is { } rejected)
+                return rejected;
             return JumpOrder.CreateAndExecute(_game, faction, commanded, jumpPointDB)
                 ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
                 : CommandResult.Reject("Command rejected by engine validation.");
@@ -812,6 +834,186 @@ namespace Pulsar4X.Engine.Api
         }
 
         // ----- ship movement (commanded entity: the ship) -----
+
+        /// <summary>Empty chair: the player plots. A seated captain issues a goal instead.</summary>
+        static bool IsEmptyChairShip(Entity commanded)
+        {
+            if (commanded.HasDataBlob<FleetDB>())
+                return false;
+            if (!commanded.TryGetDataBlob<ShipInfoDB>(out var info))
+                return true;
+            return info.CommanderID < 0;
+        }
+
+        static CommandResult? RejectPlotOnCaptainOrFleet(Entity commanded)
+        {
+            if (commanded.HasDataBlob<FleetDB>())
+                return CommandResult.Reject("Plot actions on a ship.");
+            if (commanded.TryGetDataBlob<ShipInfoDB>(out var info) && info.CommanderID >= 0)
+                return CommandResult.Reject("This ship has a captain. Issue a goal instead.");
+            if (!commanded.HasDataBlob<ActionQueueDB>())
+                return CommandResult.Reject("The entity has no order queue.");
+            return null;
+        }
+
+        CommandResult? RejectUnseen(Entity faction, Entity destination)
+        {
+            if (destination.Manager == null
+                || !destination.Manager.IsEntityVisibleToFaction(destination, faction.Id))
+                return CommandResult.Reject($"Entity {destination.Id} not found.");
+            return null;
+        }
+
+        CommandResult DispatchActions(List<EntityAction> actions, string emptyReason)
+        {
+            if (actions.Count == 0)
+                return CommandResult.Reject(string.IsNullOrEmpty(emptyReason) ? "nothing to queue" : emptyReason);
+            foreach (var action in actions)
+            {
+                if (!_game.OrderHandler.HandleOrder(action))
+                    return CommandResult.Reject("Command rejected by engine validation.");
+            }
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateGoToBody(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectPlotOnCaptainOrFleet(commanded) is { } rejected)
+                return rejected;
+            var cmd = (GoToBodyCommand)command;
+            if (!TryResolve(cmd.BodyId, out var body))
+                return CommandResult.Reject($"Entity {cmd.BodyId} not found.");
+            if (RejectUnseen(faction, body) is { } unseen)
+                return unseen;
+            if (!MovePlanner.TryBuildMoveActions(commanded, body, out var actions, out var reason, commanded.StarSysDateTime))
+                return CommandResult.Reject(reason);
+            return DispatchActions(actions, reason);
+        }
+
+        private CommandResult TranslateWarpToBody(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectPlotOnCaptainOrFleet(commanded) is { } rejected)
+                return rejected;
+            if (!commanded.HasDataBlob<WarpAbilityDB>())
+                return CommandResult.Reject("The entity has no warp drive.");
+            var cmd = (WarpToBodyCommand)command;
+            if (!TryResolve(cmd.BodyId, out var body))
+                return CommandResult.Reject($"Entity {cmd.BodyId} not found.");
+            if (RejectUnseen(faction, body) is { } unseen)
+                return unseen;
+            try
+            {
+                var actions = MovePlanner.BuildWarpAndCircularise(commanded, body, commanded.StarSysDateTime);
+                return DispatchActions(actions, "warp could not be plotted");
+            }
+            catch (Exception e)
+            {
+                return CommandResult.Reject($"Warp could not be plotted: {e.Message}");
+            }
+        }
+
+        private CommandResult TranslateCircularise(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectPlotOnCaptainOrFleet(commanded) is { } rejected)
+                return rejected;
+            if (!CirculariseAction.TryCompute(commanded, commanded.StarSysDateTime, out _, out _, out _))
+                return CommandResult.Reject("Cannot circularise here.");
+            return Dispatch(CirculariseAction.CreateCommand(commanded));
+        }
+
+        private CommandResult TranslateChangeAltitude(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectPlotOnCaptainOrFleet(commanded) is { } rejected)
+                return rejected;
+            var cmd = (ChangeAltitudeCommand)command;
+            if (!(cmd.RadiusMetres > 0) || !double.IsFinite(cmd.RadiusMetres))
+                return CommandResult.Reject("Orbit radius must be a positive finite number.");
+            if (!ChangeOrbitalAltitudeAction.TryPlanBurns(commanded, cmd.RadiusMetres, commanded.StarSysDateTime, out var burns, out var reason))
+                return CommandResult.Reject(reason);
+            if (burns.Count == 0)
+                return CommandResult.Reject("Already at altitude");
+            return Dispatch(ChangeOrbitalAltitudeAction.CreateCommand(commanded, cmd.RadiusMetres));
+        }
+
+        private CommandResult TranslateMatchOrbit(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectPlotOnCaptainOrFleet(commanded) is { } rejected)
+                return rejected;
+            var cmd = (MatchOrbitCommand)command;
+            if (!TryResolve(cmd.BodyId, out var body))
+                return CommandResult.Reject($"Entity {cmd.BodyId} not found.");
+            if (RejectUnseen(faction, body) is { } unseen)
+                return unseen;
+            if (!MatchOrbitAction.TryPlanBurns(commanded, body, commanded.StarSysDateTime, out _, out var reason))
+                return CommandResult.Reject(reason);
+            return Dispatch(MatchOrbitAction.CreateCommand(commanded, body));
+        }
+
+        CommandResult PlotGeoSurvey(Entity ship, Entity body)
+        {
+            if (RejectPlotOnCaptainOrFleet(ship) is { } rejected)
+                return rejected;
+            if (!ship.HasDataBlob<GeoSurveyAbilityDB>())
+                return CommandResult.Reject("The ship has no geological survey gear.");
+            if (!body.TryGetDataBlob<GeoSurveyableDB>(out var surveyable)
+                || surveyable.IsSurveyComplete(ship.FactionOwnerID))
+                return CommandResult.Reject("Nothing to geo-survey here.");
+            if (!IsAtGeoSite(ship, body))
+                return CommandResult.Reject("The ship is not at this body.");
+            return Dispatch(GeoSurveyOrder.CreateCommand(ship.FactionOwnerID, ship, body));
+        }
+
+        CommandResult PlotGravSurvey(Entity ship, Entity site)
+        {
+            if (RejectPlotOnCaptainOrFleet(ship) is { } rejected)
+                return rejected;
+            if (!ship.HasDataBlob<JPSurveyAbilityDB>())
+                return CommandResult.Reject("The ship has no gravitational survey gear.");
+            if (!site.TryGetDataBlob<JPSurveyableDB>(out var surveyable)
+                || surveyable.IsSurveyComplete(ship.FactionOwnerID))
+                return CommandResult.Reject("Nothing to grav-survey here.");
+            if (!IsAtGravSite(ship, site))
+                return CommandResult.Reject("The ship is not at this site.");
+            return Dispatch(JPSurveyOrder.CreateCommand(ship.FactionOwnerID, ship, site));
+        }
+
+        static bool IsAtGeoSite(Entity ship, Entity body)
+        {
+            if (ship.TryGetDataBlob<PositionDB>(out var pos) && pos.Parent == body)
+                return true;
+            return ship.GetSOIParentEntity() == body;
+        }
+
+        static bool IsAtGravSite(Entity ship, Entity site)
+        {
+            if (ship.TryGetDataBlob<PositionDB>(out var pos) && pos.Parent == site)
+                return true;
+            return MoveMath.GetDistanceBetween(ship, site) < 100_000;
+        }
+
+        CommandResult PlotShipJump(Entity ship, Entity jumpPoint, JumpPointDB jumpPointDB)
+        {
+            if (RejectPlotOnCaptainOrFleet(ship) is { } rejected)
+                return rejected;
+            var actions = new List<EntityAction>();
+            var gate = jumpPointDB.OwningEntity ?? jumpPoint;
+            bool atGate = ship.TryGetDataBlob<PositionDB>(out var pos) && pos.Parent == gate;
+            if (!atGate)
+            {
+                if (!ship.HasDataBlob<WarpAbilityDB>())
+                    return CommandResult.Reject("The entity has no warp drive.");
+                try
+                {
+                    actions.Add(WarpMoveAction.CreateCommandEZ(ship, gate, ship.StarSysDateTime));
+                }
+                catch (Exception e)
+                {
+                    return CommandResult.Reject($"Warp could not be plotted: {e.Message}");
+                }
+            }
+            actions.Add(ShipJumpAction.Create(ship, jumpPointDB));
+            return DispatchActions(actions, "jump could not be plotted");
+        }
 
         private CommandResult TranslateNewtonThrust(Entity faction, Entity commanded, GameCommand command)
         {

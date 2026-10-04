@@ -20,11 +20,16 @@ namespace Pulsar4X.Client
             Trade,
             Haul,
             HaulContract,
+            PlotWarpTo,
+            PlotCircularise,
+            PlotChangeAltitude,
+            PlotMatchOrbit,
         }
 
         private IssueOrderType selectedIssueOrderType = IssueOrderType.MoveTo;
         private int haulSourceId = -1;
         private int haulDestId = -1;
+        private double plotAltitudeM;
 
         private int? selectedFleetId = null;
         // The ship whose orders the right-hand pane is editing. Null means the selected fleet.
@@ -145,6 +150,7 @@ namespace Pulsar4X.Client
             selectedFleetId = null;
             autoSelectFirstFleet = false;
             captainChooserShipId = null;
+            plotAltitudeM = 0;
             SetActive(true);
         }
 
@@ -350,11 +356,31 @@ namespace Pulsar4X.Client
             if (orderShip != null && !ShipHasCaptain(orderShip))
             {
                 DisplayHelpers.Header("Actions");
-                ImGui.TextWrapped("No captain. You plot this ship's actions.");
+                ImGui.TextWrapped("No captain. You plot this ship's actions. The queue does not replan.");
                 var entity = SubjectEntity(galaxy);
-                if (entity != null && entity.HasView<WarpAbilityView>() && ImGui.Selectable("Warp..."))
+                bool warp = entity?.HasView<WarpAbilityView>() == true;
+                bool thrust = entity?.HasView<ThrustView>() == true;
+                if (ImGui.Selectable("Go to ...", selectedIssueOrderType == IssueOrderType.MoveTo))
+                    selectedIssueOrderType = IssueOrderType.MoveTo;
+                if (warp && ImGui.Selectable("Warp to ...", selectedIssueOrderType == IssueOrderType.PlotWarpTo))
+                    selectedIssueOrderType = IssueOrderType.PlotWarpTo;
+                if (thrust && ImGui.Selectable("Circularise", selectedIssueOrderType == IssueOrderType.PlotCircularise))
+                    selectedIssueOrderType = IssueOrderType.PlotCircularise;
+                if (thrust && ImGui.Selectable("Change altitude ...", selectedIssueOrderType == IssueOrderType.PlotChangeAltitude))
+                    selectedIssueOrderType = IssueOrderType.PlotChangeAltitude;
+                if (thrust && ImGui.Selectable("Match orbit ...", selectedIssueOrderType == IssueOrderType.PlotMatchOrbit))
+                    selectedIssueOrderType = IssueOrderType.PlotMatchOrbit;
+                var geoSite = CurrentGeoSurveySite(galaxy);
+                if (geoSite != null && ImGui.Selectable("Geo survey " + NameOf(geoSite), selectedIssueOrderType == IssueOrderType.GeoSurvey))
+                    selectedIssueOrderType = IssueOrderType.GeoSurvey;
+                var gravSite = CurrentGravSurveySite(galaxy);
+                if (gravSite != null && ImGui.Selectable("Grav survey " + NameOf(gravSite), selectedIssueOrderType == IssueOrderType.GravSurvey))
+                    selectedIssueOrderType = IssueOrderType.GravSurvey;
+                if (ImGui.Selectable("Jump...", selectedIssueOrderType == IssueOrderType.Jump))
+                    selectedIssueOrderType = IssueOrderType.Jump;
+                if (warp && ImGui.Selectable("Warp plotter..."))
                     OpenPlotter(orderShip, warp: true);
-                if (entity != null && entity.HasView<ThrustView>() && ImGui.Selectable("Nav..."))
+                if (thrust && ImGui.Selectable("Nav plotter..."))
                     OpenPlotter(orderShip, warp: false);
                 return;
             }
@@ -396,6 +422,74 @@ namespace Pulsar4X.Client
             // The fleet entity is not what warp and nav plot. A ship subject resolves the hull.
             if (orderShip == null) return null;
             return galaxy.GetSystem(systemId)?.GetEntity(id!.Value);
+        }
+
+        const double GravSurveyRangeM = 100_000;
+
+        EntitySnapshot? CurrentGeoSurveySite(IClientGalaxy galaxy)
+        {
+            if (orderShip is not { CanGeoSurvey: true }) return null;
+            var entity = SubjectEntity(galaxy);
+            var system = galaxy.GetSystem(SubjectSystemId() ?? "");
+            if (entity == null || system == null) return null;
+            var parent = entity.GetSoiParent(system);
+            return parent?.GetView<GeoSurveyView>() is { IsSurveyComplete: false } ? parent : null;
+        }
+
+        EntitySnapshot? CurrentGravSurveySite(IClientGalaxy galaxy)
+        {
+            if (orderShip is not { CanGravSurvey: true }) return null;
+            var entity = SubjectEntity(galaxy);
+            var system = galaxy.GetSystem(SubjectSystemId() ?? "");
+            if (entity == null || system == null) return null;
+            var parent = entity.GetSoiParent(system);
+            if (parent?.GetView<GravSurveyView>() is { IsSurveyComplete: false })
+                return parent;
+            var shipPos = entity.GetView<PositionView>();
+            if (shipPos == null) return null;
+            EntitySnapshot? best = null;
+            double bestD = GravSurveyRangeM;
+            foreach (var candidate in system.Entities)
+            {
+                if (candidate.GetView<GravSurveyView>() is not { IsSurveyComplete: false })
+                    continue;
+                var pos = candidate.GetView<PositionView>();
+                if (pos == null) continue;
+                double d = DistanceM(shipPos.AbsolutePosition, pos.AbsolutePosition);
+                if (d < bestD)
+                {
+                    bestD = d;
+                    best = candidate;
+                }
+            }
+            return best;
+        }
+
+        static double DistanceM(Vec3 a, Vec3 b)
+        {
+            double dx = a.X - b.X, dy = a.Y - b.Y, dz = a.Z - b.Z;
+            return Math.Sqrt(dx * dx + dy * dy + dz * dz);
+        }
+
+        void DisplayPlotSurveyHere(IClientGalaxy galaxy, int shipId, bool geo)
+        {
+            var site = geo ? CurrentGeoSurveySite(galaxy) : CurrentGravSurveySite(galaxy);
+            if (site == null)
+            {
+                ImGui.TextWrapped(geo
+                    ? "Not in orbit of an unsurveyed body."
+                    : "Not at an unsurveyed gravitational anomaly.");
+                return;
+            }
+            string name = NameOf(site);
+            ImGui.TextWrapped("Survey " + name + " from here. The queue does not replan.");
+            if (ImGui.Button(geo ? "Queue geo survey" : "Queue grav survey"))
+            {
+                if (geo)
+                    SubmitFleetCommand(new GeoSurveyCommand(shipId, site.Id));
+                else
+                    SubmitFleetCommand(new GravSurveyCommand(shipId, site.Id));
+            }
         }
 
         private string? SubjectSystemId()
@@ -440,22 +534,24 @@ namespace Pulsar4X.Client
 
                 DisplayCommandLine();
 
+                bool emptyChair = orderShip != null && !ShipHasCaptain(orderShip);
                 if (orderShip != null)
                 {
-                    bool shipGeo = orderShip.CanGeoSurvey && selectedIssueOrderType == IssueOrderType.GeoSurvey;
-                    bool shipGrav = orderShip.CanGravSurvey && selectedIssueOrderType == IssueOrderType.GravSurvey;
+                    bool atGeo = CurrentGeoSurveySite(galaxy) != null;
+                    bool atGrav = CurrentGravSurveySite(galaxy) != null;
+                    bool shipGeo = orderShip.CanGeoSurvey && selectedIssueOrderType == IssueOrderType.GeoSurvey
+                        && (!emptyChair || atGeo);
+                    bool shipGrav = orderShip.CanGravSurvey && selectedIssueOrderType == IssueOrderType.GravSurvey
+                        && (!emptyChair || atGrav);
+                    bool shipPlot = emptyChair && (selectedIssueOrderType == IssueOrderType.PlotWarpTo
+                        || selectedIssueOrderType == IssueOrderType.PlotCircularise
+                        || selectedIssueOrderType == IssueOrderType.PlotChangeAltitude
+                        || selectedIssueOrderType == IssueOrderType.PlotMatchOrbit);
                     bool shipGoal = selectedIssueOrderType == IssueOrderType.MoveTo
                         || selectedIssueOrderType == IssueOrderType.Jump
-                        || shipGeo || shipGrav;
+                        || shipGeo || shipGrav || shipPlot;
                     if (!shipGoal)
                         selectedIssueOrderType = IssueOrderType.MoveTo;
-                }
-
-                if (orderShip != null && !ShipHasCaptain(orderShip))
-                {
-                    ImGui.TextWrapped("Open Warp or Nav to queue one action. The list beside this pane is what is already queued.");
-                    ImGui.EndChild();
-                    return;
                 }
 
                 // A ship order is that one body. Command span widens a fleet order.
@@ -467,29 +563,71 @@ namespace Pulsar4X.Client
                 switch(selectedIssueOrderType)
                 {
                     case IssueOrderType.MoveTo:
+                        if (emptyChair)
+                        {
+                            ImGui.TextWrapped("Queues a one-shot plot. The ship will not rethink it.");
+                            DisplayTargetTree(candidates,
+                                e => e.HasView<BodyView>() && e.HasView<PositionView>(),
+                                "movement-button",
+                                id => SubmitFleetCommand(new GoToBodyCommand(commanded.Value, id)),
+                                starTargetsSystem: false);
+                        }
+                        else
+                        {
+                            DisplayTargetTree(candidates,
+                                e => e.HasView<BodyView>() && e.HasView<PositionView>(),
+                                "movement-button",
+                                id => SubmitFleetCommand(new MoveToBodyCommand(commanded.Value, id)),
+                                starTargetsSystem: false);
+                        }
+                        break;
+                    case IssueOrderType.PlotWarpTo:
+                        ImGui.TextWrapped("Warp to the body and circularise. Same drop-in as a captain's Move to.");
                         DisplayTargetTree(candidates,
                             e => e.HasView<BodyView>() && e.HasView<PositionView>(),
-                            "movement-button",
-                            id => SubmitFleetCommand(new MoveToBodyCommand(commanded.Value, id)),
+                            "warp-to-button",
+                            id => SubmitFleetCommand(new WarpToBodyCommand(commanded.Value, id)),
+                            starTargetsSystem: false);
+                        break;
+                    case IssueOrderType.PlotCircularise:
+                        ImGui.TextWrapped("Circularise around the current parent at the current radius.");
+                        if (ImGui.Button("Queue circularise"))
+                            SubmitFleetCommand(new CirculariseCommand(commanded.Value));
+                        break;
+                    case IssueOrderType.PlotChangeAltitude:
+                        DisplayChangeAltitude(galaxy, commanded.Value);
+                        break;
+                    case IssueOrderType.PlotMatchOrbit:
+                        ImGui.TextWrapped("Rendezvous onto this body's orbit around the shared parent.");
+                        DisplayTargetTree(candidates,
+                            e => e.HasView<BodyView>() && e.HasView<PositionView>(),
+                            "match-orbit-button",
+                            id => SubmitFleetCommand(new MatchOrbitCommand(commanded.Value, id)),
                             starTargetsSystem: false);
                         break;
                     case IssueOrderType.GeoSurvey:
-                        DisplayTargetTree(candidates,
-                            e => e.GetView<GeoSurveyView>() is { IsSurveyComplete: false },
-                            "geosurvey-button",
-                            id => SubmitFleetCommand(new GeoSurveyCommand(commanded.Value, id)),
-                            starTargetsSystem: fleetSpan,
-                            keepParentWhenChildrenRemain: fleetSpan,
-                            markDone: e => e.GetView<GeoSurveyView>()?.IsSurveyComplete == true);
+                        if (emptyChair)
+                            DisplayPlotSurveyHere(galaxy, commanded.Value, geo: true);
+                        else
+                            DisplayTargetTree(candidates,
+                                e => e.GetView<GeoSurveyView>() is { IsSurveyComplete: false },
+                                "geosurvey-button",
+                                id => SubmitFleetCommand(new GeoSurveyCommand(commanded.Value, id)),
+                                starTargetsSystem: fleetSpan,
+                                keepParentWhenChildrenRemain: fleetSpan,
+                                markDone: e => e.GetView<GeoSurveyView>()?.IsSurveyComplete == true);
                         break;
                     case IssueOrderType.GravSurvey:
-                        DisplayTargetTree(candidates,
-                            e => e.GetView<GravSurveyView>() is { IsSurveyComplete: false },
-                            "gravsurvey-button",
-                            id => SubmitFleetCommand(new GravSurveyCommand(commanded.Value, id)),
-                            starTargetsSystem: fleetSpan,
-                            keepParentWhenChildrenRemain: fleetSpan,
-                            markDone: e => e.GetView<GravSurveyView>()?.IsSurveyComplete == true);
+                        if (emptyChair)
+                            DisplayPlotSurveyHere(galaxy, commanded.Value, geo: false);
+                        else
+                            DisplayTargetTree(candidates,
+                                e => e.GetView<GravSurveyView>() is { IsSurveyComplete: false },
+                                "gravsurvey-button",
+                                id => SubmitFleetCommand(new GravSurveyCommand(commanded.Value, id)),
+                                starTargetsSystem: fleetSpan,
+                                keepParentWhenChildrenRemain: fleetSpan,
+                                markDone: e => e.GetView<GravSurveyView>()?.IsSurveyComplete == true);
                         break;
                     case IssueOrderType.Jump:
                         // The server only projects a JumpPointView once this faction has discovered it.
@@ -694,6 +832,27 @@ namespace Pulsar4X.Client
             public string Label = "";
             /// <summary>Orbital slot in km for a band. Entity rows compute their slot when sorted.</summary>
             public double SortKey;
+        }
+
+        private void DisplayChangeAltitude(IClientGalaxy galaxy, int shipId)
+        {
+            ImGui.TextWrapped("Hohmann to a circular orbit around the current parent. Circularise first if the leftover is eccentric.");
+            var entity = SubjectEntity(galaxy);
+            var system = galaxy.GetSystem(SubjectSystemId() ?? "");
+            var parent = entity != null && system != null ? entity.GetSoiParent(system) : null;
+            if (plotAltitudeM <= 0 && parent != null)
+                plotAltitudeM = parent.LowOrbitRadiusM();
+            float km = (float)(plotAltitudeM / 1000.0);
+            if (ImGui.InputFloat("Orbit radius (km)", ref km))
+                plotAltitudeM = km * 1000.0;
+            if (parent != null)
+            {
+                ImGui.SameLine();
+                if (ImGui.SmallButton("Low orbit"))
+                    plotAltitudeM = parent.LowOrbitRadiusM();
+            }
+            if (ImGui.Button("Queue change altitude") && plotAltitudeM > 0)
+                SubmitFleetCommand(new ChangeAltitudeCommand(shipId, plotAltitudeM));
         }
 
         /// <summary>

@@ -399,6 +399,69 @@ namespace Pulsar4X.Tests
                           && goals.ActiveGoal.Type == GoalType.MoveTo);
         }
 
+        [Test]
+        public void GoToBody_EmptyChair_QueuesActions_WithoutAGoal()
+        {
+            var scene = BuildMarsSurveyFleet();
+            var translator = new CommandTranslator(Game);
+            scene.Mars.FactionOwnerID = Pulsar4X.Engine.Game.NeutralFactionId;
+            _sys.ShowNeutralEntityToFaction(scene.Faction.Id, scene.Mars.Id);
+
+            var plotted = translator.Translate(scene.Faction, scene.SurveyorA,
+                new GoToBodyCommand(scene.SurveyorA.Id, scene.Mars.Id));
+            Assert.IsTrue(plotted.Accepted, plotted.RejectionReason);
+            Assert.IsFalse(scene.SurveyorA.HasDataBlob<GoalsDB>());
+            Assert.Greater(scene.SurveyorA.GetDataBlob<ActionQueueDB>().ActionList.Count, 0);
+
+            scene.SurveyorB.GetDataBlob<ShipInfoDB>().CommanderID =
+                CommanderFactory.Create(_sys, scene.Faction.Id, CommanderFactory.CreateShipCaptain(Game)).Id;
+            var blocked = translator.Translate(scene.Faction, scene.SurveyorB,
+                new GoToBodyCommand(scene.SurveyorB.Id, scene.Mars.Id));
+            Assert.IsFalse(blocked.Accepted);
+            Assert.That(blocked.RejectionReason, Does.Contain("captain"));
+        }
+
+        [Test]
+        public void GeoSurvey_EmptyChair_AtBody_QueuesOrderWithoutAGoal()
+        {
+            var scene = BuildMarsSurveyFleet();
+            var translator = new CommandTranslator(Game);
+            scene.Mars.FactionOwnerID = Pulsar4X.Engine.Game.NeutralFactionId;
+            _sys.ShowNeutralEntityToFaction(scene.Faction.Id, scene.Mars.Id);
+            ParkAtBody(scene.SurveyorA, scene.Mars);
+
+            var plotted = translator.Translate(scene.Faction, scene.SurveyorA,
+                new GeoSurveyCommand(scene.SurveyorA.Id, scene.Mars.Id));
+            Assert.IsTrue(plotted.Accepted, plotted.RejectionReason);
+            Assert.IsFalse(scene.SurveyorA.HasDataBlob<GoalsDB>());
+            Assert.That(scene.SurveyorA.GetDataBlob<ActionQueueDB>().ActionList,
+                Has.Some.InstanceOf<GeoSurveyOrder>());
+        }
+
+        [Test]
+        public void GeoSurvey_EmptyChair_NotAtBody_IsRejected()
+        {
+            var scene = BuildMarsSurveyFleet();
+            var translator = new CommandTranslator(Game);
+            scene.Mars.FactionOwnerID = Pulsar4X.Engine.Game.NeutralFactionId;
+            _sys.ShowNeutralEntityToFaction(scene.Faction.Id, scene.Mars.Id);
+
+            var blocked = translator.Translate(scene.Faction, scene.SurveyorA,
+                new GeoSurveyCommand(scene.SurveyorA.Id, scene.Mars.Id));
+            Assert.IsFalse(blocked.Accepted);
+            Assert.That(blocked.RejectionReason, Does.Contain("not at").IgnoreCase);
+            Assert.IsFalse(scene.SurveyorA.HasDataBlob<GoalsDB>());
+        }
+
+        static void ParkAtBody(Entity ship, Entity body)
+        {
+            if (ship.HasDataBlob<OrbitDB>())
+                ship.RemoveDataBlob<OrbitDB>();
+            var pos = ship.GetDataBlob<PositionDB>();
+            pos.SetParent(body);
+            pos.RelativePosition = Vector3.Zero;
+        }
+
         static void GiveOwnGoal(Entity ship, GoalType type, int targetId)
         {
             var goal = new Goal(type) { TargetEntityID = targetId, Status = GoalStatus.Active };

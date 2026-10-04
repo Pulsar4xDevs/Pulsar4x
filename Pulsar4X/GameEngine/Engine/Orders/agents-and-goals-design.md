@@ -141,6 +141,8 @@ Skill does not decide **how wide** an order is. Span comes from the **flagship /
 
 `MoveTo` does not fan out. Geo/grav `PlanSubGoals` call `CommandSpan.Expand`. Leaf `PlanActions` stays one body. Processors unchanged.
 
+An empty captain chair cannot take a goal. The fleet window plots actions instead: `GoToBodyCommand` queues `MovePlanner.TryBuildMoveActions` once (no `GoalsDB`, no replan). Named verbs `WarpToBodyCommand`, `CirculariseCommand`, `ChangeAltitudeCommand`, `MatchOrbitCommand`, and ship `JumpCommand` enqueue the same `EntityAction` types the planner uses. `GeoSurveyCommand` / `GravSurveyCommand` on an empty chair enqueue `GeoSurveyOrder` / `JPSurveyOrder` only when the ship is already at that unfinished site (parent for geo, parent or under 100 km for grav). A captain or fleet still gets the survey goal. Warp/Nav plotter windows remain as expert tools (`WarpMoveCommand` / `NewtonThrustCommand`).
+
 Scenario hulls mount `ship-command` designs (`default-design-bridge-ship` / `-well` / `-system`). `CreateShip` installs `AdminSpaceAtb` → `AdminSpaceDB`.
 
 ## Decisions (load-bearing)

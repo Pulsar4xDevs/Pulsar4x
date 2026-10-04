@@ -4,10 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using GameEngine.Engine.Orders;
 using NUnit.Framework;
+using Pulsar4X.Api;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Energy;
 using Pulsar4X.Engine;
+using Pulsar4X.Engine.Api;
 using GameEngine.People;
 using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
@@ -73,6 +75,37 @@ namespace Pulsar4X.Tests
 
             Assert.That(order.Details, Is.EqualTo("50%"));
             Assert.That(order.Name, Does.Contain("(50%)"));
+        }
+
+        [Test]
+        public void GravSurvey_EmptyChair_AtSite_QueuesOrderWithoutAGoal()
+        {
+            var scene = BuildSolGravSurveyFleet(onSite: true, includeOuter: false);
+            var translator = new CommandTranslator(Game);
+            scene.AnomalyInner.FactionOwnerID = Pulsar4X.Engine.Game.NeutralFactionId;
+            _sys.ShowNeutralEntityToFaction(scene.Faction.Id, scene.AnomalyInner.Id);
+
+            var plotted = translator.Translate(scene.Faction, scene.SurveyorA,
+                new GravSurveyCommand(scene.SurveyorA.Id, scene.AnomalyInner.Id));
+            Assert.IsTrue(plotted.Accepted, plotted.RejectionReason);
+            Assert.IsFalse(scene.SurveyorA.HasDataBlob<GoalsDB>());
+            Assert.That(scene.SurveyorA.GetDataBlob<ActionQueueDB>().ActionList,
+                Has.Some.InstanceOf<JPSurveyOrder>());
+        }
+
+        [Test]
+        public void GravSurvey_EmptyChair_NotAtSite_IsRejected()
+        {
+            var scene = BuildSolGravSurveyFleet();
+            var translator = new CommandTranslator(Game);
+            scene.AnomalyInner.FactionOwnerID = Pulsar4X.Engine.Game.NeutralFactionId;
+            _sys.ShowNeutralEntityToFaction(scene.Faction.Id, scene.AnomalyInner.Id);
+
+            var blocked = translator.Translate(scene.Faction, scene.SurveyorA,
+                new GravSurveyCommand(scene.SurveyorA.Id, scene.AnomalyInner.Id));
+            Assert.IsFalse(blocked.Accepted);
+            Assert.That(blocked.RejectionReason, Does.Contain("not at").IgnoreCase);
+            Assert.IsFalse(scene.SurveyorA.HasDataBlob<GoalsDB>());
         }
 
         [Test]

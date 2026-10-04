@@ -491,6 +491,7 @@ live `Entity` references — bespoke view DTOs sidestep that entirely. Entities 
   `SetFireControlWeaponsCommand`, `SetFireControlTargetCommand`, `AssignOrdnanceCommand`,
   `SetFireModeCommand`, `SetOrderPauseCommand`, `CancelOrderCommand`,
   `NewtonThrustCommand`, `WarpMoveCommand`,
+  `GoToBodyCommand`, `WarpToBodyCommand`, `CirculariseCommand`, `ChangeAltitudeCommand`, `MatchOrbitCommand`,
   `UninstallComponentCommand`, `InstallComponentCommand`, `QueueIndustryJobCommand`,
   `ChangeIndustryJobPriorityCommand`, `CancelIndustryJobCommand`, `AddToConstructionQueueCommand`,
   `MoveConstructionJobCommand`, `RemoveConstructionJobCommand`), `CommandResult`.

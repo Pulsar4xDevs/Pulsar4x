@@ -6,10 +6,13 @@ using NUnit.Framework;
 using Pulsar4X.Api;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
+using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Names;
 using Pulsar4X.Orbital;
 using Pulsar4X.Orbits;
+using Pulsar4X.Ships;
+using Pulsar4X.Storage;
 
 namespace Pulsar4X.Tests
 {
@@ -23,21 +26,28 @@ namespace Pulsar4X.Tests
         private Entity MakeManeuverShip(PlayerSession session)
         {
             var ship = Entity.Create(session.FactionId);
-            var thrustAbility = new Pulsar4X.Movement.NewtonThrustAbilityDB("test-fuel")
+            var data = _game.Factions[session.FactionId].GetDataBlob<FactionInfoDB>().Data;
+            var energyGood = data.CargoGoods.GetAll().Values.Concat(data.LockedCargoGoods.GetAll().Values).First();
+            data.Unlock("methalox");
+            var fuel = data.CargoGoods.GetAny("methalox");
+            Assert.That(fuel, Is.Not.Null, "test universe has methalox after Unlock");
+
+            var thrustAbility = new Pulsar4X.Movement.NewtonThrustAbilityDB(fuel.UniqueID)
             {
                 ThrustInNewtons = 100000,
                 ExhaustVelocity = 3000,
                 FuelBurnRate = 1,
             };
 
-            // Warp execution draws stored energy; any cargo good serves as the energy type.
-            var data = _game.Factions[session.FactionId].GetDataBlob<Pulsar4X.Factions.FactionInfoDB>().Data;
-            var energyGood = data.CargoGoods.GetAll().Values.Concat(data.LockedCargoGoods.GetAll().Values).First();
+            // Circularise / Hohmann execute on submit and NewtonSimpleProcessor reads cargo fuel.
+            var storage = new CargoStorageDB(fuel.CargoTypeID, 1e12);
+            storage.AddCargoByUnit(fuel, 1_000_000);
 
+            const double wetKg = 10000;
             _game.Systems[0].AddEntity(ship, new List<BaseDataBlob>
             {
                 new Pulsar4X.Movement.PositionDB { AbsolutePosition = new Vector3(1.5e11, 0, 0) },
-                new MassVolumeDB { MassDry = 10000 },
+                MassVolumeDB.NewFromMassAndRadius_m(wetKg, 10),
                 new NameDB("Maneuver Ship", session.FactionId, "Maneuver Ship"),
                 new ActionQueueDB(),
                 new Pulsar4X.Movement.WarpAbilityDB { MaxSpeed = 100000, EnergyType = energyGood.UniqueID },
@@ -48,15 +58,17 @@ namespace Pulsar4X.Tests
                     EnergyStoreMax = new Dictionary<string, double> { [energyGood.UniqueID] = 1e9 },
                 },
                 thrustAbility,
+                storage,
             });
 
-            // ~550 m/s of ΔV available (2t of fuel pushing a 10t dry mass).
-            thrustAbility.SetFuel(2000, 12000);
+            // ~20 km/s so a leftover circularise does not fail the fuel check on the first tick.
+            double dryKg = wetKg / Math.Exp(20_000 / thrustAbility.ExhaustVelocity);
+            thrustAbility.SetFuel(Math.Max(wetKg - dryKg, 1), wetKg);
 
             // Put the ship in a real orbit so the engine's movement prediction has a state to work from.
             var star = _game.Systems[0].GetFirstEntityWithDataBlob<StarInfoDB>();
             ship.SetDataBlob(OrbitDB.FromAsteroidFormat_r(
-                star, star.GetDataBlob<MassVolumeDB>().MassTotal, 12000,
+                star, star.GetDataBlob<MassVolumeDB>().MassTotal, wetKg,
                 semiMajorAxis_m: 1.5e11, eccentricity: 0, inclination: 0,
                 longitudeOfAscendingNode: 0, argumentOfPeriapsis: 0, meanAnomaly: 0,
                 epoch: _game.Systems[0].StarSysDateTime));
@@ -160,6 +172,127 @@ namespace Pulsar4X.Tests
 
             Assert.That(result.Accepted, Is.False);
             Assert.That(result.RejectionReason, Does.Contain("not found"));
+        }
+
+        int VisibleBodyId(PlayerSession session)
+            => ProjectSystem(session).Entities
+                .First(e => e.Kind != BodyKind.Star && e.GetView<OrbitView>() != null && e.GetView<MassVolumeView>() != null)
+                .Id;
+
+        [Test]
+        public void GoToBody_emptyChair_queuesPlannerActions_withoutAGoal()
+        {
+            var session = Connect();
+            var ship = MakeManeuverShip(session);
+            int destinationId = VisibleBodyId(session);
+
+            var result = _server.SubmitCommand(session, new GoToBodyCommand(ship.Id, destinationId));
+
+            Assert.That(result.Accepted, Is.True, result.RejectionReason);
+            Assert.That(ship.HasDataBlob<GoalsDB>(), Is.False);
+            var names = ProjectOrders(session, ship).Select(o => o.Name).ToList();
+            Assert.That(names, Has.Some.StartsWith("Warp Move").Or.EqualTo("Circularise")
+                .Or.EqualTo("Change altitude").Or.StartsWith("Match orbit"));
+            Assert.That(names, Is.Not.Empty);
+        }
+
+        [Test]
+        public void GoToBody_rejectsASeatedCaptain()
+        {
+            var session = Connect();
+            var ship = MakeManeuverShip(session);
+            ship.SetDataBlob(new Pulsar4X.Ships.ShipInfoDB { CommanderID = 1 });
+
+            var result = _server.SubmitCommand(session, new GoToBodyCommand(ship.Id, VisibleBodyId(session)));
+
+            Assert.That(result.Accepted, Is.False);
+            Assert.That(result.RejectionReason, Does.Contain("captain"));
+            Assert.That(ProjectOrders(session, ship), Is.Empty);
+        }
+
+        [Test]
+        public void WarpToBody_emptyChair_queuesWarpAndCircularise()
+        {
+            var session = Connect();
+            var ship = MakeManeuverShip(session);
+
+            var result = _server.SubmitCommand(session, new WarpToBodyCommand(ship.Id, VisibleBodyId(session)));
+
+            Assert.That(result.Accepted, Is.True, result.RejectionReason);
+            var names = ProjectOrders(session, ship).Select(o => o.Name).ToList();
+            Assert.That(names, Has.Some.StartsWith("Warp Move"));
+            Assert.That(names, Has.Some.EqualTo("Circularise"));
+        }
+
+        [Test]
+        public void Circularise_emptyChair_queuesCircularise()
+        {
+            var session = Connect();
+            var ship = MakeManeuverShip(session);
+            var star = _game.Systems[0].GetFirstEntityWithDataBlob<StarInfoDB>();
+            ship.SetDataBlob(OrbitDB.FromAsteroidFormat_r(
+                star, star.GetDataBlob<MassVolumeDB>().MassTotal, 12000,
+                semiMajorAxis_m: 1.5e11, eccentricity: 0.2, inclination: 0,
+                longitudeOfAscendingNode: 0, argumentOfPeriapsis: 0, meanAnomaly: 0,
+                epoch: _game.Systems[0].StarSysDateTime));
+
+            var result = _server.SubmitCommand(session, new CirculariseCommand(ship.Id));
+
+            Assert.That(result.Accepted, Is.True, result.RejectionReason);
+            Assert.That(ship.HasDataBlob<GoalsDB>(), Is.False);
+            Assert.That(ProjectOrders(session, ship).Select(o => o.Name), Has.Some.EqualTo("Circularise"));
+        }
+
+        [Test]
+        public void Circularise_rejectsASeatedCaptain()
+        {
+            var session = Connect();
+            var ship = MakeManeuverShip(session);
+            ship.SetDataBlob(new ShipInfoDB { CommanderID = 1 });
+
+            var result = _server.SubmitCommand(session, new CirculariseCommand(ship.Id));
+
+            Assert.That(result.Accepted, Is.False);
+            Assert.That(result.RejectionReason, Does.Contain("captain"));
+            Assert.That(ProjectOrders(session, ship), Is.Empty);
+        }
+
+        [Test]
+        public void ChangeAltitude_rejectsANonPositiveRadius()
+        {
+            var session = Connect();
+            var ship = MakeManeuverShip(session);
+
+            var result = _server.SubmitCommand(session, new ChangeAltitudeCommand(ship.Id, 0));
+
+            Assert.That(result.Accepted, Is.False);
+            Assert.That(result.RejectionReason, Does.Contain("radius"));
+        }
+
+        [Test]
+        public void ChangeAltitude_emptyChair_queuesChangeAltitude()
+        {
+            var session = Connect();
+            var ship = MakeManeuverShip(session);
+
+            var result = _server.SubmitCommand(session, new ChangeAltitudeCommand(ship.Id, 2e11));
+
+            Assert.That(result.Accepted, Is.True, result.RejectionReason);
+            Assert.That(ship.HasDataBlob<GoalsDB>(), Is.False);
+            Assert.That(ProjectOrders(session, ship).Select(o => o.Name), Has.Some.EqualTo("Change altitude"));
+        }
+
+        [Test]
+        public void MatchOrbit_emptyChair_queuesMatchOrbit()
+        {
+            var session = Connect();
+            var ship = MakeManeuverShip(session);
+
+            var result = _server.SubmitCommand(session, new MatchOrbitCommand(ship.Id, VisibleBodyId(session)));
+
+            Assert.That(result.Accepted, Is.True, result.RejectionReason);
+            Assert.That(ship.HasDataBlob<GoalsDB>(), Is.False);
+            Assert.That(ProjectOrders(session, ship).Select(o => o.Name), Has.Some.StartsWith("Match orbit"));
         }
     }
 }
