@@ -13,7 +13,7 @@ namespace Pulsar4X.Logistics;
 
 /// <summary>
 /// One colony posts its own book and hands <see cref="GoalType.RunMarket"/> to owned offices
-/// its command bridge can see. Balance and Stockpile edit policy before that hand-off.
+/// inside <see cref="LogisticsSpan"/>. Balance and Stockpile edit policy before that hand-off.
 /// </summary>
 public class SupplyLocalPlan : IGoalPlanner
 {
@@ -55,20 +55,23 @@ public class SupplyLocalPlan : IGoalPlanner
         var members = new List<Entity>();
         if (root.Manager != null && root.HasDataBlob<ColonyInfoDB>())
         {
-            foreach (var colony in root.Manager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
+            foreach (var manager in ReachableManagers(root))
             {
-                if (colony.FactionOwnerID != root.FactionOwnerID)
-                    continue;
-                if (!colony.HasDataBlob<LogiBaseDB>())
-                    continue;
-                members.Add(colony);
+                foreach (var colony in manager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
+                {
+                    if (colony.FactionOwnerID != root.FactionOwnerID)
+                        continue;
+                    if (!colony.HasDataBlob<LogiBaseDB>())
+                        continue;
+                    members.Add(colony);
+                }
             }
         }
 
         if (members.All(colony => colony.Id != root.Id))
             members.Add(root);
 
-        var span = CommandSpan.Of(root);
+        var span = LogisticsSpan.Of(root);
         Entity anchor = Anchor(root);
         return members.Where(colony => InSpan(colony, root, anchor, span)).ToList();
     }
@@ -80,10 +83,23 @@ public class SupplyLocalPlan : IGoalPlanner
         return Entity.InvalidEntity;
     }
 
+    static IEnumerable<EntityManager> ReachableManagers(Entity root)
+    {
+        if (root.Manager?.Game == null)
+            yield break;
+        foreach (var system in root.Manager.Game.Systems)
+        {
+            if (LogisticsSpan.ReachesManager(root, system))
+                yield return system;
+        }
+    }
+
     static bool InSpan(Entity colony, Entity root, Entity anchor, CommandSpanKind span)
     {
+        if (span == CommandSpanKind.Neighbor)
+            return colony.Manager != null && LogisticsSpan.ReachesManager(root, colony.Manager);
         if (span == CommandSpanKind.System)
-            return true;
+            return colony.Manager == root.Manager;
         if (InBody(colony, root, anchor))
             return true;
         if (span != CommandSpanKind.Well || !anchor.IsValid)

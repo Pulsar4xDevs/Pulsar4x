@@ -17,6 +17,8 @@ public enum CommandSpanKind
     Body,
     Well,
     System,
+    /// <summary>This star system and systems one known jump away. Trade, freight, and supply only.</summary>
+    Neighbor,
 }
 
 public static class CommandSpan

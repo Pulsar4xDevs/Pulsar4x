@@ -15,7 +15,7 @@ namespace Pulsar4X.Logistics;
 
 /// <summary>
 /// Splits one fleet trade or freight order into one-ship goals.
-/// Candidates stay in the fleet's star system. A contract ignores command span.
+/// Open orders and contracts use <see cref="LogisticsSpan"/>, one step wider than survey.
 /// </summary>
 static class FleetParcel
 {
@@ -249,42 +249,76 @@ static class FleetParcel
         var list = new List<Entity>();
         if (fleet.Manager == null)
             return list;
-        foreach (var market in fleet.Manager.GetAllEntitiesWithDataBlob<LogiBaseDB>())
+        foreach (var manager in ReachableManagers(fleet))
         {
-            if (market.Id == fleet.Id)
-                continue;
-            if (freight)
+            foreach (var market in manager.GetAllEntitiesWithDataBlob<LogiBaseDB>())
             {
-                if (market.FactionOwnerID != fleet.FactionOwnerID || !market.HasDataBlob<ColonyInfoDB>())
+                if (market.Id == fleet.Id)
                     continue;
-                if (contract && market.Id != goal.SourceEntityId && market.Id != goal.DestEntityId)
+                if (freight)
+                {
+                    if (market.FactionOwnerID != fleet.FactionOwnerID || !market.HasDataBlob<ColonyInfoDB>())
+                        continue;
+                    if (contract && market.Id != goal.SourceEntityId && market.Id != goal.DestEntityId)
+                        continue;
+                }
+                else if (!FactionStanceRules.CanTrade(fleet.Manager.Game, fleet.FactionOwnerID, market.FactionOwnerID))
                     continue;
-            }
-            else if (!FactionStanceRules.CanTrade(fleet.Manager.Game, fleet.FactionOwnerID, market.FactionOwnerID))
-                continue;
 
-            if (!contract && !InSpan(fleet, goal.TargetEntityID, market))
-                continue;
-            list.Add(market);
+                if (contract)
+                {
+                    if (!ContractInSpan(fleet, goal))
+                        continue;
+                }
+                else if (!InSpan(fleet, goal.TargetEntityID, market))
+                    continue;
+                list.Add(market);
+            }
         }
         list.Sort((a, b) => a.Id.CompareTo(b.Id));
         return list;
     }
 
+    static IEnumerable<EntityManager> ReachableManagers(Entity unit)
+    {
+        if (unit.Manager?.Game == null)
+            yield break;
+        foreach (var system in unit.Manager.Game.Systems)
+        {
+            if (LogisticsSpan.ReachesManager(unit, system))
+                yield return system;
+        }
+    }
+
+    static bool ContractInSpan(Entity fleet, Goal goal)
+    {
+        if (fleet.Manager == null
+            || !fleet.Manager.TryGetGlobalEntityById(goal.SourceEntityId, out var source)
+            || !fleet.Manager.TryGetGlobalEntityById(goal.DestEntityId, out var dest))
+            return false;
+        return LogisticsSpan.ContractReaches(fleet, source, dest);
+    }
+
     static bool InSpan(Entity fleet, int anchorId, Entity market)
     {
-        if (fleet.Manager == null || !fleet.Manager.TryGetEntityById(anchorId, out var anchor))
+        if (fleet.Manager == null || market.Manager == null)
             return false;
-        var span = CommandSpan.Of(fleet);
+        var span = LogisticsSpan.Of(fleet);
+        if (span == CommandSpanKind.Neighbor)
+            return LogisticsSpan.ReachesManager(fleet, market.Manager);
         if (span == CommandSpanKind.System)
             return market.Manager == fleet.Manager;
+        if (market.Manager != fleet.Manager)
+            return false;
+        if (!fleet.Manager.TryGetEntityById(anchorId, out var anchor))
+            return false;
         if (market.Id == anchor.Id)
             return true;
         if (!market.TryGetDataBlob<PositionDB>(out var pos))
             return false;
         if (pos.Parent == anchor)
             return true;
-        if (span != CommandSpanKind.Well || pos.Parent == null)
+        if (pos.Parent == null)
             return false;
         return anchor.TryGetDataBlob<PositionDB>(out var anchorPos) && anchorPos.Children.Contains(pos.Parent);
     }

@@ -7,11 +7,16 @@ public class ColonyBlueprint : Blueprint
     public string Name { get; set; }
     public double? StartingPopulation { get; set; }
 
-    /// <summary>When set with <see cref="OwnerFaction"/>, this colony is placed on that body at game start instead of being a player start option. Body is the system body's display name (NameDB default), e.g. "Luna".</summary>
+    /// <summary>
+    /// System body's display name (NameDB default), e.g. "Luna" or "Mars".
+    /// With <see cref="OwnerFaction"/>, a new faction owns the colony.
+    /// With a body and no owner, the player faction that just started gets the colony.
+    /// Either way it is not a start option.
+    /// </summary>
     public string? Body { get; set; }
     /// <summary>System UniqueID to search, e.g. "system-sol". Omitted searches every loaded system for <see cref="Body"/>.</summary>
     public string? System { get; set; }
-    /// <summary>Name of the faction that owns the placed colony. Presence of this field keeps the colony out of the player start list.</summary>
+    /// <summary>Name of the faction that owns the placed colony. Presence of this field keeps the colony out of the player start list and creates that faction.</summary>
     public string? OwnerFaction { get; set; }
     public string? OwnerAbbreviation { get; set; }
     /// <summary>Stance the player and this faction store toward each other. Friendly or Allied.</summary>

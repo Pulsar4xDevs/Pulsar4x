@@ -12,6 +12,7 @@ using Pulsar4X.Engine.Api;
 using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
+using Pulsar4X.JumpPoints;
 using Pulsar4X.Logistics;
 using Pulsar4X.Modding;
 using Pulsar4X.Movement;
@@ -111,21 +112,58 @@ public class FleetLogisticsTests
     }
 
     [Test]
-    public void Span_BodySkipsTheMoon_WellTakesIt_SystemReachesTheOtherPlanet()
+    public void Span_ShipTakesTheMoon_PlanetTakesMars_SystemTakesOneJump()
     {
         var scene = SpanScene();
 
         AttachBridge(scene.Ship, AdminLevel.Ship);
-        var body = new FleetFreighterPlan().Plan(scene.Fleet, scene.Goal, scene.Fleet.StarSysDateTime);
-        Assert.That(HaulDest(body), Is.EqualTo(scene.EarthBuy.Id), body.Message);
-
-        AttachBridge(scene.Ship, AdminLevel.Planet);
         var well = new FleetFreighterPlan().Plan(scene.Fleet, scene.Goal, scene.Fleet.StarSysDateTime);
         Assert.That(HaulDest(well), Is.EqualTo(scene.MoonBuy.Id), well.Message);
 
-        AttachBridge(scene.Ship, AdminLevel.System);
+        AttachBridge(scene.Ship, AdminLevel.Planet);
         var system = new FleetFreighterPlan().Plan(scene.Fleet, scene.Goal, scene.Fleet.StarSysDateTime);
         Assert.That(HaulDest(system), Is.EqualTo(scene.MarsBuy.Id), system.Message);
+
+        AttachBridge(scene.Ship, AdminLevel.System);
+        var neighbor = new FleetFreighterPlan().Plan(scene.Fleet, scene.Goal, scene.Fleet.StarSysDateTime);
+        Assert.That(HaulDest(neighbor), Is.EqualTo(scene.NeighborBuy.Id), neighbor.Message);
+    }
+
+    [Test]
+    public void Contract_ShipBridgeRejectsAnotherPlanet_SystemBridgeHaulsOneJump()
+    {
+        var local = ContractScene();
+        AttachBridge(local.Ships[0], AdminLevel.Ship);
+        var translator = new CommandTranslator(Game);
+        var faction = Game.Factions[local.Fleet.FactionOwnerID];
+        var rejected = translator.Translate(
+            faction,
+            local.Fleet,
+            new FleetHaulContractCommand(local.Fleet.Id, local.Source.Id, local.Dest.Id, "iron"));
+        Assert.That(rejected.Accepted, Is.False);
+        Assert.That(rejected.RejectionReason, Is.EqualTo("The target is outside this fleet's reach."));
+
+        var world = NewSystem();
+        var earth = Body(world.System, world.Star, "Earth", new Vector3(1.5e11, 0, 0));
+        var source = Office(world, earth, new Vector3(1e7, 0, 0), sell: 40, ask: 10, buy: 0, bid: 0, stock: 40, colony: true);
+        var next = AnotherSystem("Next");
+        var beyond = AnotherSystem("Beyond");
+        LinkJump(world.Faction, world.System, world.Star, next.System, next.Star);
+        LinkJump(world.Faction, next.System, next.Star, beyond.System, beyond.Star);
+        var dest = Office(world, next.System, next.Star, new Vector3(1e11, 0, 0), sell: 0, ask: 0, buy: 40, bid: 12, stock: 0, colony: true);
+        Office(world, beyond.System, beyond.Star, new Vector3(1e11, 0, 0), sell: 0, ask: 0, buy: 4000, bid: 12, stock: 0, colony: true);
+        var fleet = Fleet(world, out var ships, holds: new[] { 40 });
+        AttachBridge(ships[0], AdminLevel.System);
+
+        var accepted = translator.Translate(
+            world.Faction,
+            fleet,
+            new FleetHaulContractCommand(fleet.Id, source.Id, dest.Id, "iron"));
+        Assert.That(accepted.Accepted, Is.True, accepted.RejectionReason);
+        var child = ships[0].GetDataBlob<GoalsDB>().ActiveGoal;
+        Assert.That(child, Is.Not.Null);
+        Assert.That(child!.Type, Is.EqualTo(GoalType.Freighter));
+        Assert.That(child.DestEntityId, Is.EqualTo(dest.Id));
     }
 
     [Test]
@@ -215,6 +253,7 @@ public class FleetLogisticsTests
         var source = Office(world, earth, new Vector3(1e7, 0, 0), sell: 80, ask: 10, buy: 0, bid: 0, stock: 80, colony: true);
         var dest = Office(world, mars, new Vector3(1e7, 0, 0), sell: 0, ask: 0, buy: 80, bid: 12, stock: 0, colony: true);
         var fleet = Fleet(world, out var ships, holds: new[] { 30, 50 }, at: new Vector3(1e7, 0, 0), parent: earth);
+        AttachBridge(ships[0], AdminLevel.Planet);
         var tanker = Ship(world, 100, new Vector3(1.5e11, 1e8, 0), earth, tanker: true);
         fleet.GetDataBlob<FleetDB>().AddChild(tanker);
         return new ContractWorld
@@ -266,6 +305,12 @@ public class FleetLogisticsTests
         var earthBuy = Office(world, earth, new Vector3(1e7, 0, 0), sell: 0, ask: 0, buy: 40, bid: 12, stock: 0, colony: true);
         var moonBuy = Office(world, moon, new Vector3(0, 0, 0), sell: 0, ask: 0, buy: 100, bid: 12, stock: 0, colony: true);
         var marsBuy = Office(world, mars, new Vector3(0, 0, 0), sell: 0, ask: 0, buy: 250, bid: 12, stock: 0, colony: true);
+        var next = AnotherSystem("Next");
+        var beyond = AnotherSystem("Beyond");
+        LinkJump(world.Faction, world.System, world.Star, next.System, next.Star);
+        LinkJump(world.Faction, next.System, next.Star, beyond.System, beyond.Star);
+        var neighborBuy = Office(world, next.System, next.Star, new Vector3(1e11, 0, 0), sell: 0, ask: 0, buy: 400, bid: 12, stock: 0, colony: true);
+        Office(world, beyond.System, beyond.Star, new Vector3(1e11, 0, 0), sell: 0, ask: 0, buy: 4000, bid: 12, stock: 0, colony: true);
 
         var other = FactionFactory.CreateFaction(Game, "Partners-" + Guid.NewGuid().ToString("N"));
         other.GetDataBlob<FactionInfoDB>().Data.Unlock("iron");
@@ -285,7 +330,48 @@ public class FleetLogisticsTests
             EarthBuy = earthBuy,
             MoonBuy = moonBuy,
             MarsBuy = marsBuy,
+            NeighborBuy = neighborBuy,
         };
+    }
+
+    static (StarSystem System, Entity Star) AnotherSystem(string name)
+    {
+        var system = new StarSystem();
+        system.Initialize(Game, name + "-" + Guid.NewGuid().ToString("N"), -1);
+        system.SetActivityState(SystemActivityState.Stasis);
+        var star = Entity.Create();
+        system.AddEntity(star, new List<BaseDataBlob>
+        {
+            new NameDB(name),
+            new PositionDB(0, 0, 0),
+            MassVolumeDB.NewFromMassAndRadius_m(1.989e30, 6.96342e8),
+        });
+        return (system, star);
+    }
+
+    static void LinkJump(Entity faction, StarSystem from, Entity fromStar, StarSystem to, Entity toStar)
+    {
+        var gateFrom = Entity.Create(Game.NeutralFactionId);
+        from.AddEntity(gateFrom, new List<BaseDataBlob>
+        {
+            new NameDB("Gate"),
+            new PositionDB(new Vector3(4e11, 0, 0), fromStar),
+        });
+        var gateTo = Entity.Create(Game.NeutralFactionId);
+        to.AddEntity(gateTo, new List<BaseDataBlob>
+        {
+            new NameDB("Gate"),
+            new PositionDB(new Vector3(4e11, 0, 0), toStar),
+        });
+        gateFrom.SetDataBlob(new JumpPointDB(gateTo));
+        gateTo.SetDataBlob(new JumpPointDB(gateFrom));
+        var info = faction.GetDataBlob<FactionInfoDB>();
+        if (!info.KnownSystems.Contains(from.ID))
+            info.KnownSystems.Add(from.ID);
+        if (!info.KnownSystems.Contains(to.ID))
+            info.KnownSystems.Add(to.ID);
+        info.RememberJumpPoint(gateFrom);
+        info.RememberJumpPoint(gateTo);
     }
 
     static World NewSystem()
@@ -320,6 +406,9 @@ public class FleetLogisticsTests
     }
 
     static Entity Office(World world, Entity parent, Vector3 at, long sell, decimal ask, long buy, decimal bid, long stock, bool colony)
+        => Office(world, world.System, parent, at, sell, ask, buy, bid, stock, colony);
+
+    static Entity Office(World world, StarSystem system, Entity parent, Vector3 at, long sell, decimal ask, long buy, decimal bid, long stock, bool colony)
     {
         var office = Entity.Create(world.Faction.Id);
         var cargo = new CargoStorageDB("general-storage", 100000);
@@ -338,7 +427,7 @@ public class FleetLogisticsTests
             info.PlanetEntity = parent;
             blobs.Add(info);
         }
-        world.System.AddEntity(office, blobs);
+        system.AddEntity(office, blobs);
         if (stock > 0)
             Assert.That(cargo.AddCargoByUnit(world.Iron, stock), Is.EqualTo(stock));
         Assert.That(MarketBook.SetListing(office, new MarketListing
@@ -439,5 +528,6 @@ public class FleetLogisticsTests
         public Entity EarthBuy;
         public Entity MoonBuy;
         public Entity MarsBuy;
+        public Entity NeighborBuy;
     }
 }

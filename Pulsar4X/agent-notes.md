@@ -18,7 +18,7 @@ Inbox for small bugs and follow-ups that came up while doing something else. Any
 - `GameEngine/Damage/damage-system.md` — damage as it works today and what should change.
 - `GameEngine/Engine/Orders/agents-and-goals-design.md` — goal, action, and agent decisions.
 - `GameEngine/Engine/Orders/weighting-vertical-slice.md` — autonomous weighting slice.
-- `GameEngine/Logistics/plans/` — trade and transport plans. Plans 1–12 and 5b are implemented on `TradeAndTransport`.
+- `GameEngine/Logistics/plans/` — trade and transport plans. Plans 1–12 and 5b are implemented on `TradeAndTransport`. `office-purses.md` is an idea for later, not plan 13.
 - `GameEngine/Industry/plans/` — colony industry. Refine-one-batch is implemented. It is not logistics plan 13.
 - `GameEngine/Engine/Orders/colony-administrator.md` — standing colony intent, patience, specialization, and bids. Notes only. Not an implementation plan.
 

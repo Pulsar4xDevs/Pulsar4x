@@ -519,7 +519,7 @@ namespace Pulsar4X.Engine.Api
             return new ColonyView(population, planetId)
             {
                 SpeciesPopulations = species,
-                CommandSpan = colony.FactionOwnerID == factionId ? SpanLabel(CommandSpan.Of(colony)) : "",
+                CommandSpan = colony.FactionOwnerID == factionId ? SpanLabel(LogisticsSpan.Of(colony)) : "",
             };
         }
 
@@ -527,6 +527,7 @@ namespace Pulsar4X.Engine.Api
         {
             CommandSpanKind.Well => CommandSpanLabels.Well,
             CommandSpanKind.System => CommandSpanLabels.System,
+            CommandSpanKind.Neighbor => CommandSpanLabels.Neighbor,
             _ => CommandSpanLabels.Body,
         };
 
@@ -1294,6 +1295,8 @@ namespace Pulsar4X.Engine.Api
                 CanGeoSurvey = fleet.HasGeoSurveyAbility(),
                 CanGravSurvey = fleet.HasJPSurveyAbililty(),
                 CommandSpan = SpanLabel(CommandSpan.Of(fleet)),
+                LogisticsSpan = SpanLabel(LogisticsSpan.Of(fleet)),
+                LogisticsSystemIds = LogisticsSpan.SystemIds(fleet),
                 Goal = ProjectGoals(fleet),
                 Orders = ProjectOrders(fleet),
                 StandingOrders = ProjectStandingOrders(fleetDB),

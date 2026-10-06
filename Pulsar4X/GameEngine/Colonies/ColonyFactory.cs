@@ -165,6 +165,30 @@ namespace Pulsar4X.Colonies
         }
 
         /// <summary>
+        /// Places colony blueprints that name a body and no owner. They belong to the player
+        /// faction that already started, using that faction's species and unlocked designs.
+        /// Call this after the start colony so its StartingItems have opened the libraries.
+        /// </summary>
+        public static void PlacePlayerColonies(Game game, ModDataStore data, Entity playerFaction, Entity playerSpecies, string? exceptColonyId = null)
+        {
+            var info = playerFaction.GetDataBlob<FactionInfoDB>();
+            foreach (var colony in data.Colonies.Values)
+            {
+                if (!string.IsNullOrEmpty(colony.OwnerFaction) || string.IsNullOrEmpty(colony.Body))
+                    continue;
+                if (!string.IsNullOrEmpty(exceptColonyId) && colony.UniqueID == exceptColonyId)
+                    continue;
+                if (!TryFindBody(game, colony.System, colony.Body, out var system, out var body))
+                    continue;
+
+                if (!info.KnownSystems.Contains(system.ID))
+                    info.KnownSystems.Add(system.ID);
+
+                CreateFromBlueprint(game, playerFaction, playerSpecies, system, body, colony);
+            }
+        }
+
+        /// <summary>
         /// Places colony blueprints that name an <see cref="ColonyBlueprint.OwnerFaction"/> and a body.
         /// Those are not player start options. The named faction is created if needed, and the stance
         /// string is stored both ways (Friendly or Allied is what makes them a trade partner).

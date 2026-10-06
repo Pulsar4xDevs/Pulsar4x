@@ -11,10 +11,12 @@ using Pulsar4X.Engine;
 using Pulsar4X.Engine.Api;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
+using Pulsar4X.JumpPoints;
 using Pulsar4X.Logistics;
 using Pulsar4X.Modding;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
+using Pulsar4X.Orbital;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.Tests;
@@ -66,7 +68,7 @@ public class ColonySupplyTests
     }
 
     [Test]
-    public void Span_BodySkipsTheMoon_WellTakesIt_SystemReachesTheOtherPlanet()
+    public void Span_ShipTakesTheMoon_PlanetTakesMars_SystemTakesOneJump()
     {
         var world = NewSystem();
         var earth = Body(world.System, null);
@@ -75,29 +77,44 @@ public class ColonySupplyTests
         Assert.That(earth.GetDataBlob<PositionDB>().Children.Contains(moon), Is.True);
         Assert.That(earth.GetDataBlob<PositionDB>().Children.Contains(mars), Is.False);
 
+        var next = AnotherSystem("Next");
+        var beyond = AnotherSystem("Beyond");
+        var nextBody = Body(next, null);
+        var beyondBody = Body(beyond, null);
+        LinkJump(world.Faction, world.System, earth, next, nextBody);
+        LinkJump(world.Faction, next, nextBody, beyond, beyondBody);
+
         var root = Colony(world, earth);
         var moonColony = Colony(world, moon);
         var marsColony = Colony(world, mars);
+        var nextColony = Colony(world, next, nextBody);
+        var beyondColony = Colony(world, beyond, beyondBody);
         Policy(root, "iron", 0, 0, false, 5, 4);
         Policy(moonColony, "iron", 0, 0, false, 5, 4);
         Policy(marsColony, "iron", 0, 0, false, 5, 4);
+        Policy(nextColony, "iron", 0, 0, false, 5, 4);
+        Policy(beyondColony, "iron", 0, 0, false, 5, 4);
         var goal = new Goal(GoalType.SupplyLocal);
 
         AttachBridge(root, AdminLevel.Ship);
-        var body = new SupplyLocalPlan().Plan(root, goal, root.StarSysDateTime);
-        Assert.That(HandedIds(body), Does.Not.Contain(moonColony.Id));
-        Assert.That(HandedIds(body), Does.Not.Contain(marsColony.Id));
-
-        AttachBridge(root, AdminLevel.Planet);
         var well = new SupplyLocalPlan().Plan(root, goal, root.StarSysDateTime);
         Assert.That(HandedIds(well), Does.Contain(moonColony.Id));
         Assert.That(HandedIds(well), Does.Not.Contain(marsColony.Id));
+        Assert.That(HandedIds(well), Does.Not.Contain(nextColony.Id));
 
-        AttachBridge(root, AdminLevel.System);
+        AttachBridge(root, AdminLevel.Planet);
         var system = new SupplyLocalPlan().Plan(root, goal, root.StarSysDateTime);
         Assert.That(HandedIds(system), Does.Contain(moonColony.Id));
         Assert.That(HandedIds(system), Does.Contain(marsColony.Id));
-        Assert.That(system.SubGoals.All(item => item.Goal.ParentGoalId == goal.Id));
+        Assert.That(HandedIds(system), Does.Not.Contain(nextColony.Id));
+
+        AttachBridge(root, AdminLevel.System);
+        var neighbor = new SupplyLocalPlan().Plan(root, goal, root.StarSysDateTime);
+        Assert.That(HandedIds(neighbor), Does.Contain(moonColony.Id));
+        Assert.That(HandedIds(neighbor), Does.Contain(marsColony.Id));
+        Assert.That(HandedIds(neighbor), Does.Contain(nextColony.Id));
+        Assert.That(HandedIds(neighbor), Does.Not.Contain(beyondColony.Id));
+        Assert.That(neighbor.SubGoals.All(item => item.Goal.ParentGoalId == goal.Id));
     }
 
     [Test]
@@ -337,12 +354,48 @@ public class ColonySupplyTests
         return body;
     }
 
+    static StarSystem AnotherSystem(string name)
+    {
+        var system = new StarSystem();
+        system.Initialize(Game, name + "-" + Guid.NewGuid().ToString("N"), -1);
+        system.SetActivityState(SystemActivityState.Stasis);
+        return system;
+    }
+
+    static void LinkJump(Entity faction, StarSystem from, Entity fromBody, StarSystem to, Entity toBody)
+    {
+        var gateFrom = Entity.Create(Game.NeutralFactionId);
+        from.AddEntity(gateFrom, new List<BaseDataBlob>
+        {
+            new NameDB("Gate"),
+            new PositionDB(new Vector3(4e11, 0, 0), fromBody),
+        });
+        var gateTo = Entity.Create(Game.NeutralFactionId);
+        to.AddEntity(gateTo, new List<BaseDataBlob>
+        {
+            new NameDB("Gate"),
+            new PositionDB(new Vector3(4e11, 0, 0), toBody),
+        });
+        gateFrom.SetDataBlob(new JumpPointDB(gateTo));
+        gateTo.SetDataBlob(new JumpPointDB(gateFrom));
+        var info = faction.GetDataBlob<FactionInfoDB>();
+        if (!info.KnownSystems.Contains(from.ID))
+            info.KnownSystems.Add(from.ID);
+        if (!info.KnownSystems.Contains(to.ID))
+            info.KnownSystems.Add(to.ID);
+        info.RememberJumpPoint(gateFrom);
+        info.RememberJumpPoint(gateTo);
+    }
+
     static Entity Colony(World world, Entity planet)
+        => Colony(world, world.System, planet);
+
+    static Entity Colony(World world, StarSystem system, Entity planet)
     {
         var colony = Entity.Create(world.Faction.Id);
         var info = new ColonyInfoDB();
         info.PlanetEntity = planet;
-        world.System.AddEntity(colony, new List<BaseDataBlob>
+        system.AddEntity(colony, new List<BaseDataBlob>
         {
             new NameDB("Colony"),
             info,

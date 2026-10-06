@@ -296,8 +296,8 @@ namespace Pulsar4X.Engine.Api
             var trade = (FleetTradeCommand)command;
             if (RejectUnlessFleet(commanded) is { } notFleet)
                 return notFleet;
-            if (!InFleetSystem(commanded, trade.BodyId))
-                return CommandResult.Reject("The target is not in the fleet's system.");
+            if (!InLogisticsReach(commanded, trade.BodyId))
+                return CommandResult.Reject("The target is outside this fleet's reach.");
 
             var goal = new Goal(GoalType.FleetTrade) { TargetEntityID = trade.BodyId };
             AgentProcessor.AssignGoal(commanded, goal);
@@ -311,8 +311,8 @@ namespace Pulsar4X.Engine.Api
             var haul = (FleetFreighterCommand)command;
             if (RejectUnlessFleet(commanded) is { } notFleet)
                 return notFleet;
-            if (!InFleetSystem(commanded, haul.BodyId))
-                return CommandResult.Reject("The target is not in the fleet's system.");
+            if (!InLogisticsReach(commanded, haul.BodyId))
+                return CommandResult.Reject("The target is outside this fleet's reach.");
 
             var goal = new Goal(GoalType.FleetFreighter) { TargetEntityID = haul.BodyId };
             AgentProcessor.AssignGoal(commanded, goal);
@@ -329,8 +329,8 @@ namespace Pulsar4X.Engine.Api
             if (string.IsNullOrEmpty(haul.CargoId))
                 return CommandResult.Reject("Cargo id is required.");
             if (!TryResolve(haul.SourceId, out var source) || !TryResolve(haul.DestId, out var dest)
-                || source.Manager != commanded.Manager || dest.Manager != commanded.Manager)
-                return CommandResult.Reject("The target is not in the fleet's system.");
+                || !LogisticsSpan.ContractReaches(commanded, source, dest))
+                return CommandResult.Reject("The target is outside this fleet's reach.");
             if (source.Id == dest.Id
                 || !source.HasDataBlob<ColonyInfoDB>()
                 || !dest.HasDataBlob<ColonyInfoDB>())
@@ -362,8 +362,14 @@ namespace Pulsar4X.Engine.Api
                 ? null
                 : CommandResult.Reject("The commanded entity is not a fleet.");
 
-        private bool InFleetSystem(Entity fleet, int entityId)
-            => TryResolve(entityId, out var entity) && entity.Manager == fleet.Manager;
+        private bool InLogisticsReach(Entity fleet, int entityId)
+        {
+            if (!TryResolve(entityId, out var entity) || entity.Manager == null)
+                return false;
+            if (LogisticsSpan.Of(fleet) == CommandSpanKind.Neighbor)
+                return LogisticsSpan.ReachesManager(fleet, entity.Manager);
+            return entity.Manager == fleet.Manager;
+        }
 
         private CommandResult TranslateSetMarketListing(Entity faction, Entity commanded, GameCommand command)
         {

@@ -2,11 +2,13 @@
 
 Status: implemented on `TradeAndTransport`. Tests: `Pulsar4X.Tests/ColonySupplyTests.cs`. Colonies stay out of `FleetDB`. Do not fold this into plan 4.
 
-Reviewed against the colony agent wake, `CommandSpan`, `RunMarketPlan`, and city-hall seats. The order posts books and hands out `RunMarket`. Cargo already moves when a freighter, a fleet haul, or an autonomous freighter is running. This plan does not add a mover, a governor, population demand, or a span wider than the current star system.
+2026-10-06: membership uses `LogisticsSpan`, one step wider than survey. Earth's colony bridge covers Sol. A system bridge also covers one known jump. Survey is unchanged.
+
+Reviewed against the colony agent wake, `CommandSpan`, `RunMarketPlan`, and city-hall seats. The order posts books and hands out `RunMarket`. Cargo already moves when a freighter, a fleet haul, or an autonomous freighter is running. This plan does not add a mover, a governor, or population demand.
 
 ## Outcome
 
-The player gives one owned colony a supply order. That colony is the root office. The order covers other owned colonies on the same body, in the same gravity well, or in the same star system, clipped by the root's command bridge. Each member keeps its own market. The order posts books and hands out `RunMarket`. It does not fly cargo.
+The player gives one owned colony a supply order. That colony is the root office. Membership is `LogisticsSpan`: one step wider than the colony's survey span. A ship bridge covers the well. A colony, planet, or sphere-of-influence bridge covers this star system. A system bridge covers this system and one remembered jump. Each member keeps its own market. The order posts books and hands out `RunMarket`. It does not fly cargo.
 
 A governor entity can wait. Issuing this goal at a colony is enough.
 
@@ -14,7 +16,7 @@ A governor entity can wait. Issuing this goal at a colony is enough.
 
 Plan 4 (`RunMarket`, `ColonyMarketPolicyDB`, the colony branch in `AgentProcessor`). Plan 5b so a policy row is what the next `RunMarket` wake keeps: ask, bid, and reserve. Plan 7 so a posted sell and a posted buy can be hauled. Plan 10 is not required.
 
-`CommandSpan.Of` already reads `AdminSpaceDB` on the commanded entity when it is not a fleet. A colony with no seats is Body. Earth's city hall (`default-design-city-hall` on `admin-complex`) defaults to admin level Colony, which is Well. A seated commander is not required: span reads the seat's `AdminLevel`, and an empty `CommanderID` still counts. System span is an admin complex designed at `AdminLevel.System` or wider. That template and `tech-administration-level` already exist. Do not add a level, a tech, or a seat UI in this plan.
+`CommandSpan.Of` already reads `AdminSpaceDB` on the commanded entity when it is not a fleet. A colony with no seats is survey Body, so supply covers the well. Earth's city hall (`default-design-city-hall` on `admin-complex`) defaults to admin level Colony, which survey reads as Well and supply reads as this star system. A seated commander is not required: span reads the seat's `AdminLevel`, and an empty `CommanderID` still counts. A system seat, and anything wider, covers one remembered jump. That template and `tech-administration-level` already exist. Do not add a level, a tech, or a seat UI in this plan.
 
 ## What this plan uses, unchanged
 
@@ -44,17 +46,17 @@ The goal does not complete on its own. A pass with nothing to do returns Continu
 
 ## Who is in the group
 
-Owned colonies in the root's `EntityManager` that have `LogiBaseDB`. The root is always in. Same `FactionOwnerID` only. A friendly foreign colony is not a member. Do not call `MarketRun.Markets()`: that list unions `KnownSystems` and would pull colonies the ship can jump to.
+Owned colonies with `LogiBaseDB` in systems `LogisticsSpan` reaches. The root is always in. Same `FactionOwnerID` only. A friendly foreign colony is not a member. Do not call `MarketRun.Markets()`: that list unions every known system, and a supply order stops at one remembered jump.
 
 The anchor body is the root's `ColonyInfoDB.PlanetEntity`. Membership uses that planet, not `CommandSpan.Expand`. A moon colony is parented to the moon, so it is a grandchild of the planet and `Expand` will not see it.
 
-- **Body:** `PlanetEntity` is that body. A second colony on the same planet is in. A moon colony is out.
-- **Well:** the body set, plus a colony whose planet is a direct `PositionDB` child of the anchor. Read `anchor.PositionDB.Children` (`SafeList` is `IEnumerable`; LINQ `Contains` works).
+`LogisticsSpan.Of(root)` picks the width. Survey Body (no seats, or a ship-to-fleet seat) is supply Well. Survey Well (colony, planet, or SOI) is this star system. Survey System (system, sector, or empire) is this system and one remembered jump. Do not invent a wider empire rung.
+
+- **Well:** the anchor planet, a second colony on that planet, and a colony whose planet is a direct `PositionDB` child of the anchor. Read `anchor.PositionDB.Children` (`SafeList` is `IEnumerable`; LINQ `Contains` works).
 - **System:** every owned colony with an office in the root's star system.
+- **One jump:** those colonies, plus owned offices in systems one remembered jump from the root's star. Two hops stay out.
 
-`CommandSpan.Of(root)` picks the width. No seats, or a ship-to-fleet seat, is Body. Colony, Planet, or SOI is Well. System, Sector, or Empire is still this star system. Do not invent a sector entity.
-
-Tests set seats the way `FleetLogisticsTests.AttachBridge` does. They do not need a city hall component. A real Earth with its city hall is Well without a seated commander.
+Tests set seats the way `FleetLogisticsTests.AttachBridge` does. They do not need a city hall component. A real Earth with its city hall covers Sol without a seated commander.
 
 ## Who is handed RunMarket
 
@@ -102,7 +104,7 @@ Each button sends `SupplyLocalCommand` for the selected colony:
 
 Sending one replaces the colony's current goal. The buttons stay on screen while an order is active.
 
-Above the buttons, one line from the colony's bridge: "Covers this body", "Covers this well", or "Covers this system". `ToColonyView` fills that label from `CommandSpan.Of` for the owning faction, and leaves it empty on a friendly snapshot. The player does not pick the width.
+Above the buttons, one line from the colony's logistics reach: "Covers this well", "Covers this system", or "Covers this system and one jump". `ToColonyView` fills that label from `LogisticsSpan.Of` for the owning faction, and leaves it empty on a friendly snapshot. The fleet command line still shows the survey span. The player does not pick the width.
 
 Under the buttons, one sentence: Stockpile raises this colony's reserve, and that reserve stays after the order is replaced.
 
@@ -115,7 +117,7 @@ This tab does not list the member colonies, edit prices, or change the city hall
 `Pulsar4X.Tests/ColonySupplyTests.cs`. Call `SupplyLocalPlan.Plan` directly. Give each colony planet a `SystemBodyInfoDB` only if a test also runs an in-range exchange. These tests do not need one.
 
 - Run, two colonies on one body, both with a policy row: `Plan()` returns one `RunMarket` sub-goal for the sibling, parented to this order, and the root's actions include its own post. `AssignGoal` on that sub-goal makes the sibling's `ActiveGoal` `RunMarket`.
-- A Well seat includes a colony on a moon. A Body seat does not. A System seat includes an owned colony on another planet. The moon is a `PositionDB` child of the anchor planet. The moon colony's `PlanetEntity` is the moon.
+- A ship seat includes a colony on a moon and excludes another planet. A planet seat includes another planet in the system and excludes one jump. A system seat includes one known jump and excludes two hops. The moon is a `PositionDB` child of the anchor planet. The moon colony's `PlanetEntity` is the moon.
 - A friendly foreign colony is not a member.
 - Balance: one colony short of iron with an ask and a bid, one colony with iron stock and no iron row. The stocked colony gains a row, `AutoProduce` false, `Min` 0, prices copied. The short colony's Min is unchanged.
 - Balance with no price anywhere does not add a row.

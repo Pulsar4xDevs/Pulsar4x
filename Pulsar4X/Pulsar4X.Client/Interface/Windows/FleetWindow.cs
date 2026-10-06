@@ -654,12 +654,14 @@ namespace Pulsar4X.Client
                             break;
                         {
                             int fleetId = selectedFleet.Id;
-                            ImGui.TextWrapped("Ships buy and sell around this body. The flagship's bridge sets how far they look.");
-                            DisplayTargetTree(candidates,
+                            ImGui.TextWrapped("Ships buy and sell around the body you pick.");
+                            ImGui.Text(LogisticsSpanLabel());
+                            DisplayTargetTree(LogisticsCandidates(galaxy, candidates),
                                 e => e.HasView<BodyView>() && e.HasView<PositionView>(),
                                 "trade-button",
                                 id => SubmitFleetCommand(new FleetTradeCommand(fleetId, id)),
-                                starTargetsSystem: true);
+                                starTargetsSystem: true,
+                                spanLabel: LogisticsSpanLabel());
                         }
                         break;
                     case IssueOrderType.Haul:
@@ -667,16 +669,18 @@ namespace Pulsar4X.Client
                             break;
                         {
                             int fleetId = selectedFleet.Id;
-                            ImGui.TextWrapped("Ships move posted goods between our colonies around this body. The flagship's bridge sets how far they look.");
-                            DisplayTargetTree(candidates,
+                            ImGui.TextWrapped("Ships move posted goods between our colonies around the body you pick.");
+                            ImGui.Text(LogisticsSpanLabel());
+                            DisplayTargetTree(LogisticsCandidates(galaxy, candidates),
                                 e => e.HasView<BodyView>() && e.HasView<PositionView>(),
                                 "haul-button",
                                 id => SubmitFleetCommand(new FleetFreighterCommand(fleetId, id)),
-                                starTargetsSystem: true);
+                                starTargetsSystem: true,
+                                spanLabel: LogisticsSpanLabel());
                         }
                         break;
                     case IssueOrderType.HaulContract:
-                        DisplayHaulContract(candidates);
+                        DisplayHaulContract(LogisticsCandidates(galaxy, candidates));
                         break;
                 }
             }
@@ -776,6 +780,36 @@ namespace Pulsar4X.Client
             return selectedFleet.CommandSpan;
         }
 
+        private string LogisticsSpanLabel()
+        {
+            if(selectedFleet == null || string.IsNullOrEmpty(selectedFleet.LogisticsSpan))
+                return CommandSpanLabels.Well;
+            return selectedFleet.LogisticsSpan;
+        }
+
+        private IEnumerable<EntitySnapshot> LogisticsCandidates(IClientGalaxy galaxy, IEnumerable<EntitySnapshot> here)
+        {
+            var ids = selectedFleet?.LogisticsSystemIds;
+            if(ids == null || ids.Count <= 1)
+                return here;
+
+            var list = new List<EntitySnapshot>();
+            var seen = new HashSet<int>();
+            foreach(var id in ids)
+            {
+                var system = galaxy.GetSystem(id);
+                if(system == null)
+                    continue;
+                foreach(var entity in system.Entities)
+                {
+                    if(entity.Relation == OwnerRelation.Hostile || !seen.Add(entity.Id))
+                        continue;
+                    list.Add(entity);
+                }
+            }
+            return list.Count > 0 ? list : here;
+        }
+
         private void DisplayCommandLine()
         {
             if (orderShip != null)
@@ -872,8 +906,10 @@ namespace Pulsar4X.Client
             bool starTargetsSystem,
             bool keepParentWhenChildrenRemain = false,
             Func<EntitySnapshot, bool>? markDone = null,
-            int? selectedId = null)
+            int? selectedId = null,
+            string? spanLabel = null)
         {
+            string span = spanLabel ?? (orderShip != null ? CommandSpanLabels.Body : FleetSpanLabel());
             var byId = new Dictionary<int, EntitySnapshot>();
             foreach(var entity in candidates)
                 byId[entity.Id] = entity;
@@ -946,7 +982,7 @@ namespace Pulsar4X.Client
             }
 
             foreach(var root in SortNodes(roots, stars, null))
-                DisplayTargetNode(root, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId);
+                DisplayTargetNode(root, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span);
         }
 
         private static void AddTreeChild(Dictionary<int, List<EntitySnapshot>> children, Dictionary<int, int> parentOf, int parentId, EntitySnapshot child)
@@ -1192,7 +1228,8 @@ namespace Pulsar4X.Client
             Action<int> submit,
             bool starTargetsSystem,
             Func<EntitySnapshot, bool>? markDone,
-            int? selectedId)
+            int? selectedId,
+            string span)
         {
             if(node.IsBand)
             {
@@ -1211,7 +1248,7 @@ namespace Pulsar4X.Client
                             }
                         }
                         foreach(var child in SortNodes(bandKids, stars, star))
-                            DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId);
+                            DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span);
                     }
                     ImGui.TreePop();
                 }
@@ -1226,8 +1263,7 @@ namespace Pulsar4X.Client
             // A finished body stays in the tree while work remains under it. It is a button only
             // when this bridge includes those bodies: Well is the body's own children, System is
             // everything under it. Body span surveys the clicked body alone, which is already done.
-            string span = orderShip != null ? CommandSpanLabels.Body : FleetSpanLabel();
-            bool systemSpan = span == CommandSpanLabels.System;
+            bool systemSpan = span == CommandSpanLabels.System || span == CommandSpanLabels.Neighbor;
             bool reachesChildren = systemSpan || span == CommandSpanLabels.Well;
             bool starClickable = entity.Kind == BodyKind.Star && starTargetsSystem && systemSpan;
             bool childWork = coversWork.Contains(entity.Id);
@@ -1300,7 +1336,7 @@ namespace Pulsar4X.Client
             {
                 EntitySnapshot? around = entity.Kind == BodyKind.Star ? entity : null;
                 foreach(var child in SortNodes(childList, stars, around))
-                    DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId);
+                    DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span);
                 ImGui.TreePop();
             }
         }
@@ -1310,7 +1346,8 @@ namespace Pulsar4X.Client
             if(selectedFleet == null)
                 return;
 
-            ImGui.TextWrapped("One posted good, from one of our colonies to another. The fleet splits that load across its holds.");
+            ImGui.TextWrapped("One posted good, from one of our colonies to another. Both ends sit inside the reach below. The fleet splits that load across its holds.");
+            ImGui.Text(LogisticsSpanLabel());
 
             var colonies = candidates
                 .Where(e => e.Relation == OwnerRelation.Owned && e.Kind == BodyKind.Colony && e.HasView<MarketView>())
@@ -1318,7 +1355,7 @@ namespace Pulsar4X.Client
                 .ToList();
             if(colonies.Count == 0)
             {
-                ImGui.Text("No owned colonies with a market in this system.");
+                ImGui.Text("No owned colonies with a market in reach.");
                 return;
             }
 

@@ -102,7 +102,7 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
                 .Select(kvp => new CatalogOption(kvp.Key, kvp.Value.Name)).ToList(),
             data.Themes.Select(kvp => new CatalogOption(kvp.Key, kvp.Value.Name)).ToList(),
             data.Colonies
-                .Where(kvp => string.IsNullOrEmpty(kvp.Value.OwnerFaction))
+                .Where(kvp => string.IsNullOrEmpty(kvp.Value.OwnerFaction) && string.IsNullOrEmpty(kvp.Value.Body))
                 .Select(kvp => new CatalogOption(kvp.Key, kvp.Value.Name)).ToList(),
             systems);
     }
@@ -403,6 +403,7 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
 
         // Setup the starting colony
         ColonyFactory.CreateFromBlueprint(game, playerFaction, playerSpecies, startingSystem, startingBody, modDataStore.Colonies[request.ColonyId]);
+        ColonyFactory.PlacePlayerColonies(game, modDataStore, playerFaction, playerSpecies, request.ColonyId);
         if (modDataStore.Species.TryGetValue(request.SpeciesId, out var speciesBlueprint))
             ColonyFactory.PlaceOwnedColonies(game, modDataStore, playerFaction, speciesBlueprint);
         if (request.EleStart && !request.SystemId.Equals("random"))

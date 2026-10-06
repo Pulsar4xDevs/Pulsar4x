@@ -419,6 +419,20 @@
   {
     "Type": "ComponentDesign",
     "Payload": {
+      "UniqueId": "default-design-infrastructure-mars",
+      "Name": "Low-Gravity Infrastructure",
+      "TemplateId": "infrastructure",
+      "Properties": [
+        { "Key": "Min Gravity", "Value": 3.0 },
+        { "Key": "Max Gravity", "Value": 4.9 },
+        { "Key": "Min Pressure", "Value": 0.85 },
+        { "Key": "Max Pressure", "Value": 1.05 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
       "UniqueId": "default-design-city-hall",
       "Name": "City Hall",
       "TemplateId": "admin-complex",

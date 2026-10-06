@@ -97,5 +97,36 @@
         "MeanAnomaly": 0
       }
     }
+  },
+  {
+    "Type": "Colony",
+    "Payload": {
+      "UniqueID": "colony-mars-outpost",
+      "Name": "Mars Outpost",
+      "StartingPopulation": 8000,
+      "Body": "Mars",
+      "System": "system-sol",
+      "Installations": [
+        { "Id": "default-design-infrastructure-mars", "Amount": 20 },
+        { "Id": "default-design-mine", "Amount": 1 },
+        { "Id": "default-design-warehouse", "Amount": 1 },
+        { "Id": "default-design-spaceport", "Amount": 1 },
+        { "Id": "default-design-logistics-office", "Amount": 1 }
+      ],
+      "Cargo": [
+        { "Id": "iron", "Amount": 20000 },
+        { "Id": "water", "Amount": 10000 },
+        { "Id": "methalox", "Amount": 500, "Type": "byCount" }
+      ],
+      "StartingItems": [
+        "tech-infra-gravity-min-extension",
+        "tech-infra-gravity-min-extension",
+        "tech-infra-gravity-min-extension",
+        "tech-infra-pressure-min-extension"
+      ],
+      "ComponentDesigns": [
+        "default-design-infrastructure-mars"
+      ]
+    }
   }
 ]

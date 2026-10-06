@@ -196,7 +196,7 @@ public sealed record ColonyView(long Population, int? PlanetEntityId) : ICompone
     /// <summary>Per-species population breakdown (names resolved for the requesting faction).</summary>
     public IReadOnlyList<SpeciesPopulation> SpeciesPopulations { get; init; } = Array.Empty<SpeciesPopulation>();
 
-    /// <summary>Owning faction only. One of <see cref="CommandSpanLabels"/>.</summary>
+    /// <summary>Owning faction only. How far a supply order reaches. One of <see cref="CommandSpanLabels"/>.</summary>
     public string CommandSpan { get; init; } = "";
 }
 
@@ -206,6 +206,7 @@ public static class CommandSpanLabels
     public const string Body = "Covers this body";
     public const string Well = "Covers this well";
     public const string System = "Covers this system";
+    public const string Neighbor = "Covers this system and one jump";
 }
 
 public sealed record SpeciesPopulation(string SpeciesName, long Population);
@@ -805,8 +806,14 @@ public sealed class FleetSnapshot
     public bool CanGeoSurvey { get; init; }
     public bool CanGravSurvey { get; init; }
 
-    /// <summary>Flagship command bridge. One of <see cref="CommandSpanLabels"/>.</summary>
+    /// <summary>Flagship command bridge, as survey reads it. One of <see cref="CommandSpanLabels"/>.</summary>
     public string CommandSpan { get; init; } = "";
+
+    /// <summary>How far trade, freight, and a haul contract reach. One step wider than <see cref="CommandSpan"/>.</summary>
+    public string LogisticsSpan { get; init; } = "";
+
+    /// <summary>Systems a trade or haul order may use. The fleet's system, plus one jump when <see cref="LogisticsSpan"/> says so.</summary>
+    public IReadOnlyList<string> LogisticsSystemIds { get; init; } = Array.Empty<string>();
     public GoalSnapshot? Goal { get; init; }
     public IReadOnlyList<OrderSnapshot> Orders { get; init; } = Array.Empty<OrderSnapshot>();
     public IReadOnlyList<StandingOrder> StandingOrders { get; init; } = Array.Empty<StandingOrder>();

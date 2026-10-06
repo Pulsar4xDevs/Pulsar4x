@@ -20,4 +20,6 @@ Plans 1–12 and 5b are implemented on `TradeAndTransport`. Do not start a later
 | 11 | [Colony supply](11-colony-supply.md) | 4 and 5b. Parallel with 10. |
 | 12 | [Offer warehouse stock](12-offer-stock.md) | 4. A blueprint colony with an office lists its warehouse. |
 
+[Office purses](office-purses.md) is an idea saved on 2026-10-06. It is not plan 13. Leave it until someone asks to build it.
+
 Tests for these plans run from outside the repo (for example `/tmp`) with `DOTNET_ROLL_FORWARD=LatestMajor`, project `Pulsar4X/Pulsar4X.Tests/Pulsar4X.Tests.csproj`. `global.json` pins SDK 8.0.122; the local SDK may be newer.
