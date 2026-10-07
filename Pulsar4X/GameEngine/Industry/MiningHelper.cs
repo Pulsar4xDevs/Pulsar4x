@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Pulsar4X.Engine;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Colonies;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.Industry
 {
@@ -36,6 +37,35 @@ namespace Pulsar4X.Industry
             }
 
             return mineRates;
+        }
+
+        /// <summary>
+        /// Subtract mined units and cube accessibility down the same way the colony mine does.
+        /// A zero or negative half-original amount does not divide; accessibility drops to the floor.
+        /// </summary>
+        public static void Deplete(MineralDeposit deposit, long unitsMined)
+        {
+            if (deposit == null)
+                return;
+            if (unitsMined < 0)
+                unitsMined = 0;
+
+            long next = deposit.Amount.Actual - unitsMined;
+            if (next < 0)
+                next = 0;
+
+            var amount = deposit.Amount;
+            amount.Actual = next;
+            deposit.Amount = amount;
+
+            if (deposit.HalfOriginalAmount <= 0)
+            {
+                deposit.Accessibility = 0.1;
+                return;
+            }
+
+            double access = Math.Pow((float)next / deposit.HalfOriginalAmount, 3) * deposit.Accessibility;
+            deposit.Accessibility = GeneralMath.Clamp(access, 0.1, deposit.Accessibility);
         }
     }
 }

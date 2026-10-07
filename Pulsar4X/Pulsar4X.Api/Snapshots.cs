@@ -722,6 +722,9 @@ public sealed record ShipSnapshot(
     /// <summary>This hull's own grav-survey kit. A fleet flag is "any child can".</summary>
     public bool CanGravSurvey { get; init; }
 
+    /// <summary>This hull's own asteroid miner. A fleet flag is "any child can".</summary>
+    public bool CanMineAsteroids { get; init; }
+
     /// <summary>The seated captain, or null when the chair is empty and the player plots actions.</summary>
     public int? CommanderId { get; init; }
 }
@@ -805,6 +808,7 @@ public sealed class FleetSnapshot
     public bool InheritOrders { get; init; }
     public bool CanGeoSurvey { get; init; }
     public bool CanGravSurvey { get; init; }
+    public bool CanMineAsteroids { get; init; }
 
     /// <summary>Flagship command bridge, as survey reads it. One of <see cref="CommandSpanLabels"/>.</summary>
     public string CommandSpan { get; init; } = "";

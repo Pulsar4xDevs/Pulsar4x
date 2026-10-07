@@ -7,10 +7,11 @@ The refining goal is one plan. Factory, shipyard, and construction goals are dif
 | Plan | Status |
 |---|---|
 | [Refine one batch](refine-one-batch.md) | Implemented. |
+| [Mine asteroids](mine-asteroids.md) | Implemented. A ship goal, not a colony mine. |
 
 ## What already runs, and is not a goal
 
-- **Mines.** `MineResourcesProcessor` is a hotloop. A mine with a deposit fills the warehouse. `GoalType.Mine` has a weight and no planner. Leave it that way.
+- **Mines.** `MineResourcesProcessor` is a hotloop. A mine with a deposit fills the warehouse. `GoalType.Mine` has a weight and no planner. Leave it that way. Ship mining is [Mine asteroids](mine-asteroids.md).
 - **Jobs already on a line.** `IndustryProcessor` calls `IndustryTools.ConstructStuff` once a day, first run at three hours. It does not choose a design.
 - **Infrastructure.** `InfrastructureProcessor.GetEfficiency` scales the points a line spends when installations outgrow infrastructure. Earth starts with 100 infrastructure.
 - **Local construction.** `LocalConstructionProcessor` spends `PointsPerDay` and then `AddComponent`. It does not take cargo. The production-line queue and this queue are different systems.

@@ -155,8 +155,16 @@ namespace Pulsar4X.Engine.Api
         {
             var date = _focusedSystem?.ManagerSubpulses.StarSysDateTime ?? _game.TimePulse.GameGlobalDateTime;
             var evt = new GameEventEnvelope(GameEventType.TimeChanged, Time: _projector.ProjectTime(date));
+            var fault = _game.TimePulse.LastFault;
+            var faultEvt = fault == null
+                ? null
+                : new GameEventEnvelope(GameEventType.SimulationFaulted, FaultReport: fault.Report);
             foreach (var sub in SnapshotSubscriptions())
+            {
                 sub.Send(evt);
+                if (faultEvt != null)
+                    sub.Send(faultEvt);
+            }
         }
 
         // The position-relevant, server-computed movers of one system (the focused one), owner-scoped.

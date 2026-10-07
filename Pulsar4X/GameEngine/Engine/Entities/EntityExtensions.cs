@@ -8,6 +8,7 @@ using Pulsar4X.Colonies;
 using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.GeoSurveys;
+using Pulsar4X.Industry;
 using Pulsar4X.JumpPoints;
 using Pulsar4X.Names;
 using Pulsar4X.Orbits;
@@ -205,6 +206,22 @@ namespace Pulsar4X.Extensions
                 foreach(var child in fleetDB.Children)
                 {
                     if(child.HasGeoSurveyAbility())
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool HasAsteroidMineAbility(this Entity entity)
+        {
+            if (entity.HasDataBlob<AsteroidMineAbilityDB>()) return true;
+
+            if (entity.TryGetDataBlob<FleetDB>(out var fleetDB))
+            {
+                foreach (var child in fleetDB.Children)
+                {
+                    if (child.HasAsteroidMineAbility())
                         return true;
                 }
             }

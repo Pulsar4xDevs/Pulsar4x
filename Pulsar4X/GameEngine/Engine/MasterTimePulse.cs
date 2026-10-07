@@ -61,11 +61,27 @@ namespace Pulsar4X.Engine
         /// </summary>
         public event Action? SimulationStopped;
 
-        // Observes the (possibly cancelled) simulation task's exception and notifies listeners once it
-        // has fully stopped. ContinueWith fires after the task reaches a final state, so IsRunning is
-        // false by the time SimulationStopped is raised.
+        /// <summary>Set when a processor throws and the clock stops. Cleared when a new run starts.
+        /// The UI reads this; it is not a save.</summary>
+        [JsonIgnore]
+        public SimulationFault? LastFault { get; private set; }
+
+        // The task's exception used to be read and dropped here, so a processor fault looked like a
+        // pause. A fault caught inside the step is already on LastFault. One that escapes the task
+        // is recorded from here, then listeners run.
         private void NotifyWhenStopped(Task simulationTask)
-            => simulationTask.ContinueWith(t => { _ = t.Exception; SimulationStopped?.Invoke(); }, TaskScheduler.Default);
+            => simulationTask.ContinueWith(t =>
+            {
+                if (t.IsFaulted && t.Exception != null)
+                {
+                    var real = t.Exception.Flatten().InnerExceptions
+                        .FirstOrDefault(e => e is not OperationCanceledException);
+                    if (real != null && LastFault == null)
+                        NoteFault(real, system: null);
+                }
+
+                SimulationStopped?.Invoke();
+            }, TaskScheduler.Default);
 
         [JsonIgnore]
         private TimeSpan _tickInterval = TimeSpan.FromMilliseconds(100);
@@ -181,6 +197,7 @@ namespace Pulsar4X.Engine
             // Start the continious time simulation task.
             _timeSimulationCts?.Dispose();
             _timeSimulationCts = new CancellationTokenSource();
+            LastFault = null;
             _timeSimulationTask = Task.Run(() => SimulateTimeAsync(_timeSimulationCts.Token), _timeSimulationCts.Token);
             NotifyWhenStopped(_timeSimulationTask);
         }
@@ -204,6 +221,7 @@ namespace Pulsar4X.Engine
 
             _timeSimulationCts?.Dispose();
             _timeSimulationCts = new CancellationTokenSource();
+            LastFault = null;
             _timeSimulationTask = Task.Run(() => SimulateTimeUntil(toDate, _timeSimulationCts.Token), _timeSimulationCts.Token);
             NotifyWhenStopped(_timeSimulationTask);
 
@@ -283,33 +301,73 @@ namespace Pulsar4X.Engine
             while (GameGlobalDateTime < targetDateTime && !ct.IsCancellationRequested)
             {
                 _subpulseStopwatch.Start();
-                DateTime nextInterupt = ProcessNextInterupt(targetDateTime);
-                //do system processors
-                var activeSystems = _game.Systems.Where(s => s.ActivityState != SystemActivityState.Stasis);
-
-                if (_game.Settings.EnableMultiThreading == true)
-                {
-                    //multi-threaded
-                    Parallel.ForEach(activeSystems, starSys => starSys.ManagerSubpulses.ProcessSystem(nextInterupt));
-
-                    //The above 'blocks' till all the tasks are done.
-                }
-                else
-                {
-                    // single-threaded
-                    foreach (StarSystem starSys in activeSystems)
-                    {
-                        starSys.ManagerSubpulses.ProcessSystem(nextInterupt);
-                    }
-                }
+                if (!AdvanceOneStep(targetDateTime))
+                    break;
 
                 LastSubtickTime = _subpulseStopwatch.Elapsed;
-                GameGlobalDateTime = nextInterupt; //set the GlobalDateTime this will invoke the datechange event.
                 _subpulseStopwatch.Reset();
             }
 
             LastProcessingTime = _stopwatch.Elapsed; //how long the processing took
             _stopwatch.Reset();
+        }
+
+        // One interrupt plus every active system. A throw stops the run here, on the simulation
+        // thread, with the processor still named on the system that was in the call.
+        private bool AdvanceOneStep(DateTime targetDateTime)
+        {
+            StarSystem? current = null;
+            try
+            {
+                DateTime nextInterupt = ProcessNextInterupt(targetDateTime);
+                var activeSystems = _game.Systems.Where(s => s.ActivityState != SystemActivityState.Stasis);
+
+                if (_game.Settings.EnableMultiThreading)
+                {
+                    Parallel.ForEach(activeSystems, starSys => starSys.ManagerSubpulses.ProcessSystem(nextInterupt));
+                }
+                else
+                {
+                    foreach (StarSystem starSys in activeSystems)
+                    {
+                        current = starSys;
+                        starSys.ManagerSubpulses.ProcessSystem(nextInterupt);
+                    }
+                }
+
+                GameGlobalDateTime = nextInterupt;
+                return true;
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                NoteFault(ex, current);
+                if (Debugger.IsAttached)
+                    Debugger.Break();
+                _subpulseStopwatch.Reset();
+                return false;
+            }
+        }
+
+        private void NoteFault(Exception ex, StarSystem? system)
+        {
+            if (system == null)
+            {
+                system = _game.Systems.FirstOrDefault(s =>
+                    s.ManagerSubpulses.CurrentProcess != "Waiting");
+            }
+
+            var sub = system?.ManagerSubpulses;
+            string process = sub?.CurrentProcess ?? "Unknown";
+            DateTime systemTime = sub?.StarSysDateTime ?? GameGlobalDateTime;
+            string systemName = system?.NameDB.DefaultName ?? "";
+            LastFault = new SimulationFault(
+                ex.ToString(),
+                process,
+                system?.ID ?? "",
+                systemName,
+                systemTime,
+                GameGlobalDateTime);
+            Trace.WriteLine(LastFault.Report);
         }
 
         private DateTime ProcessNextInterupt(DateTime maxDateTime)
@@ -343,6 +401,40 @@ namespace Pulsar4X.Engine
                     equality = true;
             }
             return equality;
+        }
+    }
+
+    /// <summary>A processor threw and the clock stopped. This is the text the player is shown.
+    /// It is not a save.</summary>
+    public sealed class SimulationFault
+    {
+        public string ExceptionText { get; }
+        public string Process { get; }
+        public string SystemId { get; }
+        public string SystemName { get; }
+        public DateTime SystemTime { get; }
+        public DateTime GlobalTime { get; }
+        public string Report { get; }
+
+        public SimulationFault(string exceptionText, string process, string systemId, string systemName, DateTime systemTime, DateTime globalTime)
+        {
+            ExceptionText = exceptionText;
+            Process = process;
+            SystemId = systemId;
+            SystemName = systemName;
+            SystemTime = systemTime;
+            GlobalTime = globalTime;
+            string where = string.IsNullOrEmpty(systemName) ? systemId : systemName;
+            if (string.IsNullOrEmpty(where))
+                where = "unknown";
+            Report = string.Join(Environment.NewLine,
+                "The simulation stopped.",
+                "Process: " + process,
+                "System: " + where,
+                "System time: " + systemTime.ToString("u"),
+                "Global time: " + globalTime.ToString("u"),
+                "",
+                exceptionText);
         }
     }
 

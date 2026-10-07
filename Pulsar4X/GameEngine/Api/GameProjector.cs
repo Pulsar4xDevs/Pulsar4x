@@ -1294,6 +1294,7 @@ namespace Pulsar4X.Engine.Api
                 InheritOrders = fleetDB?.InheritOrders ?? false,
                 CanGeoSurvey = fleet.HasGeoSurveyAbility(),
                 CanGravSurvey = fleet.HasJPSurveyAbililty(),
+                CanMineAsteroids = fleet.HasAsteroidMineAbility(),
                 CommandSpan = SpanLabel(CommandSpan.Of(fleet)),
                 LogisticsSpan = SpanLabel(LogisticsSpan.Of(fleet)),
                 LogisticsSystemIds = LogisticsSpan.SystemIds(fleet),
@@ -1396,6 +1397,7 @@ namespace Pulsar4X.Engine.Api
                 Orders = ProjectOrders(ship),
                 CanGeoSurvey = ship.HasGeoSurveyAbility(),
                 CanGravSurvey = ship.HasJPSurveyAbililty(),
+                CanMineAsteroids = ship.HasAsteroidMineAbility(),
                 CommanderId = commanderId,
             };
         }

@@ -114,6 +114,9 @@ public enum GoalType
 
     // One refining batch, called by Offer stock. Appended so saved values stay put.
     RunIndustry,
+
+    // Ship mines surveyed asteroids and hauls the ore home. Appended so saved values stay put.
+    MineAsteroids,
 }
 
 public class Goal

@@ -515,6 +515,7 @@
           "tech-factory-max-size",
           "tech-shipyard-slip-max-size",
           "tech-geo-surveyor",
+          "tech-asteroid-mining",
           "tech-administration-level",
           "tech-infra-gravity-range",
           "tech-infra-gravity-min-extension",
@@ -563,6 +564,23 @@
       "Unlocks": {
         "1": [
           "geo-surveyor"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-asteroid-mining",
+      "Name": "Asteroid Mining",
+      "Description": "Research into mining asteroids from a ship",
+      "Category": "tech-category-designs",
+      "MaxLevel": 1,
+      "DataFormula": "(1 + [Level]) * 5000",
+      "CostFormula":"(1 + [Level]) * 500",
+      "Unlocks": {
+        "1": [
+          "asteroid-miner"
         ]
       }
     }

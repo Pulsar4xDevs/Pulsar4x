@@ -141,6 +141,9 @@ public sealed record MoveToBodyCommand(int TargetEntityId, int BodyId) : GameCom
 /// <summary>Warp to the body and geo-survey it.</summary>
 public sealed record GeoSurveyCommand(int TargetEntityId, int BodyId) : GameCommand(TargetEntityId);
 
+/// <summary>Mine surveyed asteroids in the current system and haul the ore home. No body is named.</summary>
+public sealed record MineAsteroidsCommand(int TargetEntityId) : GameCommand(TargetEntityId);
+
 /// <summary>Warp to the location and gravitationally survey it for jump points.</summary>
 public sealed record GravSurveyCommand(int TargetEntityId, int LocationId) : GameCommand(TargetEntityId);
 

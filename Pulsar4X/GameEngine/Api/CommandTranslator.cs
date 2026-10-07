@@ -69,6 +69,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(SetStandingOrdersCommand)] = TranslateSetStandingOrders,
                 [typeof(MoveToBodyCommand)] = TranslateMoveToBody,
                 [typeof(Pulsar4X.Api.GeoSurveyCommand)] = TranslateGeoSurvey,
+                [typeof(MineAsteroidsCommand)] = TranslateMineAsteroids,
                 [typeof(GravSurveyCommand)] = TranslateGravSurvey,
                 [typeof(Pulsar4X.Api.JumpCommand)] = TranslateJump,
                 [typeof(RefuelAtCommand)] = TranslateRefuelAt,
@@ -692,6 +693,20 @@ namespace Pulsar4X.Engine.Api
             };
             AgentProcessor.AssignGoal(commanded, goal);
             if(goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateMineAsteroids(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectGoalWithoutCaptain(commanded) is { } rejected)
+                return rejected;
+            if (!commanded.HasOrChildHasAbility<AsteroidMineAbilityDB>())
+                return CommandResult.Reject("This ship has no asteroid miner.");
+
+            var goal = new Goal(GoalType.MineAsteroids);
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
                 return CommandResult.Reject(goal.Message);
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }

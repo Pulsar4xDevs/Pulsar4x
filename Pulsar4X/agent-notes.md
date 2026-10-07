@@ -34,17 +34,11 @@ Inbox for small bugs and follow-ups that came up while doing something else. Any
 
 ## Open
 
-### Surface a simulation fault, and keep a crash save
+### A processor fault stops the clock quietly — the dialog is in, the crash save is not
 
-Spitballed 2026-10-03. Do not build it until asked.
+2026-10-03. The silent half is done. `MasterTimePulse.AdvanceOneStep` catches one step, `Debugger.Break()` when a debugger is attached, and stores `LastFault` (exception text, `CurrentProcess`, system, both clocks). `NotifyWhenStopped` records a fault that escapes the task instead of dropping `t.Exception`. The client gets `GameEventType.SimulationFaulted` and shows a modal. `TimeStopDiagnosticTests.ProcessorFault_stops_the_clock_and_keeps_the_report` passes. No save is written.
 
-One `try`/`catch` inside the simulation task, around a single step in `SimulateTimeUntil`. Not one catch per processor. In that catch: if a debugger is attached, `Debugger.Break()` while the stack is still the processor frame; write the exception text, `ManagerSubPulse.CurrentProcess`, the system, and both clocks. Stop discarding `t.Exception`. The client shows a dialog, not a silent pause.
-
-Two files. `Game.Save` of the live game, plus that text, is the crash report a player can send. Loading it and pressing play hits the same line again, which is what a dev wants. A resume file is the previous completed master step, taken after `GameGlobalDateTime` is assigned, on a real-time interval of a few minutes. The half-finished step is discarded. Offer that checkpoint from the dialog. If the checkpoint dies on the next unpause, say so and point at the crash folder. A data bug that is already in the checkpoint replays on the next unpause. Continuing past a fault only works when the fault does not replay.
-
-`EnableMultiThreading` defaults to false. If it is on, checkpoint before the parallel pass.
-
-`Pulsar4X.Client/CrashReports/DiscordCrashLogger.cs` posts a Discord embed. It is not this path.
+The crash-save half is still unbuilt. Do not build it until asked. Two files: a `Game.Save` of the live game plus the fault text (a replay dump — the step may already be torn), and a resume file taken after `GameGlobalDateTime` is assigned, every few minutes. The half-finished step is discarded. Offer the checkpoint from the dialog. If it dies on the next unpause, say so. A data bug already in the checkpoint throws again. If `EnableMultiThreading` is on, checkpoint before the parallel pass. `DiscordCrashLogger` is not this path.
 
 ### Quickstart failure leaves a blank window
 

@@ -15,6 +15,7 @@ namespace Pulsar4X.Client
             MoveTo,
             GeoSurvey,
             GravSurvey,
+            MineAsteroids,
             Jump,
             RefuelAt,
             Trade,
@@ -394,7 +395,9 @@ namespace Pulsar4X.Client
 
             bool geo = orderShip != null ? orderShip.CanGeoSurvey : selectedFleet?.CanGeoSurvey == true;
             bool grav = orderShip != null ? orderShip.CanGravSurvey : selectedFleet?.CanGravSurvey == true;
+            bool mine = orderShip != null ? orderShip.CanMineAsteroids : selectedFleet?.CanMineAsteroids == true;
             bool fleetOrders = orderShip == null;
+            bool mineGoal = mine && (orderShip == null || ShipHasCaptain(orderShip));
 
             if (ImGui.Selectable("Move to ...", selectedIssueOrderType == IssueOrderType.MoveTo))
                 selectedIssueOrderType = IssueOrderType.MoveTo;
@@ -404,6 +407,8 @@ namespace Pulsar4X.Client
                 selectedIssueOrderType = IssueOrderType.GeoSurvey;
             if (grav && ImGui.Selectable("Grav Survey ...", selectedIssueOrderType == IssueOrderType.GravSurvey))
                 selectedIssueOrderType = IssueOrderType.GravSurvey;
+            if (mineGoal && ImGui.Selectable("Mine asteroids", selectedIssueOrderType == IssueOrderType.MineAsteroids))
+                selectedIssueOrderType = IssueOrderType.MineAsteroids;
             if (ImGui.Selectable("Jump...", selectedIssueOrderType == IssueOrderType.Jump))
                 selectedIssueOrderType = IssueOrderType.Jump;
             if (fleetOrders && ImGui.Selectable("Trade ...", selectedIssueOrderType == IssueOrderType.Trade))
@@ -543,13 +548,16 @@ namespace Pulsar4X.Client
                         && (!emptyChair || atGeo);
                     bool shipGrav = orderShip.CanGravSurvey && selectedIssueOrderType == IssueOrderType.GravSurvey
                         && (!emptyChair || atGrav);
+                    bool shipMine = orderShip.CanMineAsteroids
+                        && selectedIssueOrderType == IssueOrderType.MineAsteroids
+                        && !emptyChair;
                     bool shipPlot = emptyChair && (selectedIssueOrderType == IssueOrderType.PlotWarpTo
                         || selectedIssueOrderType == IssueOrderType.PlotCircularise
                         || selectedIssueOrderType == IssueOrderType.PlotChangeAltitude
                         || selectedIssueOrderType == IssueOrderType.PlotMatchOrbit);
                     bool shipGoal = selectedIssueOrderType == IssueOrderType.MoveTo
                         || selectedIssueOrderType == IssueOrderType.Jump
-                        || shipGeo || shipGrav || shipPlot;
+                        || shipGeo || shipGrav || shipMine || shipPlot;
                     if (!shipGoal)
                         selectedIssueOrderType = IssueOrderType.MoveTo;
                 }
@@ -628,6 +636,11 @@ namespace Pulsar4X.Client
                                 starTargetsSystem: fleetSpan,
                                 keepParentWhenChildrenRemain: fleetSpan,
                                 markDone: e => e.GetView<GravSurveyView>()?.IsSurveyComplete == true);
+                        break;
+                    case IssueOrderType.MineAsteroids:
+                        ImGui.TextWrapped("Mine surveyed asteroids in this system. The ship fills its hold, then unloads at the nearest colony that can take the ore.");
+                        if (ImGui.Button("Mine asteroids"))
+                            SubmitFleetCommand(new MineAsteroidsCommand(commanded.Value));
                         break;
                     case IssueOrderType.Jump:
                         // The server only projects a JumpPointView once this faction has discovered it.

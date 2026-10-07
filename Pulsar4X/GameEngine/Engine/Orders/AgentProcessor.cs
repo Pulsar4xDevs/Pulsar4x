@@ -569,6 +569,7 @@ public class AgentProcessor : IInstanceProcessor
                 GoalType.SurveySystem or GoalType.ServeyBodies => entity.HasOrChildHasAbility<GeoSurveyAbilityDB>(),
                 GoalType.ScanAnomalies => entity.HasOrChildHasAbility<JPSurveyAbilityDB>(),
                 GoalType.Mine => entity.HasOrChildHasAbility<MiningDB>(),
+                GoalType.MineAsteroids => entity.HasOrChildHasAbility<AsteroidMineAbilityDB>(),
                 GoalType.ListeningPost => entity.HasOrChildHasAbility<SensorAbilityDB>(),
                 GoalType.Scout => entity.HasOrChildHasAbility<SensorAbilityDB>(),
                 GoalType.Trade or GoalType.Freighter => entity.HasDataBlob<ShipInfoDB>()

@@ -146,6 +146,60 @@
   {
     "Type": "ComponentTemplate",
     "Payload": {
+      "UniqueID": "asteroid-miner",
+      "Name": "Asteroid Miner",
+      "Formulas": {
+        "Description": "Mines an asteroid the ship is orbiting.",
+        "Mass": "PropertyValue('Mass')",
+        "Volume": "Max(1, [Mass] * 0.1)",
+        "HTK": "0.5",
+        "CrewReq": "1",
+        "ResearchCost": "100",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "stainless-steel": "[Mass] * 0.4",
+        "plastic": "[Mass] * 0.2",
+        "aluminium": "[Mass] * 0.1",
+        "copper": "[Mass] * 0.3"
+      },
+      "ComponentType": "Science",
+      "MountType": "ShipComponent, ShipCargo",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "component-construction",
+      "Properties": [
+        {
+          "Name": "Mining Rate",
+          "Units": "units per day",
+          "DescriptionFormula": "'Units of each mineral mined per day'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "DataDict": {},
+          "MaxFormula": "1000",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "1"
+        },
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass Calculation'",
+          "GuiHint": "None",
+          "PropertyFormula": "PropertyValue('Mining Rate') * 10"
+        },
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "DataDict": {},
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Mining Rate'))",
+          "AttributeType": "Pulsar4X.Industry.AsteroidMinerAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
       "UniqueID": "research-lab",
       "Name": "Research Lab",
       "Formulas": {

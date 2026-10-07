@@ -90,15 +90,7 @@ namespace Pulsar4X.Industry
                     // StaticRefLib.EventLog.AddPlayerEntityErrorEvent(colonyEntity,EventType.Storage, erstr);
                 }
 
-                long newAmount = mineralDeposit.Amount.Actual - unitsMinedThisTick;
-
-                var amount = mineralDeposit.Amount;
-                amount.Actual = newAmount;
-                mineralDeposit.Amount = amount;
-
-                var accessability = Math.Pow((float)newAmount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
-                double newAccess = GeneralMath.Clamp(accessability, 0.1, mineralDeposit.Accessibility);
-                mineralDeposit.Accessibility = newAccess;
+                MiningHelper.Deplete(mineralDeposit, unitsMinedThisTick);
             }
         }
 

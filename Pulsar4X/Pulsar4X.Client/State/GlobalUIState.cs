@@ -24,6 +24,10 @@ namespace Pulsar4X.Client
         public event StarSystemAddedEventHandler? OnStarSystemAdded;
 
         public bool debugnewgame = false;
+
+        /// <summary>Set when the server reports that a processor threw and the clock stopped.
+        /// The main window shows it and clears it when the player dismisses the dialog.</summary>
+        internal string? SimulationFaultReport { get; set; }
         //internal PulsarGuiWindow distanceRulerWindow { get; set; }
         internal static readonly Dictionary<Type, string> NamesForMenus = new() {
             {typeof(PinCameraBlankMenuHelper), "Pin camera"},
@@ -440,6 +444,8 @@ namespace Pulsar4X.Client
         {
             if (envelope.Type == GameEventType.SystemRevealed && envelope.SystemId is { } systemId)
                 OnStarSystemAdded?.Invoke(this, systemId);
+            if (envelope.Type == GameEventType.SimulationFaulted && !string.IsNullOrEmpty(envelope.FaultReport))
+                SimulationFaultReport = envelope.FaultReport;
         }
 
         internal void SetActiveSystem(string activeSysID, bool refresh = false)

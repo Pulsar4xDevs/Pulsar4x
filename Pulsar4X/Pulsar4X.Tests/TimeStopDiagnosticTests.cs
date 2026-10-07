@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Pulsar4X.Colonies;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
@@ -39,6 +41,47 @@ public class TimeStopDiagnosticTests
             "The first hour of a Sol start stopped the clock.\n" + thrown);
         Assert.That(scene.Sol.StarSysDateTime, Is.GreaterThan(scene.Start));
         Assert.That(scene.Game.TimePulse.GameGlobalDateTime, Is.GreaterThan(scene.Start));
+    }
+
+    [Test]
+    public void ProcessorFault_stops_the_clock_and_keeps_the_report()
+    {
+        var store = new ModDataStore();
+        new ModLoader().LoadModManifest("Data/basemod/modInfo.json", store);
+        var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
+        game.Settings.EnforceSingleThread = true;
+        game.Settings.EnableMultiThreading = false;
+
+        var system = new StarSystem();
+        system.Initialize(game, "Fault System");
+        system.SetActivityState(SystemActivityState.Foreground);
+
+        var ship = Entity.Create();
+        system.AddEntity(ship, new List<BaseDataBlob> { new NameDB("boom") });
+        system.ManagerSubpulses.AddEntityInterupt(
+            system.ManagerSubpulses.StarSysDateTime, "NotAProcessor", ship);
+
+        var start = game.TimePulse.GameGlobalDateTime;
+        Exception? thrown = null;
+        try
+        {
+            game.TimePulse.TimeStep();
+        }
+        catch (Exception ex)
+        {
+            thrown = ex;
+        }
+
+        Assert.That(thrown, Is.Null);
+        var fault = game.TimePulse.LastFault;
+        Assert.That(fault, Is.Not.Null);
+        Assert.That(fault!.Process, Is.EqualTo("NotAProcessor"));
+        Assert.That(fault.SystemName, Is.EqualTo("Fault System"));
+        Assert.That(fault.SystemTime, Is.EqualTo(start));
+        Assert.That(fault.GlobalTime, Is.EqualTo(start));
+        Assert.That(fault.Report, Does.Contain("NotAProcessor").And.Contain("Fault System"));
+        Assert.That(game.TimePulse.GameGlobalDateTime, Is.EqualTo(start));
+        Assert.That(game.TimePulse.IsRunning, Is.False);
     }
 
     static Scene BuildSolStart()

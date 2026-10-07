@@ -133,6 +133,39 @@ public class CargoTransferOrder : EntityAction
     }
 
     /// <summary>
+    /// Build an unload without enqueueing. Ship is primary. Each amount is negative so ore
+    /// leaves the ship. Caller submits secondary on the colony and returns primary in the plan.
+    /// Create this only once the ship is already at the colony. The constructor escrows immediately.
+    /// </summary>
+    public static (CargoTransferOrder primary, CargoTransferOrder secondary) CreateUnloadPair(
+        int faction,
+        Entity ship,
+        Entity colony,
+        List<(ICargoable item, long amount)> items)
+    {
+        var cargoData = new CargoTransferDataDB(ship, colony, items);
+        var now = ship.Manager.ManagerSubpulses.StarSysDateTime;
+
+        var primary = new CargoTransferOrder(cargoData)
+        {
+            RequestingFactionGuid = faction,
+            EntityCommandingGuid = ship.Id,
+            CreatedDate = now,
+            IsPrimaryEntity = true,
+            Condition = Conditionals.TakeAvailibleAtOrder,
+        };
+        var secondary = new CargoTransferOrder(cargoData)
+        {
+            RequestingFactionGuid = faction,
+            EntityCommandingGuid = colony.Id,
+            CreatedDate = now,
+            IsPrimaryEntity = false,
+            Condition = Conditionals.TakeAvailibleAtOrder,
+        };
+        return (primary, secondary);
+    }
+
+    /// <summary>
     /// Single item conditional order.
     /// Assumes transfer from secondary to primary
     /// </summary>

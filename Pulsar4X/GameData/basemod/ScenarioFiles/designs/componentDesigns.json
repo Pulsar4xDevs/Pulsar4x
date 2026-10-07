@@ -184,6 +184,17 @@
   {
     "Type": "ComponentDesign",
     "Payload": {
+      "UniqueId": "default-design-asteroid-miner",
+      "Name": "Asteroid Miner",
+      "TemplateId": "asteroid-miner",
+      "Properties": [
+        { "Key": "Mining Rate", "Value": 100 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
       "UniqueId": "default-design-gravitational-surveyor",
       "Name": "Gravitational Surveyor Mk1",
       "TemplateId": "gravitational-surveyor",

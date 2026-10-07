@@ -22,6 +22,7 @@ public enum GameEventType
     CommandersChanged, // the faction's personnel roster changed; payload carries Commanders
     StancesChanged,  // the viewer's stance toward other factions changed; payload carries Stances
     LogEvent,        // one or more game-log entries for the faction; payload carries Log
+    SimulationFaulted, // a processor threw and the clock stopped; payload carries FaultReport
 }
 
 /// <summary>
@@ -63,4 +64,5 @@ public sealed record GameEventEnvelope(
     ComponentDesignsSnapshot? ComponentDesigns = null,
     IReadOnlyList<CommanderSnapshot>? Commanders = null,
     IReadOnlyList<LogEvent>? Log = null,
-    IReadOnlyList<FactionStanceRow>? Stances = null);
+    IReadOnlyList<FactionStanceRow>? Stances = null,
+    string? FaultReport = null);

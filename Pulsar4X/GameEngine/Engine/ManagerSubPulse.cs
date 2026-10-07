@@ -402,13 +402,13 @@ namespace Pulsar4X.Engine
                         var s = itm.Item1;
                         var e = itm.Item2;
 
+                        CurrentProcess = s;
                         var processor = _processManager.GetInstanceProcessor(s);
                         var pn = processor.GetType().Name;
 
                     Trace.WriteLine($"[{StarSysDateTime:u}|{_subStepDateTime:u}] running instance processor: {pn} with entity: {e.DebuggerDisplay}");
 
                         Performance.Start(pn);
-                        CurrentProcess = s;
                         processor.ProcessEntity(e, qi.Time);
                         Performance.Stop(pn);
                     }

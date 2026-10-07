@@ -248,9 +248,35 @@ namespace Pulsar4X.Client
 
             // Render any windows that have registered themselves
             _state.WindowManager.RenderActiveWindows();
+            DisplaySimulationFault();
 
             // Render the maneuver node panel overlay (if active)
             _state.DisplayManeuverNodePanel();
+        }
+
+        private void DisplaySimulationFault()
+        {
+            var report = _state.SimulationFaultReport;
+            if (string.IsNullOrEmpty(report))
+                return;
+
+            const string popup = "Simulation stopped";
+            ImGui.SetNextWindowSize(new Vector2(640, 420), ImGuiCond.Appearing);
+            if (!ImGui.IsPopupOpen(popup))
+                ImGui.OpenPopup(popup);
+            if (!ImGui.BeginPopupModal(popup))
+                return;
+
+            ImGui.TextWrapped("The simulation hit an error and the clock stopped.");
+            if (ImGui.BeginChild("fault-text", new Vector2(0, 300), ImGuiChildFlags.Borders))
+                ImGui.TextWrapped(report);
+            ImGui.EndChild();
+            if (ImGui.Button("Ok"))
+            {
+                _state.SimulationFaultReport = null;
+                ImGui.CloseCurrentPopup();
+            }
+            ImGui.EndPopup();
         }
 
         public override void Exit()

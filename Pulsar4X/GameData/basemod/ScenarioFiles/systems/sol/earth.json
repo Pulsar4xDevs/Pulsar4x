@@ -115,6 +115,7 @@
         "tech-modern-technology",
         "tech-conventional-engine",
         "tech-geo-surveyor",
+        "tech-asteroid-mining",
         "tech-gravitational-surveyor",
         "stainless-steel-armor",
         "plastic-armor",
@@ -188,6 +189,7 @@
         "default-design-alcubierre-2k",
         "default-design-alcubierre-500",
         "default-design-auto-mine",
+        "default-design-asteroid-miner",
         "default-design-battery-2t",
         "default-design-beam-fire-control",
         "default-design-cargo-hold-1t",
@@ -234,6 +236,7 @@
         "default-ship-design-dropship",
         "default-ship-design-starship",
         "default-ship-design-surveyor",
+        "default-ship-design-miner",
         "default-ship-design-sensorsat"
       ],
       "LaunchQueue": [
@@ -300,6 +303,18 @@
             {
               "DesignId": "default-ship-design-sensorsat",
               "Name": "SensorSat I"
+            }
+          ]
+        },
+        {
+          "Name": "Mining Fleet",
+          "Ships": [
+            {
+              "DesignId": "default-ship-design-miner",
+              "Name": "Prospector I",
+              "Cargo": [
+                { "Id": "methalox", "Amount": 20000000, "Type": "byVolume" }
+              ]
             }
           ]
         }
