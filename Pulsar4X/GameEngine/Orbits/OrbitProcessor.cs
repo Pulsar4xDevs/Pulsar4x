@@ -64,6 +64,13 @@ namespace Pulsar4X.Orbits
             {
                 trueAnomalies[i] = OrbitMath.GetTrueAnomaly(orbits[i], toDate);
                 Vector3 newPosition = OrbitMath.GetPosition(orbits[i], trueAnomalies[i]);
+                if (!IsUsableRelative(newPosition) && orbits[i].Epoch != toDate)
+                {
+                    trueAnomalies[i] = OrbitMath.GetTrueAnomaly(orbits[i], orbits[i].Epoch);
+                    newPosition = OrbitMath.GetPosition(orbits[i], trueAnomalies[i]);
+                }
+                if (!IsUsableRelative(newPosition))
+                    continue;
                 orbits[i]._position = (Vector2)newPosition;
             }
 
@@ -87,6 +94,10 @@ namespace Pulsar4X.Orbits
 
             // Get our Parent-Relative coordinates.
             Vector3 newPosition = entityOrbitDB.GetPosition(toDate);
+            if (!IsUsableRelative(newPosition) && entityOrbitDB.Epoch != toDate)
+                newPosition = entityOrbitDB.GetPosition(entityOrbitDB.Epoch);
+            if (!IsUsableRelative(newPosition))
+                return counter;
             // Get our Absolute coordinates.
             entityOrbitDB._position = (Vector2)newPosition;
             entityPosition.AbsolutePosition = parentPositionDB.AbsolutePosition + newPosition;
@@ -98,6 +109,19 @@ namespace Pulsar4X.Orbits
                 counter += UpdateOrbit(child, entityPosition, toDate);
             }
             return counter;
+        }
+
+        const double MaxParentRelative_m = 1e14;
+
+        static bool IsFiniteVec(Vector3 v)
+            => double.IsFinite(v.X) && double.IsFinite(v.Y) && double.IsFinite(v.Z);
+
+        static bool IsUsableRelative(Vector3 r)
+        {
+            if (!IsFiniteVec(r))
+                return false;
+            double len = r.Length();
+            return len >= 1 && len <= MaxParentRelative_m;
         }
 
 
@@ -167,13 +191,18 @@ namespace Pulsar4X.Orbits
     {
         internal override void ProcessEntity(Entity entity, DateTime atDateTime)
         {
-            var posDB = entity.GetDataBlob<PositionDB>();
+            //Early returns are guards to verify the InstanceProcessor is not stale.
+            //Stale InstanceProcessor is normal, eg we might be adjusting the orbit, or already have adjusted the orbit.
+            if(!entity.TryGetDataBlob<PositionDB>(out var posDB))
+                return;
             var parent = posDB.Parent;
             if(parent == null) throw new NullReferenceException("parent cannot be null");
 
             // Guard: verify entity is actually near the SOI boundary.
             // If an EnterSOIProcessor fired first and changed the orbit, this interrupt is stale.
-            var oldOrbit = entity.GetDataBlob<OrbitDB>();
+            if (!entity.TryGetDataBlob<OrbitDB>(out OrbitDB? oldOrbit))
+                return;
+            
             var shipRelPos = oldOrbit.GetPosition(atDateTime);
             var soiRadius = parent.GetSOI_m();
             if (shipRelPos.Length() < soiRadius * 0.9)
@@ -182,14 +211,14 @@ namespace Pulsar4X.Orbits
             var grandparent = parent.GetSOIParentEntity();
             var newParent = grandparent == null ? parent : grandparent;
 
-            if (!parent.HasDataBlob<OrbitDB>())
+            if (!parent.TryGetDataBlob<OrbitDB>(out var parentOrbit))
                 return; // parent is the root star, can't exit further
 
             // Compute position and velocity relative to newParent from orbit equations
             // at atDateTime. GetRelativeFuturePosition/GetAbsoluteFutureVelocity return
             // values in the orbit parent's frame (not the position parent's), so we must
             // do the frame conversion manually.
-            var parentOrbit = parent.GetDataBlob<OrbitDB>();
+
             var parentRelPos = parentOrbit.GetPosition(atDateTime);
             var parentRelVel = OrbitMath.InstantaneousOrbitalVelocityVector_m(parentOrbit, atDateTime);
 
@@ -345,8 +374,22 @@ namespace Pulsar4X.Orbits
         public static void UpdateOrbit(OrbitUpdateOftenDB entityOrbitDB, DateTime toDate)
         {
             Vector3 newPosition = entityOrbitDB.GetPosition(toDate);
+            if (!IsUsableRelativeOften(newPosition))
+            {
+                if (entityOrbitDB.Epoch != toDate)
+                    newPosition = entityOrbitDB.GetPosition(entityOrbitDB.Epoch);
+                if (!IsUsableRelativeOften(newPosition))
+                    return;
+            }
             entityOrbitDB._position = (Vector2)newPosition;
+        }
 
+        static bool IsUsableRelativeOften(Vector3 r)
+        {
+            if (!double.IsFinite(r.X) || !double.IsFinite(r.Y) || !double.IsFinite(r.Z))
+                return false;
+            double len = r.Length();
+            return len >= 1 && len <= 1e14;
         }
     }
 }

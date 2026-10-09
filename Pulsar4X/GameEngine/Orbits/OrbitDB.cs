@@ -68,6 +68,13 @@ namespace Pulsar4X.Orbits
         public double MeanAnomalyAtEpoch { get; protected set; }
 
         /// <summary>
+        /// True anomaly at <see cref="Epoch"/>. Warp leftover hyperbolas cannot
+        /// reconstruct this from mean anomaly; drop-in copies it from the leftover Kepler.
+        /// </summary>
+        [JsonProperty]
+        public double TrueAnomalyAtEpoch { get; protected set; }
+
+        /// <summary>
         /// reference time. Orbital parameters are stored relative to this reference.
         /// </summary>
         [PublicAPI]
@@ -226,7 +233,8 @@ namespace Pulsar4X.Orbits
                 LongitudeOfAscendingNode = ke.LoAN,
                 ArgumentOfPeriapsis = ke.AoP,
                 MeanAnomalyAtEpoch = ke.MeanAnomalyAtEpoch,
-                Epoch = atDateTime,
+                TrueAnomalyAtEpoch = ke.TrueAnomalyAtEpoch,
+                Epoch = ke.Epoch != default ? ke.Epoch : atDateTime,
 
                 _parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry,
                 _myMass = myMass
@@ -262,6 +270,7 @@ namespace Pulsar4X.Orbits
                 LongitudeOfAscendingNode = 0,
                 ArgumentOfPeriapsis = 0,
                 MeanAnomalyAtEpoch = m0,
+                TrueAnomalyAtEpoch = m0,
                 Epoch = atDatetime,
 
                 _parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry,
@@ -299,6 +308,7 @@ namespace Pulsar4X.Orbits
                 LongitudeOfAscendingNode = 0,
                 ArgumentOfPeriapsis = 0,
                 MeanAnomalyAtEpoch = m0,
+                TrueAnomalyAtEpoch = m0,
                 Epoch = atDatetime,
 
                 _parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry,
@@ -489,6 +499,7 @@ namespace Pulsar4X.Orbits
             LongitudeOfAscendingNode = toCopy.LongitudeOfAscendingNode;
             ArgumentOfPeriapsis = toCopy.ArgumentOfPeriapsis;
             MeanAnomalyAtEpoch = toCopy.MeanAnomalyAtEpoch;
+            TrueAnomalyAtEpoch = toCopy.TrueAnomalyAtEpoch;
             _parentMass = toCopy._parentMass;
             _myMass = toCopy._myMass;
             Epoch = toCopy.Epoch;
@@ -561,7 +572,7 @@ namespace Pulsar4X.Orbits
         {
             KeplerElements ke = new KeplerElements();
             ke.SemiMajorAxis = SemiMajorAxis;                                            //a
-            ke.SemiMinorAxis = SemiMajorAxis * Math.Sqrt(1 - Eccentricity * Eccentricity);//b
+            ke.SemiMinorAxis = EllipseMath.SemiMinorAxis(SemiMajorAxis, Eccentricity);//b
             ke.Eccentricity = Eccentricity;                                              //e
             ke.Periapsis = Periapsis;                                                    //q
             ke.Apoapsis = Apoapsis;                                                      //Q
@@ -574,7 +585,9 @@ namespace Pulsar4X.Orbits
             ke.LinearEccentricity = Eccentricity * SemiMajorAxis;                        //ae
             ke.Period = OrbitalPeriod.TotalSeconds;
 			ke.StandardGravParameter = GravitationalParameter_m3S2;
-            ke.TrueAnomalyAtEpoch = OrbitMath.TrueAnomalyFromTime(GravitationalParameter_m3S2, SemiMajorAxis ,Eccentricity, MeanAnomalyAtEpoch, 0) ;   //ν or f or  θ
+            ke.TrueAnomalyAtEpoch = double.IsFinite(TrueAnomalyAtEpoch)
+                ? TrueAnomalyAtEpoch
+                : OrbitMath.TrueAnomalyFromTime(GravitationalParameter_m3S2, SemiMajorAxis ,Eccentricity, MeanAnomalyAtEpoch, 0);
 			return ke;
         }
 
@@ -582,7 +595,7 @@ namespace Pulsar4X.Orbits
         {
             KeplerElements ke = new KeplerElements();
             ke.SemiMajorAxis = SemiMajorAxis;                                            //a
-            ke.SemiMinorAxis = SemiMajorAxis * Math.Sqrt(1 - Eccentricity * Eccentricity);//b
+            ke.SemiMinorAxis = EllipseMath.SemiMinorAxis(SemiMajorAxis, Eccentricity);//b
             ke.Eccentricity = Eccentricity;                                              //e
             ke.Periapsis = Periapsis;                                                    //q
             ke.Apoapsis = Apoapsis;                                                      //Q

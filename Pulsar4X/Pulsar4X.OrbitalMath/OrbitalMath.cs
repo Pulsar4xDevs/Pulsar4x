@@ -445,7 +445,12 @@ namespace Pulsar4X.Orbital
             {
                 var m1 = m0 + GetHyperbolicMeanAnomalyFromTime(meanMotion, s);
                 TryGetHyperbolicAnomaly(e, m1, out double F);
-                return TrueAnomalyFromHyperbolicAnomaly(e, F);
+                var ta = TrueAnomalyFromHyperbolicAnomaly(e, F);
+                // Extreme leftover hyperbolas (tiny |a|, huge e) overflow sinh in
+                // a second. Hold the epoch true anomaly so callers keep a finite r.
+                if (!double.IsFinite(ta) && s != 0)
+                    return TrueAnomalyFromTime(sgp, a, e, m0, 0);
+                return ta;
             }
         }
         
@@ -471,9 +476,8 @@ namespace Pulsar4X.Orbital
             var foo = Math.Sqrt((e + 1) / (e - 1));
             var foo2 = Math.Tanh(hyperbolicAnomaly / 2);
             var ta = 2 * Math.Atan(foo * foo2);
-            
-            if (ta == double.NaN)
-                throw new Exception("Is NaN");
+            if (!double.IsFinite(ta))
+                return double.NaN;
 
             return Angle.NormaliseRadians(ta);
         }
@@ -813,9 +817,6 @@ namespace Pulsar4X.Orbital
                 Y = Math.Sin(angle) * speed
             };
 
-            if (double.IsNaN(v.X) || double.IsNaN(v.Y))
-                throw new Exception("Result is NaN");
-
             return v;
         }
         
@@ -836,32 +837,21 @@ namespace Pulsar4X.Orbital
             double i = ke.Inclination;
             double e = ke.Eccentricity;
             double a = ke.SemiMajorAxis;
-            
-            double trueAnomaly;
 
-            if (e < 1)
-            {
-                double meanAnomaly = GetMeanAnomalyFromTime(ke.MeanAnomalyAtEpoch, ke.MeanMotion, secondsFromEpoch);
-                TryGetEccentricAnomaly(ke.Eccentricity, meanAnomaly, out double eccAnom);
-                trueAnomaly = TrueAnomalyFromEccentricAnomaly(ke.Eccentricity, eccAnom);
-            }
-            else
-            {
-                var quotient = sgp / Math.Pow(-a, 3);
-                var hyperbolcMeanMotion = Math.Sqrt(quotient);
-                var hyperbolicMeanAnomaly = ke.MeanAnomalyAtEpoch + secondsFromEpoch * hyperbolcMeanMotion;
-                TryGetHyperbolicAnomaly(e, hyperbolicMeanAnomaly, out double hyperbolicAnomalyF);
-                trueAnomaly = TrueAnomalyFromHyperbolicAnomaly(e, hyperbolicAnomalyF);
-            }
+            double trueAnomaly = TrueAnomalyForState(ke, secondsFromEpoch);
+
+            if (!double.IsFinite(trueAnomaly) || !double.IsFinite(a) || !double.IsFinite(sgp))
+                return (new Vector3(double.NaN, double.NaN, double.NaN), new Vector2(double.NaN, double.NaN));
 
             double angleToObj = trueAnomaly + ke.AoP;
 
             double x = Math.Cos(lofAN) * Math.Cos(angleToObj) - Math.Sin(lofAN) * Math.Sin(angleToObj) * Math.Cos(i);
             double y = Math.Sin(lofAN) * Math.Cos(angleToObj) + Math.Cos(lofAN) * Math.Sin(angleToObj) * Math.Cos(i);
             double z = Math.Sin(i) * Math.Sin(angleToObj);
-            double radius = a * (1 - e * e) / (1 + e * Math.Cos(trueAnomaly));
+            var p = EllipseMath.SemiLatusRectum(a, e);
+            double radius = EllipseMath.RadiusAtTrueAnomaly(trueAnomaly, p, e);
             var position = new Vector3(x, y, z) * radius;
-            
+
             (double speed, double headingAngle) = ObjectLocalVelocityPolar(sgp, position, a, e, trueAnomaly, ke.AoP);
             // ObjectLocalVelocityPolar returns heading with AoP but not LoAN.
             // Rotate by LoAN to match the position reference frame.
@@ -875,11 +865,90 @@ namespace Pulsar4X.Orbital
                 Y = sinLoAN * vx_orbit + cosLoAN * vy_orbit
             };
 
-            if (double.IsNaN(v.X) || double.IsNaN(v.Y))
-                throw new Exception("Result is NaN");
+            if (!IsUsableRelative(position) || !double.IsFinite(v.X) || !double.IsFinite(v.Y))
+            {
+                if (e >= 1 && double.IsFinite(ke.TrueAnomalyAtEpoch)
+                    && trueAnomaly != ke.TrueAnomalyAtEpoch)
+                    return GetStateVectorsAtTrueAnomaly(ke, ke.TrueAnomalyAtEpoch);
+                return (new Vector3(double.NaN, double.NaN, double.NaN), new Vector2(double.NaN, double.NaN));
+            }
 
             return (position, v);
+        }
 
+        static double TrueAnomalyForState(KeplerElements ke, double secondsFromEpoch)
+        {
+            double e = ke.Eccentricity;
+            if (e >= 1
+                && Math.Abs(secondsFromEpoch) < 1e-6
+                && double.IsFinite(ke.TrueAnomalyAtEpoch))
+            {
+                // Extreme leftover hyperbolas (warp dump into a tiny well) cannot
+                // round-trip through mean anomaly. At epoch the stored true anomaly
+                // is the leftover r,v that built this Kepler.
+                return ke.TrueAnomalyAtEpoch;
+            }
+
+            double trueAnomaly;
+            if (e < 1)
+            {
+                double meanAnomaly = GetMeanAnomalyFromTime(ke.MeanAnomalyAtEpoch, ke.MeanMotion, secondsFromEpoch);
+                TryGetEccentricAnomaly(ke.Eccentricity, meanAnomaly, out double eccAnom);
+                trueAnomaly = TrueAnomalyFromEccentricAnomaly(ke.Eccentricity, eccAnom);
+            }
+            else
+            {
+                var quotient = ke.StandardGravParameter / Math.Pow(-ke.SemiMajorAxis, 3);
+                var hyperbolcMeanMotion = Math.Sqrt(quotient);
+                var hyperbolicMeanAnomaly = ke.MeanAnomalyAtEpoch + secondsFromEpoch * hyperbolcMeanMotion;
+                TryGetHyperbolicAnomaly(e, hyperbolicMeanAnomaly, out double hyperbolicAnomalyF);
+                trueAnomaly = TrueAnomalyFromHyperbolicAnomaly(e, hyperbolicAnomalyF);
+            }
+
+            if (!double.IsFinite(trueAnomaly) && e >= 1 && double.IsFinite(ke.TrueAnomalyAtEpoch))
+                return ke.TrueAnomalyAtEpoch;
+            return trueAnomaly;
+        }
+
+        static (Vector3 position, Vector2 velocity) GetStateVectorsAtTrueAnomaly(KeplerElements ke, double trueAnomaly)
+        {
+            var sgp = ke.StandardGravParameter;
+            double lofAN = ke.LoAN;
+            double i = ke.Inclination;
+            double e = ke.Eccentricity;
+            double a = ke.SemiMajorAxis;
+            double angleToObj = trueAnomaly + ke.AoP;
+            double x = Math.Cos(lofAN) * Math.Cos(angleToObj) - Math.Sin(lofAN) * Math.Sin(angleToObj) * Math.Cos(i);
+            double y = Math.Sin(lofAN) * Math.Cos(angleToObj) + Math.Cos(lofAN) * Math.Sin(angleToObj) * Math.Cos(i);
+            double z = Math.Sin(i) * Math.Sin(angleToObj);
+            var p = EllipseMath.SemiLatusRectum(a, e);
+            double radius = EllipseMath.RadiusAtTrueAnomaly(trueAnomaly, p, e);
+            var position = new Vector3(x, y, z) * radius;
+            (double speed, double headingAngle) = ObjectLocalVelocityPolar(sgp, position, a, e, trueAnomaly, ke.AoP);
+            double vx_orbit = Math.Cos(headingAngle) * speed;
+            double vy_orbit = Math.Sin(headingAngle) * speed;
+            double cosLoAN = Math.Cos(lofAN);
+            double sinLoAN = Math.Sin(lofAN);
+            var v = new Vector2()
+            {
+                X = cosLoAN * vx_orbit - sinLoAN * vy_orbit,
+                Y = sinLoAN * vx_orbit + cosLoAN * vy_orbit
+            };
+            return (position, v);
+        }
+
+        // Same bound as NewtonSimpleMoveDB.ThrowIfTrajectoryUnusable.
+        const double MaxParentRelative_m = 1e14;
+
+        static bool IsFiniteVec(Vector3 v)
+            => double.IsFinite(v.X) && double.IsFinite(v.Y) && double.IsFinite(v.Z);
+
+        static bool IsUsableRelative(Vector3 r)
+        {
+            if (!IsFiniteVec(r))
+                return false;
+            double len = r.Length();
+            return len >= 1 && len <= MaxParentRelative_m;
         }
 
         /// <summary>
@@ -942,11 +1011,11 @@ namespace Pulsar4X.Orbital
         /// <param name="semiMajAxis">Semi maj axis.</param>
         public static double InstantaneousOrbitalSpeed(double standardGravParameter, double distance, double semiMajAxis)
         {
+            if (!(standardGravParameter > 0) || !(distance > 0) || semiMajAxis == 0
+                || double.IsNaN(semiMajAxis) || double.IsNaN(distance))
+                return double.NaN;
             var foo = Math.Abs(2 / distance - 1 / semiMajAxis);
-            var spd = Math.Sqrt(standardGravParameter * foo);
-            if (double.IsNaN(spd))
-                throw new Exception("Speed Result is NaN");
-            return spd;
+            return Math.Sqrt(standardGravParameter * foo);
         }
 
         
@@ -1388,12 +1457,18 @@ namespace Pulsar4X.Orbital
         /// <returns>H</returns>
         public static double GetHyperbolicAnomalyFromTrueAnomaly(double e, double trueAnomaly)
         {
+            if (!(e > 1) || !double.IsFinite(trueAnomaly))
+                return double.NaN;
             var foo = Math.Sqrt((e - 1) / (e + 1));
             var foo2 = Math.Tan(trueAnomaly / 2);
-            var hyperbolicAnomaly = 2 * Math.Atanh(foo * foo2);
-            //hyperboilc anomaly is not an angle so don't normalise
-            //return Angle.NormaliseRadians(hyperbolicAnomaly);
-            return hyperbolicAnomaly;
+            var arg = foo * foo2;
+            if (!double.IsFinite(arg))
+                return double.NaN;
+            if (arg >= 1)
+                arg = 1 - 1e-15;
+            else if (arg <= -1)
+                arg = -1 + 1e-15;
+            return 2 * Math.Atanh(arg);
         }
         public static double GetHyperbolicMeanAnomalyFromTime(double sgp, double a, double secondsFromEpoch)
         {

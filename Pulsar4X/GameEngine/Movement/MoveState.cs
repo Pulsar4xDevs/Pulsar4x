@@ -164,6 +164,14 @@ public class MoveStateProcessor : IInstanceProcessor
 
     }
 
+    static bool IsUsableRelative(Vector3 r)
+    {
+        if (!double.IsFinite(r.X) || !double.IsFinite(r.Y) || !double.IsFinite(r.Z))
+            return false;
+        double len = r.Length();
+        return len >= 1 && len <= 1e14;
+    }
+
     public static void ProcessForType(List<OrbitDB> orbits, DateTime atDateTime)
     {
         foreach (var orbitDB in orbits)
@@ -278,6 +286,10 @@ public class MoveStateProcessor : IInstanceProcessor
         var pMass = movedb.ParentMass;
         stateDB.SGP = GeneralMath.StandardGravitationalParameter(myMass + pMass);
         var state = OrbitMath.GetStateVectors(movedb.CurrentTrajectory, atDateTime);
+        if (!IsUsableRelative(state.position) && movedb.ActionOnDateTime != atDateTime)
+            state = OrbitMath.GetStateVectors(movedb.CurrentTrajectory, movedb.ActionOnDateTime);
+        if (!IsUsableRelative(state.position))
+            return;
         stateDB.RelativePosition = state.position;
         stateDB.Velocity = state.velocity;
         // Live Kepler for debug/clients that read PositionDB. Do not SetDataBlob(OrbitDB):

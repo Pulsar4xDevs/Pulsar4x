@@ -327,6 +327,11 @@ namespace Pulsar4X.Client.Rendering
         internal OrbitIconBase? GetOrbitIcon(int entityId)
             => _orbitRings.TryGetValue(entityId, out var icon) ? icon as OrbitIconBase : null;
 
+        /// <summary>Kepler overlay for the debug window. NewtonSimpleIcon implements
+        /// IKepler without being an OrbitIconBase, so GetOrbitIcon misses it.</summary>
+        internal IKepler? GetKeplerIcon(int entityId)
+            => _orbitRings.TryGetValue(entityId, out var icon) ? icon as IKepler : null;
+
         public void UpdateUserOrbitSettings()
         {
             foreach (var item in _orbitRings.Values)

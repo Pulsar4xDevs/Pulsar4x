@@ -463,7 +463,8 @@ public static class MovePlanner
         if (parent == null)
             return MoveOption.No(mode, "no SOI parent");
 
-        if (!TryCurrentRelativeState(ship, now, out var state))
+        DateTime sampleAt = CirculariseAction.SampleAt(ship, now);
+        if (!TryCurrentRelativeState(ship, sampleAt, out var state))
             return MoveOption.No(mode, "no state vector");
 
         double r = state.pos.Length();
@@ -477,8 +478,8 @@ public static class MovePlanner
         double circulariseDV = 0;
         if (needsCircularise)
         {
-            var circKE = OrbitMath.KeplerCircularFromPosition(sgp, state.pos, now);
-            var circV = OrbitMath.GetStateVectors(circKE, now).velocity;
+            var circKE = OrbitMath.KeplerCircularFromPosition(sgp, state.pos, sampleAt);
+            var circV = OrbitMath.GetStateVectors(circKE, sampleAt).velocity;
             circulariseDV = (state.vel - (Vector3)circV).Length();
             if (!double.IsFinite(circulariseDV))
                 return MoveOption.No(mode, "circularise Δv is not finite");

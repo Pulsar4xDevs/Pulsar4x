@@ -165,6 +165,8 @@ public class NewtonSimpleProcessor : IHotloopProcessor
             return (Vector3.Zero, Vector3.Zero);
         }
         var state = OrbitMath.GetStateVectors(db.CurrentTrajectory, atDateTime);
+        if (!IsFiniteState(state) && db.ActionOnDateTime != atDateTime)
+            state = OrbitMath.GetStateVectors(db.CurrentTrajectory, db.ActionOnDateTime);
         return (state.position, (Vector3)state.velocity);
     }
     public static (Vector3 pos, Vector3 vel) GetAbsoluteState(Entity entity, DateTime atDateTime)
@@ -176,5 +178,15 @@ public class NewtonSimpleProcessor : IHotloopProcessor
             vel += MoveMath.GetAbsoluteFutureVelocity(posdb.Parent, atDateTime);
         }
         return (pos, vel);
+    }
+
+    static bool IsFiniteState((Vector3 position, Vector2 velocity) state)
+    {
+        var r = state.position;
+        if (!double.IsFinite(r.X) || !double.IsFinite(r.Y) || !double.IsFinite(r.Z)
+            || !double.IsFinite(state.velocity.X) || !double.IsFinite(state.velocity.Y))
+            return false;
+        double len = r.Length();
+        return len >= 1 && len <= 1e14;
     }
 }

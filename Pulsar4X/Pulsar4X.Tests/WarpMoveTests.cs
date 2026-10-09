@@ -10,7 +10,9 @@ using Pulsar4X.Energy;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
+using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
+using Pulsar4X.GeoSurveys;
 using Pulsar4X.Modding;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
@@ -610,6 +612,379 @@ namespace Pulsar4X.Tests
             AssertFiniteVec(abs, "absolute position after long tick");
         }
 
+        #endregion
+
+        #region Earth to asteroid warp leftover
+
+        /// <summary>
+        /// Cornelia-class belt rock: own SOI is larger than low-orbit offset (unlike Phobos),
+        /// µ is tiny versus an Earth-relative leftover dump.
+        /// </summary>
+        const double BeltAsteroidMassKg = 4.1e17;
+        const double BeltAsteroidRadiusM = 33_963;
+
+        /// <summary>8 Flora: basemod asteroids-main-belt.json. Same SOI>LOR leftover as Cornelia.</summary>
+        const double FloraMassKg = 4.1998636540399775e18;
+        const double FloraRadiusM = 73_745.5;
+
+        [Test]
+        public void LeftoverDump_AroundBeltAsteroid_RoundTripsAtEpochWithoutThrowing()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var rock = AddBeltAsteroid(sol, epoch);
+            var lor = OrbitMath.LowOrbitRadius(rock);
+            Assert.Greater(rock.GetSOI_m(), lor, "precondition: drop-in parents to the rock");
+
+            var shipMass = 1e6;
+            double sgp = GeneralMath.StandardGravitationalParameter(
+                shipMass + rock.GetDataBlob<MassVolumeDB>().MassTotal);
+            var r = new Vector3(lor, 0, 0);
+            var vel = new Vector3(0, 7_800, 0);
+
+            KeplerElements ke = default;
+            Assert.DoesNotThrow(() =>
+                ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, r, vel, epoch));
+            AssertKeplerWellFormed(ke, "leftover dump Kepler");
+            Assert.GreaterOrEqual(ke.Eccentricity, 1, "Earth-relative dump around a belt rock is hyperbolic");
+
+            (Vector3 pos, Vector2 v) atEpoch = default;
+            Assert.DoesNotThrow(() => atEpoch = OrbitMath.GetStateVectors(ke, epoch),
+                "GetStateVectors at leftover epoch must not throw Speed Result is NaN");
+            AssertFiniteVec(atEpoch.pos, "round-trip r at epoch");
+            Assert.AreEqual(r.Length(), atEpoch.pos.Length(), 10,
+                "epoch round-trip must recover leftover r");
+            Assert.AreEqual(vel.Length(), atEpoch.v.Length(), 50,
+                "epoch round-trip must recover leftover speed");
+
+            (Vector3 pos1, Vector2 v1) later = default;
+            Assert.DoesNotThrow(() => later = OrbitMath.GetStateVectors(ke, epoch + TimeSpan.FromSeconds(1)),
+                "GetStateVectors one second later must not throw");
+            AssertFiniteVec(later.pos1, "r at epoch+1s");
+            AssertFinite(later.v1.X, "vx at epoch+1s");
+            AssertFinite(later.v1.Y, "vy at epoch+1s");
+            Assert.Less(later.pos1.Length(), rock.GetSOI_m(),
+                "GetStateVectors +1s must stay in the rock SOI, not fly to an asymptotic radius");
+
+            var leftoverOrbit = OrbitDB.FromKeplerElements(rock, shipMass, ke, epoch);
+            AssertFiniteVec(leftoverOrbit.GetPosition(epoch), "OrbitDB.GetPosition at epoch");
+            var laterOrbitPos = leftoverOrbit.GetPosition(epoch + TimeSpan.FromSeconds(1));
+            AssertFiniteVec(laterOrbitPos, "OrbitDB.GetPosition one second later must stay finite (Flora-class leftover)");
+            Assert.AreEqual(r.Length(), laterOrbitPos.Length(), 1000,
+                "OrbitDB must keep leftover true anomaly instead of integrating the hyperbola");
+        }
+
+        [Test]
+        public void CirculariseCreateCommand_AfterAsteroidDropIn_DoesNotThrow()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
+            var rock = AddBeltAsteroid(sol, epoch);
+            var lor = OrbitMath.LowOrbitRadius(rock);
+            Assert.Greater(rock.GetSOI_m(), lor, "precondition: drop-in parents to the rock");
+
+            var faction = FactionFactory.CreateFaction(_game, "rock-circ-" + Guid.NewGuid().ToString("N"));
+            var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
+            var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
+            var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+            ship.SetDataBlob(OrbitDB.FromPosition(earth, ship, epoch));
+            OrbitProcessor.ProcessEntity(ship, epoch);
+
+            Assert.IsTrue(MovePlanner.TryBuildMoveActions(ship, rock, out var actions, out var reason, epoch),
+                reason);
+            Assert.IsInstanceOf<WarpMoveAction>(actions[0], reason);
+            ship.GetDataBlob<ActionQueueDB>().Enqueue(actions[0]);
+
+            var dropIns = new List<(int entityId, DateTime at)>();
+            WarpMoveProcessor.TestDropIn = (entity, at) => dropIns.Add((entity.Id, at));
+            try
+            {
+                _game.ProcessorManager.GetInstanceProcessor(nameof(ActionQueueProcessor))
+                    .ProcessEntity(ship, epoch);
+                Assert.IsTrue(ship.HasDataBlob<WarpMovingDB>(), "warp should have started");
+                var eti = ship.GetDataBlob<WarpMovingDB>().PredictedExitTime;
+                AdvanceTo(eti);
+                Assert.AreEqual(1, dropIns.Count, "drop-in at PredictedExitTime");
+                Assert.AreSame(rock, ship.GetSOIParentEntity(), "drop-in parents to the asteroid");
+
+                CirculariseAction cmd = null;
+                Assert.DoesNotThrow(() => cmd = CirculariseAction.CreateCommand(ship, eti),
+                    "CreateCommand at drop-in must not throw Speed Result is NaN");
+                Assert.IsNotNull(cmd);
+                Assert.DoesNotThrow(() => CirculariseAction.CreateCommand(ship, eti + TimeSpan.FromSeconds(1)),
+                    "CreateCommand one second after drop-in must not throw");
+
+                Assert.IsTrue(CirculariseAction.TryCompute(ship, eti, out var parent, out var startKE, out var targetKE),
+                    "circularise must be computable from leftover dump");
+                Assert.AreSame(rock, parent);
+                AssertKeplerWellFormed(startKE, "start leftover");
+                AssertKeplerWellFormed(targetKE, "circular target");
+                Assert.Less(targetKE.Eccentricity, 0.05);
+
+                Assert.DoesNotThrow(
+                    () => new NewtonSimpleMoveDB(parent, startKE, targetKE, startKE.Epoch));
+            }
+            finally
+            {
+                WarpMoveProcessor.TestDropIn = null;
+            }
+        }
+
+        [Test]
+        public void WarpOrder_EarthToBeltAsteroid_ArrivesWithoutThrowingAndCircularises()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
+            var rock = AddBeltAsteroid(sol, epoch);
+            var lor = OrbitMath.LowOrbitRadius(rock);
+            Assert.Greater(rock.GetSOI_m(), lor, "precondition: drop-in parents to the rock");
+
+            var faction = FactionFactory.CreateFaction(_game, "rock-moveto-" + Guid.NewGuid().ToString("N"));
+            var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
+            var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
+            var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+            ship.SetDataBlob(OrbitDB.FromPosition(earth, ship, epoch));
+            OrbitProcessor.ProcessEntity(ship, epoch);
+
+            var dropIns = new List<(int entityId, DateTime at)>();
+            WarpMoveProcessor.TestDropIn = (entity, at) => dropIns.Add((entity.Id, at));
+            try
+            {
+                var goal = new Goal(GoalType.MoveTo) { TargetEntityID = rock.Id };
+                AgentProcessor.AssignGoal(ship, goal);
+                Assert.AreNotEqual(GoalStatus.Failed, goal.Status, DescribeMove(ship, goal));
+                Assert.IsTrue(ship.HasDataBlob<WarpMovingDB>(),
+                    "AssignGoal should have started warp. " + DescribeMove(ship, goal));
+                var eti = ship.GetDataBlob<WarpMovingDB>().PredictedExitTime;
+
+                Assert.DoesNotThrow(() => AdvanceTo(eti),
+                    "FinishArrival → WakeActionQueue → replan Circularise.CreateCommand must not throw");
+
+                Assert.AreEqual(1, dropIns.Count, DescribeMove(ship, goal));
+                Assert.IsFalse(ship.HasDataBlob<WarpMovingDB>(), DescribeMove(ship, goal));
+                Assert.AreSame(rock, ship.GetSOIParentEntity(), "drop-in parents to the asteroid");
+
+                var circDeadline = eti + TimeSpan.FromDays(2);
+                while (ship.HasDataBlob<NewtonSimpleMoveDB>()
+                       && _starSys.StarSysDateTime < circDeadline)
+                    AdvanceTo(_starSys.StarSysDateTime + TimeSpan.FromMinutes(1));
+
+                Assert.IsFalse(ship.HasDataBlob<NewtonSimpleMoveDB>(),
+                    "circularise should have finished. " + DescribeMove(ship, goal));
+                Assert.IsTrue(ship.TryGetDataBlob<OrbitDB>(out var orbit), DescribeMove(ship, goal));
+                AssertOrbitWellFormed(orbit, "orbit after circularise");
+                Assert.AreSame(rock, orbit.Parent);
+                Assert.Less(orbit.Eccentricity, 0.05, "circularise left a near-circular orbit");
+                Assert.Greater(ship.GetDataBlob<PositionDB>().RelativePosition.Length(),
+                    rock.GetDataBlob<MassVolumeDB>().RadiusInM);
+
+                var deadline = eti + TimeSpan.FromDays(2);
+                while (goal.Status is not (GoalStatus.Completed or GoalStatus.Failed)
+                       && _starSys.StarSysDateTime < deadline)
+                {
+                    AdvanceTo(_starSys.StarSysDateTime + TimeSpan.FromMinutes(30));
+                    Assert.AreEqual(1, dropIns.Count, "must not warp again. " + DescribeMove(ship, goal));
+                    Assert.IsFalse(ship.HasDataBlob<WarpMovingDB>(), DescribeMove(ship, goal));
+                }
+
+                Assert.AreEqual(GoalStatus.Completed, goal.Status, DescribeMove(ship, goal));
+            }
+            finally
+            {
+                WarpMoveProcessor.TestDropIn = null;
+            }
+        }
+
+        [Test]
+        public void WarpOrder_EarthToBeltAsteroid_SurvivesOneLongTickPastArrival()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
+            var rock = AddBeltAsteroid(sol, epoch);
+
+            var faction = FactionFactory.CreateFaction(_game, "rock-long-" + Guid.NewGuid().ToString("N"));
+            var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
+            var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
+            var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+            ship.SetDataBlob(OrbitDB.FromPosition(earth, ship, epoch));
+            OrbitProcessor.ProcessEntity(ship, epoch);
+
+            var goal = new Goal(GoalType.MoveTo) { TargetEntityID = rock.Id };
+            AgentProcessor.AssignGoal(ship, goal);
+            Assert.IsTrue(ship.HasDataBlob<WarpMovingDB>(), DescribeMove(ship, goal));
+            var eti = ship.GetDataBlob<WarpMovingDB>().PredictedExitTime;
+
+            Assert.DoesNotThrow(() => AdvanceTo(eti + TimeSpan.FromDays(1)),
+                "one-day tick past asteroid arrival must not throw Speed Result is NaN");
+
+            Assert.IsFalse(ship.HasDataBlob<WarpMovingDB>(), DescribeMove(ship, goal));
+            Assert.IsTrue(ship.TryGetDataBlob<OrbitDB>(out var orbit), DescribeMove(ship, goal));
+            AssertOrbitWellFormed(orbit, "orbit after long tick");
+            Assert.AreSame(rock, orbit.Parent, "still parented to the asteroid");
+            Assert.Less(orbit.Eccentricity, 0.05,
+                "leftover hyperbola must have circularised in the same tick. " + DescribeMove(ship, goal));
+
+            var abs = (Vector3)MoveMath.GetAbsoluteFuturePosition(ship, _starSys.StarSysDateTime);
+            var rockAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(rock, _starSys.StarSysDateTime);
+            Assert.Less((abs - rockAbs).Length(), rock.GetSOI_m(),
+                "ship left the asteroid SOI (leftover hyperbola integrated instead of circularise). "
+                + DescribeMove(ship, goal));
+        }
+
+        [Test]
+        public void WarpOrder_EarthToFloraClass_SurvivesOneSecondTicksAfterArrival()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
+            var rock = AddFloraAsteroid(sol, epoch);
+            var lor = OrbitMath.LowOrbitRadius(rock);
+            Assert.Greater(rock.GetSOI_m(), lor, "precondition: drop-in parents to the rock");
+
+            var faction = FactionFactory.CreateFaction(_game, "flora-1s-" + Guid.NewGuid().ToString("N"));
+            var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
+            var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
+            var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+            ship.SetDataBlob(OrbitDB.FromPosition(earth, ship, epoch));
+            OrbitProcessor.ProcessEntity(ship, epoch);
+
+            var goal = new Goal(GoalType.MoveTo) { TargetEntityID = rock.Id };
+            AgentProcessor.AssignGoal(ship, goal);
+            Assert.IsTrue(ship.HasDataBlob<WarpMovingDB>(), DescribeMove(ship, goal));
+            var eti = ship.GetDataBlob<WarpMovingDB>().PredictedExitTime;
+
+            Assert.DoesNotThrow(() => AdvanceTo(eti), DescribeMove(ship, goal));
+            Assert.AreSame(rock, ship.GetSOIParentEntity(), "drop-in parents to Flora");
+
+            var until = eti + TimeSpan.FromSeconds(30);
+            while (_starSys.StarSysDateTime < until)
+            {
+                Assert.DoesNotThrow(
+                    () => AdvanceTo(_starSys.StarSysDateTime + TimeSpan.FromSeconds(1)),
+                    "1s tick after Flora arrival. " + DescribeMove(ship, goal));
+                AssertShipVisibleAtRock(ship, rock, goal);
+            }
+
+            var circDeadline = eti + TimeSpan.FromDays(2);
+            while (ship.HasDataBlob<NewtonSimpleMoveDB>()
+                   && _starSys.StarSysDateTime < circDeadline)
+                AdvanceTo(_starSys.StarSysDateTime + TimeSpan.FromMinutes(1));
+
+            Assert.IsFalse(ship.HasDataBlob<NewtonSimpleMoveDB>(), DescribeMove(ship, goal));
+            Assert.IsTrue(ship.TryGetDataBlob<OrbitDB>(out var orbit), DescribeMove(ship, goal));
+            AssertOrbitWellFormed(orbit, "orbit after 1s-tick circularise");
+            Assert.AreSame(rock, orbit.Parent);
+            Assert.Less(orbit.Eccentricity, 0.05);
+            AssertShipVisibleAtRock(ship, rock, goal);
+        }
+
+        [Test]
+        public void GeoSurvey_EarthToFloraClass_SurveyorStaysVisibleAndStartsSurvey()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
+            var rock = AddFloraAsteroid(sol, epoch);
+            rock.SetDataBlob(new GeoSurveyableDB { PointsRequired = 147 });
+
+            var faction = FactionFactory.CreateFaction(_game, "flora-geo-" + Guid.NewGuid().ToString("N"));
+            var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
+            var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
+            var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+            ship.SetDataBlob(new GeoSurveyAbilityDB { Speed = 600 });
+            ship.SetDataBlob(OrbitDB.FromPosition(earth, ship, epoch));
+            OrbitProcessor.ProcessEntity(ship, epoch);
+
+            var goal = new Goal(GoalType.ServeyBodies) { TargetEntityID = rock.Id };
+            AgentProcessor.AssignGoal(ship, goal);
+            Assert.AreNotEqual(GoalStatus.Failed, goal.Status, DescribeMove(ship, goal));
+            Assert.IsTrue(ship.HasDataBlob<WarpMovingDB>(),
+                "geo survey should warp to Flora. " + DescribeMove(ship, goal));
+            var eti = ship.GetDataBlob<WarpMovingDB>().PredictedExitTime;
+
+            Assert.DoesNotThrow(() => AdvanceTo(eti), DescribeMove(ship, goal));
+            Assert.AreSame(rock, ship.GetSOIParentEntity());
+
+            var until = eti + TimeSpan.FromSeconds(30);
+            while (_starSys.StarSysDateTime < until)
+            {
+                Assert.DoesNotThrow(
+                    () => AdvanceTo(_starSys.StarSysDateTime + TimeSpan.FromSeconds(1)),
+                    "1s tick after Flora geo arrival. " + DescribeMove(ship, goal));
+                AssertShipVisibleAtRock(ship, rock, goal);
+            }
+
+            var circDeadline = eti + TimeSpan.FromDays(2);
+            while (ship.HasDataBlob<NewtonSimpleMoveDB>()
+                   && _starSys.StarSysDateTime < circDeadline)
+                AdvanceTo(_starSys.StarSysDateTime + TimeSpan.FromMinutes(1));
+
+            AssertShipVisibleAtRock(ship, rock, goal);
+            Assert.IsFalse(ship.HasDataBlob<NewtonSimpleMoveDB>(), DescribeMove(ship, goal));
+            Assert.IsTrue(ship.TryGetDataBlob<OrbitDB>(out var orbit), DescribeMove(ship, goal));
+            AssertOrbitWellFormed(orbit, "orbit after Flora geo arrival");
+            Assert.AreSame(rock, orbit.Parent);
+            Assert.Less(orbit.Eccentricity, 0.05);
+
+            var surveyDeadline = eti + TimeSpan.FromDays(3);
+            while (_starSys.StarSysDateTime < surveyDeadline
+                   && !rock.GetDataBlob<GeoSurveyableDB>().IsSurveyComplete(faction.Id)
+                   && goal.Status is not GoalStatus.Failed)
+            {
+                AdvanceTo(_starSys.StarSysDateTime + TimeSpan.FromHours(1));
+                AssertShipVisibleAtRock(ship, rock, goal);
+            }
+
+            Assert.IsTrue(rock.GetDataBlob<GeoSurveyableDB>().IsSurveyComplete(faction.Id)
+                          || ship.GetDataBlob<ActionQueueDB>().ActionList.Any(a => a is GeoSurveyOrder && a.IsRunning),
+                "surveyor should be surveying Flora or have finished. " + DescribeMove(ship, goal));
+        }
+
+        [Test]
+        public void FleetMoveTo_BeltAsteroid_MembersArriveWithoutThrowing()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
+            var rock = AddBeltAsteroid(sol, epoch);
+
+            var faction = FactionFactory.CreateFaction(_game, "rock-fleet-" + Guid.NewGuid().ToString("N"));
+            var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
+            var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
+            var a = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+            var b = MakeMoveToShip(earth, earthAbs + new Vector3(0, leoR, 0), faction);
+            a.SetDataBlob(OrbitDB.FromPosition(earth, a, epoch));
+            b.SetDataBlob(OrbitDB.FromPosition(earth, b, epoch));
+            OrbitProcessor.ProcessEntity(a, epoch);
+            OrbitProcessor.ProcessEntity(b, epoch);
+
+            var fleet = FleetFactory.Create(_starSys, faction.Id, "asteroid flotilla");
+            fleet.GetDataBlob<FleetDB>().AddChild(a);
+            fleet.GetDataBlob<FleetDB>().AddChild(b);
+            fleet.GetDataBlob<FleetDB>().FlagShipID = a.Id;
+
+            var goal = new Goal(GoalType.MoveTo) { TargetEntityID = rock.Id };
+            AgentProcessor.AssignGoal(fleet, goal);
+            Assert.AreNotEqual(GoalStatus.Failed, goal.Status, goal.Message);
+
+            Assert.DoesNotThrow(() => AdvanceTo(epoch + TimeSpan.FromDays(30)),
+                "fleet member asteroid arrival must not throw Speed Result is NaN");
+
+            foreach (var ship in new[] { a, b })
+            {
+                Assert.IsFalse(ship.HasDataBlob<WarpMovingDB>(), DescribeMove(ship, goal));
+                Assert.IsTrue(ship.TryGetDataBlob<OrbitDB>(out var orbit),
+                    "member should have an orbit after arrival");
+                Assert.AreSame(rock, orbit.Parent, "member drop-in / circularise around the asteroid");
+                Assert.Less(orbit.Eccentricity, 0.05);
+            }
+        }
+
+        #endregion
+
         [Test]
         public void PlannedWarpExitOffset_Quality1_IsPerpendicularToVelocity()
         {
@@ -835,8 +1210,6 @@ namespace Pulsar4X.Tests
             Assert.Less(end.Eccentricity, 0.05, "end orbit is circular");
             Assert.AreEqual(lor, end.SemiMajorAxis, lor * 0.05);
         }
-
-        #endregion
 
         #region Kepler drop-in reconstructs r
 
@@ -1064,6 +1437,36 @@ namespace Pulsar4X.Tests
             });
             OrbitProcessor.ProcessEntity(ent, epoch);
             return ent;
+        }
+
+        private static Entity AddBeltAsteroid(Entity sol, DateTime epoch)
+        {
+            var rock = AddOrbitingBody(sol, BeltAsteroidMassKg, BeltAsteroidRadiusM, smaAu: 2.77, epoch);
+            rock.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Asteroid });
+            return rock;
+        }
+
+        private static Entity AddFloraAsteroid(Entity sol, DateTime epoch)
+        {
+            var rock = AddOrbitingBody(sol, FloraMassKg, FloraRadiusM, smaAu: 2.201, epoch);
+            rock.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Asteroid });
+            return rock;
+        }
+
+        private static void AssertShipVisibleAtRock(Entity ship, Entity rock, Goal goal)
+        {
+            var pos = ship.GetDataBlob<PositionDB>();
+            AssertFiniteVec(pos.RelativePosition, "RelativePosition " + DescribeMove(ship, goal));
+            AssertFiniteVec(pos.AbsolutePosition, "AbsolutePosition " + DescribeMove(ship, goal));
+            Assert.AreSame(rock, ship.GetSOIParentEntity(),
+                "left Flora SOI (leftover hyperbola integrated). " + DescribeMove(ship, goal));
+            var abs = (Vector3)MoveMath.GetAbsoluteFuturePosition(ship, ship.StarSysDateTime);
+            var rockAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(rock, ship.StarSysDateTime);
+            AssertFiniteVec(abs, "absolute future pos " + DescribeMove(ship, goal));
+            Assert.Less((abs - rockAbs).Length(), rock.GetSOI_m(),
+                "ship not next to Flora. " + DescribeMove(ship, goal));
+            Assert.Greater(pos.RelativePosition.Length(), rock.GetDataBlob<MassVolumeDB>().RadiusInM * 0.5,
+                "ship inside Flora. " + DescribeMove(ship, goal));
         }
 
         private static Entity AddMoon(Entity parent, double mass, double radius_m, double sma_m, DateTime epoch,

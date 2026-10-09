@@ -50,10 +50,11 @@ namespace Pulsar4X.Client
             var entity = entityState.GetEntity()!;
             var hasParent = entity.GetSOIParentEntity() != null;
             IsActive = wasActive;
-            if(hasParent &&
-               (entity.HasDataBlob<OrbitDB>()
-                || entity.HasDataBlob<OrbitUpdateOftenDB>())
-                || entity.HasDataBlob<NewtonMoveDB>())
+            bool hasOrbit = entity.HasDataBlob<OrbitDB>()
+                            || entity.HasDataBlob<OrbitUpdateOftenDB>()
+                            || entity.HasDataBlob<NewtonMoveDB>()
+                            || entity.HasDataBlob<NewtonSimpleMoveDB>();
+            if (hasParent && hasOrbit)
                 _debugWidget = new OrbitalDebugWidget(entityState);
             else
             {
@@ -215,7 +216,7 @@ namespace Pulsar4X.Client
         {
             _entity = entityState.GetEntity()!;
             _bodyPosition = new PositionDBAdapter(_entity.GetDataBlob<PositionDB>());
-            _orbitIcon = UniquePulsarGuiWindow._uiState.SelectedSysMapRender?.GetOrbitIcon(entityState.Id);
+            _orbitIcon = UniquePulsarGuiWindow._uiState.SelectedSysMapRender?.GetKeplerIcon(entityState.Id);
 
             //NOTE! ParentPositionDB references the focal point (ie parent's position) *not* the orbiting object position.
 
@@ -248,16 +249,17 @@ namespace Pulsar4X.Client
                     orbitDB = _entity.GetDataBlob<OrbitUpdateOftenDB>();
                 _keplerElements = orbitDB.GetElements();
             }
-            else
+            else if (_entity.HasDataBlob<NewtonMoveDB>())
             {
-                if (_entity.HasDataBlob<NewtonMoveDB>())
-                {
-                    _keplerElements = _entity.GetDataBlob<NewtonMoveDB>().GetElements();
-                }
+                _keplerElements = _entity.GetDataBlob<NewtonMoveDB>().GetElements();
+            }
+            else if (_entity.TryGetDataBlob<NewtonSimpleMoveDB>(out var simple))
+            {
+                _keplerElements = simple.CurrentTrajectory;
             }
 
-            if(_orbitIcon == null)
-                throw new NullReferenceException();
+            if (_orbitIcon == null)
+                return;
 
             _loan =  _keplerElements.LoAN;
             _aop = _keplerElements.AoP;
@@ -331,6 +333,9 @@ namespace Pulsar4X.Client
 
         void CreateLines()
         {
+            if (_orbitIcon == null)
+                return;
+
             SDL.Color[] ctrColour =
                 {   new SDL.Color() { R = 0, G = 160, B = 0, A = 100 }};
             SDL.Color[] ctrHighlight =
@@ -545,8 +550,8 @@ namespace Pulsar4X.Client
 
             //string datastring = a_m.ToString() + " * " + e.ToString() + " = " + Stringify.Distance(a_m * e);
 
-            if(_orbitIcon == null)
-                throw new NullReferenceException();
+            if (_orbitIcon == null)
+                return;
 
             ElementItem linec0 = new ElementItem()
             {

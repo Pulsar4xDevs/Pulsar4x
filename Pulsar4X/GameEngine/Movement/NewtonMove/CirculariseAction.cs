@@ -41,12 +41,36 @@ public class CirculariseAction : EntityAction
             CreatedDate = ship.StarSysDateTime,
             ActionOnDate = actionOnDate ?? ship.StarSysDateTime,
         };
+        if (ship.TryGetDataBlob<OrbitDB>(out var leftover)
+            && leftover.Eccentricity >= 1
+            && leftover.Epoch != default
+            && leftover.Epoch <= cmd.ActionOnDate)
+        {
+            // Extreme leftover (asteroid drop-in) cannot be propagated. Burn from
+            // the dump epoch so CreateCommand / Execute never sample a future hyperbola.
+            cmd.ActionOnDate = leftover.Epoch;
+        }
         cmd.UpdateDetailString();
         return cmd;
     }
 
     /// <summary>
+    /// Warp leftover hyperbolas around a tiny well cannot be integrated forward.
+    /// Sample r,v at the leftover epoch (drop-in), not a later pulse instant.
+    /// </summary>
+    internal static DateTime SampleAt(Entity ship, DateTime at)
+    {
+        if (ship.TryGetDataBlob<OrbitDB>(out var orbit)
+            && orbit.Eccentricity >= 1
+            && orbit.Epoch != default
+            && orbit.Epoch <= at)
+            return orbit.Epoch;
+        return at;
+    }
+
+    /// <summary>
     /// Leftover r,v → circular Kepler around the current SOI parent.
+    /// Never throws: vis-viva NaN / degenerate leftover returns false.
     /// </summary>
     internal static bool TryCompute(
         Entity ship, DateTime at,
@@ -56,24 +80,56 @@ public class CirculariseAction : EntityAction
         startKE = default;
         targetKE = default;
 
-        parent = ship.GetSOIParentEntity();
-        if (parent == null)
-            return false;
+        try
+        {
+            parent = ship.GetSOIParentEntity();
+            if (parent == null)
+                return false;
 
-        var raw = MoveMath.GetRelativeFutureState(ship, at);
-        var pos = raw.pos;
-        var vel = raw.Velocity;
-        if (!double.IsFinite(pos.X) || pos.Length() < 1)
-            return false;
-        if (parent.TryGetDataBlob<MassVolumeDB>(out var parentMass) && pos.Length() <= parentMass.RadiusInM)
-            return false;
+            DateTime sampleAt = SampleAt(ship, at);
+            var raw = MoveMath.GetRelativeFutureState(ship, sampleAt);
+            var pos = raw.pos;
+            var vel = raw.Velocity;
+            if (!IsFiniteVec(pos) || pos.Length() < 1)
+                return false;
+            if (!IsFiniteVec(vel))
+                return false;
+            if (parent.TryGetDataBlob<MassVolumeDB>(out var parentMass) && pos.Length() <= parentMass.RadiusInM)
+                return false;
 
-        double sgp = OrbitMath.SGP(parent, ship);
-        startKE = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, vel, at);
-        targetKE = OrbitMath.KeplerCircularFromPosition(sgp, pos, at);
-        var rAtEpoch = OrbitMath.GetStateVectors(startKE, at).position;
-        return double.IsFinite(rAtEpoch.X) && rAtEpoch.Length() <= 1e14;
+            double sgp = OrbitMath.SGP(parent, ship);
+            if (!(sgp > 0) || !double.IsFinite(sgp))
+                return false;
+
+            startKE = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, vel, sampleAt);
+            targetKE = OrbitMath.KeplerCircularFromPosition(sgp, pos, sampleAt);
+            if (!KeplerUsable(startKE, sampleAt) || !KeplerUsable(targetKE, sampleAt))
+                return false;
+            return true;
+        }
+        catch
+        {
+            parent = null!;
+            startKE = default;
+            targetKE = default;
+            return false;
+        }
     }
+
+    static bool KeplerUsable(KeplerElements ke, DateTime at)
+    {
+        if (!double.IsFinite(ke.SemiMajorAxis) || !double.IsFinite(ke.Eccentricity)
+            || !double.IsFinite(ke.StandardGravParameter) || ke.StandardGravParameter <= 0)
+            return false;
+        var state = OrbitMath.GetStateVectors(ke, at);
+        if (!IsFiniteVec(state.position) || !double.IsFinite(state.velocity.X) || !double.IsFinite(state.velocity.Y))
+            return false;
+        double r = state.position.Length();
+        return r >= 1 && r <= 1e14;
+    }
+
+    static bool IsFiniteVec(Vector3 v)
+        => double.IsFinite(v.X) && double.IsFinite(v.Y) && double.IsFinite(v.Z);
 
     internal override void Execute(DateTime atDateTime)
     {
@@ -95,8 +151,16 @@ public class CirculariseAction : EntityAction
             return;
         }
 
-        _totalDv = DvBetween(startKE, targetKE, atDateTime);
-        _db = new NewtonSimpleMoveDB(parent, startKE, targetKE, atDateTime);
+        DateTime node = startKE.Epoch != default ? startKE.Epoch : atDateTime;
+        _totalDv = DvBetween(startKE, targetKE, node);
+        if (!double.IsFinite(_totalDv))
+        {
+            Status = ActionStatus.Failed;
+            _isFinished = true;
+            return;
+        }
+
+        _db = new NewtonSimpleMoveDB(parent, startKE, targetKE, node);
         _entityCommanding.SetDataBlob(_db);
         NewtonSimpleProcessor.ProcessEntity(_entityCommanding, atDateTime);
         IsRunning = true;
@@ -118,8 +182,10 @@ public class CirculariseAction : EntityAction
         {
             if (TryCompute(_entityCommanding, ActionOnDate, out _, out var startKE, out var targetKE))
             {
-                double dv = DvBetween(startKE, targetKE, ActionOnDate);
-                return "Waiting to circularise, " + Stringify.Velocity(dv) + " Δv";
+                DateTime node = startKE.Epoch != default ? startKE.Epoch : ActionOnDate;
+                double dv = DvBetween(startKE, targetKE, node);
+                if (double.IsFinite(dv))
+                    return "Waiting to circularise, " + Stringify.Velocity(dv) + " Δv";
             }
             return "Waiting to circularise";
         }

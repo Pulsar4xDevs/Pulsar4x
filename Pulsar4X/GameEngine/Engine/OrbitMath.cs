@@ -368,9 +368,28 @@ namespace Pulsar4X.Engine
             }
             else //hyperbolic orbit
             {
-                // Hyperbolic orbits don't have a period, so no normalization needed
-                return TrueAnomalyFromTime(orbit.GravitationalParameter_m3S2, orbit.SemiMajorAxis, orbit.Eccentricity, orbit.MeanAnomalyAtEpoch, secondsFromEpoch);
+                if (Math.Abs(secondsFromEpoch) < 1e-6 && double.IsFinite(orbit.TrueAnomalyAtEpoch))
+                    return orbit.TrueAnomalyAtEpoch;
+                var ta = TrueAnomalyFromTime(orbit.GravitationalParameter_m3S2, orbit.SemiMajorAxis, orbit.Eccentricity, orbit.MeanAnomalyAtEpoch, secondsFromEpoch);
+                if (double.IsFinite(orbit.TrueAnomalyAtEpoch)
+                    && (!double.IsFinite(ta) || !HyperbolicPositionUsable(orbit, ta)))
+                    return orbit.TrueAnomalyAtEpoch;
+                if (!double.IsFinite(ta) && secondsFromEpoch != 0)
+                    return TrueAnomalyFromTime(orbit.GravitationalParameter_m3S2, orbit.SemiMajorAxis, orbit.Eccentricity, orbit.MeanAnomalyAtEpoch, 0);
+                return ta;
             }
+        }
+
+        static bool HyperbolicPositionUsable(OrbitDB orbit, double trueAnomaly)
+        {
+            var pos = OrbitalMath.GetPosition(
+                orbit.SemiMajorAxis, orbit.Eccentricity,
+                orbit.LongitudeOfAscendingNode, orbit.ArgumentOfPeriapsis,
+                orbit.Inclination, trueAnomaly);
+            if (!double.IsFinite(pos.X) || !double.IsFinite(pos.Y) || !double.IsFinite(pos.Z))
+                return false;
+            double len = pos.Length();
+            return len >= 1 && len <= 1e14;
         }
 
         /// <summary>

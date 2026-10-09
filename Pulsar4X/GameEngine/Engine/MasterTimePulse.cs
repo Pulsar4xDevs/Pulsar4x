@@ -340,6 +340,7 @@ namespace Pulsar4X.Engine
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
+                throw new Exception("Engine Crash during time pulse");
                 NoteFault(ex, current);
                 if (Debugger.IsAttached)
                     Debugger.Break();
