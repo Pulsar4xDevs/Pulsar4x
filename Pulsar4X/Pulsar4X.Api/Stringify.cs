@@ -193,127 +193,67 @@ namespace Pulsar4X.Api
             return Mass(amountInKg, format);
         }
 
+        /// <summary>
+        /// Formats a volume in cubic metres. The prefix is on the metre, then cubed,
+        /// so 1 km³ is 1e9 m³ and ship-scale volumes stay in m³.
+        /// </summary>
         public static string Volume(double volume_m, string format = "0.###")
         {
-            string stringVolume = "0 m^3";
-
-            if (volume_m > 1.0e18)
-            {
-                volume_m = volume_m * 1.0e-18;
-                stringVolume = volume_m.ToString(format) + " Em^3";
-            }
-            else if (volume_m > 1.0e15)
-            {
-                volume_m = volume_m * 1.0e-15;
-                stringVolume = volume_m.ToString(format) + " Pm^3";
-            }
-            else if(volume_m > 1.0e12)
-            {
-                volume_m = volume_m * 1.0e-12;
-                stringVolume = volume_m.ToString(format) + " Tm^3";
-            }
-            else if (volume_m > 1.0e9)
-            {
-                volume_m = volume_m * 1.0e-9;
-                stringVolume = volume_m.ToString(format) + " Gm^3";
-            }
-            else if (volume_m > 1.0e6)
-            {
-                volume_m = volume_m * 1.0e-6;
-                stringVolume = volume_m.ToString(format) + " Mm^3";
-            }
-            else if (volume_m > 1.0e3)
-            {
-                volume_m = volume_m * 1.0e-3;
-                stringVolume = volume_m.ToString(format) + " Km^3";
-            }
-            else {
-                stringVolume = volume_m.ToString(format) + " m^3";
-            }
-
-            return stringVolume;
+            double abs = Math.Abs(volume_m);
+            if (abs >= 1.0e54)
+                return (volume_m * 1.0e-54).ToString(format) + " Em^3";
+            if (abs >= 1.0e45)
+                return (volume_m * 1.0e-45).ToString(format) + " Pm^3";
+            if (abs >= 1.0e36)
+                return (volume_m * 1.0e-36).ToString(format) + " Tm^3";
+            if (abs >= 1.0e27)
+                return (volume_m * 1.0e-27).ToString(format) + " Gm^3";
+            if (abs >= 1.0e18)
+                return (volume_m * 1.0e-18).ToString(format) + " Mm^3";
+            if (abs >= 1.0e9)
+                return (volume_m * 1.0e-9).ToString(format) + " Km^3";
+            return volume_m.ToString(format) + " m^3";
         }
 
+        /// <summary>
+        /// Formats an area in square metres. The prefix is on the metre, then squared,
+        /// so 1 km² is 1e6 m².
+        /// </summary>
         public static string Area(double area_m2, string format = "0.###")
         {
-            string stringArea = "0 m^2";
-
-            if (area_m2 > 1.0e18)
-            {
-                area_m2 = area_m2 * 1.0e-18;
-                stringArea = area_m2.ToString(format) + " Em^2";
-            }
-            else if (area_m2 > 1.0e15)
-            {
-                area_m2 = area_m2 * 1.0e-15;
-                stringArea = area_m2.ToString(format) + " Pm^2";
-            }
-            else if(area_m2 > 1.0e12)
-            {
-                area_m2 = area_m2 * 1.0e-12;
-                stringArea = area_m2.ToString(format) + " Tm^2";
-            }
-            else if (area_m2 > 1.0e9)
-            {
-                area_m2 = area_m2 * 1.0e-9;
-                stringArea = area_m2.ToString(format) + " Gm^2";
-            }
-            else if (area_m2 > 1.0e6)
-            {
-                area_m2 = area_m2 * 1.0e-6;
-                stringArea = area_m2.ToString(format) + " Mm^2";
-            }
-            else if (area_m2 > 1.0e3)
-            {
-                area_m2 = area_m2 * 1.0e-3;
-                stringArea = area_m2.ToString(format) + " Km^2";
-            }
-            else {
-                stringArea = area_m2.ToString(format) + " m^2";
-            }
-
-            return stringArea;
+            double abs = Math.Abs(area_m2);
+            if (abs >= 1.0e36)
+                return (area_m2 * 1.0e-36).ToString(format) + " Em^2";
+            if (abs >= 1.0e30)
+                return (area_m2 * 1.0e-30).ToString(format) + " Pm^2";
+            if (abs >= 1.0e24)
+                return (area_m2 * 1.0e-24).ToString(format) + " Tm^2";
+            if (abs >= 1.0e18)
+                return (area_m2 * 1.0e-18).ToString(format) + " Gm^2";
+            if (abs >= 1.0e12)
+                return (area_m2 * 1.0e-12).ToString(format) + " Mm^2";
+            if (abs >= 1.0e6)
+                return (area_m2 * 1.0e-6).ToString(format) + " Km^2";
+            return area_m2.ToString(format) + " m^2";
         }
 
         public static string VolumeLtr(double volume_m, string format = "0.###", bool fullSuffix = false)
         {
-            string stringVolume = "0 Ltr";
             double volLtr = volume_m * 1000;
-            if (volLtr > 1.0e18)
-            {
-                volLtr *= 1.0e-18;
-                stringVolume = volLtr.ToString(format) + (fullSuffix ? " exalitre" : "EL");
-            }
-            else if (volLtr > 1.0e15)
-            {
-                volLtr *= 1.0e-15;
-                stringVolume = volLtr.ToString(format) + (fullSuffix ? " petalitre" : "PL");
-            }
-            else if(volLtr > 1.0e12)
-            {
-                volLtr *= 1.0e-12;
-                stringVolume = volLtr.ToString(format) + (fullSuffix ? " teralitre" : "TL");
-            }
-            else if (volLtr > 1.0e9)
-            {
-                volLtr *= 1.0e-9;
-                stringVolume = volLtr.ToString(format) + (fullSuffix ? " gigalitre" : "ML");
-            }
-            else if (volLtr > 1.0e6)
-            {
-                volLtr *= 1.0e-6;
-                stringVolume = volLtr.ToString(format) + (fullSuffix ? " megalitre" : "ML");
-            }
-            else if (volLtr > 1.0e3)
-            {
-                volLtr *= 1.0e-3;
-                stringVolume = volLtr.ToString(format) + (fullSuffix ? " kilolitre" : "KL");
-            }
-            else {
-                stringVolume = volLtr.ToString(format) + " Ltr";
-            }
-
-            return stringVolume;
+            double abs = Math.Abs(volLtr);
+            if (abs >= 1.0e18)
+                return (volLtr * 1.0e-18).ToString(format) + (fullSuffix ? " exalitre" : "EL");
+            if (abs >= 1.0e15)
+                return (volLtr * 1.0e-15).ToString(format) + (fullSuffix ? " petalitre" : "PL");
+            if (abs >= 1.0e12)
+                return (volLtr * 1.0e-12).ToString(format) + (fullSuffix ? " teralitre" : "TL");
+            if (abs >= 1.0e9)
+                return (volLtr * 1.0e-9).ToString(format) + (fullSuffix ? " gigalitre" : "GL");
+            if (abs >= 1.0e6)
+                return (volLtr * 1.0e-6).ToString(format) + (fullSuffix ? " megalitre" : "ML");
+            if (abs >= 1.0e3)
+                return (volLtr * 1.0e-3).ToString(format) + (fullSuffix ? " kilolitre" : "KL");
+            return volLtr.ToString(format) + " Ltr";
         }
 
         public static string Distance(double length_m,  string format = "#,0.###")

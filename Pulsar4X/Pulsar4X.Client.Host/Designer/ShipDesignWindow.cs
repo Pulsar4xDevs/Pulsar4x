@@ -673,7 +673,7 @@ namespace Pulsar4X.Client
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.Mass(_fuelStoreMass));
                 ImGui.SameLine();
-                ImGui.Text(Stringify.VolumeLtr(_fuelStoreVolume));
+                ImGui.Text(Stringify.Volume(_fuelStoreVolume));
 
                 ImGui.TableNextColumn();
                 ImGui.Text("Delta V");
@@ -715,7 +715,7 @@ namespace Pulsar4X.Client
                     ImGui.TableNextColumn();
                     ImGui.Text("Cargo Storage");
                     ImGui.TableNextColumn();
-                    ImGui.Text(Stringify.VolumeLtr(_cvol));
+                    ImGui.Text(Stringify.Volume(_cvol));
 
 
                     ImGui.TableNextColumn();

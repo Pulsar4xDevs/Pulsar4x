@@ -333,7 +333,7 @@ namespace Pulsar4X.Client
                     ImGui.SameLine();
                     ImGui.Text("Volume");
                     ImGui.TableNextColumn();
-                    ImGui.Text(Stringify.VolumeLtr(_componentDesigner.VolumeM3Value));
+                    ImGui.Text(Stringify.Volume(_componentDesigner.VolumeM3Value));
 
                     if(_componentDesigner.CrewReqValue > 0)
                     {

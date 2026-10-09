@@ -76,7 +76,7 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-cargo-hold-1t",
-      "Name": "Cargo Hold 1t",
+      "Name": "Cargo Hold 1000m^3",
       "TemplateId": "general-cargo-hold",
       "Properties": [
         { "Key": "Storage Volume", "Value": 1000 }
@@ -87,7 +87,7 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-cargo-hold-5t",
-      "Name": "Cargo Hold 5t",
+      "Name": "Cargo Hold 5000m^3",
       "TemplateId": "general-cargo-hold",
       "Properties": [
         { "Key": "Storage Volume", "Value": 5000 }
