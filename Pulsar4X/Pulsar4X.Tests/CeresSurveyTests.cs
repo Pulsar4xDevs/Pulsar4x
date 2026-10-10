@@ -101,14 +101,16 @@ public class CeresSurveyTests
         var depot = sol.GetAllEntitiesWithDataBlob<ColonyInfoDB>()
             .Single(c => c.FactionOwnerID == depotFaction.Id);
 
-        Assert.That(strata.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds));
-        Assert.That(lode.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds));
+        // Mining Flight's standing job buys one chart while it is placed.
+        Assert.That(strata.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds + CeresStart.ChartAsk));
+        Assert.That(lode.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds - CeresStart.ChartAsk));
 
         var charts = depot.GetDataBlob<LogiBaseDB>().Intel.Values
             .Where(row => row.Kind == IntelKind.Geo && row.ForSale)
             .ToList();
         Assert.That(charts, Has.Count.EqualTo(CeresStart.ChartCount));
 
+        int lodeOwned = 0;
         foreach (var row in charts)
         {
             Assert.That(row.Ask, Is.EqualTo(CeresStart.ChartAsk));
@@ -117,20 +119,28 @@ public class CeresSurveyTests
             Assert.That(sol.TryGetEntityById(bodyId, out var body), Is.True);
             var geo = body!.GetDataBlob<GeoSurveyableDB>();
             Assert.That(geo.IsSurveyComplete(strata.Id), Is.True);
-            Assert.That(geo.IsSurveyComplete(lode.Id), Is.False);
             Assert.That(geo.IsSurveyComplete(depotFaction.Id), Is.False);
+            if (geo.IsSurveyComplete(lode.Id))
+                lodeOwned++;
             var deposit = body.GetDataBlob<MineralsDB>().Minerals.Values.First();
             Assert.That(deposit.Amount.GetAccess(strata.GetDataBlob<FactionInfoDB>().FactionMask), Is.EqualTo(AccessLevel.Partial));
-            Assert.That(deposit.Amount.GetAccess(lode.GetDataBlob<FactionInfoDB>().FactionMask), Is.EqualTo(AccessLevel.None));
             Assert.That(deposit.Amount.GetAccess(depotFaction.GetDataBlob<FactionInfoDB>().FactionMask), Is.EqualTo(AccessLevel.None));
+            if (!geo.IsSurveyComplete(lode.Id))
+                Assert.That(deposit.Amount.GetAccess(lode.GetDataBlob<FactionInfoDB>().FactionMask), Is.EqualTo(AccessLevel.None));
         }
+        Assert.That(lodeOwned, Is.EqualTo(1));
 
-        var bought = charts[0];
+        var bought = charts.First(row =>
+        {
+            Assert.That(int.TryParse(row.Subject, out int id), Is.True);
+            Assert.That(sol.TryGetEntityById(id, out var body), Is.True);
+            return !body!.GetDataBlob<GeoSurveyableDB>().IsSurveyComplete(lode.Id);
+        });
         decimal depotBefore = depotFaction.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds();
         Assert.That(IntelBook.TryBuy(depot, lode, IntelKind.Geo, bought.Subject, out var reason), Is.True, reason);
 
-        Assert.That(lode.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds - CeresStart.ChartAsk));
-        Assert.That(strata.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds + CeresStart.ChartAsk));
+        Assert.That(lode.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds - (2 * CeresStart.ChartAsk)));
+        Assert.That(strata.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds + (2 * CeresStart.ChartAsk)));
         Assert.That(depotFaction.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(depotBefore));
         Assert.That(int.TryParse(bought.Subject, out int boughtId), Is.True);
         Assert.That(sol.TryGetEntityById(boughtId, out var boughtBody), Is.True);

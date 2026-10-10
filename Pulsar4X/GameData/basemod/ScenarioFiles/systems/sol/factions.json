@@ -12,7 +12,7 @@
       "StartingFunds": 100,
       "ComponentDesigns": [
         "default-design-passive-sensor-s50",
-        "default-design-bridge-system",
+        "default-design-bridge-ship",
         "default-design-geo-surveyor",
         "default-design-fuel-tank-1000",
         "default-design-alcubierre-500",
@@ -52,7 +52,7 @@
       "StartingFunds": 100,
       "ComponentDesigns": [
         "default-design-passive-sensor-s50",
-        "default-design-bridge-system",
+        "default-design-bridge-ship",
         "default-design-asteroid-miner",
         "default-design-cargo-hold-1t",
         "default-design-fuel-tank-1000",
@@ -62,14 +62,14 @@
         "default-design-raptor"
       ],
       "ShipDesigns": [
-        "default-ship-design-miner"
+        "ship-design-lode-prospector"
       ],
       "Fleets": [
         {
           "Name": "Mining Flight",
           "Ships": [
             {
-              "DesignId": "default-ship-design-miner",
+              "DesignId": "ship-design-lode-prospector",
               "Name": "Prospector",
               "Cargo": [
                 { "Id": "methalox", "Amount": 2000, "Type": "byVolume" }

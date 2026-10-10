@@ -229,10 +229,13 @@ public class AgentProcessor : IInstanceProcessor
                     }
 
                     // TODO: cancel-propagation to siblings on failure.
+                    // A standing job stays active when its child finishes or fails.
+                    // The next wake hands the next child. Player survey and mine still complete.
+                    bool standing = goal.Type is GoalType.SurveyStanding or GoalType.MineStanding;
                     var mine = SubGoalsOf(managedEntity, goal);
-                    if (mine.Count > 0 && mine.All(g => g.Status == GoalStatus.Completed))
+                    if (!standing && mine.Count > 0 && mine.All(g => g.Status == GoalStatus.Completed))
                         goal.Status = GoalStatus.Completed;
-                    else if (mine.Any(g => g.Status == GoalStatus.Failed))
+                    else if (!standing && mine.Any(g => g.Status == GoalStatus.Failed))
                         Fail(goal, "a subordinate's goal failed");
                     else
                         ScheduleAgent(agentHost, atDateTime + CommanderSkills.RecheckInterval(managedEntity));

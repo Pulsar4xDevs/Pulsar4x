@@ -1,6 +1,6 @@
 # Standing survey and mine jobs
 
-Status: not started.
+Status: implemented.
 
 Survey Flight and Mining Flight start with one standing goal each and keep doing it. The ship does not assign itself the next job. Player orders of `ServeyBodies` and `MineAsteroids` still complete when their work is done.
 
@@ -37,6 +37,12 @@ Assign both at the end of `PlaceFaction`, on the system fleet, not on the factio
 - With no affordable chart and no Lode survey, the standing mine goal is still active.
 - A player `MineAsteroids` with nothing to mine still completes. A player `ServeyBodies` still completes.
 - Completing the ship's child does not assign the ship a new given goal.
+
+## Limit
+
+The standing mine job hands the existing `MineAsteroids` path. That path sells only when the office's buy quantity is above 0. Plan 1 left iron's buy quantity at 0, and `RunMarket` is still unchanged, so a full hold does not sell to Ceres Depot yet. The ship can sit on the existing unload wait.
+
+The clock was not run. A finished geo site can still replan into a warp-to-self and hang `ProcessSystem`. Tests wake the planner and `AgentProcessor.RunAgentNow` directly. At placement an unscanned asteroid is inside Pathfinder's 0.2 AU neighborhood, so Survey Flight hands that child during placement. The relay delays the ship's own plan.
 
 ## Stop if
 

@@ -394,13 +394,15 @@ namespace Pulsar4X.Factions
         /// <summary>
         /// Places faction blueprints. They get fleets and a captain, and no colony.
         /// Call this after owned colonies so those factions already exist to receive a stance.
-        /// No goals are assigned.
+        /// Survey Flight and Mining Flight then take their standing goals. The faction
+        /// entity and the ships do not.
         /// </summary>
         public static void PlaceFactions(Game game, ModDataStore data)
         {
             foreach (var blueprint in data.Factions.Values)
                 PlaceFaction(game, data, blueprint);
             SeedSurveyCharts(game);
+            AssignStandingJobs(game);
         }
 
         static void PlaceFaction(Game game, ModDataStore data, FactionBlueprint blueprint)
@@ -520,6 +522,35 @@ namespace Pulsar4X.Factions
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Standing jobs live on the system fleet. AssignGoal with no time plans once now.
+        /// </summary>
+        static void AssignStandingJobs(Game game)
+        {
+            foreach (var system in game.Systems)
+            {
+                foreach (var fleet in system.GetAllEntitiesWithDataBlob<FleetDB>())
+                {
+                    if (!game.Factions.TryGetValue(fleet.FactionOwnerID, out var faction))
+                        continue;
+                    if (!faction.TryGetDataBlob<NameDB>(out var factionName)
+                        || !fleet.TryGetDataBlob<NameDB>(out var fleetName))
+                        continue;
+
+                    if (factionName.DefaultName == CeresStart.SurveyFactionName
+                        && fleetName.DefaultName == CeresStart.SurveyFleetName)
+                    {
+                        AgentProcessor.AssignGoal(fleet, new Goal(GoalType.SurveyStanding) { Name = "Survey the belt" });
+                    }
+                    else if (factionName.DefaultName == CeresStart.MiningFactionName
+                        && fleetName.DefaultName == CeresStart.MiningFleetName)
+                    {
+                        AgentProcessor.AssignGoal(fleet, new Goal(GoalType.MineStanding) { Name = "Mine the belt" });
+                    }
+                }
+            }
         }
 
         /// <summary>

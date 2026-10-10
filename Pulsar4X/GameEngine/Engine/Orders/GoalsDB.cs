@@ -117,6 +117,10 @@ public enum GoalType
 
     // Ship mines surveyed asteroids and hauls the ore home. Appended so saved values stay put.
     MineAsteroids,
+
+    // Fleet jobs that stay active and hand the next child. Appended so saved values stay put.
+    SurveyStanding,
+    MineStanding,
 }
 
 public class Goal

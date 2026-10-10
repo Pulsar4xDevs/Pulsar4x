@@ -19,4 +19,6 @@ public static class CeresStart
     public const string SurveyFactionName = "Strata Survey";
     public const string MiningFactionName = "Lode Mining";
     public const string DepotFactionName = "Ceres Depot";
+    public const string SurveyFleetName = "Survey Flight";
+    public const string MiningFleetName = "Mining Flight";
 }
