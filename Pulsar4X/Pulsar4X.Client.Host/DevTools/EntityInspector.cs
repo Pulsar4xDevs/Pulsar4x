@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Engine;
@@ -30,6 +31,10 @@ namespace Pulsar4X.Client
         private static float _heightMultiplyer = ImGui.GetTextLineHeightWithSpacing();
 
         private static bool _isActive = false;
+        private static int _depth;
+        private static readonly HashSet<object> _seen = new(ReferenceEqualityComparer.Instance);
+        const int MaxDepth = 12;
+        const int MaxItems = 200;
 
         /// <summary>
         /// use this to display the inspector as it's own window
@@ -94,18 +99,17 @@ namespace Pulsar4X.Client
 
         public static void DBDisplay(BaseDataBlob dataBlob)
         {
-            Type dbType = dataBlob.GetType();
-
-            MemberInfo[] memberInfos = dbType.GetMembers();
-
-            var _totalHeight = _numLines * _heightMultiplyer;
-            _numLines = memberInfos.Length;
+            // Height follows the rows drawn last frame, including opened lists and private fields.
+            var _totalHeight = (_numLines + 1) * _heightMultiplyer;
+            _numLines = 0;
             var size = new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, _totalHeight);
 
             ImGui.BeginChild("InnerColomns", size);
 
             ImGui.Columns(2);
 
+            _seen.Clear();
+            _depth = 0;
             RecursiveReflection(dataBlob);
 
 
@@ -117,262 +121,402 @@ namespace Pulsar4X.Client
 
         static void RecursiveReflection(object obj)
         {
-            object? value = null;
-            Type objType = obj.GetType();
-            BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
-            MemberInfo[] memberInfos = objType.GetMembers(flags);
-            foreach (var memberInfo in memberInfos)
+            // Structs are copied, so a cycle has to go through a class.
+            if (obj is not ValueType && !_seen.Add(obj))
             {
-                if (typeof(FieldInfo).IsAssignableFrom(memberInfo.GetType()) || typeof(PropertyInfo).IsAssignableFrom(memberInfo.GetType()))
+                Row("…", "cycle");
+                return;
+            }
+
+            _depth++;
+            try
+            {
+                if (_depth > MaxDepth)
                 {
-                    MemberTypes membertype = memberInfo.MemberType;
-                    object? prevVal = value;
-                    value = GetValue(memberInfo, obj);
-                    if(value == null)
+                    Row("…", "nested too deep");
+                    return;
+                }
+
+                BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+                foreach (var memberInfo in obj.GetType().GetMembers(flags))
+                {
+                    if (memberInfo is not FieldInfo and not PropertyInfo)
                         continue;
-                    Type valueType = value.GetType();
-                    if (typeof(ICollection).IsAssignableFrom(value.GetType()))
+                    if (memberInfo.GetCustomAttribute<CompilerGeneratedAttribute>() != null)
+                        continue;
+                    if (memberInfo.Name == "_lock")
+                        continue;
+                    if (memberInfo is PropertyInfo property)
                     {
-                        var items = (ICollection?)GetValue(memberInfo, obj);
-                        if(items == null) continue;
-                        int itemsCount = items.Count;
-
-                        if (ImGui.TreeNode(memberInfo.Name))
-                        {
-                            ImGui.NextColumn();
-                            ImGui.Text("Count: " + itemsCount);
-                            ImGui.NextColumn();
-                            _numLines += itemsCount;
-                            lock (items)//TODO: IDK the best way to fix this.
-                            {
-                                foreach (var item in items)
-                                {
-                                    RecursiveReflection(item);
-                                }
-                            }
-
-                            ImGui.TreePop();
-                        }
-                        else
-                        {
-                            ImGui.NextColumn();
-                            ImGui.Text("Count: " + itemsCount);
-                            ImGui.NextColumn();
-                        }
+                        if (!property.CanRead || property.GetIndexParameters().Length > 0)
+                            continue;
                     }
-                    else if (typeof(HashSet<Tech>).IsAssignableFrom(value.GetType()))
+
+                    object? value;
+                    try
                     {
-                        var items = (HashSet<Tech>?)GetValue(memberInfo, obj);
-                        if(items == null) continue;
-                        int itemsCount = items.Count;
-
-                        if (ImGui.TreeNode(memberInfo.Name))
-                        {
-                            ImGui.NextColumn();
-                            ImGui.Text("Count: " + itemsCount);
-                            ImGui.NextColumn();
-                            _numLines += itemsCount;
-                            lock (items)//TODO: IDK the best way to fix this.
-                            {
-                                foreach (var item in items)
-                                {
-                                    RecursiveReflection(item);
-                                }
-                            }
-
-                            ImGui.TreePop();
-                        }
-                        else
-                        {
-                            ImGui.NextColumn();
-                            ImGui.Text("Count: " + itemsCount);
-                            ImGui.NextColumn();
-                        }
+                        value = GetValue(memberInfo, obj);
                     }
-                    else if (typeof(IDictionary).IsAssignableFrom(value.GetType()))
+                    catch (Exception e)
                     {
-                        var items = (IDictionary?)GetValue(memberInfo, obj);
-                        if(items == null) continue;
-                        int itemsCount = items.Count;
-
-                        if (ImGui.TreeNode(memberInfo.Name))
-                        {
-                            ImGui.NextColumn();
-                            ImGui.Text("Count: " + itemsCount);
-                            ImGui.NextColumn();
-                            _numLines += itemsCount;
-                            lock (items) //TODO: IDK the best way to fix this.
-                            {
-                                foreach (var item in items)
-                                {
-                                    RecursiveReflection(item);
-                                }
-                            }
-
-                            ImGui.TreePop();
-                        }
-                        else
-                        {
-                            ImGui.NextColumn();
-                            ImGui.Text("Count: " + itemsCount);
-                            ImGui.NextColumn();
-                        }
+                        Row(memberInfo.Name, ErrorText(e));
+                        continue;
                     }
-                    else if (typeof(SafeList<Object>).IsAssignableFrom(value.GetType()))
+
+                    try
                     {
-                        var items = (IEnumerable?)GetValue(memberInfo, obj);
-                        if(items == null) continue;
-                        //int itemsCount = items.Count;
-                        ImGui.Text(memberInfo.Name);
-
-                        if (ImGui.TreeNode(memberInfo.Name))
-                        {
-                            ImGui.NextColumn();
-                            //ImGui.Text("Count: " + itemsCount);
-                            ImGui.NextColumn();
-                            //_numLines += itemsCount;
-                            lock (items)//TODO: IDK the best way to fix this.
-                            {
-                                foreach (var item in items)
-                                {
-                                    RecursiveReflection(item);
-                                }
-                            }
-
-                            ImGui.TreePop();
-                        }/*
-                        else
-                        {
-                            ImGui.NextColumn();
-                            //ImGui.Text("Count: " + itemsCount);
-                            ImGui.NextColumn();
-                        }*/
+                        ShowMember(memberInfo.Name + "###" + memberInfo.MetadataToken, value);
                     }
-                    else if (typeof(KeplerElements).IsAssignableFrom(value.GetType()))
+                    catch (Exception e)
                     {
-                        //var items = (KeplerElements)GetValue(memberInfo, obj);
-                        MemberInfo[] memberInfoske =  typeof(KeplerElements).GetMembers(flags);
-                        int itemsCount = memberInfoske.Length;
-
-                        if (ImGui.TreeNode(memberInfo.Name))
-                        {
-                            ImGui.NextColumn();
-                            ImGui.Text("Count: " + itemsCount);
-                            ImGui.NextColumn();
-                            _numLines += itemsCount;
-
-                                foreach (var memberInfoke in memberInfoske)
-                                {
-                                    object? valueke = GetValue(memberInfoke, value);
-                                    ImGui.Text(memberInfoke.Name);
-                                    ImGui.NextColumn();
-                                    //object value = memberInfo.GetValue(obj);
-                                    if (valueke != null)
-                                        ImGui.Text(valueke.ToString());
-                                    else ImGui.Text("null");
-                                    ImGui.NextColumn();
-                                }
-
-                            ImGui.TreePop();
-                        }
-                        else
-                        {
-                            ImGui.NextColumn();
-                            ImGui.Text("Count: " + itemsCount);
-                            ImGui.NextColumn();
-                        }
-                    }
-                    else
-                    {
-                        ImGui.Text(memberInfo.Name);
-                        ImGui.NextColumn();
-                        //object value = memberInfo.GetValue(obj);
-                        string? displayStr = "null";
-                        string tooltipStr = "";
-                        if (value != null)
-                        {
-                            if(value is string)
-                            {
-                                var guid = (string)value;
-                                displayStr = guid.ToString();
-                                //FIXME:
-                                // if (StaticRefLib.Game.GlobalManager.TryGetEntityByGuid(guid, out Entity entity))
-                                // {
-                                //     displayStr = entity.GetOwnersName();
-                                //     tooltipStr = (value.ToString());
-                                // }
-                                // else if (StaticRefLib.StaticData.Techs.TryGetValue(guid, out TechSD techSD))
-                                // {
-                                //     displayStr = techSD.Name;
-                                // }
-                                // else if (StaticRefLib.StaticData.ComponentTemplates.TryGetValue(guid, out ComponentTemplateBlueprint ctempSD))
-                                // {
-                                //     displayStr = "ComponentTemplateSD" + ctempSD.Name;
-                                //     tooltipStr = ctempSD.UniqueID.ToString();
-                                // }
-                                // else if (_dataBlobs[_selectedDB] is FactionTechDB)
-                                // {
-                                //     var db = (FactionTechDB)_dataBlobs[_selectedDB];
-                                //     if (db.ResearchedTechs.ContainsKey(guid))
-                                //     {
-                                //         var facInfo = db.OwningEntity.GetDataBlob<FactionInfoDB>();
-                                //         if (facInfo.ComponentDesigns.TryGetValue(guid, out ComponentDesign component))
-                                //         {
-                                //             displayStr = component.Name;
-                                //         }
-                                //     }
-                                // }
-                                // else
-                                // {
-                                     displayStr = guid.ToString();
-                                // }
-                            }
-                            else if(value is Entity)
-                            {
-                                var entity = (Entity)value;
-                                displayStr = entity.GetOwnersName();
-                                tooltipStr = "ID: " + entity.Id.ToString();
-                            }
-                            else if (value is Vector2)
-                            {
-                                displayStr = value.ToString();
-                                Vector2 v = (Vector2)value;
-                                tooltipStr = "Magnitude: " + Stringify.Quantity(v.Length());
-                            }
-                            else if (value is Vector3)
-                            {
-                                displayStr = value.ToString();
-                                Vector3 v = (Vector3)value;
-                                tooltipStr = "Magnitude: " + Stringify.Quantity(v.Length());
-                            }
-                            else
-                            {
-                                displayStr = value.ToString();
-                            }
-
-                            if (value is ProcessedMaterial)
-                            {
-                                ProcessedMaterial mat = (ProcessedMaterial)value;
-                                displayStr = ("MaterialSD: " + mat.Name);
-                            }
-
-                            if (value is IConstructableDesign)
-                            {
-                                IConstructableDesign constD = (IConstructableDesign)value;
-                                displayStr = "Constructable: " + constD.Name;
-                            }
-                            if (value is (Tech tech ,int pointsResearched, int pointCost))
-                            {
-                                (Tech tech ,int pointsResearched, int pointCost) tval = ((Tech tech ,int pointsResearched, int pointCost))value;
-                                displayStr = "TechSD: " + tval.tech.Name + " Points Researched: " + tval.pointsResearched + " / " +tval.pointCost;
-                            }
-                        }
-                        ImGui.Text(displayStr);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(tooltipStr);
-                        ImGui.NextColumn();
+                        Row(memberInfo.Name, ErrorText(e));
                     }
                 }
+            }
+            finally
+            {
+                _depth--;
+                if (obj is not ValueType)
+                    _seen.Remove(obj);
+            }
+        }
+
+        static void ShowMember(string label, object? value)
+        {
+            if (value == null)
+            {
+                Row(Visible(label), "null");
+                return;
+            }
+
+            if (value is string || IsSimple(value.GetType()))
+            {
+                Row(Visible(label), SafeSummary(value), SafeTooltip(value));
+                return;
+            }
+
+            if (value is byte[] bytes)
+            {
+                Row(Visible(label), "byte[" + bytes.Length + "]");
+                return;
+            }
+
+            if (IsDictionary(value))
+            {
+                ShowDictionary(label, value);
+                return;
+            }
+
+            if (value is IEnumerable)
+            {
+                ShowSequence(label, value);
+                return;
+            }
+
+            if (IsLeaf(value))
+            {
+                Row(Visible(label), SafeSummary(value), SafeTooltip(value));
+                return;
+            }
+
+            if (IsExpandable(value))
+            {
+                ShowExpandable(label, value);
+                return;
+            }
+
+            Row(Visible(label), SafeSummary(value), SafeTooltip(value));
+        }
+
+        static void ShowDictionary(string label, object value)
+        {
+            int count = CountOf(value);
+            bool open = ImGui.TreeNode(label);
+            ImGui.NextColumn();
+            ImGui.TextUnformatted(count < 0 ? "" : "Count: " + count);
+            ImGui.NextColumn();
+            _numLines++;
+            if (!open)
+                return;
+
+            try
+            {
+                int index = 0;
+                foreach (var item in (IEnumerable)value)
+                {
+                    if (index >= MaxItems)
+                    {
+                        Row("…", count < 0 ? "more" : (count - index) + " more");
+                        break;
+                    }
+
+                    try
+                    {
+                        if (item != null && TryPair(item, out var key, out var pairValue))
+                        {
+                            string keyText = key == null ? "null" : SafeSummary(key).Replace("###", "#");
+                            ShowMember(keyText + "###k" + index, pairValue);
+                        }
+                        else
+                        {
+                            ShowMember("[" + index + "]", item);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Row("[" + index + "]", ErrorText(e));
+                    }
+                    index++;
+                }
+            }
+            catch (Exception e)
+            {
+                Row("…", ErrorText(e));
+            }
+            finally
+            {
+                ImGui.TreePop();
+            }
+        }
+
+        static void ShowSequence(string label, object value)
+        {
+            int count = CountOf(value);
+            bool open = ImGui.TreeNode(label);
+            ImGui.NextColumn();
+            ImGui.TextUnformatted(count < 0 ? "" : "Count: " + count);
+            ImGui.NextColumn();
+            _numLines++;
+            if (!open)
+                return;
+
+            try
+            {
+                int index = 0;
+                foreach (var item in (IEnumerable)value)
+                {
+                    if (index >= MaxItems)
+                    {
+                        Row("…", count < 0 ? "more" : (count - index) + " more");
+                        break;
+                    }
+
+                    try
+                    {
+                        ShowMember("[" + index + "]", item);
+                    }
+                    catch (Exception e)
+                    {
+                        Row("[" + index + "]", ErrorText(e));
+                    }
+                    index++;
+                }
+            }
+            catch (Exception e)
+            {
+                Row("…", ErrorText(e));
+            }
+            finally
+            {
+                ImGui.TreePop();
+            }
+        }
+
+        static void ShowExpandable(string label, object value)
+        {
+            bool open = ImGui.TreeNode(label);
+            ImGui.NextColumn();
+            ImGui.TextUnformatted(SafeSummary(value));
+            ImGui.NextColumn();
+            _numLines++;
+            if (!open)
+                return;
+
+            try
+            {
+                RecursiveReflection(value);
+            }
+            finally
+            {
+                ImGui.TreePop();
+            }
+        }
+
+        static void Row(string name, string value, string? tooltip = null)
+        {
+            ImGui.TextUnformatted(Visible(name));
+            ImGui.NextColumn();
+            ImGui.TextUnformatted(value);
+            if (!string.IsNullOrEmpty(tooltip) && ImGui.IsItemHovered())
+            {
+                ImGui.BeginTooltip();
+                ImGui.TextUnformatted(tooltip);
+                ImGui.EndTooltip();
+            }
+            ImGui.NextColumn();
+            _numLines++;
+        }
+
+        // TreeNode shows the text before ### and uses the rest as a stable id.
+        static string Visible(string label)
+        {
+            int hash = label.IndexOf("###", StringComparison.Ordinal);
+            return hash < 0 ? label : label.Substring(0, hash);
+        }
+
+        static bool IsDictionary(object value)
+        {
+            if (value is IDictionary)
+                return true;
+
+            var type = value.GetType();
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SafeDictionary<,>))
+                return true;
+
+            foreach (var iface in type.GetInterfaces())
+            {
+                if (!iface.IsGenericType || iface.GetGenericTypeDefinition() != typeof(IEnumerable<>))
+                    continue;
+                var arg = iface.GetGenericArguments()[0];
+                if (arg.IsGenericType && arg.GetGenericTypeDefinition() == typeof(KeyValuePair<,>))
+                    return true;
+            }
+            return false;
+        }
+
+        static bool TryPair(object item, out object? key, out object? value)
+        {
+            if (item is DictionaryEntry entry)
+            {
+                key = entry.Key;
+                value = entry.Value;
+                return true;
+            }
+
+            var type = item.GetType();
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(KeyValuePair<,>))
+            {
+                key = type.GetProperty("Key")?.GetValue(item);
+                value = type.GetProperty("Value")?.GetValue(item);
+                return true;
+            }
+
+            key = null;
+            value = null;
+            return false;
+        }
+
+        static int CountOf(object value)
+        {
+            if (value is ICollection collection)
+                return collection.Count;
+            var count = value.GetType().GetProperty("Count");
+            if (count != null && count.GetValue(value) is int number)
+                return number;
+            return -1;
+        }
+
+        static bool IsSimple(Type type)
+        {
+            if (type.IsPrimitive || type.IsEnum)
+                return true;
+            return type == typeof(string)
+                || type == typeof(decimal)
+                || type == typeof(DateTime)
+                || type == typeof(DateTimeOffset)
+                || type == typeof(TimeSpan)
+                || type == typeof(Guid);
+        }
+
+        static bool IsLeaf(object value)
+        {
+            return value is Entity
+                or Delegate
+                or Vector2
+                or Vector3
+                or ProcessedMaterial
+                or IConstructableDesign
+                or ValueTuple<Tech, int, int>;
+        }
+
+        static bool IsExpandable(object value)
+        {
+            var type = value.GetType();
+            if (type.Namespace == null || !type.Namespace.StartsWith("Pulsar4X", StringComparison.Ordinal))
+                return false;
+            // Opening the whole simulation from a stray reference would freeze the window.
+            return type.Name is not ("Game" or "EntityManager" or "StarSystem" or "ModDataStore");
+        }
+
+        static string SafeSummary(object value)
+        {
+            try
+            {
+                return Summary(value);
+            }
+            catch (Exception e)
+            {
+                return ErrorText(e);
+            }
+        }
+
+        static string? SafeTooltip(object value)
+        {
+            try
+            {
+                return TooltipFor(value);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        static string ErrorText(Exception e)
+        {
+            if (e is TargetInvocationException && e.InnerException != null)
+                e = e.InnerException;
+            return e.GetType().Name;
+        }
+
+        static string Summary(object value)
+        {
+            switch (value)
+            {
+                case string text:
+                    return text;
+                case Entity entity:
+                    return entity.GetOwnersName();
+                case ProcessedMaterial material:
+                    return "MaterialSD: " + material.Name;
+                case IConstructableDesign design:
+                    return "Constructable: " + design.Name;
+                case ValueTuple<Tech, int, int> tech:
+                    return "TechSD: " + tech.Item1.Name + " Points Researched: " + tech.Item2 + " / " + tech.Item3;
+                case Ledger ledger:
+                    return "Funds: " + ledger.GetCurrentFunds();
+            }
+
+            string? textValue = value.ToString();
+            if (string.IsNullOrEmpty(textValue)
+                || textValue == value.GetType().ToString()
+                || textValue == value.GetType().FullName)
+                return value.GetType().Name;
+            return textValue;
+        }
+
+        static string? TooltipFor(object value)
+        {
+            switch (value)
+            {
+                case Entity entity:
+                    return "ID: " + entity.Id;
+                case Vector2 vector:
+                    return "Magnitude: " + Stringify.Quantity(vector.Length());
+                case Vector3 vector:
+                    return "Magnitude: " + Stringify.Quantity(vector.Length());
+                default:
+                    return null;
             }
         }
 
