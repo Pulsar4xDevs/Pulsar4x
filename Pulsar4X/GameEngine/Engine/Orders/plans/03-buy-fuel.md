@@ -1,6 +1,6 @@
 # Buy fuel
 
-Status: not started.
+Status: implemented.
 
 When a standing fleet job needs fuel, it hands the ship a purchase of methalox from Ceres Depot at the depot's ask. The ship pays. `RefuelAt` stays a free cargo transfer and is not this step.
 
@@ -29,6 +29,12 @@ Do not wire `ShouldInterruptForRefuel`. That changes `ActiveGoal` under a foreig
 - A full tank is not handed a fuel child.
 - An empty purse leaves the standing goal active.
 - `RefuelAt` still creates a cargo pair and does not touch the ledger.
+
+## Limit
+
+The clock was not run. Ships spawn in a circular orbit at twice the body's radius. Ceres Depot sits on the surface, and its warehouse transfer range is the default 100 m/s, so that orbit is outside cargo range. Movement already calls the orbit "at Ceres", so the fuel child drops to low orbit and buys on the wake after that burn. Tests that pay open the transfer range instead of flying it.
+
+A full mining hold still has nowhere to unload. Iron's buy quantity stays 0 because `RunMarket` is unchanged.
 
 ## Out
 

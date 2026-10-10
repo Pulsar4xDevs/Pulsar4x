@@ -24,6 +24,17 @@ public class MineStandingPlan : IGoalPlanner
         if (!managedEntity.TryGetDataBlob<FleetDB>(out var fleetDB))
             return PlanResult.Fail("fleet only");
 
+        var fuel = BuyFuelPlan.Consider(managedEntity, goal);
+        if (fuel.Postpone)
+            return PlanResult.Continue(new List<(Entity subordinate, Goal goal)>());
+        if (fuel.Child != null && fuel.Ship != null)
+        {
+            return PlanResult.Continue(new List<(Entity subordinate, Goal goal)>
+            {
+                (fuel.Ship, fuel.Child),
+            });
+        }
+
         if (HasFreeMiner(fleetDB, goal))
             BuyOneChart(managedEntity);
 

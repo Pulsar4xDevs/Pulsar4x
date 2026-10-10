@@ -29,6 +29,17 @@ public class SurveyStandingPlan : IGoalPlanner
 
         ListFinishedChart(managedEntity, fleetDB, goal);
 
+        var fuel = BuyFuelPlan.Consider(managedEntity, goal);
+        if (fuel.Postpone)
+            return Idle();
+        if (fuel.Child != null && fuel.Ship != null)
+        {
+            return PlanResult.Continue(new List<(Entity subordinate, Goal goal)>
+            {
+                (fuel.Ship, fuel.Child),
+            });
+        }
+
         Entity? ship = null;
         foreach (var subunit in fleetDB.Children)
         {

@@ -121,6 +121,9 @@ public enum GoalType
     // Fleet jobs that stay active and hand the next child. Appended so saved values stay put.
     SurveyStanding,
     MineStanding,
+
+    // Ship buys methalox at a listed ask. Appended so saved values stay put.
+    BuyFuel,
 }
 
 public class Goal
