@@ -140,5 +140,48 @@
         ]
       }
     }
+  },
+  {
+    "Type": "Colony",
+    "Payload": {
+      "UniqueID": "colony-ceres-depot",
+      "Name": "Ceres Depot",
+      "StartingPopulation": 800,
+      "Body": "Ceres",
+      "System": "system-sol",
+      "OwnerFaction": "Ceres Depot",
+      "OwnerAbbreviation": "CD",
+      "Stance": "Friendly",
+      "SeatAdministrator": true,
+      "Installations": [
+        { "Id": "default-design-warehouse", "Amount": 1 },
+        { "Id": "default-design-logistics-office", "Amount": 1 },
+        { "Id": "default-design-refinery", "Amount": 1 },
+        { "Id": "default-design-fuel-tank-3000", "Amount": 2 },
+        { "Id": "default-design-city-hall", "Amount": 1 }
+      ],
+      "Cargo": [
+        { "Id": "methalox", "Amount": 4000, "Type": "byVolume" },
+        { "Id": "iron", "Amount": 2000 },
+        { "Id": "water", "Amount": 1000 }
+      ],
+      "StartingItems": [
+        "methalox",
+        "iron",
+        "water",
+        "warehouse-facility",
+        "logistics-office",
+        "refinery",
+        "stainless-steel-fuel-tank",
+        "admin-complex"
+      ],
+      "ComponentDesigns": [
+        "default-design-warehouse",
+        "default-design-logistics-office",
+        "default-design-refinery",
+        "default-design-fuel-tank-3000",
+        "default-design-city-hall"
+      ]
+    }
   }
 ]

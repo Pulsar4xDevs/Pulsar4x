@@ -406,6 +406,7 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
         ColonyFactory.PlacePlayerColonies(game, modDataStore, playerFaction, playerSpecies, request.ColonyId);
         if (modDataStore.Species.TryGetValue(request.SpeciesId, out var speciesBlueprint))
             ColonyFactory.PlaceOwnedColonies(game, modDataStore, playerFaction, speciesBlueprint);
+        FactionFactory.PlaceFactions(game, modDataStore);
         if (request.EleStart && !request.SystemId.Equals("random"))
             AsteroidFactory.CreateAsteroid(startingSystem, startingBody, game.TimePulse.GameGlobalDateTime + TimeSpan.FromDays(365));
 

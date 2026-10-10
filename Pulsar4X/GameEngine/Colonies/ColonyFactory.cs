@@ -21,6 +21,7 @@ using Pulsar4X.Logistics;
 using Pulsar4X.Ships;
 using System;
 using GameEngine.Engine.Orders;
+using GameEngine.People;
 
 namespace Pulsar4X.Colonies
 {
@@ -129,6 +130,9 @@ namespace Pulsar4X.Colonies
             // TODO: load people from blueprints
             var scientistEntity = CommanderFactory.CreateScientist(faction, colonyEntity);
             colonyEntity.GetDataBlob<TeamsHousedDB>().AddTeam(scientistEntity);
+
+            if (colonyBlueprint.SeatAdministrator)
+                SeatStartingAdministrator(game, faction, startingSystem, colonyEntity);
 
             // Add starting fleets
             foreach(var fleet in colonyBlueprint.Fleets ?? new List<ColonyBlueprint.FleetBlueprint>())
@@ -244,6 +248,32 @@ namespace Pulsar4X.Colonies
                     info.Stances[playerFaction.Id] = stance;
                 }
             }
+        }
+
+        static void SeatStartingAdministrator(Game game, Entity faction, StarSystem system, Entity colony)
+        {
+            if (!colony.TryGetDataBlob<AdminSpaceDB>(out var adminSpace))
+                return;
+
+            AdminSpaceAbilityState? seat = null;
+            foreach (var candidate in adminSpace.CommanderSeats)
+            {
+                if (candidate.CommanderID < 0)
+                {
+                    seat = candidate;
+                    break;
+                }
+            }
+            if (seat == null)
+                return;
+
+            var adminDB = CommanderFactory.CreateAdmin(game);
+            adminDB.CommissionedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365.25 * 10);
+            adminDB.RankedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365);
+            var admin = CommanderFactory.Create(system, faction.Id, adminDB);
+            seat.CommanderID = admin.Id;
+            seat.Commander = adminDB;
+            adminDB.AssignedTo = colony.Id;
         }
 
         static void UnlockAll(IEnumerable<string> ids, FactionInfoDB info)

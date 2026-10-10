@@ -111,6 +111,9 @@ namespace Pulsar4X.Modding
                 case ModInstruction.DataType.Colony:
                     ApplyModGeneric<ColonyBlueprint>(baseData.Colonies, mod, modNamespace);
                     break;
+                case ModInstruction.DataType.Faction:
+                    ApplyModGeneric<FactionBlueprint>(baseData.Factions, mod, modNamespace);
+                    break;
                 case ModInstruction.DataType.ComponentDesign:
                     ApplyModGeneric<ComponentDesignBlueprint>(baseData.ComponentDesigns, mod, modNamespace);
                     break;

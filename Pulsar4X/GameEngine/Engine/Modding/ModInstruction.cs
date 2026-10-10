@@ -29,6 +29,7 @@ namespace Pulsar4X.Modding
             Star,
             SystemBody,
             Colony,
+            Faction,
             ComponentDesign,
             ShipDesign,
         }
@@ -122,6 +123,9 @@ namespace Pulsar4X.Modding
                     break;
                 case ModInstruction.DataType.Colony:
                     instruction.Data = jObject["Payload"].ToObject<ColonyBlueprint>();
+                    break;
+                case ModInstruction.DataType.Faction:
+                    instruction.Data = jObject["Payload"].ToObject<FactionBlueprint>();
                     break;
                 case ModInstruction.DataType.ComponentDesign:
                     instruction.Data = jObject["Payload"].ToObject<ComponentDesignBlueprint>();

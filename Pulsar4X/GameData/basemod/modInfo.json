@@ -40,6 +40,7 @@
     "ScenarioFiles/systems/sol/uranus.json",
     "ScenarioFiles/systems/sol/neptune.json",
     "ScenarioFiles/systems/sol/dwarfPlanets.json",
+    "ScenarioFiles/systems/sol/factions.json",
     "ScenarioFiles/systems/sol/comets.json",
     "ScenarioFiles/systems/sol/asteroids-centaurs.json",
     "ScenarioFiles/systems/sol/asteroids-main-belt.json",

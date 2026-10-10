@@ -21,6 +21,11 @@ public class ColonyBlueprint : Blueprint
     public string? OwnerAbbreviation { get; set; }
     /// <summary>Stance the player and this faction store toward each other. Friendly or Allied.</summary>
     public string? Stance { get; set; }
+    /// <summary>
+    /// When true, a civilian administrator is seated in the first empty admin post.
+    /// Requires an installation that creates that post, such as a city hall. Earth leaves this false.
+    /// </summary>
+    public bool SeatAdministrator { get; set; }
 
     public List<StartingItemBlueprint>? Installations { get; set; }
     public List<StartingItemBlueprint>? Cargo { get; set; }

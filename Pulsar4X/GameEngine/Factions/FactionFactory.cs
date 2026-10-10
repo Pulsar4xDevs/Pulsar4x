@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using GameEngine.Engine.Orders;
 using Newtonsoft.Json.Linq;
+using Pulsar4X.Api;
+using Pulsar4X.Blueprints;
 using Pulsar4X.Colonies;
+using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Auth;
@@ -11,8 +15,10 @@ using Pulsar4X.Engine.Factories;
 using Pulsar4X.Events;
 using Pulsar4X.Extensions;
 using Pulsar4X.Fleets;
+using Pulsar4X.Galaxy;
 using Pulsar4X.GeoSurveys;
 using Pulsar4X.Interfaces;
+using Pulsar4X.Modding;
 using Pulsar4X.Names;
 using Pulsar4X.People;
 using Pulsar4X.Ships;
@@ -381,6 +387,184 @@ namespace Pulsar4X.Factions
             return faction;
         }
 
+        /// <summary>
+        /// Places faction blueprints. They get fleets and a captain, and no colony.
+        /// Call this after owned colonies so those factions already exist to receive a stance.
+        /// No goals are assigned.
+        /// </summary>
+        public static void PlaceFactions(Game game, ModDataStore data)
+        {
+            foreach (var blueprint in data.Factions.Values)
+                PlaceFaction(game, data, blueprint);
+        }
 
+        static void PlaceFaction(Game game, ModDataStore data, FactionBlueprint blueprint)
+        {
+            if (string.IsNullOrEmpty(blueprint.Name) || string.IsNullOrEmpty(blueprint.Body))
+                return;
+            if (!TryFindBody(game, blueprint.System, blueprint.Body, out var system, out var body))
+                return;
+
+            var faction = CreateBasicFaction(
+                game,
+                blueprint.Name,
+                string.IsNullOrEmpty(blueprint.Abbreviation) ? blueprint.Name : blueprint.Abbreviation,
+                blueprint.StartingFunds);
+            faction.FactionOwnerID = faction.Id;
+
+            var info = faction.GetDataBlob<FactionInfoDB>();
+            if (!info.KnownSystems.Contains(system.ID))
+                info.KnownSystems.Add(system.ID);
+
+            if (!string.IsNullOrEmpty(blueprint.Species)
+                && data.Species.TryGetValue(blueprint.Species, out var speciesBlueprint))
+            {
+                var species = SpeciesFactory.CreateFromBlueprint(system, speciesBlueprint);
+                species.FactionOwnerID = faction.Id;
+                info.Species.Add(species);
+            }
+
+            // Designs look up resources, templates, and tech levels. A blueprint faction does not
+            // run a colony StartingItems list, so open those libraries.
+            UnlockAll(info.Data.LockedCargoGoods.GetAll().Values.Select(c => c.UniqueID), info);
+            UnlockAll(info.Data.LockedComponentTemplates.Keys, info);
+            UnlockAll(info.Data.LockedIndustryTypes.Keys, info);
+            UnlockAll(info.Data.LockedCargoTypes.Keys, info);
+            UnlockAll(info.Data.LockedArmor.Keys, info);
+            var lockedTechs = info.Data.LockedTechs.Keys.ToList();
+            UnlockAll(lockedTechs, info);
+            foreach (var id in lockedTechs)
+                info.Data.IncrementTechLevel(id);
+
+            ComponentDesigner.StartResearched = true;
+            foreach (var id in blueprint.ComponentDesigns ?? new List<string>())
+                ComponentDesignFromJson.Create(faction, info.Data, game.StartingGameData.ComponentDesigns[id]);
+            ComponentDesigner.StartResearched = false;
+
+            foreach (var id in blueprint.ShipDesigns ?? new List<string>())
+                ShipDesignFromJson.Create(faction, info.Data, game.StartingGameData.ShipDesigns[id]);
+
+            foreach (var fleet in blueprint.Fleets ?? new List<FactionBlueprint.FleetBlueprint>())
+            {
+                var fleetEntity = FleetFactory.Create(system, faction.Id, fleet.Name);
+                var fleetDB = fleetEntity.GetDataBlob<FleetDB>();
+                fleetDB.SetParent(faction);
+                if (fleet.Ships == null)
+                    continue;
+
+                foreach (var ship in fleet.Ships)
+                {
+                    double randomRadian = game.RNG.NextDouble() * Math.PI * 2;
+                    var shipEntity = ShipFactory.CreateShip(
+                        info.ShipDesigns[ship.DesignId], faction, body, randomRadian, ship.Name);
+                    fleetDB.AddChild(shipEntity);
+
+                    var commanderDB = CommanderFactory.CreateShipCaptain(game);
+                    commanderDB.CommissionedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365.25 * 10);
+                    commanderDB.RankedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365);
+                    var commander = CommanderFactory.Create(system, faction.Id, commanderDB);
+                    shipEntity.GetDataBlob<ShipInfoDB>().CommanderID = commander.Id;
+
+                    if (fleetDB.FlagShipID < 0)
+                        fleetDB.FlagShipID = shipEntity.Id;
+
+                    LoadCargo(shipEntity, info.Data, ship.Cargo);
+                }
+            }
+
+            if (Enum.TryParse<FactionStance>(blueprint.Stance, ignoreCase: true, out var stance))
+                SetStanceTowardSystem(game, faction, system, stance);
+        }
+
+        /// <summary>
+        /// Stores <paramref name="stance"/> both ways. Trade requires both sides.
+        /// Factions qualify by knowing the system or by owning a colony or ship there.
+        /// </summary>
+        static void SetStanceTowardSystem(Game game, Entity faction, StarSystem system, FactionStance stance)
+        {
+            var info = faction.GetDataBlob<FactionInfoDB>();
+            foreach (var other in game.Factions.Values)
+            {
+                if (other.Id == faction.Id || other.Id == game.GameMasterFaction.Id)
+                    continue;
+                if (!other.TryGetDataBlob<FactionInfoDB>(out var otherInfo))
+                    continue;
+                if (!SharesSystem(otherInfo, other.Id, system))
+                    continue;
+
+                info.Stances[other.Id] = stance;
+                otherInfo.Stances[faction.Id] = stance;
+            }
+        }
+
+        static bool SharesSystem(FactionInfoDB info, int factionId, StarSystem system)
+        {
+            if (info.KnownSystems.Contains(system.ID))
+                return true;
+
+            foreach (var colony in system.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
+            {
+                if (colony.FactionOwnerID == factionId)
+                    return true;
+            }
+
+            foreach (var ship in system.GetAllEntitiesWithDataBlob<ShipInfoDB>())
+            {
+                if (ship.FactionOwnerID == factionId)
+                    return true;
+            }
+
+            return false;
+        }
+
+        static void UnlockAll(IEnumerable<string> ids, FactionInfoDB info)
+        {
+            foreach (var id in ids.ToList())
+                info.Data.Unlock(id);
+        }
+
+        static bool TryFindBody(Game game, string? systemId, string bodyName, out StarSystem system, out Entity body)
+        {
+            IEnumerable<StarSystem> systems = string.IsNullOrEmpty(systemId)
+                ? game.Systems
+                : game.Systems.Where(s => s.ID == systemId);
+
+            foreach (var candidate in systems)
+            {
+                if (NameLookup.TryGetFirstEntityWithName(candidate, bodyName, out var found))
+                {
+                    system = candidate;
+                    body = found;
+                    return true;
+                }
+            }
+
+            system = null!;
+            body = null!;
+            return false;
+        }
+
+        static void LoadCargo(Entity target, FactionDataStore factionDataStore, List<FactionBlueprint.CargoBlueprint>? cargo)
+        {
+            if (cargo == null)
+                return;
+
+            foreach (var item in cargo)
+            {
+                var type = item.Type ?? "byMass";
+                switch (type)
+                {
+                    case "byVolume":
+                        CargoTransferProcessor.AddRemoveCargoVolume(target, factionDataStore.CargoGoods[item.Id], item.Amount);
+                        break;
+                    case "byCount":
+                        CargoTransferProcessor.AddCargoItems(target, factionDataStore.CargoGoods[item.Id], (int)item.Amount);
+                        break;
+                    default:
+                        CargoTransferProcessor.AddRemoveCargoMass(target, factionDataStore.CargoGoods[item.Id], item.Amount);
+                        break;
+                }
+            }
+        }
     }
 }

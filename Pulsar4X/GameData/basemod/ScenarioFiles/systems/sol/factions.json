@@ -1,0 +1,83 @@
+[
+  {
+    "Type": "Faction",
+    "Payload": {
+      "UniqueID": "faction-strata-survey",
+      "Name": "Strata Survey",
+      "Abbreviation": "SS",
+      "Species": "species-human",
+      "Stance": "Friendly",
+      "System": "system-sol",
+      "Body": "Ceres",
+      "StartingFunds": 0,
+      "ComponentDesigns": [
+        "default-design-passive-sensor-s50",
+        "default-design-bridge-system",
+        "default-design-geo-surveyor",
+        "default-design-fuel-tank-1000",
+        "default-design-alcubierre-500",
+        "default-design-battery-2t",
+        "default-design-reactor-2t",
+        "default-design-raptor"
+      ],
+      "ShipDesigns": [
+        "default-ship-design-geo-surveyor"
+      ],
+      "Fleets": [
+        {
+          "Name": "Survey Flight",
+          "Ships": [
+            {
+              "DesignId": "default-ship-design-geo-surveyor",
+              "Name": "Pathfinder",
+              "Cargo": [
+                { "Id": "methalox", "Amount": 2000, "Type": "byVolume" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "Type": "Faction",
+    "Payload": {
+      "UniqueID": "faction-lode-mining",
+      "Name": "Lode Mining",
+      "Abbreviation": "LM",
+      "Species": "species-human",
+      "Stance": "Friendly",
+      "System": "system-sol",
+      "Body": "Ceres",
+      "StartingFunds": 0,
+      "ComponentDesigns": [
+        "default-design-passive-sensor-s50",
+        "default-design-bridge-system",
+        "default-design-asteroid-miner",
+        "default-design-cargo-hold-1t",
+        "default-design-fuel-tank-1000",
+        "default-design-alcubierre-500",
+        "default-design-battery-2t",
+        "default-design-reactor-2t",
+        "default-design-raptor"
+      ],
+      "ShipDesigns": [
+        "default-ship-design-miner"
+      ],
+      "Fleets": [
+        {
+          "Name": "Mining Flight",
+          "Ships": [
+            {
+              "DesignId": "default-ship-design-miner",
+              "Name": "Prospector",
+              "Cargo": [
+                { "Id": "methalox", "Amount": 2000, "Type": "byVolume" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

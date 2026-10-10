@@ -51,3 +51,7 @@ The crash-save half is still unbuilt. Do not build it until asked. Two files: a 
 ### Geo survey: finishing a site can hang the subpulse
 
 Same test comment: the first tick after a geo survey completes replans into a warp-to-self, and `ProcessSystem` hangs. The test stops at 24h and uses a 15s timeout. Not chased past that comment. See also `GameEngine/Movement/movement-issues.md`.
+
+### A single-ship faction cannot post its own buy or sell orders
+
+2026-10-10. Strata Survey and Lode Mining have a ship and no colony. A market order is stored on the colony that owns the logistics office. `EngineGameServer.SubmitCommand` rejects a command against an entity the faction does not own. `BuyIntelCommand` is the exception, and it buys a chart the owner already listed. A friendly ship can fill an existing listing with `MarketExchangeAction` when `FactionStanceRules.CanTrade` is true and the ship is in cargo-transfer range. It cannot add a bid or an ask. `MarketView.CanEdit` is true only for the owner. Do not build a visitor order book unless asked.
