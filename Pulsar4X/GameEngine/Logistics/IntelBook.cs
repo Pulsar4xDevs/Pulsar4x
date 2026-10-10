@@ -30,12 +30,20 @@ public sealed class IntelListing
     [JsonProperty]
     public bool ForSale { get; set; }
 
+    /// <summary>
+    /// Faction that is paid and must still hold the secret.
+    /// -1 means the office owner, including rows saved before this field existed.
+    /// </summary>
+    [JsonProperty]
+    public int SellerFactionId { get; set; } = -1;
+
     public IntelListing Copy() => new()
     {
         Kind = Kind,
         Subject = Subject,
         Ask = Ask,
         ForSale = ForSale,
+        SellerFactionId = SellerFactionId,
     };
 }
 
@@ -102,9 +110,60 @@ public static class IntelBook
             Subject = subject,
             Ask = ask,
             ForSale = forSale,
+            SellerFactionId = -1,
         };
         return true;
     }
+
+    /// <summary>
+    /// List a secret for the faction that finished it, on an office that faction does not own.
+    /// The office owner does not gain the survey. <see cref="TrySet"/> stays owner-only.
+    /// </summary>
+    public static bool TryConsign(Entity office, Entity seller, IntelKind kind, string subject, decimal ask, out string reason)
+    {
+        reason = "";
+        if (seller == null || office == null)
+        {
+            reason = "That intel is not listed.";
+            return false;
+        }
+        if (string.IsNullOrWhiteSpace(subject))
+        {
+            reason = "Subject is required.";
+            return false;
+        }
+        if (ask < 0)
+        {
+            reason = "Prices cannot be negative.";
+            return false;
+        }
+        if (!office.TryGetDataBlob<LogiBaseDB>(out var book))
+        {
+            reason = "The colony has no logistics office.";
+            return false;
+        }
+        var game = office.Manager?.Game;
+        if (game == null || !SellerHas(game, seller.Id, kind, subject))
+        {
+            reason = "The seller has not finished that survey.";
+            return false;
+        }
+
+        book.Intel ??= new Dictionary<string, IntelListing>(StringComparer.Ordinal);
+        book.Intel[Key(kind, subject)] = new IntelListing
+        {
+            Kind = kind,
+            Subject = subject,
+            Ask = ask,
+            ForSale = true,
+            SellerFactionId = seller.Id == office.FactionOwnerID ? -1 : seller.Id,
+        };
+        return true;
+    }
+
+    /// <summary>Who is paid for this row. -1 on the row means the office owner.</summary>
+    public static int SellerOf(Entity office, IntelListing row)
+        => row.SellerFactionId >= 0 ? row.SellerFactionId : office.FactionOwnerID;
 
     /// <summary>Drop one row. A missing row is a no-op.</summary>
     public static void Remove(Entity office, IntelKind kind, string subject)
@@ -151,7 +210,8 @@ public static class IntelBook
             reason = "That intel is not listed.";
             return false;
         }
-        if (buyer.Id == office.FactionOwnerID)
+        int sellerId = SellerOf(office, row);
+        if (buyer.Id == sellerId || buyer.Id == office.FactionOwnerID)
         {
             reason = "A faction cannot buy its own intel.";
             return false;
@@ -161,7 +221,7 @@ public static class IntelBook
             reason = "These factions cannot trade.";
             return false;
         }
-        if (!SellerHas(game, office.FactionOwnerID, kind, subject))
+        if (!SellerHas(game, sellerId, kind, subject))
         {
             reason = "The seller no longer has this intel.";
             return false;
@@ -173,7 +233,7 @@ public static class IntelBook
         }
 
         if (!buyer.TryGetDataBlob<FactionInfoDB>(out var buyerInfo)
-            || !game.Factions.TryGetValue(office.FactionOwnerID, out var sellerEntity)
+            || !game.Factions.TryGetValue(sellerId, out var sellerEntity)
             || !sellerEntity.TryGetDataBlob<FactionInfoDB>(out var sellerInfo))
         {
             reason = "Faction has no ledger.";
@@ -193,7 +253,7 @@ public static class IntelBook
 
         if (row.Ask > 0)
         {
-            string forBuyer = $"{kind} {subject} {office.FactionOwnerID}";
+            string forBuyer = $"{kind} {subject} {sellerId}";
             string forSeller = $"{kind} {subject} {buyer.Id}";
             buyerInfo.Money.AddExpense(office.StarSysDateTime, TransactionCategory.Trade, forBuyer, row.Ask);
             sellerInfo.Money.AddIncome(office.StarSysDateTime, TransactionCategory.Trade, forSeller, row.Ask);

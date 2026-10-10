@@ -162,6 +162,9 @@ namespace Pulsar4X.Colonies
             }
 
             // Cargo is already in the warehouse. A logistics office keeps listing that stock.
+            // Priced rows go in first. Offer stock skips a cargo id that already has a policy row.
+            if (colonyBlueprint.UniqueID == CeresStart.DepotColonyId)
+                WriteDepotPrices(colonyEntity);
             if (colonyEntity.HasDataBlob<LogiBaseDB>())
                 AgentProcessor.AssignGoal(colonyEntity, new Goal(GoalType.OfferStock) { Name = "Offer stock" });
 
@@ -215,7 +218,7 @@ namespace Pulsar4X.Colonies
                         game,
                         colony.OwnerFaction,
                         string.IsNullOrEmpty(colony.OwnerAbbreviation) ? colony.OwnerFaction : colony.OwnerAbbreviation,
-                        0);
+                        colony.StartingFunds);
                     faction.FactionOwnerID = faction.Id;
                     created[colony.OwnerFaction] = faction;
                 }
@@ -249,6 +252,24 @@ namespace Pulsar4X.Colonies
                 }
             }
         }
+
+        static void WriteDepotPrices(Entity colony)
+        {
+            var policy = colony.TryGetDataBlob<ColonyMarketPolicyDB>(out var existing)
+                ? existing
+                : new ColonyMarketPolicyDB();
+            policy.Rows["methalox"] = Priced("methalox", CeresStart.FuelAsk, 0);
+            policy.Rows["iron"] = Priced("iron", CeresStart.IronAsk, CeresStart.IronBid);
+            policy.Rows["water"] = Priced("water", CeresStart.WaterAsk, 0);
+            colony.SetDataBlob(policy);
+        }
+
+        static MarketPolicyRow Priced(string cargoId, decimal ask, decimal bid) => new()
+        {
+            CargoId = cargoId,
+            Ask = ask,
+            Bid = bid,
+        };
 
         static void SeatStartingAdministrator(Game game, Entity faction, StarSystem system, Entity colony)
         {

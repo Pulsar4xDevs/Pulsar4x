@@ -13,6 +13,8 @@ Commander Command/Nav/Survey XP is quality on relay, recheck, and plan/action *r
 
 Colony growth through a seated administrator is `colony-administrator.md`. Those are notes, not an implementation plan.
 
+The Ceres faction jobs are `plans/`. Three slices, in order. They are not logistics plan 13.
+
 ## Pipeline
 
 ```

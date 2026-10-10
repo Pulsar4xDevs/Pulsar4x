@@ -152,6 +152,7 @@
       "OwnerFaction": "Ceres Depot",
       "OwnerAbbreviation": "CD",
       "Stance": "Friendly",
+      "StartingFunds": 100,
       "SeatAdministrator": true,
       "Installations": [
         { "Id": "default-design-warehouse", "Amount": 1 },

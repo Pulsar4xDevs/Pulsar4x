@@ -21,6 +21,7 @@ Inbox for small bugs and follow-ups that came up while doing something else. Any
 - `GameEngine/Logistics/plans/` — trade and transport plans. Plans 1–12 and 5b are implemented on `TradeAndTransport`. `office-purses.md` is an idea for later, not plan 13. Do not build it until asked. `survey-charts.md` is implemented: finished surveys are the first kinds on a general intel list, not plan 13.
 - `GameEngine/Industry/plans/` — colony industry. Refine-one-batch is implemented. It is not logistics plan 13.
 - `GameEngine/Engine/Orders/colony-administrator.md` — standing colony intent, patience, specialization, and bids. Notes only. Not an implementation plan.
+- `GameEngine/Engine/Orders/plans/` — Ceres faction jobs, three slices. Not logistics plan 13. Do not build them until asked.
 
 ## Done
 
@@ -51,6 +52,12 @@ The crash-save half is still unbuilt. Do not build it until asked. Two files: a 
 ### Geo survey: finishing a site can hang the subpulse
 
 Same test comment: the first tick after a geo survey completes replans into a warp-to-self, and `ProcessSystem` hangs. The test stops at 24h and uses a 15s timeout. Not chased past that comment. See also `GameEngine/Movement/movement-issues.md`.
+
+### Price finding is a later economy session
+
+2026-10-10. `OfferStockPlan` posts a new row at ask 0 and bid 0 because cargo has no catalog price. Strata Survey, Lode Mining, and Ceres Depot need non-zero prices so charts, fuel, and ore actually move cash. Do not build price finding in the faction-goal pass. What a chart, a unit of ore, and a unit of fuel are worth, and how a bid moves, belongs in an economy session. `GameEngine/Engine/Orders/colony-administrator.md` already holds the bid notes. Do not implement them from this inbox item.
+
+Interim for the Ceres trade test only. Methalox already has `WealthCost` 3 on the processed-material blueprint. Use that as the depot's fuel ask. Ore and survey charts have no catalog number, so their starting rows use fixed non-zero ask and bid, with the bid below the ask. Leave `OfferStockPlan`'s default of 0 in place. Luna Concord and Earth keep listing at 0 until that session.
 
 ### A single-ship faction cannot post its own buy or sell orders
 

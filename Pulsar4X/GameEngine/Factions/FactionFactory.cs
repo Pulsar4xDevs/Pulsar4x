@@ -9,6 +9,7 @@ using Pulsar4X.Blueprints;
 using Pulsar4X.Colonies;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Auth;
 using Pulsar4X.Engine.Factories;
@@ -17,8 +18,11 @@ using Pulsar4X.Extensions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
 using Pulsar4X.GeoSurveys;
+using Pulsar4X.Industry;
 using Pulsar4X.Interfaces;
+using Pulsar4X.Logistics;
 using Pulsar4X.Modding;
+using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using Pulsar4X.People;
 using Pulsar4X.Ships;
@@ -396,6 +400,7 @@ namespace Pulsar4X.Factions
         {
             foreach (var blueprint in data.Factions.Values)
                 PlaceFaction(game, data, blueprint);
+            SeedSurveyCharts(game);
         }
 
         static void PlaceFaction(Game game, ModDataStore data, FactionBlueprint blueprint)
@@ -515,6 +520,82 @@ namespace Pulsar4X.Factions
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Marks the nearest existing asteroids to Ceres surveyed for Strata and lists those
+        /// charts on Ceres Depot. The depot does not gain the survey. No new bodies.
+        /// </summary>
+        static void SeedSurveyCharts(Game game)
+        {
+            Entity? survey = null;
+            foreach (var faction in game.Factions.Values)
+            {
+                if (faction.GetDataBlob<NameDB>().DefaultName == CeresStart.SurveyFactionName)
+                {
+                    survey = faction;
+                    break;
+                }
+            }
+            if (survey == null || !survey.TryGetDataBlob<FactionInfoDB>(out var surveyInfo))
+                return;
+
+            Entity? depot = null;
+            Entity? ceres = null;
+            foreach (var system in game.Systems)
+            {
+                foreach (var colony in system.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
+                {
+                    if (colony.GetDataBlob<NameDB>().DefaultName != CeresStart.DepotFactionName)
+                        continue;
+                    if (!colony.HasDataBlob<LogiBaseDB>())
+                        return;
+                    depot = colony;
+                    ceres = colony.GetDataBlob<ColonyInfoDB>().PlanetEntity;
+                    break;
+                }
+                if (depot != null)
+                    break;
+            }
+            if (depot == null || ceres?.Manager == null || !ceres.TryGetDataBlob<PositionDB>(out var ceresPos))
+                return;
+
+            var rocks = new List<(Entity body, double distance, int id)>();
+            foreach (var body in ceres.Manager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>())
+            {
+                if (body.GetDataBlob<SystemBodyInfoDB>().BodyType != BodyType.Asteroid)
+                    continue;
+                if (!body.HasDataBlob<GeoSurveyableDB>() || !body.TryGetDataBlob<MineralsDB>(out var minerals))
+                    continue;
+                if (minerals.Minerals.Count == 0 || !body.TryGetDataBlob<PositionDB>(out var pos))
+                    continue;
+                rocks.Add((body, pos.GetDistanceTo_m(ceresPos), body.Id));
+            }
+
+            rocks.Sort(static (a, b) =>
+            {
+                int byDistance = a.distance.CompareTo(b.distance);
+                return byDistance != 0 ? byDistance : a.id.CompareTo(b.id);
+            });
+
+            int listed = 0;
+            foreach (var (body, _, _) in rocks)
+            {
+                if (listed >= CeresStart.ChartCount)
+                    break;
+                var geo = body.GetDataBlob<GeoSurveyableDB>();
+                geo.GeoSurveyStatus[survey.Id] = 0;
+                body.GetDataBlob<MineralsDB>().GrantFactionPartialAccess(surveyInfo.FactionMask);
+                if (!IntelBook.TryConsign(
+                        depot,
+                        survey,
+                        IntelKind.Geo,
+                        IntelBook.SubjectOf(body.Id),
+                        CeresStart.ChartAsk,
+                        out _))
+                    continue;
+                listed++;
+            }
         }
 
         static void UnlockAll(IEnumerable<string> ids, FactionInfoDB info)

@@ -9,7 +9,7 @@
       "Stance": "Friendly",
       "System": "system-sol",
       "Body": "Ceres",
-      "StartingFunds": 0,
+      "StartingFunds": 100,
       "ComponentDesigns": [
         "default-design-passive-sensor-s50",
         "default-design-bridge-system",
@@ -49,7 +49,7 @@
       "Stance": "Friendly",
       "System": "system-sol",
       "Body": "Ceres",
-      "StartingFunds": 0,
+      "StartingFunds": 100,
       "ComponentDesigns": [
         "default-design-passive-sensor-s50",
         "default-design-bridge-system",

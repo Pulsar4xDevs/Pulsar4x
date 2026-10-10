@@ -8,7 +8,9 @@ using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
 using Pulsar4X.GeoSurveys;
+using Pulsar4X.Industry;
 using Pulsar4X.JumpPoints;
+using Pulsar4X.Logistics;
 using Pulsar4X.Modding;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
@@ -72,5 +74,68 @@ public class CeresSurveyTests
         Assert.That(fleet.GetDataBlob<NameDB>().DefaultName, Is.EqualTo("Survey Flight"));
         Assert.That(fleet.GetDataBlob<FleetDB>().FlagShipID, Is.EqualTo(ship.Id));
         Assert.That(fleet.GetDataBlob<FleetDB>().GetChildren(), Is.EquivalentTo(new[] { ship }));
+    }
+
+    [Test]
+    public void PlacedCharts_AreStratas_OnTheDepot_AndLodeCanBuyOne()
+    {
+        var modLoader = new ModLoader();
+        var store = new ModDataStore();
+        modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
+
+        var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
+        game.Settings.EnforceSingleThread = true;
+        StarSystemFactory.LoadFromBlueprint(game, store.Systems["system-sol"]);
+
+        var player = FactionFactory.CreateBasicFaction(game, "United Earth Corp", "UEC", 0);
+        player.FactionOwnerID = player.Id;
+        player.GetDataBlob<FactionInfoDB>().KnownSystems.Add("system-sol");
+
+        ColonyFactory.PlaceOwnedColonies(game, store, player, store.Species["species-human"]);
+        FactionFactory.PlaceFactions(game, store);
+
+        var sol = game.Systems.Single(s => s.ID == "system-sol");
+        var strata = game.Factions.Values.Single(f => f.GetDataBlob<NameDB>().DefaultName == CeresStart.SurveyFactionName);
+        var lode = game.Factions.Values.Single(f => f.GetDataBlob<NameDB>().DefaultName == CeresStart.MiningFactionName);
+        var depotFaction = game.Factions.Values.Single(f => f.GetDataBlob<NameDB>().DefaultName == CeresStart.DepotFactionName);
+        var depot = sol.GetAllEntitiesWithDataBlob<ColonyInfoDB>()
+            .Single(c => c.FactionOwnerID == depotFaction.Id);
+
+        Assert.That(strata.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds));
+        Assert.That(lode.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds));
+
+        var charts = depot.GetDataBlob<LogiBaseDB>().Intel.Values
+            .Where(row => row.Kind == IntelKind.Geo && row.ForSale)
+            .ToList();
+        Assert.That(charts, Has.Count.EqualTo(CeresStart.ChartCount));
+
+        foreach (var row in charts)
+        {
+            Assert.That(row.Ask, Is.EqualTo(CeresStart.ChartAsk));
+            Assert.That(IntelBook.SellerOf(depot, row), Is.EqualTo(strata.Id));
+            Assert.That(int.TryParse(row.Subject, out int bodyId), Is.True);
+            Assert.That(sol.TryGetEntityById(bodyId, out var body), Is.True);
+            var geo = body!.GetDataBlob<GeoSurveyableDB>();
+            Assert.That(geo.IsSurveyComplete(strata.Id), Is.True);
+            Assert.That(geo.IsSurveyComplete(lode.Id), Is.False);
+            Assert.That(geo.IsSurveyComplete(depotFaction.Id), Is.False);
+            var deposit = body.GetDataBlob<MineralsDB>().Minerals.Values.First();
+            Assert.That(deposit.Amount.GetAccess(strata.GetDataBlob<FactionInfoDB>().FactionMask), Is.EqualTo(AccessLevel.Partial));
+            Assert.That(deposit.Amount.GetAccess(lode.GetDataBlob<FactionInfoDB>().FactionMask), Is.EqualTo(AccessLevel.None));
+            Assert.That(deposit.Amount.GetAccess(depotFaction.GetDataBlob<FactionInfoDB>().FactionMask), Is.EqualTo(AccessLevel.None));
+        }
+
+        var bought = charts[0];
+        decimal depotBefore = depotFaction.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds();
+        Assert.That(IntelBook.TryBuy(depot, lode, IntelKind.Geo, bought.Subject, out var reason), Is.True, reason);
+
+        Assert.That(lode.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds - CeresStart.ChartAsk));
+        Assert.That(strata.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds + CeresStart.ChartAsk));
+        Assert.That(depotFaction.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(depotBefore));
+        Assert.That(int.TryParse(bought.Subject, out int boughtId), Is.True);
+        Assert.That(sol.TryGetEntityById(boughtId, out var boughtBody), Is.True);
+        Assert.That(boughtBody!.GetDataBlob<GeoSurveyableDB>().IsSurveyComplete(lode.Id), Is.True);
+        Assert.That(boughtBody.GetDataBlob<GeoSurveyableDB>().IsSurveyComplete(depotFaction.Id), Is.False);
+        Assert.That(boughtBody.GetDataBlob<GeoSurveyableDB>().IsSurveyComplete(strata.Id), Is.True);
     }
 }
