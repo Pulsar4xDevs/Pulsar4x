@@ -14,6 +14,7 @@ using Pulsar4X.Components;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
+using Pulsar4X.GeoSurveys;
 using Pulsar4X.Names;
 using Pulsar4X.Sensors;
 using Pulsar4X.Technology;
@@ -33,6 +34,8 @@ namespace Pulsar4X.Client
         private static bool _isActive = false;
         private static int _depth;
         private static readonly HashSet<object> _seen = new(ReferenceEqualityComparer.Instance);
+        private static Dictionary<int, string>? _mineralNames;
+        private static Dictionary<int, string>? _factionNames;
         const int MaxDepth = 12;
         const int MaxItems = 200;
 
@@ -109,6 +112,8 @@ namespace Pulsar4X.Client
             ImGui.Columns(2);
 
             _seen.Clear();
+            _mineralNames = null;
+            _factionNames = null;
             _depth = 0;
             RecursiveReflection(dataBlob);
 
@@ -165,7 +170,7 @@ namespace Pulsar4X.Client
 
                     try
                     {
-                        ShowMember(memberInfo.Name + "###" + memberInfo.MetadataToken, value);
+                        ShowMember(memberInfo.Name + "###" + memberInfo.MetadataToken, value, obj);
                     }
                     catch (Exception e)
                     {
@@ -181,7 +186,7 @@ namespace Pulsar4X.Client
             }
         }
 
-        static void ShowMember(string label, object? value)
+        static void ShowMember(string label, object? value, object? parent = null)
         {
             if (value == null)
             {
@@ -203,7 +208,7 @@ namespace Pulsar4X.Client
 
             if (IsDictionary(value))
             {
-                ShowDictionary(label, value);
+                ShowDictionary(label, value, parent);
                 return;
             }
 
@@ -228,7 +233,7 @@ namespace Pulsar4X.Client
             Row(Visible(label), SafeSummary(value), SafeTooltip(value));
         }
 
-        static void ShowDictionary(string label, object value)
+        static void ShowDictionary(string label, object value, object? parent)
         {
             int count = CountOf(value);
             bool open = ImGui.TreeNode(label);
@@ -254,7 +259,7 @@ namespace Pulsar4X.Client
                     {
                         if (item != null && TryPair(item, out var key, out var pairValue))
                         {
-                            string keyText = key == null ? "null" : SafeSummary(key).Replace("###", "#");
+                            string keyText = key == null ? "null" : KeyText(parent, label, value, key);
                             ShowMember(keyText + "###k" + index, pairValue);
                         }
                         else
@@ -382,6 +387,92 @@ namespace Pulsar4X.Client
                     return true;
             }
             return false;
+        }
+
+        // MineralsDB keys are mineral ids. GeoSurveyStatus keys are faction ids.
+        static string KeyText(object? parent, string memberLabel, object dictionary, object key)
+        {
+            string text = SafeSummary(key);
+            if (key is int id)
+            {
+                string? name = NamedKey(parent, memberLabel, dictionary, id);
+                if (!string.IsNullOrEmpty(name))
+                    text = name + " (" + id + ")";
+            }
+            return text.Replace("###", "#");
+        }
+
+        static string? NamedKey(object? parent, string memberLabel, object dictionary, int id)
+        {
+            if (parent == null)
+                return null;
+            if (IsMineralMap(dictionary))
+                return MineralName(parent, id);
+            if (parent is GeoSurveyableDB && Visible(memberLabel) == "GeoSurveyStatus")
+                return FactionName(parent, id);
+            return null;
+        }
+
+        static bool IsMineralMap(object dictionary)
+        {
+            var type = dictionary.GetType();
+            if (!type.IsGenericType)
+                return false;
+            var args = type.GetGenericArguments();
+            return args.Length == 2 && args[1] == typeof(MineralDeposit);
+        }
+
+        static Game? GameOf(object parent)
+        {
+            return parent is BaseDataBlob blob ? blob.OwningEntity?.Manager?.Game : null;
+        }
+
+        static string? MineralName(object parent, int id)
+        {
+            var game = GameOf(parent);
+            var minerals = game?.StartingGameData?.Minerals;
+            if (minerals == null)
+                return null;
+
+            if (_mineralNames == null)
+            {
+                _mineralNames = new Dictionary<int, string>();
+                foreach (var mineral in minerals.Values)
+                {
+                    if (mineral != null && !string.IsNullOrEmpty(mineral.Name))
+                        _mineralNames[mineral.ID] = mineral.Name;
+                }
+            }
+
+            return _mineralNames.TryGetValue(id, out var name) ? name : null;
+        }
+
+        static string? FactionName(object parent, int id)
+        {
+            var game = GameOf(parent);
+            if (game == null || !game.Factions.TryGetValue(id, out var faction) || faction == null)
+                return null;
+
+            if (_factionNames == null)
+                _factionNames = new Dictionary<int, string>();
+            if (_factionNames.TryGetValue(id, out var cached))
+                return cached;
+
+            string? name = null;
+            try
+            {
+                if (faction.Manager != null && faction.TryGetDataBlob<NameDB>(out var names))
+                    name = names.OwnersName;
+            }
+            catch
+            {
+                name = null;
+            }
+
+            if (string.IsNullOrEmpty(name))
+                return null;
+            _factionNames[id] = name;
+            return name;
         }
 
         static bool TryPair(object item, out object? key, out object? value)
