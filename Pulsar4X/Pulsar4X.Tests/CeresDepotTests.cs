@@ -108,6 +108,47 @@ public class CeresDepotTests
 
         Assert.That(
             game.Factions[depot.FactionOwnerID].GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(),
-            Is.EqualTo(CeresStart.StartingFunds));
+            Is.EqualTo(CeresStart.DepotFunds));
+    }
+
+    [Test]
+    public void PlacedDepot_HasTwoOffices_TwoWarehouses_AndALargerPurse()
+    {
+        var modLoader = new ModLoader();
+        var store = new ModDataStore();
+        modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
+
+        var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
+        game.Settings.EnforceSingleThread = true;
+        StarSystemFactory.LoadFromBlueprint(game, store.Systems["system-sol"]);
+
+        var player = FactionFactory.CreateBasicFaction(game, "United Earth Corp", "UEC", 0);
+        player.FactionOwnerID = player.Id;
+        player.GetDataBlob<FactionInfoDB>().KnownSystems.Add("system-sol");
+
+        ColonyFactory.PlaceOwnedColonies(game, store, player, store.Species["species-human"]);
+        FactionFactory.PlaceFactions(game, store);
+
+        var sol = game.Systems.Single(s => s.ID == "system-sol");
+        var depot = sol.GetAllEntitiesWithDataBlob<ColonyInfoDB>()
+            .Single(c => c.GetDataBlob<NameDB>().DefaultName == "Ceres Depot");
+        var luna = sol.GetAllEntitiesWithDataBlob<ColonyInfoDB>()
+            .Single(c => c.GetDataBlob<NameDB>().DefaultName == "Luna Concord");
+
+        Assert.That(depot.GetDataBlob<LogiBaseDB>().Capacity, Is.EqualTo(10));
+        Assert.That(depot.GetDataBlob<CargoStorageDB>().TypeStores["general-storage"].MaxVolume, Is.EqualTo(20000));
+        Assert.That(
+            game.Factions[depot.FactionOwnerID].GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(),
+            Is.EqualTo(CeresStart.DepotFunds));
+
+        Assert.That(MarketBook.TryGet(depot, "iron", out var iron), Is.True);
+        Assert.That(iron.BuyQuantity, Is.EqualTo(0));
+
+        var strata = game.Factions.Values.Single(f => f.GetDataBlob<NameDB>().DefaultName == CeresStart.SurveyFactionName);
+        var lode = game.Factions.Values.Single(f => f.GetDataBlob<NameDB>().DefaultName == CeresStart.MiningFactionName);
+        Assert.That(strata.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds + CeresStart.ChartAsk));
+        Assert.That(lode.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(CeresStart.StartingFunds - CeresStart.ChartAsk));
+
+        Assert.That(luna.GetDataBlob<LogiBaseDB>().Capacity, Is.EqualTo(5));
     }
 }

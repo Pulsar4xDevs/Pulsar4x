@@ -2,12 +2,13 @@ namespace Pulsar4X.Factions;
 
 /// <summary>
 /// Fixed numbers for the Ceres trade test. Not a price model.
-/// Blueprint <c>StartingFunds</c> uses <see cref="StartingFunds"/>.
+/// Ship factions use <see cref="StartingFunds"/>. The depot blueprint uses <see cref="DepotFunds"/>.
 /// Other colonies keep Offer stock's ask 0 and bid 0.
 /// </summary>
 public static class CeresStart
 {
     public const int StartingFunds = 100;
+    public const int DepotFunds = 100000;
     public const int ChartCount = 3;
     public const decimal ChartAsk = 10m;
     public const decimal FuelAsk = 3m;
