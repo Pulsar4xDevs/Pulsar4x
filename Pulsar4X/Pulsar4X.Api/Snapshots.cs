@@ -232,6 +232,30 @@ public sealed record MarketView(
 /// <summary>A cargo id the owner may add to their book.</summary>
 public sealed record MarketGoodChoice(string CargoId, string Name);
 
+/// <summary>One intel row a faction is allowed to see on an office.</summary>
+public sealed record IntelRowView(
+    IntelKind Kind,
+    string Subject,
+    string Name,
+    string ResultTag,
+    decimal Ask,
+    bool ForSale,
+    bool OwnedByViewer,
+    string? SystemId) : IComponentView;
+
+/// <summary>A finished secret the office owner may list. Empty for a friendly viewer.</summary>
+public sealed record IntelCandidateView(
+    IntelKind Kind,
+    string Subject,
+    string Name,
+    string? SystemId);
+
+/// <summary>The intel list on a logistics office. Owned and Friendly only. Separate from <see cref="MarketView"/>.</summary>
+public sealed record IntelBookView(
+    bool CanEdit,
+    IReadOnlyList<IntelRowView> Rows,
+    IReadOnlyList<IntelCandidateView> Candidates) : IComponentView;
+
 /// <summary>A colony's infrastructure capacity (the limiter on its industrial output).</summary>
 public sealed record InfrastructureView(
     long CapacityProvided,

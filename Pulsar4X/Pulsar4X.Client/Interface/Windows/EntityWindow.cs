@@ -534,6 +534,7 @@ namespace Pulsar4X.Client
                 && ImGui.CollapsingHeader("Market", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 MarketBarsDisplay.Display(_entity, market, _uiState);
+                IntelDisplay.Display(_entity, _entity.GetView<IntelBookView>(), _system?.SystemId ?? "", _uiState);
             }
 
             if (_system != null && _entity.Kind != BodyKind.Colony)
@@ -546,7 +547,10 @@ namespace Pulsar4X.Client
                         continue;
                     string colonyName = colony.GetView<NameView>()?.Name ?? "Colony";
                     if (ImGui.CollapsingHeader(colonyName + "###market-" + colony.Id, ImGuiTreeNodeFlags.DefaultOpen))
+                    {
                         MarketBarsDisplay.Display(colony, colonyMarket, _uiState);
+                        IntelDisplay.Display(colony, colony.GetView<IntelBookView>(), _system.SystemId, _uiState);
+                    }
                 }
             }
         }
@@ -614,9 +618,9 @@ namespace Pulsar4X.Client
 
         private void DisplaySurveyInfo()
         {
-            if (_entity?.GetView<GravSurveyView>() is { } gravSurvey)
+            if (_entity?.GetView<GravSurveyView>() is { } gravSurvey && _system != null)
             {
-                Displays.GravitationalAnomlay(gravSurvey);
+                Displays.GravitationalAnomlay(gravSurvey, _entity, _system, _uiState);
             }
         }
 
@@ -1267,6 +1271,8 @@ namespace Pulsar4X.Client
             bool isGeoSurveyed = _entity!.GetView<GeoSurveyView>()?.IsSurveyComplete ?? false;
 
             DisplayProgressIndicator();
+            if (!isGeoSurveyed)
+                IntelDisplay.OfferLine(_system, _entity.Id, IntelKind.Geo, "geo chart", _uiState);
 
             var bodyStats = new System.Collections.Generic.List<(string Label, string Value)>(10);
             var body = _entity.GetView<BodyView>();
@@ -1361,6 +1367,8 @@ namespace Pulsar4X.Client
             bool isGeoSurveyed = _entity!.GetView<GeoSurveyView>()?.IsSurveyComplete ?? false;
 
             DisplayProgressIndicator();
+            if (!isGeoSurveyed)
+                IntelDisplay.OfferLine(_system, _entity.Id, IntelKind.Geo, "geo chart", _uiState);
 
             ImGui.Columns(2, "##small-body-info", true);
 

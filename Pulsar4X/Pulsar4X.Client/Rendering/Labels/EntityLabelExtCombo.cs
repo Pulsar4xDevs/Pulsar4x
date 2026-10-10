@@ -68,11 +68,11 @@ namespace Pulsar4X.Client
                 return null;
 
             if (entity.GetView<GravSurveyView>() is { } gravSurvey && !entity.HasView<BodyView>())
-                return () => Displays.GravitationalAnomlay(gravSurvey);
+                return () => Displays.GravitationalAnomlay(gravSurvey, entity, system, _state);
             if (entity.HasView<ShipView>() && entity.GetView<ThrustView>() is { } thrust)
                 return () => Displays.Ship(thrust);
             if (entity.HasView<BodyView>() && entity.Kind != BodyKind.Star)
-                return () => Displays.SystemBody(entity, system);
+                return () => Displays.SystemBody(entity, system, _state);
             if (entity.GetView<StarView>() is { } star)
                 return () => Displays.Star(star);
             return null;

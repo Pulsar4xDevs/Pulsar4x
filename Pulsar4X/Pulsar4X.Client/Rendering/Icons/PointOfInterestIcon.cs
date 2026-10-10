@@ -5,13 +5,13 @@ using SDL3;
 namespace Pulsar4X.Client;
 public class PointOfInterestIcon : Icon
 {
-    public PointOfInterestIcon(IPosition positionDB) : base(positionDB)
+    public PointOfInterestIcon(IPosition positionDB, bool chartListed = false) : base(positionDB)
     {
-        BasicShape();
+        BasicShape(chartListed);
         OnPhysicsUpdate();
     }
 
-    void BasicShape()
+    void BasicShape(bool chartListed)
     {
         //For now we're just going to use a simple cheveron to represent ships, make something fancier in the future
         //by somone who has some design mojo.
@@ -29,6 +29,18 @@ public class PointOfInterestIcon : Icon
 
         SDL.Color colour = new SDL.Color() { R = r, G = g, B = b, A = a };
         Shapes.Add(new Shape() { Points = points, Color = colour });
+        if (!chartListed)
+            return;
+
+        Vector2[] mark = {
+            new Vector2() { X = 7, Y = 9 },
+            new Vector2() { X = 11, Y = 9 },
+            new Vector2() { X = 11, Y = 5 },
+            new Vector2() { X = 7, Y = 5 },
+            new Vector2() { X = 7, Y = 9 }
+        };
+        SDL.Color gold = new SDL.Color() { R = 212, G = 175, B = 55, A = 220 };
+        Shapes.Add(new Shape() { Points = mark, Color = gold });
     }
 
     public override void OnFrameUpdate(Matrix matrix, Camera camera)

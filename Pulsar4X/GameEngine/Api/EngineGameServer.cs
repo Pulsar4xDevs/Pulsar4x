@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Globalization;
 using Pulsar4X.Api;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
+using Pulsar4X.Logistics;
 using Pulsar4X.Messaging;
 
 namespace Pulsar4X.Engine.Api
@@ -323,7 +325,11 @@ namespace Pulsar4X.Engine.Api
             // CreateFleet targets the faction). (Commands with a secondary target — e.g. a move
             // destination — carry that as a separate DTO field, which the translator resolves; only
             // the commanded entity is ownership-checked here.)
-            if (commanded.Id != session.FactionId && commanded.FactionOwnerID != session.FactionId)
+            // BuyIntel targets the seller's office. Trade stance is the permission for that one command.
+            if (commanded.Id != session.FactionId && commanded.FactionOwnerID != session.FactionId
+                && !(command is BuyIntelCommand
+                    && commanded.HasDataBlob<LogiBaseDB>()
+                    && FactionStanceRules.CanTrade(_game, session.FactionId, commanded.FactionOwnerID)))
                 return CommandResult.Reject("Faction does not control the commanded entity.");
 
             var result = _commands.Translate(faction, commanded, command);
@@ -334,6 +340,10 @@ namespace Pulsar4X.Engine.Api
             if (result.Accepted)
             {
                 PushEntityRefresh(commanded, session.FactionId);
+                if (command is BuyIntelCommand bought
+                    && int.TryParse(bought.Subject, NumberStyles.Integer, CultureInfo.InvariantCulture, out int subjectId)
+                    && _game.GlobalManager.TryGetGlobalEntityById(subjectId, out var subject))
+                    PushEntityRefresh(subject, session.FactionId);
 
                 // Assignment commands re-post commanders with no engine message; the roster is tiny,
                 // so re-push it after every accepted command rather than special-casing them.

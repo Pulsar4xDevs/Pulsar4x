@@ -224,6 +224,7 @@ namespace Pulsar4X.Engine.Api
             // so they are only projected for the owning faction.
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<CargoStorageDB>(out var cs) ? ToCargoStorageView(cs, e) : null,
             (e, f) => ToMarketView(e, f),
+            (e, f) => ToIntelBookView(e, f),
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<InfrastructureDB>(out var inf)
                 ? new InfrastructureView(inf.CapacityProvided, inf.CapacityRequired, inf.CapacityAvailable, inf.Efficiency,
                     HasInstalledInfrastructure(e))
@@ -668,6 +669,84 @@ namespace Pulsar4X.Engine.Api
                 CanEdit = canEdit,
                 Addable = canEdit ? AddableCargo(owner, book) : Array.Empty<MarketGoodChoice>(),
             };
+        }
+
+        /// <summary>
+        /// Intel on the same office as <see cref="ToMarketView"/>. Names and tags come from <see cref="IntelBook"/>.
+        /// A jump the viewer has not found is named without its destination.
+        /// </summary>
+        private static IntelBookView? ToIntelBookView(Entity entity, int factionId)
+        {
+            if (!entity.TryGetDataBlob<LogiBaseDB>(out var book))
+                return null;
+            var relation = RelationOf(entity, factionId);
+            if (relation != OwnerRelation.Owned && relation != OwnerRelation.Friendly)
+                return null;
+
+            var game = entity.Manager?.Game;
+            bool canEdit = relation == OwnerRelation.Owned;
+            book.Intel ??= new Dictionary<string, IntelListing>(StringComparer.Ordinal);
+            var stored = book.Intel.Values
+                .Where(row => canEdit || row.ForSale)
+                .OrderBy(row => row.Kind)
+                .ThenBy(row => row.Subject, StringComparer.Ordinal)
+                .ToList();
+
+            var unknownIndex = UnknownJumpIndex(game, factionId, stored);
+            var rows = new List<IntelRowView>(stored.Count);
+            foreach (var row in stored)
+            {
+                int index = 0;
+                if (row.Kind == IntelKind.Jump)
+                    unknownIndex.TryGetValue(row.Subject, out index);
+                var label = game == null
+                    ? new IntelBook.IntelLabel { Name = row.Subject, SystemId = null }
+                    : IntelBook.Describe(game, factionId, row.Kind, row.Subject, index);
+                bool owned = game != null && IntelBook.BuyerHas(game, factionId, row.Kind, row.Subject);
+                rows.Add(new IntelRowView(
+                    row.Kind,
+                    row.Subject,
+                    label.Name,
+                    IntelBook.ResultTag(row.Kind),
+                    row.Ask,
+                    row.ForSale,
+                    owned,
+                    label.SystemId));
+            }
+
+            IReadOnlyList<IntelCandidateView> candidates = Array.Empty<IntelCandidateView>();
+            if (canEdit && game != null && game.Factions.TryGetValue(entity.FactionOwnerID, out var owner))
+            {
+                candidates = IntelBook.Candidates(owner)
+                    .Select(candidate => new IntelCandidateView(candidate.Kind, candidate.Subject, candidate.Name, candidate.SystemId))
+                    .ToList();
+            }
+
+            return new IntelBookView(canEdit, rows, candidates);
+        }
+
+        static Dictionary<string, int> UnknownJumpIndex(Game? game, int viewerId, List<IntelListing> rows)
+        {
+            var index = new Dictionary<string, int>(StringComparer.Ordinal);
+            if (game == null)
+                return index;
+
+            var unknown = new List<(string SystemId, string Subject)>();
+            foreach (var row in rows)
+            {
+                if (row.Kind != IntelKind.Jump || IntelBook.BuyerHas(game, viewerId, row.Kind, row.Subject))
+                    continue;
+                var label = IntelBook.Describe(game, viewerId, row.Kind, row.Subject, 0);
+                unknown.Add((label.SystemId ?? "", row.Subject));
+            }
+
+            foreach (var group in unknown.GroupBy(row => row.SystemId))
+            {
+                int n = 1;
+                foreach (var row in group.OrderBy(row => row.Subject, StringComparer.Ordinal))
+                    index[row.Subject] = n++;
+            }
+            return index;
         }
 
         private static IReadOnlyList<MarketGoodChoice> AddableCargo(FactionInfoDB? owner, LogiBaseDB book)

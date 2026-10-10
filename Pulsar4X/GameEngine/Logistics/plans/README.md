@@ -22,4 +22,6 @@ Plans 1–12 and 5b are implemented on `TradeAndTransport`. Do not start a later
 
 [Office purses](office-purses.md) is an idea saved on 2026-10-06. It is not plan 13. Leave it until someone asks to build it.
 
+[Survey charts](survey-charts.md) is implemented. It is not plan 13. Finished surveys are the first rows on a general intel list at a logistics office. This slice sells a geo survey, a cleared grav pin, and a discovered jump. Tests: `ApiIntelBookTests`.
+
 Tests for these plans run from outside the repo (for example `/tmp`) with `DOTNET_ROLL_FORWARD=LatestMajor`, project `Pulsar4X/Pulsar4X.Tests/Pulsar4X.Tests.csproj`. `global.json` pins SDK 8.0.122; the local SDK may be newer.

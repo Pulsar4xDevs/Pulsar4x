@@ -91,6 +91,39 @@ public sealed record SetMarketListingCommand(
 /// <summary>Remove one cargo row from the book and from market policy. Targets the colony.</summary>
 public sealed record ClearMarketListingCommand(int TargetEntityId, string CargoId) : GameCommand(TargetEntityId);
 
+/// <summary>A secret a logistics office can list. Geo, Pin, and Jump are the survey kinds.</summary>
+public enum IntelKind
+{
+    Geo,
+    Pin,
+    Jump,
+}
+
+/// <summary>
+/// Post or replace one intel row on a colony's office. Targets the colony.
+/// <see cref="Subject"/> is the secret's id. Survey kinds store an entity id in invariant decimal form.
+/// </summary>
+public sealed record SetIntelListingCommand(
+    int TargetEntityId,
+    string Subject,
+    IntelKind Kind,
+    decimal Ask,
+    bool ForSale) : GameCommand(TargetEntityId);
+
+/// <summary>Drop one intel row. A missing row succeeds. Targets the colony.</summary>
+public sealed record ClearIntelListingCommand(
+    int TargetEntityId,
+    string Subject,
+    IntelKind Kind) : GameCommand(TargetEntityId);
+
+/// <summary>
+/// Buy one intel row from a colony's office. Targets the colony. The commanding faction is the buyer.
+/// </summary>
+public sealed record BuyIntelCommand(
+    int TargetEntityId,
+    string Subject,
+    IntelKind Kind) : GameCommand(TargetEntityId);
+
 // ----- fleet organisation (commanded entity: the faction for create, otherwise the fleet/ship) -----
 #region Fleet Organization Commands
 

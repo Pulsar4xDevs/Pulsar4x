@@ -4,10 +4,8 @@ using System.Linq;
 using Pulsar4X.Engine;
 using Pulsar4X.Events;
 using Pulsar4X.Extensions;
-using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Interfaces;
-using Pulsar4X.Messaging;
 using Pulsar4X.Movement;
 using Pulsar4X.People;
 
@@ -107,22 +105,8 @@ public class JPSurveyProcessor : IHotloopProcessor
         if(chance >= roll)
         {
             var jp = jpRemaining.First(); // TODO: pick randomly from remaining
-            jp.IsDiscovered.Add(discoveringEntity.FactionOwnerID);
-            discoveringEntity.Manager.Game.Factions[discoveringEntity.FactionOwnerID]
-                .GetDataBlob<FactionInfoDB>()
-                .RememberJumpPoint(jp.OwningEntity);
-
-            // Show the jump point to the faction that just completed the survey
-            jp.OwningEntity.Manager.ShowNeutralEntityToFaction(discoveringEntity.FactionOwnerID, jp.OwningEntity.Id);
-
-            EventManager.Instance.Publish(
-                Event.Create(
-                    EventType.JumpPointDetected,
-                    atDateTime,
-                    $"Jump Point discovered",
-                    discoveringEntity.FactionOwnerID,
-                    jp.OwningEntity.Manager.ManagerID,
-                    jp.OwningEntity.Id));
+            if (jp.OwningEntity != null && discoveringEntity.Manager?.Game is { } game)
+                JumpPointReveal.Grant(game, discoveringEntity.FactionOwnerID, jp.OwningEntity, atDateTime);
 
             // If this was the last jump point, hide the rest of the survey locations
             if(jpRemaining.Count == 1)
@@ -134,61 +118,6 @@ public class JPSurveyProcessor : IHotloopProcessor
                     surveyLocation.OwningEntity.Manager.HideNeutralEntityFromFaction(discoveringEntity.FactionOwnerID, surveyLocation.OwningEntity.Id);
                 }
             }
-
-            RevealOtherSide(jp, atDateTime, discoveringEntity);
-        }
-    }
-
-    private void RevealOtherSide(JumpPointDB jumpPointDB, DateTime atDateTime, Entity discoveringEntity)
-    {
-        // Skip if no destination is linked (DestinationId defaults to 0 which could match an unrelated entity)
-        if(jumpPointDB.DestinationId <= 0)
-            return;
-
-        if(discoveringEntity.Manager.TryGetGlobalEntityById(jumpPointDB.DestinationId, out var destinationEntity)
-            && destinationEntity.HasDataBlob<JumpPointDB>())
-        {
-            var factionInfoDB = discoveringEntity.Manager.Game.Factions[discoveringEntity.FactionOwnerID].GetDataBlob<FactionInfoDB>();
-
-            // Check to see if the system has been discovered yet
-            if(!factionInfoDB.KnownSystems.Contains(destinationEntity.Manager.ManagerID))
-            {
-                factionInfoDB.KnownSystems.Add(destinationEntity.Manager.ManagerID);
-
-                EventManager.Instance.Publish(
-                    Event.Create(
-                        EventType.NewSystemDiscovered,
-                        atDateTime,
-                        $"New system discovered",
-                        discoveringEntity.FactionOwnerID,
-                        destinationEntity.Manager.ManagerID,
-                        destinationEntity.Id));
-
-                MessagePublisher.Instance.Publish(
-                    Message.Create(
-                        MessageTypes.StarSystemRevealed,
-                        destinationEntity.Id,
-                        destinationEntity.Manager.ManagerID,
-                        discoveringEntity.FactionOwnerID));
-            }
-
-            // Reveal the JP
-            if(destinationEntity.TryGetDataBlob<JumpPointDB>(out var destinationDB))
-            {
-                destinationDB.IsDiscovered.Add(discoveringEntity.FactionOwnerID);
-                factionInfoDB.RememberJumpPoint(destinationEntity);
-                destinationEntity.Manager.ShowNeutralEntityToFaction(discoveringEntity.FactionOwnerID, destinationEntity.Id);
-
-                EventManager.Instance.Publish(
-                    Event.Create(
-                        EventType.JumpPointDetected,
-                        atDateTime,
-                        $"Jump Point discovered",
-                        discoveringEntity.FactionOwnerID,
-                        destinationEntity.Manager.ManagerID,
-                        destinationEntity.Id));
-            }
-
         }
     }
 

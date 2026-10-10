@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Client;
 using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Client.Interface;
@@ -8,7 +9,7 @@ namespace Pulsar4X.Client.Interface;
 public class Displays
 {
     /// <summary>Snapshot-based gravitational-anomaly display for UI ported to the API galaxy model.</summary>
-    public static void GravitationalAnomlay(Pulsar4X.Api.GravSurveyView gravSurvey)
+    public static void GravitationalAnomlay(Pulsar4X.Api.GravSurveyView gravSurvey, Pulsar4X.Api.EntitySnapshot entity, Pulsar4X.Api.IClientSystem system, GlobalUIState uiState)
     {
         ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
         ImGui.TextWrapped("Order a fleet equipped with a gravitational surveyor here. A successful survey may reveal a Jump Point to another system.");
@@ -33,6 +34,8 @@ public class Displays
         ImGui.NextColumn();
 
         ImGui.Columns(1);
+        if (!gravSurvey.IsSurveyComplete)
+            IntelDisplay.OfferLine(system, entity.Id, Pulsar4X.Api.IntelKind.Pin, "pin cleared", uiState);
     }
 
     /// <summary>Snapshot-based ship tooltip: remaining ΔV against full tanks.</summary>
@@ -45,7 +48,7 @@ public class Displays
     }
 
     /// <summary>Snapshot-based system-body tooltip.</summary>
-    public static void SystemBody(Pulsar4X.Api.EntitySnapshot body, Pulsar4X.Api.IClientSystem system)
+    public static void SystemBody(Pulsar4X.Api.EntitySnapshot body, Pulsar4X.Api.IClientSystem system, GlobalUIState uiState)
     {
         var bodyView = body.GetView<Pulsar4X.Api.BodyView>();
         if (bodyView == null) return;
@@ -175,6 +178,8 @@ public class Displays
         }
 
         ImGui.Columns(1);
+        if (!isSurveyed)
+            IntelDisplay.OfferLine(system, body.Id, Pulsar4X.Api.IntelKind.Geo, "geo chart", uiState);
     }
 
     /// <summary>Snapshot-based star tooltip.</summary>

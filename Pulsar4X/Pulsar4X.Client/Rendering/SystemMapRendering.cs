@@ -6,6 +6,8 @@ using Pulsar4X.Api;
 using Pulsar4X.Orbital;
 using SDL3;
 
+using Pulsar4X.Client;
+
 namespace Pulsar4X.Client.Rendering
 {
     internal class SystemMapRendering : UpdateWindowState
@@ -307,7 +309,9 @@ namespace Pulsar4X.Client.Rendering
 
             if (entity.HasView<GravSurveyView>() && entity.HasView<PositionView>())
             {
-                AddEntityIcon(entity, new PointOfInterestIcon(position));
+                var system = _systemId == null ? null : _state.GameClient?.Galaxy.GetSystem(_systemId);
+                bool listed = IntelDisplay.ListedPin(system, entity.Id);
+                AddEntityIcon(entity, new PointOfInterestIcon(position, listed));
             }
         }
 

@@ -58,6 +58,9 @@ namespace Pulsar4X.Engine.Api
                 [typeof(FleetHaulContractCommand)] = TranslateFleetHaulContract,
                 [typeof(SetMarketListingCommand)] = TranslateSetMarketListing,
                 [typeof(ClearMarketListingCommand)] = TranslateClearMarketListing,
+                [typeof(SetIntelListingCommand)] = TranslateSetIntelListing,
+                [typeof(ClearIntelListingCommand)] = TranslateClearIntelListing,
+                [typeof(BuyIntelCommand)] = TranslateBuyIntel,
                 [typeof(CreateFleetCommand)] = TranslateCreateFleet,
                 [typeof(CreateColonyCommand)] = TranslateCreateColony,
                 [typeof(DisbandFleetCommand)] = TranslateDisbandFleet,
@@ -411,6 +414,37 @@ namespace Pulsar4X.Engine.Api
             MarketBook.RemoveListing(commanded, clear.CargoId);
             if (commanded.TryGetDataBlob<ColonyMarketPolicyDB>(out var policy))
                 policy.Rows.Remove(clear.CargoId);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateSetIntelListing(Entity faction, Entity commanded, GameCommand command)
+        {
+            var set = (SetIntelListingCommand)command;
+            if (RejectWithoutLogisticsOffice(commanded) is { } missing)
+                return missing;
+            if (!IntelBook.TrySet(commanded, set.Kind, set.Subject, set.Ask, set.ForSale, out var reason))
+                return CommandResult.Reject(reason);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateClearIntelListing(Entity faction, Entity commanded, GameCommand command)
+        {
+            var clear = (ClearIntelListingCommand)command;
+            if (RejectWithoutLogisticsOffice(commanded) is { } missing)
+                return missing;
+            if (string.IsNullOrEmpty(clear.Subject))
+                return CommandResult.Reject("Subject is required.");
+            IntelBook.Remove(commanded, clear.Kind, clear.Subject);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateBuyIntel(Entity faction, Entity commanded, GameCommand command)
+        {
+            var buy = (BuyIntelCommand)command;
+            if (RejectWithoutLogisticsOffice(commanded) is { } missing)
+                return missing;
+            if (!IntelBook.TryBuy(commanded, faction, buy.Kind, buy.Subject, out var reason))
+                return CommandResult.Reject(reason);
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 

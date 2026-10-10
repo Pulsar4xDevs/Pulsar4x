@@ -168,7 +168,7 @@
         { "Id": "default-design-passive-sensor-s50", "Amount": 1 },
         { "Id": "default-design-bridge-system", "Amount": 1 },
         { "Id": "default-design-asteroid-miner", "Amount": 1 },
-        { "Id": "default-design-cargo-hold-5t", "Amount": 1 },
+        { "Id": "default-design-cargo-hold-1t", "Amount": 1 },
         { "Id": "default-design-fuel-tank-1000", "Amount": 2 },
         { "Id": "default-design-alcubierre-500", "Amount": 4 },
         { "Id": "default-design-battery-2t", "Amount": 3 },
