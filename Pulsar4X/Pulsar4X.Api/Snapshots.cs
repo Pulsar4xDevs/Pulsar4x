@@ -71,8 +71,17 @@ public sealed class EntitySnapshot
 /// <summary>Minimal identity of a star system for lists/maps (cheap to enumerate).</summary>
 public sealed record SystemSummary(string SystemId, string Name);
 
-/// <summary>The player's faction/corporation: identity and current funds.</summary>
-public sealed record FactionSnapshot(string Name, string Abbreviation, decimal Funds);
+/// <summary>One ledger row. <see cref="Amount"/> is negative for an expense.</summary>
+public sealed record LedgerEntrySnapshot(DateTime Date, string Category, string Description, decimal Amount);
+
+/// <summary>
+/// The player's faction/corporation: identity, current funds, and ledger rows newest first.
+/// </summary>
+public sealed record FactionSnapshot(
+    string Name,
+    string Abbreviation,
+    decimal Funds,
+    IReadOnlyList<LedgerEntrySnapshot> Transactions);
 
 /// <summary>One other faction as the viewer currently treats them. A missing stored stance arrives as Hostile.</summary>
 public sealed record FactionStanceRow(int FactionId, string Name, FactionStance Stance);

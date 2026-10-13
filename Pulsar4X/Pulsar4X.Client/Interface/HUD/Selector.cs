@@ -196,8 +196,14 @@ namespace Pulsar4X.Client
                 padding = new string(' ', Math.Max(0, spacesNeeded));
             }
 
-            // Create the selectable with the label, padding, and value
-            ImGui.Selectable($"{label}{padding}{value}");
+            if (ImGui.Selectable($"{label}{padding}{value}###corp-funds"))
+                LedgerWindow.GetInstance().SetActive(true);
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.BeginTooltip();
+                ImGui.TextUnformatted("Transaction history");
+                ImGui.EndTooltip();
+            }
         }
 
         private void DisplaySystems()

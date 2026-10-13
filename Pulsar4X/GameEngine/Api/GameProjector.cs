@@ -59,7 +59,16 @@ namespace Pulsar4X.Engine.Api
             if (!_game.Factions.TryGetValue(factionId, out var faction)) return null;
             if (!faction.TryGetDataBlob<FactionInfoDB>(out var info)) return null;
             string name = faction.TryGetDataBlob<NameDB>(out var nameDB) ? nameDB.OwnersName : factionId.ToString();
-            return new FactionSnapshot(name, info.Abbreviation, info.Money.GetCurrentFunds());
+            var transactions = new List<LedgerEntrySnapshot>();
+            foreach (var tx in info.Money.GetAllTransactions())
+            {
+                transactions.Add(new LedgerEntrySnapshot(
+                    tx.Date,
+                    tx.Category.ToString(),
+                    tx.Description ?? "",
+                    tx.Amount));
+            }
+            return new FactionSnapshot(name, info.Abbreviation, info.Money.GetCurrentFunds(), transactions);
         }
 
         /// <summary>
