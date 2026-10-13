@@ -283,7 +283,7 @@ public class MarketExchangeAction : EntityAction
         return space < 0 ? 0 : space;
     }
 
-    static long Affordable(Game game, int factionId, decimal price)
+    internal static long Affordable(Game game, int factionId, decimal price)
     {
         if (price <= 0)
             return 0;

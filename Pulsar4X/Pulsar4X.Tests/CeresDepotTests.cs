@@ -136,13 +136,14 @@ public class CeresDepotTests
             .Single(c => c.GetDataBlob<NameDB>().DefaultName == "Luna Concord");
 
         Assert.That(depot.GetDataBlob<LogiBaseDB>().Capacity, Is.EqualTo(10));
-        Assert.That(depot.GetDataBlob<CargoStorageDB>().TypeStores["general-storage"].MaxVolume, Is.EqualTo(20000));
+        var storage = depot.GetDataBlob<CargoStorageDB>();
+        Assert.That(storage.TypeStores["general-storage"].MaxVolume, Is.EqualTo(20000));
+        // One spaceport, template defaults: 3000 m/s and 6 kg/s. The warehouse does not set either.
+        Assert.That(storage.TransferRangeDv_mps, Is.EqualTo(3000));
+        Assert.That(storage.TransferRate, Is.EqualTo(6));
         Assert.That(
             game.Factions[depot.FactionOwnerID].GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(),
             Is.EqualTo(CeresStart.DepotFunds));
-
-        Assert.That(MarketBook.TryGet(depot, "iron", out var iron), Is.True);
-        Assert.That(iron.BuyQuantity, Is.EqualTo(0));
 
         var strata = game.Factions.Values.Single(f => f.GetDataBlob<NameDB>().DefaultName == CeresStart.SurveyFactionName);
         var lode = game.Factions.Values.Single(f => f.GetDataBlob<NameDB>().DefaultName == CeresStart.MiningFactionName);

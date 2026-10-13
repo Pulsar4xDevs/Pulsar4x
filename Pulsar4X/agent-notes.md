@@ -18,7 +18,7 @@ Inbox for small bugs and follow-ups that came up while doing something else. Any
 - `GameEngine/Damage/damage-system.md` — damage as it works today and what should change.
 - `GameEngine/Engine/Orders/agents-and-goals-design.md` — goal, action, and agent decisions.
 - `GameEngine/Engine/Orders/weighting-vertical-slice.md` — autonomous weighting slice.
-- `GameEngine/Logistics/plans/` — trade and transport plans. Plans 1–12 and 5b are implemented on `TradeAndTransport`. `office-purses.md` is an idea for later, not plan 13. Do not build it until asked. `survey-charts.md` is implemented: finished surveys are the first kinds on a general intel list, not plan 13.
+- `GameEngine/Logistics/plans/` — trade and transport plans. Plans 1–12 and 5b are implemented on `TradeAndTransport`. `office-purses.md` is an idea for later, not plan 13. Do not build it until asked. `survey-charts.md` is implemented: finished surveys are the first kinds on a general intel list, not plan 13. `sealed-shipments.md` is a plan for a remote friendly buy. Several goods can share one shipment. The buying office pays for the goods and posts an intel haul. Any free ship can deliver it and be paid the fee. Not plan 13. Do not build it until asked. The goal half is `DeliverShipment`.
 - `GameEngine/Industry/plans/` — colony industry. Refine-one-batch is implemented. It is not logistics plan 13.
 - `GameEngine/Engine/Orders/colony-administrator.md` — standing colony intent, patience, specialization, and bids. Notes only. Not an implementation plan.
 - `GameEngine/Engine/Orders/plans/` — Ceres faction jobs, three slices. Not logistics plan 13. Do not build them until asked.
@@ -62,3 +62,7 @@ Interim for the Ceres trade test only. Methalox already has `WealthCost` 3 on th
 ### A single-ship faction cannot post its own buy or sell orders
 
 2026-10-10. Strata Survey and Lode Mining have a ship and no colony. A market order is stored on the colony that owns the logistics office. `EngineGameServer.SubmitCommand` rejects a command against an entity the faction does not own. `BuyIntelCommand` is the exception, and it buys a chart the owner already listed. A friendly ship can fill an existing listing with `MarketExchangeAction` when `FactionStanceRules.CanTrade` is true and the ship is in cargo-transfer range. It cannot add a bid or an ask. `MarketView.CanEdit` is true only for the owner. Do not build a visitor order book unless asked.
+
+### Remote buy is a sealed shipment
+
+2026-10-10. Written up as `GameEngine/Logistics/plans/sealed-shipments.md`. Not logistics plan 13. Do not build it until asked. A goals-and-actions session can take the `DeliverShipment` half. The buying office pays the goods and posts the intel haul. Any free ship can claim it and be paid the fee. Several goods can share one shipment. Dockside escrow still starts only in cargo range.

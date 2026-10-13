@@ -63,6 +63,28 @@ public class ColonyMarketOrderTests
     }
 
     [Test]
+    public void BidAndMaxAboveStock_PostsTheShortageOnly()
+    {
+        var scene = Scene.Build();
+        scene.Stock("iron", 2000);
+        scene.Policy("iron", min: 0, max: 4000, auto: false, ask: 2, bid: 1);
+
+        AgentProcessor.AssignGoal(scene.Colony, new Goal(GoalType.RunMarket));
+        AssertListing(scene.Colony, "iron", sell: 2000, ask: 2, buy: 0, bid: 1, reserve: 0);
+    }
+
+    [Test]
+    public void BidOfZero_DoesNotBuyAboveTheHold()
+    {
+        var scene = Scene.Build();
+        scene.Stock("iron", 50);
+        scene.Policy("iron", min: 0, max: 80, auto: false, ask: 2, bid: 0);
+
+        AgentProcessor.AssignGoal(scene.Colony, new Goal(GoalType.RunMarket));
+        AssertListing(scene.Colony, "iron", sell: 50, ask: 2, buy: 0, bid: 0, reserve: 0);
+    }
+
+    [Test]
     public void Shortage_PostsBuy()
     {
         var scene = Scene.Build();

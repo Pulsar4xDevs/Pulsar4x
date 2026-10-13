@@ -15,6 +15,8 @@ Colony growth through a seated administrator is `colony-administrator.md`. Those
 
 The Ceres faction jobs are `plans/`. Three slices, in order. They are not logistics plan 13.
 
+Remote buy and sell at a friendly office is `GameEngine/Logistics/plans/sealed-shipments.md`. Not logistics plan 13. Do not build it until asked. The buyer is any logistics office that can trade, player or not. The buyer pays the goods at seal time and posts one `IntelKind.Haul` row with the freight fee. `DeliverShipment` is the goal half: a free ship claims that row, does not call `MarketExchange`, and is paid the fee on delivery. Do not interrupt a ship that already has an order. Do not give the colony a second `ActiveGoal`. Do not re-decide the package or who pays.
+
 ## Pipeline
 
 ```

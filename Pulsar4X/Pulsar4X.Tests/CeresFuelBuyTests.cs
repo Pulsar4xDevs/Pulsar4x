@@ -221,7 +221,7 @@ public class CeresFuelBuyTests
     }
 
     [Test]
-    public void StartingOrbit_HandsBuyFuel_AndMovesBeforeItPays()
+    public void StartingOrbit_IsInRange_AndBuysWithoutADrop()
     {
         var (game, sol) = Place();
         var strata = Faction(game, CeresStart.SurveyFactionName);
@@ -231,6 +231,32 @@ public class CeresFuelBuyTests
 
         FinishChild(ship);
         Drain(ship, 1);
+        decimal before = strata.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds();
+
+        AgentProcessor.RunAgentNow(fleet);
+        var child = ship.GetDataBlob<GoalsDB>().GivenGoal;
+        Assert.That(child!.Type, Is.EqualTo(GoalType.BuyFuel));
+        Assert.That(MarketExchangeAction.InRange(ship, depot), Is.True);
+
+        var plan = new BuyFuelPlan().Plan(ship, child, ship.StarSysDateTime);
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active), plan.Message);
+        Assert.That(plan.Actions.OfType<MarketExchangeAction>().Count(), Is.EqualTo(1), plan.Message);
+        Assert.That(plan.Actions.OfType<ChangeOrbitalAltitudeAction>(), Is.Empty);
+        Assert.That(strata.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(before));
+    }
+
+    [Test]
+    public void ShortRange_DropsToLowOrbitBeforeItPays()
+    {
+        var (game, sol) = Place();
+        var strata = Faction(game, CeresStart.SurveyFactionName);
+        var fleet = Fleet(sol, strata.Id);
+        var ship = Ship(sol, strata.Id);
+        var depot = Depot(sol);
+
+        FinishChild(ship);
+        Drain(ship, 1);
+        depot.GetDataBlob<CargoStorageDB>().TransferRangeDv_mps = 100;
         decimal before = strata.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds();
 
         AgentProcessor.RunAgentNow(fleet);

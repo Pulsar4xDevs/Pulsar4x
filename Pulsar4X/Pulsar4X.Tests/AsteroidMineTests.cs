@@ -191,14 +191,16 @@ public class AsteroidMineTests
 
         Colony(faction, star, shipAt + new Vector3(1e8, 0, 0), "fuel-storage", 1e6);
         var buyer = Colony(friend, star, shipAt + new Vector3(1e10, 0, 0), "general-storage", 1e6);
-        Buyer(buyer);
+        friend.GetDataBlob<FactionInfoDB>().Data.Unlock("iron");
+        friend.GetDataBlob<FactionInfoDB>().Money.AddIncome(
+            ship.StarSysDateTime, TransactionCategory.InitialInvestment, "test", 100);
 
         var goal = new Goal(GoalType.MineAsteroids);
         var plan = new MineAsteroidsPlan().Plan(ship, goal, _epoch);
 
         Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active), plan.Message);
         Assert.That(goal.DestEntityId, Is.EqualTo(buyer.Id));
-        Assert.That(plan.Actions.OfType<MarketExchangeAction>(), Is.Empty);
+        Assert.That(plan.Actions.OfType<LotOfferAction>(), Is.Empty);
         Assert.That(plan.Actions.OfType<WarpMoveAction>().Single().TargetEntityGuid, Is.EqualTo(PlanetId(buyer)));
     }
 

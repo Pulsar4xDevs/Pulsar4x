@@ -14,6 +14,12 @@ public static class CeresStart
     public const decimal FuelAsk = 3m;
     public const decimal IronAsk = 2m;
     public const decimal IronBid = 1m;
+
+    /// <summary>
+    /// One rate for every mineral in a direct offer. Half the iron bid. Not a price model.
+    /// </summary>
+    public const decimal LotPrice = IronBid / 2m;
+
     public const decimal WaterAsk = 1m;
 
     public const string DepotColonyId = "colony-ceres-depot";

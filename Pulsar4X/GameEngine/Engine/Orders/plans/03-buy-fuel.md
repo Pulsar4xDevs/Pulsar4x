@@ -32,9 +32,9 @@ Do not wire `ShouldInterruptForRefuel`. That changes `ActiveGoal` under a foreig
 
 ## Limit
 
-The clock was not run. Ships spawn in a circular orbit at twice the body's radius. Ceres Depot sits on the surface, and its warehouse transfer range is the default 100 m/s, so that orbit is outside cargo range. Movement already calls the orbit "at Ceres", so the fuel child drops to low orbit and buys on the wake after that burn. Tests that pay open the transfer range instead of flying it.
+The clock was not run. Ships spawn in a circular orbit at twice the body's radius. The depot spaceport covers that orbit, so a fuel buy there pays without a drop. At the default 100 m/s the same orbit is still outside range, and movement already calls it "at Ceres", so the fuel child drops to low orbit and buys on the wake after that burn. Tests that pay open the transfer range instead of flying it.
 
-A full mining hold still has nowhere to unload. Iron's buy quantity stays 0 because `RunMarket` is unchanged.
+A full mining hold is [Direct offer](05-direct-offer.md).
 
 ## Out
 

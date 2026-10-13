@@ -12,7 +12,7 @@ Ceres Depot can list five cargo ids, holds a purse of 100, and has one warehouse
 
 The depot has two logistics offices, so the book holds 10 cargo ids. It has two warehouses. Its purse is 100000. Strata and Lode stay at 100. Earth and Luna keep one office and one warehouse.
 
-Methalox, iron, and water still use three of the ten slots. Seven are free. Iron's buy quantity stays 0. The prospector still waits.
+Methalox, iron, and water still use three of the ten slots. Seven are free. Selling the hold is [Direct offer](05-direct-offer.md).
 
 ## What is already true
 
@@ -44,7 +44,7 @@ Do not run the clock.
 
 ## Limit
 
-The clock was not run. Iron's buy quantity is still 0, so the prospector still has nowhere to sell.
+The clock was not run. Selling the hold is [Direct offer](05-direct-offer.md).
 
 ## Out
 

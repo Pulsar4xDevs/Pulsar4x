@@ -99,7 +99,7 @@ public class RunMarketPlan : IGoalPlanner
                 CargoId = item.CargoId,
                 SellQuantity = Math.Max(0, item.Stock - item.Hold),
                 Ask = item.Row.Ask,
-                BuyQuantity = Math.Max(0, item.Hold - item.Stock),
+                BuyQuantity = BuyQuantityOf(item),
                 Bid = item.Row.Bid,
                 Reserve = item.Row.Min,
             };
@@ -108,6 +108,14 @@ public class RunMarketPlan : IGoalPlanner
         }
 
         return PlanResult.Continue(actions, notes.Count == 0 ? "" : string.Join("; ", notes));
+    }
+
+    /// <summary>
+    /// Shortage to the hold. A bid with a max above the stock does not buy that surplus.
+    /// </summary>
+    static long BuyQuantityOf(RowWork item)
+    {
+        return Math.Max(0, item.Hold - item.Stock);
     }
 
     static bool ListingMatches(Entity colony, MarketListing desired)

@@ -19,7 +19,7 @@ namespace Pulsar4X.Industry;
 /// <summary>
 /// Mine surveyed asteroids in the current system, then haul the ore home.
 /// Home is the nearest owned colony, by travel time, that can take a carried mineral.
-/// If none can, sell at the nearest friendly colony that is buying.
+/// If none can, offer the whole mineral hold to the nearest friendly office that can take it.
 /// </summary>
 public class MineAsteroidsPlan : IGoalPlanner
 {
@@ -152,20 +152,35 @@ public class MineAsteroidsPlan : IGoalPlanner
         }
 
         goal.DestEntityId = dest.Id;
-        if (!MovePlanner.TryBuildMoveActions(ship, dest, out var moveActions, out var moveReason))
-            return PlanResult.Fail(string.IsNullOrEmpty(moveReason) ? "cannot reach the colony" : moveReason);
-
-        if (moveActions.Count > 0)
-        {
-            string verb = selling ? "Selling at" : "Unloading at";
-            return PlanResult.Continue(moveActions, $"{verb} {dest.GetOwnersName()}");
-        }
+        string name = dest.GetOwnersName();
 
         if (!selling)
+        {
+            if (!MovePlanner.TryBuildMoveActions(ship, dest, out var unloadMoves, out var unloadReason))
+                return PlanResult.Fail(string.IsNullOrEmpty(unloadReason) ? "cannot reach the colony" : unloadReason);
+            if (unloadMoves.Count > 0)
+                return PlanResult.Continue(unloadMoves, $"Unloading at {name}");
             return PlanUnload(ship, dest);
+        }
 
-        var sales = SellActions(ship, dest);
-        if (sales.Count == 0)
+        // Out of cargo range the ship only travels. The lot moves in one later wake.
+        // The spawn orbit is already "there" for movement and still outside a short cargo range.
+        if (!MarketExchangeAction.InRange(ship, dest))
+        {
+            if (!MovePlanner.TryBuildMoveActions(ship, dest, out var moveActions, out var moveReason))
+                return PlanResult.Fail(string.IsNullOrEmpty(moveReason) ? "cannot reach the colony" : moveReason);
+            if (moveActions.Count == 0)
+                TryDropIntoRange(ship, dest, moveActions);
+            if (moveActions.Count > 0)
+                return PlanResult.Continue(moveActions, $"Selling at {name}");
+
+            goal.DestEntityId = -1;
+            return PlanResult.Continue(
+                new List<EntityAction> { new UnloadWaitOrder(ship) },
+                "no place to unload");
+        }
+
+        if (!CanTakeLot(ship, dest))
         {
             goal.DestEntityId = -1;
             return PlanResult.Continue(
@@ -173,7 +188,29 @@ public class MineAsteroidsPlan : IGoalPlanner
                 "no place to unload");
         }
 
-        return PlanResult.Continue(sales, $"Selling at {dest.GetOwnersName()}");
+        return PlanResult.Continue(
+            new List<EntityAction> { LotOfferAction.Create(ship, dest.Id) },
+            $"Selling at {name}");
+    }
+
+    /// <summary>
+    /// Same drop as a fuel buy. Low orbit is inside a short cargo range; the arrival radius is not.
+    /// Adds nothing when the ship is already as close as the burn can put it.
+    /// </summary>
+    static void TryDropIntoRange(Entity ship, Entity market, List<EntityAction> moves)
+    {
+        var body = market;
+        if (market.TryGetDataBlob<ColonyInfoDB>(out var colony))
+            body = colony.PlanetEntity;
+        if (ship.GetSOIParentEntity() != body)
+            return;
+
+        double parking = OrbitMath.LowOrbitRadius(body);
+        if (!ChangeOrbitalAltitudeAction.TryPlanBurns(ship, parking, ship.StarSysDateTime, out var burns, out _)
+            || burns.Count == 0)
+            return;
+
+        moves.Add(ChangeOrbitalAltitudeAction.CreateCommand(ship, parking, ship.StarSysDateTime));
     }
 
     static PlanResult PlanUnload(Entity ship, Entity colony)
@@ -228,7 +265,7 @@ public class MineAsteroidsPlan : IGoalPlanner
         {
             if (colony.FactionOwnerID == ship.FactionOwnerID)
                 continue;
-            if (CanSellAny(ship, colony))
+            if (CanTakeLot(ship, colony))
                 buyers.Add(colony);
         }
 
@@ -249,7 +286,7 @@ public class MineAsteroidsPlan : IGoalPlanner
         if (colony.FactionOwnerID == ship.FactionOwnerID)
             return CanStoreAny(ship, colony);
 
-        if (!CanSellAny(ship, colony))
+        if (!CanTakeLot(ship, colony))
             return false;
         selling = true;
         return true;
@@ -380,25 +417,45 @@ public class MineAsteroidsPlan : IGoalPlanner
         return false;
     }
 
-    static bool CanSellAny(Entity ship, Entity colony)
+    /// <summary>
+    /// One foreign office can buy the whole mineral hold at <see cref="CeresStart.LotPrice"/>.
+    /// Fuel in the tanks is not part of the lot. An owned colony unloads instead.
+    /// </summary>
+    static bool CanTakeLot(Entity ship, Entity colony)
     {
+        if (colony.FactionOwnerID == ship.FactionOwnerID)
+            return false;
         if (!colony.HasDataBlob<ColonyInfoDB>() || !colony.HasDataBlob<LogiBaseDB>())
             return false;
-        if (!FactionStanceRules.CanTrade(ship.Manager.Game, ship.FactionOwnerID, colony.FactionOwnerID))
+        var game = ship.Manager?.Game;
+        if (game == null || !FactionStanceRules.CanTrade(game, ship.FactionOwnerID, colony.FactionOwnerID))
+            return false;
+        if (!colony.TryGetDataBlob<CargoStorageDB>(out var cargo))
+            return false;
+        if (!game.Factions.TryGetValue(colony.FactionOwnerID, out var faction)
+            || !faction.TryGetDataBlob<FactionInfoDB>(out var info))
             return false;
 
-        foreach (var (mineral, _) in CarriedMinerals(ship))
+        var carried = CarriedMinerals(ship);
+        if (carried.Count == 0)
+            return false;
+
+        double volume = 0;
+        long units = 0;
+        foreach (var (mineral, count) in carried)
         {
-            if (string.IsNullOrEmpty(mineral.UniqueID))
-                continue;
-            if (!MarketBook.TryGet(colony, mineral.UniqueID, out var listing) || listing.BuyQuantity <= 0)
-                continue;
-            if (!colony.TryGetDataBlob<CargoStorageDB>(out var cargo))
-                continue;
-            if (CargoMath.GetFreeUnitSpace(cargo, mineral) >= 1)
-                return true;
+            if (count <= 0 || mineral.VolumePerUnit <= 0 || mineral.CargoTypeID != "general-storage")
+                return false;
+            if (string.IsNullOrEmpty(mineral.UniqueID) || !info.Data.CargoGoods.IsMineral(mineral.UniqueID))
+                return false;
+            volume += mineral.VolumePerUnit * count;
+            units += count;
         }
-        return false;
+
+        if (volume > CargoMath.GetFreeVolume(cargo, "general-storage"))
+            return false;
+
+        return MarketExchangeAction.Affordable(game, colony.FactionOwnerID, CeresStart.LotPrice) >= units;
     }
 
     static List<(ICargoable item, long amount)> UnloadAmounts(Entity ship, Entity colony)
@@ -415,31 +472,6 @@ public class MineAsteroidsPlan : IGoalPlanner
             items.Add((mineral, -move));
         }
         return items;
-    }
-
-    static List<EntityAction> SellActions(Entity ship, Entity colony)
-    {
-        var actions = new List<EntityAction>();
-        if (!colony.TryGetDataBlob<CargoStorageDB>(out var cargo))
-            return actions;
-        foreach (var (mineral, units) in CarriedMinerals(ship))
-        {
-            if (string.IsNullOrEmpty(mineral.UniqueID))
-                continue;
-            if (!MarketBook.TryGet(colony, mineral.UniqueID, out var listing) || listing.BuyQuantity <= 0)
-                continue;
-            long free = CargoMath.GetFreeUnitSpace(cargo, mineral);
-            long move = units;
-            if (move > listing.BuyQuantity)
-                move = listing.BuyQuantity;
-            if (move > free)
-                move = free;
-            if (move <= 0)
-                continue;
-            actions.Add(MarketExchangeAction.Create(
-                ship, colony.Id, mineral.UniqueID, MarketSide.SellToMarket, move));
-        }
-        return actions;
     }
 
     static IEnumerable<Entity> Colonies(Entity ship)

@@ -24,4 +24,6 @@ Plans 1–12 and 5b are implemented on `TradeAndTransport`. Do not start a later
 
 [Survey charts](survey-charts.md) is implemented. It is not plan 13. Finished surveys are the first rows on a general intel list at a logistics office. This slice sells a geo survey, a cleared grav pin, and a discovered jump. Tests: `ApiIntelBookTests`.
 
+[Sealed shipments](sealed-shipments.md) is a plan saved on 2026-10-10. It is not plan 13. A friendly office's market agent buys listed cargo before a ship is in range. Several goods can share one shipment. The buyer pays for the goods and posts a haul on the intel list. Any free ship can claim it and be paid the fee. The delivery goal is the half a goals-and-actions session can take. Leave it until someone asks to build it.
+
 Tests for these plans run from outside the repo (for example `/tmp`) with `DOTNET_ROLL_FORWARD=LatestMajor`, project `Pulsar4X/Pulsar4X.Tests/Pulsar4X.Tests.csproj`. `global.json` pins SDK 8.0.122; the local SDK may be newer.
