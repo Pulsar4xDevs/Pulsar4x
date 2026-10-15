@@ -30,6 +30,13 @@ public sealed record SetFactionStanceCommand(int TargetEntityId, int OtherFactio
     : GameCommand(TargetEntityId);
 
 /// <summary>
+/// Turn one grant on or off toward <see cref="OtherFactionId"/>. Targets the faction entity.
+/// Writes only that faction's grant table. <see cref="Grant"/> is a single flag.
+/// </summary>
+public sealed record SetFactionGrantCommand(int TargetEntityId, int OtherFactionId, FactionGrants Grant, bool Enabled)
+    : GameCommand(TargetEntityId);
+
+/// <summary>
 /// Set one cargo row of a colony's market policy. Targets the colony.
 /// The book is posted later by <see cref="RunMarketCommand"/>.
 /// </summary>

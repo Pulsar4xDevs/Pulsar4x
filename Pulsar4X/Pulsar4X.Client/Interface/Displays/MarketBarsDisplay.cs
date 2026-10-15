@@ -24,6 +24,8 @@ namespace Pulsar4X.Client
             }
 
             ImGui.Text($"Listings {market.Goods.Count} / {market.Capacity}");
+            if (!market.CanEdit && !market.ExchangeOpen)
+                ImGui.Text("Trade is not mutual.");
             if (market.Goods.Count == 0)
             {
                 ImGui.Text("No listings.");

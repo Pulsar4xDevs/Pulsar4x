@@ -100,7 +100,7 @@ public class MarketExchangeTests
         var action = scene.Exchange(MarketSide.BuyFromMarket, 5);
         scene.Run(action);
 
-        Assert.That(action.Details, Is.EqualTo("Cannot trade"));
+        Assert.That(action.Details, Is.EqualTo("Trade is not mutual."));
         Assert.That(action.IsFinished(), Is.True);
         Assert.That(MarketBook.Stock(scene.Market, scene.MarketIron), Is.EqualTo(20));
         Assert.That(MarketBook.Stock(scene.Ship, scene.ShipIron), Is.EqualTo(0));
@@ -227,14 +227,15 @@ public class MarketExchangeTests
 
             var shipFaction = FactionFactory.CreateFaction(game, "Haulers");
             var marketFaction = sameFaction ? shipFaction : FactionFactory.CreateFaction(game, "Market");
-            if (!sameFaction && mutualFriendly)
-            {
-                shipFaction.GetDataBlob<FactionInfoDB>().Stances[marketFaction.Id] = FactionStance.Friendly;
-                marketFaction.GetDataBlob<FactionInfoDB>().Stances[shipFaction.Id] = FactionStance.Friendly;
-            }
-
             var shipInfo = shipFaction.GetDataBlob<FactionInfoDB>();
             var marketInfo = marketFaction.GetDataBlob<FactionInfoDB>();
+            if (!sameFaction && mutualFriendly)
+            {
+                shipInfo.Stances[marketFaction.Id] = FactionStance.Friendly;
+                marketInfo.Stances[shipFaction.Id] = FactionStance.Friendly;
+                FactionStanceRules.SetGrant(shipInfo, marketFaction.Id, FactionGrants.Trade, true);
+                FactionStanceRules.SetGrant(marketInfo, shipFaction.Id, FactionGrants.Trade, true);
+            }
             if (unlockShip)
                 shipInfo.Data.Unlock("iron");
             if (!sameFaction && unlockMarket)

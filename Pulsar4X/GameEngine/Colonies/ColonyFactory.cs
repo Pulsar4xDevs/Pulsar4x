@@ -249,6 +249,8 @@ namespace Pulsar4X.Colonies
                 {
                     playerInfo.Stances[faction.Id] = stance;
                     info.Stances[playerFaction.Id] = stance;
+                    FactionStanceRules.SeedFromStance(playerInfo, faction.Id, stance);
+                    FactionStanceRules.SeedFromStance(info, playerFaction.Id, stance);
                 }
             }
         }

@@ -2,14 +2,18 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Pulsar4X.Api;
+using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine.Auth;
 using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Extensions;
+using Pulsar4X.Factions;
 using System.Reflection;
 using Pulsar4X.Messaging;
 using Pulsar4X.Galaxy;
+using Pulsar4X.Ships;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Pulsar4X.Engine
@@ -772,9 +776,7 @@ namespace Pulsar4X.Engine
             if(factionId == Game.GameMasterFaction.Id) return _entities.Values.ToList();
 
             return _entities.Values.Where(entity =>
-                ((entityFilter.HasFlag(EntityFilter.Friendly) && entity.FactionOwnerID == factionId) ||
-                (entityFilter.HasFlag(EntityFilter.Neutral) && entity.FactionOwnerID == Game.NeutralFactionId && EvaluateNeutralEntity(entity, factionId)) ||
-                (entityFilter.HasFlag(EntityFilter.Hostile) && entity.FactionOwnerID != factionId && entity.FactionOwnerID != Game.NeutralFactionId && EvaluateSensorContact(entity, factionId))) &&
+                PassesRelationFilter(entity, entityFilter, factionId) &&
                 (datablobFilter == null || datablobFilter.Count == 0 || EvaluateDataBlobs(entity, datablobFilter, filterLogic)) &&
                 (filter == null || filter(entity)))
                 .ToList();
@@ -786,9 +788,44 @@ namespace Pulsar4X.Engine
         {
             if (factionId == Game.GameMasterFaction.Id) return true;
 
-            return entity.FactionOwnerID == factionId
-                || (entity.FactionOwnerID == Game.NeutralFactionId && EvaluateNeutralEntity(entity, factionId))
-                || (entity.FactionOwnerID != factionId && entity.FactionOwnerID != Game.NeutralFactionId && EvaluateSensorContact(entity, factionId));
+            const EntityFilter all = EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile;
+            return PassesRelationFilter(entity, all, factionId);
+        }
+
+        /// <summary>
+        /// Owned entities match Friendly. Unowned neutrals match Neutral. Every other owner matches
+        /// Hostile when a sensor contact exists, or when that owner has granted this viewer ship
+        /// positions or colony trade. The grant does not rename Friendly.
+        /// </summary>
+        private bool PassesRelationFilter(Entity entity, EntityFilter entityFilter, int factionId)
+        {
+            if (entityFilter.HasFlag(EntityFilter.Friendly) && entity.FactionOwnerID == factionId)
+                return true;
+            if (entityFilter.HasFlag(EntityFilter.Neutral)
+                && entity.FactionOwnerID == Game.NeutralFactionId
+                && EvaluateNeutralEntity(entity, factionId))
+                return true;
+            if (entityFilter.HasFlag(EntityFilter.Hostile)
+                && entity.FactionOwnerID != factionId
+                && entity.FactionOwnerID != Game.NeutralFactionId
+                && (EvaluateSensorContact(entity, factionId) || GrantedByOwner(entity, factionId)))
+                return true;
+            return false;
+        }
+
+        /// <summary>The owner has opened this ship or colony to the viewer. One direction is enough.</summary>
+        private bool GrantedByOwner(Entity entity, int viewerFactionId)
+        {
+            if (Game == null)
+                return false;
+            int owner = entity.FactionOwnerID;
+            if (entity.HasDataBlob<ShipInfoDB>()
+                && FactionStanceRules.Granted(Game, owner, viewerFactionId, FactionGrants.Positions))
+                return true;
+            if (entity.HasDataBlob<ColonyInfoDB>()
+                && FactionStanceRules.Granted(Game, owner, viewerFactionId, FactionGrants.Trade))
+                return true;
+            return false;
         }
 
         private bool EvaluateNeutralEntity(Entity entity, int factionId)

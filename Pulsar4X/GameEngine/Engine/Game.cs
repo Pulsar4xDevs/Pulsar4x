@@ -230,7 +230,9 @@ namespace Pulsar4X.Engine
             // Hook up the event logs
             foreach(var (id, faction) in loadedGame.Factions)
             {
-                faction.GetDataBlob<FactionInfoDB>().EventLog.Subscribe();
+                var info = faction.GetDataBlob<FactionInfoDB>();
+                FactionStanceRules.MigrateGrants(info);
+                info.EventLog.Subscribe();
             }
             loadedGame.GameMasterFaction.GetDataBlob<FactionInfoDB>().EventLog.Subscribe();
 

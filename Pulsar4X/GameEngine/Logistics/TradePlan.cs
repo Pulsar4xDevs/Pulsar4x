@@ -54,7 +54,7 @@ public class TradePlan : IGoalPlanner
 
         if (!FactionStanceRules.CanTrade(ship.Manager.Game, ship.FactionOwnerID, source.FactionOwnerID)
             || !FactionStanceRules.CanTrade(ship.Manager.Game, ship.FactionOwnerID, dest.FactionOwnerID))
-            return PlanResult.Fail("Cannot trade");
+            return PlanResult.Fail("Trade is not mutual.");
 
         if (!MarketRun.TryShipGood(ship, goal.CargoId, out var good))
             return handed ? PlanResult.Done("share closed") : PlanResult.Fail("listing gone");

@@ -339,8 +339,12 @@ public class AsteroidMineTests
 
     static void Befriend(Entity a, Entity b)
     {
-        a.GetDataBlob<FactionInfoDB>().Stances[b.Id] = FactionStance.Friendly;
-        b.GetDataBlob<FactionInfoDB>().Stances[a.Id] = FactionStance.Friendly;
+        var left = a.GetDataBlob<FactionInfoDB>();
+        var right = b.GetDataBlob<FactionInfoDB>();
+        left.Stances[b.Id] = FactionStance.Friendly;
+        right.Stances[a.Id] = FactionStance.Friendly;
+        FactionStanceRules.SetGrant(left, b.Id, FactionGrants.Trade, true);
+        FactionStanceRules.SetGrant(right, a.Id, FactionGrants.Trade, true);
     }
 
     static Mineral Iron(Entity faction)

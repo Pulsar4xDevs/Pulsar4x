@@ -28,6 +28,21 @@ public enum FactionStance
     Allied,
 }
 
+/// <summary>
+/// What one faction has granted another. Stored on the granter, keyed by the receiver.
+/// A missing entry means nothing is granted. The two directions may differ.
+/// </summary>
+[Flags]
+public enum FactionGrants
+{
+    None = 0,
+    Trade = 1,
+    Positions = 2,
+    Geo = 4,
+    Grav = 8,
+    Research = 16,
+}
+
 /// <summary>Broad classification of an entity for list grouping and icons. The client maps this to its
 /// own display enum/short-names.</summary>
 public enum BodyKind
@@ -83,8 +98,17 @@ public sealed record FactionSnapshot(
     decimal Funds,
     IReadOnlyList<LedgerEntrySnapshot> Transactions);
 
-/// <summary>One other faction as the viewer currently treats them. A missing stored stance arrives as Hostile.</summary>
-public sealed record FactionStanceRow(int FactionId, string Name, FactionStance Stance);
+/// <summary>
+/// One other faction. <see cref="Stance"/> and <see cref="GrantedByViewer"/> are this viewer's.
+/// <see cref="TheirStance"/> and <see cref="GrantedToViewer"/> are theirs, shown and not editable.
+/// </summary>
+public sealed record FactionStanceRow(
+    int FactionId,
+    string Name,
+    FactionStance Stance,
+    FactionGrants GrantedByViewer = FactionGrants.None,
+    FactionGrants GrantedToViewer = FactionGrants.None,
+    FactionStance TheirStance = FactionStance.Hostile);
 
 /// <summary>A bulk, faction-scoped snapshot of one star system at a point in time.</summary>
 public sealed class SystemSnapshot
@@ -227,12 +251,15 @@ public sealed record MarketGoodView(
     long BuyQuantity, decimal Bid,
     long SellQuantity, decimal Ask) : IComponentView;
 
-/// <summary>The book a faction is allowed to see. Owned and Friendly only.</summary>
+/// <summary>The book a faction is allowed to see. The owner, or a viewer granted Trade.</summary>
 public sealed record MarketView(
     int Capacity, IReadOnlyList<MarketGoodView> Goods) : IComponentView
 {
     /// <summary>True when this faction owns the office and may post listings.</summary>
     public bool CanEdit { get; init; }
+
+    /// <summary>False when the book is visible from one grant and the other side has not granted Trade.</summary>
+    public bool ExchangeOpen { get; init; }
 
     /// <summary>Unlocked cargo the owner can add. Empty for a friendly viewer.</summary>
     public IReadOnlyList<MarketGoodChoice> Addable { get; init; } = Array.Empty<MarketGoodChoice>();

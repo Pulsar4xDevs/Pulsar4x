@@ -325,7 +325,7 @@ namespace Pulsar4X.Engine.Api
             // CreateFleet targets the faction). (Commands with a secondary target — e.g. a move
             // destination — carry that as a separate DTO field, which the translator resolves; only
             // the commanded entity is ownership-checked here.)
-            // BuyIntel targets the seller's office. Trade stance is the permission for that one command.
+            // BuyIntel targets the seller's office. Mutual Trade grants are the permission for that one command.
             if (commanded.Id != session.FactionId && commanded.FactionOwnerID != session.FactionId
                 && !(command is BuyIntelCommand
                     && commanded.HasDataBlob<LogiBaseDB>()
@@ -351,6 +351,17 @@ namespace Pulsar4X.Engine.Api
 
                 if (command is SetFactionStanceCommand)
                     PushStances(session.FactionId);
+
+                if (command is SetFactionGrantCommand grant)
+                {
+                    PushStances(session.FactionId);
+                    PushStances(grant.OtherFactionId);
+                    if (grant.Grant is FactionGrants.Trade or FactionGrants.Positions)
+                    {
+                        PushKnownSystems(session.FactionId);
+                        PushKnownSystems(grant.OtherFactionId);
+                    }
+                }
 
                 // A new component design also registers a research project for itself.
                 if (command is CreateComponentDesignCommand)
@@ -397,6 +408,30 @@ namespace Pulsar4X.Engine.Api
             foreach (var sub in SnapshotSubscriptions())
                 if (sub.FactionId == factionId)
                     sub.Send(evt);
+        }
+
+        /// <summary>
+        /// Re-sends each system this faction already knows. A Trade or Ship-positions grant changes
+        /// which entities belong in that snapshot, and the client replaces the system wholesale.
+        /// </summary>
+        private void PushKnownSystems(int factionId)
+        {
+            if (!_game.Factions.TryGetValue(factionId, out var faction))
+                return;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var info) || info.KnownSystems == null)
+                return;
+
+            foreach (var sub in SnapshotSubscriptions())
+            {
+                if (sub.FactionId != factionId)
+                    continue;
+                foreach (var systemId in info.KnownSystems)
+                {
+                    var system = _projector.ProjectSystem(systemId, factionId);
+                    if (system != null)
+                        sub.Send(new GameEventEnvelope(GameEventType.SystemRevealed, systemId, System: system));
+                }
+            }
         }
 
         private void PushCommanders(int factionId)

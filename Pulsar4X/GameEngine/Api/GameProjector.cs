@@ -91,9 +91,24 @@ namespace Pulsar4X.Engine.Api
                     ? nameDB.GetName(viewerFactionId)
                     : id.ToString();
                 var stance = FactionStance.Hostile;
-                if (info != null && info.Stances.TryGetValue(id, out var stored))
-                    stance = stored;
-                rows.Add(new FactionStanceRow(id, name, stance));
+                var theirStance = FactionStance.Hostile;
+                var grantedByViewer = FactionGrants.None;
+                var grantedToViewer = FactionGrants.None;
+                if (info != null)
+                {
+                    if (info.Stances != null && info.Stances.TryGetValue(id, out var stored))
+                        stance = stored;
+                    if (info.Grants != null && info.Grants.TryGetValue(id, out var mine))
+                        grantedByViewer = mine;
+                }
+                if (faction.TryGetDataBlob<FactionInfoDB>(out var theirs))
+                {
+                    if (theirs.Stances != null && theirs.Stances.TryGetValue(viewerFactionId, out var storedTheirs))
+                        theirStance = storedTheirs;
+                    if (theirs.Grants != null && theirs.Grants.TryGetValue(viewerFactionId, out var opened))
+                        grantedToViewer = opened;
+                }
+                rows.Add(new FactionStanceRow(id, name, stance, grantedByViewer, grantedToViewer, theirStance));
             }
 
             return rows;
@@ -197,8 +212,8 @@ namespace Pulsar4X.Engine.Api
             (e, _) => e.TryGetDataBlob<MassVolumeDB>(out var m)
                 ? new MassVolumeView(m.MassTotal, m.RadiusInM, m.DensityDry_gcm) { DryMassKg = m.MassDry } : null,
             // Projected even when the queue is empty: its presence marks the entity as orderable,
-            // which gates the order-queue UI.
-            (e, f) => e.FactionOwnerID == f && e.HasDataBlob<ActionQueueDB>() || e.HasDataBlob<GoalsDB>()
+            // which gates the order-queue UI. Owner only, so a revealed foreign ship keeps its goals.
+            (e, f) => e.FactionOwnerID == f && (e.HasDataBlob<ActionQueueDB>() || e.HasDataBlob<GoalsDB>())
                 ? new OrdersView(ProjectGoals(e), ProjectOrders(e)) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Movement.NewtonThrustAbilityDB>(out var th)
                 ? ToThrustView(th, e, f) : null,
@@ -221,7 +236,7 @@ namespace Pulsar4X.Engine.Api
             (e, _) => e.TryGetDataBlob<AtmosphereDB>(out var a) ? ToAtmosphereView(a, a.OwningEntity?.Manager?.Game) : null,
             // Non-owners see a ship's class but not its internals (health, armor, crew).
             (e, f) => e.TryGetDataBlob<ShipInfoDB>(out var sh)
-                ? (e.FactionOwnerID == f ? ToShipView(sh, e, f) : new ShipView(sh.Design.Name))
+                ? (e.FactionOwnerID == f ? ToShipView(sh, e, f) : new ShipView(sh.Design?.Name ?? ""))
                 : null,
             (e, f) => e.TryGetDataBlob<GeoSurveyableDB>(out var g) ? ToGeoSurveyView(g, f) : null,
             (e, _) => e.HasDataBlob<ColonizeableDB>() ? new ColonizableView() : null,
@@ -636,18 +651,20 @@ namespace Pulsar4X.Engine.Api
         }
 
         /// <summary>
-        /// The office book for the owner and for factions that project as Friendly (including Allied).
+        /// The office book for the owner, and for a viewer the owner has granted Trade.
         /// Names come from the viewer's cargo list. Stock is resolved with the owner's cargo definition.
+        /// Exchange is open only when trade is mutual, or the viewer owns the office.
         /// </summary>
         private static MarketView? ToMarketView(Entity entity, int factionId)
         {
             if (!entity.TryGetDataBlob<LogiBaseDB>(out var book))
                 return null;
-            var relation = RelationOf(entity, factionId);
-            if (relation != OwnerRelation.Owned && relation != OwnerRelation.Friendly)
-                return null;
-
+            bool owned = entity.FactionOwnerID == factionId;
             var game = entity.Manager?.Game;
+            bool theyGrantTrade = !owned && game != null
+                && FactionStanceRules.Granted(game, entity.FactionOwnerID, factionId, FactionGrants.Trade);
+            if (!owned && !theyGrantTrade)
+                return null;
             FactionInfoDB? viewer = null;
             FactionInfoDB? owner = null;
             if (game != null)
@@ -672,10 +689,12 @@ namespace Pulsar4X.Engine.Api
                     listing.Ask));
             }
 
-            bool canEdit = relation == OwnerRelation.Owned;
+            bool canEdit = owned;
+            bool exchangeOpen = game != null && FactionStanceRules.CanTrade(game, factionId, entity.FactionOwnerID);
             return new MarketView(book.Capacity, goods)
             {
                 CanEdit = canEdit,
+                ExchangeOpen = exchangeOpen,
                 Addable = canEdit ? AddableCargo(owner, book) : Array.Empty<MarketGoodChoice>(),
             };
         }
@@ -688,12 +707,14 @@ namespace Pulsar4X.Engine.Api
         {
             if (!entity.TryGetDataBlob<LogiBaseDB>(out var book))
                 return null;
-            var relation = RelationOf(entity, factionId);
-            if (relation != OwnerRelation.Owned && relation != OwnerRelation.Friendly)
+            bool isOwner = entity.FactionOwnerID == factionId;
+            var game = entity.Manager?.Game;
+            bool theyGrantTrade = !isOwner && game != null
+                && FactionStanceRules.Granted(game, entity.FactionOwnerID, factionId, FactionGrants.Trade);
+            if (!isOwner && !theyGrantTrade)
                 return null;
 
-            var game = entity.Manager?.Game;
-            bool canEdit = relation == OwnerRelation.Owned;
+            bool canEdit = isOwner;
             book.Intel ??= new Dictionary<string, IntelListing>(StringComparer.Ordinal);
             var stored = book.Intel.Values
                 .Where(row => canEdit || row.ForSale)

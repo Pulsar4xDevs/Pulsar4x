@@ -63,10 +63,22 @@ namespace Pulsar4X.Tests
             otherInfo.Stances[session.FactionId] = FactionStance.Friendly;
             ownerInfo!.Stances[other.Id] = FactionStance.Friendly;
 
+            var closed = _projector.ProjectEntity(colony, other.Id);
+            Assert.That(closed.Relation, Is.EqualTo(OwnerRelation.Friendly));
+            Assert.That(closed.HasView<MarketView>(), Is.False);
+
+            FactionStanceRules.SetGrant(ownerInfo, other.Id, FactionGrants.Trade, true);
+            var oneWay = _projector.ProjectEntity(colony, other.Id).GetView<MarketView>();
+            Assert.That(oneWay, Is.Not.Null);
+            Assert.That(oneWay!.CanEdit, Is.False);
+            Assert.That(oneWay.ExchangeOpen, Is.False);
+            Assert.That(oneWay.Goods[0].Ask, Is.EqualTo(11m));
+            Assert.That(oneWay.Goods[0].Stock, Is.EqualTo(250));
+
+            FactionStanceRules.SetGrant(otherInfo, session.FactionId, FactionGrants.Trade, true);
             var owned = _projector.ProjectEntity(colony, session.FactionId);
             var friendly = _projector.ProjectEntity(colony, other.Id);
-            Assert.That(friendly.Relation, Is.EqualTo(OwnerRelation.Friendly));
-            Assert.That(friendly.GetView<MarketView>(), Is.Not.Null);
+            Assert.That(friendly.GetView<MarketView>()!.ExchangeOpen, Is.True);
             AssertSame(owned.GetView<MarketView>()!, friendly.GetView<MarketView>()!);
 
             otherInfo.Stances[session.FactionId] = FactionStance.Allied;
@@ -74,7 +86,9 @@ namespace Pulsar4X.Tests
             var allied = _projector.ProjectEntity(colony, other.Id);
             Assert.That(allied.Relation, Is.EqualTo(OwnerRelation.Friendly));
             Assert.That(allied.GetView<MarketView>(), Is.Not.Null);
-            AssertSame(owned.GetView<MarketView>()!, allied.GetView<MarketView>()!);
+
+            ownerInfo.Grants[other.Id] = FactionGrants.None;
+            Assert.That(_projector.ProjectEntity(colony, other.Id).HasView<MarketView>(), Is.False);
         }
 
         [Test]
@@ -94,6 +108,10 @@ namespace Pulsar4X.Tests
             var neutral = _projector.ProjectEntity(colony, other.Id);
             Assert.That(neutral.Relation, Is.EqualTo(OwnerRelation.Neutral));
             Assert.That(neutral.HasView<MarketView>(), Is.False);
+
+            otherInfo.Stances[session.FactionId] = FactionStance.Allied;
+            FactionOf(session.FactionId).Stances[other.Id] = FactionStance.Allied;
+            Assert.That(_projector.ProjectEntity(colony, other.Id).HasView<MarketView>(), Is.False);
         }
 
         [Test]
@@ -121,6 +139,7 @@ namespace Pulsar4X.Tests
 
             var view = _projector.ProjectEntity(colony, session.FactionId).GetView<MarketView>();
             Assert.That(view!.CanEdit, Is.True);
+            Assert.That(view.ExchangeOpen, Is.True);
             Assert.That(view.Addable.Any(c => c.CargoId == "iron"), Is.False);
             Assert.That(view.Addable.Any(c => c.CargoId == "copper"), Is.True);
         }
@@ -137,10 +156,13 @@ namespace Pulsar4X.Tests
             otherInfo.Data.Unlock("copper");
             otherInfo.Stances[session.FactionId] = FactionStance.Friendly;
             FactionOf(session.FactionId).Stances[other.Id] = FactionStance.Friendly;
+            FactionStanceRules.SetGrant(FactionOf(session.FactionId), other.Id, FactionGrants.Trade, true);
+            FactionStanceRules.SetGrant(otherInfo, session.FactionId, FactionGrants.Trade, true);
 
             var view = _projector.ProjectEntity(colony, other.Id).GetView<MarketView>();
             Assert.That(view, Is.Not.Null);
             Assert.That(view!.CanEdit, Is.False);
+            Assert.That(view.ExchangeOpen, Is.True);
             Assert.That(view.Addable, Is.Empty);
         }
 

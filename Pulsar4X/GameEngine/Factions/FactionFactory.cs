@@ -484,7 +484,7 @@ namespace Pulsar4X.Factions
         }
 
         /// <summary>
-        /// Stores <paramref name="stance"/> both ways. Trade requires both sides.
+        /// Stores <paramref name="stance"/> both ways. Friendly or Allied also seeds Trade and Ship positions both ways.
         /// Factions qualify by knowing the system or by owning a colony or ship there.
         /// </summary>
         static void SetStanceTowardSystem(Game game, Entity faction, StarSystem system, FactionStance stance)
@@ -501,6 +501,8 @@ namespace Pulsar4X.Factions
 
                 info.Stances[other.Id] = stance;
                 otherInfo.Stances[faction.Id] = stance;
+                FactionStanceRules.SeedFromStance(info, other.Id, stance);
+                FactionStanceRules.SeedFromStance(otherInfo, faction.Id, stance);
             }
         }
 

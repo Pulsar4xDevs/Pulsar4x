@@ -88,7 +88,7 @@ public class MarketExchangeAction : EntityAction
         int marketFaction = market.FactionOwnerID;
         if (!FactionStanceRules.CanTrade(game, shipFaction, marketFaction))
         {
-            Fail("Cannot trade");
+            Fail("Trade is not mutual.");
             return;
         }
 

@@ -54,8 +54,7 @@ public class SystemWindow : UniquePulsarGuiWindow<SystemWindow>
                 }
 
                 var coloniesByBody = system.Entities
-                    .Where(e => e.Kind == BodyKind.Colony
-                        && (e.Relation == OwnerRelation.Owned || e.Relation == OwnerRelation.Friendly))
+                    .Where(e => e.Kind == BodyKind.Colony)
                     .Select(e => (Colony: e, PlanetId: e.GetView<ColonyView>()?.PlanetEntityId))
                     .Where(c => c.PlanetId != null)
                     .GroupBy(c => c.PlanetId!.Value)

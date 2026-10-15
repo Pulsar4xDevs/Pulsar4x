@@ -66,6 +66,9 @@ namespace Pulsar4X.Tests
 
             other.GetDataBlob<FactionInfoDB>().Stances.Remove(session.FactionId);
             FactionOf(session.FactionId).Stances.Remove(other.Id);
+            Assert.That(_projector.ProjectEntity(colony, other.Id).GetView<IntelBookView>(), Is.Not.Null);
+
+            FactionOf(session.FactionId).Grants.Remove(other.Id);
             Assert.That(_projector.ProjectEntity(colony, other.Id).GetView<IntelBookView>(), Is.Null);
         }
 
@@ -166,15 +169,16 @@ namespace Pulsar4X.Tests
             Assert.That(body.GetDataBlob<GeoSurveyableDB>().IsSurveyComplete(poor.Id), Is.False);
 
             buyerInfo.Stances.Remove(session.FactionId);
+            buyerInfo.Grants.Remove(session.FactionId);
             var oneSided = commands.Translate(buyer, colony, new BuyIntelCommand(colony.Id, subject, IntelKind.Geo));
             Assert.That(oneSided.Accepted, Is.False);
-            Assert.That(oneSided.RejectionReason, Is.EqualTo("These factions cannot trade."));
+            Assert.That(oneSided.RejectionReason, Is.EqualTo("Trade is not mutual."));
 
             var fresh = ExtraFaction(session.FactionId, buyer.Id, freeBuyer.Id, poor.Id);
             fresh.GetDataBlob<FactionInfoDB>().Stances[session.FactionId] = FactionStance.Friendly;
             var sided = commands.Translate(fresh, colony, new BuyIntelCommand(colony.Id, subject, IntelKind.Geo));
             Assert.That(sided.Accepted, Is.False);
-            Assert.That(sided.RejectionReason, Is.EqualTo("These factions cannot trade."));
+            Assert.That(sided.RejectionReason, Is.EqualTo("Trade is not mutual."));
             Assert.That(body.GetDataBlob<GeoSurveyableDB>().IsSurveyComplete(fresh.Id), Is.False);
 
             var own = commands.Translate(seller, colony, new BuyIntelCommand(colony.Id, subject, IntelKind.Geo));
@@ -360,6 +364,8 @@ namespace Pulsar4X.Tests
         {
             FactionOf(leftId).Stances[rightId] = FactionStance.Friendly;
             FactionOf(rightId).Stances[leftId] = FactionStance.Friendly;
+            FactionStanceRules.SetGrant(FactionOf(leftId), rightId, FactionGrants.Trade, true);
+            FactionStanceRules.SetGrant(FactionOf(rightId), leftId, FactionGrants.Trade, true);
         }
 
         void Fund(FactionInfoDB info, decimal amount)

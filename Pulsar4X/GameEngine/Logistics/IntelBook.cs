@@ -218,7 +218,7 @@ public static class IntelBook
         }
         if (!FactionStanceRules.CanTrade(game, buyer.Id, office.FactionOwnerID))
         {
-            reason = "These factions cannot trade.";
+            reason = "Trade is not mutual.";
             return false;
         }
         if (!SellerHas(game, sellerId, kind, subject))

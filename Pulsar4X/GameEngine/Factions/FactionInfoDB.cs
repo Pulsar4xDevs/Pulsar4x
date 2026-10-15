@@ -83,6 +83,13 @@ namespace Pulsar4X.Factions
         [JsonProperty]
         public Dictionary<int, FactionStance> Stances { get; internal set; } = new ();
 
+        /// <summary>
+        /// Grants this faction has given, keyed by the receiver's entity id.
+        /// A missing key means nothing is granted. <see cref="FactionGrants.None"/> is a stored "no".
+        /// </summary>
+        [JsonProperty]
+        public Dictionary<int, FactionGrants> Grants { get; internal set; } = new ();
+
 
         [PublicAPI]
         [JsonProperty]
@@ -166,6 +173,7 @@ namespace Pulsar4X.Factions
             KnownSystems = new List<string>(factionDB.KnownSystems);
             KnownFactions = new List<Entity>(factionDB.KnownFactions);
             Stances = new Dictionary<int, FactionStance>(factionDB.Stances ?? new Dictionary<int, FactionStance>());
+            Grants = new Dictionary<int, FactionGrants>(factionDB.Grants ?? new Dictionary<int, FactionGrants>());
             Colonies = new List<Entity>(factionDB.Colonies);
             InternalKnownJumpPoints = new Dictionary<string, List<Entity>>(factionDB.KnownJumpPoints);
 

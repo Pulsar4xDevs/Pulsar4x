@@ -64,7 +64,7 @@ public class LotOfferAction : EntityAction
         int officeFaction = office.FactionOwnerID;
         if (!FactionStanceRules.CanTrade(game, shipFaction, officeFaction))
         {
-            Finish("Cannot trade");
+            Finish("Trade is not mutual.");
             return;
         }
 

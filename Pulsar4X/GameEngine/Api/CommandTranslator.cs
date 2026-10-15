@@ -47,6 +47,7 @@ namespace Pulsar4X.Engine.Api
             {
                 [typeof(Pulsar4X.Api.RenameCommand)] = TranslateRename,
                 [typeof(SetFactionStanceCommand)] = TranslateSetFactionStance,
+                [typeof(SetFactionGrantCommand)] = TranslateSetFactionGrant,
                 [typeof(SetMarketPolicyCommand)] = TranslateSetMarketPolicy,
                 [typeof(ClearMarketPolicyCommand)] = TranslateClearMarketPolicy,
                 [typeof(RunMarketCommand)] = TranslateRunMarket,
@@ -185,6 +186,25 @@ namespace Pulsar4X.Engine.Api
                 return CommandResult.Reject("Faction has no info.");
 
             info.Stances[set.OtherFactionId] = set.Stance;
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateSetFactionGrant(Entity faction, Entity commanded, GameCommand command)
+        {
+            var set = (SetFactionGrantCommand)command;
+            if (commanded.Id != faction.Id)
+                return CommandResult.Reject("A grant is set on the faction itself.");
+            if (set.OtherFactionId == faction.Id)
+                return CommandResult.Reject("A faction cannot grant itself.");
+            if (set.OtherFactionId == Game.NeutralFactionId)
+                return CommandResult.Reject("The neutral faction cannot be a grant target.");
+            if (!_game.Factions.ContainsKey(set.OtherFactionId))
+                return CommandResult.Reject($"Faction {set.OtherFactionId} not found.");
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var info))
+                return CommandResult.Reject("Faction has no info.");
+            if (!FactionStanceRules.SetGrant(info, set.OtherFactionId, set.Grant, set.Enabled))
+                return CommandResult.Reject("A grant command changes one flag.");
+
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 

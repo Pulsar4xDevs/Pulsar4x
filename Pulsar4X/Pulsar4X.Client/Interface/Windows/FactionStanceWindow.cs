@@ -6,13 +6,22 @@ using Pulsar4X.Client.Interface.Widgets;
 namespace Pulsar4X.Client
 {
     /// <summary>
-    /// Other factions and the stance this corporation has stored toward each of them.
-    /// Reads Galaxy.Stances. A combo change submits <see cref="SetFactionStanceCommand"/>;
+    /// Other factions, this corporation's status and grants toward each of them, and their
+    /// status and grants shown read-only. Reads Galaxy.Stances. A change submits
+    /// <see cref="SetFactionStanceCommand"/> or <see cref="SetFactionGrantCommand"/>;
     /// the row updates when the server pushes <see cref="GameEventType.StancesChanged"/>.
     /// </summary>
     public class FactionStanceWindow : UniquePulsarGuiWindow<FactionStanceWindow>
     {
         static readonly string[] StanceLabels = Enum.GetNames<FactionStance>();
+        static readonly (FactionGrants Flag, string Label)[] GrantLabels =
+        {
+            (FactionGrants.Trade, "Trade"),
+            (FactionGrants.Positions, "Ships"),
+            (FactionGrants.Geo, "Geo"),
+            (FactionGrants.Grav, "Grav"),
+            (FactionGrants.Research, "Research"),
+        };
 
         private FactionStanceWindow()
         {
@@ -38,7 +47,7 @@ namespace Pulsar4X.Client
                 {
                     ImGui.TextColored(Styles.DescriptiveColor, "No other factions.");
                 }
-                else if (ImGui.BeginTable("FactionStances", 2,
+                else if (ImGui.BeginTable("FactionStances", 5,
                     ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingFixedFit))
                 {
                     // Stretch columns collapse under AlwaysAutoResize, which clipped the combo to "Frien".
@@ -49,13 +58,21 @@ namespace Pulsar4X.Client
                         nameWidth = Math.Max(nameWidth, ImGui.CalcTextSize(row.Name).X);
                     nameWidth += style.CellPadding.X * 2f;
 
-                    float comboWidth = ImGui.CalcTextSize("Stance").X;
+                    float comboWidth = Math.Max(ImGui.CalcTextSize("Status").X, ImGui.CalcTextSize("Their status").X);
                     foreach (var label in StanceLabels)
                         comboWidth = Math.Max(comboWidth, ImGui.CalcTextSize(label).X);
                     comboWidth += style.FramePadding.X * 2f + ImGui.GetFrameHeight() + style.CellPadding.X * 2f;
 
+                    float grantsWidth = Math.Max(ImGui.CalcTextSize("Their grants").X, ImGui.CalcTextSize("Grants").X);
+                    grantsWidth += style.CellPadding.X * 2f;
+                    foreach (var grant in GrantLabels)
+                        grantsWidth += ImGui.GetFrameHeight() + style.FramePadding.X * 2f + ImGui.CalcTextSize(grant.Label).X + style.ItemSpacing.X;
+
                     ImGui.TableSetupColumn("Faction", ImGuiTableColumnFlags.WidthFixed, nameWidth);
-                    ImGui.TableSetupColumn("Stance", ImGuiTableColumnFlags.WidthFixed, comboWidth);
+                    ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.WidthFixed, comboWidth);
+                    ImGui.TableSetupColumn("Grants", ImGuiTableColumnFlags.WidthFixed, grantsWidth);
+                    ImGui.TableSetupColumn("Their status", ImGuiTableColumnFlags.WidthFixed, comboWidth);
+                    ImGui.TableSetupColumn("Their grants", ImGuiTableColumnFlags.WidthFixed, grantsWidth);
                     ImGui.TableHeadersRow();
 
                     foreach (var row in galaxy.Stances)
@@ -73,12 +90,43 @@ namespace Pulsar4X.Client
                             _uiState.GameClient?.SubmitCommandAsync(
                                 new SetFactionStanceCommand(_uiState.FactionId, row.FactionId, (FactionStance)current));
                         }
+
+                        ImGui.TableNextColumn();
+                        DrawGrants(row.FactionId, row.GrantedByViewer, editable: true, "mine");
+
+                        ImGui.TableNextColumn();
+                        ImGui.Text(row.TheirStance.ToString());
+
+                        ImGui.TableNextColumn();
+                        DrawGrants(row.FactionId, row.GrantedToViewer, editable: false, "theirs");
                     }
 
                     ImGui.EndTable();
                 }
             }
             Window.End();
+        }
+
+        void DrawGrants(int factionId, FactionGrants grants, bool editable, string prefix)
+        {
+            for (int i = 0; i < GrantLabels.Length; i++)
+            {
+                if (i > 0)
+                    ImGui.SameLine();
+                var (flag, label) = GrantLabels[i];
+                bool on = grants.HasFlag(flag);
+                if (!editable)
+                    ImGui.BeginDisabled();
+                if (ImGui.Checkbox($"{label}##{prefix}-{flag}-{factionId}", ref on)
+                    && editable
+                    && on != grants.HasFlag(flag))
+                {
+                    _uiState.GameClient?.SubmitCommandAsync(
+                        new SetFactionGrantCommand(_uiState.FactionId, factionId, flag, on));
+                }
+                if (!editable)
+                    ImGui.EndDisabled();
+            }
         }
     }
 }
