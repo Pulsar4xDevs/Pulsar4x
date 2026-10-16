@@ -963,8 +963,10 @@ namespace Pulsar4X.Client
             string goalName = "Idle";
             string goalDetails = "";
             string goalMessage = "";
-            var goal = _entity.GetView<OrdersView>().goal;
-            if (goal.Name != "")
+            // Owner-only, and only when the entity has a queue or a goal. A foreign
+            // ship and an idle hull stay on the Idle label.
+            var goal = _entity.GetView<OrdersView>()?.goal;
+            if (goal != null && goal.Name != "")
             {
                 goalName = goal.Name;
                 goalDetails = goal.Status;

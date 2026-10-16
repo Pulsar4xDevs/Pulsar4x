@@ -18,6 +18,7 @@ Inbox for small bugs and follow-ups that came up while doing something else. Any
 - `GameEngine/Movement/movement-issues.md` — movement plumbing that is still broken.
 - `GameEngine/Damage/damage-system.md` — damage as it works today and what should change.
 - `GameEngine/Engine/Orders/agents-and-goals-design.md` — goal, action, and agent decisions.
+- `GameEngine/Engine/Orders/agent-wakes.md` — near-term item 2. Done 2026-10-17. One pending agent wake, the survey tick moves the clock, and the master-pulse jump key is removed after it runs.
 - `GameEngine/Engine/Orders/weighting-vertical-slice.md` — autonomous weighting slice.
 - `GameEngine/Logistics/plans/` — trade and transport plans. Plans 1–12 and 5b are implemented on `TradeAndTransport`. `office-purses.md` is an idea for later, not plan 13. Do not build it until asked. `survey-charts.md` is implemented: finished surveys are the first kinds on a general intel list, not plan 13. `sealed-shipments.md` is a plan for a remote friendly buy. Several goods can share one shipment. The buying office pays for the goods and posts an intel haul. Any free ship can deliver it and be paid the fee. Not plan 13. Do not build it until asked. The goal half is `DeliverShipment`. `faction-grants-later.md` is a stub for the grant follow-ups. The next slice is colony locations as their own box, separate from ships. Not plan 13. Do not build it until asked.
 - `GameEngine/Industry/plans/` — colony industry. Refine-one-batch is implemented. It is not logistics plan 13.
@@ -34,6 +35,14 @@ Inbox for small bugs and follow-ups that came up while doing something else. Any
 
 2026-10-03. A mine rate for a mineral the body does not have is omitted in `MiningHelper.CalculateActualMiningRates`, and `MineResourcesProcessor.MineResources` skips a rate whose deposit is missing. `TimeStopDiagnosticTests.SolStart_FirstHour_MiningDoesNotKillTheClock` passes.
 
+### Master pulse keeps a jump interrupt forever
+
+2026-10-17. `ProcessNextInterupt` removes the datetime key it just ran. A later key stays. `AgentWakeTests.JumpKey_IsGoneAfterThePulse_AndTheNextStepMovesOn` passes. Live jumps stay on `ShipJumpAction`.
+
+### Geo survey: finishing a site can hang the subpulse
+
+2026-10-17. `FleetSurvey_MarsAndMoons_ShipsSurvey_TankerMovesToParent` runs to 30 hours and Mars is complete. `FleetGravSurvey_OnSite_CompletesAssignedAnomalies` includes the outer anomaly and returns. A second pass still due at the current instant throws and names the processor. A ship parked on a `MoveTypes.None` site can plot the next warp.
+
 ## Open
 
 ### A processor fault stops the clock quietly — the dialog is in, the crash save is not
@@ -45,14 +54,6 @@ The crash-save half is still unbuilt. Do not build it until asked. Two files: a 
 ### Quickstart failure leaves a blank window
 
 `MainMenuItems` sets `IsActive = false` after `NewGameMenu.QuickstartGame()` whether or not a game was created (`Pulsar4X.Client/Interface/Menus/MainMenuItems.cs`). `QuickstartGame` returns immediately when `GameLifecycle.Quickstart()` returns null, and does not turn the menu back on (`NewGameMenu.cs`). `Quickstart` catches failures and returns null (`Pulsar4X.Client.Host/GameLifecycle.cs`). The result is a blank viewport and no Escape menu.
-
-### Master pulse keeps a jump interrupt forever
-
-`MasterTimePulse.ProcessNextInterupt` runs the jump pairs under `EntityDictionary.Keys.Min()` and returns that time. Nothing removes the key. Once `GameGlobalDateTime` reaches it, `SimulateTimeUntil` returns the same instant on every pass. The only writer is `InterSystemJumpProcessor.SetJump`. `ShipJumpAction` transfers the ship itself and does not call `SetJump`. Noted in `GeoSurveyFleetTests.FleetSurvey_MarsAndMoons_ShipsSurvey_TankerMovesToParent`, which calls `ProcessSystem` for that reason. Not the mining crash above.
-
-### Geo survey: finishing a site can hang the subpulse
-
-Same test comment: the first tick after a geo survey completes replans into a warp-to-self, and `ProcessSystem` hangs. The test stops at 24h and uses a 15s timeout. Not chased past that comment. See also `GameEngine/Movement/movement-issues.md`.
 
 ### Price finding is a later economy session
 

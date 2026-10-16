@@ -48,7 +48,10 @@ namespace Pulsar4X.Engine
             _jumpPair = jumpPair;
             _game = game;
 
-            EnumProcessorMap[action].DynamicInvoke(game, jumpPair);
+            // The map stores Action<EntityManager>. JumpOut and JumpIn read the
+            // thread-static game and pair set above; the argument is unused.
+            // Two arguments throw before the pair runs, and the key is never removed.
+            EnumProcessorMap[action].DynamicInvoke((EntityManager?)null);
         }
 
         private static void DoNothing()

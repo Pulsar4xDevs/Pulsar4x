@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Diagnostics;
+using GameEngine.Engine.Orders;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
 using Pulsar4X.DataStructures;
@@ -242,6 +243,25 @@ namespace Pulsar4X.Engine
         }
 
         /// <summary>
+        /// Drop queued <see cref="AgentProcessor"/> rows for one entity.
+        /// Warp arrivals and action-queue interrupts on that entity stay.
+        /// High index first: <see cref="TimeQueue{T}.RemoveAt"/> shifts the tail.
+        /// </summary>
+        internal void RemoveAgentInterrupts(Entity entity)
+        {
+            lock (_lock)
+            {
+                var queued = _instanceProcessorsQueue.ToList();
+                for (int i = queued.Count - 1; i >= 0; i--)
+                {
+                    var item = queued[i].Item;
+                    if (item.Item1 == nameof(AgentProcessor) && item.Item2 == entity)
+                        _instanceProcessorsQueue.RemoveAt(i);
+                }
+            }
+        }
+
+        /// <summary>
         /// removes all references of an entity from the dictionary
         /// </summary>
         /// <param name="entity"></param>
@@ -317,6 +337,11 @@ namespace Pulsar4X.Engine
                 _subStepDateTime = _processToDateTime;
                 ProcessToNextInterupt();
 
+                // One pass may run an interrupt that was already due. If the earliest
+                // interrupt is still this instant, another pass would be a zero span.
+                if (StarSysDateTime < targetDateTime)
+                    ThrowIfClockDidNotAdvance();
+
                 Performance.EndSubInterval();
             }
 
@@ -356,8 +381,21 @@ namespace Pulsar4X.Engine
         {
             Debug.Assert(_game.ProcessorManager == _processManager, "ProcessorManager mismatch");
 
+            bool consumedZeroSpan = false;
             while (StarSysDateTime <= _processToDateTime)
             {
+                bool zeroSpan = _subStepDateTime <= _systemLocalDateTime;
+                if (zeroSpan)
+                {
+                    // A second pass still sitting on this instant is reported by the
+                    // caller. Running it again would not move the clock.
+                    if (consumedZeroSpan)
+                        break;
+                    consumedZeroSpan = true;
+                }
+                else
+                    consumedZeroSpan = false;
+
                 TimeSpan span = (_subStepDateTime - _systemLocalDateTime);
                 int deltaSeconds = (int)span.TotalSeconds;
 
@@ -419,15 +457,55 @@ namespace Pulsar4X.Engine
                 }
 
                 StarSysDateTime = _subStepDateTime; //update the localDateTime and invoke the SystemDateChangedEvent
-                _subStepDateTime = GetNextInterupt(_processToDateTime - _subStepDateTime);
 
                 // Need to run this on each sub-step otherwise processors will continue to be called on subsequent sub-steps when they shouldn't
                 _entityManager.RemoveTaggedEntitys();
 
                 //this lets us run through at least once.
-                if(StarSysDateTime == _processToDateTime)
+                if(StarSysDateTime >= _processToDateTime)
                     break;
+
+                DateTime nextStep = GetNextInterupt(_processToDateTime - StarSysDateTime);
+                _subStepDateTime = nextStep;
             }
+        }
+
+        /// <summary>
+        /// The queue head is still at or before <see cref="StarSysDateTime"/>.
+        /// Name that processor and entity so the fault report can stop the clock.
+        /// </summary>
+        void ThrowIfClockDidNotAdvance()
+        {
+            DateTime earliest = GetNextInterupt(TimeSpan.FromDays(1));
+            if (earliest > StarSysDateTime)
+                return;
+
+            string which = "unknown interrupt";
+            lock (_lock)
+            {
+                if (_instanceProcessorsQueue.Any() && _instanceProcessorsQueue.First().Time <= StarSysDateTime)
+                {
+                    var head = _instanceProcessorsQueue.First();
+                    CurrentProcess = head.Item.Item1;
+                    which = head.Item.Item1 + " on " + head.Item.Item2.DebuggerDisplay;
+                }
+            }
+
+            if (which == "unknown interrupt")
+            {
+                foreach (var (type, runAt) in HotLoopProcessorsNextRun)
+                {
+                    if (runAt != null && runAt <= StarSysDateTime)
+                    {
+                        CurrentProcess = type.Name;
+                        which = type.Name;
+                        break;
+                    }
+                }
+            }
+
+            throw new InvalidOperationException(
+                "Interrupt still due at " + StarSysDateTime.ToString("u") + ": " + which);
         }
     }
 }

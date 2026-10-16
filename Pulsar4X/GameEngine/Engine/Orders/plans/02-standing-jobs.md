@@ -42,11 +42,11 @@ Assign both at the end of `PlaceFaction`, on the system fleet, not on the factio
 
 The standing mine job hands the existing `MineAsteroids` path. That path sells only when the office's buy quantity is above 0. Plan 1 left iron's buy quantity at 0, and `RunMarket` is still unchanged, so a full hold does not sell to Ceres Depot yet. The ship can sit on the existing unload wait.
 
-The clock was not run. A finished geo site can still replan into a warp-to-self and hang `ProcessSystem`. Tests wake the planner and `AgentProcessor.RunAgentNow` directly. At placement an unscanned asteroid is inside Pathfinder's 0.2 AU neighborhood, so Survey Flight hands that child during placement. The relay delays the ship's own plan.
+The clock was not run for this plan. The warp-to-self hang that blocked a clock test is fixed in `agent-wakes.md` (2026-10-17). Tests here still wake the planner and `AgentProcessor.RunAgentNow` directly. At placement an unscanned asteroid is inside Pathfinder's 0.2 AU neighborhood, so Survey Flight hands that child during placement. The relay delays the ship's own plan.
 
 ## Stop if
 
-The open fault in `agent-notes.md` is still real: the first tick after a geo survey completes can replan into a warp-to-self and hang `ProcessSystem`. Plan 2's clock test should be one site. If that hang appears, stop. Fixing it is its own pass and blocks plan 3. Listing the chart from the planner, without relying on a second site, is still in scope.
+The survey hang is fixed. If a clock test throws `Interrupt still due`, stop and record the processor name on that exception. Listing the chart from the planner, without relying on a second site, is still in scope.
 
 ## Out
 

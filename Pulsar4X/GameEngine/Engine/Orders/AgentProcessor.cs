@@ -514,6 +514,9 @@ public class AgentProcessor : IInstanceProcessor
         // equal the Split() instant and 0-span. Always schedule strictly later.
         if (when <= now)
             when = now + CommanderSkills.RecheckInterval(unit);
+        // One pending wake. A poll that is already queued is replaced, including
+        // leftovers from a game that piled a row per finished burn, dig, or sale.
+        unit.Manager.ManagerSubpulses.RemoveAgentInterrupts(unit);
         unit.Manager.ManagerSubpulses.AddEntityInterupt(when, nameof(AgentProcessor), unit);
     }
     internal static void RunAgentNow(Entity unit)

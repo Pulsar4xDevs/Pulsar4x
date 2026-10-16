@@ -340,7 +340,6 @@ namespace Pulsar4X.Engine
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                throw new Exception("Engine Crash during time pulse");
                 NoteFault(ex, current);
                 if (Debugger.IsAttached)
                     Debugger.Break();
@@ -388,6 +387,10 @@ namespace Pulsar4X.Engine
                 }
 
             }
+
+            // SetJump writes the exit and the entry as two keys. Drop only the one
+            // that just ran so a later entry key stays, and the next step can move past.
+            EntityDictionary.Remove(nextInteruptDateTime);
             return nextInteruptDateTime;
         }
 

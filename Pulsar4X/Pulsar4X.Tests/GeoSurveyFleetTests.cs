@@ -283,11 +283,10 @@ namespace Pulsar4X.Tests
             AgentProcessor.AssignGoal(scene.Fleet, scene.Goal);
             Assert.AreNotEqual(GoalStatus.Failed, scene.Goal.Status, scene.Goal.Message);
 
-            // ProcessSystem, not TimeStep: the static Game's master pulse can keep a
-            // jump-pair key at GameGlobalDateTime and SimulateTimeUntil 0-spans.
-            // One day is past Earth→Mars warp; GeoSurveyOrder gates points to +1 day
-            // after Execute starts (~t+26h). That first tick currently hangs the
-            // subpulse (replan after complete → warp-to-self), so stop at 24h.
+            // ProcessSystem, not TimeStep. One day is past Earth→Mars warp and
+            // before the first survey tick. GeoSurveyOrder gates points to +1 day
+            // after Execute starts (~t+26h). Mars is 575 points and the kit Speed
+            // is 600, so that tick finishes Mars.
             var wall = Stopwatch.StartNew();
             _sys.ManagerSubpulses.ProcessSystem(_epoch + TimeSpan.FromDays(1));
             Assert.Less(wall.ElapsedMilliseconds, 10000,
@@ -313,6 +312,14 @@ namespace Pulsar4X.Tests
                           && tankerGoals.ActiveGoal.Type == GoalType.MoveTo
                           && tankerGoals.ActiveGoal.TargetEntityID == scene.Mars.Id,
                 "tanker should MoveTo the parent body. " + dump);
+
+            var pastTick = _epoch + TimeSpan.FromHours(30);
+            _sys.ManagerSubpulses.ProcessSystem(pastTick);
+            Assert.Less(wall.ElapsedMilliseconds, 14000,
+                "ProcessSystem past the first survey tick hung. " + Describe(scene));
+            Assert.That(_sys.StarSysDateTime, Is.GreaterThanOrEqualTo(pastTick), Describe(scene));
+            Assert.IsTrue(scene.Mars.GetDataBlob<GeoSurveyableDB>().IsSurveyComplete(scene.Faction.Id),
+                "Mars completes on the first survey tick. " + Describe(scene));
         }
 
         [Test]

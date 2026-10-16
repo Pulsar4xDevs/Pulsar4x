@@ -185,9 +185,9 @@ namespace Pulsar4X.Tests
         [Test, Timeout(15000)]
         public void FleetGravSurvey_OnSite_CompletesAssignedAnomalies()
         {
-            // Two sites only so a finished ship is not immediately handed the next
-            // anomaly (warp-to-None still 0-spans). This test is the survey order.
-            var scene = BuildSolGravSurveyFleet(onSite: true, includeOuter: false);
+            // Outer anomaly is included. A finished ship is handed that site, which
+            // is MoveTypes.None. The warp has to return and the clock has to move.
+            var scene = BuildSolGravSurveyFleet(onSite: true, includeOuter: true);
 
             AgentProcessor.AssignGoal(scene.Fleet, scene.Goal);
             Assert.AreNotEqual(GoalStatus.Failed, scene.Goal.Status, scene.Goal.Message);
@@ -205,7 +205,10 @@ namespace Pulsar4X.Tests
                 "inner anomaly should be surveyed. " + dump);
             Assert.IsTrue(scene.AnomalyMid.GetDataBlob<JPSurveyableDB>().IsSurveyComplete(scene.Faction.Id),
                 "mid anomaly should be surveyed. " + dump);
-            Assert.IsTrue(SurveyOrderFinished(scene.SurveyorA), "Surveyor A order should have finished. " + dump);
+            // The on-site order is done. A follow-on warp to the unfinished outer
+            // site may already be queued; a survey of a finished site must not be.
+            Assert.IsTrue(NoOpenSurveyOfFinishedSite(scene.SurveyorA),
+                "Surveyor A should not still be surveying a finished site. " + dump);
             Assert.IsTrue(SurveyOrderFinished(scene.SurveyorB), "Surveyor B order should have finished. " + dump);
 
             Assert.IsFalse(HasScanSubgoal(scene.Tanker, scene.Goal),
@@ -245,8 +248,8 @@ namespace Pulsar4X.Tests
             Entity surveyorA, surveyorB;
             if (onSite)
             {
-                // Skip warp: sit on the site so JPSurveyOrder can Execute and the
-                // hourly processor can finish. Warp-to-None currently 0-spans.
+                // Skip the inbound warp: sit on the site the way ParkOnTarget leaves
+                // a ship (MoveTypes.None, no orbit) so the survey can finish here.
                 // Spawn parented to Earth (has OrbitDB) then park; anomalies have no OrbitDB.
                 surveyorA = MakeSurveyShip(earth, inner.GetDataBlob<PositionDB>().AbsolutePosition, faction, "Grav Surveyor A");
                 ParkAtSite(surveyorA, inner);
@@ -419,6 +422,8 @@ namespace Pulsar4X.Tests
             var pos = ship.GetDataBlob<PositionDB>();
             pos.SetParent(site);
             pos.RelativePosition = Vector3.Zero;
+            pos.MoveType = PositionDB.MoveTypes.None;
+            pos.Velocity = Vector2.Zero;
         }
 
         int CountAgentInterrupts(Entity ship)
@@ -430,6 +435,23 @@ namespace Pulsar4X.Tests
                     n++;
             }
             return n;
+        }
+
+        static bool NoOpenSurveyOfFinishedSite(Entity ship)
+        {
+            if (ship.HasDataBlob<JPSurveyDB>())
+                return false;
+            if (!ship.TryGetDataBlob<ActionQueueDB>(out var q))
+                return true;
+            foreach (var survey in q.ActionList.OfType<JPSurveyOrder>())
+            {
+                if (survey.TargetSurveyDB != null
+                    && survey.TargetSurveyDB.IsSurveyComplete(ship.FactionOwnerID)
+                    && survey.Status != ActionStatus.Succeeded
+                    && !survey.IsFinished())
+                    return false;
+            }
+            return true;
         }
 
         static bool SurveyOrderFinished(Entity ship)

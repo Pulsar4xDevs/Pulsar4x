@@ -43,10 +43,28 @@ public static class MoveMath
         {
             return entity.GetDataBlob<WarpMovingDB>().SavedNewtonionVector;
         }
+        else if (ParkedVelocity(entity, out var parkedVel))
+        {
+            return parkedVel;
+        }
         else
         {
             throw new Exception("Entity has no velocity");
         }
+    }
+
+    /// <summary>
+    /// A jump point or grav anomaly, and a ship ParkOnTarget left on one, have no
+    /// orbit or newton blob. The residual sits on PositionDB.Velocity.
+    /// </summary>
+    static bool ParkedVelocity(Entity entity, out Vector3 velocity)
+    {
+        velocity = default;
+        if (!entity.TryGetDataBlob<PositionDB>(out var parked)
+            || parked.MoveType != PositionDB.MoveTypes.None)
+            return false;
+        velocity = new Vector3(parked.Velocity.X, parked.Velocity.Y, 0);
+        return true;
     }
 
     /// <summary>
@@ -84,6 +102,13 @@ public static class MoveMath
         else if (entity.HasDataBlob<WarpMovingDB>())
         {
             return entity.GetDataBlob<WarpMovingDB>().SavedNewtonionVector;
+        }
+        else if (ParkedVelocity(entity, out var parkedVel))
+        {
+            var parent = entity.GetDataBlob<PositionDB>().Parent;
+            if (parent != null && parent != entity)
+                parkedVel += GetAbsoluteFutureVelocity(parent, atDateTime);
+            return parkedVel;
         }
         else
         {
