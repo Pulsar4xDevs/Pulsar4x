@@ -185,6 +185,21 @@ namespace Pulsar4X.Engine
             // Requests a simulation halt if it is running.
             _timeSimulationCts?.Cancel();
         }
+
+        /// <summary>
+        /// Blocks until the current step's task has finished. A faulted step still counts as finished.
+        /// </summary>
+        public void WaitUntilStopped()
+        {
+            try
+            {
+                _timeSimulationTask?.Wait();
+            }
+            catch (AggregateException)
+            {
+                // The step ended in a fault. The caller still writes the save.
+            }
+        }
         /// <summary>
         /// Starts the timeloop
         /// </summary>

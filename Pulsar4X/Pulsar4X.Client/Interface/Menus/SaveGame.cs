@@ -8,6 +8,7 @@ public class SaveGame : UniquePulsarGuiWindow<SaveGame>
 {
     private string _filePath = Path.Combine(PulsarMainWindow.GetAppDataPath(), PulsarMainWindow.SavesPath);
     private string _fileName = "savegame.sav";
+    private string? _error;
 
     private SaveGame() {}
 
@@ -22,15 +23,33 @@ public class SaveGame : UniquePulsarGuiWindow<SaveGame>
 
     internal override void Display()
     {
-        if (IsActive && FileDialog.DisplaySave(ref _filePath, ref _fileName, ref IsActive))
-        {
-            if (String.IsNullOrEmpty(_fileName) || String.IsNullOrEmpty(_filePath))
-            {
-                IsActive = false;
-                return;
-            }
+        if (!IsActive)
+            return;
 
+        bool accepted = FileDialog.DisplaySave(ref _filePath, ref _fileName, ref IsActive, _error);
+        if (!accepted)
+        {
+            if (!IsActive)
+                _error = null;
+            return;
+        }
+
+        if (String.IsNullOrEmpty(_fileName) || String.IsNullOrEmpty(_filePath))
+        {
+            IsActive = false;
+            _error = null;
+            return;
+        }
+
+        try
+        {
             _uiState.Lifecycle?.SaveGame(Path.Combine(_filePath, _fileName));
+            _error = null;
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+            IsActive = true;
         }
     }
 

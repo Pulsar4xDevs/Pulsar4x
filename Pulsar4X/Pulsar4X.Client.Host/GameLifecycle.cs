@@ -187,29 +187,54 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
     public GameActivation? LoadGame(string filePath)
     {
         string contents = File.ReadAllText(filePath);
-        var loadedGame = Game.Load(contents);
-
-        // TODO: need to figure out a way to properly handle faction selection on load
-        (int id, Entity faction) = loadedGame.Factions.Last();
+        Entity? faction = null;
+        string? systemId = null;
+        var loadedGame = Game.Load(contents, candidate =>
+        {
+            faction = RequireHumanFaction(candidate, out var known);
+            systemId = known;
+        });
 
         _state.ClearGameState();
         SetGame(loadedGame);
-        BindFaction(faction, setAsPlayer: true);
+        BindFaction(faction!, setAsPlayer: true);
 
-        return faction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB)
-            ? new GameActivation(factionInfoDB.KnownSystems[0])
-            : null;
+        return new GameActivation(systemId!);
     }
 
     public void SaveGame(string filePath)
     {
         if (_game == null) return;
 
+        if (_game.TimePulse.IsRunning)
+        {
+            _game.TimePulse.PauseTime();
+            _game.TimePulse.WaitUntilStopped();
+        }
+
         // Update the save git hash
         _game.LastSaveGitHash = AssemblyInfo.GetGitHash();
 
         string gameJson = Game.Save(_game);
         File.WriteAllText(filePath, gameJson);
+    }
+
+    private static Entity RequireHumanFaction(Game game, out string systemId)
+    {
+        systemId = "";
+        if (!game.Factions.TryGetValue(game.LocalHumanFactionId, out var faction))
+            throw new InvalidOperationException("This save has no human faction.");
+
+        if (!faction.TryGetDataBlob<FactionInfoDB>(out var info) || info.KnownSystems.Count == 0)
+            throw new InvalidOperationException("This faction has no known system.");
+
+        string known = info.KnownSystems[0];
+        if (game.Systems.All(system => system.ID != known))
+            throw new InvalidOperationException("This faction's system is not in the save.");
+
+        systemId = known;
+
+        return faction;
     }
 
     public void SetGameMasterMode(bool enabled)
@@ -389,6 +414,7 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
             request.StartingFunds);
 
         if (playerFaction == null) return null;
+        game.LocalHumanFactionId = playerFaction.Id;
         if (!playerFaction.TryGetDataBlob<FactionInfoDB>(out var factionInfoDB))
         {
             throw new Exception("Missing FactionInfoDB on the players faction");

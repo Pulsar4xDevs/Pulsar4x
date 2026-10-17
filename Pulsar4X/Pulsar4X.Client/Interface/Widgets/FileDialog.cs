@@ -27,19 +27,19 @@ public static class FileDialog
     private static bool _b = false;
     private static SaveOrLoad DialogType = SaveOrLoad.Save;
 
-    public static bool DisplaySave(ref string path, ref string fileName, ref bool IsActive)
+    public static bool DisplaySave(ref string path, ref string fileName, ref bool IsActive, string? error = null)
     {
         DialogType = SaveOrLoad.Save;
-        return Display(ref path, ref fileName, ref IsActive);
+        return Display(ref path, ref fileName, ref IsActive, error);
     }
 
-    public static bool DisplayLoad(ref string path, ref string fileName, ref bool IsActive)
+    public static bool DisplayLoad(ref string path, ref string fileName, ref bool IsActive, string? error = null)
     {
         DialogType = SaveOrLoad.Load;
-        return Display(ref path, ref fileName, ref IsActive);
+        return Display(ref path, ref fileName, ref IsActive, error);
     }
 
-    private static bool Display(ref string path, ref string fileName, ref bool IsActive)
+    private static bool Display(ref string path, ref string fileName, ref bool IsActive, string? error)
     {
         bool isok = false;
         if (string.IsNullOrEmpty(path))
@@ -175,6 +175,12 @@ public static class FileDialog
         ImGui.EndTable();
 
         ImGui.Columns(1);
+        if (!string.IsNullOrEmpty(error))
+        {
+            ImGui.PushTextWrapPos(0);
+            ImGui.TextUnformatted(error);
+            ImGui.PopTextWrapPos();
+        }
         if (DialogType == SaveOrLoad.Load)
         {
             if (ImGui.Button("Load"))

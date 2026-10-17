@@ -10,6 +10,11 @@ public class AsteroidMinerAtb : IComponentDesignAttribute
     [JsonProperty]
     public int UnitsPerDay { get; set; }
 
+    [JsonConstructor]
+    private AsteroidMinerAtb()
+    {
+    }
+
     public AsteroidMinerAtb(int unitsPerDay)
     {
         UnitsPerDay = unitsPerDay;

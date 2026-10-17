@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
@@ -8,8 +9,14 @@ namespace Pulsar4X.Industry
 {
     public class IndustryJob : JobBase
     {
+        [JsonProperty]
         internal string TypeID;
         public IndustryJobStatus Status { get; internal set; } = IndustryJobStatus.Queued;
+
+        [JsonConstructor]
+        private IndustryJob()
+        {
+        }
 
         public IndustryJob(FactionInfoDB factionInfo, string itemID)
         {

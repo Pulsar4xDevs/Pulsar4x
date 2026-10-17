@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Pulsar4X.Engine.Auth;
 using Pulsar4X.Modding;
@@ -103,14 +104,49 @@ namespace Pulsar4X.Engine
         /// </summary>
         public const int MaxFactions = 32;
 
-        // This is horribly named, it generates the ID's for the ICargoables NOT Entities
+        /// <summary>
+        /// Faction the local host binds on load. A future server ignores this when a connection names its own faction.
+        /// -1 means this save has no human faction.
+        /// </summary>
         [JsonProperty]
-        private int EntityIDCounterValue => EntityIDCounter;
+        public int LocalHumanFactionId { get; set; } = -1;
+
+        // This is horribly named, it generates the ID's for the ICargoables NOT Entities.
+        // Setters restore the statics. Field initializers call GetEntityID while the graph is built,
+        // so OnDeserialized writes the saved values again after that walk.
+        [JsonProperty]
+        private int EntityIDCounterValue
+        {
+            get => EntityIDCounter;
+            set
+            {
+                _restoredEntityIdCounter = value;
+                EntityIDCounter = value;
+            }
+        }
 
         [JsonProperty]
-        internal int NextEntityID => EntityIDGenerator.NextId;
+        internal int NextEntityID
+        {
+            get => EntityIDGenerator.NextId;
+            set
+            {
+                _restoredNextEntityId = value;
+                EntityIDGenerator.NextId = value;
+            }
+        }
 
-        private static int EntityIDCounter = 0;
+        private int _restoredEntityIdCounter;
+        private int _restoredNextEntityId;
+
+        internal static int EntityIDCounter = 0;
+
+        [OnDeserialized]
+        private void RestoreIdCounters(StreamingContext context)
+        {
+            EntityIDCounter = _restoredEntityIdCounter;
+            EntityIDGenerator.NextId = _restoredNextEntityId;
+        }
 
         internal event EventHandler PostLoad;
 
@@ -205,7 +241,28 @@ namespace Pulsar4X.Engine
             return JsonConvert.SerializeObject(game, settings);
         }
 
-        public static Game Load(string json)
+        public static Game Load(string json, Action<Game>? accept = null)
+        {
+            int previousCargoId = EntityIDCounter;
+            int previousEntityId = EntityIDGenerator.NextId;
+            Game loadedGame;
+            try
+            {
+                loadedGame = ReadGame(json);
+                accept?.Invoke(loadedGame);
+            }
+            catch
+            {
+                EntityIDCounter = previousCargoId;
+                EntityIDGenerator.NextId = previousEntityId;
+                throw;
+            }
+
+            Rehydrate(loadedGame);
+            return loadedGame;
+        }
+
+        static Game ReadGame(string json)
         {
             JsonSerializerSettings settings = new JsonSerializerSettings() {
                 Formatting = Formatting.Indented,
@@ -214,18 +271,20 @@ namespace Pulsar4X.Engine
                 ContractResolver = new NonPublicResolver(),
             };
             var loadedGame = JsonConvert.DeserializeObject<Game>(json, settings);
+            if (loadedGame == null)
+                throw new InvalidOperationException("Could not read that save.");
+            return loadedGame;
+        }
 
+        static void Rehydrate(Game loadedGame)
+        {
             ClearGlobalState();
             loadedGame.TimePulse.Initialize(loadedGame);
             loadedGame.ProcessorManager = new ProcessorManager(loadedGame);
             loadedGame.OrderHandler = new StandAloneOrderHandler(loadedGame);
-            loadedGame.GlobalManager.Initialize(loadedGame);
 
             foreach (var mgr in loadedGame.GlobalManagerDictionary)
-            {
-                mgr.Value.Initialize(loadedGame);
-                mgr.Value.ManagerSubpulses.Initialize(mgr.Value, loadedGame.ProcessorManager);
-            }
+                mgr.Value.Initialize(loadedGame, postLoad: true);
 
             // Hook up the event logs
             foreach(var (id, faction) in loadedGame.Factions)
@@ -236,6 +295,9 @@ namespace Pulsar4X.Engine
             }
             loadedGame.GameMasterFaction.GetDataBlob<FactionInfoDB>().EventLog.Subscribe();
 
+            foreach (var system in loadedGame.Systems)
+                system.UpdateActivityState();
+
             // settings.Context = new StreamingContext(StreamingContextStates.All, loadedGame);
             // loadedGame.TimePulse = JsonConvert.DeserializeObject<MasterTimePulse>(JObject.Parse(json)["GameInfo"]["TimePulse"].ToString(), settings);
             // loadedGame.ProcessorManager = new ProcessorManager(loadedGame);
@@ -245,8 +307,6 @@ namespace Pulsar4X.Engine
             // loadedGame.GameMasterFaction = JsonConvert.DeserializeObject<Entity>(JObject.Parse(json)["GameInfo"]["GameMasterFaction"].ToString(), settings);
             // StandAloneOrderHandler currently doesn't need to be serialized
             // loadedGame.OrderHandler = JsonConvert.DeserializeObject<StandAloneOrderHandler>(JObject.Parse(json)["OrderHandler"].ToString(), settings);
-
-            return loadedGame;
         }
 
         public void PostNewGameInitialization()

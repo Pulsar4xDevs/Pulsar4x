@@ -24,6 +24,7 @@ Status lives in the file itself, in `near-term.md`, or in `AGENTS.md`. This list
 - `GameEngine/Engine/Orders/weighting-vertical-slice.md` — autonomous weighting.
 - `GameEngine/Engine/Orders/colony-administrator.md` — colony administrator.
 - `GameEngine/Engine/Orders/plans/` — Ceres faction jobs.
+- `GameEngine/Engine/plans/` — save and load. Round-trip first, then work in progress.
 - `GameEngine/Logistics/plans/` — trade and transport. Includes `office-purses.md`, `sealed-shipments.md`, `survey-charts.md`, and `faction-grants-later.md`.
 - `GameEngine/Industry/plans/` — colony industry.
 

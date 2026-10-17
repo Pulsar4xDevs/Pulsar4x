@@ -8,6 +8,7 @@ public class LoadGame : UniquePulsarGuiWindow<LoadGame>
 {
     private string _filePath = Path.Combine(PulsarMainWindow.GetAppDataPath(), PulsarMainWindow.SavesPath);
     private string _fileName = "savegame";
+    private string? _error;
 
     private LoadGame() {}
 
@@ -20,45 +21,85 @@ public class LoadGame : UniquePulsarGuiWindow<LoadGame>
         return _uiState.AddUniqueWindow(new LoadGame());
     }
 
-    internal void LoadLatest()
+    internal bool LoadLatest()
     {
-        var files = Directory.EnumerateFiles(_filePath);
-        DateTime date = DateTime.UnixEpoch;
-        string? fileToLoad = null;
-        foreach (var file in files)
+        try
         {
-            FileInfo fi = new FileInfo(file);
-            if (fi.LastWriteTime > date)
+            var files = Directory.EnumerateFiles(_filePath);
+            DateTime date = DateTime.UnixEpoch;
+            string? fileToLoad = null;
+            foreach (var file in files)
             {
-                fileToLoad = file;
-                date = fi.LastWriteTime;
+                FileInfo fi = new FileInfo(file);
+                if (fi.LastWriteTime > date)
+                {
+                    fileToLoad = file;
+                    date = fi.LastWriteTime;
+                }
             }
-        }
-        if(!string.IsNullOrEmpty(fileToLoad))
-            LoadFile(Path.Combine(fileToLoad, fileToLoad));
+            if (string.IsNullOrEmpty(fileToLoad))
+            {
+                _error = "No save was found.";
+                return false;
+            }
 
+            return LoadFile(fileToLoad);
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+            return false;
+        }
     }
 
-    internal void LoadFile(string filenamepath)
+    internal bool LoadFile(string filenamepath)
     {
-        var activation = _uiState.Lifecycle?.LoadGame(filenamepath);
-        if (activation == null) return;
+        try
+        {
+            var activation = _uiState.Lifecycle?.LoadGame(filenamepath);
+            if (activation == null)
+            {
+                _error = "Could not load that save.";
+                return false;
+            }
 
-        _uiState.ActivateGameUI(activation);
+            _uiState.ActivateGameUI(activation);
+            _error = null;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+            return false;
+        }
     }
 
     internal override void Display()
     {
-        if (IsActive && FileDialog.DisplayLoad(ref _filePath, ref _fileName, ref IsActive))
-        {
-            if (String.IsNullOrEmpty(_fileName) || String.IsNullOrEmpty(_filePath))
-            {
-                IsActive = false;
-                return;
-            }
-            LoadFile(Path.Combine(_filePath, _fileName));
+        if (!IsActive)
+            return;
 
+        bool accepted = FileDialog.DisplayLoad(ref _filePath, ref _fileName, ref IsActive, _error);
+        if (!accepted)
+        {
+            if (!IsActive)
+                _error = null;
+            return;
+        }
+
+        if (String.IsNullOrEmpty(_fileName) || String.IsNullOrEmpty(_filePath))
+        {
             IsActive = false;
+            _error = null;
+            return;
+        }
+
+        if (LoadFile(Path.Combine(_filePath, _fileName)))
+            IsActive = false;
+        else
+        {
+            IsActive = true;
+            Pulsar4X.Client.MainMenuItems.GetInstance().SetActive(true);
         }
     }
 }

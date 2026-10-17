@@ -104,8 +104,11 @@ namespace Pulsar4X.Client
                     ImGui.BeginDisabled();
                 if (ImGui.Button("Resume Last Save", _buttonSize))
                 {
-                    LoadGame.GetInstance().LoadLatest();
-                    SetActive(false);
+                    var load = LoadGame.GetInstance();
+                    if (load.LoadLatest())
+                        SetActive(false);
+                    else
+                        load.SetActive(true);
                 }
                 if(disabled)
                     ImGui.EndDisabled();

@@ -126,21 +126,14 @@ namespace Pulsar4X.Engine
             if (!postLoad)
             {
                 if (seed == -1)
-                {
                     _rngSeed = game.GlobalManager.RNGNext();
-                }
                 else
-                {
                     _rngSeed = seed;
-                }
+
+                RNG = new Random(seed);
             }
             else
-            {
-                if (_rngSeed == 0)
-                    throw new Exception("postload but seed is not set");
-            }
-
-            RNG = new Random(seed);
+                RNG = new Random(_rngSeed);
 
             SetEntities();
             InitializeManagerSubPulse(game, postLoad);

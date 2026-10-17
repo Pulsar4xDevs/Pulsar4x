@@ -140,6 +140,7 @@ namespace Pulsar4X.Engine
         {
             _entityManager = entityManager;
             _processManager = entityManager.Game.ProcessorManager;
+            _game = entityManager.Game;
         }
 
         private void InitHotloopProcessors()
