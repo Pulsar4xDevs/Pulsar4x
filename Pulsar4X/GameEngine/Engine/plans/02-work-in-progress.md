@@ -18,6 +18,8 @@ An order that was running when the player saved is the same order after load. It
 
 `ActionList` has a private setter. The converter builds a new list, and a get-only property was dropping every saved order. An `EntityAction` with no constructor Newtonsoft can call is created with `RuntimeHelpers.GetUninitializedObject`. That skips field initializers. Only `EntityAction` subclasses use it.
 
+`GoalsDB` is opt-in, like every datablob. `ActiveGoal` and `GivenGoal` are saved. The weight dictionaries are rebuilt by the agent and are not saved. A fleet order is a goal, so this is what brings it back. Ship action queues were already saved. `FleetGoal_SurvivesSaveAndLoad` checks the goal id, type, target, route, and that both fields are the same goal.
+
 `MoveToNearestAction`, `WarpFleetTowardsTargetOrder`, and `JumpOrder` save their child action lists. `ShipJumpAction` saves its jump gate. Rehydrate does not enqueue those children again.
 
 A running circularise whose burn blob is already gone is finished. `OrbitDB` removes that blob when the burn completes, and the action queue may not be due until its next hotloop pass. The lane clears on that pass.

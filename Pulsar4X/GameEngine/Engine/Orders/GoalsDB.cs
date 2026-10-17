@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Pulsar4X.Api;
 using Pulsar4X.Datablobs;
 
@@ -39,15 +40,16 @@ public class GoalsDB : BaseDataBlob
         [GoalType.Stealth]           = 0.0f,
     };
 
-    public Goal? ActiveGoal { get; set; }        // The goal we're trying to acheve right now.
-    public Goal? GivenGoal { get; set; }        // Order received from superior
-    
-    // Modifier layers (multiplied together)
+    // The order itself. The modifier dictionaries below are rebuilt each agent pass and are not saved.
+    [JsonProperty]
+    public Goal? ActiveGoal { get; set; }
+    [JsonProperty]
+    public Goal? GivenGoal { get; set; }
+
     public Dictionary<GoalType, float> PersonalityModifiers { get; } = new();
     public Dictionary<GoalType, float> CapabilityModifiers { get; } = new();   // -1 = impossible
     public Dictionary<GoalType, float> OrdersModifiers { get; } = new();       // from superior
 
-    // Computed effective goals
     public Dictionary<GoalType, Goal> EffectiveGoals { get; } = new();
 
     public override object Clone()

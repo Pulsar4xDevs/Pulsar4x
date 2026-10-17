@@ -4,8 +4,11 @@ using System.Linq;
 using NUnit.Framework;
 using Pulsar4X.Colonies;
 using Pulsar4X.DataStructures;
+using GameEngine.Engine.Orders;
+using Pulsar4X.Api;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
+using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Industry;
 using Pulsar4X.JumpPoints;
@@ -107,6 +110,53 @@ public class SaveRoundTripTests
         Assert.That(ex!.Message, Is.EqualTo("rejected"));
         Assert.That(Game.EntityIDCounter, Is.EqualTo(7));
         Assert.That(EntityIDGenerator.NextId, Is.EqualTo(11));
+    }
+
+    [Test]
+    public void FleetGoal_SurvivesSaveAndLoad()
+    {
+        var game = BuildEarth();
+        var sol = game.Systems.Single(s => s.ID == "system-sol");
+        var fleet = FleetFactory.Create(sol, game.LocalHumanFactionId, "Survey");
+        var goal = new Goal(GoalType.SurveyStanding)
+        {
+            Name = "Survey the belt",
+            Status = GoalStatus.Active,
+            TargetEntityID = 42,
+            ParentGoalId = "parent-goal",
+            Message = "two rocks left",
+            CargoId = "methalox",
+            SourceEntityId = 5,
+            DestEntityId = 9,
+            UnitShare = 100,
+            SupplyMode = SupplyMode.Stockpile,
+            Weight = 0.8f,
+            PlayerCancelled = true,
+        };
+        fleet.SetDataBlob(new GoalsDB { ActiveGoal = goal, GivenGoal = goal });
+
+        string json = Game.Save(game);
+        var loaded = Game.Load(json);
+        var loadedSol = loaded.Systems.Single(s => s.ID == "system-sol");
+
+        Assert.That(loadedSol.TryGetEntityById(fleet.Id, out var loadedFleet), Is.True);
+        Assert.That(loadedFleet.TryGetDataBlob<GoalsDB>(out var goals), Is.True);
+        Assert.That(goals!.ActiveGoal, Is.SameAs(goals.GivenGoal));
+        var back = goals.GivenGoal!;
+        Assert.That(back.Id, Is.EqualTo(goal.Id));
+        Assert.That(back.ParentGoalId, Is.EqualTo("parent-goal"));
+        Assert.That(back.Type, Is.EqualTo(GoalType.SurveyStanding));
+        Assert.That(back.TargetEntityID, Is.EqualTo(42));
+        Assert.That(back.CargoId, Is.EqualTo("methalox"));
+        Assert.That(back.SourceEntityId, Is.EqualTo(5));
+        Assert.That(back.DestEntityId, Is.EqualTo(9));
+        Assert.That(back.UnitShare, Is.EqualTo(100));
+        Assert.That(back.SupplyMode, Is.EqualTo(SupplyMode.Stockpile));
+        Assert.That(back.Weight, Is.EqualTo(0.8f));
+        Assert.That(back.Name, Is.EqualTo("Survey the belt"));
+        Assert.That(back.Status, Is.EqualTo(GoalStatus.Active));
+        Assert.That(back.Message, Is.EqualTo("two rocks left"));
+        Assert.That(back.PlayerCancelled, Is.True);
     }
 
     sealed class Snapshot
