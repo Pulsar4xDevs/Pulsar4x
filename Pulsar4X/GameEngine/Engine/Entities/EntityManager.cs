@@ -153,7 +153,7 @@ namespace Pulsar4X.Engine
             ManagerSubpulses.Initialize(this, game.ProcessorManager);
         }
 
-        private void SetEntities()
+        internal void SetEntities()
         {
             // Make sure all the entities have the manager set
             foreach (var (id, entity) in _entities)

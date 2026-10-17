@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using Pulsar4X.Client.Interface.Widgets;
 
@@ -45,9 +46,9 @@ public class LoadGame : UniquePulsarGuiWindow<LoadGame>
 
             return LoadFile(fileToLoad);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!Debugger.IsAttached)
         {
-            _error = ex.Message;
+            _error = ex.ToString();
             return false;
         }
     }
@@ -67,9 +68,9 @@ public class LoadGame : UniquePulsarGuiWindow<LoadGame>
             _error = null;
             return true;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!Debugger.IsAttached)
         {
-            _error = ex.Message;
+            _error = ex.ToString();
             return false;
         }
     }

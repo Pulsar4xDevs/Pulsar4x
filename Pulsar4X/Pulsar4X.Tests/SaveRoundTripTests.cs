@@ -70,6 +70,45 @@ public class SaveRoundTripTests
         Assert.That(saved.EntityIds, Does.Not.Contain(created));
     }
 
+    [Test]
+    public void EarthColony_LoadAcceptReadsTheHumanFaction()
+    {
+        var game = BuildEarth();
+        var before = game.Factions[game.LocalHumanFactionId];
+        Assert.That(before.TryGetDataBlob<FactionInfoDB>(out var savedInfo), Is.True);
+        savedInfo!.KnownSystems.Add("system-sol");
+        string json = Game.Save(game);
+
+        string? known = null;
+        var loaded = Game.Load(json, candidate =>
+        {
+            Assert.That(candidate.Factions.TryGetValue(candidate.LocalHumanFactionId, out var faction), Is.True);
+            Assert.That(faction!.TryGetDataBlob<FactionInfoDB>(out var info), Is.True);
+            Assert.That(info!.KnownSystems, Is.EqualTo(new List<string> { "system-sol" }));
+            known = info.KnownSystems[0];
+            Assert.That(candidate.Systems.Any(system => system.ID == known), Is.True);
+        });
+
+        Assert.That(known, Is.EqualTo("system-sol"));
+        Assert.That(loaded.Systems.Single(system => system.ID == "system-sol").ActivityState, Is.EqualTo(SystemActivityState.Background));
+    }
+
+    [Test]
+    public void LoadAcceptThrow_RestoresTheIdCounters()
+    {
+        var game = BuildEarth();
+        string json = Game.Save(game);
+        Game.EntityIDCounter = 7;
+        EntityIDGenerator.NextId = 11;
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            Game.Load(json, _ => throw new InvalidOperationException("rejected")));
+
+        Assert.That(ex!.Message, Is.EqualTo("rejected"));
+        Assert.That(Game.EntityIDCounter, Is.EqualTo(7));
+        Assert.That(EntityIDGenerator.NextId, Is.EqualTo(11));
+    }
+
     sealed class Snapshot
     {
         public DateTime GlobalDate;

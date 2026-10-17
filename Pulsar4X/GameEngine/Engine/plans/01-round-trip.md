@@ -46,12 +46,17 @@ After that load succeeds, compare the miner design's `UnitsPerDay` with the valu
 
 `Game.Load`, after a successful deserialize:
 
-1. `ClearGlobalState`.
-2. `TimePulse.Initialize`.
-3. A new `ProcessorManager` and a new `StandAloneOrderHandler`. The processors are rebuilt by type. The saved queue stores processor names.
-4. `Initialize(game, postLoad: true)` once per manager in `GlobalManagerDictionary`. Do not call it again on `GlobalManager`. Do not call `ManagerSubPulse.Initialize`.
-5. Subscribe each faction event log, including the game master, and run `FactionStanceRules.MigrateGrants`. That part already exists.
-6. `UpdateActivityState` on every system.
+1. `SetEntities` on every manager in `GlobalManagerDictionary`. This sets `Manager` and datablob owners. It does not clear the event bus and it does not build processors.
+2. The accept callback, when the caller passed one. The host reads `FactionInfoDB` here through `Entity.TryGetDataBlob`. A throw restores the id counters and does not continue.
+3. `ClearGlobalState`. A rejected save has not reached this step.
+4. `TimePulse.Initialize`.
+5. A new `ProcessorManager` and a new `StandAloneOrderHandler`. The processors are rebuilt by type. The saved queue stores processor names. Processor `Init` subscribes on the event bus, so this stays after the clear.
+6. `Initialize(game, postLoad: true)` once per manager in `GlobalManagerDictionary`. Do not call it again on `GlobalManager`. Do not call `ManagerSubPulse.Initialize`.
+7. Subscribe each faction event log, including the game master, and run `FactionStanceRules.MigrateGrants`.
+8. `Rehydrate` on every saved action.
+9. `UpdateActivityState` on every system.
+
+When a debugger is attached, a throw from deserialize or from accept is not caught, so the debugger stops on that line. The id counters are still restored. The load and save windows do the same: they show the exception and its stack when no debugger is attached, and they let it propagate when one is.
 
 `EntityManager.Initialize` on the post-load path uses the saved `_rngSeed` for `new Random`. Seed 0 is a valid seed. Remove the throw that treats 0 as unset. `SetEntities` still runs, so datablob owners are wired.
 
@@ -61,7 +66,7 @@ The id properties need setters. `NextEntityID` writes `EntityIDGenerator.NextId`
 
 ## Host
 
-`GameLifecycle.SaveGame` still writes `Game.Save` of the host's `_game`, in either faction view. It pauses a running clock first, as decided above. A thrown save stays on the save window with the exception message. The window does not close over a failure.
+`GameLifecycle.SaveGame` still writes `Game.Save` of the host's `_game`, in either faction view. It pauses a running clock first, as decided above. A thrown save stays on the save window with the exception and its stack. The window does not close over a failure. When a debugger is attached, the window does not catch it.
 
 `LoadGame` reads `LocalHumanFactionId` and binds that faction. The activation system is `KnownSystems[0]` when that id is a system in `game.Systems`. Otherwise the load fails with a message. No camera position and no zoom are set.
 

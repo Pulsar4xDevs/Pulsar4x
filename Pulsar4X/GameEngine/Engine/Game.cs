@@ -9,6 +9,7 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Engine.Orders;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Events;
@@ -245,16 +246,33 @@ namespace Pulsar4X.Engine
         {
             int previousCargoId = EntityIDCounter;
             int previousEntityId = EntityIDGenerator.NextId;
+
+            // Restores the id counters from before this load. Returns false when a
+            // debugger is attached so the catch below does not run, and the debugger
+            // stops on the line that threw.
+            bool RestoreIds(int cargoId, int entityId)
+            {
+                EntityIDCounter = cargoId;
+                EntityIDGenerator.NextId = entityId;
+                return !Debugger.IsAttached;
+            }
+
             Game loadedGame;
             try
             {
                 loadedGame = ReadGame(json);
+                // Manager is null until SetEntities. The host reads FactionInfoDB
+                // through Entity.TryGetDataBlob, so entities are attached before
+                // accept. Processor setup stays in Rehydrate: those processors
+                // subscribe on the event bus, and that bus is cleared only after
+                // accept succeeds.
+                foreach (var mgr in loadedGame.GlobalManagerDictionary)
+                    mgr.Value.SetEntities();
+
                 accept?.Invoke(loadedGame);
             }
-            catch
+            catch (Exception) when (RestoreIds(previousCargoId, previousEntityId))
             {
-                EntityIDCounter = previousCargoId;
-                EntityIDGenerator.NextId = previousEntityId;
                 throw;
             }
 

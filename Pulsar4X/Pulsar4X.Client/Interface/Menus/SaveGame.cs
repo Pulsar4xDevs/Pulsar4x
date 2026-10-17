@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using Pulsar4X.Client.Interface.Widgets;
 
@@ -46,9 +47,9 @@ public class SaveGame : UniquePulsarGuiWindow<SaveGame>
             _uiState.Lifecycle?.SaveGame(Path.Combine(_filePath, _fileName));
             _error = null;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!Debugger.IsAttached)
         {
-            _error = ex.Message;
+            _error = ex.ToString();
             IsActive = true;
         }
     }
