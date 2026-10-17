@@ -17,6 +17,7 @@ public class AddToConstructionQueueOrder : EntityAction
     public override string Details => "Adds a component design to the local construction queue";
 
     internal override Entity EntityCommanding => _colonyEntity;
+    protected override void BindCommanding(Entity entity) => _colonyEntity = entity;
 
     private Entity _colonyEntity;
     private ComponentDesign _design;

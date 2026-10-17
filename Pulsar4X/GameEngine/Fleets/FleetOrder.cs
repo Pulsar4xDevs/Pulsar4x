@@ -30,7 +30,6 @@ namespace Pulsar4X.Fleets
         public override string Details => Name;
 
         private Entity _factionEntity;
-        private Entity _entityCommanding;
         private Entity _targetEntity;
         private string _requestedName;
         private EntityManager _manager;

@@ -1,6 +1,6 @@
 # Save and load
 
-Two plans. Do them in order. Plan 2 starts only after a load returns a game that can be stepped.
+Two plans. Both are implemented on branch `save-load` (2026-10-17). Plan 2 started only after a load returned a game that can be stepped.
 
 The save is the host's full `Game`. The screen after a load is one faction's slice of that game. A future server loads this same file and pushes a slice per connection. These plans do not add a pull API, a network client, or a second human.
 

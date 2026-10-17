@@ -281,8 +281,8 @@ namespace Pulsar4X.Client
                 return job.AutoAddSubJobs ? item + " +subjobs" : item;
             }
 
-            if (!string.IsNullOrEmpty(action.Details))
-                return action.Details;
+            if (!string.IsNullOrEmpty(action.DetailText))
+                return action.DetailText;
             return action.GetType().Name;
         }
 

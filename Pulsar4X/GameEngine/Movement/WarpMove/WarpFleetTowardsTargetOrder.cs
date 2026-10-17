@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using System.Linq;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Colonies;
@@ -19,12 +20,12 @@ public class WarpFleetTowardsTargetOrder : EntityAction
 
     public override string Details => "";
 
-    private Entity _entityCommanding;
 
     internal override Entity EntityCommanding => _entityCommanding;
 
     public Entity Target { get; set; }
 
+    [JsonProperty]
     List<EntityAction> _shipCommands = new List<EntityAction>();
 
     public override EntityAction Clone()

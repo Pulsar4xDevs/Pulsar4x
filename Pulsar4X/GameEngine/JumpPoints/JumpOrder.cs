@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using System.Linq;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
@@ -26,12 +27,12 @@ public class JumpOrder : EntityAction
     public override string Details { get; } = "Warp fleet to jump gate and transit";
 
     Entity _factionEntity;
-    Entity _entityCommanding;
 
     public JumpPointDB JumpGate { get; private set; }
 
     internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
+    [JsonProperty]
     List<ShipJumpAction> _shipJumpCommands = new List<ShipJumpAction>();
 
     public static bool CreateAndExecute(Game game, Entity faction, Entity fleetEntity, JumpPointDB jumpGate)
@@ -131,10 +132,19 @@ public class ShipJumpAction : EntityAction
     public override string Details { get; } = "Transit through the jump gate";
 
     Entity _factionEntity;
-    Entity _entityCommanding;
+    [JsonProperty]
     JumpPointDB _jumpGate;
 
     internal override Entity EntityCommanding => _entityCommanding;
+
+    public override void Rehydrate(Game game)
+    {
+        base.Rehydrate(game);
+        if (Status == ActionStatus.Failed)
+            return;
+        if (_jumpGate == null)
+            Fail("The jump gate is missing.");
+    }
 
     public static ShipJumpAction Create(Entity ship, JumpPointDB jumpGate)
     {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using System.Linq;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Orbital;
@@ -26,7 +27,6 @@ namespace Pulsar4X.Movement
         /// <summary>
         /// Entity commanding is a fleet in this action
         /// </summary>
-        protected Entity _entityCommanding;
         internal override Entity EntityCommanding
         {
             get { return _entityCommanding; }
@@ -38,6 +38,7 @@ namespace Pulsar4X.Movement
         public EntitySelector? TargetSelector { get; protected set; }
         public EntityFilter EntityFactionFilter { get; protected set; } = EntityFilter.Friendly | EntityFilter.Neutral | EntityFilter.Hostile;
 
+        [JsonProperty]
         private List<EntityAction> _shipCommands = new List<EntityAction>();
 
         internal override bool IsFinished()

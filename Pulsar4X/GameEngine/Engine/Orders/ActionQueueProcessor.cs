@@ -49,7 +49,8 @@ namespace GameEngine.Engine.Orders
 
                 foreach(var entityCommand in orderableDB.ActionList)
                 {
-                    if(entityCommand.Status == ActionStatus.Succeeded)
+                    if(entityCommand.Status == ActionStatus.Succeeded
+                        || entityCommand.Status == ActionStatus.Failed)
                         continue;
 
                     // Processor-side truth can lead Status: warp drop-in sets IsAtTarget
@@ -119,7 +120,10 @@ namespace GameEngine.Engine.Orders
                     }
                 }
 
-                orderableDB.ActionList.RemoveAll(e => e.IsFinished() && string.IsNullOrEmpty(e.ParentGoalId));
+                orderableDB.ActionList.RemoveAll(e =>
+                    e.Status != ActionStatus.Failed
+                    && e.IsFinished()
+                    && string.IsNullOrEmpty(e.ParentGoalId));
 
                 if (wakeAgent)//run the agent to check off goal progression.
                     AgentProcessor.RunAgentNow(entity, atDateTime);

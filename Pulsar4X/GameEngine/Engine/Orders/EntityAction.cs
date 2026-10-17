@@ -46,6 +46,13 @@ namespace GameEngine.Engine.Orders
         public abstract string Name { get; }
         public abstract string Details { get; }
 
+        /// <summary>
+        /// Shown in place of <see cref="Details"/> after a rehydrate failure.
+        /// </summary>
+        public string FailureMessage { get; private set; } = "";
+
+        public string DetailText => string.IsNullOrEmpty(FailureMessage) ? Details : FailureMessage;
+
         public virtual void UpdateDetailString()
         {}
         
@@ -85,8 +92,40 @@ namespace GameEngine.Engine.Orders
         [JsonProperty]
         public DateTime ActionedOnDate { get; set; }
 
+        protected Entity _entityCommanding;
 
-        internal abstract Entity EntityCommanding { get; }
+        internal virtual Entity EntityCommanding
+        {
+            get => _entityCommanding;
+            private set => _entityCommanding = value;
+        }
+
+        /// <summary>
+        /// Point this order at the entities and datablobs already in the save.
+        /// The action processor then keeps calling <see cref="Execute"/>.
+        /// </summary>
+        public virtual void Rehydrate(Game game)
+        {
+            if (game.GlobalManager.TryGetGlobalEntityById(EntityCommandingGuid, out var entity))
+                BindCommanding(entity);
+            else if (Status != ActionStatus.Failed && Status != ActionStatus.Succeeded)
+                Fail("The commanding entity is missing.");
+
+            if (Status == ActionStatus.Running)
+                IsRunning = true;
+        }
+
+        protected virtual void BindCommanding(Entity entity)
+        {
+            _entityCommanding = entity;
+        }
+
+        protected void Fail(string message)
+        {
+            Status = ActionStatus.Failed;
+            FailureMessage = message;
+            IsRunning = false;
+        }
 
         /// <summary>
         /// checks that the entities exsist and that the entity is owned by the faction.
@@ -109,6 +148,7 @@ namespace GameEngine.Engine.Orders
 
         public bool PauseOnAction = false;
 
+        [JsonIgnore]
         [Obsolete]
         public bool IsRunning { get; protected set; } = false;
         [Obsolete]

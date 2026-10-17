@@ -18,6 +18,7 @@ public class UnassignScientistOrder : EntityAction
     public override string Details => "Instantly unassigns a scientist from a lab";
 
     internal override Entity EntityCommanding => _labEntity;
+    protected override void BindCommanding(Entity entity) => _labEntity = entity;
 
     private Entity _labEntity;
     private int _scientistId;

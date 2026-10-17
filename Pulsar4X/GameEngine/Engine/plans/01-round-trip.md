@@ -1,6 +1,6 @@
 # A save comes back as the same game
 
-Status: implemented 2026-10-17. Branch `save-load`. `SaveRoundTripTests.EarthColony_RoundTripsTheSavedGame` passes, including one step after load. Plan 2 is `02-work-in-progress.md`. Do not start plan 2 in this pass.
+Status: implemented 2026-10-17. Branch `save-load`. `SaveRoundTripTests.EarthColony_RoundTripsTheSavedGame` passes, including one step after load. Plan 2 is implemented in `02-work-in-progress.md`.
 
 A save written from the save window loads back as the same simulation. The host then binds the human faction, and the client receives that faction's slice. The file itself stays the full game.
 
@@ -77,7 +77,7 @@ Keep this test. The commented body in `SavingAndLoadingTests.cs` calls the old `
 
 ## Out of this plan
 
-Action pointers, `IsRunning`, a warp in progress, and a burn in progress. Those are plan 2.
+Action pointers, `IsRunning`, a warp in progress, and a burn in progress. Those are plan 2, implemented 2026-10-17.
 
 Restoring the system the player was looking at, the selected entity, the camera, the open windows, or space-master mode.
 

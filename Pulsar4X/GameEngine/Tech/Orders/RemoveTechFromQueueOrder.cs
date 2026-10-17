@@ -17,6 +17,7 @@ public class RemoveTechFromQueueOrder : EntityAction
     public override string Details => "Instantly removes the given tech from the given labs queue";
 
     internal override Entity EntityCommanding => _labEntity;
+    protected override void BindCommanding(Entity entity) => _labEntity = entity;
 
     private Entity _labEntity;
     private string _techId;

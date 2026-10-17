@@ -31,7 +31,6 @@ public class AsteroidMineOrder : EntityAction
     public Entity Target { get; private set; }
     public DateTime? PreviousUpdate { get; private set; }
 
-    Entity _entityCommanding;
 
     internal override Entity EntityCommanding => _entityCommanding;
 
@@ -208,7 +207,6 @@ public class UnloadWaitOrder : EntityAction
     public override string Details => "No colony can take this cargo yet";
 
     DateTime? _started;
-    Entity _entityCommanding;
 
     internal override Entity EntityCommanding => _entityCommanding;
 

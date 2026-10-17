@@ -1557,7 +1557,7 @@ namespace Pulsar4X.Engine.Api
                         break;
                 }
                 
-                orders.Add(new OrderSnapshot(action.Name, action.IsRunning, action.GetIsFinished, action.Details,
+                orders.Add(new OrderSnapshot(action.Name, action.IsRunning, action.GetIsFinished, action.DetailText,
                     maneuver != null)
                 {
                     OrderId = action.CmdID,

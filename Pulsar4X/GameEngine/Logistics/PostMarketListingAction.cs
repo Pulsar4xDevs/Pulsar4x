@@ -19,7 +19,6 @@ public class PostMarketListingAction : EntityAction
 
     string _details = "";
     MarketListing _listing = new();
-    Entity? _entityCommanding;
 
     internal override Entity EntityCommanding => _entityCommanding!;
 

@@ -28,8 +28,23 @@ public class NewtonSimpleAction : EntityAction
     string _details = "";
 
     Entity _factionEntity;
-    Entity _entityCommanding;
     internal override Entity EntityCommanding { get { return _entityCommanding; } }
+
+    public override void Rehydrate(Game game)
+    {
+        base.Rehydrate(game);
+        AttachSimpleBurn();
+    }
+
+    void AttachSimpleBurn()
+    {
+        if (Status != ActionStatus.Running)
+            return;
+        if (_entityCommanding != null && _entityCommanding.TryGetDataBlob<NewtonSimpleMoveDB>(out var burn))
+            _db = burn;
+        else
+            Fail("The burn is missing.");
+    }
     public Vector3 OrbitrelativeDeltaV;
     public KeplerElements StartKE;
     public KeplerElements TargetKE;

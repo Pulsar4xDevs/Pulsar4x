@@ -14,13 +14,12 @@ namespace Pulsar4X.Engine.Orders
 
         public override string Details => "Remove a component from it's parent entity";
 
-        internal override Entity EntityCommanding { get; }
         public ComponentInstance ComponentInstance { get; private set; }
         public int Amount { get; private set; }
 
         internal UninstallComponentInstanceOrder(Entity entity, ComponentInstance componentInstance, int amount = 1)
         {
-            EntityCommanding = entity;
+            _entityCommanding = entity;
             ComponentInstance = componentInstance;
             Amount = amount;
         }

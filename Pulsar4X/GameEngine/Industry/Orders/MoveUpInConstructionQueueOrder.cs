@@ -18,6 +18,7 @@ public class MoveUpInConstructionQueueOrder : EntityAction
     public override string Details => "Moves an item up in the local construction queue";
 
     internal override Entity EntityCommanding => _colonyEntity;
+    protected override void BindCommanding(Entity entity) => _colonyEntity = entity;
 
     private Entity _colonyEntity;
     private LocalConstructionJob _job;

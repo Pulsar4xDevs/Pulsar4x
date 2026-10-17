@@ -142,7 +142,7 @@ The Pause checkbox. That fix is `stash@{0}` and is near-term item 5.
 
 Clearing `GivenGoal`. That is near-term item 3.
 
-Saving a warp in progress. That is near-term item 4 and movement-issues 2.3.
+Saving a warp in progress. Done 2026-10-17. Near-term item 4 and movement-issues 2.3.
 
 Changing how long `RecheckInterval` is. Deduping processors other than `AgentProcessor`. Routing live jumps through `SetJump`.
 

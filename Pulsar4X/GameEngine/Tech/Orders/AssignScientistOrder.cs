@@ -18,6 +18,7 @@ public class AssignScientistOrder : EntityAction
     public override string Details => "Instantly assigns a scientist to a lab";
 
     internal override Entity EntityCommanding => _labEntity;
+    protected override void BindCommanding(Entity entity) => _labEntity = entity;
 
     private Entity _labEntity;
     private int _scientistId;

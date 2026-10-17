@@ -19,6 +19,7 @@ public class AssignAdministratorOrder : EntityAction
     public override string Details => "Instantly assigns an administrator to an admin post";
 
     internal override Entity EntityCommanding => _adminEntity;
+    protected override void BindCommanding(Entity entity) => _adminEntity = entity;
 
     private Entity _adminEntity;
     private int _administratorId;

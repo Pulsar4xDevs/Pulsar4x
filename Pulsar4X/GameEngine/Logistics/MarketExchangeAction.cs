@@ -43,7 +43,6 @@ public class MarketExchangeAction : EntityAction
     [JsonProperty]
     public long RequestedUnits { get; set; }
 
-    Entity? _entityCommanding;
 
     internal override Entity EntityCommanding => _entityCommanding!;
 

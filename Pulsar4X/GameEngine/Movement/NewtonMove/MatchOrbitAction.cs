@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
@@ -25,10 +26,27 @@ public class MatchOrbitAction : EntityAction
     public override string Details => _details;
 
     Entity _factionEntity;
-    Entity _entityCommanding;
     Entity _targetEntity;
     public int TargetEntityGuid { get; private set; }
     internal override Entity EntityCommanding => _entityCommanding;
+
+    public override void Rehydrate(Game game)
+    {
+        base.Rehydrate(game);
+        if (Status == ActionStatus.Failed || Status == ActionStatus.Succeeded)
+            return;
+        if (_targetEntity == null && _entityCommanding != null)
+            _entityCommanding.Manager.TryGetGlobalEntityById(TargetEntityGuid, out _targetEntity);
+        if (_targetEntity == null)
+        {
+            Fail("The orbit target is missing.");
+            return;
+        }
+        if (Status != ActionStatus.Running)
+            return;
+        if (_entityCommanding.TryGetDataBlob<NewtonSimpleMoveDB>(out var burn))
+            _db = burn;
+    }
 
     const double MaxEccentricityForTransfer = 0.01;
     const double CoOrbitalRadiusTolerance = 0.001;
@@ -36,7 +54,9 @@ public class MatchOrbitAction : EntityAction
     const double ArrivedWithinLowOrbits = 3.0;
     const double ArrivedWithin_m = 10_000;
 
-    readonly List<(KeplerElements start, KeplerElements end, DateTime at)> _burns = new();
+    [JsonProperty]
+    List<(KeplerElements start, KeplerElements end, DateTime at)> _burns = new();
+    [JsonProperty]
     int _next;
     NewtonSimpleMoveDB? _db;
 

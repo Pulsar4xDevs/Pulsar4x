@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
@@ -32,12 +33,42 @@ public class GeoSurveyOrder : EntityAction
     public Entity Target { get; private set; }
     public GeoSurveyableDB? TargetGeoSurveyDB { get; private set; } = null;
     public DateTime? PreviousUpdate { get; private set; } = null;
+    [JsonIgnore]
     public GeoSurveyProcessor? Processor { get; private set; } = null;
 
-    private Entity _entityCommanding;
     internal override Entity EntityCommanding
     {
         get { return _entityCommanding; }
+    }
+
+    public override void Rehydrate(Game game)
+    {
+        base.Rehydrate(game);
+        if (Status == ActionStatus.Failed)
+            return;
+        if (Target != null && Target.TryGetDataBlob<GeoSurveyableDB>(out var survey))
+            TargetGeoSurveyDB = survey;
+        if (Status != ActionStatus.Running)
+            return;
+        if (_entityCommanding == null || Target == null || TargetGeoSurveyDB == null)
+        {
+            Fail("The survey target is missing.");
+            return;
+        }
+
+        uint before = PointsRemaining();
+        Processor = new GeoSurveyProcessor(_entityCommanding, Target);
+        if (PointsRemaining() != before)
+            Fail("The survey could not be reattached.");
+    }
+
+    uint PointsRemaining()
+    {
+        if (TargetGeoSurveyDB == null || _entityCommanding == null)
+            return 0;
+        if (TargetGeoSurveyDB.GeoSurveyStatus.TryGetValue(_entityCommanding.FactionOwnerID, out var left))
+            return left;
+        return TargetGeoSurveyDB.PointsRequired;
     }
 
     public GeoSurveyOrder() { }

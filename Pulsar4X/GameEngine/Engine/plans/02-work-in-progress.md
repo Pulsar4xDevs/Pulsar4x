@@ -1,6 +1,6 @@
 # Work in progress survives a load
 
-Status: plan from 2026-10-17. Not implemented. Depends on `01-round-trip.md`. A load has to return a stepped game before this starts.
+Status: implemented 2026-10-17. Branch `save-load`. `RunningWarp_SurvivesSaveAndArrivesOnce`, `RunningCircularise_SurvivesSaveAndClearsTheLane`, and `GeoSurvey_PointsSurviveALoadAndTheNextDayAddsOnce` pass. `EarthColony_RoundTripsTheSavedGame` still passes.
 
 An order that was running when the player saved is the same order after load. It keeps the datablob it already had. It does not start a second one, and it can finish.
 
@@ -12,19 +12,17 @@ An order that was running when the player saved is the same order after load. It
 - A subclass whose start path creates a datablob, a processor, or another order overrides `Rehydrate`. It attaches the datablob already on the entity. It does not call the start path. If it cannot reattach, it fails the action with a message.
 - Instant orders that only edit a queue get the base resolve and no override.
 
-## What is already true
+## What the load does
 
-`ActionQueueDB.ActionList` serializes the action objects. `EntityAction` already saves `Status`, `EntityCommandingGuid`, `ActionOnDate`, `ParentGoalId`, and `_isFinished`. The live fields are private and are not saved: `_entityCommanding`, and on a warp `_targetEntity` and `_warpingDB`.
+`Game.Load` walks each manager's `ActionQueueDB` once, after the managers are wired and before `UpdateActivityState`, and calls `Rehydrate`. It does not also walk `Game.Systems`. `IsRunning` stays unserialized. Rehydrate sets it from `Status == Running` and resolves `EntityCommanding`. A running warp, burn, or survey attaches the datablob already on the entity and does not call the start path. A running action that cannot reattach is `Failed` with the reason on `FailureMessage`. The queue skips `Failed`, so `Execute` does not run again and the lane is not held.
 
-`WarpMoveAction.Execute` starts a bubble only when `Status != Running`. A warp saved as `Running` does not start a second bubble and does not charge `BubbleCreationCost` again. `IsFinished` then stays false, because `_warpingDB` is null and `IsRunning` is false, including after `EndWarpMove` removes the blob. The movement lane stays blocked. `movement-issues.md` section 2.3 still describes a second bubble. That description is stale. `Status` is saved now.
+`ActionList` has a private setter. The converter builds a new list, and a get-only property was dropping every saved order. An `EntityAction` with no constructor Newtonsoft can call is created with `RuntimeHelpers.GetUninitializedObject`. That skips field initializers. Only `EntityAction` subclasses use it.
 
-A warp saved as `Queued` (still charging) enters the start path on the next `Execute` and touches `_entityCommanding`, which is null.
+`MoveToNearestAction`, `WarpFleetTowardsTargetOrder`, and `JumpOrder` save their child action lists. `ShipJumpAction` saves its jump gate. Rehydrate does not enqueue those children again.
 
-`NewtonSimpleAction.IsFinished` now checks `_db` for null. `Execute` still creates a new `NewtonSimpleMoveDB` when `IsRunning` is false and the date is due. `CirculariseAction`, `MatchOrbitAction`, and `ChangeOrbitalAltitudeAction` do the same. `NewtonThrustAction` creates a `NewtonMoveDB`.
+A running circularise whose burn blob is already gone is finished. `OrbitDB` removes that blob when the burn completes, and the action queue may not be due until its next hotloop pass. The lane clears on that pass.
 
-`GeoSurveyOrder.Execute` builds a new `GeoSurveyProcessor` and resets `PreviousUpdate` when `IsRunning` is false. Survey points live on the body's survey datablob. `IsFinished` reads that datablob.
-
-The instance queue for the star system is already in the save. Plan 1 checks that its entries still point at the manager's entities. This plan checks that a running warp's arrival entry is one of them.
+`IndustryOrder2._job` is still not in the save. A running order skips the start branch. A queued new job with no job fails instead of adding another. A job that should finish later does not see `_job`, so completion is whatever `_isFinished` already was.
 
 ## Rehydrate
 

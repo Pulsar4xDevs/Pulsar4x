@@ -28,7 +28,6 @@ public class LotOfferAction : EntityAction
     [JsonProperty]
     public int OfficeEntityId { get; set; }
 
-    Entity? _entityCommanding;
 
     internal override Entity EntityCommanding => _entityCommanding!;
 

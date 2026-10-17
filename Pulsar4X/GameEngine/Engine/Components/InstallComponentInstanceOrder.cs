@@ -14,13 +14,12 @@ namespace Pulsar4X.Engine.Orders
 
         public override string Details => "Add a component to an entity";
 
-        internal override Entity EntityCommanding { get; }
         public ComponentInstance ComponentInstance { get; private set; }
 
 
         internal InstallComponentInstanceOrder(Entity entity, ComponentInstance componentInstance)
         {
-            EntityCommanding = entity;
+            _entityCommanding = entity;
             ComponentInstance = componentInstance;
         }
 

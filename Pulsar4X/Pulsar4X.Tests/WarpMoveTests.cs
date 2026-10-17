@@ -1581,6 +1581,174 @@ namespace Pulsar4X.Tests
         /// move the global clock, so HandleOrder (which uses GameGlobalDateTime)
         /// would execute follow-on actions at the warp-start instant.
         /// </summary>
+        [Test]
+        public void RunningWarp_SurvivesSaveAndArrivesOnce()
+        {
+            int cargoIds = Game.EntityIDCounter;
+            int nextId = EntityIDGenerator.NextId;
+            try
+            {
+                var epoch = _starSys.StarSysDateTime;
+                var sol = TestingUtilities.BasicSol(_starSys);
+                var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, 1.0, epoch);
+                var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, 1.524, epoch);
+                var faction = FactionFactory.CreateFaction(_game, "warp-save-" + Guid.NewGuid().ToString("N"));
+                var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
+                var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
+                var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+                ship.SetDataBlob(OrbitDB.FromPosition(earth, ship, epoch));
+
+                var ability = ship.GetDataBlob<WarpAbilityDB>();
+                ability.BubbleCreationCost = 1000;
+                ability.BubbleSustainCost = 0;
+                var action = WarpMoveAction.CreateWarpOnly(ship, mars, epoch);
+                Assert.IsTrue(_game.OrderHandler.HandleOrder(action), "warp order should be accepted");
+                Assert.IsTrue(ship.HasDataBlob<WarpMovingDB>());
+                var move = ship.GetDataBlob<WarpMovingDB>();
+                Assert.IsTrue(move.HasStarted);
+                Assert.AreEqual(ActionStatus.Running, action.Status);
+
+                double stored = ship.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[ability.EnergyType];
+                DateTime arrival = move.PredictedExitTime;
+                int shipId = ship.Id;
+                Assert.IsTrue(HasWarpArrival(_starSys, shipId, arrival));
+
+                nextId = EntityIDGenerator.NextId;
+                cargoIds = Game.EntityIDCounter;
+                string json = Game.Save(_game);
+                EntityIDGenerator.NextId = 0;
+                Game.EntityIDCounter = 0;
+                var loaded = Game.Load(json);
+                loaded.Settings.EnforceSingleThread = true;
+
+                Assert.IsTrue(TryFind(loaded, shipId, out var loadedSys, out var loadedShip));
+                Assert.AreEqual(1, BubblesOn(loadedSys, shipId));
+                var loadedWarp = loadedShip.GetDataBlob<ActionQueueDB>().ActionList.OfType<WarpMoveAction>().Single();
+                Assert.AreEqual(ActionStatus.Running, loadedWarp.Status);
+                double loadedStored = loadedShip.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[ability.EnergyType];
+                Assert.AreEqual(stored, loadedStored);
+                Assert.IsTrue(HasWarpArrival(loadedSys, shipId, arrival));
+
+                loaded.TimePulse.TimeStep(arrival);
+
+                Assert.IsFalse(loadedShip.HasDataBlob<WarpMovingDB>(), "the bubble is gone after arrival");
+                Assert.IsFalse(loadedShip.GetDataBlob<ActionQueueDB>().ActionList.OfType<WarpMoveAction>()
+                    .Any(a => a.Status == ActionStatus.Running), "the warp no longer holds the movement lane");
+                double after = loadedShip.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[ability.EnergyType];
+                Assert.Greater(after, loadedStored - ability.BubbleCreationCost, "arrival must not charge bubble creation again");
+            }
+            finally
+            {
+                // Load puts the high-water mark back. Restoring the pre-test
+                // value would reuse ids of entities still on this shared game.
+                if (Game.EntityIDCounter < cargoIds)
+                    Game.EntityIDCounter = cargoIds;
+                if (EntityIDGenerator.NextId < nextId)
+                    EntityIDGenerator.NextId = nextId;
+            }
+        }
+
+        [Test]
+        public void RunningCircularise_SurvivesSaveAndClearsTheLane()
+        {
+            int cargoIds = Game.EntityIDCounter;
+            int nextId = EntityIDGenerator.NextId;
+            try
+            {
+                var epoch = _starSys.StarSysDateTime;
+                var sol = TestingUtilities.BasicSol(_starSys);
+                var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, 1.0, epoch);
+                var faction = FactionFactory.CreateFaction(_game, "burn-save-" + Guid.NewGuid().ToString("N"));
+                var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
+                var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
+                var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+                var earthMass = earth.GetDataBlob<MassVolumeDB>().MassDry;
+                var shipMass = ship.GetDataBlob<MassVolumeDB>().MassDry;
+                double r = ship.GetDataBlob<PositionDB>().RelativePosition.Length();
+                ship.SetDataBlob(OrbitDB.FromAsteroidFormat_r(
+                    earth, earthMass, shipMass, r / 0.8, 0.2, 0, 0, 0, 0, epoch));
+
+                var cmd = CirculariseAction.CreateCommand(ship);
+                Assert.IsTrue(_game.OrderHandler.HandleOrder(cmd));
+                Assert.IsTrue(ship.HasDataBlob<NewtonSimpleMoveDB>());
+                Assert.IsFalse(ship.GetDataBlob<NewtonSimpleMoveDB>().IsComplete);
+                Assert.AreEqual(ActionStatus.Running, cmd.Status);
+                int shipId = ship.Id;
+
+                nextId = EntityIDGenerator.NextId;
+                cargoIds = Game.EntityIDCounter;
+                string json = Game.Save(_game);
+                EntityIDGenerator.NextId = 0;
+                Game.EntityIDCounter = 0;
+                var loaded = Game.Load(json);
+                loaded.Settings.EnforceSingleThread = true;
+                Assert.IsTrue(TryFind(loaded, shipId, out var loadedSys, out var loadedShip));
+                Assert.AreEqual(1, BurnsOn(loadedSys, shipId));
+                var loadedBurn = loadedShip.GetDataBlob<ActionQueueDB>().ActionList.OfType<CirculariseAction>().Single();
+                Assert.AreEqual(ActionStatus.Running, loadedBurn.Status);
+
+                bool LaneHeld() => loadedShip.GetDataBlob<ActionQueueDB>().ActionList.Any(a =>
+                    a.IsBlocking
+                    && a.ActionLanes.HasFlag(EntityAction.ActionLaneTypes.Movement)
+                    && a.Status == ActionStatus.Running);
+                bool BurnOpen() => loadedShip.HasDataBlob<NewtonSimpleMoveDB>()
+                    && !loadedShip.GetDataBlob<NewtonSimpleMoveDB>().IsComplete;
+
+                var deadline = loadedSys.StarSysDateTime + TimeSpan.FromHours(6);
+                while ((BurnOpen() || LaneHeld()) && loadedSys.StarSysDateTime < deadline)
+                {
+                    loaded.TimePulse.TimeStep(loadedSys.StarSysDateTime + TimeSpan.FromMinutes(1));
+                    Assert.LessOrEqual(BurnsOn(loadedSys, shipId), 1);
+                }
+
+                Assert.IsFalse(BurnOpen(), "the burn should finish");
+                Assert.IsFalse(LaneHeld(), "the burn no longer holds the movement lane");
+            }
+            finally
+            {
+                if (Game.EntityIDCounter < cargoIds)
+                    Game.EntityIDCounter = cargoIds;
+                if (EntityIDGenerator.NextId < nextId)
+                    EntityIDGenerator.NextId = nextId;
+            }
+        }
+
+        static bool TryFind(Game game, int entityId, out StarSystem system, out Entity entity)
+        {
+            foreach (var candidate in game.Systems)
+            {
+                if (candidate.TryGetEntityById(entityId, out entity))
+                {
+                    system = candidate;
+                    return true;
+                }
+            }
+            system = null;
+            entity = null;
+            return false;
+        }
+
+        static bool HasWarpArrival(EntityManager manager, int entityId, DateTime when)
+        {
+            foreach (var entry in manager.ManagerSubpulses.InstanceProcessorsQueue)
+            {
+                var (processor, entity) = entry.Item;
+                if (processor == nameof(WarpMoveProcessor) && entity.Id == entityId && entry.Time == when)
+                    return true;
+            }
+            return false;
+        }
+
+        static int BubblesOn(EntityManager manager, int entityId)
+        {
+            return manager.GetAllDataBlobsOfType<WarpMovingDB>().Count(blob => blob.OwningEntity != null && blob.OwningEntity.Id == entityId);
+        }
+
+        static int BurnsOn(EntityManager manager, int entityId)
+        {
+            return manager.GetAllDataBlobsOfType<NewtonSimpleMoveDB>().Count(blob => blob.OwningEntity != null && blob.OwningEntity.Id == entityId);
+        }
+
         private void AdvanceTo(DateTime when)
         {
             if (when <= _game.TimePulse.GameGlobalDateTime)

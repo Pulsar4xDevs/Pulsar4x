@@ -41,7 +41,6 @@ namespace Pulsar4X.Industry
         public override bool IsBlocking => true; //?why block?
 
 
-        private Entity _entityCommanding;
 
         private string productionLineID;
         internal override Entity EntityCommanding{get{return _entityCommanding;}}
@@ -124,6 +123,11 @@ namespace Pulsar4X.Industry
         {
             if (!IsRunning)
             {
+                if (OrderType == OrderTypeEnum.NewJob && _job == null)
+                {
+                    Fail("The industry job is missing.");
+                    return;
+                }
                 switch (OrderType)
                 {
                     case OrderTypeEnum.NewJob:
@@ -175,6 +179,8 @@ namespace Pulsar4X.Industry
 
         internal override bool IsFinished()
         {
+            if (_job == null)
+                return _isFinished;
             if (_job.Auto == false && _job.NumberCompleted == _job.NumberOrdered)
             {
                 _isFinished = true;

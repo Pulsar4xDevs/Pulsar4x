@@ -11,7 +11,6 @@ public class ServeyAnomalyAction : EntityAction
     public override bool IsBlocking { get; }
     public override string Name { get; }
     public override string Details { get; }
-    internal override Entity EntityCommanding { get; }
     internal override bool IsValidCommand(Game game)
     {
         throw new NotImplementedException();

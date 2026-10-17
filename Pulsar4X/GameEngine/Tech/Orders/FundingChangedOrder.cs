@@ -17,6 +17,7 @@ public class FundingChangedOrder : EntityAction
     public override string Details => "Instantly changes the funding level of a given lab";
 
     internal override Entity EntityCommanding => _labEntity;
+    protected override void BindCommanding(Entity entity) => _labEntity = entity;
 
     private Entity _labEntity;
     private byte _fundingLevel;

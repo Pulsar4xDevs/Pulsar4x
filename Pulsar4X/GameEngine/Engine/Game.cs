@@ -295,6 +295,9 @@ namespace Pulsar4X.Engine
             }
             loadedGame.GameMasterFaction.GetDataBlob<FactionInfoDB>().EventLog.Subscribe();
 
+            foreach (var manager in loadedGame.GlobalManagerDictionary.Values)
+                RehydrateActions(loadedGame, manager);
+
             foreach (var system in loadedGame.Systems)
                 system.UpdateActivityState();
 
@@ -307,6 +310,16 @@ namespace Pulsar4X.Engine
             // loadedGame.GameMasterFaction = JsonConvert.DeserializeObject<Entity>(JObject.Parse(json)["GameInfo"]["GameMasterFaction"].ToString(), settings);
             // StandAloneOrderHandler currently doesn't need to be serialized
             // loadedGame.OrderHandler = JsonConvert.DeserializeObject<StandAloneOrderHandler>(JObject.Parse(json)["OrderHandler"].ToString(), settings);
+        }
+
+        static void RehydrateActions(Game game, EntityManager manager)
+        {
+            foreach (var entity in manager.GetAllEntitiesWithDataBlob<ActionQueueDB>())
+            {
+                var queue = entity.GetDataBlob<ActionQueueDB>();
+                foreach (var action in queue.ActionList)
+                    action.Rehydrate(game);
+            }
         }
 
         public void PostNewGameInitialization()

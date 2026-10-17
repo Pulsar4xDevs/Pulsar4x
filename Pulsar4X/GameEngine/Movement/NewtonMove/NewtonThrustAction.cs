@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Orbital;
 using Pulsar4X.Extensions;
@@ -32,8 +33,18 @@ namespace Pulsar4X.Movement
         string _details = "";
 
         Entity _factionEntity;
-        Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
+
+        public override void Rehydrate(Game game)
+        {
+            base.Rehydrate(game);
+            if (Status != ActionStatus.Running)
+                return;
+            if (_entityCommanding != null && _entityCommanding.TryGetDataBlob<NewtonMoveDB>(out var burn))
+                _db = burn;
+            else
+                Fail("The burn is missing.");
+        }
 
         public Vector3 OrbitrelativeDeltaV;
         //private Vector3 _parentRalitiveDeltaV;
@@ -282,19 +293,41 @@ namespace Pulsar4X.Movement
         public override bool IsBlocking => true;
 
         Entity _factionEntity;
-        Entity _entityCommanding;
         // private OrdnanceDesign _missileDesign;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
+        [JsonProperty]
         private Entity _targetEntity;
         NewtonMoveDB _newtonMovedb;
         NewtonThrustAbilityDB _newtonAbilityDB;
+        [JsonProperty]
         private double _startDV;
         // private double _startBurnTime;
+        [JsonProperty]
         private double _fuelBurnRate;
+        [JsonProperty]
         private double _totalFuel;
 
+        [JsonProperty]
         private double _soiParentMass;
+
+        public override void Rehydrate(Game game)
+        {
+            base.Rehydrate(game);
+            AttachThrustBurn();
+        }
+
+        void AttachThrustBurn()
+        {
+            if (Status == ActionStatus.Failed)
+                return;
+            if (Status != ActionStatus.Running)
+                return;
+            if (_entityCommanding == null
+                || !_entityCommanding.TryGetDataBlob<NewtonMoveDB>(out _newtonMovedb)
+                || !_entityCommanding.TryGetDataBlob<NewtonThrustAbilityDB>(out _newtonAbilityDB))
+                Fail("The burn is missing.");
+        }
 
         public static ThrustToTargetCmd CreateCommand(int factionId, Entity orderEntity, DateTime actionDateTime, Entity targetEntity)
         {
@@ -505,18 +538,33 @@ namespace Pulsar4X.Movement
         public override bool IsBlocking => true;
 
         Entity _factionEntity;
-        Entity _entityCommanding;
         // private OrdnanceDesign _missileDesign;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
+        [JsonProperty]
         private Entity _targetEntity;
         NewtonMoveDB _newtonMovedb;
         NewtonThrustAbilityDB _newtonAbilityDB;
+        [JsonProperty]
         private double _startDV;
         // private double _startBurnTime;
+        [JsonProperty]
         private double _fuelBurnRate;
+        [JsonProperty]
         private double _totalFuel;
+        [JsonProperty]
         private double _soiParentMass;
+
+        public override void Rehydrate(Game game)
+        {
+            base.Rehydrate(game);
+            if (Status == ActionStatus.Failed || Status != ActionStatus.Running)
+                return;
+            if (_entityCommanding == null
+                || !_entityCommanding.TryGetDataBlob<NewtonMoveDB>(out _newtonMovedb)
+                || !_entityCommanding.TryGetDataBlob<NewtonThrustAbilityDB>(out _newtonAbilityDB))
+                Fail("The burn is missing.");
+        }
 
         public static Thrust90ToTargetCmd CreateCommand(int faction, Entity orderEntity, DateTime actionDateTime, Entity targetEntity)
         {

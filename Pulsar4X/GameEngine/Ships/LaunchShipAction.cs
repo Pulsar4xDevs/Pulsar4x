@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Engine;
@@ -13,10 +14,11 @@ public class LaunchShipAction : EntityAction
     public override string Details { get; } = "";
 
     Entity _factionEntity;
-    Entity _entityCommanding;
     internal override Entity EntityCommanding => _entityCommanding;
 
+    [JsonProperty]
     private string _padId;
+    [JsonProperty]
     private bool _hasLaunched = false;
 
     public static void CreateCommand(int factionId, Entity colonyEntity, string padId)

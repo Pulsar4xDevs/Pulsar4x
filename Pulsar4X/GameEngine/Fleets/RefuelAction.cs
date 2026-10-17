@@ -13,7 +13,6 @@ namespace Pulsar4X.Fleets
 
         public override bool IsBlocking => true;
 
-        private Entity _entityCommanding;
         internal override Entity EntityCommanding
         {
             get { return _entityCommanding; }

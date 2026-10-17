@@ -25,8 +25,18 @@ public class CirculariseAction : EntityAction
     public override string Details => LiveDetails();
 
     Entity _factionEntity;
-    Entity _entityCommanding;
     internal override Entity EntityCommanding => _entityCommanding;
+
+    public override void Rehydrate(Game game)
+    {
+        base.Rehydrate(game);
+        if (Status != ActionStatus.Running)
+            return;
+        if (_entityCommanding != null && _entityCommanding.TryGetDataBlob<NewtonSimpleMoveDB>(out var burn))
+            _db = burn;
+        else
+            Fail("The burn is missing.");
+    }
 
     NewtonSimpleMoveDB? _db;
     double _totalDv;
@@ -230,12 +240,18 @@ public class CirculariseAction : EntityAction
     {
         if (_isFinished)
             return true;
-        if (IsRunning && _db != null && _db.IsFailed)
+        if (!IsRunning || _entityCommanding == null)
+            return false;
+        if (_db != null && _db.IsFailed)
         {
             Status = ActionStatus.Failed;
             return _isFinished = true;
         }
-        if (IsRunning && _db != null && _db.IsComplete)
+        if (_db != null && _db.IsComplete)
+            return _isFinished = true;
+        // Complete() installs the orbit, and OrbitDB then removes the burn blob,
+        // possibly before IsComplete is visible to this check.
+        if (!_entityCommanding.HasDataBlob<NewtonSimpleMoveDB>())
             return _isFinished = true;
         return false;
     }

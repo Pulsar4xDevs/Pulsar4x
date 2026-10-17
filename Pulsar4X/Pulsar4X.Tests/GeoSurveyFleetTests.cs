@@ -62,6 +62,59 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void GeoSurvey_PointsSurviveALoadAndTheNextDayAddsOnce()
+        {
+            int cargoIds = Game.EntityIDCounter;
+            int nextId = EntityIDGenerator.NextId;
+            try
+            {
+                var sol = TestingUtilities.BasicSol(_sys);
+                var faction = FactionFactory.CreateFaction(Game, "survey-save-" + Guid.NewGuid().ToString("N"));
+                var body = AddBody(sol, "Survey rock", 1e22, 1_000_000, 1.0, 10000);
+                var abs = body.GetDataBlob<PositionDB>().AbsolutePosition
+                    + new Vector3(body.GetDataBlob<MassVolumeDB>().RadiusInM + 50_000, 0, 0);
+                var ship = MakeSurveyShip(body, abs, faction, "Surveyor");
+                var order = new GeoSurveyOrder(ship, body);
+                Assert.IsTrue(Game.OrderHandler.HandleOrder(order));
+
+                _sys.ManagerSubpulses.ProcessSystem(_epoch + TimeSpan.FromDays(1) + TimeSpan.FromHours(1));
+                var geo = body.GetDataBlob<GeoSurveyableDB>();
+                Assert.IsTrue(geo.GeoSurveyStatus.TryGetValue(faction.Id, out var remaining), "the first day should earn points");
+                Assert.Less(remaining, geo.PointsRequired);
+                uint earned = geo.PointsRequired - remaining;
+                int shipId = ship.Id;
+                int bodyId = body.Id;
+
+                nextId = EntityIDGenerator.NextId;
+                cargoIds = Game.EntityIDCounter;
+                string json = Game.Save(Game);
+                EntityIDGenerator.NextId = 0;
+                Game.EntityIDCounter = 0;
+                var loaded = Game.Load(json);
+                loaded.Settings.EnforceSingleThread = true;
+                var loadedSys = loaded.Systems.Single(s => s.ManagerID == _sys.ManagerID);
+                Assert.IsTrue(loadedSys.TryGetEntityById(bodyId, out var loadedBody));
+                Assert.IsTrue(loadedSys.TryGetEntityById(shipId, out var loadedShip));
+                var loadedGeo = loadedBody.GetDataBlob<GeoSurveyableDB>();
+                Assert.IsTrue(loadedGeo.GeoSurveyStatus.TryGetValue(faction.Id, out var loadedRemaining));
+                Assert.AreEqual(remaining, loadedRemaining);
+                var loadedOrder = loadedShip.GetDataBlob<ActionQueueDB>().ActionList.OfType<GeoSurveyOrder>().Single();
+                Assert.AreSame(loadedBody, loadedOrder.Target);
+
+                loadedSys.ManagerSubpulses.ProcessSystem(loadedSys.StarSysDateTime + TimeSpan.FromDays(1));
+                Assert.IsTrue(loadedGeo.GeoSurveyStatus.TryGetValue(faction.Id, out var after));
+                Assert.AreEqual(loadedRemaining - earned, after);
+            }
+            finally
+            {
+                if (Game.EntityIDCounter < cargoIds)
+                    Game.EntityIDCounter = cargoIds;
+                if (EntityIDGenerator.NextId < nextId)
+                    EntityIDGenerator.NextId = nextId;
+            }
+        }
+
+        [Test]
         public void GeoSurveyOrder_NameAndDetails_UseOwnerFactionProgress()
         {
             var scene = BuildMarsSurveyFleet();

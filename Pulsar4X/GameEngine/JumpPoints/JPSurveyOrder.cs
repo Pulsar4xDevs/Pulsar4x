@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 using GameEngine.Engine.Orders;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
@@ -22,12 +23,25 @@ public class JPSurveyOrder : EntityAction
     public Entity Target { get; private set; }
     public JPSurveyableDB? TargetSurveyDB { get; private set; } = null;
     public DateTime? PreviousUpdate { get; private set; } = null;
+    [JsonIgnore]
     public JPSurveyProcessor? Processor { get; private set; } = null;
 
-    private Entity _entityCommanding;
     internal override Entity EntityCommanding
     {
         get { return _entityCommanding; }
+    }
+
+    public override void Rehydrate(Game game)
+    {
+        base.Rehydrate(game);
+        if (Status == ActionStatus.Failed)
+            return;
+        if (Target != null && Target.TryGetDataBlob<JPSurveyableDB>(out var survey))
+            TargetSurveyDB = survey;
+        if (Status != ActionStatus.Running)
+            return;
+        if (_entityCommanding == null || !_entityCommanding.HasDataBlob<JPSurveyDB>())
+            Fail("The jump-point survey is missing.");
     }
 
     public JPSurveyOrder() { }

@@ -84,8 +84,25 @@ namespace Pulsar4X.Movement
         WarpMovingDB _warpingDB;
 
 
-        Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
+
+        public override void Rehydrate(Game game)
+        {
+            base.Rehydrate(game);
+            if (Status == ActionStatus.Failed)
+                return;
+            if (!game.GlobalManager.TryGetGlobalEntityById(TargetEntityGuid, out _targetEntity))
+            {
+                Fail("The warp target is missing.");
+                return;
+            }
+            if (Status != ActionStatus.Running)
+                return;
+            if (_entityCommanding != null && _entityCommanding.TryGetDataBlob<WarpMovingDB>(out var bubble))
+                _warpingDB = bubble;
+            else
+                Fail("The warp bubble is missing.");
+        }
 
         public DateTime TransitStartDateTime;
         public Vector3 EndpointRelitivePosition { get; set; }

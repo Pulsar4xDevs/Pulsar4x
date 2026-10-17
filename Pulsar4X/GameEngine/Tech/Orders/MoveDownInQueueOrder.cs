@@ -17,6 +17,7 @@ public class MoveDownInQueueOrder : EntityAction
     public override string Details => "Instantly moves the given tech down in the given labs queue";
 
     internal override Entity EntityCommanding => _labEntity;
+    protected override void BindCommanding(Entity entity) => _labEntity = entity;
 
     private Entity _labEntity;
     private string _techId;

@@ -16,7 +16,6 @@ namespace Pulsar4X.Names
         public override string Details { get; } = "Renames This Entity";
 
         Entity _factionEntity;
-        Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
         string NewName;
 

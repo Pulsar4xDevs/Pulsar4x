@@ -22,7 +22,6 @@ namespace Pulsar4X.Weapons
         [JsonIgnore]
         Entity _factionEntity;
 
-        Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
 
@@ -122,7 +121,6 @@ namespace Pulsar4X.Weapons
 
 
         [JsonIgnore]
-        Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
         [JsonIgnore]
@@ -235,7 +233,6 @@ namespace Pulsar4X.Weapons
         [JsonIgnore]
         Entity _factionEntity;
 
-        Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
 
@@ -338,7 +335,6 @@ namespace Pulsar4X.Weapons
         [JsonIgnore]
         Entity _factionEntity;
 
-        Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
 

@@ -9,7 +9,7 @@ namespace GameEngine.Engine.Orders
     public class ActionQueueDB : BaseDataBlob
     {
         [JsonProperty]
-        public SafeList<EntityAction> ActionList { get; } = new SafeList<EntityAction>();
+        public SafeList<EntityAction> ActionList { get; private set; } = new SafeList<EntityAction>();
 
         /// <summary>All actions currently in the queue that were spawned by the given goal.</summary>
         public List<EntityAction> ActionsFor(string parentGoalId)

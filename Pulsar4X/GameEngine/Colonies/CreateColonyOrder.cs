@@ -20,7 +20,6 @@ public class CreateColonyOrder : EntityAction
 
     public override string Details => $"Create Colony on {TargetSystemBody.ToString()}";
 
-    private Entity _entityCommanding;
     internal override Entity EntityCommanding => _entityCommanding;
 
     public static CreateColonyOrder CreateCommand(Entity faction, Entity species, Entity targetBody)

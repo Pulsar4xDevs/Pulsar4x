@@ -17,6 +17,7 @@ public class AddTechToQueueOrder : EntityAction
     public override string Details => "Instantly adds the given tech to the given labs queue";
 
     internal override Entity EntityCommanding => _labEntity;
+    protected override void BindCommanding(Entity entity) => _labEntity = entity;
 
     private Entity _labEntity;
     private string _techId;

@@ -57,11 +57,20 @@ public class CargoTransferOrder : EntityAction
         }
     }
 
-    Entity _entityCommanding;
 
     internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
-    private CargoTransferDataDB TransferData { get; }
+    [JsonProperty]
+    private CargoTransferDataDB TransferData { get; set; }
+
+    public override void Rehydrate(Game game)
+    {
+        base.Rehydrate(game);
+        if (Status == ActionStatus.Failed || Status != ActionStatus.Running)
+            return;
+        if (_entityCommanding == null || !_entityCommanding.HasDataBlob<CargoTransferDB>())
+            Fail("The cargo transfer is missing.");
+    }
 
 
 

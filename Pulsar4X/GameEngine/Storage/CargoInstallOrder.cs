@@ -34,7 +34,6 @@ public class CargoInstallOrder : EntityAction
         }
     }
 
-    Entity _entityCommanding;
 
     internal override Entity EntityCommanding { get { return _entityCommanding; } }
     internal Entity InstallOnEntity { get; set; }

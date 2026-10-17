@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
@@ -24,14 +25,24 @@ public class ChangeOrbitalAltitudeAction : EntityAction
     string _details = "Change altitude";
 
     Entity _factionEntity;
-    Entity _entityCommanding;
     internal override Entity EntityCommanding => _entityCommanding;
+
+    public override void Rehydrate(Game game)
+    {
+        base.Rehydrate(game);
+        if (Status != ActionStatus.Running)
+            return;
+        if (_entityCommanding != null && _entityCommanding.TryGetDataBlob<NewtonSimpleMoveDB>(out var burn))
+            _db = burn;
+    }
 
     public double TargetRadius_m { get; private set; }
 
     const double MaxEccentricityForTransfer = 0.01;
 
-    readonly List<(KeplerElements start, KeplerElements end, DateTime at)> _burns = new();
+    [JsonProperty]
+    List<(KeplerElements start, KeplerElements end, DateTime at)> _burns = new();
+    [JsonProperty]
     int _next;
     NewtonSimpleMoveDB? _db;
 
