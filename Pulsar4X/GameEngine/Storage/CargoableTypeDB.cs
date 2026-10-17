@@ -15,10 +15,8 @@ namespace Pulsar4X.Storage
     /// </summary>
     public class CargoAbleTypeDB : BaseDataBlob , ICargoable, IComponentDesignAttribute
     {
-        [JsonProperty]
         public int ID { get; private set; } = Game.GetEntityID();
 
-        [JsonProperty]
         public string CargoTypeID { get; internal set; }
 
         /// <summary>
@@ -38,8 +36,10 @@ namespace Pulsar4X.Storage
         [JsonIgnore]
         public long MassPerUnit => (long)Math.Ceiling(OwningEntity.GetDataBlob<MassVolumeDB>().MassDry);
 
+        [JsonIgnore]
         public double VolumePerUnit => OwningEntity.GetDataBlob<MassVolumeDB>().Volume_m3;
 
+        [JsonIgnore]
         public double Density => OwningEntity.GetDataBlob<MassVolumeDB>().DensityDry_kgm;
 
         private static string UNKNOWN = "Unknown Object";

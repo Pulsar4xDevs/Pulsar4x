@@ -7,13 +7,10 @@ namespace Pulsar4X.Fleets
 {
     public class FleetDB : TreeHierarchyDB
     {
-        [JsonProperty]
         public int FlagShipID { get; internal set; } = -1;
 
-        [JsonProperty]
         public bool InheritOrders { get; internal set; } = true;
 
-        [JsonProperty]
         public SafeList<ConditionalOrder> StandingOrders { get; internal set; } = new ();
 
         public FleetDB() : base(null) {}

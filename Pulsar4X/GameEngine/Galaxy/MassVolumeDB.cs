@@ -13,19 +13,16 @@ namespace Pulsar4X.Galaxy
         /// <summary>
         /// Mass in KG of this entity discounting cargo and fuel
         /// </summary>
-        [JsonProperty]
         public double MassDry { get; internal set; }
 
         /// <summary>
         /// Mass in Kg of this entity including all cargo and fuel
         /// </summary>
-        [JsonProperty]
         public double MassTotal {get; private set;}
 
         /// <summary>
         /// Volume_km3 of this entity in Km^3.
         /// </summary>
-        [JsonProperty]
         public double Volume_km3 { get; internal set; }
 
         /// <summary>
@@ -41,7 +38,6 @@ namespace Pulsar4X.Galaxy
         /// <summary>
         /// The density of the body in g/cm^3
         /// </summary>
-        [JsonProperty]
         public double DensityDry_gcm
         {
             get { return DensityDry_kgm * 1000;}
@@ -53,7 +49,6 @@ namespace Pulsar4X.Galaxy
         /// <summary>
         /// The Average Radius in AU.
         /// </summary>
-        [JsonProperty]
         public double RadiusInAU
         {
             get { return Distance.MToAU(RadiusInM); }
@@ -75,6 +70,7 @@ namespace Pulsar4X.Galaxy
         /// Measure on the gravity of a planet at its surface.
         /// In Earth Gravities (Gs).
         /// </summary>
+        [JsonIgnore]
         public double SurfaceGravity => GeneralMath.GetStandardGravitationAttraction(MassDry, RadiusInKM * 1000);
 
         public MassVolumeDB()

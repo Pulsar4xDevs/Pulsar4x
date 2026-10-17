@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.Colonies
 {
@@ -9,8 +10,10 @@ namespace Pulsar4X.Colonies
     {
         public int Q { get; }
         public int R { get; }
+        [JsonIgnore]
         public int S => -Q - R; // Third coordinate for validation
 
+        [JsonConstructor]
         public HexCoordinate(int q, int r)
         {
             Q = q;

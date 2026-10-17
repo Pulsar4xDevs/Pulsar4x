@@ -34,25 +34,21 @@ namespace Pulsar4X.Galaxy
         /// <summary>
         /// How many ruins are on this world. or something.
         /// </summary>
-        [JsonProperty]
         public uint RuinCount { get; internal set; }
 
         /// <summary>
         /// What kinds of things should be found in this ruin? including sophistication of killbots?
         /// </summary>
-        [JsonProperty]
         public int RuinTechLevel { get; internal set; }
 
         /// <summary>
         /// How big are these ruins?
         /// </summary>
-        [JsonProperty]
         public RSize RuinSize { get; internal set; }
 
         /// <summary>
         /// What shape are these ruins in?
         /// </summary>
-        [JsonProperty]
         public RQuality RuinQuality { get; internal set; }
 
         /// <summary>

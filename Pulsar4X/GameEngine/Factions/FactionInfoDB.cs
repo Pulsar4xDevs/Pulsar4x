@@ -18,14 +18,12 @@ namespace Pulsar4X.Factions
 {
     public class FactionInfoDB : BaseDataBlob
     {
-        [JsonProperty]
         public string Abbreviation { get; internal set; } = "";
 
         /// <summary>
         /// The unique index (0-31) for this faction used in Masked&lt;T&gt; bit masks.
         /// Use FactionMask property to get the actual bit mask value.
         /// </summary>
-        [JsonProperty]
         public int FactionMaskIndex { get; internal set; } = -1;
 
         /// <summary>
@@ -35,20 +33,16 @@ namespace Pulsar4X.Factions
         [JsonIgnore]
         public int FactionMask => FactionMaskIndex >= 0 ? 1 << FactionMaskIndex : 0;
 
-        [JsonProperty]
         public Ledger Money { get; internal set; } = new ();
 
-        [JsonProperty]
         public FactionDataStore Data { get; internal set; } = new FactionDataStore();
 
-        [JsonProperty]
         public List<Entity> Species { get; internal set; } = new ();
 
 
-        [JsonProperty]
         public List<string> KnownSystems { get; internal set; } = new ();
 
-        [JsonProperty]
+        [JsonIgnore]
         public ReadOnlyDictionary<string, List<Entity>> KnownJumpPoints => new (InternalKnownJumpPoints);
         [JsonProperty]
         internal Dictionary<string, List<Entity>> InternalKnownJumpPoints = new ();
@@ -73,41 +67,35 @@ namespace Pulsar4X.Factions
         }
 
 
-        [JsonProperty]
         public List<Entity> KnownFactions { get; internal set; } = new ();
 
         /// <summary>
         /// This faction's stance toward another faction, keyed by that faction's entity id.
         /// A missing key means <see cref="FactionStance.Hostile"/>.
         /// </summary>
-        [JsonProperty]
         public Dictionary<int, FactionStance> Stances { get; internal set; } = new ();
 
         /// <summary>
         /// Grants this faction has given, keyed by the receiver's entity id.
         /// A missing key means nothing is granted. <see cref="FactionGrants.None"/> is a stored "no".
         /// </summary>
-        [JsonProperty]
         public Dictionary<int, FactionGrants> Grants { get; internal set; } = new ();
 
 
         [PublicAPI]
-        [JsonProperty]
         public List<Entity> Colonies { get; internal set; } = new ();
 
-        [JsonProperty]
         public SafeList<Entity> Commanders { get; internal set; } = new ();
 
-        [JsonProperty]
         public Dictionary<string, ShipDesign> ShipDesigns = new ();
 
-        [JsonProperty]
         public Dictionary<string, OrdnanceDesign> MissileDesigns = new ();
 
         /// <summary>
         /// This includes non researched and not constructible designs.
         /// Does Not Include Refined Materials
         /// </summary>
+        [JsonIgnore]
         public ReadOnlyDictionary<string, ComponentDesign> ComponentDesigns => new (InternalComponentDesigns);
         [JsonProperty]
         internal Dictionary<string, ComponentDesign> InternalComponentDesigns = new ();
@@ -117,7 +105,6 @@ namespace Pulsar4X.Factions
         /// this shoudl only be designs we can construct.
         /// Does Include Refined Materials.
         /// </summary>
-        [JsonProperty]
         public Dictionary<string, IConstructableDesign> IndustryDesigns = new ();
 
 
@@ -128,14 +115,12 @@ namespace Pulsar4X.Factions
         /// </summary>
         [JsonProperty]
         internal Dictionary<int, SensorContact> SensorContacts = new ();
-        [JsonProperty]
         public Dictionary<EventType, bool> HaltsOnEvent { get; } = new ();
 
         [JsonProperty]
         private Dictionary<Entity, uint> FactionAccessRoles { get; set; } = new ();
         internal ReadOnlyDictionary<Entity, AccessRole> AccessRoles => new (FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
 
-        [JsonProperty]
         public IEventLog EventLog { get; internal set; }
 
         public FactionInfoDB()

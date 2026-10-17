@@ -19,8 +19,10 @@ namespace Pulsar4X.Names
         private Dictionary<int, string> _names = new ();
 
         [PublicAPI]
+        [JsonIgnore]
         public string DefaultName => _names[-1];
 
+        [JsonIgnore]
         public string OwnersName
         {
             get

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine.Orders;
@@ -8,7 +7,6 @@ namespace GameEngine.Engine.Orders
 {
     public class ActionQueueDB : BaseDataBlob
     {
-        [JsonProperty]
         public SafeList<EntityAction> ActionList { get; private set; } = new SafeList<EntityAction>();
 
         /// <summary>All actions currently in the queue that were spawned by the given goal.</summary>

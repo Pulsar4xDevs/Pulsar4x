@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using Pulsar4X.Datablobs;
 using GameEngine.People;
 
@@ -26,7 +27,23 @@ namespace Pulsar4X.Colonies
         /// <summary>
         /// All hex tiles in the map
         /// </summary>
+        [JsonIgnore]
         public IReadOnlyDictionary<HexCoordinate, HexTile> HexTiles => _hexTiles;
+
+        // Dictionary keys would be written with ToString and would not load back.
+        [JsonProperty("HexTiles")]
+        private List<HexTile> StoredTiles
+        {
+            get => new(_hexTiles.Values);
+            set
+            {
+                _hexTiles = new Dictionary<HexCoordinate, HexTile>();
+                if (value == null)
+                    return;
+                foreach (var tile in value)
+                    _hexTiles[tile.Coordinate] = tile;
+            }
+        }
 
         public ColonyHexMapDB()
         {

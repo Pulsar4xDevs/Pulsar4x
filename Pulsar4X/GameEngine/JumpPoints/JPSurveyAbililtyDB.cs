@@ -5,6 +5,5 @@ namespace Pulsar4X.JumpPoints;
 
 public class JPSurveyAbilityDB : BaseDataBlob
 {
-    [JsonProperty]
     public uint Speed { get; set; }
 }

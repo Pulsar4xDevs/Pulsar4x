@@ -14,70 +14,60 @@ namespace Pulsar4X.People
         /// Defaults to O2
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public string BreathableGasSymbol { get; internal set; }
 
         /// <summary>
         /// The ideal gravity for this species.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double BaseGravity { get; internal set; }
 
         /// <summary>
         /// The minimum gravity the species can tolerate
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double MinimumGravityConstraint { get; internal set; }
 
         /// <summary>
         /// The maximum gravity the species can tolerate
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double MaximumGravityConstraint { get; internal set; }
 
         /// <summary>
         /// The ideal atmospheric pressure for the species
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double BasePressure { get; internal set; }
 
         /// <summary>
         /// The minimum atmospheric pressure the species can tolerate
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double MinimumPressureConstraint { get; internal set; }
 
         /// <summary>
         /// The maximum atmospheric pressure the species can tolerate
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double MaximumPressureConstraint { get; internal set; }
 
         /// <summary>
         /// The ideal temperature for the species
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double BaseTemperature { get; internal set; }
 
         /// <summary>
         /// The minimum temperature the species can tolerate
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double MinimumTemperatureConstraint { get; internal set; }
 
         /// <summary>
         /// The maximum temperature the species can tolerate
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double MaximumTemperatureConstraint { get; internal set; }
 
         /// <summary>
@@ -89,7 +79,6 @@ namespace Pulsar4X.People
         /// Min/Max works best with aurora mechanics.
         /// </remarks>
         [PublicAPI]
-        [JsonProperty]
         public double TemperatureToleranceRange { get; internal set; }
 
         public SpeciesDB() { }

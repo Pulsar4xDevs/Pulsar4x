@@ -9,7 +9,6 @@ namespace Pulsar4X.Factions
     public class FactionTechDB : BaseDataBlob
     {
         [PublicAPI]
-        [JsonProperty]
         public int ResearchPoints { get; internal set; }
 
         public List<(Scientist scientist, Entity atEntity)> AllScientists { get; internal set; } = new List<(Scientist, Entity)>();

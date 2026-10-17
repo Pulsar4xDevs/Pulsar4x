@@ -42,6 +42,5 @@ public class Bonus
 
 public class BonusesDB : BaseDataBlob
 {
-    [JsonProperty]
     public List<Bonus> Bonuses { get; internal set; } = new List<Bonus>();
 }

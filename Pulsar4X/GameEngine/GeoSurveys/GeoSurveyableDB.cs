@@ -6,7 +6,6 @@ namespace Pulsar4X.GeoSurveys;
 
 public class GeoSurveyableDB : BaseDataBlob
 {
-    [JsonProperty]
     public uint PointsRequired { get; set; }
 
     /// <summary>
@@ -14,6 +13,5 @@ public class GeoSurveyableDB : BaseDataBlob
     /// Key: faction id
     /// Value: the points remaining to complete the survey
     /// </summary>
-    [JsonProperty]
     public SafeDictionary<int, uint> GeoSurveyStatus { get; set; } = new ();
 }

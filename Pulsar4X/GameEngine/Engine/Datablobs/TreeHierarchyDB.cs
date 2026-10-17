@@ -20,6 +20,7 @@ namespace Pulsar4X.Datablobs
     /// </remarks>
     public abstract class TreeHierarchyDB : BaseDataBlob
     {
+        [JsonIgnore]
         [PublicAPI]
         public override Entity? OwningEntity
         {
@@ -44,7 +45,6 @@ namespace Pulsar4X.Datablobs
         /// </summary>
         [CanBeNull]
         [PublicAPI]
-        [JsonProperty]
         public Entity? Parent
         {
             get { return _parent; }
@@ -66,6 +66,7 @@ namespace Pulsar4X.Datablobs
         /// </example>
         [CanBeNull]
         [PublicAPI]
+        [JsonIgnore]
         public TreeHierarchyDB? ParentDB
         {
             get
@@ -87,6 +88,7 @@ namespace Pulsar4X.Datablobs
         /// </example>
         [NotNull]
         [PublicAPI]
+        [JsonIgnore]
         public Entity Root => ParentDB?.Root ?? ((OwningEntity == null) ? Entity.InvalidEntity : OwningEntity);
 
         /// <summary>
@@ -94,6 +96,7 @@ namespace Pulsar4X.Datablobs
         /// </summary>
         [NotNull]
         [PublicAPI]
+        [JsonIgnore]
         public TreeHierarchyDB? RootDB => GetSameTypeDB(Root);
 
         /// <summary>
@@ -101,6 +104,7 @@ namespace Pulsar4X.Datablobs
         /// </summary>
         [NotNull]
         [PublicAPI]
+        [JsonIgnore]
         public SafeList<Entity> Children => _children;
         [JsonProperty]
         private readonly SafeList<Entity> _children;
@@ -110,6 +114,7 @@ namespace Pulsar4X.Datablobs
         /// </summary>
         [NotNull]
         [PublicAPI]
+        [JsonIgnore]
         public List<TreeHierarchyDB?> ChildrenDBs => Children.Select(GetSameTypeDB).ToList();
 
         /// <summary>

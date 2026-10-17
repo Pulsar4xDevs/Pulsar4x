@@ -13,7 +13,6 @@ namespace Pulsar4X.Galaxy
     /// </summary>
     public class PopulationSupportAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
-        [JsonProperty]
         // Population capacity at 1.0 colony cost
         // Infrastructure = 10000
         public int PopulationCapacity { get; internal set; }

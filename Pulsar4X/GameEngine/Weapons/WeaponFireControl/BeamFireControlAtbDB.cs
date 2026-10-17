@@ -11,19 +11,16 @@ namespace Pulsar4X.Weapons
         /// <summary>
         /// Max range of this Beam Fire Control
         /// </summary>
-        [JsonProperty]
         public int Range { get; internal set; }
 
         /// <summary>
         /// Tracking Speed of this Beam Fire Control
         /// </summary>
-        [JsonProperty]
         public int TrackingSpeed { get; internal set; }
 
         /// <summary>
         /// Determines if this Beam Fire Control is only capable of FinalDefensiveFire (Like CIWS)
         /// </summary>
-        [JsonProperty]
         public bool FinalFireOnly { get; internal set; }
 
         public BeamFireControlAtbDB(double range, double trackingSpeed) : this((int)range, (int)trackingSpeed) { }

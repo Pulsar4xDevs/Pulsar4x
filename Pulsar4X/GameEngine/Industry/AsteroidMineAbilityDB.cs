@@ -9,6 +9,5 @@ namespace Pulsar4X.Industry;
 /// </summary>
 public class AsteroidMineAbilityDB : BaseDataBlob
 {
-    [JsonProperty]
     public int UnitsPerDay { get; set; }
 }

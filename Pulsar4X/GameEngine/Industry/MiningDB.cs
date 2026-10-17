@@ -8,12 +8,10 @@ namespace Pulsar4X.Industry
 {
     public class MiningDB : BaseDataBlob, IAbilityDescription
     {
-        [JsonProperty]
         public Dictionary<int, long> BaseMiningRate { get; set; }
-        [JsonProperty]
         public Dictionary<int, long> ActualMiningRate { get; set; }
-        [JsonProperty]
         public int NumberOfMines { get; set;} = 0;
+        [JsonIgnore]
         public Dictionary<int, MineralDeposit> MineralDeposit => OwningEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>().Minerals;
 
         public MiningDB()

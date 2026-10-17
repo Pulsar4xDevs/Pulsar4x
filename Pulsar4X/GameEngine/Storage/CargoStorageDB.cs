@@ -10,7 +10,6 @@ namespace Pulsar4X.Storage
 /// </summary>
     public class CargoStorageDB : BaseDataBlob, IAbilityDescription
     {
-        [JsonProperty]
         public SafeDictionary<string, TypeStore> TypeStores = new();
 
         [JsonProperty]
@@ -19,15 +18,12 @@ namespace Pulsar4X.Storage
         /// <summary>
         /// This includes Escro Items.
         /// </summary>
-        [JsonProperty]
         public double TotalStoredMass { get; internal set; } = 0;
 
         /// <summary>
         /// kg per second.
         /// </summary>
-        [JsonProperty]
         public int TransferRate { get; internal set; } = 1;
-        [JsonProperty]
         public double TransferRangeDv_mps { get; internal set; } = 100;
 
         [JsonConstructor]

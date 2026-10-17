@@ -21,7 +21,6 @@ namespace Pulsar4X.Orbits
         /// <summary>
         /// Stored in Meters
         /// </summary>
-        [JsonProperty]
         public double SemiMajorAxis { get; protected set; }
 
 
@@ -30,7 +29,6 @@ namespace Pulsar4X.Orbits
         /// Shape of the orbit. 0 = perfectly circular, 1 = parabolic.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double Eccentricity { get; protected set; }
 
 		/// <summary>
@@ -38,7 +36,6 @@ namespace Pulsar4X.Orbits
 		/// in radians.
 		/// </summary>
 		[PublicAPI]
-        [JsonProperty]
         public double Inclination { get; protected set; }
 
         /// <summary>
@@ -46,7 +43,6 @@ namespace Pulsar4X.Orbits
         /// the reference frame stored in radians.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double LongitudeOfAscendingNode { get; protected set; }
 
 
@@ -54,7 +50,6 @@ namespace Pulsar4X.Orbits
         /// Angle from the Ascending Node to the Periapsis stored in radians.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public  double ArgumentOfPeriapsis { get; protected set; }
 
 
@@ -64,31 +59,26 @@ namespace Pulsar4X.Orbits
         /// Stored in radians.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double MeanAnomalyAtEpoch { get; protected set; }
 
         /// <summary>
         /// True anomaly at <see cref="Epoch"/>. Warp leftover hyperbolas cannot
         /// reconstruct this from mean anomaly; drop-in copies it from the leftover Kepler.
         /// </summary>
-        [JsonProperty]
         public double TrueAnomalyAtEpoch { get; protected set; }
 
         /// <summary>
         /// reference time. Orbital parameters are stored relative to this reference.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public DateTime Epoch { get; internal set; }
 
 		/// <summary>
 		/// 2-Body gravitational parameter of system in m^3/s^2
 		/// </summary>
 		[PublicAPI]
-        [JsonProperty]
 		public double GravitationalParameter_m3S2 { get; protected set; }
 
-        [JsonProperty]
         public double SOI_m { get; protected set; } = double.MaxValue;
 
 
@@ -96,35 +86,30 @@ namespace Pulsar4X.Orbits
         /// Orbital Period of orbit.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public TimeSpan OrbitalPeriod { get; private set; }
 
 		/// <summary>
 		/// Mean Motion of orbit. in Radians/Sec.
 		/// </summary>
 		[PublicAPI]
-        [JsonProperty]
 		public double MeanMotion { get; protected set; }
 
         /// <summary>
         /// Point in orbit furthest from the ParentBody. Measured in m.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double Apoapsis { get; private set; }
 
         /// <summary>
         /// Point in orbit closest to the ParentBody. Measured in m.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double Periapsis { get; private set; }
 
         /// <summary>
         /// Stationary orbits don't have all of the data to update. They always return (0, 0).
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public bool IsStationary { get; private set; } = false;
 
         [JsonProperty]

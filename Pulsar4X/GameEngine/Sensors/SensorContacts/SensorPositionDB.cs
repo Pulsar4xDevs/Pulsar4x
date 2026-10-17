@@ -11,18 +11,16 @@ namespace Pulsar4X.Sensors
         [JsonProperty]
         internal DataFrom GetDataFrom = DataFrom.Parent;
 
-        [JsonProperty]
         public PositionDB ActualEntityPositionDB; //the detected actual entity
 
-        [JsonProperty]
         public PositionDB? ParentPositionDB; //detected actual entity positional parent for relative positions.
 
-        [JsonProperty]
         public Vector3 MemoryrelativePosition_m;
 
         [JsonProperty]
         internal Vector3 AcuracyOffset = new Vector3();
 
+        [JsonIgnore]
         public Vector3 AbsolutePosition
         {
             get
@@ -36,11 +34,13 @@ namespace Pulsar4X.Sensors
             }
         }
 
+        [JsonIgnore]
         public Vector3 RelativePosition_AU
         {
             get { return Distance.MToAU(RelativePosition); }
         }
 
+        [JsonIgnore]
         public Vector3 RelativePosition
         {
             get

@@ -18,7 +18,6 @@ public class LogiBaseDB : BaseDataBlob
     /// <summary>
     /// Intel for sale. Keyed by kind and subject. Does not count toward <see cref="Capacity"/>.
     /// </summary>
-    [JsonProperty]
     public Dictionary<string, IntelListing> Intel { get; internal set; } = new();
 
     public LogiBaseDB()

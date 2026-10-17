@@ -13,25 +13,21 @@ namespace Pulsar4X.Galaxy
         /// Atmospheric Pressure
         /// In Earth Atmospheres (atm).
         /// </summary>
-        [JsonProperty]
         public float Pressure { get; internal set; }
 
         /// <summary>
         /// Weather or not the planet has abundent water.
         /// </summary>
-        [JsonProperty]
         public bool Hydrosphere { get; internal set; }
 
         /// <summary>
         /// The percentage of the bodies sureface covered by water.
         /// </summary>
-        [JsonProperty]
         public decimal HydrosphereExtent { get; internal set; }
 
         /// <summary>
         /// A measure of the greenhouse factor provided by this Atmosphere.
         /// </summary>
-        [JsonProperty]
         public float GreenhouseFactor { get; internal set; }
 
         /// <summary>
@@ -40,7 +36,6 @@ namespace Pulsar4X.Galaxy
         /// in the atmosphere and times it by the gasses GreenhouseEffect
         /// which is a number between 1 and -1 normally.
         /// </summary>
-        [JsonProperty]
         public float GreenhousePressure { get; internal set; }
 
         /// <summary>
@@ -56,21 +51,19 @@ namespace Pulsar4X.Galaxy
         /// This is a factor of the base temp and Green House effects.
         /// In Degrees C.
         /// </summary>
-        [JsonProperty]
         public float SurfaceTemperature { get; internal set; }
 
         //<summary>
         //The composition of the atmosphere, i.e. what gases make it up and in what ammounts.
         //In Earth Atmospheres (atm).
         //</summary>
-        [JsonProperty]
         public Dictionary<string, float> Composition { get; internal set; }
 
         //<summary>
         //The composition of the atmosphere, i.e. what gases make it up and in what ammounts.
         //In Earth Atmospheres (atm).
         //</summary>
-        [JsonProperty]
+        [JsonIgnore]
         public Dictionary<string, float> CompositionByPercent {
             get
             {
@@ -100,6 +93,7 @@ namespace Pulsar4X.Galaxy
         /// <summary>
         /// indicates if the body as a valid atmosphere.
         /// </summary>
+        [JsonIgnore]
         public bool Exists => Composition.Count != 0;
 
         /// <summary>

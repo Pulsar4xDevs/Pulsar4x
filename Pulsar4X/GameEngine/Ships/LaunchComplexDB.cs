@@ -36,10 +36,8 @@ namespace Pulsar4X.Ships
 
     public class LaunchComplexDB : BaseDataBlob
     {
-        [JsonProperty]
         public Dictionary<string, LaunchPad> Pads { get; set; } = new();
 
-        [JsonProperty]
         public List<LaunchQueueEntry> LaunchQueue { get; set; } = new();
 
         [JsonConstructor]

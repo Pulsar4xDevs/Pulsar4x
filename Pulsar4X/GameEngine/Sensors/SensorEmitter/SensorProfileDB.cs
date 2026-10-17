@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Pulsar4X.Components;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
@@ -30,6 +31,7 @@ namespace Pulsar4X.Sensors
         /// Cross section in meters squared.
         /// </summary>
         /// <exception cref="Exception"></exception>
+        [JsonIgnore]
         public double TargetCrossSection_msq
         {
             get

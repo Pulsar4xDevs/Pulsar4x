@@ -25,18 +25,19 @@ public class PositionDB : TreeHierarchyDB, IPosition
         NewtonComplex,
         Warp,
     }
-    [JsonProperty]
     public MoveTypes MoveType { get; internal set; }
 
     public KeplerElements GetKeplerElements { get; internal set; }
 
     public Vector3 RelativePosition { get; internal set; }
 
+    [JsonIgnore]
     public Vector2 RelativePosition2
     {
         get { return (Vector2)RelativePosition; }
         set { RelativePosition = (Vector3)value; }
     }
+    [JsonIgnore]
     public Vector3 AbsolutePosition
     {
         get
@@ -65,13 +66,12 @@ public class PositionDB : TreeHierarchyDB, IPosition
         }
     }
 
+    [JsonIgnore]
     public Vector2 AbsolutePosition2     {
         get { return (Vector2)AbsolutePosition; }
         set { AbsolutePosition = (Vector3)value; }
     }
-    [JsonProperty]
     public Vector2 Velocity { get; internal set; }
-    [JsonProperty]
     public double SGP { get; internal set; }
 
     [JsonConstructor]

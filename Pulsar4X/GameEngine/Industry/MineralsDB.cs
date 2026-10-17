@@ -20,7 +20,6 @@ namespace Pulsar4X.Industry
     public class MineralsDB : BaseDataBlob
     {
         [PublicAPI]
-        [JsonProperty]
         public Dictionary<int, MineralDeposit> Minerals { get; internal set; }
 
         public MineralsDB()

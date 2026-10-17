@@ -46,8 +46,11 @@ namespace Pulsar4X.Components
 
         /// <summary>
         /// This is the entity that this component  is mounted on.
+        /// The setter looks up ComponentInstancesDB on that entity, which is not loaded yet.
+        /// The entity itself is stored on <see cref="_parentEntity"/>.
         /// </summary>
         /// <value>The parent entity.</value>
+        [JsonIgnore]
         public Entity ParentEntity
         {
             get { return _parentEntity; }

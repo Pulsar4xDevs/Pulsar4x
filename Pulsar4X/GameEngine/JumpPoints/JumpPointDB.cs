@@ -13,7 +13,6 @@ namespace Pulsar4X.JumpPoints
         /// <summary>
         /// The Id of the entity that this jump point goes to
         /// </summary>
-        [JsonProperty]
         public int DestinationId { get; internal set; }
 
         /// <summary>
@@ -23,10 +22,8 @@ namespace Pulsar4X.JumpPoints
         /// TODO: Gameplay Review
         /// We might want to use a TransitType enum, to allow different types of FTL using the same type of DB
         /// </remarks>
-        [JsonProperty]
         public bool IsStabilized { get; internal set; }
 
-        [JsonProperty]
         public HashSet<int> IsDiscovered { get; internal set; } = new HashSet<int>();
 
         public JumpPointDB() { }

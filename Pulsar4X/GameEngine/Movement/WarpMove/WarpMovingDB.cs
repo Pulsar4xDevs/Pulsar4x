@@ -18,15 +18,11 @@ namespace Pulsar4X.Movement
     {
 
         #region InWarpData
-        [JsonProperty]
         public bool HasStarted { get; internal set; } = false;
 
-        [JsonProperty]
         public DateTime LastProcessDateTime = new DateTime();
-        [JsonProperty]
         public float Heading_Radians { get; internal set; }
 
-        [JsonProperty]
         public Vector3 CurrentNonNewtonionVectorMS { get; internal set; }
 
         [JsonProperty]
@@ -42,27 +38,20 @@ namespace Pulsar4X.Movement
 
         #region StartPointData
 
-        [JsonProperty]
         public DateTime EntryDateTime { get; internal set; }
-        [JsonProperty]
         public Vector3 SavedNewtonionVector { get; internal set; }
 
-        [JsonProperty]
         public Vector3 EntryPointAbsolute { get; internal set; }
 
         #endregion
 
         #region EndPointData
 
-        [JsonProperty]
         public DateTime PredictedExitTime { get; internal set; }
 
-        [JsonProperty]
         public Vector3 ExitPointAbsolute { get; internal set; }
 
-        [JsonProperty]
         public Vector3 ExitPointrelative { get; internal set; }
-        [JsonProperty]
         public KeplerElements EndpointTargetOrbit { get; private set; }
 
         [JsonProperty]
@@ -71,6 +60,7 @@ namespace Pulsar4X.Movement
 
         [JsonProperty] 
         internal PositionDB TargetPositionDB;
+        [JsonIgnore]
         public PositionDB GetTargetPosDB
         {
             get { return TargetPositionDB; }

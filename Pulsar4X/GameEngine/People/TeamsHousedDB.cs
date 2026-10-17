@@ -8,7 +8,6 @@ namespace Pulsar4X.People
 {
     public class TeamsHousedDB : BaseDataBlob
     {
-        [JsonProperty]
         public Dictionary<TeamTypes, List<TeamObject>> TeamsByType = new Dictionary<TeamTypes, List<TeamObject>>();
 
 

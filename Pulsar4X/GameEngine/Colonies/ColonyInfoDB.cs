@@ -12,7 +12,6 @@ namespace Pulsar4X.Colonies
         /// <summary>
         /// Species Entity and amount
         /// </summary>
-        [JsonProperty]
         public Dictionary<int, long> Population { get; internal set; } = new ();
 
 
@@ -20,25 +19,21 @@ namespace Pulsar4X.Colonies
         /// constructed parts stockpile.
         /// Construction pulls and pushes from here.
         /// </summary>
-        [JsonProperty]
         public Dictionary<string, int> ComponentStockpile { get; internal set; } = new ();
 
         /// <summary>
         /// Construction pushes here.
         /// </summary>
-        [JsonProperty]
         public Dictionary<string, float> OrdinanceStockpile { get; internal set; } = new ();
 
         /// <summary>
         /// Construction *adds* to this list. damaged and partialy constructed fighters will go here too, but shouldnt launch.
         /// </summary>
-        [JsonProperty]
         public List<Entity> FighterStockpile { get; internal set; } = new List<Entity>();
 
         /// <summary>
         /// the parent planet
         /// </summary>
-        [JsonProperty]
         public Entity PlanetEntity { get; internal set; } = Entity.InvalidEntity;
 
 

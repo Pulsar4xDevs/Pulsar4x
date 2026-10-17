@@ -10,3 +10,5 @@ The save is the host's full `Game`. The screen after a load is one faction's sli
 | 2 | [Work in progress survives a load](02-work-in-progress.md) | 1 |
 
 Out of both plans: the crash-save beside the fault dialog, restoring the open windows, the selected ship, the camera, or space-master mode, and the nine tests already failing on `DevBranch` (`Prune_RunMarket_RequiresALogisticsOffice` and the eight hyperbolic cases in `OrbitFuzzTesting`).
+
+Later, not a third plan: [saved things should be data](saved-data.md). Do not build it until asked.

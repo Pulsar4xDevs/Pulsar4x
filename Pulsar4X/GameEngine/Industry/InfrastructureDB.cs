@@ -15,19 +15,19 @@ namespace Pulsar4X.Industry
     /// </summary>
     public class InfrastructureDB : BaseDataBlob
     {
-        [JsonProperty]
         public long CapacityProvided { get; internal set; }
 
-        [JsonProperty]
         public long CapacityRequired { get; internal set; }
 
         /// <summary>Provided minus required; negative means the colony is over capacity.</summary>
+        [JsonIgnore]
         public long CapacityAvailable => CapacityProvided - CapacityRequired;
 
         /// <summary>
         /// Output multiplier in (0, 1]. 1.0 while infrastructure meets or exceeds
         /// demand; otherwise the ratio of what's provided to what's required.
         /// </summary>
+        [JsonIgnore]
         public double Efficiency
         {
             get

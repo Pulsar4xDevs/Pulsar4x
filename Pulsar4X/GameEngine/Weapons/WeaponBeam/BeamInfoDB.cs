@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Movement;
@@ -26,6 +27,7 @@ public class BeamInfoDB : BaseDataBlob
     public Entity TargetEntity;
     public Vector3 LaunchPosition;
     private PositionDB _posDB;
+    [JsonIgnore]
     public PositionDB PosDB {
         get
         {

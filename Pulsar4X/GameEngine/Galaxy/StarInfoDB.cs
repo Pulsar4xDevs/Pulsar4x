@@ -18,7 +18,6 @@ namespace Pulsar4X.Galaxy
         /// Age of this star. Fluff.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double Age { get; internal set; }
 
         /// <summary>
@@ -26,28 +25,24 @@ namespace Pulsar4X.Galaxy
         /// Affects habitable zone.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double Temperature { get; internal set; }
 
         /// <summary>
         /// Luminosity of this star. Fluff.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double Luminosity { get; internal set; }
 
         /// <summary>
         /// Star class. Mostly fluff (affects SystemGeneration).
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public string Class { get; internal set; }
 
         /// <summary>
         /// Main Type. Mostly fluff (affects SystemGeneration).
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public SpectralType SpectralType { get; internal set; }
 
         /// <summary>
@@ -55,14 +50,12 @@ namespace Pulsar4X.Galaxy
         /// number from  0 (hottest) to 9 (coolest)
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public ushort SpectralSubDivision { get; internal set; }
 
         /// <summary>
         /// LuminosityClass. Fluff.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public LuminosityClass LuminosityClass { get; internal set; }
 
         /// <summary>
@@ -70,22 +63,28 @@ namespace Pulsar4X.Galaxy
         /// calculated according to this site: http://www.planetarybiology.com/calculating_habitable_zone.html
         /// </summary>
         [PublicAPI]
+        [JsonIgnore]
         public double EcoSphereRadius_AU => (MinHabitableRadius_AU + MaxHabitableRadius_AU) / 2;
 
+        [JsonIgnore]
         public double EcoSphereRadius_m => (MinHabitableRadius_m + MaxHabitableRadius_m) / 2;
         /// <summary>
         /// Minimum edge of the Habitable Zone (in AU)
         /// </summary>
         [PublicAPI]
+        [JsonIgnore]
         public double MinHabitableRadius_AU => Math.Sqrt(Luminosity / 1.1);
 
+        [JsonIgnore]
         public double MinHabitableRadius_m => Distance.AuToMt(MinHabitableRadius_AU);
         /// <summary>
         /// Maximum edge of the Habitable Zone (in AU)
         /// </summary>
         [PublicAPI]
+        [JsonIgnore]
         public double MaxHabitableRadius_AU => Math.Sqrt(Luminosity / 0.53);
 
+        [JsonIgnore]
         public double MaxHabitableRadius_m => Distance.AuToMt(MaxHabitableRadius_AU);
 
         public StarInfoDB() { }

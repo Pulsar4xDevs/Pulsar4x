@@ -5,12 +5,14 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.Datablobs
 {
-    [JsonObject(MemberSerialization.OptIn)]
+    [JsonObject(MemberSerialization.OptOut)]
     public abstract class BaseDataBlob : ICloneable
     {
         /// <summary>
-        /// This is the Entity which Owns/Conatains/IsParentOf this datablob
+        /// This is the Entity which Owns/Conatains/IsParentOf this datablob.
+        /// Set again on load by the manager. Saving it would point every blob back at its entity.
         /// </summary>
+        [JsonIgnore]
         public virtual Entity? OwningEntity { get; internal set; } = Entity.InvalidEntity;
 
         /// <summary>

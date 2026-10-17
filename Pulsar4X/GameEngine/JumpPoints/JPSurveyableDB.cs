@@ -20,15 +20,10 @@ namespace Pulsar4X.JumpPoints
     /// </remarks>
     public class JPSurveyableDB : BaseDataBlob
     {
-        [JsonProperty]
         public uint PointsRequired;
-        [JsonProperty]
         public SafeDictionary<int, uint> SurveyPointsRemaining;
-        [JsonProperty]
         public Entity? JumpPointTo;
-        [JsonProperty]
         public string SystemToGuid;
-        [JsonProperty]
         public double MinimumDistanceToJump_m;
 
         /// <summary>

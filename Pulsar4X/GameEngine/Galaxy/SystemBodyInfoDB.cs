@@ -22,14 +22,12 @@ namespace Pulsar4X.Galaxy
         /// Type of body this is. <see cref="BodyType"/>
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public BodyType BodyType { get; internal set; }
 
         /// <summary>
         /// Gets or sets the albedo(Bond).
         /// </summary>
         /// <value>The albedo(Bond)</value>
-        [JsonProperty]
         public PercentValue Albedo { get; internal set; }
 
         /// <summary>
@@ -37,7 +35,6 @@ namespace Pulsar4X.Galaxy
         /// Influences magnitic field. maybe this should be in the processor?
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public TectonicActivity Tectonics { get; internal set; }
 
         /// <summary>
@@ -45,7 +42,6 @@ namespace Pulsar4X.Galaxy
         /// Measured in degrees.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public float AxialTilt { get; internal set; }
 
         /// <summary>
@@ -53,7 +49,6 @@ namespace Pulsar4X.Galaxy
         /// In Microtesla (uT)
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public float MagneticField { get; internal set; }
 
         /// <summary>
@@ -62,21 +57,18 @@ namespace Pulsar4X.Galaxy
         /// In Degrees C.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public float BaseTemperature { get; internal set; }
 
         /// <summary>
         /// Amount of radiation on this body. Affects ColonyCost.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public float RadiationLevel { get; internal set; }
 
         /// <summary>
         /// Amount of atmosphic dust on this body. Affects ColonyCost.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public float AtmosphericDust { get; internal set; }
 
         /// <summary>
@@ -89,21 +81,18 @@ namespace Pulsar4X.Galaxy
         /// Maybe this should be at the species level.
         /// </remarks>
         [PublicAPI]
-        [JsonProperty]
         public bool SupportsPopulations { get; internal set; }
 
         /// <summary>
         /// Length of day for this body. Mostly fluff.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public TimeSpan LengthOfDay { get; internal set; }
 
         /// <summary>
         /// Gravity on this body measured in m/s/s. Affects ColonyCost.
         /// </summary>
         [PublicAPI]
-        [JsonProperty]
         public double Gravity { get; internal set; }
 
 

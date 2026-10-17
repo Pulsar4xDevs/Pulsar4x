@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 using Pulsar4X.Engine;
 
 namespace Pulsar4X.Colonies
@@ -29,6 +30,7 @@ namespace Pulsar4X.Colonies
         public HexTileType TileType { get; set; }
         public string? BuildingId { get; set; }
         public Entity? Building { get; set; }
+        [JsonIgnore]
         public bool IsOccupied => Building != null || !string.IsNullOrEmpty(BuildingId);
         
         /// <summary>
@@ -46,6 +48,7 @@ namespace Pulsar4X.Colonies
         /// </summary>
         public int InfrastructureLevel { get; set; } = 0;
 
+        [JsonConstructor]
         public HexTile(HexCoordinate coordinate)
         {
             Coordinate = coordinate;

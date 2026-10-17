@@ -12,20 +12,17 @@ public class AdministratorDB : BaseDataBlob
     /// <summary>
     /// The amount of points per day the researcher outputs
     /// </summary>
-    [JsonProperty]
     public ModifiableValue<int> PointsPerDay { get; internal set; } = new (0);
 
     /// <summary>
     /// key = category Id
     /// value = percentage bonus to the category (0-1 range IE: 0.1 is a 10 percent bonus)
     /// </summary>
-    [JsonProperty]
     public Dictionary<string, double> BonusCategories { get; internal set; } = new ();
 
     /// <summary>
     /// The *base* cost per day to operate the researcher
     /// </summary>
-    [JsonProperty]
     public ModifiableValue<decimal> CostPerDay { get; internal set; } = new(0);
 
     /// <summary>
@@ -37,25 +34,20 @@ public class AdministratorDB : BaseDataBlob
     /// 4 = full speed ahead, multiplies the research point output by 4, multiplies the cost per day by 13
     /// 5 = spared no expense, multiplies the research point output by 5, multiplies the cost by day by 22
     /// </summary>
-    [JsonProperty]
     public byte FundingLevel { get; set; } = 1;
 
-    [JsonProperty]
     public string FundingPointModifierId { get; internal set; } = "";
 
-    [JsonProperty]
     public string FundingCostModifierId { get; internal set; } = "";
 
     /// <summary>
     /// The entity Id of the admin assigned
     /// </summary>
-    [JsonProperty]
     public int AdministratorId { get; internal set; } = -1;
 
     /// <summary>
     /// The entity Id of the location the lab is at
     /// </summary>
-    [JsonProperty]
     public int LocationId { get; internal set; } = -1;
 
 
@@ -63,7 +55,6 @@ public class AdministratorDB : BaseDataBlob
     /// <summary>
     /// Needed for the UI
     /// </summary>
-    [JsonProperty]
     public IConstructableDesign Design { get; internal set; }
 
     public AdministratorDB(IConstructableDesign design)

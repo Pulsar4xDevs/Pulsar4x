@@ -41,15 +41,17 @@ public class GoalsDB : BaseDataBlob
     };
 
     // The order itself. The modifier dictionaries below are rebuilt each agent pass and are not saved.
-    [JsonProperty]
     public Goal? ActiveGoal { get; set; }
-    [JsonProperty]
     public Goal? GivenGoal { get; set; }
 
+    [JsonIgnore]
     public Dictionary<GoalType, float> PersonalityModifiers { get; } = new();
+    [JsonIgnore]
     public Dictionary<GoalType, float> CapabilityModifiers { get; } = new();   // -1 = impossible
+    [JsonIgnore]
     public Dictionary<GoalType, float> OrdersModifiers { get; } = new();       // from superior
 
+    [JsonIgnore]
     public Dictionary<GoalType, Goal> EffectiveGoals { get; } = new();
 
     public override object Clone()
