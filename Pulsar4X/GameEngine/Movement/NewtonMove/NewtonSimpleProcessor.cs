@@ -137,6 +137,14 @@ public class NewtonSimpleProcessor : IHotloopProcessor
         db.LastProcessDateTime = at;
     }
 
+    internal static void Abort(Entity entity, DateTime at)
+    {
+        if (!entity.TryGetDataBlob<NewtonSimpleMoveDB>(out var db) || db.SOIParent == null)
+            return;
+        double mass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
+        Fail(db, entity, mass, at);
+    }
+
     /// <summary>
     /// Blend start→target at the burn node, not at "now". Evaluating both Kepler
     /// states at the current time then lerping r,v is a chord between two drifted

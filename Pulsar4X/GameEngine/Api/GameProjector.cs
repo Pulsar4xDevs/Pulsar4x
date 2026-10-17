@@ -1522,7 +1522,10 @@ namespace Pulsar4X.Engine.Api
             {
                 var goal = goals.ActiveGoal;
                 string strStatus = Enum.GetName(typeof(GoalStatus), goal.Status) ?? "";
-                goalSnapshot = new GoalSnapshot(goals.ActiveGoal.Name, strStatus, goal.Message);
+                goalSnapshot = new GoalSnapshot(goals.ActiveGoal.Name, strStatus, goal.Message)
+                {
+                    PlayerCancelled = goal.PlayerCancelled,
+                };
             }
             return goalSnapshot;
         }

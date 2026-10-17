@@ -240,6 +240,13 @@ public class MatchOrbitAction : EntityAction
         return radians;
     }
 
+    public override void Stop(DateTime at)
+    {
+        if (_entityCommanding == null || _db == null)
+            return;
+        NewtonSimpleProcessor.Abort(_entityCommanding, at);
+    }
+
     public override void UpdateDetailString()
     {
         if (_burns.Count == 0)

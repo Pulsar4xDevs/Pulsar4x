@@ -19,20 +19,39 @@ public static class FleetChildDuty
     }
 
     /// <summary>
-    /// Own in-progress goal, or queued actions that are not this fleet goal's work.
-    /// A completed or failed goal does not count. The fleet may task the ship again.
+    /// A ship the player took off this fleet order stays busy, so the same job does not hand it again.
+    /// A ship's own cancelled order stays busy too. A child of a fleet order that has been replaced does not.
+    /// Own in-progress work, and actions the player plotted, stay busy too.
     /// </summary>
     public static bool BusyWithOwnWork(Entity child, Goal fleetGoal)
     {
-        if (child.TryGetDataBlob<GoalsDB>(out var goals) && goals.ActiveGoal != null)
+        if (child.TryGetDataBlob<GoalsDB>(out var goals))
         {
-            var active = goals.ActiveGoal;
-            if (active.Status is not (GoalStatus.Completed or GoalStatus.Failed)
-                && active.ParentGoalId != fleetGoal.Id)
+            if (CancelledBlocks(goals.ActiveGoal, fleetGoal) || CancelledBlocks(goals.GivenGoal, fleetGoal))
                 return true;
+            if (goals.ActiveGoal != null)
+            {
+                var active = goals.ActiveGoal;
+                if (active.Status is not (GoalStatus.Completed or GoalStatus.Failed)
+                    && active.ParentGoalId != fleetGoal.Id)
+                    return true;
+            }
         }
 
         return HasPlayerPlottedActions(child, fleetGoal);
+    }
+
+    /// <summary>
+    /// True when this cancelled goal is the ship's own order, or a child of <paramref name="fleetGoal"/>.
+    /// A cancelled child of an earlier fleet order must not block the next one.
+    /// </summary>
+    static bool CancelledBlocks(Goal? goal, Goal fleetGoal)
+    {
+        if (goal is not { PlayerCancelled: true })
+            return false;
+        if (string.IsNullOrEmpty(goal.ParentGoalId))
+            return true;
+        return goal.ParentGoalId == fleetGoal.Id;
     }
 
     public static bool HasPlayerPlottedActions(Entity child, Goal fleetGoal)

@@ -108,14 +108,25 @@ namespace Pulsar4X.Client
                 return;
             }
 
-            var orders = entity.GetView<OrdersView>()?.Orders ?? System.Array.Empty<OrderSnapshot>();
+            var ordersView = entity.GetView<OrdersView>();
+            var orders = ordersView?.Orders ?? System.Array.Empty<OrderSnapshot>();
             string entityName = entity.GetView<NameView>()?.Name ?? "Unknown";
+            bool colony = entity.Kind == BodyKind.Colony;
 
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(550, 325), ImGuiCond.Once);
             if (Window.Begin("Orders: " + entityName + "###" + UniqueName, ref IsActiveRef, _flags))
             {
+                if (!colony && CanCancelGoal(ordersView?.goal))
+                {
+                    if (ImGui.Button("Cancel now"))
+                        _uiState.GameClient?.SubmitCommandAsync(new CancelGoalCommand(entity.Id, CancelTiming.Now));
+                    ImGui.SameLine();
+                    if (ImGui.Button("Cancel when convenient"))
+                        _uiState.GameClient?.SubmitCommandAsync(new CancelGoalCommand(entity.Id, CancelTiming.WhenConvenient));
+                }
+
                 var tableFlags = ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingFixedFit;
-                if (ImGui.BeginTable("OrdersTable", 6, tableFlags))
+                if (ImGui.BeginTable("OrdersTable", 7, tableFlags))
                 {
                     ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthFixed, 124);
                     ImGui.TableSetupColumn("Details", ImGuiTableColumnFlags.WidthStretch);
@@ -123,6 +134,7 @@ namespace Pulsar4X.Client
                     ImGui.TableSetupColumn("IE", ImGuiTableColumnFlags.WidthFixed, 32);
                     ImGui.TableSetupColumn("IS", ImGuiTableColumnFlags.WidthFixed, 32);
                     ImGui.TableSetupColumn("Pause", ImGuiTableColumnFlags.WidthFixed, 44);
+                    ImGui.TableSetupColumn("Cancel", ImGuiTableColumnFlags.WidthFixed, 64);
                     ImGui.TableHeadersRow();
 
                     if (orders.Any())
@@ -163,6 +175,13 @@ namespace Pulsar4X.Client
                                 _uiState.GameClient?.SubmitCommandAsync(
                                     new SetOrderPauseCommand(entity.Id, order.OrderId, pause));
                             }
+
+                            ImGui.TableNextColumn();
+                            if (!colony && order.OrderId.Length > 0 && ImGui.SmallButton("Cancel##" + order.OrderId))
+                            {
+                                _uiState.GameClient?.SubmitCommandAsync(
+                                    new CancelOrderCommand(entity.Id, order.OrderId));
+                            }
                         }
                     }
                     else
@@ -186,6 +205,13 @@ namespace Pulsar4X.Client
                 }
             }
             Window.End();
+        }
+
+        static bool CanCancelGoal(GoalSnapshot? goal)
+        {
+            if (goal == null || goal.PlayerCancelled || goal.Name.Length == 0)
+                return false;
+            return goal.Status is "Planning" or "Active" or "Holding" or "Failing";
         }
     }
 }

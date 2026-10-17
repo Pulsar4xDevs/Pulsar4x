@@ -14,16 +14,18 @@ Inbox for small bugs and follow-ups that came up while doing something else. Any
 
 ## Longer notes, already written
 
-- `near-term.md` — ordered work list from 2026-10-15. Play bugs first, then session features, then later plans. GitHub issues are not on it.
-- `GameEngine/Movement/movement-issues.md` — movement plumbing that is still broken.
-- `GameEngine/Damage/damage-system.md` — damage as it works today and what should change.
-- `GameEngine/Engine/Orders/agents-and-goals-design.md` — goal, action, and agent decisions.
-- `GameEngine/Engine/Orders/agent-wakes.md` — near-term item 2. Done 2026-10-17. One pending agent wake, the survey tick moves the clock, and the master-pulse jump key is removed after it runs.
-- `GameEngine/Engine/Orders/weighting-vertical-slice.md` — autonomous weighting slice.
-- `GameEngine/Logistics/plans/` — trade and transport plans. Plans 1–12 and 5b are implemented on `TradeAndTransport`. `office-purses.md` is an idea for later, not plan 13. Do not build it until asked. `survey-charts.md` is implemented: finished surveys are the first kinds on a general intel list, not plan 13. `sealed-shipments.md` is a plan for a remote friendly buy. Several goods can share one shipment. The buying office pays for the goods and posts an intel haul. Any free ship can deliver it and be paid the fee. Not plan 13. Do not build it until asked. The goal half is `DeliverShipment`. `faction-grants-later.md` is a stub for the grant follow-ups. The next slice is colony locations as their own box, separate from ships. Not plan 13. Do not build it until asked.
-- `GameEngine/Industry/plans/` — colony industry. Refine-one-batch is implemented. It is not logistics plan 13.
-- `GameEngine/Engine/Orders/colony-administrator.md` — standing colony intent, patience, specialization, and bids. Notes only. Not an implementation plan.
-- `GameEngine/Engine/Orders/plans/` — Ceres faction jobs, three slices. Not logistics plan 13. Do not build them until asked.
+Status lives in the file itself, in `near-term.md`, or in `AGENTS.md`. This list is only where to look.
+
+- `near-term.md` — ordered work list.
+- `GameEngine/Movement/movement-issues.md` — movement.
+- `GameEngine/Damage/damage-system.md` — damage.
+- `GameEngine/Engine/Orders/agents-and-goals-design.md` — goals, actions, and agents.
+- `GameEngine/Engine/Orders/agent-wakes.md` — agent wakes.
+- `GameEngine/Engine/Orders/weighting-vertical-slice.md` — autonomous weighting.
+- `GameEngine/Engine/Orders/colony-administrator.md` — colony administrator.
+- `GameEngine/Engine/Orders/plans/` — Ceres faction jobs.
+- `GameEngine/Logistics/plans/` — trade and transport. Includes `office-purses.md`, `sealed-shipments.md`, `survey-charts.md`, and `faction-grants-later.md`.
+- `GameEngine/Industry/plans/` — colony industry.
 
 ## Done
 

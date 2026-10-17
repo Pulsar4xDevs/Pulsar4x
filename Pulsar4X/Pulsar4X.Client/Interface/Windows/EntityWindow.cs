@@ -1027,6 +1027,22 @@ namespace Pulsar4X.Client
 
             // Reserve vertical space for the indicator row
             ImGui.InvisibleButton("##statusRow", new Vector2(availWidth, radius * 2f + 24f));
+
+            if (CanCancelGoal(goal))
+            {
+                if (ImGui.Button("Cancel now##goal"))
+                    _uiState.GameClient?.SubmitCommandAsync(new CancelGoalCommand(EntityId, CancelTiming.Now));
+                ImGui.SameLine();
+                if (ImGui.Button("Cancel when convenient##goal"))
+                    _uiState.GameClient?.SubmitCommandAsync(new CancelGoalCommand(EntityId, CancelTiming.WhenConvenient));
+            }
+        }
+
+        static bool CanCancelGoal(GoalSnapshot? goal)
+        {
+            if (goal == null || goal.PlayerCancelled || goal.Name.Length == 0)
+                return false;
+            return goal.Status is "Planning" or "Active" or "Holding" or "Failing";
         }
 
         // --- Type-Specific Content ---
@@ -1126,13 +1142,14 @@ namespace Pulsar4X.Client
                 SectionLabel("ACTIONS (" + orders.Count + ")");
 
                 ImGui.Indent();
-                if (ImGui.BeginTable("##orders", 4,
+                if (ImGui.BeginTable("##orders", 5,
                     ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.NoPadOuterX))
                 {
                     ImGui.TableSetupColumn("##n", ImGuiTableColumnFlags.WidthFixed, 20f);
                     ImGui.TableSetupColumn("##status", ImGuiTableColumnFlags.WidthFixed, 20f);
                     ImGui.TableSetupColumn("##cmd", ImGuiTableColumnFlags.WidthFixed, 200f);
                     ImGui.TableSetupColumn("##det", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("##cancel", ImGuiTableColumnFlags.WidthFixed, 64f);
 
                     for (int i = 0; i < orders.Count; i++)
                     {
@@ -1197,6 +1214,9 @@ namespace Pulsar4X.Client
                         ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                         ImGui.Text(orders[i].Details);
                         ImGui.PopStyleColor();
+                        ImGui.TableNextColumn();
+                        if (orders[i].OrderId.Length > 0 && ImGui.SmallButton("Cancel##" + orders[i].OrderId))
+                            _uiState.GameClient?.SubmitCommandAsync(new CancelOrderCommand(EntityId, orders[i].OrderId));
                     }
                     ImGui.EndTable();
                 }

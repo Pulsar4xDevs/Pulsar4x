@@ -166,6 +166,13 @@ public class CirculariseAction : EntityAction
         IsRunning = true;
     }
 
+    public override void Stop(DateTime at)
+    {
+        if (_entityCommanding == null || _db == null)
+            return;
+        NewtonSimpleProcessor.Abort(_entityCommanding, at);
+    }
+
     public override void UpdateDetailString()
     {
         _details = LiveDetails();

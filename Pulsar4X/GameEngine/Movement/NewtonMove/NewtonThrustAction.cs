@@ -216,6 +216,19 @@ namespace Pulsar4X.Movement
             }
         }
 
+        public override void Stop(DateTime at)
+        {
+            if (_entityCommanding == null || _db == null || _db.SOIParent == null)
+                return;
+            var parent = _db.SOIParent;
+            var pos = _entityCommanding.GetDataBlob<PositionDB>().RelativePosition;
+            double myMass = _entityCommanding.GetDataBlob<MassVolumeDB>().MassTotal;
+            double parentMass = parent.GetDataBlob<MassVolumeDB>().MassTotal;
+            double sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
+            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, _db.CurrentVector_ms, at);
+            _entityCommanding.SetDataBlob(OrbitDB.FromKeplerElements(parent, myMass, ke, at));
+        }
+
         public override void UpdateDetailString()
         {
             if(_entityCommanding != null && ActionOnDate > _entityCommanding.StarSysDateTime)

@@ -90,6 +90,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(TransferCargoCommand)] = TranslateTransferCargo,
                 [typeof(SetOrderPauseCommand)] = TranslateSetOrderPause,
                 [typeof(Pulsar4X.Api.CancelOrderCommand)] = TranslateCancelOrder,
+                [typeof(CancelGoalCommand)] = TranslateCancelGoal,
                 [typeof(Pulsar4X.Api.NewtonThrustCommand)] = TranslateNewtonThrust,
                 [typeof(Pulsar4X.Api.WarpMoveCommand)] = TranslateWarpMove,
                 [typeof(GoToBodyCommand)] = TranslateGoToBody,
@@ -900,11 +901,34 @@ namespace Pulsar4X.Engine.Api
             var order = orderable.ActionList.FirstOrDefault(o => o.CmdID == cancel.OrderId);
             if (order == null)
                 return CommandResult.Reject($"Order {cancel.OrderId} is not in the queue.");
-            if (order.IsRunning)
-                return CommandResult.Reject("A running order cannot be cancelled.");
 
-            orderable.ActionList.Remove(order);
+            AgentProcessor.CancelAction(commanded, order, commanded.StarSysDateTime);
             PublishOrdersChanged(commanded);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateCancelGoal(Entity faction, Entity commanded, GameCommand command)
+        {
+            var cancel = (CancelGoalCommand)command;
+            if (commanded.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject("Cancel a ship or a fleet order.");
+            if (!AgentProcessor.CancelGoal(commanded, cancel.Timing, commanded.StarSysDateTime))
+                return CommandResult.Reject("Nothing to cancel.");
+
+            PublishOrdersChanged(commanded);
+            if (commanded.TryGetDataBlob<FleetDB>(out var fleet)
+                && commanded.TryGetDataBlob<GoalsDB>(out var goals)
+                && goals.GivenGoal != null)
+            {
+                foreach (var child in fleet.Children)
+                {
+                    if (child.TryGetDataBlob<GoalsDB>(out var childGoals)
+                        && childGoals.ActiveGoal != null
+                        && childGoals.ActiveGoal.ParentGoalId == goals.GivenGoal.Id
+                        && childGoals.ActiveGoal.PlayerCancelled)
+                        PublishOrdersChanged(child);
+                }
+            }
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 

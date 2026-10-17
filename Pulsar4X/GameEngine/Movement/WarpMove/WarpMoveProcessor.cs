@@ -524,6 +524,139 @@ namespace Pulsar4X.Movement
 */
         }
 
+        /// <summary>
+        /// Drop out of a bubble that is already up. The ship orbits whichever body
+        /// currently contains it, at the saved newtonian. A true failure to build
+        /// that orbit parks on the current parent.
+        /// </summary>
+        internal static void Abort(Entity entity, DateTime at)
+        {
+            if (!entity.TryGetDataBlob<WarpMovingDB>(out var moveDB))
+                return;
+            if (!moveDB.HasStarted || moveDB.IsAtTarget)
+                return;
+
+            // Read the bubble before an orbit blob removes WarpMovingDB.
+            var here = new Vector3(moveDB._position.X, moveDB._position.Y, 0);
+            var saved = moveDB.SavedNewtonionVector;
+            PayCollapse(entity, at);
+
+            if (entity.Manager is not StarSystem)
+            {
+                ParkHere(entity);
+                return;
+            }
+
+            var soi = CurrentSoi(entity, here);
+            if (soi == null
+                || !soi.TryGetDataBlob<PositionDB>(out var parentPos)
+                || !soi.TryGetDataBlob<MassVolumeDB>(out var parentMass)
+                || !entity.TryGetDataBlob<MassVolumeDB>(out var shipMass))
+            {
+                ParkHere(entity);
+                return;
+            }
+
+            double myMass = shipMass.MassTotal;
+            double sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass.MassTotal);
+            var ke = OrbitMath.KeplerFromPositionAndVelocity(
+                sgp, here - parentPos.AbsolutePosition, saved, at);
+            if (!double.IsFinite(ke.SemiMajorAxis) || !double.IsFinite(ke.Eccentricity))
+            {
+                ParkHere(entity);
+                return;
+            }
+
+            try
+            {
+                moveDB.IsAtTarget = true;
+                entity.SetDataBlob(OrbitDB.FromKeplerElements(soi, myMass, ke, at));
+            }
+            catch
+            {
+                ParkHere(entity);
+                return;
+            }
+
+            OrbitProcessor.ProcessEntity(entity, at);
+        }
+
+        static void PayCollapse(Entity entity, DateTime at)
+        {
+            if (!entity.TryGetDataBlob<WarpAbilityDB>(out var warpDB)
+                || !entity.TryGetDataBlob<EnergyGenAbilityDB>(out var powerDB)
+                || string.IsNullOrEmpty(warpDB.EnergyType)
+                || !powerDB.EnergyStored.ContainsKey(warpDB.EnergyType))
+                return;
+
+            EnergyGenProcessor.EnergyGen(entity, at - TimeSpan.FromSeconds(1));
+            powerDB.AddDemand(warpDB.BubbleCollapseCost, at - TimeSpan.FromSeconds(1));
+            EnergyGenProcessor.EnergyGen(entity, at);
+            powerDB.AddDemand(-warpDB.BubbleSustainCost, at);
+            powerDB.AddDemand(-warpDB.BubbleCollapseCost, at);
+        }
+
+        /// <summary>
+        /// Smallest finite sphere of influence that contains <paramref name="here"/>.
+        /// The star (infinite sphere) is only the fallback.
+        /// </summary>
+        static Entity? CurrentSoi(Entity ship, Vector3 here)
+        {
+            var orbits = ship.Manager.GetAllDataBlobsOfType<OrbitDB>();
+            Entity? best = null;
+            double bestRadius = double.PositiveInfinity;
+            foreach (var orbit in orbits)
+            {
+                var body = orbit.OwningEntity;
+                if (body == null || body == ship || !body.TryGetDataBlob<PositionDB>(out var pos))
+                    continue;
+                double soi = body.GetSOI_m();
+                if (!double.IsFinite(soi) || soi <= 0 || soi >= bestRadius)
+                    continue;
+                if ((here - pos.AbsolutePosition).Length() < soi)
+                {
+                    best = body;
+                    bestRadius = soi;
+                }
+            }
+            if (best != null)
+                return best;
+
+            if (ship.TryGetDataBlob<PositionDB>(out var shipPos))
+            {
+                var root = shipPos.Root;
+                if (root != null && root != ship && root.IsValid)
+                    return root;
+            }
+
+            foreach (var orbit in orbits)
+            {
+                var body = orbit.OwningEntity;
+                if (body == null || body == ship)
+                    continue;
+                if (!double.IsFinite(body.GetSOI_m()))
+                    return body;
+            }
+            return null;
+        }
+
+        static void ParkHere(Entity entity)
+        {
+            if (entity.HasDataBlob<OrbitDB>())
+                entity.RemoveDataBlob<OrbitDB>();
+            if (entity.TryGetDataBlob<PositionDB>(out var pos))
+            {
+                pos.MoveType = PositionDB.MoveTypes.None;
+                pos.Velocity = Vector2.Zero;
+            }
+            if (entity.TryGetDataBlob<WarpMovingDB>(out var moveDB))
+            {
+                moveDB.IsAtTarget = true;
+                moveDB.CurrentNonNewtonionVectorMS = Vector3.Zero;
+                entity.RemoveDataBlob<WarpMovingDB>();
+            }
+        }
+
 
     }
 

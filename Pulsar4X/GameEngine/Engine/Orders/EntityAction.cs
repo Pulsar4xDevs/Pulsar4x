@@ -99,6 +99,14 @@ namespace GameEngine.Engine.Orders
         /// <param name="game">Game.</param>
         internal abstract void Execute(DateTime atDateTime);
 
+        /// <summary>
+        /// Stop motion this action already started. The caller removes the line.
+        /// The default has no motion of its own.
+        /// </summary>
+        public virtual void Stop(DateTime at)
+        {
+        }
+
         public bool PauseOnAction = false;
 
         [Obsolete]

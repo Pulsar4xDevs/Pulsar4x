@@ -305,6 +305,13 @@ namespace Pulsar4X.Movement
 
         
 
+        public override void Stop(DateTime at)
+        {
+            if (_entityCommanding == null)
+                return;
+            WarpMoveProcessor.Abort(_entityCommanding, at);
+        }
+
         internal override bool IsFinished()
         {
             if (_warpingDB != null && _warpingDB.IsAtTarget)

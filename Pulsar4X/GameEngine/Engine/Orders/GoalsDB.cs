@@ -148,6 +148,8 @@ public class Goal
     public string Name = "";
     public GoalStatus Status = GoalStatus.Planning;
     public string Message = "";
+    /// <summary>The player cancelled this order. The agent does not plan it again.</summary>
+    public bool PlayerCancelled;
     
     public Goal(GoalType type)
     {

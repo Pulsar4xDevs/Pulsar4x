@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Pulsar4X.Api;
 using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
@@ -27,6 +28,13 @@ interface IGoalPlanner
     GoalType Type { get; }
 
     PlanResult Plan(Entity managedEntity, Goal goal, DateTime atDateTime);
+
+    /// <summary>
+    /// Default drops every line on cancel-now, and leaves the line that has already
+    /// started on cancel-when-convenient. MoveTo keeps a warp that is already up.
+    /// </summary>
+    void Cancel(Entity unit, Goal goal, DateTime at, CancelTiming timing)
+        => GoalCancel.Apply(unit, goal, at, timing);
 }
 
 /// <summary>
@@ -165,6 +173,12 @@ public class AgentProcessor : IInstanceProcessor
             goal = new Goal(picked.Type);
             goalsDB.GivenGoal = goal;
             goalsDB.ActiveGoal = goal;
+        }
+
+        if (goal.PlayerCancelled)
+        {
+            GoalCancel.Settle(managedEntity, agentHost, goal, atDateTime);
+            return;
         }
 
         bool isFleet = managedEntity.HasDataBlob<FleetDB>();
@@ -434,6 +448,46 @@ public class AgentProcessor : IInstanceProcessor
         else
             ScheduleAgent(unit, when.Value);
     }
+
+    /// <summary>
+    /// Player cancel. The goal stays on <see cref="GoalsDB.GivenGoal"/> so an idle wake
+    /// does not pick a replacement. Returns false for a colony or when there is nothing to cancel.
+    /// </summary>
+    internal static bool CancelGoal(Entity unit, CancelTiming timing, DateTime at)
+    {
+        if (unit.HasDataBlob<ColonyInfoDB>())
+            return false;
+        if (!unit.TryGetDataBlob<GoalsDB>(out var goals) || goals.GivenGoal == null)
+            return false;
+
+        var goal = goals.GivenGoal;
+        if (goal.PlayerCancelled || goal.Status is GoalStatus.Completed or GoalStatus.Failed)
+            return false;
+
+        goal.PlayerCancelled = true;
+        if (_planners.TryGetValue(goal.Type, out var planner))
+            planner.Cancel(unit, goal, at, timing);
+        else
+            GoalCancel.Apply(unit, goal, at, timing);
+
+        if (unit.TryGetDataBlob<FleetDB>(out var fleet))
+        {
+            foreach (var child in fleet.Children.ToList())
+            {
+                if (!child.TryGetDataBlob<GoalsDB>(out var childGoals) || childGoals.ActiveGoal == null)
+                    continue;
+                if (childGoals.ActiveGoal.ParentGoalId != goal.Id || childGoals.ActiveGoal.PlayerCancelled)
+                    continue;
+                CancelGoal(child, timing, at);
+            }
+        }
+
+        GoalCancel.Settle(unit, unit, goal, at);
+        return true;
+    }
+
+    internal static void CancelAction(Entity unit, EntityAction action, DateTime at)
+        => GoalCancel.CancelLine(unit, action, at);
 
     /// <summary>
     /// This agent's work items: the sub-goals its subordinates are currently holding on behalf of

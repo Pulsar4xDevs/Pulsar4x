@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using GameEngine.Engine.Orders;
+using Pulsar4X.Api;
 using Pulsar4X.Colonies;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
@@ -29,6 +30,30 @@ public enum MoveMode
 public class MoveToPlan : IGoalPlanner
 {
     public GoalType Type => GoalType.MoveTo;
+
+    public void Cancel(Entity unit, Goal goal, DateTime at, CancelTiming timing)
+    {
+        if (timing == CancelTiming.Now || !BubbleUp(unit))
+        {
+            GoalCancel.Apply(unit, goal, at, timing);
+            return;
+        }
+
+        if (!unit.TryGetDataBlob<ActionQueueDB>(out var queue))
+            return;
+
+        // The bubble is one transit. Keep the warp and the circularise behind it.
+        foreach (var action in queue.ActionsFor(goal))
+        {
+            if (action is WarpMoveAction or CirculariseAction)
+                continue;
+            action.Stop(at);
+            queue.ActionList.Remove(action);
+        }
+    }
+
+    static bool BubbleUp(Entity unit)
+        => unit.TryGetDataBlob<WarpMovingDB>(out var warp) && warp.HasStarted && !warp.IsAtTarget;
 
     public PlanResult Plan(Entity managedEntity, Goal goal, DateTime atDateTime)
     {

@@ -111,6 +111,13 @@ public class NewtonSimpleAction : EntityAction
         }
     }
 
+    public override void Stop(DateTime at)
+    {
+        if (_entityCommanding == null || _db == null)
+            return;
+        NewtonSimpleProcessor.Abort(_entityCommanding, at);
+    }
+
     public override void UpdateDetailString()
     {
         if(ActionOnDate > _entityCommanding.StarSysDateTime)

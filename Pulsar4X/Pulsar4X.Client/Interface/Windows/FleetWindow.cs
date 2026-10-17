@@ -196,6 +196,13 @@ namespace Pulsar4X.Client
 
         static bool HasGoal(GoalSnapshot? goal) => goal != null && goal.Name.Length > 0;
 
+        static bool CanCancelGoal(GoalSnapshot? goal)
+        {
+            if (goal == null || goal.PlayerCancelled || goal.Name.Length == 0)
+                return false;
+            return goal.Status is "Planning" or "Active" or "Holding" or "Failing";
+        }
+
         internal override void Display()
         {
             if(!IsActive) return;
@@ -1463,17 +1470,26 @@ namespace Pulsar4X.Client
                             ImGui.SetTooltip(goal.Message);
                         ImGui.EndTable();
                     }
+                    if (CanCancelGoal(goal))
+                    {
+                        if (ImGui.Button("Cancel now"))
+                            SubmitFleetCommand(new CancelGoalCommand(holderId, CancelTiming.Now));
+                        ImGui.SameLine();
+                        if (ImGui.Button("Cancel when convenient"))
+                            SubmitFleetCommand(new CancelGoalCommand(holderId, CancelTiming.WhenConvenient));
+                    }
                 }
 
                 if (orders.Count == 0)
                 {
                     ImGui.Text("None");
                 }
-                else if (ImGui.BeginTable("SubjectOrders", 3, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
+                else if (ImGui.BeginTable("SubjectOrders", 4, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
                 {
                     ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.1f);
-                    ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.None, 0.7f);
-                    ImGui.TableSetupColumn("Pause", ImGuiTableColumnFlags.None, 0.2f);
+                    ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.None, 0.55f);
+                    ImGui.TableSetupColumn("Pause", ImGuiTableColumnFlags.None, 0.15f);
+                    ImGui.TableSetupColumn("Cancel", ImGuiTableColumnFlags.None, 0.2f);
                     ImGui.TableHeadersRow();
 
                     for (int i = 0; i < orders.Count; i++)
@@ -1494,6 +1510,9 @@ namespace Pulsar4X.Client
                                 SubmitFleetCommand(new SetOrderPauseCommand(holderId, order.OrderId, pause));
                             }
                         }
+                        ImGui.TableNextColumn();
+                        if (order.OrderId.Length > 0 && ImGui.SmallButton("Cancel##" + order.OrderId))
+                            SubmitFleetCommand(new CancelOrderCommand(holderId, order.OrderId));
                     }
 
                     ImGui.EndTable();

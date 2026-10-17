@@ -721,9 +721,9 @@ public sealed record GoalSnapshot(
     string Name,
     string Status,
     string Message = "")
-
 {
-    
+    /// <summary>Set once the player has cancelled. The buttons hide, and a transit may still be finishing.</summary>
+    public bool PlayerCancelled { get; init; }
 }
 
 

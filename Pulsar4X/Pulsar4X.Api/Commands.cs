@@ -246,9 +246,19 @@ public sealed record TransferCargoCommand(
 /// (<see cref="OrderSnapshot.OrderId"/>).</summary>
 public sealed record SetOrderPauseCommand(int TargetEntityId, string OrderId, bool Pause) : GameCommand(TargetEntityId);
 
-/// <summary>Remove a queued order (<see cref="OrderSnapshot.OrderId"/>) that has not started
-/// running yet.</summary>
+/// <summary>Remove one order (<see cref="OrderSnapshot.OrderId"/>). A running line is stopped.
+/// A warp line also drops the circularise that was waiting behind it.</summary>
 public sealed record CancelOrderCommand(int TargetEntityId, string OrderId) : GameCommand(TargetEntityId);
+
+/// <summary>Stop now, or let the step that has already started finish and do not start the next.</summary>
+public enum CancelTiming
+{
+    Now,
+    WhenConvenient,
+}
+
+/// <summary>Cancel the commanded ship or fleet's current goal.</summary>
+public sealed record CancelGoalCommand(int TargetEntityId, CancelTiming Timing) : GameCommand(TargetEntityId);
 
 #endregion
 
