@@ -59,7 +59,10 @@ namespace GameEngine.Engine.Orders
                     // lane until the agent drops unstarted follow-ons and Plan()s.
                     if (entityCommand.IsFinished())
                     {
-                        entityCommand.Status = ActionStatus.Succeeded;
+                        // IsFinished may already have set Failed (short ΔV, and the like).
+                        // A success is the only status this loop fills in.
+                        if (entityCommand.Status != ActionStatus.Failed)
+                            entityCommand.Status = ActionStatus.Succeeded;
                         if (!string.IsNullOrEmpty(entityCommand.ParentGoalId))
                         {
                             wakeAgent = true;
@@ -107,7 +110,12 @@ namespace GameEngine.Engine.Orders
 
                     if (action.IsFinished())
                     {
-                        if (action.Status != ActionStatus.Succeeded)   // transition
+                        if (action.Status == ActionStatus.Failed)
+                        {
+                            if (!string.IsNullOrEmpty(action.ParentGoalId))
+                                wakeAgent = true;
+                        }
+                        else if (action.Status != ActionStatus.Succeeded)   // transition
                         {
                             action.Status = ActionStatus.Succeeded;
                             if (!string.IsNullOrEmpty(action.ParentGoalId))

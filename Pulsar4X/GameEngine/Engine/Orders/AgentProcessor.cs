@@ -264,7 +264,7 @@ public class AgentProcessor : IInstanceProcessor
                     managedEntity.TryGetDataBlob<ActionQueueDB>(out var queue);
                     if (queue != null && queue.ActionsFor(goal).Any(a => a.Status == ActionStatus.Failed))
                     {
-                        Fail(goal, "an action failed");
+                        Fail(goal, FailedActionReason(queue.ActionsFor(goal)));
                         queue.ClearFor(goal);
                         break;
                     }
@@ -317,7 +317,7 @@ public class AgentProcessor : IInstanceProcessor
 
                     if (actions.Any(a => a.Status == ActionStatus.Failed))
                     {
-                        Fail(goal, "an action failed");
+                        Fail(goal, FailedActionReason(actions));
                         queue.ClearFor(goal);
                     }
                     else
@@ -512,6 +512,19 @@ public class AgentProcessor : IInstanceProcessor
         }
 
         return subGoals;
+    }
+
+    static string FailedActionReason(IEnumerable<EntityAction> actions)
+    {
+        foreach (var action in actions)
+        {
+            if (action.Status != ActionStatus.Failed)
+                continue;
+            if (!string.IsNullOrEmpty(action.FailureMessage))
+                return action.FailureMessage;
+            return "an action failed";
+        }
+        return "an action failed";
     }
 
     static void Fail(Goal goal, string message)

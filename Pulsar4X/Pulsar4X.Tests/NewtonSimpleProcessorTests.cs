@@ -1,4 +1,5 @@
 using System;
+using GameEngine.Engine.Orders;
 using NUnit.Framework;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
@@ -100,6 +101,26 @@ namespace Pulsar4X.Tests
             Assert.IsFalse(db.IsComplete);
             Assert.Greater(db.CurrentTrajectory.Eccentricity, 0.1,
                 "must not snap to the circular target when the burn cannot finish");
+        }
+
+        [Test]
+        public void ShortDeltaV_FailsTheActionAndCoasts()
+        {
+            var (ship, startKE, _, db) = MakeCirculariseBurn(fuelBurnRateKgS: 1e6, deltaVBudget: 1);
+            var queue = new ActionQueueDB();
+            ship.SetDataBlob(queue);
+            var action = NewtonSimpleAction.CreateCommand(
+                ship.FactionOwnerID, ship, _epoch, startKE, db.TargetTrajectory, "burn");
+            queue.Enqueue(action);
+
+            Game.ProcessorManager.GetInstanceProcessor(nameof(ActionQueueProcessor))
+                .ProcessEntity(ship, _epoch);
+
+            Assert.AreEqual(ActionStatus.Failed, action.Status);
+            Assert.AreEqual("not enough ΔV", action.FailureMessage);
+            Assert.IsTrue(ship.HasDataBlob<OrbitDB>(), "the ship coasts on the orbit it had reached");
+            Assert.IsFalse(ship.HasDataBlob<NewtonSimpleMoveDB>());
+            Assert.IsTrue(queue.ActionList.Contains(action));
         }
 
         (Entity ship, KeplerElements startKE, KeplerElements targetKE, NewtonSimpleMoveDB db)

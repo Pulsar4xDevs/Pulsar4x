@@ -283,7 +283,7 @@ public class MatchOrbitAction : EntityAction
             return true;
         if (IsRunning && _db != null && _db.IsFailed)
         {
-            Status = ActionStatus.Failed;
+            Fail("not enough ΔV");
             return _isFinished = true;
         }
         if (IsRunning && _next >= _burns.Count && (_db == null || _db.IsComplete))
@@ -302,6 +302,20 @@ public class MatchOrbitAction : EntityAction
 
     public override EntityAction Clone()
     {
-        throw new NotImplementedException();
+        var copy = new MatchOrbitAction
+        {
+            UseActionLanes = UseActionLanes,
+            ParentGoalId = ParentGoalId,
+            RequestingFactionGuid = RequestingFactionGuid,
+            EntityCommandingGuid = EntityCommandingGuid,
+            _entityCommanding = _entityCommanding,
+            _targetEntity = _targetEntity,
+            TargetEntityGuid = TargetEntityGuid,
+            CreatedDate = CreatedDate,
+            ActionOnDate = ActionOnDate,
+            _name = _name,
+        };
+        copy.UpdateDetailString();
+        return copy;
     }
 }

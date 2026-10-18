@@ -146,7 +146,7 @@ public class NewtonSimpleAction : EntityAction
     {
         if (IsRunning && _db != null && _db.IsFailed)
         {
-            Status = ActionStatus.Failed;
+            Fail("not enough ΔV");
             return _isFinished = true;
         }
         if (IsRunning && _db != null && _db.IsComplete)
@@ -166,6 +166,23 @@ public class NewtonSimpleAction : EntityAction
 
     public override EntityAction Clone()
     {
-        throw new NotImplementedException();
+        var copy = new NewtonSimpleAction
+        {
+            UseActionLanes = UseActionLanes,
+            ParentGoalId = ParentGoalId,
+            RequestingFactionGuid = RequestingFactionGuid,
+            EntityCommandingGuid = EntityCommandingGuid,
+            _entityCommanding = _entityCommanding,
+            CreatedDate = CreatedDate,
+            ActionOnDate = ActionOnDate,
+            OrbitrelativeDeltaV = OrbitrelativeDeltaV,
+            StartKE = StartKE,
+            TargetKE = TargetKE,
+            _vectorDateTime = _vectorDateTime,
+            _name = _name,
+        };
+        if (_entityCommanding != null)
+            copy.UpdateDetailString();
+        return copy;
     }
 }

@@ -268,7 +268,22 @@ namespace Pulsar4X.Movement
 
         public override EntityAction Clone()
         {
-            throw new NotImplementedException();
+            var copy = new NewtonThrustAction
+            {
+                UseActionLanes = UseActionLanes,
+                ParentGoalId = ParentGoalId,
+                RequestingFactionGuid = RequestingFactionGuid,
+                EntityCommandingGuid = EntityCommandingGuid,
+                _entityCommanding = _entityCommanding,
+                CreatedDate = CreatedDate,
+                ActionOnDate = ActionOnDate,
+                OrbitrelativeDeltaV = OrbitrelativeDeltaV,
+                _vectorDateTime = _vectorDateTime,
+                _name = _name,
+            };
+            if (_entityCommanding != null)
+                copy.UpdateDetailString();
+            return copy;
         }
     }
 
@@ -511,7 +526,17 @@ namespace Pulsar4X.Movement
 
         public override EntityAction Clone()
         {
-            throw new NotImplementedException();
+            return new ThrustToTargetCmd
+            {
+                UseActionLanes = UseActionLanes,
+                ParentGoalId = ParentGoalId,
+                RequestingFactionGuid = RequestingFactionGuid,
+                EntityCommandingGuid = EntityCommandingGuid,
+                _entityCommanding = _entityCommanding,
+                _targetEntity = _targetEntity,
+                CreatedDate = CreatedDate,
+                ActionOnDate = ActionOnDate,
+            };
         }
     }
 
@@ -733,7 +758,17 @@ namespace Pulsar4X.Movement
 
         public override EntityAction Clone()
         {
-            throw new NotImplementedException();
+            return new Thrust90ToTargetCmd
+            {
+                UseActionLanes = UseActionLanes,
+                ParentGoalId = ParentGoalId,
+                RequestingFactionGuid = RequestingFactionGuid,
+                EntityCommandingGuid = EntityCommandingGuid,
+                _entityCommanding = _entityCommanding,
+                _targetEntity = _targetEntity,
+                CreatedDate = CreatedDate,
+                ActionOnDate = ActionOnDate,
+            };
         }
     }
 

@@ -278,16 +278,31 @@ namespace Pulsar4X.Movement
                 if (!_entityCommanding.TryGetDataBlob<WarpAbilityDB>(out var warpDB)
                     || !_entityCommanding.TryGetDataBlob<EnergyGenAbilityDB>(out var powerDB))
                 {
-                    Status = ActionStatus.Failed;
+                    Fail("No working warp drive");
                     return;
                 }
 
                 string eType = warpDB.EnergyType;
-                double estored = powerDB.EnergyStored[eType];
+                if (string.IsNullOrEmpty(eType)
+                    || !powerDB.EnergyStored.TryGetValue(eType, out double estored))
+                {
+                    Fail("not enough power to open a warp");
+                    return;
+                }
+
                 double creationCost = warpDB.BubbleCreationCost;
 
                 if (creationCost > estored)
                 {
+                    // A ship that is only short keeps waiting. One that can never
+                    // store the cost, or has nothing generating that type, fails.
+                    bool storeCanHold = powerDB.EnergyStoreMax.TryGetValue(eType, out double storeMax)
+                        && storeMax + 1e-6 >= creationCost;
+                    if (!storeCanHold || powerDB.TotalOutputMax <= 0)
+                    {
+                        Fail("not enough power to open a warp");
+                        return;
+                    }
                     Status = ActionStatus.Queued;
                     return;
                 }
@@ -342,7 +357,25 @@ namespace Pulsar4X.Movement
 
         public override EntityAction Clone()
         {
-            throw new NotImplementedException();
+            // A standing order copies the plot, not a live bubble.
+            var copy = new WarpMoveAction
+            {
+                UseActionLanes = UseActionLanes,
+                ParentGoalId = ParentGoalId,
+                RequestingFactionGuid = RequestingFactionGuid,
+                EntityCommandingGuid = EntityCommandingGuid,
+                _entityCommanding = _entityCommanding,
+                _targetEntity = _targetEntity,
+                CreatedDate = CreatedDate,
+                ActionOnDate = ActionOnDate,
+                TargetEntityGuid = TargetEntityGuid,
+                TransitStartDateTime = TransitStartDateTime,
+                EndpointRelitivePosition = EndpointRelitivePosition,
+                EndpointTargetOrbit = EndpointTargetOrbit,
+            };
+            if (_entityCommanding != null)
+                copy.UpdateDetailString();
+            return copy;
         }
     }
 }

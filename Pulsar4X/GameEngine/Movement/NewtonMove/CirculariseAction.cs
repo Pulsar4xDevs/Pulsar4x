@@ -244,7 +244,7 @@ public class CirculariseAction : EntityAction
             return false;
         if (_db != null && _db.IsFailed)
         {
-            Status = ActionStatus.Failed;
+            Fail("not enough ΔV");
             return _isFinished = true;
         }
         if (_db != null && _db.IsComplete)
@@ -265,6 +265,15 @@ public class CirculariseAction : EntityAction
 
     public override EntityAction Clone()
     {
-        throw new NotImplementedException();
+        return new CirculariseAction
+        {
+            UseActionLanes = UseActionLanes,
+            ParentGoalId = ParentGoalId,
+            RequestingFactionGuid = RequestingFactionGuid,
+            EntityCommandingGuid = EntityCommandingGuid,
+            _entityCommanding = _entityCommanding,
+            CreatedDate = CreatedDate,
+            ActionOnDate = ActionOnDate,
+        };
     }
 }

@@ -1840,6 +1840,94 @@ namespace Pulsar4X.Tests
             OrbitProcessor.ProcessEntity(ship, epoch);
         }
 
+        [Test]
+        public void RunningWarp_CloneIsAFreshOrder()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, 1.0, epoch);
+            var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, 1.524, epoch);
+            var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
+            var ship = AddPhobosWarpShip(earth, earthAbs + new Vector3(6_571_000, 0, 0));
+            ship.SetDataBlob(OrbitDB.FromPosition(earth, ship, epoch));
+
+            var action = WarpMoveAction.CreateWarpOnly(ship, mars, epoch);
+            action.Execute(epoch);
+
+            Assert.IsTrue(action.IsRunning);
+            Assert.AreEqual(1, BubblesOn(_starSys, ship.Id));
+
+            var copy = (WarpMoveAction)action.Clone();
+            Assert.AreNotSame(action, copy);
+            Assert.AreNotEqual(action.CmdID, copy.CmdID);
+            Assert.IsFalse(copy.IsRunning);
+            Assert.AreEqual(ActionStatus.Queued, copy.Status);
+            Assert.AreEqual(mars.Id, copy.TargetEntityGuid);
+            Assert.AreEqual(1, BubblesOn(_starSys, ship.Id), "clone must not take or duplicate the live bubble");
+        }
+
+        [Test]
+        public void Warp_StoreCannotHoldTheBubble_Fails()
+        {
+            var (ship, action, epoch) = QueueWarpWithPower(stored: 0, storeMax: 10, reactorKw: 100);
+
+            _game.ProcessorManager.GetInstanceProcessor(nameof(ActionQueueProcessor))
+                .ProcessEntity(ship, epoch);
+
+            Assert.AreEqual(ActionStatus.Failed, action.Status);
+            Assert.AreEqual("not enough power to open a warp", action.FailureMessage);
+            Assert.AreEqual(0, BubblesOn(_starSys, ship.Id));
+        }
+
+        [Test]
+        public void Warp_NothingGeneratingAndShort_Fails()
+        {
+            var (ship, action, epoch) = QueueWarpWithPower(stored: 0, storeMax: 5000, reactorKw: 0);
+
+            _game.ProcessorManager.GetInstanceProcessor(nameof(ActionQueueProcessor))
+                .ProcessEntity(ship, epoch);
+
+            Assert.AreEqual(ActionStatus.Failed, action.Status);
+            Assert.AreEqual("not enough power to open a warp", action.FailureMessage);
+            Assert.AreEqual(0, BubblesOn(_starSys, ship.Id));
+        }
+
+        [Test]
+        public void Warp_ShortButAbleToCharge_StaysQueued()
+        {
+            var (ship, action, epoch) = QueueWarpWithPower(stored: 0, storeMax: 5000, reactorKw: 100);
+
+            _game.ProcessorManager.GetInstanceProcessor(nameof(ActionQueueProcessor))
+                .ProcessEntity(ship, epoch);
+
+            Assert.AreEqual(ActionStatus.Queued, action.Status);
+            Assert.IsFalse(action.IsRunning);
+            Assert.That(action.Details, Does.Contain("Charging batteries"));
+            Assert.AreEqual(0, BubblesOn(_starSys, ship.Id));
+        }
+
+        static (Entity ship, WarpMoveAction action, DateTime epoch) QueueWarpWithPower(
+            double stored, double storeMax, double reactorKw)
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, 1.0, epoch);
+            var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, 1.524, epoch);
+            var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
+            var ship = AddPhobosWarpShip(earth, earthAbs + new Vector3(6_571_000, 0, 0));
+            var warp = ship.GetDataBlob<WarpAbilityDB>();
+            warp.EnergyType = "electricity";
+            warp.BubbleCreationCost = 1000;
+            var energy = ship.GetDataBlob<EnergyGenAbilityDB>();
+            energy.EnergyStored["electricity"] = stored;
+            energy.EnergyStoreMax["electricity"] = storeMax;
+            energy.MaxOutputFromReactor = reactorKw;
+
+            var action = WarpMoveAction.CreateWarpOnly(ship, mars, epoch);
+            ship.GetDataBlob<ActionQueueDB>().Enqueue(action);
+            return (ship, action, epoch);
+        }
+
         class TestEnergyType : ICargoable
         {
             public int ID => 0;

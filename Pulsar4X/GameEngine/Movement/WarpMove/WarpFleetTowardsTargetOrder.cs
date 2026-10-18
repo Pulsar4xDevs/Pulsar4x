@@ -30,7 +30,17 @@ public class WarpFleetTowardsTargetOrder : EntityAction
 
     public override EntityAction Clone()
     {
-        throw new NotImplementedException();
+        return new WarpFleetTowardsTargetOrder
+        {
+            UseActionLanes = UseActionLanes,
+            ParentGoalId = ParentGoalId,
+            RequestingFactionGuid = RequestingFactionGuid,
+            EntityCommandingGuid = EntityCommandingGuid,
+            _entityCommanding = _entityCommanding,
+            Target = Target,
+            CreatedDate = CreatedDate,
+            ActionOnDate = ActionOnDate,
+        };
     }
 
     internal override bool IsFinished()

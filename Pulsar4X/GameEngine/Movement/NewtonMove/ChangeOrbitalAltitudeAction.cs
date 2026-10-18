@@ -208,7 +208,7 @@ public class ChangeOrbitalAltitudeAction : EntityAction
             return true;
         if (IsRunning && _db != null && _db.IsFailed)
         {
-            Status = ActionStatus.Failed;
+            Fail("not enough ΔV");
             return _isFinished = true;
         }
         if (IsRunning && _next >= _burns.Count && (_db == null || _db.IsComplete))
@@ -225,6 +225,18 @@ public class ChangeOrbitalAltitudeAction : EntityAction
 
     public override EntityAction Clone()
     {
-        throw new NotImplementedException();
+        var copy = new ChangeOrbitalAltitudeAction
+        {
+            UseActionLanes = UseActionLanes,
+            ParentGoalId = ParentGoalId,
+            RequestingFactionGuid = RequestingFactionGuid,
+            EntityCommandingGuid = EntityCommandingGuid,
+            _entityCommanding = _entityCommanding,
+            CreatedDate = CreatedDate,
+            ActionOnDate = ActionOnDate,
+            TargetRadius_m = TargetRadius_m,
+        };
+        copy.UpdateDetailString();
+        return copy;
     }
 }

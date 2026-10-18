@@ -5,6 +5,7 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Modding;
+using Pulsar4X.Ships;
 
 namespace Pulsar4X.Tests
 {
@@ -92,12 +93,62 @@ namespace Pulsar4X.Tests
             Assert.IsFalse(second.Executed, "an unfinished blocking action must still hold the lane");
         }
 
+        [Test]
+        public void FailedFinish_StaysFailedAndDoesNotHoldAHandQueue()
+        {
+            var entity = Entity.Create();
+            var queue = new ActionQueueDB();
+            _starSys.AddEntity(entity, new BaseDataBlob[] { queue });
+
+            var first = new StubMoveAction(entity) { FailOnFinish = true };
+            var second = new StubMoveAction(entity);
+            queue.Enqueue(first);
+            queue.Enqueue(second);
+
+            var now = _starSys.StarSysDateTime;
+            _game.ProcessorManager.GetInstanceProcessor(nameof(ActionQueueProcessor))
+                .ProcessEntity(entity, now);
+
+            Assert.AreEqual(ActionStatus.Failed, first.Status);
+            Assert.AreEqual("not enough ΔV", first.FailureMessage);
+            Assert.IsTrue(queue.ActionList.Contains(first), "a failed line stays so the player can read it");
+            Assert.IsTrue(second.Executed, "a goal-less failure does not hold the lane");
+        }
+
+        [Test]
+        public void FailedGoalAction_FailsTheGoalWithTheReason()
+        {
+            var entity = Entity.Create();
+            var queue = new ActionQueueDB();
+            var goals = new GoalsDB();
+            var goal = new Goal(GoalType.MoveTo) { Status = GoalStatus.Active };
+            goals.ActiveGoal = goal;
+            goals.GivenGoal = goal;
+            _starSys.AddEntity(entity, new BaseDataBlob[] { queue, goals, new ShipInfoDB() });
+
+            var first = new StubMoveAction(entity) { FailOnFinish = true, ParentGoalId = goal.Id };
+            var second = new StubMoveAction(entity) { ParentGoalId = goal.Id };
+            queue.Enqueue(first);
+            queue.Enqueue(second);
+
+            var now = _starSys.StarSysDateTime;
+            _game.ProcessorManager.GetInstanceProcessor(nameof(ActionQueueProcessor))
+                .ProcessEntity(entity, now);
+
+            Assert.AreEqual(ActionStatus.Failed, first.Status);
+            Assert.AreEqual(GoalStatus.Failed, goal.Status);
+            Assert.AreEqual("not enough ΔV", goal.Message);
+            Assert.IsFalse(second.Executed, "a failed goal holds the lane until the agent drops the follow-on");
+            Assert.AreEqual(0, queue.ActionList.Count);
+        }
+
         class StubMoveAction : EntityAction
         {
             readonly Entity _entity;
             public bool Finished;
             public bool Running;
             public bool Executed;
+            public bool FailOnFinish;
 
             public StubMoveAction(Entity entity)
             {
@@ -120,7 +171,13 @@ namespace Pulsar4X.Tests
                 Running = true;
             }
 
-            internal override bool IsFinished() => Finished;
+            internal override bool IsFinished()
+            {
+                if (!FailOnFinish)
+                    return Finished;
+                Fail("not enough ΔV");
+                return true;
+            }
 
             public override EntityAction Clone() => throw new NotImplementedException();
         }
