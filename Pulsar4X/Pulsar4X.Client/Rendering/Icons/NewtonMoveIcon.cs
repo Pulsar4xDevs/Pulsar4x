@@ -364,7 +364,7 @@ namespace Pulsar4X.Client
             for (int i = 0; i < _drawPoints.Length - 1; i++)
             {
                 SDL.SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creeping up.
-                SDL.RenderLine(rendererPtr, _drawPoints[i].X, _drawPoints[i].Y, _drawPoints[i + 1].X, _drawPoints[i +1].Y);
+                DrawPrimitive.RenderLineClipped(rendererPtr, camera, _drawPoints[i].X, _drawPoints[i].Y, _drawPoints[i + 1].X, _drawPoints[i + 1].Y);
                 alpha -= _alphaChangeAmount;
             }
             byte r = 100;
@@ -374,7 +374,7 @@ namespace Pulsar4X.Client
 
             //now draw the thrust line.
             SDL.SetRenderDrawColor(rendererPtr, r, g, b, a);
-            SDL.RenderLine(rendererPtr, _drawThrustLinePoints[0].X, _drawThrustLinePoints[0].Y, _drawThrustLinePoints[1].X, _drawThrustLinePoints[1].Y);
+            DrawPrimitive.RenderLineClipped(rendererPtr, camera, _drawThrustLinePoints[0].X, _drawThrustLinePoints[0].Y, _drawThrustLinePoints[1].X, _drawThrustLinePoints[1].Y);
         }
 
 
@@ -708,7 +708,7 @@ namespace Pulsar4X.Client
             for (int i = 0; i < _numberOfDrawSegments - 1; i++)
             {
                 SDL.SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creeping up.
-                SDL.RenderLine(rendererPtr, _drawPoints[i].X, _drawPoints[i].Y, _drawPoints[i + 1].X, _drawPoints[i +1].Y);
+                DrawPrimitive.RenderLineClipped(rendererPtr, camera, _drawPoints[i].X, _drawPoints[i].Y, _drawPoints[i + 1].X, _drawPoints[i + 1].Y);
                 alpha -= _alphaChangeAmount;
             }
             base.Draw(rendererPtr, camera);

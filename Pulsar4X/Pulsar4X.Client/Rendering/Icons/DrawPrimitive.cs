@@ -7,6 +7,107 @@ namespace Pulsar4X.Client
 {
     public static class DrawPrimitive
     {
+        /// <summary>
+        /// SDL.RenderLine locks the window when an endpoint is far outside it.
+        /// Clip to the viewport in double and draw only the crossing piece.
+        /// </summary>
+        public static void RenderLineClipped(IntPtr renderer, Camera camera, double x1, double y1, double x2, double y2)
+        {
+            if (!double.IsFinite(x1) || !double.IsFinite(y1) || !double.IsFinite(x2) || !double.IsFinite(y2))
+                return;
+
+            double right = camera.ViewPortSize.X;
+            double bottom = camera.ViewPortSize.Y;
+            if (!(right > 0) || !(bottom > 0))
+                return;
+
+            const int Inside = 0;
+            const int Left = 1;
+            const int Right = 2;
+            const int Bottom = 4;
+            const int Top = 8;
+
+            int Code(double x, double y)
+            {
+                int code = Inside;
+                if (x < 0)
+                    code |= Left;
+                else if (x > right)
+                    code |= Right;
+                if (y < 0)
+                    code |= Top;
+                else if (y > bottom)
+                    code |= Bottom;
+                return code;
+            }
+
+            int c1 = Code(x1, y1);
+            int c2 = Code(x2, y2);
+            // Four edges are enough. The cap is so a bad clip cannot spin on the UI thread.
+            for (int step = 0; step < 8; step++)
+            {
+                if ((c1 | c2) == 0)
+                {
+                    SDL.RenderLine(renderer, (float)x1, (float)y1, (float)x2, (float)y2);
+                    return;
+                }
+                if ((c1 & c2) != 0)
+                    return;
+
+                int outside = c1 != 0 ? c1 : c2;
+                double x;
+                double y;
+                if ((outside & Top) != 0)
+                {
+                    double dy = y2 - y1;
+                    if (dy == 0)
+                        return;
+                    x = x1 + (x2 - x1) * (0 - y1) / dy;
+                    y = 0;
+                }
+                else if ((outside & Bottom) != 0)
+                {
+                    double dy = y2 - y1;
+                    if (dy == 0)
+                        return;
+                    x = x1 + (x2 - x1) * (bottom - y1) / dy;
+                    y = bottom;
+                }
+                else if ((outside & Right) != 0)
+                {
+                    double dx = x2 - x1;
+                    if (dx == 0)
+                        return;
+                    y = y1 + (y2 - y1) * (right - x1) / dx;
+                    x = right;
+                }
+                else
+                {
+                    double dx = x2 - x1;
+                    if (dx == 0)
+                        return;
+                    y = y1 + (y2 - y1) * (0 - x1) / dx;
+                    x = 0;
+                }
+
+                if (!double.IsFinite(x) || !double.IsFinite(y))
+                    return;
+
+                if (c1 != 0)
+                {
+                    x1 = x;
+                    y1 = y;
+                    c1 = Code(x1, y1);
+                }
+                else
+                {
+                    x2 = x;
+                    y2 = y;
+                    c2 = Code(x2, y2);
+                }
+            }
+        }
+
         public static void DrawEllipse(IntPtr renderer, int posX, int posY, double xRadius, double yRadius)
         {
             byte _numberOfArcSegments = 255;
@@ -686,7 +787,7 @@ namespace Pulsar4X.Client
                 //then go through each of the points and draw a line from one point to the next.
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
-                    SDL.RenderLine(rendererPtr, (int)shape.Points[i].X, (int)shape.Points[i].Y, (int)shape.Points[i + 1].X, (int)shape.Points[i + 1].Y);
+                    DrawPrimitive.RenderLineClipped(rendererPtr, camera, shape.Points[i].X, shape.Points[i].Y, shape.Points[i + 1].X, shape.Points[i + 1].Y);
                 }
             }
 

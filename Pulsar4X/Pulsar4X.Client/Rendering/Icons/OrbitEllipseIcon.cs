@@ -26,6 +26,9 @@ namespace Pulsar4X.Client
     /// </summary>
     public class OrbitEllipseIcon : OrbitIconBase
     {
+        Matrix _screen = new Matrix();
+        Vector2 _bodyScreen;
+        bool _hasScreen;
 
         internal OrbitEllipseIcon(Pulsar4X.Api.OrbitView orbit, IPosition bodyPosition, IPosition parentPosition,
             UserOrbitSettings.OrbitBodyType bodyType, List<List<UserOrbitSettings>> settings)
@@ -151,6 +154,9 @@ namespace Pulsar4X.Client
 
             int index = _index;
             var spos = camera.ViewCoordinateV2_m(_bodyAbsolutePos);
+            _screen = mtrx;
+            _bodyScreen = spos;
+            _hasScreen = true;
 
             // Pin the ghost orbit point at the body's index to the actual body screen position
             // so the ghost and tail meet at the same spot on large orbits
@@ -174,29 +180,54 @@ namespace Pulsar4X.Client
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
-            //now we draw a line between each of the points in the translatedPoints[] array.
-            if (_drawPoints.Count() < _numberOfDrawSegments - 1)
+            if (!_hasScreen || _points == null || _points.Length < 2)
                 return;
 
-            // Draw faded full orbit ghost underneath
+            // Draw faded full orbit ghost underneath. Screen positions stay double so a
+            // segment that crosses the window keeps its slope instead of saturating.
             byte ghostAlpha = _userSettings.GhostOrbitAlpha;
-            if (ghostAlpha > 0 && _fullOrbitDrawPoints.Length > 1)
+            if (ghostAlpha > 0)
             {
                 SDL.SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, ghostAlpha);
-                for (int i = 0; i < _numberOfArcSegments; i++)
+                int count = Math.Min(_numberOfArcSegments, _points.Length - 1);
+                for (int i = 0; i < count; i++)
                 {
-                    SDL.RenderLine(rendererPtr, _fullOrbitDrawPoints[i].X, _fullOrbitDrawPoints[i].Y, _fullOrbitDrawPoints[i + 1].X, _fullOrbitDrawPoints[i + 1].Y);
+                    var a = OrbitScreenPoint(i);
+                    var b = OrbitScreenPoint(i + 1);
+                    DrawPrimitive.RenderLineClipped(rendererPtr, camera, a.X, a.Y, b.X, b.Y);
                 }
             }
 
-            // Draw the bright tail on top
+            // Draw the bright tail on top, walking back from the body the same way as before.
+            if (_numberOfDrawSegments < 2)
+                return;
+
             float alpha = _userSettings.MaxAlpha;
-            for (int i = 0; i < _numberOfDrawSegments - 1; i++)
+            int index = _index;
+            var tail = _bodyScreen;
+            for (int i = 1; i < _numberOfDrawSegments; i++)
             {
-                SDL.SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creaping up.
-                SDL.RenderLine(rendererPtr, _drawPoints[i].X, _drawPoints[i].Y, _drawPoints[i + 1].X, _drawPoints[i +1].Y);
+                if (index > 0)
+                    index--;
+                else
+                    index = _numberOfArcSegments - 1;
+
+                if (index < 0 || index >= _points.Length)
+                    break;
+
+                var next = _screen.TransformD(_points[index].X, _points[index].Y);
+                SDL.SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);
+                DrawPrimitive.RenderLineClipped(rendererPtr, camera, tail.X, tail.Y, next.X, next.Y);
+                tail = next;
                 alpha -= _alphaChangeAmount;
             }
+        }
+
+        Vector2 OrbitScreenPoint(int i)
+        {
+            if (i == _index)
+                return _bodyScreen;
+            return _screen.TransformD(_points[i].X, _points[i].Y);
         }
     }
 

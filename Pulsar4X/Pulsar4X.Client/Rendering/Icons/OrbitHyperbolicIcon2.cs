@@ -119,7 +119,7 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
         for (int i = 0; i < _drawPoints.Length - 1; i++)
         {
             SDL.SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creaping up.
-            SDL.RenderLine(rendererPtr, _drawPoints[i].X, _drawPoints[i].Y, _drawPoints[i + 1].X, _drawPoints[i +1].Y);
+            DrawPrimitive.RenderLineClipped(rendererPtr, camera, _drawPoints[i].X, _drawPoints[i].Y, _drawPoints[i + 1].X, _drawPoints[i + 1].Y);
             alpha -= _alphaChangeAmount;
         }
     }

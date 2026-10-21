@@ -3,7 +3,6 @@ using Pulsar4X.Api;
 using Pulsar4X.Orbital;
 using SDL3;
 using Pulsar4X.Input;
-using System.Drawing;
 
 namespace Pulsar4X.Client
 {
@@ -146,45 +145,43 @@ namespace Pulsar4X.Client
                 var shape = DrawShapes[0];
                 if (shape.Points != null && shape.Points.Length > 2)
                 {
-                    int cx = ViewScreenPos.X;
-                    int cy = ViewScreenPos.Y;
-                    int radius = (int)(Scale * 100);
+                    // True pixel radius. A planet at the zoom cap is millions of pixels
+                    // across, so the fill walks only the rows inside the window, and the
+                    // circle equation stays in double. An int square overflows past 46340px.
+                    double radius = Scale * 100.0;
+                    double cx = ViewScreenPos.X;
+                    double cy = ViewScreenPos.Y;
+                    int viewW = (int)camera.ViewPortSize.X;
+                    int viewH = (int)camera.ViewPortSize.Y;
 
-
-                    // Implements basic frustum culling for the icon.
-                    // Drop icons that are fully out of viewbox.
-                    var aabb = new Rectangle(cx - radius, cy - radius, radius * 2, radius * 2);
-                    if (aabb.Right < 0 || aabb.Bottom < 0)
+                    if (radius <= 0
+                        || cx + radius < 0 || cy + radius < 0
+                        || cx - radius > viewW || cy - radius > viewH)
                         return;
 
-                    var vps = camera.ViewPortSize;
-                    if (aabb.Left > vps.X || aabb.Top > vps.Y)
+                    int y0 = (int)Math.Max(0, Math.Ceiling(cy - radius));
+                    int y1 = (int)Math.Min(viewH, Math.Floor(cy + radius));
+                    if (y0 > y1)
                         return;
 
-
-                    if (radius > 0)
+                    // Brighter fill color derived from the body's base color, dimmed for moons
+                    float brighten = _bodyType == BodyKind.Moon ? 0.8f : 1.0f;
+                    byte fillR = (byte)Math.Min(255, (int)((shape.Color.R + 80) * brighten));
+                    byte fillG = (byte)Math.Min(255, (int)((shape.Color.G + 80) * brighten));
+                    byte fillB = (byte)Math.Min(255, (int)((shape.Color.B + 80) * brighten));
+                    SDL.SetRenderDrawColor(rendererPtr, fillR, fillG, fillB, shape.Color.A);
+                    for (int y = y0; y <= y1; y++)
                     {
-                        // Brighter fill color derived from the body's base color, dimmed for moons
-                        float brighten = _bodyType == BodyKind.Moon ? 0.8f : 1.0f;
-                        byte fillR = (byte)Math.Min(255, (int)((shape.Color.R + 80) * brighten));
-                        byte fillG = (byte)Math.Min(255, (int)((shape.Color.G + 80) * brighten));
-                        byte fillB = (byte)Math.Min(255, (int)((shape.Color.B + 80) * brighten));
-                        SDL.SetRenderDrawColor(rendererPtr, fillR, fillG, fillB, shape.Color.A);
-                        for (int y = -radius; y <= radius; y++)
-                        {
-                            // Skip draw call if the y-level is outside the viewport
-                            int yLevel = cy + y;
-                            if(yLevel < 0 || yLevel > (int)camera.ViewPortSize.Y)
-                            {
-                                continue;
-                            }
+                        double dy = y - cy;
+                        double spanSq = radius * radius - dy * dy;
+                        if (spanSq < 0)
+                            continue;
 
-                            int xSpan = (int)Math.Sqrt(radius * radius - y * y);
-                            int xStart = Math.Max(0, cx - xSpan);
-                            int xEnd = Math.Min((int)camera.ViewPortSize.X, cx + xSpan);
-
-                            SDL.RenderLine(rendererPtr, xStart, yLevel, xEnd, yLevel);
-                        }
+                        double xSpan = Math.Sqrt(spanSq);
+                        int xStart = (int)Math.Max(0, Math.Ceiling(cx - xSpan));
+                        int xEnd = (int)Math.Min(viewW, Math.Floor(cx + xSpan));
+                        if (xStart <= xEnd)
+                            SDL.RenderLine(rendererPtr, xStart, y, xEnd, y);
                     }
                 }
                 return; // skip outline for filled bodies
