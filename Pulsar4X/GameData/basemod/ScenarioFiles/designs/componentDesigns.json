@@ -479,6 +479,14 @@
   {
     "Type": "ComponentDesign",
     "Payload": {
+      "UniqueId": "default-design-ship-construction",
+      "Name": "Ship Construction",
+      "TemplateId": "ship-construction"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
       "UniqueId": "default-design-launch-complex",
       "Name": "Launch Complex",
       "TemplateId": "launch-complex"

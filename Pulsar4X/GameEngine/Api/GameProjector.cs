@@ -238,6 +238,7 @@ namespace Pulsar4X.Engine.Api
             (e, f) => e.TryGetDataBlob<ShipInfoDB>(out var sh)
                 ? (e.FactionOwnerID == f ? ToShipView(sh, e, f) : new ShipView(sh.Design?.Name ?? ""))
                 : null,
+            (e, f) => e.FactionOwnerID == f && e.HasDataBlob<ShipInfoDB>() ? ToShipRefitView(e, f) : null,
             (e, f) => e.TryGetDataBlob<GeoSurveyableDB>(out var g) ? ToGeoSurveyView(g, f) : null,
             (e, _) => e.HasDataBlob<ColonizeableDB>() ? new ColonizableView() : null,
             (e, f) => e.TryGetDataBlob<MineralsDB>(out var md) ? ToMineralDepositsView(md, e, f) : null,
@@ -817,9 +818,12 @@ namespace Pulsar4X.Engine.Api
 
         private static CargoStorageView ToCargoStorageView(CargoStorageDB storage, Entity holder)
         {
-            bool holderIsColony = holder.HasDataBlob<ColonyInfoDB>();
-            bool holderIsShip = holder.HasDataBlob<ShipInfoDB>();
             var factionData = holder.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data;
+            bool isColony = holder.HasDataBlob<ColonyInfoDB>();
+            bool hasRate = holder.TryGetDataBlob<LocalConstructionDB>(out var rate) && rate.PointsPerDay > 0;
+            var installColonies = !isColony && hasRate
+                ? LocalConstructionProcessor.ColoniesInRange(holder)
+                : new List<Entity>();
 
             var stores = new List<CargoTypeStoreView>(storage.TypeStores.Count);
             foreach (var (typeId, typeStore) in storage.TypeStores)
@@ -832,6 +836,8 @@ namespace Pulsar4X.Engine.Api
 
                     string kind = "", description = "";
                     bool canInstall = false;
+                    bool showInstall = false;
+                    long mountCost = 0;
                     switch (cargoable)
                     {
                         case Mineral mineral:
@@ -845,8 +851,12 @@ namespace Pulsar4X.Engine.Api
                         case ComponentInstance instance:
                             kind = instance.Design.ComponentType;
                             description = instance.Design.Description;
-                            canInstall = (holderIsColony && instance.Design.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation))
-                                      || (holderIsShip && instance.Design.ComponentMountType.HasFlag(ComponentMountType.ShipComponent));
+                            if (hasRate && LocalConstructionJob.IsCrate(instance.Design))
+                            {
+                                showInstall = true;
+                                canInstall = isColony || installColonies.Count > 0;
+                                mountCost = LocalConstructionJob.MountCost(instance.MassPerUnit);
+                            }
                             break;
                         case Pulsar4X.Components.ComponentDesign design:
                             kind = design.ComponentType;
@@ -866,7 +876,11 @@ namespace Pulsar4X.Engine.Api
                         storage.GetVolumeStored(cargoable, true),
                         cargoable.VolumePerUnit,
                         storage.GetFreeUnitSpace(cargoable),
-                        canInstall));
+                        canInstall)
+                    {
+                        MountCost = mountCost,
+                        ShowInstall = showInstall,
+                    });
                 }
 
                 string typeName = factionData.CargoTypes.TryGetValue(typeId, out var cargoType) ? cargoType.Name : typeId;
@@ -879,6 +893,7 @@ namespace Pulsar4X.Engine.Api
             return new CargoStorageView(storage.TotalStoredMass, storage.TransferRate, storage.TransferRangeDv_mps)
             {
                 Stores = stores,
+                InstallColonyIds = installColonies.Select(colony => colony.Id).ToList(),
             };
         }
 
@@ -949,6 +964,8 @@ namespace Pulsar4X.Engine.Api
             if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo)) return null;
 
             entity.TryGetDataBlob<CargoStorageDB>(out var storage);
+            bool hasInstallationRate = entity.TryGetDataBlob<LocalConstructionDB>(out var localConstruction)
+                && localConstruction.PointsPerDay > 0;
 
             var sortedDesigns = factionInfo.IndustryDesigns.Values
                 .Where(d => d.IsValid)
@@ -1002,22 +1019,170 @@ namespace Pulsar4X.Engine.Api
                         costs.Add(new IndustryCostItem(ResolveItemName(factionInfo, resourceId), perUnit, available, canProduce));
                     }
 
+                    bool isColonyInstallation = design is Pulsar4X.Components.ComponentDesign componentDesign
+                        && componentDesign.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation);
+                    string reason = "";
+                    if (!isColonyInstallation)
+                        reason = "This design is not a colony installation.";
+                    else if (!hasInstallationRate)
+                        reason = "This colony has no installation points.";
+
+                    bool overSlip = design is ShipDesign ship && ship.MassPerUnit > line.MaxVolume;
                     constructibles.Add(new ConstructibleItemView(
                         design.UniqueID, design.Name, design.IndustryPointCosts, design.OutputAmount,
-                        design.GuiHints == ConstructableGuiHints.CanBeInstalled)
+                        isColonyInstallation && hasInstallationRate)
                     {
                         Costs = costs,
+                        AutoInstallReason = reason,
+                        Mass = design is ICargoable cargo ? cargo.MassPerUnit : 0,
+                        OverSlip = overSlip,
+                        SlipReason = overSlip ? "That design is over this slip." : "",
                     });
+                }
+
+                bool shipyard = line.IndustryTypeRates.ContainsKey("ship-assembly");
+                long refitPoints = 0;
+                var refitShips = new List<RefitShipView>();
+                var refitCargo = new List<RefitPartView>();
+                var refitJobs = new List<RefitJobView>();
+                if (shipyard)
+                    CollectRefit(entity, line, lineId, factionId, ref refitPoints, refitShips, refitCargo, refitJobs);
+
+                var hulls = new List<YardHullView>(line.Hulls.Count);
+                foreach (var hull in line.Hulls)
+                {
+                    string designName = factionInfo.IndustryDesigns.TryGetValue(hull.DesignId, out var hullDesign)
+                        ? hullDesign.Name
+                        : hull.DesignId;
+                    hulls.Add(new YardHullView(
+                        hull.DesignId, designName, hull.Name, hull.Mass,
+                        LaunchComplexProcessor.HoldReason(entity, hull.Mass)));
                 }
 
                 lines.Add(new ProductionLineView(lineId, line.Name, currentRate)
                 {
                     Jobs = jobs,
                     Constructibles = constructibles,
+                    IsShipyard = shipyard,
+                    SlipSize = line.MaxVolume,
+                    Hulls = hulls,
+                    RefitPointsPerDay = refitPoints,
+                    RefitShips = refitShips,
+                    RefitCargo = refitCargo,
+                    RefitJobs = refitJobs,
                 });
             }
 
-            return new IndustryView(lines);
+            var pads = new List<LaunchPadStateView>();
+            if (entity.TryGetDataBlob<LaunchComplexDB>(out var launch))
+            {
+                foreach (var pad in launch.Pads.Values)
+                    pads.Add(new LaunchPadStateView(pad.MaxTonnage, pad.ShipDesignId == null));
+            }
+
+            return new IndustryView(lines) { Pads = pads };
+        }
+
+        static void CollectRefit(
+            Entity yard, IndustryAbilityDB.ProductionLine line, string lineId, int factionId,
+            ref long refitPoints, List<RefitShipView> ships, List<RefitPartView> cargo, List<RefitJobView> jobs)
+        {
+            yard.TryGetDataBlob<LocalConstructionDB>(out var construction);
+            refitPoints = construction?.RefitPointsPerDay ?? 0;
+            if (yard.Manager == null)
+                return;
+
+            var reserved = new HashSet<int>();
+            if (construction != null)
+            {
+                foreach (var job in construction.RefitQueue)
+                {
+                    foreach (var part in job.Remove)
+                        reserved.Add(part.ID);
+                    foreach (var part in job.Mount)
+                        reserved.Add(part.ID);
+                    if (job.ProductionLineId != lineId)
+                        continue;
+                    string shipName = yard.Manager.TryGetEntityById(job.ShipEntityId, out var named)
+                        ? named.GetName(factionId)
+                        : job.ShipEntityId.ToString();
+                    jobs.Add(new RefitJobView(shipName, job.PointCost, job.PointsAccumulated, job.Progress));
+                }
+            }
+
+            var found = new List<Entity>();
+            foreach (var ship in yard.Manager.GetAllEntitiesWithDataBlob<ShipInfoDB>())
+            {
+                if (ship.FactionOwnerID != yard.FactionOwnerID)
+                    continue;
+                if (ShipRefitJob.TryFind(ship, out _, out _))
+                    continue;
+                if (!LocalConstructionProcessor.InTransferRange(yard, ship))
+                    continue;
+                found.Add(ship);
+            }
+            found.Sort((a, b) =>
+            {
+                int byName = string.Compare(a.GetName(factionId), b.GetName(factionId), StringComparison.Ordinal);
+                return byName != 0 ? byName : a.Id.CompareTo(b.Id);
+            });
+
+            foreach (var ship in found)
+            {
+                long mass = ShipRefitJob.ShipMass(ship);
+                bool over = mass > line.MaxVolume;
+                var parts = new List<RefitPartView>();
+                if (ship.TryGetDataBlob<ComponentInstancesDB>(out var components))
+                {
+                    foreach (var part in components.AllComponents.Values)
+                    {
+                        if (!ShipRefitJob.IsShipPart(part.Design) || reserved.Contains(part.ID))
+                            continue;
+                        parts.Add(new RefitPartView(
+                            part.ID, part.Name, part.MassPerUnit, LocalConstructionJob.MountCost(part.MassPerUnit)));
+                    }
+                }
+                parts.Sort(CompareRefitParts);
+                ships.Add(new RefitShipView(ship.Id, ship.GetName(factionId), mass, over)
+                {
+                    SlipReason = over ? ShipRefitJob.OverSlip : "",
+                    Parts = parts,
+                });
+            }
+
+            if (yard.TryGetDataBlob<CargoStorageDB>(out var storage))
+            {
+                foreach (var pair in storage.TypeStores)
+                {
+                    foreach (var cargoable in pair.Value.GetCargoables().Values)
+                    {
+                        if (cargoable is not ComponentInstance instance)
+                            continue;
+                        if (!ShipRefitJob.IsShipPart(instance.Design) || reserved.Contains(instance.ID))
+                            continue;
+                        cargo.Add(new RefitPartView(
+                            instance.ID, instance.Name, instance.MassPerUnit, LocalConstructionJob.MountCost(instance.MassPerUnit)));
+                    }
+                }
+            }
+            cargo.Sort(CompareRefitParts);
+        }
+
+        static int CompareRefitParts(RefitPartView a, RefitPartView b)
+        {
+            int byName = string.Compare(a.Name, b.Name, StringComparison.Ordinal);
+            return byName != 0 ? byName : a.ComponentId.CompareTo(b.ComponentId);
+        }
+
+        static ShipRefitView? ToShipRefitView(Entity ship, int factionId)
+        {
+            if (!ShipRefitJob.TryFind(ship, out var yard, out var job))
+                return null;
+            return new ShipRefitView(yard.GetName(factionId), job.PointCost, job.PointsAccumulated, job.Progress)
+            {
+                Removing = job.Remove.Select(part => part.Name).ToList(),
+                Mounting = job.Mount.Select(part => part.Name).ToList(),
+            };
         }
 
         private static ConstructionView? ToConstructionView(LocalConstructionDB construction, Entity entity, int factionId)
@@ -1026,24 +1191,83 @@ namespace Pulsar4X.Engine.Api
             if (game == null || !game.Factions.TryGetValue(factionId, out var faction)) return null;
             if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo)) return null;
 
+            entity.TryGetDataBlob<CargoStorageDB>(out var storage);
+
+            bool isShip = !entity.HasDataBlob<ColonyInfoDB>();
+            var colonies = isShip && construction.PointsPerDay > 0
+                ? LocalConstructionProcessor.ColoniesInRange(entity)
+                : new List<Entity>();
+
             var queue = new List<ConstructionJobView>(construction.BuildQueue.Count);
             foreach (var job in construction.BuildQueue)
             {
+                string targetName = "";
+                if (job.TargetEntityId != 0
+                    && entity.Manager != null
+                    && entity.Manager.TryGetEntityById(job.TargetEntityId, out var target))
+                    targetName = target.GetName(factionId);
+
                 queue.Add(new ConstructionJobView(
-                    job.Design.Name, job.Design.ComponentType, job.Design.IndustryPointCosts,
-                    job.PointsAccumulated, job.CurrentItemProgress));
+                    job.Design.Name, job.Kind, job.PointCost, job.PointsAccumulated, job.CurrentItemProgress)
+                {
+                    TargetName = targetName,
+                });
             }
 
-            var designs = factionInfo.ComponentDesigns.Values
-                .Where(d => d.IsValid && d.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation))
-                .OrderBy(d => d.Name)
-                .Select(d => new ConstructibleDesignView(d.UniqueID, d.Name, d.ComponentType, d.IndustryPointCosts))
-                .ToList();
+            var crates = new List<ConstructionCrateView>();
+            if (storage != null)
+            {
+                foreach (var pair in storage.TypeStores)
+                {
+                    foreach (var cargoable in pair.Value.GetCargoables().Values)
+                    {
+                        if (cargoable is not ComponentInstance instance)
+                            continue;
+                        if (!LocalConstructionJob.IsCrate(instance.Design))
+                            continue;
+                        crates.Add(new ConstructionCrateView(
+                            instance.ID, instance.Design.UniqueID, instance.Name,
+                            LocalConstructionJob.MountCost(instance.MassPerUnit)));
+                    }
+                }
+            }
+            crates.Sort((a, b) =>
+            {
+                int byName = string.Compare(a.Name, b.Name, StringComparison.Ordinal);
+                return byName != 0 ? byName : a.ComponentId.CompareTo(b.ComponentId);
+            });
+
+            var sites = new List<ConstructionSiteView>();
+            foreach (var design in factionInfo.ComponentDesigns.Values.OrderBy(d => d.Name))
+            {
+                if (!design.IsValid || !LocalConstructionJob.IsSiteOnly(design))
+                    continue;
+
+                var missing = new List<string>();
+                foreach (var (resourceId, amount) in design.ResourceCosts)
+                {
+                    if (amount <= 0)
+                        continue;
+                    long available = 0;
+                    if (storage != null && TryResolveCargoable(factionInfo, resourceId, out var cargoable))
+                        available = storage.GetUnitsStored(cargoable, false);
+                    if (available < amount)
+                        missing.Add(ResolveItemName(factionInfo, resourceId));
+                }
+
+                sites.Add(new ConstructionSiteView(design.UniqueID, design.Name, design.IndustryPointCosts)
+                {
+                    MissingResources = missing,
+                });
+            }
 
             return new ConstructionView(construction.PointsPerDay)
             {
                 BuildQueue = queue,
-                AvailableDesigns = designs,
+                Crates = crates,
+                SiteDesigns = sites,
+                IsShip = isShip,
+                ColoniesInRange = colonies.Select(colony => new ConstructionColonyView(colony.Id, colony.GetName(factionId))).ToList(),
             };
         }
 

@@ -67,6 +67,7 @@ namespace Pulsar4X.Client
         private CommanderSnapshot? _commander;
 
         private Vector4 _accentColor;
+        private ColonyConstructionDisplay? _shipConstruction;
 
         // Animation constants
         private const float WindowWidth = 624f;
@@ -1053,6 +1054,19 @@ namespace Pulsar4X.Client
 
             DisplayShipStatusRow();
 
+            if (_entity!.GetView<ShipRefitView>() is { } refit)
+            {
+                SectionLabel("REFIT");
+                ImGui.Indent();
+                ImGui.Text(refit.YardName);
+                ImGui.Text(refit.PointsAccumulated + " / " + refit.PointCost);
+                foreach (var name in refit.Removing)
+                    ImGui.BulletText("Remove  " + name);
+                foreach (var name in refit.Mounting)
+                    ImGui.BulletText("Mount  " + name);
+                ImGui.Unindent();
+            }
+
             // Crew row
             SectionLabel("CREW");
 
@@ -1251,6 +1265,21 @@ namespace Pulsar4X.Client
                     ImGui.PopStyleColor(2);
                 }
                 ImGui.Unindent();
+            }
+
+            // A ship with an installation rate gets the colony construction section, aimed at one
+            // colony in transfer range. A freighter has no rate and does not get the section.
+            if (_entity.GetView<ConstructionView>() is { IsShip: true } construction)
+            {
+                SectionLabel("CONSTRUCTION");
+                _shipConstruction ??= new ColonyConstructionDisplay();
+                float sectionHeight = Math.Max(280f, ImGui.GetContentRegionAvail().Y);
+                if (ImGui.BeginChild("ShipConstruction", new Vector2(0, sectionHeight), ImGuiChildFlags.None))
+                    _shipConstruction.Display(EntityId, construction, _uiState);
+                ImGui.EndChild();
+
+                if (storage != null)
+                    storage.Display(EntityId, _uiState, ImGuiTreeNodeFlags.None);
             }
         }
 

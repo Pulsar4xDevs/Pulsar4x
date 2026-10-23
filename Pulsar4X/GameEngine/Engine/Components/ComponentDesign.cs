@@ -67,19 +67,18 @@ namespace Pulsar4X.Components
             batchJob.ResourcesRequiredRemaining = new Dictionary<string, long>(designInfo.ResourceCosts);
             batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
 
-            if (batchJob.InstallOn != null)
+            var design = (ComponentDesign)designInfo;
+            var instance = new ComponentInstance(design);
+            long stored = storage.AddCargoByUnit(instance, 1);
+
+            // A checked box queues a mount of this crate. Colony construction pays it later.
+            if (stored > 0
+                && batchJob.InstallOn != null
+                && design.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation)
+                && industryEntity.TryGetDataBlob<LocalConstructionDB>(out var construction)
+                && construction.PointsPerDay > 0)
             {
-               ComponentInstance specificComponent = new((ComponentDesign)designInfo);
-               if (batchJob.InstallOn == industryEntity || storage.HasSpecificEntity(batchJob.InstallOn.GetDataBlob<CargoAbleTypeDB>()))
-               {
-                   batchJob.InstallOn.AddComponent(specificComponent);
-                   ReCalcProcessor.ReCalcAbilities(batchJob.InstallOn);
-               }
-            }
-            else
-            {
-                storage.AddCargoByUnit((ComponentDesign)designInfo, 1);
-               //StorageSpaceProcessor.AddCargo(storage, (ComponentDesign)designInfo, 1);
+                construction.BuildQueue.Enqueue(new LocalConstructionJob(design, instance));
             }
 
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)

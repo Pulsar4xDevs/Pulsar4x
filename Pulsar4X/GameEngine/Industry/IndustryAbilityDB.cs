@@ -9,12 +9,21 @@ namespace Pulsar4X.Industry
 {
     public class IndustryAbilityDB : BaseDataBlob, IAbilityDescription
     {
+        /// <summary>A finished hull waiting on a shipyard line. The launch pad is what puts it in orbit.</summary>
+        public class YardHull
+        {
+            public string DesignId = "";
+            public string Name = "";
+            public long Mass;
+        }
+
         public class ProductionLine
         {
             public string Name;
             public double MaxVolume;
             public Dictionary<string, int> IndustryTypeRates = new ();
             public List<IndustryJob> Jobs = new ();
+            public List<YardHull> Hulls = new ();
         }
 
         public Dictionary<string, ProductionLine> ProductionLines { get; } = new ();

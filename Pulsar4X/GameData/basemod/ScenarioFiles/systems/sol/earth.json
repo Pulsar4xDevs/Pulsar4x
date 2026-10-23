@@ -182,6 +182,7 @@
         "tech-panel-density",
         "solarArray",
         "local-construction",
+        "ship-construction",
         "launch-complex",
         "logistics-office"
       ],
@@ -222,6 +223,7 @@
         "default-design_solarpanel",
         "default-design-battery-25kg",
         "default-design-local-construction",
+        "default-design-ship-construction",
         "default-design-launch-complex",
         "default-design-bridge-ship",
         "default-design-bridge-well",
@@ -231,6 +233,7 @@
       "ShipDesigns": [
         "default-ship-design-courier",
         "default-ship-design-freighter",
+        "default-ship-design-colony-ship",
         "default-ship-design-tanker",
         "default-ship-design-gunship",
         "default-ship-design-dropship",

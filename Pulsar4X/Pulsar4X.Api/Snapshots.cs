@@ -428,6 +428,9 @@ public sealed record CargoStorageView(
     : IComponentView
 {
     public IReadOnlyList<CargoTypeStoreView> Stores { get; init; } = Array.Empty<CargoTypeStoreView>();
+
+    /// <summary>Same-faction colonies in transfer range. Empty for a colony and for a ship with no rate.</summary>
+    public IReadOnlyList<int> InstallColonyIds { get; init; } = Array.Empty<int>();
 }
 
 public sealed record CargoTypeStoreView(
@@ -451,8 +454,16 @@ public sealed record CargoItemView(
     double VolumeStored,
     double VolumePerUnit,
     long FreeUnitSpace,
-    /// <summary>Whether this item is a component instance that can be installed on the holding entity.</summary>
-    bool CanInstall);
+    /// <summary>Whether Install can be clicked. A ship crate is disabled when no colony is in range.</summary>
+    bool CanInstall)
+{
+    /// <summary>Installation points to mount this crate. Zero when it cannot be mounted.</summary>
+    public long MountCost { get; init; }
+
+    /// <summary>Whether the cargo menu shows Install. A freighter stays false. A ship with the rate
+    /// stays true even when <see cref="CanInstall"/> is false.</summary>
+    public bool ShowInstall { get; init; }
+}
 
 /// <summary>An entity's weapons and fire controls. Owner-only.</summary>
 public sealed record FireControlView(IReadOnlyList<FireControlSnapshot> FireControls) : IComponentView
@@ -517,7 +528,13 @@ public sealed record NavalAcademyClassView(int ClassSize, int TrainingPeriodMont
 
 /// <summary>An entity's industrial capability: its production lines, their job queues, and what
 /// each line can build (with cost previews against the local stockpile).</summary>
-public sealed record IndustryView(IReadOnlyList<ProductionLineView> ProductionLines) : IComponentView;
+public sealed record IndustryView(IReadOnlyList<ProductionLineView> ProductionLines) : IComponentView
+{
+    /// <summary>Launch pads on this colony. Empty when the colony has no launch complex.</summary>
+    public IReadOnlyList<LaunchPadStateView> Pads { get; init; } = Array.Empty<LaunchPadStateView>();
+}
+
+public sealed record LaunchPadStateView(long MaxTonnage, bool Free);
 
 public sealed record ProductionLineView(
     string Id,
@@ -527,7 +544,48 @@ public sealed record ProductionLineView(
 {
     public IReadOnlyList<IndustryJobView> Jobs { get; init; } = Array.Empty<IndustryJobView>();
     public IReadOnlyList<ConstructibleItemView> Constructibles { get; init; } = Array.Empty<ConstructibleItemView>();
+
+    /// <summary>True when this line builds hulls. Slip size is gross tonnage, compared to ship mass.</summary>
+    public bool IsShipyard { get; init; }
+
+    public double SlipSize { get; init; }
+
+    public IReadOnlyList<YardHullView> Hulls { get; init; } = Array.Empty<YardHullView>();
+
+    /// <summary>Ship-refit points per day on this colony. Zero when the yard has no refit rate.</summary>
+    public long RefitPointsPerDay { get; init; }
+
+    public IReadOnlyList<RefitShipView> RefitShips { get; init; } = Array.Empty<RefitShipView>();
+
+    public IReadOnlyList<RefitPartView> RefitCargo { get; init; } = Array.Empty<RefitPartView>();
+
+    public IReadOnlyList<RefitJobView> RefitJobs { get; init; } = Array.Empty<RefitJobView>();
 }
+
+/// <summary>A ship in transfer range of a shipyard line.</summary>
+public sealed record RefitShipView(int EntityId, string Name, long Mass, bool OverSlip)
+{
+    public string SlipReason { get; init; } = "";
+
+    public IReadOnlyList<RefitPartView> Parts { get; init; } = Array.Empty<RefitPartView>();
+}
+
+/// <summary>A ship part on the ship or in the warehouse. Cost is the mass formula.</summary>
+public sealed record RefitPartView(int ComponentId, string Name, long Mass, long Cost);
+
+/// <summary>A refit job queued on this line.</summary>
+public sealed record RefitJobView(string ShipName, long PointCost, long PointsAccumulated, double Progress);
+
+/// <summary>Shown on the ship while a refit names it. Not an editor.</summary>
+public sealed record ShipRefitView(string YardName, long PointCost, long PointsAccumulated, double Progress) : IComponentView
+{
+    public IReadOnlyList<string> Removing { get; init; } = Array.Empty<string>();
+
+    public IReadOnlyList<string> Mounting { get; init; } = Array.Empty<string>();
+}
+
+/// <summary>A finished hull waiting on a shipyard line.</summary>
+public sealed record YardHullView(string DesignId, string DesignName, string Name, long Mass, string Reason);
 
 public sealed record IndustryJobView(
     string JobId,
@@ -553,9 +611,22 @@ public sealed record ConstructibleItemView(
     string Name,
     long IndustryPointsPerUnit,
     int OutputAmount,
+    /// <summary>Whether the production checkbox can queue a construction mount.</summary>
     bool CanAutoInstall)
 {
     public IReadOnlyList<IndustryCostItem> Costs { get; init; } = Array.Empty<IndustryCostItem>();
+
+    /// <summary>Why the checkbox is disabled. Empty when it can queue a mount.</summary>
+    public string AutoInstallReason { get; init; } = "";
+
+    /// <summary>Design mass in the same unit as slip size and pad tonnage.</summary>
+    public long Mass { get; init; }
+
+    /// <summary>True when this ship design is heavier than the line's slip.</summary>
+    public bool OverSlip { get; init; }
+
+    /// <summary>Why the design is disabled in the new-job combo. Empty when it fits the slip.</summary>
+    public string SlipReason { get; init; } = "";
 }
 
 public sealed record IndustryCostItem(
@@ -566,23 +637,45 @@ public sealed record IndustryCostItem(
     /// <summary>Whether the faction could produce/mine more of this input itself.</summary>
     bool CanProduce);
 
-/// <summary>An entity's local construction capability: build rate, FIFO queue, and the designs the
-/// faction can queue here.</summary>
+/// <summary>An entity's installation queue: the daily rate, the jobs, stored crates, and site-only designs.
+/// A ship also lists same-faction colonies in transfer range.</summary>
 public sealed record ConstructionView(long PointsPerDay) : IComponentView
 {
     public IReadOnlyList<ConstructionJobView> BuildQueue { get; init; } = Array.Empty<ConstructionJobView>();
-    public IReadOnlyList<ConstructibleDesignView> AvailableDesigns { get; init; } = Array.Empty<ConstructibleDesignView>();
+    public IReadOnlyList<ConstructionCrateView> Crates { get; init; } = Array.Empty<ConstructionCrateView>();
+    public IReadOnlyList<ConstructionSiteView> SiteDesigns { get; init; } = Array.Empty<ConstructionSiteView>();
+
+    /// <summary>True when the actor is a ship. Colony Management does not list colonies for a colony.</summary>
+    public bool IsShip { get; init; }
+
+    public IReadOnlyList<ConstructionColonyView> ColoniesInRange { get; init; } = Array.Empty<ConstructionColonyView>();
 }
+
+/// <summary>A same-faction colony in cargo-transfer range of a construction ship.</summary>
+public sealed record ConstructionColonyView(int EntityId, string Name);
 
 public sealed record ConstructionJobView(
     string Name,
-    string ComponentType,
-    long IndustryPointCosts,
+    /// <summary>Mount or Assemble.</summary>
+    string Kind,
+    /// <summary>Point cost copied onto the job when it was queued.</summary>
+    long PointCost,
     long PointsAccumulated,
     /// <summary>Progress on the current item, 0.0–1.0.</summary>
-    double Progress);
+    double Progress)
+{
+    /// <summary>Colony a ship job mounts on. Empty when the actor mounts on itself.</summary>
+    public string TargetName { get; init; } = "";
+}
 
-public sealed record ConstructibleDesignView(string DesignId, string Name, string ComponentType, long IndustryPointCosts);
+/// <summary>A warehouse crate that can be mounted. The cost is the mass formula, not the recipe.</summary>
+public sealed record ConstructionCrateView(int ComponentId, string DesignId, string Name, long MountCost);
+
+/// <summary>A design with no cargo flag. Listed even when its recipe is short.</summary>
+public sealed record ConstructionSiteView(string DesignId, string Name, long IndustryPointCosts)
+{
+    public IReadOnlyList<string> MissingResources { get; init; } = Array.Empty<string>();
+}
 
 /// <summary>One named contribution to a modified stat (for breakdown tooltips).</summary>
 public sealed record ValueModifier(string Name, double Delta);

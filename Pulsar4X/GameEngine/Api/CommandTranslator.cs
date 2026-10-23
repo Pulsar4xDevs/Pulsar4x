@@ -108,6 +108,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(ChangeIndustryJobPriorityCommand)] = TranslateChangeIndustryJobPriority,
                 [typeof(CancelIndustryJobCommand)] = TranslateCancelIndustryJob,
                 [typeof(AddToConstructionQueueCommand)] = TranslateAddToConstructionQueue,
+                [typeof(QueueShipRefitCommand)] = TranslateQueueShipRefit,
                 [typeof(MoveConstructionJobCommand)] = TranslateMoveConstructionJob,
                 [typeof(RemoveConstructionJobCommand)] = TranslateRemoveConstructionJob,
             };
@@ -119,6 +120,12 @@ namespace Pulsar4X.Engine.Api
         /// </summary>
         public CommandResult Translate(Entity faction, Entity commanded, GameCommand command)
         {
+            // A ship in a refit accepts no new orders. Move to Storage still uninstalls.
+            if (command is not UninstallComponentCommand
+                && commanded.HasDataBlob<ShipInfoDB>()
+                && ShipRefitJob.TryFind(commanded, out _, out _))
+                return CommandResult.Reject(ShipRefitJob.InRefit);
+
             if (!_translators.TryGetValue(command.GetType(), out var translate))
                 return CommandResult.Reject($"Unsupported command: {command.GetType().Name}");
 
@@ -1528,30 +1535,32 @@ namespace Pulsar4X.Engine.Api
         private CommandResult TranslateInstallComponent(Entity faction, Entity commanded, GameCommand command)
         {
             var install = (InstallComponentCommand)command;
+            bool colony = commanded.HasDataBlob<ColonyInfoDB>();
+            if (!commanded.TryGetDataBlob<LocalConstructionDB>(out var construction) || construction.PointsPerDay <= 0)
+                return CommandResult.Reject(colony
+                    ? "This colony has no installation points."
+                    : "This ship has no installation points.");
 
-            // The component travels as a cargo-item id; find the live instance in the holder's storage.
-            ComponentInstance? instance = null;
-            if (commanded.TryGetDataBlob<Pulsar4X.Storage.CargoStorageDB>(out var storage))
-            {
-                foreach (var typeStore in storage.TypeStores.Values)
-                {
-                    if (typeStore.CurrentStoreInUnits.ContainsKey(install.ComponentId)
-                        && typeStore.GetCargoables().TryGetValue(install.ComponentId, out var cargoable)
-                        && cargoable is ComponentInstance found)
-                    {
-                        instance = found;
-                        break;
-                    }
-                }
-            }
+            if (!TryFindCargoComponent(commanded, install.ComponentId, out var instance))
+                return CommandResult.Reject(colony
+                    ? "That component is not in the warehouse."
+                    : "That component is not in the hold.");
 
-            if (instance == null)
-                return CommandResult.Reject($"Component {install.ComponentId} is not in the entity's storage.");
+            if (!LocalConstructionJob.IsCrate(instance.Design))
+                return CommandResult.Reject("That component is not a colony installation crate.");
 
-            if (!_game.OrderHandler.HandleOrder(RemoveComponentFromStorageOrder.Create(commanded, instance)))
-                return CommandResult.Reject("Command rejected by engine validation.");
+            if (AlreadyQueued(construction, instance))
+                return CommandResult.Reject("That component is already in the construction queue.");
 
-            return Dispatch(InstallComponentInstanceOrder.Create(commanded, instance));
+            if (colony)
+                return Dispatch(AddToConstructionQueueOrder.CreateMount(commanded, instance));
+
+            if (install.ColonyId is not int colonyId)
+                return CommandResult.Reject("No colony in transfer range.");
+            if (!TryResolveConstructionColony(commanded, colonyId, out var target, out var reason))
+                return CommandResult.Reject(reason);
+
+            return Dispatch(AddToConstructionQueueOrder.CreateMount(commanded, instance, target));
         }
 
         // ----- industry / local construction (commanded entity: the colony) -----
@@ -1580,14 +1589,20 @@ namespace Pulsar4X.Engine.Api
             if (ValidateIndustryLine(commanded, queue.ProductionLineId) is { } lineError)
                 return lineError;
 
+            if (design is ShipDesign ship
+                && commanded.TryGetDataBlob<IndustryAbilityDB>(out var industry)
+                && industry.ProductionLines.TryGetValue(queue.ProductionLineId, out var line)
+                && ship.MassPerUnit > line.MaxVolume)
+                return CommandResult.Reject("That design is over this slip.");
+
             var job = new IndustryJob(factionInfo, queue.DesignId);
 
-            // Auto-install only applies to installations built by the colony for itself; ship
-            // components etc. need a target-selection flow that doesn't exist yet (engine TODO).
+            // A checked box queues a mount on a colony that has installation points. It does not install now.
             if (queue.AutoInstall
-                && design.GuiHints == DataStructures.ConstructableGuiHints.CanBeInstalled
                 && design is Pulsar4X.Components.ComponentDesign componentDesign
-                && componentDesign.ComponentMountType.HasFlag(DataStructures.ComponentMountType.PlanetInstallation))
+                && componentDesign.ComponentMountType.HasFlag(DataStructures.ComponentMountType.PlanetInstallation)
+                && commanded.TryGetDataBlob<LocalConstructionDB>(out var construction)
+                && construction.PointsPerDay > 0)
             {
                 job.InstallOn = commanded;
             }
@@ -1614,6 +1629,57 @@ namespace Pulsar4X.Engine.Api
                 faction.Id, commanded, cancel.ProductionLineId, cancel.JobId));
         }
 
+        private CommandResult TranslateQueueShipRefit(Entity faction, Entity commanded, GameCommand command)
+        {
+            var refit = (QueueShipRefitCommand)command;
+            if (!TryResolveShip(commanded, refit.ShipEntityId, out var ship))
+                return CommandResult.Reject(ShipRefitJob.OutOfRange);
+
+            var remove = new List<ComponentInstance>();
+            foreach (var componentId in refit.RemoveInstanceIds ?? Array.Empty<int>())
+            {
+                if (!TryFindMounted(ship, componentId, out var instance))
+                    return CommandResult.Reject(ShipRefitJob.NotOnShip);
+                remove.Add(instance);
+            }
+
+            var mount = new List<ComponentInstance>();
+            foreach (var componentId in refit.MountInstanceIds ?? Array.Empty<int>())
+            {
+                if (!TryFindCargoComponent(commanded, componentId, out var instance))
+                    return CommandResult.Reject(ShipRefitJob.NotInWarehouse);
+                mount.Add(instance);
+            }
+
+            var reason = ShipRefitJob.Rejection(commanded, refit.ProductionLineId, ship, remove, mount);
+            if (reason != null)
+                return CommandResult.Reject(reason);
+            return Dispatch(QueueShipRefitOrder.Create(commanded, refit.ProductionLineId, ship, remove, mount));
+        }
+
+        static bool TryResolveShip(Entity yard, int shipId, out Entity ship)
+        {
+            if (yard.Manager != null && yard.Manager.TryGetEntityById(shipId, out ship!))
+                return true;
+            ship = null!;
+            return false;
+        }
+
+        static bool TryFindMounted(Entity ship, int componentId, out ComponentInstance instance)
+        {
+            instance = null!;
+            if (!ship.TryGetDataBlob<ComponentInstancesDB>(out var components))
+                return false;
+            foreach (var part in components.AllComponents.Values)
+            {
+                if (part.ID != componentId)
+                    continue;
+                instance = part;
+                return true;
+            }
+            return false;
+        }
+
         private CommandResult TranslateAddToConstructionQueue(Entity faction, Entity commanded, GameCommand command)
         {
             var add = (AddToConstructionQueueCommand)command;
@@ -1621,7 +1687,93 @@ namespace Pulsar4X.Engine.Api
                 || !factionInfo.ComponentDesigns.TryGetValue(add.DesignId, out var design))
                 return CommandResult.Reject($"Design {add.DesignId} not found.");
 
-            return Dispatch(AddToConstructionQueueOrder.Create(commanded, design));
+            bool colony = commanded.HasDataBlob<ColonyInfoDB>();
+            if (!commanded.TryGetDataBlob<LocalConstructionDB>(out var construction) || construction.PointsPerDay <= 0)
+                return CommandResult.Reject(colony
+                    ? "This colony has no installation points."
+                    : "This ship has no installation points.");
+
+            if (add.ComponentId is int componentId)
+            {
+                if (!TryFindCargoComponent(commanded, componentId, out var instance))
+                    return CommandResult.Reject(colony
+                        ? "That component is not in the warehouse."
+                        : "That component is not in the hold.");
+                if (instance.Design.UniqueID != design.UniqueID)
+                    return CommandResult.Reject("That crate is a different design.");
+                if (!LocalConstructionJob.IsCrate(instance.Design))
+                    return CommandResult.Reject("That component is not a colony installation crate.");
+                if (AlreadyQueued(construction, instance))
+                    return CommandResult.Reject("That component is already in the construction queue.");
+
+                if (colony)
+                    return Dispatch(AddToConstructionQueueOrder.CreateMount(commanded, instance));
+                if (add.ColonyId is not int mountColonyId)
+                    return CommandResult.Reject("No colony in transfer range.");
+                if (!TryResolveConstructionColony(commanded, mountColonyId, out var mountTarget, out var mountReason))
+                    return CommandResult.Reject(mountReason);
+                return Dispatch(AddToConstructionQueueOrder.CreateMount(commanded, instance, mountTarget));
+            }
+
+            if (!LocalConstructionJob.IsSiteOnly(design))
+                return CommandResult.Reject(colony
+                    ? "That design is carried as cargo. Queue a crate from the warehouse."
+                    : "That design is carried as cargo. Queue a crate from the hold.");
+
+            if (colony)
+                return Dispatch(AddToConstructionQueueOrder.CreateAssemble(commanded, design));
+            if (add.ColonyId is not int assembleColonyId)
+                return CommandResult.Reject("No colony in transfer range.");
+            if (!TryResolveConstructionColony(commanded, assembleColonyId, out var assembleTarget, out var assembleReason))
+                return CommandResult.Reject(assembleReason);
+            return Dispatch(AddToConstructionQueueOrder.CreateAssemble(commanded, design, assembleTarget));
+        }
+
+        static bool TryResolveConstructionColony(Entity ship, int colonyId, out Entity colony, out string reason)
+        {
+            colony = null!;
+            if (ship.Manager == null || !ship.Manager.TryGetEntityById(colonyId, out colony!))
+            {
+                reason = "That colony was not found.";
+                return false;
+            }
+            if (!colony.HasDataBlob<ColonyInfoDB>()
+                || colony.FactionOwnerID != ship.FactionOwnerID
+                || !LocalConstructionProcessor.InTransferRange(ship, colony))
+            {
+                reason = "That colony is out of transfer range.";
+                return false;
+            }
+            reason = "";
+            return true;
+        }
+
+        static bool AlreadyQueued(LocalConstructionDB construction, ComponentInstance instance)
+        {
+            foreach (var job in construction.BuildQueue)
+            {
+                if (job.Instance != null && job.Instance.ID == instance.ID)
+                    return true;
+            }
+            return false;
+        }
+
+        static bool TryFindCargoComponent(Entity entity, int componentId, out ComponentInstance instance)
+        {
+            instance = null!;
+            if (!entity.TryGetDataBlob<CargoStorageDB>(out var storage))
+                return false;
+
+            foreach (var pair in storage.TypeStores)
+            {
+                if (pair.Value.GetCargoables().TryGetValue(componentId, out var cargoable)
+                    && cargoable is ComponentInstance found)
+                {
+                    instance = found;
+                    return true;
+                }
+            }
+            return false;
         }
 
         private CommandResult TranslateMoveConstructionJob(Entity faction, Entity commanded, GameCommand command)

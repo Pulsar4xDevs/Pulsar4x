@@ -68,6 +68,10 @@ Interim for the Ceres trade test only. Methalox already has `WealthCost` 3 on th
 
 2026-10-10. Strata Survey and Lode Mining have a ship and no colony. A market order is stored on the colony that owns the logistics office. `EngineGameServer.SubmitCommand` rejects a command against an entity the faction does not own. `BuyIntelCommand` is the exception, and it buys a chart the owner already listed. A friendly ship can fill an existing listing with `MarketExchangeAction` when `FactionStanceRules.CanTrade` is true and the ship is in cargo-transfer range. It cannot add a bid or an ask. `MarketView.CanEdit` is true only for the owner. Do not build a visitor order book unless asked.
 
+### Ship refit is implemented; stations are not started
+
+2026-10-24. The construction attribute, construction components, manufacture instances, colony construction, ship construction, yard-holds-the-hull, and ship-refit slices are implemented. A shipyard refit spends `ship-refit` points on one ship in transfer range. Each part removed and each part mounted costs `max(1, MassPerUnit / 100000)`, copied onto the job. The slip comparison is the ship's design mass against the line's `MaxVolume`. An office with only `installation` cannot refit. A colony installation is refused. The ship takes no new orders until the job finishes. Move to Storage still works. The job does not create a hull. Stations are next. Do not start a slice until asked.
+
 ### Remote buy is a sealed shipment
 
 2026-10-10. Written up as `GameEngine/Logistics/plans/sealed-shipments.md`. Not logistics plan 13. Do not build it until asked. A goals-and-actions session can take the `DeliverShipment` half. The buying office pays the goods and posts the intel haul. Any free ship can claim it and be paid the fee. Several goods can share one shipment. Dockside escrow still starts only in cargo range.

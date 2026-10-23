@@ -220,8 +220,10 @@ public sealed record MoveTechInQueueCommand(int TargetEntityId, string TechId, b
 /// <summary>Uninstall one installed component of the given design and move it into cargo storage.</summary>
 public sealed record UninstallComponentCommand(int TargetEntityId, string DesignId) : GameCommand(TargetEntityId);
 
-/// <summary>Install a component instance (<see cref="CargoItemView.Id"/>) out of cargo storage.</summary>
-public sealed record InstallComponentCommand(int TargetEntityId, int ComponentId) : GameCommand(TargetEntityId);
+/// <summary>Queue a mount of a crate in the commanded entity's cargo (<see cref="CargoItemView.Id"/>).
+/// A colony mounts it on itself. A ship passes <paramref name="ColonyId"/> and mounts it on that colony.
+/// Does not mount the part and does not remove it from cargo until the mount finishes.</summary>
+public sealed record InstallComponentCommand(int TargetEntityId, int ComponentId, int? ColonyId = null) : GameCommand(TargetEntityId);
 
 // ----- cargo transfer (commanded entity: the source, which must hold the items) -----
 
@@ -373,7 +375,8 @@ public sealed record SetShipDesignObsoleteCommand(int TargetEntityId, string Des
 #region Colony Development Commands
 
 /// <summary>Queue a batch job on one of the entity's production lines. When <see cref="AutoInstall"/>
-/// is set and the design is a colony installation, completed output installs on the entity itself.</summary>
+/// is set, the design is a colony installation, and the colony has installation points, completion
+/// queues a construction mount of that instance. It does not mount the part.</summary>
 public sealed record QueueIndustryJobCommand(
     int TargetEntityId,
     string ProductionLineId,
@@ -394,7 +397,18 @@ public sealed record CancelIndustryJobCommand(
     string ProductionLineId,
     string JobId) : GameCommand(TargetEntityId);
 
-public sealed record AddToConstructionQueueCommand(int TargetEntityId, string DesignId) : GameCommand(TargetEntityId);
+/// <summary>Queue a site-only assemble, or a mount when <paramref name="ComponentId"/> names a stored crate.
+/// A colony mounts on itself. A ship passes <paramref name="ColonyId"/> and mounts on that colony.</summary>
+public sealed record AddToConstructionQueueCommand(int TargetEntityId, string DesignId, int? ComponentId = null, int? ColonyId = null) : GameCommand(TargetEntityId);
+
+/// <summary>Queue a shipyard refit. The yard spends ship-refit points. The ship is one in transfer range.
+/// Removed instances return to the warehouse when the job finishes. Mounted instances leave it.</summary>
+public sealed record QueueShipRefitCommand(
+    int TargetEntityId,
+    string ProductionLineId,
+    int ShipEntityId,
+    IReadOnlyList<int> RemoveInstanceIds,
+    IReadOnlyList<int> MountInstanceIds) : GameCommand(TargetEntityId);
 
 /// <summary>Move a job in the local-construction queue by its current position.</summary>
 public sealed record MoveConstructionJobCommand(int TargetEntityId, int QueueIndex, bool MoveUp) : GameCommand(TargetEntityId);

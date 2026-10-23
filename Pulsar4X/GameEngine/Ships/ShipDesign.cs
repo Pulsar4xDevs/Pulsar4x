@@ -10,7 +10,6 @@ using Pulsar4X.Industry;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
-using Pulsar4X.Fleets;
 using Pulsar4X.Damage;
 using Pulsar4X.Engine;
 using Pulsar4X.Names;
@@ -71,28 +70,17 @@ namespace Pulsar4X.Ships
             batchJob.ResourcesRequiredRemaining = new Dictionary<string, long>(designInfo.ResourceCosts);
             batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
 
-            var faction = industryEntity.GetFactionOwner;
-
-            if (industryEntity.TryGetDataBlob<LaunchComplexDB>(out var launchDB))
+            // The hull stays on this slip. LaunchComplexProcessor is the only path that creates the ship.
+            var shipDesign = (ShipDesign)designInfo;
+            string shipName = industryEntity.Manager?.Game != null
+                ? NameFactory.GetShipName(industryEntity.Manager.Game)
+                : shipDesign.Name;
+            industryDB.ProductionLines[productionLine].Hulls.Add(new IndustryAbilityDB.YardHull
             {
-                var shipName = NameFactory.GetShipName(industryEntity.Manager.Game);
-                launchDB.LaunchQueue.Add(new LaunchQueueEntry
-                {
-                    DesignId = designInfo.UniqueID,
-                    ShipName = shipName
-                });
-            }
-            else
-            {
-                var industryParent = industryEntity.GetSOIParentEntity();
-                if(industryParent == null) throw new NullReferenceException("industryParent cannot be null");
-
-                var ship = ShipFactory.CreateShip((ShipDesign)designInfo, faction, industryParent);
-                if(faction.TryGetDataBlob<FleetDB>(out var fleetDB))
-                {
-                    fleetDB.AddChild(ship);
-                }
-            }
+                DesignId = shipDesign.UniqueID,
+                Name = shipName,
+                Mass = shipDesign.MassPerUnit,
+            });
 
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)
             {

@@ -5,12 +5,10 @@ using Pulsar4X.Client;
 using Pulsar4X.Client.Interface;
 using Pulsar4X.Colonies;
 using Pulsar4X.Components;
-using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
-using Pulsar4X.Engine.Orders;
 using Pulsar4X.Factions;
 using Pulsar4X.Industry;
-using Pulsar4X.Ships;
+using Pulsar4X.Industry.Orders;
 using Pulsar4X.Storage;
 using Pulsar4X.Weapons;
 using Stringify = Pulsar4X.Api.Stringify;
@@ -125,38 +123,61 @@ public static class CargoStorageDBDisplay
         private static void AddContextMenu(CargoStorageDB cargoStorageDB, ComponentInstance component, GlobalUIState uiState)
         {
             if(cargoStorageDB.OwningEntity == null) throw new InvalidOperationException($"OwningEntity for {cargoStorageDB} cannot be null");
+            var entity = cargoStorageDB.OwningEntity;
+            bool isColony = entity.HasDataBlob<ColonyInfoDB>();
+            bool hasRate = entity.TryGetDataBlob<LocalConstructionDB>(out var construction)
+                && construction.PointsPerDay > 0;
+            bool isCrate = LocalConstructionJob.IsCrate(component.Design);
+            var colonies = !isColony && hasRate && isCrate
+                ? LocalConstructionProcessor.ColoniesInRange(entity)
+                : new System.Collections.Generic.List<Entity>();
+            bool showInstall = hasRate && isCrate;
+            bool canQueue = showInstall && (isColony || colonies.Count > 0);
 
-            ImGui.PushID(component.Design.UniqueID.ToString());
-            if(ImGui.BeginPopupContextItem("###" + component.Design.UniqueID))
+            ImGui.PushID(component.ID);
+            if(ImGui.BeginPopupContextItem("###cargo-" + component.ID))
             {
                 ImGui.Text(component.Name);
                 ImGui.Separator();
 
-                bool canInstall = false;
-                if(cargoStorageDB.OwningEntity.HasDataBlob<ColonyInfoDB>()
-                    && component.Design.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation))
-                    {
-                        canInstall = true;
-                    }
-                else if(cargoStorageDB.OwningEntity.HasDataBlob<ShipInfoDB>()
-                    && component.Design.ComponentMountType.HasFlag(ComponentMountType.ShipComponent))
-                    {
-                        canInstall = true;
-                    }
-
-                if(canInstall && !cargoStorageDB.TypeStores.ContainsKey(component.CargoTypeID))
+                if(showInstall)
                 {
-                    canInstall = false;
+                    if(!canQueue)
+                        ImGui.BeginDisabled();
+                    if(ImGui.MenuItem("Install") && canQueue)
+                    {
+                        if(isColony)
+                        {
+                            entity.Manager?.Game.OrderHandler.HandleOrder(
+                                AddToConstructionQueueOrder.CreateMount(entity, component));
+                        }
+                        else
+                        {
+                            var ids = new System.Collections.Generic.List<int>(colonies.Count);
+                            foreach(var colony in colonies)
+                                ids.Add(colony.Id);
+                            int picked = ColonyConstructionDisplay.PickedColony(entity.Id, ids);
+                            Entity? target = null;
+                            foreach(var colony in colonies)
+                            {
+                                if(colony.Id == picked)
+                                    target = colony;
+                            }
+                            if(target != null)
+                            {
+                                entity.Manager?.Game.OrderHandler.HandleOrder(
+                                    AddToConstructionQueueOrder.CreateMount(entity, component, target));
+                            }
+                        }
+                    }
+                    if(!canQueue)
+                        ImGui.EndDisabled();
+                    if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                        ImGui.SetTooltip(canQueue
+                            ? $"Queue a mount ({LocalConstructionJob.MountCost(component.MassPerUnit):N0} installation points)."
+                            : "No colony in transfer range.");
                 }
 
-                if(canInstall && ImGui.MenuItem("Install"))
-                {
-                    var storageOrder = RemoveComponentFromStorageOrder.Create(component.ParentEntity, component, 1);
-                    GameLifecycle.Instance?.Game?.OrderHandler.HandleOrder(storageOrder);
-
-                    var installOrder = InstallComponentInstanceOrder.Create(component.ParentEntity, component);
-                    GameLifecycle.Instance?.Game?.OrderHandler.HandleOrder(installOrder);
-                }
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
                 if(ImGui.MenuItem("Destroy"))
                 {

@@ -430,6 +430,11 @@
           "PropertyFormula": "10000"
         },
         {
+          "Name": "Refit Points",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Crew Size') * 0.0005"
+        },
+        {
           "Name": "db",
           "GuiHint": "None",
           "DataDict": {
@@ -438,6 +443,15 @@
           },
           "PropertyFormula": "AtbConstrArgs([GuidDict], PropertyValue('Slip Size'))",
           "AttributeType": "Pulsar4X.Industry.IndustryAtb"
+        },
+        {
+          "Name": "Construction",
+          "GuiHint": "None",
+          "DataDict": {
+            "ship-refit": "PropertyValue('Refit Points')"
+          },
+          "PropertyFormula": "AtbConstrArgs([GuidDict])",
+          "AttributeType": "Pulsar4X.Industry.ConstructionAtb"
         }
       ]
     }
@@ -1016,8 +1030,50 @@
         {
           "Name": "DBargs",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(PropertyValue('Level'), 5)",
-          "AttributeType": "Pulsar4X.Industry.LocalConstructionAtb"
+          "DataDict": {
+            "installation": "PropertyValue('Level') * 5"
+          },
+          "PropertyFormula": "AtbConstrArgs([GuidDict])",
+          "AttributeType": "Pulsar4X.Industry.ConstructionAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "ship-construction",
+      "Name": "Ship Construction",
+      "Formulas": {
+        "Description": "Installation rate of 5 points a day, carried on a ship.",
+        "Mass": "5000",
+        "Volume": "[Mass] * 0.1",
+        "HTK": "0.5",
+        "CrewReq": "5",
+        "ResearchCost": "0",
+        "CreditCost": "0",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "iron": "[Mass] * 0.6",
+        "aluminium": "[Mass] * 0.1",
+        "copper": "[Mass] * 0.1",
+        "plastic": "[Mass] * 0.1",
+        "stainless-steel": "[Mass] * 0.1"
+      },
+      "ComponentType": "Facility",
+      "MountType": "ShipComponent",
+      "CargoTypeID": "None",
+      "IndustryTypeID": "component-construction",
+      "Properties": [
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "DataDict": {
+            "installation": "5"
+          },
+          "PropertyFormula": "AtbConstrArgs([GuidDict])",
+          "AttributeType": "Pulsar4X.Industry.ConstructionAtb"
         }
       ]
     }

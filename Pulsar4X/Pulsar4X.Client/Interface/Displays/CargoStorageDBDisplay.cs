@@ -39,9 +39,9 @@ namespace Pulsar4X.Client
                             {
                                 DisplayHelpers.DescriptiveTooltip(item.Name, item.ItemKind, item.Description);
                             }
-                            if(item.CanInstall)
+                            if(item.ShowInstall)
                             {
-                                AddContextMenu(item, holderId, uiState);
+                                AddContextMenu(item, holderId, storage.InstallColonyIds, uiState);
                             }
                             ImGui.TableNextColumn();
                             ImGui.Text(Stringify.Quantity(item.Units, "##.##"));
@@ -71,7 +71,7 @@ namespace Pulsar4X.Client
             }
         }
 
-        private static void AddContextMenu(Pulsar4X.Api.CargoItemView item, int holderId, GlobalUIState uiState)
+        private static void AddContextMenu(Pulsar4X.Api.CargoItemView item, int holderId, System.Collections.Generic.IReadOnlyList<int> colonyIds, GlobalUIState uiState)
         {
             ImGui.PushID(item.Id);
             if(ImGui.BeginPopupContextItem("###cargo-item-" + item.Id))
@@ -79,11 +79,28 @@ namespace Pulsar4X.Client
                 ImGui.Text(item.Name);
                 ImGui.Separator();
 
-                if(ImGui.MenuItem("Install"))
+                if(!item.CanInstall)
+                    ImGui.BeginDisabled();
+                if(ImGui.MenuItem("Install") && item.CanInstall)
                 {
-                    uiState.GameClient?.SubmitCommandAsync(
-                        new Pulsar4X.Api.InstallComponentCommand(holderId, item.Id));
+                    if(colonyIds.Count > 0)
+                    {
+                        int colonyId = ColonyConstructionDisplay.PickedColony(holderId, colonyIds);
+                        uiState.GameClient?.SubmitCommandAsync(
+                            new Pulsar4X.Api.InstallComponentCommand(holderId, item.Id, colonyId));
+                    }
+                    else
+                    {
+                        uiState.GameClient?.SubmitCommandAsync(
+                            new Pulsar4X.Api.InstallComponentCommand(holderId, item.Id));
+                    }
                 }
+                if(!item.CanInstall)
+                    ImGui.EndDisabled();
+                if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                    ImGui.SetTooltip(item.CanInstall
+                        ? $"Queue a mount ({item.MountCost:N0} installation points)."
+                        : "No colony in transfer range.");
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
                 if(ImGui.MenuItem("Destroy"))
                 {
