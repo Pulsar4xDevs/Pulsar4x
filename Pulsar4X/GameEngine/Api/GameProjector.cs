@@ -1774,7 +1774,29 @@ namespace Pulsar4X.Engine.Api
                 CanGravSurvey = ship.HasJPSurveyAbililty(),
                 CanMineAsteroids = ship.HasAsteroidMineAbility(),
                 CommanderId = commanderId,
+                ColoniesInCargoRange = ColoniesInCargoRange(ship, factionId),
             };
+        }
+
+        /// <summary>
+        /// Owned colonies this ship could load or unload right now. The client does not recompute Hohmann.
+        /// </summary>
+        static IReadOnlyList<int> ColoniesInCargoRange(Entity ship, int factionId)
+        {
+            if (ship.FactionOwnerID != factionId
+                || !ship.HasDataBlob<CargoStorageDB>()
+                || ship.Manager == null)
+                return Array.Empty<int>();
+
+            var ids = new List<int>();
+            foreach (var colony in ship.Manager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
+            {
+                if (colony.FactionOwnerID != factionId || !colony.HasDataBlob<CargoStorageDB>())
+                    continue;
+                if (MarketExchangeAction.InRange(ship, colony))
+                    ids.Add(colony.Id);
+            }
+            return ids;
         }
 
         private static GoalSnapshot ProjectGoals(Entity entity)

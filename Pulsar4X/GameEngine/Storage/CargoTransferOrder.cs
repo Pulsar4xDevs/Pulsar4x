@@ -175,6 +175,82 @@ public class CargoTransferOrder : EntityAction
     }
 
     /// <summary>
+    /// Build a load without enqueueing. Ship is primary. Each amount stays positive so goods
+    /// leave the colony. Caller submits secondary on the colony. The constructor escrows immediately.
+    /// </summary>
+    public static (CargoTransferOrder primary, CargoTransferOrder secondary) CreateLoadPair(
+        int faction,
+        Entity ship,
+        Entity colony,
+        List<(ICargoable item, long amount)> items)
+    {
+        var cargoData = new CargoTransferDataDB(ship, colony, items);
+        var now = ship.Manager.ManagerSubpulses.StarSysDateTime;
+
+        var primary = new CargoTransferOrder(cargoData)
+        {
+            RequestingFactionGuid = faction,
+            EntityCommandingGuid = ship.Id,
+            CreatedDate = now,
+            IsPrimaryEntity = true,
+            Condition = Conditionals.TakeAvailibleAtOrder,
+        };
+        var secondary = new CargoTransferOrder(cargoData)
+        {
+            RequestingFactionGuid = faction,
+            EntityCommandingGuid = colony.Id,
+            CreatedDate = now,
+            IsPrimaryEntity = false,
+            Condition = Conditionals.TakeAvailibleAtOrder,
+        };
+        return (primary, secondary);
+    }
+
+    /// <summary>Units this transfer actually escrowed for one item. Zero when the line did not fit.</summary>
+    internal long Taken(int itemId)
+    {
+        if (TransferData == null)
+            return 0;
+        long count = 0;
+        foreach (var tup in TransferData.EscroHeldInPrimary)
+        {
+            if (tup.item != null && tup.item.ID == itemId)
+                count += tup.count;
+        }
+        foreach (var tup in TransferData.EscroHeldInSecondary)
+        {
+            if (tup.item != null && tup.item.ID == itemId)
+                count += tup.count;
+        }
+        return count;
+    }
+
+    internal bool HasData(CargoTransferDataDB data) => ReferenceEquals(TransferData, data);
+
+    /// <summary>
+    /// Cancel returns escrow, then drops the partner order. The caller removes this line.
+    /// </summary>
+    public override void Stop(DateTime at)
+    {
+        var data = TransferData;
+        if (data == null)
+            return;
+        data.ReturnEscrow();
+        RemovePartner(data.PrimaryEntity, data);
+        RemovePartner(data.SecondaryEntity, data);
+    }
+
+    void RemovePartner(Entity entity, CargoTransferDataDB data)
+    {
+        if (entity == null || !entity.TryGetDataBlob<ActionQueueDB>(out var queue))
+            return;
+        queue.ActionList.RemoveAll(action =>
+            !ReferenceEquals(action, this)
+            && action is CargoTransferOrder other
+            && other.HasData(data));
+    }
+
+    /// <summary>
     /// Single item conditional order.
     /// Assumes transfer from secondary to primary
     /// </summary>

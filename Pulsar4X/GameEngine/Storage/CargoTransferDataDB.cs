@@ -34,6 +34,12 @@ public class CargoTransferDataDB : BaseDataBlob
     [JsonProperty]
     internal SafeList<(ICargoable item, long count, double mass)> EscroHeldInSecondary { get; private set; } = new();
 
+    /// <summary>
+    /// Cancel already put every held unit back. A second Stop must not add them again.
+    /// </summary>
+    [JsonProperty]
+    internal bool EscrowReturned { get; private set; }
+
     [JsonConstructor]
     private CargoTransferDataDB(){}
         
@@ -127,6 +133,54 @@ public class CargoTransferDataDB : BaseDataBlob
                 itemsToRemove.Add((cargoItem,0,0));
             }
             break;
+        }
+    }
+
+    /// <summary>
+    /// Put every unit still in escrow back on the store it was taken from.
+    /// Escrow only subtracted <see cref="TypeStore.CurrentStoreInUnits"/>. Free volume and mass
+    /// stay as they were, so this must not call <c>AddCargoByUnit</c>.
+    /// Units the processor already moved stay where they landed.
+    /// </summary>
+    internal void ReturnEscrow()
+    {
+        if (EscrowReturned)
+            return;
+        EscrowReturned = true;
+        Restore(SecondaryStorageDB, EscroHeldInSecondary);
+        Restore(PrimaryStorageDB, EscroHeldInPrimary);
+        EscroHeldInSecondary.Clear();
+        EscroHeldInPrimary.Clear();
+        PrimaryStorageDB?.EscroItems.Remove(this);
+        SecondaryStorageDB?.EscroItems.Remove(this);
+        DropBlob(PrimaryEntity);
+        DropBlob(SecondaryEntity);
+    }
+
+    void DropBlob(Entity entity)
+    {
+        if (entity == null || !entity.TryGetDataBlob<CargoTransferDB>(out var blob))
+            return;
+        if (ReferenceEquals(blob.TransferData, this))
+            entity.RemoveDataBlob<CargoTransferDB>();
+    }
+
+    static void Restore(CargoStorageDB store, SafeList<(ICargoable item, long count, double mass)> held)
+    {
+        if (store == null)
+            return;
+        foreach (var (item, count, _) in held)
+        {
+            if (item == null || count <= 0)
+                continue;
+            if (!store.TypeStores.TryGetValue(item.CargoTypeID, out var type))
+                continue;
+            if (type.CurrentStoreInUnits.ContainsKey(item.ID))
+                type.CurrentStoreInUnits[item.ID] += count;
+            else
+                type.CurrentStoreInUnits.Add(item.ID, count);
+            if (!type.Cargoables.ContainsKey(item.ID))
+                type.Cargoables.Add(item.ID, item);
         }
     }
 

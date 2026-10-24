@@ -21,6 +21,9 @@ namespace Pulsar4X.Client
             Trade,
             Haul,
             HaulContract,
+            MoveGoods,
+            LoadGoods,
+            UnloadGoods,
             PlotWarpTo,
             PlotCircularise,
             PlotChangeAltitude,
@@ -30,6 +33,16 @@ namespace Pulsar4X.Client
         private IssueOrderType selectedIssueOrderType = IssueOrderType.MoveTo;
         private int haulSourceId = -1;
         private int haulDestId = -1;
+        private int goodsSourceId = -1;
+        private int goodsDestId = -1;
+        private int loadColonyId = -1;
+        private int unloadColonyId = -1;
+        private int goodsSeedSource = int.MinValue;
+        private int loadSeedSource = int.MinValue;
+        private int unloadSeedShip = int.MinValue;
+        private readonly Dictionary<int, int> goodsAmounts = new();
+        private readonly Dictionary<int, int> loadAmounts = new();
+        private readonly Dictionary<int, int> unloadAmounts = new();
         private double plotAltitudeM;
 
         private int? selectedFleetId = null;
@@ -386,6 +399,12 @@ namespace Pulsar4X.Client
                     selectedIssueOrderType = IssueOrderType.GravSurvey;
                 if (ImGui.Selectable("Jump...", selectedIssueOrderType == IssueOrderType.Jump))
                     selectedIssueOrderType = IssueOrderType.Jump;
+                if (ImGui.Selectable("Move goods ...", selectedIssueOrderType == IssueOrderType.MoveGoods))
+                    selectedIssueOrderType = IssueOrderType.MoveGoods;
+                if (ImGui.Selectable("Load at colony in range", selectedIssueOrderType == IssueOrderType.LoadGoods))
+                    selectedIssueOrderType = IssueOrderType.LoadGoods;
+                if (ImGui.Selectable("Unload at colony in range", selectedIssueOrderType == IssueOrderType.UnloadGoods))
+                    selectedIssueOrderType = IssueOrderType.UnloadGoods;
                 if (warp && ImGui.Selectable("Warp plotter..."))
                     OpenPlotter(orderShip, warp: true);
                 if (thrust && ImGui.Selectable("Nav plotter..."))
@@ -424,6 +443,8 @@ namespace Pulsar4X.Client
                 selectedIssueOrderType = IssueOrderType.Haul;
             if (fleetOrders && ImGui.Selectable("Haul contract ...", selectedIssueOrderType == IssueOrderType.HaulContract))
                 selectedIssueOrderType = IssueOrderType.HaulContract;
+            if (ImGui.Selectable("Move goods ...", selectedIssueOrderType == IssueOrderType.MoveGoods))
+                selectedIssueOrderType = IssueOrderType.MoveGoods;
         }
 
         private EntitySnapshot? SubjectEntity(IClientGalaxy galaxy)
@@ -562,11 +583,19 @@ namespace Pulsar4X.Client
                         || selectedIssueOrderType == IssueOrderType.PlotCircularise
                         || selectedIssueOrderType == IssueOrderType.PlotChangeAltitude
                         || selectedIssueOrderType == IssueOrderType.PlotMatchOrbit);
+                    bool shipGoods = selectedIssueOrderType == IssueOrderType.MoveGoods
+                        || (emptyChair && (selectedIssueOrderType == IssueOrderType.LoadGoods
+                            || selectedIssueOrderType == IssueOrderType.UnloadGoods));
                     bool shipGoal = selectedIssueOrderType == IssueOrderType.MoveTo
                         || selectedIssueOrderType == IssueOrderType.Jump
-                        || shipGeo || shipGrav || shipMine || shipPlot;
+                        || shipGeo || shipGrav || shipMine || shipPlot || shipGoods;
                     if (!shipGoal)
                         selectedIssueOrderType = IssueOrderType.MoveTo;
+                }
+                else if (selectedIssueOrderType == IssueOrderType.LoadGoods
+                    || selectedIssueOrderType == IssueOrderType.UnloadGoods)
+                {
+                    selectedIssueOrderType = IssueOrderType.MoveTo;
                 }
 
                 // A ship order is that one body. Command span widens a fleet order.
@@ -701,6 +730,15 @@ namespace Pulsar4X.Client
                         break;
                     case IssueOrderType.HaulContract:
                         DisplayHaulContract(LogisticsCandidates(galaxy, candidates));
+                        break;
+                    case IssueOrderType.MoveGoods:
+                        DisplayMoveGoods(galaxy, candidates, commanded.Value);
+                        break;
+                    case IssueOrderType.LoadGoods:
+                        DisplayLoadGoods(candidates, commanded.Value);
+                        break;
+                    case IssueOrderType.UnloadGoods:
+                        DisplayUnloadGoods(galaxy, candidates, commanded.Value);
                         break;
                 }
             }
@@ -1359,6 +1397,250 @@ namespace Pulsar4X.Client
                     DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span);
                 ImGui.TreePop();
             }
+        }
+
+        private void DisplayMoveGoods(IClientGalaxy galaxy, IEnumerable<EntitySnapshot> candidates, int commandedId)
+        {
+            ImGui.TextWrapped("One trip. Goods that do not fit stay behind.");
+            var pool = selectedFleet != null ? LogisticsCandidates(galaxy, candidates) : candidates;
+            var colonies = OwnedWarehouses(pool);
+            if(colonies.Count == 0)
+            {
+                ImGui.Text("No owned colonies with a warehouse in reach.");
+                return;
+            }
+
+            if(colonies.All(colony => colony.Id != goodsSourceId))
+                goodsSourceId = -1;
+            if(goodsDestId == goodsSourceId || colonies.All(colony => colony.Id != goodsDestId))
+                goodsDestId = -1;
+
+            DisplayHelpers.Header("From");
+            DisplayTargetTree(pool,
+                e => OwnedWarehouse(e),
+                "goods-from",
+                id =>
+                {
+                    goodsSourceId = id;
+                    if(goodsDestId == id)
+                        goodsDestId = -1;
+                },
+                starTargetsSystem: false,
+                selectedId: goodsSourceId);
+
+            DisplayHelpers.Header("To");
+            DisplayTargetTree(pool,
+                e => e.Id != goodsSourceId && OwnedWarehouse(e),
+                "goods-to",
+                id => goodsDestId = id,
+                starTargetsSystem: false,
+                selectedId: goodsDestId);
+
+            var source = colonies.FirstOrDefault(colony => colony.Id == goodsSourceId);
+            var dest = colonies.FirstOrDefault(colony => colony.Id == goodsDestId);
+            if(source == null || dest == null)
+                return;
+
+            var piles = Piles(source);
+            SyncAmounts(goodsAmounts, ref goodsSeedSource, source.Id, piles);
+            DisplayHelpers.Header("Cargo");
+            if(piles.Count == 0)
+            {
+                ImGui.Text("Nothing in the warehouse.");
+                return;
+            }
+            DrawPileAmounts(goodsAmounts, piles);
+            if(!ImGui.Button("Move goods"))
+                return;
+            var items = Chosen(goodsAmounts, piles);
+            if(items.Count == 0)
+                return;
+            if(orderShip == null)
+                SubmitFleetCommand(new FleetMoveGoodsCommand(commandedId, source.Id, dest.Id, items));
+            else if(!ShipHasCaptain(orderShip))
+                SubmitFleetCommand(new QueueMoveGoodsCommand(commandedId, source.Id, dest.Id, items));
+            else
+                SubmitFleetCommand(new MoveGoodsCommand(commandedId, source.Id, dest.Id, items));
+        }
+
+        private void DisplayLoadGoods(IEnumerable<EntitySnapshot> candidates, int shipId)
+        {
+            ImGui.TextWrapped("Load from a colony in cargo range. Goods that do not fit stay behind.");
+            var colonies = OwnedWarehouses(candidates).Where(InCargoRange).ToList();
+            if(colonies.Count == 0)
+            {
+                ImGui.Text("No colony in cargo range.");
+                return;
+            }
+            if(colonies.All(colony => colony.Id != loadColonyId))
+                loadColonyId = -1;
+
+            DisplayHelpers.Header("From");
+            DisplayTargetTree(candidates,
+                e => OwnedWarehouse(e) && InCargoRange(e),
+                "load-from",
+                id => loadColonyId = id,
+                starTargetsSystem: false,
+                selectedId: loadColonyId);
+
+            var source = colonies.FirstOrDefault(colony => colony.Id == loadColonyId);
+            if(source == null)
+                return;
+            var piles = Piles(source);
+            SyncAmounts(loadAmounts, ref loadSeedSource, source.Id, piles);
+            DisplayHelpers.Header("Cargo");
+            if(piles.Count == 0)
+            {
+                ImGui.Text("Nothing in the warehouse.");
+                return;
+            }
+            DrawPileAmounts(loadAmounts, piles);
+            if(!ImGui.Button("Load"))
+                return;
+            var items = Chosen(loadAmounts, piles);
+            if(items.Count == 0)
+                return;
+            SubmitFleetCommand(new LoadGoodsCommand(shipId, source.Id, items));
+        }
+
+        private void DisplayUnloadGoods(IClientGalaxy galaxy, IEnumerable<EntitySnapshot> candidates, int shipId)
+        {
+            ImGui.TextWrapped("Unload onto a colony in cargo range. Goods that do not fit stay aboard.");
+            var ship = SubjectEntity(galaxy);
+            var colonies = OwnedWarehouses(candidates).Where(InCargoRange).ToList();
+            if(colonies.Count == 0)
+            {
+                ImGui.Text("No colony in cargo range.");
+                return;
+            }
+            if(colonies.All(colony => colony.Id != unloadColonyId))
+                unloadColonyId = -1;
+
+            DisplayHelpers.Header("To");
+            DisplayTargetTree(candidates,
+                e => OwnedWarehouse(e) && InCargoRange(e),
+                "unload-to",
+                id => unloadColonyId = id,
+                starTargetsSystem: false,
+                selectedId: unloadColonyId);
+
+            var dest = colonies.FirstOrDefault(colony => colony.Id == unloadColonyId);
+            if(dest == null || ship == null)
+                return;
+            var piles = Piles(ship);
+            SyncAmounts(unloadAmounts, ref unloadSeedShip, ship.Id, piles);
+            DisplayHelpers.Header("Cargo");
+            if(piles.Count == 0)
+            {
+                ImGui.Text("Nothing aboard.");
+                return;
+            }
+            DrawPileAmounts(unloadAmounts, piles);
+            if(!ImGui.Button("Unload"))
+                return;
+            var items = Chosen(unloadAmounts, piles);
+            if(items.Count == 0)
+                return;
+            SubmitFleetCommand(new UnloadGoodsCommand(shipId, dest.Id, items));
+        }
+
+        bool InCargoRange(EntitySnapshot colony)
+        {
+            if(orderShip == null)
+                return false;
+            foreach(var id in orderShip.ColoniesInCargoRange)
+            {
+                if(id == colony.Id)
+                    return true;
+            }
+            return false;
+        }
+
+        static bool OwnedWarehouse(EntitySnapshot entity)
+            => entity.Relation == OwnerRelation.Owned && entity.Kind == BodyKind.Colony && entity.HasView<CargoStorageView>();
+
+        static List<EntitySnapshot> OwnedWarehouses(IEnumerable<EntitySnapshot> candidates)
+            => candidates.Where(OwnedWarehouse).OrderBy(e => NameOf(e), StringComparer.Ordinal).ToList();
+
+        static List<CargoItemView> Piles(EntitySnapshot entity)
+        {
+            var piles = new List<CargoItemView>();
+            if(entity.GetView<CargoStorageView>() is not { } storage)
+                return piles;
+            foreach(var store in storage.Stores)
+            {
+                foreach(var item in store.Items)
+                {
+                    if(item.Units > 0)
+                        piles.Add(item);
+                }
+            }
+            piles.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
+            return piles;
+        }
+
+        static void SyncAmounts(Dictionary<int, int> amounts, ref int seededFrom, int sourceKey, List<CargoItemView> piles)
+        {
+            if(seededFrom != sourceKey)
+            {
+                amounts.Clear();
+                seededFrom = sourceKey;
+            }
+            var live = new HashSet<int>();
+            foreach(var item in piles)
+            {
+                live.Add(item.Id);
+                int cap = item.Units > int.MaxValue ? int.MaxValue : (int)item.Units;
+                if(!amounts.ContainsKey(item.Id))
+                    amounts[item.Id] = cap;
+                else if(amounts[item.Id] > cap)
+                    amounts[item.Id] = cap;
+                else if(amounts[item.Id] < 0)
+                    amounts[item.Id] = 0;
+            }
+            var drop = new List<int>();
+            foreach(var id in amounts.Keys)
+            {
+                if(!live.Contains(id))
+                    drop.Add(id);
+            }
+            foreach(var id in drop)
+                amounts.Remove(id);
+        }
+
+        static void DrawPileAmounts(Dictionary<int, int> amounts, List<CargoItemView> piles)
+        {
+            foreach(var item in piles)
+            {
+                if(!amounts.TryGetValue(item.Id, out var amount))
+                    continue;
+                int cap = item.Units > int.MaxValue ? int.MaxValue : (int)item.Units;
+                ImGui.Text(item.Name);
+                ImGui.SameLine();
+                ImGui.Text(Stringify.Quantity(item.Units));
+                ImGui.SetNextItemWidth(120);
+                ImGui.InputInt("###pile-" + item.Id, ref amount);
+                if(amount < 0)
+                    amount = 0;
+                if(amount > cap)
+                    amount = cap;
+                amounts[item.Id] = amount;
+            }
+        }
+
+        static List<CargoTransferItem> Chosen(Dictionary<int, int> amounts, List<CargoItemView> piles)
+        {
+            var items = new List<CargoTransferItem>();
+            foreach(var item in piles)
+            {
+                if(!amounts.TryGetValue(item.Id, out var amount) || amount <= 0)
+                    continue;
+                long units = amount;
+                if(units > item.Units)
+                    units = item.Units;
+                items.Add(new CargoTransferItem(item.Id, units));
+            }
+            return items;
         }
 
         private void DisplayHaulContract(IEnumerable<EntitySnapshot> candidates)

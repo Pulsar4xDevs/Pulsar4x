@@ -57,6 +57,11 @@ namespace Pulsar4X.Engine.Api
                 [typeof(FleetTradeCommand)] = TranslateFleetTrade,
                 [typeof(FleetFreighterCommand)] = TranslateFleetFreighter,
                 [typeof(FleetHaulContractCommand)] = TranslateFleetHaulContract,
+                [typeof(MoveGoodsCommand)] = TranslateMoveGoods,
+                [typeof(QueueMoveGoodsCommand)] = TranslateQueueMoveGoods,
+                [typeof(LoadGoodsCommand)] = TranslateLoadGoods,
+                [typeof(UnloadGoodsCommand)] = TranslateUnloadGoods,
+                [typeof(FleetMoveGoodsCommand)] = TranslateFleetMoveGoods,
                 [typeof(SetMarketListingCommand)] = TranslateSetMarketListing,
                 [typeof(ClearMarketListingCommand)] = TranslateClearMarketListing,
                 [typeof(SetIntelListingCommand)] = TranslateSetIntelListing,
@@ -387,6 +392,160 @@ namespace Pulsar4X.Engine.Api
             if (goal.Status == GoalStatus.Failed)
                 return CommandResult.Reject(goal.Message);
             return CommandResult.Ok(goal.Id);
+        }
+
+        private CommandResult TranslateMoveGoods(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectGoalWithoutCaptain(commanded) is { } rejected)
+                return rejected;
+            var cmd = (MoveGoodsCommand)command;
+            if (RejectOwnHaul(faction, commanded, cmd.SourceId, cmd.DestId, cmd.Items, out var lines) is { } bad)
+                return bad;
+            var goal = new Goal(GoalType.MoveGoods)
+            {
+                Name = "Move goods",
+                SourceEntityId = cmd.SourceId,
+                DestEntityId = cmd.DestId,
+                MoveGoodsLines = lines,
+            };
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        private CommandResult TranslateQueueMoveGoods(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectPlotOnCaptainOrFleet(commanded) is { } rejected)
+                return rejected;
+            var cmd = (QueueMoveGoodsCommand)command;
+            if (RejectOwnHaul(faction, commanded, cmd.SourceId, cmd.DestId, cmd.Items, out var lines) is { } bad)
+                return bad;
+
+            if (!TryResolve(cmd.SourceId, out var source))
+                return CommandResult.Reject("the colony is gone.");
+
+            var actions = new List<EntityAction>();
+            if (!MarketExchangeAction.InRange(commanded, source))
+            {
+                if (!MoveGoodsPlan.TryMoveIntoRange(commanded, source, out var moves, out var reason))
+                    return CommandResult.Reject(string.IsNullOrEmpty(reason) ? "out of range" : reason);
+                actions.AddRange(moves);
+            }
+            actions.Add(LoadGoodsAction.Create(commanded, cmd.SourceId, cmd.DestId, lines, plotDestination: true));
+            return DispatchActions(actions, "Nothing to move.");
+        }
+
+        private CommandResult TranslateLoadGoods(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectPlotOnCaptainOrFleet(commanded) is { } rejected)
+                return rejected;
+            var cmd = (LoadGoodsCommand)command;
+            if (!commanded.HasDataBlob<CargoStorageDB>())
+                return CommandResult.Reject("The ship has no cargo storage.");
+            if (!TryResolve(cmd.ColonyId, out var colony))
+                return CommandResult.Reject("the colony is gone.");
+            if (RejectWarehouse(faction, colony) is { } bad)
+                return bad;
+            if (!MarketExchangeAction.InRange(commanded, colony))
+                return CommandResult.Reject("out of range");
+            if (RejectLines(colony, cmd.Items, aboard: false, out var lines) is { } linesBad)
+                return linesBad;
+            return Dispatch(LoadGoodsAction.Create(commanded, colony.Id, 0, lines, plotDestination: false));
+        }
+
+        private CommandResult TranslateUnloadGoods(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectPlotOnCaptainOrFleet(commanded) is { } rejected)
+                return rejected;
+            var cmd = (UnloadGoodsCommand)command;
+            if (!commanded.HasDataBlob<CargoStorageDB>())
+                return CommandResult.Reject("The ship has no cargo storage.");
+            if (!TryResolve(cmd.ColonyId, out var colony))
+                return CommandResult.Reject("the colony is gone.");
+            if (RejectWarehouse(faction, colony) is { } bad)
+                return bad;
+            if (!MarketExchangeAction.InRange(commanded, colony))
+                return CommandResult.Reject("out of range");
+            if (RejectLines(commanded, cmd.Items, aboard: true, out var lines) is { } linesBad)
+                return linesBad;
+            return Dispatch(UnloadGoodsAction.Create(commanded, colony.Id, lines));
+        }
+
+        private CommandResult TranslateFleetMoveGoods(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectUnlessFleet(commanded) is { } notFleet)
+                return notFleet;
+            var cmd = (FleetMoveGoodsCommand)command;
+            if (RejectOwnHaul(faction, commanded, cmd.SourceId, cmd.DestId, cmd.Items, out var lines) is { } bad)
+                return bad;
+            var goal = new Goal(GoalType.FleetMoveGoods)
+            {
+                Name = "Move goods",
+                SourceEntityId = cmd.SourceId,
+                DestEntityId = cmd.DestId,
+                MoveGoodsLines = lines,
+            };
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        /// <summary>
+        /// Both ends are owned colonies with a warehouse. Lines are read from the source warehouse.
+        /// A fleet has no hold of its own, so the cargo-storage check is the ship's.
+        /// </summary>
+        private CommandResult? RejectOwnHaul(
+            Entity faction, Entity commanded, int sourceId, int destId,
+            IReadOnlyList<CargoTransferItem> items, out List<MoveGoodsLine> lines)
+        {
+            lines = new List<MoveGoodsLine>();
+            if (!commanded.HasDataBlob<FleetDB>() && !commanded.HasDataBlob<CargoStorageDB>())
+                return CommandResult.Reject("The ship has no cargo storage.");
+            if (!TryResolve(sourceId, out var source) || !TryResolve(destId, out var dest))
+                return CommandResult.Reject("the colony is gone.");
+            if (RejectWarehouse(faction, source) is { } sourceBad)
+                return sourceBad;
+            if (RejectWarehouse(faction, dest) is { } destBad)
+                return destBad;
+            if (source.Id == dest.Id)
+                return CommandResult.Reject("Pick two different colonies.");
+            if (RejectLines(source, items, aboard: false, out lines) is { } linesBad)
+                return linesBad;
+            return null;
+        }
+
+        static CommandResult? RejectWarehouse(Entity faction, Entity colony)
+        {
+            if (!colony.HasDataBlob<ColonyInfoDB>() || !colony.HasDataBlob<CargoStorageDB>())
+                return CommandResult.Reject("The colony has no warehouse.");
+            if (colony.FactionOwnerID != faction.Id)
+                return CommandResult.Reject("The colony is not yours.");
+            return null;
+        }
+
+        static CommandResult? RejectLines(
+            Entity storeEntity, IReadOnlyList<CargoTransferItem> items, bool aboard, out List<MoveGoodsLine> lines)
+        {
+            lines = new List<MoveGoodsLine>();
+            if (items == null || items.Count == 0)
+                return CommandResult.Reject("Nothing to move.");
+            if (!storeEntity.HasDataBlob<CargoStorageDB>())
+                return CommandResult.Reject(aboard ? "The ship has no cargo storage." : "The colony has no warehouse.");
+            foreach (var item in items)
+            {
+                if (item.Units <= 0)
+                    return CommandResult.Reject("Transfer amounts must be positive.");
+                if (!MoveGoodsPlan.TryCargo(storeEntity, item.CargoItemId, out _))
+                {
+                    return CommandResult.Reject(aboard
+                        ? $"Cargo item {item.CargoItemId} is not aboard."
+                        : $"Cargo item {item.CargoItemId} is not in the source's storage.");
+                }
+                lines.Add(new MoveGoodsLine { ItemId = item.CargoItemId, Requested = item.Units });
+            }
+            return null;
         }
 
         private static CommandResult RejectUnlessFleet(Entity commanded)

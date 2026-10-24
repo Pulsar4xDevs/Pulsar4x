@@ -905,6 +905,9 @@ public sealed record ShipSnapshot(
 
     /// <summary>The seated captain, or null when the chair is empty and the player plots actions.</summary>
     public int? CommanderId { get; init; }
+
+    /// <summary>Owned colonies currently inside this ship's cargo-transfer range.</summary>
+    public IReadOnlyList<int> ColoniesInCargoRange { get; init; } = Array.Empty<int>();
 }
 
 /// <summary>

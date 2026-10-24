@@ -128,6 +128,25 @@ public enum GoalType
 
     // Ship buys methalox at a listed ask. Appended so saved values stay put.
     BuyFuel,
+
+    // One trip of this faction's own warehouse goods. Appended so saved values stay put.
+    MoveGoods,
+    FleetMoveGoods,
+}
+
+public enum MoveGoodsLeg
+{
+    Load,
+    Unload,
+}
+
+public class MoveGoodsLine
+{
+    public int ItemId;
+    public long Requested;
+    public long Loaded;
+    /// <summary>Units handed to the destination. The rest of <see cref="Loaded"/> stays aboard.</summary>
+    public long Delivered;
 }
 
 public class Goal
@@ -140,6 +159,12 @@ public class Goal
     public int TargetEntityID = -1;
     /// <summary>Trade and freight cargo id. Empty until a planner commits a route.</summary>
     public string CargoId = "";
+    /// <summary>Move goods. Empty for every other goal.</summary>
+    public List<MoveGoodsLine> MoveGoodsLines = new();
+    /// <summary>Move goods. Load, then Unload. Other goals leave this at Load.</summary>
+    public MoveGoodsLeg MoveGoodsLeg = MoveGoodsLeg.Load;
+    /// <summary>The unload transfer was handed off. The next wake completes the trip.</summary>
+    public bool MoveGoodsUnloaded;
     /// <summary>Where to buy, or the freight source. -1 until a route is committed.</summary>
     public int SourceEntityId = -1;
     /// <summary>Where to sell, or the freight destination. -1 until a route is committed.</summary>

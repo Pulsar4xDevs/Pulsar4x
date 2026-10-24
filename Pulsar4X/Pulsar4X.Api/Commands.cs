@@ -82,6 +82,39 @@ public sealed record FleetFreighterCommand(int TargetEntityId, int BodyId) : Gam
 public sealed record FleetHaulContractCommand(int TargetEntityId, int SourceId, int DestId, string CargoId)
     : GameCommand(TargetEntityId);
 
+/// <summary>One trip. A captained ship carries these warehouse piles between two owned colonies.</summary>
+public sealed record MoveGoodsCommand(
+    int TargetEntityId,
+    int SourceId,
+    int DestId,
+    IReadOnlyList<CargoTransferItem> Items) : GameCommand(TargetEntityId);
+
+/// <summary>Empty chair. Plot the flight to the source and a load. The load plots the destination when it finishes.</summary>
+public sealed record QueueMoveGoodsCommand(
+    int TargetEntityId,
+    int SourceId,
+    int DestId,
+    IReadOnlyList<CargoTransferItem> Items) : GameCommand(TargetEntityId);
+
+/// <summary>Empty chair, in cargo range. Load these piles from the colony. Escrow waits until the action starts.</summary>
+public sealed record LoadGoodsCommand(
+    int TargetEntityId,
+    int ColonyId,
+    IReadOnlyList<CargoTransferItem> Items) : GameCommand(TargetEntityId);
+
+/// <summary>Empty chair, in cargo range. Unload these piles from the ship onto the colony.</summary>
+public sealed record UnloadGoodsCommand(
+    int TargetEntityId,
+    int ColonyId,
+    IReadOnlyList<CargoTransferItem> Items) : GameCommand(TargetEntityId);
+
+/// <summary>One trip for one captained cargo ship in the fleet. The lines are not split.</summary>
+public sealed record FleetMoveGoodsCommand(
+    int TargetEntityId,
+    int SourceId,
+    int DestId,
+    IReadOnlyList<CargoTransferItem> Items) : GameCommand(TargetEntityId);
+
 /// <summary>
 /// Post or replace one cargo row on a colony's market book, and keep the matching policy row
 /// in step so a running market wake uses these prices and reserve. Targets the colony.
