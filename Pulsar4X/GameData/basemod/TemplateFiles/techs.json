@@ -76,7 +76,7 @@
     "Payload": {
       "UniqueID": "tech-mining-production",
       "Name": "Mining Production Efficiency",
-      "Description": "Annual production of accessibility 1.0 minerals for each mine or automated mine. Small amounts of lower accessibility minerals will be produced; half annual rate for 0.5 accesssibility, one tenth annual rate for 0.1 accessibility, etc.",
+      "Description": "Multiplies the kilograms per day of each mine and robo-miner. Level 0 is the installation's own rate. Each level adds 1.5 times that rate. Accessibility still scales each deposit: half at 0.5, one tenth at 0.1. The installations apply this same 1 + level * 1.5 expression.",
       "Category": "tech-category-construction-production",
       "MaxLevel": 11,
       "DataFormula": "1 + [Level] * 1.5",

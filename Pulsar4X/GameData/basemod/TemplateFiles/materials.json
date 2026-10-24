@@ -30,12 +30,12 @@
       "MassPerUnit": 1,
       "VolumePerUnit": 0.0009446885,
       "ResourceCosts": {
-        "hydrocarbons": 1
+        "hydrocarbons": 4250
       },
-      "IndustryPointCosts": 10,
+      "IndustryPointCosts": 500,
       "IndustryTypeID": "refining",
       "WealthCost": 3,
-      "OutputAmount": 2,
+      "OutputAmount": 8500,
       "Formulas": {
         "ExhaustVelocity": "3510",
         "FuelType": "conventional"
@@ -52,12 +52,12 @@
       "MassPerUnit": 1,
       "VolumePerUnit": 0.000835561,
       "ResourceCosts": {
-        "hydrocarbons": 1
+        "hydrocarbons": 4250
       },
-      "IndustryPointCosts": 10,
+      "IndustryPointCosts": 500,
       "IndustryTypeID": "refining",
       "WealthCost": 3,
-      "OutputAmount": 2,
+      "OutputAmount": 8500,
       "Formulas": {
         "ExhaustVelocity": "3615",
         "FuelType": "conventional"
@@ -74,12 +74,12 @@
       "MassPerUnit": 1,
       "VolumePerUnit": 0.002777778,
       "ResourceCosts": {
-        "hydrocarbons": 1
+        "hydrocarbons": 4250
       },
-      "IndustryPointCosts": 10,
+      "IndustryPointCosts": 500,
       "IndustryTypeID": "refining",
       "WealthCost": 3,
-      "OutputAmount": 2,
+      "OutputAmount": 8500,
       "Formulas": {
         "ExhaustVelocity": "4462",
         "FuelType": "conventional"

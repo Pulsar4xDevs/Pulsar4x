@@ -337,7 +337,7 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-reactor-2t",
-      "Name": "48MW Steam Turbine Reactor",
+      "Name": "15kW Steam Turbine Reactor",
       "TemplateId": "steam-turbine-reactor",
       "Properties": [
         { "Key": "Mass", "Value": 2000 }

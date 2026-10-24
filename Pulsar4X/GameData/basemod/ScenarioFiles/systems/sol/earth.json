@@ -109,8 +109,8 @@
         { "Id": "default-design-merlin", "Amount": 5, "Type": "byCount" },
         { "Id": "default-design-ship-construction", "Amount": 1, "Type": "byCount" },
         { "Id": "rp-1", "Amount": 50000000, "Type": "byCount" },
-        { "Id": "methalox", "Amount": 10000, "Type": "byCount" },
-        { "Id": "hydrolox", "Amount": 10000, "Type": "byCount" }
+        { "Id": "methalox", "Amount": 9000000, "Type": "byCount" },
+        { "Id": "hydrolox", "Amount": 9000000, "Type": "byCount" }
       ],
       "StartingItems": [
         "tech-modern-technology",

@@ -27,6 +27,7 @@ Status lives in the file itself, in `near-term.md`, or in `AGENTS.md`. This list
 - `GameEngine/Engine/plans/` — save and load. Round-trip and work in progress are both implemented (2026-10-17). The crash-save is still open. `saved-data.md` is a later note. Do not build it until asked.
 - `GameEngine/Logistics/plans/` — trade and transport. Includes `office-purses.md`, `sealed-shipments.md`, `survey-charts.md`, and `faction-grants-later.md`.
 - `GameEngine/Industry/plans/` — colony industry.
+- `GameEngine/balance.md` — costs, time, and propulsion. Philosophy only. Do not retune until asked.
 
 ## Done
 

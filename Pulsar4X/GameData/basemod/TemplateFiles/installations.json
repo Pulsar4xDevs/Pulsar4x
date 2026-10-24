@@ -41,9 +41,9 @@
         },
         {
           "Name": "MiningAmount",
-          "DescriptionFormula": "'Mining rate in units per time'",
+          "DescriptionFormula": "'Kilograms per day of each mineral on this body, before accessibility. Mining Production Efficiency multiplies it.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Area') * 0.000001"
+          "PropertyFormula": "PropertyValue('Area') * 45 / 10000 * (1 + TechLevel('tech-mining-production') * 1.5)"
         },
         {
           "Name": "MiningAmountDict",
@@ -112,9 +112,9 @@
         },
         {
           "Name": "MiningAmount",
-          "DescriptionFormula": "'Mining rate'",
+          "DescriptionFormula": "'Kilograms per day of each mineral on this body, before accessibility. Mining Production Efficiency multiplies it.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Size') * 0.005"
+          "PropertyFormula": "PropertyValue('Size') * 100 * (1 + TechLevel('tech-mining-production') * 1.5)"
         },
         {
           "Name": "MiningAmountDict",
@@ -311,13 +311,13 @@
       "Name": "Factory",
       "Formulas": {
         "Description": "Constructs Facilities, Fighters, Ammo and Components",
-        "Mass": "PropertyValue('Size') * 1000",
-        "Volume": "PropertyValue('Size') * 1.5",
+        "Mass": "PropertyValue('Size')",
+        "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "PropertyValue('Size') * 5",
+        "CrewReq": "[Mass] * 0.1",
         "ResearchCost": "0",
         "CreditCost": "120",
-        "BuildPointCost": "PropertyValue('Size') * 20"
+        "BuildPointCost": "PropertyValue('Size') * 9"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.75",
@@ -331,7 +331,7 @@
       "Properties": [
         {
           "Name": "Size",
-          "DescriptionFormula": "'Size of the factory, larger factories produce more construction points'",
+          "DescriptionFormula": "'Mass of the factory in kilograms. Larger factories produce more construction points'",
           "GuiHint": "GuiSelectionMaxMinInt",
           "MaxFormula": "TechData('tech-factory-max-size')",
           "MinFormula": "1000",
@@ -387,7 +387,7 @@
         "CrewReq": "PropertyValue('Crew Size')",
         "ResearchCost": "0",
         "CreditCost": "120",
-        "BuildPointCost": "[Mass]"
+        "BuildPointCost": "[Mass] * 0.25"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.5",

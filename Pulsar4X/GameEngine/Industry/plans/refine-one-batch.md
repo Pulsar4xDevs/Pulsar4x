@@ -33,9 +33,9 @@ On each production line, consider `FactionInfoDB.IndustryDesigns` that are proce
 
 Skip a line that already has a job with `NumberCompleted < NumberOrdered`. That includes a job the player queued from the production tab.
 
-A candidate needs every `ResourceCosts` input in stock for one batch. `NumberOrdered` is 1. One completion adds `OutputAmount` to the warehouse (100 for stainless steel, 2 for each of those fuels). Do not order `OutputAmount` as the batch count. `RunMarketPlan` treats the gap as a completion count, so this planner returns its own `IndustryOrder2` and leaves `AutoProduce` false. `AutoAddSubJobs` is false.
+A candidate needs every `ResourceCosts` input in stock for one batch. `NumberOrdered` is 1. One completion adds `OutputAmount` to the warehouse (100 for stainless steel, 8500 for RP-1, methalox, and hydrolox). Do not order `OutputAmount` as the batch count. `RunMarketPlan` treats the gap as a completion count, so this planner returns its own `IndustryOrder2` and leaves `AutoProduce` false. `AutoAddSubJobs` is false.
 
-Rank the candidates that can be paid for by whole batches already in stock: `stock / OutputAmount`, lowest first, then cargo id. Queue that one. A recipe with nothing stored waits while any refined good is already in the warehouse. Earth also unlocks plastic, nuclear thruster propellant, fissile fuels, and electricity with no pile; stainless steel is the thinnest pile it stores, so that is the batch. When the colony stores none of its refined goods, every payable recipe stays in that ranking. An empty recipe, or one whose output has no volume, is not a candidate. Electricity is both.
+Rank the candidates that can be paid for by whole batches already in stock: `stock / OutputAmount`, lowest first, then cargo id. Queue that one. A recipe with nothing stored waits while any refined good is already in the warehouse. Earth also unlocks plastic, nuclear thruster propellant, fissile fuels, and electricity with no pile. Stainless steel is the thinnest pile it stores (100,000 kg is 1,000 batches). Methalox and hydrolox start at 9,000,000 kg so an 8,500 kg fuel batch is not thinner than that steel pile. When the colony stores none of its refined goods, every payable recipe stays in that ranking. An empty recipe, or one whose output has no volume, is not a candidate. Electricity is both.
 
 ### How far to go
 

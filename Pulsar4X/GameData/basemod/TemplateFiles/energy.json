@@ -17,8 +17,7 @@
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.5",
         "plastic": "[Mass] * 0.4",
-        "copper": "[Mass] * 0.1",
-        "fissile-fuels": "PropertyValue('Fuel Consumption') * 3600 * PropertyValue('Lifetime')"
+        "copper": "[Mass] * 0.1"
       },
       "ComponentType": "Facility",
       "MountType": "ShipComponent, ShipCargo, Fighter",
@@ -327,8 +326,8 @@
         {
           "Name": "Heat per kg",
           "Units": "KW/kg",
-          "DescriptionFormula": "'Heat output per kg of fuel'",
-          "PropertyFormula": "100"
+          "DescriptionFormula": "'Heat output per kg of fuel. 0.03125 makes the default 2 tonne plant 15 kW.'",
+          "PropertyFormula": "0.03125"
         },
         {
           "Name": "Core Efficiency",

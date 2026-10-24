@@ -318,6 +318,16 @@ namespace Pulsar4X.Client
                     ImGui.EndTabItem();
                 }
 
+                if (orderShip != null && ImGui.BeginTabItem("Components"))
+                {
+                    var components = SubjectEntity(galaxy)?.GetView<InstallationsView>();
+                    if (components == null || components.Installations.Count == 0)
+                        ImGui.Text("No components on this ship.");
+                    else
+                        components.Display(orderShip.Id, _uiState);
+                    ImGui.EndTabItem();
+                }
+
                 if (ImGui.BeginTabItem("Issue Orders"))
                 {
                     var size = ImGui.GetContentRegionAvail();
@@ -348,30 +358,69 @@ namespace Pulsar4X.Client
             string systemId = string.IsNullOrEmpty(ship.SystemId) ? _uiState.SelectedStarSystemId : ship.SystemId;
             string systemName = string.IsNullOrEmpty(systemId) ? "Unknown" : galaxy.GetSystem(systemId)?.Name ?? "Unknown";
 
-            if (!ImGui.CollapsingHeader("Ship", ImGuiTreeNodeFlags.DefaultOpen))
-                return;
-
-            ImGui.Columns(2);
-            DisplayHelpers.PrintRow("Name", ship.Name);
-            DisplayHelpers.PrintRow("Design", string.IsNullOrEmpty(ship.DesignName) ? "-" : ship.DesignName);
-            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-            ImGui.Text("Captain");
-            ImGui.PopStyleColor();
-            ImGui.NextColumn();
-            DisplayCaptainButton(ship.Id, CaptainLabel(ship), CaptainTooltip(ship));
-            ImGui.NextColumn();
-            ImGui.Separator();
-            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-            ImGui.Text("Current System");
-            ImGui.PopStyleColor();
-            ImGui.NextColumn();
-            if (ImGui.SmallButton(systemName))
+            if (ImGui.CollapsingHeader("Ship", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                if (!string.IsNullOrEmpty(systemId))
-                    _uiState.SetActiveSystem(systemId);
+                ImGui.Columns(2);
+                DisplayHelpers.PrintRow("Name", ship.Name);
+                DisplayHelpers.PrintRow("Design", string.IsNullOrEmpty(ship.DesignName) ? "-" : ship.DesignName);
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.Text("Captain");
+                ImGui.PopStyleColor();
+                ImGui.NextColumn();
+                DisplayCaptainButton(ship.Id, CaptainLabel(ship), CaptainTooltip(ship));
+                ImGui.NextColumn();
+                ImGui.Separator();
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.Text("Current System");
+                ImGui.PopStyleColor();
+                ImGui.NextColumn();
+                if (ImGui.SmallButton(systemName))
+                {
+                    if (!string.IsNullOrEmpty(systemId))
+                        _uiState.SetActiveSystem(systemId);
+                }
+                ImGui.NextColumn();
+                ImGui.Columns(1);
             }
-            ImGui.NextColumn();
-            ImGui.Columns(1);
+
+            var subject = SubjectEntity(galaxy);
+            // Output is the net added to the batteries this step. The old power window's Load
+            // is max output divided by that net, so it is not a percentage and is not shown.
+            if (subject?.GetView<EnergyView>() is { } energy
+                && ImGui.CollapsingHeader("Power", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                bool full = energy.StoreMax > 0 && energy.Stored >= energy.StoreMax * 0.999;
+                string status = "Holding";
+                if (energy.Output > 0.001)
+                    status = "Charging";
+                else if (energy.Output < -0.001)
+                    status = "Draining";
+                else if (full)
+                    status = "Full";
+
+                double fraction = energy.StoreMax > 0 ? energy.Stored / energy.StoreMax : 0;
+                if (fraction < 0) fraction = 0;
+                if (fraction > 1) fraction = 1;
+                string batteries = (fraction * 100).ToString("0.#") + "%  "
+                    + Stringify.Energy(energy.Stored < 0 ? 0 : energy.Stored) + " / "
+                    + Stringify.Energy(energy.StoreMax < 0 ? 0 : energy.StoreMax);
+                string flow = "0 kW";
+                if (energy.Output > 0.001)
+                    flow = "+" + Stringify.Power(energy.Output);
+                else if (energy.Output < -0.001)
+                    flow = "-" + Stringify.Power(-energy.Output);
+
+                ImGui.ProgressBar((float)fraction, new Vector2(ImGui.GetContentRegionAvail().X, 16), batteries);
+                ImGui.Columns(2);
+                DisplayHelpers.PrintRow("Status", status, "Charging fills the batteries. Draining means demand is above generation.");
+                DisplayHelpers.PrintRow("Flow", flow, "Spare or shortfall added to the batteries this step.");
+                DisplayHelpers.PrintRow("Demand", Stringify.Power(energy.Demand < 0 ? 0 : energy.Demand), "What the ship's components are drawing.");
+                DisplayHelpers.PrintRow("Generation", Stringify.Power(energy.MaxOutput < 0 ? 0 : energy.MaxOutput), "Reactor and solar capacity.", separator: false);
+                ImGui.Columns(1);
+            }
+
+            if (subject?.GetView<CargoStorageView>() is { } cargo && cargo.Stores.Count > 0)
+                cargo.Display(ship.Id, _uiState);
         }
 
         private void DisplayOrderChoices(IClientGalaxy galaxy)

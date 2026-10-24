@@ -225,16 +225,16 @@
         {
           "Name": "Bubble Creation Energy Cost",
           "Units": "KJ",
-          "DescriptionFormula": "'How much energy required to create the warp bubble.'",
+          "DescriptionFormula": "'Kilojoules to raise the bubble. At level 0 a 2 tonne drive takes two thirds of the freighter batteries.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Engine Power') * TechData('tech-alcubierre-bubble-creation-cost') * 0.5"
+          "PropertyFormula": "PropertyValue('Engine Power') * TechData('tech-alcubierre-bubble-creation-cost') * 2 / 3"
         },
         {
           "Name": "Bubble Sustain Energy Cost",
           "Units": "KW",
-          "DescriptionFormula": "'How much energy required to sustain the warp bubble per second during the warp'",
+          "DescriptionFormula": "'Kilowatts to hold the bubble. A 2 tonne drive at level 0 is 15 kW, the same as the stock reactor.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Engine Power') * 0.001 * TechData('tech-alcubierre-sustain-cost')"
+          "PropertyFormula": "PropertyValue('Engine Power') * TechData('tech-alcubierre-sustain-cost') * 15 / 2000000"
         },
         {
           "Name": "Bubble Collapse Energy Returned",

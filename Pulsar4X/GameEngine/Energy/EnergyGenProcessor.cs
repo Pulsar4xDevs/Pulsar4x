@@ -12,7 +12,16 @@ namespace Pulsar4X.Energy
         {
             EnergyGenAbilityDB _energyGenDB = entity.GetDataBlob<EnergyGenAbilityDB>();
 
-            TimeSpan t = atDateTime - _energyGenDB.dateTimeLastProcess;
+            // Kilowatts are kilojoules per second. Warp books the bubble by rewinding
+            // one second and integrating forward with the creation demand set, so a
+            // backwards call only moves the mark. A zero step does not add energy;
+            // AddDemand processes the current instant before it changes the demand.
+            double dt = (atDateTime - _energyGenDB.dateTimeLastProcess).TotalSeconds;
+            if (dt < 0)
+            {
+                _energyGenDB.dateTimeLastProcess = atDateTime;
+                return;
+            }
 
             string energyType = _energyGenDB.EnergyType.UniqueID;
             var stored = _energyGenDB.EnergyStored[energyType];
@@ -20,39 +29,34 @@ namespace Pulsar4X.Energy
             double freestore = Math.Max(0, storeMax - stored);
 
             double totaldemand = _energyGenDB.Demand + freestore;
+            double rate = _energyGenDB.TotalOutputMax - _energyGenDB.Demand;
+            double delta = GeneralMath.Clamp(rate * dt, -stored, freestore);
+            _energyGenDB.EnergyStored[energyType] = stored + delta;
 
-            var output = _energyGenDB.TotalOutputMax - _energyGenDB.Demand;
-
-            output = GeneralMath.Clamp(output, -stored, freestore);
-            _energyGenDB.EnergyStored[energyType] += output;
-
-            if (output > 0 && freestore > 0)
+            double nowStored = stored + delta;
+            double nowFree = Math.Max(0, storeMax - nowStored);
+            if (rate > 0 && nowFree > 0)
             {
-                double timeToFill = Math.Max(1, Math.Ceiling(freestore / output));
+                double timeToFill = Math.Max(1, Math.Ceiling(nowFree / rate));
                 DateTime interuptTime = atDateTime + TimeSpan.FromSeconds(timeToFill);
                 entity.Manager.ManagerSubpulses.AddEntityInterupt(interuptTime, nameof(EnergyGenProcessor), entity);
             }
-            else if (output < 0 && stored > 0)
+            else if (rate < 0 && nowStored > 0)
             {
-                double timeToEmpty = Math.Max(1, Math.Ceiling(Math.Abs(stored / output)));
+                double timeToEmpty = Math.Max(1, Math.Ceiling(nowStored / Math.Abs(rate)));
                 DateTime interuptTime = atDateTime + TimeSpan.FromSeconds(timeToEmpty);
                 entity.Manager.ManagerSubpulses.AddEntityInterupt(interuptTime, nameof(EnergyGenProcessor), entity);
             }
 
-
             double load = 0;
-            if (output > 0)
-            {
-                load = _energyGenDB.TotalOutputMax / output;
-            }
-            else if (output < 0)
-            {
+            if (delta > 0)
+                load = _energyGenDB.TotalOutputMax / rate;
+            else if (delta < 0)
                 load = 1;
-            }
             _energyGenDB.Load = load;
-            _energyGenDB.Output = output;
+            _energyGenDB.Output = dt > 0 ? delta / dt : 0;
             double fueluse = _energyGenDB.TotalFuelUseAtMax.maxUse * load;
-            _energyGenDB.LocalFuel -= fueluse * t.TotalSeconds;
+            _energyGenDB.LocalFuel -= fueluse * dt;
 
             _energyGenDB.dateTimeLastProcess = atDateTime;
 
@@ -68,9 +72,9 @@ namespace Pulsar4X.Energy
             var hgLastObj = histogram[hgLastIdx];
             int optime = hgLastObj.seconds;
 
-            int newoptime = (int)(optime + t.TotalSeconds);
+            int newoptime = (int)(optime + dt);
 
-            var nexval = (foo: output, demand: totaldemand, store: stored, newoptime);
+            var nexval = (foo: _energyGenDB.Output, demand: totaldemand, store: stored, newoptime);
 
             if(histogram.Count < _energyGenDB.HistogramSize)
                 histogram.Add(nexval);
