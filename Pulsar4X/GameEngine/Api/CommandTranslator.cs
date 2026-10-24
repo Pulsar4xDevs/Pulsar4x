@@ -306,6 +306,8 @@ namespace Pulsar4X.Engine.Api
 
         private CommandResult TranslateTrade(Entity faction, Entity commanded, GameCommand command)
         {
+            if (RejectGoalWithoutCaptain(commanded) is { } rejected)
+                return rejected;
             if (!commanded.HasDataBlob<CargoStorageDB>())
                 return CommandResult.Reject("The ship has no cargo storage.");
 
@@ -318,6 +320,8 @@ namespace Pulsar4X.Engine.Api
 
         private CommandResult TranslateFreighter(Entity faction, Entity commanded, GameCommand command)
         {
+            if (RejectGoalWithoutCaptain(commanded) is { } rejected)
+                return rejected;
             if (!commanded.HasDataBlob<CargoStorageDB>())
                 return CommandResult.Reject("The ship has no cargo storage.");
 
@@ -983,6 +987,26 @@ namespace Pulsar4X.Engine.Api
             if (!colony.HasDataBlob<CargoStorageDB>())
                 return CommandResult.Reject("Refuel target has no cargo storage.");
 
+            // A captained ship gets the goal. The captain plots the flight and the fill.
+            // A fleet still warps and fills its ships directly.
+            if (!commanded.HasDataBlob<FleetDB>())
+            {
+                if (RejectGoalWithoutCaptain(commanded) is { } rejected)
+                    return rejected;
+                if (!commanded.HasDataBlob<ShipInfoDB>())
+                    return CommandResult.Reject("Refuel needs a ship or a fleet.");
+
+                var goal = new Goal(GoalType.RefuelAt)
+                {
+                    Name = "Refuel",
+                    TargetEntityID = colony.Id,
+                };
+                AgentProcessor.AssignGoal(commanded, goal);
+                if (goal.Status == GoalStatus.Failed)
+                    return CommandResult.Reject(string.IsNullOrEmpty(goal.Message) ? "Refuel failed." : goal.Message);
+                return CommandResult.Ok(goal.Id);
+            }
+
             if (!_game.OrderHandler.HandleOrder(WarpFleetTowardsTargetOrder.CreateCommand(commanded, colony)))
                 return CommandResult.Reject("Command rejected by engine validation.");
 
@@ -1100,7 +1124,7 @@ namespace Pulsar4X.Engine.Api
 
         // ----- ship movement (commanded entity: the ship) -----
 
-        /// <summary>Empty chair: the player plots. A seated captain issues a goal instead.</summary>
+        /// <summary>Empty chair: the player plots. A seated captain can still be handed a plot.</summary>
         static bool IsEmptyChairShip(Entity commanded)
         {
             if (commanded.HasDataBlob<FleetDB>())
@@ -1110,12 +1134,14 @@ namespace Pulsar4X.Engine.Api
             return info.CommanderID < 0;
         }
 
+        /// <summary>
+        /// A fleet has no hull to plot. A ship queues the action on its own list, captain or not.
+        /// The agent only replans actions tagged with its goal, so a hand-queued plot stays.
+        /// </summary>
         static CommandResult? RejectPlotOnCaptainOrFleet(Entity commanded)
         {
             if (commanded.HasDataBlob<FleetDB>())
                 return CommandResult.Reject("Plot actions on a ship.");
-            if (commanded.TryGetDataBlob<ShipInfoDB>(out var info) && info.CommanderID >= 0)
-                return CommandResult.Reject("This ship has a captain. Issue a goal instead.");
             if (!commanded.HasDataBlob<ActionQueueDB>())
                 return CommandResult.Reject("The entity has no order queue.");
             return null;

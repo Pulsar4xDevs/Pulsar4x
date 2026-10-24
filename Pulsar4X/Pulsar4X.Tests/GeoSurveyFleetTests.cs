@@ -475,10 +475,11 @@ namespace Pulsar4X.Tests
 
             scene.SurveyorB.GetDataBlob<ShipInfoDB>().CommanderID =
                 CommanderFactory.Create(_sys, scene.Faction.Id, CommanderFactory.CreateShipCaptain(Game)).Id;
-            var blocked = translator.Translate(scene.Faction, scene.SurveyorB,
+            var plottedToo = translator.Translate(scene.Faction, scene.SurveyorB,
                 new GoToBodyCommand(scene.SurveyorB.Id, scene.Mars.Id));
-            Assert.IsFalse(blocked.Accepted);
-            Assert.That(blocked.RejectionReason, Does.Contain("captain"));
+            Assert.IsTrue(plottedToo.Accepted, plottedToo.RejectionReason);
+            Assert.IsFalse(scene.SurveyorB.TryGetDataBlob<GoalsDB>(out var goals) && goals.ActiveGoal != null);
+            Assert.Greater(scene.SurveyorB.GetDataBlob<ActionQueueDB>().ActionList.Count, 0);
         }
 
         [Test]

@@ -197,7 +197,7 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void GoToBody_rejectsASeatedCaptain()
+        public void GoToBody_seatedCaptain_queuesActions_withoutAGoal()
         {
             var session = Connect();
             var ship = MakeManeuverShip(session);
@@ -205,9 +205,9 @@ namespace Pulsar4X.Tests
 
             var result = _server.SubmitCommand(session, new GoToBodyCommand(ship.Id, VisibleBodyId(session)));
 
-            Assert.That(result.Accepted, Is.False);
-            Assert.That(result.RejectionReason, Does.Contain("captain"));
-            Assert.That(ProjectOrders(session, ship), Is.Empty);
+            Assert.That(result.Accepted, Is.True, result.RejectionReason);
+            Assert.That(ship.HasDataBlob<GoalsDB>(), Is.False);
+            Assert.That(ProjectOrders(session, ship), Is.Not.Empty);
         }
 
         [Test]
@@ -244,17 +244,23 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void Circularise_rejectsASeatedCaptain()
+        public void Circularise_seatedCaptain_queuesCircularise()
         {
             var session = Connect();
             var ship = MakeManeuverShip(session);
             ship.SetDataBlob(new ShipInfoDB { CommanderID = 1 });
+            var star = _game.Systems[0].GetFirstEntityWithDataBlob<StarInfoDB>();
+            ship.SetDataBlob(OrbitDB.FromAsteroidFormat_r(
+                star, star.GetDataBlob<MassVolumeDB>().MassTotal, 12000,
+                semiMajorAxis_m: 1.5e11, eccentricity: 0.2, inclination: 0,
+                longitudeOfAscendingNode: 0, argumentOfPeriapsis: 0, meanAnomaly: 0,
+                epoch: _game.Systems[0].StarSysDateTime));
 
             var result = _server.SubmitCommand(session, new CirculariseCommand(ship.Id));
 
-            Assert.That(result.Accepted, Is.False);
-            Assert.That(result.RejectionReason, Does.Contain("captain"));
-            Assert.That(ProjectOrders(session, ship), Is.Empty);
+            Assert.That(result.Accepted, Is.True, result.RejectionReason);
+            Assert.That(ship.HasDataBlob<GoalsDB>(), Is.False);
+            Assert.That(ProjectOrders(session, ship).Select(o => o.Name), Has.Some.EqualTo("Circularise"));
         }
 
         [Test]

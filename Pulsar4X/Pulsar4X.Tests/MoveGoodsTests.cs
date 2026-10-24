@@ -146,6 +146,52 @@ public class MoveGoodsTests
     }
 
     [Test]
+    public void CaptainedShip_RefuelAt_AssignsTheGoal()
+    {
+        var scene = Scene.Build(holdUnits: 10, sourceStock: 50, sell: 0);
+        var result = new CommandTranslator(scene.Game).Translate(
+            scene.Faction, scene.Ship, new RefuelAtCommand(scene.Ship.Id, scene.Source.Id));
+
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        var goal = scene.Ship.GetDataBlob<GoalsDB>().GivenGoal;
+        Assert.That(goal, Is.Not.Null);
+        Assert.That(goal!.Type, Is.EqualTo(GoalType.RefuelAt));
+        Assert.That(goal.TargetEntityID, Is.EqualTo(scene.Source.Id));
+        Assert.That(goal.Name, Is.EqualTo("Refuel"));
+    }
+
+    [Test]
+    public void EmptyChair_RefuelAt_IsRejected()
+    {
+        var scene = Scene.Build(holdUnits: 10, sourceStock: 50, sell: 0, commanderId: -1);
+        var result = new CommandTranslator(scene.Game).Translate(
+            scene.Faction, scene.Ship, new RefuelAtCommand(scene.Ship.Id, scene.Source.Id));
+
+        Assert.That(result.Accepted, Is.False);
+        Assert.That(result.RejectionReason, Does.Contain("captain"));
+        Assert.That(scene.Ship.TryGetDataBlob<GoalsDB>(out var goals) && goals.GivenGoal != null, Is.False);
+    }
+
+    [Test]
+    public void EmptyChair_LoadFuel_UsesTheLoad()
+    {
+        var scene = Scene.Build(holdUnits: 10, sourceStock: 50, sell: 0, commanderId: -1);
+        scene.Source.GetDataBlob<CargoStorageDB>().TransferRangeDv_mps = 1e12;
+        var items = new List<CargoTransferItem> { new(scene.Iron.ID, 50) };
+        var result = new CommandTranslator(scene.Game).Translate(
+            scene.Faction, scene.Ship, new LoadGoodsCommand(scene.Ship.Id, scene.Source.Id, items));
+
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        var load = scene.Ship.GetDataBlob<ActionQueueDB>().ActionList.OfType<LoadGoodsAction>().Single();
+        Assert.That(load.IsValidCommand(scene.Game), Is.True);
+        load.Execute(scene.Ship.StarSysDateTime);
+        Assert.That(load.Status, Is.EqualTo(ActionStatus.Running), load.FailureMessage);
+        Scene.Drain(scene.Source);
+        Assert.That(scene.Ship.GetDataBlob<CargoStorageDB>().GetUnitsStored(scene.Iron, false), Is.EqualTo(10));
+        Assert.That(scene.Source.GetDataBlob<CargoStorageDB>().GetUnitsStored(scene.Iron, false), Is.EqualTo(40));
+    }
+
+    [Test]
     public void EmptyChair_QueuesTheFlight_AndAnOutOfRangeLoadEscrowsNothing()
     {
         var scene = Scene.Build(holdUnits: 10, sourceStock: 50, sell: 0, commanderId: -1);

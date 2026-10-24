@@ -31,6 +31,8 @@ namespace Pulsar4X.Client
         }
 
         private IssueOrderType selectedIssueOrderType = IssueOrderType.MoveTo;
+        // The selected row is a manual plot. A goal row clears it. The agent does not replan these.
+        private bool plotting;
         private int haulSourceId = -1;
         private int haulDestId = -1;
         private int goodsSourceId = -1;
@@ -378,37 +380,7 @@ namespace Pulsar4X.Client
             {
                 DisplayHelpers.Header("Actions");
                 ImGui.TextWrapped("No captain. You plot this ship's actions. The queue does not replan.");
-                var entity = SubjectEntity(galaxy);
-                bool warp = entity?.HasView<WarpAbilityView>() == true;
-                bool thrust = entity?.HasView<ThrustView>() == true;
-                if (ImGui.Selectable("Go to ...", selectedIssueOrderType == IssueOrderType.MoveTo))
-                    selectedIssueOrderType = IssueOrderType.MoveTo;
-                if (warp && ImGui.Selectable("Warp to ...", selectedIssueOrderType == IssueOrderType.PlotWarpTo))
-                    selectedIssueOrderType = IssueOrderType.PlotWarpTo;
-                if (thrust && ImGui.Selectable("Circularise", selectedIssueOrderType == IssueOrderType.PlotCircularise))
-                    selectedIssueOrderType = IssueOrderType.PlotCircularise;
-                if (thrust && ImGui.Selectable("Change altitude ...", selectedIssueOrderType == IssueOrderType.PlotChangeAltitude))
-                    selectedIssueOrderType = IssueOrderType.PlotChangeAltitude;
-                if (thrust && ImGui.Selectable("Match orbit ...", selectedIssueOrderType == IssueOrderType.PlotMatchOrbit))
-                    selectedIssueOrderType = IssueOrderType.PlotMatchOrbit;
-                var geoSite = CurrentGeoSurveySite(galaxy);
-                if (geoSite != null && ImGui.Selectable("Geo survey " + NameOf(geoSite), selectedIssueOrderType == IssueOrderType.GeoSurvey))
-                    selectedIssueOrderType = IssueOrderType.GeoSurvey;
-                var gravSite = CurrentGravSurveySite(galaxy);
-                if (gravSite != null && ImGui.Selectable("Grav survey " + NameOf(gravSite), selectedIssueOrderType == IssueOrderType.GravSurvey))
-                    selectedIssueOrderType = IssueOrderType.GravSurvey;
-                if (ImGui.Selectable("Jump...", selectedIssueOrderType == IssueOrderType.Jump))
-                    selectedIssueOrderType = IssueOrderType.Jump;
-                if (ImGui.Selectable("Move goods ...", selectedIssueOrderType == IssueOrderType.MoveGoods))
-                    selectedIssueOrderType = IssueOrderType.MoveGoods;
-                if (ImGui.Selectable("Load at colony in range", selectedIssueOrderType == IssueOrderType.LoadGoods))
-                    selectedIssueOrderType = IssueOrderType.LoadGoods;
-                if (ImGui.Selectable("Unload at colony in range", selectedIssueOrderType == IssueOrderType.UnloadGoods))
-                    selectedIssueOrderType = IssueOrderType.UnloadGoods;
-                if (warp && ImGui.Selectable("Warp plotter..."))
-                    OpenPlotter(orderShip, warp: true);
-                if (thrust && ImGui.Selectable("Nav plotter..."))
-                    OpenPlotter(orderShip, warp: false);
+                DisplayManualActions(galaxy);
                 return;
             }
 
@@ -424,27 +396,93 @@ namespace Pulsar4X.Client
             bool mine = orderShip != null ? orderShip.CanMineAsteroids : selectedFleet?.CanMineAsteroids == true;
             bool fleetOrders = orderShip == null;
             bool mineGoal = mine && (orderShip == null || ShipHasCaptain(orderShip));
+            bool manual = orderShip != null && plotting;
+            bool goalMove = selectedIssueOrderType == IssueOrderType.MoveTo && !manual;
+            bool goalGeo = selectedIssueOrderType == IssueOrderType.GeoSurvey && !manual;
+            bool goalGrav = selectedIssueOrderType == IssueOrderType.GravSurvey && !manual;
+            bool goalJump = selectedIssueOrderType == IssueOrderType.Jump && !manual;
+            bool goalRefuel = selectedIssueOrderType == IssueOrderType.RefuelAt && !manual;
+            bool goalGoods = selectedIssueOrderType == IssueOrderType.MoveGoods && !manual;
 
-            if (ImGui.Selectable("Move to ...", selectedIssueOrderType == IssueOrderType.MoveTo))
-                selectedIssueOrderType = IssueOrderType.MoveTo;
-            if (fleetOrders && ImGui.Selectable("Refuel at ...", selectedIssueOrderType == IssueOrderType.RefuelAt))
-                selectedIssueOrderType = IssueOrderType.RefuelAt;
-            if (geo && ImGui.Selectable("Geo Survey ...", selectedIssueOrderType == IssueOrderType.GeoSurvey))
-                selectedIssueOrderType = IssueOrderType.GeoSurvey;
-            if (grav && ImGui.Selectable("Grav Survey ...", selectedIssueOrderType == IssueOrderType.GravSurvey))
-                selectedIssueOrderType = IssueOrderType.GravSurvey;
+            if (ImGui.Selectable("Move to ...", goalMove))
+                Choose(IssueOrderType.MoveTo, plot: false);
+            if (ImGui.Selectable("Refuel at ...", goalRefuel))
+                Choose(IssueOrderType.RefuelAt, plot: false);
+            if (geo && ImGui.Selectable("Geo Survey ...", goalGeo))
+                Choose(IssueOrderType.GeoSurvey, plot: false);
+            if (grav && ImGui.Selectable("Grav Survey ...", goalGrav))
+                Choose(IssueOrderType.GravSurvey, plot: false);
             if (mineGoal && ImGui.Selectable("Mine asteroids", selectedIssueOrderType == IssueOrderType.MineAsteroids))
-                selectedIssueOrderType = IssueOrderType.MineAsteroids;
-            if (ImGui.Selectable("Jump...", selectedIssueOrderType == IssueOrderType.Jump))
-                selectedIssueOrderType = IssueOrderType.Jump;
-            if (fleetOrders && ImGui.Selectable("Trade ...", selectedIssueOrderType == IssueOrderType.Trade))
-                selectedIssueOrderType = IssueOrderType.Trade;
-            if (fleetOrders && ImGui.Selectable("Haul ...", selectedIssueOrderType == IssueOrderType.Haul))
-                selectedIssueOrderType = IssueOrderType.Haul;
+                Choose(IssueOrderType.MineAsteroids, plot: false);
+            if (ImGui.Selectable("Jump...", goalJump))
+                Choose(IssueOrderType.Jump, plot: false);
+            if (ImGui.Selectable(orderShip != null ? "Trade" : "Trade ...", selectedIssueOrderType == IssueOrderType.Trade))
+                Choose(IssueOrderType.Trade, plot: false);
+            if (ImGui.Selectable(orderShip != null ? "Haul" : "Haul ...", selectedIssueOrderType == IssueOrderType.Haul))
+                Choose(IssueOrderType.Haul, plot: false);
             if (fleetOrders && ImGui.Selectable("Haul contract ...", selectedIssueOrderType == IssueOrderType.HaulContract))
-                selectedIssueOrderType = IssueOrderType.HaulContract;
-            if (ImGui.Selectable("Move goods ...", selectedIssueOrderType == IssueOrderType.MoveGoods))
-                selectedIssueOrderType = IssueOrderType.MoveGoods;
+                Choose(IssueOrderType.HaulContract, plot: false);
+            if (ImGui.Selectable("Move goods ...", goalGoods))
+                Choose(IssueOrderType.MoveGoods, plot: false);
+
+            if (orderShip != null && ImGui.CollapsingHeader("Actions"))
+            {
+                ImGui.TextWrapped("Queue a plot on this ship. The captain does not replan it.");
+                DisplayManualActions(galaxy);
+            }
+        }
+
+        void Choose(IssueOrderType type, bool plot)
+        {
+            selectedIssueOrderType = type;
+            plotting = plot;
+        }
+
+        bool ManualPlot => orderShip != null && (!ShipHasCaptain(orderShip) || plotting);
+
+        void DisplayManualActions(IClientGalaxy galaxy)
+        {
+            var entity = SubjectEntity(galaxy);
+            bool warp = entity?.HasView<WarpAbilityView>() == true;
+            bool thrust = entity?.HasView<ThrustView>() == true;
+            bool plotMove = ManualPlot && selectedIssueOrderType == IssueOrderType.MoveTo;
+            bool plotGeo = ManualPlot && selectedIssueOrderType == IssueOrderType.GeoSurvey;
+            bool plotGrav = ManualPlot && selectedIssueOrderType == IssueOrderType.GravSurvey;
+            bool plotJump = ManualPlot && selectedIssueOrderType == IssueOrderType.Jump;
+            bool plotGoods = ManualPlot && selectedIssueOrderType == IssueOrderType.MoveGoods;
+            bool plotRefuel = ManualPlot && selectedIssueOrderType == IssueOrderType.RefuelAt;
+            if (ImGui.Selectable("Go to ...", plotMove))
+                Choose(IssueOrderType.MoveTo, plot: true);
+            if (warp && ImGui.Selectable("Warp to ...", selectedIssueOrderType == IssueOrderType.PlotWarpTo))
+                Choose(IssueOrderType.PlotWarpTo, plot: true);
+            if (thrust && ImGui.Selectable("Circularise", selectedIssueOrderType == IssueOrderType.PlotCircularise))
+                Choose(IssueOrderType.PlotCircularise, plot: true);
+            if (thrust && ImGui.Selectable("Change altitude ...", selectedIssueOrderType == IssueOrderType.PlotChangeAltitude))
+                Choose(IssueOrderType.PlotChangeAltitude, plot: true);
+            if (thrust && ImGui.Selectable("Match orbit ...", selectedIssueOrderType == IssueOrderType.PlotMatchOrbit))
+                Choose(IssueOrderType.PlotMatchOrbit, plot: true);
+            var geoSite = CurrentGeoSurveySite(galaxy);
+            if (geoSite != null && ImGui.Selectable("Geo survey " + NameOf(geoSite), plotGeo))
+                Choose(IssueOrderType.GeoSurvey, plot: true);
+            var gravSite = CurrentGravSurveySite(galaxy);
+            if (gravSite != null && ImGui.Selectable("Grav survey " + NameOf(gravSite), plotGrav))
+                Choose(IssueOrderType.GravSurvey, plot: true);
+            // Jump on a captained ship is the Goals row. The same command, so it is not listed again here.
+            var ship = orderShip;
+            if (ship != null && !ShipHasCaptain(ship) && ImGui.Selectable("Jump...", plotJump))
+                Choose(IssueOrderType.Jump, plot: true);
+            if (ImGui.Selectable("Move goods (plot) ...", plotGoods))
+                Choose(IssueOrderType.MoveGoods, plot: true);
+            if (ImGui.Selectable("Load at colony in range", selectedIssueOrderType == IssueOrderType.LoadGoods))
+                Choose(IssueOrderType.LoadGoods, plot: true);
+            if (ImGui.Selectable("Unload at colony in range", selectedIssueOrderType == IssueOrderType.UnloadGoods))
+                Choose(IssueOrderType.UnloadGoods, plot: true);
+            if (HasFuel(galaxy) && ImGui.Selectable("Refuel", plotRefuel))
+                Choose(IssueOrderType.RefuelAt, plot: true);
+            if (orderShip != null && warp && ImGui.Selectable("Warp plotter..."))
+                OpenPlotter(orderShip, warp: true);
+            if (orderShip != null && thrust && ImGui.Selectable("Nav plotter..."))
+                OpenPlotter(orderShip, warp: false);
         }
 
         private EntitySnapshot? SubjectEntity(IClientGalaxy galaxy)
@@ -567,34 +605,49 @@ namespace Pulsar4X.Client
 
                 DisplayCommandLine();
 
-                bool emptyChair = orderShip != null && !ShipHasCaptain(orderShip);
+                bool plot = ManualPlot;
                 if (orderShip != null)
                 {
                     bool atGeo = CurrentGeoSurveySite(galaxy) != null;
                     bool atGrav = CurrentGravSurveySite(galaxy) != null;
                     bool shipGeo = orderShip.CanGeoSurvey && selectedIssueOrderType == IssueOrderType.GeoSurvey
-                        && (!emptyChair || atGeo);
+                        && (!plot || atGeo);
                     bool shipGrav = orderShip.CanGravSurvey && selectedIssueOrderType == IssueOrderType.GravSurvey
-                        && (!emptyChair || atGrav);
+                        && (!plot || atGrav);
                     bool shipMine = orderShip.CanMineAsteroids
                         && selectedIssueOrderType == IssueOrderType.MineAsteroids
-                        && !emptyChair;
-                    bool shipPlot = emptyChair && (selectedIssueOrderType == IssueOrderType.PlotWarpTo
+                        && !plot;
+                    bool shipPlot = plot && (selectedIssueOrderType == IssueOrderType.PlotWarpTo
                         || selectedIssueOrderType == IssueOrderType.PlotCircularise
                         || selectedIssueOrderType == IssueOrderType.PlotChangeAltitude
                         || selectedIssueOrderType == IssueOrderType.PlotMatchOrbit);
                     bool shipGoods = selectedIssueOrderType == IssueOrderType.MoveGoods
-                        || (emptyChair && (selectedIssueOrderType == IssueOrderType.LoadGoods
+                        || (plot && (selectedIssueOrderType == IssueOrderType.LoadGoods
                             || selectedIssueOrderType == IssueOrderType.UnloadGoods));
+                    bool shipRefuel = selectedIssueOrderType == IssueOrderType.RefuelAt;
+                    bool shipRun = !plot && (selectedIssueOrderType == IssueOrderType.Trade
+                        || selectedIssueOrderType == IssueOrderType.Haul);
                     bool shipGoal = selectedIssueOrderType == IssueOrderType.MoveTo
                         || selectedIssueOrderType == IssueOrderType.Jump
-                        || shipGeo || shipGrav || shipMine || shipPlot || shipGoods;
+                        || shipGeo || shipGrav || shipMine || shipPlot || shipGoods
+                        || shipRefuel || shipRun;
                     if (!shipGoal)
+                    {
+                        plotting = false;
+                        plot = false;
                         selectedIssueOrderType = IssueOrderType.MoveTo;
+                    }
                 }
-                else if (selectedIssueOrderType == IssueOrderType.LoadGoods
-                    || selectedIssueOrderType == IssueOrderType.UnloadGoods)
+                else if (plotting
+                    || selectedIssueOrderType == IssueOrderType.LoadGoods
+                    || selectedIssueOrderType == IssueOrderType.UnloadGoods
+                    || selectedIssueOrderType == IssueOrderType.PlotWarpTo
+                    || selectedIssueOrderType == IssueOrderType.PlotCircularise
+                    || selectedIssueOrderType == IssueOrderType.PlotChangeAltitude
+                    || selectedIssueOrderType == IssueOrderType.PlotMatchOrbit)
                 {
+                    plotting = false;
+                    plot = false;
                     selectedIssueOrderType = IssueOrderType.MoveTo;
                 }
 
@@ -607,7 +660,7 @@ namespace Pulsar4X.Client
                 switch(selectedIssueOrderType)
                 {
                     case IssueOrderType.MoveTo:
-                        if (emptyChair)
+                        if (plot)
                         {
                             ImGui.TextWrapped("Queues a one-shot plot. The ship will not rethink it.");
                             DisplayTargetTree(candidates,
@@ -650,7 +703,7 @@ namespace Pulsar4X.Client
                             starTargetsSystem: false);
                         break;
                     case IssueOrderType.GeoSurvey:
-                        if (emptyChair)
+                        if (plot)
                             DisplayPlotSurveyHere(galaxy, commanded.Value, geo: true);
                         else
                             DisplayTargetTree(candidates,
@@ -662,7 +715,7 @@ namespace Pulsar4X.Client
                                 markDone: e => e.GetView<GeoSurveyView>()?.IsSurveyComplete == true);
                         break;
                     case IssueOrderType.GravSurvey:
-                        if (emptyChair)
+                        if (plot)
                             DisplayPlotSurveyHere(galaxy, commanded.Value, geo: false);
                         else
                             DisplayTargetTree(candidates,
@@ -687,18 +740,25 @@ namespace Pulsar4X.Client
                             starTargetsSystem: false);
                         break;
                     case IssueOrderType.RefuelAt:
-                        if (selectedFleet == null)
-                            break;
+                        if (plot)
                         {
-                            int fleetId = selectedFleet.Id;
-                            DisplayTargetTree(candidates,
-                                e => e.Kind == BodyKind.Colony && e.HasView<CargoStorageView>(),
-                                "refuelAt-button",
-                                id => SubmitFleetCommand(new RefuelAtCommand(fleetId, id)),
-                                starTargetsSystem: false);
+                            DisplayRefuelHere(galaxy, candidates, commanded.Value);
+                            break;
                         }
+                        DisplayTargetTree(candidates,
+                            e => e.Kind == BodyKind.Colony && e.HasView<CargoStorageView>(),
+                            "refuelAt-button",
+                            id => SubmitFleetCommand(new RefuelAtCommand(commanded.Value, id)),
+                            starTargetsSystem: false);
                         break;
                     case IssueOrderType.Trade:
+                        if (orderShip != null)
+                        {
+                            ImGui.TextWrapped("The captain picks one buy and one sell.");
+                            if (ImGui.Button("Trade"))
+                                SubmitFleetCommand(new TradeCommand(orderShip.Id));
+                            break;
+                        }
                         if (selectedFleet == null)
                             break;
                         {
@@ -714,6 +774,13 @@ namespace Pulsar4X.Client
                         }
                         break;
                     case IssueOrderType.Haul:
+                        if (orderShip != null)
+                        {
+                            ImGui.TextWrapped("The captain picks one posted haul between our colonies.");
+                            if (ImGui.Button("Haul"))
+                                SubmitFleetCommand(new FreighterCommand(orderShip.Id));
+                            break;
+                        }
                         if (selectedFleet == null)
                             break;
                         {
@@ -1457,10 +1524,68 @@ namespace Pulsar4X.Client
                 return;
             if(orderShip == null)
                 SubmitFleetCommand(new FleetMoveGoodsCommand(commandedId, source.Id, dest.Id, items));
-            else if(!ShipHasCaptain(orderShip))
+            else if(ManualPlot)
                 SubmitFleetCommand(new QueueMoveGoodsCommand(commandedId, source.Id, dest.Id, items));
             else
                 SubmitFleetCommand(new MoveGoodsCommand(commandedId, source.Id, dest.Id, items));
+        }
+
+        bool HasFuel(IClientGalaxy galaxy)
+        {
+            var fuelName = SubjectEntity(galaxy)?.GetView<ThrustView>()?.FuelName;
+            return !string.IsNullOrEmpty(fuelName);
+        }
+
+        private void DisplayRefuelHere(IClientGalaxy galaxy, IEnumerable<EntitySnapshot> candidates, int shipId)
+        {
+            string fuelName = SubjectEntity(galaxy)?.GetView<ThrustView>()?.FuelName ?? "";
+            if (string.IsNullOrEmpty(fuelName))
+            {
+                ImGui.Text("This ship has no fuel.");
+                return;
+            }
+
+            ImGui.TextWrapped("Fill the tank from a colony in cargo range. Loads " + fuelName + ".");
+            var colonies = OwnedWarehouses(candidates)
+                .Where(colony => InCargoRange(colony) && FuelPile(colony, fuelName) != null)
+                .ToList();
+            if (colonies.Count == 0)
+            {
+                ImGui.Text("No colony in cargo range has " + fuelName + ".");
+                return;
+            }
+            if (colonies.All(colony => colony.Id != loadColonyId))
+                loadColonyId = -1;
+
+            DisplayHelpers.Header("From");
+            DisplayTargetTree(candidates,
+                e => OwnedWarehouse(e) && InCargoRange(e) && FuelPile(e, fuelName) != null,
+                "refuel-from",
+                id => loadColonyId = id,
+                starTargetsSystem: false,
+                selectedId: loadColonyId);
+
+            var source = colonies.FirstOrDefault(colony => colony.Id == loadColonyId);
+            var pile = source == null ? null : FuelPile(source, fuelName);
+            if (source == null || pile == null)
+                return;
+            ImGui.Text(pile.Name);
+            ImGui.SameLine();
+            ImGui.Text(Stringify.Quantity(pile.Units));
+            if (!ImGui.Button("Refuel###refuel-here"))
+                return;
+            SubmitFleetCommand(new LoadGoodsCommand(
+                shipId, source.Id, new[] { new CargoTransferItem(pile.Id, pile.Units) }));
+        }
+
+        static CargoItemView? FuelPile(EntitySnapshot colony, string fuelName)
+        {
+            foreach (var item in Piles(colony))
+            {
+                if (item.Units > 0 && string.Equals(item.Name, fuelName, StringComparison.Ordinal))
+                    return item;
+            }
+            return null;
         }
 
         private void DisplayLoadGoods(IEnumerable<EntitySnapshot> candidates, int shipId)
@@ -1842,7 +1967,8 @@ namespace Pulsar4X.Client
             ImGui.PushID(fleet.Id.ToString());
             string name = fleet.Name;
             bool hasChildren = fleet.SubFleets.Count > 0 || fleet.Ships.Count > 0;
-            var flags = ImGuiTreeNodeFlags.DefaultOpen;
+            // The arrow, or a double-click, opens the fleet. A single click on the name only selects it.
+            var flags = ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick;
             if(!hasChildren)
                 flags |= ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
 

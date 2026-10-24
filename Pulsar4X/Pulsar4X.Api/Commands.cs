@@ -223,7 +223,10 @@ public sealed record GravSurveyCommand(int TargetEntityId, int LocationId) : Gam
 /// <summary>Warp to the jump point and transit through it.</summary>
 public sealed record JumpCommand(int TargetEntityId, int JumpPointId) : GameCommand(TargetEntityId);
 
-/// <summary>Warp to the colony and refuel the fleet's ships from its stores.</summary>
+/// <summary>
+/// Refuel from this colony. A fleet warps there and fills its ships. A captained ship is given
+/// the Refuel goal, and the captain plots the flight. An empty chair uses a load instead.
+/// </summary>
 public sealed record RefuelAtCommand(int TargetEntityId, int ColonyId) : GameCommand(TargetEntityId);
 
 #endregion
