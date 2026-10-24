@@ -44,6 +44,11 @@ public class RefuelShipPlanner : IGoalPlanner
         if (!source.TryGetDataBlob<CargoStorageDB>(out _))
             return PlanResult.Fail("refuel source has no cargo storage");
 
+        // A tank full of some other good has no stored fuel and no free mass.
+        // That is not a full tank of this fuel.
+        if (snap.MassStored <= 0 && snap.MassCapacity <= 0)
+            return PlanResult.Fail("no room in the tank for " + (snap.FuelType?.Name ?? "fuel"));
+
         // Already full enough — nothing to do.
         if (snap.Fraction >= 0.98f)
             return PlanResult.Done("tanks full");

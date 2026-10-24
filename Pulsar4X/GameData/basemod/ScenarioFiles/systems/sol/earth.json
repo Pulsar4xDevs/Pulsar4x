@@ -254,7 +254,7 @@
               "DesignId": "default-ship-design-courier",
               "Name": "Planet Express Ship",
               "Cargo": [
-                { "Id": "methalox", "Amount": 20000000, "Type": "byVolume" },
+                { "Id": "hydrolox", "Amount": 20000000, "Type": "byVolume" },
                 { "Id": "default-design-auto-mine", "Amount": 1, "Type": "byCount" }
               ]
             }

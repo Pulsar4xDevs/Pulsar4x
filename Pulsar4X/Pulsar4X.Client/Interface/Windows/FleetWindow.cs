@@ -1546,6 +1546,20 @@ namespace Pulsar4X.Client
             }
 
             ImGui.TextWrapped("Fill the tank from a colony in cargo range. Loads " + fuelName + ".");
+            var stores = SubjectEntity(galaxy)?.GetView<CargoStorageView>()?.Stores;
+            var tank = stores?.FirstOrDefault(store => store.TypeId == "fuel-storage");
+            if (tank == null)
+            {
+                ImGui.Text("This ship has no fuel tank.");
+                return;
+            }
+            if (tank.FreeVolume <= 0)
+            {
+                var held = tank.Items.Where(item => item.Units > 0).Select(item => item.Name).ToList();
+                string contents = held.Count == 0 ? "other cargo" : string.Join(", ", held);
+                ImGui.TextWrapped("No room in the tank for " + fuelName + ". It holds " + contents + ".");
+                return;
+            }
             var colonies = OwnedWarehouses(candidates)
                 .Where(colony => InCargoRange(colony) && FuelPile(colony, fuelName) != null)
                 .ToList();
@@ -1716,8 +1730,9 @@ namespace Pulsar4X.Client
             {
                 live.Add(item.Id);
                 int cap = item.Units > int.MaxValue ? int.MaxValue : (int)item.Units;
+                // A new pile starts at zero. The player sets the lines they want. All fills them.
                 if(!amounts.ContainsKey(item.Id))
-                    amounts[item.Id] = cap;
+                    amounts[item.Id] = 0;
                 else if(amounts[item.Id] > cap)
                     amounts[item.Id] = cap;
                 else if(amounts[item.Id] < 0)
@@ -1735,6 +1750,20 @@ namespace Pulsar4X.Client
 
         static void DrawPileAmounts(Dictionary<int, int> amounts, List<CargoItemView> piles)
         {
+            if(ImGui.SmallButton("All###piles-all"))
+            {
+                foreach(var item in piles)
+                    amounts[item.Id] = item.Units > int.MaxValue ? int.MaxValue : (int)item.Units;
+            }
+            ImGui.SameLine();
+            if(ImGui.SmallButton("None###piles-none"))
+            {
+                foreach(var item in piles)
+                    amounts[item.Id] = 0;
+            }
+            ImGui.SameLine();
+            ImGui.Text("Amounts start at zero.");
+
             foreach(var item in piles)
             {
                 if(!amounts.TryGetValue(item.Id, out var amount))
@@ -1745,6 +1774,9 @@ namespace Pulsar4X.Client
                 ImGui.Text(Stringify.Quantity(item.Units));
                 ImGui.SetNextItemWidth(120);
                 ImGui.InputInt("###pile-" + item.Id, ref amount);
+                ImGui.SameLine();
+                if(ImGui.SmallButton("All###pile-all-" + item.Id))
+                    amount = cap;
                 if(amount < 0)
                     amount = 0;
                 if(amount > cap)
