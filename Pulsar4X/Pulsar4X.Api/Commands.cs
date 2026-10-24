@@ -408,7 +408,9 @@ public sealed record QueueShipRefitCommand(
     string ProductionLineId,
     int ShipEntityId,
     IReadOnlyList<int> RemoveInstanceIds,
-    IReadOnlyList<int> MountInstanceIds) : GameCommand(TargetEntityId);
+    IReadOnlyList<int> MountInstanceIds,
+    /// <summary>When set, a finished refit whose parts match this design adopts it. Null keeps the old design.</summary>
+    string? TargetDesignId = null) : GameCommand(TargetEntityId);
 
 /// <summary>Move a job in the local-construction queue by its current position.</summary>
 public sealed record MoveConstructionJobCommand(int TargetEntityId, int QueueIndex, bool MoveUp) : GameCommand(TargetEntityId);

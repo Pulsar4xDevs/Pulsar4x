@@ -110,6 +110,22 @@ namespace Pulsar4X.Storage
         }
 
         /// <summary>
+        /// Starting cargo of a component design is one instance per count.
+        /// A stored design object is not a part the yard can mount.
+        /// </summary>
+        internal static void AddStartingCount(Entity entity, ICargoable item, int amount)
+        {
+            if (item is Pulsar4X.Components.ComponentDesign design)
+            {
+                for (int i = 0; i < amount; i++)
+                    AddCargoItems(entity, new Pulsar4X.Components.ComponentInstance(design), 1);
+                return;
+            }
+
+            AddCargoItems(entity, item, amount);
+        }
+
+        /// <summary>
         /// Removes cargo and updates the entites MassTotal
         /// </summary>
         /// <param name="entity"></param>

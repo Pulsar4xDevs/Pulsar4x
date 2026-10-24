@@ -107,6 +107,7 @@
         { "Id": "tungsten", "Amount": 5000 },
         { "Id": "nickel", "Amount": 5000 },
         { "Id": "default-design-merlin", "Amount": 5, "Type": "byCount" },
+        { "Id": "default-design-ship-construction", "Amount": 1, "Type": "byCount" },
         { "Id": "rp-1", "Amount": 50000000, "Type": "byCount" },
         { "Id": "methalox", "Amount": 10000, "Type": "byCount" },
         { "Id": "hydrolox", "Amount": 10000, "Type": "byCount" }
@@ -243,14 +244,14 @@
         "default-ship-design-sensorsat"
       ],
       "LaunchQueue": [
-        { "DesignId": "default-ship-design-courier", "Name": "ISS Hermes" }
+        { "DesignId": "default-ship-design-freighter", "Name": "ISS Hermes" }
       ],
       "Fleets": [
         {
           "Name": "Freight Fleet",
           "Ships": [
             {
-              "DesignId": "default-ship-design-freighter",
+              "DesignId": "default-ship-design-courier",
               "Name": "Planet Express Ship",
               "Cargo": [
                 { "Id": "methalox", "Amount": 20000000, "Type": "byVolume" },

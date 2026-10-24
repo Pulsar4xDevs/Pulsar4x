@@ -12,7 +12,7 @@ Templates live in `GameData/basemod/TemplateFiles/installations.json`. Designs l
 
 `local-construction` is `PlanetInstallation` only. Its attribute line is an `installation` rate of Level times 5 on `ConstructionAtb`. The design `default-design-local-construction` is level 1.
 
-The shipyard template is `ShipCargo, PlanetInstallation`. Its `IndustryAtb` rates are `component-construction` at Crew Size times 0.01, and `ship-assembly` at Crew Size times 0.02. Default Crew Size is 10000. Slip Size defaults to 10000. Its `ConstructionAtb` key is `ship-refit` at Crew Size times 0.0005.
+The shipyard template is `ShipCargo, PlanetInstallation`. Its `IndustryAtb` rates are `component-construction` at Crew Size times 0.01, and `ship-assembly` at Crew Size times 0.02. Default Crew Size is 10000. Slip Size defaults to 100000, the same figure as the launch pad, so the stock hulls fit. Its `ConstructionAtb` key is `ship-refit` at Crew Size times 0.0005.
 
 The freighter in `shipDesigns.json` is the pattern for a small ship: bridge, tank, cargo, power, thrust. `sol-trade` is not edited.
 
@@ -20,7 +20,7 @@ The freighter in `shipDesigns.json` is the pattern for a small ship: bridge, tan
 
 `GameData/basemod` only.
 
-New template `ship-construction` in `installations.json`. `ShipComponent` only. `ConstructionAtb` with an `installation` rate of 5. One design, `default-design-ship-construction`.
+New template `ship-construction` in `installations.json`. The display name is Construction Bay. `ShipComponent, ShipCargo`, cargo type `general-storage`, so a factory can put the finished part in the warehouse. `Size` defaults to 1. Installation points are Size times 5. Crew is Size times 100. One design, `default-design-ship-construction`.
 
 Edit `local-construction` so the attribute args are an `installation` rate of Level times 5. Mount stays `PlanetInstallation`. It does not gain `ShipCargo`. The display name stays Construction Services.
 
@@ -36,7 +36,7 @@ No new control. The shipyard row on the Production tab lists the faction's ship 
 
 ## Tests
 
-A loaded basemod faction has the ship-construction design, the colony ship, an office whose only construction key is `installation`, and a shipyard whose construction key is `ship-refit` and whose industry keys are unchanged. The colony ship design names the ship-construction component. `sol-trade` files are untouched.
+A loaded basemod faction has the ship-construction design, the colony ship, an office whose only construction key is `installation`, and a shipyard whose construction key is `ship-refit` and whose industry keys are unchanged. The colony ship design names the ship-construction component. The size-1 design is `ShipComponent, ShipCargo`, cargo type `general-storage`, with 5 installation points and crew 100. A size-2 design has 10 installation points and crew 200. Completing the size-1 design on a colony with general storage leaves one instance in that store and does not mount it. `sol-trade` files are untouched.
 
 ## Left out
 

@@ -480,8 +480,11 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-ship-construction",
-      "Name": "Ship Construction",
-      "TemplateId": "ship-construction"
+      "Name": "Construction Bay",
+      "TemplateId": "ship-construction",
+      "Properties": [
+        { "Key": "Size", "Value": 1 }
+      ]
     }
   },
   {

@@ -172,6 +172,198 @@ public class ShipRefitTests
         Assert.That(colony.GetDataBlob<CargoStorageDB>().GetUnitsStored(crate, false), Is.EqualTo(1));
     }
 
+    [Test]
+    public void Freighter_RefitToColonyShip_KeepsTheSensorAndTank()
+    {
+        var world = NewSystem();
+        var sensorFlags = Game.StartingGameData.ComponentTemplates["passive-sensor"].MountType;
+        var tankFlags = Game.StartingGameData.ComponentTemplates["stainless-steel-fuel-tank"].MountType;
+        var bayFlags = Game.StartingGameData.ComponentTemplates["ship-construction"].MountType;
+        Assert.That(sensorFlags.HasFlag(ComponentMountType.PlanetInstallation), Is.True);
+        Assert.That(tankFlags.HasFlag(ComponentMountType.PlanetInstallation), Is.True);
+
+        var sensor = FlaggedPart(world, "Passive Sensor S50", sensorFlags);
+        var tank = FlaggedPart(world, "Fuel Tank 1500m^3", tankFlags);
+        var bay = FlaggedPart(world, "Construction Bay", bayFlags);
+        world.Info.Data.Unlock("plastic");
+        world.Info.Data.Unlock("plastic-armor");
+        var armor = (world.Info.Data.Armor["plastic-armor"], 0f);
+        var freighter = new ShipDesign(
+            world.Info, "Freighter", new List<(ComponentDesign, int)> { (sensor, 1), (tank, 1) }, armor);
+        freighter.Initialise(world.Info);
+        freighter.ResourceCosts.Clear();
+        var colonyShip = new ShipDesign(
+            world.Info, "Colony Ship",
+            new List<(ComponentDesign, int)> { (sensor, 1), (tank, 1), (bay, 1) }, armor);
+        colonyShip.Initialise(world.Info);
+        colonyShip.ResourceCosts.Clear();
+
+        var colony = Colony(world, Math.Max(freighter.MassPerUnit, colonyShip.MassPerUnit), refitPoints: 5);
+        var ship = Ship(world, colony, freighter);
+        var spare = new ComponentInstance(bay);
+        Assert.That(colony.GetDataBlob<CargoStorageDB>().AddCargoByUnit(spare, 1), Is.EqualTo(1));
+
+        var line = YardLine(world, colony);
+        var aboard = line.RefitShips.Single();
+        Assert.That(aboard.Parts.Select(part => part.DesignId), Is.EquivalentTo(new[] { sensor.UniqueID, tank.UniqueID }));
+        var target = line.RefitTargets.Single(view => view.DesignId == colonyShip.UniqueID);
+        var diff = RefitDesignDiff.Compute(target, aboard.Parts, line.RefitCargo);
+        Assert.That(diff.RemoveInstanceIds, Is.Empty);
+        Assert.That(diff.MountInstanceIds, Is.EqualTo(new[] { spare.ID }));
+        Assert.That(diff.Missing, Is.Empty);
+
+        var queued = new CommandTranslator(Game).Translate(world.Faction, colony, new QueueShipRefitCommand(
+            colony.Id, LineId, ship.Id, diff.RemoveInstanceIds, diff.MountInstanceIds, colonyShip.UniqueID));
+        Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
+    }
+
+    [Test]
+    public void ColonyShipDiff_MountsTheBayWhenItIsInCargo()
+    {
+        var freighter = Game.StartingGameData.ShipDesigns["default-ship-design-freighter"];
+        var colonyShip = Game.StartingGameData.ShipDesigns["default-ship-design-colony-ship"];
+        var onShip = new List<RefitPartView>();
+        int next = 1;
+        foreach (var part in freighter.Components)
+        {
+            for (int i = 0; i < part.Amount; i++)
+                onShip.Add(new RefitPartView(next++, part.Id, 1, 1) { DesignId = part.Id });
+        }
+        var target = new RefitTargetView(colonyShip.UniqueID, colonyShip.Name)
+        {
+            Parts = colonyShip.Components
+                .Select(part => new RefitTargetPartView(part.Id, part.Id, (int)part.Amount))
+                .ToList(),
+        };
+        var bay = new RefitPartView(next, "Construction Bay", 5000, 1)
+        {
+            DesignId = "default-design-ship-construction",
+        };
+
+        var withCargo = RefitDesignDiff.Compute(target, onShip, new[] { bay });
+        Assert.That(withCargo.RemoveInstanceIds, Is.Empty);
+        Assert.That(withCargo.MountInstanceIds, Is.EqualTo(new[] { bay.ComponentId }));
+        Assert.That(withCargo.Missing, Is.Empty);
+
+        var without = RefitDesignDiff.Compute(target, onShip, Array.Empty<RefitPartView>());
+        Assert.That(without.RemoveInstanceIds, Is.Empty);
+        Assert.That(without.MountInstanceIds, Is.Empty);
+        Assert.That(without.Missing, Has.Count.EqualTo(1));
+        Assert.That(without.Missing[0].DesignId, Is.EqualTo("default-design-ship-construction"));
+        Assert.That(without.Missing[0].Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void MissingBay_QueuesAComponentJobAndNotARefit()
+    {
+        var world = NewSystem();
+        var bay = new ComponentDesign
+        {
+            UniqueID = "bay-" + Guid.NewGuid().ToString("N"),
+            Name = "Construction Bay",
+            IndustryTypeID = "component-construction",
+            ComponentMountType = ComponentMountType.ShipComponent | ComponentMountType.ShipCargo,
+            CargoTypeID = "general-storage",
+            MassPerUnit = 5000,
+            VolumePerUnit = 500,
+            IndustryPointCosts = 5000,
+        };
+        world.Info.IndustryDesigns[bay.UniqueID] = bay;
+        var colony = Colony(world, 1_000_000, refitPoints: 5);
+        colony.GetDataBlob<IndustryAbilityDB>().ProductionLines[LineId]
+            .IndustryTypeRates["component-construction"] = 100;
+
+        var queued = new CommandTranslator(Game).Translate(world.Faction, colony, new QueueIndustryJobCommand(
+            colony.Id, LineId, bay.UniqueID, 1, false, false));
+
+        Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
+        Assert.That(colony.GetDataBlob<LocalConstructionDB>().RefitQueue, Is.Empty);
+        var job = colony.GetDataBlob<IndustryAbilityDB>().ProductionLines[LineId].Jobs.Single();
+        Assert.That(job.ItemGuid, Is.EqualTo(bay.UniqueID));
+        Assert.That(job.InstallOn, Is.Null);
+        Assert.That(YardLine(world, colony).Constructibles.Select(item => item.DesignId), Does.Contain(bay.UniqueID));
+    }
+
+    [Test]
+    public void TargetDesign_AdoptsTheDesignWhenThePartsMatch()
+    {
+        var world = NewSystem();
+        var (freighter, colonyShip, bay) = FreighterAndColonyShip(world);
+        var colony = Colony(world, Math.Max(freighter.MassPerUnit, colonyShip.MassPerUnit), refitPoints: 5);
+        var ship = Ship(world, colony, freighter);
+        var spare = new ComponentInstance(bay);
+        Assert.That(colony.GetDataBlob<CargoStorageDB>().AddCargoByUnit(spare, 1), Is.EqualTo(1));
+
+        var queued = new CommandTranslator(Game).Translate(world.Faction, colony, new QueueShipRefitCommand(
+            colony.Id, LineId, ship.Id, Array.Empty<int>(), new[] { spare.ID }, colonyShip.UniqueID));
+        Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
+        Assert.That(colony.GetDataBlob<LocalConstructionDB>().RefitQueue.Single().TargetDesignId, Is.EqualTo(colonyShip.UniqueID));
+
+        new LocalConstructionProcessor().ProcessEntity(colony, 0);
+
+        Assert.That(ship.GetDataBlob<ShipInfoDB>().Design.UniqueID, Is.EqualTo(colonyShip.UniqueID));
+        Assert.That(ship.GetDataBlob<ShipInfoDB>().Tanker, Is.False);
+    }
+
+    [Test]
+    public void ManualRefit_KeepsTheOldDesign()
+    {
+        var world = NewSystem();
+        var (freighter, _, bay) = FreighterAndColonyShip(world);
+        var colony = Colony(world, freighter.MassPerUnit, refitPoints: 5);
+        var ship = Ship(world, colony, freighter);
+        var spare = new ComponentInstance(bay);
+        Assert.That(colony.GetDataBlob<CargoStorageDB>().AddCargoByUnit(spare, 1), Is.EqualTo(1));
+
+        var queued = new CommandTranslator(Game).Translate(world.Faction, colony, new QueueShipRefitCommand(
+            colony.Id, LineId, ship.Id, Array.Empty<int>(), new[] { spare.ID }));
+        Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
+
+        new LocalConstructionProcessor().ProcessEntity(colony, 0);
+
+        Assert.That(ship.GetDataBlob<ShipInfoDB>().Design.UniqueID, Is.EqualTo(freighter.UniqueID));
+        Assert.That(ShipRefitJob.OnShip(ship, spare.ID), Is.True);
+    }
+
+    [Test]
+    public void TargetDesign_LeavesTheNameWhenThePartsDoNotMatch()
+    {
+        var world = NewSystem();
+        var (freighter, colonyShip, bay) = FreighterAndColonyShip(world);
+        var colony = Colony(world, Math.Max(freighter.MassPerUnit, colonyShip.MassPerUnit), refitPoints: 5);
+        var ship = Ship(world, colony, freighter);
+        var kept = ship.GetDataBlob<ComponentInstancesDB>().AllComponents.Values.Single();
+        var spare = new ComponentInstance(bay);
+        Assert.That(colony.GetDataBlob<CargoStorageDB>().AddCargoByUnit(spare, 1), Is.EqualTo(1));
+
+        var queued = new CommandTranslator(Game).Translate(world.Faction, colony, new QueueShipRefitCommand(
+            colony.Id, LineId, ship.Id, new[] { kept.ID }, new[] { spare.ID }, colonyShip.UniqueID));
+        Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
+
+        new LocalConstructionProcessor().ProcessEntity(colony, 0);
+
+        Assert.That(ship.GetDataBlob<ShipInfoDB>().Design.UniqueID, Is.EqualTo(freighter.UniqueID));
+        Assert.That(ShipRefitJob.OnShip(ship, spare.ID), Is.True);
+        Assert.That(ShipRefitJob.OnShip(ship, kept.ID), Is.False);
+    }
+
+    static (ShipDesign Freighter, ShipDesign ColonyShip, ComponentDesign Bay) FreighterAndColonyShip(World world)
+    {
+        world.Info.Data.Unlock("plastic");
+        world.Info.Data.Unlock("plastic-armor");
+        var armor = (world.Info.Data.Armor["plastic-armor"], 0f);
+        var kept = Part(world, "Kept", 1000);
+        var bay = Part(world, "Bay", 1000);
+        var freighter = new ShipDesign(world.Info, "Freighter", new List<(ComponentDesign, int)> { (kept, 1) }, armor);
+        freighter.Initialise(world.Info);
+        freighter.ResourceCosts.Clear();
+        var colonyShip = new ShipDesign(
+            world.Info, "Colony Ship", new List<(ComponentDesign, int)> { (kept, 1), (bay, 1) }, armor);
+        colonyShip.Initialise(world.Info);
+        colonyShip.ResourceCosts.Clear();
+        return (freighter, colonyShip, bay);
+    }
+
     static ComponentInstance MountColonyPart(Entity colony)
     {
         var office = new ComponentInstance(new ComponentDesign
@@ -188,6 +380,9 @@ public class ShipRefitTests
     }
 
     static ComponentDesign Part(World world, string name, long mass)
+        => FlaggedPart(world, name, ComponentMountType.ShipComponent, mass);
+
+    static ComponentDesign FlaggedPart(World world, string name, ComponentMountType mount, long mass = 1000)
     {
         return new ComponentDesign
         {
@@ -196,7 +391,7 @@ public class ShipRefitTests
             MassPerUnit = mass,
             VolumePerUnit = 1,
             CargoTypeID = "general-storage",
-            ComponentMountType = ComponentMountType.ShipComponent,
+            ComponentMountType = mount,
         };
     }
 

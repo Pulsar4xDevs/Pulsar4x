@@ -9,6 +9,7 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Api;
+using Pulsar4X.Engine.Factories;
 using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Industry;
@@ -118,6 +119,46 @@ public class ManufactureInstanceTests
         Assert.That(StoredInstances(colony), Has.Count.EqualTo(1));
         Assert.That(colony.HasDataBlob<LocalConstructionDB>(), Is.False);
         Assert.That(MountedCount(colony), Is.EqualTo(0));
+    }
+
+    [Test]
+    public void ShipConstructionCompletion_StoresTheInstanceAndDoesNotMount()
+    {
+        var world = NewSystem();
+        Unlock(world.Info, "ship-construction");
+        Unlock(world.Info, "iron");
+        Unlock(world.Info, "aluminium");
+        Unlock(world.Info, "copper");
+        Unlock(world.Info, "plastic");
+        Unlock(world.Info, "stainless-steel");
+
+        ComponentDesign design;
+        ComponentDesigner.StartResearched = true;
+        try
+        {
+            design = ComponentDesignFromJson.Create(
+                world.Faction,
+                world.Info.Data,
+                Game.StartingGameData.ComponentDesigns["default-design-ship-construction"]);
+        }
+        finally
+        {
+            ComponentDesigner.StartResearched = false;
+        }
+
+        var colony = Colony(world, withOffice: true);
+        var job = new IndustryJob(design);
+        job.InitialiseJob(1, false);
+        job.InstallOn = colony;
+        colony.GetDataBlob<IndustryAbilityDB>().ProductionLines[LineId].Jobs.Add(job);
+
+        Complete(colony, design, job);
+
+        var stored = StoredInstances(colony);
+        Assert.That(stored, Has.Count.EqualTo(1));
+        Assert.That(stored.Single().Design, Is.SameAs(design));
+        Assert.That(MountedCount(colony), Is.EqualTo(0));
+        Assert.That(colony.GetDataBlob<LocalConstructionDB>().BuildQueue, Is.Empty);
     }
 
     [Test]

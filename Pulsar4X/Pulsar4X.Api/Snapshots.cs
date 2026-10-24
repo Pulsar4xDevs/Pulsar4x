@@ -560,6 +560,9 @@ public sealed record ProductionLineView(
     public IReadOnlyList<RefitPartView> RefitCargo { get; init; } = Array.Empty<RefitPartView>();
 
     public IReadOnlyList<RefitJobView> RefitJobs { get; init; } = Array.Empty<RefitJobView>();
+
+    /// <summary>Faction ship designs the refit pane can target. Empty when this line is not a yard.</summary>
+    public IReadOnlyList<RefitTargetView> RefitTargets { get; init; } = Array.Empty<RefitTargetView>();
 }
 
 /// <summary>A ship in transfer range of a shipyard line.</summary>
@@ -571,7 +574,29 @@ public sealed record RefitShipView(int EntityId, string Name, long Mass, bool Ov
 }
 
 /// <summary>A ship part on the ship or in the warehouse. Cost is the mass formula.</summary>
-public sealed record RefitPartView(int ComponentId, string Name, long Mass, long Cost);
+public sealed record RefitPartView(int ComponentId, string Name, long Mass, long Cost)
+{
+    /// <summary>Component design id. The refit diff matches on this, not on the instance.</summary>
+    public string DesignId { get; init; } = "";
+}
+
+/// <summary>A ship design the refit pane can turn the selected ship toward.</summary>
+public sealed record RefitTargetView(string DesignId, string Name)
+{
+    public IReadOnlyList<RefitTargetPartView> Parts { get; init; } = Array.Empty<RefitTargetPartView>();
+}
+
+/// <summary>One component design and how many copies a target ship design carries.</summary>
+public sealed record RefitTargetPartView(string DesignId, string Name, int Count);
+
+/// <summary>A component design the target needs that is not on the ship or in the warehouse.</summary>
+public sealed record RefitMissingPartView(string DesignId, string Name, int Count);
+
+/// <summary>Suggested checks and the parts still to build, for one target design.</summary>
+public sealed record RefitDesignDiffResult(
+    IReadOnlyList<int> RemoveInstanceIds,
+    IReadOnlyList<int> MountInstanceIds,
+    IReadOnlyList<RefitMissingPartView> Missing);
 
 /// <summary>A refit job queued on this line.</summary>
 public sealed record RefitJobView(string ShipName, long PointCost, long PointsAccumulated, double Progress);

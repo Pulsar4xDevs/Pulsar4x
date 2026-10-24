@@ -27,16 +27,19 @@ public class QueueShipRefitOrder : EntityAction
     private string _lineId;
     private List<ComponentInstance> _remove;
     private List<ComponentInstance> _mount;
+    private string? _targetDesignId;
 
     private QueueShipRefitOrder(
         Entity yard, string lineId, Entity ship,
-        List<ComponentInstance> remove, List<ComponentInstance> mount)
+        List<ComponentInstance> remove, List<ComponentInstance> mount,
+        string? targetDesignId)
     {
         _yard = yard;
         _ship = ship;
         _lineId = lineId;
         _remove = remove;
         _mount = mount;
+        _targetDesignId = targetDesignId;
         RequestingFactionGuid = yard.FactionOwnerID;
         EntityCommandingGuid = yard.Id;
         CreatedDate = yard.StarSysDateTime;
@@ -45,8 +48,9 @@ public class QueueShipRefitOrder : EntityAction
 
     public static QueueShipRefitOrder Create(
         Entity yard, string lineId, Entity ship,
-        List<ComponentInstance> remove, List<ComponentInstance> mount)
-        => new QueueShipRefitOrder(yard, lineId, ship, remove, mount);
+        List<ComponentInstance> remove, List<ComponentInstance> mount,
+        string? targetDesignId = null)
+        => new QueueShipRefitOrder(yard, lineId, ship, remove, mount, targetDesignId);
 
     public override EntityAction Clone()
     {
@@ -59,6 +63,7 @@ public class QueueShipRefitOrder : EntityAction
             return;
 
         var job = new ShipRefitJob(_ship.Id, _lineId, _remove, _mount);
+        job.TargetDesignId = _targetDesignId;
         construction.RefitQueue.Enqueue(job);
         string shipName = _ship.TryGetDataBlob<NameDB>(out var name)
             ? name.GetName(_yard.FactionOwnerID)

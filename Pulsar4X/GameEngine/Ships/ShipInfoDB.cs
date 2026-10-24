@@ -51,6 +51,13 @@ namespace Pulsar4X.Ships
             Tanker = design.Tanker;
         }
 
+        /// <summary>A finished refit whose parts match a chosen design adopts that design.</summary>
+        internal void SetDesign(ShipDesign design)
+        {
+            Design = design;
+            Tanker = design.Tanker;
+        }
+
         public ShipInfoDB(ShipInfoDB shipInfoDB)
         {
             CommanderID = shipInfoDB.CommanderID;

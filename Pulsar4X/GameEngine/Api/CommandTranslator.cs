@@ -1654,7 +1654,13 @@ namespace Pulsar4X.Engine.Api
             var reason = ShipRefitJob.Rejection(commanded, refit.ProductionLineId, ship, remove, mount);
             if (reason != null)
                 return CommandResult.Reject(reason);
-            return Dispatch(QueueShipRefitOrder.Create(commanded, refit.ProductionLineId, ship, remove, mount));
+            string? targetDesignId = string.IsNullOrEmpty(refit.TargetDesignId) ? null : refit.TargetDesignId;
+            if (targetDesignId != null
+                && (!faction.TryGetDataBlob<FactionInfoDB>(out var info)
+                    || !info.ShipDesigns.ContainsKey(targetDesignId)))
+                return CommandResult.Reject(ShipRefitJob.UnknownDesign);
+            return Dispatch(QueueShipRefitOrder.Create(
+                commanded, refit.ProductionLineId, ship, remove, mount, targetDesignId));
         }
 
         static bool TryResolveShip(Entity yard, int shipId, out Entity ship)

@@ -25,6 +25,7 @@ public class ShipRefitJob
     public const string NothingToRefit = "Nothing to refit.";
     public const string NotAShipyard = "That line is not a shipyard.";
     public const string AlreadyListed = "That part is already in a refit.";
+    public const string UnknownDesign = "That design is not available.";
 
     public int ShipEntityId { get; set; }
 
@@ -38,6 +39,9 @@ public class ShipRefitJob
 
     /// <summary>Copied at queue time. A later edit to a part's mass does not change it.</summary>
     public long PointCost { get; set; }
+
+    /// <summary>When set, a finished refit whose parts match this design adopts it. Null keeps the old design.</summary>
+    public string? TargetDesignId { get; set; }
 
     public bool IsComplete => PointCost > 0 && PointsAccumulated >= PointCost;
 
@@ -61,8 +65,7 @@ public class ShipRefitJob
     }
 
     public static bool IsShipPart(ComponentDesign design)
-        => design.ComponentMountType.HasFlag(ComponentMountType.ShipComponent)
-           && !design.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation);
+        => design.ComponentMountType.HasFlag(ComponentMountType.ShipComponent);
 
     public static bool IsColonyInstallation(ComponentDesign design)
         => design.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation);
@@ -98,10 +101,8 @@ public class ShipRefitJob
         {
             if (!seen.Add(part.ID))
                 return AlreadyListed;
-            if (IsColonyInstallation(part.Design))
-                return ColonyInstallation;
             if (!IsShipPart(part.Design))
-                return NotShipPart;
+                return IsColonyInstallation(part.Design) ? ColonyInstallation : NotShipPart;
             if (!OnShip(ship, part.ID))
                 return NotOnShip;
             if (Reserved(yard, part.ID))
@@ -114,10 +115,8 @@ public class ShipRefitJob
         {
             if (!seen.Add(part.ID))
                 return AlreadyListed;
-            if (IsColonyInstallation(part.Design))
-                return ColonyInstallation;
             if (!IsShipPart(part.Design))
-                return NotShipPart;
+                return IsColonyInstallation(part.Design) ? ColonyInstallation : NotShipPart;
             if (storage.GetUnitsStored(part, false) < 1)
                 return NotInWarehouse;
             if (Reserved(yard, part.ID))

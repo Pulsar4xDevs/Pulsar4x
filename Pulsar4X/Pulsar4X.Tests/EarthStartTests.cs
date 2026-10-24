@@ -2,7 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using GameEngine.Engine.Orders;
 using NUnit.Framework;
+using Pulsar4X.Api;
 using Pulsar4X.Colonies;
+using Pulsar4X.Engine.Api;
+using Pulsar4X.Components;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
@@ -12,6 +15,7 @@ using Pulsar4X.Logistics;
 using Pulsar4X.Modding;
 using Pulsar4X.Names;
 using Pulsar4X.People;
+using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.Tests;
@@ -67,6 +71,37 @@ public class EarthStartTests
         Assert.That(jobs, Has.Count.EqualTo(1));
         Assert.That(jobs[0].ItemGuid, Is.EqualTo("stainless-steel"));
         Assert.That(jobs[0].NumberOrdered, Is.EqualTo(1));
+
+        var hermes = colony.GetDataBlob<LaunchComplexDB>().LaunchQueue
+            .Single(entry => entry.ShipName == "ISS Hermes");
+        Assert.That(hermes.DesignId, Is.EqualTo("default-ship-design-freighter"));
+        var express = sol.GetAllEntitiesWithDataBlob<ShipInfoDB>()
+            .Single(ship => ship.GetDataBlob<NameDB>().GetName(player.Id) == "Planet Express Ship");
+        Assert.That(express.GetDataBlob<ShipInfoDB>().Design.UniqueID, Is.EqualTo("default-ship-design-courier"));
+
+        var stored = colony.GetDataBlob<CargoStorageDB>().TypeStores.Values
+            .SelectMany(store => store.GetCargoables().Values)
+            .ToList();
+        var bays = stored.OfType<ComponentInstance>()
+            .Where(instance => instance.Design.UniqueID == "default-design-ship-construction")
+            .ToList();
+        Assert.That(bays, Has.Count.EqualTo(1));
+        Assert.That(stored.OfType<ComponentDesign>().Select(design => design.UniqueID),
+            Does.Not.Contain("default-design-ship-construction"));
+        Assert.That(stored.OfType<ComponentInstance>()
+            .Count(instance => instance.Design.UniqueID == "default-design-merlin"), Is.EqualTo(5));
+
+        var designs = player.GetDataBlob<FactionInfoDB>().ShipDesigns;
+        var yard = colony.GetDataBlob<IndustryAbilityDB>().ProductionLines.Values
+            .Single(line => line.IndustryTypeRates.ContainsKey("ship-assembly"));
+        foreach (var design in designs.Values)
+            Assert.That(design.MassPerUnit, Is.LessThanOrEqualTo(yard.MaxVolume), design.Name);
+
+        var projected = new GameProjector(game).ProjectEntity(colony, player.Id).GetView<IndustryView>();
+        var yardLine = projected!.ProductionLines.Single(line => line.IsShipyard);
+        Assert.That(yardLine.RefitCargo.Select(part => part.DesignId), Does.Contain("default-design-ship-construction"));
+        Assert.That(yardLine.RefitCargo.Where(part => part.DesignId == "default-design-ship-construction").Sum(part => part.Cost),
+            Is.GreaterThan(0));
     }
 
     static List<string> LargestPiles(Entity colony, int capacity)

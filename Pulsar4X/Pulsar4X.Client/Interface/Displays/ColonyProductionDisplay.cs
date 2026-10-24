@@ -17,9 +17,12 @@ namespace Pulsar4X.Client
         private int _newJobBatchCount = 1;
         private bool _newJobRepeat = false;
         private bool _newJobAutoInstall = true;
+        private bool _rightPaneIsRefit;
         private string? _refitLineId;
         private int _refitShipIndex;
         private int _refitShipId;
+        private int _refitTargetIndex = -1;
+        private string? _refitAppliedKey;
         private readonly HashSet<int> _refitRemove = new();
         private readonly HashSet<int> _refitMount = new();
 
@@ -50,8 +53,16 @@ namespace Pulsar4X.Client
 
             if (ImGui.BeginChild("JobDescriptionPane", new Vector2(windowContentSize.X * 0.5f - 8f, windowContentSize.Y), ImGuiChildFlags.Borders))
             {
-                DisplayHelpers.Header("Create a new job for: " + selectedLine.Name);
-                NewJobDisplay(entityId, selectedLine, uiState);
+                if (_rightPaneIsRefit && selectedLine.IsShipyard)
+                {
+                    DisplayHelpers.Header("New refit for: " + selectedLine.Name);
+                    RefitSection(entityId, selectedLine, uiState);
+                }
+                else
+                {
+                    DisplayHelpers.Header("Create a new job for: " + selectedLine.Name);
+                    NewJobDisplay(entityId, selectedLine, uiState);
+                }
             }
             ImGui.EndChild();
         }
@@ -87,8 +98,19 @@ namespace Pulsar4X.Client
                         if (ImGui.Button("+ New Job"))
                         {
                             _selectedProdLine = line.Id;
+                            _rightPaneIsRefit = false;
                             _newJobDesignIndex = 0;
                             _newJobBatchCount = 1;
+                        }
+
+                        if (line.IsShipyard)
+                        {
+                            ImGui.SameLine();
+                            if (ImGui.Button("+ New Refit"))
+                            {
+                                _selectedProdLine = line.Id;
+                                _rightPaneIsRefit = true;
+                            }
                         }
 
                         ImGui.SameLine();
@@ -117,7 +139,7 @@ namespace Pulsar4X.Client
                         if (line.IsShipyard)
                         {
                             YardList(line);
-                            RefitSection(entityId, line, uiState);
+                            RefitQueue(line);
                         }
                     }
                     if (pop)
@@ -339,18 +361,10 @@ namespace Pulsar4X.Client
                 _refitLineId = line.Id;
                 _refitShipIndex = 0;
                 _refitShipId = 0;
+                _refitTargetIndex = -1;
+                _refitAppliedKey = null;
                 _refitRemove.Clear();
                 _refitMount.Clear();
-            }
-
-            ImGui.Separator();
-            ImGui.Text("Refit " + line.RefitPointsPerDay + " / day");
-            if (line.RefitJobs.Count == 0)
-                ImGui.BulletText("None");
-            else
-            {
-                foreach (var job in line.RefitJobs)
-                    ImGui.BulletText(job.ShipName + "  " + job.PointsAccumulated + " / " + job.PointCost);
             }
 
             if (line.RefitPointsPerDay <= 0)
@@ -372,7 +386,15 @@ namespace Pulsar4X.Client
             if (_refitShipId != selected.EntityId)
             {
                 _refitShipId = selected.EntityId;
+                _refitTargetIndex = -1;
+                _refitAppliedKey = null;
                 _refitRemove.Clear();
+                _refitMount.Clear();
+            }
+            if (_refitTargetIndex >= line.RefitTargets.Count)
+            {
+                _refitTargetIndex = -1;
+                _refitAppliedKey = null;
             }
 
             ImGui.Text("Ship");
@@ -393,6 +415,49 @@ namespace Pulsar4X.Client
                 ImGui.EndCombo();
             }
             selected = line.RefitShips[_refitShipIndex];
+
+            string designLabel = _refitTargetIndex >= 0
+                ? line.RefitTargets[_refitTargetIndex].Name
+                : "None";
+            ImGui.Text("Refit to");
+            if (ImGui.BeginCombo("###refit-design", designLabel))
+            {
+                if (ImGui.Selectable("None##refit-design-none", _refitTargetIndex < 0))
+                {
+                    _refitTargetIndex = -1;
+                    _refitAppliedKey = null;
+                    _refitRemove.Clear();
+                    _refitMount.Clear();
+                }
+                for (int i = 0; i < line.RefitTargets.Count; i++)
+                {
+                    var design = line.RefitTargets[i];
+                    if (ImGui.Selectable(design.Name + "##refit-design" + design.DesignId, i == _refitTargetIndex))
+                        _refitTargetIndex = i;
+                }
+                ImGui.EndCombo();
+            }
+
+            RefitTargetView? target = _refitTargetIndex >= 0 ? line.RefitTargets[_refitTargetIndex] : null;
+            RefitDesignDiffResult? diff = target == null
+                ? null
+                : RefitDesignDiff.Compute(target, selected.Parts, line.RefitCargo);
+            if (target != null && diff != null)
+            {
+                string key = selected.EntityId + "|" + target.DesignId + "|"
+                    + string.Join(",", selected.Parts.Select(part => part.ComponentId)) + "|"
+                    + string.Join(",", line.RefitCargo.Select(part => part.ComponentId));
+                if (_refitAppliedKey != key)
+                {
+                    _refitRemove.Clear();
+                    _refitMount.Clear();
+                    foreach (var id in diff.RemoveInstanceIds)
+                        _refitRemove.Add(id);
+                    foreach (var id in diff.MountInstanceIds)
+                        _refitMount.Add(id);
+                    _refitAppliedKey = key;
+                }
+            }
 
             ImGui.Text("On the ship");
             if (selected.Parts.Count == 0)
@@ -442,6 +507,35 @@ namespace Pulsar4X.Client
                 mountIds.Add(part.ComponentId);
             }
 
+            if (diff != null && diff.Missing.Count > 0)
+            {
+                ImGui.Text("To build");
+                var buildable = new List<RefitMissingPartView>();
+                foreach (var missing in diff.Missing)
+                {
+                    bool canBuild = line.Constructibles.Any(item => item.DesignId == missing.DesignId);
+                    if (canBuild)
+                    {
+                        buildable.Add(missing);
+                        ImGui.BulletText(missing.Name + "  x" + missing.Count);
+                    }
+                    else
+                        ImGui.BulletText(missing.Name + "  x" + missing.Count + "  this line cannot build it");
+                }
+                if (buildable.Count == 0)
+                    ImGui.BeginDisabled();
+                if (ImGui.Button("Queue missing parts"))
+                {
+                    foreach (var missing in buildable)
+                    {
+                        uiState.GameClient?.SubmitCommandAsync(new QueueIndustryJobCommand(
+                            entityId, line.Id, missing.DesignId, missing.Count, false, false));
+                    }
+                }
+                if (buildable.Count == 0)
+                    ImGui.EndDisabled();
+            }
+
             ImGui.Text("Cost " + cost);
             bool blocked = cost <= 0 || selected.OverSlip;
             if (blocked)
@@ -449,15 +543,39 @@ namespace Pulsar4X.Client
             if (ImGui.Button("Queue refit"))
             {
                 uiState.GameClient?.SubmitCommandAsync(new QueueShipRefitCommand(
-                    entityId, line.Id, selected.EntityId, removeIds, mountIds));
+                    entityId, line.Id, selected.EntityId, removeIds, mountIds, target?.DesignId));
                 _refitRemove.Clear();
                 _refitMount.Clear();
             }
-            bool hovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled);
             if (blocked)
                 ImGui.EndDisabled();
-            if (hovered && selected.OverSlip && selected.SlipReason.Length > 0)
-                ImGui.SetTooltip(selected.SlipReason);
+            if (blocked && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            {
+                string reason = "";
+                if (selected.OverSlip)
+                {
+                    reason = selected.SlipReason.Length > 0
+                        ? selected.SlipReason
+                        : "That ship is over this slip.";
+                    reason += " Ship " + selected.Mass + " kg, slip " + line.SlipSize.ToString("0") + " kg.";
+                }
+                if (cost <= 0)
+                    reason = reason.Length == 0 ? "Nothing to refit." : reason + "\nNothing to refit.";
+                ImGui.SetTooltip(reason);
+            }
+        }
+
+        private static void RefitQueue(ProductionLineView line)
+        {
+            ImGui.Text("Refit " + line.RefitPointsPerDay.ToString("0") + " / day");
+            if (line.RefitJobs.Count == 0)
+            {
+                ImGui.BulletText("None");
+                return;
+            }
+
+            foreach (var job in line.RefitJobs)
+                ImGui.BulletText(job.ShipName + "  " + job.PointsAccumulated + " / " + job.PointCost);
         }
 
         private static void YardList(ProductionLineView line)

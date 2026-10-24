@@ -264,7 +264,7 @@ namespace Pulsar4X.Factions
                         CargoTransferProcessor.AddRemoveCargoVolume(target, factionDataStore.CargoGoods[cargoId], amount);
                         break;
                     case "byCount":
-                        CargoTransferProcessor.AddCargoItems(target, factionDataStore.CargoGoods[cargoId], amount);
+                        CargoTransferProcessor.AddStartingCount(target, factionDataStore.CargoGoods[cargoId], amount);
                         break;
                     default:
                         CargoTransferProcessor.AddRemoveCargoMass(target, factionDataStore.CargoGoods[cargoId], amount);
@@ -672,7 +672,7 @@ namespace Pulsar4X.Factions
                         CargoTransferProcessor.AddRemoveCargoVolume(target, factionDataStore.CargoGoods[item.Id], item.Amount);
                         break;
                     case "byCount":
-                        CargoTransferProcessor.AddCargoItems(target, factionDataStore.CargoGoods[item.Id], (int)item.Amount);
+                        CargoTransferProcessor.AddStartingCount(target, factionDataStore.CargoGoods[item.Id], (int)item.Amount);
                         break;
                     default:
                         CargoTransferProcessor.AddRemoveCargoMass(target, factionDataStore.CargoGoods[item.Id], item.Amount);

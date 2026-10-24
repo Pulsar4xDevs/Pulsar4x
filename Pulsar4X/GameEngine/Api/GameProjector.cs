@@ -1045,8 +1045,15 @@ namespace Pulsar4X.Engine.Api
                 var refitShips = new List<RefitShipView>();
                 var refitCargo = new List<RefitPartView>();
                 var refitJobs = new List<RefitJobView>();
+                var refitTargets = new List<RefitTargetView>();
                 if (shipyard)
+                {
                     CollectRefit(entity, line, lineId, factionId, ref refitPoints, refitShips, refitCargo, refitJobs);
+                    foreach (var shipDesign in factionInfo.ShipDesigns.Values
+                        .OrderBy(design => design.Name)
+                        .ThenBy(design => design.UniqueID))
+                        refitTargets.Add(ToRefitTarget(shipDesign));
+                }
 
                 var hulls = new List<YardHullView>(line.Hulls.Count);
                 foreach (var hull in line.Hulls)
@@ -1070,6 +1077,7 @@ namespace Pulsar4X.Engine.Api
                     RefitShips = refitShips,
                     RefitCargo = refitCargo,
                     RefitJobs = refitJobs,
+                    RefitTargets = refitTargets,
                 });
             }
 
@@ -1139,7 +1147,10 @@ namespace Pulsar4X.Engine.Api
                         if (!ShipRefitJob.IsShipPart(part.Design) || reserved.Contains(part.ID))
                             continue;
                         parts.Add(new RefitPartView(
-                            part.ID, part.Name, part.MassPerUnit, LocalConstructionJob.MountCost(part.MassPerUnit)));
+                            part.ID, part.Name, part.MassPerUnit, LocalConstructionJob.MountCost(part.MassPerUnit))
+                        {
+                            DesignId = part.Design.UniqueID,
+                        });
                     }
                 }
                 parts.Sort(CompareRefitParts);
@@ -1161,11 +1172,42 @@ namespace Pulsar4X.Engine.Api
                         if (!ShipRefitJob.IsShipPart(instance.Design) || reserved.Contains(instance.ID))
                             continue;
                         cargo.Add(new RefitPartView(
-                            instance.ID, instance.Name, instance.MassPerUnit, LocalConstructionJob.MountCost(instance.MassPerUnit)));
+                            instance.ID, instance.Name, instance.MassPerUnit, LocalConstructionJob.MountCost(instance.MassPerUnit))
+                        {
+                            DesignId = instance.Design.UniqueID,
+                        });
                     }
                 }
             }
             cargo.Sort(CompareRefitParts);
+        }
+
+        static RefitTargetView ToRefitTarget(ShipDesign design)
+        {
+            var counts = new Dictionary<string, (string Name, int Count)>();
+            var order = new List<string>();
+            if (design.Components != null)
+            {
+                foreach (var (part, count) in design.Components)
+                {
+                    if (part == null || count <= 0)
+                        continue;
+                    if (!counts.TryGetValue(part.UniqueID, out var row))
+                    {
+                        order.Add(part.UniqueID);
+                        row = (part.Name, 0);
+                    }
+                    counts[part.UniqueID] = (row.Name, row.Count + count);
+                }
+            }
+
+            var parts = new List<RefitTargetPartView>(order.Count);
+            foreach (var id in order)
+            {
+                var row = counts[id];
+                parts.Add(new RefitTargetPartView(id, row.Name, row.Count));
+            }
+            return new RefitTargetView(design.UniqueID, design.Name) { Parts = parts };
         }
 
         static int CompareRefitParts(RefitPartView a, RefitPartView b)

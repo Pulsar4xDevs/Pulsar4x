@@ -6,9 +6,11 @@ using Pulsar4X.Engine;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Events;
 using Pulsar4X.Extensions;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Factions;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Names;
+using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.Industry;
@@ -201,6 +203,60 @@ public class LocalConstructionProcessor : IHotloopProcessor
 
         foreach (var part in taken)
             ship.AddComponent(part);
+        AdoptDesign(yard, ship, job);
+        return true;
+    }
+
+    static void AdoptDesign(Entity yard, Entity ship, ShipRefitJob job)
+    {
+        if (string.IsNullOrEmpty(job.TargetDesignId))
+            return;
+        var game = yard.Manager?.Game;
+        if (game == null || !game.Factions.TryGetValue(yard.FactionOwnerID, out var faction))
+            return;
+        if (!faction.TryGetDataBlob<FactionInfoDB>(out var info))
+            return;
+        if (!info.ShipDesigns.TryGetValue(job.TargetDesignId, out var design))
+            return;
+        if (!CountsMatch(ship, design))
+            return;
+        ship.GetDataBlob<ShipInfoDB>().SetDesign(design);
+    }
+
+    static bool CountsMatch(Entity ship, ShipDesign design)
+    {
+        var expected = new Dictionary<string, int>();
+        if (design.Components != null)
+        {
+            foreach (var (part, count) in design.Components)
+            {
+                if (part == null || count <= 0)
+                    continue;
+                expected.TryGetValue(part.UniqueID, out var have);
+                expected[part.UniqueID] = have + count;
+            }
+        }
+
+        var actual = new Dictionary<string, int>();
+        if (ship.TryGetDataBlob<ComponentInstancesDB>(out var components))
+        {
+            foreach (var instance in components.AllComponents.Values)
+            {
+                var id = instance.Design?.UniqueID;
+                if (string.IsNullOrEmpty(id))
+                    continue;
+                actual.TryGetValue(id, out var have);
+                actual[id] = have + 1;
+            }
+        }
+
+        if (actual.Count != expected.Count)
+            return false;
+        foreach (var pair in expected)
+        {
+            if (!actual.TryGetValue(pair.Key, out var have) || have != pair.Value)
+                return false;
+        }
         return true;
     }
 

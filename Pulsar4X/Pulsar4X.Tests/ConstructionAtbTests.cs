@@ -1,7 +1,11 @@
+using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using Pulsar4X.Blueprints;
 using Pulsar4X.Colonies;
 using Pulsar4X.Components;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Factories;
 using Pulsar4X.Factions;
@@ -75,9 +79,17 @@ public class ConstructionAtbTests
         Assert.That(office.ConstructionPoints.Keys, Is.EquivalentTo(new[] { "installation" }));
         Assert.That(office.ConstructionPoints["installation"], Is.EqualTo(5));
 
-        var module = info.ComponentDesigns["default-design-ship-construction"].GetAttribute<ConstructionAtb>();
+        var moduleDesign = info.ComponentDesigns["default-design-ship-construction"];
+        Assert.That(moduleDesign.Name, Is.EqualTo("Construction Bay"));
+        Assert.That(moduleDesign.UniqueID, Is.EqualTo("default-design-ship-construction"));
+        var module = moduleDesign.GetAttribute<ConstructionAtb>();
         Assert.That(module.ConstructionPoints["installation"], Is.EqualTo(5));
         Assert.That(module.ConstructionPoints.ContainsKey("ship-refit"), Is.False);
+        Assert.That(moduleDesign.ComponentMountType.HasFlag(ComponentMountType.ShipComponent), Is.True);
+        Assert.That(moduleDesign.ComponentMountType.HasFlag(ComponentMountType.ShipCargo), Is.True);
+        Assert.That(moduleDesign.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation), Is.False);
+        Assert.That(moduleDesign.CargoTypeID, Is.EqualTo("general-storage"));
+        Assert.That(moduleDesign.CrewReq, Is.EqualTo(100));
 
         var yard = info.ComponentDesigns["default-design-shipyard"];
         var refit = yard.GetAttribute<ConstructionAtb>();
@@ -88,5 +100,49 @@ public class ConstructionAtbTests
 
         var colonyShip = info.ShipDesigns["default-ship-design-colony-ship"];
         Assert.That(colonyShip.Components.Select(part => part.design.UniqueID), Does.Contain("default-design-ship-construction"));
+    }
+
+    [Test]
+    public void Size2Module_HasTenPointsAndTwoHundredCrew()
+    {
+        var modLoader = new ModLoader();
+        var store = new ModDataStore();
+        modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
+
+        var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
+        var faction = FactionFactory.CreateBasicFaction(game, "Size", "SZ", 0);
+        var info = faction.GetDataBlob<FactionInfoDB>();
+        info.Data.Unlock("ship-construction");
+        info.Data.Unlock("iron");
+        info.Data.Unlock("aluminium");
+        info.Data.Unlock("copper");
+        info.Data.Unlock("plastic");
+        info.Data.Unlock("stainless-steel");
+
+        var blueprint = new ComponentDesignBlueprint
+        {
+            UniqueID = "test-ship-construction-size-2",
+            Name = "Ship Construction Size 2",
+            TemplateId = "ship-construction",
+            Properties = new List<ComponentDesignBlueprint.Property>
+            {
+                new() { Key = "Size", Value = new JValue(2) },
+            },
+        };
+
+        ComponentDesigner.StartResearched = true;
+        try
+        {
+            var design = ComponentDesignFromJson.Create(faction, info.Data, blueprint);
+            var atb = design.GetAttribute<ConstructionAtb>();
+            Assert.That(atb.ConstructionPoints["installation"], Is.EqualTo(10));
+            Assert.That(atb.ConstructionPoints.ContainsKey("ship-refit"), Is.False);
+            Assert.That(design.CrewReq, Is.EqualTo(200));
+            Assert.That(design.MassPerUnit, Is.EqualTo(10_000));
+        }
+        finally
+        {
+            ComponentDesigner.StartResearched = false;
+        }
     }
 }

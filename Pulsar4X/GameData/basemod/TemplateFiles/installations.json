@@ -413,12 +413,12 @@
         },
         {
           "Name": "Slip Size",
-          "DescriptionFormula": "'Maximum gross tonnage this slip can work on'",
+          "DescriptionFormula": "'Maximum ship mass this slip can work on (kg)'",
           "GuiHint": "GuiSelectionMaxMinInt",
           "MaxFormula": "TechData('tech-shipyard-slip-max-size') + 20000",
           "MinFormula": "1000",
           "StepFormula": "1000",
-          "PropertyFormula": "10000"
+          "PropertyFormula": "100000"
         },
         {
           "Name": "Crew Size",
@@ -1043,13 +1043,13 @@
     "Type": "ComponentTemplate",
     "Payload": {
       "UniqueID": "ship-construction",
-      "Name": "Ship Construction",
+      "Name": "Construction Bay",
       "Formulas": {
-        "Description": "Installation rate of 5 points a day, carried on a ship.",
-        "Mass": "5000",
+        "Description": "A crew-heavy module for a colony ship. Installation points and crew both follow size.",
+        "Mass": "PropertyValue('Size') * 5000",
         "Volume": "[Mass] * 0.1",
         "HTK": "0.5",
-        "CrewReq": "5",
+        "CrewReq": "PropertyValue('Size') * 100",
         "ResearchCost": "0",
         "CreditCost": "0",
         "BuildPointCost": "[Mass]"
@@ -1062,15 +1062,24 @@
         "stainless-steel": "[Mass] * 0.1"
       },
       "ComponentType": "Facility",
-      "MountType": "ShipComponent",
-      "CargoTypeID": "None",
+      "MountType": "ShipComponent, ShipCargo",
+      "CargoTypeID": "general-storage",
       "IndustryTypeID": "component-construction",
       "Properties": [
+        {
+          "Name": "Size",
+          "DescriptionFormula": "'Larger modules install faster and need more crew.'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "20",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "1"
+        },
         {
           "Name": "DBargs",
           "GuiHint": "None",
           "DataDict": {
-            "installation": "5"
+            "installation": "PropertyValue('Size') * 5"
           },
           "PropertyFormula": "AtbConstrArgs([GuidDict])",
           "AttributeType": "Pulsar4X.Industry.ConstructionAtb"

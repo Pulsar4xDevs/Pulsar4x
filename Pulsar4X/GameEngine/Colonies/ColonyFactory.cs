@@ -381,7 +381,7 @@ namespace Pulsar4X.Colonies
                         CargoTransferProcessor.AddRemoveCargoVolume(target, factionDataStore.CargoGoods[item.Id], item.Amount);
                         break;
                     case "byCount":
-                        CargoTransferProcessor.AddCargoItems(target, factionDataStore.CargoGoods[item.Id], (int)item.Amount);
+                        CargoTransferProcessor.AddStartingCount(target, factionDataStore.CargoGoods[item.Id], (int)item.Amount);
                         break;
                     default:
                         CargoTransferProcessor.AddRemoveCargoMass(target, factionDataStore.CargoGoods[item.Id], item.Amount);
