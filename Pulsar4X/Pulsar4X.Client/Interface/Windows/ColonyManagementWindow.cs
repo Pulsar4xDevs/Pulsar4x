@@ -19,6 +19,8 @@ namespace Pulsar4X.Client
 
         private ColonyProductionDisplay? _productionDisplay;
         private ColonyConstructionDisplay? _constructionDisplay;
+        private int _logShownId = -1;
+        private int _logShownCount = -1;
 
         internal static ColonyManagementWindow GetInstance()
         {
@@ -135,6 +137,15 @@ namespace Pulsar4X.Client
                 {
                     DisplayNavalAcademy(selectedColony.Id, academy);
                     ImGui.EndTabItem();
+                }
+                if (ImGui.BeginTabItem("Log"))
+                {
+                    ShipLogDisplay.Draw(selectedColony, ref _logShownId, ref _logShownCount);
+                    ImGui.EndTabItem();
+                }
+                else
+                {
+                    _logShownId = -1;
                 }
                 ImGui.EndTabBar();
             }

@@ -179,6 +179,8 @@ public class Goal
     public string Message = "";
     /// <summary>The player cancelled this order. The agent does not plan it again.</summary>
     public bool PlayerCancelled;
+    /// <summary>The entity that handed this goal down. -1 when the player gave it.</summary>
+    public int IssuerEntityId = -1;
     
     public Goal(GoalType type)
     {

@@ -881,6 +881,21 @@ public sealed record OrderSnapshot(
 /// fleet-hierarchy snapshots, this view serves per-entity UI like the entity window).</summary>
 public sealed record OrdersView(GoalSnapshot goal, IReadOnlyList<OrderSnapshot> Orders) : IComponentView;
 
+/// <summary>How a ship's-log line sits on the page. To, From, and Action are indented.</summary>
+public enum ShipLogKind
+{
+    Own,
+    To,
+    From,
+    Action,
+}
+
+/// <summary>One saved line. The text already names the other party.</summary>
+public sealed record ShipLogLine(DateTime At, ShipLogKind Kind, string Text);
+
+/// <summary>The owner's book for one ship, fleet, or colony. Another faction does not get this view.</summary>
+public sealed record ShipLogView(IReadOnlyList<ShipLogLine> Lines) : IComponentView;
+
 
 /// <summary>A ship as a fleet member: identity, the system it currently resides in, and the
 /// display details the fleet UI shows (design, commander, queued orders).</summary>

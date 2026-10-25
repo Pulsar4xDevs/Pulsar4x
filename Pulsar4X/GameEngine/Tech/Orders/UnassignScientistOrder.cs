@@ -23,15 +23,19 @@ public class UnassignScientistOrder : EntityAction
     private Entity _labEntity;
     private int _scientistId;
 
-    private UnassignScientistOrder(Entity labEntity, int scientistId)
+    private readonly bool _silent;
+
+    private UnassignScientistOrder(Entity labEntity, int scientistId, bool silent)
     {
         _labEntity = labEntity;
         _scientistId = scientistId;
+        _silent = silent;
+        UseActionLanes = false;
     }
 
-    public static UnassignScientistOrder Create(Entity labEntity, int scientistId)
+    public static UnassignScientistOrder Create(Entity labEntity, int scientistId, bool silent = false)
     {
-        return new UnassignScientistOrder(labEntity, scientistId);
+        return new UnassignScientistOrder(labEntity, scientistId, silent);
     }
 
     public override EntityAction Clone()
@@ -54,6 +58,12 @@ public class UnassignScientistOrder : EntityAction
         // Clear the assignments
         commanderDB.AssignedTo = -1;
         researcherDB.ScientistId = -1;
+        if (!_silent)
+        {
+            var book = ShipLogBook.LabBook(_labEntity);
+            if (book != null)
+                ShipLogBook.NoteLeftPost(book, scientist, atDateTime, "the lab");
+        }
 
         // From the lab perspective
         EventManager.Instance.Publish(

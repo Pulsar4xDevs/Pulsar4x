@@ -81,6 +81,7 @@ static class GoalCancel
         // GivenGoal stays, so an idle wake does not pick a replacement.
         if (unit.TryGetDataBlob<GoalsDB>(out var goals) && ReferenceEquals(goals.ActiveGoal, goal))
             goals.ActiveGoal = null;
+        ShipLogBook.NoteOutcome(unit, goal, at);
     }
 
     public static bool Started(EntityAction action)

@@ -215,6 +215,8 @@ namespace Pulsar4X.Engine.Api
             // which gates the order-queue UI. Owner only, so a revealed foreign ship keeps its goals.
             (e, f) => e.FactionOwnerID == f && (e.HasDataBlob<ActionQueueDB>() || e.HasDataBlob<GoalsDB>())
                 ? new OrdersView(ProjectGoals(e), ProjectOrders(e)) : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ShipLogDB>(out var log)
+                ? ToShipLogView(log) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Movement.NewtonThrustAbilityDB>(out var th)
                 ? ToThrustView(th, e, f) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<Pulsar4X.Movement.WarpAbilityDB>(out var wa)
@@ -1816,6 +1818,14 @@ namespace Pulsar4X.Engine.Api
                 };
             }
             return goalSnapshot;
+        }
+
+        private static ShipLogView ToShipLogView(ShipLogDB log)
+        {
+            var lines = new List<ShipLogLine>(log.Entries.Count);
+            foreach (var entry in log.Entries)
+                lines.Add(new ShipLogLine(entry.At, entry.Kind, entry.Text ?? ""));
+            return new ShipLogView(lines);
         }
 
         private static IReadOnlyList<OrderSnapshot> ProjectOrders(Entity entity)

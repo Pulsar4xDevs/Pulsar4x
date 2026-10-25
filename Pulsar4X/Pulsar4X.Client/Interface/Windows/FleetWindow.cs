@@ -66,6 +66,9 @@ namespace Pulsar4X.Client
         private ShipSnapshot? orderShip = null;
         // The ship whose captain chair the assign modal is editing. A fleet commander is the flagship's captain.
         private int? captainChooserShipId = null;
+        // Log tab scrolls to the latest line when it opens or the book grows.
+        private int _logShownId = -1;
+        private int _logShownCount = -1;
 
         // ----- Standing Orders editor -----
         // The editor works on a local copy of the fleet's StandingOrders snapshot; Save replaces
@@ -346,6 +349,16 @@ namespace Pulsar4X.Client
                 if (orderShip == null)
                     DisplayStandingOrdersTab();
 
+                if (ImGui.BeginTabItem("Log"))
+                {
+                    ShipLogDisplay.Draw(LogSubject(galaxy), ref _logShownId, ref _logShownCount);
+                    ImGui.EndTabItem();
+                }
+                else
+                {
+                    _logShownId = -1;
+                }
+
                 ImGui.EndTabBar();
             }
             ImGui.EndChild();
@@ -535,6 +548,15 @@ namespace Pulsar4X.Client
                 OpenPlotter(orderShip, warp: true);
             if (orderShip != null && thrust && ImGui.Selectable("Nav plotter..."))
                 OpenPlotter(orderShip, warp: false);
+        }
+
+        private EntitySnapshot? LogSubject(IClientGalaxy galaxy)
+        {
+            int? id = orderShip?.Id ?? selectedFleet?.Id;
+            string? systemId = SubjectSystemId();
+            if (id == null || string.IsNullOrEmpty(systemId))
+                return null;
+            return galaxy.GetSystem(systemId)?.GetEntity(id.Value);
         }
 
         private EntitySnapshot? SubjectEntity(IClientGalaxy galaxy)

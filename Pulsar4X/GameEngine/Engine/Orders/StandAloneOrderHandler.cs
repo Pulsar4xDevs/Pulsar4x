@@ -18,6 +18,9 @@ namespace GameEngine.Engine.Orders
         {
             if (entityAction.IsValidCommand(Game))
             {
+                // The line is the action as queued. Finishing it does not write again.
+                ShipLogBook.NoteQueued(entityAction);
+
                 if (entityAction.UseActionLanes)
                 {
                     var pulses = entityAction.EntityCommanding.Manager.ManagerSubpulses;

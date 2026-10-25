@@ -1423,6 +1423,8 @@ namespace Pulsar4X.Engine.Api
 
             if (assign.CommanderId < 0)
             {
+                if (shipInfo.CommanderID >= 0 && TryResolve(shipInfo.CommanderID, out var sitting))
+                    ShipLogBook.NoteLeftPost(commanded, sitting, commanded.StarSysDateTime, "command");
                 ClearChair(commanded, shipInfo);
                 PublishPersonnelChanged(commanded);
                 return CommandResult.Ok(Guid.NewGuid().ToString("N"));
@@ -1452,16 +1454,23 @@ namespace Pulsar4X.Engine.Api
             ClearOfficerFromFleet(faction, officer.Id, commanded.Id, vacated);
 
             int leaving = shipInfo.CommanderID;
-            if (leaving >= 0 && leaving != officer.Id
-                && TryResolve(leaving, out var leavingOfficer)
-                && leavingOfficer.TryGetDataBlob<CommanderDB>(out var leavingDB)
-                && leavingDB.AssignedTo == commanded.Id)
+            bool alreadySeated = leaving == officer.Id;
+            Entity bumped = null;
+            if (!alreadySeated && leaving >= 0 && TryResolve(leaving, out var leavingOfficer))
             {
-                leavingDB.AssignedTo = -1;
+                bumped = leavingOfficer;
+                if (leavingOfficer.TryGetDataBlob<CommanderDB>(out var leavingDB)
+                    && leavingDB.AssignedTo == commanded.Id)
+                    leavingDB.AssignedTo = -1;
             }
 
             shipInfo.CommanderID = officer.Id;
             commanderDB.AssignedTo = commanded.Id;
+
+            if (bumped != null)
+                ShipLogBook.NoteLeftPost(commanded, bumped, commanded.StarSysDateTime, "command");
+            if (!alreadySeated)
+                ShipLogBook.NoteTookPost(commanded, officer, commanded.StarSysDateTime, "command");
 
             PublishPersonnelChanged(commanded);
             foreach (var ship in vacated)
@@ -1499,6 +1508,8 @@ namespace Pulsar4X.Engine.Api
                 && node.TryGetDataBlob<ShipInfoDB>(out var info)
                 && info.CommanderID == commanderId)
             {
+                if (node.Manager != null && node.Manager.TryGetGlobalEntityById(commanderId, out var officer))
+                    ShipLogBook.NoteLeftPost(node, officer, node.StarSysDateTime, "command");
                 info.CommanderID = -1;
                 if (!vacated.Contains(node))
                     vacated.Add(node);

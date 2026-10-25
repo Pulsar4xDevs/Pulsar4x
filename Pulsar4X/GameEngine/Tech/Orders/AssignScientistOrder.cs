@@ -27,6 +27,7 @@ public class AssignScientistOrder : EntityAction
     {
         _labEntity = labEntity;
         _scientistId = scientistId;
+        UseActionLanes = false;
     }
 
     public static AssignScientistOrder Create(Entity labEntity, int scientistId)
@@ -51,12 +52,15 @@ public class AssignScientistOrder : EntityAction
         if(!scientist.TryGetDataBlob<CommanderDB>(out var commanderDB))
             return;
 
+        int previousId = researcherDB.ScientistId;
+
         // Need to find the current assignment and unassign them
         if(commanderDB.AssignedTo >= 0)
         {
             if(_labEntity.Manager.TryGetGlobalEntityById(commanderDB.AssignedTo, out var previousLab))
             {
-                var unassignOrder = UnassignScientistOrder.Create(previousLab, scientist.Id);
+                bool sameChair = previousLab.Id == _labEntity.Id;
+                var unassignOrder = UnassignScientistOrder.Create(previousLab, scientist.Id, silent: sameChair);
                 _labEntity.Manager.Game.OrderHandler.HandleOrder(unassignOrder);
             }
         }
@@ -64,6 +68,18 @@ public class AssignScientistOrder : EntityAction
         // Assign the scientist
         researcherDB.ScientistId = _scientistId;
         commanderDB.AssignedTo = _labEntity.Id;
+
+        if (previousId != _scientistId)
+        {
+            var book = ShipLogBook.LabBook(_labEntity);
+            if (book != null)
+            {
+                if (previousId >= 0
+                    && _labEntity.Manager.TryGetGlobalEntityById(previousId, out var previous))
+                    ShipLogBook.NoteLeftPost(book, previous, atDateTime, "the lab");
+                ShipLogBook.NoteTookPost(book, scientist, atDateTime, "the lab");
+            }
+        }
 
         // From the lab perspective
         EventManager.Instance.Publish(

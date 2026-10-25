@@ -206,13 +206,7 @@ public class AgentProcessor : IInstanceProcessor
                 }
 
                 // Continue: enqueue work, then mark Active.
-                foreach (var (subordinate, subGoal) in plan.SubGoals)
-                {
-                    if (string.IsNullOrEmpty(subGoal.ParentGoalId))
-                        subGoal.ParentGoalId = goal.Id;
-                    AssignGoal(subordinate, subGoal, atDateTime + CommanderSkills.RelayDelay(managedEntity));
-                }
-
+                HandDown(managedEntity, goal, plan.SubGoals, atDateTime);
                 SubmitActions(managedEntity, goal, plan.Actions, atDateTime);
 
                 goal.Status = GoalStatus.Active;
@@ -234,12 +228,7 @@ public class AgentProcessor : IInstanceProcessor
                             goal.Status = plan.Status;
                             break;
                         }
-                        foreach (var (subordinate, subGoal) in plan.SubGoals)
-                        {
-                            if (string.IsNullOrEmpty(subGoal.ParentGoalId))
-                                subGoal.ParentGoalId = goal.Id;
-                            AssignGoal(subordinate, subGoal, atDateTime + CommanderSkills.RelayDelay(managedEntity));
-                        }
+                        HandDown(managedEntity, goal, plan.SubGoals, atDateTime);
                     }
 
                     // TODO: cancel-propagation to siblings on failure.
@@ -295,12 +284,7 @@ public class AgentProcessor : IInstanceProcessor
                             break;
                         }
 
-                        foreach (var (subordinate, subGoal) in plan.SubGoals)
-                        {
-                            if (string.IsNullOrEmpty(subGoal.ParentGoalId))
-                                subGoal.ParentGoalId = goal.Id;
-                            AssignGoal(subordinate, subGoal, atDateTime + CommanderSkills.RelayDelay(managedEntity));
-                        }
+                        HandDown(managedEntity, goal, plan.SubGoals, atDateTime);
                         SubmitActions(managedEntity, goal, plan.Actions, atDateTime);
                     }
 
@@ -350,12 +334,7 @@ public class AgentProcessor : IInstanceProcessor
                                 break;
                             }
 
-                            foreach (var (subordinate, subGoal) in plan.SubGoals)
-                            {
-                                if (string.IsNullOrEmpty(subGoal.ParentGoalId))
-                                    subGoal.ParentGoalId = goal.Id;
-                                AssignGoal(subordinate, subGoal, atDateTime + CommanderSkills.RelayDelay(managedEntity));
-                            }
+                            HandDown(managedEntity, goal, plan.SubGoals, atDateTime);
                             SubmitActions(managedEntity, goal, plan.Actions, atDateTime);
                             ScheduleAgent(agentHost, atDateTime + CommanderSkills.RecheckInterval(managedEntity));
                         }
@@ -371,6 +350,9 @@ public class AgentProcessor : IInstanceProcessor
                 break;
             }
         }
+
+        if (goal.Status is GoalStatus.Completed or GoalStatus.Failed)
+            ShipLogBook.NoteOutcome(managedEntity, goal, atDateTime);
 
         if (goal.Status == GoalStatus.Completed)
             CommanderSkills.GrantForCompleted(managedEntity, goal);
@@ -444,9 +426,47 @@ public class AgentProcessor : IInstanceProcessor
             goal.Status = GoalStatus.Planning;
 
         if (when == null)
-            RunAgentNow(unit);
+        {
+            // A handed goal already has its From line. This is the player's order.
+            if (goal.IssuerEntityId < 0)
+                ShipLogBook.NoteOrdered(unit, goal, unit.StarSysDateTime);
+            _loggedOrder.Add(goal.Id);
+            try
+            {
+                RunAgentNow(unit);
+            }
+            finally
+            {
+                _loggedOrder.Remove(goal.Id);
+            }
+        }
         else
             ScheduleAgent(unit, when.Value);
+    }
+
+    static readonly HashSet<string> _loggedOrder = new();
+
+    /// <summary>
+    /// One handed goal: the parent writes To, the child writes From, and the child
+    /// remembers who issued it so the later report can name the parent.
+    /// </summary>
+    static void HandDown(Entity parent, Goal parentGoal, IReadOnlyList<(Entity Sub, Goal Goal)> subGoals, DateTime at)
+    {
+        if (subGoals == null || subGoals.Count == 0)
+            return;
+
+        foreach (var (subordinate, subGoal) in subGoals)
+        {
+            if (string.IsNullOrEmpty(subGoal.ParentGoalId))
+                subGoal.ParentGoalId = parentGoal.Id;
+            subGoal.IssuerEntityId = parent.Id;
+            string phrase = ShipLogBook.Phrase(parent, subGoal);
+            string childName = subordinate.GetName(parent.FactionOwnerID);
+            string parentName = parent.GetName(parent.FactionOwnerID);
+            ShipLogBook.Append(parent, at, ShipLogKind.To, "To " + childName + " — " + phrase + ".", subordinate.Id);
+            ShipLogBook.Append(subordinate, at, ShipLogKind.From, "From " + parentName + " — " + phrase + ".", parent.Id);
+            AssignGoal(subordinate, subGoal, at + CommanderSkills.RelayDelay(parent));
+        }
     }
 
     /// <summary>
@@ -561,6 +581,10 @@ public class AgentProcessor : IInstanceProcessor
     {
         if (actions == null || actions.Count == 0)
             return;
+
+        // The player's order line already names this decision. A later commit still logs.
+        if (!_loggedOrder.Contains(goal.Id))
+            ShipLogBook.NoteRoute(managedEntity, goal, actions, atDateTime);
 
         foreach (var action in actions)
         {

@@ -30,6 +30,7 @@ public class AssignAdministratorOrder : EntityAction
         _adminEntity = adminEntity;
         _administratorId = administratorId;
         _postComponentName = postComponentName;
+        UseActionLanes = false;
     }
 
     public static AssignAdministratorOrder Create(Entity adminEntity, int administratorId, string postComponentName)
@@ -67,12 +68,16 @@ public class AssignAdministratorOrder : EntityAction
         if(!administrator.TryGetDataBlob<CommanderDB>(out var commanderDB))
             return;
 
+        int previousId = post.CommanderID;
+
         // Need to find the current assignment and unassign them
         if(commanderDB.AssignedTo >= 0)
         {
             if(_adminEntity.Manager.TryGetGlobalEntityById(commanderDB.AssignedTo, out var previousEntity))
             {
-                var unassignOrder = UnassignAdministratorOrder.Create(previousEntity, administrator.Id, _postComponentName);
+                bool sameChair = previousEntity.Id == _adminEntity.Id;
+                var unassignOrder = UnassignAdministratorOrder.Create(
+                    previousEntity, administrator.Id, _postComponentName, silent: sameChair);
                 _adminEntity.Manager.Game.OrderHandler.HandleOrder(unassignOrder);
             }
         }
@@ -81,6 +86,14 @@ public class AssignAdministratorOrder : EntityAction
         post.CommanderID = _administratorId;
         post.Commander = commanderDB;
         commanderDB.AssignedTo = _adminEntity.Id;
+
+        if (previousId != _administratorId)
+        {
+            if (previousId >= 0
+                && _adminEntity.Manager.TryGetGlobalEntityById(previousId, out var previous))
+                ShipLogBook.NoteLeftPost(_adminEntity, previous, atDateTime, "the post");
+            ShipLogBook.NoteTookPost(_adminEntity, administrator, atDateTime, "the post");
+        }
 
         // From the colony/post perspective
         EventManager.Instance.Publish(

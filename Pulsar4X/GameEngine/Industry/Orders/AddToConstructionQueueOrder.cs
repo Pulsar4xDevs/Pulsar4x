@@ -17,8 +17,8 @@ public class AddToConstructionQueueOrder : EntityAction
     public override string Name => "Add To Construction Queue";
 
     public override string Details => _instance != null
-        ? "Queue a mount of a stored component"
-        : "Queue assembly of a site-only design";
+        ? "Install " + (_instance.Design?.Name ?? "component")
+        : "Install " + (_design?.Name ?? "design");
 
     internal override Entity EntityCommanding => _actor;
     protected override void BindCommanding(Entity entity) => _actor = entity;

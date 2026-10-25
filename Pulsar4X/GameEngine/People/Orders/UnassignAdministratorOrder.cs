@@ -25,16 +25,20 @@ public class UnassignAdministratorOrder : EntityAction
     private int _administratorId;
     private string _postComponentName;
 
-    private UnassignAdministratorOrder(Entity adminEntity, int administratorId, string postComponentName)
+    private readonly bool _silent;
+
+    private UnassignAdministratorOrder(Entity adminEntity, int administratorId, string postComponentName, bool silent)
     {
         _adminEntity = adminEntity;
         _administratorId = administratorId;
         _postComponentName = postComponentName;
+        _silent = silent;
+        UseActionLanes = false;
     }
 
-    public static UnassignAdministratorOrder Create(Entity adminEntity, int administratorId, string postComponentName)
+    public static UnassignAdministratorOrder Create(Entity adminEntity, int administratorId, string postComponentName, bool silent = false)
     {
-        return new UnassignAdministratorOrder(adminEntity, administratorId, postComponentName);
+        return new UnassignAdministratorOrder(adminEntity, administratorId, postComponentName, silent);
     }
 
     public override EntityAction Clone()
@@ -71,6 +75,8 @@ public class UnassignAdministratorOrder : EntityAction
         commanderDB.AssignedTo = -1;
         post.CommanderID = -1;
         post.Commander = null;
+        if (!_silent)
+            ShipLogBook.NoteLeftPost(_adminEntity, administrator, atDateTime, "the post");
 
         // From the colony/post perspective
         EventManager.Instance.Publish(
