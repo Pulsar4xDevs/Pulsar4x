@@ -35,6 +35,18 @@ public class EnergyGenHotloopProcessor : IHotloopProcessor
     {
         EnergyGenAbilityDB _energyGenDB = entity.GetDataBlob<EnergyGenAbilityDB>();
         _energyGenDB.MaxOutputFromSolar = ComputeSolarMax(entity);
+
+        // Launch leaves Output at 0 and never books an energy interrupt. One call starts that chain.
+        // A ship that is already charging has a non-zero Output, so this does not book a second chain.
+        if (_energyGenDB.Output == 0
+            && _energyGenDB.TotalOutputMax > _energyGenDB.Demand
+            && _energyGenDB.EnergyType != null
+            && _energyGenDB.EnergyStored.TryGetValue(_energyGenDB.EnergyType.UniqueID, out double stored)
+            && _energyGenDB.EnergyStoreMax.TryGetValue(_energyGenDB.EnergyType.UniqueID, out double storeMax)
+            && stored < storeMax)
+        {
+            EnergyGenProcessor.EnergyGen(entity, entity.Manager.ManagerSubpulses.NextSafeInterruptTime);
+        }
     }
     
     private static double ComputeSolarMax(Entity entity)

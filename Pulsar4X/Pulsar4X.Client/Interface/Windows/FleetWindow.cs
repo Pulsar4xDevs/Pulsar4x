@@ -318,16 +318,6 @@ namespace Pulsar4X.Client
                     ImGui.EndTabItem();
                 }
 
-                if (orderShip != null && ImGui.BeginTabItem("Components"))
-                {
-                    var components = SubjectEntity(galaxy)?.GetView<InstallationsView>();
-                    if (components == null || components.Installations.Count == 0)
-                        ImGui.Text("No components on this ship.");
-                    else
-                        components.Display(orderShip.Id, _uiState);
-                    ImGui.EndTabItem();
-                }
-
                 if (ImGui.BeginTabItem("Issue Orders"))
                 {
                     var size = ImGui.GetContentRegionAvail();
@@ -340,6 +330,16 @@ namespace Pulsar4X.Client
                     ImGui.EndChild();
                     ImGui.SameLine();
                     IssueOrdersDisplay(galaxy, secondChildSize);
+                    ImGui.EndTabItem();
+                }
+
+                if (orderShip != null && ImGui.BeginTabItem("Components"))
+                {
+                    var components = SubjectEntity(galaxy)?.GetView<InstallationsView>();
+                    if (components == null || components.Installations.Count == 0)
+                        ImGui.Text("No components on this ship.");
+                    else
+                        components.Display(orderShip.Id, _uiState);
                     ImGui.EndTabItem();
                 }
 
@@ -390,13 +390,15 @@ namespace Pulsar4X.Client
                 && ImGui.CollapsingHeader("Power", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 bool full = energy.StoreMax > 0 && energy.Stored >= energy.StoreMax * 0.999;
+                // The last charge step can leave Output positive after the battery is already full.
+                // Nothing further is stored until a warp runs the energy step again.
                 string status = "Holding";
-                if (energy.Output > 0.001)
-                    status = "Charging";
-                else if (energy.Output < -0.001)
+                if (energy.Output < -0.001)
                     status = "Draining";
                 else if (full)
                     status = "Full";
+                else if (energy.Output > 0.001)
+                    status = "Charging";
 
                 double fraction = energy.StoreMax > 0 ? energy.Stored / energy.StoreMax : 0;
                 if (fraction < 0) fraction = 0;
@@ -404,11 +406,12 @@ namespace Pulsar4X.Client
                 string batteries = (fraction * 100).ToString("0.#") + "%  "
                     + Stringify.Energy(energy.Stored < 0 ? 0 : energy.Stored) + " / "
                     + Stringify.Energy(energy.StoreMax < 0 ? 0 : energy.StoreMax);
+                double flowKw = full && energy.Output > 0 ? 0 : energy.Output;
                 string flow = "0 kW";
-                if (energy.Output > 0.001)
-                    flow = "+" + Stringify.Power(energy.Output);
-                else if (energy.Output < -0.001)
-                    flow = "-" + Stringify.Power(-energy.Output);
+                if (flowKw > 0.001)
+                    flow = "+" + Stringify.Power(flowKw);
+                else if (flowKw < -0.001)
+                    flow = "-" + Stringify.Power(-flowKw);
 
                 ImGui.ProgressBar((float)fraction, new Vector2(ImGui.GetContentRegionAvail().X, 16), batteries);
                 ImGui.Columns(2);

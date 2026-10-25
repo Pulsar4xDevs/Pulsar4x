@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Pulsar4X.Colonies;
+using Pulsar4X.Energy;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
@@ -152,6 +153,10 @@ namespace Pulsar4X.Ships
 
             var position = new Vector3(targetRadius, 0, 0);
             var ship = ShipFactory.CreateShip(shipDesign, faction, position, planet, pad.ShipName);
+            // Ships that exist at the new game are started by PostNewGameInitialization.
+            // A later launch is not, so the battery update never gets its first appointment.
+            if (ship.HasDataBlob<EnergyGenAbilityDB>())
+                EnergyGenProcessor.EnergyGen(ship, ship.Manager.ManagerSubpulses.NextSafeInterruptTime);
 
             if (faction.TryGetDataBlob<FleetDB>(out var fleetDB))
             {
@@ -261,6 +266,8 @@ namespace Pulsar4X.Ships
 
             var position = new Vector3(OrbitMath.LowOrbitRadius(planet), 0, 0);
             var ship = ShipFactory.CreateShip(shipDesign, faction, position, planet, hull.Name);
+            if (ship.HasDataBlob<EnergyGenAbilityDB>())
+                EnergyGenProcessor.EnergyGen(ship, ship.Manager.ManagerSubpulses.NextSafeInterruptTime);
             if (faction.TryGetDataBlob<FleetDB>(out var fleetDB))
                 fleetDB.AddChild(ship);
             return true;
