@@ -10,34 +10,34 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client
 {
-    public record EntityWindowEntity(int EntityId, string SystemId);
+    public record EntityCardEntity(int EntityId, string SystemId);
 
-    internal static class EntityWindowExtensions
+    internal static class EntityCardExtensions
     {
         private static int _idCounter = 0;
 
         /// <summary>
-        /// Activates a window displaying the orders for a given entity.
+        /// Activates a card displaying the given entity.
         /// </summary>
         /// <param name="manager">The window manager instance.</param>
         /// <param name="entity">The entity requested for display.</param>
-        public static EntityWindow ActivateEntityWindow(this WindowManager manager, EntityWindowEntity entity)
+        public static EntityCard ActivateEntityCard(this WindowManager manager, EntityCardEntity entity)
         {
-            void DeactivateAllOtherWindows(EntityWindow keepActive)
+            void DeactivateAllOtherWindows(EntityCard keepActive)
             {
-                if (manager.NamedWindowsByType.TryGetValue(typeof(EntityWindow), out var windows))
+                if (manager.NamedWindowsByType.TryGetValue(typeof(EntityCard), out var windows))
                 {
-                    foreach (var window in windows.Cast<EntityWindow>().Where(w => !ReferenceEquals(w, keepActive)))
+                    foreach (var window in windows.Cast<EntityCard>().Where(w => !ReferenceEquals(w, keepActive)))
                     {
                         window.SetActive(false);
                     }
                 }
             }
 
-            if (manager.NamedWindowsByType.TryGetValue(typeof(EntityWindow), out var windowList))
+            if (manager.NamedWindowsByType.TryGetValue(typeof(EntityCard), out var windowList))
             {
                 // Reuse an existing inactive window if available
-                foreach (var window in windowList.Cast<EntityWindow>().Where(w => !w.GetActive()))
+                foreach (var window in windowList.Cast<EntityCard>().Where(w => !w.GetActive()))
                 {
                     window.SetEntity(entity.EntityId, entity.SystemId);
                     window.SetActive(true);
@@ -45,16 +45,16 @@ namespace Pulsar4X.Client
                     return window;
                 }
             }
-            string name = "EntityWindow|" + _idCounter++;
-            var entityWindow = new EntityWindow(name, entity.EntityId, entity.SystemId);
-            manager.AddNamedWindow(name, entityWindow);
-            entityWindow.SetActive(true);
-            DeactivateAllOtherWindows(entityWindow);
-            return entityWindow;
+            string name = "EntityCard|" + _idCounter++;
+            var entityCard = new EntityCard(name, entity.EntityId, entity.SystemId);
+            manager.AddNamedWindow(name, entityCard);
+            entityCard.SetActive(true);
+            DeactivateAllOtherWindows(entityCard);
+            return entityCard;
         }
     }
 
-    public class EntityWindow : NamedPulsarGuiWindow
+    public class EntityCard : NamedPulsarGuiWindow
     {
         public int EntityId { get; private set; }
         public string SystemId { get; private set; }
@@ -76,13 +76,17 @@ namespace Pulsar4X.Client
         private const float BottomMargin = 4f;
         private const float RightMargin = 4f;
 
+        // The Selector reads this so its list stops at the top of the open card.
+        internal float ScreenTop { get; private set; }
+        private float _laidOutHeight = 220f;
+
         // Animation state
         private enum AnimationState { Closed, Opening, Open, Closing }
         private AnimationState _animationState = AnimationState.Closed;
         private float _animationProgress = 0f;
         private DateTime _animationStartTime;
 
-        internal EntityWindow(string name, int entityId, string systemId) : base(name)
+        internal EntityCard(string name, int entityId, string systemId) : base(name)
         {
             EntityId = entityId;
             SystemId = systemId;
@@ -174,31 +178,20 @@ namespace Pulsar4X.Client
             }
         }
 
-        private Vector2 CalculateWindowPosition()
-        {
-            var viewportSize = _uiState.ViewPort.Size;
-
-            // Final position: bottom right corner
-            float finalX = viewportSize.Width - WindowWidth - RightMargin;
-            float finalY = viewportSize.Height - WindowHeight - BottomMargin;
-
-            // Animate from right (offscreen beyond right edge) into final position
-            // When progress is 0, window is offscreen to the right
-            // When progress is 1, window is at its final position
-            float startX = viewportSize.Width; // Start completely off-screen to the right
-            float currentX = startX + (finalX - startX) * _animationProgress;
-
-            return new Vector2(currentX, finalY);
-        }
-
         internal override void Display()
         {
             if (!IsActive && _animationState == AnimationState.Closed) return;
 
             UpdateAnimation();
 
-            // Don't render if fully closed
-            if (_animationState == AnimationState.Closed) return;
+            // Don't render if fully closed. A window that just finished closing drops its
+            // claim on the bottom edge. One that was already closed leaves the live card alone.
+            if (_animationState == AnimationState.Closed)
+            {
+                if (!IsActive)
+                    ScreenTop = 0;
+                return;
+            }
 
             _system = _uiState.GameClient?.Galaxy.GetSystem(SystemId);
             _entity = _system?.GetEntity(EntityId);
@@ -208,6 +201,7 @@ namespace Pulsar4X.Client
             {
                 IsActive = false;
                 _animationState = AnimationState.Closed;
+                ScreenTop = 0;
                 return;
             }
 
@@ -215,9 +209,30 @@ namespace Pulsar4X.Client
             _commander = FindCommander();
             Title = _entity.GetView<NameView>()?.Name ?? "Unknown";
 
-            var windowPos = CalculateWindowPosition();
-            ImGui.SetNextWindowPos(windowPos, ImGuiCond.Always);
-            ImGui.SetNextWindowSize(new Vector2(WindowWidth, WindowHeight), ImGuiCond.Always);
+            // The construction panes take the leftover height, so that one case stays a fixed window.
+            // Everything else hugs its summary. Both sit on the bottom edge of the work area.
+            bool shipConstruction = _commander == null
+                && _bodyType == UserOrbitSettings.OrbitBodyType.Ship
+                && _entity.GetView<ConstructionView>() is { IsShip: true };
+            float width = shipConstruction ? WindowWidth : 480f;
+            float height = shipConstruction ? WindowHeight : _laidOutHeight;
+            var work = ImGui.GetMainViewport();
+            float workRight = work.WorkPos.X + work.WorkSize.X;
+            float workBottom = work.WorkPos.Y + work.WorkSize.Y;
+            float finalX = workRight - width - RightMargin;
+            float currentX = workRight + (finalX - workRight) * _animationProgress;
+            float y = workBottom - height - BottomMargin;
+            if (shipConstruction)
+            {
+                _flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar;
+                ImGui.SetNextWindowSize(new Vector2(width, height), ImGuiCond.Always);
+            }
+            else
+            {
+                _flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize;
+                ImGui.SetNextWindowSizeConstraints(new Vector2(width, 48f), new Vector2(width, work.WorkSize.Y - 8f));
+            }
+            ImGui.SetNextWindowPos(new Vector2(currentX, y), ImGuiCond.Always);
             ImGui.SetNextWindowBgAlpha(0.85f);
 
             var accentColor = GetAccentColor();
@@ -242,6 +257,11 @@ namespace Pulsar4X.Client
                 DrawWindowAccents(accentColor);
                 DisplayHeader(accentColor);
                 DisplayContent();
+                float actual = ImGui.GetWindowSize().Y;
+                float pinnedY = workBottom - actual - BottomMargin;
+                ImGui.SetWindowPos(new Vector2(currentX, pinnedY));
+                _laidOutHeight = actual;
+                ScreenTop = pinnedY;
             }
             Window.End();
 
@@ -530,28 +550,59 @@ namespace Pulsar4X.Client
                     DisplayGenericContent();
                     break;
             }
+        }
 
-            if (_entity.GetView<MarketView>() is { } market
-                && ImGui.CollapsingHeader("Market", ImGuiTreeNodeFlags.DefaultOpen))
+        /// <summary>
+        /// Owned colonies jump to Colony Management. A friendly colony's market stays here,
+        /// because Colony Management only lists colonies this faction owns.
+        /// </summary>
+        private void DisplayColonyManagementLinks()
+        {
+            if (_entity == null || _system == null) return;
+
+            if (_entity.Kind == BodyKind.Colony)
             {
-                MarketBarsDisplay.Display(_entity, market, _uiState);
-                IntelDisplay.Display(_entity, _entity.GetView<IntelBookView>(), _system?.SystemId ?? "", _uiState);
+                if (_entity.Relation != OwnerRelation.Owned) return;
+                ImGui.Spacing();
+                if (ImGui.Button("Colony Management", new Vector2(ImGui.GetContentRegionAvail().X, 0)))
+                {
+                    var window = ColonyManagementWindow.GetInstance();
+                    window.SelectColony(_entity.Id, SystemId);
+                    window.SetActive(true);
+                }
+                return;
             }
 
-            if (_system != null && _entity.Kind != BodyKind.Colony)
+            foreach (var colony in _system.Entities)
             {
-                foreach (var colony in _system.Entities)
+                if (colony.Relation != OwnerRelation.Owned) continue;
+                if (colony.GetView<ColonyView>()?.PlanetEntityId != _entity.Id) continue;
+                string name = colony.GetView<NameView>()?.Name ?? "Colony";
+                ImGui.Spacing();
+                if (ImGui.Button("Colony Management: " + name + "##colony-link-" + colony.Id,
+                    new Vector2(ImGui.GetContentRegionAvail().X, 0)))
                 {
-                    if (colony.GetView<ColonyView>()?.PlanetEntityId != _entity.Id)
-                        continue;
-                    if (colony.GetView<MarketView>() is not { } colonyMarket)
-                        continue;
-                    string colonyName = colony.GetView<NameView>()?.Name ?? "Colony";
-                    if (ImGui.CollapsingHeader(colonyName + "###market-" + colony.Id, ImGuiTreeNodeFlags.DefaultOpen))
-                    {
-                        MarketBarsDisplay.Display(colony, colonyMarket, _uiState);
-                        IntelDisplay.Display(colony, colony.GetView<IntelBookView>(), _system.SystemId, _uiState);
-                    }
+                    var window = ColonyManagementWindow.GetInstance();
+                    window.SelectColony(colony.Id, SystemId);
+                    window.SetActive(true);
+                }
+            }
+        }
+
+        private void DisplayFriendlyMarkets()
+        {
+            if (_entity == null || _system == null || _entity.Kind == BodyKind.Colony) return;
+
+            foreach (var colony in _system.Entities)
+            {
+                if (colony.Relation == OwnerRelation.Owned) continue;
+                if (colony.GetView<ColonyView>()?.PlanetEntityId != _entity.Id) continue;
+                if (colony.GetView<MarketView>() is not { } market) continue;
+                string name = colony.GetView<NameView>()?.Name ?? "Colony";
+                if (ImGui.CollapsingHeader(name + "###market-" + colony.Id))
+                {
+                    MarketBarsDisplay.Display(colony, market, _uiState);
+                    IntelDisplay.Display(colony, colony.GetView<IntelBookView>(), _system.SystemId, _uiState);
                 }
             }
         }
@@ -769,60 +820,6 @@ namespace Pulsar4X.Client
                     new Vector4(_accentColor.X, _accentColor.Y, _accentColor.Z, 0.15f)));
         }
 
-        private void StatBlock(string label, string value, Vector4? valueColor = null)
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-            ImGui.TextUnformatted(label);
-            ImGui.PopStyleColor();
-            if (valueColor.HasValue)
-                ImGui.PushStyleColor(ImGuiCol.Text, valueColor.Value);
-            ImGui.TextUnformatted(value);
-            if (valueColor.HasValue)
-                ImGui.PopStyleColor();
-        }
-
-        /// <summary>
-        /// Renders label/value stats as accent-tinted cards laid out three per row.
-        /// Each card matches the infrastructure overview card's styling.
-        /// </summary>
-        private void DisplayStatCards(string idPrefix, System.Collections.Generic.List<(string Label, string Value)> stats)
-        {
-            if (stats.Count == 0) return;
-
-            const int columns = 3;
-            const float cardPadding = 6f;
-            float spacing = ImGui.GetStyle().ItemSpacing.X;
-            float avail = ImGui.GetContentRegionAvail().X;
-            float cardWidth = MathF.Floor((avail - spacing * (columns - 1)) / columns);
-            float cardHeight = cardPadding * 2f + ImGui.GetTextLineHeightWithSpacing() * 2f;
-
-            ImGui.PushStyleColor(ImGuiCol.ChildBg,
-                new Vector4(_accentColor.X, _accentColor.Y, _accentColor.Z, 0.06f));
-            ImGui.PushStyleColor(ImGuiCol.Border,
-                new Vector4(_accentColor.X, _accentColor.Y, _accentColor.Z, 0.35f));
-            ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(cardPadding, cardPadding));
-
-            for (int i = 0; i < stats.Count; i++)
-            {
-                if (i % columns != 0)
-                    ImGui.SameLine();
-
-                if (ImGui.BeginChild(idPrefix + i, new Vector2(cardWidth, cardHeight),
-                    ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                    ImGui.TextUnformatted(stats[i].Label);
-                    ImGui.PopStyleColor();
-                    ImGui.TextUnformatted(stats[i].Value);
-                }
-                ImGui.EndChild();
-            }
-
-            ImGui.PopStyleVar(2);
-            ImGui.PopStyleColor(2);
-        }
-
         private Vector4 GetHealthColor(float value)
         {
             if (value >= 0.75f) return Styles.GoodColor;
@@ -834,17 +831,15 @@ namespace Pulsar4X.Client
         private void DrawRadialIndicator(
             ImDrawListPtr drawList, Vector2 center, float radius, float ringThickness,
             float value, string label, string centerText, bool isPlaceholder,
-            string extraTooltip = null)
+            string? extraTooltip = null)
         {
             var dimColor = new Vector4(
                 _accentColor.X * 0.3f, _accentColor.Y * 0.3f, _accentColor.Z * 0.3f, 0.4f);
             var healthColor = isPlaceholder ? Styles.DescriptiveColor : GetHealthColor(value);
             var textColor = isPlaceholder ? Styles.DescriptiveColor : healthColor;
 
-            // Background ring (full circle, dim)
             drawList.AddCircle(center, radius, ImGui.ColorConvertFloat4ToU32(dimColor), 32, ringThickness);
 
-            // Foreground arc (starts at 12 o'clock, sweeps clockwise)
             if (!isPlaceholder && value > 0f)
             {
                 float startAngle = -MathF.PI / 2f;
@@ -853,21 +848,18 @@ namespace Pulsar4X.Client
                 drawList.PathStroke(ImGui.ColorConvertFloat4ToU32(healthColor), ImDrawFlags.None, ringThickness);
             }
 
-            // Center text (centered in the ring)
             var centerTextSize = ImGui.CalcTextSize(centerText);
             drawList.AddText(
                 new Vector2(center.X - centerTextSize.X * 0.5f, center.Y - centerTextSize.Y * 0.5f),
                 ImGui.ColorConvertFloat4ToU32(textColor),
                 centerText);
 
-            // Label below the ring
             var labelSize = ImGui.CalcTextSize(label);
             drawList.AddText(
                 new Vector2(center.X - labelSize.X * 0.5f, center.Y + radius + ringThickness * 0.5f + 2f),
                 ImGui.ColorConvertFloat4ToU32(Styles.DescriptiveColor),
                 label);
 
-            // Tooltip on hover
             var min = new Vector2(center.X - radius - ringThickness, center.Y - radius - ringThickness);
             var max = new Vector2(center.X + radius + ringThickness, center.Y + radius + ringThickness);
             if (ImGui.IsMouseHoveringRect(min, max))
@@ -890,13 +882,11 @@ namespace Pulsar4X.Client
 
             var cursorPos = ImGui.GetCursorScreenPos();
             float centerY = cursorPos.Y + radius + 4f;
-
             var drawList = ImGui.GetWindowDrawList();
 
             var ship = _entity!.GetView<ShipView>();
             var thrust = _entity.GetView<ThrustView>();
 
-            // Compute values
             float htkValue = 0f;
             string htkText = "-";
             float compValue = 0f;
@@ -920,10 +910,9 @@ namespace Pulsar4X.Client
                 armorText = ship.ArmorThicknessMm.ToString("0.#") + "mm";
             }
 
-            // Compute delta V values
             float dvValue = 0f;
             string dvText = "N/A";
-            string dvTooltip = null;
+            string? dvTooltip = null;
             bool dvPlaceholder = true;
 
             if (thrust != null && thrust.ExhaustVelocityMps > 0)
@@ -932,7 +921,6 @@ namespace Pulsar4X.Client
                 double dv = thrust.DeltaVMps;
                 dvTooltip = Stringify.Velocity(dv);
 
-                // Compact center text
                 if (dv >= 1e6)
                     dvText = (dv / 1e6).ToString("0.#") + "M";
                 else if (dv >= 1e3)
@@ -940,13 +928,12 @@ namespace Pulsar4X.Client
                 else
                     dvText = dv.ToString("0");
 
-                // Percentage: current DV / max DV at full fuel (pre-computed server-side)
                 if (dv > 0 && thrust.MaxDeltaVMps > 0)
                     dvValue = Math.Clamp((float)(dv / thrust.MaxDeltaVMps), 0f, 1f);
             }
 
-            // Draw five indicators left-aligned
-            float x0 = cursorPos.X + radius;
+            float span = indicatorWidth * 4f + radius * 2f;
+            float x0 = cursorPos.X + Math.Max(0f, (availWidth - span) * 0.5f) + radius;
 
             DrawRadialIndicator(drawList, new Vector2(x0, centerY),
                 radius, ringThickness, dvValue, "Δv", dvText, dvPlaceholder, dvTooltip);
@@ -959,91 +946,7 @@ namespace Pulsar4X.Client
             DrawRadialIndicator(drawList, new Vector2(x0 + indicatorWidth * 4f, centerY),
                 radius, ringThickness, 0f, "SHIELD", "N/A", true);
 
-            // Current order (right-aligned on the same row)
-            string goalLabel = "CURRENT Goal";
-            string goalName = "Idle";
-            string goalDetails = "";
-            string goalMessage = "";
-            // Owner-only, and only when the entity has a queue or a goal. A foreign
-            // ship and an idle hull stay on the Idle label.
-            var goal = _entity.GetView<OrdersView>()?.goal;
-            if (goal != null && goal.Name != "")
-            {
-                goalName = goal.Name;
-                goalDetails = goal.Status;
-                goalMessage = goal.Message;
-            }          
-            float rightEdge = cursorPos.X + availWidth;
-            var labelSize = ImGui.CalcTextSize(goalLabel);
-            var nameSize = ImGui.CalcTextSize(goalName);
-
-
-            // Right-align: find the widest text to anchor from
-            float maxTextWidth = Math.Max(labelSize.X, nameSize.X);
-            if (goalDetails.Length > 0)
-            {
-                var detailSize = ImGui.CalcTextSize(goalDetails);
-                maxTextWidth = Math.Max(maxTextWidth, detailSize.X);
-            }
-            if (goalMessage.Length > 0)
-            {
-                var messageSize = ImGui.CalcTextSize(goalMessage);
-                maxTextWidth = Math.Max(maxTextWidth, messageSize.X);
-            }
-            float textX = rightEdge - maxTextWidth;
-
-            // Label
-            float textY = cursorPos.Y + 4f;
-            drawList.AddText(
-                new Vector2(textX, textY),
-                ImGui.ColorConvertFloat4ToU32(Styles.DescriptiveColor),
-                goalLabel);
-
-            // Order name
-            float nameY = textY + labelSize.Y + 2f;
-            var nameColor = goalDetails.Length > 0 ? _accentColor : Styles.NeutralColor;
-            drawList.AddText(
-                new Vector2(textX, nameY),
-                ImGui.ColorConvertFloat4ToU32(nameColor),
-                goalName);
-
-            // Order details (if any)
-            float detailY = nameY + nameSize.Y + 1f;
-            if (goalDetails.Length > 0)
-            {
-                drawList.AddText(
-                    new Vector2(textX, detailY),
-                    ImGui.ColorConvertFloat4ToU32(Styles.DescriptiveColor),
-                    goalDetails);
-            }
-            
-            if (goalMessage.Length > 0)
-            {
-                float messageY = detailY + nameSize.Y + 1;
-                drawList.AddText(
-                    new Vector2(textX, messageY),
-                    ImGui.ColorConvertFloat4ToU32(Styles.DescriptiveColor),
-                    goalMessage);
-            }
-
-            // Reserve vertical space for the indicator row
             ImGui.InvisibleButton("##statusRow", new Vector2(availWidth, radius * 2f + 24f));
-
-            if (CanCancelGoal(goal))
-            {
-                if (ImGui.Button("Cancel now##goal"))
-                    _uiState.GameClient?.SubmitCommandAsync(new CancelGoalCommand(EntityId, CancelTiming.Now));
-                ImGui.SameLine();
-                if (ImGui.Button("Cancel when convenient##goal"))
-                    _uiState.GameClient?.SubmitCommandAsync(new CancelGoalCommand(EntityId, CancelTiming.WhenConvenient));
-            }
-        }
-
-        static bool CanCancelGoal(GoalSnapshot? goal)
-        {
-            if (goal == null || goal.PlayerCancelled || goal.Name.Length == 0)
-                return false;
-            return goal.Status is "Planning" or "Active" or "Holding" or "Failing";
         }
 
         // --- Type-Specific Content ---
@@ -1054,83 +957,54 @@ namespace Pulsar4X.Client
 
             DisplayShipStatusRow();
 
-            if (_entity!.GetView<ShipRefitView>() is { } refit)
+            string captain = string.IsNullOrEmpty(ship?.CommanderName) ? "No captain" : ship!.CommanderName!;
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.TextUnformatted("Captain");
+            ImGui.PopStyleColor();
+            ImGui.SameLine();
+            ImGui.TextUnformatted(captain);
+
+            if (_entity.GetView<OrdersView>() is { } ordersView)
             {
-                SectionLabel("REFIT");
-                ImGui.Indent();
-                ImGui.Text(refit.YardName);
-                ImGui.Text(refit.PointsAccumulated + " / " + refit.PointCost);
-                foreach (var name in refit.Removing)
-                    ImGui.BulletText("Remove  " + name);
-                foreach (var name in refit.Mounting)
-                    ImGui.BulletText("Mount  " + name);
-                ImGui.Unindent();
-            }
-
-            // Crew row
-            SectionLabel("CREW");
-
-            string captainName = ship?.CommanderName ?? "Unassigned";
-
-            ImGui.Indent();
-            int crewCols = ship != null ? 2 : 1;
-            if (ImGui.BeginTable("##crew", crewCols, ImGuiTableFlags.SizingStretchSame))
-            {
-                ImGui.TableNextColumn();
-                StatBlock("COMMANDER", captainName);
-
-                if (ship != null)
+                string line = "Idle";
+                string detail = "";
+                string message = "";
+                if (ordersView.goal.Name.Length > 0)
                 {
-                    ImGui.TableNextColumn();
-                    StatBlock("CREW", ship.CrewRequired.ToString());
+                    line = ordersView.goal.Name;
+                    detail = ordersView.goal.Status;
+                    message = ordersView.goal.Message;
+                }
+                else if (ordersView.Orders.Count > 0)
+                {
+                    line = ordersView.Orders[0].Name;
+                    if (ordersView.Orders.Count > 1)
+                        detail = "+" + (ordersView.Orders.Count - 1);
                 }
 
-                ImGui.EndTable();
-            }
-            ImGui.Unindent();
-
-            // Propulsion stat grid
-            var thrust = _entity.GetView<ThrustView>();
-            var warp = _entity.GetView<WarpAbilityView>();
-
-            if (thrust != null || warp != null)
-            {
-                SectionLabel("PROPULSION");
-
-                ImGui.Indent();
-                int propCols = (thrust != null ? 3 : 0) + (warp != null ? 1 : 0);
-                if (ImGui.BeginTable("##propulsion", propCols, ImGuiTableFlags.SizingStretchSame))
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.TextUnformatted("Now");
+                ImGui.PopStyleColor();
+                ImGui.SameLine();
+                ImGui.TextUnformatted(line);
+                bool hoverLine = ImGui.IsItemHovered();
+                if (detail.Length > 0)
                 {
-                    if (thrust != null)
-                    {
-                        ImGui.TableNextColumn();
-                        StatBlock("THRUST", Stringify.Thrust(thrust.ThrustNewtons));
-
-                        ImGui.TableNextColumn();
-                        StatBlock("BURN", Stringify.Mass(thrust.FuelBurnRateKgPerSec) + "/s");
-
-                        ImGui.TableNextColumn();
-                        StatBlock("EXHAUST", Stringify.Velocity(thrust.ExhaustVelocityMps));
-                    }
-                    if (warp != null)
-                    {
-                        ImGui.TableNextColumn();
-                        StatBlock("WARP", Stringify.Velocity(warp.MaxSpeedMps));
-                    }
-                    ImGui.EndTable();
+                    ImGui.SameLine();
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                    ImGui.TextUnformatted(detail);
+                    ImGui.PopStyleColor();
                 }
-                ImGui.Unindent();
+                if (hoverLine && message.Length > 0)
+                    ImGui.SetTooltip(message);
             }
 
-            // Location
             var parent = GetParent();
             if (parent != null)
             {
-                SectionLabel("LOCATION");
-                ImGui.Indent();
-                ImGui.PushStyleColor(ImGuiCol.Text, _accentColor);
                 if (_entity.GetView<WarpMovingView>() is { } warping)
                 {
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                     ImGui.TextUnformatted("Warping");
                     ImGui.PopStyleColor();
                     ImGui.SameLine();
@@ -1138,137 +1012,33 @@ namespace Pulsar4X.Client
                 }
                 else
                 {
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                     ImGui.TextUnformatted("Orbiting");
                     ImGui.PopStyleColor();
                     ImGui.SameLine();
                     if (ImGui.SmallButton(parent.GetView<NameView>()?.Name ?? "Unknown"))
-                    {
                         _uiState.EntityClicked(parent.Id, _uiState.SelectedStarSystemId, MouseButtons.Primary);
-                    }
                 }
-                ImGui.Unindent();
             }
 
-            // Orders (inline, no collapsing header)
-            IReadOnlyList<OrderSnapshot>? orders = _entity.GetView<OrdersView>()?.Orders;
-            if (orders is { Count: > 0 })
+            if (_entity.GetView<ShipRefitView>() is { } refit)
             {
-                SectionLabel("ACTIONS (" + orders.Count + ")");
-
-                ImGui.Indent();
-                if (ImGui.BeginTable("##orders", 5,
-                    ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.NoPadOuterX))
-                {
-                    ImGui.TableSetupColumn("##n", ImGuiTableColumnFlags.WidthFixed, 20f);
-                    ImGui.TableSetupColumn("##status", ImGuiTableColumnFlags.WidthFixed, 20f);
-                    ImGui.TableSetupColumn("##cmd", ImGuiTableColumnFlags.WidthFixed, 200f);
-                    ImGui.TableSetupColumn("##det", ImGuiTableColumnFlags.WidthStretch);
-                    ImGui.TableSetupColumn("##cancel", ImGuiTableColumnFlags.WidthFixed, 64f);
-
-                    for (int i = 0; i < orders.Count; i++)
-                    {
-                        ImGui.TableNextColumn();
-                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                        ImGui.Text((i + 1).ToString());
-                        ImGui.PopStyleColor();
-                        ImGui.TableNextColumn();
-                        var status = orders[i].Status;
-                        switch (status)
-                        {
-                            case ".":
-                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                                break;
-                            case ">":
-                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                                break;
-                            case "-":
-                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.GoodColor);
-                                break;
-                            case "x":
-                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
-                                break;
-                        }
-                        ImGui.Text(status);
-                        ImGui.PopStyleColor();
-                        ImGui.TableNextColumn();
-                        
-                        // Make thrust-maneuver orders clickable for editing
-                        if (orders[i].IsEditableManeuver)
-                        {
-                            ImGui.PushStyleColor(ImGuiCol.Header, Styles.InvisibleColor);
-                            ImGui.PushStyleColor(ImGuiCol.HeaderHovered,
-                                new Vector4(_accentColor.X * 0.2f, _accentColor.Y * 0.2f, _accentColor.Z * 0.2f, 0.5f));
-                            ImGui.PushStyleColor(ImGuiCol.HeaderActive,
-                                new Vector4(_accentColor.X * 0.3f, _accentColor.Y * 0.3f, _accentColor.Z * 0.3f, 0.7f));
-                            if (ImGui.Selectable(orders[i].Name + "##order" + i, false, ImGuiSelectableFlags.SpanAllColumns))
-                            {
-                                _uiState.OpenManeuverPanelForOrder(EntityId, SystemId, orders[i]);
-                            }
-                            ImGui.PopStyleColor(3);
-                            if (ImGui.IsItemHovered())
-                            {
-                                ImGui.BeginTooltip();
-                                ImGui.Text("Click to edit or delete this order");
-                                ImGui.EndTooltip();
-                            }
-                        }
-                        else
-                        {
-                            ImGui.Text(orders[i].Name);
-                            if (ImGui.IsItemHovered())
-                            {
-                                ImGui.BeginTooltip();
-                                ImGui.Text("Running: " + orders[i].IsRunning);
-                                ImGui.Text("Finished: " + orders[i].IsFinished);
-                                ImGui.EndTooltip();
-                            }
-                        }
-
-                        ImGui.TableNextColumn();
-                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                        ImGui.Text(orders[i].Details);
-                        ImGui.PopStyleColor();
-                        ImGui.TableNextColumn();
-                        if (orders[i].OrderId.Length > 0 && ImGui.SmallButton("Cancel##" + orders[i].OrderId))
-                            _uiState.GameClient?.SubmitCommandAsync(new CancelOrderCommand(EntityId, orders[i].OrderId));
-                    }
-                    ImGui.EndTable();
-                }
-                ImGui.Unindent();
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.TextUnformatted("Refit");
+                ImGui.PopStyleColor();
+                ImGui.SameLine();
+                ImGui.TextUnformatted(refit.YardName + "  " + refit.PointsAccumulated + " / " + refit.PointCost);
             }
 
-            // Cargo summary bars
-            var storage = _entity.GetView<CargoStorageView>();
-            if (storage != null && storage.Stores.Count > 0)
+            if (_entity.Relation == OwnerRelation.Owned)
             {
-                SectionLabel("CARGO");
-
-                ImGui.Indent();
-                foreach (var store in storage.Stores)
-                {
-                    double usedVolume = store.MaxVolume - store.FreeVolume;
-                    double percent = store.MaxVolume > 0 ? usedVolume / store.MaxVolume : 0;
-
-                    string barLabel = store.TypeName + "  " + (percent * 100).ToString("0") + "%  ·  " +
-                        Stringify.VolumeLtr(usedVolume) + " / " + Stringify.VolumeLtr(store.MaxVolume);
-
-                    Vector4 barColor = new Vector4(
-                        _accentColor.X * 0.4f, _accentColor.Y * 0.4f, _accentColor.Z * 0.4f, 0.8f);
-                    if (percent > 0.9)
-                        barColor = Styles.BadColor;
-                    else if (percent > 0.75)
-                        barColor = Styles.OkColor;
-
-                    ImGui.PushStyleColor(ImGuiCol.FrameBg, new Vector4(0.08f, 0.08f, 0.1f, 0.5f));
-                    ImGui.PushStyleColor(ImGuiCol.PlotHistogram, barColor);
-                    ImGui.ProgressBar((float)percent, new Vector2(ImGui.GetContentRegionAvail().X, 16), barLabel);
-                    ImGui.PopStyleColor(2);
-                }
-                ImGui.Unindent();
+                ImGui.Spacing();
+                if (ImGui.Button("Fleet & Ship Management", new Vector2(ImGui.GetContentRegionAvail().X, 0)))
+                    FleetWindow.GetInstance().OrderShip(EntityId);
             }
 
-            // A ship with an installation rate gets the colony construction section, aimed at one
-            // colony in transfer range. A freighter has no rate and does not get the section.
+            // A ship with an installation rate keeps the construction section. Fleet Management
+            // does not have it, and the cargo Install menu reads the colony picked here.
             if (_entity.GetView<ConstructionView>() is { IsShip: true } construction)
             {
                 SectionLabel("CONSTRUCTION");
@@ -1278,7 +1048,7 @@ namespace Pulsar4X.Client
                     _shipConstruction.Display(EntityId, construction, _uiState);
                 ImGui.EndChild();
 
-                if (storage != null)
+                if (_entity.GetView<CargoStorageView>() is { } storage)
                     storage.Display(EntityId, _uiState, ImGuiTreeNodeFlags.None);
             }
         }
@@ -1325,92 +1095,34 @@ namespace Pulsar4X.Client
             if (!isGeoSurveyed)
                 IntelDisplay.OfferLine(_system, _entity.Id, IntelKind.Geo, "geo chart", _uiState);
 
-            var bodyStats = new System.Collections.Generic.List<(string Label, string Value)>(10);
-            var body = _entity.GetView<BodyView>();
-            if (body != null)
+            if (_entity.GetView<BodyView>() is { } body)
             {
-                bodyStats.Add(("Gravity",
-                    body.GravityMetresPerSec2.ToString("0.##") + " m/s² · "
-                    + (body.GravityMetresPerSec2 / 9.80665).ToString("0.###") + " G"));
-                bodyStats.Add(("Temperature", body.SurfaceTemperatureC.ToString("##0.#") + " °C"));
-                bodyStats.Add(("Day Length", body.DayLength.TotalDays.ToString("0.#") + " days"));
-                bodyStats.Add(("Axial Tilt", body.AxialTiltDegrees.ToString("0.#") + "°"));
-                bodyStats.Add(("Tectonics", body.Tectonics));
-                bodyStats.Add(("Magnetic Field", body.MagneticFieldMicroTesla.ToString("0.##") + " μT"));
-                // Every colony needs infrastructure now, so show what a body's infrastructure
-                // must be rated for. Earth-like worlds take the default Earth-Standard design;
-                // hostile worlds need one tuned to their gravity and atmospheric pressure.
-                string infraReq;
-                if (!_entity.HasView<ColonizableView>())
-                {
-                    infraReq = "Not colonizable";
-                }
-                else if (body.SupportsPopulations)
-                {
-                    infraReq = "Earth-Standard";
-                }
-                else
-                {
-                    string grav = body.GravityMetresPerSec2.ToString("0.##") + " m/s²";
-                    string pressure;
-                    var atmosphere = _entity.GetView<AtmosphereView>();
-                    if (!isGeoSurveyed)
-                        pressure = "? atm"; // atmospheric pressure isn't known until surveyed
-                    else if (atmosphere != null && atmosphere.PressureAtm > 0)
-                        pressure = atmosphere.PressureAtm.ToString("0.##") + " atm";
-                    else
-                        pressure = "vacuum";
-                    infraReq = grav + " · " + pressure;
-                }
-                bodyStats.Add(("Infrastructure", infraReq));
+                ImGui.TextUnformatted(body.GravityMetresPerSec2.ToString("0.##") + " m/s²  ·  "
+                    + body.SurfaceTemperatureC.ToString("0.#") + " °C");
             }
-
             if (_entity.GetView<MassVolumeView>() is { } massVolume)
             {
-                bodyStats.Add(("Mass", Stringify.CelestialMass(massVolume.MassKg)));
-                bodyStats.Add(("Radius", Stringify.Distance(massVolume.RadiusMetres)));
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.TextUnformatted(Stringify.CelestialMass(massVolume.MassKg)
+                    + "  ·  " + Stringify.Distance(massVolume.RadiusMetres));
+                ImGui.PopStyleColor();
             }
 
-            SectionLabel(body != null ? body.BodyType.ToUpperInvariant() : "CELESTIAL BODY");
-            DisplayStatCards("##body-stat", bodyStats);
-
-            if (isGeoSurveyed && _entity.GetView<AtmosphereView>() is { } atmosphereView)
-            {
+            bool ownedColony = GetColony()?.Relation == OwnerRelation.Owned;
+            // Atmosphere and the rest of the body live on the colony summary once someone is there.
+            if (isGeoSurveyed && !ownedColony && _entity.GetView<AtmosphereView>() is { } atmosphereView)
                 atmosphereView.Display();
-            }
 
-            if (_entity.GetView<ColonyView>() is { } colonyView)
-            {
-                colonyView.Display(_entity.Id);
-            }
+            DisplayColonyManagementLinks();
+            DisplayFriendlyMarkets();
 
             if (isGeoSurveyed && _entity.GetView<MineralDepositsView>() is { } deposits
-                && ImGui.CollapsingHeader("Minerals", ImGuiTreeNodeFlags.DefaultOpen))
+                && ImGui.CollapsingHeader("Minerals"))
             {
                 deposits.Display(_entity.Id);
             }
 
             DisplaySurveyInfo();
-
-            var colony = GetColony();
-            if (colony?.GetView<ColonyMiningView>() is { Minerals.Count: > 0 } mining
-                && ImGui.CollapsingHeader("Mining", ImGuiTreeNodeFlags.DefaultOpen))
-            {
-                mining.Display();
-            }
-
-            // Installations (collapsed by default)
-            if (_entity.GetView<InstallationsView>() is { } installations
-                && ImGui.CollapsingHeader("Installations"))
-            {
-                installations.Display(_entity.Id, _uiState);
-            }
-
-            // Cargo (collapsed by default)
-            if (_entity.GetView<CargoStorageView>() is { } cargo)
-            {
-                cargo.Display(_entity.Id, _uiState, ImGuiTreeNodeFlags.None);
-            }
         }
 
         private void DisplaySmallBodyContent()
@@ -1421,23 +1133,22 @@ namespace Pulsar4X.Client
             if (!isGeoSurveyed)
                 IntelDisplay.OfferLine(_system, _entity.Id, IntelKind.Geo, "geo chart", _uiState);
 
-            ImGui.Columns(2, "##small-body-info", true);
-
             if (_entity.GetView<BodyView>() is { } body)
-            {
-                DisplayHelpers.PrintRow("Body Type", body.BodyType);
-            }
+                ImGui.TextUnformatted(body.BodyType);
 
             if (_entity.GetView<MassVolumeView>() is { } massVolume)
             {
-                DisplayHelpers.PrintRow("Mass", Stringify.CelestialMass(massVolume.MassKg));
-                DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolume.RadiusMetres));
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.TextUnformatted(Stringify.CelestialMass(massVolume.MassKg)
+                    + "  ·  " + Stringify.Distance(massVolume.RadiusMetres));
+                ImGui.PopStyleColor();
             }
 
-            ImGui.Columns(1);
+            DisplayColonyManagementLinks();
+            DisplayFriendlyMarkets();
 
             if (isGeoSurveyed && _entity.GetView<MineralDepositsView>() is { } deposits
-                && ImGui.CollapsingHeader("Minerals", ImGuiTreeNodeFlags.DefaultOpen))
+                && ImGui.CollapsingHeader("Minerals"))
             {
                 deposits.Display(_entity.Id);
             }
@@ -1447,98 +1158,63 @@ namespace Pulsar4X.Client
 
         private void DisplayColonyContent()
         {
-            bool isGeoSurveyed = _entity!.GetView<GeoSurveyView>()?.IsSurveyComplete ?? false;
-
-            DisplayProgressIndicator();
-
-            // Population (prominent at top)
-            if (_entity.GetView<ColonyView>() is { } colonyView)
+            if (_entity!.GetView<ColonyView>() is { } colonyView)
             {
-                colonyView.Display(_entity.Id);
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.TextUnformatted("Population");
+                ImGui.PopStyleColor();
+                ImGui.SameLine();
+                ImGui.TextUnformatted(Stringify.Quantity(colonyView.Population));
             }
 
-            // Environment section
-            if (ImGui.CollapsingHeader("Environment"))
+            if (_entity.Relation == OwnerRelation.Owned)
             {
-                ImGui.Columns(2, "##environment-info", true);
-                if (_entity.GetView<BodyView>() is { } body)
+                if (_entity.GetView<InfrastructureView>() is { HasInstalledInfrastructure: true } infrastructure)
                 {
-                    DisplayHelpers.PrintRow("Body Type", body.BodyType);
-                    DisplayHelpers.PrintRow("Gravity", body.GravityMetresPerSec2.ToString("0.##") + " m/s²",
-                        null, (body.GravityMetresPerSec2 / 9.80665).ToString("0.###") + " G");
-                    DisplayHelpers.PrintRow("Temperature", body.SurfaceTemperatureC.ToString("##0.#") + " °C");
+                    bool overCapacity = infrastructure.CapacityAvailable < 0;
+                    string summary = $"{infrastructure.CapacityRequired:N0} / {infrastructure.CapacityProvided:N0}"
+                        + $"  ·  {infrastructure.Efficiency * 100:0}% output";
+                    ImGui.PushStyleColor(ImGuiCol.Text, overCapacity ? Styles.BadColor : Styles.DescriptiveColor);
+                    ImGui.TextUnformatted(summary);
+                    ImGui.PopStyleColor();
                 }
-                if (_entity.GetView<MassVolumeView>() is { } massVolume)
+                else
                 {
-                    DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolume.RadiusMetres));
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                    ImGui.TextUnformatted("No infrastructure");
+                    ImGui.PopStyleColor();
                 }
-                ImGui.Columns(1);
-            }
-
-            // Atmosphere
-            if (isGeoSurveyed && _entity.GetView<AtmosphereView>() is { } atmosphere)
-            {
-                atmosphere.Display();
-            }
-
-            // Minerals (collapsed by default)
-            if (isGeoSurveyed && _entity.GetView<MineralDepositsView>() is { } deposits
-                && ImGui.CollapsingHeader("Minerals"))
-            {
-                deposits.Display(_entity.Id);
-            }
-
-            // Mining
-            if (_entity.GetView<ColonyMiningView>() is { Minerals.Count: > 0 } mining
-                && ImGui.CollapsingHeader("Mining", ImGuiTreeNodeFlags.DefaultOpen))
-            {
-                mining.Display();
-            }
-
-            // Installations
-            if (_entity.GetView<InstallationsView>() is { } installations
-                && ImGui.CollapsingHeader("Installations", ImGuiTreeNodeFlags.DefaultOpen))
-            {
-                installations.Display(_entity.Id, _uiState);
-            }
-
-            // Cargo
-            if (_entity.GetView<CargoStorageView>() is { } cargo)
-            {
-                cargo.Display(_entity.Id, _uiState);
             }
 
             DisplayOrbitInfo();
+            DisplayColonyManagementLinks();
+
+            // Friendly and neutral colonies are not in Colony Management. The market stays here.
+            if (_entity.Relation != OwnerRelation.Owned && _entity.GetView<MarketView>() is { } market)
+            {
+                MarketBarsDisplay.Display(_entity, market, _uiState);
+                IntelDisplay.Display(_entity, _entity.GetView<IntelBookView>(), _system?.SystemId ?? "", _uiState);
+            }
         }
 
         private void DisplayGenericContent()
         {
-            ImGui.Columns(2, "##generic-info", true);
             if (_entity!.GetView<MassVolumeView>() is { } massVolume)
             {
-                DisplayHelpers.PrintRow("Mass", Stringify.Mass(massVolume.MassKg));
-                DisplayHelpers.PrintRow("Radius", Stringify.Distance(massVolume.RadiusMetres));
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.TextUnformatted(Stringify.Mass(massVolume.MassKg)
+                    + "  ·  " + Stringify.Distance(massVolume.RadiusMetres));
+                ImGui.PopStyleColor();
             }
-            ImGui.Columns(1);
 
             DisplayOrbitInfo();
             DisplayOrders();
+            DisplayColonyManagementLinks();
+            DisplayFriendlyMarkets();
 
-            if (_entity.GetView<InstallationsView>() is { } installations
-                && ImGui.CollapsingHeader("Components", ImGuiTreeNodeFlags.DefaultOpen))
-            {
-                installations.Display(_entity.Id, _uiState);
-            }
-
-            if (_entity.GetView<CargoStorageView>() is { } cargo)
-            {
-                cargo.Display(_entity.Id, _uiState);
-            }
-
-            bool isGeoSurveyed = _entity.GetView<GeoSurveyView>()?.IsSurveyComplete ?? false;
-
-            if (isGeoSurveyed && _entity.GetView<MineralDepositsView>() is { } deposits
-                && ImGui.CollapsingHeader("Minerals", ImGuiTreeNodeFlags.DefaultOpen))
+            if (_entity.GetView<GeoSurveyView>()?.IsSurveyComplete == true
+                && _entity.GetView<MineralDepositsView>() is { } deposits
+                && ImGui.CollapsingHeader("Minerals"))
             {
                 deposits.Display(_entity.Id);
             }

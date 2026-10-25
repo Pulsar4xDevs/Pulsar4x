@@ -605,7 +605,7 @@ namespace Pulsar4X.Engine.Api
                         if (commanders != null)
                             _sink(new GameEventEnvelope(GameEventType.CommandersChanged, Commanders: commanders));
                     }
-                    // EntityWindow reads OrdersView on the per-entity system snapshot,
+                    // EntityCard reads OrdersView on the per-entity system snapshot,
                     // not the fleet tree. OrdersChanged is mapped to FleetsChanged, so
                     // also upsert the commanded entity when we have its id.
                     if (m.EntityId is { } orderEntityId

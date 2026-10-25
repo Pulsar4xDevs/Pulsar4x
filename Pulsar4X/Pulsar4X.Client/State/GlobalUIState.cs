@@ -828,7 +828,7 @@ namespace Pulsar4X.Client
 
             if (button == MouseButtons.Primary)
             {
-                WindowManager.ActivateEntityWindow(new EntityWindowEntity(entityGuid, starSys));
+                WindowManager.ActivateEntityCard(new EntityCardEntity(entityGuid, starSys));
             }
         }
 

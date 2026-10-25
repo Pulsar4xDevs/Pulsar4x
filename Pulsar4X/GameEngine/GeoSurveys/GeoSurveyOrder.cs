@@ -126,7 +126,7 @@ public class GeoSurveyOrder : EntityAction
 
     void PublishSurveyChanged()
     {
-        // EntityWindow re-reads the open entity's snapshot each frame. The ship snapshot
+        // EntityCard re-reads the open entity's snapshot each frame. The ship snapshot
         // carries the order line; the body snapshot carries GeoSurveyView and the mineral
         // reveal. Push both, addressed to the surveying faction, or the body window stays stale.
         int? factionId = EntityCommanding?.FactionOwnerID;

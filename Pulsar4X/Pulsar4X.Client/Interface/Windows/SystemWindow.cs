@@ -148,8 +148,8 @@ public class SystemWindow : UniquePulsarGuiWindow<SystemWindow>
                     }
                     else
                     {
-                        _uiState.WindowManager.ActivateEntityWindow(
-                            new EntityWindowEntity(colony.Id, _uiState.SelectedStarSystemId));
+                        _uiState.WindowManager.ActivateEntityCard(
+                            new EntityCardEntity(colony.Id, _uiState.SelectedStarSystemId));
                     }
                 }
             }

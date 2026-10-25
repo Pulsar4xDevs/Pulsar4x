@@ -63,8 +63,23 @@ namespace Pulsar4X.Client
         {
             if(!IsActive || !_uiState.IsGameLoaded) return;
 
+            var work = ImGui.GetMainViewport();
+            float maxHeight = work.WorkSize.Y;
+            if (_uiState.WindowManager.NamedWindowsByType.TryGetValue(typeof(EntityCard), out var entityCards))
+            {
+                foreach (var window in entityCards)
+                {
+                    if (window is EntityCard entity && entity.GetActive() && entity.ScreenTop > 8f)
+                        maxHeight = Math.Min(maxHeight, entity.ScreenTop - 4f);
+                }
+            }
+            maxHeight = Math.Max(48f, maxHeight);
+
+            _flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar
+                | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoBackground;
             ImGui.SetNextWindowSize(new Vector2(256, 0));
-            ImGui.SetNextWindowPos(new Vector2(ImGui.GetMainViewport().WorkSize.X - 256, 0));
+            ImGui.SetNextWindowSizeConstraints(new Vector2(256, 0), new Vector2(256, maxHeight));
+            ImGui.SetNextWindowPos(new Vector2(work.WorkPos.X + work.WorkSize.X - 256, work.WorkPos.Y));
             ImGui.SetNextWindowBgAlpha(0);
             if(Window.Begin("###selector", _flags))
             {

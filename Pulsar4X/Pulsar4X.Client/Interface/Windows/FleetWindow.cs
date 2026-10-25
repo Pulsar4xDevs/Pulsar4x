@@ -1989,9 +1989,19 @@ namespace Pulsar4X.Client
                         ImGui.TableNextColumn();
                         ImGui.Text((i + 1).ToString());
                         ImGui.TableNextColumn();
-                        ImGui.Text(order.Name);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(order.IsRunning ? "Running" : order.IsFinished ? "Finished" : order.Details);
+                        if (order.IsEditableManeuver && orderShip != null && orderShip.SystemId.Length > 0)
+                        {
+                            if (ImGui.Selectable(order.Name + "##edit-" + i))
+                                _uiState.OpenManeuverPanelForOrder(orderShip.Id, orderShip.SystemId, order);
+                            if (ImGui.IsItemHovered())
+                                ImGui.SetTooltip("Click to edit or delete this order");
+                        }
+                        else
+                        {
+                            ImGui.Text(order.Name);
+                            if (ImGui.IsItemHovered())
+                                ImGui.SetTooltip(order.IsRunning ? "Running" : order.IsFinished ? "Finished" : order.Details);
+                        }
                         ImGui.TableNextColumn();
                         if (order.OrderId.Length > 0)
                         {

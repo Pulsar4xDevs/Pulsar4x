@@ -159,7 +159,7 @@ public class SystemViewPreferences : UniquePulsarGuiWindow<SystemViewPreferences
         }
         else
         {
-            values.Add(UserOrbitSettings.OrbitBodyType.Asteroid, true);
+            values.Add(UserOrbitSettings.OrbitBodyType.Asteroid, false);
         }
 
         // Colonies
@@ -286,7 +286,7 @@ public class SystemViewPreferences : UniquePulsarGuiWindow<SystemViewPreferences
             writer.WriteLine("[meta]");
             writer.WriteLine("name=Default");
             writer.WriteLine("[views]");
-            writer.WriteLine("asteroids=True");
+            writer.WriteLine("asteroids=False");
             writer.WriteLine("colonies=True");
             writer.WriteLine("comets=True");
             writer.WriteLine("moons=True");
@@ -325,7 +325,7 @@ public class SystemViewPreferences : UniquePulsarGuiWindow<SystemViewPreferences
                     {
                         FilterCheckmarks = new ()
                         {
-                            { UserOrbitSettings.OrbitBodyType.Asteroid, true },
+                            { UserOrbitSettings.OrbitBodyType.Asteroid, false },
                             { UserOrbitSettings.OrbitBodyType.Colony, true },
                             { UserOrbitSettings.OrbitBodyType.Comet, true },
                             { UserOrbitSettings.OrbitBodyType.Moon, true },
