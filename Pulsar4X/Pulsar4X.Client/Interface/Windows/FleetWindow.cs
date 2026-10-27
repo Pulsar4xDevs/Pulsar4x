@@ -248,11 +248,6 @@ namespace Pulsar4X.Client
                 {
                     ImGui.SameLine();
                     ImGui.SetCursorPosY(27f);
-                    DisplayOrders();
-
-                    ImGui.SameLine();
-                    ImGui.SetCursorPosY(27f);
-
                     DisplayTabs(galaxy);
                 }
 
@@ -271,78 +266,74 @@ namespace Pulsar4X.Client
 
                 if(ImGui.BeginTabItem("Summary"))
                 {
-                    Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-                    var firstChildSize = new Vector2(windowContentSize.X * 0.99f, windowContentSize.Y);
-                    if (ImGui.BeginChild("FleetSummary1", firstChildSize, ImGuiChildFlags.Borders))
+                    if (orderShip != null)
                     {
-                        if (orderShip != null)
-                            DisplayShipSummary(galaxy);
-                        else if (selectedFleet != null && ImGui.CollapsingHeader("Fleet Information", ImGuiTreeNodeFlags.DefaultOpen))
-                        {
-                            ImGui.Columns(2);
-                            DisplayHelpers.PrintRow("Name", selectedFleet.Name);
-                            DisplayHelpers.PrintRow("Flagship", selectedFleet.FlagshipName ?? "-");
-                            DisplayFleetCommanderRow();
-                            DisplayHelpers.PrintRow("Command span", FleetSpanLabel(),
-                                tooltipTwo: "How far this fleet's orders reach. It comes from the flagship's bridge.");
-
-                            // Current system
-                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                            ImGui.Text("Current System");
-                            ImGui.PopStyleColor();
-                            ImGui.NextColumn();
-                            if (ImGui.SmallButton(selectedFleet.SystemName ?? "Unknown"))
-                            {
-                                if(selectedFleet.SystemId != null)
-                                    _uiState.SetActiveSystem(selectedFleet.SystemId);
-                            }
-                            ImGui.NextColumn();
-                            ImGui.Separator();
-
-                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                            ImGui.Text("Orbiting");
-                            ImGui.PopStyleColor();
-                            ImGui.NextColumn();
-                            // The server already resolved this to the nearest faction-visible ancestor
-                            // (hidden entities like un-surveyed anomalies are skipped).
-                            if (ImGui.SmallButton(selectedFleet.OrbitingName ?? "Unknown"))
-                            {
-                                if(selectedFleet.OrbitingEntityId is { } orbitingId && selectedFleet.SystemId != null)
-                                    _uiState.EntityClicked(orbitingId, selectedFleet.SystemId, MouseButtons.Primary);
-                            }
-                            ImGui.NextColumn();
-                            ImGui.Separator();
-                            DisplayHelpers.PrintRow("Ships", selectedFleet.Ships.Count.ToString());
-                        }
-                        ImGui.Columns(1);
+                        DisplayShipSummary(galaxy);
                     }
-                    ImGui.EndChild();
-                    ImGui.SameLine();
+                    else if (selectedFleet != null)
+                    {
+                        Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+                        var firstChildSize = new Vector2(windowContentSize.X * 0.99f, windowContentSize.Y);
+                        if (ImGui.BeginChild("FleetSummary1", firstChildSize, ImGuiChildFlags.Borders))
+                        {
+                            if (ImGui.CollapsingHeader("Fleet Information", ImGuiTreeNodeFlags.DefaultOpen))
+                            {
+                                ImGui.Columns(2);
+                                DisplayHelpers.PrintRow("Name", selectedFleet.Name);
+                                DisplayHelpers.PrintRow("Flagship", selectedFleet.FlagshipName ?? "-");
+                                DisplayFleetCommanderRow();
+                                DisplayHelpers.PrintRow("Command span", FleetSpanLabel(),
+                                    tooltipTwo: "How far this fleet's orders reach. It comes from the flagship's bridge.");
+
+                                // Current system
+                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                                ImGui.Text("Current System");
+                                ImGui.PopStyleColor();
+                                ImGui.NextColumn();
+                                if (ImGui.SmallButton(selectedFleet.SystemName ?? "Unknown"))
+                                {
+                                    if(selectedFleet.SystemId != null)
+                                        _uiState.SetActiveSystem(selectedFleet.SystemId);
+                                }
+                                ImGui.NextColumn();
+                                ImGui.Separator();
+
+                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                                ImGui.Text("Orbiting");
+                                ImGui.PopStyleColor();
+                                ImGui.NextColumn();
+                                // The server already resolved this to the nearest faction-visible ancestor
+                                // (hidden entities like un-surveyed anomalies are skipped).
+                                if (ImGui.SmallButton(selectedFleet.OrbitingName ?? "Unknown"))
+                                {
+                                    if(selectedFleet.OrbitingEntityId is { } orbitingId && selectedFleet.SystemId != null)
+                                        _uiState.EntityClicked(orbitingId, selectedFleet.SystemId, MouseButtons.Primary);
+                                }
+                                ImGui.NextColumn();
+                                ImGui.Separator();
+                                DisplayHelpers.PrintRow("Ships", selectedFleet.Ships.Count.ToString());
+                            }
+                            ImGui.Columns(1);
+                        }
+                        ImGui.EndChild();
+                    }
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("Issue Orders"))
+                if (ImGui.BeginTabItem("Orders"))
                 {
                     var size = ImGui.GetContentRegionAvail();
-                    var firstChildSize = new Vector2(size.X * 0.27f, size.Y);
-                    var secondChildSize = new Vector2(size.X * 0.73f - (size.X * 0.01f), size.Y);
-                    if(ImGui.BeginChild("IssueOrders-List", firstChildSize, ImGuiChildFlags.Borders))
-                    {
-                        DisplayOrderChoices(galaxy);
-                    }
+                    var column = new Vector2(size.X * 0.33f, size.Y);
+                    var formSize = new Vector2(size.X * 0.33f - (size.X * 0.01f), size.Y);
+                    if (ImGui.BeginChild("Orders-Queue", column, ImGuiChildFlags.Borders))
+                        DisplayOrders();
                     ImGui.EndChild();
                     ImGui.SameLine();
-                    IssueOrdersDisplay(galaxy, secondChildSize);
-                    ImGui.EndTabItem();
-                }
-
-                if (orderShip != null && ImGui.BeginTabItem("Components"))
-                {
-                    var components = SubjectEntity(galaxy)?.GetView<InstallationsView>();
-                    if (components == null || components.Installations.Count == 0)
-                        ImGui.Text("No components on this ship.");
-                    else
-                        components.Display(orderShip.Id, _uiState);
+                    if (ImGui.BeginChild("IssueOrders-List", column, ImGuiChildFlags.Borders))
+                        DisplayOrderChoices(galaxy);
+                    ImGui.EndChild();
+                    ImGui.SameLine();
+                    IssueOrdersDisplay(galaxy, formSize);
                     ImGui.EndTabItem();
                 }
 
@@ -370,73 +361,125 @@ namespace Pulsar4X.Client
             var ship = orderShip;
             string systemId = string.IsNullOrEmpty(ship.SystemId) ? _uiState.SelectedStarSystemId : ship.SystemId;
             string systemName = string.IsNullOrEmpty(systemId) ? "Unknown" : galaxy.GetSystem(systemId)?.Name ?? "Unknown";
-
-            if (ImGui.CollapsingHeader("Ship", ImGuiTreeNodeFlags.DefaultOpen))
-            {
-                ImGui.Columns(2);
-                DisplayHelpers.PrintRow("Name", ship.Name);
-                DisplayHelpers.PrintRow("Design", string.IsNullOrEmpty(ship.DesignName) ? "-" : ship.DesignName);
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.Text("Captain");
-                ImGui.PopStyleColor();
-                ImGui.NextColumn();
-                DisplayCaptainButton(ship.Id, CaptainLabel(ship), CaptainTooltip(ship));
-                ImGui.NextColumn();
-                ImGui.Separator();
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.Text("Current System");
-                ImGui.PopStyleColor();
-                ImGui.NextColumn();
-                if (ImGui.SmallButton(systemName))
-                {
-                    if (!string.IsNullOrEmpty(systemId))
-                        _uiState.SetActiveSystem(systemId);
-                }
-                ImGui.NextColumn();
-                ImGui.Columns(1);
-            }
-
             var subject = SubjectEntity(galaxy);
-            // Output is the net added to the batteries this step. The old power window's Load
-            // is max output divided by that net, so it is not a percentage and is not shown.
-            if (subject?.GetView<EnergyView>() is { } energy
-                && ImGui.CollapsingHeader("Power", ImGuiTreeNodeFlags.DefaultOpen))
+
+            Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+            var firstChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
+            var secondChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
+            var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
+
+            if (ImGui.BeginChild("ShipSummary1", firstChildSize, ImGuiChildFlags.Borders))
             {
-                bool full = energy.StoreMax > 0 && energy.Stored >= energy.StoreMax * 0.999;
-                // The last charge step can leave Output positive after the battery is already full.
-                // Nothing further is stored until a warp runs the energy step again.
-                string status = "Holding";
-                if (energy.Output < -0.001)
-                    status = "Draining";
-                else if (full)
-                    status = "Full";
-                else if (energy.Output > 0.001)
-                    status = "Charging";
+                if (ImGui.CollapsingHeader("Ship", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    ImGui.Columns(2);
+                    DisplayHelpers.PrintRow("Name", ship.Name);
+                    DisplayHelpers.PrintRow("Design", string.IsNullOrEmpty(ship.DesignName) ? "-" : ship.DesignName);
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                    ImGui.Text("Captain");
+                    ImGui.PopStyleColor();
+                    ImGui.NextColumn();
+                    DisplayCaptainButton(ship.Id, CaptainLabel(ship), CaptainTooltip(ship));
+                    ImGui.NextColumn();
+                    ImGui.Separator();
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                    ImGui.Text("Current System");
+                    ImGui.PopStyleColor();
+                    ImGui.NextColumn();
+                    if (ImGui.SmallButton(systemName))
+                    {
+                        if (!string.IsNullOrEmpty(systemId))
+                            _uiState.SetActiveSystem(systemId);
+                    }
+                    ImGui.NextColumn();
+                    ImGui.Columns(1);
+                }
 
-                double fraction = energy.StoreMax > 0 ? energy.Stored / energy.StoreMax : 0;
-                if (fraction < 0) fraction = 0;
-                if (fraction > 1) fraction = 1;
-                string batteries = (fraction * 100).ToString("0.#") + "%  "
-                    + Stringify.Energy(energy.Stored < 0 ? 0 : energy.Stored) + " / "
-                    + Stringify.Energy(energy.StoreMax < 0 ? 0 : energy.StoreMax);
-                double flowKw = full && energy.Output > 0 ? 0 : energy.Output;
-                string flow = "0 kW";
-                if (flowKw > 0.001)
-                    flow = "+" + Stringify.Power(flowKw);
-                else if (flowKw < -0.001)
-                    flow = "-" + Stringify.Power(-flowKw);
+                // Output is the net added to the batteries this step. The old power window's Load
+                // is max output divided by that net, so it is not a percentage and is not shown.
+                if (subject?.GetView<EnergyView>() is { } energy
+                    && ImGui.CollapsingHeader("Power", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    bool full = energy.StoreMax > 0 && energy.Stored >= energy.StoreMax * 0.999;
+                    // The last charge step can leave Output positive after the battery is already full.
+                    // Nothing further is stored until a warp runs the energy step again.
+                    string status = "Holding";
+                    if (energy.Output < -0.001)
+                        status = "Draining";
+                    else if (full)
+                        status = "Full";
+                    else if (energy.Output > 0.001)
+                        status = "Charging";
 
-                ImGui.ProgressBar((float)fraction, new Vector2(ImGui.GetContentRegionAvail().X, 16), batteries);
-                ImGui.Columns(2);
-                DisplayHelpers.PrintRow("Status", status, "Charging fills the batteries. Draining means demand is above generation.");
-                DisplayHelpers.PrintRow("Flow", flow, "Spare or shortfall added to the batteries this step.");
-                DisplayHelpers.PrintRow("Demand", Stringify.Power(energy.Demand < 0 ? 0 : energy.Demand), "What the ship's components are drawing.");
-                DisplayHelpers.PrintRow("Generation", Stringify.Power(energy.MaxOutput < 0 ? 0 : energy.MaxOutput), "Reactor and solar capacity.", separator: false);
-                ImGui.Columns(1);
+                    double fraction = energy.StoreMax > 0 ? energy.Stored / energy.StoreMax : 0;
+                    if (fraction < 0) fraction = 0;
+                    if (fraction > 1) fraction = 1;
+                    string batteries = (fraction * 100).ToString("0.#") + "%  "
+                        + Stringify.Energy(energy.Stored < 0 ? 0 : energy.Stored) + " / "
+                        + Stringify.Energy(energy.StoreMax < 0 ? 0 : energy.StoreMax);
+                    double flowKw = full && energy.Output > 0 ? 0 : energy.Output;
+                    string flow = "0 kW";
+                    if (flowKw > 0.001)
+                        flow = "+" + Stringify.Power(flowKw);
+                    else if (flowKw < -0.001)
+                        flow = "-" + Stringify.Power(-flowKw);
+
+                    ImGui.ProgressBar((float)fraction, new Vector2(ImGui.GetContentRegionAvail().X, 16), batteries);
+                    ImGui.Columns(2);
+                    DisplayHelpers.PrintRow("Status", status, "Charging fills the batteries. Draining means demand is above generation.");
+                    DisplayHelpers.PrintRow("Flow", flow, "Spare or shortfall added to the batteries this step.");
+                    DisplayHelpers.PrintRow("Demand", Stringify.Power(energy.Demand < 0 ? 0 : energy.Demand), "What the ship's components are drawing.");
+                    DisplayHelpers.PrintRow("Generation", Stringify.Power(energy.MaxOutput < 0 ? 0 : energy.MaxOutput), "Reactor and solar capacity.", separator: false);
+                    ImGui.Columns(1);
+                }
             }
+            ImGui.EndChild();
 
-            if (subject?.GetView<CargoStorageView>() is { } cargo && cargo.Stores.Count > 0)
-                cargo.Display(ship.Id, _uiState);
+            ImGui.SameLine();
+            if (ImGui.BeginChild("ShipSummary2", secondChildSize, ImGuiChildFlags.Borders))
+            {
+                if (ImGui.CollapsingHeader("Crew", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    int required = subject?.GetView<ShipView>()?.CrewRequired ?? 0;
+                    ImGui.Columns(2);
+                    DisplayHelpers.PrintRow("Required", required.ToString("N0"), separator: false);
+                    ImGui.Columns(1);
+                }
+
+                if (ImGui.CollapsingHeader("Components", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    var components = subject?.GetView<InstallationsView>();
+                    if (components == null || components.Installations.Count == 0)
+                        ImGui.Text("No components on this ship.");
+                    else
+                        components.Display(ship.Id, _uiState);
+                }
+            }
+            ImGui.EndChild();
+
+            ImGui.SameLine();
+            if (ImGui.BeginChild("ShipSummary3", thirdChildSize, ImGuiChildFlags.Borders))
+            {
+                if (subject?.GetView<CargoStorageView>() is { } cargo && cargo.Stores.Count > 0)
+                {
+                    if (!string.IsNullOrEmpty(ship.SystemId))
+                    {
+                        var size = ImGui.GetContentRegionAvail();
+                        ImGui.PushStyleColor(ImGuiCol.Button, Styles.Theme.Button.ToImVector4());
+                        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Styles.Theme.ButtonHovered.ToImVector4());
+                        ImGui.PushStyleColor(ImGuiCol.ButtonActive, Styles.Theme.ButtonActive.ToImVector4());
+                        if (ImGui.Button("Initiate Transfer", new Vector2(size.X - 8, 18)))
+                        {
+                            var transfer = CreateTransferWindow.GetInstance();
+                            transfer.SetLeft(ship.Id, ship.SystemId);
+                            transfer.SetActive(true);
+                        }
+                        ImGui.PopStyleColor(3);
+                    }
+                    cargo.Display(ship.Id, _uiState);
+                }
+            }
+            ImGui.EndChild();
         }
 
         private void DisplayOrderChoices(IClientGalaxy galaxy)
@@ -1962,87 +2005,79 @@ namespace Pulsar4X.Client
                 : selectedFleet?.Orders ?? Array.Empty<OrderSnapshot>();
             int holderId = orderShip?.Id ?? selectedFleet!.Id;
 
-            var xPosition = ImGui.GetCursorPosX();
-            Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-
-            if (ImGui.BeginChild("Fleet Orders", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y), ImGuiChildFlags.Borders))
+            DisplayHelpers.Header(header);
+            if (!shipActionsOnly && HasGoal(goal))
             {
-                DisplayHelpers.Header(header);
-                if (!shipActionsOnly && HasGoal(goal))
+                if (ImGui.BeginTable("SubjectGoal", 2, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
                 {
-                    if (ImGui.BeginTable("SubjectGoal", 2, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
-                    {
-                        ImGui.TableSetupColumn("Goal", ImGuiTableColumnFlags.None, 0.4f);
-                        ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 0.6f);
-                        ImGui.TableHeadersRow();
-                        ImGui.TableNextColumn();
-                        ImGui.Text(goal!.Name);
-                        ImGui.TableNextColumn();
-                        ImGui.Text(goal.Status);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(goal.Message);
-                        ImGui.EndTable();
-                    }
-                    if (CanCancelGoal(goal))
-                    {
-                        if (ImGui.Button("Cancel now"))
-                            SubmitFleetCommand(new CancelGoalCommand(holderId, CancelTiming.Now));
-                        ImGui.SameLine();
-                        if (ImGui.Button("Cancel when convenient"))
-                            SubmitFleetCommand(new CancelGoalCommand(holderId, CancelTiming.WhenConvenient));
-                    }
-                }
-
-                if (orders.Count == 0)
-                {
-                    ImGui.Text("None");
-                }
-                else if (ImGui.BeginTable("SubjectOrders", 4, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
-                {
-                    ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.1f);
-                    ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.None, 0.55f);
-                    ImGui.TableSetupColumn("Pause", ImGuiTableColumnFlags.None, 0.15f);
-                    ImGui.TableSetupColumn("Cancel", ImGuiTableColumnFlags.None, 0.2f);
+                    ImGui.TableSetupColumn("Goal", ImGuiTableColumnFlags.None, 0.4f);
+                    ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 0.6f);
                     ImGui.TableHeadersRow();
-
-                    for (int i = 0; i < orders.Count; i++)
-                    {
-                        var order = orders[i];
-                        ImGui.TableNextColumn();
-                        ImGui.Text((i + 1).ToString());
-                        ImGui.TableNextColumn();
-                        if (order.IsEditableManeuver && orderShip != null && orderShip.SystemId.Length > 0)
-                        {
-                            if (ImGui.Selectable(order.Name + "##edit-" + i))
-                                _uiState.OpenManeuverPanelForOrder(orderShip.Id, orderShip.SystemId, order);
-                            if (ImGui.IsItemHovered())
-                                ImGui.SetTooltip("Click to edit or delete this order");
-                        }
-                        else
-                        {
-                            ImGui.Text(order.Name);
-                            if (ImGui.IsItemHovered())
-                                ImGui.SetTooltip(order.IsRunning ? "Running" : order.IsFinished ? "Finished" : order.Details);
-                        }
-                        ImGui.TableNextColumn();
-                        if (order.OrderId.Length > 0)
-                        {
-                            bool pause = order.PauseOnAction;
-                            if (ImGui.Checkbox("##pause-" + order.OrderId, ref pause))
-                            {
-                                SubmitFleetCommand(new SetOrderPauseCommand(holderId, order.OrderId, pause));
-                            }
-                        }
-                        ImGui.TableNextColumn();
-                        if (order.OrderId.Length > 0 && ImGui.SmallButton("Cancel##" + order.OrderId))
-                            SubmitFleetCommand(new CancelOrderCommand(holderId, order.OrderId));
-                    }
-
+                    ImGui.TableNextColumn();
+                    ImGui.Text(goal!.Name);
+                    ImGui.TableNextColumn();
+                    ImGui.Text(goal.Status);
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip(goal.Message);
                     ImGui.EndTable();
                 }
+                if (CanCancelGoal(goal))
+                {
+                    if (ImGui.Button("Cancel now"))
+                        SubmitFleetCommand(new CancelGoalCommand(holderId, CancelTiming.Now));
+                    ImGui.SameLine();
+                    if (ImGui.Button("Cancel when convenient"))
+                        SubmitFleetCommand(new CancelGoalCommand(holderId, CancelTiming.WhenConvenient));
+                }
             }
-            ImGui.EndChild();
-            ImGui.SetCursorPosX(xPosition);
+
+            if (orders.Count == 0)
+            {
+                ImGui.Text("None");
+            }
+            else if (ImGui.BeginTable("SubjectOrders", 4, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
+            {
+                ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.1f);
+                ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.None, 0.55f);
+                ImGui.TableSetupColumn("Pause", ImGuiTableColumnFlags.None, 0.15f);
+                ImGui.TableSetupColumn("Cancel", ImGuiTableColumnFlags.None, 0.2f);
+                ImGui.TableHeadersRow();
+
+                for (int i = 0; i < orders.Count; i++)
+                {
+                    var order = orders[i];
+                    ImGui.TableNextColumn();
+                    ImGui.Text((i + 1).ToString());
+                    ImGui.TableNextColumn();
+                    if (order.IsEditableManeuver && orderShip != null && orderShip.SystemId.Length > 0)
+                    {
+                        if (ImGui.Selectable(order.Name + "##edit-" + i))
+                            _uiState.OpenManeuverPanelForOrder(orderShip.Id, orderShip.SystemId, order);
+                        if (ImGui.IsItemHovered())
+                            ImGui.SetTooltip("Click to edit or delete this order");
+                    }
+                    else
+                    {
+                        ImGui.Text(order.Name);
+                        if (ImGui.IsItemHovered())
+                            ImGui.SetTooltip(order.IsRunning ? "Running" : order.IsFinished ? "Finished" : order.Details);
+                    }
+                    ImGui.TableNextColumn();
+                    if (order.OrderId.Length > 0)
+                    {
+                        bool pause = order.PauseOnAction;
+                        if (ImGui.Checkbox("##pause-" + order.OrderId, ref pause))
+                        {
+                            SubmitFleetCommand(new SetOrderPauseCommand(holderId, order.OrderId, pause));
+                        }
+                    }
+                    ImGui.TableNextColumn();
+                    if (order.OrderId.Length > 0 && ImGui.SmallButton("Cancel##" + order.OrderId))
+                        SubmitFleetCommand(new CancelOrderCommand(holderId, order.OrderId));
+                }
+
+                ImGui.EndTable();
+            }
         }
 
         private void DisplayFleetList(IClientGalaxy galaxy)

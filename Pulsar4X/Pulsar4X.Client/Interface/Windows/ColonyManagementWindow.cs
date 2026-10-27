@@ -47,14 +47,41 @@ namespace Pulsar4X.Client
 
             if(Window.Begin("Manage Colonies", ref IsActive))
             {
-                Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-                if(ImGui.BeginChild("Colonies", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y), ImGuiChildFlags.Borders))
+                // A missing selection, or one the latest push no longer has, opens on the first owned colony.
+                // SelectColony already stored an id, so a colony that resolves is left alone.
+                var selectedSystem = _selectedSystemId == null ? null : galaxy.GetSystem(_selectedSystemId);
+                var selectedColony = SelectedColonyId is { } openId ? selectedSystem?.GetEntity(openId) : null;
+                if (selectedColony == null)
                 {
-                    DisplayHelpers.Header("Select Colony to Manage");
+                    foreach (var summary in galaxy.KnownSystems)
+                    {
+                        var system = galaxy.GetSystem(summary.SystemId);
+                        var first = system?.Entities.FirstOrDefault(e => e.Kind == BodyKind.Colony && e.Relation == OwnerRelation.Owned);
+                        if (first == null) continue;
+                        SelectColony(first.Id, summary.SystemId);
+                        break;
+                    }
+                }
+
+                Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+                if(ImGui.BeginChild("Colonies", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y), ImGuiChildFlags.Borders))
+                {
+                    DisplayHelpers.Header("Colonies", "Select a colony to manage it.");
                     foreach(var summary in galaxy.KnownSystems)
                     {
                         var system = galaxy.GetSystem(summary.SystemId);
                         if(system == null) continue;
+
+                        bool anyOwned = false;
+                        foreach (var entity in system.Entities)
+                        {
+                            if (entity.Kind == BodyKind.Colony && entity.Relation == OwnerRelation.Owned)
+                            {
+                                anyOwned = true;
+                                break;
+                            }
+                        }
+                        if (!anyOwned) continue;
 
                         if(!isExpanded.ContainsKey(summary.SystemId)) isExpanded.Add(summary.SystemId, true);
                         ImGui.SetNextItemOpen(isExpanded[summary.SystemId], ImGuiCond.Appearing);
@@ -63,22 +90,14 @@ namespace Pulsar4X.Client
                             foreach(var colony in system.Entities.Where(e => e.Kind == BodyKind.Colony && e.Relation == OwnerRelation.Owned))
                             {
                                 var population = colony.GetView<ColonyView>()?.Population ?? 0;
-
-                                if(SelectedColonyId == colony.Id)
-                                {
-                                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.75f, 0.25f, 0.25f, 1f));
-                                }
-                                else
-                                {
-                                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 0, 0, 0f));
-                                }
-
                                 var name = colony.GetView<NameView>()?.Name ?? "Unknown";
-                                if(ImGui.SmallButton(name + " (" + Stringify.Quantity(population) + ")###colony-" + colony.Id))
-                                {
+                                var flags = ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
+                                if (SelectedColonyId == colony.Id)
+                                    flags |= ImGuiTreeNodeFlags.Selected;
+
+                                ImGui.TreeNodeEx(name + " (" + Stringify.Quantity(population) + ")###colony-" + colony.Id, flags);
+                                if (ImGui.IsItemClicked())
                                     SelectColony(colony.Id, summary.SystemId);
-                                }
-                                ImGui.PopStyleColor();
                             }
                             ImGui.TreePop();
                         }
@@ -86,9 +105,9 @@ namespace Pulsar4X.Client
                 }
                 ImGui.EndChild();
 
-                // Re-resolve the selected colony against the current push.
-                var selectedSystem = _selectedSystemId == null ? null : galaxy.GetSystem(_selectedSystemId);
-                var selectedColony = SelectedColonyId is { } id ? selectedSystem?.GetEntity(id) : null;
+                // Re-resolve after the list so a click this frame opens that colony.
+                selectedSystem = _selectedSystemId == null ? null : galaxy.GetSystem(_selectedSystemId);
+                selectedColony = SelectedColonyId is { } id ? selectedSystem?.GetEntity(id) : null;
 
                 if (selectedColony != null && selectedSystem != null)
                 {
