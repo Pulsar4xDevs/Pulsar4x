@@ -33,14 +33,9 @@ public static class CommanderSkills
         db.Experience = total;
     }
 
-    /// <summary>1.0 at skill 0, up to 2.0 at cap.</summary>
+    /// <summary>1.0 at skill 0. Each point of skill adds 0.01. A filled cap of 100 stays 2.0.</summary>
     public static float Quality(CommanderDB db, SkillDomain domain)
-    {
-        int cap = db.ExperienceCap > 0 ? db.ExperienceCap : DefaultCap;
-        if (cap <= 0)
-            return 1f;
-        return 1f + Get(db, domain) / (float)cap;
-    }
+        => 1f + Get(db, domain) / 100f;
 
     public static void GrantForCompleted(Entity unit, Goal goal)
     {

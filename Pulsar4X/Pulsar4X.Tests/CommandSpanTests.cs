@@ -99,9 +99,9 @@ namespace Pulsar4X.Tests
                 data.Unlock(id);
 
             var well = ComponentDesignFromJson.Create(faction, data, BridgeBlueprint(
-                "default-design-bridge-well", "Planetary Command Bridge", adminLevel: 6, consoles: 8));
+                "default-design-bridge-well", "Planetary Command Bridge", span: 1, consoles: 8));
             var system = ComponentDesignFromJson.Create(faction, data, BridgeBlueprint(
-                "default-design-bridge-system", "System Command Bridge", adminLevel: 8, consoles: 12));
+                "default-design-bridge-system", "System Command Bridge", span: 2, consoles: 12));
 
             var sol = TestingUtilities.BasicSol(_sys);
             var wellShip = SpawnWithBridge(faction, info, well, sol, "well-flag");
@@ -169,7 +169,7 @@ namespace Pulsar4X.Tests
             Assert.That(system.Select(e => e.Id), Does.Contain(luna.Id));
         }
 
-        static ComponentDesignBlueprint BridgeBlueprint(string id, string name, int adminLevel, int consoles)
+        static ComponentDesignBlueprint BridgeBlueprint(string id, string name, int span, int consoles)
         {
             return new ComponentDesignBlueprint
             {
@@ -178,7 +178,7 @@ namespace Pulsar4X.Tests
                 TemplateId = "ship-command",
                 Properties = new List<ComponentDesignBlueprint.Property>
                 {
-                    new() { Key = "Admin Level", Value = new JValue(adminLevel) },
+                    new() { Key = "Command Span", Value = new JValue(span) },
                     new() { Key = "Console Space", Value = new JValue(consoles) },
                 },
             };

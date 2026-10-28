@@ -30,11 +30,17 @@ namespace Pulsar4X.Client
             PlotMatchOrbit,
         }
 
+        private enum OrderBand
+        {
+            Ship,
+            Well,
+            System,
+        }
+
         private IssueOrderType selectedIssueOrderType = IssueOrderType.MoveTo;
+        private OrderBand selectedBand = OrderBand.Ship;
         // The selected row is a manual plot. A goal row clears it. The agent does not replan these.
         private bool plotting;
-        private int haulSourceId = -1;
-        private int haulDestId = -1;
         private int goodsSourceId = -1;
         private int goodsDestId = -1;
         private int loadColonyId = -1;
@@ -140,8 +146,6 @@ namespace Pulsar4X.Client
             selectedShips = new ();
             orderShipId = null;
             autoSelectFirstFleet = false;
-            haulSourceId = -1;
-            haulDestId = -1;
             editedOrders = null;
             editedOrdersSource = null;
             standingOrdersDirty = false;
@@ -282,8 +286,8 @@ namespace Pulsar4X.Client
                                 DisplayHelpers.PrintRow("Name", selectedFleet.Name);
                                 DisplayHelpers.PrintRow("Flagship", selectedFleet.FlagshipName ?? "-");
                                 DisplayFleetCommanderRow();
-                                DisplayHelpers.PrintRow("Command span", FleetSpanLabel(),
-                                    tooltipTwo: "How far this fleet's orders reach. It comes from the flagship's bridge.");
+                                DisplayHelpers.PrintRow("Command span", SpanLine(),
+                                    tooltipTwo: "The narrower of the flagship's bridge and its captain's rank.");
 
                                 // Current system
                                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
@@ -492,58 +496,91 @@ namespace Pulsar4X.Client
                 return;
             }
 
-            DisplayHelpers.Header(orderShip != null ? "Goals" : "Available Orders");
-            if (orderShip != null)
-            {
-                string captain = string.IsNullOrEmpty(orderShip.CommanderName) ? "The captain" : orderShip.CommanderName;
-                ImGui.TextWrapped("Captain " + captain + " turns a goal into a plot.");
-            }
-
             bool geo = orderShip != null ? orderShip.CanGeoSurvey : selectedFleet?.CanGeoSurvey == true;
             bool grav = orderShip != null ? orderShip.CanGravSurvey : selectedFleet?.CanGravSurvey == true;
             bool mine = orderShip != null ? orderShip.CanMineAsteroids : selectedFleet?.CanMineAsteroids == true;
-            bool fleetOrders = orderShip == null;
-            bool mineGoal = mine && (orderShip == null || ShipHasCaptain(orderShip));
             bool manual = orderShip != null && plotting;
-            bool goalMove = selectedIssueOrderType == IssueOrderType.MoveTo && !manual;
-            bool goalGeo = selectedIssueOrderType == IssueOrderType.GeoSurvey && !manual;
-            bool goalGrav = selectedIssueOrderType == IssueOrderType.GravSurvey && !manual;
-            bool goalJump = selectedIssueOrderType == IssueOrderType.Jump && !manual;
-            bool goalRefuel = selectedIssueOrderType == IssueOrderType.RefuelAt && !manual;
-            bool goalGoods = selectedIssueOrderType == IssueOrderType.MoveGoods && !manual;
 
-            if (ImGui.Selectable("Move to ...", goalMove))
-                Choose(IssueOrderType.MoveTo, plot: false);
-            if (ImGui.Selectable("Refuel at ...", goalRefuel))
-                Choose(IssueOrderType.RefuelAt, plot: false);
-            if (geo && ImGui.Selectable("Geo Survey ...", goalGeo))
-                Choose(IssueOrderType.GeoSurvey, plot: false);
-            if (grav && ImGui.Selectable("Grav Survey ...", goalGrav))
-                Choose(IssueOrderType.GravSurvey, plot: false);
-            if (mineGoal && ImGui.Selectable("Mine asteroids", selectedIssueOrderType == IssueOrderType.MineAsteroids))
-                Choose(IssueOrderType.MineAsteroids, plot: false);
-            if (ImGui.Selectable("Jump...", goalJump))
-                Choose(IssueOrderType.Jump, plot: false);
-            if (ImGui.Selectable(orderShip != null ? "Trade" : "Trade ...", selectedIssueOrderType == IssueOrderType.Trade))
-                Choose(IssueOrderType.Trade, plot: false);
-            if (ImGui.Selectable(orderShip != null ? "Haul" : "Haul ...", selectedIssueOrderType == IssueOrderType.Haul))
-                Choose(IssueOrderType.Haul, plot: false);
-            if (fleetOrders && ImGui.Selectable("Haul contract ...", selectedIssueOrderType == IssueOrderType.HaulContract))
-                Choose(IssueOrderType.HaulContract, plot: false);
-            if (ImGui.Selectable("Move goods ...", goalGoods))
-                Choose(IssueOrderType.MoveGoods, plot: false);
-
-            if (orderShip != null && ImGui.CollapsingHeader("Actions"))
+            DisplayBand(OrderBand.Ship, () =>
             {
-                ImGui.TextWrapped("Queue a plot on this ship. The captain does not replan it.");
-                DisplayManualActions(galaxy);
-            }
+                ImGui.TextWrapped(FreightSentence(OrderBand.Ship));
+                GoalRow("Move to ...", IssueOrderType.MoveTo, OrderBand.Ship, manual);
+                GoalRow("Refuel at ...", IssueOrderType.RefuelAt, OrderBand.Ship, manual);
+                GoalRow("Jump...", IssueOrderType.Jump, OrderBand.Ship, manual);
+                GoalRow("Trade ...", IssueOrderType.Trade, OrderBand.Ship, manual);
+                GoalRow("Haul ...", IssueOrderType.Haul, OrderBand.Ship, manual);
+                GoalRow("Move goods ...", IssueOrderType.MoveGoods, OrderBand.Ship, manual);
+                if (mine && ImGui.Selectable("Mine asteroids###mine-ship", selectedIssueOrderType == IssueOrderType.MineAsteroids && !manual && selectedBand == OrderBand.Ship))
+                    Choose(IssueOrderType.MineAsteroids, plot: false, OrderBand.Ship);
+                if (geo)
+                    GoalRow("Geo Survey ...", IssueOrderType.GeoSurvey, OrderBand.Ship, manual);
+                if (grav)
+                    GoalRow("Grav Survey ...", IssueOrderType.GravSurvey, OrderBand.Ship, manual);
+                if (orderShip != null && ImGui.CollapsingHeader("Actions"))
+                {
+                    ImGui.TextWrapped("Queue a plot on this ship. The captain does not replan it.");
+                    DisplayManualActions(galaxy);
+                }
+            });
+            DisplayBand(OrderBand.Well, () =>
+            {
+                ImGui.TextWrapped(FreightSentence(OrderBand.Well));
+                if (geo)
+                    GoalRow("Geo Survey ...", IssueOrderType.GeoSurvey, OrderBand.Well, manual);
+                if (grav)
+                    GoalRow("Grav Survey ...", IssueOrderType.GravSurvey, OrderBand.Well, manual);
+                GoalRow("Trade ...", IssueOrderType.Trade, OrderBand.Well, manual);
+                GoalRow("Haul ...", IssueOrderType.Haul, OrderBand.Well, manual);
+                GoalRow("Move goods ...", IssueOrderType.MoveGoods, OrderBand.Well, manual);
+            });
+            DisplayBand(OrderBand.System, () =>
+            {
+                ImGui.TextWrapped(FreightSentence(OrderBand.System));
+                if (geo)
+                    GoalRow("Geo Survey ...", IssueOrderType.GeoSurvey, OrderBand.System, manual);
+                if (grav)
+                    GoalRow("Grav Survey ...", IssueOrderType.GravSurvey, OrderBand.System, manual);
+                GoalRow("Trade ...", IssueOrderType.Trade, OrderBand.System, manual);
+                GoalRow("Haul ...", IssueOrderType.Haul, OrderBand.System, manual);
+                GoalRow("Move goods ...", IssueOrderType.MoveGoods, OrderBand.System, manual);
+            });
         }
 
-        void Choose(IssueOrderType type, bool plot)
+        void DisplayBand(OrderBand band, Action body)
+        {
+            bool openBand = BandOpen(band);
+            if (!openBand)
+                ImGui.BeginDisabled();
+            ImGui.SetNextItemOpen(true, ImGuiCond.Once);
+            bool open = ImGui.CollapsingHeader(BandTitle(band) + "###band-" + band);
+            if (!openBand && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                ImGui.SetTooltip(SpanLine());
+            if (open)
+                body();
+            if (!openBand)
+                ImGui.EndDisabled();
+        }
+
+        static string BandTitle(OrderBand band) => band switch
+        {
+            OrderBand.Well => "This well",
+            OrderBand.System => "This system",
+            _ => "This ship",
+        };
+
+        void GoalRow(string label, IssueOrderType type, OrderBand band, bool manual)
+        {
+            bool selected = !manual && selectedIssueOrderType == type && selectedBand == band;
+            if (ImGui.Selectable(label + "###" + type + "-" + band, selected))
+                Choose(type, plot: false, band);
+        }
+
+        void Choose(IssueOrderType type, bool plot, OrderBand band = OrderBand.Ship)
         {
             selectedIssueOrderType = type;
             plotting = plot;
+            if (!plot)
+                selectedBand = band;
         }
 
         bool ManualPlot => orderShip != null && (!ShipHasCaptain(orderShip) || plotting);
@@ -768,11 +805,19 @@ namespace Pulsar4X.Client
                     selectedIssueOrderType = IssueOrderType.MoveTo;
                 }
 
-                // A ship order is that one body. Command span widens a fleet order.
-                bool fleetSpan = orderShip == null;
-
                 // Mirror the old EntityFilter.Friendly | EntityFilter.Neutral read: hostiles aren't targets.
                 var candidates = system.Entities.Where(e => e.Relation != OwnerRelation.Hostile);
+
+                if (!plot && !BandOpen(selectedBand))
+                {
+                    ImGui.TextWrapped(SpanLine());
+                    ImGui.EndChild();
+                    return;
+                }
+
+                bool bandWell = selectedBand != OrderBand.Ship;
+                bool bandSystem = selectedBand == OrderBand.System;
+                string bandSpan = BandSpanLabel(selectedBand);
 
                 switch(selectedIssueOrderType)
                 {
@@ -827,9 +872,10 @@ namespace Pulsar4X.Client
                                 e => e.GetView<GeoSurveyView>() is { IsSurveyComplete: false },
                                 "geosurvey-button",
                                 id => SubmitFleetCommand(new GeoSurveyCommand(commanded.Value, id)),
-                                starTargetsSystem: fleetSpan,
-                                keepParentWhenChildrenRemain: fleetSpan,
-                                markDone: e => e.GetView<GeoSurveyView>()?.IsSurveyComplete == true);
+                                starTargetsSystem: bandWell,
+                                keepParentWhenChildrenRemain: bandWell,
+                                markDone: e => e.GetView<GeoSurveyView>()?.IsSurveyComplete == true,
+                                spanLabel: bandSpan);
                         break;
                     case IssueOrderType.GravSurvey:
                         if (plot)
@@ -839,9 +885,10 @@ namespace Pulsar4X.Client
                                 e => e.GetView<GravSurveyView>() is { IsSurveyComplete: false },
                                 "gravsurvey-button",
                                 id => SubmitFleetCommand(new GravSurveyCommand(commanded.Value, id)),
-                                starTargetsSystem: fleetSpan,
-                                keepParentWhenChildrenRemain: fleetSpan,
-                                markDone: e => e.GetView<GravSurveyView>()?.IsSurveyComplete == true);
+                                starTargetsSystem: bandWell,
+                                keepParentWhenChildrenRemain: bandWell,
+                                markDone: e => e.GetView<GravSurveyView>()?.IsSurveyComplete == true,
+                                spanLabel: bandSpan);
                         break;
                     case IssueOrderType.MineAsteroids:
                         ImGui.TextWrapped("Mine surveyed asteroids in this system. The ship fills its hold, then unloads at the nearest colony that can take the ore.");
@@ -870,53 +917,16 @@ namespace Pulsar4X.Client
                         break;
                     case IssueOrderType.Trade:
                         if (orderShip != null)
-                        {
-                            ImGui.TextWrapped("The captain picks one buy and one sell.");
-                            if (ImGui.Button("Trade"))
-                                SubmitFleetCommand(new TradeCommand(orderShip.Id));
-                            break;
-                        }
-                        if (selectedFleet == null)
-                            break;
-                        {
-                            int fleetId = selectedFleet.Id;
-                            ImGui.TextWrapped("Ships buy and sell around the body you pick.");
-                            ImGui.Text(LogisticsSpanLabel());
-                            DisplayTargetTree(LogisticsCandidates(galaxy, candidates),
-                                e => e.HasView<BodyView>() && e.HasView<PositionView>(),
-                                "trade-button",
-                                id => SubmitFleetCommand(new FleetTradeCommand(fleetId, id)),
-                                starTargetsSystem: true,
-                                spanLabel: LogisticsSpanLabel());
-                        }
+                            DisplayFreightPairs(galaxy, candidates, trade: true);
+                        else if (selectedFleet != null)
+                            DisplayFleetTrade(galaxy, candidates);
                         break;
                     case IssueOrderType.Haul:
-                        if (orderShip != null)
-                        {
-                            ImGui.TextWrapped("The captain picks one posted haul between our colonies.");
-                            if (ImGui.Button("Haul"))
-                                SubmitFleetCommand(new FreighterCommand(orderShip.Id));
-                            break;
-                        }
-                        if (selectedFleet == null)
-                            break;
-                        {
-                            int fleetId = selectedFleet.Id;
-                            ImGui.TextWrapped("Ships move posted goods between our colonies around the body you pick.");
-                            ImGui.Text(LogisticsSpanLabel());
-                            DisplayTargetTree(LogisticsCandidates(galaxy, candidates),
-                                e => e.HasView<BodyView>() && e.HasView<PositionView>(),
-                                "haul-button",
-                                id => SubmitFleetCommand(new FleetFreighterCommand(fleetId, id)),
-                                starTargetsSystem: true,
-                                spanLabel: LogisticsSpanLabel());
-                        }
-                        break;
                     case IssueOrderType.HaulContract:
-                        DisplayHaulContract(LogisticsCandidates(galaxy, candidates));
+                        DisplayFreightPairs(galaxy, candidates, trade: false);
                         break;
                     case IssueOrderType.MoveGoods:
-                        DisplayMoveGoods(galaxy, candidates, commanded.Value);
+                        DisplayMoveGoods(galaxy, candidates, commanded.Value, plot ? null : selectedBand);
                         break;
                     case IssueOrderType.LoadGoods:
                         DisplayLoadGoods(candidates, commanded.Value);
@@ -1015,24 +1025,62 @@ namespace Pulsar4X.Client
             return rank + person.Name + post;
         }
 
-        private string FleetSpanLabel()
+        private string SubjectSpanLabel()
         {
-            if(selectedFleet == null || string.IsNullOrEmpty(selectedFleet.CommandSpan))
-                return CommandSpanLabels.Body;
-            return selectedFleet.CommandSpan;
+            if(orderShip != null && !string.IsNullOrEmpty(orderShip.CommandSpan))
+                return orderShip.CommandSpan;
+            if(selectedFleet != null && !string.IsNullOrEmpty(selectedFleet.CommandSpan))
+                return selectedFleet.CommandSpan;
+            return CommandSpanLabels.Body;
         }
 
-        private string LogisticsSpanLabel()
+        private string SpanLine()
         {
-            if(selectedFleet == null || string.IsNullOrEmpty(selectedFleet.LogisticsSpan))
-                return CommandSpanLabels.Well;
-            return selectedFleet.LogisticsSpan;
+            if(orderShip != null && !string.IsNullOrEmpty(orderShip.SpanLine))
+                return orderShip.SpanLine;
+            if(selectedFleet != null && !string.IsNullOrEmpty(selectedFleet.SpanLine))
+                return selectedFleet.SpanLine;
+            return "Body. This bridge covers this ship. No officer is seated.";
+        }
+
+        static int SpanRank(string label)
+        {
+            if(label == CommandSpanLabels.Well)
+                return 1;
+            if(label == CommandSpanLabels.System || label == CommandSpanLabels.Neighbor)
+                return 2;
+            return 0;
+        }
+
+        bool BandOpen(OrderBand band) => SpanRank(SubjectSpanLabel()) >= (int)band;
+
+        static string BandSpanLabel(OrderBand band) => band switch
+        {
+            OrderBand.Well => CommandSpanLabels.Well,
+            OrderBand.System => CommandSpanLabels.System,
+            _ => CommandSpanLabels.Body,
+        };
+
+        static string FreightSentence(OrderBand band) => band switch
+        {
+            OrderBand.Well => "Haul any two colonies in this star system.",
+            OrderBand.System => "One end may sit in a system one jump away.",
+            _ => "Haul two bodies in this well.",
+        };
+
+        private IReadOnlyList<string> LogisticsIds()
+        {
+            if(orderShip?.LogisticsSystemIds is { Count: > 1 } shipIds)
+                return shipIds;
+            if(selectedFleet?.LogisticsSystemIds is { Count: > 1 } fleetIds)
+                return fleetIds;
+            return Array.Empty<string>();
         }
 
         private IEnumerable<EntitySnapshot> LogisticsCandidates(IClientGalaxy galaxy, IEnumerable<EntitySnapshot> here)
         {
-            var ids = selectedFleet?.LogisticsSystemIds;
-            if(ids == null || ids.Count <= 1)
+            var ids = LogisticsIds();
+            if(ids.Count <= 1)
                 return here;
 
             var list = new List<EntitySnapshot>();
@@ -1062,24 +1110,17 @@ namespace Pulsar4X.Client
                 ImGui.PopStyleColor();
                 ImGui.SameLine();
                 DisplayCaptainButton(orderShip.Id, CaptainLabel(orderShip), CaptainTooltip(orderShip));
-                ImGui.Separator();
-                return;
             }
-
-            ImGui.AlignTextToFramePadding();
-            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-            ImGui.Text("Fleet commander");
-            ImGui.PopStyleColor();
-            ImGui.SameLine();
-            DisplayFleetCommanderValue();
-            ImGui.SameLine(0, 28f);
-            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-            ImGui.Text("Command span");
-            ImGui.PopStyleColor();
-            ImGui.SameLine();
-            ImGui.Text(FleetSpanLabel());
-            if(ImGui.IsItemHovered())
-                ImGui.SetTooltip("How far this fleet's orders reach. It comes from the flagship's bridge.");
+            else
+            {
+                ImGui.AlignTextToFramePadding();
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.Text("Fleet commander");
+                ImGui.PopStyleColor();
+                ImGui.SameLine();
+                DisplayFleetCommanderValue();
+            }
+            ImGui.TextWrapped(SpanLine());
             ImGui.Separator();
         }
 
@@ -1149,9 +1190,10 @@ namespace Pulsar4X.Client
             bool keepParentWhenChildrenRemain = false,
             Func<EntitySnapshot, bool>? markDone = null,
             int? selectedId = null,
-            string? spanLabel = null)
+            string? spanLabel = null,
+            Func<EntitySnapshot, string?>? blocked = null)
         {
-            string span = spanLabel ?? (orderShip != null ? CommandSpanLabels.Body : FleetSpanLabel());
+            string span = spanLabel ?? SubjectSpanLabel();
             var byId = new Dictionary<int, EntitySnapshot>();
             foreach(var entity in candidates)
                 byId[entity.Id] = entity;
@@ -1224,7 +1266,7 @@ namespace Pulsar4X.Client
             }
 
             foreach(var root in SortNodes(roots, stars, null))
-                DisplayTargetNode(root, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span);
+                DisplayTargetNode(root, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span, blocked);
         }
 
         private static void AddTreeChild(Dictionary<int, List<EntitySnapshot>> children, Dictionary<int, int> parentOf, int parentId, EntitySnapshot child)
@@ -1471,7 +1513,8 @@ namespace Pulsar4X.Client
             bool starTargetsSystem,
             Func<EntitySnapshot, bool>? markDone,
             int? selectedId,
-            string span)
+            string span,
+            Func<EntitySnapshot, string?>? blocked = null)
         {
             if(node.IsBand)
             {
@@ -1490,7 +1533,7 @@ namespace Pulsar4X.Client
                             }
                         }
                         foreach(var child in SortNodes(bandKids, stars, star))
-                            DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span);
+                            DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span, blocked);
                     }
                     ImGui.TreePop();
                 }
@@ -1510,7 +1553,8 @@ namespace Pulsar4X.Client
             bool starClickable = entity.Kind == BodyKind.Star && starTargetsSystem && systemSpan;
             bool childWork = coversWork.Contains(entity.Id);
             bool showDone = childWork && !isTarget(entity) && markDone != null && markDone(entity);
-            bool clickable = starClickable || (entity.Kind != BodyKind.Star && (isTarget(entity) || (showDone && reachesChildren)));
+            string? block = blocked?.Invoke(entity);
+            bool clickable = block == null && (starClickable || (entity.Kind != BodyKind.Star && (isTarget(entity) || (showDone && reachesChildren))));
 
             var flags = ImGuiTreeNodeFlags.OpenOnArrow;
             if(entity.Kind == BodyKind.Star || showDone)
@@ -1568,25 +1612,26 @@ namespace Pulsar4X.Client
                     if(nameHovered || ImGui.IsItemHovered())
                         ImGui.SetTooltip("This body is surveyed. This bridge only covers the body you click, so pick an unsurveyed body under it.");
                 }
-                else if(nameHovered && entity.Kind == BodyKind.Star && starTargetsSystem && !systemSpan)
-                {
-                    ImGui.SetTooltip("The flagship's bridge does not cover the whole system.");
-                }
+                else if(nameHovered && !string.IsNullOrEmpty(block))
+                    ImGui.SetTooltip(block);
+                else if(nameHovered)
+                    ImGui.SetTooltip(SpanLine());
             }
 
             if(childList != null && open)
             {
                 EntitySnapshot? around = entity.Kind == BodyKind.Star ? entity : null;
                 foreach(var child in SortNodes(childList, stars, around))
-                    DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span);
+                    DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span, blocked);
                 ImGui.TreePop();
             }
         }
 
-        private void DisplayMoveGoods(IClientGalaxy galaxy, IEnumerable<EntitySnapshot> candidates, int commandedId)
+        private void DisplayMoveGoods(IClientGalaxy galaxy, IEnumerable<EntitySnapshot> candidates, int commandedId, OrderBand? band)
         {
             ImGui.TextWrapped("One trip. Goods that do not fit stay behind.");
-            var pool = selectedFleet != null ? LogisticsCandidates(galaxy, candidates) : candidates;
+            bool widen = band == OrderBand.System;
+            var pool = widen ? LogisticsCandidates(galaxy, candidates) : candidates;
             var colonies = OwnedWarehouses(pool);
             if(colonies.Count == 0)
             {
@@ -1594,10 +1639,17 @@ namespace Pulsar4X.Client
                 return;
             }
 
-            if(colonies.All(colony => colony.Id != goodsSourceId))
+            var placed = Place(galaxy, pool, widen);
+            bool InBand(EntitySnapshot colony, int otherId)
+                => band == null || HasPartner(colony, otherId, band.Value, placed);
+
+            if(!colonies.Any(colony => colony.Id == goodsSourceId && InBand(colony, goodsDestId)))
                 goodsSourceId = -1;
-            if(goodsDestId == goodsSourceId || colonies.All(colony => colony.Id != goodsDestId))
+            if(goodsDestId == goodsSourceId || !colonies.Any(colony => colony.Id == goodsDestId && InBand(colony, goodsSourceId)))
                 goodsDestId = -1;
+
+            string? Block(EntitySnapshot colony, int otherId)
+                => band != null && OwnedWarehouse(colony) && !InBand(colony, otherId) ? SpanLine() : null;
 
             DisplayHelpers.Header("From");
             DisplayTargetTree(pool,
@@ -1610,7 +1662,8 @@ namespace Pulsar4X.Client
                         goodsDestId = -1;
                 },
                 starTargetsSystem: false,
-                selectedId: goodsSourceId);
+                selectedId: goodsSourceId,
+                blocked: e => Block(e, goodsDestId));
 
             DisplayHelpers.Header("To");
             DisplayTargetTree(pool,
@@ -1618,7 +1671,8 @@ namespace Pulsar4X.Client
                 "goods-to",
                 id => goodsDestId = id,
                 starTargetsSystem: false,
-                selectedId: goodsDestId);
+                selectedId: goodsDestId,
+                blocked: e => Block(e, goodsSourceId));
 
             var source = colonies.FirstOrDefault(colony => colony.Id == goodsSourceId);
             var dest = colonies.FirstOrDefault(colony => colony.Id == goodsDestId);
@@ -1917,78 +1971,173 @@ namespace Pulsar4X.Client
             return items;
         }
 
-        private void DisplayHaulContract(IEnumerable<EntitySnapshot> candidates)
+        private void DisplayFleetTrade(IClientGalaxy galaxy, IEnumerable<EntitySnapshot> here)
         {
             if(selectedFleet == null)
                 return;
+            int fleetId = selectedFleet.Id;
+            ImGui.TextWrapped("Ships buy and sell around the body you pick.");
+            bool widen = selectedBand == OrderBand.System;
+            var pool = widen ? LogisticsCandidates(galaxy, here) : here;
+            DisplayTargetTree(pool,
+                e => e.HasView<BodyView>() && e.HasView<PositionView>(),
+                "trade-" + selectedBand,
+                id => SubmitFleetCommand(new FleetTradeCommand(fleetId, id)),
+                starTargetsSystem: selectedBand == OrderBand.System,
+                spanLabel: BandSpanLabel(selectedBand));
+        }
 
-            ImGui.TextWrapped("One posted good, from one of our colonies to another. Both ends sit inside the reach below. The fleet splits that load across its holds.");
-            ImGui.Text(LogisticsSpanLabel());
-
-            var colonies = candidates
-                .Where(e => e.Relation == OwnerRelation.Owned && e.Kind == BodyKind.Colony && e.HasView<MarketView>())
+        private void DisplayFreightPairs(IClientGalaxy galaxy, IEnumerable<EntitySnapshot> here, bool trade)
+        {
+            bool widen = selectedBand == OrderBand.System;
+            var pool = widen ? LogisticsCandidates(galaxy, here) : here;
+            var placed = Place(galaxy, pool, widen);
+            var colonies = pool
+                .Where(e => e.Kind == BodyKind.Colony && e.HasView<MarketView>() && (trade || e.Relation == OwnerRelation.Owned))
                 .OrderBy(e => NameOf(e), StringComparer.Ordinal)
                 .ToList();
-            if(colonies.Count == 0)
-            {
-                ImGui.Text("No owned colonies with a market in reach.");
-                return;
-            }
+            ImGui.TextWrapped(trade
+                ? "One buy and one sell inside this band."
+                : "One posted haul inside this band. A fleet splits that load across its holds.");
 
-            if(colonies.All(colony => colony.Id != haulSourceId))
-                haulSourceId = -1;
-            if(haulDestId == haulSourceId || colonies.All(colony => colony.Id != haulDestId))
-                haulDestId = -1;
-
-            DisplayHelpers.Header("From");
-            DisplayTargetTree(candidates,
-                e => e.Relation == OwnerRelation.Owned && e.Kind == BodyKind.Colony && e.HasView<MarketView>(),
-                "haul-from",
-                id =>
-                {
-                    haulSourceId = id;
-                    if(haulDestId == id)
-                        haulDestId = -1;
-                },
-                starTargetsSystem: false,
-                selectedId: haulSourceId);
-
-            DisplayHelpers.Header("To");
-            DisplayTargetTree(candidates,
-                e => e.Id != haulSourceId && e.Relation == OwnerRelation.Owned && e.Kind == BodyKind.Colony && e.HasView<MarketView>(),
-                "haul-to",
-                id => haulDestId = id,
-                starTargetsSystem: false,
-                selectedId: haulDestId);
-
-            var source = colonies.FirstOrDefault(colony => colony.Id == haulSourceId);
-            var dest = colonies.FirstOrDefault(colony => colony.Id == haulDestId);
-            if(source == null || dest == null)
-                return;
-
-            var sourceBook = source.GetView<MarketView>();
-            var destBook = dest.GetView<MarketView>();
-            DisplayHelpers.Header("Cargo");
             bool any = false;
-            if(sourceBook != null && destBook != null)
+            for(int i = 0; i < colonies.Count; i++)
             {
-                foreach(var sell in sourceBook.Goods.Where(good => good.SellQuantity > 0).OrderBy(good => good.Name, StringComparer.Ordinal))
+                for(int j = 0; j < colonies.Count; j++)
                 {
-                    var buy = destBook.Goods.FirstOrDefault(good => good.CargoId == sell.CargoId && good.BuyQuantity > 0);
-                    if(buy == null)
+                    if(i == j)
                         continue;
-                    any = true;
-                    long units = Math.Min(sell.SellQuantity, buy.BuyQuantity);
-                    if(ImGui.Button($"{sell.Name} ({units})###haul-cargo-{sell.CargoId}"))
+                    var source = colonies[i];
+                    var dest = colonies[j];
+                    if(PairBand(source, dest.Id, placed) != selectedBand)
+                        continue;
+                    var sourceBook = source.GetView<MarketView>();
+                    var destBook = dest.GetView<MarketView>();
+                    if(sourceBook == null || destBook == null)
+                        continue;
+                    foreach(var sell in sourceBook.Goods.Where(good => good.SellQuantity > 0).OrderBy(good => good.Name, StringComparer.Ordinal))
                     {
-                        SubmitFleetCommand(new FleetHaulContractCommand(selectedFleet.Id, source.Id, dest.Id, sell.CargoId));
+                        var buy = destBook.Goods.FirstOrDefault(good => good.CargoId == sell.CargoId && good.BuyQuantity > 0);
+                        if(buy == null)
+                            continue;
+                        any = true;
+                        long units = Math.Min(sell.SellQuantity, buy.BuyQuantity);
+                        string id = "pair-" + source.Id + "-" + dest.Id + "-" + sell.CargoId;
+                        if(!ImGui.Button(NameOf(source) + " to " + NameOf(dest) + ": " + sell.Name + " (" + units + ")###" + id))
+                            continue;
+                        if(trade && orderShip != null)
+                            SubmitFleetCommand(new TradePairCommand(orderShip.Id, source.Id, dest.Id, sell.CargoId));
+                        else if(!trade && orderShip != null)
+                            SubmitFleetCommand(new HaulPairCommand(orderShip.Id, source.Id, dest.Id, sell.CargoId));
+                        else if(!trade && selectedFleet != null)
+                            SubmitFleetCommand(new FleetHaulContractCommand(selectedFleet.Id, source.Id, dest.Id, sell.CargoId));
                     }
                 }
             }
 
             if(!any)
-                ImGui.Text("No posted haul between these colonies.");
+                ImGui.Text(trade ? "No posted trade in this reach." : "No posted haul in this reach.");
         }
+
+        sealed class Placed
+        {
+            public string Home = "";
+            public Dictionary<int, string> SystemOf = new();
+            public Dictionary<int, EntitySnapshot> ById = new();
+        }
+
+        Placed Place(IClientGalaxy galaxy, IEnumerable<EntitySnapshot> pool, bool widen)
+        {
+            var placed = new Placed { Home = SubjectSystemId() ?? "" };
+            if(!widen)
+            {
+                foreach(var entity in pool)
+                {
+                    placed.ById[entity.Id] = entity;
+                    placed.SystemOf[entity.Id] = placed.Home;
+                }
+                return placed;
+            }
+
+            var ids = LogisticsIds();
+            if(ids.Count <= 1)
+                ids = string.IsNullOrEmpty(placed.Home) ? ids : new[] { placed.Home };
+            foreach(var systemId in ids)
+            {
+                var system = galaxy.GetSystem(systemId);
+                if(system == null)
+                    continue;
+                foreach(var entity in system.Entities)
+                {
+                    if(entity.Relation == OwnerRelation.Hostile)
+                        continue;
+                    placed.ById[entity.Id] = entity;
+                    placed.SystemOf[entity.Id] = system.SystemId;
+                }
+            }
+            foreach(var entity in pool)
+            {
+                placed.ById[entity.Id] = entity;
+                if(!placed.SystemOf.ContainsKey(entity.Id))
+                    placed.SystemOf[entity.Id] = placed.Home;
+            }
+            return placed;
+        }
+
+        OrderBand? PairBand(EntitySnapshot colony, int otherId, Placed placed)
+        {
+            if(otherId >= 0 && otherId != colony.Id && placed.ById.TryGetValue(otherId, out var other))
+                return BandOf(colony, other, placed);
+            return null;
+        }
+
+        bool HasPartner(EntitySnapshot colony, int otherId, OrderBand band, Placed placed)
+        {
+            if(otherId >= 0 && otherId != colony.Id)
+                return PairBand(colony, otherId, placed) == band;
+            foreach(var candidate in placed.ById.Values)
+            {
+                if(candidate.Id == colony.Id || candidate.Kind != BodyKind.Colony)
+                    continue;
+                if(!candidate.HasView<CargoStorageView>() && !candidate.HasView<MarketView>())
+                    continue;
+                if(BandOf(colony, candidate, placed) == band)
+                    return true;
+            }
+            return false;
+        }
+
+        static OrderBand? BandOf(EntitySnapshot left, EntitySnapshot right, Placed placed)
+        {
+            string home = placed.Home;
+            string leftSystem = placed.SystemOf.TryGetValue(left.Id, out var leftId) ? leftId : home;
+            string rightSystem = placed.SystemOf.TryGetValue(right.Id, out var rightId) ? rightId : home;
+            if(leftSystem != home || rightSystem != home)
+                return OrderBand.System;
+            if(ShareWell(left, right, placed.ById))
+                return OrderBand.Ship;
+            return OrderBand.Well;
+        }
+
+        static bool ShareWell(EntitySnapshot left, EntitySnapshot right, Dictionary<int, EntitySnapshot> byId)
+        {
+            int a = BodyId(left);
+            int b = BodyId(right);
+            if(a == b)
+                return true;
+            if(!byId.TryGetValue(a, out var bodyA) || !byId.TryGetValue(b, out var bodyB))
+                return false;
+            int? parentA = ParentIdOf(bodyA);
+            int? parentB = ParentIdOf(bodyB);
+            if(parentB == a || parentA == b)
+                return true;
+            if(parentA == null || parentB == null || parentA != parentB)
+                return false;
+            return byId.TryGetValue(parentA.Value, out var parent) && ParentIdOf(parent) != null;
+        }
+
+        static int BodyId(EntitySnapshot colony)
+            => colony.GetView<ColonyView>()?.PlanetEntityId ?? colony.Id;
 
         private void SubmitFleetCommand(GameCommand command) => _uiState.GameClient?.SubmitCommandAsync(command);
 

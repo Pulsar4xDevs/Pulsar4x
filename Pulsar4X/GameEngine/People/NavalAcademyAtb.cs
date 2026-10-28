@@ -1,8 +1,7 @@
-using System;
+using Newtonsoft.Json;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
-using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.People
 {
@@ -11,7 +10,8 @@ namespace Pulsar4X.People
         public int ClassSize { get; internal set; }
         public int TrainingPeriodInMonths { get; internal set; }
 
-        private NavalAcademy _academy;
+        [JsonConstructor]
+        private NavalAcademyAtb() { }
 
         public NavalAcademyAtb(double classSize, double period)
         {
@@ -43,38 +43,42 @@ namespace Pulsar4X.People
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            DateTime graduationDate = parentEntity.StarSysDateTime + TimeSpan.FromDays(TrainingPeriodInMonths * 30);
-
-            _academy = new NavalAcademy() {
-                ClassSize = this.ClassSize,
-                GraduationDate = graduationDate,
-                TrainingPeriodInMonths = this.TrainingPeriodInMonths
+            var row = new NavalAcademy
+            {
+                ComponentId = componentInstance.ID,
+                ClassSize = ClassSize,
+                TrainingPeriodInMonths = TrainingPeriodInMonths,
+                CourseKind = AcademyCourseKind.Idle,
+                OfficerId = -1,
+                SpeciesId = -1,
             };
 
-            if (parentEntity.TryGetDataBlob<NavalAcademyDB>(out var academyDB))
-            {
-                academyDB.Academies.Add(_academy);
-            }
-            else
+            if (!parentEntity.TryGetDataBlob<NavalAcademyDB>(out var academyDB))
             {
                 academyDB = new NavalAcademyDB();
-                academyDB.Academies.Add(_academy);
                 parentEntity.SetDataBlob(academyDB);
             }
-            parentEntity.Manager.ManagerSubpulses.AddEntityInterupt(graduationDate, nameof(NavalAcademyProcessor), parentEntity);
+            academyDB.Academies.Add(row);
         }
 
         public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            if(parentEntity.TryGetDataBlob<NavalAcademyDB>(out var academyDB))
-            {
-                academyDB.Academies.Remove(_academy);
+            if (!parentEntity.TryGetDataBlob<NavalAcademyDB>(out var academyDB))
+                return;
 
-                if(academyDB.Academies.Count == 0)
-                {
-                    parentEntity.RemoveDataBlob<NavalAcademyDB>();
-                }
+            for (int i = 0; i < academyDB.Academies.Count; i++)
+            {
+                if (academyDB.Academies[i].ComponentId != componentInstance.ID)
+                    continue;
+                var row = academyDB.Academies[i];
+                if (row.CourseKind == AcademyCourseKind.Class)
+                    NavalAcademyCourse.ReturnPeople(parentEntity, row);
+                academyDB.Academies.RemoveAt(i);
+                break;
             }
+
+            if (academyDB.Academies.Count == 0)
+                parentEntity.RemoveDataBlob<NavalAcademyDB>();
         }
     }
 }

@@ -178,6 +178,7 @@
         "laser-weapon",
         "admin-complex",
         "ship-command",
+        "naval-academy",
         "tech-panel-efficiency",
         "tech-panel-bandwidth",
         "tech-panel-density",
@@ -229,7 +230,8 @@
         "default-design-bridge-ship",
         "default-design-bridge-well",
         "default-design-bridge-system",
-        "default-design-logistics-office"
+        "default-design-logistics-office",
+        "default-design-naval-academy"
       ],
       "ShipDesigns": [
         "default-ship-design-courier",

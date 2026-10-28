@@ -106,7 +106,7 @@ public class ServeyBodyPlanner : IGoalPlanner
         TryGetFleetTanker(fleetDB, out var tanker);
         var pointsOfInterest = IsAsteroid(targetEntity)
             ? CollectAsteroidNeighborhood(targetEntity, AsteroidRadiusFor(tanker), fleet.FactionOwnerID)
-            : CollectSurveyPois(targetEntity, CommandSpan.Of(fleet), fleet.FactionOwnerID);
+            : CollectSurveyPois(targetEntity, CommandSpan.Effective(fleet), fleet.FactionOwnerID);
 
         var claimedPoiIds = new HashSet<int>();
         var freeShips = new List<Entity>();

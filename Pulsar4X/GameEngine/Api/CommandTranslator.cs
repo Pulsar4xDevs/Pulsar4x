@@ -75,6 +75,11 @@ namespace Pulsar4X.Engine.Api
                 [typeof(DetachShipCommand)] = TranslateDetachShip,
                 [typeof(SetFlagshipCommand)] = TranslateSetFlagship,
                 [typeof(AssignCaptainCommand)] = TranslateAssignCaptain,
+                [typeof(TrainAcademyClassCommand)] = TranslateTrainAcademyClass,
+                [typeof(AcademyCommandCourseCommand)] = TranslateAcademyCommandCourse,
+                [typeof(CancelAcademyCourseCommand)] = TranslateCancelAcademyCourse,
+                [typeof(HaulPairCommand)] = TranslateHaulPair,
+                [typeof(TradePairCommand)] = TranslateTradePair,
                 [typeof(SetStandingOrdersCommand)] = TranslateSetStandingOrders,
                 [typeof(MoveToBodyCommand)] = TranslateMoveToBody,
                 [typeof(Pulsar4X.Api.GeoSurveyCommand)] = TranslateGeoSurvey,
@@ -405,6 +410,8 @@ namespace Pulsar4X.Engine.Api
             var cmd = (MoveGoodsCommand)command;
             if (RejectOwnHaul(faction, commanded, cmd.SourceId, cmd.DestId, cmd.Items, out var lines) is { } bad)
                 return bad;
+            if (!PairReaches(commanded, cmd.SourceId, cmd.DestId))
+                return CommandResult.Reject("The target is outside this ship's reach.");
             var goal = new Goal(GoalType.MoveGoods)
             {
                 Name = "Move goods",
@@ -483,6 +490,8 @@ namespace Pulsar4X.Engine.Api
             var cmd = (FleetMoveGoodsCommand)command;
             if (RejectOwnHaul(faction, commanded, cmd.SourceId, cmd.DestId, cmd.Items, out var lines) is { } bad)
                 return bad;
+            if (!PairReaches(commanded, cmd.SourceId, cmd.DestId))
+                return CommandResult.Reject("The target is outside this fleet's reach.");
             var goal = new Goal(GoalType.FleetMoveGoods)
             {
                 Name = "Move goods",
@@ -561,10 +570,20 @@ namespace Pulsar4X.Engine.Api
         {
             if (!TryResolve(entityId, out var entity) || entity.Manager == null)
                 return false;
-            if (LogisticsSpan.Of(fleet) == CommandSpanKind.Neighbor)
+            var span = LogisticsSpan.Of(fleet);
+            if (span == CommandSpanKind.Neighbor)
                 return LogisticsSpan.ReachesManager(fleet, entity.Manager);
-            return entity.Manager == fleet.Manager;
+            if (entity.Manager != fleet.Manager)
+                return false;
+            if (span == CommandSpanKind.System)
+                return true;
+            return entity.TryGetDataBlob<PositionDB>(out var pos) && pos.Parent != null;
         }
+
+        private bool PairReaches(Entity commanded, int sourceId, int destId)
+            => TryResolve(sourceId, out var source)
+                && TryResolve(destId, out var dest)
+                && LogisticsSpan.ContractReaches(commanded, source, dest);
 
         private CommandResult TranslateSetMarketListing(Entity faction, Entity commanded, GameCommand command)
         {
@@ -1438,6 +1457,9 @@ namespace Pulsar4X.Engine.Api
             if (commanderDB.Type != DataStructures.CommanderTypes.Navy)
                 return CommandResult.Reject("Only a navy officer can captain a ship.");
 
+            if (NavalAcademyCourse.IsEnrolled(_game, officer.Id))
+                return CommandResult.Reject("This officer is already on a course.");
+
             // A lab or admin post is not a ship. Leave that seat alone.
             if (commanderDB.AssignedTo >= 0 && commanderDB.AssignedTo != commanded.Id)
             {
@@ -1477,6 +1499,112 @@ namespace Pulsar4X.Engine.Api
                 PublishPersonnelChanged(ship);
 
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        private CommandResult TranslateTrainAcademyClass(Entity faction, Entity commanded, GameCommand command)
+        {
+            var train = (TrainAcademyClassCommand)command;
+            var reason = NavalAcademyCourse.TryTrain(commanded, train.ComponentId);
+            return reason == null
+                ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
+                : CommandResult.Reject(reason);
+        }
+
+        private CommandResult TranslateAcademyCommandCourse(Entity faction, Entity commanded, GameCommand command)
+        {
+            var course = (AcademyCommandCourseCommand)command;
+            if (!TryResolve(course.CommanderId, out var officer) || officer.FactionOwnerID != faction.Id)
+                return CommandResult.Reject($"Officer {course.CommanderId} not found.");
+            var reason = NavalAcademyCourse.TryCommand(commanded, course.ComponentId, officer);
+            return reason == null
+                ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
+                : CommandResult.Reject(reason);
+        }
+
+        private CommandResult TranslateCancelAcademyCourse(Entity faction, Entity commanded, GameCommand command)
+        {
+            var cancel = (CancelAcademyCourseCommand)command;
+            var reason = NavalAcademyCourse.TryCancel(commanded, cancel.ComponentId);
+            return reason == null
+                ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
+                : CommandResult.Reject(reason);
+        }
+
+        private CommandResult TranslateHaulPair(Entity faction, Entity commanded, GameCommand command)
+        {
+            var haul = (HaulPairCommand)command;
+            if (commanded.HasDataBlob<FleetDB>())
+                return CommandResult.Reject("Haul is one ship.");
+            if (RejectGoalWithoutCaptain(commanded) is { } rejected)
+                return rejected;
+            if (!commanded.HasDataBlob<CargoStorageDB>())
+                return CommandResult.Reject("The ship has no cargo storage.");
+            if (string.IsNullOrEmpty(haul.CargoId))
+                return CommandResult.Reject("Cargo id is required.");
+            if (!TryResolve(haul.SourceId, out var source) || !TryResolve(haul.DestId, out var dest)
+                || !LogisticsSpan.ContractReaches(commanded, source, dest))
+                return CommandResult.Reject("The target is outside this ship's reach.");
+            if (source.Id == dest.Id
+                || !source.HasDataBlob<ColonyInfoDB>()
+                || !dest.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject("The contract needs two colonies.");
+            if (source.FactionOwnerID != commanded.FactionOwnerID || dest.FactionOwnerID != commanded.FactionOwnerID)
+                return CommandResult.Reject("The colony is not yours.");
+            if (!source.HasDataBlob<CargoStorageDB>() || !dest.HasDataBlob<CargoStorageDB>())
+                return CommandResult.Reject("The colony has no warehouse.");
+
+            var goal = new Goal(GoalType.Freighter)
+            {
+                CargoId = haul.CargoId,
+                SourceEntityId = source.Id,
+                DestEntityId = dest.Id,
+                TargetEntityID = ColonyAnchor(dest),
+            };
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        private CommandResult TranslateTradePair(Entity faction, Entity commanded, GameCommand command)
+        {
+            var trade = (TradePairCommand)command;
+            if (commanded.HasDataBlob<FleetDB>())
+                return CommandResult.Reject("Trade is one ship.");
+            if (RejectGoalWithoutCaptain(commanded) is { } rejected)
+                return rejected;
+            if (!commanded.HasDataBlob<CargoStorageDB>())
+                return CommandResult.Reject("The ship has no cargo storage.");
+            if (string.IsNullOrEmpty(trade.CargoId))
+                return CommandResult.Reject("Cargo id is required.");
+            if (!TryResolve(trade.SourceId, out var source) || !TryResolve(trade.DestId, out var dest)
+                || !LogisticsSpan.ContractReaches(commanded, source, dest))
+                return CommandResult.Reject("The target is outside this ship's reach.");
+            if (source.Id == dest.Id
+                || !source.HasDataBlob<ColonyInfoDB>()
+                || !dest.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject("The contract needs two colonies.");
+
+            var goal = new Goal(GoalType.Trade)
+            {
+                CargoId = trade.CargoId,
+                SourceEntityId = source.Id,
+                DestEntityId = dest.Id,
+                TargetEntityID = ColonyAnchor(dest),
+            };
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        static int ColonyAnchor(Entity colony)
+        {
+            if (colony.TryGetDataBlob<ColonyInfoDB>(out var info)
+                && info.PlanetEntity != null
+                && info.PlanetEntity.IsValid)
+                return info.PlanetEntity.Id;
+            return colony.Id;
         }
 
         private void ClearChair(Entity ship, ShipInfoDB shipInfo)

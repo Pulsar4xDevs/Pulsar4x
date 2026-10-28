@@ -12,6 +12,7 @@ using Pulsar4X.Logistics;
 using Pulsar4X.Modding;
 using Pulsar4X.Movement;
 using Pulsar4X.Orbital;
+using Pulsar4X.People;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
@@ -132,6 +133,10 @@ public class TradePlannerTests
             new ShipInfoDB(),
             new ActionQueueDB(),
         });
+        var seated = CommanderFactory.CreateShipCaptain(scene.Game);
+        var person = CommanderFactory.Create(scene.System, scene.Faction.Id, seated);
+        bare.GetDataBlob<ShipInfoDB>().CommanderID = person.Id;
+        seated.AssignedTo = bare.Id;
 
         var result = new CommandTranslator(scene.Game).Translate(
             scene.Faction, bare, new TradeCommand(bare.Id));
@@ -222,6 +227,10 @@ public class TradePlannerTests
             });
             if (lowFuel)
                 ship.SetDataBlob(new AgentDB { Caution = 4f });
+            var captain = CommanderFactory.CreateShipCaptain(game);
+            var officer = CommanderFactory.Create(system, faction.Id, captain);
+            ship.GetDataBlob<ShipInfoDB>().CommanderID = officer.Id;
+            captain.AssignedTo = ship.Id;
 
             return new Scene
             {

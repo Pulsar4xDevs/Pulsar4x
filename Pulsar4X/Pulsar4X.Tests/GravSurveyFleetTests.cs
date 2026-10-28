@@ -20,6 +20,7 @@ using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using Pulsar4X.Orbital;
 using Pulsar4X.Orbits;
+using Pulsar4X.People;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
@@ -82,6 +83,7 @@ namespace Pulsar4X.Tests
         {
             var scene = BuildSolGravSurveyFleet(onSite: true, includeOuter: false);
             var translator = new CommandTranslator(Game);
+            scene.SurveyorA.GetDataBlob<ShipInfoDB>().CommanderID = -1;
             scene.AnomalyInner.FactionOwnerID = Pulsar4X.Engine.Game.NeutralFactionId;
             _sys.ShowNeutralEntityToFaction(scene.Faction.Id, scene.AnomalyInner.Id);
 
@@ -98,6 +100,7 @@ namespace Pulsar4X.Tests
         {
             var scene = BuildSolGravSurveyFleet();
             var translator = new CommandTranslator(Game);
+            scene.SurveyorA.GetDataBlob<ShipInfoDB>().CommanderID = -1;
             scene.AnomalyInner.FactionOwnerID = Pulsar4X.Engine.Game.NeutralFactionId;
             _sys.ShowNeutralEntityToFaction(scene.Faction.Id, scene.AnomalyInner.Id);
 
@@ -269,6 +272,7 @@ namespace Pulsar4X.Tests
             fleet.GetDataBlob<FleetDB>().AddChild(tanker);
             fleet.GetDataBlob<FleetDB>().FlagShipID = surveyorA.Id;
             AttachBridge(surveyorA, AdminLevel.System);
+            SeatCaptain(surveyorA);
 
             return new Scene
             {
@@ -413,6 +417,15 @@ namespace Pulsar4X.Tests
             var admin = new AdminSpaceDB();
             admin.CommanderSeats.Add(new AdminSpaceAbilityState(level, "command-bridge"));
             ship.SetDataBlob(admin);
+        }
+
+        static void SeatCaptain(Entity ship, int rank = 6)
+        {
+            var db = CommanderFactory.CreateShipCaptain(ship.Manager.Game);
+            db.Rank = rank;
+            var officer = CommanderFactory.Create(ship.Manager, ship.FactionOwnerID, db);
+            ship.GetDataBlob<ShipInfoDB>().CommanderID = officer.Id;
+            db.AssignedTo = ship.Id;
         }
 
         static void ParkAtSite(Entity ship, Entity site)

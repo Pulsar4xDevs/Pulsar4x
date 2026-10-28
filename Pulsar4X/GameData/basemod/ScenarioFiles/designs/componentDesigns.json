@@ -502,7 +502,7 @@
       "Name": "Ship Bridge",
       "TemplateId": "ship-command",
       "Properties": [
-        { "Key": "Admin Level", "Value": 0 },
+        { "Key": "Command Span", "Value": 0 },
         { "Key": "Console Space", "Value": 5 }
       ]
     }
@@ -514,7 +514,7 @@
       "Name": "Planetary Command Bridge",
       "TemplateId": "ship-command",
       "Properties": [
-        { "Key": "Admin Level", "Value": 6 },
+        { "Key": "Command Span", "Value": 1 },
         { "Key": "Console Space", "Value": 8 }
       ]
     }
@@ -526,8 +526,20 @@
       "Name": "System Command Bridge",
       "TemplateId": "ship-command",
       "Properties": [
-        { "Key": "Admin Level", "Value": 8 },
+        { "Key": "Command Span", "Value": 2 },
         { "Key": "Console Space", "Value": 12 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-naval-academy",
+      "Name": "Naval Academy",
+      "TemplateId": "naval-academy",
+      "Properties": [
+        { "Key": "Class Size", "Value": 2 },
+        { "Key": "Class Length", "Value": 12 }
       ]
     }
   }

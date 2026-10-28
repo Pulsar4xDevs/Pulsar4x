@@ -90,6 +90,8 @@ public class TradePlan : IGoalPlanner
                 {
                     if (to.Id == from.Id)
                         continue;
+                    if (!LogisticsSpan.ContractReaches(ship, from, to))
+                        continue;
                     if (!MarketBook.TryGet(to, sell.CargoId, out var buy) || buy.BuyQuantity <= 0)
                         continue;
 

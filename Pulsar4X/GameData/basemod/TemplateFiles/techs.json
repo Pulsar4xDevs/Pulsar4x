@@ -514,6 +514,9 @@
           "tech-antenna-bandwidth",
           "tech-factory-max-size",
           "tech-shipyard-slip-max-size",
+          "tech-academy-larger-classes",
+          "tech-academy-better-instruction",
+          "tech-academy-candidate-search",
           "tech-geo-surveyor",
           "tech-asteroid-mining",
           "tech-administration-level",
@@ -549,6 +552,42 @@
       "MaxLevel": 100,
       "DataFormula": "(1 + [Level]) * 5000",
       "CostFormula":"(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-academy-larger-classes",
+      "Name": "Larger Academy Classes",
+      "Description": "A naval academy can take a larger class",
+      "Category": "tech-category-construction-production",
+      "MaxLevel": 3,
+      "DataFormula": "[Level] * 4",
+      "CostFormula": "(1 + [Level]) * 2000"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-academy-better-instruction",
+      "Name": "Better Academy Instruction",
+      "Description": "Graduates and command courses leave with a higher experience cap",
+      "Category": "tech-category-construction-production",
+      "MaxLevel": 3,
+      "DataFormula": "[Level] * 12",
+      "CostFormula": "(1 + [Level]) * 2000"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-academy-candidate-search",
+      "Name": "Academy Candidate Search",
+      "Description": "A class can be drawn from a smaller colony",
+      "Category": "tech-category-construction-production",
+      "MaxLevel": 4,
+      "DataFormula": "[Level]",
+      "CostFormula": "(1 + [Level]) * 1500"
     }
   },
   {

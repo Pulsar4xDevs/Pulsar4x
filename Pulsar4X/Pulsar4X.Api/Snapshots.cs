@@ -518,9 +518,30 @@ public sealed record MineralMiningRow(
     long AnnualProduction,     // 0 when the colony can't mine this mineral
     bool CanMine);
 
-public sealed record NavalAcademyView(IReadOnlyList<NavalAcademyClassView> Academies) : IComponentView;
+/// <summary>What one mounted academy is doing. Idle until the colony orders a course.</summary>
+public enum AcademyCourseKind
+{
+    Idle,
+    Class,
+    Command,
+}
 
-public sealed record NavalAcademyClassView(int ClassSize, int TrainingPeriodMonths, DateTime GraduationDate);
+/// <summary>Every mounted academy on a colony, plus the people a class would draw on.</summary>
+public sealed record NavalAcademyView(
+    IReadOnlyList<NavalAcademyClassView> Academies,
+    long Population,
+    int PeoplePerEnsign) : IComponentView;
+
+/// <summary>One mounted academy. <see cref="Graduation"/> is null while the academy is idle.</summary>
+public sealed record NavalAcademyClassView(
+    int ComponentId,
+    int ClassSize,
+    int TrainingPeriodMonths,
+    AcademyCourseKind Course,
+    DateTime? Graduation,
+    int OfficerId,
+    int PopulationTaken,
+    int MeanCap);
 
 // --------------------------------------------------------------------------------------------
 // Industry (production lines) and local construction. Owner-only.
@@ -923,6 +944,15 @@ public sealed record ShipSnapshot(
 
     /// <summary>Owned colonies currently inside this ship's cargo-transfer range.</summary>
     public IReadOnlyList<int> ColoniesInCargoRange { get; init; } = Array.Empty<int>();
+
+    /// <summary>Effective span, the narrower of the bridge and the seated rank. One of <see cref="CommandSpanLabels"/>.</summary>
+    public string CommandSpan { get; init; } = "";
+
+    /// <summary>One line under the captain. Names the effective span, the bridge, and the officer.</summary>
+    public string SpanLine { get; init; } = "";
+
+    /// <summary>Systems a haul or trade from this ship may use.</summary>
+    public IReadOnlyList<string> LogisticsSystemIds { get; init; } = Array.Empty<string>();
 }
 
 /// <summary>
@@ -1006,8 +1036,11 @@ public sealed class FleetSnapshot
     public bool CanGravSurvey { get; init; }
     public bool CanMineAsteroids { get; init; }
 
-    /// <summary>Flagship command bridge, as survey reads it. One of <see cref="CommandSpanLabels"/>.</summary>
+    /// <summary>Effective span of the flagship. One of <see cref="CommandSpanLabels"/>.</summary>
     public string CommandSpan { get; init; } = "";
+
+    /// <summary>One line under the fleet commander. Names the effective span, the bridge, and the officer.</summary>
+    public string SpanLine { get; init; } = "";
 
     /// <summary>How far trade, freight, and a haul contract reach. One step wider than <see cref="CommandSpan"/>.</summary>
     public string LogisticsSpan { get; init; } = "";

@@ -268,11 +268,11 @@
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
-          "Name": "Admin Level",
-          "DescriptionFormula": "'Command level of this office'",
+          "Name": "Command Span",
+          "DescriptionFormula": "'How far this bridge can see. Body is this ship, Well is that body and its moons, System is the star.'",
           "GuiHint": "GuiEnumSelectionList",
-          "EnumTypeName" : "GameEngine.People.AdminLevel",
-          "MaxFormula": "8",
+          "EnumTypeName" : "GameEngine.People.ShipCommandSpan",
+          "MaxFormula": "3",
           "MinFormula": "0",
           "StepFormula": "1",
           "PropertyFormula": "0"
@@ -289,7 +289,7 @@
         {
           "Name": "DBargs",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(PropertyValue('Admin Level'), PropertyValue('Console Space'))",
+          "PropertyFormula": "AtbConstrArgs((8 * PropertyValue('Command Span')) - (2 * PropertyValue('Command Span') * PropertyValue('Command Span')), PropertyValue('Console Space'))",
           "AttributeType": "GameEngine.People.AdminSpaceAtb"
         }
       ]

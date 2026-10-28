@@ -2,15 +2,18 @@ using System;
 using System.Collections.Generic;
 using GameEngine.People;
 using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Fleets;
 using Pulsar4X.Movement;
+using Pulsar4X.People;
+using Pulsar4X.Ships;
 
 namespace GameEngine.Engine.Orders;
 
 /// <summary>
 /// How far an issued goal may fan out from <c>TargetEntityID</c>.
-/// Comes from the flagship / ship command bridge (<see cref="AdminSpaceDB"/>), not skill.
+/// <see cref="Of"/> is the bridge. <see cref="Effective"/> is the narrower of that and the seated officer's rank.
 /// </summary>
 public enum CommandSpanKind
 {
@@ -46,6 +49,94 @@ public static class CommandSpan
                 max = seat.SeatType;
         }
         return any ? FromAdminLevel(max) : CommandSpanKind.Body;
+    }
+
+    /// <summary>Ranks 1–3 are Body, 4–5 are Well, 6 and above are System.</summary>
+    public static CommandSpanKind RankSpan(int rank)
+    {
+        if (rank >= 6)
+            return CommandSpanKind.System;
+        if (rank >= 4)
+            return CommandSpanKind.Well;
+        return CommandSpanKind.Body;
+    }
+
+    /// <summary>
+    /// Ships and fleets use the narrower of the bridge and the seated rank.
+    /// No seated officer is Body. A colony keeps the hardware reading.
+    /// </summary>
+    public static CommandSpanKind Effective(Entity unit)
+    {
+        var hardware = Of(unit);
+        if (unit == null)
+            return CommandSpanKind.Body;
+        if (!unit.HasDataBlob<ShipInfoDB>() && !unit.HasDataBlob<FleetDB>())
+            return hardware;
+        if (!CommanderSkills.TryGetCommander(unit, out _, out var commander))
+            return CommandSpanKind.Body;
+        return Narrower(hardware, RankSpan(commander.Rank));
+    }
+
+    public static CommandSpanKind Narrower(CommandSpanKind hardware, CommandSpanKind rank)
+    {
+        if (hardware == CommandSpanKind.Body || rank == CommandSpanKind.Body)
+            return CommandSpanKind.Body;
+        if (hardware == CommandSpanKind.Well || rank == CommandSpanKind.Well)
+            return CommandSpanKind.Well;
+        return CommandSpanKind.System;
+    }
+
+    /// <summary>
+    /// One line. "Body. This bridge can cover a system. Ensign Kim covers this ship."
+    /// </summary>
+    public static string Describe(Entity unit)
+    {
+        var hardware = unit == null ? CommandSpanKind.Body : Of(unit);
+        var effective = unit == null ? CommandSpanKind.Body : Effective(unit);
+        return Word(effective) + ". " + BridgeClause(hardware) + " " + OfficerClause(unit, effective);
+    }
+
+    static string Word(CommandSpanKind span) => span switch
+    {
+        CommandSpanKind.Well => "Well",
+        CommandSpanKind.System => "System",
+        CommandSpanKind.Neighbor => "Neighbor",
+        _ => "Body",
+    };
+
+    static string BridgeClause(CommandSpanKind hardware) => hardware switch
+    {
+        CommandSpanKind.Well => "This bridge can cover a well.",
+        CommandSpanKind.System => "This bridge can cover a system.",
+        _ => "This bridge covers this ship.",
+    };
+
+    static string OfficerClause(Entity? unit, CommandSpanKind effective)
+    {
+        if (unit == null || !CommanderSkills.TryGetCommander(unit, out var commander, out var db))
+            return "No officer is seated.";
+        string name = string.IsNullOrWhiteSpace(db.Name) ? "the officer" : db.Name;
+        string rank = RankTitle(commander, db);
+        string reach = effective switch
+        {
+            CommandSpanKind.Well => "covers this well.",
+            CommandSpanKind.System => "covers this system.",
+            _ => "covers this ship.",
+        };
+        return rank + " " + name + " " + reach;
+    }
+
+    static string RankTitle(Entity commander, CommanderDB db)
+    {
+        if (db.Type == CommanderTypes.Navy
+            && commander.Manager?.Game is Game game
+            && game.Themes != null
+            && game.Themes.TryGetValue(game.Settings.CurrentTheme, out var theme)
+            && theme.NavyRanks != null
+            && theme.NavyRanks.TryGetValue(db.Rank, out var title)
+            && !string.IsNullOrWhiteSpace(title))
+            return title;
+        return "Rank " + db.Rank;
     }
 
     public static bool TryGetCommandBridge(Entity unit, out AdminSpaceDB admin)

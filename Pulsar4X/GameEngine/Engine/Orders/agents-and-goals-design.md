@@ -131,11 +131,11 @@ XP lives on the **person** (`CommanderDB.Skills`), not the hull and not `AgentDB
 
 Do not put skill inside `IGoalPlanner.Plan` feasibility (no “Nav too low → Fail”). Weighting / autonomous pick is still unwired; do not add skill bias there until Decide exists.
 
-Quality is `1 + skill/cap` (cap default 100). Missing commander = 1.0 so existing tests stay on the old 90° exit and 1 s / 30 min timings.
+Quality is `1 + skill / 100`. Grants stop at `ExperienceCap`, or at 100 when the cap is 0. A cap of 40 filled to 40 is quality 1.4. A cap of 100 filled to 100 stays quality 2. Missing commander = 1.0 so existing tests stay on the old 90° exit and 1 s / 30 min timings.
 
 ### Command span (the gate)
 
-Skill does not decide **how wide** an order is. Span comes from the **flagship / subfleet-leader command bridge** (`AdminSpaceDB` max `AdminLevel`). Missing bridge → **Body**.
+Skill does not decide **how wide** an order is. `CommandSpan.Of` is the bridge (`AdminSpaceDB` max `AdminLevel`). Effective span is the narrower of that and the seated officer's rank. Ranks 1–3 are Body, 4–5 are Well, and 6 and above are System. No seated officer is Body. A colony keeps the hardware reading. Missing bridge → **Body**.
 
 | Span | Seats | Fan-out of `TargetEntityID` |
 |---|---|---|
@@ -153,7 +153,7 @@ Scenario hulls mount `ship-command` designs (`default-design-bridge-ship` / `-we
 
 1. **Tier = span of command**, not planner IQ. `(GoalType, does this unit decompose?)`.
 2. **One engine-side `CanAccept` at inject**, walk up the tree. Client is not a gate.
-3. **Officers plentiful; skill never a gate** — quality only (replan, relay, recovery, plan/action *requests*). Processors are physics.
+3. **Officers are scarce. Rank clips span. Skill stays quality and never fails a plan, a move, a survey, or a burn. Processors are physics.**
 4. **AI: free admin tech, not free seats.**
 5. **Relay costs game time per hop; leaf plan does not.** Hop time scales with Command skill.
 6. **`IGoalPlanner` + reflection**; agent has no feature switches. `GoalType` enum for now (string id later).
@@ -167,7 +167,7 @@ Scenario hulls mount `ship-command` designs (`default-design-bridge-ship` / `-we
 | `IGoalPlanner` (`Plan` → `PlanResult`) | Feature folder; one class per `GoalType` |
 | `GoalType` (+ `BaseWeights` / role if autonomous) | `GoalsDB` / `GoalRoles` |
 | `SkillDomains.DomainOf` line | if the type should grant XP |
-| Command span (`AdminLevel` on flagship bridge) | `CommandSpan.Expand` in fleet planners |
+| Command span (narrower of the bridge and the seated rank) | `CommandSpan.Effective`, then `CommandSpan.Expand` in fleet planners |
 | API DTO + translator | Central (auth boundary) |
 
 ## TODO

@@ -4,6 +4,14 @@ using Pulsar4X.Interfaces;
 
 namespace GameEngine.People;
 
+/// <summary>The three spans a ship bridge can be bought as. Stored values map to admin levels 0, 6, and 8.</summary>
+public enum ShipCommandSpan
+{
+    Body = 0,
+    Well = 1,
+    System = 2,
+}
+
 public enum AdminLevel
 {
     Ship,

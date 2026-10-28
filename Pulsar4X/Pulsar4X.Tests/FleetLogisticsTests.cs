@@ -18,6 +18,7 @@ using Pulsar4X.Modding;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using Pulsar4X.Orbital;
+using Pulsar4X.People;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
@@ -115,6 +116,7 @@ public class FleetLogisticsTests
     public void Span_ShipTakesTheMoon_PlanetTakesMars_SystemTakesOneJump()
     {
         var scene = SpanScene();
+        SeatCaptain(scene.Ship);
 
         AttachBridge(scene.Ship, AdminLevel.Ship);
         var well = new FleetFreighterPlan().Plan(scene.Fleet, scene.Goal, scene.Fleet.StarSysDateTime);
@@ -154,6 +156,7 @@ public class FleetLogisticsTests
         Office(world, beyond.System, beyond.Star, new Vector3(1e11, 0, 0), sell: 0, ask: 0, buy: 4000, bid: 12, stock: 0, colony: true);
         var fleet = Fleet(world, out var ships, holds: new[] { 40 });
         AttachBridge(ships[0], AdminLevel.System);
+        SeatCaptain(ships[0]);
 
         var accepted = translator.Translate(
             world.Faction,
@@ -222,6 +225,15 @@ public class FleetLogisticsTests
         ship.SetDataBlob(admin);
     }
 
+    static void SeatCaptain(Entity ship, int rank = 6)
+    {
+        var db = CommanderFactory.CreateShipCaptain(ship.Manager.Game);
+        db.Rank = rank;
+        var officer = CommanderFactory.Create(ship.Manager, ship.FactionOwnerID, db);
+        ship.GetDataBlob<ShipInfoDB>().CommanderID = officer.Id;
+        db.AssignedTo = ship.Id;
+    }
+
     static TradeWorld TradeScene(bool secondPair)
     {
         var world = NewSystem();
@@ -254,6 +266,7 @@ public class FleetLogisticsTests
         var dest = Office(world, mars, new Vector3(1e7, 0, 0), sell: 0, ask: 0, buy: 80, bid: 12, stock: 0, colony: true);
         var fleet = Fleet(world, out var ships, holds: new[] { 30, 50 }, at: new Vector3(1e7, 0, 0), parent: earth);
         AttachBridge(ships[0], AdminLevel.Planet);
+        SeatCaptain(ships[0]);
         var tanker = Ship(world, 100, new Vector3(1.5e11, 1e8, 0), earth, tanker: true);
         fleet.GetDataBlob<FleetDB>().AddChild(tanker);
         return new ContractWorld

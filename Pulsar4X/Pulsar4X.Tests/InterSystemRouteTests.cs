@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GameEngine.Engine.Orders;
+using GameEngine.People;
 using NUnit.Framework;
 using Pulsar4X.Api;
 using Pulsar4X.Colonies;
@@ -17,6 +18,7 @@ using Pulsar4X.Modding;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using Pulsar4X.Orbital;
+using Pulsar4X.People;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
@@ -207,6 +209,13 @@ public class InterSystemRouteTests
                 new NewtonMoveDB(here.Star, Vector3.Zero),
                 MassVolumeDB.NewFromMassAndRadius_m(1e6, 20),
             });
+            var admin = new AdminSpaceDB();
+            admin.CommanderSeats.Add(new AdminSpaceAbilityState(AdminLevel.System, "command-bridge"));
+            ship.SetDataBlob(admin);
+            var captain = CommanderFactory.CreateShipCaptain(game);
+            var officer = CommanderFactory.Create(here.System, faction.Id, captain);
+            ship.GetDataBlob<ShipInfoDB>().CommanderID = officer.Id;
+            captain.AssignedTo = ship.Id;
 
             var scene = new Scene
             {

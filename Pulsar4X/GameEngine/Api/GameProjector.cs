@@ -258,7 +258,7 @@ namespace Pulsar4X.Engine.Api
                 : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ComponentInstancesDB>(out var ci) ? ToInstallationsView(ci, e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ColonyInfoDB>(out var col) ? ToColonyMiningView(col, e, f) : null,
-            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<NavalAcademyDB>(out var na) ? ToNavalAcademyView(na) : null,
+            (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<NavalAcademyDB>(out var na) ? ToNavalAcademyView(na, e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<IndustryAbilityDB>(out var ind) ? ToIndustryView(ind, e, f) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<LocalConstructionDB>(out var lc) ? ToConstructionView(lc, e, f) : null,
             // A lab's queue/economics are internal to its owner; other factions just see the entity.
@@ -949,12 +949,32 @@ namespace Pulsar4X.Engine.Api
             };
         }
 
-        private static NavalAcademyView ToNavalAcademyView(NavalAcademyDB na)
+        private static NavalAcademyView ToNavalAcademyView(NavalAcademyDB na, Entity colony)
         {
+            int instruction = NavalAcademyCourse.InstructionOf(colony);
+            long population = colony.TryGetDataBlob<ColonyInfoDB>(out var info)
+                ? NavalAcademyCourse.PopulationOf(info)
+                : 0;
             var academies = new List<NavalAcademyClassView>(na.Academies.Count);
             foreach (var academy in na.Academies)
-                academies.Add(new NavalAcademyClassView(academy.ClassSize, academy.TrainingPeriodInMonths, academy.GraduationDate));
-            return new NavalAcademyView(academies);
+            {
+                bool idle = academy.CourseKind == Pulsar4X.People.AcademyCourseKind.Idle;
+                academies.Add(new NavalAcademyClassView(
+                    academy.ComponentId,
+                    academy.ClassSize,
+                    academy.TrainingPeriodInMonths,
+                    academy.CourseKind switch
+                    {
+                        Pulsar4X.People.AcademyCourseKind.Class => Pulsar4X.Api.AcademyCourseKind.Class,
+                        Pulsar4X.People.AcademyCourseKind.Command => Pulsar4X.Api.AcademyCourseKind.Command,
+                        _ => Pulsar4X.Api.AcademyCourseKind.Idle,
+                    },
+                    idle ? null : academy.GraduationDate,
+                    academy.OfficerId,
+                    academy.PopulationTaken,
+                    NavalAcademyCourse.SchoolMean(academy.TrainingPeriodInMonths, instruction)));
+            }
+            return new NavalAcademyView(academies, population, NavalAcademyCourse.PeoplePerEnsign(colony));
         }
 
         // ----- industry / local construction -----
@@ -1672,7 +1692,8 @@ namespace Pulsar4X.Engine.Api
                 CanGeoSurvey = fleet.HasGeoSurveyAbility(),
                 CanGravSurvey = fleet.HasJPSurveyAbililty(),
                 CanMineAsteroids = fleet.HasAsteroidMineAbility(),
-                CommandSpan = SpanLabel(CommandSpan.Of(fleet)),
+                CommandSpan = SpanLabel(CommandSpan.Effective(fleet)),
+                SpanLine = CommandSpan.Describe(fleet),
                 LogisticsSpan = SpanLabel(LogisticsSpan.Of(fleet)),
                 LogisticsSystemIds = LogisticsSpan.SystemIds(fleet),
                 Goal = ProjectGoals(fleet),
@@ -1777,6 +1798,9 @@ namespace Pulsar4X.Engine.Api
                 CanMineAsteroids = ship.HasAsteroidMineAbility(),
                 CommanderId = commanderId,
                 ColoniesInCargoRange = ColoniesInCargoRange(ship, factionId),
+                CommandSpan = SpanLabel(CommandSpan.Effective(ship)),
+                SpanLine = CommandSpan.Describe(ship),
+                LogisticsSystemIds = LogisticsSpan.SystemIds(ship),
             };
         }
 

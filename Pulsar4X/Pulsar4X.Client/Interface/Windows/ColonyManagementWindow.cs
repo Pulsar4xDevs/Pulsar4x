@@ -301,43 +301,123 @@ namespace Pulsar4X.Client
 
         private void DisplayNavalAcademy(int colonyId, NavalAcademyView academy)
         {
-            Vector2 topSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("NumberOfAcademies" + colonyId, new Vector2(topSize.X, 28f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            ImGui.Text("The colony has " + Stringify.Quantity(academy.Population) + " people.");
+
+            var enrolled = new HashSet<int>();
+            foreach (var row in academy.Academies)
             {
-                ImGui.Text("Academies:");
+                if (row.Course == AcademyCourseKind.Command && row.OfficerId >= 0)
+                    enrolled.Add(row.OfficerId);
+            }
+
+            var galaxy = _uiState.GameClient?.Galaxy;
+            for (int i = 0; i < academy.Academies.Count; i++)
+            {
+                var row = academy.Academies[i];
+                ImGui.Separator();
+                ImGui.Text("Academy " + (i + 1));
                 ImGui.SameLine();
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-                ImGui.Text(academy.Academies.Count.ToString("0"));
-                ImGui.PopStyleColor();
-                ImGui.EndChild();
-            }
+                ImGui.TextColored(Styles.DescriptiveColor,
+                    "Class of " + row.ClassSize + ", " + row.TrainingPeriodMonths + " months. Mean cap " + row.MeanCap + ".");
 
-            Vector2 sizeAvailable = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("AcademyList", new Vector2(sizeAvailable.X * .25f, sizeAvailable.Y), ImGuiChildFlags.Borders))
+                if (row.Course == AcademyCourseKind.Idle)
+                    DisplayIdleAcademy(colonyId, academy, row, galaxy, enrolled);
+                else
+                    DisplayRunningCourse(colonyId, row, galaxy);
+            }
+        }
+
+        private void DisplayIdleAcademy(int colonyId, NavalAcademyView academy, NavalAcademyClassView row, IClientGalaxy? galaxy, HashSet<int> enrolled)
+        {
+            long need = (long)row.ClassSize * academy.PeoplePerEnsign;
+            string train = "Train a class of " + row.ClassSize + ". Needs " + Stringify.Quantity(need)
+                + " people. The colony has " + Stringify.Quantity(academy.Population) + ".";
+            bool shortOfPeople = academy.Population < need;
+            if (shortOfPeople)
+                ImGui.BeginDisabled();
+            if (ImGui.Button(train + "###train-" + row.ComponentId))
+                _uiState.GameClient?.SubmitCommandAsync(new TrainAcademyClassCommand(colonyId, row.ComponentId));
+            if (shortOfPeople)
             {
-                if(ImGui.BeginTable("AcademyListTable", 4, Styles.TableFlags))
-                {
-                    ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.1f);
-                    ImGui.TableSetupColumn("Class Size", ImGuiTableColumnFlags.None, 0.25f);
-                    ImGui.TableSetupColumn("Length", ImGuiTableColumnFlags.None, 0.2f);
-                    ImGui.TableSetupColumn("Graduation", ImGuiTableColumnFlags.None, 0.3f);
-                    ImGui.TableHeadersRow();
-
-                    for(int i = 0; i < academy.Academies.Count; i++)
-                    {
-                        ImGui.TableNextColumn();
-                        ImGui.Text((i + 1).ToString());
-                        ImGui.TableNextColumn();
-                        ImGui.Text(academy.Academies[i].ClassSize.ToString());
-                        ImGui.TableNextColumn();
-                        ImGui.Text(academy.Academies[i].TrainingPeriodMonths.ToString() + " months");
-                        ImGui.TableNextColumn();
-                        ImGui.Text(academy.Academies[i].GraduationDate.ToShortDateString());
-                    }
-                    ImGui.EndTable();
-                }
-                ImGui.EndChild();
+                ImGui.EndDisabled();
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                    ImGui.SetTooltip("The colony has " + academy.Population + " people. This class needs " + need + ".");
             }
+
+            if (galaxy == null)
+                return;
+
+            bool anyNavy = false;
+            foreach (var officer in galaxy.Commanders)
+            {
+                if (officer.Kind != CommanderKind.Navy)
+                    continue;
+                anyNavy = true;
+                string? refusal = CommandCourseRefusal(officer, row.MeanCap, enrolled);
+                string label = OfficerLine(officer) + ". " + (refusal ?? CommandCourseLabel(officer, row.MeanCap));
+                if (refusal != null)
+                    ImGui.BeginDisabled();
+                if (ImGui.Button(label + "###course-" + row.ComponentId + "-" + officer.Id))
+                    _uiState.GameClient?.SubmitCommandAsync(new AcademyCommandCourseCommand(colonyId, row.ComponentId, officer.Id));
+                if (refusal != null)
+                {
+                    ImGui.EndDisabled();
+                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                        ImGui.SetTooltip(refusal);
+                }
+            }
+            if (!anyNavy)
+                ImGui.TextColored(Styles.DescriptiveColor, "No navy officers.");
+        }
+
+        private void DisplayRunningCourse(int colonyId, NavalAcademyClassView row, IClientGalaxy? galaxy)
+        {
+            string date = row.Graduation?.ToShortDateString() ?? "";
+            if (row.Course == AcademyCourseKind.Class)
+            {
+                ImGui.Text("Training a class of " + row.ClassSize + ". Finishes " + date + ".");
+            }
+            else
+            {
+                string who = "An officer";
+                var officer = galaxy?.Commanders.FirstOrDefault(person => person.Id == row.OfficerId);
+                if (officer != null)
+                    who = OfficerLine(officer);
+                ImGui.Text("Command course for " + who + ". Finishes " + date + ".");
+            }
+            if (ImGui.Button("Cancel###cancel-" + row.ComponentId))
+                _uiState.GameClient?.SubmitCommandAsync(new CancelAcademyCourseCommand(colonyId, row.ComponentId));
+        }
+
+        private static string OfficerLine(CommanderSnapshot officer)
+        {
+            string rank = string.IsNullOrEmpty(officer.RankName) ? "Rank " + officer.Rank : officer.RankName;
+            return rank + " " + officer.Name;
+        }
+
+        /// <summary>Null when the button may order the course. The sentence matches the server refusal.</summary>
+        private static string? CommandCourseRefusal(CommanderSnapshot officer, int mean, HashSet<int> enrolled)
+        {
+            if (officer.IsAssigned)
+                return "This officer is assigned.";
+            if (enrolled.Contains(officer.Id))
+                return "This officer is already on a course.";
+            if (officer.ExperienceCap < mean)
+                return null;
+            if (officer.Rank < 4)
+                return officer.Experience >= 8 ? null : "Experience " + officer.Experience + ". This course needs 8.";
+            if (officer.Rank <= 5)
+                return officer.Experience >= 16 ? null : "Experience " + officer.Experience + ". This course needs 16.";
+            return "Rank is already 6. This course cannot raise it further.";
+        }
+
+        private static string CommandCourseLabel(CommanderSnapshot officer, int mean)
+        {
+            if (officer.ExperienceCap < mean)
+                return "Raise the experience cap to " + mean + ".";
+            if (officer.Rank < 4)
+                return "Promote to rank 4.";
+            return "Promote to rank 6.";
         }
 
     }

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using GameEngine.Engine.Orders;
+using GameEngine.People;
 using NUnit.Framework;
 using Pulsar4X.Api;
 using Pulsar4X.Colonies;
@@ -15,6 +16,7 @@ using Pulsar4X.Modding;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using Pulsar4X.Orbital;
+using Pulsar4X.People;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
@@ -226,6 +228,16 @@ public class FreighterPlannerTests
             });
             if (lowFuel)
                 ship.SetDataBlob(new AgentDB { Caution = 4f });
+
+            // A planet bridge and a captain cover every colony in this star system.
+            // Two planets do not share a well, so a ship bridge cannot haul this pair.
+            var admin = new AdminSpaceDB();
+            admin.CommanderSeats.Add(new AdminSpaceAbilityState(AdminLevel.Planet, "command-bridge"));
+            ship.SetDataBlob(admin);
+            var captain = CommanderFactory.CreateShipCaptain(game);
+            var officer = CommanderFactory.Create(system, faction.Id, captain);
+            ship.GetDataBlob<ShipInfoDB>().CommanderID = officer.Id;
+            captain.AssignedTo = ship.Id;
 
             Assert.That(ship.GetDataBlob<CargoStorageDB>().GetFreeUnitSpace(iron), Is.EqualTo(capacityUnits));
 

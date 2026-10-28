@@ -10,15 +10,14 @@ using Pulsar4X.Movement;
 namespace Pulsar4X.Logistics;
 
 /// <summary>
-/// Trade, freight, and supply read the command bridge one step wider than survey.
-/// A ship bridge covers the well. A colony, planet, or sphere-of-influence bridge covers this
-/// star system. A system bridge, and anything wider, covers this system and one known jump.
+/// Trade, freight, and supply read one step wider than the effective span.
+/// Body freight is a well. Well freight is the star system. System freight is one known jump.
 /// </summary>
 public static class LogisticsSpan
 {
     public static CommandSpanKind Of(Entity unit)
     {
-        return CommandSpan.Of(unit) switch
+        return CommandSpan.Effective(unit) switch
         {
             CommandSpanKind.Body => CommandSpanKind.Well,
             CommandSpanKind.Well => CommandSpanKind.System,

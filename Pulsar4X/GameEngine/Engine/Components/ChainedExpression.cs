@@ -482,6 +482,17 @@ namespace Pulsar4X.Components
                     args.Result = dict;
                     break;
 
+                case "Text":
+                    var text = "";
+                    foreach (var argParam in args.Parameters)
+                    {
+                        var argExpression = new ChainedExpression(argParam, _designProperty, _factionDataStore, _factionTechDB);
+                        argExpression.Evaluate();
+                        text += argExpression.Result;
+                    }
+                    args.Result = text;
+                    break;
+
                 case "TechData":
                     techID = (string)args.EvaluateParameters()[0];
                     var tech = _factionDataStore.Techs[techID];

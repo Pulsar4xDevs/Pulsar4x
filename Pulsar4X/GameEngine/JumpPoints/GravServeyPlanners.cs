@@ -97,7 +97,7 @@ public class ScanAnomalyPlan : IGoalPlanner
         if (!fleet.Manager.TryGetGlobalEntityById(goal.TargetEntityID, out var targetEntity))
             return PlanResult.Fail("We have no target");
 
-        var pointsOfInterest = CollectAnomalies(targetEntity, CommandSpan.Of(fleet), fleet.FactionOwnerID);
+        var pointsOfInterest = CollectAnomalies(targetEntity, CommandSpan.Effective(fleet), fleet.FactionOwnerID);
 
         if (pointsOfInterest.Count == 0)
             return PlanResult.Done("nothing left to survey");

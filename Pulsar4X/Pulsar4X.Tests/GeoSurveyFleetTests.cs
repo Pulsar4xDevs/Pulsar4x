@@ -435,6 +435,7 @@ namespace Pulsar4X.Tests
         {
             var scene = BuildMarsSurveyFleet();
             var translator = new CommandTranslator(Game);
+            scene.SurveyorA.GetDataBlob<ShipInfoDB>().CommanderID = -1;
 
             var blocked = translator.Translate(scene.Faction, scene.SurveyorA,
                 new MoveToBodyCommand(scene.SurveyorA.Id, scene.Mars.Id));
@@ -487,6 +488,7 @@ namespace Pulsar4X.Tests
         {
             var scene = BuildMarsSurveyFleet();
             var translator = new CommandTranslator(Game);
+            scene.SurveyorA.GetDataBlob<ShipInfoDB>().CommanderID = -1;
             scene.Mars.FactionOwnerID = Pulsar4X.Engine.Game.NeutralFactionId;
             _sys.ShowNeutralEntityToFaction(scene.Faction.Id, scene.Mars.Id);
             ParkAtBody(scene.SurveyorA, scene.Mars);
@@ -504,6 +506,7 @@ namespace Pulsar4X.Tests
         {
             var scene = BuildMarsSurveyFleet();
             var translator = new CommandTranslator(Game);
+            scene.SurveyorA.GetDataBlob<ShipInfoDB>().CommanderID = -1;
             scene.Mars.FactionOwnerID = Pulsar4X.Engine.Game.NeutralFactionId;
             _sys.ShowNeutralEntityToFaction(scene.Faction.Id, scene.Mars.Id);
 
@@ -556,6 +559,7 @@ namespace Pulsar4X.Tests
             fleet.GetDataBlob<FleetDB>().AddChild(tanker);
             fleet.GetDataBlob<FleetDB>().FlagShipID = surveyorA.Id;
             AttachBridge(surveyorA, AdminLevel.Planet);
+            SeatCaptain(surveyorA);
 
             var fuel = faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny("methalox");
             Assert.IsTrue(FuelSituation.TryFindFleetTanker(surveyorA, fuel, out var tankerId, out var tankerReason),
@@ -597,6 +601,7 @@ namespace Pulsar4X.Tests
             fleetDB.AddChild(tanker);
             fleetDB.FlagShipID = surveyorA.Id;
             AttachBridge(surveyorA, flagshipLevel);
+            SeatCaptain(surveyorA);
 
             return new Scene
             {
@@ -726,6 +731,15 @@ namespace Pulsar4X.Tests
             var admin = new AdminSpaceDB();
             admin.CommanderSeats.Add(new AdminSpaceAbilityState(level, "command-bridge"));
             ship.SetDataBlob(admin);
+        }
+
+        static void SeatCaptain(Entity ship, int rank = 6)
+        {
+            var db = CommanderFactory.CreateShipCaptain(ship.Manager.Game);
+            db.Rank = rank;
+            var officer = CommanderFactory.Create(ship.Manager, ship.FactionOwnerID, db);
+            ship.GetDataBlob<ShipInfoDB>().CommanderID = officer.Id;
+            db.AssignedTo = ship.Id;
         }
 
         Entity MakeSurveyShip(Entity parent, Vector3 abs, Entity faction, string name)
