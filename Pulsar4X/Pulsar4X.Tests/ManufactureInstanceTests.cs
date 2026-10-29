@@ -98,7 +98,7 @@ public class ManufactureInstanceTests
     }
 
     [Test]
-    public void CheckedBox_OnASiteOnlyDesign_QueuesTheAssembleCost()
+    public void CheckedBox_OnASiteOnlyDesign_QueuesTheMountCost()
     {
         var world = NewSystem();
         var colony = Colony(world, withOffice: true);
@@ -114,23 +114,21 @@ public class ManufactureInstanceTests
         Assert.That(construction.BuildQueue.Count, Is.EqualTo(1));
         Assert.That(queued.Instance, Is.Null);
         Assert.That(queued.Kind, Is.EqualTo("Assemble"));
-        Assert.That(queued.PointCost, Is.EqualTo(design.IndustryPointCosts));
-        Assert.That(queued.PointCost, Is.EqualTo(45_000));
-        Assert.That(queued.PointCost, Is.Not.EqualTo(LocalConstructionJob.MountCost(design.MassPerUnit)));
+        Assert.That(queued.PointCost, Is.EqualTo(LocalConstructionJob.MountCost(design.MassPerUnit)));
+        Assert.That(queued.PointCost, Is.EqualTo(1));
+        Assert.That(queued.PointCost, Is.Not.EqualTo(design.IndustryPointCosts));
         Assert.That(queued.ResourcesRemaining, Is.Empty);
         Assert.That(StoredInstances(colony), Is.Empty);
         Assert.That(MountedCount(colony), Is.EqualTo(0));
 
         new LocalConstructionProcessor().ProcessEntity(colony, 0);
 
-        Assert.That(construction.BuildQueue.Count, Is.EqualTo(1));
-        Assert.That(queued.PointsAccumulated, Is.EqualTo(5));
-        Assert.That(queued.IsComplete, Is.False);
-        Assert.That(MountedCount(colony), Is.EqualTo(0));
+        Assert.That(construction.BuildQueue, Is.Empty);
+        Assert.That(MountedCount(colony), Is.EqualTo(1));
     }
 
     [Test]
-    public void StuckSiteOnlyMount_BecomesAnAssembleAndSpendsPoints()
+    public void StuckSiteOnlyMount_InstallsAtTheMountCost()
     {
         var world = NewSystem();
         var colony = Colony(world, withOffice: true);
@@ -144,13 +142,28 @@ public class ManufactureInstanceTests
 
         new LocalConstructionProcessor().ProcessEntity(colony, 0);
 
-        var queued = construction.BuildQueue.Peek();
-        Assert.That(queued.Instance, Is.Null);
-        Assert.That(queued.Kind, Is.EqualTo("Assemble"));
-        Assert.That(queued.PointCost, Is.EqualTo(45_000));
-        Assert.That(queued.PointsAccumulated, Is.EqualTo(5));
+        Assert.That(construction.BuildQueue, Is.Empty);
         Assert.That(StoredInstances(colony), Is.Empty);
-        Assert.That(MountedCount(colony), Is.EqualTo(0));
+        Assert.That(MountedCount(colony), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void OldFactoryFollowUp_DropsToTheMountCost()
+    {
+        var world = NewSystem();
+        var colony = Colony(world, withOffice: true);
+        var design = SiteOnlyDesign();
+        var construction = colony.GetDataBlob<LocalConstructionDB>();
+        var queued = new LocalConstructionJob(design);
+        queued.ResourcesRemaining.Clear();
+        queued.PointsAccumulated = 25;
+        construction.BuildQueue.Enqueue(queued);
+        Assert.That(queued.PointCost, Is.EqualTo(45_000));
+
+        new LocalConstructionProcessor().ProcessEntity(colony, 0);
+
+        Assert.That(construction.BuildQueue, Is.Empty);
+        Assert.That(MountedCount(colony), Is.EqualTo(1));
     }
 
     [Test]

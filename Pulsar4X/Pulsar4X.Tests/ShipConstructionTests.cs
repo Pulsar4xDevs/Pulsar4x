@@ -201,7 +201,7 @@ public class ShipConstructionTests
 
         var office = world.Info.ComponentDesigns["default-design-local-construction"];
         long rate = office.GetAttribute<ConstructionAtb>().ConstructionPoints["installation"];
-        Assert.That(rate, Is.EqualTo(5));
+        Assert.That(rate, Is.EqualTo(25));
         Assert.That(office.IndustryPointCosts, Is.GreaterThan(0));
         Stock(world, ship, office.ResourceCosts);
         Assert.That(colony.GetDataBlob<CargoStorageDB>().TypeStores, Is.Empty);
@@ -247,7 +247,7 @@ public class ShipConstructionTests
         var office = world.Info.ComponentDesigns["default-design-local-construction"];
         colony.AddComponent(office);
         long colonyRate = colony.GetDataBlob<LocalConstructionDB>().PointsPerDay;
-        Assert.That(colonyRate, Is.EqualTo(5));
+        Assert.That(colonyRate, Is.EqualTo(25));
 
         var infra = world.Info.ComponentDesigns["default-design-infrastructure"];
         var colonyCargo = colony.GetDataBlob<CargoStorageDB>();

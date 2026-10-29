@@ -61,7 +61,10 @@ Targets for stock Earth, one of each starting building. Applied 2026-10-25 excep
 | A tech step | a week to a month | 25 days for a 500-point step with both labs |
 | A second factory | a season | 90 days. Size is kilograms, same as the refinery. Default 5,000 kg, 500 points/day, build `Size * 9`, iron 3,750 kg. |
 | A new slip | about a year | 400 days. Yard mass stays `slip * 8` (800,000 kg). Build is `mass * 0.25` (200,000 points) on the factory's 500 installation points/day. |
+| Naval Academy, factory then install | a season | 90 factory days plus one mount day. Mass 90,000 kg, build `mass * 0.5` (45,000 points). |
 | Mount a crate that already exists | about a day | already about that. Yard refit stays 5 points/day. |
+
+A facility is manufactured once. `BuildPointCost` is that cost, paid by the factory. When the completion checkbox queues construction, the follow-up is `max(1, mass_kg / 100000)` installation points, including a planet-only design. The recipe is not spent again. Queuing that design from the Construction tab, with no factory job, still pays `BuildPointCost` and the recipe, because that tab is the build. Earth's Construction Office design is level 5, 25 points a day. A job already copied onto a queue keeps its old cost.
 
 Earth's RP-1 stock is 50 million kg, about 100 hours of one Merlin. One refinery replaces about one minute of that burn per day. A homeworld deposit is at least accessibility 0.5, so a poor bulk deposit is about half the table.
 
@@ -104,6 +107,7 @@ Code:
 - `GameEngine/Industry/IndustryJob.cs` — points and recipe copied off the design.
 - `GameEngine/Industry/MineResourcesProcessor.cs`, `MineResourcesAtbDB.cs`, `MiningHelper.cs` — daily mine. Accessibility multiplies the rate, then `Convert.ToInt64` rounds. Under 0.5 becomes 0.
 - `GameEngine/Industry/LocalConstructionProcessor.cs` — mount and assemble. Separate from the factory line.
+- `GameEngine/Engine/Components/ComponentDesign.cs` — a checked factory completion of a planet-only design queues the mount cost. The Construction tab still pays `BuildPointCost`.
 - `GameEngine/Ships/ShipDesign.cs` — hull points are `mass * 0.1`.
 - `GameEngine/Engine/Components/ComponentDesigner.cs` — evaluates `BuildPointCost`, `ResearchCost`, and `ResourceCost`.
 - `GameEngine/Movement/NewtonMove/NewtonionThrustAtb.cs` — thrust and delta-v.

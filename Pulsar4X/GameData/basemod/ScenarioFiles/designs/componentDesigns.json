@@ -472,7 +472,7 @@
       "Name": "Construction Office",
       "TemplateId": "local-construction",
       "Properties": [
-        { "Key": "Level", "Value": 1 }
+        { "Key": "Level", "Value": 5 }
       ]
     }
   },

@@ -304,15 +304,25 @@ public class LocalConstructionProcessor : IHotloopProcessor
         if (job.PointCost <= 0)
             return false;
 
-        // A queued site-only mount cannot advance. Turn it into the assemble the
-        // Construction tab would have added. The factory already spent the recipe.
+        // A queued site-only mount cannot advance. The factory already spent the
+        // recipe and the build points, so this follow-up is the mount cost.
         if (job.Instance != null && LocalConstructionJob.IsSiteOnly(job.Design))
         {
             storage.RemoveCargoByUnit(job.Instance, 1);
             job.Instance = null;
-            job.PointCost = job.Design.IndustryPointCosts;
+            job.PointCost = LocalConstructionJob.MountCost(job.Design.MassPerUnit);
             job.PointsAccumulated = 0;
             job.ResourcesRemaining.Clear();
+        }
+
+        // An older follow-up copied IndustryPointCosts after the factory had paid.
+        // An empty recipe is that follow-up. A Construction-tab assemble still has its recipe.
+        if (job.Instance == null
+            && LocalConstructionJob.IsSiteOnly(job.Design)
+            && job.ResourcesRemaining.Count == 0
+            && job.PointCost > LocalConstructionJob.MountCost(job.Design.MassPerUnit))
+        {
+            job.PointCost = LocalConstructionJob.MountCost(job.Design.MassPerUnit);
         }
 
         if (job.Instance != null)

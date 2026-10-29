@@ -627,7 +627,7 @@
         "CrewReq": "40 + PropertyValue('Class Size')",
         "ResearchCost": "PropertyValue('Class Size') * 0.5",
         "CreditCost": "120",
-        "BuildPointCost": "[Mass]"
+        "BuildPointCost": "[Mass] * 0.5"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.5",

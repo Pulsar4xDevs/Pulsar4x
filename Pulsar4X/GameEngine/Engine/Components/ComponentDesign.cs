@@ -69,8 +69,8 @@ namespace Pulsar4X.Components
 
             var design = (ComponentDesign)designInfo;
 
-            // A site-only design is an assemble. A mount of it never advances, and its mass
-            // cost displays as under a day. The factory already spent the recipe.
+            // A site-only design cannot sit in cargo. The factory already spent the
+            // recipe and the build points, so the follow-up is the mount cost.
             if (batchJob.InstallOn != null
                 && LocalConstructionJob.IsSiteOnly(design)
                 && industryEntity.TryGetDataBlob<LocalConstructionDB>(out var siteConstruction)
@@ -78,6 +78,7 @@ namespace Pulsar4X.Components
             {
                 var assemble = new LocalConstructionJob(design);
                 assemble.ResourcesRemaining.Clear();
+                assemble.PointCost = LocalConstructionJob.MountCost(design.MassPerUnit);
                 siteConstruction.BuildQueue.Enqueue(assemble);
             }
             else

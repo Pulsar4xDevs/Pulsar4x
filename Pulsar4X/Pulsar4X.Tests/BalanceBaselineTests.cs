@@ -70,6 +70,11 @@ public class BalanceBaselineTests
             Assert.That(yard.IndustryPointCosts, Is.EqualTo(200000));
             Assert.That(yard.GetAttribute<ConstructionAtb>().ConstructionPoints["ship-refit"], Is.EqualTo(5));
 
+            var academy = Design(faction, data, "naval-academy");
+            Assert.That(academy.MassPerUnit, Is.EqualTo(90000));
+            Assert.That(academy.IndustryPointCosts, Is.EqualTo(45000));
+            Assert.That(LocalConstructionJob.MountCost(academy.MassPerUnit), Is.EqualTo(1));
+
             var reactor = Design(faction, data, "reactor");
             Assert.That(reactor.ResourceCosts.ContainsKey("fissile-fuels"), Is.False);
             Assert.That(reactor.ResourceCosts["stainless-steel"], Is.EqualTo(750));
