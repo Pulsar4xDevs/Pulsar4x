@@ -68,17 +68,32 @@ namespace Pulsar4X.Components
             batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
 
             var design = (ComponentDesign)designInfo;
-            var instance = new ComponentInstance(design);
-            long stored = storage.AddCargoByUnit(instance, 1);
 
-            // A checked box queues a mount of this crate. Colony construction pays it later.
-            if (stored > 0
-                && batchJob.InstallOn != null
-                && design.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation)
-                && industryEntity.TryGetDataBlob<LocalConstructionDB>(out var construction)
-                && construction.PointsPerDay > 0)
+            // A site-only design is an assemble. A mount of it never advances, and its mass
+            // cost displays as under a day. The factory already spent the recipe.
+            if (batchJob.InstallOn != null
+                && LocalConstructionJob.IsSiteOnly(design)
+                && industryEntity.TryGetDataBlob<LocalConstructionDB>(out var siteConstruction)
+                && siteConstruction.PointsPerDay > 0)
             {
-                construction.BuildQueue.Enqueue(new LocalConstructionJob(design, instance));
+                var assemble = new LocalConstructionJob(design);
+                assemble.ResourcesRemaining.Clear();
+                siteConstruction.BuildQueue.Enqueue(assemble);
+            }
+            else
+            {
+                var instance = new ComponentInstance(design);
+                long stored = storage.AddCargoByUnit(instance, 1);
+
+                // A checked box queues a mount of this crate. Colony construction pays it later.
+                if (stored > 0
+                    && batchJob.InstallOn != null
+                    && LocalConstructionJob.IsCrate(design)
+                    && industryEntity.TryGetDataBlob<LocalConstructionDB>(out var construction)
+                    && construction.PointsPerDay > 0)
+                {
+                    construction.BuildQueue.Enqueue(new LocalConstructionJob(design, instance));
+                }
             }
 
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)

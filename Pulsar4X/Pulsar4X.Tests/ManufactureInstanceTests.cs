@@ -98,6 +98,62 @@ public class ManufactureInstanceTests
     }
 
     [Test]
+    public void CheckedBox_OnASiteOnlyDesign_QueuesTheAssembleCost()
+    {
+        var world = NewSystem();
+        var colony = Colony(world, withOffice: true);
+        var design = SiteOnlyDesign();
+        var job = new IndustryJob(design);
+        job.InitialiseJob(1, false);
+        job.InstallOn = colony;
+
+        Complete(colony, design, job);
+
+        var construction = colony.GetDataBlob<LocalConstructionDB>();
+        var queued = construction.BuildQueue.Peek();
+        Assert.That(construction.BuildQueue.Count, Is.EqualTo(1));
+        Assert.That(queued.Instance, Is.Null);
+        Assert.That(queued.Kind, Is.EqualTo("Assemble"));
+        Assert.That(queued.PointCost, Is.EqualTo(design.IndustryPointCosts));
+        Assert.That(queued.PointCost, Is.EqualTo(45_000));
+        Assert.That(queued.PointCost, Is.Not.EqualTo(LocalConstructionJob.MountCost(design.MassPerUnit)));
+        Assert.That(queued.ResourcesRemaining, Is.Empty);
+        Assert.That(StoredInstances(colony), Is.Empty);
+        Assert.That(MountedCount(colony), Is.EqualTo(0));
+
+        new LocalConstructionProcessor().ProcessEntity(colony, 0);
+
+        Assert.That(construction.BuildQueue.Count, Is.EqualTo(1));
+        Assert.That(queued.PointsAccumulated, Is.EqualTo(5));
+        Assert.That(queued.IsComplete, Is.False);
+        Assert.That(MountedCount(colony), Is.EqualTo(0));
+    }
+
+    [Test]
+    public void StuckSiteOnlyMount_BecomesAnAssembleAndSpendsPoints()
+    {
+        var world = NewSystem();
+        var colony = Colony(world, withOffice: true);
+        var design = SiteOnlyDesign();
+        var instance = new ComponentInstance(design);
+        Assert.That(colony.GetDataBlob<CargoStorageDB>().AddCargoByUnit(instance, 1), Is.EqualTo(1));
+
+        var construction = colony.GetDataBlob<LocalConstructionDB>();
+        construction.BuildQueue.Enqueue(new LocalConstructionJob(design, instance));
+        Assert.That(construction.BuildQueue.Peek().PointCost, Is.EqualTo(1));
+
+        new LocalConstructionProcessor().ProcessEntity(colony, 0);
+
+        var queued = construction.BuildQueue.Peek();
+        Assert.That(queued.Instance, Is.Null);
+        Assert.That(queued.Kind, Is.EqualTo("Assemble"));
+        Assert.That(queued.PointCost, Is.EqualTo(45_000));
+        Assert.That(queued.PointsAccumulated, Is.EqualTo(5));
+        Assert.That(StoredInstances(colony), Is.Empty);
+        Assert.That(MountedCount(colony), Is.EqualTo(0));
+    }
+
+    [Test]
     public void ColonyWithNoOffice_LeavesTheInstanceInCargo()
     {
         var world = NewSystem();
@@ -236,6 +292,22 @@ public class ManufactureInstanceTests
 
     static int MountedCount(Entity colony)
         => colony.GetDataBlob<ComponentInstancesDB>().AllComponents.Count;
+
+    static ComponentDesign SiteOnlyDesign()
+    {
+        return new ComponentDesign
+        {
+            UniqueID = "test-academy-" + Guid.NewGuid().ToString("N"),
+            Name = "Test Academy",
+            CargoTypeID = "general-storage",
+            MassPerUnit = 90_000,
+            VolumePerUnit = 1,
+            IndustryPointCosts = 45_000,
+            IndustryTypeID = "installation-construction",
+            ComponentMountType = ComponentMountType.PlanetInstallation,
+            ResourceCosts = new Dictionary<string, long> { ["iron"] = 45_000 },
+        };
+    }
 
     static ComponentDesign FactoryDesign()
     {

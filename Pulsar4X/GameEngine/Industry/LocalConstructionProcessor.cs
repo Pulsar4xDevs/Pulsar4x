@@ -304,6 +304,17 @@ public class LocalConstructionProcessor : IHotloopProcessor
         if (job.PointCost <= 0)
             return false;
 
+        // A queued site-only mount cannot advance. Turn it into the assemble the
+        // Construction tab would have added. The factory already spent the recipe.
+        if (job.Instance != null && LocalConstructionJob.IsSiteOnly(job.Design))
+        {
+            storage.RemoveCargoByUnit(job.Instance, 1);
+            job.Instance = null;
+            job.PointCost = job.Design.IndustryPointCosts;
+            job.PointsAccumulated = 0;
+            job.ResourcesRemaining.Clear();
+        }
+
         if (job.Instance != null)
             return TryAdvanceMount(storage, job, ref pointsLeft);
 

@@ -18,7 +18,7 @@ The Production tab checkbox is "Auto-install on completion?". It is shown when `
 
 `OnConstructionComplete` for a component stores `new ComponentInstance(design)` in the colony warehouse. It does not call `AddComponent`. It does not store the design.
 
-The checkbox no longer mounts. When the colony has an `installation` rate and the design is a colony installation, a checked box enqueues a construction mount of that instance. The mount is paid later by [colony construction](colony-construction.md). With the box clear, or with no installation rate, the instance stays in cargo.
+The checkbox no longer mounts on the industry tick. When the colony has an `installation` rate and the design is a crate, a checked box enqueues a construction mount of that instance. A site-only design enqueues an assemble at `IndustryPointCosts`. The factory already spent the recipe, so that assemble does not spend it again, and the instance is not left in cargo. The mount or assemble is paid later by [colony construction](colony-construction.md). With the box clear, or with no installation rate, the instance stays in cargo.
 
 Until colony construction, a queued mount stays in `LocalConstructionDB.BuildQueue` and names the warehouse instance. `LocalConstructionProcessor` does not spend points on it and does not call `AddComponent`. A design job with no instance still mounts a free copy, so the Construction tab's current rows still finish. Cargo Install is hidden and `InstallComponentCommand` is rejected.
 
