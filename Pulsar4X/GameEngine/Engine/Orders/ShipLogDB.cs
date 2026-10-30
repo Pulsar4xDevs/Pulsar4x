@@ -111,6 +111,32 @@ static class ShipLogBook
         Append(entity, at, ShipLogKind.Action, ActionText(action));
     }
 
+    /// <summary>
+    /// One failed action, on a ship or a colony. A fleet does not list these.
+    /// The reason is the one the order already shows.
+    /// </summary>
+    public static void NoteFailed(EntityAction action)
+    {
+        if (action?.EntityCommanding == null)
+            return;
+        var entity = action.EntityCommanding;
+        if (entity.HasDataBlob<FleetDB>())
+            return;
+        if (action is AssignAdministratorOrder or UnassignAdministratorOrder
+            or AssignScientistOrder or UnassignScientistOrder)
+            return;
+        if (!entity.HasDataBlob<ShipInfoDB>() && !entity.HasDataBlob<ColonyInfoDB>())
+            return;
+
+        string name = (action.Name ?? "").Trim();
+        if (name.Length == 0)
+            name = "Action";
+        string reason = (action.FailureMessage ?? "").Trim();
+        string text = reason.Length == 0 ? name + " failed" : name + " — " + reason;
+        DateTime at = entity.Manager != null ? entity.StarSysDateTime : action.CreatedDate;
+        Append(entity, at, ShipLogKind.Action, EndSentence(text));
+    }
+
     /// <summary>A commander sat this chair. <paramref name="post"/> is "command", "the post", or "the lab".</summary>
     public static void NoteTookPost(Entity entity, Entity officer, DateTime at, string post)
         => Append(entity, at, ShipLogKind.Own, OfficerLabel(officer) + " took " + post + ".");
@@ -244,11 +270,16 @@ static class ShipLogBook
         string target = TargetName(entity, goal.TargetEntityID);
         if (goal.Status == GoalStatus.Failed)
         {
+            string lead;
             if (!IsReach(goal.Message))
-                return "Could not finish.";
-            if (TargetIsAsteroid(entity, goal.TargetEntityID))
-                return "Could not reach the asteroid.";
-            return target.Length > 0 ? "Could not reach " + target + "." : "Could not reach the target.";
+                lead = "Could not finish.";
+            else if (TargetIsAsteroid(entity, goal.TargetEntityID))
+                lead = "Could not reach the asteroid.";
+            else
+                lead = target.Length > 0 ? "Could not reach " + target + "." : "Could not reach the target.";
+
+            string why = PlayerReason(goal.Message);
+            return why.Length == 0 ? lead : lead + " " + why;
         }
 
         return goal.Type switch
@@ -264,6 +295,28 @@ static class ShipLogBook
         };
     }
 
+    static readonly string[] InternalReasons =
+    {
+        "no path",
+        "fleet only",
+        "ship only",
+        "non supported entity",
+        "unknown fail",
+        "a move action failed",
+        "a survey action failed",
+        "a mining action failed",
+        "a fuel buy failed",
+        "a refuel action failed",
+        "an action failed",
+        "invalid target",
+        "not a valid target",
+        "we have no subordinates to manage",
+        "no subordinates can move",
+        "no action queue",
+        "no geo-survey capability",
+        "no grav-survey capability",
+    };
+
     static bool IsReach(string? message)
     {
         if (string.IsNullOrEmpty(message))
@@ -275,6 +328,36 @@ static class ShipLogBook
             || message.Contains("warp", StringComparison.OrdinalIgnoreCase)
             || message.Contains("power", StringComparison.OrdinalIgnoreCase)
             || message.Contains("reach", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// The player-facing reason, capitalised and ended. An internal planner token is left off.
+    /// </summary>
+    static string PlayerReason(string? message)
+    {
+        if (string.IsNullOrWhiteSpace(message) || IsInternal(message))
+            return "";
+        string text = EndSentence(message.Trim());
+        if (text.Length == 0 || IsInternal(text))
+            return "";
+        if (char.IsLower(text[0]))
+            text = char.ToUpperInvariant(text[0]) + text.Substring(1);
+        return text;
+    }
+
+    static bool IsInternal(string message)
+    {
+        string text = message.Trim();
+        if (text.EndsWith('.'))
+            text = text.Substring(0, text.Length - 1).Trim();
+        if (text.StartsWith("no planner", StringComparison.OrdinalIgnoreCase))
+            return true;
+        foreach (var token in InternalReasons)
+        {
+            if (text.Equals(token, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
     }
 
     static bool TargetIsAsteroid(Entity entity, int id)

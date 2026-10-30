@@ -234,8 +234,8 @@ public class MarketExchangeAction : EntityAction
 
     void Fail(string message)
     {
+        base.Fail(message);
         _details = message;
-        Status = ActionStatus.Failed;
         _isFinished = true;
     }
 

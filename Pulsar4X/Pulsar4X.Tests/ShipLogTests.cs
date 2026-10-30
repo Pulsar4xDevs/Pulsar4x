@@ -272,6 +272,54 @@ public class ShipLogTests
         Assert.That(fleetBook.Entries.Select(entry => entry.Text), Has.No.Member("Moving to Mars."));
     }
 
+    [Test]
+    public void FailedOrder_StatesWhy_OnTheShipAndOnTheReport()
+    {
+        var (ship, mars) = MakeMoveShip("Courier");
+        var fleet = FleetFactory.Create(_sys, ship.FactionOwnerID, "Survey Fleet");
+
+        var order = new FailedOrder(ship);
+        order.FailNow("not enough ΔV");
+        order.FailNow("not enough ΔV");
+        Assert.That(Texts(ship), Is.EqualTo(new[] { "Warp Move to Mars — not enough ΔV." }));
+        Assert.That(ship.GetDataBlob<ShipLogDB>().Entries[0].Kind, Is.EqualTo(ShipLogKind.Action));
+
+        new FailedOrder(fleet).FailNow("not enough ΔV");
+        Assert.That(fleet.HasDataBlob<ShipLogDB>(), Is.False);
+
+        var goal = new Goal(GoalType.MoveTo)
+        {
+            TargetEntityID = mars.Id,
+            Status = GoalStatus.Failed,
+            Message = "not enough ΔV",
+            IssuerEntityId = fleet.Id,
+        };
+        ShipLogBook.NoteOutcome(ship, goal, _epoch);
+        Assert.That(Texts(ship)[^1], Is.EqualTo("Could not reach Mars. Not enough ΔV."));
+        Assert.That(Texts(fleet), Is.EqualTo(new[] { "From Courier — Could not reach Mars. Not enough ΔV." }));
+
+        goal.Message = "a move action failed";
+        ShipLogBook.NoteOutcome(ship, goal, _epoch);
+        Assert.That(Texts(ship)[^1], Is.EqualTo("Could not reach Mars."));
+
+        goal.Message = "no path";
+        ShipLogBook.NoteOutcome(ship, goal, _epoch);
+        Assert.That(Texts(ship)[^1], Is.EqualTo("Could not reach Mars."));
+
+        goal.Message = "The warp target is missing.";
+        ShipLogBook.NoteOutcome(ship, goal, _epoch);
+        Assert.That(Texts(ship)[^1], Is.EqualTo("Could not reach Mars. The warp target is missing."));
+
+        goal.Message = "nothing to load";
+        ShipLogBook.NoteOutcome(ship, goal, _epoch);
+        Assert.That(Texts(ship)[^1], Is.EqualTo("Could not finish. Nothing to load."));
+
+        goal.PlayerCancelled = true;
+        goal.Message = "not enough ΔV";
+        ShipLogBook.NoteOutcome(ship, goal, _epoch);
+        Assert.That(Texts(ship)[^1], Is.EqualTo("Cancelled."));
+    }
+
     (Entity Ship, Entity Mars) MakeMoveShip(string name)
     {
         var faction = FactionFactory.CreateFaction(Game, "log-move-" + Guid.NewGuid().ToString("N"));
@@ -379,6 +427,27 @@ public class ShipLogTests
         storage.AddCargoByUnit(fuel, 1_000_000);
         ship.SetDataBlob(storage);
         return ship;
+    }
+
+    sealed class FailedOrder : EntityAction
+    {
+        readonly Entity _ship;
+
+        public FailedOrder(Entity ship)
+        {
+            _ship = ship;
+            BindCommanding(ship);
+        }
+
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
+        public override bool IsBlocking => false;
+        public override string Name => "Warp Move to Mars";
+        public override string Details => "Warping";
+        internal override bool IsValidCommand(Game game) => true;
+        internal override void Execute(DateTime atDateTime) { }
+        internal override bool IsFinished() => Status == ActionStatus.Failed;
+        public override EntityAction Clone() => new FailedOrder(_ship);
+        public void FailNow(string why) => Fail(why);
     }
 
     sealed class TestEnergyType : ICargoable

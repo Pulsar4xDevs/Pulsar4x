@@ -87,7 +87,7 @@ public class MatchOrbitAction : EntityAction
             if (_targetEntity == null
                 && !_entityCommanding.Manager.TryGetGlobalEntityById(TargetEntityGuid, out _targetEntity))
             {
-                Status = ActionStatus.Failed;
+                Fail("target gone");
                 _isFinished = true;
                 _details = "target gone";
                 return;
@@ -95,7 +95,7 @@ public class MatchOrbitAction : EntityAction
 
             if (!TryPlanBurns(_entityCommanding, _targetEntity, atDateTime, out var burns, out var reason))
             {
-                Status = ActionStatus.Failed;
+                Fail(reason);
                 _isFinished = true;
                 _details = reason;
                 return;

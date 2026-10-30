@@ -125,6 +125,7 @@ namespace GameEngine.Engine.Orders
             Status = ActionStatus.Failed;
             FailureMessage = message;
             IsRunning = false;
+            ShipLogBook.NoteFailed(this);
         }
 
         /// <summary>

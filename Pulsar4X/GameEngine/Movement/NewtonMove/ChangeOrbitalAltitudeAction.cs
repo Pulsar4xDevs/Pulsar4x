@@ -70,7 +70,7 @@ public class ChangeOrbitalAltitudeAction : EntityAction
         {
             if (!TryPlanBurns(_entityCommanding, TargetRadius_m, atDateTime, out var burns, out var reason))
             {
-                Status = ActionStatus.Failed;
+                Fail(reason);
                 _isFinished = true;
                 _details = reason;
                 return;
