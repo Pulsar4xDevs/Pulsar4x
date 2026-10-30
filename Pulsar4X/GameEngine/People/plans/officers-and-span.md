@@ -8,14 +8,14 @@ This is the ship half of near-term item 19 and the definition pass of item 15. S
 
 Earth can design and assemble a Naval Academy on the first day. The template is unlocked and a stock design exists. Earth does not start with one mounted. It stays site-only (`PlanetInstallation`, no `ShipCargo`). The construction office assembles it.
 
-Mounting the building does not start a class. Colony Management's existing Naval Academy tab appears once one is mounted. The tab shows each mounted academy as idle, or the course it is running and the date it finishes. Two mounted academies are two rows. Each runs one course.
+Mounting the building does not start a class. Colony Management's Naval Academy tab appears once one is mounted. Two mounted academies are two sections. Class size is how many students can be enrolled in that building at once. A recruit uses one seat. A command-course officer uses one seat.
 
-From an idle academy the player orders one of two courses. Both take the design's class length.
+Each section lists the cohorts already running, each with its own finish date and its own cancel. A slider sets how many new recruits this click starts, from zero up to the free seats the colony's population can support. The officer list shows only unassigned navy officers who are ready for the command course. One button at the bottom runs the class. The same click does not start recruits and an officer. A later click can start another cohort while an earlier one is still in class, while a seat is free.
 
-* **Train a class.** Graduates that many rank-1 ensigns. They are unassigned. The colony must have 1,000 people present per ensign. The course removes one person per ensign when it starts. The button names the population it needs and the population the colony has.
-* **Command course.** One unassigned officer who already has the experience. They stay off the ships until the date. The course either raises their experience cap to this school's mean, or promotes them one span step. It never does both, and banked experience never skips a step.
+* **Recruits.** That many rank-1 ensigns graduate on that cohort's date. They are unassigned. The colony must have 1,000 people present per recruit. The course removes one person per recruit when it starts. The slider names the population this run needs.
+* **Command course.** One unassigned officer who already has the experience. They stay off the ships until that cohort's date. The course either raises their experience cap to this school's mean, or promotes them one span step. It never does both, and banked experience never skips a step.
 
-Cancelling a class returns the people to the colony. Cancelling a command course leaves the officer unassigned and unchanged. A busy academy rejects a second course.
+Cancelling a recruit cohort returns the people that cohort took. Cancelling a command course leaves the officer unassigned and unchanged. Other cohorts keep their seats.
 
 Fleet Management's Orders tab groups goals into three bands. A band the ship cannot use stays visible and grey. The reason names the bridge, the rank, or both. The line under the captain reads the result, for example "Body. This bridge can cover a system. Ensign Kim covers this ship." There is one span on that line. The logistics span label goes away.
 
@@ -75,7 +75,7 @@ Move goods, haul contract, trade, and a fleet haul all use the pair test. A ship
 
 The stock design is class size 2, class length 12 months. The designer allows class size 1 to 8, step 1, and length 6 to 48 months, step 1.
 
-Retune the building so a class of 2 is not a shed. Mass is `80000 + ClassSize * 5000`. Crew requirement is `40 + ClassSize`. Length does not change the mass. The class-size description says "per course you order," not "each year."
+Retune the building so a class of 2 is not a shed. Mass is `80000 + ClassSize * 5000`. Crew requirement is `40 + ClassSize`. Length does not change the mass. The class-size description says how many students can be enrolled at once, one seat each.
 
 A new ensign is rank 1, unassigned, with `CommissionedOn` and `RankedOn` set to the graduation date. The experience cap is a bell curve around `100 + (months - 24) + instruction`, clamped 0 to 300. The old upper clamp of 200 hides a long course. Starting experience stays the current 0–30 roll when the cap is above 30. Show the mean cap on the design slider.
 
@@ -92,7 +92,7 @@ The officer must be unassigned. An enrolled officer cannot be given a ship and c
 
 Quality is `1 + skill / 100`. Grants stop at `ExperienceCap`, or at 100 when the cap is 0. A cap of 40 filled to 40 is quality 1.4. A cap of 100 filled to 100 stays quality 2, so the existing skill tests keep their numbers. A long course can pass 2.0. Skill still never fails a move, a survey, or a burn.
 
-Population is the sum of `ColonyInfoDB.Population`. The people removed come out of the largest species group. A colony short of `class size * threshold` refuses the class. The threshold starts at 1,000.
+Population is the sum of `ColonyInfoDB.Population`. The people removed come out of the largest species group. A colony short of `count * threshold` refuses that run. The threshold starts at 1,000. Class size caps the seats in use. It does not set how many people one click must take.
 
 ## Research
 

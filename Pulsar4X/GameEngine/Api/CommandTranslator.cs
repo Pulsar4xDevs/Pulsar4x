@@ -1504,7 +1504,7 @@ namespace Pulsar4X.Engine.Api
         private CommandResult TranslateTrainAcademyClass(Entity faction, Entity commanded, GameCommand command)
         {
             var train = (TrainAcademyClassCommand)command;
-            var reason = NavalAcademyCourse.TryTrain(commanded, train.ComponentId);
+            var reason = NavalAcademyCourse.TryTrain(commanded, train.ComponentId, train.Count);
             return reason == null
                 ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
                 : CommandResult.Reject(reason);
@@ -1524,7 +1524,7 @@ namespace Pulsar4X.Engine.Api
         private CommandResult TranslateCancelAcademyCourse(Entity faction, Entity commanded, GameCommand command)
         {
             var cancel = (CancelAcademyCourseCommand)command;
-            var reason = NavalAcademyCourse.TryCancel(commanded, cancel.ComponentId);
+            var reason = NavalAcademyCourse.TryCancel(commanded, cancel.ComponentId, cancel.CohortId);
             return reason == null
                 ? CommandResult.Ok(Guid.NewGuid().ToString("N"))
                 : CommandResult.Reject(reason);

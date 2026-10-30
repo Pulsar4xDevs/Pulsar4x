@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Pulsar4X.Colonies;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
@@ -10,7 +11,8 @@ using Pulsar4X.Ships;
 namespace Pulsar4X.People;
 
 /// <summary>
-/// An academy sits idle until the colony orders one course. The processor graduates that course and does not start another.
+/// Class size is how many students can be enrolled at once. Each order starts a cohort with its own
+/// graduation date. The processor graduates the cohorts whose date has arrived and leaves the rest.
 /// </summary>
 public static class NavalAcademyCourse
 {
@@ -43,6 +45,16 @@ public static class NavalAcademyCourse
         return Math.Max(officer.Experience, skills);
     }
 
+    public static int SeatsUsed(NavalAcademy row)
+    {
+        if (row.Cohorts == null)
+            return 0;
+        int used = 0;
+        foreach (var cohort in row.Cohorts)
+            used += cohort.Kind == AcademyCourseKind.Command ? 1 : cohort.Count;
+        return used;
+    }
+
     /// <summary>Null when the course may run. Otherwise the sentence the button shows.</summary>
     public static string? CommandRefusal(CommanderDB officer, int mean)
     {
@@ -56,34 +68,78 @@ public static class NavalAcademyCourse
         return "Rank is already 6. This course cannot raise it further.";
     }
 
-    public static string? TryTrain(Entity colony, int componentId)
+    /// <summary>
+    /// A save from the single-course academy stores the run on the building. Fold that into one cohort.
+    /// </summary>
+    public static void FoldLegacy(ref NavalAcademy row)
     {
-        if (!TryIdle(colony, componentId, out var db, out int index, out var reason))
-            return reason;
+        row.Cohorts ??= new List<AcademyCohort>();
+        if (row.Cohorts.Count == 0 && row.CourseKind != AcademyCourseKind.Idle)
+        {
+            bool command = row.CourseKind == AcademyCourseKind.Command;
+            int count = command
+                ? 1
+                : (row.PopulationTaken > 0 ? row.PopulationTaken : Math.Max(row.ClassSize, 1));
+            row.Cohorts.Add(new AcademyCohort
+            {
+                CohortId = 1,
+                Kind = row.CourseKind,
+                Count = count,
+                GraduationDate = row.GraduationDate,
+                OfficerId = row.OfficerId,
+                PopulationTaken = row.PopulationTaken,
+                SpeciesId = row.SpeciesId,
+            });
+            if (row.NextCohortId <= 1)
+                row.NextCohortId = 2;
+        }
+        row.CourseKind = AcademyCourseKind.Idle;
+        row.OfficerId = -1;
+        row.PopulationTaken = 0;
+        row.SpeciesId = -1;
+        if (row.NextCohortId <= 0)
+            row.NextCohortId = 1;
+    }
 
+    public static string? TryTrain(Entity colony, int componentId, int count)
+    {
+        if (!TryAcademy(colony, componentId, out var db, out int index, out var reason))
+            return reason;
+        if (count < 1)
+            return "A class needs at least one recruit.";
         if (!colony.TryGetDataBlob<ColonyInfoDB>(out var info))
             return "The colony has no population.";
 
         var row = db.Academies[index];
+        int free = row.ClassSize - SeatsUsed(row);
+        if (count > free)
+            return "This class needs " + count + " seats. " + free + " are free.";
+
         long people = PopulationOf(info);
-        long need = (long)row.ClassSize * PeoplePerEnsign(colony);
+        long need = (long)count * PeoplePerEnsign(colony);
         if (people < need)
             return "The colony has " + people + " people. This class needs " + need + ".";
 
-        row.CourseKind = AcademyCourseKind.Class;
-        row.PopulationTaken = row.ClassSize;
-        row.SpeciesId = TakePeople(info, row.ClassSize);
-        row.OfficerId = -1;
-        row.GraduationDate = colony.StarSysDateTime.AddDays(row.TrainingPeriodInMonths * 30);
+        var cohort = new AcademyCohort
+        {
+            CohortId = TakeId(ref row),
+            Kind = AcademyCourseKind.Class,
+            Count = count,
+            PopulationTaken = count,
+            SpeciesId = TakePeople(info, count),
+            OfficerId = -1,
+            GraduationDate = colony.StarSysDateTime.AddDays(row.TrainingPeriodInMonths * 30),
+        };
+        row.Cohorts.Add(cohort);
         db.Academies[index] = row;
-        Schedule(colony, row.GraduationDate);
+        Schedule(colony, cohort.GraduationDate);
         Publish(colony, personnel: false);
         return null;
     }
 
     public static string? TryCommand(Entity colony, int componentId, Entity officer)
     {
-        if (!TryIdle(colony, componentId, out var db, out int index, out var reason))
+        if (!TryAcademy(colony, componentId, out var db, out int index, out var reason))
             return reason;
         if (!officer.TryGetDataBlob<CommanderDB>(out var commander))
             return "This officer is assigned.";
@@ -99,40 +155,64 @@ public static class NavalAcademyCourse
         var refusal = CommandRefusal(commander, mean);
         if (refusal != null)
             return refusal;
+        if (row.ClassSize - SeatsUsed(row) < 1)
+            return "This academy has no free seats.";
 
-        row.CourseKind = AcademyCourseKind.Command;
-        row.OfficerId = officer.Id;
-        row.PopulationTaken = 0;
-        row.SpeciesId = -1;
-        row.GraduationDate = colony.StarSysDateTime.AddDays(row.TrainingPeriodInMonths * 30);
+        var cohort = new AcademyCohort
+        {
+            CohortId = TakeId(ref row),
+            Kind = AcademyCourseKind.Command,
+            Count = 1,
+            OfficerId = officer.Id,
+            PopulationTaken = 0,
+            SpeciesId = -1,
+            GraduationDate = colony.StarSysDateTime.AddDays(row.TrainingPeriodInMonths * 30),
+        };
+        row.Cohorts.Add(cohort);
         db.Academies[index] = row;
-        Schedule(colony, row.GraduationDate);
+        Schedule(colony, cohort.GraduationDate);
         Publish(colony, personnel: false);
         return null;
     }
 
-    public static string? TryCancel(Entity colony, int componentId)
+    public static string? TryCancel(Entity colony, int componentId, int cohortId)
     {
         if (!colony.TryGetDataBlob<NavalAcademyDB>(out var db) || !TryIndex(db, componentId, out int index))
             return "No such academy.";
         var row = db.Academies[index];
-        if (row.CourseKind == AcademyCourseKind.Idle)
-            return "This academy is idle.";
-        if (row.CourseKind == AcademyCourseKind.Class)
-            ReturnPeople(colony, row);
-        Clear(db, index, row);
+        FoldLegacy(ref row);
+        int found = -1;
+        for (int i = 0; i < row.Cohorts.Count; i++)
+        {
+            if (row.Cohorts[i].CohortId == cohortId)
+            {
+                found = i;
+                break;
+            }
+        }
+        if (found < 0)
+        {
+            db.Academies[index] = row;
+            return "No such course.";
+        }
+
+        var cohort = row.Cohorts[found];
+        if (cohort.Kind == AcademyCourseKind.Class)
+            ReturnPeople(colony, cohort.PopulationTaken, cohort.SpeciesId);
+        row.Cohorts.RemoveAt(found);
+        db.Academies[index] = row;
         Publish(colony, personnel: false);
         return null;
     }
 
-    public static void ReturnPeople(Entity colony, NavalAcademy row)
+    public static void ReturnPeople(Entity colony, int taken, int speciesId)
     {
-        if (row.PopulationTaken <= 0 || row.SpeciesId < 0)
+        if (taken <= 0 || speciesId < 0)
             return;
         if (!colony.TryGetDataBlob<ColonyInfoDB>(out var info))
             return;
-        info.Population.TryGetValue(row.SpeciesId, out long have);
-        info.Population[row.SpeciesId] = have + row.PopulationTaken;
+        info.Population.TryGetValue(speciesId, out long have);
+        info.Population[speciesId] = have + taken;
     }
 
     public static void Graduate(Entity colony, DateTime at)
@@ -141,17 +221,23 @@ public static class NavalAcademyCourse
             return;
 
         bool any = false;
-        for (int i = 0; i < db.Academies.Count; i++)
+        for (int a = 0; a < db.Academies.Count; a++)
         {
-            var row = db.Academies[i];
-            if (row.CourseKind == AcademyCourseKind.Idle || row.GraduationDate.Date != at.Date)
-                continue;
-            if (row.CourseKind == AcademyCourseKind.Class)
-                GraduateClass(colony, row, at);
-            else
-                GraduateCommand(colony, row, at);
-            Clear(db, i, row);
-            any = true;
+            var row = db.Academies[a];
+            FoldLegacy(ref row);
+            for (int i = row.Cohorts.Count - 1; i >= 0; i--)
+            {
+                var cohort = row.Cohorts[i];
+                if (cohort.GraduationDate.Date != at.Date)
+                    continue;
+                if (cohort.Kind == AcademyCourseKind.Class)
+                    GraduateClass(colony, row, cohort, at);
+                else
+                    GraduateCommand(colony, row, cohort, at);
+                row.Cohorts.RemoveAt(i);
+                any = true;
+            }
+            db.Academies[a] = row;
         }
 
         if (any)
@@ -164,12 +250,18 @@ public static class NavalAcademyCourse
         {
             foreach (var colony in system.GetAllEntitiesWithDataBlob<NavalAcademyDB>())
             {
-                var academies = colony.GetDataBlob<NavalAcademyDB>().Academies;
-                for (int i = 0; i < academies.Count; i++)
+                var db = colony.GetDataBlob<NavalAcademyDB>();
+                for (int i = 0; i < db.Academies.Count; i++)
                 {
-                    var row = academies[i];
-                    if (row.CourseKind == AcademyCourseKind.Command && row.OfficerId == officerId)
-                        return true;
+                    var row = db.Academies[i];
+                    FoldLegacy(ref row);
+                    db.Academies[i] = row;
+                    for (int c = 0; c < row.Cohorts.Count; c++)
+                    {
+                        var cohort = row.Cohorts[c];
+                        if (cohort.Kind == AcademyCourseKind.Command && cohort.OfficerId == officerId)
+                            return true;
+                    }
                 }
             }
         }
@@ -194,7 +286,7 @@ public static class NavalAcademyCourse
         return false;
     }
 
-    static bool TryIdle(Entity colony, int componentId, out NavalAcademyDB db, out int index, out string? reason)
+    static bool TryAcademy(Entity colony, int componentId, out NavalAcademyDB db, out int index, out string? reason)
     {
         db = null!;
         index = -1;
@@ -208,11 +300,9 @@ public static class NavalAcademyCourse
             reason = "No such academy.";
             return false;
         }
-        if (db.Academies[index].CourseKind != AcademyCourseKind.Idle)
-        {
-            reason = "This academy is already running a course.";
-            return false;
-        }
+        var row = db.Academies[index];
+        FoldLegacy(ref row);
+        db.Academies[index] = row;
         reason = null;
         return true;
     }
@@ -231,13 +321,13 @@ public static class NavalAcademyCourse
         return false;
     }
 
-    static void Clear(NavalAcademyDB db, int index, NavalAcademy row)
+    static int TakeId(ref NavalAcademy row)
     {
-        row.CourseKind = AcademyCourseKind.Idle;
-        row.OfficerId = -1;
-        row.PopulationTaken = 0;
-        row.SpeciesId = -1;
-        db.Academies[index] = row;
+        if (row.NextCohortId <= 0)
+            row.NextCohortId = 1;
+        int id = row.NextCohortId;
+        row.NextCohortId++;
+        return id;
     }
 
     static int TakePeople(ColonyInfoDB info, int count)
@@ -280,7 +370,7 @@ public static class NavalAcademyCourse
         colony.Manager.ManagerSubpulses.AddEntityInterupt(when, nameof(NavalAcademyProcessor), colony);
     }
 
-    static void GraduateClass(Entity colony, NavalAcademy row, DateTime at)
+    static void GraduateClass(Entity colony, NavalAcademy row, AcademyCohort cohort, DateTime at)
     {
         if (colony.Manager?.Game == null)
             return;
@@ -288,7 +378,7 @@ public static class NavalAcademyCourse
         var generator = new GaussianRandom();
         int instruction = InstructionOf(colony);
         double mean = 100 + (row.TrainingPeriodInMonths - 24) + instruction;
-        for (int i = 0; i < row.ClassSize; i++)
+        for (int i = 0; i < cohort.Count; i++)
         {
             var commander = CommanderFactory.CreateAcademyGraduate(game);
             commander.CommissionedOn = at;
@@ -309,9 +399,9 @@ public static class NavalAcademyCourse
         }
     }
 
-    static void GraduateCommand(Entity colony, NavalAcademy row, DateTime at)
+    static void GraduateCommand(Entity colony, NavalAcademy row, AcademyCohort cohort, DateTime at)
     {
-        if (colony.Manager == null || !colony.Manager.TryGetGlobalEntityById(row.OfficerId, out var officer))
+        if (colony.Manager == null || !colony.Manager.TryGetGlobalEntityById(cohort.OfficerId, out var officer))
             return;
         if (!officer.TryGetDataBlob<CommanderDB>(out var commander))
             return;

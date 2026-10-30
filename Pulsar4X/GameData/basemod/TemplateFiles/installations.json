@@ -643,7 +643,7 @@
       "Properties": [
         {
           "Name": "Class Size",
-          "DescriptionFormula": "'How many ensigns graduate per course you order.'",
+          "DescriptionFormula": "'How many students can be in class at once. Each recruit or officer uses one seat.'",
           "GuiHint": "GuiSelectionMaxMinInt",
           "MaxFormula": "8 + TechData('tech-academy-larger-classes')",
           "MinFormula": "1",

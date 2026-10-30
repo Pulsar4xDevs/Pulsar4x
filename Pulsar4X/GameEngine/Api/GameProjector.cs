@@ -958,21 +958,31 @@ namespace Pulsar4X.Engine.Api
             var academies = new List<NavalAcademyClassView>(na.Academies.Count);
             foreach (var academy in na.Academies)
             {
-                bool idle = academy.CourseKind == Pulsar4X.People.AcademyCourseKind.Idle;
+                var row = academy;
+                NavalAcademyCourse.FoldLegacy(ref row);
+                var cohorts = new List<AcademyCohortView>(row.Cohorts.Count);
+                foreach (var cohort in row.Cohorts)
+                {
+                    cohorts.Add(new AcademyCohortView(
+                        cohort.CohortId,
+                        cohort.Kind switch
+                        {
+                            Pulsar4X.People.AcademyCourseKind.Class => Pulsar4X.Api.AcademyCourseKind.Class,
+                            Pulsar4X.People.AcademyCourseKind.Command => Pulsar4X.Api.AcademyCourseKind.Command,
+                            _ => Pulsar4X.Api.AcademyCourseKind.Idle,
+                        },
+                        cohort.Count,
+                        cohort.GraduationDate,
+                        cohort.OfficerId,
+                        cohort.PopulationTaken));
+                }
                 academies.Add(new NavalAcademyClassView(
-                    academy.ComponentId,
-                    academy.ClassSize,
-                    academy.TrainingPeriodInMonths,
-                    academy.CourseKind switch
-                    {
-                        Pulsar4X.People.AcademyCourseKind.Class => Pulsar4X.Api.AcademyCourseKind.Class,
-                        Pulsar4X.People.AcademyCourseKind.Command => Pulsar4X.Api.AcademyCourseKind.Command,
-                        _ => Pulsar4X.Api.AcademyCourseKind.Idle,
-                    },
-                    idle ? null : academy.GraduationDate,
-                    academy.OfficerId,
-                    academy.PopulationTaken,
-                    NavalAcademyCourse.SchoolMean(academy.TrainingPeriodInMonths, instruction)));
+                    row.ComponentId,
+                    row.ClassSize,
+                    row.TrainingPeriodInMonths,
+                    NavalAcademyCourse.SeatsUsed(row),
+                    NavalAcademyCourse.SchoolMean(row.TrainingPeriodInMonths, instruction),
+                    cohorts));
             }
             return new NavalAcademyView(academies, population, NavalAcademyCourse.PeoplePerEnsign(colony));
         }

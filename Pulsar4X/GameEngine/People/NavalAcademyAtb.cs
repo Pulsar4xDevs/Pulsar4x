@@ -48,6 +48,8 @@ namespace Pulsar4X.People
                 ComponentId = componentInstance.ID,
                 ClassSize = ClassSize,
                 TrainingPeriodInMonths = TrainingPeriodInMonths,
+                NextCohortId = 1,
+                Cohorts = new System.Collections.Generic.List<AcademyCohort>(),
                 CourseKind = AcademyCourseKind.Idle,
                 OfficerId = -1,
                 SpeciesId = -1,
@@ -71,8 +73,15 @@ namespace Pulsar4X.People
                 if (academyDB.Academies[i].ComponentId != componentInstance.ID)
                     continue;
                 var row = academyDB.Academies[i];
-                if (row.CourseKind == AcademyCourseKind.Class)
-                    NavalAcademyCourse.ReturnPeople(parentEntity, row);
+                NavalAcademyCourse.FoldLegacy(ref row);
+                if (row.Cohorts != null)
+                {
+                    foreach (var cohort in row.Cohorts)
+                    {
+                        if (cohort.Kind == AcademyCourseKind.Class)
+                            NavalAcademyCourse.ReturnPeople(parentEntity, cohort.PopulationTaken, cohort.SpeciesId);
+                    }
+                }
                 academyDB.Academies.RemoveAt(i);
                 break;
             }

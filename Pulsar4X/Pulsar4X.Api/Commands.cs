@@ -197,14 +197,14 @@ public sealed record SetFlagshipCommand(int TargetEntityId, int ShipId) : GameCo
 /// </summary>
 public sealed record AssignCaptainCommand(int TargetEntityId, int CommanderId) : GameCommand(TargetEntityId);
 
-/// <summary>Start a class at one mounted academy. Targets the colony. The component is the academy.</summary>
-public sealed record TrainAcademyClassCommand(int TargetEntityId, int ComponentId) : GameCommand(TargetEntityId);
+/// <summary>Start a recruit cohort at one mounted academy. Targets the colony. Count is how many ensigns this run enrolls.</summary>
+public sealed record TrainAcademyClassCommand(int TargetEntityId, int ComponentId, int Count) : GameCommand(TargetEntityId);
 
 /// <summary>Send one unassigned officer through one academy's command course. Targets the colony.</summary>
 public sealed record AcademyCommandCourseCommand(int TargetEntityId, int ComponentId, int CommanderId) : GameCommand(TargetEntityId);
 
-/// <summary>Stop the course on one mounted academy and return anyone it took. Targets the colony.</summary>
-public sealed record CancelAcademyCourseCommand(int TargetEntityId, int ComponentId) : GameCommand(TargetEntityId);
+/// <summary>Stop one cohort and return the people that cohort took. Targets the colony.</summary>
+public sealed record CancelAcademyCourseCommand(int TargetEntityId, int ComponentId, int CohortId) : GameCommand(TargetEntityId);
 
 /// <summary>One posted haul between two colonies. Targets the ship. Both ends must sit inside its freight reach.</summary>
 public sealed record HaulPairCommand(int TargetEntityId, int SourceId, int DestId, string CargoId) : GameCommand(TargetEntityId);

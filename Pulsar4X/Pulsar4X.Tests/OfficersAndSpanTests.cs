@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using Newtonsoft.Json;
 using GameEngine.Engine.Orders;
 using GameEngine.People;
 using NUnit.Framework;
@@ -61,8 +63,8 @@ public class OfficersAndSpanTests
         Assert.That(academies, Has.Count.EqualTo(2));
         Assert.That(academies[0].ComponentId, Is.EqualTo(first));
         Assert.That(academies[1].ComponentId, Is.EqualTo(second));
-        Assert.That(academies[0].CourseKind, Is.EqualTo(AcademyCourseKind.Idle));
-        Assert.That(academies[1].CourseKind, Is.EqualTo(AcademyCourseKind.Idle));
+        Assert.That(academies[0].Cohorts, Is.Empty);
+        Assert.That(academies[1].Cohorts, Is.Empty);
         Assert.That(faction.GetDataBlob<FactionInfoDB>().Commanders, Has.Count.EqualTo(before));
         Assert.That(AcademyInterrupt(colony), Is.False);
     }
@@ -74,32 +76,30 @@ public class OfficersAndSpanTests
         int id = Mount(colony);
 
         colony.GetDataBlob<ColonyInfoDB>().Population[species.Id] = 1999;
-        var refused = NavalAcademyCourse.TryTrain(colony, id);
+        var refused = NavalAcademyCourse.TryTrain(colony, id, 2);
         Assert.That(refused, Is.EqualTo("The colony has 1999 people. This class needs 2000."));
         Assert.That(colony.GetDataBlob<ColonyInfoDB>().Population[species.Id], Is.EqualTo(1999));
-        Assert.That(Row(colony).CourseKind, Is.EqualTo(AcademyCourseKind.Idle));
+        Assert.That(Row(colony).Cohorts, Is.Empty);
 
         colony.GetDataBlob<ColonyInfoDB>().Population[species.Id] = 2000;
-        Assert.That(NavalAcademyCourse.TryTrain(colony, id), Is.Null);
+        Assert.That(NavalAcademyCourse.TryTrain(colony, id, 2), Is.Null);
         Assert.That(colony.GetDataBlob<ColonyInfoDB>().Population[species.Id], Is.EqualTo(1998));
-        Assert.That(Row(colony).CourseKind, Is.EqualTo(AcademyCourseKind.Class));
-        Assert.That(Row(colony).PopulationTaken, Is.EqualTo(2));
+        var running = Sole(colony);
+        Assert.That(running.Kind, Is.EqualTo(AcademyCourseKind.Class));
+        Assert.That(running.Count, Is.EqualTo(2));
+        Assert.That(running.PopulationTaken, Is.EqualTo(2));
         Assert.That(AcademyInterrupt(colony), Is.True);
 
-        Assert.That(NavalAcademyCourse.TryTrain(colony, id), Is.EqualTo("This academy is already running a course."));
-        Assert.That(colony.GetDataBlob<ColonyInfoDB>().Population[species.Id], Is.EqualTo(1998));
-
-        Assert.That(NavalAcademyCourse.TryCancel(colony, id), Is.Null);
+        Assert.That(NavalAcademyCourse.TryCancel(colony, id, running.CohortId), Is.Null);
         Assert.That(colony.GetDataBlob<ColonyInfoDB>().Population[species.Id], Is.EqualTo(2000));
-        Assert.That(Row(colony).CourseKind, Is.EqualTo(AcademyCourseKind.Idle));
-        Assert.That(Row(colony).PopulationTaken, Is.EqualTo(0));
+        Assert.That(Row(colony).Cohorts, Is.Empty);
         Assert.That(faction.GetDataBlob<FactionInfoDB>().Commanders, Is.Empty);
 
-        Assert.That(NavalAcademyCourse.TryTrain(colony, id), Is.Null);
-        var when = Row(colony).GraduationDate;
+        Assert.That(NavalAcademyCourse.TryTrain(colony, id, 2), Is.Null);
+        var when = Sole(colony).GraduationDate;
         NavalAcademyCourse.Graduate(colony, when);
 
-        Assert.That(Row(colony).CourseKind, Is.EqualTo(AcademyCourseKind.Idle));
+        Assert.That(Row(colony).Cohorts, Is.Empty);
         var graduates = faction.GetDataBlob<FactionInfoDB>().Commanders;
         Assert.That(graduates, Has.Count.EqualTo(2));
         foreach (var person in graduates)
@@ -112,6 +112,133 @@ public class OfficersAndSpanTests
             Assert.That(commander.RankedOn, Is.EqualTo(when));
             Assert.That(NavalAcademyCourse.IsSeated(person), Is.False);
         }
+    }
+
+    [Test]
+    public void Stagger_SecondCohortStartsBeforeTheFirstGraduates()
+    {
+        var colony = Colony(5000, out var faction, out var species);
+        int id = Mount(colony);
+        int other = Mount(colony);
+        int mean = NavalAcademyCourse.SchoolMean(12, 0);
+        var population = colony.GetDataBlob<ColonyInfoDB>().Population;
+
+        var unready = Officer(colony, faction, experience: 0, cap: mean, rank: 1);
+        Assert.That(NavalAcademyCourse.TryCommand(colony, id, unready),
+            Is.EqualTo("Experience 0. This course needs 8."));
+
+        var seated = Officer(colony, faction, experience: 8, cap: mean, rank: 1);
+        var ship = Ship(colony.Manager, faction);
+        seated.GetDataBlob<CommanderDB>().AssignedTo = ship.Id;
+        Assert.That(NavalAcademyCourse.TryCommand(colony, id, seated), Is.EqualTo("This officer is assigned."));
+
+        Assert.That(NavalAcademyCourse.TryTrain(colony, id, 1), Is.Null);
+        Assert.That(population[species.Id], Is.EqualTo(4999));
+        var first = Sole(colony);
+        AdvanceDays(colony, 1);
+        Assert.That(NavalAcademyCourse.TryTrain(colony, id, 1), Is.Null);
+        Assert.That(population[species.Id], Is.EqualTo(4998));
+        Assert.That(Row(colony).Cohorts, Has.Count.EqualTo(2));
+        var secondDate = Row(colony).Cohorts[1].GraduationDate;
+        Assert.That(secondDate, Is.Not.EqualTo(first.GraduationDate));
+        Assert.That(NavalAcademyCourse.TryTrain(colony, id, 1),
+            Is.EqualTo("This class needs 1 seats. 0 are free."));
+        Assert.That(population[species.Id], Is.EqualTo(4998));
+
+        var ensign = Officer(colony, faction, experience: 8, cap: mean, rank: 1);
+        Assert.That(NavalAcademyCourse.TryCommand(colony, id, ensign),
+            Is.EqualTo("This academy has no free seats."));
+
+        Assert.That(NavalAcademyCourse.TryCancel(colony, id, first.CohortId), Is.Null);
+        Assert.That(population[species.Id], Is.EqualTo(4999));
+        Assert.That(Row(colony).Cohorts, Has.Count.EqualTo(1));
+        Assert.That(Row(colony).Cohorts[0].GraduationDate, Is.EqualTo(secondDate));
+
+        AdvanceDays(colony, 1);
+        Assert.That(NavalAcademyCourse.TryCommand(colony, id, ensign), Is.Null);
+        Assert.That(NavalAcademyCourse.TryCommand(colony, id, ensign),
+            Is.EqualTo("This officer is already on a course."));
+        var another = Officer(colony, faction, experience: 8, cap: mean, rank: 1);
+        Assert.That(NavalAcademyCourse.TryCommand(colony, id, another),
+            Is.EqualTo("This academy has no free seats."));
+
+        int before = faction.GetDataBlob<FactionInfoDB>().Commanders.Count;
+        NavalAcademyCourse.Graduate(colony, secondDate);
+        Assert.That(faction.GetDataBlob<FactionInfoDB>().Commanders, Has.Count.EqualTo(before + 1));
+        Assert.That(NavalAcademyCourse.IsEnrolled(Game, ensign.Id), Is.True);
+        Assert.That(ensign.GetDataBlob<CommanderDB>().Rank, Is.EqualTo(1));
+        Assert.That(Row(colony).Cohorts, Has.Count.EqualTo(1));
+        Assert.That(Row(colony).Cohorts[0].Kind, Is.EqualTo(AcademyCourseKind.Command));
+
+        var commandDate = Row(colony).Cohorts[0].GraduationDate;
+        NavalAcademyCourse.Graduate(colony, commandDate);
+        Assert.That(ensign.GetDataBlob<CommanderDB>().Rank, Is.EqualTo(4));
+        Assert.That(Row(colony).Cohorts, Is.Empty);
+        Assert.That(NavalAcademyCourse.IsEnrolled(Game, ensign.Id), Is.False);
+
+        Assert.That(NavalAcademyCourse.TryTrain(colony, other, 2), Is.Null);
+        Assert.That(population[species.Id], Is.EqualTo(4997));
+        Assert.That(colony.GetDataBlob<NavalAcademyDB>().Academies[1].Cohorts, Has.Count.EqualTo(1));
+        Assert.That(colony.GetDataBlob<NavalAcademyDB>().Academies[1].Cohorts[0].Count, Is.EqualTo(2));
+        Assert.That(Row(colony).Cohorts, Is.Empty);
+    }
+
+    [Test]
+    public void Uninstall_ReturnsEveryRecruitCohort()
+    {
+        var colony = Colony(5000, out _, out var species);
+        int id = Mount(colony);
+        Assert.That(NavalAcademyCourse.TryTrain(colony, id, 1), Is.Null);
+        AdvanceDays(colony, 1);
+        Assert.That(NavalAcademyCourse.TryTrain(colony, id, 1), Is.Null);
+        Assert.That(colony.GetDataBlob<ColonyInfoDB>().Population[species.Id], Is.EqualTo(4998));
+
+        Assert.That(colony.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<NavalAcademyAtb>(out var parts), Is.True);
+        var part = parts.Single(instance => instance.ID == id);
+        colony.RemoveComponent(part);
+
+        Assert.That(colony.GetDataBlob<ColonyInfoDB>().Population[species.Id], Is.EqualTo(5000));
+        Assert.That(colony.HasDataBlob<NavalAcademyDB>(), Is.False);
+    }
+
+    [Test]
+    public void LegacyCourse_LoadsAsOneCohort_AndGraduates()
+    {
+        var colony = Colony(2000, out var faction, out var species);
+        Mount(colony);
+        colony.GetDataBlob<ColonyInfoDB>().Population[species.Id] = 1998;
+        var when = colony.StarSysDateTime.AddDays(12 * 30);
+        var row = Row(colony);
+        row.Cohorts = null;
+        row.CourseKind = AcademyCourseKind.Class;
+        row.PopulationTaken = 2;
+        row.SpeciesId = species.Id;
+        row.OfficerId = -1;
+        row.GraduationDate = when;
+        var db = colony.GetDataBlob<NavalAcademyDB>();
+        db.Academies[0] = row;
+
+        var settings = new JsonSerializerSettings
+        {
+            Formatting = Formatting.Indented,
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+            TypeNameHandling = TypeNameHandling.Objects,
+            ContractResolver = new NonPublicResolver(),
+        };
+        string json = JsonConvert.SerializeObject(db, settings);
+        var loaded = JsonConvert.DeserializeObject<NavalAcademyDB>(json, settings);
+
+        Assert.That(loaded, Is.Not.Null);
+        Assert.That(loaded.Academies[0].Cohorts, Has.Count.EqualTo(1));
+        Assert.That(loaded.Academies[0].Cohorts[0].Kind, Is.EqualTo(AcademyCourseKind.Class));
+        Assert.That(loaded.Academies[0].Cohorts[0].Count, Is.EqualTo(2));
+        Assert.That(loaded.Academies[0].Cohorts[0].GraduationDate, Is.EqualTo(when));
+        Assert.That(loaded.Academies[0].CourseKind, Is.EqualTo(AcademyCourseKind.Idle));
+
+        colony.SetDataBlob(loaded);
+        NavalAcademyCourse.Graduate(colony, when);
+        Assert.That(faction.GetDataBlob<FactionInfoDB>().Commanders, Has.Count.EqualTo(2));
+        Assert.That(Row(colony).Cohorts, Is.Empty);
     }
 
     [Test]
@@ -137,14 +264,14 @@ public class OfficersAndSpanTests
         Assert.That(blocked.Accepted, Is.False);
         Assert.That(blocked.RejectionReason, Is.EqualTo("This officer is already on a course."));
 
-        var firstDate = Row(colony).GraduationDate;
+        var firstDate = Sole(colony).GraduationDate;
         NavalAcademyCourse.Graduate(colony, firstDate);
         var promoted = ensign.GetDataBlob<CommanderDB>();
         Assert.That(promoted.Rank, Is.EqualTo(4));
         Assert.That(promoted.Experience, Is.EqualTo(8));
         Assert.That(promoted.RankedOn, Is.EqualTo(firstDate));
         Assert.That(promoted.AssignedTo, Is.EqualTo(-1));
-        Assert.That(Row(colony).CourseKind, Is.EqualTo(AcademyCourseKind.Idle));
+        Assert.That(Row(colony).Cohorts, Is.Empty);
 
         var seatedAgain = translator.Translate(faction, ship, new AssignCaptainCommand(ship.Id, ensign.Id));
         Assert.That(seatedAgain.Accepted, Is.True, seatedAgain.RejectionReason);
@@ -153,27 +280,27 @@ public class OfficersAndSpanTests
 
         promoted.Experience = 16;
         Assert.That(NavalAcademyCourse.TryCommand(colony, id, ensign), Is.Null);
-        var secondDate = Row(colony).GraduationDate;
+        var secondDate = Sole(colony).GraduationDate;
         NavalAcademyCourse.Graduate(colony, secondDate);
         Assert.That(promoted.Rank, Is.EqualTo(6));
         Assert.That(promoted.Experience, Is.EqualTo(16));
 
         var skip = Officer(colony, faction, experience: 16, cap: mean, rank: 1);
         Assert.That(NavalAcademyCourse.TryCommand(colony, id, skip), Is.Null);
-        NavalAcademyCourse.Graduate(colony, Row(colony).GraduationDate);
+        NavalAcademyCourse.Graduate(colony, Sole(colony).GraduationDate);
         Assert.That(skip.GetDataBlob<CommanderDB>().Rank, Is.EqualTo(4));
         Assert.That(skip.GetDataBlob<CommanderDB>().Experience, Is.EqualTo(16));
 
         var field = Officer(colony, faction, experience: 8, cap: 40, rank: 1);
         Assert.That(NavalAcademyCourse.TryCommand(colony, id, field), Is.Null);
-        NavalAcademyCourse.Graduate(colony, Row(colony).GraduationDate);
+        NavalAcademyCourse.Graduate(colony, Sole(colony).GraduationDate);
         var raised = field.GetDataBlob<CommanderDB>();
         Assert.That(raised.Rank, Is.EqualTo(1));
         Assert.That(raised.Experience, Is.EqualTo(8));
         Assert.That(raised.ExperienceCap, Is.EqualTo(mean));
 
         Assert.That(NavalAcademyCourse.TryCommand(colony, id, field), Is.Null);
-        NavalAcademyCourse.Graduate(colony, Row(colony).GraduationDate);
+        NavalAcademyCourse.Graduate(colony, Sole(colony).GraduationDate);
         Assert.That(raised.Rank, Is.EqualTo(4));
         Assert.That(raised.Experience, Is.EqualTo(8));
     }
@@ -297,6 +424,7 @@ public class OfficersAndSpanTests
 
         var school = new ComponentDesigner(info.Data.ComponentTemplates["naval-academy"], info.Data, techs);
         var size = school.ComponentDesignProperties["Class Size"];
+        Assert.That(size.Description, Does.Contain("one seat"));
         size.SetMax();
         Assert.That(size.MaxValue, Is.EqualTo(8));
         Assert.That(school.ComponentDesignProperties["Class Length"].Description,
@@ -459,6 +587,22 @@ public class OfficersAndSpanTests
 
     static NavalAcademy Row(Entity colony)
         => colony.GetDataBlob<NavalAcademyDB>().Academies[0];
+
+    static AcademyCohort Sole(Entity colony)
+    {
+        var cohorts = Row(colony).Cohorts;
+        Assert.That(cohorts, Is.Not.Null);
+        Assert.That(cohorts, Has.Count.EqualTo(1));
+        return cohorts[0];
+    }
+
+    static void AdvanceDays(Entity colony, int days)
+    {
+        var pulse = colony.Manager.ManagerSubpulses;
+        var field = typeof(ManagerSubPulse).GetField("_systemLocalDateTime", BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.That(field, Is.Not.Null);
+        field.SetValue(pulse, colony.StarSysDateTime.AddDays(days));
+    }
 
     static bool AcademyInterrupt(Entity colony)
     {

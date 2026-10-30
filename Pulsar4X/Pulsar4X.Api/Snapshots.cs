@@ -518,7 +518,7 @@ public sealed record MineralMiningRow(
     long AnnualProduction,     // 0 when the colony can't mine this mineral
     bool CanMine);
 
-/// <summary>What one mounted academy is doing. Idle until the colony orders a course.</summary>
+/// <summary>A cohort's kind. A cohort is never idle. Idle remains so an old snapshot still reads.</summary>
 public enum AcademyCourseKind
 {
     Idle,
@@ -526,22 +526,29 @@ public enum AcademyCourseKind
     Command,
 }
 
-/// <summary>Every mounted academy on a colony, plus the people a class would draw on.</summary>
+/// <summary>Every mounted academy on a colony, plus the people a recruit cohort would draw on.</summary>
 public sealed record NavalAcademyView(
     IReadOnlyList<NavalAcademyClassView> Academies,
     long Population,
     int PeoplePerEnsign) : IComponentView;
 
-/// <summary>One mounted academy. <see cref="Graduation"/> is null while the academy is idle.</summary>
+/// <summary>One mounted academy. Class size is how many students can be enrolled at once.</summary>
 public sealed record NavalAcademyClassView(
     int ComponentId,
     int ClassSize,
     int TrainingPeriodMonths,
+    int SeatsInUse,
+    int MeanCap,
+    IReadOnlyList<AcademyCohortView> Cohorts);
+
+/// <summary>One run. A class enrolls <see cref="Count"/> recruits. A command course is one officer.</summary>
+public sealed record AcademyCohortView(
+    int CohortId,
     AcademyCourseKind Course,
-    DateTime? Graduation,
+    int Count,
+    DateTime Graduation,
     int OfficerId,
-    int PopulationTaken,
-    int MeanCap);
+    int PopulationTaken);
 
 // --------------------------------------------------------------------------------------------
 // Industry (production lines) and local construction. Owner-only.
