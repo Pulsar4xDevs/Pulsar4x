@@ -1526,8 +1526,13 @@ namespace Pulsar4X.Client
             string span,
             Func<EntitySnapshot, string?>? blocked = null)
         {
+            // Refuel, load, and unload nest the colony under its planet. That planet starts closed,
+            // which hides the only button. Keep the path open so the colony stays on screen.
+            bool revealColony = buttonPrefix is "refuel-from" or "load-from" or "unload-to";
             if(node.IsBand)
             {
+                if(revealColony)
+                    ImGui.SetNextItemOpen(true, ImGuiCond.Always);
                 bool bandOpen = ImGui.TreeNodeEx($"{node.Label}###{buttonPrefix}-band-{node.Id}");
                 if(bandOpen)
                 {
@@ -1571,6 +1576,8 @@ namespace Pulsar4X.Client
                 flags |= ImGuiTreeNodeFlags.DefaultOpen;
             if(childList == null)
                 flags |= ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
+            if(revealColony)
+                ImGui.SetNextItemOpen(true, ImGuiCond.Always);
 
             bool open = ImGui.TreeNodeEx($"##{buttonPrefix}-node-{entity.Id}", flags);
             ImGui.SameLine();
@@ -1750,7 +1757,7 @@ namespace Pulsar4X.Client
                 return;
             }
             if (colonies.All(colony => colony.Id != loadColonyId))
-                loadColonyId = -1;
+                loadColonyId = colonies[0].Id;
 
             DisplayHelpers.Header("From");
             DisplayTargetTree(candidates,
@@ -1793,7 +1800,7 @@ namespace Pulsar4X.Client
                 return;
             }
             if(colonies.All(colony => colony.Id != loadColonyId))
-                loadColonyId = -1;
+                loadColonyId = colonies[0].Id;
 
             DisplayHelpers.Header("From");
             DisplayTargetTree(candidates,
@@ -1834,7 +1841,7 @@ namespace Pulsar4X.Client
                 return;
             }
             if(colonies.All(colony => colony.Id != unloadColonyId))
-                unloadColonyId = -1;
+                unloadColonyId = colonies[0].Id;
 
             DisplayHelpers.Header("To");
             DisplayTargetTree(candidates,
