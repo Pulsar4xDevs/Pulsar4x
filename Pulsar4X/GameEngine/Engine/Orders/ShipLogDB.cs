@@ -7,6 +7,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
+using Pulsar4X.Logistics;
 using Pulsar4X.Movement;
 using Pulsar4X.People;
 using Pulsar4X.People.Orders;
@@ -389,6 +390,8 @@ static class ShipLogBook
         string detail = (action.Details ?? "").Trim();
 
         if (name == "Add To Construction Queue" && detail.StartsWith("Install ", StringComparison.Ordinal))
+            return EndSentence(detail);
+        if (action is LoadGoodsAction or UnloadGoodsAction)
             return EndSentence(detail);
         if (detail.Length == 0
             || detail.Equals(name, StringComparison.OrdinalIgnoreCase)

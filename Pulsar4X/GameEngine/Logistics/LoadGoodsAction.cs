@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using GameEngine.Engine.Orders;
 using Newtonsoft.Json;
+using Pulsar4X.Api;
 using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.Logistics;
@@ -20,9 +22,7 @@ public class LoadGoodsAction : EntityAction
 
     public override string Name => "Load goods";
 
-    public override string Details => _plotDestination
-        ? "Load, then plot the flight to the destination."
-        : "Load from the colony.";
+    public override string Details => TransferSentence(loaded: false);
 
     [JsonProperty]
     int _colonyId;
@@ -147,17 +147,19 @@ public class LoadGoodsAction : EntityAction
 
     internal override bool IsFinished()
     {
+        if (_isFinished)
+            return true;
         if (Status == ActionStatus.Failed)
             return _isFinished = true;
         if (!IsRunning || _shipOrder == null)
-            return _isFinished = false;
+            return false;
         if (_shipOrder.Status == ActionStatus.Failed)
         {
             Fail(string.IsNullOrEmpty(_shipOrder.FailureMessage) ? "nothing to load" : _shipOrder.FailureMessage);
             return _isFinished = true;
         }
         if (!_shipOrder.IsFinished())
-            return _isFinished = false;
+            return false;
         if (_followOn || !_plotDestination)
         {
             if (!_plotDestination && !_lines.Exists(line => line.Loaded > 0))
@@ -165,7 +167,7 @@ public class LoadGoodsAction : EntityAction
                 Fail("nothing to load");
                 return _isFinished = true;
             }
-            return _isFinished = true;
+            return NoteLoaded();
         }
 
         _followOn = true;
@@ -176,7 +178,78 @@ public class LoadGoodsAction : EntityAction
         }
         if (!InsertDestination())
             return _isFinished = true;
-        return _isFinished = true;
+        return NoteLoaded();
+    }
+
+    /// <summary>What the player asked for, or what the escrow actually took.</summary>
+    string TransferSentence(bool loaded)
+    {
+        string goods = Goods(loaded ? line => line.Loaded : line => line.Requested);
+        string colony = PlaceName();
+        if (goods.Length == 0)
+            return colony.Length == 0 ? "Load from the colony." : "Load from " + colony + ".";
+        if (colony.Length == 0)
+            return (loaded ? "Loaded " : "Load ") + goods + ".";
+        return (loaded ? "Loaded " : "Load ") + goods + " from " + colony + ".";
+    }
+
+    bool NoteLoaded()
+    {
+        _isFinished = true;
+        var ship = _entityCommanding;
+        if (ship == null || !_lines.Exists(line => line.Loaded > 0))
+            return true;
+        DateTime at = ship.Manager != null ? ship.StarSysDateTime : CreatedDate;
+        ShipLogBook.Append(ship, at, ShipLogKind.Action, TransferSentence(loaded: true));
+        return true;
+    }
+
+    string Goods(Func<MoveGoodsLine, long> countOf)
+    {
+        var parts = new List<string>();
+        foreach (var line in _lines)
+        {
+            long count = countOf(line);
+            if (count <= 0)
+                continue;
+            parts.Add(Stringify.Quantity(count) + " " + ItemLabel(line.ItemId));
+        }
+        return string.Join(", ", parts);
+    }
+
+    string ItemLabel(int itemId)
+    {
+        if (TryItem(_entityCommanding, itemId, out var aboard))
+            return aboard;
+        if (_entityCommanding?.Manager != null
+            && _entityCommanding.Manager.Game.GlobalManager.TryGetGlobalEntityById(_colonyId, out var colony)
+            && TryItem(colony, itemId, out var there))
+            return there;
+        return "goods";
+    }
+
+    static bool TryItem(Entity entity, int itemId, out string name)
+    {
+        name = "";
+        if (entity != null
+            && MoveGoodsPlan.TryCargo(entity, itemId, out var cargo)
+            && !string.IsNullOrWhiteSpace(cargo.Name))
+        {
+            name = cargo.Name;
+            return true;
+        }
+        return false;
+    }
+
+    string PlaceName()
+    {
+        var ship = _entityCommanding;
+        if (ship?.Manager == null || _colonyId < 0)
+            return "";
+        if (!ship.Manager.Game.GlobalManager.TryGetGlobalEntityById(_colonyId, out var colony))
+            return "";
+        string name = colony.GetName(ship.FactionOwnerID);
+        return name == "Unknown" ? "" : name;
     }
 
     bool InsertDestination()
@@ -287,7 +360,7 @@ public class UnloadGoodsAction : EntityAction
 
     public override string Name => "Unload goods";
 
-    public override string Details => "Unload onto the colony.";
+    public override string Details => TransferSentence(delivered: false);
 
     [JsonProperty]
     int _colonyId;
@@ -402,18 +475,87 @@ public class UnloadGoodsAction : EntityAction
 
     internal override bool IsFinished()
     {
+        if (_isFinished)
+            return true;
         if (Status == ActionStatus.Failed)
             return _isFinished = true;
         if (!IsRunning || _shipOrder == null)
-            return _isFinished = false;
+            return false;
         if (_shipOrder.Status == ActionStatus.Failed)
         {
             Fail(string.IsNullOrEmpty(_shipOrder.FailureMessage) ? "no place to unload" : _shipOrder.FailureMessage);
             return _isFinished = true;
         }
         if (!_shipOrder.IsFinished())
-            return _isFinished = false;
-        return _isFinished = true;
+            return false;
+
+        _isFinished = true;
+        var ship = _entityCommanding;
+        if (ship != null && _lines.Exists(line => line.Delivered > 0))
+        {
+            DateTime at = ship.Manager != null ? ship.StarSysDateTime : CreatedDate;
+            ShipLogBook.Append(ship, at, ShipLogKind.Action, TransferSentence(delivered: true));
+        }
+        return true;
+    }
+
+    string TransferSentence(bool delivered)
+    {
+        string goods = Goods(delivered ? line => line.Delivered : line => line.Requested);
+        string colony = PlaceName();
+        if (goods.Length == 0)
+            return colony.Length == 0 ? "Unload onto the colony." : "Unload at " + colony + ".";
+        if (colony.Length == 0)
+            return (delivered ? "Unloaded " : "Unload ") + goods + ".";
+        return (delivered ? "Unloaded " : "Unload ") + goods + " at " + colony + ".";
+    }
+
+    string Goods(Func<MoveGoodsLine, long> countOf)
+    {
+        var parts = new List<string>();
+        foreach (var line in _lines)
+        {
+            long count = countOf(line);
+            if (count <= 0)
+                continue;
+            parts.Add(Stringify.Quantity(count) + " " + ItemLabel(line.ItemId));
+        }
+        return string.Join(", ", parts);
+    }
+
+    string ItemLabel(int itemId)
+    {
+        if (TryItem(_entityCommanding, itemId, out var aboard))
+            return aboard;
+        if (_entityCommanding?.Manager != null
+            && _entityCommanding.Manager.Game.GlobalManager.TryGetGlobalEntityById(_colonyId, out var colony)
+            && TryItem(colony, itemId, out var there))
+            return there;
+        return "goods";
+    }
+
+    static bool TryItem(Entity entity, int itemId, out string name)
+    {
+        name = "";
+        if (entity != null
+            && MoveGoodsPlan.TryCargo(entity, itemId, out var cargo)
+            && !string.IsNullOrWhiteSpace(cargo.Name))
+        {
+            name = cargo.Name;
+            return true;
+        }
+        return false;
+    }
+
+    string PlaceName()
+    {
+        var ship = _entityCommanding;
+        if (ship?.Manager == null || _colonyId < 0)
+            return "";
+        if (!ship.Manager.Game.GlobalManager.TryGetGlobalEntityById(_colonyId, out var colony))
+            return "";
+        string name = colony.GetName(ship.FactionOwnerID);
+        return name == "Unknown" ? "" : name;
     }
 
     public override void Stop(DateTime at)

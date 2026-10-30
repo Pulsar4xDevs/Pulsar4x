@@ -186,9 +186,24 @@ public class MoveGoodsTests
         Assert.That(load.IsValidCommand(scene.Game), Is.True);
         load.Execute(scene.Ship.StarSysDateTime);
         Assert.That(load.Status, Is.EqualTo(ActionStatus.Running), load.FailureMessage);
+        Assert.That(Scene.Log(scene.Ship), Does.Contain("Load 50 Iron from Colony."));
         Scene.Drain(scene.Source);
+        Assert.That(load.IsFinished(), Is.True);
         Assert.That(scene.Ship.GetDataBlob<CargoStorageDB>().GetUnitsStored(scene.Iron, false), Is.EqualTo(10));
         Assert.That(scene.Source.GetDataBlob<CargoStorageDB>().GetUnitsStored(scene.Iron, false), Is.EqualTo(40));
+        Assert.That(Scene.Log(scene.Ship), Does.Contain("Loaded 10 Iron from Colony."));
+        Assert.That(Scene.Log(scene.Ship), Has.No.Member("Loaded 50 Iron from Colony."));
+
+        var unload = new CommandTranslator(scene.Game).Translate(
+            scene.Faction, scene.Ship, new UnloadGoodsCommand(
+                scene.Ship.Id, scene.Source.Id, new[] { new CargoTransferItem(scene.Iron.ID, 10) }));
+        Assert.That(unload.Accepted, Is.True, unload.RejectionReason);
+        Assert.That(Scene.Log(scene.Ship), Does.Contain("Unload 10 Iron at Colony."));
+        var put = scene.Ship.GetDataBlob<ActionQueueDB>().ActionList.OfType<UnloadGoodsAction>().Single();
+        scene.Ship.GetDataBlob<CargoStorageDB>().TransferRangeDv_mps = 1e12;
+        Scene.Drain(scene.Ship);
+        Assert.That(put.IsFinished(), Is.True);
+        Assert.That(Scene.Log(scene.Ship), Does.Contain("Unloaded 10 Iron at Colony."));
     }
 
     [Test]
@@ -215,6 +230,8 @@ public class MoveGoodsTests
         Assert.That(load.FailureMessage, Is.EqualTo("out of range"));
         Assert.That(scene.Source.GetDataBlob<CargoStorageDB>().GetUnitsStored(scene.Iron, false), Is.EqualTo(50));
         Assert.That(scene.Source.GetDataBlob<CargoStorageDB>().EscroItems, Is.Empty);
+        Assert.That(Scene.Log(scene.Ship), Has.No.Member("Loaded 50 Iron from Colony."));
+        Assert.That(Scene.Log(scene.Ship).Exists(line => line.StartsWith("Loaded ")), Is.False);
     }
 
     [Test]
@@ -385,6 +402,9 @@ public class MoveGoodsTests
             }
             return colony;
         }
+
+        public static List<string> Log(Entity entity)
+            => entity.GetDataBlob<ShipLogDB>().Entries.Select(entry => entry.Text).ToList();
 
         public static void Drain(Entity holder)
         {
