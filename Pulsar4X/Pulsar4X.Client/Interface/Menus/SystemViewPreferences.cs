@@ -68,7 +68,12 @@ public class SystemViewPreferences : UniquePulsarGuiWindow<SystemViewPreferences
 
     internal bool ShouldDisplay(string key, UserOrbitSettings.OrbitBodyType orbitBodyType)
     {
-        return ViewIndexes.ContainsKey(key) ? Views[ViewIndexes[key]].FilterCheckmarks[orbitBodyType] : true;
+        // GetViewIndex registers an unknown key against view 0 (the default view), so the
+        // default filters apply from the first frame instead of "show everything".
+        return Views.TryGetValue(GetViewIndex(key), out var view)
+               && view.FilterCheckmarks.TryGetValue(orbitBodyType, out var visible)
+            ? visible
+            : true;
     }
 
     internal void ToggleFilter(string key, UserOrbitSettings.OrbitBodyType orbitBodyType)

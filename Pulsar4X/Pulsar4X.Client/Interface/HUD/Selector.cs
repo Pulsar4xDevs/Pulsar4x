@@ -273,10 +273,44 @@ namespace Pulsar4X.Client
             }
 
             var prefs = SystemViewPreferences.GetInstance();
-            foreach (var root in SortBodies(roots))
+            DisplayBodyGroup(roots, -1, children, prefs, 0);
+        }
+
+        /// <summary>
+        /// Draws a sibling list. When asteroids are shown and there are two or more of them they
+        /// fold into one closed "Asteroids (N)" tree node (after the other siblings) instead of
+        /// swamping the list. A lone asteroid stays a normal row; hidden asteroids add no node.
+        /// </summary>
+        private static void DisplayBodyGroup(List<EntitySnapshot> siblings, int parentId,
+            Dictionary<int, List<EntitySnapshot>> children, SystemViewPreferences prefs, int visibleDepth)
+        {
+            var sorted = SortBodies(siblings).ToList();
+            bool showAsteroids = prefs.ShouldDisplay("map", UserOrbitSettings.OrbitBodyType.Asteroid);
+            var rocks = showAsteroids
+                ? sorted.Where(b => b.Kind == BodyKind.Asteroid).ToList()
+                : new List<EntitySnapshot>();
+            bool fold = rocks.Count >= 2;
+
+            foreach (var body in sorted)
             {
-                DisplayBodyNode(root, children, prefs, 0);
+                if (fold && body.Kind == BodyKind.Asteroid)
+                    continue;
+                DisplayBodyNode(body, children, prefs, visibleDepth);
             }
+
+            if (!fold)
+                return;
+
+            float indent = visibleDepth * IndentStep;
+            if (indent > 0) ImGui.Indent(indent);
+            // The tree node supplies its own indent for the rows inside it.
+            if (ImGui.TreeNodeEx($"Asteroids ({rocks.Count})###asteroids-{parentId}", ImGuiTreeNodeFlags.None))
+            {
+                foreach (var rock in rocks)
+                    DisplayBodyNode(rock, children, prefs, 0);
+                ImGui.TreePop();
+            }
+            if (indent > 0) ImGui.Unindent(indent);
         }
 
         private static int? ParentIdOf(EntitySnapshot body)
@@ -335,10 +369,7 @@ namespace Pulsar4X.Client
 
             if (children.TryGetValue(body.Id, out var childList))
             {
-                foreach (var child in SortBodies(childList))
-                {
-                    DisplayBodyNode(child, children, prefs, childDepth);
-                }
+                DisplayBodyGroup(childList, body.Id, children, prefs, childDepth);
             }
         }
 
