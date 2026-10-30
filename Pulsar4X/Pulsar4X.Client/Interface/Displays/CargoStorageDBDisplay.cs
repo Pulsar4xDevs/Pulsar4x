@@ -24,7 +24,7 @@ namespace Pulsar4X.Client
                     DisplayHelpers.PrintRow("Available Volume", Stringify.VolumeLtr(store.FreeVolume), null, null, false);
                     ImGui.Columns(1);
 
-                    if(ImGui.BeginTable(header + "table", 3, Styles.TableFlags))
+                    if(ImGui.BeginTable("###" + store.TypeId, 3, Styles.TableFlags))
                     {
                         ImGui.TableSetupColumn("Item");
                         ImGui.TableSetupColumn("Quantity");
@@ -34,7 +34,7 @@ namespace Pulsar4X.Client
                         foreach(var item in store.Items)
                         {
                             ImGui.TableNextColumn();
-                            if(ImGui.Selectable(item.Name, false, ImGuiSelectableFlags.SpanAllColumns)) {}
+                            if(ImGui.Selectable(item.Name + "##" + item.Id, false, ImGuiSelectableFlags.SpanAllColumns)) {}
                             if(item.ItemKind.Length > 0)
                             {
                                 DisplayHelpers.DescriptiveTooltip(item.Name, item.ItemKind, item.Description);

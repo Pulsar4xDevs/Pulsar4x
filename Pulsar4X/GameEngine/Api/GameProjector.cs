@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GameEngine.Engine.Orders;
+using GameEngine.People;
 using Pulsar4X.Api;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Colonies;
@@ -544,10 +545,41 @@ namespace Pulsar4X.Engine.Api
             }
 
             int? planetId = c.PlanetEntity.IsValid ? c.PlanetEntity.Id : null;
+            int administratorId = -1;
+            string? administratorName = null;
+            bool hasAdministrativePost = false;
+            // The chair is the first seat at colony level or wider. A ship bridge does not count.
+            if (colony.FactionOwnerID == factionId
+                && colony.TryGetDataBlob<AdminSpaceDB>(out var admin))
+            {
+                foreach (var seat in admin.CommanderSeats)
+                {
+                    if (seat.SeatType < AdminLevel.Colony)
+                        continue;
+                    hasAdministrativePost = true;
+                    if (seat.CommanderID >= 0)
+                    {
+                        administratorId = seat.CommanderID;
+                        administratorName = "Unknown";
+                        if (colony.Manager != null
+                            && colony.Manager.TryGetGlobalEntityById(seat.CommanderID, out var person))
+                        {
+                            string name = person.GetName(factionId);
+                            if (!string.IsNullOrEmpty(name))
+                                administratorName = name;
+                        }
+                    }
+                    break;
+                }
+            }
+
             return new ColonyView(population, planetId)
             {
                 SpeciesPopulations = species,
                 CommandSpan = colony.FactionOwnerID == factionId ? SpanLabel(LogisticsSpan.Of(colony)) : "",
+                AdministratorId = administratorId,
+                AdministratorName = administratorName,
+                HasAdministrativePost = hasAdministrativePost,
             };
         }
 

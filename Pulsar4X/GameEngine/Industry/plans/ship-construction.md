@@ -24,7 +24,7 @@ Mount uses `max(1, MassPerUnit / 100000)` and moves the ship's instance onto the
 
 `InstallComponentCommand` and `AddToConstructionQueueCommand` take an optional colony id. A colony order ignores it. A ship order is rejected when the ship has no installation rate, when no colony is named, when that colony is out of range, or when a site-only design is offered as a crate. A freighter is rejected. The colony ship is accepted.
 
-The ship entity window shows the construction section only when the ship has an installation rate: its points, hold crates, site-only designs it can pay for, and a picker of same-faction colonies in transfer range. Cargo Install enqueues a mount at the picked colony. With no colony in range the item is shown and disabled. A freighter does not show it. Colony Management stays a colony screen.
+Fleet Management shows a Construction tab only when the selected ship has an installation rate: its points, hold crates, site-only designs it can pay for, and a picker of same-faction colonies in transfer range. Cargo Install enqueues a mount at the picked colony. With no colony in range the item is shown and disabled. A freighter does not get the tab. The entity card does not show it. Colony Management stays a colony screen.
 
 Range is cargo-transfer range. Both sides have cargo storage, they share a parent with a mass, and the transfer rate is above zero. An empty colony store still counts. Hulls in a yard, refit, and stations are not started.
 
@@ -36,7 +36,7 @@ A freighter is rejected. The colony ship is accepted.
 
 ## UI
 
-The ship entity window is the screen. A ship with an installation rate gets the same construction section as the colony tab: the ship's points, crates in its hold, and site-only designs it can pay for from that hold. A picker lists same-faction colonies in transfer range. A ship without the rate does not get the section. Colony Management does not grow a ship builder.
+Fleet Management is the screen. A ship with an installation rate gets a Construction tab, the same section as the colony tab: the ship's points, crates in its hold, and site-only designs it can pay for from that hold. A picker lists same-faction colonies in transfer range. A ship without the rate does not get the tab. The entity card does not show it. Colony Management does not grow a ship builder.
 
 The cargo Install item on that ship enqueues a mount at the picked colony. With no colony in range, the item is disabled. A freighter never shows it.
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GameEngine.Engine.Orders;
+using GameEngine.People;
 using Pulsar4X.Api;
 using Pulsar4X.Colonies;
 using Pulsar4X.Components;
@@ -75,6 +76,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(DetachShipCommand)] = TranslateDetachShip,
                 [typeof(SetFlagshipCommand)] = TranslateSetFlagship,
                 [typeof(AssignCaptainCommand)] = TranslateAssignCaptain,
+                [typeof(AssignAdministratorCommand)] = TranslateAssignAdministrator,
                 [typeof(TrainAcademyClassCommand)] = TranslateTrainAcademyClass,
                 [typeof(AcademyCommandCourseCommand)] = TranslateAcademyCommandCourse,
                 [typeof(CancelAcademyCourseCommand)] = TranslateCancelAcademyCourse,
@@ -1499,6 +1501,116 @@ namespace Pulsar4X.Engine.Api
                 PublishPersonnelChanged(ship);
 
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        // ----- administrator (commanded entity: the colony). One chair, the first post at colony level or wider. -----
+
+        private CommandResult TranslateAssignAdministrator(Entity faction, Entity commanded, GameCommand command)
+        {
+            var assign = (AssignAdministratorCommand)command;
+            if (!commanded.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject("An administrator sits a colony.");
+
+            var chair = ColonyChair(commanded);
+            if (chair == null)
+                return CommandResult.Reject("This colony has no administrative post.");
+
+            if (assign.CommanderId < 0)
+            {
+                if (chair.CommanderID >= 0 && TryResolve(chair.CommanderID, out var sitting))
+                {
+                    ShipLogBook.NoteLeftPost(commanded, sitting, commanded.StarSysDateTime, "the post");
+                    if (sitting.TryGetDataBlob<CommanderDB>(out var sittingDB)
+                        && sittingDB.AssignedTo == commanded.Id)
+                        sittingDB.AssignedTo = -1;
+                }
+                chair.CommanderID = -1;
+                chair.Commander = null;
+                PublishPersonnelChanged(commanded);
+                return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+            }
+
+            if (!TryResolve(assign.CommanderId, out var person)
+                || person.FactionOwnerID != faction.Id
+                || !person.TryGetDataBlob<CommanderDB>(out var commanderDB))
+                return CommandResult.Reject($"Civilian {assign.CommanderId} not found.");
+
+            if (commanderDB.Type != DataStructures.CommanderTypes.Civilian)
+                return CommandResult.Reject("Only a civilian can administer a colony.");
+
+            if (chair.CommanderID == person.Id)
+                return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+
+            var vacated = new List<Entity>();
+            if (commanderDB.AssignedTo >= 0
+                && commanderDB.AssignedTo != commanded.Id
+                && TryResolve(commanderDB.AssignedTo, out var previous))
+            {
+                ClearPostedCivilian(previous, person, vacated);
+            }
+
+            int leaving = chair.CommanderID;
+            if (leaving >= 0 && leaving != person.Id && TryResolve(leaving, out var bumped))
+            {
+                ShipLogBook.NoteLeftPost(commanded, bumped, commanded.StarSysDateTime, "the post");
+                if (bumped.TryGetDataBlob<CommanderDB>(out var bumpedDB)
+                    && bumpedDB.AssignedTo == commanded.Id)
+                    bumpedDB.AssignedTo = -1;
+            }
+
+            chair.CommanderID = person.Id;
+            chair.Commander = commanderDB;
+            commanderDB.AssignedTo = commanded.Id;
+            ShipLogBook.NoteTookPost(commanded, person, commanded.StarSysDateTime, "the post");
+
+            PublishPersonnelChanged(commanded);
+            foreach (var entity in vacated)
+                PublishPersonnelChanged(entity);
+
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        // A ship bridge is not a colony chair. Extra posts are not listed.
+        private static AdminSpaceAbilityState? ColonyChair(Entity colony)
+        {
+            if (!colony.TryGetDataBlob<AdminSpaceDB>(out var admin))
+                return null;
+            foreach (var seat in admin.CommanderSeats)
+            {
+                if (seat.SeatType >= AdminLevel.Colony)
+                    return seat;
+            }
+            return null;
+        }
+
+        // Leaves every admin seat on the previous entity that this civilian holds.
+        // The previous post is found by the person, not by the component name.
+        private static void ClearPostedCivilian(Entity previous, Entity person, List<Entity> vacated)
+        {
+            if (!person.TryGetDataBlob<CommanderDB>(out var commanderDB))
+                return;
+
+            bool left = false;
+            if (previous.TryGetDataBlob<AdminSpaceDB>(out var admin))
+            {
+                foreach (var seat in admin.CommanderSeats)
+                {
+                    if (seat.CommanderID != person.Id)
+                        continue;
+                    seat.CommanderID = -1;
+                    seat.Commander = null;
+                    left = true;
+                }
+            }
+
+            if (commanderDB.AssignedTo == previous.Id)
+                commanderDB.AssignedTo = -1;
+            if (!left)
+                return;
+
+            ShipLogBook.NoteLeftPost(previous, person, previous.StarSysDateTime, "the post");
+            if (!vacated.Contains(previous))
+                vacated.Add(previous);
         }
 
         private CommandResult TranslateTrainAcademyClass(Entity faction, Entity commanded, GameCommand command)

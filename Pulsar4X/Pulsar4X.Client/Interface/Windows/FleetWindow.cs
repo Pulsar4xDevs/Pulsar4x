@@ -72,6 +72,7 @@ namespace Pulsar4X.Client
         private ShipSnapshot? orderShip = null;
         // The ship whose captain chair the assign modal is editing. A fleet commander is the flagship's captain.
         private int? captainChooserShipId = null;
+        private ColonyConstructionDisplay? _shipConstruction;
         // Log tab scrolls to the latest line when it opens or the book grows.
         private int _logShownId = -1;
         private int _logShownCount = -1;
@@ -341,6 +342,15 @@ namespace Pulsar4X.Client
                     ImGui.EndTabItem();
                 }
 
+                if (orderShip != null
+                    && SubjectEntity(galaxy)?.GetView<ConstructionView>() is { IsShip: true } construction
+                    && ImGui.BeginTabItem("Construction"))
+                {
+                    _shipConstruction ??= new ColonyConstructionDisplay();
+                    _shipConstruction.Display(orderShip.Id, construction, _uiState);
+                    ImGui.EndTabItem();
+                }
+
                 if (orderShip == null)
                     DisplayStandingOrdersTab();
 
@@ -399,6 +409,14 @@ namespace Pulsar4X.Client
                     ImGui.Columns(1);
                 }
 
+                if (ImGui.CollapsingHeader("Crew", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    int required = subject?.GetView<ShipView>()?.CrewRequired ?? 0;
+                    ImGui.Columns(2);
+                    DisplayHelpers.PrintRow("Required", required.ToString("N0"), separator: false);
+                    ImGui.Columns(1);
+                }
+
                 // Output is the net added to the batteries this step. The old power window's Load
                 // is max output divided by that net, so it is not a percentage and is not shown.
                 if (subject?.GetView<EnergyView>() is { } energy
@@ -442,14 +460,6 @@ namespace Pulsar4X.Client
             ImGui.SameLine();
             if (ImGui.BeginChild("ShipSummary2", secondChildSize, ImGuiChildFlags.Borders))
             {
-                if (ImGui.CollapsingHeader("Crew", ImGuiTreeNodeFlags.DefaultOpen))
-                {
-                    int required = subject?.GetView<ShipView>()?.CrewRequired ?? 0;
-                    ImGui.Columns(2);
-                    DisplayHelpers.PrintRow("Required", required.ToString("N0"), separator: false);
-                    ImGui.Columns(1);
-                }
-
                 if (ImGui.CollapsingHeader("Components", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     var components = subject?.GetView<InstallationsView>();

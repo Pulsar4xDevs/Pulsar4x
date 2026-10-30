@@ -67,11 +67,8 @@ namespace Pulsar4X.Client
         private CommanderSnapshot? _commander;
 
         private Vector4 _accentColor;
-        private ColonyConstructionDisplay? _shipConstruction;
 
         // Animation constants
-        private const float WindowWidth = 624f;
-        private const float WindowHeight = 420f;
         private const float AnimationDuration = 0.2f; // seconds
         private const float BottomMargin = 4f;
         private const float RightMargin = 4f;
@@ -209,29 +206,17 @@ namespace Pulsar4X.Client
             _commander = FindCommander();
             Title = _entity.GetView<NameView>()?.Name ?? "Unknown";
 
-            // The construction panes take the leftover height, so that one case stays a fixed window.
-            // Everything else hugs its summary. Both sit on the bottom edge of the work area.
-            bool shipConstruction = _commander == null
-                && _bodyType == UserOrbitSettings.OrbitBodyType.Ship
-                && _entity.GetView<ConstructionView>() is { IsShip: true };
-            float width = shipConstruction ? WindowWidth : 480f;
-            float height = shipConstruction ? WindowHeight : _laidOutHeight;
+            // The card hugs its summary and sits on the bottom edge of the work area.
+            float width = 480f;
+            float height = _laidOutHeight;
             var work = ImGui.GetMainViewport();
             float workRight = work.WorkPos.X + work.WorkSize.X;
             float workBottom = work.WorkPos.Y + work.WorkSize.Y;
             float finalX = workRight - width - RightMargin;
             float currentX = workRight + (finalX - workRight) * _animationProgress;
             float y = workBottom - height - BottomMargin;
-            if (shipConstruction)
-            {
-                _flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar;
-                ImGui.SetNextWindowSize(new Vector2(width, height), ImGuiCond.Always);
-            }
-            else
-            {
-                _flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize;
-                ImGui.SetNextWindowSizeConstraints(new Vector2(width, 48f), new Vector2(width, work.WorkSize.Y - 8f));
-            }
+            _flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize;
+            ImGui.SetNextWindowSizeConstraints(new Vector2(width, 48f), new Vector2(width, work.WorkSize.Y - 8f));
             ImGui.SetNextWindowPos(new Vector2(currentX, y), ImGuiCond.Always);
             ImGui.SetNextWindowBgAlpha(0.85f);
 
@@ -1035,21 +1020,6 @@ namespace Pulsar4X.Client
                 ImGui.Spacing();
                 if (ImGui.Button("Fleet & Ship Management", new Vector2(ImGui.GetContentRegionAvail().X, 0)))
                     FleetWindow.GetInstance().OrderShip(EntityId);
-            }
-
-            // A ship with an installation rate keeps the construction section. Fleet Management
-            // does not have it, and the cargo Install menu reads the colony picked here.
-            if (_entity.GetView<ConstructionView>() is { IsShip: true } construction)
-            {
-                SectionLabel("CONSTRUCTION");
-                _shipConstruction ??= new ColonyConstructionDisplay();
-                float sectionHeight = Math.Max(280f, ImGui.GetContentRegionAvail().Y);
-                if (ImGui.BeginChild("ShipConstruction", new Vector2(0, sectionHeight), ImGuiChildFlags.None))
-                    _shipConstruction.Display(EntityId, construction, _uiState);
-                ImGui.EndChild();
-
-                if (_entity.GetView<CargoStorageView>() is { } storage)
-                    storage.Display(EntityId, _uiState, ImGuiTreeNodeFlags.None);
             }
         }
 

@@ -231,6 +231,15 @@ public sealed record ColonyView(long Population, int? PlanetEntityId) : ICompone
 
     /// <summary>Owning faction only. How far a supply order reaches. One of <see cref="CommandSpanLabels"/>.</summary>
     public string CommandSpan { get; init; } = "";
+
+    /// <summary>Owning faction only. The first chair at colony level or wider. -1 when that chair is empty or missing.</summary>
+    public int AdministratorId { get; init; } = -1;
+
+    /// <summary>Owning faction only. Null when the chair is empty or the colony has no chair.</summary>
+    public string? AdministratorName { get; init; }
+
+    /// <summary>Owning faction only. True when a colony-level chair exists, even if nobody sits it.</summary>
+    public bool HasAdministrativePost { get; init; }
 }
 
 /// <summary>Flagship or colony bridge span, as shown to the owning faction.</summary>

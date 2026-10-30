@@ -24,6 +24,8 @@ namespace Pulsar4X.Client
         private int _logShownCount = -1;
         private readonly Dictionary<int, int> _academyRecruits = new();
         private readonly Dictionary<int, int> _academyOfficer = new();
+        // The colony whose administrator chair the assign modal is editing.
+        private int? _administratorChooserColonyId = null;
 
         internal static ColonyManagementWindow GetInstance()
         {
@@ -117,6 +119,8 @@ namespace Pulsar4X.Client
                     ImGui.SameLine();
                     DisplaySelectedColony(selectedSystem, selectedColony);
                 }
+
+                DisplayAdministratorChooser(galaxy);
             }
             Window.End();
         }
@@ -185,6 +189,50 @@ namespace Pulsar4X.Client
             var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
             if(ImGui.BeginChild("ColonySummary1", firstChildSize, ImGuiChildFlags.Borders))
             {
+                var colonyName = colony.GetView<NameView>()?.Name ?? "Unknown";
+                if(ImGui.CollapsingHeader("Colony", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    ImGui.Columns(2);
+                    DisplayHelpers.PrintRow("Name", colonyName);
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                    ImGui.Text("Administrator");
+                    ImGui.PopStyleColor();
+                    ImGui.NextColumn();
+                    DisplayAdministratorButton(colonyView, colony.Id);
+                    ImGui.NextColumn();
+                    ImGui.Separator();
+                    ImGui.Columns(1);
+                }
+
+                colonyView?.Display(colony.Id);
+
+                if(colony.GetView<InfrastructureView>() is { } infrastructure
+                    && ImGui.CollapsingHeader("Infrastructure", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    bool overCapacity = infrastructure.CapacityAvailable < 0;
+
+                    ImGui.Columns(2);
+                    DisplayHelpers.PrintRow("Provided", infrastructure.CapacityProvided.ToString("N0"));
+                    DisplayHelpers.PrintRow("Used", infrastructure.CapacityRequired.ToString("N0"));
+                    DisplayHelpers.PrintRow("Available", infrastructure.CapacityAvailable.ToString("N0"));
+                    ImGui.Columns(1);
+
+                    // Use TextUnformatted: ImGui.Text/TextColored treat the string as a printf
+                    // format, so a literal '%' would be parsed as a format specifier.
+                    if(overCapacity)
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0.4f, 0.4f, 1f));
+                        ImGui.TextUnformatted($"Over capacity - all output reduced to {infrastructure.Efficiency * 100:0}%");
+                        ImGui.PopStyleColor();
+                    }
+                    else
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                        ImGui.TextUnformatted($"Output at {infrastructure.Efficiency * 100:0}% of capacity");
+                        ImGui.PopStyleColor();
+                    }
+                }
+
                 var planetName = planet?.GetView<NameView>()?.Name ?? "Unknown";
                 var body = planet?.GetView<BodyView>();
 
@@ -232,36 +280,6 @@ namespace Pulsar4X.Client
             ImGui.SameLine();
             if(ImGui.BeginChild("ColonySummary2", secondChildSize, ImGuiChildFlags.Borders))
             {
-                colonyView?.Display(colony.Id);
-                ImGui.Columns(1);
-
-                if(colony.GetView<InfrastructureView>() is { } infrastructure
-                    && ImGui.CollapsingHeader("Infrastructure", ImGuiTreeNodeFlags.DefaultOpen))
-                {
-                    bool overCapacity = infrastructure.CapacityAvailable < 0;
-
-                    ImGui.Columns(2);
-                    DisplayHelpers.PrintRow("Provided", infrastructure.CapacityProvided.ToString("N0"));
-                    DisplayHelpers.PrintRow("Used", infrastructure.CapacityRequired.ToString("N0"));
-                    DisplayHelpers.PrintRow("Available", infrastructure.CapacityAvailable.ToString("N0"));
-                    ImGui.Columns(1);
-
-                    // Use TextUnformatted: ImGui.Text/TextColored treat the string as a printf
-                    // format, so a literal '%' would be parsed as a format specifier.
-                    if(overCapacity)
-                    {
-                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0.4f, 0.4f, 1f));
-                        ImGui.TextUnformatted($"Over capacity - all output reduced to {infrastructure.Efficiency * 100:0}%");
-                        ImGui.PopStyleColor();
-                    }
-                    else
-                    {
-                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                        ImGui.TextUnformatted($"Output at {infrastructure.Efficiency * 100:0}% of capacity");
-                        ImGui.PopStyleColor();
-                    }
-                }
-
                 if(ImGui.CollapsingHeader("Installations", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     if(colony.GetView<InstallationsView>() is { } installations)
@@ -300,6 +318,68 @@ namespace Pulsar4X.Client
                 }
             }
             ImGui.EndChild();
+        }
+
+        private void DisplayAdministratorButton(ColonyView? colonyView, int colonyId)
+        {
+            bool hasPost = colonyView?.HasAdministrativePost == true;
+            string label = string.IsNullOrEmpty(colonyView?.AdministratorName) ? "None" : colonyView!.AdministratorName!;
+            if (!hasPost)
+                ImGui.BeginDisabled();
+            if (ImGui.SmallButton(label + "###admin-" + colonyId) && hasPost)
+                _administratorChooserColonyId = colonyId;
+            if (!hasPost)
+                ImGui.EndDisabled();
+            if (ImGui.IsItemHovered(hasPost ? ImGuiHoveredFlags.None : ImGuiHoveredFlags.AllowWhenDisabled))
+                ImGui.SetTooltip(hasPost
+                    ? "Seats a civilian as this colony's administrator."
+                    : "This colony has no administrative post.");
+        }
+
+        private void DisplayAdministratorChooser(IClientGalaxy galaxy)
+        {
+            if (_administratorChooserColonyId is not int colonyId)
+                return;
+
+            var system = _selectedSystemId == null ? null : galaxy.GetSystem(_selectedSystemId);
+            var colony = system?.GetEntity(colonyId);
+            var view = colony?.GetView<ColonyView>();
+            if (colony == null || view is not { HasAdministrativePost: true })
+            {
+                _administratorChooserColonyId = null;
+                return;
+            }
+
+            var civilians = galaxy.Commanders
+                .Where(commander => commander.Kind == CommanderKind.Civilian)
+                .OrderBy(commander => commander.Name, StringComparer.Ordinal)
+                .ToList();
+            int current = view.AdministratorId;
+            ResultModal.GetInstance().DisplayCustomButtons(
+                "Assign Administrator",
+                () => _administratorChooserColonyId = null,
+                close =>
+                {
+                    int selected = DisplayHelpers.PeopleChooser(
+                        _uiState,
+                        civilians,
+                        current,
+                        "admin_" + colonyId,
+                        close,
+                        CivilianRow,
+                        320f);
+                    if (selected != current)
+                    {
+                        _uiState.GameClient?.SubmitCommandAsync(new AssignAdministratorCommand(colonyId, selected));
+                        close();
+                    }
+                });
+        }
+
+        private static string CivilianRow(CommanderSnapshot person)
+        {
+            string post = string.IsNullOrEmpty(person.AssignmentName) ? "" : ", " + person.AssignmentName;
+            return person.Name + post;
         }
 
         private void DisplayNavalAcademy(int colonyId, NavalAcademyView academy)

@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.Engine.Orders;
+using GameEngine.People;
 using NUnit.Framework;
 using Pulsar4X.Api;
+using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
@@ -288,6 +291,87 @@ namespace Pulsar4X.Tests
             Assert.That(fleet.CommanderId, Is.EqualTo(officer.Id));
             Assert.That(fleet.CommanderName, Is.EqualTo(officer.GetName(session.FactionId)));
             Assert.That(fleet.Ships.Single().CommanderId, Is.EqualTo(officer.Id));
+        }
+
+        private Entity MakeAdminColony(int factionId, string name, bool withChair)
+        {
+            var colony = Entity.Create(factionId);
+            var blobs = new List<BaseDataBlob>
+            {
+                new ColonyInfoDB(),
+                new NameDB(name, factionId, name),
+            };
+            if (withChair)
+            {
+                var admin = new AdminSpaceDB();
+                // A ship bridge comes first and must not become the colony chair.
+                admin.CommanderSeats.Add(new AdminSpaceAbilityState(AdminLevel.Ship, "bridge"));
+                admin.CommanderSeats.Add(new AdminSpaceAbilityState(AdminLevel.Colony, "City Hall"));
+                blobs.Add(admin);
+            }
+            _game.Systems[0].AddEntity(colony, blobs);
+            return colony;
+        }
+
+        [Test]
+        public void AssignAdministrator_seats_a_civilian_and_a_negative_id_clears_the_chair()
+        {
+            var session = Connect();
+            var colony = MakeAdminColony(session.FactionId, "Earth Colony", withChair: true);
+            var other = MakeAdminColony(session.FactionId, "Ceres Colony", withChair: true);
+            var bare = MakeAdminColony(session.FactionId, "Bare Colony", withChair: false);
+            var civilian = MakeCommander(session.FactionId, CommanderTypes.Civilian);
+            var officer = MakeCommander(session.FactionId, CommanderTypes.Navy, rank: 1);
+
+            var noSeat = _server.SubmitCommand(session, new AssignAdministratorCommand(bare.Id, civilian.Id));
+            Assert.That(noSeat.Accepted, Is.False);
+            Assert.That(noSeat.RejectionReason, Does.Contain("administrative post"));
+
+            var rejected = _server.SubmitCommand(session, new AssignAdministratorCommand(colony.Id, officer.Id));
+            Assert.That(rejected.Accepted, Is.False);
+            Assert.That(rejected.RejectionReason, Does.Contain("civilian"));
+            Assert.That(officer.GetDataBlob<CommanderDB>().AssignedTo, Is.EqualTo(-1));
+
+            var seated = _server.SubmitCommand(session, new AssignAdministratorCommand(colony.Id, civilian.Id));
+            Assert.That(seated.Accepted, Is.True, seated.RejectionReason);
+            var seats = colony.GetDataBlob<AdminSpaceDB>().CommanderSeats;
+            Assert.That(seats[0].CommanderID, Is.EqualTo(-1), "a ship bridge is not the colony chair");
+            Assert.That(seats[1].CommanderID, Is.EqualTo(civilian.Id));
+            Assert.That(civilian.GetDataBlob<CommanderDB>().AssignedTo, Is.EqualTo(colony.Id));
+            Assert.That(colony.GetDataBlob<ShipLogDB>().Entries.Last().Text, Does.Contain("took the post"));
+
+            var view = _projector.ProjectEntity(colony, session.FactionId).GetView<ColonyView>();
+            Assert.That(view, Is.Not.Null);
+            Assert.That(view!.HasAdministrativePost, Is.True);
+            Assert.That(view.AdministratorId, Is.EqualTo(civilian.Id));
+            Assert.That(view.AdministratorName, Is.EqualTo(civilian.GetName(session.FactionId)));
+
+            var moved = _server.SubmitCommand(session, new AssignAdministratorCommand(other.Id, civilian.Id));
+            Assert.That(moved.Accepted, Is.True, moved.RejectionReason);
+            Assert.That(colony.GetDataBlob<AdminSpaceDB>().CommanderSeats[1].CommanderID, Is.EqualTo(-1));
+            Assert.That(other.GetDataBlob<AdminSpaceDB>().CommanderSeats[1].CommanderID, Is.EqualTo(civilian.Id));
+            Assert.That(civilian.GetDataBlob<CommanderDB>().AssignedTo, Is.EqualTo(other.Id));
+            Assert.That(colony.GetDataBlob<ShipLogDB>().Entries.Last().Text, Does.Contain("left the post"));
+            Assert.That(other.GetDataBlob<ShipLogDB>().Entries.Last().Text, Does.Contain("took the post"));
+
+            var left = _projector.ProjectEntity(colony, session.FactionId).GetView<ColonyView>();
+            Assert.That(left!.HasAdministrativePost, Is.True);
+            Assert.That(left.AdministratorId, Is.EqualTo(-1));
+            Assert.That(left.AdministratorName, Is.Null);
+            var right = _projector.ProjectEntity(other, session.FactionId).GetView<ColonyView>();
+            Assert.That(right!.AdministratorId, Is.EqualTo(civilian.Id));
+            Assert.That(right.AdministratorName, Is.EqualTo(civilian.GetName(session.FactionId)));
+
+            var cleared = _server.SubmitCommand(session, new AssignAdministratorCommand(other.Id, -1));
+            Assert.That(cleared.Accepted, Is.True, cleared.RejectionReason);
+            Assert.That(other.GetDataBlob<AdminSpaceDB>().CommanderSeats[1].CommanderID, Is.EqualTo(-1));
+            Assert.That(civilian.GetDataBlob<CommanderDB>().AssignedTo, Is.EqualTo(-1));
+            Assert.That(other.GetDataBlob<ShipLogDB>().Entries.Last().Text, Does.Contain("left the post"));
+            var empty = _projector.ProjectEntity(other, session.FactionId).GetView<ColonyView>();
+            Assert.That(empty!.AdministratorId, Is.EqualTo(-1));
+            Assert.That(empty.AdministratorName, Is.Null);
+            Assert.That(empty.HasAdministrativePost, Is.True);
+            Assert.That(_projector.ProjectEntity(bare, session.FactionId).GetView<ColonyView>()!.HasAdministrativePost, Is.False);
         }
     }
 }

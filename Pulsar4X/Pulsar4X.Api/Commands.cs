@@ -197,6 +197,13 @@ public sealed record SetFlagshipCommand(int TargetEntityId, int ShipId) : GameCo
 /// </summary>
 public sealed record AssignCaptainCommand(int TargetEntityId, int CommanderId) : GameCommand(TargetEntityId);
 
+/// <summary>
+/// Seat a civilian as this colony's administrator, or clear the chair when <see cref="CommanderId"/>
+/// is negative. Targets the colony. The chair is the first post at colony level or wider.
+/// A civilian already posted elsewhere leaves that post first. A navy officer or a scientist is rejected.
+/// </summary>
+public sealed record AssignAdministratorCommand(int TargetEntityId, int CommanderId) : GameCommand(TargetEntityId);
+
 /// <summary>Start a recruit cohort at one mounted academy. Targets the colony. Count is how many ensigns this run enrolls.</summary>
 public sealed record TrainAcademyClassCommand(int TargetEntityId, int ComponentId, int Count) : GameCommand(TargetEntityId);
 
