@@ -161,6 +161,39 @@ public class CirculariseAction : EntityAction
             return;
         }
 
+        DateTime sampleAt = SampleAt(_entityCommanding, atDateTime);
+        var raw = MoveMath.GetRelativeFutureState(_entityCommanding, sampleAt);
+        double budget = _entityCommanding.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrust)
+            ? thrust.DeltaV
+            : 0;
+        if (!MovePlanner.TryArrivalBurn(
+                _entityCommanding, parent, raw.pos, raw.Velocity, budget, sampleAt,
+                out bool circular, out bool hold, out Vector3 slowed, out double shortfall))
+        {
+            Fail("not enough ΔV");
+            return;
+        }
+
+        if (hold)
+        {
+            IsRunning = true;
+            _isFinished = true;
+            _details = MovePlanner.EllipticalOrbitDetails(parent, _entityCommanding, shortfall);
+            return;
+        }
+
+        if (!circular)
+        {
+            double sgp = OrbitMath.SGP(parent, _entityCommanding);
+            targetKE = OrbitMath.KeplerFromPositionAndVelocity(sgp, raw.pos, slowed, sampleAt);
+            if (!(targetKE.Eccentricity < 1) || !double.IsFinite(targetKE.SemiMajorAxis))
+            {
+                Fail("not enough ΔV");
+                return;
+            }
+            _details = MovePlanner.EllipticalOrbitDetails(parent, _entityCommanding, shortfall);
+        }
+
         DateTime node = startKE.Epoch != default ? startKE.Epoch : atDateTime;
         _totalDv = DvBetween(startKE, targetKE, node);
         if (!double.IsFinite(_totalDv))
@@ -209,7 +242,7 @@ public class CirculariseAction : EntityAction
         if (IsRunning && _db != null)
         {
             if (_db.IsComplete)
-                return "Circularised";
+                return _details.StartsWith("Elliptical orbit") ? _details : "Circularised";
             if (_db.IsFailed)
                 return "Circularise failed";
             return "Circularising, " + Stringify.Velocity(RemainingDv()) + " Δv left";

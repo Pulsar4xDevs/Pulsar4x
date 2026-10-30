@@ -82,7 +82,14 @@ public class MoveToPlan : IGoalPlanner
                 if (actionsForGoal.Exists(a => a.Status == ActionStatus.Failed))
                     return PlanResult.Fail("a move action failed");
                 if (actionsForGoal.TrueForAll(a => a.Status == ActionStatus.Succeeded))
+                {
+                    foreach (var action in actionsForGoal)
+                    {
+                        if (action.Details.StartsWith("Elliptical orbit"))
+                            return PlanResult.Done(action.Details);
+                    }
                     return PlanResult.Done();
+                }
                 return PlanResult.Continue(new List<EntityAction>());
             }
         }
@@ -428,7 +435,22 @@ public static class MovePlanner
         }
 
         if (!double.IsFinite(eccentricity) || eccentricity >= ArrivedMaxEccentricity)
+        {
+            // Bound, and the tank cannot buy a tighter orbit. The goal completes
+            // on that ellipse instead of queueing a burn the processor would snap.
+            if (parent == target && eccentricity < 1)
+            {
+                DateTime sampleAt = CirculariseAction.SampleAt(ship, now);
+                double budget = ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var tank) ? tank.DeltaV : 0;
+                if (TryCurrentRelativeState(ship, sampleAt, out var holdState)
+                    && TryArrivalBurn(ship, parent, holdState.pos, holdState.vel, budget, sampleAt,
+                        out _, out bool hold, out _, out double shortfall)
+                    && hold)
+                    return MoveOption.Yes(MoveMode.AlreadyThere, 0,
+                        message: EllipticalOrbitDetails(parent, ship, shortfall));
+            }
             return MoveOption.No(MoveMode.AlreadyThere, "not in a circular orbit");
+        }
 
         // Blobs lag the orbit hotloop. Evaluate where we actually are at the plan instant.
         double separation = ((Vector3)MoveMath.GetAbsoluteFuturePosition(ship, now)
@@ -516,9 +538,18 @@ public static class MovePlanner
         {
             if (needsCircularise)
             {
-                if (circulariseDV > thrust.DeltaV)
+                // Warp arrival replans from this well after the preview circularise is
+                // dropped. A tank that can capture but not circularise still queues the burn.
+                if (!TryArrivalBurn(ship, parent, state.pos, state.vel, thrust.DeltaV, sampleAt,
+                        out bool circular, out bool hold, out Vector3 slowed, out _))
                     return MoveOption.No(mode, $"needs {circulariseDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
-                return MoveOption.Yes(mode, 0, circulariseDV,
+
+                double dv = circular || hold
+                    ? circulariseDV
+                    : state.vel.Length() - slowed.Length();
+                if (!double.IsFinite(dv) || dv < 0)
+                    dv = 0;
+                return MoveOption.Yes(mode, 0, dv,
                     message: $"Circularise at {NameOf(target, ship)}");
             }
 
@@ -697,7 +728,14 @@ public static class MovePlanner
             return true;
 
         if (chosen.Mode == MoveMode.Warp)
+        {
+            if (!CaptureAllowsWarp(ship, target, now, out string captureReason))
+            {
+                reason = captureReason;
+                return false;
+            }
             actions.AddRange(BuildWarpAndCircularise(ship, target, now));
+        }
         else if (chosen.Manuvers.Length == 0)
             actions.Add(CirculariseAction.CreateCommand(ship, now));
         else if (ship.GetSOIParentEntity() == target)
@@ -725,6 +763,169 @@ public static class MovePlanner
         if (targetEntity.GetDataBlob<PositionDB>().MoveType == PositionDB.MoveTypes.Orbit)
             actions.Add(CirculariseAction.CreateCommand(orderEntity));
         return actions;
+    }
+
+    /// <summary>
+    /// Best arrival the tank can finish at this position and velocity.
+    /// Circular: the full circularise fits. Hold: already on an acceptable ellipse, do not burn.
+    /// Otherwise <paramref name="slowed"/> is the same direction, shed by up to the budget,
+    /// and still at least circular speed. False when no capture orbit exists or the budget
+    /// cannot reach apoapsis at 90% of the parent's sphere of influence.
+    /// </summary>
+    internal static bool TryArrivalBurn(
+        Entity ship, Entity parent, Vector3 pos, Vector3 vel, double budget, DateTime at,
+        out bool circular, out bool hold, out Vector3 slowed, out double shortfall)
+    {
+        circular = false;
+        hold = false;
+        slowed = vel;
+        shortfall = 0;
+        try
+        {
+            if (parent == null || ship == null)
+                return false;
+            if (!double.IsFinite(budget) || budget < 0)
+                budget = 0;
+
+            double r = pos.Length();
+            double v = vel.Length();
+            if (!(r > 1) || !double.IsFinite(v) || v < 0)
+                return false;
+            if (!TryCaptureSpeed(parent, ship, r, out double vCap, out double mu))
+                return false;
+
+            var circKE = OrbitMath.KeplerCircularFromPosition(mu, pos, at);
+            var circVel = (Vector3)OrbitMath.GetStateVectors(circKE, at).velocity;
+            double vCirc = circVel.Length();
+            if (!double.IsFinite(vCirc) || vCirc <= 0)
+                return false;
+
+            double toCircular = (vel - circVel).Length();
+            if (!double.IsFinite(toCircular))
+                return false;
+            if (budget + 1e-6 >= toCircular)
+            {
+                if (toCircular < 0.01 && ApoapsisInside(parent, mu, pos, vel, at))
+                {
+                    hold = true;
+                    shortfall = toCircular;
+                    return true;
+                }
+                circular = true;
+                return true;
+            }
+
+            // Slower than circular already. Slowing further raises the apoapsis.
+            if (v + 1e-6 < vCirc)
+            {
+                if (!ApoapsisInside(parent, mu, pos, vel, at))
+                    return false;
+                hold = true;
+                shortfall = toCircular;
+                return true;
+            }
+
+            if (budget + 1e-6 < v - vCap)
+                return false;
+
+            double targetSpeed = Math.Max(vCirc, v - budget);
+            double dv = v - targetSpeed;
+            if (dv < 0.01)
+            {
+                if (!ApoapsisInside(parent, mu, pos, vel, at))
+                    return false;
+                hold = true;
+                shortfall = toCircular;
+                return true;
+            }
+
+            slowed = Vector3.Normalise(vel) * targetSpeed;
+            shortfall = (slowed - circVel).Length();
+            return double.IsFinite(shortfall);
+        }
+        catch
+        {
+            circular = false;
+            hold = false;
+            slowed = vel;
+            shortfall = 0;
+            return false;
+        }
+    }
+
+    internal static string EllipticalOrbitDetails(Entity parent, Entity ship, double shortfall)
+        => "Elliptical orbit around " + parent.GetName(ship.FactionOwnerID)
+           + ", " + Stringify.Velocity(shortfall) + " short of circular";
+
+    /// <summary>
+    /// A captained ship does not open the warp when the pasted parent-relative speed
+    /// cannot be captured. An empty chair is not gated. A fleet commander who is not
+    /// aboard this ship does not count.
+    /// </summary>
+    static bool CaptureAllowsWarp(Entity ship, Entity target, DateTime now, out string reason)
+    {
+        reason = string.Empty;
+        if (!CommanderSkills.TryGetCommander(ship, out _, out _))
+            return true;
+
+        double radius = PlannedWarpExitOffsetLength(target);
+        if (!(radius > 1) || !double.IsFinite(radius))
+            radius = 1;
+        var dropIn = PredictDropInParent(target, radius);
+        var rel = MoveMath.GetRelativeFutureState(ship, now);
+        double speed = rel.Velocity.Length();
+        if (!double.IsFinite(speed) || speed < 0)
+            speed = 0;
+        var pos = new Vector3(radius, 0, 0);
+        var vel = new Vector3(0, speed, 0);
+        double budget = ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrust) ? thrust.DeltaV : 0;
+        if (TryArrivalBurn(ship, dropIn, pos, vel, budget, now, out _, out _, out _, out _))
+            return true;
+
+        double need = CaptureNeed(ship, dropIn, radius, speed);
+        reason = "Not enough Δv to orbit " + NameOf(dropIn, ship)
+                 + " (need " + Stringify.Velocity(need) + ", have " + Stringify.Velocity(budget) + ")";
+        return false;
+    }
+
+    static double CaptureNeed(Entity ship, Entity parent, double r, double speed)
+    {
+        if (TryCaptureSpeed(parent, ship, r, out double vCap, out _))
+            return Math.Max(0, speed - vCap);
+        return speed;
+    }
+
+    /// <summary>
+    /// Speed at <paramref name="r"/> whose apoapsis is 90% of the parent's sphere.
+    /// A parent with no orbit, or a sphere that does not contain <paramref name="r"/>, has none.
+    /// </summary>
+    static bool TryCaptureSpeed(Entity parent, Entity ship, double r, out double vCap, out double mu)
+    {
+        vCap = 0;
+        mu = 0;
+        if (parent == null || !parent.TryGetDataBlob<OrbitDB>(out var orbit))
+            return false;
+        double soi = OrbitMath.GetSOIRadius(orbit);
+        if (!(soi > r) || !(r > 1))
+            return false;
+        double ra = 0.9 * soi;
+        if (!(ra > r))
+            return false;
+        mu = OrbitMath.SGP(parent, ship);
+        if (!(mu > 0) || !double.IsFinite(mu))
+            return false;
+        double a = (r + ra) / 2.0;
+        vCap = Math.Sqrt(mu * (2.0 / r - 1.0 / a));
+        return double.IsFinite(vCap) && vCap > 0;
+    }
+
+    static bool ApoapsisInside(Entity parent, double mu, Vector3 pos, Vector3 vel, DateTime at)
+    {
+        if (!parent.TryGetDataBlob<OrbitDB>(out var orbit))
+            return false;
+        double limit = 0.9 * OrbitMath.GetSOIRadius(orbit);
+        var ke = OrbitMath.KeplerFromPositionAndVelocity(mu, pos, vel, at);
+        return ke.Eccentricity < 1 && double.IsFinite(ke.Apoapsis) && ke.Apoapsis <= limit;
     }
 
     /// <summary>

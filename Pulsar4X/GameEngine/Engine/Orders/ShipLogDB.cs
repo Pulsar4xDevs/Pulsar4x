@@ -289,11 +289,22 @@ static class ShipLogBook
                 => target.Length > 0 ? target + " surveyed." : "Surveyed.",
             GoalType.Mine or GoalType.MineAsteroids or GoalType.MineStanding
                 => target.Length > 0 ? target + " mined." : "Mined.",
-            GoalType.MoveTo => target.Length > 0 ? "Arrived at " + target + "." : "Arrived.",
+            GoalType.MoveTo => Arrived(target, goal.Message),
             GoalType.RefuelAt or GoalType.BuyFuel
                 => target.Length > 0 ? "Refuelled at " + target + "." : "Refuelled.",
             _ => Phrase(entity, goal) + ".",
         };
+    }
+
+    static string Arrived(string target, string? message)
+    {
+        string lead = target.Length > 0 ? "Arrived at " + target + "." : "Arrived.";
+        if (string.IsNullOrEmpty(message) || !message.StartsWith("Elliptical orbit"))
+            return lead;
+        string rest = message.Trim();
+        if (!rest.EndsWith('.'))
+            rest += ".";
+        return lead + " " + rest;
     }
 
     static readonly string[] InternalReasons =
@@ -325,7 +336,7 @@ static class ShipLogBook
         return message.Contains("path", StringComparison.OrdinalIgnoreCase)
             || message.Contains("Target not found", StringComparison.Ordinal)
             || message.Contains("move", StringComparison.OrdinalIgnoreCase)
-            || message.Contains("ΔV", StringComparison.Ordinal)
+            || message.Contains("Δv", StringComparison.OrdinalIgnoreCase)
             || message.Contains("warp", StringComparison.OrdinalIgnoreCase)
             || message.Contains("power", StringComparison.OrdinalIgnoreCase)
             || message.Contains("reach", StringComparison.OrdinalIgnoreCase);

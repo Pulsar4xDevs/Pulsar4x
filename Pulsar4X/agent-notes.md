@@ -49,6 +49,10 @@ Status lives in the file itself, in `near-term.md`, or in `AGENTS.md`. This list
 
 ## Open
 
+### Movement plans: capture ellipse is playing, warp sustain and warp-brake are specified
+
+2026-10-31. `GameEngine/Movement/plans/`. `01-capture-ellipse.md` is playing. A short tank burns to a bound ellipse, or a captain refuses before the warp. A new MoveTo already inside the well queues that same burn. Implement `02-warp-sustain.md` when asked. Uphill warp is a sustain draw on the same bubble, one speed for the leg. `03-warp-brake.md` is specified. A high-Nav captain coasts inside the destination well and warps back to low orbit, at most three bubbles, until plan 1 can capture. The saved vector stays parent-relative. Do not build it until plan 2 is playing.
+
 ### A processor fault stops the clock quietly — the dialog is in, the crash save is not
 
 2026-10-03. The silent half is done. `MasterTimePulse.AdvanceOneStep` catches one step, `Debugger.Break()` when a debugger is attached, and stores `LastFault` (exception text, `CurrentProcess`, system, both clocks). `NotifyWhenStopped` records a fault that escapes the task instead of dropping `t.Exception`. The client gets `GameEventType.SimulationFaulted` and shows a modal. `TimeStopDiagnosticTests.ProcessorFault_stops_the_clock_and_keeps_the_report` passes. No save is written.
