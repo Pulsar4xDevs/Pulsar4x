@@ -1,3 +1,4 @@
+using System.Numerics;
 using ImGuiNET;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,7 @@ public class SystemWindow : UniquePulsarGuiWindow<SystemWindow>
     {
         if(!IsActive) return;
 
+        ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.FirstUseEver);
         if (Window.Begin("System Viewer", ref IsActive, _flags))
         {
             var system = _uiState.GameClient?.Galaxy.GetSystem(_uiState.SelectedStarSystemId);

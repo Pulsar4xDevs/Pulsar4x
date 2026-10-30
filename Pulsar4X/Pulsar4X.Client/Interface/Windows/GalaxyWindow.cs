@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Client.Interface.Widgets;
 
@@ -28,7 +29,7 @@ namespace Pulsar4X.Client
         internal override void Display()
         {
             if (!IsActive) return;
-            //ImGui.SetNextWindowSize();
+            ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.FirstUseEver);
             if (Window.Begin("Galaxy Browser", ref IsActive, _flags))
             {
                 // The faction's known systems, kept current by the adapter's event stream.

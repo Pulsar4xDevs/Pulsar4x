@@ -2,7 +2,9 @@
 using SDL3;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace Pulsar4X.Client
 {
@@ -125,6 +127,7 @@ namespace Pulsar4X.Client
             // Create ImGui context
             ImGuiContext = ImGui.CreateContext();
             ImGui.SetCurrentContext(ImGuiContext);
+            SetImGuiIniPath();
 
             // Init platform and imgui renderer
             PlatformBackend = new (Window, Renderer);
@@ -135,6 +138,25 @@ namespace Pulsar4X.Client
 
             // Set the background color
             SetRenderDrawColor(0, 0, 28, 255);
+        }
+
+        // ImGui keeps the raw pointer, so this must stay allocated for the lifetime of the context.
+        private static nint _iniFilenamePtr;
+
+        /// <summary>
+        /// Stores imgui.ini next to preferences.ini in the app data folder instead of the
+        /// current working directory, so window sizes/positions don't depend on where the game is launched from.
+        /// </summary>
+        private static unsafe void SetImGuiIniPath()
+        {
+            string? dir = GetAppDataPath();
+            if (string.IsNullOrEmpty(dir))
+                return; // keep ImGui's default (imgui.ini in the working directory)
+
+            // Allocated once and never freed: any live ImGui context may still point at it.
+            if (_iniFilenamePtr == 0)
+                _iniFilenamePtr = Marshal.StringToHGlobalAnsi(Path.Combine(dir, "imgui.ini"));
+            ImGui.GetIO().NativePtr->IniFilename = (byte*)_iniFilenamePtr;
         }
 
         public bool IsVisible => (Flags & SDL.WindowFlags.Hidden) == 0;
