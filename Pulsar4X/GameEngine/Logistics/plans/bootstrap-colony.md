@@ -8,7 +8,7 @@ One captained ship with a Construction Bay carries finished crates from one owne
 
 Order `BootstrapColonyCommand` on a ship with a captain: a source colony, a destination colony, and a list of crate-able designs with a count each. The translator rejects a ship with no captain, a fleet, no Construction Bay, no cargo store, a warehouse, the same colony twice, an empty list, a count under 1, an unknown design, a design that is not a crate (`LocalConstructionJob.IsCrate`), and a pair outside the ship's reach (`LogisticsSpan.PairReaches`).
 
-There is no client picker yet.
+Fleet Management has a Bootstrap colony order for a selected ship. It is offered only when the ship has a captain and a Construction Bay. A fleet never gets it. From and To are the Move goods trees: owned colonies with a warehouse, the same span blocking, and To leaves out the source. Below them each crate design with finished stock at the source (plus crates already in the hold) gets a count and an All button. The panel states the first failed check, in the translator's order, and the button stays disabled until there is none. The option lists and checks are in `BootstrapPicker` (`Pulsar4X.Api`), which reads snapshots only. `CargoItemView` carries `DesignId` and `IsCrate`, and `ShipSnapshot` carries `HasConstructionBay`.
 
 ## What the goal does
 
@@ -32,7 +32,7 @@ There is no client picker yet.
 
 * Factory production at the source when crates are not in stock.
 * More than one trip.
-* The client picker.
+* A fleet-level order and picker.
 * A `SkillDomains` line: no domain fits.
 * Build order. All aboard crates are queued in the order picked. Open: office first, or the player's order.
 

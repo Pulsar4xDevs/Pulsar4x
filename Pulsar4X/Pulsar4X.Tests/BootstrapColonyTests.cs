@@ -11,6 +11,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Engine.Api;
 using Pulsar4X.Engine.Factories;
 using Pulsar4X.Factions;
+using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Industry;
 using Pulsar4X.Logistics;
@@ -341,6 +342,33 @@ public class BootstrapColonyTests
         Assert.That(result.Accepted, Is.False);
         Assert.That(result.RejectionReason, Is.EqualTo("The target is outside this ship's reach."));
     }
+
+    [Test]
+    public void Projection_MarksCrateRowsWithTheirDesign_AndShipsWithABay()
+    {
+        var scene = Build(crates: 1);
+        scene.Load();
+        var freighter = ShipFactory.CreateShip(
+            scene.Info.ShipDesigns["default-ship-design-freighter"], scene.Faction, scene.Planet, "Freighter");
+
+        var projector = new GameProjector(Game);
+        var entity = projector.ProjectEntity(scene.Ship, scene.Faction.Id);
+        var row = entity.GetView<CargoStorageView>()!.Stores.SelectMany(store => store.Items)
+            .Single(item => item.Id == scene.Crates[0].ID);
+        Assert.That(row.IsCrate, Is.True);
+        Assert.That(row.DesignId, Is.EqualTo(Infra));
+
+        var root = scene.Faction.GetDataBlob<FleetDB>();
+        root.AddChild(scene.Ship);
+        root.AddChild(freighter);
+        var ships = projector.ProjectFleetHierarchy(scene.Faction.Id);
+        var all = ships.UnattachedShips.Concat(ships.Fleets.SelectMany(AllShips)).ToList();
+        Assert.That(all.Single(ship => ship.Id == scene.Ship.Id).HasConstructionBay, Is.True);
+        Assert.That(all.Single(ship => ship.Id == freighter.Id).HasConstructionBay, Is.False);
+    }
+
+    static IEnumerable<ShipSnapshot> AllShips(FleetSnapshot fleet)
+        => fleet.Ships.Concat(fleet.SubFleets.SelectMany(AllShips));
 
     static List<ComponentInstance> Mounted(Entity entity)
         => entity.GetDataBlob<ComponentInstancesDB>().AllComponents.Values.ToList();
