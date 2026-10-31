@@ -235,6 +235,8 @@ public class ShipRefitTests
                 .Select(part => new RefitTargetPartView(part.Id, part.Id, (int)part.Amount))
                 .ToList(),
         };
+        // The colony ship carries a Planetary Command Bridge beside the Ship Bridge. Fit it so this test stays about the bay.
+        onShip.Add(new RefitPartView(next++, "Planetary Command Bridge", 800, 1) { DesignId = "default-design-bridge-well" });
         var bay = new RefitPartView(next, "Construction Bay", 5000, 1)
         {
             DesignId = "default-design-ship-construction",

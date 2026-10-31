@@ -1,3 +1,4 @@
+using Pulsar4X.Datablobs;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
@@ -44,6 +45,18 @@ public class AdminSpaceAtb  : IComponentDesignAttribute
             adminSpaceDB = new AdminSpaceDB();
             parentEntity.SetDataBlob(adminSpaceDB);
             AdminSpaceProcessor.CalcEntityAdminSpace(parentEntity, adminSpaceDB);
+        }
+        else
+        {
+            // A second bridge or admin space arrives after the first made the seat list. Add its seat now, so the
+            // ship's span reads the widest bridge from the first tick, not after the next processor pass.
+            // Seats already assigned stay as they are.
+            int installed = 0;
+            if (parentEntity.TryGetDataBlob<ComponentInstancesDB>(out var instances)
+                && instances.TryGetComponentsByAttribute<AdminSpaceAtb>(out var adminSpaces))
+                installed = adminSpaces.Count;
+            if (adminSpaceDB.CommanderSeats.Count < installed)
+                adminSpaceDB.CommanderSeats.Add(new AdminSpaceAbilityState(AdminLevel, componentInstance.Name));
         }
     }
 

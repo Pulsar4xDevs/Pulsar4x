@@ -988,8 +988,14 @@ public sealed record ShipSnapshot(
     /// <summary>Effective span, the narrower of the bridge and the seated rank. One of <see cref="CommandSpanLabels"/>.</summary>
     public string CommandSpan { get; init; } = "";
 
-    /// <summary>One line under the captain. Names the effective span, the bridge, and the officer.</summary>
+    /// <summary>One line under the captain. Names the effective span, the bridge, the officer, and which of them limits reach.</summary>
     public string SpanLine { get; init; } = "";
+
+    /// <summary>What to change to reach a well: fit a bridge, seat or promote an officer. Empty when the ship already does.</summary>
+    public string ReachFixWell { get; init; } = "";
+
+    /// <summary>What to change to reach a system. Empty when the ship already does.</summary>
+    public string ReachFixSystem { get; init; } = "";
 
     /// <summary>Systems a haul or trade from this ship may use.</summary>
     public IReadOnlyList<string> LogisticsSystemIds { get; init; } = Array.Empty<string>();

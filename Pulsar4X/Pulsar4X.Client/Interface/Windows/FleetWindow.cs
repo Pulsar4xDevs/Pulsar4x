@@ -575,7 +575,7 @@ namespace Pulsar4X.Client
             ImGui.SetNextItemOpen(true, ImGuiCond.Once);
             bool open = ImGui.CollapsingHeader(BandTitle(band) + "###band-" + band);
             if (!openBand && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                ImGui.SetTooltip(SpanLine());
+                ImGui.SetTooltip(BandFix(band));
             if (open)
                 body();
             if (!openBand)
@@ -1063,6 +1063,13 @@ namespace Pulsar4X.Client
             if(selectedFleet != null && !string.IsNullOrEmpty(selectedFleet.CommandSpan))
                 return selectedFleet.CommandSpan;
             return CommandSpanLabels.Body;
+        }
+
+        // The span line plus what to change to open this band, when the ship can name it.
+        private string BandFix(OrderBand band)
+        {
+            string fix = orderShip == null ? "" : band == OrderBand.System ? orderShip.ReachFixSystem : band == OrderBand.Well ? orderShip.ReachFixWell : "";
+            return string.IsNullOrEmpty(fix) ? SpanLine() : SpanLine() + "\n" + fix;
         }
 
         private string SpanLine()
@@ -1762,8 +1769,12 @@ namespace Pulsar4X.Client
             if(bootDestId == bootSourceId || !colonies.Any(colony => colony.Id == bootDestId && InBand(colony, bootSourceId)))
                 bootDestId = -1;
 
+            // Say which part holds reach back and what to change, or which band the pair belongs under.
             string? Block(EntitySnapshot colony, int otherId)
-                => BootstrapPicker.IsPickable(colony) && !InBand(colony, otherId) ? SpanLine() : null;
+                => BootstrapPicker.IsPickable(colony) && !InBand(colony, otherId)
+                    ? BootstrapPicker.Blocked(ship, PairBand(colony, otherId, placed) is { } pair ? (BootstrapPicker.ReachBand)(int)pair : null, (BootstrapPicker.ReachBand)(int)band)
+                        ?? SpanLine()
+                    : null;
 
             DisplayHelpers.Header("From");
             DisplayTargetTree(pool,

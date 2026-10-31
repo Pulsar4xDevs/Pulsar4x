@@ -23,6 +23,51 @@ public static class BootstrapPicker
         return null;
     }
 
+    /// <summary>The three reach bands the picker groups colonies under, narrowest first.</summary>
+    public enum ReachBand
+    {
+        Ship = 0,
+        Well = 1,
+        System = 2,
+    }
+
+    /// <summary>The widest band the ship's effective span reaches.</summary>
+    public static ReachBand ReachOf(ShipSnapshot ship)
+        => ship.CommandSpan == CommandSpanLabels.System || ship.CommandSpan == CommandSpanLabels.Neighbor ? ReachBand.System
+            : ship.CommandSpan == CommandSpanLabels.Well ? ReachBand.Well
+            : ReachBand.Ship;
+
+    static string BandTitle(ReachBand band) => band switch
+    {
+        ReachBand.Well => "This well",
+        ReachBand.System => "This system",
+        _ => "This ship",
+    };
+
+    /// <summary>
+    /// Why a grayed colony row cannot be picked, and what to change. Null when the row is not blocked.
+    /// <paramref name="pair"/> is the band the row and the other chosen colony share, null when no other
+    /// colony is chosen. <paramref name="shown"/> is the band the row is listed under.
+    /// A band the ship's reach does not cover names the part to change (bridge, captain's rank, empty
+    /// chair). A pair that sits in another band says which one to pick under.
+    /// </summary>
+    public static string? Blocked(ShipSnapshot ship, ReachBand? pair, ReachBand shown)
+    {
+        if(pair == shown)
+            return null;
+        var needed = pair ?? shown;
+        if(needed > ReachOf(ship))
+        {
+            string fix = needed == ReachBand.System ? ship.ReachFixSystem : ship.ReachFixWell;
+            if(string.IsNullOrEmpty(fix))
+                return ship.SpanLine;
+            return pair == null ? fix : fix + " Then pick under " + BandTitle(needed) + ".";
+        }
+        if(pair != null)
+            return "These two colonies sit in " + BandTitle(pair.Value).ToLowerInvariant() + ". Pick them under " + BandTitle(pair.Value) + ".";
+        return "No other colony of yours with a warehouse sits in " + BandTitle(shown).ToLowerInvariant() + ".";
+    }
+
     /// <summary>The colonies the picker offers: owned, with a warehouse.</summary>
     public static bool IsPickable(EntitySnapshot colony)
         => colony.Relation == OwnerRelation.Owned

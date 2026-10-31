@@ -169,6 +169,87 @@ namespace Pulsar4X.Tests
             Assert.That(system.Select(e => e.Id), Does.Contain(luna.Id));
         }
 
+        static string Title(int rank) => rank switch { 4 => "Lieutenant Commander", 6 => "Captain", _ => null };
+
+        [Test]
+        public void Fix_BridgeLimited_SaysFitABridge()
+        {
+            var well = CommandSpan.Fix(CommandSpanKind.Body, seated: true, rank: 6, CommandSpanKind.Well, Title);
+            Assert.That(well, Does.Contain("The bridge limits reach."));
+            Assert.That(well, Does.Contain("Fit a Planetary Command Bridge"));
+            Assert.That(well, Does.Not.Contain("Seat"));
+
+            var system = CommandSpan.Fix(CommandSpanKind.Well, seated: true, rank: 6, CommandSpanKind.System, Title);
+            Assert.That(system, Does.Contain("Fit a System Command Bridge"));
+        }
+
+        [Test]
+        public void Fix_RankLimited_SaysWhichRankToSeat()
+        {
+            var well = CommandSpan.Fix(CommandSpanKind.Well, seated: true, rank: 2, CommandSpanKind.Well, Title);
+            Assert.That(well, Does.Contain("The captain's rank limits reach."));
+            Assert.That(well, Does.Contain("rank 4+ (Lieutenant Commander)"));
+            Assert.That(well, Does.Not.Contain("Fit a"));
+
+            var system = CommandSpan.Fix(CommandSpanKind.System, seated: true, rank: 4, CommandSpanKind.System, Title);
+            Assert.That(system, Does.Contain("rank 6+ (Captain)"));
+        }
+
+        [Test]
+        public void Fix_EmptyChair_SaysSeatAnOfficer()
+        {
+            var fix = CommandSpan.Fix(CommandSpanKind.Well, seated: false, rank: 0, CommandSpanKind.Well, Title);
+            Assert.That(fix, Does.StartWith("The chair is empty."));
+            Assert.That(fix, Does.Contain("Seat an officer of rank 4+ (Lieutenant Commander)"));
+            Assert.That(fix, Does.Not.Contain("Fit a"));
+        }
+
+        [Test]
+        public void Fix_BothLimit_NamesBoth_AndNothingWhenReachIsEnough()
+        {
+            var both = CommandSpan.Fix(CommandSpanKind.Body, seated: true, rank: 1, CommandSpanKind.Well, Title);
+            Assert.That(both, Does.Contain("Fit a Planetary Command Bridge"));
+            Assert.That(both, Does.Contain("rank 4+"));
+            var emptyBoth = CommandSpan.Fix(CommandSpanKind.Body, seated: false, rank: 0, CommandSpanKind.Well, null);
+            Assert.That(emptyBoth, Does.Contain("empty chair"));
+            Assert.That(emptyBoth, Does.Contain("Seat an officer of rank 4+."));
+
+            Assert.That(CommandSpan.Fix(CommandSpanKind.Well, true, 4, CommandSpanKind.Well, Title), Is.Null);
+            Assert.That(CommandSpan.Fix(CommandSpanKind.System, true, 6, CommandSpanKind.System, Title), Is.Null);
+            Assert.That(CommandSpan.Fix(CommandSpanKind.Body, false, 0, CommandSpanKind.Body, Title), Is.Null);
+        }
+
+        [Test]
+        public void LimiterOf_NamesTheCappingPart()
+        {
+            Assert.That(CommandSpan.LimiterOf(CommandSpanKind.System, true, 6), Is.EqualTo(CommandSpan.SpanLimiter.None));
+            Assert.That(CommandSpan.LimiterOf(CommandSpanKind.Well, true, 6), Is.EqualTo(CommandSpan.SpanLimiter.Bridge));
+            Assert.That(CommandSpan.LimiterOf(CommandSpanKind.System, true, 4), Is.EqualTo(CommandSpan.SpanLimiter.Rank));
+            Assert.That(CommandSpan.LimiterOf(CommandSpanKind.Well, true, 4), Is.EqualTo(CommandSpan.SpanLimiter.Bridge | CommandSpan.SpanLimiter.Rank));
+            Assert.That(CommandSpan.LimiterOf(CommandSpanKind.System, false, 0), Is.EqualTo(CommandSpan.SpanLimiter.EmptyChair));
+            Assert.That(CommandSpan.LimiterOf(CommandSpanKind.Body, false, 0),
+                Is.EqualTo(CommandSpan.SpanLimiter.Bridge | CommandSpan.SpanLimiter.EmptyChair));
+            Assert.That(CommandSpan.LimitClause(CommandSpan.SpanLimiter.Bridge), Is.EqualTo("The bridge limits reach."));
+            Assert.That(CommandSpan.LimitClause(CommandSpan.SpanLimiter.Rank), Is.EqualTo("The captain's rank limits reach."));
+            Assert.That(CommandSpan.LimitClause(CommandSpan.SpanLimiter.EmptyChair), Is.EqualTo("The empty chair limits reach."));
+            Assert.That(CommandSpan.LimitClause(CommandSpan.SpanLimiter.None), Is.Empty);
+        }
+
+        [Test]
+        public void Describe_NamesTheLimitingPart()
+        {
+            var ship = BareShip();
+            AttachBridge(ship, AdminLevel.Planet);
+            // The empty chair holds a well bridge back to this ship.
+            Assert.That(CommandSpan.Describe(ship), Does.EndWith("The empty chair limits reach."));
+            Assert.That(CommandSpan.Describe(ship), Does.StartWith("Body. This bridge can cover a well. No officer is seated."));
+            Assert.That(CommandSpan.Fix(ship, CommandSpanKind.Well), Does.Contain("Seat an officer of rank 4+"));
+
+            var plain = BareShip();
+            Assert.That(CommandSpan.Describe(plain), Does.Contain("The bridge and the empty chair limit reach."));
+            Assert.That(CommandSpan.Fix(plain, CommandSpanKind.Well), Does.Contain("Fit a Planetary Command Bridge"));
+        }
+
         static ComponentDesignBlueprint BridgeBlueprint(string id, string name, int span, int consoles)
         {
             return new ComponentDesignBlueprint

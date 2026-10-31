@@ -108,4 +108,47 @@ public class BootstrapPickerTests
         Assert.That(BootstrapPicker.Validate(Ship(), 10, 20, one, false), Is.EqualTo(BootstrapPicker.OutOfReach));
         Assert.That(BootstrapPicker.Validate(Ship(), 10, 20, one, true), Is.Null);
     }
+
+    static ShipSnapshot Reach(string span, string wellFix = "", string systemFix = "")
+        => new(1, "Ship", "sys", "Design", null) { CommandSpan = span, SpanLine = "line", ReachFixWell = wellFix, ReachFixSystem = systemFix };
+
+    [Test]
+    public void Blocked_PairBeyondReach_NamesThePartToChange_ThenTheBand()
+    {
+        var body = Reach(CommandSpanLabels.Body, wellFix: "The bridge limits reach. Fit a Planetary Command Bridge.");
+
+        Assert.That(BootstrapPicker.Blocked(body, BootstrapPicker.ReachBand.Well, BootstrapPicker.ReachBand.Ship),
+            Is.EqualTo("The bridge limits reach. Fit a Planetary Command Bridge. Then pick under This well."));
+        Assert.That(BootstrapPicker.Blocked(body, null, BootstrapPicker.ReachBand.Well),
+            Is.EqualTo("The bridge limits reach. Fit a Planetary Command Bridge."));
+
+        var rank = Reach(CommandSpanLabels.Body, systemFix: "The captain's rank limits reach. Seat an officer of rank 6+.");
+        Assert.That(BootstrapPicker.Blocked(rank, BootstrapPicker.ReachBand.System, BootstrapPicker.ReachBand.Well),
+            Does.StartWith("The captain's rank limits reach."));
+        Assert.That(BootstrapPicker.Blocked(Reach(CommandSpanLabels.Body), BootstrapPicker.ReachBand.Well, BootstrapPicker.ReachBand.Ship),
+            Is.EqualTo("line"));
+    }
+
+    [Test]
+    public void Blocked_PairInReach_SaysWhichBandToPickUnder()
+    {
+        var well = Reach(CommandSpanLabels.Well);
+
+        Assert.That(BootstrapPicker.Blocked(well, BootstrapPicker.ReachBand.Well, BootstrapPicker.ReachBand.Ship),
+            Does.Contain("Pick them under This well."));
+        Assert.That(BootstrapPicker.Blocked(well, BootstrapPicker.ReachBand.Ship, BootstrapPicker.ReachBand.Well),
+            Does.Contain("Pick them under This ship."));
+        Assert.That(BootstrapPicker.Blocked(well, null, BootstrapPicker.ReachBand.Well),
+            Does.StartWith("No other colony of yours"));
+        Assert.That(BootstrapPicker.Blocked(well, BootstrapPicker.ReachBand.Well, BootstrapPicker.ReachBand.Well), Is.Null);
+    }
+
+    [Test]
+    public void ReachOf_ReadsTheEffectiveSpanLabel()
+    {
+        Assert.That(BootstrapPicker.ReachOf(Reach(CommandSpanLabels.Body)), Is.EqualTo(BootstrapPicker.ReachBand.Ship));
+        Assert.That(BootstrapPicker.ReachOf(Reach(CommandSpanLabels.Well)), Is.EqualTo(BootstrapPicker.ReachBand.Well));
+        Assert.That(BootstrapPicker.ReachOf(Reach(CommandSpanLabels.System)), Is.EqualTo(BootstrapPicker.ReachBand.System));
+        Assert.That(BootstrapPicker.ReachOf(Reach(CommandSpanLabels.Neighbor)), Is.EqualTo(BootstrapPicker.ReachBand.System));
+    }
 }
