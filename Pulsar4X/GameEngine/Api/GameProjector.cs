@@ -1543,6 +1543,18 @@ namespace Pulsar4X.Engine.Api
                 if (technique.Known(commanderDB))
                     skills.Add(new CommanderSkillSnapshot(technique.Name, technique.Line));
             }
+
+            int domainCap = commanderDB.ExperienceCap > 0 ? commanderDB.ExperienceCap : 100;
+            var domains = new List<CommanderDomainSnapshot>();
+            foreach (SkillDomain domain in Enum.GetValues<SkillDomain>())
+            {
+                domains.Add(new CommanderDomainSnapshot(
+                    domain.ToString(),
+                    CommanderSkills.Get(commanderDB, domain),
+                    domainCap,
+                    CommanderSkills.Quality(commanderDB, domain),
+                    SkillDomains.Effect(domain)));
+            }
             if (commander.TryGetDataBlob<BonusesDB>(out var bonusesDB))
             {
                 foreach (var bonus in bonusesDB.Bonuses)
@@ -1599,6 +1611,7 @@ namespace Pulsar4X.Engine.Api
             {
                 Bonuses = bonuses,
                 Skills = skills,
+                Domains = domains,
                 Rank = commanderDB.Rank,
                 RankName = rankName,
                 RankedOn = commanderDB.RankedOn,

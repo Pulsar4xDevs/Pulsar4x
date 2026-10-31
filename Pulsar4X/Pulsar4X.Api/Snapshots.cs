@@ -801,6 +801,12 @@ public sealed record CommanderBonusSnapshot(string Name, double Value, bool IsPe
 /// <summary>A named skill the commander already knows. The line is the player-facing description.</summary>
 public sealed record CommanderSkillSnapshot(string Name, string Line);
 
+/// <summary>
+/// One skill domain. Points rise by one when a finished order maps here.
+/// Quality is 1 + points / 100. Cap is the commander's experience cap, or 100 when that cap is 0.
+/// </summary>
+public sealed record CommanderDomainSnapshot(string Name, int Points, int Cap, float Quality, string Line);
+
 /// <summary>A faction commander (scientist, officer, …) for the personnel roster and assignment UIs.</summary>
 public sealed record CommanderSnapshot(
     int Id,
@@ -815,6 +821,9 @@ public sealed record CommanderSnapshot(
 
     /// <summary>Named skills this commander knows. Empty when they know none.</summary>
     public IReadOnlyList<CommanderSkillSnapshot> Skills { get; init; } = Array.Empty<CommanderSkillSnapshot>();
+
+    /// <summary>Command, Nav, and Survey. Present even when every value is 0.</summary>
+    public IReadOnlyList<CommanderDomainSnapshot> Domains { get; init; } = Array.Empty<CommanderDomainSnapshot>();
 
     /// <summary>Numeric rank within the commander's career track.</summary>
     public int Rank { get; init; }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
@@ -141,8 +142,8 @@ namespace Pulsar4X.Client
         }
 
         /// <summary>
-        /// Portrait, service lines, known skills, and bonuses. The personnel card, the assign
-        /// chooser, and the entity card all use this.
+        /// Portrait, service lines, skill domains, known skills, and bonuses. The personnel
+        /// card, the assign chooser, and the entity card all use this.
         /// </summary>
         public static void PersonCard(GlobalUIState state, CommanderSnapshot person, DateTime now)
         {
@@ -207,18 +208,37 @@ namespace Pulsar4X.Client
 
             ImGui.Columns(1);
 
-            if (person.Skills.Count > 0)
+            if (person.Domains.Count > 0 || person.Skills.Count > 0)
             {
                 ImGui.NewLine();
                 Header("Skills");
-                foreach (var skill in person.Skills)
+                if (person.Domains.Count > 0)
                 {
-                    ImGui.Text(skill.Name);
-                    if (!string.IsNullOrEmpty(skill.Line))
+                    ImGui.Columns(2, "SkillDomainColumns", false);
+                    ImGui.SetColumnWidth(0, 120);
+                    foreach (var domain in person.Domains)
                     {
-                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                        ImGui.TextWrapped(skill.Line);
-                        ImGui.PopStyleColor();
+                        PrintFormattedCell(domain.Name + ":", domain.Line);
+                        PrintCell(domain.Points.ToString(),
+                            "Quality " + domain.Quality.ToString("0.00", CultureInfo.InvariantCulture)
+                            + ". Caps at " + domain.Cap + ".");
+                    }
+                    ImGui.Columns(1);
+                }
+
+                if (person.Skills.Count > 0)
+                {
+                    if (person.Domains.Count > 0)
+                        ImGui.NewLine();
+                    foreach (var skill in person.Skills)
+                    {
+                        ImGui.Text(skill.Name);
+                        if (!string.IsNullOrEmpty(skill.Line))
+                        {
+                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                            ImGui.TextWrapped(skill.Line);
+                            ImGui.PopStyleColor();
+                        }
                     }
                 }
             }

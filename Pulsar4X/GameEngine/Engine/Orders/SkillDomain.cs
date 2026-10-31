@@ -34,4 +34,13 @@ public static class SkillDomains
             _ => null,
         };
     }
+
+    /// <summary>Player-facing line for the person card. One effect, not the grant rule.</summary>
+    public static string Effect(SkillDomain domain) => domain switch
+    {
+        SkillDomain.Command => "Fleet orders pass down faster.",
+        SkillDomain.Nav => "Warp drops lead the target.",
+        SkillDomain.Survey => "Surveys finish faster.",
+        _ => "",
+    };
 }
