@@ -89,6 +89,29 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void DomainOf_BootstrapColony_IsConstruction()
+        {
+            Assert.AreEqual(SkillDomain.Construction, SkillDomains.DomainOf(GoalType.BootstrapColony, false));
+            Assert.IsNull(SkillDomains.DomainOf(GoalType.BootstrapColony, true));
+            Assert.IsNotEmpty(SkillDomains.Effect(SkillDomain.Construction));
+        }
+
+        [Test]
+        public void GrantForCompleted_Bootstrap_IsConstruction_OnlyWhenCompleted()
+        {
+            var (ship, db) = ShipWithCommander();
+
+            CommanderSkills.GrantForCompleted(ship, new Goal(GoalType.BootstrapColony) { Status = GoalStatus.Active });
+            Assert.AreEqual(0, CommanderSkills.Get(db, SkillDomain.Construction));
+
+            CommanderSkills.GrantForCompleted(ship, new Goal(GoalType.BootstrapColony) { Status = GoalStatus.Completed });
+            Assert.AreEqual(1, CommanderSkills.Get(db, SkillDomain.Construction));
+            Assert.AreEqual(0, CommanderSkills.Get(db, SkillDomain.Nav));
+            Assert.AreEqual(0, CommanderSkills.Get(db, SkillDomain.Command));
+            Assert.AreEqual(1, db.Experience);
+        }
+
+        [Test]
         public void SurveyRate_NoCommander_IsKitSpeed_CapSurvey_Doubles()
         {
             var ship = BareShip();
