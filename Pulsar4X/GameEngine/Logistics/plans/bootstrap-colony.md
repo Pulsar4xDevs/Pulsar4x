@@ -34,7 +34,8 @@ Fleet Management has a Bootstrap colony order for a selected ship. It is offered
 * More than one trip.
 * A fleet-level order and picker.
 * A `SkillDomains` line: no domain fits.
-* Build order. All aboard crates are queued in the order picked. Open: office first, or the player's order.
+* Build order. All aboard crates are queued in the order picked.
+  Already decided (2026-11-01): the player picks the order; crates are mounted in the order chosen (current behaviour stands).
 
 ## Later
 
