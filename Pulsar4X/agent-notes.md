@@ -49,9 +49,9 @@ Status lives in the file itself, in `near-term.md`, or in `AGENTS.md`. This list
 
 ## Open
 
-### Movement plans: capture ellipse is playing, warp sustain and warp-brake are specified
+### Movement plans: capture ellipse, warp sustain, and warp-brake are playing
 
-2026-10-31. `GameEngine/Movement/plans/`. `01-capture-ellipse.md` is playing. A short tank burns to a bound ellipse, or a captain refuses before the warp. A new MoveTo already inside the well queues that same burn. Implement `02-warp-sustain.md` when asked. Uphill warp is a sustain draw on the same bubble, one speed for the leg. `03-warp-brake.md` is specified. A high-Nav captain coasts inside the destination well and warps back to low orbit, at most three bubbles, until plan 1 can capture. The saved vector stays parent-relative. Do not build it until plan 2 is playing.
+2026-11-01. `GameEngine/Movement/plans/`. All three are playing. `01-capture-ellipse.md`: a short tank burns to a bound ellipse, or a captain refuses before the warp. A new MoveTo already inside the well queues that same burn. `02-warp-sustain.md`: uphill warp is a sustain draw on the same bubble, one speed for the leg. `03-warp-brake.md`: Warp brake, the Nav skill at quality 1.25, coasts inside the destination well and warps back to low orbit, at most three bubbles, until plan 1 can capture. The order line is "Shedding speed, warp k of n". Low Nav and an empty chair stay on plan 1. The saved vector stays parent-relative. A new class and the commander snapshot skill list need a game restart.
 
 ### A processor fault stops the clock quietly — the dialog is in, the crash save is not
 

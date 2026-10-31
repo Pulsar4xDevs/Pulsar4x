@@ -181,6 +181,8 @@ public class Goal
     public bool PlayerCancelled;
     /// <summary>The entity that handed this goal down. -1 when the player gave it.</summary>
     public int IssuerEntityId = -1;
+    /// <summary>Warp-brake bubbles for this goal. Set once when the sequence starts. An old save stays 0.</summary>
+    public int BrakeSteps;
     
     public Goal(GoalType type)
     {

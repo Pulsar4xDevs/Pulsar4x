@@ -89,7 +89,7 @@ public class BuyFuelPlan : IGoalPlanner
 
         if (!MarketExchangeAction.InRange(managedEntity, market))
         {
-            if (!TryMoveIntoRange(managedEntity, market, out var moves, out var reason))
+            if (!TryMoveIntoRange(managedEntity, market, out var moves, out var reason, goal))
                 return PlanResult.Fail(string.IsNullOrEmpty(reason) ? "Out of range" : reason);
             return PlanResult.Continue(moves);
         }
@@ -104,9 +104,9 @@ public class BuyFuelPlan : IGoalPlanner
     /// Spawn orbit counts as already at the body, and it sits just outside cargo range.
     /// Low orbit is inside that range, so drop there when movement has nothing to fly.
     /// </summary>
-    static bool TryMoveIntoRange(Entity ship, Entity market, out List<EntityAction> moves, out string reason)
+    static bool TryMoveIntoRange(Entity ship, Entity market, out List<EntityAction> moves, out string reason, Goal goal = null)
     {
-        if (!MovePlanner.TryBuildMoveActions(ship, market, out moves, out reason))
+        if (!MovePlanner.TryBuildMoveActions(ship, market, out moves, out reason, goal))
             return false;
         if (moves.Count > 0)
             return true;

@@ -25,6 +25,7 @@ namespace Pulsar4X.Tests
         static readonly Game Game = InitializeGame();
         StarSystem _sys;
         DateTime _epoch;
+        internal DateTime Epoch => _epoch;
 
         static Game InitializeGame()
         {
@@ -264,7 +265,7 @@ namespace Pulsar4X.Tests
             return (mars, ship, r, mu);
         }
 
-        void Place(Entity mars, Entity ship, double r, double speed)
+        internal void Place(Entity mars, Entity ship, double r, double speed)
         {
             var marsAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(mars, _epoch);
             var pos = ship.GetDataBlob<PositionDB>();
@@ -274,7 +275,7 @@ namespace Pulsar4X.Tests
             ship.SetDataBlob(OrbitDB.FromVelocity(mars, ship, new Vector3(0, speed, 0), _epoch));
         }
 
-        (Entity Ship, Entity Mars) EarthShipAimedAtMars(double budget, bool captained)
+        internal (Entity Ship, Entity Mars) EarthShipAimedAtMars(double budget, bool captained)
         {
             var sol = TestingUtilities.BasicSol(_sys);
             var earth = AddBody(sol, "Earth", 5.972e24, 6_371_000, 1.0);

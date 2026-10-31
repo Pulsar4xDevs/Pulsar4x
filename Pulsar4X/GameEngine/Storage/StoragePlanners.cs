@@ -70,7 +70,7 @@ public class RefuelShipPlanner : IGoalPlanner
         var plan = new List<EntityAction>();
 
         // 1. Get alongside the source (empty if already there).
-        if (!MovePlanner.TryBuildMoveActions(ship, source, out var moveActions, out var moveReason))
+        if (!MovePlanner.TryBuildMoveActions(ship, source, out var moveActions, out var moveReason, goal))
             return PlanResult.Fail(moveReason);
         plan.AddRange(moveActions);
 

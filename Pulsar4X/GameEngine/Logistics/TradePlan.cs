@@ -39,7 +39,7 @@ public class TradePlan : IGoalPlanner
         if (!TryChooseRoute(managedEntity, out var route, out var source, out var dest, out var good))
             return PlanResult.Fail("no route");
 
-        var leg = MarketRun.NextLeg(managedEntity, source, dest, route.CargoId, good);
+        var leg = MarketRun.NextLeg(managedEntity, source, dest, route.CargoId, good, goal: goal);
         if (leg.Status != GoalStatus.Active)
             return leg;
         return leg.WithRoute(route);

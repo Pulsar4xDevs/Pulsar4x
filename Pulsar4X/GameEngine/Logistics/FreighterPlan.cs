@@ -35,7 +35,7 @@ public class FreighterPlan : IGoalPlanner
         if (!TryChooseRoute(managedEntity, out var route, out var source, out var dest, out var good))
             return PlanResult.Fail("no haul");
 
-        var leg = MarketRun.NextLeg(managedEntity, source, dest, route.CargoId, good, capBuyAtRequest: true);
+        var leg = MarketRun.NextLeg(managedEntity, source, dest, route.CargoId, good, capBuyAtRequest: true, goal: goal);
         if (leg.Status != GoalStatus.Active)
             return leg;
         return leg.WithRoute(route);

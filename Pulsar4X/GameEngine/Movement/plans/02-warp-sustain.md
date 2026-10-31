@@ -1,6 +1,6 @@
 # Uphill warp paid as bubble sustain
 
-Status: playing. Implemented 2026-10-31. Do not start plan 3 until asked.
+Status: playing. Implemented 2026-10-31. Plan 3 is playing.
 
 The velocity paste rewrites the ship's sun-frame energy and the reactor never sees it. Bubble creation is a battery spike. Sustain is a flat 15 kW that matches the stock 2 tonne reactor exactly, so a cruise has no surplus. This plan puts the climb on that sustain draw and lets the reactor limit warp speed.
 

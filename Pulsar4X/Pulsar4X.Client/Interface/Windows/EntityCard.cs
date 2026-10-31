@@ -451,55 +451,9 @@ namespace Pulsar4X.Client
         private void DisplayCommander(CommanderSnapshot person)
         {
             var now = _uiState.GameClient?.Galaxy?.Time.GameDateTime ?? DateTime.UtcNow;
-
-            ImGui.Columns(2, "##commander-info", false);
-            ImGui.SetColumnWidth(0, 120);
-
-            DisplayHelpers.PrintRow("Type", person.Kind.ToString());
-            DisplayHelpers.PrintRow("Rank", person.RankName ?? "Rank " + person.Rank);
-            DisplayHelpers.PrintRow(
-                "Commissioned",
-                person.CommissionedOn.ToShortDateString(),
-                null,
-                YearsBetween(person.CommissionedOn, now).ToString("0.0") + " years of service");
-            DisplayHelpers.PrintRow(
-                "Promoted",
-                person.RankedOn.ToShortDateString(),
-                null,
-                YearsBetween(person.RankedOn, now).ToString("0.0") + " years in rank");
-            DisplayHelpers.PrintRow("Experience", person.Experience + " / " + person.ExperienceCap);
-            DisplayHelpers.PrintRow("Status", person.IsAssigned ? "Assigned" : "Available");
-            if (person.AssignmentName != null)
-                DisplayHelpers.PrintRow("Assignment", person.AssignmentName);
-
-            ImGui.Columns(1);
-
-            if (person.Bonuses.Count > 0)
-            {
-                ImGui.NewLine();
-                DisplayHelpers.Header("Bonuses");
-                foreach (var bonus in person.Bonuses)
-                {
-                    string valueStr = bonus.IsPercentage
-                        ? (bonus.Value * 100).ToString("+0.#;-0.#") + "%"
-                        : bonus.Value.ToString("+0.#;-0.#");
-                    string bonusText = bonus.Name;
-                    if (!string.IsNullOrEmpty(bonus.FilterName))
-                        bonusText += " (" + bonus.FilterName + ")";
-
-                    ImGui.PushStyleColor(ImGuiCol.Text, bonus.Value >= 0 ? Styles.GoodColor : Styles.BadColor);
-                    ImGui.TextUnformatted(valueStr);
-                    ImGui.PopStyleColor();
-                    ImGui.SameLine();
-                    ImGui.Text(bonusText);
-                }
-            }
-
+            DisplayHelpers.PersonCard(_uiState, person, now);
             DisplayOrders();
         }
-
-        private static double YearsBetween(DateTime from, DateTime to)
-            => (to - from).TotalDays / 365.25;
 
         private void DisplayContent()
         {

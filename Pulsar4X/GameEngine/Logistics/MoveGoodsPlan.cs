@@ -56,7 +56,7 @@ public class MoveGoodsPlan : IGoalPlanner
     {
         if (!MarketExchangeAction.InRange(ship, source))
         {
-            if (!TryMoveIntoRange(ship, source, out var moves, out var reason))
+            if (!TryMoveIntoRange(ship, source, out var moves, out var reason, goal))
                 return PlanResult.Fail(string.IsNullOrEmpty(reason) ? "out of range" : reason);
             return PlanResult.Continue(moves);
         }
@@ -86,7 +86,7 @@ public class MoveGoodsPlan : IGoalPlanner
     {
         if (!MarketExchangeAction.InRange(ship, dest))
         {
-            if (!TryMoveIntoRange(ship, dest, out var moves, out var reason))
+            if (!TryMoveIntoRange(ship, dest, out var moves, out var reason, goal))
                 return PlanResult.Fail(string.IsNullOrEmpty(reason) ? "out of range" : reason);
             return PlanResult.Continue(moves);
         }
@@ -146,14 +146,14 @@ public class MoveGoodsPlan : IGoalPlanner
     /// Same approach as a fuel buy. Spawn orbit sits just outside cargo range, so drop to low orbit
     /// when movement has nothing left to fly. Another system takes one jump leg.
     /// </summary>
-    internal static bool TryMoveIntoRange(Entity ship, Entity colony, out List<EntityAction> moves, out string reason)
+    internal static bool TryMoveIntoRange(Entity ship, Entity colony, out List<EntityAction> moves, out string reason, Goal goal = null)
     {
         moves = new List<EntityAction>();
         reason = "";
 
         if (colony.Manager != null && ship.Manager != null && colony.Manager != ship.Manager)
         {
-            var leg = JumpRoute.LegToward(ship, colony);
+            var leg = JumpRoute.LegToward(ship, colony, goal);
             if (leg.Status == GoalStatus.Failed || leg.Actions == null || leg.Actions.Count == 0)
             {
                 reason = string.IsNullOrEmpty(leg.Message) ? "no path" : leg.Message;
@@ -163,7 +163,7 @@ public class MoveGoodsPlan : IGoalPlanner
             return true;
         }
 
-        if (!MovePlanner.TryBuildMoveActions(ship, colony, out moves, out reason))
+        if (!MovePlanner.TryBuildMoveActions(ship, colony, out moves, out reason, goal))
             return false;
         if (moves.Count > 0)
             return true;

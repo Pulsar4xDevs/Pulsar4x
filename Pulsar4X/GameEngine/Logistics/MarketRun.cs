@@ -97,13 +97,13 @@ static class MarketRun
         if (handed && held > 0 && buy.BuyQuantity <= 0)
             return PlanResult.Done("share closed");
 
-        var leg = NextLeg(ship, source, dest, cargoId, good, capBuyAtRequest, handed ? share : 0);
+        var leg = NextLeg(ship, source, dest, cargoId, good, capBuyAtRequest, handed ? share : 0, goal);
         if (handed && share > 0 && held > 0 && leg.Status == GoalStatus.Active)
             return leg.WithMessage(ShareInFlight);
         return leg;
     }
 
-    public static PlanResult NextLeg(Entity ship, Entity source, Entity dest, string cargoId, ICargoable good, bool capBuyAtRequest = false, long unitShare = 0)
+    public static PlanResult NextLeg(Entity ship, Entity source, Entity dest, string cargoId, ICargoable good, bool capBuyAtRequest = false, long unitShare = 0, Goal goal = null)
     {
         if (!MarketBook.TryGet(source, cargoId, out var sell) || !MarketBook.TryGet(dest, cargoId, out var buy))
             return PlanResult.Fail("listing gone");
@@ -113,7 +113,7 @@ static class MarketRun
         if (held > 0)
         {
             long units = Math.Min(held, buy.BuyQuantity);
-            return ExchangeOrMove(ship, dest, cargoId, MarketSide.SellToMarket, units);
+            return ExchangeOrMove(ship, dest, cargoId, MarketSide.SellToMarket, units, goal);
         }
 
         long free = store.GetFreeUnitSpace(good);
@@ -122,18 +122,18 @@ static class MarketRun
             buyUnits = Math.Min(buyUnits, Math.Max(0, buy.BuyQuantity));
         if (unitShare > 0)
             buyUnits = Math.Min(buyUnits, unitShare);
-        return ExchangeOrMove(ship, source, cargoId, MarketSide.BuyFromMarket, buyUnits);
+        return ExchangeOrMove(ship, source, cargoId, MarketSide.BuyFromMarket, buyUnits, goal);
     }
 
-    public static PlanResult ExchangeOrMove(Entity ship, Entity market, string cargoId, MarketSide side, long units)
+    public static PlanResult ExchangeOrMove(Entity ship, Entity market, string cargoId, MarketSide side, long units, Goal goal = null)
     {
         if (market.Manager != ship.Manager)
-            return JumpRoute.LegToward(ship, market);
+            return JumpRoute.LegToward(ship, market, goal);
 
         if (MarketExchangeAction.InRange(ship, market))
             return PlanResult.Continue(MarketExchangeAction.Create(ship, market.Id, cargoId, side, units));
 
-        if (!MovePlanner.TryBuildMoveActions(ship, market, out var actions, out var reason) || actions.Count == 0)
+        if (!MovePlanner.TryBuildMoveActions(ship, market, out var actions, out var reason, goal) || actions.Count == 0)
             return PlanResult.Fail(string.IsNullOrEmpty(reason) ? "Out of range" : reason);
         return PlanResult.Continue(actions);
     }

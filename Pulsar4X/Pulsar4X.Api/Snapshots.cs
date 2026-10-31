@@ -798,6 +798,9 @@ public enum CommanderKind
 /// <summary>A commander's bonus for chooser tooltips; the filter target is pre-resolved to a display name.</summary>
 public sealed record CommanderBonusSnapshot(string Name, double Value, bool IsPercentage, string? FilterName);
 
+/// <summary>A named skill the commander already knows. The line is the player-facing description.</summary>
+public sealed record CommanderSkillSnapshot(string Name, string Line);
+
 /// <summary>A faction commander (scientist, officer, …) for the personnel roster and assignment UIs.</summary>
 public sealed record CommanderSnapshot(
     int Id,
@@ -809,6 +812,9 @@ public sealed record CommanderSnapshot(
     DateTime CommissionedOn)
 {
     public IReadOnlyList<CommanderBonusSnapshot> Bonuses { get; init; } = Array.Empty<CommanderBonusSnapshot>();
+
+    /// <summary>Named skills this commander knows. Empty when they know none.</summary>
+    public IReadOnlyList<CommanderSkillSnapshot> Skills { get; init; } = Array.Empty<CommanderSkillSnapshot>();
 
     /// <summary>Numeric rank within the commander's career track.</summary>
     public int Rank { get; init; }

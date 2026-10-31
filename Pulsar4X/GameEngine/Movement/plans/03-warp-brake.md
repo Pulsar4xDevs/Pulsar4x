@@ -1,6 +1,6 @@
 # Skilled warp-brake
 
-Status: specified. Written 2026-10-31. Do not build until plan 2 is playing. The hops are ordinary warps, and they should pay that sustain bill. Do not build this from the old stub.
+Status: playing. Implemented 2026-11-01. The hops are ordinary warps, and they pay the plan 2 sustain bill.
 
 A high-Nav captain who cannot capture the pasted speed climbs inside the destination well, warps back to low orbit once the parent-relative speed has fallen, and repeats until plan 1's burn can finish or three bubbles have been spent. A low-Nav captain, and an empty chair, stay on plan 1.
 
@@ -19,9 +19,24 @@ Under this paste, gravity changes the saved speed only while the bubble is down.
 - `EvaluateWarp` still refuses with `already in destination gravity well`. The rewarp is built by `TryBuildMoveActions` and does not go through that gate.
 - One action per plan. `AgentProcessor`, when an action for the goal succeeds, drops every still-queued follow-on and calls `Plan` again. A list of warp, coast, warp, circularise queued up front loses everything after the first warp. Emit the next step only.
 - The last step is plan 1. When `TryArrivalBurn` succeeds, the existing in-well path queues `CirculariseAction`. This plan does not emit that burn.
-- Nav quality of at least 1.25 (skill 25). Quality is `1 + skill / 100`. A cap of 40 can reach 1.25. A fresh captain is 1.0 and stays on plan 1. The failure sentence stays plan 1's `Not enough Δv to orbit ...`. Skill is not in the text. That matches `agents-and-goals-design.md`: skill never fails a plan. This gate chooses a plot.
+- The captain knows the named skill in the next section. That is Nav quality of at least 1.25 (skill 25). Quality is `1 + skill / 100`. A cap of 40 can reach 1.25. A fresh captain is 1.0 and stays on plan 1. The failure sentence stays plan 1's `Not enough Δv to orbit ...`. The skill name is not in that sentence. That matches `agents-and-goals-design.md`: skill never fails a plan. This gate chooses a plot.
 - A commander aboard that ship, the same rule as `CaptureAllowsWarp`. A fleet commander who is not aboard does not count.
 - A game restart is required. This adds a class. It will not apply with Edit and Continue.
+
+## The skill
+
+The Nav gate is a named skill, **Warp brake**. A captain knows it when Nav quality is at least 1.25. It is derived from Nav. It is not a fourth `SkillDomain`, and it does not spend its own XP. The working name can change. The shape should not: one definition per skill of this type, so the next one is another row.
+
+The definition sits next to `CommanderSkills`. It holds the display name, one line a player can read, and the predicate. The planner asks the predicate. It does not compare 1.25 itself.
+
+`CommanderSnapshot` does not carry skills. Project the known skills as the name plus that line. An old save is unchanged, because nothing new is stored on `CommanderDB`. Adding the snapshot field needs a game restart.
+
+Show the list on the person card, under a Skills header, and omit the header when the captain knows none.
+
+- `CommanderWindow.DisplayPersonDetail`, the card beside the roster. `DisplayPeopleList` is the table (name, type, rank, assignment, years). It does not grow a skill column.
+- The assign-captain chooser. `FleetWindow` opens `DisplayHelpers.PeopleChooser`, and that pane repeats the portrait, the columns, and the bonus list.
+
+Those two panes are copies. Pull that block into one shared function and call it from both. `EntityCard.DisplayCommander` is a third copy of the same card. It calls the same function.
 
 ## What the coast is worth
 
@@ -38,6 +53,8 @@ The Earth-orbit ship in `CaptureEllipseTests.EarthShipAimedAtMars` pastes about 
 A paste near 30 km/s sheds one escape-speed squared per hop. That is dozens of bubbles. The cap refuses it before the first extra warp. A parent with no orbit, or a sphere that does not reach past low orbit (`rCap <= rLow * 1.05`), has no room to climb. `TryCaptureSpeed` already rejects the star. An asteroid well fails the room test. Those stay plan 1.
 
 ## What to build
+
+The Nav check in the steps below calls the Warp brake predicate from the skill section. The card work in that section is part of this build.
 
 ### 1. The closed form
 

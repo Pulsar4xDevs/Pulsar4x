@@ -1,6 +1,6 @@
 # Capture into an ellipse, or refuse before the warp
 
-Status: playing. Implemented 2026-10-31. Do not start plan 2 or plan 3 until asked.
+Status: playing. Implemented 2026-10-31. Plan 2 and plan 3 are playing.
 
 A MoveTo from a deep well (Hermes, Earth low orbit, to Mars) warps, then the circularise asks for the full drop from the pasted speed down to circular. The tank cannot pay that. `NewtonSimpleProcessor` refuses the whole burn before spending any fuel, and the ship is left on the arrival hyperbola. It never tries for a bound ellipse. A captain can already know this before the bubble, and today the planner prices the warp at 0 m/s.
 

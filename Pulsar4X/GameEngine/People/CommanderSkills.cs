@@ -104,3 +104,40 @@ public static class CommanderSkills
         return false;
     }
 }
+
+/// <summary>
+/// A named skill derived from a domain. The next one is another row.
+/// </summary>
+public readonly struct CommanderTechnique
+{
+    public string Name { get; }
+    public string Line { get; }
+    readonly Func<CommanderDB, bool> _known;
+
+    public CommanderTechnique(string name, string line, Func<CommanderDB, bool> known)
+    {
+        Name = name;
+        Line = line;
+        _known = known;
+    }
+
+    public bool Known(CommanderDB db) => _known(db);
+}
+
+public static class CommanderTechniques
+{
+    public const float WarpBrakeNavQuality = 1.25f;
+
+    public static readonly CommanderTechnique WarpBrake = new(
+        "Warp brake",
+        "Coasts out in a gravity well and warps back to low orbit to shed speed.",
+        db => CommanderSkills.Quality(db, SkillDomain.Nav) >= WarpBrakeNavQuality);
+
+    public static readonly CommanderTechnique[] All = { WarpBrake };
+
+    /// <summary>
+    /// The commander aboard this ship. A fleet commander who is not aboard does not count.
+    /// </summary>
+    public static bool KnowsWarpBrake(Entity ship)
+        => CommanderSkills.TryGetCommander(ship, out _, out var db) && WarpBrake.Known(db);
+}

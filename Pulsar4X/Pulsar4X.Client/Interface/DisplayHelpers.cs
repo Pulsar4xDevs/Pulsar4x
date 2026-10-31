@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.Api;
 
 namespace Pulsar4X.Client
 {
@@ -140,6 +141,114 @@ namespace Pulsar4X.Client
         }
 
         /// <summary>
+        /// Portrait, service lines, known skills, and bonuses. The personnel card, the assign
+        /// chooser, and the entity card all use this.
+        /// </summary>
+        public static void PersonCard(GlobalUIState state, CommanderSnapshot person, DateTime now)
+        {
+            float portraitSize = 32f;
+            float headerPadding = 4f;
+            float headerHeight = portraitSize + headerPadding * 2;
+
+            var drawList = ImGui.GetWindowDrawList();
+            Vector2 headerMin = ImGui.GetCursorScreenPos();
+            Vector2 headerMax = new Vector2(
+                headerMin.X + ImGui.GetContentRegionAvail().X,
+                headerMin.Y + headerHeight);
+            uint headerBgColor = ImGui.ColorConvertFloat4ToU32(new Vector4(0.2f, 0.2f, 0.25f, 1.0f));
+            drawList.AddRectFilled(headerMin, headerMax, headerBgColor, 4.0f);
+
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + headerPadding);
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + headerPadding);
+
+            IntPtr portraitTexture = state.Img_Character();
+            if (portraitTexture != IntPtr.Zero)
+            {
+                ImGui.Image(portraitTexture.ToTextureRef(), new Vector2(portraitSize, portraitSize));
+                ImGui.SameLine();
+            }
+
+            float textHeight = ImGui.GetTextLineHeight();
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + (portraitSize - textHeight) / 2);
+            ImGui.Text(person.Name);
+
+            ImGui.SetCursorPosY(headerMin.Y - ImGui.GetWindowPos().Y + headerHeight + headerPadding);
+
+            ImGui.Columns(2, "PersonCardColumns", false);
+            ImGui.SetColumnWidth(0, 120);
+
+            PrintFormattedCell("Type:");
+            PrintCell(person.Kind.ToString());
+
+            PrintFormattedCell("Rank:");
+            PrintCell(string.IsNullOrEmpty(person.RankName) ? "Rank " + person.Rank : person.RankName);
+
+            PrintFormattedCell("Commissioned:");
+            PrintCell(person.CommissionedOn.ToShortDateString(),
+                YearsInService(person.CommissionedOn, now).ToString("F1") + " years of service");
+
+            PrintFormattedCell("Promoted:");
+            PrintCell(person.RankedOn.ToShortDateString(),
+                YearsInService(person.RankedOn, now).ToString("F1") + " years in rank");
+
+            PrintFormattedCell("Experience:");
+            PrintCell(person.Experience + " / " + person.ExperienceCap);
+
+            PrintFormattedCell("Status:");
+            ImGui.PushStyleColor(ImGuiCol.Text, person.IsAssigned ? Styles.OkColor : Styles.GoodColor);
+            PrintCell(person.IsAssigned ? "Assigned" : "Available");
+            ImGui.PopStyleColor();
+
+            if (person.AssignmentName != null)
+            {
+                PrintFormattedCell("Assignment:");
+                PrintCell(person.AssignmentName);
+            }
+
+            ImGui.Columns(1);
+
+            if (person.Skills.Count > 0)
+            {
+                ImGui.NewLine();
+                Header("Skills");
+                foreach (var skill in person.Skills)
+                {
+                    ImGui.Text(skill.Name);
+                    if (!string.IsNullOrEmpty(skill.Line))
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                        ImGui.TextWrapped(skill.Line);
+                        ImGui.PopStyleColor();
+                    }
+                }
+            }
+
+            if (person.Bonuses.Count > 0)
+            {
+                ImGui.NewLine();
+                Header("Bonuses");
+                foreach (var bonus in person.Bonuses)
+                {
+                    string valueStr = bonus.IsPercentage
+                        ? $"{bonus.Value * 100:+0.#;-0.#}%"
+                        : $"{bonus.Value:+0.#;-0.#}";
+                    string bonusText = bonus.Name;
+                    if (!string.IsNullOrEmpty(bonus.FilterName))
+                        bonusText += " (" + bonus.FilterName + ")";
+
+                    ImGui.PushStyleColor(ImGuiCol.Text, bonus.Value >= 0 ? Styles.GoodColor : Styles.BadColor);
+                    ImGui.TextUnformatted(valueStr);
+                    ImGui.PopStyleColor();
+                    ImGui.SameLine();
+                    ImGui.Text(bonusText);
+                }
+            }
+        }
+
+        static double YearsInService(DateTime from, DateTime to)
+            => (to - from).TotalDays / 365.25;
+
+        /// <summary>
         /// Snapshot-based people chooser for UI ported to the API galaxy model: pass the candidate
         /// commanders (already filtered by kind, e.g. <c>Galaxy.Research.Scientists</c>). Returns the
         /// chosen commander's id when Assign is pressed (-1 for "None"), otherwise
@@ -227,91 +336,7 @@ namespace Pulsar4X.Client
                     }
                     else if(selectedPerson != null)
                     {
-                        // Portrait and name header with background
-                        float portraitSize = 32f;
-                        float headerPadding = 4f;
-                        float headerHeight = portraitSize + headerPadding * 2;
-
-                        var drawList = ImGui.GetWindowDrawList();
-                        Vector2 headerMin = ImGui.GetCursorScreenPos();
-                        Vector2 headerMax = new Vector2(
-                            headerMin.X + ImGui.GetContentRegionAvail().X,
-                            headerMin.Y + headerHeight);
-                        uint headerBgColor = ImGui.ColorConvertFloat4ToU32(new Vector4(0.2f, 0.2f, 0.25f, 1.0f));
-                        drawList.AddRectFilled(headerMin, headerMax, headerBgColor, 4.0f);
-
-                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + headerPadding);
-                        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + headerPadding);
-
-                        IntPtr portraitTexture = state.Img_Character();
-                        if(portraitTexture != IntPtr.Zero)
-                        {
-                            ImGui.Image(portraitTexture.ToTextureRef(), new Vector2(portraitSize, portraitSize));
-                            ImGui.SameLine();
-                        }
-
-                        float textHeight = ImGui.GetTextLineHeight();
-                        float verticalOffset = (portraitSize - textHeight) / 2;
-                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + verticalOffset);
-                        ImGui.Text(selectedPerson.Name);
-
-                        ImGui.SetCursorPosY(headerMin.Y - ImGui.GetWindowPos().Y + headerHeight + headerPadding);
-
-                        ImGui.Columns(2, "PersonDetailsColumns", false);
-                        ImGui.SetColumnWidth(0, 120);
-
-                        PrintFormattedCell("Type:");
-                        PrintCell(selectedPerson.Kind.ToString());
-
-                        if(rowLabel != null && !string.IsNullOrEmpty(selectedPerson.RankName))
-                        {
-                            PrintFormattedCell("Rank:");
-                            PrintCell(selectedPerson.RankName);
-                        }
-
-                        if(rowLabel != null && !string.IsNullOrEmpty(selectedPerson.AssignmentName))
-                        {
-                            PrintFormattedCell("Post:");
-                            PrintCell(selectedPerson.AssignmentName);
-                        }
-
-                        PrintFormattedCell("Experience:");
-                        PrintCell($"{selectedPerson.Experience} / {selectedPerson.ExperienceCap}");
-
-                        PrintFormattedCell("Commissioned:");
-                        PrintCell(selectedPerson.CommissionedOn.ToString("yyyy-MM-dd"));
-
-                        PrintFormattedCell("Status:");
-                        ImGui.PushStyleColor(ImGuiCol.Text, selectedPerson.IsAssigned ? Styles.OkColor : Styles.GoodColor);
-                        PrintCell(selectedPerson.IsAssigned ? "Assigned" : "Available");
-                        ImGui.PopStyleColor();
-
-                        ImGui.Columns(1);
-
-                        if(selectedPerson.Bonuses.Count > 0)
-                        {
-                            ImGui.NewLine();
-                            Header("Bonuses");
-
-                            foreach(var bonus in selectedPerson.Bonuses)
-                            {
-                                string valueStr = bonus.IsPercentage
-                                    ? $"{bonus.Value * 100:+0.#;-0.#}%"
-                                    : $"{bonus.Value:+0.#;-0.#}";
-
-                                string bonusText = bonus.Name;
-                                if(!string.IsNullOrEmpty(bonus.FilterName))
-                                {
-                                    bonusText += $" ({bonus.FilterName})";
-                                }
-
-                                ImGui.PushStyleColor(ImGuiCol.Text, bonus.Value >= 0 ? Styles.GoodColor : Styles.BadColor);
-                                ImGui.TextUnformatted(valueStr);
-                                ImGui.PopStyleColor();
-                                ImGui.SameLine();
-                                ImGui.Text(bonusText);
-                            }
-                        }
+                        PersonCard(state, selectedPerson, DateTime.UtcNow);
                     }
                     else
                     {

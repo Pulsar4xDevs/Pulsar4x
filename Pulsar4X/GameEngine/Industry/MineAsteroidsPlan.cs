@@ -132,7 +132,7 @@ public class MineAsteroidsPlan : IGoalPlanner
         goal.TargetEntityID = rock.Id;
         goal.DestEntityId = -1;
 
-        if (!MovePlanner.TryBuildMoveActions(ship, rock, out var moveActions, out var moveReason))
+        if (!MovePlanner.TryBuildMoveActions(ship, rock, out var moveActions, out var moveReason, goal))
             return PlanResult.Fail(string.IsNullOrEmpty(moveReason) ? "cannot reach the asteroid" : moveReason);
 
         moveActions.Add(new AsteroidMineOrder(ship, rock));
@@ -156,7 +156,7 @@ public class MineAsteroidsPlan : IGoalPlanner
 
         if (!selling)
         {
-            if (!MovePlanner.TryBuildMoveActions(ship, dest, out var unloadMoves, out var unloadReason))
+            if (!MovePlanner.TryBuildMoveActions(ship, dest, out var unloadMoves, out var unloadReason, goal))
                 return PlanResult.Fail(string.IsNullOrEmpty(unloadReason) ? "cannot reach the colony" : unloadReason);
             if (unloadMoves.Count > 0)
                 return PlanResult.Continue(unloadMoves, $"Unloading at {name}");
@@ -167,7 +167,7 @@ public class MineAsteroidsPlan : IGoalPlanner
         // The spawn orbit is already "there" for movement and still outside a short cargo range.
         if (!MarketExchangeAction.InRange(ship, dest))
         {
-            if (!MovePlanner.TryBuildMoveActions(ship, dest, out var moveActions, out var moveReason))
+            if (!MovePlanner.TryBuildMoveActions(ship, dest, out var moveActions, out var moveReason, goal))
                 return PlanResult.Fail(string.IsNullOrEmpty(moveReason) ? "cannot reach the colony" : moveReason);
             if (moveActions.Count == 0)
                 TryDropIntoRange(ship, dest, moveActions);

@@ -66,7 +66,8 @@ public class MoveToPlan : IGoalPlanner
     }
 
     /// <summary>
-    /// Leaf: resolve target, pick move mode, emit actions. Does not mutate <paramref name="goal"/>.
+    /// Leaf: resolve target, pick move mode, emit actions. Does not write <paramref name="goal"/>.Status.
+    /// A brake step may set <see cref="Goal.BrakeSteps"/> once.
     /// </summary>
     public PlanResult PlanActions(Entity ship, Goal goal, DateTime atDateTime)
     {
@@ -94,7 +95,7 @@ public class MoveToPlan : IGoalPlanner
             }
         }
 
-        if (!MovePlanner.TryBuildMoveActions(ship, requested, out var actions, out string reason, atDateTime))
+        if (!MovePlanner.TryBuildMoveActions(ship, requested, out var actions, out string reason, atDateTime, goal))
             return PlanResult.Fail(reason);
 
         if (actions.Count == 0)
@@ -708,15 +709,15 @@ public static class MovePlanner
     /// AlreadyThere yields an empty list and true.
     /// </summary>
     public static bool TryBuildMoveActions(Entity ship, Entity targetEntity,
-                                           out List<EntityAction> actions, out string reason)
-        => TryBuildMoveActions(ship, targetEntity, out actions, out reason, ship.StarSysDateTime);
+                                           out List<EntityAction> actions, out string reason, Goal goal = null)
+        => TryBuildMoveActions(ship, targetEntity, out actions, out reason, ship.StarSysDateTime, goal);
 
     public static bool TryBuildMoveActions(Entity ship, Entity targetEntity,
-                                           out List<EntityAction> actions, out string reason, DateTime now)
+                                           out List<EntityAction> actions, out string reason, DateTime now, Goal goal = null)
     {
         actions = new List<EntityAction>();
         reason = string.Empty;
-        
+
         if (!MoveTargeting.TryResolve(targetEntity, out var target, out reason))
             return false;
         if (!CanMove(ship, out reason))
@@ -724,32 +725,65 @@ public static class MovePlanner
 
         var moveOptions = Evaluate(ship, target, now);
         var chosen = Select(moveOptions);
-        if (!chosen.Feasible)
+        if (chosen.Feasible && chosen.Mode == MoveMode.AlreadyThere)
         {
             reason = chosen.Reason;
+            return true;
+        }
+
+        if (chosen.Feasible && chosen.Mode != MoveMode.Warp)
+        {
+            reason = chosen.Reason;
+            if (chosen.Manuvers.Length == 0)
+                actions.Add(CirculariseAction.CreateCommand(ship, now));
+            else if (ship.GetSOIParentEntity() == target)
+                actions.Add(ChangeOrbitalAltitudeAction.CreateCommand(ship, OrbitMath.LowOrbitRadius(target), now));
+            else
+                actions.Add(MatchOrbitAction.CreateCommand(ship, target, now));
+            return true;
+        }
+
+        if (chosen.Feasible && chosen.Mode == MoveMode.Warp)
+        {
+            if (CaptureAllowsWarp(ship, target, now, out string captureReason))
+            {
+                reason = chosen.Reason;
+                actions.AddRange(BuildWarpAndCircularise(ship, target, now));
+                return true;
+            }
+
+            // A hand plot does not replan, so it does not open the first bubble.
+            if (goal != null
+                && CommanderTechniques.KnowsWarpBrake(ship)
+                && TryBrakeForecast(ship, target, now, out var entry)
+                && entry.Kind == BrakeKind.Warp)
+                return EmitBrakeWarp(ship, target, now, goal, entry, false, actions, out reason);
+
+            reason = captureReason;
             return false;
         }
-        reason = chosen.Reason;
-        if (chosen.Mode == MoveMode.AlreadyThere)
-            return true;
 
-        if (chosen.Mode == MoveMode.Warp)
+        if (goal != null
+            && InsideDropIn(ship, target)
+            && CommanderTechniques.KnowsWarpBrake(ship)
+            && TryBrakeForecast(ship, target, now, out var brake))
         {
-            if (!CaptureAllowsWarp(ship, target, now, out string captureReason))
-            {
-                reason = captureReason;
-                return false;
-            }
-            actions.AddRange(BuildWarpAndCircularise(ship, target, now));
+            if (brake.Kind == BrakeKind.Coast)
+                return EmitCoast(ship, now, goal, brake, actions, out reason);
+            if (brake.Kind == BrakeKind.Warp)
+                return EmitBrakeWarp(ship, target, now, goal, brake, true, actions, out reason);
         }
-        else if (chosen.Manuvers.Length == 0)
-            actions.Add(CirculariseAction.CreateCommand(ship, now));
-        else if (ship.GetSOIParentEntity() == target)
-            actions.Add(ChangeOrbitalAltitudeAction.CreateCommand(ship, OrbitMath.LowOrbitRadius(target), now));
-        else
-            actions.Add(MatchOrbitAction.CreateCommand(ship, target, now));
 
-        return true;
+        if (InsideDropIn(ship, target)
+            && CommanderTechniques.KnowsWarpBrake(ship)
+            && !CaptureAllowsWarp(ship, target, now, out string offered))
+        {
+            reason = offered;
+            return false;
+        }
+
+        reason = chosen.Reason;
+        return false;
     }
 
     public static List<EntityAction> BuildWarpAndCircularise(Entity orderEntity, Entity targetEntity, DateTime now)
@@ -862,6 +896,193 @@ public static class MovePlanner
     internal static string EllipticalOrbitDetails(Entity parent, Entity ship, double shortfall)
         => "Elliptical orbit around " + parent.GetName(ship.FactionOwnerID)
            + ", " + Stringify.Velocity(shortfall) + " short of circular";
+
+    const int MaxBrakeWarps = 3;
+
+    internal enum BrakeKind { Warp, Coast }
+
+    internal struct BrakeForecast
+    {
+        public BrakeKind Kind;
+        public int Bubbles;
+        public int StillToOpen;
+        public double ArrivalSpeed;
+        public double CapRadius;
+        public Entity DropIn;
+    }
+
+    internal static bool TryBrakeForecast(Entity ship, Entity target, DateTime now, out BrakeForecast forecast)
+    {
+        forecast = default;
+        if (ship == null || target == null || !target.HasDataBlob<MassVolumeDB>())
+            return false;
+        double rLow = OrbitMath.LowOrbitRadius(target);
+        if (!(rLow > 1) || !double.IsFinite(rLow))
+            return false;
+
+        var dropIn = PredictDropInParent(target, rLow);
+        if (!TryCaptureSpeed(dropIn, ship, rLow, out _, out double mu))
+            return false;
+        if (!dropIn.TryGetDataBlob<OrbitDB>(out var dropOrbit))
+            return false;
+        double rCap = 0.9 * OrbitMath.GetSOIRadius(dropOrbit);
+        if (!(rCap > rLow * 1.05) || !double.IsFinite(rCap))
+            return false;
+
+        if (!ship.TryGetDataBlob<PositionDB>(out _))
+            return false;
+        var live = MoveMath.GetRelativeFutureState(ship, now);
+        double speed = live.Velocity.Length();
+        double radius = live.pos.Length();
+        if (!double.IsFinite(speed) || speed < 0 || !double.IsFinite(radius) || radius < 1)
+            return false;
+
+        var parent = ship.GetSOIParentEntity();
+        double midpoint = (rLow + rCap) / 2.0;
+        double budget = ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrust) ? thrust.DeltaV : 0;
+        int bubbles = 0;
+        int openedBeforeFirst = -1;
+        BrakeKind first = BrakeKind.Coast;
+        bool simulated = false;
+
+        for (int guard = 0; guard < 8; guard++)
+        {
+            bool inside = parent != null && (parent == target || parent == dropIn);
+            if (inside && radius <= rLow * 1.02)
+            {
+                Vector3 pos = simulated ? new Vector3(radius, 0, 0) : live.pos;
+                Vector3 vel = simulated ? new Vector3(0, speed, 0) : live.Velocity;
+                if (TryArrivalBurn(ship, dropIn, pos, vel, budget, now, out _, out _, out _, out _))
+                {
+                    if (openedBeforeFirst < 0 || bubbles < 1)
+                        return false;
+                    forecast = new BrakeForecast
+                    {
+                        Kind = first,
+                        Bubbles = bubbles,
+                        StillToOpen = bubbles - openedBeforeFirst,
+                        ArrivalSpeed = speed,
+                        CapRadius = rCap,
+                        DropIn = dropIn,
+                    };
+                    return forecast.StillToOpen >= 1;
+                }
+            }
+
+            if (!inside)
+            {
+                if (bubbles + 1 > MaxBrakeWarps)
+                    return false;
+                if (openedBeforeFirst < 0)
+                {
+                    openedBeforeFirst = bubbles;
+                    first = BrakeKind.Warp;
+                }
+                bubbles++;
+                parent = dropIn;
+                radius = rLow;
+                simulated = true;
+                continue;
+            }
+
+            if (radius < midpoint)
+            {
+                if (!SpeedAt(speed, radius, rCap, mu, out double slowed) || speed - slowed < 1)
+                    return false;
+                if (openedBeforeFirst < 0)
+                {
+                    openedBeforeFirst = bubbles;
+                    first = BrakeKind.Coast;
+                }
+                speed = slowed;
+                radius = rCap;
+                simulated = true;
+                continue;
+            }
+
+            if (!SpeedAt(speed, radius, rLow, mu, out double atLow) || atLow - speed < 1)
+                return false;
+            if (bubbles + 1 > MaxBrakeWarps)
+                return false;
+            if (openedBeforeFirst < 0)
+            {
+                openedBeforeFirst = bubbles;
+                first = BrakeKind.Warp;
+            }
+            bubbles++;
+            radius = rLow;
+            parent = dropIn;
+            simulated = true;
+        }
+
+        return false;
+    }
+
+    static bool SpeedAt(double speed, double rFrom, double rTo, double mu, out double next)
+    {
+        next = 0;
+        if (!(rFrom > 1) || !(rTo > 1) || !(mu > 0) || !double.IsFinite(speed))
+            return false;
+        double v2 = speed * speed + 2.0 * mu * (1.0 / rTo - 1.0 / rFrom);
+        if (!double.IsFinite(v2) || v2 <= 0)
+            return false;
+        next = Math.Sqrt(v2);
+        return double.IsFinite(next);
+    }
+
+    static bool InsideDropIn(Entity ship, Entity target)
+    {
+        double radius = PlannedWarpExitOffsetLength(target);
+        var dropIn = PredictDropInParent(target, radius);
+        var parent = ship.GetSOIParentEntity();
+        return parent != null && (parent == target || parent == dropIn);
+    }
+
+    static void RememberBrake(Goal goal, BrakeForecast forecast)
+    {
+        if (goal != null && goal.BrakeSteps == 0)
+            goal.BrakeSteps = forecast.Bubbles;
+    }
+
+    static string BrakeLine(Goal goal, BrakeForecast forecast)
+    {
+        int n = goal != null && goal.BrakeSteps > 0 ? goal.BrakeSteps : forecast.Bubbles;
+        int k = n - forecast.StillToOpen + 1;
+        if (n < 1)
+            n = 1;
+        if (k < 1)
+            k = 1;
+        if (k > n)
+            k = n;
+        return "Shedding speed, warp " + k + " of " + n;
+    }
+
+    static bool EmitCoast(Entity ship, DateTime now, Goal goal, BrakeForecast forecast,
+        List<EntityAction> actions, out string reason)
+    {
+        RememberBrake(goal, forecast);
+        reason = BrakeLine(goal, forecast);
+        actions.Add(ShedSpeedAction.Create(ship, forecast.DropIn.Id, forecast.CapRadius, reason, now));
+        return true;
+    }
+
+    static bool EmitBrakeWarp(Entity ship, Entity target, DateTime now, Goal goal, BrakeForecast forecast,
+        bool fromInside, List<EntityAction> actions, out string reason)
+    {
+        Vector3 departureVel;
+        if (fromInside)
+            departureVel = MoveMath.GetRelativeFutureState(ship, now).Velocity;
+        else if (ship.Manager.Game.Settings.UseRelativeVelocity)
+            departureVel = MoveMath.GetRelativeFutureState(ship, now).Velocity;
+        else
+            departureVel = MoveMath.GetAbsoluteState(ship, now).velocity;
+
+        var end = PlannedWarpExitOffset(ship, target, departureVel);
+        actions.Add(WarpMoveAction.CreateWarpOnly(ship, target, now, end));
+        RememberBrake(goal, forecast);
+        reason = BrakeLine(goal, forecast);
+        return true;
+    }
 
     /// <summary>
     /// A captained ship does not open the warp when the pasted parent-relative speed

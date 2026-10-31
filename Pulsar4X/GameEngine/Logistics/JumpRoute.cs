@@ -80,7 +80,7 @@ static class JumpRoute
     /// <summary>
     /// Current leg toward a market in another system: warp to the next known gate, or transit it.
     /// </summary>
-    public static PlanResult LegToward(Entity ship, Entity market)
+    public static PlanResult LegToward(Entity ship, Entity market, Goal goal = null)
     {
         if (!TryConnect(ship, ship, market, out _, out _, out var path))
             return PlanResult.Fail("no path");
@@ -95,7 +95,7 @@ static class JumpRoute
 
         if (!AtGate(ship, gate))
         {
-            if (!MovePlanner.TryBuildMoveActions(ship, gate, out var actions, out var reason))
+            if (!MovePlanner.TryBuildMoveActions(ship, gate, out var actions, out var reason, goal))
                 return PlanResult.Fail(string.IsNullOrEmpty(reason) ? "no path" : reason);
             if (actions.Count > 0)
                 return PlanResult.Continue(actions);

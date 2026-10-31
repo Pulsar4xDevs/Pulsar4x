@@ -1537,6 +1537,12 @@ namespace Pulsar4X.Engine.Api
             FactionDataStore data, int factionId, IReadOnlyDictionary<int, string>? shipCommands = null)
         {
             var bonuses = new List<CommanderBonusSnapshot>();
+            var skills = new List<CommanderSkillSnapshot>();
+            foreach (var technique in CommanderTechniques.All)
+            {
+                if (technique.Known(commanderDB))
+                    skills.Add(new CommanderSkillSnapshot(technique.Name, technique.Line));
+            }
             if (commander.TryGetDataBlob<BonusesDB>(out var bonusesDB))
             {
                 foreach (var bonus in bonusesDB.Bonuses)
@@ -1592,6 +1598,7 @@ namespace Pulsar4X.Engine.Api
                 commanderDB.CommissionedOn)
             {
                 Bonuses = bonuses,
+                Skills = skills,
                 Rank = commanderDB.Rank,
                 RankName = rankName,
                 RankedOn = commanderDB.RankedOn,

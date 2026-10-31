@@ -69,7 +69,8 @@ public class ScanAnomalyPlan : IGoalPlanner
                          ship,
                          targetEntity,
                          out var moveActions,
-                         out var moveReason))
+                         out var moveReason,
+                         goal))
             {
                 moveActions.Add(new JPSurveyOrder(ship, targetEntity));
                 plan = PlanResult.Continue(moveActions);
