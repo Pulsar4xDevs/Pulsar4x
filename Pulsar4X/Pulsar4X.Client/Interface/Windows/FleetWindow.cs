@@ -249,7 +249,7 @@ namespace Pulsar4X.Client
             // Resolve the selection against the current push; a disbanded fleet drops the selection.
             selectedFleet = selectedFleetId is { } id ? FindFleet(galaxy.Fleets, id) : null;
 
-            ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowSize(new Vector2(1000, 600), ImGuiCond.FirstUseEver);
             if(Window.Begin("Fleets and Ships", ref IsActive, _flags))
             {
                 DisplayFleetList(galaxy);
