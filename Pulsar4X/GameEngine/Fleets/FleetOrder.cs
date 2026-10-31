@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
@@ -127,6 +128,23 @@ namespace Pulsar4X.Fleets
             };
 
             return order;
+        }
+
+        /// <summary>
+        /// True when nesting <paramref name="fleet"/> under <paramref name="newParent"/> would make a cycle:
+        /// the new parent is the fleet itself or one of its descendants.
+        /// </summary>
+        internal static bool WouldCycle(Entity fleet, Entity newParent)
+        {
+            var seen = new HashSet<int>();
+            Entity? node = newParent;
+            while (node != null && node != Entity.InvalidEntity && seen.Add(node.Id))
+            {
+                if (node.Id == fleet.Id)
+                    return true;
+                node = node.TryGetDataBlob<FleetDB>(out var db) ? db.Parent : null;
+            }
+            return false;
         }
 
         internal override void Execute(DateTime atDateTime)
@@ -261,6 +279,8 @@ namespace Pulsar4X.Fleets
                     {
                         return false;
                     }
+                    if (OrderType == FleetOrderType.ChangeParent && WouldCycle(_entityCommanding, _targetEntity))
+                        return false;
                     return RequestingFactionGuid == _entityCommanding.FactionOwnerID;
             }
             return false;

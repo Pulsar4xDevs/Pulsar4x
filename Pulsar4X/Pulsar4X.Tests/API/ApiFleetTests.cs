@@ -142,6 +142,33 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void ChangeFleetParent_command_rejects_a_cycle()
+        {
+            var session = Connect();
+            for (int i = 0; i < 3; i++)
+                _server.SubmitCommand(session, new CreateFleetCommand(session.FactionId, _game.Systems[0].ID));
+            var (fleets, _) = _projector.ProjectFleetHierarchy(session.FactionId);
+            Assert.That(fleets, Has.Count.EqualTo(3));
+            int a = fleets[0].Id, b = fleets[1].Id, c = fleets[2].Id;
+
+            var self = _server.SubmitCommand(session, new ChangeFleetParentCommand(a, a));
+            Assert.That(self.Accepted, Is.False, "a fleet under itself");
+
+            Assert.That(_server.SubmitCommand(session, new ChangeFleetParentCommand(b, a)).Accepted, Is.True);
+            Assert.That(_server.SubmitCommand(session, new ChangeFleetParentCommand(c, b)).Accepted, Is.True);
+
+            var child = _server.SubmitCommand(session, new ChangeFleetParentCommand(a, b));
+            Assert.That(child.Accepted, Is.False, "a fleet under its child");
+            var grandchild = _server.SubmitCommand(session, new ChangeFleetParentCommand(a, c));
+            Assert.That(grandchild.Accepted, Is.False, "a fleet under its grandchild");
+            Assert.That(grandchild.RejectionReason, Does.Contain("nested under itself"));
+
+            var (after, _) = _projector.ProjectFleetHierarchy(session.FactionId);
+            Assert.That(after, Has.Count.EqualTo(1), "the tree is unchanged");
+            Assert.That(after[0].Id, Is.EqualTo(a));
+        }
+
+        [Test]
         public void Reassign_and_detach_move_a_ship_between_fleets_and_the_unassigned_list()
         {
             var session = Connect();

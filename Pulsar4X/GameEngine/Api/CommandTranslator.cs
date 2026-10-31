@@ -802,6 +802,9 @@ namespace Pulsar4X.Engine.Api
             if (newParent.FactionOwnerID != faction.Id || !newParent.HasDataBlob<FleetDB>())
                 return CommandResult.Reject("The new parent is not one of your fleets.");
 
+            if (FleetOrder.WouldCycle(commanded, newParent))
+                return CommandResult.Reject("A fleet cannot be nested under itself or one of its own sub-fleets.");
+
             return Dispatch(FleetOrder.ChangeParent(faction.Id, commanded, newParent));
         }
 

@@ -62,19 +62,87 @@ public static class CommandSpan
     }
 
     /// <summary>
-    /// Ships and fleets use the narrower of the bridge and the seated rank.
-    /// No seated officer is Body. A colony keeps the hardware reading.
+    /// Ships and fleets use the narrower of the bridge, the seated rank, and the ceiling of every fleet
+    /// above them (<see cref="ParentCeiling"/>). No seated officer is Body. A colony keeps the hardware reading.
     /// </summary>
     public static CommandSpanKind Effective(Entity unit)
     {
-        var hardware = Of(unit);
         if (unit == null)
             return CommandSpanKind.Body;
+        var own = OwnEffective(unit);
+        if (own == CommandSpanKind.Body)
+            return own;
+        if (!unit.HasDataBlob<ShipInfoDB>() && !unit.HasDataBlob<FleetDB>())
+            return own;
+        return Narrower(own, ParentCeiling(unit));
+    }
+
+    /// <summary>The narrower of the bridge and the seated rank, ignoring any fleet above.</summary>
+    static CommandSpanKind OwnEffective(Entity unit)
+    {
+        var hardware = Of(unit);
         if (!unit.HasDataBlob<ShipInfoDB>() && !unit.HasDataBlob<FleetDB>())
             return hardware;
         if (!CommanderSkills.TryGetCommander(unit, out _, out var commander))
             return CommandSpanKind.Body;
         return Narrower(hardware, RankSpan(commander.Rank));
+    }
+
+    /// <summary>
+    /// The narrowest own span of the fleets above <paramref name="unit"/>. System when nothing caps it.
+    /// A ship starts at the fleet that holds it, so that fleet's flagship caps the ships in it, the flagship included.
+    /// A fleet starts at its parent. A fleet without a flagship imposes no ceiling itself, but the fleets above it still do.
+    /// A cycle in the tree stops the walk.
+    /// </summary>
+    public static CommandSpanKind ParentCeiling(Entity unit)
+    {
+        var ceiling = CommandSpanKind.System;
+        if (unit == null)
+            return ceiling;
+        var seen = new HashSet<int> { unit.Id };
+        var node = unit.HasDataBlob<FleetDB>() ? ParentFleetOf(unit) : HoldingFleetOf(unit);
+        while (node != null && ceiling != CommandSpanKind.Body && seen.Add(node.Id))
+        {
+            if (HasFlagship(node))
+                ceiling = Narrower(ceiling, OwnEffective(node));
+            node = ParentFleetOf(node);
+        }
+        return ceiling;
+    }
+
+    static bool HasFlagship(Entity fleet)
+        => fleet.TryGetDataBlob<FleetDB>(out var db) && db.FlagShipID >= 0
+            && fleet.Manager != null && fleet.Manager.TryGetEntityById(db.FlagShipID, out _);
+
+    static Entity? ParentFleetOf(Entity fleet)
+    {
+        if (!fleet.TryGetDataBlob<FleetDB>(out var db) || db.Parent == null || db.Parent == Entity.InvalidEntity)
+            return null;
+        return db.Parent.HasDataBlob<FleetDB>() ? db.Parent : null;
+    }
+
+    /// <summary>The fleet with <paramref name="ship"/> among its direct children, or null.</summary>
+    static Entity? HoldingFleetOf(Entity ship)
+    {
+        if (ship.Manager == null)
+            return null;
+        var managers = new List<EntityManager> { ship.Manager };
+        if (ship.Manager.Game?.GlobalManager is { } global && global != ship.Manager)
+            managers.Add(global);
+        foreach (var manager in managers)
+        {
+            foreach (var fleet in manager.GetAllEntitiesWithDataBlob<FleetDB>())
+            {
+                if (fleet.FactionOwnerID != ship.FactionOwnerID || !fleet.TryGetDataBlob<FleetDB>(out var db))
+                    continue;
+                foreach (var child in db.Children)
+                {
+                    if (child.Id == ship.Id)
+                        return fleet;
+                }
+            }
+        }
+        return null;
     }
 
     public static CommandSpanKind Narrower(CommandSpanKind hardware, CommandSpanKind rank)
@@ -109,6 +177,8 @@ public static class CommandSpan
         Rank = 2,
         /// <summary>Nobody sits the chair.</summary>
         EmptyChair = 4,
+        /// <summary>A fleet above this unit has a narrower span, and holds it down.</summary>
+        Parent = 8,
     }
 
     /// <summary>
@@ -135,6 +205,8 @@ public static class CommandSpan
             return SpanLimiter.None;
         if (!unit.HasDataBlob<ShipInfoDB>() && !unit.HasDataBlob<FleetDB>())
             return SpanLimiter.None;
+        if (Order(ParentCeiling(unit)) < Order(OwnEffective(unit)))
+            return SpanLimiter.Parent;
         bool seated = CommanderSkills.TryGetCommander(unit, out _, out var commander);
         return LimiterOf(Of(unit), seated, seated ? commander.Rank : 0);
     }
@@ -143,6 +215,8 @@ public static class CommandSpan
     public static string LimitClause(SpanLimiter limiter)
     {
         bool bridge = limiter.HasFlag(SpanLimiter.Bridge);
+        if (limiter.HasFlag(SpanLimiter.Parent))
+            return "The parent fleet limits reach.";
         if (limiter.HasFlag(SpanLimiter.EmptyChair))
             return bridge ? "The bridge and the empty chair limit reach." : "The empty chair limits reach.";
         if (limiter.HasFlag(SpanLimiter.Rank))
@@ -192,8 +266,13 @@ public static class CommandSpan
         if (unit == null)
             return null;
         bool seated = CommanderSkills.TryGetCommander(unit, out _, out var commander);
-        return Fix(Of(unit), seated, seated ? commander.Rank : 0, wanted, rank => TitleFor(unit, rank));
+        var fix = Fix(Of(unit), seated, seated ? commander.Rank : 0, wanted, rank => TitleFor(unit, rank));
+        if (fix == null && Order(ParentCeiling(unit)) < Order(wanted))
+            return ParentFix;
+        return fix;
     }
+
+    const string ParentFix = "The parent fleet limits reach. Raise the span of the fleet above, or take this unit out of it.";
 
     static string? TitleFor(Entity unit, int rank)
     {
