@@ -14,6 +14,8 @@ namespace Pulsar4X.Movement
         public double BubbleCreationCost { get; internal set; }
         public double BubbleSustainCost { get; internal set; }
         public double BubbleCollapseCost { get; internal set; }
+        public double Coupling { get; internal set; }
+        public double BleedFraction { get; internal set; }
 
 
         public WarpAbilityDB()
@@ -28,6 +30,8 @@ namespace Pulsar4X.Movement
             BubbleCreationCost = db.BubbleCreationCost;
             BubbleSustainCost = db.BubbleSustainCost;
             BubbleCollapseCost = db.BubbleCollapseCost;
+            Coupling = db.Coupling;
+            BleedFraction = db.BleedFraction;
         }
 
         public override object Clone()
@@ -46,6 +50,8 @@ namespace Pulsar4X.Movement
             desc += "Bubble Creation : " + BubbleCreationCost + "\n";
             desc += "Bubble Sustain : " + BubbleSustainCost + "\n";
             desc += "Bubble Collapse : " + BubbleCollapseCost + "\n";
+            desc += "Gravitational Coupling : " + Coupling + "\n";
+            desc += "Bleed Fraction : " + BleedFraction + "\n";
 
             return desc;
         }

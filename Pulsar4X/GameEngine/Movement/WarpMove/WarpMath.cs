@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Energy;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Orbital;
 using Pulsar4X.Orbits;
+using Stringify = Pulsar4X.Api.Stringify;
 
 namespace Pulsar4X.Movement;
 
@@ -185,6 +187,108 @@ public static class WarpMath
         }
         // Optional safety floor so we never search a ridiculously small window
         return Math.Max(period, 3600.0);
+    }
+
+    /// <summary>
+    /// One speed for the bubble, priced from the heading at opening.
+    /// Two heading checks, then stop. The speed that flies is the second price.
+    /// </summary>
+    public static (double speed, double demandKW, string limitLine, Vector3 exit, DateTime exitTime) PriceCruise(
+        Entity ship, Entity target, DateTime at, Vector3 offset)
+    {
+        var warp = ship.GetDataBlob<WarpAbilityDB>();
+        double drive = warp.MaxSpeed;
+        double sustain = warp.BubbleSustainCost;
+        var shipPos = ship.GetDataBlob<PositionDB>().AbsolutePosition;
+
+        if (!(drive > 0) || !double.IsFinite(drive))
+            return (drive, sustain, "", shipPos, at);
+
+        var first = GetInterceptPosition(shipPos, drive, target, at, offset);
+        var firstPrice = PriceHeading(ship, shipPos, first.position, drive, sustain);
+        double priced = firstPrice.speed > 0 && double.IsFinite(firstPrice.speed) ? firstPrice.speed : drive;
+
+        var second = GetInterceptPosition(shipPos, priced, target, at, offset);
+        var secondPrice = PriceHeading(ship, shipPos, second.position, drive, sustain);
+        double cruise = secondPrice.speed > 0 && double.IsFinite(secondPrice.speed) ? secondPrice.speed : drive;
+
+        var exit = second;
+        if (Math.Abs(cruise - priced) > 1e-3)
+            exit = GetInterceptPosition(shipPos, cruise, target, at, offset);
+
+        return (cruise, secondPrice.demandKW, secondPrice.limitLine ?? "", exit.position, exit.etiDateTime);
+    }
+
+    static (double speed, double demandKW, string limitLine) PriceHeading(
+        Entity ship, Vector3 shipPos, Vector3 exitPos, double driveSpeed, double sustain)
+    {
+        var warp = ship.GetDataBlob<WarpAbilityDB>();
+        double mass = ship.TryGetDataBlob<MassVolumeDB>(out var massDb) ? massDb.MassTotal : 0;
+        var root = ship.GetDataBlob<PositionDB>().Root;
+        if (root == null
+            || root == Entity.InvalidEntity
+            || !root.IsValid
+            || root == ship
+            || !root.TryGetDataBlob<MassVolumeDB>(out var starMass)
+            || !root.TryGetDataBlob<PositionDB>(out var starPos)
+            || !(mass > 0)
+            || !(driveSpeed > 0))
+            return (driveSpeed, sustain, "");
+
+        Vector3 fromStar = shipPos - starPos.AbsolutePosition;
+        double distance = fromStar.Length();
+        double r = Math.Max(distance, Math.Max(starMass.RadiusInM, 1));
+        double g = GeneralMath.StandardGravitationalParameter(starMass.MassDry) / (r * r);
+        if (!double.IsFinite(g) || !(g > 0) || !(distance > 0))
+            return (driveSpeed, sustain, "");
+
+        Vector3 heading = exitPos - shipPos;
+        double headingLen = heading.Length();
+        if (!(headingLen > 0))
+            return (driveSpeed, sustain, "");
+
+        double radial = Vector3.Dot(heading / headingLen, fromStar / distance);
+        if (radial > 0 && warp.Coupling > 0)
+            return PriceClimb(ship, warp.Coupling, mass, g, radial, driveSpeed, sustain);
+
+        if (radial <= 0)
+            return PriceFall(warp.BleedFraction, driveSpeed, sustain);
+
+        return (driveSpeed, sustain, "");
+    }
+
+    static (double speed, double demandKW, string limitLine) PriceClimb(
+        Entity ship, double coupling, double mass, double g, double radial, double driveSpeed, double sustain)
+    {
+        double outputKW = ship.TryGetDataBlob<EnergyGenAbilityDB>(out var power) ? power.TotalOutputMax : 0;
+        double plantSpeed = outputKW * 1000.0 / (coupling * mass * g * radial);
+        if (!(plantSpeed > 0) || !double.IsFinite(plantSpeed))
+            return (driveSpeed, sustain, "");
+
+        double cruise = Math.Min(driveSpeed, plantSpeed);
+        // Plant-limited outward speed is defined as the plant output. The product
+        // form is a hair over that output, and EnergyGen then schedules an empty
+        // time past TimeSpan.Max.
+        double climbKW = plantSpeed <= driveSpeed
+            ? outputKW
+            : coupling * mass * g * (cruise * radial) / 1000.0;
+        double demand = Math.Max(sustain, climbKW);
+        string line = plantSpeed < driveSpeed
+            ? "Drive " + Stringify.Velocity(driveSpeed) + ". Plant holds " + Stringify.Velocity(cruise) + " uphill. Warp at " + Stringify.Velocity(cruise) + "."
+            : "Drive " + Stringify.Velocity(driveSpeed) + ". Uphill, plant can hold it. Warp at " + Stringify.Velocity(cruise) + ".";
+        return (cruise, demand, line);
+    }
+
+    static (double speed, double demandKW, string limitLine) PriceFall(double bleed, double driveSpeed, double sustain)
+    {
+        if (!(bleed > 0))
+            return (driveSpeed, sustain, "");
+
+        double cap = driveSpeed * bleed;
+        if (cap < driveSpeed)
+            return (cap, sustain, "Downhill, bleed limited to " + Stringify.Velocity(cap) + ".");
+
+        return (driveSpeed, sustain, "Downhill, at drive speed.");
     }
 
 }

@@ -679,8 +679,14 @@ public static class MovePlanner
             return MoveOption.No(mode, $"cannot solve a warp intercept against a {moveType} target");
         }
 
-        var intercept = WarpMath.GetInterceptPosition(ship, target, now);
-        double eta = (intercept.etiDateTime - now).TotalSeconds;
+        (Vector3 pos, Vector3 vel) departureState;
+        if (ship.Manager.Game.Settings.UseRelativeVelocity)
+            departureState = MoveMath.GetRelativeFutureState(ship, now);
+        else
+            departureState = MoveMath.GetAbsoluteState(ship, now);
+        var offset = PlannedWarpExitOffset(ship, target, departureState.vel);
+        var cruise = WarpMath.PriceCruise(ship, target, now, offset);
+        double eta = (cruise.exitTime - now).TotalSeconds;
         if (double.IsNaN(eta) || eta < 0)
             return MoveOption.No(mode, "warp intercept did not converge");
 
@@ -688,7 +694,7 @@ public static class MovePlanner
         // the up-front cost is knowable here. WarpMoveAction holds the goal on "Charging
         // batteries" if we can't afford even that, so it isn't a feasibility gate.
         return MoveOption.Yes(mode, eta, 0, warpDB.BubbleCreationCost,
-            message: $"Warp to {NameOf(target, ship)}, {FormatArrival(intercept.etiDateTime)}");
+            message: $"Warp to {NameOf(target, ship)}, {FormatArrival(cruise.exitTime)}");
     }
 
     // ---------------------------------------------------------------------

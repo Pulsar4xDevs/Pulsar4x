@@ -52,6 +52,15 @@ namespace Pulsar4X.Movement
         public Vector3 ExitPointAbsolute { get; internal set; }
 
         public Vector3 ExitPointrelative { get; internal set; }
+
+        /// <summary>
+        /// Sustain booked when this bubble opened. Old saves leave this 0 and ChargedSustain false.
+        /// </summary>
+        public double SustainDemandKW { get; internal set; }
+
+        public bool ChargedSustain { get; internal set; }
+
+        public string LimitLine { get; internal set; } = "";
         public KeplerElements EndpointTargetOrbit { get; private set; }
 
         [JsonProperty]
@@ -134,6 +143,9 @@ namespace Pulsar4X.Movement
 
             HasStarted = db.HasStarted;
             TargetPositionDB = db.TargetPositionDB;
+            SustainDemandKW = db.SustainDemandKW;
+            ChargedSustain = db.ChargedSustain;
+            LimitLine = db.LimitLine;
 
         }
         // JSON deserialization callback.

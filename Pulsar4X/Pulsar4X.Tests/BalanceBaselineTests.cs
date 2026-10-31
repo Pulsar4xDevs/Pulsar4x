@@ -98,6 +98,8 @@ public class BalanceBaselineTests
             "tech-alcubierre-miniaturization",
             "tech-alcubierre-bubble-creation-cost",
             "tech-alcubierre-sustain-cost",
+            "tech-alcubierre-gravitational-coupling",
+            "tech-alcubierre-bleed",
             "tech-alcubierre-collapse-efficiency",
             "tech-conventional-engine-max-power",
             "tech-conventional-engine-min-power",
@@ -114,6 +116,8 @@ public class BalanceBaselineTests
             Assert.That(warp.BubbleCreationCost, Is.EqualTo(4_000_000d / 3d).Within(0.01));
             Assert.That(warp.BubbleSustainCost, Is.EqualTo(15).Within(0.001));
             Assert.That(warp.BubbleCollapseCost, Is.EqualTo(0).Within(0.001));
+            Assert.That(warp.Coupling, Is.EqualTo(0.0025).Within(1e-9));
+            Assert.That(warp.BleedFraction, Is.EqualTo(0.5).Within(1e-9));
 
             var battery = Design(faction, data, "battery-bank", ("Mass", 2000));
             Assert.That(battery.GetAttribute<EnergyStoreAtb>().MaxStore, Is.EqualTo(1_000_000).Within(0.01));

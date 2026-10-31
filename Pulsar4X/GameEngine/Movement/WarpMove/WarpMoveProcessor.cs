@@ -239,7 +239,6 @@ namespace Pulsar4X.Movement
             if (creationCost <= estored)
             {
                 var positionDB = entity.GetDataBlob<PositionDB>();
-                var maxSpeedMS = warpDB.MaxSpeed;
 
                 EnergyGenProcessor.EnergyGen(entity, toDateTime);
 
@@ -251,17 +250,19 @@ namespace Pulsar4X.Movement
                 // GetInterceptPosition(entity, ...) uses GetAbsoluteFuturePosition, which
                 // is the origin once OnSetToEntity has stripped OrbitDB.
                 Vector3 currentPositionMt = positionDB.AbsolutePosition;
-                var intercept = WarpMath.GetInterceptPosition(
-                    currentPositionMt, maxSpeedMS, moveDB.TargetEntity, toDateTime, moveDB.ExitPointrelative);
-                moveDB.ExitPointAbsolute = intercept.position;
-                moveDB.PredictedExitTime = intercept.etiDateTime;
+                var cruise = WarpMath.PriceCruise(entity, moveDB.TargetEntity, toDateTime, moveDB.ExitPointrelative);
+                moveDB.ExitPointAbsolute = cruise.exit;
+                moveDB.PredictedExitTime = cruise.exitTime;
                 moveDB.EntryPointAbsolute = currentPositionMt;
                 moveDB.EntryDateTime = toDateTime;
+                moveDB.SustainDemandKW = cruise.demandKW;
+                moveDB.ChargedSustain = true;
+                moveDB.LimitLine = cruise.limitLine;
 
                 moveDB._position = (Vector2)currentPositionMt;
                 Vector3 targetPosMt = moveDB.ExitPointAbsolute;
 
-                var currentVelocityMS = Vector3.Normalise(targetPosMt - currentPositionMt) * maxSpeedMS;
+                var currentVelocityMS = Vector3.Normalise(targetPosMt - currentPositionMt) * cruise.speed;
 
                 moveDB.CurrentNonNewtonionVectorMS = currentVelocityMS;
                 moveDB.LastProcessDateTime = toDateTime;
@@ -270,7 +271,7 @@ namespace Pulsar4X.Movement
                 powerDB.AddDemand(creationCost, toDateTime - TimeSpan.FromSeconds(1));
                 EnergyGenProcessor.EnergyGen(entity, toDateTime);
                 powerDB.AddDemand(-creationCost, toDateTime);
-                powerDB.AddDemand(warpDB.BubbleSustainCost, toDateTime);
+                powerDB.AddDemand(cruise.demandKW, toDateTime);
 
                 moveDB.HasStarted = true;
                 canStart = true;
@@ -319,7 +320,7 @@ namespace Pulsar4X.Movement
                 EnergyGenProcessor.EnergyGen(entity, toDateTime - TimeSpan.FromSeconds(1));
                 powerDB.AddDemand(warpDB.BubbleCollapseCost, toDateTime - TimeSpan.FromSeconds(1));
                 EnergyGenProcessor.EnergyGen(entity, toDateTime);
-                powerDB.AddDemand(-warpDB.BubbleSustainCost, toDateTime);
+                powerDB.AddDemand(-SustainToRemove(moveDB, warpDB), toDateTime);
                 powerDB.AddDemand(-warpDB.BubbleCollapseCost, toDateTime);
             }
 
@@ -592,8 +593,14 @@ namespace Pulsar4X.Movement
             EnergyGenProcessor.EnergyGen(entity, at - TimeSpan.FromSeconds(1));
             powerDB.AddDemand(warpDB.BubbleCollapseCost, at - TimeSpan.FromSeconds(1));
             EnergyGenProcessor.EnergyGen(entity, at);
-            powerDB.AddDemand(-warpDB.BubbleSustainCost, at);
+            var bubble = entity.GetDataBlob<WarpMovingDB>();
+            powerDB.AddDemand(-SustainToRemove(bubble, warpDB), at);
             powerDB.AddDemand(-warpDB.BubbleCollapseCost, at);
+        }
+
+        static double SustainToRemove(WarpMovingDB moveDB, WarpAbilityDB warpDB)
+        {
+            return moveDB != null && moveDB.ChargedSustain ? moveDB.SustainDemandKW : warpDB.BubbleSustainCost;
         }
 
         /// <summary>

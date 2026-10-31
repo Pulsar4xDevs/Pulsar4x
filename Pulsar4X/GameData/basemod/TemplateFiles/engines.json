@@ -244,9 +244,23 @@
           "PropertyFormula": "PropertyValue('Bubble Creation Energy Cost') * TechData('tech-alcubierre-collapse-efficiency')"
         },
         {
+          "Name": "Gravitational Coupling",
+          "Units": "",
+          "DescriptionFormula": "'How hard an uphill warp draws on the reactor. Level 0 is 0.0025. Zero means no climb.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.0025 * TechData('tech-alcubierre-gravitational-coupling')"
+        },
+        {
+          "Name": "Bleed Fraction",
+          "Units": "",
+          "DescriptionFormula": "'Fraction of drive speed kept on a downhill warp.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "TechData('tech-alcubierre-bleed')"
+        },
+        {
           "Name": "db",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(PropertyValue('Engine Power'), 'electricity', PropertyValue('Bubble Creation Energy Cost'), PropertyValue('Bubble Sustain Energy Cost'), -PropertyValue('Bubble Collapse Energy Returned'))",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Engine Power'), 'electricity', PropertyValue('Bubble Creation Energy Cost'), PropertyValue('Bubble Sustain Energy Cost'), -PropertyValue('Bubble Collapse Energy Returned'), PropertyValue('Gravitational Coupling'), PropertyValue('Bleed Fraction'))",
           "AttributeType": "Pulsar4X.Movement.WarpDriveAtb"
         }
       ]

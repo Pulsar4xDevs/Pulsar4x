@@ -1,3 +1,4 @@
+using System;
 using Newtonsoft.Json;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Components;
@@ -16,6 +17,8 @@ namespace Pulsar4X.Movement
         public double BubbleCreationCost { get; internal set; }
         public double BubbleSustainCost { get; internal set; }
         public double BubbleCollapseCost { get; internal set; }
+        public double Coupling { get; internal set; }
+        public double BleedFraction { get; internal set; }
 
         public WarpDriveAtb()
         {
@@ -45,6 +48,13 @@ namespace Pulsar4X.Movement
             BubbleCollapseCost = bubbleCollapseCost;
         }
 
+        public WarpDriveAtb(double warpPower, string energyType, double creationCost, double sustainCost, double bubbleCollapseCost, double coupling, double bleed)
+            : this(warpPower, energyType, creationCost, sustainCost, bubbleCollapseCost)
+        {
+            Coupling = coupling;
+            BleedFraction = bleed;
+        }
+
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
 
@@ -55,6 +65,8 @@ namespace Pulsar4X.Movement
                 ablty.BubbleCreationCost = BubbleCreationCost;
                 ablty.BubbleSustainCost = BubbleSustainCost;
                 ablty.BubbleCollapseCost = BubbleCollapseCost;
+                ablty.Coupling = Coupling;
+                ablty.BleedFraction = BleedFraction;
                 parentEntity.SetDataBlob(ablty);
             }
             else
@@ -63,6 +75,14 @@ namespace Pulsar4X.Movement
                 ablty.BubbleCreationCost += BubbleCreationCost;
                 ablty.BubbleSustainCost += BubbleSustainCost;
                 ablty.BubbleCollapseCost += BubbleCollapseCost;
+                // A zero coupling is the free drive. The greater number is the one that climbs.
+                ablty.Coupling = Math.Max(ablty.Coupling, Coupling);
+                if (BleedFraction > 0)
+                {
+                    ablty.BleedFraction = ablty.BleedFraction > 0
+                        ? Math.Min(ablty.BleedFraction, BleedFraction)
+                        : BleedFraction;
+                }
             }
             WarpMath.CalcMaxWarpAndEnergyUsage(parentEntity);
         }

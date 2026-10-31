@@ -158,6 +158,30 @@
   {
     "Type": "Tech",
     "Payload": {
+      "UniqueID": "tech-alcubierre-gravitational-coupling",
+      "Name": "Alcubierre Gravitational Coupling",
+      "Description": "A lower coupling eases the reactor draw of an uphill warp",
+      "MaxLevel": 10,
+      "DataFormula": "1 - [Level] * 0.08",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "500 + [Level] * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-alcubierre-bleed",
+      "Name": "Alcubierre Bleed",
+      "Description": "How much of drive speed a downhill warp may keep",
+      "MaxLevel": 10,
+      "DataFormula": "0.5 + [Level] * 0.05",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "500 + [Level] * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
       "UniqueID": "tech-alcubierre-collapse-efficiency",
       "Name": "Alcubierre Collapse Efficency",
       "Description": "We can recover some of the energy put into creating the bubble when we collapse it in a controlled manner",
@@ -496,6 +520,8 @@
           "tech-alcubierre-miniaturization",
           "tech-alcubierre-bubble-creation-cost",
           "tech-alcubierre-sustain-cost",
+          "tech-alcubierre-gravitational-coupling",
+          "tech-alcubierre-bleed",
           "tech-alcubierre-collapse-efficiency",
           "tech-solid-fuel",
           "tech-conventional-engine",

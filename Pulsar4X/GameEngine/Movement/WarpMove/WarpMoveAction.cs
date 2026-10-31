@@ -63,8 +63,7 @@ namespace Pulsar4X.Movement
             // In transit — processor owns motion; action only reports
             else if (_warpingDB != null && !_warpingDB.IsAtTarget)
             {
-                // optional: distance / ETA from _warpingDB positions + MaxSpeed
-                _details =  "Warping";
+                _details = string.IsNullOrEmpty(_warpingDB.LimitLine) ? "Warping" : _warpingDB.LimitLine;
             }
             else
                 _details =  "Arriving";
@@ -322,6 +321,7 @@ namespace Pulsar4X.Movement
                 WarpMoveProcessor.TryStartWarp(EntityCommanding, _warpingDB, atDateTime);
                 Status = ActionStatus.Running;
                 IsRunning = true;
+                UpdateDetailString();
 
                 // CreateCommand / CreateCommandEZ used to circularise inside drop-in.
                 // Queue a CirculariseAction so leftover r,v is read at exit, not predicted here.
