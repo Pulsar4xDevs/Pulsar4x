@@ -82,6 +82,7 @@ namespace Pulsar4X.Client
             var galaxy = _uiState.GameClient?.Galaxy;
             var research = galaxy?.Research;
 
+            ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.FirstUseEver);
             if (Window.Begin("Research and Development", ref IsActive, _flags))
             {
                 if(galaxy != null && research != null)

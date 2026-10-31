@@ -50,6 +50,7 @@ namespace Pulsar4X.Client
             var galaxy = _uiState.GameClient?.Galaxy;
             if(galaxy == null) return;
 
+            ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.FirstUseEver);
             if(Window.Begin("Manage Colonies", ref IsActive))
             {
                 // A missing selection, or one the latest push no longer has, opens on the first owned colony.
