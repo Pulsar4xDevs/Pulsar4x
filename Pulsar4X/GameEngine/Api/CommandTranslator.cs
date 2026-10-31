@@ -59,6 +59,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(FleetFreighterCommand)] = TranslateFleetFreighter,
                 [typeof(FleetHaulContractCommand)] = TranslateFleetHaulContract,
                 [typeof(MoveGoodsCommand)] = TranslateMoveGoods,
+                [typeof(BootstrapColonyCommand)] = TranslateBootstrapColony,
                 [typeof(QueueMoveGoodsCommand)] = TranslateQueueMoveGoods,
                 [typeof(LoadGoodsCommand)] = TranslateLoadGoods,
                 [typeof(UnloadGoodsCommand)] = TranslateUnloadGoods,
@@ -420,6 +421,57 @@ namespace Pulsar4X.Engine.Api
                 SourceEntityId = cmd.SourceId,
                 DestEntityId = cmd.DestId,
                 MoveGoodsLines = lines,
+            };
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        private CommandResult TranslateBootstrapColony(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectGoalWithoutCaptain(commanded) is { } rejected)
+                return rejected;
+            var cmd = (BootstrapColonyCommand)command;
+            if (commanded.HasDataBlob<FleetDB>() || !commanded.HasDataBlob<ShipInfoDB>())
+                return CommandResult.Reject("Bootstrap colony is one ship.");
+            if (!commanded.TryGetDataBlob<LocalConstructionDB>(out var bay) || bay.PointsPerDay <= 0)
+                return CommandResult.Reject("The ship has no Construction Bay.");
+            if (!commanded.HasDataBlob<CargoStorageDB>())
+                return CommandResult.Reject("The ship has no cargo storage.");
+            if (!TryResolve(cmd.SourceId, out var source) || !TryResolve(cmd.DestId, out var dest))
+                return CommandResult.Reject("the colony is gone.");
+            if (RejectWarehouse(faction, source) is { } sourceBad)
+                return sourceBad;
+            if (RejectWarehouse(faction, dest) is { } destBad)
+                return destBad;
+            if (source.Id == dest.Id)
+                return CommandResult.Reject("Pick two different colonies.");
+            if (cmd.Crates == null || cmd.Crates.Count == 0)
+                return CommandResult.Reject("Nothing to build.");
+
+            var crates = new List<BootstrapCrateLine>();
+            var info = faction.GetDataBlob<FactionInfoDB>();
+            foreach (var request in cmd.Crates)
+            {
+                if (request.Count <= 0)
+                    return CommandResult.Reject("Crate counts must be positive.");
+                if (!info.ComponentDesigns.TryGetValue(request.DesignId, out var design))
+                    return CommandResult.Reject($"Unknown design {request.DesignId}.");
+                if (!LocalConstructionJob.IsCrate(design))
+                    return CommandResult.Reject($"{design.Name} is not a crate-able facility.");
+                crates.Add(new BootstrapCrateLine { DesignId = request.DesignId, Count = request.Count });
+            }
+
+            if (!PairReaches(commanded, cmd.SourceId, cmd.DestId))
+                return CommandResult.Reject("The target is outside this ship's reach.");
+            var goal = new Goal(GoalType.BootstrapColony)
+            {
+                Name = "Bootstrap colony",
+                SourceEntityId = cmd.SourceId,
+                DestEntityId = cmd.DestId,
+                TargetEntityID = cmd.DestId,
+                BootstrapCrates = crates,
             };
             AgentProcessor.AssignGoal(commanded, goal);
             if (goal.Status == GoalStatus.Failed)

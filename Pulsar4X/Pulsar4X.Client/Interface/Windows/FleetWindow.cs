@@ -22,6 +22,7 @@ namespace Pulsar4X.Client
             Haul,
             HaulContract,
             MoveGoods,
+            Bootstrap,
             LoadGoods,
             UnloadGoods,
             PlotWarpTo,
@@ -43,6 +44,9 @@ namespace Pulsar4X.Client
         private bool plotting;
         private int goodsSourceId = -1;
         private int goodsDestId = -1;
+        private int bootSourceId = -1;
+        private int bootDestId = -1;
+        private readonly Dictionary<string, int> bootCounts = new();
         private int loadColonyId = -1;
         private int unloadColonyId = -1;
         private int goodsSeedSource = int.MinValue;
@@ -521,6 +525,8 @@ namespace Pulsar4X.Client
                 GoalRow("Trade ...", IssueOrderType.Trade, OrderBand.Ship, manual);
                 GoalRow("Haul ...", IssueOrderType.Haul, OrderBand.Ship, manual);
                 GoalRow("Move goods ...", IssueOrderType.MoveGoods, OrderBand.Ship, manual);
+                if (BootstrapShip)
+                    GoalRow("Bootstrap colony ...", IssueOrderType.Bootstrap, OrderBand.Ship, manual);
                 if (mine && ImGui.Selectable("Mine asteroids###mine-ship", selectedIssueOrderType == IssueOrderType.MineAsteroids && !manual && selectedBand == OrderBand.Ship))
                     Choose(IssueOrderType.MineAsteroids, plot: false, OrderBand.Ship);
                 if (geo)
@@ -543,6 +549,8 @@ namespace Pulsar4X.Client
                 GoalRow("Trade ...", IssueOrderType.Trade, OrderBand.Well, manual);
                 GoalRow("Haul ...", IssueOrderType.Haul, OrderBand.Well, manual);
                 GoalRow("Move goods ...", IssueOrderType.MoveGoods, OrderBand.Well, manual);
+                if (BootstrapShip)
+                    GoalRow("Bootstrap colony ...", IssueOrderType.Bootstrap, OrderBand.Well, manual);
             });
             DisplayBand(OrderBand.System, () =>
             {
@@ -554,6 +562,8 @@ namespace Pulsar4X.Client
                 GoalRow("Trade ...", IssueOrderType.Trade, OrderBand.System, manual);
                 GoalRow("Haul ...", IssueOrderType.Haul, OrderBand.System, manual);
                 GoalRow("Move goods ...", IssueOrderType.MoveGoods, OrderBand.System, manual);
+                if (BootstrapShip)
+                    GoalRow("Bootstrap colony ...", IssueOrderType.Bootstrap, OrderBand.System, manual);
             });
         }
 
@@ -593,6 +603,9 @@ namespace Pulsar4X.Client
             if (!plot)
                 selectedBand = band;
         }
+
+        // Bootstrap colony is one ship's order: a captained hull with a Construction Bay. A fleet never gets it.
+        bool BootstrapShip => orderShip != null && ShipHasCaptain(orderShip) && orderShip.HasConstructionBay;
 
         bool ManualPlot => orderShip != null && (!ShipHasCaptain(orderShip) || plotting);
 
@@ -790,12 +803,14 @@ namespace Pulsar4X.Client
                         || (plot && (selectedIssueOrderType == IssueOrderType.LoadGoods
                             || selectedIssueOrderType == IssueOrderType.UnloadGoods));
                     bool shipRefuel = selectedIssueOrderType == IssueOrderType.RefuelAt;
+                    bool shipBootstrap = selectedIssueOrderType == IssueOrderType.Bootstrap
+                        && !plot && BootstrapShip;
                     bool shipRun = !plot && (selectedIssueOrderType == IssueOrderType.Trade
                         || selectedIssueOrderType == IssueOrderType.Haul);
                     bool shipGoal = selectedIssueOrderType == IssueOrderType.MoveTo
                         || selectedIssueOrderType == IssueOrderType.Jump
                         || shipGeo || shipGrav || shipMine || shipPlot || shipGoods
-                        || shipRefuel || shipRun;
+                        || shipRefuel || shipRun || shipBootstrap;
                     if (!shipGoal)
                     {
                         plotting = false;
@@ -804,6 +819,7 @@ namespace Pulsar4X.Client
                     }
                 }
                 else if (plotting
+                    || selectedIssueOrderType == IssueOrderType.Bootstrap
                     || selectedIssueOrderType == IssueOrderType.LoadGoods
                     || selectedIssueOrderType == IssueOrderType.UnloadGoods
                     || selectedIssueOrderType == IssueOrderType.PlotWarpTo
@@ -938,6 +954,10 @@ namespace Pulsar4X.Client
                         break;
                     case IssueOrderType.MoveGoods:
                         DisplayMoveGoods(galaxy, candidates, commanded.Value, plot ? null : selectedBand);
+                        break;
+                    case IssueOrderType.Bootstrap:
+                        if (BootstrapShip)
+                            DisplayBootstrap(galaxy, candidates, orderShip!, selectedBand);
                         break;
                     case IssueOrderType.LoadGoods:
                         DisplayLoadGoods(candidates, commanded.Value);
@@ -1717,6 +1737,96 @@ namespace Pulsar4X.Client
                 SubmitFleetCommand(new QueueMoveGoodsCommand(commandedId, source.Id, dest.Id, items));
             else
                 SubmitFleetCommand(new MoveGoodsCommand(commandedId, source.Id, dest.Id, items));
+        }
+
+        // Source, destination and crates for one captained ship. The From and To fields are Move goods':
+        // the same owned-warehouse trees, the same span blocking. The option lists and checks live in
+        // BootstrapPicker so they run without a window.
+        private void DisplayBootstrap(IClientGalaxy galaxy, IEnumerable<EntitySnapshot> candidates, ShipSnapshot ship, OrderBand band)
+        {
+            ImGui.TextWrapped("One trip. The ship loads finished crates at the source, flies to the destination and mounts them from its hold with its Construction Bay.");
+            bool widen = band == OrderBand.System;
+            var pool = widen ? LogisticsCandidates(galaxy, candidates) : candidates;
+            var colonies = pool.Where(BootstrapPicker.IsPickable).OrderBy(e => NameOf(e), StringComparer.Ordinal).ToList();
+            if(colonies.Count == 0)
+            {
+                ImGui.Text("No owned colonies with a warehouse in reach.");
+                return;
+            }
+
+            var placed = Place(galaxy, pool, widen);
+            bool InBand(EntitySnapshot colony, int otherId) => HasPartner(colony, otherId, band, placed);
+
+            if(!colonies.Any(colony => colony.Id == bootSourceId && InBand(colony, bootDestId)))
+                bootSourceId = -1;
+            if(bootDestId == bootSourceId || !colonies.Any(colony => colony.Id == bootDestId && InBand(colony, bootSourceId)))
+                bootDestId = -1;
+
+            string? Block(EntitySnapshot colony, int otherId)
+                => BootstrapPicker.IsPickable(colony) && !InBand(colony, otherId) ? SpanLine() : null;
+
+            DisplayHelpers.Header("From");
+            DisplayTargetTree(pool,
+                e => BootstrapPicker.IsPickable(e),
+                "bootstrap-from",
+                id =>
+                {
+                    bootSourceId = id;
+                    if(bootDestId == id)
+                        bootDestId = -1;
+                },
+                starTargetsSystem: false,
+                selectedId: bootSourceId,
+                blocked: e => Block(e, bootDestId));
+
+            DisplayHelpers.Header("To");
+            DisplayTargetTree(pool,
+                e => BootstrapPicker.IsPickableDestination(e, bootSourceId),
+                "bootstrap-to",
+                id => bootDestId = id,
+                starTargetsSystem: false,
+                selectedId: bootDestId,
+                blocked: e => Block(e, bootSourceId));
+
+            var source = colonies.FirstOrDefault(colony => colony.Id == bootSourceId);
+            var dest = colonies.FirstOrDefault(colony => colony.Id == bootDestId);
+            if(source == null || dest == null)
+                return;
+
+            var options = BootstrapPicker.CrateOptions(source, SubjectEntity(galaxy));
+            BootstrapPicker.SyncCounts(bootCounts, options);
+            DisplayHelpers.Header("Crates");
+            if(options.Count == 0)
+            {
+                ImGui.TextWrapped("No finished crates at the source or in the hold.");
+                return;
+            }
+            foreach(var option in options)
+            {
+                int count = bootCounts[option.DesignId];
+                int cap = option.Available > int.MaxValue ? int.MaxValue : (int)option.Available;
+                ImGui.Text(option.Name);
+                ImGui.SameLine();
+                ImGui.Text(Stringify.Quantity(option.Available));
+                ImGui.SetNextItemWidth(120);
+                ImGui.InputInt("###bootstrap-" + option.DesignId, ref count);
+                ImGui.SameLine();
+                if(ImGui.SmallButton("All###bootstrap-all-" + option.DesignId))
+                    count = cap;
+                bootCounts[option.DesignId] = Math.Clamp(count, 0, cap);
+            }
+
+            var lines = BootstrapPicker.Requests(options, bootCounts);
+            string? problem = BootstrapPicker.Validate(ship, source.Id, dest.Id, lines, InBand(source, dest.Id));
+            if(problem != null)
+                ImGui.TextWrapped(problem);
+            if(problem != null)
+                ImGui.BeginDisabled();
+            bool send = ImGui.Button("Bootstrap colony");
+            if(problem != null)
+                ImGui.EndDisabled();
+            if(send && problem == null)
+                SubmitFleetCommand(new BootstrapColonyCommand(ship.Id, source.Id, dest.Id, lines));
         }
 
         bool HasFuel(IClientGalaxy galaxy)

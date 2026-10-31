@@ -230,6 +230,7 @@ static class ShipLogBook
             GoalType.OfferStock => "Offer stock",
             GoalType.RunMarket => "Run the market",
             GoalType.MoveGoods or GoalType.FleetMoveGoods => "Move goods",
+            GoalType.BootstrapColony => target.Length > 0 ? "Bootstrap " + target : "Bootstrap colony",
             _ => name.Length > 0 ? name : goal.Type.ToString(),
         };
     }
@@ -402,7 +403,7 @@ static class ShipLogBook
 
         if (name == "Add To Construction Queue" && detail.StartsWith("Install ", StringComparison.Ordinal))
             return EndSentence(detail);
-        if (action is LoadGoodsAction or UnloadGoodsAction)
+        if (action is LoadGoodsAction or UnloadGoodsAction or MountFromHoldAction)
             return EndSentence(detail);
         if (detail.Length == 0
             || detail.Equals(name, StringComparison.OrdinalIgnoreCase)

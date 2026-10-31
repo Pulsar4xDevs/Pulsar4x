@@ -1014,7 +1014,7 @@
         "stainless-steel": "[Mass] * 0.1"
       },
       "ComponentType": "Facility",
-      "MountType": "PlanetInstallation",
+      "MountType": "ShipCargo, PlanetInstallation",
       "CargoTypeID": "general-storage",
       "IndustryTypeID": "installation-construction",
       "Properties": [

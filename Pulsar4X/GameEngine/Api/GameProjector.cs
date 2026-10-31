@@ -872,6 +872,8 @@ namespace Pulsar4X.Engine.Api
                     bool canInstall = false;
                     bool showInstall = false;
                     long mountCost = 0;
+                    string designId = "";
+                    bool isCrate = false;
                     switch (cargoable)
                     {
                         case Mineral mineral:
@@ -885,6 +887,8 @@ namespace Pulsar4X.Engine.Api
                         case ComponentInstance instance:
                             kind = instance.Design.ComponentType;
                             description = instance.Design.Description;
+                            designId = instance.Design.UniqueID;
+                            isCrate = LocalConstructionJob.IsCrate(instance.Design);
                             if (hasRate && LocalConstructionJob.IsCrate(instance.Design))
                             {
                                 showInstall = true;
@@ -914,6 +918,8 @@ namespace Pulsar4X.Engine.Api
                     {
                         MountCost = mountCost,
                         ShowInstall = showInstall,
+                        DesignId = designId,
+                        IsCrate = isCrate,
                     });
                 }
 
@@ -1859,6 +1865,7 @@ namespace Pulsar4X.Engine.Api
                 CanGravSurvey = ship.HasJPSurveyAbililty(),
                 CanMineAsteroids = ship.HasAsteroidMineAbility(),
                 CommanderId = commanderId,
+                HasConstructionBay = ship.TryGetDataBlob<LocalConstructionDB>(out var bay) && bay.PointsPerDay > 0,
                 ColoniesInCargoRange = ColoniesInCargoRange(ship, factionId),
                 CommandSpan = SpanLabel(CommandSpan.Effective(ship)),
                 SpanLine = CommandSpan.Describe(ship),

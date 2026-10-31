@@ -472,6 +472,12 @@ public sealed record CargoItemView(
     /// <summary>Whether the cargo menu shows Install. A freighter stays false. A ship with the rate
     /// stays true even when <see cref="CanInstall"/> is false.</summary>
     public bool ShowInstall { get; init; }
+
+    /// <summary>The component design's id when this row is a component instance, else empty.</summary>
+    public string DesignId { get; init; } = "";
+
+    /// <summary>A finished facility a Construction Bay can mount: the design is crate-able.</summary>
+    public bool IsCrate { get; init; }
 }
 
 /// <summary>An entity's weapons and fire controls. Owner-only.</summary>
@@ -972,6 +978,9 @@ public sealed record ShipSnapshot(
 
     /// <summary>The seated captain, or null when the chair is empty and the player plots actions.</summary>
     public int? CommanderId { get; init; }
+
+    /// <summary>This hull has a Construction Bay that can mount crates.</summary>
+    public bool HasConstructionBay { get; init; }
 
     /// <summary>Owned colonies currently inside this ship's cargo-transfer range.</summary>
     public IReadOnlyList<int> ColoniesInCargoRange { get; init; } = Array.Empty<int>();

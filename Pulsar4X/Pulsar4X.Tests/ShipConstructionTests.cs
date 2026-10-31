@@ -175,13 +175,14 @@ public class ShipConstructionTests
         var ship = ColonyShip(world, planet);
         InRange(ship, colony);
 
-        var office = world.Info.ComponentDesigns["default-design-local-construction"];
-        Assert.That(LocalConstructionJob.IsSiteOnly(office), Is.True);
-        var crate = new ComponentInstance(office);
+        var cityHall = world.Info.ComponentDesigns["default-design-city-hall"];
+        Assert.That(LocalConstructionJob.IsSiteOnly(cityHall), Is.True);
+        var crate = new ComponentInstance(cityHall);
+        ship.GetDataBlob<CargoStorageDB>().TypeStores["general-storage"] = new TypeStore(1_000_000_000);
         Assert.That(ship.GetDataBlob<CargoStorageDB>().AddCargoByUnit(crate, 1), Is.EqualTo(1));
 
         var rejected = new CommandTranslator(Game).Translate(
-            world.Faction, ship, new AddToConstructionQueueCommand(ship.Id, office.UniqueID, crate.ID, colony.Id));
+            world.Faction, ship, new AddToConstructionQueueCommand(ship.Id, cityHall.UniqueID, crate.ID, colony.Id));
         Assert.That(rejected.Accepted, Is.False);
         Assert.That(rejected.RejectionReason, Does.Contain("crate"));
         Assert.That(ship.GetDataBlob<LocalConstructionDB>().BuildQueue, Is.Empty);
@@ -191,7 +192,16 @@ public class ShipConstructionTests
     }
 
     [Test]
-    public void AssemblingAnOffice_MountsItOnTheEmptyColony_AndSpendsTheHold()
+    public void AnOfficeCrate_IsCrateAbleNotSiteOnly()
+    {
+        var world = NewSystem();
+        var office = world.Info.ComponentDesigns["default-design-local-construction"];
+        Assert.That(LocalConstructionJob.IsCrate(office), Is.True);
+        Assert.That(LocalConstructionJob.IsSiteOnly(office), Is.False);
+    }
+
+    [Test]
+    public void MountingAnOfficeCrate_GivesTheEmptyColonyItsOwnPoints()
     {
         var world = NewSystem();
         var planet = Planet(world);
@@ -202,37 +212,68 @@ public class ShipConstructionTests
         var office = world.Info.ComponentDesigns["default-design-local-construction"];
         long rate = office.GetAttribute<ConstructionAtb>().ConstructionPoints["installation"];
         Assert.That(rate, Is.EqualTo(25));
-        Assert.That(office.IndustryPointCosts, Is.GreaterThan(0));
-        Stock(world, ship, office.ResourceCosts);
+        var crate = new ComponentInstance(office);
+        Assert.That(ship.GetDataBlob<CargoStorageDB>().AddCargoByUnit(crate, 1), Is.EqualTo(1));
         Assert.That(colony.GetDataBlob<CargoStorageDB>().TypeStores, Is.Empty);
 
         var queued = new CommandTranslator(Game).Translate(
-            world.Faction, ship, new AddToConstructionQueueCommand(ship.Id, office.UniqueID, null, colony.Id));
+            world.Faction, ship, new AddToConstructionQueueCommand(ship.Id, office.UniqueID, crate.ID, colony.Id));
         Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
 
         var job = ship.GetDataBlob<LocalConstructionDB>().BuildQueue.Peek();
-        Assert.That(job.Kind, Is.EqualTo("Assemble"));
-        Assert.That(job.PointCost, Is.EqualTo(office.IndustryPointCosts));
+        Assert.That(job.Kind, Is.EqualTo("Mount"));
+        Assert.That(job.Instance, Is.SameAs(crate));
         Assert.That(job.TargetEntityId, Is.EqualTo(colony.Id));
-        Assert.That(job.ResourcesRemaining["iron"], Is.EqualTo(office.ResourceCosts["iron"]));
 
         var processor = new LocalConstructionProcessor();
         for (int day = 0; day < 500 && ship.GetDataBlob<LocalConstructionDB>().BuildQueue.Count > 0; day++)
             processor.ProcessEntity(ship, 0);
 
         Assert.That(ship.GetDataBlob<LocalConstructionDB>().BuildQueue, Is.Empty);
-        foreach (var (resourceId, _) in office.ResourceCosts)
-        {
-            var good = world.Info.Data.CargoGoods.GetAny(resourceId)!;
-            Assert.That(ship.GetDataBlob<CargoStorageDB>().GetUnitsStored(good, false), Is.EqualTo(0), resourceId);
-        }
+        Assert.That(ship.GetDataBlob<CargoStorageDB>().GetUnitsStored(crate, false), Is.EqualTo(0));
         Assert.That(colony.GetDataBlob<LocalConstructionDB>().PointsPerDay, Is.EqualTo(rate));
-        Assert.That(Mounted(colony).Single().Design, Is.SameAs(office));
+        Assert.That(Mounted(colony).Single(), Is.SameAs(crate));
         Assert.That(colony.GetDataBlob<CargoStorageDB>().TypeStores, Is.Empty);
 
         var colonyView = new GameProjector(Game).ProjectEntity(colony, colony.FactionOwnerID).GetView<ConstructionView>();
         Assert.That(colonyView!.PointsPerDay, Is.EqualTo(rate));
         Assert.That(colonyView.IsShip, Is.False);
+    }
+
+    [Test]
+    public void AssemblingASiteOnlyDesign_MountsItOnTheEmptyColony_AndSpendsTheHold()
+    {
+        var world = NewSystem();
+        var planet = Planet(world);
+        var colony = EmptyColony(world, planet);
+        var ship = ColonyShip(world, planet);
+        InRange(ship, colony);
+
+        var cityHall = world.Info.ComponentDesigns["default-design-city-hall"];
+        ship.GetDataBlob<CargoStorageDB>().TypeStores["general-storage"] = new TypeStore(1_000_000_000_000);
+        Assert.That(cityHall.IndustryPointCosts, Is.GreaterThan(0));
+        Stock(world, ship, cityHall.ResourceCosts);
+
+        var queued = new CommandTranslator(Game).Translate(
+            world.Faction, ship, new AddToConstructionQueueCommand(ship.Id, cityHall.UniqueID, null, colony.Id));
+        Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
+
+        var job = ship.GetDataBlob<LocalConstructionDB>().BuildQueue.Peek();
+        Assert.That(job.Kind, Is.EqualTo("Assemble"));
+        Assert.That(job.PointCost, Is.EqualTo(cityHall.IndustryPointCosts));
+        Assert.That(job.TargetEntityId, Is.EqualTo(colony.Id));
+
+        var processor = new LocalConstructionProcessor();
+        for (int day = 0; day < 100_000 && ship.GetDataBlob<LocalConstructionDB>().BuildQueue.Count > 0; day++)
+            processor.ProcessEntity(ship, 0);
+
+        Assert.That(ship.GetDataBlob<LocalConstructionDB>().BuildQueue, Is.Empty);
+        foreach (var (resourceId, _) in cityHall.ResourceCosts)
+        {
+            var good = world.Info.Data.CargoGoods.GetAny(resourceId)!;
+            Assert.That(ship.GetDataBlob<CargoStorageDB>().GetUnitsStored(good, false), Is.EqualTo(0), resourceId);
+        }
+        Assert.That(Mounted(colony).Single().Design, Is.SameAs(cityHall));
     }
 
     [Test]
@@ -376,6 +417,7 @@ public class ShipConstructionTests
             "default-design-raptor",
             "default-design-infrastructure",
             "default-design-local-construction",
+            "default-design-city-hall",
         };
 
         ComponentDesigner.StartResearched = true;
