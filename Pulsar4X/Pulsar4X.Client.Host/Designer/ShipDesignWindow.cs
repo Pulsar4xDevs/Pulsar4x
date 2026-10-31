@@ -226,7 +226,7 @@ namespace Pulsar4X.Client
         {
             if(!IsActive) return;
 
-            ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowSize(new Vector2(1350, 825), ImGuiCond.FirstUseEver);
 
             if (Window.Begin("Ship Design", ref IsActive, _flags))
             {

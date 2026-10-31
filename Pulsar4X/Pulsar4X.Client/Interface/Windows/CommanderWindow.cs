@@ -39,7 +39,7 @@ namespace Pulsar4X.Client
 
             var galaxy = _uiState.GameClient?.Galaxy;
 
-            ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowSize(new Vector2(960, 500), ImGuiCond.FirstUseEver);
             if(Window.Begin("Commanders", ref IsActive, _flags))
             {
                 if(galaxy != null)
