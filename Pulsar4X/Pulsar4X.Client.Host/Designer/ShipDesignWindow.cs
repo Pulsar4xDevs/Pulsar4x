@@ -226,6 +226,8 @@ namespace Pulsar4X.Client
         {
             if(!IsActive) return;
 
+            ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.FirstUseEver);
+
             if (Window.Begin("Ship Design", ref IsActive, _flags))
             {
                 if(_existingShipDesignNames.Count != _factionInfoDB.ShipDesigns.Values.Count(d => !d.IsObsolete))

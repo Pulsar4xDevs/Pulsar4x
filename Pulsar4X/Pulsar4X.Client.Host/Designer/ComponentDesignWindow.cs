@@ -61,6 +61,8 @@ namespace Pulsar4X.Client
         {
             if(!IsActive) return;
 
+            ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.FirstUseEver);
+
             if(Window.Begin("Component Designer", ref IsActive, _flags))
             {
                 var snapshot = _uiState.GameClient?.Galaxy?.ComponentDesigns;
