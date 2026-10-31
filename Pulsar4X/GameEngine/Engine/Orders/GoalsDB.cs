@@ -132,6 +132,9 @@ public enum GoalType
     // One trip of this faction's own warehouse goods. Appended so saved values stay put.
     MoveGoods,
     FleetMoveGoods,
+
+    // One ship carries finished crates to another colony and mounts them there. Appended so saved values stay put.
+    BootstrapColony,
 }
 
 public enum MoveGoodsLeg
@@ -147,6 +150,13 @@ public class MoveGoodsLine
     public long Loaded;
     /// <summary>Units handed to the destination. The rest of <see cref="Loaded"/> stays aboard.</summary>
     public long Delivered;
+}
+
+/// <summary>What the player asked a bootstrap ship to carry: this many crates of one component design.</summary>
+public class BootstrapCrateLine
+{
+    public string DesignId = "";
+    public int Count;
 }
 
 public class Goal
@@ -165,6 +175,10 @@ public class Goal
     public MoveGoodsLeg MoveGoodsLeg = MoveGoodsLeg.Load;
     /// <summary>The unload transfer was handed off. The next wake completes the trip.</summary>
     public bool MoveGoodsUnloaded;
+    /// <summary>Bootstrap colony. The crates the player asked for. Empty for every other goal.</summary>
+    public List<BootstrapCrateLine> BootstrapCrates = new();
+    /// <summary>Bootstrap colony. Instance ids picked on the first plan, so later plans count only these.</summary>
+    public List<int> BootstrapCrateIds = new();
     /// <summary>Where to buy, or the freight source. -1 until a route is committed.</summary>
     public int SourceEntityId = -1;
     /// <summary>Where to sell, or the freight destination. -1 until a route is committed.</summary>

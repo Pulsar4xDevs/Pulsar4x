@@ -89,6 +89,19 @@ public sealed record MoveGoodsCommand(
     int DestId,
     IReadOnlyList<CargoTransferItem> Items) : GameCommand(TargetEntityId);
 
+/// <summary>This many finished crates of one component design.</summary>
+public sealed record BootstrapCrateRequest(string DesignId, int Count);
+
+/// <summary>
+/// One captained ship with a Construction Bay. It loads the crates at the source colony, flies to the
+/// destination colony and its bay mounts them there from its own hold.
+/// </summary>
+public sealed record BootstrapColonyCommand(
+    int TargetEntityId,
+    int SourceId,
+    int DestId,
+    IReadOnlyList<BootstrapCrateRequest> Crates) : GameCommand(TargetEntityId);
+
 /// <summary>Empty chair. Plot the flight to the source and a load. The load plots the destination when it finishes.</summary>
 public sealed record QueueMoveGoodsCommand(
     int TargetEntityId,

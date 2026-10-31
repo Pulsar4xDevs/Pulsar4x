@@ -28,6 +28,8 @@ Plans 1–12 and 5b are implemented on `TradeAndTransport`. Do not start a later
 
 [Move own goods](move-own-goods.md) is implemented. It is not plan 13. One trip carries named warehouse piles between two owned colonies. Haul and Haul contract stay the posted-book orders.
 
+[Bootstrap colony](bootstrap-colony.md) is implemented for one ship. It is not plan 13. A captained ship with a Construction Bay carries finished crates between two owned colonies and mounts them from its own hold. The fleet-level order and the client picker are not built.
+
 [Faction grants, later](faction-grants-later.md) is a stub saved on 2026-10-15. It is not plan 13. The checkbox pass is in. The next slice is a Colonies box separate from Ships. Geo, Grav, Research, a transponder, sensor profiles, opinion, and combat use of status stay listed there and unbuilt. Leave it until someone asks to build it.
 
 Tests for these plans run from outside the repo (for example `/tmp`) with `DOTNET_ROLL_FORWARD=LatestMajor`, project `Pulsar4X/Pulsar4X.Tests/Pulsar4X.Tests.csproj`. `global.json` pins SDK 8.0.122; the local SDK may be newer.
