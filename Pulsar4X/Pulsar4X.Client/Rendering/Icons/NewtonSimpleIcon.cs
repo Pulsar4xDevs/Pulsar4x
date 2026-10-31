@@ -112,6 +112,9 @@ namespace Pulsar4X.Client
             if(_points.Length == 0)
                 return;
 
+            // the point array is rebuilt with a new length when the user changes NumberOfArcSegments
+            _taIndex = Math.Clamp(_taIndex, 0, _points.Length - 1);
+
             Orbital.Vector2 pos = new Vector2(_myPosDB.RelativePosition.X, _myPosDB.RelativePosition.Y);
             double minDist = (pos - _points[_taIndex]).Length();
 

@@ -95,15 +95,31 @@ namespace Pulsar4X.Client
         /// </summary>
         public virtual void UpdateUserSettings()
         {
-            //if this happens, we need to rebuild the whole set of points.
-            if (_userSettings.NumberOfArcSegments != _numberOfArcSegments)
-            {
+            // The angular step must be derived from the segment count *before* the point array
+            // is rebuilt: CreatePointArray() spaces the points using _segmentArcSweepRadians.
+            int oldSegments = _numberOfArcSegments;
+            bool segmentsChanged = _userSettings.NumberOfArcSegments != _numberOfArcSegments;
+            if (segmentsChanged)
                 _numberOfArcSegments = _userSettings.NumberOfArcSegments;
-                CreatePointArray();
-            }
 
             _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
             _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
+
+            //if the segment count changed, we need to rebuild the whole set of points.
+            if (segmentsChanged)
+            {
+                CreatePointArray();
+
+                // _index is a position in the old (differently sized) point array. Keep it pointing
+                // at the same angle in the new array, and never past its end. OnPhysicsUpdate()
+                // will refine it to the exact nearest point on the next game update.
+                if (_points != null && _points.Length > 0)
+                {
+                    int scaled = (int)Math.Round((double)_index * _numberOfArcSegments / Math.Max(1, oldSegments));
+                    _index = Math.Clamp(scaled, 0, _points.Length - 1);
+                }
+            }
+
             _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
             _drawPoints = new SDL.Point[_numberOfDrawSegments];
             _fullOrbitDrawPoints = new SDL.Point[_numberOfArcSegments + 1];

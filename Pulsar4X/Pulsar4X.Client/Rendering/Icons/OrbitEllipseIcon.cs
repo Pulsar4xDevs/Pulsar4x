@@ -147,12 +147,13 @@ namespace Pulsar4X.Client
             var mtrx =  scAU * matrix * trns; //scale to au, scale for camera zoom, and move to camera position and zoom
 
             // Transform full orbit points for ghost rendering
-            for (int i = 0; i < _numberOfArcSegments + 1 && i < _fullOrbitDrawPoints.Length; i++)
+            for (int i = 0; i < _numberOfArcSegments + 1 && i < _fullOrbitDrawPoints.Length && i < _points.Length; i++)
             {
                 _fullOrbitDrawPoints[i] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
             }
 
-            int index = _index;
+            // _index is only ever set against the current _points, but never trust it past the array end.
+            int index = Math.Min(_index, _points.Length - 1);
             var spos = camera.ViewCoordinateV2_m(_bodyAbsolutePos);
             _screen = mtrx;
             _bodyScreen = spos;
