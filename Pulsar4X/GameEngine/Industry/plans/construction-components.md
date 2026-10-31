@@ -10,7 +10,7 @@ Basemod has a ship component that carries the installation rate, a Construction 
 
 Templates live in `GameData/basemod/TemplateFiles/installations.json`. Designs live in `ScenarioFiles/designs/componentDesigns.json`. Ships live in `ScenarioFiles/designs/shipDesigns.json`. Earth's unlocked ids are in `ScenarioFiles/systems/sol/earth.json`.
 
-`local-construction` is `PlanetInstallation` only. Its attribute line is an `installation` rate of Level times 5 on `ConstructionAtb`. The design `default-design-local-construction` is level 1.
+`local-construction` is `ShipCargo, PlanetInstallation`, a crate (it was `PlanetInstallation` only until the colony-bootstrap goal). Its attribute line is an `installation` rate of Level times 5 on `ConstructionAtb`. The design `default-design-local-construction` is level 1.
 
 The shipyard template is `ShipCargo, PlanetInstallation`. Its `IndustryAtb` rates are `component-construction` at Crew Size times 0.01, and `ship-assembly` at Crew Size times 0.02. Default Crew Size is 10000. Slip Size defaults to 100000, the same figure as the launch pad, so the stock hulls fit. Its `ConstructionAtb` key is `ship-refit` at Crew Size times 0.0005.
 
@@ -22,7 +22,7 @@ The freighter in `shipDesigns.json` is the pattern for a small ship: bridge, tan
 
 New template `ship-construction` in `installations.json`. The display name is Construction Bay. `ShipComponent, ShipCargo`, cargo type `general-storage`, so a factory can put the finished part in the warehouse. `Size` defaults to 1. Installation points are Size times 5. Crew is Size times 100. One design, `default-design-ship-construction`.
 
-Edit `local-construction` so the attribute args are an `installation` rate of Level times 5. Mount stays `PlanetInstallation`. It does not gain `ShipCargo`. The display name stays Construction Services.
+Edit `local-construction` so the attribute args are an `installation` rate of Level times 5. Mount was `PlanetInstallation` only here, and later gained `ShipCargo` so a factory can build the office as a crate. The display name stays Construction Services.
 
 Edit `shipyard`. Add `ConstructionAtb` with `ship-refit` only. Leave the `IndustryAtb` block as it is. Refit points are Crew Size times 0.0005, so the default yard has 5. That formula sits on a property next to Crew Size.
 
