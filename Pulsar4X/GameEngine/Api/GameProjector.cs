@@ -1869,6 +1869,8 @@ namespace Pulsar4X.Engine.Api
                 ColoniesInCargoRange = ColoniesInCargoRange(ship, factionId),
                 CommandSpan = SpanLabel(CommandSpan.Effective(ship)),
                 SpanLine = CommandSpan.Describe(ship),
+                ReachFixWell = CommandSpan.Fix(ship, CommandSpanKind.Well) ?? "",
+                ReachFixSystem = CommandSpan.Fix(ship, CommandSpanKind.System) ?? "",
                 LogisticsSystemIds = LogisticsSpan.SystemIds(ship),
             };
         }

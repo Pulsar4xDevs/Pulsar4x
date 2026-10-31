@@ -407,6 +407,7 @@ public class ShipConstructionTests
         {
             "default-design-passive-sensor-s50",
             "default-design-bridge-ship",
+            "default-design-bridge-well",
             "default-design-ship-construction",
             "default-design-fuel-tank-1500",
             "default-design-shuttlebay",

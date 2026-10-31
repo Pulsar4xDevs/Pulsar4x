@@ -93,7 +93,118 @@ public static class CommandSpan
     {
         var hardware = unit == null ? CommandSpanKind.Body : Of(unit);
         var effective = unit == null ? CommandSpanKind.Body : Effective(unit);
-        return Word(effective) + ". " + BridgeClause(hardware) + " " + OfficerClause(unit, effective);
+        string line = Word(effective) + ". " + BridgeClause(hardware) + " " + OfficerClause(unit, effective);
+        string limit = LimitClause(unit == null ? SpanLimiter.None : LimiterOf(unit));
+        return limit.Length == 0 ? line : line + " " + limit;
+    }
+
+    /// <summary>What caps a ship's reach. Flags, since the bridge and the chair can both be the cap.</summary>
+    [Flags]
+    public enum SpanLimiter
+    {
+        None = 0,
+        /// <summary>The bridge hardware is no wider than the effective span.</summary>
+        Bridge = 1,
+        /// <summary>A seated officer's rank is no wider than the effective span.</summary>
+        Rank = 2,
+        /// <summary>Nobody sits the chair.</summary>
+        EmptyChair = 4,
+    }
+
+    /// <summary>
+    /// Which part holds reach below System. Pure: a bridge, whether an officer sits, and that officer's rank.
+    /// A chair with nobody in it is the cap, not the rank.
+    /// </summary>
+    public static SpanLimiter LimiterOf(CommandSpanKind bridge, bool seated, int rank)
+    {
+        var rankSpan = seated ? RankSpan(rank) : CommandSpanKind.Body;
+        var effective = Narrower(bridge, rankSpan);
+        if (effective == CommandSpanKind.System)
+            return SpanLimiter.None;
+        var found = SpanLimiter.None;
+        if (Order(bridge) == Order(effective))
+            found |= SpanLimiter.Bridge;
+        if (Order(rankSpan) == Order(effective))
+            found |= seated ? SpanLimiter.Rank : SpanLimiter.EmptyChair;
+        return found;
+    }
+
+    public static SpanLimiter LimiterOf(Entity unit)
+    {
+        if (unit == null)
+            return SpanLimiter.None;
+        if (!unit.HasDataBlob<ShipInfoDB>() && !unit.HasDataBlob<FleetDB>())
+            return SpanLimiter.None;
+        bool seated = CommanderSkills.TryGetCommander(unit, out _, out var commander);
+        return LimiterOf(Of(unit), seated, seated ? commander.Rank : 0);
+    }
+
+    /// <summary>One sentence naming the part that limits reach. Empty when nothing below System does.</summary>
+    public static string LimitClause(SpanLimiter limiter)
+    {
+        bool bridge = limiter.HasFlag(SpanLimiter.Bridge);
+        if (limiter.HasFlag(SpanLimiter.EmptyChair))
+            return bridge ? "The bridge and the empty chair limit reach." : "The empty chair limits reach.";
+        if (limiter.HasFlag(SpanLimiter.Rank))
+            return bridge ? "The bridge and the captain's rank limit reach." : "The captain's rank limits reach.";
+        return bridge ? "The bridge limits reach." : "";
+    }
+
+    static int Order(CommandSpanKind span) => span switch
+    {
+        CommandSpanKind.Body => 0,
+        CommandSpanKind.Well => 1,
+        _ => 2,
+    };
+
+    /// <summary>The lowest rank whose span reaches <paramref name="wanted"/>.</summary>
+    public static int RankFor(CommandSpanKind wanted) => Order(wanted) >= 2 ? 6 : Order(wanted) == 1 ? 4 : 1;
+
+    /// <summary>
+    /// What to change so reach grows to <paramref name="wanted"/>. Null when it already does.
+    /// Pure. <paramref name="titleOf"/> turns a rank into its theme title and may be null.
+    /// </summary>
+    public static string? Fix(CommandSpanKind bridge, bool seated, int rank, CommandSpanKind wanted, Func<int, string?>? titleOf = null)
+    {
+        int want = Order(wanted);
+        var rankSpan = seated ? RankSpan(rank) : CommandSpanKind.Body;
+        bool bridgeShort = Order(bridge) < want;
+        bool rankShort = Order(rankSpan) < want;
+        if (!bridgeShort && !rankShort)
+            return null;
+
+        string bridgeFix = want >= 2 ? "Fit a System Command Bridge" : "Fit a Planetary Command Bridge";
+        int need = RankFor(wanted);
+        string? title = titleOf?.Invoke(need);
+        string officer = "an officer of rank " + need + "+" + (string.IsNullOrWhiteSpace(title) ? "" : " (" + title + ")");
+        string seat = seated ? "Promote the captain or seat " + officer : "Seat " + officer;
+
+        if (bridgeShort && rankShort)
+            return (seated ? "The bridge and the captain's rank both limit reach. " : "The bridge and the empty chair both limit reach. ")
+                + bridgeFix + ". " + seat + ".";
+        if (bridgeShort)
+            return "The bridge limits reach. " + bridgeFix + ".";
+        return (seated ? "The captain's rank limits reach. " : "The chair is empty. ") + seat + ".";
+    }
+
+    public static string? Fix(Entity unit, CommandSpanKind wanted)
+    {
+        if (unit == null)
+            return null;
+        bool seated = CommanderSkills.TryGetCommander(unit, out _, out var commander);
+        return Fix(Of(unit), seated, seated ? commander.Rank : 0, wanted, rank => TitleFor(unit, rank));
+    }
+
+    static string? TitleFor(Entity unit, int rank)
+    {
+        if (unit.Manager?.Game is Game game
+            && game.Themes != null
+            && game.Themes.TryGetValue(game.Settings.CurrentTheme, out var theme)
+            && theme.NavyRanks != null
+            && theme.NavyRanks.TryGetValue(rank, out var title)
+            && !string.IsNullOrWhiteSpace(title))
+            return title;
+        return null;
     }
 
     static string Word(CommandSpanKind span) => span switch

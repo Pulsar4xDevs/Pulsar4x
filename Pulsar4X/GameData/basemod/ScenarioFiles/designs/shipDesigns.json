@@ -54,6 +54,7 @@
       "Components": [
         { "Id": "default-design-passive-sensor-s50", "Amount": 1 },
         { "Id": "default-design-bridge-ship", "Amount": 1 },
+        { "Id": "default-design-bridge-well", "Amount": 1 },
         { "Id": "default-design-ship-construction", "Amount": 1 },
         { "Id": "default-design-fuel-tank-1500", "Amount": 1 },
         { "Id": "default-design-shuttlebay", "Amount": 1 },
