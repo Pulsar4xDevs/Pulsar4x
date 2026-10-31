@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Factories;
 using Pulsar4X.Factions;
@@ -17,6 +18,7 @@ using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using Pulsar4X.Orbital;
 using Pulsar4X.Orbits;
+using Pulsar4X.People;
 using Pulsar4X.Ships;
 
 namespace Pulsar4X.Tests
@@ -248,6 +250,143 @@ namespace Pulsar4X.Tests
             var plain = BareShip();
             Assert.That(CommandSpan.Describe(plain), Does.Contain("The bridge and the empty chair limit reach."));
             Assert.That(CommandSpan.Fix(plain, CommandSpanKind.Well), Does.Contain("Fit a Planetary Command Bridge"));
+        }
+
+        [Test]
+        public void Effective_ShipInFleet_IsCappedByTheFlagship()
+        {
+            var faction = SpanFaction();
+            var flag = SeatedShip(faction, AdminLevel.Planet, rank: 6);
+            var wide = SeatedShip(faction, AdminLevel.System, rank: 6);
+            Assert.AreEqual(CommandSpanKind.System, CommandSpan.Effective(wide), "alone, nothing caps it");
+
+            var fleet = FleetFactory.Create(_sys, faction.Id, "flotilla");
+            var fdb = fleet.GetDataBlob<FleetDB>();
+            fdb.AddChild(flag);
+            fdb.AddChild(wide);
+            fdb.FlagShipID = flag.Id;
+
+            Assert.AreEqual(CommandSpanKind.Well, CommandSpan.Effective(wide));
+            Assert.AreEqual(CommandSpanKind.Well, CommandSpan.Effective(flag));
+        }
+
+        [Test]
+        public void Effective_ParentCeiling_CapsFlagshipAndSubFleet()
+        {
+            var faction = SpanFaction();
+            var parentFlag = SeatedShip(faction, AdminLevel.Planet, rank: 6);
+            var parent = FleetFactory.Create(_sys, faction.Id, "parent");
+            parent.GetDataBlob<FleetDB>().AddChild(parentFlag);
+            parent.GetDataBlob<FleetDB>().FlagShipID = parentFlag.Id;
+
+            var childFlag = SeatedShip(faction, AdminLevel.System, rank: 6);
+            var child = FleetFactory.Create(_sys, faction.Id, "child");
+            child.GetDataBlob<FleetDB>().AddChild(childFlag);
+            child.GetDataBlob<FleetDB>().FlagShipID = childFlag.Id;
+
+            Assert.AreEqual(CommandSpanKind.System, CommandSpan.Effective(child));
+            Assert.AreEqual(CommandSpanKind.System, CommandSpan.Effective(childFlag));
+
+            child.GetDataBlob<FleetDB>().SetParent(parent);
+
+            Assert.AreEqual(CommandSpanKind.Well, CommandSpan.Effective(child), "the sub-fleet is capped");
+            Assert.AreEqual(CommandSpanKind.Well, CommandSpan.Effective(childFlag), "so is its flagship");
+            Assert.AreEqual(CommandSpanKind.Well, CommandSpan.Effective(parent));
+        }
+
+        [Test]
+        public void Effective_ParentCeiling_LowRankOfTheParentCaptainCaps()
+        {
+            var faction = SpanFaction();
+            var parentFlag = SeatedShip(faction, AdminLevel.System, rank: 1);
+            var parent = FleetFactory.Create(_sys, faction.Id, "parent");
+            parent.GetDataBlob<FleetDB>().AddChild(parentFlag);
+            parent.GetDataBlob<FleetDB>().FlagShipID = parentFlag.Id;
+
+            var ship = SeatedShip(faction, AdminLevel.System, rank: 6);
+            parent.GetDataBlob<FleetDB>().AddChild(ship);
+
+            Assert.AreEqual(CommandSpanKind.Body, CommandSpan.Effective(ship));
+            Assert.That(CommandSpan.Describe(ship), Does.Contain("The parent fleet limits reach."));
+            Assert.That(CommandSpan.Fix(ship, CommandSpanKind.Well), Does.Contain("The parent fleet limits reach."));
+        }
+
+        [Test]
+        public void Effective_FlagshipLessFleet_ImposesNoCeiling_ButItsAncestorsStillCap()
+        {
+            var faction = SpanFaction();
+            var topFlag = SeatedShip(faction, AdminLevel.Planet, rank: 6);
+            var top = FleetFactory.Create(_sys, faction.Id, "top");
+            top.GetDataBlob<FleetDB>().AddChild(topFlag);
+            top.GetDataBlob<FleetDB>().FlagShipID = topFlag.Id;
+
+            var middle = FleetFactory.Create(_sys, faction.Id, "middle");
+            var leafFlag = SeatedShip(faction, AdminLevel.System, rank: 6);
+            var leaf = FleetFactory.Create(_sys, faction.Id, "leaf");
+            leaf.GetDataBlob<FleetDB>().AddChild(leafFlag);
+            leaf.GetDataBlob<FleetDB>().FlagShipID = leafFlag.Id;
+
+            leaf.GetDataBlob<FleetDB>().SetParent(middle);
+            Assert.AreEqual(CommandSpanKind.System, CommandSpan.Effective(leaf), "a flagship-less parent alone caps nothing");
+            Assert.AreEqual(CommandSpanKind.System, CommandSpan.Effective(leafFlag));
+
+            middle.GetDataBlob<FleetDB>().SetParent(top);
+            Assert.AreEqual(CommandSpanKind.Well, CommandSpan.Effective(leaf), "the grandparent still caps");
+            Assert.AreEqual(CommandSpanKind.Well, CommandSpan.Effective(leafFlag));
+        }
+
+        [Test]
+        public void Effective_ShipDirectlyInAFlagshipLessFleet_IsNotCapped()
+        {
+            var faction = SpanFaction();
+            var ship = SeatedShip(faction, AdminLevel.System, rank: 6);
+            var fleet = FleetFactory.Create(_sys, faction.Id, "empty-chair");
+            fleet.GetDataBlob<FleetDB>().AddChild(ship);
+
+            Assert.AreEqual(CommandSpanKind.System, CommandSpan.Effective(ship));
+        }
+
+        [Test]
+        public void Effective_CycleInTheFleetTree_Terminates()
+        {
+            var faction = SpanFaction();
+            var aFlag = SeatedShip(faction, AdminLevel.Planet, rank: 6);
+            var a = FleetFactory.Create(_sys, faction.Id, "a");
+            a.GetDataBlob<FleetDB>().AddChild(aFlag);
+            a.GetDataBlob<FleetDB>().FlagShipID = aFlag.Id;
+            var bFlag = SeatedShip(faction, AdminLevel.System, rank: 6);
+            var b = FleetFactory.Create(_sys, faction.Id, "b");
+            b.GetDataBlob<FleetDB>().AddChild(bFlag);
+            b.GetDataBlob<FleetDB>().FlagShipID = bFlag.Id;
+
+            a.GetDataBlob<FleetDB>().SetParent(b);
+            b.GetDataBlob<FleetDB>().SetParent(a);
+
+            Assert.AreEqual(CommandSpanKind.Well, CommandSpan.Effective(a));
+            Assert.AreEqual(CommandSpanKind.Well, CommandSpan.Effective(bFlag));
+        }
+
+        [Test]
+        public void Effective_Colony_IsNotCappedByAFleet()
+        {
+            var colony = Entity.Create();
+            _sys.AddEntity(colony, new BaseDataBlob[] { new NameDB("c") });
+            AttachBridge(colony, AdminLevel.Planet);
+
+            Assert.AreEqual(CommandSpanKind.Well, CommandSpan.Effective(colony));
+            Assert.AreEqual(CommandSpanKind.System, CommandSpan.ParentCeiling(colony));
+        }
+
+        Entity SpanFaction() => FactionFactory.CreateFaction(Game, "span-" + Guid.NewGuid().ToString("N"));
+
+        Entity SeatedShip(Entity faction, AdminLevel bridge, int rank)
+        {
+            var ship = BareShip();
+            ship.FactionOwnerID = faction.Id;
+            AttachBridge(ship, bridge);
+            var officer = CommanderFactory.Create(_sys, faction.Id, new CommanderDB("O", rank, CommanderTypes.Navy));
+            ship.GetDataBlob<ShipInfoDB>().CommanderID = officer.Id;
+            return ship;
         }
 
         static ComponentDesignBlueprint BridgeBlueprint(string id, string name, int span, int consoles)
