@@ -107,6 +107,84 @@ public static class BootstrapPicker
             .ToList();
     }
 
+    /// <summary>The destination's planet as the infrastructure check sees it.</summary>
+    public sealed record BootstrapClimate(string PlanetName, double GravityMetresPerSec2, double PressureAtm);
+
+    /// <summary>One infrastructure design the source holds a crate of, and its window.</summary>
+    public sealed record InfrastructureOption(string DesignId, string Name, InfrastructureWindow Window);
+
+    /// <summary>
+    /// The destination colony's planet: gravity from its body and pressure from its atmosphere (none is 0).
+    /// Null when the colony or its planet is not known yet.
+    /// </summary>
+    public static BootstrapClimate? ClimateOf(EntitySnapshot? colony, Func<int, EntitySnapshot?> find)
+    {
+        if (colony?.GetView<ColonyView>()?.PlanetEntityId is not int planetId || find(planetId) is not { } planet)
+            return null;
+        var body = planet.GetView<BodyView>();
+        if (body == null)
+            return null;
+        return new BootstrapClimate(planet.GetView<NameView>()?.Name ?? "", body.GravityMetresPerSec2, planet.GetView<AtmosphereView>()?.PressureAtm ?? 0);
+    }
+
+    /// <summary>
+    /// The infrastructure designs with finished crates at the source. The check reads source cargo only, so the
+    /// destination's stock and the ships' holds do not count.
+    /// </summary>
+    public static IReadOnlyList<InfrastructureOption> InfrastructureAtSource(ComponentDesignsSnapshot designs, EntitySnapshot? source)
+    {
+        var found = new List<InfrastructureOption>();
+        if (source?.GetView<CargoStorageView>() is not { } storage)
+            return found;
+        foreach (var store in storage.Stores)
+        {
+            foreach (var item in store.Items)
+            {
+                if (!item.IsCrate || item.Units <= 0 || string.IsNullOrEmpty(item.DesignId)
+                    || found.Any(o => o.DesignId == item.DesignId))
+                    continue;
+                var design = designs.Designs.FirstOrDefault(d => d.Id == item.DesignId);
+                if (design?.Infrastructure != null)
+                    found.Add(new InfrastructureOption(design.Id, design.Name, design.Infrastructure));
+            }
+        }
+        return found.OrderBy(o => o.Name, StringComparer.Ordinal).ThenBy(o => o.DesignId, StringComparer.Ordinal).ToList();
+    }
+
+    /// <summary>The fitting designs, best fit first, from the source's crates and the destination's climate.</summary>
+    public static IReadOnlyList<InfrastructureOption> FittingInfrastructure(
+        IReadOnlyList<InfrastructureOption> atSource, BootstrapClimate climate)
+    {
+        var ranked = InfrastructureFit.Rank(
+            atSource.Select(o => (o.DesignId, o.Window)), climate.GravityMetresPerSec2, climate.PressureAtm);
+        return ranked.Select(id => atSource.First(o => o.DesignId == id)).ToList();
+    }
+
+    /// <summary>
+    /// What blocks the order on infrastructure, or null. Only a list with an infrastructure line is checked, and an
+    /// unknown climate blocks nothing here, since the server decides.
+    /// </summary>
+    public static string? CheckInfrastructure(
+        BootstrapOrderList list, ComponentDesignsSnapshot designs,
+        IReadOnlyList<InfrastructureOption> atSource, BootstrapClimate? climate)
+    {
+        if (climate == null || list.InfrastructureEntry(designs) == null)
+            return null;
+        return FittingInfrastructure(atSource, climate).Count == 0 ? InfrastructureFit.NoFitMessage(climate.PlanetName) : null;
+    }
+
+    /// <summary>
+    /// Puts the best fit on the list, the default the player may then tweak. Call it when the source or the
+    /// destination changes. False when nothing fits or the list has no infrastructure line.
+    /// </summary>
+    public static bool ApplyBestFit(
+        BootstrapOrderList list, ComponentDesignsSnapshot designs,
+        IReadOnlyList<InfrastructureOption> atSource, BootstrapClimate climate)
+    {
+        var fits = FittingInfrastructure(atSource, climate);
+        return fits.Count > 0 && list.UseInfrastructure(designs, fits[0].DesignId);
+    }
+
     /// <summary>
     /// Keeps the typed counts in step with the live options: a new design starts at zero, a count never
     /// passes the stock or goes below zero, and a design that left the list is dropped.

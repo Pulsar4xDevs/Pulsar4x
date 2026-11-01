@@ -68,7 +68,9 @@ public class DeliverShipmentPlan : IGoalPlanner
         ShipmentBook.Unpack(dest, shipment);
         if (shipment.AllArrived)
         {
-            ShipmentBook.Complete(game, shipment, source, ship.FactionOwnerID, atDateTime);
+            // A Bootstrap crate package stays open until the colony has mounted every crate. The fleet closes it.
+            if (!ShipmentBook.AwaitsMount(dest, shipment))
+                ShipmentBook.Complete(game, shipment, source, ship.FactionOwnerID, atDateTime);
             return PlanResult.Done("delivered");
         }
 
@@ -97,7 +99,7 @@ public class DeliverShipmentPlan : IGoalPlanner
 
     // ------------------------------------------------------------------ legs
 
-    static PlanResult PlanLoad(Entity ship, Goal goal, Entity source, ShipmentCargo shipment)
+    internal static PlanResult PlanLoad(Entity ship, Goal goal, Entity source, ShipmentCargo shipment)
     {
         var game = ship.Manager.Game;
         if (!MarketExchangeAction.InRange(ship, source))
@@ -216,7 +218,7 @@ public class DeliverShipmentPlan : IGoalPlanner
         return found;
     }
 
-    static bool Lookup(Game game, int id, out Entity colony)
+    internal static bool Lookup(Game game, int id, out Entity colony)
     {
         colony = null!;
         return id >= 0
@@ -261,7 +263,7 @@ public class DeliverShipmentPlan : IGoalPlanner
         IntelBook.ReleaseClaim(dest, goal.CargoId, ship.Id);
     }
 
-    static bool TransferQueued(Entity ship, Goal goal)
+    internal static bool TransferQueued(Entity ship, Goal goal)
     {
         if (!ship.TryGetDataBlob<ActionQueueDB>(out var queue))
             return false;

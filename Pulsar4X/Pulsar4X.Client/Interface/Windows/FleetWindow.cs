@@ -51,6 +51,7 @@ namespace Pulsar4X.Client
         private BootstrapOrderList? bootList;
         private int bootListFleetId = int.MinValue;
         private string bootAddPick = "";
+        private string bootFitKey = "";
         private BootstrapSiteBuildList bootSites = new();
         private string bootSitePick = "";
         private int loadColonyId = -1;
@@ -619,11 +620,12 @@ namespace Pulsar4X.Client
         // Bootstrap colony is one ship's order: a captained hull with a Construction Bay.
         bool BootstrapShip => orderShip != null && ShipHasCaptain(orderShip) && orderShip.HasConstructionBay;
 
-        // Bootstrap is the fleet's order: it hands crates to its captained ships with a Construction Bay, sub-fleets included.
+        // Bootstrap is the fleet's order: it hands packages to its captained ships, sub-fleets included. A ship needs no
+        // Construction Bay, because the destination colony can mount the crates.
         bool BootstrapFleet => orderShip == null && selectedFleet != null && CapableShips(selectedFleet) > 0;
 
         static int CapableShips(FleetSnapshot fleet)
-            => fleet.Ships.Count(ship => ShipHasCaptain(ship) && ship.HasConstructionBay)
+            => fleet.Ships.Count(ShipHasCaptain)
                 + fleet.SubFleets.Sum(CapableShips);
 
         bool ManualPlot => orderShip != null && (!ShipHasCaptain(orderShip) || plotting);
@@ -1867,8 +1869,10 @@ namespace Pulsar4X.Client
         // sub-fleets included, over as many trips as it takes. List edits live in BootstrapOrderList.
         private void DisplayBootstrapFleet(IClientGalaxy galaxy, IEnumerable<EntitySnapshot> candidates, FleetSnapshot fleet, OrderBand band)
         {
-            ImGui.TextWrapped("The fleet's ships load finished crates at the source, fly to the destination and mount them with their Construction Bays. "
-                + "Crates higher in the list ship first. A list bigger than one hold goes over in several trips.");
+            ImGui.TextWrapped("The crates and resources are sealed at the source when you send the order. The fleet's ships load them there and "
+                + "fly them to the destination. Whichever of the ship's Construction Bay or the destination colony has more free "
+                + "construction capacity mounts the crates, and the colony on a tie. Crates higher in the list ship first, and the "
+                + "resources go after every crate has arrived.");
             bool widen = band == OrderBand.System;
             var pool = widen ? LogisticsCandidates(galaxy, candidates) : candidates;
             var colonies = pool.Where(BootstrapPicker.IsPickable).OrderBy(e => NameOf(e), StringComparer.Ordinal).ToList();
@@ -1923,6 +1927,43 @@ namespace Pulsar4X.Client
                 bootList = BootstrapOrderList.FromDefaults(designs);
                 bootSites = new BootstrapSiteBuildList();
                 bootListFleetId = fleet.Id;
+                bootFitKey = "";
+            }
+
+            var pickedSource = colonies.FirstOrDefault(colony => colony.Id == bootSourceId);
+            var pickedDest = colonies.FirstOrDefault(colony => colony.Id == bootDestId);
+            var infraAtSource = BootstrapPicker.InfrastructureAtSource(designs, pickedSource);
+            var climate = BootstrapPicker.ClimateOf(pickedDest, id => pool.FirstOrDefault(e => e.Id == id));
+
+            // The best fit is the default whenever the pair changes. The combo below is the player's tweak.
+            string fitKey = bootSourceId + ":" + bootDestId;
+            if(fitKey != bootFitKey && climate != null)
+            {
+                bootFitKey = fitKey;
+                BootstrapPicker.ApplyBestFit(bootList, designs, infraAtSource, climate);
+            }
+            var infraProblem = BootstrapPicker.CheckInfrastructure(bootList, designs, infraAtSource, climate);
+            if(bootList.InfrastructureEntry(designs) is { } infraEntry && infraAtSource.Count > 0)
+            {
+                DisplayHelpers.Header("Infrastructure design");
+                var fits = climate == null
+                    ? new List<BootstrapPicker.InfrastructureOption>()
+                    : BootstrapPicker.FittingInfrastructure(infraAtSource, climate).ToList();
+                string bestId = fits.Count > 0 ? fits[0].DesignId : "";
+                ImGui.SetNextItemWidth(260);
+                if(ImGui.BeginCombo("###fleet-bootstrap-infra", infraEntry.Name + (infraEntry.DesignId == bestId ? " (best fit)" : "")))
+                {
+                    foreach(var option in infraAtSource)
+                    {
+                        string suffix = option.DesignId == bestId ? " (best fit)" : fits.Any(f => f.DesignId == option.DesignId) ? "" : " (does not fit)";
+                        if(ImGui.Selectable(option.Name + suffix + "###fleet-bootstrap-infra-" + option.DesignId, option.DesignId == infraEntry.DesignId))
+                            bootList.UseInfrastructure(designs, option.DesignId);
+                    }
+                    ImGui.EndCombo();
+                }
+                ImGui.SameLine();
+                if(ImGui.SmallButton("Best fit###fleet-bootstrap-infra-best") && climate != null)
+                    BootstrapPicker.ApplyBestFit(bootList, designs, infraAtSource, climate);
             }
 
             DisplayHelpers.Header("Crates, in priority order");
@@ -1979,7 +2020,10 @@ namespace Pulsar4X.Client
                     bootList.Add(chosen.Id, chosen.Name);
             }
             if(ImGui.SmallButton("Reset to default list###fleet-bootstrap-reset"))
+            {
                 bootList = BootstrapOrderList.FromDefaults(designs);
+                bootFitKey = "";
+            }
 
             DisplayHelpers.Header("Built on site");
             ImGui.TextWrapped("Facilities that cannot ride in a hold. The fleet hauls the resources they cost, after the crates arrive.");
@@ -2028,20 +2072,24 @@ namespace Pulsar4X.Client
             }
 
             var lines = bootList.Requests();
-            var source = colonies.FirstOrDefault(colony => colony.Id == bootSourceId);
-            var dest = colonies.FirstOrDefault(colony => colony.Id == bootDestId);
+            var source = pickedSource;
+            var dest = pickedDest;
             string? problem = BootstrapOrderList.Validate(
                 CapableShips(fleet), source?.Id ?? -1, dest?.Id ?? -1, lines,
-                source != null && dest != null && InBand(source, dest.Id));
+                source != null && dest != null && InBand(source, dest.Id))
+                ?? infraProblem;
             if(problem != null)
                 ImGui.TextWrapped(problem);
             if(problem != null)
                 ImGui.BeginDisabled();
             bool send = ImGui.Button("Bootstrap###fleet-bootstrap-send");
+            if(problem != null && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                ImGui.SetTooltip(problem);
             if(problem != null)
                 ImGui.EndDisabled();
             if(send && problem == null && source != null && dest != null)
-                SubmitFleetCommand(new FleetBootstrapCommand(fleet.Id, source.Id, dest.Id, lines, bootSites.Requests()));
+                SubmitFleetCommand(new FleetBootstrapCommand(fleet.Id, source.Id, dest.Id, lines, bootSites.Requests(),
+                    bootList.InfrastructureEntry(designs)?.DesignId));
         }
 
         bool HasFuel(IClientGalaxy galaxy)

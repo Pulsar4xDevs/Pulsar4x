@@ -898,6 +898,8 @@ public sealed record ComponentDesignSummary(string Id, string Name, string Templ
     public bool IsSiteOnly { get; init; }
     /// <summary>What one unit costs to build, per resource.</summary>
     public IReadOnlyList<ResourceCostLine> ResourceCosts { get; init; } = Array.Empty<ResourceCostLine>();
+    /// <summary>The gravity and pressure window of an infrastructure design. Null for every other design.</summary>
+    public InfrastructureWindow? Infrastructure { get; init; }
     public IReadOnlyList<DesignerInput> PropertyValues { get; init; } = Array.Empty<DesignerInput>();
 }
 

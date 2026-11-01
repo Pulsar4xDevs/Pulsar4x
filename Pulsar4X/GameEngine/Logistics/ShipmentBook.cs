@@ -613,7 +613,10 @@ public static class ShipmentBook
                 continue;
             if (line.IsCrate)
             {
-                if (db.GetUnitsStored(line.Held, false) >= line.Units)
+                // A crate has arrived when it sits in the destination's cargo, or is already mounted there
+                // (a ship that mounts its own crates never unloads them).
+                if (db.GetUnitsStored(line.Held, false) >= line.Units
+                    || (line.Held is ComponentInstance crate && MountFromHoldAction.Mounted(dest, crate.ID)))
                 {
                     line.Delivered = line.Units;
                     moved += line.Units;
@@ -629,6 +632,22 @@ public static class ShipmentBook
             moved += take;
         }
         return moved;
+    }
+
+    /// <summary>
+    /// A fleet Bootstrap package that has landed but still holds a crate the destination has not mounted. Its hold stays
+    /// open until the fleet order sees every crate mounted, so the order can still count them.
+    /// </summary>
+    internal static bool AwaitsMount(Entity dest, ShipmentCargo shipment)
+    {
+        if (!shipment.FleetOrder.StartsWith(BootstrapPackage.OrderPrefix, StringComparison.Ordinal))
+            return false;
+        foreach (var line in shipment.Lines)
+        {
+            if (line.Held is ComponentInstance crate && !MountFromHoldAction.Mounted(dest, crate.ID))
+                return true;
+        }
+        return false;
     }
 
     /// <summary>

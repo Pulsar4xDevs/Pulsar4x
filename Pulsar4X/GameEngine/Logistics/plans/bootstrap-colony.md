@@ -1,6 +1,6 @@
 # Bootstrap colony
 
-Status: implemented as a single-ship goal. The fleet-level Bootstrap order (section "Later") is not built. It is not logistics plan 13.
+Status: implemented as a single-ship goal. The fleet-level Bootstrap order is built separately (`FleetBootstrapPlan`, `FleetBootstrapCommand`; see section "Later"). It is not logistics plan 13.
 
 One captained ship with a Construction Bay carries finished crates from one owned colony to another. The bay mounts them from the ship's own hold. The destination needs no office of its own, so this also installs the first office on an empty colony.
 
@@ -31,12 +31,11 @@ Fleet Management has a Bootstrap colony order for a selected ship. It is offered
 ## Not built
 
 * Factory production at the source when crates are not in stock.
-* More than one trip.
-* A fleet-level order and picker.
+* More than one trip (in this single-ship goal; the fleet Bootstrap order does the multi-trip runs).
 * A `SkillDomains` line: no domain fits.
 * Build order. All aboard crates are queued in the order picked.
   Already decided (2026-11-01): the player picks the order; crates are mounted in the order chosen (current behaviour stands).
 
 ## Later
 
-A fleet `Bootstrap` order would decide which facilities a new colony needs and hand `BootstrapColony` goals to its ships. Out of scope here.
+The fleet `Bootstrap` order is built: it decides which facilities a new colony needs and hands `BootstrapColony` goals to its ships (`FleetBootstrapPlan.cs`). It is not described here; see `fleet-bootstrap-stub.md` and `colony-bootstrap-goal-plan.md` §7. Decided but not built: the fleet order will carry its crates in a sealed shipment (package) instead of `Goal.BootstrapCrateIds` (`fleet-bootstrap-stub.md` decision 15, `sealed-shipments.md`).

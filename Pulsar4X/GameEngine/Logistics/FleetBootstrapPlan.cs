@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GameEngine.Engine.Orders;
+using Pulsar4X.Api;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
-using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Industry;
+using Pulsar4X.Industry.Orders;
 using Pulsar4X.Movement;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
@@ -14,15 +15,20 @@ using Pulsar4X.Storage;
 namespace Pulsar4X.Logistics;
 
 /// <summary>
-/// The fleet Bootstrap order. The fleet does not fly. Its captained ships that carry a Construction
-/// Bay, sub-fleets included, each get a <see cref="GoalType.BootstrapColony"/> goal for as many of the
-/// player's crates as fit their hold, taken in the player's priority order. A ship that finishes its trip
-/// is handed the next batch, so a list bigger than one hold goes over in several trips.
+/// The fleet Bootstrap order. At order build the translator seals the player's crates and the resources the site
+/// builds cost into sealed packages at the source (<see cref="BootstrapPackage"/>), and the goal points at them
+/// through <see cref="Goal.BootstrapPackageIds"/>. The fleet does not fly. It hands one package to one free
+/// captained ship at a time, sub-fleets included, and waits until that ship has loaded.
 ///
-/// Every plan reads the world. The goal keeps three things: the priority list (<see cref="Goal.BootstrapCrates"/>),
-/// what ships have been given so far (<see cref="Goal.BootstrapAssigned"/>), and the crate instances they were
-/// given (<see cref="Goal.BootstrapCrateIds"/>). A ship with its own order, a cancelled order, or a failed trip
-/// of this goal is left alone, so the fleet order never doubles up on a ship that took over.
+/// Crates go first. Whichever of the ship's Construction Bay or the destination colony has more free construction
+/// capacity mounts them, the colony on a tie (<see cref="BootstrapPackage.Choose"/>). A ship that mounts keeps the
+/// crates in its hold and gets a <see cref="GoalType.BootstrapColony"/> trip. When the colony mounts, the ship gets a
+/// <see cref="GoalType.DeliverShipment"/> trip, unloads the crates and the fleet queues them on the colony.
+/// Resources go only once every crate has arrived, as further <see cref="GoalType.DeliverShipment"/> trips of the
+/// resource packages. Nothing is hauled with Move goods.
+///
+/// Every plan reads the world, so the goal holds only the package ids. The order fails or is cancelled with every
+/// package released back to open stock. Crates that had already left the hold stay in the cargo they are in, unmarked.
 /// </summary>
 public class FleetBootstrapPlan : IGoalPlanner
 {
@@ -30,148 +36,216 @@ public class FleetBootstrapPlan : IGoalPlanner
 
     public PlanResult Plan(Entity fleetEntity, Goal goal, DateTime atDateTime)
     {
-        if (!fleetEntity.HasDataBlob<FleetDB>())
+        var game = fleetEntity.Manager?.Game;
+        if (game == null || !fleetEntity.HasDataBlob<FleetDB>())
             return PlanResult.Fail("We have no subordinates to manage");
-        if (goal.BootstrapCrates.Count == 0)
+        if (goal.BootstrapPackageIds.Count == 0)
             return PlanResult.Fail("Nothing to build.");
 
         if (!MoveGoodsPlan.TryColony(fleetEntity, goal.SourceEntityId, out var source, out var reason)
             || !MoveGoodsPlan.TryColony(fleetEntity, goal.DestEntityId, out var dest, out reason))
-            return PlanResult.Fail(reason);
+            return Stop(game, goal, reason);
         if (source.Id == dest.Id)
-            return PlanResult.Fail("Pick two different colonies.");
+            return Stop(game, goal, "Pick two different colonies.");
 
-        var ships = FleetChildDuty.Descendants(fleetEntity)
-            .Where(entity => entity.HasDataBlob<ShipInfoDB>() && !entity.HasDataBlob<FleetDB>())
-            .ToList();
-        if (ships.Count == 0)
-            return PlanResult.Fail("We have no subordinates to manage");
-
-        string failedWhy = TakeBack(goal, ships, dest);
-
-        bool Live(Goal? trip, GoalType type)
-            => trip is { PlayerCancelled: false, Status: not (GoalStatus.Completed or GoalStatus.Failed) } && trip.Type == type;
-        bool cratesInFlight = ships.Any(ship => Live(OwnTrip(ship, goal), GoalType.BootstrapColony));
-        bool haulsInFlight = ships.Any(ship => Live(OwnTrip(ship, goal), GoalType.MoveGoods));
-
-        var remaining = Remaining(goal);
-        var handed = new List<(Entity, Goal)>();
-        bool anyEligible = false;
-        bool tooBig = false;
-        if (remaining.Count > 0)
+        // What has landed is unpacked, and a package whose every line has arrived and whose crates are mounted is closed.
+        var live = new List<ShipmentCargo>();
+        foreach (var package in BootstrapPackage.Open(game, goal))
         {
-            var reserved = new HashSet<int>(goal.BootstrapCrateIds);
-            foreach (var ship in ships.OrderBy(ship => MarketRun.DistanceMeters(ship, source)).ThenBy(ship => ship.Id))
+            ShipmentBook.Unpack(dest, package);
+            if (package.AllArrived && !ShipmentBook.AwaitsMount(dest, package))
             {
-                if (!Eligible(ship, goal, source, dest, needsBay: true))
-                    continue;
-                anyEligible = true;
-                var trip = Batch(ship, source, goal, remaining, reserved, out bool bigForThisShip);
-                tooBig |= bigForThisShip;
-                if (trip == null)
-                    continue;
-                handed.Add((ship, trip));
-                foreach (var line in trip.BootstrapCrates)
-                    Credit(goal.BootstrapAssigned, line.DesignId, line.Count);
-                goal.BootstrapCrateIds.AddRange(trip.BootstrapCrateIds);
-                remaining = Remaining(goal);
-                if (remaining.Count == 0)
-                    break;
+                ShipmentBook.Complete(game, package, source, fleetEntity.FactionOwnerID, atDateTime);
+                continue;
             }
-
-            if (handed.Count > 0 || cratesInFlight || haulsInFlight)
-                return PlanResult.Continue(handed);
-
-            // Nothing in flight and nothing handed, so the rest cannot ship.
-            if (!anyEligible)
-                return PlanResult.Fail(string.IsNullOrEmpty(failedWhy) ? "no ship" : failedWhy);
-            if (tooBig)
-                return PlanResult.Fail("doesn't fit hold");
-            return PlanResult.Fail(ShortMessage(fleetEntity, remaining));
+            live.Add(package);
         }
 
-        // Resources go after the crates: the crates are what let the destination use them, so every crate
-        // has arrived before the first haul leaves.
-        if (cratesInFlight)
-            return PlanResult.Continue(handed);
-
-        var needs = BootstrapResources.Remaining(fleetEntity, goal);
-        if (needs.Count == 0)
+        if (live.Count == 0)
         {
-            if (haulsInFlight)
-                return PlanResult.Continue(handed);
-            int total = goal.BootstrapAssigned.Sum(line => line.Count);
+            int total = goal.BootstrapCrates.Sum(line => line.Count);
             string crates = $"Mounted {total} {(total == 1 ? "crate" : "crates")}";
             return PlanResult.Done(goal.BootstrapSiteBuilds.Count == 0 ? crates : crates + ", hauled the resources");
         }
 
-        // One round of hauls at a time, so every pass reads the stock the source really holds.
-        if (haulsInFlight)
-            return PlanResult.Continue(handed);
+        var ships = FleetChildDuty.Descendants(fleetEntity)
+            .Where(entity => entity.HasDataBlob<ShipInfoDB>() && !entity.HasDataBlob<FleetDB>())
+            .ToList();
+        var workers = ships.Where(ship => FleetChildDuty.WorkingThisGoal(ship, goal)).ToList();
 
-        var hauls = HandOutHauls(ships, goal, source, dest, needs, out string haulWhy);
-        if (hauls.Count > 0)
-            return PlanResult.Continue(hauls);
-        return PlanResult.Fail(string.IsNullOrEmpty(failedWhy) ? haulWhy : failedWhy);
+        if (goal.PlayerCancelled)
+        {
+            if (workers.Count > 0)
+                return PlanResult.Continue(new List<(Entity, Goal)>());
+            return Stop(game, goal, "cancelled");
+        }
+
+        if (fleetEntity.TryGetDataBlob<GoalsDB>(out var goals)
+            && GoalWeighting.ShouldInterruptForRefuel(goals, goal))
+            return Stop(game, goal, "low on fuel");
+
+        // A crate the ship unloaded is mounted by the colony.
+        if (!QueueColonyMounts(game, dest, live, out reason))
+            return Stop(game, goal, reason);
+
+        // A line that left the hold and has no ship working on it is stranded: its trip failed or the ship is gone.
+        if (live.Any(package => package.Lines.Any(line => line.Released && !line.Arrived
+                && !workers.Any(ship => ship.Id == line.CarrierId))))
+            return Stop(game, goal, FailedTripMessage(ships, goal) ?? "load stranded");
+
+        // A ship that has been handed a package but has not loaded yet is still on its way to the source.
+        // A second ship would race it for the same lines.
+        if (workers.Any(ship => !live.Any(package => package.Lines.Any(line => line.Released && line.CarrierId == ship.Id))))
+            return PlanResult.Continue(new List<(Entity, Goal)>());
+
+        // Crates arrive before resources (decision 4). While any crate has not arrived the resources wait.
+        var cratePackages = live.Where(BootstrapPackage.IsCratePackage).ToList();
+        var resourcePackages = live.Where(package => !BootstrapPackage.IsCratePackage(package)).ToList();
+        bool crateStillOut = cratePackages.Any(package => package.Lines.Any(line => !line.Arrived));
+        var serve = cratePackages.FirstOrDefault(package => package.Lines.Any(line => !line.Released));
+        if (serve == null && !crateStillOut)
+            serve = resourcePackages.FirstOrDefault(package => package.Lines.Any(line => !line.Released));
+        if (serve == null)
+            return PlanResult.Continue(new List<(Entity, Goal)>());
+
+        if (ships.Count == 0)
+            return Stop(game, goal, "We have no subordinates to manage");
+        return HandOut(game, fleetEntity, goal, source, dest, ships, workers, serve);
+    }
+
+    public void Cancel(Entity unit, Goal goal, DateTime at, CancelTiming timing)
+    {
+        GoalCancel.Apply(unit, goal, at, timing);
+        var game = unit.Manager?.Game;
+        if (game == null)
+            return;
+
+        // A child still finishing keeps its load. The next plan wake releases the packages once it is done.
+        bool working = FleetChildDuty.Descendants(unit)
+            .Any(ship => ship.HasDataBlob<ShipInfoDB>() && FleetChildDuty.WorkingThisGoal(ship, goal));
+        if (timing == CancelTiming.WhenConvenient && working)
+            return;
+        BootstrapPackage.ReleaseAll(game, goal);
+    }
+
+    // ------------------------------------------------------------------ hand out
+
+    static PlanResult HandOut(Game game, Entity fleet, Goal goal, Entity source, Entity dest,
+        List<Entity> ships, List<Entity> workers, ShipmentCargo serve)
+    {
+        bool crates = BootstrapPackage.IsCratePackage(serve);
+        var open = serve.Lines.Where(line => !line.Released).ToList();
+
+        bool anyShip = false;
+        bool anyCanMount = false;
+        Entity best = null!;
+        MountChoice bestChoice = default;
+        double bestDistance = double.MaxValue;
+        foreach (var ship in ships)
+        {
+            if (!ship.TryGetDataBlob<CargoStorageDB>(out var hold)
+                || (!ship.HasDataBlob<WarpAbilityDB>() && !ship.HasDataBlob<NewtonThrustAbilityDB>()))
+                continue;
+            anyShip = true;
+            // Whether anything could mount is a fact about the colony and the bays, whatever else keeps a ship idle.
+            if (BootstrapPackage.Choose(ship, dest).Possible)
+                anyCanMount = true;
+            if (ship.GetDataBlob<ShipInfoDB>().CommanderID < 0)
+                continue;
+            if (OwnTrip(ship, goal) is { Status: GoalStatus.Failed })
+                continue;
+            if (FleetChildDuty.WorkingThisGoal(ship, goal) || FleetChildDuty.BusyWithOwnWork(ship, goal))
+                continue;
+            if (!JumpRoute.CanReach(ship, source) || !JumpRoute.CanReach(ship, dest))
+                continue;
+            if (!open.Any(line => line.Held.VolumePerUnit > 0 && hold.Accepts(line.Held)
+                    && hold.TypeStores.ContainsKey(line.Held.CargoTypeID)
+                    && line.Volume <= hold.GetFreeVolume(line.Held) + 1e-9))
+                continue;
+
+            var choice = BootstrapPackage.Choose(ship, dest);
+            if (crates && !choice.Possible)
+                continue;
+
+            double distance = MarketRun.DistanceMeters(ship, source);
+            if (best != null && (distance > bestDistance || (distance == bestDistance && ship.Id > best.Id)))
+                continue;
+            best = ship;
+            bestChoice = choice;
+            bestDistance = distance;
+        }
+
+        if (best == null)
+        {
+            if (workers.Count > 0)
+                return PlanResult.Continue(new List<(Entity, Goal)>());
+            string why = !anyShip ? "We have no subordinates to manage"
+                : crates && !anyCanMount ? "Neither the colony nor a ship's Construction Bay can mount crates"
+                : "no ship";
+            return Stop(game, goal, why);
+        }
+
+        var trip = new Goal(crates && bestChoice.ByShip ? GoalType.BootstrapColony : GoalType.DeliverShipment)
+        {
+            Name = !crates ? "Deliver resources" : bestChoice.ByShip ? "Bootstrap colony" : "Deliver crates",
+            ParentGoalId = goal.Id,
+            CargoId = serve.UniqueID,
+            SourceEntityId = source.Id,
+            DestEntityId = dest.Id,
+            TargetEntityID = dest.Id,
+        };
+        string message = crates ? bestChoice.Describe() : "Hauling resources";
+        return PlanResult.Continue(new List<(Entity, Goal)> { (best, trip) }).WithMessage(message);
     }
 
     /// <summary>
-    /// A round of resource hauls: each free captained ship with a hold takes what it can of what is still
-    /// needed, in the order <see cref="BootstrapResources.Remaining"/> lists it, from what the source holds.
+    /// Queue every crate that has landed in the destination cargo on the colony's own construction queue.
+    /// False, with the reason, when the colony cannot.
     /// </summary>
-    static List<(Entity, Goal)> HandOutHauls(List<Entity> ships, Goal goal, Entity source, Entity dest,
-        List<BootstrapResourceLine> needs, out string why)
+    static bool QueueColonyMounts(Game game, Entity dest, List<ShipmentCargo> live, out string reason)
     {
-        why = "no ship";
-        var handed = new List<(Entity, Goal)>();
-        var left = needs.ToDictionary(need => need.Cargo.ID, need => need.Amount);
-        var stock = source.GetDataBlob<CargoStorageDB>();
-        var taken = new Dictionary<int, long>();
-
-        bool anyShip = false;
-        foreach (var ship in ships.OrderBy(ship => MarketRun.DistanceMeters(ship, source)).ThenBy(ship => ship.Id))
+        reason = "";
+        dest.TryGetDataBlob<LocalConstructionDB>(out var bay);
+        foreach (var package in live)
         {
-            if (!Eligible(ship, goal, source, dest, needsBay: false))
-                continue;
-            anyShip = true;
-            var wants = new List<MoveGoodsLine>();
-            foreach (var need in needs)
+            foreach (var line in package.Lines)
             {
-                long onHand = stock.GetUnitsStored(need.Cargo, false) - taken.GetValueOrDefault(need.Cargo.ID);
-                long ask = Math.Min(left[need.Cargo.ID], Math.Max(0, onHand));
-                if (ask > 0)
-                    wants.Add(new MoveGoodsLine { ItemId = need.Cargo.ID, Requested = ask });
+                if (!line.Released || !line.Arrived || line.Held is not ComponentInstance crate)
+                    continue;
+                if (MountFromHoldAction.Mounted(dest, crate.ID) || !MountFromHoldAction.TryAboard(dest, crate.ID, out _))
+                    continue;
+                if (bay != null && MountFromHoldAction.Queued(bay, crate.ID))
+                    continue;
+                if (bay == null || bay.PointsPerDay <= 0)
+                {
+                    reason = "The colony has no construction capacity to mount the crates.";
+                    return false;
+                }
+                if (!game.OrderHandler.HandleOrder(AddToConstructionQueueOrder.CreateMount(dest, crate)))
+                {
+                    reason = "The colony could not queue " + crate.Name + ".";
+                    return false;
+                }
             }
-            var picked = MoveGoodsPlan.ClampLines(source, ship, wants, useLoaded: false);
-            if (picked.Count == 0)
-                continue;
-
-            var lines = new List<MoveGoodsLine>();
-            foreach (var (item, amount) in picked)
-            {
-                lines.Add(new MoveGoodsLine { ItemId = item.ID, Requested = amount });
-                left[item.ID] -= amount;
-                taken[item.ID] = taken.GetValueOrDefault(item.ID) + amount;
-                goal.BootstrapHauled[item.UniqueID] = goal.BootstrapHauled.GetValueOrDefault(item.UniqueID) + amount;
-            }
-            handed.Add((ship, new Goal(GoalType.MoveGoods)
-            {
-                Name = "Move goods",
-                ParentGoalId = goal.Id,
-                SourceEntityId = source.Id,
-                DestEntityId = dest.Id,
-                MoveGoodsLines = lines,
-            }));
-            if (left.Values.All(amount => amount <= 0))
-                break;
         }
+        return true;
+    }
 
-        if (handed.Count == 0)
+    /// <summary>Fail the order and give every package back to open stock.</summary>
+    static PlanResult Stop(Game game, Goal goal, string why)
+    {
+        BootstrapPackage.ReleaseAll(game, goal);
+        return PlanResult.Fail(why);
+    }
+
+    static string? FailedTripMessage(List<Entity> ships, Goal goal)
+    {
+        foreach (var ship in ships)
         {
-            var first = needs.FirstOrDefault(need => stock.GetUnitsStored(need.Cargo, false) <= 0) ?? needs[0];
-            why = anyShip ? $"not enough {first.Cargo.Name} at source" : "no ship";
+            if (OwnTrip(ship, goal) is { Status: GoalStatus.Failed } trip && !string.IsNullOrEmpty(trip.Message))
+                return trip.Message;
         }
-        return handed;
+        return null;
     }
 
     /// <summary>This goal's trip on the ship, if its active goal is one. Null otherwise.</summary>
@@ -180,161 +254,5 @@ public class FleetBootstrapPlan : IGoalPlanner
         if (!ship.TryGetDataBlob<GoalsDB>(out var goals) || goals.ActiveGoal == null)
             return null;
         return goals.ActiveGoal.ParentGoalId == fleetGoal.Id ? goals.ActiveGoal : null;
-    }
-
-    static bool Eligible(Entity ship, Goal goal, Entity source, Entity dest, bool needsBay)
-    {
-        if (ship.GetDataBlob<ShipInfoDB>().CommanderID < 0)
-            return false;
-        if (needsBay && (!ship.TryGetDataBlob<LocalConstructionDB>(out var bay) || bay.PointsPerDay <= 0))
-            return false;
-        if (!ship.HasDataBlob<CargoStorageDB>())
-            return false;
-        if (!ship.HasDataBlob<WarpAbilityDB>() && !ship.HasDataBlob<NewtonThrustAbilityDB>())
-            return false;
-        // A failed trip of this goal benches the ship for the rest of the order, or it would fail again.
-        if (OwnTrip(ship, goal) is { Status: GoalStatus.Failed })
-            return false;
-        if (FleetChildDuty.WorkingThisGoal(ship, goal) || FleetChildDuty.BusyWithOwnWork(ship, goal))
-            return false;
-        return JumpRoute.CanReach(ship, source) && JumpRoute.CanReach(ship, dest);
-    }
-
-    /// <summary>
-    /// The player's list minus what ships have been given, in priority order. Designs with nothing left are dropped.
-    /// </summary>
-    internal static List<BootstrapCrateLine> Remaining(Goal goal)
-    {
-        var left = new List<BootstrapCrateLine>();
-        foreach (var asked in goal.BootstrapCrates)
-        {
-            int given = goal.BootstrapAssigned.Where(line => line.DesignId == asked.DesignId).Sum(line => line.Count);
-            if (asked.Count - given > 0)
-                left.Add(new BootstrapCrateLine { DesignId = asked.DesignId, Count = asked.Count - given });
-        }
-        return left;
-    }
-
-    static void Credit(List<BootstrapCrateLine> lines, string designId, int count)
-    {
-        var line = lines.FirstOrDefault(l => l.DesignId == designId);
-        if (line == null)
-            lines.Add(new BootstrapCrateLine { DesignId = designId, Count = count });
-        else
-            line.Count += count;
-    }
-
-    /// <summary>
-    /// One ship's next trip: crates from the source in priority order until the next one would not fit the
-    /// hold. A crate too big for an empty hold is skipped and flagged. Null when nothing fits or nothing is left.
-    /// </summary>
-    static Goal? Batch(Entity ship, Entity source, Goal goal, List<BootstrapCrateLine> remaining,
-        HashSet<int> reserved, out bool tooBig)
-    {
-        tooBig = false;
-        var lines = new List<MoveGoodsLine>();
-        var ids = new List<int>();
-        var perDesign = new List<BootstrapCrateLine>();
-        foreach (var want in remaining)
-        {
-            int need = want.Count;
-            bool full = false;
-            foreach (var crate in BootstrapColonyPlan.CratesOf(source, want.DesignId))
-            {
-                if (need == 0)
-                    break;
-                if (reserved.Contains(crate.ID) || ids.Contains(crate.ID))
-                    continue;
-                var trial = new List<MoveGoodsLine>(lines) { new MoveGoodsLine { ItemId = crate.ID, Requested = 1 } };
-                if (MoveGoodsPlan.ClampLines(source, ship, trial, useLoaded: false).Count < trial.Count)
-                {
-                    // Priority is strict: nothing lower on the list rides ahead of this crate.
-                    // Only a crate no hold of this ship could ever take is skipped.
-                    if (lines.Count == 0)
-                        tooBig = true;
-                    full = true;
-                    break;
-                }
-                lines = trial;
-                ids.Add(crate.ID);
-                Credit(perDesign, want.DesignId, 1);
-                need--;
-            }
-            if (full && lines.Count > 0)
-                break;
-        }
-
-        if (ids.Count == 0)
-            return null;
-        tooBig = false;
-        return new Goal(GoalType.BootstrapColony)
-        {
-            Name = "Bootstrap colony",
-            ParentGoalId = goal.Id,
-            SourceEntityId = goal.SourceEntityId,
-            DestEntityId = goal.DestEntityId,
-            TargetEntityID = goal.DestEntityId,
-            BootstrapCrates = perDesign,
-            BootstrapCrateIds = ids,
-        };
-    }
-
-    /// <summary>
-    /// A ship's trip of this goal that failed or was cancelled gives its undelivered crates back, once, so a
-    /// later trip can carry them. A crate already mounted stays counted. Returns that trip's reason, if any.
-    /// </summary>
-    static string TakeBack(Goal goal, List<Entity> ships, Entity dest)
-    {
-        string why = "";
-        foreach (var ship in ships)
-        {
-            if (OwnTrip(ship, goal) is not { } trip)
-                continue;
-            if (trip.Type == GoalType.MoveGoods)
-            {
-                // A resource haul gives back what it did not deliver, whether it finished, failed or was cancelled.
-                if (trip.Status is not (GoalStatus.Completed or GoalStatus.Failed) && !trip.PlayerCancelled)
-                    continue;
-                if (trip.Status == GoalStatus.Failed && !string.IsNullOrEmpty(trip.Message))
-                    why = trip.Message;
-                if (goal.BootstrapSettled.Contains(trip.Id))
-                    continue;
-                goal.BootstrapSettled.Add(trip.Id);
-                BootstrapResources.GiveBack(ship, goal, trip);
-                continue;
-            }
-            if (trip.Status != GoalStatus.Failed && !trip.PlayerCancelled)
-                continue;
-            if (!string.IsNullOrEmpty(trip.Message))
-                why = trip.Message;
-            if (goal.BootstrapSettled.Contains(trip.Id))
-                continue;
-            goal.BootstrapSettled.Add(trip.Id);
-
-            int next = 0;
-            foreach (var line in trip.BootstrapCrates)
-            {
-                for (int i = 0; i < line.Count && next < trip.BootstrapCrateIds.Count; i++, next++)
-                {
-                    int id = trip.BootstrapCrateIds[next];
-                    if (MountFromHoldAction.Mounted(dest, id))
-                        continue;
-                    goal.BootstrapCrateIds.Remove(id);
-                    Credit(goal.BootstrapAssigned, line.DesignId, -1);
-                }
-            }
-        }
-        return why;
-    }
-
-    static string ShortMessage(Entity fleetEntity, List<BootstrapCrateLine> remaining)
-    {
-        var first = remaining[0];
-        string name = first.DesignId;
-        if (fleetEntity.Manager.Game.Factions.TryGetValue(fleetEntity.FactionOwnerID, out var faction)
-            && faction.TryGetDataBlob<FactionInfoDB>(out var info)
-            && info.ComponentDesigns.TryGetValue(first.DesignId, out var design))
-            name = design.Name;
-        return $"no finished crates of {name} at source";
     }
 }

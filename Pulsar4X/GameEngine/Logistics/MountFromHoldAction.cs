@@ -195,7 +195,7 @@ public class MountFromHoldAction : EntityAction
         return false;
     }
 
-    static bool Queued(LocalConstructionDB bay, int crateId)
+    internal static bool Queued(LocalConstructionDB bay, int crateId)
     {
         foreach (var job in bay.BuildQueue)
         {
