@@ -1665,10 +1665,36 @@ namespace Pulsar4X.Engine.Api
                 designs.Add(new ComponentDesignSummary(design.UniqueID, design.Name, design.TemplateID, design.TemplateName)
                 {
                     PropertyValues = values,
+                    IsCrate = LocalConstructionJob.IsCrate(design),
                 });
             }
 
-            return new ComponentDesignsSnapshot { Templates = templates, Designs = designs };
+            return new ComponentDesignsSnapshot
+            {
+                Templates = templates,
+                Designs = designs,
+                BootstrapDefaults = BootstrapDefaultList(info),
+            };
+        }
+
+        /// <summary>
+        /// The mod's default crate list for a fleet Bootstrap order, minus any design this faction does not
+        /// have or cannot crate. Lists from every loaded mod are joined in the order the mods loaded.
+        /// </summary>
+        private List<BootstrapCrateRequest> BootstrapDefaultList(FactionInfoDB info)
+        {
+            var lines = new List<BootstrapCrateRequest>();
+            foreach (var list in _game.StartingGameData.BootstrapDefaults.Values)
+            {
+                foreach (var line in list.Crates)
+                {
+                    if (line.Count <= 0 || lines.Any(l => l.DesignId == line.DesignId))
+                        continue;
+                    if (info.ComponentDesigns.TryGetValue(line.DesignId, out var design) && LocalConstructionJob.IsCrate(design))
+                        lines.Add(new BootstrapCrateRequest(line.DesignId, line.Count));
+                }
+            }
+            return lines;
         }
 
         // The "Description" formula is usually a quoted string literal; unwrap it rather than

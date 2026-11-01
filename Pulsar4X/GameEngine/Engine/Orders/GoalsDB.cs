@@ -135,6 +135,9 @@ public enum GoalType
 
     // One ship carries finished crates to another colony and mounts them there. Appended so saved values stay put.
     BootstrapColony,
+
+    // The fleet order behind BootstrapColony: hands crates to its ships, sub-fleets included, over as many trips as it takes.
+    FleetBootstrap,
 }
 
 public enum MoveGoodsLeg
@@ -179,6 +182,14 @@ public class Goal
     public List<BootstrapCrateLine> BootstrapCrates = new();
     /// <summary>Bootstrap colony. Instance ids picked on the first plan, so later plans count only these.</summary>
     public List<int> BootstrapCrateIds = new();
+    /// <summary>
+    /// Fleet bootstrap. Crates handed to ships so far, per design. <see cref="BootstrapCrates"/> is the priority
+    /// list the player asked for, and the difference is what is still to ship. A fleet goal's
+    /// <see cref="BootstrapCrateIds"/> holds the instances those ships were given.
+    /// </summary>
+    public List<BootstrapCrateLine> BootstrapAssigned = new();
+    /// <summary>Fleet bootstrap. Ship goals that failed or were cancelled and have already been taken back, so their crates count once.</summary>
+    public List<string> BootstrapSettled = new();
     /// <summary>Where to buy, or the freight source. -1 until a route is committed.</summary>
     public int SourceEntityId = -1;
     /// <summary>Where to sell, or the freight destination. -1 until a route is committed.</summary>

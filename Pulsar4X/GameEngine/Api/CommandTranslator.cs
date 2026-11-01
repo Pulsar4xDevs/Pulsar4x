@@ -60,6 +60,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(FleetHaulContractCommand)] = TranslateFleetHaulContract,
                 [typeof(MoveGoodsCommand)] = TranslateMoveGoods,
                 [typeof(BootstrapColonyCommand)] = TranslateBootstrapColony,
+                [typeof(FleetBootstrapCommand)] = TranslateFleetBootstrap,
                 [typeof(QueueMoveGoodsCommand)] = TranslateQueueMoveGoods,
                 [typeof(LoadGoodsCommand)] = TranslateLoadGoods,
                 [typeof(UnloadGoodsCommand)] = TranslateUnloadGoods,
@@ -450,9 +451,31 @@ namespace Pulsar4X.Engine.Api
             if (cmd.Crates == null || cmd.Crates.Count == 0)
                 return CommandResult.Reject("Nothing to build.");
 
-            var crates = new List<BootstrapCrateLine>();
+            if (RejectCrates(faction, cmd.Crates, out var crates) is { } crateBad)
+                return crateBad;
+
+            if (!PairReaches(commanded, cmd.SourceId, cmd.DestId))
+                return CommandResult.Reject("The target is outside this ship's reach.");
+            var goal = new Goal(GoalType.BootstrapColony)
+            {
+                Name = "Bootstrap colony",
+                SourceEntityId = cmd.SourceId,
+                DestEntityId = cmd.DestId,
+                TargetEntityID = cmd.DestId,
+                BootstrapCrates = crates,
+            };
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        /// <summary>Every requested design is a crate-able facility of this faction, with a positive count.</summary>
+        static CommandResult? RejectCrates(Entity faction, IReadOnlyList<BootstrapCrateRequest> requests, out List<BootstrapCrateLine> crates)
+        {
+            crates = new List<BootstrapCrateLine>();
             var info = faction.GetDataBlob<FactionInfoDB>();
-            foreach (var request in cmd.Crates)
+            foreach (var request in requests)
             {
                 if (request.Count <= 0)
                     return CommandResult.Reject("Crate counts must be positive.");
@@ -462,12 +485,43 @@ namespace Pulsar4X.Engine.Api
                     return CommandResult.Reject($"{design.Name} is not a crate-able facility.");
                 crates.Add(new BootstrapCrateLine { DesignId = request.DesignId, Count = request.Count });
             }
+            return null;
+        }
+
+        private CommandResult TranslateFleetBootstrap(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectUnlessFleet(commanded) is { } notFleet)
+                return notFleet;
+            var cmd = (FleetBootstrapCommand)command;
+            if (!TryResolve(cmd.SourceId, out var source) || !TryResolve(cmd.DestId, out var dest))
+                return CommandResult.Reject("the colony is gone.");
+            if (RejectWarehouse(faction, source) is { } sourceBad)
+                return sourceBad;
+            if (RejectWarehouse(faction, dest) is { } destBad)
+                return destBad;
+            if (source.Id == dest.Id)
+                return CommandResult.Reject("Pick two different colonies.");
+            if (cmd.Crates == null || cmd.Crates.Count == 0)
+                return CommandResult.Reject("Nothing to build.");
+            if (RejectCrates(faction, cmd.Crates, out var listed) is { } crateBad)
+                return crateBad;
+
+            // The list order is the priority. A design named twice keeps its first place and the counts add up.
+            var crates = new List<BootstrapCrateLine>();
+            foreach (var line in listed)
+            {
+                var same = crates.Find(c => c.DesignId == line.DesignId);
+                if (same != null)
+                    same.Count += line.Count;
+                else
+                    crates.Add(line);
+            }
 
             if (!PairReaches(commanded, cmd.SourceId, cmd.DestId))
-                return CommandResult.Reject("The target is outside this ship's reach.");
-            var goal = new Goal(GoalType.BootstrapColony)
+                return CommandResult.Reject("The target is outside this fleet's reach.");
+            var goal = new Goal(GoalType.FleetBootstrap)
             {
-                Name = "Bootstrap colony",
+                Name = "Bootstrap",
                 SourceEntityId = cmd.SourceId,
                 DestEntityId = cmd.DestId,
                 TargetEntityID = cmd.DestId,

@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using Pulsar4X.Engine;
+using Pulsar4X.Fleets;
 
 namespace GameEngine.Engine.Orders;
 
@@ -9,6 +11,29 @@ namespace GameEngine.Engine.Orders;
 /// </summary>
 public static class FleetChildDuty
 {
+    /// <summary>
+    /// Every entity below this fleet, sub-fleets and their members included, nearest first.
+    /// A fleet order that hands work to ships reads this, so a ship in a sub-fleet is not missed.
+    /// </summary>
+    public static List<Entity> Descendants(Entity fleet)
+    {
+        var found = new List<Entity>();
+        var queue = new Queue<Entity>();
+        queue.Enqueue(fleet);
+        while (queue.Count > 0)
+        {
+            var next = queue.Dequeue();
+            if (!next.TryGetDataBlob<FleetDB>(out var db))
+                continue;
+            foreach (var child in db.Children)
+            {
+                found.Add(child);
+                queue.Enqueue(child);
+            }
+        }
+        return found;
+    }
+
     public static bool WorkingThisGoal(Entity child, Goal fleetGoal)
     {
         if (!child.TryGetDataBlob<GoalsDB>(out var goals) || goals.ActiveGoal == null)

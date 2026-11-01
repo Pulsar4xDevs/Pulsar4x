@@ -868,6 +868,11 @@ public sealed class ComponentDesignsSnapshot
 {
     public IReadOnlyList<ComponentTemplateSummary> Templates { get; init; } = Array.Empty<ComponentTemplateSummary>();
     public IReadOnlyList<ComponentDesignSummary> Designs { get; init; } = Array.Empty<ComponentDesignSummary>();
+    /// <summary>
+    /// The crate list a fleet Bootstrap order starts from, in priority order, from mod data. Only designs this
+    /// faction has and that can be crated are listed.
+    /// </summary>
+    public IReadOnlyList<BootstrapCrateRequest> BootstrapDefaults { get; init; } = Array.Empty<BootstrapCrateRequest>();
 }
 
 /// <summary>A component template the faction can design from.</summary>
@@ -877,6 +882,8 @@ public sealed record ComponentTemplateSummary(string Id, string Name, string Com
 /// created with so the client can reload it into the designer.</summary>
 public sealed record ComponentDesignSummary(string Id, string Name, string TemplateId, string TemplateName)
 {
+    /// <summary>Can be mounted on a planet and carried in a ship's hold. A fleet Bootstrap order can ship these.</summary>
+    public bool IsCrate { get; init; }
     public IReadOnlyList<DesignerInput> PropertyValues { get; init; } = Array.Empty<DesignerInput>();
 }
 

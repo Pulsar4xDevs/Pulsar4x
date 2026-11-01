@@ -102,6 +102,17 @@ public sealed record BootstrapColonyCommand(
     int DestId,
     IReadOnlyList<BootstrapCrateRequest> Crates) : GameCommand(TargetEntityId);
 
+/// <summary>
+/// The fleet Bootstrap order. Crates are listed in priority order: the fleet's ships, sub-fleets included,
+/// take them first to last, over as many trips as it takes. The same design listed twice counts once, at its
+/// first place. Targets the fleet.
+/// </summary>
+public sealed record FleetBootstrapCommand(
+    int TargetEntityId,
+    int SourceId,
+    int DestId,
+    IReadOnlyList<BootstrapCrateRequest> Crates) : GameCommand(TargetEntityId);
+
 /// <summary>Empty chair. Plot the flight to the source and a load. The load plots the destination when it finishes.</summary>
 public sealed record QueueMoveGoodsCommand(
     int TargetEntityId,

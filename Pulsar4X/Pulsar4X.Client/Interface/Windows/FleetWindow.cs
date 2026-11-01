@@ -47,6 +47,10 @@ namespace Pulsar4X.Client
         private int bootSourceId = -1;
         private int bootDestId = -1;
         private readonly Dictionary<string, int> bootCounts = new();
+        // The fleet Bootstrap order's prioritized crate list. Seeded from the mod's default list when a fleet is picked.
+        private BootstrapOrderList? bootList;
+        private int bootListFleetId = int.MinValue;
+        private string bootAddPick = "";
         private int loadColonyId = -1;
         private int unloadColonyId = -1;
         private int goodsSeedSource = int.MinValue;
@@ -527,6 +531,8 @@ namespace Pulsar4X.Client
                 GoalRow("Move goods ...", IssueOrderType.MoveGoods, OrderBand.Ship, manual);
                 if (BootstrapShip)
                     GoalRow("Bootstrap colony ...", IssueOrderType.Bootstrap, OrderBand.Ship, manual);
+                else if (BootstrapFleet)
+                    GoalRow("Bootstrap ...", IssueOrderType.Bootstrap, OrderBand.Ship, manual);
                 if (mine && ImGui.Selectable("Mine asteroids###mine-ship", selectedIssueOrderType == IssueOrderType.MineAsteroids && !manual && selectedBand == OrderBand.Ship))
                     Choose(IssueOrderType.MineAsteroids, plot: false, OrderBand.Ship);
                 if (geo)
@@ -551,6 +557,8 @@ namespace Pulsar4X.Client
                 GoalRow("Move goods ...", IssueOrderType.MoveGoods, OrderBand.Well, manual);
                 if (BootstrapShip)
                     GoalRow("Bootstrap colony ...", IssueOrderType.Bootstrap, OrderBand.Well, manual);
+                else if (BootstrapFleet)
+                    GoalRow("Bootstrap ...", IssueOrderType.Bootstrap, OrderBand.Well, manual);
             });
             DisplayBand(OrderBand.System, () =>
             {
@@ -564,6 +572,8 @@ namespace Pulsar4X.Client
                 GoalRow("Move goods ...", IssueOrderType.MoveGoods, OrderBand.System, manual);
                 if (BootstrapShip)
                     GoalRow("Bootstrap colony ...", IssueOrderType.Bootstrap, OrderBand.System, manual);
+                else if (BootstrapFleet)
+                    GoalRow("Bootstrap ...", IssueOrderType.Bootstrap, OrderBand.System, manual);
             });
         }
 
@@ -604,8 +614,15 @@ namespace Pulsar4X.Client
                 selectedBand = band;
         }
 
-        // Bootstrap colony is one ship's order: a captained hull with a Construction Bay. A fleet never gets it.
+        // Bootstrap colony is one ship's order: a captained hull with a Construction Bay.
         bool BootstrapShip => orderShip != null && ShipHasCaptain(orderShip) && orderShip.HasConstructionBay;
+
+        // Bootstrap is the fleet's order: it hands crates to its captained ships with a Construction Bay, sub-fleets included.
+        bool BootstrapFleet => orderShip == null && selectedFleet != null && CapableShips(selectedFleet) > 0;
+
+        static int CapableShips(FleetSnapshot fleet)
+            => fleet.Ships.Count(ship => ShipHasCaptain(ship) && ship.HasConstructionBay)
+                + fleet.SubFleets.Sum(CapableShips);
 
         bool ManualPlot => orderShip != null && (!ShipHasCaptain(orderShip) || plotting);
 
@@ -819,7 +836,7 @@ namespace Pulsar4X.Client
                     }
                 }
                 else if (plotting
-                    || selectedIssueOrderType == IssueOrderType.Bootstrap
+                    || (selectedIssueOrderType == IssueOrderType.Bootstrap && !BootstrapFleet)
                     || selectedIssueOrderType == IssueOrderType.LoadGoods
                     || selectedIssueOrderType == IssueOrderType.UnloadGoods
                     || selectedIssueOrderType == IssueOrderType.PlotWarpTo
@@ -958,6 +975,8 @@ namespace Pulsar4X.Client
                     case IssueOrderType.Bootstrap:
                         if (BootstrapShip)
                             DisplayBootstrap(galaxy, candidates, orderShip!, selectedBand);
+                        else if (BootstrapFleet)
+                            DisplayBootstrapFleet(galaxy, candidates, selectedFleet!, selectedBand);
                         break;
                     case IssueOrderType.LoadGoods:
                         DisplayLoadGoods(candidates, commanded.Value);
@@ -1838,6 +1857,142 @@ namespace Pulsar4X.Client
                 ImGui.EndDisabled();
             if(send && problem == null)
                 SubmitFleetCommand(new BootstrapColonyCommand(ship.Id, source.Id, dest.Id, lines));
+        }
+
+        // The fleet Bootstrap order. From and To are Move goods' owned-warehouse trees. The crate list is the
+        // player's prioritized list: top ships first, a quantity per line, up/down buttons to reorder. It starts
+        // from the mod's default list. The fleet hands the crates to its captained ships with a Construction Bay,
+        // sub-fleets included, over as many trips as it takes. List edits live in BootstrapOrderList.
+        private void DisplayBootstrapFleet(IClientGalaxy galaxy, IEnumerable<EntitySnapshot> candidates, FleetSnapshot fleet, OrderBand band)
+        {
+            ImGui.TextWrapped("The fleet's ships load finished crates at the source, fly to the destination and mount them with their Construction Bays. "
+                + "Crates higher in the list ship first. A list bigger than one hold goes over in several trips.");
+            bool widen = band == OrderBand.System;
+            var pool = widen ? LogisticsCandidates(galaxy, candidates) : candidates;
+            var colonies = pool.Where(BootstrapPicker.IsPickable).OrderBy(e => NameOf(e), StringComparer.Ordinal).ToList();
+            if(colonies.Count == 0)
+            {
+                ImGui.Text("No owned colonies with a warehouse in reach.");
+                return;
+            }
+
+            var placed = Place(galaxy, pool, widen);
+            bool InBand(EntitySnapshot colony, int otherId) => HasPartner(colony, otherId, band, placed);
+
+            if(!colonies.Any(colony => colony.Id == bootSourceId && InBand(colony, bootDestId)))
+                bootSourceId = -1;
+            if(bootDestId == bootSourceId || !colonies.Any(colony => colony.Id == bootDestId && InBand(colony, bootSourceId)))
+                bootDestId = -1;
+
+            string? Block(EntitySnapshot colony, int otherId)
+                => BootstrapPicker.IsPickable(colony) && !InBand(colony, otherId) ? SpanLine() : null;
+
+            DisplayHelpers.Header("From");
+            DisplayTargetTree(pool,
+                e => BootstrapPicker.IsPickable(e),
+                "fleet-bootstrap-from",
+                id =>
+                {
+                    bootSourceId = id;
+                    if(bootDestId == id)
+                        bootDestId = -1;
+                },
+                starTargetsSystem: false,
+                selectedId: bootSourceId,
+                blocked: e => Block(e, bootDestId));
+
+            DisplayHelpers.Header("To");
+            DisplayTargetTree(pool,
+                e => BootstrapPicker.IsPickableDestination(e, bootSourceId),
+                "fleet-bootstrap-to",
+                id => bootDestId = id,
+                starTargetsSystem: false,
+                selectedId: bootDestId,
+                blocked: e => Block(e, bootSourceId));
+
+            var designs = galaxy.ComponentDesigns;
+            if(designs == null)
+            {
+                ImGui.Text("No component designs yet.");
+                return;
+            }
+            if(bootList == null || bootListFleetId != fleet.Id)
+            {
+                bootList = BootstrapOrderList.FromDefaults(designs);
+                bootListFleetId = fleet.Id;
+            }
+
+            DisplayHelpers.Header("Crates, in priority order");
+            ImGui.TextWrapped("Top of the list ships first. Up and down change the priority.");
+            for(int i = 0; i < bootList.Entries.Count; i++)
+            {
+                var entry = bootList.Entries[i];
+                string id = entry.DesignId;
+                ImGui.Text((i + 1) + ". " + entry.Name);
+                ImGui.SameLine();
+                int count = entry.Count;
+                ImGui.SetNextItemWidth(110);
+                if(ImGui.InputInt("###fleet-bootstrap-count-" + id, ref count))
+                    bootList.SetCount(i, count);
+                ImGui.SameLine();
+                if(ImGui.SmallButton("Up###fleet-bootstrap-up-" + id))
+                {
+                    bootList.MoveUp(i);
+                    break;
+                }
+                ImGui.SameLine();
+                if(ImGui.SmallButton("Down###fleet-bootstrap-down-" + id))
+                {
+                    bootList.MoveDown(i);
+                    break;
+                }
+                ImGui.SameLine();
+                if(ImGui.SmallButton("Remove###fleet-bootstrap-remove-" + id))
+                {
+                    bootList.Remove(i);
+                    break;
+                }
+            }
+            if(bootList.Entries.Count == 0)
+                ImGui.Text("The list is empty.");
+
+            var addable = bootList.Addable(designs);
+            if(addable.Count > 0)
+            {
+                var chosen = addable.FirstOrDefault(d => d.Id == bootAddPick) ?? addable[0];
+                bootAddPick = chosen.Id;
+                ImGui.SetNextItemWidth(260);
+                if(ImGui.BeginCombo("###fleet-bootstrap-add-pick", chosen.Name))
+                {
+                    foreach(var design in addable)
+                    {
+                        if(ImGui.Selectable(design.Name + "###fleet-bootstrap-add-" + design.Id, design.Id == bootAddPick))
+                            bootAddPick = design.Id;
+                    }
+                    ImGui.EndCombo();
+                }
+                ImGui.SameLine();
+                if(ImGui.Button("Add crate###fleet-bootstrap-add"))
+                    bootList.Add(chosen.Id, chosen.Name);
+            }
+            if(ImGui.SmallButton("Reset to default list###fleet-bootstrap-reset"))
+                bootList = BootstrapOrderList.FromDefaults(designs);
+
+            var lines = bootList.Requests();
+            var source = colonies.FirstOrDefault(colony => colony.Id == bootSourceId);
+            var dest = colonies.FirstOrDefault(colony => colony.Id == bootDestId);
+            string? problem = BootstrapOrderList.Validate(
+                CapableShips(fleet), source?.Id ?? -1, dest?.Id ?? -1, lines,
+                source != null && dest != null && InBand(source, dest.Id));
+            if(problem != null)
+                ImGui.TextWrapped(problem);
+            if(problem != null)
+                ImGui.BeginDisabled();
+            bool send = ImGui.Button("Bootstrap###fleet-bootstrap-send");
+            if(problem != null)
+                ImGui.EndDisabled();
+            if(send && problem == null && source != null && dest != null)
+                SubmitFleetCommand(new FleetBootstrapCommand(fleet.Id, source.Id, dest.Id, lines));
         }
 
         bool HasFuel(IClientGalaxy galaxy)

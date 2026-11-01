@@ -234,7 +234,9 @@ public class AgentProcessor : IInstanceProcessor
                     // TODO: cancel-propagation to siblings on failure.
                     // A standing job stays active when its child finishes or fails.
                     // The next wake hands the next child. Player survey and mine still complete.
-                    bool standing = goal.Type is GoalType.SurveyStanding or GoalType.MineStanding;
+                    // Fleet bootstrap is multi-trip: its planner decides when it is done or failed, one ship's
+                    // finished or failed trip does not end the order.
+                    bool standing = goal.Type is GoalType.SurveyStanding or GoalType.MineStanding or GoalType.FleetBootstrap;
                     var mine = SubGoalsOf(managedEntity, goal);
                     if (!standing && mine.Count > 0 && mine.All(g => g.Status == GoalStatus.Completed))
                         goal.Status = GoalStatus.Completed;
@@ -492,7 +494,8 @@ public class AgentProcessor : IInstanceProcessor
 
         if (unit.TryGetDataBlob<FleetDB>(out var fleet))
         {
-            foreach (var child in fleet.Children.ToList())
+            // Ships in sub-fleets hold goals handed straight down by a fleet order, so walk every descendant.
+            foreach (var child in FleetChildDuty.Descendants(unit))
             {
                 if (!child.TryGetDataBlob<GoalsDB>(out var childGoals) || childGoals.ActiveGoal == null)
                     continue;
