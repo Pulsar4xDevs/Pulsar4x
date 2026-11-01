@@ -1,10 +1,30 @@
 using System;
 using System.Linq;
+using Pulsar4X.Components;
+using Pulsar4X.Industry;
+using Pulsar4X.Ships;
 
 namespace Pulsar4X.Storage
 {
     public static class CargoMath
     {
+        /// <summary>
+        /// Whether this store may hold the item at all. A site-only facility (mounts on a planet but has
+        /// no ShipCargo mount) is not freight, so a ship's hold refuses it. Colony storage is not
+        /// restricted here: factory output and uninstalled facilities can still sit in a warehouse.
+        /// </summary>
+        public static bool Accepts(this CargoStorageDB db, ICargoable cargoItem)
+        {
+            var design = cargoItem switch
+            {
+                ComponentInstance instance => instance.Design,
+                ComponentDesign d => d,
+                _ => null
+            };
+            if (design == null || !LocalConstructionJob.IsSiteOnly(design))
+                return true;
+            return !(db.OwningEntity is { IsValid: true } owner && owner.HasDataBlob<ShipInfoDB>());
+        }
         
         /// <summary>
         /// Add or remove cargo by volume.
@@ -15,6 +35,8 @@ namespace Pulsar4X.Storage
         /// <returns>amount of volume successfuly added or removed</returns>
         internal static double AddRemoveCargoByVolume(this CargoStorageDB db, ICargoable cargoItem, double volume)
         {
+            if (volume > 0 && !db.Accepts(cargoItem))
+                return 0;
             //check we're actualy capable of
             if (!db.TypeStores.ContainsKey(cargoItem.CargoTypeID))
             {
@@ -57,6 +79,8 @@ namespace Pulsar4X.Storage
         /// <returns>amount succesfully added or removed</returns>
         internal static double AddRemoveCargoByMass(this CargoStorageDB db, ICargoable cargoItem, double mass)
         {
+            if (mass > 0 && !db.Accepts(cargoItem))
+                return 0;
             //check we're actualy capable of
 
             if (!db.TypeStores.ContainsKey(cargoItem.CargoTypeID))
@@ -102,6 +126,8 @@ namespace Pulsar4X.Storage
         /// <returns>amount succesfully added</returns>
         internal static long AddCargoByUnit(this CargoStorageDB db, ICargoable cargoItem, long count)
         {
+            if (count > 0 && !db.Accepts(cargoItem))
+                return 0;
             //check we're actualy capable of
 
             if (!db.TypeStores.ContainsKey(cargoItem.CargoTypeID))
@@ -296,7 +322,7 @@ namespace Pulsar4X.Storage
         public static double GetFreeMass(this CargoStorageDB db, ICargoable cargoItem)
         {
             var type = cargoItem.CargoTypeID;
-            if (!db.TypeStores.ContainsKey(type))
+            if (!db.TypeStores.ContainsKey(type) || !db.Accepts(cargoItem))
                 return 0;
             return db.TypeStores[type].FreeVolume / cargoItem.VolumePerUnit * cargoItem.MassPerUnit;
         }
@@ -310,7 +336,7 @@ namespace Pulsar4X.Storage
         public static double GetFreeVolume(this CargoStorageDB db, ICargoable cargoItem)
         {
             var type = cargoItem.CargoTypeID;
-            if (!db.TypeStores.ContainsKey(type))
+            if (!db.TypeStores.ContainsKey(type) || !db.Accepts(cargoItem))
                 return 0;
             return db.TypeStores[type].FreeVolume;
         }
@@ -347,7 +373,7 @@ namespace Pulsar4X.Storage
         public static long GetFreeUnitSpace(this CargoStorageDB db, ICargoable cargoItem, bool includeEscro = true)
         {
             var type = cargoItem.CargoTypeID;
-            if (!db.TypeStores.ContainsKey(type))
+            if (!db.TypeStores.ContainsKey(type) || !db.Accepts(cargoItem))
                 return 0;
             long items = (int)(db.TypeStores[type].FreeVolume / cargoItem.VolumePerUnit);
             if(includeEscro)

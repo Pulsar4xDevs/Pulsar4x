@@ -344,6 +344,34 @@ public class BootstrapColonyTests
     }
 
     [Test]
+    public void ASiteOnlyDesign_CannotBeFreighted_ButACrateAndAColonyWarehouseStillWork()
+    {
+        var scene = Build(crates: 1);
+        var cityHall = scene.Info.ComponentDesigns["default-design-city-hall"];
+        Assert.That(LocalConstructionJob.IsSiteOnly(cityHall), Is.True);
+        var siteOnly = new ComponentInstance(cityHall);
+        var hold = scene.Ship.GetDataBlob<CargoStorageDB>();
+        var warehouse = scene.Source.GetDataBlob<CargoStorageDB>();
+
+        // The colony warehouse still takes it (factory output, uninstall), the ship's hold does not.
+        Assert.That(warehouse.AddCargoByUnit(siteOnly, 1), Is.EqualTo(1));
+        Assert.That(hold.AddCargoByUnit(new ComponentInstance(cityHall), 1), Is.EqualTo(0));
+        Assert.That(hold.AddRemoveCargoByMass(new ComponentInstance(cityHall), 1), Is.EqualTo(0));
+        Assert.That(hold.AddRemoveCargoByVolume(new ComponentInstance(cityHall), 1), Is.EqualTo(0));
+        Assert.That(hold.GetFreeUnitSpace(siteOnly), Is.EqualTo(0));
+        Assert.That(hold.GetFreeVolume(siteOnly), Is.EqualTo(0));
+
+        // The load path clamps it to nothing, so a load line for it moves no units.
+        var lines = new List<MoveGoodsLine> { new() { ItemId = siteOnly.ID, Requested = 1 } };
+        Assert.That(MoveGoodsPlan.ClampLines(scene.Source, scene.Ship, lines, useLoaded: false), Is.Empty);
+
+        // A crate still loads.
+        var crateLines = new List<MoveGoodsLine> { new() { ItemId = scene.Crates[0].ID, Requested = 1 } };
+        Assert.That(MoveGoodsPlan.ClampLines(scene.Source, scene.Ship, crateLines, useLoaded: false), Has.Count.EqualTo(1));
+        Assert.That(hold.AddCargoByUnit(scene.Crates[0], 1), Is.EqualTo(1));
+    }
+
+    [Test]
     public void Projection_MarksCrateRowsWithTheirDesign_AndShipsWithABay()
     {
         var scene = Build(crates: 1);
