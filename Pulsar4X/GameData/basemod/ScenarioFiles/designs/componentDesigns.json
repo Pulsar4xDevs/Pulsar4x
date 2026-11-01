@@ -117,6 +117,17 @@
   {
     "Type": "ComponentDesign",
     "Payload": {
+      "UniqueId": "default-design-planetary-spaceport-crate",
+      "Name": "Planetary Spaceport Complex (Crate)",
+      "TemplateId": "planetary-spaceport-crate",
+      "Properties": [
+        { "Key": "Warehouse Size", "Value": 2000 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
       "UniqueId": "default-design-f1",
       "Name": "F1",
       "TemplateId": "conventional-engine",
