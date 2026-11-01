@@ -106,12 +106,17 @@ public sealed record BootstrapColonyCommand(
 /// The fleet Bootstrap order. Crates are listed in priority order: the fleet's ships, sub-fleets included,
 /// take them first to last, over as many trips as it takes. The same design listed twice counts once, at its
 /// first place. Targets the fleet.
+/// <para>
+/// <c>SiteBuilds</c> are site-only facilities the player wants built at the destination. They are not shipped. The
+/// resources they cost (cost x count) are derived by the server and hauled once every crate has arrived.
+/// </para>
 /// </summary>
 public sealed record FleetBootstrapCommand(
     int TargetEntityId,
     int SourceId,
     int DestId,
-    IReadOnlyList<BootstrapCrateRequest> Crates) : GameCommand(TargetEntityId);
+    IReadOnlyList<BootstrapCrateRequest> Crates,
+    IReadOnlyList<BootstrapCrateRequest>? SiteBuilds = null) : GameCommand(TargetEntityId);
 
 /// <summary>Empty chair. Plot the flight to the source and a load. The load plots the destination when it finishes.</summary>
 public sealed record QueueMoveGoodsCommand(

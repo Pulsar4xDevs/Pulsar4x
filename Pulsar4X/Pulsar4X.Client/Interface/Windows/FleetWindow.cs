@@ -51,6 +51,8 @@ namespace Pulsar4X.Client
         private BootstrapOrderList? bootList;
         private int bootListFleetId = int.MinValue;
         private string bootAddPick = "";
+        private BootstrapSiteBuildList bootSites = new();
+        private string bootSitePick = "";
         private int loadColonyId = -1;
         private int unloadColonyId = -1;
         private int goodsSeedSource = int.MinValue;
@@ -1919,6 +1921,7 @@ namespace Pulsar4X.Client
             if(bootList == null || bootListFleetId != fleet.Id)
             {
                 bootList = BootstrapOrderList.FromDefaults(designs);
+                bootSites = new BootstrapSiteBuildList();
                 bootListFleetId = fleet.Id;
             }
 
@@ -1978,6 +1981,52 @@ namespace Pulsar4X.Client
             if(ImGui.SmallButton("Reset to default list###fleet-bootstrap-reset"))
                 bootList = BootstrapOrderList.FromDefaults(designs);
 
+            DisplayHelpers.Header("Built on site");
+            ImGui.TextWrapped("Facilities that cannot ride in a hold. The fleet hauls the resources they cost, after the crates arrive.");
+            for(int i = 0; i < bootSites.Entries.Count; i++)
+            {
+                var entry = bootSites.Entries[i];
+                string id = entry.DesignId;
+                ImGui.Text(entry.Name);
+                ImGui.SameLine();
+                int count = entry.Count;
+                ImGui.SetNextItemWidth(110);
+                if(ImGui.InputInt("###fleet-bootstrap-site-count-" + id, ref count))
+                    bootSites.SetCount(i, count);
+                ImGui.SameLine();
+                if(ImGui.SmallButton("Remove###fleet-bootstrap-site-remove-" + id))
+                {
+                    bootSites.Remove(i);
+                    break;
+                }
+            }
+            var sitesAddable = bootSites.Addable(designs);
+            if(sitesAddable.Count > 0)
+            {
+                var chosenSite = sitesAddable.FirstOrDefault(d => d.Id == bootSitePick) ?? sitesAddable[0];
+                bootSitePick = chosenSite.Id;
+                ImGui.SetNextItemWidth(260);
+                if(ImGui.BeginCombo("###fleet-bootstrap-site-pick", chosenSite.Name))
+                {
+                    foreach(var design in sitesAddable)
+                    {
+                        if(ImGui.Selectable(design.Name + "###fleet-bootstrap-site-add-" + design.Id, design.Id == bootSitePick))
+                            bootSitePick = design.Id;
+                    }
+                    ImGui.EndCombo();
+                }
+                ImGui.SameLine();
+                if(ImGui.Button("Add facility###fleet-bootstrap-site-add"))
+                    bootSites.Add(chosenSite.Id, chosenSite.Name);
+            }
+            var derived = bootSites.DerivedResources(designs);
+            if(derived.Count > 0)
+            {
+                ImGui.Text("Resources to haul (worked out from the facilities):");
+                foreach(var resource in derived)
+                    ImGui.BulletText(resource.Name + ": " + resource.Amount);
+            }
+
             var lines = bootList.Requests();
             var source = colonies.FirstOrDefault(colony => colony.Id == bootSourceId);
             var dest = colonies.FirstOrDefault(colony => colony.Id == bootDestId);
@@ -1992,7 +2041,7 @@ namespace Pulsar4X.Client
             if(problem != null)
                 ImGui.EndDisabled();
             if(send && problem == null && source != null && dest != null)
-                SubmitFleetCommand(new FleetBootstrapCommand(fleet.Id, source.Id, dest.Id, lines));
+                SubmitFleetCommand(new FleetBootstrapCommand(fleet.Id, source.Id, dest.Id, lines, bootSites.Requests()));
         }
 
         bool HasFuel(IClientGalaxy galaxy)

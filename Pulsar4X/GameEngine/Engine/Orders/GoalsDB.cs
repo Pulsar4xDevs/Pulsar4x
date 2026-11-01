@@ -190,6 +190,13 @@ public class Goal
     public List<BootstrapCrateLine> BootstrapAssigned = new();
     /// <summary>Fleet bootstrap. Ship goals that failed or were cancelled and have already been taken back, so their crates count once.</summary>
     public List<string> BootstrapSettled = new();
+    /// <summary>
+    /// Fleet bootstrap. Site-only facilities the player wants built at the destination, by design. The fleet
+    /// hauls the resources these cost (design cost x count) after the crates are delivered. Never shipped as crates.
+    /// </summary>
+    public List<BootstrapCrateLine> BootstrapSiteBuilds = new();
+    /// <summary>Fleet bootstrap. Units of each resource (cargo id) handed to haulers so far and not given back.</summary>
+    public Dictionary<string, long> BootstrapHauled = new();
     /// <summary>Where to buy, or the freight source. -1 until a route is committed.</summary>
     public int SourceEntityId = -1;
     /// <summary>Where to sell, or the freight destination. -1 until a route is committed.</summary>

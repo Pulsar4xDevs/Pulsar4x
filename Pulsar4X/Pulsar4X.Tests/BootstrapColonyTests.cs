@@ -31,7 +31,8 @@ public class BootstrapColonyTests
     const string Infra = "default-design-infrastructure";
 
     static readonly ModDataStore Store = LoadStore();
-    static readonly Game Game = InitializeGame();
+    static Game Game = InitializeGame();
+    static int _factionsMade;
 
     static ModDataStore LoadStore()
     {
@@ -526,6 +527,195 @@ public class BootstrapColonyTests
         Assert.That(plan.Message, Is.EqualTo("Mounted 2 crates"));
     }
 
+    const string CityHall = "default-design-city-hall";
+
+    /// <summary>A fleet goal whose crates all went over, wanting the listed site-only facilities built.</summary>
+    static Goal ResourceGoal(Scene scene, int cityHalls)
+    {
+        var goal = FleetGoal(scene, (Infra, 1));
+        goal.BootstrapAssigned.Add(new BootstrapCrateLine { DesignId = Infra, Count = 1 });
+        goal.BootstrapSiteBuilds.Add(new BootstrapCrateLine { DesignId = CityHall, Count = cityHalls });
+        return goal;
+    }
+
+    static void StockResources(Scene scene, Dictionary<string, long> amounts)
+    {
+        foreach (var (cargoId, amount) in amounts)
+            Assert.That(scene.Source.GetDataBlob<CargoStorageDB>()
+                .AddCargoByUnit(scene.Info.Data.CargoGoods.GetAny(cargoId)!, amount), Is.EqualTo(amount));
+    }
+
+    [Test]
+    public void BootstrapResources_AreTheFacilitysConstructionCost_TimesTheQuantity_SummedAcrossFacilities()
+    {
+        var scene = Build(crates: 0);
+        var hall = scene.Info.ComponentDesigns[CityHall];
+        Assert.That(hall.ResourceCosts, Is.Not.Empty, "the test needs a design with a construction cost");
+
+        var one = BootstrapResources.Derive(scene.Info, new[] { new BootstrapCrateLine { DesignId = CityHall, Count = 1 } });
+        var three = BootstrapResources.Derive(scene.Info, new[] { new BootstrapCrateLine { DesignId = CityHall, Count = 3 } });
+        Assert.That(one, Is.EquivalentTo(hall.ResourceCosts.Where(c => c.Value > 0)));
+        foreach (var (cargoId, amount) in one)
+            Assert.That(three[cargoId], Is.EqualTo(amount * 3));
+
+        // Two listings of the same cost add up, and a design the faction does not have adds nothing.
+        var twice = BootstrapResources.Derive(scene.Info, new[]
+        {
+            new BootstrapCrateLine { DesignId = CityHall, Count = 1 },
+            new BootstrapCrateLine { DesignId = CityHall, Count = 2 },
+            new BootstrapCrateLine { DesignId = "no-such-design", Count = 5 },
+        });
+        Assert.That(twice, Is.EquivalentTo(three));
+    }
+
+    [Test]
+    public void FleetBootstrap_HaulsTheResourcesTheSiteBuildsCost_OnlyAfterTheCratesHaveArrived()
+    {
+        var scene = Build(crates: 1);
+        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
+        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
+        var needed = BootstrapResources.Derive(scene.Info, new[] { new BootstrapCrateLine { DesignId = CityHall, Count = 2 } });
+        StockResources(scene, needed);
+
+        // Crates first: the crate is still at the source, so the ship is handed the crate and no resources.
+        var goal = FleetGoal(scene, (Infra, 1));
+        goal.BootstrapSiteBuilds.Add(new BootstrapCrateLine { DesignId = CityHall, Count = 2 });
+        var plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
+        Assert.That(plan.SubGoals.Single().Goal.Type, Is.EqualTo(GoalType.BootstrapColony));
+        Assert.That(goal.BootstrapHauled, Is.Empty);
+
+        // The crate trip is under way, so the resources keep waiting for it.
+        scene.Ship.SetDataBlob(new GoalsDB { ActiveGoal = plan.SubGoals.Single().Goal, GivenGoal = plan.SubGoals.Single().Goal });
+        plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active));
+        Assert.That(plan.SubGoals, Is.Empty);
+        Assert.That(goal.BootstrapHauled, Is.Empty);
+
+        // The crate arrived: the ship is sent for the resources the two facilities cost.
+        scene.Ship.GetDataBlob<GoalsDB>().ActiveGoal!.Status = GoalStatus.Completed;
+        plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
+        var (ship, haul) = plan.SubGoals.Single();
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active), plan.Message);
+        Assert.That(ship.Id, Is.EqualTo(scene.Ship.Id));
+        Assert.That(haul.Type, Is.EqualTo(GoalType.MoveGoods));
+        Assert.That(haul.ParentGoalId, Is.EqualTo(goal.Id));
+        Assert.That(haul.SourceEntityId, Is.EqualTo(scene.Source.Id));
+        Assert.That(haul.DestEntityId, Is.EqualTo(scene.Dest.Id));
+        Assert.That(haul.MoveGoodsLines, Is.Not.Empty);
+        foreach (var line in haul.MoveGoodsLines)
+        {
+            var cargo = scene.Info.Data.CargoGoods.GetAny(line.ItemId);
+            Assert.That(line.Requested, Is.LessThanOrEqualTo(needed[cargo.UniqueID]));
+            Assert.That(goal.BootstrapHauled[cargo.UniqueID], Is.EqualTo(line.Requested));
+        }
+    }
+
+    [Test]
+    public void FleetBootstrap_AHaulThatDeliveredLess_OwesTheRest_AndTheGoalIsDoneOnceItAllArrived()
+    {
+        var scene = Build(crates: 0);
+        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
+        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
+        var needed = BootstrapResources.Derive(scene.Info, new[] { new BootstrapCrateLine { DesignId = CityHall, Count = 1 } });
+        StockResources(scene, needed);
+        var goal = ResourceGoal(scene, cityHalls: 1);
+
+        var plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
+        var haul = plan.SubGoals.Single().Goal;
+        long handed = haul.MoveGoodsLines.Sum(line => line.Requested);
+        Assert.That(handed, Is.GreaterThan(0));
+
+        // The trip finished having delivered nothing of one line: that line is owed again.
+        var owed = haul.MoveGoodsLines[0];
+        haul.MoveGoodsLines.ForEach(line => line.Delivered = line.Requested);
+        owed.Delivered = 0;
+        haul.Status = GoalStatus.Completed;
+        scene.Ship.SetDataBlob(new GoalsDB { ActiveGoal = haul, GivenGoal = haul });
+        plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
+
+        var again = plan.SubGoals.Single().Goal;
+        Assert.That(again.MoveGoodsLines.Select(l => l.ItemId), Does.Contain(owed.ItemId));
+        Assert.That(goal.BootstrapHauled.Values.Sum(), Is.EqualTo(handed));
+
+        // Everything delivered and nothing in flight: the order is done.
+        again.MoveGoodsLines.ForEach(line => line.Delivered = line.Requested);
+        again.Status = GoalStatus.Completed;
+        goal.BootstrapHauled.Clear();
+        foreach (var (cargoId, amount) in needed)
+            goal.BootstrapHauled[cargoId] = amount;
+        scene.Ship.SetDataBlob(new GoalsDB { ActiveGoal = again, GivenGoal = again });
+        plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Completed), plan.Message);
+    }
+
+    [Test]
+    public void FleetBootstrap_ShortOfAResourceAtTheSource_FailsNamingIt()
+    {
+        var scene = Build(crates: 0);
+        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
+        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
+        var goal = ResourceGoal(scene, cityHalls: 1);
+
+        var plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
+
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Failed));
+        Assert.That(plan.Message, Does.StartWith("not enough ").And.EndWith(" at source"));
+    }
+
+    [Test]
+    public void FleetBootstrapCommand_TakesSiteBuilds_AndRefusesACrateOrABadCount()
+    {
+        var scene = Build(crates: 1);
+        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
+        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
+        CommandResult Send(params BootstrapCrateRequest[] builds)
+            => scene.Translate(fleet, new FleetBootstrapCommand(fleet.Id, scene.Source.Id, scene.Dest.Id,
+                new[] { new BootstrapCrateRequest(Infra, 1) }, builds));
+
+        Assert.That(Send(new BootstrapCrateRequest(Infra, 1)).RejectionReason, Does.Contain("not a site-only"));
+        Assert.That(Send(new BootstrapCrateRequest(CityHall, 0)).RejectionReason, Is.EqualTo("Site build counts must be positive."));
+        Assert.That(Send(new BootstrapCrateRequest("no-such-design", 1)).Accepted, Is.False);
+
+        var result = Send(new BootstrapCrateRequest(CityHall, 1), new BootstrapCrateRequest(CityHall, 2));
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        var goal = fleet.GetDataBlob<GoalsDB>().ActiveGoal!;
+        Assert.That(goal.BootstrapSiteBuilds.Select(l => (l.DesignId, l.Count)), Is.EqualTo(new[] { (CityHall, 3) }));
+    }
+
+    [Test]
+    public void BootstrapSiteBuildList_ShowsTheDerivedResources_AsCostTimesCount()
+    {
+        var designs = new ComponentDesignsSnapshot
+        {
+            Designs = new[]
+            {
+                new ComponentDesignSummary("hall", "Hall", "t", "T")
+                {
+                    IsSiteOnly = true,
+                    ResourceCosts = new[] { new ResourceCostLine("iron", "Iron", 10), new ResourceCostLine("steel", "Steel", 4) },
+                },
+                new ComponentDesignSummary("tower", "Tower", "t", "T")
+                {
+                    IsSiteOnly = true,
+                    ResourceCosts = new[] { new ResourceCostLine("iron", "Iron", 5) },
+                },
+                new ComponentDesignSummary("crate", "Crate", "t", "T") { IsCrate = true },
+            },
+        };
+        var list = new BootstrapSiteBuildList();
+
+        Assert.That(list.Addable(designs).Select(d => d.Id), Is.EqualTo(new[] { "hall", "tower" }), "crates are not site builds");
+        Assert.That(list.Add("hall", "Hall", 3), Is.True);
+        Assert.That(list.Add("tower", "Tower", 2), Is.True);
+        Assert.That(list.Add("hall", "Hall", 0), Is.False);
+
+        var totals = list.DerivedResources(designs);
+        Assert.That(totals.Select(t => (t.Name, t.Amount)), Is.EqualTo(new[] { ("Iron", 40L), ("Steel", 12L) }));
+        Assert.That(list.Requests().Select(r => (r.DesignId, r.Count)), Is.EqualTo(new[] { ("hall", 3), ("tower", 2) }));
+        list.Remove(0);
+        Assert.That(list.DerivedResources(designs).Single().Amount, Is.EqualTo(10));
+    }
+
     [Test]
     public void FleetBootstrapCommand_GoesToTheShipsOfTheFleet_AndTheShipFollowsTheFleetsGoal()
     {
@@ -657,6 +847,12 @@ public class BootstrapColonyTests
 
     static Scene Build(int crates)
     {
+        // A game holds at most 32 factions and every scene makes one, so start a fresh game before it runs out.
+        if (_factionsMade++ >= 24)
+        {
+            Game = InitializeGame();
+            _factionsMade = 1;
+        }
         var faction = FactionFactory.CreateFaction(Game, "Bootstrap-" + Guid.NewGuid().ToString("N"));
         var info = faction.GetDataBlob<FactionInfoDB>();
         PrepareDesigns(faction, info);

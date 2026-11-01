@@ -878,12 +878,19 @@ public sealed class ComponentDesignsSnapshot
 /// <summary>A component template the faction can design from.</summary>
 public sealed record ComponentTemplateSummary(string Id, string Name, string ComponentType, string Description);
 
+/// <summary>An amount of one resource, by cargo id, with its display name.</summary>
+public sealed record ResourceCostLine(string CargoId, string Name, long Amount);
+
 /// <summary>An existing component design; <see cref="PropertyValues"/> carries the inputs it was
 /// created with so the client can reload it into the designer.</summary>
 public sealed record ComponentDesignSummary(string Id, string Name, string TemplateId, string TemplateName)
 {
     /// <summary>Can be mounted on a planet and carried in a ship's hold. A fleet Bootstrap order can ship these.</summary>
     public bool IsCrate { get; init; }
+    /// <summary>Mounts on a planet but cannot ride in a hold. It is built on site, from hauled resources.</summary>
+    public bool IsSiteOnly { get; init; }
+    /// <summary>What one unit costs to build, per resource.</summary>
+    public IReadOnlyList<ResourceCostLine> ResourceCosts { get; init; } = Array.Empty<ResourceCostLine>();
     public IReadOnlyList<DesignerInput> PropertyValues { get; init; } = Array.Empty<DesignerInput>();
 }
 

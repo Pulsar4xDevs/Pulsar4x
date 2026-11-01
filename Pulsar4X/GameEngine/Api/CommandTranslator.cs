@@ -519,6 +519,23 @@ namespace Pulsar4X.Engine.Api
 
             if (!PairReaches(commanded, cmd.SourceId, cmd.DestId))
                 return CommandResult.Reject("The target is outside this fleet's reach.");
+            var siteBuilds = new List<BootstrapCrateLine>();
+            var designs = faction.GetDataBlob<FactionInfoDB>().ComponentDesigns;
+            foreach (var request in cmd.SiteBuilds ?? Array.Empty<BootstrapCrateRequest>())
+            {
+                if (request.Count <= 0)
+                    return CommandResult.Reject("Site build counts must be positive.");
+                if (!designs.TryGetValue(request.DesignId, out var design))
+                    return CommandResult.Reject($"Unknown design {request.DesignId}.");
+                if (!LocalConstructionJob.IsSiteOnly(design))
+                    return CommandResult.Reject($"{design.Name} is not a site-only facility. List crates under crates.");
+                var same = siteBuilds.Find(c => c.DesignId == request.DesignId);
+                if (same != null)
+                    same.Count += request.Count;
+                else
+                    siteBuilds.Add(new BootstrapCrateLine { DesignId = request.DesignId, Count = request.Count });
+            }
+
             var goal = new Goal(GoalType.FleetBootstrap)
             {
                 Name = "Bootstrap",
@@ -526,6 +543,7 @@ namespace Pulsar4X.Engine.Api
                 DestEntityId = cmd.DestId,
                 TargetEntityID = cmd.DestId,
                 BootstrapCrates = crates,
+                BootstrapSiteBuilds = siteBuilds,
             };
             AgentProcessor.AssignGoal(commanded, goal);
             if (goal.Status == GoalStatus.Failed)

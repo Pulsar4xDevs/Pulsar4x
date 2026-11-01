@@ -1666,6 +1666,8 @@ namespace Pulsar4X.Engine.Api
                 {
                     PropertyValues = values,
                     IsCrate = LocalConstructionJob.IsCrate(design),
+                    IsSiteOnly = LocalConstructionJob.IsSiteOnly(design),
+                    ResourceCosts = CostLines(info, design),
                 });
             }
 
@@ -1675,6 +1677,21 @@ namespace Pulsar4X.Engine.Api
                 Designs = designs,
                 BootstrapDefaults = BootstrapDefaultList(info),
             };
+        }
+
+        private static List<ResourceCostLine> CostLines(FactionInfoDB info, ComponentDesign design)
+        {
+            var lines = new List<ResourceCostLine>();
+            foreach (var (cargoId, amount) in design.ResourceCosts)
+            {
+                if (amount <= 0)
+                    continue;
+                string name = info.Data?.CargoGoods != null && info.Data.CargoGoods.Contains(cargoId)
+                    ? info.Data.CargoGoods.GetAny(cargoId)!.Name
+                    : cargoId;
+                lines.Add(new ResourceCostLine(cargoId, name, amount));
+            }
+            return lines;
         }
 
         /// <summary>

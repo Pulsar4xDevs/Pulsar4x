@@ -49,48 +49,129 @@ public class FleetBootstrapPlan : IGoalPlanner
 
         string failedWhy = TakeBack(goal, ships, dest);
 
-        bool inFlight = ships.Any(ship => OwnTrip(ship, goal) is { PlayerCancelled: false, Status: not (GoalStatus.Completed or GoalStatus.Failed) });
+        bool Live(Goal? trip, GoalType type)
+            => trip is { PlayerCancelled: false, Status: not (GoalStatus.Completed or GoalStatus.Failed) } && trip.Type == type;
+        bool cratesInFlight = ships.Any(ship => Live(OwnTrip(ship, goal), GoalType.BootstrapColony));
+        bool haulsInFlight = ships.Any(ship => Live(OwnTrip(ship, goal), GoalType.MoveGoods));
 
         var remaining = Remaining(goal);
-        if (remaining.Count == 0)
+        var handed = new List<(Entity, Goal)>();
+        bool anyEligible = false;
+        bool tooBig = false;
+        if (remaining.Count > 0)
         {
-            if (inFlight)
-                return PlanResult.Continue(new List<(Entity, Goal)>());
-            int total = goal.BootstrapAssigned.Sum(line => line.Count);
-            return PlanResult.Done($"Mounted {total} {(total == 1 ? "crate" : "crates")}");
+            var reserved = new HashSet<int>(goal.BootstrapCrateIds);
+            foreach (var ship in ships.OrderBy(ship => MarketRun.DistanceMeters(ship, source)).ThenBy(ship => ship.Id))
+            {
+                if (!Eligible(ship, goal, source, dest, needsBay: true))
+                    continue;
+                anyEligible = true;
+                var trip = Batch(ship, source, goal, remaining, reserved, out bool bigForThisShip);
+                tooBig |= bigForThisShip;
+                if (trip == null)
+                    continue;
+                handed.Add((ship, trip));
+                foreach (var line in trip.BootstrapCrates)
+                    Credit(goal.BootstrapAssigned, line.DesignId, line.Count);
+                goal.BootstrapCrateIds.AddRange(trip.BootstrapCrateIds);
+                remaining = Remaining(goal);
+                if (remaining.Count == 0)
+                    break;
+            }
+
+            if (handed.Count > 0 || cratesInFlight || haulsInFlight)
+                return PlanResult.Continue(handed);
+
+            // Nothing in flight and nothing handed, so the rest cannot ship.
+            if (!anyEligible)
+                return PlanResult.Fail(string.IsNullOrEmpty(failedWhy) ? "no ship" : failedWhy);
+            if (tooBig)
+                return PlanResult.Fail("doesn't fit hold");
+            return PlanResult.Fail(ShortMessage(fleetEntity, remaining));
         }
 
+        // Resources go after the crates: the crates are what let the destination use them, so every crate
+        // has arrived before the first haul leaves.
+        if (cratesInFlight)
+            return PlanResult.Continue(handed);
+
+        var needs = BootstrapResources.Remaining(fleetEntity, goal);
+        if (needs.Count == 0)
+        {
+            if (haulsInFlight)
+                return PlanResult.Continue(handed);
+            int total = goal.BootstrapAssigned.Sum(line => line.Count);
+            string crates = $"Mounted {total} {(total == 1 ? "crate" : "crates")}";
+            return PlanResult.Done(goal.BootstrapSiteBuilds.Count == 0 ? crates : crates + ", hauled the resources");
+        }
+
+        // One round of hauls at a time, so every pass reads the stock the source really holds.
+        if (haulsInFlight)
+            return PlanResult.Continue(handed);
+
+        var hauls = HandOutHauls(ships, goal, source, dest, needs, out string haulWhy);
+        if (hauls.Count > 0)
+            return PlanResult.Continue(hauls);
+        return PlanResult.Fail(string.IsNullOrEmpty(failedWhy) ? haulWhy : failedWhy);
+    }
+
+    /// <summary>
+    /// A round of resource hauls: each free captained ship with a hold takes what it can of what is still
+    /// needed, in the order <see cref="BootstrapResources.Remaining"/> lists it, from what the source holds.
+    /// </summary>
+    static List<(Entity, Goal)> HandOutHauls(List<Entity> ships, Goal goal, Entity source, Entity dest,
+        List<BootstrapResourceLine> needs, out string why)
+    {
+        why = "no ship";
         var handed = new List<(Entity, Goal)>();
-        bool tooBig = false;
-        bool anyEligible = false;
-        var reserved = new HashSet<int>(goal.BootstrapCrateIds);
+        var left = needs.ToDictionary(need => need.Cargo.ID, need => need.Amount);
+        var stock = source.GetDataBlob<CargoStorageDB>();
+        var taken = new Dictionary<int, long>();
+
+        bool anyShip = false;
         foreach (var ship in ships.OrderBy(ship => MarketRun.DistanceMeters(ship, source)).ThenBy(ship => ship.Id))
         {
-            if (!Eligible(ship, goal, source, dest))
+            if (!Eligible(ship, goal, source, dest, needsBay: false))
                 continue;
-            anyEligible = true;
-            var trip = Batch(ship, source, goal, remaining, reserved, out bool bigForThisShip);
-            tooBig |= bigForThisShip;
-            if (trip == null)
+            anyShip = true;
+            var wants = new List<MoveGoodsLine>();
+            foreach (var need in needs)
+            {
+                long onHand = stock.GetUnitsStored(need.Cargo, false) - taken.GetValueOrDefault(need.Cargo.ID);
+                long ask = Math.Min(left[need.Cargo.ID], Math.Max(0, onHand));
+                if (ask > 0)
+                    wants.Add(new MoveGoodsLine { ItemId = need.Cargo.ID, Requested = ask });
+            }
+            var picked = MoveGoodsPlan.ClampLines(source, ship, wants, useLoaded: false);
+            if (picked.Count == 0)
                 continue;
-            handed.Add((ship, trip));
-            foreach (var line in trip.BootstrapCrates)
-                Credit(goal.BootstrapAssigned, line.DesignId, line.Count);
-            goal.BootstrapCrateIds.AddRange(trip.BootstrapCrateIds);
-            remaining = Remaining(goal);
-            if (remaining.Count == 0)
+
+            var lines = new List<MoveGoodsLine>();
+            foreach (var (item, amount) in picked)
+            {
+                lines.Add(new MoveGoodsLine { ItemId = item.ID, Requested = amount });
+                left[item.ID] -= amount;
+                taken[item.ID] = taken.GetValueOrDefault(item.ID) + amount;
+                goal.BootstrapHauled[item.UniqueID] = goal.BootstrapHauled.GetValueOrDefault(item.UniqueID) + amount;
+            }
+            handed.Add((ship, new Goal(GoalType.MoveGoods)
+            {
+                Name = "Move goods",
+                ParentGoalId = goal.Id,
+                SourceEntityId = source.Id,
+                DestEntityId = dest.Id,
+                MoveGoodsLines = lines,
+            }));
+            if (left.Values.All(amount => amount <= 0))
                 break;
         }
 
-        if (handed.Count > 0 || inFlight)
-            return PlanResult.Continue(handed);
-
-        // Nothing in flight and nothing handed, so the rest cannot ship.
-        if (!anyEligible)
-            return PlanResult.Fail(string.IsNullOrEmpty(failedWhy) ? "no ship" : failedWhy);
-        if (tooBig)
-            return PlanResult.Fail("doesn't fit hold");
-        return PlanResult.Fail(ShortMessage(fleetEntity, remaining));
+        if (handed.Count == 0)
+        {
+            var first = needs.FirstOrDefault(need => stock.GetUnitsStored(need.Cargo, false) <= 0) ?? needs[0];
+            why = anyShip ? $"not enough {first.Cargo.Name} at source" : "no ship";
+        }
+        return handed;
     }
 
     /// <summary>This goal's trip on the ship, if its active goal is one. Null otherwise.</summary>
@@ -101,11 +182,11 @@ public class FleetBootstrapPlan : IGoalPlanner
         return goals.ActiveGoal.ParentGoalId == fleetGoal.Id ? goals.ActiveGoal : null;
     }
 
-    static bool Eligible(Entity ship, Goal goal, Entity source, Entity dest)
+    static bool Eligible(Entity ship, Goal goal, Entity source, Entity dest, bool needsBay)
     {
         if (ship.GetDataBlob<ShipInfoDB>().CommanderID < 0)
             return false;
-        if (!ship.TryGetDataBlob<LocalConstructionDB>(out var bay) || bay.PointsPerDay <= 0)
+        if (needsBay && (!ship.TryGetDataBlob<LocalConstructionDB>(out var bay) || bay.PointsPerDay <= 0))
             return false;
         if (!ship.HasDataBlob<CargoStorageDB>())
             return false;
@@ -209,6 +290,19 @@ public class FleetBootstrapPlan : IGoalPlanner
         {
             if (OwnTrip(ship, goal) is not { } trip)
                 continue;
+            if (trip.Type == GoalType.MoveGoods)
+            {
+                // A resource haul gives back what it did not deliver, whether it finished, failed or was cancelled.
+                if (trip.Status is not (GoalStatus.Completed or GoalStatus.Failed) && !trip.PlayerCancelled)
+                    continue;
+                if (trip.Status == GoalStatus.Failed && !string.IsNullOrEmpty(trip.Message))
+                    why = trip.Message;
+                if (goal.BootstrapSettled.Contains(trip.Id))
+                    continue;
+                goal.BootstrapSettled.Add(trip.Id);
+                BootstrapResources.GiveBack(ship, goal, trip);
+                continue;
+            }
             if (trip.Status != GoalStatus.Failed && !trip.PlayerCancelled)
                 continue;
             if (!string.IsNullOrEmpty(trip.Message))
