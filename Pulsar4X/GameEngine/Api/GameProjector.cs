@@ -1717,6 +1717,7 @@ namespace Pulsar4X.Engine.Api
                     IsCrate = LocalConstructionJob.IsCrate(design),
                     IsSiteOnly = LocalConstructionJob.IsSiteOnly(design),
                     ResourceCosts = CostLines(info, design),
+                    Infrastructure = InfrastructureSuitability.WindowOf(design),
                 });
             }
 

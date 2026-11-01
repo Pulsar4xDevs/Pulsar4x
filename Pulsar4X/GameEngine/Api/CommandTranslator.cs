@@ -538,6 +538,9 @@ namespace Pulsar4X.Engine.Api
                     siteBuilds.Add(new BootstrapCrateLine { DesignId = request.DesignId, Count = request.Count });
             }
 
+            if (RejectInfrastructure(faction, source, dest, cmd.InfrastructureDesignId, crates, out var infrastructureId) is { } infraBad)
+                return infraBad;
+
             var goal = new Goal(GoalType.FleetBootstrap)
             {
                 Name = "Bootstrap",
@@ -546,11 +549,66 @@ namespace Pulsar4X.Engine.Api
                 TargetEntityID = cmd.DestId,
                 BootstrapCrates = crates,
                 BootstrapSiteBuilds = siteBuilds,
+                BootstrapInfrastructureId = infrastructureId,
             };
+
+            // Seal last, after every other rejection (decision 15). The packages hold the crates and the resources
+            // until the fleet loads them. Any later failure gives them back.
+            if (!BootstrapPackage.TrySeal(commanded, goal, source, dest, out var packages, out var sealReason))
+                return CommandResult.Reject(sealReason);
+            goal.BootstrapPackageIds = packages.Select(p => p.UniqueID).ToList();
+
             AgentProcessor.AssignGoal(commanded, goal);
             if (goal.Status == GoalStatus.Failed)
+            {
+                BootstrapPackage.ReleaseAll(commanded.Manager.Game, goal);
                 return CommandResult.Reject(goal.Message);
+            }
             return CommandResult.Ok(goal.Id);
+        }
+
+        /// <summary>
+        /// The infrastructure check of the fleet Bootstrap order (decision 18). It runs only when the list has an
+        /// infrastructure line, and reads the source cargo only. The designs in the source cargo that cover the
+        /// destination body's gravity and pressure are the fits, and none is a rejection, whatever the player
+        /// picked. The player's design is used as picked, and a null pick is the best fit. Every infrastructure
+        /// line of the list becomes one line of the chosen design, at the first infrastructure line's place.
+        /// </summary>
+        static CommandResult? RejectInfrastructure(Entity faction, Entity source, Entity dest, string? picked,
+            List<BootstrapCrateLine> crates, out string infrastructureId)
+        {
+            infrastructureId = "";
+            var designs = faction.GetDataBlob<FactionInfoDB>().ComponentDesigns;
+            bool IsInfrastructure(string id) => designs.TryGetValue(id, out var d) && InfrastructureSuitability.WindowOf(d) != null;
+            int first = crates.FindIndex(c => IsInfrastructure(c.DesignId));
+            if (first < 0)
+                return null;
+
+            var (gravity, pressure) = InfrastructureSuitability.ClimateOf(dest);
+            var candidates = InfrastructureSuitability.InStock(source)
+                .Select(d => (d.UniqueID, InfrastructureSuitability.WindowOf(d)!))
+                .ToList();
+            var best = InfrastructureFit.Best(candidates, gravity, pressure);
+            if (best == null)
+            {
+                string planet = dest.TryGetDataBlob<ColonyInfoDB>(out var colony) && colony.PlanetEntity.IsValid
+                    ? colony.PlanetEntity.GetName(faction.Id) : dest.GetName(faction.Id);
+                return CommandResult.Reject(InfrastructureFit.NoFitMessage(planet));
+            }
+
+            string chosen = best;
+            if (!string.IsNullOrEmpty(picked))
+            {
+                if (!IsInfrastructure(picked))
+                    return CommandResult.Reject($"Unknown infrastructure design {picked}.");
+                chosen = picked;
+            }
+
+            int total = crates.Where(c => IsInfrastructure(c.DesignId)).Sum(c => c.Count);
+            crates.RemoveAll(c => IsInfrastructure(c.DesignId));
+            crates.Insert(Math.Min(first, crates.Count), new BootstrapCrateLine { DesignId = chosen, Count = total });
+            infrastructureId = chosen;
+            return null;
         }
 
         private CommandResult TranslateQueueMoveGoods(Entity faction, Entity commanded, GameCommand command)

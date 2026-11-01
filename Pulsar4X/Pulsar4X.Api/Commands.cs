@@ -105,10 +105,17 @@ public sealed record BootstrapColonyCommand(
 /// <summary>
 /// The fleet Bootstrap order. Crates are listed in priority order: the fleet's ships, sub-fleets included,
 /// take them first to last, over as many trips as it takes. The same design listed twice counts once, at its
-/// first place. Targets the fleet.
+/// first place. Targets the fleet. At order build the crates and resources are sealed into packages at the
+/// source, so nothing else can use them (<c>fleet-bootstrap-stub.md</c> decision 15).
 /// <para>
 /// <c>SiteBuilds</c> are site-only facilities the player wants built at the destination. They are not shipped. The
-/// resources they cost (cost x count) are derived by the server and hauled once every crate has arrived.
+/// resources they cost (cost x count) are derived by the server and sealed with the crates, to arrive once every crate has.
+/// </para>
+/// <para>
+/// <c>InfrastructureDesignId</c> is the infrastructure design the player wants, the tweak on the default. Null lets the
+/// server pick the best fit for the destination body from the source cargo. Every infrastructure line in <c>Crates</c>
+/// is merged into the one design. A list with no infrastructure line skips the check. When no design in the source
+/// cargo fits the destination, the order is rejected with "No suitable infrastructure for [destination planet]".
 /// </para>
 /// </summary>
 public sealed record FleetBootstrapCommand(
@@ -116,7 +123,8 @@ public sealed record FleetBootstrapCommand(
     int SourceId,
     int DestId,
     IReadOnlyList<BootstrapCrateRequest> Crates,
-    IReadOnlyList<BootstrapCrateRequest>? SiteBuilds = null) : GameCommand(TargetEntityId);
+    IReadOnlyList<BootstrapCrateRequest>? SiteBuilds = null,
+    string? InfrastructureDesignId = null) : GameCommand(TargetEntityId);
 
 /// <summary>Empty chair. Plot the flight to the source and a load. The load plots the destination when it finishes.</summary>
 public sealed record QueueMoveGoodsCommand(

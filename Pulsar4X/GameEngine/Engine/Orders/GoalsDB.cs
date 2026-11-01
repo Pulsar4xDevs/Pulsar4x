@@ -189,20 +189,20 @@ public class Goal
     /// <summary>Bootstrap colony. Instance ids picked on the first plan, so later plans count only these.</summary>
     public List<int> BootstrapCrateIds = new();
     /// <summary>
-    /// Fleet bootstrap. Crates handed to ships so far, per design. <see cref="BootstrapCrates"/> is the priority
-    /// list the player asked for, and the difference is what is still to ship. A fleet goal's
-    /// <see cref="BootstrapCrateIds"/> holds the instances those ships were given.
+    /// Fleet bootstrap. The sealed packages (shipment unique ids) the order built at its source, crates
+    /// first and then the resources. A bootstrap trip goal names its one package in <see cref="CargoId"/>.
     /// </summary>
-    public List<BootstrapCrateLine> BootstrapAssigned = new();
-    /// <summary>Fleet bootstrap. Ship goals that failed or were cancelled and have already been taken back, so their crates count once.</summary>
-    public List<string> BootstrapSettled = new();
+    public List<string> BootstrapPackageIds = new();
+    /// <summary>
+    /// Fleet bootstrap. The infrastructure design the order uses, set at order build: the player's pick, or the best fit
+    /// for the destination. Empty when the list has no infrastructure.
+    /// </summary>
+    public string BootstrapInfrastructureId = "";
     /// <summary>
     /// Fleet bootstrap. Site-only facilities the player wants built at the destination, by design. The fleet
-    /// hauls the resources these cost (design cost x count) after the crates are delivered. Never shipped as crates.
+    /// seals the resources these cost (design cost x count) into the packages at order build. Never shipped as crates.
     /// </summary>
     public List<BootstrapCrateLine> BootstrapSiteBuilds = new();
-    /// <summary>Fleet bootstrap. Units of each resource (cargo id) handed to haulers so far and not given back.</summary>
-    public Dictionary<string, long> BootstrapHauled = new();
     /// <summary>Where to buy, or the freight source. -1 until a route is committed.</summary>
     public int SourceEntityId = -1;
     /// <summary>Where to sell, or the freight destination. -1 until a route is committed.</summary>

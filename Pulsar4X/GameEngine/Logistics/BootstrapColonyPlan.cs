@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using GameEngine.Engine.Orders;
 using Pulsar4X.Colonies;
 using Pulsar4X.Components;
@@ -50,6 +51,10 @@ public class BootstrapColonyPlan : IGoalPlanner
         if (source.Id == dest.Id)
             return PlanResult.Fail("Pick two different colonies.");
 
+        // A fleet Bootstrap trip names one sealed package instead of picking crates itself.
+        if (!string.IsNullOrEmpty(goal.CargoId))
+            return PlanPackage(ship, goal, source, dest);
+
         if (goal.BootstrapCrateIds.Count == 0 && !TryPick(ship, source, goal, out reason))
             return PlanResult.Fail(reason);
 
@@ -84,6 +89,55 @@ public class BootstrapColonyPlan : IGoalPlanner
         return PlanResult.Continue(
             new List<EntityAction> { MountFromHoldAction.Create(ship, dest.Id, aboard) },
             "Mounting crates");
+    }
+
+    /// <summary>
+    /// A trip for one sealed crate package (decisions 15 and 16). The ship loads whole crate lines, flies to the
+    /// destination and its own Construction Bay mounts them from the hold. A mounted crate counts as delivered on the line.
+    /// Reads the world on every plan, like the single-ship order.
+    /// </summary>
+    static PlanResult PlanPackage(Entity ship, Goal goal, Entity source, Entity dest)
+    {
+        if (!ShipmentBook.TryFind(source, goal.CargoId, out var shipment))
+            return PlanResult.Done("package closed");
+
+        // A crate the bay has mounted counts as arrived.
+        ShipmentBook.Unpack(dest, shipment);
+
+        var aboard = new List<int>();
+        bool carried = false;
+        foreach (var line in shipment.Lines)
+        {
+            if (!line.Released || line.CarrierId != ship.Id)
+                continue;
+            carried = true;
+            if (line.Arrived)
+                continue;
+            if (line.Held is ComponentInstance crate && MountFromHoldAction.TryAboard(ship, crate.ID, out _))
+                aboard.Add(crate.ID);
+            else
+                return PlanResult.Fail("A crate is gone from the hold.");
+        }
+
+        if (aboard.Count > 0)
+        {
+            if (!LocalConstructionProcessor.InTransferRange(ship, dest))
+            {
+                if (!MoveGoodsPlan.TryMoveIntoRange(ship, dest, out var moves, out var why, goal))
+                    return PlanResult.Fail(string.IsNullOrEmpty(why) ? "The colony is out of transfer range." : why);
+                return PlanResult.Continue(moves);
+            }
+            return PlanResult.Continue(
+                new List<EntityAction> { MountFromHoldAction.Create(ship, dest.Id, aboard) },
+                "Mounting crates");
+        }
+
+        // One trip: what this ship carried is mounted, so the fleet hands the rest to a free ship.
+        if (carried)
+            return PlanResult.Done("Mounted the crates");
+        if (!shipment.Lines.Any(line => !line.Released))
+            return PlanResult.Done("nothing left to load");
+        return DeliverShipmentPlan.PlanLoad(ship, goal, source, shipment);
     }
 
     static PlanResult PlanLoad(Entity ship, Entity source, List<MoveGoodsLine> lines, Goal goal)

@@ -414,135 +414,848 @@ public class BootstrapColonyTests
         return crate;
     }
 
-    [Test]
-    public void FleetBootstrap_HandsEveryCrateToAShipInASubFleet_AsAPrefilledShipGoal()
-    {
-        var scene = Build(crates: 2);
-        var outer = FleetFactory.Create(scene.System, scene.Faction.Id, "Outer");
-        var inner = FleetFactory.Create(scene.System, scene.Faction.Id, "Inner");
-        inner.GetDataBlob<FleetDB>().AddChild(scene.Ship);
-        outer.GetDataBlob<FleetDB>().AddChild(inner);
-        var goal = FleetGoal(scene, (Infra, 2));
-
-        var plan = new FleetBootstrapPlan().Plan(outer, goal, scene.Ship.StarSysDateTime);
-
-        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active), plan.Message);
-        var (ship, trip) = plan.SubGoals.Single();
-        Assert.That(ship.Id, Is.EqualTo(scene.Ship.Id));
-        Assert.That(trip.Type, Is.EqualTo(GoalType.BootstrapColony));
-        Assert.That(trip.ParentGoalId, Is.EqualTo(goal.Id));
-        Assert.That(trip.DestEntityId, Is.EqualTo(scene.Dest.Id));
-        Assert.That(trip.BootstrapCrateIds, Is.EquivalentTo(scene.Crates.Select(crate => crate.ID)));
-        Assert.That(goal.BootstrapAssigned.Single().Count, Is.EqualTo(2));
-    }
-
-    [Test]
-    public void FleetBootstrap_TakesCratesInPriorityOrder_ASmallHoldTakesTheTopOfTheList_ThenTheNextTrip()
-    {
-        var scene = Build(crates: 1);
-        var factory = Stock(scene, Factory);
-        var hold = scene.Ship.GetDataBlob<CargoStorageDB>();
-        // Room for the factory crate and not a crumb more than half of the smaller one.
-        hold.TypeStores["general-storage"] = new TypeStore(factory.VolumePerUnit + Math.Min(factory.VolumePerUnit, scene.Crates[0].VolumePerUnit) * 0.5);
-        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
-        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
-        // Factory is on top, so it rides first even though the infrastructure crate was stocked first.
-        var goal = FleetGoal(scene, (Factory, 1), (Infra, 1));
-
-        var plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
-
-        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active), plan.Message);
-        Assert.That(plan.SubGoals.Single().Goal.BootstrapCrateIds, Is.EqualTo(new[] { factory.ID }));
-
-        // The ship comes back empty and free. The next plan sends the rest.
-        plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
-
-        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active), plan.Message);
-        Assert.That(plan.SubGoals.Single().Goal.BootstrapCrateIds, Is.EqualTo(new[] { scene.Crates[0].ID }));
-        Assert.That(FleetBootstrapPlan.Remaining(goal), Is.Empty);
-    }
-
-    [Test]
-    public void FleetBootstrap_WithNoShipAbleToTakeIt_FailsAndSaysWhy()
-    {
-        var scene = Build(crates: 1);
-        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
-        scene.Ship.GetDataBlob<ShipInfoDB>().CommanderID = -1;
-        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
-
-        var plan = new FleetBootstrapPlan().Plan(fleet, FleetGoal(scene, (Infra, 1)), scene.Ship.StarSysDateTime);
-
-        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Failed));
-        Assert.That(plan.Message, Is.EqualTo("no ship"));
-    }
-
-    [Test]
-    public void FleetBootstrap_ShortOfCrates_FailsNamingTheDesign()
-    {
-        var scene = Build(crates: 1);
-        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
-        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
-
-        var plan = new FleetBootstrapPlan().Plan(fleet, FleetGoal(scene, (Factory, 1)), scene.Ship.StarSysDateTime);
-
-        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Failed));
-        Assert.That(plan.Message, Does.Contain("no finished crates of").And.Contain(scene.Info.ComponentDesigns[Factory].Name));
-    }
-
-    [Test]
-    public void FleetBootstrap_ATripThatFailed_GivesItsCratesBack_AndBenchesThatShip()
-    {
-        var scene = Build(crates: 1);
-        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
-        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
-        var goal = FleetGoal(scene, (Infra, 1));
-        var plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
-        var trip = plan.SubGoals.Single().Goal;
-        Assert.That(goal.BootstrapAssigned.Single().Count, Is.EqualTo(1));
-
-        trip.Status = GoalStatus.Failed;
-        trip.Message = "out of range";
-        scene.Ship.SetDataBlob(new GoalsDB { ActiveGoal = trip, GivenGoal = trip });
-        plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
-
-        // The crate was not mounted, so it is owed again. The only ship failed this goal, so nothing is left to carry it.
-        Assert.That(goal.BootstrapAssigned.Single().Count, Is.EqualTo(0));
-        Assert.That(goal.BootstrapCrateIds, Is.Empty);
-        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Failed));
-        Assert.That(plan.Message, Is.EqualTo("out of range"));
-    }
-
-    [Test]
-    public void FleetBootstrap_EverythingHandedOutAndNothingInFlight_IsDone()
-    {
-        var scene = Build(crates: 2);
-        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
-        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
-        var goal = FleetGoal(scene, (Infra, 2));
-        goal.BootstrapAssigned.Add(new BootstrapCrateLine { DesignId = Infra, Count = 2 });
-
-        var plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
-
-        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Completed));
-        Assert.That(plan.Message, Is.EqualTo("Mounted 2 crates"));
-    }
-
     const string CityHall = "default-design-city-hall";
-
-    /// <summary>A fleet goal whose crates all went over, wanting the listed site-only facilities built.</summary>
-    static Goal ResourceGoal(Scene scene, int cityHalls)
-    {
-        var goal = FleetGoal(scene, (Infra, 1));
-        goal.BootstrapAssigned.Add(new BootstrapCrateLine { DesignId = Infra, Count = 1 });
-        goal.BootstrapSiteBuilds.Add(new BootstrapCrateLine { DesignId = CityHall, Count = cityHalls });
-        return goal;
-    }
 
     static void StockResources(Scene scene, Dictionary<string, long> amounts)
     {
         foreach (var (cargoId, amount) in amounts)
             Assert.That(scene.Source.GetDataBlob<CargoStorageDB>()
                 .AddCargoByUnit(scene.Info.Data.CargoGoods.GetAny(cargoId)!, amount), Is.EqualTo(amount));
+    }
+
+    // ------------------------------------------------------------------ fleet Bootstrap: sealed packages
+
+    const string MarsInfra = "default-design-infrastructure-mars";
+
+    /// <summary>Sends a fleet Bootstrap order for the scene's ships and returns the fleet and its goal.</summary>
+    static (Entity Fleet, Goal Goal, CommandResult Result) Order(
+        Scene scene, int crates = 1, int cityHalls = 0, string? infra = null, string design = Infra, bool addShip = true)
+    {
+        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
+        if (addShip)
+            fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
+        var builds = cityHalls > 0 ? new[] { new BootstrapCrateRequest(CityHall, cityHalls) } : Array.Empty<BootstrapCrateRequest>();
+        var result = scene.Translate(fleet, new FleetBootstrapCommand(fleet.Id, scene.Source.Id, scene.Dest.Id,
+            new[] { new BootstrapCrateRequest(design, crates) }, builds, infra));
+        var goal = fleet.TryGetDataBlob<GoalsDB>(out var goals) ? goals.ActiveGoal! : null!;
+        return (fleet, goal, result);
+    }
+
+    static Goal ShipTrip(Entity ship) => ship.GetDataBlob<GoalsDB>().ActiveGoal!;
+
+    static DateTime Now(Scene scene) => scene.Ship.StarSysDateTime;
+
+    static PlanResult PlanFleet(Entity fleet, Goal goal, Scene scene) => new FleetBootstrapPlan().Plan(fleet, goal, Now(scene));
+
+    static bool Sealed(Scene scene, string packageId) => ShipmentBook.TryFind(scene.Source, packageId, out _);
+
+    static ShipmentCargo Package(Scene scene, string packageId)
+    {
+        Assert.That(ShipmentBook.TryFind(scene.Source, packageId, out var package), Is.True, "the package is closed");
+        return package;
+    }
+
+    static List<ShipmentCargo> Packages(Scene scene, Goal goal) => goal.BootstrapPackageIds.Select(id => Package(scene, id)).ToList();
+
+    static long Units(Entity holder, ICargoable item) => holder.GetDataBlob<CargoStorageDB>().GetUnitsStored(item, false);
+
+    /// <summary>Runs a queued transfer to the end, like the cargo processor does between pulses.</summary>
+    static void Drain(Entity holder)
+    {
+        holder.GetDataBlob<CargoStorageDB>().TransferRate = 1_000_000;
+        var blob = holder.GetDataBlob<CargoTransferDB>();
+        var processor = new CargoTransferProcessor();
+        for (int i = 0; i < 8; i++)
+        {
+            processor.ProcessEntity(blob, 10);
+            if (!blob.TransferData.EscroHeldInPrimary.Any(t => t.count > 0) && !blob.TransferData.EscroHeldInSecondary.Any(t => t.count > 0))
+                break;
+        }
+        Assert.That(blob.TransferData.EscroHeldInPrimary.Any(t => t.count > 0) || blob.TransferData.EscroHeldInSecondary.Any(t => t.count > 0),
+            Is.False, "transfer escrow did not clear");
+        holder.Manager.Game.ProcessorManager.GetInstanceProcessor(nameof(ActionQueueProcessor))
+            .ProcessEntity(holder, holder.StarSysDateTime);
+    }
+
+    static void SetColonyPoints(Scene scene, long pointsPerDay)
+        => scene.Dest.SetDataBlob(new LocalConstructionDB { PointsPerDay = pointsPerDay });
+
+    // ---- decision 15: the seal
+
+    [Test]
+    public void FleetBootstrap_SealsTheCratesAndTheResourcesIntoPackages_AtOrderBuild()
+    {
+        var scene = Build(crates: 2);
+        var hall = scene.Info.ComponentDesigns[CityHall];
+        var needs = BootstrapResources.Derive(scene.Info, new[] { new BootstrapCrateLine { DesignId = CityHall, Count = 2 } });
+        StockResources(scene, needs.ToDictionary(n => n.Key, n => n.Value * 3));
+
+        var (_, goal, result) = Order(scene, crates: 2, cityHalls: 2);
+
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        Assert.That(hall.ResourceCosts, Is.Not.Empty);
+        // The goal points at the packages and not at loose crates.
+        Assert.That(goal.BootstrapPackageIds, Is.Not.Empty);
+        Assert.That(goal.BootstrapCrateIds, Is.Empty);
+        var packages = Packages(scene, goal);
+        Assert.That(packages.All(p => p.FleetOrder == BootstrapPackage.OrderPrefix + goal.Id), Is.True);
+        Assert.That(packages.All(p => !p.IsMarket), Is.True, "a Bootstrap package is not a market shipment");
+        // One package per cargo type: the crates are alone in theirs.
+        var cratePackage = packages.Single(BootstrapPackage.IsCratePackage);
+        Assert.That(cratePackage.Lines.All(line => line.IsCrate), Is.True);
+        Assert.That(cratePackage.Lines.Sum(line => line.Units), Is.EqualTo(2));
+        Assert.That(packages.Where(p => !BootstrapPackage.IsCratePackage(p)).SelectMany(p => p.Lines).All(line => !line.IsCrate), Is.True);
+        // The crates the order sealed are no longer open stock.
+        Assert.That(BootstrapColonyPlan.CratesOf(scene.Source, Infra), Is.Empty);
+        // Each resource is sealed in the amount the facilities cost, and only that much.
+        foreach (var (cargoId, amount) in needs)
+        {
+            var item = scene.Info.Data.CargoGoods.GetAny(cargoId)!;
+            Assert.That(packages.SelectMany(p => p.Lines).Where(line => line.Open.ID == item.ID).Sum(line => line.Units), Is.EqualTo(amount));
+            Assert.That(Units(scene.Source, item), Is.EqualTo(amount * 2), "the rest of the stock stays open");
+        }
+    }
+
+    [Test]
+    public void FleetBootstrap_SealedCratesAreGone_SoASecondOrderCannotTakeThem()
+    {
+        var scene = Build(crates: 1);
+        Assert.That(Order(scene, crates: 1).Result.Accepted, Is.True);
+
+        var second = Order(scene, crates: 1, addShip: false);
+
+        Assert.That(second.Result.Accepted, Is.False);
+        Assert.That(second.Result.RejectionReason, Does.StartWith("No suitable infrastructure"),
+            "the sealed crate is out of the source's stock, so no infrastructure is left to fit");
+    }
+
+    [Test]
+    public void FleetBootstrap_ShortOfCrates_IsRejectedNamingTheDesign_AndSealsNothing()
+    {
+        var scene = Build(crates: 1);
+        Stock(scene, Factory);
+
+        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
+        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
+        var result = scene.Translate(fleet, new FleetBootstrapCommand(fleet.Id, scene.Source.Id, scene.Dest.Id,
+            new[] { new BootstrapCrateRequest(Infra, 1), new BootstrapCrateRequest(Factory, 2) }));
+
+        Assert.That(result.Accepted, Is.False);
+        Assert.That(result.RejectionReason, Does.Contain("no finished crates of").And.Contain(scene.Info.ComponentDesigns[Factory].Name));
+        Assert.That(ShipmentBook.At(scene.Source), Is.Empty, "the infrastructure crate must not stay sealed");
+        Assert.That(BootstrapColonyPlan.CratesOf(scene.Source, Infra), Has.Count.EqualTo(1));
+    }
+
+    [Test]
+    public void FleetBootstrap_ShortOfAResourceAtTheSource_IsRejectedNamingIt_AndSealsNothing()
+    {
+        var scene = Build(crates: 1);
+        var needs = BootstrapResources.Derive(scene.Info, new[] { new BootstrapCrateLine { DesignId = CityHall, Count = 1 } });
+        var (cargoId, amount) = needs.First();
+        StockResources(scene, needs.ToDictionary(n => n.Key, n => n.Key == cargoId ? n.Value - 1 : n.Value));
+
+        var (_, _, result) = Order(scene, crates: 1, cityHalls: 1);
+
+        Assert.That(result.Accepted, Is.False);
+        Assert.That(result.RejectionReason, Does.StartWith("not enough ").And.EndWith(" at source"));
+        Assert.That(ShipmentBook.At(scene.Source), Is.Empty);
+        Assert.That(BootstrapColonyPlan.CratesOf(scene.Source, Infra), Has.Count.EqualTo(1));
+    }
+
+    [Test]
+    public void FleetBootstrap_ARejectionAfterTheSeal_GivesThePackagesBack()
+    {
+        var scene = Build(crates: 1);
+        var needs = BootstrapResources.Derive(scene.Info, new[] { new BootstrapCrateLine { DesignId = CityHall, Count = 1 } });
+        StockResources(scene, needs);
+
+        // A fleet with no ship fails when the goal is assigned, which is after the seal.
+        var (fleet, _, result) = Order(scene, crates: 1, cityHalls: 1, addShip: false);
+
+        Assert.That(result.Accepted, Is.False);
+        Assert.That(result.RejectionReason, Is.EqualTo("We have no subordinates to manage"));
+        Assert.That(ShipmentBook.At(scene.Source), Is.Empty);
+        Assert.That(BootstrapColonyPlan.CratesOf(scene.Source, Infra), Has.Count.EqualTo(1));
+        foreach (var (cargoId, amount) in needs)
+            Assert.That(Units(scene.Source, scene.Info.Data.CargoGoods.GetAny(cargoId)!), Is.EqualTo(amount));
+        Assert.That(fleet.TryGetDataBlob<GoalsDB>(out var goals) && goals.ActiveGoal is { Status: GoalStatus.Active }, Is.False);
+    }
+
+    [Test]
+    public void FleetBootstrap_CancelNow_ReleasesThePackages_AndLeavesTheCratesUnmarked()
+    {
+        var scene = Build(crates: 1);
+        var (fleet, goal, result) = Order(scene);
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        Assert.That(ShipmentBook.At(scene.Source), Is.Not.Empty);
+
+        new FleetBootstrapPlan().Cancel(fleet, goal, Now(scene), CancelTiming.Now);
+
+        Assert.That(ShipmentBook.At(scene.Source), Is.Empty);
+        var crate = scene.Crates[0];
+        Assert.That(Units(scene.Source, crate), Is.EqualTo(1));
+        Assert.That(BootstrapColonyPlan.CratesOf(scene.Source, Infra), Is.EquivalentTo(new[] { crate }), "released crates are open stock again");
+    }
+
+    [Test]
+    public void FleetBootstrap_CancelWhenConvenient_KeepsThePackagesWhileAShipIsStillWorking()
+    {
+        var scene = Build(crates: 1);
+        var (fleet, goal, _) = Order(scene);
+        Assert.That(ShipTrip(scene.Ship).ParentGoalId, Is.EqualTo(goal.Id));
+
+        new FleetBootstrapPlan().Cancel(fleet, goal, Now(scene), CancelTiming.WhenConvenient);
+        goal.PlayerCancelled = true; // the cancel command marks the goal. The planner reads it.
+
+        // The ship is still working its trip, so the order waits and the packages stay sealed.
+        var waiting = PlanFleet(fleet, goal, scene);
+        Assert.That(waiting.Status, Is.EqualTo(GoalStatus.Active), waiting.Message);
+        Assert.That(ShipmentBook.At(scene.Source), Is.Not.Empty);
+
+        // Once the ship's trip is over the order ends and gives the packages back.
+        ShipTrip(scene.Ship).Status = GoalStatus.Failed;
+        var done = PlanFleet(fleet, goal, scene);
+        Assert.That(done.Status, Is.EqualTo(GoalStatus.Failed), done.Message);
+        Assert.That(ShipmentBook.At(scene.Source), Is.Empty);
+    }
+
+    [Test]
+    public void FleetBootstrap_WhenTheOrderFails_ThePackagesAreReleased()
+    {
+        var scene = Build(crates: 1);
+        var (fleet, goal, _) = Order(scene);
+        Assert.That(ShipmentBook.At(scene.Source), Is.Not.Empty);
+        // The ship loses its captain and the trip is dropped, so nothing can carry the package.
+        var trip = ShipTrip(scene.Ship);
+        trip.Status = GoalStatus.Failed;
+        trip.Message = "out of range";
+        scene.Ship.SetDataBlob(new GoalsDB { ActiveGoal = trip, GivenGoal = trip });
+        scene.Ship.GetDataBlob<ShipInfoDB>().CommanderID = -1;
+
+        var plan = PlanFleet(fleet, goal, scene);
+
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Failed));
+        Assert.That(plan.Message, Is.EqualTo("no ship"));
+        Assert.That(ShipmentBook.At(scene.Source), Is.Empty);
+        Assert.That(BootstrapColonyPlan.CratesOf(scene.Source, Infra), Has.Count.EqualTo(1));
+    }
+
+    [Test]
+    public void FleetBootstrap_ATripThatFailedAfterLoading_FailsTheOrder_ReleasesThePackage_AndLeavesTheCrateAboard()
+    {
+        var scene = Build(crates: 1);
+        var (fleet, goal, _) = Order(scene);
+        var trip = ShipTrip(scene.Ship);
+        Assert.That(new BootstrapColonyPlan().Plan(scene.Ship, trip, Now(scene)).Status, Is.EqualTo(GoalStatus.Active));
+        Drain(scene.Source);
+        Assert.That(Units(scene.Ship, scene.Crates[0]), Is.EqualTo(1));
+
+        trip.Status = GoalStatus.Failed;
+        trip.Message = "out of range";
+        var plan = PlanFleet(fleet, goal, scene);
+
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Failed));
+        Assert.That(plan.Message, Is.EqualTo("out of range"));
+        Assert.That(ShipmentBook.At(scene.Source), Is.Empty);
+        Assert.That(Units(scene.Ship, scene.Crates[0]), Is.EqualTo(1), "the crate stays where the trip left it");
+    }
+
+    // ---- decision 16: who mounts the crates
+
+    [Test]
+    public void FleetBootstrap_TheShipMounts_WhenItsBayHasMoreFreeCapacity()
+    {
+        var scene = Build(crates: 1);
+        SetColonyPoints(scene, scene.Bay.PointsPerDay - 1);
+
+        var (_, goal, result) = Order(scene);
+
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        var trip = ShipTrip(scene.Ship);
+        Assert.That(trip.Type, Is.EqualTo(GoalType.BootstrapColony));
+        Assert.That(trip.CargoId, Is.EqualTo(goal.BootstrapPackageIds[0]));
+        Assert.That(goal.Message, Does.Contain("ship's Construction Bay").And.Contain($"{scene.Bay.PointsPerDay} free build points"));
+    }
+
+    [Test]
+    public void FleetBootstrap_TheColonyMounts_WhenItHasMoreFreeCapacity()
+    {
+        var scene = Build(crates: 1);
+        SetColonyPoints(scene, scene.Bay.PointsPerDay + 1);
+
+        var (_, goal, result) = Order(scene);
+
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        var trip = ShipTrip(scene.Ship);
+        Assert.That(trip.Type, Is.EqualTo(GoalType.DeliverShipment));
+        Assert.That(trip.CargoId, Is.EqualTo(goal.BootstrapPackageIds[0]));
+        Assert.That(goal.Message, Does.StartWith("The colony mounts the crates").And.Contain($"{scene.Bay.PointsPerDay + 1} free build points"));
+    }
+
+    [Test]
+    public void FleetBootstrap_ATieInFreeCapacity_GoesToTheColony()
+    {
+        var scene = Build(crates: 1);
+        SetColonyPoints(scene, scene.Bay.PointsPerDay);
+
+        var choice = BootstrapPackage.Choose(scene.Ship, scene.Dest);
+        var (_, _, result) = Order(scene);
+
+        Assert.That(choice.ByShip, Is.False);
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        Assert.That(ShipTrip(scene.Ship).Type, Is.EqualTo(GoalType.DeliverShipment));
+    }
+
+    [Test]
+    public void FleetBootstrap_Capacity_IsPointsPerDayLessTheWorkAlreadyQueued()
+    {
+        var scene = Build(crates: 1);
+        long perDay = scene.Bay.PointsPerDay;
+        // The colony makes twice the ship's points but is two days behind, so the ship has more free capacity.
+        SetColonyPoints(scene, perDay * 2);
+        var infra = scene.Info.ComponentDesigns[Infra];
+        var job = new LocalConstructionJob(infra, new ComponentInstance(infra));
+        job.PointCost = perDay * 3; // a heavier job, so the colony is a day behind
+        scene.Dest.GetDataBlob<LocalConstructionDB>().BuildQueue.Enqueue(job);
+
+        long colonyFree = BootstrapPackage.FreeBuildPoints(scene.Dest, out bool colonyCan);
+        long shipFree = BootstrapPackage.FreeBuildPoints(scene.Ship, out bool shipCan);
+
+        Assert.That(colonyCan && shipCan, Is.True);
+        Assert.That(colonyFree, Is.EqualTo(perDay * 2 - job.PointCost));
+        Assert.That(shipFree, Is.EqualTo(perDay));
+        Assert.That(BootstrapPackage.Choose(scene.Ship, scene.Dest).ByShip, Is.True);
+    }
+
+    [Test]
+    public void FleetBootstrap_AColonyWithNoBay_LeavesTheMountingToTheShip()
+    {
+        var scene = Build(crates: 1);
+        Assert.That(scene.Dest.HasDataBlob<LocalConstructionDB>(), Is.False);
+
+        var (_, goal, result) = Order(scene);
+
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        Assert.That(ShipTrip(scene.Ship).Type, Is.EqualTo(GoalType.BootstrapColony));
+        Assert.That(goal.Message, Does.Contain("the colony has no construction capacity"));
+    }
+
+    [Test]
+    public void FleetBootstrap_WhenNeitherCanBuild_TheOrderIsRejected_AndThePackagesAreReleased()
+    {
+        var scene = Build(crates: 1);
+        scene.Ship.RemoveDataBlob<LocalConstructionDB>();
+
+        var (_, _, result) = Order(scene);
+
+        Assert.That(result.Accepted, Is.False);
+        Assert.That(result.RejectionReason, Does.Contain("Neither the colony nor a ship's Construction Bay can mount crates"));
+        Assert.That(ShipmentBook.At(scene.Source), Is.Empty);
+        Assert.That(BootstrapColonyPlan.CratesOf(scene.Source, Infra), Has.Count.EqualTo(1));
+    }
+
+    [Test]
+    public void FleetBootstrap_AShipMount_KeepsTheCrateInTheShipsHold_UntilItIsConstructed()
+    {
+        var scene = Build(crates: 1);
+        var (fleet, goal, result) = Order(scene);
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        var trip = ShipTrip(scene.Ship);
+        Assert.That(trip.Type, Is.EqualTo(GoalType.BootstrapColony));
+        var crate = scene.Crates[0];
+
+        // Load the package's crate line.
+        var plan = new BootstrapColonyPlan().Plan(scene.Ship, trip, Now(scene));
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active), plan.Message);
+        Drain(scene.Source);
+        Assert.That(Units(scene.Ship, crate), Is.EqualTo(1));
+
+        // The ship mounts from its own hold: no unload to the colony.
+        plan = new BootstrapColonyPlan().Plan(scene.Ship, trip, Now(scene));
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active), plan.Message);
+        var mount = plan.Actions.OfType<MountFromHoldAction>().Single();
+        Assert.That(plan.Actions.OfType<CargoTransferOrder>(), Is.Empty);
+        mount.ParentGoalId = trip.Id;
+        scene.Ship.GetDataBlob<ActionQueueDB>().Enqueue(mount);
+        Assert.That(mount.IsValidCommand(Game), Is.True);
+        mount.Execute(Now(scene));
+        Assert.That(mount.Status, Is.EqualTo(ActionStatus.Running), mount.FailureMessage);
+
+        Assert.That(Units(scene.Ship, crate), Is.EqualTo(1), "still in the ship's hold while it waits to be built");
+        Assert.That(Units(scene.Dest, crate), Is.EqualTo(0));
+        Assert.That(scene.Bay.BuildQueue.Select(job => job.Instance), Is.EquivalentTo(new[] { crate }));
+        var waiting = PlanFleet(fleet, goal, scene);
+        Assert.That(waiting.Status, Is.EqualTo(GoalStatus.Active), waiting.Message);
+        Assert.That(ShipmentBook.At(scene.Source), Is.Not.Empty, "the package stays until the crate is mounted");
+
+        new LocalConstructionProcessor().ProcessEntity(scene.Ship, 0);
+
+        Assert.That(Mounted(scene.Dest), Is.EquivalentTo(new[] { crate }));
+        Assert.That(Units(scene.Ship, crate), Is.EqualTo(0));
+        Assert.That(Units(scene.Dest, crate), Is.EqualTo(0), "it was never unloaded to the colony");
+        scene.Ship.GetDataBlob<ActionQueueDB>().ActionList.Remove(mount);
+        trip.Status = GoalStatus.Completed;
+        var done = PlanFleet(fleet, goal, scene);
+        Assert.That(done.Status, Is.EqualTo(GoalStatus.Completed), done.Message);
+        Assert.That(done.Message, Is.EqualTo("Mounted 1 crate"));
+        Assert.That(ShipmentBook.At(scene.Source), Is.Empty);
+    }
+
+    [Test]
+    public void FleetBootstrap_AColonyMount_UnloadsTheCrate_ThenTheColonyBuildsIt()
+    {
+        var scene = Build(crates: 1);
+        SetColonyPoints(scene, scene.Bay.PointsPerDay * 10);
+        var (fleet, goal, result) = Order(scene);
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        var trip = ShipTrip(scene.Ship);
+        Assert.That(trip.Type, Is.EqualTo(GoalType.DeliverShipment));
+        var crate = scene.Crates[0];
+
+        var plan = new DeliverShipmentPlan().Plan(scene.Ship, trip, Now(scene));
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active), plan.Message);
+        Drain(scene.Source);
+        Assert.That(Units(scene.Ship, crate), Is.EqualTo(1));
+        plan = new DeliverShipmentPlan().Plan(scene.Ship, trip, Now(scene));
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active), plan.Message + " " + string.Join(",", scene.Ship.GetDataBlob<ActionQueueDB>().ActionList.Select(a => a.GetType().Name)));
+        Drain(scene.Dest);
+        Assert.That(Units(scene.Dest, crate), Is.EqualTo(1));
+
+        // The trip is done, but the package stays open until the colony has built the crate.
+        plan = new DeliverShipmentPlan().Plan(scene.Ship, trip, Now(scene));
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Completed), plan.Message);
+        Assert.That(ShipmentBook.At(scene.Source), Is.Not.Empty);
+        trip.Status = GoalStatus.Completed;
+
+        var mounting = PlanFleet(fleet, goal, scene);
+        Assert.That(mounting.Status, Is.EqualTo(GoalStatus.Active), mounting.Message);
+        var colonyBay = scene.Dest.GetDataBlob<LocalConstructionDB>();
+        Assert.That(colonyBay.BuildQueue.Select(job => job.Instance), Is.EquivalentTo(new[] { crate }));
+
+        new LocalConstructionProcessor().ProcessEntity(scene.Dest, 0);
+        Assert.That(Mounted(scene.Dest), Is.EquivalentTo(new[] { crate }));
+
+        var done = PlanFleet(fleet, goal, scene);
+        Assert.That(done.Status, Is.EqualTo(GoalStatus.Completed), done.Message);
+        Assert.That(ShipmentBook.At(scene.Source), Is.Empty);
+    }
+
+    // ---- decision 17: the resources ride in the package, after the crates
+
+    [Test]
+    public void FleetBootstrap_TheResourcesWait_WhileACrateIsStillOut_EvenWithAFreeShip()
+    {
+        var scene = Build(crates: 1);
+        StockResources(scene, BootstrapResources.Derive(scene.Info, new[] { new BootstrapCrateLine { DesignId = CityHall, Count = 1 } }));
+        var spare = ShipFactory.CreateShip(
+            scene.Info.ShipDesigns["default-ship-design-colony-ship"], scene.Faction, scene.Planet, "Spare Ship");
+        spare.GetDataBlob<ShipInfoDB>().CommanderID = 2;
+        spare.GetDataBlob<CargoStorageDB>().TransferRangeDv_mps = 1e12;
+        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
+        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
+        fleet.GetDataBlob<FleetDB>().AddChild(spare);
+        var result = scene.Translate(fleet, new FleetBootstrapCommand(fleet.Id, scene.Source.Id, scene.Dest.Id,
+            new[] { new BootstrapCrateRequest(Infra, 1) }, new[] { new BootstrapCrateRequest(CityHall, 1) }));
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        var goal = fleet.GetDataBlob<GoalsDB>().ActiveGoal!;
+        var carrier = new[] { scene.Ship, spare }.Single(ship => ship.HasDataBlob<GoalsDB>() && ship.GetDataBlob<GoalsDB>().ActiveGoal?.ParentGoalId == goal.Id);
+        var trip = ShipTrip(carrier);
+        Assert.That(Package(scene, trip.CargoId).Lines.All(line => line.IsCrate), Is.True, "the crates are served first");
+
+        // Before the carrier has loaded, and after, the free ship gets nothing.
+        var plan = PlanFleet(fleet, goal, scene);
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active));
+        Assert.That(plan.SubGoals, Is.Empty);
+        new BootstrapColonyPlan().Plan(carrier, trip, Now(scene));
+        Drain(scene.Source);
+        plan = PlanFleet(fleet, goal, scene);
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active), plan.Message);
+        Assert.That(plan.SubGoals, Is.Empty, "the resources wait for the crates");
+        Assert.That(Packages(scene, goal).Where(p => !BootstrapPackage.IsCratePackage(p)).All(p => p.Lines.All(line => !line.Released)), Is.True);
+    }
+
+    [Test]
+    public void FleetBootstrap_TheResourcesAreHauledInTheirPackage_NotAsMoveGoods_OnceTheCratesAreMounted()
+    {
+        var scene = Build(crates: 1);
+        var needs = BootstrapResources.Derive(scene.Info, new[] { new BootstrapCrateLine { DesignId = CityHall, Count = 1 } });
+        StockResources(scene, needs);
+        var (fleet, goal, result) = Order(scene, crates: 1, cityHalls: 1);
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        Assert.That(goal.BootstrapSiteBuilds.Single().Count, Is.EqualTo(1));
+
+        // The crate goes first: ship-mounted, since the colony has no bay.
+        var trip = ShipTrip(scene.Ship);
+        Assert.That(Package(scene, trip.CargoId).Lines.All(line => line.IsCrate), Is.True);
+        new BootstrapColonyPlan().Plan(scene.Ship, trip, Now(scene));
+        Drain(scene.Source);
+        var mount = new BootstrapColonyPlan().Plan(scene.Ship, trip, Now(scene)).Actions.OfType<MountFromHoldAction>().Single();
+        mount.ParentGoalId = trip.Id;
+        scene.Ship.GetDataBlob<ActionQueueDB>().Enqueue(mount);
+        Assert.That(mount.IsValidCommand(Game), Is.True);
+        mount.Execute(Now(scene));
+        new LocalConstructionProcessor().ProcessEntity(scene.Ship, 0);
+        scene.Ship.GetDataBlob<ActionQueueDB>().ActionList.Remove(mount);
+        trip.Status = GoalStatus.Completed;
+
+        // Now the resources go, as a DeliverShipment of the resource package.
+        var plan = PlanFleet(fleet, goal, scene);
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active), plan.Message);
+        var (ship, haul) = plan.SubGoals.Single();
+        Assert.That(ship.Id, Is.EqualTo(scene.Ship.Id));
+        Assert.That(haul.Type, Is.EqualTo(GoalType.DeliverShipment));
+        Assert.That(haul.Type, Is.Not.EqualTo(GoalType.MoveGoods));
+        Assert.That(goal.BootstrapPackageIds, Does.Contain(haul.CargoId));
+        Assert.That(BootstrapPackage.IsCratePackage(Package(scene, haul.CargoId)), Is.False);
+        scene.Ship.SetDataBlob(new GoalsDB { ActiveGoal = haul, GivenGoal = haul });
+
+        // Load, unload and unpack the package.
+        for (int guard = 0; guard < 6; guard++)
+        {
+            var step = new DeliverShipmentPlan().Plan(scene.Ship, haul, Now(scene));
+            if (step.Status != GoalStatus.Active)
+                break;
+            Assert.That(step.Message, Is.EqualTo("Loading").Or.EqualTo("Unloading"), step.Message);
+            Drain(step.Message == "Unloading" ? scene.Dest : scene.Source);
+            if (!Sealed(scene, haul.CargoId))
+                break;
+        }
+        haul.Status = GoalStatus.Completed;
+        var done = PlanFleet(fleet, goal, scene);
+        Assert.That(done.Status, Is.EqualTo(GoalStatus.Completed), done.Message);
+        Assert.That(done.Message, Is.EqualTo("Mounted 1 crate, hauled the resources"));
+        foreach (var (cargoId, amount) in needs)
+            Assert.That(Units(scene.Dest, scene.Info.Data.CargoGoods.GetAny(cargoId)!), Is.EqualTo(amount));
+        Assert.That(ShipmentBook.At(scene.Source), Is.Empty);
+    }
+
+    // ---- decision 18: the best-fit infrastructure design
+
+    static InfrastructureWindow Window(double minG, double maxG, double minP, double maxP) => new(minG, maxG, minP, maxP);
+
+    [Test]
+    public void InfrastructureFit_PicksTheWindowThatCoversTheBodyMostTightly()
+    {
+        var earth = ("earth", Window(8.8, 10.8, 0.9, 1.1));
+        var mars = ("mars", Window(3.0, 4.9, 0.85, 1.05));
+
+        Assert.That(InfrastructureFit.Best(new[] { earth, mars }, 9.81, 1.0), Is.EqualTo("earth"));
+        Assert.That(InfrastructureFit.Best(new[] { earth, mars }, 3.7, 0.95), Is.EqualTo("mars"));
+        Assert.That(InfrastructureFit.Best(new[] { mars, earth }, 3.7, 0.95), Is.EqualTo("mars"), "list order does not matter");
+        Assert.That(InfrastructureFit.Best(new[] { earth, mars }, 20, 1.0), Is.Null);
+        Assert.That(InfrastructureFit.Best(new[] { earth, mars }, 9.81, 5), Is.Null, "pressure is part of the window");
+        Assert.That(InfrastructureFit.Best(Array.Empty<(string, InfrastructureWindow)>(), 9.81, 1.0), Is.Null);
+        Assert.That(InfrastructureFit.NoFitMessage("Mars"), Is.EqualTo("No suitable infrastructure for Mars"));
+    }
+
+    [Test]
+    public void InfrastructureFit_OfTwoCoveringWindows_TheCloserMidpointWins_ThenTheNarrowerWindow_ThenTheLowerId()
+    {
+        // Both cover 6, but "wide" is centred on it and "off" is not.
+        var wide = ("wide", Window(2, 10, 0, 2));
+        var off = ("off", Window(5, 8, 0, 2));
+        Assert.That(InfrastructureFit.Rank(new[] { wide, off }, 6, 1), Is.EqualTo(new[] { "wide", "off" }));
+
+        // The body sits dead centre of both, so the narrower window is the more specific design.
+        var broad = ("a-broad", Window(0, 10, 0, 2));
+        var narrow = ("z-narrow", Window(4, 6, 0.5, 1.5));
+        Assert.That(InfrastructureFit.Rank(new[] { broad, narrow }, 5, 1), Is.EqualTo(new[] { "z-narrow", "a-broad" }));
+
+        // An exact tie on both goes to the lower id.
+        var twinB = ("b", Window(4, 6, 0.5, 1.5));
+        var twinA = ("a", Window(4, 6, 0.5, 1.5));
+        Assert.That(InfrastructureFit.Rank(new[] { twinB, twinA }, 5, 1), Is.EqualTo(new[] { "a", "b" }));
+    }
+
+    [Test]
+    public void InfrastructureFit_AnAxisWithNoLimit_AddsNothingToTheDistance()
+    {
+        var open = ("open", Window(double.MinValue, double.MaxValue, 0.9, 1.1));
+        var tight = ("tight", Window(8, 12, 0.9, 1.1));
+        Assert.That(InfrastructureFit.Rank(new[] { open, tight }, 10, 1.0), Is.EqualTo(new[] { "tight", "open" }),
+            "no limit on gravity is perfect on that axis, so both fit equally well, and then the narrower window wins");
+        Assert.That(InfrastructureFit.Best(new[] { open }, 500, 1.0), Is.EqualTo("open"));
+    }
+
+    [Test]
+    public void FleetBootstrap_TheBestFitDesignIsTheDefault_AndTheStockDesignsHaveTheirWindows()
+    {
+        var scene = Build(crates: 1);
+        var earth = InfrastructureSuitability.WindowOf(scene.Info.ComponentDesigns[Infra]);
+        var mars = InfrastructureSuitability.WindowOf(scene.Info.ComponentDesigns[MarsInfra]);
+        Assert.That(earth, Is.Not.Null);
+        Assert.That(mars, Is.Not.Null);
+        Assert.That(earth!.Covers(9.81, 1.0), Is.True, earth.ToString());
+        Assert.That(mars!.Covers(3.7, 0.95), Is.True, mars.ToString());
+        Assert.That(InfrastructureSuitability.WindowOf(scene.Info.ComponentDesigns[Factory]), Is.Null);
+        Stock(scene, MarsInfra);
+        scene.SetClimate(3.7, 0.95f);
+
+        // The player asked for the Earth design, but only the Mars one fits Mars, so Mars is the default.
+        var (_, goal, result) = Order(scene, infra: null);
+
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        Assert.That(goal.BootstrapInfrastructureId, Is.EqualTo(MarsInfra));
+        Assert.That(goal.BootstrapCrates.Single().DesignId, Is.EqualTo(MarsInfra));
+        Assert.That(Package(scene, goal.BootstrapPackageIds[0]).Lines.Single().Held, Is.InstanceOf<ComponentInstance>()
+            .With.Property("Design").Property("UniqueID").EqualTo(MarsInfra));
+    }
+
+    [Test]
+    public void FleetBootstrap_TheBestFitReadsSourceCargoOnly_SoACrateElsewhereDoesNotCount()
+    {
+        var scene = Build(crates: 1);
+        // A Mars crate sits in the destination's cargo and not the source's.
+        var marsCrate = new ComponentInstance(scene.Info.ComponentDesigns[MarsInfra]);
+        scene.Dest.GetDataBlob<CargoStorageDB>().TypeStores["general-storage"] = new TypeStore(1_000_000);
+        Assert.That(scene.Dest.GetDataBlob<CargoStorageDB>().AddCargoByUnit(marsCrate, 1), Is.EqualTo(1));
+        scene.SetClimate(3.7, 0.95f);
+
+        var (_, _, result) = Order(scene);
+
+        Assert.That(result.Accepted, Is.False);
+        Assert.That(result.RejectionReason, Is.EqualTo("No suitable infrastructure for Body"));
+    }
+
+    [Test]
+    public void FleetBootstrap_APlayersTweak_IsUsedInPlaceOfTheBestFit()
+    {
+        // Both designs are in stock. At 9.81 the Earth one is the best fit.
+        var scene = Build(crates: 1);
+        Stock(scene, MarsInfra);
+        var best = Order(scene, infra: null);
+        Assert.That(best.Result.Accepted, Is.True, best.Result.RejectionReason);
+        Assert.That(best.Goal.BootstrapInfrastructureId, Is.EqualTo(Infra));
+
+        // The same stock with the player's pick of the other design.
+        var other = Build(crates: 1);
+        Stock(other, MarsInfra);
+        var tweaked = Order(other, infra: MarsInfra);
+
+        Assert.That(tweaked.Result.Accepted, Is.True, tweaked.Result.RejectionReason);
+        Assert.That(tweaked.Goal.BootstrapInfrastructureId, Is.EqualTo(MarsInfra));
+        Assert.That(tweaked.Goal.BootstrapCrates.Single().DesignId, Is.EqualTo(MarsInfra));
+    }
+
+    [Test]
+    public void FleetBootstrap_AnUnknownInfrastructureDesign_IsRejected()
+    {
+        var scene = Build(crates: 1);
+
+        var (_, _, result) = Order(scene, infra: Factory);
+
+        Assert.That(result.Accepted, Is.False);
+        Assert.That(result.RejectionReason, Does.Contain("Unknown infrastructure design"));
+        Assert.That(ShipmentBook.At(scene.Source), Is.Empty);
+    }
+
+    [Test]
+    public void FleetBootstrap_NoFittingInfrastructure_IsRejectedWithTheStubsWording()
+    {
+        var scene = Build(crates: 1);
+        scene.SetClimate(25, 1f);
+
+        var (_, _, result) = Order(scene);
+
+        Assert.That(result.Accepted, Is.False);
+        Assert.That(result.RejectionReason, Is.EqualTo("No suitable infrastructure for Body"));
+        Assert.That(ShipmentBook.At(scene.Source), Is.Empty);
+        Assert.That(BootstrapColonyPlan.CratesOf(scene.Source, Infra), Has.Count.EqualTo(1));
+    }
+
+    [Test]
+    public void FleetBootstrap_APlanetWithNoAtmosphere_HasPressureZero_SoTheStockDesignsDoNotFit()
+    {
+        var scene = Build(crates: 1);
+        scene.Planet.RemoveDataBlob<AtmosphereDB>();
+
+        var (_, _, result) = Order(scene);
+
+        Assert.That(result.Accepted, Is.False);
+        Assert.That(result.RejectionReason, Does.StartWith("No suitable infrastructure for"));
+    }
+
+    [Test]
+    public void FleetBootstrap_AListWithNoInfrastructureLine_SkipsTheCheck()
+    {
+        var scene = Build(crates: 0);
+        Stock(scene, Factory);
+        scene.SetClimate(25, 1f);
+
+        var (_, goal, result) = Order(scene, design: Factory);
+
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        Assert.That(goal.BootstrapInfrastructureId, Is.Empty);
+        Assert.That(goal.BootstrapCrates.Single().DesignId, Is.EqualTo(Factory));
+    }
+
+    [Test]
+    public void FleetBootstrap_TheSuitabilityCheck_RunsAtOrderBuildOnly()
+    {
+        var scene = Build(crates: 1);
+        var (fleet, goal, result) = Order(scene);
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+
+        // The climate changes after the order is built. The running order does not look again.
+        scene.SetClimate(25, 1f);
+        var plan = PlanFleet(fleet, goal, scene);
+
+        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active), plan.Message);
+        Assert.That(goal.BootstrapInfrastructureId, Is.EqualTo(Infra));
+    }
+
+    // ---- decision 18: the fleet window's own helpers
+
+    static ComponentDesignsSnapshot InfraDesigns() => new()
+    {
+        Designs = new[]
+        {
+            new ComponentDesignSummary("earth", "Earth Infrastructure", "t", "T") { IsCrate = true, Infrastructure = Window(8.8, 10.8, 0.9, 1.1) },
+            new ComponentDesignSummary("mars", "Mars Infrastructure", "t", "T") { IsCrate = true, Infrastructure = Window(3.0, 4.9, 0.85, 1.05) },
+            new ComponentDesignSummary("factory", "Factory", "t", "T") { IsCrate = true },
+        },
+    };
+
+    static BootstrapOrderList ListOf(ComponentDesignsSnapshot designs, params (string Id, int Count)[] lines)
+    {
+        var list = new BootstrapOrderList();
+        foreach (var (id, count) in lines)
+            Assert.That(list.Add(id, designs.Designs.Single(d => d.Id == id).Name, count), Is.True);
+        return list;
+    }
+
+    [Test]
+    public void BootstrapPicker_TheBestFitBecomesTheListsInfrastructureLine_AndTheTweakMergesLines()
+    {
+        var designs = InfraDesigns();
+        var list = ListOf(designs, ("factory", 1), ("earth", 2));
+        var atSource = new[]
+        {
+            new BootstrapPicker.InfrastructureOption("earth", "Earth Infrastructure", designs.Designs[0].Infrastructure!),
+            new BootstrapPicker.InfrastructureOption("mars", "Mars Infrastructure", designs.Designs[1].Infrastructure!),
+        };
+        var mars = new BootstrapPicker.BootstrapClimate("Mars", 3.7, 0.95);
+
+        Assert.That(BootstrapPicker.FittingInfrastructure(atSource, mars).Select(o => o.DesignId), Is.EqualTo(new[] { "mars" }));
+        Assert.That(BootstrapPicker.ApplyBestFit(list, designs, atSource, mars), Is.True);
+        Assert.That(list.Requests().Select(r => (r.DesignId, r.Count)), Is.EqualTo(new[] { ("factory", 1), ("mars", 2) }),
+            "the line keeps its place and its count");
+
+        // The player's tweak, and a second infrastructure line merges into the first.
+        list = ListOf(designs, ("earth", 2), ("factory", 1));
+        Assert.That(list.Add("mars", "Mars Infrastructure", 3), Is.True);
+        Assert.That(list.UseInfrastructure(designs, "mars"), Is.True);
+        Assert.That(list.Requests().Select(r => (r.DesignId, r.Count)), Is.EqualTo(new[] { ("mars", 5), ("factory", 1) }));
+        Assert.That(list.InfrastructureEntry(designs)!.DesignId, Is.EqualTo("mars"));
+        Assert.That(list.UseInfrastructure(designs, "factory"), Is.False, "a factory is not infrastructure");
+        Assert.That(ListOf(designs, ("factory", 1)).UseInfrastructure(designs, "earth"), Is.False, "no infrastructure line to swap");
+    }
+
+    [Test]
+    public void BootstrapPicker_NoFit_BlocksWithTheStubsWording_OnlyForAListWithInfrastructure()
+    {
+        var designs = InfraDesigns();
+        var atSource = new[] { new BootstrapPicker.InfrastructureOption("earth", "Earth Infrastructure", designs.Designs[0].Infrastructure!) };
+        var mars = new BootstrapPicker.BootstrapClimate("Mars", 3.7, 0.95);
+        var earth = new BootstrapPicker.BootstrapClimate("Earth", 9.81, 1.0);
+
+        Assert.That(BootstrapPicker.CheckInfrastructure(ListOf(designs, ("earth", 1)), designs, atSource, mars),
+            Is.EqualTo("No suitable infrastructure for Mars"));
+        Assert.That(BootstrapPicker.CheckInfrastructure(ListOf(designs, ("earth", 1)), designs, atSource, earth), Is.Null);
+        Assert.That(BootstrapPicker.CheckInfrastructure(ListOf(designs, ("factory", 1)), designs, atSource, mars), Is.Null);
+        Assert.That(BootstrapPicker.CheckInfrastructure(ListOf(designs, ("earth", 1)), designs, atSource, null), Is.Null, "an unknown climate blocks nothing");
+        Assert.That(BootstrapPicker.ApplyBestFit(ListOf(designs, ("earth", 1)), designs, atSource, mars), Is.False);
+    }
+
+    [Test]
+    public void BootstrapOrderList_OffersNoSecondInfrastructureDesign_OnceTheListHasOne()
+    {
+        var designs = InfraDesigns();
+        var list = ListOf(designs, ("factory", 1));
+        Assert.That(list.Addable(designs).Select(d => d.Id), Is.EqualTo(new[] { "earth", "mars" }));
+
+        list.Add("earth", "Earth Infrastructure", 1);
+
+        Assert.That(list.Addable(designs), Is.Empty);
+    }
+
+    [Test]
+    public void BootstrapPicker_TheDestinationsClimateComesFromItsBodyAndAtmosphere_WithNoAtmosphereAsZero()
+    {
+        var scene = Build(crates: 0);
+        var projector = new GameProjector(Game);
+        var colony = projector.ProjectEntity(scene.Dest, scene.Faction.Id);
+        var planet = projector.ProjectEntity(scene.Planet, scene.Faction.Id);
+        Assert.That(colony, Is.Not.Null);
+        Assert.That(planet, Is.Not.Null);
+
+        var climate = BootstrapPicker.ClimateOf(colony, id => id == scene.Planet.Id ? planet : null);
+
+        Assert.That(climate, Is.Not.Null);
+        Assert.That(climate!.GravityMetresPerSec2, Is.EqualTo(9.81).Within(1e-9));
+        Assert.That(climate.PressureAtm, Is.EqualTo(1.0).Within(1e-6));
+        Assert.That(climate.PlanetName, Is.EqualTo("Body"));
+        Assert.That(BootstrapPicker.ClimateOf(colony, _ => null), Is.Null);
+    }
+
+    [Test]
+    public void TheProjectedInfrastructureDesign_CarriesItsWindow()
+    {
+        var scene = Build(crates: 0);
+        var designs = new GameProjector(Game).ProjectComponentDesigns(scene.Faction.Id)!;
+
+        var earth = designs.Designs.Single(d => d.Id == Infra);
+        var factory = designs.Designs.Single(d => d.Id == Factory);
+
+        Assert.That(earth.Infrastructure, Is.Not.Null);
+        Assert.That(earth.Infrastructure!.Covers(9.81, 1.0), Is.True);
+        Assert.That(factory.Infrastructure, Is.Null);
+    }
+
+    // ---- the command's other checks
+
+    [Test]
+    public void FleetBootstrapCommand_TakesSiteBuilds_AndRefusesACrateOrABadCount()
+    {
+        var scene = Build(crates: 1);
+        StockResources(scene, BootstrapResources.Derive(scene.Info, new[] { new BootstrapCrateLine { DesignId = CityHall, Count = 3 } }));
+        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
+        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
+        CommandResult Send(params BootstrapCrateRequest[] builds)
+            => scene.Translate(fleet, new FleetBootstrapCommand(fleet.Id, scene.Source.Id, scene.Dest.Id,
+                new[] { new BootstrapCrateRequest(Infra, 1) }, builds));
+
+        Assert.That(Send(new BootstrapCrateRequest(Infra, 1)).RejectionReason, Does.Contain("not a site-only"));
+        Assert.That(Send(new BootstrapCrateRequest(CityHall, 0)).RejectionReason, Is.EqualTo("Site build counts must be positive."));
+        Assert.That(Send(new BootstrapCrateRequest("no-such-design", 1)).Accepted, Is.False);
+        Assert.That(ShipmentBook.At(scene.Source), Is.Empty, "a rejected order seals nothing");
+
+        var result = Send(new BootstrapCrateRequest(CityHall, 1), new BootstrapCrateRequest(CityHall, 2));
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        var goal = fleet.GetDataBlob<GoalsDB>().ActiveGoal!;
+        Assert.That(goal.BootstrapSiteBuilds.Select(l => (l.DesignId, l.Count)), Is.EqualTo(new[] { (CityHall, 3) }));
+    }
+
+    [Test]
+    public void FleetBootstrapCommand_GoesToTheShipsOfTheFleet_AndTheShipFollowsTheFleetsGoal()
+    {
+        var scene = Build(crates: 2);
+        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
+        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
+        var command = new FleetBootstrapCommand(fleet.Id, scene.Source.Id, scene.Dest.Id,
+            new[] { new BootstrapCrateRequest(Infra, 1), new BootstrapCrateRequest(Infra, 1) });
+
+        var result = scene.Translate(fleet, command);
+
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
+        var fleetGoal = fleet.GetDataBlob<GoalsDB>().ActiveGoal!;
+        Assert.That(fleetGoal.Type, Is.EqualTo(GoalType.FleetBootstrap));
+        // Two lines for one design merge into one, quantity two.
+        Assert.That(fleetGoal.BootstrapCrates.Select(line => (line.DesignId, line.Count)), Is.EqualTo(new[] { (Infra, 2) }));
+        var shipGoal = scene.Ship.GetDataBlob<GoalsDB>().ActiveGoal!;
+        Assert.That(shipGoal.ParentGoalId, Is.EqualTo(fleetGoal.Id));
+        Assert.That(shipGoal.CargoId, Is.EqualTo(fleetGoal.BootstrapPackageIds[0]));
+        Assert.That(Package(scene, shipGoal.CargoId).Lines.Sum(line => line.Units), Is.EqualTo(2));
     }
 
     [Test]
@@ -566,120 +1279,6 @@ public class BootstrapColonyTests
             new BootstrapCrateLine { DesignId = "no-such-design", Count = 5 },
         });
         Assert.That(twice, Is.EquivalentTo(three));
-    }
-
-    [Test]
-    public void FleetBootstrap_HaulsTheResourcesTheSiteBuildsCost_OnlyAfterTheCratesHaveArrived()
-    {
-        var scene = Build(crates: 1);
-        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
-        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
-        var needed = BootstrapResources.Derive(scene.Info, new[] { new BootstrapCrateLine { DesignId = CityHall, Count = 2 } });
-        StockResources(scene, needed);
-
-        // Crates first: the crate is still at the source, so the ship is handed the crate and no resources.
-        var goal = FleetGoal(scene, (Infra, 1));
-        goal.BootstrapSiteBuilds.Add(new BootstrapCrateLine { DesignId = CityHall, Count = 2 });
-        var plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
-        Assert.That(plan.SubGoals.Single().Goal.Type, Is.EqualTo(GoalType.BootstrapColony));
-        Assert.That(goal.BootstrapHauled, Is.Empty);
-
-        // The crate trip is under way, so the resources keep waiting for it.
-        scene.Ship.SetDataBlob(new GoalsDB { ActiveGoal = plan.SubGoals.Single().Goal, GivenGoal = plan.SubGoals.Single().Goal });
-        plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
-        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active));
-        Assert.That(plan.SubGoals, Is.Empty);
-        Assert.That(goal.BootstrapHauled, Is.Empty);
-
-        // The crate arrived: the ship is sent for the resources the two facilities cost.
-        scene.Ship.GetDataBlob<GoalsDB>().ActiveGoal!.Status = GoalStatus.Completed;
-        plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
-        var (ship, haul) = plan.SubGoals.Single();
-        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Active), plan.Message);
-        Assert.That(ship.Id, Is.EqualTo(scene.Ship.Id));
-        Assert.That(haul.Type, Is.EqualTo(GoalType.MoveGoods));
-        Assert.That(haul.ParentGoalId, Is.EqualTo(goal.Id));
-        Assert.That(haul.SourceEntityId, Is.EqualTo(scene.Source.Id));
-        Assert.That(haul.DestEntityId, Is.EqualTo(scene.Dest.Id));
-        Assert.That(haul.MoveGoodsLines, Is.Not.Empty);
-        foreach (var line in haul.MoveGoodsLines)
-        {
-            var cargo = scene.Info.Data.CargoGoods.GetAny(line.ItemId);
-            Assert.That(line.Requested, Is.LessThanOrEqualTo(needed[cargo.UniqueID]));
-            Assert.That(goal.BootstrapHauled[cargo.UniqueID], Is.EqualTo(line.Requested));
-        }
-    }
-
-    [Test]
-    public void FleetBootstrap_AHaulThatDeliveredLess_OwesTheRest_AndTheGoalIsDoneOnceItAllArrived()
-    {
-        var scene = Build(crates: 0);
-        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
-        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
-        var needed = BootstrapResources.Derive(scene.Info, new[] { new BootstrapCrateLine { DesignId = CityHall, Count = 1 } });
-        StockResources(scene, needed);
-        var goal = ResourceGoal(scene, cityHalls: 1);
-
-        var plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
-        var haul = plan.SubGoals.Single().Goal;
-        long handed = haul.MoveGoodsLines.Sum(line => line.Requested);
-        Assert.That(handed, Is.GreaterThan(0));
-
-        // The trip finished having delivered nothing of one line: that line is owed again.
-        var owed = haul.MoveGoodsLines[0];
-        haul.MoveGoodsLines.ForEach(line => line.Delivered = line.Requested);
-        owed.Delivered = 0;
-        haul.Status = GoalStatus.Completed;
-        scene.Ship.SetDataBlob(new GoalsDB { ActiveGoal = haul, GivenGoal = haul });
-        plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
-
-        var again = plan.SubGoals.Single().Goal;
-        Assert.That(again.MoveGoodsLines.Select(l => l.ItemId), Does.Contain(owed.ItemId));
-        Assert.That(goal.BootstrapHauled.Values.Sum(), Is.EqualTo(handed));
-
-        // Everything delivered and nothing in flight: the order is done.
-        again.MoveGoodsLines.ForEach(line => line.Delivered = line.Requested);
-        again.Status = GoalStatus.Completed;
-        goal.BootstrapHauled.Clear();
-        foreach (var (cargoId, amount) in needed)
-            goal.BootstrapHauled[cargoId] = amount;
-        scene.Ship.SetDataBlob(new GoalsDB { ActiveGoal = again, GivenGoal = again });
-        plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
-        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Completed), plan.Message);
-    }
-
-    [Test]
-    public void FleetBootstrap_ShortOfAResourceAtTheSource_FailsNamingIt()
-    {
-        var scene = Build(crates: 0);
-        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
-        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
-        var goal = ResourceGoal(scene, cityHalls: 1);
-
-        var plan = new FleetBootstrapPlan().Plan(fleet, goal, scene.Ship.StarSysDateTime);
-
-        Assert.That(plan.Status, Is.EqualTo(GoalStatus.Failed));
-        Assert.That(plan.Message, Does.StartWith("not enough ").And.EndWith(" at source"));
-    }
-
-    [Test]
-    public void FleetBootstrapCommand_TakesSiteBuilds_AndRefusesACrateOrABadCount()
-    {
-        var scene = Build(crates: 1);
-        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
-        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
-        CommandResult Send(params BootstrapCrateRequest[] builds)
-            => scene.Translate(fleet, new FleetBootstrapCommand(fleet.Id, scene.Source.Id, scene.Dest.Id,
-                new[] { new BootstrapCrateRequest(Infra, 1) }, builds));
-
-        Assert.That(Send(new BootstrapCrateRequest(Infra, 1)).RejectionReason, Does.Contain("not a site-only"));
-        Assert.That(Send(new BootstrapCrateRequest(CityHall, 0)).RejectionReason, Is.EqualTo("Site build counts must be positive."));
-        Assert.That(Send(new BootstrapCrateRequest("no-such-design", 1)).Accepted, Is.False);
-
-        var result = Send(new BootstrapCrateRequest(CityHall, 1), new BootstrapCrateRequest(CityHall, 2));
-        Assert.That(result.Accepted, Is.True, result.RejectionReason);
-        var goal = fleet.GetDataBlob<GoalsDB>().ActiveGoal!;
-        Assert.That(goal.BootstrapSiteBuilds.Select(l => (l.DesignId, l.Count)), Is.EqualTo(new[] { (CityHall, 3) }));
     }
 
     [Test]
@@ -714,28 +1313,6 @@ public class BootstrapColonyTests
         Assert.That(list.Requests().Select(r => (r.DesignId, r.Count)), Is.EqualTo(new[] { ("hall", 3), ("tower", 2) }));
         list.Remove(0);
         Assert.That(list.DerivedResources(designs).Single().Amount, Is.EqualTo(10));
-    }
-
-    [Test]
-    public void FleetBootstrapCommand_GoesToTheShipsOfTheFleet_AndTheShipFollowsTheFleetsGoal()
-    {
-        var scene = Build(crates: 2);
-        var fleet = FleetFactory.Create(scene.System, scene.Faction.Id, "Fleet");
-        fleet.GetDataBlob<FleetDB>().AddChild(scene.Ship);
-        var command = new FleetBootstrapCommand(fleet.Id, scene.Source.Id, scene.Dest.Id,
-            new[] { new BootstrapCrateRequest(Infra, 1), new BootstrapCrateRequest(Infra, 1) });
-
-        var result = scene.Translate(fleet, command);
-
-        Assert.That(result.Accepted, Is.True, result.RejectionReason);
-        var fleetGoal = fleet.GetDataBlob<GoalsDB>().ActiveGoal!;
-        Assert.That(fleetGoal.Type, Is.EqualTo(GoalType.FleetBootstrap));
-        // Two lines for one design merge into one, quantity two.
-        Assert.That(fleetGoal.BootstrapCrates.Select(line => (line.DesignId, line.Count)), Is.EqualTo(new[] { (Infra, 2) }));
-        var shipGoal = scene.Ship.GetDataBlob<GoalsDB>().ActiveGoal!;
-        Assert.That(shipGoal.Type, Is.EqualTo(GoalType.BootstrapColony));
-        Assert.That(shipGoal.ParentGoalId, Is.EqualTo(fleetGoal.Id));
-        Assert.That(shipGoal.BootstrapCrateIds, Is.EquivalentTo(scene.Crates.Select(crate => crate.ID)));
     }
 
     [Test]
@@ -815,7 +1392,7 @@ public class BootstrapColonyTests
     public void TheFleetBootstrapChecks_NameWhatIsMissing_InOrder()
     {
         var one = new[] { new BootstrapCrateRequest("a", 1) };
-        Assert.That(BootstrapOrderList.Validate(0, 1, 2, one, true), Does.Contain("Construction Bay"));
+        Assert.That(BootstrapOrderList.Validate(0, 1, 2, one, true), Is.EqualTo("No ship in this fleet has a captain."));
         Assert.That(BootstrapOrderList.Validate(1, -1, 2, one, true), Is.EqualTo("Pick a source colony."));
         Assert.That(BootstrapOrderList.Validate(1, 1, -1, one, true), Is.EqualTo("Pick a destination colony."));
         Assert.That(BootstrapOrderList.Validate(1, 1, 1, one, true), Is.EqualTo("Pick two different colonies."));
@@ -865,6 +1442,8 @@ public class BootstrapColonyTests
         scene.Source = scene.ColonyAt(scene.Planet, faction, "Source Colony");
         scene.Dest = scene.ColonyAt(scene.Planet, faction, "Empty Colony");
         scene.Source.GetDataBlob<CargoStorageDB>().TypeStores["general-storage"] = new TypeStore(1_000_000_000);
+        // Small enough that the free unit count of a light resource stays inside an int.
+        scene.Dest.GetDataBlob<CargoStorageDB>().TypeStores["general-storage"] = new TypeStore(1_000);
         scene.Ship = ShipFactory.CreateShip(
             info.ShipDesigns["default-ship-design-colony-ship"], faction, scene.Planet, "Colony Ship");
         scene.Ship.GetDataBlob<ShipInfoDB>().CommanderID = 1;
@@ -892,6 +1471,13 @@ public class BootstrapColonyTests
                 info.Data.IncrementTechLevel(id);
         }
         info.Data.Unlock("plastic-armor");
+        // The low-gravity design only keeps its window once the Mars outpost's range extensions are researched.
+        foreach (var id in new[] { "tech-infra-gravity-min-extension", "tech-infra-gravity-min-extension",
+                     "tech-infra-gravity-min-extension", "tech-infra-pressure-min-extension" })
+        {
+            info.Data.Unlock(id);
+            info.Data.IncrementTechLevel(id);
+        }
 
         string[] designs =
         {
@@ -907,6 +1493,7 @@ public class BootstrapColonyTests
             "default-design-reactor-2t",
             "default-design-raptor",
             "default-design-infrastructure",
+            "default-design-infrastructure-mars",
             "default-design-city-hall",
             "default-design-factory",
         };
@@ -977,9 +1564,17 @@ public class BootstrapColonyTests
                 new PositionDB(0, 0, 0),
                 new OrbitDB(),
                 MassVolumeDB.NewFromMassAndRadius_m(1e24, 6_000_000),
-                new SystemBodyInfoDB { LengthOfDay = TimeSpan.FromHours(24) },
+                new SystemBodyInfoDB { LengthOfDay = TimeSpan.FromHours(24), Gravity = 9.81 },
+                new AtmosphereDB { Pressure = 1f },
             });
             return planet;
+        }
+
+        /// <summary>The destination planet's gravity (m/s squared) and pressure (atm) as the infrastructure check reads them.</summary>
+        public void SetClimate(double gravity, float pressure)
+        {
+            Planet.GetDataBlob<SystemBodyInfoDB>().Gravity = gravity;
+            Planet.GetDataBlob<AtmosphereDB>().Pressure = pressure;
         }
 
         public Entity ColonyAt(Entity planet, Entity owner, string name)
@@ -990,6 +1585,7 @@ public class BootstrapColonyTests
                 new NameDB(name),
                 new ColonyInfoDB { PlanetEntity = planet },
                 new CargoStorageDB(),
+                new ActionQueueDB(),
                 new ComponentInstancesDB(),
                 new PositionDB(new Vector3(planet.GetDataBlob<MassVolumeDB>().RadiusInM, 0, 0), planet),
             });

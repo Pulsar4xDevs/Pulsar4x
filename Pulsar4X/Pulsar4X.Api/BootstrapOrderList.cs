@@ -56,10 +56,43 @@ public sealed class BootstrapOrderList
         return true;
     }
 
-    /// <summary>Crate designs the faction has that are not on the list yet, by name.</summary>
+    /// <summary>
+    /// The list's infrastructure line, or null when it has none. The order carries one infrastructure design, so
+    /// <see cref="UseInfrastructure"/> keeps it to one line.
+    /// </summary>
+    public BootstrapOrderEntry? InfrastructureEntry(ComponentDesignsSnapshot designs)
+        => _entries.FirstOrDefault(e => IsInfrastructure(designs, e.DesignId));
+
+    /// <summary>
+    /// Makes <paramref name="designId"/> the list's infrastructure design: the first infrastructure line takes it and the
+    /// others merge into that line's count. The default is the best fit, and this is the player's tweak. False when the list has no
+    /// infrastructure line, or the design is not an infrastructure design.
+    /// </summary>
+    public bool UseInfrastructure(ComponentDesignsSnapshot designs, string designId)
+    {
+        var chosen = designs.Designs.FirstOrDefault(d => d.Id == designId);
+        if (chosen?.Infrastructure == null)
+            return false;
+        int first = _entries.FindIndex(e => IsInfrastructure(designs, e.DesignId));
+        if (first < 0)
+            return false;
+        int total = _entries.Where(e => IsInfrastructure(designs, e.DesignId)).Sum(e => e.Count);
+        _entries.RemoveAll(e => IsInfrastructure(designs, e.DesignId));
+        _entries.Insert(Math.Min(first, _entries.Count), new BootstrapOrderEntry(chosen.Id, chosen.Name, Clamp(total)));
+        return true;
+    }
+
+    static bool IsInfrastructure(ComponentDesignsSnapshot designs, string designId)
+        => designs.Designs.FirstOrDefault(d => d.Id == designId)?.Infrastructure != null;
+
+    /// <summary>
+    /// Crate designs the faction has that are not on the list yet, by name. Infrastructure is not offered again once
+    /// the list has a line of it. The player swaps its design with <see cref="UseInfrastructure"/>.
+    /// </summary>
     public IReadOnlyList<ComponentDesignSummary> Addable(ComponentDesignsSnapshot designs)
         => designs.Designs
-            .Where(d => d.IsCrate && _entries.All(e => e.DesignId != d.Id))
+            .Where(d => d.IsCrate && _entries.All(e => e.DesignId != d.Id)
+                && (d.Infrastructure == null || InfrastructureEntry(designs) == null))
             .OrderBy(d => d.Name, StringComparer.Ordinal)
             .ThenBy(d => d.Id, StringComparer.Ordinal)
             .ToList();
@@ -91,12 +124,13 @@ public sealed class BootstrapOrderList
 
     /// <summary>
     /// Why the fleet order cannot be sent yet, or null. <paramref name="inReach"/> is the client's span test
-    /// of the pair. <paramref name="capableShips"/> counts the fleet's captained ships with a Construction Bay.
+    /// of the pair. <paramref name="captainedShips"/> counts the fleet's captained ships. A ship needs no
+    /// Construction Bay, because the destination colony can mount the crates.
     /// </summary>
-    public static string? Validate(int capableShips, int sourceId, int destId, IReadOnlyList<BootstrapCrateRequest> lines, bool inReach)
+    public static string? Validate(int captainedShips, int sourceId, int destId, IReadOnlyList<BootstrapCrateRequest> lines, bool inReach)
     {
-        if (capableShips == 0)
-            return "No captained ship in this fleet has a Construction Bay.";
+        if (captainedShips == 0)
+            return "No ship in this fleet has a captain.";
         if (sourceId < 0)
             return "Pick a source colony.";
         if (destId < 0)
