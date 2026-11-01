@@ -1,6 +1,6 @@
 # Stations
 
-Status: not started. Do not build until asked, and not before [ship refit](ship-refit.md).
+Status: not started. Do not build until asked, and ship refit is already built (`QueueShipRefitOrder`).
 
 ## Outcome
 
@@ -8,7 +8,7 @@ A station is a ship design that does not need thrust and cannot move. A planetar
 
 ## What already runs
 
-`IsShipDesignValid` requires mass, newtonian thrust, and energy generation plus storage. The designer that saves designs is `Pulsar4X.Client.Host/Designer/ShipDesignWindow.cs`. The ported client has no designer. `ComponentMountType` has no station value. A shipyard completion's orbit path is changed by [yard holds hull](yard-holds-hull.md): no pad means the hull waits.
+`IsShipDesignValid` requires mass, newtonian thrust, and energy generation plus storage. The designer that saves designs is `Pulsar4X.Client.Host/Designer/ShipDesignWindow.cs`. The ported client has no designer. `ComponentMountType` has no station value. A shipyard completion's orbit path is changed by the yard-holds-hull rule (built): no pad means the hull waits.
 
 ## Decision
 

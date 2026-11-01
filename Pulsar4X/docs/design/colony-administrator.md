@@ -1,8 +1,8 @@
 # Colony administrator
 
-Status: notes from 2026-10-03. Not an implementation plan. Do not build personality, bids, or construction from this file. Refine-one-batch does not wait on it. A later plan names tests and the bid number before any of that is coded.
+Status: notes from 2026-10-03. Not an implementation plan. Do not build personality, bids, or construction from this file. Refine-one-batch did not wait on it. A later plan names tests and the bid number before any of that is coded.
 
-Goal rules stay in `agents-and-goals-design.md`. The refining slice is `GameEngine/Industry/plans/refine-one-batch.md`.
+Goal rules stay in [agents-and-goals.md](agents-and-goals.md). The refining slice is built (see [industry-overview.md](industry-overview.md)).
 
 ## What this is for
 

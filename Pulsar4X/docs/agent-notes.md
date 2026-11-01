@@ -9,25 +9,12 @@ Inbox for small bugs and follow-ups that came up while doing something else. Any
 - A new problem that is unrelated to the task, or that is not a small change, gets an entry and stays unfixed.
 - When you fix one, replace the body with the date and the one-line outcome, or delete the entry. An open heading means it is still open.
 - Longer writeups already have a home. Link them. Do not paste them here.
-- Plans under `GameEngine/Logistics/plans/` own their own "later" lists. Do not copy those into this file.
+- Plans own their own "later" lists, and the master plan carries the ones from deleted plans. Do not copy those into this file.
 - No secrets, no save files, no logs.
 
 ## Longer notes, already written
 
-Status lives in the file itself, in `near-term.md`, or in `AGENTS.md`. This list is only where to look.
-
-- `near-term.md` — ordered work list.
-- `GameEngine/Movement/movement-issues.md` — movement.
-- `GameEngine/Damage/damage-system.md` — damage.
-- `GameEngine/Engine/Orders/agents-and-goals-design.md` — goals, actions, and agents.
-- `GameEngine/Engine/Orders/agent-wakes.md` — agent wakes.
-- `GameEngine/Engine/Orders/weighting-vertical-slice.md` — autonomous weighting.
-- `GameEngine/Engine/Orders/colony-administrator.md` — colony administrator.
-- `GameEngine/Engine/Orders/plans/` — Ceres faction jobs.
-- `GameEngine/Engine/plans/` — save and load. Round-trip and work in progress are both implemented (2026-10-17). The crash-save is still open. `saved-data.md` is a later note. Do not build it until asked.
-- `GameEngine/Logistics/plans/` — trade and transport. Includes `office-purses.md`, `sealed-shipments.md`, `survey-charts.md`, and `faction-grants-later.md`.
-- `GameEngine/Industry/plans/` — colony industry.
-- `GameEngine/balance.md` — costs, time, and propulsion. Philosophy only. Do not retune until asked.
+Everything is linked from [master-plan.md](master-plan.md): the work queue, the open plans in `plans/`, and the reference notes in `design/`. This file is only the bug inbox.
 
 ## Done
 
@@ -49,10 +36,6 @@ Status lives in the file itself, in `near-term.md`, or in `AGENTS.md`. This list
 
 ## Open
 
-### Movement plans: capture ellipse, warp sustain, and warp-brake are playing
-
-2026-11-01. `GameEngine/Movement/plans/`. All three are playing. `01-capture-ellipse.md`: a short tank burns to a bound ellipse, or a captain refuses before the warp. A new MoveTo already inside the well queues that same burn. `02-warp-sustain.md`: uphill warp is a sustain draw on the same bubble, one speed for the leg. `03-warp-brake.md`: Warp brake, the Nav skill at quality 1.25, coasts inside the destination well and warps back to low orbit, at most three bubbles, until plan 1 can capture. The order line is "Shedding speed, warp k of n". Low Nav and an empty chair stay on plan 1. The saved vector stays parent-relative. A new class and the commander snapshot skill list need a game restart.
-
 ### A processor fault stops the clock quietly — the dialog is in, the crash save is not
 
 2026-10-03. The silent half is done. `MasterTimePulse.AdvanceOneStep` catches one step, `Debugger.Break()` when a debugger is attached, and stores `LastFault` (exception text, `CurrentProcess`, system, both clocks). `NotifyWhenStopped` records a fault that escapes the task instead of dropping `t.Exception`. The client gets `GameEventType.SimulationFaulted` and shows a modal. `TimeStopDiagnosticTests.ProcessorFault_stops_the_clock_and_keeps_the_report` passes. No save is written.
@@ -65,18 +48,10 @@ The crash-save half is still unbuilt. Do not build it until asked. Two files: a 
 
 ### Price finding is a later economy session
 
-2026-10-10. `OfferStockPlan` posts a new row at ask 0 and bid 0 because cargo has no catalog price. Strata Survey, Lode Mining, and Ceres Depot need non-zero prices so charts, fuel, and ore actually move cash. Do not build price finding in the faction-goal pass. What a chart, a unit of ore, and a unit of fuel are worth, and how a bid moves, belongs in an economy session. `GameEngine/Engine/Orders/colony-administrator.md` already holds the bid notes. Do not implement them from this inbox item.
+2026-10-10. `OfferStockPlan` posts a new row at ask 0 and bid 0 because cargo has no catalog price. Strata Survey, Lode Mining, and Ceres Depot need non-zero prices so charts, fuel, and ore actually move cash. Do not build price finding in the faction-goal pass. What a chart, a unit of ore, and a unit of fuel are worth, and how a bid moves, belongs in an economy session. [design/colony-administrator.md](design/colony-administrator.md) already holds the bid notes. Do not implement them from this inbox item.
 
 Interim for the Ceres trade test only. Methalox already has `WealthCost` 3 on the processed-material blueprint. Use that as the depot's fuel ask. Ore and survey charts have no catalog number, so their starting rows use fixed non-zero ask and bid, with the bid below the ask. Leave `OfferStockPlan`'s default of 0 in place. Luna Concord and Earth keep listing at 0 until that session.
 
 ### A single-ship faction cannot post its own buy or sell orders
 
 2026-10-10. Strata Survey and Lode Mining have a ship and no colony. A market order is stored on the colony that owns the logistics office. `EngineGameServer.SubmitCommand` rejects a command against an entity the faction does not own. `BuyIntelCommand` is the exception, and it buys a chart the owner already listed. A friendly ship can fill an existing listing with `MarketExchangeAction` when `FactionStanceRules.CanTrade` is true and the ship is in cargo-transfer range. It cannot add a bid or an ask. `MarketView.CanEdit` is true only for the owner. Do not build a visitor order book unless asked.
-
-### Ship refit is implemented; stations are not started
-
-2026-10-24. The construction attribute, construction components, manufacture instances, colony construction, ship construction, yard-holds-the-hull, and ship-refit slices are implemented. A shipyard refit spends `ship-refit` points on one ship in transfer range. Each part removed and each part mounted costs `max(1, MassPerUnit / 100000)`, copied onto the job. The slip comparison is the ship's design mass against the line's `MaxVolume`. An office with only `installation` cannot refit. A colony installation is refused. The ship takes no new orders until the job finishes. Move to Storage still works. The job does not create a hull. Stations are next. Do not start a slice until asked.
-
-### Remote buy is a sealed shipment
-
-2026-10-10. Written up as `GameEngine/Logistics/plans/sealed-shipments.md`. Not logistics plan 13. Do not build it until asked. A goals-and-actions session can take the `DeliverShipment` half. The buying office pays the goods and posts the intel haul. Any free ship can claim it and be paid the fee. Several goods can share one shipment. Dockside escrow still starts only in cargo range.

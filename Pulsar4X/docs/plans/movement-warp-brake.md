@@ -19,7 +19,7 @@ Under this paste, gravity changes the saved speed only while the bubble is down.
 - `EvaluateWarp` still refuses with `already in destination gravity well`. The rewarp is built by `TryBuildMoveActions` and does not go through that gate.
 - One action per plan. `AgentProcessor`, when an action for the goal succeeds, drops every still-queued follow-on and calls `Plan` again. A list of warp, coast, warp, circularise queued up front loses everything after the first warp. Emit the next step only.
 - The last step is plan 1. When `TryArrivalBurn` succeeds, the existing in-well path queues `CirculariseAction`. This plan does not emit that burn.
-- The captain knows the named skill in the next section. That is Nav quality of at least 1.25 (skill 25). Quality is `1 + skill / 100`. A cap of 40 can reach 1.25. A fresh captain is 1.0 and stays on plan 1. The failure sentence stays plan 1's `Not enough Δv to orbit ...`. The skill name is not in that sentence. That matches `agents-and-goals-design.md`: skill never fails a plan. This gate chooses a plot.
+- The captain knows the named skill in the next section. That is Nav quality of at least 1.25 (skill 25). Quality is `1 + skill / 100`. A cap of 40 can reach 1.25. A fresh captain is 1.0 and stays on plan 1. The failure sentence stays plan 1's `Not enough Δv to orbit ...`. The skill name is not in that sentence. That matches [agents-and-goals.md](../design/agents-and-goals.md): skill never fails a plan. This gate chooses a plot.
 - A commander aboard that ship, the same rule as `CaptureAllowsWarp`. A fleet commander who is not aboard does not count.
 - A game restart is required. This adds a class. It will not apply with Edit and Continue.
 

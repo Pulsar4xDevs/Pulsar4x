@@ -2,11 +2,11 @@
 
 Status: not started.
 
-The office holds ore for another faction and sells it for them. A later buyer pays that faction minus a cut. This is not how the miner unloads. A whole hold is sold by [Direct offer](05-direct-offer.md).
+The office holds ore for another faction and sells it for them. A later buyer pays that faction minus a cut. This is not how the miner unloads. A whole hold is sold by Direct offer (Ceres plan 5, implemented).
 
 ## Depends on
 
-[Depot room](04-sell-ore.md) for free slots and warehouse volume. [Direct offer](05-direct-offer.md) so the standing mine's return is already a lot sale. Consigned units stay out of that sale and out of the depot's own stock.
+Depot room (Ceres plan 4, implemented) for free slots and warehouse volume. Direct offer (Ceres plan 5, implemented) so the standing mine's return is already a lot sale. Consigned units stay out of that sale and out of the depot's own stock.
 
 ## Outcome
 

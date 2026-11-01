@@ -114,7 +114,7 @@ Code:
 - `GameEngine/Energy/EnergyGenProcessor.cs` — store change is kilowatts times seconds. Warp's one-second creation spike depends on the backwards timestamp only moving the mark.
 - `GameEngine/Tech/Tech.cs` — `CostFormula` sees the current `Level`. A formula `(1 + [Level]) * 500` costs 500 at level 0.
 
-Behavior of construction, refit, and the yard is `GameEngine/Industry/plans/`. That folder is not this file. Costs and time stay here.
+Behavior of construction, refit, and the yard is in [industry-overview.md](industry-overview.md) and the code. That file is not this one. Costs and time stay here.
 
 UI, for a later readout. Do not build until asked:
 

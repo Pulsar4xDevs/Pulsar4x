@@ -2,11 +2,11 @@
 
 Note from 2026-10-23, updated when the construction plans were written. Not a plan. Do not move files until asked. Do not change what a job spends from this note.
 
-The construction rules are the plans in this folder: attribute, components, manufacture instances, colony construction, ship construction, yard holds the hull, ship refit, and stations. Fitting is not an attribute. `ConstructionAtb` is the name in those plans. The folder sort waits until those plans exist in code. Whether `IndustryAtb` becomes three classes is still open, and none of those plans decide it.
+The construction rules were plans for: attribute, components, manufacture instances, colony construction, ship construction, yard holds the hull, and ship refit. All are built and deleted. Stations is still open ([stations.md](stations.md)). Fitting is not an attribute. `ConstructionAtb` is the name in those plans. The folder sort waits until those plans exist in code. Whether `IndustryAtb` becomes three classes is still open, and none of those plans decide it.
 
 ## Mounting
 
-`InstallComponentInstanceOrder` and `UninstallComponentInstanceOrder` mount and unmount an instance. They are not an attribute. `OnComponentInstallation` is the callback every attribute runs when a part is mounted. The construction plans own the player-facing work.
+`InstallComponentInstanceOrder` and `UninstallComponentInstanceOrder` mount and unmount an instance. They are not an attribute. `OnComponentInstallation` is the callback every attribute runs when a part is mounted. The construction code owns the player-facing work.
 
 ## What the folder has
 
@@ -27,9 +27,9 @@ Attributes that already stand alone:
 - `ConstructionAtb` — Construction Services. Points, then `AddComponent`. It does not take cargo.
 - `InfrastructureCapacityAtb` — support capacity. Not a producer.
 
-`LaunchComplexAtb` is the pad that puts a finished ship into orbit. It lives in `GameEngine/Ships/`, not in this folder. The shipyard does not use it.
+`LaunchComplexAtb` is the pad that puts a finished ship into orbit. It lives in `GameEngine/Ships/`, not with the industry code. The shipyard does not use it.
 
-Also in this folder, and not one of those attributes: minerals and deposits, `InfrastructureProcessor`, `LotOfferAction`, `InstallationsDB`, and the construction-queue orders.
+Also in the industry code, and not one of those attributes: minerals and deposits, `InfrastructureProcessor`, `LotOfferAction`, `InstallationsDB`, and the construction-queue orders.
 
 ## The sort
 

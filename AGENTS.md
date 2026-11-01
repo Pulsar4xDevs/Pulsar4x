@@ -4,19 +4,19 @@ Checkout is DevBranch. Do not commit or push unless asked. `git add` every new f
 
 ## Start of a session
 
-Read the Open section of `Pulsar4X/agent-notes.md`, then the first unfinished item in `Pulsar4X/near-term.md`.
+Read the Open section of `Pulsar4X/docs/agent-notes.md`, then the first unfinished item in the work queue in `Pulsar4X/docs/master-plan.md`.
 
-If no bug is named, do that near-term item. If a bug is named, do that and leave the list alone.
+If no bug is named, do that work-queue item. If a bug is named, do that and leave the list alone.
 
-Read a design doc only when the task is inside it. Linked from agent-notes: movement, damage, agents-and-goals, agent wakes, weighting, logistics plans, industry plans, colony-administrator, and Ceres plans under `GameEngine/Engine/Orders/plans/`.
+Read a plan or design doc only when the task is inside it. They are all linked from `Pulsar4X/docs/master-plan.md`: open plans in `Pulsar4X/docs/plans/`, reference notes in `Pulsar4X/docs/design/`.
 
 Repo markdown wins over chat memory.
 
 ## While editing
 
-If you are already in the code an open note describes, and the fix is small, fix it and mark the note done. If it is unrelated or not small, append one heading to agent-notes and leave that code alone.
+If you are already in the code an open note describes, and the fix is small, fix it and mark the note done. If it is unrelated or not small, append one heading to `Pulsar4X/docs/agent-notes.md` and leave that code alone.
 
-A plan, a saved idea, or an inbox item that says "do not build until asked" stays unbuilt. That includes Ceres plan 6, sealed shipments, office purses, colony-administrator personality, price finding, faction-grants-later, and any logistics plan 13.
+A plan, a saved idea, or an inbox item that says "do not build until asked" stays unbuilt. That includes the Ceres consignment plan, office purses, colony-administrator personality, price finding, faction grants (later), stations, and any logistics plan 13.
 
 JSON mod data: edit basemod only. Leave sol-trade unchanged unless asked.
 

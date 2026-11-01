@@ -2,7 +2,7 @@
 
 Status: **working vertical slice** for `MoveTo`, `ServeyBodies`, `ScanAnomalies`, and `RefuelAt`
 (leaf + fleet). Agent applies `PlanResult`; planners do not mutate goals. Orient
-(`GoalWeighting`) runs each agent pass; autonomous pick / interrupt-resume not fully wired.
+(`GoalWeighting`) runs each agent pass; autonomous pick is wired (`GoalWeighting.PickAutonomousTask`, called from `AgentProcessor`); interrupt-resume is not.
 Commander Command/Nav/Survey XP is quality on relay, recheck, and plan/action *requests*; processors stay physics.
 
 ## Purpose
@@ -11,11 +11,11 @@ Commander Command/Nav/Survey XP is quality on relay, recheck, and plan/action *r
 2. **One command surface** — humans and AI use the same goals, gates, and queue.
 3. **Command hierarchy has mechanical cost** — seats, rank, and relay delay matter.
 
-Colony growth through a seated administrator is `colony-administrator.md`. Those are notes, not an implementation plan.
+Colony growth through a seated administrator is [colony-administrator.md](colony-administrator.md). Those are notes, not an implementation plan.
 
-The Ceres faction jobs are `plans/`. Three slices, in order. They are not logistics plan 13.
+The Ceres faction jobs (chart consignment, standing jobs, buy fuel, sell ore, direct offer) are built. The one left is [ceres-consignment.md](../plans/ceres-consignment.md). They are not logistics plan 13.
 
-Remote buy and sell at a friendly office is `GameEngine/Logistics/plans/sealed-shipments.md`. Not logistics plan 13. Do not build it until asked. The buyer is any logistics office that can trade, player or not. The buyer pays the goods at seal time and posts one `IntelKind.Haul` row with the freight fee. `DeliverShipment` is the goal half: a free ship claims that row, does not call `MarketExchange`, and is paid the fee on delivery. Do not interrupt a ship that already has an order. Do not give the colony a second `ActiveGoal`. Do not re-decide the package or who pays.
+Remote buy and sell at a friendly office is built as sealed shipments; the rules are in [colony-bootstrap-and-shipments.md](colony-bootstrap-and-shipments.md). Not logistics plan 13. The buyer is any logistics office that can trade, player or not. The buyer pays the goods at seal time and posts one `IntelKind.Haul` row with the freight fee. `DeliverShipment` is the goal half: a free ship claims that row, does not call `MarketExchange`, and is paid the fee on delivery. Do not interrupt a ship that already has an order. Do not give the colony a second `ActiveGoal`. Do not re-decide the package or who pays.
 
 ## Pipeline
 
@@ -129,7 +129,7 @@ XP lives on the **person** (`CommanderDB.Skills`), not the hull and not `AgentDB
 
 `NewtonSimpleProcessor`, `WarpMoveProcessor`, intercept, Kepler interpolation stay pure physics. They execute the offset / target Kepler they are given. No fuel × skill, no fudged eccentricity, no skill checks inside the burn.
 
-Do not put skill inside `IGoalPlanner.Plan` feasibility (no “Nav too low → Fail”). Weighting / autonomous pick is still unwired; do not add skill bias there until Decide exists.
+Do not put skill inside `IGoalPlanner.Plan` feasibility (no “Nav too low → Fail”). Autonomous pick is wired, but do not add skill bias to weighting until asked.
 
 Quality is `1 + skill / 100`. Grants stop at `ExperienceCap`, or at 100 when the cap is 0. A cap of 40 filled to 40 is quality 1.4. A cap of 100 filled to 100 stays quality 2. Missing commander = 1.0 so existing tests stay on the old 90° exit and 1 s / 30 min timings.
 
@@ -186,7 +186,7 @@ Scenario hulls mount `ship-command` designs (`default-design-bridge-ship` / `-we
 1. **Playtest issued goals** — MoveTo, survey body/system, ScanAnomalies, RefuelAt (depot + fleet tanker)
 2. **Translator feedback** — after sync `AssignGoal`, `Reject` if goal already Failed; else `Ok(goal.Id)`
 3. **UI** — project `ActiveGoal` / `GivenGoal` + `Message` + action `Details` on snapshots
-4. **Autonomous Decide** — when `ActiveGoal` null/terminal, `PickAutonomousTask` (start with RefuelAt + source id)
+4. ~~**Autonomous Decide**~~ — done: `PickAutonomousTask` is wired (old logistics plan 9)
 5. **Interrupt resume** — if `ShouldInterruptForRefuel`, set Active=RefuelAt, keep Given; on Refuel Done restore Given as Active
 6. **`GoalsDB.Clone`** — copy `GivenGoal` as well as `ActiveGoal`
 
@@ -197,7 +197,7 @@ Scenario hulls mount `ship-command` designs (`default-design-bridge-ship` / `-we
 - [ ] Migrate off `IsRunning` → `ActionStatus` only
 - [ ] Real `CanAccept`; staff-size term in `RelayDelay` (skill term is in)
 - [x] Survey skill scales kit Survey Speed in geo/grav processors (`SurveyRate`); movement processors stay physics-only
-- [ ] Weighting skill bias only when autonomous Decide is wired
+- [ ] Weighting skill bias (autonomous Decide is wired now; still not asked for)
 - [ ] Colonies / sector orgs on same `Plan` path (decompose vs leaf helpers)
 
 **Movement / logistics**

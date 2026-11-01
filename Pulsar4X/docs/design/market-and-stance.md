@@ -1,12 +1,11 @@
 # Market and stance
 
-Status: plans 1–3 are implemented on `TradeAndTransport`. This note is the design for those three.
+Status: faction stance, the market book and settlement (old logistics plans 1–3) are implemented. This note is the design for those three. The whole trade sequence (old plans 1–12) is built and its plan files were deleted; what is left is in [master-plan.md](../master-plan.md).
 
 **Superseded for trade and visibility (2026-10-15).** Settlement and ship visibility follow one-way `FactionGrants`, not stance. You see their market when they granted you Trade. A trade finishes only when both granted Trade. You see their ships when they granted you Ship positions. Status remains the map colour. Geo, grav, and research are saved and do nothing yet. The stance rules below describe the earlier slice.
-Implementation steps for those three are `GameEngine/Logistics/plans/01-faction-stance.md`, `02-market-book.md`, and `03-settlement.md`. The index of all nine plans is `GameEngine/Logistics/plans/README.md`.
 Later plans (colony orders, bar graph, trader, freighter) use the words defined here.
 
-Companion: `GameEngine/Engine/Orders/agents-and-goals-design.md`. This note does not add goals. Settlement is an action. Ships are not moved.
+Companion: [agents-and-goals.md](agents-and-goals.md). This note does not add goals. Settlement is an action. Ships are not moved.
 
 ## Purpose
 
