@@ -1,6 +1,6 @@
 # Sealed shipments
 
-Status: plan from 2026-10-10. Not implemented. Do not build it until asked. When it is built, it comes before the fleet-order infrastructure suitability check, which depends on it (see Packages). It is not logistics plan 13, and it is not part of the 1–12 sequence. Office purses stay in `office-purses.md`. Ceres consignment stays in `GameEngine/Engine/Orders/plans/06-consignment.md`. Price finding stays the later economy note in `agent-notes.md`.
+Status: plan from 2026-10-10. Implemented: merged in PR #492 (commit `adb9bbb6`). The fleet-order infrastructure suitability check depends on it (see Packages) and is not built yet. Fleet Bootstrap does not use packages yet (`fleet-bootstrap-stub.md` decisions 15 to 18). It is not logistics plan 13, and it is not part of the 1–12 sequence. Office purses stay in `office-purses.md`. Ceres consignment stays in `GameEngine/Engine/Orders/plans/06-consignment.md`. Price finding stays the later economy note in `agent-notes.md`.
 
 A shipment is a sealed pile with a source and a destination. It can be sealed in two ways. The non-market path seals goods with no sale: no buyer or seller factions, no prices, no fee, no intel row, and no ledger lines. The market path is one use case. In it, a logistics office buys listed cargo from a friendly office before any ship is in cargo range. The units leave the open piles and become one shipment, which can hold several goods. The buyer pays for the goods when the pile is sealed, and the buyer pays for the shipping by posting one haul on the intel list. Any free ship may claim that job, deliver the shipment, and be paid the fee.
 
@@ -66,7 +66,7 @@ On the market path, the buying office may cancel only while the shipment is stil
 
 Once a ship has claimed the job, or any unit is aboard, this plan does not cancel and does not refund the goods. The goal runs to the destination. A lost ship is a later hole. Do not build insurance here. A claim that fails before loading clears the claimant so another free ship can take the row. The goods stay sealed.
 
-Gap to close: these rules cover only the buying office on the market path. A package held for a fleet order must be releasable back to open stock when that order fails or is cancelled, which is the case `TakeBack` handles today. This plan does not define that release yet.
+Built (PR #492): these rules cover the buying office on the market path. A package held for a fleet order is released back to open stock when that order fails or is cancelled, with `ShipmentBook.Release(game, shipment)`. It works on non-market packages only. `FleetDeliverShipmentPlan` calls it from `Stop` and `Cancel`. `FleetBootstrapPlan` does not call it yet; it still returns crates with its own `TakeBack`.
 
 ## The haul on the intel list
 
@@ -117,9 +117,9 @@ No toolbar button. No change to survey goals, mine goals, or the Ceres standing 
 
 ## Packages (2026-11-01)
 
-Decided 2026-11-01: the "package" idea from fleet Bootstrap planning is this plan. A package is a sealed shipment: a container with a source and a destination that resources, crates and similar items go into. It is to be built before the fleet-order infrastructure suitability check.
+Decided 2026-11-01: the "package" idea from fleet Bootstrap planning is this plan. A package is a sealed shipment: a container with a source and a destination that resources, crates and similar items go into. It was built before the fleet-order infrastructure suitability check (PR #492).
 
-Why: it solves the fleet-order escrow gap. The suitability check passes, the chosen infrastructure goes into a shipment, and nothing else can touch it until the fleet loads it. Today nothing holds goods at order-build time. `CargoTransferDataDB` escrow (`CargoStorageDB.EscroItems`, `CargoTransferProcessor.MoveFromEscro`) starts only when `LoadGoodsAction` starts and needs two stores. Fleet Bootstrap's `Goal.BootstrapCrateIds` only stops ships under the same goal from taking the same crate.
+Why: it solves the fleet-order escrow gap. The suitability check passes, the chosen infrastructure goes into a shipment, and nothing else can touch it until the fleet loads it. Before PR #492 nothing held goods at order-build time. `CargoTransferDataDB` escrow (`CargoStorageDB.EscroItems`, `CargoTransferProcessor.MoveFromEscro`) starts only when `LoadGoodsAction` starts and needs two stores. Fleet Bootstrap's `Goal.BootstrapCrateIds` only stops ships under the same goal from taking the same crate.
 
 How packages widen the plan above:
 
@@ -133,7 +133,7 @@ How packages widen the plan above:
 - Decided by Jon, 2026-11-01: when a package arrives at a destination that cannot take everything, it unloads as much as it can, and the ship stays and retries until the remaining contents fit.
 - Decided by Jon, 2026-11-01: a package may be carried partly across several ships or trips. Splits happen at the line, never inside a line: a crate or other instance travels whole on one ship. A package with several crated facilities can go one crate at a time, but never half a crate. This replaces the one-ship-per-shipment rule: the fleet hands the package to free ships as they become available, and the package is only fully delivered once every line has arrived.
 - Decided by Jon, 2026-11-01: no separate unpack step before mounting. Crates are mounted at the destination directly from the held cargo.
-- Decided by Jon, 2026-11-01: once a package is aboard, its lines travel as themselves, marked as sealed for this package. The sealed object does not ride aboard to be released into lines on arrival. Unload and mounting work as they do today. The seal survives the cargo transfer as decided below. The `CargoTransferDataDB` escrow lifetime stays as it is.
+- Decided by Jon, 2026-11-01: once a package is aboard, its lines travel as themselves, marked as sealed for this package. The mark applies to resource lines (`SealedLineCargo`). Crate lines carry no seal mark: a crate is never wrapped, and once released it is an ordinary unmarked crate (decided by Jon, 2026-11-01: accept this; see `fleet-bootstrap-stub.md`, last open-questions entry). The sealed object does not ride aboard to be released into lines on arrival. Unload and mounting work as they do today. The seal survives the cargo transfer as decided below. The `CargoTransferDataDB` escrow lifetime stays as it is.
 - Decided by Jon, 2026-11-01: the seal survives the cargo transfer through a separate cargo id for each sealed line. A sealed line is a small `ICargoable` class that gets its own id from `Game.GetEntityID()`, copies `CargoTypeID`, `MassPerUnit` and `VolumePerUnit` from the resource it holds, and keeps the resource id and the shipment id. Sealing removes the resource units and adds the line. Delivery removes the line and adds the units back under the library id. Crates are already component instances with their own ids, so they need no wrapper. Escrow, `MoveFromEscro`, `ReturnEscrow`, free space, mass and `Clone` work unchanged. Seal enforcement comes for free: industry, mining, refuelling and the market all ask for the library id, so they cannot see or consume sealed units by accident.
 - Decided by Jon, 2026-11-01: a package replaces the `Goal.BootstrapCrateIds` claim rather than sitting alongside it. The package carries the crate ids inside it, so the bootstrap goal points at the package instead of listing crate ids separately. Keeping both would double-book the same cargo.
 
