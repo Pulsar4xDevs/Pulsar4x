@@ -72,7 +72,14 @@ namespace Pulsar4X.Client
                         ImGui.TableNextColumn();
                         ImGui.Text(row.ResultTag);
                         ImGui.TableNextColumn();
-                        if (book.CanEdit)
+                        if (row.Kind == IntelKind.Haul)
+                        {
+                            // A haul is a sealed shipment. The fee is fixed, so there is nothing to edit.
+                            ImGui.Text(row.Ask.ToString(CultureInfo.InvariantCulture));
+                            ImGui.TableNextColumn();
+                            HaulButtons(colony.Id, row, book.CanEdit, uiState);
+                        }
+                        else if (book.CanEdit)
                         {
                             var edit = Edit(colony.Id, row, idle);
                             ImGui.SetNextItemWidth(100f);
@@ -153,6 +160,29 @@ namespace Pulsar4X.Client
                     colony.Id, selected.Subject, selected.Kind, (decimal)ask, true));
                 AddAsk[colony.Id] = 0;
             }
+        }
+
+        /// <summary>
+        /// Claim takes the selected ship, or fleet, as the carrier. The office owner may take the row down
+        /// while it is unclaimed, which cancels the shipment.
+        /// </summary>
+        static void HaulButtons(int officeId, IntelRowView row, bool isOwner, GlobalUIState uiState)
+        {
+            if (row.ClaimantId >= 0)
+            {
+                ImGui.Text("Claimed");
+                return;
+            }
+            var carrier = uiState.PrimaryEntity;
+            if (carrier != null && row.ForSale)
+            {
+                if (ImGui.Button("Claim with " + carrier.Name))
+                    uiState.GameClient?.SubmitCommandAsync(new ClaimHaulCommand(officeId, row.Subject, carrier.Id));
+                if (isOwner)
+                    ImGui.SameLine();
+            }
+            if (isOwner && ImGui.Button("Cancel"))
+                uiState.GameClient?.SubmitCommandAsync(new ClearIntelListingCommand(officeId, row.Subject, row.Kind));
         }
 
         /// <summary>One offer line for a body or a grav pin. The table does not use this.</summary>

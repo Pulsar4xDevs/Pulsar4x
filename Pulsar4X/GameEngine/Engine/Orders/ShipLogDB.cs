@@ -230,6 +230,7 @@ static class ShipLogBook
             GoalType.OfferStock => "Offer stock",
             GoalType.RunMarket => "Run the market",
             GoalType.MoveGoods or GoalType.FleetMoveGoods => "Move goods",
+            GoalType.FleetBootstrap => target.Length > 0 ? "Bootstrap " + target : "Bootstrap",
             GoalType.BootstrapColony => target.Length > 0 ? "Bootstrap " + target : "Bootstrap colony",
             _ => name.Length > 0 ? name : goal.Type.ToString(),
         };

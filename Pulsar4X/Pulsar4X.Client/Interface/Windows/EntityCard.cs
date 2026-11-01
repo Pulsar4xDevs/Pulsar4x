@@ -541,6 +541,7 @@ namespace Pulsar4X.Client
                 if (ImGui.CollapsingHeader(name + "###market-" + colony.Id))
                 {
                     MarketBarsDisplay.Display(colony, market, _uiState);
+                    MarketBarsDisplay.DisplayBuyAndShip(colony, market, _system, _uiState);
                     IntelDisplay.Display(colony, colony.GetView<IntelBookView>(), _system.SystemId, _uiState);
                 }
             }
@@ -1117,6 +1118,7 @@ namespace Pulsar4X.Client
             if (_entity.Relation != OwnerRelation.Owned && _entity.GetView<MarketView>() is { } market)
             {
                 MarketBarsDisplay.Display(_entity, market, _uiState);
+                MarketBarsDisplay.DisplayBuyAndShip(_entity, market, _system, _uiState);
                 IntelDisplay.Display(_entity, _entity.GetView<IntelBookView>(), _system?.SystemId ?? "", _uiState);
             }
         }

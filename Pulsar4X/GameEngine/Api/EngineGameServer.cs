@@ -326,9 +326,16 @@ namespace Pulsar4X.Engine.Api
             // destination — carry that as a separate DTO field, which the translator resolves; only
             // the commanded entity is ownership-checked here.)
             // BuyIntel targets the seller's office. Mutual Trade grants are the permission for that one command.
+            // ClaimHaul targets the buyer's office too, and a bid-fill seal targets the buying office with the
+            // session owning the seller. The translator checks the ship or the seller belongs to the session.
             if (commanded.Id != session.FactionId && commanded.FactionOwnerID != session.FactionId
-                && !(command is BuyIntelCommand
+                && !(command is BuyIntelCommand or ClaimHaulCommand
                     && commanded.HasDataBlob<LogiBaseDB>()
+                    && FactionStanceRules.CanTrade(_game, session.FactionId, commanded.FactionOwnerID))
+                && !(command is SealShipmentCommand { FillBid: true } fill
+                    && commanded.HasDataBlob<LogiBaseDB>()
+                    && _game.GlobalManager.TryGetGlobalEntityById(fill.SellerId, out var sealSeller)
+                    && sealSeller.FactionOwnerID == session.FactionId
                     && FactionStanceRules.CanTrade(_game, session.FactionId, commanded.FactionOwnerID)))
                 return CommandResult.Reject("Faction does not control the commanded entity.");
 
@@ -344,6 +351,15 @@ namespace Pulsar4X.Engine.Api
                     && int.TryParse(bought.Subject, NumberStyles.Integer, CultureInfo.InvariantCulture, out int subjectId)
                     && _game.GlobalManager.TryGetGlobalEntityById(subjectId, out var subject))
                     PushEntityRefresh(subject, session.FactionId);
+
+                if (command is SealShipmentCommand sealCmd)
+                {
+                    if (_game.GlobalManager.TryGetGlobalEntityById(sealCmd.SellerId, out var sealSource))
+                        PushEntityRefresh(sealSource, session.FactionId);
+                }
+                if (command is ClaimHaulCommand claimed
+                    && _game.GlobalManager.TryGetGlobalEntityById(claimed.ShipId, out var claimShip))
+                    PushEntityRefresh(claimShip, session.FactionId);
 
                 // Assignment commands re-post commanders with no engine message; the roster is tiny,
                 // so re-push it after every accepted command rather than special-casing them.

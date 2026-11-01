@@ -60,6 +60,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(FleetHaulContractCommand)] = TranslateFleetHaulContract,
                 [typeof(MoveGoodsCommand)] = TranslateMoveGoods,
                 [typeof(BootstrapColonyCommand)] = TranslateBootstrapColony,
+                [typeof(FleetBootstrapCommand)] = TranslateFleetBootstrap,
                 [typeof(QueueMoveGoodsCommand)] = TranslateQueueMoveGoods,
                 [typeof(LoadGoodsCommand)] = TranslateLoadGoods,
                 [typeof(UnloadGoodsCommand)] = TranslateUnloadGoods,
@@ -69,6 +70,8 @@ namespace Pulsar4X.Engine.Api
                 [typeof(SetIntelListingCommand)] = TranslateSetIntelListing,
                 [typeof(ClearIntelListingCommand)] = TranslateClearIntelListing,
                 [typeof(BuyIntelCommand)] = TranslateBuyIntel,
+                [typeof(SealShipmentCommand)] = TranslateSealShipment,
+                [typeof(ClaimHaulCommand)] = TranslateClaimHaul,
                 [typeof(CreateFleetCommand)] = TranslateCreateFleet,
                 [typeof(CreateColonyCommand)] = TranslateCreateColony,
                 [typeof(DisbandFleetCommand)] = TranslateDisbandFleet,
@@ -450,18 +453,8 @@ namespace Pulsar4X.Engine.Api
             if (cmd.Crates == null || cmd.Crates.Count == 0)
                 return CommandResult.Reject("Nothing to build.");
 
-            var crates = new List<BootstrapCrateLine>();
-            var info = faction.GetDataBlob<FactionInfoDB>();
-            foreach (var request in cmd.Crates)
-            {
-                if (request.Count <= 0)
-                    return CommandResult.Reject("Crate counts must be positive.");
-                if (!info.ComponentDesigns.TryGetValue(request.DesignId, out var design))
-                    return CommandResult.Reject($"Unknown design {request.DesignId}.");
-                if (!LocalConstructionJob.IsCrate(design))
-                    return CommandResult.Reject($"{design.Name} is not a crate-able facility.");
-                crates.Add(new BootstrapCrateLine { DesignId = request.DesignId, Count = request.Count });
-            }
+            if (RejectCrates(faction, cmd.Crates, out var crates) is { } crateBad)
+                return crateBad;
 
             if (!PairReaches(commanded, cmd.SourceId, cmd.DestId))
                 return CommandResult.Reject("The target is outside this ship's reach.");
@@ -472,6 +465,87 @@ namespace Pulsar4X.Engine.Api
                 DestEntityId = cmd.DestId,
                 TargetEntityID = cmd.DestId,
                 BootstrapCrates = crates,
+            };
+            AgentProcessor.AssignGoal(commanded, goal);
+            if (goal.Status == GoalStatus.Failed)
+                return CommandResult.Reject(goal.Message);
+            return CommandResult.Ok(goal.Id);
+        }
+
+        /// <summary>Every requested design is a crate-able facility of this faction, with a positive count.</summary>
+        static CommandResult? RejectCrates(Entity faction, IReadOnlyList<BootstrapCrateRequest> requests, out List<BootstrapCrateLine> crates)
+        {
+            crates = new List<BootstrapCrateLine>();
+            var info = faction.GetDataBlob<FactionInfoDB>();
+            foreach (var request in requests)
+            {
+                if (request.Count <= 0)
+                    return CommandResult.Reject("Crate counts must be positive.");
+                if (!info.ComponentDesigns.TryGetValue(request.DesignId, out var design))
+                    return CommandResult.Reject($"Unknown design {request.DesignId}.");
+                if (!LocalConstructionJob.IsCrate(design))
+                    return CommandResult.Reject($"{design.Name} is not a crate-able facility.");
+                crates.Add(new BootstrapCrateLine { DesignId = request.DesignId, Count = request.Count });
+            }
+            return null;
+        }
+
+        private CommandResult TranslateFleetBootstrap(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectUnlessFleet(commanded) is { } notFleet)
+                return notFleet;
+            var cmd = (FleetBootstrapCommand)command;
+            if (!TryResolve(cmd.SourceId, out var source) || !TryResolve(cmd.DestId, out var dest))
+                return CommandResult.Reject("the colony is gone.");
+            if (RejectWarehouse(faction, source) is { } sourceBad)
+                return sourceBad;
+            if (RejectWarehouse(faction, dest) is { } destBad)
+                return destBad;
+            if (source.Id == dest.Id)
+                return CommandResult.Reject("Pick two different colonies.");
+            if (cmd.Crates == null || cmd.Crates.Count == 0)
+                return CommandResult.Reject("Nothing to build.");
+            if (RejectCrates(faction, cmd.Crates, out var listed) is { } crateBad)
+                return crateBad;
+
+            // The list order is the priority. A design named twice keeps its first place and the counts add up.
+            var crates = new List<BootstrapCrateLine>();
+            foreach (var line in listed)
+            {
+                var same = crates.Find(c => c.DesignId == line.DesignId);
+                if (same != null)
+                    same.Count += line.Count;
+                else
+                    crates.Add(line);
+            }
+
+            if (!PairReaches(commanded, cmd.SourceId, cmd.DestId))
+                return CommandResult.Reject("The target is outside this fleet's reach.");
+            var siteBuilds = new List<BootstrapCrateLine>();
+            var designs = faction.GetDataBlob<FactionInfoDB>().ComponentDesigns;
+            foreach (var request in cmd.SiteBuilds ?? Array.Empty<BootstrapCrateRequest>())
+            {
+                if (request.Count <= 0)
+                    return CommandResult.Reject("Site build counts must be positive.");
+                if (!designs.TryGetValue(request.DesignId, out var design))
+                    return CommandResult.Reject($"Unknown design {request.DesignId}.");
+                if (!LocalConstructionJob.IsSiteOnly(design))
+                    return CommandResult.Reject($"{design.Name} is not a site-only facility. List crates under crates.");
+                var same = siteBuilds.Find(c => c.DesignId == request.DesignId);
+                if (same != null)
+                    same.Count += request.Count;
+                else
+                    siteBuilds.Add(new BootstrapCrateLine { DesignId = request.DesignId, Count = request.Count });
+            }
+
+            var goal = new Goal(GoalType.FleetBootstrap)
+            {
+                Name = "Bootstrap",
+                SourceEntityId = cmd.SourceId,
+                DestEntityId = cmd.DestId,
+                TargetEntityID = cmd.DestId,
+                BootstrapCrates = crates,
+                BootstrapSiteBuilds = siteBuilds,
             };
             AgentProcessor.AssignGoal(commanded, goal);
             if (goal.Status == GoalStatus.Failed)
@@ -698,8 +772,113 @@ namespace Pulsar4X.Engine.Api
                 return missing;
             if (string.IsNullOrEmpty(clear.Subject))
                 return CommandResult.Reject("Subject is required.");
+            // A haul row is a sealed shipment. Taking the row down cancels the shipment, or the goods stay sealed.
+            if (clear.Kind == IntelKind.Haul)
+            {
+                if (!ShipmentBook.TryCancel(commanded, clear.Subject, out var cancelReason))
+                    return CommandResult.Reject(cancelReason);
+                return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+            }
             IntelBook.Remove(commanded, clear.Kind, clear.Subject);
             return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
+
+        /// <summary>
+        /// The commanded entity is the buying office. The goods come from <c>SellerId</c>'s warehouse
+        /// (a buy) or are sold into the office's bids (<c>FillBid</c>, the session owns the seller).
+        /// </summary>
+        private CommandResult TranslateSealShipment(Entity faction, Entity commanded, GameCommand command)
+        {
+            var seal = (SealShipmentCommand)command;
+            if (RejectWithoutLogisticsOffice(commanded) is { } missing)
+                return missing;
+            if (!TryResolve(seal.SellerId, out var seller) || !seller.HasDataBlob<ColonyInfoDB>()
+                || !seller.HasDataBlob<CargoStorageDB>() || !seller.HasDataBlob<LogiBaseDB>())
+                return CommandResult.Reject("The seller has no warehouse.");
+            if (!commanded.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject("The buyer is not a colony.");
+            if (seller.Id == commanded.Id)
+                return CommandResult.Reject("Pick two different colonies.");
+            if (seal.FillBid)
+            {
+                if (seller.FactionOwnerID != faction.Id)
+                    return CommandResult.Reject("The colony is not yours.");
+            }
+            else if (commanded.FactionOwnerID != faction.Id)
+                return CommandResult.Reject("The colony is not yours.");
+            if (seal.Items == null || seal.Items.Count == 0)
+                return CommandResult.Reject("Nothing to move.");
+            var wanted = new List<(ICargoable item, long units)>();
+            foreach (var item in seal.Items)
+            {
+                if (item.Units <= 0)
+                    return CommandResult.Reject("Transfer amounts must be positive.");
+                if (!TryCargoByUniqueId(seller, item.CargoId, out var cargo))
+                    return CommandResult.Reject($"Cargo item {item.CargoId} is not in the source's storage.");
+                wanted.Add((cargo, item.Units));
+            }
+            if (!ShipmentBook.TrySealMarket(commanded, seller, seal.FillBid, wanted, seal.Fee, out var made, out var reason))
+                return CommandResult.Reject(reason);
+            return CommandResult.Ok(made[0].UniqueID);
+        }
+
+        static bool TryCargoByUniqueId(Entity holder, string cargoId, out ICargoable cargo)
+        {
+            cargo = null!;
+            if (string.IsNullOrEmpty(cargoId) || !holder.TryGetDataBlob<CargoStorageDB>(out var storage))
+                return false;
+            foreach (var store in storage.TypeStores.Values)
+            {
+                foreach (var found in store.GetCargoables().Values)
+                {
+                    if (found.UniqueID == cargoId)
+                    {
+                        cargo = found;
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// The commanded entity is the office that holds the haul row. A ship, or a fleet of cargo ships, takes it.
+        /// The claim is released again if the goal cannot be assigned.
+        /// </summary>
+        private CommandResult TranslateClaimHaul(Entity faction, Entity commanded, GameCommand command)
+        {
+            var claim = (ClaimHaulCommand)command;
+            if (RejectWithoutLogisticsOffice(commanded) is { } missing)
+                return missing;
+            if (!TryResolve(claim.ShipId, out var carrier) || carrier.FactionOwnerID != faction.Id)
+                return CommandResult.Reject("The ship is not yours.");
+            bool fleet = carrier.HasDataBlob<FleetDB>();
+            if (!fleet && !carrier.HasDataBlob<ShipInfoDB>())
+                return CommandResult.Reject("Only a ship or a fleet can carry a haul.");
+            if (RejectGoalWithoutCaptain(carrier) is { } rejected)
+                return rejected;
+            if (!commanded.TryGetDataBlob<LogiBaseDB>(out var book) || book.Intel == null
+                || !book.Intel.TryGetValue(IntelBook.Key(IntelKind.Haul, claim.Subject ?? ""), out var row))
+                return CommandResult.Reject("That haul is not listed.");
+            if (!PairReaches(carrier, row.SourceId, commanded.Id))
+                return CommandResult.Reject("The target is outside this ship's reach.");
+            if (!IntelBook.TryClaim(commanded, carrier, claim.Subject!, out var reason))
+                return CommandResult.Reject(reason);
+
+            var goal = new Goal(fleet ? GoalType.FleetDeliverShipment : GoalType.DeliverShipment)
+            {
+                Name = "Deliver shipment",
+                CargoId = claim.Subject!,
+                SourceEntityId = row.SourceId,
+                DestEntityId = commanded.Id,
+            };
+            AgentProcessor.AssignGoal(carrier, goal);
+            if (goal.Status == GoalStatus.Failed)
+            {
+                IntelBook.ReleaseClaim(commanded, claim.Subject!, carrier.Id);
+                return CommandResult.Reject(goal.Message);
+            }
+            return CommandResult.Ok(goal.Id);
         }
 
         private CommandResult TranslateBuyIntel(Entity faction, Entity commanded, GameCommand command)

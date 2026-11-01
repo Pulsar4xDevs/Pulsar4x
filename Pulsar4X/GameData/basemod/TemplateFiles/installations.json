@@ -671,10 +671,10 @@
   {
     "Type": "ComponentTemplate",
     "Payload": {
-      "UniqueID": "spaceport",
-      "Name": "Planetary Spaceport Complex",
+      "UniqueID": "planetary-spaceport-crate",
+      "Name": "Planetary Spaceport Complex (Crate)",
       "Formulas": {
-        "Description": "A generic does everything space facility",
+        "Description": "A generic does everything space facility, built as a crate so a ship can carry it to a colony and mount it there",
         "Mass": "PropertyValue('Warehouse Size')",
         "Volume": "[Mass]",
         "HTK": "0.5",
@@ -691,7 +691,7 @@
         "stainless-steel": "[Mass] * 0.1"
       },
       "ComponentType":"Facility",
-      "MountType": "PlanetInstallation",
+      "MountType": "ShipCargo, PlanetInstallation",
       "CargoTypeID": "general-storage",
       "IndustryTypeID": "installation-construction",
       "Properties": [
@@ -743,7 +743,7 @@
           "Name": "DBargsTransfer",
           "GuiHint": "None",
           "PropertyFormula": "AtbConstrArgs(PropertyValue('Cargo Transfer Rate'), PropertyValue('Transfer Range'))",
-          "AttributeType": "Pulsar4X.Datablobs.CargoTransferAtbDB"
+          "AttributeType": "Pulsar4X.Storage.CargoTransferAtb"
         },
         {
           "Name": "DBargsStorage",

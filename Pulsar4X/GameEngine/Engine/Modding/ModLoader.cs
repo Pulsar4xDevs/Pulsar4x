@@ -120,6 +120,9 @@ namespace Pulsar4X.Modding
                 case ModInstruction.DataType.ShipDesign:
                     ApplyModGeneric<ShipDesignBlueprint>(baseData.ShipDesigns, mod, modNamespace);
                     break;
+                case ModInstruction.DataType.BootstrapDefaults:
+                    ApplyModGeneric<BootstrapDefaultsBlueprint>(baseData.BootstrapDefaults, mod, modNamespace);
+                    break;
             }
         }
 

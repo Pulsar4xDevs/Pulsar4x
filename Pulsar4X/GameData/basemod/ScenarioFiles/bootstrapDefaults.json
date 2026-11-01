@@ -1,0 +1,16 @@
+[
+  {
+    "Type": "BootstrapDefaults",
+    "Payload": {
+      "UniqueID": "default-bootstrap-list",
+      "Name": "Minimal self-sustaining colony",
+      "Crates": [
+        { "DesignId": "default-design-local-construction", "Count": 1 },
+        { "DesignId": "default-design-factory", "Count": 1 },
+        { "DesignId": "default-design-auto-mine", "Count": 1 },
+        { "DesignId": "default-design-planetary-spaceport-crate", "Count": 1 },
+        { "DesignId": "default-design-infrastructure", "Count": 1 }
+      ]
+    }
+  }
+]

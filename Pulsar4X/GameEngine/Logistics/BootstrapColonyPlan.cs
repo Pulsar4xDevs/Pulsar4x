@@ -72,11 +72,11 @@ public class BootstrapColonyPlan : IGoalPlanner
             return PlanResult.Done($"Mounted {mounted} {(mounted == 1 ? "crate" : "crates")}");
 
         if (atSource.Count > 0)
-            return PlanLoad(ship, source, atSource);
+            return PlanLoad(ship, source, atSource, goal);
 
         if (!LocalConstructionProcessor.InTransferRange(ship, dest))
         {
-            if (!MoveGoodsPlan.TryMoveIntoRange(ship, dest, out var moves, out reason))
+            if (!MoveGoodsPlan.TryMoveIntoRange(ship, dest, out var moves, out reason, goal))
                 return PlanResult.Fail(string.IsNullOrEmpty(reason) ? "The colony is out of transfer range." : reason);
             return PlanResult.Continue(moves);
         }
@@ -86,11 +86,11 @@ public class BootstrapColonyPlan : IGoalPlanner
             "Mounting crates");
     }
 
-    static PlanResult PlanLoad(Entity ship, Entity source, List<MoveGoodsLine> lines)
+    static PlanResult PlanLoad(Entity ship, Entity source, List<MoveGoodsLine> lines, Goal goal)
     {
         if (!MarketExchangeAction.InRange(ship, source))
         {
-            if (!MoveGoodsPlan.TryMoveIntoRange(ship, source, out var moves, out var reason))
+            if (!MoveGoodsPlan.TryMoveIntoRange(ship, source, out var moves, out var reason, goal))
                 return PlanResult.Fail(string.IsNullOrEmpty(reason) ? "out of range" : reason);
             return PlanResult.Continue(moves);
         }

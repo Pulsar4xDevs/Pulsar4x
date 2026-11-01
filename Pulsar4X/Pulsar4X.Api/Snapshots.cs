@@ -277,7 +277,11 @@ public sealed record MarketView(
 /// <summary>A cargo id the owner may add to their book.</summary>
 public sealed record MarketGoodChoice(string CargoId, string Name);
 
-/// <summary>One intel row a faction is allowed to see on an office.</summary>
+/// <summary>
+/// One intel row a faction is allowed to see on an office.
+/// A haul row (<see cref="IntelKind.Haul"/>) is a sealed shipment: <c>Ask</c> is the freight fee, <c>ClaimantId</c> is
+/// the carrying ship or -1, and <c>SourceName</c> / <c>DestName</c> name the two colonies.
+/// </summary>
 public sealed record IntelRowView(
     IntelKind Kind,
     string Subject,
@@ -286,7 +290,10 @@ public sealed record IntelRowView(
     decimal Ask,
     bool ForSale,
     bool OwnedByViewer,
-    string? SystemId) : IComponentView;
+    string? SystemId,
+    int ClaimantId = -1,
+    string? SourceName = null,
+    string? DestName = null) : IComponentView;
 
 /// <summary>A finished secret the office owner may list. Empty for a friendly viewer.</summary>
 public sealed record IntelCandidateView(
@@ -868,15 +875,29 @@ public sealed class ComponentDesignsSnapshot
 {
     public IReadOnlyList<ComponentTemplateSummary> Templates { get; init; } = Array.Empty<ComponentTemplateSummary>();
     public IReadOnlyList<ComponentDesignSummary> Designs { get; init; } = Array.Empty<ComponentDesignSummary>();
+    /// <summary>
+    /// The crate list a fleet Bootstrap order starts from, in priority order, from mod data. Only designs this
+    /// faction has and that can be crated are listed.
+    /// </summary>
+    public IReadOnlyList<BootstrapCrateRequest> BootstrapDefaults { get; init; } = Array.Empty<BootstrapCrateRequest>();
 }
 
 /// <summary>A component template the faction can design from.</summary>
 public sealed record ComponentTemplateSummary(string Id, string Name, string ComponentType, string Description);
 
+/// <summary>An amount of one resource, by cargo id, with its display name.</summary>
+public sealed record ResourceCostLine(string CargoId, string Name, long Amount);
+
 /// <summary>An existing component design; <see cref="PropertyValues"/> carries the inputs it was
 /// created with so the client can reload it into the designer.</summary>
 public sealed record ComponentDesignSummary(string Id, string Name, string TemplateId, string TemplateName)
 {
+    /// <summary>Can be mounted on a planet and carried in a ship's hold. A fleet Bootstrap order can ship these.</summary>
+    public bool IsCrate { get; init; }
+    /// <summary>Mounts on a planet but cannot ride in a hold. It is built on site, from hauled resources.</summary>
+    public bool IsSiteOnly { get; init; }
+    /// <summary>What one unit costs to build, per resource.</summary>
+    public IReadOnlyList<ResourceCostLine> ResourceCosts { get; init; } = Array.Empty<ResourceCostLine>();
     public IReadOnlyList<DesignerInput> PropertyValues { get; init; } = Array.Empty<DesignerInput>();
 }
 

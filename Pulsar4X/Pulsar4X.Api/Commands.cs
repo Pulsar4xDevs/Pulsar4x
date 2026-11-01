@@ -102,6 +102,22 @@ public sealed record BootstrapColonyCommand(
     int DestId,
     IReadOnlyList<BootstrapCrateRequest> Crates) : GameCommand(TargetEntityId);
 
+/// <summary>
+/// The fleet Bootstrap order. Crates are listed in priority order: the fleet's ships, sub-fleets included,
+/// take them first to last, over as many trips as it takes. The same design listed twice counts once, at its
+/// first place. Targets the fleet.
+/// <para>
+/// <c>SiteBuilds</c> are site-only facilities the player wants built at the destination. They are not shipped. The
+/// resources they cost (cost x count) are derived by the server and hauled once every crate has arrived.
+/// </para>
+/// </summary>
+public sealed record FleetBootstrapCommand(
+    int TargetEntityId,
+    int SourceId,
+    int DestId,
+    IReadOnlyList<BootstrapCrateRequest> Crates,
+    IReadOnlyList<BootstrapCrateRequest>? SiteBuilds = null) : GameCommand(TargetEntityId);
+
 /// <summary>Empty chair. Plot the flight to the source and a load. The load plots the destination when it finishes.</summary>
 public sealed record QueueMoveGoodsCommand(
     int TargetEntityId,
@@ -150,6 +166,8 @@ public enum IntelKind
     Geo,
     Pin,
     Jump,
+    /// <summary>A sealed shipment waiting for a carrier. <c>Subject</c> is the shipment id, <c>Ask</c> the freight fee.</summary>
+    Haul,
 }
 
 /// <summary>
@@ -176,6 +194,31 @@ public sealed record BuyIntelCommand(
     int TargetEntityId,
     string Subject,
     IntelKind Kind) : GameCommand(TargetEntityId);
+
+/// <summary>One line of a seal: a cargo unique id as the market lists it, and the units wanted.</summary>
+public sealed record SealLine(string CargoId, long Units);
+
+/// <summary>
+/// Seal goods into one shipment per cargo type at <see cref="SellerId"/>'s warehouse and post the haul on the
+/// target's office. Targets the buying office, which is the destination. The lines are cargo unique ids as the market lists them, taken from the seller's warehouse and priced by its book (the buyer's own
+/// bids when <see cref="FillBid"/>). Each line is clamped to what the book offers and the buyer can pay.
+/// <see cref="Fee"/> is the freight fee a carrier earns, shared over the shipments.
+/// </summary>
+public sealed record SealShipmentCommand(
+    int TargetEntityId,
+    int SellerId,
+    IReadOnlyList<SealLine> Items,
+    decimal Fee,
+    bool FillBid = false) : GameCommand(TargetEntityId);
+
+/// <summary>
+/// A ship claims one posted haul and is given the delivery. Targets the office that holds the row.
+/// <see cref="Subject"/> is the shipment id. A second claim on the same row is rejected.
+/// </summary>
+public sealed record ClaimHaulCommand(
+    int TargetEntityId,
+    string Subject,
+    int ShipId) : GameCommand(TargetEntityId);
 
 // ----- fleet organisation (commanded entity: the faction for create, otherwise the fleet/ship) -----
 #region Fleet Organization Commands

@@ -25,6 +25,7 @@
     "TemplateFiles/damageResistance.json",
     "ScenarioFiles/designs/componentDesigns.json",
     "ScenarioFiles/designs/shipDesigns.json",
+    "ScenarioFiles/bootstrapDefaults.json",
     "ScenarioFiles/defaultTheme.json",
     "ScenarioFiles/systemGenSettings.json",
     "ScenarioFiles/species.json",

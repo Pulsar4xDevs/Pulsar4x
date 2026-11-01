@@ -56,6 +56,38 @@ public class ConstructionAtbTests
     }
 
     [Test]
+    public void PlanetarySpaceportCrate_IsACrateThatFitsAHold()
+    {
+        var modLoader = new ModLoader();
+        var store = new ModDataStore();
+        modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
+
+        var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
+        var faction = FactionFactory.CreateBasicFaction(game, "Port", "PRT", 0);
+        var info = faction.GetDataBlob<FactionInfoDB>();
+        foreach (var id in new[] { "planetary-spaceport-crate", "iron", "aluminium", "copper", "plastic", "stainless-steel" })
+            info.Data.Unlock(id);
+
+        ComponentDesigner.StartResearched = true;
+        try
+        {
+            var design = ComponentDesignFromJson.Create(
+                faction,
+                info.Data,
+                game.StartingGameData.ComponentDesigns["default-design-planetary-spaceport-crate"]);
+
+            Assert.That(LocalConstructionJob.IsCrate(design), Is.True);
+            Assert.That(LocalConstructionJob.IsSiteOnly(design), Is.False);
+            Assert.That(design.CargoTypeID, Is.EqualTo("general-storage"));
+            Assert.That(design.VolumePerUnit, Is.LessThanOrEqualTo(5000), "one crate must fit a 5000 m3 hold");
+        }
+        finally
+        {
+            ComponentDesigner.StartResearched = false;
+        }
+    }
+
+    [Test]
     public void BasemodFaction_HasTheConstructionParts()
     {
         var modLoader = new ModLoader();

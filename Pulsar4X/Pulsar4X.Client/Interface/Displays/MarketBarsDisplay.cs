@@ -78,6 +78,91 @@ namespace Pulsar4X.Client
             }
         }
 
+        sealed class ShipDraft
+        {
+            public int Good;
+            public int Units = 1;
+            public int Buyer;
+            public double Fee;
+        }
+
+        static readonly Dictionary<int, ShipDraft> _ship = new();
+
+        /// <summary>
+        /// Buy and ship from a friendly market: the goods are sealed at the seller and paid for now, and a haul is
+        /// posted on one of this faction's colonies in the same system. A ship claims the haul to carry it.
+        /// </summary>
+        public static void DisplayBuyAndShip(EntitySnapshot seller, MarketView? market, IClientSystem? system, GlobalUIState uiState)
+        {
+            if (market == null || market.CanEdit || !market.ExchangeOpen || system == null)
+                return;
+
+            var goods = new List<MarketGoodView>();
+            foreach (var good in market.Goods)
+            {
+                if (good.SellQuantity > 0)
+                    goods.Add(good);
+            }
+            var buyers = new List<EntitySnapshot>();
+            foreach (var colony in system.Entities)
+            {
+                if (colony.Relation == OwnerRelation.Owned && colony.Kind == BodyKind.Colony
+                    && colony.GetView<MarketView>() != null)
+                    buyers.Add(colony);
+            }
+            if (goods.Count == 0 || buyers.Count == 0)
+                return;
+
+            if (!_ship.TryGetValue(seller.Id, out var draft))
+            {
+                draft = new ShipDraft();
+                _ship[seller.Id] = draft;
+            }
+            draft.Good = Math.Clamp(draft.Good, 0, goods.Count - 1);
+            draft.Buyer = Math.Clamp(draft.Buyer, 0, buyers.Count - 1);
+
+            ImGui.Separator();
+            ImGui.Text("Buy and ship");
+            ImGui.PushID("buy-and-ship-" + seller.Id);
+            if (ImGui.BeginCombo("Good", goods[draft.Good].Name))
+            {
+                for (int i = 0; i < goods.Count; i++)
+                {
+                    if (ImGui.Selectable(goods[i].Name + "###" + goods[i].CargoId, i == draft.Good))
+                        draft.Good = i;
+                }
+                ImGui.EndCombo();
+            }
+            string buyerName = buyers[draft.Buyer].GetView<NameView>()?.Name ?? "Colony";
+            if (ImGui.BeginCombo("Deliver to", buyerName))
+            {
+                for (int i = 0; i < buyers.Count; i++)
+                {
+                    string name = buyers[i].GetView<NameView>()?.Name ?? "Colony";
+                    if (ImGui.Selectable(name + "###" + buyers[i].Id, i == draft.Buyer))
+                        draft.Buyer = i;
+                }
+                ImGui.EndCombo();
+            }
+            ImGui.SetNextItemWidth(140f);
+            ImGui.InputInt("Units", ref draft.Units);
+            ImGui.SetNextItemWidth(140f);
+            ImGui.InputDouble("Freight fee", ref draft.Fee, 0, 0, "%.2f");
+            if (draft.Units < 1)
+                draft.Units = 1;
+            if (draft.Fee < 0)
+                draft.Fee = 0;
+            if (ImGui.Button("Buy and ship"))
+            {
+                uiState.GameClient?.SubmitCommandAsync(new SealShipmentCommand(
+                    buyers[draft.Buyer].Id,
+                    seller.Id,
+                    new[] { new SealLine(goods[draft.Good].CargoId, draft.Units) },
+                    (decimal)draft.Fee));
+            }
+            ImGui.PopID();
+        }
+
         static void DisplaySupply(EntitySnapshot entity, GlobalUIState uiState)
         {
             ImGui.Separator();

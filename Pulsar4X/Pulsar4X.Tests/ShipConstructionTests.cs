@@ -178,8 +178,12 @@ public class ShipConstructionTests
         var cityHall = world.Info.ComponentDesigns["default-design-city-hall"];
         Assert.That(LocalConstructionJob.IsSiteOnly(cityHall), Is.True);
         var crate = new ComponentInstance(cityHall);
-        ship.GetDataBlob<CargoStorageDB>().TypeStores["general-storage"] = new TypeStore(1_000_000_000);
-        Assert.That(ship.GetDataBlob<CargoStorageDB>().AddCargoByUnit(crate, 1), Is.EqualTo(1));
+        var hold = ship.GetDataBlob<CargoStorageDB>();
+        hold.TypeStores["general-storage"] = new TypeStore(1_000_000_000);
+        // A ship's hold now refuses site-only items, so seed one as an older save would have held it.
+        Assert.That(hold.AddCargoByUnit(crate, 1), Is.EqualTo(0));
+        hold.TypeStores["general-storage"].CurrentStoreInUnits[crate.ID] = 1;
+        hold.TypeStores["general-storage"].Cargoables[crate.ID] = crate;
 
         var rejected = new CommandTranslator(Game).Translate(
             world.Faction, ship, new AddToConstructionQueueCommand(ship.Id, cityHall.UniqueID, crate.ID, colony.Id));

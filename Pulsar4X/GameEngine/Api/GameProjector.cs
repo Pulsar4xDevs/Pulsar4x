@@ -768,15 +768,27 @@ namespace Pulsar4X.Engine.Api
                     ? new IntelBook.IntelLabel { Name = row.Subject, SystemId = null }
                     : IntelBook.Describe(game, factionId, row.Kind, row.Subject, index);
                 bool owned = game != null && IntelBook.BuyerHas(game, factionId, row.Kind, row.Subject);
+                string? sourceName = null;
+                string? destName = null;
+                string rowName = label.Name;
+                string? systemId = label.SystemId;
+                if (row.Kind == IntelKind.Haul && game != null)
+                {
+                    HaulLabel(game, factionId, row, out rowName, out sourceName, out destName, out var haulSystem);
+                    systemId = haulSystem ?? systemId;
+                }
                 rows.Add(new IntelRowView(
                     row.Kind,
                     row.Subject,
-                    label.Name,
+                    rowName,
                     IntelBook.ResultTag(row.Kind),
                     row.Ask,
                     row.ForSale,
                     owned,
-                    label.SystemId));
+                    systemId,
+                    row.ClaimantId,
+                    sourceName,
+                    destName));
             }
 
             IReadOnlyList<IntelCandidateView> candidates = Array.Empty<IntelCandidateView>();
@@ -788,6 +800,33 @@ namespace Pulsar4X.Engine.Api
             }
 
             return new IntelBookView(canEdit, rows, candidates);
+        }
+
+        /// <summary>A haul row reads as its goods and where they go, from the sealed shipment at the source.</summary>
+        private static void HaulLabel(
+            Game game, int factionId, IntelListing row,
+            out string name, out string? sourceName, out string? destName, out string? systemId)
+        {
+            name = "Shipment";
+            sourceName = null;
+            destName = null;
+            systemId = null;
+            Entity? source = null;
+            if (row.SourceId >= 0 && game.GlobalManager.TryGetGlobalEntityById(row.SourceId, out var found))
+            {
+                source = found;
+                sourceName = found.GetName(factionId);
+                systemId = found.Manager is StarSystem sourceSystem ? sourceSystem.ID : null;
+            }
+            if (row.DestId >= 0 && game.GlobalManager.TryGetGlobalEntityById(row.DestId, out var dest))
+                destName = dest.GetName(factionId);
+            if (source != null && ShipmentBook.TryFind(source, row.Subject, out var shipment))
+            {
+                var goods = string.Join(", ", shipment.Lines.Select(line => $"{line.Units} {line.Held.Name}"));
+                name = $"Deliver {goods}";
+            }
+            if (sourceName != null || destName != null)
+                name += $" · {sourceName ?? "?"} → {destName ?? "?"}";
         }
 
         static Dictionary<string, int> UnknownJumpIndex(Game? game, int viewerId, List<IntelListing> rows)
@@ -899,6 +938,16 @@ namespace Pulsar4X.Engine.Api
                         case Pulsar4X.Components.ComponentDesign design:
                             kind = design.ComponentType;
                             description = design.Description;
+                            break;
+                        case ShipmentCargo shipment:
+                            kind = "Shipment";
+                            description = shipment.IsMarket
+                                ? "Sealed for delivery. Paid for, and waiting for a carrier."
+                                : "Sealed for delivery to a fleet order.";
+                            break;
+                        case SealedLineCargo:
+                            kind = "Sealed";
+                            description = "Part of a sealed shipment. It unseals on arrival.";
                             break;
                     }
 
@@ -1665,10 +1714,53 @@ namespace Pulsar4X.Engine.Api
                 designs.Add(new ComponentDesignSummary(design.UniqueID, design.Name, design.TemplateID, design.TemplateName)
                 {
                     PropertyValues = values,
+                    IsCrate = LocalConstructionJob.IsCrate(design),
+                    IsSiteOnly = LocalConstructionJob.IsSiteOnly(design),
+                    ResourceCosts = CostLines(info, design),
                 });
             }
 
-            return new ComponentDesignsSnapshot { Templates = templates, Designs = designs };
+            return new ComponentDesignsSnapshot
+            {
+                Templates = templates,
+                Designs = designs,
+                BootstrapDefaults = BootstrapDefaultList(info),
+            };
+        }
+
+        private static List<ResourceCostLine> CostLines(FactionInfoDB info, ComponentDesign design)
+        {
+            var lines = new List<ResourceCostLine>();
+            foreach (var (cargoId, amount) in design.ResourceCosts)
+            {
+                if (amount <= 0)
+                    continue;
+                string name = info.Data?.CargoGoods != null && info.Data.CargoGoods.Contains(cargoId)
+                    ? info.Data.CargoGoods.GetAny(cargoId)!.Name
+                    : cargoId;
+                lines.Add(new ResourceCostLine(cargoId, name, amount));
+            }
+            return lines;
+        }
+
+        /// <summary>
+        /// The mod's default crate list for a fleet Bootstrap order, minus any design this faction does not
+        /// have or cannot crate. Lists from every loaded mod are joined in the order the mods loaded.
+        /// </summary>
+        private List<BootstrapCrateRequest> BootstrapDefaultList(FactionInfoDB info)
+        {
+            var lines = new List<BootstrapCrateRequest>();
+            foreach (var list in _game.StartingGameData.BootstrapDefaults.Values)
+            {
+                foreach (var line in list.Crates)
+                {
+                    if (line.Count <= 0 || lines.Any(l => l.DesignId == line.DesignId))
+                        continue;
+                    if (info.ComponentDesigns.TryGetValue(line.DesignId, out var design) && LocalConstructionJob.IsCrate(design))
+                        lines.Add(new BootstrapCrateRequest(line.DesignId, line.Count));
+                }
+            }
+            return lines;
         }
 
         // The "Description" formula is usually a quoted string literal; unwrap it rather than
