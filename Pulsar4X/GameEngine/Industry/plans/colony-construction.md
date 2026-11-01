@@ -10,7 +10,7 @@ A colony with an installation rate can mount a crate from its warehouse, or asse
 
 `installation` is the only key this plan reads. A job spends the colony's pool.
 
-`ShipCargo` plus `PlanetInstallation` is a crate. No `ShipCargo` means site-only. Site-only today: `mine`, `naval-academy`, `spaceport`, `admin-complex`, and `launch-complex`. `local-construction` became a crate (`ShipCargo, PlanetInstallation`) so a ship can carry the first office to an empty colony. `space-port` has `ShipCargo` and is a different template.
+`ShipCargo` plus `PlanetInstallation` is a crate. No `ShipCargo` means site-only. Site-only today: `mine`, `naval-academy`, `admin-complex`, and `launch-complex`. `local-construction` became a crate (`ShipCargo, PlanetInstallation`) so a ship can carry the first office to an empty colony. `space-port` has `ShipCargo` and is a different template.
 
 A crate does not store a point cost. It points at its design.
 
