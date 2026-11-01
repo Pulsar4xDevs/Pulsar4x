@@ -37,6 +37,21 @@ public sealed class IntelListing
     [JsonProperty]
     public int SellerFactionId { get; set; } = -1;
 
+    /// <summary>
+    /// Haul rows only. The ship that claimed the row, or -1 while it waits for a carrier.
+    /// A claimed row is not for sale, so a second claim is rejected.
+    /// </summary>
+    [JsonProperty]
+    public int ClaimantId { get; set; } = -1;
+
+    /// <summary>Haul rows only. The colony that holds the sealed goods, or -1.</summary>
+    [JsonProperty]
+    public int SourceId { get; set; } = -1;
+
+    /// <summary>Haul rows only. The colony the goods go to, or -1.</summary>
+    [JsonProperty]
+    public int DestId { get; set; } = -1;
+
     public IntelListing Copy() => new()
     {
         Kind = Kind,
@@ -44,6 +59,9 @@ public sealed class IntelListing
         Ask = Ask,
         ForSale = ForSale,
         SellerFactionId = SellerFactionId,
+        ClaimantId = ClaimantId,
+        SourceId = SourceId,
+        DestId = DestId,
     };
 }
 
@@ -64,6 +82,7 @@ public static class IntelBook
         IntelKind.Geo => "partial minerals",
         IntelKind.Pin => "pin cleared",
         IntelKind.Jump => "jump",
+        IntelKind.Haul => "deliver",
         _ => "",
     };
 
@@ -193,6 +212,11 @@ public static class IntelBook
             reason = "That intel is not listed.";
             return false;
         }
+        if (kind == IntelKind.Haul)
+        {
+            reason = "A haul is claimed by a ship, not bought.";
+            return false;
+        }
         if (!row.ForSale)
         {
             reason = "That intel is not for sale.";
@@ -259,6 +283,91 @@ public static class IntelBook
             sellerInfo.Money.AddIncome(office.StarSysDateTime, TransactionCategory.Trade, forSeller, row.Ask);
         }
         return true;
+    }
+
+    /// <summary>
+    /// Post a haul row for a sealed shipment on the buying office. <paramref name="fee"/> is the carrier's pay.
+    /// The row is for sale until a ship claims it. Not a survey secret, so no seller check applies.
+    /// </summary>
+    internal static void PostHaul(Entity office, string shipmentId, decimal fee, int sourceId, int destId)
+    {
+        if (!office.TryGetDataBlob<LogiBaseDB>(out var book))
+            return;
+        book.Intel ??= new Dictionary<string, IntelListing>(StringComparer.Ordinal);
+        book.Intel[Key(IntelKind.Haul, shipmentId)] = new IntelListing
+        {
+            Kind = IntelKind.Haul,
+            Subject = shipmentId,
+            Ask = Math.Max(0, fee),
+            ForSale = true,
+            SellerFactionId = -1,
+            ClaimantId = -1,
+            SourceId = sourceId,
+            DestId = destId,
+        };
+    }
+
+    /// <summary>
+    /// A ship takes a posted haul. The row stops being for sale and keeps the claimant, so a second claim is rejected.
+    /// The ship's faction must trade with the buyer (the office owner) and with the seller (the source colony's owner).
+    /// </summary>
+    public static bool TryClaim(Entity office, Entity ship, string subject, out string reason)
+    {
+        reason = "";
+        if (office == null || ship == null)
+        {
+            reason = "That haul is not listed.";
+            return false;
+        }
+        if (!office.TryGetDataBlob<LogiBaseDB>(out var book) || book.Intel == null
+            || !book.Intel.TryGetValue(Key(IntelKind.Haul, subject ?? ""), out var row))
+        {
+            reason = "That haul is not listed.";
+            return false;
+        }
+        if (!row.ForSale || row.ClaimantId >= 0)
+        {
+            reason = "That haul is already claimed.";
+            return false;
+        }
+
+        var game = office.Manager?.Game;
+        if (game == null)
+        {
+            reason = "That haul is not listed.";
+            return false;
+        }
+        if (!FactionStanceRules.CanTrade(game, ship.FactionOwnerID, office.FactionOwnerID))
+        {
+            reason = "Trade is not mutual.";
+            return false;
+        }
+        if (row.SourceId >= 0 && game.GlobalManager.TryGetGlobalEntityById(row.SourceId, out var source)
+            && !FactionStanceRules.CanTrade(game, ship.FactionOwnerID, source.FactionOwnerID))
+        {
+            reason = "Trade is not mutual.";
+            return false;
+        }
+
+        row.ForSale = false;
+        row.ClaimantId = ship.Id;
+        return true;
+    }
+
+    /// <summary>
+    /// The haul goes back up for claim. A missing row is a no-op. When <paramref name="claimantId"/> is 0 or more,
+    /// only that claimant's claim is cleared.
+    /// </summary>
+    internal static void ReleaseClaim(Entity office, string subject, int claimantId = -1)
+    {
+        if (office == null || !office.TryGetDataBlob<LogiBaseDB>(out var book) || book.Intel == null)
+            return;
+        if (!book.Intel.TryGetValue(Key(IntelKind.Haul, subject ?? ""), out var row))
+            return;
+        if (claimantId >= 0 && row.ClaimantId != claimantId)
+            return;
+        row.ForSale = true;
+        row.ClaimantId = -1;
     }
 
     public static bool SellerHas(Game game, int factionId, IntelKind kind, string subject)

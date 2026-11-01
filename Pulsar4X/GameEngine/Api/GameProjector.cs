@@ -768,15 +768,27 @@ namespace Pulsar4X.Engine.Api
                     ? new IntelBook.IntelLabel { Name = row.Subject, SystemId = null }
                     : IntelBook.Describe(game, factionId, row.Kind, row.Subject, index);
                 bool owned = game != null && IntelBook.BuyerHas(game, factionId, row.Kind, row.Subject);
+                string? sourceName = null;
+                string? destName = null;
+                string rowName = label.Name;
+                string? systemId = label.SystemId;
+                if (row.Kind == IntelKind.Haul && game != null)
+                {
+                    HaulLabel(game, factionId, row, out rowName, out sourceName, out destName, out var haulSystem);
+                    systemId = haulSystem ?? systemId;
+                }
                 rows.Add(new IntelRowView(
                     row.Kind,
                     row.Subject,
-                    label.Name,
+                    rowName,
                     IntelBook.ResultTag(row.Kind),
                     row.Ask,
                     row.ForSale,
                     owned,
-                    label.SystemId));
+                    systemId,
+                    row.ClaimantId,
+                    sourceName,
+                    destName));
             }
 
             IReadOnlyList<IntelCandidateView> candidates = Array.Empty<IntelCandidateView>();
@@ -788,6 +800,33 @@ namespace Pulsar4X.Engine.Api
             }
 
             return new IntelBookView(canEdit, rows, candidates);
+        }
+
+        /// <summary>A haul row reads as its goods and where they go, from the sealed shipment at the source.</summary>
+        private static void HaulLabel(
+            Game game, int factionId, IntelListing row,
+            out string name, out string? sourceName, out string? destName, out string? systemId)
+        {
+            name = "Shipment";
+            sourceName = null;
+            destName = null;
+            systemId = null;
+            Entity? source = null;
+            if (row.SourceId >= 0 && game.GlobalManager.TryGetGlobalEntityById(row.SourceId, out var found))
+            {
+                source = found;
+                sourceName = found.GetName(factionId);
+                systemId = found.Manager is StarSystem sourceSystem ? sourceSystem.ID : null;
+            }
+            if (row.DestId >= 0 && game.GlobalManager.TryGetGlobalEntityById(row.DestId, out var dest))
+                destName = dest.GetName(factionId);
+            if (source != null && ShipmentBook.TryFind(source, row.Subject, out var shipment))
+            {
+                var goods = string.Join(", ", shipment.Lines.Select(line => $"{line.Units} {line.Held.Name}"));
+                name = $"Deliver {goods}";
+            }
+            if (sourceName != null || destName != null)
+                name += $" · {sourceName ?? "?"} → {destName ?? "?"}";
         }
 
         static Dictionary<string, int> UnknownJumpIndex(Game? game, int viewerId, List<IntelListing> rows)
@@ -899,6 +938,16 @@ namespace Pulsar4X.Engine.Api
                         case Pulsar4X.Components.ComponentDesign design:
                             kind = design.ComponentType;
                             description = design.Description;
+                            break;
+                        case ShipmentCargo shipment:
+                            kind = "Shipment";
+                            description = shipment.IsMarket
+                                ? "Sealed for delivery. Paid for, and waiting for a carrier."
+                                : "Sealed for delivery to a fleet order.";
+                            break;
+                        case SealedLineCargo:
+                            kind = "Sealed";
+                            description = "Part of a sealed shipment. It unseals on arrival.";
                             break;
                     }
 

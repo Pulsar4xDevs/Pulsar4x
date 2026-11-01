@@ -277,7 +277,11 @@ public sealed record MarketView(
 /// <summary>A cargo id the owner may add to their book.</summary>
 public sealed record MarketGoodChoice(string CargoId, string Name);
 
-/// <summary>One intel row a faction is allowed to see on an office.</summary>
+/// <summary>
+/// One intel row a faction is allowed to see on an office.
+/// A haul row (<see cref="IntelKind.Haul"/>) is a sealed shipment: <c>Ask</c> is the freight fee, <c>ClaimantId</c> is
+/// the carrying ship or -1, and <c>SourceName</c> / <c>DestName</c> name the two colonies.
+/// </summary>
 public sealed record IntelRowView(
     IntelKind Kind,
     string Subject,
@@ -286,7 +290,10 @@ public sealed record IntelRowView(
     decimal Ask,
     bool ForSale,
     bool OwnedByViewer,
-    string? SystemId) : IComponentView;
+    string? SystemId,
+    int ClaimantId = -1,
+    string? SourceName = null,
+    string? DestName = null) : IComponentView;
 
 /// <summary>A finished secret the office owner may list. Empty for a friendly viewer.</summary>
 public sealed record IntelCandidateView(

@@ -166,6 +166,8 @@ public enum IntelKind
     Geo,
     Pin,
     Jump,
+    /// <summary>A sealed shipment waiting for a carrier. <c>Subject</c> is the shipment id, <c>Ask</c> the freight fee.</summary>
+    Haul,
 }
 
 /// <summary>
@@ -192,6 +194,31 @@ public sealed record BuyIntelCommand(
     int TargetEntityId,
     string Subject,
     IntelKind Kind) : GameCommand(TargetEntityId);
+
+/// <summary>One line of a seal: a cargo unique id as the market lists it, and the units wanted.</summary>
+public sealed record SealLine(string CargoId, long Units);
+
+/// <summary>
+/// Seal goods into one shipment per cargo type at <see cref="SellerId"/>'s warehouse and post the haul on the
+/// target's office. Targets the buying office, which is the destination. The lines are cargo unique ids as the market lists them, taken from the seller's warehouse and priced by its book (the buyer's own
+/// bids when <see cref="FillBid"/>). Each line is clamped to what the book offers and the buyer can pay.
+/// <see cref="Fee"/> is the freight fee a carrier earns, shared over the shipments.
+/// </summary>
+public sealed record SealShipmentCommand(
+    int TargetEntityId,
+    int SellerId,
+    IReadOnlyList<SealLine> Items,
+    decimal Fee,
+    bool FillBid = false) : GameCommand(TargetEntityId);
+
+/// <summary>
+/// A ship claims one posted haul and is given the delivery. Targets the office that holds the row.
+/// <see cref="Subject"/> is the shipment id. A second claim on the same row is rejected.
+/// </summary>
+public sealed record ClaimHaulCommand(
+    int TargetEntityId,
+    string Subject,
+    int ShipId) : GameCommand(TargetEntityId);
 
 // ----- fleet organisation (commanded entity: the faction for create, otherwise the fleet/ship) -----
 #region Fleet Organization Commands

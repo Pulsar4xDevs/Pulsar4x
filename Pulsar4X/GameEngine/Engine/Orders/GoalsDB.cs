@@ -138,6 +138,12 @@ public enum GoalType
 
     // The fleet order behind BootstrapColony: hands crates to its ships, sub-fleets included, over as many trips as it takes.
     FleetBootstrap,
+
+    // One ship carries a sealed shipment from its source colony to its destination. Appended so saved values stay put.
+    DeliverShipment,
+
+    // The fleet order behind DeliverShipment: hands whole lines of the package to free cargo ships. Appended so saved values stay put.
+    FleetDeliverShipment,
 }
 
 public enum MoveGoodsLeg
