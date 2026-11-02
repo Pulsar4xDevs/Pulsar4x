@@ -13,5 +13,8 @@ namespace Pulsar4X.Modding
         public string PlayerFactionStartingItems { get; set; }
         public string AIFactionStartingItems { get; set; }
         public bool DefaultEnabled { get; set; } = false;
+
+        /// <summary>Namespaces of the mods this one builds on. They are always loaded before it.</summary>
+        public List<string>? Dependencies { get; set; }
     }
 }
