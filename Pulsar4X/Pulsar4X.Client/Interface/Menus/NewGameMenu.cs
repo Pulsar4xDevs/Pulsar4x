@@ -51,6 +51,10 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
 
     List<string> _enabledSystems = new ();
 
+    // The last failure from loading mods or creating the game, shown on the page so the wizard
+    // never fails silently or takes the whole client down.
+    string _errorMessage = "";
+
     int _maxSystems = DEFAULT_NUM_SYSTEMS;
     int _startingFunds = 100_000_000;
 
@@ -87,6 +91,15 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
     {
         if(!IsActive) return;
 
+        // Without an explicit size ImGui auto-fits the first frame around the empty child regions
+        // (their height is derived from the window height) and saves a tiny window to imgui.ini.
+        // Open at a usable size, and never allow a window smaller than the wizard needs.
+        var viewport = new Vector2(_uiState.ViewPort.Size.Width, _uiState.ViewPort.Size.Height);
+        var openSize = new Vector2(Math.Min(720f, viewport.X - 40f), Math.Min(560f, viewport.Y - 40f));
+        ImGui.SetNextWindowSize(openSize, ImGuiCond.Appearing);
+        ImGui.SetNextWindowPos((viewport - openSize) / 2f, ImGuiCond.Appearing);
+        ImGui.SetNextWindowSizeConstraints(new Vector2(Math.Min(480f, openSize.X), Math.Min(360f, openSize.Y)),
+            new Vector2(float.MaxValue, float.MaxValue));
         if (Window.Begin("New Game Setup", _flags | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse))
         {
             _contentRegion = ImGui.GetContentRegionAvail();
@@ -110,8 +123,19 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
                     DisplayDetailsPage();
                     break;
             }
-            Window.End();
         }
+        // ImGui needs End() even when Begin() returned false (collapsed or clipped window).
+        Window.End();
+    }
+
+    private void DisplayError()
+    {
+        if (string.IsNullOrEmpty(_errorMessage))
+            return;
+
+        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0.35f, 0.35f, 1f));
+        ImGui.TextWrapped(_errorMessage);
+        ImGui.PopStyleColor();
     }
 
     private void RefreshAvailableMods()
@@ -132,6 +156,7 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
         ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), ImGuiChildFlags.None);
 
         DisplayHelpers.Header("Select Mods to Enable");
+        DisplayError();
         if(ImGui.BeginTable("ModsList", 4, Styles.TableFlags))
         {
             ImGui.TableNextColumn();
@@ -176,10 +201,28 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
             _uiState.debugnewgame = false;
             var enabledPaths = EnabledModPaths();
 
-            // FIXME: this should show some error in the UI if no mods are selected
-            if (enabledPaths.Count > 0 && _uiState.Lifecycle != null)
+            NewGameCatalog? catalog = null;
+            if (enabledPaths.Count == 0)
             {
-                _catalog = _uiState.Lifecycle.LoadMods(enabledPaths);
+                _errorMessage = "Select at least one mod to continue.";
+            }
+            else if (_uiState.Lifecycle != null)
+            {
+                try
+                {
+                    catalog = _uiState.Lifecycle.LoadMods(enabledPaths);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"New game: failed to load mods: {ex}");
+                    _errorMessage = $"Could not load the selected mods: {ex.Message}";
+                }
+            }
+
+            if (catalog != null)
+            {
+                _catalog = catalog;
+                _errorMessage = "";
                 _selectedSpeciesId = _catalog.Species.FirstOrDefault()?.Id ?? "";
                 _selectedThemeId = _catalog.Themes.FirstOrDefault()?.Id ?? "";
                 _selectedColonyId = _catalog.Colonies.FirstOrDefault()?.Id ?? "";
@@ -259,6 +302,7 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
 
         ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), ImGuiChildFlags.None);
 
+        DisplayError();
         DisplayHelpers.Header("CORPORTATION SETUP");
         ImGui.InputText("Corporation Name", _corporationNameBuffer, NAME_BUFFER_SIZE);
         ImGui.InputText("Corporation Abbreviation", _corporationAbbreviationBuffer, SHORTNAME_BUFFER_SIZE);
@@ -428,10 +472,25 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
             SMPassword: Utils.StringFromBytes(_smPassInputbuffer),
             PlayerPassword: Utils.StringFromBytes(_passInputBuffer));
 
-        var activation = _uiState.Lifecycle.CreateNewGame(request);
-        if (activation == null) return;
+        try
+        {
+            var activation = _uiState.Lifecycle.CreateNewGame(request);
+            if (activation == null)
+            {
+                _errorMessage = "Could not create the game: the chosen system and starting location were not found.";
+                return;
+            }
 
-        _uiState.ActivateGameUI(activation);
+            _uiState.ActivateGameUI(activation);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"New game: failed to create the game: {ex}");
+            _errorMessage = $"Could not create the game: {ex.Message}";
+            return;
+        }
+
+        _errorMessage = "";
         IsActive = false;
         _currentPage = Page.SelectMods;
     }
