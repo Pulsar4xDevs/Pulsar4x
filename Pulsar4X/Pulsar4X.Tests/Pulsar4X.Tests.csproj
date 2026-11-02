@@ -90,6 +90,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
+    <!-- The new game menu path (mod loading + CreateGameCore) lives in the host; tests drive it directly. -->
+    <ProjectReference Include="..\Pulsar4X.Client.Host\Pulsar4X.Client.Host.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="mono_crash.197419f3c8.0.json" />

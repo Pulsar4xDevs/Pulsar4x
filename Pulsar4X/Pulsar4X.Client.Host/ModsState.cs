@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
@@ -45,7 +46,7 @@ public class ModsState
     {
         if(clearExistingMods) ClearModList();
 
-        foreach(var directory in Directory.GetDirectories(modsPath))
+        foreach(var directory in Directory.GetDirectories(modsPath).OrderBy(d => d, StringComparer.Ordinal))
         {
             // All mods must have a modInfo.json file that acts as the mod manifest
             var manifestPath = Path.Combine(directory, "modInfo.json");
@@ -59,7 +60,7 @@ public class ModsState
                     Console.WriteLine($"Found mod '{modManifest.ModName}' from {manifestPath}");
 #endif
                     AvailableMods.Add(new ModMetaData(manifestPath, modManifest, manifestHash));
-                    IsModEnabled.Add(modManifest.ModName, modManifest.DefaultEnabled);
+                    IsModEnabled[modManifest.ModName] = modManifest.DefaultEnabled;
                 }
             }
         }
