@@ -31,11 +31,11 @@ public static class ComponentDesignFromJson
             {
                 if(property.Value.Type == JTokenType.Integer)
                 {
-                    designer.ComponentDesignProperties[property.Key].SetValueFromInput(property.AsInt);
+                    designer.ComponentDesignProperties[property.Key].SetValueFromInput(property.AsInt, clampToTrack: false);
                 }
                 else if(property.Value.Type == JTokenType.Float)
                 {
-                    designer.ComponentDesignProperties[property.Key].SetValueFromInput(property.AsDouble);
+                    designer.ComponentDesignProperties[property.Key].SetValueFromInput(property.AsDouble, clampToTrack: false);
                 }
                 else if(property.AsString != null)
                 {
@@ -86,11 +86,11 @@ public static class ComponentDesignFromJson
                 var valueType = prop["value"];
                 if(valueType.Type == JTokenType.Integer)
                 {
-                    designer.ComponentDesignProperties[key].SetValueFromInput((int?)prop["value"] ?? 0);
+                    designer.ComponentDesignProperties[key].SetValueFromInput((int?)prop["value"] ?? 0, clampToTrack: false);
                 }
                 else if(valueType.Type == JTokenType.Float)
                 {
-                    designer.ComponentDesignProperties[key].SetValueFromInput((double?)prop["value"] ?? 0.0);
+                    designer.ComponentDesignProperties[key].SetValueFromInput((double?)prop["value"] ?? 0.0, clampToTrack: false);
                 }
                 else
                 {

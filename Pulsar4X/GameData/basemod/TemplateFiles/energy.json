@@ -405,7 +405,7 @@
         "rare-earth-elements": "[Mass] * 0.05"
       },
       "ComponentType": "Energy Generation",
-      "MountType": 1,
+      "MountType": "ShipComponent, ShipCargo",
       "IndustryTypeID": "component-construction",
       "CargoTypeID": "general-storage",
       "Properties": [

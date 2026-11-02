@@ -20,6 +20,7 @@ Costs, recipes, and time are not a plan in this folder. The philosophy is [balan
 | [Yard holds the hull](yard-holds-hull.md) | Implemented. |
 | [Ship refit](ship-refit.md) | Implemented. |
 | [Stations](stations.md) | Not started. Do not build until asked. |
+| [Prefab facilities](prefab-facilities.md) | Implemented. Crate and site twins, and infrastructure windows for Mars, Luna, and Ceres. |
 
 ## What already runs, and is not a goal
 

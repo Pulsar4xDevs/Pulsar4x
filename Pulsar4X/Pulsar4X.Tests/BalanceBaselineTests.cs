@@ -60,15 +60,15 @@ public class BalanceBaselineTests
             Assert.That(miner.GetAttribute<MineResourcesAtbDB>().ResourcesPerEconTick["iron"], Is.EqualTo(500));
 
             var factory = Design(faction, data, "factory");
-            Assert.That(factory.MassPerUnit, Is.EqualTo(5000));
+            Assert.That(factory.MassPerUnit, Is.EqualTo(2000));
             Assert.That(factory.IndustryPointCosts, Is.EqualTo(45000));
-            Assert.That(factory.CrewReq, Is.EqualTo(500));
-            Assert.That(factory.ResourceCosts["iron"], Is.EqualTo(3750));
+            Assert.That(factory.CrewReq, Is.EqualTo(40));
+            Assert.That(factory.ResourceCosts["iron"], Is.EqualTo(300));
 
             var yard = Design(faction, data, "shipyard");
             Assert.That(yard.MassPerUnit, Is.EqualTo(800000));
-            Assert.That(yard.IndustryPointCosts, Is.EqualTo(200000));
-            Assert.That(yard.GetAttribute<ConstructionAtb>().ConstructionPoints["ship-refit"], Is.EqualTo(5));
+            Assert.That(yard.IndustryPointCosts, Is.EqualTo(20000));
+            Assert.That(yard.GetAttribute<ConstructionAtb>().ConstructionPoints["ship-refit"], Is.EqualTo(10));
 
             var academy = Design(faction, data, "naval-academy");
             Assert.That(academy.MassPerUnit, Is.EqualTo(90000));

@@ -53,6 +53,8 @@ namespace Pulsar4X.Components
                         return (int)val;
                     case float val:
                         return (int)val;
+                    case decimal val:
+                        return (int)val;
                     case long val:
                         return Convert.ToInt32(val);
                     case int val:
@@ -83,6 +85,8 @@ namespace Pulsar4X.Components
                     case double val:
                         return (long)val;
                     case float val:
+                        return (long)val;
+                    case decimal val:
                         return (long)val;
                     case int val:
                         return Convert.ToInt64(val);
@@ -115,6 +119,8 @@ namespace Pulsar4X.Components
                         return val;
                     case float val:
                         return val;
+                    case decimal val:
+                        return (double)val;
                     case int val:
                         return val;
                     default:

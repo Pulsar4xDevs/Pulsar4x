@@ -9,21 +9,19 @@
         "Mass": "PropertyValue('Area') * 0.05",
         "Volume": "PropertyValue('Area') * 0.01",
         "HTK": "0.5",
-        "CrewReq": "PropertyValue('Area') * 0.005",
+        "CrewReq": "PropertyValue('Area') * 0.008",
         "ResearchCost": "0",
         "CreditCost": "120",
         "BuildPointCost": "[Mass]"
       },
       "ResourceCost": {
-        "iron": "[Mass] * 0.35",
-        "aluminium": "[Mass] * 0.2",
+        "iron": "[Mass] * 0.45",
+        "space-crete": "[Mass] * 0.20",
+        "stainless-steel": "[Mass] * 0.10",
+        "silicon": "[Mass] * 0.10",
+        "aluminium": "[Mass] * 0.05",
         "copper": "[Mass] * 0.05",
-        "tungsten": "[Mass] * 0.05",
-        "silicon": "[Mass] * 0.1",
-        "graphite": "[Mass] * 0.05",
-        "nickel": "[Mass] * 0.1",
-        "stainless-steel": "[Mass] * 0.05",
-        "space-crete": "[Mass] * 0.05"
+        "graphite": "[Mass] * 0.05"
       },
       "ComponentType": "Facility",
       "MountType": "PlanetInstallation",
@@ -76,10 +74,10 @@
     "Type": "ComponentTemplate",
     "Payload": {
       "UniqueID": "automine",
-      "Name": "RoboMiner",
+      "Name": "Prefab RoboMiner",
       "Formulas": {
-        "Description": "An unmanned, transportable resources collector",
-        "Mass": "PropertyValue('Size') * 2000.0",
+        "Description": "A freightable unmanned resources collector. The site mine is the heavier twin.",
+        "Mass": "PropertyValue('Size') * 800",
         "Volume": "PropertyValue('Size')",
         "HTK": "0.5",
         "CrewReq": "0",
@@ -88,13 +86,13 @@
         "BuildPointCost": "[Mass]"
       },
       "ResourceCost": {
-        "iron": "[Mass] * 0.2",
-        "aluminium": "[Mass] * 0.4",
+        "iron": "[Mass] * 0.10",
+        "aluminium": "[Mass] * 0.35",
+        "titanium": "[Mass] * 0.30",
+        "silicon": "[Mass] * 0.10",
         "copper": "[Mass] * 0.05",
-        "titanium": "[Mass] * 0.2",
-        "silicon": "[Mass] * 0.1",
-        "graphite": "[Mass] * 0.05",
-        "plastic": "[Mass] * 0.05"
+        "plastic": "[Mass] * 0.05",
+        "rare-earth-elements": "[Mass] * 0.05"
       },
       "ComponentType": "Facility",
       "MountType": "ShipCargo, PlanetInstallation",
@@ -207,19 +205,20 @@
         "Mass": "100000",
         "Volume": "1000",
         "HTK": "0.5",
-        "CrewReq": "20",
+        "CrewReq": "80",
         "ResearchCost": "10",
         "CreditCost": "120",
-        "BuildPointCost": "[Mass] / 2"
+        "BuildPointCost": "10000"
       },
       "ResourceCost": {
-        "iron": "[Mass] * 0.75",
-        "aluminium": "[Mass] * 0.2",
+        "iron": "[Mass] * 0.50",
+        "space-crete": "[Mass] * 0.30",
+        "stainless-steel": "[Mass] * 0.15",
         "copper": "[Mass] * 0.05"
       },
       "ComponentType":"Facility",
-      "MountType": "ShipCargo, PlanetInstallation",
-      "CargoTypeID": "general-storage",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
@@ -255,21 +254,23 @@
     "Type": "ComponentTemplate",
     "Payload": {
       "UniqueID": "refinery",
-      "Name": "Refinery",
+      "Name": "Prefab Refinery",
       "Formulas": {
-        "Description": "An installation designed to refine base minerals into materials",
-        "Mass": "PropertyValue('Size')",
+        "Description": "A freightable refinery. The site refinery is the heavier twin.",
+        "Mass": "PropertyValue('Size') * 0.4",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "[Mass] * 0.1",
+        "CrewReq": "[Mass] * 0.02",
         "ResearchCost": "0",
         "CreditCost": "120",
         "BuildPointCost": "[Mass]"
       },
       "ResourceCost": {
-        "iron": "[Mass] * 0.75",
-        "aluminium": "[Mass] * 0.2",
-        "copper": "[Mass] * 0.05"
+        "iron": "[Mass] * 0.15",
+        "aluminium": "[Mass] * 0.25",
+        "titanium": "[Mass] * 0.35",
+        "stainless-steel": "[Mass] * 0.15",
+        "copper": "[Mass] * 0.10"
       },
       "ComponentType": "Facility",
       "MountType": "ShipCargo, PlanetInstallation",
@@ -307,22 +308,78 @@
   {
     "Type": "ComponentTemplate",
     "Payload": {
-      "UniqueID": "factory",
-      "Name": "Factory",
+      "UniqueID": "refinery-site",
+      "Name": "Refinery",
       "Formulas": {
-        "Description": "Constructs Facilities, Fighters, Ammo and Components",
-        "Mass": "PropertyValue('Size')",
+        "Description": "A site-built refinery. Assembled in place. It cannot be freighted.",
+        "Mass": "PropertyValue('Size') * 2.5",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "[Mass] * 0.1",
+        "CrewReq": "[Mass] * 0.08",
+        "ResearchCost": "0",
+        "CreditCost": "120",
+        "BuildPointCost": "8000"
+      },
+      "ResourceCost": {
+        "iron": "[Mass] * 0.50",
+        "space-crete": "[Mass] * 0.30",
+        "stainless-steel": "[Mass] * 0.15",
+        "copper": "[Mass] * 0.05"
+      },
+      "ComponentType": "Facility",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Size",
+          "DescriptionFormula": "'Size of this installation'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "10000",
+          "MinFormula": "1000",
+          "StepFormula": "50",
+          "PropertyFormula": "5000"
+        },
+        {
+          "Name": "Refinery Points",
+          "DescriptionFormula": "'Refines at a rate of'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Size') * 0.1"
+        },
+        {
+          "Name": "RefineAbilitys",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "DataDict": {
+            "refining": "PropertyValue('Refinery Points')"
+          },
+          "PropertyFormula": "AtbConstrArgs([GuidDict])",
+          "AttributeType": "Pulsar4X.Industry.IndustryAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "factory",
+      "Name": "Prefab Factory",
+      "Formulas": {
+        "Description": "A freightable factory. The site factory is the heavier twin.",
+        "Mass": "PropertyValue('Size') * 0.4",
+        "Volume": "[Mass]",
+        "HTK": "0.5",
+        "CrewReq": "[Mass] * 0.02",
         "ResearchCost": "0",
         "CreditCost": "120",
         "BuildPointCost": "PropertyValue('Size') * 9"
       },
       "ResourceCost": {
-        "iron": "[Mass] * 0.75",
-        "aluminium": "[Mass] * 0.2",
-        "copper": "[Mass] * 0.05"
+        "iron": "[Mass] * 0.15",
+        "aluminium": "[Mass] * 0.25",
+        "titanium": "[Mass] * 0.35",
+        "stainless-steel": "[Mass] * 0.15",
+        "copper": "[Mass] * 0.10"
       },
       "ComponentType": "Facility",
       "MountType": "ShipCargo, PlanetInstallation",
@@ -377,6 +434,78 @@
   {
     "Type": "ComponentTemplate",
     "Payload": {
+      "UniqueID": "factory-site",
+      "Name": "Factory",
+      "Formulas": {
+        "Description": "A site-built factory. Assembled in place. It cannot be freighted.",
+        "Mass": "PropertyValue('Size') * 2.5",
+        "Volume": "[Mass]",
+        "HTK": "0.5",
+        "CrewReq": "[Mass] * 0.08",
+        "ResearchCost": "0",
+        "CreditCost": "120",
+        "BuildPointCost": "8000"
+      },
+      "ResourceCost": {
+        "iron": "[Mass] * 0.50",
+        "space-crete": "[Mass] * 0.30",
+        "stainless-steel": "[Mass] * 0.15",
+        "copper": "[Mass] * 0.05"
+      },
+      "ComponentType": "Facility",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Size",
+          "DescriptionFormula": "'Mass of the factory in kilograms. Larger factories produce more construction points'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "TechData('tech-factory-max-size')",
+          "MinFormula": "1000",
+          "StepFormula": "50",
+          "PropertyFormula": "5000"
+        },
+        {
+          "Name": "Component Construction Points",
+          "DescriptionFormula": "'Daily production towards components'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Size') * 0.1"
+        },
+        {
+          "Name": "Installation Construction Points",
+          "DescriptionFormula": "'Daily production towards installations'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Size') * 0.1"
+        },
+        {
+          "Name": "Fighter Construction Points",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0"
+        },
+        {
+          "Name": "Ordnance Construction Points",
+          "DescriptionFormula": "'Daily production towards ordnance'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Size') * 0.1"
+        },
+        {
+          "Name": "Construction Points",
+          "GuiHint": "None",
+          "DataDict": {
+            "component-construction": "PropertyValue('Component Construction Points')",
+            "installation-construction": "PropertyValue('Installation Construction Points')",
+            "ordnance-construction": "PropertyValue('Ordnance Construction Points')"
+          },
+          "PropertyFormula": "AtbConstrArgs([GuidDict])",
+          "AttributeType": "Pulsar4X.Industry.IndustryAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
       "UniqueID": "shipyard",
       "Name": "Ship Yard",
       "Formulas": {
@@ -387,18 +516,17 @@
         "CrewReq": "PropertyValue('Crew Size')",
         "ResearchCost": "0",
         "CreditCost": "120",
-        "BuildPointCost": "[Mass] * 0.25"
+        "BuildPointCost": "20000"
       },
       "ResourceCost": {
-        "iron": "[Mass] * 0.5",
-        "aluminium": "[Mass] * 0.2",
-        "copper": "[Mass] * 0.1",
-        "plastic": "[Mass] * 0.1",
-        "stainless-steel": "[Mass] * 0.1"
+        "iron": "[Mass] * 0.50",
+        "space-crete": "[Mass] * 0.30",
+        "stainless-steel": "[Mass] * 0.15",
+        "copper": "[Mass] * 0.05"
       },
       "ComponentType":"Facility",
-      "MountType": "ShipCargo, PlanetInstallation",
-      "CargoTypeID": "general-storage",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
@@ -427,7 +555,7 @@
           "MaxFormula": "1000000",
           "MinFormula": "1000",
           "StepFormula": "1000",
-          "PropertyFormula": "10000"
+          "PropertyFormula": "20000"
         },
         {
           "Name": "Refit Points",
@@ -460,23 +588,22 @@
     "Type": "ComponentTemplate",
     "Payload": {
       "UniqueID": "logistics-office",
-      "Name": "Logistics Office",
+      "Name": "Prefab Logistics Office",
       "Formulas": {
-        "Description": "Handles import and Export of goods",
-        "Mass": "5000",
+        "Description": "A freightable office for import and export. The site office handles more goods.",
+        "Mass": "2000",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "10",
+        "CrewReq": "4",
         "ResearchCost": "0",
         "CreditCost": "120",
         "BuildPointCost": "[Mass]"
       },
       "ResourceCost": {
-        "iron": "[Mass] * 0.5",
-        "aluminium": "[Mass] * 0.2",
-        "copper": "[Mass] * 0.1",
-        "plastic": "[Mass] * 0.1",
-        "stainless-steel": "[Mass] * 0.1"
+        "aluminium": "[Mass] * 0.40",
+        "titanium": "[Mass] * 0.30",
+        "plastic": "[Mass] * 0.20",
+        "copper": "[Mass] * 0.10"
       },
       "ComponentType":"Facility",
       "MountType": "ShipCargo, PlanetInstallation",
@@ -488,7 +615,7 @@
           "DescriptionFormula": "'How many different items this office can handle'",
           "GuiHint": "GuiSelectionMaxMin",
           "DataDict": {},
-          "MaxFormula": "100",
+          "MaxFormula": "10",
           "MinFormula": "5",
           "StepFormula": "5",
           "PropertyFormula": "5"
@@ -502,7 +629,51 @@
       ]
     }
   },
-
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "logistics-office-site",
+      "Name": "Logistics Office",
+      "Formulas": {
+        "Description": "A site-built office for import and export. Assembled in place. It cannot be freighted.",
+        "Mass": "25000",
+        "Volume": "[Mass]",
+        "HTK": "0.5",
+        "CrewReq": "40",
+        "ResearchCost": "0",
+        "CreditCost": "120",
+        "BuildPointCost": "8000"
+      },
+      "ResourceCost": {
+        "iron": "[Mass] * 0.50",
+        "space-crete": "[Mass] * 0.30",
+        "stainless-steel": "[Mass] * 0.15",
+        "copper": "[Mass] * 0.05"
+      },
+      "ComponentType":"Facility",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Logistic Capacity",
+          "DescriptionFormula": "'How many different items this office can handle'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "DataDict": {},
+          "MaxFormula": "80",
+          "MinFormula": "10",
+          "StepFormula": "5",
+          "PropertyFormula": "20"
+        },
+        {
+          "Name": "db",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Logistic Capacity'))",
+          "AttributeType": "Pulsar4X.Logistics.LogiBaseAtb"
+        }
+      ]
+    }
+  },
   {
     "Type": "ComponentTemplate",
     "Payload": {
@@ -672,23 +843,22 @@
     "Type": "ComponentTemplate",
     "Payload": {
       "UniqueID": "planetary-spaceport-crate",
-      "Name": "Planetary Spaceport Complex (Crate)",
+      "Name": "Prefab Spaceport",
       "Formulas": {
-        "Description": "A generic does everything space facility, built as a crate so a ship can carry it to a colony and mount it there",
-        "Mass": "PropertyValue('Warehouse Size')",
+        "Description": "A freightable cargo transfer point. It moves cargo and does not store it.",
+        "Mass": "2000",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "PropertyValue('Size Efficiency') * 0.1",
+        "CrewReq": "4",
         "ResearchCost": "0",
         "CreditCost": "120",
         "BuildPointCost": "[Mass]"
       },
       "ResourceCost": {
-        "iron": "[Mass] * 0.5",
-        "aluminium": "[Mass] * 0.2",
-        "copper": "[Mass] * 0.1",
-        "plastic": "[Mass] * 0.1",
-        "stainless-steel": "[Mass] * 0.1"
+        "aluminium": "[Mass] * 0.40",
+        "titanium": "[Mass] * 0.35",
+        "stainless-steel": "[Mass] * 0.15",
+        "copper": "[Mass] * 0.10"
       },
       "ComponentType":"Facility",
       "MountType": "ShipCargo, PlanetInstallation",
@@ -696,60 +866,30 @@
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
-          "Name": "Warehouse Size",
-          "DescriptionFormula": "''",
-          "GuiHint": "GuiSelectionMaxMin",
-          "DataDict": {},
-          "MaxFormula": "1000000",
-          "MinFormula": "100",
-          "StepFormula": "100",
-          "PropertyFormula": "50000"
-        },
-        {
-          "Name": "Size Efficiency",
-          "DescriptionFormula": "'The amount of tonnage taken up by racking, office space etc.'",
-          "GuiHint": "GuiTextDisplay",
-          "DataDict": {},
-          "PropertyFormula": "PropertyValue('Warehouse Size') * 0.01"
-        },
-        {
           "Name": "Cargo Transfer Rate",
-          "DescriptionFormula": "'How much cargo can be transfered per secong in kg.'",
+          "DescriptionFormula": "'How much cargo can be transfered per second in kg.'",
           "GuiHint": "GuiSelectionMaxMin",
           "DataDict": {},
-          "MaxFormula": "10000",
+          "MaxFormula": "50",
           "MinFormula": "1",
-          "StepFormula": "10",
-          "PropertyFormula": "5"
+          "StepFormula": "1",
+          "PropertyFormula": "20"
         },
         {
           "Name": "Transfer Range",
           "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
           "GuiHint": "GuiSelectionMaxMin",
           "DataDict": {},
-          "MaxFormula": "1000000",
+          "MaxFormula": "2000",
           "MinFormula": "100",
           "StepFormula": "100",
-          "PropertyFormula": "50000"
-        },
-        {
-          "Name": "Total Cargo Stored",
-          "DescriptionFormula": "'The volume of cargo this can store.'",
-          "GuiHint": "GuiTextDisplay",
-          "DataDict": {},
-          "PropertyFormula": "PropertyValue('Warehouse Size') - PropertyValue('Size Efficiency') - PropertyValue('Cargo Transfer Rate')"
+          "PropertyFormula": "1000"
         },
         {
           "Name": "DBargsTransfer",
           "GuiHint": "None",
           "PropertyFormula": "AtbConstrArgs(PropertyValue('Cargo Transfer Rate'), PropertyValue('Transfer Range'))",
           "AttributeType": "Pulsar4X.Storage.CargoTransferAtb"
-        },
-        {
-          "Name": "DBargsStorage",
-          "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs('general-storage', PropertyValue('Total Cargo Stored'))",
-          "AttributeType": "Pulsar4X.Storage.CargoStorageAtb"
         }
       ]
     }
@@ -758,23 +898,22 @@
     "Type": "ComponentTemplate",
     "Payload": {
       "UniqueID": "infrastructure",
-      "Name": "Infrastructure",
+      "Name": "Prefab Infrastructure",
       "Formulas": {
-        "Description": "The underlying support a colony needs to function: power, roads, utilities and housing. Provides the support capacity that every other installation on the body draws on, and houses colonists on hostile worlds.",
-        "Mass": "1000",
+        "Description": "A freightable colony support crate: power, roads, utilities, housing, and a small warehouse. An empty colony mounts this to get its first storage. The site template is the heavier twin and stores nothing.",
+        "Mass": "400",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "10",
+        "CrewReq": "4",
         "ResearchCost": "0",
         "CreditCost": "0",
         "BuildPointCost": "100"
       },
       "ResourceCost": {
-        "iron": "[Mass] * 0.5",
-        "aluminium": "[Mass] * 0.2",
-        "copper": "[Mass] * 0.1",
-        "plastic": "[Mass] * 0.1",
-        "stainless-steel": "[Mass] * 0.1"
+        "iron": "[Mass] * 0.2",
+        "aluminium": "[Mass] * 0.1",
+        "titanium": "[Mass] * 0.35 * (PropertyValue('Max Gravity') - PropertyValue('Min Gravity')) / 1.962",
+        "tungsten": "[Mass] * 0.15 * (PropertyValue('Max Pressure') - PropertyValue('Min Pressure')) / 0.2"
       },
       "ComponentType":"Infrastructure",
       "MountType": "ShipCargo, PlanetInstallation",
@@ -785,47 +924,47 @@
           "Name": "Support Colonists",
           "DescriptionFormula": "'Population supported when the gravity and atmosphere of the body fall within tolerance. Out-of-tolerance bodies receive no support from this design.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "500"
+          "PropertyFormula": "200"
         },
         {
           "Name": "Storage Amount",
           "DescriptionFormula": "'The amount of space that is dedicated to storage space. '",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "500"
+          "PropertyFormula": "200"
         },
         {
           "Name": "Support Capacity",
           "DescriptionFormula": "'Support capacity each unit of this infrastructure provides to the colony. Other installations consume this capacity; if demand exceeds supply all colony output is reduced. Only counts on bodies within the gravity and pressure tolerances below.'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "1000"
+          "PropertyFormula": "400"
         },
         {
           "Name": "Min Gravity",
           "DescriptionFormula": "'Surface gravity range (m/s²) this infrastructure can operate in. Earth standard is 9.81 m/s². Drag the left/right handles to set the bounds; drag the bar between them to shift the whole range.'",
           "GuiHint": "GuiSelectionMinMaxRange",
           "PairedPropertyName": "Max Gravity",
-          "MaxFormula": "Min(100, 9.81 * (1.0 + TechData('tech-infra-gravity-range') + TechData('tech-infra-gravity-max-extension')))",
-          "MinFormula": "Max(0, 9.81 * (1.0 - TechData('tech-infra-gravity-range') - TechData('tech-infra-gravity-min-extension')))",
+          "MaxFormula": "Min(100, 9.81 * (1.0 + 0.1 + TechData('tech-infra-gravity-max-extension')))",
+          "MinFormula": "Max(0, 9.81 * (1.0 - 0.1 - TechData('tech-infra-gravity-min-extension')))",
           "MaxRangeFormula": "9.81 * 2.0 * TechData('tech-infra-gravity-range')",
           "StepFormula": "0.1",
-          "PropertyFormula": "8.8"
+          "PropertyFormula": "8.829"
         },
         {
           "Name": "Max Gravity",
           "DescriptionFormula": "'Upper bound of the gravity operating range. Configured via the Min Gravity range slider.'",
           "GuiHint": "None",
-          "MaxFormula": "Min(100, 9.81 * (1.0 + TechData('tech-infra-gravity-range') + TechData('tech-infra-gravity-max-extension')))",
-          "MinFormula": "Max(0, 9.81 * (1.0 - TechData('tech-infra-gravity-range') - TechData('tech-infra-gravity-min-extension')))",
+          "MaxFormula": "Min(100, 9.81 * (1.0 + 0.1 + TechData('tech-infra-gravity-max-extension')))",
+          "MinFormula": "Max(0, 9.81 * (1.0 - 0.1 - TechData('tech-infra-gravity-min-extension')))",
           "StepFormula": "0.1",
-          "PropertyFormula": "10.8"
+          "PropertyFormula": "10.791"
         },
         {
           "Name": "Min Pressure",
           "DescriptionFormula": "'Atmospheric pressure range (Earth atmospheres) this infrastructure can operate in. Drag the handles to set the bounds; drag the bar between them to shift the whole range.'",
           "GuiHint": "GuiSelectionMinMaxRange",
           "PairedPropertyName": "Max Pressure",
-          "MaxFormula": "1.0 + TechData('tech-infra-pressure-range') + TechData('tech-infra-pressure-max-extension')",
-          "MinFormula": "Max(0, 1.0 - TechData('tech-infra-pressure-range') - TechData('tech-infra-pressure-min-extension'))",
+          "MaxFormula": "Min(10, 1.15 + TechData('tech-infra-pressure-max-extension'))",
+          "MinFormula": "Max(0, 0.85 - TechData('tech-infra-pressure-min-extension'))",
           "MaxRangeFormula": "2.0 * TechData('tech-infra-pressure-range')",
           "StepFormula": "0.1",
           "PropertyFormula": "0.9"
@@ -834,8 +973,8 @@
           "Name": "Max Pressure",
           "DescriptionFormula": "'Upper bound of the pressure operating range. Configured via the Min Pressure range slider.'",
           "GuiHint": "None",
-          "MaxFormula": "1.0 + TechData('tech-infra-pressure-range') + TechData('tech-infra-pressure-max-extension')",
-          "MinFormula": "Max(0, 1.0 - TechData('tech-infra-pressure-range') - TechData('tech-infra-pressure-min-extension'))",
+          "MaxFormula": "Min(10, 1.15 + TechData('tech-infra-pressure-max-extension'))",
+          "MinFormula": "Max(0, 0.85 - TechData('tech-infra-pressure-min-extension'))",
           "StepFormula": "0.1",
           "PropertyFormula": "1.1"
         },
@@ -883,55 +1022,118 @@
   {
     "Type": "ComponentTemplate",
     "Payload": {
-      "UniqueID": "space-port",
-      "Name": "Space Port",
+      "UniqueID": "infrastructure-site",
+      "Name": "Infrastructure",
       "Formulas": {
-        "Description": "Facilities for transfering cargo",
-        "Mass": "500000",
+        "Description": "Site-built colony support. Assembled in place. The gravity and pressure windows are the same width as the prefab, on a track that runs the full range, so a site can be aimed at any body a prefab can. Cost rises as the window moves away from Earth. It does not store cargo. The prefab crate is what gives an empty colony its first warehouse.",
+        "Mass": "20000",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "1000000",
+        "CrewReq": "80",
         "ResearchCost": "0",
-        "CreditCost": "120",
-        "BuildPointCost": "[Mass]"
+        "CreditCost": "0",
+        "BuildPointCost": "5000"
       },
       "ResourceCost": {
-        "iron": "[Mass] * 0.5",
-        "aluminium": "[Mass] * 0.2",
-        "copper": "[Mass] * 0.1",
-        "plastic": "[Mass] * 0.1",
-        "stainless-steel": "[Mass] * 0.1"
+        "iron": "[Mass] * 0.45 * PropertyValue('Hostility')",
+        "space-crete": "[Mass] * 0.25 * PropertyValue('Hostility')",
+        "stainless-steel": "[Mass] * 0.15 * PropertyValue('Hostility')",
+        "copper": "[Mass] * 0.05 * PropertyValue('Hostility')"
       },
-      "ComponentType":"Facility",
-      "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
-      "CargoTypeID": "general-storage",
+      "ComponentType":"Infrastructure",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
-          "Name": "Cargo Transfer Rate",
-          "DescriptionFormula": "'How much cargo can be transfered per second in kg.'",
-          "GuiHint": "GuiSelectionMaxMin",
-          "DataDict": {},
-          "MaxFormula": "10000",
-          "MinFormula": "1",
-          "StepFormula": "10",
-          "PropertyFormula": "5"
+          "Name": "Support Colonists",
+          "DescriptionFormula": "'Population supported when the gravity and atmosphere of the body fall within tolerance. Out-of-tolerance bodies receive no support from this design.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "4000"
         },
         {
-          "Name": "Transfer Range",
-          "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
-          "GuiHint": "GuiSelectionMaxMin",
-          "DataDict": {},
-          "MaxFormula": "1000000",
-          "MinFormula": "100",
-          "StepFormula": "100",
-          "PropertyFormula": "50000"
+          "Name": "Support Capacity",
+          "DescriptionFormula": "'Support capacity each unit of this infrastructure provides to the colony. Other installations consume this capacity; if demand exceeds supply all colony output is reduced. Only counts on bodies within the gravity and pressure tolerances below.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "8000"
         },
         {
-          "Name": "db",
+          "Name": "Min Gravity",
+          "DescriptionFormula": "'Surface gravity range (m/s²). The track runs from 0 to 100. The window is the same width as the prefab. Drag the handles or the bar.'",
+          "GuiHint": "GuiSelectionMinMaxRange",
+          "PairedPropertyName": "Max Gravity",
+          "MaxFormula": "100",
+          "MinFormula": "0",
+          "MaxRangeFormula": "9.81 * 2.0 * TechData('tech-infra-gravity-range')",
+          "StepFormula": "0.1",
+          "PropertyFormula": "9.6"
+        },
+        {
+          "Name": "Max Gravity",
+          "DescriptionFormula": "'Upper bound of the gravity operating range.'",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(PropertyValue('Cargo Transfer Rate'), PropertyValue('Transfer Range'))",
-          "AttributeType": "Pulsar4X.Storage.CargoTransferAtb"
+          "MaxFormula": "100",
+          "MinFormula": "0",
+          "StepFormula": "0.1",
+          "PropertyFormula": "10.0"
+        },
+        {
+          "Name": "Min Pressure",
+          "DescriptionFormula": "'Atmospheric pressure range (Earth atmospheres). The track runs from 0 to 10. The window is the same width as the prefab.'",
+          "GuiHint": "GuiSelectionMinMaxRange",
+          "PairedPropertyName": "Max Pressure",
+          "MaxFormula": "10",
+          "MinFormula": "0",
+          "MaxRangeFormula": "2.0 * TechData('tech-infra-pressure-range')",
+          "StepFormula": "0.1",
+          "PropertyFormula": "0.9"
+        },
+        {
+          "Name": "Max Pressure",
+          "DescriptionFormula": "'Upper bound of the pressure operating range.'",
+          "GuiHint": "None",
+          "MaxFormula": "10",
+          "MinFormula": "0",
+          "StepFormula": "0.1",
+          "PropertyFormula": "1.1"
+        },
+        {
+          "Name": "Hostility",
+          "DescriptionFormula": "'Cost multiplier. Earth-centered is about 1. A window far from 9.81 m/s² and 1 atm costs more.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "1 + Abs((PropertyValue('Min Gravity') + PropertyValue('Max Gravity')) / 2 - 9.81) / 9.81 + Abs((PropertyValue('Min Pressure') + PropertyValue('Max Pressure')) / 2 - 1)"
+        },
+        {
+          "Name": "DBargsPopSupport",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Support Colonists'))",
+          "AttributeType": "Pulsar4X.Galaxy.PopulationSupportAtbDB"
+        },
+        {
+          "Name": "DBargsCapacity",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Support Capacity'))",
+          "AttributeType": "Pulsar4X.Industry.InfrastructureCapacityAtb"
+        },
+        {
+          "Name": "DBargsGravity",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Min Gravity'), PropertyValue('Max Gravity'))",
+          "AttributeType": "Pulsar4X.Galaxy.GravityToleranceAtb"
+        },
+        {
+          "Name": "DBargsPressure",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Min Pressure'), PropertyValue('Max Pressure'))",
+          "AttributeType": "Pulsar4X.Galaxy.PressureToleranceAtb"
+        },
+        {
+          "Name": "Sensor Signature",
+          "Units": "unknown",
+          "DescriptionFormula": "'Placeholder emission so a colony can be picked up by the starting passive sensor. Not balanced.'",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(1e9, 470, 345, 725)",
+          "AttributeType": "Pulsar4X.Sensors.SensorSignatureAtb"
         }
       ]
     }
@@ -995,27 +1197,73 @@
     "Type": "ComponentTemplate",
     "Payload": {
       "UniqueID": "local-construction",
-      "Name": "Construction Services",
+      "Name": "Prefab Construction Office",
       "Formulas": {
-        "Description": "Provides construction points for construction projects at this colony",
-        "Mass": "PropertyValue('Level') * 5000",
+        "Description": "A freightable construction office. Each level gives five installation points a day. The site office is heavier and gives eight.",
+        "Mass": "PropertyValue('Level') * 2000",
         "Volume": "[Mass] * 0.1",
         "HTK": "1.0",
-        "CrewReq": "PropertyValue('Level') * 55",
+        "CrewReq": "PropertyValue('Level') * 10",
         "ResearchCost": "0",
         "CreditCost": "0",
         "BuildPointCost": "PropertyValue('Level') * 200"
       },
       "ResourceCost": {
-        "iron": "[Mass] * 0.6",
-        "aluminium": "[Mass] * 0.1",
-        "copper": "[Mass] * 0.1",
-        "plastic": "[Mass] * 0.1",
-        "stainless-steel": "[Mass] * 0.1"
+        "aluminium": "[Mass] * 0.35",
+        "titanium": "[Mass] * 0.30",
+        "stainless-steel": "[Mass] * 0.20",
+        "copper": "[Mass] * 0.15"
       },
       "ComponentType": "Facility",
       "MountType": "ShipCargo, PlanetInstallation",
       "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Level",
+          "DescriptionFormula": "'Level of construction services provided, each level provides additional construction points per day.'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "5",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "PropertyFormula": "1"
+        },
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "DataDict": {
+            "installation": "PropertyValue('Level') * 5"
+          },
+          "PropertyFormula": "AtbConstrArgs([GuidDict])",
+          "AttributeType": "Pulsar4X.Industry.ConstructionAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "local-construction-site",
+      "Name": "Construction Office",
+      "Formulas": {
+        "Description": "A site-built construction office. Assembled in place. Each level gives eight installation points a day.",
+        "Mass": "PropertyValue('Level') * 15000",
+        "Volume": "[Mass] * 0.1",
+        "HTK": "1.0",
+        "CrewReq": "PropertyValue('Level') * 80",
+        "ResearchCost": "0",
+        "CreditCost": "0",
+        "BuildPointCost": "PropertyValue('Level') * 2000"
+      },
+      "ResourceCost": {
+        "iron": "[Mass] * 0.50",
+        "space-crete": "[Mass] * 0.30",
+        "stainless-steel": "[Mass] * 0.15",
+        "copper": "[Mass] * 0.05"
+      },
+      "ComponentType": "Facility",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
@@ -1031,7 +1279,7 @@
           "Name": "DBargs",
           "GuiHint": "None",
           "DataDict": {
-            "installation": "PropertyValue('Level') * 5"
+            "installation": "PropertyValue('Level') * 8"
           },
           "PropertyFormula": "AtbConstrArgs([GuidDict])",
           "AttributeType": "Pulsar4X.Industry.ConstructionAtb"

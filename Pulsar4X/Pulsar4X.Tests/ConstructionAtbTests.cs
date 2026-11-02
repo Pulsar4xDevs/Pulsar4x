@@ -33,6 +33,7 @@ public class ConstructionAtbTests
         info.Data.Unlock("local-construction");
         info.Data.Unlock("iron");
         info.Data.Unlock("aluminium");
+        info.Data.Unlock("titanium");
         info.Data.Unlock("copper");
         info.Data.Unlock("plastic");
         info.Data.Unlock("stainless-steel");
@@ -65,7 +66,7 @@ public class ConstructionAtbTests
         var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
         var faction = FactionFactory.CreateBasicFaction(game, "Port", "PRT", 0);
         var info = faction.GetDataBlob<FactionInfoDB>();
-        foreach (var id in new[] { "planetary-spaceport-crate", "iron", "aluminium", "copper", "plastic", "stainless-steel" })
+        foreach (var id in new[] { "planetary-spaceport-crate", "iron", "aluminium", "titanium", "copper", "plastic", "stainless-steel" })
             info.Data.Unlock(id);
 
         ComponentDesigner.StartResearched = true;
@@ -126,7 +127,7 @@ public class ConstructionAtbTests
         var yard = info.ComponentDesigns["default-design-shipyard"];
         var refit = yard.GetAttribute<ConstructionAtb>();
         Assert.That(refit.ConstructionPoints.Keys, Is.EquivalentTo(new[] { "ship-refit" }));
-        Assert.That(refit.ConstructionPoints["ship-refit"], Is.EqualTo(5));
+        Assert.That(refit.ConstructionPoints["ship-refit"], Is.EqualTo(10));
         var industry = yard.GetAttribute<IndustryAtb>();
         Assert.That(industry.IndustryPoints.Keys, Is.EquivalentTo(new[] { "component-construction", "ship-assembly" }));
 

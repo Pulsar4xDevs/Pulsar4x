@@ -3,10 +3,10 @@
     "Type": "ComponentTemplate",
     "Payload": {
       "UniqueID": "warehouse-facility",
-      "Name": "Warehouse faciliy",
+      "Name": "Prefab Warehouse",
       "Formulas": {
-        "Description": "Stores General Cargo on a colony",
-        "Mass": "PropertyValue('Size Efficiency') * 1.5",
+        "Description": "A freightable general-cargo store. Volume is capped at 2000. The site warehouse is the large twin.",
+        "Mass": "PropertyValue('Size Efficiency') * 0.6",
         "Volume": "PropertyValue('Storage Volume') + PropertyValue('Size Efficiency')",
         "HTK": "0.5",
         "CrewReq": "Max(1, PropertyValue('Size Efficiency') * 0.1)",
@@ -15,9 +15,10 @@
         "BuildPointCost": "[Mass] * 4.5"
       },
       "ResourceCost": {
-        "iron": "[Mass] * 0.7",
-        "aluminium": "[Mass] * 0.2",
-        "plastic": "[Mass] * 0.1"
+        "aluminium": "[Mass] * 0.45",
+        "titanium": "[Mass] * 0.30",
+        "plastic": "[Mass] * 0.15",
+        "copper": "[Mass] * 0.10"
       },
       "ComponentType":"Cargo Hold",
       "MountType": "ShipCargo, PlanetInstallation",
@@ -29,10 +30,62 @@
           "DescriptionFormula": "'Larger cargo holds store more goods'",
           "GuiHint": "GuiSelectionMaxMinInt",
           "DataDict": {},
-          "MaxFormula": "10000",
+          "MaxFormula": "2000",
           "MinFormula": "10",
           "StepFormula": "100",
           "PropertyFormula": "500"
+        },
+        {
+          "Name": "Size Efficiency",
+          "DescriptionFormula": "'The amount of volume taken up by racking, office space etc.'",
+          "GuiHint": "GuiTextDisplay",
+          "DataDict": {},
+          "PropertyFormula": "Max(1, PropertyValue('Storage Volume') * 0.01)"
+        },
+        {
+          "Name": "DBargsStor",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs('general-storage', PropertyValue('Storage Volume'))",
+          "AttributeType": "Pulsar4X.Storage.CargoStorageAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "warehouse-site",
+      "Name": "Warehouse",
+      "Formulas": {
+        "Description": "A site-built general-cargo store. Assembled in place. It cannot be freighted.",
+        "Mass": "PropertyValue('Size Efficiency') * 4",
+        "Volume": "PropertyValue('Storage Volume') + PropertyValue('Size Efficiency')",
+        "HTK": "0.5",
+        "CrewReq": "Max(10, PropertyValue('Size Efficiency') * 0.25)",
+        "ResearchCost": "0",
+        "CreditCost": "[Mass] * 0.12",
+        "BuildPointCost": "8000"
+      },
+      "ResourceCost": {
+        "iron": "[Mass] * 0.50",
+        "space-crete": "[Mass] * 0.30",
+        "stainless-steel": "[Mass] * 0.15",
+        "copper": "[Mass] * 0.05"
+      },
+      "ComponentType":"Cargo Hold",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Storage Volume",
+          "DescriptionFormula": "'Larger cargo holds store more goods'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "DataDict": {},
+          "MaxFormula": "2000000",
+          "MinFormula": "10000",
+          "StepFormula": "10000",
+          "PropertyFormula": "100000"
         },
         {
           "Name": "Size Efficiency",
@@ -106,27 +159,26 @@
     "Type": "ComponentTemplate",
     "Payload": {
       "UniqueID": "spaceport",
-      "Name": "Space Port",
+      "Name": "Spaceport",
       "Formulas": {
-        "Description": "Facility for transporting cargo and fuel to ships from the surface of a planet",
-        "Mass": "PropertyValue('Size') * 1.0",
+        "Description": "A site-built port. It transfers cargo and stores half its size. Assembled in place. It cannot be freighted.",
+        "Mass": "PropertyValue('Size') * 2.5",
         "Volume": "PropertyValue('Size')",
         "HTK": "0.5",
-        "CrewReq": "Max(1, PropertyValue('Size') * 0.1)",
+        "CrewReq": "Max(40, PropertyValue('Size') * 0.15)",
         "ResearchCost": "0",
         "CreditCost": "[Mass] * 0.12",
-        "BuildPointCost": "[Mass] * 4.5"
+        "BuildPointCost": "8000"
       },
       "ResourceCost": {
-        "iron": "[Mass] * 0.4",
-        "stainless-steel": "[Mass] * 0.3",
-        "aluminium": "[Mass] * 0.1",
-        "titanium": "[Mass] * 0.1",
-        "plastic": "[Mass] * 0.1"
+        "iron": "[Mass] * 0.50",
+        "space-crete": "[Mass] * 0.30",
+        "stainless-steel": "[Mass] * 0.15",
+        "copper": "[Mass] * 0.05"
       },
       "ComponentType":"Cargo Hold",
-      "MountType": "ShipCargo, PlanetInstallation",
-      "CargoTypeID": "general-storage",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "None",
       "IndustryTypeID": "installation-construction",
       "Properties": [
         {
@@ -135,9 +187,9 @@
           "GuiHint": "GuiSelectionMaxMinInt",
           "DataDict": {},
           "MaxFormula": "2000000",
-          "MinFormula": "2000",
+          "MinFormula": "50000",
           "StepFormula": "100",
-          "PropertyFormula": "12000"
+          "PropertyFormula": "100000"
         },
         {
           "Name": "Rate vs Range",
@@ -167,6 +219,18 @@
           "GuiHint": "None",
           "PropertyFormula": "AtbConstrArgs(PropertyValue('Transfer Rate'), PropertyValue('Transfer Range'))",
           "AttributeType": "Pulsar4X.Storage.CargoTransferAtb"
+        },
+        {
+          "Name": "Stored Volume",
+          "DescriptionFormula": "'Cargo volume this port keeps on the ground.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Size') * 0.5"
+        },
+        {
+          "Name": "DBargsStor",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(UniqueID('general-storage'), PropertyValue('Stored Volume'))",
+          "AttributeType": "Pulsar4X.Storage.CargoStorageAtb"
         }
       ]
     }

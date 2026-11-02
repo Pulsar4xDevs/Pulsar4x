@@ -46,7 +46,7 @@ public class MarsColonyTests
 
         Assert.That(colony.FactionOwnerID, Is.EqualTo(player.Id));
         Assert.That(colony.GetDataBlob<NameDB>().DefaultName, Is.EqualTo("Mars HQ"));
-        Assert.That(colony.GetDataBlob<ColonyInfoDB>().Population[species.Id], Is.EqualTo(8000));
+        Assert.That(colony.GetDataBlob<ColonyInfoDB>().Population[species.Id], Is.EqualTo(4000));
         Assert.That(player.GetDataBlob<FactionInfoDB>().Colonies, Does.Contain(colony));
 
         var infra = colony.GetDataBlob<InfrastructureDB>();
@@ -54,7 +54,7 @@ public class MarsColonyTests
         Assert.That(infra.Efficiency, Is.EqualTo(1.0));
         Assert.That(
             colony.GetDataBlob<ComponentInstancesDB>().GetPopulationSupportValue(mars),
-            Is.GreaterThanOrEqualTo(8000));
+            Is.GreaterThanOrEqualTo(4000));
 
         var techs = player.GetDataBlob<FactionInfoDB>().Data.Techs;
         Assert.That(techs["tech-infra-gravity-min-extension"].Level, Is.EqualTo(3));

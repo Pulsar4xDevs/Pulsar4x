@@ -197,15 +197,19 @@ namespace Pulsar4X.Components
             //ParentComponent.SetAttributes();
         }
 
-        public void SetValueFromInput(double input)
+        public void SetValueFromInput(double input, bool clampToTrack = true)
         {
             Debug.Assert(GuiHint != GuiHint.GuiTextDisplay || GuiHint != GuiHint.None, Name + " is not an editable value");
-            SetMin();
-            SetMax();
-            if (input < MinValue)
-                input = MinValue;
-            else if (input > MaxValue)
-                input = MaxValue;
+            // A saved design keeps the numbers it stored. The designer slider still clamps.
+            if (clampToTrack)
+            {
+                SetMin();
+                SetMax();
+                if (input < MinValue)
+                    input = MinValue;
+                else if (input > MaxValue)
+                    input = MaxValue;
+            }
             Formula.ReplaceExpression(input.ToString(_toStringCulture));    //prevents it being reset to the default value on Evaluate;
             Formula.Evaluate();                                             //force dependants to recalc.
             ParentComponent.SetAttributes();

@@ -10,13 +10,13 @@ A colony with an installation rate can mount a crate from its warehouse, or asse
 
 `installation` is the only key this plan reads. A job spends the colony's pool.
 
-`ShipCargo` plus `PlanetInstallation` is a crate. No `ShipCargo` means site-only. Site-only today: `mine`, `naval-academy`, `admin-complex`, and `launch-complex`. `local-construction` became a crate (`ShipCargo, PlanetInstallation`) so a ship can carry the first office to an empty colony. `space-port` has `ShipCargo` and is a different template.
+`ShipCargo` plus `PlanetInstallation` is a crate. No `ShipCargo` means site-only. Site-only: `mine`, `research-lab`, `shipyard`, `naval-academy`, `admin-complex`, `launch-complex`, `spaceport`, and the site twins `factory-site`, `refinery-site`, `local-construction-site`, `logistics-office-site`, `warehouse-site`, and `infrastructure-site`. `local-construction` stays a crate (`ShipCargo, PlanetInstallation`) so a ship can carry the first office to an empty colony.
 
 A crate does not store a point cost. It points at its design.
 
 The cost to build a design is `IndustryPointCosts`, stored when the design is calculated from `BuildPointCost`. An assemble job copies that number onto itself.
 
-A mount job copies `max(1, MassPerUnit / 100000)`. A default factory is mass 5,000,000, so the mount cost is 50. Infrastructure is mass 1,000, so the mount cost is 1. The divisor lives in one function. A later edit to the design does not change a job already queued. Two crates of the same design cost the same.
+A mount job copies `max(1, MassPerUnit / 100000)`. A default prefab factory is mass 2,000, so the mount cost is 1. Prefab infrastructure is mass 400, so the mount cost is 1. The divisor lives in one function. A later edit to the design does not change a job already queued. Two crates of the same design cost the same.
 
 ## What already runs
 

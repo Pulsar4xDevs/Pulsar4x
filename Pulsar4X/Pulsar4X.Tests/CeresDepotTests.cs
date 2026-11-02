@@ -137,10 +137,10 @@ public class CeresDepotTests
 
         Assert.That(depot.GetDataBlob<LogiBaseDB>().Capacity, Is.EqualTo(10));
         var storage = depot.GetDataBlob<CargoStorageDB>();
-        Assert.That(storage.TypeStores["general-storage"].MaxVolume, Is.EqualTo(20000));
-        // One spaceport, template defaults: 3000 m/s and 6 kg/s. The warehouse does not set either.
-        Assert.That(storage.TransferRangeDv_mps, Is.EqualTo(3000));
-        Assert.That(storage.TransferRate, Is.EqualTo(6));
+        // Two prefab warehouses (500) and four infrastructure crates (200).
+        Assert.That(storage.TypeStores["general-storage"].MaxVolume, Is.EqualTo(1800));
+        Assert.That(storage.TransferRangeDv_mps, Is.EqualTo(1000));
+        Assert.That(storage.TransferRate, Is.EqualTo(20));
         Assert.That(
             game.Factions[depot.FactionOwnerID].GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(),
             Is.EqualTo(CeresStart.DepotFunds));

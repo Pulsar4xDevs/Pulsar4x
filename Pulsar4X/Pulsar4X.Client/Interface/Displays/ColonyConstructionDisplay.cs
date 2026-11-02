@@ -48,7 +48,7 @@ namespace Pulsar4X.Client
                 if (ImGui.BeginChild("NoConstructionAvailable", new Vector2(topSize.X, 72f), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
-                    ImGui.Text("This colony needs a Construction Office.\n\nMount Construction Services to install components here.");
+                    ImGui.Text("This colony needs a Construction Office.\n\nMount a Prefab Construction Office to install components here.");
                     ImGui.PopStyleColor();
                 }
                 ImGui.EndChild();

@@ -25,7 +25,7 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-auto-mine",
-      "Name": "Auto Mine",
+      "Name": "Prefab Auto Mine",
       "TemplateId": "automine"
     }
   },
@@ -33,7 +33,7 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-factory",
-      "Name": "Factory",
+      "Name": "Prefab Factory",
       "TemplateId": "factory"
     }
   },
@@ -110,18 +110,22 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-spaceport",
-      "Name": "Spaceport Facility",
-      "TemplateId": "spaceport"
+      "Name": "Spaceport",
+      "TemplateId": "spaceport",
+      "Properties": [
+        { "Key": "Size", "Value": 100000 }
+      ]
     }
   },
   {
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-planetary-spaceport-crate",
-      "Name": "Planetary Spaceport Complex (Crate)",
+      "Name": "Prefab Spaceport",
       "TemplateId": "planetary-spaceport-crate",
       "Properties": [
-        { "Key": "Warehouse Size", "Value": 2000 }
+        { "Key": "Cargo Transfer Rate", "Value": 20 },
+        { "Key": "Transfer Range", "Value": 1000 }
       ]
     }
   },
@@ -226,7 +230,7 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-logistics-office",
-      "Name": "Logistics Office",
+      "Name": "Prefab Logistics Office",
       "TemplateId": "logistics-office"
     }
   },
@@ -359,7 +363,7 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-refinery",
-      "Name": "Refinery",
+      "Name": "Prefab Refinery",
       "TemplateId": "refinery"
     }
   },
@@ -418,7 +422,7 @@
     "Payload": {
       "UniqueId": "default-design-warehouse",
       "Name": "Warehouse",
-      "TemplateId": "warehouse-facility",
+      "TemplateId": "warehouse-site",
       "Properties": [
         { "Key": "Storage Volume", "Value": 1000000 }
       ]
@@ -428,11 +432,11 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-infrastructure",
-      "Name": "Earth-Standard Infrastructure",
+      "Name": "Prefab Earth-Standard Infrastructure",
       "TemplateId": "infrastructure",
       "Properties": [
-        { "Key": "Min Gravity", "Value": 8.8 },
-        { "Key": "Max Gravity", "Value": 10.8 },
+        { "Key": "Min Gravity", "Value": 8.829 },
+        { "Key": "Max Gravity", "Value": 10.791 },
         { "Key": "Min Pressure", "Value": 0.9 },
         { "Key": "Max Pressure", "Value": 1.1 }
       ]
@@ -442,7 +446,7 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-infrastructure-mars",
-      "Name": "Low-Gravity Infrastructure",
+      "Name": "Prefab Mars Infrastructure",
       "TemplateId": "infrastructure",
       "Properties": [
         { "Key": "Min Gravity", "Value": 3.0 },
@@ -450,6 +454,91 @@
         { "Key": "Min Pressure", "Value": 0.85 },
         { "Key": "Max Pressure", "Value": 1.05 }
       ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-infrastructure-luna",
+      "Name": "Prefab Luna Infrastructure",
+      "TemplateId": "infrastructure",
+      "Properties": [
+        { "Key": "Min Gravity", "Value": 1.4 },
+        { "Key": "Max Gravity", "Value": 1.8 },
+        { "Key": "Min Pressure", "Value": 0 },
+        { "Key": "Max Pressure", "Value": 0.2 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-infrastructure-ceres",
+      "Name": "Prefab Ceres Infrastructure",
+      "TemplateId": "infrastructure",
+      "Properties": [
+        { "Key": "Min Gravity", "Value": 0.1 },
+        { "Key": "Max Gravity", "Value": 0.5 },
+        { "Key": "Min Pressure", "Value": 0 },
+        { "Key": "Max Pressure", "Value": 0.2 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-infrastructure-site",
+      "Name": "Infrastructure",
+      "TemplateId": "infrastructure-site",
+      "Properties": [
+        { "Key": "Min Gravity", "Value": 9.6 },
+        { "Key": "Max Gravity", "Value": 10.0 },
+        { "Key": "Min Pressure", "Value": 0.9 },
+        { "Key": "Max Pressure", "Value": 1.1 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-warehouse-prefab",
+      "Name": "Prefab Warehouse",
+      "TemplateId": "warehouse-facility",
+      "Properties": [
+        { "Key": "Storage Volume", "Value": 500 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-factory-site",
+      "Name": "Factory",
+      "TemplateId": "factory-site"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-refinery-site",
+      "Name": "Refinery",
+      "TemplateId": "refinery-site"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-local-construction-site",
+      "Name": "Construction Office",
+      "TemplateId": "local-construction-site"
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
+      "UniqueId": "default-design-logistics-office-site",
+      "Name": "Logistics Office",
+      "TemplateId": "logistics-office-site"
     }
   },
   {
@@ -480,7 +569,7 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-local-construction",
-      "Name": "Construction Office",
+      "Name": "Prefab Construction Office",
       "TemplateId": "local-construction",
       "Properties": [
         { "Key": "Level", "Value": 5 }
