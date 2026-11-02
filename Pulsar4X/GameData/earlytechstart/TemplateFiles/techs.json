@@ -4,7 +4,7 @@
     "Payload": {
       "UniqueID": "tech-early-technology",
       "Name": "Early Technology",
-      "Description": "Starting gate for the Early Tech Start: opens the basic industrial, survey and propulsion research lines. Nuclear power, directed energy and warp travel must be researched.",
+      "Description": "Starting gate for the Early Tech Start: opens the basic industrial, survey and propulsion research lines. Ships move by reaction drive only; nuclear power must be researched, and warp and jump-point technology after that.",
       "Category": "tech-category-missiles-kinetic-weapons",
       "MaxLevel": 1,
       "DataFormula": "1",
@@ -24,7 +24,6 @@
           "tech-shipyard-slip-max-size",
           "tech-geo-surveyor",
           "tech-asteroid-mining",
-          "tech-gravitational-surveyor",
           "tech-administration-level",
           "tech-infra-gravity-range",
           "tech-infra-gravity-min-extension",
@@ -82,7 +81,7 @@
     "Payload": {
       "UniqueID": "tech-early-warp-drive",
       "Name": "Alcubierre Warp Drive",
-      "Description": "Warp drives, and the warp and jump point research lines that improve them.",
+      "Description": "Warp drives, jump point survey and stabilisation, and the research lines that improve them. Nothing in this line is known at the start.",
       "Category": "tech-category-power-propulsion",
       "MaxLevel": 1,
       "DataFormula": "1",
@@ -96,6 +95,7 @@
           "tech-alcubierre-gravitational-coupling",
           "tech-alcubierre-bleed",
           "tech-alcubierre-collapse-efficiency",
+          "tech-gravitational-surveyor",
           "tech-jumpoint-stabilization",
           "tech-jumpoint-stabilization-size-reduction",
           "tech-jumpoint-stabilization-time-reduction"

@@ -8,9 +8,17 @@ using Pulsar4X.Client.Host;
 using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
+using Pulsar4X.Galaxy;
+using Pulsar4X.JumpPoints;
+using Pulsar4X.Orbits;
+using Pulsar4X.Components;
 using Pulsar4X.Modding;
+using Pulsar4X.Movement;
 using Pulsar4X.Names;
+using Pulsar4X.Ships;
+using Pulsar4X.Storage;
 
 namespace Pulsar4X.Tests;
 
@@ -174,9 +182,9 @@ public class EarlyTechStartTests
         ModsState.RefreshModsList("Data");
         var store = GameLifecycle.LoadModStore(TickedPaths(EarlyMod), ModsState.AvailableMods.Select(m => m.Path));
 
-        // The mod ships no facility or component data of its own.
+        // The mod ships no facility or component data of its own, only techs, the colony and one ship design.
         var early = Mod(EarlyMod).Mod;
-        Assert.That(early.DataFiles, Is.EquivalentTo(new[] { "TemplateFiles/techs.json", "ScenarioFiles/colonies.json" }));
+        Assert.That(early.DataFiles, Is.EquivalentTo(new[] { "TemplateFiles/techs.json", "ScenarioFiles/colonies.json", "ScenarioFiles/ships.json" }));
 
         var colony = store.Colonies[EarlyColony];
         foreach (var id in colony.ComponentDesigns!)
@@ -264,7 +272,7 @@ public class EarlyTechStartTests
             Assert.That(data.ComponentTemplates.ContainsKey(known), Is.True, known);
 
         // Advanced systems are not, but can be researched toward.
-        foreach (var locked in new[] { "alcubierre-warp-drive", "reactor", "laser-weapon", "automine", "scntr-engine" })
+        foreach (var locked in new[] { "alcubierre-warp-drive", "reactor", "laser-weapon", "automine", "scntr-engine", "gravitational-surveyor" })
         {
             Assert.That(data.ComponentTemplates.ContainsKey(locked), Is.False, locked);
             Assert.That(data.LockedComponentTemplates.ContainsKey(locked), Is.True, locked);
@@ -275,6 +283,125 @@ public class EarlyTechStartTests
         Assert.That(data.Techs.ContainsKey("tech-early-warp-drive"), Is.False);
         Assert.That(data.Techs.ContainsKey("tech-early-directed-energy"), Is.False);
         Assert.That(data.IsResearchable("tech-geo-surveyor"), Is.True);
+    }
+
+    // --- Newtonian-only start: no warp, no jump -------------------------------------------
+
+    [Test]
+    public void NewGameWithEarlyMod_KnowsNoWarpOrJumpTech()
+    {
+        var (_, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var data = faction.GetDataBlob<FactionInfoDB>().Data;
+
+        // Not known and not even researchable: the whole line sits behind tech-early-warp-drive.
+        foreach (var id in data.Techs.Keys)
+        {
+            Assert.That(id, Does.Not.Contain("warp"), id);
+            Assert.That(id, Does.Not.Contain("alcubierre"), id);
+            Assert.That(id, Does.Not.Contain("jump"), id);
+            Assert.That(id, Does.Not.Contain("gravitational"), id);
+        }
+        foreach (var id in new[] { "tech-early-warp-drive", "tech-gravitational-surveyor", "tech-modern-technology" })
+            Assert.That(data.Techs.ContainsKey(id), Is.False, id);
+
+        foreach (var id in new[] { "alcubierre-warp-drive", "gravitational-surveyor" })
+        {
+            Assert.That(data.ComponentTemplates.ContainsKey(id), Is.False, id);
+            Assert.That(data.LockedComponentTemplates.ContainsKey(id), Is.True, id);
+        }
+    }
+
+    [Test]
+    public void NewGameWithEarlyMod_HasNoWarpOrJumpComponentsOrKnownJumpPoints()
+    {
+        var (game, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var info = faction.GetDataBlob<FactionInfoDB>();
+
+        foreach (var design in info.ComponentDesigns.Values)
+        {
+            Assert.That(design.HasAttribute<WarpDriveAtb>(), Is.False, design.UniqueID);
+            Assert.That(design.HasAttribute<GravSurveyAtb>(), Is.False, design.UniqueID);
+        }
+        Assert.That(info.KnownJumpPoints, Is.Empty);
+
+        var engines = info.ComponentDesigns.Values.Where(d => d.HasAttribute<NewtonionThrustAtb>()).ToList();
+        Assert.That(engines, Is.Not.Empty, "there must be reaction engines to fly with");
+
+        // Nothing that was built or launched can warp or survey.
+        var all = game.Systems.SelectMany(system => system.GetAllEntitiesWithDataBlob<ColonyInfoDB>()
+            .Concat(system.GetAllEntitiesWithDataBlob<ShipInfoDB>())).ToList();
+        foreach (var entity in all)
+        {
+            Assert.That(entity.HasDataBlob<WarpAbilityDB>(), Is.False, entity.GetName(faction.Id));
+            Assert.That(entity.HasDataBlob<JPSurveyAbilityDB>(), Is.False, entity.GetName(faction.Id));
+        }
+    }
+
+    [Test]
+    public void NewGameWithEarlyMod_StartingShipsFlyOnReactionDrivesOnly()
+    {
+        var (game, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var info = faction.GetDataBlob<FactionInfoDB>();
+
+        Assert.That(info.ShipDesigns.Keys, Is.EquivalentTo(new[] { "early-ship-design-newton-tug" }));
+        var ships = game.Systems.SelectMany(system => system.GetAllEntitiesWithDataBlob<ShipInfoDB>()).ToList();
+        Assert.That(ships, Has.Count.EqualTo(1));
+
+        var ship = ships[0];
+        Assert.That(ship.HasDataBlob<WarpAbilityDB>(), Is.False);
+        Assert.That(ship.GetDataBlob<NewtonThrustAbilityDB>().ThrustInNewtons, Is.GreaterThan(0));
+        Assert.That(MovePlanner.CanMove(ship, out string reason), Is.True, reason);
+    }
+
+    [Test]
+    public void NewtonianOnlyShip_IsOfferedNoWarpMove_AndCanHohmannWithinTheWell()
+    {
+        var (game, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var ship = game.Systems.SelectMany(system => system.GetAllEntitiesWithDataBlob<ShipInfoDB>()).Single();
+        var now = ship.StarSysDateTime;
+        var system = game.Systems.Single(s => s.GetAllEntitiesWithDataBlob<ShipInfoDB>().Contains(ship));
+        var earth = ship.GetSOIParentEntity();
+        var luna = earth.GetDataBlob<OrbitDB>().Children
+            .First(c => c.GetName(faction.Id) == "Luna");
+        var mars = system.GetAllEntitiesWithDataBlob<OrbitDB>()
+            .First(c => c.GetName(faction.Id) == "Mars");
+
+        // Interplanetary: only warp could do it, and there is none.
+        var toMars = MovePlanner.Evaluate(ship, mars, now);
+        Assert.That(toMars.Single(o => o.Mode == MoveMode.Warp).Feasible, Is.False);
+        Assert.That(toMars.Single(o => o.Mode == MoveMode.NewtonianTransfer).Feasible, Is.False);
+        Assert.That(MovePlanner.TryBuildMoveActions(ship, mars, out var marsActions, out _, now), Is.False);
+        Assert.That(marsActions.OfType<WarpMoveAction>(), Is.Empty);
+
+        // Luna is in Earth's well but has its own SOI. Whatever the planner decides, it must not warp.
+        var toLuna = MovePlanner.Evaluate(ship, luna, now);
+        Assert.That(toLuna.Single(o => o.Mode == MoveMode.Warp).Feasible, Is.False);
+        MovePlanner.TryBuildMoveActions(ship, luna, out var lunaActions, out _, now);
+        Assert.That(lunaActions.OfType<WarpMoveAction>(), Is.Empty);
+
+        // Rendezvous with another ship in a higher circular orbit: a Hohmann transfer, no warp.
+        var design = faction.GetDataBlob<FactionInfoDB>().ShipDesigns["early-ship-design-newton-tug"];
+        double r = earth.GetDataBlob<MassVolumeDB>().RadiusInM * 6;
+        var buddy = ShipFactory.CreateShip(design, faction, new Pulsar4X.Orbital.Vector3(r, 0, 0), earth, "Buddy");
+        var hydrolox = faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny("hydrolox");
+        double shipFuel = ship.GetDataBlob<CargoStorageDB>().GetMassStored(hydrolox, false);
+        Assert.That(shipFuel, Is.GreaterThan(0), "the starting tug is fuelled");
+        CargoTransferProcessor.AddRemoveCargoMass(buddy.GetDataBlob<CargoStorageDB>(), hydrolox, shipFuel);
+        var toBuddy = MovePlanner.Evaluate(ship, buddy, now);
+        var transfer = toBuddy.Single(o => o.Mode == MoveMode.NewtonianTransfer);
+        Assert.That(transfer.Feasible, Is.True, transfer.Reason);
+        Assert.That(toBuddy.Single(o => o.Mode == MoveMode.Warp).Feasible, Is.False);
+        Assert.That(MovePlanner.TryBuildMoveActions(ship, buddy, out var buddyActions, out string why, now), Is.True, why);
+        Assert.That(buddyActions.OfType<WarpMoveAction>(), Is.Empty);
+        Assert.That(buddyActions, Is.Not.Empty);
+
+        // Coming down from the higher orbit to Earth's parking altitude is a Hohmann too.
+        var toEarth = MovePlanner.Evaluate(buddy, earth, now).Single(o => o.Mode == MoveMode.NewtonianTransfer);
+        Assert.That(toEarth.Feasible, Is.True, toEarth.Reason);
+        Assert.That(toEarth.DeltaV, Is.GreaterThan(0));
+        Assert.That(MovePlanner.TryBuildMoveActions(buddy, earth, out var earthActions, out why, now), Is.True, why);
+        Assert.That(earthActions, Is.Not.Empty);
+        Assert.That(earthActions.OfType<WarpMoveAction>(), Is.Empty);
     }
 
     [Test]

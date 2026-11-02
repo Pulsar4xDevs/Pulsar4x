@@ -285,6 +285,27 @@
         "default-design-logistics-office-site",
         "default-design-infrastructure-site",
         "default-design-warehouse-prefab"
+      ],
+      "ShipDesigns": [
+        "early-ship-design-newton-tug"
+      ],
+      "Fleets": [
+        {
+          "Name": "Newton Test Fleet",
+          "Ships": [
+            {
+              "DesignId": "early-ship-design-newton-tug",
+              "Name": "Newton Tug I",
+              "Cargo": [
+                {
+                  "Id": "hydrolox",
+                  "Amount": 20000000,
+                  "Type": "byVolume"
+                }
+              ]
+            }
+          ]
+        }
       ]
     }
   }

@@ -9,6 +9,7 @@
   ],
   "DataFiles": [
     "TemplateFiles/techs.json",
-    "ScenarioFiles/colonies.json"
+    "ScenarioFiles/colonies.json",
+    "ScenarioFiles/ships.json"
   ]
 }
