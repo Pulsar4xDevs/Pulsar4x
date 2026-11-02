@@ -638,8 +638,8 @@ namespace Pulsar4X.Client
             float width = widgetAvailWidth;
             const float TrackHeight = 8f;
             const float HandleRadius = 8f;
-            // Edge padding leaves room for the value label to stay centered under a handle
-            // when the handle sits at the very end of the track.
+            // Inset so a handle at the end of the track is not flush with the row edge.
+            // Labels hang off the outer side of their handle and can use this inset.
             const float Padding = 28f;
             float trackY = ImGui.GetCursorScreenPos().Y + HandleRadius + 4f;
             float trackLeftX = widgetLeftAnchorX + Padding;
@@ -671,11 +671,69 @@ namespace Pulsar4X.Client
                 new Vector2(highPx, trackY + TrackHeight * 0.5f),
                 colFill, 2f);
 
-            // Three invisible buttons for the three drag zones. Middle button sits BEHIND the handles
-            // so handle clicks win when they overlap.
+            // Label boxes are known before the hit targets so a drag on the number
+            // moves the same handle as the dot.
+            uint colLabelBg = ImGui.ColorConvertFloat4ToU32(new Vector4(0.10f, 0.14f, 0.22f, 0.95f));
+            uint colLabelBgHot = ImGui.ColorConvertFloat4ToU32(new Vector4(0.16f, 0.24f, 0.38f, 0.98f));
+            uint colLabelBorder = ImGui.ColorConvertFloat4ToU32(new Vector4(0.55f, 0.75f, 1.00f, 1.00f));
+            uint colLabelText = ImGui.ColorConvertFloat4ToU32(new Vector4(0.92f, 0.96f, 1.00f, 1.00f));
+            float labelGap = 6f;
+            float labelTopY = trackY + HandleRadius + labelGap;
+            float peakOverhang = 7f;
+            float labelPadX = 6f;
+            float labelPadY = 3f;
+
+            string lowText = lowVal.ToString("0.0");
+            string highText = highVal.ToString("0.0");
+            PeakedLabelBox(lowText, labelPadX, labelPadY, out float lowBoxW, out float lowBoxH, out float lowInset);
+            PeakedLabelBox(highText, labelPadX, labelPadY, out float highBoxW, out float highBoxH, out float highInset);
+
+            // Left-handed min: peak on the right edge of the box. Right-handed max: peak on the left.
+            // A narrow band still overlaps after that hang, so push the min left and the max right.
+            float lowLeft = lowPx - lowBoxW + lowInset;
+            float highLeft = highPx - highInset;
+            float widgetLeftX = widgetLeftAnchorX;
+            float widgetRightX = widgetLeftAnchorX + width;
+            float lowLimit = MathF.Max(widgetLeftX, widgetRightX - lowBoxW);
+            float highLimit = MathF.Max(widgetLeftX, widgetRightX - highBoxW);
+            lowLeft = MathF.Max(widgetLeftX, MathF.Min(lowLimit, lowLeft));
+            highLeft = MathF.Max(widgetLeftX, MathF.Min(highLimit, highLeft));
+
+            // The slot between the labels is the center triangle plus a hair of air on each side.
+            const float midTriW = 8f;
+            const float midTriH = 6f;
+            const float labelGapX = midTriW + 4f;
+            float overlap = lowLeft + lowBoxW + labelGapX - highLeft;
+            if (overlap > 0f)
+            {
+                float half = overlap * 0.5f;
+                float minCanMoveLeft = MathF.Max(0f, lowLeft - widgetLeftX);
+                float maxCanMoveRight = MathF.Max(0f, highLimit - highLeft);
+                float pushLeft = MathF.Min(half, minCanMoveLeft);
+                float pushRight = MathF.Min(overlap - pushLeft, maxCanMoveRight);
+                float still = overlap - pushLeft - pushRight;
+                if (still > 0f)
+                    pushLeft += MathF.Min(still, minCanMoveLeft - pushLeft);
+                lowLeft -= pushLeft;
+                highLeft += pushRight;
+            }
+
+            float gapLeft = lowLeft + lowBoxW;
+            float gapRight = highLeft;
+            float gapW = gapRight - gapLeft;
+            float triW = MathF.Min(midTriW, gapW - 4f);
+            bool showMidTri = triW >= 4f;
+            float midTriX = (gapLeft + gapRight) * 0.5f;
+            float midTriTop = labelTopY - midTriH;
+            bool midActive = false;
+            bool midHot = false;
+
+            // Hit targets: the track between the dots, each dot, each value label,
+            // and the center triangle. The track rect is inset by a handle radius
+            // so it does not cover the dots. The triangle is submitted after the
+            // labels so a label keeps the click where they meet.
             var startCursor = ImGui.GetCursorPos();
 
-            // Mid (fill) drag — full track region between handles.
             float midLeft = lowPx + HandleRadius;
             float midRight = highPx - HandleRadius;
             if (midRight > midLeft)
@@ -683,35 +741,21 @@ namespace Pulsar4X.Client
                 ImGui.SetCursorScreenPos(new Vector2(midLeft, trackY - TrackHeight));
                 ImGui.InvisibleButton("##midDrag" + lowProperty.Name,
                     new Vector2(midRight - midLeft, TrackHeight * 2f));
-                if (ImGui.IsItemActive())
-                {
-                    float dx = ImGui.GetIO().MouseDelta.X;
-                    if (dx != 0)
-                    {
-                        double delta = PxDeltaToValue(dx);
-                        // Clamp so neither bound crosses the shared axis limits.
-                        double maxUp = axisMax - highVal;
-                        double maxDown = axisMin - lowVal;
-                        delta = Math.Clamp(delta, maxDown, maxUp);
-                        if (Math.Abs(delta) > 0)
-                        {
-                            lowProperty.SetValueFromInput(lowVal + delta);
-                            highProperty.SetValueFromInput(highVal + delta);
-                        }
-                    }
-                }
-                else if (ImGui.IsItemHovered())
-                {
-                    ImGui.SetTooltip("Drag to shift the whole range");
-                }
+                midActive = ImGui.IsItemActive();
+                midHot = midActive || ImGui.IsItemHovered();
             }
 
-            // Left handle drag
             ImGui.SetCursorScreenPos(new Vector2(lowPx - HandleRadius, trackY - HandleRadius));
             ImGui.InvisibleButton("##lowHandle" + lowProperty.Name,
                 new Vector2(HandleRadius * 2f, HandleRadius * 2f));
-            bool lowHover = ImGui.IsItemHovered();
-            if (ImGui.IsItemActive())
+            bool lowActive = ImGui.IsItemActive();
+            bool lowHot = lowActive || ImGui.IsItemHovered();
+            ImGui.SetCursorScreenPos(new Vector2(lowLeft, labelTopY - peakOverhang));
+            ImGui.InvisibleButton("##lowLabel" + lowProperty.Name,
+                new Vector2(lowBoxW, lowBoxH + peakOverhang));
+            lowActive |= ImGui.IsItemActive();
+            lowHot |= lowActive || ImGui.IsItemHovered();
+            if (lowActive)
             {
                 float dx = ImGui.GetIO().MouseDelta.X;
                 if (dx != 0)
@@ -723,12 +767,17 @@ namespace Pulsar4X.Client
                 }
             }
 
-            // Right handle drag
             ImGui.SetCursorScreenPos(new Vector2(highPx - HandleRadius, trackY - HandleRadius));
             ImGui.InvisibleButton("##highHandle" + lowProperty.Name,
                 new Vector2(HandleRadius * 2f, HandleRadius * 2f));
-            bool highHover = ImGui.IsItemHovered();
-            if (ImGui.IsItemActive())
+            bool highActive = ImGui.IsItemActive();
+            bool highHot = highActive || ImGui.IsItemHovered();
+            ImGui.SetCursorScreenPos(new Vector2(highLeft, labelTopY - peakOverhang));
+            ImGui.InvisibleButton("##highLabel" + lowProperty.Name,
+                new Vector2(highBoxW, highBoxH + peakOverhang));
+            highActive |= ImGui.IsItemActive();
+            highHot |= highActive || ImGui.IsItemHovered();
+            if (highActive)
             {
                 float dx = ImGui.GetIO().MouseDelta.X;
                 if (dx != 0)
@@ -740,34 +789,68 @@ namespace Pulsar4X.Client
                 }
             }
 
+            if (showMidTri)
+            {
+                float hitW = MathF.Min(gapW, triW + 6f);
+                ImGui.SetCursorScreenPos(new Vector2(midTriX - hitW * 0.5f, midTriTop));
+                ImGui.InvisibleButton("##midTri" + lowProperty.Name,
+                    new Vector2(hitW, midTriH + 8f));
+                midActive |= ImGui.IsItemActive();
+                midHot |= midActive || ImGui.IsItemHovered();
+            }
+
+            if (midActive)
+            {
+                float dx = ImGui.GetIO().MouseDelta.X;
+                if (dx != 0)
+                {
+                    double delta = PxDeltaToValue(dx);
+                    // Clamp so neither bound crosses the shared axis limits.
+                    double maxUp = axisMax - highVal;
+                    double maxDown = axisMin - lowVal;
+                    delta = Math.Clamp(delta, maxDown, maxUp);
+                    if (Math.Abs(delta) > 0)
+                    {
+                        lowProperty.SetValueFromInput(lowVal + delta);
+                        highProperty.SetValueFromInput(highVal + delta);
+                    }
+                }
+            }
+            else if (midHot)
+            {
+                ImGui.SetTooltip("Drag to shift the whole range");
+            }
+
+            if (lowHot || highHot || midHot)
+                ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
+
             // Draw handles last so they sit on top of the fill.
             drawList.AddCircleFilled(new Vector2(lowPx, trackY), HandleRadius,
-                lowHover ? colHandleHover : colHandle);
+                lowHot ? colHandleHover : colHandle);
             drawList.AddCircle(new Vector2(lowPx, trackY), HandleRadius, colHandleOutline, 16, 1.5f);
             drawList.AddCircleFilled(new Vector2(highPx, trackY), HandleRadius,
-                highHover ? colHandleHover : colHandle);
+                highHot ? colHandleHover : colHandle);
             drawList.AddCircle(new Vector2(highPx, trackY), HandleRadius, colHandleOutline, 16, 1.5f);
 
-            // Peaked value labels under each handle.
-            uint colLabelBg = ImGui.ColorConvertFloat4ToU32(new Vector4(0.10f, 0.14f, 0.22f, 0.95f));
-            uint colLabelBorder = ImGui.ColorConvertFloat4ToU32(new Vector4(0.55f, 0.75f, 1.00f, 1.00f));
-            uint colLabelText = ImGui.ColorConvertFloat4ToU32(new Vector4(0.92f, 0.96f, 1.00f, 1.00f));
-            float labelGap = 6f;
-            float labelTopY = trackY + HandleRadius + labelGap;
-            float peakOverhang = 7f;
-            float labelPadX = 6f;
-            float labelPadY = 3f;
-
-            // Labels may extend into the edge padding (full content region), so the peak can
-            // stay centered under a handle that sits at the very end of the track.
-            float widgetLeftX = widgetLeftAnchorX;
-            float widgetRightX = widgetLeftAnchorX + width;
             DrawPeakedLabel(drawList, lowPx, labelTopY, peakOverhang, labelPadX, labelPadY,
-                widgetLeftX, widgetRightX, lowVal.ToString("0.0"),
-                colLabelBg, colLabelBorder, colLabelText, out float lowLabelBottomY);
+                lowLeft, lowText, lowHot ? colLabelBgHot : colLabelBg, lowHot ? colHandleHover : colLabelBorder,
+                colLabelText, out float lowLabelBottomY);
             DrawPeakedLabel(drawList, highPx, labelTopY, peakOverhang, labelPadX, labelPadY,
-                widgetLeftX, widgetRightX, highVal.ToString("0.0"),
-                colLabelBg, colLabelBorder, colLabelText, out float highLabelBottomY);
+                highLeft, highText, highHot ? colLabelBgHot : colLabelBg, highHot ? colHandleHover : colLabelBorder,
+                colLabelText, out float highLabelBottomY);
+
+            if (showMidTri)
+            {
+                var triTip = new Vector2(midTriX, midTriTop);
+                var triL = new Vector2(midTriX - triW * 0.5f, labelTopY);
+                var triR = new Vector2(midTriX + triW * 0.5f, labelTopY);
+                uint triFill = midHot ? colLabelBgHot : colLabelBg;
+                uint triBorder = midHot ? colHandleHover : colLabelBorder;
+                drawList.AddTriangleFilled(triTip, triL, triR, triFill);
+                drawList.AddLine(triTip, triL, triBorder, 1.2f);
+                drawList.AddLine(triL, triR, triBorder, 1.2f);
+                drawList.AddLine(triR, triTip, triBorder, 1.2f);
+            }
 
             float labelsBottomY = Math.Max(lowLabelBottomY, highLabelBottomY);
             float widgetHeight = labelsBottomY - ImGui.GetCursorScreenPos().Y + 14f;
@@ -776,23 +859,29 @@ namespace Pulsar4X.Client
             ImGui.NewLine();
         }
 
+        private static void PeakedLabelBox(string text, float padX, float padY,
+            out float boxW, out float boxH, out float peakInset)
+        {
+            var textSize = ImGui.CalcTextSize(text);
+            boxW = MathF.Max(textSize.X + padX * 2f, 26f);
+            boxH = textSize.Y + padY * 2f;
+            // Keep the peak inside the box (with a small inset so the slope reads).
+            peakInset = MathF.Min(8f, boxW * 0.5f - 2f);
+        }
+
         private static void DrawPeakedLabel(
             ImDrawListPtr drawList, float peakX, float labelTopY,
             float peakOverhang, float padX, float padY,
-            float clampLeftX, float clampRightX,
+            float boxLeftX,
             string text, uint colBg, uint colBorder, uint colText,
             out float bottomY)
         {
             var textSize = ImGui.CalcTextSize(text);
-            float boxW = MathF.Max(textSize.X + padX * 2f, 26f);
-            float boxH = textSize.Y + padY * 2f;
+            PeakedLabelBox(text, padX, padY, out float boxW, out float boxH, out float peakInset);
             float boxTopY = labelTopY;
             float boxBottomY = boxTopY + boxH;
             float peakY = boxTopY - peakOverhang;
-            float boxLeftX = MathF.Max(clampLeftX, MathF.Min(clampRightX - boxW, peakX - boxW * 0.5f));
             float boxRightX = boxLeftX + boxW;
-            // Keep the peak inside the box (with a small inset so the slope reads).
-            float peakInset = MathF.Min(8f, boxW * 0.5f - 2f);
             float clampedPeakX = MathF.Max(boxLeftX + peakInset, MathF.Min(boxRightX - peakInset, peakX));
 
             // Fill: rectangle body + triangle pointer share the same color, so the seam is invisible.
