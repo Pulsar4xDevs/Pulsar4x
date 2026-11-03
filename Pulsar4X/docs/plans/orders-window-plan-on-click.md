@@ -1,6 +1,6 @@
 # Orders window: plan on click, not per row
 
-Status: not started. Written 2026-11-03 after Jon reported that opening an asteroid list in a ship's Orders tab freezes the game. The cause is measured below. Slice 1 is a small fix for the freeze; slices 2 to 5 are the redesign Jon asked for. Slices 6 to 8 (added 2026-11-04) are the outstanding warp-order items, folded in so there is one list for the Orders and move work.
+Status: not started (slice 7 decided 2026-11-04, ready to build). Written 2026-11-03 after Jon reported that opening an asteroid list in a ship's Orders tab freezes the game. The cause is measured below. Slice 1 is a small fix for the freeze; slices 2 to 5 are the redesign Jon asked for. Slices 6 to 8 (added 2026-11-04) are the outstanding warp-order items, folded in so there is one list for the Orders and move work.
 
 Related: [Warp brake](movement-warp-brake.md) (slice 8), [Newtonian SOI capture](movement-newtonian-soi-capture.md) slice 7 (the refusal and the other-orbit offers, which this plan moves from every row to the clicked row), [Lambert and porkchop](movement-lambert-porkchop.md), [interplanetary Newtonian](movement-interplanetary-newtonian.md).
 
@@ -12,7 +12,8 @@ Related: [Warp brake](movement-warp-brake.md) (slice 8), [Newtonian SOI capture]
 - **Order options live next to Execute.** Target orbit (periapsis and apoapsis, or altitude with a circular default), arrival type, and mode (Auto, Warp, Newtonian). Changing an option replans the selected target only.
 - **Rows show cheap facts only.** Anything on a row must be O(1) arithmetic over data the client already holds. No `OrbitDB` propagation, no Lambert, no `PreviewMove`.
 - **Auto is the default mode, and it stays `MovePlanner.Select`.** Inside one sphere Newtonian wins; between planets warp wins when the ship has both. The player can force Warp or Newtonian, and the panel shows what the other mode would have done (slice 3). Nothing here changes the default choice.
-- **Engine behaviour does not change** (slices 1 to 5; slices 6 to 8 name the exceptions). `MovePlanner.Preview`, `Evaluate` and `Select` keep their rules. 22 ms per plan is the price of three modes plus a scan, and a single click can pay it. This plan does not make the planner faster.
+- **Departure timing is an order option.** `Best window` (default: least Δv within a wait cap, 10% tolerance), `Depart now`, or `Pick on porkchop`. The preview shows the wait, departure, arrival, Δv and fuel for the chosen timing and the alternative. Warp has no window, so timing applies to Newtonian plans, including the local transfer a warp ends with (slice 7).
+- **Engine behaviour does not change** (slices 1 to 5; slice 7 names the exception: the default window rule). `MovePlanner.Preview`, `Evaluate` and `Select` keep their rules. 22 ms per plan is the price of three modes plus a scan, and a single click can pay it. This plan does not make the planner faster.
 
 ## What is going wrong
 
@@ -70,6 +71,7 @@ Extract the row facts from `FleetWindow` into a plain class, `MoveTargetHints` (
 - First version: call `PreviewMove` synchronously on the click. It is 22 ms. Do not make it async until measured on a real map with the server on another thread; the `InProcessAdapter` runs on the UI thread today and `Pulsar4X.Api` may hand the query to the game thread over a network client. If it is slow there, run it on a task and show `Planning…`.
 - The panel shows what `TripPreview` carries today: `Mode`, `DeltaV` and `Have`, departure (`DepartInSeconds`), arrival (`EtaSeconds`), and `Reason` in red when refused with the words `Refused, nothing was started`. It adds the route as legs (escape, cruise, capture, or warp) once `TripPreview` carries them (slice 5).
 - **The other mode, for free.** `MovePlanner.Preview` already calls `Evaluate`, which answers every mode (Already there, Newtonian, Warp), and then throws away all but the chosen one. Keep them: `TripPreview` gains `OtherModes`, a short list of `(Mode, Feasible, EtaSeconds, DeltaV, Reason)` for the modes `Select` did not pick. The panel shows one line under the chosen mode, for example `Warp would arrive 3 h 10 min sooner` or `Newtonian would need 1,240 m/s, arrive in 6 d`. No extra planning cost; the numbers were computed already. A faster option is only a hint. Choosing it sets the Mode option (slice 4) and replans; it never sends anything.
+- **Timing rows.** For a Newtonian plan the panel shows the chosen timing and its alternative: wait, depart, arrive, Δv, fuel (slice 7c). From the same scan, so no extra planning.
 - **Other orbits that fit.** For a Δv refusal the panel lists `Alternatives` as slice 7 of the SOI plan asked (three rows at most, each with Δv, periapsis and apoapsis). Choosing one fills the order options (slice 4); it does not send anything.
 - Cache: one entry per selected target and option set, keyed with the game day as today. Replanning happens on click, on an option change, or when the day changes and the selection is still open. A day change replans one target, not a band.
 - Tests: selecting a target makes exactly one `PreviewMove`; changing an option makes exactly one more; closing the panel makes none.
@@ -79,9 +81,10 @@ Extract the row facts from `FleetWindow` into a plain class, `MoveTargetHints` (
 - `Execute` is enabled only when the preview is feasible. It sends the command with the options in the panel. The row button goes away for Move to.
 - Options, all optional and defaulting to what happens today:
   - **Mode**: Auto (default), Warp, Newtonian. Auto is `MovePlanner.Select` as it is. Warp and Newtonian force one mode; if the forced mode is refused, the panel says so and Execute stays off. A ship with no warp drive shows Warp disabled with the words `no warp drive`; a ship with no reaction drive shows Newtonian disabled the same way. The choice is per order, not remembered.
+  - **Timing**: Best window (default), Depart now, Pick on porkchop. Live only when the plan is Newtonian; with a warp it is disabled with `warp leaves now`. The Pick option shows the porkchop in the panel (slice 7b). Fields `Timing` and `PickedWindow` join `MoveOrderOptions`.
   - **Target orbit**: low circular (default), a circular orbit at a chosen altitude, or periapsis and apoapsis. `SubmitMove` already sends a periapsis and apoapsis in `MoveToBodyCommand` and `GoToBodyCommand`; the panel reuses that path. SOI plan slice 7 gives `SoiTransferAction` an optional arrival orbit; this slice fills it from the panel.
   - **Arrival type**: orbit (default), flyby, or stop at the target. Only orbit exists in the engine today. Show the others disabled with the words `not built`, so the room is visible but nothing is promised.
-- `PreviewMove` takes the options: `PreviewMove(shipId, bodyId, MoveOrderOptions options)`, with an options record that has `Mode`, `Periapsis`, `Apoapsis`, `Arrival`. The old two-argument call stays as the defaults. `MovePlanner.Preview` already has a mode and an arrival radius inside it; this exposes them and does not add a planner.
+- `PreviewMove` takes the options: `PreviewMove(shipId, bodyId, MoveOrderOptions options)`, with an options record that has `Mode`, `Timing`, `PickedWindow`, `Periapsis`, `Apoapsis`, `Arrival`. The old two-argument call stays as the defaults. `MovePlanner.Preview` already has a mode and an arrival radius inside it; this exposes them and does not add a planner.
 - Tests: `Preview_ForcedWarp_DoesNotPickNewtonian`, `Preview_WithApoapsis_ReportsTheSmallerDeltaV`, and `Execute_SendsTheOptionsThePanelShows` for the command translator.
 
 Acceptance: remove fuel from `Starship I`, click Luna, see the red reason and the other orbits, click one, see the options fill in and the preview turn feasible, click Execute, and the trip flies and ends in that orbit.
@@ -100,25 +103,67 @@ Most of this is built. `d007f2cd` added the `CanJump` flag to `ShipSnapshot` and
 
 Small. Can ship with slice 1.
 
-### 7. The five Phobos `WarpMoveTests` failures: a decision
+### 7. Departure timing: wait for a window, or go now (decided), and the five Phobos tests
 
-**What happens.** After the Lambert/patched-conic work, a warp to Phobos drops the ship into Mars's well about 13 km from where Phobos will be, on a leftover hyperbola. The agent replans from there. Before, the planner circularised at the drop-in radius (which is already Phobos's orbit) and was done in one action. Now `EvaluateNewtonian` takes the Lambert branch first: the hyperbolic leftover makes `closedForm` false (`needsCircularise`), `TryLambertWindow` finds a "Transfer window" to Phobos, and it returns that before the old `Circularise to match` fallback is reached (`MoveToPlanners.cs`, the `if (!closedForm)` block). So a ship that warped to within kilometres of Phobos plans a roughly six hour phasing transfer to it.
+**Decided (Jon, 2026-11-04).** The five Phobos `WarpMoveTests` failures are a gameplay choice, not a bug. With the new solver a ship waits for a convenient window to transfer instead of going now and spending more fuel circularising at the destination. That stays. What was missing is that the player has no say, and no way to see what waiting costs. So the order gets a **departure timing** option with a sane default, shown in the preview, inside the flow select destination → calculate → Execute. The planner gate in the earlier draft of this slice (circularise when already at the target) is dropped.
 
-The five failing tests (all in `WarpMoveTests`) show the result, none of them is flaky:
+**What happens today.** After a warp to Phobos the ship drops into Mars's well about 13 km from where Phobos will be, on a leftover hyperbola. `EvaluateNewtonian` takes the Lambert branch first (`closedForm` is false because the leftover needs circularising), `TryLambertWindow` finds a "Transfer window" to Phobos, and that is returned before the old `Circularise to match` fallback (`MoveToPlanners.cs`, the `if (!closedForm)` block). The window is chosen by `TransferPlanner.TryAffordableWindow`: a 32 × 20 `TransferWindows.Scan` from now over one synodic period (capped at four years), then `TransferGrid.TryBestUnderBudget`, which takes the **earliest** departure the tank can afford. So today's rule is "earliest affordable", and it is not shown to the player.
 
-| Test | Fails because |
-|---|---|
-| `MoveToPlan_HyperbolicAroundMarsNearPhobos_MatchesPhobosOrbit` | Plan is 2 actions (a transfer), test wants 1 `CirculariseAction` |
-| `CircularPrograde-Phobos`, `CircularRetrograde-Phobos`, `EccentricPrograde-Phobos` | After the drop-in the goal is `Transfer to <Phobos>, depart/arrive ~6 h` with `NewtonThrustAction` running and no `OrbitDB`; the test wants an orbit or a circularise move |
-| `WarpOrder_EarthToPhobos_SurvivesOneLongTickPastArrival` | Goal fails: `Newtonian needs 3,804 m/s, have 0 m/s`; the ship stays at e = 0.72 in Mars's well. The old path queued the circularise burn even with a short tank |
+#### 7a. The timing option and the Best window rule
 
-**Options.**
+`MoveOrderOptions` (slice 4) gains `Timing`: `BestWindow` (default), `DepartNow`, `PickOnPorkchop`. A fourth field, `PickedWindow` (`TransferWindow?`), carries the cell for `PickOnPorkchop`. The option rides on `MoveToBodyCommand` and on the `Goal` (`Goal.Timing`, `Goal.PickedWindow`), because the agent replans after a warp drop-in and must plan the same way.
 
-1. **Planner gate: already there, so circularise (recommended).** If the ship is in the same sphere as the target and within the drop-in offset of it (the distance `PlannedWarpExitOffsetLength(target)` plus a small margin, or equivalently the ship's radius is within a percent of the target's semi-major axis), skip the Lambert scan and take the existing `Circularise to match` branch, with the existing "a short tank still queues the burn" rule. After the circularise the goal replans, sees a near-circular orbit, and finishes through `AlreadyThere` or a short Hohmann phase. The five tests pass unchanged. It matches what the warp was for: the warp already did the transfer, so planning another is the wrong default. Cost: one condition and one test for the boundary (just inside and just outside the gate); the gate is a distance, so the Newtonian trip from far away is untouched.
-2. **Change the tests to the new behaviour.** Assert that the goal is a Lambert "Transfer window" and that the ship ends in Phobos's orbit after the burns. Cheap, but it blesses a six hour phasing leg after a warp that ended 13 km away, and the no-fuel test would have to be rewritten to assert a failed goal, which is a worse player outcome than the old queued circularise.
-3. **Make the warp arrive circular at the target.** Nothing to replan. A bigger change to `WarpMoveProcessor`'s drop-in and an engine behaviour change that slices 1 to 5 did not need; park it.
+- **Best window (default).** Candidates are the scan cells the tank can afford (`TotalDeltaV <= budget`, the same budget test as today) whose departure is within the **wait cap**. Let `dvMin` be the least `TotalDeltaV` among them. Take the **earliest departure whose `TotalDeltaV <= dvMin × 1.10`**. Ties at that date take the cheaper cell, then the shorter flight, as `TryBestUnderBudget` does now.
+  - **Why Δv first.** Fuel is the scarce thing and is hauled around the whole game; waiting costs only time, and a parked ship is not doing anything the player has asked for. So the rule minimises Δv, and does not minimise arrival time.
+  - **Why the 10% band.** The porkchop floor is flat near the best window. Waiting a day or a week for the last 2% is a bad trade. A 10% band takes the first window that is near best. Make both numbers constants (`BestWindowDvTolerance = 0.10`, `BestWindowWaitCapHohmannFlights = 2`) so the tests and Jon can move them.
+  - **The wait cap.** `2 ×` the Hohmann flight time between the two radii (the centre of `TransferWindows.HohmannTofBand`), and never more than one synodic period (waiting past one period cannot find a cheaper window; the scan span already stops there). The cap scales with the trip: a six hour hop waits at most about a day, an Earth to Mars Newtonian trip can wait most of a synodic period. If nothing affordable is inside the cap, widen to the whole scan span, take the earliest affordable cell as today, and the preview says `No window inside the wait cap; earliest the tank can fly is in <time>`.
+  - **Where.** A new `TransferGrid.TryBestWindow(budget, maxWaitSeconds, tolerance, out window)` next to `TryBestUnderBudget`; `TransferPlanner.TryAffordableWindow` takes the options and calls it. `TryBestUnderBudget` stays (it is the widen fallback).
+- **Depart now.** The cheapest affordable cell in the first departure column (departure = now). If the first column has none, the earliest affordable cell, and the preview says `Cannot leave now; earliest is in <time>`. This is the old "go now and circularise at the end" for the local case.
+- **Pick on porkchop.** The player clicks a cell (7b). `PickedWindow` goes to the planner through `PlanFromWindow` (it exists, and `TransferFromWindowCommand` already carries a window to `CommandTranslator`). If the cell is no longer affordable at Execute, the preview turns red with the Δv sentence; nothing is sent.
+- **Warp vs Newtonian.** Timing is a Newtonian concept. A warp leaves now and has no window, so:
+  - **Auto** is still `MovePlanner.Select` (no change to the default mode, see Decided). If `Select` picks warp, the Timing control is disabled with the words `warp leaves now`, and the preview shows the warp trip only. If `Select` picks Newtonian, Timing is live and defaults to Best window.
+  - **Forced Newtonian**: Timing is live, default Best window. **Forced Warp**: Timing disabled.
+  - **After a warp.** The drop-in leaves the ship near the target on a leftover orbit, and the agent replans from there as a Newtonian trip. That plan uses the order's timing, so the default is also what a warp to Phobos does at the end: wait for the window, transfer, arrive matching Phobos's orbit. The preview for a warp trip says so in one grey line (`After the warp, a local transfer is planned on arrival`). It does not promise a number, because the leftover orbit is not known until the drop-in.
+  - **When both modes can fly the trip**, the existing "other mode" line (slice 3) carries the comparison: for example `Warp leaves now, arrives in 3 h 10 min, 0 m/s` against the Newtonian wait, ETA and Δv.
+- **Engine behaviour change (named).** The default planning rule goes from earliest-affordable to Best window. For most trips the two agree or differ by hours. It is the reason the five Phobos tests change (7d).
 
-**Recommend option 1.** Do it as its own small PR, not in the Orders window PRs: it touches `MoveToPlanners.cs` only, and the five tests are the acceptance. Jon's call before it starts. Related review note: `MoveToPlanners.cs` is already very large; put the gate in a named helper (`ArrivedByWarp`), not inline.
+Tests: `BestWindow_WaitsForTheCheaperWindowInsideTheCap`, `BestWindow_TakesTheEarlierWindowInsideTheTolerance` (two windows 6% apart in Δv: takes the earlier), `BestWindow_NothingInsideTheCap_WidensAndSaysSo`, `DepartNow_TakesTheFirstColumn`, `DepartNow_NoWindowNow_SaysEarliestIs`, `Timing_IsIgnoredForWarp`, `Goal_KeepsTheTimingAcrossAWarpDropIn` (the replan after drop-in uses the order's timing, not the default).
+
+#### 7b. The porkchop in the preview
+
+The NavWindow already has the whole thing: an async `TransferWindows.Scan` (`StartPorkchop`, `TakePorkchopResult`), the heatmap and hover (`DrawPorkchop`), the best-cell mark (`MarkPorkchopBest`), and a cell selection (`_porkSelectI/J`), committed through `TransferFromWindowCommand`. Do not copy it into the Orders tab.
+
+- Extract it into `PorkchopPanel` (`Pulsar4X.Client`, ImGui, no NavWindow state): `Start(shipKe, targetKe, axes)`, `Draw(size)`, `Selected` (the `TransferWindow?`), `Best`. `NavWindow` switches to it so there is one implementation. The Δv/axis helpers (`SuggestPorkchopAxes`, the cost delegates) move with it.
+- The Orders preview shows it **only** when Timing is `PickOnPorkchop`. The scan is **not** run on a row click or on Best window. It starts when the player chooses Pick, on a task, with `Scanning…` shown; so the 22 ms click budget of slice 3 is untouched. One scan per (ship, target, game day); a day change marks it stale and rescans on the next draw.
+- The heatmap marks two cells: the Best window cell (the default rule) and the Depart-now cell, and the picked cell is outlined. Clicking a cell sets `PickedWindow`, replans through `PlanFromWindow`, and updates the preview rows (7c). It does not send anything.
+- Only for trips the scan can answer: a Newtonian transfer inside one parent or a one-level patched-conic transfer. For anything else the Pick option is disabled with the reason.
+- Tests: `PorkchopPanel_PicksTheCellUnderTheMouse` (pure index maths, extract it so it can be tested without ImGui), `Preview_PickOnPorkchop_UsesTheChosenWindow`, `ClickingARow_DoesNotStartAScan` (spy on `TransferWindows.Scan`).
+
+#### 7c. What the preview shows
+
+Under the mode line, a two-row table with the **chosen** option and the **alternative** (the next best timing: for Best window the alternative is Depart now, for Depart now it is Best window, for Pick it is Best window). `TripPreview` gains `Timing` (the chosen kind), `WaitSeconds`, and `TimingOptions`, a short list of `(Kind, WaitSeconds, EtaSeconds, DeltaV, FuelKg, Feasible, Reason)`; it is the same list that feeds slice 3's other-mode line, so no new planning cost: the scan runs once and the cells are already priced.
+
+```
+              Wait      Depart            Arrive    Δv       Fuel
+Best window   5 h 40    Nov 4 18:10       +6 h 20   212 m/s  41 kg   ← will fly this
+Depart now    0         now               +1 h 05   340 m/s  66 kg
+```
+
+A line under it says `Best window saves 128 m/s (38%) for a 5 h 40 wait`. Fuel comes from the rocket equation on the ship's current mass and exhaust speed, using what `ThrustView` and `NewtonThrustAbilityDB` hold; if a number cannot be computed, show Δv only. `Execute` sends the order with the chosen timing. The order is the one the preview showed: the Execute handler passes the same `MoveOrderOptions`, so a changed option replans first.
+
+#### 7d. Rewrite the five Phobos tests (`WarpMoveTests.cs`)
+
+Do this **after 7a**, in its own PR. No planner change belongs in it. If a test exposes a real bug, stop and report it. Keep each test's intent; change what it expects to the new behaviour (a ship that waits for a transfer window and arrives matching Phobos's orbit).
+
+Common helpers to add in the test class: `AssertArrivedMatchingPhobos(ship, mars, phobos)` (parent is Mars; `Eccentricity < 0.05`; `SemiMajorAxis` within 1% of Phobos's; separation along the orbit within `AlongTrackArrivedSeparation`), and `GoNowDeltaV(ship, phobos)` (previews with `Timing = DepartNow` and returns `DeltaV`).
+
+| Test | Intent (keep) | New assertions |
+|---|---|---|
+| `MoveToPlan_HyperbolicAroundMarsNearPhobos_MatchesPhobosOrbit` | A ship at Phobos's distance on a leftover hyperbola ends up matching Phobos's orbit and does not warp. | Replace `Assert.AreEqual(1, actions.Count)` and `IsInstanceOf<CirculariseAction>` with: no `WarpMoveAction`; the first action is the transfer window burn (`NewtonThrustAction` named `Transfer window`, or `SoiTransferAction`, whichever `MovePlanner` returns); `Preview(...).Timing == BestWindow`; `WaitSeconds >= 0`. Then run the burns to arrival and call `AssertArrivedMatchingPhobos`. Delete the `CirculariseAction.TryCompute` block (a circularise is no longer the plan). Keep `Assert.DoesNotThrow` for constructing each planned action. Fuel: the preview `DeltaV` is `<= GoNowDeltaV`. |
+| `WarpOrder_EarthToPhobos_ArrivesOnTimeInPlaceWithWellFormedOrbit` cases `CircularPrograde-Phobos`, `CircularRetrograde-Phobos`, `EccentricPrograde-Phobos` (the `-Mars` cases stay as they are) | One warp, drop-in once at the predicted exit time, no second warp, the goal completes in a well-formed orbit around Mars. | Keep everything up to and including the drop-in checks. Replace `HasDataBlob<OrbitDB> \|\| NewtonSimpleMoveDB` with: an orbit, or a pending `NewtonThrustAction` for the transfer. Replace the wait-for-`NewtonSimpleMoveDB` loop with: run until the goal completes, with the deadline set from the plan (`drop-in + WaitCap + transfer flight + 1 day`, read from the preview, not a fixed 2 days). Add: before it completes, assert the goal reason starts with `Transfer to` and a `Transfer window` burn is queued, i.e. the ship waited for a window (`WaitSeconds` from the preview > 0 for at least one case). At the end `AssertArrivedMatchingPhobos`. Keep the "never warps again" checks inside the loop. Fuel: the preview `DeltaV` is `<= GoNowDeltaV`, and the fuel the ship actually burned after the drop-in is no more than the fuel for `GoNowDeltaV` (rocket equation, 5% slack). If the retrograde case cannot afford the transfer, that is a finding: report it, do not weaken the assert. |
+| `WarpOrder_EarthToPhobos_SurvivesOneLongTickPastArrival` | One long tick past arrival must not fling the ship out of Mars's well. | Split in two. (1) `...WithADrive_SurvivesOneLongTick`: give the ship a drive and tank (the `AttachThrust` helper the `MoveToPlan_*` tests use), keep `AdvanceTo(eti + 1 day)` and every existing bounds assert except `Eccentricity < 0.05` (a transfer may still be pending); instead assert the goal is not `Failed`, and either the orbit is near circular or a transfer window burn is queued with a finite position. (2) `...WithAnEmptyTank_StaysBoundToMars`: the ship as the test builds it today (no usable Δv). The goal fails with the `Newtonian needs … m/s, have 0 m/s` sentence; assert that, plus `orbit.Parent == mars`, `Eccentricity < 1`, position inside Mars's SOI and finite after the long tick. The old path queued a burn the tank could not fly; the new one fails the goal and leaves the ship bound at e ≈ 0.72. That is the honest outcome, and the test says so. |
+
+Acceptance: `dotnet test --filter WarpMoveTests` is green; the whole suite shows 0 failures. A change that only edits the planner's rule fails these tests, as it should.
 
 ### 8. Bootstrap warp-brake test
 
@@ -144,13 +189,14 @@ Acceptance: delete `goal` from one of the three `TryMoveIntoRange` calls and a t
 - Should Execute stay on a day-change replan that turns feasible into refused? The plan says the panel shows the new answer and turns Execute off, with a note.
 - Is the preview worth running off the UI thread at all? 22 ms is one dropped frame. Measure in the real client first.
 - Do the goods and bootstrap pickers need the same treatment? Slice 1 audits; no measurement yet.
-- Slice 7: option 1, 2 or 3? Recommended: 1, as its own PR.
+- Slice 7: are 10% and two Hohmann flights the right defaults for Best window? Both are constants; Jon can move them after playing it.
+- Slice 7: a ship with an empty tank that warps to Phobos now fails the goal and sits bound in Mars's well (the old code queued a burn it could not fly). Is a failed goal with the Δv sentence enough, or should the preview warn before the warp?
 - Slice 3: should the other-mode line also show the warp sustain cost, or only time and Δv? Time and Δv are free; sustain needs the plan 2 bill.
 - Timing was a Debug build. A Release build will be faster, but a band of 500 will still be seconds.
 
 ## Out
 
-Making `MovePlanner.Preview` faster. Changing `MovePlanner.Select`. New arrival types in the engine. Warp changes, except the Phobos gate in slice 7 if Jon picks option 1 (or 3). A porkchop inside the Orders tab (the NavWindow has it).
+Making `MovePlanner.Preview` faster. Changing `MovePlanner.Select`. New arrival types in the engine. Warp changes. Making the warp arrive circular (the Phobos option that was dropped). A second porkchop implementation: the Orders tab reuses the NavWindow's through `PorkchopPanel` (slice 7b).
 
 ## Stop if
 
