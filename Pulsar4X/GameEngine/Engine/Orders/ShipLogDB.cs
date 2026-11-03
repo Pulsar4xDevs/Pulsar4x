@@ -88,6 +88,11 @@ static class ShipLogBook
     {
         if (entity.HasDataBlob<FleetDB>())
             return;
+        // A standing colony job replans on every wake that changes a listing or a job. The
+        // order line already named it once. Writing it again each pass alternates with the
+        // listing lines, so the "same as the last line" check never catches it.
+        if (IsStandingColonyJob(goal))
+            return;
         Append(entity, at, ShipLogKind.Own, RouteSentence(entity, goal, actions));
     }
 
@@ -102,6 +107,11 @@ static class ShipLogBook
         // A posting has its own sentence, written when the chair actually changes.
         if (action is AssignAdministratorOrder or UnassignAdministratorOrder
             or AssignScientistOrder or UnassignScientistOrder)
+            return;
+        // A listing is the market book changing, not something the colony did. It is only
+        // queued when the numbers moved, which for a producing colony is every few days, and
+        // the line has no cargo name at queue time, so every one reads the same.
+        if (action is PostMarketListingAction)
             return;
         if (!entity.HasDataBlob<ShipInfoDB>() && !entity.HasDataBlob<ColonyInfoDB>())
             return;
@@ -190,6 +200,9 @@ static class ShipLogBook
 
         return name;
     }
+
+    static bool IsStandingColonyJob(Goal goal)
+        => goal.Type is GoalType.OfferStock or GoalType.RunMarket or GoalType.RunIndustry;
 
     public static void NoteOutcome(Entity entity, Goal goal, DateTime at)
     {
