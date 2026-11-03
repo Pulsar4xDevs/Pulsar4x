@@ -177,6 +177,11 @@
           "Id": "hydrolox",
           "Amount": 9000000,
           "Type": "byCount"
+        },
+        {
+          "Id": "methalox",
+          "Amount": 9000000,
+          "Type": "byCount"
         }
       ],
       "StartingItems": [
@@ -211,6 +216,7 @@
         "stainless-steel",
         "rp-1",
         "hydrolox",
+        "methalox",
         "plastic",
         "electricity",
         "hydrocarbons",
@@ -260,6 +266,7 @@
         "default-design-mine",
         "default-design-passive-sensor",
         "default-design-passive-sensor-s50",
+        "default-design-raptor",
         "default-design-refinery",
         "default-design-rs-25",
         "default-design-shipyard",
@@ -287,18 +294,19 @@
         "default-design-warehouse-prefab"
       ],
       "ShipDesigns": [
+        "early-ship-design-starship",
         "early-ship-design-newton-tug"
       ],
       "Fleets": [
         {
-          "Name": "Newton Test Fleet",
+          "Name": "Starship Test Fleet",
           "Ships": [
             {
-              "DesignId": "early-ship-design-newton-tug",
-              "Name": "Newton Tug I",
+              "DesignId": "early-ship-design-starship",
+              "Name": "Starship I",
               "Cargo": [
                 {
-                  "Id": "hydrolox",
+                  "Id": "methalox",
                   "Amount": 20000000,
                   "Type": "byVolume"
                 }

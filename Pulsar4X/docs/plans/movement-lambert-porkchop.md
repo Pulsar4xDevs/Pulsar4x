@@ -101,7 +101,8 @@ Tests: an `ActionQueue`-level test that the planned burns match the selected cel
 - Multi-revolution solutions: a long wait for a cheaper orbit is a real tactic. Add later behind a `maxRevs` argument?
 - ImGui draw lists are fine for a 120 × 120 grid. Is a texture upload wanted for finer grids? Only if the draw list is slow.
 - Should an AI captain pick the minimum-Δv window or the earliest one that fits the budget? The plan assumes earliest-in-budget, since an agent that waits two years for 100 m/s is wrong more often than right. Jon's call.
-- Whether `SnapshotMoves.InterPlanetaryHohmann` and `InterceptCalcs.InterPlanetaryHohmann` are deleted here or in plan 3. Plan 3 assumes it deletes them.
+- `SnapshotMoves.InterPlanetaryHohmann` and `InterceptCalcs.InterPlanetaryHohmann`: decided (Jon, 2026-11-03: fix or delete, either is fine). Delete and rewrite, in plan 3 slice 5. This plan does not touch them, and the porkchop replaces their NavWindow mode.
+- The porkchop's Δv axis should show the ship's budget as a contour (the `Starship I` budget is 13.6 km/s, so on Early Tech Start almost the whole plot is affordable; a drained ship is the case that shows a limit). Warp stays the default interplanetary mode (plan 3); the plot is where a player chooses the Newtonian one.
 
 ## Out
 

@@ -1,6 +1,6 @@
 # Interplanetary Newtonian transfer (patched conics)
 
-Status: not started. Do not build until asked. Written 2026-11-03 for the Early Tech Start mod.
+Status: not started. Do not build until asked. Written 2026-11-03 for the Early Tech Start mod. Revised 2026-11-03 after Jon's answers (rewrite `InterPlanetaryHohmann`, warp stays the default, the entry scan, the Starship start ship).
 
 Plan 3 of 3. It needs [plan 1](movement-newtonian-soi-capture.md) slices 3 and 4 (the escape and capture maths, and `SoiTransferAction`) and [plan 2](movement-lambert-porkchop.md) slices 1 to 3 (Lambert and the window scan). Do not start it before those are built and tested.
 
@@ -18,7 +18,8 @@ With no warp, a ship in low Earth orbit that wants to reach Mars needs three thi
   4. Lambert from that exit state to the target aimed at `LowOrbitRadius` with the impact offset from plan 1.
   5. Adjust `vInf` by the difference. Repeat at most five times. If the exit state has not settled within 1,000 km at the target, fail with `transfer did not converge`.
 - **One mid-course correction is allowed, and it is optional.** After the ship enters `Cruise`, the action solves Lambert from the ship's real state to the aim point and burns the difference if it is bigger than 1 m/s and affordable. This is the safety net for the integrator-versus-conic differences that the iteration above cannot see. It is `Correct`.
-- **`Select` keeps preferring warp when a ship has both.** `MovePlanner.Select` today prefers `AlreadyThere`, then `NewtonianTransfer`, then `Warp`. If both are feasible on an interplanetary leg, an eight-month coast would beat warp. For a ship that has a warp drive keep today's behaviour for different-parent targets: warp first. Newtonian for these targets is chosen when warp is not feasible or the player picks it in the porkchop (plan 2, slice 4). Within one sphere (plan 1) the order is unchanged. See the open questions.
+- **Warp is the default on an interplanetary leg (Jon, 2026-11-03).** `MovePlanner.Select` today prefers `AlreadyThere`, then `NewtonianTransfer`, then `Warp`. For targets under a different parent, a ship that has both keeps warp first. Newtonian is chosen when warp is not feasible or the player picks it from the porkchop (plan 2, slice 4). Within one sphere (plan 1) the order is unchanged. Future work, not built: a calculation of which is faster for the ship at hand (warp time including the sustain draw against the Newtonian time of flight, 259 days for Earth to Mars) so `Select` can choose. It is a small slice once both plans exist and is listed in the open questions.
+- **Delete `InterPlanetaryHohmann` and write the planner new (Jon said either; this is the pick).** Fixing it means changing nearly every line: the escape burn is an ellipse to the sphere's edge and not a hyperbola with `vInf`; its `mu` uses the ship's mass in place of the planet's; the window uses a longitude-alignment time and not a lead angle (`gpHommanAngle` is unused and `1/2*Math.Sqrt(2)` is integer division, which is `0`); it has no capture burn and no frame change; and it has no test. What would survive is the two-line idea of a lead angle, which `Hohmann2` and plan 2's scan already cover. There are two copies (`InterceptCalcs`, `SnapshotMoves`) to keep in step as well. Slice 5 deletes both.
 - **The planner checks the whole trip's Δv first,** as plan 1 does: escape plus (optional) correction allowance plus capture, against `NewtonThrustAbilityDB.DeltaV`. `NewtonSimpleProcessor` is not changed.
 
 ## What is going wrong
@@ -35,11 +36,26 @@ With no warp, a ship in low Earth orbit that wants to reach Mars needs three thi
 
 ### 1. Fix the entry scan before building on it
 
-`Orbits/OrbitDB.cs` `ScheduleSOIEntry`. Not game rules, just detection:
+`Orbits/OrbitDB.cs` `ScheduleSOIEntry` (~665). Not game rules, just detection. This is the same code Jon asked about for an ellipse that a moving sphere runs into, and the two-day lookahead is the cause of that problem, so it is one fix.
 
-- Choose the step size from physics: `step = min(period/180, soiRadius / (2 · relativeSpeedEstimate))`, with a ceiling on total samples (4,000) and a scan window of the lesser of the time to the next frame change and 10 years.
-- After the first sampled hit, keep the existing 20-step bisection. When a miss passes through the sphere between two samples (distance to the child's centre dips inside the sphere only between samples), catch it by checking the closest approach in each step with a quadratic fit, not only the endpoints.
-- Tests, `Pulsar4X.Tests/SoiEntryScanTests.cs`: a fast fly-by that the old scan misses is now found; a 2.7-year ellipse to Jupiter's orbit is scheduled; a trip that never enters is not.
+**What is wrong, in numbers.** The scan takes 180 equal samples across `min(period, 1 year)`, about 2 days a step. A ship cruising at 15 km/s relative to a planet moves 2.6 million km in a step. Mars's sphere is 1.15 million km across, Earth's about 1.85 million. A crossing can fall between two samples, and then the code says "no encounter". A transfer longer than a year is never scanned past a year. Nothing is rescheduled when the scan comes up empty.
+
+**The fix has three parts.** A band filter to throw out candidates, a step that cannot jump a crossing, and a rescan instead of a cap.
+
+1. **Band prefilter (cheap, per sibling).** A ship on a bound orbit about the parent sweeps radii from its periapsis to its apoapsis. A sibling body sweeps from its periapsis minus its sphere radius to its apoapsis plus its sphere radius. If the two intervals do not overlap, the ship can never be inside that sphere, whatever the phase or the inclination, because distance from the parent is a necessary condition. This is two comparisons per sibling. Most siblings are dropped here (a ship on a 7,000 km orbit is never near Mars). For `e >= 1` the ship's band is `[periapsis, the radius where it leaves this frame]`. This also covers the case Jon raised, a sphere that moves into the ship's ellipse: the sibling's band is the whole range it sweeps in its orbit, so a sphere that will pass through the ellipse's radii keeps the sibling a candidate, and only then is time worked out.
+2. **Conservative advancement (survivors only).** Let `gap(t) = |r_ship(t) − r_child(t)| − sphereRadius`. Neither body can close the gap faster than `v_ship,max + v_child,max`, each the speed at its own periapsis (vis-viva). So `Δt = gap / (v_ship,max + v_child,max)` is a step that provably cannot jump over a crossing. Advance by `Δt`; when `gap ≤ 0` there is a hit, and the existing 20-step bisection finds the entry time. The step shrinks near an encounter and is long far from one, so the cost is a handful of evaluations for a far sibling. Put a floor of 60 seconds on `Δt` and a ceiling of 20,000 iterations. The floor means a graze shorter than 60 s of relative travel is ignored: at 15 km/s that is 900 km against a sphere of hundreds of thousands. State the floor in a comment.
+3. **Horizon and rescan, not a one-year cap.** The scan runs to the earlier of (a) the ship's own next frame change, if `ChangeSOIProcessor` is scheduled for it, (b) one synodic period of ship and child, `1 / |1/T_ship − 1/T_child|`, because the relative geometry of two near-circular orbits repeats after it, and (c) ten years. If the scan finds nothing, schedule an interrupt at the horizon that runs `ScheduleSOIEntry` again from there. An empty scan is then "nothing yet" and not "never". The rescan interrupt can go stale like any other, so `EnterSOIProcessor` keeps its own check that the ship is still on the same orbit (it should already do this; verify).
+
+Where the bands overlap and the synodic period is long (a Jupiter-bound ellipse, 2.7 years), step 3 still finds the encounter on the first pass, because it is not capped at a year.
+
+Tests, `Pulsar4X.Tests/SoiEntryScanTests.cs`:
+- A fast fly-by that the old 180-sample scan misses is found (build it from the old sampler's miss, so the test fails on the old code).
+- A 2.7-year ellipse out to Jupiter's orbit is scheduled.
+- A trip whose band does not overlap any sibling schedules nothing and does not iterate (count the position evaluations).
+- A trip that overlaps in radius but passes the child's sphere on the wrong side (never enters) is rejected after the advancement ends.
+- A sibling moving into a fixed ship ellipse is found: put a ship on a high ellipse, a body whose sphere crosses it six months later, and check the scheduled time within a minute of a brute-force one-minute scan.
+- A rescan interrupt is set when nothing is found, and the second pass finds a crossing that begins after the first horizon.
+- Luna from a LEO ellipse still gives today's entry time (regression).
 
 ### 2. Frame-level helper: common ancestor and body states
 
@@ -73,12 +89,12 @@ Extend `SoiTransferAction` (plan 1) with `Escape`, `Cruise`, `Correct`, `Approac
 
 `MovePlanner`: `EvaluateNewtonian` calls `PatchedConicPlanner` when the target's orbit parent is neither the ship's parent nor the target itself (the cases plan 1 owns). `TryBuildMoveActions` returns the action. The `MoveOption.Message` is `Transfer to Mars, depart <date>, arrive <date>`.
 
-Tests, `PatchedConicActionTests.cs`, using the Early Tech Start start and fuel added with `CargoTransferProcessor.AddRemoveCargoMass` so the tug has about 7 km/s:
+Tests, `PatchedConicActionTests.cs`, using the Early Tech Start start ship (`Starship I`, 13.6 km/s as started; no fuel needs adding):
 - Plan Earth to Mars on day 0. Run `game.TimePulse` for up to 450 game days, in the same stepping the existing `NewGameWithEarlyMod_RunsAMonthOfGameTimeAndSurvivesASaveAndLoad` uses.
 - Assert, in order: `SOIChanged` events `Exited SOI of Earth`, `Entered SOI of Mars`; the final `OrbitDB.Parent` is Mars; periapsis of the arrival hyperbola within 25% of the target; the finished orbit's eccentricity is under 0.05 (or the ellipse sentence); fuel burned within 5% of the Tsiolkovsky figure for the planned Δv (plus the correction).
 - Save after the escape, again mid-cruise, again during the approach; load; the trip still finishes.
-- A short tank: refuses with `Δv` before the first burn; fuel unchanged.
-- Delete the `Mars refused` asserts in `EarlyTechStartTests.NewtonianOnlyShip_IsOfferedNoWarpMove_AndCanHohmannWithinTheWell` and replace them with `Feasible` or a Δv refusal, depending on the tug's tank (see open questions).
+- A short tank: drain the ship with `CargoTransferProcessor.AddRemoveCargoMass` until its Δv is about 4 km/s. It refuses with `Δv` before the first burn, and fuel is unchanged. A short tank is a refusal, not a parking orbit (plan 1, slice 7 puts the reason and alternative orbits in the Fleet window).
+- Delete the `Mars refused` asserts in `EarlyTechStartTests.NewtonianOnlyShip_IsOfferedNoWarpMove_AndCanHohmannWithinTheWell` and replace them with `Feasible`: the Starship has 13.6 km/s against about 5.6 km/s needed.
 
 ### 5. NavWindow, and remove the duplicates
 
@@ -87,20 +103,21 @@ Tests, `PatchedConicActionTests.cs`, using the Early Tech Start start and fuel a
 - Delete `InterceptCalcs.InterPlanetaryHohmann` and `SnapshotMoves.InterPlanetaryHohmann`. `OrbitalMath.Hohmann2` stays: `ChangeOrbitalAltitudeAction.TryPlanBurns` (~166) uses it. Remove `HohmannOE2` if it still has no caller, and note it in master-plan section 4 if not.
 - Update master-plan section 4, "Movement plumbing": strike `InterPlanetaryHohmann has no test and the planner does not use it` and `a burn that leaves the parent's sphere of influence is not detected` if plan 1's decision covers it.
 
-Checked by a play-test list in the PR: Earth to Mars from the start screen with a fuelled tug, then Mars back.
+Checked by a play-test list in the PR: Earth to Mars from the start screen with `Starship I`, then Mars back (the round trip is about 11.2 km/s of the ship's 13.6, with no refuelling).
 
 ## Numbers (by hand, to be replaced by test output)
 
 - Earth to Mars Hohmann: about 259 days, heliocentric `vInf` at Earth about 2.94 km/s, at Mars about 2.65 km/s.
 - Escape from 7,008 km: hyperbolic periapsis speed 11.06 km/s against circular 7.54 km/s, Δv about 3.5 km/s.
 - Capture at Mars low orbit (1.1 × 3,390 km = 3,729 km): periapsis speed 5.48 km/s, circular 3.39 km/s, Δv about 2.1 km/s.
-- Total about 5.6 km/s. The Newton Tug I will almost certainly need more tank than its mod design has, or a refuel (open questions).
+- Total about 5.6 km/s. `Starship I` (28.5 t dry, 1,197 t methalox, three Raptors, Δv 13.6 km/s empty, 8.4 km/s with 100 t of cargo) covers it with a large margin, and the round trip with no refuel.
+- The scan numbers: relative speed 15 km/s gives 2.6 million km per two-day step against a Mars sphere diameter of 1.15 million km.
 - Earth's sphere is about 925,000 km. At 3 km/s the leaving hyperbola crosses it in about 4 days. Mars's sphere is about 577,000 km.
 
 ## Open questions
 
-- Fuel. A tug with enough Δv for Earth to Mars and nothing left is a one-way trip. Do we give the mod a bigger tanker design, rely on refuelling at Mars (there are no colonies there yet in Early Tech Start), or leave Mars as a goal the player has to engineer for? Jon's call.
-- Should a ship that has both warp and a reaction drive pick warp on interplanetary legs (the plan's default), or let the player choose per order? A per-order toggle is more UI. The plan defaults to "warp first, Newtonian from the porkchop".
+- Fuel: answered. The start ship is `Starship I`, enough for Earth to Mars and back. A tanker and refuelling at Mars stay out.
+- Warp versus Newtonian on an interplanetary leg: answered, warp first for now. Open as future work: the calculation that picks the faster. It needs warp's sustain cost for the leg and the Newtonian time of flight from the patched-conic planner, so it comes after slice 3.
 - Aerobraking and gravity assists are out. Say if gravity assists are wanted as a later plan; they need `EnterSOIProcessor` to handle a fly-by that leaves the sphere again, which it does today only via `ChangeSOIProcessor` for hyperbolas.
 - Is a second mid-course correction wanted? One is planned. Two doubles the work for little accuracy gain unless the integrator drifts.
 - Time acceleration: an eight-month transfer under the game's pulse needs `SoiTransferAction` to wake only at events (frame changes, the correction time), not every tick. `AddEntityInterupt` does that. Check at 1-day-per-step time compression that nothing is skipped.

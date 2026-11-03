@@ -343,7 +343,7 @@ public class EarlyTechStartTests
         var (game, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
         var info = faction.GetDataBlob<FactionInfoDB>();
 
-        Assert.That(info.ShipDesigns.Keys, Is.EquivalentTo(new[] { "early-ship-design-newton-tug" }));
+        Assert.That(info.ShipDesigns.Keys, Is.EquivalentTo(new[] { "early-ship-design-starship", "early-ship-design-newton-tug" }));
         var ships = game.Systems.SelectMany(system => system.GetAllEntitiesWithDataBlob<ShipInfoDB>()).ToList();
         Assert.That(ships, Has.Count.EqualTo(1));
 
@@ -351,6 +351,24 @@ public class EarlyTechStartTests
         Assert.That(ship.HasDataBlob<WarpAbilityDB>(), Is.False);
         Assert.That(ship.GetDataBlob<NewtonThrustAbilityDB>().ThrustInNewtons, Is.GreaterThan(0));
         Assert.That(MovePlanner.CanMove(ship, out string reason), Is.True, reason);
+    }
+
+    [Test]
+    public void StartingShip_IsStarshipLike_AndHasTheDeltaVForEarthToMars()
+    {
+        var (game, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var ship = game.Systems.SelectMany(system => system.GetAllEntitiesWithDataBlob<ShipInfoDB>()).Single();
+        var thrust = ship.GetDataBlob<NewtonThrustAbilityDB>();
+
+        Assert.That(ship.GetName(faction.Id), Is.EqualTo("Starship I"));
+        // ~1200 t of methalox through Raptor-class engines (ve = 3.6 km/s, Isp ~ 370 s).
+        Assert.That(thrust.TotalFuel_kg, Is.InRange(1.1e6, 1.3e6));
+        Assert.That(thrust.ExhaustVelocity, Is.InRange(3500, 3700));
+        Assert.That(thrust.ThrustInNewtons, Is.GreaterThan(5e6));
+
+        // An Earth parking orbit to Mars transfer is about 5.6 km/s. Demand a clear margin.
+        const double earthToMarsDv = 5600;
+        Assert.That(thrust.DeltaV, Is.GreaterThan(earthToMarsDv * 1.5));
     }
 
     [Test]
@@ -380,13 +398,13 @@ public class EarlyTechStartTests
         Assert.That(lunaActions.OfType<WarpMoveAction>(), Is.Empty);
 
         // Rendezvous with another ship in a higher circular orbit: a Hohmann transfer, no warp.
-        var design = faction.GetDataBlob<FactionInfoDB>().ShipDesigns["early-ship-design-newton-tug"];
+        var design = faction.GetDataBlob<FactionInfoDB>().ShipDesigns["early-ship-design-starship"];
         double r = earth.GetDataBlob<MassVolumeDB>().RadiusInM * 6;
         var buddy = ShipFactory.CreateShip(design, faction, new Pulsar4X.Orbital.Vector3(r, 0, 0), earth, "Buddy");
-        var hydrolox = faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny("hydrolox");
-        double shipFuel = ship.GetDataBlob<CargoStorageDB>().GetMassStored(hydrolox, false);
-        Assert.That(shipFuel, Is.GreaterThan(0), "the starting tug is fuelled");
-        CargoTransferProcessor.AddRemoveCargoMass(buddy.GetDataBlob<CargoStorageDB>(), hydrolox, shipFuel);
+        var methalox = faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny("methalox");
+        double shipFuel = ship.GetDataBlob<CargoStorageDB>().GetMassStored(methalox, false);
+        Assert.That(shipFuel, Is.GreaterThan(0), "the starting ship is fuelled");
+        CargoTransferProcessor.AddRemoveCargoMass(buddy.GetDataBlob<CargoStorageDB>(), methalox, shipFuel);
         var toBuddy = MovePlanner.Evaluate(ship, buddy, now);
         var transfer = toBuddy.Single(o => o.Mode == MoveMode.NewtonianTransfer);
         Assert.That(transfer.Feasible, Is.True, transfer.Reason);
