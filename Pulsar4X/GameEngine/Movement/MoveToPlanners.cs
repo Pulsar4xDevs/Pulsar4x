@@ -1321,6 +1321,10 @@ public static class MovePlanner
             speed = 0;
         var pos = new Vector3(radius, 0, 0);
         var vel = new Vector3(0, speed, 0);
+        // Nothing to capture into (jump point, anomaly, orbitless body): there is no capture
+        // burn to pay for, so the gate does not apply.
+        if (!TryCaptureSpeed(dropIn, ship, radius, out _, out _))
+            return true;
         double budget = ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrust) ? thrust.DeltaV : 0;
         if (TryArrivalBurn(ship, dropIn, pos, vel, budget, now, out _, out _, out _, out _))
             return true;
