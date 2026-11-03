@@ -224,6 +224,7 @@ public class ColonyMarketOrderTests
         Assert.That(GoalsDB.BaseWeights[GoalType.RunMarket], Is.EqualTo(0.5f));
 
         var withOffice = Scene.Build();
+        withOffice.Policy("iron", min: 0, max: 10, auto: false, ask: 2, bid: 1);
         var goals = new GoalsDB();
         AgentProcessor.PruneImpossibleGoals(goals, withOffice.Colony);
         Assert.That(goals.CapabilityModifiers.ContainsKey(GoalType.RunMarket), Is.False);
