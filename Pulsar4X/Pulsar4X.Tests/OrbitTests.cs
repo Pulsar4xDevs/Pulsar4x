@@ -54,26 +54,6 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void TestOrbitEpoch()
-        {
-            double parentMass = 1.989e30;
-            double objMass = 2.2e+15;
-            Vector3 position = new Vector3() { X = Distance.AuToMt(0.57) }; //Halley's Comet at periapse aprox
-            Vector3 velocity = new Vector3() { Y = 54000 };
-
-            BaseDataBlob[] parentblobs = new BaseDataBlob[3];
-            parentblobs[0] = new PositionDB() { AbsolutePosition = Vector3.Zero };
-            parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
-            parentblobs[2] = new OrbitDB();
-            Entity parentEntity = Entity.Create();
-            _entityManager.AddEntity(parentEntity, parentblobs);
-            double sgp_m = GeneralMath.StandardGravitationalParameter(parentMass + objMass);
-
-            OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, position, velocity, new DateTime());
-            Vector3 resultPos = objOrbit.GetPosition_AU(new DateTime());
-        }
-
-        [Test]
         public void TestHyperbolicFunctions()
         {
             var a = -1267000000;
@@ -354,34 +334,6 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(2 * Math.PI - (Math.PI / 2), l5);
         }
 
-        [Test]
-        public void OrbitMath_KeplerFromPositionAndVelocity_When_ZeroXPositiveYVelocity_Should_GiveCorrectResults()
-        {
-            // double parentMass = 1.989e30;
-            // double objMass = 10000;
-        }
-
-        [Test]
-        public void FailingOrbitsFromVectorTests()
-        {
-            double parentMass = 1.989e30;
-            double objMass = 10000;
-            Vector3 position = new Vector3() { X = Distance.AuToMt(0.25), Y = Distance.AuToMt(0.25) };
-            Vector3 velocity = new Vector3() { X = Distance.KmToM(0), Y = Distance.KmToM(1) }; //passes
-            TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
-
-            /*
-            velocity = new Vector3() { X = Distance.KmToM(0), Y = -Distance.KmToM(2) }; //fails
-            TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
-
-            velocity = new Vector3() { X = Distance.KmToM(1), Y = Distance.KmToM(0) }; //fails
-            TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
-
-            velocity = new Vector3() { X = Distance.KmToM(-1), Y = Distance.KmToM(0) }; //fails
-            TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
-            */
-        }
-
         public bool TestVectorsAreEqual(Vector3 expected, Vector3 actual, double requiredAccuracy = 0.01)
         {
             Assert.AreEqual(expected.X, actual.X, requiredAccuracy);
@@ -623,33 +575,6 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(distance1, distance2); //if we put the variable timstep which is related to the speed of the object in we'll have to give this a delta
             */
-        }
-
-        [Test]
-        public void EccentricityVectorTimeStudy()
-        {
-            Stopwatch sw1 = new Stopwatch();
-            Stopwatch sw2 = new Stopwatch();
-
-            for (int i = 0; i < 1e6; i++)
-            {
-                Random r = new Random();
-
-                double sgp = r.NextDouble();
-                Vector3 position = Vector3.Random(r);
-                Vector3 velocity = Vector3.Random(r);
-
-                sw1.Start();
-                OrbitalMath.EccentricityVector(sgp, position, velocity);
-                sw1.Stop();
-
-				sw2.Start();
-				OrbitalMath.EccentricityVector2(sgp, position, velocity);
-				sw2.Stop();
-			}
-
-            Console.WriteLine("EccentricityVector:\t\t" + sw1.Elapsed.ToString());
-            Console.WriteLine("EccentricityVector2:\t" + sw2.Elapsed.ToString());
         }
 
     }
