@@ -75,17 +75,26 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
 
     public NewGameCatalog LoadMods(IReadOnlyList<string> modManifestPaths)
     {
-        var modLoader = new ModLoader();
-        _modDataStore = new ModDataStore();
-        foreach (var manifestPath in modManifestPaths)
-        {
-            modLoader.LoadModManifest(manifestPath, _modDataStore);
-        }
+        // Load into a fresh store and keep it only if every mod loads, so a failed attempt never
+        // leaves a half-loaded set behind. Dependencies are pulled in and loaded first.
+        var modDataStore = LoadModStore(modManifestPaths, ModsState.AvailableMods.Select(m => m.Path));
+        _modDataStore = modDataStore;
 
         return BuildCatalog(_modDataStore);
     }
 
-    private static NewGameCatalog BuildCatalog(ModDataStore data)
+    /// <summary>Loads the mods (and the mods they depend on, found among
+    /// <paramref name="availableManifestPaths"/>) into a fresh store.</summary>
+    internal static ModDataStore LoadModStore(
+        IEnumerable<string> modManifestPaths, IEnumerable<string> availableManifestPaths)
+    {
+        var modLoader = new ModLoader();
+        var modDataStore = new ModDataStore();
+        modLoader.LoadModManifests(modManifestPaths, availableManifestPaths, modDataStore);
+        return modDataStore;
+    }
+
+    internal static NewGameCatalog BuildCatalog(ModDataStore data)
     {
         var systems = new List<CatalogSystemOption>();
         foreach (var (id, system) in data.Systems)
@@ -323,7 +332,7 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
         };
     }
 
-    private static (Game game, Entity faction, StarSystem system, Entity body)? CreateGameCore(
+    internal static (Game game, Entity faction, StarSystem system, Entity body)? CreateGameCore(
         ModDataStore modDataStore, NewGameRequest request)
     {
         var gameSettings = new NewGameSettings

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Blueprints;
@@ -15,10 +16,77 @@ namespace Pulsar4X.Modding
     {
         public Dictionary<string, ModManifest> LoadedMods { get; private set; } = new Dictionary<string, ModManifest>();
 
+        /// <summary>
+        /// Loads the requested mods plus anything they depend on, dependencies first. Mods that do
+        /// not depend on each other load in namespace order so the result never depends on the
+        /// order directories were listed in.
+        /// </summary>
+        /// <param name="requestedManifestPaths">The mods to load.</param>
+        /// <param name="availableManifestPaths">Every manifest a dependency may be found in.</param>
+        public void LoadModManifests(
+            IEnumerable<string> requestedManifestPaths,
+            IEnumerable<string> availableManifestPaths,
+            ModDataStore baseData)
+        {
+            var available = new Dictionary<string, (string Path, ModManifest Manifest)>();
+            foreach (var path in availableManifestPaths.Concat(requestedManifestPaths))
+            {
+                var manifest = ReadManifest(path);
+                if (!available.ContainsKey(manifest.Namespace))
+                    available.Add(manifest.Namespace, (path, manifest));
+            }
+
+            var ordered = new List<string>();
+            var visiting = new HashSet<string>();
+
+            void Visit(string ns, string requiredBy)
+            {
+                if (ordered.Contains(ns)) return;
+                if (!available.TryGetValue(ns, out var entry))
+                    throw new FileNotFoundException($"Mod '{requiredBy}' requires mod '{ns}', which is not installed.");
+                if (!visiting.Add(ns))
+                    throw new InvalidOperationException($"Mod '{ns}' depends on itself through a dependency cycle.");
+
+                foreach (var dependency in entry.Manifest.Dependencies ?? new List<string>())
+                    Visit(dependency, ns);
+
+                visiting.Remove(ns);
+                ordered.Add(ns);
+            }
+
+            var requestedNamespaces = new List<string>();
+            foreach (var path in requestedManifestPaths)
+            {
+                var ns = ReadManifest(path).Namespace;
+                if (!requestedNamespaces.Contains(ns))
+                    requestedNamespaces.Add(ns);
+            }
+
+            foreach (var ns in requestedNamespaces.OrderBy(n => n, StringComparer.Ordinal))
+                Visit(ns, ns);
+
+            foreach (var ns in ordered)
+                LoadModManifest(available[ns].Path, baseData);
+        }
+
+        private static ModManifest ReadManifest(string modManifestPath)
+        {
+            var manifest = JsonConvert.DeserializeObject<ModManifest>(File.ReadAllText(modManifestPath));
+            if (manifest == null || string.IsNullOrEmpty(manifest.Namespace))
+                throw new InvalidDataException($"{modManifestPath} is not a valid mod manifest (missing Namespace).");
+            return manifest;
+        }
+
         public void LoadModManifest(string modManifestPath, ModDataStore baseData)
         {
-            var manifestJson = File.ReadAllText(modManifestPath);
-            var modManifest = JsonConvert.DeserializeObject<ModManifest>(manifestJson);
+            var modManifest = ReadManifest(modManifestPath);
+
+            foreach (var dependency in modManifest.Dependencies ?? new List<string>())
+            {
+                if (!LoadedMods.ContainsKey(dependency))
+                    throw new InvalidOperationException(
+                        $"Mod '{modManifest.Namespace}' requires mod '{dependency}' to be loaded first.");
+            }
 
             if(LoadedMods.ContainsKey(modManifest.Namespace))
             {
@@ -218,6 +286,11 @@ namespace Pulsar4X.Modding
                     dataDict.Remove(instruction.Data.UniqueID);
                     return;
                 }
+            }
+            else if (instruction.Operation == ModInstruction.OperationType.Remove)
+            {
+                // Nothing to remove. Do not fall through and add the Remove's stub payload.
+                return;
             }
             else
             {

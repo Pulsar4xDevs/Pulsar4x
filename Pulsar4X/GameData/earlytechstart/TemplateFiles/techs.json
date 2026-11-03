@@ -1,0 +1,106 @@
+[
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-early-technology",
+      "Name": "Early Technology",
+      "Description": "Starting gate for the Early Tech Start: opens the basic industrial, survey and propulsion research lines. Ships move by reaction drive only; nuclear power must be researched, and warp and jump-point technology after that.",
+      "Category": "tech-category-missiles-kinetic-weapons",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "0",
+      "Unlocks": {
+        "1": [
+          "tech-mining-production",
+          "tech-battery-capacity",
+          "tech-capacitors",
+          "tech-conductors",
+          "tech-solid-fuel",
+          "tech-conventional-engine",
+          "tech-antenna-sensitivity",
+          "tech-antenna-efficiency",
+          "tech-antenna-bandwidth",
+          "tech-factory-max-size",
+          "tech-shipyard-slip-max-size",
+          "tech-geo-surveyor",
+          "tech-asteroid-mining",
+          "tech-administration-level",
+          "tech-infra-gravity-range",
+          "tech-infra-gravity-min-extension",
+          "tech-infra-gravity-max-extension",
+          "tech-infra-pressure-range",
+          "tech-infra-pressure-min-extension",
+          "tech-infra-pressure-max-extension",
+          "tech-early-nuclear-power"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-early-nuclear-power",
+      "Name": "Nuclear Power",
+      "Description": "Fission reactors, steam turbine reactors and RTGs. Leads on to directed energy and warp research.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "(1 + [Level]) * 2000",
+      "Unlocks": {
+        "1": [
+          "reactor",
+          "steam-turbine-reactor",
+          "rtg",
+          "tech-early-directed-energy",
+          "tech-early-warp-drive"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-early-directed-energy",
+      "Name": "Directed Energy",
+      "Description": "Lasers and the beam fire control that aims them.",
+      "Category": "tech-category-missiles-kinetic-weapons",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "(1 + [Level]) * 2500",
+      "Unlocks": {
+        "1": [
+          "laser-weapon",
+          "beam-fire-control",
+          "tech-laser-warheads"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-early-warp-drive",
+      "Name": "Alcubierre Warp Drive",
+      "Description": "Warp drives, jump point survey and stabilisation, and the research lines that improve them. Nothing in this line is known at the start.",
+      "Category": "tech-category-power-propulsion",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "(1 + [Level]) * 5000",
+      "Unlocks": {
+        "1": [
+          "alcubierre-warp-drive",
+          "tech-alcubierre-miniaturization",
+          "tech-alcubierre-bubble-creation-cost",
+          "tech-alcubierre-sustain-cost",
+          "tech-alcubierre-gravitational-coupling",
+          "tech-alcubierre-bleed",
+          "tech-alcubierre-collapse-efficiency",
+          "tech-gravitational-surveyor",
+          "tech-jumpoint-stabilization",
+          "tech-jumpoint-stabilization-size-reduction",
+          "tech-jumpoint-stabilization-time-reduction"
+        ]
+      }
+    }
+  }
+]
