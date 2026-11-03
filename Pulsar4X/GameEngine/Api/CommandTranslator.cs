@@ -110,6 +110,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(Pulsar4X.Api.NewtonThrustCommand)] = TranslateNewtonThrust,
                 [typeof(Pulsar4X.Api.WarpMoveCommand)] = TranslateWarpMove,
                 [typeof(GoToBodyCommand)] = TranslateGoToBody,
+                [typeof(TransferFromWindowCommand)] = TranslateTransferFromWindow,
                 [typeof(WarpToBodyCommand)] = TranslateWarpToBody,
                 [typeof(CirculariseCommand)] = TranslateCircularise,
                 [typeof(ChangeAltitudeCommand)] = TranslateChangeAltitude,
@@ -1495,6 +1496,26 @@ namespace Pulsar4X.Engine.Api
                     commanded, body, out var actions, out var reason, commanded.StarSysDateTime,
                     null, cmd.ArrivalPeriapsis, cmd.ArrivalApoapsis))
                 return CommandResult.Reject(reason);
+            return DispatchActions(actions, reason);
+        }
+
+        private CommandResult TranslateTransferFromWindow(Entity faction, Entity commanded, GameCommand command)
+        {
+            if (RejectPlotOnCaptainOrFleet(commanded) is { } rejected)
+                return rejected;
+            var cmd = (TransferFromWindowCommand)command;
+            if (!TryResolve(cmd.BodyId, out var body))
+                return CommandResult.Reject($"Entity {cmd.BodyId} not found.");
+            if (RejectUnseen(faction, body) is { } unseen)
+                return unseen;
+
+            var depart = new Pulsar4X.Orbital.Vector3(cmd.DepartDeltaVMps.X, cmd.DepartDeltaVMps.Y, cmd.DepartDeltaVMps.Z);
+            var arrive = new Pulsar4X.Orbital.Vector3(cmd.ArriveDeltaVMps.X, cmd.ArriveDeltaVMps.Y, cmd.ArriveDeltaVMps.Z);
+            var window = new Pulsar4X.Orbital.TransferWindow(
+                cmd.Depart, cmd.Arrive, depart, arrive,
+                depart.Length() + arrive.Length(), depart.Length(), arrive.Length());
+            if (!MovePlanner.PlanFromWindow(commanded, body, window, commanded.StarSysDateTime, out var actions, out var reason))
+                return CommandResult.Reject(string.IsNullOrEmpty(reason) ? "transfer did not converge" : reason);
             return DispatchActions(actions, reason);
         }
 

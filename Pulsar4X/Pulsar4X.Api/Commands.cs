@@ -409,6 +409,18 @@ public sealed record WarpMoveCommand(
     int DestinationId,
     Vec3? InsertionPointRelative = null) : GameCommand(TargetEntityId);
 
+/// <summary>
+/// Empty chair: fly one porkchop cell to <see cref="BodyId"/>. Depart and arrive v-infinity
+/// are a hint. The planner re-solves the patched conic from the ship's real parking orbit.
+/// </summary>
+public sealed record TransferFromWindowCommand(
+    int TargetEntityId,
+    int BodyId,
+    DateTime Depart,
+    DateTime Arrive,
+    Vec3 DepartDeltaVMps,
+    Vec3 ArriveDeltaVMps) : GameCommand(TargetEntityId);
+
 /// <summary>Empty chair: queue the same plot <c>MovePlanner</c> would build for this body.
 /// No goal, no replan. A seated captain uses <see cref="MoveToBodyCommand"/> instead.</summary>
 public sealed record GoToBodyCommand(

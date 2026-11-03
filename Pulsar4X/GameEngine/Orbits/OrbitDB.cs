@@ -130,6 +130,26 @@ namespace Pulsar4X.Orbits
         private double _cachedSinIncl;
         private bool _trigCacheValid = false;
 
+        /// <summary>
+        /// The EnterSOI interrupt this orbit scheduled. Default means this orbit scheduled none,
+        /// so an interrupt left by a replaced orbit is ignored.
+        /// </summary>
+        [JsonProperty]
+        internal DateTime EntryDueAt;
+
+        /// <summary>The rescan interrupt. Default means this orbit scheduled none.</summary>
+        [JsonProperty]
+        internal DateTime EntryRescanAt;
+
+        /// <summary>
+        /// Position samples taken by the last entry scan. A band reject leaves this at zero.
+        /// </summary>
+        public static int SoiEntryPositionChecks;
+
+        internal bool EntryIsDue(DateTime at) => EntryDueAt != default && EntryDueAt == at;
+
+        internal bool RescanIsDue(DateTime at) => EntryRescanAt != default && EntryRescanAt == at;
+
         #region Construction Interface
 
 
@@ -659,119 +679,327 @@ namespace Pulsar4X.Orbits
         }
 
         /// <summary>
-        /// Scans the orbit for encounters with sibling child bodies and schedules
-        /// an EnterSOIProcessor interrupt at the predicted SOI crossing time.
+        /// Scans the orbit for encounters with sibling bodies and schedules an
+        /// <see cref="EnterSOIProcessor"/> interrupt at the crossing. An empty scan
+        /// schedules <see cref="SoiEntryRescanProcessor"/> at the horizon instead of
+        /// deciding the ship never meets anyone.
         /// </summary>
-        private void ScheduleSOIEntry()
+        private void ScheduleSOIEntry() => ScheduleSOIEntryFrom(Epoch);
+
+        internal void ScheduleSOIEntryFrom(DateTime from)
         {
-            if (Parent == null || !Parent.HasDataBlob<OrbitDB>()) return;
-            var parentOrbit = Parent.GetDataBlob<OrbitDB>();
-            var siblings = parentOrbit.Children;
-            if (siblings.Count == 0) return;
+            SoiEntryPositionChecks = 0;
+            EntryDueAt = default;
+            EntryRescanAt = default;
+            if (Parent == null || !Parent.HasDataBlob<OrbitDB>() || OwningEntity?.Manager == null)
+                return;
+            if (!TryRadialBand(this, out double shipInner, out double shipOuter))
+                return;
 
-            // Determine scan window
-            double scanSeconds;
-            if (Eccentricity < 1)
-            {
-                // Elliptical: scan one orbital period, capped at 1 year
-                scanSeconds = Math.Min(OrbitalPeriod.TotalSeconds, 365.25 * 24 * 3600);
-            }
-            else
-            {
-                // Hyperbolic: scan until SOI exit (already scheduled above), capped at 1 year
-                if (TryParentSphere(out double soiRadius))
-                {
-                    var soiExitTime = OrbitMath.TimeToRadius(this, soiRadius);
-                    scanSeconds = Math.Min((soiExitTime - Epoch).TotalSeconds, 365.25 * 24 * 3600);
-                }
-                else
-                {
-                    scanSeconds = 365.25 * 24 * 3600;
-                }
-            }
+            var siblings = Parent.GetDataBlob<OrbitDB>().Children;
+            if (siblings.Count == 0)
+                return;
 
-            if (scanSeconds <= 0) return;
-
-            int numSamples = 180;
-            double stepSeconds = scanSeconds / numSamples;
-
-            DateTime earliestCrossTime = DateTime.MaxValue;
-            DateTime tOutside = DateTime.MinValue;
-            DateTime tInside = DateTime.MinValue;
-            Entity? crossChild = null;
+            double shipSpeed = MaxOrbitalSpeed(this);
+            Entity? hitChild = null;
+            DateTime hitOutside = default;
+            DateTime hitInside = DateTime.MaxValue;
+            DateTime? rescanAt = null;
 
             foreach (var child in siblings)
             {
-                if (child == OwningEntity) continue;
-                if (!child.HasDataBlob<OrbitDB>() || !child.HasDataBlob<MassVolumeDB>()) continue;
-
-                var childSOI = child.GetSOI_m();
-                if (childSOI <= 0 || double.IsInfinity(childSOI)) continue;
+                if (child == OwningEntity)
+                    continue;
+                if (!child.HasDataBlob<OrbitDB>() || !child.HasDataBlob<MassVolumeDB>())
+                    continue;
+                double childSoi = child.GetSOI_m();
+                if (!(childSoi > 0) || double.IsInfinity(childSoi))
+                    continue;
 
                 var childOrbit = child.GetDataBlob<OrbitDB>();
+                if (!TryRadialBand(childOrbit, out double childInner, out double childOuter))
+                    continue;
+                // Distance from the parent is a necessary condition. Two comparisons,
+                // and no position sample, drops a sibling the ship can never reach.
+                if (shipInner > childOuter + childSoi || childInner - childSoi > shipOuter)
+                    continue;
 
-                // Determine initial state: if we're already inside this child's SOI at Epoch
-                // (e.g., we just exited it), don't treat it as an outside→inside transition.
-                var initShipPos = this.GetPosition(Epoch);
-                var initChildPos = childOrbit.GetPosition(Epoch);
-                bool wasOutside = (initShipPos - initChildPos).Length() >= childSOI;
+                DateTime horizon = ChildHorizon(childOrbit, from, out bool frameExit);
+                if (hitChild != null && horizon > hitInside)
+                    horizon = hitInside;
+                if (horizon <= from)
+                    continue;
 
-                for (int i = 1; i <= numSamples; i++)
+                bool truncated = false;
+                bool found = TryAdvanceToCrossing(
+                    childOrbit, childSoi, from, horizon, shipSpeed, MaxOrbitalSpeed(childOrbit),
+                    out DateTime outsideAt, out DateTime insideAt, ref truncated);
+                if (found && insideAt < hitInside)
                 {
-                    var sampleTime = Epoch + TimeSpan.FromSeconds(i * stepSeconds);
-                    var shipPos = this.GetPosition(sampleTime);
-                    var childPos = childOrbit.GetPosition(sampleTime);
-                    var dist = (shipPos - childPos).Length();
-
-                    if (dist < childSOI)
-                    {
-                        if (wasOutside)
-                        {
-                            // Genuine outside → inside transition
-                            tInside = sampleTime;
-                            tOutside = Epoch + TimeSpan.FromSeconds((i - 1) * stepSeconds);
-
-                            if (tInside < earliestCrossTime)
-                            {
-                                earliestCrossTime = tInside;
-                                crossChild = child;
-                            }
-                        }
-                        break;  // Found first crossing for this child, stop sampling
-                    }
-                    wasOutside = true;
+                    hitInside = insideAt;
+                    hitOutside = outsideAt;
+                    hitChild = child;
+                    rescanAt = null;
+                }
+                else if (!found && (truncated || !frameExit))
+                {
+                    DateTime at = truncated && outsideAt > from ? outsideAt : horizon;
+                    if (rescanAt == null || at < rescanAt)
+                        rescanAt = at;
                 }
             }
 
-            if (crossChild == null) return;
+            var manager = OwningEntity.Manager;
+            DateTime now = manager.ManagerSubpulses.StarSysDateTime;
+            if (hitChild != null)
+            {
+                DateTime cross = BisectEntry(hitChild, hitOutside, hitInside);
+                if (cross > now)
+                {
+                    EntryDueAt = cross;
+                    manager.ManagerSubpulses.AddEntityInterupt(cross, nameof(EnterSOIProcessor), OwningEntity);
+                }
+                return;
+            }
 
-            // Binary search to refine the crossing time
-            var childOrbitRef = crossChild.GetDataBlob<OrbitDB>();
-            var childSOIRef = crossChild.GetSOI_m();
-            DateTime lo = tOutside;
-            DateTime hi = tInside;
+            if (rescanAt is DateTime again && again > now && again > from)
+            {
+                EntryRescanAt = again;
+                manager.ManagerSubpulses.AddEntityInterupt(again, nameof(SoiEntryRescanProcessor), OwningEntity);
+            }
+        }
 
+        /// <summary>
+        /// Bound orbits sweep periapsis to apoapsis. A hyperbola sweeps from periapsis
+        /// out to the radius where this frame ends.
+        /// </summary>
+        static bool TryRadialBand(OrbitDB orbit, out double inner, out double outer)
+        {
+            inner = 0;
+            outer = 0;
+            double peri = orbit.Periapsis;
+            if (!(peri >= 0) || !double.IsFinite(peri))
+                return false;
+            if (orbit.Eccentricity < 1)
+            {
+                double apo = orbit.Apoapsis;
+                if (!double.IsFinite(apo) || apo < peri)
+                    return false;
+                inner = peri;
+                outer = apo;
+                return true;
+            }
+
+            inner = peri;
+            outer = LeaveRadius(orbit);
+            return outer > inner;
+        }
+
+        static double LeaveRadius(OrbitDB orbit)
+        {
+            var body = orbit.OwningEntity;
+            if (body == null)
+                return double.PositiveInfinity;
+            var parent = body.GetSOIParentEntity();
+            if (parent == null)
+                return double.PositiveInfinity;
+            double soi = parent.GetSOI_m();
+            if (!double.IsFinite(soi) || !(soi > 0))
+                return double.PositiveInfinity;
+            return soi;
+        }
+
+        /// <summary>Speed at periapsis. Nothing in the orbit is faster than this.</summary>
+        static double MaxOrbitalSpeed(OrbitDB orbit)
+        {
+            double mu = orbit.GravitationalParameter_m3S2;
+            double rp = orbit.Periapsis;
+            double a = orbit.SemiMajorAxis;
+            if (!(mu > 0) || !(rp > 1) || !double.IsFinite(a) || a == 0)
+                return 0;
+            double v2 = mu * (2.0 / rp - 1.0 / a);
+            if (!(v2 > 0) || !double.IsFinite(v2))
+                return 0;
+            return Math.Sqrt(v2);
+        }
+
+        /// <summary>
+        /// The earlier of the ship's frame change, one synodic period, and ten years.
+        /// <paramref name="frameExit"/> is set when that frame change is the one that won.
+        /// </summary>
+        DateTime ChildHorizon(OrbitDB childOrbit, DateTime from, out bool frameExit)
+        {
+            frameExit = false;
+            DateTime horizon = from.AddYears(10);
+            double leave = LeaveRadius(this);
+            if (double.IsFinite(leave) && (Eccentricity >= 1 || (double.IsFinite(Apoapsis) && Apoapsis > leave)))
+            {
+                try
+                {
+                    DateTime exit = OrbitMath.TimeToRadius(this, leave);
+                    if (exit > from && exit < horizon)
+                    {
+                        horizon = exit;
+                        frameExit = true;
+                    }
+                }
+                catch (Exception ex) when (ex is not OutOfMemoryException)
+                {
+                }
+            }
+
+            double synodic = SynodicSeconds(OrbitalPeriod.TotalSeconds, childOrbit.OrbitalPeriod.TotalSeconds);
+            if (double.IsFinite(synodic) && synodic > 60)
+            {
+                DateTime synEnd;
+                try
+                {
+                    synEnd = from.AddSeconds(synodic);
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    synEnd = DateTime.MaxValue;
+                }
+                if (synEnd < horizon)
+                {
+                    horizon = synEnd;
+                    frameExit = false;
+                }
+            }
+
+            return horizon;
+        }
+
+        static double SynodicSeconds(double period1, double period2)
+        {
+            if (!(period1 > 0) || !(period2 > 0) || !double.IsFinite(period1) || !double.IsFinite(period2))
+                return double.PositiveInfinity;
+            if (period1 >= TimeSpan.MaxValue.TotalSeconds * 0.5 || period2 >= TimeSpan.MaxValue.TotalSeconds * 0.5)
+                return double.PositiveInfinity;
+            double difference = Math.Abs(1.0 / period1 - 1.0 / period2);
+            if (difference < 1e-30)
+                return double.PositiveInfinity;
+            return 1.0 / difference;
+        }
+
+        /// <summary>
+        /// Step by gap / (vShip + vChild). That step cannot jump a crossing.
+        /// The 60 s floor ignores a graze shorter than 60 s of relative travel:
+        /// at 15 km/s that is 900 km, against a sphere of hundreds of thousands of km.
+        /// </summary>
+        bool TryAdvanceToCrossing(
+            OrbitDB childOrbit, double childSoi, DateTime from, DateTime horizon,
+            double shipSpeed, double childSpeed,
+            out DateTime outsideAt, out DateTime insideAt, ref bool truncated)
+        {
+            outsideAt = from;
+            insideAt = from;
+            const int maxSteps = 20000;
+            const double floorSeconds = 60;
+            double vSum = shipSpeed + childSpeed;
+            DateTime t = from;
+            double gap = Gap(childOrbit, childSoi, t);
+            bool outside = gap > 0;
+            if (outside)
+                outsideAt = t;
+
+            for (int step = 0; step < maxSteps && t < horizon; step++)
+            {
+                double dt;
+                if (!(vSum > 1))
+                {
+                    if (gap > 0)
+                        return false;
+                    dt = floorSeconds;
+                }
+                else
+                {
+                    dt = Math.Abs(gap) / vSum;
+                    if (dt < floorSeconds)
+                        dt = floorSeconds;
+                }
+
+                double remain = (horizon - t).TotalSeconds;
+                if (dt > remain)
+                    dt = remain;
+                if (!(dt >= 1) || !double.IsFinite(dt))
+                    return false;
+
+                DateTime next;
+                try
+                {
+                    next = t.AddSeconds(dt);
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    return false;
+                }
+
+                double nextGap = Gap(childOrbit, childSoi, next);
+                if (!outside)
+                {
+                    if (nextGap > 0)
+                    {
+                        outside = true;
+                        outsideAt = next;
+                    }
+                }
+                else if (nextGap <= 0)
+                {
+                    insideAt = next;
+                    return true;
+                }
+                else
+                {
+                    outsideAt = next;
+                }
+
+                t = next;
+                gap = nextGap;
+            }
+
+            if (t < horizon)
+                truncated = true;
+            outsideAt = t;
+            return false;
+        }
+
+        double Gap(OrbitDB childOrbit, double childSoi, DateTime at)
+        {
+            SoiEntryPositionChecks += 2;
+            return (PositionAt(this, at) - PositionAt(childOrbit, at)).Length() - childSoi;
+        }
+
+        static Vector3 PositionAt(OrbitDB orbit, DateTime at)
+        {
+            try
+            {
+                return orbit.GetPosition(at);
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                return new Vector3(double.NaN, double.NaN, double.NaN);
+            }
+        }
+
+        DateTime BisectEntry(Entity child, DateTime outsideAt, DateTime insideAt)
+        {
+            var childOrbit = child.GetDataBlob<OrbitDB>();
+            double childSoi = child.GetSOI_m();
+            DateTime lo = outsideAt;
+            DateTime hi = insideAt;
             for (int iter = 0; iter < 20; iter++)
             {
-                var midTicks = lo.Ticks / 2 + hi.Ticks / 2;
-                var mid = new DateTime(midTicks);
-                var shipPos = this.GetPosition(mid);
-                var childPos = childOrbitRef.GetPosition(mid);
-                var dist = (shipPos - childPos).Length();
-
-                if (dist < childSOIRef)
+                var mid = new DateTime(lo.Ticks / 2 + hi.Ticks / 2);
+                SoiEntryPositionChecks += 2;
+                double dist = (PositionAt(this, mid) - PositionAt(childOrbit, mid)).Length();
+                if (dist < childSoi)
                     hi = mid;
                 else
                     lo = mid;
             }
 
-            // Schedule slightly after the crossing so the entity is inside the SOI
-            var crossTime = hi;
-            var manager = OwningEntity.Manager;
-            if (crossTime > manager.ManagerSubpulses.StarSysDateTime)
-            {
-                manager.ManagerSubpulses.AddEntityInterupt(crossTime, nameof(EnterSOIProcessor), OwningEntity);
-            }
+            return hi;
         }
 
 

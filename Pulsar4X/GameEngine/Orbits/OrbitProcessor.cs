@@ -8,6 +8,7 @@ using Pulsar4X.Events;
 using Pulsar4X.Engine;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Movement;
+using GameEngine.Engine.Orders;
 
 namespace Pulsar4X.Orbits
 {
@@ -251,6 +252,23 @@ namespace Pulsar4X.Orbits
                 "Exited SOI of " + parent.GetDefaultName(),
                 entity.FactionOwnerID, entity.Manager.ManagerID);
             EventManager.Instance.Publish(soievent);
+            EnterSOIProcessor.WakeTransfer(entity, atDateTime);
+        }
+    }
+
+    /// <summary>
+    /// An entry scan that found nothing left this interrupt at its horizon.
+    /// A replaced orbit does not match <see cref="OrbitDB.RescanIsDue"/> and is ignored.
+    /// </summary>
+    public class SoiEntryRescanProcessor : IInstanceProcessor
+    {
+        internal override void ProcessEntity(Entity entity, DateTime atDateTime)
+        {
+            if (!entity.TryGetDataBlob<OrbitDB>(out var orbit))
+                return;
+            if (!orbit.RescanIsDue(atDateTime))
+                return;
+            orbit.ScheduleSOIEntryFrom(atDateTime);
         }
     }
 
@@ -265,6 +283,9 @@ namespace Pulsar4X.Orbits
             if (parent == null || !parent.HasDataBlob<OrbitDB>()) return;
 
             var shipOrbit = entity.GetDataBlob<OrbitDB>();
+            // A new orbit schedules its own entry. This interrupt belonged to the previous one.
+            if (!shipOrbit.EntryIsDue(atDateTime))
+                return;
             var parentOrbit = parent.GetDataBlob<OrbitDB>();
 
             // Compute ship position at atDateTime from orbit equations (not stale PositionDB)
@@ -332,6 +353,20 @@ namespace Pulsar4X.Orbits
                 "Entered SOI of " + targetChild.GetDefaultName(),
                 entity.FactionOwnerID, entity.Manager.ManagerID);
             EventManager.Instance.Publish(soievent);
+            WakeTransfer(entity, atDateTime);
+        }
+
+        /// <summary>
+        /// The transfer action waits on the frame change. The interrupt queue drops a
+        /// same-instant add while processors are running, so wake the queue directly.
+        /// </summary>
+        internal static void WakeTransfer(Entity entity, DateTime atDateTime)
+        {
+            if (!entity.HasDataBlob<ActionQueueDB>() || entity.Manager?.Game == null)
+                return;
+            entity.Manager.Game.ProcessorManager
+                .GetInstanceProcessor(nameof(ActionQueueProcessor))
+                .ProcessEntity(entity, atDateTime);
         }
     }
 

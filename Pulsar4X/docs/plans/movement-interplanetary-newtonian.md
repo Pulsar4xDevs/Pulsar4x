@@ -1,6 +1,6 @@
 # Interplanetary Newtonian transfer (patched conics)
 
-Status: not started. Do not build until asked. Written 2026-11-03 for the Early Tech Start mod. Revised 2026-11-03 after Jon's answers (rewrite `InterPlanetaryHohmann`, warp stays the default, the entry scan, the Starship start ship).
+Status: built, tests pass. UI not play-tested. Written 2026-11-03 for the Early Tech Start mod. Revised 2026-11-03 after Jon's answers (rewrite `InterPlanetaryHohmann`, warp stays the default, the entry scan, the Starship start ship). A game restart is needed (`SoiTransferAction` phases, `TransferFromWindowCommand`, `MoveOption.Interplanetary`).
 
 Plan 3 of 3. It needs [plan 1](movement-newtonian-soi-capture.md) slices 3 and 4 (the escape and capture maths, and `SoiTransferAction`) and [plan 2](movement-lambert-porkchop.md) slices 1 to 3 (Lambert and the window scan). Do not start it before those are built and tested.
 

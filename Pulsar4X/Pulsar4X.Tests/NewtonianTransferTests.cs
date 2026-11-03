@@ -280,6 +280,9 @@ public class NewtonianTransferTests
         MoveOption newt = Newtonian(ship, buddy);
         Assert.That(newt.Feasible, Is.True, newt.Reason);
         Assert.That(newt.HasWindow, Is.True, newt.Reason);
+        Assert.That(newt.Reason, Does.Contain("depart "));
+        Assert.That(newt.Reason, Does.Contain("arrive "));
+        Assert.That(newt.DepartSeconds, Is.EqualTo(Math.Max(0, (newt.Window.Value.Depart - _now).TotalSeconds)).Within(1.5));
         Assert.That(buddy.GetDataBlob<OrbitDB>().Eccentricity, Is.EqualTo(0.3).Within(0.02));
     }
 

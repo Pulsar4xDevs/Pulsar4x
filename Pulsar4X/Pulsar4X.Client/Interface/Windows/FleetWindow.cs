@@ -2583,6 +2583,12 @@ namespace Pulsar4X.Client
             if(!string.IsNullOrEmpty(preview.Mode))
                 ImGui.Text("Mode: " + preview.Mode);
             ImGui.Text($"Δv {Stringify.Velocity(preview.DeltaV)}, have {Stringify.Velocity(preview.Have)}");
+            // A burn inside the next minute is this order, not a window we are waiting on.
+            if(preview.Feasible && preview.DepartInSeconds > 60 && preview.DepartInSeconds < 1e10)
+            {
+                var depart = galaxy.Time.GameDateTime.AddSeconds(preview.DepartInSeconds);
+                ImGui.Text("Departure " + depart.ToString("yyyy-MM-dd HH:mm"));
+            }
             if(preview.Feasible && preview.EtaSeconds > 0 && preview.EtaSeconds < 1e10)
             {
                 var arrive = galaxy.Time.GameDateTime.AddSeconds(preview.EtaSeconds);

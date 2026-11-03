@@ -92,6 +92,7 @@ public class SoiCaptureTests
         var transfer = MovePlanner.Evaluate(ship, _luna, now).Single(o => o.Mode == MoveMode.NewtonianTransfer);
         Assert.That(transfer.Feasible, Is.True, transfer.Reason);
         Assert.That(transfer.SoiTransfer, Is.True, transfer.Reason);
+        Assert.That(transfer.Interplanetary, Is.False, transfer.Reason);
         Assert.That(MovePlanner.Evaluate(ship, _luna, now).Single(o => o.Mode == MoveMode.Warp).Feasible, Is.False);
 
         Assert.That(MovePlanner.TryBuildMoveActions(ship, _luna, out var actions, out string why, now), Is.True, why);
@@ -211,8 +212,9 @@ public class SoiCaptureTests
             .First(body => body.GetName(_faction.Id) == "Mars");
         var far = MovePlanner.Preview(ship, mars, ship.StarSysDateTime);
         Assert.That(far.Feasible, Is.False, DescribePreview(far));
-        Assert.That(far.RefusedForDeltaV, Is.False, DescribePreview(far));
-        Assert.That(far.Alternatives, Is.Empty);
+        Assert.That(far.Reason, Does.Contain("Δv"), DescribePreview(far));
+        Assert.That(far.RefusedForDeltaV, Is.True, DescribePreview(far));
+        Assert.That(far.Alternatives, Is.Empty, DescribePreview(far));
     }
 
     [Test]
@@ -273,27 +275,37 @@ public class SoiCaptureTests
     }
 
     [Test]
-    public void EarthToMars_StaysAWarpRefusal()
+    public void EarthToMars_PlansAPatchedConicTransfer()
     {
         var mars = _game.Systems.SelectMany(s => s.GetAllEntitiesWithDataBlob<OrbitDB>())
             .First(body => body.GetName(_faction.Id) == "Mars");
         var now = _starship.StarSysDateTime;
-        var transfer = MovePlanner.Evaluate(_starship, mars, now).Single(o => o.Mode == MoveMode.NewtonianTransfer);
-        Assert.That(transfer.Feasible, Is.False, transfer.Reason);
-        Assert.That(transfer.Reason, Does.Contain("usable SOI"));
-        Assert.That(transfer.SoiTransfer, Is.False);
-        Assert.That(MovePlanner.TryBuildMoveActions(_starship, mars, out var actions, out _, now), Is.False);
-        Assert.That(actions.OfType<SoiTransferAction>(), Is.Empty);
+        var options = MovePlanner.Evaluate(_starship, mars, now);
+        var transfer = options.Single(o => o.Mode == MoveMode.NewtonianTransfer);
+        Assert.That(transfer.Feasible, Is.True, transfer.Reason);
+        Assert.That(transfer.SoiTransfer, Is.True, transfer.Reason);
+        Assert.That(transfer.Interplanetary, Is.True);
+        Assert.That(transfer.Reason, Does.Contain("Transfer to Mars, depart "));
+        Assert.That(transfer.Reason, Does.Contain("arrive "));
+        int departAt = transfer.Reason.IndexOf("depart ", StringComparison.Ordinal);
+        var departStamp = transfer.Reason.Substring(departAt + "depart ".Length, 19);
+        var departWhen = DateTime.ParseExact(departStamp, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+        Assert.That(transfer.DepartSeconds, Is.EqualTo(Math.Max(0, (departWhen - now).TotalSeconds)).Within(1.5));
+        var preview = MovePlanner.Preview(_starship, mars, now);
+        Assert.That(preview.Feasible, Is.True, preview.Reason);
+        Assert.That(preview.DepartInSeconds, Is.EqualTo(transfer.DepartSeconds).Within(1.5));
+        Assert.That(preview.EtaSeconds, Is.GreaterThan(preview.DepartInSeconds));
+        Assert.That(options.Single(o => o.Mode == MoveMode.Warp).Feasible, Is.False);
+        Assert.That(options.Single(o => o.Mode == MoveMode.Warp).Reason, Does.Contain("no warp drive"));
+
+        Assert.That(MovePlanner.TryBuildMoveActions(_starship, mars, out var actions, out string why, now), Is.True, why);
+        Assert.That(actions.OfType<SoiTransferAction>().Count(), Is.EqualTo(1));
+        Assert.That(actions.OfType<WarpMoveAction>(), Is.Empty);
 
         var goal = new Goal(GoalType.MoveTo) { TargetEntityID = mars.Id };
         AgentProcessor.AssignGoal(_starship, goal);
-        Assert.That(goal.Status, Is.EqualTo(GoalStatus.Failed), goal.Message);
-        Assert.That(goal.Message, Does.Contain("\n"));
-        string log = LogText(_starship);
-        Assert.That(log, Does.Contain("Could not reach Mars"));
-        Assert.That(log, Does.Contain("AlreadyThere:"));
-        Assert.That(log, Does.Contain("no warp drive"));
-        Assert.That(log, Does.Contain("\n"));
+        Assert.That(goal.Status, Is.Not.EqualTo(GoalStatus.Failed), goal.Message);
+        Assert.That(_starship.GetDataBlob<ActionQueueDB>().ActionList.OfType<SoiTransferAction>().Count(), Is.EqualTo(1));
     }
 
     Entity ShipInLunasPlane(string name)

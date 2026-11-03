@@ -431,7 +431,7 @@ internal static class SoiTransferMath
         return new Plan
         {
             Kind = Kind.Ready,
-            Reason = $"Transfer to {name}, {window.DepartAt.AddSeconds(window.TTrans):yyyy-MM-dd HH:mm:ss}",
+            Reason = $"Transfer to {name}, depart {window.DepartAt:yyyy-MM-dd HH:mm:ss}, arrive {window.DepartAt.AddSeconds(window.TTrans):yyyy-MM-dd HH:mm:ss}",
             DeltaV = total,
             EtaSeconds = eta,
             DepartAt = window.DepartAt,

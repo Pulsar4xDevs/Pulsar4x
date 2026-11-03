@@ -442,12 +442,17 @@ public class EarlyTechStartTests
         var mars = system.GetAllEntitiesWithDataBlob<OrbitDB>()
             .First(c => c.GetName(faction.Id) == "Mars");
 
-        // Interplanetary: only warp could do it, and there is none.
+        // Interplanetary Newtonian is the patched conic. There is still no warp drive.
         var toMars = MovePlanner.Evaluate(ship, mars, now);
         Assert.That(toMars.Single(o => o.Mode == MoveMode.Warp).Feasible, Is.False);
-        Assert.That(toMars.Single(o => o.Mode == MoveMode.NewtonianTransfer).Feasible, Is.False);
-        Assert.That(MovePlanner.TryBuildMoveActions(ship, mars, out var marsActions, out _, now), Is.False);
+        var marsTransfer = toMars.Single(o => o.Mode == MoveMode.NewtonianTransfer);
+        Assert.That(marsTransfer.Feasible, Is.True, marsTransfer.Reason);
+        Assert.That(marsTransfer.SoiTransfer, Is.True, marsTransfer.Reason);
+        Assert.That(marsTransfer.Interplanetary, Is.True);
+        Assert.That(marsTransfer.Reason, Does.Contain("Transfer to Mars"));
+        Assert.That(MovePlanner.TryBuildMoveActions(ship, mars, out var marsActions, out string marsWhy, now), Is.True, marsWhy);
         Assert.That(marsActions.OfType<WarpMoveAction>(), Is.Empty);
+        Assert.That(marsActions.OfType<SoiTransferAction>().Count(), Is.EqualTo(1));
 
         // Luna is in Earth's well but has its own SOI. Whatever the planner decides, it must not warp.
         var toLuna = MovePlanner.Evaluate(ship, luna, now);

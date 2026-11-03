@@ -248,6 +248,8 @@ public readonly struct MoveOption
 
     /// <summary>Seconds from now until we arrive.</summary>
     public readonly double EtaSeconds;
+    /// <summary>Seconds from now until the departure burn. Zero when it starts now.</summary>
+    public readonly double DepartSeconds;
     /// <summary>Reaction mass budget in m/s. Zero for warp.</summary>
     public readonly double DeltaV;
     /// <summary>Warp bubble energy. Zero for newtonian.</summary>
@@ -262,10 +264,17 @@ public readonly struct MoveOption
     /// <summary>Set when the Hohmann branch took a Lambert window instead of the closed form.</summary>
     public readonly TransferWindow? Window;
 
+    /// <summary>
+    /// Patched-conic trip between two planets. Warp stays ahead of this when both are feasible.
+    /// A transfer inside one sphere leaves it false.
+    /// </summary>
+    public readonly bool Interplanetary;
+
     public bool HasWindow => Window is { IsFinite: true };
 
     MoveOption(MoveMode mode, bool feasible, string reason, double eta, double deltaV, double energy,
-        (Vector3 deltaV, double timeInSeconds)[] manuvers, bool soiTransfer = false, TransferWindow? window = null)
+        (Vector3 deltaV, double timeInSeconds)[] manuvers, bool soiTransfer = false, TransferWindow? window = null,
+        bool interplanetary = false, double departSeconds = 0)
     {
         Mode = mode;
         Feasible = feasible;
@@ -276,6 +285,8 @@ public readonly struct MoveOption
         Manuvers = manuvers ?? Array.Empty<(Vector3, double)>();
         SoiTransfer = soiTransfer;
         Window = window;
+        Interplanetary = interplanetary;
+        DepartSeconds = double.IsFinite(departSeconds) && departSeconds > 0 ? departSeconds : 0;
     }
 
     public static MoveOption No(MoveMode mode, string reason)
@@ -283,8 +294,8 @@ public readonly struct MoveOption
 
     public static MoveOption Yes(MoveMode mode, double etaSeconds, double deltaV = 0, double energyCost = 0,
         (Vector3 deltaV, double timeInSeconds)[] manuvers = null, string message = "", bool soiTransfer = false,
-        TransferWindow? window = null)
-        => new MoveOption(mode, true, message, etaSeconds, deltaV, energyCost, manuvers, soiTransfer, window);
+        TransferWindow? window = null, bool interplanetary = false, double departSeconds = 0)
+        => new MoveOption(mode, true, message, etaSeconds, deltaV, energyCost, manuvers, soiTransfer, window, interplanetary, departSeconds);
 }
 
 /// <summary>
@@ -381,6 +392,7 @@ public static class MovePlanner
         var alternatives = dvRefuse
             ? FindArrivals(ship, target, now, have)
             : Array.Empty<ArrivalChoice>();
+        double depart = chosen.Feasible ? chosen.DepartSeconds : 0;
         return new TripPreview(
             chosen.Feasible,
             reason ?? "",
@@ -389,7 +401,8 @@ public static class MovePlanner
             have,
             chosen.Feasible ? chosen.EtaSeconds : 0,
             dvRefuse,
-            alternatives);
+            alternatives,
+            depart);
     }
 
     static string ModeName(MoveMode mode) => mode switch
@@ -475,9 +488,8 @@ public static class MovePlanner
     /// outright. Until the goal layer can express that, the ordering is:
     ///
     ///   1. already there — do nothing
-    ///   2. newtonian — match orbits in the current well (phase/Hohmann; circularise first
-    ///      if leftover e is high). Same-orbit and next-moon-over; do not lose to warp on ETA
-    ///   3. warp — when the target is under a different parent (interplanetary)
+    ///   2. warp — when the newtonian option is an interplanetary patched conic and warp can fly
+    ///   3. newtonian — inside one sphere, and interplanetary when warp cannot
     /// </summary>
     public static MoveOption Select(IReadOnlyList<MoveOption> options)
     {
@@ -490,10 +502,11 @@ public static class MovePlanner
         bool newtOk = newt.HasValue && newt.Value.Feasible;
         bool warpOk = warp.HasValue && warp.Value.Feasible;
 
-        // Newtonian is only feasible in the current well (match the moon's orbit around
-        // the parent, or phase/Hohmann with a co-orbital). Warp is seconds; a Phobos
-        // phasing burn is hours and would always lose a 3× ETA comparison — which is
-        // how MoveTo Phobos kept warping and never completed.
+        // Inside one sphere, Newtonian stays first. A Phobos phasing burn is hours and
+        // warp is seconds; losing that comparison is how MoveTo Phobos kept warping.
+        // Between planets, warp stays the default when the ship has both.
+        if (newtOk && warpOk && newt.Value.Interplanetary)
+            return warp.Value;
         if (newtOk) return newt.Value;
         if (warpOk) return warp.Value;
 
@@ -704,8 +717,12 @@ public static class MovePlanner
                 manuvers: new (Vector3, double)[parkingBurns.Count]);
         }
 
-        // One level in or out (Earth to Luna, Luna to Earth). Anything else with a
-        // usable sphere, such as Earth to Mars, still has no route without warp.
+        // Earth to Mars, one level each side of the star. A moon to another planet is
+        // two escapes and stays on the refusal below.
+        if (PatchedConic.IsOneLevelTransfer(ship, target))
+            return EvaluatePatched(ship, target, now, thrust.DeltaV, arrivalPeriapsis, arrivalApoapsis);
+
+        // One level in or out (Earth to Luna, Luna to Earth).
         if (dropInParent == target)
         {
             var soi = SoiTransferMath.Evaluate(
@@ -724,7 +741,8 @@ public static class MovePlanner
             return MoveOption.Yes(mode, soi.EtaSeconds, soi.DeltaV,
                 manuvers: new (Vector3, double)[] { (Vector3.Zero, soi.EtaSeconds) },
                 message: soi.Reason,
-                soiTransfer: true);
+                soiTransfer: true,
+                departSeconds: ForwardSeconds(soi.DepartAt, now));
         }
         if (parent != dropInParent || targetOrbit.Parent != dropInParent)
         {
@@ -804,11 +822,37 @@ public static class MovePlanner
         if (totalDV > thrust.DeltaV)
             return MoveOption.No(mode, $"needs {totalDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
 
-        string match = IsCoOrbital(shipRadius, targetRadius, target)
-            ? $"Phasing to {NameOf(target, ship)}"
-            : $"Hohmann to {NameOf(target, ship)}";
+        bool hohmann = !IsCoOrbital(shipRadius, targetRadius, target);
+        double depart = 0;
+        if (hohmann && manuvers.Length > 0 && double.IsFinite(manuvers[0].timeInSeconds) && manuvers[0].timeInSeconds > 0)
+            depart = manuvers[0].timeInSeconds;
+        string match = hohmann
+            ? $"Hohmann to {NameOf(target, ship)}"
+            : $"Phasing to {NameOf(target, ship)}";
+        string when = depart > 60
+            ? $"depart {FormatArrival(now.AddSeconds(depart))}, arrive {FormatArrival(now.AddSeconds(eta))}"
+            : FormatArrival(now.AddSeconds(eta));
         return MoveOption.Yes(mode, eta, totalDV, 0, manuvers,
-            $"{match}, {FormatArrival(now.AddSeconds(eta))}");
+            $"{match}, {when}", departSeconds: depart);
+    }
+
+    static MoveOption EvaluatePatched(
+        Entity ship, Entity target, DateTime now, double budget, double arrivalPeriapsis, double arrivalApoapsis)
+    {
+        const MoveMode mode = MoveMode.NewtonianTransfer;
+        var plan = PatchedConicPlanner.TryPlan(ship, target, now, budget, arrivalPeriapsis, arrivalApoapsis);
+        if (!plan.Feasible)
+            return MoveOption.No(mode, string.IsNullOrEmpty(plan.Reason) ? "transfer did not converge" : plan.Reason);
+
+        double eta = (plan.ArriveAt - now).TotalSeconds;
+        if (!double.IsFinite(eta) || eta < 0)
+            eta = 0;
+        string message = $"Transfer to {NameOf(target, ship)}, depart {FormatArrival(plan.DepartAt)}, arrive {FormatArrival(plan.ArriveAt)}";
+        if (!string.IsNullOrEmpty(plan.Reason))
+            message += ", " + plan.Reason;
+        return MoveOption.Yes(mode, eta, plan.TotalDeltaV,
+            message: message, soiTransfer: true, interplanetary: true,
+            departSeconds: ForwardSeconds(plan.DepartAt, now));
     }
 
     static MoveOption EvaluateWarp(Entity ship, Entity target, DateTime now)
@@ -1495,8 +1539,8 @@ public static class MovePlanner
         }
 
         option = MoveOption.Yes(mode, (window.Arrive - now).TotalSeconds, window.TotalDeltaV, 0, manuvers,
-            $"Transfer to {NameOf(target, ship)}, {FormatArrival(window.Arrive)}",
-            window: window);
+            $"Transfer to {NameOf(target, ship)}, depart {FormatArrival(window.Depart)}, arrive {FormatArrival(window.Arrive)}",
+            window: window, departSeconds: ForwardSeconds(window.Depart, now));
         return true;
     }
 
@@ -1529,6 +1573,22 @@ public static class MovePlanner
         {
             reason = "no SOI parent";
             return false;
+        }
+
+        if (PatchedConic.IsOneLevelTransfer(ship, target))
+        {
+            var plan = PatchedConicPlanner.TryPlanFromWindow(ship, target, now, thrust.DeltaV, window);
+            if (!plan.Feasible)
+            {
+                reason = string.IsNullOrEmpty(plan.Reason) ? "transfer did not converge" : plan.Reason;
+                return false;
+            }
+
+            actions.Add(SoiTransferAction.CreateCommand(ship, target, now, 0, 0, window));
+            reason = $"Transfer to {NameOf(target, ship)}, depart {FormatArrival(plan.DepartAt)}, arrive {FormatArrival(plan.ArriveAt)}";
+            if (!string.IsNullOrEmpty(plan.Reason))
+                reason += ", " + plan.Reason;
+            return true;
         }
 
         bool sameParent = target.GetSOIParentEntity() == parent
@@ -1575,7 +1635,7 @@ public static class MovePlanner
             ship.FactionOwnerID, ship, window.Depart, burn1, seconds1, "Transfer window"));
         actions.Add(NewtonThrustAction.CreateCommand(
             ship.FactionOwnerID, ship, window.Arrive, burn2, seconds2, "Transfer window"));
-        reason = $"Transfer to {NameOf(target, ship)}, {FormatArrival(window.Arrive)}";
+        reason = $"Transfer to {NameOf(target, ship)}, depart {FormatArrival(window.Depart)}, arrive {FormatArrival(window.Arrive)}";
         return true;
     }
 
@@ -1596,6 +1656,12 @@ public static class MovePlanner
 
     static string FormatArrival(DateTime at)
         => at.ToString("yyyy-MM-dd HH:mm:ss");
+
+    static double ForwardSeconds(DateTime at, DateTime now)
+    {
+        double seconds = (at - now).TotalSeconds;
+        return double.IsFinite(seconds) && seconds > 0 ? seconds : 0;
+    }
 
     /// <summary>
     /// Angle about the SOI parent, increasing in the direction of motion.

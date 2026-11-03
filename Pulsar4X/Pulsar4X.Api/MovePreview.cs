@@ -18,7 +18,8 @@ public sealed record TripPreview(
     double Have,
     double EtaSeconds,
     bool RefusedForDeltaV,
-    IReadOnlyList<ArrivalChoice> Alternatives)
+    IReadOnlyList<ArrivalChoice> Alternatives,
+    double DepartInSeconds = 0)
 {
     public static TripPreview None(string reason) =>
         new(false, reason, "", 0, 0, 0, false, Array.Empty<ArrivalChoice>());

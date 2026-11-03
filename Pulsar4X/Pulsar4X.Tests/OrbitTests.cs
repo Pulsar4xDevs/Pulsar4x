@@ -697,7 +697,7 @@ namespace Pulsar4X.Tests
             double escape = OrbitalMath.EscapeBurn(muEarth, rPark, vInf);
             Assert.That(escape, Is.EqualTo(3155.8).Within(0.1));
 
-            // InterPlanetaryHohmann's dva is the ellipse that dies at the sphere, not this hyperbola.
+            // An ellipse that reaches the sphere and stops is a smaller burn than this hyperbola.
             double earthSma = 149_597_870_700;
             double earthSoi = OrbitalMath.GetSOI(earthSma, 5.972e24, 1.9885e30);
             double vCirc = Math.Sqrt(muEarth / rPark);

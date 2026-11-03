@@ -107,6 +107,12 @@ namespace Pulsar4X.Orbital
     {
         public const int MaxSteps = 400;
 
+        /// <summary>
+        /// Spare Δv the patched-conic planner holds back for one mid-course burn, in m/s.
+        /// Counted in the budget check, not in the escape-plus-capture total.
+        /// </summary>
+        public const double CorrectionAllowanceMps = 100;
+
         /// <summary>Body-to-body cost in one frame: the v-infinity magnitude, with no parking orbit.</summary>
         public static double MagnitudeCost(Vector3 vInfinity, Vector3 position) => vInfinity.Length();
 
