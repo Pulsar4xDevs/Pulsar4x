@@ -96,44 +96,5 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(node2, pathStack.Pop());
             Assert.AreEqual(node3, pathStack.Pop());
         }
-
-        /*
-        [Test]
-        [Ignore("Incomplete Test")]
-        public void PathfindingTest()
-        {
-            CreateTestUniverse();
-
-            List<StarSystem> systems = _game.GetSystems(_authToken);
-
-
-        }
-
-        private void CreateTestUniverse()
-        {
-            _game = new Game(new NewGameSettings { GameName = "Pathfinding Test Game", StartDateTime = DateTime.Now, MaxSystems = 10 });
-            _pathfindingManager = new PathfindingManager(_game);
-
-            //_testPlayer = _game.AddPlayer("TestPlayer");
-            _authToken = new AuthenticationToken(_testPlayer.ID);
-
-            _humanFaction = DefaultStartFactory.DefaultHumans(_game, "TestHumanFaction");
-
-            List<StarSystem> systems = _game.GetSystems(new AuthenticationToken(_game.SpaceMaster.ID));
-            var factionInfoDB = _humanFaction.GetDataBlob<FactionInfoDB>();
-
-            List<StarSystem> testPlayerSystems = _game.GetSystems(_authToken);
-
-            StarSystem starSystem;
-            StarSystem sol = testPlayerSystems[0];
-            Random RNG = new Random();
-            do
-            {
-                starSystem = systems[RNG.Next(systems.Count - 1)];
-            } while (starSystem == sol);
-
-            factionInfoDB.KnownSystems.Add(starSystem.Guid);
-        }
-        */
     }
 }
