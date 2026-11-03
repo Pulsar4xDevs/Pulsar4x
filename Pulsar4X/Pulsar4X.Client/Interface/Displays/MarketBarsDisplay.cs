@@ -30,44 +30,39 @@ namespace Pulsar4X.Client
             {
                 ImGui.Text("No listings.");
             }
-            else
+            else if (ImGui.BeginTable("##market-bars", 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
             {
-            const ImGuiTableFlags flags = ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp;
-            if (ImGui.BeginTable("##market-bars", 4, flags))
-            {
+                ImGui.TableSetupColumn("Good", ImGuiTableColumnFlags.WidthFixed, 140f);
+                ImGui.TableSetupColumn("Stock");
+                ImGui.TableSetupColumn("Buy");
+                ImGui.TableSetupColumn("Sell");
+                ImGui.TableHeadersRow();
 
-            ImGui.TableSetupColumn("Good", ImGuiTableColumnFlags.WidthFixed, 140f);
-            ImGui.TableSetupColumn("Stock");
-            ImGui.TableSetupColumn("Buy");
-            ImGui.TableSetupColumn("Sell");
-            ImGui.TableHeadersRow();
+                foreach (var good in market.Goods)
+                {
+                    long scale = Math.Max(good.Stock, Math.Max(good.Reserve, Math.Max(good.BuyQuantity, Math.Max(good.SellQuantity, 1L))));
 
-            foreach (var good in market.Goods)
-            {
-                long scale = Math.Max(good.Stock, Math.Max(good.Reserve, Math.Max(good.BuyQuantity, Math.Max(good.SellQuantity, 1L))));
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ImGui.Text(good.Name);
+                    ImGui.Text($"bid {good.Bid}   ask {good.Ask}");
 
-                ImGui.TableNextRow();
-                ImGui.TableNextColumn();
-                ImGui.Text(good.Name);
-                ImGui.Text($"bid {good.Bid}   ask {good.Ask}");
+                    ImGui.TableNextColumn();
+                    string reserve = $"reserve {good.Reserve}";
+                    float reserveWidth = ImGui.CalcTextSize(reserve).X + ImGui.GetStyle().ItemSpacing.X;
+                    float stockWidth = Math.Max(24f, ImGui.GetContentRegionAvail().X - reserveWidth);
+                    DrawBar(good.Stock, scale, StockColor, good.Stock.ToString(), stockWidth);
+                    ImGui.SameLine();
+                    ImGui.Text(reserve);
 
-                ImGui.TableNextColumn();
-                string reserve = $"reserve {good.Reserve}";
-                float reserveWidth = ImGui.CalcTextSize(reserve).X + ImGui.GetStyle().ItemSpacing.X;
-                float stockWidth = Math.Max(24f, ImGui.GetContentRegionAvail().X - reserveWidth);
-                DrawBar(good.Stock, scale, StockColor, good.Stock.ToString(), stockWidth);
-                ImGui.SameLine();
-                ImGui.Text(reserve);
+                    ImGui.TableNextColumn();
+                    DrawBar(good.BuyQuantity, scale, BuyColor, good.BuyQuantity.ToString(), -1f);
 
-                ImGui.TableNextColumn();
-                DrawBar(good.BuyQuantity, scale, BuyColor, good.BuyQuantity.ToString(), -1f);
+                    ImGui.TableNextColumn();
+                    DrawBar(good.SellQuantity, scale, SellColor, good.SellQuantity.ToString(), -1f);
+                }
 
-                ImGui.TableNextColumn();
-                DrawBar(good.SellQuantity, scale, SellColor, good.SellQuantity.ToString(), -1f);
-            }
-
-            ImGui.EndTable();
-            }
+                ImGui.EndTable();
             }
 
             if (market.CanEdit)
@@ -190,73 +185,135 @@ namespace Pulsar4X.Client
 
         static void DisplayEditor(int entityId, MarketView market, GlobalUIState uiState)
         {
-            bool idle = !ImGui.IsAnyItemActive();
-            foreach (var good in market.Goods)
-            {
-                var edit = Row(entityId, good, idle);
-                ImGui.PushID(good.CargoId);
-                ImGui.Separator();
-                ImGui.Text(good.Name);
-                ImGui.SetNextItemWidth(140f);
-                ImGui.InputInt("Sell", ref edit.Sell);
-                ImGui.SetNextItemWidth(140f);
-                ImGui.InputDouble("Ask", ref edit.Ask, 0, 0, "%.2f");
-                ImGui.SetNextItemWidth(140f);
-                ImGui.InputInt("Buy", ref edit.Buy);
-                ImGui.SetNextItemWidth(140f);
-                ImGui.InputDouble("Bid", ref edit.Bid, 0, 0, "%.2f");
-                ImGui.SetNextItemWidth(140f);
-                ImGui.InputInt("Reserve", ref edit.Reserve);
-                if (ImGui.Button("Set"))
-                    SubmitSet(entityId, good.CargoId, edit, uiState);
-                ImGui.SameLine();
-                if (ImGui.Button("Remove"))
-                    uiState.GameClient?.SubmitCommandAsync(new ClearMarketListingCommand(entityId, good.CargoId));
-                ImGui.PopID();
-            }
-
-            if (market.Addable.Count == 0)
+            if (market.Goods.Count == 0 && market.Addable.Count == 0)
                 return;
 
-            var draft = AddDraft(entityId);
-            int index = AddIndex(entityId, market.Addable.Count);
-            var selected = market.Addable[index];
-            ImGui.Separator();
-            ImGui.Text("Add a good");
-            if (ImGui.BeginCombo("Good", selected.Name))
-            {
-                for (int i = 0; i < market.Addable.Count; i++)
-                {
-                    var choice = market.Addable[i];
-                    if (ImGui.Selectable(choice.Name + "###" + choice.CargoId, i == index))
-                        index = i;
-                }
-                ImGui.EndCombo();
-            }
-            _addIndex[entityId] = index;
-            selected = market.Addable[index];
+            bool room = market.Goods.Count < market.Capacity;
+            bool idle = !ImGui.IsAnyItemActive();
+            string? selectedId = SelectedCargo(entityId, market);
+            if (selectedId == null)
+                return;
 
-            ImGui.PushID("add-listing");
-            ImGui.SetNextItemWidth(140f);
-            ImGui.InputInt("Sell", ref draft.Sell);
-            ImGui.SetNextItemWidth(140f);
-            ImGui.InputDouble("Ask", ref draft.Ask, 0, 0, "%.2f");
-            ImGui.SetNextItemWidth(140f);
-            ImGui.InputInt("Buy", ref draft.Buy);
-            ImGui.SetNextItemWidth(140f);
-            ImGui.InputDouble("Bid", ref draft.Bid, 0, 0, "%.2f");
-            ImGui.SetNextItemWidth(140f);
-            ImGui.InputInt("Reserve", ref draft.Reserve);
-            if (ImGui.Button("Add"))
+            var catalog = new List<(string Id, string Name)>(market.Goods.Count + market.Addable.Count);
+            foreach (var good in market.Goods)
+                catalog.Add((good.CargoId, good.Name));
+            foreach (var choice in market.Addable)
+                catalog.Add((choice.CargoId, choice.Name));
+            catalog.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+
+            ImGui.Separator();
+            ImGui.PushID("market-edit-" + entityId);
+            if (!_filter.TryGetValue(entityId, out string filter))
+                filter = "";
+            float listW = MathF.Min(320f, MathF.Max(160f, ImGui.GetContentRegionAvail().X));
+            ImGui.SetNextItemWidth(listW);
+            ImGui.InputTextWithHint("##good-search", "Search goods...", ref filter, 64);
+            _filter[entityId] = filter;
+
+            float listH = ImGui.GetTextLineHeightWithSpacing() * 8f;
+            if (ImGui.BeginChild("##good-list", new Vector2(listW, listH), ImGuiChildFlags.Borders))
             {
-                SubmitSet(entityId, selected.CargoId, draft, uiState);
-                draft.Sell = 0;
-                draft.Buy = 0;
-                draft.Reserve = 0;
-                draft.Ask = 0;
-                draft.Bid = 0;
+                bool any = false;
+                foreach (var entry in catalog)
+                {
+                    if (!NameMatches(entry.Name, filter))
+                        continue;
+                    any = true;
+                    if (ImGui.Selectable(entry.Name + "###" + entry.Id, entry.Id == selectedId))
+                        selectedId = entry.Id;
+                }
+
+                if (!any)
+                    ImGui.TextDisabled("No match.");
+            }
+            ImGui.EndChild();
+            _selected[entityId] = selectedId;
+
+            MarketGoodView? listed = null;
+            foreach (var good in market.Goods)
+            {
+                if (good.CargoId == selectedId)
+                {
+                    listed = good;
+                    break;
+                }
+            }
+
+            if (listed != null)
+            {
+                var edit = Row(entityId, listed, idle);
+                DrawFields(edit);
+                if (ImGui.Button("Set"))
+                    SubmitSet(entityId, listed.CargoId, edit, uiState);
+                ImGui.SameLine();
+                if (ImGui.Button("Remove"))
+                    uiState.GameClient?.SubmitCommandAsync(new ClearMarketListingCommand(entityId, listed.CargoId));
+            }
+            else if (room)
+            {
+                var draft = AddDraft(entityId);
+                DrawFields(draft);
+                if (ImGui.Button("Add"))
+                {
+                    SubmitSet(entityId, selectedId, draft, uiState);
+                    draft.Sell = 0;
+                    draft.Buy = 0;
+                    draft.Reserve = 0;
+                    draft.Ask = 0;
+                    draft.Bid = 0;
+                }
+            }
+            else
+            {
+                ImGui.Text("This office is full.");
             }
             ImGui.PopID();
+        }
+
+        static void DrawFields(RowEdit edit)
+        {
+            ImGui.SetNextItemWidth(140f);
+            ImGui.InputInt("Sell", ref edit.Sell);
+            ImGui.SetNextItemWidth(140f);
+            ImGui.InputDouble("Ask", ref edit.Ask, 0, 0, "%.2f");
+            ImGui.SetNextItemWidth(140f);
+            ImGui.InputInt("Buy", ref edit.Buy);
+            ImGui.SetNextItemWidth(140f);
+            ImGui.InputDouble("Bid", ref edit.Bid, 0, 0, "%.2f");
+            ImGui.SetNextItemWidth(140f);
+            ImGui.InputInt("Reserve", ref edit.Reserve);
+        }
+
+        static string? SelectedCargo(int entityId, MarketView market)
+        {
+            if (_selected.TryGetValue(entityId, out var id) && IsChoice(market, id))
+                return id;
+            if (market.Goods.Count > 0)
+                return market.Goods[0].CargoId;
+            if (market.Addable.Count > 0)
+                return market.Addable[0].CargoId;
+            return null;
+        }
+
+        static bool IsChoice(MarketView market, string cargoId)
+        {
+            foreach (var good in market.Goods)
+            {
+                if (good.CargoId == cargoId)
+                    return true;
+            }
+            foreach (var choice in market.Addable)
+            {
+                if (choice.CargoId == cargoId)
+                    return true;
+            }
+            return false;
+        }
+
+        static bool NameMatches(string name, string filter)
+        {
+            return string.IsNullOrEmpty(filter)
+                || name.Contains(filter, StringComparison.OrdinalIgnoreCase);
         }
 
         static void SubmitSet(int entityId, string cargoId, RowEdit edit, GlobalUIState uiState)
@@ -292,13 +349,6 @@ namespace Pulsar4X.Client
             return edit;
         }
 
-        static int AddIndex(int entityId, int count)
-        {
-            if (!_addIndex.TryGetValue(entityId, out int index) || index < 0 || index >= count)
-                index = 0;
-            return index;
-        }
-
         static RowEdit Seed(MarketGoodView good)
         {
             return new RowEdit
@@ -331,7 +381,8 @@ namespace Pulsar4X.Client
 
         static readonly Dictionary<(int EntityId, string CargoId), RowEdit> _rows = new();
         static readonly Dictionary<int, RowEdit> _adds = new();
-        static readonly Dictionary<int, int> _addIndex = new();
+        static readonly Dictionary<int, string> _selected = new();
+        static readonly Dictionary<int, string> _filter = new();
 
         static void DrawBar(long value, long scale, Vector4 color, string overlay, float width)
         {
