@@ -482,15 +482,25 @@ namespace Pulsar4X.Engine
                     child.GetDataBlob<MassVolumeDB>().MassTotal);
 
         /// <summary>
-        /// returns the SOI radius of *this* orbital body,
-        /// ie for the SOI radius of earth give the orbitDB of earth.
-        /// TODO: what do we want to return if orbit is the sun? currently returning null.
+        /// Capture and brake planning stop this far inside the sphere.
+        /// Exit detection uses the sphere itself, not this margin.
         /// </summary>
-        /// <param name="orbit"></param>
-        /// <returns></returns>
+        public const double SoiCaptureFraction = 0.9;
+
+        /// <summary>
+        /// A scheduled exit is stale when the ship is still this far inside the sphere.
+        /// </summary>
+        public const double SoiExitEpsilon = 1e-6;
+
+        /// <summary>
+        /// Sphere of this body, in metres. Same number as <c>Entity.GetSOI_m</c>.
+        /// The star, and an orbit that is not on an entity yet, are infinite.
+        /// </summary>
         public static double GetSOIRadius(OrbitDB orbit)
         {
-            return GetSOI(orbit.SemiMajorAxis, orbit._myMass, orbit._parentMass);
+            if (orbit?.OwningEntity == null)
+                return double.PositiveInfinity;
+            return orbit.OwningEntity.GetSOI_m();
         }
 
         public static OrbitDB FindSOIForOrbit(OrbitDB orbit, Vector3 AbsolutePosition)

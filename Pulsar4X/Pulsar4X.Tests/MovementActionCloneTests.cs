@@ -48,6 +48,7 @@ namespace Pulsar4X.Tests
                 new CirculariseAction(),
                 new MatchOrbitAction(),
                 new ChangeOrbitalAltitudeAction(),
+                new SoiTransferAction(),
                 new NewtonThrustAction(),
                 new ThrustToTargetCmd(),
                 new Thrust90ToTargetCmd(),

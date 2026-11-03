@@ -996,6 +996,9 @@ public sealed record ShipSnapshot(
     /// <summary>This hull's own grav-survey kit. A fleet flag is "any child can".</summary>
     public bool CanGravSurvey { get; init; }
 
+    /// <summary>This hull can warp to a jump gate. A fleet flag is "any child can".</summary>
+    public bool CanJump { get; init; }
+
     /// <summary>This hull's own asteroid miner. A fleet flag is "any child can".</summary>
     public bool CanMineAsteroids { get; init; }
 
@@ -1103,6 +1106,7 @@ public sealed class FleetSnapshot
     public bool InheritOrders { get; init; }
     public bool CanGeoSurvey { get; init; }
     public bool CanGravSurvey { get; init; }
+    public bool CanJump { get; init; }
     public bool CanMineAsteroids { get; init; }
 
     /// <summary>Effective span of the flagship. One of <see cref="CommandSpanLabels"/>.</summary>

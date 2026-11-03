@@ -1206,6 +1206,8 @@ namespace Pulsar4X.Engine.Api
             var goal = new Goal(GoalType.MoveTo)
             {
                 TargetEntityID = cmd.BodyId,
+                ArrivalPeriapsis = cmd.ArrivalPeriapsis,
+                ArrivalApoapsis = cmd.ArrivalApoapsis,
             };
             AgentProcessor.AssignGoal(commanded, goal);
             if(goal.Status == GoalStatus.Failed)
@@ -1489,7 +1491,9 @@ namespace Pulsar4X.Engine.Api
                 return CommandResult.Reject($"Entity {cmd.BodyId} not found.");
             if (RejectUnseen(faction, body) is { } unseen)
                 return unseen;
-            if (!MovePlanner.TryBuildMoveActions(commanded, body, out var actions, out var reason, commanded.StarSysDateTime))
+            if (!MovePlanner.TryBuildMoveActions(
+                    commanded, body, out var actions, out var reason, commanded.StarSysDateTime,
+                    null, cmd.ArrivalPeriapsis, cmd.ArrivalApoapsis))
                 return CommandResult.Reject(reason);
             return DispatchActions(actions, reason);
         }

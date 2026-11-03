@@ -145,6 +145,8 @@ public class MoveToPlan : IGoalPlanner
             {
                 TargetEntityID = goal.TargetEntityID,
                 ParentGoalId = goal.Id,
+                ArrivalPeriapsis = goal.ArrivalPeriapsis,
+                ArrivalApoapsis = goal.ArrivalApoapsis,
             }));
         }
 
@@ -254,8 +256,11 @@ public readonly struct MoveOption
     /// <summary>Prograde-frame burns and their cumulative offsets from now, in seconds.</summary>
     public readonly (Vector3 deltaV, double timeInSeconds)[] Manuvers;
 
+    /// <summary>One-level sphere change. <see cref="MovePlanner.TryBuildMoveActions"/> queues a transfer, not a match.</summary>
+    public readonly bool SoiTransfer;
+
     MoveOption(MoveMode mode, bool feasible, string reason, double eta, double deltaV, double energy,
-        (Vector3 deltaV, double timeInSeconds)[] manuvers)
+        (Vector3 deltaV, double timeInSeconds)[] manuvers, bool soiTransfer = false)
     {
         Mode = mode;
         Feasible = feasible;
@@ -264,14 +269,15 @@ public readonly struct MoveOption
         DeltaV = deltaV;
         EnergyCost = energy;
         Manuvers = manuvers ?? Array.Empty<(Vector3, double)>();
+        SoiTransfer = soiTransfer;
     }
 
     public static MoveOption No(MoveMode mode, string reason)
         => new MoveOption(mode, false, reason, double.PositiveInfinity, 0, 0, null);
 
     public static MoveOption Yes(MoveMode mode, double etaSeconds, double deltaV = 0, double energyCost = 0,
-        (Vector3 deltaV, double timeInSeconds)[] manuvers = null, string message = "")
-        => new MoveOption(mode, true, message, etaSeconds, deltaV, energyCost, manuvers);
+        (Vector3 deltaV, double timeInSeconds)[] manuvers = null, string message = "", bool soiTransfer = false)
+        => new MoveOption(mode, true, message, etaSeconds, deltaV, energyCost, manuvers, soiTransfer);
 }
 
 /// <summary>
@@ -331,14 +337,124 @@ public static class MovePlanner
     }
 
     /// <summary>Evaluate every mode we know about. Infeasible ones are returned too, for the reason.</summary>
-    public static List<MoveOption> Evaluate(Entity ship, Entity target, DateTime now)
+    public static List<MoveOption> Evaluate(Entity ship, Entity target, DateTime now,
+        double arrivalPeriapsis = 0, double arrivalApoapsis = 0)
     {
         return new List<MoveOption>
         {
             EvaluateAlreadyThere(ship, target, now),
-            EvaluateNewtonian(ship, target, now),
+            EvaluateNewtonian(ship, target, now, arrivalPeriapsis, arrivalApoapsis),
             EvaluateWarp(ship, target, now),
         };
+    }
+
+    /// <summary>
+    /// The plan the Orders tree shows. Does not start a burn.
+    /// A short tank for a one-level transfer also gets up to three arrival orbits that fit.
+    /// </summary>
+    public static TripPreview Preview(Entity ship, Entity target, DateTime now)
+    {
+        if (ship == null || target == null)
+            return TripPreview.None("target not found");
+        if (!CanMove(ship, out string cannot))
+            return TripPreview.None(cannot);
+
+        var options = Evaluate(ship, target, now);
+        var chosen = Select(options);
+        double have = ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrust) ? thrust.DeltaV : 0;
+        string reason = chosen.Reason;
+        var newton = Find(options, MoveMode.NewtonianTransfer);
+        if (!chosen.Feasible && newton.HasValue && newton.Value.Reason.Contains("Δv"))
+            reason = newton.Value.Reason;
+        bool dvRefuse = !chosen.Feasible && reason.Contains("Δv");
+        var alternatives = dvRefuse
+            ? FindArrivals(ship, target, now, have)
+            : Array.Empty<ArrivalChoice>();
+        return new TripPreview(
+            chosen.Feasible,
+            reason ?? "",
+            ModeName(chosen.Mode),
+            chosen.Feasible ? chosen.DeltaV : DeltaVFrom(reason),
+            have,
+            chosen.Feasible ? chosen.EtaSeconds : 0,
+            dvRefuse,
+            alternatives);
+    }
+
+    static string ModeName(MoveMode mode) => mode switch
+    {
+        MoveMode.AlreadyThere => "Already there",
+        MoveMode.NewtonianTransfer => "Newtonian",
+        MoveMode.Warp => "Warp",
+        _ => mode.ToString(),
+    };
+
+    static double DeltaVFrom(string reason)
+    {
+        if (string.IsNullOrEmpty(reason))
+            return 0;
+        int at = reason.IndexOf("needs ", StringComparison.Ordinal);
+        if (at < 0)
+            return 0;
+        int start = at + "needs ".Length;
+        int end = start;
+        while (end < reason.Length && (char.IsDigit(reason[end]) || reason[end] == ','))
+            end++;
+        if (end == start)
+            return 0;
+        string digits = reason.Substring(start, end - start).Replace(",", "");
+        return double.TryParse(digits, out double dv) ? dv : 0;
+    }
+
+    static ArrivalChoice[] FindArrivals(Entity ship, Entity target, DateTime now, double have)
+    {
+        if (!OneLevel(ship, target, out var parent, out var shipOrbit, out var targetOrbit))
+            return Array.Empty<ArrivalChoice>();
+        double low = OrbitMath.LowOrbitRadius(target);
+        double soi = target.GetSOI_m();
+        if (!(low > 1) || !double.IsFinite(soi) || soi < low * 2)
+            return Array.Empty<ArrivalChoice>();
+        double apoCap = soi * OrbitMath.SoiCaptureFraction;
+
+        var found = new List<ArrivalChoice>();
+        void Consider(double peri, double apo, string label)
+        {
+            var plan = SoiTransferMath.Evaluate(
+                ship, target, parent, shipOrbit, targetOrbit, now, double.PositiveInfinity, peri, apo);
+            if (plan.Kind != SoiTransferMath.Kind.Ready || !(plan.DeltaV <= have) || !(plan.DeltaV > 0))
+                return;
+            foreach (var prior in found)
+            {
+                if (Math.Abs(prior.DeltaV - plan.DeltaV) < 50)
+                    return;
+            }
+            found.Add(new ArrivalChoice(peri, apo, plan.DeltaV, label));
+        }
+
+        Consider(low, apoCap, "Ellipse");
+        double hi = Math.Min(apoCap * 0.5, low * 30);
+        for (double radius = low * 2; radius < hi; radius *= 2)
+            Consider(radius, 0, "Circular");
+
+        found.Sort((a, b) => a.DeltaV.CompareTo(b.DeltaV));
+        if (found.Count > 3)
+            found.RemoveRange(3, found.Count - 3);
+        return found.ToArray();
+    }
+
+    static bool OneLevel(Entity ship, Entity target, out Entity parent, out OrbitDB shipOrbit, out OrbitDB targetOrbit)
+    {
+        parent = ship.GetSOIParentEntity();
+        shipOrbit = null;
+        targetOrbit = null;
+        if (parent == null
+            || !ship.TryGetDataBlob(out shipOrbit)
+            || !target.TryGetDataBlob(out targetOrbit)
+            || targetOrbit.Parent == null)
+            return false;
+        if (targetOrbit.Parent == parent && parent != target)
+            return true;
+        return parent.TryGetDataBlob<OrbitDB>(out var parentOrbit) && parentOrbit.Parent == target;
     }
 
     /// <summary>
@@ -376,7 +492,7 @@ public static class MovePlanner
             if (!o.Feasible && !string.IsNullOrEmpty(o.Reason))
                 why.Add($"{o.Mode}: {o.Reason}");
 
-        return MoveOption.No(MoveMode.Warp, string.Join("; ", why));
+        return MoveOption.No(MoveMode.Warp, string.Join("\n", why));
     }
 
     static MoveOption? Find(IReadOnlyList<MoveOption> options, MoveMode mode)
@@ -490,7 +606,8 @@ public static class MovePlanner
     /// Reaction-drive transfer. Only the cases we have working maths for; everything else is
     /// rejected with a reason rather than plotted badly.
     /// </summary>
-    static MoveOption EvaluateNewtonian(Entity ship, Entity target, DateTime now)
+    static MoveOption EvaluateNewtonian(Entity ship, Entity target, DateTime now,
+        double arrivalPeriapsis = 0, double arrivalApoapsis = 0)
     {
         const MoveMode mode = MoveMode.NewtonianTransfer;
 
@@ -576,9 +693,28 @@ public static class MovePlanner
                 manuvers: new (Vector3, double)[parkingBurns.Count]);
         }
 
-        // Match the target's orbit around the shared drop-in parent (Phobos around Mars).
+        // One level in or out (Earth to Luna, Luna to Earth). Anything else with a
+        // usable sphere, such as Earth to Mars, still has no route without warp.
         if (dropInParent == target)
-            return MoveOption.No(mode, "target body has a usable SOI; warp");
+        {
+            var soi = SoiTransferMath.Evaluate(
+                ship, target, parent, shipOrbit, targetOrbit, now, thrust.DeltaV,
+                arrivalPeriapsis, arrivalApoapsis);
+            if (soi.Kind == SoiTransferMath.Kind.NotApplicable)
+                return MoveOption.No(mode, "target body has a usable SOI; warp");
+            if (soi.Kind == SoiTransferMath.Kind.Circularise)
+            {
+                if (circulariseDV > thrust.DeltaV)
+                    return MoveOption.No(mode, $"needs {circulariseDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
+                return MoveOption.Yes(mode, 0, circulariseDV, message: soi.Reason);
+            }
+            if (soi.Kind != SoiTransferMath.Kind.Ready)
+                return MoveOption.No(mode, soi.Reason);
+            return MoveOption.Yes(mode, soi.EtaSeconds, soi.DeltaV,
+                manuvers: new (Vector3, double)[] { (Vector3.Zero, soi.EtaSeconds) },
+                message: soi.Reason,
+                soiTransfer: true);
+        }
         if (parent != dropInParent || targetOrbit.Parent != dropInParent)
         {
             return MoveOption.No(mode, "target is under a different SOI parent; no interplanetary transfer maths yet");
@@ -713,7 +849,8 @@ public static class MovePlanner
         => TryBuildMoveActions(ship, targetEntity, out actions, out reason, ship.StarSysDateTime, goal);
 
     public static bool TryBuildMoveActions(Entity ship, Entity targetEntity,
-                                           out List<EntityAction> actions, out string reason, DateTime now, Goal goal = null)
+                                           out List<EntityAction> actions, out string reason, DateTime now, Goal goal = null,
+                                           double arrivalPeriapsis = 0, double arrivalApoapsis = 0)
     {
         actions = new List<EntityAction>();
         reason = string.Empty;
@@ -723,7 +860,17 @@ public static class MovePlanner
         if (!CanMove(ship, out reason))
             return false;
 
-        var moveOptions = Evaluate(ship, target, now);
+        double peri = arrivalPeriapsis;
+        double apo = arrivalApoapsis;
+        if (goal != null)
+        {
+            if (goal.ArrivalPeriapsis > 0)
+                peri = goal.ArrivalPeriapsis;
+            if (goal.ArrivalApoapsis > 0)
+                apo = goal.ArrivalApoapsis;
+        }
+
+        var moveOptions = Evaluate(ship, target, now, peri, apo);
         var chosen = Select(moveOptions);
         if (chosen.Feasible && chosen.Mode == MoveMode.AlreadyThere)
         {
@@ -734,7 +881,9 @@ public static class MovePlanner
         if (chosen.Feasible && chosen.Mode != MoveMode.Warp)
         {
             reason = chosen.Reason;
-            if (chosen.Manuvers.Length == 0)
+            if (chosen.SoiTransfer)
+                actions.Add(SoiTransferAction.CreateCommand(ship, target, now, peri, apo));
+            else if (chosen.Manuvers.Length == 0)
                 actions.Add(CirculariseAction.CreateCommand(ship, now));
             else if (ship.GetSOIParentEntity() == target)
                 actions.Add(ChangeOrbitalAltitudeAction.CreateCommand(ship, OrbitMath.LowOrbitRadius(target), now));
@@ -925,7 +1074,7 @@ public static class MovePlanner
             return false;
         if (!dropIn.TryGetDataBlob<OrbitDB>(out var dropOrbit))
             return false;
-        double rCap = 0.9 * OrbitMath.GetSOIRadius(dropOrbit);
+        double rCap = OrbitMath.SoiCaptureFraction * OrbitMath.GetSOIRadius(dropOrbit);
         if (!(rCap > rLow * 1.05) || !double.IsFinite(rCap))
             return false;
 
@@ -1123,7 +1272,7 @@ public static class MovePlanner
     }
 
     /// <summary>
-    /// Speed at <paramref name="r"/> whose apoapsis is 90% of the parent's sphere.
+    /// Speed at <paramref name="r"/> whose apoapsis is <see cref="OrbitMath.SoiCaptureFraction"/> of the parent's sphere.
     /// A parent with no orbit, or a sphere that does not contain <paramref name="r"/>, has none.
     /// </summary>
     static bool TryCaptureSpeed(Entity parent, Entity ship, double r, out double vCap, out double mu)
@@ -1135,7 +1284,7 @@ public static class MovePlanner
         double soi = OrbitMath.GetSOIRadius(orbit);
         if (!(soi > r) || !(r > 1))
             return false;
-        double ra = 0.9 * soi;
+        double ra = OrbitMath.SoiCaptureFraction * soi;
         if (!(ra > r))
             return false;
         mu = OrbitMath.SGP(parent, ship);
@@ -1150,7 +1299,7 @@ public static class MovePlanner
     {
         if (!parent.TryGetDataBlob<OrbitDB>(out var orbit))
             return false;
-        double limit = 0.9 * OrbitMath.GetSOIRadius(orbit);
+        double limit = OrbitMath.SoiCaptureFraction * OrbitMath.GetSOIRadius(orbit);
         var ke = OrbitMath.KeplerFromPositionAndVelocity(mu, pos, vel, at);
         return ke.Eccentricity < 1 && double.IsFinite(ke.Apoapsis) && ke.Apoapsis <= limit;
     }
@@ -1281,11 +1430,29 @@ public static class MovePlanner
     static string FormatArrival(DateTime at)
         => at.ToString("yyyy-MM-dd HH:mm:ss");
 
-    /// <summary>True longitude of an entity about its SOI parent, in the reference plane.</summary>
+    /// <summary>
+    /// Angle about the SOI parent, increasing in the direction of motion.
+    /// A retrograde orbit's longitude runs the other way, so the sign is flipped.
+    /// </summary>
     static double AngleOf(Entity entity, DateTime atDateTime)
     {
-        var pos = MoveMath.GetRelativeFuturePosition(entity, atDateTime);
-        return Math.Atan2(pos.Y, pos.X);
+        Vector3 pos;
+        Vector3 vel;
+        if (entity.TryGetDataBlob<OrbitDB>(out var orbit))
+        {
+            var state = OrbitMath.GetStateVectors(orbit, atDateTime);
+            pos = state.pos;
+            vel = state.Velocity;
+        }
+        else
+        {
+            var raw = MoveMath.GetRelativeFutureState(entity, atDateTime);
+            pos = raw.pos;
+            vel = raw.Velocity;
+        }
+        double longitude = Math.Atan2(pos.Y, pos.X);
+        double hz = pos.X * vel.Y - pos.Y * vel.X;
+        return hz < 0 ? -longitude : longitude;
     }
 
     /// <summary>Wrap to (-pi, pi].</summary>

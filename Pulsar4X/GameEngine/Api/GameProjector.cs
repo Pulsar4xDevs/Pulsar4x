@@ -291,9 +291,13 @@ namespace Pulsar4X.Engine.Api
                 MeanMotionRadPerSec = o.MeanMotion,
                 Epoch = o.Epoch,
                 StandardGravParameter = o.GravitationalParameter_m3S2,
-                ParentSoiRadiusM = o.ParentDB is OrbitDB parentOrbit ? OrbitMath.GetSOIRadius(parentOrbit) : 0,
-                SoiRadiusM = o.Parent != null ? OrbitMath.GetSOIRadius(o) : 0,
+                ParentSoiRadiusM = FiniteSoi(o.ParentDB is OrbitDB parentOrbit ? OrbitMath.GetSOIRadius(parentOrbit) : 0),
+                SoiRadiusM = FiniteSoi(o.Parent != null ? OrbitMath.GetSOIRadius(o) : 0),
             };
+
+        /// <summary>The star's sphere is infinite. The map draws no ring for that.</summary>
+        static double FiniteSoi(double radius)
+            => double.IsFinite(radius) && radius > 0 ? radius : 0;
 
         private static OrbitView ToOrbitView(Pulsar4X.Orbital.KeplerElements ke, int? parentId)
             => new(ke.SemiMajorAxis / 1000.0, ke.Eccentricity, ke.Period, parentId)
@@ -1852,6 +1856,9 @@ namespace Pulsar4X.Engine.Api
                 InheritOrders = fleetDB?.InheritOrders ?? false,
                 CanGeoSurvey = fleet.HasGeoSurveyAbility(),
                 CanGravSurvey = fleet.HasJPSurveyAbililty(),
+                // ShipJumpAction transfers whoever is already at the gate. Getting there is a warp,
+                // and JumpOrder skips a ship with no WarpAbilityDB. There is no separate jump drive.
+                CanJump = fleet.HasOrChildHasAbility<Pulsar4X.Movement.WarpAbilityDB>(),
                 CanMineAsteroids = fleet.HasAsteroidMineAbility(),
                 CommandSpan = SpanLabel(CommandSpan.Effective(fleet)),
                 SpanLine = CommandSpan.Describe(fleet),
@@ -1956,6 +1963,7 @@ namespace Pulsar4X.Engine.Api
                 Orders = ProjectOrders(ship),
                 CanGeoSurvey = ship.HasGeoSurveyAbility(),
                 CanGravSurvey = ship.HasJPSurveyAbililty(),
+                CanJump = ship.HasOrChildHasAbility<Pulsar4X.Movement.WarpAbilityDB>(),
                 CanMineAsteroids = ship.HasAsteroidMineAbility(),
                 CommanderId = commanderId,
                 HasConstructionBay = ship.TryGetDataBlob<LocalConstructionDB>(out var bay) && bay.PointsPerDay > 0,

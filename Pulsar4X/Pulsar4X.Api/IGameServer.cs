@@ -4,7 +4,8 @@ namespace Pulsar4X.Api;
 /// The server-authoritative surface the engine exposes, scoped to a <see cref="PlayerSession"/>
 /// (a faction). It is deliberately <b>push-only</b>: clients connect, subscribe, and issue writes —
 /// all state arrives through the event stream (initial snapshot on <see cref="Subscribe"/>, then
-/// self-contained deltas). There are no read/query methods, so nothing is ever polled or fetched.
+/// self-contained deltas). <see cref="PreviewMove"/> is the one read: a move plan is too heavy
+/// to put on every snapshot, and the window caches it for the game day.
 ///
 /// Implemented in the engine by <c>EngineGameServer</c>.
 /// </summary>
@@ -17,6 +18,9 @@ public interface IGameServer
     // --- writes ---
     void SetTimeControl(PlayerSession session, TimeControlRequest request);
     CommandResult SubmitCommand(PlayerSession session, GameCommand command);
+
+    /// <summary>Plan a move from this ship to this body. Does not start anything.</summary>
+    TripPreview PreviewMove(PlayerSession session, int shipId, int bodyId);
 
     /// <summary>Tell the server which system this session is watching, so the engine can
     /// prioritise its processing (foreground-observer scheduling). Null clears the focus.</summary>

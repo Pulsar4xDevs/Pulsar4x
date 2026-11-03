@@ -205,7 +205,10 @@ namespace Pulsar4X.Orbits
             
             var shipRelPos = oldOrbit.GetPosition(atDateTime);
             var soiRadius = parent.GetSOI_m();
-            if (shipRelPos.Length() < soiRadius * 0.9)
+            // Still clearly inside: an earlier orbit left this interrupt behind.
+            // The capture margin is not a detection radius.
+            if (!double.IsFinite(soiRadius)
+                || shipRelPos.Length() < soiRadius * (1.0 - OrbitMath.SoiExitEpsilon))
                 return;
 
             var grandparent = parent.GetSOIParentEntity();

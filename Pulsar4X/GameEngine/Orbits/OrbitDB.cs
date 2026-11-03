@@ -79,7 +79,11 @@ namespace Pulsar4X.Orbits
 		[PublicAPI]
 		public double GravitationalParameter_m3S2 { get; protected set; }
 
-        public double SOI_m { get; protected set; } = double.MaxValue;
+        /// <summary>
+        /// This body's sphere, in metres. Same number as <see cref="EntityExtensions.GetSOI_m"/>.
+        /// The star, and an orbit that is not on an entity yet, are infinite.
+        /// </summary>
+        public double SOI_m => OwningEntity != null ? OwningEntity.GetSOI_m() : double.PositiveInfinity;
 
 
         /// <summary>
@@ -519,8 +523,6 @@ namespace Pulsar4X.Orbits
             Apoapsis = EllipseMath.Apoapsis(Eccentricity, SemiMajorAxis);
             Periapsis = EllipseMath.Periapsis(Eccentricity, SemiMajorAxis);
 
-            SOI_m = OrbitMath.GetSOI(SemiMajorAxis, _myMass, _parentMass);
-
             // Cache trigonometric values for performance
             UpdateTrigCache();
         }
@@ -625,19 +627,15 @@ namespace Pulsar4X.Orbits
             if (OwningEntity.GetDataBlob<PositionDB>().Parent != Parent)
                 OwningEntity.GetDataBlob<PositionDB>().SetParent(Parent);
 
-            if (Eccentricity >= 1)
+            // A hyperbola always leaves. A bound ellipse leaves only when its apoapsis
+            // crosses the parent's sphere. The star's sphere is infinite, so neither schedules.
+            if (TryParentSphere(out double soiRadius)
+                && (Eccentricity >= 1 || (Eccentricity < 1 && Apoapsis > soiRadius)))
             {
-                var soiParent = OwningEntity.GetSOIParentEntity();
-                var soiRadius = OrbitMath.GetSOIRadius(soiParent.GetDataBlob<OrbitDB>());
-                if (soiRadius is not double.NaN)//radius will return nan if for example soiParent is the sun.
-                {
-                    var soiChangeAt = OrbitMath.TimeToRadius(this, soiRadius);
+                var soiChangeAt = OrbitMath.TimeToRadius(this, soiRadius);
+                var now = OwningEntity.Manager.ManagerSubpulses.StarSysDateTime;
+                if (soiChangeAt >= now)
                     OwningEntity.Manager.ManagerSubpulses.AddEntityInterupt(soiChangeAt, nameof(ChangeSOIProcessor), OwningEntity);
-                }
-                else//in this case we dont need to do a transition. might need to destroy it or something.
-                {
-
-                }
             }
 
             // SOI entry prediction for ships/projectiles (not system bodies)
@@ -645,6 +643,19 @@ namespace Pulsar4X.Orbits
             {
                 ScheduleSOIEntry();
             }
+        }
+
+        /// <summary>
+        /// The parent's sphere. False at the star, where the sphere is infinite.
+        /// </summary>
+        bool TryParentSphere(out double soiRadius)
+        {
+            soiRadius = 0;
+            var soiParent = OwningEntity?.GetSOIParentEntity();
+            if (soiParent == null)
+                return false;
+            soiRadius = soiParent.GetSOI_m();
+            return double.IsFinite(soiRadius) && soiRadius > 0;
         }
 
         /// <summary>
@@ -668,19 +679,10 @@ namespace Pulsar4X.Orbits
             else
             {
                 // Hyperbolic: scan until SOI exit (already scheduled above), capped at 1 year
-                var soiParent = OwningEntity.GetSOIParentEntity();
-                if (soiParent != null && soiParent.HasDataBlob<OrbitDB>())
+                if (TryParentSphere(out double soiRadius))
                 {
-                    var soiRadius = OrbitMath.GetSOIRadius(soiParent.GetDataBlob<OrbitDB>());
-                    if (!double.IsNaN(soiRadius))
-                    {
-                        var soiExitTime = OrbitMath.TimeToRadius(this, soiRadius);
-                        scanSeconds = Math.Min((soiExitTime - Epoch).TotalSeconds, 365.25 * 24 * 3600);
-                    }
-                    else
-                    {
-                        scanSeconds = 365.25 * 24 * 3600;
-                    }
+                    var soiExitTime = OrbitMath.TimeToRadius(this, soiRadius);
+                    scanSeconds = Math.Min((soiExitTime - Epoch).TotalSeconds, 365.25 * 24 * 3600);
                 }
                 else
                 {

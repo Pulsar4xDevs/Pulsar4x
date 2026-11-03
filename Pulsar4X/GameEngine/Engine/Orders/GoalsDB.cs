@@ -176,6 +176,10 @@ public class Goal
     public string ParentGoalId = "";
     public GoalType Type;
     public int TargetEntityID = -1;
+    /// <summary>Move to. Arrival periapsis in metres. 0 is the low circular orbit.</summary>
+    public double ArrivalPeriapsis;
+    /// <summary>Move to. Arrival apoapsis in metres. 0 with a periapsis is circular.</summary>
+    public double ArrivalApoapsis;
     /// <summary>Trade and freight cargo id. Empty until a planner commits a route.</summary>
     public string CargoId = "";
     /// <summary>Move goods. Empty for every other goal.</summary>

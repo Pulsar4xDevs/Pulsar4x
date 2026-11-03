@@ -74,6 +74,13 @@ public sealed class InProcessAdapter : IGameClient
         return Task.FromResult(_server.SubmitCommand(Session, command));
     }
 
+    public TripPreview PreviewMove(int shipId, int bodyId)
+    {
+        if (!IsConnected)
+            return TripPreview.None("not connected");
+        return _server.PreviewMove(Session, shipId, bodyId);
+    }
+
     public Task SetSystemFocusAsync(string? systemId, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

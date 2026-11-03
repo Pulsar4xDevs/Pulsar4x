@@ -1493,6 +1493,34 @@ namespace Pulsar4X.Orbital
             return Math.Abs( semiMajorAxis * Math.Pow((mass / parentMass), 0.4));
         }
 
+        /// <summary>
+        /// Hyperbola with periapsis <paramref name="rp"/> and excess speed <paramref name="vInf"/>.
+        /// <c>a</c> is negative, the sign <see cref="KeplerFromPositionAndVelocity"/> uses.
+        /// <c>b</c> is the impact parameter. <c>turnAngle</c> is the deflection of the velocity.
+        /// </summary>
+        public static (double e, double a, double b, double turnAngle) HyperbolaForPeriapsis(double mu, double vInf, double rp)
+        {
+            if (!(mu > 0) || !(vInf > 0) || !(rp > 0) || !double.IsFinite(mu + vInf + rp))
+                throw new ArgumentOutOfRangeException(nameof(rp), "mu, vInf, and rp must be positive and finite.");
+
+            double a = -mu / (vInf * vInf);
+            double e = 1.0 - rp / a;
+            double b = Math.Abs(a) * Math.Sqrt(e * e - 1.0);
+            double turnAngle = 2.0 * Math.Asin(1.0 / e);
+            return (e, a, b, turnAngle);
+        }
+
+        /// <summary>Δv from the hyperbola's periapsis speed down to circular at <paramref name="rp"/>.</summary>
+        public static double CaptureBurn(double mu, double vInf, double rp)
+            => HyperbolicPeriapsisSpeed(mu, vInf, rp) - Math.Sqrt(mu / rp);
+
+        /// <summary>Δv from circular at <paramref name="rPark"/> up to a hyperbola that leaves with <paramref name="vInf"/>.</summary>
+        public static double EscapeBurn(double mu, double rPark, double vInf)
+            => HyperbolicPeriapsisSpeed(mu, vInf, rPark) - Math.Sqrt(mu / rPark);
+
+        static double HyperbolicPeriapsisSpeed(double mu, double vInf, double r)
+            => Math.Sqrt(vInf * vInf + 2.0 * mu / r);
+
 
 
         /// <summary>

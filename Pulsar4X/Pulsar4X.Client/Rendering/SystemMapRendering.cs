@@ -242,7 +242,7 @@ namespace Pulsar4X.Client.Rendering
                 if (orbit.Eccentricity < 1)
                     _orbitRings.TryAdd(entity.Id,
                         new OrbitEllipseIcon(orbit, position, parentPosition, bodyType, _state.UserOrbitSettingsMtx));
-                else if (orbit.ParentSoiRadiusM > 0)
+                else if (orbit.ParentSoiRadiusM > 0 && double.IsFinite(orbit.ParentSoiRadiusM))
                     _orbitRings.TryAdd(entity.Id,
                         new OrbitHyperbolicIcon2(orbit, position, parentPosition, bodyType, _state.UserOrbitSettingsMtx));
             }

@@ -63,6 +63,9 @@ namespace Pulsar4X.Client
         private readonly Dictionary<int, int> loadAmounts = new();
         private readonly Dictionary<int, int> unloadAmounts = new();
         private double plotAltitudeM;
+        private int tripTargetId = -1;
+        private string? moveReject;
+        private readonly Dictionary<(int ship, int body, int day), TripPreview> movePreviewCache = new();
 
         private int? selectedFleetId = null;
         // The ship whose orders the right-hand pane is editing. Null means the selected fleet.
@@ -520,6 +523,7 @@ namespace Pulsar4X.Client
 
             bool geo = orderShip != null ? orderShip.CanGeoSurvey : selectedFleet?.CanGeoSurvey == true;
             bool grav = orderShip != null ? orderShip.CanGravSurvey : selectedFleet?.CanGravSurvey == true;
+            bool jump = orderShip != null ? orderShip.CanJump : selectedFleet?.CanJump == true;
             bool mine = orderShip != null ? orderShip.CanMineAsteroids : selectedFleet?.CanMineAsteroids == true;
             bool manual = orderShip != null && plotting;
 
@@ -528,7 +532,8 @@ namespace Pulsar4X.Client
                 ImGui.TextWrapped(FreightSentence(OrderBand.Ship));
                 GoalRow("Move to ...", IssueOrderType.MoveTo, OrderBand.Ship, manual);
                 GoalRow("Refuel at ...", IssueOrderType.RefuelAt, OrderBand.Ship, manual);
-                GoalRow("Jump...", IssueOrderType.Jump, OrderBand.Ship, manual);
+                if (jump)
+                    GoalRow("Jump...", IssueOrderType.Jump, OrderBand.Ship, manual);
                 GoalRow("Trade ...", IssueOrderType.Trade, OrderBand.Ship, manual);
                 GoalRow("Haul ...", IssueOrderType.Haul, OrderBand.Ship, manual);
                 GoalRow("Move goods ...", IssueOrderType.MoveGoods, OrderBand.Ship, manual);
@@ -659,7 +664,7 @@ namespace Pulsar4X.Client
                 Choose(IssueOrderType.GravSurvey, plot: true);
             // Jump on a captained ship is the Goals row. The same command, so it is not listed again here.
             var ship = orderShip;
-            if (ship != null && !ShipHasCaptain(ship) && ImGui.Selectable("Jump...", plotJump))
+            if (ship is { CanJump: true } && !ShipHasCaptain(ship) && ImGui.Selectable("Jump...", plotJump))
                 Choose(IssueOrderType.Jump, plot: true);
             if (ImGui.Selectable("Move goods (plot) ...", plotGoods))
                 Choose(IssueOrderType.MoveGoods, plot: true);
@@ -828,8 +833,9 @@ namespace Pulsar4X.Client
                         && !plot && BootstrapShip;
                     bool shipRun = !plot && (selectedIssueOrderType == IssueOrderType.Trade
                         || selectedIssueOrderType == IssueOrderType.Haul);
+                    bool shipJump = orderShip.CanJump && selectedIssueOrderType == IssueOrderType.Jump;
                     bool shipGoal = selectedIssueOrderType == IssueOrderType.MoveTo
-                        || selectedIssueOrderType == IssueOrderType.Jump
+                        || shipJump
                         || shipGeo || shipGrav || shipMine || shipPlot || shipGoods
                         || shipRefuel || shipRun || shipBootstrap;
                     if (!shipGoal)
@@ -841,6 +847,7 @@ namespace Pulsar4X.Client
                 }
                 else if (plotting
                     || (selectedIssueOrderType == IssueOrderType.Bootstrap && !BootstrapFleet)
+                    || (selectedIssueOrderType == IssueOrderType.Jump && selectedFleet?.CanJump != true)
                     || selectedIssueOrderType == IssueOrderType.LoadGoods
                     || selectedIssueOrderType == IssueOrderType.UnloadGoods
                     || selectedIssueOrderType == IssueOrderType.PlotWarpTo
@@ -870,24 +877,20 @@ namespace Pulsar4X.Client
                 switch(selectedIssueOrderType)
                 {
                     case IssueOrderType.MoveTo:
+                    {
+                        int? previewShip = orderShip?.Id ?? selectedFleet?.FlagshipId;
                         if (plot)
-                        {
                             ImGui.TextWrapped("Queues a one-shot plot. The ship will not rethink it.");
-                            DisplayTargetTree(candidates,
-                                e => e.HasView<BodyView>() && e.HasView<PositionView>(),
-                                "movement-button",
-                                id => SubmitFleetCommand(new GoToBodyCommand(commanded.Value, id)),
-                                starTargetsSystem: false);
-                        }
-                        else
-                        {
-                            DisplayTargetTree(candidates,
-                                e => e.HasView<BodyView>() && e.HasView<PositionView>(),
-                                "movement-button",
-                                id => SubmitFleetCommand(new MoveToBodyCommand(commanded.Value, id)),
-                                starTargetsSystem: false);
-                        }
+                        DisplayTargetTree(candidates,
+                            e => e.HasView<BodyView>() && e.HasView<PositionView>(),
+                            "movement-button",
+                            id => SubmitMove(commanded.Value, id, 0, 0, plot),
+                            starTargetsSystem: false,
+                            blocked: e => MoveBlock(previewShip, e),
+                            select: id => tripTargetId = id);
+                        DisplayTrip(galaxy, previewShip, commanded.Value, plot);
                         break;
+                    }
                     case IssueOrderType.PlotWarpTo:
                         ImGui.TextWrapped("Warp to the body and circularise. Same drop-in as a captain's Move to.");
                         DisplayTargetTree(candidates,
@@ -1252,7 +1255,8 @@ namespace Pulsar4X.Client
             Func<EntitySnapshot, bool>? markDone = null,
             int? selectedId = null,
             string? spanLabel = null,
-            Func<EntitySnapshot, string?>? blocked = null)
+            Func<EntitySnapshot, string?>? blocked = null,
+            Action<int>? select = null)
         {
             string span = spanLabel ?? SubjectSpanLabel();
             var byId = new Dictionary<int, EntitySnapshot>();
@@ -1327,7 +1331,7 @@ namespace Pulsar4X.Client
             }
 
             foreach(var root in SortNodes(roots, stars, null))
-                DisplayTargetNode(root, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span, blocked);
+                DisplayTargetNode(root, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span, blocked, select);
         }
 
         private static void AddTreeChild(Dictionary<int, List<EntitySnapshot>> children, Dictionary<int, int> parentOf, int parentId, EntitySnapshot child)
@@ -1575,7 +1579,8 @@ namespace Pulsar4X.Client
             Func<EntitySnapshot, bool>? markDone,
             int? selectedId,
             string span,
-            Func<EntitySnapshot, string?>? blocked = null)
+            Func<EntitySnapshot, string?>? blocked = null,
+            Action<int>? select = null)
         {
             // Refuel, load, and unload nest the colony under its planet. That planet starts closed,
             // which hides the only button. Keep the path open so the colony stays on screen.
@@ -1599,7 +1604,7 @@ namespace Pulsar4X.Client
                             }
                         }
                         foreach(var child in SortNodes(bandKids, stars, star))
-                            DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span, blocked);
+                            DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span, blocked, select);
                     }
                     ImGui.TreePop();
                 }
@@ -1671,7 +1676,21 @@ namespace Pulsar4X.Client
             {
                 ImGui.TextDisabled(name);
                 bool nameHovered = ImGui.IsItemHovered();
-                if(showDone)
+                if(select != null && ImGui.IsItemClicked())
+                    select(node.Id);
+                if(!string.IsNullOrEmpty(block))
+                {
+                    bool breaks = block.Contains('\n');
+                    if(!breaks)
+                        ImGui.SameLine();
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
+                    if(breaks)
+                        ImGui.TextWrapped(block);
+                    else
+                        ImGui.Text(block);
+                    ImGui.PopStyleColor();
+                }
+                else if(showDone)
                 {
                     ImGui.SameLine();
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
@@ -1680,8 +1699,6 @@ namespace Pulsar4X.Client
                     if(nameHovered || ImGui.IsItemHovered())
                         ImGui.SetTooltip("This body is surveyed. This bridge only covers the body you click, so pick an unsurveyed body under it.");
                 }
-                else if(nameHovered && !string.IsNullOrEmpty(block))
-                    ImGui.SetTooltip(block);
                 else if(nameHovered)
                     ImGui.SetTooltip(SpanLine());
             }
@@ -1690,7 +1707,7 @@ namespace Pulsar4X.Client
             {
                 EntitySnapshot? around = entity.Kind == BodyKind.Star ? entity : null;
                 foreach(var child in SortNodes(childList, stars, around))
-                    DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span, blocked);
+                    DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span, blocked, select);
                 ImGui.TreePop();
             }
         }
@@ -2529,6 +2546,83 @@ namespace Pulsar4X.Client
 
         static int BodyId(EntitySnapshot colony)
             => colony.GetView<ColonyView>()?.PlanetEntityId ?? colony.Id;
+
+        private string? MoveBlock(int? shipId, EntitySnapshot body)
+        {
+            if(shipId == null || body.Kind == BodyKind.Star)
+                return null;
+            if(!body.HasView<BodyView>() || !body.HasView<PositionView>())
+                return null;
+            var preview = CachedPreview(shipId.Value, body.Id);
+            return preview.Feasible ? null : preview.Reason;
+        }
+
+        private TripPreview CachedPreview(int shipId, int bodyId)
+        {
+            var client = _uiState.GameClient;
+            if(client == null)
+                return TripPreview.None("not connected");
+            int day = (int)(client.Galaxy.Time.GameDateTime.Date - DateTime.UnixEpoch).TotalDays;
+            var key = (shipId, bodyId, day);
+            if(movePreviewCache.TryGetValue(key, out var cached))
+                return cached;
+            var preview = client.PreviewMove(shipId, bodyId);
+            if(movePreviewCache.Count > 400)
+                movePreviewCache.Clear();
+            movePreviewCache[key] = preview;
+            return preview;
+        }
+
+        private void DisplayTrip(IClientGalaxy galaxy, int? shipId, int commandedId, bool plot)
+        {
+            if(shipId == null || tripTargetId < 0)
+                return;
+            var preview = CachedPreview(shipId.Value, tripTargetId);
+            ImGui.Separator();
+            ImGui.Text("Trip");
+            if(!string.IsNullOrEmpty(preview.Mode))
+                ImGui.Text("Mode: " + preview.Mode);
+            ImGui.Text($"Δv {Stringify.Velocity(preview.DeltaV)}, have {Stringify.Velocity(preview.Have)}");
+            if(preview.Feasible && preview.EtaSeconds > 0 && preview.EtaSeconds < 1e10)
+            {
+                var arrive = galaxy.Time.GameDateTime.AddSeconds(preview.EtaSeconds);
+                ImGui.Text("Arrival " + arrive.ToString("yyyy-MM-dd HH:mm"));
+            }
+            if(!preview.Feasible)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
+                if(!string.IsNullOrEmpty(preview.Reason))
+                    ImGui.TextWrapped(preview.Reason);
+                ImGui.Text("Refused, nothing was started");
+                ImGui.PopStyleColor();
+                foreach(var alt in preview.Alternatives)
+                {
+                    string orbit = alt.Apoapsis > alt.Periapsis
+                        ? $"{Stringify.Distance(alt.Periapsis)} × {Stringify.Distance(alt.Apoapsis)}"
+                        : Stringify.Distance(alt.Periapsis);
+                    string label = $"{alt.Label} {Stringify.Velocity(alt.DeltaV)} {orbit}###trip-{tripTargetId}-{alt.Periapsis:F0}-{alt.Apoapsis:F0}";
+                    if(ImGui.SmallButton(label))
+                        SubmitMove(commandedId, tripTargetId, alt.Periapsis, alt.Apoapsis, plot);
+                }
+            }
+            if(!string.IsNullOrEmpty(moveReject))
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
+                ImGui.TextWrapped(moveReject);
+                ImGui.PopStyleColor();
+            }
+        }
+
+        private void SubmitMove(int commandedId, int bodyId, double periapsis, double apoapsis, bool plot)
+        {
+            tripTargetId = bodyId;
+            GameCommand command = plot
+                ? new GoToBodyCommand(commandedId, bodyId, periapsis, apoapsis)
+                : new MoveToBodyCommand(commandedId, bodyId, periapsis, apoapsis);
+            var task = _uiState.GameClient?.SubmitCommandAsync(command);
+            if(task != null && task.IsCompleted)
+                moveReject = task.Result.Accepted ? null : task.Result.RejectionReason;
+        }
 
         private void SubmitFleetCommand(GameCommand command) => _uiState.GameClient?.SubmitCommandAsync(command);
 

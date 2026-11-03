@@ -53,7 +53,7 @@ namespace Pulsar4X.Tests
         {
             var (mars, ship, r, mu) = MarsAndShip(deltaV: 1);
             double soi = OrbitMath.GetSOIRadius(mars.GetDataBlob<OrbitDB>());
-            double ra = 0.9 * soi;
+            double ra = OrbitMath.SoiCaptureFraction * soi;
             var pos = new Vector3(r, 0, 0);
             double a = (r + ra) / 2.0;
             double vCap = Math.Sqrt(mu * (2.0 / r - 1.0 / a));
@@ -81,7 +81,7 @@ namespace Pulsar4X.Tests
             Assert.IsTrue(ship.TryGetDataBlob<OrbitDB>(out var orbit));
             Assert.Less(orbit.Eccentricity, 1);
             Assert.GreaterOrEqual(orbit.Eccentricity, 0.05, "a partial burn is not a full circularise");
-            Assert.LessOrEqual(orbit.Apoapsis, soi * 0.9 * 1.01);
+            Assert.LessOrEqual(orbit.Apoapsis, soi * OrbitMath.SoiCaptureFraction * 1.01);
             Assert.Less(FuelMass(ship), fuelBefore);
         }
 
@@ -220,7 +220,7 @@ namespace Pulsar4X.Tests
         {
             var (mars, ship, r, mu) = MarsAndShip(1);
             double soi = OrbitMath.GetSOIRadius(mars.GetDataBlob<OrbitDB>());
-            double ra = 0.9 * soi;
+            double ra = OrbitMath.SoiCaptureFraction * soi;
             double a = (r + ra) / 2.0;
             double vCirc = Math.Sqrt(mu / r);
             double vEsc = Math.Sqrt(2.0 * mu / r);

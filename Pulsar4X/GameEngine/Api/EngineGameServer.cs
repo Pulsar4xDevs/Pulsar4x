@@ -8,6 +8,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Factions;
 using Pulsar4X.Logistics;
 using Pulsar4X.Messaging;
+using Pulsar4X.Movement;
 
 namespace Pulsar4X.Engine.Api
 {
@@ -309,6 +310,18 @@ namespace Pulsar4X.Engine.Api
         }
 
         // ----- commands -----
+
+        public TripPreview PreviewMove(PlayerSession session, int shipId, int bodyId)
+        {
+            if (!_game.Factions.ContainsKey(session.FactionId))
+                return TripPreview.None("Unknown faction for session.");
+            if (!_game.GlobalManager.TryGetGlobalEntityById(shipId, out var ship)
+                || ship.FactionOwnerID != session.FactionId)
+                return TripPreview.None("ship not found");
+            if (!_game.GlobalManager.TryGetGlobalEntityById(bodyId, out var body))
+                return TripPreview.None("target not found");
+            return MovePlanner.Preview(ship, body, ship.StarSysDateTime);
+        }
 
         public CommandResult SubmitCommand(PlayerSession session, GameCommand command)
         {

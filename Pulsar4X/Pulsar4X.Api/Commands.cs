@@ -295,7 +295,11 @@ public sealed record SetStandingOrdersCommand(
 // ----- fleet movement/activity orders (commanded entity: the fleet) -----
 #region Fleet Movement Commands
 
-public sealed record MoveToBodyCommand(int TargetEntityId, int BodyId) : GameCommand(TargetEntityId);
+public sealed record MoveToBodyCommand(
+    int TargetEntityId,
+    int BodyId,
+    double ArrivalPeriapsis = 0,
+    double ArrivalApoapsis = 0) : GameCommand(TargetEntityId);
 
 /// <summary>Warp to the body and geo-survey it.</summary>
 public sealed record GeoSurveyCommand(int TargetEntityId, int BodyId) : GameCommand(TargetEntityId);
@@ -407,7 +411,11 @@ public sealed record WarpMoveCommand(
 
 /// <summary>Empty chair: queue the same plot <c>MovePlanner</c> would build for this body.
 /// No goal, no replan. A seated captain uses <see cref="MoveToBodyCommand"/> instead.</summary>
-public sealed record GoToBodyCommand(int TargetEntityId, int BodyId) : GameCommand(TargetEntityId);
+public sealed record GoToBodyCommand(
+    int TargetEntityId,
+    int BodyId,
+    double ArrivalPeriapsis = 0,
+    double ArrivalApoapsis = 0) : GameCommand(TargetEntityId);
 
 /// <summary>Empty chair: warp to the body with the planner drop-in and circularise.
 /// Forces warp even when a newtonian transfer would also work.</summary>

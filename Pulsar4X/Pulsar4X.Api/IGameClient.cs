@@ -26,6 +26,9 @@ public interface IGameClient
     /// <summary>Submit a command. Over a network the token cancels the <i>wait</i> for the server's
     /// result — not the command's effect, which the server may still apply once it arrives.</summary>
     Task<CommandResult> SubmitCommandAsync(GameCommand command, CancellationToken cancellationToken = default);
+
+    /// <summary>Plan a move. The Orders tree caches the result for the game day.</summary>
+    TripPreview PreviewMove(int shipId, int bodyId);
     Task SetTimeControlAsync(TimeControlRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>Tell the server which system the player is watching (engine processing priority).</summary>

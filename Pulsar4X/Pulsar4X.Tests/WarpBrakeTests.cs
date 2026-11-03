@@ -223,7 +223,7 @@ namespace Pulsar4X.Tests
         (double RLow, double RCap, double Mu, double EarthSpeed) Well(Entity ship, Entity mars)
         {
             double rLow = OrbitMath.LowOrbitRadius(mars);
-            double rCap = 0.9 * OrbitMath.GetSOIRadius(mars.GetDataBlob<OrbitDB>());
+            double rCap = OrbitMath.SoiCaptureFraction * OrbitMath.GetSOIRadius(mars.GetDataBlob<OrbitDB>());
             double mu = OrbitMath.SGP(mars, ship);
             double earth = MoveMath.GetRelativeFutureState(ship, _fx.Epoch).Velocity.Length();
             return (rLow, rCap, mu, earth);

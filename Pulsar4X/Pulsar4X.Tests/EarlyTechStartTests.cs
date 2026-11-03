@@ -3,8 +3,10 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using Pulsar4X.Api;
 using Pulsar4X.Client;
 using Pulsar4X.Client.Host;
+using Pulsar4X.Engine.Api;
 using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
@@ -351,6 +353,62 @@ public class EarlyTechStartTests
         Assert.That(ship.HasDataBlob<WarpAbilityDB>(), Is.False);
         Assert.That(ship.GetDataBlob<NewtonThrustAbilityDB>().ThrustInNewtons, Is.GreaterThan(0));
         Assert.That(MovePlanner.CanMove(ship, out string reason), Is.True, reason);
+    }
+
+    [Test]
+    public void EarlyTechShip_CannotJump_AndABaseModWarpShipCan()
+    {
+        var (early, earlyFaction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        AssertJumpMatchesWarp(early, earlyFaction);
+        var earlyShips = ProjectedShips(early, earlyFaction.Id);
+        Assert.That(earlyShips, Is.Not.Empty);
+        Assert.That(earlyShips.All(s => !s.CanJump), Is.True);
+
+        var (stock, stockFaction) = StartGameLikeTheMenu(BaseMod);
+        AssertJumpMatchesWarp(stock, stockFaction);
+        Assert.That(ProjectedShips(stock, stockFaction.Id).Any(s => s.CanJump), Is.True);
+    }
+
+    static void AssertJumpMatchesWarp(Game game, Entity faction)
+    {
+        var hierarchy = new GameProjector(game).ProjectFleetHierarchy(faction.Id);
+        var byId = game.Systems.SelectMany(system => system.GetAllEntitiesWithDataBlob<ShipInfoDB>())
+            .Where(ship => ship.FactionOwnerID == faction.Id)
+            .ToDictionary(ship => ship.Id);
+        foreach (var snap in EveryShip(hierarchy.Fleets).Concat(hierarchy.UnattachedShips))
+        {
+            Assert.That(byId.ContainsKey(snap.Id), Is.True, snap.Name);
+            Assert.That(snap.CanJump, Is.EqualTo(byId[snap.Id].HasDataBlob<WarpAbilityDB>()), snap.Name);
+        }
+        foreach (var fleet in hierarchy.Fleets)
+            AssertFleetJump(fleet);
+    }
+
+    static void AssertFleetJump(FleetSnapshot fleet)
+    {
+        Assert.That(fleet.CanJump, Is.EqualTo(AnyChildCanJump(fleet)), fleet.Name);
+        foreach (var sub in fleet.SubFleets)
+            AssertFleetJump(sub);
+    }
+
+    static bool AnyChildCanJump(FleetSnapshot fleet)
+        => fleet.Ships.Any(ship => ship.CanJump) || fleet.SubFleets.Any(AnyChildCanJump);
+
+    static List<ShipSnapshot> ProjectedShips(Game game, int factionId)
+    {
+        var hierarchy = new GameProjector(game).ProjectFleetHierarchy(factionId);
+        return EveryShip(hierarchy.Fleets).Concat(hierarchy.UnattachedShips).ToList();
+    }
+
+    static IEnumerable<ShipSnapshot> EveryShip(IEnumerable<FleetSnapshot> fleets)
+    {
+        foreach (var fleet in fleets)
+        {
+            foreach (var ship in fleet.Ships)
+                yield return ship;
+            foreach (var ship in EveryShip(fleet.SubFleets))
+                yield return ship;
+        }
     }
 
     [Test]

@@ -249,8 +249,25 @@ public class MatchOrbitAction : EntityAction
 
     static double AngleOf(Entity entity, DateTime at)
     {
-        var pos = MoveMath.GetRelativeFuturePosition(entity, at);
-        return Math.Atan2(pos.Y, pos.X);
+        // Longitude increases against a retrograde orbit, so phase would point the
+        // wrong way. Measure the angle along the motion instead.
+        Vector3 pos;
+        Vector3 vel;
+        if (entity.TryGetDataBlob<OrbitDB>(out var orbit))
+        {
+            var state = OrbitMath.GetStateVectors(orbit, at);
+            pos = state.pos;
+            vel = state.Velocity;
+        }
+        else
+        {
+            var raw = MoveMath.GetRelativeFutureState(entity, at);
+            pos = raw.pos;
+            vel = raw.Velocity;
+        }
+        double longitude = Math.Atan2(pos.Y, pos.X);
+        double hz = pos.X * vel.Y - pos.Y * vel.X;
+        return hz < 0 ? -longitude : longitude;
     }
 
     static double NormaliseAngle(double radians)

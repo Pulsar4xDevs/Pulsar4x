@@ -282,7 +282,10 @@ static class ShipLogBook
                 lead = target.Length > 0 ? "Could not reach " + target + "." : "Could not reach the target.";
 
             string why = PlayerReason(goal.Message);
-            return why.Length == 0 ? lead : lead + " " + why;
+            if (why.Length == 0)
+                return lead;
+            // One reason stays on the lead line. Several reasons each take a line.
+            return why.Contains('\n') ? lead + "\n" + why : lead + " " + why;
         }
 
         return goal.Type switch

@@ -652,5 +652,58 @@ namespace Pulsar4X.Tests
             Console.WriteLine("EccentricityVector2:\t" + sw2.Elapsed.ToString());
         }
 
+        [Test]
+        public void HyperbolaForPeriapsis_RoundTripsThroughKepler()
+        {
+            const double mu = 4.905e12;
+            const double vInf = 825.6;
+            const double rp = 1.1 * 1_737_000;
+            var (e, a, b, turn) = OrbitalMath.HyperbolaForPeriapsis(mu, vInf, rp);
+
+            Assert.That(e, Is.GreaterThan(1));
+            Assert.That(a, Is.LessThan(0));
+            Assert.That(b, Is.GreaterThan(0));
+            Assert.That(turn, Is.GreaterThan(0).And.LessThan(Math.PI));
+
+            double vPeri = Math.Sqrt(vInf * vInf + 2.0 * mu / rp);
+            var ke = OrbitalMath.KeplerFromPositionAndVelocity(
+                mu, new Vector3(rp, 0, 0), new Vector3(0, vPeri, 0), DateTime.UnixEpoch);
+
+            Assert.That(ke.Eccentricity, Is.EqualTo(e).Within(1e-9));
+            Assert.That(ke.SemiMajorAxis, Is.EqualTo(a).Within(Math.Abs(a) * 1e-9));
+            Assert.That(ke.Periapsis, Is.EqualTo(rp).Within(rp * 1e-9));
+            Assert.That(Math.Abs(a) * Math.Sqrt(e * e - 1.0), Is.EqualTo(b).Within(b * 1e-9));
+        }
+
+        [Test]
+        public void EarthToLuna_CaptureAndEscape_MatchTheHandNumbers()
+        {
+            const double muEarth = 3.986e14;
+            const double muLuna = 4.905e12;
+            const double rPark = 1.1 * 6_371_000;
+            const double rMoon = 384_400_000;
+            const double rpLuna = 1.1 * 1_737_000;
+
+            double aTransfer = (rPark + rMoon) / 2.0;
+            double speedAtApoapsis = Math.Sqrt(muEarth * (2.0 / rMoon - 1.0 / aTransfer));
+            double moonSpeed = Math.Sqrt(muEarth / rMoon);
+            double vInf = Math.Abs(moonSpeed - speedAtApoapsis);
+
+            // Hand figures were 0.83 km/s and 0.8 km/s. These are the values the formula returns.
+            Assert.That(vInf, Is.EqualTo(825.6).Within(0.1));
+            double capture = OrbitalMath.CaptureBurn(muLuna, vInf, rpLuna);
+            Assert.That(capture, Is.EqualTo(809.4).Within(0.1));
+
+            double escape = OrbitalMath.EscapeBurn(muEarth, rPark, vInf);
+            Assert.That(escape, Is.EqualTo(3155.8).Within(0.1));
+
+            // InterPlanetaryHohmann's dva is the ellipse that dies at the sphere, not this hyperbola.
+            double earthSma = 149_597_870_700;
+            double earthSoi = OrbitalMath.GetSOI(earthSma, 5.972e24, 1.9885e30);
+            double vCirc = Math.Sqrt(muEarth / rPark);
+            double ellipticalToSphere = vCirc * (Math.Sqrt(2.0 * earthSoi / (rPark + earthSoi)) - 1.0);
+            Assert.That(escape, Is.GreaterThan(ellipticalToSphere));
+        }
+
     }
 }

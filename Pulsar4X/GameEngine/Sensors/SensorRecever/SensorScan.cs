@@ -59,6 +59,9 @@ namespace Pulsar4X.Sensors
                             {
                                 //sensorInfo = knownContacts[detectableEntity.ID].GetDataBlob<SensorInfoDB>();
                                 sensorInfo = sensorMgr.GetSensorContact(detectableEntity.Id).SensorInfo;
+                                // DetectedEntity is not saved. The next scan still has the body.
+                                if (sensorInfo.DetectedEntity == null)
+                                    sensorInfo.DetectedEntity = detectableEntity;
                                 sensorInfo.LatestDetectionQuality = detectionValues;
                                 sensorInfo.LastDetection = atDateTime;
                                 if (sensorInfo.HighestDetectionQuality.SignalQuality < detectionValues.SignalQuality)
