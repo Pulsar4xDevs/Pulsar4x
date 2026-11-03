@@ -375,7 +375,7 @@ namespace Pulsar4X.Storage
             var type = cargoItem.CargoTypeID;
             if (!db.TypeStores.ContainsKey(type) || !db.Accepts(cargoItem))
                 return 0;
-            long items = (int)(db.TypeStores[type].FreeVolume / cargoItem.VolumePerUnit);
+            long items = (long)(db.TypeStores[type].FreeVolume / cargoItem.VolumePerUnit);
             if(includeEscro)
                 items -= GetUnitCountInEscro(db, cargoItem);
             return items;
