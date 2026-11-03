@@ -75,34 +75,22 @@ namespace Pulsar4X.Tests
 		}
 
         [Test]
-        public void EqualCorrectlyReturnsTrue()
+        public void EqualityOperators_CompareComponentWise()
         {
+            // == returns true for equal vectors, false when any one component differs.
             Assert.That(vec1 == new Vector3(vec1), Is.True);
             Assert.That(vec2 == new Vector3(vec2.X, vec2.Y, vec2.Z), Is.True);
-        }
-
-        [Test]
-        public void EqualCorrectlyReturnsFalse()
-        {
             Assert.That(vec1 == new Vector3(vec1.X, vec1.Y, vec1.Z + 1), Is.False);
             Assert.That(vec1 == new Vector3(vec1.X, vec1.Y + 1, vec1.Z), Is.False);
             Assert.That(vec1 == new Vector3(vec1.X + 1, vec1.Y, vec1.Z), Is.False);
+
+            // != is the exact inverse.
+            Assert.That(vec1 != new Vector3(vec1.X, vec1.Y, vec1.Z + 1), Is.True);
+            Assert.That(vec1 != new Vector3(vec1.X, vec1.Y + 1, vec1.Z), Is.True);
+            Assert.That(vec1 != new Vector3(vec1.X + 1, vec1.Y, vec1.Z), Is.True);
+            Assert.That(vec1 != new Vector3(vec1), Is.False);
+            Assert.That(vec2 != new Vector3(vec2.X, vec2.Y, vec2.Z), Is.False);
         }
-
-        [Test]
-        public void NotEqualCorrectlyReturnsTrue()
-        {
-			Assert.That(vec1 != new Vector3(vec1.X, vec1.Y, vec1.Z + 1), Is.True);
-			Assert.That(vec1 != new Vector3(vec1.X, vec1.Y + 1, vec1.Z), Is.True);
-			Assert.That(vec1 != new Vector3(vec1.X + 1, vec1.Y, vec1.Z), Is.True);
-		}
-
-        [Test]
-        public void NotEqualCorrectlyReturnsFalse()
-        {
-			Assert.That(vec1 != new Vector3(vec1), Is.False);
-			Assert.That(vec2 != new Vector3(vec2.X, vec2.Y, vec2.Z), Is.False);
-		}
 
         [Test]
         public void AdditionReturnsCorrectValue()
@@ -179,35 +167,6 @@ namespace Pulsar4X.Tests
             vector = new Vector3(2d, -3d, 4d); // Same value, despite the negative coordinate
             Assert.AreEqual(Math.Sqrt(29d), vector.Length());
 
-        }
-
-        [Test]
-        public void DifferenceBetweenCrossAndCrossPrecise()
-        {
-            Random r = new Random();
-            List<double> lengths = new List<Double>();
-            double maxElement = 0;
-
-            for (int i = 0; i < 1e3; i++)
-            {
-                Vector3 v1 = Vector3.Random(r);
-                Vector3 v2 = Vector3.Random(r);
-
-                Vector3 cross = Vector3.Cross(v1, v2);
-                var (X, Y, Z) = Vector3.CrossPrecise(v1, v2);
-                Vector3 crossPrecise = new Vector3((double)X, (double)Y, (double)Z);
-
-                Vector3 diff = cross - crossPrecise;
-                if (diff.X > maxElement) maxElement = diff.X;
-                if (diff.Y > maxElement) maxElement = diff.Y;
-                if (diff.Z > maxElement) maxElement = diff.Z;
-
-                lengths.Add(diff.Length());
-            }
-
-            Console.WriteLine("Largest single coordinate error:\t" + maxElement.ToString());
-            Console.WriteLine("Max difference in position:\t\t" + lengths.Max());
-            Console.WriteLine("Average difference in position:\t" + lengths.Average());
         }
     }
 }

@@ -102,7 +102,7 @@ public class FreighterPlannerTests
 
         var next = new FreighterPlan().Plan(scene.Ship, goal, scene.Ship.StarSysDateTime);
 
-        Assert.That(next.Status, Is.EqualTo(GoalStatus.Active));
+        Assert.That(next.Status, Is.EqualTo(GoalStatus.Active), next.Message);
         Assert.That(next.Actions, Is.Not.Empty);
         Assert.That(next.Actions[0], Is.InstanceOf<WarpMoveAction>());
         Assert.That(next.Actions.OfType<MarketExchangeAction>(), Is.Empty);

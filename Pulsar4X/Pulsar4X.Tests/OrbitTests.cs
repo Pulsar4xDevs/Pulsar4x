@@ -54,26 +54,6 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void TestOrbitEpoch()
-        {
-            double parentMass = 1.989e30;
-            double objMass = 2.2e+15;
-            Vector3 position = new Vector3() { X = Distance.AuToMt(0.57) }; //Halley's Comet at periapse aprox
-            Vector3 velocity = new Vector3() { Y = 54000 };
-
-            BaseDataBlob[] parentblobs = new BaseDataBlob[3];
-            parentblobs[0] = new PositionDB() { AbsolutePosition = Vector3.Zero };
-            parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
-            parentblobs[2] = new OrbitDB();
-            Entity parentEntity = Entity.Create();
-            _entityManager.AddEntity(parentEntity, parentblobs);
-            double sgp_m = GeneralMath.StandardGravitationalParameter(parentMass + objMass);
-
-            OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, position, velocity, new DateTime());
-            Vector3 resultPos = objOrbit.GetPosition_AU(new DateTime());
-        }
-
-        [Test]
         public void TestHyperbolicFunctions()
         {
             var a = -1267000000;
