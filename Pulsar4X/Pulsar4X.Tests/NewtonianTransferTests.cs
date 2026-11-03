@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using NUnit.Framework;
 using Pulsar4X.Client;
 using Pulsar4X.Client.Host;
@@ -254,4 +255,80 @@ public class NewtonianTransferTests
 
     static Vector3 RelativeAt(Entity entity, DateTime at)
         => OrbitMath.GetPosition(entity.GetDataBlob<OrbitDB>(), at);
+
+    [Test]
+    public void CircularCoplanar_StaysOnHohmann()
+    {
+        double earthR = _earth.GetDataBlob<MassVolumeDB>().RadiusInM;
+        var ship = FuelledShip(CircularPosition(earthR * 2, 0), "lambert-circ-ship");
+        var buddy = FuelledShip(CircularPosition(earthR * 6, 0.7), "lambert-circ-buddy");
+
+        MoveOption newt = Newtonian(ship, buddy);
+        Assert.That(newt.Feasible, Is.True, newt.Reason);
+        Assert.That(newt.HasWindow, Is.False);
+        Assert.That(newt.Reason, Does.Contain("Hohmann"));
+    }
+
+    [Test]
+    public void EccentricTarget_UsesLambertWindow()
+    {
+        double earthR = _earth.GetDataBlob<MassVolumeDB>().RadiusInM;
+        var ship = FuelledShip(CircularPosition(earthR * 2, 0), "lambert-ecc-ship");
+        var buddy = FuelledShip(CircularPosition(earthR * 6, 0), "lambert-ecc-buddy");
+        PlaceEllipse(buddy, earthR * 6, 0.3, Math.PI / 2);
+
+        MoveOption newt = Newtonian(ship, buddy);
+        Assert.That(newt.Feasible, Is.True, newt.Reason);
+        Assert.That(newt.HasWindow, Is.True, newt.Reason);
+        Assert.That(buddy.GetDataBlob<OrbitDB>().Eccentricity, Is.EqualTo(0.3).Within(0.02));
+    }
+
+    [Test]
+    public void PlanFromWindow_BurnMagnitudesMatchTheCell()
+    {
+        double earthR = _earth.GetDataBlob<MassVolumeDB>().RadiusInM;
+        double shipR = earthR * 2;
+        double targetR = earthR * 6;
+        var ship = FuelledShip(CircularPosition(shipR, 0), "lambert-plan-ship");
+        var buddy = FuelledShip(CircularPosition(targetR, 1.2), "lambert-plan-buddy");
+        double mu = OrbitMath.SGP(_earth, ship);
+        var (tofMin, tofMax) = TransferWindows.HohmannTofBand(mu, shipR, targetR);
+
+        TransferGrid grid = TransferPlanner.Scan(
+            ship, buddy, mu, _now, _now.AddDays(2), 12, tofMin, tofMax, 8, true);
+        Assert.That(grid.HasBest, Is.True);
+
+        Assert.That(
+            MovePlanner.PlanFromWindow(ship, buddy, grid.Best, _now, out var actions, out string reason),
+            Is.True, reason);
+
+        double planned = 0;
+        foreach (NewtonThrustAction burn in actions)
+            planned += burn.OrbitrelativeDeltaV.Length();
+        Assert.That(planned, Is.EqualTo(grid.Best.TotalDeltaV).Within(grid.Best.TotalDeltaV * 0.01));
+
+        var queue = ship.GetDataBlob<ActionQueueDB>();
+        foreach (EntityAction action in actions)
+            queue.Enqueue(action);
+        Assert.That(queue.ActionList.OfType<NewtonThrustAction>().Count(), Is.GreaterThanOrEqualTo(2));
+    }
+
+    MoveOption Newtonian(Entity ship, Entity target)
+        => MovePlanner.Evaluate(ship, target, _now).Single(option => option.Mode == MoveMode.NewtonianTransfer);
+
+    void PlaceEllipse(Entity body, double sma, double eccentricity, double trueAnomaly)
+    {
+        double myMass = body.GetDataBlob<MassVolumeDB>().MassDry;
+        double parentMass = _earth.GetDataBlob<MassVolumeDB>().MassDry;
+        double mu = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
+        double p = sma * (1 - eccentricity * eccentricity);
+        double radius = p / (1 + eccentricity * Math.Cos(trueAnomaly));
+        double h = Math.Sqrt(mu * p);
+        double vr = mu / h * eccentricity * Math.Sin(trueAnomaly);
+        double vt = h / radius;
+        var radial = new Vector3(Math.Cos(trueAnomaly), Math.Sin(trueAnomaly), 0);
+        var tangent = new Vector3(-Math.Sin(trueAnomaly), Math.Cos(trueAnomaly), 0);
+        body.SetDataBlob(OrbitDB.FromVector(
+            _earth, myMass, parentMass, radial * radius, radial * vr + tangent * vt, _now));
+    }
 }

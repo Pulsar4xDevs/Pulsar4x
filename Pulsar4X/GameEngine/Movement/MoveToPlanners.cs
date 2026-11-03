@@ -259,8 +259,13 @@ public readonly struct MoveOption
     /// <summary>One-level sphere change. <see cref="MovePlanner.TryBuildMoveActions"/> queues a transfer, not a match.</summary>
     public readonly bool SoiTransfer;
 
+    /// <summary>Set when the Hohmann branch took a Lambert window instead of the closed form.</summary>
+    public readonly TransferWindow? Window;
+
+    public bool HasWindow => Window is { IsFinite: true };
+
     MoveOption(MoveMode mode, bool feasible, string reason, double eta, double deltaV, double energy,
-        (Vector3 deltaV, double timeInSeconds)[] manuvers, bool soiTransfer = false)
+        (Vector3 deltaV, double timeInSeconds)[] manuvers, bool soiTransfer = false, TransferWindow? window = null)
     {
         Mode = mode;
         Feasible = feasible;
@@ -270,14 +275,16 @@ public readonly struct MoveOption
         EnergyCost = energy;
         Manuvers = manuvers ?? Array.Empty<(Vector3, double)>();
         SoiTransfer = soiTransfer;
+        Window = window;
     }
 
     public static MoveOption No(MoveMode mode, string reason)
         => new MoveOption(mode, false, reason, double.PositiveInfinity, 0, 0, null);
 
     public static MoveOption Yes(MoveMode mode, double etaSeconds, double deltaV = 0, double energyCost = 0,
-        (Vector3 deltaV, double timeInSeconds)[] manuvers = null, string message = "", bool soiTransfer = false)
-        => new MoveOption(mode, true, message, etaSeconds, deltaV, energyCost, manuvers, soiTransfer);
+        (Vector3 deltaV, double timeInSeconds)[] manuvers = null, string message = "", bool soiTransfer = false,
+        TransferWindow? window = null)
+        => new MoveOption(mode, true, message, etaSeconds, deltaV, energyCost, manuvers, soiTransfer, window);
 }
 
 /// <summary>
@@ -320,6 +327,10 @@ public static class MovePlanner
 
     /// <summary>The transfer maths we have all assume circular orbits.</summary>
     const double MaxEccentricityForTransfer = 0.01;
+
+    /// <summary>Above this, HohmannOE is the wrong tool and the Lambert scan answers instead.</summary>
+    const double ClosedFormEccentricity = 0.05;
+    const double ClosedFormInclination = 2.0 * Math.PI / 180.0;
 
     // ---------------------------------------------------------------------
 
@@ -720,15 +731,25 @@ public static class MovePlanner
             return MoveOption.No(mode, "target is under a different SOI parent; no interplanetary transfer maths yet");
         }
 
-        // Leftover dump is a hyperbola. Circularise at current r before Hohmann/phase,
-        // including when the target (Phobos e=0.015) is slightly eccentric — that used
-        // to reject here and Fail the goal with warp also blocked in-well.
-        if (needsCircularise)
+        // Leftover dump is a hyperbola. A near-circular coplanar pair keeps HohmannOE.
+        // Anything eccentric or inclined asks the Lambert scan, which is the case the
+        // closed form cannot answer. A short tank that cannot fly the window still circularises.
+        bool closedForm = !needsCircularise
+            && targetOrbit.Eccentricity <= ClosedFormEccentricity
+            && RelativeInclination(shipOrbit, targetOrbit) <= ClosedFormInclination;
+        if (!closedForm)
         {
-            if (circulariseDV > thrust.DeltaV)
-                return MoveOption.No(mode, $"needs {circulariseDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
-            return MoveOption.Yes(mode, 0, circulariseDV,
-                message: $"Circularise to match {NameOf(target, ship)}");
+            if (TryLambertWindow(ship, target, parent, now, thrust.DeltaV, out MoveOption windowed))
+                return windowed;
+            if (needsCircularise)
+            {
+                if (circulariseDV > thrust.DeltaV)
+                    return MoveOption.No(mode, $"needs {circulariseDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
+                return MoveOption.Yes(mode, 0, circulariseDV,
+                    message: $"Circularise to match {NameOf(target, ship)}");
+            }
+
+            return MoveOption.No(mode, "transfer solution did not converge");
         }
 
         // Hyperbolic SMA is negative; Hohmann/phasing run from the circular radius we'll have.
@@ -881,6 +902,8 @@ public static class MovePlanner
         if (chosen.Feasible && chosen.Mode != MoveMode.Warp)
         {
             reason = chosen.Reason;
+            if (chosen.HasWindow && chosen.Window is { } hinted)
+                return PlanFromWindow(ship, target, hinted, now, out actions, out reason);
             if (chosen.SoiTransfer)
                 actions.Add(SoiTransferAction.CreateCommand(ship, target, now, peri, apo));
             else if (chosen.Manuvers.Length == 0)
@@ -1420,6 +1443,150 @@ public static class MovePlanner
         var raw = MoveMath.GetRelativeFutureState(ship, at);
         state = (raw.pos, raw.Velocity);
         return double.IsFinite(state.pos.X) && double.IsFinite(state.vel.X);
+    }
+
+    /// <summary>
+    /// Angle between two orbit planes. Zero when they share a plane, including both equatorial.
+    /// </summary>
+    static double RelativeInclination(OrbitDB a, OrbitDB b)
+    {
+        double cos = Math.Cos(a.Inclination) * Math.Cos(b.Inclination)
+            + Math.Sin(a.Inclination) * Math.Sin(b.Inclination) * Math.Cos(a.LongitudeOfAscendingNode - b.LongitudeOfAscendingNode);
+        if (cos > 1)
+            cos = 1;
+        if (cos < -1)
+            cos = -1;
+        return Math.Acos(cos);
+    }
+
+    /// <summary>
+    /// Best Lambert window the tank can fly. Returns false when the scan has nothing to say,
+    /// so an eccentric ship can still fall back to circularise. A circular ship that found a
+    /// window it cannot afford gets the usual Δv sentence.
+    /// </summary>
+    static bool TryLambertWindow(Entity ship, Entity target, Entity parent, DateTime now, double budget, out MoveOption option)
+    {
+        option = default;
+        const MoveMode mode = MoveMode.NewtonianTransfer;
+        double mu = OrbitMath.SGP(parent, ship);
+        bool affordable = TransferPlanner.TryAffordableWindow(ship, target, mu, now, budget, out TransferWindow window, out double bestDv);
+        if (!affordable)
+        {
+            bool shipEccentric = ship.TryGetDataBlob<OrbitDB>(out var shipOrbit)
+                && shipOrbit.Eccentricity > MaxEccentricityForTransfer;
+            if (!shipEccentric && double.IsFinite(bestDv) && bestDv > budget)
+            {
+                option = MoveOption.No(mode, $"needs {bestDv:N0} m/s Δv, have {budget:N0} m/s");
+                return true;
+            }
+
+            return false;
+        }
+
+        var manuvers = new (Vector3 deltaV, double timeInSeconds)[2];
+        if (TransferPlanner.TryState(ship, window.Depart, out var from)
+            && TransferPlanner.TryState(target, window.Arrive, out var to))
+        {
+            Vector3 depart = TransferPlanner.ToProgradeFrame(window.DepartDeltaV, from.pos, from.vel);
+            Vector3 arrivalVelocity = to.vel + window.ArriveDeltaV;
+            Vector3 arrive = TransferPlanner.ToProgradeFrame(-window.ArriveDeltaV, to.pos, arrivalVelocity);
+            manuvers[0] = (depart, Math.Max(0, (window.Depart - now).TotalSeconds));
+            manuvers[1] = (arrive, (window.Arrive - now).TotalSeconds);
+        }
+
+        option = MoveOption.Yes(mode, (window.Arrive - now).TotalSeconds, window.TotalDeltaV, 0, manuvers,
+            $"Transfer to {NameOf(target, ship)}, {FormatArrival(window.Arrive)}",
+            window: window);
+        return true;
+    }
+
+    /// <summary>
+    /// Build the two burns for a chosen window. The window is a hint: the burns are solved
+    /// again from the propagated state at its departure and arrival.
+    /// </summary>
+    public static bool PlanFromWindow(Entity ship, Entity target, TransferWindow window,
+        out List<EntityAction> actions, out string reason)
+    {
+        DateTime now = ship != null ? ship.StarSysDateTime : default;
+        return PlanFromWindow(ship, target, window, now, out actions, out reason);
+    }
+
+    public static bool PlanFromWindow(Entity ship, Entity target, TransferWindow window, DateTime now,
+        out List<EntityAction> actions, out string reason)
+    {
+        actions = new List<EntityAction>();
+        reason = "transfer solution did not converge";
+        if (ship == null || target == null || !window.IsFinite)
+            return false;
+        if (!ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrust) || thrust.ThrustInNewtons <= 0)
+        {
+            reason = "no reaction drive";
+            return false;
+        }
+
+        var parent = ship.GetSOIParentEntity();
+        if (parent == null)
+        {
+            reason = "no SOI parent";
+            return false;
+        }
+
+        bool sameParent = target.GetSOIParentEntity() == parent
+            || (target.TryGetDataBlob<OrbitDB>(out var targetOrbit) && targetOrbit.Parent == parent);
+        if (!sameParent)
+        {
+            reason = "target is under a different SOI parent; no interplanetary transfer maths yet";
+            return false;
+        }
+
+        double mu = OrbitMath.SGP(parent, ship);
+        double tof = (window.Arrive - window.Depart).TotalSeconds;
+        if (!(mu > 0) || !(tof > 0))
+            return false;
+        if (!TransferPlanner.TryState(ship, window.Depart, out var from)
+            || !TransferPlanner.TryState(target, window.Arrive, out var to))
+            return false;
+
+        bool prograde = from.pos.X * from.vel.Y - from.pos.Y * from.vel.X >= 0;
+        bool solved = LambertSolver.TrySolve(mu, from.pos, to.pos, tof, prograde, out Vector3 v1, out Vector3 v2)
+            || LambertSolver.TrySolve(mu, from.pos, to.pos, tof, !prograde, out v1, out v2);
+        if (!solved)
+            return false;
+
+        Vector3 dvDepart = v1 - from.vel;
+        Vector3 dvArrive = to.vel - v2;
+        double total = dvDepart.Length() + dvArrive.Length();
+        if (!double.IsFinite(total))
+            return false;
+        if (total > thrust.DeltaV)
+        {
+            reason = $"needs {total:N0} m/s Δv, have {thrust.DeltaV:N0} m/s";
+            return false;
+        }
+
+        Vector3 burn1 = TransferPlanner.ToProgradeFrame(dvDepart, from.pos, from.vel);
+        Vector3 burn2 = TransferPlanner.ToProgradeFrame(dvArrive, to.pos, v2);
+        double mass = ship.TryGetDataBlob<MassVolumeDB>(out var massDb) ? massDb.MassTotal : 0;
+        double seconds1 = BurnSeconds(mass, burn1.Length(), thrust);
+        double fuel1 = thrust.FuelBurnRate > 0 ? seconds1 * thrust.FuelBurnRate : 0;
+        double seconds2 = BurnSeconds(mass - fuel1, burn2.Length(), thrust);
+
+        actions.Add(NewtonThrustAction.CreateCommand(
+            ship.FactionOwnerID, ship, window.Depart, burn1, seconds1, "Transfer window"));
+        actions.Add(NewtonThrustAction.CreateCommand(
+            ship.FactionOwnerID, ship, window.Arrive, burn2, seconds2, "Transfer window"));
+        reason = $"Transfer to {NameOf(target, ship)}, {FormatArrival(window.Arrive)}";
+        return true;
+    }
+
+    static double BurnSeconds(double mass, double deltaV, NewtonThrustAbilityDB thrust)
+    {
+        if (!(mass > 0) || !(deltaV > 0) || !(thrust.FuelBurnRate > 0) || !(thrust.ExhaustVelocity > 0))
+            return 0;
+        double fuel = OrbitMath.TsiolkovskyFuelUse(mass, thrust.ExhaustVelocity, deltaV);
+        if (!double.IsFinite(fuel) || fuel < 0)
+            return 0;
+        return fuel / thrust.FuelBurnRate;
     }
 
     // ---------------------------------------------------------------------

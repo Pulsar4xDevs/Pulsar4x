@@ -1,6 +1,6 @@
 # Lambert solver, transfer windows and a porkchop plot
 
-Status: not started. Do not build until asked. Written 2026-11-03 for the Early Tech Start mod.
+Status: built, playing. UI not play-tested. Written 2026-11-03 for the Early Tech Start mod. Solver, scan, planner, and the NavWindow porkchop are in. A game restart is needed (`TransferWindow`, `MoveOption.Window`, `NavMode.Porkchop`).
 
 Plan 2 of 3. Slices 1 to 3 are engine maths with no UI and no game-state change; they unblock slice 5 of [the SOI capture plan](movement-newtonian-soi-capture.md) and the heliocentric leg of [the interplanetary plan](movement-interplanetary-newtonian.md). Slices 4 and 5 are the NavWindow porkchop.
 

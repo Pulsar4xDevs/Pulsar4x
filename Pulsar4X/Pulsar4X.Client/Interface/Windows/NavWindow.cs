@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading.Tasks;
 using ImGuiNET;
 using Pulsar4X.Api;
 using Pulsar4X.Client.Interface.Widgets;
@@ -22,6 +23,23 @@ namespace Pulsar4X.Client
         private int _selectedUncleId = -1;
         private float _targetSMA = 0;
         private (Vector3 deltaV, double tSec)[]? _manuvers;
+
+        private string _porkError = "";
+        private float _porkDepartDays;
+        private float _porkTofMinDays;
+        private float _porkTofMaxDays;
+        private int _porkSteps = 48;
+        private float _porkCeiling;
+        private bool _porkPrograde = true;
+        private int _porkAxesForId = int.MinValue;
+        private int _porkGen;
+        private int _porkTaskGen;
+        private Task<TransferGrid>? _porkTask;
+        private TransferGrid? _porkGrid;
+        private int _porkSelectI = -1;
+        private int _porkSelectJ = -1;
+        private int _porkBestI = -1;
+        private int _porkBestJ = -1;
 
         private ManuverLinesComplete _manuverLines = new ManuverLinesComplete();
 
@@ -61,6 +79,16 @@ namespace Pulsar4X.Client
             _targetSMA = 0;
             _manuvers = null;
             _atDatetime = _uiState.PrimarySystemDateTime;
+            _porkGen++;
+            _porkTask = null;
+            _porkGrid = null;
+            _porkAxesForId = int.MinValue;
+            _porkSelectI = -1;
+            _porkSelectJ = -1;
+            _porkBestI = -1;
+            _porkBestJ = -1;
+            _porkCeiling = 0;
+            _porkDepartDays = 0;
 
             var system = _uiState.GameClient?.Galaxy.GetSystem(_systemId);
             var entity = system?.GetEntity(_entityId);
@@ -89,7 +117,8 @@ namespace Pulsar4X.Client
             HohmannTransfer,
             InterplanetaryTransfer,
             PhaseChange,
-            EscapeSOI
+            EscapeSOI,
+            Porkchop
         }
 
         private NavMode _navMode = NavMode.None;
@@ -199,7 +228,7 @@ namespace Pulsar4X.Client
                 _targetSMA = (float)currentKE.SemiMajorAxis;
 
             string entityName = entity.GetView<NameView>()?.Name ?? "Unknown";
-            ImGui.SetNextWindowSize(new Vector2(600f, 400f), ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowSize(new Vector2(860f, 560f), ImGuiCond.FirstUseEver);
             if (Window.Begin("Nav Control: " + entityName, ref IsActive, _flags))
             {
                 ImGui.Columns(2);
@@ -220,6 +249,17 @@ namespace Pulsar4X.Client
                         var halfOrbit = _manuverLines.EditingNodes[0].TargetOrbit.Period * 0.5;
                         _manuverLines.EditingNodes[1] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
                         _navMode = NavMode.HohmannTransfer;
+                    }
+
+                    ImGui.SameLine();
+                    if (ImGui.Button("Transfer Windows"))
+                    {
+                        _manuverLines.EditingNodes = new ManuverNode[2];
+                        _manuverLines.EditingNodes[0] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime);
+                        _manuverLines.EditingNodes[1] = new ManuverNode(_uiState, _systemId, _entityId, _atDatetime);
+                        if (_porkCeiling <= 0)
+                            _porkCeiling = (float)thrust.DeltaVMps;
+                        _navMode = NavMode.Porkchop;
                     }
 
                     if (ImGui.Button("Interplanetary Transfer"))
@@ -257,6 +297,9 @@ namespace Pulsar4X.Client
                         break;
                     case NavMode.HohmannTransfer:
                         DisplayHohmannMode(system, entity, soiParent, thrust, massVolume, currentKE);
+                        break;
+                    case NavMode.Porkchop:
+                        DisplayPorkchopMode(system, soiParent, thrust, currentKE);
                         break;
                     case NavMode.InterplanetaryTransfer:
                         DisplayInterPlanetaryHohmannMode(system, entity, soiParent, thrust, massVolume);
@@ -656,6 +699,337 @@ namespace Pulsar4X.Client
                 SubmitBurn(manuver.deltaV, manuverDateTime);
             }
 
+        }
+
+        void DisplayPorkchopMode(IClientSystem system, EntitySnapshot soiParent, ThrustView thrust, KeplerElements currentKE)
+        {
+            TakePorkchopResult();
+            var selected = TargetBodyCombo(ChildrenOf(system, soiParent.Id), ref _selectedSiblingId);
+            var targetOrbit = selected?.GetView<OrbitView>();
+            if (selected == null || targetOrbit == null)
+            {
+                ImGui.Text("Pick a body orbiting the same parent.");
+                return;
+            }
+
+            KeplerElements targetKe = targetOrbit.ToKeplerElements();
+            if (selected.Id != _porkAxesForId || _porkDepartDays <= 0)
+            {
+                SuggestPorkchopAxes(currentKE, targetKe);
+                _porkAxesForId = selected.Id;
+                _porkGrid = null;
+                _porkSelectI = -1;
+                _porkSelectJ = -1;
+                _porkBestI = -1;
+                _porkBestJ = -1;
+            }
+
+            if (_porkCeiling <= 0)
+                _porkCeiling = (float)thrust.DeltaVMps;
+
+            ImGui.SliderFloat("Departure span (days)", ref _porkDepartDays, 1f, 2000f, "%.1f");
+            ImGui.SliderFloat("TOF min (days)", ref _porkTofMinDays, 0.05f, 2000f, "%.2f");
+            ImGui.SliderFloat("TOF max (days)", ref _porkTofMaxDays, 0.05f, 2000f, "%.2f");
+            ImGui.SliderInt("Grid size", ref _porkSteps, 8, 120);
+            float ceilMax = Math.Max(1000f, Math.Max(_porkCeiling, (float)thrust.DeltaVMps * 2f));
+            ImGui.SliderFloat("Δv ceiling", ref _porkCeiling, 0f, ceilMax, "%.0f m/s");
+            ImGui.Checkbox("Prograde", ref _porkPrograde);
+
+            bool computing = _porkTask != null && !_porkTask.IsCompleted;
+            if (computing)
+                ImGui.Text("Computing…");
+            else if (ImGui.Button("Compute"))
+                StartPorkchop(currentKE, targetKe);
+            if (_porkError.Length > 0)
+                ImGui.TextColored(new Vector4(0.9f, 0.3f, 0.2f, 1f), _porkError);
+
+            if (_porkGrid == null)
+                return;
+
+            DrawPorkchop(_porkGrid, _porkCeiling);
+            if (_porkSelectI < 0 || _porkSelectJ < 0)
+                return;
+            TransferWindow chosen = _porkGrid.Cells[_porkSelectI, _porkSelectJ];
+            if (!chosen.IsFinite)
+            {
+                ImGui.Text("That cell has no solution.");
+                return;
+            }
+
+            PreviewPorkchop(chosen, currentKE, targetKe);
+            ImGui.Text("Depart " + chosen.Depart.ToString("yyyy-MM-dd HH:mm"));
+            ImGui.Text("Arrive " + chosen.Arrive.ToString("yyyy-MM-dd HH:mm"));
+            ImGui.Text("Δv " + Stringify.Velocity(chosen.TotalDeltaV)
+                + "  (depart " + Stringify.Velocity(chosen.DepartDeltaV.Length())
+                + ", arrive " + Stringify.Velocity(chosen.ArriveDeltaV.Length()) + ")");
+            if (chosen.TotalDeltaV > thrust.DeltaVMps)
+                ImGui.TextColored(new Vector4(0.9f, 0f, 0f, 1f), "Over the ship's budget.");
+            if (ImGui.Button("Make it so"))
+                CommitPorkchop(chosen, currentKE, targetKe);
+        }
+
+        void SuggestPorkchopAxes(KeplerElements shipKe, KeplerElements targetKe)
+        {
+            double synodic = TransferWindows.SynodicSeconds(shipKe.Period, targetKe.Period);
+            double days = double.IsFinite(synodic) && synodic > 0 ? synodic / 86400.0 : 365.25;
+            if (days < 1)
+                days = 1;
+            if (days > 2000)
+                days = 2000;
+            _porkDepartDays = (float)days;
+
+            (Vector3 pos, Vector3 vel) shipNow = KeplerState(shipKe, _uiState.PrimarySystemDateTime);
+            (Vector3 pos, Vector3 vel) targetNow = KeplerState(targetKe, _uiState.PrimarySystemDateTime);
+            var band = TransferWindows.HohmannTofBand(shipKe.StandardGravParameter, shipNow.pos.Length(), targetNow.pos.Length());
+            if (double.IsFinite(band.tofMin) && double.IsFinite(band.tofMax) && band.tofMax > band.tofMin)
+            {
+                _porkTofMinDays = (float)(band.tofMin / 86400.0);
+                _porkTofMaxDays = (float)(band.tofMax / 86400.0);
+            }
+            else
+            {
+                _porkTofMinDays = 1f;
+                _porkTofMaxDays = 30f;
+            }
+
+            _porkPrograde = shipNow.pos.X * shipNow.vel.Y - shipNow.pos.Y * shipNow.vel.X >= 0;
+        }
+
+        void StartPorkchop(KeplerElements shipKe, KeplerElements targetKe)
+        {
+            KeplerElements shipCopy = shipKe;
+            KeplerElements targetCopy = targetKe;
+            double mu = shipCopy.StandardGravParameter;
+            DateTime start = _uiState.PrimarySystemDateTime;
+            double departSeconds = Math.Max(1.0, _porkDepartDays) * 86400.0;
+            double tofMin = Math.Max(1.0, _porkTofMinDays) * 86400.0;
+            double tofMax = _porkTofMaxDays * 86400.0;
+            if (!(tofMax > tofMin))
+                tofMax = tofMin + 86400.0;
+            int steps = Math.Clamp(_porkSteps, 8, 120);
+            bool prograde = _porkPrograde;
+            _porkError = "";
+            _porkTaskGen = _porkGen;
+            _porkTask = Task.Run(() => TransferWindows.Scan(
+                mu,
+                at => KeplerState(shipCopy, at),
+                at => KeplerState(targetCopy, at),
+                start, start.AddSeconds(departSeconds), steps,
+                tofMin, tofMax, steps,
+                TransferWindows.MagnitudeCost, TransferWindows.MagnitudeCost,
+                prograde));
+        }
+
+        void TakePorkchopResult()
+        {
+            if (_porkTask == null || !_porkTask.IsCompleted)
+                return;
+            if (_porkTask.Status == TaskStatus.RanToCompletion && _porkTaskGen == _porkGen)
+            {
+                _porkGrid = _porkTask.Result;
+                MarkPorkchopBest(_porkGrid);
+            }
+            else if (_porkTask.IsFaulted)
+                _porkError = _porkTask.Exception?.GetBaseException().Message ?? "scan failed";
+            _porkTask = null;
+        }
+
+        void MarkPorkchopBest(TransferGrid grid)
+        {
+            _porkBestI = -1;
+            _porkBestJ = -1;
+            _porkSelectI = -1;
+            _porkSelectJ = -1;
+            if (!grid.HasBest)
+                return;
+            for (int i = 0; i < grid.Departures.Length; i++)
+            {
+                for (int j = 0; j < grid.TimeOfFlightSeconds.Length; j++)
+                {
+                    TransferWindow cell = grid.Cells[i, j];
+                    if (cell.Depart == grid.Best.Depart && cell.Arrive == grid.Best.Arrive && cell.IsFinite)
+                    {
+                        _porkBestI = i;
+                        _porkBestJ = j;
+                        _porkSelectI = i;
+                        _porkSelectJ = j;
+                        return;
+                    }
+                }
+            }
+        }
+
+        void DrawPorkchop(TransferGrid grid, float ceiling)
+        {
+            int nx = grid.Departures.Length;
+            int ny = grid.TimeOfFlightSeconds.Length;
+            if (nx == 0 || ny == 0)
+                return;
+
+            float plotW = Math.Max(80f, ImGui.GetContentRegionAvail().X);
+            float plotH = 220f;
+            Vector2 origin = ImGui.GetCursorScreenPos();
+            ImGui.Dummy(new Vector2(plotW, plotH));
+
+            double lowest = double.PositiveInfinity;
+            for (int i = 0; i < nx; i++)
+            {
+                for (int j = 0; j < ny; j++)
+                {
+                    double cost = grid.Cost[i, j];
+                    if (double.IsFinite(cost) && cost <= ceiling && cost < lowest)
+                        lowest = cost;
+                }
+            }
+            if (!double.IsFinite(lowest))
+                lowest = 0;
+            double span = Math.Max(1.0, ceiling - lowest);
+
+            var draw = ImGui.GetWindowDrawList();
+            uint grey = ImGui.ColorConvertFloat4ToU32(new Vector4(0.35f, 0.35f, 0.38f, 1f));
+            uint white = ImGui.ColorConvertFloat4ToU32(new Vector4(1f, 1f, 1f, 1f));
+            uint yellow = ImGui.ColorConvertFloat4ToU32(new Vector4(1f, 0.85f, 0.2f, 1f));
+            float cellW = plotW / nx;
+            float cellH = plotH / ny;
+            double bestDv = grid.HasBest ? grid.Best.TotalDeltaV : double.NaN;
+
+            for (int i = 0; i < nx; i++)
+            {
+                for (int j = 0; j < ny; j++)
+                {
+                    float x0 = origin.X + i * cellW;
+                    float y0 = origin.Y + (ny - 1 - j) * cellH;
+                    var min = new Vector2(x0, y0);
+                    var max = new Vector2(x0 + cellW - 1f, y0 + cellH - 1f);
+                    double cost = grid.Cost[i, j];
+                    uint colour = grey;
+                    if (double.IsFinite(cost) && cost <= ceiling)
+                    {
+                        float t = (float)((cost - lowest) / span);
+                        if (t < 0f)
+                            t = 0f;
+                        if (t > 1f)
+                            t = 1f;
+                        colour = ImGui.ColorConvertFloat4ToU32(new Vector4(0.15f + 0.75f * t, 0.72f * (1f - t), 0.12f, 1f));
+                    }
+                    draw.AddRectFilled(min, max, colour);
+                    if (double.IsFinite(bestDv) && double.IsFinite(cost) && cost <= bestDv * 1.05 && cost <= ceiling)
+                        draw.AddRect(min, max, white, 0f, ImDrawFlags.None, 1f);
+                }
+            }
+
+            OutlineCell(_porkBestI, _porkBestJ, white);
+            OutlineCell(_porkSelectI, _porkSelectJ, yellow);
+
+            ImGui.Text(grid.Departures[0].ToString("yyyy-MM-dd")
+                + "  →  " + grid.Departures[nx - 1].ToString("yyyy-MM-dd")
+                + "     TOF " + (grid.TimeOfFlightSeconds[0] / 86400.0).ToString("0.##")
+                + "–" + (grid.TimeOfFlightSeconds[ny - 1] / 86400.0).ToString("0.##") + " days");
+
+            Vector2 mouse = ImGui.GetMousePos();
+            bool inside = mouse.X >= origin.X && mouse.X < origin.X + plotW
+                && mouse.Y >= origin.Y && mouse.Y < origin.Y + plotH;
+            if (!inside || !ImGui.IsWindowHovered())
+                return;
+
+            int hoverI = Math.Clamp((int)((mouse.X - origin.X) / cellW), 0, nx - 1);
+            int hoverJ = ny - 1 - Math.Clamp((int)((mouse.Y - origin.Y) / cellH), 0, ny - 1);
+            TransferWindow cell = grid.Cells[hoverI, hoverJ];
+            ImGui.BeginTooltip();
+            if (!cell.IsFinite)
+                ImGui.Text("No solution");
+            else
+            {
+                ImGui.Text("Depart " + cell.Depart.ToString("yyyy-MM-dd HH:mm"));
+                ImGui.Text("Arrive " + cell.Arrive.ToString("yyyy-MM-dd HH:mm"));
+                ImGui.Text("Δv " + Stringify.Velocity(cell.TotalDeltaV));
+                ImGui.Text("depart " + Stringify.Velocity(cell.DepartDeltaV.Length())
+                    + "   arrive " + Stringify.Velocity(cell.ArriveDeltaV.Length()));
+                ImGui.Text("vInf " + Stringify.Velocity(cell.VInfDepart) + " / " + Stringify.Velocity(cell.VInfArrive));
+            }
+            ImGui.EndTooltip();
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            {
+                _porkSelectI = hoverI;
+                _porkSelectJ = hoverJ;
+            }
+
+            void OutlineCell(int i, int j, uint colour)
+            {
+                if (i < 0 || j < 0 || i >= nx || j >= ny)
+                    return;
+                float x0 = origin.X + i * cellW;
+                float y0 = origin.Y + (ny - 1 - j) * cellH;
+                draw.AddRect(new Vector2(x0, y0), new Vector2(x0 + cellW - 1f, y0 + cellH - 1f), colour, 0f, ImDrawFlags.None, 2f);
+            }
+        }
+
+        void PreviewPorkchop(TransferWindow window, KeplerElements shipKe, KeplerElements targetKe)
+        {
+            if (_manuverLines.EditingNodes.Length < 2)
+            {
+                _manuverLines.EditingNodes = new ManuverNode[2];
+                _manuverLines.EditingNodes[0] = new ManuverNode(_uiState, _systemId, _entityId, window.Depart);
+                _manuverLines.EditingNodes[1] = new ManuverNode(_uiState, _systemId, _entityId, window.Arrive);
+            }
+
+            (Vector3 depart, Vector3 arrive) burns = PorkchopBurns(window, shipKe, targetKe);
+            _manuverLines.EditingNodes[0].SetNode(burns.depart, window.Depart);
+            _manuverLines.EditingNodes[1].PriorOrbit = _manuverLines.EditingNodes[0].TargetOrbit;
+            _manuverLines.EditingNodes[1].SetNode(burns.arrive, window.Arrive);
+        }
+
+        void CommitPorkchop(TransferWindow window, KeplerElements shipKe, KeplerElements targetKe)
+        {
+            (Vector3 depart, Vector3 arrive) burns = PorkchopBurns(window, shipKe, targetKe);
+            SubmitBurn(burns.depart, window.Depart);
+            SubmitBurn(burns.arrive, window.Arrive);
+
+            var sequence = new ManuverSequence();
+            sequence.SequenceName = "Transfer window";
+            if (_manuverLines.EditingNodes.Length >= 2)
+            {
+                _manuverLines.EditingNodes[0].NodeName = "Depart";
+                _manuverLines.EditingNodes[1].NodeName = "Arrive";
+                sequence.ManuverNodes.Add(_manuverLines.EditingNodes[0]);
+                sequence.ManuverNodes.Add(_manuverLines.EditingNodes[1]);
+            }
+            _manuverLines.SelectedSequence.ManuverSequences.Add(sequence);
+            _navMode = NavMode.None;
+        }
+
+        static (Vector3 depart, Vector3 arrive) PorkchopBurns(TransferWindow window, KeplerElements shipKe, KeplerElements targetKe)
+        {
+            (Vector3 pos, Vector3 vel) from = KeplerState(shipKe, window.Depart);
+            (Vector3 pos, Vector3 vel) to = KeplerState(targetKe, window.Arrive);
+            Vector3 depart = OrbitalMath.ToProgradeFrame(window.DepartDeltaV, from.pos, from.vel);
+            Vector3 arrivalVelocity = to.vel + window.ArriveDeltaV;
+            Vector3 arrive = OrbitalMath.ToProgradeFrame(-window.ArriveDeltaV, to.pos, arrivalVelocity);
+            return (depart, arrive);
+        }
+
+        /// <summary>
+        /// Position and velocity from a copied Kepler set. Velocity keeps inclination;
+        /// <c>GetStateVectors</c> on the client drops it.
+        /// </summary>
+        static (Vector3 pos, Vector3 vel) KeplerState(KeplerElements ke, DateTime at)
+        {
+            var missing = new Vector3(double.NaN, double.NaN, double.NaN);
+            try
+            {
+                double trueAnomaly = OrbitalMath.TrueAnomalyFromElements(ke, at);
+                Vector3 pos = OrbitalMath.GetPosition(ke, at);
+                Vector3 vel = OrbitalMath.ParentLocalVeclocityVector(
+                    ke.StandardGravParameter, pos, ke.SemiMajorAxis, ke.Eccentricity,
+                    trueAnomaly, ke.AoP, ke.Inclination, ke.LoAN);
+                if (!double.IsFinite(pos.X) || !double.IsFinite(vel.X))
+                    return (missing, missing);
+                return (pos, vel);
+            }
+            catch
+            {
+                return (missing, missing);
+            }
         }
     }
 }

@@ -752,6 +752,33 @@ namespace Pulsar4X.Orbital
             return transformedVector;
         }
 
+        /// <summary>
+        /// Inertial parent-relative Δv into the burn frame: X radial, Y prograde, Z normal.
+        /// The basis is the state at the burn, the same one <see cref="ProgradeToStateVector(double, Vector3, Vector3, Vector3)"/> inverts.
+        /// </summary>
+        public static Vector3 ToProgradeFrame(Vector3 inertial, Vector3 position, Vector3 velocity)
+        {
+            double radius = position.Length();
+            if (!(radius > 1) || !double.IsFinite(inertial.X) || !double.IsFinite(inertial.Y) || !double.IsFinite(inertial.Z))
+                return inertial;
+
+            Vector3 radial = position / radius;
+            Vector3 h = Vector3.Cross(position, velocity);
+            double hLen = h.Length();
+            Vector3 normal = hLen > 1e-6
+                ? h / hLen
+                : (Math.Abs(radial.Z) < 0.9 ? new Vector3(0, 0, 1) : new Vector3(0, 1, 0));
+            Vector3 prograde = Vector3.Cross(normal, radial);
+            double pLen = prograde.Length();
+            if (!(pLen > 1e-8))
+                return inertial;
+            prograde /= pLen;
+            return new Vector3(
+                Vector3.Dot(inertial, radial),
+                Vector3.Dot(inertial, prograde),
+                Vector3.Dot(inertial, normal));
+        }
+
         public static Vector3 ProgradeVector(KeplerElements ke, DateTime dateTime )
         {
             var secondsFromEpoch = (dateTime - ke.Epoch).TotalSeconds;
