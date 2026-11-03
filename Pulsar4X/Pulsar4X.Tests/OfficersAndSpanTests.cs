@@ -330,7 +330,8 @@ public class OfficersAndSpanTests
         SetRank(ship, 6);
         Assert.That(CommandSpan.Effective(ship), Is.EqualTo(CommandSpanKind.Body));
         AssertSurvey(ship, world.Earth, world.Earth.Id);
-        Assert.That(Haul(ship, world.EarthOffice, world.LunaOffice).Accepted, Is.True);
+        var toLuna = Haul(ship, world.EarthOffice, world.LunaOffice);
+        Assert.That(toLuna.Accepted, Is.True, toLuna.RejectionReason);
         var mars = Haul(ship, world.EarthOffice, world.MarsOffice);
         Assert.That(mars.Accepted, Is.False);
         Assert.That(mars.RejectionReason, Is.EqualTo("The target is outside this ship's reach."));
@@ -339,7 +340,8 @@ public class OfficersAndSpanTests
         SetRank(ship, 1);
         Assert.That(CommandSpan.Effective(ship), Is.EqualTo(CommandSpanKind.Body));
         AssertSurvey(ship, world.Earth, world.Earth.Id);
-        Assert.That(Haul(ship, world.EarthOffice, world.LunaOffice).Accepted, Is.True);
+        var toLunaAgain = Haul(ship, world.EarthOffice, world.LunaOffice);
+        Assert.That(toLunaAgain.Accepted, Is.True, toLunaAgain.RejectionReason);
         Assert.That(Haul(ship, world.EarthOffice, world.MarsOffice).Accepted, Is.False);
 
         SetRank(ship, 6);

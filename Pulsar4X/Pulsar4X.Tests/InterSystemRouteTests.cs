@@ -32,7 +32,8 @@ public class InterSystemRouteTests
     {
         var scene = Scene.Build(farPair: true);
 
-        Assert.That(scene.Trade().Accepted, Is.True);
+        var traded = scene.Trade();
+        Assert.That(traded.Accepted, Is.True, traded.RejectionReason);
         var goal = scene.Ship.GetDataBlob<GoalsDB>().ActiveGoal;
         Assert.That(goal!.SourceEntityId, Is.EqualTo(scene.FarSell.Id));
         Assert.That(goal.DestEntityId, Is.EqualTo(scene.FarBuy.Id));
@@ -50,7 +51,8 @@ public class InterSystemRouteTests
     {
         var scene = Scene.Build(farPair: true, hiddenPair: true);
 
-        Assert.That(scene.Trade().Accepted, Is.True);
+        var traded = scene.Trade();
+        Assert.That(traded.Accepted, Is.True, traded.RejectionReason);
         var goal = scene.Ship.GetDataBlob<GoalsDB>().ActiveGoal;
         Assert.That(goal!.SourceEntityId, Is.EqualTo(scene.FarSell.Id));
         Assert.That(goal.DestEntityId, Is.EqualTo(scene.FarBuy.Id));
@@ -78,7 +80,7 @@ public class InterSystemRouteTests
         var scene = Scene.Build(farColony: true);
         var result = new CommandTranslator(scene.Game).Translate(scene.Faction, scene.Ship, new FreighterCommand(scene.Ship.Id));
 
-        Assert.That(result.Accepted, Is.True);
+        Assert.That(result.Accepted, Is.True, result.RejectionReason);
         var goal = scene.Ship.GetDataBlob<GoalsDB>().ActiveGoal;
         Assert.That(goal!.Type, Is.EqualTo(GoalType.Freighter));
         Assert.That(goal.SourceEntityId, Is.EqualTo(scene.FarColony.Id));
