@@ -1,0 +1,320 @@
+[
+  {
+    "Type": "Colony",
+    "Operation": "Remove",
+    "Payload": {
+      "UniqueID": "colony-earth"
+    }
+  },
+  {
+    "Type": "Colony",
+    "Operation": "Remove",
+    "Payload": {
+      "UniqueID": "colony-luna-concord"
+    }
+  },
+  {
+    "Type": "Colony",
+    "Operation": "Remove",
+    "Payload": {
+      "UniqueID": "colony-mars-outpost"
+    }
+  },
+  {
+    "Type": "Colony",
+    "Operation": "Remove",
+    "Payload": {
+      "UniqueID": "colony-ceres-depot"
+    }
+  },
+  {
+    "Type": "Faction",
+    "Operation": "Remove",
+    "Payload": {
+      "UniqueID": "faction-strata-survey"
+    }
+  },
+  {
+    "Type": "Faction",
+    "Operation": "Remove",
+    "Payload": {
+      "UniqueID": "faction-lode-mining"
+    }
+  },
+  {
+    "Type": "Colony",
+    "Payload": {
+      "UniqueID": "colony-early-earth",
+      "Name": "Early Tech Earth Start",
+      "StartingPopulation": 8200000000.0,
+      "Installations": [
+        {
+          "Id": "default-design-infrastructure-site",
+          "Amount": 5
+        },
+        {
+          "Id": "default-design-mine",
+          "Amount": 1
+        },
+        {
+          "Id": "default-design-warehouse",
+          "Amount": 1
+        },
+        {
+          "Id": "default-design-fuel-farm-5000k",
+          "Amount": 1
+        },
+        {
+          "Id": "default-design-passive-sensor",
+          "Amount": 1
+        },
+        {
+          "Id": "default-design-refinery",
+          "Amount": 1
+        },
+        {
+          "Id": "default-design-factory",
+          "Amount": 1
+        },
+        {
+          "Id": "default-design-shipyard",
+          "Amount": 1
+        },
+        {
+          "Id": "default-design-spaceport",
+          "Amount": 1
+        },
+        {
+          "Id": "default-design-research-lab",
+          "Amount": 2
+        },
+        {
+          "id": "default-design-city-hall",
+          "amount": 1
+        },
+        {
+          "Id": "default-design-local-construction",
+          "Amount": 1
+        },
+        {
+          "Id": "default-design-launch-complex",
+          "Amount": 1
+        },
+        {
+          "Id": "default-design-logistics-office",
+          "Amount": 1
+        }
+      ],
+      "Cargo": [
+        {
+          "Id": "iron",
+          "Amount": 500000
+        },
+        {
+          "Id": "hydrocarbons",
+          "Amount": 50000
+        },
+        {
+          "Id": "stainless-steel",
+          "Amount": 100000
+        },
+        {
+          "Id": "chromium",
+          "Amount": 50000
+        },
+        {
+          "Id": "fissionables",
+          "Amount": 50000
+        },
+        {
+          "Id": "copper",
+          "Amount": 50000
+        },
+        {
+          "Id": "aluminium",
+          "Amount": 50000
+        },
+        {
+          "Id": "lithium",
+          "Amount": 50000
+        },
+        {
+          "Id": "titanium",
+          "Amount": 50000
+        },
+        {
+          "Id": "silicon",
+          "Amount": 5000
+        },
+        {
+          "Id": "graphite",
+          "Amount": 5000
+        },
+        {
+          "Id": "tungsten",
+          "Amount": 5000
+        },
+        {
+          "Id": "nickel",
+          "Amount": 5000
+        },
+        {
+          "Id": "default-design-merlin",
+          "Amount": 5,
+          "Type": "byCount"
+        },
+        {
+          "Id": "default-design-ship-construction",
+          "Amount": 1,
+          "Type": "byCount"
+        },
+        {
+          "Id": "rp-1",
+          "Amount": 50000000,
+          "Type": "byCount"
+        },
+        {
+          "Id": "hydrolox",
+          "Amount": 9000000,
+          "Type": "byCount"
+        },
+        {
+          "Id": "methalox",
+          "Amount": 9000000,
+          "Type": "byCount"
+        }
+      ],
+      "StartingItems": [
+        "tech-early-technology",
+        "tech-conventional-engine",
+        "stainless-steel-armor",
+        "plastic-armor",
+        "aluminium-armor",
+        "general-storage",
+        "warehouse-facility",
+        "spaceport",
+        "planetary-spaceport-crate",
+        "cargo-Shuttlebay",
+        "fuel-storage",
+        "battery-storage",
+        "passive-sensor",
+        "battery-bank",
+        "conventional-engine",
+        "refining",
+        "component-construction",
+        "installation-construction",
+        "ship-assembly",
+        "mine",
+        "research-lab",
+        "refinery",
+        "factory",
+        "shipyard",
+        "general-cargo-hold",
+        "fuel-cargo-hold",
+        "stainless-steel-fuel-tank",
+        "infrastructure",
+        "stainless-steel",
+        "rp-1",
+        "hydrolox",
+        "methalox",
+        "plastic",
+        "electricity",
+        "hydrocarbons",
+        "iron",
+        "aluminium",
+        "copper",
+        "titanium",
+        "lithium",
+        "chromium",
+        "fissionables",
+        "silicon",
+        "graphite",
+        "tungsten",
+        "nickel",
+        "water",
+        "rare-earth-elements",
+        "regolith",
+        "space-crete",
+        "admin-complex",
+        "ship-command",
+        "tech-panel-efficiency",
+        "tech-panel-bandwidth",
+        "tech-panel-density",
+        "solarArray",
+        "local-construction",
+        "ship-construction",
+        "launch-complex",
+        "logistics-office",
+        "factory-site",
+        "refinery-site",
+        "local-construction-site",
+        "logistics-office-site",
+        "warehouse-site",
+        "infrastructure-site"
+      ],
+      "ComponentDesigns": [
+        "default-design-battery-2t",
+        "default-design-cargo-hold-1t",
+        "default-design-cargo-hold-5t",
+        "default-design-f1",
+        "default-design-factory",
+        "default-design-fuel-farm-5000k",
+        "default-design-fuel-tank-1000",
+        "default-design-fuel-tank-1500",
+        "default-design-fuel-tank-3000",
+        "default-design-merlin",
+        "default-design-mine",
+        "default-design-passive-sensor",
+        "default-design-passive-sensor-s50",
+        "default-design-raptor",
+        "default-design-refinery",
+        "default-design-rs-25",
+        "default-design-shipyard",
+        "default-design-shuttlebay",
+        "default-design-spaceport",
+        "default-design-planetary-spaceport-crate",
+        "default-design-research-lab",
+        "default-design-warehouse",
+        "default-design-infrastructure",
+        "default-design-city-hall",
+        "default-design_solarpanel",
+        "default-design-battery-25kg",
+        "default-design-local-construction",
+        "default-design-ship-construction",
+        "default-design-launch-complex",
+        "default-design-bridge-ship",
+        "default-design-bridge-well",
+        "default-design-bridge-system",
+        "default-design-logistics-office",
+        "default-design-factory-site",
+        "default-design-refinery-site",
+        "default-design-local-construction-site",
+        "default-design-logistics-office-site",
+        "default-design-infrastructure-site",
+        "default-design-warehouse-prefab"
+      ],
+      "ShipDesigns": [
+        "early-ship-design-starship",
+        "early-ship-design-newton-tug"
+      ],
+      "Fleets": [
+        {
+          "Name": "Starship Test Fleet",
+          "Ships": [
+            {
+              "DesignId": "early-ship-design-starship",
+              "Name": "Starship I",
+              "Cargo": [
+                {
+                  "Id": "methalox",
+                  "Amount": 20000000,
+                  "Type": "byVolume"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
