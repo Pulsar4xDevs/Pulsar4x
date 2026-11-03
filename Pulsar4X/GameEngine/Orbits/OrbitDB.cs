@@ -65,7 +65,7 @@ namespace Pulsar4X.Orbits
         /// True anomaly at <see cref="Epoch"/>. Warp leftover hyperbolas cannot
         /// reconstruct this from mean anomaly; drop-in copies it from the leftover Kepler.
         /// </summary>
-        public double TrueAnomalyAtEpoch { get; protected set; }
+        public double TrueAnomalyAtEpoch { get; protected set; } = double.NaN;
 
         /// <summary>
         /// reference time. Orbital parameters are stored relative to this reference.
