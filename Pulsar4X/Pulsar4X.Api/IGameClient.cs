@@ -27,8 +27,8 @@ public interface IGameClient
     /// result — not the command's effect, which the server may still apply once it arrives.</summary>
     Task<CommandResult> SubmitCommandAsync(GameCommand command, CancellationToken cancellationToken = default);
 
-    /// <summary>Plan a move. The Orders tree caches the result for the game day.</summary>
-    TripPreview PreviewMove(int shipId, int bodyId);
+    /// <summary>Plan a move for the clicked target. A null <paramref name="options"/> is today's defaults.</summary>
+    TripPreview PreviewMove(int shipId, int bodyId, MoveOrderOptions? options = null);
     Task SetTimeControlAsync(TimeControlRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>Tell the server which system the player is watching (engine processing priority).</summary>

@@ -484,6 +484,110 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void Execute_SendsTheOptionsThePanelShows()
+        {
+            var scene = BuildMarsSurveyFleet();
+            var translator = new CommandTranslator(Game);
+            See(scene, scene.Mars);
+            var depart = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+            var window = new WindowChoice(depart, depart.AddDays(20), new Vec3(1, 2, 3), new Vec3(4, 5, 6));
+
+            var flyby = translator.Translate(scene.Faction, scene.SurveyorA,
+                new MoveToBodyCommand(scene.SurveyorA.Id, scene.Mars.Id, Arrival: ArrivalKind.Flyby));
+            Assert.IsFalse(flyby.Accepted);
+            Assert.AreEqual("not built", flyby.RejectionReason);
+
+            var sent = translator.Translate(scene.Faction, scene.SurveyorA,
+                new MoveToBodyCommand(scene.SurveyorA.Id, scene.Mars.Id,
+                    7_000_000, 8_000_000,
+                    MoveDriveChoice.Warp, DepartureTiming.DepartNow, window, ArrivalKind.Orbit));
+            Assert.IsTrue(sent.Accepted, sent.RejectionReason);
+            var goal = scene.SurveyorA.GetDataBlob<GoalsDB>().ActiveGoal;
+            Assert.IsNotNull(goal);
+            Assert.AreEqual(MoveDriveChoice.Warp, goal.Mode);
+            Assert.AreEqual(DepartureTiming.DepartNow, goal.Timing);
+            Assert.AreEqual(ArrivalKind.Orbit, goal.Arrival);
+            Assert.AreEqual(7_000_000, goal.ArrivalPeriapsis, 0.1);
+            Assert.AreEqual(8_000_000, goal.ArrivalApoapsis, 0.1);
+            Assert.IsTrue(goal.HasPickedWindow);
+            Assert.AreEqual(depart, goal.PickedDepart);
+            Assert.AreEqual(1, goal.PickedDepartDx, 0.001);
+            Assert.AreEqual(6, goal.PickedArriveDz, 0.001);
+
+            var plotted = translator.Translate(scene.Faction, scene.SurveyorB,
+                new GoToBodyCommand(scene.SurveyorB.Id, scene.Mars.Id,
+                    0, 0, MoveDriveChoice.Newtonian, DepartureTiming.BestWindow, null, ArrivalKind.Flyby));
+            Assert.IsFalse(plotted.Accepted);
+            Assert.AreEqual("not built", plotted.RejectionReason);
+        }
+
+        [Test]
+        public void Translator_RejectsJumpFromAShipWithoutWarp()
+        {
+            var scene = BuildMarsSurveyFleet();
+            var translator = new CommandTranslator(Game);
+            scene.SurveyorA.RemoveDataBlob<WarpAbilityDB>();
+
+            var ship = translator.Translate(scene.Faction, scene.SurveyorA,
+                new JumpCommand(scene.SurveyorA.Id, -1));
+            Assert.IsFalse(ship.Accepted);
+            Assert.AreEqual("This ship has no warp drive, so it cannot jump.", ship.RejectionReason);
+
+            scene.SurveyorB.RemoveDataBlob<WarpAbilityDB>();
+            scene.Tanker.RemoveDataBlob<WarpAbilityDB>();
+            var fleet = translator.Translate(scene.Faction, scene.Fleet,
+                new JumpCommand(scene.Fleet.Id, -1));
+            Assert.IsFalse(fleet.Accepted);
+            Assert.AreEqual("No ship in this fleet has a warp drive, so it cannot jump.", fleet.RejectionReason);
+        }
+
+        [Test]
+        public void Preview_ForcedWarp_DoesNotPickNewtonian()
+        {
+            var scene = BuildMarsSurveyFleet();
+            See(scene, scene.Mars);
+            var now = scene.SurveyorA.StarSysDateTime;
+            var auto = MovePlanner.Preview(scene.SurveyorA, scene.Mars, now);
+            Assert.AreEqual("Warp", auto.Mode, auto.Reason);
+            Assert.IsTrue(auto.Feasible, auto.Reason);
+
+            var forced = MovePlanner.Preview(scene.SurveyorA, scene.Mars, now,
+                new MoveOrderOptions(Mode: MoveDriveChoice.Warp, Timing: DepartureTiming.DepartNow));
+            Assert.AreEqual("Warp", forced.Mode, forced.Reason);
+            Assert.IsTrue(forced.Feasible, forced.Reason);
+            Assert.IsEmpty(forced.Timings);
+            Assert.AreEqual(0, forced.WaitSeconds);
+            Assert.IsTrue(forced.LocalTransferAfterWarp);
+
+            var newton = MovePlanner.Preview(scene.SurveyorA, scene.Mars, now,
+                new MoveOrderOptions(Mode: MoveDriveChoice.Newtonian));
+            Assert.AreEqual("Newtonian", newton.Mode, newton.Reason);
+        }
+
+        [Test]
+        public void Preview_WithApoapsis_ReportsTheSmallerDeltaV()
+        {
+            var scene = BuildEarthMoonSurveyFleet(AdminLevel.Planet, targetEarth: false);
+            See(scene, scene.Luna);
+            var now = scene.SurveyorA.StarSysDateTime;
+            var low = MovePlanner.Preview(scene.SurveyorA, scene.Luna, now);
+            double high = scene.Luna.GetDataBlob<MassVolumeDB>().RadiusInM * 8;
+            var up = MovePlanner.Preview(scene.SurveyorA, scene.Luna, now,
+                new MoveOrderOptions(Periapsis: high, Apoapsis: high));
+
+            Assert.IsTrue(low.Feasible, low.Reason);
+            Assert.IsTrue(up.Feasible, up.Reason);
+            Assert.That(up.DeltaV, Is.LessThan(low.DeltaV),
+                $"low {low.DeltaV:F0} m/s, high {up.DeltaV:F0} m/s");
+        }
+
+        void See(Scene scene, Entity body)
+        {
+            body.FactionOwnerID = Pulsar4X.Engine.Game.NeutralFactionId;
+            _sys.ShowNeutralEntityToFaction(scene.Faction.Id, body.Id);
+        }
+
+        [Test]
         public void GeoSurvey_EmptyChair_AtBody_QueuesOrderWithoutAGoal()
         {
             var scene = BuildMarsSurveyFleet();

@@ -237,6 +237,27 @@ public static class MoveTargeting
 
 
 /// <summary>
+/// Timing rows and route legs copied onto a <see cref="TripPreview"/>. Default means the option
+/// has no porkchop (a Hohmann, a warp, or already there).
+/// </summary>
+public struct PreviewFacts
+{
+    public bool HasTiming;
+    public DepartureTiming Timing;
+    public double WaitSeconds;
+    public string Note;
+    public bool HasAlt;
+    public DepartureTiming AltTiming;
+    public double AltWaitSeconds;
+    public double AltEtaSeconds;
+    public double AltDeltaV;
+    public bool AltFeasible;
+    public string AltNote;
+    public bool CanPick;
+    public TripLeg[] Legs;
+}
+
+/// <summary>
 /// One candidate way of getting there, with what it would cost. Infeasible options carry the
 /// reason so a failed goal can say *why* rather than just "can't".
 /// </summary>
@@ -272,9 +293,12 @@ public readonly struct MoveOption
 
     public bool HasWindow => Window is { IsFinite: true };
 
+    /// <summary>Set when this option came from a porkchop. Empty for Hohmann and warp.</summary>
+    public readonly PreviewFacts Facts;
+
     MoveOption(MoveMode mode, bool feasible, string reason, double eta, double deltaV, double energy,
         (Vector3 deltaV, double timeInSeconds)[] manuvers, bool soiTransfer = false, TransferWindow? window = null,
-        bool interplanetary = false, double departSeconds = 0)
+        bool interplanetary = false, double departSeconds = 0, PreviewFacts facts = default)
     {
         Mode = mode;
         Feasible = feasible;
@@ -287,15 +311,16 @@ public readonly struct MoveOption
         Window = window;
         Interplanetary = interplanetary;
         DepartSeconds = double.IsFinite(departSeconds) && departSeconds > 0 ? departSeconds : 0;
+        Facts = facts;
     }
 
-    public static MoveOption No(MoveMode mode, string reason)
-        => new MoveOption(mode, false, reason, double.PositiveInfinity, 0, 0, null);
+    public static MoveOption No(MoveMode mode, string reason, PreviewFacts facts = default)
+        => new MoveOption(mode, false, reason, double.PositiveInfinity, 0, 0, null, facts: facts);
 
     public static MoveOption Yes(MoveMode mode, double etaSeconds, double deltaV = 0, double energyCost = 0,
         (Vector3 deltaV, double timeInSeconds)[] manuvers = null, string message = "", bool soiTransfer = false,
-        TransferWindow? window = null, bool interplanetary = false, double departSeconds = 0)
-        => new MoveOption(mode, true, message, etaSeconds, deltaV, energyCost, manuvers, soiTransfer, window, interplanetary, departSeconds);
+        TransferWindow? window = null, bool interplanetary = false, double departSeconds = 0, PreviewFacts facts = default)
+        => new MoveOption(mode, true, message, etaSeconds, deltaV, energyCost, manuvers, soiTransfer, window, interplanetary, departSeconds, facts);
 }
 
 /// <summary>
@@ -360,39 +385,52 @@ public static class MovePlanner
 
     /// <summary>Evaluate every mode we know about. Infeasible ones are returned too, for the reason.</summary>
     public static List<MoveOption> Evaluate(Entity ship, Entity target, DateTime now,
-        double arrivalPeriapsis = 0, double arrivalApoapsis = 0)
+        double arrivalPeriapsis = 0, double arrivalApoapsis = 0, MoveOrderOptions order = null)
     {
+        order ??= new MoveOrderOptions(Periapsis: arrivalPeriapsis, Apoapsis: arrivalApoapsis);
         return new List<MoveOption>
         {
             EvaluateAlreadyThere(ship, target, now),
-            EvaluateNewtonian(ship, target, now, arrivalPeriapsis, arrivalApoapsis),
+            EvaluateNewtonian(ship, target, now, order),
             EvaluateWarp(ship, target, now),
         };
     }
 
     /// <summary>
-    /// The plan the Orders tree shows. Does not start a burn.
+    /// The plan the Orders panel shows for one clicked target. Does not start a burn.
     /// A short tank for a one-level transfer also gets up to three arrival orbits that fit.
     /// </summary>
-    public static TripPreview Preview(Entity ship, Entity target, DateTime now)
+    public static TripPreview Preview(Entity ship, Entity target, DateTime now, MoveOrderOptions order = null)
     {
         if (ship == null || target == null)
             return TripPreview.None("target not found");
+        order ??= new MoveOrderOptions();
+        if (order.Arrival != ArrivalKind.Orbit)
+            return TripPreview.None("not built");
         if (!CanMove(ship, out string cannot))
             return TripPreview.None(cannot);
 
-        var options = Evaluate(ship, target, now);
-        var chosen = Select(options);
+        var options = Evaluate(ship, target, now, order.Periapsis, order.Apoapsis, order);
+        var chosen = Choose(options, order.Mode, ship, target);
         double have = ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrust) ? thrust.DeltaV : 0;
         string reason = chosen.Reason;
         var newton = Find(options, MoveMode.NewtonianTransfer);
-        if (!chosen.Feasible && newton.HasValue && newton.Value.Reason.Contains("Δv"))
+        if (!chosen.Feasible && newton.HasValue && newton.Value.Reason.Contains("Δv")
+            && order.Mode != MoveDriveChoice.Warp)
             reason = newton.Value.Reason;
-        bool dvRefuse = !chosen.Feasible && reason.Contains("Δv");
+        bool dvRefuse = !chosen.Feasible && (reason ?? "").Contains("Δv");
         var alternatives = dvRefuse
             ? FindArrivals(ship, target, now, have)
             : Array.Empty<ArrivalChoice>();
         double depart = chosen.Feasible ? chosen.DepartSeconds : 0;
+        bool warp = chosen.Mode == MoveMode.Warp;
+        bool showTiming = chosen.Mode == MoveMode.NewtonianTransfer && chosen.Facts.HasTiming;
+        var timings = showTiming ? TimingRows(ship, chosen) : null;
+        string timingNote = showTiming ? chosen.Facts.Note ?? "" : "";
+        double wait = showTiming ? chosen.Facts.WaitSeconds : 0;
+        DepartureTiming timing = showTiming ? chosen.Facts.Timing : order.Timing;
+        bool canPick = chosen.Mode == MoveMode.NewtonianTransfer && chosen.Facts.CanPick;
+        TripLeg[] legs = LegsOf(chosen);
         return new TripPreview(
             chosen.Feasible,
             reason ?? "",
@@ -402,7 +440,82 @@ public static class MovePlanner
             chosen.Feasible ? chosen.EtaSeconds : 0,
             dvRefuse,
             alternatives,
-            depart);
+            depart,
+            OtherModes(options, chosen.Mode),
+            legs,
+            timing,
+            wait,
+            timings,
+            timingNote,
+            warp && chosen.Feasible,
+            canPick);
+    }
+
+    static ModeOffer[] OtherModes(IReadOnlyList<MoveOption> options, MoveMode chosen)
+    {
+        var list = new List<ModeOffer>();
+        foreach (var option in options)
+        {
+            if (option.Mode == chosen)
+                continue;
+            if (option.Mode == MoveMode.AlreadyThere && !option.Feasible)
+                continue;
+            list.Add(new ModeOffer(
+                ModeName(option.Mode),
+                option.Feasible,
+                option.Feasible ? option.EtaSeconds : 0,
+                option.Feasible ? option.DeltaV : 0,
+                option.Reason ?? ""));
+        }
+        return list.ToArray();
+    }
+
+    static TimingOffer[] TimingRows(Entity ship, MoveOption chosen)
+    {
+        var facts = chosen.Facts;
+        var rows = new List<TimingOffer>
+        {
+            new TimingOffer(facts.Timing, facts.WaitSeconds, chosen.Feasible ? chosen.EtaSeconds : 0,
+                chosen.Feasible ? chosen.DeltaV : 0, FuelKg(ship, chosen.DeltaV), chosen.Feasible, facts.Note ?? ""),
+        };
+        if (facts.HasAlt)
+        {
+            rows.Add(new TimingOffer(facts.AltTiming, facts.AltWaitSeconds, facts.AltEtaSeconds, facts.AltDeltaV,
+                FuelKg(ship, facts.AltDeltaV), facts.AltFeasible, facts.AltNote ?? ""));
+        }
+        return rows.ToArray();
+    }
+
+    static double FuelKg(Entity ship, double deltaV)
+    {
+        if (!(deltaV > 0) || ship == null)
+            return double.NaN;
+        if (!ship.TryGetDataBlob<MassVolumeDB>(out var mass) || !(mass.MassTotal > 0))
+            return double.NaN;
+        if (!ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrust) || !(thrust.ExhaustVelocity > 0))
+            return double.NaN;
+        double fuel = OrbitMath.TsiolkovskyFuelUse(mass.MassTotal, thrust.ExhaustVelocity, deltaV);
+        return double.IsFinite(fuel) && fuel >= 0 ? fuel : double.NaN;
+    }
+
+    static TripLeg[] LegsOf(MoveOption chosen)
+    {
+        if (chosen.Facts.Legs is { Length: > 0 })
+            return chosen.Facts.Legs;
+        if (chosen.Mode == MoveMode.Warp && chosen.Feasible)
+            return new[] { new TripLeg("warp", 0, 0, chosen.EtaSeconds) };
+        if (chosen.Manuvers == null || chosen.Manuvers.Length == 0)
+            return null;
+        var legs = new TripLeg[chosen.Manuvers.Length];
+        for (int i = 0; i < chosen.Manuvers.Length; i++)
+        {
+            double at = chosen.Manuvers[i].timeInSeconds;
+            if (!double.IsFinite(at) || at < 0)
+                at = 0;
+            string kind = chosen.Manuvers.Length == 2 ? (i == 0 ? "departure" : "arrival") : "burn";
+            legs[i] = new TripLeg(kind, chosen.Manuvers[i].deltaV.Length(), at, at);
+        }
+        return legs;
     }
 
     static string ModeName(MoveMode mode) => mode switch
@@ -519,6 +632,32 @@ public static class MovePlanner
         return MoveOption.No(MoveMode.Warp, string.Join("\n", why));
     }
 
+    /// <summary>
+    /// <see cref="Select"/> for Auto. Warp and Newtonian force that mode.
+    /// A forced warp that is already in the destination well falls through to Newtonian,
+    /// so the post-warp replan still uses the order's timing.
+    /// </summary>
+    public static MoveOption Choose(IReadOnlyList<MoveOption> options, MoveDriveChoice mode, Entity ship, Entity target)
+    {
+        if (mode == MoveDriveChoice.Newtonian)
+            return Find(options, MoveMode.NewtonianTransfer) ?? MoveOption.No(MoveMode.NewtonianTransfer, "no reaction drive");
+        if (mode == MoveDriveChoice.Warp)
+        {
+            MoveOption? warp = Find(options, MoveMode.Warp);
+            if (warp.HasValue && warp.Value.Feasible)
+                return warp.Value;
+            if (ship != null && target != null && InsideDropIn(ship, target))
+            {
+                MoveOption? newt = Find(options, MoveMode.NewtonianTransfer);
+                if (newt.HasValue)
+                    return newt.Value;
+            }
+            return warp ?? MoveOption.No(MoveMode.Warp, "no warp drive");
+        }
+
+        return Select(options);
+    }
+
     static MoveOption? Find(IReadOnlyList<MoveOption> options, MoveMode mode)
     {
         foreach (var o in options)
@@ -630,10 +769,12 @@ public static class MovePlanner
     /// Reaction-drive transfer. Only the cases we have working maths for; everything else is
     /// rejected with a reason rather than plotted badly.
     /// </summary>
-    static MoveOption EvaluateNewtonian(Entity ship, Entity target, DateTime now,
-        double arrivalPeriapsis = 0, double arrivalApoapsis = 0)
+    static MoveOption EvaluateNewtonian(Entity ship, Entity target, DateTime now, MoveOrderOptions order)
     {
         const MoveMode mode = MoveMode.NewtonianTransfer;
+        order ??= new MoveOrderOptions();
+        double arrivalPeriapsis = order.Periapsis;
+        double arrivalApoapsis = order.Apoapsis;
 
         if (!ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrust) || thrust.ThrustInNewtons <= 0)
             return MoveOption.No(mode, "no reaction drive");
@@ -720,7 +861,7 @@ public static class MovePlanner
         // Earth to Mars, one level each side of the star. A moon to another planet is
         // two escapes and stays on the refusal below.
         if (PatchedConic.IsOneLevelTransfer(ship, target))
-            return EvaluatePatched(ship, target, now, thrust.DeltaV, arrivalPeriapsis, arrivalApoapsis);
+            return EvaluatePatched(ship, target, now, thrust.DeltaV, order);
 
         // One level in or out (Earth to Luna, Luna to Earth).
         if (dropInParent == target)
@@ -738,11 +879,17 @@ public static class MovePlanner
             }
             if (soi.Kind != SoiTransferMath.Kind.Ready)
                 return MoveOption.No(mode, soi.Reason);
+            double departAt = ForwardSeconds(soi.DepartAt, now);
+            var leg = new PreviewFacts
+            {
+                Legs = new[] { new TripLeg("transfer", soi.DeltaV, departAt, soi.EtaSeconds) },
+            };
             return MoveOption.Yes(mode, soi.EtaSeconds, soi.DeltaV,
                 manuvers: new (Vector3, double)[] { (Vector3.Zero, soi.EtaSeconds) },
                 message: soi.Reason,
                 soiTransfer: true,
-                departSeconds: ForwardSeconds(soi.DepartAt, now));
+                departSeconds: departAt,
+                facts: leg);
         }
         if (parent != dropInParent || targetOrbit.Parent != dropInParent)
         {
@@ -757,7 +904,7 @@ public static class MovePlanner
             && RelativeInclination(shipOrbit, targetOrbit) <= ClosedFormInclination;
         if (!closedForm)
         {
-            if (TryLambertWindow(ship, target, parent, now, thrust.DeltaV, out MoveOption windowed))
+            if (TryLambertWindow(ship, target, parent, now, thrust.DeltaV, order, out MoveOption windowed))
                 return windowed;
             if (needsCircularise)
             {
@@ -836,13 +983,16 @@ public static class MovePlanner
             $"{match}, {when}", departSeconds: depart);
     }
 
-    static MoveOption EvaluatePatched(
-        Entity ship, Entity target, DateTime now, double budget, double arrivalPeriapsis, double arrivalApoapsis)
+    static MoveOption EvaluatePatched(Entity ship, Entity target, DateTime now, double budget, MoveOrderOptions order)
     {
         const MoveMode mode = MoveMode.NewtonianTransfer;
-        var plan = PatchedConicPlanner.TryPlan(ship, target, now, budget, arrivalPeriapsis, arrivalApoapsis);
+        order ??= new MoveOrderOptions();
+        TransferWindow? picked = ToWindow(order.PickedWindow);
+        var plan = PatchedConicPlanner.TryPlan(
+            ship, target, now, budget, order.Periapsis, order.Apoapsis, order.Timing, picked);
+        var facts = PatchedFacts(plan, now);
         if (!plan.Feasible)
-            return MoveOption.No(mode, string.IsNullOrEmpty(plan.Reason) ? "transfer did not converge" : plan.Reason);
+            return MoveOption.No(mode, string.IsNullOrEmpty(plan.Reason) ? "transfer did not converge" : plan.Reason, facts);
 
         double eta = (plan.ArriveAt - now).TotalSeconds;
         if (!double.IsFinite(eta) || eta < 0)
@@ -850,9 +1000,49 @@ public static class MovePlanner
         string message = $"Transfer to {NameOf(target, ship)}, depart {FormatArrival(plan.DepartAt)}, arrive {FormatArrival(plan.ArriveAt)}";
         if (!string.IsNullOrEmpty(plan.Reason))
             message += ", " + plan.Reason;
+        TransferWindow? flown = plan.HasFlownWindow ? plan.Flown : null;
         return MoveOption.Yes(mode, eta, plan.TotalDeltaV,
-            message: message, soiTransfer: true, interplanetary: true,
-            departSeconds: ForwardSeconds(plan.DepartAt, now));
+            message: message, soiTransfer: true, window: flown, interplanetary: true,
+            departSeconds: ForwardSeconds(plan.DepartAt, now), facts: facts);
+    }
+
+    static PreviewFacts PatchedFacts(PatchedConicPlanner.Plan plan, DateTime now)
+    {
+        double depart = ForwardSeconds(plan.DepartAt, now);
+        double exit = ForwardSeconds(plan.ExitAt, now);
+        double arrive = ForwardSeconds(plan.ArriveAt, now);
+        TripLeg[] legs = plan.Feasible
+            ? new[]
+            {
+                new TripLeg("escape", plan.EscapeDeltaV, depart, exit),
+                new TripLeg("cruise", plan.PlaneChange, exit, arrive),
+                new TripLeg("capture", plan.CaptureDeltaV, arrive, arrive),
+            }
+            : null;
+        if (!plan.HasTiming)
+        {
+            return new PreviewFacts { CanPick = plan.CanPick, Legs = legs };
+        }
+
+        var answer = plan.TimingAnswer;
+        bool hasWindow = plan.Feasible;
+        bool hasAlt = answer.HasAlt && answer.AltWindow.IsFinite;
+        return new PreviewFacts
+        {
+            HasTiming = true,
+            Timing = plan.Timing,
+            WaitSeconds = hasWindow ? depart : 0,
+            Note = plan.TimingNote ?? "",
+            HasAlt = hasAlt,
+            AltTiming = answer.AltTiming,
+            AltWaitSeconds = hasAlt ? NonNeg((answer.AltWindow.Depart - now).TotalSeconds) : 0,
+            AltEtaSeconds = hasAlt ? NonNeg((answer.AltWindow.Arrive - now).TotalSeconds) : 0,
+            AltDeltaV = hasAlt ? answer.AltWindow.TotalDeltaV : 0,
+            AltFeasible = hasAlt && answer.AltFeasible,
+            AltNote = answer.AltNote ?? "",
+            CanPick = true,
+            Legs = legs,
+        };
     }
 
     static MoveOption EvaluateWarp(Entity ship, Entity target, DateTime now)
@@ -895,8 +1085,15 @@ public static class MovePlanner
         // Sustain and collapse costs are charged by WarpMoveProcessor as the bubble runs; only
         // the up-front cost is knowable here. WarpMoveAction holds the goal on "Charging
         // batteries" if we can't afford even that, so it isn't a feasibility gate.
+        // The leg carries cruise speed. DeltaV stays 0: warp does not spend reaction mass.
+        double legSpeed = cruise.speed > 0 && double.IsFinite(cruise.speed) ? cruise.speed : warpDB.MaxSpeed;
+        var warpLeg = new PreviewFacts
+        {
+            Legs = new[] { new TripLeg("warp", legSpeed, 0, eta) },
+        };
         return MoveOption.Yes(mode, eta, 0, warpDB.BubbleCreationCost,
-            message: $"Warp to {NameOf(target, ship)}, {FormatArrival(cruise.exitTime)}");
+            message: $"Warp to {NameOf(target, ship)}, {FormatArrival(cruise.exitTime)}",
+            facts: warpLeg);
     }
 
     // ---------------------------------------------------------------------
@@ -915,7 +1112,8 @@ public static class MovePlanner
 
     public static bool TryBuildMoveActions(Entity ship, Entity targetEntity,
                                            out List<EntityAction> actions, out string reason, DateTime now, Goal goal = null,
-                                           double arrivalPeriapsis = 0, double arrivalApoapsis = 0)
+                                           double arrivalPeriapsis = 0, double arrivalApoapsis = 0,
+                                           MoveOrderOptions options = null)
     {
         actions = new List<EntityAction>();
         reason = string.Empty;
@@ -925,18 +1123,18 @@ public static class MovePlanner
         if (!CanMove(ship, out reason))
             return false;
 
-        double peri = arrivalPeriapsis;
-        double apo = arrivalApoapsis;
-        if (goal != null)
+        MoveOrderOptions order = OrderFrom(goal, options, arrivalPeriapsis, arrivalApoapsis);
+        if (order.Arrival != ArrivalKind.Orbit)
         {
-            if (goal.ArrivalPeriapsis > 0)
-                peri = goal.ArrivalPeriapsis;
-            if (goal.ArrivalApoapsis > 0)
-                apo = goal.ArrivalApoapsis;
+            reason = "not built";
+            return false;
         }
 
-        var moveOptions = Evaluate(ship, target, now, peri, apo);
-        var chosen = Select(moveOptions);
+        double peri = order.Periapsis;
+        double apo = order.Apoapsis;
+        var moveOptions = Evaluate(ship, target, now, peri, apo, order);
+        var chosen = Choose(moveOptions, order.Mode, ship, target);
+        bool allowBrake = order.Mode != MoveDriveChoice.Newtonian;
         if (chosen.Feasible && chosen.Mode == MoveMode.AlreadyThere)
         {
             reason = chosen.Reason;
@@ -979,7 +1177,8 @@ public static class MovePlanner
             return false;
         }
 
-        if (goal != null
+        if (allowBrake
+            && goal != null
             && InsideDropIn(ship, target)
             && CommanderTechniques.KnowsWarpBrake(ship)
             && TryBrakeForecast(ship, target, now, out var brake))
@@ -990,7 +1189,8 @@ public static class MovePlanner
                 return EmitBrakeWarp(ship, target, now, goal, brake, true, actions, out reason);
         }
 
-        if (InsideDropIn(ship, target)
+        if (allowBrake
+            && InsideDropIn(ship, target)
             && CommanderTechniques.KnowsWarpBrake(ship)
             && !CaptureAllowsWarp(ship, target, now, out string offered))
         {
@@ -1466,7 +1666,7 @@ public static class MovePlanner
         return Math.Abs(shipRadius - targetRadius) <= tol;
     }
 
-    static double AlongTrackArrivedSeparation(Entity target, double targetRadius)
+    internal static double AlongTrackArrivedSeparation(Entity target, double targetRadius)
     {
         double close = target.HasDataBlob<MassVolumeDB>()
             ? OrbitMath.LowOrbitRadius(target) * ArrivedWithinLowOrbits
@@ -1512,19 +1712,39 @@ public static class MovePlanner
     /// so an eccentric ship can still fall back to circularise. A circular ship that found a
     /// window it cannot afford gets the usual Δv sentence.
     /// </summary>
-    static bool TryLambertWindow(Entity ship, Entity target, Entity parent, DateTime now, double budget, out MoveOption option)
+    static bool TryLambertWindow(Entity ship, Entity target, Entity parent, DateTime now, double budget, MoveOrderOptions order, out MoveOption option)
     {
         option = default;
         const MoveMode mode = MoveMode.NewtonianTransfer;
+        order ??= new MoveOrderOptions();
         double mu = OrbitMath.SGP(parent, ship);
-        bool affordable = TransferPlanner.TryAffordableWindow(ship, target, mu, now, budget, out TransferWindow window, out double bestDv);
+        TransferWindow? picked = ToWindow(order.PickedWindow);
+        bool affordable = TransferPlanner.TryAffordableWindow(
+            ship, target, mu, now, budget, order.Timing, picked,
+            out TransferWindow window, out double bestDv, out _, out WindowAnswer answer);
+        var facts = LambertFacts(answer, now, order.Timing);
         if (!affordable)
         {
+            if (order.Timing == DepartureTiming.PickOnPorkchop && !string.IsNullOrEmpty(answer.Note))
+            {
+                option = MoveOption.No(mode, answer.Note, facts);
+                return true;
+            }
+
             bool shipEccentric = ship.TryGetDataBlob<OrbitDB>(out var shipOrbit)
                 && shipOrbit.Eccentricity > MaxEccentricityForTransfer;
             if (!shipEccentric && double.IsFinite(bestDv) && bestDv > budget)
             {
-                option = MoveOption.No(mode, $"needs {bestDv:N0} m/s Δv, have {budget:N0} m/s");
+                string sentence = string.IsNullOrEmpty(answer.Note)
+                    ? $"needs {bestDv:N0} m/s Δv, have {budget:N0} m/s"
+                    : answer.Note;
+                option = MoveOption.No(mode, sentence, facts);
+                return true;
+            }
+
+            if (answer.Scanned && !string.IsNullOrEmpty(answer.Note))
+            {
+                option = MoveOption.No(mode, answer.Note, facts);
                 return true;
             }
 
@@ -1542,10 +1762,76 @@ public static class MovePlanner
             manuvers[1] = (arrive, (window.Arrive - now).TotalSeconds);
         }
 
+        facts.Legs = new[]
+        {
+            new TripLeg("departure", manuvers[0].deltaV.Length(), manuvers[0].timeInSeconds, manuvers[0].timeInSeconds),
+            new TripLeg("arrival", manuvers[1].deltaV.Length(), manuvers[1].timeInSeconds, manuvers[1].timeInSeconds),
+        };
         option = MoveOption.Yes(mode, (window.Arrive - now).TotalSeconds, window.TotalDeltaV, 0, manuvers,
             $"Transfer to {NameOf(target, ship)}, depart {FormatArrival(window.Depart)}, arrive {FormatArrival(window.Arrive)}",
-            window: window, departSeconds: ForwardSeconds(window.Depart, now));
+            window: window, departSeconds: ForwardSeconds(window.Depart, now), facts: facts);
         return true;
+    }
+
+    static PreviewFacts LambertFacts(WindowAnswer answer, DateTime now, DepartureTiming timing)
+    {
+        if (!answer.Scanned)
+            return default;
+        bool hasAlt = answer.HasAlt && answer.AltWindow.IsFinite;
+        double wait = answer.Feasible && answer.Window.IsFinite
+            ? NonNeg((answer.Window.Depart - now).TotalSeconds)
+            : 0;
+        return new PreviewFacts
+        {
+            HasTiming = true,
+            Timing = timing,
+            WaitSeconds = wait,
+            Note = answer.Note ?? "",
+            HasAlt = hasAlt,
+            AltTiming = answer.AltTiming,
+            AltWaitSeconds = hasAlt ? NonNeg((answer.AltWindow.Depart - now).TotalSeconds) : 0,
+            AltEtaSeconds = hasAlt ? NonNeg((answer.AltWindow.Arrive - now).TotalSeconds) : 0,
+            AltDeltaV = hasAlt ? answer.AltWindow.TotalDeltaV : 0,
+            AltFeasible = hasAlt && answer.AltFeasible,
+            AltNote = answer.AltNote ?? "",
+            CanPick = true,
+        };
+    }
+
+    static TransferWindow? ToWindow(WindowChoice pick)
+    {
+        if (pick == null)
+            return null;
+        var depart = new Vector3(pick.DepartDeltaV.X, pick.DepartDeltaV.Y, pick.DepartDeltaV.Z);
+        var arrive = new Vector3(pick.ArriveDeltaV.X, pick.ArriveDeltaV.Y, pick.ArriveDeltaV.Z);
+        double total = depart.Length() + arrive.Length();
+        return new TransferWindow(pick.Depart, pick.Arrive, depart, arrive, total, depart.Length(), arrive.Length());
+    }
+
+    static double NonNeg(double seconds)
+        => double.IsFinite(seconds) && seconds > 0 ? seconds : 0;
+
+    static MoveOrderOptions OrderFrom(Goal goal, MoveOrderOptions options, double periArg, double apoArg)
+    {
+        var order = options ?? new MoveOrderOptions();
+        if (periArg > 0)
+            order = order with { Periapsis = periArg };
+        if (apoArg > 0)
+            order = order with { Apoapsis = apoArg };
+        if (goal == null)
+            return order;
+        WindowChoice pick = null;
+        if (goal.HasPickedWindow)
+        {
+            pick = new WindowChoice(
+                goal.PickedDepart, goal.PickedArrive,
+                new Vec3(goal.PickedDepartDx, goal.PickedDepartDy, goal.PickedDepartDz),
+                new Vec3(goal.PickedArriveDx, goal.PickedArriveDy, goal.PickedArriveDz));
+        }
+
+        double peri = goal.ArrivalPeriapsis > 0 ? goal.ArrivalPeriapsis : order.Periapsis;
+        double apo = goal.ArrivalApoapsis > 0 ? goal.ArrivalApoapsis : order.Apoapsis;
+        return new MoveOrderOptions(goal.Mode, goal.Timing, pick, peri, apo, goal.Arrival);
     }
 
     /// <summary>

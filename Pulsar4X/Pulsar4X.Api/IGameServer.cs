@@ -5,7 +5,7 @@ namespace Pulsar4X.Api;
 /// (a faction). It is deliberately <b>push-only</b>: clients connect, subscribe, and issue writes —
 /// all state arrives through the event stream (initial snapshot on <see cref="Subscribe"/>, then
 /// self-contained deltas). <see cref="PreviewMove"/> is the one read: a move plan is too heavy
-/// to put on every snapshot, and the window caches it for the game day.
+/// to put on every snapshot, and the window asks for the one target the player clicked.
 ///
 /// Implemented in the engine by <c>EngineGameServer</c>.
 /// </summary>
@@ -19,8 +19,9 @@ public interface IGameServer
     void SetTimeControl(PlayerSession session, TimeControlRequest request);
     CommandResult SubmitCommand(PlayerSession session, GameCommand command);
 
-    /// <summary>Plan a move from this ship to this body. Does not start anything.</summary>
-    TripPreview PreviewMove(PlayerSession session, int shipId, int bodyId);
+    /// <summary>Plan a move from this ship to this body. Does not start anything.
+    /// A null <paramref name="options"/> is today's defaults.</summary>
+    TripPreview PreviewMove(PlayerSession session, int shipId, int bodyId, MoveOrderOptions? options = null);
 
     /// <summary>Tell the server which system this session is watching, so the engine can
     /// prioritise its processing (foreground-observer scheduling). Null clears the focus.</summary>

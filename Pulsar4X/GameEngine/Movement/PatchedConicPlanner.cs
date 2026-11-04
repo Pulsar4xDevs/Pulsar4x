@@ -1,4 +1,5 @@
 using System;
+using Pulsar4X.Api;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Galaxy;
@@ -43,15 +44,25 @@ internal static class PatchedConicPlanner
         public double CaptureDeltaV;
         public double TotalDeltaV;
         public double PlaneChange;
+        public Vector3 ApproachVInf;
+        public bool HasFlownWindow;
+        public TransferWindow Flown;
+        public bool HasTiming;
+        public bool CanPick;
+        public DepartureTiming Timing;
+        public string TimingNote;
+        public WindowAnswer TimingAnswer;
     }
 
     internal static Plan TryPlan(
         Entity ship, Entity target, DateTime now, double budget,
-        double arrivalPeriapsis = 0, double arrivalApoapsis = 0)
+        double arrivalPeriapsis = 0, double arrivalApoapsis = 0,
+        DepartureTiming timing = DepartureTiming.BestWindow,
+        TransferWindow? picked = null)
     {
         try
         {
-            return Solve(ship, target, now, budget, arrivalPeriapsis, arrivalApoapsis);
+            return Solve(ship, target, now, budget, arrivalPeriapsis, arrivalApoapsis, picked, timing);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
@@ -72,7 +83,7 @@ internal static class PatchedConicPlanner
         {
             if (window.Arrive <= window.Depart || !(window.DepartDeltaV.Length() > 1))
                 return Fail("transfer did not converge");
-            return Solve(ship, target, now, budget, arrivalPeriapsis, arrivalApoapsis, window);
+            return Solve(ship, target, now, budget, arrivalPeriapsis, arrivalApoapsis, window, priceAlternative: false);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
@@ -83,7 +94,9 @@ internal static class PatchedConicPlanner
     static Plan Solve(
         Entity ship, Entity target, DateTime now, double budget,
         double arrivalPeriapsis, double arrivalApoapsis,
-        TransferWindow? hint = null)
+        TransferWindow? hint = null,
+        DepartureTiming timing = DepartureTiming.BestWindow,
+        bool priceAlternative = true)
     {
         if (ship == null || target == null)
             return Fail("transfer did not converge");
@@ -135,48 +148,72 @@ internal static class PatchedConicPlanner
         double r2 = targetOrbit.SemiMajorAxis;
         var band = TransferWindows.HohmannTofBand(muStar, r1, r2);
 
+        bool haveHint = hint is TransferWindow hintedCheck
+            && hintedCheck.Arrive > hintedCheck.Depart
+            && hintedCheck.DepartDeltaV.Length() > 1
+            && double.IsFinite(hintedCheck.DepartDeltaV.X + hintedCheck.DepartDeltaV.Y + hintedCheck.DepartDeltaV.Z);
+        if (timing == DepartureTiming.PickOnPorkchop && !haveHint)
+            return Fail("Pick a cell on the porkchop.", canPick: true);
+
+        WindowAnswer timingAnswer = default;
         TransferWindow window;
-        if (hint is TransferWindow hinted
-            && hinted.Arrive > hinted.Depart
-            && hinted.DepartDeltaV.Length() > 1
-            && double.IsFinite(hinted.DepartDeltaV.X + hinted.DepartDeltaV.Y + hinted.DepartDeltaV.Z))
+        if (haveHint && !priceAlternative)
         {
-            window = hinted;
+            window = hint.Value;
         }
         else
         {
-            double DepartCost(Vector3 vInfVec, Vector3 pos)
-            {
-                double v = vInfVec.Length();
-                if (!(v > 1) || !double.IsFinite(v))
-                    return double.NaN;
-                return OrbitalMath.EscapeBurn(muPlanet, rPark, v);
-            }
+        double DepartCost(Vector3 vInfVec, Vector3 pos)
+        {
+            double v = vInfVec.Length();
+            if (!(v > 1) || !double.IsFinite(v))
+                return double.NaN;
+            return OrbitalMath.EscapeBurn(muPlanet, rPark, v);
+        }
 
-            double ArriveCost(Vector3 vInfVec, Vector3 pos)
-            {
-                double v = vInfVec.Length();
-                if (!(v > 1) || !double.IsFinite(v))
-                    return double.NaN;
-                return CaptureCost(muTarget, v, rp, arrivalApoapsis);
-            }
+        double ArriveCost(Vector3 vInfVec, Vector3 pos)
+        {
+            double v = vInfVec.Length();
+            if (!(v > 1) || !double.IsFinite(v))
+                return double.NaN;
+            return CaptureCost(muTarget, v, rp, arrivalApoapsis);
+        }
 
-            (Vector3 pos, Vector3 vel) Origin(DateTime t) => PatchedConic.StateRelativeToAncestor(planet, ancestor, t);
-            (Vector3 pos, Vector3 vel) Dest(DateTime t) => PatchedConic.StateRelativeToAncestor(target, ancestor, t);
+        (Vector3 pos, Vector3 vel) Origin(DateTime t) => PatchedConic.StateRelativeToAncestor(planet, ancestor, t);
+        (Vector3 pos, Vector3 vel) Dest(DateTime t) => PatchedConic.StateRelativeToAncestor(target, ancestor, t);
 
-            var coarse = TransferWindows.Scan(
-                muStar, Origin, Dest, now, departTo, 31, band.tofMin, band.tofMax, 21,
-                DepartCost, ArriveCost, prograde: true);
-            if (!coarse.HasBest)
-                return Fail("transfer did not converge");
+        var coarse = TransferWindows.Scan(
+            muStar, Origin, Dest, now, departTo, 31, band.tofMin, band.tofMax, 21,
+            DepartCost, ArriveCost, prograde: true);
+        if (!coarse.HasBest && !haveHint)
+            return Fail("transfer did not converge", canPick: true);
+
+        double span = (departTo - now).TotalSeconds;
+        double cap = TransferPlanner.WaitCapSeconds(band.tofMin, band.tofMax, span);
+        double affordable = budget - CorrectionAllowance;
+        DepartureTiming seedTiming = haveHint ? DepartureTiming.BestWindow : timing;
+        if (coarse.Departures.Length > 0)
+            timingAnswer = TransferPlanner.Choose(coarse, affordable, cap, seedTiming, null);
+
+        if (haveHint)
+        {
+            window = hint.Value;
+        }
+        else
+        {
+            TransferWindow seed = timingAnswer.Feasible && timingAnswer.Window.IsFinite
+                ? timingAnswer.Window
+                : coarse.Best;
+            if (!seed.IsFinite)
+                return Stamp(Fail("transfer did not converge", canPick: true), timing, timingAnswer);
 
             double departSpan = synodic / 30.0;
             double tofSpan = (band.tofMax - band.tofMin) / 20.0;
-            double chosenTof = (coarse.Best.Arrive - coarse.Best.Depart).TotalSeconds;
-            DateTime fineFrom = coarse.Best.Depart.AddSeconds(-departSpan);
+            double chosenTof = (seed.Arrive - seed.Depart).TotalSeconds;
+            DateTime fineFrom = seed.Depart.AddSeconds(-departSpan);
             if (fineFrom < now)
                 fineFrom = now;
-            DateTime fineTo = coarse.Best.Depart.AddSeconds(departSpan);
+            DateTime fineTo = seed.Depart.AddSeconds(departSpan);
             if (fineTo <= fineFrom)
                 fineTo = fineFrom.AddDays(1);
             double fineTofMin = Math.Max(86400, chosenTof - tofSpan);
@@ -185,7 +222,8 @@ internal static class PatchedConicPlanner
             var fine = TransferWindows.Scan(
                 muStar, Origin, Dest, fineFrom, fineTo, 15, fineTofMin, fineTofMax, 15,
                 DepartCost, ArriveCost, prograde: true);
-            window = fine.HasBest ? fine.Best : coarse.Best;
+            window = fine.HasBest ? fine.Best : seed;
+        }
         }
 
         Vector3 vInf = window.DepartDeltaV;
@@ -239,10 +277,11 @@ internal static class PatchedConicPlanner
         double trip = escapeDv + captureDv;
         double need = trip + CorrectionAllowance;
         if (!double.IsFinite(budget) || need > budget)
-            return Fail($"needs {need:N0} m/s Δv, have {budget:N0} m/s");
+            return Stamp(Fail($"needs {need:N0} m/s Δv, have {budget:N0} m/s"), timing, timingAnswer);
 
         string reason = planeDv > 1 ? $"plane change {planeDv:N0} m/s" : "";
-        return new Plan
+        var flown = new TransferWindow(burnAt, arrive, vInf, approach, trip, vInf.Length(), approach.Length());
+        return Stamp(new Plan
         {
             Feasible = true,
             Reason = reason,
@@ -260,7 +299,10 @@ internal static class PatchedConicPlanner
             CaptureDeltaV = captureDv,
             TotalDeltaV = trip,
             PlaneChange = planeDv,
-        };
+            ApproachVInf = approach,
+            HasFlownWindow = arrive > burnAt && vInf.Length() > 1 && flown.IsFinite,
+            Flown = flown,
+        }, timing, timingAnswer);
     }
 
     /// <summary>
@@ -583,5 +625,16 @@ internal static class PatchedConicPlanner
         return double.IsFinite(start.SemiMajorAxis) && double.IsFinite(end.SemiMajorAxis);
     }
 
-    static Plan Fail(string reason) => new Plan { Feasible = false, Reason = reason };
+    static Plan Fail(string reason, bool canPick = false)
+        => new Plan { Feasible = false, Reason = reason, CanPick = canPick };
+
+    static Plan Stamp(Plan plan, DepartureTiming timing, WindowAnswer answer)
+    {
+        plan.HasTiming = answer.Scanned;
+        plan.CanPick = true;
+        plan.Timing = timing;
+        plan.TimingNote = answer.Note ?? "";
+        plan.TimingAnswer = answer;
+        return plan;
+    }
 }

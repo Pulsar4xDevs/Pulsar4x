@@ -311,7 +311,7 @@ namespace Pulsar4X.Engine.Api
 
         // ----- commands -----
 
-        public TripPreview PreviewMove(PlayerSession session, int shipId, int bodyId)
+        public TripPreview PreviewMove(PlayerSession session, int shipId, int bodyId, MoveOrderOptions? options = null)
         {
             if (!_game.Factions.ContainsKey(session.FactionId))
                 return TripPreview.None("Unknown faction for session.");
@@ -320,7 +320,7 @@ namespace Pulsar4X.Engine.Api
                 return TripPreview.None("ship not found");
             if (!_game.GlobalManager.TryGetGlobalEntityById(bodyId, out var body))
                 return TripPreview.None("target not found");
-            return MovePlanner.Preview(ship, body, ship.StarSysDateTime);
+            return MovePlanner.Preview(ship, body, ship.StarSysDateTime, options);
         }
 
         public CommandResult SubmitCommand(PlayerSession session, GameCommand command)

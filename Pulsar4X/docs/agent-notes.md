@@ -36,6 +36,10 @@ Everything is linked from [master-plan.md](master-plan.md): the work queue, the 
 
 ## Open
 
+### Phobos transfer completes when the departure burn finishes
+
+2026-11-04. Orders-window plan slice 7d. A Phobos move now queues two `NewtonThrustAction` burns named `Transfer window` (depart, then arrive). When the departure succeeds, the ship agent drops the still-queued arrival and replans (`AgentProcessor.cs`, ship Active path, around line 312). A later wake with an empty queue sets the goal `Completed` (line 344) without checking that the ship has arrived. `MoveToPlanner.PlanActions` (around line 85) also returns done when every action still on the goal has succeeded, and that check does not look at the orbit. `ApplyPlanMessage` leaves the `Transfer to …` text when done carries an empty message. The old one-action circularise hid this. Do not weaken `AssertArrivedMatchingPhobos`, and do not put circularise back. Failing tests: the Phobos cases of `WarpOrder_EarthToPhobos_ArrivesOnTimeInPlaceWithWellFormedOrbit` (prograde, eccentric, retrograde), `LeftoverCircularAtMarsRetrograde`, the fueled one-day tick, and `MoveToPlan_HyperbolicAroundMarsNearPhobos_MatchesPhobosOrbit`. The Mars cases of that warp test still pass. The empty-tank long tick passes: the goal fails and the ship stays bound to Mars. Fix only when asked.
+
 ### A processor fault stops the clock quietly — the dialog is in, the crash save is not
 
 2026-10-03. The silent half is done. `MasterTimePulse.AdvanceOneStep` catches one step, `Debugger.Break()` when a debugger is attached, and stores `LastFault` (exception text, `CurrentProcess`, system, both clocks). `NotifyWhenStopped` records a fault that escapes the task instead of dropping `t.Exception`. The client gets `GameEventType.SimulationFaulted` and shows a modal. `TimeStopDiagnosticTests.ProcessorFault_stops_the_clock_and_keeps_the_report` passes. No save is written.

@@ -20,6 +20,7 @@ using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using Pulsar4X.Orbital;
 using Pulsar4X.Orbits;
+using Pulsar4X.People;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
@@ -1420,6 +1421,126 @@ public class BootstrapColonyTests
         Assert.That(CommandSpan.LimiterOf(scene.Ship), Is.EqualTo(CommandSpan.SpanLimiter.EmptyChair));
         Assert.That(CommandSpan.Fix(scene.Ship, CommandSpanKind.Well), Does.StartWith("The chair is empty."));
         Assert.That(CommandSpan.Fix(scene.Ship, CommandSpanKind.System), Does.Contain("Fit a System Command Bridge"));
+    }
+
+    /// <summary>
+    /// A captained colony ship flying Earth to Mars uses the skilled warp-brake on every
+    /// Bootstrap move into range: the destination, a sealed package, and the load.
+    /// Nav 0 stays on the warp-brake refusal. The move is not queued, and BrakeSteps stays 0.
+    /// </summary>
+    [Test]
+    public void Bootstrap_FlyingToAFarColony_UsesTheWarpBrake()
+    {
+        var fx = new CaptureEllipseTests();
+        fx.SetUp();
+        foreach (var nav in new[] { 25, 0 })
+        {
+            AssertBootstrapBrake(fx, nav, "dest");
+            AssertBootstrapBrake(fx, nav, "package");
+            AssertBootstrapBrake(fx, nav, "load");
+        }
+    }
+
+    static void AssertBootstrapBrake(CaptureEllipseTests fx, int nav, string path)
+    {
+        var (ship, mars) = fx.EarthShipAimedAtMars(1, captained: true);
+        var earth = ship.GetDataBlob<PositionDB>().Parent;
+        var game = ship.Manager.Game;
+        Assert.IsTrue(game.Factions.TryGetValue(ship.FactionOwnerID, out var faction));
+        UnlockInfra(game, faction);
+        ship.SetDataBlob(new LocalConstructionDB { PointsPerDay = 5 });
+        ship.GetDataBlob<CargoStorageDB>().TypeStores["general-storage"] = new TypeStore(1_000_000_000);
+        Assert.IsTrue(CommanderSkills.TryGetCommander(ship, out _, out var commander));
+        CommanderSkills.Grant(commander, SkillDomain.Nav, nav);
+
+        bool loadFromMars = path == "load";
+        var source = ColonyOn(loadFromMars ? mars : earth, faction, loadFromMars ? "Mars source" : "Earth");
+        var dest = ColonyOn(loadFromMars ? earth : mars, faction, loadFromMars ? "Earth dest" : "Mars");
+
+        var design = faction.GetDataBlob<FactionInfoDB>().ComponentDesigns[Infra];
+        var crate = new ComponentInstance(design);
+        var goal = new Goal(GoalType.BootstrapColony)
+        {
+            SourceEntityId = source.Id,
+            DestEntityId = dest.Id,
+            TargetEntityID = dest.Id,
+            BootstrapCrates = new List<BootstrapCrateLine> { new() { DesignId = Infra, Count = 1 } },
+        };
+
+        if (path == "package")
+        {
+            var sourceStore = source.GetDataBlob<CargoStorageDB>();
+            Assert.That(sourceStore.AddCargoByUnit(crate, 1), Is.EqualTo(1));
+            Assert.IsTrue(ShipmentBook.TrySeal(
+                source, dest, new (ICargoable, long)[] { (crate, 1) }, "bootstrap-brake",
+                out var made, out var why), why);
+            var shipment = made[0];
+            var line = shipment.Lines.Single();
+            ShipmentBook.ReleaseLine(source, shipment, line, ship.Id);
+            Assert.That(sourceStore.RemoveCargoByUnit(line.Held, 1), Is.EqualTo(1));
+            Assert.That(ship.GetDataBlob<CargoStorageDB>().AddCargoByUnit(line.Held, 1), Is.EqualTo(1));
+            goal.CargoId = shipment.UniqueID;
+        }
+        else if (loadFromMars)
+        {
+            Assert.That(source.GetDataBlob<CargoStorageDB>().AddCargoByUnit(crate, 1), Is.EqualTo(1));
+        }
+        else
+        {
+            Assert.That(ship.GetDataBlob<CargoStorageDB>().AddCargoByUnit(crate, 1), Is.EqualTo(1));
+        }
+
+        var plan = new BootstrapColonyPlan().Plan(ship, goal, ship.StarSysDateTime);
+        string where = path + " nav " + nav;
+        if (nav >= 25)
+        {
+            Assert.AreEqual(GoalStatus.Active, plan.Status, where + " " + plan.Message);
+            Assert.IsInstanceOf<WarpMoveAction>(plan.Actions[0], where + " " + plan.Message);
+            Assert.AreEqual(3, goal.BrakeSteps, where + " " + plan.Message);
+        }
+        else
+        {
+            Assert.AreEqual(GoalStatus.Failed, plan.Status, where + " " + plan.Message);
+            Assert.That(plan.Message, Does.StartWith("Not enough Δv to orbit"), where);
+            Assert.AreEqual(0, goal.BrakeSteps, where);
+            Assert.IsFalse(plan.Actions.OfType<WarpMoveAction>().Any(), where);
+        }
+    }
+
+    static void UnlockInfra(Game game, Entity faction)
+    {
+        var info = faction.GetDataBlob<FactionInfoDB>();
+        var component = game.StartingGameData.ComponentDesigns[Infra];
+        info.Data.Unlock(component.TemplateId);
+        foreach (var cargo in new[] { "iron", "aluminium", "titanium", "tungsten" })
+            info.Data.Unlock(cargo);
+        ComponentDesigner.StartResearched = true;
+        try
+        {
+            ComponentDesignFromJson.Create(faction, info.Data, component);
+        }
+        finally
+        {
+            ComponentDesigner.StartResearched = false;
+        }
+    }
+
+    static Entity ColonyOn(Entity planet, Entity owner, string name)
+    {
+        var colony = Entity.Create(owner.Id);
+        planet.Manager.AddEntity(colony, new List<BaseDataBlob>
+        {
+            new NameDB(name),
+            new ColonyInfoDB { PlanetEntity = planet },
+            new CargoStorageDB(),
+            new ActionQueueDB(),
+            new ComponentInstancesDB(),
+            new PositionDB(new Vector3(planet.GetDataBlob<MassVolumeDB>().RadiusInM, 0, 0), planet),
+        });
+        colony.FactionOwnerID = owner.Id;
+        colony.GetDataBlob<CargoStorageDB>().TypeStores["general-storage"] = new TypeStore(1_000_000_000);
+        colony.GetDataBlob<NameDB>().SetName(owner.Id, name);
+        return colony;
     }
 
     static Scene Build(int crates)

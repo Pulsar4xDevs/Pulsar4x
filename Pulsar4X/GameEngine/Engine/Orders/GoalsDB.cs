@@ -225,6 +225,23 @@ public class Goal
     public int IssuerEntityId = -1;
     /// <summary>Warp-brake bubbles for this goal. Set once when the sequence starts. An old save stays 0.</summary>
     public int BrakeSteps;
+
+    /// <summary>Move to. Auto is <c>MovePlanner.Select</c>. An old save stays Auto.</summary>
+    public MoveDriveChoice Mode = MoveDriveChoice.Auto;
+    /// <summary>Move to. Newtonian departure. Warp leaves now and ignores this. An old save stays Best window.</summary>
+    public DepartureTiming Timing = DepartureTiming.BestWindow;
+    /// <summary>Move to. Only orbit is built. An old save stays Orbit.</summary>
+    public ArrivalKind Arrival = ArrivalKind.Orbit;
+    /// <summary>Move to. A porkchop cell the player picked. Dates stay at default when this is false.</summary>
+    public bool HasPickedWindow;
+    public DateTime PickedDepart;
+    public DateTime PickedArrive;
+    public double PickedDepartDx;
+    public double PickedDepartDy;
+    public double PickedDepartDz;
+    public double PickedArriveDx;
+    public double PickedArriveDy;
+    public double PickedArriveDz;
     
     public Goal(GoalType type)
     {

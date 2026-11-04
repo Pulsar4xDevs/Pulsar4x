@@ -65,7 +65,20 @@ namespace Pulsar4X.Client
         private double plotAltitudeM;
         private int tripTargetId = -1;
         private string? moveReject;
-        private readonly Dictionary<(int ship, int body, int day), TripPreview> movePreviewCache = new();
+        private MoveOrderOptions moveOptions = new();
+        private readonly MovePreviewSession moveSession = new();
+        private readonly PorkchopPanel movePork = new() { SelectBestWhenReady = false };
+        private int movePorkShip = int.MinValue;
+        private int movePorkBody = int.MinValue;
+        private int movePorkDay = int.MinValue;
+        private int moveSeenDay = int.MinValue;
+        private bool moveWasFeasible;
+        private string moveDayNote = "";
+        // Last preview, so the timing radios know whether Auto picked warp before this frame's plan returns.
+        private string moveShownMode = "";
+        private bool moveCanPick = true;
+        private static readonly IReadOnlyDictionary<string, IReadOnlyList<string>> NoJumpLinks =
+            new Dictionary<string, IReadOnlyList<string>>();
 
         private int? selectedFleetId = null;
         // The ship whose orders the right-hand pane is editing. Null means the selected fleet.
@@ -884,11 +897,13 @@ namespace Pulsar4X.Client
                         DisplayTargetTree(candidates,
                             e => e.HasView<BodyView>() && e.HasView<PositionView>(),
                             "movement-button",
-                            id => SubmitMove(commanded.Value, id, 0, 0, plot),
+                            _ => { },
                             starTargetsSystem: false,
-                            blocked: e => MoveBlock(previewShip, e),
-                            select: id => tripTargetId = id);
-                        DisplayTrip(galaxy, previewShip, commanded.Value, plot);
+                            select: SelectTrip,
+                            selectOnClick: true,
+                            hint: e => MoveHint(previewShip, e, system),
+                            selectedId: tripTargetId >= 0 ? tripTargetId : null);
+                        DisplayTrip(galaxy, previewShip, commanded.Value, plot, system);
                         break;
                     }
                     case IssueOrderType.PlotWarpTo:
@@ -1190,16 +1205,7 @@ namespace Pulsar4X.Client
 
         private static string NameOf(EntitySnapshot entity) => entity.GetView<NameView>()?.Name ?? "";
 
-        private static int? ParentIdOf(EntitySnapshot body)
-        {
-            if(body.GetView<OrbitView>()?.ParentId is int orbitParent && orbitParent != body.Id)
-                return orbitParent;
-            if(body.GetView<PositionView>()?.ParentId is int positionParent && positionParent != body.Id)
-                return positionParent;
-            if(body.GetView<ColonyView>()?.PlanetEntityId is int planetId && planetId != body.Id)
-                return planetId;
-            return null;
-        }
+        private static int? ParentIdOf(EntitySnapshot body) => MoveTargetHints.ParentId(body);
 
         /// <summary>
         /// One row in the order tree. Bands are not entities: they only fold asteroids that orbit a star.
@@ -1256,7 +1262,9 @@ namespace Pulsar4X.Client
             int? selectedId = null,
             string? spanLabel = null,
             Func<EntitySnapshot, string?>? blocked = null,
-            Action<int>? select = null)
+            Action<int>? select = null,
+            bool selectOnClick = false,
+            Func<EntitySnapshot, string?>? hint = null)
         {
             string span = spanLabel ?? SubjectSpanLabel();
             var byId = new Dictionary<int, EntitySnapshot>();
@@ -1331,7 +1339,7 @@ namespace Pulsar4X.Client
             }
 
             foreach(var root in SortNodes(roots, stars, null))
-                DisplayTargetNode(root, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span, blocked, select);
+                DisplayTargetNode(root, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span, blocked, select, selectOnClick, hint);
         }
 
         private static void AddTreeChild(Dictionary<int, List<EntitySnapshot>> children, Dictionary<int, int> parentOf, int parentId, EntitySnapshot child)
@@ -1580,7 +1588,9 @@ namespace Pulsar4X.Client
             int? selectedId,
             string span,
             Func<EntitySnapshot, string?>? blocked = null,
-            Action<int>? select = null)
+            Action<int>? select = null,
+            bool selectOnClick = false,
+            Func<EntitySnapshot, string?>? hint = null)
         {
             // Refuel, load, and unload nest the colony under its planet. That planet starts closed,
             // which hides the only button. Keep the path open so the colony stays on screen.
@@ -1604,7 +1614,7 @@ namespace Pulsar4X.Client
                             }
                         }
                         foreach(var child in SortNodes(bandKids, stars, star))
-                            DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span, blocked, select);
+                            DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span, blocked, select, selectOnClick, hint);
                     }
                     ImGui.TreePop();
                 }
@@ -1657,7 +1667,12 @@ namespace Pulsar4X.Client
                     colors = 1;
                 }
                 if(ImGui.SmallButton($"{name}###{buttonPrefix}-{node.Id}"))
-                    submit(node.Id);
+                {
+                    if(selectOnClick)
+                        select?.Invoke(node.Id);
+                    else
+                        submit(node.Id);
+                }
                 if(showDone && ImGui.IsItemHovered())
                     ImGui.SetTooltip(doneTooltip);
                 if(colors > 0)
@@ -1676,8 +1691,6 @@ namespace Pulsar4X.Client
             {
                 ImGui.TextDisabled(name);
                 bool nameHovered = ImGui.IsItemHovered();
-                if(select != null && ImGui.IsItemClicked())
-                    select(node.Id);
                 if(!string.IsNullOrEmpty(block))
                 {
                     bool breaks = block.Contains('\n');
@@ -1703,11 +1716,20 @@ namespace Pulsar4X.Client
                     ImGui.SetTooltip(SpanLine());
             }
 
+            string? tag = hint?.Invoke(entity);
+            if(!string.IsNullOrEmpty(tag))
+            {
+                ImGui.SameLine();
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.Text(tag);
+                ImGui.PopStyleColor();
+            }
+
             if(childList != null && open)
             {
                 EntitySnapshot? around = entity.Kind == BodyKind.Star ? entity : null;
                 foreach(var child in SortNodes(childList, stars, around))
-                    DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span, blocked, select);
+                    DisplayTargetNode(child, children, stars, isTarget, coversWork, buttonPrefix, submit, starTargetsSystem, markDone, selectedId, span, blocked, select, selectOnClick, hint);
                 ImGui.TreePop();
             }
         }
@@ -2547,53 +2569,172 @@ namespace Pulsar4X.Client
         static int BodyId(EntitySnapshot colony)
             => colony.GetView<ColonyView>()?.PlanetEntityId ?? colony.Id;
 
-        private string? MoveBlock(int? shipId, EntitySnapshot body)
+        private void SelectTrip(int id)
         {
-            if(shipId == null || body.Kind == BodyKind.Star)
-                return null;
-            if(!body.HasView<BodyView>() || !body.HasView<PositionView>())
-                return null;
-            var preview = CachedPreview(shipId.Value, body.Id);
-            return preview.Feasible ? null : preview.Reason;
+            if(tripTargetId != id)
+            {
+                moveOptions = new MoveOrderOptions();
+                moveDayNote = "";
+                moveSeenDay = int.MinValue;
+                moveShownMode = "";
+                moveCanPick = true;
+                movePork.Reset();
+                movePorkShip = int.MinValue;
+            }
+            tripTargetId = id;
+            moveReject = null;
         }
 
-        private TripPreview CachedPreview(int shipId, int bodyId)
+        private string? MoveHint(int? shipId, EntitySnapshot target, IClientSystem system)
         {
-            var client = _uiState.GameClient;
-            if(client == null)
-                return TripPreview.None("not connected");
-            int day = (int)(client.Galaxy.Time.GameDateTime.Date - DateTime.UnixEpoch).TotalDays;
-            var key = (shipId, bodyId, day);
-            if(movePreviewCache.TryGetValue(key, out var cached))
-                return cached;
-            var preview = client.PreviewMove(shipId, bodyId);
-            if(movePreviewCache.Count > 400)
-                movePreviewCache.Clear();
-            movePreviewCache[key] = preview;
-            return preview;
+            if(shipId == null)
+                return null;
+            var ship = system.GetEntity(shipId.Value);
+            int? parent = ship != null ? ParentIdOf(ship) : selectedFleet?.OrbitingEntityId;
+            return MoveTargetHints.Of(target, parent, system.SystemId, system.SystemId, NoJumpLinks);
         }
 
-        private void DisplayTrip(IClientGalaxy galaxy, int? shipId, int commandedId, bool plot)
+        // Radios edit the options before the one preview, so a click is not a wasted plan.
+        // A porkchop cell click is the only second preview, and only when the cell changed.
+        private void DisplayTrip(IClientGalaxy galaxy, int? shipId, int commandedId, bool plot, IClientSystem system)
         {
             if(shipId == null || tripTargetId < 0)
                 return;
-            var preview = CachedPreview(shipId.Value, tripTargetId);
+            var client = _uiState.GameClient;
+            if(client == null)
+                return;
+
+            DateTime now = galaxy.Time.GameDateTime;
+            int day = GameDay(now);
+            var target = system.GetEntity(tripTargetId);
+
             ImGui.Separator();
-            ImGui.Text("Trip");
+            ImGui.Text(target == null ? "Trip" : "Trip to " + DisplayName(target));
+
+            var thrust = system.GetEntity(shipId.Value)?.GetView<ThrustView>();
+            bool canWarp = orderShip?.CanJump ?? selectedFleet?.CanJump ?? false;
+            bool canNewton = thrust == null || thrust.ThrustNewtons != 0;
+            double warpSpeed = system.GetEntity(shipId.Value)?.GetView<WarpAbilityView>()?.MaxSpeedMps ?? 0;
+            ImGui.Text("Mode");
+            ImGui.SameLine();
+            Option("Auto###move-mode-auto", moveOptions.Mode == MoveDriveChoice.Auto, true, "",
+                () => moveOptions = moveOptions with { Mode = MoveDriveChoice.Auto });
+            Option("Warp###move-mode-warp", moveOptions.Mode == MoveDriveChoice.Warp, canWarp, "no warp drive",
+                () => moveOptions = moveOptions with { Mode = MoveDriveChoice.Warp });
+            Option("Newtonian###move-mode-newton", moveOptions.Mode == MoveDriveChoice.Newtonian, canNewton, "no reaction drive",
+                () => moveOptions = moveOptions with { Mode = MoveDriveChoice.Newtonian });
+            ImGui.NewLine();
+
+            bool warpLeavesNow = moveOptions.Mode == MoveDriveChoice.Warp
+                || (moveOptions.Mode == MoveDriveChoice.Auto && moveShownMode == "Warp");
+            bool timingLive = !warpLeavesNow && (moveOptions.Mode == MoveDriveChoice.Newtonian
+                || (moveOptions.Mode == MoveDriveChoice.Auto && moveShownMode == "Newtonian"));
+            // Auto's first frame has no preview yet. Leave timing live so a Newtonian plan is not hidden.
+            if(moveOptions.Mode == MoveDriveChoice.Auto && moveShownMode.Length == 0)
+                timingLive = true;
+            bool pickLive = timingLive && moveCanPick;
+            ImGui.Text("Timing");
+            ImGui.SameLine();
+            // Warp leaves now. Show that radio selected, and leave the stored timing alone
+            // so a switch back to Newtonian still has the window the player picked.
+            Option("Best window###timing-best", !warpLeavesNow && moveOptions.Timing == DepartureTiming.BestWindow, timingLive, "warp leaves now",
+                () => moveOptions = moveOptions with { Timing = DepartureTiming.BestWindow });
+            Option("Depart now###timing-now", warpLeavesNow || moveOptions.Timing == DepartureTiming.DepartNow, timingLive, "warp leaves now",
+                () => moveOptions = moveOptions with { Timing = DepartureTiming.DepartNow });
+            Option("Pick###timing-pick", !warpLeavesNow && moveOptions.Timing == DepartureTiming.PickOnPorkchop, pickLive,
+                timingLive ? "the porkchop cannot price this trip" : "warp leaves now",
+                () => moveOptions = moveOptions with { Timing = DepartureTiming.PickOnPorkchop });
+            ImGui.NewLine();
+
+            bool showPork = timingLive && moveOptions.Timing == DepartureTiming.PickOnPorkchop;
+            bool porkPriced = false;
+            bool tripCost = false;
+            if(showPork)
+                porkPriced = EnsureMovePorkchop(system, shipId.Value, tripTargetId, now, out tripCost);
+
+            TripPreview preview = moveSession.Get(shipId.Value, tripTargetId, day, moveOptions,
+                options => client.PreviewMove(shipId.Value, tripTargetId, options));
+            if(showPork)
+                preview = DrawMovePorkchop(preview, client, shipId.Value, day, tripCost, porkPriced);
+
+            if(day != moveSeenDay)
+            {
+                if(moveSeenDay != int.MinValue && moveWasFeasible && !preview.Feasible)
+                    moveDayNote = "The day changed and this plan no longer fits.";
+                else if(moveSeenDay != int.MinValue)
+                    moveDayNote = "";
+                moveSeenDay = day;
+            }
+            moveWasFeasible = preview.Feasible;
+            moveShownMode = preview.Mode ?? "";
+            moveCanPick = preview.CanPickWindow;
+
             if(!string.IsNullOrEmpty(preview.Mode))
                 ImGui.Text("Mode: " + preview.Mode);
             ImGui.Text($"Δv {Stringify.Velocity(preview.DeltaV)}, have {Stringify.Velocity(preview.Have)}");
-            // A burn inside the next minute is this order, not a window we are waiting on.
             if(preview.Feasible && preview.DepartInSeconds > 60 && preview.DepartInSeconds < 1e10)
-            {
-                var depart = galaxy.Time.GameDateTime.AddSeconds(preview.DepartInSeconds);
-                ImGui.Text("Departure " + depart.ToString("yyyy-MM-dd HH:mm"));
-            }
+                ImGui.Text("Departure " + now.AddSeconds(preview.DepartInSeconds).ToString("yyyy-MM-dd HH:mm"));
             if(preview.Feasible && preview.EtaSeconds > 0 && preview.EtaSeconds < 1e10)
+                ImGui.Text("Arrival " + now.AddSeconds(preview.EtaSeconds).ToString("yyyy-MM-dd HH:mm"));
+
+            foreach(var other in preview.Modes)
+                ImGui.TextWrapped(OtherModeLine(other, preview, warpSpeed));
+
+            if(preview.Timings.Count > 0 && ImGui.BeginTable("trip-timing", 6, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
             {
-                var arrive = galaxy.Time.GameDateTime.AddSeconds(preview.EtaSeconds);
-                ImGui.Text("Arrival " + arrive.ToString("yyyy-MM-dd HH:mm"));
+                ImGui.TableSetupColumn("Timing");
+                ImGui.TableSetupColumn("Wait");
+                ImGui.TableSetupColumn("Depart");
+                ImGui.TableSetupColumn("Arrive");
+                ImGui.TableSetupColumn("Δv");
+                ImGui.TableSetupColumn("Fuel");
+                ImGui.TableHeadersRow();
+                TimingOffer? best = null;
+                TimingOffer? departNow = null;
+                foreach(var row in preview.Timings)
+                {
+                    if(row.Kind == DepartureTiming.BestWindow)
+                        best = row;
+                    if(row.Kind == DepartureTiming.DepartNow)
+                        departNow = row;
+                    ImGui.TableNextColumn();
+                    string name = TimingName(row.Kind);
+                    if(row.Kind == preview.Timing && row.Feasible)
+                        name += "  will fly this";
+                    ImGui.Text(name);
+                    ImGui.TableNextColumn();
+                    ImGui.Text(row.WaitSeconds < 60 ? "0" : WaitText(row.WaitSeconds));
+                    ImGui.TableNextColumn();
+                    ImGui.Text(row.WaitSeconds < 60 ? "now" : now.AddSeconds(row.WaitSeconds).ToString("MMM d HH:mm"));
+                    ImGui.TableNextColumn();
+                    ImGui.Text("+" + WaitText(row.EtaSeconds));
+                    ImGui.TableNextColumn();
+                    ImGui.Text(Stringify.Velocity(row.DeltaV));
+                    ImGui.TableNextColumn();
+                    ImGui.Text(double.IsNaN(row.FuelKg) ? "—" : Stringify.Mass(row.FuelKg));
+                }
+                ImGui.EndTable();
+                if(best != null && departNow != null && best.Feasible && departNow.Feasible
+                    && best.DeltaV < departNow.DeltaV && departNow.DeltaV > 0)
+                {
+                    double saved = departNow.DeltaV - best.DeltaV;
+                    double pct = 100.0 * saved / departNow.DeltaV;
+                    ImGui.Text($"Best window saves {saved:N0} m/s ({pct:N0}%) for a {WaitText(best.WaitSeconds)} wait");
+                }
             }
+
+            foreach(var leg in preview.Route)
+            {
+                double shown = leg.DeltaV;
+                if(leg.Kind == "warp" && !(shown > 1) && warpSpeed > 1)
+                    shown = warpSpeed;
+                ImGui.Text(leg.Kind + "  " + Stringify.Velocity(shown));
+            }
+            if(preview.LocalTransferAfterWarp)
+                Grey("After the warp, a local transfer is planned on arrival");
+            Grey(preview.TimingNote);
+            Grey(moveDayNote);
+
             if(!preview.Feasible)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
@@ -2608,9 +2749,52 @@ namespace Pulsar4X.Client
                         : Stringify.Distance(alt.Periapsis);
                     string label = $"{alt.Label} {Stringify.Velocity(alt.DeltaV)} {orbit}###trip-{tripTargetId}-{alt.Periapsis:F0}-{alt.Apoapsis:F0}";
                     if(ImGui.SmallButton(label))
-                        SubmitMove(commandedId, tripTargetId, alt.Periapsis, alt.Apoapsis, plot);
+                        moveOptions = moveOptions with { Periapsis = alt.Periapsis, Apoapsis = alt.Apoapsis };
                 }
             }
+
+            ImGui.Text("Arrival");
+            ImGui.SameLine();
+            Option("Orbit###arrival-orbit", moveOptions.Arrival == ArrivalKind.Orbit, true, "",
+                () => moveOptions = moveOptions with { Arrival = ArrivalKind.Orbit });
+            Option("Flyby###arrival-flyby", moveOptions.Arrival == ArrivalKind.Flyby, false, "not built",
+                () => { });
+            Option("Stop###arrival-stop", moveOptions.Arrival == ArrivalKind.Stop, false, "not built",
+                () => { });
+            ImGui.NewLine();
+
+            double lowM = target?.LowOrbitRadiusM() ?? 0;
+            double periM = moveOptions.Periapsis > 0 ? moveOptions.Periapsis : lowM;
+            double periKm = periM / 1000.0;
+            double ecc = OrbitEccentricity(periM, moveOptions.Apoapsis);
+            ImGui.SetNextItemWidth(160);
+            if(ImGui.InputDouble("Periapsis (km)", ref periKm, 0, 0, "%.3f"))
+            {
+                double newPeri = Math.Max(0, periKm) * 1000.0;
+                double newApo = ecc > 0 && newPeri > 0 ? ApoapsisFrom(newPeri, ecc) : 0;
+                moveOptions = moveOptions with { Periapsis = newPeri, Apoapsis = newApo };
+            }
+            double eccMax = Math.Max(0.9, ecc);
+            ImGui.SetNextItemWidth(160);
+            if(ImGuiExt.SliderDouble("Eccentricity", ref ecc, 0, eccMax, "%.3f", ImGuiSliderFlags.AlwaysClamp))
+            {
+                double rp = moveOptions.Periapsis > 0 ? moveOptions.Periapsis : lowM;
+                double ra = ecc <= 1e-4 ? 0 : ApoapsisFrom(rp, ecc);
+                moveOptions = moveOptions with { Apoapsis = ra };
+            }
+            double apoM = moveOptions.Apoapsis > periM ? moveOptions.Apoapsis : periM;
+            Grey("Apoapsis " + (apoM > 0 ? Stringify.Distance(apoM) : "—"));
+            if((moveOptions.Periapsis != 0 || moveOptions.Apoapsis != 0) && ImGui.SmallButton("Low circular"))
+                moveOptions = moveOptions with { Periapsis = 0, Apoapsis = 0 };
+
+            bool canSend = preview.Feasible && moveOptions.Arrival == ArrivalKind.Orbit;
+            if(!canSend)
+                ImGui.BeginDisabled();
+            if(ImGui.Button("Execute") && canSend)
+                SubmitMove(commandedId, tripTargetId, plot);
+            if(!canSend)
+                ImGui.EndDisabled();
+
             if(!string.IsNullOrEmpty(moveReject))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
@@ -2619,15 +2803,231 @@ namespace Pulsar4X.Client
             }
         }
 
-        private void SubmitMove(int commandedId, int bodyId, double periapsis, double apoapsis, bool plot)
+        private bool EnsureMovePorkchop(IClientSystem system, int shipId, int bodyId, DateTime now, out bool tripCost)
+        {
+            tripCost = false;
+            if(!TryMovePorkchop(system, shipId, bodyId, out var shipKe, out var targetKe, out var departCost, out var arriveCost, out tripCost))
+            {
+                if(movePorkShip != int.MinValue)
+                {
+                    movePork.Reset();
+                    movePorkShip = int.MinValue;
+                }
+                return false;
+            }
+
+            int day = GameDay(now);
+            if(movePorkShip == shipId && movePorkBody == bodyId && movePorkDay == day)
+                return true;
+            movePork.Reset();
+            movePorkShip = shipId;
+            movePorkBody = bodyId;
+            movePorkDay = day;
+            if(!PorkchopPanel.TrySuggest(shipKe, targetKe, now, out double depart, out double tofMin, out double tofMax, out bool prograde))
+            {
+                movePorkShip = int.MinValue;
+                return false;
+            }
+            movePork.Start(shipKe, targetKe, now, depart, tofMin, tofMax, 48, prograde, departCost, arriveCost);
+            return true;
+        }
+
+        private static bool TryMovePorkchop(
+            IClientSystem system, int shipId, int bodyId,
+            out Pulsar4X.Orbital.KeplerElements shipKe,
+            out Pulsar4X.Orbital.KeplerElements targetKe,
+            out Func<Pulsar4X.Orbital.Vector3, Pulsar4X.Orbital.Vector3, double> departCost,
+            out Func<Pulsar4X.Orbital.Vector3, Pulsar4X.Orbital.Vector3, double> arriveCost,
+            out bool tripCost)
+        {
+            shipKe = default;
+            targetKe = default;
+            departCost = Pulsar4X.Orbital.TransferWindows.MagnitudeCost;
+            arriveCost = departCost;
+            tripCost = false;
+
+            var ship = system.GetEntity(shipId);
+            var target = system.GetEntity(bodyId);
+            var shipOrbit = ship?.ResolveOrbit();
+            var targetOrbit = target?.ResolveOrbit();
+            if(shipOrbit == null || targetOrbit == null || !(shipOrbit.StandardGravParameter > 0) || !(targetOrbit.StandardGravParameter > 0))
+                return false;
+
+            if(shipOrbit.ParentId is int shipParent && targetOrbit.ParentId == shipParent)
+            {
+                shipKe = shipOrbit.ToKeplerElements();
+                targetKe = targetOrbit.ToKeplerElements();
+                return true;
+            }
+
+            if(shipOrbit.ParentId is not int planetId || !(shipOrbit.SemiMajorAxisM > 1))
+                return false;
+            var planetOrbit = system.GetEntity(planetId)?.ResolveOrbit();
+            if(planetOrbit?.ParentId is not int starId || targetOrbit.ParentId != starId || !(planetOrbit.StandardGravParameter > 0))
+                return false;
+            double targetMass = target!.GetView<MassVolumeView>()?.MassKg ?? 0;
+            double rp = target.LowOrbitRadiusM();
+            if(!(targetMass > 0) || !(rp > 1))
+                return false;
+
+            double muPlanet = shipOrbit.StandardGravParameter;
+            double rPark = shipOrbit.SemiMajorAxisM;
+            double muTarget = Pulsar4X.Orbital.GeneralMath.StandardGravitationalParameter(targetMass);
+            shipKe = planetOrbit.ToKeplerElements();
+            targetKe = targetOrbit.ToKeplerElements();
+            departCost = (vInf, _) => PorkBurn(vInf, v => Pulsar4X.Orbital.OrbitalMath.EscapeBurn(muPlanet, rPark, v));
+            arriveCost = (vInf, _) => PorkBurn(vInf, v => Pulsar4X.Orbital.OrbitalMath.CaptureBurn(muTarget, v, rp));
+            tripCost = true;
+            return true;
+        }
+
+        private TripPreview DrawMovePorkchop(TripPreview preview, IGameClient client, int shipId, int day, bool tripCost, bool priced)
+        {
+            if(!priced)
+            {
+                ImGui.TextDisabled("the porkchop cannot price this trip");
+                return preview;
+            }
+            movePork.Take();
+            if(movePork.Scanning)
+            {
+                ImGui.Text("Scanning…");
+                return preview;
+            }
+            if(movePork.Error.Length > 0)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
+                ImGui.TextWrapped(movePork.Error);
+                ImGui.PopStyleColor();
+            }
+            if(movePork.Grid == null)
+                return preview;
+
+            movePork.MarkRule(preview.Have);
+            float ceiling = preview.Have > 0 && double.IsFinite(preview.Have) ? (float)preview.Have : 1_000_000f;
+            int beforeI = movePork.SelectedI;
+            int beforeJ = movePork.SelectedJ;
+            movePork.Draw(ceiling, tripCost);
+            if((movePork.SelectedI == beforeI && movePork.SelectedJ == beforeJ)
+                || movePork.Selected is not Pulsar4X.Orbital.TransferWindow cell)
+                return preview;
+
+            moveOptions = moveOptions with
+            {
+                PickedWindow = new WindowChoice(
+                    cell.Depart,
+                    cell.Arrive,
+                    new Vec3(cell.DepartDeltaV.X, cell.DepartDeltaV.Y, cell.DepartDeltaV.Z),
+                    new Vec3(cell.ArriveDeltaV.X, cell.ArriveDeltaV.Y, cell.ArriveDeltaV.Z))
+            };
+            return moveSession.Get(shipId, tripTargetId, day, moveOptions,
+                options => client.PreviewMove(shipId, tripTargetId, options));
+        }
+
+        private void SubmitMove(int commandedId, int bodyId, bool plot)
         {
             tripTargetId = bodyId;
             GameCommand command = plot
-                ? new GoToBodyCommand(commandedId, bodyId, periapsis, apoapsis)
-                : new MoveToBodyCommand(commandedId, bodyId, periapsis, apoapsis);
+                ? new GoToBodyCommand(commandedId, bodyId, moveOptions.Periapsis, moveOptions.Apoapsis,
+                    moveOptions.Mode, moveOptions.Timing, moveOptions.PickedWindow, moveOptions.Arrival)
+                : new MoveToBodyCommand(commandedId, bodyId, moveOptions.Periapsis, moveOptions.Apoapsis,
+                    moveOptions.Mode, moveOptions.Timing, moveOptions.PickedWindow, moveOptions.Arrival);
             var task = _uiState.GameClient?.SubmitCommandAsync(command);
             if(task != null && task.IsCompleted)
                 moveReject = task.Result.Accepted ? null : task.Result.RejectionReason;
+        }
+
+        private static void Option(string label, bool on, bool enabled, string tip, Action pick)
+        {
+            if(!enabled)
+                ImGui.BeginDisabled();
+            if(ImGui.RadioButton(label, on) && enabled)
+                pick();
+            if(!enabled)
+            {
+                ImGui.EndDisabled();
+                if(tip.Length > 0 && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                    ImGui.SetTooltip(tip);
+            }
+            ImGui.SameLine();
+        }
+
+        private static void Grey(string text)
+        {
+            if(string.IsNullOrEmpty(text))
+                return;
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.TextWrapped(text);
+            ImGui.PopStyleColor();
+        }
+
+        private static string OtherModeLine(ModeOffer other, TripPreview preview, double warpSpeed)
+        {
+            double dv = other.Mode == "Warp" && !(other.DeltaV > 1) && warpSpeed > 1 ? warpSpeed : other.DeltaV;
+            if(other.Feasible && preview.Feasible && other.EtaSeconds + 60 < preview.EtaSeconds)
+            {
+                double sooner = preview.EtaSeconds - other.EtaSeconds;
+                return $"{other.Mode} would arrive {WaitText(sooner)} sooner, {Stringify.Velocity(dv)}";
+            }
+            if(other.Feasible && other.Mode == "Warp")
+                return $"Warp leaves now, arrives in {WaitText(other.EtaSeconds)}, {Stringify.Velocity(dv)}";
+            if(other.Feasible && other.Mode == "Newtonian")
+                return $"Newtonian would need {Stringify.Velocity(other.DeltaV)}, arrive in {WaitText(other.EtaSeconds)}";
+            return string.IsNullOrEmpty(other.Reason) ? other.Mode : $"{other.Mode}: {other.Reason}";
+        }
+
+        private static double OrbitEccentricity(double periapsis, double apoapsis)
+        {
+            if(!(periapsis > 0) || !(apoapsis > periapsis))
+                return 0;
+            double e = (apoapsis - periapsis) / (apoapsis + periapsis);
+            return double.IsFinite(e) && e > 0 ? e : 0;
+        }
+
+        private static double ApoapsisFrom(double periapsis, double eccentricity)
+        {
+            if(!(periapsis > 0) || !(eccentricity > 0) || eccentricity >= 1)
+                return 0;
+            return periapsis * (1 + eccentricity) / (1 - eccentricity);
+        }
+
+        private static string TimingName(DepartureTiming kind) => kind switch
+        {
+            DepartureTiming.DepartNow => "Depart now",
+            DepartureTiming.PickOnPorkchop => "Pick",
+            _ => "Best window",
+        };
+
+        // Same words as TransferPlanner.FormatWait. The client cannot reference the engine.
+        private static string WaitText(double seconds)
+        {
+            if(!double.IsFinite(seconds) || seconds < 60)
+                return "under a minute";
+            if(seconds < 3600)
+                return $"{Math.Max(1, (int)Math.Round(seconds / 60.0))} min";
+            if(seconds < 86400)
+            {
+                int hours = (int)(seconds / 3600.0);
+                int minutes = (int)Math.Round((seconds - hours * 3600.0) / 60.0);
+                if(minutes == 60)
+                {
+                    hours++;
+                    minutes = 0;
+                }
+                return minutes == 0 ? $"{hours} h" : $"{hours} h {minutes} min";
+            }
+            return $"{Math.Max(1, (int)Math.Round(seconds / 86400.0))} d";
+        }
+
+        private static int GameDay(DateTime now) => (int)(now.Date - DateTime.UnixEpoch).TotalDays;
+
+        private static double PorkBurn(Pulsar4X.Orbital.Vector3 vInf, Func<double, double> burn)
+        {
+            double v = vInf.Length();
+            if(!(v > 1) || !double.IsFinite(v))
+                return double.NaN;
+            double dv = burn(v);
+            return double.IsFinite(dv) && dv >= 0 ? dv : double.NaN;
         }
 
         private void SubmitFleetCommand(GameCommand command) => _uiState.GameClient?.SubmitCommandAsync(command);

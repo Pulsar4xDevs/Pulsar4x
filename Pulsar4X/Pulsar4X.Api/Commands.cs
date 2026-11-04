@@ -299,7 +299,11 @@ public sealed record MoveToBodyCommand(
     int TargetEntityId,
     int BodyId,
     double ArrivalPeriapsis = 0,
-    double ArrivalApoapsis = 0) : GameCommand(TargetEntityId);
+    double ArrivalApoapsis = 0,
+    MoveDriveChoice Mode = MoveDriveChoice.Auto,
+    DepartureTiming Timing = DepartureTiming.BestWindow,
+    WindowChoice? PickedWindow = null,
+    ArrivalKind Arrival = ArrivalKind.Orbit) : GameCommand(TargetEntityId);
 
 /// <summary>Warp to the body and geo-survey it.</summary>
 public sealed record GeoSurveyCommand(int TargetEntityId, int BodyId) : GameCommand(TargetEntityId);
@@ -427,7 +431,11 @@ public sealed record GoToBodyCommand(
     int TargetEntityId,
     int BodyId,
     double ArrivalPeriapsis = 0,
-    double ArrivalApoapsis = 0) : GameCommand(TargetEntityId);
+    double ArrivalApoapsis = 0,
+    MoveDriveChoice Mode = MoveDriveChoice.Auto,
+    DepartureTiming Timing = DepartureTiming.BestWindow,
+    WindowChoice? PickedWindow = null,
+    ArrivalKind Arrival = ArrivalKind.Orbit) : GameCommand(TargetEntityId);
 
 /// <summary>Empty chair: warp to the body with the planner drop-in and circularise.
 /// Forces warp even when a newtonian transfer would also work.</summary>

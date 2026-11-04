@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GameEngine.Engine.Orders;
 using NUnit.Framework;
+using Pulsar4X.Api;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Energy;
@@ -421,6 +422,10 @@ namespace Pulsar4X.Tests
             var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
             var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
             var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+            // The thrust blob says 20 km/s, but the cargo is only a short burn until the tank is filled.
+            // Phobos now flies a real transfer. Mars still circularises on the blob the test used to build.
+            if (destIsPhobos)
+                FillTank(ship);
 
             var offsetGuess = new Vector3(OrbitMath.LowOrbitRadius(dest), 0, 0);
             ApplyEarthStartOrbit(startOrbit, ship, earth, mars, dest, epoch, offsetGuess);
@@ -463,9 +468,17 @@ namespace Pulsar4X.Tests
                 Assert.IsFalse(ship.HasDataBlob<WarpMovingDB>(),
                     "bubble is gone after arrival; a second warp must not have started. "
                     + DescribeMove(ship, goal));
-                Assert.IsTrue(
-                    ship.HasDataBlob<OrbitDB>() || ship.HasDataBlob<NewtonSimpleMoveDB>(),
-                    "drop-in leftover Kepler or circularise SimpleNewt. " + DescribeMove(ship, goal));
+                if (destIsPhobos)
+                {
+                    Assert.IsTrue(ship.HasDataBlob<OrbitDB>() || TransferBurnQueued(ship),
+                        "drop-in leftover Kepler or a transfer burn. " + DescribeMove(ship, goal));
+                }
+                else
+                {
+                    Assert.IsTrue(
+                        ship.HasDataBlob<OrbitDB>() || ship.HasDataBlob<NewtonSimpleMoveDB>(),
+                        "drop-in leftover Kepler or circularise SimpleNewt. " + DescribeMove(ship, goal));
+                }
 
                 var dropAt = dropIns[0].at;
                 var pos = ship.GetDataBlob<PositionDB>();
@@ -490,32 +503,54 @@ namespace Pulsar4X.Tests
                     Assert.Greater(rel.Length(), marsRadius, "Mars-relative r is inside Mars");
                 });
 
-                // Hyperbolic leftover starts CirculariseAction, which strips OrbitDB until
-                // SimpleNewt completes. Wait for that before asserting a settled Kepler.
-                var circDeadline = eti + TimeSpan.FromDays(2);
-                while (ship.HasDataBlob<NewtonSimpleMoveDB>()
-                       && _starSys.StarSysDateTime < circDeadline)
-                    AdvanceTo(_starSys.StarSysDateTime + TimeSpan.FromMinutes(1));
-
-                Assert.IsFalse(ship.HasDataBlob<NewtonSimpleMoveDB>(),
-                    "circularise should have finished. " + DescribeMove(ship, goal));
-                Assert.IsTrue(ship.TryGetDataBlob<OrbitDB>(out var orbit),
-                    "circularise / drop-in left an orbit. " + DescribeMove(ship, goal));
-
-                var now = _starSys.StarSysDateTime;
-                OrbitProcessor.ProcessEntity(ship, now);
-                var posFromOrbit = OrbitMath.GetPosition(orbit, now);
-                rel = ship.GetDataBlob<PositionDB>().RelativePosition;
-
-                Assert.Multiple(() =>
+                // Price the replan at drop-in, before the next minute starts the burn.
+                TripPreview preview = null;
+                double fuelAtPlan = 0;
+                double massAtPlan = 0;
+                double goNowDv = 0;
+                if (destIsPhobos)
                 {
-                    AssertOrbitWellFormed(orbit, $"{startOrbit} orbit after circularise");
-                    Assert.AreSame(expectedParent, orbit.Parent, "SOI parent after circularise");
-                    Assert.Less(orbit.Eccentricity, 0.05, "circularise left a near-circular orbit");
-                    AssertFiniteVec(posFromOrbit, "OrbitMath.GetPosition after circularise");
-                    Assert.Less((rel - posFromOrbit).Length(), 1e3,
-                        "PositionDB.RelativePosition must match the orbit equations after circularise");
-                });
+                    preview = MovePlanner.Preview(ship, dest, _starSys.StarSysDateTime);
+                    fuelAtPlan = ship.GetDataBlob<NewtonThrustAbilityDB>().TotalFuel_kg;
+                    massAtPlan = ship.GetDataBlob<MassVolumeDB>().MassTotal;
+                    Assert.AreEqual(DepartureTiming.BestWindow, preview.Timing, DescribeMove(ship, goal));
+                    Assert.GreaterOrEqual(preview.WaitSeconds, 0);
+                    goNowDv = GoNowDeltaV(ship, dest);
+                    Assert.LessOrEqual(preview.DeltaV, goNowDv + 1e-3,
+                        "Best window spends no more Δv than leaving now. " + DescribeMove(ship, goal));
+                    TestContext.WriteLine(
+                        $"{startOrbit}-Phobos wait={preview.WaitSeconds:0}s dv={preview.DeltaV:0} goNow={goNowDv:0}");
+                }
+
+                if (!destIsPhobos)
+                {
+                    // Hyperbolic leftover starts CirculariseAction, which strips OrbitDB until
+                    // SimpleNewt completes. Wait for that before asserting a settled Kepler.
+                    var circDeadline = eti + TimeSpan.FromDays(2);
+                    while (ship.HasDataBlob<NewtonSimpleMoveDB>()
+                           && _starSys.StarSysDateTime < circDeadline)
+                        AdvanceTo(_starSys.StarSysDateTime + TimeSpan.FromMinutes(1));
+
+                    Assert.IsFalse(ship.HasDataBlob<NewtonSimpleMoveDB>(),
+                        "circularise should have finished. " + DescribeMove(ship, goal));
+                    Assert.IsTrue(ship.TryGetDataBlob<OrbitDB>(out var orbit),
+                        "circularise / drop-in left an orbit. " + DescribeMove(ship, goal));
+
+                    var now = _starSys.StarSysDateTime;
+                    OrbitProcessor.ProcessEntity(ship, now);
+                    var posFromOrbit = OrbitMath.GetPosition(orbit, now);
+                    rel = ship.GetDataBlob<PositionDB>().RelativePosition;
+
+                    Assert.Multiple(() =>
+                    {
+                        AssertOrbitWellFormed(orbit, $"{startOrbit} orbit after circularise");
+                        Assert.AreSame(expectedParent, orbit.Parent, "SOI parent after circularise");
+                        Assert.Less(orbit.Eccentricity, 0.05, "circularise left a near-circular orbit");
+                        AssertFiniteVec(posFromOrbit, "OrbitMath.GetPosition after circularise");
+                        Assert.Less((rel - posFromOrbit).Length(), 1e3,
+                            "PositionDB.RelativePosition must match the orbit equations after circularise");
+                    });
+                }
 
                 var queue = ship.GetDataBlob<ActionQueueDB>();
                 Assert.IsFalse(queue.ActionList.Any(a => a is WarpMoveAction && a.IsRunning),
@@ -532,19 +567,47 @@ namespace Pulsar4X.Tests
                                                          && a.Status is ActionStatus.Queued or ActionStatus.Running),
                     "must not have queued another warp. " + DescribeMove(ship, goal));
 
-                bool circulariseStarted = ship.HasDataBlob<NewtonSimpleMoveDB>()
-                    || queue.ActionList.Any(a =>
-                        (a is CirculariseAction or NewtonSimpleAction)
-                        && a.Status is ActionStatus.Running or ActionStatus.Succeeded);
-                bool alreadyParked = ship.TryGetDataBlob<OrbitDB>(out var afterOrbit)
-                    && afterOrbit.Eccentricity < 0.05
-                    && afterOrbit.Parent == expectedParent;
-                Assert.IsTrue(circulariseStarted || alreadyParked || goal.Status == GoalStatus.Completed,
-                    "expected circularise / parked orbit / completed goal after the next timestep. "
-                    + DescribeMove(ship, goal));
+                if (!destIsPhobos)
+                {
+                    bool circulariseStarted = ship.HasDataBlob<NewtonSimpleMoveDB>()
+                        || queue.ActionList.Any(a =>
+                            (a is CirculariseAction or NewtonSimpleAction)
+                            && a.Status is ActionStatus.Running or ActionStatus.Succeeded);
+                    bool alreadyParked = ship.TryGetDataBlob<OrbitDB>(out var afterOrbit)
+                        && afterOrbit.Eccentricity < 0.05
+                        && afterOrbit.Parent == expectedParent;
+                    Assert.IsTrue(circulariseStarted || alreadyParked || goal.Status == GoalStatus.Completed,
+                        "expected circularise / parked orbit / completed goal after the next timestep. "
+                        + DescribeMove(ship, goal));
+                }
+                else if (startOrbit is EarthStartOrbit.CircularPrograde
+                         or EarthStartOrbit.CircularRetrograde
+                         or EarthStartOrbit.EccentricPrograde)
+                {
+                    // A circular leftover at Phobos's radius is already alongside and matches.
+                    // These three are not: the replan waits for a transfer window.
+                    Assert.That(goal.Message, Does.StartWith("Transfer to"),
+                        "the replan waits for a window. " + DescribeMove(ship, goal));
+                    Assert.IsTrue(TransferBurnQueued(ship),
+                        "a transfer-window burn is queued. " + DescribeMove(ship, goal));
+                }
 
-                // Run until the MoveTo goal itself should have completed — not just drop-in.
+                // Mars parks in a couple of days. Phobos waits out the window the preview just priced.
                 var deadline = eti + TimeSpan.FromDays(2);
+                if (destIsPhobos)
+                {
+                    double seconds = Math.Max(preview.EtaSeconds, preview.WaitSeconds);
+                    if (!double.IsFinite(seconds) || seconds < 0)
+                        seconds = 0;
+                    deadline = dropAt + TimeSpan.FromSeconds(seconds) + TimeSpan.FromDays(1);
+                    foreach (var burn in queue.ActionList.OfType<NewtonThrustAction>())
+                    {
+                        var afterBurn = burn.NodeDateTime + TimeSpan.FromDays(1);
+                        if (afterBurn > deadline)
+                            deadline = afterBurn;
+                    }
+                }
+
                 while (goal.Status is not (GoalStatus.Completed or GoalStatus.Failed)
                        && _starSys.StarSysDateTime < deadline)
                 {
@@ -561,6 +624,16 @@ namespace Pulsar4X.Tests
                 AssertOrbitWellFormed(finalOrbit, "final orbit");
                 Assert.AreSame(expectedParent, finalOrbit.Parent);
                 Assert.Greater(ship.GetDataBlob<PositionDB>().RelativePosition.Length(), marsRadius);
+                if (destIsPhobos)
+                {
+                    AssertArrivedMatchingPhobos(ship, mars, phobos);
+                    double burned = fuelAtPlan - ship.GetDataBlob<NewtonThrustAbilityDB>().TotalFuel_kg;
+                    double ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+                    double goNowFuel = OrbitMath.TsiolkovskyFuelUse(massAtPlan, ve, goNowDv);
+                    if (double.IsFinite(goNowFuel) && goNowFuel > 0 && burned > 0)
+                        Assert.LessOrEqual(burned, goNowFuel * 1.05 + 1,
+                            "fuel burned after drop-in stays within the depart-now bill. " + DescribeMove(ship, goal));
+                }
             }
             finally
             {
@@ -569,12 +642,143 @@ namespace Pulsar4X.Tests
         }
 
         /// <summary>
-        /// In-game "play" is one TimePulse tick (often 1h–1d), not hour-by-hour. A leftover
-        /// hyperbola integrated for the rest of that tick flies off the Phobos camera.
-        /// Circularise must run in that same jump, and the ship must stay near Mars.
+        /// One long tick past arrival must not fling a fueled ship out of Mars's well.
+        /// The transfer may still be waiting; it must not have failed.
         /// </summary>
         [Test]
-        public void WarpOrder_EarthToPhobos_SurvivesOneLongTickPastArrival()
+        public void WarpOrder_EarthToPhobos_SurvivesOneLongTickPastArrival_WithADrive_SurvivesOneLongTick()
+        {
+            var (ship, mars, goal, eti) = StartPhobosLongTick("long-tick-drive", fillTank: true);
+
+            AdvanceTo(eti + TimeSpan.FromDays(1));
+
+            Assert.IsFalse(ship.HasDataBlob<WarpMovingDB>(), "must not still be warping. " + DescribeMove(ship, goal));
+            Assert.AreNotEqual(GoalStatus.Failed, goal.Status, DescribeMove(ship, goal));
+            Assert.IsTrue(ship.TryGetDataBlob<OrbitDB>(out var orbit), DescribeMove(ship, goal));
+            AssertOrbitWellFormed(orbit, "orbit after long tick");
+            Assert.AreSame(mars, orbit.Parent, "still parented to Mars, not escaped to Sol");
+            bool nearCircular = orbit.Eccentricity < 0.05;
+            bool transferQueued = TransferBurnQueued(ship);
+            Assert.IsTrue(nearCircular || transferQueued,
+                "near circular, or a transfer-window burn still queued. " + DescribeMove(ship, goal));
+            AssertStaysInMarsSoi(ship, mars, goal);
+        }
+
+        /// <summary>
+        /// The ship this test used to build has no usable Δv once the burn reconciles the tank.
+        /// The goal fails with the Δv sentence and the ship stays bound to Mars.
+        /// </summary>
+        [Test]
+        public void WarpOrder_EarthToPhobos_SurvivesOneLongTickPastArrival_WithAnEmptyTank_StaysBoundToMars()
+        {
+            var (ship, mars, goal, eti) = StartPhobosLongTick("long-tick-empty", fillTank: false);
+
+            AdvanceTo(eti + TimeSpan.FromDays(1));
+
+            Assert.IsFalse(ship.HasDataBlob<WarpMovingDB>(), "must not still be warping. " + DescribeMove(ship, goal));
+            Assert.AreEqual(GoalStatus.Failed, goal.Status, DescribeMove(ship, goal));
+            Assert.That(goal.Message, Does.Contain("needs").And.Contain("have 0 m/s"),
+                DescribeMove(ship, goal));
+            Assert.IsTrue(ship.TryGetDataBlob<OrbitDB>(out var orbit), DescribeMove(ship, goal));
+            AssertOrbitWellFormed(orbit, "orbit after long tick");
+            Assert.AreSame(mars, orbit.Parent, "still parented to Mars, not escaped to Sol");
+            Assert.Less(orbit.Eccentricity, 1, "bound, not a hyperbola. " + DescribeMove(ship, goal));
+            AssertStaysInMarsSoi(ship, mars, goal);
+        }
+
+        /// <summary>
+        /// A warp leaves now. Departure timing does not change the warp's arrival.
+        /// </summary>
+        [Test]
+        public void Timing_IsIgnoredForWarp()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
+            var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
+            var faction = FactionFactory.CreateFaction(_game, "warp-timing-" + Guid.NewGuid().ToString("N"));
+            var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
+            var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
+            var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+            ship.SetDataBlob(OrbitDB.FromPosition(earth, ship, epoch));
+            OrbitProcessor.ProcessEntity(ship, epoch);
+
+            var best = MovePlanner.Preview(ship, mars, epoch,
+                new MoveOrderOptions(MoveDriveChoice.Warp, DepartureTiming.BestWindow));
+            var now = MovePlanner.Preview(ship, mars, epoch,
+                new MoveOrderOptions(MoveDriveChoice.Warp, DepartureTiming.DepartNow));
+
+            Assert.IsTrue(best.Feasible, best.Reason);
+            Assert.IsTrue(now.Feasible, now.Reason);
+            Assert.AreEqual("Warp", best.Mode);
+            Assert.AreEqual("Warp", now.Mode);
+            Assert.AreEqual(0, best.WaitSeconds);
+            Assert.AreEqual(0, now.WaitSeconds);
+            Assert.AreEqual(best.EtaSeconds, now.EtaSeconds, 1.0);
+            Assert.IsTrue(best.LocalTransferAfterWarp);
+            Assert.IsEmpty(best.Timings);
+            Assert.IsEmpty(now.Timings);
+        }
+
+        /// <summary>
+        /// After the drop-in the Newtonian replan uses the timing stored on the goal.
+        /// Depart now does not leave later than Best window.
+        /// </summary>
+        [Test]
+        public void Goal_KeepsTheTimingAcrossAWarpDropIn()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
+            var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
+            var phobos = AddMoon(mars, 1.06e16, 11_266, sma_m: 9_376_000, epoch, eccentricity: 0.0151);
+            phobos.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Moon });
+            var faction = FactionFactory.CreateFaction(_game, "timing-drop-" + Guid.NewGuid().ToString("N"));
+            var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
+            var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
+            var offset = new Vector3(OrbitMath.LowOrbitRadius(phobos), 0, 0);
+
+            var shipNow = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+            var shipBest = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+            FillTank(shipNow);
+            FillTank(shipBest);
+            ApplyEarthStartOrbit(EarthStartOrbit.CircularPrograde, shipNow, earth, mars, phobos, epoch, offset);
+            ApplyEarthStartOrbit(EarthStartOrbit.CircularPrograde, shipBest, earth, mars, phobos, epoch, offset);
+
+            var goalNow = new Goal(GoalType.MoveTo)
+            {
+                TargetEntityID = phobos.Id,
+                Timing = DepartureTiming.DepartNow,
+            };
+            var goalBest = new Goal(GoalType.MoveTo)
+            {
+                TargetEntityID = phobos.Id,
+                Timing = DepartureTiming.BestWindow,
+            };
+            AgentProcessor.AssignGoal(shipNow, goalNow);
+            AgentProcessor.AssignGoal(shipBest, goalBest);
+            Assert.IsTrue(shipNow.HasDataBlob<WarpMovingDB>() && shipBest.HasDataBlob<WarpMovingDB>());
+            var eti = shipNow.GetDataBlob<WarpMovingDB>().PredictedExitTime;
+            var etiBest = shipBest.GetDataBlob<WarpMovingDB>().PredictedExitTime;
+            if (etiBest > eti)
+                eti = etiBest;
+
+            AdvanceTo(eti);
+
+            Assert.AreEqual(DepartureTiming.DepartNow, goalNow.Timing);
+            Assert.AreEqual(DepartureTiming.BestWindow, goalBest.Timing);
+            Assert.That(goalNow.Message, Does.StartWith("Transfer to"), DescribeMove(shipNow, goalNow));
+            Assert.That(goalBest.Message, Does.StartWith("Transfer to"), DescribeMove(shipBest, goalBest));
+            var nowBurn = FirstWindowBurn(shipNow);
+            var bestBurn = FirstWindowBurn(shipBest);
+            Assert.IsNotNull(nowBurn, DescribeMove(shipNow, goalNow));
+            Assert.IsNotNull(bestBurn, DescribeMove(shipBest, goalBest));
+            Assert.LessOrEqual(nowBurn.NodeDateTime, bestBurn.NodeDateTime.AddSeconds(1),
+                "Depart now does not leave after Best window. now=" + DescribeMove(shipNow, goalNow)
+                + " best=" + DescribeMove(shipBest, goalBest));
+        }
+
+        (Entity ship, Entity mars, Goal goal, DateTime eti) StartPhobosLongTick(string name, bool fillTank)
         {
             var epoch = _starSys.StarSysDateTime;
             var sol = TestingUtilities.BasicSol(_starSys);
@@ -583,33 +787,90 @@ namespace Pulsar4X.Tests
             var phobos = AddMoon(mars, 1.06e16, 11_266, sma_m: 9_376_000, epoch, eccentricity: 0.0151);
             phobos.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Moon });
 
-            var faction = FactionFactory.CreateFaction(_game, "long-tick-" + Guid.NewGuid().ToString("N"));
+            var faction = FactionFactory.CreateFaction(_game, name + "-" + Guid.NewGuid().ToString("N"));
             var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
             var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
             var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
+            if (fillTank)
+                FillTank(ship);
             ApplyEarthStartOrbit(EarthStartOrbit.CircularPrograde, ship, earth, mars, phobos, epoch,
                 new Vector3(OrbitMath.LowOrbitRadius(phobos), 0, 0));
 
             var goal = new Goal(GoalType.MoveTo) { TargetEntityID = phobos.Id };
             AgentProcessor.AssignGoal(ship, goal);
             Assert.IsTrue(ship.HasDataBlob<WarpMovingDB>(), DescribeMove(ship, goal));
-            var eti = ship.GetDataBlob<WarpMovingDB>().PredictedExitTime;
+            return (ship, mars, goal, ship.GetDataBlob<WarpMovingDB>().PredictedExitTime);
+        }
 
-            AdvanceTo(eti + TimeSpan.FromDays(1));
+        static void FillTank(Entity ship, double deltaV = 20_000)
+        {
+            var thrust = ship.GetDataBlob<NewtonThrustAbilityDB>();
+            var mass = ship.GetDataBlob<MassVolumeDB>();
+            var fuel = ship.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(thrust.FuelType);
+            Assert.IsNotNull(fuel);
+            double dry = mass.MassDry;
+            double fuelMass = dry * (Math.Exp(deltaV / thrust.ExhaustVelocity) - 1);
+            long units = (long)Math.Ceiling(fuelMass / Math.Max(1, fuel.MassPerUnit));
+            var storage = ship.GetDataBlob<CargoStorageDB>();
+            double have = storage.GetMassStored(fuel, false);
+            if (have > 0)
+                storage.AddRemoveCargoByMass(fuel, -have);
+            // AddCargoByUnit truncates (volume * count) / volume, so a full tank can land one unit short.
+            long added = storage.AddCargoByUnit(fuel, units);
+            Assert.That(added, Is.GreaterThan(0).And.GreaterThanOrEqualTo(units - 1));
+            mass.UpdateMassTotal(storage);
+            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship);
+            Assert.Greater(thrust.DeltaV, 1_000, "the tank can fly a local transfer");
+        }
 
-            Assert.IsFalse(ship.HasDataBlob<WarpMovingDB>(), "must not still be warping. " + DescribeMove(ship, goal));
-            Assert.IsTrue(ship.TryGetDataBlob<OrbitDB>(out var orbit), DescribeMove(ship, goal));
-            AssertOrbitWellFormed(orbit, "orbit after long tick");
-            Assert.AreSame(mars, orbit.Parent, "still parented to Mars, not escaped to Sol");
-            Assert.Less(orbit.Eccentricity, 0.05, "leftover hyperbola must have circularised in the same tick. " + DescribeMove(ship, goal));
-
+        void AssertStaysInMarsSoi(Entity ship, Entity mars, Goal goal)
+        {
             var abs = (Vector3)MoveMath.GetAbsoluteFuturePosition(ship, _starSys.StarSysDateTime);
             var marsAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(mars, _starSys.StarSysDateTime);
-            var marsSoi = mars.GetSOI_m();
-            Assert.Less((abs - marsAbs).Length(), marsSoi,
-                "ship flew out of Mars SOI (leftover hyperbola integrated instead of circularise). "
-                + DescribeMove(ship, goal));
+            Assert.Less((abs - marsAbs).Length(), mars.GetSOI_m(),
+                "ship flew out of Mars SOI. " + DescribeMove(ship, goal));
             AssertFiniteVec(abs, "absolute position after long tick");
+        }
+
+        static bool IsTransferBurn(EntityAction action)
+            => action is NewtonThrustAction thrust && thrust.Name == "Transfer window"
+               || action is SoiTransferAction;
+
+        static bool TransferBurnQueued(Entity ship)
+        {
+            if (!ship.TryGetDataBlob<ActionQueueDB>(out var queue))
+                return false;
+            return queue.ActionList.Any(a =>
+                a.Status is ActionStatus.Queued or ActionStatus.Running && IsTransferBurn(a));
+        }
+
+        static NewtonThrustAction FirstWindowBurn(Entity ship)
+        {
+            if (!ship.TryGetDataBlob<ActionQueueDB>(out var queue))
+                return null;
+            return queue.ActionList.OfType<NewtonThrustAction>()
+                .FirstOrDefault(a => a.Name == "Transfer window");
+        }
+
+        static void AssertArrivedMatchingPhobos(Entity ship, Entity mars, Entity phobos)
+        {
+            Assert.IsTrue(ship.TryGetDataBlob<OrbitDB>(out var orbit), "finished on an orbit");
+            Assert.AreSame(mars, orbit.Parent, "parent is Mars");
+            Assert.Less(orbit.Eccentricity, 0.05, "matching Phobos is near circular");
+            double targetA = phobos.GetDataBlob<OrbitDB>().SemiMajorAxis;
+            Assert.AreEqual(targetA, orbit.SemiMajorAxis, Math.Abs(targetA) * 0.01, "SMA within 1% of Phobos");
+            var now = ship.StarSysDateTime;
+            double separation = ((Vector3)MoveMath.GetAbsoluteFuturePosition(ship, now)
+                                 - (Vector3)MoveMath.GetAbsoluteFuturePosition(phobos, now)).Length();
+            Assert.LessOrEqual(separation, MovePlanner.AlongTrackArrivedSeparation(phobos, targetA),
+                "along-track separation");
+        }
+
+        static double GoNowDeltaV(Entity ship, Entity body)
+        {
+            var preview = MovePlanner.Preview(ship, body, ship.StarSysDateTime,
+                new MoveOrderOptions(Timing: DepartureTiming.DepartNow));
+            return preview.DeltaV;
         }
 
         #endregion
@@ -1104,8 +1365,9 @@ namespace Pulsar4X.Tests
             phobos.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Moon });
 
             var phobosAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(phobos, epoch);
-            var ship = AddPhobosWarpShip(mars, phobosAbs);
-            AttachThrust(ship);
+            var faction = FactionFactory.CreateFaction(_game, "phobos-hyp-" + Guid.NewGuid().ToString("N"));
+            var ship = MakeMoveToShip(mars, phobosAbs, faction);
+            FillTank(ship);
             var r = ship.GetDataBlob<PositionDB>().RelativePosition;
             double mu = OrbitMath.SGP(mars, ship);
             double vCirc = Math.Sqrt(mu / r.Length());
@@ -1115,19 +1377,48 @@ namespace Pulsar4X.Tests
 
             Assert.IsTrue(MovePlanner.TryBuildMoveActions(ship, phobos, out var actions, out var reason),
                 reason);
-            Assert.AreEqual(1, actions.Count, "in Phobos's orbit with leftover e: circularise to match, do not warp");
-            Assert.IsInstanceOf<CirculariseAction>(actions[0]);
-            Assert.IsTrue(CirculariseAction.TryCompute(ship, epoch, out var parent, out var startKE, out var targetKE));
-            Assert.AreSame(mars, parent);
-            var marsSgp = GeneralMath.StandardGravitationalParameter(
-                mars.GetDataBlob<MassVolumeDB>().MassTotal);
-            Assert.Greater(startKE.StandardGravParameter / marsSgp, 0.9);
-            Assert.Less(startKE.StandardGravParameter / marsSgp, 1.1);
-            Assert.Less(targetKE.Eccentricity, 0.05, "match is a circular Mars orbit");
-            Assert.AreEqual(r.Length(), targetKE.SemiMajorAxis, r.Length() * 0.01,
-                "circularise at current r, which is already Phobos SMA");
-            Assert.DoesNotThrow(
-                () => new NewtonSimpleMoveDB(mars, startKE, targetKE, epoch));
+            Assert.IsFalse(actions.Exists(a => a is WarpMoveAction),
+                "in Phobos's orbit with leftover e: transfer, do not warp. " + reason);
+            Assert.IsTrue(actions.Count > 0 && IsTransferBurn(actions[0]),
+                "first action is the transfer-window burn. " + reason);
+            var preview = MovePlanner.Preview(ship, phobos, epoch);
+            Assert.AreEqual(DepartureTiming.BestWindow, preview.Timing);
+            Assert.GreaterOrEqual(preview.WaitSeconds, 0);
+            Assert.LessOrEqual(preview.DeltaV, GoNowDeltaV(ship, phobos) + 1e-3, reason);
+
+            Assert.DoesNotThrow(() =>
+            {
+                foreach (var action in actions)
+                    action.Rehydrate(_game);
+            });
+
+            // The agent flies one burn at a time and replans the arrival from the orbit it actually has.
+            var goal = new Goal(GoalType.MoveTo) { TargetEntityID = phobos.Id };
+            AgentProcessor.AssignGoal(ship, goal);
+            var queue = ship.GetDataBlob<ActionQueueDB>();
+
+            DateTime deadline = epoch.AddDays(1);
+            if (double.IsFinite(preview.EtaSeconds) && preview.EtaSeconds > 0)
+            {
+                var eta = epoch.AddSeconds(preview.EtaSeconds).AddDays(1);
+                if (eta > deadline)
+                    deadline = eta;
+            }
+            foreach (var burn in actions.OfType<NewtonThrustAction>())
+            {
+                var after = burn.NodeDateTime.AddHours(6);
+                if (after > deadline)
+                    deadline = after;
+            }
+
+            while (goal.Status is not (GoalStatus.Completed or GoalStatus.Failed)
+                   && _starSys.StarSysDateTime < deadline)
+                AdvanceTo(_starSys.StarSysDateTime + TimeSpan.FromMinutes(10));
+
+            Assert.IsFalse(queue.ActionList.Any(a => a is NewtonThrustAction && a.Status == ActionStatus.Failed),
+                "a transfer burn failed. " + DescribeMove(ship, goal));
+            Assert.AreEqual(GoalStatus.Completed, goal.Status, DescribeMove(ship, goal));
+            AssertArrivedMatchingPhobos(ship, mars, phobos);
         }
 
         [Test]

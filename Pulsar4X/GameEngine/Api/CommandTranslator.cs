@@ -1204,12 +1204,29 @@ namespace Pulsar4X.Engine.Api
             if (RejectGoalWithoutCaptain(commanded) is { } rejected)
                 return rejected;
             var cmd = (MoveToBodyCommand)command;
+            if (cmd.Arrival != ArrivalKind.Orbit)
+                return CommandResult.Reject("not built");
             var goal = new Goal(GoalType.MoveTo)
             {
                 TargetEntityID = cmd.BodyId,
                 ArrivalPeriapsis = cmd.ArrivalPeriapsis,
                 ArrivalApoapsis = cmd.ArrivalApoapsis,
+                Mode = cmd.Mode,
+                Timing = cmd.Timing,
+                Arrival = cmd.Arrival,
             };
+            if (cmd.PickedWindow is { } pick)
+            {
+                goal.HasPickedWindow = true;
+                goal.PickedDepart = pick.Depart;
+                goal.PickedArrive = pick.Arrive;
+                goal.PickedDepartDx = pick.DepartDeltaV.X;
+                goal.PickedDepartDy = pick.DepartDeltaV.Y;
+                goal.PickedDepartDz = pick.DepartDeltaV.Z;
+                goal.PickedArriveDx = pick.ArriveDeltaV.X;
+                goal.PickedArriveDy = pick.ArriveDeltaV.Y;
+                goal.PickedArriveDz = pick.ArriveDeltaV.Z;
+            }
             AgentProcessor.AssignGoal(commanded, goal);
             if(goal.Status == GoalStatus.Failed)
                 return CommandResult.Reject(goal.Message);
@@ -1276,6 +1293,13 @@ namespace Pulsar4X.Engine.Api
 
         private CommandResult TranslateJump(Entity faction, Entity commanded, GameCommand command)
         {
+            if (!commanded.HasOrChildHasAbility<WarpAbilityDB>())
+            {
+                return CommandResult.Reject(commanded.HasDataBlob<FleetDB>()
+                    ? "No ship in this fleet has a warp drive, so it cannot jump."
+                    : "This ship has no warp drive, so it cannot jump.");
+            }
+
             var jump = (Pulsar4X.Api.JumpCommand)command;
             if (!TryResolve(jump.JumpPointId, out var jumpPoint)
                 || !jumpPoint.TryGetDataBlob<JumpPointDB>(out var jumpPointDB))
@@ -1488,13 +1512,16 @@ namespace Pulsar4X.Engine.Api
             if (RejectPlotOnCaptainOrFleet(commanded) is { } rejected)
                 return rejected;
             var cmd = (GoToBodyCommand)command;
+            if (cmd.Arrival != ArrivalKind.Orbit)
+                return CommandResult.Reject("not built");
             if (!TryResolve(cmd.BodyId, out var body))
                 return CommandResult.Reject($"Entity {cmd.BodyId} not found.");
             if (RejectUnseen(faction, body) is { } unseen)
                 return unseen;
+            var plotted = new MoveOrderOptions(cmd.Mode, cmd.Timing, cmd.PickedWindow, cmd.ArrivalPeriapsis, cmd.ArrivalApoapsis, cmd.Arrival);
             if (!MovePlanner.TryBuildMoveActions(
                     commanded, body, out var actions, out var reason, commanded.StarSysDateTime,
-                    null, cmd.ArrivalPeriapsis, cmd.ArrivalApoapsis))
+                    null, cmd.ArrivalPeriapsis, cmd.ArrivalApoapsis, plotted))
                 return CommandResult.Reject(reason);
             return DispatchActions(actions, reason);
         }

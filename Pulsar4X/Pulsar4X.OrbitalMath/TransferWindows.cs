@@ -85,6 +85,134 @@ namespace Pulsar4X.Orbital
             return found;
         }
 
+        /// <summary>
+        /// Earliest departure inside the wait cap whose Δv is within <paramref name="tolerance"/>
+        /// of the cheapest affordable cell in that cap. <paramref name="tolerance"/> is a fraction:
+        /// 0.10 keeps a cell up to 10% above the floor. Ties use <see cref="TryBestUnderBudget"/>'s order.
+        /// </summary>
+        public bool TryBestWindow(double budget, double maxWaitSeconds, double tolerance, out TransferWindow window)
+        {
+            window = default;
+            if (!double.IsFinite(budget) || budget < 0 || Departures.Length == 0)
+                return false;
+            if (!double.IsFinite(maxWaitSeconds) || maxWaitSeconds < 0)
+                maxWaitSeconds = 0;
+            if (!double.IsFinite(tolerance) || tolerance < 0)
+                tolerance = 0;
+
+            DateTime start = Departures[0];
+            double floor = double.PositiveInfinity;
+            bool any = false;
+            for (int i = 0; i < Departures.Length; i++)
+            {
+                for (int j = 0; j < TimeOfFlightSeconds.Length; j++)
+                {
+                    TransferWindow cell = Cells[i, j];
+                    if (!InCap(cell, start, maxWaitSeconds, budget))
+                        continue;
+                    any = true;
+                    if (cell.TotalDeltaV < floor)
+                        floor = cell.TotalDeltaV;
+                }
+            }
+
+            if (!any || !double.IsFinite(floor))
+                return false;
+
+            double limit = floor * (1.0 + tolerance);
+            bool found = false;
+            for (int i = 0; i < Departures.Length; i++)
+            {
+                for (int j = 0; j < TimeOfFlightSeconds.Length; j++)
+                {
+                    TransferWindow cell = Cells[i, j];
+                    if (!InCap(cell, start, maxWaitSeconds, budget) || cell.TotalDeltaV > limit)
+                        continue;
+                    if (!found || Earlier(cell, window))
+                    {
+                        window = cell;
+                        found = true;
+                    }
+                }
+            }
+
+            return found;
+        }
+
+        /// <summary>Cheapest affordable cell in one departure column. Ties take the shorter flight.</summary>
+        public bool TryCheapestInColumn(int column, double budget, out TransferWindow window)
+        {
+            window = default;
+            if (!double.IsFinite(budget) || budget < 0
+                || column < 0 || column >= Departures.Length)
+                return false;
+
+            bool found = false;
+            for (int j = 0; j < TimeOfFlightSeconds.Length; j++)
+            {
+                TransferWindow cell = Cells[column, j];
+                if (!cell.IsFinite || cell.TotalDeltaV > budget)
+                    continue;
+                if (!found || Earlier(cell, window))
+                {
+                    window = cell;
+                    found = true;
+                }
+            }
+
+            return found;
+        }
+
+        /// <summary>A grid the tests can fill by hand. Cost and the absolute cheapest cell are derived.</summary>
+        public static TransferGrid FromCells(DateTime[] departures, double[] tof, TransferWindow[,] cells)
+        {
+            departures ??= Array.Empty<DateTime>();
+            tof ??= Array.Empty<double>();
+            int ni = departures.Length;
+            int nj = tof.Length;
+            var cost = new double[ni, nj];
+            bool hasBest = false;
+            TransferWindow best = default;
+            for (int i = 0; i < ni; i++)
+            {
+                for (int j = 0; j < nj; j++)
+                {
+                    TransferWindow cell = cells[i, j];
+                    cost[i, j] = cell.IsFinite ? cell.TotalDeltaV : double.NaN;
+                    if (!cell.IsFinite)
+                        continue;
+                    if (!hasBest || CheaperCell(cell, best))
+                    {
+                        best = cell;
+                        hasBest = true;
+                    }
+                }
+            }
+
+            return new TransferGrid(departures, tof, cost, cells, hasBest, best);
+        }
+
+        static bool InCap(TransferWindow cell, DateTime start, double maxWaitSeconds, double budget)
+        {
+            if (!cell.IsFinite || cell.TotalDeltaV > budget)
+                return false;
+            double wait = (cell.Depart - start).TotalSeconds;
+            return double.IsFinite(wait) && wait <= maxWaitSeconds + 1e-3;
+        }
+
+        static bool CheaperCell(TransferWindow cell, TransferWindow soFar)
+        {
+            if (cell.TotalDeltaV < soFar.TotalDeltaV)
+                return true;
+            if (cell.TotalDeltaV > soFar.TotalDeltaV)
+                return false;
+            if (cell.Depart < soFar.Depart)
+                return true;
+            if (cell.Depart > soFar.Depart)
+                return false;
+            return cell.Arrive < soFar.Arrive;
+        }
+
         static bool Earlier(TransferWindow cell, TransferWindow soFar)
         {
             if (cell.Depart < soFar.Depart)
@@ -106,6 +234,29 @@ namespace Pulsar4X.Orbital
     public static class TransferWindows
     {
         public const int MaxSteps = 400;
+
+        /// <summary>A cell within this fraction of the cheapest affordable Δv counts as best.</summary>
+        public const double BestWindowDvTolerance = 0.10;
+
+        /// <summary>Wait at most this many Hohmann flight times. The flight is the centre of <see cref="HohmannTofBand"/>.</summary>
+        public const double BestWindowWaitCapHohmannFlights = 2;
+
+        /// <summary>
+        /// Wait cap in seconds: <see cref="BestWindowWaitCapHohmannFlights"/> times the Hohmann coast,
+        /// and never longer than the scan span.
+        /// </summary>
+        public static double BestWindowWaitCap(double tofMin, double tofMax, double scanSpanSeconds)
+        {
+            if (!double.IsFinite(tofMin) || !double.IsFinite(tofMax))
+                return 0;
+            double centre = 0.5 * (tofMin + tofMax);
+            double cap = BestWindowWaitCapHohmannFlights * centre;
+            if (!double.IsFinite(cap) || cap < 0)
+                return 0;
+            if (double.IsFinite(scanSpanSeconds) && scanSpanSeconds > 0 && cap > scanSpanSeconds)
+                cap = scanSpanSeconds;
+            return cap;
+        }
 
         /// <summary>
         /// Spare Δv the patched-conic planner holds back for one mid-course burn, in m/s.

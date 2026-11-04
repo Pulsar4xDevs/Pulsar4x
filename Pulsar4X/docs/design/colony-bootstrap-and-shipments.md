@@ -10,7 +10,7 @@ One captained ship with a Construction Bay carries finished crates from one owne
 - Planner: `BootstrapColonyPlan` re-derives state from the world every `Plan`. It picks crate instances once (crates already in the hold first, then the source warehouse) and keeps them in `Goal.BootstrapCrateIds`. Steps: load at source (Fail "doesn't fit hold" if they do not fit; one trip, no splitting) → fly into transfer range of the destination (Fail with a reason if it cannot) → `MountFromHoldAction` for everything aboard → Done when every picked crate is mounted.
 - `MountFromHoldAction` wraps `AddToConstructionQueueOrder.CreateMount` and keeps running until each job has left the bay's `BuildQueue`. It Fails, and removes its own jobs, when the colony is gone or out of range or a crate is neither mounted nor aboard.
 - `GoalType.BootstrapColony` is appended to the enum, is not in `BaseWeights` (never auto-picked), and has no `SkillDomains` line. A queued load, mount or transfer for the goal makes the planner wait, and this check runs before the refuel interrupt. `LocalConstructionProcessor` is unchanged. The player picks the build order; crates mount in the order chosen.
-- The warp-brake gap is fixed: `goal` is passed at both call sites in `BootstrapColonyPlan`.
+- The warp-brake gap is fixed: `goal` is passed at all three call sites in `BootstrapColonyPlan` (the destination move, `PlanPackage`, and `PlanLoad`). `Bootstrap_FlyingToAFarColony_UsesTheWarpBrake` covers each one.
 
 ## Fleet order: `Bootstrap`
 

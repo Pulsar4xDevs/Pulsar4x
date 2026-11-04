@@ -1,6 +1,6 @@
 # Orders window: plan on click, not per row
 
-Status: not started (slice 7 decided 2026-11-04, ready to build). Written 2026-11-03 after Jon reported that opening an asteroid list in a ship's Orders tab freezes the game. The cause is measured below. Slice 1 is a small fix for the freeze; slices 2 to 5 are the redesign Jon asked for. Slices 6 to 8 (added 2026-11-04) are the outstanding warp-order items, folded in so there is one list for the Orders and move work.
+Status: built, not played (2026-11-04). Click-to-plan, the preview, Execute, departure timing, the porkchop, the jump check, and the bootstrap brake test are in. The Phobos flights do not arrive: the goal completes when the departure burn finishes and the arrival burn is dropped. That is an open bug. Written 2026-11-03 after Jon reported that opening an asteroid list in a ship's Orders tab freezes the game. The cause is measured below. Slice 1 is a small fix for the freeze; slices 2 to 5 are the redesign Jon asked for. Slices 6 to 8 (added 2026-11-04) are the outstanding warp-order items, folded in so there is one list for the Orders and move work.
 
 Related: [Warp brake](movement-warp-brake.md) (slice 8), [Newtonian SOI capture](movement-newtonian-soi-capture.md) slice 7 (the refusal and the other-orbit offers, which this plan moves from every row to the clicked row), [Lambert and porkchop](movement-lambert-porkchop.md), [interplanetary Newtonian](movement-interplanetary-newtonian.md).
 
