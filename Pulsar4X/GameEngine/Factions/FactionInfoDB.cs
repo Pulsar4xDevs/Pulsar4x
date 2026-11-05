@@ -85,6 +85,12 @@ namespace Pulsar4X.Factions
         [PublicAPI]
         public List<Entity> Colonies { get; internal set; } = new ();
 
+        /// <summary>
+        /// True for a computer-run faction. It hires from its colonies' candidate pools on each refresh.
+        /// A player faction never auto-hires.
+        /// </summary>
+        public bool AutoHires { get; internal set; }
+
         public SafeList<Entity> Commanders { get; internal set; } = new ();
 
         public Dictionary<string, ShipDesign> ShipDesigns = new ();
@@ -160,6 +166,7 @@ namespace Pulsar4X.Factions
             Stances = new Dictionary<int, FactionStance>(factionDB.Stances ?? new Dictionary<int, FactionStance>());
             Grants = new Dictionary<int, FactionGrants>(factionDB.Grants ?? new Dictionary<int, FactionGrants>());
             Colonies = new List<Entity>(factionDB.Colonies);
+            AutoHires = factionDB.AutoHires;
             InternalKnownJumpPoints = new Dictionary<string, List<Entity>>(factionDB.KnownJumpPoints);
 
             ShipDesigns = new Dictionary<string, ShipDesign>(factionDB.ShipDesigns);

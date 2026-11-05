@@ -123,6 +123,7 @@ namespace Pulsar4X.Colonies
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
             GrowPopulation(entity);
+            Recruitment.Refresh(entity, entity.StarSysDateTime);
         }
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)
@@ -132,7 +133,10 @@ namespace Pulsar4X.Colonies
             foreach (var colony in colonies)
             {
                 if(colony.OwningEntity != null)
+                {
                     GrowPopulation(colony.OwningEntity);
+                    Recruitment.Refresh(colony.OwningEntity, colony.OwningEntity.StarSysDateTime);
+                }
             }
 
             return colonies.Count;

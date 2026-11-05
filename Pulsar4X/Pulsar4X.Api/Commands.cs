@@ -268,6 +268,20 @@ public sealed record AssignCaptainCommand(int TargetEntityId, int CommanderId) :
 /// </summary>
 public sealed record AssignAdministratorCommand(int TargetEntityId, int CommanderId) : GameCommand(TargetEntityId);
 
+/// <summary>
+/// Hire one candidate from this colony's pool. Targets the colony whose pool holds the candidate. One person
+/// leaves the population. An administrator joins unassigned, or takes <see cref="PostColonyId"/>'s chair when
+/// that is set. A lab technician is housed on the candidate's colony.
+/// </summary>
+public sealed record HireCandidateCommand(int TargetEntityId, int CandidateId, HireRole Role, int PostColonyId = -1)
+    : GameCommand(TargetEntityId);
+
+public enum HireRole
+{
+    Administrator,
+    LabTechnician,
+}
+
 /// <summary>Start a recruit cohort at one mounted academy. Targets the colony. Count is how many ensigns this run enrolls.</summary>
 public sealed record TrainAcademyClassCommand(int TargetEntityId, int ComponentId, int Count) : GameCommand(TargetEntityId);
 

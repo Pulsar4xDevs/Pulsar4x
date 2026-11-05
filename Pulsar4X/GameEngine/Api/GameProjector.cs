@@ -260,6 +260,7 @@ namespace Pulsar4X.Engine.Api
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ComponentInstancesDB>(out var ci) ? ToInstallationsView(ci, e) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<ColonyInfoDB>(out var col) ? ToColonyMiningView(col, e, f) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<NavalAcademyDB>(out var na) ? ToNavalAcademyView(na, e) : null,
+            (e, f) => e.FactionOwnerID == f && e.HasDataBlob<ColonyInfoDB>() ? ToRecruitmentView(e, f) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<IndustryAbilityDB>(out var ind) ? ToIndustryView(ind, e, f) : null,
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<LocalConstructionDB>(out var lc) ? ToConstructionView(lc, e, f) : null,
             // A lab's queue/economics are internal to its owner; other factions just see the entity.
@@ -1038,6 +1039,26 @@ namespace Pulsar4X.Engine.Api
             {
                 Minerals = rows.OrderBy(r => r.Name).ToList(),
             };
+        }
+
+        private static RecruitmentView? ToRecruitmentView(Entity colony, int factionId)
+        {
+            var game = colony.Manager?.Game;
+            if (game == null || !game.Factions.TryGetValue(factionId, out var faction))
+                return null;
+
+            var here = new List<CandidateView>();
+            var all = new List<CandidateView>();
+            foreach (var (candidate, at) in Recruitment.FactionCandidates(faction))
+            {
+                string category = game.TechCategories.TryGetValue(candidate.LabCategory, out var cat) ? cat.Name : candidate.LabCategory;
+                var view = new CandidateView(candidate.Id, candidate.Name, candidate.Age, at.Id, at.GetName(factionId),
+                    Recruitment.PlaceholderWage, category, candidate.MaxLabs);
+                all.Add(view);
+                if (at.Id == colony.Id)
+                    here.Add(view);
+            }
+            return new RecruitmentView(here, Recruitment.EmptyReason(colony), all);
         }
 
         private static NavalAcademyView ToNavalAcademyView(NavalAcademyDB na, Entity colony)

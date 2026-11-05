@@ -81,6 +81,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(SetFlagshipCommand)] = TranslateSetFlagship,
                 [typeof(AssignCaptainCommand)] = TranslateAssignCaptain,
                 [typeof(AssignAdministratorCommand)] = TranslateAssignAdministrator,
+                [typeof(HireCandidateCommand)] = TranslateHireCandidate,
                 [typeof(TrainAcademyClassCommand)] = TranslateTrainAcademyClass,
                 [typeof(AcademyCommandCourseCommand)] = TranslateAcademyCommandCourse,
                 [typeof(CancelAcademyCourseCommand)] = TranslateCancelAcademyCourse,
@@ -1955,6 +1956,35 @@ namespace Pulsar4X.Engine.Api
             ShipLogBook.NoteLeftPost(previous, person, previous.StarSysDateTime, "the post");
             if (!vacated.Contains(previous))
                 vacated.Add(previous);
+        }
+
+        private CommandResult TranslateHireCandidate(Entity faction, Entity commanded, GameCommand command)
+        {
+            var hire = (HireCandidateCommand)command;
+            if (!commanded.HasDataBlob<ColonyInfoDB>())
+                return CommandResult.Reject("Candidates are hired from a colony.");
+
+            Entity? post = null;
+            if (hire.Role == Pulsar4X.Api.HireRole.Administrator && hire.PostColonyId >= 0)
+            {
+                if (!TryResolve(hire.PostColonyId, out post) || post.FactionOwnerID != faction.Id || !post.HasDataBlob<ColonyInfoDB>())
+                    return CommandResult.Reject($"Colony {hire.PostColonyId} not found.");
+                if (ColonyChair(post) == null)
+                    return CommandResult.Reject("This colony has no administrative post.");
+            }
+
+            var role = hire.Role == Pulsar4X.Api.HireRole.Administrator
+                ? Pulsar4X.People.HireRole.Administrator
+                : Pulsar4X.People.HireRole.LabTechnician;
+            var reason = Recruitment.Hire(faction, commanded, hire.CandidateId, role, out var admin, out _);
+            if (reason != null)
+                return CommandResult.Reject(reason);
+
+            if (post != null && admin != null)
+                return TranslateAssignAdministrator(faction, post, new AssignAdministratorCommand(post.Id, admin.Id));
+
+            PublishPersonnelChanged(commanded);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 
         private CommandResult TranslateTrainAcademyClass(Entity faction, Entity commanded, GameCommand command)

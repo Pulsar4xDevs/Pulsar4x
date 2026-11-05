@@ -82,24 +82,52 @@ namespace Pulsar4X.People
             return db;
         }
 
+        public const int ScientistMinAge = 25;
+        public const int ScientistMaxAge = 60;
+        public const int ScientistMinLabs = 15;
+        public const int ScientistMaxLabs = 30;
+        public const float ScientistCategoryBonus = 1.1f;
+
+        /// <summary>
+        /// A lab scientist with a random name, age, favoured category and lab limit, all from the game's seeded random.
+        /// Added to the faction's AllScientists. The caller houses it on the colony.
+        /// </summary>
         public static Scientist CreateScientist(Entity faction, Entity location)
         {
-            //all this stuff needs a proper bit of code to get names from a file or something
+            var game = faction.Manager!.Game;
+            string name = NameFactory.GetCommanderName(game);
+            int age = game.RNG.Next(ScientistMinAge, ScientistMaxAge + 1);
+            string category = RandomTechCategory(game);
+            byte maxLabs = (byte)game.RNG.Next(ScientistMinLabs, ScientistMaxLabs + 1);
+            return CreateScientist(faction, location, name, age, category, maxLabs);
+        }
 
-            //this is going to have to be thought out properly.
-            Dictionary<string, float> bonuses = new Dictionary<string, float>();
-            bonuses.Add("tech-category-power-propulsion", 1.1f);
+        public static Scientist CreateScientist(Entity faction, Entity location, string name, int age, string category, byte maxLabs)
+        {
+            var bonuses = new Dictionary<string, float>();
+            if (!string.IsNullOrEmpty(category))
+                bonuses.Add(category, ScientistCategoryBonus);
 
             Scientist sci = new Scientist();
-            sci.Name = "Augusta King";
-            sci.Age = 30;
-            sci.MaxLabs = 25;
+            sci.Name = name;
+            sci.Age = age;
+            sci.MaxLabs = maxLabs;
             sci.Bonuses = bonuses;
 
             var factionTech = faction.GetDataBlob<FactionTechDB>();
             factionTech.AllScientists.Add((sci, location));
 
             return sci;
+        }
+
+        /// <summary>One tech category id, picked from the sorted ids so the same seed gives the same pick.</summary>
+        public static string RandomTechCategory(Game game)
+        {
+            var ids = new List<string>(game.TechCategories.Keys);
+            if (ids.Count == 0)
+                return "";
+            ids.Sort(StringComparer.Ordinal);
+            return ids[game.RNG.Next(0, ids.Count)];
         }
 
         public static void DestroyCommander(Entity commanderToDestroy)

@@ -548,6 +548,26 @@ public enum AcademyCourseKind
     Command,
 }
 
+/// <summary>
+/// Owning faction only. This colony's candidate pool, and every candidate in the faction's pools for the picker.
+/// <see cref="EmptyReason"/> is set when this colony has no candidates.
+/// </summary>
+public sealed record RecruitmentView(
+    IReadOnlyList<CandidateView> Candidates,
+    string? EmptyReason,
+    IReadOnlyList<CandidateView> FactionCandidates) : IComponentView;
+
+/// <summary>One person who could be hired. Wage is a placeholder until payroll exists. Nothing is charged.</summary>
+public sealed record CandidateView(
+    int Id,
+    string Name,
+    int Age,
+    int ColonyId,
+    string Location,
+    int Wage,
+    string LabCategory,
+    int MaxLabs);
+
 /// <summary>Every mounted academy on a colony, plus the people a recruit cohort would draw on.</summary>
 public sealed record NavalAcademyView(
     IReadOnlyList<NavalAcademyClassView> Academies,
