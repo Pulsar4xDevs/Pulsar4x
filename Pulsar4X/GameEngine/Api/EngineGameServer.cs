@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Globalization;
 using Pulsar4X.Api;
 using Pulsar4X.Engine;
+using Pulsar4X.Events;
 using Pulsar4X.Factions;
 using Pulsar4X.Logistics;
 using Pulsar4X.Messaging;
@@ -37,6 +38,10 @@ namespace Pulsar4X.Engine.Api
         // Fired when the sim loop stops (pause/step/end); we push a final clock so clients unlock.
         private readonly Action _onSimulationStopped;
 
+        // Research completion unlocks component templates on the faction data store with no
+        // MessagePublisher signal, so bridge the event here and refresh designs for that faction.
+        private readonly Action<Event> _onResearchCompleted;
+
         public EngineGameServer(Game game)
         {
             _game = game;
@@ -56,12 +61,19 @@ namespace Pulsar4X.Engine.Api
             // TimeState stays IsRunning=true and its time controls never unlock. Push a final clock.
             _onSimulationStopped = OnSimulationStopped;
             _game.TimePulse.SimulationStopped += _onSimulationStopped;
+
+            // Completing research can unlock component templates (e.g. Geological Surveyor). The
+            // design window only updates from ComponentDesignsChanged, which otherwise only fires
+            // on connect/load and CreateComponentDesignCommand.
+            _onResearchCompleted = OnResearchCompleted;
+            EventManager.Instance.Subscribe(EventType.ResearchCompleted, _onResearchCompleted);
         }
 
         public void Dispose()
         {
             _game.TimePulse.GameGlobalDateChangedEvent -= _onDateChanged;
             _game.TimePulse.SimulationStopped -= _onSimulationStopped;
+            EventManager.Instance.Unsubscribe(EventType.ResearchCompleted, _onResearchCompleted);
             if (_focusedSystem != null)
                 _focusedSystem.ManagerSubpulses.SystemDateChangedEvent -= _onFocusedSystemDateChanged;
             lock (_sinkLock) _subscriptions.Clear();
@@ -412,6 +424,12 @@ namespace Pulsar4X.Engine.Api
             if (!faction.TryGetDataBlob<FactionInfoDB>(out var info)) return null;
             if (!faction.TryGetDataBlob<FactionTechDB>(out var techs)) return null;
             return (info, techs);
+        }
+
+        private void OnResearchCompleted(Event e)
+        {
+            if (e.FactionId is not int factionId) return;
+            PushComponentDesigns(factionId);
         }
 
         private void PushComponentDesigns(int factionId)
