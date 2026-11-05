@@ -165,6 +165,11 @@ namespace Pulsar4X.Client
                     DisplayNavalAcademy(selectedColony.Id, academy);
                     ImGui.EndTabItem();
                 }
+                if (selectedColony.GetView<RecruitmentView>() is { } recruitment && ImGui.BeginTabItem("Recruitment"))
+                {
+                    DisplayRecruitment(selectedColony.Id, recruitment);
+                    ImGui.EndTabItem();
+                }
                 if (ImGui.BeginTabItem("Log"))
                 {
                     ShipLogDisplay.Draw(selectedColony, ref _logShownId, ref _logShownCount);
@@ -373,8 +378,51 @@ namespace Pulsar4X.Client
                     {
                         _uiState.GameClient?.SubmitCommandAsync(new AssignAdministratorCommand(colonyId, selected));
                         close();
+                        return;
+                    }
+
+                    var candidates = colony.GetView<RecruitmentView>()?.FactionCandidates;
+                    if (candidates == null)
+                        return;
+                    ImGui.Separator();
+                    ImGui.Text("Or hire a candidate:");
+                    if (candidates.Count == 0)
+                        ImGui.TextDisabled("No candidates anywhere right now.");
+                    foreach (var candidate in candidates)
+                    {
+                        if (ImGui.Button("Hire###hire-admin-" + candidate.Id))
+                        {
+                            _uiState.GameClient?.SubmitCommandAsync(new HireCandidateCommand(
+                                candidate.ColonyId, candidate.Id, HireRole.Administrator, colonyId));
+                            close();
+                            return;
+                        }
+                        ImGui.SameLine();
+                        ImGui.Text(candidate.Name + ", " + candidate.Location + ", wage " + candidate.Wage);
                     }
                 });
+        }
+
+        private void DisplayRecruitment(int colonyId, RecruitmentView view)
+        {
+            if (view.Candidates.Count == 0)
+            {
+                ImGui.TextDisabled(view.EmptyReason ?? "No candidates right now.");
+                return;
+            }
+            foreach (var candidate in view.Candidates)
+            {
+                ImGui.Text(candidate.Name + ", age " + candidate.Age);
+                ImGui.Text("Lab: " + candidate.LabCategory + ", up to " + candidate.MaxLabs + " labs. Wage " + candidate.Wage + ".");
+                if (ImGui.Button("Hire as administrator###recruit-admin-" + candidate.Id))
+                    _uiState.GameClient?.SubmitCommandAsync(
+                        new HireCandidateCommand(colonyId, candidate.Id, HireRole.Administrator));
+                ImGui.SameLine();
+                if (ImGui.Button("Hire as lab technician###recruit-lab-" + candidate.Id))
+                    _uiState.GameClient?.SubmitCommandAsync(
+                        new HireCandidateCommand(colonyId, candidate.Id, HireRole.LabTechnician));
+                ImGui.Separator();
+            }
         }
 
         private static string CivilianRow(CommanderSnapshot person)

@@ -220,6 +220,7 @@ namespace Pulsar4X.Colonies
                         string.IsNullOrEmpty(colony.OwnerAbbreviation) ? colony.OwnerFaction : colony.OwnerAbbreviation,
                         colony.StartingFunds);
                     faction.FactionOwnerID = faction.Id;
+                    faction.GetDataBlob<FactionInfoDB>().AutoHires = true;
                     created[colony.OwnerFaction] = faction;
                 }
 
