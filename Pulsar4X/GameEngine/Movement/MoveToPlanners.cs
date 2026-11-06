@@ -755,12 +755,23 @@ public static class MovePlanner
 
         double targetRadius = targetOrbit.SemiMajorAxis;
         double along = AlongTrackArrivedSeparation(target, targetRadius);
-        if (separation <= along)
-            return MoveOption.Yes(MoveMode.AlreadyThere, 0, message: $"Matching {NameOf(target, ship)}'s orbit");
-
-        if (!IsCoOrbital(shipRadius, targetRadius, target)
-            && !IsCoOrbital(posRel.Length(), targetRadius, target))
+        // Phobos e=0.0151 → radial swing ~a*e exceeds the 1% along-track band. Treat the
+        // same phase tolerance EvaluateNewtonian uses as arrived, not only Euclidean near.
+        // Drop-in is dest+offset: nearby counts when sense and altitude also match.
+        bool sameSense = ship.TryGetDataBlob<OrbitDB>(out var senseOrbit)
+            && senseOrbit.Parent == parent
+            && RelativeInclination(senseOrbit, targetOrbit) <= ClosedFormInclination;
+        bool coOrbital = IsCoOrbital(shipRadius, targetRadius, target)
+            || IsCoOrbital(posRel.Length(), targetRadius, target);
+        if (!sameSense)
+            return MoveOption.No(MoveMode.AlreadyThere, "orbit sense does not match the target");
+        if (!coOrbital)
             return MoveOption.No(MoveMode.AlreadyThere, "not in the target's orbit");
+
+        double phaseAngle = NormaliseAngle(AngleOf(target, now) - AngleOf(ship, now));
+        double phaseTol = targetRadius > 0 ? along / targetRadius : 0;
+        if (Math.Abs(phaseAngle) <= phaseTol || separation <= along)
+            return MoveOption.Yes(MoveMode.AlreadyThere, 0, message: $"Matching {NameOf(target, ship)}'s orbit");
 
         return MoveOption.No(MoveMode.AlreadyThere, "in the orbit but not with the target yet");
     }
@@ -896,23 +907,24 @@ public static class MovePlanner
             return MoveOption.No(mode, "target is under a different SOI parent; no interplanetary transfer maths yet");
         }
 
-        // Leftover dump is a hyperbola. A near-circular coplanar pair keeps HohmannOE.
-        // Anything eccentric or inclined asks the Lambert scan, which is the case the
-        // closed form cannot answer. A short tank that cannot fly the window still circularises.
-        bool closedForm = !needsCircularise
-            && targetOrbit.Eccentricity <= ClosedFormEccentricity
+        // Same-parent rendezvous (Phobos, station, ship): we cannot enter the target's SOI,
+        // so leftover e around the parent is circularised first. The next Plan then Hohmanns
+        // or phases. Lambert from a hyperbola spent 9 km/s and never matched the moon.
+        if (needsCircularise)
+        {
+            if (circulariseDV > thrust.DeltaV)
+                return MoveOption.No(mode, $"needs {circulariseDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
+            return MoveOption.Yes(mode, 0, circulariseDV,
+                message: $"Circularise to match {NameOf(target, ship)}");
+        }
+
+        // Near-circular coplanar pair keeps HohmannOE. Inclined leftovers ask Lambert.
+        bool closedForm = targetOrbit.Eccentricity <= ClosedFormEccentricity
             && RelativeInclination(shipOrbit, targetOrbit) <= ClosedFormInclination;
         if (!closedForm)
         {
             if (TryLambertWindow(ship, target, parent, now, thrust.DeltaV, order, out MoveOption windowed))
                 return windowed;
-            if (needsCircularise)
-            {
-                if (circulariseDV > thrust.DeltaV)
-                    return MoveOption.No(mode, $"needs {circulariseDV:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
-                return MoveOption.Yes(mode, 0, circulariseDV,
-                    message: $"Circularise to match {NameOf(target, ship)}");
-            }
 
             return MoveOption.No(mode, "transfer solution did not converge");
         }

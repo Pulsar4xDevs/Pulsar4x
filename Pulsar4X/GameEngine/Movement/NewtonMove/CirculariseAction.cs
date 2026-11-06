@@ -153,7 +153,9 @@ public class CirculariseAction : EntityAction
             return;
         }
 
-        if (startKE.Eccentricity < 0.05)
+        // Must match MovePlanner.MaxEccentricityForTransfer (0.01). Finishing at e<0.05
+        // while the planner still wants circularise loops Circularise forever.
+        if (startKE.Eccentricity <= 0.01)
         {
             IsRunning = true;
             _isFinished = true;

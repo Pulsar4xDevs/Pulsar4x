@@ -188,11 +188,15 @@ public class MatchOrbitAction : EntityAction
         double separation = ((Vector3)MoveMath.GetAbsoluteFuturePosition(ship, now)
                              - (Vector3)MoveMath.GetAbsoluteFuturePosition(target, now)).Length();
 
-        // Warp drop-in leaves us dest+offset; that is arrived even if leftover SMA ≠ a.
-        if (separation <= along)
+        // Warp drop-in leaves us dest+offset; that is arrived when the leftover is the same
+        // sense and roughly the same altitude. Retrograde or wrong-SMA leftovers still burn.
+        double incl = RelativeInclination(shipOrbit, targetOrbit);
+        const double maxIncl = 2.0 * Math.PI / 180.0;
+        if (separation <= along && incl <= maxIncl && IsCoOrbital(shipRadius, targetRadius, target))
             return true;
 
-        if (IsCoOrbital(shipRadius, targetRadius, target) && Math.Abs(phaseAngle) <= phaseTol)
+        if (IsCoOrbital(shipRadius, targetRadius, target) && incl <= maxIncl
+            && Math.Abs(phaseAngle) <= phaseTol)
             return true;
 
         (Vector3 deltaV, double timeInSeconds)[] manuvers;
@@ -224,6 +228,17 @@ public class MatchOrbitAction : EntityAction
         }
 
         return burns.Count > 0;
+    }
+
+
+    static double RelativeInclination(OrbitDB a, OrbitDB b)
+    {
+        double cos = Math.Cos(a.Inclination) * Math.Cos(b.Inclination)
+            + Math.Sin(a.Inclination) * Math.Sin(b.Inclination)
+              * Math.Cos(a.LongitudeOfAscendingNode - b.LongitudeOfAscendingNode);
+        if (cos > 1) cos = 1;
+        if (cos < -1) cos = -1;
+        return Math.Acos(cos);
     }
 
     static bool IsCoOrbital(double shipRadius, double targetRadius, Entity target)
