@@ -158,6 +158,50 @@
   {
     "Type": "ComponentTemplate",
     "Payload": {
+      "UniqueID": "passenger-hold",
+      "Name": "Passenger Quarters",
+      "Formulas": {
+        "Description": "Berths for people in transit between colonies. One person takes about 0.065 m^3 and 100 kg. Holds no freight.",
+        "Mass": "PropertyValue('Berths') * 0.1",
+        "Volume": "PropertyValue('Berths') * 0.065",
+        "HTK": "0.5",
+        "CrewReq": "Max(1, PropertyValue('Berths') * 0.01)",
+        "ResearchCost": "0",
+        "CreditCost": "[Mass] * 0.12",
+        "BuildPointCost": "[Mass] * 4.5"
+      },
+      "ResourceCost": {
+        "stainless-steel": "[Mass] * 0.4",
+        "aluminium": "[Mass] * 0.2",
+        "plastic": "[Mass] * 0.4"
+      },
+      "ComponentType":"Cargo Hold",
+      "MountType": "ShipComponent, ShipCargo",
+      "CargoTypeID": "passenger-storage",
+      "IndustryTypeID": "installation-construction",
+      "Properties": [
+        {
+          "Name": "Berths",
+          "DescriptionFormula": "'How many people this hold can carry'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "DataDict": {},
+          "MaxFormula": "200000",
+          "MinFormula": "10",
+          "StepFormula": "10",
+          "PropertyFormula": "100"
+        },
+        {
+          "Name": "DBargsStor",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs('passenger-storage', PropertyValue('Berths') * 0.065)",
+          "AttributeType": "Pulsar4X.Storage.CargoStorageAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
       "UniqueID": "spaceport",
       "Name": "Spaceport",
       "Formulas": {

@@ -15,6 +15,12 @@ public sealed class MarketListing
     public decimal Bid;
     public long Reserve;
 
+    /// <summary>
+    /// Set on the offers the periodic migration refresh posts so it can find and replace them
+    /// without disturbing an ordinary listing for the same cargo id. Never set by hand.
+    /// </summary>
+    public bool Relocation;
+
     public MarketListing Copy() => new()
     {
         CargoId = CargoId,
@@ -23,6 +29,7 @@ public sealed class MarketListing
         BuyQuantity = BuyQuantity,
         Bid = Bid,
         Reserve = Reserve,
+        Relocation = Relocation,
     };
 }
 

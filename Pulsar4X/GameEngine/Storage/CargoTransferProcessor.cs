@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Pulsar4X.Colonies;
 using Pulsar4X.DataStructures;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
 using Pulsar4X.Extensions;
 using Pulsar4X.Interfaces;
@@ -80,7 +82,13 @@ namespace Pulsar4X.Storage
                 escroList[index] = (cargoItem,itemsLeft, massLeft);
 
                 //add items to cargo of seconddary entity store
-                moveTo.AddCargoByUnit(cargoItem, countToXfer);
+                long added = moveTo.AddCargoByUnit(cargoItem, countToXfer);
+
+                //People come off the hold and go onto the colony's books. Anyone the colony has no
+                //room for stays aboard, because AddCargoByUnit above only took the people it stored.
+                if (cargoItem is SpeciesCargo passengers && added > 0
+                    && moveTo.OwningEntity is { IsValid: true } colony && colony.HasDataBlob<ColonyInfoDB>())
+                    PassengerAdapter.LandAvailable(colony, moveFrom.OwningEntity!, passengers, added);
 
                 //update mass and volume of primary entity store.
                 double volumeStoring = countToXfer * cargoItem.VolumePerUnit;

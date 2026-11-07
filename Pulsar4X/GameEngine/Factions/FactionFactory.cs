@@ -321,6 +321,8 @@ namespace Pulsar4X.Factions
             game.SpaceMaster.SetAccess(factionEntity.Id, AccessRole.SM);
             name.SetName(factionEntity.Id, factionName);
             game.Factions.Add(factionEntity.Id, factionEntity);
+            // Any species already created are people, so a later ship or market can find them by id.
+            SpeciesCargo.Register(factionInfo.Data, factionInfo.Species);
             return factionEntity;
         }
 
@@ -362,6 +364,7 @@ namespace Pulsar4X.Factions
             game.SpaceMaster.SetAccess(factionEntity.Id, AccessRole.SM);
             name.SetName(factionEntity.Id, factionName);
             game.Factions.Add(factionEntity.Id, factionEntity);
+            SpeciesCargo.Register(factionInfo.Data, factionInfo.Species);
             return factionEntity;
         }
 
@@ -429,6 +432,7 @@ namespace Pulsar4X.Factions
                 var species = SpeciesFactory.CreateFromBlueprint(system, speciesBlueprint);
                 species.FactionOwnerID = faction.Id;
                 info.Species.Add(species);
+                SpeciesCargo.Register(info.Data, info.Species);
             }
 
             // Designs look up resources, templates, and tech levels. A blueprint faction does not

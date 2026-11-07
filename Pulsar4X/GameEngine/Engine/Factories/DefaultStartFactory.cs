@@ -194,6 +194,7 @@ namespace Pulsar4X.Engine
             DefaultBFC(factionEntity, factionDataStore);
             ShipDefaultCargoHold(factionEntity, factionDataStore);
             ShipSmallCargo(factionEntity, factionDataStore);
+            ShipPassengerHold(factionEntity, factionDataStore);
             ShipPassiveSensor(factionEntity, factionDataStore);
             FacPassiveSensor(factionEntity, factionDataStore);
             DefaultFisionReactor(factionEntity, factionDataStore);
@@ -681,6 +682,18 @@ namespace Pulsar4X.Engine
                 return _cargoCompartment;
             _cargoCompartment = ComponentDesignFromJson.Create(faction, factionDataStore, "Data/basemod/componentDesigns/cargoHold-1t.json");
             return _cargoCompartment;
+        }
+        /// <summary>
+        /// Berths for people in transit. It sits beside the cargo holds so a start can build a
+        /// ship that carries colonists, without handing out a ship that already has one. The design
+        /// is the stock mod-data one, so a new start cannot drift from the published numbers.
+        /// </summary>
+        public static ComponentDesign ShipPassengerHold(Entity faction, FactionDataStore factionDataStore)
+        {
+            var game = faction.Manager?.Game
+                ?? throw new InvalidOperationException("The faction is not in a game, so it has no mod data.");
+            var blueprint = game.StartingGameData.ComponentDesigns["default-design-passenger-hold"];
+            return ComponentDesignFromJson.Create(faction, factionDataStore, blueprint);
         }
         public static ComponentDesign ShipSmallOrdnanceStore(Entity faction, FactionDataStore factionDataStore)
         {

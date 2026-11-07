@@ -18,7 +18,8 @@
         "default-design-alcubierre-500",
         "default-design-battery-2t",
         "default-design-reactor-2t",
-        "default-design-raptor"
+        "default-design-raptor",
+        "default-design-passenger-hold"
       ],
       "ShipDesigns": [
         "default-ship-design-geo-surveyor"
@@ -59,7 +60,8 @@
         "default-design-alcubierre-500",
         "default-design-battery-2t",
         "default-design-reactor-2t",
-        "default-design-raptor"
+        "default-design-raptor",
+        "default-design-passenger-hold"
       ],
       "ShipDesigns": [
         "ship-design-lode-prospector"

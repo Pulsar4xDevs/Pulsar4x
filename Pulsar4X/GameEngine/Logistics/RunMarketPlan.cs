@@ -10,7 +10,9 @@ namespace Pulsar4X.Logistics;
 
 /// <summary>
 /// One pass of <see cref="GoalType.RunMarket"/>. Returns listing and industry actions.
-/// Does not write the book and does not enqueue jobs.
+/// Does not write the book and does not enqueue jobs, except for the relocation offers
+/// <see cref="MigrationBook"/> keeps current: those are market state, not work, and the freighters
+/// pick them up through the ordinary book.
 /// </summary>
 public class RunMarketPlan : IGoalPlanner
 {
@@ -23,6 +25,12 @@ public class RunMarketPlan : IGoalPlanner
 
         if (!managedEntity.TryGetDataBlob<LogiBaseDB>(out var book))
             return PlanResult.Continue(new List<EntityAction>(), "no logistics office");
+
+        // Overcrowding relocation rides on this periodic pass. The refresh is idempotent and
+        // retires its own stale offers before posting, so a repeat is harmless.
+        if (managedEntity.Manager is { } manager)
+            MigrationBook.Refresh(manager);
+
         if (!managedEntity.TryGetDataBlob<ColonyMarketPolicyDB>(out var policy) || policy.Rows.Count == 0)
             return PlanResult.Continue(new List<EntityAction>());
 

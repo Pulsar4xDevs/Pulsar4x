@@ -1,9 +1,11 @@
 using System;
 using GameEngine.Engine.Orders;
 using Newtonsoft.Json;
+using Pulsar4X.Colonies;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
 using Pulsar4X.Movement;
+using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.Logistics;
@@ -104,6 +106,28 @@ public class MarketExchangeAction : EntityAction
             return;
         }
 
+        bool colonists = shipGood is SpeciesCargo || marketGood is SpeciesCargo;
+        if (colonists)
+        {
+            if (shipFaction != marketFaction)
+            {
+                Fail("People do not change factions.");
+                return;
+            }
+            if (!(shipGood is SpeciesCargo shipPeople && marketGood is SpeciesCargo marketPeople)
+                || shipPeople.SpeciesId != marketPeople.SpeciesId)
+            {
+                Fail("Unknown good");
+                return;
+            }
+            if (!_entityCommanding.HasDataBlob<ColonyInfoDB>()
+                && !market.HasDataBlob<ColonyInfoDB>())
+            {
+                Fail("People need a colony on one side.");
+                return;
+            }
+        }
+
         long requested = RequestedUnits < 0 ? 0 : RequestedUnits;
         long quantity;
         decimal price;
@@ -112,14 +136,21 @@ public class MarketExchangeAction : EntityAction
         ICargoable sourceGood;
         ICargoable destGood;
 
+        // A colony's people are not stock in its warehouse, so no bound reads the hold.
+        // PassengerAdapter caps them once it knows which side is the colony.
+        long marketStock = colonists ? long.MaxValue : MarketBook.Sellable(market, listing, marketGood);
+        long shipFree = colonists ? long.MaxValue : FreeUnits(_entityCommanding, shipGood);
+        long shipStock = colonists ? long.MaxValue : MarketBook.Stock(_entityCommanding, shipGood);
+        long marketFree = colonists ? long.MaxValue : FreeUnits(market, marketGood);
+
         if (Side == MarketSide.BuyFromMarket)
         {
             price = listing.Ask;
             quantity = Min(
                 requested,
                 listing.SellQuantity,
-                MarketBook.Sellable(market, listing, marketGood),
-                FreeUnits(_entityCommanding, shipGood));
+                marketStock,
+                shipFree);
             source = market;
             dest = _entityCommanding;
             sourceGood = marketGood;
@@ -131,8 +162,8 @@ public class MarketExchangeAction : EntityAction
             quantity = Min(
                 requested,
                 listing.BuyQuantity,
-                MarketBook.Stock(_entityCommanding, shipGood),
-                FreeUnits(market, marketGood));
+                shipStock,
+                marketFree);
             source = _entityCommanding;
             dest = market;
             sourceGood = shipGood;
@@ -161,6 +192,35 @@ public class MarketExchangeAction : EntityAction
             || !dest.TryGetDataBlob<CargoStorageDB>(out var destStore))
         {
             Fail("Nothing to exchange");
+            return;
+        }
+
+        if (colonists)
+        {
+            // A colony's people are not in its warehouse, so the adapter decides the count.
+            if (!TryPeople(shipFaction, marketFaction, sourceGood, source, dest,
+                    out var colony, out var ship, out var people, out var landing, out var why))
+            {
+                Fail(why);
+                return;
+            }
+
+            long moved_People = Side == MarketSide.BuyFromMarket
+                ? PassengerAdapter.Board(colony, ship, people, landing)
+                : PassengerAdapter.Land(colony, ship, people, landing);
+            if (moved_People <= 0)
+            {
+                Fail("Nothing to exchange");
+                return;
+            }
+
+            if (Side == MarketSide.BuyFromMarket)
+                listing.SellQuantity -= moved_People;
+            else
+                listing.BuyQuantity -= moved_People;
+
+            _details = $"{Side} {moved_People} {CargoId}";
+            _isFinished = true;
             return;
         }
 
@@ -254,6 +314,72 @@ public class MarketExchangeAction : EntityAction
         double dv = CargoTransferProcessor.CalcDVDifference_m(ship, market);
         double maxRange = Math.Max(shipStore.TransferRangeDv_mps, marketStore.TransferRangeDv_mps);
         return dv <= maxRange;
+    }
+
+    /// <summary>
+    /// Pick the colony and the ship for one colonist exchange, then cap the count by the colony's
+    /// population or its room and by the ship's passenger hold. A ship with no passenger capacity
+    /// is a refusal, never an error.
+    /// </summary>
+    static bool TryPeople(int shipFaction, int marketFaction,
+        ICargoable sourceGood, Entity source, Entity dest,
+        out Entity colony, out Entity ship, out SpeciesCargo people,
+        out long quantity, out string why)
+    {
+        colony = null!;
+        ship = null!;
+        people = null!;
+        quantity = 0;
+        why = "Nothing to exchange";
+
+        ICargoable held = sourceGood;
+        if (source.HasDataBlob<ColonyInfoDB>())
+            colony = source;
+        else if (source.HasDataBlob<ShipInfoDB>())
+            ship = source;
+        if (dest.HasDataBlob<ColonyInfoDB>())
+            colony = dest;
+        else if (dest.HasDataBlob<ShipInfoDB>())
+            ship = dest;
+
+        if (colony == null || ship == null)
+        {
+            why = "People need a colony on one side.";
+            return false;
+        }
+        if (held is not SpeciesCargo passengers)
+        {
+            why = "Unknown good";
+            return false;
+        }
+        people = passengers;
+        if (colony.FactionOwnerID != ship.FactionOwnerID
+            || colony.FactionOwnerID != shipFaction
+            || colony.FactionOwnerID != marketFaction)
+        {
+            why = "People do not change factions.";
+            return false;
+        }
+
+        long cap = long.MaxValue;
+        if (ReferenceEquals(colony, source))
+        {
+            if (!PassengerAdapter.CanBoard(colony, ship, people, cap, out var boardable, out var reason))
+            {
+                why = reason;
+                return false;
+            }
+            quantity = boardable;
+            return true;
+        }
+
+        if (!PassengerAdapter.CanLand(colony, ship, people, cap, out var landing, out var landReason))
+        {
+            why = landReason;
+            return false;
+        }
+        quantity = landing;
+        return true;
     }
 
     static bool TryResolve(Game game, int factionId, string cargoId, out ICargoable cargo)
