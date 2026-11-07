@@ -34,7 +34,10 @@
     "Payload": {
       "UniqueId": "default-design-factory",
       "Name": "Prefab Factory",
-      "TemplateId": "factory"
+      "TemplateId": "factory",
+      "Properties": [
+        { "Key": "Size", "Value": 200 }
+      ]
     }
   },
   {
@@ -145,10 +148,10 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-fuel-farm-5000k",
-      "Name": "Fuel Farm 5000km^3",
+      "Name": "Fuel Farm 1000000m^3",
       "TemplateId": "stainless-steel-fuel-tank",
       "Properties": [
-        { "key": "Tank Volume", "value": 5000000 }
+        { "Key": "Tank Volume", "Value": 1000000 }
       ]
     }
   },
@@ -364,7 +367,10 @@
     "Payload": {
       "UniqueId": "default-design-refinery",
       "Name": "Prefab Refinery",
-      "TemplateId": "refinery"
+      "TemplateId": "refinery",
+      "Properties": [
+        { "Key": "Size", "Value": 1000 }
+      ]
     }
   },
   {
@@ -514,7 +520,10 @@
     "Payload": {
       "UniqueId": "default-design-factory-site",
       "Name": "Factory",
-      "TemplateId": "factory-site"
+      "TemplateId": "factory-site",
+      "Properties": [
+        { "Key": "Size", "Value": 1000 }
+      ]
     }
   },
   {
@@ -572,7 +581,7 @@
       "Name": "Prefab Construction Office",
       "TemplateId": "local-construction",
       "Properties": [
-        { "Key": "Level", "Value": 5 }
+        { "Key": "Level", "Value": 1 }
       ]
     }
   },

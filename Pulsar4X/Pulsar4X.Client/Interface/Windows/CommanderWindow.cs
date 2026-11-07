@@ -46,6 +46,8 @@ namespace Pulsar4X.Client
                 {
                     var people = galaxy.Commanders;
 
+                    DisplayRecruitButton(galaxy);
+
                     // Keep the selection valid, defaulting to the first person so the window is
                     // immediately usable without an extra click.
                     CommanderSnapshot? selected = null;
@@ -78,6 +80,44 @@ namespace Pulsar4X.Client
                 }
             }
             Window.End();
+        }
+
+        // Hiring lives on each colony's Recruitment tab (Manage Colonies). This button only opens
+        // that tab on an owned colony, preferring one that has candidates right now.
+        private void DisplayRecruitButton(IClientGalaxy galaxy)
+        {
+            (int colonyId, string systemId)? target = null;
+            bool hasCandidates = false;
+            foreach (var summary in galaxy.KnownSystems)
+            {
+                var system = galaxy.GetSystem(summary.SystemId);
+                if (system == null) continue;
+                foreach (var entity in system.Entities)
+                {
+                    if (entity.Kind != BodyKind.Colony || entity.Relation != OwnerRelation.Owned) continue;
+                    if (entity.GetView<RecruitmentView>() is not { } view) continue;
+                    if (view.Candidates.Count > 0)
+                    {
+                        target = (entity.Id, summary.SystemId);
+                        hasCandidates = true;
+                        break;
+                    }
+                    target ??= (entity.Id, summary.SystemId);
+                }
+                if (hasCandidates) break;
+            }
+
+            bool enabled = target != null;
+            if (!enabled) ImGui.BeginDisabled();
+            if (ImGui.Button("Recruit") && target is { } t)
+                ColonyManagementWindow.GetInstance().OpenRecruitment(t.colonyId, t.systemId);
+            if (!enabled) ImGui.EndDisabled();
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                ImGui.SetTooltip(!enabled
+                    ? "No owned colony offers recruitment."
+                    : hasCandidates
+                        ? "Open the colony Recruitment tab to hire."
+                        : "Open the colony Recruitment tab. No candidates right now.");
         }
 
         private void DisplayPeopleList(IReadOnlyList<CommanderSnapshot> people, DateTime now)
