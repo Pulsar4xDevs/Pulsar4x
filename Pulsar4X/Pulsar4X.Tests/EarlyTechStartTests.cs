@@ -215,10 +215,11 @@ public class EarlyTechStartTests
         Assert.That(withColonies, Is.Empty);
     }
 
-    [Test]
-    public void NewGameWithEarlyMod_BuildsTheFacilitiesAndStocksTheWarehouse()
+    [TestCase(false)]
+    [TestCase(true)]
+    public void NewGameWithEarlyMod_BuildsTheFacilitiesAndStocksTheWarehouse(bool earlyModOnly)
     {
-        var (game, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var (game, faction) = StartGameLikeTheMenu(earlyModOnly ? new[] { EarlyMod } : new[] { BaseMod, EarlyMod });
         var colony = game.Systems
             .SelectMany(system => system.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
             .Single();
@@ -228,6 +229,9 @@ public class EarlyTechStartTests
                      "default-design-shipyard", "default-design-research-lab", "default-design-city-hall" })
             Assert.That(installations, Does.Contain(id), id);
         Assert.That(installations, Does.Not.Contain("default-design-auto-mine"));
+        var byDesign = colony.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign;
+        Assert.That(byDesign["default-design-factory"], Has.Count.EqualTo(1), "one installed factory in a fresh Earth start");
+        Assert.That(byDesign["default-design-refinery"], Has.Count.EqualTo(1), "one installed refinery in a fresh Earth start");
 
         var designs = faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Keys;
         Assert.That(designs, Does.Not.Contain("default-design-alcubierre-2k"));

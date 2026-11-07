@@ -70,11 +70,11 @@
         },
         {
           "Id": "default-design-refinery",
-          "Amount": 5
+          "Amount": 1
         },
         {
           "Id": "default-design-factory",
-          "Amount": 25
+          "Amount": 1
         },
         {
           "Id": "default-design-shipyard",
