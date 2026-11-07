@@ -188,16 +188,36 @@ public class MatchOrbitAction : EntityAction
         double separation = ((Vector3)MoveMath.GetAbsoluteFuturePosition(ship, now)
                              - (Vector3)MoveMath.GetAbsoluteFuturePosition(target, now)).Length();
 
-        // Warp drop-in leaves us dest+offset; that is arrived even if leftover SMA ≠ a.
-        if (separation <= along)
+        // Warp drop-in leaves us dest+offset; that is arrived when the leftover is the same
+        // sense and roughly the same altitude. Retrograde leftovers flip first, then match.
+        double incl = RelativeInclination(shipOrbit, targetOrbit);
+        const double maxIncl = 2.0 * Math.PI / 180.0;
+        if (separation <= along && incl <= maxIncl && IsCoOrbital(shipRadius, targetRadius, target))
             return true;
 
-        if (IsCoOrbital(shipRadius, targetRadius, target) && Math.Abs(phaseAngle) <= phaseTol)
+        if (IsCoOrbital(shipRadius, targetRadius, target) && incl <= maxIncl
+            && Math.Abs(phaseAngle) <= phaseTol)
             return true;
+
+        var startKE = shipOrbit.GetElements();
+        if (incl > maxIncl)
+        {
+            if (!TryPlaneChangeBurn(ship, targetOrbit, sgp, now, startKE, out var flipEnd, out reason))
+                return false;
+            burns.Add((startKE, flipEnd, now));
+            startKE = flipEnd;
+            shipRadius = flipEnd.SemiMajorAxis;
+            // Recompute angles from the post-flip orbit.
+            shipAngle = AngleOfKepler(startKE, now);
+            phaseAngle = NormaliseAngle(targetAngle - shipAngle);
+        }
+
+        if (IsCoOrbital(shipRadius, targetRadius, target) && Math.Abs(phaseAngle) <= phaseTol)
+            return true; // plane-change alone may already be enough
 
         (Vector3 deltaV, double timeInSeconds)[] manuvers;
         if (IsCoOrbital(shipRadius, targetRadius, target))
-            manuvers = OrbitalMath.OrbitPhasingManuvers(shipOrbit.GetElements(), sgp, now, phaseAngle);
+            manuvers = OrbitalMath.OrbitPhasingManuvers(startKE, sgp, now, phaseAngle);
         else
         {
             manuvers = OrbitalMath.HohmannOE(sgp, shipRadius, shipAngle, targetRadius, targetAngle);
@@ -205,7 +225,6 @@ public class MatchOrbitAction : EntityAction
                 manuvers[1].timeInSeconds += manuvers[0].timeInSeconds;
         }
 
-        var startKE = shipOrbit.GetElements();
         foreach (var manuver in manuvers)
         {
             DateTime nodeTime = now + TimeSpan.FromSeconds(manuver.timeInSeconds);
@@ -224,6 +243,75 @@ public class MatchOrbitAction : EntityAction
         }
 
         return burns.Count > 0;
+    }
+
+    static bool TryPlaneChangeBurn(
+        Entity ship, OrbitDB targetOrbit, double sgp, DateTime now, KeplerElements startKE,
+        out KeplerElements endKE, out string reason)
+    {
+        endKE = default;
+        reason = string.Empty;
+        var state = OrbitalMath.GetStateVectors(startKE, now);
+        var pos = state.position;
+        var vel = (Vector3)state.velocity;
+        double r = pos.Length();
+        if (!(r > 1))
+        {
+            reason = "no usable radius for plane change";
+            return false;
+        }
+        var tgtState = OrbitMath.GetStateVectors(targetOrbit, now);
+        var planeN = Vector3.Cross(tgtState.pos, tgtState.Velocity);
+        if (planeN.Length() < 1e-12)
+        {
+            reason = "target orbit plane is degenerate";
+            return false;
+        }
+        planeN = Vector3.Normalise(planeN);
+        var radial = Vector3.Normalise(pos);
+        var desiredDir = Vector3.Cross(planeN, radial);
+        if (desiredDir.Length() < 1e-12)
+        {
+            reason = "plane-change direction is degenerate";
+            return false;
+        }
+        desiredDir = Vector3.Normalise(desiredDir);
+        double vCirc = Math.Sqrt(sgp / r);
+        if (!double.IsFinite(vCirc) || vCirc <= 0)
+        {
+            reason = "circular speed for plane change is not finite";
+            return false;
+        }
+        var desiredVel = desiredDir * vCirc;
+        endKE = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, desiredVel, now);
+        if (!double.IsFinite(endKE.SemiMajorAxis) || !double.IsFinite(endKE.Eccentricity)
+            || endKE.Eccentricity > MaxEccentricityForTransfer)
+        {
+            reason = "plane-change solution did not converge";
+            return false;
+        }
+        return true;
+    }
+
+    static double AngleOfKepler(KeplerElements ke, DateTime at)
+    {
+        var state = OrbitalMath.GetStateVectors(ke, at);
+        var pos = state.position;
+        var vel = (Vector3)state.velocity;
+        double longitude = Math.Atan2(pos.Y, pos.X);
+        double hz = pos.X * vel.Y - pos.Y * vel.X;
+        return hz < 0 ? -longitude : longitude;
+    }
+
+
+    static double RelativeInclination(OrbitDB a, OrbitDB b)
+    {
+        double cos = Math.Cos(a.Inclination) * Math.Cos(b.Inclination)
+            + Math.Sin(a.Inclination) * Math.Sin(b.Inclination)
+              * Math.Cos(a.LongitudeOfAscendingNode - b.LongitudeOfAscendingNode);
+        if (cos > 1) cos = 1;
+        if (cos < -1) cos = -1;
+        return Math.Acos(cos);
     }
 
     static bool IsCoOrbital(double shipRadius, double targetRadius, Entity target)

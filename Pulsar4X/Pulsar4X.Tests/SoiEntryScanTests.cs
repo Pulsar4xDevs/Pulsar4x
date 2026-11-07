@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
+using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Modding;
 using Pulsar4X.Movement;
@@ -242,6 +244,139 @@ public class SoiEntryScanTests
         DateTime brute = BruteEntry(orbit, luna, oldHit.AddDays(-2), oldHit.AddDays(1), TimeSpan.FromMinutes(1));
         Assert.That(orbit.EntryDueAt, Is.EqualTo(brute).Within(TimeSpan.FromMinutes(1)));
         Assert.That(orbit.EntryDueAt, Is.EqualTo(oldHit).Within(TimeSpan.FromMinutes(1)));
+    }
+
+    /// <summary>
+    /// Phobos's Laplace sphere sits inside the moon. A ship that crosses that
+    /// geometric sphere stays on Mars: the scan does not schedule entry, an
+    /// entry interrupt does not reparent, and a newton step does not either.
+    /// </summary>
+    [Test]
+    public void PhobosSphereInsideTheBody_IsNotEntered()
+    {
+        var phobosData = LoadedPhobos();
+        double radius = phobosData.RadiusInM;
+        double soi = phobosData.SoiM;
+        TestContext.WriteLine(
+            $"Phobos radius_m={radius:G17} soi_m={soi:G17} sma_m={phobosData.SmaM:G17} " +
+            $"mass_kg={phobosData.MassKg:G17} marsMass_kg={phobosData.MarsMassKg:G17}");
+        Assert.That(radius, Is.EqualTo(Distance.AuToMt(Distance.KmToAU(11.1))),
+            "runtime radius is the mars.json Radius (km) through KmToAU / AuToM");
+        Assert.That(phobosData.MassKg, Is.EqualTo(1.07e16));
+        Assert.That(phobosData.MarsMassKg, Is.EqualTo(0.64174e24));
+        Assert.That(phobosData.SmaM, Is.EqualTo(9376.0 * 1000.0));
+        Assert.That(soi, Is.EqualTo(OrbitMath.GetSOI(phobosData.SmaM, phobosData.MassKg, phobosData.MarsMassKg)));
+        Assert.That(soi, Is.LessThanOrEqualTo(radius));
+        Assert.That(phobosData.HasExterior, Is.False);
+
+        var mars = AddBody(_sol, "Mars", phobosData.MarsMassKg, phobosData.MarsRadiusInM, phobosData.MarsSmaM, 0);
+        var phobos = AddBody(mars, "Phobos", phobosData.MassKg, radius, phobosData.SmaM, 0);
+        Assert.That(phobos.GetSOI_m(), Is.EqualTo(soi));
+        Assert.That(phobos.HasExteriorSoi(), Is.False);
+        Assert.That(mars.HasExteriorSoi(), Is.True);
+
+        var phobosOrbit = phobos.GetDataBlob<OrbitDB>();
+        var phobosPos = phobosOrbit.GetPosition(_epoch);
+        var phobosVel = OrbitMath.InstantaneousOrbitalVelocityVector_m(phobosOrbit, _epoch);
+        var outDir = Vector3.Normalise(new Vector3(-phobosPos.Y, phobosPos.X, 0));
+
+        // 15 km out is outside the body and outside the sphere. 50 m/s inward
+        // crosses the sphere in a few minutes, slowly enough that the entry
+        // scan's 60 s step cannot step over it.
+        const double startGap = 15_000;
+        const double closeSpeed = 50;
+        var ship = AddShip();
+        Place(ship, mars, phobosPos + outDir * startGap, phobosVel - outDir * closeSpeed);
+
+        var shipOrbit = ship.GetDataBlob<OrbitDB>();
+        double startDist = (shipOrbit.GetPosition(_epoch) - phobosPos).Length();
+        Assert.That(startDist, Is.GreaterThan(radius));
+        Assert.That(shipOrbit.EntryDueAt, Is.EqualTo(default(DateTime)));
+        Assert.That(Queued(ship, nameof(EnterSOIProcessor)), Is.Empty);
+        Assert.That(Queued(ship, nameof(SoiEntryRescanProcessor)), Is.Empty);
+
+        double min = double.MaxValue;
+        DateTime insideAt = default;
+        for (int s = 0; s <= 2000; s += 10)
+        {
+            var t = _epoch.AddSeconds(s);
+            double dist = (shipOrbit.GetPosition(t) - phobosOrbit.GetPosition(t)).Length();
+            if (dist < min)
+                min = dist;
+            if (insideAt == default && dist < soi)
+                insideAt = t;
+        }
+        Assert.That(min, Is.LessThan(soi),
+            "the coast does pass through the geometric sphere; the scan must be what refused it");
+        Assert.That(min, Is.LessThan(radius), "that pass is inside the body");
+        Assert.That(ship.GetDataBlob<PositionDB>().Parent, Is.SameAs(mars));
+        Assert.That(shipOrbit.Parent, Is.SameAs(mars));
+
+        shipOrbit.EntryDueAt = insideAt;
+        Game.ProcessorManager.GetInstanceProcessor(nameof(EnterSOIProcessor))
+            .ProcessEntity(ship, insideAt);
+        Assert.That(ship.GetDataBlob<PositionDB>().Parent, Is.SameAs(mars),
+            "an entry interrupt while inside the buried sphere must not reparent");
+        Assert.That(ship.GetDataBlob<OrbitDB>().Parent, Is.SameAs(mars));
+        Assert.That(ship.GetDataBlob<OrbitDB>().GravitationalParameter_m3S2,
+            Is.EqualTo(OrbitMath.SGP(mars, ship)).Within(1e-6));
+
+        // Same geometry under thrust integration: already inside the sphere, coast one second.
+        var newton = AddShip();
+        newton.FactionOwnerID = FactionFactory.CreateFaction(Game, "phobos-soi").Id;
+        var insidePos = phobosPos + outDir * (soi * 0.5);
+        Place(newton, mars, insidePos, phobosVel);
+        Assert.That((newton.GetDataBlob<PositionDB>().RelativePosition - phobosPos).Length(), Is.LessThan(soi));
+        var thrust = new NewtonThrustAbilityDB("methalox");
+        thrust.ExhaustVelocity = 3000;
+        thrust.FuelBurnRate = 0;
+        thrust.ThrustInNewtons = 1;
+        newton.SetDataBlob(thrust);
+        var move = new NewtonMoveDB(mars, phobosVel);
+        newton.SetDataBlob(move);
+        NewtonionMovementProcessor.NewtonMove(move, _epoch.AddSeconds(1));
+        Assert.That(newton.GetDataBlob<PositionDB>().Parent, Is.SameAs(mars));
+        Assert.That(newton.HasDataBlob<OrbitDB>()
+            ? newton.GetDataBlob<OrbitDB>().Parent
+            : newton.GetDataBlob<NewtonMoveDB>().SOIParent, Is.SameAs(mars));
+    }
+
+    struct PhobosNumbers
+    {
+        public double RadiusInM;
+        public double SoiM;
+        public double SmaM;
+        public double MassKg;
+        public double MarsMassKg;
+        public double MarsRadiusInM;
+        public double MarsSmaM;
+        public bool HasExterior;
+    }
+
+    static PhobosNumbers LoadedPhobos()
+    {
+        var modLoader = new ModLoader();
+        var store = new ModDataStore();
+        modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
+        var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
+        StarSystemFactory.LoadFromBlueprint(game, store.Systems["system-sol"]);
+        var sol = game.Systems.Single(system => system.ID == "system-sol");
+        var phobos = sol.GetAllEntitiesWithDataBlob<OrbitDB>()
+            .Single(body => body.GetDefaultName() == "Phobos");
+        var mars = phobos.GetSOIParentEntity();
+        var phobosOrbit = phobos.GetDataBlob<OrbitDB>();
+        var marsOrbit = mars.GetDataBlob<OrbitDB>();
+        return new PhobosNumbers
+        {
+            RadiusInM = phobos.GetDataBlob<MassVolumeDB>().RadiusInM,
+            SoiM = phobos.GetSOI_m(),
+            SmaM = phobosOrbit.SemiMajorAxis,
+            MassKg = phobos.GetDataBlob<MassVolumeDB>().MassDry,
+            MarsMassKg = mars.GetDataBlob<MassVolumeDB>().MassDry,
+            MarsRadiusInM = mars.GetDataBlob<MassVolumeDB>().RadiusInM,
+            MarsSmaM = marsOrbit.SemiMajorAxis,
+            HasExterior = phobos.HasExteriorSoi(),
+        };
     }
 
     /// <summary>The previous 180-equal-sample scan, kept here so a regression can see the miss.</summary>

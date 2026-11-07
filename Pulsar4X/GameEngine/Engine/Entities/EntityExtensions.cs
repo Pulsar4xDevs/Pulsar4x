@@ -75,6 +75,21 @@ namespace Pulsar4X.Extensions
         }
 
         /// <summary>
+        /// True when this body's Laplace sphere extends outside the body.
+        /// A sphere at or inside the surface is not a patched-conic parent:
+        /// every point in it intersects the body. Sol Phobos is that case.
+        /// </summary>
+        public static bool HasExteriorSoi(this Entity entity)
+        {
+            double soi = entity.GetSOI_m();
+            if (!double.IsFinite(soi) || !(soi > 0))
+                return false;
+            if (entity.TryGetDataBlob<MassVolumeDB>(out var mass) && soi <= mass.RadiusInM)
+                return false;
+            return true;
+        }
+
+        /// <summary>
         /// Gets the SOI radius of a given body.
         /// </summary>
         /// <returns>The SOI radius in AU</returns>
