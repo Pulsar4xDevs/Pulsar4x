@@ -20,6 +20,37 @@ namespace Pulsar4X.Ships
     [JsonObject]
     public class ShipDesign : ICargoable, IConstructableDesign, ISerializable
     {
+        /// <summary>Finite collector area (m²) capable of conversion under suitable illumination,
+        /// zero if none, or NaN if any positive-count panel is malformed or the area overflows.
+        /// This is NOT a power rating; runtime supplies the local spectrum.</summary>
+        public static double GetSolarCollectionArea(IEnumerable<(ComponentDesign design, int count)> components)
+        {
+            double area = 0;
+            foreach (var (design, count) in components)
+            {
+                if (count <= 0 || !design.TryGetAttribute<Pulsar4X.Energy.EnergySolarGenerationAtb>(out var panel))
+                    continue;
+                var band = panel.AbsorptionWaveformCapability;
+                // Validate every installed panel before skipping inert ones: NaN can poison
+                // the runtime sum even when a different panel provides useful conversion.
+                if (!double.IsFinite(panel.Area_m2) || panel.Area_m2 < 0
+                    || !double.IsFinite(panel.BestEfficiency) || panel.BestEfficiency < 0
+                    || !double.IsFinite(panel.WorstEfficiency) || panel.WorstEfficiency < 0
+                    || band == null || !double.IsFinite(band.WavelengthMin_nm)
+                    || !double.IsFinite(band.WavelengthAverage_nm) || !double.IsFinite(band.WavelengthMax_nm)
+                    || band.WavelengthMax_nm < band.WavelengthMin_nm)
+                    return double.NaN;
+                if (panel.Area_m2 == 0 || (panel.BestEfficiency == 0 && panel.WorstEfficiency == 0)
+                    || band.WavelengthMax_nm == band.WavelengthMin_nm)
+                    continue;
+                double contribution = panel.Area_m2 * count;
+                if (!double.IsFinite(contribution) || !double.IsFinite(area + contribution))
+                    return double.NaN;
+                area += contribution;
+            }
+            return area;
+        }
+
         public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.CanBeLaunched;
         public int ID { get; private set; } = Game.GetEntityID();
         public string UniqueID { get; private set; } = Guid.NewGuid().ToString();

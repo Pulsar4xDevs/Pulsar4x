@@ -10,7 +10,7 @@ public class ShipDesignValidityDisplayTests
     [TestCase(0, "Design mass")]
     [TestCase(1, "Newtonian thrust")]
     [TestCase(2, "Thrust-to-mass ratio")]
-    [TestCase(3, "Energy generation")]
+    [TestCase(3, "Add a working generator")]
     [TestCase(4, "Energy storage")]
     public void Every_failed_rule_has_an_explanation_including_negative_and_NaN(int field, string label)
     {
@@ -38,10 +38,12 @@ public class ShipDesignValidityDisplayTests
     }
 
     [Test]
-    public void Missing_generation_explains_existing_solar_limitation()
+    public void Solar_collector_satisfies_generation_but_not_storage_or_thrust()
     {
-        var reasons = ShipDesignWindow.GetInvalidDesignReasons(100, 1000, 0.1, 0, 1000);
-        Assert.That(reasons.Single(), Does.Contain("Solar panels do not currently satisfy"));
+        Assert.That(ShipDesignWindow.GetInvalidDesignReasons(100, 1000, 0.1, 0, 1000, 100), Is.Empty);
+        Assert.That(ShipDesignWindow.GetInvalidDesignReasons(100, 1000, 0.1, 0, 0, 100).Single(),
+            Does.StartWith("Energy storage"));
+        Assert.That(ShipDesignWindow.GetInvalidDesignReasons(100, 0, 0, 0, 1000, 100), Has.Count.EqualTo(2));
     }
 
     [Test]

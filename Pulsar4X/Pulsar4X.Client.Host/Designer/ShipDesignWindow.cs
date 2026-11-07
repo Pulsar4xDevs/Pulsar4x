@@ -61,6 +61,7 @@ namespace Pulsar4X.Client
         //energy
         private double _estor;
         private double _egen;
+        private double _solarArea;
 
         //mass
         private double _massDry;
@@ -746,9 +747,30 @@ namespace Pulsar4X.Client
                 ImGui.Text(Stringify.Power(_wec));
 
                 ImGui.TableNextColumn();
-                ImGui.Text("Energy Output");
+                ImGui.Text((_solarArea > 0 || double.IsNaN(_solarArea)) ? "Non-solar Output" : "Energy Output");
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.Power(_egen));
+
+                if (_solarArea > 0 || double.IsNaN(_solarArea))
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.Text("Solar Collector Area");
+                    ImGui.TableNextColumn();
+                    if (double.IsNaN(_solarArea))
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+                        ImGui.TextWrapped("Invalid collector data or area overflow.");
+                        ImGui.PopStyleColor();
+                    }
+                    else
+                        ImGui.Text(Stringify.Quantity(_solarArea) + " m²");
+                    ImGui.TableNextColumn();
+                    ImGui.Text("Solar Output");
+                    ImGui.TableNextColumn();
+                    ImGui.TextWrapped(double.IsNaN(_solarArea)
+                        ? "Cannot assess malformed collectors."
+                        : "Depends on local illumination and spectrum.");
+                }
 
                 ImGui.TableNextColumn();
                 ImGui.Text("Energy Storage");
@@ -807,7 +829,7 @@ namespace Pulsar4X.Client
                 ImGui.SetTooltip(hint);
             }
 
-            var invalidReasons = GetInvalidDesignReasons(_massDry, _tn, _ttwr, _egen, _estor);
+            var invalidReasons = GetInvalidDesignReasons(_massDry, _tn, _ttwr, _egen, _estor, _solarArea);
             if (invalidReasons.Count > 0)
             {
                 ImGui.NewLine();
@@ -952,6 +974,7 @@ namespace Pulsar4X.Client
             _wsc = wsc;
             _wspd = WarpMath.MaxSpeedCalc(wp, mass);
             _egen = egen;
+            _solarArea = ShipDesign.GetSolarCollectionArea(SelectedComponents);
             _estor = estor;
             _trate = cargoTransfer.rate;
             if(double.IsNaN(cargoTransfer.range))
@@ -988,7 +1011,7 @@ namespace Pulsar4X.Client
         // !(value > 0) also explains NaN (for example 0 / 0 thrust-to-mass on an empty design).
         // Warp and cargo handling are not validity requirements.
         public static List<string> GetInvalidDesignReasons(double mass, double thrust, double thrustToMass,
-            double energyGeneration, double energyStorage)
+            double energyGeneration, double energyStorage, double solarCollectionArea = 0)
         {
             var reasons = new List<string>();
             if (!(mass > 0))
@@ -997,8 +1020,10 @@ namespace Pulsar4X.Client
                 reasons.Add("Newtonian thrust must be greater than zero.");
             if (!(thrustToMass > 0))
                 reasons.Add("Thrust-to-mass ratio must be greater than zero.");
-            if (!(energyGeneration > 0))
-                reasons.Add("Energy generation must be greater than zero. Solar panels do not currently satisfy this design check.");
+            if (!(energyGeneration > 0) && !(solarCollectionArea > 0))
+                reasons.Add(double.IsNaN(solarCollectionArea)
+                    ? "Solar collector data is invalid or its total area overflows. Check the panel designs."
+                    : "Add a working generator or solar collector to generate energy.");
             if (!(energyStorage > 0))
                 reasons.Add("Energy storage must be greater than zero.");
             return reasons;

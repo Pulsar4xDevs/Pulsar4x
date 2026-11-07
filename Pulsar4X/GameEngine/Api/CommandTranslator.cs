@@ -2298,7 +2298,8 @@ namespace Pulsar4X.Engine.Api
                 hasEnergyStore |= componentDesign.HasAttribute<Pulsar4X.Energy.EnergyStoreAtb>();
             }
 
-            return design.MassPerUnit > 0 && hasThrust && hasEnergyGen && hasEnergyStore;
+            return design.MassPerUnit > 0 && hasThrust && hasEnergyStore
+                && (hasEnergyGen || Pulsar4X.Ships.ShipDesign.GetSolarCollectionArea(design.Components) > 0);
         }
 
         private CommandResult TranslateDeleteShipDesign(Entity faction, Entity commanded, GameCommand command)

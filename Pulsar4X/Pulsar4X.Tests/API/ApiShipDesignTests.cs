@@ -219,6 +219,62 @@ namespace Pulsar4X.Tests
                 "thrust is still required");
         }
 
+        [TestCase(1, 100, 20, false, true, false)]
+        [TestCase(0, 100, 20, false, false, false)]
+        [TestCase(1, 0, 20, false, false, false)]
+        [TestCase(1, 100, 0, false, false, false)]
+        [TestCase(1, 100, 20, true, true, false)]
+        [TestCase(1, 100, 20, false, false, true)]
+        [TestCase(1, 100, 20, true, true, true)]
+        [TestCase(2, double.MaxValue, 20, false, false, false)]
+        public void Solar_ship_save_and_shipyard_choices_use_positive_solar_capability(
+            int panelCount, double area, double efficiency, bool includeReactor, bool expectedValid, bool malformedCompanion)
+        {
+            var session = Connect();
+            var (_, armorId) = SetUpDesignData(session);
+            string engine = CreatePart(session, "conventional-engine", "Solar Ship Engine");
+            string battery = CreatePart(session, "battery-bank", "Solar Ship Battery");
+            string solar = CreatePart(session, "solarArray", "Solar Ship Panel");
+            Info(session).ComponentDesigns[solar].AttributesByType[typeof(EnergySolarGenerationAtb)] =
+                new EnergySolarGenerationAtb(550, 300, efficiency, efficiency * 0.5, area);
+            var parts = new List<ShipComponentCount> { new(engine, 1), new(battery, 1), new(solar, panelCount) };
+            if (malformedCompanion)
+            {
+                string bad = CreatePart(session, "solarArray", "Malformed Solar Companion");
+                Info(session).ComponentDesigns[bad].AttributesByType[typeof(EnergySolarGenerationAtb)] =
+                    new EnergySolarGenerationAtb(550, 300, 20, 10, double.NaN);
+                parts.Add(new ShipComponentCount(bad, 1));
+            }
+            if (includeReactor)
+                parts.Add(new ShipComponentCount(CreatePart(session, "reactor", "Mixed Solar Reactor"), 1));
+            var save = _server.SubmitCommand(session, new SaveShipDesignCommand(session.FactionId, null,
+                "Solar Hull", parts, armorId, 1, false));
+            Assert.That(save.Accepted, Is.True, save.RejectionReason);
+            var info = Info(session);
+            var design = info.ShipDesigns.Values.Single(d => d.Name == "Solar Hull");
+            Assert.That(design.IsValid, Is.EqualTo(expectedValid));
+
+            var faction = _game.Factions[session.FactionId];
+            var species = SpeciesFactory.CreateSpeciesHuman(faction, _game.GlobalManager);
+            var planet = _game.Systems[0].GetAllEntitiesWithDataBlob<SystemBodyInfoDB>()
+                .First(b => b.HasDataBlob<MassVolumeDB>() && b.HasDataBlob<Pulsar4X.Names.NameDB>());
+            var colony = ColonyFactory.CreateColony(faction, species, planet, initialPopulation: 9_000_000);
+            colony.SetDataBlob(new IndustryAbilityDB("solar-yard", new IndustryAbilityDB.ProductionLine
+            {
+                Name = "Solar Test Yard", MaxVolume = double.MaxValue,
+                IndustryTypeRates = { ["ship-assembly"] = 10 },
+            }));
+            var choices = _projector.ProjectEntity(colony, session.FactionId).GetView<IndustryView>()!
+                .ProductionLines.Single().Constructibles;
+            Assert.That(choices.Any(d => d.DesignId == design.UniqueID), Is.EqualTo(expectedValid));
+            if (expectedValid)
+            {
+                var queue = _server.SubmitCommand(session, new QueueIndustryJobCommand(colony.Id,
+                    "solar-yard", design.UniqueID, 1, false, false));
+                Assert.That(queue.Accepted, Is.True, queue.RejectionReason);
+            }
+        }
+
         [TestCase(false)]
         [TestCase(true)]
         public void SaveShipDesign_pushes_fresh_shipyard_choices_without_a_tick(bool overSlip)
