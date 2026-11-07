@@ -201,9 +201,13 @@ internal static class PatchedConicPlanner
         }
         else
         {
-            TransferWindow seed = timingAnswer.Feasible && timingAnswer.Window.IsFinite
-                ? timingAnswer.Window
-                : coarse.Best;
+            // Best window on this coarse grid is the earliest cell within 10% of the
+            // floor. A step here is weeks, so that cell can leave the Hohmann basin
+            // (212 days instead of ~259). Depart now is one column and keeps its own
+            // seed. Same-sphere transfers still use the 10% rule in TransferPlanner.Choose.
+            bool departNow = timing == DepartureTiming.DepartNow
+                && timingAnswer.Feasible && timingAnswer.Window.IsFinite;
+            TransferWindow seed = departNow ? timingAnswer.Window : coarse.Best;
             if (!seed.IsFinite)
                 return Stamp(Fail("transfer did not converge", canPick: true), timing, timingAnswer);
 
@@ -280,7 +284,10 @@ internal static class PatchedConicPlanner
             return Stamp(Fail($"needs {need:N0} m/s Δv, have {budget:N0} m/s"), timing, timingAnswer);
 
         string reason = planeDv > 1 ? $"plane change {planeDv:N0} m/s" : "";
-        var flown = new TransferWindow(burnAt, arrive, vInf, approach, trip, vInf.Length(), approach.Length());
+        // Depart is the Lambert epoch TryEscape aims the sphere exit at. PlanFromWindow
+        // replans from this cell. The parking-orbit burn is earlier by the escape coast;
+        // storing that burn here shifts the exit and the capture misses low orbit.
+        var flown = new TransferWindow(window.Depart, arrive, vInf, approach, trip, vInf.Length(), approach.Length());
         return Stamp(new Plan
         {
             Feasible = true,
