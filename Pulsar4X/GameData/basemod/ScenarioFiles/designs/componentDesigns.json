@@ -127,7 +127,7 @@
       "Name": "Prefab Spaceport",
       "TemplateId": "planetary-spaceport-crate",
       "Properties": [
-        { "Key": "Cargo Transfer Rate", "Value": 20 },
+        { "Key": "Cargo Transfer Rate", "Value": 10 },
         { "Key": "Transfer Range", "Value": 1000 }
       ]
     }

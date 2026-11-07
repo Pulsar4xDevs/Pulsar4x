@@ -225,13 +225,50 @@ public class EarlyTechStartTests
             .Single();
 
         var installations = colony.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign.Keys.ToList();
-        foreach (var id in new[] { "default-design-mine", "default-design-refinery", "default-design-factory",
+        foreach (var id in new[] { "default-design-mine", "default-design-refinery-site", "default-design-factory-site",
                      "default-design-shipyard", "default-design-research-lab", "default-design-city-hall" })
             Assert.That(installations, Does.Contain(id), id);
         Assert.That(installations, Does.Not.Contain("default-design-auto-mine"));
         var byDesign = colony.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign;
-        Assert.That(byDesign["default-design-factory"], Has.Count.EqualTo(1), "one installed factory in a fresh Earth start");
-        Assert.That(byDesign["default-design-refinery"], Has.Count.EqualTo(1), "one installed refinery in a fresh Earth start");
+        Assert.That(byDesign["default-design-factory-site"], Has.Count.EqualTo(1), "one installed factory in a fresh Earth start");
+        Assert.That(byDesign["default-design-refinery-site"], Has.Count.EqualTo(1), "one installed refinery in a fresh Earth start");
+
+        Assert.That(installations, Does.Not.Contain("default-design-factory"));
+        Assert.That(installations, Does.Not.Contain("default-design-refinery"));
+
+        var info = faction.GetDataBlob<FactionInfoDB>();
+        var tech = faction.GetDataBlob<FactionTechDB>();
+        var ship = game.Systems.SelectMany(system => system.GetAllEntitiesWithDataBlob<ShipInfoDB>()).Single();
+        var cargo = ship.GetDataBlob<CargoStorageDB>();
+        Assert.That(cargo.TypeStores["general-storage"].MaxVolume, Is.EqualTo(1000));
+        Assert.That(cargo.TypeStores["general-storage"].FreeVolume, Is.EqualTo(1000));
+
+        foreach (var id in new[] { "factory", "refinery", "factory-site", "logistics-office", "planetary-spaceport-crate" })
+        {
+            var designer = new ComponentDesigner(info.Data.ComponentTemplates[id], info.Data, tech);
+            if (designer.ComponentDesignProperties.TryGetValue("Size", out var size))
+            {
+                size.SetMin();
+                size.SetMax();
+                Assert.That(size.Value, Is.InRange(size.MinValue, size.MaxValue), id);
+            }
+            if (id == "factory-site") continue; // Site-built facilities are not freight.
+
+            // Each design fits individually in an EMPTY bay, not all designs together.
+            foreach (var design in new[] { designer.CreateDesign(faction), info.ComponentDesigns["default-design-" + id] })
+            {
+                Assert.That(design.VolumePerUnit, Is.GreaterThan(0).And.LessThanOrEqualTo(1000), id);
+                Assert.That(cargo.GetFreeUnitSpace(design), Is.GreaterThanOrEqualTo(1), id);
+                if (id == "logistics-office")
+                    Assert.That(design.GetAttribute<Pulsar4X.Logistics.LogiBaseAtb>().LogisicCapacity, Is.EqualTo(2));
+                if (id == "planetary-spaceport-crate")
+                {
+                    var transfer = design.GetAttribute<CargoTransferAtb>();
+                    Assert.That(transfer.TransferRate_kgs, Is.EqualTo(10));
+                    Assert.That(transfer.TransferRange_ms, Is.EqualTo(1000));
+                }
+            }
+        }
 
         var designs = faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Keys;
         Assert.That(designs, Does.Not.Contain("default-design-alcubierre-2k"));

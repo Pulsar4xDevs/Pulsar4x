@@ -284,7 +284,7 @@
           "MaxFormula": "10000",
           "MinFormula": "1000",
           "StepFormula": "50",
-          "PropertyFormula": "5000"
+          "PropertyFormula": "1000"
         },
         {
           "Name": "Refinery Points",
@@ -393,7 +393,7 @@
           "MaxFormula": "TechData('tech-factory-max-size')",
           "MinFormula": "200",
           "StepFormula": "50",
-          "PropertyFormula": "5000"
+          "PropertyFormula": "200"
         },
         {
           "Name": "Component Construction Points",
@@ -464,7 +464,7 @@
           "MaxFormula": "TechData('tech-factory-max-size')",
           "MinFormula": "1000",
           "StepFormula": "50",
-          "PropertyFormula": "5000"
+          "PropertyFormula": "1000"
         },
         {
           "Name": "Component Construction Points",
@@ -591,12 +591,12 @@
       "Name": "Prefab Logistics Office",
       "Formulas": {
         "Description": "A freightable office for import and export. The site office handles more goods.",
-        "Mass": "2000",
+        "Mass": "1000",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "4",
+        "CrewReq": "2",
         "ResearchCost": "0",
-        "CreditCost": "120",
+        "CreditCost": "60",
         "BuildPointCost": "[Mass]"
       },
       "ResourceCost": {
@@ -615,10 +615,10 @@
           "DescriptionFormula": "'How many different items this office can handle'",
           "GuiHint": "GuiSelectionMaxMin",
           "DataDict": {},
-          "MaxFormula": "10",
-          "MinFormula": "5",
-          "StepFormula": "5",
-          "PropertyFormula": "5"
+          "MaxFormula": "5",
+          "MinFormula": "2",
+          "StepFormula": "1",
+          "PropertyFormula": "2"
         },
         {
           "Name": "db",
@@ -846,12 +846,12 @@
       "Name": "Prefab Spaceport",
       "Formulas": {
         "Description": "A freightable cargo transfer point. It moves cargo and does not store it.",
-        "Mass": "2000",
+        "Mass": "1000",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "4",
+        "CrewReq": "2",
         "ResearchCost": "0",
-        "CreditCost": "120",
+        "CreditCost": "60",
         "BuildPointCost": "[Mass]"
       },
       "ResourceCost": {
@@ -870,10 +870,10 @@
           "DescriptionFormula": "'How much cargo can be transfered per second in kg.'",
           "GuiHint": "GuiSelectionMaxMin",
           "DataDict": {},
-          "MaxFormula": "50",
+          "MaxFormula": "25",
           "MinFormula": "1",
           "StepFormula": "1",
-          "PropertyFormula": "20"
+          "PropertyFormula": "10"
         },
         {
           "Name": "Transfer Range",
