@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Factions;
 using Pulsar4X.Engine;
@@ -117,9 +118,7 @@ namespace Pulsar4X.Technology
                     throw new Exception("Unable to dequeue from tech queue");
 
                 if (tech.Faction != null && tech.Design != null && tech.Faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo))
-                {
-                    factionInfo.IndustryDesigns[tech.UniqueID] = tech.Design;
-                }
+                    RegisterConstructableDesign(factionInfo, tech.Design);
 
                 // if (cycleProject)
                 //     scientist.ProjectQueue.Add((project.UniqueID, true));
@@ -369,6 +368,29 @@ namespace Pulsar4X.Technology
         public static void AssignTech(ResearcherDB researcherDB, string techId)
         {
             researcherDB.TechQueue.Enqueue(techId);
+        }
+
+        /// <summary>
+        /// File a constructable under its own id. Research completion used to use the tech id,
+        /// which is not the id the factory list queues.
+        /// </summary>
+        internal static void RegisterConstructableDesign(FactionInfoDB factionInfo, IConstructableDesign design)
+        {
+            if (string.IsNullOrEmpty(design.UniqueID))
+                return;
+
+            var stale = new List<string>();
+            foreach (var pair in factionInfo.IndustryDesigns)
+            {
+                if (pair.Key == design.UniqueID)
+                    continue;
+                if (pair.Value.UniqueID == design.UniqueID)
+                    stale.Add(pair.Key);
+            }
+            foreach (var key in stale)
+                factionInfo.IndustryDesigns.Remove(key);
+
+            factionInfo.IndustryDesigns[design.UniqueID] = design;
         }
     }
 }

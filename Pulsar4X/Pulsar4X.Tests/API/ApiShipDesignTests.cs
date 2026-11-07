@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Pulsar4X.Api;
+using Pulsar4X.Components;
+using Pulsar4X.Energy;
 using Pulsar4X.Engine.Api;
 using Pulsar4X.Factions;
+using Pulsar4X.Movement;
 using Pulsar4X.Ships;
 
 namespace Pulsar4X.Tests
@@ -156,6 +159,99 @@ namespace Pulsar4X.Tests
                 IsObsolete: false, Tanker: false));
             Assert.That(update.Accepted, Is.True, update.RejectionReason);
             Assert.That(info.ShipDesigns[design.UniqueID].Tanker, Is.False);
+        }
+
+        /// <summary>Newtonian MoveTo does not need a warp drive, so a hull with thrust, a reactor,
+        /// and a battery is a valid design. Dropping the engine is still invalid.</summary>
+        [Test]
+        public void SaveShipDesign_accepts_a_newtonian_design_with_no_warp_drive()
+        {
+            var session = Connect();
+            var (_, armorId) = SetUpDesignData(session);
+            var info = Info(session);
+
+            string engineId = CreatePart(session, "conventional-engine", "Newton Engine");
+            string reactorId = CreatePart(session, "reactor", "Newton Reactor");
+            string batteryId = CreatePart(session, "battery-bank", "Newton Battery");
+
+            var engine = info.ComponentDesigns[engineId];
+            var reactor = info.ComponentDesigns[reactorId];
+            var battery = info.ComponentDesigns[batteryId];
+            Assert.That(engine.HasAttribute<WarpDriveAtb>(), Is.False);
+            Assert.That(reactor.HasAttribute<WarpDriveAtb>(), Is.False);
+            Assert.That(battery.HasAttribute<WarpDriveAtb>(), Is.False);
+            Assert.That(engine.HasAttribute<NewtonionThrustAtb>(), Is.True);
+            Assert.That(reactor.HasAttribute<EnergyGenerationAtb>(), Is.True);
+            Assert.That(battery.HasAttribute<EnergyStoreAtb>(), Is.True);
+
+            var save = _server.SubmitCommand(session, new SaveShipDesignCommand(
+                session.FactionId, null, "Newton Hull",
+                new[]
+                {
+                    new ShipComponentCount(engineId, 1),
+                    new ShipComponentCount(reactorId, 1),
+                    new ShipComponentCount(batteryId, 1),
+                },
+                armorId, 1, IsObsolete: false));
+            Assert.That(save.Accepted, Is.True, save.RejectionReason);
+
+            var design = info.ShipDesigns.Values.Single(d => d.Name == "Newton Hull");
+            Assert.That(design.IsValid, Is.True, "a newtonian hull with power is valid without a warp drive");
+            Assert.That(design.TryGetComponentsByAttribute<WarpDriveAtb>(out _), Is.False);
+            Assert.That(design.TryGetComponentsByAttribute<NewtonionThrustAtb>(out _), Is.True);
+
+            var noThrust = _server.SubmitCommand(session, new SaveShipDesignCommand(
+                session.FactionId, null, "No Thrust",
+                new[]
+                {
+                    new ShipComponentCount(reactorId, 1),
+                    new ShipComponentCount(batteryId, 1),
+                },
+                armorId, 1, IsObsolete: false));
+            Assert.That(noThrust.Accepted, Is.True, noThrust.RejectionReason);
+            Assert.That(info.ShipDesigns.Values.Single(d => d.Name == "No Thrust").IsValid, Is.False,
+                "thrust is still required");
+        }
+
+        /// <summary>The designer's Copy Design saves its draft with no design id. That must create a
+        /// separate design and leave the source untouched.</summary>
+        [Test]
+        public void SaveShipDesign_with_no_id_copies_without_touching_the_source()
+        {
+            var session = Connect();
+            var (_, armorId) = SetUpDesignData(session);
+            var info = Info(session);
+            string engineId = CreatePart(session, "conventional-engine", "Copy Engine");
+            string reactorId = CreatePart(session, "reactor", "Copy Reactor");
+
+            var original = _server.SubmitCommand(session, new SaveShipDesignCommand(
+                session.FactionId, null, "Source Hull",
+                new[] { new ShipComponentCount(engineId, 1) }, armorId, 1, IsObsolete: false));
+            Assert.That(original.Accepted, Is.True, original.RejectionReason);
+            var source = info.ShipDesigns.Values.Single(d => d.Name == "Source Hull");
+            int before = info.ShipDesigns.Count;
+
+            var copy = _server.SubmitCommand(session, new SaveShipDesignCommand(
+                session.FactionId, null, "Source Hull copy",
+                new[] { new ShipComponentCount(engineId, 1), new ShipComponentCount(reactorId, 1) },
+                armorId, 2, IsObsolete: false));
+            Assert.That(copy.Accepted, Is.True, copy.RejectionReason);
+
+            Assert.That(info.ShipDesigns.Count, Is.EqualTo(before + 1));
+            var copied = info.ShipDesigns.Values.Single(d => d.Name == "Source Hull copy");
+            Assert.That(copied.UniqueID, Is.Not.EqualTo(source.UniqueID));
+            Assert.That(info.ShipDesigns[source.UniqueID].Name, Is.EqualTo("Source Hull"));
+            Assert.That(info.ShipDesigns[source.UniqueID].Components.Count, Is.EqualTo(1));
+            Assert.That(info.ShipDesigns[source.UniqueID].Armor.thickness, Is.EqualTo(1f));
+            Assert.That(copied.Components.Count, Is.EqualTo(2));
+        }
+
+        private string CreatePart(PlayerSession session, string templateId, string name)
+        {
+            var result = _server.SubmitCommand(session, new CreateComponentDesignCommand(
+                session.FactionId, templateId, name, Array.Empty<DesignerInput>()));
+            Assert.That(result.Accepted, Is.True, templateId + ": " + result.RejectionReason);
+            return Info(session).ComponentDesigns.Values.First(d => d.Name == name).UniqueID;
         }
     }
 }

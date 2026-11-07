@@ -391,7 +391,7 @@
           "DescriptionFormula": "'Mass of the factory in kilograms. Larger factories produce more construction points'",
           "GuiHint": "GuiSelectionMaxMinInt",
           "MaxFormula": "TechData('tech-factory-max-size')",
-          "MinFormula": "1000",
+          "MinFormula": "200",
           "StepFormula": "50",
           "PropertyFormula": "5000"
         },
@@ -543,10 +543,10 @@
           "Name": "Slip Size",
           "DescriptionFormula": "'Maximum ship mass this slip can work on (kg)'",
           "GuiHint": "GuiSelectionMaxMinInt",
-          "MaxFormula": "TechData('tech-shipyard-slip-max-size') + 20000",
+          "MaxFormula": "TechData('tech-shipyard-slip-max-size') + 29000",
           "MinFormula": "1000",
           "StepFormula": "1000",
-          "PropertyFormula": "100000"
+          "PropertyFormula": "34000"
         },
         {
           "Name": "Crew Size",

@@ -47,7 +47,7 @@ public class ConstructionAtbTests
                 game.StartingGameData.ComponentDesigns["default-design-local-construction"]);
 
             var atb = design.GetAttribute<ConstructionAtb>();
-            Assert.That(atb.ConstructionPoints["installation"], Is.EqualTo(25));
+            Assert.That(atb.ConstructionPoints["installation"], Is.EqualTo(5)); // default prefab office is Level 1
             Assert.That(atb.ConstructionPoints.ContainsKey("ship-refit"), Is.False);
         }
         finally
@@ -110,7 +110,7 @@ public class ConstructionAtbTests
         var info = player.GetDataBlob<FactionInfoDB>();
         var office = info.ComponentDesigns["default-design-local-construction"].GetAttribute<ConstructionAtb>();
         Assert.That(office.ConstructionPoints.Keys, Is.EquivalentTo(new[] { "installation" }));
-        Assert.That(office.ConstructionPoints["installation"], Is.EqualTo(25));
+        Assert.That(office.ConstructionPoints["installation"], Is.EqualTo(5)); // Level 1 prefab; Earth mounts five
 
         var moduleDesign = info.ComponentDesigns["default-design-ship-construction"];
         Assert.That(moduleDesign.Name, Is.EqualTo("Construction Bay"));

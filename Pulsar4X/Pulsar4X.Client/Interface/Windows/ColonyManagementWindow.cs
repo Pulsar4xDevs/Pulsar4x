@@ -43,6 +43,26 @@ namespace Pulsar4X.Client
             _selectedSystemId = systemId;
         }
 
+        // Set by OpenRecruitment so the Recruitment tab is brought forward once.
+        private bool _focusRecruitmentTab;
+
+        // ImGui.NET only exposes the flags overload together with p_open, which adds a close
+        // button; call the native entry with a null p_open instead.
+        private static unsafe bool BeginTabItem(string label, ImGuiTabItemFlags flags)
+        {
+            var bytes = System.Text.Encoding.UTF8.GetBytes(label + "\0");
+            fixed (byte* text = bytes)
+                return ImGuiNative.igBeginTabItem(text, null, flags) != 0;
+        }
+
+        /// <summary>Open this window on a colony with its Recruitment tab selected.</summary>
+        public void OpenRecruitment(int colonyId, string systemId)
+        {
+            SelectColony(colonyId, systemId);
+            _focusRecruitmentTab = true;
+            SetActive(true);
+        }
+
         internal override void Display()
         {
             if(!IsActive) return;
@@ -165,8 +185,10 @@ namespace Pulsar4X.Client
                     DisplayNavalAcademy(selectedColony.Id, academy);
                     ImGui.EndTabItem();
                 }
-                if (selectedColony.GetView<RecruitmentView>() is { } recruitment && ImGui.BeginTabItem("Recruitment"))
+                if (selectedColony.GetView<RecruitmentView>() is { } recruitment
+                    && BeginTabItem("Recruitment", _focusRecruitmentTab ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None))
                 {
+                    _focusRecruitmentTab = false;
                     DisplayRecruitment(selectedColony.Id, recruitment);
                     ImGui.EndTabItem();
                 }

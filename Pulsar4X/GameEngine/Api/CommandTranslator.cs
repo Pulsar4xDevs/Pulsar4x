@@ -16,6 +16,7 @@ using Pulsar4X.Galaxy;
 using Pulsar4X.GeoSurveys;
 using Pulsar4X.Industry;
 using Pulsar4X.Industry.Orders;
+using Pulsar4X.Interfaces;
 using Pulsar4X.JumpPoints;
 using Pulsar4X.Logistics;
 using Pulsar4X.Messaging;
@@ -2285,7 +2286,7 @@ namespace Pulsar4X.Engine.Api
         }
 
         // Mirrors the designer UI's validity rule: a producible ship needs mass, newtonian thrust,
-        // and energy generation + storage.
+        // and energy generation + storage. A warp drive is not required.
         private static bool IsShipDesignValid(Pulsar4X.Ships.ShipDesign design)
         {
             bool hasThrust = false, hasEnergyGen = false, hasEnergyStore = false;
@@ -2389,9 +2390,26 @@ namespace Pulsar4X.Engine.Api
         private CommandResult TranslateQueueIndustryJob(Entity faction, Entity commanded, GameCommand command)
         {
             var queue = (QueueIndustryJobCommand)command;
-            if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo)
-                || !factionInfo.IndustryDesigns.TryGetValue(queue.DesignId, out var design))
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo))
                 return CommandResult.Reject($"Design {queue.DesignId} not found.");
+
+            // The factory list sends design.UniqueID. A researched component used to be stored
+            // under its tech id, so the click resolved nothing and the client dropped the rejection.
+            if (!factionInfo.IndustryDesigns.TryGetValue(queue.DesignId, out var design))
+            {
+                IConstructableDesign? listed = null;
+                foreach (var candidate in factionInfo.IndustryDesigns.Values)
+                {
+                    if (candidate.UniqueID != queue.DesignId)
+                        continue;
+                    listed = candidate;
+                    break;
+                }
+                if (listed == null)
+                    return CommandResult.Reject($"Design {queue.DesignId} not found.");
+                ResearchProcessor.RegisterConstructableDesign(factionInfo, listed);
+                design = listed;
+            }
 
             if (queue.Quantity is < 1 or > ushort.MaxValue)
                 return CommandResult.Reject("Quantity must be between 1 and 65535.");

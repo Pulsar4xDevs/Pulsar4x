@@ -409,6 +409,49 @@ namespace Pulsar4X.Client
                 ShowNoDesigns = false;
                 _saveError = null;
             }
+
+            // Copy the selected design (as currently shown in the editor) into an unsaved draft.
+            // Clearing SelectedExistingDesignID makes Save take the no-id create path, so the
+            // original design is never overwritten.
+            bool canCopy = !_editingNewDesign && !SelectedExistingDesignID.IsNullOrEmpty() && _armor != null;
+            if(!canCopy) ImGui.BeginDisabled();
+            if(ImGui.Button("Copy Design", new Vector2(204f, 0f)) && canCopy)
+                CopySelectedDesign();
+            if(!canCopy) ImGui.EndDisabled();
+            if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                ImGui.SetTooltip(canCopy
+                    ? "Start a new, unsaved design from this one. Saving creates a separate design."
+                    : "Select an existing design to copy it.");
+        }
+
+        void CopySelectedDesign()
+        {
+            string sourceName = Utils.StringFromBytes(SelectedDesignName);
+            if(sourceName.IsNullOrEmpty())
+                sourceName = _workingDesign?.Name ?? "Design";
+            string baseName = sourceName + " copy", name = baseName;
+            int counter = 2;
+            while(_factionInfoDB.ShipDesigns.Values.Any(d => d.Name.Equals(name)))
+            {
+                name = baseName + " " + counter.ToString();
+                counter++;
+            }
+
+            // Fresh lists so edits to the draft never touch the source design.
+            SelectedComponents = new List<(ComponentDesign design, int count)>(SelectedComponents);
+            _workingDesign = new ShipDesign(_factionInfoDB, name, SelectedComponents, (_armor!, _armorThickness))
+            {
+                Tanker = SelectedDesignTanker,
+                IsValid = false
+            };
+            SelectedDesignName = Utils.BytesFromString(name, Math.Max(64, name.Length * 2));
+            SelectedDesignObsolete = false;
+            SelectedExistingDesignID = String.Empty;
+            _editingNewDesign = true;
+            ShowNoDesigns = false;
+            _saveError = null;
+            DesignChanged = true;
+            UpdateShipStats();
         }
 
         internal void DisplayComponents()
@@ -935,6 +978,7 @@ namespace Pulsar4X.Client
             DesignChanged = false;
         }
 
+        // Warp speed is not part of this. Newtonian MoveTo does not need a warp drive.
         private bool IsDesignValid()
         {
             return _massDry > 0 &&
@@ -994,11 +1038,6 @@ namespace Pulsar4X.Client
             {
                 warnings.Add("This ship has cargo space but no way to transfer cargo by itself");
             }
-            if (_wspd == 0)
-            {
-                warnings.Add("This ship has no warp ability");
-            }
-
             if (_ttwr == 0)
             {
                 warnings.Add("This ship has no newtonion thrust");

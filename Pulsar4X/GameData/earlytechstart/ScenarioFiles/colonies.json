@@ -62,7 +62,7 @@
         },
         {
           "Id": "default-design-fuel-farm-5000k",
-          "Amount": 1
+          "Amount": 5
         },
         {
           "Id": "default-design-passive-sensor",
@@ -70,11 +70,11 @@
         },
         {
           "Id": "default-design-refinery",
-          "Amount": 1
+          "Amount": 5
         },
         {
           "Id": "default-design-factory",
-          "Amount": 1
+          "Amount": 25
         },
         {
           "Id": "default-design-shipyard",
@@ -94,7 +94,7 @@
         },
         {
           "Id": "default-design-local-construction",
-          "Amount": 1
+          "Amount": 5
         },
         {
           "Id": "default-design-launch-complex",

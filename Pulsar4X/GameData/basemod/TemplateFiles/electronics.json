@@ -30,7 +30,7 @@
           "Units": "m^2",
           "DescriptionFormula": "'Gives an effective area of:  '",
           "GuiHint": "GuiSelectionMaxMin",
-          "MaxFormula": "2500",
+          "MaxFormula": "5000",
           "MinFormula": "1",
           "StepFormula": "1",
           "PropertyFormula": "1.25"
@@ -212,8 +212,8 @@
         "Mass": "PropertyValue('Mass')",
         "Volume": "Max(1, [Mass] * 0.1)",
         "HTK": "0.5",
-        "CrewReq": "Pow(PropertyValue('Survey Speed') * 2, 3)",
-        "ResearchCost": "Pow(PropertyValue('Survey Speed'), 2)",
+        "CrewReq": "8 * PropertyValue('Survey Speed')",
+        "ResearchCost": "PropertyValue('Survey Speed')",
         "CreditCost": "[Mass]",
         "BuildPointCost": "[Mass]"
       },
@@ -244,7 +244,7 @@
           "Units": "kg",
           "DescriptionFormula": "'Mass Calculation'",
           "GuiHint": "None",
-          "PropertyFormula": "Pow(10 * PropertyValue('Survey Speed'), 2)"
+          "PropertyFormula": "100 * PropertyValue('Survey Speed')"
         },
         {
           "Name": "DBargs",
@@ -266,8 +266,8 @@
         "Mass": "PropertyValue('Mass')",
         "Volume": "Max(1, [Mass] * 0.1)",
         "HTK": "0.5",
-        "CrewReq": "Pow(PropertyValue('Survey Speed') * 2, 3)",
-        "ResearchCost": "Pow(PropertyValue('Survey Speed'), 2)",
+        "CrewReq": "8 * PropertyValue('Survey Speed')",
+        "ResearchCost": "PropertyValue('Survey Speed')",
         "CreditCost": "[Mass]",
         "BuildPointCost": "[Mass]"
       },
@@ -298,7 +298,7 @@
           "Units": "kg",
           "DescriptionFormula": "'Mass Calculation'",
           "GuiHint": "None",
-          "PropertyFormula": "Pow(10 * PropertyValue('Survey Speed'), 2)"
+          "PropertyFormula": "100 * PropertyValue('Survey Speed')"
         },
         {
           "Name": "DBargs",

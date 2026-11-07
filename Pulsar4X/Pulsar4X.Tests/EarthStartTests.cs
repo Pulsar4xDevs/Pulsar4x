@@ -94,8 +94,22 @@ public class EarthStartTests
         var designs = player.GetDataBlob<FactionInfoDB>().ShipDesigns;
         var yard = colony.GetDataBlob<IndustryAbilityDB>().ProductionLines.Values
             .Single(line => line.IndustryTypeRates.ContainsKey("ship-assembly"));
-        foreach (var design in designs.Values)
-            Assert.That(design.MassPerUnit, Is.LessThanOrEqualTo(yard.MaxVolume), design.Name);
+        // The starting yard is sized a little above the Starship (Jon's call), not to fit every
+        // starting design: larger hulls need slip research first.
+        var starship = designs["default-ship-design-starship"];
+        Assert.That(yard.MaxVolume, Is.EqualTo(34000));
+        Assert.That(starship.MassPerUnit, Is.LessThanOrEqualTo(yard.MaxVolume));
+        Assert.That(yard.MaxVolume, Is.LessThanOrEqualTo(starship.MassPerUnit * 1.15), "a modest margin, not a blanket allowance");
+        Assert.That(designs["default-ship-design-tanker"].MassPerUnit, Is.GreaterThan(yard.MaxVolume),
+            "larger starting hulls need slip research");
+
+        // The starting yard is reproducible with starting research: the designer's slip range allows it.
+        var info = player.GetDataBlob<FactionInfoDB>();
+        var yardDesigner = new Pulsar4X.Components.ComponentDesigner(
+            info.Data.ComponentTemplates["shipyard"], info.Data, player.GetDataBlob<Pulsar4X.Factions.FactionTechDB>());
+        var slip = yardDesigner.ComponentDesignProperties["Slip Size"];
+        slip.SetMax();
+        Assert.That(slip.MaxValue, Is.GreaterThanOrEqualTo(yard.MaxVolume));
 
         var projected = new GameProjector(game).ProjectEntity(colony, player.Id).GetView<IndustryView>();
         var yardLine = projected!.ProductionLines.Single(line => line.IsShipyard);
