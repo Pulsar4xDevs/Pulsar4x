@@ -52,6 +52,8 @@
           "steam-turbine-reactor",
           "rtg",
           "fissile-fuels",
+          "scntr-engine",
+          "ntp",
           "tech-early-directed-energy",
           "tech-early-warp-drive"
         ]

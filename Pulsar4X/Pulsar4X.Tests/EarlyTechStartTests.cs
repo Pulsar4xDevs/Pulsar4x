@@ -501,6 +501,30 @@ public class EarlyTechStartTests
         Assert.That(data.ComponentTemplates.ContainsKey("alcubierre-warp-drive"), Is.True);
     }
 
+    [Test]
+    public void NuclearThermalEngine_IsDesignableOnlyAfterFirstNuclearPowerResearch()
+    {
+        var (_, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var info = faction.GetDataBlob<FactionInfoDB>();
+        var data = info.Data;
+        Assert.That(data.ComponentTemplates.ContainsKey("scntr-engine"), Is.False);
+        Assert.That(data.LockedComponentTemplates.ContainsKey("scntr-engine"), Is.True);
+        Assert.That(info.ComponentDesigns.ContainsKey("default-design-NTR1.8"), Is.False,
+            "the stock NERVA must not bypass the nuclear gate");
+        Assert.That(info.ComponentDesigns.Values.Any(d => d.TemplateID == "scntr-engine"), Is.False);
+        Assert.That(data.CargoGoods.GetAny("ntp"), Is.Null);
+        Assert.That(data.ComponentTemplates.ContainsKey("conventional-engine"), Is.True);
+
+        data.IncrementTechLevel("tech-early-nuclear-power");
+
+        Assert.That(data.ComponentTemplates.ContainsKey("scntr-engine"), Is.True);
+        Assert.That(data.CargoGoods.GetAny("ntp"), Is.Not.Null,
+            "the template's default nuclear propellant must be available too");
+        Assert.DoesNotThrow(() => new ComponentDesigner(data.ComponentTemplates["scntr-engine"], data,
+            faction.GetDataBlob<FactionTechDB>()));
+        Assert.That(data.ComponentTemplates.ContainsKey("conventional-engine"), Is.True);
+    }
+
     [TestCase("steam-turbine-reactor")]
     [TestCase("rtg")]
     [TestCase("reactor")]
@@ -523,7 +547,10 @@ public class EarlyTechStartTests
     [Test]
     public void DefaultBaseModStart_IsUnchangedByTheEarlyModBeingInstalled()
     {
-        var (game, _) = StartGameLikeTheMenu(BaseMod);
+        var (game, faction) = StartGameLikeTheMenu(BaseMod);
+        var info = faction.GetDataBlob<FactionInfoDB>();
+        Assert.That(info.Data.ComponentTemplates.ContainsKey("scntr-engine"), Is.True);
+        Assert.That(info.ComponentDesigns.ContainsKey("default-design-NTR1.8"), Is.True);
 
         var colonies = game.Systems
             .SelectMany(system => system.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
