@@ -404,6 +404,17 @@ namespace Pulsar4X.Engine.Api
                     }
                 }
 
+                // Ship designs are saved on the faction, but each producer's IndustryView
+                // contains its own projected design choices. Refresh those snapshots even while
+                // paused, rather than waiting for the next colony tick.
+                if (command is SaveShipDesignCommand)
+                {
+                    foreach (var system in _game.Systems)
+                        foreach (var producer in system.GetAllEntitiesWithDataBlob<Pulsar4X.Industry.IndustryAbilityDB>())
+                            if (producer.FactionOwnerID == session.FactionId)
+                                PushEntityRefresh(producer, session.FactionId);
+                }
+
                 // A new component design also registers a research project for itself.
                 if (command is CreateComponentDesignCommand)
                     PushComponentDesigns(session.FactionId);

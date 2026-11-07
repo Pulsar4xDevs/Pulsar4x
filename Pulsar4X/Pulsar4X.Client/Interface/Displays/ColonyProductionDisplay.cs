@@ -13,7 +13,7 @@ namespace Pulsar4X.Client
     public sealed class ColonyProductionDisplay
     {
         private string? _selectedProdLine;
-        private int _newJobDesignIndex = 0;
+        private string? _newJobDesignId;
         private int _newJobBatchCount = 1;
         private bool _newJobRepeat = false;
         private bool _newJobAutoInstall = true;
@@ -99,7 +99,7 @@ namespace Pulsar4X.Client
                         {
                             _selectedProdLine = line.Id;
                             _rightPaneIsRefit = false;
-                            _newJobDesignIndex = 0;
+                            _newJobDesignId = null;
                             _newJobBatchCount = 1;
                         }
 
@@ -275,25 +275,27 @@ namespace Pulsar4X.Client
         {
             if (line.Constructibles.Count == 0)
             {
+                _newJobDesignId = null;
                 ImGui.Text("This production line can't build anything the faction knows how to make.");
                 return;
             }
 
-            if (_newJobDesignIndex >= line.Constructibles.Count)
-                _newJobDesignIndex = 0;
+            // Snapshots are sorted by name: an insertion or rename must not silently
+            // switch the queued design. If the selected design disappears, require a new pick.
+            var selectedDesign = line.Constructibles.FirstOrDefault(d => d.DesignId == _newJobDesignId);
+            if (selectedDesign == null)
+                _newJobDesignId = null;
 
             ImGui.NewLine();
             ImGui.Text("Select a design:");
-            var selectedDesign = line.Constructibles[_newJobDesignIndex];
-            if (ImGui.BeginCombo("###newjobselection", selectedDesign.Name))
+            if (ImGui.BeginCombo("###newjobselection", selectedDesign?.Name ?? "Select a design"))
             {
-                for (int i = 0; i < line.Constructibles.Count; i++)
+                foreach (var item in line.Constructibles)
                 {
-                    var item = line.Constructibles[i];
                     if (item.OverSlip)
                         ImGui.BeginDisabled();
-                    if (ImGui.Selectable(item.Name + "##" + item.DesignId, i == _newJobDesignIndex))
-                        _newJobDesignIndex = i;
+                    if (ImGui.Selectable(item.Name + "##" + item.DesignId, item.DesignId == _newJobDesignId))
+                        _newJobDesignId = item.DesignId;
                     if (item.OverSlip && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) && item.SlipReason.Length > 0)
                         ImGui.SetTooltip(item.SlipReason);
                     if (item.OverSlip)
@@ -301,7 +303,9 @@ namespace Pulsar4X.Client
                 }
                 ImGui.EndCombo();
             }
-            selectedDesign = line.Constructibles[_newJobDesignIndex];
+            selectedDesign = line.Constructibles.FirstOrDefault(d => d.DesignId == _newJobDesignId);
+            if (selectedDesign == null)
+                return;
 
             ImGui.NewLine();
             ImGui.Text("Enter the quantity:");

@@ -4,6 +4,12 @@ using System.Linq;
 using NUnit.Framework;
 using Pulsar4X.Api;
 using Pulsar4X.Components;
+using Pulsar4X.Colonies;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
+using Pulsar4X.Galaxy;
+using Pulsar4X.Industry;
+using Pulsar4X.People;
 using Pulsar4X.Energy;
 using Pulsar4X.Engine.Api;
 using Pulsar4X.Factions;
@@ -211,6 +217,69 @@ namespace Pulsar4X.Tests
             Assert.That(noThrust.Accepted, Is.True, noThrust.RejectionReason);
             Assert.That(info.ShipDesigns.Values.Single(d => d.Name == "No Thrust").IsValid, Is.False,
                 "thrust is still required");
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void SaveShipDesign_pushes_fresh_shipyard_choices_without_a_tick(bool overSlip)
+        {
+            var session = Connect();
+            var (_, armorId) = SetUpDesignData(session);
+            var faction = _game.Factions[session.FactionId];
+            var species = SpeciesFactory.CreateSpeciesHuman(faction, _game.GlobalManager);
+            var planet = _game.Systems[0].GetAllEntitiesWithDataBlob<SystemBodyInfoDB>()
+                .First(b => b.HasDataBlob<MassVolumeDB>() && b.HasDataBlob<Pulsar4X.Names.NameDB>());
+            var colony = ColonyFactory.CreateColony(faction, species, planet, initialPopulation: 9_000_000);
+            colony.SetDataBlob(new IndustryAbilityDB("test-yard", new IndustryAbilityDB.ProductionLine
+            {
+                Name = "Test Yard",
+                MaxVolume = overSlip ? 0 : double.MaxValue,
+                IndustryTypeRates = { ["ship-assembly"] = 10 },
+            }));
+            string engineId = CreatePart(session, "conventional-engine", "Yard Engine");
+            string reactorId = CreatePart(session, "reactor", "Yard Reactor");
+            string batteryId = CreatePart(session, "battery-bank", "Yard Battery");
+            var parts = new[]
+            {
+                new ShipComponentCount(engineId, 1),
+                new ShipComponentCount(reactorId, 1),
+                new ShipComponentCount(batteryId, 1),
+            };
+            var received = new List<GameEventEnvelope>();
+            using var subscription = _server.Subscribe(session, received.Add);
+            received.Clear();
+            var before = _game.TimePulse.GameGlobalDateTime;
+
+            var save = _server.SubmitCommand(session, new SaveShipDesignCommand(
+                session.FactionId, null, "Fresh Yard Hull", parts, armorId, 1, false));
+            Assert.That(save.Accepted, Is.True, save.RejectionReason);
+            var design = Info(session).ShipDesigns.Values.Single(d => d.Name == "Fresh Yard Hull");
+            var pushed = received.LastOrDefault(e => e.Entity?.Id == colony.Id)?.Entity;
+            Assert.That(pushed, Is.Not.Null, "saving a faction design must refresh the colony's cached industry view");
+            var item = pushed!.GetView<IndustryView>()!.ProductionLines.Single().Constructibles
+                .Single(d => d.DesignId == design.UniqueID);
+            Assert.That(item.Name, Is.EqualTo("Fresh Yard Hull"));
+            Assert.That(item.OverSlip, Is.EqualTo(overSlip), "slip limits must still apply");
+
+            received.Clear();
+            var update = _server.SubmitCommand(session, new SaveShipDesignCommand(
+                session.FactionId, design.UniqueID, "Renamed Yard Hull", parts, armorId, 1, false));
+            Assert.That(update.Accepted, Is.True, update.RejectionReason);
+            pushed = received.LastOrDefault(e => e.Entity?.Id == colony.Id)?.Entity;
+            Assert.That(pushed, Is.Not.Null);
+            Assert.That(pushed!.GetView<IndustryView>()!.ProductionLines.Single().Constructibles
+                .Single(d => d.DesignId == design.UniqueID).Name, Is.EqualTo("Renamed Yard Hull"));
+
+            received.Clear();
+            var invalid = _server.SubmitCommand(session, new SaveShipDesignCommand(
+                session.FactionId, design.UniqueID, "No Thrust Yard Hull",
+                parts.Skip(1).ToArray(), armorId, 1, false));
+            Assert.That(invalid.Accepted, Is.True, invalid.RejectionReason);
+            pushed = received.LastOrDefault(e => e.Entity?.Id == colony.Id)?.Entity;
+            Assert.That(pushed, Is.Not.Null);
+            Assert.That(pushed!.GetView<IndustryView>()!.ProductionLines.Single().Constructibles
+                .Any(d => d.DesignId == design.UniqueID), Is.False, "invalid designs must stay excluded");
+            Assert.That(_game.TimePulse.GameGlobalDateTime, Is.EqualTo(before), "no tick or reload is needed");
         }
 
         /// <summary>The designer's Copy Design saves its draft with no design id. That must create a
