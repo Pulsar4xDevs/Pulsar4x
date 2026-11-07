@@ -807,20 +807,17 @@ namespace Pulsar4X.Client
                 ImGui.SetTooltip(hint);
             }
 
-            if(!IsDesignValid())
+            var invalidReasons = GetInvalidDesignReasons(_massDry, _tn, _ttwr, _egen, _estor);
+            if (invalidReasons.Count > 0)
             {
                 ImGui.NewLine();
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
                 ImGui.Text("Current design is invalid!");
-                // TODO: tell the player what is invalid about their design
                 if(ImGui.IsItemHovered())
                     ImGui.SetTooltip("You will not be able to construct ships with an invalid design.");
+                foreach (var reason in invalidReasons)
+                    ImGui.TextWrapped(reason);
                 ImGui.PopStyleColor();
-            }
-
-            foreach (var warning in Warnings())
-            {
-                ImGui.Text(warning);
             }
 
             // Advisory only: a transfer sums both ends' handling (CargoTransferProcessor.CalcTransferRate),
@@ -987,14 +984,24 @@ namespace Pulsar4X.Client
             DesignChanged = false;
         }
 
-        // Warp speed is not part of this. Newtonian MoveTo does not need a warp drive.
-        private bool IsDesignValid()
+        // The invalid banner and its explanations share the same predicates. Keep strict > 0:
+        // !(value > 0) also explains NaN (for example 0 / 0 thrust-to-mass on an empty design).
+        // Warp and cargo handling are not validity requirements.
+        public static List<string> GetInvalidDesignReasons(double mass, double thrust, double thrustToMass,
+            double energyGeneration, double energyStorage)
         {
-            return _massDry > 0 &&
-                    _tn > 0 &&
-                    _ttwr > 0 &&
-                    _egen > 0 &&
-                    _estor > 0;
+            var reasons = new List<string>();
+            if (!(mass > 0))
+                reasons.Add("Design mass must be greater than zero.");
+            if (!(thrust > 0))
+                reasons.Add("Newtonian thrust must be greater than zero.");
+            if (!(thrustToMass > 0))
+                reasons.Add("Thrust-to-mass ratio must be greater than zero.");
+            if (!(energyGeneration > 0))
+                reasons.Add("Energy generation must be greater than zero. Solar panels do not currently satisfy this design check.");
+            if (!(energyStorage > 0))
+                reasons.Add("Energy storage must be greater than zero.");
+            return reasons;
         }
 
         internal bool CheckDisplayImage(float maxwidth, float maxheight, float checkwidth)
@@ -1038,16 +1045,6 @@ namespace Pulsar4X.Client
 
                 ImGui.Image(_shipImgPtr.ToTextureRef(), new System.Numerics.Vector2(rawimagewidth * scale, rawimageheight * scale));
             }
-        }
-
-        private List<string> Warnings()
-        {
-            List<string> warnings = new List<string>();
-            if (_ttwr == 0)
-            {
-                warnings.Add("This ship has no newtonion thrust");
-            }
-            return warnings;
         }
     }
 }
