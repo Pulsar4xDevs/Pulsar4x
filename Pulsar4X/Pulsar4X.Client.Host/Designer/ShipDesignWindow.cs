@@ -823,6 +823,15 @@ namespace Pulsar4X.Client
                 ImGui.Text(warning);
             }
 
+            // Advisory only: a transfer sums both ends' handling (CargoTransferProcessor.CalcTransferRate),
+            // so a hold without its own handling still loads and unloads where the other side has some.
+            if (_cvol > 0 && (_trate == 0 || _trnge == 0))
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.MediocreColor);
+                ImGui.TextWrapped("No onboard cargo handling. Transfers require cargo-handling capability at the other location.");
+                ImGui.PopStyleColor();
+            }
+
             if (_saveError != null)
             {
                 ImGui.NewLine();
@@ -1034,10 +1043,6 @@ namespace Pulsar4X.Client
         private List<string> Warnings()
         {
             List<string> warnings = new List<string>();
-            if (_cvol > 0 && _trate == 0 || _trnge == 0)
-            {
-                warnings.Add("This ship has cargo space but no way to transfer cargo by itself");
-            }
             if (_ttwr == 0)
             {
                 warnings.Add("This ship has no newtonion thrust");
