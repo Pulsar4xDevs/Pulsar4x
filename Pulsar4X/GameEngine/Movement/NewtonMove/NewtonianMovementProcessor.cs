@@ -169,6 +169,9 @@ namespace Pulsar4X.Movement
                         if (child == entity) continue;
                         if (!child.HasDataBlob<OrbitDB>() || !child.HasDataBlob<MassVolumeDB>()) continue;
 
+                        // A sphere at or inside the body (Phobos) is not a frame change.
+                        if (!child.HasExteriorSoi()) continue;
+
                         var childSOI = child.GetSOI_m();
                         if (childSOI <= 0 || double.IsInfinity(childSOI)) continue;
 

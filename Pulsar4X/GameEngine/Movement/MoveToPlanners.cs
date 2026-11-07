@@ -918,9 +918,22 @@ public static class MovePlanner
                 message: $"Circularise to match {NameOf(target, ship)}");
         }
 
-        // Near-circular coplanar pair keeps HohmannOE. Inclined leftovers ask Lambert.
-        bool closedForm = targetOrbit.Eccentricity <= ClosedFormEccentricity
-            && RelativeInclination(shipOrbit, targetOrbit) <= ClosedFormInclination;
+        // Near-circular coplanar pair keeps HohmannOE. Same-parent and wrong plane:
+        // flip sense (MatchOrbit plane-change) rather than Lambert — Lambert from
+        // retrograde leftovers hung the Phobos flights and never matched.
+        double relativeIncl = RelativeInclination(shipOrbit, targetOrbit);
+        if (relativeIncl > ClosedFormInclination)
+        {
+            if (!TryEstimatePlaneChangeDV(ship, targetOrbit, now, sgp, out double planeDv))
+                return MoveOption.No(mode, "plane-change Δv is not finite");
+            if (planeDv > thrust.DeltaV)
+                return MoveOption.No(mode, $"needs {planeDv:N0} m/s Δv, have {thrust.DeltaV:N0} m/s");
+            return MoveOption.Yes(mode, 0, planeDv,
+                manuvers: new (Vector3, double)[] { (Vector3.Zero, 0) },
+                message: $"Flip orbit to match {NameOf(target, ship)}");
+        }
+
+        bool closedForm = targetOrbit.Eccentricity <= ClosedFormEccentricity;
         if (!closedForm)
         {
             if (TryLambertWindow(ship, target, parent, now, thrust.DeltaV, order, out MoveOption windowed))
@@ -1703,6 +1716,51 @@ public static class MovePlanner
         var raw = MoveMath.GetRelativeFutureState(ship, at);
         state = (raw.pos, raw.Velocity);
         return double.IsFinite(state.pos.X) && double.IsFinite(state.vel.X);
+    }
+
+
+    /// <summary>
+    /// Δv to circularise into the target's orbit plane at the ship's current radius
+    /// (equatorial retrograde → prograde is ~2 v_circ).
+    /// </summary>
+    static bool TryEstimatePlaneChangeDV(Entity ship, OrbitDB targetOrbit, DateTime now, double sgp, out double dv)
+    {
+        dv = 0;
+        if (!TryDesiredPlaneVelocity(ship, targetOrbit, now, sgp, out var desired, out var vel))
+            return false;
+        dv = (desired - vel).Length();
+        return double.IsFinite(dv);
+    }
+
+    static bool TryDesiredPlaneVelocity(Entity ship, OrbitDB targetOrbit, DateTime now, double sgp,
+        out Vector3 desiredVel, out Vector3 currentVel)
+    {
+        desiredVel = default;
+        currentVel = default;
+        if (!TryCurrentRelativeState(ship, now, out var state))
+            return false;
+        var pos = state.pos;
+        currentVel = state.vel;
+        double r = pos.Length();
+        if (!(r > 1) || !double.IsFinite(sgp) || sgp <= 0)
+            return false;
+        var tgtState = OrbitMath.GetStateVectors(targetOrbit, now);
+        var tgtPos = tgtState.pos;
+        var tgtVel = tgtState.Velocity;
+        var planeN = Vector3.Cross(tgtPos, tgtVel);
+        if (planeN.Length() < 1e-12)
+            return false;
+        planeN = Vector3.Normalise(planeN);
+        var radial = Vector3.Normalise(pos);
+        var desiredDir = Vector3.Cross(planeN, radial);
+        if (desiredDir.Length() < 1e-12)
+            return false;
+        desiredDir = Vector3.Normalise(desiredDir);
+        double vCirc = Math.Sqrt(sgp / r);
+        if (!double.IsFinite(vCirc) || vCirc <= 0)
+            return false;
+        desiredVel = desiredDir * vCirc;
+        return true;
     }
 
     /// <summary>

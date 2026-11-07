@@ -712,9 +712,10 @@ namespace Pulsar4X.Orbits
                     continue;
                 if (!child.HasDataBlob<OrbitDB>() || !child.HasDataBlob<MassVolumeDB>())
                     continue;
-                double childSoi = child.GetSOI_m();
-                if (!(childSoi > 0) || double.IsInfinity(childSoi))
+                // A sphere at or inside the body (Phobos) is not a frame change.
+                if (!child.HasExteriorSoi())
                     continue;
+                double childSoi = child.GetSOI_m();
 
                 var childOrbit = child.GetDataBlob<OrbitDB>();
                 if (!TryRadialBand(childOrbit, out double childInner, out double childOuter))

@@ -368,6 +368,7 @@ namespace Pulsar4X.Tests
         #endregion
 
 
+
         #region Earth to Phobos warp order
 
         public enum EarthStartOrbit
@@ -588,14 +589,15 @@ namespace Pulsar4X.Tests
                          or EarthStartOrbit.CircularRetrograde
                          or EarthStartOrbit.EccentricPrograde)
                 {
-                    // Leftover e around Mars: circularise first, then the next Plan matches Phobos.
-                    Assert.That(goal.Message, Does.StartWith("Circularise to match"),
-                        "the replan circularises around Mars first. " + DescribeMove(ship, goal));
+                    // Leftover e around Mars: circularise first (then flip if retrograde, then match).
+                    Assert.That(goal.Message, Does.StartWith("Circularise to match")
+                        .Or.StartWith("Flip orbit to match"),
+                        "the replan circularises or flips around Mars first. " + DescribeMove(ship, goal));
                     var queueAfter = ship.GetDataBlob<ActionQueueDB>();
                     Assert.IsTrue(queueAfter.ActionList.Any(a =>
-                            a is CirculariseAction
+                            (a is CirculariseAction or MatchOrbitAction)
                             && (a.Status is ActionStatus.Queued or ActionStatus.Running)),
-                        "a circularise is queued. " + DescribeMove(ship, goal));
+                        "circularise or match is queued. " + DescribeMove(ship, goal));
                 }
 
                 // Mars parks in a couple of days. Phobos waits out the window the preview just priced.
@@ -1376,6 +1378,67 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void MoveToPlan_RetrogradeAroundMarsNearPhobos_FlipsThenMatches()
+        {
+            var epoch = _starSys.StarSysDateTime;
+            var sol = TestingUtilities.BasicSol(_starSys);
+            var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
+            var phobos = AddMoon(mars, 1.06e16, 11_266, sma_m: 9_376_000, epoch, eccentricity: 0.0151);
+            phobos.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Moon });
+
+            var phobosAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(phobos, epoch);
+            var faction = FactionFactory.CreateFaction(_game, "phobos-ret-" + Guid.NewGuid().ToString("N"));
+            var ship = MakeMoveToShip(mars, phobosAbs, faction);
+            FillTank(ship);
+            var r = ship.GetDataBlob<PositionDB>().RelativePosition;
+            double mu = OrbitMath.SGP(mars, ship);
+            double vCirc = Math.Sqrt(mu / r.Length());
+            var perp = Vector3.Normalise(new Vector3(-r.Y, r.X, 0));
+            ship.SetDataBlob(OrbitDB.FromVelocity(mars, ship, -perp * vCirc, epoch));
+            OrbitProcessor.ProcessEntity(ship, epoch);
+
+            Assert.IsTrue(MovePlanner.TryBuildMoveActions(ship, phobos, out var actions, out var reason), reason);
+            Assert.IsFalse(actions.Exists(a => a is WarpMoveAction), reason);
+            Assert.IsTrue(actions.Count == 1 && actions[0] is MatchOrbitAction,
+                "flip+match via MatchOrbit, not Lambert. " + reason);
+            Assert.That(reason, Does.StartWith("Flip orbit to match"), reason);
+            Assert.IsTrue(MatchOrbitAction.TryPlanBurns(ship, phobos, epoch, out var burns, out var planReason),
+                planReason);
+            Assert.GreaterOrEqual(burns.Count, 1, "plane-change burn at least");
+            Assert.Less(burns[0].end.Inclination, 0.1, "first burn flips to the target plane");
+
+            var goal = new Goal(GoalType.MoveTo) { TargetEntityID = phobos.Id };
+            AgentProcessor.AssignGoal(ship, goal);
+            DateTime deadline = epoch.AddDays(1);
+            foreach (var b in burns)
+            {
+                var after = b.at.AddDays(1);
+                if (after > deadline)
+                    deadline = after;
+            }
+            while (goal.Status is not (GoalStatus.Completed or GoalStatus.Failed)
+                   && _starSys.StarSysDateTime < deadline)
+            {
+                var step = TimeSpan.FromHours(6);
+                // Jump toward the next planned burn so we do not crawl for weeks.
+                foreach (var b in burns)
+                {
+                    if (b.at > _starSys.StarSysDateTime)
+                    {
+                        var jump = b.at - _starSys.StarSysDateTime;
+                        if (jump > step && jump < TimeSpan.FromDays(60))
+                            step = jump;
+                        break;
+                    }
+                }
+                AdvanceTo(_starSys.StarSysDateTime + step);
+            }
+
+            Assert.AreEqual(GoalStatus.Completed, goal.Status, DescribeMove(ship, goal));
+            AssertArrivedMatchingPhobos(ship, mars, phobos);
+        }
+
+        [Test]
         public void MoveToPlan_HyperbolicAroundMarsNearPhobos_MatchesPhobosOrbit()
         {
             var epoch = _starSys.StarSysDateTime;
@@ -2069,6 +2132,8 @@ namespace Pulsar4X.Tests
             }
 
             _game.TimePulse.TimeStep(when);
+            var fault = _game.TimePulse.LastFault;
+            Assert.That(fault, Is.Null, fault?.Report);
         }
 
         private static string DescribeMove(Entity ship, Goal goal)
