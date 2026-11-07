@@ -501,6 +501,25 @@ public class EarlyTechStartTests
         Assert.That(data.ComponentTemplates.ContainsKey("alcubierre-warp-drive"), Is.True);
     }
 
+    [TestCase("steam-turbine-reactor")]
+    [TestCase("rtg")]
+    [TestCase("reactor")]
+    public void ResearchingNuclearPower_MakesItsTemplatesDesignableWithTheirFuel(string templateId)
+    {
+        var (_, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var data = faction.GetDataBlob<FactionInfoDB>().Data;
+        Assert.That(data.CargoGoods.GetAny("fissile-fuels"), Is.Null,
+            "nuclear fuel is not available before nuclear research");
+
+        data.IncrementTechLevel("tech-early-nuclear-power");
+
+        Assert.DoesNotThrow(() => new ComponentDesigner(data.ComponentTemplates[templateId], data,
+            faction.GetDataBlob<FactionTechDB>()), "selecting the newly unlocked template must not crash");
+        Assert.That(data.CargoGoods.GetAny("fissile-fuels"), Is.Not.Null,
+            "nuclear research must also make its processed fuel available");
+        Assert.That(data.LockedCargoGoods.Contains("fissile-fuels"), Is.False);
+    }
+
     [Test]
     public void DefaultBaseModStart_IsUnchangedByTheEarlyModBeingInstalled()
     {
