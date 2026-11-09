@@ -23,7 +23,7 @@ namespace Pulsar4X.Client
                 return;
             }
 
-            ImGui.Text($"Listings {market.Goods.Count} / {market.Capacity}");
+            ImGui.Text($"Listings {OfficeSlots(market)} / {market.Capacity}");
             if (!market.CanEdit && !market.ExchangeOpen)
                 ImGui.Text("Trade is not mutual.");
             if (market.Goods.Count == 0)
@@ -45,7 +45,10 @@ namespace Pulsar4X.Client
                     ImGui.TableNextRow();
                     ImGui.TableNextColumn();
                     ImGui.Text(good.Name);
-                    ImGui.Text($"bid {good.Bid}   ask {good.Ask}");
+                    if (good.Relocation && !string.IsNullOrEmpty(good.Note))
+                        ImGui.TextWrapped(good.Note);
+                    else
+                        ImGui.Text($"bid {good.Bid}   ask {good.Ask}");
 
                     ImGui.TableNextColumn();
                     string reserve = $"reserve {good.Reserve}";
@@ -95,7 +98,7 @@ namespace Pulsar4X.Client
             var goods = new List<MarketGoodView>();
             foreach (var good in market.Goods)
             {
-                if (good.SellQuantity > 0)
+                if (good.SellQuantity > 0 && !good.Relocation)
                     goods.Add(good);
             }
             var buyers = new List<EntitySnapshot>();
@@ -188,7 +191,7 @@ namespace Pulsar4X.Client
             if (market.Goods.Count == 0 && market.Addable.Count == 0)
                 return;
 
-            bool room = market.Goods.Count < market.Capacity;
+            bool room = OfficeSlots(market) < market.Capacity;
             bool idle = !ImGui.IsAnyItemActive();
             string? selectedId = SelectedCargo(entityId, market);
             if (selectedId == null)
@@ -239,7 +242,15 @@ namespace Pulsar4X.Client
                 }
             }
 
-            if (listed != null)
+            if (listed != null && listed.Relocation)
+            {
+                if (!string.IsNullOrEmpty(listed.Note))
+                    ImGui.TextWrapped(listed.Note);
+                ImGui.TextWrapped("This follows the population. It does not use an office slot.");
+                if (ImGui.Button("Remove"))
+                    uiState.GameClient?.SubmitCommandAsync(new ClearMarketListingCommand(entityId, listed.CargoId));
+            }
+            else if (listed != null)
             {
                 var edit = Row(entityId, listed, idle);
                 DrawFields(edit);
@@ -282,6 +293,18 @@ namespace Pulsar4X.Client
             ImGui.InputDouble("Bid", ref edit.Bid, 0, 0, "%.2f");
             ImGui.SetNextItemWidth(140f);
             ImGui.InputInt("Reserve", ref edit.Reserve);
+        }
+
+        /// <summary>Ordinary listings. A relocation follows the population and does not take a slot.</summary>
+        static int OfficeSlots(MarketView market)
+        {
+            int count = 0;
+            foreach (var good in market.Goods)
+            {
+                if (!good.Relocation)
+                    count++;
+            }
+            return count;
         }
 
         static string? SelectedCargo(int entityId, MarketView market)

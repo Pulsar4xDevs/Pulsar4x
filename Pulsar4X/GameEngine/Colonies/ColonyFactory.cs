@@ -231,6 +231,7 @@ namespace Pulsar4X.Colonies
                 var species = SpeciesFactory.CreateFromBlueprint(system, speciesBlueprint);
                 species.FactionOwnerID = faction.Id;
                 info.Species.Add(species);
+                SpeciesCargo.Register(info.Data, info.Species);
 
                 // Installation designs look up resources, templates, and tech levels. A placed
                 // faction does not run the player's long StartingItems list, so open those libraries.

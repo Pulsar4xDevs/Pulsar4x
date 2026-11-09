@@ -62,6 +62,13 @@ namespace Pulsar4X.Colonies
         /// a production recipe: a species is not a material, so no industry line can consume one.
         /// Idempotent; an id already there is left alone.
         /// </summary>
+        /// <summary>Register every species this faction already has. Idempotent.</summary>
+        public static void RegisterOwned(Entity faction)
+        {
+            if (faction != null && faction.TryGetDataBlob<FactionInfoDB>(out var info))
+                Register(info.Data, info.Species);
+        }
+
         public static void Register(FactionDataStore data, IEnumerable<Entity> species)
         {
             if (data == null || species == null)

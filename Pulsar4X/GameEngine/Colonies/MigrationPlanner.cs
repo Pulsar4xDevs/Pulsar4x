@@ -5,7 +5,9 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Fleets;
+using Pulsar4X.Galaxy;
 using Pulsar4X.Logistics;
+using Pulsar4X.Orbits;
 using Pulsar4X.People;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
@@ -230,31 +232,68 @@ namespace Pulsar4X.Colonies
                 return 0;
             if (!species.TryGetDataBlob<SpeciesDB>(out var speciesDb))
                 return 0;
+            if (info.PlanetEntity == null)
+                return 0;
 
-            double colonyCost = speciesDb.ColonyCost(info.PlanetEntity);
+            double colonyCost = ColonyCostOrComfortable(speciesDb, info.PlanetEntity);
+            // Unsurvivable. Nobody of this species can stay, and nobody can arrive.
+            if (colonyCost < SpeciesDBExtensions.NO_COST)
+                return 0;
+            // A comfortable world (cost 0) is rated at its infrastructure, the same way a cost of 1 is.
+            // Population growth on a cost of 0 is uncapped. Migration will not pack past the rating.
             if (colonyCost <= SpeciesDBExtensions.NO_COST)
-                return 0;
-            if (colonyCost == SpeciesDBExtensions.UNSURVIVABLE_COST)
-                return 0;
+                colonyCost = 1;
 
             long supportValue = instances.GetPopulationSupportValue(info.PlanetEntity);
-            int sharing = 0;
-            foreach (var (otherId, _) in info.Population)
-            {
-                if (!colony.Manager.TryGetGlobalEntityById(otherId, out var other))
-                    continue;
-                if (other.TryGetDataBlob<SpeciesDB>(out var otherDb)
-                    && otherDb.ColonyCost(info.PlanetEntity) > SpeciesDBExtensions.NO_COST)
-                    sharing++;
-            }
+            int sharing = SharingSpecies(colony, info, species, colonyCost);
             if (sharing == 0)
                 return 0;
 
-            double perSpecies = (double)supportValue / sharing;
-            double supported = perSpecies / colonyCost;
+            double supported = (double)supportValue / sharing / colonyCost;
             if (supported <= 0)
                 return 0;
             return (long)supported;
+        }
+
+        /// <summary>
+        /// Colony cost, or <see cref="SpeciesDBExtensions.NO_COST"/> when the body is missing the
+        /// blobs that cost needs. A test colony and an unfinished body are treated as comfortable
+        /// rather than throwing out of the market pass.
+        /// </summary>
+        static double ColonyCostOrComfortable(SpeciesDB species, Entity planet)
+        {
+            if (planet == null || !planet.HasDataBlob<SystemBodyInfoDB>() || !planet.HasDataBlob<OrbitDB>())
+                return SpeciesDBExtensions.NO_COST;
+            return species.ColonyCost(planet);
+        }
+
+        /// <summary>
+        /// Species who share the infrastructure rating, including a comfortable species (cost 0).
+        /// The species being asked about counts even when it does not live here yet, so an empty
+        /// colony still has room for the people who are coming.
+        /// </summary>
+        static int SharingSpecies(Entity colony, ColonyInfoDB info, Entity asked, double askedCost)
+        {
+            int sharing = 0;
+            bool countedAsked = false;
+            foreach (var (otherId, count) in info.Population)
+            {
+                if (count <= 0)
+                    continue;
+                if (!colony.Manager.TryGetGlobalEntityById(otherId, out var other))
+                    continue;
+                if (!other.TryGetDataBlob<SpeciesDB>(out var otherDb))
+                    continue;
+                double cost = ColonyCostOrComfortable(otherDb, info.PlanetEntity);
+                if (cost < SpeciesDBExtensions.NO_COST)
+                    continue;
+                sharing++;
+                if (otherId == asked.Id)
+                    countedAsked = true;
+            }
+            if (!countedAsked && askedCost >= SpeciesDBExtensions.NO_COST)
+                sharing++;
+            return sharing;
         }
 
         /// <summary>

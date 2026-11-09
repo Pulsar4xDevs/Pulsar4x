@@ -71,36 +71,114 @@ namespace Pulsar4X.Storage
             {
                 (ICargoable cargoItem, long count, double mass) tuple = escroList[index];
                 var cargoItem = tuple.cargoItem;
+                if (cargoItem == null || tuple.count <= 0 || cargoItem.MassPerUnit <= 0)
+                    continue;
+
                 double itemMassPerUnit = cargoItem.MassPerUnit;
                 double massToXfer = Math.Min(massTransferable, tuple.mass);
-                massToXfer = Math.Min(massToXfer, CargoMath.GetFreeMass(moveTo, cargoItem));
+                // People land on a colony's books. The colony has no passenger store, so its free
+                // mass is not the limit. Warehouse goods still stop at the destination's free mass.
+                bool landing = IsPassengerLanding(cargoItem, moveTo);
+                bool fromBooks = IsPassengerBooks(cargoItem, moveFrom);
+                if (!landing)
+                    massToXfer = Math.Min(massToXfer, CargoMath.GetFreeMass(moveTo, cargoItem));
 
-                double massLeft = tuple.mass - massToXfer;
-                //we use Ceiling here to signify whole part items not fully moved yet.
-                long itemsLeft = (long)Math.Ceiling(massLeft / itemMassPerUnit);
-                var countToXfer = tuple.count - itemsLeft;
-                escroList[index] = (cargoItem,itemsLeft, massLeft);
+                // Whole units only. Ceiling left one unit in escrow forever when a float remainder
+                // was just under one item, and that leftover was then subtracted from free space again.
+                long affordable = (long)Math.Floor((massToXfer + 1e-6) / itemMassPerUnit);
+                long countToXfer = Math.Min(tuple.count, Math.Max(0, affordable));
+                long itemsLeft = tuple.count - countToXfer;
+                double massLeft = itemsLeft == 0 ? 0 : tuple.mass - countToXfer * itemMassPerUnit;
+                if (massLeft < 0)
+                    massLeft = 0;
+                escroList[index] = (cargoItem, itemsLeft, massLeft);
 
-                //add items to cargo of seconddary entity store
-                long added = moveTo.AddCargoByUnit(cargoItem, countToXfer);
+                long moved;
+                if (countToXfer <= 0)
+                {
+                    moved = 0;
+                }
+                else if (landing)
+                {
+                    var colony = moveTo.OwningEntity!;
+                    var ship = moveFrom.OwningEntity!;
+                    long landed = PassengerAdapter.LandAvailable(colony, ship, (SpeciesCargo)cargoItem, countToXfer);
+                    long staying = countToXfer - landed;
+                    // Volume was never freed. Put the people the colony cannot take back in the hold.
+                    if (staying > 0)
+                        PutUnitsBack(moveFrom, cargoItem, staying);
+                    moved = landed;
+                }
+                else
+                {
+                    long added = moveTo.AddCargoByUnit(cargoItem, countToXfer);
+                    long staying = countToXfer - added;
+                    if (staying > 0)
+                    {
+                        if (fromBooks && cargoItem is SpeciesCargo passengers)
+                            ReturnPeople(moveFrom.OwningEntity, passengers, staying);
+                        else
+                            PutUnitsBack(moveFrom, cargoItem, staying);
+                    }
+                    moved = added;
+                }
 
-                //People come off the hold and go onto the colony's books. Anyone the colony has no
-                //room for stays aboard, because AddCargoByUnit above only took the people it stored.
-                if (cargoItem is SpeciesCargo passengers && added > 0
-                    && moveTo.OwningEntity is { IsValid: true } colony && colony.HasDataBlob<ColonyInfoDB>())
-                    PassengerAdapter.LandAvailable(colony, moveFrom.OwningEntity!, passengers, added);
+                // Escrow only took the units. Release the reserved volume once, and take the mass
+                // off the source once, for the units that actually left. A colony's books are not
+                // a store: boarding must not change its warehouse mass or volume.
+                if (!fromBooks && moved > 0 && moveFrom.TypeStores.TryGetValue(cargoItem.CargoTypeID, out var store))
+                {
+                    store.FreeVolume += moved * cargoItem.VolumePerUnit;
+                    moveFrom.TotalStoredMass -= moved * cargoItem.MassPerUnit;
+                    if (moveFrom.TotalStoredMass < 0 && moveFrom.TotalStoredMass > -1e-6)
+                        moveFrom.TotalStoredMass = 0;
+                }
 
-                //update mass and volume of primary entity store.
-                double volumeStoring = countToXfer * cargoItem.VolumePerUnit;
-                double massStoring = countToXfer * cargoItem.MassPerUnit;
-                TypeStore store = moveFrom.TypeStores[cargoItem.CargoTypeID];
-                store.FreeVolume += volumeStoring;
-                moveFrom.TotalStoredMass += massStoring;
-
-                massTransferable -= massToXfer;
-                totalMassXfered += massToXfer;
+                double massAccounted = countToXfer * itemMassPerUnit;
+                if (massAccounted > massTransferable)
+                    massAccounted = massTransferable;
+                massTransferable -= massAccounted;
+                totalMassXfered += massAccounted;
             }
             return totalMassXfered;
+        }
+
+        static bool IsPassengerLanding(ICargoable cargo, CargoStorageDB dest)
+        {
+            return cargo is SpeciesCargo
+                && dest?.OwningEntity is { IsValid: true } colony
+                && colony.HasDataBlob<ColonyInfoDB>();
+        }
+
+        static bool IsPassengerBooks(ICargoable cargo, CargoStorageDB source)
+        {
+            return cargo is SpeciesCargo
+                && source?.OwningEntity is { IsValid: true } colony
+                && colony.HasDataBlob<ColonyInfoDB>();
+        }
+
+        static void PutUnitsBack(CargoStorageDB store, ICargoable item, long count)
+        {
+            if (count <= 0 || store == null || item == null)
+                return;
+            if (!store.TypeStores.TryGetValue(item.CargoTypeID, out var type))
+                return;
+            if (type.CurrentStoreInUnits.ContainsKey(item.ID))
+                type.CurrentStoreInUnits[item.ID] += count;
+            else
+                type.CurrentStoreInUnits.Add(item.ID, count);
+            if (!type.Cargoables.ContainsKey(item.ID))
+                type.Cargoables.Add(item.ID, item);
+        }
+
+        static void ReturnPeople(Entity colony, SpeciesCargo passengers, long count)
+        {
+            if (count <= 0 || colony == null || !colony.TryGetDataBlob<ColonyInfoDB>(out var info))
+                return;
+            if (info.Population.ContainsKey(passengers.SpeciesId))
+                info.Population[passengers.SpeciesId] += count;
+            else
+                info.Population.Add(passengers.SpeciesId, count);
         }
 
         /// <summary>

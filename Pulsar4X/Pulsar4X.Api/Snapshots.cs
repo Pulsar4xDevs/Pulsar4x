@@ -253,12 +253,18 @@ public static class CommandSpanLabels
 
 public sealed record SpeciesPopulation(string SpeciesName, long Population);
 
-/// <summary>One listed good at a logistics office. Stock is the office's cargo hold.</summary>
+/// <summary>
+/// One listed good at a logistics office. Stock is the office's cargo hold.
+/// A relocation is people, not a trade good: <see cref="Note"/> says who is leaving and where they are accepted.
+/// It does not use an office slot.
+/// </summary>
 public sealed record MarketGoodView(
     string CargoId, string Name,
     long Stock, long Reserve,
     long BuyQuantity, decimal Bid,
-    long SellQuantity, decimal Ask) : IComponentView;
+    long SellQuantity, decimal Ask,
+    bool Relocation = false,
+    string Note = "") : IComponentView;
 
 /// <summary>The book a faction is allowed to see. The owner, or a viewer granted Trade.</summary>
 public sealed record MarketView(

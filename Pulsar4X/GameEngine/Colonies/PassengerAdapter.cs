@@ -109,14 +109,8 @@ namespace Pulsar4X.Colonies
         /// </summary>
         public static long Room(Entity colony, Entity ship, int speciesId)
         {
-            if (!colony.TryGetDataBlob<ColonyInfoDB>(out var info))
-                return 0;
-            info.Population.TryGetValue(speciesId, out var people);
-            long max = colony.TryGetDataBlob<ColonyLifeSupportDB>(out var support) ? support.MaxPopulation : 0;
-            // A colony with no ceiling set cannot say it has room.
-            if (max <= 0)
-                return 0;
-            long room = max - people - InTransit(colony, ship, speciesId);
+            // The same support number the planner uses, with people already in transit taken out.
+            long room = MigrationPlanner.Room(colony, speciesId) - InTransit(colony, ship, speciesId);
             return room > 0 ? room : 0;
         }
 
@@ -172,13 +166,16 @@ namespace Pulsar4X.Colonies
 
         /// <summary>
         /// Take people out of the hold and add them to the colony, clamped to its room.
-        /// Returns how many actually landed.
+        /// Returns how many actually landed. The hold loses exactly that many.
         /// </summary>
         public static long Land(Entity colony, Entity ship, SpeciesCargo passengers, long count)
         {
             if (!CanLand(colony, ship, passengers, count, out var available, out _))
                 return 0;
-            return LandAvailable(colony, ship, passengers, available);
+            long landed = LandAvailable(colony, ship, passengers, available);
+            if (landed > 0 && ship.TryGetDataBlob<CargoStorageDB>(out var hold))
+                hold.RemoveCargoByUnit(passengers, landed);
+            return landed;
         }
 
         /// <summary>

@@ -33,6 +33,7 @@ public static class MigrationBook
     /// </summary>
     public static int Refresh(EntityManager manager)
     {
+        RegisterSpecies(manager);
         Retire(manager);
 
         // A book holds one listing per cargo id, so a colony cannot both send people of a species
@@ -122,6 +123,22 @@ public static class MigrationBook
         }
     }
 
+    /// <summary>
+    /// The player species is added after the faction is created, and an owned colony such as
+    /// Luna Concord adds its own species the same way. Register here so a market pass can see them
+    /// even when that earlier step was missed. Register is idempotent.
+    /// </summary>
+    static void RegisterSpecies(EntityManager manager)
+    {
+        if (manager.Game != null)
+        {
+            foreach (var faction in manager.Game.Factions.Values)
+                SpeciesCargo.RegisterOwned(faction);
+        }
+        foreach (var faction in manager.GetAllEntitiesWithDataBlob<Factions.FactionInfoDB>())
+            SpeciesCargo.RegisterOwned(faction);
+    }
+
     static bool HasForeignListing(Entity colony, string cargoId)
     {
         return MarketBook.TryGet(colony, cargoId, out var listing) && !listing.Relocation;
@@ -129,7 +146,12 @@ public static class MigrationBook
 
     static bool CanResolve(Entity colony, string cargoId)
     {
-        if (!colony.TryGetDataBlob<Factions.FactionInfoDB>(out var info))
+        // FactionInfoDB lives on the faction, never on the colony.
+        if (colony?.Manager?.Game == null)
+            return false;
+        if (!colony.Manager.Game.Factions.TryGetValue(colony.FactionOwnerID, out var faction))
+            return false;
+        if (!faction.TryGetDataBlob<Factions.FactionInfoDB>(out var info))
             return false;
         return info.Data.CargoGoods.Contains(cargoId);
     }

@@ -35,6 +35,7 @@
         { "Id": "default-design-fuel-tank-1500", "Amount": 1 },
         { "Id": "default-design-shuttlebay", "Amount": 1 },
         { "Id": "default-design-cargo-hold-5t", "Amount": 1 },
+        { "Id": "default-design-passenger-hold", "Amount": 1 },
         { "Id": "default-design-alcubierre-2k", "Amount": 1 },
         { "Id": "default-design-battery-2t", "Amount": 2 },
         { "Id": "default-design-reactor-2t", "Amount": 1 },

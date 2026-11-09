@@ -226,6 +226,9 @@ public class ShipRefitTests
         int next = 1;
         foreach (var part in freighter.Components)
         {
+            // Passenger quarters are on the freighter only. This diff is about the construction bay.
+            if (part.Id == "default-design-passenger-hold")
+                continue;
             for (int i = 0; i < part.Amount; i++)
                 onShip.Add(new RefitPartView(next++, part.Id, 1, 1) { DesignId = part.Id });
         }

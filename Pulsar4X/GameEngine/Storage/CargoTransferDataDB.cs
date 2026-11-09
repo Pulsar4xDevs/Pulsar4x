@@ -77,39 +77,7 @@ public class CargoTransferDataDB : BaseDataBlob
         for (int index = 0; index < OrderedToTransfer.Count; index++)
         {
             (ICargoable item, long amount) tuple = OrderedToTransfer[index];
-            var cargoItem = tuple.item;
-            var unitAmount = tuple.amount;
-            TypeStore store;
-            SafeList<(ICargoable item, long count, double mass)> itemsToRemove; //reference which list.
-            long unitsStorable; 
-            if (unitAmount < 0) //we're moving items from primary to secondary
-            {
-                unitAmount *= -1;
-                store = PrimaryStorageDB.TypeStores[cargoItem.CargoTypeID];
-                itemsToRemove = EscroHeldInPrimary;
-                unitsStorable = CargoMath.GetFreeUnitSpace(SecondaryStorageDB, cargoItem);
-            }
-            else   //we're moving items from secondary to primary
-            {
-                store = SecondaryStorageDB.TypeStores[cargoItem.CargoTypeID];
-                itemsToRemove = EscroHeldInSecondary;
-                unitsStorable = CargoMath.GetFreeUnitSpace(PrimaryStorageDB, cargoItem);
-            }
-            if (store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
-            {
-                long amountInStore = store.CurrentStoreInUnits[cargoItem.ID];
-                
-                long amountToRemove = Math.Min(unitAmount, amountInStore);
-                amountToRemove = Math.Min(unitsStorable, amountToRemove);
-                store.CurrentStoreInUnits[cargoItem.ID] -= amountToRemove;
-                double massToRemove = cargoItem.MassPerUnit * amountToRemove;
-                itemsToRemove.Add((cargoItem,amountToRemove, massToRemove));
-            }
-            else
-            {
-                //in this case we're trying to remove items that don't exist. not sure how we should handle this yet.
-                itemsToRemove.Add((cargoItem,0,0));
-            }
+            HoldForTransfer(tuple.item, tuple.amount);
         }
 
         MovePassengersOffColonies();
@@ -171,39 +139,107 @@ public class CargoTransferDataDB : BaseDataBlob
             if(tuple.item != cargoItem)
                 continue;
             OrderedToTransfer[index] = (cargoItem, tuple.amount + unitAmount);
-            TypeStore store;
-            SafeList<(ICargoable item, long count, double mass)> itemsToRemove; //reference which list.
-            long unitsStorable; 
-            if (unitAmount < 0) //if we're removing items
-            {
-                unitAmount *= -1;
-                store = PrimaryStorageDB.TypeStores[cargoItem.CargoTypeID];
-                itemsToRemove = EscroHeldInPrimary;
-                unitsStorable = CargoMath.GetFreeUnitSpace(SecondaryStorageDB, cargoItem);
-            }
-            else
-            {
-                store = SecondaryStorageDB.TypeStores[cargoItem.CargoTypeID];
-                itemsToRemove = EscroHeldInSecondary;
-                unitsStorable = CargoMath.GetFreeUnitSpace(PrimaryStorageDB, cargoItem);
-            }
-            if (store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
-            {
-                long amountInStore = store.CurrentStoreInUnits[cargoItem.ID];
-                
-                long amountToRemove = Math.Min(unitAmount, amountInStore);
-                amountToRemove = Math.Min(unitsStorable, amountToRemove);
-                store.CurrentStoreInUnits[cargoItem.ID] -= amountToRemove;
-                double massToRemove = cargoItem.MassPerUnit * amountToRemove;
-                itemsToRemove.Add((cargoItem,amountToRemove, massToRemove));
-            }
-            else
-            {
-                //in this case we're trying to remove items that don't exist. not sure how we should handle this yet.
-                itemsToRemove.Add((cargoItem,0,0));
-            }
+            HoldForTransfer(cargoItem, unitAmount);
             break;
         }
+    }
+
+    /// <summary>
+    /// Reserve units for one line. Volume and mass stay where they are: the space stays reserved
+    /// until delivery frees it once, and a cancel only puts the units back.
+    /// People on a colony are not warehouse stock. A load counts them off the population, and an
+    /// unload counts them out of the ship's passenger store. A colony has no passenger store, so
+    /// this must not index one.
+    /// </summary>
+    void HoldForTransfer(ICargoable cargoItem, long unitAmount)
+    {
+        if (cargoItem == null)
+            return;
+        bool fromPrimary = unitAmount < 0;
+        if (fromPrimary)
+            unitAmount = -unitAmount;
+        var sourceStore = fromPrimary ? PrimaryStorageDB : SecondaryStorageDB;
+        var destStore = fromPrimary ? SecondaryStorageDB : PrimaryStorageDB;
+        var sourceEntity = fromPrimary ? PrimaryEntity : SecondaryEntity;
+        var destEntity = fromPrimary ? SecondaryEntity : PrimaryEntity;
+        var held = fromPrimary ? EscroHeldInPrimary : EscroHeldInSecondary;
+
+        if (cargoItem is SpeciesCargo passengers && OnColonyBooks(sourceEntity))
+        {
+            long take = Math.Min(unitAmount, PeopleOn(sourceEntity, passengers));
+            // Every species shares the passenger volume. Free-unit space only sees this species,
+            // so a second species would board into berths the first species already reserved.
+            take = Math.Min(take, PassengerBerthsLeft(destStore, passengers));
+            held.Add((cargoItem, take, cargoItem.MassPerUnit * take));
+            return;
+        }
+
+        if (sourceStore == null
+            || !sourceStore.TypeStores.TryGetValue(cargoItem.CargoTypeID, out var store)
+            || !store.CurrentStoreInUnits.TryGetValue(cargoItem.ID, out var amountInStore))
+        {
+            held.Add((cargoItem, 0, 0));
+            return;
+        }
+
+        long room = long.MaxValue;
+        if (!(cargoItem is SpeciesCargo && OnColonyBooks(destEntity)))
+        {
+            if (destStore != null && destStore.TypeStores.ContainsKey(cargoItem.CargoTypeID))
+                room = Math.Max(0, CargoMath.GetFreeUnitSpace(destStore, cargoItem));
+            else
+                room = 0;
+        }
+
+        long amountToRemove = Math.Min(unitAmount, Math.Min(amountInStore, room));
+        store.CurrentStoreInUnits[cargoItem.ID] -= amountToRemove;
+        held.Add((cargoItem, amountToRemove, cargoItem.MassPerUnit * amountToRemove));
+    }
+
+    static bool OnColonyBooks(Entity entity)
+    {
+        return entity != null && entity.IsValid && entity.HasDataBlob<ColonyInfoDB>();
+    }
+
+    static long PeopleOn(Entity colony, SpeciesCargo passengers)
+    {
+        if (!colony.TryGetDataBlob<ColonyInfoDB>(out var info))
+            return 0;
+        return info.Population.TryGetValue(passengers.SpeciesId, out var people) ? Math.Max(0, people) : 0;
+    }
+
+    /// <summary>
+    /// Berths still free on the destination, after every species already held in escrow.
+    /// Volume stays reserved until delivery, so the free-volume figure alone still shows the
+    /// whole hold. Do not also call <see cref="CargoMath.GetFreeUnitSpace"/>: that subtracts
+    /// only this item's id and would count those units twice.
+    /// </summary>
+    static long PassengerBerthsLeft(CargoStorageDB dest, SpeciesCargo passengers)
+    {
+        if (dest == null || passengers.VolumePerUnit <= 0)
+            return 0;
+        if (!dest.TypeStores.TryGetValue(passengers.CargoTypeID, out var store))
+            return 0;
+        long berths = (long)(store.FreeVolume / passengers.VolumePerUnit);
+        long reserved = 0;
+        foreach (var transfer in dest.EscroItems)
+        {
+            reserved += SpeciesUnits(transfer.EscroHeldInPrimary);
+            reserved += SpeciesUnits(transfer.EscroHeldInSecondary);
+        }
+        long left = berths - reserved;
+        return left > 0 ? left : 0;
+    }
+
+    static long SpeciesUnits(SafeList<(ICargoable item, long count, double mass)> held)
+    {
+        long units = 0;
+        foreach (var (item, count, _) in held)
+        {
+            if (item is SpeciesCargo && count > 0)
+                units += count;
+        }
+        return units;
     }
 
     /// <summary>

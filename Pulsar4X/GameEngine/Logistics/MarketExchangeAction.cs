@@ -198,9 +198,17 @@ public class MarketExchangeAction : EntityAction
         if (colonists)
         {
             // A colony's people are not in its warehouse, so the adapter decides the count.
-            if (!TryPeople(shipFaction, marketFaction, sourceGood, source, dest,
+            if (!TryPeople(shipFaction, marketFaction, sourceGood, source, dest, quantity,
                     out var colony, out var ship, out var people, out var landing, out var why))
             {
+                // No passenger hold is a refusal the log can show. It is not a failed order:
+                // nothing was asked of a hold the ship does not have.
+                if (why == "The ship has no passenger capacity.")
+                {
+                    _details = why;
+                    _isFinished = true;
+                    return;
+                }
                 Fail(why);
                 return;
             }
@@ -322,7 +330,7 @@ public class MarketExchangeAction : EntityAction
     /// is a refusal, never an error.
     /// </summary>
     static bool TryPeople(int shipFaction, int marketFaction,
-        ICargoable sourceGood, Entity source, Entity dest,
+        ICargoable sourceGood, Entity source, Entity dest, long cap,
         out Entity colony, out Entity ship, out SpeciesCargo people,
         out long quantity, out string why)
     {
@@ -361,7 +369,6 @@ public class MarketExchangeAction : EntityAction
             return false;
         }
 
-        long cap = long.MaxValue;
         if (ReferenceEquals(colony, source))
         {
             if (!PassengerAdapter.CanBoard(colony, ship, people, cap, out var boardable, out var reason))

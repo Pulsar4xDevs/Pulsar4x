@@ -718,15 +718,20 @@ namespace Pulsar4X.Engine.Api
             var goods = new List<MarketGoodView>(book.Listings.Count);
             foreach (var listing in book.Listings.Values.OrderBy(l => l.CargoId, StringComparer.Ordinal))
             {
+                long stock = listing.Relocation
+                    ? PopulationOf(entity, listing.CargoId)
+                    : StockOf(entity, owner, listing.CargoId);
                 goods.Add(new MarketGoodView(
                     listing.CargoId,
                     CargoName(viewer, listing.CargoId),
-                    StockOf(entity, owner, listing.CargoId),
+                    stock,
                     listing.Reserve,
                     listing.BuyQuantity,
                     listing.Bid,
                     listing.SellQuantity,
-                    listing.Ask));
+                    listing.Ask,
+                    listing.Relocation,
+                    listing.Relocation ? RelocationNote(entity, listing) : ""));
             }
 
             bool canEdit = owned;
@@ -882,6 +887,49 @@ namespace Pulsar4X.Engine.Api
                     return cargo.Name;
             }
             return cargoId;
+        }
+
+        /// <summary>People of the species this relocation names. The cargo id is the species entity id.</summary>
+        private static long PopulationOf(Entity colony, string cargoId)
+        {
+            if (!int.TryParse(cargoId, out int speciesId))
+                return 0;
+            if (!colony.TryGetDataBlob<ColonyInfoDB>(out var info))
+                return 0;
+            return info.Population.TryGetValue(speciesId, out var people) ? people : 0;
+        }
+
+        /// <summary>
+        /// "1200 leaving for Mars" or "1200 accepted from Earth". The other colony is the matching
+        /// relocation in the same system.
+        /// </summary>
+        private static string RelocationNote(Entity colony, MarketListing listing)
+        {
+            bool leaving = listing.SellQuantity > 0;
+            long count = leaving ? listing.SellQuantity : listing.BuyQuantity;
+            string where = RelocationPartner(colony, listing.CargoId, leaving);
+            if (leaving)
+                return string.IsNullOrEmpty(where) ? $"{count} leaving" : $"{count} leaving for {where}";
+            return string.IsNullOrEmpty(where) ? $"{count} accepted" : $"{count} accepted from {where}";
+        }
+
+        private static string RelocationPartner(Entity colony, string cargoId, bool weAreLeaving)
+        {
+            if (colony.Manager == null)
+                return "";
+            foreach (var other in colony.Manager.GetAllEntitiesWithDataBlob<LogiBaseDB>())
+            {
+                if (other.Id == colony.Id || other.FactionOwnerID != colony.FactionOwnerID)
+                    continue;
+                if (!MarketBook.TryGet(other, cargoId, out var row) || !row.Relocation)
+                    continue;
+                if (weAreLeaving && row.BuyQuantity <= 0)
+                    continue;
+                if (!weAreLeaving && row.SellQuantity <= 0)
+                    continue;
+                return other.GetName(colony.FactionOwnerID);
+            }
+            return "";
         }
 
         private static long StockOf(Entity entity, FactionInfoDB? owner, string cargoId)

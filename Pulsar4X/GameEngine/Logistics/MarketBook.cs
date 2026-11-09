@@ -1,3 +1,4 @@
+using Pulsar4X.Colonies;
 using Pulsar4X.Engine;
 using Pulsar4X.Storage;
 
@@ -66,8 +67,17 @@ public static class MarketBook
         if (!entity.TryGetDataBlob<LogiBaseDB>(out var book))
             return false;
 
-        bool exists = book.Listings.ContainsKey(listing.CargoId);
-        if (!exists && book.Listings.Count >= book.Capacity)
+        bool exists = book.Listings.TryGetValue(listing.CargoId, out var previous);
+        // A relocation follows the population. It does not take one of the office's listing slots.
+        // Replacing a relocation with an ordinary row does, and a full office rejects that.
+        int occupied = 0;
+        foreach (var row in book.Listings.Values)
+        {
+            if (!row.Relocation)
+                occupied++;
+        }
+        bool consumesSlot = !listing.Relocation && (!exists || previous.Relocation);
+        if (consumesSlot && occupied >= book.Capacity)
             return false;
 
         book.Listings[listing.CargoId] = listing.Copy();
@@ -92,9 +102,18 @@ public static class MarketBook
 
     public static long Sellable(Entity entity, MarketListing listing, ICargoable cargo)
     {
-        if (listing == null)
+        if (listing == null || cargo == null)
             return 0;
-        long stock = Stock(entity, cargo);
+        long stock;
+        if (listing.Relocation && cargo is SpeciesCargo people
+            && entity.TryGetDataBlob<ColonyInfoDB>(out var info))
+        {
+            info.Population.TryGetValue(people.SpeciesId, out stock);
+        }
+        else
+        {
+            stock = Stock(entity, cargo);
+        }
         long sellable = stock - listing.Reserve;
         return sellable > 0 ? sellable : 0;
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using Pulsar4X.Blueprints;
+using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
@@ -64,6 +65,7 @@ namespace Pulsar4X.People
 
             species.FactionOwnerID = faction.Id;
             faction.GetDataBlob<FactionInfoDB>().Species.Add(species);
+            SpeciesCargo.RegisterOwned(faction);
 
             return species;
         }
@@ -77,6 +79,7 @@ namespace Pulsar4X.People
             species.FactionOwnerID = faction.Id;
             systemEntityManager.AddEntity(species, blobs);
             faction.GetDataBlob<FactionInfoDB>().Species.Add(species);
+            SpeciesCargo.RegisterOwned(faction);
             return species;
         }
 
@@ -107,6 +110,7 @@ namespace Pulsar4X.People
             species.FactionOwnerID = faction.Id;
             globalManager.AddEntity(species, blobs);
             faction.GetDataBlob<FactionInfoDB>().Species.Add(species);
+            SpeciesCargo.RegisterOwned(faction);
             return species;
         }
 
@@ -126,6 +130,7 @@ namespace Pulsar4X.People
             species.FactionOwnerID = faction.Id;
             systemEntityManager.AddEntity(species, blobs);
             faction.GetDataBlob<FactionInfoDB>().Species.Add(species);
+            SpeciesCargo.RegisterOwned(faction);
             return species;
         }
 

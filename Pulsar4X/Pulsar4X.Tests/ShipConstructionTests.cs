@@ -416,6 +416,7 @@ public class ShipConstructionTests
             "default-design-fuel-tank-1500",
             "default-design-shuttlebay",
             "default-design-cargo-hold-5t",
+            "default-design-passenger-hold",
             "default-design-alcubierre-2k",
             "default-design-battery-2t",
             "default-design-reactor-2t",

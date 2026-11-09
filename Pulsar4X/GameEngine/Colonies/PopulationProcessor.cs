@@ -91,14 +91,14 @@ namespace Pulsar4X.Colonies
 
         internal void ReCalcMaxPopulation(Entity colonyEntity)
         {
-            var infrastructure = new List<Entity>();
-            var instancesDB = colonyEntity.GetDataBlob<ComponentInstancesDB>();
+            if (!colonyEntity.TryGetDataBlob<ComponentInstancesDB>(out var instancesDB))
+                return;
+            if (!colonyEntity.TryGetDataBlob<ColonyInfoDB>(out var info) || info.PlanetEntity == null)
+                return;
+            if (!colonyEntity.TryGetDataBlob<ColonyLifeSupportDB>(out var life))
+                return;
 
-            //List<KeyValuePair<Entity, PrIwObsList<Entity>>> infrastructureEntities = instancesDB.ComponentsByDesign.GetInternalDictionary().Where(item => item.Key.HasDataBlob<PopulationSupportAtbDB>()).ToList();
-
-            long totalMaxPop = instancesDB.GetPopulationSupportValue(colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity);
-
-            colonyEntity.GetDataBlob<ColonyLifeSupportDB>().MaxPopulation = totalMaxPop;
+            life.MaxPopulation = instancesDB.GetPopulationSupportValue(info.PlanetEntity);
         }
 
         private void UpdatePopulation(ColonyInfoDB colony ,Dictionary<int, long> population, int id, long newPopulation)

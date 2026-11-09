@@ -34,11 +34,11 @@ Everything is linked from [master-plan.md](master-plan.md): the work queue, the 
 
 2026-10-17. `FleetSurvey_MarsAndMoons_ShipsSurvey_TankerMovesToParent` runs to 30 hours and Mars is complete. `FleetGravSurvey_OnSite_CompletesAssignedAnomalies` includes the outer anomaly and returns. A second pass still due at the current instant throws and names the processor. A ship parked on a `MoveTypes.None` site can plot the next warp.
 
-## Open
-
 ### Escrow of a moving load does not finish
 
-2026-11-04. Found while writing passenger transport. `CargoTransferDataDB` escrow subtracts `TypeStore.CurrentStoreInUnits` and the matching volume from `TotalStoredMass` but not from `TypeStore.FreeVolume`, and `CargoTransferProcessor.MoveFromEscro` adds that volume again on the way out. So the second leg of a round trip has less room than it should. To a fixed destination the extra room is flushed when the escrow takes the whole remaining store and the store is removed, so `CargoTransferTests`, `MoveGoodsTests` and `PassengerTransportTests` pass. A hold loaded and unloaded more than once (`MoveGoodsTests.CaptainedShip...`-style trips, `LoadGoodsAction` repeatedly) loses capacity each time and can leave units in escrow with `AmountLeftToXfer() > 0` forever. Not fixed: the fix touches every escrow user (refuel, sealed shipments, market exchange). Repro: load a full hold, unload it, reload it.
+2026-11-08. Escrow reserves units only. Delivery frees that volume once and subtracts the mass of the units that left. A sub-unit remainder no longer sticks in escrow. Passenger load and unload do not index a colony passenger store.
+
+## Open
 
 ### Phobos transfer completes when the departure burn finishes
 

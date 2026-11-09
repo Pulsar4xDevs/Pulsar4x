@@ -435,6 +435,7 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
         var playerSpecies = SpeciesFactory.CreateFromBlueprint(startingSystem, modDataStore.Species[request.SpeciesId]);
         playerSpecies.FactionOwnerID = playerFaction.Id;
         factionInfoDB.Species.Add(playerSpecies);
+        SpeciesCargo.Register(factionInfoDB.Data, factionInfoDB.Species);
 
         // Setup the starting colony
         ColonyFactory.CreateFromBlueprint(game, playerFaction, playerSpecies, startingSystem, startingBody, modDataStore.Colonies[request.ColonyId]);

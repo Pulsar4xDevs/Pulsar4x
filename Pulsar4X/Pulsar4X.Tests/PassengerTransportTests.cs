@@ -225,9 +225,10 @@ public class PassengerTransportTests
             Ask = 0,
         });
 
+        scene.AtHome();
         var action = MarketExchangeAction.Create(
             scene.Ship, scene.Home.Id, scene.People.UniqueID, MarketSide.BuyFromMarket, 40);
-        action.Execute(scene.Ship.StarSysDateTime);
+        Run(scene, action);
 
         Assert.That(action.IsFinished(), Is.True);
         Assert.That(scene.Population(scene.Home), Is.EqualTo(460));
@@ -252,7 +253,7 @@ public class PassengerTransportTests
 
         var action = MarketExchangeAction.Create(
             scene.Ship, scene.Dest.Id, scene.People.UniqueID, MarketSide.SellToMarket, 50);
-        action.Execute(scene.Ship.StarSysDateTime);
+        Run(scene, action);
 
         Assert.That(scene.Population(scene.Dest), Is.EqualTo(1000));
         Assert.That(scene.Aboard(scene.Ship), Is.EqualTo(40));
@@ -264,11 +265,8 @@ public class PassengerTransportTests
         var scene = Scene.Build(population: 500, capacity: 1000, berths: 100);
         scene.AtHome();
         var info = scene.Faction.GetDataBlob<FactionInfoDB>();
-        // scene.Other is the second faction. People aboard it first, so the exchange is refused for
-        // the faction, not for an empty hold.
-        scene.Ship.FactionOwnerID = scene.Other.Id;
+        // People are already aboard, so the exchange is refused for the faction, not for an empty hold.
         PassengerAdapter.Board(scene.Home, scene.Ship, scene.People, 10);
-        scene.Ship.FactionOwnerID = scene.Faction.Id;
         var rivalInfo = scene.Other.GetDataBlob<FactionInfoDB>();
         info.Stances[scene.Other.Id] = FactionStance.Friendly;
         rivalInfo.Stances[scene.Faction.Id] = FactionStance.Friendly;
@@ -286,7 +284,7 @@ public class PassengerTransportTests
 
         var action = MarketExchangeAction.Create(
             scene.Ship, other.Id, scene.People.UniqueID, MarketSide.SellToMarket, 10);
-        action.Execute(scene.Ship.StarSysDateTime);
+        Run(scene, action);
 
         Assert.That(action.IsFinished(), Is.True);
         Assert.That(action.Status, Is.EqualTo(ActionStatus.Failed));
@@ -309,7 +307,7 @@ public class PassengerTransportTests
 
         var action = MarketExchangeAction.Create(
             scene.Ship, scene.Home.Id, scene.People.UniqueID, MarketSide.BuyFromMarket, 10);
-        action.Execute(scene.Ship.StarSysDateTime);
+        Run(scene, action);
 
         Assert.That(action.IsFinished(), Is.True);
         Assert.That(action.Status, Is.Not.EqualTo(ActionStatus.Failed));
@@ -333,7 +331,7 @@ public class PassengerTransportTests
 
         var action = MarketExchangeAction.Create(
             scene.Ship, scene.Dest.Id, scene.People.UniqueID, MarketSide.SellToMarket, 50);
-        action.Execute(scene.Ship.StarSysDateTime);
+        Run(scene, action);
 
         Assert.That(action.IsFinished(), Is.True);
         Assert.That(scene.Population(scene.Dest), Is.EqualTo(1000));
@@ -352,7 +350,10 @@ public class PassengerTransportTests
         if (!buildable)
         {
             // A start that has not unlocked it yet still must be able to build it from the template.
-            Assert.That(info.Data.ComponentTemplates.ContainsKey("passenger-hold"), Is.True,
+            Assert.That(
+                info.Data.ComponentTemplates.ContainsKey("passenger-hold")
+                || info.Data.LockedComponentTemplates.ContainsKey("passenger-hold"),
+                Is.True,
                 "the passenger-hold template must ship with the mod");
             Assert.That(mod.ComponentDesigns.ContainsKey("default-design-passenger-hold"), Is.True,
                 "the passenger-hold design must ship with the mod");
@@ -383,6 +384,8 @@ public class PassengerTransportTests
 
         // Put it on the hull. The ship is built with a hold already, so the berths add up.
         var ship = scene.Ship;
+        if (!ship.HasDataBlob<ComponentInstancesDB>())
+            ship.SetDataBlob(new ComponentInstancesDB());
         var hull = ship.GetDataBlob<CargoStorageDB>();
         long were = hull.GetFreeUnitSpace(scene.People, false);
         ship.AddComponent(component, 1);
@@ -420,10 +423,7 @@ public class PassengerTransportTests
             scene.AtDest();
             long landed = PassengerAdapter.Land(scene.Dest, scene.Ship, scene.People, 25);
             Assert.That(landed, Is.EqualTo(25));
-            // The processor takes the people out of the hold before it lands them; do the same here
-            // so the hold reflects where the people are.
-            Assert.That(shipStore.RemoveCargoByUnit(scene.People, landed), Is.EqualTo(landed));
-            Assert.That(scene.Aboard(scene.Ship), Is.EqualTo(0));
+            Assert.That(scene.Aboard(scene.Ship), Is.EqualTo(0), "landing takes them out of the hold");
             Assert.That(shipStore.TotalStoredMass, Is.EqualTo(shipMassEmpty).Within(1e-6),
                 "the hold is back to its empty mass");
             Assert.That(berthVolume - shipStore.GetFreeVolume(scene.People), Is.EqualTo(0).Within(1e-6),
@@ -456,13 +456,15 @@ public class PassengerTransportTests
         double homeMass = homeStore.TotalStoredMass;
         double homeVolume = homeStore.GetFreeVolume("general-storage");
         Assert.That(berthVolume, Is.GreaterThan(0));
-
         for (int trip = 0; trip < 3; trip++)
         {
             scene.AtHome();
-            CargoTransferOrder.CreateLoadPair(
+            var (primary, _) = CargoTransferOrder.CreateLoadPair(
                 scene.Faction.Id, scene.Ship, scene.Home,
                 new List<(ICargoable item, long amount)> { (scene.People, 25) });
+            Assert.That(primary.Taken(scene.People.ID), Is.EqualTo(25), "escrow took the people off the colony");
+            Assert.That(scene.Population(scene.Home), Is.EqualTo(5000 - 25 * (trip + 1)));
+
             Scene.Drain(scene.Home);
             Assert.That(scene.Aboard(scene.Ship), Is.EqualTo(25), "the hold took the people");
             Assert.That(scene.Population(scene.Home), Is.EqualTo(5000 - 25 * (trip + 1)));
@@ -529,7 +531,7 @@ public class PassengerTransportTests
         Assert.That(loadLeg.Actions.OfType<MarketExchangeAction>().Count(), Is.EqualTo(1),
             "the freighter is told to buy people at the origin market");
         foreach (var action in loadLeg.Actions)
-            action.Execute(scene.Ship.StarSysDateTime);
+            Run(scene, action);
 
         Assert.That(scene.Aboard(scene.Ship), Is.EqualTo(100), "capped by the berths, not the offer");
         Assert.That(scene.Population(scene.Home), Is.EqualTo(1100));
@@ -540,7 +542,7 @@ public class PassengerTransportTests
         Assert.That(unloadLeg.Actions.OfType<MarketExchangeAction>().Count(), Is.EqualTo(1),
             "the freighter is told to sell people at the destination market");
         foreach (var action in unloadLeg.Actions)
-            action.Execute(scene.Ship.StarSysDateTime);
+            Run(scene, action);
 
         Assert.That(scene.Population(scene.Dest), Is.EqualTo(100));
         Assert.That(scene.Aboard(scene.Ship), Is.EqualTo(0));
@@ -627,7 +629,7 @@ public class PassengerTransportTests
         var fleet = scene.Fleet();
         scene.AtHome();
 
-        var moves = MigrationPlanner.Plan(scene.Game.GlobalManager);
+        var moves = MigrationPlanner.Plan(scene.Home.Manager);
 
         Assert.That(moves, Has.Count.EqualTo(1));
         Assert.That(moves[0].Origin, Is.EqualTo(scene.Home));
@@ -644,7 +646,7 @@ public class PassengerTransportTests
         scene.Fleet();
         scene.AtHome();
 
-        Assert.That(MigrationPlanner.Plan(scene.Game.GlobalManager), Is.Empty);
+        Assert.That(MigrationPlanner.Plan(scene.Home.Manager), Is.Empty);
     }
 
     [Test]
@@ -654,7 +656,7 @@ public class PassengerTransportTests
         scene.Fleet(berths: 0);
         scene.AtHome();
 
-        Assert.That(MigrationPlanner.Plan(scene.Game.GlobalManager), Is.Empty);
+        Assert.That(MigrationPlanner.Plan(scene.Home.Manager), Is.Empty);
     }
 
     [Test]
@@ -665,7 +667,7 @@ public class PassengerTransportTests
         scene.Fleet();
         scene.AtHome();
 
-        Assert.That(MigrationPlanner.Plan(scene.Game.GlobalManager), Is.Empty);
+        Assert.That(MigrationPlanner.Plan(scene.Home.Manager), Is.Empty);
     }
 
     [Test]
@@ -684,6 +686,46 @@ public class PassengerTransportTests
 
         scene.Home.GetDataBlob<ColonyLifeSupportDB>().MaxPopulation = 1300;
         Assert.That(MigrationPlanner.Room(scene.Home, scene.Species.Id), Is.EqualTo(0), "the ceiling is what makes it full");
+    }
+
+    [Test]
+    public void Relocation_DoesNotUseAnOfficeSlot_AndSellableIsThePopulation()
+    {
+        var scene = Scene.Build(population: 500, capacity: 1000, berths: 10);
+        var book = scene.Home.GetDataBlob<LogiBaseDB>();
+        book.Capacity = 1;
+
+        Assert.That(MarketBook.SetListing(scene.Home, new MarketListing
+        {
+            CargoId = "iron",
+            SellQuantity = 10,
+            Ask = 1,
+        }), Is.True);
+        Assert.That(MarketBook.SetListing(scene.Home, new MarketListing
+        {
+            CargoId = "copper",
+            SellQuantity = 10,
+            Ask = 1,
+        }), Is.False, "a trade good still needs a free slot");
+        Assert.That(MarketBook.SetListing(scene.Home, new MarketListing
+        {
+            CargoId = scene.People.UniqueID,
+            SellQuantity = 40,
+            Relocation = true,
+        }), Is.True, "a relocation does not take an office slot");
+
+        Assert.That(MarketBook.Sellable(scene.Home, book.Listings[scene.People.UniqueID], scene.People),
+            Is.EqualTo(500));
+    }
+
+    /// <summary>
+    /// The queue binds the ship in <see cref="EntityAction.IsValidCommand"/> before
+    /// <see cref="EntityAction.Execute"/>. These tests call Execute directly, so bind first.
+    /// </summary>
+    static void Run(Scene scene, EntityAction action)
+    {
+        Assert.That(action.IsValidCommand(scene.Game), Is.True, action.Name);
+        action.Execute(scene.Ship.StarSysDateTime);
     }
 
     sealed class Scene
@@ -867,6 +909,14 @@ public class PassengerTransportTests
             {
                 new NameDB("Body"),
                 Habitable(),
+                // Cargo transfer reads the day length for a colony's orbital speed. No orbit blob:
+                // a missing orbit stays a comfortable world, so support is still the infrastructure.
+                new SystemBodyInfoDB
+                {
+                    Gravity = 9.8,
+                    BaseTemperature = 15,
+                    LengthOfDay = TimeSpan.FromDays(1),
+                },
                 new PositionDB(at, star),
                 MassVolumeDB.NewFromMassAndRadius_m(5.972e24, 6.371e6),
             });
@@ -903,6 +953,7 @@ public class PassengerTransportTests
         {
             var design = new ComponentDesign
             {
+                UniqueID = "test-infrastructure-" + capacity,
                 Name = "Infrastructure",
                 CargoTypeID = "general-storage",
                 VolumePerUnit = 1,
@@ -917,15 +968,45 @@ public class PassengerTransportTests
         {
             var store = holder.GetDataBlob<CargoStorageDB>();
             store.TransferRate = 1_000_000;
-            var blob = holder.GetDataBlob<CargoTransferDB>();
+            // CreateLoadPair escrows without running the order, so nothing replaces the blob.
+            // A finished trip leaves the old CargoTransferDB in place. Bind the open escrow,
+            // the way CargoTransferOrder.Execute does when the next order starts.
+            CargoTransferDataDB data = null;
+            foreach (var item in store.EscroItems)
+            {
+                if (!Cleared(item))
+                    data = item;
+            }
+            Assert.That(data, Is.Not.Null, "escrow was not opened");
+            var blob = new CargoTransferDB(data);
+            blob.ParentStorageDB = store;
+            holder.SetDataBlob(blob);
             var processor = new CargoTransferProcessor();
             for (int i = 0; i < 8; i++)
             {
                 processor.ProcessEntity(blob, 10);
                 if (Empty(blob))
+                {
+                    holder.RemoveDataBlob<CargoTransferDB>();
                     return;
+                }
             }
             Assert.That(Empty(blob), Is.True, "transfer escrow did not clear");
+        }
+
+        static bool Cleared(CargoTransferDataDB data)
+        {
+            foreach (var tup in data.EscroHeldInPrimary)
+            {
+                if (tup.count > 0)
+                    return false;
+            }
+            foreach (var tup in data.EscroHeldInSecondary)
+            {
+                if (tup.count > 0)
+                    return false;
+            }
+            return true;
         }
 
         static bool Empty(CargoTransferDB blob)
