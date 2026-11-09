@@ -109,11 +109,7 @@ public class MarketExchangeAction : EntityAction
         bool colonists = shipGood is SpeciesCargo || marketGood is SpeciesCargo;
         if (colonists)
         {
-            if (shipFaction != marketFaction)
-            {
-                Fail("People do not change factions.");
-                return;
-            }
+            // Cross-faction boarding/landing is allowed when CanTrade already succeeded above.
             if (!(shipGood is SpeciesCargo shipPeople && marketGood is SpeciesCargo marketPeople)
                 || shipPeople.SpeciesId != marketPeople.SpeciesId)
             {
@@ -176,7 +172,9 @@ public class MarketExchangeAction : EntityAction
         }
 
         bool crossFaction = shipFaction != marketFaction;
-        if (crossFaction && price > 0)
+        // Colonist fares are paid by migrants to the carrier on delivery; do not require the
+        // destination or origin faction to afford a Bid/Ask up front.
+        if (!colonists && crossFaction && price > 0)
         {
             int payer = Side == MarketSide.BuyFromMarket ? shipFaction : marketFaction;
             quantity = Math.Min(quantity, Affordable(game, payer, price));
@@ -226,6 +224,18 @@ public class MarketExchangeAction : EntityAction
                 listing.SellQuantity -= moved_People;
             else
                 listing.BuyQuantity -= moved_People;
+
+            // Migrants pay the carrier on delivery only. Credits are created as income for the
+            // transporting faction; the exporter and the destination are not charged.
+            if (Side == MarketSide.SellToMarket
+                && SpeciesCargo.FareCreditsPerPerson > 0
+                && game.Factions.TryGetValue(shipFaction, out var carrier)
+                && carrier.TryGetDataBlob<FactionInfoDB>(out var carrierInfo))
+            {
+                decimal fare = SpeciesCargo.FareCreditsPerPerson * moved_People;
+                carrierInfo.Money.AddIncome(atDateTime, TransactionCategory.Trade,
+                    $"passenger fare {CargoId} {moved_People}", fare);
+            }
 
             _details = $"{Side} {moved_People} {CargoId}";
             _isFinished = true;
@@ -361,11 +371,13 @@ public class MarketExchangeAction : EntityAction
             return false;
         }
         people = passengers;
-        if (colony.FactionOwnerID != ship.FactionOwnerID
-            || colony.FactionOwnerID != shipFaction
-            || colony.FactionOwnerID != marketFaction)
+        // Ship must be allowed to trade with the colony; market permission was checked earlier.
+        var game = colony.Manager?.Game ?? ship.Manager?.Game;
+        if (game == null
+            || !FactionStanceRules.CanTrade(game, ship.FactionOwnerID, colony.FactionOwnerID)
+            || ship.FactionOwnerID != shipFaction)
         {
-            why = "People do not change factions.";
+            why = "Trade is not mutual.";
             return false;
         }
 

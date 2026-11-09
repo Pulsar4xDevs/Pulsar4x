@@ -23,6 +23,12 @@ namespace Pulsar4X.Colonies
         /// <summary>Volume of one person, m^3.</summary>
         public const double VolumePerPerson = 0.065;
 
+        /// <summary>
+        /// Credits paid to the transporting faction per person delivered. Paid on landing only;
+        /// created as income for the carrier, not charged to the exporting or importing faction.
+        /// </summary>
+        public const decimal FareCreditsPerPerson = 10;
+
         public int ID { get; private set; } = Game.GetEntityID();
 
         public string UniqueID => SpeciesId.ToString();

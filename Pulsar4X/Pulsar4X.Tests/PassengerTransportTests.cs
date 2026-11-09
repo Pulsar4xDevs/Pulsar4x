@@ -260,26 +260,21 @@ public class PassengerTransportTests
     }
 
     [Test]
-    public void MarketCrossFaction_RefusesColonists()
+    public void MarketCrossFaction_WithoutTrade_RefusesColonists()
     {
         var scene = Scene.Build(population: 500, capacity: 1000, berths: 100);
         scene.AtHome();
         var info = scene.Faction.GetDataBlob<FactionInfoDB>();
-        // People are already aboard, so the exchange is refused for the faction, not for an empty hold.
         PassengerAdapter.Board(scene.Home, scene.Ship, scene.People, 10);
         var rivalInfo = scene.Other.GetDataBlob<FactionInfoDB>();
-        info.Stances[scene.Other.Id] = FactionStance.Friendly;
-        rivalInfo.Stances[scene.Faction.Id] = FactionStance.Friendly;
-        FactionStanceRules.SetGrant(info, scene.Other.Id, FactionGrants.Trade, true);
-        FactionStanceRules.SetGrant(rivalInfo, scene.Faction.Id, FactionGrants.Trade, true);
-        // The rival knows the same species under the same id, so only the faction check can refuse.
+        // Rival knows the species but trade is not granted.
         SpeciesCargo.Register(rivalInfo.Data, info.Species);
         var other = scene.Colony(scene.Other, new Vector3(1.4e11, 0, 0), 100, 1000);
         MarketBook.SetListing(other, new MarketListing
         {
             CargoId = scene.People.UniqueID,
             BuyQuantity = 100,
-            Bid = 1,
+            Bid = SpeciesCargo.FareCreditsPerPerson,
         });
 
         var action = MarketExchangeAction.Create(
@@ -288,9 +283,51 @@ public class PassengerTransportTests
 
         Assert.That(action.IsFinished(), Is.True);
         Assert.That(action.Status, Is.EqualTo(ActionStatus.Failed));
-        Assert.That(action.Details, Is.EqualTo("People do not change factions."));
+        Assert.That(action.Details, Is.EqualTo("Trade is not mutual."));
         Assert.That(scene.Population(other), Is.EqualTo(100));
         Assert.That(scene.Aboard(scene.Ship), Is.EqualTo(10), "the passengers stay aboard");
+    }
+
+    [Test]
+    public void MarketCrossFaction_WithTrade_LandsPeople_AndPaysTheCarrier()
+    {
+        var scene = Scene.Build(population: 500, capacity: 1000, berths: 100);
+        scene.AtHome();
+        var info = scene.Faction.GetDataBlob<FactionInfoDB>();
+        PassengerAdapter.Board(scene.Home, scene.Ship, scene.People, 10);
+        var rivalInfo = scene.Other.GetDataBlob<FactionInfoDB>();
+        info.Stances[scene.Other.Id] = FactionStance.Friendly;
+        rivalInfo.Stances[scene.Faction.Id] = FactionStance.Friendly;
+        FactionStanceRules.SetGrant(info, scene.Other.Id, FactionGrants.Trade, true);
+        FactionStanceRules.SetGrant(rivalInfo, scene.Faction.Id, FactionGrants.Trade, true);
+        SpeciesCargo.Register(rivalInfo.Data, info.Species);
+        var other = scene.Colony(scene.Other, new Vector3(1.4e11, 0, 0), 100, 1000);
+        MarketBook.SetListing(other, new MarketListing
+        {
+            CargoId = scene.People.UniqueID,
+            BuyQuantity = 100,
+            Bid = SpeciesCargo.FareCreditsPerPerson,
+            Relocation = true,
+        });
+        // Put the ship on the destination colony the same way MarketSell does.
+        scene.Ship.GetDataBlob<PositionDB>().RelativePosition = other.GetDataBlob<PositionDB>().AbsolutePosition;
+        other.GetDataBlob<CargoStorageDB>().TransferRate = 1_000_000;
+        other.GetDataBlob<CargoStorageDB>().TransferRangeDv_mps = 1e12;
+        scene.Ship.GetDataBlob<CargoStorageDB>().TransferRate = 1_000_000;
+        scene.Ship.GetDataBlob<CargoStorageDB>().TransferRangeDv_mps = 1e12;
+        decimal before = info.Money.GetCurrentFunds();
+
+        var action = MarketExchangeAction.Create(
+            scene.Ship, other.Id, scene.People.UniqueID, MarketSide.SellToMarket, 10);
+        Run(scene, action);
+
+        Assert.That(action.IsFinished(), Is.True);
+        Assert.That(action.Status, Is.Not.EqualTo(ActionStatus.Failed), action.Details);
+        Assert.That(scene.Population(other), Is.EqualTo(110));
+        Assert.That(scene.Aboard(scene.Ship), Is.EqualTo(0));
+        Assert.That(scene.SpeciesAt(other), Is.EqualTo(scene.Species.Id), "species preserved at the other faction");
+        Assert.That(info.Money.GetCurrentFunds(), Is.EqualTo(before + SpeciesCargo.FareCreditsPerPerson * 10));
+        Assert.That(rivalInfo.Money.GetCurrentFunds(), Is.EqualTo(0), "destination is not charged");
     }
 
     [Test]
@@ -495,7 +532,7 @@ public class PassengerTransportTests
     }
 
     [Test]
-    public void Overcrowding_RefreshPostsZeroPriceRelocation_AndTheMarketMovesThePeople()
+    public void Overcrowding_RefreshPostsFareRelocation_AndTheMarketMovesThePeople()
     {
         // Home is over its support, Dest has room. Both are one faction, one system.
         var scene = Scene.Build(population: 1200, capacity: 1000, berths: 100, destPopulation: 0, destCapacity: 3000);
@@ -510,13 +547,13 @@ public class PassengerTransportTests
             "the crowded colony offers its people");
         Assert.That(leaving.Relocation, Is.True);
         Assert.That(leaving.SellQuantity, Is.EqualTo(200));
-        Assert.That(leaving.Ask, Is.EqualTo(0), "relocation is free");
+        Assert.That(leaving.Ask, Is.EqualTo(0), "boarding is free; migrants pay on delivery");
 
         Assert.That(MarketBook.TryGet(scene.Dest, peopleId, out var accepting), Is.True,
             "the roomy colony says it will take them");
         Assert.That(accepting.Relocation, Is.True);
         Assert.That(accepting.BuyQuantity, Is.EqualTo(200));
-        Assert.That(accepting.Bid, Is.EqualTo(0), "no fare economy");
+        Assert.That(accepting.Bid, Is.EqualTo(SpeciesCargo.FareCreditsPerPerson), "carrier fare per person");
 
         // A second pass is idempotent and does not duplicate the offer.
         new RunMarketPlan().Plan(scene.Home, new Goal(GoalType.RunMarket), scene.Home.StarSysDateTime);
@@ -537,6 +574,7 @@ public class PassengerTransportTests
         Assert.That(scene.Population(scene.Home), Is.EqualTo(1100));
 
         // Fly the hold to the destination and hand the people over at its market.
+        decimal fundsBeforeDelivery = scene.Faction.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds();
         scene.AtDest();
         var unloadLeg = MarketRun.NextLeg(scene.Ship, scene.Home, scene.Dest, peopleId, good);
         Assert.That(unloadLeg.Actions.OfType<MarketExchangeAction>().Count(), Is.EqualTo(1),
@@ -549,6 +587,9 @@ public class PassengerTransportTests
         Assert.That(scene.SpeciesAt(scene.Dest), Is.EqualTo(scene.Species.Id), "the species is kept");
         Assert.That(scene.Population(scene.Home) + scene.Population(scene.Dest), Is.EqualTo(1200),
             "nobody is created or lost");
+        Assert.That(scene.Faction.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(),
+            Is.EqualTo(fundsBeforeDelivery + SpeciesCargo.FareCreditsPerPerson * 100),
+            "carrier is paid the migrant fare on delivery only");
 
         // The refreshed offer is retired on the next pass, now that only 100 excess remains.
         new RunMarketPlan().Plan(scene.Home, new Goal(GoalType.RunMarket), scene.Home.StarSysDateTime);
@@ -572,16 +613,36 @@ public class PassengerTransportTests
     }
 
     [Test]
-    public void Overcrowding_NeverPostsAnOffer_ForAnotherFactionsColony()
+    public void Overcrowding_NeverPostsAnOffer_ForAnotherFactionsColony_WithoutTrade()
     {
         var scene = Scene.Build(population: 1200, capacity: 1000, berths: 100, destPopulation: 0, destCapacity: 3000);
-        // Make the roomy colony somebody else's.
+        // Make the roomy colony somebody else's, with no trade grants.
         scene.Dest.FactionOwnerID = scene.Other.Id;
 
         new RunMarketPlan().Plan(scene.Home, new Goal(GoalType.RunMarket), scene.Home.StarSysDateTime);
 
         Assert.That(scene.Home.GetDataBlob<LogiBaseDB>().Listings.Values.Any(l => l.Relocation), Is.False);
         Assert.That(scene.Dest.GetDataBlob<LogiBaseDB>().Listings.Values.Any(l => l.Relocation), Is.False);
+    }
+
+    [Test]
+    public void Overcrowding_PostsOffer_ForAnotherFactionsColony_WhenTradeIsMutual()
+    {
+        var scene = Scene.Build(population: 1200, capacity: 1000, berths: 100, destPopulation: 0, destCapacity: 3000);
+        scene.Dest.FactionOwnerID = scene.Other.Id;
+        var info = scene.Faction.GetDataBlob<FactionInfoDB>();
+        var rival = scene.Other.GetDataBlob<FactionInfoDB>();
+        FactionStanceRules.SetGrant(info, scene.Other.Id, FactionGrants.Trade, true);
+        FactionStanceRules.SetGrant(rival, scene.Faction.Id, FactionGrants.Trade, true);
+
+        new RunMarketPlan().Plan(scene.Home, new Goal(GoalType.RunMarket), scene.Home.StarSysDateTime);
+
+        Assert.That(MarketBook.TryGet(scene.Home, scene.People.UniqueID, out var leaving), Is.True);
+        Assert.That(leaving.Relocation, Is.True);
+        Assert.That(leaving.Ask, Is.EqualTo(0));
+        Assert.That(MarketBook.TryGet(scene.Dest, scene.People.UniqueID, out var accepting), Is.True);
+        Assert.That(accepting.Relocation, Is.True);
+        Assert.That(accepting.Bid, Is.EqualTo(SpeciesCargo.FareCreditsPerPerson));
     }
 
     [Test]
@@ -660,7 +721,7 @@ public class PassengerTransportTests
     }
 
     [Test]
-    public void Migration_NeverCrossesFactions()
+    public void Migration_NeverCrossesFactions_WithoutTrade()
     {
         var scene = Scene.Build(population: 1500, capacity: 500, berths: 100, destPopulation: 0, destCapacity: 1000);
         scene.Dest.FactionOwnerID = scene.Other.Id;
@@ -668,6 +729,23 @@ public class PassengerTransportTests
         scene.AtHome();
 
         Assert.That(MigrationPlanner.Plan(scene.Home.Manager), Is.Empty);
+    }
+
+    [Test]
+    public void Migration_PlansAcrossFactions_WhenTradeIsMutual()
+    {
+        var scene = Scene.Build(population: 1500, capacity: 500, berths: 100, destPopulation: 0, destCapacity: 1000);
+        scene.Dest.FactionOwnerID = scene.Other.Id;
+        var info = scene.Faction.GetDataBlob<FactionInfoDB>();
+        var rival = scene.Other.GetDataBlob<FactionInfoDB>();
+        FactionStanceRules.SetGrant(info, scene.Other.Id, FactionGrants.Trade, true);
+        FactionStanceRules.SetGrant(rival, scene.Faction.Id, FactionGrants.Trade, true);
+        scene.Fleet();
+        scene.AtHome();
+
+        var moves = MigrationPlanner.Plan(scene.Home.Manager);
+        Assert.That(moves, Is.Not.Empty);
+        Assert.That(moves[0].Destination.Id, Is.EqualTo(scene.Dest.Id));
     }
 
     [Test]

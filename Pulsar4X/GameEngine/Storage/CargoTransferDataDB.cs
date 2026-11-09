@@ -5,6 +5,7 @@ using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
+using Pulsar4X.Factions;
 using Pulsar4X.Galaxy;
 
 namespace Pulsar4X.Storage;
@@ -49,7 +50,7 @@ public class CargoTransferDataDB : BaseDataBlob
     internal bool PassengersBoarded { get; private set; }
 
     /// <summary>
-    /// A passenger line was refused because the two sides are not one faction. Counted as taken
+    /// A passenger line was refused because the two sides may not trade. Counted as taken
     /// so the order finishes empty instead of moving someone else's people.
     /// </summary>
     [JsonProperty]
@@ -69,7 +70,7 @@ public class CargoTransferDataDB : BaseDataBlob
         PrimaryStorageDB.EscroItems.Add(this);
         SecondaryStorageDB.EscroItems.Add(this);
 
-        // A colony's people stay with their faction. Cross-faction boarding escrows nothing.
+        // Without mutual trade, cross-faction passenger lines escrow nothing.
         CrossFactionPassengers = CrossesFactions(itemsToTransfer);
         if (CrossFactionPassengers)
             return;
@@ -89,12 +90,22 @@ public class CargoTransferDataDB : BaseDataBlob
             return false;
         if (PrimaryEntity.FactionOwnerID == SecondaryEntity.FactionOwnerID)
             return false;
+        bool passengers = false;
         foreach (var (item, _) in itemsToTransfer)
         {
             if (item is SpeciesCargo)
-                return true;
+            {
+                passengers = true;
+                break;
+            }
         }
-        return false;
+        if (!passengers)
+            return false;
+        // Mutual trade lets a freighter board or land people at another faction's colony.
+        var game = PrimaryEntity.Manager?.Game ?? SecondaryEntity.Manager?.Game;
+        if (game != null && FactionStanceRules.CanTrade(game, PrimaryEntity.FactionOwnerID, SecondaryEntity.FactionOwnerID))
+            return false;
+        return true;
     }
 
     /// <summary>

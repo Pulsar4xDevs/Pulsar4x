@@ -10,9 +10,10 @@ namespace Pulsar4X.Logistics;
 ///
 /// One pass reads the same willingness numbers <see cref="MigrationPlanner"/> uses and then makes
 /// each market say one of two things for a species: "this many people want to leave here" at a
-/// crowded colony, and "this many will be taken" at the roomiest colony in the same system with
-/// room left. Prices are zero and both sides are the same faction, so nothing is paid and no fare
-/// economy appears.
+/// crowded colony, and "this many will be taken" at the roomiest eligible colony in the same system with
+/// room left. Eligible means the same faction, or another faction that has mutual
+/// <see cref="Pulsar4X.Factions.FactionStanceRules.CanTrade"/> grants. Leaving asks are free; accepting
+/// bids carry <see cref="SpeciesCargo.FareCreditsPerPerson"/> so the carrier is paid on delivery.
 ///
 /// The offers are ordinary <see cref="MarketListing"/>s, so the existing freighter and trade goals
 /// pick them up with no change: a ship loads at the origin through
@@ -61,6 +62,10 @@ public static class MigrationBook
             if (string.IsNullOrEmpty(cargoId))
                 continue;
 
+            // Both factions must resolve the species id before a freighter can fill either end.
+            EnsureSpecies(offer.Origin, species);
+            EnsureSpecies(offer.Destination, species);
+
             // A relocation needs both ends to be able to see the good by id.
             if (!CanResolve(offer.Origin, cargoId) || !CanResolve(offer.Destination, cargoId))
                 continue;
@@ -82,7 +87,7 @@ public static class MigrationBook
                 CargoId = cargoId,
                 BuyQuantity = offer.Accepted,
                 Ask = 0,
-                Bid = 0,
+                Bid = SpeciesCargo.FareCreditsPerPerson,
                 Relocation = true,
             };
 
@@ -142,6 +147,17 @@ public static class MigrationBook
     static bool HasForeignListing(Entity colony, string cargoId)
     {
         return MarketBook.TryGet(colony, cargoId, out var listing) && !listing.Relocation;
+    }
+
+    static void EnsureSpecies(Entity colony, Entity species)
+    {
+        if (colony?.Manager?.Game == null)
+            return;
+        if (!colony.Manager.Game.Factions.TryGetValue(colony.FactionOwnerID, out var faction))
+            return;
+        if (!faction.TryGetDataBlob<Factions.FactionInfoDB>(out var info))
+            return;
+        SpeciesCargo.Register(info.Data, new[] { species });
     }
 
     static bool CanResolve(Entity colony, string cargoId)

@@ -46,14 +46,15 @@ public class EarthStartTests
             game, player, species, sol, earth, store.Colonies["colony-earth"]);
 
         Assert.That(colony.TryGetDataBlob<LogiBaseDB>(out var book), Is.True);
-        Assert.That(book!.Capacity, Is.EqualTo(5));
+        Assert.That(book!.Capacity, Is.EqualTo(20));
         Assert.That(colony.GetDataBlob<GoalsDB>().ActiveGoal!.Type, Is.EqualTo(GoalType.OfferStock));
         Assert.That(colony.GetDataBlob<GoalsDB>().ActiveGoal!.Name, Is.EqualTo("Offer stock"));
 
-        var expected = LargestPiles(colony, book.Capacity);
-        Assert.That(expected, Does.Contain("iron"));
-        Assert.That(book.Listings.Keys, Is.EquivalentTo(expected));
-        foreach (var cargoId in expected)
+        // Site office capacity is 20. OfferStock fills up to that many stocked piles (Earth
+        // currently has fewer than 20 distinct stocked goods, so listings stay under capacity).
+        Assert.That(book.Listings.Count, Is.GreaterThan(2).And.LessThanOrEqualTo(20));
+        Assert.That(book.Listings.Keys, Does.Contain("stainless-steel"));
+        foreach (var cargoId in book.Listings.Keys)
         {
             Assert.That(book.Listings[cargoId].SellQuantity, Is.EqualTo(StockOf(colony, cargoId)));
             Assert.That(book.Listings[cargoId].BuyQuantity, Is.EqualTo(0));

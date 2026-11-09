@@ -4,6 +4,7 @@ using System.Linq;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
+using Pulsar4X.Factions;
 using Pulsar4X.Fleets;
 using Pulsar4X.Galaxy;
 using Pulsar4X.Logistics;
@@ -42,7 +43,8 @@ namespace Pulsar4X.Colonies
     }
 
     /// <summary>
-    /// Automatic colonist migration between colonies of the same faction. No offer, no request,
+    /// Automatic colonist migration between colonies that may trade: the same faction, or another
+    /// faction with mutual <see cref="FactionStanceRules.CanTrade"/> grants. No offer, no request,
     /// no UI: every colony works out for itself who would leave and where they would go, and the
     /// ships in the same system with spare passenger berths move them.
     ///
@@ -91,7 +93,7 @@ namespace Pulsar4X.Colonies
                     long bestRoom = MinimumRoom - 1;
                     foreach (var candidate in colonies)
                     {
-                        if (candidate.Id == origin.Id || candidate.FactionOwnerID != origin.FactionOwnerID)
+                        if (candidate.Id == origin.Id || !CanRelocateBetween(origin, candidate))
                             continue;
                         if (candidate.Manager != origin.Manager)
                             continue;
@@ -147,7 +149,7 @@ namespace Pulsar4X.Colonies
         /// <summary>
         /// The relocation offers a market should carry: for every overcrowded colony, how many of
         /// each species should be posted as leaving, and for the roomiest colony in the same system
-        /// that can take them, how many it will accept. Same faction and same system only, one
+        /// that can take them, how many it will accept. Same system and trade-eligible factions only, one
         /// species at a time, and the numbers already account for the room promised to earlier
         /// origins so two offers cannot both claim the last berth.
         ///
@@ -180,7 +182,7 @@ namespace Pulsar4X.Colonies
                     {
                         if (candidate.Id == origin.Id)
                             continue;
-                        if (candidate.FactionOwnerID != origin.FactionOwnerID)
+                        if (!CanRelocateBetween(origin, candidate))
                             continue;
                         if (candidate.Manager != origin.Manager)
                             continue;
@@ -319,6 +321,18 @@ namespace Pulsar4X.Colonies
         /// Room for one species at a colony: its capacity with the people it already has and the
         /// people on their way to it taken out. The same number <see cref="PassengerAdapter"/> uses.
         /// </summary>
+
+        /// <summary>Same faction, or mutual trade grants between the two colony owners.</summary>
+        static bool CanRelocateBetween(Entity origin, Entity candidate)
+        {
+            if (origin == null || candidate == null)
+                return false;
+            if (origin.FactionOwnerID == candidate.FactionOwnerID)
+                return true;
+            var game = origin.Manager?.Game ?? candidate.Manager?.Game;
+            return game != null && FactionStanceRules.CanTrade(game, origin.FactionOwnerID, candidate.FactionOwnerID);
+        }
+
         public static long Room(Entity colony, int speciesId)
         {
             if (!colony.TryGetDataBlob<ColonyInfoDB>(out var info))

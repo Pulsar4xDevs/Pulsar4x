@@ -4,6 +4,7 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Events;
 using Pulsar4X.Extensions;
+using Pulsar4X.Factions;
 using Pulsar4X.Ships;
 using Pulsar4X.Storage;
 
@@ -17,9 +18,10 @@ namespace Pulsar4X.Colonies
     /// Board: colony population down, passenger cargo up.
     /// Land:  passenger cargo down, colony population up, never past the colony's capacity.
     ///
-    /// Refusals return 0 and change nothing: someone else's colony, no passenger capacity on the
-    /// ship, a species that does not live at the colony, a full colony. Cross-faction colonists are
-    /// refused here as well as by the market and the transfer order.
+    /// Refusals return 0 and change nothing: a colony the ship may not trade with, no passenger
+    /// capacity on the ship, a species that does not live at the colony, a full colony. Cross-faction
+    /// boarding and landing are allowed when <see cref="FactionStanceRules.CanTrade"/> is mutual;
+    /// people land as that destination colony's population with their species preserved.
     /// </summary>
     public static class PassengerAdapter
     {
@@ -28,9 +30,9 @@ namespace Pulsar4X.Colonies
         {
             available = 0;
             reason = "";
-            if (!SameOwner(colony, ship))
+            if (!MayCarry(colony, ship))
             {
-                reason = "The colony is not yours.";
+                reason = "Trade is not mutual.";
                 return false;
             }
             if (!colony.TryGetDataBlob<ColonyInfoDB>(out var info))
@@ -68,9 +70,9 @@ namespace Pulsar4X.Colonies
         {
             available = 0;
             reason = "";
-            if (!SameOwner(colony, ship))
+            if (!MayCarry(colony, ship))
             {
-                reason = "The colony is not yours.";
+                reason = "Trade is not mutual.";
                 return false;
             }
             if (!colony.TryGetDataBlob<ColonyInfoDB>(out _))
@@ -185,7 +187,7 @@ namespace Pulsar4X.Colonies
         /// </summary>
         internal static long LandAvailable(Entity colony, Entity ship, SpeciesCargo passengers, long count)
         {
-            if (count <= 0 || !SameOwner(colony, ship))
+            if (count <= 0 || !MayCarry(colony, ship))
                 return 0;
             if (!colony.TryGetDataBlob<ColonyInfoDB>(out var info))
                 return 0;
@@ -209,9 +211,14 @@ namespace Pulsar4X.Colonies
         /// Escrow took the people off the hold but not off the books yet, so a cancel puts them
         /// back in the hold and nothing else changes. Landing is the only path that adds people.
         /// </summary>
-        static bool SameOwner(Entity colony, Entity ship)
+        static bool MayCarry(Entity colony, Entity ship)
         {
-            return colony != null && ship != null && colony.FactionOwnerID == ship.FactionOwnerID;
+            if (colony == null || ship == null)
+                return false;
+            if (colony.FactionOwnerID == ship.FactionOwnerID)
+                return true;
+            var game = colony.Manager?.Game ?? ship.Manager?.Game;
+            return game != null && FactionStanceRules.CanTrade(game, colony.FactionOwnerID, ship.FactionOwnerID);
         }
 
         static void NoteChanged(Entity colony, long population)

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using GameEngine.Engine.Orders;
 using NUnit.Framework;
 using Pulsar4X.Api;
 using Pulsar4X.Client;
@@ -20,6 +21,7 @@ using Pulsar4X.Modding;
 using Pulsar4X.Movement;
 using Pulsar4X.Names;
 using Pulsar4X.Ships;
+using Pulsar4X.Logistics;
 using Pulsar4X.Storage;
 
 namespace Pulsar4X.Tests;
@@ -232,6 +234,10 @@ public class EarlyTechStartTests
         var byDesign = colony.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign;
         Assert.That(byDesign["default-design-factory-site"], Has.Count.EqualTo(1), "one installed factory in a fresh Earth start");
         Assert.That(byDesign["default-design-refinery-site"], Has.Count.EqualTo(1), "one installed refinery in a fresh Earth start");
+        Assert.That(byDesign["default-design-logistics-office-site"], Has.Count.EqualTo(1), "one site logistics office");
+        Assert.That(byDesign["default-design-local-construction-site"], Has.Count.EqualTo(5), "five site construction offices");
+        Assert.That(installations, Does.Not.Contain("default-design-logistics-office"));
+        Assert.That(installations, Does.Not.Contain("default-design-local-construction"));
 
         Assert.That(installations, Does.Not.Contain("default-design-factory"));
         Assert.That(installations, Does.Not.Contain("default-design-refinery"));
@@ -598,4 +604,41 @@ public class EarlyTechStartTests
             .ToList();
         Assert.That(colonies.Count, Is.GreaterThan(1));
     }
+
+    [Test]
+    public void StockSol_MarsHasSpareRoom_AndEarthPostsRelocationWithFare()
+    {
+        var (game, faction) = StartGameLikeTheMenu(BaseMod);
+        var sol = game.Systems.Single(system => system.ID == "system-sol");
+        var colonies = sol.GetAllEntitiesWithDataBlob<ColonyInfoDB>()
+            .Where(c => c.FactionOwnerID == faction.Id).ToList();
+        var earth = colonies.Single(c => c.GetName(faction.Id).Contains("Earth"));
+        var mars = colonies.Single(c => c.GetName(faction.Id).Contains("Mars"));
+
+        long marsPop = mars.GetDataBlob<ColonyInfoDB>().Population.Values.Sum();
+        Assert.That(marsPop, Is.EqualTo(1000), "Mars starts below its colony-cost-adjusted support");
+        var species = mars.GetDataBlob<ColonyInfoDB>().Population.Keys.First();
+        Assert.That(game.GlobalManager.TryGetGlobalEntityById(species, out var speciesEntity), Is.True);
+        long marsSupport = MigrationPlanner.Capacity(mars, speciesEntity);
+        // Raw infrastructure is 20*200=4000, but Mars colony cost halves human support to 2000.
+        Assert.That(marsSupport, Is.EqualTo(2000), "colony-cost-adjusted Mars capacity");
+        Assert.That(marsSupport - marsPop, Is.EqualTo(1000), "Mars posts meaningful demand room");
+
+        // The periodic market pass posts relocation from overcrowded Earth toward Mars.
+        new RunMarketPlan().Plan(earth, new Goal(GoalType.RunMarket), earth.StarSysDateTime);
+
+        var speciesId = earth.GetDataBlob<ColonyInfoDB>().Population.Keys.First().ToString();
+        Assert.That(MarketBook.TryGet(earth, speciesId, out var leaving), Is.True,
+            "Earth offers people leaving");
+        Assert.That(leaving.Relocation, Is.True);
+        Assert.That(leaving.SellQuantity, Is.GreaterThan(0));
+        Assert.That(leaving.Ask, Is.EqualTo(0));
+        Assert.That(MarketBook.TryGet(mars, speciesId, out var accepting), Is.True,
+            "Mars accepts relocating people");
+        Assert.That(accepting.Relocation, Is.True);
+        Assert.That(accepting.BuyQuantity, Is.GreaterThan(0));
+        Assert.That(accepting.Bid, Is.EqualTo(SpeciesCargo.FareCreditsPerPerson));
+    }
+
+
 }

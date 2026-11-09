@@ -103,7 +103,7 @@
     "Payload": {
       "UniqueID": "colony-mars-outpost",
       "Name": "Mars Outpost",
-      "StartingPopulation": 4000,
+      "StartingPopulation": 1000,
       "Body": "Mars",
       "System": "system-sol",
       "Installations": [
