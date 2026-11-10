@@ -1,6 +1,9 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Auth;
+using Pulsar4X.Engine.Factories;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Modding;
 using Pulsar4X.Orbital;
@@ -47,9 +50,9 @@ namespace Pulsar4X.Tests
             return ent;
         }
 
-        internal static Game CreateTestUniverse(int numSystems, DateTime testTime, bool generateDefaultHumans = false)
+        internal static Game CreateTestUniverse(int numSystems, DateTime testTime)
         {
-            var gamesettings = new NewGameSettings { StartDateTime = testTime, MaxSystems = numSystems, DefaultSolStart = generateDefaultHumans, CreatePlayerFaction = false };
+            var gamesettings = new NewGameSettings { StartDateTime = testTime, MaxSystems = numSystems, DefaultSolStart = false, CreatePlayerFaction = false };
             ModLoader modLoader = new ModLoader();
             ModDataStore modDataStore = new ModDataStore();
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
@@ -89,17 +92,12 @@ namespace Pulsar4X.Tests
                 system.SetActivityState(SystemActivityState.Foreground);
             }
 
-            if (generateDefaultHumans)
-            {
-                DefaultStartFactory.DefaultHumans(game, "Humans");
-            }
-
             return game;
         }
 
-        internal static Game CreateTestUniverse(int numSystems, bool generateDefaultHumans = false)
+        internal static Game CreateTestUniverse(int numSystems)
         {
-            return CreateTestUniverse(numSystems, DateTime.Now, generateDefaultHumans);
+            return CreateTestUniverse(numSystems, DateTime.Now);
         }
     }
 
@@ -161,10 +159,44 @@ namespace Pulsar4X.Tests
             Sol.SetActivityState(SystemActivityState.Foreground);
             Earth = NameLookup.GetFirstEntityWithName(Sol, "Earth"); //Sol.Entities[3]; //should be fourth entity created
              EarthColony = ColonyFactory.CreateColony(HumanFaction, HumanSpecies, Earth);
-             var humondatastore = HumanFaction.GetDataBlob<FactionInfoDB>().Data;
-            DefaultEngineDesign = DefaultStartFactory.DefaultThrusterDesign(HumanFaction, humondatastore);
-            DefaultWeaponDesign = DefaultStartFactory.DefaultSimpleLaser(HumanFaction, humondatastore);
-            DefaultShipDesign = DefaultStartFactory.DefaultShipDesign(HumanFaction, humondatastore);
+            var humondatastore = HumanFaction.GetDataBlob<FactionInfoDB>().Data;
+            foreach (var id in humondatastore.LockedComponentTemplates.Keys.ToList())
+                humondatastore.Unlock(id);
+            foreach (var uniqueId in humondatastore.LockedCargoGoods.GetAll().Values.Select(c => c.UniqueID).ToList())
+                humondatastore.Unlock(uniqueId);
+            foreach (var id in humondatastore.LockedTechs.Keys.ToList())
+                humondatastore.Unlock(id);
+            foreach (var id in humondatastore.LockedArmor.Keys.ToList())
+                humondatastore.Unlock(id);
+
+            var dropship = Game.StartingGameData.ShipDesigns["default-ship-design-dropship"];
+            var componentIds = new List<string>();
+            foreach (var component in dropship.Components)
+            {
+                if (!componentIds.Contains(component.Id))
+                    componentIds.Add(component.Id);
+            }
+            if (!componentIds.Contains("default-design-merlin"))
+                componentIds.Add("default-design-merlin");
+
+            ComponentDesigner.StartResearched = true;
+            try
+            {
+                foreach (var id in componentIds)
+                {
+                    var component = Game.StartingGameData.ComponentDesigns[id];
+                    ComponentDesignFromJson.Create(HumanFaction, humondatastore, component);
+                }
+
+                var designs = HumanFaction.GetDataBlob<FactionInfoDB>().ComponentDesigns;
+                DefaultEngineDesign = designs["default-design-merlin"];
+                DefaultWeaponDesign = designs["default-design-laser-weapon"];
+                DefaultShipDesign = ShipDesignFromJson.Create(HumanFaction, humondatastore, dropship);
+            }
+            finally
+            {
+                ComponentDesigner.StartResearched = false;
+            }
 
             Vector3 position = Earth.GetDataBlob<PositionDB>().AbsolutePosition;
             DefaultShip = ShipFactory.CreateShip(DefaultShipDesign, HumanFaction, position, Earth,  "Serial Peacemaker");

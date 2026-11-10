@@ -21,8 +21,7 @@ namespace Pulsar4X.Tests
             var session = Connect();
             var faction = _game.Factions[session.FactionId];
 
-            // Plant a colony on a body in the test system (the default-humans start can't be used:
-            // DefaultStartFactory's design-file paths predate the basemod reorganisation).
+            // Plant a colony on a body in the test system (there is no default-humans helper).
             var species = SpeciesFactory.CreateSpeciesHuman(faction, _game.GlobalManager);
             var planet = _game.Systems[0].GetAllEntitiesWithDataBlob<SystemBodyInfoDB>()
                 .First(b => b.HasDataBlob<MassVolumeDB>() && b.HasDataBlob<NameDB>());

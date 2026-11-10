@@ -5,8 +5,6 @@ using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Extensions;
-using System.IO;
-using Newtonsoft.Json.Linq;
 using Pulsar4X.Factions;
 using Pulsar4X.JumpPoints;
 using Pulsar4X.Names;
@@ -315,76 +313,6 @@ namespace Pulsar4X.Galaxy
 
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.ID);
             return sol;
-        }
-
-        public StarSystem LoadSystemFromJson(Game game, string folder)
-        {
-            string fileContents = File.ReadAllText(Path.Combine(folder, "systemInfo.json"));
-            var rootJson = JObject.Parse(fileContents);
-            var id = rootJson["id"].ToString();
-            var systemName = rootJson["name"].ToString();
-            var rngSeed = (int?)rootJson["seed"] ?? -1;
-
-            StarSystem system = new StarSystem();
-            system.Initialize(game, systemName, rngSeed, false, id);
-
-            var stars = (JArray?)rootJson["stars"];
-            Entity? rootStar = null;
-            foreach(var starFileName in stars)
-            {
-                var star = StarFactory.Create(system, GalaxyGen.Settings, Path.Combine(folder, starFileName.ToString()));
-                if(rootStar == null)
-                    rootStar = star;
-            }
-
-            if(rootStar != null)
-            {
-                var bodies = (JArray?)rootJson["bodies"];
-                foreach(var bodyFileName in bodies)
-                {
-                    var body = SystemBodyFactory.Create(
-                        game,
-                        system,
-                        rootStar,
-                        GalaxyGen.Settings.J2000,
-                        new SensorProfileDB(),
-                        Path.Combine(folder, bodyFileName.ToString()));
-                }
-            }
-
-            var surveyRings = (JArray?)rootJson["surveyRings"];
-            if(surveyRings != null)
-            {
-                var ringSettings = new Dictionary<double, int>();
-
-                foreach(var ring in surveyRings)
-                {
-                    var radius = (double?)ring["ringRadiusInAU"] ?? 1;
-                    var count = (int?)ring["count"] ?? 1;
-
-                    ringSettings.Add(Distance.AuToMt(radius), count);
-                }
-                JPSurveyFactory.GenerateJPSurveyPoints(system, ringSettings);
-            }
-            else
-            {
-                JPSurveyFactory.GenerateJPSurveyPoints(system);
-            }
-
-            if(rootStar != null)
-            {
-                JPFactory.GenerateJumpPoints(this, system, rootStar.GetDataBlob<PositionDB>().Root);
-            }
-
-            // Go through all the created entities and set them to be neutral
-            foreach(var entity in system.GetAllEntites())
-            {
-                entity.FactionOwnerID = Game.NeutralFactionId;
-            }
-
-            game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.ID);
-
-            return system;
         }
 
         public static StarSystem LoadFromBlueprint(Game game, SystemBlueprint systemBlueprint)

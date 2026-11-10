@@ -14,7 +14,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Setup()
         {
-            _game = TestingUtilities.CreateTestUniverse(3, new DateTime(2100, 1, 1), false);
+            _game = TestingUtilities.CreateTestUniverse(3, new DateTime(2100, 1, 1));
             _game.Settings.EnforceSingleThread = true;
             // CreateTestUniverse double-adds systems (Initialize + explicit Add),
             // so deduplicate to get the actual distinct systems.

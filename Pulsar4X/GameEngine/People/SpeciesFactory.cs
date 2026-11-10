@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using Newtonsoft.Json.Linq;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Colonies;
 using Pulsar4X.Datablobs;
@@ -34,38 +32,6 @@ namespace Pulsar4X.People
                     BreathableGasSymbol = speciesBlueprint.BreathableGasSymbol ?? "O2",
                 }
             });
-
-            return species;
-        }
-
-        public static Entity CreateFromJson(Entity faction, EntityManager system, string filePath)
-        {
-            string fileContents = File.ReadAllText(filePath);
-            var rootJson = JObject.Parse(fileContents);
-
-            var name = rootJson["name"].ToString();
-            var species = Entity.Create();
-
-            system.AddEntity(species, new List<BaseDataBlob>() {
-                new NameDB(name),
-                new SpeciesDB()
-                {
-                    BaseGravity = (double?)rootJson["gravity"]["ideal"] ?? 0,
-                    MinimumGravityConstraint = (double?)rootJson["gravity"]["minimum"] ?? 0,
-                    MaximumGravityConstraint = (double?)rootJson["gravity"]["maximum"] ?? 0,
-                    BasePressure = (double?)rootJson["pressure"]["ideal"] ?? 0,
-                    MinimumPressureConstraint = (double?)rootJson["pressure"]["minimum"] ?? 0,
-                    MaximumPressureConstraint = (double?)rootJson["pressure"]["maximum"] ?? 0,
-                    BaseTemperature = (double?)rootJson["temperature"]["ideal"] ?? 0,
-                    MinimumTemperatureConstraint = (double?)rootJson["temperature"]["minimum"] ?? 0,
-                    MaximumTemperatureConstraint = (double?)rootJson["temperature"]["maximum"] ?? 0,
-                    BreathableGasSymbol = (string?)rootJson["breathableGasSymbol"] ?? "O2",
-                }
-            });
-
-            species.FactionOwnerID = faction.Id;
-            faction.GetDataBlob<FactionInfoDB>().Species.Add(species);
-            SpeciesCargo.RegisterOwned(faction);
 
             return species;
         }
