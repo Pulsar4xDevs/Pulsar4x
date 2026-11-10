@@ -75,8 +75,9 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
 
     public NewGameCatalog LoadMods(IReadOnlyList<string> modManifestPaths)
     {
-        // Load into a fresh store and keep it only if every mod loads, so a failed attempt never
-        // leaves a half-loaded set behind. Dependencies are pulled in and loaded first.
+        // Load into a fresh store and keep it only if every mod and the start scenario load, so a
+        // failed attempt never leaves a half-loaded set behind. Dependencies are pulled in and loaded
+        // first. Pulsar4x loads sol-default; Early Tech Start also loads early-tech after that.
         var modDataStore = LoadModStore(modManifestPaths, ModsState.AvailableMods.Select(m => m.Path));
         _modDataStore = modDataStore;
 
@@ -84,13 +85,30 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
     }
 
     /// <summary>Loads the mods (and the mods they depend on, found among
-    /// <paramref name="availableManifestPaths"/>) into a fresh store.</summary>
+    /// <paramref name="availableManifestPaths"/>) into a fresh store, then the start
+    /// scenario. Sol Default loads when Pulsar4x is loaded. Early Tech loads after
+    /// it when Pulsar4x.EarlyTechStart is loaded. A store without Pulsar4x loads no
+    /// scenario.</summary>
     internal static ModDataStore LoadModStore(
         IEnumerable<string> modManifestPaths, IEnumerable<string> availableManifestPaths)
     {
         var modLoader = new ModLoader();
         var modDataStore = new ModDataStore();
         modLoader.LoadModManifests(modManifestPaths, availableManifestPaths, modDataStore);
+
+        var pulsar4x = modDataStore.ModManifests.FirstOrDefault(manifest => manifest.Namespace == "Pulsar4x");
+        if (pulsar4x != null)
+        {
+            string? modsFolder = Path.GetDirectoryName(pulsar4x.ModDirectory);
+            if (string.IsNullOrEmpty(modsFolder))
+                throw new DirectoryNotFoundException("Could not find the mods folder for " + pulsar4x.ModDirectory);
+
+            string scenarios = Path.Combine(modsFolder, "scenarios");
+            modLoader.LoadScenario(Path.Combine(scenarios, "sol-default", "scenarioInfo.json"), modDataStore);
+            if (modDataStore.ModManifests.Any(manifest => manifest.Namespace == "Pulsar4x.EarlyTechStart"))
+                modLoader.LoadScenario(Path.Combine(scenarios, "early-tech", "scenarioInfo.json"), modDataStore);
+        }
+
         return modDataStore;
     }
 

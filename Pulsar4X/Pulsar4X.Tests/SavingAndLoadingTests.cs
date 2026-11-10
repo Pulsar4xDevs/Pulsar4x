@@ -19,6 +19,7 @@ namespace Pulsar4X.Tests
             var modDataStore = new ModDataStore();
 
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
+            modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", modDataStore);
 
             _settings = new NewGameSettings() {
                 StartDateTime = new System.DateTime(2100, 9, 1)

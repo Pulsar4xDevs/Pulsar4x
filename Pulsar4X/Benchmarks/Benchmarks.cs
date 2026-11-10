@@ -25,6 +25,7 @@ public class Benchmarks
         ModDataStore modDataStore = new ModDataStore();
 
         modLoader.LoadModManifest("../../../../../../../../GameData/basemod/modInfo.json", modDataStore);
+        modLoader.LoadScenario("../../../../../../../../GameData/scenarios/sol-default/scenarioInfo.json", modDataStore);
 
         // Select default values
         string selectedSpeciesId = modDataStore.Species.First(kvp => kvp.Value.Playable).Key;

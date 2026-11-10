@@ -1,6 +1,6 @@
 # SolBodies
 
-Pulls the largest measured asteroids from the JPL Small-Body Database and writes them into basemod. No API key. The conversion itself is `SbdbSmallBodyImporter` in GameEngine; this console only fetches and writes files.
+Pulls the largest measured asteroids from the JPL Small-Body Database and writes them into the sol-default scenario. No API key. The conversion itself is `SbdbSmallBodyImporter` in GameEngine; this console only fetches and writes files.
 
 From the repo root:
 
@@ -40,6 +40,6 @@ Files land in `GameData/scenarios/sol-default/systems/sol/`:
 - `asteroids-trans-neptunian.json`
 - `asteroids-other.json`
 
-An empty field is not written. A field file left over from an earlier run is deleted. `sol.json` has its `asteroid-*` body ids replaced with the new set. `modInfo.json` and the sol-default `scenarioInfo.json` list the new files just after `comets.json`. Manifests are rewritten indented. Sol-trade is not touched.
+An empty field is not written. A field file left over from an earlier run is deleted. `sol.json` has its `asteroid-*` body ids replaced with the new set. Only the sol-default `scenarioInfo.json` lists the new files, just after `comets.json`. The manifest is rewritten indented. Sol-trade is not touched.
 
 Orbits are heliocentric, including Jupiter trojans. Semi-major axis is stored in kilometres. The orbit epoch is the JPL epoch date. The JSON keeps the real inclination. At runtime `CreateFromBlueprint` still flattens inclination to prograde or retrograde.

@@ -36,6 +36,7 @@ namespace Pulsar4X.Tests
             var modLoader = new ModLoader();
             var modDataStore = new ModDataStore();
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
+            modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", modDataStore);
             var game = new Game(new NewGameSettings(), modDataStore);
             game.Settings.EnforceSingleThread = true;
             // Arrival uses SetOrbitHereNoNewt, so the save test does not need thrust.

@@ -33,6 +33,7 @@ namespace Pulsar4X.Tests
             var _modDataStore = new ModDataStore();
 
             _modLoader.LoadModManifest("Data/basemod/modInfo.json", _modDataStore);
+            _modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", _modDataStore);
 
             var _settings = new NewGameSettings() {
                 MaxSystems = 1

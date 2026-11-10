@@ -340,6 +340,7 @@ public class ColonyMarketOrderTests
             var modLoader = new ModLoader();
             var store = new ModDataStore();
             modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
+            modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", store);
             var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
 
             var faction = FactionFactory.CreateFaction(game, "Colony Market");

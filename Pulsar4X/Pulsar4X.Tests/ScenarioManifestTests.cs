@@ -12,7 +12,7 @@ namespace Pulsar4X.Tests;
 public class ScenarioManifestTests
 {
     [Test]
-    public void ShippedScenarios_MatchTheFilesTheirModsStillLoad_AndDefaultStartIdsExist()
+    public void ShippedScenarios_DataFilesExist_AndDefaultStartIdsAreInTheLoadedStore()
     {
         ModsState.RefreshModsList("Data");
 
@@ -22,13 +22,7 @@ public class ScenarioManifestTests
                 File.ReadAllText(Path.Combine(scenarioDir, "scenarioInfo.json")));
             Assert.That(scenario, Is.Not.Null, scenarioDir);
 
-            string prefix = "../scenarios/" + Path.GetFileName(scenarioDir) + "/";
-            var fromScenario = scenario!.DataFiles.Select(f => prefix + f).ToList();
-            var owner = ModsState.AvailableMods.Single(m => m.Mod.DataFiles.Any(f => f.StartsWith(prefix)));
-            var fromMod = owner.Mod.DataFiles.Where(f => f.StartsWith(prefix)).ToList();
-            Assert.That(fromScenario, Is.EqualTo(fromMod), scenarioDir);
-
-            foreach (var file in scenario.DataFiles)
+            foreach (var file in scenario!.DataFiles)
                 Assert.That(File.Exists(Path.Combine(scenarioDir, file)), Is.True, file);
 
             var paths = scenario.RequiredMods
@@ -36,10 +30,55 @@ public class ScenarioManifestTests
                 .ToList();
             var store = GameLifecycle.LoadModStore(paths, ModsState.AvailableMods.Select(m => m.Path));
 
-            Assert.That(store.Species, Does.ContainKey(scenario.DefaultStart.Species));
-            Assert.That(store.Colonies, Does.ContainKey(scenario.DefaultStart.Colony));
-            Assert.That(store.Systems, Does.ContainKey(scenario.DefaultStart.System));
+            Assert.That(store.Species, Does.ContainKey(scenario.DefaultStart.Species), scenarioDir);
+            Assert.That(store.Colonies, Does.ContainKey(scenario.DefaultStart.Colony), scenarioDir);
+            Assert.That(store.Systems, Does.ContainKey(scenario.DefaultStart.System), scenarioDir);
+            Assert.That(store.SystemBodies, Does.ContainKey(scenario.DefaultStart.Body), scenarioDir);
         }
+    }
+
+    [Test]
+    public void ModManifests_DoNotListScenarioFiles()
+    {
+        ModsState.RefreshModsList("Data");
+
+        foreach (var mod in ModsState.AvailableMods)
+        {
+            if (mod.Mod.DataFiles == null)
+                continue;
+
+            foreach (var file in mod.Mod.DataFiles)
+            {
+                Assert.That(file, Does.Not.Contain("../scenarios"), mod.Mod.ModName + " " + file);
+                Assert.That(file, Does.Not.StartWith("scenarios/"), mod.Mod.ModName + " " + file);
+            }
+        }
+    }
+
+    [Test]
+    public void BothStarts_CatalogHasSolEarthAndTheStartColony()
+    {
+        ModsState.RefreshModsList("Data");
+        var available = ModsState.AvailableMods.Select(m => m.Path).ToList();
+
+        var defaultPaths = ModsState.AvailableMods
+            .Where(m => m.Mod.ModName == "Pulsar4x")
+            .Select(m => m.Path)
+            .ToList();
+        var defaultCatalog = GameLifecycle.BuildCatalog(GameLifecycle.LoadModStore(defaultPaths, available));
+        var defaultSol = defaultCatalog.Systems.Single(system => system.Id == "system-sol");
+        Assert.That(defaultSol.StartingBodies.Select(body => body.Id), Does.Contain("planet-earth"));
+        Assert.That(defaultCatalog.Colonies.Select(colony => colony.Id), Does.Contain("colony-earth"));
+
+        var earlyPaths = ModsState.AvailableMods
+            .Where(m => m.Mod.ModName == "Early Tech Start")
+            .Select(m => m.Path)
+            .ToList();
+        var earlyCatalog = GameLifecycle.BuildCatalog(GameLifecycle.LoadModStore(earlyPaths, available));
+        var earlySol = earlyCatalog.Systems.Single(system => system.Id == "system-sol");
+        Assert.That(earlySol.StartingBodies.Select(body => body.Id), Does.Contain("planet-earth"));
+        Assert.That(earlyCatalog.Colonies.Select(colony => colony.Id), Does.Contain("colony-early-earth"));
+        Assert.That(earlyCatalog.Colonies.Select(colony => colony.Id), Does.Not.Contain("colony-earth"));
     }
 
     [Test]

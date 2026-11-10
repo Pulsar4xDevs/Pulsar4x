@@ -25,27 +25,7 @@
     "TemplateFiles/damageResistance.json",
     "ScenarioFiles/designs/componentDesigns.json",
     "ScenarioFiles/designs/shipDesigns.json",
-    "../scenarios/sol-default/bootstrapDefaults.json",
-    "../scenarios/sol-default/defaultTheme.json",
     "ScenarioFiles/systemGenSettings.json",
-    "../scenarios/sol-default/species.json",
-    "ScenarioFiles/systems/alpha-centauri/alphaCentauri.json",
-    "../scenarios/sol-default/systems/sol/sol.json",
-    "../scenarios/sol-default/systems/sol/mercury.json",
-    "../scenarios/sol-default/systems/sol/venus.json",
-    "../scenarios/sol-default/systems/sol/earth.json",
-    "../scenarios/sol-default/systems/sol/luna.json",
-    "../scenarios/sol-default/systems/sol/mars.json",
-    "../scenarios/sol-default/systems/sol/jupiter.json",
-    "../scenarios/sol-default/systems/sol/saturn.json",
-    "../scenarios/sol-default/systems/sol/uranus.json",
-    "../scenarios/sol-default/systems/sol/neptune.json",
-    "../scenarios/sol-default/systems/sol/dwarfPlanets.json",
-    "../scenarios/sol-default/systems/sol/factions.json",
-    "../scenarios/sol-default/systems/sol/comets.json",
-    "../scenarios/sol-default/systems/sol/asteroids-centaurs.json",
-    "../scenarios/sol-default/systems/sol/asteroids-main-belt.json",
-    "../scenarios/sol-default/systems/sol/asteroids-trans-neptunian.json",
-    "../scenarios/sol-default/systems/sol/asteroids-trojans.json"
+    "ScenarioFiles/systems/alpha-centauri/alphaCentauri.json"
   ]
 }

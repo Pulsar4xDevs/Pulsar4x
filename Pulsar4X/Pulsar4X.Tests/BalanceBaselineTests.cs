@@ -189,6 +189,7 @@ public class BalanceBaselineTests
     {
         var store = new ModDataStore();
         new ModLoader().LoadModManifest("Data/basemod/modInfo.json", store);
+        new ModLoader().LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", store);
         return store;
     }
 

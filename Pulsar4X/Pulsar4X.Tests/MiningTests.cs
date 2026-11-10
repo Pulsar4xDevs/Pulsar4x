@@ -33,6 +33,7 @@ namespace Pulsar4X.Tests
             var modDataStore = new ModDataStore();
 
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
+            modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", modDataStore);
             var startDate = new DateTime(2050, 1, 1);
             _game = new Game(new NewGameSettings { StartDateTime = startDate, MaxSystems = 0 }, modDataStore); // reinit with empty game, so we can do a clean test.
             _game.Settings.EnableMultiThreading = true;

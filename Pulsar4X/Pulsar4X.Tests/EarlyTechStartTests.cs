@@ -186,9 +186,10 @@ public class EarlyTechStartTests
         ModsState.RefreshModsList("Data");
         var store = GameLifecycle.LoadModStore(TickedPaths(EarlyMod), ModsState.AvailableMods.Select(m => m.Path));
 
-        // The mod ships no facility or component data of its own, only techs, the colony and one ship design.
+        // The mod ships no facility or component data of its own, only techs. The colony and one ship
+        // design come from the early-tech scenario.
         var early = Mod(EarlyMod).Mod;
-        Assert.That(early.DataFiles, Is.EquivalentTo(new[] { "TemplateFiles/techs.json", "../scenarios/early-tech/colonies.json", "../scenarios/early-tech/ships.json" }));
+        Assert.That(early.DataFiles, Is.EquivalentTo(new[] { "TemplateFiles/techs.json" }));
 
         var colony = store.Colonies[EarlyColony];
         foreach (var id in colony.ComponentDesigns!)

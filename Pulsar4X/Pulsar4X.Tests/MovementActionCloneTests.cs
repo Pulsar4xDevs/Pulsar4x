@@ -70,6 +70,7 @@ namespace Pulsar4X.Tests
             var modLoader = new ModLoader();
             var modDataStore = new ModDataStore();
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
+            modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", modDataStore);
             var game = new Game(new NewGameSettings(), modDataStore);
             var sys = new StarSystem();
             sys.Initialize(game, "Clone", -1);

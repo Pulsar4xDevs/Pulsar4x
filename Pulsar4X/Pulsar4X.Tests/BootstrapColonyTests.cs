@@ -40,6 +40,7 @@ public class BootstrapColonyTests
         var modLoader = new ModLoader();
         var store = new ModDataStore();
         modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
+        modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", store);
         return store;
     }
 

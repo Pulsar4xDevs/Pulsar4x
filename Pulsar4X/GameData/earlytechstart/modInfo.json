@@ -8,8 +8,6 @@
     "Pulsar4x"
   ],
   "DataFiles": [
-    "TemplateFiles/techs.json",
-    "../scenarios/early-tech/colonies.json",
-    "../scenarios/early-tech/ships.json"
+    "TemplateFiles/techs.json"
   ]
 }

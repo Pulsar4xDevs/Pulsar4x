@@ -29,6 +29,7 @@ public class EarthStartTests
         var modLoader = new ModLoader();
         var store = new ModDataStore();
         modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
+        modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", store);
 
         var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
         game.Settings.EnforceSingleThread = true;

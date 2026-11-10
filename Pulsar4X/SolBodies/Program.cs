@@ -6,7 +6,7 @@ using Pulsar4X.Galaxy;
 namespace Pulsar4X.SolBodies;
 
 /// <summary>
-/// Writes JPL small bodies into basemod. The conversion lives in
+/// Writes JPL small bodies into the sol-default scenario. The conversion lives in
 /// <see cref="SbdbSmallBodyImporter"/> so the game can call it later.
 /// </summary>
 public static class Program
@@ -82,9 +82,8 @@ public static class Program
         }
 
         WriteBodies(modRoot, groups);
-        var asteroidFiles = groups.Select(group => group.Key);
-        UpdateModInfo(Path.Combine(modRoot, "modInfo.json"), "../scenarios/sol-default/systems/sol/", asteroidFiles);
-        UpdateModInfo(Path.Combine(modRoot, "..", "scenarios", "sol-default", "scenarioInfo.json"), "systems/sol/", asteroidFiles);
+        string scenarioFolder = Path.Combine(modRoot, "..", "scenarios", "sol-default");
+        UpdateScenarioInfo(scenarioFolder, groups.Select(group => group.Key));
         UpdateSystemBodies(modRoot, result.Bodies.Select(body => body.Blueprint.UniqueID));
         Console.WriteLine("Wrote " + modRoot);
         return 0;
@@ -180,8 +179,10 @@ public static class Program
         }
     }
 
-    static void UpdateModInfo(string path, string prefix, IEnumerable<string> fileNames)
+    static void UpdateScenarioInfo(string scenarioFolder, IEnumerable<string> fileNames)
     {
+        string path = Path.Combine(scenarioFolder, "scenarioInfo.json");
+        string prefix = "systems/sol/";
         var manifest = JObject.Parse(File.ReadAllText(path));
         var files = (JArray)manifest["DataFiles"]!;
         var kept = new JArray();

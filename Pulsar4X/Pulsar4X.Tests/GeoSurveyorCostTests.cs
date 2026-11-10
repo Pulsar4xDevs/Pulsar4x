@@ -31,6 +31,7 @@ public class GeoSurveyorCostTests
     {
         var store = new ModDataStore();
         new ModLoader().LoadModManifest("Data/basemod/modInfo.json", store);
+        new ModLoader().LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", store);
         var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
         var faction = FactionFactory.CreateBasicFaction(game, "Survey", "SRV", 0);
         var data = faction.GetDataBlob<FactionInfoDB>().Data;

@@ -26,6 +26,7 @@ public class ConstructionAtbTests
         var modLoader = new ModLoader();
         var store = new ModDataStore();
         modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
+        modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", store);
 
         var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
         var faction = FactionFactory.CreateBasicFaction(game, "Office", "OFF", 0);
@@ -62,6 +63,7 @@ public class ConstructionAtbTests
         var modLoader = new ModLoader();
         var store = new ModDataStore();
         modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
+        modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", store);
 
         var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
         var faction = FactionFactory.CreateBasicFaction(game, "Port", "PRT", 0);
@@ -94,6 +96,7 @@ public class ConstructionAtbTests
         var modLoader = new ModLoader();
         var store = new ModDataStore();
         modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
+        modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", store);
 
         var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
         game.Settings.EnforceSingleThread = true;
@@ -141,6 +144,7 @@ public class ConstructionAtbTests
         var modLoader = new ModLoader();
         var store = new ModDataStore();
         modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
+        modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", store);
 
         var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
         var faction = FactionFactory.CreateBasicFaction(game, "Size", "SZ", 0);

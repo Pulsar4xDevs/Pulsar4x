@@ -34,6 +34,6 @@
     "Species": "species-human",
     "Colony": "colony-earth",
     "System": "system-sol",
-    "Body": "Earth"
+    "Body": "planet-earth"
   }
 }
