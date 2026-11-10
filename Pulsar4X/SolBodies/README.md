@@ -30,7 +30,7 @@ Fields: `main-belt`, `mars-crossers`, `near-earth`, `trojans`, `centaurs`, `tran
 
 Bodies are the largest ones that have a measured diameter and an eccentricity below 1. Names already used by a hand-authored Sol system body (planets, moons, Ceres, the other dwarfs, Halley) are skipped. A previous `asteroids-*.json` is not a skip source, so a rerun can replace itself.
 
-Files land in `GameData/basemod/ScenarioFiles/systems/sol/`:
+Files land in `GameData/scenarios/sol-default/systems/sol/`:
 
 - `asteroids-main-belt.json`
 - `asteroids-mars-crossers.json`
@@ -40,6 +40,6 @@ Files land in `GameData/basemod/ScenarioFiles/systems/sol/`:
 - `asteroids-trans-neptunian.json`
 - `asteroids-other.json`
 
-An empty field is not written. A field file left over from an earlier run is deleted. `sol.json` has its `asteroid-*` body ids replaced with the new set. `modInfo.json` lists the new files just after `comets.json`. Both manifests are rewritten indented. Sol-trade is not touched.
+An empty field is not written. A field file left over from an earlier run is deleted. `sol.json` has its `asteroid-*` body ids replaced with the new set. `modInfo.json` and the sol-default `scenarioInfo.json` list the new files just after `comets.json`. Manifests are rewritten indented. Sol-trade is not touched.
 
 Orbits are heliocentric, including Jupiter trojans. Semi-major axis is stored in kilometres. The orbit epoch is the JPL epoch date. The JSON keeps the real inclination. At runtime `CreateFromBlueprint` still flattens inclination to prograde or retrograde.

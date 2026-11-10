@@ -1,0 +1,22 @@
+{
+  "Author": "Pulsar4x Devs",
+  "ScenarioName": "Early Tech Start",
+  "Version": "0.1",
+  "Namespace": "Pulsar4x.Scenario.EarlyTech",
+  "Description": "An early-technology Earth start; advanced techs stay locked until researched.",
+  "DefaultEnabled": false,
+  "RequiredMods": [
+    "Pulsar4x",
+    "Pulsar4x.EarlyTechStart"
+  ],
+  "DataFiles": [
+    "colonies.json",
+    "ships.json"
+  ],
+  "DefaultStart": {
+    "Species": "species-human",
+    "Colony": "colony-early-earth",
+    "System": "system-sol",
+    "Body": "Earth"
+  }
+}

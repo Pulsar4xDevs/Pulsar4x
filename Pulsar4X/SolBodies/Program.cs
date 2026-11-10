@@ -82,7 +82,9 @@ public static class Program
         }
 
         WriteBodies(modRoot, groups);
-        UpdateModInfo(modRoot, groups.Select(group => group.Key));
+        var asteroidFiles = groups.Select(group => group.Key);
+        UpdateModInfo(Path.Combine(modRoot, "modInfo.json"), "../scenarios/sol-default/systems/sol/", asteroidFiles);
+        UpdateModInfo(Path.Combine(modRoot, "..", "scenarios", "sol-default", "scenarioInfo.json"), "systems/sol/", asteroidFiles);
         UpdateSystemBodies(modRoot, result.Bodies.Select(body => body.Blueprint.UniqueID));
         Console.WriteLine("Wrote " + modRoot);
         return 0;
@@ -127,7 +129,7 @@ public static class Program
     static HashSet<string> ReadHandAuthoredNames(string modRoot)
     {
         var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        string solDir = Path.Combine(modRoot, "ScenarioFiles", "systems", "sol");
+        string solDir = Path.Combine(modRoot, "..", "scenarios", "sol-default", "systems", "sol");
         foreach (var file in Directory.GetFiles(solDir, "*.json"))
         {
             if (Path.GetFileName(file).StartsWith("asteroids-", StringComparison.Ordinal))
@@ -147,7 +149,7 @@ public static class Program
 
     static void WriteBodies(string modRoot, IEnumerable<IGrouping<string, SbdbImportedBody>> groups)
     {
-        string solDir = Path.Combine(modRoot, "ScenarioFiles", "systems", "sol");
+        string solDir = Path.Combine(modRoot, "..", "scenarios", "sol-default", "systems", "sol");
         var serializer = JsonSerializer.Create(new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Ignore,
@@ -178,9 +180,8 @@ public static class Program
         }
     }
 
-    static void UpdateModInfo(string modRoot, IEnumerable<string> fileNames)
+    static void UpdateModInfo(string path, string prefix, IEnumerable<string> fileNames)
     {
-        string path = Path.Combine(modRoot, "modInfo.json");
         var manifest = JObject.Parse(File.ReadAllText(path));
         var files = (JArray)manifest["DataFiles"]!;
         var kept = new JArray();
@@ -188,7 +189,7 @@ public static class Program
         foreach (var token in files)
         {
             string entry = token.Value<string>()!;
-            if (entry.StartsWith("ScenarioFiles/systems/sol/asteroids-", StringComparison.Ordinal))
+            if (entry.StartsWith(prefix + "asteroids-", StringComparison.Ordinal))
                 continue;
             kept.Add(entry);
             if (entry.EndsWith("/comets.json", StringComparison.Ordinal))
@@ -197,7 +198,7 @@ public static class Program
         if (insertAt == 0)
             insertAt = kept.Count;
         foreach (var fileName in fileNames.OrderBy(name => name, StringComparer.Ordinal))
-            kept.Insert(insertAt++, "ScenarioFiles/systems/sol/" + fileName);
+            kept.Insert(insertAt++, prefix + fileName);
 
         manifest["DataFiles"] = kept;
         File.WriteAllText(path, manifest.ToString(Formatting.Indented) + "\n", new UTF8Encoding(false));
@@ -205,7 +206,7 @@ public static class Program
 
     static void UpdateSystemBodies(string modRoot, IEnumerable<string> ids)
     {
-        string path = Path.Combine(modRoot, "ScenarioFiles", "systems", "sol", "sol.json");
+        string path = Path.Combine(modRoot, "..", "scenarios", "sol-default", "systems", "sol", "sol.json");
         var items = JArray.Parse(File.ReadAllText(path));
         foreach (var item in items)
         {

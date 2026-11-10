@@ -188,7 +188,7 @@ public class EarlyTechStartTests
 
         // The mod ships no facility or component data of its own, only techs, the colony and one ship design.
         var early = Mod(EarlyMod).Mod;
-        Assert.That(early.DataFiles, Is.EquivalentTo(new[] { "TemplateFiles/techs.json", "ScenarioFiles/colonies.json", "ScenarioFiles/ships.json" }));
+        Assert.That(early.DataFiles, Is.EquivalentTo(new[] { "TemplateFiles/techs.json", "../scenarios/early-tech/colonies.json", "../scenarios/early-tech/ships.json" }));
 
         var colony = store.Colonies[EarlyColony];
         foreach (var id in colony.ComponentDesigns!)

@@ -1,0 +1,39 @@
+{
+  "Author": "Pulsar4x Devs",
+  "ScenarioName": "Sol Default Start",
+  "Version": "0.1",
+  "Namespace": "Pulsar4x.Scenario.SolDefault",
+  "Description": "The default Sol system start, with Earth as the player colony.",
+  "DefaultEnabled": true,
+  "RequiredMods": [
+    "Pulsar4x"
+  ],
+  "DataFiles": [
+    "bootstrapDefaults.json",
+    "defaultTheme.json",
+    "species.json",
+    "systems/sol/sol.json",
+    "systems/sol/mercury.json",
+    "systems/sol/venus.json",
+    "systems/sol/earth.json",
+    "systems/sol/luna.json",
+    "systems/sol/mars.json",
+    "systems/sol/jupiter.json",
+    "systems/sol/saturn.json",
+    "systems/sol/uranus.json",
+    "systems/sol/neptune.json",
+    "systems/sol/dwarfPlanets.json",
+    "systems/sol/factions.json",
+    "systems/sol/comets.json",
+    "systems/sol/asteroids-centaurs.json",
+    "systems/sol/asteroids-main-belt.json",
+    "systems/sol/asteroids-trans-neptunian.json",
+    "systems/sol/asteroids-trojans.json"
+  ],
+  "DefaultStart": {
+    "Species": "species-human",
+    "Colony": "colony-earth",
+    "System": "system-sol",
+    "Body": "Earth"
+  }
+}

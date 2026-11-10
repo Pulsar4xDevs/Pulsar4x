@@ -100,10 +100,47 @@ namespace Pulsar4X.Modding
 
             modManifest.ModDirectory = modDirectory;
 
-            foreach (var modDataFile in modManifest.DataFiles)
+            ApplyDataFiles(modDirectory, modManifest.DataFiles, modManifest.Namespace, baseData);
+
+            baseData.ModManifests.Add(modManifest);
+
+            LoadedMods.Add(modManifest.Namespace, modManifest);
+        }
+
+        /// <summary>
+        /// Applies a scenario's data files on top of an already-loaded mod store.
+        /// Does not register the scenario as a mod and does not walk dependencies.
+        /// </summary>
+        public ScenarioManifest LoadScenario(string scenarioManifestPath, ModDataStore baseData)
+        {
+            var scenarioManifest = JsonConvert.DeserializeObject<ScenarioManifest>(File.ReadAllText(scenarioManifestPath));
+            if (scenarioManifest == null || string.IsNullOrEmpty(scenarioManifest.Namespace))
+                throw new InvalidDataException($"{scenarioManifestPath} is not a valid scenario manifest (missing Namespace).");
+
+            foreach (var required in scenarioManifest.RequiredMods ?? new List<string>())
+            {
+                if (!baseData.ModManifests.Any(m => m.Namespace == required))
+                    throw new InvalidOperationException(
+                        $"Scenario '{scenarioManifest.ScenarioName}' requires mod '{required}', which is not loaded.");
+            }
+
+            string? scenarioDirectory = Path.GetDirectoryName(scenarioManifestPath);
+
+            if(string.IsNullOrEmpty(scenarioDirectory)) throw new DirectoryNotFoundException($"Could not find {scenarioManifestPath}");
+
+            scenarioManifest.ScenarioDirectory = scenarioDirectory;
+
+            ApplyDataFiles(scenarioDirectory, scenarioManifest.DataFiles, scenarioManifest.Namespace, baseData);
+
+            return scenarioManifest;
+        }
+
+        private void ApplyDataFiles(string directory, List<string> dataFiles, string modNamespace, ModDataStore baseData)
+        {
+            foreach (var modDataFile in dataFiles)
             {
                 // Combine the directory with the mod data file name
-                string modDataFilePath = Path.Combine(modDirectory, modDataFile);
+                string modDataFilePath = Path.Combine(directory, modDataFile);
 
                 var modInstructions = JsonConvert.DeserializeObject<List<ModInstruction>>(
                     File.ReadAllText(modDataFilePath),
@@ -112,13 +149,9 @@ namespace Pulsar4X.Modding
                 foreach (var mod in modInstructions)
                 {
                     mod.Data.JsonFileName =  modDataFile;
-                    ApplyMod(baseData, mod, modManifest.Namespace);
+                    ApplyMod(baseData, mod, modNamespace);
                 }
             }
-
-            baseData.ModManifests.Add(modManifest);
-
-            LoadedMods.Add(modManifest.Namespace, modManifest);
         }
 
         private void ApplyMod(ModDataStore baseData, ModInstruction mod, string modNamespace)
