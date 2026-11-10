@@ -410,7 +410,7 @@ public class ShipConstructionTests
         string[] designs =
         {
             "default-design-passive-sensor-s50",
-            "default-design-bridge-ship",
+            "default-design-Cockpit",
             "default-design-bridge-well",
             "default-design-ship-construction",
             "default-design-fuel-tank-1500",

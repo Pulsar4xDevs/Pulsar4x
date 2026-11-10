@@ -411,7 +411,7 @@ public class OfficersAndSpanTests
         Assert.That(academy.ComponentMountType.HasFlag(ComponentMountType.ShipCargo), Is.False);
         Assert.That(colony.HasDataBlob<NavalAcademyDB>(), Is.False);
 
-        Assert.That(info.ComponentDesigns["default-design-bridge-ship"].GetAttribute<AdminSpaceAtb>().AdminLevel,
+        Assert.That(info.ComponentDesigns["default-design-Cockpit"].GetAttribute<AdminSpaceAtb>().AdminLevel,
             Is.EqualTo(AdminLevel.Ship));
         Assert.That(info.ComponentDesigns["default-design-bridge-well"].GetAttribute<AdminSpaceAtb>().AdminLevel,
             Is.EqualTo(AdminLevel.Planet));

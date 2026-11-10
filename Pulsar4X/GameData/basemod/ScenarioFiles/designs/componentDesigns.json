@@ -618,8 +618,8 @@
   {
     "Type": "ComponentDesign",
     "Payload": {
-      "UniqueId": "default-design-bridge-ship",
-      "Name": "Ship Bridge",
+      "UniqueId": "default-design-Cockpit",
+      "Name": "Shuttle Bridge",
       "TemplateId": "ship-command",
       "Properties": [
         { "Key": "Command Span", "Value": 0 },
@@ -631,7 +631,7 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-bridge-well",
-      "Name": "Planetary Command Bridge",
+      "Name": "Ship Command Bridge",
       "TemplateId": "ship-command",
       "Properties": [
         { "Key": "Command Span", "Value": 1 },
@@ -643,7 +643,7 @@
     "Type": "ComponentDesign",
     "Payload": {
       "UniqueId": "default-design-bridge-system",
-      "Name": "System Command Bridge",
+      "Name": "Fleet Command Bridge",
       "TemplateId": "ship-command",
       "Properties": [
         { "Key": "Command Span", "Value": 2 },

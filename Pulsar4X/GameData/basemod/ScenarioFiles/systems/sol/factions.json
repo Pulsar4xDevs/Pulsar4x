@@ -12,7 +12,8 @@
       "StartingFunds": 100,
       "ComponentDesigns": [
         "default-design-passive-sensor-s50",
-        "default-design-bridge-ship",
+        "default-design-Cockpit",
+        "default-design-bridge-well",
         "default-design-geo-surveyor",
         "default-design-fuel-tank-1000",
         "default-design-alcubierre-500",
@@ -53,7 +54,8 @@
       "StartingFunds": 100,
       "ComponentDesigns": [
         "default-design-passive-sensor-s50",
-        "default-design-bridge-ship",
+        "default-design-Cockpit",
+        "default-design-bridge-well",
         "default-design-asteroid-miner",
         "default-design-cargo-hold-1t",
         "default-design-fuel-tank-1000",
