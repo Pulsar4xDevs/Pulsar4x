@@ -600,6 +600,62 @@ public class PassengerTransportTests
     }
 
     [Test]
+    public void Haul_DeliversPeople_AndPaysFare_AfterListingsAreRemovedMidHaul()
+    {
+        // Reproduce the playtest failure: people are already aboard, then the
+        // periodic market pass retires the relocation listings while the ship
+        // is still en route to the destination the haul was given.
+        var scene = Scene.Build(population: 1200, capacity: 1000, berths: 100, destPopulation: 0, destCapacity: 3000);
+        new RunMarketPlan().Plan(scene.Home, new Goal(GoalType.RunMarket), scene.Home.StarSysDateTime);
+
+        string peopleId = scene.People.UniqueID;
+        Assert.That(MarketRun.TryShipGood(scene.Ship, peopleId, out var good), Is.True);
+        scene.AtHome();
+        var loadLeg = MarketRun.NextLeg(scene.Ship, scene.Home, scene.Dest, peopleId, good);
+        Assert.That(loadLeg.Actions.OfType<MarketExchangeAction>().Count(), Is.EqualTo(1));
+        foreach (var action in loadLeg.Actions)
+            Run(scene, action);
+        Assert.That(scene.Aboard(scene.Ship), Is.EqualTo(100), "the hold has the people before the listings vanish");
+
+        MigrationBook.Retire(scene.Home.Manager);
+        Assert.That(MarketBook.TryGet(scene.Home, peopleId, out _), Is.False, "origin listing is gone mid-haul");
+        Assert.That(MarketBook.TryGet(scene.Dest, peopleId, out _), Is.False, "destination listing is gone mid-haul");
+
+        var haul = new Goal(GoalType.Freighter)
+        {
+            CargoId = peopleId,
+            SourceEntityId = scene.Home.Id,
+            DestEntityId = scene.Dest.Id,
+        };
+
+        // Still at the origin, so the next plan must keep moving toward dest
+        // (circularise / approach) rather than fail "listing gone".
+        var enRoute = new FreighterPlan().Plan(scene.Ship, haul, scene.Ship.StarSysDateTime);
+        Assert.That(enRoute.Status, Is.EqualTo(GoalStatus.Active),
+            enRoute.Message ?? "haul should stay active with people aboard");
+        Assert.That(enRoute.Actions, Is.Not.Empty, "the ship is told to move or exchange, not abort");
+        Assert.That(enRoute.Message, Is.Not.EqualTo("listing gone"));
+        Assert.That(scene.Aboard(scene.Ship), Is.EqualTo(100), "people stay aboard until they land");
+
+        decimal fundsBeforeDelivery = scene.Faction.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds();
+        scene.AtDest();
+        var deliver = new FreighterPlan().Plan(scene.Ship, haul, scene.Ship.StarSysDateTime);
+        Assert.That(deliver.Status, Is.EqualTo(GoalStatus.Active));
+        var landing = deliver.Actions.OfType<MarketExchangeAction>().ToList();
+        Assert.That(landing, Has.Count.EqualTo(1), "in range at dest, land without a live listing");
+        foreach (var action in landing)
+            Run(scene, action);
+
+        Assert.That(scene.Aboard(scene.Ship), Is.EqualTo(0), "the hold is emptied at dest");
+        Assert.That(scene.Population(scene.Dest), Is.EqualTo(100));
+        Assert.That(scene.Population(scene.Home) + scene.Population(scene.Dest), Is.EqualTo(1200),
+            "nobody is created or lost");
+        Assert.That(scene.Faction.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(),
+            Is.EqualTo(fundsBeforeDelivery + SpeciesCargo.FareCreditsPerPerson * 100),
+            "fare is paid on actual delivery even without a live listing");
+    }
+
+    [Test]
     public void Overcrowding_DoesNotOfferPeople_WhenNoColonyCanTakeThem()
     {
         // Dest is full, so there is nowhere to send anyone: no offer at all.

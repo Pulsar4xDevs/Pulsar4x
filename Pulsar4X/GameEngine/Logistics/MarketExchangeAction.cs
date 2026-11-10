@@ -79,12 +79,6 @@ public class MarketExchangeAction : EntityAction
             return;
         }
 
-        if (!MarketBook.TryGet(market, CargoId, out var listing))
-        {
-            Fail("No listing");
-            return;
-        }
-
         int shipFaction = _entityCommanding.FactionOwnerID;
         int marketFaction = market.FactionOwnerID;
         if (!FactionStanceRules.CanTrade(game, shipFaction, marketFaction))
@@ -124,6 +118,15 @@ public class MarketExchangeAction : EntityAction
             }
         }
 
+        MarketBook.TryGet(market, CargoId, out var listing);
+        // Landing people already aboard does not need the dest listing to still
+        // exist: a periodic refresh retires relocation offers mid-haul.
+        if (listing == null && !(colonists && Side == MarketSide.SellToMarket))
+        {
+            Fail("No listing");
+            return;
+        }
+
         long requested = RequestedUnits < 0 ? 0 : RequestedUnits;
         long quantity;
         decimal price;
@@ -141,7 +144,7 @@ public class MarketExchangeAction : EntityAction
 
         if (Side == MarketSide.BuyFromMarket)
         {
-            price = listing.Ask;
+            price = listing!.Ask;
             quantity = Min(
                 requested,
                 listing.SellQuantity,
@@ -154,12 +157,16 @@ public class MarketExchangeAction : EntityAction
         }
         else if (Side == MarketSide.SellToMarket)
         {
-            price = listing.Bid;
-            quantity = Min(
-                requested,
-                listing.BuyQuantity,
-                shipStock,
-                marketFree);
+            price = listing != null ? listing.Bid : 0;
+            // Colonists already in the hold land up to requested; PassengerAdapter
+            // clamps to remaining room. Do not require a live BuyQuantity.
+            quantity = colonists
+                ? requested
+                : Min(
+                    requested,
+                    listing!.BuyQuantity,
+                    shipStock,
+                    marketFree);
             source = _entityCommanding;
             dest = market;
             sourceGood = shipGood;
@@ -220,10 +227,13 @@ public class MarketExchangeAction : EntityAction
                 return;
             }
 
-            if (Side == MarketSide.BuyFromMarket)
-                listing.SellQuantity -= moved_People;
-            else
-                listing.BuyQuantity -= moved_People;
+            if (listing != null)
+            {
+                if (Side == MarketSide.BuyFromMarket)
+                    listing.SellQuantity = Math.Max(0, listing.SellQuantity - moved_People);
+                else
+                    listing.BuyQuantity = Math.Max(0, listing.BuyQuantity - moved_People);
+            }
 
             // Migrants pay the carrier on delivery only. Credits are created as income for the
             // transporting faction; the exporter and the destination are not charged.

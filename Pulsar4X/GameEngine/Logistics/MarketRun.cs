@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GameEngine.Engine.Orders;
+using Pulsar4X.Colonies;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
@@ -90,11 +91,18 @@ static class MarketRun
             return PlanResult.Done("share delivered");
 
         if (!MarketBook.TryGet(source, cargoId, out var sell) || !MarketBook.TryGet(dest, cargoId, out var buy))
+        {
+            // People already aboard still need to land. A mid-route market refresh
+            // retires relocation listings, so do not fail a player haul or close a
+            // handed share while the hold is not empty.
+            if (held > 0 && good is SpeciesCargo)
+                return NextLeg(ship, source, dest, cargoId, good, capBuyAtRequest, handed ? share : 0, goal);
             return handed ? PlanResult.Done("share closed") : PlanResult.Fail("listing gone");
+        }
 
         if (handed && held == 0 && (sell.SellQuantity <= 0 || buy.BuyQuantity <= 0))
             return PlanResult.Done("share closed");
-        if (handed && held > 0 && buy.BuyQuantity <= 0)
+        if (handed && held > 0 && buy.BuyQuantity <= 0 && good is not SpeciesCargo)
             return PlanResult.Done("share closed");
 
         var leg = NextLeg(ship, source, dest, cargoId, good, capBuyAtRequest, handed ? share : 0, goal);
@@ -105,16 +113,22 @@ static class MarketRun
 
     public static PlanResult NextLeg(Entity ship, Entity source, Entity dest, string cargoId, ICargoable good, bool capBuyAtRequest = false, long unitShare = 0, Goal goal = null)
     {
-        if (!MarketBook.TryGet(source, cargoId, out var sell) || !MarketBook.TryGet(dest, cargoId, out var buy))
-            return PlanResult.Fail("listing gone");
-
         var store = ship.GetDataBlob<CargoStorageDB>();
         long held = store.GetUnitsStored(good, includeEscro: false);
         if (held > 0)
         {
-            long units = Math.Min(held, buy.BuyQuantity);
-            return ExchangeOrMove(ship, dest, cargoId, MarketSide.SellToMarket, units, goal);
+            // Passengers already loaded are delivered to the goal destination even
+            // if MigrationBook retired the relocation listings while en route.
+            if (good is SpeciesCargo)
+                return ExchangeOrMove(ship, dest, cargoId, MarketSide.SellToMarket, held, goal);
+
+            if (!MarketBook.TryGet(dest, cargoId, out var buyHeld))
+                return PlanResult.Fail("listing gone");
+            return ExchangeOrMove(ship, dest, cargoId, MarketSide.SellToMarket, Math.Min(held, buyHeld.BuyQuantity), goal);
         }
+
+        if (!MarketBook.TryGet(source, cargoId, out var sell) || !MarketBook.TryGet(dest, cargoId, out var buy))
+            return PlanResult.Fail("listing gone");
 
         long free = store.GetFreeUnitSpace(good);
         long buyUnits = Math.Min(sell.SellQuantity, Math.Max(0, free));
