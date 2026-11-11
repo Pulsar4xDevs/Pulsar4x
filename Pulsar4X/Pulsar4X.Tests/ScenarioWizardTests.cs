@@ -12,8 +12,9 @@ using Pulsar4X.Names;
 namespace Pulsar4X.Tests;
 
 /// <summary>
-/// The new-game wizard's scenario page: which mods a scenario still needs, how picking one
-/// ticks those mods, and that an explicit scenario id is what gets loaded.
+/// The new-game wizard's scenario page: which required mods are not installed, which mods a
+/// scenario requires, how picking one ticks those mods, and that an explicit scenario id is
+/// what gets loaded.
 /// </summary>
 [TestFixture]
 public class ScenarioWizardTests
@@ -108,6 +109,53 @@ public class ScenarioWizardTests
         Assert.That(earlyMod.EnabledByDefault, Is.False);
         Assert.That(enabled[EarlyModNamespace], Is.EqualTo(earlyMod.EnabledByDefault));
         Assert.That(enabled[BaseMod], Is.True);
+    }
+
+    [Test]
+    public void NotInstalledMods_EarlyTech_EmptyWhenTheEarlyModIsInstalledButOff()
+    {
+        var early = DiscoverScenarios()[EarlyTech];
+        var mods = InstalledMods();
+        var earlyMod = mods.Single(m => m.Namespace == EarlyModNamespace);
+        Assert.That(earlyMod.EnabledByDefault, Is.False);
+        Assert.That(ScenarioCompatibility.NotInstalledMods(early, mods), Is.Empty);
+
+        var withoutEarly = mods.Where(m => m.Namespace != EarlyModNamespace).ToList();
+        Assert.That(ScenarioCompatibility.NotInstalledMods(early, withoutEarly),
+            Is.EqualTo(new[] { EarlyModNamespace }));
+    }
+
+    [Test]
+    public void IsRequired_EarlyTechRequiresBoth_SolDefaultDoesNotRequireTheEarlyMod()
+    {
+        var scenarios = DiscoverScenarios();
+        var early = scenarios[EarlyTech];
+        var sol = scenarios[SolDefault];
+
+        Assert.That(ScenarioCompatibility.IsRequired(early, BaseMod), Is.True);
+        Assert.That(ScenarioCompatibility.IsRequired(early, EarlyModNamespace), Is.True);
+        Assert.That(ScenarioCompatibility.IsRequired(sol, EarlyModNamespace), Is.False);
+        Assert.That(ScenarioCompatibility.IsRequired(null, BaseMod), Is.False);
+        Assert.That(ScenarioCompatibility.IsRequired(null, EarlyModNamespace), Is.False);
+    }
+
+    [Test]
+    public void ApplySelection_SelectingEarlyTechFromDefault_NotInstalledAndMissingAreEmpty()
+    {
+        var scenarios = DiscoverScenarios();
+        var mods = InstalledMods();
+        var enabled = new Dictionary<string, bool>();
+        foreach (var mod in mods)
+            enabled[mod.Namespace] = mod.EnabledByDefault;
+
+        var sol = scenarios[SolDefault];
+        var early = scenarios[EarlyTech];
+        Assert.That(enabled[EarlyModNamespace], Is.False);
+
+        ScenarioCompatibility.ApplySelection(sol, early, enabled, mods);
+        Assert.That(enabled[EarlyModNamespace], Is.True);
+        Assert.That(ScenarioCompatibility.NotInstalledMods(early, mods), Is.Empty);
+        Assert.That(ScenarioCompatibility.MissingMods(early, enabled), Is.Empty);
     }
 
     [Test]
