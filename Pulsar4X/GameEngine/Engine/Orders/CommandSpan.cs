@@ -247,7 +247,7 @@ public static class CommandSpan
         if (!bridgeShort && !rankShort)
             return null;
 
-        string bridgeFix = want >= 2 ? "Fit a System Command Bridge" : "Fit a Planetary Command Bridge";
+        string bridgeFix = want >= 2 ? "Fit a Fleet Command Bridge" : "Fit a Ship Command Bridge";
         int need = RankFor(wanted);
         string? title = titleOf?.Invoke(need);
         string officer = "an officer of rank " + need + "+" + (string.IsNullOrWhiteSpace(title) ? "" : " (" + title + ")");

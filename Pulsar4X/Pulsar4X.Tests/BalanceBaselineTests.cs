@@ -66,7 +66,7 @@ public class BalanceBaselineTests
             Assert.That(factory.ResourceCosts["iron"], Is.EqualTo(12));
 
             var yard = Design(faction, data, "shipyard");
-            Assert.That(yard.MassPerUnit, Is.EqualTo(800000));
+            Assert.That(yard.MassPerUnit, Is.EqualTo(272000));
             Assert.That(yard.IndustryPointCosts, Is.EqualTo(20000));
             Assert.That(yard.GetAttribute<ConstructionAtb>().ConstructionPoints["ship-refit"], Is.EqualTo(10));
 

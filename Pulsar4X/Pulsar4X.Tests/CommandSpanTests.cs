@@ -102,9 +102,9 @@ namespace Pulsar4X.Tests
                 data.Unlock(id);
 
             var well = ComponentDesignFromJson.Create(faction, data, BridgeBlueprint(
-                "default-design-bridge-well", "Planetary Command Bridge", span: 1, consoles: 8));
+                "default-design-bridge-well", "Ship Command Bridge", span: 1, consoles: 8));
             var system = ComponentDesignFromJson.Create(faction, data, BridgeBlueprint(
-                "default-design-bridge-system", "System Command Bridge", span: 2, consoles: 12));
+                "default-design-bridge-system", "Fleet Command Bridge", span: 2, consoles: 12));
 
             var sol = TestingUtilities.BasicSol(_sys);
             var wellShip = SpawnWithBridge(faction, info, well, sol, "well-flag");
@@ -179,11 +179,11 @@ namespace Pulsar4X.Tests
         {
             var well = CommandSpan.Fix(CommandSpanKind.Body, seated: true, rank: 6, CommandSpanKind.Well, Title);
             Assert.That(well, Does.Contain("The bridge limits reach."));
-            Assert.That(well, Does.Contain("Fit a Planetary Command Bridge"));
+            Assert.That(well, Does.Contain("Fit a Ship Command Bridge"));
             Assert.That(well, Does.Not.Contain("Seat"));
 
             var system = CommandSpan.Fix(CommandSpanKind.Well, seated: true, rank: 6, CommandSpanKind.System, Title);
-            Assert.That(system, Does.Contain("Fit a System Command Bridge"));
+            Assert.That(system, Does.Contain("Fit a Fleet Command Bridge"));
         }
 
         [Test]
@@ -211,7 +211,7 @@ namespace Pulsar4X.Tests
         public void Fix_BothLimit_NamesBoth_AndNothingWhenReachIsEnough()
         {
             var both = CommandSpan.Fix(CommandSpanKind.Body, seated: true, rank: 1, CommandSpanKind.Well, Title);
-            Assert.That(both, Does.Contain("Fit a Planetary Command Bridge"));
+            Assert.That(both, Does.Contain("Fit a Ship Command Bridge"));
             Assert.That(both, Does.Contain("rank 4+"));
             var emptyBoth = CommandSpan.Fix(CommandSpanKind.Body, seated: false, rank: 0, CommandSpanKind.Well, null);
             Assert.That(emptyBoth, Does.Contain("empty chair"));
@@ -250,7 +250,7 @@ namespace Pulsar4X.Tests
 
             var plain = BareShip();
             Assert.That(CommandSpan.Describe(plain), Does.Contain("The bridge and the empty chair limit reach."));
-            Assert.That(CommandSpan.Fix(plain, CommandSpanKind.Well), Does.Contain("Fit a Planetary Command Bridge"));
+            Assert.That(CommandSpan.Fix(plain, CommandSpanKind.Well), Does.Contain("Fit a Ship Command Bridge"));
         }
 
         [Test]

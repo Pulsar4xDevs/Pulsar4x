@@ -115,12 +115,12 @@ public class BootstrapPickerTests
     [Test]
     public void Blocked_PairBeyondReach_NamesThePartToChange_ThenTheBand()
     {
-        var body = Reach(CommandSpanLabels.Body, wellFix: "The bridge limits reach. Fit a Planetary Command Bridge.");
+        var body = Reach(CommandSpanLabels.Body, wellFix: "The bridge limits reach. Fit a Ship Command Bridge.");
 
         Assert.That(BootstrapPicker.Blocked(body, BootstrapPicker.ReachBand.Well, BootstrapPicker.ReachBand.Ship),
-            Is.EqualTo("The bridge limits reach. Fit a Planetary Command Bridge. Then pick under This well."));
+            Is.EqualTo("The bridge limits reach. Fit a Ship Command Bridge. Then pick under This well."));
         Assert.That(BootstrapPicker.Blocked(body, null, BootstrapPicker.ReachBand.Well),
-            Is.EqualTo("The bridge limits reach. Fit a Planetary Command Bridge."));
+            Is.EqualTo("The bridge limits reach. Fit a Ship Command Bridge."));
 
         var rank = Reach(CommandSpanLabels.Body, systemFix: "The captain's rank limits reach. Seat an officer of rank 6+.");
         Assert.That(BootstrapPicker.Blocked(rank, BootstrapPicker.ReachBand.System, BootstrapPicker.ReachBand.Well),

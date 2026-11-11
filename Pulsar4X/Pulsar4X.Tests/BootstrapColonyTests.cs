@@ -1416,12 +1416,12 @@ public class BootstrapColonyTests
         var design = scene.Info.ShipDesigns["default-ship-design-colony-ship"];
         var bridges = design.Components.Select(part => part.design.UniqueID).Where(id => id.StartsWith("default-design-bridge")).ToList();
 
-        Assert.That(bridges, Is.EquivalentTo(new[] { "default-design-Cockpit", "default-design-bridge-well" }));
+        Assert.That(bridges, Is.EquivalentTo(new[] { "default-design-bridge-well" }));
         Assert.That(CommandSpan.Of(scene.Ship), Is.EqualTo(CommandSpanKind.Well));
         // With no officer seated the chair, not the bridge, is what holds reach to this ship.
         Assert.That(CommandSpan.LimiterOf(scene.Ship), Is.EqualTo(CommandSpan.SpanLimiter.EmptyChair));
         Assert.That(CommandSpan.Fix(scene.Ship, CommandSpanKind.Well), Does.StartWith("The chair is empty."));
-        Assert.That(CommandSpan.Fix(scene.Ship, CommandSpanKind.System), Does.Contain("Fit a System Command Bridge"));
+        Assert.That(CommandSpan.Fix(scene.Ship, CommandSpanKind.System), Does.Contain("Fit a Fleet Command Bridge"));
     }
 
     /// <summary>

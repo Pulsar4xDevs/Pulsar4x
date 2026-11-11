@@ -47,7 +47,7 @@ public class MarsColonyTests
 
         Assert.That(colony.FactionOwnerID, Is.EqualTo(player.Id));
         Assert.That(colony.GetDataBlob<NameDB>().DefaultName, Is.EqualTo("Mars HQ"));
-        Assert.That(colony.GetDataBlob<ColonyInfoDB>().Population[species.Id], Is.EqualTo(4000));
+        Assert.That(colony.GetDataBlob<ColonyInfoDB>().Population[species.Id], Is.EqualTo(1000));
         Assert.That(player.GetDataBlob<FactionInfoDB>().Colonies, Does.Contain(colony));
 
         var infra = colony.GetDataBlob<InfrastructureDB>();

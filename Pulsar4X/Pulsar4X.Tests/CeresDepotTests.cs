@@ -143,7 +143,7 @@ public class CeresDepotTests
         // Two prefab warehouses (500) and four infrastructure crates (200).
         Assert.That(storage.TypeStores["general-storage"].MaxVolume, Is.EqualTo(1800));
         Assert.That(storage.TransferRangeDv_mps, Is.EqualTo(1000));
-        Assert.That(storage.TransferRate, Is.EqualTo(20));
+        Assert.That(storage.TransferRate, Is.EqualTo(10));
         Assert.That(
             game.Factions[depot.FactionOwnerID].GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(),
             Is.EqualTo(CeresStart.DepotFunds));

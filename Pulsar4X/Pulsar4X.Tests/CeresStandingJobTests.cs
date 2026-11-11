@@ -28,7 +28,7 @@ namespace Pulsar4X.Tests;
 public class CeresStandingJobTests
 {
     [Test]
-    public void PlacedSurveyFlight_KeepsTheStandingGoal_AndAShipBridge()
+    public void PlacedSurveyFlight_KeepsTheStandingGoal_AndAWellBridge()
     {
         var (game, sol) = Place();
         var strata = Faction(game, CeresStart.SurveyFactionName);
@@ -40,7 +40,7 @@ public class CeresStandingJobTests
         Assert.That(standing!.Type, Is.EqualTo(GoalType.SurveyStanding));
         Assert.That(standing.Status, Is.EqualTo(GoalStatus.Active));
         Assert.That(ship.GetDataBlob<AdminSpaceDB>().CommanderSeats, Is.Not.Empty);
-        Assert.That(ship.GetDataBlob<AdminSpaceDB>().CommanderSeats.All(s => s.SeatType == AdminLevel.Ship), Is.True);
+        Assert.That(ship.GetDataBlob<AdminSpaceDB>().CommanderSeats.All(s => s.SeatType == AdminLevel.Planet), Is.True);
 
         Assert.That(ship.TryGetDataBlob<GoalsDB>(out var shipGoals) && shipGoals.GivenGoal != null, Is.True, "Pathfinder was not handed a rock");
         if (ship.TryGetDataBlob<GoalsDB>(out shipGoals) && shipGoals.GivenGoal != null)
@@ -110,7 +110,7 @@ public class CeresStandingJobTests
         Assert.That(standing!.Type, Is.EqualTo(GoalType.MineStanding));
         Assert.That(standing.Status, Is.EqualTo(GoalStatus.Active));
         Assert.That(ship.GetDataBlob<AdminSpaceDB>().CommanderSeats, Is.Not.Empty);
-        Assert.That(ship.GetDataBlob<AdminSpaceDB>().CommanderSeats.All(s => s.SeatType == AdminLevel.Ship), Is.True);
+        Assert.That(ship.GetDataBlob<AdminSpaceDB>().CommanderSeats.All(s => s.SeatType == AdminLevel.Planet), Is.True);
 
         var owned = sol.GetAllEntitiesWithDataBlob<GeoSurveyableDB>()
             .Where(body => body.GetDataBlob<GeoSurveyableDB>().IsSurveyComplete(lode.Id))
