@@ -251,6 +251,17 @@
   {
     "Type": "ComponentDesign",
     "Payload": {
+      "UniqueId": "default-design-logistics-office-trade",
+      "Name": "Trade Logistics Office",
+      "TemplateId": "logistics-office",
+      "Properties": [
+        { "Key": "Logistic Capacity", "Value": 5 }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentDesign",
+    "Payload": {
       "UniqueId": "default-design-merlin",
       "Name": "Merlin",
       "TemplateId": "conventional-engine",
