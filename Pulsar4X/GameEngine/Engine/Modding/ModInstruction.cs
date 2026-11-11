@@ -137,6 +137,9 @@ namespace Pulsar4X.Modding
                 case ModInstruction.DataType.BootstrapDefaults:
                     instruction.Data = jObject["Payload"].ToObject<BootstrapDefaultsBlueprint>();
                     break;
+                default:
+                    // Left null for the loader to report with the mod and file it is reading.
+                    break;
             }
 
             return instruction;

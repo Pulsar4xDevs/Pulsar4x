@@ -193,10 +193,53 @@ namespace Pulsar4X.Factions
         /// </summary>
         public static void PlaceFactions(Game game, ModDataStore data)
         {
+            // One faction with a bad reference must not hide the rest, so every placed faction is checked
+            // for missing start references before any of them is built. All the misses are then listed together.
+            var errors = new List<ModLoadError>();
+            foreach (var blueprint in data.Factions.Values)
+                FindMissingReferences(game, blueprint, errors);
+            if (errors.Count > 0)
+                throw new ModLoadException(errors);
+
             foreach (var blueprint in data.Factions.Values)
                 PlaceFaction(game, data, blueprint);
             SeedSurveyCharts(game);
             AssignStandingJobs(game);
+        }
+
+        /// <summary>
+        /// Adds an error for every component design and ship design <paramref name="blueprint"/> names
+        /// that the loaded data does not have.
+        /// </summary>
+        static void FindMissingReferences(Game game, FactionBlueprint blueprint, List<ModLoadError> errors)
+        {
+            foreach (var id in blueprint.ComponentDesigns ?? new List<string>())
+            {
+                if (!game.StartingGameData.ComponentDesigns.ContainsKey(id))
+                {
+                    errors.Add(new ModLoadError(
+                        blueprint.ModNamespace,
+                        blueprint.JsonFileName,
+                        nameof(FactionBlueprint),
+                        blueprint.UniqueID,
+                        nameof(FactionBlueprint.ComponentDesigns),
+                        id));
+                }
+            }
+
+            foreach (var id in blueprint.ShipDesigns ?? new List<string>())
+            {
+                if (!game.StartingGameData.ShipDesigns.ContainsKey(id))
+                {
+                    errors.Add(new ModLoadError(
+                        blueprint.ModNamespace,
+                        blueprint.JsonFileName,
+                        nameof(FactionBlueprint),
+                        blueprint.UniqueID,
+                        nameof(FactionBlueprint.ShipDesigns),
+                        id));
+                }
+            }
         }
 
         static void PlaceFaction(Game game, ModDataStore data, FactionBlueprint blueprint)
@@ -240,11 +283,39 @@ namespace Pulsar4X.Factions
 
             ComponentDesigner.StartResearched = true;
             foreach (var id in blueprint.ComponentDesigns ?? new List<string>())
-                ComponentDesignFromJson.Create(faction, info.Data, game.StartingGameData.ComponentDesigns[id]);
+            {
+                if (!game.StartingGameData.ComponentDesigns.TryGetValue(id, out var componentDesignBlueprint))
+                {
+                    // PlaceFactions checks for these first and lists them all together.
+                    throw new ModLoadException(new ModLoadError(
+                        blueprint.ModNamespace,
+                        blueprint.JsonFileName,
+                        nameof(FactionBlueprint),
+                        blueprint.UniqueID,
+                        nameof(FactionBlueprint.ComponentDesigns),
+                        id));
+                }
+
+                ComponentDesignFromJson.Create(faction, info.Data, componentDesignBlueprint);
+            }
             ComponentDesigner.StartResearched = false;
 
             foreach (var id in blueprint.ShipDesigns ?? new List<string>())
-                ShipDesignFromJson.Create(faction, info.Data, game.StartingGameData.ShipDesigns[id]);
+            {
+                if (!game.StartingGameData.ShipDesigns.TryGetValue(id, out var shipDesignBlueprint))
+                {
+                    // Checked ahead in PlaceFactions, kept here so the single-faction call still names the reference.
+                    throw new ModLoadException(new ModLoadError(
+                        blueprint.ModNamespace,
+                        blueprint.JsonFileName,
+                        nameof(FactionBlueprint),
+                        blueprint.UniqueID,
+                        nameof(FactionBlueprint.ShipDesigns),
+                        id));
+                }
+
+                ShipDesignFromJson.Create(faction, info.Data, shipDesignBlueprint);
+            }
 
             foreach (var fleet in blueprint.Fleets ?? new List<FactionBlueprint.FleetBlueprint>())
             {

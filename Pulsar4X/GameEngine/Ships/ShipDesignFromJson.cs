@@ -4,6 +4,7 @@ using Pulsar4X.Components;
 using Pulsar4X.Damage;
 using Pulsar4X.Engine;
 using Pulsar4X.Factions;
+using Pulsar4X.Modding;
 
 namespace Pulsar4X.Ships;
 
@@ -16,13 +17,31 @@ public static class ShipDesignFromJson
 
         foreach(var component in shipDesignBlueprint.Components)
         {
-            shipComponents.Add((
-                factionInfoDB.InternalComponentDesigns[component.Id],
-                (int)component.Amount
-            ));
+            if (!factionInfoDB.InternalComponentDesigns.TryGetValue(component.Id, out var componentDesign))
+            {
+                throw new ModLoadException(new ModLoadError(
+                    shipDesignBlueprint.ModNamespace,
+                    shipDesignBlueprint.JsonFileName,
+                    nameof(ShipDesignBlueprint),
+                    shipDesignBlueprint.UniqueID,
+                    "Components",
+                    component.Id));
+            }
+
+            shipComponents.Add((componentDesign, (int)component.Amount));
         }
 
-        var armor = factionDataStore.Armor[shipDesignBlueprint.Armor.Id];
+        if (!factionDataStore.Armor.TryGetValue(shipDesignBlueprint.Armor.Id, out var armor))
+        {
+            throw new ModLoadException(new ModLoadError(
+                shipDesignBlueprint.ModNamespace,
+                shipDesignBlueprint.JsonFileName,
+                nameof(ShipDesignBlueprint),
+                shipDesignBlueprint.UniqueID,
+                "Armor.Id",
+                shipDesignBlueprint.Armor.Id));
+        }
+
         var design = new ShipDesign(factionInfoDB, shipDesignBlueprint.Name, shipComponents, (armor, shipDesignBlueprint.Armor.Thickness), shipDesignBlueprint.UniqueID)
         {
             DamageProfileDB = new EntityDamageProfileDB(shipComponents, (armor, shipDesignBlueprint.Armor.Thickness)),

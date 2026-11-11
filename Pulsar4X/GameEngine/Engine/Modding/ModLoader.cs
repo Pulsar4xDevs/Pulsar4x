@@ -137,20 +137,42 @@ namespace Pulsar4X.Modding
 
         private void ApplyDataFiles(string directory, List<string> dataFiles, string modNamespace, ModDataStore baseData)
         {
+            // One corrupt file still stops the load, but the message names the mod and file first.
             foreach (var modDataFile in dataFiles)
             {
-                // Combine the directory with the mod data file name
-                string modDataFilePath = Path.Combine(directory, modDataFile);
-
-                var modInstructions = JsonConvert.DeserializeObject<List<ModInstruction>>(
-                    File.ReadAllText(modDataFilePath),
-                    new JsonSerializerSettings { Converters = new List<JsonConverter> { new ModInstructionJsonConverter(), new WeightedListConverter() } });
-
-                foreach (var mod in modInstructions)
+                try
                 {
-                    mod.Data.JsonFileName =  modDataFile;
-                    ApplyMod(baseData, mod, modNamespace);
+                    LoadModDataFile(baseData, modNamespace, directory, modDataFile);
                 }
+                catch (Exception ex) when (ex is JsonException or FormatException)
+                {
+                    throw new InvalidDataException(
+                        $"Mod '{modNamespace}', file '{modDataFile}': {ex.Message}", ex);
+                }
+            }
+        }
+
+        private void LoadModDataFile(ModDataStore baseData, string modNamespace, string modDirectory, string modDataFile)
+        {
+            // Combine the directory with the mod data file name
+            string modDataFilePath = Path.Combine(modDirectory, modDataFile);
+
+            if (!File.Exists(modDataFilePath))
+                throw new FileNotFoundException(
+                    $"Mod '{modNamespace}', file '{modDataFile}': the data file listed in its manifest is not there.",
+                    modDataFilePath);
+
+            var modInstructions = JsonConvert.DeserializeObject<List<ModInstruction>>(
+                File.ReadAllText(modDataFilePath),
+                new JsonSerializerSettings { Converters = new List<JsonConverter> { new ModInstructionJsonConverter(), new WeightedListConverter() } });
+
+            if (modInstructions == null)
+                return;
+
+            foreach (var mod in modInstructions)
+            {
+                mod.Data.JsonFileName =  modDataFile;
+                ApplyMod(baseData, mod, modNamespace);
             }
         }
 

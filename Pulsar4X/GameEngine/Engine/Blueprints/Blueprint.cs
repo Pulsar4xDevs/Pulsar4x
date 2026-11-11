@@ -9,10 +9,13 @@ namespace Pulsar4X.Blueprints
         [JsonIgnore]
         public string FullIdentifier { get; protected set; }
         [JsonIgnore]
+        public string ModNamespace { get; protected set; }
+        [JsonIgnore]
         public string JsonFileName { get; set; }
 
         public void SetFullIdentifier(string modNamespace)
         {
+            ModNamespace = modNamespace;
             FullIdentifier = $"{modNamespace}:{UniqueID}";
         }
     }

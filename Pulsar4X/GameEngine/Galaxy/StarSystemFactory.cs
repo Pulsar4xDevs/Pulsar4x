@@ -13,6 +13,7 @@ using Pulsar4X.Sensors;
 using Pulsar4X.Engine;
 using Pulsar4X.Movement;
 using Pulsar4X.Blueprints;
+using Pulsar4X.Modding;
 
 namespace Pulsar4X.Galaxy
 {
@@ -327,7 +328,18 @@ namespace Pulsar4X.Galaxy
             // Load stars
             foreach(var id in systemBlueprint.Stars)
             {
-                var starEntity = StarFactory.CreateFromBlueprint(system, game.SystemGenSettings, game.StartingGameData.Stars[id]);
+                if (!game.StartingGameData.Stars.TryGetValue(id, out var starBlueprint))
+                {
+                    throw new ModLoadException(new ModLoadError(
+                        systemBlueprint.ModNamespace,
+                        systemBlueprint.JsonFileName,
+                        nameof(SystemBlueprint),
+                        systemBlueprint.UniqueID,
+                        nameof(SystemBlueprint.Stars),
+                        id));
+                }
+
+                var starEntity = StarFactory.CreateFromBlueprint(system, game.SystemGenSettings, starBlueprint);
                 if(rootStar == null)
                     rootStar = starEntity;
             }
@@ -335,7 +347,18 @@ namespace Pulsar4X.Galaxy
             // Load bodies
             foreach(var id in systemBlueprint.Bodies)
             {
-                var bodyEntity = SystemBodyFactory.CreateFromBlueprint(game, system, rootStar, new SensorProfileDB(), game.StartingGameData.SystemBodies[id]);
+                if (!game.StartingGameData.SystemBodies.TryGetValue(id, out var bodyBlueprint))
+                {
+                    throw new ModLoadException(new ModLoadError(
+                        systemBlueprint.ModNamespace,
+                        systemBlueprint.JsonFileName,
+                        nameof(SystemBlueprint),
+                        systemBlueprint.UniqueID,
+                        nameof(SystemBlueprint.Bodies),
+                        id));
+                }
+
+                var bodyEntity = SystemBodyFactory.CreateFromBlueprint(game, system, rootStar, new SensorProfileDB(), bodyBlueprint);
             }
 
             if(systemBlueprint.SurveyRings != null)

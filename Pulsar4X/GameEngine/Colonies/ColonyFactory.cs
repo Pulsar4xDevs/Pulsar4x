@@ -54,14 +54,36 @@ namespace Pulsar4X.Colonies
             ComponentDesigner.StartResearched = true;
             foreach(var id in colonyBlueprint.ComponentDesigns ?? new List<string>())
             {
-                ComponentDesignFromJson.Create(faction, factionInfo.Data, game.StartingGameData.ComponentDesigns[id]);
+                if (!game.StartingGameData.ComponentDesigns.TryGetValue(id, out var componentDesignBlueprint))
+                {
+                    throw new ModLoadException(new ModLoadError(
+                        colonyBlueprint.ModNamespace,
+                        colonyBlueprint.JsonFileName,
+                        nameof(ColonyBlueprint),
+                        colonyBlueprint.UniqueID,
+                        nameof(ColonyBlueprint.ComponentDesigns),
+                        id));
+                }
+
+                ComponentDesignFromJson.Create(faction, factionInfo.Data, componentDesignBlueprint);
             }
             ComponentDesigner.StartResearched = false;
 
             // Add ship designs
             foreach(var id in colonyBlueprint.ShipDesigns ?? new List<string>())
             {
-                ShipDesignFromJson.Create(faction, factionInfo.Data, game.StartingGameData.ShipDesigns[id]);
+                if (!game.StartingGameData.ShipDesigns.TryGetValue(id, out var shipDesignBlueprint))
+                {
+                    throw new ModLoadException(new ModLoadError(
+                        colonyBlueprint.ModNamespace,
+                        colonyBlueprint.JsonFileName,
+                        nameof(ColonyBlueprint),
+                        colonyBlueprint.UniqueID,
+                        nameof(ColonyBlueprint.ShipDesigns),
+                        id));
+                }
+
+                ShipDesignFromJson.Create(faction, factionInfo.Data, shipDesignBlueprint);
             }
 
             var blobs = new List<BaseDataBlob>();

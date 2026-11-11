@@ -168,6 +168,13 @@ namespace Pulsar4X.Engine
 
         public Game(NewGameSettings settings, ModDataStore modDataStore)
         {
+            // A start list that names an id which is not loaded fails here, before a game exists, and
+            // lists every such reference at once. Forgetting to call this still fails closed in the
+            // factories with the same ModLoadException naming the one reference.
+            var missingReferences = ModDataReferences.FindMissing(modDataStore);
+            if (missingReferences.Count > 0)
+                throw new ModLoadException(missingReferences);
+
             ClearGlobalState();
             ApplyModData(modDataStore);
             ApplySettings(settings);
