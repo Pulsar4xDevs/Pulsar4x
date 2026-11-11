@@ -60,7 +60,7 @@ public class ModsState
                     Console.WriteLine($"Found mod '{modManifest.ModName}' from {manifestPath}");
 #endif
                     AvailableMods.Add(new ModMetaData(manifestPath, modManifest, manifestHash));
-                    IsModEnabled[modManifest.ModName] = modManifest.DefaultEnabled;
+                    IsModEnabled[modManifest.Namespace] = modManifest.DefaultEnabled;
                 }
             }
         }

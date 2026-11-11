@@ -69,8 +69,8 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
 
     public IReadOnlyList<ModOption> GetAvailableMods()
         => ModsState.AvailableMods
-            .Select(m => new ModOption(m.Mod.ModName, m.Mod.Version, m.ManifestHash, m.Path,
-                ModsState.IsModEnabled.TryGetValue(m.Mod.ModName, out bool enabled) && enabled))
+            .Select(m => new ModOption(m.Mod.ModName, m.Mod.Namespace, m.Mod.Version, m.ManifestHash, m.Path,
+                ModsState.IsModEnabled.TryGetValue(m.Mod.Namespace, out bool enabled) && enabled))
             .ToList();
 
     public IReadOnlyList<ScenarioOption> GetAvailableScenarios()
@@ -200,7 +200,7 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
     public GameActivation? Quickstart()
     {
         var defaultEnabled = ModsState.AvailableMods
-            .Where(m => ModsState.IsModEnabled.TryGetValue(m.Mod.ModName, out bool on) && on)
+            .Where(m => ModsState.IsModEnabled.TryGetValue(m.Mod.Namespace, out bool on) && on)
             .ToList();
         var enabledNamespaces = new HashSet<string>(defaultEnabled.Select(m => m.Mod.Namespace));
         var scenario = GetAvailableScenarios()

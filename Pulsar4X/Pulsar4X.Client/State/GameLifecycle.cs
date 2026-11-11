@@ -59,9 +59,11 @@ public sealed record GameRules(
     bool UseRelativeVelocity,
     bool StrictNewtonion);
 
-/// <summary>An installed mod, as listed on the new-game menu's mod-selection page.</summary>
+/// <summary>An installed mod, as listed on the new-game menu's mod-selection page.
+/// <see cref="Namespace"/> is the enable-state key.</summary>
 public sealed record ModOption(
     string Name,
+    string Namespace,
     string Version,
     string ManifestHash,
     string ManifestPath,

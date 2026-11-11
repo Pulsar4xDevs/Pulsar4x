@@ -11,6 +11,7 @@ namespace Pulsar4X.Client;
 
 enum Page
 {
+    SelectScenario,
     SelectMods,
     ConfigureGalaxy,
     SelectDetails
@@ -34,12 +35,16 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
     private const int MAX_STARTING_FUNDS = 1_000_000_000;
     private const int DEFAULT_NUM_SYSTEMS = 10; // mirrors the engine's NewGameSettings default
 
-    Page _currentPage = Page.SelectMods;
+    Page _currentPage = Page.SelectScenario;
 
-    // The mod list and the option catalog come from the lifecycle seam (composition-root work);
-    // this window only holds the player's selections.
+    // The mod list, the scenario list and the option catalog come from the lifecycle seam
+    // (composition-root work); this window only holds the player's selections.
     IReadOnlyList<ModOption> _availableMods = Array.Empty<ModOption>();
+    IReadOnlyList<ScenarioOption> _availableScenarios = Array.Empty<ScenarioOption>();
     Dictionary<string, bool> _modEnabled = new ();
+    string _selectedScenarioId = "";
+    bool _scenariosLoaded;
+    bool _scenarioListFailed;
     NewGameCatalog? _catalog;
 
     string _selectedSpeciesId = "";
@@ -113,6 +118,9 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
 
             switch(_currentPage)
             {
+                case Page.SelectScenario:
+                    DisplayScenarioPage();
+                    break;
                 case Page.SelectMods:
                     DisplayModsPage();
                     break;
@@ -143,19 +151,181 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
         _availableMods = _uiState.Lifecycle?.GetAvailableMods() ?? Array.Empty<ModOption>();
         foreach (var mod in _availableMods)
         {
-            if (!_modEnabled.ContainsKey(mod.Name))
-                _modEnabled[mod.Name] = mod.EnabledByDefault;
+            if (!_modEnabled.ContainsKey(mod.Namespace))
+                _modEnabled[mod.Namespace] = mod.EnabledByDefault;
         }
     }
 
-    private void DisplayModsPage()
+    private void EnsureNewGameOptions()
     {
         if (_availableMods.Count == 0)
             RefreshAvailableMods();
 
+        if (_scenariosLoaded || _uiState.Lifecycle == null)
+            return;
+
+        try
+        {
+            _availableScenarios = _uiState.Lifecycle.GetAvailableScenarios();
+            _scenarioListFailed = false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"New game: failed to list scenarios: {ex}");
+            _errorMessage = $"Could not list scenarios: {ex.Message}";
+            _availableScenarios = Array.Empty<ScenarioOption>();
+            _scenarioListFailed = true;
+        }
+
+        _scenariosLoaded = true;
+        if (_scenarioListFailed || !string.IsNullOrEmpty(_selectedScenarioId))
+            return;
+
+        ScenarioOption? firstCompatible = null;
+        ScenarioOption? firstDefault = null;
+        foreach (var scenario in _availableScenarios)
+        {
+            if (ScenarioCompatibility.MissingMods(scenario, _modEnabled).Count > 0)
+                continue;
+            if (firstCompatible == null)
+                firstCompatible = scenario;
+            if (scenario.DefaultEnabled)
+            {
+                firstDefault = scenario;
+                break;
+            }
+        }
+
+        var pick = firstDefault ?? firstCompatible;
+        if (pick != null)
+            SelectScenario(pick);
+    }
+
+    private ScenarioOption? SelectedScenario()
+        => _availableScenarios.FirstOrDefault(s => s.Id == _selectedScenarioId);
+
+    private bool SelectedScenarioIsCompatible()
+    {
+        var scenario = SelectedScenario();
+        return scenario != null && ScenarioCompatibility.MissingMods(scenario, _modEnabled).Count == 0;
+    }
+
+    private void SelectScenario(ScenarioOption next)
+    {
+        var previous = SelectedScenario();
+        if (previous != null && previous.Id == next.Id)
+            return;
+        ScenarioCompatibility.ApplySelection(previous, next, _modEnabled, _availableMods);
+        _selectedScenarioId = next.Id;
+    }
+
+    /// <summary>
+    /// The red error for the scenario gate. A load or create failure does not start with these
+    /// prefixes, so a compatible selection leaves that message alone.
+    /// </summary>
+    private void UpdateScenarioGate()
+    {
+        if (_scenarioListFailed)
+            return;
+
+        if (_availableScenarios.Count == 0)
+        {
+            _errorMessage = "No scenarios are installed. Add a folder with a scenarioInfo.json in a scenarios directory next to the mods.";
+            return;
+        }
+
+        var scenario = SelectedScenario();
+        if (scenario == null)
+        {
+            _errorMessage = "Select a scenario to continue.";
+            return;
+        }
+
+        var missing = ScenarioCompatibility.MissingMods(scenario, _modEnabled);
+        if (missing.Count > 0)
+        {
+            _errorMessage = "Requires: " + string.Join(", ", missing);
+            return;
+        }
+
+        if (_errorMessage.StartsWith("Requires: ")
+            || _errorMessage.StartsWith("No scenarios are installed.")
+            || _errorMessage == "Select a scenario to continue.")
+            _errorMessage = "";
+    }
+
+    private void DisplayScenarioPage()
+    {
+        EnsureNewGameOptions();
+        UpdateScenarioGate();
+
+        ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), ImGuiChildFlags.None);
+
+        DisplayHelpers.Header("Select Scenario");
+        DisplayError();
+
+        foreach (var scenario in _availableScenarios)
+        {
+            var missing = ScenarioCompatibility.MissingMods(scenario, _modEnabled);
+            bool compatible = missing.Count == 0;
+            if (!compatible)
+                ImGui.BeginDisabled();
+
+            if (ImGui.Selectable(scenario.Name + "###" + scenario.Id, scenario.Id == _selectedScenarioId))
+                SelectScenario(scenario);
+
+            ImGui.Indent();
+            ImGui.Text(scenario.Id);
+            if (!string.IsNullOrEmpty(scenario.Description))
+                ImGui.TextWrapped(scenario.Description);
+            if (scenario.RequiredMods.Count == 0)
+                ImGui.Text("Required mods: none");
+            else
+                ImGui.TextWrapped("Required mods: " + string.Join(", ", scenario.RequiredMods));
+            if (!compatible)
+                ImGui.Text("Requires: " + string.Join(", ", missing));
+            ImGui.Unindent();
+
+            if (!compatible)
+                ImGui.EndDisabled();
+            ImGui.Separator();
+        }
+
+        ImGui.EndChild();
+        ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+
+        CancelButton();
+        ImGui.SameLine();
+
+        float buttonX = _windowSize.X - _buttonWidth - ImGui.GetStyle().WindowPadding.X;
+        ImGui.SetCursorPosX(buttonX);
+        // An incompatible selection still opens the mods page (the error says why, and that
+        // page blocks Next) so the player can tick the missing mod. No selection at all cannot.
+        bool canContinue = SelectedScenario() != null && !_scenarioListFailed;
+        if (!canContinue)
+            ImGui.BeginDisabled();
+        // debugnewgame is cleared on the mods page, so this only steps forward.
+        if (ImGui.Button("Next", new Vector2(_buttonWidth, 0)) || (_uiState.debugnewgame && canContinue))
+        {
+            if (canContinue)
+                _currentPage = Page.SelectMods;
+        }
+        if (!canContinue)
+            ImGui.EndDisabled();
+        ImGui.EndChild();
+    }
+
+    private void DisplayModsPage()
+    {
+        EnsureNewGameOptions();
+        UpdateScenarioGate();
+
         ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), ImGuiChildFlags.None);
 
         DisplayHelpers.Header("Select Mods to Enable");
+        var scenario = SelectedScenario();
+        if (scenario != null)
+            ImGui.Text("Scenario: " + scenario.Name);
         DisplayError();
         if(ImGui.BeginTable("ModsList", 4, Styles.TableFlags))
         {
@@ -176,11 +346,11 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
                 ImGui.Text(mod.Version);
                 ImGui.TableNextColumn();
                 ImGui.Text(mod.ManifestHash);
-                var isEnabled = _modEnabled[mod.Name];
+                _modEnabled.TryGetValue(mod.Namespace, out bool isEnabled);
                 ImGui.TableNextColumn();
-                if(ImGui.Checkbox("###" + mod.Name + "-checkbox", ref isEnabled))
+                if(ImGui.Checkbox("###" + mod.Namespace + "-checkbox", ref isEnabled))
                 {
-                    _modEnabled[mod.Name] = isEnabled;
+                    _modEnabled[mod.Namespace] = isEnabled;
                 }
             }
 
@@ -193,10 +363,23 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
         CancelButton();
         ImGui.SameLine();
 
+        if (ImGui.Button("Back", new Vector2(_buttonWidth, 0)))
+        {
+            _currentPage = Page.SelectScenario;
+        }
+        ImGui.SameLine();
+
         // Right-align the button by calculating its position
         float buttonX = _windowSize.X - _buttonWidth - ImGui.GetStyle().WindowPadding.X;
         ImGui.SetCursorPosX(buttonX);
-        if (ImGui.Button("Next", new Vector2(_buttonWidth, 0)) || _uiState.debugnewgame)
+        // Ticks changed while the table was drawn, so decide Next from the dictionary now.
+        bool scenarioOk = SelectedScenarioIsCompatible();
+        if (!scenarioOk)
+            ImGui.BeginDisabled();
+        bool next = ImGui.Button("Next", new Vector2(_buttonWidth, 0));
+        if (!scenarioOk)
+            ImGui.EndDisabled();
+        if ((next || _uiState.debugnewgame) && scenarioOk)
         {
             _uiState.debugnewgame = false;
             var enabledPaths = EnabledModPaths();
@@ -210,7 +393,7 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
             {
                 try
                 {
-                    catalog = _uiState.Lifecycle.LoadMods(enabledPaths);
+                    catalog = _uiState.Lifecycle.LoadMods(enabledPaths, _selectedScenarioId);
                 }
                 catch (Exception ex)
                 {
@@ -456,7 +639,7 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
 
         foreach(var mod in _availableMods)
         {
-            if(_modEnabled.TryGetValue(mod.Name, out bool enabled) && enabled)
+            if(_modEnabled.TryGetValue(mod.Namespace, out bool enabled) && enabled)
             {
                 enabledMods.Add(mod.ManifestPath);
             }
@@ -470,6 +653,7 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
         if (_uiState.Lifecycle == null)
             return;
 
+        var selectedScenario = SelectedScenario();
         var request = new NewGameRequest(
             ModManifestPaths: EnabledModPaths(),
             FactionName: Utils.StringFromBytes(_corporationNameBuffer),
@@ -485,7 +669,8 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
             EleStart: _eleStart,
             SMPassword: Utils.StringFromBytes(_smPassInputbuffer),
             PlayerPassword: Utils.StringFromBytes(_passInputBuffer),
-            ScenarioId: _catalog?.ScenarioId);
+            ScenarioId: selectedScenario?.Id,
+            ScenarioManifestPath: selectedScenario?.ManifestPath);
 
         try
         {
@@ -507,7 +692,7 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
 
         _errorMessage = "";
         IsActive = false;
-        _currentPage = Page.SelectMods;
+        _currentPage = Page.SelectScenario;
     }
 
     private void ResetSelectedBodyId()

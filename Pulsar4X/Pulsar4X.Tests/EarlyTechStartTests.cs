@@ -82,7 +82,7 @@ public class EarlyTechStartTests
 
         var names = ModsState.AvailableMods.Select(m => m.Mod.ModName).ToList();
         Assert.That(names, Does.Contain(EarlyMod));
-        Assert.That(ModsState.IsModEnabled[EarlyMod], Is.False);
+        Assert.That(ModsState.IsModEnabled[Mod(EarlyMod).Mod.Namespace], Is.False);
         Assert.That(Mod(EarlyMod).Mod.Dependencies, Is.EquivalentTo(new[] { "Pulsar4x" }));
     }
 
