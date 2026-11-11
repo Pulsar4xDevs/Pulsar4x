@@ -1,0 +1,25 @@
+{
+  "Author": "Pulsar4x Devs",
+  "Name": "Sol",
+  "Version": "0.1",
+  "Namespace": "Pulsar4x.System.Sol",
+  "Description": "The Sol system: the Sun, planets, moons, dwarf planets, comets and asteroids. Map data only.",
+  "DataFiles": [
+    "sol.json",
+    "mercury.json",
+    "venus.json",
+    "earth.json",
+    "luna.json",
+    "mars.json",
+    "jupiter.json",
+    "saturn.json",
+    "uranus.json",
+    "neptune.json",
+    "dwarfPlanets.json",
+    "comets.json",
+    "asteroids-centaurs.json",
+    "asteroids-main-belt.json",
+    "asteroids-trans-neptunian.json",
+    "asteroids-trojans.json"
+  ]
+}

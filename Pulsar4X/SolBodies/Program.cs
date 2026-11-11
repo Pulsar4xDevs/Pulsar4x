@@ -6,7 +6,7 @@ using Pulsar4X.Galaxy;
 namespace Pulsar4X.SolBodies;
 
 /// <summary>
-/// Writes JPL small bodies into the sol-default scenario. The conversion lives in
+/// Writes JPL small bodies into the Sol system pack. The conversion lives in
 /// <see cref="SbdbSmallBodyImporter"/> so the game can call it later.
 /// </summary>
 public static class Program
@@ -82,8 +82,7 @@ public static class Program
         }
 
         WriteBodies(modRoot, groups);
-        string scenarioFolder = Path.Combine(modRoot, "..", "scenarios", "sol-default");
-        UpdateScenarioInfo(scenarioFolder, groups.Select(group => group.Key));
+        UpdateSystemInfo(Path.Combine(modRoot, "..", "systems", "sol"), groups.Select(group => group.Key));
         UpdateSystemBodies(modRoot, result.Bodies.Select(body => body.Blueprint.UniqueID));
         Console.WriteLine("Wrote " + modRoot);
         return 0;
@@ -128,10 +127,12 @@ public static class Program
     static HashSet<string> ReadHandAuthoredNames(string modRoot)
     {
         var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        string solDir = Path.Combine(modRoot, "..", "scenarios", "sol-default", "systems", "sol");
+        string solDir = Path.Combine(modRoot, "..", "systems", "sol");
         foreach (var file in Directory.GetFiles(solDir, "*.json"))
         {
-            if (Path.GetFileName(file).StartsWith("asteroids-", StringComparison.Ordinal))
+            // The pack manifest sits beside the body files and is not a list of records.
+            if (Path.GetFileName(file).StartsWith("asteroids-", StringComparison.Ordinal)
+                || Path.GetFileName(file) == "systemInfo.json")
                 continue;
             var items = JArray.Parse(File.ReadAllText(file));
             foreach (var item in items)
@@ -148,7 +149,7 @@ public static class Program
 
     static void WriteBodies(string modRoot, IEnumerable<IGrouping<string, SbdbImportedBody>> groups)
     {
-        string solDir = Path.Combine(modRoot, "..", "scenarios", "sol-default", "systems", "sol");
+        string solDir = Path.Combine(modRoot, "..", "systems", "sol");
         var serializer = JsonSerializer.Create(new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Ignore,
@@ -179,10 +180,9 @@ public static class Program
         }
     }
 
-    static void UpdateScenarioInfo(string scenarioFolder, IEnumerable<string> fileNames)
+    static void UpdateSystemInfo(string solDir, IEnumerable<string> fileNames)
     {
-        string path = Path.Combine(scenarioFolder, "scenarioInfo.json");
-        string prefix = "systems/sol/";
+        string path = Path.Combine(solDir, "systemInfo.json");
         var manifest = JObject.Parse(File.ReadAllText(path));
         var files = (JArray)manifest["DataFiles"]!;
         var kept = new JArray();
@@ -190,16 +190,16 @@ public static class Program
         foreach (var token in files)
         {
             string entry = token.Value<string>()!;
-            if (entry.StartsWith(prefix + "asteroids-", StringComparison.Ordinal))
+            if (entry.StartsWith("asteroids-", StringComparison.Ordinal))
                 continue;
             kept.Add(entry);
-            if (entry.EndsWith("/comets.json", StringComparison.Ordinal))
+            if (entry == "comets.json")
                 insertAt = kept.Count;
         }
         if (insertAt == 0)
             insertAt = kept.Count;
         foreach (var fileName in fileNames.OrderBy(name => name, StringComparer.Ordinal))
-            kept.Insert(insertAt++, prefix + fileName);
+            kept.Insert(insertAt++, fileName);
 
         manifest["DataFiles"] = kept;
         File.WriteAllText(path, manifest.ToString(Formatting.Indented) + "\n", new UTF8Encoding(false));
@@ -207,7 +207,7 @@ public static class Program
 
     static void UpdateSystemBodies(string modRoot, IEnumerable<string> ids)
     {
-        string path = Path.Combine(modRoot, "..", "scenarios", "sol-default", "systems", "sol", "sol.json");
+        string path = Path.Combine(modRoot, "..", "systems", "sol", "sol.json");
         var items = JArray.Parse(File.ReadAllText(path));
         foreach (var item in items)
         {

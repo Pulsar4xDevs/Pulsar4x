@@ -8,27 +8,16 @@
   "RequiredMods": [
     "Pulsar4x"
   ],
+  "IncludedSystems": [
+    "Pulsar4x.System.AlphaCentauri",
+    "Pulsar4x.System.Sol"
+  ],
   "DataFiles": [
     "bootstrapDefaults.json",
     "defaultTheme.json",
     "species.json",
-    "systems/sol/sol.json",
-    "systems/sol/mercury.json",
-    "systems/sol/venus.json",
-    "systems/sol/earth.json",
-    "systems/sol/luna.json",
-    "systems/sol/mars.json",
-    "systems/sol/jupiter.json",
-    "systems/sol/saturn.json",
-    "systems/sol/uranus.json",
-    "systems/sol/neptune.json",
-    "systems/sol/dwarfPlanets.json",
-    "systems/sol/factions.json",
-    "systems/sol/comets.json",
-    "systems/sol/asteroids-centaurs.json",
-    "systems/sol/asteroids-main-belt.json",
-    "systems/sol/asteroids-trans-neptunian.json",
-    "systems/sol/asteroids-trojans.json"
+    "colonies.json",
+    "factions.json"
   ],
   "DefaultStart": {
     "Species": "species-human",

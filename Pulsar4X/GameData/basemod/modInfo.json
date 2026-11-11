@@ -25,7 +25,6 @@
     "TemplateFiles/damageResistance.json",
     "ScenarioFiles/designs/componentDesigns.json",
     "ScenarioFiles/designs/shipDesigns.json",
-    "ScenarioFiles/systemGenSettings.json",
-    "ScenarioFiles/systems/alpha-centauri/alphaCentauri.json"
+    "ScenarioFiles/systemGenSettings.json"
   ]
 }

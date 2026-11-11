@@ -1,0 +1,30 @@
+[
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "moon-luna",
+      "Name": "Luna",
+      "Parent": "Earth",
+      "Colonizable": true,
+      "GeoSurveyPointsRequired": 250,
+      "Info": {
+        "Gravity": 1.625,
+        "Type": "moon",
+        "Mass": 7.34767309E22,
+        "Radius": 1737.4,
+        "LengthOfDay": "27.07:43:00"
+      },
+      "Orbit": {
+        "SemiMajorAxis_km": 384399,
+        "Eccentricity": 0.0549,
+        "EclipticInclination_d": 5.145,
+        "LoAN_d": 125.08,
+        "AoP_d": 318.0634,
+        "MeanAnomaly_d": 115.3654
+      },
+      "Minerals": [
+        { "Id": "iron", "Abundance": 0.5, "Accessibility": 1 }
+      ]
+    }
+  }
+]

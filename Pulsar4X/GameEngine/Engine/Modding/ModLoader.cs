@@ -151,6 +151,49 @@ namespace Pulsar4X.Modding
         }
 
         /// <summary>
+        /// Scans each root's immediate subfolders for systemInfo.json, deserializes them, and
+        /// returns them keyed by Namespace. Duplicate namespaces throw one ModLoadException.
+        /// </summary>
+        public Dictionary<string, SystemManifest> DiscoverSystems(IEnumerable<string> systemRootFolders)
+        {
+            var found = new Dictionary<string, SystemManifest>();
+            var errors = new List<ModLoadError>();
+
+            foreach (var root in systemRootFolders.Distinct())
+            {
+                if (!Directory.Exists(root))
+                    continue;
+
+                foreach (var dir in Directory.GetDirectories(root).OrderBy(d => d, StringComparer.Ordinal))
+                {
+                    var path = Path.Combine(dir, "systemInfo.json");
+                    if (!File.Exists(path))
+                        continue;
+
+                    var manifest = ReadSystemManifest(path);
+                    if (found.ContainsKey(manifest.Namespace))
+                    {
+                        errors.Add(new ModLoadError(
+                            manifest.Namespace,
+                            "systemInfo.json",
+                            "SystemManifest",
+                            manifest.Namespace,
+                            "Namespace",
+                            manifest.Namespace));
+                        continue;
+                    }
+
+                    found.Add(manifest.Namespace, manifest);
+                }
+            }
+
+            if (errors.Count > 0)
+                throw new ModLoadException(errors);
+
+            return found;
+        }
+
+        /// <summary>
         /// Among discovered scenarios whose RequiredMods are all loaded, pick the one with the most
         /// RequiredMods, then DefaultEnabled first, then Namespace ordinal. Null if none qualify.
         /// </summary>
@@ -168,15 +211,19 @@ namespace Pulsar4X.Modding
 
         /// <summary>
         /// Resolves the chosen scenario's RequiredScenarios (base first, each once), checks every
-        /// scenario in the chain, then applies each. Throws one ModLoadException before applying
-        /// anything if the chain is unsound. <paramref name="scenarioManifestPath"/> selects a
-        /// manifest that may not be in <paramref name="discovered"/> (a fixture or a later user folder).
+        /// scenario in the chain, including the system packs it includes, then applies each.
+        /// Throws one ModLoadException before applying anything if the chain is unsound.
+        /// <paramref name="scenarioManifestPath"/> selects a manifest that may not be in
+        /// <paramref name="discovered"/> (a fixture or a later user folder).
+        /// When <paramref name="discoveredSystems"/> is null, each scenario's packs are discovered
+        /// from the systems folder next to that scenario's scenarios root.
         /// </summary>
         public void ApplyScenario(
             string? scenarioId,
             string? scenarioManifestPath,
             IReadOnlyDictionary<string, ScenarioManifest> discovered,
-            ModDataStore store)
+            ModDataStore store,
+            IReadOnlyDictionary<string, SystemManifest>? discoveredSystems = null)
         {
             var byNamespace = discovered.ToDictionary(entry => entry.Key, entry => entry.Value);
             string? chosenNs = scenarioId;
@@ -207,6 +254,21 @@ namespace Pulsar4X.Modding
             var errors = new List<ModLoadError>();
             var ordered = new List<string>();
             var visiting = new HashSet<string>();
+            var systemsByRoot = new Dictionary<string, IReadOnlyDictionary<string, SystemManifest>>();
+
+            IReadOnlyDictionary<string, SystemManifest> SystemsFor(ScenarioManifest manifest)
+            {
+                if (discoveredSystems != null)
+                    return discoveredSystems;
+
+                string root = DefaultSystemsRoot(manifest.ScenarioDirectory);
+                if (!systemsByRoot.TryGetValue(root, out var found))
+                {
+                    found = DiscoverSystems(new[] { root });
+                    systemsByRoot[root] = found;
+                }
+                return found;
+            }
 
             void Visit(string ns)
             {
@@ -269,6 +331,20 @@ namespace Pulsar4X.Modding
                             required));
                     }
                 }
+
+                foreach (var included in manifest.IncludedSystems ?? new List<string>())
+                {
+                    if (!SystemsFor(manifest).ContainsKey(included))
+                    {
+                        errors.Add(new ModLoadError(
+                            manifest.Namespace,
+                            "scenarioInfo.json",
+                            "ScenarioManifest",
+                            manifest.Namespace,
+                            "IncludedSystems",
+                            included));
+                    }
+                }
             }
 
             Visit(chosenNs);
@@ -276,13 +352,32 @@ namespace Pulsar4X.Modding
             if (errors.Count > 0)
                 throw new ModLoadException(errors);
 
+            IReadOnlyDictionary<string, SystemManifest> systemsForLoad;
+            if (discoveredSystems != null)
+            {
+                systemsForLoad = discoveredSystems;
+            }
+            else
+            {
+                var merged = new Dictionary<string, SystemManifest>();
+                foreach (var found in systemsByRoot.Values)
+                {
+                    foreach (var pair in found)
+                    {
+                        if (!merged.ContainsKey(pair.Key))
+                            merged.Add(pair.Key, pair.Value);
+                    }
+                }
+                systemsForLoad = merged;
+            }
+
             ScenarioManifest? chosen = null;
             foreach (var ns in ordered)
             {
                 string path = ns == chosenNs && chosenPath != null
                     ? chosenPath
                     : Path.Combine(byNamespace[ns].ScenarioDirectory, "scenarioInfo.json");
-                var loaded = LoadScenario(path, store);
+                var loaded = LoadScenario(path, store, systemsForLoad);
                 if (ns == chosenNs)
                     chosen = loaded;
             }
@@ -295,10 +390,15 @@ namespace Pulsar4X.Modding
         }
 
         /// <summary>
-        /// Applies a scenario's data files on top of an already-loaded mod store.
-        /// Does not register the scenario as a mod and does not walk RequiredScenarios.
+        /// Applies a scenario's included system packs, then its own data files, on top of an
+        /// already-loaded mod store. Does not register the scenario as a mod and does not
+        /// walk RequiredScenarios. When <paramref name="systems"/> is null, packs are
+        /// discovered from the systems folder next to this scenario's scenarios root.
         /// </summary>
-        public ScenarioManifest LoadScenario(string scenarioManifestPath, ModDataStore baseData)
+        public ScenarioManifest LoadScenario(
+            string scenarioManifestPath,
+            ModDataStore baseData,
+            IReadOnlyDictionary<string, SystemManifest>? systems = null)
         {
             var scenarioManifest = ReadScenarioManifest(scenarioManifestPath);
 
@@ -318,6 +418,29 @@ namespace Pulsar4X.Modding
             }
             if (missingMods.Count > 0)
                 throw new ModLoadException(missingMods);
+
+            var systemManifests = systems
+                ?? DiscoverSystems(new[] { DefaultSystemsRoot(scenarioManifest.ScenarioDirectory) });
+
+            var missingSystems = new List<ModLoadError>();
+            foreach (var included in scenarioManifest.IncludedSystems ?? new List<string>())
+            {
+                if (!systemManifests.ContainsKey(included))
+                {
+                    missingSystems.Add(new ModLoadError(
+                        scenarioManifest.Namespace,
+                        "scenarioInfo.json",
+                        "ScenarioManifest",
+                        scenarioManifest.Namespace,
+                        "IncludedSystems",
+                        included));
+                }
+            }
+            if (missingSystems.Count > 0)
+                throw new ModLoadException(missingSystems);
+
+            foreach (var included in scenarioManifest.IncludedSystems ?? new List<string>())
+                ApplySystemPack(systemManifests[included], baseData);
 
             ApplyDataFiles(
                 scenarioManifest.ScenarioDirectory,
@@ -341,6 +464,51 @@ namespace Pulsar4X.Modding
 
             scenarioManifest.ScenarioDirectory = scenarioDirectory;
             return scenarioManifest;
+        }
+
+        private static SystemManifest ReadSystemManifest(string systemManifestPath)
+        {
+            var systemManifest = JsonConvert.DeserializeObject<SystemManifest>(
+                File.ReadAllText(systemManifestPath), SystemManifest.SerializerSettings);
+            if (systemManifest == null || string.IsNullOrEmpty(systemManifest.Namespace))
+                throw new InvalidDataException($"{systemManifestPath} is not a valid system manifest (missing Namespace).");
+
+            string? systemDirectory = Path.GetDirectoryName(systemManifestPath);
+            if (string.IsNullOrEmpty(systemDirectory))
+                throw new DirectoryNotFoundException($"Could not find {systemManifestPath}");
+
+            systemManifest.SystemDirectory = systemDirectory;
+            return systemManifest;
+        }
+
+        /// <summary>The systems folder next to the scenarios root that contains
+        /// <paramref name="scenarioDirectory"/>. A scenario folder Data/scenarios/name resolves to Data/systems.</summary>
+        private static string DefaultSystemsRoot(string scenarioDirectory)
+        {
+            if (string.IsNullOrEmpty(scenarioDirectory))
+                return "";
+
+            string? scenariosRoot = Path.GetDirectoryName(scenarioDirectory);
+            string? parent = string.IsNullOrEmpty(scenariosRoot) ? null : Path.GetDirectoryName(scenariosRoot);
+            if (string.IsNullOrEmpty(parent))
+                return "";
+
+            return Path.Combine(parent, "systems");
+        }
+
+        /// <summary>Applies one system pack's data files under the pack namespace.
+        /// A pack already listed in <see cref="ModDataStore.LoadedSystems"/> is skipped.</summary>
+        private void ApplySystemPack(SystemManifest manifest, ModDataStore store)
+        {
+            if (store.LoadedSystems.Contains(manifest.Namespace))
+                return;
+
+            ApplyDataFiles(
+                manifest.SystemDirectory,
+                manifest.DataFiles ?? new List<string>(),
+                manifest.Namespace,
+                store);
+            store.LoadedSystems.Add(manifest.Namespace);
         }
 
         private static void ValidateDefaultStart(ScenarioManifest scenario, ModDataStore store)

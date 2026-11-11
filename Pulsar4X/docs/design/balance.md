@@ -98,7 +98,7 @@ Data, under `GameData/basemod/`:
 - `TemplateFiles/storage.json`, `weapons.json`, `electronics.json`, `armor.json`, `ordnance.json` — other templates.
 - `TemplateFiles/techs.json`, `techs-bureaucracy.json`, `techCategories.json` — research. `Unlocks` is sparse. `tech-modern-technology` unlocks a pile at level 1.
 - `ScenarioFiles/designs/componentDesigns.json` — stock designs (Merlin, factory, mine, yard).
-- `GameData/scenarios/sol-default/systems/sol/earth.json` — starting installations and cargo. Minerals are `randomHW`.
+- `GameData/scenarios/sol-default/colonies.json` — starting installations and cargo. Earth's minerals stay in `GameData/systems/sol/earth.json` (`randomHW`).
 - `Industry.mmd` — hand-drawn chain. Stale. Trust the JSON.
 
 Code:

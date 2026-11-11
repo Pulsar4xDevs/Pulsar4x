@@ -105,7 +105,7 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
 
     /// <summary>Loads the mods (and the mods they depend on, found among
     /// <paramref name="availableManifestPaths"/>) into a fresh store, then the chosen
-    /// scenario. When neither <paramref name="scenarioId"/> nor
+    /// scenario and the system packs it includes. When neither <paramref name="scenarioId"/> nor
     /// <paramref name="scenarioManifestPath"/> is given, the default among discovered
     /// scenarios whose RequiredMods are loaded is applied. A store with no qualifying
     /// scenario loads no scenario.</summary>
@@ -121,13 +121,15 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
         var modDataStore = new ModDataStore();
         modLoader.LoadModManifests(requested, available, modDataStore);
 
-        var discovered = modLoader.DiscoverScenarios(ScenarioRoots(requested.Concat(available)));
+        var modPaths = requested.Concat(available).ToList();
+        var discovered = modLoader.DiscoverScenarios(ScenarioRoots(modPaths));
+        var systems = modLoader.DiscoverSystems(SystemRoots(modPaths));
         string? chosenId = scenarioId;
         if (string.IsNullOrEmpty(scenarioManifestPath) && string.IsNullOrEmpty(chosenId))
             chosenId = ModLoader.ChooseDefaultScenario(discovered.Values, modDataStore);
 
         if (!string.IsNullOrEmpty(scenarioManifestPath) || !string.IsNullOrEmpty(chosenId))
-            modLoader.ApplyScenario(chosenId, scenarioManifestPath, discovered, modDataStore);
+            modLoader.ApplyScenario(chosenId, scenarioManifestPath, discovered, modDataStore, systems);
 
         return modDataStore;
     }
@@ -146,6 +148,24 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
             var scenarios = Path.Combine(parent, "scenarios");
             if (Directory.Exists(scenarios) && !roots.Contains(scenarios))
                 roots.Add(scenarios);
+        }
+        return roots;
+    }
+
+    /// <summary>System pack folders next to the folders that contain the given mod manifests,
+    /// existing ones only, each once.</summary>
+    internal static List<string> SystemRoots(IEnumerable<string> modManifestPaths)
+    {
+        var roots = new List<string>();
+        foreach (var path in modManifestPaths)
+        {
+            var modDir = Path.GetDirectoryName(path);
+            if (string.IsNullOrEmpty(modDir)) continue;
+            var parent = Path.GetDirectoryName(modDir);
+            if (string.IsNullOrEmpty(parent)) continue;
+            var systems = Path.Combine(parent, "systems");
+            if (Directory.Exists(systems) && !roots.Contains(systems))
+                roots.Add(systems);
         }
         return roots;
     }

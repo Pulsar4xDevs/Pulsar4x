@@ -1,0 +1,73 @@
+[
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "planet-earth",
+      "Name": "Earth",
+      "CanStartHere": true,
+      "Colonizable": true,
+      "GenerateMinerals": "randomHW",
+      "Info": {
+        "Gravity": 9.8,
+        "Type": "terrestrial",
+        "Albedo": 0.306,
+        "AxialTilt": 23.439,
+        "MagneticField": 45,
+        "Mass": 5.9726E24,
+        "Radius": 6378.1,
+        "Tectonics": "earth-like",
+        "LengthOfDay": "1.00:00:00"
+      },
+      "Orbit": {
+        "SemiMajorAxis_km": 149597887,
+        "Eccentricity": 0.01671022,
+        "EclipticInclination_d": 7.155,
+        "LoAN_d": -11.26064,
+        "AoP_d": 102.94719,
+        "MeanAnomaly_d": 358.617
+      },
+      "Atmosphere": {
+        "Pressure": 1,
+        "Hydrosphere": true,
+        "HydroExtent": 71,
+        "GreenhouseFactor": 1,
+        "GreenhousePressure": 1,
+        "SurfaceTemperature": 14.76,
+        "Gases": [
+          { "Symbol": "N2", "Percent": 0.7808 },
+          { "Symbol": "O2", "Percent": 0.2095 },
+          { "Symbol": "H2O", "Percent": 0.005 },
+          { "Symbol": "Ar", "Percent": 0.00934 },
+          { "Symbol": "CO2", "Percent": 0.000415 },
+          { "Symbol": "Ne", "Percent": 0.0000182 }
+        ]
+      }
+    }
+  },
+  {
+    "Type": "SystemBody",
+    "Payload": {
+      "UniqueID": "moon-earth-hyperbola",
+      "Name": "Hyperbolic Test Moon",
+      "Parent": "Earth",
+      "Colonizable": false,
+      "GeoSurveyPointsRequired": 50,
+      "Info": {
+        "Type": "moon",
+        "Albedo": 0.1,
+        "Mass": 1.0E12,
+        "Radius": 5,
+        "LengthOfDay": "0.10:00:00"
+      },
+      "Orbit": {
+        "SemiMajorAxis": -25000,
+        "Eccentricity": 1.5,
+        "EclipticInclination": 15,
+        "LoAN": 0,
+        "AoP": 90,
+        "MeanAnomaly": 0,
+        "Epoch": "2050-01-01T00:00:00"
+      }
+    }
+  }
+]

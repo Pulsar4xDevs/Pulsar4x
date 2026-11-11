@@ -41,5 +41,9 @@ namespace Pulsar4X.Modding
 
         /// <summary>DefaultStart of the applied scenario, if any. Used to prefill a new game.</summary>
         public ScenarioManifest.ScenarioStart? ScenarioDefaultStart { get; set; }
+
+        /// <summary>Namespaces of the system packs applied, in order. Old saves that omit
+        /// this field still load.</summary>
+        public List<string> LoadedSystems { get; set; } = new ();
     }
 }

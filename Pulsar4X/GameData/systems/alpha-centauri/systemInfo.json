@@ -1,0 +1,10 @@
+{
+  "Author": "Pulsar4x Devs",
+  "Name": "Alpha Centauri",
+  "Version": "0.1",
+  "Namespace": "Pulsar4x.System.AlphaCentauri",
+  "Description": "The Alpha Centauri system: Alpha Centauri A and B. Map data only.",
+  "DataFiles": [
+    "alphaCentauri.json"
+  ]
+}

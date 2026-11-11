@@ -25,6 +25,10 @@ namespace Pulsar4X.Modding
         /// <summary>Namespaces of scenarios applied first, in order.</summary>
         public List<string> RequiredScenarios { get; set; }
 
+        /// <summary>Namespaces of the system packs this scenario includes, in order.
+        /// Applied before this scenario's own data files.</summary>
+        public List<string> IncludedSystems { get; set; }
+
         /// <summary>Data files relative to the scenario folder.</summary>
         public List<string> DataFiles { get; set; }
 
