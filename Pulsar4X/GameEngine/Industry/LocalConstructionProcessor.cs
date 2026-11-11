@@ -455,7 +455,9 @@ public class LocalConstructionProcessor : IHotloopProcessor
         {
             if (job.Instance == null && (!LocalConstructionJob.IsSiteOnly(job.Design) || !ResourcesSettled(job)))
                 return false;
-            return FacilityUpgrade.TrySwap(target, storage, job);
+            if (!TryGetFaction(target, out var factionInfo))
+                return false;
+            return FacilityUpgrade.TrySwap(target, storage, factionInfo, job);
         }
 
         if (job.Instance != null)
@@ -543,7 +545,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
         return faction.TryGetDataBlob(out factionInfo);
     }
 
-    static bool TryResolve(FactionInfoDB factionInfo, string resourceId, out ICargoable cargoable)
+    internal static bool TryResolve(FactionInfoDB factionInfo, string resourceId, out ICargoable cargoable)
     {
         if (factionInfo.Data.CargoGoods.Contains(resourceId))
         {

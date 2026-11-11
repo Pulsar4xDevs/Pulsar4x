@@ -154,13 +154,14 @@ public class FacilityUpgradeTests
         var current = Facility(world, "Factory Mk1", "test-factory", rate: 10, siteOnly: false);
         var better = Facility(world, "Factory Mk2", "test-factory", rate: 30, siteOnly: false);
         better.MassPerUnit = 3_000_000;
+        current.ResourceCosts = new Dictionary<string, long> { ["iron"] = 10 };
         var oldCrate = new ComponentInstance(current);
         colony.AddComponent(oldCrate);
         string lineId = oldCrate.UniqueID;
         var newCrate = new ComponentInstance(better);
         var storage = colony.GetDataBlob<CargoStorageDB>();
         Assert.That(storage.AddCargoByUnit(newCrate, 1), Is.EqualTo(1));
-        StockIron(world, colony, 1000);
+        var iron = StockIron(world, colony, 1000);
         var widgetJob = QueueWidget(world, colony, lineId);
 
         var target = Line(colony, lineId).UpgradeTargets.Single();
@@ -182,6 +183,9 @@ public class FacilityUpgradeTests
         var mounted = colony.GetDataBlob<ComponentInstancesDB>().AllComponents.Values.Single();
         Assert.That(mounted, Is.SameAs(newCrate));
         Assert.That(StoredInstances(colony), Is.EqualTo(new[] { oldCrate }));
+        // The crate comes back whole, so its recipe is not refunded as well.
+        Assert.That(storage.GetUnitsStored(iron, false), Is.EqualTo(1000));
+        Assert.That(FacilityUpgrade.SiteRefund(world.Info, current), Is.Empty);
         var industry = colony.GetDataBlob<IndustryAbilityDB>();
         Assert.That(industry.ProductionLines.Keys, Is.EqualTo(new[] { newCrate.UniqueID }));
         Assert.That(industry.ProductionLines[newCrate.UniqueID].Name, Is.EqualTo("Factory Mk2"));
@@ -264,6 +268,124 @@ public class FacilityUpgradeTests
         Assert.That(colony.GetDataBlob<ComponentInstancesDB>().AllComponents.Values.Single(), Is.SameAs(newCrate));
         Assert.That(StoredInstances(colony), Is.EqualTo(new[] { oldCrate }));
         Assert.That(industry.ProductionLines[newCrate.UniqueID].Jobs.Single(), Is.SameAs(widgetJob));
+    }
+
+    [Test]
+    public void SiteOnlyUpgrade_ReturnsHalfTheOldRecipe_RoundedDown()
+    {
+        var world = NewSystem();
+        var colony = Colony(world, pointsPerDay: 100);
+        var current = Facility(world, "Factory Mk1", "test-factory", rate: 10, siteOnly: true);
+        current.ResourceCosts = new Dictionary<string, long> { ["iron"] = 7, ["copper"] = 4, ["aluminium"] = 1 };
+        var better = Facility(world, "Factory Mk2", "test-factory", rate: 30, siteOnly: true);
+        string lineId = Install(colony, current);
+        world.Info.Data.Unlock("iron");
+        world.Info.Data.Unlock("copper");
+        var iron = world.Info.Data.CargoGoods.GetAny("iron")!;
+        var copper = world.Info.Data.CargoGoods.GetAny("copper")!;
+        var widgetJob = QueueWidget(world, colony, lineId);
+
+        var refund = FacilityUpgrade.SiteRefund(world.Info, current).ToDictionary(r => r.Item.UniqueID, r => r.Units);
+        Assert.That(refund, Is.EqualTo(new Dictionary<string, long> { ["iron"] = 3, ["copper"] = 2 }));
+
+        var queued = Translate(world, colony, new UpgradeFacilityCommand(colony.Id, lineId, better.UniqueID));
+        Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
+        var construction = colony.GetDataBlob<LocalConstructionDB>();
+        long pointsBefore = construction.PointsPerDay;
+
+        new LocalConstructionProcessor().ProcessEntity(colony, 0);
+
+        Assert.That(construction.BuildQueue, Is.Empty);
+        Assert.That(MountedDesigns(colony), Is.EqualTo(new[] { better.UniqueID }));
+        var storage = colony.GetDataBlob<CargoStorageDB>();
+        Assert.That(storage.GetUnitsStored(iron, false), Is.EqualTo(3));
+        Assert.That(storage.GetUnitsStored(copper, false), Is.EqualTo(2));
+        Assert.That(StoredInstances(colony), Is.Empty);
+        Assert.That(construction.PointsPerDay, Is.EqualTo(pointsBefore));
+        var newId = colony.GetDataBlob<ComponentInstancesDB>().AllComponents.Values.Single().UniqueID;
+        Assert.That(colony.GetDataBlob<IndustryAbilityDB>().ProductionLines[newId].Jobs.Single(), Is.SameAs(widgetJob));
+    }
+
+    [Test]
+    public void SiteRefund_ThatDoesNotFit_WaitsWithTheOldFacility_ThenSwapsWhenThereIsRoom()
+    {
+        var world = NewSystem();
+        world.Info.Data.Unlock("iron");
+        var iron = world.Info.Data.CargoGoods.GetAny("iron")!;
+        var colony = Colony(world, pointsPerDay: 100, cargoVolume: iron.VolumePerUnit * 500);
+        var current = Facility(world, "Factory Mk1", "test-factory", rate: 10, siteOnly: true);
+        current.ResourceCosts = new Dictionary<string, long> { ["iron"] = 2001 };
+        var better = Facility(world, "Factory Mk2", "test-factory", rate: 30, siteOnly: true);
+        string lineId = Install(colony, current);
+        var widgetJob = QueueWidget(world, colony, lineId);
+
+        var queued = Translate(world, colony, new UpgradeFacilityCommand(colony.Id, lineId, better.UniqueID));
+        Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
+        var construction = colony.GetDataBlob<LocalConstructionDB>();
+        var storage = colony.GetDataBlob<CargoStorageDB>();
+
+        new LocalConstructionProcessor().ProcessEntity(colony, 0);
+
+        Assert.That(construction.BuildQueue.Single().IsComplete, Is.True);
+        Assert.That(MountedDesigns(colony), Is.EqualTo(new[] { current.UniqueID }));
+        Assert.That(storage.GetUnitsStored(iron, false), Is.EqualTo(0));
+        var industry = colony.GetDataBlob<IndustryAbilityDB>();
+        Assert.That(industry.ProductionLines.Keys, Is.EqualTo(new[] { lineId }));
+        Assert.That(industry.ProductionLines[lineId].Jobs.Single(), Is.SameAs(widgetJob));
+
+        var store = storage.TypeStores[iron.CargoTypeID];
+        double extra = iron.VolumePerUnit * 1000;
+        store.MaxVolume += extra;
+        store.FreeVolume += extra;
+        new LocalConstructionProcessor().ProcessEntity(colony, 0);
+
+        Assert.That(construction.BuildQueue, Is.Empty);
+        Assert.That(MountedDesigns(colony), Is.EqualTo(new[] { better.UniqueID }));
+        Assert.That(storage.GetUnitsStored(iron, false), Is.EqualTo(1000));
+        var newId = colony.GetDataBlob<ComponentInstancesDB>().AllComponents.Values.Single().UniqueID;
+        Assert.That(industry.ProductionLines[newId].Jobs.Single(), Is.SameAs(widgetJob));
+    }
+
+    [Test]
+    public void SiteRefund_ThatFailsPartWay_IsRolledBack()
+    {
+        var world = NewSystem();
+        var colony = Colony(world, pointsPerDay: 100);
+        // A recipe part with no volume passes the room check but the warehouse refuses it.
+        var weightless = new ComponentDesign
+        {
+            UniqueID = "test-weightless-" + Guid.NewGuid().ToString("N"),
+            Name = "Weightless Part",
+            CargoTypeID = "general-storage",
+            MassPerUnit = 1,
+            VolumePerUnit = 0,
+            ComponentMountType = ComponentMountType.ShipCargo,
+        };
+        world.Info.InternalComponentDesigns[weightless.UniqueID] = weightless;
+        world.Info.Data.Unlock("iron");
+        var iron = world.Info.Data.CargoGoods.GetAny("iron")!;
+        var current = Facility(world, "Factory Mk1", "test-factory", rate: 10, siteOnly: true);
+        current.ResourceCosts = new Dictionary<string, long> { ["iron"] = 8, [weightless.UniqueID] = 2 };
+        var better = Facility(world, "Factory Mk2", "test-factory", rate: 30, siteOnly: true);
+        string lineId = Install(colony, current);
+        var oldInstance = colony.GetDataBlob<ComponentInstancesDB>().AllComponents[lineId];
+        var widgetJob = QueueWidget(world, colony, lineId);
+
+        var queued = Translate(world, colony, new UpgradeFacilityCommand(colony.Id, lineId, better.UniqueID));
+        Assert.That(queued.Accepted, Is.True, queued.RejectionReason);
+
+        new LocalConstructionProcessor().ProcessEntity(colony, 0);
+
+        var construction = colony.GetDataBlob<LocalConstructionDB>();
+        Assert.That(construction.BuildQueue.Single().IsComplete, Is.True);
+        Assert.That(colony.GetDataBlob<ComponentInstancesDB>().AllComponents.Values.Single(), Is.SameAs(oldInstance));
+        var storage = colony.GetDataBlob<CargoStorageDB>();
+        Assert.That(storage.GetUnitsStored(iron, false), Is.EqualTo(0));
+        Assert.That(storage.GetUnitsStored(weightless, false), Is.EqualTo(0));
+        var industry = colony.GetDataBlob<IndustryAbilityDB>();
+        Assert.That(industry.ProductionLines.Keys, Is.EqualTo(new[] { lineId }));
+        Assert.That(industry.ProductionLines[lineId].Name, Is.EqualTo("Factory Mk1"));
+        Assert.That(industry.ProductionLines[lineId].Jobs.Single(), Is.SameAs(widgetJob));
     }
 
     static CommandResult Translate(World world, Entity colony, GameCommand command)

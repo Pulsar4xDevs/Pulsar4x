@@ -135,10 +135,11 @@ public static class FacilityUpgrade
 
     /// <summary>
     /// Mounts the new facility, takes the old one off, and moves the old line's jobs, hulls and refits
-    /// to the new line. An old crate goes back to the warehouse. A site-only facility has no crate and is
-    /// not refunded. Anything that fails leaves the colony as it was and returns false.
+    /// to the new line. An old crate goes back to the warehouse whole. A site-only facility has no crate,
+    /// so half its recipe goes back instead (<see cref="SiteRefund"/>). Room for whatever comes back is
+    /// checked before anything moves. Anything that fails leaves the colony as it was and returns false.
     /// </summary>
-    internal static bool TrySwap(Entity colony, CargoStorageDB storage, LocalConstructionJob job)
+    internal static bool TrySwap(Entity colony, CargoStorageDB storage, FactionInfoDB factionInfo, LocalConstructionJob job)
     {
         string lineId = job.UpgradeLineId!;
         if (!TryFindFacility(colony, lineId, out var old))
@@ -148,7 +149,8 @@ public static class FacilityUpgrade
             return false;
 
         bool returnOld = LocalConstructionJob.IsCrate(old.Design);
-        if (returnOld && !RoomForOld(storage, old, job.Instance))
+        var refund = returnOld ? new List<(ICargoable Item, long Units)>() : SiteRefund(factionInfo, old.Design);
+        if (!RoomForReturns(storage, returnOld ? old : null, refund, job.Instance))
             return false;
 
         ComponentInstance fresh;
@@ -167,9 +169,29 @@ public static class FacilityUpgrade
         colony.AddComponent(fresh);
         colony.RemoveComponent(old);
 
-        if (!industry.ProductionLines.TryGetValue(fresh.UniqueID, out var newLine)
-            || (returnOld && storage.AddCargoByUnit(old, 1) < 1))
+        var added = new List<(ICargoable Item, long Units)>();
+        bool ok = industry.ProductionLines.TryGetValue(fresh.UniqueID, out var newLine);
+        if (ok && returnOld)
         {
+            long back = storage.AddCargoByUnit(old, 1);
+            if (back > 0)
+                added.Add((old, back));
+            ok = back == 1;
+        }
+        foreach (var (item, units) in refund)
+        {
+            if (!ok)
+                break;
+            long back = storage.AddCargoByUnit(item, units);
+            if (back > 0)
+                added.Add((item, back));
+            ok = back == units;
+        }
+
+        if (!ok)
+        {
+            foreach (var (item, units) in added)
+                storage.RemoveCargoByUnit(item, units);
             colony.RemoveComponent(fresh);
             colony.AddComponent(old);
             industry.ProductionLines[lineId] = oldLine;
@@ -178,7 +200,7 @@ public static class FacilityUpgrade
             return false;
         }
 
-        newLine.Jobs.AddRange(oldLine.Jobs);
+        newLine!.Jobs.AddRange(oldLine.Jobs);
         newLine.Hulls.AddRange(oldLine.Hulls);
         if (colony.TryGetDataBlob<LocalConstructionDB>(out var construction))
         {
@@ -191,16 +213,59 @@ public static class FacilityUpgrade
         return true;
     }
 
-    static bool RoomForOld(CargoStorageDB storage, ComponentInstance old, ComponentInstance? leaving)
+    /// <summary>
+    /// What a decommissioned site-only facility gives back: half of each recipe amount, rounded down.
+    /// No industry points come back. A stand-in until there is a real scrap feature. An id the faction
+    /// cannot resolve is skipped. Empty for a crate design, which goes back to the warehouse whole.
+    /// </summary>
+    public static List<(ICargoable Item, long Units)> SiteRefund(FactionInfoDB factionInfo, ComponentDesign design)
     {
-        double need = old.VolumePerUnit;
-        if (leaving != null && leaving.CargoTypeID == old.CargoTypeID)
-            need -= leaving.VolumePerUnit;
-        if (need <= 0)
-            return true;
-        if (!storage.TypeStores.TryGetValue(old.CargoTypeID, out var store))
-            return false;
-        return store.FreeVolume + 1e-9 >= need;
+        var refund = new List<(ICargoable Item, long Units)>();
+        if (!LocalConstructionJob.IsSiteOnly(design))
+            return refund;
+        foreach (var (resourceId, amount) in design.ResourceCosts)
+        {
+            long units = amount / 2;
+            if (units <= 0)
+                continue;
+            if (!LocalConstructionProcessor.TryResolve(factionInfo, resourceId, out var cargoable))
+                continue;
+            refund.Add((cargoable, units));
+        }
+        return refund;
+    }
+
+    /// <summary>
+    /// Free volume per cargo type for the returned crate and the refund, after the new crate leaves.
+    /// </summary>
+    static bool RoomForReturns(
+        CargoStorageDB storage, ComponentInstance? oldCrate,
+        List<(ICargoable Item, long Units)> refund, ComponentInstance? leaving)
+    {
+        var need = new Dictionary<string, double>();
+        void Add(string cargoType, double volume)
+        {
+            need.TryGetValue(cargoType, out var current);
+            need[cargoType] = current + volume;
+        }
+
+        if (oldCrate != null)
+            Add(oldCrate.CargoTypeID, oldCrate.VolumePerUnit);
+        foreach (var (item, units) in refund)
+            Add(item.CargoTypeID, item.VolumePerUnit * units);
+        if (leaving != null)
+            Add(leaving.CargoTypeID, -leaving.VolumePerUnit);
+
+        foreach (var (cargoType, volume) in need)
+        {
+            if (volume <= 0)
+                continue;
+            if (!storage.TypeStores.TryGetValue(cargoType, out var store))
+                return false;
+            if (store.FreeVolume + 1e-9 < volume)
+                return false;
+        }
+        return true;
     }
 
     static bool CrateInQueue(LocalConstructionDB construction, ComponentInstance crate)
