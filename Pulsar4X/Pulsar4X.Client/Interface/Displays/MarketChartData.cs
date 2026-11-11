@@ -81,11 +81,6 @@ namespace Pulsar4X.Client
             return MarketBucketSize.Month;
         }
 
-        public static IReadOnlyList<MarketChartBucket> Aggregate(IReadOnlyList<PricePointView>? days, DateTime from, DateTime to)
-        {
-            return Aggregate(days, from, to, BucketSizeFor(from, to));
-        }
-
         public static IReadOnlyList<MarketChartBucket> Aggregate(
             IReadOnlyList<PricePointView>? days, DateTime from, DateTime to, MarketBucketSize size)
         {
@@ -249,6 +244,46 @@ namespace Pulsar4X.Client
                     scaled[i] = 100m * value / first.Value;
             }
             return scaled;
+        }
+
+        /// <summary>
+        /// Adds or removes a good from the compare set. Returns true when the good is now checked.
+        /// </summary>
+        public static bool ToggleCompare(ISet<string> checkedIds, string cargoId)
+        {
+            if (checkedIds.Remove(cargoId))
+                return false;
+            checkedIds.Add(cargoId);
+            return true;
+        }
+
+        /// <summary>
+        /// The bucket under the mouse. When slots are narrower than <paramref name="snapPx"/>, a nearby bucket
+        /// with a trade wins over an empty one, so a thin candle can be hovered. Returns -1 off the plot.
+        /// </summary>
+        public static int HoverIndex(IReadOnlyList<MarketChartBucket> buckets, float rel, float slot, float snapPx)
+        {
+            if (buckets == null || buckets.Count == 0 || slot <= 0f || rel < 0f || rel > slot * buckets.Count)
+                return -1;
+            int hover = (int)(rel / slot);
+            if (hover >= buckets.Count)
+                hover = buckets.Count - 1;
+            if (buckets[hover].HasCandle || slot >= snapPx)
+                return hover;
+            int best = hover;
+            float bestDistance = float.MaxValue;
+            for (int i = 0; i < buckets.Count; i++)
+            {
+                if (!buckets[i].HasCandle)
+                    continue;
+                float distance = Math.Abs((i + 0.5f) * slot - rel);
+                if (distance <= snapPx && distance < bestDistance)
+                {
+                    best = i;
+                    bestDistance = distance;
+                }
+            }
+            return best;
         }
 
         public static bool TryLastTrade(IReadOnlyList<PricePointView>? days, out decimal close)

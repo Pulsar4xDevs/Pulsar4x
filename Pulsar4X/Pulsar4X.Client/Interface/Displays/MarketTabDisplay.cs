@@ -127,21 +127,22 @@ namespace Pulsar4X.Client
             if (market.CanEdit && entity.Kind == BodyKind.Colony)
                 DrawSupplyStatus(entity);
 
-            float listW = compact ? 156f : 210f;
-            if (compact)
+            // Narrow (the entity card, or a small window): the goods list sits above the detail at full width.
+            if (compact || ImGui.GetContentRegionAvail().X < 600f)
             {
-                float listH = 360f;
-                ImGui.BeginChild("##market-goods", new Vector2(listW, listH), ImGuiChildFlags.Borders);
+                int rows = addable.Count > 0 ? listed.Count + addable.Count + 2 : listed.Count + 1;
+                float listH = ImGui.GetFrameHeightWithSpacing() * 1.5f + ImGui.GetTextLineHeightWithSpacing() * 1.25f * rows;
+                if (listH > 220f)
+                    listH = 220f;
+                ImGui.BeginChild("##market-goods", new Vector2(0f, listH), ImGuiChildFlags.Borders);
                 DrawGoods(ui, listed, addable, ref selectedId);
                 ImGui.EndChild();
-                ImGui.SameLine();
-                ImGui.BeginGroup();
                 DrawDetail(entity, market, history, book, officeSystemId, now, uiState, ui, listed, addable, selectedId, true);
-                ImGui.EndGroup();
                 IntelDisplay.Display(entity, book, officeSystemId, uiState);
             }
             else
             {
+                float listW = 210f;
                 float bodyH = ImGui.GetContentRegionAvail().Y;
                 if (bodyH < 160f)
                     bodyH = 160f;
@@ -298,17 +299,19 @@ namespace Pulsar4X.Client
                     bool on = ui.Checked.Contains(good.CargoId);
                     if (ImGui.Checkbox("##cmp", ref on))
                     {
-                        if (on)
-                            ui.Checked.Add(good.CargoId);
-                        else
-                            ui.Checked.Remove(good.CargoId);
+                        MarketChartData.ToggleCompare(ui.Checked, good.CargoId);
                         selectedId = good.CargoId;
                     }
                 }
 
                 ImGui.TableNextColumn();
                 if (ImGui.Selectable(good.Name + "###row", selected))
+                {
+                    // In Compare the whole row toggles the good, so a click that lands beside the small box still counts.
+                    if (ui.Compare)
+                        MarketChartData.ToggleCompare(ui.Checked, good.CargoId);
                     selectedId = good.CargoId;
+                }
                 ImGui.TableNextColumn();
                 RightText(Money(good.Bid));
                 if (ImGui.IsItemClicked())
@@ -1165,7 +1168,8 @@ namespace Pulsar4X.Client
 
         static bool SeriesUsesQuoteMid(MarketHistoryView? history, string cargoId, MarketChartRange range)
         {
-            var buckets = MarketChartData.Aggregate(DaysFor(history, cargoId), range.From, range.To);
+            var buckets = MarketChartData.Aggregate(
+                DaysFor(history, cargoId), range.From, range.To, MarketChartData.BucketSizeFor(range.From, range.To));
             for (int i = 0; i < buckets.Count; i++)
             {
                 if (buckets[i].QuoteMid && buckets[i].Line != null)

@@ -191,8 +191,8 @@ public class MarketChartDataTests
     {
         DateTime from = new DateTime(2045, 10, 1);
         DateTime to = new DateTime(2045, 10, 8);
-        Assert.That(MarketChartData.Aggregate(null, from, to), Is.Empty);
-        Assert.That(MarketChartData.Aggregate(new List<PricePointView>(), from, to), Is.Empty);
+        Assert.That(MarketChartData.Aggregate(null, from, to, MarketBucketSize.Day), Is.Empty);
+        Assert.That(MarketChartData.Aggregate(new List<PricePointView>(), from, to, MarketBucketSize.Day), Is.Empty);
         Assert.That(MarketChartData.Index(null), Is.Empty);
         Assert.That(MarketChartData.Index(Array.Empty<decimal?>()), Is.Empty);
 
@@ -200,7 +200,57 @@ public class MarketChartDataTests
         {
             Point(new DateTime(2045, 11, 1), 1m, 1m, 1m, 1m, 1, 1m, 2m, 1),
         };
-        Assert.That(MarketChartData.Aggregate(after, from, to), Is.Empty);
+        Assert.That(MarketChartData.Aggregate(after, from, to, MarketBucketSize.Day), Is.Empty);
+    }
+
+    [Test]
+    public void ToggleCompare_KeepsEarlierChecksAndTogglesTheClickedGood()
+    {
+        var checkedIds = new HashSet<string> { "iron" };
+
+        Assert.That(MarketChartData.ToggleCompare(checkedIds, "methalox"), Is.True);
+        Assert.That(MarketChartData.ToggleCompare(checkedIds, "silicon"), Is.True);
+        Assert.That(checkedIds, Is.EquivalentTo(new[] { "iron", "methalox", "silicon" }));
+
+        Assert.That(MarketChartData.ToggleCompare(checkedIds, "iron"), Is.False);
+        Assert.That(checkedIds, Is.EquivalentTo(new[] { "methalox", "silicon" }));
+    }
+
+    [Test]
+    public void ZeroPriceTrade_IsACandleWithItsVolume()
+    {
+        var days = new List<PricePointView>
+        {
+            Point(new DateTime(2050, 1, 2), 0m, 0m, 0m, 0m, 10, 0m, 0m, 990),
+        };
+
+        var buckets = MarketChartData.Aggregate(
+            days, new DateTime(2050, 1, 1), new DateTime(2050, 1, 3), MarketBucketSize.Day);
+
+        Assert.That(buckets[0].HasCandle, Is.False);
+        AssertCandle(buckets[1], 0m, 0m, 0m, 0m, 10);
+        Assert.That(buckets[2].HasCandle, Is.False);
+    }
+
+    [Test]
+    public void HoverIndex_SnapsToANearbyTradeOnlyWhenSlotsAreNarrow()
+    {
+        var days = new List<PricePointView>
+        {
+            Point(new DateTime(2050, 1, 1), 5m, 5m, 5m, 5m, 10, 4m, 6m, 100),
+        };
+        var buckets = MarketChartData.Aggregate(
+            days, new DateTime(2050, 1, 1), new DateTime(2050, 1, 31), MarketBucketSize.Day);
+
+        // 4 px slots: the mouse over day 3 (x = 10) is within 8 px of the day 1 candle centre (x = 2).
+        Assert.That(MarketChartData.HoverIndex(buckets, 10f, 4f, 8f), Is.EqualTo(0));
+        // Far from any trade it stays on the day under the mouse.
+        Assert.That(MarketChartData.HoverIndex(buckets, 41f, 4f, 8f), Is.EqualTo(10));
+        // Wide slots never snap.
+        Assert.That(MarketChartData.HoverIndex(buckets, 30f, 20f, 8f), Is.EqualTo(1));
+        // Off the plot.
+        Assert.That(MarketChartData.HoverIndex(buckets, -1f, 4f, 8f), Is.EqualTo(-1));
+        Assert.That(MarketChartData.HoverIndex(buckets, 4f * 31 + 1f, 4f, 8f), Is.EqualTo(-1));
     }
 
     static PricePointView Point(

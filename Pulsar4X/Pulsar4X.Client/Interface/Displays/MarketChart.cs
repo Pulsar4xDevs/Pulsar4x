@@ -238,21 +238,16 @@ namespace Pulsar4X.Client
             if (!hovered)
                 return;
             var mouse = ImGui.GetMousePos();
-            float rel = mouse.X - plotLeft;
-            if (rel < 0f || rel > plotW)
-                return;
-            int hover = (int)(rel / slot);
+            int hover = MarketChartData.HoverIndex(buckets, mouse.X - plotLeft, slot, candles ? 8f : 0f);
             if (hover < 0)
-                hover = 0;
-            if (hover >= buckets.Count)
-                hover = buckets.Count - 1;
+                return;
             float guideX = plotLeft + (hover + 0.5f) * slot;
             draw.AddLine(
                 new Vector2(guideX, plotTop),
                 new Vector2(guideX, origin.Y + size.Y - padB),
                 ImGui.ColorConvertFloat4ToU32(Guide),
                 1f);
-            DrawTooltip(buckets[hover], hover, candles, lines, indexScale);
+            DrawTooltip(buckets[hover], hover, candles, lines ?? Array.Empty<MarketLineSeries>(), indexScale);
         }
 
         static void DrawAxisLabels(
@@ -298,16 +293,23 @@ namespace Pulsar4X.Client
 
             if (candles)
             {
-                if (bucket.HasCandle)
+                string volume = bucket.Volume.ToString("N0", CultureInfo.InvariantCulture);
+                if (bucket.HasCandle && bucket.Open == bucket.High && bucket.High == bucket.Low && bucket.Low == bucket.Close)
+                {
+                    ImGui.TextUnformatted("Traded " + volume + " @ " + Money(bucket.Close));
+                }
+                else if (bucket.HasCandle)
                 {
                     ImGui.TextUnformatted("O " + Money(bucket.Open) + "   H " + Money(bucket.High));
                     ImGui.TextUnformatted("L " + Money(bucket.Low) + "   C " + Money(bucket.Close));
-                    ImGui.TextUnformatted("Vol " + bucket.Volume.ToString("N0", CultureInfo.InvariantCulture));
+                    ImGui.TextUnformatted("Vol " + volume);
                 }
                 else
                 {
                     ImGui.TextUnformatted("No trade");
                 }
+                if (bucket.HasQuote)
+                    ImGui.TextDisabled("Bid " + Money(bucket.Bid) + "   Ask " + Money(bucket.Ask));
                 if (bucket.QuoteMid)
                     ImGui.TextUnformatted("quote mid");
             }
