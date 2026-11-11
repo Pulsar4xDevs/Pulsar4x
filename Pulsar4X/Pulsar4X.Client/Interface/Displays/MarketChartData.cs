@@ -46,6 +46,89 @@ namespace Pulsar4X.Client
     public readonly record struct MarketRangeChange(decimal Absolute, decimal Percent, bool HasPercent);
 
     /// <summary>
+    /// The chart's date range: a preset, or a custom From/To typed into the date fields.
+    /// The fields show the plotted range unless the player is typing in them.
+    /// </summary>
+    public sealed class MarketRangeState
+    {
+        public MarketChartPreset Preset = MarketChartPreset.Week;
+        public bool Custom;
+        public DateTime CustomFrom;
+        public DateTime CustomTo;
+        public int FromYear;
+        public int FromMonth = 1;
+        public int FromDay = 1;
+        public int ToYear;
+        public int ToMonth = 1;
+        public int ToDay = 1;
+        public bool Editing;
+
+        /// <summary>Changes when a preset is picked, so the client can drop any half-typed field text.</summary>
+        public int FieldGeneration;
+
+        public MarketChartRange Range(DateTime now, DateTime? earliest)
+        {
+            if (!Custom)
+                return MarketChartData.Preset(Preset, now, earliest);
+            DateTime from = CustomFrom.Date;
+            DateTime to = CustomTo.Date;
+            if (from > to)
+                from = to;
+            return new MarketChartRange(from, to);
+        }
+
+        public void SelectPreset(MarketChartPreset preset)
+        {
+            Preset = preset;
+            Custom = false;
+            Editing = false;
+            FieldGeneration++;
+        }
+
+        /// <summary>Copies the plotted range into the date fields, unless the player is typing in them.</summary>
+        public void SyncFields(DateTime now, DateTime? earliest)
+        {
+            if (Editing)
+                return;
+            var range = Range(now, earliest);
+            FromYear = range.From.Year;
+            FromMonth = range.From.Month;
+            FromDay = range.From.Day;
+            ToYear = range.To.Year;
+            ToMonth = range.To.Month;
+            ToDay = range.To.Day;
+        }
+
+        /// <summary>The player changed a date field: the chart switches to the typed range.</summary>
+        public void ApplyFieldEdit(bool fromEdited, bool toEdited)
+        {
+            if (!fromEdited && !toEdited)
+                return;
+            Editing = true;
+            Custom = true;
+            DateTime from = ClampDate(FromYear, FromMonth, FromDay);
+            DateTime to = ClampDate(ToYear, ToMonth, ToDay);
+            if (from > to)
+            {
+                if (fromEdited && !toEdited)
+                    to = from;
+                else
+                    from = to;
+            }
+            CustomFrom = from;
+            CustomTo = to;
+        }
+
+        static DateTime ClampDate(int year, int month, int day)
+        {
+            year = Math.Clamp(year, 1, 9999);
+            month = Math.Clamp(month, 1, 12);
+            day = Math.Clamp(day, 1, DateTime.DaysInMonth(year, month));
+            return new DateTime(year, month, day);
+        }
+    }
+
+    /// <summary>
     /// Buckets daily price points for the market chart. Days the history omits are carried forward
     /// flat with zero volume. A point with zero volume is a quote only: its open/high/low/close are ignored.
     /// </summary>
@@ -65,6 +148,9 @@ namespace Pulsar4X.Client
                 from = today.AddYears(-1);
             else
                 from = earliest?.Date ?? today;
+            // A preset never shows an empty stretch before the first data point.
+            if (earliest is DateTime first && first.Date > from)
+                from = first.Date;
             if (from > today)
                 from = today;
             return new MarketChartRange(from, today);

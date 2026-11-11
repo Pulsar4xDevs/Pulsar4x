@@ -45,17 +45,7 @@ namespace Pulsar4X.Client
             public readonly HashSet<string> Checked = new();
             public bool Candles = true;
             public bool Index = true;
-            public MarketChartPreset Preset = MarketChartPreset.Week;
-            public bool CustomRange;
-            public DateTime CustomFrom;
-            public DateTime CustomTo;
-            public bool DateFieldActive;
-            public int FromYear;
-            public int FromMonth = 1;
-            public int FromDay = 1;
-            public int ToYear;
-            public int ToMonth = 1;
-            public int ToDay = 1;
+            public readonly MarketRangeState Range = new();
             public readonly Dictionary<string, RowEdit> Rows = new();
             public readonly RowEdit Add = new();
             public string AddFor = "";
@@ -78,6 +68,9 @@ namespace Pulsar4X.Client
         }
 
         static readonly Dictionary<int, OfficeUi> Ui = new();
+
+        /// <summary>Space between segment buttons. A click there hits nothing.</summary>
+        const float SegmentGap = 4f;
 
         public static void Display(
             EntitySnapshot entity,
@@ -142,7 +135,8 @@ namespace Pulsar4X.Client
             }
             else
             {
-                float listW = 210f;
+                // Compare adds the checkbox column on top of the usual width, so names keep theirs.
+                float listW = 210f + (ui.Compare ? CompareColumnWidth() + ImGui.GetStyle().CellPadding.X * 2f : 0f);
                 float bodyH = ImGui.GetContentRegionAvail().Y;
                 if (bodyH < 160f)
                     bodyH = 160f;
@@ -274,7 +268,7 @@ namespace Pulsar4X.Client
                 return;
 
             if (ui.Compare)
-                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 22f);
+                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, CompareColumnWidth());
             ImGui.TableSetupColumn("Good", ImGuiTableColumnFlags.WidthStretch);
             ImGui.TableSetupColumn("Bid", ImGuiTableColumnFlags.WidthFixed, 52f);
             ImGui.TableSetupColumn("Ask", ImGuiTableColumnFlags.WidthFixed, 52f);
@@ -531,9 +525,10 @@ namespace Pulsar4X.Client
         {
             if (facts.Count == 0)
                 return;
+            // Screen x: after EndChild the cursor is already on the next line, so the previous box's
+            // right edge comes from its item rect, not from GetCursorPosX.
             float spacing = ImGui.GetStyle().ItemSpacing.X;
-            float rowLeft = ImGui.GetCursorPosX();
-            float maxX = rowLeft + ImGui.GetContentRegionAvail().X;
+            float maxX = ImGui.GetCursorScreenPos().X + ImGui.GetContentRegionAvail().X;
             float boxH = ImGui.GetTextLineHeight() * 2f + 16f;
             ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.102f, 0.102f, 0.102f, 1f));
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6f, 4f));
@@ -544,7 +539,7 @@ namespace Pulsar4X.Client
                 float boxW = labelW < 92f ? 92f : labelW;
                 if (boxW > 220f)
                     boxW = 220f;
-                if (i > 0 && ImGui.GetCursorPosX() + spacing + boxW <= maxX)
+                if (i > 0 && ImGui.GetItemRectMax().X + spacing + boxW <= maxX)
                     ImGui.SameLine();
                 ImGui.BeginChild("fact-" + fact.Id, new Vector2(boxW, boxH), ImGuiChildFlags.Borders);
                 ImGui.TextDisabled(fact.Label);
@@ -566,66 +561,61 @@ namespace Pulsar4X.Client
             MarketHistoryView? history,
             List<string> shownIds)
         {
-            var range = CurrentRange(ui, now, earliest);
-            if (!ui.DateFieldActive)
-            {
-                ui.FromYear = range.From.Year;
-                ui.FromMonth = range.From.Month;
-                ui.FromDay = range.From.Day;
-                ui.ToYear = range.To.Year;
-                ui.ToMonth = range.To.Month;
-                ui.ToDay = range.To.Day;
-            }
-
             float rowLeft = ImGui.GetCursorPosX();
             float maxX = rowLeft + ImGui.GetContentRegionAvail().X;
+            float gap = SegmentGap;
             bool lineShown = ui.Compare || !ui.Candles;
-            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0f, ImGui.GetStyle().ItemSpacing.Y));
             if (Segment("Candles", !lineShown))
             {
                 ui.Candles = true;
                 ui.Compare = false;
             }
-            ImGui.SameLine();
+            ImGui.SameLine(0f, gap);
             if (Segment("Line", lineShown))
                 ui.Candles = false;
-            ImGui.PopStyleVar();
 
             if (ui.Compare)
             {
-                float scaleW = ButtonWidth("Price") + ButtonWidth("Index");
+                float scaleW = ButtonWidth("Price") + gap + ButtonWidth("Index");
                 ImGui.SameLine();
                 if (ImGui.GetCursorPosX() + scaleW > maxX)
                     ImGui.NewLine();
-                ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0f, ImGui.GetStyle().ItemSpacing.Y));
                 if (Segment("Price", !ui.Index))
                     ui.Index = false;
-                ImGui.SameLine();
+                ImGui.SameLine(0f, gap);
                 if (Segment("Index", ui.Index))
                     ui.Index = true;
-                ImGui.PopStyleVar();
             }
 
-            float rangeW = ButtonWidth("1W") + ButtonWidth("1M") + ButtonWidth("3M") + ButtonWidth("1Y") + ButtonWidth("All");
+            var state = ui.Range;
+            var presets = new (string Label, MarketChartPreset Preset)[]
+            {
+                ("1W", MarketChartPreset.Week),
+                ("1M", MarketChartPreset.Month),
+                ("3M", MarketChartPreset.ThreeMonths),
+                ("1Y", MarketChartPreset.Year),
+                ("All", MarketChartPreset.All),
+            };
+            float rangeW = 0f;
+            foreach (var (label, _) in presets)
+                rangeW += ButtonWidth(label) + gap;
             ImGui.SameLine();
             if (ImGui.GetCursorPosX() + rangeW > maxX)
                 ImGui.NewLine();
-            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0f, ImGui.GetStyle().ItemSpacing.Y));
-            if (Segment("1W", !ui.CustomRange && ui.Preset == MarketChartPreset.Week))
-                SetPreset(ui, MarketChartPreset.Week);
-            ImGui.SameLine();
-            if (Segment("1M", !ui.CustomRange && ui.Preset == MarketChartPreset.Month))
-                SetPreset(ui, MarketChartPreset.Month);
-            ImGui.SameLine();
-            if (Segment("3M", !ui.CustomRange && ui.Preset == MarketChartPreset.ThreeMonths))
-                SetPreset(ui, MarketChartPreset.ThreeMonths);
-            ImGui.SameLine();
-            if (Segment("1Y", !ui.CustomRange && ui.Preset == MarketChartPreset.Year))
-                SetPreset(ui, MarketChartPreset.Year);
-            ImGui.SameLine();
-            if (Segment("All", !ui.CustomRange && ui.Preset == MarketChartPreset.All))
-                SetPreset(ui, MarketChartPreset.All);
-            ImGui.PopStyleVar();
+            bool presetClicked = false;
+            for (int i = 0; i < presets.Length; i++)
+            {
+                if (i > 0)
+                    ImGui.SameLine(0f, gap);
+                if (Segment(presets[i].Label, !state.Custom && state.Preset == presets[i].Preset))
+                {
+                    state.SelectPreset(presets[i].Preset);
+                    presetClicked = true;
+                }
+            }
+
+            // The fields show the range the chart plots (after any preset click this frame).
+            state.SyncFields(now, earliest);
 
             int yearW = 52;
             int mdW = 32;
@@ -635,20 +625,22 @@ namespace Pulsar4X.Client
             ImGui.SameLine();
             if (ImGui.GetCursorPosX() + fromW + spacing + toW > maxX)
                 ImGui.NewLine();
+            // A new id after a preset click drops any text ImGui still holds for a field that was being edited.
+            string g = "-" + state.FieldGeneration.ToString(CultureInfo.InvariantCulture);
             bool datesActive = false;
             ImGui.AlignTextToFramePadding();
             ImGui.Text("From");
             ImGui.SameLine();
             ImGui.SetNextItemWidth(yearW);
-            bool fromEdited = ImGui.InputInt("##from-y", ref ui.FromYear, 0, 0);
+            bool fromEdited = ImGui.InputInt("##from-y" + g, ref state.FromYear, 0, 0);
             datesActive |= ImGui.IsItemActive();
             ImGui.SameLine();
             ImGui.SetNextItemWidth(mdW);
-            fromEdited |= ImGui.InputInt("##from-m", ref ui.FromMonth, 0, 0);
+            fromEdited |= ImGui.InputInt("##from-m" + g, ref state.FromMonth, 0, 0);
             datesActive |= ImGui.IsItemActive();
             ImGui.SameLine();
             ImGui.SetNextItemWidth(mdW);
-            fromEdited |= ImGui.InputInt("##from-d", ref ui.FromDay, 0, 0);
+            fromEdited |= ImGui.InputInt("##from-d" + g, ref state.FromDay, 0, 0);
             datesActive |= ImGui.IsItemActive();
             ImGui.SameLine();
             if (ImGui.GetCursorPosX() + toW > maxX)
@@ -657,32 +649,24 @@ namespace Pulsar4X.Client
             ImGui.Text("To");
             ImGui.SameLine();
             ImGui.SetNextItemWidth(yearW);
-            bool toEdited = ImGui.InputInt("##to-y", ref ui.ToYear, 0, 0);
+            bool toEdited = ImGui.InputInt("##to-y" + g, ref state.ToYear, 0, 0);
             datesActive |= ImGui.IsItemActive();
             ImGui.SameLine();
             ImGui.SetNextItemWidth(mdW);
-            toEdited |= ImGui.InputInt("##to-m", ref ui.ToMonth, 0, 0);
+            toEdited |= ImGui.InputInt("##to-m" + g, ref state.ToMonth, 0, 0);
             datesActive |= ImGui.IsItemActive();
             ImGui.SameLine();
             ImGui.SetNextItemWidth(mdW);
-            toEdited |= ImGui.InputInt("##to-d", ref ui.ToDay, 0, 0);
+            toEdited |= ImGui.InputInt("##to-d" + g, ref state.ToDay, 0, 0);
             datesActive |= ImGui.IsItemActive();
-            ui.DateFieldActive = datesActive;
-            if (fromEdited || toEdited)
+            if (presetClicked)
             {
-                ui.DateFieldActive = true;
-                ui.CustomRange = true;
-                DateTime from = ClampDate(ui.FromYear, ui.FromMonth, ui.FromDay);
-                DateTime to = ClampDate(ui.ToYear, ui.ToMonth, ui.ToDay);
-                if (from > to)
-                {
-                    if (fromEdited && !toEdited)
-                        to = from;
-                    else
-                        from = to;
-                }
-                ui.CustomFrom = from;
-                ui.CustomTo = to;
+                state.Editing = false;
+            }
+            else
+            {
+                state.Editing = datesActive;
+                state.ApplyFieldEdit(fromEdited, toEdited);
             }
 
             DrawLegend(ui, listed, history, shownIds, CurrentRange(ui, now, earliest));
@@ -695,7 +679,7 @@ namespace Pulsar4X.Client
             bool any = false;
             bool lines = ui.Compare || !ui.Candles;
             float spacing = ImGui.GetStyle().ItemSpacing.X;
-            float maxX = ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X;
+            float maxX = ImGui.GetCursorScreenPos().X + ImGui.GetContentRegionAvail().X;
             if (ui.Compare)
             {
                 int colorIndex = 0;
@@ -706,7 +690,7 @@ namespace Pulsar4X.Client
                     if (!ui.Checked.Contains(good.CargoId))
                         continue;
                     float need = ImGui.GetTextLineHeight() + ImGui.CalcTextSize(good.Name).X + spacing;
-                    if (any && ImGui.GetCursorPosX() + need <= maxX)
+                    if (any && ImGui.GetItemRectMax().X + need <= maxX)
                         ImGui.SameLine();
                     Swatch(color, good.Name);
                     any = true;
@@ -724,7 +708,7 @@ namespace Pulsar4X.Client
             if (!quoteMid)
                 return;
             float noteW = ImGui.CalcTextSize("quote mid").X + spacing;
-            if (any && ImGui.GetCursorPosX() + noteW <= maxX)
+            if (any && ImGui.GetItemRectMax().X + noteW <= maxX)
                 ImGui.SameLine();
             ImGui.TextDisabled("quote mid");
         }
@@ -988,28 +972,28 @@ namespace Pulsar4X.Client
 
         static bool Segment(string label, bool on)
         {
+            // The selected segment is a solid fill with white text, so it reads on the dark theme.
             if (on)
             {
-                ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.26f, 0.59f, 0.98f, 0.40f));
-                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.26f, 0.59f, 0.98f, 0.55f));
-                ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.26f, 0.59f, 0.98f, 0.70f));
+                ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.20f, 0.47f, 0.82f, 1f));
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.26f, 0.55f, 0.92f, 1f));
+                ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.16f, 0.40f, 0.72f, 1f));
+                ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 1f, 1f, 1f));
             }
             bool pressed = ImGui.Button(label);
             if (on)
-                ImGui.PopStyleColor(3);
+                ImGui.PopStyleColor(4);
             return pressed;
+        }
+
+        static float CompareColumnWidth()
+        {
+            return ImGui.GetFrameHeight();
         }
 
         static float ButtonWidth(string label)
         {
             return ImGui.CalcTextSize(label).X + ImGui.GetStyle().FramePadding.X * 2f;
-        }
-
-        static void SetPreset(OfficeUi ui, MarketChartPreset preset)
-        {
-            ui.Preset = preset;
-            ui.CustomRange = false;
-            ui.DateFieldActive = false;
         }
 
         static OfficeUi Office(int entityId)
@@ -1157,13 +1141,7 @@ namespace Pulsar4X.Client
 
         static MarketChartRange CurrentRange(OfficeUi ui, DateTime now, DateTime? earliest)
         {
-            if (!ui.CustomRange)
-                return MarketChartData.Preset(ui.Preset, now, earliest);
-            DateTime from = ui.CustomFrom.Date;
-            DateTime to = ui.CustomTo.Date;
-            if (from > to)
-                from = to;
-            return new MarketChartRange(from, to);
+            return ui.Range.Range(now, earliest);
         }
 
         static bool SeriesUsesQuoteMid(MarketHistoryView? history, string cargoId, MarketChartRange range)
@@ -1192,15 +1170,15 @@ namespace Pulsar4X.Client
 
         static string RangePhrase(OfficeUi ui)
         {
-            if (ui.CustomRange)
+            if (ui.Range.Custom)
                 return "in range";
-            if (ui.Preset == MarketChartPreset.Week)
+            if (ui.Range.Preset == MarketChartPreset.Week)
                 return "this week";
-            if (ui.Preset == MarketChartPreset.Month)
+            if (ui.Range.Preset == MarketChartPreset.Month)
                 return "this month";
-            if (ui.Preset == MarketChartPreset.ThreeMonths)
+            if (ui.Range.Preset == MarketChartPreset.ThreeMonths)
                 return "3 months";
-            if (ui.Preset == MarketChartPreset.Year)
+            if (ui.Range.Preset == MarketChartPreset.Year)
                 return "this year";
             return "all";
         }
@@ -1223,23 +1201,6 @@ namespace Pulsar4X.Client
             return value.ToString("N0", CultureInfo.InvariantCulture);
         }
 
-        static DateTime ClampDate(int year, int month, int day)
-        {
-            if (year < 1)
-                year = 1;
-            if (year > 9999)
-                year = 9999;
-            if (month < 1)
-                month = 1;
-            if (month > 12)
-                month = 12;
-            int dim = DateTime.DaysInMonth(year, month);
-            if (day < 1)
-                day = 1;
-            if (day > dim)
-                day = dim;
-            return new DateTime(year, month, day);
-        }
 
         static RowEdit Row(OfficeUi ui, MarketGoodView good, bool idle)
         {

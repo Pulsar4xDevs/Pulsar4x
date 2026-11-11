@@ -8,7 +8,8 @@ namespace Pulsar4X.Logistics;
 /// <summary>
 /// One day's prices at one office for one cargo id.
 /// Open/High/Low/Close and Volume are from executed trades that day (meaningful when Volume is above 0).
-/// Bid, Ask and Stock are the last quote recorded that day.
+/// Bid, Ask and Stock are the last quote recorded that day. A later 0/0 quote does not wipe a non-zero
+/// Bid/Ask already recorded that day; a day that only ever saw 0/0 keeps 0/0.
 /// </summary>
 public sealed class PriceBucket
 {
@@ -73,8 +74,7 @@ public static class MarketHistory
             bucket.Close = price;
         }
         bucket.Volume += units;
-        bucket.Bid = listing.Bid;
-        bucket.Ask = listing.Ask;
+        KeepQuote(bucket, listing);
         bucket.Stock = StockOf(office, listing.CargoId);
         book.HistoryVersion++;
     }
@@ -97,10 +97,21 @@ public static class MarketHistory
         if (bucket == null)
             return;
 
-        bucket.Bid = listing.Bid;
-        bucket.Ask = listing.Ask;
+        KeepQuote(bucket, listing);
         bucket.Stock = StockOf(office, listing.CargoId);
         book.HistoryVersion++;
+    }
+
+    /// <summary>
+    /// Takes the listing's Bid/Ask, except that a 0/0 listing does not replace a non-zero Bid/Ask the day
+    /// already has (from an earlier quote or trade). A one-sided listing (only Bid or only Ask) is a real quote.
+    /// </summary>
+    static void KeepQuote(PriceBucket bucket, MarketListing listing)
+    {
+        if (listing.Bid == 0 && listing.Ask == 0 && (bucket.Bid != 0 || bucket.Ask != 0))
+            return;
+        bucket.Bid = listing.Bid;
+        bucket.Ask = listing.Ask;
     }
 
     static PriceBucket? BucketForToday(LogiBaseDB book, string cargoId, DateTime today)

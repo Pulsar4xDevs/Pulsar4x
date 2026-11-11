@@ -253,6 +253,93 @@ public class MarketChartDataTests
         Assert.That(MarketChartData.HoverIndex(buckets, 4f * 31 + 1f, 4f, 8f), Is.EqualTo(-1));
     }
 
+    [Test]
+    public void PresetAll_StartsAtTheEarliestPoint()
+    {
+        var earliest = new DateTime(2050, 1, 1);
+        var now = new DateTime(2050, 1, 21);
+
+        var all = MarketChartData.Preset(MarketChartPreset.All, now, earliest);
+
+        Assert.That(all.From, Is.EqualTo(earliest));
+        Assert.That(all.To, Is.EqualTo(now));
+    }
+
+    [Test]
+    public void Presets_StartAtTheFirstPoint_WhenHistoryStartsLater()
+    {
+        var earliest = new DateTime(2050, 1, 1);
+        var now = new DateTime(2050, 1, 21);
+
+        Assert.That(MarketChartData.Preset(MarketChartPreset.ThreeMonths, now, earliest).From, Is.EqualTo(earliest));
+        Assert.That(MarketChartData.Preset(MarketChartPreset.Month, now, earliest).From, Is.EqualTo(earliest));
+        Assert.That(MarketChartData.Preset(MarketChartPreset.Year, now, earliest).From, Is.EqualTo(earliest));
+        // The week fits inside the history, so it is the plain week.
+        Assert.That(MarketChartData.Preset(MarketChartPreset.Week, now, earliest).From, Is.EqualTo(new DateTime(2050, 1, 15)));
+    }
+
+    [Test]
+    public void CustomRange_KeepsTheTypedFrom_EvenBeforeTheFirstPoint()
+    {
+        var earliest = new DateTime(2050, 1, 1);
+        var now = new DateTime(2050, 1, 21);
+        var state = new MarketRangeState();
+        state.SyncFields(now, earliest);
+        state.FromYear = 2049;
+        state.FromMonth = 10;
+        state.FromDay = 1;
+
+        state.ApplyFieldEdit(fromEdited: true, toEdited: false);
+
+        var range = state.Range(now, earliest);
+        Assert.That(range.From, Is.EqualTo(new DateTime(2049, 10, 1)));
+        Assert.That(range.To, Is.EqualTo(now));
+    }
+
+    [Test]
+    public void PresetClick_RefreshesTheDateFields_AfterACustomEdit()
+    {
+        var earliest = new DateTime(2049, 6, 1);
+        var now = new DateTime(2050, 1, 21);
+        var state = new MarketRangeState();
+        state.SyncFields(now, earliest);
+        state.FromYear = 2050;
+        state.FromMonth = 12;
+        state.FromDay = 21;
+        state.ApplyFieldEdit(fromEdited: true, toEdited: false);
+        Assert.That(state.Editing, Is.True);
+        Assert.That(state.Custom, Is.True);
+        int generation = state.FieldGeneration;
+
+        state.SelectPreset(MarketChartPreset.Month);
+        state.SyncFields(now, earliest);
+
+        Assert.That(state.Custom, Is.False);
+        Assert.That(state.FieldGeneration, Is.Not.EqualTo(generation));
+        var range = state.Range(now, earliest);
+        Assert.That(range.From, Is.EqualTo(new DateTime(2049, 12, 21)));
+        Assert.That((state.FromYear, state.FromMonth, state.FromDay), Is.EqualTo((2049, 12, 21)));
+        Assert.That((state.ToYear, state.ToMonth, state.ToDay), Is.EqualTo((2050, 1, 21)));
+
+        state.SelectPreset(MarketChartPreset.All);
+        state.SyncFields(now, earliest);
+        Assert.That((state.FromYear, state.FromMonth, state.FromDay), Is.EqualTo((2049, 6, 1)));
+    }
+
+    [Test]
+    public void DateFields_AreLeftAlone_WhileThePlayerTypes()
+    {
+        var now = new DateTime(2050, 1, 21);
+        var state = new MarketRangeState();
+        state.SyncFields(now, null);
+        state.Editing = true;
+        state.FromYear = 20;
+
+        state.SyncFields(now, null);
+
+        Assert.That(state.FromYear, Is.EqualTo(20));
+    }
+
     static PricePointView Point(
         DateTime day, decimal open, decimal high, decimal low, decimal close, long volume,
         decimal bid, decimal ask, long stock)

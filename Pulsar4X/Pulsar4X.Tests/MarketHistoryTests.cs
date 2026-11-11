@@ -120,6 +120,44 @@ public class MarketHistoryTests
     }
 
     [Test]
+    public void LaterSameDayZeroQuote_KeepsTheNonZeroBidAndAsk()
+    {
+        var scene = Scene.Build(marketStock: 40, sell: 30, ask: 10, bid: 7);
+        scene.Run(scene.Exchange(MarketSide.BuyFromMarket, 5));
+        Assert.That(MarketBook.SetListing(scene.Market, new MarketListing { CargoId = "iron", SellQuantity = 30 }), Is.True);
+
+        var bucket = SoleBucket(scene, "iron");
+        Assert.That(bucket.Volume, Is.EqualTo(5));
+        Assert.That(bucket.Close, Is.EqualTo(10m));
+        Assert.That(bucket.Bid, Is.EqualTo(7m));
+        Assert.That(bucket.Ask, Is.EqualTo(10m));
+
+        // A later real (non-zero) quote still replaces it.
+        Assert.That(MarketBook.SetListing(scene.Market, new MarketListing
+        {
+            CargoId = "iron",
+            SellQuantity = 30,
+            Ask = 12,
+            Bid = 9,
+        }), Is.True);
+        bucket = SoleBucket(scene, "iron");
+        Assert.That(bucket.Bid, Is.EqualTo(9m));
+        Assert.That(bucket.Ask, Is.EqualTo(12m));
+    }
+
+    [Test]
+    public void DayThatOnlySawZeroQuotes_StoresZero()
+    {
+        var scene = Scene.Build(marketStock: 40, sell: 30);
+        Assert.That(MarketBook.SetListing(scene.Market, new MarketListing { CargoId = "iron", SellQuantity = 20 }), Is.True);
+
+        var bucket = SoleBucket(scene, "iron");
+        Assert.That(bucket.Volume, Is.EqualTo(0));
+        Assert.That(bucket.Bid, Is.EqualTo(0m));
+        Assert.That(bucket.Ask, Is.EqualTo(0m));
+    }
+
+    [Test]
     public void CapTrimming_DropsOldestBeyondMaxDays()
     {
         var scene = Scene.Build(list: false, marketStock: 10);
