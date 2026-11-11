@@ -12,6 +12,7 @@ namespace Pulsar4X.Client
     {
 
         bool _saveGame = false;
+        string _quickstartError = "";
         System.Numerics.Vector2 _buttonSize = new System.Numerics.Vector2(400, 24);
         new ImGuiWindowFlags _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar;
         private MainMenuItems(){}
@@ -44,6 +45,7 @@ namespace Pulsar4X.Client
 
                 if (ImGui.Button("New Game...", _buttonSize) || _uiState.debugnewgame)
                 {
+                    _quickstartError = "";
                     //_uiState.NewGameOptions.IsActive = true;
                     var newgameoptions = NewGameMenu.GetInstance();
                     newgameoptions.SetActive(true);
@@ -51,8 +53,12 @@ namespace Pulsar4X.Client
                 }
                 if (ImGui.Button("Quickstart", _buttonSize))
                 {
-                    NewGameMenu.QuickstartGame();
-                    this.IsActive = false;
+                    _quickstartError = "";
+                    var error = NewGameMenu.QuickstartGame();
+                    if (error == null)
+                        this.IsActive = false;
+                    else
+                        _quickstartError = error;
                 }
                 if (_uiState.IsGameLoaded)
                 {
@@ -140,6 +146,13 @@ namespace Pulsar4X.Client
                 if(ImGui.Button("Exit to Desktop", _buttonSize))
                 {
                     _uiState.ViewPort.IsAlive = false;
+                }
+
+                if (!string.IsNullOrEmpty(_quickstartError))
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0.35f, 0.35f, 1f));
+                    ImGui.TextWrapped(_quickstartError);
+                    ImGui.PopStyleColor();
                 }
             }
 

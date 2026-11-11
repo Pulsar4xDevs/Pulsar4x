@@ -199,81 +199,56 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
 
     public GameActivation? Quickstart()
     {
-        try
-        {
-            var defaultEnabled = ModsState.AvailableMods
-                .Where(m => ModsState.IsModEnabled.TryGetValue(m.Mod.ModName, out bool on) && on)
-                .ToList();
-            var enabledNamespaces = new HashSet<string>(defaultEnabled.Select(m => m.Mod.Namespace));
-            var scenario = GetAvailableScenarios()
-                .Where(s => s.DefaultEnabled && s.RequiredMods.All(ns => enabledNamespaces.Contains(ns)))
-                .OrderBy(s => s.Id, StringComparer.Ordinal)
-                .FirstOrDefault();
+        var defaultEnabled = ModsState.AvailableMods
+            .Where(m => ModsState.IsModEnabled.TryGetValue(m.Mod.ModName, out bool on) && on)
+            .ToList();
+        var enabledNamespaces = new HashSet<string>(defaultEnabled.Select(m => m.Mod.Namespace));
+        var scenario = GetAvailableScenarios()
+            .Where(s => s.DefaultEnabled && s.RequiredMods.All(ns => enabledNamespaces.Contains(ns)))
+            .OrderBy(s => s.Id, StringComparer.Ordinal)
+            .FirstOrDefault();
 
-            var modManifestPaths = defaultEnabled.Select(m => m.Path).ToList();
-            if (scenario != null)
+        var modManifestPaths = defaultEnabled.Select(m => m.Path).ToList();
+        if (scenario != null)
+        {
+            foreach (var ns in scenario.RequiredMods)
             {
-                foreach (var ns in scenario.RequiredMods)
-                {
-                    var mod = ModsState.AvailableMods.FirstOrDefault(m => m.Mod.Namespace == ns);
-                    if (mod != null && !modManifestPaths.Contains(mod.Path))
-                        modManifestPaths.Add(mod.Path);
-                }
+                var mod = ModsState.AvailableMods.FirstOrDefault(m => m.Mod.Namespace == ns);
+                if (mod != null && !modManifestPaths.Contains(mod.Path))
+                    modManifestPaths.Add(mod.Path);
             }
-
-            var catalog = LoadMods(modManifestPaths, scenario?.Id);
-            var request = BuildQuickstartRequest(
-                modManifestPaths, catalog, RandomNumberGenerator.GetInt32(999999999));
-            if (request == null)
-                return null;
-
-            var result = CreateGameCore(_modDataStore, request);
-            if (result == null)
-            {
-                Console.WriteLine("Quickstart Error: Could not create game");
-                return null;
-            }
-
-            var (game, playerFaction, system, startingBody) = result.Value;
-            return Activate(game, playerFaction, system.ManagerID, startingBody);
         }
-        catch (ModLoadException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Quickstart Error: {ex.Message}");
-            Console.WriteLine(ex.StackTrace);
-            return null;
-        }
+
+        var catalog = LoadMods(modManifestPaths, scenario?.Id);
+        var request = BuildQuickstartRequest(
+            modManifestPaths, catalog, RandomNumberGenerator.GetInt32(999999999));
+
+        var result = CreateGameCore(_modDataStore, request);
+        if (result == null)
+            throw new InvalidOperationException(
+                "Quickstart: could not create the game: the starting system or body was not found.");
+
+        var (game, playerFaction, system, startingBody) = result.Value;
+        return Activate(game, playerFaction, system.ManagerID, startingBody);
     }
 
     /// <summary>Builds the quickstart NewGameRequest from the catalog's DefaultStart when
-    /// those ids are in the catalog lists.</summary>
-    internal static NewGameRequest? BuildQuickstartRequest(
+    /// those ids are in the catalog lists. Throws with a player-facing message when the
+    /// catalog has nothing a quickstart game can start from.</summary>
+    internal static NewGameRequest BuildQuickstartRequest(
         IReadOnlyList<string> modManifestPaths,
         NewGameCatalog catalog,
         int masterSeed)
     {
         if (catalog.Species.Count == 0)
-        {
-            Console.WriteLine("Quickstart Error: No playable species found in loaded mods");
-            return null;
-        }
+            throw new InvalidOperationException("Quickstart: the loaded mods have no playable species.");
 
         if (catalog.Colonies.Count == 0)
-        {
-            Console.WriteLine("Quickstart Error: No colonies found in loaded mods");
-            return null;
-        }
+            throw new InvalidOperationException("Quickstart: the loaded mods have no colonies.");
 
         var startableSystems = catalog.Systems.Where(s => s.StartingBodies.Count > 0).ToList();
         if (startableSystems.Count == 0)
-        {
-            Console.WriteLine("Quickstart Error: No compatible starting systems found");
-            return null;
-        }
+            throw new InvalidOperationException("Quickstart: the loaded mods have no startable systems.");
 
         var startingSystem = startableSystems.First();
         string speciesId = catalog.Species.First().Id;

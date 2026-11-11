@@ -125,8 +125,19 @@ namespace Pulsar4X.Colonies
             // Add starting installations
             foreach(var installation in colonyBlueprint.Installations ?? new List<ColonyBlueprint.StartingItemBlueprint>())
             {
+                if (!factionInfo.InternalComponentDesigns.TryGetValue(installation.Id, out var design))
+                {
+                    throw new ModLoadException(new ModLoadError(
+                        colonyBlueprint.ModNamespace,
+                        colonyBlueprint.JsonFileName,
+                        nameof(ColonyBlueprint),
+                        colonyBlueprint.UniqueID,
+                        "Installations",
+                        installation.Id));
+                }
+
                 colonyEntity.AddComponent(
-                    factionInfo.InternalComponentDesigns[installation.Id],
+                    design,
                     (int)installation.Amount
                 );
             }

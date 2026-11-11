@@ -261,6 +261,7 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
     {
         ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), ImGuiChildFlags.None);
 
+        DisplayError();
         DisplayHelpers.Header("Select pre-configured Systems to include");
 
         if(_catalog != null && ImGui.BeginTable("SystemsSelection", 2, Styles.TableFlags))
@@ -525,25 +526,24 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
     }
 
     /// <summary>
-    /// Creates a new game instantly with default settings, bypassing the wizard
+    /// Creates a new game instantly with default settings, bypassing the wizard.
+    /// Returns a player-facing error message, or null when the game was created.
     /// </summary>
-    public static void QuickstartGame()
+    public static string? QuickstartGame()
     {
         try
         {
             var activation = _uiState.Lifecycle?.Quickstart();
-            if (activation == null) return;
+            if (activation == null)
+                return "Quickstart: could not create the game.";
 
             _uiState.ActivateGameUI(activation);
+            return null;
         }
         catch (Exception ex)
         {
-            // Quickstart lets a mod load error through (its message is the player-facing list of
-            // bad ids); show it on the new-game menu rather than leaving a blank window.
             Console.WriteLine($"Quickstart: {ex}");
-            var menu = GetInstance();
-            menu._errorMessage = ex.Message;
-            menu.SetActive(true);
+            return ex.Message;
         }
     }
 }

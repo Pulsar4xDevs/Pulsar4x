@@ -30,7 +30,8 @@ public interface IGameLifecycle
     /// Null when creation fails (e.g. no valid starting body).</summary>
     GameActivation? CreateNewGame(NewGameRequest request);
 
-    /// <summary>Create a game instantly with default settings, bypassing the wizard.</summary>
+    /// <summary>Create a game instantly with default settings, bypassing the wizard.
+    /// Throws with a player-facing message when quickstart cannot start a game.</summary>
     GameActivation? Quickstart();
 
     /// <summary>Load a saved game from disk and bring it up.</summary>

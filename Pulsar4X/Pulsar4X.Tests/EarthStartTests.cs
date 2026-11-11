@@ -3,6 +3,7 @@ using System.Linq;
 using GameEngine.Engine.Orders;
 using NUnit.Framework;
 using Pulsar4X.Api;
+using Pulsar4X.Blueprints;
 using Pulsar4X.Colonies;
 using Pulsar4X.Engine.Api;
 using Pulsar4X.Components;
@@ -118,6 +119,39 @@ public class EarthStartTests
         Assert.That(yardLine.RefitCargo.Select(part => part.DesignId), Does.Contain("default-design-ship-construction"));
         Assert.That(yardLine.RefitCargo.Where(part => part.DesignId == "default-design-ship-construction").Sum(part => part.Cost),
             Is.GreaterThan(0));
+    }
+
+    [Test]
+    public void StartingInstallation_MissingDesign_ThrowsModLoadException()
+    {
+        var modLoader = new ModLoader();
+        var store = new ModDataStore();
+        modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
+        modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", store);
+
+        var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
+        game.Settings.EnforceSingleThread = true;
+        StarSystemFactory.LoadFromBlueprint(game, store.Systems["system-sol"]);
+
+        var player = FactionFactory.CreateBasicFaction(game, "United Earth Corp", "UEC", 0);
+        player.FactionOwnerID = player.Id;
+        var sol = game.Systems.Single(s => s.ID == "system-sol");
+        var species = SpeciesFactory.CreateFromBlueprint(sol, store.Species["species-human"]);
+        species.FactionOwnerID = player.Id;
+        var earth = NameLookup.GetFirstEntityWithName(sol, "Earth");
+
+        var blueprint = store.Colonies["colony-earth"];
+        const string missingId = "missing-installation-design";
+        blueprint.Installations = new List<ColonyBlueprint.StartingItemBlueprint>
+        {
+            new ColonyBlueprint.StartingItemBlueprint { Id = missingId, Amount = 1 }
+        };
+
+        var ex = Assert.Throws<ModLoadException>(() =>
+            ColonyFactory.CreateFromBlueprint(game, player, species, sol, earth, blueprint));
+
+        Assert.That(ex!.Errors[0].Field, Is.EqualTo("Installations"));
+        Assert.That(ex.Errors[0].MissingId, Is.EqualTo(missingId));
     }
 
     static List<string> LargestPiles(Entity colony, int capacity)

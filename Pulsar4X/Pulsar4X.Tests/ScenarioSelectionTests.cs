@@ -297,10 +297,64 @@ public class ScenarioSelectionTests
 
         var request = GameLifecycle.BuildQuickstartRequest(paths, catalog, 1);
         Assert.That(request, Is.Not.Null);
-        Assert.That(request!.ScenarioId, Is.EqualTo(SolDefault));
+        Assert.That(request.ScenarioId, Is.EqualTo(SolDefault));
         Assert.That(request.SpeciesId, Is.EqualTo("species-human"));
         Assert.That(request.ColonyId, Is.EqualTo("colony-earth"));
         Assert.That(request.SystemId, Is.EqualTo("system-sol"));
         Assert.That(request.BodyId, Is.EqualTo("planet-earth"));
+    }
+
+    [Test]
+    public void BuildQuickstartRequest_EmptyCatalog_ThrowsNoPlayableSpecies()
+    {
+        var catalog = new NewGameCatalog(
+            new List<CatalogOption>(),
+            new List<CatalogOption>(),
+            new List<CatalogOption>(),
+            new List<CatalogSystemOption>());
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            GameLifecycle.BuildQuickstartRequest(new List<string>(), catalog, 1));
+
+        Assert.That(ex!.Message, Does.Contain("playable species"));
+    }
+
+    [Test]
+    public void BuildQuickstartRequest_SpeciesButNoColonies_Throws()
+    {
+        var catalog = new NewGameCatalog(
+            new List<CatalogOption> { new CatalogOption("species-human", "Human") },
+            new List<CatalogOption>(),
+            new List<CatalogOption>(),
+            new List<CatalogSystemOption>
+            {
+                new CatalogSystemOption("system-sol", "Sol", new List<CatalogOption>
+                {
+                    new CatalogOption("planet-earth", "Earth")
+                })
+            });
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            GameLifecycle.BuildQuickstartRequest(new List<string>(), catalog, 1));
+
+        Assert.That(ex!.Message, Does.Contain("no colonies"));
+    }
+
+    [Test]
+    public void BuildQuickstartRequest_NoStartableSystems_Throws()
+    {
+        var catalog = new NewGameCatalog(
+            new List<CatalogOption> { new CatalogOption("species-human", "Human") },
+            new List<CatalogOption>(),
+            new List<CatalogOption> { new CatalogOption("colony-earth", "Earth") },
+            new List<CatalogSystemOption>
+            {
+                new CatalogSystemOption("system-sol", "Sol", new List<CatalogOption>())
+            });
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            GameLifecycle.BuildQuickstartRequest(new List<string>(), catalog, 1));
+
+        Assert.That(ex!.Message, Does.Contain("startable systems"));
     }
 }
