@@ -12,7 +12,7 @@ using Pulsar4X.Names;
 namespace Pulsar4X.Tests;
 
 /// <summary>
-/// The new-game wizard's scenario page: which required mods are not installed, which mods a
+/// The one-page new-game wizard: which required mods are not installed, which mods a
 /// scenario requires, how picking one ticks those mods, and that an explicit scenario id is
 /// what gets loaded.
 /// </summary>

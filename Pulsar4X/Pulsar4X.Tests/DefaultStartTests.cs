@@ -331,12 +331,14 @@ public class DefaultStartTests
     public void Wizard_HasTwoPages_AndKeepsOnlyNameAbbreviationAndSeed()
     {
         var page = typeof(NewGameMenu).Assembly.GetType("Pulsar4X.Client.Page");
-        Assert.That(page, Is.Not.Null);
-        Assert.That(page!.IsEnum, Is.True);
-        Assert.That(Enum.GetNames(page), Is.EqualTo(new[] { "SelectScenario", "SelectDetails" }));
+        Assert.That(page, Is.Null);
 
-        var fields = typeof(NewGameMenu).GetFields(
-            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+        var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+        var fields = typeof(NewGameMenu).GetFields(flags);
+        Assert.That(fields.Select(field => field.Name), Does.Not.Contain("_currentPage"));
+        Assert.That(typeof(NewGameMenu).GetMethods(flags).Select(method => method.Name),
+            Does.Not.Contain("DisplayDetailsPage"));
+
         string[] forbidden =
         {
             "password", "species", "theme", "colony", "funds", "maxsystems", "enabledsystems",

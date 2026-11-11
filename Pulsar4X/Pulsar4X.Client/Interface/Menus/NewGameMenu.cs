@@ -8,12 +8,6 @@ using Pulsar4X.Client.Interface.Widgets;
 
 namespace Pulsar4X.Client;
 
-enum Page
-{
-    SelectScenario,
-    SelectDetails
-}
-
 static class Helper
 {
     public static byte[] ToByteArray(this string str)
@@ -27,8 +21,6 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
     private const int NAME_BUFFER_SIZE = 32;
     private const int SHORTNAME_BUFFER_SIZE = 5;
 
-    Page _currentPage = Page.SelectScenario;
-
     // The mod list, the scenario list and the option catalog come from the lifecycle seam
     // (composition-root work); this window only holds the player's selections.
     IReadOnlyList<ModOption> _availableMods = Array.Empty<ModOption>();
@@ -38,6 +30,11 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
     bool _scenariosLoaded;
     bool _scenarioListFailed;
     NewGameCatalog? _catalog;
+
+    // Scenario id and enabled mod paths the current _catalog was loaded for. Reloaded when either
+    // differs; a failed load leaves _catalog null so Create stays disabled.
+    string? _catalogScenarioId;
+    List<string>? _catalogModPaths;
 
     // The last failure from loading mods or creating the game, shown on the page so the wizard
     // never fails silently or takes the whole client down.
@@ -93,15 +90,7 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
             // Calculate content area height (window height minus footer)
             _contentHeight = _windowSize.Y - _footerHeight;// - ImGui.GetFrameHeightWithSpacing();
 
-            switch(_currentPage)
-            {
-                case Page.SelectScenario:
-                    DisplayScenarioPage();
-                    break;
-                case Page.SelectDetails:
-                    DisplayDetailsPage();
-                    break;
-            }
+            DisplayPage();
         }
         // ImGui needs End() even when Begin() returned false (collapsed or clipped window).
         Window.End();
@@ -212,10 +201,72 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
             _errorMessage = "";
     }
 
-    private void DisplayScenarioPage()
+    /// <summary>
+    /// Reloads the catalog when the selected scenario or the enabled mod set is not what the
+    /// current catalog was loaded for. A scenario change (including the first selection) refills
+    /// the corporation name and abbreviation from DefaultStart; a mod toggle does not.
+    /// </summary>
+    private void EnsureCatalogCurrent()
+    {
+        var selected = SelectedScenario();
+        if (selected == null
+            || _scenarioListFailed
+            || ScenarioCompatibility.NotInstalledMods(selected, _availableMods).Count > 0)
+        {
+            return;
+        }
+
+        foreach (var mod in _availableMods)
+        {
+            if (ScenarioCompatibility.IsRequired(selected, mod.Namespace))
+                _modEnabled[mod.Namespace] = true;
+        }
+
+        var enabledPaths = EnabledModPaths();
+        bool scenarioChanged = _catalogScenarioId != _selectedScenarioId;
+        bool modsChanged = _catalogModPaths == null || !enabledPaths.SequenceEqual(_catalogModPaths);
+        if (!scenarioChanged && !modsChanged)
+            return;
+
+        _catalogScenarioId = _selectedScenarioId;
+        _catalogModPaths = new List<string>(enabledPaths);
+
+        NewGameCatalog? catalog = null;
+        if (enabledPaths.Count == 0)
+        {
+            _errorMessage = "Select at least one mod to continue.";
+        }
+        else if (_uiState.Lifecycle != null)
+        {
+            try
+            {
+                catalog = _uiState.Lifecycle.LoadMods(enabledPaths, _selectedScenarioId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"New game: failed to load mods: {ex}");
+                _errorMessage = $"Could not load the selected mods: {ex.Message}";
+            }
+        }
+
+        _catalog = catalog;
+        if (catalog == null)
+            return;
+
+        _errorMessage = "";
+        if (!scenarioChanged)
+            return;
+
+        var start = catalog.DefaultStart;
+        _corporationNameBuffer = Utils.BytesFromString(start?.FactionName ?? "", NAME_BUFFER_SIZE);
+        _corporationAbbreviationBuffer = Utils.BytesFromString(start?.FactionAbbreviation ?? "", SHORTNAME_BUFFER_SIZE);
+    }
+
+    private void DisplayPage()
     {
         EnsureNewGameOptions();
         UpdateScenarioGate();
+        EnsureCatalogCurrent();
 
         ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), ImGuiChildFlags.None);
 
@@ -307,73 +358,9 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
             }
         }
 
-        ImGui.EndChild();
-        ImGui.BeginChild("Footer", new Vector2(0, _footerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+        EnsureCatalogCurrent();
 
-        CancelButton();
-        ImGui.SameLine();
-
-        float buttonX = _windowSize.X - _buttonWidth - ImGui.GetStyle().WindowPadding.X;
-        ImGui.SetCursorPosX(buttonX);
-        bool canContinue = selected != null
-            && !_scenarioListFailed
-            && ScenarioCompatibility.NotInstalledMods(selected, _availableMods).Count == 0;
-        if (!canContinue)
-            ImGui.BeginDisabled();
-        bool next = ImGui.Button("Next", new Vector2(_buttonWidth, 0));
-        if (!canContinue)
-            ImGui.EndDisabled();
-        if ((next || _uiState.debugnewgame) && canContinue && selected != null)
-        {
-            _uiState.debugnewgame = false;
-            foreach (var mod in _availableMods)
-            {
-                if (ScenarioCompatibility.IsRequired(selected, mod.Namespace))
-                    _modEnabled[mod.Namespace] = true;
-            }
-
-            var enabledPaths = EnabledModPaths();
-
-            NewGameCatalog? catalog = null;
-            if (enabledPaths.Count == 0)
-            {
-                _errorMessage = "Select at least one mod to continue.";
-            }
-            else if (_uiState.Lifecycle != null)
-            {
-                try
-                {
-                    catalog = _uiState.Lifecycle.LoadMods(enabledPaths, _selectedScenarioId);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"New game: failed to load mods: {ex}");
-                    _errorMessage = $"Could not load the selected mods: {ex.Message}";
-                }
-            }
-
-            if (catalog != null)
-            {
-                _catalog = catalog;
-                _errorMessage = "";
-                var start = _catalog.DefaultStart;
-                _corporationNameBuffer = Utils.BytesFromString(start?.FactionName ?? "", NAME_BUFFER_SIZE);
-                _corporationAbbreviationBuffer = Utils.BytesFromString(start?.FactionAbbreviation ?? "", SHORTNAME_BUFFER_SIZE);
-                _currentPage = Page.SelectDetails;
-            }
-        }
-        ImGui.EndChild();
-    }
-
-    private void DisplayDetailsPage()
-    {
-        if (_catalog == null)
-            return;
-
-        ImGui.BeginChild("ScrollingRegion", new Vector2(0, _contentHeight), ImGuiChildFlags.None);
-
-        DisplayError();
-        DisplayHelpers.Header("CORPORTATION SETUP");
+        DisplayHelpers.Header("CORPORATION");
         ImGui.InputText("Corporation Name", _corporationNameBuffer, NAME_BUFFER_SIZE);
         ImGui.InputText("Corporation Abbreviation", _corporationAbbreviationBuffer, SHORTNAME_BUFFER_SIZE);
 
@@ -390,16 +377,20 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
         CancelButton();
         ImGui.SameLine();
 
-        if (ImGui.Button("Back", new Vector2(_buttonWidth, 0)))
-        {
-            _currentPage = Page.SelectScenario;
-        }
-        ImGui.SameLine();
-        // Right-align the button by calculating its position
         float buttonX = _windowSize.X - _buttonWidth - ImGui.GetStyle().WindowPadding.X;
         ImGui.SetCursorPosX(buttonX);
-        if (ImGui.Button("Create Game!", new Vector2(_buttonWidth, 0)))
+        bool canCreate = selected != null
+            && !_scenarioListFailed
+            && ScenarioCompatibility.NotInstalledMods(selected, _availableMods).Count == 0
+            && _catalog != null;
+        if (!canCreate)
+            ImGui.BeginDisabled();
+        bool create = ImGui.Button("Create", new Vector2(_buttonWidth, 0));
+        if (!canCreate)
+            ImGui.EndDisabled();
+        if ((create || _uiState.debugnewgame) && canCreate)
         {
+            _uiState.debugnewgame = false;
             CreateNewGame();
         }
         ImGui.EndChild();
@@ -454,7 +445,10 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
 
         _errorMessage = "";
         IsActive = false;
-        _currentPage = Page.SelectScenario;
+        // Reload and refill the corporation fields the next time the window opens.
+        _catalog = null;
+        _catalogScenarioId = null;
+        _catalogModPaths = null;
     }
 
     private void CancelButton()
