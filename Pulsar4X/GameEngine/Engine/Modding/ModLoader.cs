@@ -212,6 +212,7 @@ namespace Pulsar4X.Modding
         /// <summary>
         /// Resolves the chosen scenario's RequiredScenarios (base first, each once), checks every
         /// scenario in the chain, including the system packs it includes, then applies each.
+        /// DefaultStart is merged along that chain, base first, and stored as the effective start.
         /// Throws one ModLoadException before applying anything if the chain is unsound.
         /// <paramref name="scenarioManifestPath"/> selects a manifest that may not be in
         /// <paramref name="discovered"/> (a fixture or a later user folder).
@@ -371,6 +372,7 @@ namespace Pulsar4X.Modding
                 systemsForLoad = merged;
             }
 
+            var starts = new List<ScenarioManifest.ScenarioStart?>();
             ScenarioManifest? chosen = null;
             foreach (var ns in ordered)
             {
@@ -378,15 +380,17 @@ namespace Pulsar4X.Modding
                     ? chosenPath
                     : Path.Combine(byNamespace[ns].ScenarioDirectory, "scenarioInfo.json");
                 var loaded = LoadScenario(path, store, systemsForLoad);
+                starts.Add(loaded.DefaultStart);
                 if (ns == chosenNs)
                     chosen = loaded;
             }
 
-            if (chosen?.DefaultStart != null)
-                ValidateDefaultStart(chosen, store);
+            var mergedStart = ScenarioManifest.ScenarioStart.Merge(starts);
+            if (mergedStart != null && chosen != null)
+                ValidateDefaultStart(chosen, mergedStart, store);
 
             store.ScenarioNamespace = chosen?.Namespace;
-            store.ScenarioDefaultStart = chosen?.DefaultStart;
+            store.ScenarioDefaultStart = mergedStart;
         }
 
         /// <summary>
@@ -511,9 +515,9 @@ namespace Pulsar4X.Modding
             store.LoadedSystems.Add(manifest.Namespace);
         }
 
-        private static void ValidateDefaultStart(ScenarioManifest scenario, ModDataStore store)
+        private static void ValidateDefaultStart(
+            ScenarioManifest scenario, ScenarioManifest.ScenarioStart start, ModDataStore store)
         {
-            var start = scenario.DefaultStart;
             var errors = new List<ModLoadError>();
 
             if (!string.IsNullOrEmpty(start.Species) && !store.Species.ContainsKey(start.Species))
@@ -539,6 +543,12 @@ namespace Pulsar4X.Modding
                 errors.Add(new ModLoadError(
                     scenario.Namespace, "scenarioInfo.json", "ScenarioManifest",
                     scenario.Namespace, "DefaultStart.Body", start.Body));
+            }
+            if (!string.IsNullOrEmpty(start.Theme) && !store.Themes.ContainsKey(start.Theme))
+            {
+                errors.Add(new ModLoadError(
+                    scenario.Namespace, "scenarioInfo.json", "ScenarioManifest",
+                    scenario.Namespace, "DefaultStart.Theme", start.Theme));
             }
 
             if (errors.Count > 0)

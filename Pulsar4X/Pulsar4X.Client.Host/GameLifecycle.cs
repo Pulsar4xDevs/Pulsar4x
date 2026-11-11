@@ -27,9 +27,6 @@ namespace Pulsar4X.Client.Host;
 /// </summary>
 public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
 {
-    private const string DEFAULT_NAME = "United Earth Corp";
-    private const string DEFAULT_ABBREVIATION = "UEC";
-
     private readonly GlobalUIState _state;
     private ModDataStore _modDataStore = new ();
 
@@ -173,6 +170,7 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
     internal static NewGameCatalog BuildCatalog(ModDataStore data)
     {
         var systems = new List<CatalogSystemOption>();
+        var includedSystemIds = new List<string>();
         foreach (var (id, system) in data.Systems)
         {
             var startingBodies = data.SystemBodies
@@ -180,16 +178,25 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
                 .Select(kvp => new CatalogOption(kvp.Key, kvp.Value.Name))
                 .ToList();
             systems.Add(new CatalogSystemOption(id, system.Name, startingBodies));
+            if (data.LoadedSystems.Contains(system.ModNamespace))
+                includedSystemIds.Add(id);
         }
 
         CatalogDefaultStart? defaultStart = null;
         if (data.ScenarioDefaultStart != null)
         {
+            var start = data.ScenarioDefaultStart;
             defaultStart = new CatalogDefaultStart(
-                data.ScenarioDefaultStart.Species,
-                data.ScenarioDefaultStart.Colony,
-                data.ScenarioDefaultStart.System,
-                data.ScenarioDefaultStart.Body);
+                start.Species,
+                start.Colony,
+                start.System,
+                start.Body,
+                start.Theme,
+                start.StartingFunds,
+                start.MaxSystems,
+                start.EleStart,
+                start.FactionName,
+                start.FactionAbbreviation);
         }
 
         return new NewGameCatalog(
@@ -201,7 +208,10 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
                 .Select(kvp => new CatalogOption(kvp.Key, kvp.Value.Name)).ToList(),
             systems,
             defaultStart,
-            data.ScenarioNamespace);
+            data.ScenarioNamespace)
+        {
+            IncludedSystemIds = includedSystemIds
+        };
     }
 
     public GameActivation? CreateNewGame(NewGameRequest request)
@@ -252,9 +262,9 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
         return Activate(game, playerFaction, system.ManagerID, startingBody);
     }
 
-    /// <summary>Builds the quickstart NewGameRequest from the catalog's DefaultStart when
-    /// those ids are in the catalog lists. Throws with a player-facing message when the
-    /// catalog has nothing a quickstart game can start from.</summary>
+    /// <summary>Builds the quickstart NewGameRequest from the catalog's DefaultStart.
+    /// Throws with a player-facing message when the catalog has nothing a quickstart
+    /// game can start from, or when that DefaultStart is incomplete.</summary>
     internal static NewGameRequest BuildQuickstartRequest(
         IReadOnlyList<string> modManifestPaths,
         NewGameCatalog catalog,
@@ -266,49 +276,16 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
         if (catalog.Colonies.Count == 0)
             throw new InvalidOperationException("Quickstart: the loaded mods have no colonies.");
 
-        var startableSystems = catalog.Systems.Where(s => s.StartingBodies.Count > 0).ToList();
-        if (startableSystems.Count == 0)
+        if (!catalog.Systems.Any(system => system.StartingBodies.Count > 0))
             throw new InvalidOperationException("Quickstart: the loaded mods have no startable systems.");
 
-        var startingSystem = startableSystems.First();
-        string speciesId = catalog.Species.First().Id;
-        string colonyId = catalog.Colonies.First().Id;
-        string systemId = startingSystem.Id;
-        string bodyId = startingSystem.StartingBodies.First().Id;
-
-        if (catalog.DefaultStart is { } start)
-        {
-            if (catalog.Species.Any(s => s.Id == start.SpeciesId))
-                speciesId = start.SpeciesId;
-            if (catalog.Colonies.Any(c => c.Id == start.ColonyId))
-                colonyId = start.ColonyId;
-            var system = catalog.Systems.FirstOrDefault(s => s.Id == start.SystemId);
-            if (system != null)
-            {
-                systemId = system.Id;
-                if (system.StartingBodies.Any(b => b.Id == start.BodyId))
-                    bodyId = start.BodyId;
-                else if (system.StartingBodies.Count > 0)
-                    bodyId = system.StartingBodies.First().Id;
-            }
-        }
-
-        return new NewGameRequest(
-            ModManifestPaths: modManifestPaths,
-            FactionName: DEFAULT_NAME,
-            FactionAbbreviation: DEFAULT_ABBREVIATION,
-            SpeciesId: speciesId,
-            ColonyId: colonyId,
-            SystemId: systemId,
-            BodyId: bodyId,
-            EnabledSystems: startableSystems.Select(s => s.Id).ToList(),
-            MaxSystems: NewGameSettings.DEFAULT_NUM_SYSTEMS,
-            MasterSeed: masterSeed,
-            StartingFunds: 100_000_000,
-            EleStart: true,
-            SMPassword: "",
-            PlayerPassword: "",
-            ScenarioId: catalog.ScenarioId);
+        var start = catalog.DefaultStart;
+        return NewGameRequests.FromDefaultStart(
+            catalog,
+            modManifestPaths,
+            start?.FactionName ?? "",
+            start?.FactionAbbreviation ?? "",
+            masterSeed);
     }
 
     public GameActivation? LoadGame(string filePath)
@@ -464,6 +441,9 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
             MasterSeed = request.MasterSeed,
             EleStart = request.EleStart
         };
+        // A theme from the scenario replaces the engine default. An empty id keeps it.
+        if (!string.IsNullOrEmpty(request.ThemeId))
+            gameSettings.CurrentTheme = request.ThemeId;
 
         Game game = GameFactory.CreateGame(modDataStore, gameSettings);
         game.CreatedOnGitHash = AssemblyInfo.GetGitHash();

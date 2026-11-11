@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Pulsar4X.Api;
 
@@ -80,25 +81,41 @@ public sealed record ScenarioOption(
 
 public sealed record CatalogOption(string Id, string Name);
 
-/// <summary>The applied scenario's DefaultStart ids, for prefilling a new game.</summary>
-public sealed record CatalogDefaultStart(string SpeciesId, string ColonyId, string SystemId, string BodyId);
+/// <summary>The effective DefaultStart of the applied scenario chain.</summary>
+public sealed record CatalogDefaultStart(
+    string SpeciesId,
+    string ColonyId,
+    string SystemId,
+    string BodyId,
+    string? ThemeId = null,
+    int? StartingFunds = null,
+    int? MaxSystems = null,
+    bool? EleStart = null,
+    string? FactionName = null,
+    string? FactionAbbreviation = null);
 
 /// <summary>A mod-defined star system; <see cref="StartingBodies"/> are its bodies a new game can
 /// start on (empty when the system can be included but not started in).</summary>
 public sealed record CatalogSystemOption(string Id, string Name, IReadOnlyList<CatalogOption> StartingBodies);
 
 /// <summary>The mod-defined options a new game is configured from (species pre-filtered to
-/// playable ones).</summary>
+/// playable ones). <see cref="IncludedSystemIds"/> are the systems from the scenario's
+/// included packs, in store order.</summary>
 public sealed record NewGameCatalog(
     IReadOnlyList<CatalogOption> Species,
     IReadOnlyList<CatalogOption> Themes,
     IReadOnlyList<CatalogOption> Colonies,
     IReadOnlyList<CatalogSystemOption> Systems,
     CatalogDefaultStart? DefaultStart = null,
-    string? ScenarioId = null);
+    string? ScenarioId = null)
+{
+    /// <summary>System ids from the scenario's included packs, in store order.</summary>
+    public IReadOnlyList<string> IncludedSystemIds { get; init; } = Array.Empty<string>();
+}
 
 /// <summary>Everything the composition root needs to create a game. <see cref="SystemId"/> may be
-/// "random" to start in a randomly generated system.</summary>
+/// "random" to start in a randomly generated system. <see cref="ThemeId"/>, when set, becomes
+/// the game's current theme; an empty id keeps the engine default.</summary>
 public sealed record NewGameRequest(
     IReadOnlyList<string> ModManifestPaths,
     string FactionName,
@@ -115,7 +132,8 @@ public sealed record NewGameRequest(
     string SMPassword,
     string PlayerPassword,
     string? ScenarioId = null,
-    string? ScenarioManifestPath = null);
+    string? ScenarioManifestPath = null,
+    string? ThemeId = null);
 
 /// <summary>
 /// What the UI needs to finish bringing a game on screen. By the time this is returned the

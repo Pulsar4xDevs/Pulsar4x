@@ -23,6 +23,12 @@
     "Species": "species-human",
     "Colony": "colony-earth",
     "System": "system-sol",
-    "Body": "planet-earth"
+    "Body": "planet-earth",
+    "Theme": "default-theme",
+    "StartingFunds": 100000000,
+    "MaxSystems": 10,
+    "EleStart": true,
+    "FactionName": "United Earth Corp",
+    "FactionAbbreviation": "UEC"
   }
 }

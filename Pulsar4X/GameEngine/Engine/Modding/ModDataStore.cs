@@ -39,7 +39,8 @@ namespace Pulsar4X.Modding
         /// stores that loaded no scenario and on saves from before this field existed.</summary>
         public string? ScenarioNamespace { get; set; }
 
-        /// <summary>DefaultStart of the applied scenario, if any. Used to prefill a new game.</summary>
+        /// <summary>Effective DefaultStart of the applied scenario chain, base first.
+        /// A later scenario overwrites only the fields it sets. Null when none set one.</summary>
         public ScenarioManifest.ScenarioStart? ScenarioDefaultStart { get; set; }
 
         /// <summary>Namespaces of the system packs applied, in order. Old saves that omit
