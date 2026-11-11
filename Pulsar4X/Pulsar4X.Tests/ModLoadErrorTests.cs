@@ -65,9 +65,11 @@ public class ModLoadErrorTests
     /// in the store before it builds anything, so a bad reference throws before a Game exists, and
     /// before anything has changed in the store.
     /// </summary>
-    private static (ModLoadException? error, Game? game) StartLikeTheMenu(List<string> paths)
+    private static (ModLoadException? error, Game? game) StartLikeTheMenu(
+        List<string> paths, string? scenarioManifestPath = null)
     {
-        var store = GameLifecycle.LoadModStore(paths, ModsState.AvailableMods.Select(m => m.Path));
+        var store = GameLifecycle.LoadModStore(
+            paths, ModsState.AvailableMods.Select(m => m.Path), scenarioManifestPath: scenarioManifestPath);
 
         // A start list on its own only opens what the player colony's StartingItems unlock, so a ship
         // design over those lists can report the armor as missing before the library is opened. When the
@@ -170,15 +172,6 @@ public class ModLoadErrorTests
                   "Payload": { "UniqueID": "fixture-plastic-armor", "ResourceID": "plastic", "Density": "1175" }
                 }
                 """);
-            // Basemod's Mars outpost is placed for the player too, and its designs need what the Earth
-            // start unlocks. This start is not Earth, so take the outpost out, as earlytechstart does.
-            entries.Add("""
-                {
-                  "Type": "Colony",
-                  "Operation": "Remove",
-                  "Payload": { "UniqueID": "colony-mars-outpost" }
-                }
-                """);
             entries.Add(ComponentDesign(DesignA));
             entries.Add(ComponentDesign(DesignB));
             entries.Add(ComponentDesign(FactionDesign));
@@ -230,6 +223,40 @@ public class ModLoadErrorTests
             """);
 
         File.WriteAllText(Path.Combine(dir, FixtureFile), "[\n" + string.Join(",\n", entries) + "\n]\n");
+
+        if (withTheIds)
+        {
+            // Sol-default is applied after the fixture mod and would put the Mars outpost back.
+            // A fixture scenario on top of SolDefault removes it, the same way early-tech does.
+            File.WriteAllText(Path.Combine(dir, "scenario.json"), """
+                [
+                  {
+                    "Type": "Colony",
+                    "Operation": "Remove",
+                    "Payload": { "UniqueID": "colony-mars-outpost" }
+                  }
+                ]
+                """);
+            File.WriteAllText(Path.Combine(dir, "scenarioInfo.json"), $$"""
+                {
+                  "Author": "Pulsar4X Tests",
+                  "ScenarioName": "Missing Design Start",
+                  "Version": "0.1",
+                  "Namespace": "Pulsar4x.Scenario.MissingDesign",
+                  "Description": "Sound start for the missing-design fixture.",
+                  "DefaultEnabled": false,
+                  "RequiredMods": [ "{{BaseMod}}", "{{FixtureNamespace}}" ],
+                  "RequiredScenarios": [ "Pulsar4x.Scenario.SolDefault" ],
+                  "DataFiles": [ "scenario.json" ],
+                  "DefaultStart": {
+                    "Species": "species-human",
+                    "Colony": "colony-missing-designs",
+                    "System": "system-sol",
+                    "Body": "planet-earth"
+                  }
+                }
+                """);
+        }
 
         return dir;
     }
@@ -298,7 +325,7 @@ public class ModLoadErrorTests
 
         try
         {
-            var (error, game) = StartLikeTheMenu(paths);
+            var (error, game) = StartLikeTheMenu(paths, Path.Combine(fixtureDir, "scenarioInfo.json"));
 
             Assert.That(error, Is.Null, error?.DisplayMessage);
             Assert.That(game, Is.Not.Null, "a start whose references all resolve has to create the game");

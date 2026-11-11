@@ -73,43 +73,81 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
                 ModsState.IsModEnabled.TryGetValue(m.Mod.ModName, out bool enabled) && enabled))
             .ToList();
 
-    public NewGameCatalog LoadMods(IReadOnlyList<string> modManifestPaths)
+    public IReadOnlyList<ScenarioOption> GetAvailableScenarios()
+    {
+        var discovered = new ModLoader().DiscoverScenarios(ScenarioRoots(ModsState.AvailableMods.Select(m => m.Path)));
+        return discovered.Values
+            .OrderBy(s => s.Namespace, StringComparer.Ordinal)
+            .Select(s => new ScenarioOption(
+                s.Namespace,
+                s.ScenarioName,
+                s.Description,
+                s.DefaultEnabled,
+                s.RequiredMods ?? new List<string>(),
+                Path.Combine(s.ScenarioDirectory, "scenarioInfo.json")))
+            .ToList();
+    }
+
+    public NewGameCatalog LoadMods(
+        IReadOnlyList<string> modManifestPaths,
+        string? scenarioId = null,
+        string? scenarioManifestPath = null)
     {
         // Load into a fresh store and keep it only if every mod and the start scenario load, so a
         // failed attempt never leaves a half-loaded set behind. Dependencies are pulled in and loaded
-        // first. Pulsar4x loads sol-default; Early Tech Start also loads early-tech after that.
-        var modDataStore = LoadModStore(modManifestPaths, ModsState.AvailableMods.Select(m => m.Path));
+        // first, then the chosen scenario (or the default among those whose RequiredMods are loaded).
+        var modDataStore = LoadModStore(
+            modManifestPaths, ModsState.AvailableMods.Select(m => m.Path), scenarioId, scenarioManifestPath);
         _modDataStore = modDataStore;
 
         return BuildCatalog(_modDataStore);
     }
 
     /// <summary>Loads the mods (and the mods they depend on, found among
-    /// <paramref name="availableManifestPaths"/>) into a fresh store, then the start
-    /// scenario. Sol Default loads when Pulsar4x is loaded. Early Tech loads after
-    /// it when Pulsar4x.EarlyTechStart is loaded. A store without Pulsar4x loads no
-    /// scenario.</summary>
+    /// <paramref name="availableManifestPaths"/>) into a fresh store, then the chosen
+    /// scenario. When neither <paramref name="scenarioId"/> nor
+    /// <paramref name="scenarioManifestPath"/> is given, the default among discovered
+    /// scenarios whose RequiredMods are loaded is applied. A store with no qualifying
+    /// scenario loads no scenario.</summary>
     internal static ModDataStore LoadModStore(
-        IEnumerable<string> modManifestPaths, IEnumerable<string> availableManifestPaths)
+        IEnumerable<string> modManifestPaths,
+        IEnumerable<string> availableManifestPaths,
+        string? scenarioId = null,
+        string? scenarioManifestPath = null)
     {
+        var requested = modManifestPaths.ToList();
+        var available = availableManifestPaths.ToList();
         var modLoader = new ModLoader();
         var modDataStore = new ModDataStore();
-        modLoader.LoadModManifests(modManifestPaths, availableManifestPaths, modDataStore);
+        modLoader.LoadModManifests(requested, available, modDataStore);
 
-        var pulsar4x = modDataStore.ModManifests.FirstOrDefault(manifest => manifest.Namespace == "Pulsar4x");
-        if (pulsar4x != null)
-        {
-            string? modsFolder = Path.GetDirectoryName(pulsar4x.ModDirectory);
-            if (string.IsNullOrEmpty(modsFolder))
-                throw new DirectoryNotFoundException("Could not find the mods folder for " + pulsar4x.ModDirectory);
+        var discovered = modLoader.DiscoverScenarios(ScenarioRoots(requested.Concat(available)));
+        string? chosenId = scenarioId;
+        if (string.IsNullOrEmpty(scenarioManifestPath) && string.IsNullOrEmpty(chosenId))
+            chosenId = ModLoader.ChooseDefaultScenario(discovered.Values, modDataStore);
 
-            string scenarios = Path.Combine(modsFolder, "scenarios");
-            modLoader.LoadScenario(Path.Combine(scenarios, "sol-default", "scenarioInfo.json"), modDataStore);
-            if (modDataStore.ModManifests.Any(manifest => manifest.Namespace == "Pulsar4x.EarlyTechStart"))
-                modLoader.LoadScenario(Path.Combine(scenarios, "early-tech", "scenarioInfo.json"), modDataStore);
-        }
+        if (!string.IsNullOrEmpty(scenarioManifestPath) || !string.IsNullOrEmpty(chosenId))
+            modLoader.ApplyScenario(chosenId, scenarioManifestPath, discovered, modDataStore);
 
         return modDataStore;
+    }
+
+    /// <summary>Scenario folders next to the folders that contain the given mod manifests,
+    /// existing ones only, each once.</summary>
+    internal static List<string> ScenarioRoots(IEnumerable<string> modManifestPaths)
+    {
+        var roots = new List<string>();
+        foreach (var path in modManifestPaths)
+        {
+            var modDir = Path.GetDirectoryName(path);
+            if (string.IsNullOrEmpty(modDir)) continue;
+            var parent = Path.GetDirectoryName(modDir);
+            if (string.IsNullOrEmpty(parent)) continue;
+            var scenarios = Path.Combine(parent, "scenarios");
+            if (Directory.Exists(scenarios) && !roots.Contains(scenarios))
+                roots.Add(scenarios);
+        }
+        return roots;
     }
 
     internal static NewGameCatalog BuildCatalog(ModDataStore data)
@@ -124,6 +162,16 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
             systems.Add(new CatalogSystemOption(id, system.Name, startingBodies));
         }
 
+        CatalogDefaultStart? defaultStart = null;
+        if (data.ScenarioDefaultStart != null)
+        {
+            defaultStart = new CatalogDefaultStart(
+                data.ScenarioDefaultStart.Species,
+                data.ScenarioDefaultStart.Colony,
+                data.ScenarioDefaultStart.System,
+                data.ScenarioDefaultStart.Body);
+        }
+
         return new NewGameCatalog(
             data.Species.Where(kvp => kvp.Value.Playable)
                 .Select(kvp => new CatalogOption(kvp.Key, kvp.Value.Name)).ToList(),
@@ -131,14 +179,16 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
             data.Colonies
                 .Where(kvp => string.IsNullOrEmpty(kvp.Value.OwnerFaction) && string.IsNullOrEmpty(kvp.Value.Body))
                 .Select(kvp => new CatalogOption(kvp.Key, kvp.Value.Name)).ToList(),
-            systems);
+            systems,
+            defaultStart,
+            data.ScenarioNamespace);
     }
 
     public GameActivation? CreateNewGame(NewGameRequest request)
     {
         // Reload the requested mod set so creation is self-contained (Quickstart and a re-entered
         // wizard both pass through here with their own paths).
-        LoadMods(request.ModManifestPaths);
+        LoadMods(request.ModManifestPaths, request.ScenarioId, request.ScenarioManifestPath);
 
         var result = CreateGameCore(_modDataStore, request);
         if (result == null) return null;
@@ -151,47 +201,31 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
     {
         try
         {
-            var modManifestPaths = GetAvailableMods()
-                .Where(m => m.EnabledByDefault)
-                .Select(m => m.ManifestPath)
+            var defaultEnabled = ModsState.AvailableMods
+                .Where(m => ModsState.IsModEnabled.TryGetValue(m.Mod.ModName, out bool on) && on)
                 .ToList();
-            var catalog = LoadMods(modManifestPaths);
+            var enabledNamespaces = new HashSet<string>(defaultEnabled.Select(m => m.Mod.Namespace));
+            var scenario = GetAvailableScenarios()
+                .Where(s => s.DefaultEnabled && s.RequiredMods.All(ns => enabledNamespaces.Contains(ns)))
+                .OrderBy(s => s.Id, StringComparer.Ordinal)
+                .FirstOrDefault();
 
-            if (catalog.Species.Count == 0)
+            var modManifestPaths = defaultEnabled.Select(m => m.Path).ToList();
+            if (scenario != null)
             {
-                Console.WriteLine("Quickstart Error: No playable species found in loaded mods");
-                return null;
+                foreach (var ns in scenario.RequiredMods)
+                {
+                    var mod = ModsState.AvailableMods.FirstOrDefault(m => m.Mod.Namespace == ns);
+                    if (mod != null && !modManifestPaths.Contains(mod.Path))
+                        modManifestPaths.Add(mod.Path);
+                }
             }
 
-            if (catalog.Colonies.Count == 0)
-            {
-                Console.WriteLine("Quickstart Error: No colonies found in loaded mods");
+            var catalog = LoadMods(modManifestPaths, scenario?.Id);
+            var request = BuildQuickstartRequest(
+                modManifestPaths, catalog, RandomNumberGenerator.GetInt32(999999999));
+            if (request == null)
                 return null;
-            }
-
-            var startableSystems = catalog.Systems.Where(s => s.StartingBodies.Count > 0).ToList();
-            if (startableSystems.Count == 0)
-            {
-                Console.WriteLine("Quickstart Error: No compatible starting systems found");
-                return null;
-            }
-
-            var startingSystem = startableSystems.First();
-            var request = new NewGameRequest(
-                ModManifestPaths: modManifestPaths,
-                FactionName: DEFAULT_NAME,
-                FactionAbbreviation: DEFAULT_ABBREVIATION,
-                SpeciesId: catalog.Species.First().Id,
-                ColonyId: catalog.Colonies.First().Id,
-                SystemId: startingSystem.Id,
-                BodyId: startingSystem.StartingBodies.First().Id,
-                EnabledSystems: startableSystems.Select(s => s.Id).ToList(),
-                MaxSystems: NewGameSettings.DEFAULT_NUM_SYSTEMS,
-                MasterSeed: RandomNumberGenerator.GetInt32(999999999),
-                StartingFunds: 100_000_000,
-                EleStart: true,
-                SMPassword: "",
-                PlayerPassword: "");
 
             var result = CreateGameCore(_modDataStore, request);
             if (result == null)
@@ -203,12 +237,83 @@ public sealed class GameLifecycle : IGameLifecycle, IDesignDataProvider
             var (game, playerFaction, system, startingBody) = result.Value;
             return Activate(game, playerFaction, system.ManagerID, startingBody);
         }
+        catch (ModLoadException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             Console.WriteLine($"Quickstart Error: {ex.Message}");
             Console.WriteLine(ex.StackTrace);
             return null;
         }
+    }
+
+    /// <summary>Builds the quickstart NewGameRequest from the catalog's DefaultStart when
+    /// those ids are in the catalog lists.</summary>
+    internal static NewGameRequest? BuildQuickstartRequest(
+        IReadOnlyList<string> modManifestPaths,
+        NewGameCatalog catalog,
+        int masterSeed)
+    {
+        if (catalog.Species.Count == 0)
+        {
+            Console.WriteLine("Quickstart Error: No playable species found in loaded mods");
+            return null;
+        }
+
+        if (catalog.Colonies.Count == 0)
+        {
+            Console.WriteLine("Quickstart Error: No colonies found in loaded mods");
+            return null;
+        }
+
+        var startableSystems = catalog.Systems.Where(s => s.StartingBodies.Count > 0).ToList();
+        if (startableSystems.Count == 0)
+        {
+            Console.WriteLine("Quickstart Error: No compatible starting systems found");
+            return null;
+        }
+
+        var startingSystem = startableSystems.First();
+        string speciesId = catalog.Species.First().Id;
+        string colonyId = catalog.Colonies.First().Id;
+        string systemId = startingSystem.Id;
+        string bodyId = startingSystem.StartingBodies.First().Id;
+
+        if (catalog.DefaultStart is { } start)
+        {
+            if (catalog.Species.Any(s => s.Id == start.SpeciesId))
+                speciesId = start.SpeciesId;
+            if (catalog.Colonies.Any(c => c.Id == start.ColonyId))
+                colonyId = start.ColonyId;
+            var system = catalog.Systems.FirstOrDefault(s => s.Id == start.SystemId);
+            if (system != null)
+            {
+                systemId = system.Id;
+                if (system.StartingBodies.Any(b => b.Id == start.BodyId))
+                    bodyId = start.BodyId;
+                else if (system.StartingBodies.Count > 0)
+                    bodyId = system.StartingBodies.First().Id;
+            }
+        }
+
+        return new NewGameRequest(
+            ModManifestPaths: modManifestPaths,
+            FactionName: DEFAULT_NAME,
+            FactionAbbreviation: DEFAULT_ABBREVIATION,
+            SpeciesId: speciesId,
+            ColonyId: colonyId,
+            SystemId: systemId,
+            BodyId: bodyId,
+            EnabledSystems: startableSystems.Select(s => s.Id).ToList(),
+            MaxSystems: NewGameSettings.DEFAULT_NUM_SYSTEMS,
+            MasterSeed: masterSeed,
+            StartingFunds: 100_000_000,
+            EleStart: true,
+            SMPassword: "",
+            PlayerPassword: "",
+            ScenarioId: catalog.ScenarioId);
     }
 
     public GameActivation? LoadGame(string filePath)

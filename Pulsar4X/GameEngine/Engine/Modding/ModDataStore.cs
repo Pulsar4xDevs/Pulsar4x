@@ -34,5 +34,12 @@ namespace Pulsar4X.Modding
         public Dictionary<string, ComponentDesignBlueprint> ComponentDesigns { get; set; } = new ();
         public Dictionary<string, ShipDesignBlueprint> ShipDesigns { get; set; } = new ();
         public Dictionary<string, BootstrapDefaultsBlueprint> BootstrapDefaults { get; set; } = new ();
+
+        /// <summary>Namespace of the scenario applied on top of the mods, if any. Null on
+        /// stores that loaded no scenario and on saves from before this field existed.</summary>
+        public string? ScenarioNamespace { get; set; }
+
+        /// <summary>DefaultStart of the applied scenario, if any. Used to prefill a new game.</summary>
+        public ScenarioManifest.ScenarioStart? ScenarioDefaultStart { get; set; }
     }
 }

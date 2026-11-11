@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Pulsar4X.Client;
+using Pulsar4X.Client.Host;
 using Pulsar4X.Client.Interface.Widgets;
 using Pulsar4X.Modding;
 
@@ -220,9 +224,11 @@ public class ModInfoUI
 
     private void Load(string path, string filename)
     {
-        ModLoader modLoader = new ModLoader();
-        ModDataStore modDataStore = new ModDataStore();
-        modLoader.LoadModManifest(Path.Combine(path,filename), modDataStore);
+        var manifestPath = Path.Combine(path, filename);
+        var available = ModsState.AvailableMods.Select(m => m.Path).ToList();
+        if (!available.Contains(manifestPath))
+            available.Add(manifestPath);
+        var modDataStore = GameLifecycle.LoadModStore(new[] { manifestPath }, available);
         var editor = ModFileEditor.GetInstance();
         editor.Refresh(modDataStore);
     }

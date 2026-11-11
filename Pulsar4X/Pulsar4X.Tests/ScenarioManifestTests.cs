@@ -115,7 +115,7 @@ public class ScenarioManifestTests
         var colonyKeys = store.Colonies.Keys.ToList();
 
         var loader = new ModLoader();
-        var ex = Assert.Throws<System.InvalidOperationException>(
+        var ex = Assert.Throws<ModLoadException>(
             () => loader.LoadScenario("Data/scenarios/early-tech/scenarioInfo.json", store));
 
         Assert.That(ex!.Message, Does.Contain("Pulsar4x.EarlyTechStart"));

@@ -1,10 +1,16 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.Modding
 {
     public class ScenarioManifest
     {
+        /// <summary>Settings used to load and to serialize a scenario manifest so a round-trip
+        /// keeps the same fields. DefaultStart stays UniqueIDs only.</summary>
+        public static readonly JsonSerializerSettings SerializerSettings = new JsonSerializerSettings();
+
         /// <summary>Filled by the loader from the manifest path.</summary>
+        [JsonIgnore]
         public string ScenarioDirectory { get; set; }
         public string Author { get; set; }
         public string ScenarioName { get; set; }
@@ -15,6 +21,9 @@ namespace Pulsar4X.Modding
 
         /// <summary>Namespaces of the mods this scenario needs. They must already be loaded.</summary>
         public List<string> RequiredMods { get; set; }
+
+        /// <summary>Namespaces of scenarios applied first, in order.</summary>
+        public List<string> RequiredScenarios { get; set; }
 
         /// <summary>Data files relative to the scenario folder.</summary>
         public List<string> DataFiles { get; set; }

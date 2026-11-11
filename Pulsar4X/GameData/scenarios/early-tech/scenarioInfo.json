@@ -9,6 +9,9 @@
     "Pulsar4x",
     "Pulsar4x.EarlyTechStart"
   ],
+  "RequiredScenarios": [
+    "Pulsar4x.Scenario.SolDefault"
+  ],
   "DataFiles": [
     "colonies.json",
     "ships.json"

@@ -15,9 +15,16 @@ public interface IGameLifecycle
     /// <summary>The installed mod manifests, for the new-game menu's mod-selection page.</summary>
     IReadOnlyList<ModOption> GetAvailableMods();
 
-    /// <summary>Load the chosen mods and return the option catalog the new-game setup pages
-    /// build their pick-lists from.</summary>
-    NewGameCatalog LoadMods(IReadOnlyList<string> modManifestPaths);
+    /// <summary>Installed scenarios, scanned from the scenarios folders next to the installed mods.</summary>
+    IReadOnlyList<ScenarioOption> GetAvailableScenarios();
+
+    /// <summary>Load the chosen mods, then the chosen scenario (or the default when
+    /// <paramref name="scenarioId"/> and <paramref name="scenarioManifestPath"/> are omitted),
+    /// and return the option catalog the new-game setup pages build their pick-lists from.</summary>
+    NewGameCatalog LoadMods(
+        IReadOnlyList<string> modManifestPaths,
+        string? scenarioId = null,
+        string? scenarioManifestPath = null);
 
     /// <summary>Create a game from the request and bring it up (faction bound, client built).
     /// Null when creation fails (e.g. no valid starting body).</summary>
@@ -59,7 +66,19 @@ public sealed record ModOption(
     string ManifestPath,
     bool EnabledByDefault);
 
+/// <summary>An installed scenario, as listed for a new game. <see cref="Id"/> is the namespace.</summary>
+public sealed record ScenarioOption(
+    string Id,
+    string Name,
+    string Description,
+    bool DefaultEnabled,
+    IReadOnlyList<string> RequiredMods,
+    string ManifestPath);
+
 public sealed record CatalogOption(string Id, string Name);
+
+/// <summary>The applied scenario's DefaultStart ids, for prefilling a new game.</summary>
+public sealed record CatalogDefaultStart(string SpeciesId, string ColonyId, string SystemId, string BodyId);
 
 /// <summary>A mod-defined star system; <see cref="StartingBodies"/> are its bodies a new game can
 /// start on (empty when the system can be included but not started in).</summary>
@@ -71,7 +90,9 @@ public sealed record NewGameCatalog(
     IReadOnlyList<CatalogOption> Species,
     IReadOnlyList<CatalogOption> Themes,
     IReadOnlyList<CatalogOption> Colonies,
-    IReadOnlyList<CatalogSystemOption> Systems);
+    IReadOnlyList<CatalogSystemOption> Systems,
+    CatalogDefaultStart? DefaultStart = null,
+    string? ScenarioId = null);
 
 /// <summary>Everything the composition root needs to create a game. <see cref="SystemId"/> may be
 /// "random" to start in a randomly generated system.</summary>
@@ -89,7 +110,9 @@ public sealed record NewGameRequest(
     int StartingFunds,
     bool EleStart,
     string SMPassword,
-    string PlayerPassword);
+    string PlayerPassword,
+    string? ScenarioId = null,
+    string? ScenarioManifestPath = null);
 
 /// <summary>
 /// What the UI needs to finish bringing a game on screen. By the time this is returned the

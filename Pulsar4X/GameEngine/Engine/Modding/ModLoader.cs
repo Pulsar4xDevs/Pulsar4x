@@ -108,31 +108,273 @@ namespace Pulsar4X.Modding
         }
 
         /// <summary>
+        /// Scans each root's immediate subfolders for scenarioInfo.json, deserializes them, and
+        /// returns them keyed by Namespace. Duplicate namespaces throw one ModLoadException.
+        /// </summary>
+        public Dictionary<string, ScenarioManifest> DiscoverScenarios(IEnumerable<string> scenarioRootFolders)
+        {
+            var found = new Dictionary<string, ScenarioManifest>();
+            var errors = new List<ModLoadError>();
+
+            foreach (var root in scenarioRootFolders.Distinct())
+            {
+                if (!Directory.Exists(root))
+                    continue;
+
+                foreach (var dir in Directory.GetDirectories(root).OrderBy(d => d, StringComparer.Ordinal))
+                {
+                    var path = Path.Combine(dir, "scenarioInfo.json");
+                    if (!File.Exists(path))
+                        continue;
+
+                    var manifest = ReadScenarioManifest(path);
+                    if (found.ContainsKey(manifest.Namespace))
+                    {
+                        errors.Add(new ModLoadError(
+                            manifest.Namespace,
+                            "scenarioInfo.json",
+                            "ScenarioManifest",
+                            manifest.Namespace,
+                            "Namespace",
+                            manifest.Namespace));
+                        continue;
+                    }
+
+                    found.Add(manifest.Namespace, manifest);
+                }
+            }
+
+            if (errors.Count > 0)
+                throw new ModLoadException(errors);
+
+            return found;
+        }
+
+        /// <summary>
+        /// Among discovered scenarios whose RequiredMods are all loaded, pick the one with the most
+        /// RequiredMods, then DefaultEnabled first, then Namespace ordinal. Null if none qualify.
+        /// </summary>
+        public static string? ChooseDefaultScenario(IEnumerable<ScenarioManifest> discovered, ModDataStore store)
+        {
+            var loaded = new HashSet<string>(store.ModManifests.Select(m => m.Namespace));
+            var best = discovered
+                .Where(s => (s.RequiredMods ?? new List<string>()).All(ns => loaded.Contains(ns)))
+                .OrderByDescending(s => (s.RequiredMods ?? new List<string>()).Count)
+                .ThenByDescending(s => s.DefaultEnabled)
+                .ThenBy(s => s.Namespace, StringComparer.Ordinal)
+                .FirstOrDefault();
+            return best?.Namespace;
+        }
+
+        /// <summary>
+        /// Resolves the chosen scenario's RequiredScenarios (base first, each once), checks every
+        /// scenario in the chain, then applies each. Throws one ModLoadException before applying
+        /// anything if the chain is unsound. <paramref name="scenarioManifestPath"/> selects a
+        /// manifest that may not be in <paramref name="discovered"/> (a fixture or a later user folder).
+        /// </summary>
+        public void ApplyScenario(
+            string? scenarioId,
+            string? scenarioManifestPath,
+            IReadOnlyDictionary<string, ScenarioManifest> discovered,
+            ModDataStore store)
+        {
+            var byNamespace = discovered.ToDictionary(entry => entry.Key, entry => entry.Value);
+            string? chosenNs = scenarioId;
+            string? chosenPath = null;
+
+            if (!string.IsNullOrEmpty(scenarioManifestPath))
+            {
+                var fromPath = ReadScenarioManifest(scenarioManifestPath);
+                byNamespace[fromPath.Namespace] = fromPath;
+                chosenNs = fromPath.Namespace;
+                chosenPath = scenarioManifestPath;
+            }
+
+            if (string.IsNullOrEmpty(chosenNs))
+                return;
+
+            if (!byNamespace.ContainsKey(chosenNs))
+            {
+                throw new ModLoadException(new ModLoadError(
+                    chosenNs,
+                    "scenarioInfo.json",
+                    "ScenarioManifest",
+                    chosenNs,
+                    "ScenarioId",
+                    chosenNs));
+            }
+
+            var errors = new List<ModLoadError>();
+            var ordered = new List<string>();
+            var visiting = new HashSet<string>();
+
+            void Visit(string ns)
+            {
+                if (ordered.Contains(ns)) return;
+                if (!byNamespace.TryGetValue(ns, out var manifest))
+                {
+                    errors.Add(new ModLoadError(
+                        ns,
+                        "scenarioInfo.json",
+                        "ScenarioManifest",
+                        ns,
+                        "RequiredScenarios",
+                        ns));
+                    return;
+                }
+                if (!visiting.Add(ns))
+                {
+                    errors.Add(new ModLoadError(
+                        ns,
+                        "scenarioInfo.json",
+                        "ScenarioManifest",
+                        ns,
+                        "RequiredScenarios",
+                        ns));
+                    return;
+                }
+
+                foreach (var required in manifest.RequiredScenarios ?? new List<string>())
+                {
+                    if (!byNamespace.ContainsKey(required))
+                    {
+                        errors.Add(new ModLoadError(
+                            manifest.Namespace,
+                            "scenarioInfo.json",
+                            "ScenarioManifest",
+                            manifest.Namespace,
+                            "RequiredScenarios",
+                            required));
+                    }
+                    else
+                    {
+                        Visit(required);
+                    }
+                }
+
+                visiting.Remove(ns);
+                if (!ordered.Contains(ns))
+                    ordered.Add(ns);
+
+                foreach (var required in manifest.RequiredMods ?? new List<string>())
+                {
+                    if (!store.ModManifests.Any(m => m.Namespace == required))
+                    {
+                        errors.Add(new ModLoadError(
+                            manifest.Namespace,
+                            "scenarioInfo.json",
+                            "ScenarioManifest",
+                            manifest.Namespace,
+                            "RequiredMods",
+                            required));
+                    }
+                }
+            }
+
+            Visit(chosenNs);
+
+            if (errors.Count > 0)
+                throw new ModLoadException(errors);
+
+            ScenarioManifest? chosen = null;
+            foreach (var ns in ordered)
+            {
+                string path = ns == chosenNs && chosenPath != null
+                    ? chosenPath
+                    : Path.Combine(byNamespace[ns].ScenarioDirectory, "scenarioInfo.json");
+                var loaded = LoadScenario(path, store);
+                if (ns == chosenNs)
+                    chosen = loaded;
+            }
+
+            if (chosen?.DefaultStart != null)
+                ValidateDefaultStart(chosen, store);
+
+            store.ScenarioNamespace = chosen?.Namespace;
+            store.ScenarioDefaultStart = chosen?.DefaultStart;
+        }
+
+        /// <summary>
         /// Applies a scenario's data files on top of an already-loaded mod store.
-        /// Does not register the scenario as a mod and does not walk dependencies.
+        /// Does not register the scenario as a mod and does not walk RequiredScenarios.
         /// </summary>
         public ScenarioManifest LoadScenario(string scenarioManifestPath, ModDataStore baseData)
         {
-            var scenarioManifest = JsonConvert.DeserializeObject<ScenarioManifest>(File.ReadAllText(scenarioManifestPath));
-            if (scenarioManifest == null || string.IsNullOrEmpty(scenarioManifest.Namespace))
-                throw new InvalidDataException($"{scenarioManifestPath} is not a valid scenario manifest (missing Namespace).");
+            var scenarioManifest = ReadScenarioManifest(scenarioManifestPath);
 
+            var missingMods = new List<ModLoadError>();
             foreach (var required in scenarioManifest.RequiredMods ?? new List<string>())
             {
                 if (!baseData.ModManifests.Any(m => m.Namespace == required))
-                    throw new InvalidOperationException(
-                        $"Scenario '{scenarioManifest.ScenarioName}' requires mod '{required}', which is not loaded.");
+                {
+                    missingMods.Add(new ModLoadError(
+                        scenarioManifest.Namespace,
+                        "scenarioInfo.json",
+                        "ScenarioManifest",
+                        scenarioManifest.Namespace,
+                        "RequiredMods",
+                        required));
+                }
             }
+            if (missingMods.Count > 0)
+                throw new ModLoadException(missingMods);
 
-            string? scenarioDirectory = Path.GetDirectoryName(scenarioManifestPath);
-
-            if(string.IsNullOrEmpty(scenarioDirectory)) throw new DirectoryNotFoundException($"Could not find {scenarioManifestPath}");
-
-            scenarioManifest.ScenarioDirectory = scenarioDirectory;
-
-            ApplyDataFiles(scenarioDirectory, scenarioManifest.DataFiles, scenarioManifest.Namespace, baseData);
+            ApplyDataFiles(
+                scenarioManifest.ScenarioDirectory,
+                scenarioManifest.DataFiles ?? new List<string>(),
+                scenarioManifest.Namespace,
+                baseData);
 
             return scenarioManifest;
+        }
+
+        private static ScenarioManifest ReadScenarioManifest(string scenarioManifestPath)
+        {
+            var scenarioManifest = JsonConvert.DeserializeObject<ScenarioManifest>(
+                File.ReadAllText(scenarioManifestPath), ScenarioManifest.SerializerSettings);
+            if (scenarioManifest == null || string.IsNullOrEmpty(scenarioManifest.Namespace))
+                throw new InvalidDataException($"{scenarioManifestPath} is not a valid scenario manifest (missing Namespace).");
+
+            string? scenarioDirectory = Path.GetDirectoryName(scenarioManifestPath);
+            if (string.IsNullOrEmpty(scenarioDirectory))
+                throw new DirectoryNotFoundException($"Could not find {scenarioManifestPath}");
+
+            scenarioManifest.ScenarioDirectory = scenarioDirectory;
+            return scenarioManifest;
+        }
+
+        private static void ValidateDefaultStart(ScenarioManifest scenario, ModDataStore store)
+        {
+            var start = scenario.DefaultStart;
+            var errors = new List<ModLoadError>();
+
+            if (!string.IsNullOrEmpty(start.Species) && !store.Species.ContainsKey(start.Species))
+            {
+                errors.Add(new ModLoadError(
+                    scenario.Namespace, "scenarioInfo.json", "ScenarioManifest",
+                    scenario.Namespace, "DefaultStart.Species", start.Species));
+            }
+            if (!string.IsNullOrEmpty(start.Colony) && !store.Colonies.ContainsKey(start.Colony))
+            {
+                errors.Add(new ModLoadError(
+                    scenario.Namespace, "scenarioInfo.json", "ScenarioManifest",
+                    scenario.Namespace, "DefaultStart.Colony", start.Colony));
+            }
+            if (!string.IsNullOrEmpty(start.System) && !store.Systems.ContainsKey(start.System))
+            {
+                errors.Add(new ModLoadError(
+                    scenario.Namespace, "scenarioInfo.json", "ScenarioManifest",
+                    scenario.Namespace, "DefaultStart.System", start.System));
+            }
+            if (!string.IsNullOrEmpty(start.Body) && !store.SystemBodies.ContainsKey(start.Body))
+            {
+                errors.Add(new ModLoadError(
+                    scenario.Namespace, "scenarioInfo.json", "ScenarioManifest",
+                    scenario.Namespace, "DefaultStart.Body", start.Body));
+            }
+
+            if (errors.Count > 0)
+                throw new ModLoadException(errors);
         }
 
         private void ApplyDataFiles(string directory, List<string> dataFiles, string modNamespace, ModDataStore baseData)

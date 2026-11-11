@@ -1,6 +1,7 @@
 using System.IO;
 using ImGuiNET;
 using Pulsar4X.Blueprints;
+using Pulsar4X.Client.Host;
 using Pulsar4X.Modding;
 
 namespace Pulsar4X.Client.ModFileEditing;
@@ -28,11 +29,9 @@ public class ModFileEditor : UniquePulsarGuiWindow<ModFileEditor>
         if (!_uiState.LoadedWindows.ContainsKey(typeof(ModFileEditor)))
         {
             instance = new ModFileEditor();
-            ModLoader modLoader = new ModLoader();
-            ModDataStore modDataStore = new ModDataStore();
             string? appDataDirectory = PulsarMainWindow.GetAppDataPath();
             string modPath = Path.Combine(appDataDirectory, PulsarMainWindow.ModsPath, "basemod/modInfo.json");
-            modLoader.LoadModManifest(modPath, modDataStore);
+            var modDataStore = GameLifecycle.LoadModStore(new[] { modPath }, new[] { modPath });
             instance.Refresh(modDataStore);
         }
         else

@@ -238,6 +238,19 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
                 _selectedSystemId = _enabledSystems.Any() ? _enabledSystems.First() : "";
                 ResetSelectedBodyId();
 
+                if (_catalog.DefaultStart is { } start)
+                {
+                    if (_catalog.Species.Any(s => s.Id == start.SpeciesId))
+                        _selectedSpeciesId = start.SpeciesId;
+                    if (_catalog.Colonies.Any(c => c.Id == start.ColonyId))
+                        _selectedColonyId = start.ColonyId;
+                    if (_enabledSystems.Contains(start.SystemId))
+                        _selectedSystemId = start.SystemId;
+                    var selectedSystem = _catalog.Systems.FirstOrDefault(s => s.Id == _selectedSystemId);
+                    if (selectedSystem != null && selectedSystem.StartingBodies.Any(b => b.Id == start.BodyId))
+                        _selectedBodyId = start.BodyId;
+                }
+
                 _currentPage = Page.ConfigureGalaxy;
             }
         }
@@ -470,7 +483,8 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
             StartingFunds: _startingFunds,
             EleStart: _eleStart,
             SMPassword: Utils.StringFromBytes(_smPassInputbuffer),
-            PlayerPassword: Utils.StringFromBytes(_passInputBuffer));
+            PlayerPassword: Utils.StringFromBytes(_passInputBuffer),
+            ScenarioId: _catalog?.ScenarioId);
 
         try
         {
@@ -515,9 +529,21 @@ public class NewGameMenu : UniquePulsarGuiWindow<NewGameMenu>
     /// </summary>
     public static void QuickstartGame()
     {
-        var activation = _uiState.Lifecycle?.Quickstart();
-        if (activation == null) return;
+        try
+        {
+            var activation = _uiState.Lifecycle?.Quickstart();
+            if (activation == null) return;
 
-        _uiState.ActivateGameUI(activation);
+            _uiState.ActivateGameUI(activation);
+        }
+        catch (Exception ex)
+        {
+            // Quickstart lets a mod load error through (its message is the player-facing list of
+            // bad ids); show it on the new-game menu rather than leaving a blank window.
+            Console.WriteLine($"Quickstart: {ex}");
+            var menu = GetInstance();
+            menu._errorMessage = ex.Message;
+            menu.SetActive(true);
+        }
     }
 }
