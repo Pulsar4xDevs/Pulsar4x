@@ -16,9 +16,11 @@ public class AddToConstructionQueueOrder : EntityAction
 
     public override string Name => "Add To Construction Queue";
 
-    public override string Details => _instance != null
-        ? "Install " + (_instance.Design?.Name ?? "component")
-        : "Install " + (_design?.Name ?? "design");
+    public override string Details => _upgradeLineId != null
+        ? "Upgrade to " + (_design?.Name ?? "design")
+        : _instance != null
+            ? "Install " + (_instance.Design?.Name ?? "component")
+            : "Install " + (_design?.Name ?? "design");
 
     internal override Entity EntityCommanding => _actor;
     protected override void BindCommanding(Entity entity) => _actor = entity;
@@ -27,6 +29,7 @@ public class AddToConstructionQueueOrder : EntityAction
     private Entity? _targetColony;
     private ComponentDesign? _design;
     private ComponentInstance? _instance;
+    private string? _upgradeLineId;
 
     private AddToConstructionQueueOrder(Entity actor, ComponentDesign? design, ComponentInstance? instance, Entity? targetColony)
     {
@@ -52,6 +55,13 @@ public class AddToConstructionQueueOrder : EntityAction
     public static AddToConstructionQueueOrder CreateAssemble(Entity actor, ComponentDesign design, Entity colony)
         => new AddToConstructionQueueOrder(actor, design, null, colony);
 
+    /// <summary>
+    /// Replace the facility behind <paramref name="lineId"/> with <paramref name="design"/>.
+    /// A crate design names the warehouse crate to mount. A site-only design passes null and assembles.
+    /// </summary>
+    public static AddToConstructionQueueOrder CreateUpgrade(Entity colony, string lineId, ComponentDesign design, ComponentInstance? crate)
+        => new AddToConstructionQueueOrder(colony, design, crate, null) { _upgradeLineId = lineId };
+
     public override EntityAction Clone()
     {
         throw new NotImplementedException();
@@ -67,6 +77,7 @@ public class AddToConstructionQueueOrder : EntityAction
             : new LocalConstructionJob(_design!);
         if (_targetColony != null)
             job.TargetEntityId = _targetColony.Id;
+        job.UpgradeLineId = _upgradeLineId;
         constructionDB.BuildQueue.Enqueue(job);
     }
 
@@ -79,6 +90,8 @@ public class AddToConstructionQueueOrder : EntityAction
     {
         if (_actor == null)
             return false;
+        if (_upgradeLineId != null)
+            return _design != null && FacilityUpgrade.Rejection(_actor, _upgradeLineId, _design, _instance) == null;
         if (!_actor.TryGetDataBlob<LocalConstructionDB>(out var construction) || construction.PointsPerDay <= 0)
             return false;
         if (_targetColony != null)

@@ -43,8 +43,21 @@ public class LocalConstructionJob
     /// </summary>
     public Dictionary<string, long> ResourcesRemaining { get; set; } = new();
 
-    /// <summary>Mount or Assemble.</summary>
-    public string Kind => Instance != null ? "Mount" : "Assemble";
+    /// <summary>
+    /// Production line whose facility this job replaces. Null for a plain mount or assemble.
+    /// The line id is the old facility's instance id. The cost is still the new design's mount or assemble cost.
+    /// </summary>
+    public string? UpgradeLineId { get; set; }
+
+    /// <summary>Mount or Assemble. An upgrade is "Upgrade (Mount)" or "Upgrade (Assemble)".</summary>
+    public string Kind
+    {
+        get
+        {
+            string kind = Instance != null ? "Mount" : "Assemble";
+            return UpgradeLineId != null ? "Upgrade (" + kind + ")" : kind;
+        }
+    }
 
     public LocalConstructionJob(ComponentDesign design, ComponentInstance? instance = null, int pointsAccumulated = 0)
     {

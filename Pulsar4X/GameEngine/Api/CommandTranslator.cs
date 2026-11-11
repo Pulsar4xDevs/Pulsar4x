@@ -128,6 +128,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(CancelIndustryJobCommand)] = TranslateCancelIndustryJob,
                 [typeof(AddToConstructionQueueCommand)] = TranslateAddToConstructionQueue,
                 [typeof(QueueShipRefitCommand)] = TranslateQueueShipRefit,
+                [typeof(UpgradeFacilityCommand)] = TranslateUpgradeFacility,
                 [typeof(MoveConstructionJobCommand)] = TranslateMoveConstructionJob,
                 [typeof(RemoveConstructionJobCommand)] = TranslateRemoveConstructionJob,
             };
@@ -2562,6 +2563,29 @@ namespace Pulsar4X.Engine.Api
             if (!TryResolveConstructionColony(commanded, assembleColonyId, out var assembleTarget, out var assembleReason))
                 return CommandResult.Reject(assembleReason);
             return Dispatch(AddToConstructionQueueOrder.CreateAssemble(commanded, design, assembleTarget));
+        }
+
+        private CommandResult TranslateUpgradeFacility(Entity faction, Entity commanded, GameCommand command)
+        {
+            var upgrade = (UpgradeFacilityCommand)command;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var factionInfo)
+                || !factionInfo.ComponentDesigns.TryGetValue(upgrade.DesignId, out var design))
+                return CommandResult.Reject($"Design {upgrade.DesignId} not found.");
+
+            ComponentInstance? crate = null;
+            if (upgrade.ComponentId is int componentId)
+            {
+                if (!TryFindCargoComponent(commanded, componentId, out var found))
+                    return CommandResult.Reject(FacilityUpgrade.NoCrate);
+                crate = found;
+            }
+            else if (LocalConstructionJob.IsCrate(design))
+                crate = FacilityUpgrade.FreeCrate(commanded, design);
+
+            var reason = FacilityUpgrade.Rejection(commanded, upgrade.ProductionLineId, design, crate);
+            if (reason != null)
+                return CommandResult.Reject(reason);
+            return Dispatch(AddToConstructionQueueOrder.CreateUpgrade(commanded, upgrade.ProductionLineId, design, crate));
         }
 
         static bool TryResolveConstructionColony(Entity ship, int colonyId, out Entity colony, out string reason)

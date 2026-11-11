@@ -576,6 +576,16 @@ public sealed record QueueShipRefitCommand(
     /// <summary>When set, a finished refit whose parts match this design adopts it. Null keeps the old design.</summary>
     string? TargetDesignId = null) : GameCommand(TargetEntityId);
 
+/// <summary>Replace the facility behind a production line with another design of the same template.
+/// The colony queues the new design as a normal mount (a stored crate) or assemble (site-only). When it finishes
+/// the old facility comes off and the line's jobs move to the new line. <paramref name="ComponentId"/> picks the
+/// crate. Null takes any free crate of the design.</summary>
+public sealed record UpgradeFacilityCommand(
+    int TargetEntityId,
+    string ProductionLineId,
+    string DesignId,
+    int? ComponentId = null) : GameCommand(TargetEntityId);
+
 /// <summary>Move a job in the local-construction queue by its current position.</summary>
 public sealed record MoveConstructionJobCommand(int TargetEntityId, int QueueIndex, bool MoveUp) : GameCommand(TargetEntityId);
 

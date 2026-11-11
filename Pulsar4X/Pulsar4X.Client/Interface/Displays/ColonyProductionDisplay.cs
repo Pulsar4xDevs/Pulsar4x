@@ -18,6 +18,8 @@ namespace Pulsar4X.Client
         private bool _newJobRepeat = false;
         private bool _newJobAutoInstall = true;
         private bool _rightPaneIsRefit;
+        private bool _rightPaneIsUpgrade;
+        private string? _upgradeDesignId;
         private string? _refitLineId;
         private int _refitShipIndex;
         private int _refitShipId;
@@ -53,7 +55,12 @@ namespace Pulsar4X.Client
 
             if (ImGui.BeginChild("JobDescriptionPane", new Vector2(windowContentSize.X * 0.5f - 8f, windowContentSize.Y), ImGuiChildFlags.Borders))
             {
-                if (_rightPaneIsRefit && selectedLine.IsShipyard)
+                if (_rightPaneIsUpgrade)
+                {
+                    DisplayHelpers.Header("Upgrade " + selectedLine.Name);
+                    UpgradeSection(entityId, selectedLine, uiState);
+                }
+                else if (_rightPaneIsRefit && selectedLine.IsShipyard)
                 {
                     DisplayHelpers.Header("New refit for: " + selectedLine.Name);
                     RefitSection(entityId, selectedLine, uiState);
@@ -99,6 +106,7 @@ namespace Pulsar4X.Client
                         {
                             _selectedProdLine = line.Id;
                             _rightPaneIsRefit = false;
+                            _rightPaneIsUpgrade = false;
                             _newJobDesignId = null;
                             _newJobBatchCount = 1;
                         }
@@ -110,17 +118,26 @@ namespace Pulsar4X.Client
                             {
                                 _selectedProdLine = line.Id;
                                 _rightPaneIsRefit = true;
+                                _rightPaneIsUpgrade = false;
                             }
                         }
 
                         ImGui.SameLine();
 
-                        ImGui.BeginDisabled();
+                        bool noUpgrade = line.UpgradeReason.Length > 0;
+                        if (noUpgrade)
+                            ImGui.BeginDisabled();
                         if (ImGui.Button("Upgrade " + line.Name))
                         {
-                            // TODO: add upgrade functionality
+                            _selectedProdLine = line.Id;
+                            _rightPaneIsRefit = false;
+                            _rightPaneIsUpgrade = true;
+                            _upgradeDesignId = null;
                         }
-                        ImGui.EndDisabled();
+                        if (noUpgrade)
+                            ImGui.EndDisabled();
+                        if (noUpgrade && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                            ImGui.SetTooltip(line.UpgradeReason);
 
                         if (line.Jobs.Count > 0)
                         {
@@ -356,6 +373,68 @@ namespace Pulsar4X.Client
                 ImGui.SetTooltip(selectedDesign.SlipReason);
             if (selectedDesign.OverSlip)
                 ImGui.EndDisabled();
+        }
+
+        private void UpgradeSection(int entityId, ProductionLineView line, GlobalUIState uiState)
+        {
+            if (line.FacilityDesignName.Length > 0)
+                ImGui.Text("Current design: " + line.FacilityDesignName);
+            if (line.UpgradeInProgress)
+            {
+                ImGui.Text(line.UpgradeReason);
+                return;
+            }
+            if (line.UpgradeTargets.Count == 0)
+            {
+                _upgradeDesignId = null;
+                ImGui.Text(line.UpgradeReason);
+                return;
+            }
+
+            // Pick by design id so a rename or a new design does not switch the selection.
+            var selected = line.UpgradeTargets.FirstOrDefault(t => t.DesignId == _upgradeDesignId);
+            if (selected == null)
+                _upgradeDesignId = null;
+
+            ImGui.NewLine();
+            ImGui.Text("Upgrade to:");
+            if (ImGui.BeginCombo("###upgradeselection", selected?.Name ?? "Select a design"))
+            {
+                foreach (var target in line.UpgradeTargets)
+                {
+                    if (ImGui.Selectable(target.Name + "##" + target.DesignId, target.DesignId == _upgradeDesignId))
+                        _upgradeDesignId = target.DesignId;
+                    if (target.Reason.Length > 0 && ImGui.IsItemHovered())
+                        ImGui.SetTooltip(target.Reason);
+                }
+                ImGui.EndCombo();
+            }
+            selected = line.UpgradeTargets.FirstOrDefault(t => t.DesignId == _upgradeDesignId);
+            if (selected == null)
+                return;
+
+            ImGui.NewLine();
+            ImGui.Text(selected.Kind + "  " + selected.PointCost + " installation points");
+            foreach (var cost in selected.Costs)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, cost.Available >= cost.PerUnit ? Styles.GoodColor : Styles.BadColor);
+                ImGui.BulletText(cost.Name + "  " + cost.PerUnit + " (" + cost.Available + " on hand)");
+                ImGui.PopStyleColor();
+            }
+            ImGui.Text("The line keeps working until the upgrade finishes. Its jobs move to the new design.");
+
+            bool blocked = selected.Reason.Length > 0;
+            if (blocked)
+                ImGui.BeginDisabled();
+            if (ImGui.Button("Queue upgrade to " + selected.Name))
+            {
+                uiState.GameClient?.SubmitCommandAsync(new UpgradeFacilityCommand(entityId, line.Id, selected.DesignId));
+                _upgradeDesignId = null;
+            }
+            if (blocked)
+                ImGui.EndDisabled();
+            if (blocked && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                ImGui.SetTooltip(selected.Reason);
         }
 
         private void RefitSection(int entityId, ProductionLineView line, GlobalUIState uiState)
