@@ -540,9 +540,21 @@ namespace Pulsar4X.Client
                 string name = colony.GetView<NameView>()?.Name ?? "Colony";
                 if (ImGui.CollapsingHeader(name + "###market-" + colony.Id))
                 {
-                    MarketBarsDisplay.Display(colony, market, _uiState);
+                    MarketTabDisplay.Display(
+                        colony,
+                        market,
+                        colony.GetView<MarketHistoryView>(),
+                        colony.GetView<IntelBookView>(),
+                        _system.SystemId,
+                        _system.DateTime,
+                        _uiState,
+                        true);
                     MarketBarsDisplay.DisplayBuyAndShip(colony, market, _system, _uiState);
-                    IntelDisplay.Display(colony, colony.GetView<IntelBookView>(), _system.SystemId, _uiState);
+                    if (ImGui.CollapsingHeader("Shipping###shipping-" + colony.Id))
+                    {
+                        ShippingDisplay.Display(
+                            colony, market, colony.GetView<IntelBookView>(), _system, _uiState);
+                    }
                 }
             }
         }
@@ -1117,9 +1129,21 @@ namespace Pulsar4X.Client
             // Friendly and neutral colonies are not in Colony Management. The market stays here.
             if (_entity.Relation != OwnerRelation.Owned && _entity.GetView<MarketView>() is { } market)
             {
-                MarketBarsDisplay.Display(_entity, market, _uiState);
+                MarketTabDisplay.Display(
+                    _entity,
+                    market,
+                    _entity.GetView<MarketHistoryView>(),
+                    _entity.GetView<IntelBookView>(),
+                    _system?.SystemId ?? "",
+                    _system?.DateTime ?? default,
+                    _uiState,
+                    true);
                 MarketBarsDisplay.DisplayBuyAndShip(_entity, market, _system, _uiState);
-                IntelDisplay.Display(_entity, _entity.GetView<IntelBookView>(), _system?.SystemId ?? "", _uiState);
+                if (ImGui.CollapsingHeader("Shipping###shipping-" + _entity.Id))
+                {
+                    ShippingDisplay.Display(
+                        _entity, market, _entity.GetView<IntelBookView>(), _system, _uiState);
+                }
             }
         }
 

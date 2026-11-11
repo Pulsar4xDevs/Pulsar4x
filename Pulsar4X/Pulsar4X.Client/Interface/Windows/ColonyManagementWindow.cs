@@ -171,8 +171,25 @@ namespace Pulsar4X.Client
                 }
                 if (ImGui.BeginTabItem("Market"))
                 {
-                    MarketBarsDisplay.Display(selectedColony, selectedColony.GetView<MarketView>(), _uiState);
-                    IntelDisplay.Display(selectedColony, selectedColony.GetView<IntelBookView>(), selectedSystem.SystemId, _uiState);
+                    MarketTabDisplay.Display(
+                        selectedColony,
+                        selectedColony.GetView<MarketView>(),
+                        selectedColony.GetView<MarketHistoryView>(),
+                        selectedColony.GetView<IntelBookView>(),
+                        selectedSystem.SystemId,
+                        selectedSystem.DateTime,
+                        _uiState,
+                        false);
+                    ImGui.EndTabItem();
+                }
+                if (ImGui.BeginTabItem("Shipping"))
+                {
+                    ShippingDisplay.Display(
+                        selectedColony,
+                        selectedColony.GetView<MarketView>(),
+                        selectedColony.GetView<IntelBookView>(),
+                        selectedSystem,
+                        _uiState);
                     ImGui.EndTabItem();
                 }
                 if (selectedColony.GetView<ColonyMiningView>() is { } mining && ImGui.BeginTabItem("Mining"))

@@ -26,8 +26,14 @@ namespace Pulsar4X.Client
             if (book == null)
                 return;
 
-            ImGui.Separator();
-            ImGui.Text("Intel");
+            int listedCount = 0;
+            foreach (var row in book.Rows)
+            {
+                if (row.Kind != IntelKind.Haul)
+                    listedCount++;
+            }
+            if (!ImGui.CollapsingHeader("Intel · " + listedCount.ToString(CultureInfo.InvariantCulture) + " listed###intel-" + colony.Id))
+                return;
 
             bool all = ShowAll.TryGetValue(colony.Id, out bool show) && show;
             if (ImGui.BeginCombo("Show##intel-" + colony.Id, all ? "All" : "This system"))
@@ -43,6 +49,8 @@ namespace Pulsar4X.Client
             var rows = new List<IntelRowView>();
             foreach (var row in book.Rows)
             {
+                if (row.Kind == IntelKind.Haul)
+                    continue;
                 if (ShowRow(row.SystemId, officeSystemId, all))
                     rows.Add(row);
             }
@@ -72,14 +80,7 @@ namespace Pulsar4X.Client
                         ImGui.TableNextColumn();
                         ImGui.Text(row.ResultTag);
                         ImGui.TableNextColumn();
-                        if (row.Kind == IntelKind.Haul)
-                        {
-                            // A haul is a sealed shipment. The fee is fixed, so there is nothing to edit.
-                            ImGui.Text(row.Ask.ToString(CultureInfo.InvariantCulture));
-                            ImGui.TableNextColumn();
-                            HaulButtons(colony.Id, row, book.CanEdit, uiState);
-                        }
-                        else if (book.CanEdit)
+                        if (book.CanEdit)
                         {
                             var edit = Edit(colony.Id, row, idle);
                             ImGui.SetNextItemWidth(100f);
@@ -166,7 +167,7 @@ namespace Pulsar4X.Client
         /// Claim takes the selected ship, or fleet, as the carrier. The office owner may take the row down
         /// while it is unclaimed, which cancels the shipment.
         /// </summary>
-        static void HaulButtons(int officeId, IntelRowView row, bool isOwner, GlobalUIState uiState)
+        internal static void HaulButtons(int officeId, IntelRowView row, bool isOwner, GlobalUIState uiState)
         {
             if (row.ClaimantId >= 0)
             {
