@@ -20,10 +20,9 @@ namespace Pulsar4X.Tests;
 public class ScenarioWizardTests
 {
     private const string BaseMod = "Pulsar4x";
-    private const string EarlyMod = "Early Tech Start";
-    private const string SolDefault = "Pulsar4x.Scenario.SolDefault";
+    private const string WarpTechStart = "Pulsar4x.Scenario.WarpTechStart";
     private const string EarlyTech = "Pulsar4x.Scenario.EarlyTech";
-    private const string EarlyModNamespace = "Pulsar4x.EarlyTechStart";
+    private const string TestingMod = "Pulsar4x-Testing";
 
     private static ModsState.ModMetaData Mod(string name)
         => ModsState.AvailableMods.Single(m => m.Mod.ModName == name);
@@ -62,100 +61,121 @@ public class ScenarioWizardTests
     }
 
     [Test]
-    public void MissingMods_EarlyTech_ListsModsThatAreOffOrNotInstalled()
+    public void MissingMods_ListsRequiredModsThatAreOffOrNotInstalled()
     {
-        var early = DiscoverScenarios()[EarlyTech];
+        var needsOptional = new ScenarioOption(
+            "needs-optional", "Needs Optional", "", false,
+            new[] { BaseMod, TestingMod }, "");
 
         var onlyBase = new Dictionary<string, bool>
         {
             [BaseMod] = true,
-            [EarlyModNamespace] = false,
+            [TestingMod] = false,
         };
-        Assert.That(ScenarioCompatibility.MissingMods(early, onlyBase),
-            Is.EqualTo(new[] { EarlyModNamespace }));
+        Assert.That(ScenarioCompatibility.MissingMods(needsOptional, onlyBase),
+            Is.EqualTo(new[] { TestingMod }));
 
         var both = new Dictionary<string, bool>
         {
             [BaseMod] = true,
-            [EarlyModNamespace] = true,
+            [TestingMod] = true,
         };
-        Assert.That(ScenarioCompatibility.MissingMods(early, both), Is.Empty);
+        Assert.That(ScenarioCompatibility.MissingMods(needsOptional, both), Is.Empty);
 
         var notInstalled = new Dictionary<string, bool>
         {
             [BaseMod] = true,
         };
-        Assert.That(ScenarioCompatibility.MissingMods(early, notInstalled),
-            Is.EqualTo(new[] { EarlyModNamespace }));
+        Assert.That(ScenarioCompatibility.MissingMods(needsOptional, notInstalled),
+            Is.EqualTo(new[] { TestingMod }));
     }
 
     [Test]
-    public void ApplySelection_EarlyTechThenSolDefault_RestoresTheEarlyModToItsDefault()
+    public void ApplySelection_RequiredThenNotRequired_RestoresTheOptionalModToItsDefault()
     {
-        var scenarios = DiscoverScenarios();
+        ModsState.RefreshModsList("Data");
         var mods = InstalledMods();
         var enabled = new Dictionary<string, bool>();
         foreach (var mod in mods)
             enabled[mod.Namespace] = mod.EnabledByDefault;
 
-        var sol = scenarios[SolDefault];
-        var early = scenarios[EarlyTech];
-        ScenarioCompatibility.ApplySelection(sol, early, enabled, mods);
-        Assert.That(enabled[BaseMod], Is.True);
-        Assert.That(enabled[EarlyModNamespace], Is.True);
+        var testing = mods.Single(m => m.Namespace == TestingMod);
+        Assert.That(testing.EnabledByDefault, Is.False);
 
-        ScenarioCompatibility.ApplySelection(early, sol, enabled, mods);
-        var earlyMod = mods.Single(m => m.Namespace == EarlyModNamespace);
-        Assert.That(earlyMod.EnabledByDefault, Is.False);
-        Assert.That(enabled[EarlyModNamespace], Is.EqualTo(earlyMod.EnabledByDefault));
+        var needsTesting = new ScenarioOption(
+            "needs-testing", "Needs Testing", "", false,
+            new[] { BaseMod, TestingMod }, "");
+        var baseOnly = new ScenarioOption(
+            "base-only", "Base Only", "", false,
+            new[] { BaseMod }, "");
+
+        ScenarioCompatibility.ApplySelection(baseOnly, needsTesting, enabled, mods);
+        Assert.That(enabled[BaseMod], Is.True);
+        Assert.That(enabled[TestingMod], Is.True);
+
+        ScenarioCompatibility.ApplySelection(needsTesting, baseOnly, enabled, mods);
+        Assert.That(enabled[TestingMod], Is.EqualTo(testing.EnabledByDefault));
         Assert.That(enabled[BaseMod], Is.True);
     }
 
     [Test]
-    public void NotInstalledMods_EarlyTech_EmptyWhenTheEarlyModIsInstalledButOff()
+    public void NotInstalledMods_EmptyWhenTheRequiredModIsInstalledButOff()
     {
-        var early = DiscoverScenarios()[EarlyTech];
+        ModsState.RefreshModsList("Data");
         var mods = InstalledMods();
-        var earlyMod = mods.Single(m => m.Namespace == EarlyModNamespace);
-        Assert.That(earlyMod.EnabledByDefault, Is.False);
-        Assert.That(ScenarioCompatibility.NotInstalledMods(early, mods), Is.Empty);
+        var testing = mods.Single(m => m.Namespace == TestingMod);
+        Assert.That(testing.EnabledByDefault, Is.False);
 
-        var withoutEarly = mods.Where(m => m.Namespace != EarlyModNamespace).ToList();
-        Assert.That(ScenarioCompatibility.NotInstalledMods(early, withoutEarly),
-            Is.EqualTo(new[] { EarlyModNamespace }));
+        var needsTesting = new ScenarioOption(
+            "needs-testing", "Needs Testing", "", false,
+            new[] { BaseMod, TestingMod }, "");
+        Assert.That(ScenarioCompatibility.NotInstalledMods(needsTesting, mods), Is.Empty);
+
+        var withoutTesting = mods.Where(m => m.Namespace != TestingMod).ToList();
+        Assert.That(ScenarioCompatibility.NotInstalledMods(needsTesting, withoutTesting),
+            Is.EqualTo(new[] { TestingMod }));
     }
 
     [Test]
-    public void IsRequired_EarlyTechRequiresBoth_SolDefaultDoesNotRequireTheEarlyMod()
+    public void IsRequired_ShippedScenariosRequireOnlyTheBaseMod()
     {
         var scenarios = DiscoverScenarios();
         var early = scenarios[EarlyTech];
-        var sol = scenarios[SolDefault];
+        var sol = scenarios[WarpTechStart];
 
+        Assert.That(early.RequiredMods, Is.EqualTo(new[] { BaseMod }));
+        Assert.That(sol.RequiredMods, Is.EqualTo(new[] { BaseMod }));
         Assert.That(ScenarioCompatibility.IsRequired(early, BaseMod), Is.True);
-        Assert.That(ScenarioCompatibility.IsRequired(early, EarlyModNamespace), Is.True);
-        Assert.That(ScenarioCompatibility.IsRequired(sol, EarlyModNamespace), Is.False);
+        Assert.That(ScenarioCompatibility.IsRequired(sol, BaseMod), Is.True);
+        Assert.That(ScenarioCompatibility.IsRequired(early, TestingMod), Is.False);
+        Assert.That(ScenarioCompatibility.IsRequired(sol, TestingMod), Is.False);
         Assert.That(ScenarioCompatibility.IsRequired(null, BaseMod), Is.False);
-        Assert.That(ScenarioCompatibility.IsRequired(null, EarlyModNamespace), Is.False);
+        Assert.That(ScenarioCompatibility.IsRequired(null, TestingMod), Is.False);
+
+        var extra = new ScenarioOption(
+            "extra", "Extra", "", false, new[] { BaseMod, TestingMod }, "");
+        Assert.That(ScenarioCompatibility.IsRequired(extra, TestingMod), Is.True);
+        Assert.That(ScenarioCompatibility.IsRequired(extra, BaseMod), Is.True);
     }
 
     [Test]
-    public void ApplySelection_SelectingEarlyTechFromDefault_NotInstalledAndMissingAreEmpty()
+    public void ApplySelection_SelectingAScenarioThatNeedsAnOptionalMod_NotInstalledAndMissingAreEmpty()
     {
-        var scenarios = DiscoverScenarios();
+        var sol = DiscoverScenarios()[WarpTechStart];
         var mods = InstalledMods();
         var enabled = new Dictionary<string, bool>();
         foreach (var mod in mods)
             enabled[mod.Namespace] = mod.EnabledByDefault;
 
-        var sol = scenarios[SolDefault];
-        var early = scenarios[EarlyTech];
-        Assert.That(enabled[EarlyModNamespace], Is.False);
+        var needsTesting = new ScenarioOption(
+            "needs-testing", "Needs Testing", "", false,
+            new[] { BaseMod, TestingMod }, "");
+        Assert.That(enabled[TestingMod], Is.False);
 
-        ScenarioCompatibility.ApplySelection(sol, early, enabled, mods);
-        Assert.That(enabled[EarlyModNamespace], Is.True);
-        Assert.That(ScenarioCompatibility.NotInstalledMods(early, mods), Is.Empty);
-        Assert.That(ScenarioCompatibility.MissingMods(early, enabled), Is.Empty);
+        ScenarioCompatibility.ApplySelection(sol, needsTesting, enabled, mods);
+        Assert.That(enabled[TestingMod], Is.True);
+        Assert.That(ScenarioCompatibility.NotInstalledMods(needsTesting, mods), Is.Empty);
+        Assert.That(ScenarioCompatibility.MissingMods(needsTesting, enabled), Is.Empty);
     }
 
     [Test]
@@ -164,10 +184,11 @@ public class ScenarioWizardTests
         ModsState.RefreshModsList("Data");
 
         Assert.That(ModsState.IsModEnabled.ContainsKey(BaseMod), Is.True);
-        Assert.That(ModsState.IsModEnabled.ContainsKey(EarlyModNamespace), Is.True);
-        Assert.That(ModsState.IsModEnabled.ContainsKey(EarlyMod), Is.False);
+        Assert.That(ModsState.IsModEnabled.ContainsKey("Pulsar4x.EarlyTechStart"), Is.False);
+        Assert.That(ModsState.IsModEnabled.ContainsKey("Early Tech Start"), Is.False);
         Assert.That(ModsState.IsModEnabled[BaseMod], Is.True);
-        Assert.That(ModsState.IsModEnabled[EarlyModNamespace], Is.False);
+        Assert.That(ModsState.IsModEnabled.ContainsKey(TestingMod), Is.True);
+        Assert.That(ModsState.IsModEnabled[TestingMod], Is.False);
 
         foreach (var mod in ModsState.AvailableMods)
         {
@@ -179,11 +200,11 @@ public class ScenarioWizardTests
     }
 
     [Test]
-    public void ExplicitSolDefault_HasFourColonyBlueprintsAndTheSolStartIds()
+    public void ExplicitWarpTechStart_HasFourColonyBlueprintsAndTheSolStartIds()
     {
         ModsState.RefreshModsList("Data");
         var available = ModsState.AvailableMods.Select(m => m.Path).ToList();
-        var store = GameLifecycle.LoadModStore(TickedPaths(BaseMod), available, SolDefault);
+        var store = GameLifecycle.LoadModStore(TickedPaths(BaseMod), available, WarpTechStart);
 
         Assert.That(store.Colonies, Has.Count.EqualTo(4));
         Assert.That(store.Colonies.Keys, Is.EquivalentTo(new[]
@@ -210,7 +231,7 @@ public class ScenarioWizardTests
             EleStart: true,
             SMPassword: "",
             PlayerPassword: "",
-            ScenarioId: SolDefault);
+            ScenarioId: WarpTechStart);
         Assert.That(request.SpeciesId, Is.EqualTo("species-human"));
         Assert.That(request.ColonyId, Is.EqualTo("colony-earth"));
         Assert.That(request.SystemId, Is.EqualTo("system-sol"));
@@ -234,13 +255,13 @@ public class ScenarioWizardTests
     {
         ModsState.RefreshModsList("Data");
         var available = ModsState.AvailableMods.Select(m => m.Path).ToList();
-        var store = GameLifecycle.LoadModStore(TickedPaths(BaseMod, EarlyMod), available, EarlyTech);
+        var store = GameLifecycle.LoadModStore(TickedPaths(BaseMod), available, EarlyTech);
         Assert.That(store.Systems.ContainsKey("system-sol"), Is.True);
 
         var catalog = GameLifecycle.BuildCatalog(store);
         var systems = catalog.Systems.Where(s => s.StartingBodies.Count > 0).ToList();
         var request = new NewGameRequest(
-            ModManifestPaths: TickedPaths(BaseMod, EarlyMod),
+            ModManifestPaths: TickedPaths(BaseMod),
             FactionName: "United Earth Corp",
             FactionAbbreviation: "UEC",
             SpeciesId: catalog.DefaultStart!.SpeciesId,

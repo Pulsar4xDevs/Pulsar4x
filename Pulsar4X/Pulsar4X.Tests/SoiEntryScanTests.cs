@@ -35,7 +35,7 @@ public class SoiEntryScanTests
         var modLoader = new ModLoader();
         var store = new ModDataStore();
         modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
-        modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", store);
+        modLoader.LoadScenario("Data/scenarios/warp-tech-start/scenarioInfo.json", store);
         var game = new Game(new NewGameSettings(), store);
         game.Settings.EnforceSingleThread = true;
         return game;
@@ -359,7 +359,7 @@ public class SoiEntryScanTests
         var modLoader = new ModLoader();
         var store = new ModDataStore();
         modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
-        modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", store);
+        modLoader.LoadScenario("Data/scenarios/warp-tech-start/scenarioInfo.json", store);
         var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
         StarSystemFactory.LoadFromBlueprint(game, store.Systems["system-sol"]);
         var sol = game.Systems.Single(system => system.ID == "system-sol");

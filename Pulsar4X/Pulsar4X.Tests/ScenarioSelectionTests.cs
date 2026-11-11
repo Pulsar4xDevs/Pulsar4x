@@ -19,8 +19,7 @@ namespace Pulsar4X.Tests;
 public class ScenarioSelectionTests
 {
     private const string BaseMod = "Pulsar4x";
-    private const string EarlyMod = "Early Tech Start";
-    private const string SolDefault = "Pulsar4x.Scenario.SolDefault";
+    private const string WarpTechStart = "Pulsar4x.Scenario.WarpTechStart";
     private const string EarlyTech = "Pulsar4x.Scenario.EarlyTech";
 
     private static ModsState.ModMetaData Mod(string name)
@@ -30,49 +29,39 @@ public class ScenarioSelectionTests
         => names.Select(n => Mod(n).Path).ToList();
 
     [Test]
-    public void DiscoverScenarios_DataScenarios_FindsSolDefaultAndEarlyTech()
+    public void DiscoverScenarios_DataScenarios_FindsWarpTechStartAndEarlyTech()
     {
         ModsState.RefreshModsList("Data");
         var discovered = new ModLoader().DiscoverScenarios(new[] { "Data/scenarios" });
 
-        Assert.That(discovered.Keys, Is.EquivalentTo(new[] { SolDefault, EarlyTech }));
-        Assert.That(discovered[EarlyTech].RequiredScenarios, Does.Contain(SolDefault));
+        Assert.That(discovered.Keys, Is.EquivalentTo(new[] { WarpTechStart, EarlyTech }));
+        Assert.That(discovered[WarpTechStart].RequiredMods, Is.EqualTo(new[] { BaseMod }));
+        Assert.That(discovered[EarlyTech].RequiredMods, Is.EqualTo(new[] { BaseMod }));
+        Assert.That(discovered[EarlyTech].RequiredScenarios, Does.Contain(WarpTechStart));
     }
 
     [Test]
-    public void DefaultChoice_Pulsar4xOnly_IsSolDefault()
+    public void DefaultChoice_Pulsar4xOnly_IsWarpTechStart()
     {
         ModsState.RefreshModsList("Data");
         var store = GameLifecycle.LoadModStore(TickedPaths(BaseMod), ModsState.AvailableMods.Select(m => m.Path));
 
-        Assert.That(store.ScenarioNamespace, Is.EqualTo(SolDefault));
+        Assert.That(store.ScenarioNamespace, Is.EqualTo(WarpTechStart));
         Assert.That(store.Colonies, Does.ContainKey("colony-earth"));
         Assert.That(store.Colonies, Does.Not.ContainKey("colony-early-earth"));
     }
 
     [Test]
-    public void DefaultChoice_Pulsar4xAndEarlyTechStart_IsEarlyTech()
-    {
-        ModsState.RefreshModsList("Data");
-        var store = GameLifecycle.LoadModStore(
-            TickedPaths(BaseMod, EarlyMod), ModsState.AvailableMods.Select(m => m.Path));
-
-        Assert.That(store.ScenarioNamespace, Is.EqualTo(EarlyTech));
-        Assert.That(store.Colonies, Does.ContainKey("colony-early-earth"));
-        Assert.That(store.Colonies, Does.Not.ContainKey("colony-earth"));
-    }
-
-    [Test]
-    public void LoadModStore_ExplicitSolDefault_HasFourColoniesAndEarthAmongTheBodies()
+    public void LoadModStore_ExplicitWarpTechStart_HasFourColoniesAndEarthAmongTheBodies()
     {
         ModsState.RefreshModsList("Data");
         var available = ModsState.AvailableMods.Select(m => m.Path).ToList();
-        var store = GameLifecycle.LoadModStore(TickedPaths(BaseMod), available, SolDefault);
+        var store = GameLifecycle.LoadModStore(TickedPaths(BaseMod), available, WarpTechStart);
 
         var baseline = new ModDataStore();
         var loader = new ModLoader();
         loader.LoadModManifest("Data/basemod/modInfo.json", baseline);
-        loader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", baseline);
+        loader.LoadScenario("Data/scenarios/warp-tech-start/scenarioInfo.json", baseline);
 
         Assert.That(store.Colonies, Has.Count.EqualTo(4));
         Assert.That(store.Colonies.Keys, Is.EquivalentTo(new[]
@@ -101,7 +90,7 @@ public class ScenarioSelectionTests
             EleStart: true,
             SMPassword: "",
             PlayerPassword: "",
-            ScenarioId: SolDefault);
+            ScenarioId: WarpTechStart);
         var result = GameLifecycle.CreateGameCore(store, request);
         Assert.That(result, Is.Not.Null);
 
@@ -120,11 +109,11 @@ public class ScenarioSelectionTests
     {
         ModsState.RefreshModsList("Data");
         var store = GameLifecycle.LoadModStore(
-            TickedPaths(BaseMod, EarlyMod), ModsState.AvailableMods.Select(m => m.Path), EarlyTech);
+            TickedPaths(BaseMod), ModsState.AvailableMods.Select(m => m.Path), EarlyTech);
         var catalog = GameLifecycle.BuildCatalog(store);
         var systems = catalog.Systems.Where(s => s.StartingBodies.Count > 0).ToList();
         var request = new NewGameRequest(
-            ModManifestPaths: TickedPaths(BaseMod, EarlyMod),
+            ModManifestPaths: TickedPaths(BaseMod),
             FactionName: "United Earth Corp",
             FactionAbbreviation: "UEC",
             SpeciesId: catalog.DefaultStart!.SpeciesId,
@@ -155,28 +144,41 @@ public class ScenarioSelectionTests
     }
 
     [Test]
-    public void ApplyScenario_EarlyTechWithoutItsMod_ThrowsAndAppliesNothing()
+    public void ApplyScenario_MissingRequiredMod_ThrowsAndAppliesNothing()
     {
-        var loader = new ModLoader();
-        var store = new ModDataStore();
-        loader.LoadModManifest("Data/basemod/modInfo.json", store);
-        var discovered = loader.DiscoverScenarios(new[] { "Data/scenarios" });
-        int colonies = store.Colonies.Count;
-        int systems = store.Systems.Count;
+        var root = Path.Combine(Path.GetTempPath(), "p4x-scenario-missing-mod-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(Path.Combine(root, "needs-mod"));
+        try
+        {
+            const string scenarioNs = "needs-missing-mod";
+            File.WriteAllText(Path.Combine(root, "needs-mod", "scenarioInfo.json"),
+                "{\"ScenarioName\":\"Needs Mod\",\"Namespace\":\"" + scenarioNs + "\",\"RequiredMods\":[\"not-installed-mod\"],\"DataFiles\":[]}");
 
-        var ex = Assert.Throws<ModLoadException>(
-            () => loader.ApplyScenario(EarlyTech, null, discovered, store));
+            var loader = new ModLoader();
+            var store = new ModDataStore();
+            loader.LoadModManifest("Data/basemod/modInfo.json", store);
+            var discovered = loader.DiscoverScenarios(new[] { root });
+            int colonies = store.Colonies.Count;
+            int systems = store.Systems.Count;
 
-        Assert.That(store.Colonies, Has.Count.EqualTo(colonies));
-        Assert.That(store.Systems, Has.Count.EqualTo(systems));
-        Assert.That(ex!.Errors, Has.Count.EqualTo(1));
-        var error = ex.Errors[0];
-        Assert.That(error.ModNamespace, Is.EqualTo(EarlyTech));
-        Assert.That(error.FileName, Is.EqualTo("scenarioInfo.json"));
-        Assert.That(error.ObjectType, Is.EqualTo("ScenarioManifest"));
-        Assert.That(error.ObjectId, Is.EqualTo(EarlyTech));
-        Assert.That(error.Field, Is.EqualTo("RequiredMods"));
-        Assert.That(error.MissingId, Is.EqualTo("Pulsar4x.EarlyTechStart"));
+            var ex = Assert.Throws<ModLoadException>(
+                () => loader.ApplyScenario(scenarioNs, null, discovered, store));
+
+            Assert.That(store.Colonies, Has.Count.EqualTo(colonies));
+            Assert.That(store.Systems, Has.Count.EqualTo(systems));
+            Assert.That(ex!.Errors, Has.Count.EqualTo(1));
+            var error = ex.Errors[0];
+            Assert.That(error.ModNamespace, Is.EqualTo(scenarioNs));
+            Assert.That(error.FileName, Is.EqualTo("scenarioInfo.json"));
+            Assert.That(error.ObjectType, Is.EqualTo("ScenarioManifest"));
+            Assert.That(error.ObjectId, Is.EqualTo(scenarioNs));
+            Assert.That(error.Field, Is.EqualTo("RequiredMods"));
+            Assert.That(error.MissingId, Is.EqualTo("not-installed-mod"));
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
     }
 
     [Test]
@@ -288,7 +290,7 @@ public class ScenarioSelectionTests
     }
 
     [Test]
-    public void BuildQuickstartRequest_DefaultEnabledMods_UsesSolDefaultStart()
+    public void BuildQuickstartRequest_DefaultEnabledMods_UsesWarpTechStartStart()
     {
         ModsState.RefreshModsList("Data");
         var paths = ModsState.AvailableMods.Where(m => m.Mod.DefaultEnabled).Select(m => m.Path).ToList();
@@ -297,7 +299,7 @@ public class ScenarioSelectionTests
 
         var request = GameLifecycle.BuildQuickstartRequest(paths, catalog, 1);
         Assert.That(request, Is.Not.Null);
-        Assert.That(request.ScenarioId, Is.EqualTo(SolDefault));
+        Assert.That(request.ScenarioId, Is.EqualTo(WarpTechStart));
         Assert.That(request.SpeciesId, Is.EqualTo("species-human"));
         Assert.That(request.ColonyId, Is.EqualTo("colony-earth"));
         Assert.That(request.SystemId, Is.EqualTo("system-sol"));

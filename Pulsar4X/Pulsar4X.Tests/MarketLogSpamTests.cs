@@ -25,9 +25,9 @@ public class MarketLogSpamTests
     {
         ModsState.RefreshModsList("Data");
         var mods = ModsState.AvailableMods;
-        var names = early ? new[] { "Pulsar4x", "Early Tech Start" } : new[] { "Pulsar4x" };
-        var paths = names.Select(n => mods.Single(m => m.Mod.ModName == n).Path).ToList();
-        var store = GameLifecycle.LoadModStore(paths, mods.Select(m => m.Path));
+        var paths = new[] { mods.Single(m => m.Mod.ModName == "Pulsar4x").Path }.ToList();
+        string? scenarioId = early ? "Pulsar4x.Scenario.EarlyTech" : null;
+        var store = GameLifecycle.LoadModStore(paths, mods.Select(m => m.Path), scenarioId);
         var catalog = GameLifecycle.BuildCatalog(store);
         var systems = catalog.Systems.Where(x => x.StartingBodies.Count > 0).ToList();
         var request = new NewGameRequest(

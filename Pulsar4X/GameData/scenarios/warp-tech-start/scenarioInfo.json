@@ -1,8 +1,8 @@
 {
   "Author": "Pulsar4x Devs",
-  "ScenarioName": "Sol Default Start",
+  "ScenarioName": "Warp Tech Start",
   "Version": "0.1",
-  "Namespace": "Pulsar4x.Scenario.SolDefault",
+  "Namespace": "Pulsar4x.Scenario.WarpTechStart",
   "Description": "The default Sol system start, with Earth as the player colony.",
   "DefaultEnabled": true,
   "RequiredMods": [
@@ -17,7 +17,9 @@
     "defaultTheme.json",
     "species.json",
     "colonies.json",
-    "factions.json"
+    "factions.json",
+    "designs/componentDesigns.json",
+    "designs/shipDesigns.json"
   ],
   "DefaultStart": {
     "Species": "species-human",

@@ -20,8 +20,7 @@ namespace Pulsar4X.Tests;
 public class DefaultStartTests
 {
     private const string BaseMod = "Pulsar4x";
-    private const string EarlyMod = "Early Tech Start";
-    private const string SolDefault = "Pulsar4x.Scenario.SolDefault";
+    private const string WarpTechStart = "Pulsar4x.Scenario.WarpTechStart";
     private const string EarlyTech = "Pulsar4x.Scenario.EarlyTech";
 
     private static ModsState.ModMetaData Mod(string name)
@@ -177,12 +176,12 @@ public class DefaultStartTests
     }
 
     [Test]
-    public void Catalog_SolDefaultAndEarlyTech_CarryTheMergedStartAndIncludedSystems()
+    public void Catalog_WarpTechStartAndEarlyTech_CarryTheMergedStartAndIncludedSystems()
     {
-        var (solStore, solCatalog, _) = Load(SolDefault, BaseMod);
+        var (solStore, solCatalog, _) = Load(WarpTechStart, BaseMod);
         AssertEffective(solCatalog, solStore, "colony-earth");
 
-        var (earlyStore, earlyCatalog, _) = Load(EarlyTech, BaseMod, EarlyMod);
+        var (earlyStore, earlyCatalog, _) = Load(EarlyTech, BaseMod);
         AssertEffective(earlyCatalog, earlyStore, "colony-early-earth");
     }
 
@@ -217,7 +216,7 @@ public class DefaultStartTests
     [Test]
     public void FromDefaultStart_UsesTheCatalog_AndRejectsAMissingStartingFunds()
     {
-        var (_, catalog, paths) = Load(SolDefault, BaseMod);
+        var (_, catalog, paths) = Load(WarpTechStart, BaseMod);
         var request = RequestFrom(catalog, paths);
 
         Assert.That(request.SpeciesId, Is.EqualTo("species-human"));
@@ -245,7 +244,7 @@ public class DefaultStartTests
     [Test]
     public void CreateGameCore_AppliesThemeId()
     {
-        var (store, catalog, paths) = Load(SolDefault, BaseMod);
+        var (store, catalog, paths) = Load(WarpTechStart, BaseMod);
         var source = store.Themes["default-theme"];
         var theme = new ThemeBlueprint
         {
@@ -282,7 +281,7 @@ public class DefaultStartTests
     [Test]
     public void CreateGameCore_GeneratesOnlyTheSystemsPastTheIncludedPacks()
     {
-        var (store, catalog, paths) = Load(SolDefault, BaseMod);
+        var (store, catalog, paths) = Load(WarpTechStart, BaseMod);
         int included = catalog.IncludedSystemIds.Count;
         Assert.That(included, Is.GreaterThan(0));
 
@@ -304,7 +303,7 @@ public class DefaultStartTests
     [Test]
     public void BuildQuickstartRequest_UsesDefaultStartValues()
     {
-        var (_, catalog, paths) = Load(SolDefault, BaseMod);
+        var (_, catalog, paths) = Load(WarpTechStart, BaseMod);
         var request = GameLifecycle.BuildQuickstartRequest(paths, catalog, 7);
         var start = catalog.DefaultStart;
 

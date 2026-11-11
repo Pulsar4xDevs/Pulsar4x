@@ -96,7 +96,7 @@ public class InterSystemRouteTests
         var modLoader = new ModLoader();
         var store = new ModDataStore();
         modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
-        modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", store);
+        modLoader.LoadScenario("Data/scenarios/warp-tech-start/scenarioInfo.json", store);
         var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
         var system = new StarSystem();
         system.Initialize(game, "Arrival", -1);
@@ -184,7 +184,7 @@ public class InterSystemRouteTests
             var modLoader = new ModLoader();
             var store = new ModDataStore();
             modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
-            modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", store);
+            modLoader.LoadScenario("Data/scenarios/warp-tech-start/scenarioInfo.json", store);
             var game = new Game(new NewGameSettings { MaxSystems = 4, CreatePlayerFaction = false }, store);
             var faction = FactionFactory.CreateFaction(game, "Haulers");
             faction.GetDataBlob<FactionInfoDB>().Data.Unlock("iron");

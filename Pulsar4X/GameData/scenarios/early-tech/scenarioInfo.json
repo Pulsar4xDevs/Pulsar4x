@@ -6,11 +6,10 @@
   "Description": "An early-technology Earth start; advanced techs stay locked until researched.",
   "DefaultEnabled": false,
   "RequiredMods": [
-    "Pulsar4x",
-    "Pulsar4x.EarlyTechStart"
+    "Pulsar4x"
   ],
   "RequiredScenarios": [
-    "Pulsar4x.Scenario.SolDefault"
+    "Pulsar4x.Scenario.WarpTechStart"
   ],
   "DataFiles": [
     "colonies.json",

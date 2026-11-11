@@ -56,7 +56,7 @@ namespace Pulsar4X.Tests
             ModLoader modLoader = new ModLoader();
             ModDataStore modDataStore = new ModDataStore();
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
-            modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", modDataStore);
+            modLoader.LoadScenario("Data/scenarios/warp-tech-start/scenarioInfo.json", modDataStore);
             var game = new Game(gamesettings, modDataStore );
 
             var smAuthToken = new AuthenticationToken(game.SpaceMaster);
@@ -134,7 +134,7 @@ namespace Pulsar4X.Tests
             ModLoader modLoader = new ModLoader();
             ModDataStore modDataStore = new ModDataStore();
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
-            modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", modDataStore);
+            modLoader.LoadScenario("Data/scenarios/warp-tech-start/scenarioInfo.json", modDataStore);
             Game = new Game(GameSettings, modDataStore);
 
             // add a faction:

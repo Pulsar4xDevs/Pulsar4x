@@ -23,8 +23,6 @@
     "TemplateFiles/techs-bureaucracy.json",
     "TemplateFiles/weapons.json",
     "TemplateFiles/damageResistance.json",
-    "ScenarioFiles/designs/componentDesigns.json",
-    "ScenarioFiles/designs/shipDesigns.json",
     "ScenarioFiles/systemGenSettings.json"
   ]
 }

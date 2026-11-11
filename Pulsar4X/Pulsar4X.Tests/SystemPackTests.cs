@@ -15,8 +15,7 @@ namespace Pulsar4X.Tests;
 public class SystemPackTests
 {
     private const string BaseMod = "Pulsar4x";
-    private const string EarlyMod = "Early Tech Start";
-    private const string SolDefault = "Pulsar4x.Scenario.SolDefault";
+    private const string WarpTechStart = "Pulsar4x.Scenario.WarpTechStart";
     private const string EarlyTech = "Pulsar4x.Scenario.EarlyTech";
     private const string SolPack = "Pulsar4x.System.Sol";
     private const string AlphaPack = "Pulsar4x.System.AlphaCentauri";
@@ -79,11 +78,11 @@ public class SystemPackTests
     }
 
     [Test]
-    public void LoadModStore_SolDefault_LoadsPacksThenScenarioOwnedData()
+    public void LoadModStore_WarpTechStart_LoadsPacksThenScenarioOwnedData()
     {
         ModsState.RefreshModsList("Data");
         var available = ModsState.AvailableMods.Select(m => m.Path).ToList();
-        var store = GameLifecycle.LoadModStore(TickedPaths(BaseMod), available, SolDefault);
+        var store = GameLifecycle.LoadModStore(TickedPaths(BaseMod), available, WarpTechStart);
 
         Assert.That(store.LoadedSystems, Is.EqualTo(PackOrder));
         Assert.That(store.Systems, Does.ContainKey("system-sol"));
@@ -102,9 +101,9 @@ public class SystemPackTests
         }));
 
         foreach (var colony in store.Colonies.Values)
-            Assert.That(colony.ModNamespace, Is.EqualTo(SolDefault), colony.UniqueID);
+            Assert.That(colony.ModNamespace, Is.EqualTo(WarpTechStart), colony.UniqueID);
         foreach (var faction in store.Factions.Values)
-            Assert.That(faction.ModNamespace, Is.EqualTo(SolDefault), faction.UniqueID);
+            Assert.That(faction.ModNamespace, Is.EqualTo(WarpTechStart), faction.UniqueID);
         foreach (var body in store.SystemBodies.Values)
             Assert.That(body.ModNamespace, Is.EqualTo(SolPack), body.UniqueID);
         Assert.That(store.Stars["sol"].ModNamespace, Is.EqualTo(SolPack));
@@ -113,16 +112,16 @@ public class SystemPackTests
     }
 
     [Test]
-    public void LoadScenario_SolDefault_DefaultRootDiscoversTheSamePacks()
+    public void LoadScenario_WarpTechStart_DefaultRootDiscoversTheSamePacks()
     {
         ModsState.RefreshModsList("Data");
         var available = ModsState.AvailableMods.Select(m => m.Path).ToList();
-        var viaStore = GameLifecycle.LoadModStore(TickedPaths(BaseMod), available, SolDefault);
+        var viaStore = GameLifecycle.LoadModStore(TickedPaths(BaseMod), available, WarpTechStart);
 
         var loader = new ModLoader();
         var direct = new ModDataStore();
         loader.LoadModManifest("Data/basemod/modInfo.json", direct);
-        loader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", direct);
+        loader.LoadScenario("Data/scenarios/warp-tech-start/scenarioInfo.json", direct);
 
         Assert.That(direct.LoadedSystems, Is.EqualTo(PackOrder));
         Assert.That(direct.LoadedSystems, Is.EqualTo(viaStore.LoadedSystems));
@@ -136,7 +135,7 @@ public class SystemPackTests
     {
         ModsState.RefreshModsList("Data");
         var available = ModsState.AvailableMods.Select(m => m.Path).ToList();
-        var store = GameLifecycle.LoadModStore(TickedPaths(BaseMod, EarlyMod), available, EarlyTech);
+        var store = GameLifecycle.LoadModStore(TickedPaths(BaseMod), available, EarlyTech);
 
         Assert.That(store.LoadedSystems, Is.EqualTo(PackOrder));
         Assert.That(store.Systems, Does.ContainKey("system-sol"));
@@ -198,7 +197,7 @@ public class SystemPackTests
         try
         {
             File.WriteAllText(Path.Combine(scenarioDir, "scenarioInfo.json"),
-                "{\"ScenarioName\":\"Shared Sol\",\"Namespace\":\"test-shared-sol\",\"RequiredScenarios\":[\"" + SolDefault + "\"],\"IncludedSystems\":[\"" + SolPack + "\"],\"DataFiles\":[]}");
+                "{\"ScenarioName\":\"Shared Sol\",\"Namespace\":\"test-shared-sol\",\"RequiredScenarios\":[\"" + WarpTechStart + "\"],\"IncludedSystems\":[\"" + SolPack + "\"],\"DataFiles\":[]}");
 
             var loader = new ModLoader();
             var store = new ModDataStore();

@@ -225,7 +225,7 @@ public class PrefabFacilitiesTests
     {
         var store = new ModDataStore();
         new ModLoader().LoadModManifest("Data/basemod/modInfo.json", store);
-        new ModLoader().LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", store);
+        new ModLoader().LoadScenario("Data/scenarios/warp-tech-start/scenarioInfo.json", store);
         return store;
     }
 

@@ -23,7 +23,7 @@ public class EventLogTests
         var modDataStore = new ModDataStore();
 
         modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
-        modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", modDataStore);
+        modLoader.LoadScenario("Data/scenarios/warp-tech-start/scenarioInfo.json", modDataStore);
 
         var settings = new NewGameSettings() {
             StartDateTime = new System.DateTime(2100, 9, 1)

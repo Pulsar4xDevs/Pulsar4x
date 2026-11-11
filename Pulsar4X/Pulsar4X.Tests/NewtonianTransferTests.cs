@@ -27,7 +27,7 @@ namespace Pulsar4X.Tests;
 public class NewtonianTransferTests
 {
     const string BaseMod = "Pulsar4x";
-    const string EarlyMod = "Early Tech Start";
+    const string EarlyTech = "Pulsar4x.Scenario.EarlyTech";
 
     Game _game = null!;
     Entity _faction = null!;
@@ -43,10 +43,8 @@ public class NewtonianTransferTests
     {
         ModsState.RefreshModsList("Data");
         var mods = ModsState.AvailableMods;
-        var paths = new[] { BaseMod, EarlyMod }
-            .Select(name => mods.Single(m => m.Mod.ModName == name).Path)
-            .ToList();
-        var store = GameLifecycle.LoadModStore(paths, mods.Select(m => m.Path));
+        var paths = new[] { mods.Single(m => m.Mod.ModName == BaseMod).Path }.ToList();
+        var store = GameLifecycle.LoadModStore(paths, mods.Select(m => m.Path), EarlyTech);
         var catalog = GameLifecycle.BuildCatalog(store);
         var systems = catalog.Systems.Where(s => s.StartingBodies.Count > 0).ToList();
         var request = new NewGameRequest(

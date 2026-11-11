@@ -27,14 +27,14 @@ using Pulsar4X.Storage;
 namespace Pulsar4X.Tests;
 
 /// <summary>
-/// The Early Tech Start mod, driven through the same host calls as the New Game wizard:
-/// scan the mods folder, load the ticked mods, take the catalog defaults, create the game.
+/// The Early Tech Start scenario, driven through the same host calls as the New Game wizard:
+/// scan the mods folder, load the base mod plus the scenario, take the catalog defaults, create the game.
 /// </summary>
 [TestFixture]
 public class EarlyTechStartTests
 {
     private const string BaseMod = "Pulsar4x";
-    private const string EarlyMod = "Early Tech Start";
+    private const string EarlyTech = "Pulsar4x.Scenario.EarlyTech";
     private const string EarlyColony = "colony-early-earth";
 
     private static ModsState.ModMetaData Mod(string name)
@@ -42,13 +42,12 @@ public class EarlyTechStartTests
 
     private static List<string> TickedPaths(params string[] names) => names.Select(n => Mod(n).Path).ToList();
 
-    private static (Game game, Entity faction) StartGameLikeTheMenu(params string[] tickedMods)
+    private static (Game game, Entity faction) StartGameLikeTheMenu(string? scenarioId = null)
     {
         ModsState.RefreshModsList("Data");
-        var paths = TickedPaths(tickedMods);
+        var paths = TickedPaths(BaseMod);
 
-        // "Next" on the mods page.
-        var store = GameLifecycle.LoadModStore(paths, ModsState.AvailableMods.Select(m => m.Path));
+        var store = GameLifecycle.LoadModStore(paths, ModsState.AvailableMods.Select(m => m.Path), scenarioId);
         var catalog = GameLifecycle.BuildCatalog(store);
 
         // The wizard's defaults: first species, first colony, every startable system, first body.
@@ -69,58 +68,111 @@ public class EarlyTechStartTests
             SMPassword: "",
             PlayerPassword: "");
 
-        // "Create Game!" on the details page.
         var result = GameLifecycle.CreateGameCore(store, request);
         Assert.That(result, Is.Not.Null, "CreateGameCore returned null");
         return (result!.Value.game, result.Value.faction);
     }
 
     [Test]
-    public void ManifestIsDiscovered_DependsOnTheBaseMod_AndIsNotEnabledByDefault()
+    public void NoShippedMod_HasTheRemovedEarlyTechStartNamespace()
     {
         ModsState.RefreshModsList("Data");
 
-        var names = ModsState.AvailableMods.Select(m => m.Mod.ModName).ToList();
-        Assert.That(names, Does.Contain(EarlyMod));
-        Assert.That(ModsState.IsModEnabled[Mod(EarlyMod).Mod.Namespace], Is.False);
-        Assert.That(Mod(EarlyMod).Mod.Dependencies, Is.EquivalentTo(new[] { "Pulsar4x" }));
+        Assert.That(ModsState.AvailableMods.Select(m => m.Mod.Namespace),
+            Does.Not.Contain("Pulsar4x.EarlyTechStart"));
+        Assert.That(ModsState.AvailableMods.Select(m => m.Mod.ModName),
+            Does.Not.Contain("Early Tech Start"));
     }
 
     [Test]
-    public void EarlyModAlone_PullsInTheBaseModFirst()
+    public void BaseMod_IncludesTheFourEarlyTechs()
     {
-        ModsState.RefreshModsList("Data");
+        var loader = new ModLoader();
+        var store = new ModDataStore();
+        loader.LoadModManifest("Data/basemod/modInfo.json", store);
 
-        var store = GameLifecycle.LoadModStore(TickedPaths(EarlyMod), ModsState.AvailableMods.Select(m => m.Path));
+        foreach (var id in new[]
+        {
+            "tech-early-technology", "tech-early-nuclear-power",
+            "tech-early-directed-energy", "tech-early-warp-drive"
+        })
+            Assert.That(store.Techs, Does.ContainKey(id), id);
+    }
 
-        Assert.That(store.ModManifests.Select(m => m.Namespace),
-            Is.EqualTo(new[] { "Pulsar4x", "Pulsar4x.EarlyTechStart" }));
-        Assert.That(store.ComponentTemplates, Does.ContainKey("mine"));
+    [Test]
+    public void DependentModAlone_PullsInTheRequiredModFirst()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "p4x-mod-" + Path.GetRandomFileName());
+        Directory.CreateDirectory(dir);
+        try
+        {
+            var manifest = Path.Combine(dir, "modInfo.json");
+            File.WriteAllText(manifest,
+                "{\"ModName\":\"Dependent\",\"Namespace\":\"dependent\",\"Dependencies\":[\"Pulsar4x\"],\"DataFiles\":[]}");
+
+            ModsState.RefreshModsList("Data");
+            var available = ModsState.AvailableMods.Select(m => m.Path).Concat(new[] { manifest }).ToList();
+            var store = GameLifecycle.LoadModStore(new[] { manifest }, available);
+
+            Assert.That(store.ModManifests.Select(m => m.Namespace),
+                Is.EqualTo(new[] { "Pulsar4x", "dependent" }));
+            Assert.That(store.ComponentTemplates, Does.ContainKey("mine"));
+        }
+        finally
+        {
+            Directory.Delete(dir, true);
+        }
     }
 
     [Test]
     public void LoadOrderFollowsDependenciesNotTheOrderPathsAreGiven()
     {
-        ModsState.RefreshModsList("Data");
-        var all = ModsState.AvailableMods.Select(m => m.Path).ToList();
+        var dir = Path.Combine(Path.GetTempPath(), "p4x-mod-" + Path.GetRandomFileName());
+        Directory.CreateDirectory(dir);
+        try
+        {
+            var manifest = Path.Combine(dir, "modInfo.json");
+            File.WriteAllText(manifest,
+                "{\"ModName\":\"Dependent\",\"Namespace\":\"dependent\",\"Dependencies\":[\"Pulsar4x\"],\"DataFiles\":[]}");
 
-        var store = GameLifecycle.LoadModStore(TickedPaths(EarlyMod, BaseMod), all);
+            ModsState.RefreshModsList("Data");
+            var basePath = Mod(BaseMod).Path;
+            var available = ModsState.AvailableMods.Select(m => m.Path).Concat(new[] { manifest }).ToList();
+            var store = GameLifecycle.LoadModStore(new[] { manifest, basePath }, available);
 
-        Assert.That(store.ModManifests.Select(m => m.Namespace).ToList(),
-            Is.EqualTo(new[] { "Pulsar4x", "Pulsar4x.EarlyTechStart" }));
+            Assert.That(store.ModManifests.Select(m => m.Namespace).ToList(),
+                Is.EqualTo(new[] { "Pulsar4x", "dependent" }));
+        }
+        finally
+        {
+            Directory.Delete(dir, true);
+        }
     }
 
     [Test]
     public void LoadingAModDirectlyWithoutItsDependency_Throws()
     {
-        var loader = new ModLoader();
-        var store = new ModDataStore();
+        var dir = Path.Combine(Path.GetTempPath(), "p4x-mod-" + Path.GetRandomFileName());
+        Directory.CreateDirectory(dir);
+        try
+        {
+            var manifest = Path.Combine(dir, "modInfo.json");
+            File.WriteAllText(manifest,
+                "{\"ModName\":\"Dependent\",\"Namespace\":\"dependent\",\"Dependencies\":[\"Pulsar4x\"],\"DataFiles\":[]}");
 
-        var ex = Assert.Throws<System.InvalidOperationException>(
-            () => loader.LoadModManifest("Data/earlytechstart/modInfo.json", store));
+            var loader = new ModLoader();
+            var store = new ModDataStore();
 
-        Assert.That(ex!.Message, Does.Contain("Pulsar4x"));
-        Assert.That(store.Colonies, Is.Empty);
+            var ex = Assert.Throws<System.InvalidOperationException>(
+                () => loader.LoadModManifest(manifest, store));
+
+            Assert.That(ex!.Message, Does.Contain("Pulsar4x"));
+            Assert.That(store.Colonies, Is.Empty);
+        }
+        finally
+        {
+            Directory.Delete(dir, true);
+        }
     }
 
     [Test]
@@ -173,7 +225,8 @@ public class EarlyTechStartTests
     {
         ModsState.RefreshModsList("Data");
 
-        var store = GameLifecycle.LoadModStore(TickedPaths(BaseMod, EarlyMod), ModsState.AvailableMods.Select(m => m.Path));
+        var store = GameLifecycle.LoadModStore(
+            TickedPaths(BaseMod), ModsState.AvailableMods.Select(m => m.Path), EarlyTech);
         var catalog = GameLifecycle.BuildCatalog(store);
 
         Assert.That(catalog.Colonies.Select(c => c.Id), Is.EqualTo(new[] { EarlyColony }));
@@ -181,15 +234,11 @@ public class EarlyTechStartTests
     }
 
     [Test]
-    public void EarlyMod_ReusesTheBaseComponentDesignsAndTemplates()
+    public void EarlyTech_ReusesTheWarpTechStartComponentDesignsAndTemplates()
     {
         ModsState.RefreshModsList("Data");
-        var store = GameLifecycle.LoadModStore(TickedPaths(EarlyMod), ModsState.AvailableMods.Select(m => m.Path));
-
-        // The mod ships no facility or component data of its own, only techs. The colony and one ship
-        // design come from the early-tech scenario.
-        var early = Mod(EarlyMod).Mod;
-        Assert.That(early.DataFiles, Is.EquivalentTo(new[] { "TemplateFiles/techs.json" }));
+        var store = GameLifecycle.LoadModStore(
+            TickedPaths(BaseMod), ModsState.AvailableMods.Select(m => m.Path), EarlyTech);
 
         var colony = store.Colonies[EarlyColony];
         foreach (var id in colony.ComponentDesigns!)
@@ -201,7 +250,7 @@ public class EarlyTechStartTests
     [Test]
     public void NewGameWithEarlyMod_HasEarthAsTheOnlyColony()
     {
-        var (game, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var (game, faction) = StartGameLikeTheMenu(EarlyTech);
 
         var colonies = game.Systems
             .SelectMany(system => system.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
@@ -218,11 +267,10 @@ public class EarlyTechStartTests
         Assert.That(withColonies, Is.Empty);
     }
 
-    [TestCase(false)]
-    [TestCase(true)]
-    public void NewGameWithEarlyMod_BuildsTheFacilitiesAndStocksTheWarehouse(bool earlyModOnly)
+    [Test]
+    public void NewGameWithEarlyMod_BuildsTheFacilitiesAndStocksTheWarehouse()
     {
-        var (game, faction) = StartGameLikeTheMenu(earlyModOnly ? new[] { EarlyMod } : new[] { BaseMod, EarlyMod });
+        var (game, faction) = StartGameLikeTheMenu(EarlyTech);
         var colony = game.Systems
             .SelectMany(system => system.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
             .Single();
@@ -284,7 +332,7 @@ public class EarlyTechStartTests
     [Test]
     public void NewGameWithEarlyMod_RunsAMonthOfGameTimeAndSurvivesASaveAndLoad()
     {
-        var (game, _) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var (game, _) = StartGameLikeTheMenu(EarlyTech);
         game.Settings.EnforceSingleThread = true;
 
         for (int day = 0; day < 30; day++)
@@ -300,21 +348,9 @@ public class EarlyTechStartTests
     }
 
     [Test]
-    public void NewGameWithEarlyModOnly_StartsTheSameWayAsWithBothTicked()
-    {
-        var (game, faction) = StartGameLikeTheMenu(EarlyMod);
-
-        var colonies = game.Systems
-            .SelectMany(system => system.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
-            .ToList();
-        Assert.That(colonies, Has.Count.EqualTo(1));
-        Assert.That(colonies[0].FactionOwnerID, Is.EqualTo(faction.Id));
-    }
-
-    [Test]
     public void NewGameWithEarlyMod_StartsWithEarlyTechnology()
     {
-        var (_, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var (_, faction) = StartGameLikeTheMenu(EarlyTech);
         var data = faction.GetDataBlob<FactionInfoDB>().Data;
 
         // Basic industry and rockets are known.
@@ -340,7 +376,7 @@ public class EarlyTechStartTests
     [Test]
     public void NewGameWithEarlyMod_KnowsNoWarpOrJumpTech()
     {
-        var (_, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var (_, faction) = StartGameLikeTheMenu(EarlyTech);
         var data = faction.GetDataBlob<FactionInfoDB>().Data;
 
         // Not known and not even researchable: the whole line sits behind tech-early-warp-drive.
@@ -364,7 +400,7 @@ public class EarlyTechStartTests
     [Test]
     public void NewGameWithEarlyMod_HasNoWarpOrJumpComponentsOrKnownJumpPoints()
     {
-        var (game, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var (game, faction) = StartGameLikeTheMenu(EarlyTech);
         var info = faction.GetDataBlob<FactionInfoDB>();
 
         foreach (var design in info.ComponentDesigns.Values)
@@ -390,7 +426,7 @@ public class EarlyTechStartTests
     [Test]
     public void NewGameWithEarlyMod_StartingShipsFlyOnReactionDrivesOnly()
     {
-        var (game, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var (game, faction) = StartGameLikeTheMenu(EarlyTech);
         var info = faction.GetDataBlob<FactionInfoDB>();
 
         Assert.That(info.ShipDesigns.Keys, Is.EquivalentTo(new[] { "early-ship-design-starship", "early-ship-design-newton-tug" }));
@@ -406,13 +442,13 @@ public class EarlyTechStartTests
     [Test]
     public void EarlyTechShip_CannotJump_AndABaseModWarpShipCan()
     {
-        var (early, earlyFaction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var (early, earlyFaction) = StartGameLikeTheMenu(EarlyTech);
         AssertJumpMatchesWarp(early, earlyFaction);
         var earlyShips = ProjectedShips(early, earlyFaction.Id);
         Assert.That(earlyShips, Is.Not.Empty);
         Assert.That(earlyShips.All(s => !s.CanJump), Is.True);
 
-        var (stock, stockFaction) = StartGameLikeTheMenu(BaseMod);
+        var (stock, stockFaction) = StartGameLikeTheMenu();
         AssertJumpMatchesWarp(stock, stockFaction);
         Assert.That(ProjectedShips(stock, stockFaction.Id).Any(s => s.CanJump), Is.True);
     }
@@ -462,7 +498,7 @@ public class EarlyTechStartTests
     [Test]
     public void StartingShip_IsStarshipLike_AndHasTheDeltaVForEarthToMars()
     {
-        var (game, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var (game, faction) = StartGameLikeTheMenu(EarlyTech);
         var ship = game.Systems.SelectMany(system => system.GetAllEntitiesWithDataBlob<ShipInfoDB>()).Single();
         var thrust = ship.GetDataBlob<NewtonThrustAbilityDB>();
 
@@ -480,7 +516,7 @@ public class EarlyTechStartTests
     [Test]
     public void NewtonianOnlyShip_IsOfferedNoWarpMove_AndCanHohmannWithinTheWell()
     {
-        var (game, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var (game, faction) = StartGameLikeTheMenu(EarlyTech);
         var ship = game.Systems.SelectMany(system => system.GetAllEntitiesWithDataBlob<ShipInfoDB>()).Single();
         var now = ship.StarSysDateTime;
         var system = game.Systems.Single(s => s.GetAllEntitiesWithDataBlob<ShipInfoDB>().Contains(ship));
@@ -536,7 +572,7 @@ public class EarlyTechStartTests
     [Test]
     public void ResearchingNuclearPower_UnlocksTheNextTechsAndTemplates()
     {
-        var (_, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var (_, faction) = StartGameLikeTheMenu(EarlyTech);
         var data = faction.GetDataBlob<FactionInfoDB>().Data;
 
         data.IncrementTechLevel("tech-early-nuclear-power");
@@ -552,7 +588,7 @@ public class EarlyTechStartTests
     [Test]
     public void NuclearThermalEngine_IsDesignableOnlyAfterFirstNuclearPowerResearch()
     {
-        var (_, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var (_, faction) = StartGameLikeTheMenu(EarlyTech);
         var info = faction.GetDataBlob<FactionInfoDB>();
         var data = info.Data;
         Assert.That(data.ComponentTemplates.ContainsKey("scntr-engine"), Is.False);
@@ -578,7 +614,7 @@ public class EarlyTechStartTests
     [TestCase("reactor")]
     public void ResearchingNuclearPower_MakesItsTemplatesDesignableWithTheirFuel(string templateId)
     {
-        var (_, faction) = StartGameLikeTheMenu(BaseMod, EarlyMod);
+        var (_, faction) = StartGameLikeTheMenu(EarlyTech);
         var data = faction.GetDataBlob<FactionInfoDB>().Data;
         Assert.That(data.CargoGoods.GetAny("fissile-fuels"), Is.Null,
             "nuclear fuel is not available before nuclear research");
@@ -593,9 +629,9 @@ public class EarlyTechStartTests
     }
 
     [Test]
-    public void DefaultBaseModStart_IsUnchangedByTheEarlyModBeingInstalled()
+    public void DefaultBaseModStart_HasNuclearEnginesAndMoreThanOneColony()
     {
-        var (game, faction) = StartGameLikeTheMenu(BaseMod);
+        var (game, faction) = StartGameLikeTheMenu();
         var info = faction.GetDataBlob<FactionInfoDB>();
         Assert.That(info.Data.ComponentTemplates.ContainsKey("scntr-engine"), Is.True);
         Assert.That(info.ComponentDesigns.ContainsKey("default-design-NTR1.8"), Is.True);
@@ -609,7 +645,7 @@ public class EarlyTechStartTests
     [Test]
     public void StockSol_MarsHasSpareRoom_AndEarthPostsRelocationWithFare()
     {
-        var (game, faction) = StartGameLikeTheMenu(BaseMod);
+        var (game, faction) = StartGameLikeTheMenu();
         var sol = game.Systems.Single(system => system.ID == "system-sol");
         var colonies = sol.GetAllEntitiesWithDataBlob<ColonyInfoDB>()
             .Where(c => c.FactionOwnerID == faction.Id).ToList();

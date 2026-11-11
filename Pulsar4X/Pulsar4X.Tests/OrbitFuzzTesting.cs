@@ -24,7 +24,7 @@ namespace Pulsar4X.Tests
             ModLoader modLoader = new ModLoader();
             ModDataStore modDataStore = new ModDataStore();
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
-            modLoader.LoadScenario("Data/scenarios/sol-default/scenarioInfo.json", modDataStore);
+            modLoader.LoadScenario("Data/scenarios/warp-tech-start/scenarioInfo.json", modDataStore);
             var game = new Game(new NewGameSettings(), modDataStore);
 
             return game;

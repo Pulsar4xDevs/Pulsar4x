@@ -227,7 +227,7 @@ public class ModLoadErrorTests
         if (withTheIds)
         {
             // Sol-default is applied after the fixture mod and would put the Mars outpost back.
-            // A fixture scenario on top of SolDefault removes it, the same way early-tech does.
+            // A fixture scenario on top of WarpTechStart removes it, the same way early-tech does.
             File.WriteAllText(Path.Combine(dir, "scenario.json"), """
                 [
                   {
@@ -246,7 +246,7 @@ public class ModLoadErrorTests
                   "Description": "Sound start for the missing-design fixture.",
                   "DefaultEnabled": false,
                   "RequiredMods": [ "{{BaseMod}}", "{{FixtureNamespace}}" ],
-                  "RequiredScenarios": [ "Pulsar4x.Scenario.SolDefault" ],
+                  "RequiredScenarios": [ "Pulsar4x.Scenario.WarpTechStart" ],
                   "DataFiles": [ "scenario.json" ],
                   "DefaultStart": {
                     "Species": "species-human",
