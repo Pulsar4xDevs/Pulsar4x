@@ -23,6 +23,6 @@
     "TemplateFiles/techs-bureaucracy.json",
     "TemplateFiles/weapons.json",
     "TemplateFiles/damageResistance.json",
-    "ScenarioFiles/systemGenSettings.json"
+    "systemGenSettings.json"
   ]
 }
