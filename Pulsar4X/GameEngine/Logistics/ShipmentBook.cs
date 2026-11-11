@@ -382,6 +382,12 @@ public static class ShipmentBook
             else
                 listings[i].SellQuantity -= picked[i].units;
         }
+        var listingHolder = fillBid ? buyer : seller;
+        for (int i = 0; i < picked.Count; i++)
+        {
+            decimal listingPrice = fillBid ? listings[i].Bid : listings[i].Ask;
+            MarketHistory.RecordTrade(listingHolder, listings[i], listingPrice, picked[i].units);
+        }
         var now = buyer.StarSysDateTime;
         foreach (var shipment in made)
         {

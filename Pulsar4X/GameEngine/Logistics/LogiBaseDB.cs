@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Pulsar4X.Api;
 using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.Logistics;
@@ -14,6 +15,20 @@ public class LogiBaseDB : BaseDataBlob
     public int Capacity { get; internal set; }
 
     public Dictionary<string, MarketListing> Listings { get; internal set; } = new();
+
+    /// <summary>
+    /// Daily price buckets keyed by cargo id. Kept when a listing is removed. Empty on old saves.
+    /// </summary>
+    public Dictionary<string, List<PriceBucket>> History { get; internal set; } = new();
+
+    [JsonIgnore]
+    internal int HistoryVersion;
+
+    [JsonIgnore]
+    internal MarketHistoryView? ProjectedHistory;
+
+    [JsonIgnore]
+    internal int ProjectedHistoryVersion;
 
     /// <summary>
     /// Intel for sale. Keyed by kind and subject. Does not count toward <see cref="Capacity"/>.
@@ -39,6 +54,23 @@ public class LogiBaseDB : BaseDataBlob
         {
             foreach (var (id, row) in db.Intel)
                 Intel[id] = row.Copy();
+        }
+        History = new Dictionary<string, List<PriceBucket>>();
+        if (db.History != null)
+        {
+            foreach (var (id, days) in db.History)
+            {
+                var copy = new List<PriceBucket>();
+                if (days != null)
+                {
+                    foreach (var bucket in days)
+                    {
+                        if (bucket != null)
+                            copy.Add(bucket.Copy());
+                    }
+                }
+                History[id] = copy;
+            }
         }
     }
 

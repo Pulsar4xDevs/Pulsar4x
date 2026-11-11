@@ -280,6 +280,20 @@ public sealed record MarketView(
     public IReadOnlyList<MarketGoodChoice> Addable { get; init; } = Array.Empty<MarketGoodChoice>();
 }
 
+/// <summary>One day's bucket at an office for one cargo id.</summary>
+public sealed record PricePointView(
+    DateTime Day, decimal Open, decimal High, decimal Low, decimal Close, long Volume,
+    decimal Bid, decimal Ask, long Stock);
+
+/// <summary>Daily buckets for one cargo id at an office, oldest first.</summary>
+public sealed record MarketGoodHistoryView(string CargoId, IReadOnlyList<PricePointView> Days);
+
+/// <summary>
+/// Daily buckets only for days with events, oldest first. The client carries values forward across gaps.
+/// At most MarketHistory.MaxDays points per good and at most MaxGoodsInView goods (the goods with the most recent activity).
+/// </summary>
+public sealed record MarketHistoryView(IReadOnlyList<MarketGoodHistoryView> Goods) : IComponentView;
+
 /// <summary>A cargo id the owner may add to their book.</summary>
 public sealed record MarketGoodChoice(string CargoId, string Name);
 

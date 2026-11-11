@@ -80,7 +80,10 @@ public static class MarketBook
         if (consumesSlot && occupied >= book.Capacity)
             return false;
 
-        book.Listings[listing.CargoId] = listing.Copy();
+        var stored = listing.Copy();
+        book.Listings[listing.CargoId] = stored;
+        if (!stored.Relocation)
+            MarketHistory.RecordQuote(entity, stored);
         return true;
     }
 

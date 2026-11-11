@@ -271,6 +271,8 @@ public class MarketExchangeAction : EntityAction
         else
             listing.BuyQuantity -= moved;
 
+        MarketHistory.RecordTrade(market, listing, price, moved);
+
         if (crossFaction
             && game.Factions.TryGetValue(shipFaction, out var shipFactionEntity)
             && game.Factions.TryGetValue(marketFaction, out var marketFactionEntity)

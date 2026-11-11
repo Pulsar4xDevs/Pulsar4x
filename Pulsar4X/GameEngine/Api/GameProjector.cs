@@ -252,6 +252,7 @@ namespace Pulsar4X.Engine.Api
             // so they are only projected for the owning faction.
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<CargoStorageDB>(out var cs) ? ToCargoStorageView(cs, e) : null,
             (e, f) => ToMarketView(e, f),
+            (e, f) => ToMarketHistoryView(e, f),
             (e, f) => ToIntelBookView(e, f),
             (e, f) => e.FactionOwnerID == f && e.TryGetDataBlob<InfrastructureDB>(out var inf)
                 ? new InfrastructureView(inf.CapacityProvided, inf.CapacityRequired, inf.CapacityAvailable, inf.Efficiency,
@@ -742,6 +743,75 @@ namespace Pulsar4X.Engine.Api
                 ExchangeOpen = exchangeOpen,
                 Addable = canEdit ? AddableCargo(owner, book) : Array.Empty<MarketGoodChoice>(),
             };
+        }
+
+        const int MaxGoodsInView = 64;
+
+        /// <summary>
+        /// Daily price history for the same viewers as <see cref="ToMarketView"/>.
+        /// Null when the office has no history. Cached on the book while <see cref="LogiBaseDB.HistoryVersion"/> is unchanged.
+        /// </summary>
+        private static MarketHistoryView? ToMarketHistoryView(Entity entity, int factionId)
+        {
+            if (!entity.TryGetDataBlob<LogiBaseDB>(out var book))
+                return null;
+            bool owned = entity.FactionOwnerID == factionId;
+            var game = entity.Manager?.Game;
+            bool theyGrantTrade = !owned && game != null
+                && FactionStanceRules.Granted(game, entity.FactionOwnerID, factionId, FactionGrants.Trade);
+            if (!owned && !theyGrantTrade)
+                return null;
+
+            book.History ??= new Dictionary<string, List<PriceBucket>>();
+            if (book.ProjectedHistory != null && book.ProjectedHistoryVersion == book.HistoryVersion)
+                return book.ProjectedHistory;
+
+            var ranked = new List<(string CargoId, DateTime LastDay, List<PriceBucket> Days)>();
+            foreach (var (cargoId, days) in book.History)
+            {
+                if (days == null || days.Count == 0)
+                    continue;
+                ranked.Add((cargoId, days[days.Count - 1].Day, days));
+            }
+            if (ranked.Count == 0)
+                return null;
+
+            ranked.Sort(static (a, b) =>
+            {
+                int byDay = b.LastDay.CompareTo(a.LastDay);
+                if (byDay != 0)
+                    return byDay;
+                return string.Compare(a.CargoId, b.CargoId, StringComparison.Ordinal);
+            });
+            if (ranked.Count > MaxGoodsInView)
+                ranked.RemoveRange(MaxGoodsInView, ranked.Count - MaxGoodsInView);
+
+            ranked.Sort(static (a, b) => string.Compare(a.CargoId, b.CargoId, StringComparison.Ordinal));
+
+            var goods = new List<MarketGoodHistoryView>(ranked.Count);
+            foreach (var item in ranked)
+            {
+                var points = new List<PricePointView>(item.Days.Count);
+                foreach (var bucket in item.Days)
+                {
+                    points.Add(new PricePointView(
+                        bucket.Day,
+                        bucket.Open,
+                        bucket.High,
+                        bucket.Low,
+                        bucket.Close,
+                        bucket.Volume,
+                        bucket.Bid,
+                        bucket.Ask,
+                        bucket.Stock));
+                }
+                goods.Add(new MarketGoodHistoryView(item.CargoId, points));
+            }
+
+            var view = new MarketHistoryView(goods);
+            book.ProjectedHistory = view;
+            book.ProjectedHistoryVersion = book.HistoryVersion;
+            return view;
         }
 
         /// <summary>
