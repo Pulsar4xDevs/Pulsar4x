@@ -1247,6 +1247,21 @@ namespace Pulsar4X.Engine.Api
                         refitTargets.Add(ToRefitTarget(shipDesign));
                 }
 
+                string facilityName = "";
+                var upgradeTargets = new List<FacilityUpgradeView>();
+                bool upgradeQueued = localConstruction != null && FacilityUpgrade.IsQueued(localConstruction, lineId);
+                if (FacilityUpgrade.TryFindFacility(entity, lineId, out var facility))
+                {
+                    facilityName = facility.Design.Name;
+                    foreach (var candidate in FacilityUpgrade.Candidates(factionInfo, facility.Design))
+                        upgradeTargets.Add(ToUpgradeTarget(entity, lineId, candidate, factionInfo, storage));
+                }
+                string upgradeReason = "";
+                if (upgradeQueued)
+                    upgradeReason = FacilityUpgrade.InProgress;
+                else if (upgradeTargets.Count == 0)
+                    upgradeReason = FacilityUpgrade.NoOtherDesign;
+
                 var hulls = new List<YardHullView>(line.Hulls.Count);
                 foreach (var hull in line.Hulls)
                 {
@@ -1270,6 +1285,10 @@ namespace Pulsar4X.Engine.Api
                     RefitCargo = refitCargo,
                     RefitJobs = refitJobs,
                     RefitTargets = refitTargets,
+                    FacilityDesignName = facilityName,
+                    UpgradeTargets = upgradeTargets,
+                    UpgradeInProgress = upgradeQueued,
+                    UpgradeReason = upgradeReason,
                 });
             }
 
@@ -1281,6 +1300,36 @@ namespace Pulsar4X.Engine.Api
             }
 
             return new IndustryView(lines) { Pads = pads };
+        }
+
+        static FacilityUpgradeView ToUpgradeTarget(
+            Entity colony, string lineId, ComponentDesign design, FactionInfoDB factionInfo, CargoStorageDB? storage)
+        {
+            bool crate = LocalConstructionJob.IsCrate(design);
+            var free = crate ? FacilityUpgrade.FreeCrate(colony, design) : null;
+            long points = crate
+                ? LocalConstructionJob.MountCost(free?.MassPerUnit ?? design.MassPerUnit)
+                : design.IndustryPointCosts;
+
+            var costs = new List<IndustryCostItem>();
+            if (!crate)
+            {
+                foreach (var (resourceId, amount) in design.ResourceCosts)
+                {
+                    long available = 0;
+                    if (storage != null && TryResolveCargoable(factionInfo, resourceId, out var cargoable))
+                        available = storage.GetUnitsStored(cargoable, false);
+                    bool canProduce = factionInfo.IndustryDesigns.ContainsKey(resourceId)
+                        || factionInfo.Data.CargoGoods.IsMineral(resourceId);
+                    costs.Add(new IndustryCostItem(ResolveItemName(factionInfo, resourceId), amount, available, canProduce));
+                }
+            }
+
+            return new FacilityUpgradeView(design.UniqueID, design.Name, crate ? "Mount" : "Assemble", points)
+            {
+                Costs = costs,
+                Reason = FacilityUpgrade.Rejection(colony, lineId, design, free) ?? "",
+            };
         }
 
         static void CollectRefit(

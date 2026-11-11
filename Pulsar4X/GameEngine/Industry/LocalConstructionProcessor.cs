@@ -304,6 +304,10 @@ public class LocalConstructionProcessor : IHotloopProcessor
         if (job.PointCost <= 0)
             return false;
 
+        // An upgrade whose facility is gone spends nothing. Removing the job is the player's call.
+        if (job.UpgradeLineId != null && !FacilityUpgrade.TryFindFacility(entity, job.UpgradeLineId, out _))
+            return false;
+
         // A queued site-only mount cannot advance. The factory already spent the
         // recipe and the build points, so this follow-up is the mount cost.
         if (job.Instance != null && LocalConstructionJob.IsSiteOnly(job.Design))
@@ -318,6 +322,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
         // An older follow-up copied IndustryPointCosts after the factory had paid.
         // An empty recipe is that follow-up. A Construction-tab assemble still has its recipe.
         if (job.Instance == null
+            && job.UpgradeLineId == null
             && LocalConstructionJob.IsSiteOnly(job.Design)
             && job.ResourcesRemaining.Count == 0
             && job.PointCost > LocalConstructionJob.MountCost(job.Design.MassPerUnit))
@@ -446,6 +451,13 @@ public class LocalConstructionProcessor : IHotloopProcessor
 
     static bool TryFinish(CargoStorageDB storage, Entity target, LocalConstructionJob job)
     {
+        if (job.UpgradeLineId != null)
+        {
+            if (job.Instance == null && (!LocalConstructionJob.IsSiteOnly(job.Design) || !ResourcesSettled(job)))
+                return false;
+            return FacilityUpgrade.TrySwap(target, storage, job);
+        }
+
         if (job.Instance != null)
         {
             if (storage.RemoveCargoByUnit(job.Instance, 1) < 1)

@@ -639,6 +639,34 @@ public sealed record ProductionLineView(
 
     /// <summary>Faction ship designs the refit pane can target. Empty when this line is not a yard.</summary>
     public IReadOnlyList<RefitTargetView> RefitTargets { get; init; } = Array.Empty<RefitTargetView>();
+
+    /// <summary>Design name of the facility this line belongs to. Empty when none is found.</summary>
+    public string FacilityDesignName { get; init; } = "";
+
+    /// <summary>Other faction designs with the facility's TemplateID. Never the current design.</summary>
+    public IReadOnlyList<FacilityUpgradeView> UpgradeTargets { get; init; } = Array.Empty<FacilityUpgradeView>();
+
+    /// <summary>True while an upgrade for this line is in the colony's installation queue.</summary>
+    public bool UpgradeInProgress { get; init; }
+
+    /// <summary>Why the Upgrade button is disabled. Empty when it can open the picker.</summary>
+    public string UpgradeReason { get; init; } = "";
+}
+
+/// <summary>A design a facility can be upgraded to. The cost is the normal mount or assemble cost.</summary>
+public sealed record FacilityUpgradeView(
+    string DesignId,
+    string Name,
+    /// <summary>Mount (a crate from the warehouse) or Assemble (site-only, spends the recipe).</summary>
+    string Kind,
+    /// <summary>Installation points: mount cost of the crate, or the design's industry point cost.</summary>
+    long PointCost)
+{
+    /// <summary>Recipe for an assemble, with local stock. Empty for a mount.</summary>
+    public IReadOnlyList<IndustryCostItem> Costs { get; init; } = Array.Empty<IndustryCostItem>();
+
+    /// <summary>Why this design cannot be queued now. Empty when it can.</summary>
+    public string Reason { get; init; } = "";
 }
 
 /// <summary>A ship in transfer range of a shipyard line.</summary>
