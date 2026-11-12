@@ -19,6 +19,7 @@ using Pulsar4X.Energy;
 using Pulsar4X.JumpPoints;
 using Pulsar4X.Sensors;
 using Pulsar4X.Messaging;
+using Pulsar4X.Logistics;
 [assembly: InternalsVisibleTo("Pulsar4X.Tests")]
 
 namespace Pulsar4X.Engine
@@ -369,6 +370,13 @@ namespace Pulsar4X.Engine
 
                 // Systems with faction entities start as Background, others stay Stasis (default)
                 system.UpdateActivityState();
+            }
+
+            // New games start with a month of seeded market history (flavor only). Not run on load or mid-game founding.
+            foreach (var system in Systems)
+            {
+                foreach (var office in system.GetAllEntitiesWithDataBlob<LogiBaseDB>())
+                    MarketHistory.SeedPriorDays(office);
             }
         }
     }

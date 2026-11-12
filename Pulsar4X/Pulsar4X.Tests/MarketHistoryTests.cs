@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using GameEngine.Engine.Orders;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -268,6 +269,383 @@ public class MarketHistoryTests
         Assert.That(bucket.Volume, Is.EqualTo(30));
         Assert.That(bucket.Ask, Is.EqualTo(10m));
         Assert.That(bucket.Stock, Is.EqualTo(70));
+    }
+
+    [Test]
+    public void SeedPriorDays_WritesThirtyDaysBeforeStart_NeverToday()
+    {
+        var scene = Scene.Build(marketStock: 40, sell: 30, ask: 10, bid: 8);
+        var start = scene.Market.StarSysDateTime.Date;
+        var today = SoleBucket(scene, "iron");
+        Assert.That(today.Day, Is.EqualTo(start));
+        Assert.That(today.Volume, Is.EqualTo(0));
+        Assert.That(today.Bid, Is.EqualTo(8m));
+        Assert.That(today.Ask, Is.EqualTo(10m));
+
+        MarketHistory.SeedPriorDays(scene.Market);
+
+        var days = Days(scene, "iron");
+        Assert.That(days, Has.Count.EqualTo(31));
+        for (int i = 0; i < 30; i++)
+            Assert.That(days[i].Day, Is.EqualTo(start.AddDays(-30 + i)));
+        Assert.That(days[30], Is.SameAs(today));
+        Assert.That(days[30].Day, Is.EqualTo(start));
+        Assert.That(days[30].Volume, Is.EqualTo(0));
+        Assert.That(days[30].Bid, Is.EqualTo(8m));
+        Assert.That(days[30].Ask, Is.EqualTo(10m));
+    }
+
+    [Test]
+    public void SeedPriorDays_ValidOhlc()
+    {
+        var scene = Scene.Build(marketStock: 40, sell: 30, ask: 10, bid: 8);
+        MarketHistory.SeedPriorDays(scene.Market);
+
+        var seeded = Days(scene, "iron").Take(30).ToList();
+        Assert.That(seeded, Has.Count.EqualTo(30));
+        for (int i = 0; i < seeded.Count; i++)
+        {
+            var bucket = seeded[i];
+            Assert.That(bucket.High, Is.GreaterThanOrEqualTo(Math.Max(bucket.Open, bucket.Close)));
+            Assert.That(bucket.Low, Is.LessThanOrEqualTo(Math.Min(bucket.Open, bucket.Close)));
+            Assert.That(bucket.Low, Is.GreaterThanOrEqualTo(0.01m));
+            Assert.That(bucket.Open, Is.GreaterThanOrEqualTo(0.01m));
+            Assert.That(bucket.High, Is.GreaterThanOrEqualTo(0.01m));
+            Assert.That(bucket.Close, Is.GreaterThanOrEqualTo(0.01m));
+            Assert.That(bucket.Bid, Is.GreaterThanOrEqualTo(0.01m));
+            Assert.That(bucket.Ask, Is.GreaterThanOrEqualTo(0.01m));
+            Assert.That(bucket.Volume, Is.GreaterThan(0));
+            Assert.That(bucket.Stock, Is.EqualTo(40));
+            Assert.That(bucket.Ask, Is.GreaterThanOrEqualTo(bucket.Bid));
+            Assert.That(bucket.Bid, Is.GreaterThan(0));
+            Assert.That(bucket.Close, Is.GreaterThanOrEqualTo(6.29m).And.LessThanOrEqualTo(11.71m));
+            if (i >= 1)
+                Assert.That(bucket.Open, Is.EqualTo(seeded[i - 1].Close));
+        }
+        Assert.That(seeded[29].Close, Is.EqualTo(9.00m));
+    }
+
+    [Test]
+    public void SeedPriorDays_SameSeedSameSeries()
+    {
+        var scene = Scene.Build(marketStock: 40, sell: 30, ask: 10, bid: 8);
+        scene.Game.Settings.MasterSeed = 12345678;
+        var first = SeedAndTakePrior(scene);
+        var second = SeedAndTakePrior(scene);
+
+        Assert.That(first, Has.Count.EqualTo(30));
+        Assert.That(second, Has.Count.EqualTo(30));
+        for (int i = 0; i < 30; i++)
+            AssertBucketEquals(second[i], first[i]);
+    }
+
+    [Test]
+    public void SeedPriorDays_DifferentMasterSeedDifferentSeries()
+    {
+        var scene = Scene.Build(marketStock: 40, sell: 30, ask: 10, bid: 8);
+        scene.Game.Settings.MasterSeed = 12345678;
+        var first = SeedAndTakePrior(scene);
+        scene.Game.Settings.MasterSeed = 87654321;
+        var second = SeedAndTakePrior(scene);
+
+        Assert.That(second, Has.Count.EqualTo(30));
+        bool closeDiffers = false;
+        for (int i = 0; i < 30; i++)
+        {
+            if (first[i].Close != second[i].Close)
+            {
+                closeDiffers = true;
+                break;
+            }
+        }
+        Assert.That(closeDiffers, Is.True);
+    }
+
+    [Test]
+    public void SeedFor_IsStableAcrossProcesses()
+    {
+        int IndependentFnv(int masterSeed, int officeId, string cargoId)
+        {
+            unchecked
+            {
+                ulong h = 14695981039346656037UL;
+                const ulong prime = 1099511628211UL;
+                h = (h ^ (byte)(masterSeed >> 0)) * prime;
+                h = (h ^ (byte)(masterSeed >> 8)) * prime;
+                h = (h ^ (byte)(masterSeed >> 16)) * prime;
+                h = (h ^ (byte)(masterSeed >> 24)) * prime;
+                h = (h ^ (byte)(officeId >> 0)) * prime;
+                h = (h ^ (byte)(officeId >> 8)) * prime;
+                h = (h ^ (byte)(officeId >> 16)) * prime;
+                h = (h ^ (byte)(officeId >> 24)) * prime;
+                byte[] bytes = Encoding.UTF8.GetBytes(cargoId);
+                for (int i = 0; i < bytes.Length; i++)
+                    h = (h ^ bytes[i]) * prime;
+                return (int)(h ^ (h >> 32));
+            }
+        }
+
+        Assert.That(MarketHistory.SeedFor(12345678, 7, "iron"), Is.EqualTo(IndependentFnv(12345678, 7, "iron")));
+        // Fixed value: the seed must not depend on process-randomized string hashing.
+        Assert.That(MarketHistory.SeedFor(12345678, 7, "iron"), Is.EqualTo(-537164315));
+        Assert.That(MarketHistory.SeedFor(1, 2, "iron"), Is.Not.EqualTo(MarketHistory.SeedFor(2, 1, "iron")));
+        Assert.That(MarketHistory.SeedFor(1, 2, "iron"), Is.Not.EqualTo(MarketHistory.SeedFor(1, 2, "water")));
+    }
+
+    [Test]
+    public void SeedPriorDays_SecondCallIsNoOp()
+    {
+        var scene = Scene.Build(marketStock: 40, sell: 30, ask: 10, bid: 8);
+        MarketHistory.SeedPriorDays(scene.Market);
+        var book = scene.Market.GetDataBlob<LogiBaseDB>();
+        int version = book.HistoryVersion;
+        var snapshot = book.History["iron"].Select(b => b.Copy()).ToList();
+
+        MarketHistory.SeedPriorDays(scene.Market);
+
+        Assert.That(book.History["iron"], Has.Count.EqualTo(snapshot.Count));
+        Assert.That(book.HistoryVersion, Is.EqualTo(version));
+        for (int i = 0; i < snapshot.Count; i++)
+            AssertBucketEquals(book.History["iron"][i], snapshot[i]);
+    }
+
+    [Test]
+    public void SeedPriorDays_KeepsTodayTradeBucket()
+    {
+        var scene = Scene.Build(marketStock: 40, sell: 30, ask: 10, bid: 7);
+        scene.Run(scene.Exchange(MarketSide.BuyFromMarket, 12));
+        var today = SoleBucket(scene, "iron");
+        var start = scene.Market.StarSysDateTime.Date;
+
+        MarketHistory.SeedPriorDays(scene.Market);
+
+        var days = Days(scene, "iron");
+        Assert.That(days[days.Count - 1], Is.SameAs(today));
+        Assert.That(days[days.Count - 1].Day, Is.EqualTo(start));
+        Assert.That(days[days.Count - 1].Open, Is.EqualTo(10m));
+        Assert.That(days[days.Count - 1].High, Is.EqualTo(10m));
+        Assert.That(days[days.Count - 1].Low, Is.EqualTo(10m));
+        Assert.That(days[days.Count - 1].Close, Is.EqualTo(10m));
+        Assert.That(days[days.Count - 1].Volume, Is.EqualTo(12));
+        Assert.That(days[days.Count - 1].Stock, Is.EqualTo(28));
+        Assert.That(days[days.Count - 1].Bid, Is.EqualTo(7m));
+        Assert.That(days[days.Count - 1].Ask, Is.EqualTo(10m));
+    }
+
+    [Test]
+    public void SeedPriorDays_DoesNotMoveCargoOrMoney()
+    {
+        var scene = Scene.Build(marketStock: 40, sell: 30, ask: 10, bid: 8);
+        long stockBefore = MarketBook.Stock(scene.Market, scene.MarketIron);
+        decimal moneyBefore = scene.MarketInfo.Money.GetCurrentFunds();
+        decimal bid = scene.Listing.Bid;
+        decimal ask = scene.Listing.Ask;
+        long sell = scene.Listing.SellQuantity;
+
+        MarketHistory.SeedPriorDays(scene.Market);
+
+        Assert.That(MarketBook.Stock(scene.Market, scene.MarketIron), Is.EqualTo(stockBefore));
+        Assert.That(scene.MarketInfo.Money.GetCurrentFunds(), Is.EqualTo(moneyBefore));
+        Assert.That(scene.Listing.Bid, Is.EqualTo(bid));
+        Assert.That(scene.Listing.Ask, Is.EqualTo(ask));
+        Assert.That(scene.Listing.SellQuantity, Is.EqualTo(sell));
+    }
+
+    [Test]
+    public void SeedPriorDays_SkipsZeroZeroAndRelocationAndUnpriced()
+    {
+        var zeroZero = Scene.Build(marketStock: 40, sell: 30);
+        var zeroStart = zeroZero.Market.StarSysDateTime.Date;
+        MarketHistory.SeedPriorDays(zeroZero.Market);
+        var zeroDays = Days(zeroZero, "iron");
+        Assert.That(zeroDays.Any(b => b.Day.Date < zeroStart), Is.False);
+
+        var reloc = Scene.Build(list: false, marketStock: 20);
+        Assert.That(MarketBook.SetListing(reloc.Market, new MarketListing
+        {
+            CargoId = "iron",
+            SellQuantity = 20,
+            Ask = 10,
+            Relocation = true,
+        }), Is.True);
+        MarketHistory.SeedPriorDays(reloc.Market);
+        Assert.That(reloc.Market.GetDataBlob<LogiBaseDB>().History, Is.Empty);
+
+        var unpriced = Scene.Build(list: false);
+        MarketHistory.SeedPriorDays(unpriced.Market);
+        Assert.That(unpriced.Market.GetDataBlob<LogiBaseDB>().History, Is.Empty);
+
+        var policyOnly = Scene.Build(list: false, marketStock: 20);
+        var policy = new ColonyMarketPolicyDB();
+        policy.Rows["iron"] = new MarketPolicyRow { CargoId = "iron", Ask = 4, Bid = 0 };
+        policyOnly.Market.SetDataBlob(policy);
+        MarketHistory.SeedPriorDays(policyOnly.Market);
+        var policyDays = Days(policyOnly, "iron");
+        Assert.That(policyDays, Has.Count.EqualTo(30));
+        foreach (var bucket in policyDays)
+        {
+            Assert.That(bucket.Ask, Is.EqualTo(bucket.Close));
+            Assert.That(bucket.Bid, Is.EqualTo(0m));
+        }
+        Assert.That(policyDays[29].Close, Is.EqualTo(4.00m));
+    }
+
+    [Test]
+    public void SeedPriorDays_CloneAndJsonRoundTrip()
+    {
+        var scene = Scene.Build(marketStock: 40, sell: 30, ask: 10, bid: 8);
+        MarketHistory.SeedPriorDays(scene.Market);
+        var original = scene.Market.GetDataBlob<LogiBaseDB>();
+        Assert.That(original.History["iron"], Has.Count.EqualTo(31));
+
+        var clone = (LogiBaseDB)original.Clone();
+        Assert.That(clone.History["iron"], Has.Count.EqualTo(31));
+        for (int i = 0; i < 31; i++)
+            AssertBucketEquals(clone.History["iron"][i], original.History["iron"][i]);
+
+        var settings = new JsonSerializerSettings
+        {
+            Formatting = Formatting.Indented,
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+            TypeNameHandling = TypeNameHandling.Objects,
+            ContractResolver = new NonPublicResolver(),
+        };
+        string json = JsonConvert.SerializeObject(original, settings);
+        var loaded = JsonConvert.DeserializeObject<LogiBaseDB>(json, settings);
+        Assert.That(loaded, Is.Not.Null);
+        Assert.That(loaded!.History, Is.Not.Null);
+        Assert.That(loaded.History["iron"], Has.Count.EqualTo(31));
+        for (int i = 0; i < 31; i++)
+            AssertBucketEquals(loaded.History["iron"][i], original.History["iron"][i]);
+    }
+
+    [Test]
+    public void NewGame_PostNewGameInitialization_SeedsCeresButNotZeroListings()
+    {
+        var (game, sol) = Place();
+        foreach (var system in game.Systems)
+        {
+            foreach (var office in system.GetAllEntitiesWithDataBlob<LogiBaseDB>())
+            {
+                DateTime start = office.StarSysDateTime.Date;
+                var book = office.GetDataBlob<LogiBaseDB>();
+                if (book.History == null)
+                    continue;
+                foreach (var days in book.History.Values)
+                {
+                    if (days == null)
+                        continue;
+                    Assert.That(days.Any(b => b.Day.Date < start), Is.False);
+                }
+            }
+        }
+
+        game.PostNewGameInitialization();
+
+        var depot = sol.GetAllEntitiesWithDataBlob<ColonyInfoDB>()
+            .Single(c => c.GetDataBlob<NameDB>().DefaultName == CeresStart.DepotFactionName);
+        var depotBook = depot.GetDataBlob<LogiBaseDB>();
+        DateTime depotStart = depot.StarSysDateTime.Date;
+        AssertPriorSeed(depotBook, "iron", depotStart, 1.50m);
+        AssertPriorSeed(depotBook, "methalox", depotStart, 3.00m);
+        AssertPriorSeed(depotBook, "water", depotStart, 1.00m);
+
+        bool foundZeroOnEarthOrLuna = false;
+        foreach (var office in sol.GetAllEntitiesWithDataBlob<LogiBaseDB>())
+        {
+            if (office.Id == depot.Id)
+                continue;
+            var officeBook = office.GetDataBlob<LogiBaseDB>();
+            DateTime officeStart = office.StarSysDateTime.Date;
+            foreach (var listing in officeBook.Listings.Values)
+            {
+                if (listing.Relocation || listing.Bid != 0 || listing.Ask != 0)
+                    continue;
+                if (HasPricedPolicy(office, listing.CargoId))
+                    continue;
+                bool hasPrior = officeBook.History != null
+                    && officeBook.History.TryGetValue(listing.CargoId, out var days)
+                    && days != null
+                    && days.Any(b => b.Day.Date < officeStart);
+                Assert.That(hasPrior, Is.False, listing.CargoId);
+
+                if (PlanetNamed(office, "Earth") || PlanetNamed(office, "Luna"))
+                    foundZeroOnEarthOrLuna = true;
+            }
+        }
+        Assert.That(foundZeroOnEarthOrLuna, Is.True);
+    }
+
+    /// <summary>Seeds the iron history, returns copies of the prior days and removes them so the office can be seeded again.</summary>
+    static List<PriceBucket> SeedAndTakePrior(Scene scene)
+    {
+        var start = scene.Market.StarSysDateTime.Date;
+        MarketHistory.SeedPriorDays(scene.Market);
+        var days = Days(scene, "iron");
+        var prior = days.Where(b => b.Day.Date < start).Select(b => b.Copy()).ToList();
+        days.RemoveAll(b => b.Day.Date < start);
+        return prior;
+    }
+
+    static void AssertBucketEquals(PriceBucket actual, PriceBucket expected)
+    {
+        Assert.That(actual.Day, Is.EqualTo(expected.Day));
+        Assert.That(actual.Open, Is.EqualTo(expected.Open));
+        Assert.That(actual.High, Is.EqualTo(expected.High));
+        Assert.That(actual.Low, Is.EqualTo(expected.Low));
+        Assert.That(actual.Close, Is.EqualTo(expected.Close));
+        Assert.That(actual.Volume, Is.EqualTo(expected.Volume));
+        Assert.That(actual.Bid, Is.EqualTo(expected.Bid));
+        Assert.That(actual.Ask, Is.EqualTo(expected.Ask));
+        Assert.That(actual.Stock, Is.EqualTo(expected.Stock));
+    }
+
+    static void AssertPriorSeed(LogiBaseDB book, string cargoId, DateTime start, decimal lastClose)
+    {
+        Assert.That(book.History.ContainsKey(cargoId), Is.True);
+        var prior = book.History[cargoId].Where(b => b.Day.Date < start).ToList();
+        Assert.That(prior, Has.Count.EqualTo(30));
+        Assert.That(prior[0].Day.Date, Is.EqualTo(start.AddDays(-30)));
+        Assert.That(prior[29].Day.Date, Is.EqualTo(start.AddDays(-1)));
+        Assert.That(prior[29].Close, Is.EqualTo(lastClose));
+    }
+
+    static bool HasPricedPolicy(Entity office, string cargoId)
+    {
+        if (!office.TryGetDataBlob<ColonyMarketPolicyDB>(out var policy) || policy == null)
+            return false;
+        if (!policy.Rows.TryGetValue(cargoId, out var row) || row == null)
+            return false;
+        return row.Bid != 0 || row.Ask != 0;
+    }
+
+    static bool PlanetNamed(Entity office, string name)
+    {
+        if (!office.TryGetDataBlob<ColonyInfoDB>(out var colony) || colony == null)
+            return false;
+        var planet = colony.PlanetEntity;
+        if (planet == null || planet.Manager == null)
+            return false;
+        if (!planet.TryGetDataBlob<NameDB>(out var nameDb) || nameDb == null)
+            return false;
+        return nameDb.DefaultName == name;
+    }
+
+    static (Game game, StarSystem sol) Place()
+    {
+        var modLoader = new ModLoader();
+        var store = new ModDataStore();
+        modLoader.LoadModManifest("Data/basemod/modInfo.json", store);
+        modLoader.LoadScenario("Data/scenarios/warp-tech-start/scenarioInfo.json", store);
+        var game = new Game(new NewGameSettings { MaxSystems = 1, CreatePlayerFaction = false }, store);
+        game.Settings.EnforceSingleThread = true;
+        StarSystemFactory.LoadFromBlueprint(game, store.Systems["system-sol"]);
+        var player = FactionFactory.CreateBasicFaction(game, "United Earth Corp", "UEC", 0);
+        player.FactionOwnerID = player.Id;
+        player.GetDataBlob<FactionInfoDB>().KnownSystems.Add("system-sol");
+        ColonyFactory.PlaceOwnedColonies(game, store, player, store.Species["species-human"]);
+        FactionFactory.PlaceFactions(game, store);
+        return (game, game.Systems.Single(s => s.ID == "system-sol"));
     }
 
     static PriceBucket SoleBucket(Scene scene, string cargoId)
