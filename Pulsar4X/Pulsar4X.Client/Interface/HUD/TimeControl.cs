@@ -103,10 +103,8 @@ namespace Pulsar4X.Client
 
             if (isStopping) ImGui.EndDisabled();
 
-            if (isPaused)
-                DisplayPauseReason();
-
-            // Step button only shown when paused
+            // Step button only shown when paused; the invisible placeholder keeps the layout
+            // from jumping while time runs.
             if (isPaused)
             {
                 ImGui.SameLine();
@@ -120,6 +118,11 @@ namespace Pulsar4X.Client
                 ImGui.SameLine();
                 ImGui.InvisibleButton("##onestep_invisbtn", _iconSize);
             }
+
+            // Pause reason goes last on the row so a long reason only widens the window to the
+            // right and never covers or displaces the play/pause and step buttons.
+            if (isPaused)
+                DisplayPauseReason();
 
             //When the submenu is expanded allow the user to adjust time frequency
             if (_expanded)
