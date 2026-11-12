@@ -80,7 +80,8 @@ namespace Pulsar4X.Client
             string officeSystemId,
             DateTime now,
             GlobalUIState uiState,
-            bool compact)
+            bool compact,
+            float bottomReserve = 0f)
         {
             if (market == null)
             {
@@ -137,7 +138,11 @@ namespace Pulsar4X.Client
             {
                 // Compare adds the checkbox column on top of the usual width, so names keep theirs.
                 float listW = 210f + (ui.Compare ? CompareColumnWidth() + ImGui.GetStyle().CellPadding.X * 2f : 0f);
-                float bodyH = ImGui.GetContentRegionAvail().Y;
+                // Closed Intel (when it will draw) and any caller reserve such as Buy and ship, so the default view does not scroll.
+                float reserve = bottomReserve;
+                if (book != null)
+                    reserve += ImGui.GetFrameHeightWithSpacing() + ImGui.GetStyle().ItemSpacing.Y + 8f;
+                float bodyH = ImGui.GetContentRegionAvail().Y - reserve;
                 if (bodyH < 160f)
                     bodyH = 160f;
                 ImGui.BeginChild("##market-goods", new Vector2(listW, bodyH), ImGuiChildFlags.Borders);

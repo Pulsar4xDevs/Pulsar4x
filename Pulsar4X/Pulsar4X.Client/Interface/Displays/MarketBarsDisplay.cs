@@ -21,28 +21,27 @@ namespace Pulsar4X.Client
         static readonly Dictionary<int, ShipDraft> _ship = new();
 
         /// <summary>
+        /// Height to leave under the Market tab so Buy and ship sits on-screen when it will draw. Zero if it will not.
+        /// Slightly generous so a 1px shortfall does not still show a scrollbar.
+        /// </summary>
+        public static float BottomReserve(MarketView? market, IClientSystem? system)
+        {
+            if (!TryBuyAndShipOptions(market, system, out _, out _))
+                return 0f;
+
+            return ImGui.GetStyle().ItemSpacing.Y * 2f
+                + ImGui.GetTextLineHeightWithSpacing()
+                + ImGui.GetFrameHeightWithSpacing() * 5f
+                + 8f;
+        }
+
+        /// <summary>
         /// Buy and ship from a friendly market: the goods are sealed at the seller and paid for now, and a haul is
         /// posted on one of this faction's colonies in the same system. A ship claims the haul to carry it.
         /// </summary>
         public static void DisplayBuyAndShip(EntitySnapshot seller, MarketView? market, IClientSystem? system, GlobalUIState uiState)
         {
-            if (market == null || market.CanEdit || !market.ExchangeOpen || system == null)
-                return;
-
-            var goods = new List<MarketGoodView>();
-            foreach (var good in market.Goods)
-            {
-                if (good.SellQuantity > 0 && !good.Relocation)
-                    goods.Add(good);
-            }
-            var buyers = new List<EntitySnapshot>();
-            foreach (var colony in system.Entities)
-            {
-                if (colony.Relation == OwnerRelation.Owned && colony.Kind == BodyKind.Colony
-                    && colony.GetView<MarketView>() != null)
-                    buyers.Add(colony);
-            }
-            if (goods.Count == 0 || buyers.Count == 0)
+            if (!TryBuyAndShipOptions(market, system, out var goods, out var buyers))
                 return;
 
             if (!_ship.TryGetValue(seller.Id, out var draft))
@@ -93,6 +92,27 @@ namespace Pulsar4X.Client
                     (decimal)draft.Fee));
             }
             ImGui.PopID();
+        }
+
+        static bool TryBuyAndShipOptions(MarketView? market, IClientSystem? system, out List<MarketGoodView> goods, out List<EntitySnapshot> buyers)
+        {
+            goods = new List<MarketGoodView>();
+            buyers = new List<EntitySnapshot>();
+            if (market == null || market.CanEdit || !market.ExchangeOpen || system == null)
+                return false;
+
+            foreach (var good in market.Goods)
+            {
+                if (good.SellQuantity > 0 && !good.Relocation)
+                    goods.Add(good);
+            }
+            foreach (var colony in system.Entities)
+            {
+                if (colony.Relation == OwnerRelation.Owned && colony.Kind == BodyKind.Colony
+                    && colony.GetView<MarketView>() != null)
+                    buyers.Add(colony);
+            }
+            return goods.Count > 0 && buyers.Count > 0;
         }
     }
 }

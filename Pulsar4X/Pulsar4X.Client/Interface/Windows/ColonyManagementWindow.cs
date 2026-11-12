@@ -184,17 +184,22 @@ namespace Pulsar4X.Client
                 }
                 if (tabs.HasFlag(ForeignEntities.ColonyTabs.Market) && ImGui.BeginTabItem("Market"))
                 {
+                    var marketView = selectedColony.GetView<MarketView>();
+                    float bottomReserve = 0f;
+                    if (ForeignEntities.IsReadOnly(selectedColony))
+                        bottomReserve = MarketBarsDisplay.BottomReserve(marketView, selectedSystem);
                     MarketTabDisplay.Display(
                         selectedColony,
-                        selectedColony.GetView<MarketView>(),
+                        marketView,
                         selectedColony.GetView<MarketHistoryView>(),
                         selectedColony.GetView<IntelBookView>(),
                         selectedSystem.SystemId,
                         selectedSystem.DateTime,
                         _uiState,
-                        false);
+                        false,
+                        bottomReserve);
                     if (ForeignEntities.IsReadOnly(selectedColony))
-                        MarketBarsDisplay.DisplayBuyAndShip(selectedColony, selectedColony.GetView<MarketView>(), selectedSystem, _uiState);
+                        MarketBarsDisplay.DisplayBuyAndShip(selectedColony, marketView, selectedSystem, _uiState);
                     ImGui.EndTabItem();
                 }
                 if (tabs.HasFlag(ForeignEntities.ColonyTabs.Shipping) && ImGui.BeginTabItem("Shipping"))
