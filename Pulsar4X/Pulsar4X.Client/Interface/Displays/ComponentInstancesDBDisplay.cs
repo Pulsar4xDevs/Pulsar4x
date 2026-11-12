@@ -6,8 +6,9 @@ namespace Pulsar4X.Client
     public static class ComponentInstancesDBDisplay
     {
         /// <summary>Snapshot-based installations display for UI ported to the API galaxy model.
-        /// <paramref name="holderId"/> is the colony/ship the installations belong to (the command target).</summary>
-        public static void Display(this Pulsar4X.Api.InstallationsView view, int holderId, GlobalUIState uiState)
+        /// <paramref name="holderId"/> is the colony/ship the installations belong to (the command target).
+        /// <paramref name="readOnly"/> skips the command menu.</summary>
+        public static void Display(this Pulsar4X.Api.InstallationsView view, int holderId, GlobalUIState uiState, bool readOnly = false)
         {
             if(ImGui.BeginTable("InstallationTable", 3, Styles.TableFlags | ImGuiTableFlags.SizingStretchProp))
             {
@@ -20,7 +21,8 @@ namespace Pulsar4X.Client
                 {
                     ImGui.TableNextColumn();
                     ImGui.Text(group.Name);
-                    AddContextMenu(group, holderId, uiState);
+                    if(!readOnly)
+                        AddContextMenu(group, holderId, uiState);
                     DisplayHelpers.DescriptiveTooltip(group.Name, group.TemplateName, group.Description, null, true);
                     ImGui.TableNextColumn();
                     ImGui.Text(group.Count.ToString());

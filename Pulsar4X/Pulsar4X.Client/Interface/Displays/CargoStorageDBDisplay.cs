@@ -8,8 +8,9 @@ namespace Pulsar4X.Client
     public static class CargoStorageDBDisplay
     {
         /// <summary>Snapshot-based cargo display for UI ported to the API galaxy model.
-        /// <paramref name="holderId"/> is the colony/ship holding the cargo (the command target).</summary>
-        public static void Display(this Pulsar4X.Api.CargoStorageView storage, int holderId, GlobalUIState uiState, ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.DefaultOpen)
+        /// <paramref name="holderId"/> is the colony/ship holding the cargo (the command target).
+        /// <paramref name="readOnly"/> skips the command menu.</summary>
+        public static void Display(this Pulsar4X.Api.CargoStorageView storage, int holderId, GlobalUIState uiState, ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.DefaultOpen, bool readOnly = false)
         {
             foreach(var store in storage.Stores)
             {
@@ -39,7 +40,7 @@ namespace Pulsar4X.Client
                             {
                                 DisplayHelpers.DescriptiveTooltip(item.Name, item.ItemKind, item.Description);
                             }
-                            if(item.ShowInstall)
+                            if(item.ShowInstall && !readOnly)
                             {
                                 AddContextMenu(item, holderId, storage.InstallColonyIds, uiState);
                             }

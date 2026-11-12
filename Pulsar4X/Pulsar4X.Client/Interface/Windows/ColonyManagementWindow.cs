@@ -74,19 +74,20 @@ namespace Pulsar4X.Client
             if(Window.Begin("Manage Colonies", ref IsActive))
             {
                 // A missing selection, or one the latest push no longer has, opens on the first owned colony.
-                // SelectColony already stored an id, so a colony that resolves is left alone.
-                var selectedSystem = _selectedSystemId == null ? null : galaxy.GetSystem(_selectedSystemId);
-                var selectedColony = SelectedColonyId is { } openId ? selectedSystem?.GetEntity(openId) : null;
-                if (selectedColony == null)
+                // A selection that resolves, owned or not, is left alone.
+                var resolved = ForeignEntities.ResolveColonySelection(
+                    SelectedColonyId,
+                    _selectedSystemId,
+                    galaxy.KnownSystems.Select(s => (s.SystemId, (IEnumerable<EntitySnapshot>?)galaxy.GetSystem(s.SystemId)?.Entities)));
+                if (resolved is { } pick)
                 {
-                    foreach (var summary in galaxy.KnownSystems)
-                    {
-                        var system = galaxy.GetSystem(summary.SystemId);
-                        var first = system?.Entities.FirstOrDefault(e => e.Kind == BodyKind.Colony && e.Relation == OwnerRelation.Owned);
-                        if (first == null) continue;
-                        SelectColony(first.Id, summary.SystemId);
-                        break;
-                    }
+                    if (pick.ColonyId != SelectedColonyId || pick.SystemId != _selectedSystemId)
+                        SelectColony(pick.ColonyId, pick.SystemId);
+                }
+                else
+                {
+                    SelectedColonyId = null;
+                    _selectedSystemId = null;
                 }
 
                 Vector2 windowContentSize = ImGui.GetContentRegionAvail();
@@ -98,32 +99,30 @@ namespace Pulsar4X.Client
                         var system = galaxy.GetSystem(summary.SystemId);
                         if(system == null) continue;
 
-                        bool anyOwned = false;
-                        foreach (var entity in system.Entities)
-                        {
-                            if (entity.Kind == BodyKind.Colony && entity.Relation == OwnerRelation.Owned)
-                            {
-                                anyOwned = true;
-                                break;
-                            }
-                        }
-                        if (!anyOwned) continue;
+                        var groups = ForeignEntities.ColonyGroups(system.Entities, galaxy.Stances);
+                        if (groups.Count == 0) continue;
 
                         if(!isExpanded.ContainsKey(summary.SystemId)) isExpanded.Add(summary.SystemId, true);
                         ImGui.SetNextItemOpen(isExpanded[summary.SystemId], ImGuiCond.Appearing);
                         if(ImGui.TreeNode(summary.Name + "###" + summary.SystemId))
                         {
-                            foreach(var colony in system.Entities.Where(e => e.Kind == BodyKind.Colony && e.Relation == OwnerRelation.Owned))
+                            foreach (var group in groups)
                             {
-                                var population = colony.GetView<ColonyView>()?.Population ?? 0;
-                                var name = colony.GetView<NameView>()?.Name ?? "Unknown";
-                                var flags = ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
-                                if (SelectedColonyId == colony.Id)
-                                    flags |= ImGuiTreeNodeFlags.Selected;
-
-                                ImGui.TreeNodeEx(name + " (" + Stringify.Quantity(population) + ")###colony-" + colony.Id, flags);
-                                if (ImGui.IsItemClicked())
-                                    SelectColony(colony.Id, summary.SystemId);
+                                if (group.FactionId == null)
+                                {
+                                    foreach (var colony in group.Colonies)
+                                        DisplayColonyLeaf(colony, summary.SystemId);
+                                }
+                                else
+                                {
+                                    ImGui.SetNextItemOpen(true, ImGuiCond.Appearing);
+                                    if (ImGui.TreeNode(group.FactionName + "###faction-" + summary.SystemId + "-" + group.FactionId))
+                                    {
+                                        foreach (var colony in group.Colonies)
+                                            DisplayColonyLeaf(colony, summary.SystemId);
+                                        ImGui.TreePop();
+                                    }
+                                }
                             }
                             ImGui.TreePop();
                         }
@@ -132,8 +131,8 @@ namespace Pulsar4X.Client
                 ImGui.EndChild();
 
                 // Re-resolve after the list so a click this frame opens that colony.
-                selectedSystem = _selectedSystemId == null ? null : galaxy.GetSystem(_selectedSystemId);
-                selectedColony = SelectedColonyId is { } id ? selectedSystem?.GetEntity(id) : null;
+                var selectedSystem = _selectedSystemId == null ? null : galaxy.GetSystem(_selectedSystemId);
+                var selectedColony = SelectedColonyId is { } id ? selectedSystem?.GetEntity(id) : null;
 
                 if (selectedColony != null && selectedSystem != null)
                 {
@@ -146,30 +145,44 @@ namespace Pulsar4X.Client
             Window.End();
         }
 
+        private void DisplayColonyLeaf(EntitySnapshot colony, string systemId)
+        {
+            var population = colony.GetView<ColonyView>()?.Population ?? 0;
+            var name = colony.GetView<NameView>()?.Name ?? "Unknown";
+            var flags = ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
+            if (SelectedColonyId == colony.Id)
+                flags |= ImGuiTreeNodeFlags.Selected;
+
+            ImGui.TreeNodeEx(name + " (" + Stringify.Quantity(population) + ")###colony-" + colony.Id, flags);
+            if (ImGui.IsItemClicked())
+                SelectColony(colony.Id, systemId);
+        }
+
         private void DisplaySelectedColony(IClientSystem selectedSystem, EntitySnapshot selectedColony)
         {
+            var tabs = ForeignEntities.ColonyTabsFor(selectedColony);
             if (ImGui.BeginChild("ColoniesTabs"))
             {
                 ImGui.BeginTabBar("EconomicsTabBar", ImGuiTabBarFlags.None);
 
-                if (ImGui.BeginTabItem("Summary"))
+                if (tabs.HasFlag(ForeignEntities.ColonyTabs.Summary) && ImGui.BeginTabItem("Summary"))
                 {
                     DisplaySummary(selectedColony, selectedSystem);
                     ImGui.EndTabItem();
                 }
-                if (ImGui.BeginTabItem("Production"))
+                if (tabs.HasFlag(ForeignEntities.ColonyTabs.Production) && ImGui.BeginTabItem("Production"))
                 {
                     _productionDisplay ??= new ColonyProductionDisplay();
                     _productionDisplay.Display(selectedColony.Id, selectedColony.GetView<IndustryView>(), _uiState);
                     ImGui.EndTabItem();
                 }
-                if (ImGui.BeginTabItem("Construction"))
+                if (tabs.HasFlag(ForeignEntities.ColonyTabs.Construction) && ImGui.BeginTabItem("Construction"))
                 {
                     _constructionDisplay ??= new ColonyConstructionDisplay();
                     _constructionDisplay.Display(selectedColony.Id, selectedColony.GetView<ConstructionView>(), _uiState);
                     ImGui.EndTabItem();
                 }
-                if (ImGui.BeginTabItem("Market"))
+                if (tabs.HasFlag(ForeignEntities.ColonyTabs.Market) && ImGui.BeginTabItem("Market"))
                 {
                     MarketTabDisplay.Display(
                         selectedColony,
@@ -180,9 +193,11 @@ namespace Pulsar4X.Client
                         selectedSystem.DateTime,
                         _uiState,
                         false);
+                    if (ForeignEntities.IsReadOnly(selectedColony))
+                        MarketBarsDisplay.DisplayBuyAndShip(selectedColony, selectedColony.GetView<MarketView>(), selectedSystem, _uiState);
                     ImGui.EndTabItem();
                 }
-                if (ImGui.BeginTabItem("Shipping"))
+                if (tabs.HasFlag(ForeignEntities.ColonyTabs.Shipping) && ImGui.BeginTabItem("Shipping"))
                 {
                     ShippingDisplay.Display(
                         selectedColony,
@@ -192,27 +207,37 @@ namespace Pulsar4X.Client
                         _uiState);
                     ImGui.EndTabItem();
                 }
-                if (selectedColony.GetView<ColonyMiningView>() is { } mining && ImGui.BeginTabItem("Mining"))
+                if (tabs.HasFlag(ForeignEntities.ColonyTabs.Mining)
+                    && selectedColony.GetView<ColonyMiningView>() is { } mining && ImGui.BeginTabItem("Mining"))
                 {
                     mining.Display();
                     ImGui.EndTabItem();
                 }
-                if (selectedColony.GetView<NavalAcademyView>() is { } academy && ImGui.BeginTabItem("Naval Academy"))
+                if (tabs.HasFlag(ForeignEntities.ColonyTabs.NavalAcademy)
+                    && selectedColony.GetView<NavalAcademyView>() is { } academy && ImGui.BeginTabItem("Naval Academy"))
                 {
                     DisplayNavalAcademy(selectedColony.Id, academy);
                     ImGui.EndTabItem();
                 }
-                if (selectedColony.GetView<RecruitmentView>() is { } recruitment
+                if (tabs.HasFlag(ForeignEntities.ColonyTabs.Recruitment)
+                    && selectedColony.GetView<RecruitmentView>() is { } recruitment
                     && BeginTabItem("Recruitment", _focusRecruitmentTab ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None))
                 {
                     _focusRecruitmentTab = false;
                     DisplayRecruitment(selectedColony.Id, recruitment);
                     ImGui.EndTabItem();
                 }
-                if (ImGui.BeginTabItem("Log"))
+                if (tabs.HasFlag(ForeignEntities.ColonyTabs.Log))
                 {
-                    ShipLogDisplay.Draw(selectedColony, ref _logShownId, ref _logShownCount);
-                    ImGui.EndTabItem();
+                    if (ImGui.BeginTabItem("Log"))
+                    {
+                        ShipLogDisplay.Draw(selectedColony, ref _logShownId, ref _logShownCount);
+                        ImGui.EndTabItem();
+                    }
+                    else
+                    {
+                        _logShownId = -1;
+                    }
                 }
                 else
                 {
@@ -226,6 +251,7 @@ namespace Pulsar4X.Client
         private void DisplaySummary(EntitySnapshot colony, IClientSystem system)
         {
             var colonyView = colony.GetView<ColonyView>();
+            bool readOnly = ForeignEntities.IsReadOnly(colony);
             var planet = colonyView?.PlanetEntityId is { } planetId ? system.GetEntity(planetId) : null;
 
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
@@ -243,7 +269,10 @@ namespace Pulsar4X.Client
                     ImGui.Text("Administrator");
                     ImGui.PopStyleColor();
                     ImGui.NextColumn();
-                    DisplayAdministratorButton(colonyView, colony.Id);
+                    if (readOnly)
+                        ImGui.TextUnformatted(string.IsNullOrEmpty(colonyView?.AdministratorName) ? "Unknown" : colonyView!.AdministratorName!);
+                    else
+                        DisplayAdministratorButton(colonyView, colony.Id);
                     ImGui.NextColumn();
                     ImGui.Separator();
                     ImGui.Columns(1);
@@ -329,7 +358,11 @@ namespace Pulsar4X.Client
                 {
                     if(colony.GetView<InstallationsView>() is { } installations)
                     {
-                        installations.Display(colony.Id, _uiState);
+                        installations.Display(colony.Id, _uiState, readOnly: readOnly);
+                    }
+                    else if(readOnly)
+                    {
+                        ImGui.TextDisabled("Not visible.");
                     }
                 }
             }
@@ -342,23 +375,30 @@ namespace Pulsar4X.Client
                 {
                     if(colony.GetView<CargoStorageView>() is { } storage)
                     {
-                        var size = ImGui.GetContentRegionAvail();
-                        ImGui.PushStyleColor(ImGuiCol.Button, Styles.Theme.Button.ToImVector4());
-                        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Styles.Theme.ButtonHovered.ToImVector4());
-                        ImGui.PushStyleColor(ImGuiCol.ButtonActive, Styles.Theme.ButtonActive.ToImVector4());
-                        if(ImGui.Button("Initiate Transfer", new Vector2(size.X - 8, 18)) && _selectedSystemId != null)
+                        if(!readOnly)
                         {
-                            CreateTransferWindow.GetInstance().SetLeft(colony.Id, _selectedSystemId);
-                            CreateTransferWindow.GetInstance().SetActive(true);
+                            var size = ImGui.GetContentRegionAvail();
+                            ImGui.PushStyleColor(ImGuiCol.Button, Styles.Theme.Button.ToImVector4());
+                            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Styles.Theme.ButtonHovered.ToImVector4());
+                            ImGui.PushStyleColor(ImGuiCol.ButtonActive, Styles.Theme.ButtonActive.ToImVector4());
+                            if(ImGui.Button("Initiate Transfer", new Vector2(size.X - 8, 18)) && _selectedSystemId != null)
+                            {
+                                CreateTransferWindow.GetInstance().SetLeft(colony.Id, _selectedSystemId);
+                                CreateTransferWindow.GetInstance().SetActive(true);
+                            }
+                            ImGui.PopStyleColor(3);
                         }
-                        ImGui.PopStyleColor(3);
 
                         ImGui.Columns(2);
                         DisplayHelpers.PrintRow("Total Mass in Storage", Stringify.Mass(storage.TotalStoredMassKg));
                         DisplayHelpers.PrintRow("Transfer Rate", storage.TransferRateKgPerHour.ToString() + " kg/hr");
                         DisplayHelpers.PrintRow("Transfer Range", storage.TransferRangeDvMps.ToString("0.#") + " dV m/s", tooltipOne: "This is confusing as hell :D", separator: false);
                         ImGui.Columns(1);
-                        storage.Display(colony.Id, _uiState, ImGuiTreeNodeFlags.None);
+                        storage.Display(colony.Id, _uiState, ImGuiTreeNodeFlags.None, readOnly: readOnly);
+                    }
+                    else if(readOnly)
+                    {
+                        ImGui.TextDisabled("Not visible.");
                     }
                 }
             }

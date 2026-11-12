@@ -83,6 +83,10 @@ namespace Pulsar4X.Client
         private int? selectedFleetId = null;
         // The ship whose orders the right-hand pane is editing. Null means the selected fleet.
         private int? orderShipId = null;
+        // A visible ship this faction does not own, shown read-only. Never in galaxy.Fleets.
+        private int? inspectShipId = null;
+        private string? inspectSystemId = null;
+        private EntitySnapshot? inspectShip = null;
         // Re-selects the first root fleet after connect/faction change, mirroring the old default selection.
         private bool autoSelectFirstFleet = true;
         private int dragFleetId = -1;
@@ -179,6 +183,9 @@ namespace Pulsar4X.Client
             standingOrdersDirty = false;
             selectedOrderIndex = -1;
             captainChooserShipId = null;
+            inspectShipId = null;
+            inspectSystemId = null;
+            inspectShip = null;
         }
 
         private static FleetSnapshot? FindFleet(IReadOnlyList<FleetSnapshot> fleets, int fleetId)
@@ -202,6 +209,28 @@ namespace Pulsar4X.Client
             autoSelectFirstFleet = false;
             captainChooserShipId = null;
             plotAltitudeM = 0;
+            inspectShipId = null;
+            inspectSystemId = null;
+            inspectShip = null;
+            SetActive(true);
+        }
+
+        /// <summary>Opens the window on a visible ship this faction does not own, read-only. An owned id goes to OrderShip.</summary>
+        internal void InspectShip(int shipId, string systemId)
+        {
+            var entity = _uiState.GameClient?.Galaxy?.GetSystem(systemId)?.GetEntity(shipId);
+            if (entity != null && entity.Relation == OwnerRelation.Owned)
+            {
+                OrderShip(shipId);
+                return;
+            }
+
+            inspectShipId = shipId;
+            inspectSystemId = systemId;
+            orderShipId = null;
+            selectedFleetId = null;
+            autoSelectFirstFleet = false;
+            captainChooserShipId = null;
             SetActive(true);
         }
 
@@ -264,7 +293,28 @@ namespace Pulsar4X.Client
             if (orderShipId != null && orderShip == null)
                 orderShipId = null;
 
-            if(autoSelectFirstFleet && orderShip == null && galaxy.Fleets.Count > 0)
+            if (inspectShipId is int foreignId)
+            {
+                var found = ForeignEntities.ResolveForeignShip(
+                    foreignId,
+                    inspectSystemId,
+                    galaxy.KnownSystems.Select(s => (s.SystemId, (IEnumerable<EntitySnapshot>?)galaxy.GetSystem(s.SystemId)?.Entities)));
+                if (found is { } hit)
+                {
+                    inspectShip = hit.Ship;
+                    inspectSystemId = hit.SystemId;
+                }
+                else
+                {
+                    inspectShipId = null;
+                    inspectSystemId = null;
+                    inspectShip = null;
+                }
+            }
+            else
+                inspectShip = null;
+
+            if(autoSelectFirstFleet && orderShip == null && inspectShip == null && galaxy.Fleets.Count > 0)
             {
                 SelectFleet(galaxy.Fleets[0].Id);
             }
@@ -277,7 +327,13 @@ namespace Pulsar4X.Client
             {
                 DisplayFleetList(galaxy);
 
-                if(selectedFleet != null || orderShip != null)
+                if (inspectShip != null)
+                {
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosY(27f);
+                    DisplayInspectedShip(galaxy, inspectShip, inspectSystemId!);
+                }
+                else if(selectedFleet != null || orderShip != null)
                 {
                     ImGui.SameLine();
                     ImGui.SetCursorPosY(27f);
@@ -3120,6 +3176,88 @@ namespace Pulsar4X.Client
             }
         }
 
+        private void DisplayInspectedShip(IClientGalaxy galaxy, EntitySnapshot ship, string systemId)
+        {
+            if (ImGui.BeginChild("InspectShip"))
+            {
+                ImGui.BeginTabBar("InspectShipTabBar", ImGuiTabBarFlags.None);
+                if (ImGui.BeginTabItem("Summary"))
+                {
+                    Vector2 size = ImGui.GetContentRegionAvail();
+                    if (ImGui.BeginChild("InspectShipSummary", size, ImGuiChildFlags.Borders))
+                    {
+                        if (ImGui.CollapsingHeader("Ship", ImGuiTreeNodeFlags.DefaultOpen))
+                        {
+                            ImGui.TextDisabled("Not your ship. View only.");
+                            ImGui.Columns(2);
+
+                            string name = ship.GetView<NameView>()?.Name ?? "Unknown ship";
+                            DisplayHelpers.PrintRow("Name", name);
+                            DisplayHelpers.PrintRow("Owner", ForeignEntities.FactionName(galaxy.Stances, ship.FactionId));
+
+                            var shipView = ship.GetView<ShipView>();
+                            string design = string.IsNullOrEmpty(shipView?.DesignName) ? "-" : shipView!.DesignName;
+                            DisplayHelpers.PrintRow("Design", design);
+                            string captain = string.IsNullOrEmpty(shipView?.CommanderName) ? "Unknown" : shipView!.CommanderName!;
+                            DisplayHelpers.PrintRow("Captain", captain);
+                            if (shipView != null && shipView.TotalComponents > 0)
+                            {
+                                DisplayHelpers.PrintRow("Status",
+                                    shipView.OperationalComponents + " / " + shipView.TotalComponents + " components");
+                            }
+
+                            string systemName = galaxy.GetSystem(systemId)?.Name ?? "Unknown";
+                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                            ImGui.Text("Current System");
+                            ImGui.PopStyleColor();
+                            ImGui.NextColumn();
+                            if (ImGui.SmallButton(systemName + "##inspect-system"))
+                                _uiState.SetActiveSystem(systemId);
+                            ImGui.NextColumn();
+                            ImGui.Separator();
+
+                            int? parentId = ship.GetView<PositionView>()?.ParentId;
+                            var parent = parentId is int pid ? galaxy.GetSystem(systemId)?.GetEntity(pid) : null;
+                            if (parent != null)
+                            {
+                                string parentName = parent.GetView<NameView>()?.Name ?? "Unknown";
+                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                                ImGui.Text("Orbiting");
+                                ImGui.PopStyleColor();
+                                ImGui.NextColumn();
+                                if (ImGui.SmallButton(parentName + "##inspect-orbit"))
+                                    _uiState.EntityClicked(parent.Id, systemId, MouseButtons.Primary);
+                                ImGui.NextColumn();
+                                ImGui.Separator();
+                            }
+
+                            string activity = "Unknown";
+                            if (ship.GetView<OrdersView>() is { } orders)
+                            {
+                                activity = "Idle";
+                                if (orders.goal.Name.Length > 0)
+                                    activity = orders.goal.Name;
+                                else if (orders.Orders.Count > 0)
+                                    activity = orders.Orders[0].Name;
+                            }
+                            DisplayHelpers.PrintRow("Activity", activity, separator: false);
+                            ImGui.Columns(1);
+                        }
+
+                        if (ship.GetView<CargoStorageView>() is { } cargo
+                            && ImGui.CollapsingHeader("Cargo", ImGuiTreeNodeFlags.DefaultOpen))
+                        {
+                            cargo.Display(ship.Id, _uiState, readOnly: true);
+                        }
+                    }
+                    ImGui.EndChild();
+                    ImGui.EndTabItem();
+                }
+                ImGui.EndTabBar();
+            }
+            ImGui.EndChild();
+        }
+
         private void DisplayFleetList(IClientGalaxy galaxy)
         {
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
@@ -3137,13 +3275,26 @@ namespace Pulsar4X.Client
 
                 DisplayUnassignedBranch(galaxy.UnattachedShips);
 
+                if (inspectShip != null)
+                {
+                    ImGui.Separator();
+                    string factionName = ForeignEntities.FactionName(galaxy.Stances, inspectShip.FactionId);
+                    if (ImGui.TreeNodeEx(factionName + "###inspect-faction", ImGuiTreeNodeFlags.DefaultOpen))
+                    {
+                        string shipName = inspectShip.GetView<NameView>()?.Name ?? "Unknown ship";
+                        ImGui.TreeNodeEx(shipName + "###inspect-ship-" + inspectShip.Id,
+                            ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen | ImGuiTreeNodeFlags.Selected);
+                        ImGui.TreePop();
+                    }
+                }
+
                 var sizeLeft = ImGui.GetContentRegionAvail();
                 ImGui.InvisibleButton("invis-droptarget", new Vector2(sizeLeft.X, 32f));
                 DisplayEmptyDropTarget();
             }
             ImGui.EndChild();
 
-            if(ImGui.Button("Create New Fleet", new Vector2(Styles.LeftColumnWidthLg, 0f)))
+            if(inspectShip == null && ImGui.Button("Create New Fleet", new Vector2(Styles.LeftColumnWidthLg, 0f)))
             {
                 if(_uiState.GameClient != null && !string.IsNullOrEmpty(_uiState.SelectedStarSystemId))
                 {

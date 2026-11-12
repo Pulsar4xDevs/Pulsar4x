@@ -492,8 +492,8 @@ namespace Pulsar4X.Client
         }
 
         /// <summary>
-        /// Owned colonies jump to Colony Management. A friendly colony's market stays here,
-        /// because Colony Management only lists colonies this faction owns.
+        /// Owned and visible foreign colonies both open Colony Management. Foreign ones
+        /// open view-only there (market and shipping included).
         /// </summary>
         private void DisplayColonyManagementLinks()
         {
@@ -501,7 +501,6 @@ namespace Pulsar4X.Client
 
             if (_entity.Kind == BodyKind.Colony)
             {
-                if (_entity.Relation != OwnerRelation.Owned) return;
                 ImGui.Spacing();
                 if (ImGui.Button("Colony Management", new Vector2(ImGui.GetContentRegionAvail().X, 0)))
                 {
@@ -526,35 +525,17 @@ namespace Pulsar4X.Client
                     window.SetActive(true);
                 }
             }
-        }
 
-        private void DisplayFriendlyMarkets()
-        {
-            if (_entity == null || _system == null || _entity.Kind == BodyKind.Colony) return;
-
-            foreach (var colony in _system.Entities)
+            foreach (var colony in ForeignEntities.ForeignColoniesOn(_system.Entities, _entity.Id))
             {
-                if (colony.Relation == OwnerRelation.Owned) continue;
-                if (colony.GetView<ColonyView>()?.PlanetEntityId != _entity.Id) continue;
-                if (colony.GetView<MarketView>() is not { } market) continue;
                 string name = colony.GetView<NameView>()?.Name ?? "Colony";
-                if (ImGui.CollapsingHeader(name + "###market-" + colony.Id))
+                ImGui.Spacing();
+                if (ImGui.Button(name + "##foreign-colony-link-" + colony.Id,
+                    new Vector2(ImGui.GetContentRegionAvail().X, 0)))
                 {
-                    MarketTabDisplay.Display(
-                        colony,
-                        market,
-                        colony.GetView<MarketHistoryView>(),
-                        colony.GetView<IntelBookView>(),
-                        _system.SystemId,
-                        _system.DateTime,
-                        _uiState,
-                        true);
-                    MarketBarsDisplay.DisplayBuyAndShip(colony, market, _system, _uiState);
-                    if (ImGui.CollapsingHeader("Shipping###shipping-" + colony.Id))
-                    {
-                        ShippingDisplay.Display(
-                            colony, market, colony.GetView<IntelBookView>(), _system, _uiState);
-                    }
+                    var window = ColonyManagementWindow.GetInstance();
+                    window.SelectColony(colony.Id, SystemId);
+                    window.SetActive(true);
                 }
             }
         }
@@ -916,6 +897,8 @@ namespace Pulsar4X.Client
             ImGui.SameLine();
             ImGui.TextUnformatted(captain);
 
+            DisplayOwnerRow();
+
             if (_entity.GetView<OrdersView>() is { } ordersView)
             {
                 string line = "Idle";
@@ -988,6 +971,27 @@ namespace Pulsar4X.Client
                 if (ImGui.Button("Fleet & Ship Management", new Vector2(ImGui.GetContentRegionAvail().X, 0)))
                     FleetWindow.GetInstance().OrderShip(EntityId);
             }
+            else
+            {
+                ImGui.Spacing();
+                if (ImGui.Button("Fleet & Ship Management", new Vector2(ImGui.GetContentRegionAvail().X, 0)))
+                    FleetWindow.GetInstance().InspectShip(EntityId, SystemId);
+            }
+        }
+
+        private void DisplayOwnerRow()
+        {
+            if (_entity == null || _entity.Relation == OwnerRelation.Owned)
+                return;
+            var galaxy = _uiState.GameClient?.Galaxy;
+            if (galaxy == null)
+                return;
+
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.TextUnformatted("Owner");
+            ImGui.PopStyleColor();
+            ImGui.SameLine();
+            ImGui.TextUnformatted(ForeignEntities.FactionName(galaxy.Stances, _entity.FactionId));
         }
 
         private void DisplayStarContent()
@@ -1051,7 +1055,6 @@ namespace Pulsar4X.Client
                 atmosphereView.Display();
 
             DisplayColonyManagementLinks();
-            DisplayFriendlyMarkets();
 
             if (isGeoSurveyed && _entity.GetView<MineralDepositsView>() is { } deposits
                 && ImGui.CollapsingHeader("Minerals"))
@@ -1082,7 +1085,6 @@ namespace Pulsar4X.Client
             }
 
             DisplayColonyManagementLinks();
-            DisplayFriendlyMarkets();
 
             if (isGeoSurveyed && _entity.GetView<MineralDepositsView>() is { } deposits
                 && ImGui.CollapsingHeader("Minerals"))
@@ -1102,6 +1104,7 @@ namespace Pulsar4X.Client
                 ImGui.PopStyleColor();
                 ImGui.SameLine();
                 ImGui.TextUnformatted(Stringify.Quantity(colonyView.Population));
+                DisplayOwnerRow();
             }
 
             if (_entity.Relation == OwnerRelation.Owned)
@@ -1125,26 +1128,6 @@ namespace Pulsar4X.Client
 
             DisplayOrbitInfo();
             DisplayColonyManagementLinks();
-
-            // Friendly and neutral colonies are not in Colony Management. The market stays here.
-            if (_entity.Relation != OwnerRelation.Owned && _entity.GetView<MarketView>() is { } market)
-            {
-                MarketTabDisplay.Display(
-                    _entity,
-                    market,
-                    _entity.GetView<MarketHistoryView>(),
-                    _entity.GetView<IntelBookView>(),
-                    _system?.SystemId ?? "",
-                    _system?.DateTime ?? default,
-                    _uiState,
-                    true);
-                MarketBarsDisplay.DisplayBuyAndShip(_entity, market, _system, _uiState);
-                if (ImGui.CollapsingHeader("Shipping###shipping-" + _entity.Id))
-                {
-                    ShippingDisplay.Display(
-                        _entity, market, _entity.GetView<IntelBookView>(), _system, _uiState);
-                }
-            }
         }
 
         private void DisplayGenericContent()
@@ -1160,7 +1143,6 @@ namespace Pulsar4X.Client
             DisplayOrbitInfo();
             DisplayOrders();
             DisplayColonyManagementLinks();
-            DisplayFriendlyMarkets();
 
             if (_entity.GetView<GeoSurveyView>()?.IsSurveyComplete == true
                 && _entity.GetView<MineralDepositsView>() is { } deposits
