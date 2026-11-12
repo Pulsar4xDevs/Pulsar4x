@@ -248,19 +248,32 @@ public static class WarpMath
             return (driveSpeed, sustain, "");
 
         double radial = Vector3.Dot(heading / headingLen, fromStar / distance);
-        if (radial > 0 && warp.Coupling > 0)
-            return PriceClimb(ship, warp.Coupling, mass, g, radial, driveSpeed, sustain);
+        double outputKW = ship.TryGetDataBlob<EnergyGenAbilityDB>(out var power) ? power.TotalOutputMax : 0;
+        return PriceInWell(warp.Coupling, warp.BleedFraction, outputKW, mass, g, radial, driveSpeed, sustain);
+    }
+
+    /// <summary>
+    /// The speed and sustain demand for one heading in a star's well, from numbers only.
+    /// <paramref name="radial"/> is the heading's cosine against the outward line from the star.
+    /// <see cref="PriceCruise"/> calls this for a live ship; <see cref="MoveCostCalculator"/> calls it
+    /// for a hypothetical one.
+    /// </summary>
+    public static (double speed, double demandKW, string limitLine) PriceInWell(
+        double coupling, double bleed, double outputKW, double mass, double g, double radial,
+        double driveSpeed, double sustain)
+    {
+        if (radial > 0 && coupling > 0)
+            return PriceClimb(outputKW, coupling, mass, g, radial, driveSpeed, sustain);
 
         if (radial <= 0)
-            return PriceFall(warp.BleedFraction, driveSpeed, sustain);
+            return PriceFall(bleed, driveSpeed, sustain);
 
         return (driveSpeed, sustain, "");
     }
 
     static (double speed, double demandKW, string limitLine) PriceClimb(
-        Entity ship, double coupling, double mass, double g, double radial, double driveSpeed, double sustain)
+        double outputKW, double coupling, double mass, double g, double radial, double driveSpeed, double sustain)
     {
-        double outputKW = ship.TryGetDataBlob<EnergyGenAbilityDB>(out var power) ? power.TotalOutputMax : 0;
         double plantSpeed = outputKW * 1000.0 / (coupling * mass * g * radial);
         if (!(plantSpeed > 0) || !double.IsFinite(plantSpeed))
             return (driveSpeed, sustain, "");

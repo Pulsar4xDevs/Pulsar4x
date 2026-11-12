@@ -1,0 +1,271 @@
+using System;
+using System.Collections.Generic;
+using Pulsar4X.Energy;
+using Pulsar4X.Engine;
+using Pulsar4X.Galaxy;
+using Pulsar4X.Orbital;
+using Pulsar4X.Orbits;
+
+namespace Pulsar4X.Movement;
+
+/// <summary>
+/// What a ship brings to a move, as plain numbers. Build it from a live ship with
+/// <see cref="FromEntity"/>, or fill it from a design for a ship that does not exist yet,
+/// then change <see cref="CargoMass_kg"/> or <see cref="FuelMass_kg"/> with <c>with</c>.
+/// Units follow the blobs it is read from: kg, m/s, kg/s, N, kW and kJ.
+/// </summary>
+public record struct MoveCostShip
+{
+    /// <summary><see cref="MassVolumeDB.MassDry"/>.</summary>
+    public double DryMass_kg;
+    /// <summary>Stored cargo that is not the reaction drive's fuel.</summary>
+    public double CargoMass_kg;
+    /// <summary>Stored mass of <see cref="FuelType"/>.</summary>
+    public double FuelMass_kg;
+
+    // Reaction drive, from NewtonThrustAbilityDB.
+    public string FuelType;
+    public double ExhaustVelocity;
+    public double FuelBurnRate;
+    public double ThrustInNewtons;
+
+    // Warp drive, from WarpAbilityDB.
+    public bool HasWarp;
+    public double WarpPower;
+    public string WarpEnergyType;
+    public double BubbleCreationCost;
+    public double BubbleSustainCost;
+    public double BubbleCollapseCost;
+    public double Coupling;
+    public double BleedFraction;
+
+    // Power, from EnergyGenAbilityDB, for WarpEnergyType.
+    public double EnergyStored;
+    public double EnergyStoreMax;
+    public double EnergyOutputMax;
+
+    /// <summary>Same sum as <see cref="MassVolumeDB.UpdateMassTotal(Pulsar4X.Storage.CargoStorageDB)"/>.</summary>
+    public double MassTotal_kg => DryMass_kg + CargoMass_kg + FuelMass_kg;
+
+    /// <summary>Read a live ship. Missing blobs leave their fields at zero.</summary>
+    public static MoveCostShip FromEntity(Entity ship)
+    {
+        var spec = new MoveCostShip();
+        double total = 0;
+        if (ship.TryGetDataBlob<MassVolumeDB>(out var mass))
+        {
+            spec.DryMass_kg = mass.MassDry;
+            total = mass.MassTotal;
+        }
+
+        if (ship.TryGetDataBlob<NewtonThrustAbilityDB>(out var thrust))
+        {
+            spec.FuelType = thrust.FuelType;
+            spec.ExhaustVelocity = thrust.ExhaustVelocity;
+            spec.FuelBurnRate = thrust.FuelBurnRate;
+            spec.ThrustInNewtons = thrust.ThrustInNewtons;
+            spec.FuelMass_kg = thrust.TotalFuel_kg;
+        }
+        spec.CargoMass_kg = Math.Max(0, total - spec.DryMass_kg - spec.FuelMass_kg);
+
+        if (ship.TryGetDataBlob<WarpAbilityDB>(out var warp))
+        {
+            spec.HasWarp = true;
+            spec.WarpPower = warp.TotalWarpPower;
+            spec.WarpEnergyType = warp.EnergyType;
+            spec.BubbleCreationCost = warp.BubbleCreationCost;
+            spec.BubbleSustainCost = warp.BubbleSustainCost;
+            spec.BubbleCollapseCost = warp.BubbleCollapseCost;
+            spec.Coupling = warp.Coupling;
+            spec.BleedFraction = warp.BleedFraction;
+        }
+
+        if (ship.TryGetDataBlob<EnergyGenAbilityDB>(out var power))
+        {
+            spec.EnergyOutputMax = power.TotalOutputMax;
+            if (!string.IsNullOrEmpty(spec.WarpEnergyType))
+            {
+                spec.EnergyStored = power.EnergyStored.TryGetValue(spec.WarpEnergyType, out double stored) ? stored : 0;
+                spec.EnergyStoreMax = power.EnergyStoreMax.TryGetValue(spec.WarpEnergyType, out double max) ? max : 0;
+            }
+        }
+
+        return spec;
+    }
+}
+
+public enum MoveCostMode { Warp, Burn, Hohmann }
+
+/// <summary>
+/// What one move costs. Costs are filled in when the move is infeasible too, so a caller can
+/// say how short the ship is.
+/// </summary>
+public readonly record struct MoveCost(
+    MoveCostMode Mode,
+    bool Feasible,
+    string Reason,
+    IReadOnlyDictionary<string, double> FuelUsed_kg,
+    double EnergyUsed_kJ,
+    double DeltaV,
+    double Duration_s,
+    double BurnSeconds,
+    double ChargeWait_s,
+    double Speed);
+
+/// <summary>
+/// Pure cost of a move order: reaction fuel for burns, warp energy for jumps. Reads nothing
+/// from the game and changes nothing. Every formula is the one the movement code runs;
+/// see /workspace/pulsar4x-team/plans/move-order-cost.md and the comments below for where.
+/// </summary>
+public static class MoveCostCalculator
+{
+    static readonly IReadOnlyDictionary<string, double> NoFuel = new Dictionary<string, double>();
+
+    /// <summary>
+    /// A warp jump of <paramref name="distance_m"/>. Pass the star's pull
+    /// <paramref name="gravity_ms2"/> at the start and the heading's cosine against the
+    /// outward line, <paramref name="radial"/>, to price the well as
+    /// <see cref="WarpMath.PriceCruise"/> does. Gravity 0 prices free space at drive speed.
+    /// </summary>
+    public static MoveCost Warp(MoveCostShip ship, double distance_m, double gravity_ms2 = 0, double radial = 0)
+    {
+        const MoveCostMode mode = MoveCostMode.Warp;
+        if (!ship.HasWarp)
+            return No(mode, "no warp drive");
+
+        // WarpDriveAtb.OnComponentInstallation runs WarpMath.CalcMaxWarpAndEnergyUsage while the
+        // ship is still empty, and nothing runs it again when cargo or fuel is loaded. So the
+        // flown WarpAbilityDB.MaxSpeed is MaxSpeedCalc(TotalWarpPower, dry mass), and drive speed
+        // does not change with cargo.
+        double drive = ship.DryMass_kg > 0 ? WarpMath.MaxSpeedCalc(ship.WarpPower, ship.DryMass_kg) : 0;
+        if (!(drive > 0))
+            return No(mode, "warp drive produces no speed");
+
+        // WarpMath.PriceHeading prices the well with MassVolumeDB.MassTotal, so climbing does
+        // scale with cargo. No well flies at drive speed on the base sustain.
+        double mass = ship.MassTotal_kg;
+        var price = gravity_ms2 > 0 && double.IsFinite(gravity_ms2)
+            ? WarpMath.PriceInWell(ship.Coupling, ship.BleedFraction, ship.EnergyOutputMax, mass,
+                gravity_ms2, radial, drive, ship.BubbleSustainCost)
+            : (speed: drive, demandKW: ship.BubbleSustainCost, limitLine: "");
+        double speed = price.speed > 0 && double.IsFinite(price.speed) ? price.speed : drive;
+        double duration = Math.Max(0, distance_m) / speed;
+
+        // WarpMoveProcessor.TryStartWarp and FinishArrival book creation and collapse as one
+        // second of that many kW; the sustain demand runs from entry to exit.
+        double energy = ship.BubbleCreationCost + price.demandKW * duration + ship.BubbleCollapseCost;
+
+        // WarpMoveAction.Execute: short of the creation cost waits to charge, unless the store
+        // can never hold it or nothing generates.
+        double wait = 0;
+        bool feasible = true;
+        string reason = price.limitLine ?? "";
+        if (ship.BubbleCreationCost > ship.EnergyStored)
+        {
+            bool storeCanHold = ship.EnergyStoreMax + 1e-6 >= ship.BubbleCreationCost;
+            if (!storeCanHold || ship.EnergyOutputMax <= 0)
+            {
+                feasible = false;
+                reason = "not enough power to open a warp";
+            }
+            else
+            {
+                wait = (ship.BubbleCreationCost - ship.EnergyStored) / ship.EnergyOutputMax;
+            }
+        }
+
+        return new MoveCost(mode, feasible, reason, NoFuel, energy, 0, duration, 0, wait, speed);
+    }
+
+    /// <summary>
+    /// <see cref="Warp(MoveCostShip, double, double, double)"/> for a live ship as it is now.
+    /// </summary>
+    public static MoveCost Warp(Entity ship, double distance_m, double gravity_ms2 = 0, double radial = 0)
+        => Warp(MoveCostShip.FromEntity(ship), distance_m, gravity_ms2, radial);
+
+    /// <summary>One reaction burn of <paramref name="deltaV"/> m/s, as NewtonThrustAction plans it.</summary>
+    public static MoveCost Burn(MoveCostShip ship, double deltaV)
+    {
+        const MoveCostMode mode = MoveCostMode.Burn;
+        if (!HasReactionDrive(ship))
+            return No(mode, "no reaction drive");
+
+        double fuel = FuelFor(ship.MassTotal_kg, deltaV, ship.ExhaustVelocity);
+        return Spend(mode, ship, deltaV, fuel, 0);
+    }
+
+    /// <summary>
+    /// A two-burn Hohmann between circular radii around one body, as
+    /// ChangeOrbitalAltitudeAction plans it with <see cref="OrbitalMath.Hohmann2"/>.
+    /// Duration is the coast from the first burn to the second.
+    /// </summary>
+    public static MoveCost Hohmann(MoveCostShip ship, double parentMass_kg, double fromRadius_m, double toRadius_m)
+    {
+        const MoveCostMode mode = MoveCostMode.Hohmann;
+        if (!HasReactionDrive(ship))
+            return No(mode, "no reaction drive");
+        if (!(fromRadius_m >= 1) || !(toRadius_m >= 1) || !double.IsFinite(fromRadius_m) || !double.IsFinite(toRadius_m))
+            return No(mode, "no usable radius");
+
+        double mass = ship.MassTotal_kg;
+        // OrbitMath.SGP(parent, ship) adds the ship's mass to the parent's.
+        double sgp = GeneralMath.StandardGravitationalParameter(parentMass_kg, mass);
+        var manuvers = OrbitalMath.Hohmann2(sgp, fromRadius_m, toRadius_m);
+        double dv1 = manuvers[0].deltaV.Length();
+        double dv2 = manuvers[1].deltaV.Length();
+        if (!double.IsFinite(dv1) || !double.IsFinite(dv2) || !double.IsFinite(manuvers[1].timeInSeconds))
+            return No(mode, "Hohmann solution did not converge");
+
+        // MovePlanner.PlanFromWindow: the second burn starts lighter by the first burn's fuel.
+        double fuel1 = FuelFor(mass, dv1, ship.ExhaustVelocity);
+        double fuel2 = FuelFor(mass - fuel1, dv2, ship.ExhaustVelocity);
+        return Spend(mode, ship, dv1 + dv2, fuel1 + fuel2, manuvers[1].timeInSeconds);
+    }
+
+    /// <summary>
+    /// <see cref="Hohmann(MoveCostShip, double, double, double)"/> for a live ship from its
+    /// current orbit to a circular <paramref name="toRadius_m"/> around the same parent.
+    /// </summary>
+    public static MoveCost Hohmann(Entity ship, double toRadius_m)
+    {
+        if (!ship.TryGetDataBlob<OrbitDB>(out var orbit)
+            || orbit.Parent == null
+            || !orbit.Parent.TryGetDataBlob<MassVolumeDB>(out var parentMass))
+            return No(MoveCostMode.Hohmann, "ship is not in a stable orbit to transfer from");
+        return Hohmann(MoveCostShip.FromEntity(ship), parentMass.MassTotal, orbit.SemiMajorAxis, toRadius_m);
+    }
+
+    static bool HasReactionDrive(MoveCostShip ship)
+        // MovePlanner.EvaluateNewtonian refuses ThrustInNewtons <= 0.
+        => ship.ThrustInNewtons > 0 && ship.ExhaustVelocity > 0;
+
+    static double FuelFor(double mass, double deltaV, double exhaustVelocity)
+    {
+        if (!(mass > 0) || !(deltaV > 0))
+            return 0;
+        // OrbitMath.TsiolkovskyFuelUse, as NewtonThrustAction.CreateCommand and MovePlanner.FuelKg use it.
+        return OrbitMath.TsiolkovskyFuelUse(mass, exhaustVelocity, deltaV);
+    }
+
+    static MoveCost Spend(MoveCostMode mode, MoveCostShip ship, double deltaV, double fuel, double coast)
+    {
+        // MovePlanner.BurnSeconds: fuel over the burn rate.
+        double burnSeconds = ship.FuelBurnRate > 0 ? fuel / ship.FuelBurnRate : 0;
+        var used = new Dictionary<string, double> { [ship.FuelType ?? ""] = fuel };
+        if (!double.IsFinite(fuel) || fuel < 0)
+            return new MoveCost(mode, false, "burn solution did not converge", used, 0, deltaV, coast, burnSeconds, 0, 0);
+
+        // NewtonThrustAbilityDB.SetFuel: the Δv the tank holds at this mass.
+        double mass = ship.MassTotal_kg;
+        double have = mass > 0
+            ? OrbitMath.TsiolkovskyRocketEquation(mass, mass - ship.FuelMass_kg, ship.ExhaustVelocity)
+            : 0;
+        bool feasible = fuel <= ship.FuelMass_kg;
+        // Same wording as MovePlanner.EvaluateNewtonian.
+        string reason = feasible ? "" : $"needs {deltaV:N0} m/s Δv, have {have:N0} m/s";
+        return new MoveCost(mode, feasible, reason, used, 0, deltaV, coast, burnSeconds, 0, 0);
+    }
+
+    static MoveCost No(MoveCostMode mode, string reason)
+        => new MoveCost(mode, false, reason, NoFuel, 0, 0, 0, 0, 0, 0);
+}
