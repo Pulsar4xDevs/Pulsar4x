@@ -196,20 +196,32 @@ namespace Pulsar4X.Engine
         /// <summary>
         /// Pauses the timeloop and records <paramref name="reason"/> for <paramref name="factionId"/>.
         /// The first reason since the clock last resumed is kept; later ones only add to its count.
-        /// The same event passed twice (standing OrdersHalt plus the one-shot) counts once.
+        /// The same event passed twice (standing OrdersHalt plus the one-shot) counts once, and a
+        /// one-shot for the same entity at the same instant (a warp's order after its WarpExited)
+        /// names the order on the first reason instead of counting as another.
+        /// Returns false, and does not pause, for a faction that may not stop the clock
+        /// (see <see cref="Game.FactionCanHaltClock"/>).
         /// </summary>
-        public void PauseTime(int factionId, Event reason, string? orderName = null)
+        public bool PauseTime(int factionId, Event reason, string? orderName = null)
         {
+            if (_game != null && !_game.FactionCanHaltClock(factionId))
+                return false;
+
             lock (_pauseReasons)
             {
                 if (!_pauseReasons.TryGetValue(factionId, out var first))
                     _pauseReasons[factionId] = new PauseReason(reason, orderName);
                 else if (ReferenceEquals(first.Event, reason))
                     first.OrderName ??= orderName;
+                else if (orderName != null && first.OrderName == null
+                         && first.Event.EntityId != null && first.Event.EntityId == reason.EntityId
+                         && first.Event.StarDate == reason.StarDate)
+                    first.OrderName = orderName;
                 else
                     first.OthersCount++;
             }
             PauseTime();
+            return true;
         }
 
         public PauseReason? GetPauseReason(int factionId)

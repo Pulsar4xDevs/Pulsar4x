@@ -121,6 +121,26 @@ public class PauseReasonTests
     }
 
     [Test]
+    public void Npc_faction_event_does_not_stop_the_clock_once_a_human_faction_is_set()
+    {
+        var npc = FactionFactory.CreateBasicFaction(_game, "Strata Survey", "SS", 100);
+        var npcLog = (FactionEventLog)npc.GetDataBlob<FactionInfoDB>().EventLog;
+        Assert.That(npcLog.HaltsOn(EventType.WarpExited), Is.True, "NPCs get the same default halts");
+        _game.LocalHumanFactionId = _faction.Id;
+        DateTime at = _game.TimePulse.GameGlobalDateTime;
+
+        var ev = Event.Create(EventType.WarpExited, at, "Pathfinder arrived at Adeona", npc.Id);
+        EventManager.Instance.Publish(ev);
+
+        Assert.That(_game.TimePulse.GetPauseReason(npc.Id), Is.Null);
+        Assert.That(_game.TimePulse.PauseTime(npc.Id, ev), Is.False, "the NPC may not stop the clock");
+        Assert.That(npcLog.GetEvents(), Has.Member(ev), "it is still logged for the NPC");
+
+        Publish(EventType.WarpExited, at, "Endeavour arrived at Mars", Ship("Endeavour"));
+        Assert.That(_game.TimePulse.GetPauseReason(_faction.Id), Is.Not.Null, "the human faction still pauses");
+    }
+
+    [Test]
     public void Several_pauses_at_one_instant_keep_the_first_and_count_the_others()
     {
         var a = Ship("Endeavour");

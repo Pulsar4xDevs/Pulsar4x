@@ -84,8 +84,8 @@ namespace GameEngine.Engine.Orders
                         // through departure so it fires here, not at TryStartWarp.
                         if (entityCommand.PauseOnAction)
                         {
-                            HaltOnOneShot(entityCommand, atDateTime);
-                            pulseStopping = true;
+                            if (HaltOnOneShot(entityCommand, atDateTime))
+                                pulseStopping = true;
                         }
                         continue;
                     }
@@ -107,8 +107,8 @@ namespace GameEngine.Engine.Orders
                             if (entityCommand.PauseOnAction && !entityCommand.IsRunning
                                 && entityCommand is not WarpMoveAction)
                             {
-                                HaltOnOneShot(entityCommand, atDateTime);
-                                pulseStopping = true;
+                                if (HaltOnOneShot(entityCommand, atDateTime))
+                                    pulseStopping = true;
                             }
                             entityCommand.Execute(atDateTime);
                         }
@@ -162,8 +162,9 @@ namespace GameEngine.Engine.Orders
         /// One-shot PauseOnAction: publish OrdersHalt, pause the pulse ourselves
         /// (OrdersHalt is off by default and is not a standing special case), then
         /// clear the flag so unpause does not re-halt. Does not touch OrdersCompleted.
+        /// Returns whether the clock was told to stop (a faction that may not halt it does not).
         /// </summary>
-        void HaltOnOneShot(EntityAction action, DateTime atDateTime)
+        bool HaltOnOneShot(EntityAction action, DateTime atDateTime)
         {
             var commanded = action.EntityCommanding;
             string name = commanded != null && commanded.TryGetDataBlob<NameDB>(out var names)
@@ -179,8 +180,9 @@ namespace GameEngine.Engine.Orders
                 action.EntityCommandingGuid);
             EventManager.Instance.Publish(ev);
             var pulse = (action.EntityCommanding?.Manager?.Game ?? _game)?.TimePulse;
-            pulse?.PauseTime(action.RequestingFactionGuid, ev, action.Name);
+            bool stopped = pulse?.PauseTime(action.RequestingFactionGuid, ev, action.Name) ?? false;
             action.PauseOnAction = false;
+            return stopped;
         }
     }
 }

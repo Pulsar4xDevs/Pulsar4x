@@ -413,7 +413,8 @@ namespace Pulsar4X.Engine
                 {
                     foreach (var action in warpQueue.ActionList)
                     {
-                        if (action is WarpMoveAction && action.PauseOnAction && !IsDone(action))
+                        if (action is WarpMoveAction && action.PauseOnAction && !IsDone(action)
+                            && FactionCanHaltClock(action.RequestingFactionGuid))
                         {
                             wantHalt = true;
                             break;
@@ -441,7 +442,8 @@ namespace Pulsar4X.Engine
                     bool current = (mask & (int)action.ActionLanes) == 0;
                     if (action.IsBlocking)
                         mask |= (int)action.ActionLanes;
-                    if (!current || !action.PauseOnAction || action.IsRunning)
+                    if (!current || !action.PauseOnAction || action.IsRunning
+                        || !FactionCanHaltClock(action.RequestingFactionGuid))
                         continue;
                     // Future start only. A past ActionOnDate on a current-but-blocked
                     // follower never reaches here; a current one due now is started
@@ -452,8 +454,20 @@ namespace Pulsar4X.Engine
             }
         }
 
+        /// <summary>
+        /// Whether pauses for <paramref name="factionId"/> may stop the shared clock. Every faction,
+        /// NPCs included, gets the default halt settings and its own event log, but only the local
+        /// human faction should stop time: an NPC survey ship's WarpExited used to pause the game
+        /// with the reason filed under the NPC, so the player saw a plain "Paused". A game with no
+        /// human faction recorded (headless, tests) lets any faction pause, as before.
+        /// </summary>
+        internal bool FactionCanHaltClock(int factionId)
+            => LocalHumanFactionId < 0 || factionId == LocalHumanFactionId;
+
         bool FactionHaltsOn(Entity entity, EventType eventType)
         {
+            if (!FactionCanHaltClock(entity.FactionOwnerID))
+                return false;
             if (!Factions.TryGetValue(entity.FactionOwnerID, out var faction))
                 return false;
             if (!faction.TryGetDataBlob<FactionInfoDB>(out var info) || info.EventLog == null)
