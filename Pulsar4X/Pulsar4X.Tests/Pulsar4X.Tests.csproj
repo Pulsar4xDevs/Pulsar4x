@@ -113,10 +113,14 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <!-- Full-replace output Data so leftover official folders (e.g. old scenarios) cannot linger after GameData changes. Recopy this project's Data because CopyToOutputDirectory may already have run. -->
   <Target Name="CopyJsonData" AfterTargets="Build">
+    <RemoveDir Directories="$(OutputPath)\Data" Condition="Exists('$(OutputPath)\Data')" />
     <ItemGroup>
       <JsonDataFiles Include="..\GameData\**\*" />
+      <TestDataFiles Include="Data\**\*" />
     </ItemGroup>
     <Copy SourceFiles="@(JsonDataFiles)" DestinationFolder="$(OutputPath)\Data\%(RecursiveDir)" />
+    <Copy SourceFiles="@(TestDataFiles)" DestinationFolder="$(OutputPath)\Data\%(RecursiveDir)" />
   </Target>
 </Project>
