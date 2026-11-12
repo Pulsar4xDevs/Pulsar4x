@@ -64,7 +64,7 @@ public class FactionEventLog : IEventLog
 
         if (HaltsOn(e.EventType) && _masterTimePulse != null)
         {
-            _masterTimePulse.PauseTime();
+            _masterTimePulse.PauseTime(_factionId, e);
         }
 
         _events.Add(e);

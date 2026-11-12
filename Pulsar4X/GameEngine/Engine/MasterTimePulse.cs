@@ -187,6 +187,44 @@ namespace Pulsar4X.Engine
         }
 
         /// <summary>
+        /// Why the clock stopped, per faction. Set by an event or one-shot order pause, cleared when
+        /// time resumes. A plain player pause leaves it empty. Not saved.
+        /// </summary>
+        [JsonIgnore]
+        private readonly Dictionary<int, PauseReason> _pauseReasons = new();
+
+        /// <summary>
+        /// Pauses the timeloop and records <paramref name="reason"/> for <paramref name="factionId"/>.
+        /// The first reason since the clock last resumed is kept; later ones only add to its count.
+        /// The same event passed twice (standing OrdersHalt plus the one-shot) counts once.
+        /// </summary>
+        public void PauseTime(int factionId, Event reason, string? orderName = null)
+        {
+            lock (_pauseReasons)
+            {
+                if (!_pauseReasons.TryGetValue(factionId, out var first))
+                    _pauseReasons[factionId] = new PauseReason(reason, orderName);
+                else if (ReferenceEquals(first.Event, reason))
+                    first.OrderName ??= orderName;
+                else
+                    first.OthersCount++;
+            }
+            PauseTime();
+        }
+
+        public PauseReason? GetPauseReason(int factionId)
+        {
+            lock (_pauseReasons)
+                return _pauseReasons.TryGetValue(factionId, out var reason) ? reason : null;
+        }
+
+        private void ClearPauseReasons()
+        {
+            lock (_pauseReasons)
+                _pauseReasons.Clear();
+        }
+
+        /// <summary>
         /// Blocks until the current step's task has finished. A faulted step still counts as finished.
         /// </summary>
         public void WaitUntilStopped()
@@ -213,6 +251,7 @@ namespace Pulsar4X.Engine
             _timeSimulationCts?.Dispose();
             _timeSimulationCts = new CancellationTokenSource();
             LastFault = null;
+            ClearPauseReasons();
             _timeSimulationTask = Task.Run(() => SimulateTimeAsync(_timeSimulationCts.Token), _timeSimulationCts.Token);
             NotifyWhenStopped(_timeSimulationTask);
         }
@@ -237,6 +276,7 @@ namespace Pulsar4X.Engine
             _timeSimulationCts?.Dispose();
             _timeSimulationCts = new CancellationTokenSource();
             LastFault = null;
+            ClearPauseReasons();
             _timeSimulationTask = Task.Run(() => SimulateTimeUntil(toDate, _timeSimulationCts.Token), _timeSimulationCts.Token);
             NotifyWhenStopped(_timeSimulationTask);
 

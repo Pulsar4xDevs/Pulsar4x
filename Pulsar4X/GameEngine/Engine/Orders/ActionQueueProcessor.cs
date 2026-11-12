@@ -179,7 +179,7 @@ namespace GameEngine.Engine.Orders
                 action.EntityCommandingGuid);
             EventManager.Instance.Publish(ev);
             var pulse = (action.EntityCommanding?.Manager?.Game ?? _game)?.TimePulse;
-            pulse?.PauseTime();
+            pulse?.PauseTime(action.RequestingFactionGuid, ev, action.Name);
             action.PauseOnAction = false;
         }
     }

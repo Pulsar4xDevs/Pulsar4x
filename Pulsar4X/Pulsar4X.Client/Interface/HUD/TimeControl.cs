@@ -103,6 +103,9 @@ namespace Pulsar4X.Client
 
             if (isStopping) ImGui.EndDisabled();
 
+            if (isPaused)
+                DisplayPauseReason();
+
             // Step button only shown when paused
             if (isPaused)
             {
@@ -209,6 +212,51 @@ namespace Pulsar4X.Client
                 7 => (float)time.TickFrequency.TotalDays / 365,
                 _ => _freqTimeSpanValue,
             };
+        }
+
+        // "Paused: Warp exited — Endeavour arrived at Mars (and 2 more)". A plain player pause has
+        // no reason and shows just "Paused". Clicking selects the entity and opens the log.
+        void DisplayPauseReason()
+        {
+            ImGui.SameLine();
+            var reason = _uiState.GameClient?.Galaxy.Faction?.PauseReason;
+            if (reason == null)
+            {
+                ImGui.TextDisabled("Paused");
+                return;
+            }
+
+            string label = reason.OrderName != null
+                ? $"Order: {reason.OrderName}"
+                : GameLogWindow.FriendlyLabel(reason.EventType);
+            string text = $"Paused: {label} — {reason.Message}";
+            if (reason.OthersCount > 0)
+                text += $" (and {reason.OthersCount} more)";
+
+            if (ImGui.Selectable($"{text}###pausereason", false, ImGuiSelectableFlags.None, ImGui.CalcTextSize(text)))
+                PauseReasonClicked(reason);
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Show on the map and in the game log");
+        }
+
+        void PauseReasonClicked(PauseReasonSnapshot reason)
+        {
+            // Select and centre only an entity this faction can see: its system must be in the
+            // client's galaxy model and the entity in that system's snapshot.
+            if (reason.EntityId is { } entityId && reason.SystemId is { } systemId)
+            {
+                var snapshot = _uiState.GameClient?.Galaxy.GetSystem(systemId)?.GetEntity(entityId);
+                if (snapshot != null)
+                {
+                    if (_uiState.SelectedStarSystemId != systemId)
+                        _uiState.SetActiveSystem(systemId);
+                    _uiState.EntityClicked(entityId, systemId, MouseButtons.Primary);
+                    if (snapshot.GetView<PositionView>() is { } pos)
+                        _uiState.Camera.CenterOnPosition(pos.AbsolutePosition.X, pos.AbsolutePosition.Y, pos.AbsolutePosition.Z);
+                }
+            }
+
+            GameLogWindow.GetInstance().ShowPauseReason(reason);
         }
 
         internal void PausePlayPressed()

@@ -179,6 +179,11 @@ namespace Pulsar4X.Engine.Api
                 sub.Send(evt);
                 if (faultEvt != null)
                     sub.Send(faultEvt);
+                // The pause reason rides the faction snapshot. A pause mid-step may not move the
+                // global date, so push it here where the clock has just stopped.
+                var faction = _projector.ProjectFaction(sub.FactionId);
+                if (faction != null)
+                    sub.Send(new GameEventEnvelope(GameEventType.FactionChanged, Faction: faction));
             }
         }
 

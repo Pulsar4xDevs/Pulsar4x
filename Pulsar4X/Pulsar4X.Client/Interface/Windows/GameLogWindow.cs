@@ -39,8 +39,41 @@ namespace Pulsar4X.Client
             }),
         };
 
+        // Rows to highlight after the player clicks the pause reason in TimeControl.
+        private PauseReasonSnapshot? _highlight;
+        private bool _scrollToHighlight;
+
         private GameLogWindow()
         {
+        }
+
+        /// <summary>The curated label for an engine event type, or the type name when it has none.</summary>
+        internal static string FriendlyLabel(string eventType)
+        {
+            foreach (var (_, items) in PauseGroups)
+                foreach (var (type, label) in items)
+                    if (type == eventType)
+                        return label;
+            return eventType == "OrdersHalt" ? "Order halt" : eventType;
+        }
+
+        /// <summary>Open the log with the rows behind <paramref name="reason"/> highlighted.</summary>
+        internal void ShowPauseReason(PauseReasonSnapshot reason)
+        {
+            _highlight = reason;
+            _scrollToHighlight = true;
+            SetActive(true);
+        }
+
+        // The pause reason's own row, plus the other pausing rows at that instant (its "and N more").
+        private bool IsHighlighted(LogEvent e)
+        {
+            if (_highlight == null || e.StarDate != _highlight.StarDate)
+                return false;
+            if (e.EventType == _highlight.EventType || e.EventType == "OrdersHalt")
+                return true;
+            var settings = _uiState.GameClient?.Galaxy.Faction?.EventHaltSettings;
+            return settings != null && settings.TryGetValue(e.EventType, out var on) && on;
         }
 
         internal static GameLogWindow GetInstance()
@@ -104,7 +137,17 @@ namespace Pulsar4X.Client
                     if (HidenEvents.Contains(e.EventType))
                         continue;
 
+                    bool highlighted = IsHighlighted(e);
                     ImGui.Separator();
+                    if (highlighted)
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(1f, 0.85f, 0.3f, 1f));
+                        if (_scrollToHighlight)
+                        {
+                            ImGui.SetScrollHereY();
+                            _scrollToHighlight = false;
+                        }
+                    }
                     ImGui.Text(e.StarDate.ToString(_uiState.GameSettings.GetDateTimeFormat()));
                     ImGui.NextColumn();
                     ImGui.Text(e.EventType);
@@ -115,6 +158,8 @@ namespace Pulsar4X.Client
                     ImGui.NextColumn();
                     ImGui.TextWrapped(e.Message);
                     ImGui.NextColumn();
+                    if (highlighted)
+                        ImGui.PopStyleColor();
                 }
 
                 ImGui.Separator();

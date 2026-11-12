@@ -362,20 +362,23 @@ namespace Pulsar4X.Movement
             // Drop-in is already applied. Publish at this exact instant so a standing
             // WarpExited halt (or a one-shot on this warp) can PauseTime before the
             // queue is woken — the queue then yields and does not start a follower here.
-            PublishWarpExited(entity, toDateTime);
+            PublishWarpExited(entity, moveDB.TargetEntity, toDateTime);
             if (wakeQueue)
                 WakeActionQueue(entity, toDateTime);
         }
 
-        static void PublishWarpExited(Entity entity, DateTime atDateTime)
+        static void PublishWarpExited(Entity entity, Entity? target, DateTime atDateTime)
         {
             string name = entity.TryGetDataBlob<NameDB>(out var names)
                 ? names.GetName(entity.FactionOwnerID)
                 : "Ship";
+            string message = target != null && target.TryGetDataBlob<NameDB>(out var targetNames)
+                ? $"{name} arrived at {targetNames.GetName(entity.FactionOwnerID)}"
+                : $"{name} exited warp";
             var ev = Event.Create(
                 EventType.WarpExited,
                 atDateTime,
-                $"{name} exited warp",
+                message,
                 entity.FactionOwnerID,
                 entity.Manager?.ManagerID,
                 entity.Id);

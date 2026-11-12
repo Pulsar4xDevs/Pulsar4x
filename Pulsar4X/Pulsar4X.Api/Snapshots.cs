@@ -97,7 +97,23 @@ public sealed record FactionSnapshot(
     string Abbreviation,
     decimal Funds,
     IReadOnlyList<LedgerEntrySnapshot> Transactions,
-    IReadOnlyDictionary<string, bool> EventHaltSettings = null!);
+    IReadOnlyDictionary<string, bool> EventHaltSettings = null!,
+    PauseReasonSnapshot? PauseReason = null);
+
+/// <summary>
+/// Why the clock stopped for this faction: the first event or one-shot order pause since time last
+/// resumed. <see cref="OthersCount"/> is how many more pauses came after it. Null for a plain
+/// player pause or while time runs. <see cref="EventType"/> is the engine name, as in <see cref="LogEvent"/>.
+/// </summary>
+public sealed record PauseReasonSnapshot(
+    string EventType,
+    string Message,
+    DateTime StarDate,
+    int? EntityId = null,
+    string? EntityName = null,
+    string? SystemId = null,
+    string? OrderName = null,
+    int OthersCount = 0);
 
 /// <summary>
 /// One other faction. <see cref="Stance"/> and <see cref="GrantedByViewer"/> are this viewer's.

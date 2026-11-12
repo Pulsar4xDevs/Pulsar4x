@@ -76,7 +76,20 @@ namespace Pulsar4X.Engine.Api
                 foreach (var kv in eventLog.HaltSettings)
                     halts[kv.Key.ToString()] = kv.Value;
             }
-            return new FactionSnapshot(name, info.Abbreviation, info.Money.GetCurrentFunds(), transactions, halts);
+            return new FactionSnapshot(name, info.Abbreviation, info.Money.GetCurrentFunds(), transactions, halts,
+                ProjectPauseReason(factionId));
+        }
+
+        public PauseReasonSnapshot? ProjectPauseReason(int factionId)
+        {
+            var reason = _game.TimePulse.GetPauseReason(factionId);
+            if (reason == null) return null;
+            var e = reason.Event;
+            string? entityName = null;
+            if (e.EntityId is { } entityId && _game.GlobalManager.TryGetGlobalEntityById(entityId, out var entity))
+                entityName = entity.GetName(factionId);
+            return new PauseReasonSnapshot(e.EventType.ToString(), e.Message, e.StarDate,
+                e.EntityId, entityName, e.SystemId, reason.OrderName, reason.OthersCount);
         }
 
         /// <summary>
