@@ -152,6 +152,96 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void PlantLimitedClimb_CalculatorAndLiveWarpAgree()
+        {
+            var (ship, target) = RadialLeg(shipAu: 1, targetAu: 2, ShipMassKg, DriveMps, PlantKw, Coupling, bleed: 0);
+            GiveWarpPower(ship, DriveMps, ShipMassKg);
+            var epoch = _starSys.StarSysDateTime;
+
+            var live = WarpMath.PriceCruise(ship, target, epoch, Vector3.Zero);
+            var cost = MoveCostCalculator.Warp(MoveCostShip.FromEntity(ship), Distance.AuToMt(1), SunPullAt(ship), radial: 1);
+
+            Assert.That(live.refusal, Is.Empty);
+            Assert.That(cost.Feasible, Is.True, cost.Reason);
+            Assert.Less(cost.Speed, DriveMps, "slower than the drive: the plant limits it");
+            Assert.That(cost.Speed, Is.GreaterThanOrEqualTo(WarpMath.MinWarpSpeed_ms));
+            Assert.That(cost.Speed, Is.EqualTo(live.speed).Within(live.speed * 1e-9));
+            Assert.That(cost.Note, Is.EqualTo(live.limitLine));
+
+            var action = StartLiveWarp(ship, target, epoch);
+            Assert.That(action.Status, Is.Not.EqualTo(ActionStatus.Failed), action.FailureMessage);
+            var bubble = ship.GetDataBlob<WarpMovingDB>();
+            Assert.IsTrue(bubble.HasStarted);
+            Assert.That(bubble.CurrentNonNewtonionVectorMS.Length(), Is.EqualTo(cost.Speed).Within(cost.Speed * 1e-9));
+            Assert.That(bubble.SustainDemandKW, Is.EqualTo(PlantKw).Within(1e-9));
+        }
+
+        [Test]
+        public void ClimbBelowMinimumSpeed_CalculatorAndLiveOrderBothRefuse()
+        {
+            // 30 x the mass: the plant holds about 843 m/s uphill at 1 AU.
+            double heavy = ShipMassKg * 30;
+            var (ship, target) = RadialLeg(shipAu: 1, targetAu: 2, heavy, DriveMps, PlantKw, Coupling, bleed: 0);
+            GiveWarpPower(ship, DriveMps, heavy);
+            var epoch = _starSys.StarSysDateTime;
+
+            var live = WarpMath.PriceCruise(ship, target, epoch, Vector3.Zero);
+            var cost = MoveCostCalculator.Warp(MoveCostShip.FromEntity(ship), Distance.AuToMt(1), SunPullAt(ship), radial: 1);
+
+            Assert.Less(cost.Speed, WarpMath.MinWarpSpeed_ms);
+            Assert.That(cost.Feasible, Is.False);
+            Assert.That(cost.Reason, Does.Contain("minimum"));
+            Assert.That(live.refusal, Is.EqualTo(cost.Reason));
+
+            var moveDB = new WarpMovingDB(ship, target, Vector3.Zero, default);
+            ship.SetDataBlob(moveDB);
+            Assert.IsFalse(WarpMoveProcessor.TryStartWarp(ship, moveDB, epoch), "the processor refuses too");
+            Assert.IsFalse(moveDB.HasStarted);
+            ship.RemoveDataBlob<WarpMovingDB>();
+
+            var action = StartLiveWarp(ship, target, epoch);
+            Assert.That(action.Status, Is.EqualTo(ActionStatus.Failed));
+            Assert.That(action.FailureMessage, Is.EqualTo(cost.Reason));
+            Assert.IsFalse(ship.HasDataBlob<WarpMovingDB>(), "no bubble opened");
+        }
+
+        [Test]
+        public void SustainAbovePlant_LiveOrderRefuses()
+        {
+            var (ship, target) = RadialLeg(shipAu: 1, targetAu: 0.5, ShipMassKg, DriveMps, outputKw: SustainKw / 2, Coupling, bleed: 0);
+            var action = StartLiveWarp(ship, target, _starSys.StarSysDateTime);
+            Assert.That(action.Status, Is.EqualTo(ActionStatus.Failed));
+            Assert.That(action.FailureMessage, Does.Contain("cannot hold"));
+        }
+
+        /// <summary>
+        /// Stored warp power for a fixture ship, so MaxSpeed derives to <paramref name="drive"/>
+        /// and MoveCostShip.FromEntity sees the same drive.
+        /// </summary>
+        static void GiveWarpPower(Entity ship, double drive, double mass)
+        {
+            var warp = ship.GetDataBlob<WarpAbilityDB>();
+            warp.TotalWarpPower = drive * mass / 1000.0;
+            Assert.That(warp.MaxSpeed, Is.EqualTo(drive));
+        }
+
+        static double SunPullAt(Entity ship)
+        {
+            var star = ship.GetDataBlob<PositionDB>().Root;
+            double r = (ship.GetDataBlob<PositionDB>().AbsolutePosition - star.GetDataBlob<PositionDB>().AbsolutePosition).Length();
+            return GeneralMath.StandardGravitationalParameter(star.GetDataBlob<MassVolumeDB>().MassDry) / (r * r);
+        }
+
+        static WarpMoveAction StartLiveWarp(Entity ship, Entity target, DateTime epoch)
+        {
+            ship.SetDataBlob(new ActionQueueDB());
+            var action = WarpMoveAction.CreateWarpOnly(ship, target, epoch, Vector3.Zero);
+            ship.GetDataBlob<ActionQueueDB>().Enqueue(action);
+            action.Execute(epoch);
+            return action;
+        }
+
+        [Test]
         public void EarthMars_SameSide_ClimbIsSlowerAndDoesNotStackDemand()
         {
             var leg = OpenEarthMars(coupling: Coupling);

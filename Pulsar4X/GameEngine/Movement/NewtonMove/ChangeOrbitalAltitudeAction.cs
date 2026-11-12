@@ -122,15 +122,19 @@ public class ChangeOrbitalAltitudeAction : EntityAction
             _isFinished = true;
     }
 
-    internal static bool TryPlanBurns(
-        Entity ship, double targetRadius_m, DateTime now,
-        out List<(KeplerElements start, KeplerElements end, DateTime at)> burns,
-        out string reason)
+    /// <summary>
+    /// The refusals a change of altitude checks before it plans: a stable, near-circular orbit,
+    /// a target radius outside the parent body, finite radii. <paramref name="alreadyThere"/> is
+    /// set when the ship is within tolerance of the target radius (no burns needed).
+    /// Shared with <see cref="MoveCostCalculator.Hohmann(Entity, double)"/>.
+    /// </summary>
+    internal static bool TryCheckTransfer(
+        Entity ship, double targetRadius_m, out OrbitDB shipOrbit, out bool alreadyThere, out string reason)
     {
-        burns = new List<(KeplerElements, KeplerElements, DateTime)>();
         reason = string.Empty;
+        alreadyThere = false;
 
-        if (!ship.TryGetDataBlob<OrbitDB>(out var shipOrbit) || shipOrbit.Parent == null)
+        if (!ship.TryGetDataBlob<OrbitDB>(out shipOrbit) || shipOrbit.Parent == null)
         {
             reason = "ship is not in a stable orbit";
             return false;
@@ -157,11 +161,27 @@ public class ChangeOrbitalAltitudeAction : EntityAction
             return false;
         }
 
-        double sgp = OrbitMath.SGP(parent, ship);
         // Already at this altitude (same tolerance as planner co-orbital).
         double tol = Math.Max(r2 * 0.001, 1_000);
-        if (Math.Abs(r1 - r2) <= tol)
+        alreadyThere = Math.Abs(r1 - r2) <= tol;
+        return true;
+    }
+
+    internal static bool TryPlanBurns(
+        Entity ship, double targetRadius_m, DateTime now,
+        out List<(KeplerElements start, KeplerElements end, DateTime at)> burns,
+        out string reason)
+    {
+        burns = new List<(KeplerElements, KeplerElements, DateTime)>();
+        if (!TryCheckTransfer(ship, targetRadius_m, out var shipOrbit, out bool alreadyThere, out reason))
+            return false;
+        if (alreadyThere)
             return true;
+
+        var parent = shipOrbit.Parent;
+        double r1 = shipOrbit.SemiMajorAxis;
+        double r2 = targetRadius_m;
+        double sgp = OrbitMath.SGP(parent, ship);
 
         var manuvers = OrbitalMath.Hohmann2(sgp, r1, r2);
         var startKE = shipOrbit.GetElements();

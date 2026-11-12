@@ -27,11 +27,7 @@ public static class WarpMath
         WarpAbilityDB warpDB = ship.GetDataBlob<WarpAbilityDB>();
         warpDB.TotalWarpPower = totalEnginePower;
         //propulsionDB.FuelUsePerKM = totalFuelUsage;
-
-        var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
-        var maxSpeed = MaxSpeedCalc(totalEnginePower, mass);
-        warpDB.MaxSpeed = maxSpeed;
-
+        // MaxSpeed is derived from TotalWarpPower and the dry mass; nothing to store.
     }
 
     /// <summary>
@@ -190,37 +186,61 @@ public static class WarpMath
     }
 
     /// <summary>
+    /// Slowest warp worth opening a bubble for, m/s. A heading the plant can only hold below this
+    /// does not start. Tunable.
+    /// </summary>
+    public const double MinWarpSpeed_ms = 1000;
+
+    /// <summary>
+    /// Why a priced bubble must not open, or "" when it may. The plant has to hold the bubble's
+    /// demand (sustain, or the uphill climb at the slowed speed), and the speed it holds has to
+    /// reach <see cref="MinWarpSpeed_ms"/>. One gate for WarpMoveAction, WarpMoveProcessor.TryStartWarp,
+    /// MovePlanner.EvaluateWarp (all through <see cref="PriceCruise"/>) and MoveCostCalculator.Warp.
+    /// </summary>
+    public static string WarpRefusal(double speed, double demandKW, double outputKW)
+    {
+        if (demandKW > outputKW)
+            return "Plant output " + Stringify.Power(outputKW) + " cannot hold the warp bubble's " + Stringify.Power(demandKW) + ".";
+        if (!(speed >= MinWarpSpeed_ms))
+            return "Warp speed " + Stringify.Velocity(speed) + " is below the " + Stringify.Velocity(MinWarpSpeed_ms) + " minimum.";
+        return "";
+    }
+
+    /// <summary>
     /// One speed for the bubble, priced from the heading at opening.
     /// Two heading checks, then stop. The speed that flies is the second price.
+    /// <c>refusal</c> is <see cref="WarpRefusal"/> for that price; "" means the bubble may open.
     /// </summary>
-    public static (double speed, double demandKW, string limitLine, Vector3 exit, DateTime exitTime) PriceCruise(
+    public static (double speed, double demandKW, string limitLine, Vector3 exit, DateTime exitTime, string refusal) PriceCruise(
         Entity ship, Entity target, DateTime at, Vector3 offset)
     {
         var warp = ship.GetDataBlob<WarpAbilityDB>();
         double drive = warp.MaxSpeed;
         double sustain = warp.BubbleSustainCost;
+        double outputKW = ship.TryGetDataBlob<EnergyGenAbilityDB>(out var power) ? power.TotalOutputMax : 0;
         var shipPos = ship.GetDataBlob<PositionDB>().AbsolutePosition;
 
         if (!(drive > 0) || !double.IsFinite(drive))
-            return (drive, sustain, "", shipPos, at);
+            return (drive, sustain, "", shipPos, at, WarpRefusal(drive, sustain, outputKW));
 
         var first = GetInterceptPosition(shipPos, drive, target, at, offset);
-        var firstPrice = PriceHeading(ship, shipPos, first.position, drive, sustain);
+        var firstPrice = PriceHeading(ship, shipPos, first.position, drive, sustain, outputKW);
         double priced = firstPrice.speed > 0 && double.IsFinite(firstPrice.speed) ? firstPrice.speed : drive;
 
         var second = GetInterceptPosition(shipPos, priced, target, at, offset);
-        var secondPrice = PriceHeading(ship, shipPos, second.position, drive, sustain);
+        var secondPrice = PriceHeading(ship, shipPos, second.position, drive, sustain, outputKW);
         double cruise = secondPrice.speed > 0 && double.IsFinite(secondPrice.speed) ? secondPrice.speed : drive;
 
         var exit = second;
         if (Math.Abs(cruise - priced) > 1e-3)
             exit = GetInterceptPosition(shipPos, cruise, target, at, offset);
 
-        return (cruise, secondPrice.demandKW, secondPrice.limitLine ?? "", exit.position, exit.etiDateTime);
+        return (cruise, secondPrice.demandKW, secondPrice.limitLine ?? "", exit.position, exit.etiDateTime,
+            WarpRefusal(cruise, secondPrice.demandKW, outputKW));
     }
 
     static (double speed, double demandKW, string limitLine) PriceHeading(
-        Entity ship, Vector3 shipPos, Vector3 exitPos, double driveSpeed, double sustain)
+        Entity ship, Vector3 shipPos, Vector3 exitPos, double driveSpeed, double sustain, double outputKW)
     {
         var warp = ship.GetDataBlob<WarpAbilityDB>();
         double mass = ship.TryGetDataBlob<MassVolumeDB>(out var massDb) ? massDb.MassTotal : 0;
@@ -248,7 +268,6 @@ public static class WarpMath
             return (driveSpeed, sustain, "");
 
         double radial = Vector3.Dot(heading / headingLen, fromStar / distance);
-        double outputKW = ship.TryGetDataBlob<EnergyGenAbilityDB>(out var power) ? power.TotalOutputMax : 0;
         return PriceInWell(warp.Coupling, warp.BleedFraction, outputKW, mass, g, radial, driveSpeed, sustain);
     }
 

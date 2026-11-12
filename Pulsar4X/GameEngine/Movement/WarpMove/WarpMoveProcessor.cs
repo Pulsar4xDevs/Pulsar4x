@@ -242,17 +242,21 @@ namespace Pulsar4X.Movement
             {
                 var positionDB = entity.GetDataBlob<PositionDB>();
 
+                // Intercept from the same inertial start the bubble will fly from.
+                // GetInterceptPosition(entity, ...) uses GetAbsoluteFuturePosition, which
+                // is the origin once OnSetToEntity has stripped OrbitDB.
+                // Priced before anything changes: a refused bubble leaves the ship as it was.
+                var cruise = WarpMath.PriceCruise(entity, moveDB.TargetEntity, toDateTime, moveDB.ExitPointrelative);
+                if (!string.IsNullOrEmpty(cruise.refusal))
+                    return false;
+
                 EnergyGenProcessor.EnergyGen(entity, toDateTime);
 
                 // Check to make sure we don't set the position parent to itself
                 if(positionDB.Parent != positionDB.Root)
                     positionDB.SetParent(positionDB.Root);
 
-                // Intercept from the same inertial start the bubble will fly from.
-                // GetInterceptPosition(entity, ...) uses GetAbsoluteFuturePosition, which
-                // is the origin once OnSetToEntity has stripped OrbitDB.
                 Vector3 currentPositionMt = positionDB.AbsolutePosition;
-                var cruise = WarpMath.PriceCruise(entity, moveDB.TargetEntity, toDateTime, moveDB.ExitPointrelative);
                 moveDB.ExitPointAbsolute = cruise.exit;
                 moveDB.PredictedExitTime = cruise.exitTime;
                 moveDB.EntryPointAbsolute = currentPositionMt;

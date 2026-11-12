@@ -72,6 +72,7 @@ namespace Pulsar4X.Client
         private double _wsc;
         private double _wec;
         private double _wspd;
+        private double _wpow;
         //newt
         private double _tn;
         private double _ttwr;
@@ -727,9 +728,13 @@ namespace Pulsar4X.Client
                 ImGui.Text(Stringify.Velocity(_dv));
 
                 ImGui.TableNextColumn();
-                ImGui.Text("Warp Speed");
+                ImGui.Text("Max warp speed (empty)");
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Open-space speed with empty holds and tanks.\nCargo only slows a climb out of a star's gravity well.");
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.Velocity(_wspd));
+                ImGui.SameLine();
+                ImGui.TextDisabled("(warp power " + _wpow.ToString("N0") + ")");
 
                 ImGui.TableNextColumn();
                 ImGui.Text("Warp Bubble Creation");
@@ -973,6 +978,7 @@ namespace Pulsar4X.Client
             _wec = wec;
             _wsc = wsc;
             _wspd = WarpMath.MaxSpeedCalc(wp, mass);
+            _wpow = wp;
             _egen = egen;
             _solarArea = ShipDesign.GetSolarCollectionArea(SelectedComponents);
             _estor = estor;

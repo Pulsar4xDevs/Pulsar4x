@@ -306,6 +306,15 @@ namespace Pulsar4X.Movement
                     return;
                 }
                 
+                // Same gate TryStartWarp applies: the plant must hold a speed of at least
+                // WarpMath.MinWarpSpeed_ms on this heading, or the order fails and says why.
+                var cruise = WarpMath.PriceCruise(_entityCommanding, _targetEntity, atDateTime, EndpointRelitivePosition);
+                if (!string.IsNullOrEmpty(cruise.refusal))
+                {
+                    Fail(cruise.refusal);
+                    return;
+                }
+
                 _warpingDB = new WarpMovingDB(_entityCommanding, _targetEntity, EndpointRelitivePosition, EndpointTargetOrbit);
 
                 //if we're already in a warp moving state,

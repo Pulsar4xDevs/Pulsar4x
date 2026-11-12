@@ -1,14 +1,35 @@
 using Newtonsoft.Json;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Galaxy;
 
 namespace Pulsar4X.Movement
 {
     public class WarpAbilityDB : BaseDataBlob, IAbilityDescription
     {
         /// <summary>
-        ///
+        /// Open-space warp speed of the empty ship, m/s. Derived from <see cref="TotalWarpPower"/>
+        /// and the owner's <see cref="MassVolumeDB.MassDry"/> via <see cref="WarpMath.MaxSpeedCalc"/>,
+        /// so refits and damage show at once and cargo never changes it.
+        /// A blob with no warp power, or no owner yet, returns the value last set: test fixtures
+        /// set it directly, and old saves still carry a stored number that loads into it.
         /// </summary>
-        public double MaxSpeed { get; internal set; }
+        public double MaxSpeed
+        {
+            get
+            {
+                if (TotalWarpPower > 0
+                    && OwningEntity != null
+                    && OwningEntity.IsValid
+                    && OwningEntity.TryGetDataBlob<MassVolumeDB>(out var mass)
+                    && mass.MassDry > 0)
+                    return WarpMath.MaxSpeedCalc(TotalWarpPower, mass.MassDry);
+                return _setSpeed;
+            }
+            internal set => _setSpeed = value;
+        }
+
+        double _setSpeed;
+
         public double TotalWarpPower { get; internal set; }
         public string EnergyType { get; internal set; }
         public double BubbleCreationCost { get; internal set; }
@@ -24,7 +45,7 @@ namespace Pulsar4X.Movement
 
         public WarpAbilityDB(WarpAbilityDB db)
         {
-            MaxSpeed = db.MaxSpeed;
+            _setSpeed = db._setSpeed;
             TotalWarpPower = db.TotalWarpPower;
             EnergyType = db.EnergyType;
             BubbleCreationCost = db.BubbleCreationCost;

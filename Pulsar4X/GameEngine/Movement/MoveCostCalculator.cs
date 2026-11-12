@@ -98,12 +98,14 @@ public enum MoveCostMode { Warp, Burn, Hohmann }
 
 /// <summary>
 /// What one move costs. Costs are filled in when the move is infeasible too, so a caller can
-/// say how short the ship is.
+/// say how short the ship is. <see cref="Reason"/> is only set when the move cannot be made;
+/// <see cref="Note"/> carries information such as the warp limit line.
 /// </summary>
 public readonly record struct MoveCost(
     MoveCostMode Mode,
     bool Feasible,
     string Reason,
+    string Note,
     IReadOnlyDictionary<string, double> FuelUsed_kg,
     double EnergyUsed_kJ,
     double DeltaV,
@@ -133,10 +135,8 @@ public static class MoveCostCalculator
         if (!ship.HasWarp)
             return No(mode, "no warp drive");
 
-        // WarpDriveAtb.OnComponentInstallation runs WarpMath.CalcMaxWarpAndEnergyUsage while the
-        // ship is still empty, and nothing runs it again when cargo or fuel is loaded. So the
-        // flown WarpAbilityDB.MaxSpeed is MaxSpeedCalc(TotalWarpPower, dry mass), and drive speed
-        // does not change with cargo.
+        // WarpAbilityDB.MaxSpeed: MaxSpeedCalc(TotalWarpPower, dry mass). Open-space speed is the
+        // empty ship's; cargo does not change it.
         double drive = ship.DryMass_kg > 0 ? WarpMath.MaxSpeedCalc(ship.WarpPower, ship.DryMass_kg) : 0;
         if (!(drive > 0))
             return No(mode, "warp drive produces no speed");
@@ -150,6 +150,9 @@ public static class MoveCostCalculator
             : (speed: drive, demandKW: ship.BubbleSustainCost, limitLine: "");
         double speed = price.speed > 0 && double.IsFinite(price.speed) ? price.speed : drive;
         double duration = Math.Max(0, distance_m) / speed;
+        // Same gate as the live warp (WarpMath.PriceCruise): the plant holds the demand and the
+        // speed reaches WarpMath.MinWarpSpeed_ms.
+        string refusal = WarpMath.WarpRefusal(speed, price.demandKW, ship.EnergyOutputMax);
 
         // WarpMoveProcessor.TryStartWarp and FinishArrival book creation and collapse as one
         // second of that many kW; the sustain demand runs from entry to exit.
@@ -158,9 +161,9 @@ public static class MoveCostCalculator
         // WarpMoveAction.Execute: short of the creation cost waits to charge, unless the store
         // can never hold it or nothing generates.
         double wait = 0;
-        bool feasible = true;
-        string reason = price.limitLine ?? "";
-        if (ship.BubbleCreationCost > ship.EnergyStored)
+        bool feasible = string.IsNullOrEmpty(refusal);
+        string reason = refusal;
+        if (feasible && ship.BubbleCreationCost > ship.EnergyStored)
         {
             bool storeCanHold = ship.EnergyStoreMax + 1e-6 >= ship.BubbleCreationCost;
             if (!storeCanHold || ship.EnergyOutputMax <= 0)
@@ -174,7 +177,7 @@ public static class MoveCostCalculator
             }
         }
 
-        return new MoveCost(mode, feasible, reason, NoFuel, energy, 0, duration, 0, wait, speed);
+        return new MoveCost(mode, feasible, reason, price.limitLine ?? "", NoFuel, energy, 0, duration, 0, wait, speed);
     }
 
     /// <summary>
@@ -225,13 +228,18 @@ public static class MoveCostCalculator
     /// <summary>
     /// <see cref="Hohmann(MoveCostShip, double, double, double)"/> for a live ship from its
     /// current orbit to a circular <paramref name="toRadius_m"/> around the same parent.
+    /// Refuses what <see cref="ChangeOrbitalAltitudeAction"/> refuses (same check), including a
+    /// ship already at that altitude.
     /// </summary>
     public static MoveCost Hohmann(Entity ship, double toRadius_m)
     {
-        if (!ship.TryGetDataBlob<OrbitDB>(out var orbit)
-            || orbit.Parent == null
-            || !orbit.Parent.TryGetDataBlob<MassVolumeDB>(out var parentMass))
-            return No(MoveCostMode.Hohmann, "ship is not in a stable orbit to transfer from");
+        const MoveCostMode mode = MoveCostMode.Hohmann;
+        if (!ChangeOrbitalAltitudeAction.TryCheckTransfer(ship, toRadius_m, out var orbit, out bool alreadyThere, out string reason))
+            return No(mode, reason);
+        if (alreadyThere)
+            return No(mode, "already at altitude");
+        if (!orbit.Parent.TryGetDataBlob<MassVolumeDB>(out var parentMass))
+            return No(mode, "no SOI parent");
         return Hohmann(MoveCostShip.FromEntity(ship), parentMass.MassTotal, orbit.SemiMajorAxis, toRadius_m);
     }
 
@@ -253,7 +261,7 @@ public static class MoveCostCalculator
         double burnSeconds = ship.FuelBurnRate > 0 ? fuel / ship.FuelBurnRate : 0;
         var used = new Dictionary<string, double> { [ship.FuelType ?? ""] = fuel };
         if (!double.IsFinite(fuel) || fuel < 0)
-            return new MoveCost(mode, false, "burn solution did not converge", used, 0, deltaV, coast, burnSeconds, 0, 0);
+            return new MoveCost(mode, false, "burn solution did not converge", "", used, 0, deltaV, coast, burnSeconds, 0, 0);
 
         // NewtonThrustAbilityDB.SetFuel: the Δv the tank holds at this mass.
         double mass = ship.MassTotal_kg;
@@ -263,9 +271,9 @@ public static class MoveCostCalculator
         bool feasible = fuel <= ship.FuelMass_kg;
         // Same wording as MovePlanner.EvaluateNewtonian.
         string reason = feasible ? "" : $"needs {deltaV:N0} m/s Δv, have {have:N0} m/s";
-        return new MoveCost(mode, feasible, reason, used, 0, deltaV, coast, burnSeconds, 0, 0);
+        return new MoveCost(mode, feasible, reason, "", used, 0, deltaV, coast, burnSeconds, 0, 0);
     }
 
     static MoveCost No(MoveCostMode mode, string reason)
-        => new MoveCost(mode, false, reason, NoFuel, 0, 0, 0, 0, 0, 0);
+        => new MoveCost(mode, false, reason, "", NoFuel, 0, 0, 0, 0, 0, 0);
 }

@@ -1106,6 +1106,8 @@ public static class MovePlanner
         double eta = (cruise.exitTime - now).TotalSeconds;
         if (double.IsNaN(eta) || eta < 0)
             return MoveOption.No(mode, "warp intercept did not converge");
+        if (!string.IsNullOrEmpty(cruise.refusal))
+            return MoveOption.No(mode, cruise.refusal);
 
         // Sustain and collapse costs are charged by WarpMoveProcessor as the bubble runs; only
         // the up-front cost is knowable here. WarpMoveAction holds the goal on "Charging
