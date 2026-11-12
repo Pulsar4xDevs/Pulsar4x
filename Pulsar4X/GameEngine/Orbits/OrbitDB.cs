@@ -184,7 +184,7 @@ namespace Pulsar4X.Orbits
             var d = (pos - relativePos).Length();
             if (d > 1)
             {
-                Event e = Event.Create(EventType.Opps, atDateTime, $"Positional difference of {Stringify.Distance(d)} when creating orbit from velocity", entity.FactionOwnerID, entity.Manager.ManagerID, entity.Id);
+                Event e = Event.Create(EventType.EngineError, atDateTime, $"Positional difference of {Stringify.Distance(d)} when creating orbit from velocity", entity.FactionOwnerID, entity.Manager.ManagerID, entity.Id);
                 EventManager.Instance.Publish(e);
 
                 //other info:

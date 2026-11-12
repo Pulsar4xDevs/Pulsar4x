@@ -19,17 +19,20 @@ public class SpaceMasterEventLog : IEventLog
 
     public void Subscribe()
     {
-        var allEvents = EventTypeHelper.GetAllEventTypes();
-        EventManager.Instance.Subscribe(allEvents, OnEvent);
+        EventManager.Instance.SubscribeAll(OnEvent);
     }
 
     public void Unsubscribe()
     {
-        var allEvents = EventTypeHelper.GetAllEventTypes();
-        EventManager.Instance.Unsubscribe(allEvents, OnEvent);
+        EventManager.Instance.UnsubscribeAll(OnEvent);
     }
 
     public void ToggleHaltsOn(EventType eventType)
+    {
+        // Do nothing, the SM log shouldn't ever halt the game
+    }
+
+    public void SetHaltsOn(EventType eventType, bool halt)
     {
         // Do nothing, the SM log shouldn't ever halt the game
     }

@@ -29,7 +29,7 @@ public static class JumpPointReveal
 
         EventManager.Instance.Publish(
             Event.Create(
-                EventType.JumpPointDetected,
+                EventType.JumpPointFound,
                 at,
                 "Jump Point discovered",
                 factionId,
@@ -72,7 +72,7 @@ public static class JumpPointReveal
         destination.Manager.ShowNeutralEntityToFaction(factionId, destination.Id);
         EventManager.Instance.Publish(
             Event.Create(
-                EventType.JumpPointDetected,
+                EventType.JumpPointFound,
                 at,
                 "Jump Point discovered",
                 factionId,

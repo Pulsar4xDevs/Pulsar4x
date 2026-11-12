@@ -88,7 +88,7 @@ namespace Pulsar4X.Factions
             var factionEntity = Entity.Create();
             game.GlobalManager.AddEntity(factionEntity, blobs);
 
-            factionInfo.EventLog = FactionEventLog.Create(factionEntity.Id, game.TimePulse);
+            factionInfo.EventLog = FactionEventLog.Create(factionEntity.Id, game.TimePulse, game.Settings.DefaultHaltOnEvents);
             factionInfo.EventLog.Subscribe();
 
             // Need to unlock the starting data in the game
@@ -148,7 +148,7 @@ namespace Pulsar4X.Factions
             var factionEntity = Entity.Create();
             game.GlobalManager.AddEntity(factionEntity, blobs);
 
-            factionInfo.EventLog = FactionEventLog.Create(factionEntity.Id, game.TimePulse);
+            factionInfo.EventLog = FactionEventLog.Create(factionEntity.Id, game.TimePulse, game.Settings.DefaultHaltOnEvents);
             factionInfo.EventLog.Subscribe();
 
             // Add this faction to the SM's access list.

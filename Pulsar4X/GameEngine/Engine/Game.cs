@@ -312,11 +312,13 @@ namespace Pulsar4X.Engine
             foreach (var mgr in loadedGame.GlobalManagerDictionary)
                 mgr.Value.Initialize(loadedGame, postLoad: true);
 
-            // Hook up the event logs
+            // Hook up the event logs. MasterTimePulse is not serialized on the log, so re-attach it.
             foreach(var (id, faction) in loadedGame.Factions)
             {
                 var info = faction.GetDataBlob<FactionInfoDB>();
                 FactionStanceRules.MigrateGrants(info);
+                if (info.EventLog is FactionEventLog factionLog)
+                    factionLog.AttachTimePulse(loadedGame.TimePulse);
                 info.EventLog.Subscribe();
             }
             loadedGame.GameMasterFaction.GetDataBlob<FactionInfoDB>().EventLog.Subscribe();

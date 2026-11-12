@@ -96,7 +96,8 @@ public sealed record FactionSnapshot(
     string Name,
     string Abbreviation,
     decimal Funds,
-    IReadOnlyList<LedgerEntrySnapshot> Transactions);
+    IReadOnlyList<LedgerEntrySnapshot> Transactions,
+    IReadOnlyDictionary<string, bool> EventHaltSettings = null!);
 
 /// <summary>
 /// One other faction. <see cref="Stance"/> and <see cref="GrantedByViewer"/> are this viewer's.

@@ -108,5 +108,40 @@ namespace Pulsar4X.Tests
 
             Assert.That(LogEntries(received), Is.Empty);
         }
+
+        [Test]
+        public void SetEventHaltCommand_flips_the_setting_and_is_visible_on_the_snapshot()
+        {
+            var session = Connect();
+            var before = _projector.ProjectFaction(session.FactionId);
+            Assert.That(before, Is.Not.Null);
+            Assert.That(before!.EventHaltSettings, Is.Not.Null);
+            Assert.That(before.EventHaltSettings[nameof(EventType.ResearchCompleted)], Is.True);
+            Assert.That(before.EventHaltSettings[nameof(EventType.OrdersCompleted)], Is.False);
+
+            var received = new List<GameEventEnvelope>();
+            using var _ = _server.Subscribe(session, received.Add);
+            received.Clear();
+
+            var result = _server.SubmitCommand(session, new SetEventHaltCommand(
+                session.FactionId, nameof(EventType.ResearchCompleted), false));
+            Assert.That(result.Accepted, Is.True, result.RejectionReason ?? "command rejected");
+
+            var after = _projector.ProjectFaction(session.FactionId);
+            Assert.That(after!.EventHaltSettings[nameof(EventType.ResearchCompleted)], Is.False);
+
+            var pushed = received.Where(e => e.Type == GameEventType.FactionChanged && e.Faction != null).ToList();
+            Assert.That(pushed, Is.Not.Empty, "accepted SetEventHaltCommand should push FactionChanged");
+            Assert.That(pushed[^1].Faction!.EventHaltSettings[nameof(EventType.ResearchCompleted)], Is.False);
+        }
+
+        [Test]
+        public void SetEventHaltCommand_rejects_an_unknown_event_type()
+        {
+            var session = Connect();
+            var result = _server.SubmitCommand(session, new SetEventHaltCommand(
+                session.FactionId, "NotARealEventType", true));
+            Assert.That(result.Accepted, Is.False);
+        }
     }
 }

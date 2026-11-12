@@ -403,7 +403,7 @@ namespace Pulsar4X.Engine
             if(!TryGetEccentricAnomaly(orbit.Eccentricity, currentMeanAnomaly, out double E))
             {
                 var datetime = orbit.Parent.StarSysDateTime;
-                var e = Event.Create(EventType.Opps, datetime, "Non-convergence of Newton's method while calculating Eccentric Anomaly.");
+                var e = Event.Create(EventType.EngineError, datetime, "Non-convergence of Newton's method while calculating Eccentric Anomaly.");
                 EventManager.Instance.Publish(e);
             }
             return E;
@@ -420,7 +420,7 @@ namespace Pulsar4X.Engine
             if(!TryGetHyperbolicAnomaly(orbit.Eccentricity, hyperbolicMeanAnomaly, out double F))
             {
                 var datetime = orbit.Parent.StarSysDateTime;
-                var e = Event.Create(EventType.Opps, datetime, "Non-convergence of Newton's method while calculating Hyperbolic Anomaly.");
+                var e = Event.Create(EventType.EngineError, datetime, "Non-convergence of Newton's method while calculating Hyperbolic Anomaly.");
                 EventManager.Instance.Publish(e);
             }
             return F;

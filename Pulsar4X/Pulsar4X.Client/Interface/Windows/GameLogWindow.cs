@@ -9,6 +9,36 @@ namespace Pulsar4X.Client
     {
         public HashSet<string> HidenEvents = new HashSet<string>();
 
+        private static readonly (string Group, (string Type, string Label)[] Items)[] PauseGroups =
+        {
+            ("Research", new[]
+            {
+                ("ResearchCompleted", "Research completed"),
+            }),
+            ("Surveys and exploration", new[]
+            {
+                ("GeoSurveyCompleted", "Geological survey completed"),
+                ("JumpPointSurveyCompleted", "Jump point survey completed"),
+                ("JumpPointFound", "Jump point found"),
+                ("NewSystemDiscovered", "New system discovered"),
+            }),
+            ("Orders and movement", new[]
+            {
+                ("WarpExited", "Warp exited"),
+                ("OrdersCompleted", "Orders completed"),
+            }),
+            ("Economy", new[]
+            {
+                ("ProductionCompleted", "Production completed"),
+                ("ShipRefitCompleted", "Ship refit completed"),
+                ("FuelExhausted", "Fuel exhausted"),
+            }),
+            ("Combat", new[]
+            {
+                ("ShipDestroyed", "Ship destroyed"),
+            }),
+        };
+
         private GameLogWindow()
         {
         }
@@ -38,6 +68,8 @@ namespace Pulsar4X.Client
 
             if (Window.Begin("GameLog", ref IsActive))
             {
+                DisplayPauseSettings();
+
                 var events = _uiState.GameClient?.Galaxy.EventLog;
                 if (events == null || events.Count == 0)
                 {
@@ -87,6 +119,29 @@ namespace Pulsar4X.Client
 
                 ImGui.Separator();
                 Window.End();
+            }
+        }
+
+        private void DisplayPauseSettings()
+        {
+            if (!ImGui.CollapsingHeader("Pause on"))
+                return;
+
+            var settings = _uiState.GameClient?.Galaxy.Faction?.EventHaltSettings;
+            int factionId = _uiState.FactionId;
+
+            foreach (var (group, items) in PauseGroups)
+            {
+                ImGui.TextDisabled(group);
+                foreach (var (type, label) in items)
+                {
+                    bool halt = settings != null && settings.TryGetValue(type, out var on) && on;
+                    if (ImGui.Checkbox($"{label}###halt-{type}", ref halt))
+                    {
+                        _uiState.GameClient?.SubmitCommandAsync(
+                            new SetEventHaltCommand(factionId, type, halt));
+                    }
+                }
             }
         }
     }

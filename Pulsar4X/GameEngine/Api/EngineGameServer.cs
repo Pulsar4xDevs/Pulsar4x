@@ -393,6 +393,9 @@ namespace Pulsar4X.Engine.Api
                 if (command is SetFactionStanceCommand)
                     PushStances(session.FactionId);
 
+                if (command is SetEventHaltCommand)
+                    PushFaction(session.FactionId);
+
                 if (command is SetFactionGrantCommand grant)
                 {
                     PushStances(session.FactionId);
@@ -463,6 +466,16 @@ namespace Pulsar4X.Engine.Api
         private void PushStances(int factionId)
         {
             var evt = StancesEnvelope(factionId);
+            foreach (var sub in SnapshotSubscriptions())
+                if (sub.FactionId == factionId)
+                    sub.Send(evt);
+        }
+
+        private void PushFaction(int factionId)
+        {
+            var faction = _projector.ProjectFaction(factionId);
+            if (faction == null) return;
+            var evt = new GameEventEnvelope(GameEventType.FactionChanged, Faction: faction);
             foreach (var sub in SnapshotSubscriptions())
                 if (sub.FactionId == factionId)
                     sub.Send(evt);
@@ -628,8 +641,7 @@ namespace Pulsar4X.Engine.Api
                 // can't land in both. The sync-state bridges above are upserts, so their
                 // overlap with the initial state is harmless; log entries append.
                 _onLogEvent = OnLogEvent;
-                Pulsar4X.Events.EventManager.Instance.Subscribe(
-                    Pulsar4X.Events.EventTypeHelper.GetAllEventTypes(), _onLogEvent);
+                Pulsar4X.Events.EventManager.Instance.SubscribeAll(_onLogEvent);
             }
 
             // Mirrors FactionEventLog's filter: an event reaches a faction when addressed to it or
@@ -718,8 +730,7 @@ namespace Pulsar4X.Engine.Api
                 foreach (var (type, handler) in _handlers)
                     MessagePublisher.Instance.Unsubscribe(type, handler);
                 _handlers.Clear();
-                Pulsar4X.Events.EventManager.Instance.Unsubscribe(
-                    Pulsar4X.Events.EventTypeHelper.GetAllEventTypes(), _onLogEvent);
+                Pulsar4X.Events.EventManager.Instance.UnsubscribeAll(_onLogEvent);
                 lock (_server._sinkLock) _server._subscriptions.Remove(this);
             }
         }

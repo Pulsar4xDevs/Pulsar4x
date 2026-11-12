@@ -10,6 +10,7 @@ using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
+using Pulsar4X.Events;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
@@ -69,7 +70,13 @@ namespace Pulsar4X.Engine.Api
                     tx.Description ?? "",
                     tx.Amount));
             }
-            return new FactionSnapshot(name, info.Abbreviation, info.Money.GetCurrentFunds(), transactions);
+            var halts = new Dictionary<string, bool>();
+            if (info.EventLog is FactionEventLog eventLog)
+            {
+                foreach (var kv in eventLog.HaltSettings)
+                    halts[kv.Key.ToString()] = kv.Value;
+            }
+            return new FactionSnapshot(name, info.Abbreviation, info.Money.GetCurrentFunds(), transactions, halts);
         }
 
         /// <summary>

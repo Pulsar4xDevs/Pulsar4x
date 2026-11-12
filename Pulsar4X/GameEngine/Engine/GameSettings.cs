@@ -23,8 +23,12 @@ namespace Pulsar4X.Engine
 
         public Dictionary<EventType, bool> DefaultHaltOnEvents { get; set; } = new Dictionary<EventType, bool>()
         {
-            { EventType.OrdersCompleted, true },
-            { EventType.FuelExhausted, true }
+            { EventType.ResearchCompleted, true },
+            { EventType.GeoSurveyCompleted, true },
+            { EventType.JumpPointSurveyCompleted, true },
+            { EventType.FuelExhausted, true },
+            { EventType.WarpExited, true },
+            { EventType.OrdersCompleted, false },
         };
 
         public string CurrentTheme { get; set; } = "default-theme";

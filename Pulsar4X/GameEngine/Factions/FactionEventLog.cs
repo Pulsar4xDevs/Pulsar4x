@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
@@ -13,30 +14,44 @@ public class FactionEventLog : IEventLog
     [JsonProperty]
     private int _factionId;
     private MasterTimePulse _masterTimePulse;
-    
+
     [JsonProperty]
-    private SafeList<EventType> _haltsOn = new();
+    private Dictionary<EventType, bool> _haltsOn = new();
     private FactionEventLog() { }
 
-    public static FactionEventLog Create(int factionId, MasterTimePulse masterTimePulse)
+    public static FactionEventLog Create(int factionId, MasterTimePulse masterTimePulse, IReadOnlyDictionary<EventType, bool>? defaultHalts = null)
     {
-        return new FactionEventLog()
+        var log = new FactionEventLog()
         {
             _factionId = factionId,
             _masterTimePulse = masterTimePulse
         };
+        if (defaultHalts != null)
+        {
+            foreach (var kv in defaultHalts)
+                log._haltsOn[kv.Key] = kv.Value;
+        }
+        return log;
     }
+
+    /// <summary>
+    /// <see cref="_masterTimePulse"/> is not serialized. Call this after load so pause works again.
+    /// </summary>
+    public void AttachTimePulse(MasterTimePulse masterTimePulse)
+    {
+        _masterTimePulse = masterTimePulse;
+    }
+
+    public IReadOnlyDictionary<EventType, bool> HaltSettings => _haltsOn;
 
     public void Subscribe()
     {
-        EventType allEvents = EventTypeHelper.GetAllEventTypes();
-        EventManager.Instance.Subscribe(allEvents, OnEvent);
+        EventManager.Instance.SubscribeAll(OnEvent);
     }
 
     public void Unsubscribe()
     {
-        EventType allEvents = EventTypeHelper.GetAllEventTypes();
-        EventManager.Instance.Unsubscribe(allEvents, OnEvent);
+        EventManager.Instance.UnsubscribeAll(OnEvent);
     }
 
     public void OnEvent(Event e)
@@ -47,7 +62,7 @@ public class FactionEventLog : IEventLog
             return;
         }
 
-        if (_haltsOn.Contains(e.EventType))
+        if (HaltsOn(e.EventType) && _masterTimePulse != null)
         {
             _masterTimePulse.PauseTime();
         }
@@ -57,17 +72,15 @@ public class FactionEventLog : IEventLog
 
     public void ToggleHaltsOn(EventType eventType)
     {
-        if (_haltsOn.Contains(eventType))
-        {
-            _haltsOn.Remove(eventType);
-        }
-        else
-        {
-            _haltsOn.Add(eventType);    
-        }
+        SetHaltsOn(eventType, !HaltsOn(eventType));
     }
 
-    public bool HaltsOn(EventType eventType) => _haltsOn.Contains(eventType);
+    public void SetHaltsOn(EventType eventType, bool halt)
+    {
+        _haltsOn[eventType] = halt;
+    }
+
+    public bool HaltsOn(EventType eventType) => _haltsOn.TryGetValue(eventType, out var on) && on;
 
     public SafeList<Event> GetEvents() => _events;
 }

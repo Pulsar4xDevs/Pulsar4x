@@ -8,6 +8,7 @@ using Pulsar4X.Colonies;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
+using Pulsar4X.Events;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
@@ -50,6 +51,7 @@ namespace Pulsar4X.Engine.Api
                 [typeof(Pulsar4X.Api.RenameCommand)] = TranslateRename,
                 [typeof(SetFactionStanceCommand)] = TranslateSetFactionStance,
                 [typeof(SetFactionGrantCommand)] = TranslateSetFactionGrant,
+                [typeof(SetEventHaltCommand)] = TranslateSetEventHalt,
                 [typeof(SetMarketPolicyCommand)] = TranslateSetMarketPolicy,
                 [typeof(ClearMarketPolicyCommand)] = TranslateClearMarketPolicy,
                 [typeof(RunMarketCommand)] = TranslateRunMarket,
@@ -241,6 +243,22 @@ namespace Pulsar4X.Engine.Api
             if (!commanded.HasDataBlob<LogiBaseDB>())
                 return CommandResult.Reject("The colony has no logistics office.");
             return null;
+        }
+
+        
+        private CommandResult TranslateSetEventHalt(Entity faction, Entity commanded, GameCommand command)
+        {
+            var set = (SetEventHaltCommand)command;
+            if (commanded.Id != faction.Id)
+                return CommandResult.Reject("Event halt is set on the faction itself.");
+            if (!Enum.TryParse<EventType>(set.EventType, ignoreCase: false, out var eventType)
+                || !Enum.IsDefined(typeof(EventType), eventType))
+                return CommandResult.Reject($"Unknown event type '{set.EventType}'.");
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var info) || info.EventLog == null)
+                return CommandResult.Reject("Faction has no event log.");
+
+            info.EventLog.SetHaltsOn(eventType, set.Halt);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
         }
 
         private CommandResult TranslateSetMarketPolicy(Entity faction, Entity commanded, GameCommand command)

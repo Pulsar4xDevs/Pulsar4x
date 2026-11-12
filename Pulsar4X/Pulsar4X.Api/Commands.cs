@@ -37,6 +37,14 @@ public sealed record SetFactionGrantCommand(int TargetEntityId, int OtherFaction
     : GameCommand(TargetEntityId);
 
 /// <summary>
+/// Set whether the commanded faction's game log pauses the clock when an event of
+/// <see cref="EventType"/> is recorded. Targets the faction entity. <see cref="EventType"/> is
+/// the engine event-type name (for example <c>ResearchCompleted</c>).
+/// </summary>
+public sealed record SetEventHaltCommand(int TargetEntityId, string EventType, bool Halt)
+    : GameCommand(TargetEntityId);
+
+/// <summary>
 /// Set one cargo row of a colony's market policy. Targets the colony.
 /// The book is posted later by <see cref="RunMarketCommand"/>.
 /// </summary>
