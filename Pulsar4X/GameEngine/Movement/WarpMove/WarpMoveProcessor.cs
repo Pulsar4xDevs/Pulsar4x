@@ -7,6 +7,8 @@ using Pulsar4X.Extensions;
 using Pulsar4X.Energy;
 using Pulsar4X.Orbits;
 using Pulsar4X.Galaxy;
+using Pulsar4X.Events;
+using Pulsar4X.Names;
 using Pulsar4X.Engine;
 
 namespace Pulsar4X.Movement
@@ -324,6 +326,7 @@ namespace Pulsar4X.Movement
                 powerDB.AddDemand(-warpDB.BubbleCollapseCost, toDateTime);
             }
 
+            bool wakeQueue = false;
             switch (destinationMoveType)
             {
                 case PositionDB.MoveTypes.Orbit:
@@ -333,7 +336,7 @@ namespace Pulsar4X.Movement
                         SetOrbitHereSimpleNewt(entity, moveDB, toDateTime);
                     else
                         SetOrbitHereNoNewt(entity, moveDB, toDateTime);
-                    WakeActionQueue(entity, toDateTime);
+                    wakeQueue = true;
                     break;
                 }
                 case PositionDB.MoveTypes.Warp:
@@ -351,10 +354,32 @@ namespace Pulsar4X.Movement
                 default:
                 {
                     ParkOnTarget(entity, moveDB);
-                    WakeActionQueue(entity, toDateTime);
+                    wakeQueue = true;
                     break;
                 }
             }
+
+            // Drop-in is already applied. Publish at this exact instant so a standing
+            // WarpExited halt (or a one-shot on this warp) can PauseTime before the
+            // queue is woken — the queue then yields and does not start a follower here.
+            PublishWarpExited(entity, toDateTime);
+            if (wakeQueue)
+                WakeActionQueue(entity, toDateTime);
+        }
+
+        static void PublishWarpExited(Entity entity, DateTime atDateTime)
+        {
+            string name = entity.TryGetDataBlob<NameDB>(out var names)
+                ? names.GetName(entity.FactionOwnerID)
+                : "Ship";
+            var ev = Event.Create(
+                EventType.WarpExited,
+                atDateTime,
+                $"{name} exited warp",
+                entity.FactionOwnerID,
+                entity.Manager?.ManagerID,
+                entity.Id);
+            EventManager.Instance.Publish(ev);
         }
 
         /// <summary>
@@ -418,9 +443,11 @@ namespace Pulsar4X.Movement
             TestDropIn?.Invoke(entity, atDateTime);
 
             var (orbitalParent, leftover) = LeftoverKeplerAtExit(entity, moveDB, atDateTime);
-            double combinedMass = entity.GetDataBlob<MassVolumeDB>().MassTotal
-                                  + orbitalParent.GetDataBlob<MassVolumeDB>().MassTotal;
-            entity.SetDataBlob(OrbitDB.FromKeplerElements(orbitalParent, combinedMass, leftover, atDateTime));
+            // FromKeplerElements takes the ship's mass, not the combined parent+ship
+            // mass. Passing combined doubled SGP and made circular leftover look
+            // like escape velocity to CirculariseAction.TryCompute.
+            double myMass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
+            entity.SetDataBlob(OrbitDB.FromKeplerElements(orbitalParent, myMass, leftover, atDateTime));
             OrbitProcessor.ProcessEntity(entity, atDateTime);
         }
 

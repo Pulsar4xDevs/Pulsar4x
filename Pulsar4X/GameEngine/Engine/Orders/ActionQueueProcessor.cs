@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Pulsar4X.Engine;
 using Pulsar4X.Events;
 using Pulsar4X.Interfaces;
+using Pulsar4X.Movement;
+using Pulsar4X.Names;
 
 namespace GameEngine.Engine.Orders
 {
@@ -46,6 +48,14 @@ namespace GameEngine.Engine.Orders
             {
                 int mask = 0;
                 bool wakeAgent = false;
+                // The instance-processor copy is a second Activator instance and is
+                // never Init'd, so _game is null on WakeActionQueue / HandleOrder.
+                // The hotloop copy is Init'd. Always take Game from the entity.
+                var game = entity.Manager?.Game ?? _game;
+                // PauseTime cancels the running step's CTS. Yield unstarted work in
+                // this same pass so a warp drop-in that just paused does not start
+                // circularise at this same instant.
+                bool pulseStopping = game != null && game.TimePulse.IsStopping;
 
                 foreach(var entityCommand in orderableDB.ActionList)
                 {
@@ -69,6 +79,14 @@ namespace GameEngine.Engine.Orders
                             if (entityCommand.IsBlocking)
                                 mask = mask | ((int)entityCommand.ActionLanes);
                         }
+                        // One-shot at finish, only for this order (it was current).
+                        // Warp drop-in takes this path; PauseOnAction is left set
+                        // through departure so it fires here, not at TryStartWarp.
+                        if (entityCommand.PauseOnAction)
+                        {
+                            HaltOnOneShot(entityCommand, atDateTime);
+                            pulseStopping = true;
+                        }
                         continue;
                     }
 
@@ -80,15 +98,17 @@ namespace GameEngine.Engine.Orders
                         }
                         if (atDateTime >= entityCommand.ActionOnDate)
                         {
-                            if(entityCommand.PauseOnAction &! entityCommand.IsRunning)
+                            // Not current-and-starting while the pulse is already
+                            // stopping: a follower with a past ActionOnDate must not
+                            // halt or Execute during the earlier warp's drop-in pass.
+                            if (pulseStopping && !entityCommand.IsRunning)
+                                continue;
+
+                            if (entityCommand.PauseOnAction && !entityCommand.IsRunning
+                                && entityCommand is not WarpMoveAction)
                             {
-                                var e = Event.Create(EventType.OrdersHalt,
-                                                        atDateTime,
-                                                        "",
-                                                        entityCommand.RequestingFactionGuid,
-                                                        entityCommand.EntityCommanding.Manager.ManagerID,
-                                                        entityCommand.EntityCommandingGuid);
-                                EventManager.Instance.Publish(e);
+                                HaltOnOneShot(entityCommand, atDateTime);
+                                pulseStopping = true;
                             }
                             entityCommand.Execute(atDateTime);
                         }
@@ -136,6 +156,31 @@ namespace GameEngine.Engine.Orders
                 if (wakeAgent)//run the agent to check off goal progression.
                     AgentProcessor.RunAgentNow(entity, atDateTime);
             }
+        }
+
+        /// <summary>
+        /// One-shot PauseOnAction: publish OrdersHalt, pause the pulse ourselves
+        /// (OrdersHalt is off by default and is not a standing special case), then
+        /// clear the flag so unpause does not re-halt. Does not touch OrdersCompleted.
+        /// </summary>
+        void HaltOnOneShot(EntityAction action, DateTime atDateTime)
+        {
+            var commanded = action.EntityCommanding;
+            string name = commanded != null && commanded.TryGetDataBlob<NameDB>(out var names)
+                ? names.GetName(action.RequestingFactionGuid)
+                : "";
+            string message = string.IsNullOrEmpty(name) ? action.Name : $"{name}: {action.Name}";
+            var ev = Event.Create(
+                EventType.OrdersHalt,
+                atDateTime,
+                message,
+                action.RequestingFactionGuid,
+                commanded?.Manager?.ManagerID,
+                action.EntityCommandingGuid);
+            EventManager.Instance.Publish(ev);
+            var pulse = (action.EntityCommanding?.Manager?.Game ?? _game)?.TimePulse;
+            pulse?.PauseTime();
+            action.PauseOnAction = false;
         }
     }
 }

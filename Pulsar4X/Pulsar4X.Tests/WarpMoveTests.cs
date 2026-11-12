@@ -8,6 +8,7 @@ using Pulsar4X.Api;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Energy;
+using Pulsar4X.Events;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Factions;
@@ -421,7 +422,7 @@ namespace Pulsar4X.Tests
             Entity dest = destIsPhobos ? phobos : mars;
             Entity expectedParent = mars;
 
-            var faction = FactionFactory.CreateFaction(_game, "move-to-" + Guid.NewGuid().ToString("N"));
+            var faction = CreateTestFaction("move-to-" + Guid.NewGuid().ToString("N"));
             var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
             var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
             var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
@@ -714,7 +715,7 @@ namespace Pulsar4X.Tests
             var sol = TestingUtilities.BasicSol(_starSys);
             var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
             var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
-            var faction = FactionFactory.CreateFaction(_game, "warp-timing-" + Guid.NewGuid().ToString("N"));
+            var faction = CreateTestFaction("warp-timing-" + Guid.NewGuid().ToString("N"));
             var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
             var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
             var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
@@ -751,7 +752,7 @@ namespace Pulsar4X.Tests
             var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
             var phobos = AddMoon(mars, 1.06e16, 11_266, sma_m: 9_376_000, epoch, eccentricity: 0.0151);
             phobos.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Moon });
-            var faction = FactionFactory.CreateFaction(_game, "timing-drop-" + Guid.NewGuid().ToString("N"));
+            var faction = CreateTestFaction("timing-drop-" + Guid.NewGuid().ToString("N"));
             var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
             var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
             var offset = new Vector3(OrbitMath.LowOrbitRadius(phobos), 0, 0);
@@ -806,7 +807,7 @@ namespace Pulsar4X.Tests
             var phobos = AddMoon(mars, 1.06e16, 11_266, sma_m: 9_376_000, epoch, eccentricity: 0.0151);
             phobos.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Moon });
 
-            var faction = FactionFactory.CreateFaction(_game, name + "-" + Guid.NewGuid().ToString("N"));
+            var faction = CreateTestFaction(name + "-" + Guid.NewGuid().ToString("N"));
             var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
             var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
             var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
@@ -968,7 +969,7 @@ namespace Pulsar4X.Tests
             var lor = OrbitMath.LowOrbitRadius(rock);
             Assert.Greater(rock.GetSOI_m(), lor, "precondition: drop-in parents to the rock");
 
-            var faction = FactionFactory.CreateFaction(_game, "rock-circ-" + Guid.NewGuid().ToString("N"));
+            var faction = CreateTestFaction("rock-circ-" + Guid.NewGuid().ToString("N"));
             var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
             var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
             var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
@@ -1025,7 +1026,7 @@ namespace Pulsar4X.Tests
             var lor = OrbitMath.LowOrbitRadius(rock);
             Assert.Greater(rock.GetSOI_m(), lor, "precondition: drop-in parents to the rock");
 
-            var faction = FactionFactory.CreateFaction(_game, "rock-moveto-" + Guid.NewGuid().ToString("N"));
+            var faction = CreateTestFaction("rock-moveto-" + Guid.NewGuid().ToString("N"));
             var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
             var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
             var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
@@ -1089,7 +1090,7 @@ namespace Pulsar4X.Tests
             var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
             var rock = AddBeltAsteroid(sol, epoch);
 
-            var faction = FactionFactory.CreateFaction(_game, "rock-long-" + Guid.NewGuid().ToString("N"));
+            var faction = CreateTestFaction("rock-long-" + Guid.NewGuid().ToString("N"));
             var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
             var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
             var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
@@ -1128,7 +1129,7 @@ namespace Pulsar4X.Tests
             var lor = OrbitMath.LowOrbitRadius(rock);
             Assert.Greater(rock.GetSOI_m(), lor, "precondition: drop-in parents to the rock");
 
-            var faction = FactionFactory.CreateFaction(_game, "flora-1s-" + Guid.NewGuid().ToString("N"));
+            var faction = CreateTestFaction("flora-1s-" + Guid.NewGuid().ToString("N"));
             var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
             var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
             var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
@@ -1174,7 +1175,7 @@ namespace Pulsar4X.Tests
             var rock = AddFloraAsteroid(sol, epoch);
             rock.SetDataBlob(new GeoSurveyableDB { PointsRequired = 147 });
 
-            var faction = FactionFactory.CreateFaction(_game, "flora-geo-" + Guid.NewGuid().ToString("N"));
+            var faction = CreateTestFaction("flora-geo-" + Guid.NewGuid().ToString("N"));
             var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
             var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
             var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
@@ -1235,7 +1236,7 @@ namespace Pulsar4X.Tests
             var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
             var rock = AddBeltAsteroid(sol, epoch);
 
-            var faction = FactionFactory.CreateFaction(_game, "rock-fleet-" + Guid.NewGuid().ToString("N"));
+            var faction = CreateTestFaction("rock-fleet-" + Guid.NewGuid().ToString("N"));
             var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
             var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
             var a = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
@@ -1276,7 +1277,7 @@ namespace Pulsar4X.Tests
             var sol = TestingUtilities.BasicSol(_starSys);
             var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
             var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
-            var faction = FactionFactory.CreateFaction(_game, "nav-off-" + Guid.NewGuid().ToString("N"));
+            var faction = CreateTestFaction("nav-off-" + Guid.NewGuid().ToString("N"));
             var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
             var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
             var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
@@ -1296,7 +1297,7 @@ namespace Pulsar4X.Tests
             var sol = TestingUtilities.BasicSol(_starSys);
             var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, smaAu: 1.0, epoch);
             var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, smaAu: 1.524, epoch);
-            var faction = FactionFactory.CreateFaction(_game, "nav-on-" + Guid.NewGuid().ToString("N"));
+            var faction = CreateTestFaction("nav-on-" + Guid.NewGuid().ToString("N"));
             var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
             var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
             var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
@@ -1388,7 +1389,7 @@ namespace Pulsar4X.Tests
             phobos.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Moon });
 
             var phobosAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(phobos, epoch);
-            var faction = FactionFactory.CreateFaction(_game, "phobos-ret-" + Guid.NewGuid().ToString("N"));
+            var faction = CreateTestFaction("phobos-ret-" + Guid.NewGuid().ToString("N"));
             var ship = MakeMoveToShip(mars, phobosAbs, faction);
             FillTank(ship);
             var r = ship.GetDataBlob<PositionDB>().RelativePosition;
@@ -1449,7 +1450,7 @@ namespace Pulsar4X.Tests
             phobos.SetDataBlob(new SystemBodyInfoDB { BodyType = BodyType.Moon });
 
             var phobosAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(phobos, epoch);
-            var faction = FactionFactory.CreateFaction(_game, "phobos-hyp-" + Guid.NewGuid().ToString("N"));
+            var faction = CreateTestFaction("phobos-hyp-" + Guid.NewGuid().ToString("N"));
             var ship = MakeMoveToShip(mars, phobosAbs, faction);
             FillTank(ship);
             var r = ship.GetDataBlob<PositionDB>().RelativePosition;
@@ -1966,7 +1967,7 @@ namespace Pulsar4X.Tests
                 var sol = TestingUtilities.BasicSol(_starSys);
                 var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, 1.0, epoch);
                 var mars = AddOrbitingBody(sol, 0.64174e24, 3_396_200, 1.524, epoch);
-                var faction = FactionFactory.CreateFaction(_game, "warp-save-" + Guid.NewGuid().ToString("N"));
+                var faction = CreateTestFaction("warp-save-" + Guid.NewGuid().ToString("N"));
                 var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
                 var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
                 var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
@@ -2032,7 +2033,7 @@ namespace Pulsar4X.Tests
                 var epoch = _starSys.StarSysDateTime;
                 var sol = TestingUtilities.BasicSol(_starSys);
                 var earth = AddOrbitingBody(sol, 5.972e24, 6_371_000, 1.0, epoch);
-                var faction = FactionFactory.CreateFaction(_game, "burn-save-" + Guid.NewGuid().ToString("N"));
+                var faction = CreateTestFaction("burn-save-" + Guid.NewGuid().ToString("N"));
                 var leoR = earth.GetDataBlob<MassVolumeDB>().RadiusInM + 200_000;
                 var earthAbs = (Vector3)MoveMath.GetAbsoluteFuturePosition(earth, epoch);
                 var ship = MakeMoveToShip(earth, earthAbs + new Vector3(leoR, 0, 0), faction);
@@ -2121,6 +2122,20 @@ namespace Pulsar4X.Tests
         static int BurnsOn(EntityManager manager, int entityId)
         {
             return manager.GetAllDataBlobsOfType<NewtonSimpleMoveDB>().Count(blob => blob.OwningEntity != null && blob.OwningEntity.Id == entityId);
+        }
+
+        /// <summary>
+        /// These tests TimeStep through warp arrival and follow-on circularise
+        /// in one go. Standing WarpExited is default-on and would pause at
+        /// drop-in, so the fixture turns that halt off. Event-pause itself is
+        /// covered by EventPausePass2Tests.
+        /// </summary>
+        static Entity CreateTestFaction(string name)
+        {
+            var faction = FactionFactory.CreateFaction(_game, name);
+            if (faction.TryGetDataBlob<FactionInfoDB>(out var info) && info.EventLog != null)
+                info.EventLog.SetHaltsOn(EventType.WarpExited, false);
+            return faction;
         }
 
         private void AdvanceTo(DateTime when)

@@ -20,6 +20,7 @@ using Pulsar4X.JumpPoints;
 using Pulsar4X.Sensors;
 using Pulsar4X.Messaging;
 using Pulsar4X.Logistics;
+using Pulsar4X.Movement;
 [assembly: InternalsVisibleTo("Pulsar4X.Tests")]
 
 namespace Pulsar4X.Engine
@@ -380,6 +381,91 @@ namespace Pulsar4X.Engine
                 foreach (var office in system.GetAllEntitiesWithDataBlob<LogiBaseDB>())
                     MarketHistory.SeedPriorDays(office);
             }
+        }
+
+        /// <summary>
+        /// Re-arm the pulse's earliest-wins halt cap from live game state: in-flight
+        /// warps the faction will pause on (standing WarpExited or a one-shot on that
+        /// warp order), and current not-started one-shot orders with a future start.
+        /// A follower behind a blocking order is not current, even if its ActionOnDate
+        /// is already past — arming that would re-halt during the earlier warp.
+        /// </summary>
+        internal void RefreshHaltingInterupts()
+        {
+            TimePulse.ClearHaltingInterupt();
+            DateTime now = TimePulse.GameGlobalDateTime;
+            foreach (var system in Systems)
+                ArmHaltingInterupts(system, now);
+            if (GlobalManager != null)
+                ArmHaltingInterupts(GlobalManager, now);
+        }
+
+        void ArmHaltingInterupts(EntityManager manager, DateTime now)
+        {
+            foreach (var entity in manager.GetAllEntitiesWithDataBlob<WarpMovingDB>())
+            {
+                if (!entity.TryGetDataBlob<WarpMovingDB>(out var warp))
+                    continue;
+                if (!warp.HasStarted || warp.IsAtTarget || warp.PredictedExitTime <= now)
+                    continue;
+                bool wantHalt = FactionHaltsOn(entity, EventType.WarpExited);
+                if (!wantHalt && entity.TryGetDataBlob<ActionQueueDB>(out var warpQueue))
+                {
+                    foreach (var action in warpQueue.ActionList)
+                    {
+                        if (action is WarpMoveAction && action.PauseOnAction && !IsDone(action))
+                        {
+                            wantHalt = true;
+                            break;
+                        }
+                    }
+                }
+                if (wantHalt)
+                    TimePulse.AddHaltingInterupt(warp.PredictedExitTime);
+            }
+
+            foreach (var entity in manager.GetAllEntitiesWithDataBlob<ActionQueueDB>())
+            {
+                if (!entity.TryGetDataBlob<ActionQueueDB>(out var queue))
+                    continue;
+                int mask = 0;
+                foreach (var action in queue.ActionList)
+                {
+                    if (IsDone(action))
+                    {
+                        // Goal-tagged finished work still holds the lane, same as ActionQueueProcessor.
+                        if (!string.IsNullOrEmpty(action.ParentGoalId) && action.IsBlocking)
+                            mask |= (int)action.ActionLanes;
+                        continue;
+                    }
+                    bool current = (mask & (int)action.ActionLanes) == 0;
+                    if (action.IsBlocking)
+                        mask |= (int)action.ActionLanes;
+                    if (!current || !action.PauseOnAction || action.IsRunning)
+                        continue;
+                    // Future start only. A past ActionOnDate on a current-but-blocked
+                    // follower never reaches here; a current one due now is started
+                    // in this step, not capped at "now" (that would zero-length-loop).
+                    if (action.ActionOnDate > now)
+                        TimePulse.AddHaltingInterupt(action.ActionOnDate);
+                }
+            }
+        }
+
+        bool FactionHaltsOn(Entity entity, EventType eventType)
+        {
+            if (!Factions.TryGetValue(entity.FactionOwnerID, out var faction))
+                return false;
+            if (!faction.TryGetDataBlob<FactionInfoDB>(out var info) || info.EventLog == null)
+                return false;
+            return info.EventLog.HaltsOn(eventType);
+        }
+
+        static bool IsDone(EntityAction action)
+        {
+            if (action.Status == ActionStatus.Succeeded || action.Status == ActionStatus.Failed)
+                return true;
+            return action.IsFinished();
         }
     }
 
