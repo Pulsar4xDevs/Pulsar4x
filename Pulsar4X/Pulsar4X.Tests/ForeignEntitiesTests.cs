@@ -33,75 +33,151 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void ColonyGroups_OwnedFirst_ThenForeignByName_SkippingNonColonies()
+        public void OwnedBySystem_OwnedColoniesByKnownSystemsOrder_SkippingForeignAndNonColonies()
         {
-            var entities = new[]
+            var mars = Colony(2, OwnerRelation.Owned, 1, 4, "Mars Base");
+            var earth = Colony(1, OwnerRelation.Owned, 1, 9, "Earth");
+            var ceres = Colony(11, OwnerRelation.Friendly, 7, 500, "Ceres One");
+            var camp = Colony(100, OwnerRelation.Hostile, 3, 500, "Zeus Outpost");
+            var systems = new (string SystemId, string SystemName, IEnumerable<EntitySnapshot>? Entities)[]
+            {
+                NamedNoEntities("gap", "Gap"),
+                NamedSys("outer", "Outer", Planet(500, "Ceres"), camp, Ship(600, OwnerRelation.Friendly, 7, "Hauler")),
+                NamedSys("alpha", "Alpha", mars, Planet(9, "Mars")),
+                NamedSys("sol", "Sol", ceres, earth, Ship(601, OwnerRelation.Owned, 1, "Surveyor")),
+            };
+
+            var owned = ForeignEntities.OwnedBySystem(systems);
+            Assert.AreEqual(2, owned.Count, "only systems with at least one owned colony");
+            Assert.AreEqual("alpha", owned[0].SystemId, "KnownSystems order, not name order");
+            Assert.AreEqual("Alpha", owned[0].SystemName);
+            Assert.AreEqual(1, owned[0].Colonies.Count);
+            Assert.AreEqual(2, owned[0].Colonies[0].Id);
+
+            Assert.AreEqual("sol", owned[1].SystemId);
+            Assert.AreEqual("Sol", owned[1].SystemName);
+            Assert.AreEqual(1, owned[1].Colonies.Count, "foreign colonies and non-colonies are omitted");
+            Assert.AreEqual(1, owned[1].Colonies[0].Id);
+
+            var twoOwned = ForeignEntities.OwnedBySystem(new[]
+            {
+                NamedSys("sol", "Sol", mars, Planet(4, "Mars"), earth),
+            });
+            Assert.AreEqual(2, twoOwned[0].Colonies.Count, "owned colonies stay in snapshot order");
+            Assert.AreEqual(2, twoOwned[0].Colonies[0].Id);
+            Assert.AreEqual(1, twoOwned[0].Colonies[1].Id);
+
+            var onlyForeign = ForeignEntities.OwnedBySystem(new[]
+            {
+                NamedSys("sol", "Sol", ceres, camp, Planet(500, "Ceres")),
+            });
+            Assert.AreEqual(0, onlyForeign.Count, "a system with only foreign colonies is hidden from Your colonies");
+
+            var none = ForeignEntities.OwnedBySystem(new[]
+            {
+                NamedNoEntities("gap", "Gap"),
+                NamedSys("empty", "Empty", Planet(500, "Ceres"), Ship(600, OwnerRelation.Friendly, 7, "Hauler")),
+            });
+            Assert.AreEqual(0, none.Count);
+            Assert.AreEqual(0, ForeignEntities.OwnedBySystem(Array.Empty<(string, string, IEnumerable<EntitySnapshot>?)>()).Count);
+        }
+
+        [Test]
+        public void ForeignByFaction_NameThenId_SingleSystemHasNoSystemNode_MultiSystemDoes()
+        {
+            var entitiesSol = new[]
             {
                 Planet(500, "Ceres"),
-                Colony(100, OwnerRelation.Hostile, 3, 500, "Zeus Outpost"),
                 Colony(2, OwnerRelation.Owned, 1, 4, "Mars Base"),
                 Colony(31, OwnerRelation.Friendly, 30, 1, "Twin B"),
                 Ship(600, OwnerRelation.Friendly, 7, "Hauler"),
                 Colony(11, OwnerRelation.Friendly, 7, 500, "Ceres One"),
                 Colony(10, OwnerRelation.Friendly, 7, 500, "Ceres Two"),
-                Colony(40, OwnerRelation.Neutral, 20, 2, "Alpha Post"),
                 Colony(32, OwnerRelation.Hostile, 4, 3, "Twin A"),
                 Colony(1, OwnerRelation.Owned, 1, 9, "Earth"),
                 Colony(80, OwnerRelation.Neutral, 8, 6, "Luna Concord"),
             };
+            var entitiesAlpha = new[]
+            {
+                Colony(40, OwnerRelation.Neutral, 20, 2, "Alpha Post"),
+                Colony(81, OwnerRelation.Neutral, 8, 6, "Luna Outpost"),
+            };
+            var systems = new (string SystemId, string SystemName, IEnumerable<EntitySnapshot>? Entities)[]
+            {
+                NamedNoEntities("gap", "Gap"),
+                NamedSys("outer", "Outer", Colony(100, OwnerRelation.Hostile, 3, 500, "Zeus Outpost")),
+                NamedSys("alpha", "Alpha", entitiesAlpha),
+                NamedSys("sol", "Sol", entitiesSol),
+                NamedSys("empty", "Empty", Planet(9, "Rock"), Ship(7, OwnerRelation.Owned, 1, "Surveyor")),
+            };
 
-            var groups = ForeignEntities.ColonyGroups(entities, Stances);
-            Assert.AreEqual(7, groups.Count);
+            var foreign = ForeignEntities.ForeignByFaction(systems, Stances);
+            Assert.AreEqual(6, foreign.Count);
 
-            Assert.IsNull(groups[0].FactionId);
-            Assert.IsNull(groups[0].FactionName);
-            Assert.AreEqual(2, groups[0].Colonies[0].Id, "owned colonies stay in snapshot order");
-            Assert.AreEqual(1, groups[0].Colonies[1].Id);
+            Assert.AreEqual(20, foreign[0].FactionId);
+            Assert.AreEqual("Alpha Yard", foreign[0].FactionName);
+            Assert.AreEqual(1, foreign[0].Systems.Count, "a faction in only one system has no system node");
+            Assert.AreEqual("alpha", foreign[0].Systems[0].SystemId);
+            Assert.AreEqual("Alpha", foreign[0].Systems[0].SystemName);
+            Assert.AreEqual(40, foreign[0].Systems[0].Colonies[0].Id);
 
-            Assert.AreEqual(20, groups[1].FactionId);
-            Assert.AreEqual("Alpha Yard", groups[1].FactionName);
-            Assert.AreEqual(40, groups[1].Colonies[0].Id);
+            Assert.AreEqual(7, foreign[1].FactionId);
+            Assert.AreEqual("Ceres Depot Authority", foreign[1].FactionName);
+            Assert.AreEqual(1, foreign[1].Systems.Count);
+            Assert.AreEqual("sol", foreign[1].Systems[0].SystemId);
+            Assert.AreEqual(2, foreign[1].Systems[0].Colonies.Count, "colonies in a system stay in snapshot order");
+            Assert.AreEqual(11, foreign[1].Systems[0].Colonies[0].Id);
+            Assert.AreEqual(10, foreign[1].Systems[0].Colonies[1].Id);
+            Assert.AreEqual(OwnerRelation.Friendly, foreign[1].Systems[0].Colonies[0].Relation);
 
-            Assert.AreEqual(7, groups[2].FactionId);
-            Assert.AreEqual("Ceres Depot Authority", groups[2].FactionName);
-            Assert.AreEqual(11, groups[2].Colonies[0].Id, "colonies in a faction stay in snapshot order");
-            Assert.AreEqual(10, groups[2].Colonies[1].Id);
-            Assert.AreEqual(OwnerRelation.Friendly, groups[2].Colonies[0].Relation);
+            Assert.AreEqual(8, foreign[2].FactionId);
+            Assert.AreEqual("Luna Concord", foreign[2].FactionName);
+            Assert.AreEqual(2, foreign[2].Systems.Count, "a faction in more than one system gets a system node each");
+            Assert.AreEqual("alpha", foreign[2].Systems[0].SystemId, "system nodes follow KnownSystems order");
+            Assert.AreEqual("Alpha", foreign[2].Systems[0].SystemName);
+            Assert.AreEqual(81, foreign[2].Systems[0].Colonies[0].Id);
+            Assert.AreEqual("sol", foreign[2].Systems[1].SystemId);
+            Assert.AreEqual("Sol", foreign[2].Systems[1].SystemName);
+            Assert.AreEqual(80, foreign[2].Systems[1].Colonies[0].Id);
+            Assert.AreEqual(OwnerRelation.Neutral, foreign[2].Systems[1].Colonies[0].Relation);
 
-            Assert.AreEqual(8, groups[3].FactionId);
-            Assert.AreEqual("Luna Concord", groups[3].FactionName);
-            Assert.AreEqual(OwnerRelation.Neutral, groups[3].Colonies[0].Relation);
+            Assert.AreEqual(4, foreign[3].FactionId, "equal faction names break ties by FactionId");
+            Assert.AreEqual("Twin", foreign[3].FactionName);
+            Assert.AreEqual(1, foreign[3].Systems.Count);
+            Assert.AreEqual(32, foreign[3].Systems[0].Colonies[0].Id);
+            Assert.AreEqual(30, foreign[4].FactionId);
+            Assert.AreEqual("Twin", foreign[4].FactionName);
+            Assert.AreEqual(31, foreign[4].Systems[0].Colonies[0].Id);
 
-            Assert.AreEqual(4, groups[4].FactionId, "equal faction names break ties by FactionId");
-            Assert.AreEqual("Twin", groups[4].FactionName);
-            Assert.AreEqual(32, groups[4].Colonies[0].Id);
-            Assert.AreEqual(30, groups[5].FactionId);
-            Assert.AreEqual("Twin", groups[5].FactionName);
-            Assert.AreEqual(31, groups[5].Colonies[0].Id);
+            Assert.AreEqual(3, foreign[5].FactionId);
+            Assert.AreEqual("Zeus Combine", foreign[5].FactionName);
+            Assert.AreEqual(1, foreign[5].Systems.Count);
+            Assert.AreEqual("outer", foreign[5].Systems[0].SystemId);
+            Assert.AreEqual(OwnerRelation.Hostile, foreign[5].Systems[0].Colonies[0].Relation);
 
-            Assert.AreEqual(3, groups[6].FactionId);
-            Assert.AreEqual("Zeus Combine", groups[6].FactionName);
-            Assert.AreEqual(OwnerRelation.Hostile, groups[6].Colonies[0].Relation);
-
-            foreach (var group in groups)
+            foreach (var group in foreign)
                 Assert.IsFalse(group.FactionName == "No Colonies Here");
 
-            var onlyForeign = ForeignEntities.ColonyGroups(new[]
+            var onlyForeign = ForeignEntities.ForeignByFaction(new[]
             {
-                Colony(100, OwnerRelation.Hostile, 3, 500, "Zeus Outpost"),
-                Colony(11, OwnerRelation.Friendly, 7, 500, "Ceres One"),
-                Colony(40, OwnerRelation.Neutral, 20, 2, "Alpha Post"),
+                NamedSys("sol", "Sol",
+                    Colony(100, OwnerRelation.Hostile, 3, 500, "Zeus Outpost"),
+                    Colony(11, OwnerRelation.Friendly, 7, 500, "Ceres One"),
+                    Colony(40, OwnerRelation.Neutral, 20, 2, "Alpha Post")),
             }, Stances);
-            Assert.AreEqual(3, onlyForeign.Count);
-            Assert.IsNotNull(onlyForeign[0].FactionId);
+            Assert.AreEqual(3, onlyForeign.Count, "a galaxy with only foreign colonies still fills Other factions");
             Assert.AreEqual("Alpha Yard", onlyForeign[0].FactionName);
             Assert.AreEqual("Ceres Depot Authority", onlyForeign[1].FactionName);
             Assert.AreEqual("Zeus Combine", onlyForeign[2].FactionName);
+            Assert.AreEqual(1, onlyForeign[0].Systems.Count);
+            Assert.AreEqual(1, onlyForeign[1].Systems.Count);
+            Assert.AreEqual(1, onlyForeign[2].Systems.Count);
 
-            var none = ForeignEntities.ColonyGroups(new[]
+            var none = ForeignEntities.ForeignByFaction(new[]
             {
-                Planet(500, "Ceres"),
-                Ship(600, OwnerRelation.Friendly, 7, "Hauler"),
+                NamedNoEntities("gap", "Gap"),
+                NamedSys("empty", "Empty", Planet(500, "Ceres"), Ship(600, OwnerRelation.Friendly, 7, "Hauler"),
+                    Colony(1, OwnerRelation.Owned, 1, 9, "Earth")),
             }, Stances);
             Assert.AreEqual(0, none.Count);
         }
@@ -327,5 +403,12 @@ namespace Pulsar4X.Tests
 
         static (string SystemId, IEnumerable<EntitySnapshot>? Entities) NoEntities(string systemId)
             => (systemId, null);
+
+        static (string SystemId, string SystemName, IEnumerable<EntitySnapshot>? Entities) NamedSys(
+            string systemId, string name, params EntitySnapshot[] entities)
+            => (systemId, name, entities);
+
+        static (string SystemId, string SystemName, IEnumerable<EntitySnapshot>? Entities) NamedNoEntities(string systemId, string name)
+            => (systemId, name, null);
     }
 }

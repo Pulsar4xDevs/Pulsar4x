@@ -93,40 +93,15 @@ namespace Pulsar4X.Client
                 Vector2 windowContentSize = ImGui.GetContentRegionAvail();
                 if(ImGui.BeginChild("Colonies", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y), ImGuiChildFlags.Borders))
                 {
-                    DisplayHelpers.Header("Colonies", "Select a colony to manage it.");
-                    foreach(var summary in galaxy.KnownSystems)
+                    var systems = new List<(string SystemId, string SystemName, IEnumerable<EntitySnapshot>? Entities)>();
+                    foreach (var summary in galaxy.KnownSystems)
                     {
                         var system = galaxy.GetSystem(summary.SystemId);
-                        if(system == null) continue;
-
-                        var groups = ForeignEntities.ColonyGroups(system.Entities, galaxy.Stances);
-                        if (groups.Count == 0) continue;
-
-                        if(!isExpanded.ContainsKey(summary.SystemId)) isExpanded.Add(summary.SystemId, true);
-                        ImGui.SetNextItemOpen(isExpanded[summary.SystemId], ImGuiCond.Appearing);
-                        if(ImGui.TreeNode(summary.Name + "###" + summary.SystemId))
-                        {
-                            foreach (var group in groups)
-                            {
-                                if (group.FactionId == null)
-                                {
-                                    foreach (var colony in group.Colonies)
-                                        DisplayColonyLeaf(colony, summary.SystemId);
-                                }
-                                else
-                                {
-                                    ImGui.SetNextItemOpen(true, ImGuiCond.Appearing);
-                                    if (ImGui.TreeNode(group.FactionName + "###faction-" + summary.SystemId + "-" + group.FactionId))
-                                    {
-                                        foreach (var colony in group.Colonies)
-                                            DisplayColonyLeaf(colony, summary.SystemId);
-                                        ImGui.TreePop();
-                                    }
-                                }
-                            }
-                            ImGui.TreePop();
-                        }
+                        systems.Add((summary.SystemId, summary.Name, system?.Entities));
                     }
+                    DisplayColonySections(
+                        ForeignEntities.OwnedBySystem(systems),
+                        ForeignEntities.ForeignByFaction(systems, galaxy.Stances));
                 }
                 ImGui.EndChild();
 
@@ -143,6 +118,61 @@ namespace Pulsar4X.Client
                 DisplayAdministratorChooser(galaxy);
             }
             Window.End();
+        }
+
+        private void DisplayColonySections(
+            IReadOnlyList<ForeignEntities.SystemColonies> owned,
+            IReadOnlyList<ForeignEntities.ForeignFactionGroup> foreign)
+        {
+            if (owned.Count > 0 && ImGui.CollapsingHeader("Your colonies###your-colonies", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                foreach (var system in owned)
+                {
+                    if (!isExpanded.ContainsKey(system.SystemId))
+                        isExpanded.Add(system.SystemId, true);
+                    ImGui.SetNextItemOpen(isExpanded[system.SystemId], ImGuiCond.Appearing);
+                    if (ImGui.TreeNode(system.SystemName + "###" + system.SystemId))
+                    {
+                        foreach (var colony in system.Colonies)
+                            DisplayColonyLeaf(colony, system.SystemId);
+                        ImGui.TreePop();
+                    }
+                }
+            }
+
+            if (foreign.Count > 0 && ImGui.CollapsingHeader("Other factions###other-factions", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                foreach (var faction in foreign)
+                {
+                    ImGui.SetNextItemOpen(true, ImGuiCond.Appearing);
+                    if (ImGui.TreeNode(faction.FactionName + "###faction-" + faction.FactionId))
+                    {
+                        if (faction.Systems.Count == 1)
+                        {
+                            var only = faction.Systems[0];
+                            foreach (var colony in only.Colonies)
+                                DisplayColonyLeaf(colony, only.SystemId);
+                        }
+                        else
+                        {
+                            foreach (var system in faction.Systems)
+                            {
+                                string key = "faction-" + faction.FactionId + "-sys-" + system.SystemId;
+                                if (!isExpanded.ContainsKey(key))
+                                    isExpanded.Add(key, true);
+                                ImGui.SetNextItemOpen(isExpanded[key], ImGuiCond.Appearing);
+                                if (ImGui.TreeNode(system.SystemName + "###" + key))
+                                {
+                                    foreach (var colony in system.Colonies)
+                                        DisplayColonyLeaf(colony, system.SystemId);
+                                    ImGui.TreePop();
+                                }
+                            }
+                        }
+                        ImGui.TreePop();
+                    }
+                }
+            }
         }
 
         private void DisplayColonyLeaf(EntitySnapshot colony, string systemId)

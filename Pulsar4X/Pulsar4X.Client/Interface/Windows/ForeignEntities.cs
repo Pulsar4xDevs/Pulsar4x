@@ -26,43 +26,83 @@ namespace Pulsar4X.Client
             return "Unknown faction";
         }
 
-        /// <summary>One faction's colonies in a system, in snapshot order. The player's group has a null faction.</summary>
-        public sealed record ColonyGroup(int? FactionId, string? FactionName, IReadOnlyList<EntitySnapshot> Colonies);
+        /// <summary>Colonies in one system, in snapshot order.</summary>
+        public sealed record SystemColonies(string SystemId, string SystemName, IReadOnlyList<EntitySnapshot> Colonies);
 
         /// <summary>
-        /// One system's colonies for the Colony Management list: the player's owned colonies first (FactionId null,
-        /// FactionName null), then one group per other faction ordered by FactionName (StringComparer.Ordinal) then FactionId.
-        /// Only Kind == BodyKind.Colony. Colonies keep snapshot order inside a group. Groups with no colonies are not returned
-        /// (so a system with no colonies returns an empty list, and a system with only foreign colonies returns only foreign groups).
+        /// One other faction's colonies across known systems. When Systems has one entry, the leaves sit directly under
+        /// the faction; when it has more than one, the UI nests a system node per entry (KnownSystems order).
         /// </summary>
-        public static IReadOnlyList<ColonyGroup> ColonyGroups(IEnumerable<EntitySnapshot> entities, IReadOnlyList<FactionStanceRow> stances)
-        {
-            var owned = new List<EntitySnapshot>();
-            var byFaction = new Dictionary<int, List<EntitySnapshot>>();
-            if (entities != null)
-            {
-                foreach (var entity in entities)
-                {
-                    if (entity == null || entity.Kind != BodyKind.Colony)
-                        continue;
-                    if (entity.Relation == OwnerRelation.Owned)
-                    {
-                        owned.Add(entity);
-                        continue;
-                    }
+        public sealed record ForeignFactionGroup(int FactionId, string FactionName, IReadOnlyList<SystemColonies> Systems);
 
-                    if (!byFaction.TryGetValue(entity.FactionId, out var list))
+        /// <summary>
+        /// Systems that have at least one OwnerRelation.Owned colony, in the given (KnownSystems) order. Only
+        /// Kind == BodyKind.Colony. Owned colonies keep snapshot order. Systems with none, and foreign colonies, are omitted.
+        /// </summary>
+        public static IReadOnlyList<SystemColonies> OwnedBySystem(
+            IEnumerable<(string SystemId, string SystemName, IEnumerable<EntitySnapshot>? Entities)> systems)
+        {
+            var result = new List<SystemColonies>();
+            if (systems == null)
+                return result;
+
+            foreach (var system in systems)
+            {
+                var owned = new List<EntitySnapshot>();
+                if (system.Entities != null)
+                {
+                    foreach (var entity in system.Entities)
+                    {
+                        if (entity == null || entity.Kind != BodyKind.Colony)
+                            continue;
+                        if (entity.Relation == OwnerRelation.Owned)
+                            owned.Add(entity);
+                    }
+                }
+                if (owned.Count > 0)
+                    result.Add(new SystemColonies(system.SystemId, system.SystemName, owned));
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Visible non-owned colonies (Kind == Colony, Relation != Owned) grouped by faction, ordered by FactionName
+        /// (StringComparer.Ordinal) then FactionId. Each faction's Systems are the known systems that actually have
+        /// that faction's colonies, in the given (KnownSystems) order; colonies keep snapshot order inside a system.
+        /// Factions with no colonies are not returned.
+        /// </summary>
+        public static IReadOnlyList<ForeignFactionGroup> ForeignByFaction(
+            IEnumerable<(string SystemId, string SystemName, IEnumerable<EntitySnapshot>? Entities)> systems,
+            IReadOnlyList<FactionStanceRow> stances)
+        {
+            var result = new List<ForeignFactionGroup>();
+            if (systems == null)
+                return result;
+
+            var systemOrder = new List<(string SystemId, string SystemName)>();
+            var byFaction = new Dictionary<int, Dictionary<string, List<EntitySnapshot>>>();
+            foreach (var system in systems)
+            {
+                systemOrder.Add((system.SystemId, system.SystemName));
+                if (system.Entities == null)
+                    continue;
+                foreach (var entity in system.Entities)
+                {
+                    if (entity == null || entity.Kind != BodyKind.Colony || entity.Relation == OwnerRelation.Owned)
+                        continue;
+                    if (!byFaction.TryGetValue(entity.FactionId, out var bySystem))
+                    {
+                        bySystem = new Dictionary<string, List<EntitySnapshot>>();
+                        byFaction.Add(entity.FactionId, bySystem);
+                    }
+                    if (!bySystem.TryGetValue(system.SystemId, out var list))
                     {
                         list = new List<EntitySnapshot>();
-                        byFaction.Add(entity.FactionId, list);
+                        bySystem.Add(system.SystemId, list);
                     }
                     list.Add(entity);
                 }
             }
-
-            var groups = new List<ColonyGroup>();
-            if (owned.Count > 0)
-                groups.Add(new ColonyGroup(null, null, owned));
 
             var factionIds = new List<int>(byFaction.Keys);
             factionIds.Sort((a, b) =>
@@ -73,8 +113,17 @@ namespace Pulsar4X.Client
                 return a.CompareTo(b);
             });
             foreach (int factionId in factionIds)
-                groups.Add(new ColonyGroup(factionId, FactionName(stances, factionId), byFaction[factionId]));
-            return groups;
+            {
+                var factionSystems = new List<SystemColonies>();
+                var bySystem = byFaction[factionId];
+                foreach (var system in systemOrder)
+                {
+                    if (bySystem.TryGetValue(system.SystemId, out var colonies) && colonies.Count > 0)
+                        factionSystems.Add(new SystemColonies(system.SystemId, system.SystemName, colonies));
+                }
+                result.Add(new ForeignFactionGroup(factionId, FactionName(stances, factionId), factionSystems));
+            }
+            return result;
         }
 
         /// <summary>
