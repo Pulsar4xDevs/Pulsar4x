@@ -130,7 +130,7 @@ namespace Pulsar4X.Client
                 ImGui.BeginChild("##market-goods", new Vector2(0f, listH), ImGuiChildFlags.Borders);
                 DrawGoods(ui, listed, addable, ref selectedId);
                 ImGui.EndChild();
-                DrawDetail(entity, market, history, book, officeSystemId, now, uiState, ui, listed, addable, selectedId, true);
+                DrawDetail(entity, market, history, now, uiState, ui, listed, addable, selectedId, true);
                 IntelDisplay.Display(entity, book, officeSystemId, uiState);
             }
             else
@@ -145,8 +145,9 @@ namespace Pulsar4X.Client
                 ImGui.EndChild();
                 ImGui.SameLine();
                 ImGui.BeginChild("##market-detail", new Vector2(0f, bodyH));
-                DrawDetail(entity, market, history, book, officeSystemId, now, uiState, ui, listed, addable, selectedId, false);
+                DrawDetail(entity, market, history, now, uiState, ui, listed, addable, selectedId, false);
                 ImGui.EndChild();
+                IntelDisplay.Display(entity, book, officeSystemId, uiState);
             }
 
             ui.SelectedId = selectedId;
@@ -358,8 +359,6 @@ namespace Pulsar4X.Client
             EntitySnapshot entity,
             MarketView market,
             MarketHistoryView? history,
-            IntelBookView? book,
-            string officeSystemId,
             DateTime now,
             GlobalUIState uiState,
             OfficeUi ui,
@@ -393,8 +392,6 @@ namespace Pulsar4X.Client
             if (selectedGood == null && selectedChoice == null)
             {
                 ImGui.Text("No listings.");
-                if (!compact)
-                    IntelDisplay.Display(entity, book, officeSystemId, uiState);
                 return;
             }
 
@@ -412,13 +409,13 @@ namespace Pulsar4X.Client
             float chartH = 200f;
             if (!compact)
             {
-                float reserve = ImGui.GetFrameHeightWithSpacing();
+                float reserve = 0f;
                 if (market.CanEdit)
                 {
                     if (ImGui.GetContentRegionAvail().X >= 560f)
-                        reserve += ImGui.GetFrameHeightWithSpacing() * 3f + 8f;
+                        reserve = ImGui.GetFrameHeightWithSpacing() * 3f + 8f;
                     else
-                        reserve += ImGui.GetFrameHeightWithSpacing() * 6f + 8f;
+                        reserve = ImGui.GetFrameHeightWithSpacing() * 6f + 8f;
                 }
                 chartH = ImGui.GetContentRegionAvail().Y - reserve;
                 if (chartH < 120f)
@@ -428,8 +425,6 @@ namespace Pulsar4X.Client
 
             if (market.CanEdit)
                 DrawEditor(entity.Id, market, selectedGood, selectedId, ui, uiState);
-            if (!compact)
-                IntelDisplay.Display(entity, book, officeSystemId, uiState);
         }
 
         static void DrawTitle(OfficeUi ui, MarketHistoryView? history, string selectedId, string title, MarketChartRange range)
