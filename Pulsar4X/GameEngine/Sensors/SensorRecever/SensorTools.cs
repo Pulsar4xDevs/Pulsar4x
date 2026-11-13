@@ -343,6 +343,17 @@ namespace Pulsar4X.Sensors
         }
 
         /// <summary>
+        /// Wien's displacement law in nanometers. Returns 0 if the temperature is at or below absolute zero.
+        /// </summary>
+        public static double StarPeakWavelengthNm(double temperatureC)
+        {
+            double kelvin = temperatureC + 273.15;
+            if (kelvin <= 0)
+                return 0;
+            return 2898000.0 / kelvin;
+        }
+
+        /// <summary>
         /// Probibly only needs to be done at star creation, unless we do funky stuff like change a stars temprature and stuff.
         /// </summary>
         /// <returns>The star emmision sig.</returns>
@@ -351,10 +362,7 @@ namespace Pulsar4X.Sensors
         internal static SensorProfileDB SetStarEmmisionSig(StarInfoDB starInfoDB, MassVolumeDB starMassVolumeDB)
         {
 
-            var tempDegreesC = starInfoDB.Temperature;
-            var kelvin = tempDegreesC + 273.15;
-            double b = 2898000; //Wien's displacement constant for nanometers.
-            var wavelength = b / kelvin; //Wien's displacement law https://en.wikipedia.org/wiki/Wien%27s_displacement_law
+            var wavelength = StarPeakWavelengthNm(starInfoDB.Temperature);
             var magnitudeInKW = starInfoDB.Luminosity * 3.827e23; //tempDegreesC / starMassVolumeDB.Volume_km3; //maybe this should be lum / volume?
 
             //-300, + 600, semi arbitrary number pulled outa my ass from 10min of internet research.

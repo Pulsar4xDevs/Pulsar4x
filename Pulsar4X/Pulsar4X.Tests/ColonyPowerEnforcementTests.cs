@@ -89,16 +89,16 @@ public class ColonyPowerEnforcementTests
     public void Brownout_ServesTiersInOrder_AndScalesTheShortTier()
     {
         // 1,000 people (10 kW life support at the garden 0.01 kW, plus the trained pool) plus Earth's facilities: 2.2 MW of control (the 2 MW
-        // spaceport), 0.5 MW of storage, idle industry, the mine and two idle labs (1.2 MW), about
-        // 4.2 MW in all. One 4 MW thermal plant delivers 3,680 kW: research is the tier left short.
-        SmallEarthOnPlant(TemplateDesign("thermal-plant", ("Size", 4)));
+        // spaceport), 0.5 MW of storage, idle industry, the mine and one idle lab (0.6 MW), about
+        // 3.6 MW in all. One 3.5 MW thermal plant delivers 3,220 kW: research is the tier left short.
+        SmallEarthOnPlant(TemplateDesign("thermal-plant", ("Size", 3.5)));
 
         ColonyPowerProcessor.RunDay(_earth);
 
         var p = Power;
-        const double delivered = 4000 * 0.92;
+        const double delivered = 3500 * 0.92;
         Assert.That(p.Demand_kW, Is.GreaterThan(delivered));
-        Assert.That(p.Dispatched_kW, Is.EqualTo(4000).Within(1e-6), "the plant runs flat out");
+        Assert.That(p.Dispatched_kW, Is.EqualTo(3500).Within(1e-6), "the plant runs flat out");
         double left = delivered;
         foreach (PowerTier tier in Enum.GetValues(typeof(PowerTier)))
         {
@@ -329,15 +329,13 @@ public class ColonyPowerEnforcementTests
     public void RemovingAFacility_RecalcsTheGrid()
     {
         var lab = _earth.GetDataBlob<ComponentInstancesDB>().GetComponentsBySpecificDesign("default-design-research-lab").First();
-        Assert.That(Power.Consumers.Single(c => c.DesignId == "default-design-research-lab").Count, Is.EqualTo(2));
+        Assert.That(Power.Consumers.Single(c => c.DesignId == "default-design-research-lab").Count, Is.EqualTo(1));
 
         _earth.RemoveComponent(lab);
 
         // Removing a building also moves infrastructure efficiency, and with it the industry
         // lines' working draw, so check the lab line and the sum rather than a fixed delta.
-        var line = Power.Consumers.Single(c => c.DesignId == "default-design-research-lab");
-        Assert.That(line.Count, Is.EqualTo(1));
-        Assert.That(line.Draw_kW, Is.EqualTo(0.2 * 3000).Within(1e-6), "the idle 3 MW lab left");
+        Assert.That(Power.Consumers.Any(c => c.DesignId == "default-design-research-lab"), Is.False, "the only lab was removed");
         Assert.That(Power.Demand_kW, Is.EqualTo(Power.Consumers.Sum(c => c.Draw_kW)).Within(1e-6));
     }
 
@@ -373,11 +371,12 @@ public class ColonyPowerEnforcementTests
     public void DamagedFacilities_DrawInProportionToTheirHealth()
     {
         var labs = _earth.GetDataBlob<ComponentInstancesDB>().GetComponentsBySpecificDesign("default-design-research-lab").ToList();
+        Assert.That(labs, Has.Count.EqualTo(1));
         labs[0].HealthPercent = 0.5f;
         ColonyPowerProcessor.Recalc(_earth);
         var line = Power.Consumers.Single(c => c.DesignId == "default-design-research-lab");
-        Assert.That(line.Draw_kW, Is.EqualTo(0.2 * 3000 * 1.5).Within(1e-3), "two idle 3 MW labs, one at half health");
-        Assert.That(line.Count, Is.EqualTo(2));
+        Assert.That(line.Draw_kW, Is.EqualTo(0.2 * 3000 * 0.5).Within(1e-3), "one idle 3 MW lab at half health");
+        Assert.That(line.Count, Is.EqualTo(1));
     }
 
     // ---- scenarios ----

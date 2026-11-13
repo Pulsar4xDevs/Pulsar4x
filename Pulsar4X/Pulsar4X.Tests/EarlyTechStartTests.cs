@@ -285,6 +285,7 @@ public class EarlyTechStartTests
         Assert.That(byDesign["default-design-refinery-site"], Has.Count.EqualTo(1), "one installed refinery in a fresh Earth start");
         Assert.That(byDesign["default-design-logistics-office-site"], Has.Count.EqualTo(1), "one site logistics office");
         Assert.That(byDesign["default-design-local-construction-site"], Has.Count.EqualTo(5), "five site construction offices");
+        Assert.That(byDesign["default-design-research-lab"], Has.Count.EqualTo(1), "one installed research lab in a fresh Earth start");
         Assert.That(installations, Does.Not.Contain("default-design-logistics-office"));
         Assert.That(installations, Does.Not.Contain("default-design-local-construction"));
 

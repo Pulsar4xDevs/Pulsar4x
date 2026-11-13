@@ -155,6 +155,14 @@ namespace Pulsar4X.Components
 
             SetAttributes();
 
+            var rangePartners = new HashSet<string>();
+            foreach (var property in ComponentDesignProperties.Values)
+            {
+                if (property.GuiHint == GuiHint.GuiSelectionMinMaxRange && !string.IsNullOrEmpty(property.PairedPropertyName))
+                    rangePartners.Add(property.PairedPropertyName);
+            }
+
+            _design.DisplayProperties = new Dictionary<string, double>();
             foreach (var designAttribute in ComponentDesignProperties.Values)
             {
                 var type = designAttribute.AttributeType;
@@ -183,12 +191,36 @@ namespace Pulsar4X.Components
                     }
                     case GuiHint.GuiTextDisplay:
                     {
-                        //ignore it, it's not player settable.
+                        if (designAttribute.IsEnabled)
+                        {
+                            try
+                            {
+                                double value = designAttribute.Value;
+                                if (double.IsFinite(value))
+                                    _design.DisplayProperties[designAttribute.Name] = value;
+                            }
+                            catch
+                            {
+                                // Non-numeric display text is not a comparable stat.
+                            }
+                        }
                         break;
                     }
                     case GuiHint.None:
                     {
-                        //ignore it, it's not player settable.
+                        // Range-slider upper bounds render as GuiHint.None but are player-set;
+                        // persist them so reloading an infrastructure design keeps the full window.
+                        if (rangePartners.Contains(designAttribute.Name))
+                        {
+                            try
+                            {
+                                _design.TemplatePropertyValues.Add((designAttribute.Name, typeof(double), designAttribute.Value));
+                            }
+                            catch
+                            {
+                                // A partner that does not evaluate to a number cannot be replayed.
+                            }
+                        }
                         break;
                     }
                     case 0:

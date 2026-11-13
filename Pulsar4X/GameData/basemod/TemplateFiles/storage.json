@@ -12,7 +12,7 @@
         "CrewReq": "Max(1, PropertyValue('Size Efficiency') * 0.1)",
         "ResearchCost": "0",
         "CreditCost": "[Mass] * 0.12",
-        "BuildPointCost": "[Mass] * 4.5"
+        "BuildPointCost": "[Mass]"
       },
       "ResourceCost": {
         "aluminium": "[Mass] * 0.45",
@@ -144,7 +144,7 @@
         "CrewReq": "Max(1, 0.33 * Pow(PropertyValue('Size Efficiency'), 0.7))",
         "ResearchCost": "0",
         "CreditCost": "[Mass] * 0.12",
-        "BuildPointCost": "[Mass] * 4.5"
+        "BuildPointCost": "[Mass] * 0.25"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.5",
@@ -196,7 +196,7 @@
         "CrewReq": "0.02 * Pow(PropertyValue('Berths'), 0.7)",
         "ResearchCost": "0",
         "CreditCost": "[Mass] * 0.12",
-        "BuildPointCost": "[Mass] * 4.5"
+        "BuildPointCost": "[Mass] * 0.5"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.4",
@@ -378,7 +378,7 @@
         "CrewReq": "Max(5, 0.01 * Pow(PropertyValue('Size'), 0.7))",
         "ResearchCost": "0",
         "CreditCost": "[Mass] * 0.12",
-        "BuildPointCost": "[Mass] * 4.5"
+        "BuildPointCost": "[Mass] * 0.5"
       },
       "ResourceCost": {
         "stainless-steel": "[Mass] * 0.3",

@@ -22,7 +22,13 @@ namespace Pulsar4X.Components
         public string TemplateName; //ie the name in staticData. ie "Newtonion Thruster".
         public string TemplateID; //ie the UniqueID in staticData. ie "newtonion-thruster".
         public List<(string propName, Type valueType, object propValue)> TemplatePropertyValues = new ();
-        
+
+        /// <summary>
+        /// Numeric GuiTextDisplay property values at design time, for upgrade comparisons.
+        /// Missing from older saved JSON, which deserializes as an empty dictionary.
+        /// </summary>
+        [JsonProperty]
+        public Dictionary<string, double> DisplayProperties { get; internal set; } = new();
         
         public bool IsValid {get; set; } = true;
 

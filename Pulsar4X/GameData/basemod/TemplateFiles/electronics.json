@@ -243,6 +243,19 @@
       "IndustryTypeID": "component-construction",
       "Properties":[
         {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "5 * PropertyValue('Survey Speed')"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 2)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
+        {
           "Name": "Survey Speed",
           "Units": "survey per hour",
           "DescriptionFormula": "'Each point in speed provides one survey point per hour'",
@@ -296,6 +309,19 @@
       "CargoTypeID": "general-storage",
       "IndustryTypeID": "component-construction",
       "Properties":[
+        {
+          "Name": "Power Draw",
+          "Units": "kW",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "1 * PropertyValue('Survey Speed')"
+        },
+        {
+          "Name": "DBargsPower",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Power Draw'), 2)",
+          "AttributeType": "Pulsar4X.Energy.PowerConsumerAtb"
+        },
         {
           "Name": "Survey Speed",
           "Units": "survey points per day",

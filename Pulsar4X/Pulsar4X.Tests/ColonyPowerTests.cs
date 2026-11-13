@@ -77,8 +77,8 @@ public class ColonyPowerTests
         Assert.That(sites.Nameplate_kW, Is.EqualTo(5 * 8 * 10 / 24.0).Within(1e-6), "5 sites ~17 kW nameplate");
         Assert.That(sites.Draw_kW, Is.EqualTo(0.1 * 5 * 8 * 10 / 24.0).Within(1e-6), "an empty queue: 10 % of it");
         var labs = Line(power, "default-design-research-lab");
-        Assert.That(labs.Nameplate_kW, Is.EqualTo(2 * 3000).Within(1e-6), "2 labs, 3 MW each");
-        Assert.That(labs.Draw_kW, Is.EqualTo(0.2 * 2 * 3000).Within(1e-6), "no project yet: 20 % of it");
+        Assert.That(labs.Nameplate_kW, Is.EqualTo(1 * 3000).Within(1e-6), "1 lab, 3 MW");
+        Assert.That(labs.Draw_kW, Is.EqualTo(0.2 * 1 * 3000).Within(1e-6), "no project yet: 20 % of it");
         Assert.That(PerUnit("default-design-city-hall"), Is.EqualTo(125).Within(1e-6), "City Hall 125 kW");
         Assert.That(PerUnit("default-design-logistics-office-site"), Is.EqualTo(20).Within(1e-6), "logistics site 20 kW");
         Assert.That(PerUnit("default-design-spaceport"), Is.EqualTo(2000).Within(1e-6), "spaceport 1e5 m2 x 20 W/m2 = 2 MW");
@@ -142,11 +142,11 @@ public class ColonyPowerTests
 
         // Labs with no project draw 20 % of their 3 MW nameplate. The new buildings also move
         // infrastructure efficiency, which moves the industry lines' working draw, so check the lab line and the sum.
-        Assert.That(Line(power, "default-design-research-lab").Draw_kW, Is.EqualTo(5 * 0.2 * 3000).Within(1e-6));
-        Assert.That(Line(power, "default-design-research-lab").Nameplate_kW, Is.EqualTo(5 * 3000).Within(1e-6));
+        Assert.That(Line(power, "default-design-research-lab").Draw_kW, Is.EqualTo(4 * 0.2 * 3000).Within(1e-6));
+        Assert.That(Line(power, "default-design-research-lab").Nameplate_kW, Is.EqualTo(4 * 3000).Within(1e-6));
         Assert.That(power.Demand_kW, Is.EqualTo(power.Consumers.Sum(c => c.Draw_kW)).Within(1e-6));
         Assert.That(power.Demand_kW, Is.GreaterThan(before + 3 * 0.2 * 3000 - 100));
-        Assert.That(Line(power, "default-design-research-lab").Count, Is.EqualTo(5));
+        Assert.That(Line(power, "default-design-research-lab").Count, Is.EqualTo(4));
     }
 
     [Test]
@@ -154,9 +154,11 @@ public class ColonyPowerTests
     {
         var power = Power(_earthColony);
         var labs = _earthColony.GetDataBlob<ComponentInstancesDB>().GetComponentsBySpecificDesign("default-design-research-lab").ToList();
+        Assert.That(labs, Has.Count.EqualTo(1));
         labs[0].IsEnabled = false;
         ColonyPowerProcessor.Recalc(_earthColony);
-        Assert.That(Line(power, "default-design-research-lab").Draw_kW, Is.EqualTo(0.2 * 3000).Within(1e-6), "one idle 3 MW lab");
+        var line = power.Consumers.SingleOrDefault(c => c.DesignId == "default-design-research-lab");
+        Assert.That(line == null || line.Draw_kW == 0, Is.True, "a disabled lab draws nothing");
     }
 
     // ---- life support ----

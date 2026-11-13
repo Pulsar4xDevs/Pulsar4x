@@ -12,7 +12,7 @@
         "CrewReq": "PropertyValue('Area') * 0.008",
         "ResearchCost": "0",
         "CreditCost": "120",
-        "BuildPointCost": "[Mass]"
+        "BuildPointCost": "[Mass] * 0.2"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.45",
@@ -267,7 +267,7 @@
           "Name": "Research Points",
           "DescriptionFormula": "'Research points produced per day'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "10"
+          "PropertyFormula": "5"
         },
         {
           "Name": "Cost Per Day",
@@ -1337,7 +1337,7 @@
         "CrewReq": "PropertyValue('Office Space') * 0.25",
         "ResearchCost": "PropertyValue('Office Space') * 0.5",
         "CreditCost": "120",
-        "BuildPointCost": "[Mass]"
+        "BuildPointCost": "[Mass] * 0.1"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.5",

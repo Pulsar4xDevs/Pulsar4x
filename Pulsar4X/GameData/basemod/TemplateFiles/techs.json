@@ -64,11 +64,11 @@
     "Payload": {
       "UniqueID": "tech-infra-pressure-min-extension",
       "Name": "Thin-Atmosphere Habitat Engineering",
-      "Description": "Opens the floor of the prefab track toward vacuum. It does not widen the window. Level 5 reaches 0 atm.",
+      "Description": "Opens the floor of the prefab track toward vacuum. It does not widen the window. Level 1 reaches 0 atm.",
       "Category": "tech-category-biology-genetics",
-      "MaxLevel": 5,
-      "DataFormula": "[Level] * 0.17",
-      "CostFormula": "1000 + [Level] * 1000"
+      "MaxLevel": 1,
+      "DataFormula": "[Level] * 0.85",
+      "CostFormula": "1000"
     }
   },
   {

@@ -296,6 +296,9 @@ public sealed record StarView(
 {
     /// <summary>Ordinal of the spectral type (O,B,A,F,G,K,M,…), for icon styling.</summary>
     public int SpectralTypeIndex { get; init; }
+
+    /// <summary>Peak emission wavelength from Wien's law, nanometers.</summary>
+    public double PeakWavelengthNm { get; init; }
 }
 
 public sealed record ColonyView(long Population, int? PlanetEntityId) : IComponentView
@@ -1247,6 +1250,16 @@ public sealed record ConstructibleItemView(
 
     /// <summary>Ship designs: the designer's crew warning, e.g. "10 berths for 28 crew". Empty when none.</summary>
     public string CrewWarning { get; init; } = "";
+
+    /// <summary>Where a component design can be mounted. 0 for ships and materials.</summary>
+    public ComponentMountFlags MountFlags { get; init; }
+
+    /// <summary>Component type, "Ship" for a ship design, or "Material" for a processed material.</summary>
+    public string ComponentType { get; init; } = "";
+
+    public bool IsShipDesign { get; init; }
+
+    public bool IsMaterial { get; init; }
 }
 
 public sealed record IndustryCostItem(
@@ -1427,8 +1440,24 @@ public sealed class ComponentDesignsSnapshot
     public IReadOnlyList<BootstrapCrateRequest> BootstrapDefaults { get; init; } = Array.Empty<BootstrapCrateRequest>();
 }
 
+/// <summary>Where a component can be mounted. Bit values match the engine's ComponentMountType.</summary>
+[Flags]
+public enum ComponentMountFlags
+{
+    None = 0,
+    ShipComponent = 1 << 0,
+    ShipCargo = 1 << 1,
+    PlanetInstallation = 1 << 2,
+    Pdc = 1 << 3,
+    Fighter = 1 << 4,
+    Missile = 1 << 5,
+}
+
 /// <summary>A component template the faction can design from.</summary>
-public sealed record ComponentTemplateSummary(string Id, string Name, string ComponentType, string Description);
+public sealed record ComponentTemplateSummary(string Id, string Name, string ComponentType, string Description)
+{
+    public ComponentMountFlags MountFlags { get; init; }
+}
 
 /// <summary>An amount of one resource, by cargo id, with its display name.</summary>
 public sealed record ResourceCostLine(string CargoId, string Name, long Amount);
@@ -1450,6 +1479,14 @@ public sealed record ComponentDesignSummary(string Id, string Name, string Templ
     public int CrewRequired { get; init; }
     /// <summary>Berths one copy gives (crew quarters, bridge console space), people.</summary>
     public int Berths { get; init; }
+
+    public long MassPerUnit { get; init; }
+    public double VolumePerUnit { get; init; }
+    public int CreditCost { get; init; }
+    public long ResearchCost { get; init; }
+    public long IndustryPoints { get; init; }
+    public double EnergyCost { get; init; }
+    public IReadOnlyDictionary<string, double> DisplayStats { get; init; } = new Dictionary<string, double>();
 }
 
 /// <summary>One player-set designer property value: numeric for sliders/ranges/enums, a string id
