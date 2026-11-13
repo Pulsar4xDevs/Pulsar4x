@@ -45,7 +45,7 @@ public class JPSurveyProcessor : IHotloopProcessor
             var distance =  MoveMath.GetDistanceBetween(entity, jpSurveyableDB.OwningEntity);
             if (distance < 100000) // FIXME: needs to be an attribute of the JPSurveyAbilityDB
             {
-                uint rate = CommanderSkills.SurveyRate(jpSurveyAbilityDB.Speed, entity);
+                uint rate = Pulsar4X.Ships.ShipCrew.ScaleSurvey(entity, CommanderSkills.SurveyRate(jpSurveyAbilityDB.Speed, entity), grav: true);
                 if (rate >= jpSurveyableDB.SurveyPointsRemaining[entity.FactionOwnerID])
                 {
                     RollToDiscoverJumpPoint(entity.StarSysDateTime, entity, jpSurveyableDB.OwningEntity);

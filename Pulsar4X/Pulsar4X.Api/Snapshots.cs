@@ -488,31 +488,33 @@ public sealed record ShipView(
     public IReadOnlyList<ShipBerthRow> BerthsByComponent { get; init; } = Array.Empty<ShipBerthRow>();
 
     /// <summary>
-    /// Owner only. True once the engine tracks the people aboard this ship (crew plan phase 3). While false,
+    /// Owner only. True when the engine tracks the people aboard this ship (every ship it makes). While false,
     /// <see cref="CrewAboard"/>, <see cref="CrewFactor"/>, <see cref="EngineCrewFactor"/> and <see cref="UnderCrewed"/> are defaults
     /// and should not be shown.
     /// </summary>
     public bool CrewTracked { get; init; }
 
-    /// <summary>Owner only. People aboard, at most min(required, berths). 0 until crew plan phase 3.</summary>
+    /// <summary>Owner only. People aboard, at most min(required, berths).</summary>
     public int CrewAboard { get; init; }
 
     /// <summary>
-    /// Owner only. F = min(1, aboard / required), 0..1; 1 when the ship needs no crew. Work parts run at F² (surveyors,
-    /// miners, shuttlebay rate, construction bay). 1 until crew plan phase 3.
+    /// Owner only. F for the work parts, 0..1: the crew left after the engines and then the bridge are filled, over the
+    /// work parts' own crew; 1 when the ship has no crewed work parts. Work parts run at F² (geo and grav surveyors,
+    /// miners, shuttlebay transfer rate, construction bay). Lasers, fire control, sensors, reactors and the bridge do not
+    /// degrade (weapon crew waits for the damage rework).
     /// </summary>
     public double CrewFactor { get; init; } = 1;
 
     /// <summary>
     /// Owner only. Share of the engines' own crew requirement that is filled, 0..1 (crew fill the engines first);
-    /// engine power is scaled by it. 1 until crew plan phase 3.
+    /// warp power (and so warp speed) is scaled by it.
     /// </summary>
     public double EngineCrewFactor { get; init; } = 1;
 
-    /// <summary>Owner only. True when aboard is below required. False until crew plan phase 3.</summary>
+    /// <summary>Owner only. True when aboard is below required.</summary>
     public bool UnderCrewed { get; init; }
 
-    /// <summary>Owner only. One line on what the crew shortfall limits, e.g. "12/28 crew: engines 60 %, surveyors 18 %". Empty when fully crewed.</summary>
+    /// <summary>Owner only. One line on what the crew shortfall limits, e.g. "12/28 crew: engines 60 %, work parts 18 %" (work parts as F²). Empty when fully crewed.</summary>
     public string CrewNote { get; init; } = "";
 }
 
@@ -959,10 +961,10 @@ public sealed record LaunchPadStateView(long MaxTonnage, bool Free)
     /// <summary>Crew the design on this pad needs, people. 0 when the pad is free.</summary>
     public int CrewRequired { get; init; }
 
-    /// <summary>Crew the ship will take aboard at launch: min(required, berths, colony pool), people. 0 until crew plan phase 3.</summary>
+    /// <summary>Crew the ship will take aboard at launch: min(required, berths, colony pool), people (an NPC colony crews from its population).</summary>
     public int CrewToBoard { get; init; }
 
-    /// <summary>True when the ship would launch with fewer crew than it needs. False until crew plan phase 3.</summary>
+    /// <summary>True when the ship would launch with fewer crew than it needs.</summary>
     public bool CrewShort { get; init; }
 
     /// <summary>The launch-short warning, e.g. "Launches with 12/28 crew; train crew at an academy". Empty when not short.</summary>
@@ -1092,7 +1094,7 @@ public sealed record IndustryJobView(
 
     /// <summary>
     /// Ship jobs: warning that the colony's crew pool will not fill this ship when it launches, e.g.
-    /// "Pool 5 of 28 crew; the ship will launch under-crewed". Empty when not short. Empty until crew plan phase 3.
+    /// "Pool 5 of 28 crew; the ship will launch under-crewed". Empty when not short.
     /// </summary>
     public string CrewWarning { get; init; } = "";
 }
@@ -1465,13 +1467,13 @@ public sealed record ShipSnapshot(
     /// <summary>Crew the design can house, people.</summary>
     public int CrewBerths { get; init; }
 
-    /// <summary>People aboard. 0 until crew plan phase 3 (see <see cref="CrewTracked"/>).</summary>
+    /// <summary>People aboard (see <see cref="CrewTracked"/>).</summary>
     public int CrewAboard { get; init; }
 
-    /// <summary>True once the engine tracks crew aboard (phase 3). While false, ignore CrewAboard and UnderCrewed.</summary>
+    /// <summary>True when the engine tracks crew aboard. While false, ignore CrewAboard and UnderCrewed.</summary>
     public bool CrewTracked { get; init; }
 
-    /// <summary>For the fleet tree badge: aboard below required. False until crew plan phase 3.</summary>
+    /// <summary>For the fleet tree badge: aboard below required.</summary>
     public bool UnderCrewed { get; init; }
 }
 

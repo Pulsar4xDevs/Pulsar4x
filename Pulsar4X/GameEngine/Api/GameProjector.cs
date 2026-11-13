@@ -821,9 +821,14 @@ namespace Pulsar4X.Engine.Api
                 armorThickness)
             {
                 CrewByComponent = crewRows,
-                // Crew plan: berths are real from phase 1 (ShipCrew.Berths); aboard and the factors from phase 3.
                 CrewBerths = ShipCrew.Berths(parts),
                 BerthsByComponent = berthRows,
+                CrewTracked = ShipCrew.Tracked(ship),
+                CrewAboard = ShipCrew.Aboard(ship),
+                CrewFactor = ShipCrew.WorkFactor(ship),
+                EngineCrewFactor = ShipCrew.EngineFactor(ship),
+                UnderCrewed = ShipCrew.Tracked(ship) && ShipCrew.Aboard(ship) < ShipCrew.SplitOf(ship).Required,
+                CrewNote = ShipCrew.Note(ship),
             };
         }
 
@@ -1603,6 +1608,7 @@ namespace Pulsar4X.Engine.Api
                         RemainingRequirements = requirements,
                         CrewRequired = factionInfo.IndustryDesigns.TryGetValue(job.ItemGuid, out var jobDesign) && jobDesign is ShipDesign jobShip
                             ? jobShip.CrewReq : 0,
+                        CrewWarning = jobDesign is ShipDesign crewed ? JobCrewWarning(entity, crewed) : "",
                     });
                 }
 
@@ -1726,16 +1732,39 @@ namespace Pulsar4X.Engine.Api
             if (entity.TryGetDataBlob<LaunchComplexDB>(out var launch))
             {
                 foreach (var pad in launch.Pads.Values)
+                {
+                    ShipDesign? padDesign = pad.ShipDesignId != null && factionInfo.ShipDesigns.TryGetValue(pad.ShipDesignId, out var onPad)
+                        ? onPad : null;
+                    int required = padDesign?.CrewReq ?? 0;
+                    int board = padDesign != null ? PadCrew(entity, padDesign).board : 0;
                     pads.Add(new LaunchPadStateView(pad.MaxTonnage, pad.ShipDesignId == null)
                     {
                         LaunchFuel = LaunchComplexProcessor.FuelName(entity, pad.LaunchFuel),
                         Reason = LaunchComplexProcessor.PadHoldReason(entity, pad),
-                        CrewRequired = pad.ShipDesignId != null && factionInfo.ShipDesigns.TryGetValue(pad.ShipDesignId, out var padDesign)
-                            ? padDesign.CrewReq : 0,
+                        CrewRequired = required,
+                        CrewToBoard = board,
+                        CrewShort = board < required,
+                        CrewWarning = board < required ? $"Launches with {board}/{required} crew; train crew at an academy" : "",
                     });
+                }
             }
 
             return new IndustryView(lines) { Pads = pads };
+        }
+
+        /// <summary>Crew a launch of this design would board from the colony now: min(required, berths, pool).</summary>
+        static (int board, int capacity) PadCrew(Entity colony, ShipDesign design)
+        {
+            int capacity = Math.Min(design.CrewReq, design.CrewBerths);
+            return (ShipCrew.Available(colony, capacity), capacity);
+        }
+
+        static string JobCrewWarning(Entity colony, ShipDesign design)
+        {
+            if (design.CrewReq <= 0)
+                return "";
+            int board = PadCrew(colony, design).board;
+            return board < design.CrewReq ? $"Pool {board} of {design.CrewReq} crew; the ship will launch under-crewed" : "";
         }
 
         static FacilityUpgradeView ToUpgradeTarget(
@@ -2531,6 +2560,9 @@ namespace Pulsar4X.Engine.Api
                 LogisticsSystemIds = LogisticsSpan.SystemIds(ship),
                 CrewRequired = shipInfo?.Design?.CrewReq ?? 0,
                 CrewBerths = shipInfo?.Design?.CrewBerths ?? 0,
+                CrewAboard = ShipCrew.Aboard(ship),
+                CrewTracked = ShipCrew.Tracked(ship),
+                UnderCrewed = ShipCrew.Tracked(ship) && ShipCrew.Aboard(ship) < ShipCrew.SplitOf(ship).Required,
             };
         }
 

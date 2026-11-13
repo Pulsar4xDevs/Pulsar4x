@@ -96,7 +96,7 @@ public record struct MoveCostShip
         if (ship.TryGetDataBlob<WarpAbilityDB>(out var warp))
         {
             spec.HasWarp = true;
-            spec.WarpPower = warp.TotalWarpPower;
+            spec.WarpPower = warp.TotalWarpPower * Pulsar4X.Ships.ShipCrew.EngineFactor(ship);
             spec.WarpEnergyType = warp.EnergyType;
             spec.BubbleCreationCost = warp.BubbleCreationCost;
             spec.BubbleSustainCost = warp.BubbleSustainCost;

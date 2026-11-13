@@ -132,8 +132,13 @@ public class CrewAcademyTests
         Assert.That(NavalAcademyCourse.TryTrainCrew(_earth, Academy.ComponentId, 10), Is.Null);
         var grad = Academy.Cohorts.Single().GraduationDate;
         _game.Settings.EnforceSingleThread = true;
+        var before = _earth.Manager!.GetAllEntitiesWithDataBlob<Pulsar4X.Ships.ShipCrewDB>().Select(s => s.Id).ToHashSet();
         _earth.Manager!.ManagerSubpulses.ProcessSystem(grad.AddHours(1));
-        Assert.That(Pool, Is.EqualTo(510));
+        // Ships the start's queue launched meanwhile took their crew from the pool (crew plan phase 3).
+        int launched = _earth.Manager!.GetAllEntitiesWithDataBlob<Pulsar4X.Ships.ShipCrewDB>()
+            .Where(s => !before.Contains(s.Id)).Sum(s => s.GetDataBlob<Pulsar4X.Ships.ShipCrewDB>().Aboard);
+        Assert.That(Academy.Cohorts, Is.Empty);
+        Assert.That(Pool + launched, Is.EqualTo(510));
     }
 
     [Test]

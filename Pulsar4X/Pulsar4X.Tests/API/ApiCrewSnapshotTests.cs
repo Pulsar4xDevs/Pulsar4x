@@ -39,7 +39,7 @@ public class ApiCrewSnapshotTests
     }
 
     [Test]
-    public void Ships_CarryRequiredCrew_AndCrewDefaultsUntilItIsTracked()
+    public void Ships_CarryRequiredCrew_AndStartFullyCrewed()
     {
         var ships = _game.Systems.SelectMany(s => s.GetAllEntitiesWithDataBlob<ShipInfoDB>())
             .Where(s => s.FactionOwnerID == _player.Id).ToList();
@@ -52,8 +52,8 @@ public class ApiCrewSnapshotTests
             Assert.That(view.CrewBerths, Is.EqualTo(design.CrewBerths).And.GreaterThanOrEqualTo(design.CrewReq), design.Name);
             Assert.That(view.BerthsByComponent, Is.Not.Empty, "a bridge or crew quarters");
             Assert.That(view.BerthsByComponent.Sum(r => r.Berths), Is.EqualTo(view.CrewBerths));
-            Assert.That(view.CrewTracked, Is.False, "crew aboard arrives in phase 3");
-            Assert.That(view.CrewAboard, Is.EqualTo(0));
+            Assert.That(view.CrewTracked, Is.True, "crew plan phase 3 tracks crew aboard");
+            Assert.That(view.CrewAboard, Is.EqualTo(design.CrewReq), "scenario ships start fully crewed");
             Assert.That(view.CrewFactor, Is.EqualTo(1));
             Assert.That(view.EngineCrewFactor, Is.EqualTo(1));
             Assert.That(view.UnderCrewed, Is.False);
@@ -68,7 +68,8 @@ public class ApiCrewSnapshotTests
             var design = ships.Single(s => s.Id == snapshot.Id).GetDataBlob<ShipInfoDB>().Design;
             Assert.That(snapshot.CrewRequired, Is.EqualTo(design.CrewReq), snapshot.Name);
             Assert.That(snapshot.CrewBerths, Is.EqualTo(design.CrewBerths));
-            Assert.That(snapshot.CrewTracked, Is.False);
+            Assert.That(snapshot.CrewTracked, Is.True);
+            Assert.That(snapshot.CrewAboard, Is.EqualTo(design.CrewReq));
             Assert.That(snapshot.UnderCrewed, Is.False);
         }
     }
@@ -106,6 +107,7 @@ public class ApiCrewSnapshotTests
         foreach (var pad in industry.Pads.Where(p => p.Free))
         {
             Assert.That(pad.CrewRequired, Is.EqualTo(0), "a free pad needs nobody");
+            Assert.That(pad.CrewToBoard, Is.EqualTo(0));
             Assert.That(pad.CrewShort, Is.False);
             Assert.That(pad.CrewWarning, Is.Empty);
         }

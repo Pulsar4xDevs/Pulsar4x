@@ -48,7 +48,9 @@ namespace Pulsar4X.Storage
         {
             var transferData = transferDB.TransferData;
             var transferRange = transferDB.ParentStorageDB.TransferRangeDv_mps;
-            var transferRate = transferDB.ParentStorageDB.TransferRate;
+            // Crew plan phase 3: a ship's shuttlebays short of crew move cargo at F² (rate only, not range).
+            double transferRate = transferDB.ParentStorageDB.TransferRate
+                * (transferDB.ParentStorageDB.OwningEntity is { } owner ? Pulsar4X.Ships.ShipCrew.WorkRate(owner) : 1);
             double dv_mps = CalcDVDifference_m(transferData.PrimaryEntity, transferData.SecondaryEntity);
 
 

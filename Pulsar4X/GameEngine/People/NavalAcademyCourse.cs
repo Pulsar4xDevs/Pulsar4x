@@ -431,7 +431,7 @@ public static class NavalAcademyCourse
         return id;
     }
 
-    static int TakePeople(ColonyInfoDB info, int count)
+    internal static int TakePeople(ColonyInfoDB info, int count)
     {
         int species = -1;
         int left = count;

@@ -177,6 +177,8 @@ namespace Pulsar4X.Ships
 
             var position = new Vector3(targetRadius, 0, 0);
             var ship = ShipFactory.CreateShip(shipDesign, faction, position, planet, pad.ShipName);
+            // Crew plan phase 3: crew come from the colony's pool (an NPC's population); short launches under-crewed.
+            ShipCrew.BoardAtLaunch(ship, colonyEntity, colonyEntity.StarSysDateTime);
             // Ships that exist at the new game are started by PostNewGameInitialization.
             // A later launch is not, so the battery update never gets its first appointment.
             if (ship.HasDataBlob<EnergyGenAbilityDB>())
@@ -292,6 +294,7 @@ namespace Pulsar4X.Ships
 
             var position = new Vector3(OrbitMath.LowOrbitRadius(planet), 0, 0);
             var ship = ShipFactory.CreateShip(shipDesign, faction, position, planet, hull.Name);
+            ShipCrew.BoardAtLaunch(ship, colony, colony.StarSysDateTime);
             if (ship.HasDataBlob<EnergyGenAbilityDB>())
                 EnergyGenProcessor.EnergyGen(ship, ship.Manager.ManagerSubpulses.NextSafeInterruptTime);
             if (faction.TryGetDataBlob<FleetDB>(out var fleetDB))

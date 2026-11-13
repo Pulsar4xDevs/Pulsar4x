@@ -93,6 +93,9 @@ namespace Pulsar4X.Tests
             var design = new ShipDesign(Info, "Power Tab Test", components, (Data.Armor["plastic-armor"], 0f));
             design.Initialise(Info);
             var ship = ShipFactory.CreateShip(design, _faction, _planet, "Tabby");
+            // The test hull has no bridge or quarters, so it would sail with nobody aboard; crew it fully
+            // so its miner runs (crew plan phase 3).
+            ship.GetDataBlob<ShipCrewDB>().Aboard = ShipCrew.SplitOf(ship).Required;
 
             // The cells' propellant in the hold.
             var fuel = Data.CargoGoods.GetAny(parts.Cell.GetAttribute<EnergyGenerationAtb>().FuelType)!;

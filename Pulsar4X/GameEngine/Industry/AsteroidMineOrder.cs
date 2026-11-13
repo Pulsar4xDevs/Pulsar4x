@@ -108,7 +108,8 @@ public class AsteroidMineOrder : EntityAction
         if (rate > 0 && Target.TryGetDataBlob<MineralsDB>(out var minerals)
             && _entityCommanding.TryGetDataBlob<CargoStorageDB>(out var cargo))
         {
-            long budget = rate * wholeDays;
+            // Crew plan phase 3: a miner short of crew digs at F².
+            long budget = (long)Math.Floor(rate * wholeDays * Pulsar4X.Ships.ShipCrew.WorkRate(_entityCommanding) + 1e-9);
             var library = _entityCommanding.GetFactionCargoDefinitions();
             if (library != null && budget > 0)
             {

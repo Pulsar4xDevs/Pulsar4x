@@ -183,6 +183,14 @@ namespace Pulsar4X.Engine.Api
                 systemId: ship.Manager.ManagerID,
                 factionId: ship.FactionOwnerID));
 
+        // Crew moves are a direct write: publish so the ship and colony views refresh while paused.
+        private static void PublishEntityChanged(Entity entity)
+            => MessagePublisher.Instance.Publish(Message.Create(
+                MessageTypes.EntityChanged,
+                entityId: entity.Id,
+                systemId: entity.Manager.ManagerID,
+                factionId: entity.FactionOwnerID));
+
         private bool TryResolve(int entityId, out Entity entity)
             => _game.GlobalManager.TryGetGlobalEntityById(entityId, out entity);
 
@@ -2039,8 +2047,6 @@ namespace Pulsar4X.Engine.Api
                 : CommandResult.Reject(reason);
         }
 
-        /// <summary>Refusal for crew commands whose engine half has not landed yet.</summary>
-        internal const string CrewNotYet = "Not yet: crew aboard ships arrives in a later update.";
 
         private CommandResult TranslateTrainAcademyCrew(Entity faction, Entity commanded, GameCommand command)
         {
@@ -2056,18 +2062,46 @@ namespace Pulsar4X.Engine.Api
         }
 
         private CommandResult TranslateTopUpCrew(Entity faction, Entity commanded, GameCommand command)
-            => CrewTransferCheck(faction, commanded, ((TopUpCrewCommand)command).ColonyId) ?? CommandResult.Reject(CrewNotYet);
+        {
+            var topUp = (TopUpCrewCommand)command;
+            if (CrewTransferCheck(faction, commanded, topUp.ColonyId, out var colony) is { } rejected)
+                return rejected;
+            if (topUp.Count == 0 || topUp.Count < -1)
+                return CommandResult.Reject("Top up at least one crew, or -1 to fill.");
+            int room = ShipCrew.SplitOf(commanded).Capacity - ShipCrew.Aboard(commanded);
+            if (room <= 0)
+                return CommandResult.Reject("The ship has a full crew.");
+            if (ShipCrew.Available(colony, 1) <= 0)
+                return CommandResult.Reject(ShipCrew.CrewsFromPopulation(colony) ? "The colony has no people." : "The colony's crew pool is empty.");
+            ShipCrew.TopUp(commanded, colony, topUp.Count);
+            PublishEntityChanged(commanded);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
 
         private CommandResult TranslateCrewToPool(Entity faction, Entity commanded, GameCommand command)
-            => CrewTransferCheck(faction, commanded, ((CrewToPoolCommand)command).ColonyId) ?? CommandResult.Reject(CrewNotYet);
+        {
+            var down = (CrewToPoolCommand)command;
+            if (CrewTransferCheck(faction, commanded, down.ColonyId, out var colony) is { } rejected)
+                return rejected;
+            if (down.Count == 0 || down.Count < -1)
+                return CommandResult.Reject("Send down at least one crew, or -1 for everyone.");
+            if (ShipCrew.Aboard(commanded) <= 0)
+                return CommandResult.Reject("Nobody is aboard.");
+            ShipCrew.ToPool(commanded, colony, down.Count);
+            PublishEntityChanged(commanded);
+            return CommandResult.Ok(Guid.NewGuid().ToString("N"));
+        }
 
         /// <summary>A crew transfer is one owned ship and one owned colony. Null when the pair is valid.</summary>
-        private CommandResult? CrewTransferCheck(Entity faction, Entity ship, int colonyId)
+        private CommandResult? CrewTransferCheck(Entity faction, Entity ship, int colonyId, out Entity colony)
         {
+            colony = null!;
             if (!ship.HasDataBlob<ShipInfoDB>())
                 return CommandResult.Reject("Crew move to or from one ship.");
-            if (!TryResolve(colonyId, out var colony) || colony.FactionOwnerID != faction.Id || !colony.HasDataBlob<ColonyInfoDB>())
+            if (!TryResolve(colonyId, out colony) || colony.FactionOwnerID != faction.Id || !colony.HasDataBlob<ColonyInfoDB>())
                 return CommandResult.Reject($"Colony {colonyId} not found.");
+            if (ShipCrew.TransferRefusal(ship, colony) is { } refusal)
+                return CommandResult.Reject(refusal);
             return null;
         }
 

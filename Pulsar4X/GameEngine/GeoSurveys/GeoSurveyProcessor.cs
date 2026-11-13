@@ -67,7 +67,8 @@ public class GeoSurveyProcessor : IInstanceProcessor
 
         if(entity.TryGetDataBlob<GeoSurveyAbilityDB>(out var geoSurveyAbilityDB))
         {
-            totalSurveyPoints += CommanderSkills.SurveyRate(geoSurveyAbilityDB.Speed, entity);
+            // Crew plan phase 3: a surveyor short of crew works at F².
+            totalSurveyPoints += Pulsar4X.Ships.ShipCrew.ScaleSurvey(entity, CommanderSkills.SurveyRate(geoSurveyAbilityDB.Speed, entity), grav: false);
         }
 
         if(entity.TryGetDataBlob<FleetDB>(out var fleetDB))

@@ -135,6 +135,10 @@ namespace Pulsar4X.Ships
                 NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship);
             }
 
+            // Crew plan phase 3: a new ship starts fully crewed (scenario and test ships). A launch
+            // then sets its crew from the colony (ShipCrew.BoardAtLaunch).
+            ShipCrew.CrewFully(ship);
+
             return ship;
         }
 

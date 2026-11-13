@@ -42,7 +42,8 @@ public class LocalConstructionProcessor : IHotloopProcessor
         if (!entity.TryGetDataBlob<CargoStorageDB>(out var storage))
             return;
 
-        long pointsLeft = constructionDB.PointsPerDay;
+        // Crew plan phase 3: a ship's construction bay short of crew builds at F² (colonies are 1).
+        long pointsLeft = (long)Math.Floor(constructionDB.PointsPerDay * Pulsar4X.Ships.ShipCrew.WorkRate(entity) + 1e-9);
         int queuedBefore = constructionDB.BuildQueue.Count;
         int refitsBefore = constructionDB.RefitQueue.Count;
         double scrapBefore = Pulsar4X.Energy.ColonyPowerProcessor.Scrapping_kW(entity);
@@ -89,7 +90,7 @@ public class LocalConstructionProcessor : IHotloopProcessor
     /// </summary>
     static void SpendRefit(Entity yard, CargoStorageDB storage, LocalConstructionDB construction)
     {
-        long pointsLeft = construction.RefitPointsPerDay;
+        long pointsLeft = (long)Math.Floor(construction.RefitPointsPerDay * Pulsar4X.Ships.ShipCrew.WorkRate(yard) + 1e-9);
         while (pointsLeft > 0 && construction.RefitQueue.Count > 0)
         {
             var job = construction.RefitQueue.Peek();
@@ -216,6 +217,8 @@ public class LocalConstructionProcessor : IHotloopProcessor
         foreach (var part in taken)
             ship.AddComponent(part);
         AdoptDesign(yard, ship, job);
+        // Crew plan phase 3: crew the refitted ship cannot berth (or no longer needs) go to the yard's pool.
+        Pulsar4X.Ships.ShipCrew.AfterRefit(ship, yard);
         return true;
     }
 

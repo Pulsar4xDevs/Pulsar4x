@@ -22,7 +22,8 @@ namespace Pulsar4X.Movement
                     && OwningEntity.IsValid
                     && OwningEntity.TryGetDataBlob<MassVolumeDB>(out var mass)
                     && mass.MassDry > 0)
-                    return WarpMath.MaxSpeedCalc(TotalWarpPower, mass.MassDry);
+                    // Crew plan phase 3: warp drives short of their crew run at aboard / engine crew.
+                    return WarpMath.MaxSpeedCalc(TotalWarpPower * Pulsar4X.Ships.ShipCrew.EngineFactor(OwningEntity), mass.MassDry);
                 return _setSpeed;
             }
             internal set => _setSpeed = value;
