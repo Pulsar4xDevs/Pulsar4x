@@ -234,6 +234,45 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void EmptyBatteries_WithSpareOutput_AreCharging_NotNoPower()
+        {
+            var (ship, _) = BuildShip();
+            var power = ship.GetDataBlob<EnergyGenAbilityDB>();
+            string id = power.EnergyType.UniqueID;
+            power.EnergyStored[id] = 0;
+            double generation = power.TotalOutputMax;
+            double max = power.EnergyStoreMax[id];
+            Assert.That(generation, Is.GreaterThan(0));
+            Assert.That(power.AuxServed, Is.EqualTo(0), "engine: other loads wait for full batteries");
+
+            var view = _projector.ProjectEntity(ship, _faction.Id).GetView<ShipPowerView>()!;
+            Assert.That(view.Charging_kW, Is.EqualTo(generation).Within(1e-9), "no warp demand: all output charges");
+            Assert.That(view.LoadsWaitOnCharge, Is.True);
+            Assert.That(view.FullIn_s, Is.EqualTo(max / generation).Within(1e-6));
+            Assert.That(view.Delivered_kW, Is.EqualTo(0), "charging is not delivered to a load");
+            Assert.That(view.SupplyShare, Is.EqualTo(0));
+            var sensors = view.LoadGroups.Single(g => g.Kind == "Sensors");
+            Assert.That(sensors.State, Is.EqualTo("Charging"), "waiting on a charge, not a shortage");
+            Assert.That(sensors.Satisfaction, Is.EqualTo(0));
+            Assert.That(sensors.Note, Does.Contain("Waiting for the batteries"));
+
+            // Warp taking all output with empty batteries: nothing charges, so it is a real shortage.
+            power.AddDemand(2 * generation, power.dateTimeLastProcess);
+            var warping = _projector.ProjectEntity(ship, _faction.Id).GetView<ShipPowerView>()!;
+            Assert.That(warping.Charging_kW, Is.EqualTo(0));
+            Assert.That(warping.LoadsWaitOnCharge, Is.False);
+            Assert.That(warping.FullIn_s, Is.Null);
+            Assert.That(warping.LoadGroups.Single(g => g.Kind == "Sensors").State, Is.EqualTo("No power"));
+
+            // Full batteries: nothing to charge.
+            power.AddDemand(-2 * generation, power.dateTimeLastProcess);
+            FillBatteries(power);
+            var full = _projector.ProjectEntity(ship, _faction.Id).GetView<ShipPowerView>()!;
+            Assert.That(full.Charging_kW, Is.EqualTo(0));
+            Assert.That(full.LoadGroups.Single(g => g.Kind == "Sensors").State, Is.EqualTo("Powered"));
+        }
+
+        [Test]
         public void Miners_ShowTheRunningOrdersReport_PoweredOrNoPower()
         {
             Data.Unlock("iron");

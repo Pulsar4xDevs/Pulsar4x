@@ -491,6 +491,18 @@ public sealed record ShipPowerView(double Generation_kW, double Demand_kW, doubl
     /// <summary>The share of <see cref="AuxDemand_kW"/> the plant serves now, kW (0 while the batteries charge).</summary>
     public double AuxServed_kW { get; init; }
 
+    /// <summary>
+    /// Output going into the batteries now, kW: the spare over warp demand while the store has room
+    /// (the engine charges first and serves other loads only once full). Not counted in Delivered_kW.
+    /// </summary>
+    public double Charging_kW { get; init; }
+
+    /// <summary>Seconds until the batteries are full at <see cref="Charging_kW"/>, or null when not charging.</summary>
+    public double? FullIn_s => Charging_kW > 0 && StoreMax_kJ > Stored_kJ ? (StoreMax_kJ - Math.Max(0, Stored_kJ)) / Charging_kW : null;
+
+    /// <summary>True while the batteries charge and the other loads wait for them (not a shortage).</summary>
+    public bool LoadsWaitOnCharge => Charging_kW > 0 && AuxDemand_kW > 0 && AuxServed_kW < AuxDemand_kW;
+
     /// <summary>Warp demand plus the other loads, kW.</summary>
     public double TotalDemand_kW => Demand_kW + AuxDemand_kW;
 
@@ -543,7 +555,8 @@ public sealed record ShipPowerSourceRow(string Kind, string Name, int Count, dou
 /// <summary>
 /// One group of ship loads. Kind is "Engines and warp", "Sensors", "Other loads" or "Miners".
 /// Satisfaction is the share served now, 0..1, or null when the engine does not measure it (a miner
-/// that is idle or reports it went short). State is "Powered", "Partial", "No power" or "Idle".
+/// that is idle or reports it went short). State is "Powered", "Partial", "No power", "Idle", or
+/// "Charging" for sensors and other loads waiting while the batteries charge (output exists; not a shortage).
 /// </summary>
 public sealed record ShipPowerLoadGroup(string Kind, double Demand_kW, double Served_kW, double? Satisfaction, string State,
     IReadOnlyList<ShipPowerLoadRow> Loads, string? Note = null);

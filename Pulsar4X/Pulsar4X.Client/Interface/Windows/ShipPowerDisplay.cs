@@ -45,40 +45,57 @@ namespace Pulsar4X.Client
 
         static void Summary(ShipPowerView power, Vector4 accentColour)
         {
+            // Charging with the loads waiting is not a shortage: the plant runs flat out into the
+            // batteries, and the engine serves sensors and other loads once they are full.
+            bool charging = power.LoadsWaitOnCharge;
+            Vector4 ringColour = charging ? PowerRing.PartialColour : PowerRing.ColourFor(power.SupplyShare);
+            string words = charging ? "charging batteries" : PowerRing.WordsFor(power.SupplyShare);
+
             const float radius = 26f, thickness = 5f;
             var cursor = ImGui.GetCursorScreenPos();
             var centre = new Vector2(cursor.X + radius + thickness, cursor.Y + radius + thickness);
-            string tooltip = power.TotalDemand_kW > 0
-                ? $"Delivered {Stringify.Power(power.Delivered_kW)} of {Stringify.Power(power.TotalDemand_kW)} demand, {PowerRing.WordsFor(power.SupplyShare)}"
-                : power.HasPlant ? "Nothing draws power" : "No power plant. Nothing draws power";
-            PowerRing.DrawAt(ImGui.GetWindowDrawList(), centre, radius, thickness, power.SupplyShare, accentColour, tooltip);
+            string tooltip = charging
+                ? $"{Stringify.Power(power.Charging_kW)} is charging the batteries; {Stringify.Power(power.AuxDemand_kW)} of other loads wait until they are full"
+                : power.TotalDemand_kW > 0
+                    ? $"Delivered {Stringify.Power(power.Delivered_kW)} of {Stringify.Power(power.TotalDemand_kW)} demand, {words}"
+                    : power.HasPlant ? "Nothing draws power" : "No power plant. Nothing draws power";
+            RadialIndicator.Draw(ImGui.GetWindowDrawList(), centre, radius, thickness, (float)power.SupplyShare,
+                "POWER", $"{power.SupplyShare * 100:0}%", false, accentColour, ringColour, tooltip);
             ImGui.InvisibleButton("##shipPowerRing", new Vector2((radius + thickness) * 2f, (radius + thickness) * 2f + ImGui.GetTextLineHeight() + 2f));
             ImGui.SameLine();
             ImGui.BeginGroup();
-            ImGui.PushStyleColor(ImGuiCol.Text, PowerRing.ColourFor(power.SupplyShare));
-            ImGui.TextUnformatted(Capitalise(PowerRing.WordsFor(power.SupplyShare)));
+            ImGui.PushStyleColor(ImGuiCol.Text, ringColour);
+            ImGui.TextUnformatted(Capitalise(words));
             ImGui.PopStyleColor();
+            if (charging)
+            {
+                ImGui.TextDisabled("Loads wait until full");
+                if (power.FullIn_s is { } full)
+                    ImGui.TextDisabled("Full in " + Duration(full));
+            }
             if (!power.HasPlant)
                 ImGui.TextDisabled("No power plant");
             ImGui.EndGroup();
 
             ImGui.Columns(2, "ShipPowerSummaryCols", false);
+            ImGui.SetColumnWidth(0, 96f);
             DisplayHelpers.PrintRow("Generation", Stringify.Power(power.Generation_kW), tooltipTwo: "What the sources can give now (an RTG after decay, a reactor or fuel cell only with fuel)");
             DisplayHelpers.PrintRow("Demand", Stringify.Power(power.TotalDemand_kW),
                 tooltipTwo: $"Warp {Stringify.Power(power.Demand_kW)}, other loads {Stringify.Power(power.AuxDemand_kW)}");
-            DisplayHelpers.PrintRow("Delivered", Stringify.Power(power.Delivered_kW), tooltipTwo: "Warp up to generation, plus the other loads served from spare output");
+            DisplayHelpers.PrintRow("Delivered", Stringify.Power(power.Delivered_kW), tooltipTwo: "To the loads: warp up to generation, plus the other loads served from spare output. Charging is not counted.");
+            if (power.Charging_kW > 0)
+                DisplayHelpers.PrintRow("To batteries", Stringify.Power(power.Charging_kW), tooltipTwo: "Output over warp demand while the batteries have room");
             // PrintRow draws with ImGui.Text, which reads printf formats: escape the percent signs.
-            DisplayHelpers.PrintRow("Share", $"{power.SupplyShare * 100:0}%%");
+            DisplayHelpers.PrintRow("Share", $"{power.SupplyShare * 100:0}%%", tooltipTwo: "Delivered over demand");
             if (power.StoreMax_kJ > 0)
             {
                 double fraction = Math.Clamp(power.Stored_kJ / power.StoreMax_kJ, 0, 1);
-                DisplayHelpers.PrintRow("Batteries", $"{fraction * 100:0.#}%%  {Stringify.Energy(Math.Max(0, power.Stored_kJ))} / {Stringify.Energy(power.StoreMax_kJ)}", separator: false);
+                DisplayHelpers.PrintRow("Batteries", $"{fraction * 100:0.#}%% of {Stringify.Energy(power.StoreMax_kJ, "0.#")}",
+                    tooltipTwo: $"{Stringify.Energy(Math.Max(0, power.Stored_kJ))} of {Stringify.Energy(power.StoreMax_kJ)}, as of the plant's last energy step", separator: false);
             }
             ImGui.Columns(1);
             if (power.Demand_kW > power.Generation_kW && power.Stored_kJ > 0)
                 ImGui.TextWrapped("Generation is below warp demand. The batteries cover the gap while they last.");
-            if (power.AuxDemand_kW > 0 && power.AuxServed_kW < power.AuxDemand_kW && power.StoreMax_kJ > 0 && power.Stored_kJ < power.StoreMax_kJ)
-                ImGui.TextWrapped("Sensors and other loads wait until the batteries are full.");
         }
 
         static void Sources(ShipPowerView power)
@@ -88,25 +105,27 @@ namespace Pulsar4X.Client
                 ImGui.TextDisabled("No power sources on this ship.");
                 return;
             }
-            if (!ImGui.BeginTable("ShipPowerSources", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+            if (!ImGui.BeginTable("ShipPowerSources", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingFixedFit))
                 return;
-            ImGui.TableSetupColumn("Source");
+            ImGui.TableSetupColumn("Source", ImGuiTableColumnFlags.WidthStretch, 1.4f);
             ImGui.TableSetupColumn("Kind");
-            ImGui.TableSetupColumn("Count");
-            ImGui.TableSetupColumn("Output now / installed");
-            ImGui.TableSetupColumn("Fuel or decay");
+            ImGui.TableSetupColumn("#");
+            ImGui.TableSetupColumn("Now / max");
+            ImGui.TableSetupColumn("Fuel or decay", ImGuiTableColumnFlags.WidthStretch, 1f);
             ImGui.TableHeadersRow();
             foreach (var s in power.Sources)
             {
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.TextUnformatted(s.Name);
+                ImGui.TextWrapped(s.Name);
                 ImGui.TableNextColumn();
-                ImGui.TextUnformatted(s.Kind == "Reactor" ? "Reactor / turbine" : s.Kind);
+                ImGui.TextUnformatted(s.Kind);
+                if (s.Kind == "Reactor" && ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Fission reactor or steam turbine");
                 ImGui.TableNextColumn();
                 ImGui.TextUnformatted(s.Count.ToString());
                 ImGui.TableNextColumn();
-                ImGui.TextUnformatted($"{Stringify.Power(s.Output_kW)} / {Stringify.Power(s.Nameplate_kW)}");
+                ImGui.TextUnformatted($"{Stringify.Power(s.Output_kW, "0.#")} / {Stringify.Power(s.Nameplate_kW, "0.#")}");
                 if (s.Note != null)
                 {
                     ImGui.SameLine();
@@ -115,25 +134,37 @@ namespace Pulsar4X.Client
                         ImGui.SetTooltip(s.Note);
                 }
                 ImGui.TableNextColumn();
-                ImGui.TextUnformatted(FuelText(s));
-                if (s.FuelBurnAtFull_kgPerS is { } burn && ImGui.IsItemHovered())
-                    ImGui.SetTooltip($"Burns {Stringify.Mass(burn * 86400.0)}/day at full output");
+                ImGui.TextWrapped(FuelText(s));
+                string? detail = FuelDetail(s);
+                if (detail != null && ImGui.IsItemHovered())
+                    ImGui.SetTooltip(detail);
             }
             ImGui.EndTable();
         }
 
+        /// <summary>The short cell text, e.g. "600 kg, 15,210 y" or "50% left, t1/2 88 y".</summary>
         static string FuelText(ShipPowerSourceRow s)
         {
             if (s.DecayRemaining is { } left)
-                return $"{left * 100:0.#}% of new" + (s.HalfLife_years is { } hl ? $", half-life {hl:0.#} years" : "");
+                return $"{left * 100:0}% of new" + (s.HalfLife_years is { } hl ? $", t1/2 {hl:0} y" : "");
             if (s.FuelRemaining_kg is { } kg)
-            {
-                string text = $"{s.FuelName ?? "Fuel"}: {Stringify.Mass(kg)} left";
-                if (s.RunwayAtFull_s is { } runway)
-                    text += $", {Duration(runway)} at full output";
-                return text;
-            }
+                return s.RunwayAtFull_s is { } runway ? $"{Stringify.Mass(kg, "0.#")}, {ShortDuration(runway)}" : Stringify.Mass(kg, "0.#");
             return s.Kind == "Solar" ? "Sunlight" : "";
+        }
+
+        /// <summary>The long form for the hover.</summary>
+        static string? FuelDetail(ShipPowerSourceRow s)
+        {
+            if (s.DecayRemaining is { } left)
+                return $"Output is {left * 100:0.#}% of new" + (s.HalfLife_years is { } hl ? $"; it halves every {hl:0.#} years" : "");
+            if (s.FuelRemaining_kg is not { } kg)
+                return null;
+            string text = $"{s.FuelName ?? "Fuel"}: {Stringify.Mass(kg)} left";
+            if (s.RunwayAtFull_s is { } runway)
+                text += $", lasts {Duration(runway)} at full output";
+            if (s.FuelBurnAtFull_kgPerS is { } burn)
+                text += $"\nBurns {Stringify.Mass(burn * 86400.0)}/day at full output";
+            return text;
         }
 
         static void Loads(ShipPowerView power)
@@ -151,10 +182,18 @@ namespace Pulsar4X.Client
                     "Powered" => PowerRing.FullColour,
                     "Partial" => PowerRing.PartialColour,
                     "No power" => PowerRing.NoneColour,
+                    "Charging" => PowerRing.PartialColour,
                     _ => Styles.DescriptiveColor,
                 };
                 ImGui.PushStyleColor(ImGuiCol.PlotHistogram, colour);
-                ImGui.ProgressBar(g.State == "Idle" ? 0f : (float)share, new Vector2(80f, 0f), "");
+                // Waiting on a charge: the bar shows how full the batteries are, in amber.
+                float fill = g.State switch
+                {
+                    "Idle" => 0f,
+                    "Charging" => power.StoreMax_kJ > 0 ? (float)Math.Clamp(power.Stored_kJ / power.StoreMax_kJ, 0, 1) : 0f,
+                    _ => (float)share,
+                };
+                ImGui.ProgressBar(fill, new Vector2(80f, 0f), "");
                 ImGui.PopStyleColor();
                 ImGui.SameLine();
                 string demand = g.Kind == "Miners" ? "per dig" : Stringify.Power(g.Demand_kW);
@@ -200,6 +239,7 @@ namespace Pulsar4X.Client
         static string Words(ShipPowerLoadGroup g) => g.State switch
         {
             "Idle" => "idle",
+            "Charging" => "charging batteries",
             "Partial" when g.Satisfaction is null => "running short",
             _ => PowerRing.WordsFor(g.Satisfaction ?? (g.State == "No power" ? 0 : 1)),
         };
@@ -269,6 +309,17 @@ namespace Pulsar4X.Client
             if (days >= 2) return $"{days:N0} days";
             double hours = seconds / 3600.0;
             return hours >= 1 ? $"{hours:N1} hours" : $"{seconds / 60.0:N0} min";
+        }
+
+        /// <summary>"15,210 y", "40 d", "5 h", "12 min".</summary>
+        static string ShortDuration(double seconds)
+        {
+            if (!double.IsFinite(seconds)) return "-";
+            double days = seconds / 86400.0;
+            if (days >= 730) return $"{days / 365.25:N0} y";
+            if (days >= 2) return $"{days:N0} d";
+            double hours = seconds / 3600.0;
+            return hours >= 1 ? $"{hours:N0} h" : $"{seconds / 60.0:N0} min";
         }
 
         static string Capitalise(string s) => s.Length == 0 ? s : char.ToUpperInvariant(s[0]) + s.Substring(1);

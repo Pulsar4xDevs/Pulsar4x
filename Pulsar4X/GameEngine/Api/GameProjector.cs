@@ -354,12 +354,16 @@ namespace Pulsar4X.Engine.Api
             double generation = energy.TotalOutputMax;
             double aux = Math.Max(0, energy.AuxDemand);
             double auxServed = Math.Clamp(energy.AuxServed, 0, aux);
+            // The engine's step model (EnergyGenProcessor.Phases): with room in the store and output to
+            // spare, the plant runs flat out and the spare charges the batteries; other loads wait.
+            double charging = storeMax - stored > 1e-9 ? Math.Max(0, generation - demand) : 0;
             return new ShipPowerView(generation, demand, stored, storeMax, hasPlant)
             {
                 AuxDemand_kW = aux,
                 AuxServed_kW = auxServed,
+                Charging_kW = charging,
                 Sources = ShipPowerSources(ship, energy),
-                LoadGroups = ShipPowerLoadGroups(ship, demand, generation, aux, auxServed),
+                LoadGroups = ShipPowerLoadGroups(ship, demand, generation, aux, auxServed, charging),
             };
         }
 
@@ -463,7 +467,7 @@ namespace Pulsar4X.Engine.Api
         /// so both groups get the same share. Miners draw per dig (ShipPower.DrawEnergy) and keep no kW
         /// load, so their state comes from the running mining order's report.
         /// </summary>
-        private static IReadOnlyList<ShipPowerLoadGroup> ShipPowerLoadGroups(Entity ship, double demand, double generation, double aux, double auxServed)
+        private static IReadOnlyList<ShipPowerLoadGroup> ShipPowerLoadGroups(Entity ship, double demand, double generation, double aux, double auxServed, double charging)
         {
             var groups = new List<ShipPowerLoadGroup>();
 
@@ -480,15 +484,19 @@ namespace Pulsar4X.Engine.Api
 
             var consumers = DesignsWith<Pulsar4X.Energy.PowerConsumerAtb>(ship).Where(c => c.atb.Draw_kW > 0).ToList();
             double auxShare = aux > 0 ? Math.Clamp(auxServed / aux, 0, 1) : 1;
-            string? auxNote = aux > 0 && auxServed < aux
-                ? "Runs on spare output once the batteries are full, after warp and charging" : null;
+            // Waiting on a charge is not a shortage: the plant has output, it goes to the batteries first.
+            bool waitingOnCharge = aux > 0 && auxServed < aux && charging > 0;
+            string? auxNote = waitingOnCharge
+                ? $"Waiting for the batteries: they charge first ({charging:0.###} kW spare), then these run"
+                : aux > 0 && auxServed < aux
+                    ? "Runs on spare output once the batteries are full, after warp and charging" : null;
             foreach (var (kind, sensors) in new[] { ("Sensors", true), ("Other loads", false) })
             {
                 var mine = consumers.Where(c => c.design.HasAttribute<Pulsar4X.Sensors.SensorReceiverAtb>() == sensors).ToList();
                 if (mine.Count == 0)
                     continue;
                 double kw = mine.Sum(c => c.atb.Draw_kW * c.count);
-                groups.Add(new ShipPowerLoadGroup(kind, kw, kw * auxShare, auxShare, StateFor(auxShare),
+                groups.Add(new ShipPowerLoadGroup(kind, kw, kw * auxShare, auxShare, waitingOnCharge ? "Charging" : StateFor(auxShare),
                     mine.Select(c => new ShipPowerLoadRow(c.design.UniqueID, c.design.Name, c.count, c.atb.Draw_kW * c.count)).ToList(),
                     auxNote));
             }
