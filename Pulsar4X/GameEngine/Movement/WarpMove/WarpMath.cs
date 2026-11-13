@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Energy;
 using Pulsar4X.Engine;
@@ -204,6 +205,59 @@ public static class WarpMath
         if (!(speed >= MinWarpSpeed_ms))
             return "Warp speed " + Stringify.Velocity(speed) + " is below the " + Stringify.Velocity(MinWarpSpeed_ms) + " minimum.";
         return "";
+    }
+
+    /// <summary>
+    /// Design-time warp checks for the ship designer. Totals come from the components the same
+    /// way installation builds the live ship:
+    /// sustain and creation add up over every drive (WarpDriveAtb.OnComponentInstallation);
+    /// plant output is generator output only (EnergyGenAbilityDB.MaxOutputFromReactor; solar is
+    /// left out because it drops away from a star);
+    /// the store is EnergyStoreAtb.MaxStore for the drive's energy type plus one second of each
+    /// generator's output (EnergyGenerationAtb.OnComponentInstallation adds that), i.e. the live
+    /// EnergyStoreMax[WarpAbilityDB.EnergyType].
+    /// The sustain line is the <see cref="WarpRefusal"/> demand test; the creation line is
+    /// WarpMoveAction's "store can never hold it" test. Empty when there is no drive or nothing is wrong.
+    /// </summary>
+    public static List<string> DesignWarpWarnings(IEnumerable<(ComponentDesign design, int count)> components)
+    {
+        double sustain = 0;
+        double creation = 0;
+        double output = 0;
+        string energyType = null;
+        bool hasDrive = false;
+        foreach (var (design, count) in components)
+        {
+            if (design.TryGetAttribute<WarpDriveAtb>(out var drive))
+            {
+                hasDrive = true;
+                energyType ??= drive.EnergyType;
+                sustain += drive.BubbleSustainCost * count;
+                creation += drive.BubbleCreationCost * count;
+            }
+            if (design.TryGetAttribute<EnergyGenerationAtb>(out var plant))
+                output += plant.PowerOutputMax * count;
+        }
+
+        var warnings = new List<string>();
+        if (!hasDrive)
+            return warnings;
+
+        double store = 0;
+        foreach (var (design, count) in components)
+        {
+            if (design.TryGetAttribute<EnergyStoreAtb>(out var battery) && battery.EnergyTypeID == energyType)
+                store += battery.MaxStore * count;
+            if (design.TryGetAttribute<EnergyGenerationAtb>(out var plant) && plant.EnergyTypeID == energyType)
+                store += plant.PowerOutputMax * count;
+        }
+
+        if (sustain > output)
+            warnings.Add("Can't warp: bubble sustain needs " + Stringify.Power(sustain) + ", plant makes " + Stringify.Power(output) + ".");
+        // WarpMoveAction.Execute: storeMax + 1e-6 >= creationCost or the warp fails.
+        if (store + 1e-6 < creation)
+            warnings.Add("Can't warp: bubble creation needs " + Stringify.Energy(creation) + ", batteries hold " + Stringify.Energy(store) + ".");
+        return warnings;
     }
 
     /// <summary>

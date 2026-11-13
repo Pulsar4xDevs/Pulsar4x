@@ -73,6 +73,7 @@ namespace Pulsar4X.Client
         private double _wec;
         private double _wspd;
         private double _wpow;
+        private List<string> _warpWarnings = new();
         //newt
         private double _tn;
         private double _ttwr;
@@ -730,7 +731,7 @@ namespace Pulsar4X.Client
                 ImGui.TableNextColumn();
                 ImGui.Text("Max warp speed (empty)");
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Open-space speed with empty holds and tanks.\nCargo only slows a climb out of a star's gravity well.");
+                    ImGui.SetTooltip("Drive speed with empty holds and tanks.\nFalling toward a star it is capped by the drive's bleed.\nClimbing away from a star it is limited by plant output and the loaded mass.");
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.Velocity(_wspd));
                 ImGui.SameLine();
@@ -750,6 +751,15 @@ namespace Pulsar4X.Client
                 ImGui.Text("Warp Bubble Collapse");
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.Power(_wec));
+
+                foreach (var warning in _warpWarnings)
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.TableNextColumn();
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+                    ImGui.TextWrapped(warning);
+                    ImGui.PopStyleColor();
+                }
 
                 ImGui.TableNextColumn();
                 ImGui.Text((_solarArea > 0 || double.IsNaN(_solarArea)) ? "Non-solar Output" : "Energy Output");
@@ -979,6 +989,7 @@ namespace Pulsar4X.Client
             _wsc = wsc;
             _wspd = WarpMath.MaxSpeedCalc(wp, mass);
             _wpow = wp;
+            _warpWarnings = WarpMath.DesignWarpWarnings(SelectedComponents);
             _egen = egen;
             _solarArea = ShipDesign.GetSolarCollectionArea(SelectedComponents);
             _estor = estor;
