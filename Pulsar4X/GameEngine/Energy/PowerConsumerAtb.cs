@@ -9,7 +9,9 @@ namespace Pulsar4X.Energy
     /// <summary>
     /// A colony installation's nameplate electrical draw, in kW, and its shortfall tier.
     /// The colony grid (<see cref="ColonyPowerProcessor"/>) sums these from the installed
-    /// designs, so install and uninstall have nothing to do. On a ship this has no effect yet.
+    /// designs, so install and uninstall do nothing there. On a ship (energy phase 6) install adds
+    /// the draw to <see cref="EnergyGenAbilityDB.AuxDemand"/>: it runs on spare output once the
+    /// store is full, so warp and charging come first.
     /// </summary>
     public class PowerConsumerAtb : IComponentDesignAttribute
     {
@@ -30,9 +32,34 @@ namespace Pulsar4X.Energy
             Tier = Enum.IsDefined(typeof(PowerTier), t) ? (PowerTier)t : PowerTier.Industry;
         }
 
-        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance) { }
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+            if (parentEntity.HasDataBlob<Colonies.ColonyInfoDB>() || !(Draw_kW > 0))
+                return;
+            EnergyGenAbilityDB genDB;
+            if (!parentEntity.TryGetDataBlob(out genDB))
+            {
+                genDB = new EnergyGenAbilityDB(parentEntity.StarSysDateTime);
+                parentEntity.SetDataBlob(genDB);
+            }
+            else
+            {
+                EnergyGenProcessor.CatchUp(parentEntity, genDB);
+            }
+            genDB.AuxDemand += Draw_kW;
+        }
 
-        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance) { }
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+            if (parentEntity.HasDataBlob<Colonies.ColonyInfoDB>() || !(Draw_kW > 0))
+                return;
+            if (!parentEntity.TryGetDataBlob<EnergyGenAbilityDB>(out var genDB))
+                return;
+            EnergyGenProcessor.CatchUp(parentEntity, genDB);
+            genDB.AuxDemand = Math.Max(0, genDB.AuxDemand - Draw_kW);
+            if (genDB.AuxDemand < 1e-12)
+                genDB.AuxDemand = 0;
+        }
 
         public string AtbName() => "Power Draw";
 

@@ -82,6 +82,11 @@ namespace Pulsar4X.Energy
             EnergyStored = 0,
             EnergyStoreMax = 3000015,
             EnergyOutputMax = 15,
+            // Energy phase 6: the 2 t steam turbine, 50 kW of core heat at 30% for 15 kW,
+            // burns 50 / 40e9 kg/s of fissile fuel at full output.
+            ReactorOutputMax = 15,
+            ReactorFuelType = "fissile-fuels",
+            ReactorFuelPerKJ = 50.0 / 40e9 / 15,
         };
 
         /// <summary>The reference hauler's general hold, kg (1,000 t of cargo holds).</summary>

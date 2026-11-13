@@ -254,13 +254,20 @@ public class EmbodiedEnergyTests
     {
         var data = Info.Data;
         double hand = EnergyPriceOracle.Delivery_kWhPerKg(_game);
-        // 2 x (4e6/3 kJ + 15 kW x 0.2 AU / 22,029 m/s) / 3600 / 1e6 kg
-        Assert.That(hand, Is.EqualTo(0.012059).Within(1e-6));
+        // 2 x (4e6/3 kJ + 15 kW x 0.2 AU / 22,029 m/s) / 3600 / 1e6 kg = 0.012059, plus (energy
+        // phase 6) the turbine's fissile fuel for those kJ at 1,403 kWh/kg: 0.0000051.
+        Assert.That(hand, Is.EqualTo(0.012064).Within(1e-6));
         Assert.That(EnergyPricing.DepotDeliveryKWhPerKg(_game, data), Is.EqualTo(hand).Within(1e-12));
         var legs = EnergyPricing.DepotDeliveryLegs(_game);
         Assert.That(legs, Has.Count.EqualTo(2));
         Assert.That(legs.All(l => l.Feasible), Is.True);
-        Assert.That(legs.All(l => l.Mode == MoveCostMode.Warp && l.FuelUsed_kg.Count == 0), Is.True, "warped, no reaction fuel");
+        Assert.That(legs.All(l => l.Mode == MoveCostMode.Warp), Is.True, "warped, no reaction fuel");
+        // Energy phase 6: the only fuel is the reactor's, priced per kJ of the leg.
+        foreach (var l in legs)
+        {
+            Assert.That(l.FuelUsed_kg.Keys, Is.EquivalentTo(new[] { "fissile-fuels" }));
+            Assert.That(l.FuelUsed_kg["fissile-fuels"], Is.EqualTo(l.EnergyUsed_kJ * 50 / 40e9 / 15).Within(1e-12));
+        }
         TestContext.Out.WriteLine($"Delivery: {legs[0].EnergyUsed_kJ / 3600:N1} kWh back full + {legs[1].EnergyUsed_kJ / 3600:N1} kWh out empty"
             + $" over {EnergyPricing.ReferenceHold_kg:N0} kg = {hand:0.######} kWh/kg = {EnergyPricing.Credits(_game, hand):0.####} credits/kg"
             + $", {legs[0].Duration_s / 86400:0.0} days a leg");
@@ -374,6 +381,11 @@ public class EmbodiedEnergyTests
         Assert.That(reference.BleedFraction, Is.EqualTo(live.BleedFraction).Within(1e-12));
         Assert.That(reference.EnergyOutputMax, Is.EqualTo(live.EnergyOutputMax).Within(1e-9));
         Assert.That(reference.EnergyStoreMax, Is.EqualTo(live.EnergyStoreMax).Within(1e-6));
+        Assert.That(reference.ReactorOutputMax, Is.EqualTo(live.ReactorOutputMax).Within(1e-9));
+        Assert.That(reference.ReactorFuelType, Is.EqualTo(live.ReactorFuelType));
+        Assert.That(reference.ReactorFuelPerKJ, Is.EqualTo(live.ReactorFuelPerKJ).Within(1e-18));
+        Assert.That(reference.FreeOutputMax, Is.EqualTo(live.FreeOutputMax).Within(1e-9));
+        Assert.That(reference.CellOutputMax, Is.EqualTo(live.CellOutputMax).Within(1e-9));
         var leg = MoveCostCalculator.Warp(full, 0.2 * UniversalConstants.Units.MetersPerAu, sun(2.77), 0);
         Assert.That(EnergyPricing.DepotDeliveryLegs(game)[0].EnergyUsed_kJ, Is.EqualTo(leg.EnergyUsed_kJ).Within(1e-6 * leg.EnergyUsed_kJ));
     }

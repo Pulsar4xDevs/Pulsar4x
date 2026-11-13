@@ -137,7 +137,7 @@
       "UniqueID": "rtg",
       "Name": "RTG",
       "Formulas": {
-        "Description": "A non refuelable reactor, Generates power for a ship",
+        "Description": "A radioisotope thermoelectric generator: Pu-238 decay heat through thermocouples. No moving parts and no refuelling; output falls by half every 87.7 years as the isotope decays.",
         "Mass": "PropertyValue('Mass')",
         "Volume": "PropertyValue('Mass')",
         "HTK": "0.5",
@@ -160,7 +160,7 @@
         {
           "Name": "Mass",
           "Units": "kg",
-          "DescriptionFormula": "'Mass of the reactor'",
+          "DescriptionFormula": "'Mass of the generator'",
           "GuiHint": "GuiSelectionMaxMin",
           "MaxFormula": "25000",
           "MinFormula": "25",
@@ -168,47 +168,51 @@
           "PropertyFormula": "1000"
         },
         {
-          "Name": "Power Output",
-          "Units": "Kw",
-          "DescriptionFormula": "'Max output of this unit when new, output will degrade over lifetime of the unit'",
+          "Name": "Fuel",
+          "Units": "kg",
+          "DescriptionFormula": "'Isotope heat source: 15% of the mass, as in a GPHS-RTG'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Fuel') * PropertyValue('Heat per kg') * PropertyValue('Efficiency') * 0.01"
+          "PropertyFormula": "[Mass] * 0.15"
         },
         {
           "Name": "Heat per kg",
           "Units": "kW/kg",
-          "DescriptionFormula": "'Decay heat of the fuel. A shorter lived isotope runs hotter'",
+          "DescriptionFormula": "'Decay heat of Pu-238 when new, about 0.57 kW per kg'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "0.1 / PropertyValue('Operational Lifetime')"
-        },
-        {
-          "Name": "Fuel Consumption",
-          "Units": "kg/s",
-          "DescriptionFormula": "'Fuel Consumption kg per second at Max Output'",
-          "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "PropertyValue('Fuel') / (PropertyValue('Operational Lifetime') * 31557600)"
-        },
-        {
-          "Name": "Operational Lifetime",
-          "Units": "years",
-          "DescriptionFormula": "'Output vs lifetime'",
-          "GuiHint": "GuiSelectionMaxMin",
-          "MaxFormula": "25",
-          "MinFormula": "1",
-          "StepFormula": "1",
-          "PropertyFormula": "5"
+          "PropertyFormula": "0.57"
         },
         {
           "Name": "Efficiency",
           "Units": "percent",
-          "DescriptionFormula": "'The efficiency of this RTG to turn heat into electrical power, increased by research'",
+          "DescriptionFormula": "'Thermoelectric conversion: 6% at level 0, +0.5 points per Conductors level'",
           "GuiHint": "GuiTextDisplay",
-          "PropertyFormula": "TechData('tech-conductors') + 10"
+          "PropertyFormula": "6 + TechData('tech-conductors') * 0.5"
+        },
+        {
+          "Name": "Power Output",
+          "Units": "kW",
+          "DescriptionFormula": "'Output when new: fuel x heat per kg x efficiency. Halves every half-life.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Fuel') * PropertyValue('Heat per kg') * PropertyValue('Efficiency') * 0.01"
+        },
+        {
+          "Name": "Half-life",
+          "Units": "years",
+          "DescriptionFormula": "'Pu-238 half-life'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "87.7"
+        },
+        {
+          "Name": "Output after 20 years",
+          "Units": "kW",
+          "DescriptionFormula": "'Output once the isotope has decayed for 20 years'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Power Output') * Pow(0.5, 20.0 / PropertyValue('Half-life'))"
         },
         {
           "Name": "Watt per kg",
           "Units": "Watt",
-          "DescriptionFormula": "''",
+          "DescriptionFormula": "'Specific power when new'",
           "GuiHint": "GuiTextDisplay",
           "PropertyFormula": "(1000 * PropertyValue('Power Output')) / [Mass]"
         },
@@ -217,21 +221,14 @@
           "Units": "kg",
           "DescriptionFormula": "'Structural material amount'",
           "GuiHint": "None",
-          "PropertyFormula": "[Mass] * 0.3"
-        },
-        {
-          "Name": "Fuel",
-          "Units": "kg",
-          "DescriptionFormula": "'Fuel Amount'",
-          "GuiHint": "None",
-          "PropertyFormula": "[Mass] * 0.5"
+          "PropertyFormula": "[Mass] * 0.55"
         },
         {
           "Name": "Thermoelectric Materials",
           "Units": "kg",
           "DescriptionFormula": "'Amount of Material used for energy conversion'",
           "GuiHint": "None",
-          "PropertyFormula": "[Mass] * 0.1"
+          "PropertyFormula": "[Mass] * 0.2"
         },
         {
           "Name": "Electrics and wiring",
@@ -244,7 +241,7 @@
           "Name": "DB",
           "DescriptionFormula": "''",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(UniqueID('fissile-fuels'), PropertyValue('Fuel Consumption'), UniqueID('electricity'), PropertyValue('Power Output'), PropertyValue('Operational Lifetime') * 31557600)",
+          "PropertyFormula": "AtbConstrArgs(UniqueID('fissile-fuels'), 0.0, UniqueID('electricity'), PropertyValue('Power Output'), 0.0, PropertyValue('Half-life') * 31557600, 0.0)",
           "AttributeType": "Pulsar4X.Energy.EnergyGenerationAtb"
         },
         {
@@ -252,7 +249,105 @@
           "Units": "unknown",
           "DescriptionFormula": "''",
           "GuiHint": "None",
-          "PropertyFormula": "AtbConstrArgs(1700, PropertyValue('Power Output') * 0.1 * [Mass])",
+          "PropertyFormula": "AtbConstrArgs(1700, PropertyValue('Fuel') * PropertyValue('Heat per kg'))",
+          "AttributeType": "Pulsar4X.Sensors.SensorSignatureAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "fuel-cell",
+      "Name": "Fuel Cell",
+      "Formulas": {
+        "Description": "Hydrogen or methane fuel cells: electricity from the ship's tank propellant, burnt with its own oxidiser. Non-nuclear power for early ships, at a fuel cost of about half a kilogram per kWh.",
+        "Mass": "PropertyValue('Mass')",
+        "Volume": "PropertyValue('Mass') / 1000",
+        "HTK": "0.5",
+        "CrewReq": "1",
+        "ResearchCost": "[Mass] * 0.5",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "stainless-steel": "[Mass] * 0.3",
+        "plastic": "[Mass] * 0.3",
+        "nickel": "[Mass] * 0.2",
+        "graphite": "[Mass] * 0.1",
+        "electronics": "[Mass] * 0.1"
+      },
+      "ComponentType": "Energy Generator",
+      "MountType": "ShipComponent, ShipCargo, Fighter",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "component-construction",
+      "Properties": [
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass of the fuel cell stack and its plumbing'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "20000",
+          "MinFormula": "50",
+          "StepFormula": "10",
+          "PropertyFormula": "250"
+        },
+        {
+          "Name": "Fuel Type",
+          "DescriptionFormula": "'The tank propellant the cells burn'",
+          "GuiHint": "GuiFuelTypeSelection",
+          "DataDict": {
+            "fuel-storage": "'conventional'"
+          },
+          "PropertyFormula": "UniqueID('hydrolox')"
+        },
+        {
+          "Name": "Specific Power",
+          "Units": "W/kg",
+          "DescriptionFormula": "'Electric output per kg of stack, about 60 W/kg (the Shuttle cells were 7 kW at 118 kg)'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "60"
+        },
+        {
+          "Name": "Cell Efficiency",
+          "DescriptionFormula": "'Share of the propellant chemical energy turned into electricity'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "0.6"
+        },
+        {
+          "Name": "Power Output",
+          "Units": "kW",
+          "DescriptionFormula": "'Maximum electric output'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "[Mass] * PropertyValue('Specific Power') / 1000"
+        },
+        {
+          "Name": "Fuel per kWh",
+          "Units": "kg/kWh",
+          "DescriptionFormula": "'Propellant burnt per kWh: 3,600 kJ / (chemical energy per kg x efficiency)'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "3600 / (ChemicalEnergyLookup(PropertyValue('Fuel Type')) * PropertyValue('Cell Efficiency'))"
+        },
+        {
+          "Name": "Fuel Burn Rate",
+          "Units": "kg/s",
+          "DescriptionFormula": "'Propellant burnt per second at full output'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "PropertyValue('Power Output') * PropertyValue('Fuel per kWh') / 3600"
+        },
+        {
+          "Name": "DB",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(PropertyValue('Fuel Type'), PropertyValue('Fuel Burn Rate'), UniqueID('electricity'), PropertyValue('Power Output'), 0.0, 0.0, 1.0)",
+          "AttributeType": "Pulsar4X.Energy.EnergyGenerationAtb"
+        },
+        {
+          "Name": "Sensor Signature",
+          "Units": "unknown",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "PropertyFormula": "AtbConstrArgs(1000, PropertyValue('Power Output') / PropertyValue('Cell Efficiency'))",
           "AttributeType": "Pulsar4X.Sensors.SensorSignatureAtb"
         }
       ]
@@ -333,8 +428,8 @@
         {
           "Name": "Heat per kg",
           "Units": "KW/kg",
-          "DescriptionFormula": "'Heat output per kg of fuel. 0.03125 makes the default 2 tonne plant 15 kW at Reactor Power Density level 0; each level multiplies it.'",
-          "PropertyFormula": "0.03125 * TechData('tech-reactor-power-density')"
+          "DescriptionFormula": "'Heat output per kg of fuel. 1/12 kW/kg makes the default 2 tonne plant 50 kW of heat, 15 kW electric at 30% conversion. Larger cores run hotter (x (Mass / 2 t)^0.3, as space reactors gain specific power with size), and each Reactor Power Density level multiplies it.'",
+          "PropertyFormula": "(1.0 / 12.0) * Pow(PropertyValue('Mass') / 2000.0, 0.3) * TechData('tech-reactor-power-density')"
         },
         {
           "Name": "Core Efficiency",
@@ -343,8 +438,9 @@
         },
         {
           "Name": "Generator Efficiency",
-          "DescriptionFormula": "'The efficiency of the turbine and generator - TODO this needs linking to tech'",
-          "PropertyFormula": "0.8"
+          "DescriptionFormula": "'Share of the core heat the turbine and generator turn into electricity: Reactor Power Conversion, 30% at level 0. The rest is waste heat.'",
+          "GuiHint": "GuiTextDisplay",
+          "PropertyFormula": "TechData('tech-power-conversion')"
         },
         {
           "Name": "Fuel Burn Rate",

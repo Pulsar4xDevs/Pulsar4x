@@ -824,7 +824,7 @@
         "Mass": "PropertyValue('Tank Radius')",
         "Volume": "[Mass]",
         "HTK": "0.5",
-        "CrewReq": "PropertyValue('Tank Volume')",
+        "CrewReq": "0",
         "ResearchCost": "0",
         "CreditCost": "[Mass]",
         "BuildPointCost": "[Mass]"
