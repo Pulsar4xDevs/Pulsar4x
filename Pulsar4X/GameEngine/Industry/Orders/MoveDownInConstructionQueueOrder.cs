@@ -59,6 +59,8 @@ public class MoveDownInConstructionQueueOrder : EntityAction
             queueList.RemoveAt(index);
             queueList.Insert(index + 1, _job);
             constructionDB.BuildQueue = new Queue<LocalConstructionJob>(queueList);
+            // Today's points go to the queue head first, so the order sets the scrap draw.
+            Pulsar4X.Energy.ColonyPowerProcessor.RefreshDemand(_colonyEntity);
         }
     }
 

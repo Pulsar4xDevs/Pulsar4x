@@ -81,6 +81,8 @@ public class AddToConstructionQueueOrder : EntityAction
         if (_upgradeLineId != null)
             job.ScrapEnergy = FacilityUpgrade.ScrapEnergy(_actor, _upgradeLineId);
         constructionDB.BuildQueue.Enqueue(job);
+        // An upgrade's scrap energy is a grid load from now.
+        Pulsar4X.Energy.ColonyPowerProcessor.RefreshDemand(_actor);
     }
 
     internal override bool IsFinished()

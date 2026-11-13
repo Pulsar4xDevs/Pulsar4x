@@ -51,6 +51,7 @@ public class RemoveFromConstructionQueueOrder : EntityAction
         var queueList = constructionDB.BuildQueue.ToList();
         queueList.Remove(_job);
         constructionDB.BuildQueue = new Queue<LocalConstructionJob>(queueList);
+        Pulsar4X.Energy.ColonyPowerProcessor.RefreshDemand(_colonyEntity);
     }
 
     internal override bool IsFinished()
