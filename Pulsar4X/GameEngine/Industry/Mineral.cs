@@ -20,6 +20,7 @@ namespace Pulsar4X.Industry
             MassPerUnit = blueprint.MassPerUnit;
             VolumePerUnit = blueprint.VolumePerUnit;
             Abundance = blueprint.Abundance;
+            ExtractionEnergy = blueprint.ExtractionEnergy;
         }
     }
 }

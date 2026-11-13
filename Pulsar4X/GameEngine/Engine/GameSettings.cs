@@ -63,6 +63,25 @@ namespace Pulsar4X.Engine
 
         #endregion
 
+        #region Economy (energy economy phase 5)
+
+        /// <summary>
+        /// Credits per kWh of embodied energy: the price anchor (Jon: 1 credit is roughly 1 kWh).
+        /// Seed and ask prices are E x this x (1 + <see cref="PriceMarkup"/>).
+        /// </summary>
+        public double CreditsPerKWh { get; set; } = 1.0;
+
+        /// <summary>
+        /// Markup on embodied energy in seed and ask prices, standing in for labour, capital and
+        /// scarcity (deferred). 4 makes energy a fifth of the price.
+        /// </summary>
+        public double PriceMarkup { get; set; } = 4.0;
+
+        /// <summary>A seeded bid as a share of its ask (the depot's spread).</summary>
+        public double SeedBidShare { get; set; } = 0.5;
+
+        #endregion
+
         #region Network Settings
 
         public int portNumber { get; set; }

@@ -418,7 +418,7 @@ public class MineAsteroidsPlan : IGoalPlanner
     }
 
     /// <summary>
-    /// One foreign office can buy the whole mineral hold at <see cref="CeresStart.LotPrice"/>.
+    /// One foreign office can buy the whole mineral hold at CeresStart.LotPrice.
     /// Fuel in the tanks is not part of the lot. An owned colony unloads instead.
     /// </summary>
     static bool CanTakeLot(Entity ship, Entity colony)
@@ -455,7 +455,7 @@ public class MineAsteroidsPlan : IGoalPlanner
         if (volume > CargoMath.GetFreeVolume(cargo, "general-storage"))
             return false;
 
-        return MarketExchangeAction.Affordable(game, colony.FactionOwnerID, CeresStart.LotPrice) >= units;
+        return MarketExchangeAction.Affordable(game, colony.FactionOwnerID, CeresStart.LotPrice(game, info.Data)) >= units;
     }
 
     static List<(ICargoable item, long amount)> UnloadAmounts(Entity ship, Entity colony)

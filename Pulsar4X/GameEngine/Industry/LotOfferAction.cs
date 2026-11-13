@@ -10,7 +10,7 @@ using Pulsar4X.Storage;
 namespace Pulsar4X.Industry;
 
 /// <summary>
-/// Moves every carried mineral into one office and pays <see cref="CeresStart.LotPrice"/> once.
+/// Moves every carried mineral into one office and pays CeresStart.LotPrice once.
 /// Does not write a market row. A line that cannot move puts the lot back and does not fail the mine.
 /// </summary>
 public class LotOfferAction : EntityAction
@@ -92,7 +92,7 @@ public class LotOfferAction : EntityAction
             units += line.Units;
 
         if (shipFaction != officeFaction
-            && MarketExchangeAction.Affordable(game, officeFaction, CeresStart.LotPrice) < units)
+            && MarketExchangeAction.Affordable(game, officeFaction, CeresStart.LotPrice(game, officeFaction)) < units)
         {
             Finish("Cannot pay");
             return;
@@ -138,7 +138,7 @@ public class LotOfferAction : EntityAction
             && shipFactionEntity.TryGetDataBlob<FactionInfoDB>(out var shipInfo)
             && officeFactionEntity.TryGetDataBlob<FactionInfoDB>(out var officeInfo))
         {
-            decimal amount = CeresStart.LotPrice * units;
+            decimal amount = CeresStart.LotPrice(game, officeInfo.Data) * units;
             string forShip = $"minerals {units} {officeFaction}";
             string forOffice = $"minerals {units} {shipFaction}";
             officeInfo.Money.AddExpense(atDateTime, TransactionCategory.Trade, forOffice, amount);

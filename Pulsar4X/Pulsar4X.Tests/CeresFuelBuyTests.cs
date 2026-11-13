@@ -53,10 +53,10 @@ public class CeresFuelBuyTests
         AgentProcessor.RunAgentNow(ship);
 
         long bought = ship.GetDataBlob<CargoStorageDB>().GetUnitsStored(Fuel(ship), false) - beforeUnits;
-        long affordable = (long)Math.Floor(strataBefore / CeresStart.FuelAsk);
+        long affordable = (long)Math.Floor(strataBefore / EnergyPriceOracle.FuelAsk(game));
         Assert.That(bought, Is.EqualTo(Math.Min(space, affordable)));
         Assert.That(bought, Is.GreaterThan(0));
-        decimal cost = bought * CeresStart.FuelAsk;
+        decimal cost = bought * EnergyPriceOracle.FuelAsk(game);
         Assert.That(strata.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(strataBefore - cost));
         Assert.That(depotFaction.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(depotBefore + cost));
 
@@ -90,7 +90,7 @@ public class CeresFuelBuyTests
         Assert.That(FuelSituation.Observe(ship).IsLow, Is.True);
 
         decimal before = strata.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds();
-        Assert.That(Math.Floor(before / CeresStart.FuelAsk), Is.GreaterThan(space));
+        Assert.That(Math.Floor(before / EnergyPriceOracle.FuelAsk(game)), Is.GreaterThan(space));
 
         AgentProcessor.RunAgentNow(fleet);
         Assert.That(ship.GetDataBlob<GoalsDB>().GivenGoal!.Type, Is.EqualTo(GoalType.BuyFuel));
@@ -98,7 +98,7 @@ public class CeresFuelBuyTests
 
         long bought = ship.GetDataBlob<CargoStorageDB>().GetUnitsStored(fuel, false) - stored;
         Assert.That(bought, Is.EqualTo(space));
-        Assert.That(strata.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(before - (bought * CeresStart.FuelAsk)));
+        Assert.That(strata.GetDataBlob<FactionInfoDB>().Money.GetCurrentFunds(), Is.EqualTo(before - (bought * EnergyPriceOracle.FuelAsk(game))));
     }
 
     [Test]
