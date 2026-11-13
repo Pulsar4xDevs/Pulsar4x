@@ -91,6 +91,55 @@ public class MarketExchangeTests
     }
 
     [Test]
+    public void PlayerBuy_IsRefused_WhileFundsAreNegative()
+    {
+        var scene = Scene.Build(sameFaction: false, mutualFriendly: true, marketStock: 20, sell: 20, ask: 10, shipFunds: 1000);
+        var game = scene.Ship.Manager.Game;
+        game.LocalHumanFactionId = scene.ShipFaction.Id;
+        scene.ShipInfo.Money.AddExpense(scene.Ship.StarSysDateTime, TransactionCategory.Trade, "test drain", 1500);
+        decimal buyer = scene.ShipInfo.Money.GetCurrentFunds();
+        Assert.That(buyer, Is.EqualTo(-500));
+
+        var action = scene.Exchange(MarketSide.BuyFromMarket, 4);
+        scene.Run(action);
+
+        Assert.That(action.Details, Is.EqualTo(FactionSpending.FundsNegative));
+        Assert.That(MarketBook.Stock(scene.Ship, scene.ShipIron), Is.EqualTo(0));
+        Assert.That(MarketBook.Stock(scene.Market, scene.MarketIron), Is.EqualTo(20));
+        Assert.That(scene.ShipInfo.Money.GetCurrentFunds(), Is.EqualTo(buyer));
+        Assert.That(scene.MarketInfo.Money.GetCurrentFunds(), Is.EqualTo(0));
+    }
+
+    [Test]
+    public void PlayerSell_IsStillPaid_WhileFundsAreNegative()
+    {
+        var scene = Scene.Build(sameFaction: false, mutualFriendly: true, marketStock: 0, shipStock: 15, sell: 0, buy: 10, bid: 12, marketFunds: 500);
+        var game = scene.Ship.Manager.Game;
+        game.LocalHumanFactionId = scene.ShipFaction.Id;
+        scene.ShipInfo.Money.AddExpense(scene.Ship.StarSysDateTime, TransactionCategory.Trade, "test drain", 100);
+
+        var action = scene.Exchange(MarketSide.SellToMarket, 6);
+        scene.Run(action);
+
+        Assert.That(MarketBook.Stock(scene.Ship, scene.ShipIron), Is.EqualTo(9));
+        Assert.That(scene.ShipInfo.Money.GetCurrentFunds(), Is.EqualTo(-100 + 72), "income is never blocked");
+    }
+
+    [Test]
+    public void NpcBuy_IsNotBlocked_WhenAnotherFactionIsThePlayer()
+    {
+        var scene = Scene.Build(sameFaction: false, mutualFriendly: true, marketStock: 20, sell: 20, ask: 10, shipFunds: 1000);
+        scene.Ship.Manager.Game.LocalHumanFactionId = scene.MarketFaction.Id;
+        scene.MarketInfo.Money.AddExpense(scene.Ship.StarSysDateTime, TransactionCategory.Trade, "test drain", 100);
+
+        var action = scene.Exchange(MarketSide.BuyFromMarket, 4);
+        scene.Run(action);
+
+        Assert.That(MarketBook.Stock(scene.Ship, scene.ShipIron), Is.EqualTo(4));
+        Assert.That(scene.ShipInfo.Money.GetCurrentFunds(), Is.EqualTo(1000 - 40));
+    }
+
+    [Test]
     public void Hostile_SetsTheMessage_AndChangesNothing()
     {
         var scene = Scene.Build(sameFaction: false, mutualFriendly: false, marketStock: 20, sell: 20, ask: 10, shipFunds: 200);

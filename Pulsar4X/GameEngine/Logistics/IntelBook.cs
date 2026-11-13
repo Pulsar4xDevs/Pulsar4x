@@ -263,6 +263,11 @@ public static class IntelBook
             reason = "Faction has no ledger.";
             return false;
         }
+        if (row.Ask > 0 && Pulsar4X.Factions.FactionSpending.IsBlocked(game, buyer.Id))
+        {
+            reason = Pulsar4X.Factions.FactionSpending.FundsNegative;
+            return false;
+        }
         if (row.Ask > buyerInfo.Money.GetCurrentFunds())
         {
             reason = "Cannot afford that price.";

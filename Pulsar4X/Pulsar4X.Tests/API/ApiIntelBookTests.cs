@@ -189,6 +189,32 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void BuyGeo_IsRefused_WhileThePlayerBuyerIsNegative()
+        {
+            var session = Connect();
+            var colony = MakeColony(session.FactionId);
+            Office(colony);
+            var seller = _game.Factions[session.FactionId];
+            var body = SurveyBody(colony);
+            FinishGeo(body, session.FactionId);
+            var buyer = OtherFaction(session.FactionId);
+            var buyerInfo = buyer.GetDataBlob<FactionInfoDB>();
+            Befriend(session.FactionId, buyer.Id);
+            Fund(buyerInfo, 500m);
+            string subject = body.Id.ToString(CultureInfo.InvariantCulture);
+            var commands = new CommandTranslator(_game);
+            Assert.That(commands.Translate(seller, colony, new SetIntelListingCommand(colony.Id, subject, IntelKind.Geo, 25m, true)).Accepted, Is.True);
+
+            _game.LocalHumanFactionId = buyer.Id;
+            buyerInfo.Money.AddExpense(colony.StarSysDateTime, TransactionCategory.Trade, "test drain", buyerInfo.Money.GetCurrentFunds() + 100m);
+            var blocked = commands.Translate(buyer, colony, new BuyIntelCommand(colony.Id, subject, IntelKind.Geo));
+            Assert.That(blocked.Accepted, Is.False);
+            Assert.That(blocked.RejectionReason, Is.EqualTo(FactionSpending.FundsNegative));
+            Assert.That(body.GetDataBlob<GeoSurveyableDB>().IsSurveyComplete(buyer.Id), Is.False);
+            Assert.That(buyerInfo.Money.GetCurrentFunds(), Is.EqualTo(-100m));
+        }
+
+        [Test]
         public void BuyPin_CompletesAndHides_WithoutRevealingAJump()
         {
             var session = Connect();

@@ -226,6 +226,53 @@ public class CeresDirectOfferTests
     }
 
     [Test]
+    public void PlayerDepotInDebt_MakesNoLotOffer()
+    {
+        var (game, sol) = Place();
+        var lode = Faction(game, CeresStart.MiningFactionName);
+        var depotFaction = Faction(game, CeresStart.DepotFactionName);
+        var ship = Ship(sol, lode.Id);
+        var depot = Depot(sol);
+        var (iron, copper) = LoadHold(lode, ship);
+        BringAlongside(ship, depot);
+        game.LocalHumanFactionId = depotFaction.Id;
+        var purse = depotFaction.GetDataBlob<FactionInfoDB>().Money;
+        purse.AddExpense(ship.StarSysDateTime, TransactionCategory.Trade, "test", purse.GetCurrentFunds() + 1000);
+
+        var action = LotOfferAction.Create(ship, depot.Id);
+        Assert.That(action.IsValidCommand(game), Is.True);
+        action.Execute(ship.StarSysDateTime);
+
+        Assert.That(action.Details, Is.EqualTo(FactionSpending.FundsNegative));
+        Assert.That(MarketBook.Stock(ship, iron), Is.EqualTo(IronUnits));
+        Assert.That(MarketBook.Stock(ship, copper), Is.EqualTo(CopperUnits));
+        Assert.That(purse.GetCurrentFunds(), Is.EqualTo(-1000));
+    }
+
+    [Test]
+    public void PlayerSellerInDebt_IsStillPaidForTheLot()
+    {
+        var (game, sol) = Place();
+        var lode = Faction(game, CeresStart.MiningFactionName);
+        var fleet = Fleet(sol, lode.Id);
+        var ship = Ship(sol, lode.Id);
+        var depot = Depot(sol);
+        var standing = fleet.GetDataBlob<GoalsDB>().ActiveGoal!;
+        var (iron, copper) = LoadHold(lode, ship);
+        BringAlongside(ship, depot);
+        ReadyToSell(ship, standing);
+        game.LocalHumanFactionId = lode.Id;
+        var money = lode.GetDataBlob<FactionInfoDB>().Money;
+        money.AddExpense(ship.StarSysDateTime, TransactionCategory.Trade, "test", money.GetCurrentFunds() + 1000);
+
+        AgentProcessor.RunAgentNow(ship);
+
+        decimal cost = (IronUnits + CopperUnits) * EnergyPriceOracle.LotPrice(game);
+        Assert.That(MarketBook.Stock(ship, iron), Is.EqualTo(0));
+        Assert.That(money.GetCurrentFunds(), Is.EqualTo(-1000 + cost), "income is never blocked");
+    }
+
+    [Test]
     public void OutOfRange_Moves_AndDoesNotTransfer()
     {
         var (game, sol) = Place();

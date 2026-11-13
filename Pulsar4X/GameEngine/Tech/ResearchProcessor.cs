@@ -99,8 +99,8 @@ namespace Pulsar4X.Technology
 
             var cost = researcherDB.CostPerDay.GetValue();
 
-            // Check to make sure the cost can be paid
-            if(factionInfoDB.Money.GetCurrentFunds() < cost)
+            // Check to make sure the cost can be paid (and, crew plan phase 5, the player is not in debt)
+            if(factionInfoDB.Money.GetCurrentFunds() < cost || Pulsar4X.Factions.FactionSpending.IsBlocked(entity.Manager.Game, entity.FactionOwnerID))
                 return;
 
             // Pay the costs

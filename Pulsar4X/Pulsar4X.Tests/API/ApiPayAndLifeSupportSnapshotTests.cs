@@ -17,7 +17,7 @@ namespace Pulsar4X.Tests.API;
 /// <summary>
 /// Crew plan phases 4-5, step A: the life support and crew pay fields the UI binds to. Crew counts,
 /// lab costs, days until broke, the negative-funds flag and the colony rate are real; ship life support,
-/// wages, the spending block and the funds-negative pause reasons hold their defaults until the phases land.
+/// wages, the spending block and the funds-negative pause reasons are live from phase 5 (player only).
 /// </summary>
 [TestFixture]
 [NonParallelizable]
@@ -54,14 +54,11 @@ public class ApiPayAndLifeSupportSnapshotTests
         var faction = _projector.ProjectFaction(_player.Id)!;
         Assert.That(crew, Is.GreaterThan(500), "ships aboard plus the 500 Earth pool");
         Assert.That(faction.CrewOnPayroll, Is.EqualTo(crew));
-        Assert.That(faction.CrewWagePerDay, Is.EqualTo(0m), "wages are charged from phase 5");
-        Assert.That(faction.PayrollPerDay, Is.EqualTo(0m));
+        Assert.That(faction.CrewWagePerDay, Is.EqualTo(100m), "the player pays GameSettings.CrewWagePerDay");
+        Assert.That(faction.PayrollPerDay, Is.EqualTo(crew * 100m));
         Assert.That(faction.LabCostsPerDay, Is.EqualTo(labs));
-        Assert.That(faction.RunningCostsPerDay, Is.EqualTo(labs));
-        if (labs > 0)
-            Assert.That(faction.DaysUntilBroke, Is.EqualTo((double)(faction.Funds / labs)));
-        else
-            Assert.That(faction.DaysUntilBroke, Is.Null, "nothing costs anything: ∞");
+        Assert.That(faction.RunningCostsPerDay, Is.EqualTo(crew * 100m + labs));
+        Assert.That(faction.DaysUntilBroke, Is.EqualTo((double)(faction.Funds / faction.RunningCostsPerDay)));
         Assert.That(faction.Funds, Is.GreaterThan(0m));
         Assert.That(faction.FundsNegative, Is.False);
         Assert.That(faction.SpendingBlocked, Is.False);
@@ -87,8 +84,9 @@ public class ApiPayAndLifeSupportSnapshotTests
         Assert.That(faction.LastWages, Is.EqualTo(-(2_000m + funds)), "the last day's lines");
         Assert.That(faction.LastWagesDate, Is.EqualTo(day.Date));
         Assert.That(faction.Transactions.Count(t => t.Category == FactionSnapshot.WagesCategory), Is.EqualTo(3));
-        if (faction.RunningCostsPerDay > 0)
-            Assert.That(faction.DaysUntilBroke, Is.EqualTo(0));
+        Assert.That(faction.DaysUntilBroke, Is.EqualTo(0));
+        Assert.That(faction.SpendingBlocked, Is.True, "the player is blocked while negative");
+        Assert.That(faction.BlockedSpending, Is.EqualTo(FactionSpending.BlockedWhileNegative));
     }
 
     [Test]
@@ -147,5 +145,18 @@ public class ApiPayAndLifeSupportSnapshotTests
         Assert.That(industry.ProductionLines.SelectMany(l => l.Jobs).All(j => j.FundsReason == ""), Is.True);
         var academy = projected.GetView<NavalAcademyView>()!.Academies.Single();
         Assert.That(academy.FundsReason, Is.Empty);
+    }
+
+    [Test]
+    public void Pads_AndAcademies_ShowTheFundsReason_WhileThePlayerIsNegative()
+    {
+        var info = _player.GetDataBlob<FactionInfoDB>();
+        info.Money.AddExpense(_game.TimePulse.GameGlobalDateTime, TransactionCategory.Trade, "test drain", info.Money.GetCurrentFunds() + 1m);
+        var earth = Owned<ColonyInfoDB>().First(c => c.HasDataBlob<Pulsar4X.People.NavalAcademyDB>());
+        var projected = _projector.ProjectEntity(earth, _player.Id);
+        var industry = projected.GetView<IndustryView>()!;
+        Assert.That(industry.Pads.All(p => p.FundsReason == FundsText.PausedFundsNegative), Is.True);
+        Assert.That(industry.ProductionLines.SelectMany(l => l.Jobs).All(j => j.FundsReason == FundsText.PausedFundsNegative), Is.True);
+        Assert.That(projected.GetView<NavalAcademyView>()!.Academies.Single().FundsReason, Is.EqualTo(FundsText.PausedFundsNegative));
     }
 }

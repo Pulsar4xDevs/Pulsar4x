@@ -78,8 +78,9 @@ namespace Pulsar4X.Engine.Api
             }
             decimal funds = info.Money.GetCurrentFunds();
             var (payrollCrew, labCosts) = FactionRunningCosts(factionId);
-            // Crew plan phase 5 charges wages; until then the payroll is 0 and nothing is blocked.
-            decimal wage = 0;
+            // Crew plan phase 5: the player pays the game's wage per crew per day; NPCs pay nothing for now.
+            decimal wage = Pulsar4X.Factions.FactionSpending.WagePerDay(_game, factionId);
+            bool blocked = Pulsar4X.Factions.FactionSpending.IsBlocked(_game, factionId);
             decimal payroll = payrollCrew * wage;
             decimal running = payroll + labCosts;
             var lastWages = info.Money.GetAllTransactions().Where(t => t.Category == TransactionCategory.Wages)
@@ -96,6 +97,8 @@ namespace Pulsar4X.Engine.Api
                 LastWages = lastWages?.Sum(t => t.Amount) ?? 0,
                 LastWagesDate = lastWages?.Key,
                 FundsNegative = funds < 0,
+                SpendingBlocked = blocked,
+                BlockedSpending = blocked ? Pulsar4X.Factions.FactionSpending.BlockedWhileNegative : Array.Empty<string>(),
             };
         }
 
@@ -105,16 +108,10 @@ namespace Pulsar4X.Engine.Api
         /// </summary>
         private (long crew, decimal labs) FactionRunningCosts(int factionId)
         {
-            long crew = 0;
+            long crew = Pulsar4X.Factions.FactionSpending.CrewOnPayroll(_game, factionId);
             decimal labs = 0;
             foreach (var system in _game.Systems)
             {
-                foreach (var ship in system.GetAllEntitiesWithDataBlob<ShipCrewDB>())
-                    if (ship.FactionOwnerID == factionId)
-                        crew += ship.GetDataBlob<ShipCrewDB>().Aboard;
-                foreach (var colony in system.GetAllEntitiesWithDataBlob<ColonyCrewPoolDB>())
-                    if (colony.FactionOwnerID == factionId)
-                        crew += colony.GetDataBlob<ColonyCrewPoolDB>().Total;
                 foreach (var lab in system.GetAllEntitiesWithDataBlob<ResearcherDB>())
                 {
                     if (lab.FactionOwnerID != factionId)
@@ -1656,6 +1653,7 @@ namespace Pulsar4X.Engine.Api
                     NextCrewGraduationCount = NavalAcademyCourse.NextCrewCohort(row)?.Count ?? 0,
                     // Why one more trainee could not start now; empty when one can.
                     CrewCourseReason = NavalAcademyCourse.CrewRefusal(colony, row, 1) ?? "",
+                    FundsReason = Pulsar4X.Factions.FactionSpending.IsBlocked(colony) ? FundsText.PausedFundsNegative : "",
                 });
             }
             return new NavalAcademyView(academies, population, NavalAcademyCourse.PeoplePerEnsign(colony));
@@ -1679,6 +1677,8 @@ namespace Pulsar4X.Engine.Api
                 .ToList();
 
             var lines = new List<ProductionLineView>(industry.ProductionLines.Count);
+            // Crew plan phase 5: no industry points are spent while the player's balance is negative.
+            string fundsReason = Pulsar4X.Factions.FactionSpending.IsBlocked(entity) ? FundsText.PausedFundsNegative : "";
             foreach (var (lineId, line) in industry.ProductionLines)
             {
                 var jobs = new List<IndustryJobView>(line.Jobs.Count);
@@ -1698,6 +1698,7 @@ namespace Pulsar4X.Engine.Api
                         CrewRequired = factionInfo.IndustryDesigns.TryGetValue(job.ItemGuid, out var jobDesign) && jobDesign is ShipDesign jobShip
                             ? jobShip.CrewReq : 0,
                         CrewWarning = jobDesign is ShipDesign crewed ? JobCrewWarning(entity, crewed) : "",
+                        FundsReason = fundsReason,
                     });
                 }
 
@@ -1834,6 +1835,7 @@ namespace Pulsar4X.Engine.Api
                         CrewToBoard = board,
                         CrewShort = board < required,
                         CrewWarning = board < required ? $"Launches with {board}/{required} crew; train crew at an academy" : "",
+                        FundsReason = Pulsar4X.Factions.FactionSpending.IsBlocked(entity) ? FundsText.PausedFundsNegative : "",
                     });
                 }
             }

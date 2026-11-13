@@ -104,17 +104,17 @@ public sealed record FactionSnapshot(
 
     /// <summary>
     /// The ledger category name of a crew pay line, as in <see cref="LedgerEntrySnapshot.Category"/>. The pay
-    /// processor books one such line per faction per day (amount negative). No lines are booked before phase 5.
+    /// processor books one such line a day for the player (amount negative); NPC factions pay no wages yet.
     /// </summary>
     public const string WagesCategory = "Wages";
 
     /// <summary>People the faction pays: crew aboard its ships plus trained crew in its colony pools (academy students are not paid).</summary>
     public long CrewOnPayroll { get; init; }
 
-    /// <summary>Wage per crew per day, cr. 0 until crew pay is charged (phase 5).</summary>
+    /// <summary>Wage per crew per day, cr (GameSettings.CrewWagePerDay, default 100). 0 for factions that do not pay (NPCs, and every faction in a game with no local human player).</summary>
     public decimal CrewWagePerDay { get; init; }
 
-    /// <summary>Daily crew payroll, cr/day: <see cref="CrewOnPayroll"/> × <see cref="CrewWagePerDay"/>. 0 until crew pay is charged (phase 5).</summary>
+    /// <summary>Daily crew payroll, cr/day: <see cref="CrewOnPayroll"/> × <see cref="CrewWagePerDay"/>. 0 when the faction pays no wages.</summary>
     public decimal PayrollPerDay { get; init; }
 
     /// <summary>Research labs' running cost, cr/day: the labs that research today (a queued tech and points to spend).</summary>
@@ -139,12 +139,15 @@ public sealed record FactionSnapshot(
     public bool FundsNegative { get; init; }
 
     /// <summary>
-    /// True while spending is blocked because funds are negative (building, launches, new academy courses,
-    /// market and intel buys). False until the spending gate lands (phase 5).
+    /// True while spending is blocked because funds are negative: research, market, fuel, intel and shipment
+    /// buys, lot offers, building, launches and new academy courses. The player only; income is never blocked.
     /// </summary>
     public bool SpendingBlocked { get; init; }
 
-    /// <summary>What the block stops, for the negative-balance banner, e.g. "Building", "Launches". Empty when not blocked.</summary>
+    /// <summary>
+    /// What the block stops, for the negative-balance banner: "Research", "Market buys", "Fuel buys", "Intel buys",
+    /// "Shipment buys", "Lot offers", "Construction", "Launches", "Academy courses". Empty when not blocked.
+    /// </summary>
     public IReadOnlyList<string> BlockedSpending { get; init; } = Array.Empty<string>();
 }
 
@@ -1030,7 +1033,7 @@ public sealed record NavalAcademyClassView(
     /// <summary>Why a crew course cannot start now (e.g. no free crew seats, too few colonists). Empty when it can.</summary>
     public string CrewCourseReason { get; init; } = "";
 
-    /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while new courses are refused for negative funds. Empty otherwise; always empty until phase 5.</summary>
+    /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while new courses are refused for negative funds. Empty otherwise.</summary>
     public string FundsReason { get; init; } = "";
 }
 
@@ -1075,7 +1078,7 @@ public sealed record LaunchPadStateView(long MaxTonnage, bool Free)
     /// <summary>The launch-short warning, e.g. "Launches with 12/28 crew; train crew at an academy". Empty when not short.</summary>
     public string CrewWarning { get; init; } = "";
 
-    /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while launches are held for negative funds. Empty otherwise; always empty until phase 5.</summary>
+    /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while launches are held for negative funds. Empty otherwise.</summary>
     public string FundsReason { get; init; } = "";
 }
 
@@ -1206,7 +1209,7 @@ public sealed record IndustryJobView(
     /// </summary>
     public string CrewWarning { get; init; } = "";
 
-    /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while the job spends no points for negative funds. Empty otherwise; always empty until phase 5.</summary>
+    /// <summary>"Paused: funds negative" (<see cref="FundsText.PausedFundsNegative"/>) while the job spends no points for negative funds. Empty otherwise.</summary>
     public string FundsReason { get; init; } = "";
 }
 
