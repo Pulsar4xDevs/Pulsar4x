@@ -128,6 +128,48 @@ public class LaunchFuelChoiceTests
         Assert.That(rebuilt.ComponentDesignProperties["Launch Fuel"].ValueString, Is.EqualTo("methalox"));
     }
 
+    [TestCase(null, "rp-1")]
+    [TestCase("", "rp-1")]
+    [TestCase("   ", "rp-1")]
+    [TestCase("unobtainium", "rp-1")]
+    [TestCase("fissile-fuels", "rp-1")]
+    [TestCase("ntp", "rp-1")]
+    [TestCase("RP-1", "rp-1")]
+    [TestCase("rp-1", "rp-1")]
+    [TestCase("methalox", "methalox")]
+    [TestCase("hydrolox", "hydrolox")]
+    [TestCase(" methalox ", "methalox")]
+    public void LaunchFuel_IsCheckedAgainstTheAllowList_Everywhere(string? input, string expected)
+    {
+        Assert.That(LaunchComplexAtb.AllowedLaunchFuels, Is.EquivalentTo(new[] { "rp-1", "methalox", "hydrolox" }));
+        Assert.That(LaunchComplexAtb.NormalizeLaunchFuel(input), Is.EqualTo(expected));
+
+        // A pad from a save or a test, whatever its stored id.
+        Assert.That(new LaunchPad { LaunchFuelId = input }.LaunchFuel, Is.EqualTo(expected));
+
+        // The attribute, whatever it was constructed with.
+        var atb = new LaunchComplexAtb(100000, input!);
+        Assert.That(atb.LaunchFuel, Is.EqualTo(expected));
+        Assert.That(atb.LaunchFuelId, Is.EqualTo(expected));
+
+        // The design property path: the designer's Launch Fuel value reaches the design and the pad it installs.
+        var designer = new ComponentDesigner(_info.Data.ComponentTemplates["launch-complex"], _info.Data, _player.GetDataBlob<FactionTechDB>())
+        {
+            Name = "Launch Complex " + (input ?? "null"),
+        };
+        if (input != null)
+            designer.ComponentDesignProperties["Launch Fuel"].SetValueFromString(input);
+        designer.EvalAll();
+        var design = designer.CreateDesign(_player);
+        Assert.That(design.GetAttribute<LaunchComplexAtb>().LaunchFuel, Is.EqualTo(expected));
+        var launch = _earth.GetDataBlob<LaunchComplexDB>();
+        var before = launch.Pads.Keys.ToList();
+        _earth.AddComponent(design, 1);
+        var pad = launch.Pads.Single(kv => !before.Contains(kv.Key)).Value;
+        Assert.That(pad.LaunchFuelId, Is.EqualTo(expected));
+        Assert.That(pad.LaunchFuel, Is.EqualTo(expected));
+    }
+
     [Test]
     public void DefaultDesign_BurnsRp1_AndEarthsPadSaysSo()
     {

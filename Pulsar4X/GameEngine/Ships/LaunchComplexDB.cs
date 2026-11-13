@@ -31,9 +31,9 @@ namespace Pulsar4X.Ships
         [JsonProperty]
         public string? LaunchFuelId { get; set; }
 
-        /// <summary>The launch fuel, falling back to <see cref="LaunchComplexAtb.DefaultLaunchFuel"/>.</summary>
+        /// <summary>The launch fuel, checked by <see cref="LaunchComplexAtb.NormalizeLaunchFuel"/>: rp-1 unless the id is an allowed propellant.</summary>
         [JsonIgnore]
-        public string LaunchFuel => string.IsNullOrEmpty(LaunchFuelId) ? LaunchComplexAtb.DefaultLaunchFuel : LaunchFuelId;
+        public string LaunchFuel => LaunchComplexAtb.NormalizeLaunchFuel(LaunchFuelId);
     }
 
     public class LaunchQueueEntry

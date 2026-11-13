@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using Pulsar4X.Components;
 using Pulsar4X.Engine;
@@ -13,18 +15,33 @@ namespace Pulsar4X.Ships
         /// </summary>
         public const string DefaultLaunchFuel = "rp-1";
 
+        /// <summary>The propellants a launch complex may burn. The one list every launch fuel id is checked against.</summary>
+        public static readonly IReadOnlyList<string> AllowedLaunchFuels = new[] { "rp-1", "methalox", "hydrolox" };
+
+        /// <summary>
+        /// The launch fuel to use for an id from a design, a pad or a save: the id when it is on
+        /// <see cref="AllowedLaunchFuels"/>, else <see cref="DefaultLaunchFuel"/>. Null, empty,
+        /// whitespace, unknown ids and plant fuels such as fissile fuels all give rp-1.
+        /// </summary>
+        public static string NormalizeLaunchFuel(string? fuelId)
+        {
+            string id = fuelId?.Trim() ?? "";
+            return AllowedLaunchFuels.Contains(id) ? id : DefaultLaunchFuel;
+        }
+
         [JsonProperty]
         public double MaxTonnage { get; private set; }
 
         /// <summary>
         /// Cargo id of the propellant this design's pads burn for launches, picked in the
-        /// component designer. Null in a save from before the choice: see <see cref="LaunchFuel"/>.
+        /// component designer's "Launch Fuel" property and checked by <see cref="NormalizeLaunchFuel"/>
+        /// when the design is made. Null in a save from before the choice: see <see cref="LaunchFuel"/>.
         /// </summary>
         [JsonProperty]
         public string? LaunchFuelId { get; private set; }
 
-        /// <summary>The launch fuel, falling back to <see cref="DefaultLaunchFuel"/>.</summary>
-        public string LaunchFuel => string.IsNullOrEmpty(LaunchFuelId) ? DefaultLaunchFuel : LaunchFuelId;
+        /// <summary>The launch fuel, checked by <see cref="NormalizeLaunchFuel"/>.</summary>
+        public string LaunchFuel => NormalizeLaunchFuel(LaunchFuelId);
 
         [JsonConstructor]
         private LaunchComplexAtb() { }
@@ -34,7 +51,7 @@ namespace Pulsar4X.Ships
         public LaunchComplexAtb(double maxTonnage, string launchFuelId)
         {
             MaxTonnage = maxTonnage;
-            LaunchFuelId = launchFuelId;
+            LaunchFuelId = NormalizeLaunchFuel(launchFuelId);
         }
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
